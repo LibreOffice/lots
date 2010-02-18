@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Eine Bibliothek von benannten Druckfunktionen
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 19.09.2006 | LUT | Erstellung.
  * -------------------------------------------------------------------
@@ -61,7 +61,7 @@ public class PrintFunctionLibrary
   /**
    * Erzeugt eine Funktionsbibliothek, die baselib referenziert (nicht kopiert!).
    * baselib wird immer dann befragt, wenn die Funktionsbibliothek selbst keine
-   * Funktion des entsprechenden Namens enthält. baselib darf null sein.
+   * Funktion des entsprechenden Namens enthÃ¤lt. baselib darf null sein.
    * 
    * @param baselib
    */
@@ -72,7 +72,7 @@ public class PrintFunctionLibrary
   }
 
   /**
-   * Fügt func dieser Funktionsbibliothek unter dem Namen funcName hinzu. Eine
+   * FÃ¼gt func dieser Funktionsbibliothek unter dem Namen funcName hinzu. Eine
    * bereits existierende Funktion mit diesem Namen wird dabei ersetzt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -86,7 +86,7 @@ public class PrintFunctionLibrary
   }
 
   /**
-   * Liefert die Function namens funcName zurück oder null, falls keine Funktion mit
+   * Liefert die Function namens funcName zurÃ¼ck oder null, falls keine Funktion mit
    * diesem Namen bekannt ist. Wurde die Funktionsbibliothek mit einer Referenz auf
    * eine andere Funktionsbibliothek initialisiert, so wird diese befragt, falls die
    * Funktionsbibliothek selbst keine Funktion des entsprechenden Namens kennt.
@@ -101,7 +101,7 @@ public class PrintFunctionLibrary
   }
 
   /**
-   * Liefert die Namen aller Funktionen, die über diese Funktionsbibliothek verfügbar
+   * Liefert die Namen aller Funktionen, die Ã¼ber diese Funktionsbibliothek verfÃ¼gbar
    * sind.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)

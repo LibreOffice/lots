@@ -1,9 +1,9 @@
 /*
  * Dateiname: Workarounds.java
  * Projekt  : WollMux
- * Funktion : Referenziert alle temporären Workarounds an einer zentralen Stelle
+ * Funktion : Referenziert alle temporÃ¤ren Workarounds an einer zentralen Stelle
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 01.04.2009 | LUT | Erstellung
  * -------------------------------------------------------------------
@@ -40,23 +40,23 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 
 /**
- * Diese Klasse referenziert alle temporären Workarounds, die im WollMux aufgenommen
+ * Diese Klasse referenziert alle temporÃ¤ren Workarounds, die im WollMux aufgenommen
  * wurden, an einer zentralen Stelle. Sie definiert Methoden, die die Steuerung
- * übernehmen, ob ein Workaround anzuwenden ist oder nicht.
+ * Ã¼bernehmen, ob ein Workaround anzuwenden ist oder nicht.
  * 
  * @author Christoph Lutz (D-III-ITD-D101)
  */
 public class Workarounds
 {
   /**
-   * Enthält die Version des eingesetzten OpenOffice.org, die mit
+   * EnthÃ¤lt die Version des eingesetzten OpenOffice.org, die mit
    * {@link #getOOoVersion()} abgefragt werden kann.
    */
   private static String oooVersion = null;
 
   /*
-   * Das ".*" nach dem \\A dürfte da eigentlich nicht sein, aber wenn es nicht da
-   * ist, wird bei der Abtretungserklärung gemeckert wegen des Issues 101249.
+   * Das ".*" nach dem \\A dÃ¼rfte da eigentlich nicht sein, aber wenn es nicht da
+   * ist, wird bei der AbtretungserklÃ¤rung gemeckert wegen des Issues 101249.
    */
   private static final Pattern INSERTFORMVALUE_BOOKMARK_TEXT_THAT_CAN_BE_SAFELY_DELETED_WORKAROUND =
     Pattern.compile("\\A.*[<\\[{].*[\\]>}]\\z");
@@ -77,15 +77,15 @@ public class Workarounds
 
   private static Boolean applyWorkaround(String issueNumber)
   {
-    Logger.debug("Workaround für Issue "
+    Logger.debug("Workaround fÃ¼r Issue "
       + issueNumber
-      + " aktiv. Bestimmte Features sind evtl. nicht verfügbar. Die Performance kann ebenfalls leiden.");
+      + " aktiv. Bestimmte Features sind evtl. nicht verfÃ¼gbar. Die Performance kann ebenfalls leiden.");
     return Boolean.TRUE;
   }
 
   /**
    * Issue #100374 betrifft OOo 3.0.x. Der Workaround kann entfernt werden, wenn
-   * voraussichtlich OOo 3.1 flächendeckend eingesetzt wird.
+   * voraussichtlich OOo 3.1 flÃ¤chendeckend eingesetzt wird.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
@@ -94,7 +94,7 @@ public class Workarounds
     if (workaround100374 == null)
     {
       String version = getOOoVersion();
-      // -100374 ist der Marker für unsere selbst gepatchten Versionen ohne den
+      // -100374 ist der Marker fÃ¼r unsere selbst gepatchten Versionen ohne den
       // Fehler
       if (version != null && version.startsWith("3.0")
         && !version.contains("-100374"))
@@ -111,7 +111,7 @@ public class Workarounds
   /**
    * Issue #102164 betrifft OOo 3.2. Es ist unklar, wann der Workaround entfernt
    * werden kann, da er aufgrund eines Bugs in der Swing-Implementierung von Java 6
-   * zurückgeht.
+   * zurÃ¼ckgeht.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
@@ -147,9 +147,9 @@ public class Workarounds
    * Issue #103137 betrifft OOo 3.0 und 3.1. Der Workaround kann entfernt werden,
    * wenn keine Dokumente mehr im Umlauf sind, deren Generator OOo 2 ist und in denen
    * Textstellen mindestens einmal aus- und wieder eingeblendet wurden. Notfalls muss
-   * man vor der Deaktivierung einen Mechanismus über die Dokumentablagen der
-   * Referate laufen lassen der dafür sorgt, dass der Altbestand der von OOo 2
-   * erzeugten Dokumente von sämtlichen text:display="none"-Stellen befreit wurde.
+   * man vor der Deaktivierung einen Mechanismus Ã¼ber die Dokumentablagen der
+   * Referate laufen lassen der dafÃ¼r sorgt, dass der Altbestand der von OOo 2
+   * erzeugten Dokumente von sÃ¤mtlichen text:display="none"-Stellen befreit wurde.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -171,7 +171,7 @@ public class Workarounds
   }
 
   /**
-   * Issue #96281 betrifft OOo 3.1 und 3.2. Ob es in 3.3 gelöst sein wird wissen wir
+   * Issue #96281 betrifft OOo 3.1 und 3.2. Ob es in 3.3 gelÃ¶st sein wird wissen wir
    * nicht. Seien wir einfach mal pessimistisch.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -196,7 +196,7 @@ public class Workarounds
   /**
    * Diese Methode liefert die Versionsnummer von OpenOffice.org aus dem
    * Konfigurationsknoten /org.openoffice.Setup/Product/oooSetupVersionAboutBox
-   * konkateniert mit /org.openoffice.Setup/Product/oooSetupExtension zurück oder
+   * konkateniert mit /org.openoffice.Setup/Product/oooSetupExtension zurÃ¼ck oder
    * null, falls bei der Bestimmung der Versionsnummer Fehler auftraten.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
@@ -247,7 +247,7 @@ public class Workarounds
   {
     if (workaround101249 == null)
     {
-      Logger.debug(L.m("Workaround für Issue 101249 aktiv."));
+      Logger.debug(L.m("Workaround fÃ¼r Issue 101249 aktiv."));
       workaround101249 =
         INSERTFORMVALUE_BOOKMARK_TEXT_THAT_CAN_BE_SAFELY_DELETED_WORKAROUND;
     }
@@ -256,10 +256,10 @@ public class Workarounds
 
   /**
    * Wegen http://qa.openoffice.org/issues/show_bug.cgi?id=101283 muss der Inhalt des
-   * Bookmarks durch ein Leerzeichen an Stelle des gewünschten Leerstrings ersetzt
+   * Bookmarks durch ein Leerzeichen an Stelle des gewÃ¼nschten Leerstrings ersetzt
    * werden.
    * 
-   * @return Der String, der an Stelle des gewünschten Leerstrings zur Behebung des
+   * @return Der String, der an Stelle des gewÃ¼nschten Leerstrings zur Behebung des
    *         Workarounds verwendet werden muss.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
@@ -268,7 +268,7 @@ public class Workarounds
   {
     if (workaround101283 == null)
     {
-      Logger.debug(L.m("Workaround für Issue 101283 aktiv."));
+      Logger.debug(L.m("Workaround fÃ¼r Issue 101283 aktiv."));
       workaround101283 = " ";
     }
     return workaround101283;

@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Verwaltet eine Liste von InsertionModels.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 06.09.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -68,13 +68,13 @@ public class InsertionModelList
   private List<InsertionModel> models = new LinkedList<InsertionModel>();
 
   /**
-   * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts
+   * Liste aller {@link ItemListener}, die Ã¼ber Ã„nderungen des Listeninhalts
    * informiert werden wollen.
    */
   private List<ItemListener> listeners = new Vector<ItemListener>(1);
 
   /**
-   * Der FormularMax4000 zu dem diese InsertionModelList gehört.
+   * Der FormularMax4000 zu dem diese InsertionModelList gehÃ¶rt.
    */
   private FormularMax4000 formularMax4000;
 
@@ -82,7 +82,7 @@ public class InsertionModelList
    * Erzeugt eine neue InsertionModelList.
    * 
    * @param formularMax4000
-   *          der FormularMax4000 zu dem diese Liste gehört.
+   *          der FormularMax4000 zu dem diese Liste gehÃ¶rt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public InsertionModelList(FormularMax4000 formularMax4000)
@@ -92,7 +92,7 @@ public class InsertionModelList
   }
 
   /**
-   * Fügt model dieser Liste hinzu.
+   * FÃ¼gt model dieser Liste hinzu.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -104,7 +104,7 @@ public class InsertionModelList
   }
 
   /**
-   * Löscht alle bestehenden InsertionModels aus der Liste.
+   * LÃ¶scht alle bestehenden InsertionModels aus der Liste.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -120,12 +120,12 @@ public class InsertionModelList
   }
 
   /**
-   * Liefert einen Iterator über alle {@link InsertionModel}s in dieser Liste.
-   * ACHTUNG! Es dürfen keine Veränderungen über den Iterator (z.B.
-   * {@link Iterator#remove()}) vorgenommen werden. Auch dürfen während der
-   * Iteration keine Veränderungen an der InsertionModelList vorkommen, da der
+   * Liefert einen Iterator Ã¼ber alle {@link InsertionModel}s in dieser Liste.
+   * ACHTUNG! Es dÃ¼rfen keine VerÃ¤nderungen Ã¼ber den Iterator (z.B.
+   * {@link Iterator#remove()}) vorgenommen werden. Auch dÃ¼rfen wÃ¤hrend der
+   * Iteration keine VerÃ¤nderungen an der InsertionModelList vorkommen, da der
    * Iterator direkt auf der internen Datenstruktur arbeitet und es daher zur
-   * {@link java.util.ConcurrentModificationException} kommen würde.
+   * {@link java.util.ConcurrentModificationException} kommen wÃ¼rde.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -215,8 +215,8 @@ public class InsertionModelList
   }
 
   /**
-   * Versucht TRAFOs von Einfügungen der ComboBox combo zu reparieren, die durch eine
-   * Änderung der Werte-Liste von combo zerbrochen sind.
+   * Versucht TRAFOs von EinfÃ¼gungen der ComboBox combo zu reparieren, die durch eine
+   * Ã„nderung der Werte-Liste von combo zerbrochen sind.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -283,7 +283,7 @@ public class InsertionModelList
     }
 
     /*
-     * Wenn wir ein unbenutztes Item haben, dann ändern wir alle TRAFOs, die broken
+     * Wenn wir ein unbenutztes Item haben, dann Ã¤ndern wir alle TRAFOs, die broken
      * sind so, dass sie auf dieses matchen.
      */
     if (unusedItems.size() > 0)
@@ -299,7 +299,7 @@ public class InsertionModelList
   }
 
   /**
-   * Liefert einen regulären Ausdruck, der genau den String str matcht (aber ohne ^
+   * Liefert einen regulÃ¤ren Ausdruck, der genau den String str matcht (aber ohne ^
    * und $).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -325,19 +325,19 @@ public class InsertionModelList
   }
 
   /**
-   * Lässt alle in dieser Liste gespeicherten {@link InsertionModel}s ihre
-   * zugehörigen Bookmarks updaten. Falls beim Update eines Bookmarks etwas
-   * schiefgeht wird das entsprechende {@link InsertionModel} aus der Liste gelöscht.
-   * Das Ausführen dieser Funktion triggert also potentiell einige Listener.
+   * LÃ¤sst alle in dieser Liste gespeicherten {@link InsertionModel}s ihre
+   * zugehÃ¶rigen Bookmarks updaten. Falls beim Update eines Bookmarks etwas
+   * schiefgeht wird das entsprechende {@link InsertionModel} aus der Liste gelÃ¶scht.
+   * Das AusfÃ¼hren dieser Funktion triggert also potentiell einige Listener.
    * 
    * @param mapFunctionNameToConfigThingy
    *          bildet einen Funktionsnamen auf ein ConfigThingy ab, dessen Wurzel der
    *          Funktionsname ist und dessen Inhalt eine Funktionsdefinition. Wenn eine
-   *          Einfügung mit einer TRAFO versehen ist, wird für das Aktualisieren des
+   *          EinfÃ¼gung mit einer TRAFO versehen ist, wird fÃ¼r das Aktualisieren des
    *          Bookmarks ein Funktionsname generiert, der noch nicht in dieser Map
-   *          vorkommt und ein Mapping für diese Funktion wird in die Map eingefügt.
-   *          Nach dem Aufruf von updateDocument() sind zu dieser Map also Einträge
-   *          hinzugekommen für alle TRAFOs, die in den Einfügungen vorkommen.
+   *          vorkommt und ein Mapping fÃ¼r diese Funktion wird in die Map eingefÃ¼gt.
+   *          Nach dem Aufruf von updateDocument() sind zu dieser Map also EintrÃ¤ge
+   *          hinzugekommen fÃ¼r alle TRAFOs, die in den EinfÃ¼gungen vorkommen.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void updateDocument(Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
@@ -358,7 +358,7 @@ public class InsertionModelList
   }
 
   /**
-   * listener wird über Änderungen der Liste informiert.
+   * listener wird Ã¼ber Ã„nderungen der Liste informiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -368,11 +368,11 @@ public class InsertionModelList
   }
 
   /**
-   * Benachrichtigt alle ItemListener über das Hinzufügen oder Entfernen von model
+   * Benachrichtigt alle ItemListener Ã¼ber das HinzufÃ¼gen oder Entfernen von model
    * zur bzw. aus der Liste an/von Index index.
    * 
    * @param removed
-   *          falls true, wurde model entfernt, ansonsten hinzugefügt.
+   *          falls true, wurde model entfernt, ansonsten hinzugefÃ¼gt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void notifyListeners(InsertionModel model, int index, boolean removed)
@@ -389,15 +389,15 @@ public class InsertionModelList
   }
 
   /**
-   * Interface für Klassen, die interessiert sind, zu erfahren, wenn sich die Liste
-   * ändert.
+   * Interface fÃ¼r Klassen, die interessiert sind, zu erfahren, wenn sich die Liste
+   * Ã¤ndert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static interface ItemListener
   {
     /**
-     * Wird aufgerufen nachdem model zur Liste hinzugefügt wurde (an Index index).
+     * Wird aufgerufen nachdem model zur Liste hinzugefÃ¼gt wurde (an Index index).
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */

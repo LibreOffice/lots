@@ -1,10 +1,10 @@
 /*
  * Dateiname: TextSection.java
  * Projekt  : WollMux
- * Funktion : Repräsentiert einen Textbereich (TextSection) mit einem
+ * Funktion : ReprÃ¤sentiert einen Textbereich (TextSection) mit einem
  *            Namensanhang in der Form 'GROUPS <ListeMitSichtbarkeitsgruppen>'.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -19,8 +19,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 02.01.2007 | LUT | Erstellung als TextSection
  * -------------------------------------------------------------------
@@ -42,10 +42,10 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UNO;
 
 /**
- * Diese Klasse repräsentiert einen Textbereich (TextSection), dessen Namen um den
- * Zusatz 'GROUPS <ListeMitSichtbarkeitsgruppen>' ergänzt wurde, über den die
+ * Diese Klasse reprÃ¤sentiert einen Textbereich (TextSection), dessen Namen um den
+ * Zusatz 'GROUPS <ListeMitSichtbarkeitsgruppen>' ergÃ¤nzt wurde, Ã¼ber den die
  * Sichtbarkeitsgruppen festgelegt sind, die diesen Bereich sichtbar oder unsichtbar
- * schalten können.
+ * schalten kÃ¶nnen.
  * 
  * @author christoph.lutz
  */
@@ -57,7 +57,7 @@ public class TextSection implements VisibilityElement
   private XTextSection section;
 
   /**
-   * Ein Set das die Gruppennamen dieses Sichtbarkeitselements enthält.
+   * Ein Set das die Gruppennamen dieses Sichtbarkeitselements enthÃ¤lt.
    */
   private Set<String> groups;
 
@@ -68,7 +68,7 @@ public class TextSection implements VisibilityElement
    *          UNO-Objekt des Bereichs
    * @param groups
    *          Set mit den Namen (als String) aller Sichtbarkeitsgruppen, die diesen
-   *          Bereich sichtbar oder unsichtbar machen können.
+   *          Bereich sichtbar oder unsichtbar machen kÃ¶nnen.
    */
   public TextSection(XTextSection section, Set<String> groups)
   {
@@ -143,7 +143,7 @@ public class TextSection implements VisibilityElement
 
   /**
    * Liefert den Namen der TextSection, der auch dann noch aktuell bleibt, wenn der
-   * Name manuell im Dokument geändert wurde, oder "<disposedTextSection>", wenn die
+   * Name manuell im Dokument geÃ¤ndert wurde, oder "<disposedTextSection>", wenn die
    * TextSection nicht mehr existiert.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -155,7 +155,7 @@ public class TextSection implements VisibilityElement
   }
 
   /**
-   * Liefert den HashCode von getName() und ermöglicht das Verwenden der TextSection
+   * Liefert den HashCode von getName() und ermÃ¶glicht das Verwenden der TextSection
    * in einem HashSet.
    * 
    * @see java.lang.Object#hashCode()
@@ -166,7 +166,7 @@ public class TextSection implements VisibilityElement
   }
 
   /**
-   * Vergleicht die beiden TextSections über UNORuntime.areSame()
+   * Vergleicht die beiden TextSections Ã¼ber UNORuntime.areSame()
    * 
    * @see java.lang.Object#equals(java.lang.Object)
    */

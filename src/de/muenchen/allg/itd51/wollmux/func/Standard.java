@@ -1,9 +1,9 @@
 /*
  * Dateiname: Standard.java
  * Projekt  : WollMux
- * Funktion : Standardfunktionen für Plausibilitätschecks, Trafos,... in Formularen
+ * Funktion : Standardfunktionen fÃ¼r PlausibilitÃ¤tschecks, Trafos,... in Formularen
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,11 +18,11 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 26.01.2006 | BNK | Erstellung
- * 08.05.2006 | BNK | nach Standard umbenannt, da in Zukunft auch für Trafos etc.
+ * 08.05.2006 | BNK | nach Standard umbenannt, da in Zukunft auch fÃ¼r Trafos etc.
  *                  | +anredeSuffix()
  * 26.07.2006 | BNK | formatInternalTelefonNumber5 -> formatiereTelefonnummerDIN5008
  * 26.10.2006 | BNK | +gender()
@@ -41,7 +41,7 @@ package de.muenchen.allg.itd51.wollmux.func;
  * ACHTUNG!! DATEI NICHT MEHR EDITIERT, WURDE IN DIE WOLLMUX-STANDARD-CONF
  * AUSGELAGERT
  * 
- * Änderungen haben in der wollmux-standard-config zu erfolgen!
+ * Ã„nderungen haben in der wollmux-standard-config zu erfolgen!
  * wollmux-standard-config/plugins/de/muenchen/allg/itd51/wollmux/func/Standard.java
  * 
  * In Change R24060 wird Ende 2009 die Standard.java aus dem WollMux entfernt.
@@ -55,7 +55,7 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 
 /**
- * Standardfunktionen für Plausibilitätschecks, Trafos,... in Formularen.
+ * Standardfunktionen fÃ¼r PlausibilitÃ¤tschecks, Trafos,... in Formularen.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -108,7 +108,7 @@ public class Standard
   }
 
   /**
-   * Liefert den String herrText zurück, falls lowcase(anrede) == "herr", ansonsten
+   * Liefert den String herrText zurÃ¼ck, falls lowcase(anrede) == "herr", ansonsten
    * wird frauText geliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -123,9 +123,9 @@ public class Standard
   }
 
   /**
-   * Liefert herrText zurück, falls lowcase(anrede) == "herr" oder "herrn", liefert
-   * frauText zurück, falls lowcase(anrede) == "frau", liefert sonstText zurück,
-   * falls keiner der obigen Fälle zutrifft.
+   * Liefert herrText zurÃ¼ck, falls lowcase(anrede) == "herr" oder "herrn", liefert
+   * frauText zurÃ¼ck, falls lowcase(anrede) == "frau", liefert sonstText zurÃ¼ck,
+   * falls keiner der obigen FÃ¤lle zutrifft.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -201,7 +201,7 @@ public class Standard
   }
 
   /**
-   * Formatiert tel gemäss DIN 5008 und setzt dann die Vorwahl "089" davor.
+   * Formatiert tel gemÃ¤ss DIN 5008 und setzt dann die Vorwahl "089" davor.
    * 
    * @author Bettina Bauer (D-III-ITD 5.1)
    */
@@ -214,7 +214,7 @@ public class Standard
   }
 
   /**
-   * Formatiert tel gemäss DIN 5008 und setzt dann die Vorwahl "0" davor, getrennt
+   * Formatiert tel gemÃ¤ss DIN 5008 und setzt dann die Vorwahl "0" davor, getrennt
    * durch Space. Dadurch entsteht eine Nummer, die von jedem internen Telefon aus
    * funktioniert.
    * 
@@ -229,7 +229,7 @@ public class Standard
   }
 
   /**
-   * Formatiert tel gemäss DIN 5008 und setzt dann die Vorwahl vorwahl davor,
+   * Formatiert tel gemÃ¤ss DIN 5008 und setzt dann die Vorwahl vorwahl davor,
    * getrennt durch Space.
    * 
    * @author Bettina Bauer (D-III-ITD 5.1)
@@ -279,7 +279,7 @@ public class Standard
         tel = vorwahl + " " + tel;
 
       }
-      // Wenn "/" ersetzten durch Leerzeichen dann alle anderen Sonderzeichen löschen
+      // Wenn "/" ersetzten durch Leerzeichen dann alle anderen Sonderzeichen lÃ¶schen
       else
       {
         tel = tel.replaceAll("/", " ");
@@ -290,7 +290,7 @@ public class Standard
   }
 
   /**
-   * Liefert true gdw regex eingabe vollständig matcht.
+   * Liefert true gdw regex eingabe vollstÃ¤ndig matcht.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

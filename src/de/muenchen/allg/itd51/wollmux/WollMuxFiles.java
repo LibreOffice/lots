@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Managed die Dateien auf die der WollMux zugreift (z.B. wollmux.conf)
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,11 +18,11 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 13.04.2006 | BNK | Erstellung
- * 20.04.2006 | BNK | [R1200] .wollmux-Verzeichnis als Vorbelegung für DEFAULT_CONTEXT
+ * 20.04.2006 | BNK | [R1200] .wollmux-Verzeichnis als Vorbelegung fÃ¼r DEFAULT_CONTEXT
  * 26.05.2006 | BNK | +DJ Initialisierung
  * 20.06.2006 | BNK | keine wollmux.conf mehr anlegen wenn nicht vorhanden
  *                  | /etc/wollmux/wollmux.conf auswerten
@@ -34,13 +34,13 @@
  * 20.12.2006 | BNK | CLASSPATH:Falls keine Dateierweiterung angegeben, / ans Ende setzen, weil nur so Verzeichnisse erkannt werden.
  * 09.07.2007 | BNK | [R7134]Popup, wenn Server langsam
  * 09.07.2007 | BNK | [R7137]IP-Adresse in Dumpinfo
- * 17.07.2007 | BNK | [R7605]Dateien binär kopieren in dumpInfo(), außerdem immer als UTF-8 schreiben
+ * 17.07.2007 | BNK | [R7605]Dateien binÃ¤r kopieren in dumpInfo(), auÃŸerdem immer als UTF-8 schreiben
  * 18.07.2007 | BNK | Alle Java-Properties in dumpInfo() ausgeben
  * 27.07.2007 | BNK | [P1448]WollMuxClassLoader.class.getClassLoader() als parent verwenden 
  * 01.09.2008 | BNK | [R28149]Klassen im CLASSPATH aus wollmux.conf haben vorrang vor WollMux-internen.
  * 18.08.2009 | BED | -defaultWollmuxConf
- *                  | andere Strategie für Suche nach wollmux.conf in setupWollMuxDir()
- *                  | Verzeichnis der wollmux.conf als Default für DEFAULT_CONTEXT
+ *                  | andere Strategie fÃ¼r Suche nach wollmux.conf in setupWollMuxDir()
+ *                  | Verzeichnis der wollmux.conf als Default fÃ¼r DEFAULT_CONTEXT
  * 12.01.2010 | BED | dumpInfo() gibt nun auch JVM Heap Size + verwendeten Speicher aus
  * -------------------------------------------------------------------
  *
@@ -115,7 +115,7 @@ public class WollMuxFiles
     "C:\\Programme\\wollmux\\wollmux.conf";
 
   /**
-   * Der Pfad (ohne Wurzel wie HKCU oder HKLM) zu dem Registrierungsschlüssel, unter
+   * Der Pfad (ohne Wurzel wie HKCU oder HKLM) zu dem RegistrierungsschlÃ¼ssel, unter
    * dem der WollMux seine Registry-Werte speichert
    */
   private final static String WOLLMUX_KEY = "Software\\WollMux";
@@ -129,7 +129,7 @@ public class WollMuxFiles
   private static final long DATASOURCE_TIMEOUT = 10000;
 
   /**
-   * Wenn nach dieser Anzahl Millisekunden die Konfiguration noch nicht vollständig
+   * Wenn nach dieser Anzahl Millisekunden die Konfiguration noch nicht vollstÃ¤ndig
    * eingelesen ist, wird ein Popup mit der Meldung {@link #SLOW_SERVER_MESSAGE}
    * gebracht.
    */
@@ -139,7 +139,7 @@ public class WollMuxFiles
    * Siehe {@link #SLOW_SERVER_TIMEOUT}.
    */
   private static final String SLOW_SERVER_MESSAGE =
-    L.m("Ihr Vorlagen-Server und/oder Ihre Netzwerkverbindung sind sehr langsam.\nDies kann die Arbeit mit OpenOffice.org stark beeinträchtigen.");
+    L.m("Ihr Vorlagen-Server und/oder Ihre Netzwerkverbindung sind sehr langsam.\nDies kann die Arbeit mit OpenOffice.org stark beeintrÃ¤chtigen.");
 
   private static final WollMuxClassLoader classLoader = new WollMuxClassLoader();
 
@@ -149,18 +149,18 @@ public class WollMuxFiles
   private static URL defaultContextURL;
 
   /**
-   * Enthält den zentralen DataSourceJoiner.
+   * EnthÃ¤lt den zentralen DataSourceJoiner.
    */
   private static DatasourceJoiner datasourceJoiner;
 
   /**
-   * Falls true, wurde bereits versucht, den DJ zu initialisieren (über den Erfolg
+   * Falls true, wurde bereits versucht, den DJ zu initialisieren (Ã¼ber den Erfolg
    * des Versuchs sagt die Variable nichts.)
    */
   private static boolean djInitialized = false;
 
   /**
-   * Enthält den geparsten Konfigruationsbaum der wollmux.conf
+   * EnthÃ¤lt den geparsten Konfigruationsbaum der wollmux.conf
    */
   private static ConfigThingy wollmuxConf;
 
@@ -170,17 +170,17 @@ public class WollMuxFiles
   private static File wollmuxDir;
 
   /**
-   * Enthält einen PrintStream in den die Log-Nachrichten geschrieben werden.
+   * EnthÃ¤lt einen PrintStream in den die Log-Nachrichten geschrieben werden.
    */
   private static File wollmuxLogFile;
 
   /**
-   * Enthält das File der Konfigurationsdatei wollmux.conf
+   * EnthÃ¤lt das File der Konfigurationsdatei wollmux.conf
    */
   private static File wollmuxConfFile;
 
   /**
-   * Enthält das File in des local-overwrite-storage-caches.
+   * EnthÃ¤lt das File in des local-overwrite-storage-caches.
    */
   private static File losCacheFile;
 
@@ -218,11 +218,11 @@ public class WollMuxFiles
    * 
    * <ol>
    * <li>unter dem Dateipfad (inkl. Dateiname!), der im Registrierungswert
-   * "ConfigPath" des Schlüssels HKCU\Software\WollMux\ festgelegt ist (nur Windows!)</li>
+   * "ConfigPath" des SchlÃ¼ssels HKCU\Software\WollMux\ festgelegt ist (nur Windows!)</li>
    * <li>$HOME/.wollmux/wollmux.conf (wobei $HOME unter Windows das
    * Profilverzeichnis bezeichnet)</li>
    * <li>unter dem Dateipfad (inkl. Dateiname!), der im Registrierungswert
-   * "ConfigPath" des Schlüssels HKLM\Software\WollMux\ festgelegt ist (nur Windows!)</li>
+   * "ConfigPath" des SchlÃ¼ssels HKLM\Software\WollMux\ festgelegt ist (nur Windows!)</li>
    * <li>unter dem Dateipfad, der in der Konstanten
    * {@link #C_PROGRAMME_WOLLMUX_WOLLMUX_CONF} festgelegt ist (nur Windows!)</li>
    * <li>unter dem Dateipfad, der in der Konstanten
@@ -234,14 +234,14 @@ public class WollMuxFiles
    */
   public static void setupWollMuxDir()
   {
-    long time = System.currentTimeMillis(); // Zeitnahme fürs Debuggen
+    long time = System.currentTimeMillis(); // Zeitnahme fÃ¼rs Debuggen
 
     String userHome = System.getProperty("user.home");
     wollmuxDir = new File(userHome, ".wollmux");
 
     // .wollmux-Verzeichnis im userHome erzeugen falls es nicht existiert
     // Selbst wenn die wollmux.conf nicht im .wollmux-Verzeichnis liegt,
-    // wird es dennoch für die cache.conf und wollmux.log benötigt
+    // wird es dennoch fÃ¼r die cache.conf und wollmux.log benÃ¶tigt
     if (!wollmuxDir.exists()) wollmuxDir.mkdirs();
 
     // cache.conf und wollmux.log im .wollmux-Verzeichnis
@@ -256,7 +256,7 @@ public class WollMuxFiles
     // Pfad zur wollmux.conf
     String wollmuxConfPath = null;
 
-    // Überprüfen, ob das Betriebssystem Windows ist
+    // ÃœberprÃ¼fen, ob das Betriebssystem Windows ist
     boolean windowsOS =
       System.getProperty("os.name").toLowerCase().contains("windows");
 
@@ -279,7 +279,7 @@ public class WollMuxFiles
       }
     }
 
-    // Als nächstes wird im .wollmux-Verzeichnis nach der wollmux.conf gesucht
+    // Als nÃ¤chstes wird im .wollmux-Verzeichnis nach der wollmux.conf gesucht
     if (wollmuxConfFile == null || !wollmuxConfFile.exists())
     {
       wollmuxConfFile = new File(wollmuxDir, "wollmux.conf");
@@ -308,7 +308,7 @@ public class WollMuxFiles
           }
         }
 
-        // Als letzte Möglichkeit wird in einem Fallback-Verzeichnis gesucht
+        // Als letzte MÃ¶glichkeit wird in einem Fallback-Verzeichnis gesucht
         if (!wollmuxConfFile.exists())
         {
           wollmuxConfPath = ETC_WOLLMUX_WOLLMUX_CONF;
@@ -328,7 +328,7 @@ public class WollMuxFiles
 
     // Bevor wir versuchen zu parsen wird auf jeden Fall ein leeres ConfigThingy
     // angelegt, damit wollmuxConf auch dann wohldefiniert ist, wenn die Datei
-    // Fehler enthält bzw. fehlt.
+    // Fehler enthÃ¤lt bzw. fehlt.
     wollmuxConf = new ConfigThingy("wollmuxConf");
 
     SlowServerWatchdog fido = new SlowServerWatchdog(SLOW_SERVER_TIMEOUT);
@@ -387,7 +387,7 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert das Verzeichnis ,wollmux zurück.
+   * Liefert das Verzeichnis ,wollmux zurÃ¼ck.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -397,7 +397,7 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert das File-Objekt der wollmux,conf zurück, die gelesen wurde (kann z,B,
+   * Liefert das File-Objekt der wollmux,conf zurÃ¼ck, die gelesen wurde (kann z,B,
    * auch die aus /etc/wollmux/ sein). Darf erst nach setupWollMuxDir() aufgerufen
    * werden.
    */
@@ -407,7 +407,7 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert das File-Objekt der Logdatei zurück. Darf erst nach setupWollMuxDir()
+   * Liefert das File-Objekt der Logdatei zurÃ¼ck. Darf erst nach setupWollMuxDir()
    * aufgerufen werden.
    * 
    */
@@ -417,7 +417,7 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert das File-Objekt des LocalOverrideStorage Caches zurück. Darf erst nach
+   * Liefert das File-Objekt des LocalOverrideStorage Caches zurÃ¼ck. Darf erst nach
    * setupWollMuxDir() aufgerufen werden.
    * 
    * @return das File-Objekt des LocalOverrideStorage Caches.
@@ -428,7 +428,7 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert den Inhalt der wollmux,conf zurück.
+   * Liefert den Inhalt der wollmux,conf zurÃ¼ck.
    */
   public static ConfigThingy getWollmuxConf()
   {
@@ -437,9 +437,9 @@ public class WollMuxFiles
 
   /**
    * Diese Methode liefert den letzten in der Konfigurationsdatei definierten
-   * DEFAULT_CONTEXT zurück. Ist in der Konfigurationsdatei keine URL definiert bzw.
+   * DEFAULT_CONTEXT zurÃ¼ck. Ist in der Konfigurationsdatei keine URL definiert bzw.
    * ist die Angabe fehlerhaft, so wird die URL des .wollmux Verzeichnisses
-   * zurückgeliefert.
+   * zurÃ¼ckgeliefert.
    */
   public static URL getDEFAULT_CONTEXT()
   {
@@ -448,7 +448,7 @@ public class WollMuxFiles
 
   /**
    * Liefert eine URL zum String urlStr, wobei relative Pfade relativ zum
-   * DEFAULT_CONTEXT aufgelöst werden.
+   * DEFAULT_CONTEXT aufgelÃ¶st werden.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * @throws MalformedURLException
@@ -460,8 +460,8 @@ public class WollMuxFiles
   }
 
   /**
-   * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null, falls
-   * ein Fehler während der Initialisierung aufgetreten ist).
+   * Initialisiert den DJ wenn nÃ¶tig und liefert ihn dann zurÃ¼ck (oder null, falls
+   * ein Fehler wÃ¤hrend der Initialisierung aufgetreten ist).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -500,7 +500,7 @@ public class WollMuxFiles
         }
         if (datasourceTimeoutLong <= 0)
         {
-          Logger.error(L.m("DATASOURCE_TIMEOUT muss größer als 0 sein!"));
+          Logger.error(L.m("DATASOURCE_TIMEOUT muss grÃ¶ÃŸer als 0 sein!"));
         }
       }
       catch (NodeNotFoundException e)
@@ -516,12 +516,12 @@ public class WollMuxFiles
         /*
          * Zum Zeitpunkt wo der DJ initialisiert wird sind die Funktions- und
          * Dialogbibliothek des WollMuxSingleton noch nicht initialisiert, deswegen
-         * können sie hier nicht verwendet werden. Man könnte die Reihenfolge
-         * natürlich ändern, aber diese Reihenfolgeabhängigkeit gefällt mir nicht.
-         * Besser wäre auch bei den Funktionen WollMuxSingleton.getFunctionDialogs()
+         * kÃ¶nnen sie hier nicht verwendet werden. Man kÃ¶nnte die Reihenfolge
+         * natÃ¼rlich Ã¤ndern, aber diese ReihenfolgeabhÃ¤ngigkeit gefÃ¤llt mir nicht.
+         * Besser wÃ¤re auch bei den Funktionen WollMuxSingleton.getFunctionDialogs()
          * und WollMuxSingleton.getGlobalFunctions() eine on-demand initialisierung
          * nach dem Prinzip if (... == null) initialisieren. Aber das heben wir uns
-         * für einen Zeitpunkt auf, wo es benötigt wird und nehmen jetzt erst mal
+         * fÃ¼r einen Zeitpunkt auf, wo es benÃ¶tigt wird und nehmen jetzt erst mal
          * leere Dummy-Bibliotheken.
          */
         FunctionLibrary funcLib = new FunctionLibrary();
@@ -567,7 +567,7 @@ public class WollMuxFiles
         urlStr = "./";
       }
 
-      // url mit einem "/" aufhören lassen (falls noch nicht angegeben).
+      // url mit einem "/" aufhÃ¶ren lassen (falls noch nicht angegeben).
       String urlVerzStr;
       if (urlStr.endsWith("/") || urlStr.endsWith("\\"))
         urlVerzStr = urlStr;
@@ -580,7 +580,7 @@ public class WollMuxFiles
          * Die folgenden 3 Statements realisieren ein Fallback-Verhalten. Falls das
          * letzte Statement eine MalformedURLException wirft, dann gilt das vorige
          * Statement. Hat dieses schon eine MalformedURLException geworfen (sollte
-         * eigentlich nicht passieren können), so gilt immer noch das erste.
+         * eigentlich nicht passieren kÃ¶nnen), so gilt immer noch das erste.
          */
         defaultContextURL = new URL("file:///");
         defaultContextURL = getWollMuxConfFile().toURI().toURL();
@@ -650,10 +650,10 @@ public class WollMuxFiles
   }
 
   /**
-   * Gibt Auskunft darüber, sich der WollMux im debug-modus befindet; Der debug-modus
+   * Gibt Auskunft darÃ¼ber, sich der WollMux im debug-modus befindet; Der debug-modus
    * wird automatisch aktiviert, wenn der LOGGING_MODE auf "debug" oder "all" gesetzt
    * wurde. Im debug-mode werden z.B. die Bookmarks abgearbeiteter Dokumentkommandos
-   * nach der Ausführung nicht entfernt, damit sich Fehler leichter finden lassen.
+   * nach der AusfÃ¼hrung nicht entfernt, damit sich Fehler leichter finden lassen.
    * 
    * @return
    */
@@ -689,7 +689,7 @@ public class WollMuxFiles
   }
 
   /**
-   * Parst die CLASSPATH Direktiven und hängt für jede eine weitere URL an den
+   * Parst die CLASSPATH Direktiven und hÃ¤ngt fÃ¼r jede eine weitere URL an den
    * Suchpfad von {@link #classLoader} an.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -737,7 +737,7 @@ public class WollMuxFiles
 
   /**
    * Liefert einen ClassLoader, der die in wollmux,conf gesetzten
-   * CLASSPATH-Direktiven berücksichtigt.
+   * CLASSPATH-Direktiven berÃ¼cksichtigt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -748,7 +748,7 @@ public class WollMuxFiles
 
   /**
    * Parst die "Funktionsdialoge" Abschnitte aus conf und liefert als Ergebnis eine
-   * DialogLibrary zurück.
+   * DialogLibrary zurÃ¼ck.
    * 
    * @param baselib
    *          falls nicht-null wird diese als Fallback verlinkt, um Dialoge zu
@@ -756,7 +756,7 @@ public class WollMuxFiles
    * @param context
    *          der Kontext in dem in Dialogen enthaltene Funktionsdefinitionen
    *          ausgewertet werden sollen (insbesondere DIALOG-Funktionen). ACHTUNG!
-   *          Hier werden Werte gespeichert, es ist nicht nur ein Schlüssel.
+   *          Hier werden Werte gespeichert, es ist nicht nur ein SchlÃ¼ssel.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -804,7 +804,7 @@ public class WollMuxFiles
    * @param context
    *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden sollen
    *          (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
-   *          gespeichert, es ist nicht nur ein Schlüssel.
+   *          gespeichert, es ist nicht nur ein SchlÃ¼ssel.
    * 
    * @param baselib
    *          falls nicht-null wird diese als Fallback verlinkt, um Funktionen zu
@@ -820,13 +820,13 @@ public class WollMuxFiles
   }
 
   /**
-   * Parst die Inhalte von conf,query(section) als Funktionsdefinitionen und fügt sie
+   * Parst die Inhalte von conf,query(section) als Funktionsdefinitionen und fÃ¼gt sie
    * funcs hinzu.
    * 
    * @param context
    *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden sollen
    *          (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
-   *          gespeichert, es ist nicht nur ein Schlüssel.
+   *          gespeichert, es ist nicht nur ein SchlÃ¼ssel.
    * 
    * @param baselib
    *          falls nicht-null wird diese als Fallback verlinkt, um Funktionen zu
@@ -895,7 +895,7 @@ public class WollMuxFiles
           }
           catch (NodeNotFoundException e)
           {
-            Logger.error(L.m("Druckfunktion '%1' enthält keinen Schlüssel EXTERN",
+            Logger.error(L.m("Druckfunktion '%1' enthÃ¤lt keinen SchlÃ¼ssel EXTERN",
               name), e);
             continue;
           }
@@ -909,7 +909,7 @@ public class WollMuxFiles
           catch (NodeNotFoundException e)
           {
             Logger.debug(L.m(
-              "Druckfunktion '%1' enthält keinen Schlüssel ORDER. Verwende Standard-Wert %2",
+              "Druckfunktion '%1' enthÃ¤lt keinen SchlÃ¼ssel ORDER. Verwende Standard-Wert %2",
               name, "" + DEFAULT_PRINTFUNCTION_ORDER_VALUE));
           }
           try
@@ -920,7 +920,7 @@ public class WollMuxFiles
           {
             Logger.error(
               L.m(
-                "Der Wert '%1' des Schlüssels ORDER in der Druckfunktion '%2' ist ungültig.",
+                "Der Wert '%1' des SchlÃ¼ssels ORDER in der Druckfunktion '%2' ist ungÃ¼ltig.",
                 orderStr, name), e);
             continue;
           }
@@ -941,7 +941,7 @@ public class WollMuxFiles
 
   /**
    * Erstellt eine Dump-Datei im WollMux-Verzeichnis, die wichtige Informationen zur
-   * Fehlersuche enthält und liefert den Namen dieser Datei als String zurück, oder
+   * Fehlersuche enthÃ¤lt und liefert den Namen dieser Datei als String zurÃ¼ck, oder
    * null falls bei der Erstellung Fehler auftraten.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz
@@ -1006,7 +1006,7 @@ public class WollMuxFiles
           if (!p.matcher(jConfFiles[i].getName()).matches()) continue;
           out.flush(); // weil wir gleich direkt auf den Stream zugreifen
           copyFile(jConfFiles[i], outStream);
-          outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
+          outStream.flush(); // sollte nicht nÃ¶tig sein, schadet aber nicht
           out.write("\n");
           found = true;
           break;
@@ -1044,7 +1044,7 @@ public class WollMuxFiles
       out.write("===================== START wollmuxConfFile ==================\n");
       out.flush(); // weil wir gleich direkt auf den Stream zugreifen
       copyFile(getWollMuxConfFile(), outStream);
-      outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
+      outStream.flush(); // sollte nicht nÃ¶tig sein, schadet aber nicht
       out.write("\n");
       out.write("===================== END wollmuxConfFile ==================\n");
 
@@ -1055,14 +1055,14 @@ public class WollMuxFiles
       out.write("===================== START losCacheFile ==================\n");
       out.flush(); // weil wir gleich direkt auf den Stream zugreifen
       copyFile(getLosCacheFile(), outStream);
-      outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
+      outStream.flush(); // sollte nicht nÃ¶tig sein, schadet aber nicht
       out.write("\n");
       out.write("===================== END losCacheFile ==================\n");
 
       out.write("===================== START wollmux.log ==================\n");
       out.flush(); // weil wir gleich direkt auf den Stream zugreifen
       copyFile(getWollMuxLogFile(), outStream);
-      outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
+      outStream.flush(); // sollte nicht nÃ¶tig sein, schadet aber nicht
       out.write("\n");
       out.write("===================== END wollmux.log ==================\n");
 
@@ -1113,7 +1113,7 @@ public class WollMuxFiles
   }
 
   /**
-   * Kopiert den Inhalt von file nach out (binär).
+   * Kopiert den Inhalt von file nach out (binÃ¤r).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1146,8 +1146,8 @@ public class WollMuxFiles
   }
 
   /**
-   * Gibt den Inhalt der OOo-Konfiguration einschließlich aller Unterknoten am Knoten
-   * nodePath zurück.
+   * Gibt den Inhalt der OOo-Konfiguration einschlieÃŸlich aller Unterknoten am Knoten
+   * nodePath zurÃ¼ck.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -1175,8 +1175,8 @@ public class WollMuxFiles
 
   /**
    * Gibt den Inhalt eines Knotens element der OOo-Konfiguration mit dem Knotennamen
-   * und allen enthaltenen Properties zurück, wobei die Inhalte pro Zeile um den
-   * String spaces eingerückt werden.
+   * und allen enthaltenen Properties zurÃ¼ck, wobei die Inhalte pro Zeile um den
+   * String spaces eingerÃ¼ckt werden.
    * 
    * @param element
    * @param spaces

@@ -1,10 +1,10 @@
 /*
  * Dateiname: VisibilityElement.java
  * Projekt  : WollMux
- * Funktion : Beschreibt ein Sichtbarkeitselement, das gesteuert über Sichtbarkeitsgruppen
+ * Funktion : Beschreibt ein Sichtbarkeitselement, das gesteuert Ã¼ber Sichtbarkeitsgruppen
  *            auf "sichtbar" oder "unsichtbar" geschalten werden kann.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -19,8 +19,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 02.01.2007 | LUT | Erstellung als VisibilityElement
  * -------------------------------------------------------------------
@@ -36,7 +36,7 @@ import java.util.Set;
 import com.sun.star.text.XTextRange;
 
 /**
- * Dieses Interface beschreibt ein Sichtbarkeitselement, das gesteuert über sog.
+ * Dieses Interface beschreibt ein Sichtbarkeitselement, das gesteuert Ã¼ber sog.
  * Sichtbarkeitsgruppen sichtbar oder unsichtbar geschalten werden kann.
  * 
  * Derzeit wird das Interface von folgenden Klassen implementiert:
@@ -48,7 +48,7 @@ public interface VisibilityElement
 {
 
   /**
-   * gibt den Sichtbarkeitsstatus des Sichtbarkeitselements zurück.
+   * gibt den Sichtbarkeitsstatus des Sichtbarkeitselements zurÃ¼ck.
    * 
    * @return true=sichtbar, false=ausgeblendet
    */
@@ -65,12 +65,12 @@ public interface VisibilityElement
   /**
    * Liefert alle Sichtbarkeitsgruppen zu diesem Sichtbarkeitselement.
    * 
-   * @return Ein Set, das alle zugeordneten groupId's als Strings enthält.
+   * @return Ein Set, das alle zugeordneten groupId's als Strings enthÃ¤lt.
    */
   public abstract Set<String> getGroups();
 
   /**
-   * fügt diesem Elements all in groups definierten Sichtbarkeitsgruppen hinzu.
+   * fÃ¼gt diesem Elements all in groups definierten Sichtbarkeitsgruppen hinzu.
    */
   public abstract void addGroups(Set<String> groups);
 

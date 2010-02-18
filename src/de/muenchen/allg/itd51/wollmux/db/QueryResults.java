@@ -3,7 +3,7 @@
 * Projekt  : WollMux
 * Funktion : Ergebnisse einer Datenbankanfrage.
 * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
 *
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
+* Ã„nderungshistorie:
+* Datum      | Wer | Ã„nderungsgrund
 * -------------------------------------------------------------------
 * 14.10.2005 | BNK | Erstellung
 * -------------------------------------------------------------------
@@ -45,7 +45,7 @@ public interface QueryResults extends Iterable<Dataset>
   public int size();
   
   /**
-   * Iterator über die Ergebnisse ({@link Dataset} Objekte).
+   * Iterator Ã¼ber die Ergebnisse ({@link Dataset} Objekte).
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public Iterator<Dataset> iterator();

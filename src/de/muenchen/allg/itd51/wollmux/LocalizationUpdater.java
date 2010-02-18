@@ -4,7 +4,7 @@
  * Funktion : Diese Klasse liest alle zu lokalisierenden Strings des WollMux 
  *            aus dem Source-Code und aktualisiert die Datei localization.conf.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -19,8 +19,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 21.02.2008 | LUT | Erstellung als LocalizationUpdater
  * -------------------------------------------------------------------
@@ -52,18 +52,18 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 /**
  * Diese Klasse liest alle zu lokalisierenden Strings des WollMux aus dem Source-Code
  * und aktualisiert die Datei localization.conf. Dabei wird wie folgt vorgegangen:
- * Bereits bestehende Einträge bleiben in der Reihenfolge, in der sie bestehen. Durch
- * den Update neu hinzukommende Einträge werden an das Ende der Liste angehängt.
- * Bereits bestehende Einträge, zu denen es im Code keine zugehörigen
+ * Bereits bestehende EintrÃ¤ge bleiben in der Reihenfolge, in der sie bestehen. Durch
+ * den Update neu hinzukommende EintrÃ¤ge werden an das Ende der Liste angehÃ¤ngt.
+ * Bereits bestehende EintrÃ¤ge, zu denen es im Code keine zugehÃ¶rigen
  * Original-Strings mehr gibt, werden auskommentiert und an das Ende der Liste
- * verschoben. Sind unter den auskommentierten, verschobenen Zeilen auch Einträge
- * dabei, die tatsächlich eine Übersetzung in anderen Sprachen besitzen, so wird nach
+ * verschoben. Sind unter den auskommentierten, verschobenen Zeilen auch EintrÃ¤ge
+ * dabei, die tatsÃ¤chlich eine Ãœbersetzung in anderen Sprachen besitzen, so wird nach
  * dem Update eine Warnung ausgegeben, die darauf hinweist, dass hier bereits
- * übersetzte Strings mit dem nächsten Update-Lauf entfernt werden.
+ * Ã¼bersetzte Strings mit dem nÃ¤chsten Update-Lauf entfernt werden.
  * 
- * Der Einfachheit halber findet der LocalizationUpdater auch L.m-Ausdrücke in
+ * Der Einfachheit halber findet der LocalizationUpdater auch L.m-AusdrÃ¼cke in
  * auskommentierten Code-Stellen. Eine Erkennung und Ausfilterung von Kommentaren
- * erscheint mit an dieser Stelle zu aufwendig und würde den Code unnötig
+ * erscheint mit an dieser Stelle zu aufwendig und wÃ¼rde den Code unnÃ¶tig
  * verkomplizieren.
  * 
  * @author Christoph Lutz (D-III-ITD-5.1)
@@ -71,39 +71,39 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 public class LocalizationUpdater
 {
   /**
-   * Enthält den Pfad zur Konfigurationsdatei localization.conf aus Sicht des
+   * EnthÃ¤lt den Pfad zur Konfigurationsdatei localization.conf aus Sicht des
    * Projekt-Hauptverzeichnisses.
    */
   private static File localizationConfFile = new File("./localization.conf");
 
   /**
-   * Enthält das Wurzelverzeichnis der Source-Dateien aus Sicht des
+   * EnthÃ¤lt das Wurzelverzeichnis der Source-Dateien aus Sicht des
    * Projekt-Hauptverzeichnises.
    */
   private static File sourcesDir = new File("./src/");
 
   /**
    * Beschreibt einen String im Sourcecode. In Gruppe 1 wird der Stringinhalt
-   * zurückgeliefert (ohne die Anführungszeichen, aber nach wie vor in Java-Syntax
-   * escaped). Ein einzelner String in Java kann sich niemals über mehrere Codezeilen
-   * erstrecken (das wäre syntaktisch falsch). In auskommentierten Codezeilen kann
-   * jedoch ein String ungünstig über mehrere Codezeilen umgebrochen werden. Der
-   * Ausschluss der Zeichen \n\r verhindert daher die Erkennung von ungültigen
+   * zurÃ¼ckgeliefert (ohne die AnfÃ¼hrungszeichen, aber nach wie vor in Java-Syntax
+   * escaped). Ein einzelner String in Java kann sich niemals Ã¼ber mehrere Codezeilen
+   * erstrecken (das wÃ¤re syntaktisch falsch). In auskommentierten Codezeilen kann
+   * jedoch ein String ungÃ¼nstig Ã¼ber mehrere Codezeilen umgebrochen werden. Der
+   * Ausschluss der Zeichen \n\r verhindert daher die Erkennung von ungÃ¼ltigen
    * Strings.
    */
   private static Pattern STRING = Pattern.compile("\"((?:\\\\\"|[^\"\r\n])*)\"");
 
   /**
-   * Enthält das Pattern, mit dem nach L.m(STRINGS[, args])-Ausdrücken gesucht wird.
-   * In Gruppe 1 wird der um Leerzeichen getrimmte STRINGS-Ausdruck zurückgeliefert.
-   * STRINGS können dabei auch mit "+" verkettete Strings sein.
+   * EnthÃ¤lt das Pattern, mit dem nach L.m(STRINGS[, args])-AusdrÃ¼cken gesucht wird.
+   * In Gruppe 1 wird der um Leerzeichen getrimmte STRINGS-Ausdruck zurÃ¼ckgeliefert.
+   * STRINGS kÃ¶nnen dabei auch mit "+" verkettete Strings sein.
    */
   private static Pattern L_M =
     Pattern.compile("L.m\\(\\s*(" + STRING + "(?:\\s*\\+\\s*" + STRING
       + ")*)\\s*[\\),]");
 
   /**
-   * Muss aus dem Hauptverzeichnis des WollMux-Projekts ausgeführt werden und
+   * Muss aus dem Hauptverzeichnis des WollMux-Projekts ausgefÃ¼hrt werden und
    * aktualisiert die Datei localization.conf.
    * 
    * @param args
@@ -164,7 +164,7 @@ public class LocalizationUpdater
     {
       File file = iter.next();
 
-      String sourceCode = readFile(file, "ISO-8859-1");
+      String sourceCode = readFile(file, "UTF-8");
 
       Matcher m = L_M.matcher(sourceCode);
       while (m.find())
@@ -195,9 +195,9 @@ public class LocalizationUpdater
     }
 
     // Messages-Abschnitt der localization.conf neu erzeugen (die
-    // StringRepresentation von ConfigThingy macht das nicht schön genug,
+    // StringRepresentation von ConfigThingy macht das nicht schÃ¶n genug,
     // deshalb hier eine eigene Ausgaberoutine) und dabei vorangestellte
-    // Abschnitte unverändert lassen.
+    // Abschnitte unverÃ¤ndert lassen.
     String str = "";
     String origContent = readFile(localizationConfFile, "UTF-8");
     String origContentBeforeMessages = origContent.split("\\sMessages\\s*\\(", 2)[0];
@@ -281,18 +281,18 @@ public class LocalizationUpdater
     {
       String language = ent.getKey();
       int ct = ent.getValue().intValue();
-      System.out.println(L.m("Davon nicht übersetzt in Sprache %1: %2", language,
+      System.out.println(L.m("Davon nicht Ã¼bersetzt in Sprache %1: %2", language,
         Integer.valueOf(currentOriginals.size() - ct)));
     }
 
     if (removedTranslatedMessagesWarning)
       System.err.println("\n"
-        + L.m("ACHTUNG: Bitte überprüfen Sie den Inhalt Ihrer Datei localization.conf,\nda bereits übersetzte aber nicht mehr benötigte Einträge auskommentiert\nwurden und mit der nächsten Aktualisierung endgültig entfernt werden."));
+        + L.m("ACHTUNG: Bitte Ã¼berprÃ¼fen Sie den Inhalt Ihrer Datei localization.conf,\nda bereits Ã¼bersetzte aber nicht mehr benÃ¶tigte EintrÃ¤ge auskommentiert\nwurden und mit der nÃ¤chsten Aktualisierung endgÃ¼ltig entfernt werden."));
   }
 
   /**
    * Liefert den kompletten Inhalt der mit encoding encodierten Datei file als String
-   * zurück.
+   * zurÃ¼ck.
    * 
    * @param file
    * @throws FileNotFoundException
@@ -322,7 +322,7 @@ public class LocalizationUpdater
   }
 
   /**
-   * Fügt alle Dateien, die mit .java enden aus diesem Verzeichnis fileOrDir und aus
+   * FÃ¼gt alle Dateien, die mit .java enden aus diesem Verzeichnis fileOrDir und aus
    * allen Unterverzeichnissen zur Liste l hinzu.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -348,14 +348,14 @@ public class LocalizationUpdater
   /**
    * Diese Methode evaluiert einen String aus dem SourceCode, der auch
    * Character-Escape-Sequenzen enthalten kann, in der Form, wie ihn der
-   * Java-Compiler interpretieren würde und liefert den Java-String zurück.
+   * Java-Compiler interpretieren wÃ¼rde und liefert den Java-String zurÃ¼ck.
    * 
    * Derzeit werden folgende Escape-Sequenzen aus
    * http://java.sun.com/docs/books/tutorial/java/data/characters.html umgesetzt: \t,
    * \b, \n, \r, \f, \', \", \\
    * 
    * @param str
-   *          Ein String aus dem SourceCode, der zu übersetzen ist.
+   *          Ein String aus dem SourceCode, der zu Ã¼bersetzen ist.
    * @return den evaluierten String
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)

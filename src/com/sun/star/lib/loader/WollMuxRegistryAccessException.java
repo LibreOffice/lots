@@ -4,7 +4,7 @@
  * Funktion : Signalisiert, dass ein Fehler beim Lesen von WollMux-Config-Daten
  *            aus der Windows Registry aufgetreten ist
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -19,8 +19,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 14.08.2009 | BED | Erstellung
  * -------------------------------------------------------------------

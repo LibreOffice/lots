@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Eine durch ein ConfigThingy beschriebene externe Funktion.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,11 +18,11 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 25.01.2006 | BNK | Erstellung
- * 05.12.2006 | BNK | ClassLoader kann übergeben werden
+ * 05.12.2006 | BNK | ClassLoader kann Ã¼bergeben werden
  *                  | +invoke(Object[])
  * 28.12.2006 | BNK | nur noch public Methoden als ExternalFunctions finden.
  * -------------------------------------------------------------------
@@ -75,8 +75,8 @@ public class ExternalFunction
   private String[] params;
 
   /**
-   * Erzeugt aus einem ConfigThingy (übergeben wird der EXTERN-Knoten) eine
-   * ExternalFunction, wobei zum Laden von Java-Klassen der selbe ClassLoader wie für
+   * Erzeugt aus einem ConfigThingy (Ã¼bergeben wird der EXTERN-Knoten) eine
+   * ExternalFunction, wobei zum Laden von Java-Klassen der selbe ClassLoader wie fÃ¼r
    * das Laden dieser Klasse verwendet wird.
    * 
    * @throws ConfigurationErrorException
@@ -88,7 +88,7 @@ public class ExternalFunction
   }
 
   /**
-   * Erzeugt aus einem ConfigThingy (übergeben wird der EXTERN-Knoten) eine
+   * Erzeugt aus einem ConfigThingy (Ã¼bergeben wird der EXTERN-Knoten) eine
    * ExternalFunction, wobei zum Laden von Java-Klassen classLoader verwendet wird.
    * 
    * @throws ConfigurationErrorException
@@ -102,7 +102,7 @@ public class ExternalFunction
     try
     {
       url = conf.get("URL").toString();
-      // Der folgende Spezialfall dient der Kompatibilität mit
+      // Der folgende Spezialfall dient der KompatibilitÃ¤t mit
       // wollmux-standard-config <=4.7.0
       // FIXME: diesen Spezialfall irgendwann 2010 entfernen...
       if ("java:de.muenchen.allg.itd51.wollmux.dialog.MailMergeNew.mailMergeNewSetFormValue".equals(url))
@@ -128,7 +128,7 @@ public class ExternalFunction
           {
             if (method != null)
             {
-              Logger.error(L.m("Klasse \"%1\" enthält 2 Methoden namens \"%2\"",
+              Logger.error(L.m("Klasse \"%1\" enthÃ¤lt 2 Methoden namens \"%2\"",
                 classStr, methodStr));
               break;
             }
@@ -137,7 +137,7 @@ public class ExternalFunction
 
         if (method == null)
           throw new ConfigurationErrorException(L.m(
-            "Klasse \"%1\" enthält keine PUBLIC Methode namens \"%2", classStr,
+            "Klasse \"%1\" enthÃ¤lt keine PUBLIC Methode namens \"%2", classStr,
             methodStr));
       }
       else
@@ -148,7 +148,7 @@ public class ExternalFunction
     catch (Throwable e)
     {
       throw new ConfigurationErrorException(
-        L.m("Skript \"%1\" nicht verfügbar", url), e);
+        L.m("Skript \"%1\" nicht verfÃ¼gbar", url), e);
     }
 
     ConfigThingy paramsConf = conf.query("PARAMS");
@@ -188,7 +188,7 @@ public class ExternalFunction
    *          sollte zu jedem der von {@link #parameters()} gelieferten Namen einen
    *          String-Wert enthalten.
    * @return den Wert des Funktionsaufrufs oder null falls es ein Problem gab, das
-   *         nicht zu einer Exception geführt hat.
+   *         nicht zu einer Exception gefÃ¼hrt hat.
    * @throws Exception
    *           falls ein Problem auftritt
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -205,10 +205,10 @@ public class ExternalFunction
    * Ruft die Funktion auf mit den Argumenten args.
    * 
    * @param args
-   *          muss für jeden der von {@link #parameters()} gelieferten Namen einen
+   *          muss fÃ¼r jeden der von {@link #parameters()} gelieferten Namen einen
    *          Wert enthalten.
    * @return den Wert des Funktionsaufrufs oder null falls es ein Problem gab, das
-   *         nicht zu einer Exception geführt hat.
+   *         nicht zu einer Exception gefÃ¼hrt hat.
    * @throws Exception
    *           falls ein Problem auftritt
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED

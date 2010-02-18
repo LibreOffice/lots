@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Ersetzen bzw. setzen von Shortcuts in OOo.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 19.12.2006 | BAB | Erstellung
  * -------------------------------------------------------------------
@@ -52,7 +52,7 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 public class Shortcuts
 {
   /**
-   * Liest alle Attribute SHORTCUT und URL aus tastenkombinationenConf aus, löscht
+   * Liest alle Attribute SHORTCUT und URL aus tastenkombinationenConf aus, lÃ¶scht
    * alle bisher vorhandenen Tastenkombinationen deren URL mit "wollmux:" beginnt und
    * setzt neue Tastenkombination in OOo-Writer.
    * 
@@ -65,13 +65,13 @@ public class Shortcuts
       UNO.getShortcutManager("com.sun.star.text.TextDocument");
     if (shortcutManager == null) return;
 
-    // löschen aller KeyEvents die mit "wollmux:" beginnen
+    // lÃ¶schen aller KeyEvents die mit "wollmux:" beginnen
     removeComandFromAllKeyEvents(shortcutManager);
 
     // lesen des Knoten SHORTCUT
     ConfigThingy shortcutConf = tastenkombinationenConf.queryByChild("SHORTCUT");
 
-    // Iterieren über die Knoten SHORTCUT
+    // Iterieren Ã¼ber die Knoten SHORTCUT
     Iterator<ConfigThingy> iterShortcut = shortcutConf.iterator();
     while (iterShortcut.hasNext())
     {
@@ -120,12 +120,12 @@ public class Shortcuts
       else
       {
         Logger.error(L.m(
-          "Ungültige Tastenkombination '%1' im .conf Abschnitt Tastenkuerzel",
+          "UngÃ¼ltige Tastenkombination '%1' im .conf Abschnitt Tastenkuerzel",
           shortcut));
       }
     }
 
-    // Änderung Persistent machen
+    // Ã„nderung Persistent machen
     try
     {
       if (UNO.XUIConfigurationPersistence(shortcutManager) != null)
@@ -141,11 +141,11 @@ public class Shortcuts
 
   /**
    * Wenn es Tastenkuerzel mit einer UNO-url beginnent mit "wollmux:" gibt, werden
-   * diese gelöscht. Workaround wegen nicht funktionierendem
+   * diese gelÃ¶scht. Workaround wegen nicht funktionierendem
    * xAcceleratorConfiguration.removeCommandFromAllKeyEvents(). OOo Issue #72558
    * 
    * @param xAcceleratorConfiguration
-   *          AcceleratorConfiguration (muß danach noch mit store() persistent
+   *          AcceleratorConfiguration (muÃŸ danach noch mit store() persistent
    *          gemacht werden)
    */
   private static void removeComandFromAllKeyEvents(
@@ -155,17 +155,17 @@ public class Shortcuts
     KeyEvent[] keys = xAcceleratorConfiguration.getAllKeyEvents();
 
     // Wenn es Tastenkombinationen mit der UNO-url beginnent mit "wollmux:"
-    // gibt, werden diese gelöscht. Workaround wegen nicht funktionierendem
+    // gibt, werden diese gelÃ¶scht. Workaround wegen nicht funktionierendem
     // xAcceleratorConfiguration.removeCommandFromAllKeyEvents().
     for (int i = 0; i < keys.length; i++)
     {
       try
       {
         String event = xAcceleratorConfiguration.getCommandByKeyEvent(keys[i]);
-        // wenn die UNO-url mit "wollmux:" beginnt, wird sie gelöscht
+        // wenn die UNO-url mit "wollmux:" beginnt, wird sie gelÃ¶scht
         if (event.startsWith("wollmux:"))
         {
-          // löschen der Tastenkombination
+          // lÃ¶schen der Tastenkombination
           xAcceleratorConfiguration.removeKeyEvent(keys[i]);
         }
       }
@@ -209,7 +209,7 @@ public class Shortcuts
    * 
    * @param shortcutWithSeparator
    *          Tastenkombination mit "+" als Separator
-   * @return gibt ein KeyEvent zurück oder null wenn kein keyCode sondern nur
+   * @return gibt ein KeyEvent zurÃ¼ck oder null wenn kein keyCode sondern nur
    *         keyModifier verwendet werden
    */
   private static KeyEvent createKeyEvent(String shortcutWithSeparator)
@@ -250,7 +250,7 @@ public class Shortcuts
   }
 
   /**
-   * Gibt die Konstante com.sun.star.awt.Key für die entsprechende Taste zurück
+   * Gibt die Konstante com.sun.star.awt.Key fÃ¼r die entsprechende Taste zurÃ¼ck
    * 
    * @param shortcut
    *          Taste
@@ -351,7 +351,7 @@ public class Shortcuts
     myMap.put("TABULATOR", Short.valueOf(Key.TAB));
     myMap.put("BACKSPACE", Short.valueOf(Key.BACKSPACE));
     myMap.put("RUECKSCHRITT", Short.valueOf(Key.BACKSPACE));
-    myMap.put("RÜCKSCHRITT", Short.valueOf(Key.BACKSPACE));
+    myMap.put("RÃœCKSCHRITT", Short.valueOf(Key.BACKSPACE));
     myMap.put("SPACE", Short.valueOf(Key.SPACE));
     myMap.put("LEERTASTE", Short.valueOf(Key.SPACE));
     myMap.put("INSERT", Short.valueOf(Key.INSERT));
@@ -383,8 +383,8 @@ public class Shortcuts
   }
 
   /**
-   * Gibt die Konstante com.sun.star.awt.KeyModifier für die entsprechende Taste
-   * zurück
+   * Gibt die Konstante com.sun.star.awt.KeyModifier fÃ¼r die entsprechende Taste
+   * zurÃ¼ck
    * 
    * @param shortcut
    *          Taste
@@ -412,7 +412,7 @@ public class Shortcuts
 
     UNO.init();
 
-    // lesen der conf --> fällt nachher weg
+    // lesen der conf --> fÃ¤llt nachher weg
     ConfigThingy conf = null;
     String confFile = "../../.wollmux/wollmux.conf";
 

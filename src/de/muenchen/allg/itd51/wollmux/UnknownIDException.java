@@ -3,7 +3,7 @@
 * Projekt  : WollMux
 * Funktion : Wird geworfen, wenn versucht wird, eine ID zu verwenden, die dem System nicht bekannt ist.
 * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
 *
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
+* Ã„nderungshistorie:
+* Datum      | Wer | Ã„nderungsgrund
 * -------------------------------------------------------------------
 * 17.07.2007 | BNK | Erstellung
 * -------------------------------------------------------------------
@@ -38,7 +38,7 @@ package de.muenchen.allg.itd51.wollmux;
 public class UnknownIDException extends Exception
 {
   /**
-   * keine Ahnung, was das soll, aber es macht Eclipse glücklich.
+   * keine Ahnung, was das soll, aber es macht Eclipse glÃ¼cklich.
    */
   private static final long serialVersionUID = -6185698424679725505L;
   public UnknownIDException() {};

@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Variante des DatasourceJoiners, die zum testen besser geeignet ist.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 19.10.2005 | BNK | Erstellung
  * 20.10.2005 | BNK | Fertig
@@ -28,7 +28,7 @@
  * 31.10.2005 | BNK | TestDJ ist jetzt nur noch normaler DJ mit Default-
  *                    initialisierung und ohne speichern
  * 03.11.2005 | BNK | besser kommentiert
- * 26.05.2006 | BNK | Testfaelle für dj.find(Query)
+ * 26.05.2006 | BNK | Testfaelle fÃ¼r dj.find(Query)
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -58,12 +58,12 @@ public class TestDatasourceJoiner extends DatasourceJoiner
   private static final long TEST_QUERY_TIMEOUT = 500000;
 
   /**
-   * TestDJ soll nichts (ungewollt) überschreiben, deshalb hier no-op (aber es gibt
+   * TestDJ soll nichts (ungewollt) Ã¼berschreiben, deshalb hier no-op (aber es gibt
    * reallySaveCacheAndLOS()).
    */
   public void saveCacheAndLOS(File cacheFile)
   {
-  // TestDJ soll nichts (ungewollt) überschreiben
+  // TestDJ soll nichts (ungewollt) Ã¼berschreiben
   }
 
   /**
@@ -104,10 +104,10 @@ public class TestDatasourceJoiner extends DatasourceJoiner
    * Gibt results aus.
    * 
    * @param query
-   *          ein String der in die Überschrift der Ausgabe geschrieben wird, damit
+   *          ein String der in die Ãœberschrift der Ausgabe geschrieben wird, damit
    *          der Benutzer sieht, was er angezeigt bekommt.
    * @param schema
-   *          bestimmt, welche Spalten angezeigt werden von den Datensätzen aus
+   *          bestimmt, welche Spalten angezeigt werden von den DatensÃ¤tzen aus
    *          results.
    * @param results
    *          die Ergebnisse der Anfrage.
@@ -150,7 +150,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
   }
 
   /**
-   * Es kann als Argument ein Datei-Pfad übergeben werden, unter dem dann der LOS und
+   * Es kann als Argument ein Datei-Pfad Ã¼bergeben werden, unter dem dann der LOS und
    * Cache gespeichert wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)

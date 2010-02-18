@@ -1,9 +1,9 @@
 /*
  * Dateiname: ViewChangeListener.java
  * Projekt  : WollMux
- * Funktion : Interface für Klassen, die an Änderungen einer View interessiert sind. 
+ * Funktion : Interface fÃ¼r Klassen, die an Ã„nderungen einer View interessiert sind. 
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 28.09.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -31,7 +31,7 @@
 package de.muenchen.allg.itd51.wollmux.former.view;
 
 /**
- * Interface für Klassen, die an Änderungen einer View interessiert sind.
+ * Interface fÃ¼r Klassen, die an Ã„nderungen einer View interessiert sind.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -39,7 +39,7 @@ public interface ViewChangeListener
 {
   /**
    * Wird aufgerufen, wenn alle Referenzen auf die View view entfernt werden sollten,
-   * weil die view ungültig geworden ist (typischerweise weil das zugrundeliegende
+   * weil die view ungÃ¼ltig geworden ist (typischerweise weil das zugrundeliegende
    * Model nicht mehr da ist).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)

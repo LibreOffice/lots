@@ -1,9 +1,9 @@
 /*
  * Dateiname: DatensatzBearbeiten.java
  * Projekt  : WollMux
- * Funktion : Dynamisches Erzeugen eines Swing-GUIs für das Bearbeiten eines Datensatzes anhand von ConfigThingy
+ * Funktion : Dynamisches Erzeugen eines Swing-GUIs fÃ¼r das Bearbeiten eines Datensatzes anhand von ConfigThingy
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,25 +18,25 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 11.10.2005 | BNK | Erstellung
  * 14.10.2005 | BNK | Interaktion mit DJDataset
  * 14.10.2005 | BNK | Kommentiert
- * 17.10.2005 | BNK | Unterstützung für immer ausgegraute Buttons.
- * 17.10.2005 | BNK | Unterstützung für READONLY
- * 18.10.2005 | BNK | Zusätzliche Exceptions loggen
+ * 17.10.2005 | BNK | UnterstÃ¼tzung fÃ¼r immer ausgegraute Buttons.
+ * 17.10.2005 | BNK | UnterstÃ¼tzung fÃ¼r READONLY
+ * 18.10.2005 | BNK | ZusÃ¤tzliche Exceptions loggen
  * 24.10.2005 | BNK | dialogEndListener wird am Ende aufgerufen
  *                  | show() entfernt zur Vermeidung von Thread-Problemen
  * 24.10.2005 | BNK | restoreStandard() Buttons nicht mehr ausgegraut, wenn 
- *                  | Werte nicht geändert wurden, aber bereits aus dem LOS sind.
+ *                  | Werte nicht geÃ¤ndert wurden, aber bereits aus dem LOS sind.
  * 27.10.2005 | BNK | back + CLOSEACTION
  * 02.11.2005 | BNK | +saveAndBack()
  * 15.11.2005 | BNK | Endlosschleife beseitigt durch vertauschen der || Operanden
  * 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
- * 11.01.2006 | BNK | EDIT "true" bei comboboxen unterstützt
- * 25.01.2006 | BNK | Auch editierbare Comboboxen ändern nun den Hintergrund korrekt.
+ * 11.01.2006 | BNK | EDIT "true" bei comboboxen unterstÃ¼tzt
+ * 25.01.2006 | BNK | Auch editierbare Comboboxen Ã¤ndern nun den Hintergrund korrekt.
  * 19.04.2006 | BNK | [R1337]Fehlermeldung, bei unbekanntem TYPE
  * 15.05.2006 | BNK | nicht-editierbare Comboboxen funktionieren jetzt hoffentlich 
  *                  | richtig mit Vorgabewerten, die nicht in der Liste sind.
@@ -109,10 +109,10 @@ import de.muenchen.allg.itd51.wollmux.db.NoBackingStoreException;
 import de.muenchen.allg.itd51.wollmux.db.TestDJDataset;
 
 /**
- * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
+ * Diese Klasse baut anhand einer als ConfigThingy Ã¼bergebenen Dialogbeschreibung
  * einen (mehrseitigen) Dialog zur Bearbeitung eines
  * {@link de.muenchen.allg.itd51.wollmux.db.DJDataset}s. <b>ACHTUNG:</b> Die
- * private-Funktionen dürfen NUR aus dem Event-Dispatching Thread heraus aufgerufen
+ * private-Funktionen dÃ¼rfen NUR aus dem Event-Dispatching Thread heraus aufgerufen
  * werden.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -120,17 +120,17 @@ import de.muenchen.allg.itd51.wollmux.db.TestDJDataset;
 public class DatensatzBearbeiten
 {
   /**
-   * Standardbreite für Textfelder
+   * Standardbreite fÃ¼r Textfelder
    */
   private final static int TEXTFIELD_DEFAULT_WIDTH = 22;
 
   /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
+   * Rand um Textfelder (wird auch fÃ¼r ein paar andere RÃ¤nder verwendet) in Pixeln.
    */
   private final static int TF_BORDER = 4;
 
   /**
-   * Rand über und unter einem horizontalen Separator (in Pixeln).
+   * Rand Ã¼ber und unter einem horizontalen Separator (in Pixeln).
    */
   private final static int SEP_BORDER = 7;
 
@@ -145,8 +145,8 @@ public class DatensatzBearbeiten
   private DJDataset datensatz;
 
   /**
-   * Bildet Fensternamen (umschliessender Schlüssel in der Beschreibungssprache) auf
-   * {@link DialogWindow}s ab. Wird unter anderem zum Auflösen der Bezeichner der
+   * Bildet Fensternamen (umschliessender SchlÃ¼ssel in der Beschreibungssprache) auf
+   * {@link DialogWindow}s ab. Wird unter anderem zum AuflÃ¶sen der Bezeichner der
    * switchTo-ACTION verwendet.
    */
   private Map<String, DialogWindow> fenster;
@@ -173,7 +173,7 @@ public class DatensatzBearbeiten
 
   /**
    * Der Name (siehe {@link #fenster}) des ersten Fensters des Dialogs, das ist das
-   * erste Fenster, das in der Dialog-Beschreibung aufgeführt ist.
+   * erste Fenster, das in der Dialog-Beschreibung aufgefÃ¼hrt ist.
    */
   private String firstWindow;
 
@@ -183,7 +183,7 @@ public class DatensatzBearbeiten
   private Color modColor;
 
   /**
-   * ActionListener für Buttons mit der ACTION "abort".
+   * ActionListener fÃ¼r Buttons mit der ACTION "abort".
    */
   private ActionListener actionListener_abort = new ActionListener()
   {
@@ -194,7 +194,7 @@ public class DatensatzBearbeiten
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "back".
+   * ActionListener fÃ¼r Buttons mit der ACTION "back".
    */
   private ActionListener actionListener_back = new ActionListener()
   {
@@ -205,7 +205,7 @@ public class DatensatzBearbeiten
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "restoreStandard".
+   * ActionListener fÃ¼r Buttons mit der ACTION "restoreStandard".
    */
   private ActionListener actionListener_restoreStandard = new ActionListener()
   {
@@ -216,7 +216,7 @@ public class DatensatzBearbeiten
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "save".
+   * ActionListener fÃ¼r Buttons mit der ACTION "save".
    */
   private ActionListener actionListener_save = new ActionListener()
   {
@@ -227,7 +227,7 @@ public class DatensatzBearbeiten
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "saveAndExit".
+   * ActionListener fÃ¼r Buttons mit der ACTION "saveAndExit".
    */
   private ActionListener actionListener_saveAndExit = new ActionListener()
   {
@@ -238,7 +238,7 @@ public class DatensatzBearbeiten
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "saveAndExit".
+   * ActionListener fÃ¼r Buttons mit der ACTION "saveAndExit".
    */
   private ActionListener actionListener_saveAndBack = new ActionListener()
   {
@@ -274,8 +274,8 @@ public class DatensatzBearbeiten
    *          Aktion an, die das Speichern des Dialogs veranlasst hat.
    * @throws ConfigurationErrorException
    *           im Falle eines schwerwiegenden Konfigurationsfehlers, der es dem
-   *           Dialog unmöglich macht, zu funktionieren (z.B. dass der "Fenster"
-   *           Schlüssel fehlt.
+   *           Dialog unmÃ¶glich macht, zu funktionieren (z.B. dass der "Fenster"
+   *           SchlÃ¼ssel fehlt.
    */
   public DatensatzBearbeiten(ConfigThingy conf, DJDataset datensatz,
       ActionListener dialogEndListener) throws ConfigurationErrorException
@@ -298,7 +298,7 @@ public class DatensatzBearbeiten
 
     final ConfigThingy fensterDesc = conf.query("Fenster");
     if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1",
+      throw new ConfigurationErrorException(L.m("SchlÃ¼ssel 'Fenster' fehlt in %1",
         conf.getName()));
 
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
@@ -396,8 +396,8 @@ public class DatensatzBearbeiten
   }
 
   /**
-   * Beendet den Dialog und ruft falls nötig den dialogEndListener auf wobei das
-   * gegebene actionCommand übergeben wird.
+   * Beendet den Dialog und ruft falls nÃ¶tig den dialogEndListener auf wobei das
+   * gegebene actionCommand Ã¼bergeben wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -419,8 +419,8 @@ public class DatensatzBearbeiten
     int res =
       JOptionPane.showConfirmDialog(
         myFrame,
-        L.m("Wollen Sie Ihre persönlichen Änderungen wirklich verwerfen\nund die Felder dieser Dialogseite wieder mit der zentralen Datenbank synchronisieren?"),
-        L.m("Lokale Änderungen wirklich verwerfen?"), JOptionPane.YES_NO_OPTION,
+        L.m("Wollen Sie Ihre persÃ¶nlichen Ã„nderungen wirklich verwerfen\nund die Felder dieser Dialogseite wieder mit der zentralen Datenbank synchronisieren?"),
+        L.m("Lokale Ã„nderungen wirklich verwerfen?"), JOptionPane.YES_NO_OPTION,
         JOptionPane.QUESTION_MESSAGE);
     if (res != JOptionPane.YES_OPTION) return;
     currentWindow.restoreStandard();
@@ -442,8 +442,8 @@ public class DatensatzBearbeiten
     int res =
       JOptionPane.showConfirmDialog(
         myFrame,
-        L.m("Wollen Sie Ihre Änderungen wirklich speichern\nund auf die Aktualisierung der entsprechenden Felder\naus der zentralen Datenbank verzichten?"),
-        L.m("Änderungen speichern?"), JOptionPane.YES_NO_OPTION,
+        L.m("Wollen Sie Ihre Ã„nderungen wirklich speichern\nund auf die Aktualisierung der entsprechenden Felder\naus der zentralen Datenbank verzichten?"),
+        L.m("Ã„nderungen speichern?"), JOptionPane.YES_NO_OPTION,
         JOptionPane.QUESTION_MESSAGE);
     if (res != JOptionPane.YES_OPTION) return false;
 
@@ -475,7 +475,7 @@ public class DatensatzBearbeiten
 
   /**
    * Ein WindowListener, der auf den JFrame registriert wird, damit als Reaktion auf
-   * den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
+   * den Schliessen-Knopf auch die ACTION "abort" ausgefÃ¼hrt wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -509,16 +509,16 @@ public class DatensatzBearbeiten
   }
 
   /**
-   * Zerstört den Dialog. Nach Aufruf dieser Funktion dürfen keine weiteren Aufrufe
+   * ZerstÃ¶rt den Dialog. Nach Aufruf dieser Funktion dÃ¼rfen keine weiteren Aufrufe
    * von Methoden des Dialogs erfolgen. Die Verarbeitung erfolgt asynchron. Wurde dem
-   * Konstruktor ein entsprechender ActionListener übergeben, so wird seine
+   * Konstruktor ein entsprechender ActionListener Ã¼bergeben, so wird seine
    * actionPerformed() Funktion aufgerufen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void dispose()
   {
-    // GUI im Event-Dispatching Thread zerstören wg. Thread-Safety.
+    // GUI im Event-Dispatching Thread zerstÃ¶ren wg. Thread-Safety.
     try
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
@@ -565,11 +565,11 @@ public class DatensatzBearbeiten
   }
 
   /**
-   * Dieses Interface dient dazu, dass {@link DataControl}s jemandem (nämlich
-   * {@link DialogWindow}s) mitteilen können, wenn sie ihre Farbe geändert haben
-   * (weil sich ihr "geändert" Zustand geändert hat). Dies erlaubt es den
+   * Dieses Interface dient dazu, dass {@link DataControl}s jemandem (nÃ¤mlich
+   * {@link DialogWindow}s) mitteilen kÃ¶nnen, wenn sie ihre Farbe geÃ¤ndert haben
+   * (weil sich ihr "geÃ¤ndert" Zustand geÃ¤ndert hat). Dies erlaubt es den
    * DialogWindows, Buttons zu aktualisieren, deren Ausgegrautseinszustand davon
-   * abhängt, ob angezeigte Felder geändert wurden oder nicht.
+   * abhÃ¤ngt, ob angezeigte Felder geÃ¤ndert wurden oder nicht.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -579,7 +579,7 @@ public class DatensatzBearbeiten
   }
 
   /**
-   * Ein DataControl kümmert sich um die Verwaltung von Eingabe-Controls eines
+   * Ein DataControl kÃ¼mmert sich um die Verwaltung von Eingabe-Controls eines
    * DialogWindows. Es stellt insbesondere die Schnittstelle zwischen dem Control und
    * dem Datensatz her.
    * 
@@ -589,8 +589,8 @@ public class DatensatzBearbeiten
   {
     /**
      * der Text des Datenbankfeldes dieses Controls. Wenn startText nicht mit dem
-     * aktuell im Control angezeigten Text übereinstimmt, dann hat der Benutzer den
-     * Wert seit den letzten Save geändert.
+     * aktuell im Control angezeigten Text Ã¼bereinstimmt, dann hat der Benutzer den
+     * Wert seit den letzten Save geÃ¤ndert.
      */
     protected String startText;
 
@@ -622,7 +622,7 @@ public class DatensatzBearbeiten
     protected JComponent myComponent;
 
     /**
-     * true, falls der Hintegrund des Controls aktuell in normalColor eingefärbt ist.
+     * true, falls der Hintegrund des Controls aktuell in normalColor eingefÃ¤rbt ist.
      */
     boolean isCurrentlyNormalColor;
 
@@ -706,7 +706,7 @@ public class DatensatzBearbeiten
 
     /**
      * Falls hasBeenModified() wird der aktuell im Control stehende Wert in die
-     * Datenbank zurückgespeichert.
+     * Datenbank zurÃ¼ckgespeichert.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -729,7 +729,7 @@ public class DatensatzBearbeiten
 
     /**
      * Der Wert des Controls wird aus der Datenbank aktualisiert und daran gekoppelt.
-     * D.h. lokale Änderungen werden verworfen.
+     * D.h. lokale Ã„nderungen werden verworfen.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -744,7 +744,7 @@ public class DatensatzBearbeiten
       {}
       catch (NoBackingStoreException x)
       {
-        Logger.error(L.m("Es hätte nie passieren dürfen, aber restoreStandard() wurde für einen Datensatz ohne Backing Store aufgerufen!"));
+        Logger.error(L.m("Es hÃ¤tte nie passieren dÃ¼rfen, aber restoreStandard() wurde fÃ¼r einen Datensatz ohne Backing Store aufgerufen!"));
       }
       updateBackground();
     }
@@ -752,7 +752,7 @@ public class DatensatzBearbeiten
   }
 
   /**
-   * Ein {@link DataControl} für JTextComponents.
+   * Ein {@link DataControl} fÃ¼r JTextComponents.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -795,7 +795,7 @@ public class DatensatzBearbeiten
   }
 
   /**
-   * Ein {@link DataControl} für JComboBoxes.
+   * Ein {@link DataControl} fÃ¼r JComboBoxes.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -881,17 +881,17 @@ public class DatensatzBearbeiten
   private class DialogWindow implements ColorChangeListener
   {
     /**
-     * Das Panel, das die ganze Dialogseite enthält.
+     * Das Panel, das die ganze Dialogseite enthÃ¤lt.
      */
     private JPanel myPanel;
 
     /**
-     * Unter-Panel, das die ganzen Eingabe-Elemente enthält.
+     * Unter-Panel, das die ganzen Eingabe-Elemente enthÃ¤lt.
      */
     private JPanel myInputPanel;
 
     /**
-     * Unter-Panel, das die Buttons enthält.
+     * Unter-Panel, das die Buttons enthÃ¤lt.
      */
     private JPanel myButtonPanel;
 
@@ -913,7 +913,7 @@ public class DatensatzBearbeiten
     private List<DataControl> dataControls = new Vector<DataControl>();
 
     /**
-     * Liste aller JButtons, die ausgegraut werden müssen, wenn keines der
+     * Liste aller JButtons, die ausgegraut werden mÃ¼ssen, wenn keines der
      * DataControls einen hasBeenModified() Zustand hat.
      */
     private List<JButton> buttonsToGreyOutIfNoChanges = new Vector<JButton>();
@@ -921,7 +921,7 @@ public class DatensatzBearbeiten
     private ActionListener dialogWindowCloseAction = actionListener_abort;
 
     /**
-     * Liefert das JPanel für diese Dialogseite zurück.
+     * Liefert das JPanel fÃ¼r diese Dialogseite zurÃ¼ck.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -931,7 +931,7 @@ public class DatensatzBearbeiten
     }
 
     /**
-     * Liefert den Titel zurück, den der Frame haben soll, wenn diese Dialogseite
+     * Liefert den Titel zurÃ¼ck, den der Frame haben soll, wenn diese Dialogseite
      * angezeigt wird.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -954,7 +954,7 @@ public class DatensatzBearbeiten
     }
 
     /**
-     * liefert den Namen zurück, der dem Konstruktor übergeben wurde (vergleiche
+     * liefert den Namen zurÃ¼ck, der dem Konstruktor Ã¼bergeben wurde (vergleiche
      * {@link DatensatzBearbeiten#fenster}.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1285,7 +1285,7 @@ public class DatensatzBearbeiten
             else
             {
               Logger.error(L.m(
-                "Ununterstützter TYPE für User Interface Element: %1", type));
+                "UnunterstÃ¼tzter TYPE fÃ¼r User Interface Element: %1", type));
             }
           }
           catch (NodeNotFoundException x)
@@ -1407,7 +1407,7 @@ public class DatensatzBearbeiten
   }
 
   /**
-   * Übersetzt den Namen einer ACTION in eine Referenz auf das passende
+   * Ãœbersetzt den Namen einer ACTION in eine Referenz auf das passende
    * actionListener_... Objekt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1447,7 +1447,7 @@ public class DatensatzBearbeiten
       return null;
     }
     else
-      Logger.error(L.m("Ununterstützte ACTION: %1", action));
+      Logger.error(L.m("UnunterstÃ¼tzte ACTION: %1", action));
 
     return null;
   }

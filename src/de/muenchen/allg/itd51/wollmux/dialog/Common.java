@@ -1,9 +1,9 @@
 /*
  * Dateiname: Common.java
  * Projekt  : WollMux
- * Funktion : Enthält von den Dialogen gemeinsam genutzten Code.
+ * Funktion : EnthÃ¤lt von den Dialogen gemeinsam genutzten Code.
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 22.11.2005 | BNK | Erstellung
  * 26.06.2006 | BNK | +zoomFonts
@@ -52,19 +52,19 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 
 /**
- * Enthält von den Dialogen gemeinsam genutzten Code.
+ * EnthÃ¤lt von den Dialogen gemeinsam genutzten Code.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class Common
 {
   /**
-   * Spezialwert wenn eine Breite oder Höhe die maximal sinnvolle sein soll.
+   * Spezialwert wenn eine Breite oder HÃ¶he die maximal sinnvolle sein soll.
    */
   public static final int DIMENSION_MAX = -1;
 
   /**
-   * Spezialwert, wenn eine Breite oder Höhe nicht angegeben wurde.
+   * Spezialwert, wenn eine Breite oder HÃ¶he nicht angegeben wurde.
    */
   public static final int DIMENSION_UNSPECIFIED = -2;
 
@@ -90,7 +90,7 @@ public class Common
   public static final int COORDINATE_UNSPECIFIED = -4;
 
   /**
-   * Der Unit-Increment für vertikale Scrollbars, die Zeilen von Eingabefeldern
+   * Der Unit-Increment fÃ¼r vertikale Scrollbars, die Zeilen von Eingabefeldern
    * enthalten, wie z,B, die Steuerelemente-Ansicht des FM4000.
    */
   private static int vertical_scrollbar_unit_increment = 12;
@@ -101,8 +101,8 @@ public class Common
   private static boolean lafSet = false;
 
   /**
-   * Führt {@link #setLookAndFeel()} aus, aber nur, wenn es bisher noch nicht
-   * ausgeführt wurde.
+   * FÃ¼hrt {@link #setLookAndFeel()} aus, aber nur, wenn es bisher noch nicht
+   * ausgefÃ¼hrt wurde.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -115,14 +115,14 @@ public class Common
    * Setzt das Metal Look and Feel und ruft {@link #configureTextFieldBehaviour()}
    * auf. Das plattformspezifische LAF wird nicht verwendet, damit die Benutzer unter
    * Windows und Linux eine einheitliche Optik haben, so dass a) Schulungsvideos und
-   * Unterlagen für beide Plattformen anwendbar sind und b) Benutzer sich bei der
-   * Umstellung von Windows auf Linux nicht noch beim WollMux umgewöhnen müssen. Des
+   * Unterlagen fÃ¼r beide Plattformen anwendbar sind und b) Benutzer sich bei der
+   * Umstellung von Windows auf Linux nicht noch beim WollMux umgewÃ¶hnen mÃ¼ssen. Des
    * weiteren hatte zumindest als wir angefangen haben das GTK Look and Feel einige
    * Bugs. Es ist also auch ein Problem, dass wir nicht genug Ressourcen haben, um 2
    * Plattformen diesbzgl. zu testen und zu debuggen.
    * 
    * alt: Setzt das System Look and Feel, falls es nicht MetalLookAndFeel ist.
-   * Ansonsten setzt es GTKLookAndFeel falls möglich.
+   * Ansonsten setzt es GTKLookAndFeel falls mÃ¶glich.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -151,21 +151,21 @@ public class Common
   /**
    * Konfiguriert das Verhalten von JTextFields, die in der GUI der Applikation
    * benutzt werden, so dass es dem erwarteten Standard-Verhalten von Textfeldern
-   * entspricht - nämlich dass eventuell vorhandener Text im Textfeld automatisch
+   * entspricht - nÃ¤mlich dass eventuell vorhandener Text im Textfeld automatisch
    * selektiert wird, wenn mit der Tabulator-Taste (nicht aber mit der Maus) in das
    * Feld gewechselt wird, so dass man einfach lostippen kann um den Inhalt zu
-   * überschreiben.
+   * Ã¼berschreiben.
    * 
    * Dazu installieren wir im aktuellen {@link KeyboardFocusManager} einen
    * {@link KeyEventPostProcessor}, der beim Loslassen ({@link KeyEvent#KEY_RELEASED})
-   * der Tabulator-Taste überprüft, ob das KeyEvent von einem JTextField ausgelöst
+   * der Tabulator-Taste Ã¼berprÃ¼ft, ob das KeyEvent von einem JTextField ausgelÃ¶st
    * wurde und in diesem Fall allen Text in dem Textfeld selektiert.
    * 
    * Sollte irgendwann mal RFE 4493590
    * (http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4493590) umgesetzt werden,
-   * kann man das ganze vielleicht besser lösen.
+   * kann man das ganze vielleicht besser lÃ¶sen.
    * 
-   * Außerdem wird ein Swing-Problem korrigiert, durch das es vorkommen kann, dass in
+   * AuÃŸerdem wird ein Swing-Problem korrigiert, durch das es vorkommen kann, dass in
    * einem JTextField selektierter Text auch nachdem des Textfeld den Focus verloren
    * hat noch als selektiert angezeigt wird.
    * 
@@ -175,9 +175,9 @@ public class Common
   {
     KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
 
-    // Wir fügen dem aktuellen KeyboardFocusManager einen
+    // Wir fÃ¼gen dem aktuellen KeyboardFocusManager einen
     // KeyEventPostProcessor hinzu, der beim Loslassen (KeyEvent.KEY_RELEASED)
-    // der Tabulator-Taste überprüft, ob das KeyEvent von einem JTextField ausgelöst
+    // der Tabulator-Taste Ã¼berprÃ¼ft, ob das KeyEvent von einem JTextField ausgelÃ¶st
     // wurde und in diesem Fall allen Text in dem Textfeld selektiert.
     kfm.addKeyEventPostProcessor(new KeyEventPostProcessor()
     {
@@ -195,7 +195,7 @@ public class Common
 
     // Wir melden am aktuellen KeyboardFocusManager einen PropertyChangeListener an,
     // der bemerkt, ob ein JTextField den Focus verloren hat und dessen Selektion
-    // löscht.
+    // lÃ¶scht.
     kfm.addPropertyChangeListener("focusOwner", new PropertyChangeListener()
     {
       public void propertyChange(PropertyChangeEvent evt)
@@ -204,7 +204,7 @@ public class Common
         {
           JTextField textField = (JTextField) evt.getOldValue();
 
-          // Aufruf von setCaretPosition löscht die Selektion.
+          // Aufruf von setCaretPosition lÃ¶scht die Selektion.
           textField.setCaretPosition(textField.getCaretPosition());
 
           // eigentlich sollte folgendes ausreichen:
@@ -216,10 +216,10 @@ public class Common
   }
 
   /**
-   * Multipliziert alle Font-Größen mit zoomFactor. ACHTUNG! Nach jedem Aufruf von
+   * Multipliziert alle Font-GrÃ¶ÃŸen mit zoomFactor. ACHTUNG! Nach jedem Aufruf von
    * setLookAndFeel() kann diese Funktion genau einmal verwendet werden und hat in
    * folgenden Aufrufen keine Wirkung mehr, bis wieder setLookAndFeel() aufgerufen
-   * wird (was den Zoom wieder zurücksetzt).
+   * wird (was den Zoom wieder zurÃ¼cksetzt).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -245,7 +245,7 @@ public class Common
         {}
       }
     }
-    Logger.debug(changedFonts + L.m(" Fontgrößen verändert!"));
+    Logger.debug(changedFonts + L.m(" FontgrÃ¶ÃŸen verÃ¤ndert!"));
   }
 
   public static int getVerticalScrollbarUnitIncrement()
@@ -278,7 +278,7 @@ public class Common
       else
       {
         r.x = Integer.parseInt(xStr);
-        // Ja, das folgende ist eine Einschränkung, aber
+        // Ja, das folgende ist eine EinschrÃ¤nkung, aber
         // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
         // obigen Festlegungen
         if (r.x < 0) r.x = 0;
@@ -302,7 +302,7 @@ public class Common
       else
       {
         r.y = Integer.parseInt(yStr);
-        // Ja, das folgende ist eine Einschränkung, aber
+        // Ja, das folgende ist eine EinschrÃ¤nkung, aber
         // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
         // obigen Festlegungen
         if (r.y < 0) r.y = 0;

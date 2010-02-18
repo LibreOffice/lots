@@ -1,10 +1,10 @@
 /*
  * Dateiname: JTextFieldWithTags.java
  * Projekt  : WollMux
- * Funktion : Erweiterte eine JTextComponent um die Fähigkeit, Tags, die als
+ * Funktion : Erweiterte eine JTextComponent um die FÃ¤higkeit, Tags, die als
  *            <tag> angezeigt werden, wie atomare Elemente zu behandeln.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -19,8 +19,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 13.02.2008 | LUT | Erstellung als JTextFieldWithTags
  * 13.02.2008 | LUT | Verallgemeinerung zur Klasse TextComponentTags
@@ -61,7 +61,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.L;
 
 /**
- * Erweiterte eine JTextComponent um die Fähigkeit, Tags, die als
+ * Erweiterte eine JTextComponent um die FÃ¤higkeit, Tags, die als
  * &quot;&lt;tag&gt;&quot; angezeigt werden, wie atomare Elemente zu behandeln.
  * 
  * @author Christoph Lutz (D-III-ITD-5.1)
@@ -69,29 +69,29 @@ import de.muenchen.allg.itd51.wollmux.L;
 public class TextComponentTags
 {
   /**
-   * Syntax für {@link #getContent(int)}: CAT(... VALUE "&lt;tagname>" ... VALUE
+   * Syntax fÃ¼r {@link #getContent(int)}: CAT(... VALUE "&lt;tagname>" ... VALUE
    * "&lt;tagname"> ...)
    */
   final public static int CAT_VALUE_SYNTAX = 0;
 
   /**
-   * Präfix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
+   * PrÃ¤fix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
    * Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber zur
-   * Unterscheidung des Präfix von den Benutzereingaben) und dem "<"-Zeichen.
+   * Unterscheidung des PrÃ¤fix von den Benutzereingaben) und dem "<"-Zeichen.
    */
   private final static String TAG_PREFIX = "" + Character.toChars(0x200B)[0] + "<";
 
   /**
    * Suffix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
    * Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber zur
-   * Unterscheidung des Präfix von den Benutzereingaben) und dem ">"-Zeichen.
+   * Unterscheidung des PrÃ¤fix von den Benutzereingaben) und dem ">"-Zeichen.
    */
   private final static String TAG_SUFFIX = "" + Character.toChars(0x200B)[0] + ">";
 
   /**
-   * Beschreibt einen regulären Ausdruck, mit dem nach Tags im Text gesucht werden
+   * Beschreibt einen regulÃ¤ren Ausdruck, mit dem nach Tags im Text gesucht werden
    * kann. Ein Match liefert in Gruppe 1 den Text vor dem Tag, in Gruppe 2 das Tag
-   * mit Präfix und Suffix und in Gruppe 3 den Tag-Namen zurück.
+   * mit PrÃ¤fix und Suffix und in Gruppe 3 den Tag-Namen zurÃ¼ck.
    */
   private final static Pattern TAG_PATTERN =
     Pattern.compile("([^(" + TAG_PREFIX + ")]*)(" + TAG_PREFIX + "([^(" + TAG_SUFFIX
@@ -99,7 +99,7 @@ public class TextComponentTags
 
   /**
    * Farbe, mit dem der Hintergund eines Textfeldes im Dialog "Felder anpassen"
-   * eingefärbt wird, wenn ein ungültiger Inhalt enthalten ist.
+   * eingefÃ¤rbt wird, wenn ein ungÃ¼ltiger Inhalt enthalten ist.
    */
   private static final Color invalidEntryBGColor = Color.PINK;
 
@@ -109,7 +109,7 @@ public class TextComponentTags
   private JTextComponent compo;
 
   /**
-   * Erzeugt den Wrapper und nimmt die notwendigen Änderungen am Standardverhalten
+   * Erzeugt den Wrapper und nimmt die notwendigen Ã„nderungen am Standardverhalten
    * der JTextComponent component vor.
    */
   public TextComponentTags(JTextComponent component)
@@ -122,13 +122,13 @@ public class TextComponentTags
   }
 
   /**
-   * Fügt an der aktuellen Cursorposition ein neues Tag tag ein, das anschließend mit
-   * der Darstellung &quot;&lt;tag&gt;&quot; angezeigt wird und bezüglich der
+   * FÃ¼gt an der aktuellen Cursorposition ein neues Tag tag ein, das anschlieÃŸend mit
+   * der Darstellung &quot;&lt;tag&gt;&quot; angezeigt wird und bezÃ¼glich der
    * Editierung wie ein atomares Element behandelt wird.
    * 
    * @param tag
    *          Der Name des tags, das in dieser JTextComponent an der Cursorposition
-   *          eingefügt und angezeigt werden soll.
+   *          eingefÃ¼gt und angezeigt werden soll.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -138,7 +138,7 @@ public class TextComponentTags
     int inspos = compo.getCaretPosition();
     String p1 = (inspos > 0) ? t.substring(0, inspos) : "";
     String p2 = (inspos < t.length()) ? t.substring(inspos, t.length()) : "";
-    // ACHTUNG! Änderungen hier müssen auch in setContent() gemacht werden
+    // ACHTUNG! Ã„nderungen hier mÃ¼ssen auch in setContent() gemacht werden
     t = TAG_PREFIX + tag + TAG_SUFFIX;
     compo.setText(p1 + t + p2);
     compo.getCaret().setDot(inspos + t.length());
@@ -157,7 +157,7 @@ public class TextComponentTags
 
   /**
    * Liefert eine Liste von {@link ContentElement}-Objekten, die den aktuellen
-   * Inhalt der JTextComponent repräsentiert und dabei enthaltenen Text und evtl.
+   * Inhalt der JTextComponent reprÃ¤sentiert und dabei enthaltenen Text und evtl.
    * enthaltene Tags als eigene Objekte kapselt.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -220,7 +220,7 @@ public class TextComponentTags
   }
 
   /**
-   * Das Gegenstück zu {@link #getContent(int)}.
+   * Das GegenstÃ¼ck zu {@link #getContent(int)}.
    * 
    * @throws IllegalArgumentException
    *           wenn syntaxType illegal oder ein Fehler in conf ist.
@@ -243,7 +243,7 @@ public class TextComponentTags
       ConfigThingy subConf = iter.next();
       if (subConf.getName().equals("VALUE") && subConf.count() == 1)
       {
-        // ACHTUNG! Änderungen hier müssen auch in insertTag() gemacht werden
+        // ACHTUNG! Ã„nderungen hier mÃ¼ssen auch in insertTag() gemacht werden
         buffy.append(TAG_PREFIX);
         buffy.append(subConf.toString());
         buffy.append(TAG_SUFFIX);
@@ -260,7 +260,7 @@ public class TextComponentTags
 
   /**
    * Liefert zur String-Liste fieldNames eine Liste von Actions, die die
-   * entsprechenden Strings in text einfügen.
+   * entsprechenden Strings in text einfÃ¼gen.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10) TESTED
    */
@@ -285,11 +285,11 @@ public class TextComponentTags
   }
 
   /**
-   * Kann überschrieben werden um eine Logik zu hinterlegen, die berechnet, ob das
-   * Feld einen gültigen Inhalt besitzt. Ist der Inhalt nicht gültig, dann wird das
+   * Kann Ã¼berschrieben werden um eine Logik zu hinterlegen, die berechnet, ob das
+   * Feld einen gÃ¼ltigen Inhalt besitzt. Ist der Inhalt nicht gÃ¼ltig, dann wird das
    * Feld mit einem roten Hintergrund hinterlegt.
    * 
-   * @return true, wenn der Inhalt gültig ist und false, wenn der Inhalt nicht gültig
+   * @return true, wenn der Inhalt gÃ¼ltig ist und false, wenn der Inhalt nicht gÃ¼ltig
    *         ist.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -301,8 +301,8 @@ public class TextComponentTags
 
   /**
    * Beschreibt ein Element des Inhalts dieser JTextComponent und kann entweder ein
-   * eingefügtes Tag oder ein normaler String sein. Auskunft über den Typ des
-   * Elements erteilt die Methode isTag(), auf den String-Wert kann über die
+   * eingefÃ¼gtes Tag oder ein normaler String sein. Auskunft Ã¼ber den Typ des
+   * Elements erteilt die Methode isTag(), auf den String-Wert kann Ã¼ber die
    * toString()-Methode zugegriffen werden.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -338,7 +338,7 @@ public class TextComponentTags
 
   /**
    * Immer wenn der Cursor mit der Maus in einen Bereich innerhalb eines Tags gesetzt
-   * wird, sorgt der hier registrierte caret Listener dafür, dass der Bereich auf das
+   * wird, sorgt der hier registrierte caret Listener dafÃ¼r, dass der Bereich auf das
    * gesamte Tag ausgedehnt wird.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -398,8 +398,8 @@ public class TextComponentTags
   }
 
   /**
-   * Implementiert die Aktionen für die Tastendrücke Cursor-links, Cursor-rechts,
-   * Delete und Backspace neu und berücksichtigt dabei die atomaren Tags.
+   * Implementiert die Aktionen fÃ¼r die TastendrÃ¼cke Cursor-links, Cursor-rechts,
+   * Delete und Backspace neu und berÃ¼cksichtigt dabei die atomaren Tags.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -422,7 +422,7 @@ public class TextComponentTags
         extraHighlightOff();
         int dot = compo.getCaret().getDot();
 
-        // evtl. vorhandenes Tag überspringen
+        // evtl. vorhandenes Tag Ã¼berspringen
         for (Iterator<TagPos> iter = getTagPosIterator(); iter.hasNext();)
         {
           TextComponentTags.TagPos fp = iter.next();
@@ -447,7 +447,7 @@ public class TextComponentTags
         extraHighlightOff();
         int dot = compo.getCaret().getDot();
 
-        // evtl. vorhandenes Tag überspringen
+        // evtl. vorhandenes Tag Ã¼berspringen
         for (Iterator<TagPos> iter = getTagPosIterator(); iter.hasNext();)
         {
           TextComponentTags.TagPos fp = iter.next();
@@ -472,7 +472,7 @@ public class TextComponentTags
         extraHighlightOff();
         int dot = compo.getCaret().getDot();
 
-        // evtl. vorhandenes Tag überspringen
+        // evtl. vorhandenes Tag Ã¼berspringen
         for (Iterator<TagPos> iter = getTagPosIterator(); iter.hasNext();)
         {
           TextComponentTags.TagPos fp = iter.next();
@@ -496,7 +496,7 @@ public class TextComponentTags
         extraHighlightOff();
         int dot = compo.getCaret().getDot();
 
-        // evtl. vorhandenes Tag überspringen
+        // evtl. vorhandenes Tag Ã¼berspringen
         for (Iterator<TagPos> iter = getTagPosIterator(); iter.hasNext();)
         {
           TextComponentTags.TagPos fp = iter.next();
@@ -521,14 +521,14 @@ public class TextComponentTags
         int dot = compo.getCaret().getDot();
         int mark = compo.getCaret().getMark();
 
-        // evtl. vorhandene Selektion löschen
+        // evtl. vorhandene Selektion lÃ¶schen
         if (dot != mark)
         {
           deleteAPartOfTheText(dot, mark);
           return;
         }
 
-        // Endposition des zu löschenden Bereichs bestimmen
+        // Endposition des zu lÃ¶schenden Bereichs bestimmen
         int pos2 = dot + 1;
         for (Iterator<TagPos> iter = getTagPosIterator(); iter.hasNext();)
         {
@@ -551,14 +551,14 @@ public class TextComponentTags
         int dot = compo.getCaret().getDot();
         int mark = compo.getCaret().getMark();
 
-        // evtl. vorhandene Selektion löschen
+        // evtl. vorhandene Selektion lÃ¶schen
         if (dot != mark)
         {
           deleteAPartOfTheText(dot, mark);
           return;
         }
 
-        // Anfangsposition des zu löschenden Bereichs bestimmen
+        // Anfangsposition des zu lÃ¶schenden Bereichs bestimmen
         int pos2 = dot - 1;
         for (Iterator<TagPos> iter = getTagPosIterator(); iter.hasNext();)
         {
@@ -573,9 +573,9 @@ public class TextComponentTags
   }
 
   /**
-   * Der hier registrierte DocumentListener sorgt dafür, dass nach jeder Textänderung
-   * geprüft wird, ob der Inhalt der JTextComponent noch gültig ist und im Fehlerfall
-   * mit der Hintergrundfarbe invalidEntryBGColor eingefärbt wird.
+   * Der hier registrierte DocumentListener sorgt dafÃ¼r, dass nach jeder TextÃ¤nderung
+   * geprÃ¼ft wird, ob der Inhalt der JTextComponent noch gÃ¼ltig ist und im Fehlerfall
+   * mit der Hintergrundfarbe invalidEntryBGColor eingefÃ¤rbt wird.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -616,8 +616,8 @@ public class TextComponentTags
   }
 
   /**
-   * Löscht einen Teil des aktuellen Texts zwischen den zwei Positionen pos1 und
-   * pos2. pos1 kann größer, kleiner oder gleich pos2 sein.
+   * LÃ¶scht einen Teil des aktuellen Texts zwischen den zwei Positionen pos1 und
+   * pos2. pos1 kann grÃ¶ÃŸer, kleiner oder gleich pos2 sein.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -699,7 +699,7 @@ public class TextComponentTags
   }
 
   /**
-   * Enthält das tag das beim Erzeugen des Extra-Highlights zurückgeliefert wurde und
+   * EnthÃ¤lt das tag das beim Erzeugen des Extra-Highlights zurÃ¼ckgeliefert wurde und
    * das Highlight-Objekt auszeichnet.
    */
   private Object extraHighlightTag = null;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -24,7 +24,7 @@ package de.muenchen.allg.itd51.wollmux.db.checker;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 
 /**
- * Ein DatasetChecker, der alle Datensätze durchwinkt.
+ * Ein DatasetChecker, der alle DatensÃ¤tze durchwinkt.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */

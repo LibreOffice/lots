@@ -1,9 +1,9 @@
 /*
  * Dateiname: Broadcast.java
  * Projekt  : WollMux
- * Funktion : Interface für Nachrichten auf dem globalen Broadcast-Kanal
+ * Funktion : Interface fÃ¼r Nachrichten auf dem globalen Broadcast-Kanal
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 04.09.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -31,7 +31,7 @@
 package de.muenchen.allg.itd51.wollmux.former;
 
 /**
- * Interface für Nachrichten auf dem globalen Broadcast-Kanal. Siehe auch
+ * Interface fÃ¼r Nachrichten auf dem globalen Broadcast-Kanal. Siehe auch
  * {@link de.muenchen.allg.itd51.wollmux.former.BroadcastListener}.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)

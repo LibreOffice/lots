@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Stellt eine GUI bereit zum Bearbeiten einer WollMux-Formularvorlage.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,29 +18,29 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 03.08.2006 | BNK | Erstellung
  * 08.08.2006 | BNK | Viel Arbeit reingesteckt.
  * 28.08.2006 | BNK | kommentiert
- * 31.08.2006 | BNK | Code-Editor-Fenster wird jetzt in korrekter Größe dargestellt
- *                  | Das Hauptfenster passt sein Größe an, wenn Steuerelemente dazukommen oder verschwinden
+ * 31.08.2006 | BNK | Code-Editor-Fenster wird jetzt in korrekter GrÃ¶ÃŸe dargestellt
+ *                  | Das Hauptfenster passt sein GrÃ¶ÃŸe an, wenn Steuerelemente dazukommen oder verschwinden
  * 06.09.2006 | BNK | Hoch und Runterschieben funktionieren jetzt.
  * 19.10.2006 | BNK | Quelltexteditor nicht mehr in einem eigenen Frame
- * 20.10.2006 | BNK | Rückschreiben ins Dokument erfolgt jetzt automatisch.
- * 26.10.2006 | BNK | Magische gender: Syntax unterstützt. 
- * 30.10.2006 | BNK | Menüstruktur geändert; Datei/Speichern (unter...) hinzugefügt
- * 05.02.2007 | BNK | [R5214]Formularmerkmale entfernen hat fast leere Formularnotiz übriggelassen
+ * 20.10.2006 | BNK | RÃ¼ckschreiben ins Dokument erfolgt jetzt automatisch.
+ * 26.10.2006 | BNK | Magische gender: Syntax unterstÃ¼tzt. 
+ * 30.10.2006 | BNK | MenÃ¼struktur geÃ¤ndert; Datei/Speichern (unter...) hinzugefÃ¼gt
+ * 05.02.2007 | BNK | [R5214]Formularmerkmale entfernen hat fast leere Formularnotiz Ã¼briggelassen
  * 11.04.2007 | BNK | [R6176]Nicht-WM-Bookmarks killen
- *                  | Nicht-WM-Bookmarks killen Funktion derzeit auskommentiert wegen Zerstörung von Referenzen
+ *                  | Nicht-WM-Bookmarks killen Funktion derzeit auskommentiert wegen ZerstÃ¶rung von Referenzen
  * 10.07.2007 | BNK | [P1403]abort() verbessert, damit FM4000 gemuellentsorgt werden kann
- * 19.07.2007 | BNK | [R5406]Views und Teile der Views können nach Benutzerwunsch ein- oder ausgeblendet werden
- *                  | Änderung der Menüstruktur (Einführung Ansicht und Bearbeiten Menü, Einfügen wandert nach Bearbeiten)
+ * 19.07.2007 | BNK | [R5406]Views und Teile der Views kÃ¶nnen nach Benutzerwunsch ein- oder ausgeblendet werden
+ *                  | Ã„nderung der MenÃ¼struktur (EinfÃ¼hrung Ansicht und Bearbeiten MenÃ¼, EinfÃ¼gen wandert nach Bearbeiten)
  *                  | JSplitPane besser initialisiert, um verschieben des Dividers zu verbessern.
  * 01.08.2007 | BNK | FunctionTester eingebaut      
  * 10.12.2007 | BNK | [R11302]intelligentere Behandlung von Leerzeichen am Ende von gender-Dropdown-Listen
- * 13.01.2010 | BED | [R67584]FormularMax öffnet sich bei großen Formularen und niedriger JVM Heap Size nicht mehr, sondern bringt entsprechende Meldung
+ * 13.01.2010 | BED | [R67584]FormularMax Ã¶ffnet sich bei groÃŸen Formularen und niedriger JVM Heap Size nicht mehr, sondern bringt entsprechende Meldung
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -165,22 +165,22 @@ import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 public class FormularMax4000
 {
   /**
-   * Default-Name für ein neues Tab.
+   * Default-Name fÃ¼r ein neues Tab.
    */
   public static final String STANDARD_TAB_NAME = L.m("Reiter");
 
   /**
-   * Die Namen der Parameter, die die Gender-Trafo erwartet. ACHTUNG! Diese müssen
+   * Die Namen der Parameter, die die Gender-Trafo erwartet. ACHTUNG! Diese mÃ¼ssen
    * exakt mit den Parametern der Gender()-Funktion aus der WollMux-Konfig
-   * übereinstimmen. Insbesondere dürfen sie nicht übersetzt werden, ohne dass die
-   * Gender()-Funktion angepasst wird. Und falls die Gender()-Funktion geändert wird,
+   * Ã¼bereinstimmen. Insbesondere dÃ¼rfen sie nicht Ã¼bersetzt werden, ohne dass die
+   * Gender()-Funktion angepasst wird. Und falls die Gender()-Funktion geÃ¤ndert wird,
    * dann funktionieren existierende Formulare nicht mehr.
    */
   private static final String[] GENDER_TRAFO_PARAMS = new String[] {
     "Falls_Anrede_HerrN", "Falls_Anrede_Frau", "Falls_sonstige_Anrede", "Anrede" };
 
   /**
-   * Regex für Test ob String mit Buchstabe oder Underscore beginnt. ACHTUNG! Das .*
+   * Regex fÃ¼r Test ob String mit Buchstabe oder Underscore beginnt. ACHTUNG! Das .*
    * am Ende ist notwendig, da String.matches() immer den ganzen String testet.
    */
   private static final String STARTS_WITH_LETTER_RE = "^[a-zA-Z_].*";
@@ -192,63 +192,63 @@ public class FormularMax4000
     L.m("Generiert durch FormularMax 4000");
 
   /**
-   * Maximale Anzahl Zeichen für ein automatisch generiertes Label.
+   * Maximale Anzahl Zeichen fÃ¼r ein automatisch generiertes Label.
    */
   private static final int GENERATED_LABEL_MAXLENGTH = 30;
 
   /**
-   * URL des Quelltexts für den Standard-Empfängerauswahl-Tab.
+   * URL des Quelltexts fÃ¼r den Standard-EmpfÃ¤ngerauswahl-Tab.
    */
   private final URL EMPFAENGER_TAB_URL =
     this.getClass().getClassLoader().getResource(
       "data/empfaengerauswahl_controls.conf");
 
   /**
-   * URL des Quelltexts für die Standardbuttons für einen mittleren Tab.
+   * URL des Quelltexts fÃ¼r die Standardbuttons fÃ¼r einen mittleren Tab.
    */
   private final URL STANDARD_BUTTONS_MIDDLE_URL =
     this.getClass().getClassLoader().getResource("data/standardbuttons_mitte.conf");
 
   /**
-   * URL des Quelltexts für die Standardbuttons für den letzten Tab.
+   * URL des Quelltexts fÃ¼r die Standardbuttons fÃ¼r den letzten Tab.
    */
   private final URL STANDARD_BUTTONS_LAST_URL =
     this.getClass().getClassLoader().getResource("data/standardbuttons_letztes.conf");
 
   /**
    * Beim Import neuer Formularfelder oder Checkboxen schaut der FormularMax4000 nach
-   * speziellen Hinweisen/Namen/Einträgen, die diesem Muster entsprechen. Diese
+   * speziellen Hinweisen/Namen/EintrÃ¤gen, die diesem Muster entsprechen. Diese
    * Zusatzinformationen werden herangezogen um Labels, IDs und andere Informationen
    * zu bestimmen.
    * 
    * >>>>Eingabefeld<<<<: Als "Hinweis" kann "Label<<ID>>" angegeben werden und
-   * wird beim Import entsprechend berücksichtigt. Wird nur "<<ID>>" angegeben, so
-   * markiert das Eingabefeld eine reine Einfügestelle (insertValue oder
-   * insertContent) und beim Import wird dafür kein Formularsteuerelement erzeugt.
+   * wird beim Import entsprechend berÃ¼cksichtigt. Wird nur "<<ID>>" angegeben, so
+   * markiert das Eingabefeld eine reine EinfÃ¼gestelle (insertValue oder
+   * insertContent) und beim Import wird dafÃ¼r kein Formularsteuerelement erzeugt.
    * Wird ID ein "glob:" vorangestellt, so wird gleich ein insertValue-Bookmark
    * erstellt.
    * 
    * >>>>>Eingabeliste/Dropdown<<<<<: Als "Name" kann "Label<<ID>>" angegeben
-   * werden und wird beim Import berücksichtigt. Als Spezialeintrag in der Liste kann "<<Freitext>>"
+   * werden und wird beim Import berÃ¼cksichtigt. Als Spezialeintrag in der Liste kann "<<Freitext>>"
    * eingetragen werden und signalisiert dem FM4000, dass die ComboBox im Formular
    * auch die Freitexteingabe erlauben soll. Wie bei Eingabefeldern auch ist die
-   * Angabe "<<ID>>" ohne Label möglich und signalisiert, dass es sich um eine
-   * reine Einfügestelle handelt, die kein Formularelement erzeugen soll. Wird als
+   * Angabe "<<ID>>" ohne Label mÃ¶glich und signalisiert, dass es sich um eine
+   * reine EinfÃ¼gestelle handelt, die kein Formularelement erzeugen soll. Wird als
    * "Name" die Spezialsyntax "<<gender:ID>>" verwendet, so wird eine reine
-   * Einfügestelle erzeugt, die mit einer Gender-TRAFO versehen wird, die abhängig
-   * vom Formularfeld ID einen der Werte des Dropdowns auswählt, und zwar bei "Herr"
+   * EinfÃ¼gestelle erzeugt, die mit einer Gender-TRAFO versehen wird, die abhÃ¤ngig
+   * vom Formularfeld ID einen der Werte des Dropdowns auswÃ¤hlt, und zwar bei "Herr"
    * oder "Herrn" den ersten Eintrag, bei "Frau" den zweiten Eintrag und bei allem
-   * sonstigen den dritten Eintrag. Hat das Dropdown nur 2 Einträge, so wird im
-   * sonstigen Fall das Feld ID untransformiert übernommen. Falls vorhanden werden
+   * sonstigen den dritten Eintrag. Hat das Dropdown nur 2 EintrÃ¤ge, so wird im
+   * sonstigen Fall das Feld ID untransformiert Ã¼bernommen. Falls vorhanden werden
    * bis zu N-1 Leerzeichen am Ende eines Eintrages der Dropdown-Liste entfernt,
-   * wobei N die Anzahl der Einträge ist, die bis auf folgende Leerzeichen identisch
-   * zu diesem Eintrag sind. Dies ermöglicht es, das selbe Wort mehrfach in die Liste
+   * wobei N die Anzahl der EintrÃ¤ge ist, die bis auf folgende Leerzeichen identisch
+   * zu diesem Eintrag sind. Dies ermÃ¶glicht es, das selbe Wort mehrfach in die Liste
    * aufzunehmen.
    * 
    * >>>>>Checkbox<<<<<: Bei Checkboxen kann als "Hilfetext" "Label<<ID>>"
-   * angegeben werden und wird beim Import entsprechend berücksichtigt.
+   * angegeben werden und wird beim Import entsprechend berÃ¼cksichtigt.
    * 
-   * Technischer Hinweis: Auf dieses Pattern getestet wird grundsätzlich der String,
+   * Technischer Hinweis: Auf dieses Pattern getestet wird grundsÃ¤tzlich der String,
    * der von {@link DocumentTree.FormControl#getDescriptor()} geliefert wird.
    * 
    */
@@ -256,35 +256,35 @@ public class FormularMax4000
     Pattern.compile("\\A(.*)<<(.*)>>\\z");
 
   /**
-   * Präfix zur Markierung von IDs der magischen Deskriptor-Syntax um anzuzeigen,
+   * PrÃ¤fix zur Markierung von IDs der magischen Deskriptor-Syntax um anzuzeigen,
    * dass ein insertValue anstatt eines insertFormValue erzeugt werden soll.
    */
   private static final String GLOBAL_PREFIX = "glob:";
 
   /**
-   * Präfix zur Markierung von IDs der magischen Deskriptor-Syntax um anzuzeigen,
+   * PrÃ¤fix zur Markierung von IDs der magischen Deskriptor-Syntax um anzuzeigen,
    * dass ein insertFormValue mit Gender-TRAFO erzeugt werden soll.
    */
   private static final String GENDER_PREFIX = "gender:";
 
   /**
-   * Der {@link IDManager}-Namensraum für die IDs von {@link FormControlModel}s.
+   * Der {@link IDManager}-Namensraum fÃ¼r die IDs von {@link FormControlModel}s.
    */
   public static final Integer NAMESPACE_FORMCONTROLMODEL = Integer.valueOf(0);
 
   /**
-   * Der {@link IDManager}-Namensraum für die DB_SPALTE-Angaben von
+   * Der {@link IDManager}-Namensraum fÃ¼r die DB_SPALTE-Angaben von
    * {@link InsertionModel}s.
    */
   public static final Integer NAMESPACE_DB_SPALTE = Integer.valueOf(1);
 
   /**
-   * Der {@link IDManager}-Namensraum für die Namen von {@link GroupModel}s.
+   * Der {@link IDManager}-Namensraum fÃ¼r die Namen von {@link GroupModel}s.
    */
   public static final Integer NAMESPACE_GROUPS = Integer.valueOf(2);
 
   /**
-   * ActionListener für Buttons mit der ACTION "abort".
+   * ActionListener fÃ¼r Buttons mit der ACTION "abort".
    */
   private ActionListener actionListener_abort = new ActionListener()
   {
@@ -317,28 +317,28 @@ public class FormularMax4000
   private JSplitPane mainContentPanel;
 
   /**
-   * Die normale Größe des Dividers von {@link #mainContentPanel}.
+   * Die normale GrÃ¶ÃŸe des Dividers von {@link #mainContentPanel}.
    */
   private int defaultDividerSize;
 
   /**
-   * Oberster Container für den Quelltexteditor. Wird direkt in die ContentPane von
+   * Oberster Container fÃ¼r den Quelltexteditor. Wird direkt in die ContentPane von
    * myFrame gesteckt.
    */
   private JPanel editorContentPanel;
 
   /**
-   * Der Übercontainer für die linke Hälfte des FM4000.
+   * Der Ãœbercontainer fÃ¼r die linke HÃ¤lfte des FM4000.
    */
   private LeftPanel leftPanel;
 
   /**
-   * Der Übercontainer für die rechte Hälfte des FM4000.
+   * Der Ãœbercontainer fÃ¼r die rechte HÃ¤lfte des FM4000.
    */
   private RightPanel rightPanel;
 
   /**
-   * Ein JPanel mit minimaler und bevorzugter Größe 0, das für die rechte Seite des
+   * Ein JPanel mit minimaler und bevorzugter GrÃ¶ÃŸe 0, das fÃ¼r die rechte Seite des
    * FM4000 verwendet wird, wenn diese ausgeblendet sein soll.
    */
   private JPanel nonExistingRightPanel;
@@ -365,7 +365,7 @@ public class FormularMax4000
   private String plausiMarkerColor = null;
 
   /**
-   * Das TextDocumentModel, zu dem das Dokument doc gehört.
+   * Das TextDocumentModel, zu dem das Dokument doc gehÃ¶rt.
    */
   private TextDocumentModel doc;
 
@@ -397,47 +397,47 @@ public class FormularMax4000
   private SectionModelList sectionModelList;
 
   /**
-   * Funktionsbibliothek, die globale Funktionen zur Verfügung stellt.
+   * Funktionsbibliothek, die globale Funktionen zur VerfÃ¼gung stellt.
    */
   private FunctionLibrary functionLibrary;
 
   /**
-   * Verantwortlich für das Übersetzen von TRAFO, PLAUSI und AUTOFILL in
+   * Verantwortlich fÃ¼r das Ãœbersetzen von TRAFO, PLAUSI und AUTOFILL in
    * {@link FunctionSelection}s.
    */
   private FunctionSelectionProvider functionSelectionProvider;
 
   /**
-   * Verantwortlich für das Übersetzen von Gruppennamen in {@link FunctionSelection}s
+   * Verantwortlich fÃ¼r das Ãœbersetzen von Gruppennamen in {@link FunctionSelection}s
    * anhand des Sichtbarkeit-Abschnitts.
    */
   private FunctionSelectionProvider visibilityFunctionSelectionProvider;
 
   /**
-   * Der globale Broadcast-Kanal wird für Nachrichten verwendet, die verschiedene
-   * permanente Objekte erreichen müssen, die aber von (transienten) Objekten
+   * Der globale Broadcast-Kanal wird fÃ¼r Nachrichten verwendet, die verschiedene
+   * permanente Objekte erreichen mÃ¼ssen, die aber von (transienten) Objekten
    * ausgehen, die mit diesen globalen Objekten wegen des Ausuferns der Verbindungen
-   * nicht in einer Beziehung stehen sollen. Diese Liste enthält alle
+   * nicht in einer Beziehung stehen sollen. Diese Liste enthÃ¤lt alle
    * {@link BroadcastListener}, die auf dem globalen Broadcast-Kanal horchen. Dies
-   * dürfen nur permanente Objekte sein, d.h. Objekte deren Lebensdauer nicht vor
+   * dÃ¼rfen nur permanente Objekte sein, d.h. Objekte deren Lebensdauer nicht vor
    * Beenden des FM4000 endet.
    */
   private List<BroadcastListener> broadcastListeners =
     new Vector<BroadcastListener>();
 
   /**
-   * Wird auf myFrame registriert, damit zum Schließen des Fensters abort()
+   * Wird auf myFrame registriert, damit zum SchlieÃŸen des Fensters abort()
    * aufgerufen wird.
    */
   private MyWindowListener oehrchen;
 
   /**
-   * Die Haupt-Menüleiste des FM4000.
+   * Die Haupt-MenÃ¼leiste des FM4000.
    */
   private JMenuBar mainMenuBar;
 
   /**
-   * Die Menüleiste, die angezeigt wird wenn der Quelltexteditor offen ist.
+   * Die MenÃ¼leiste, die angezeigt wird wenn der Quelltexteditor offen ist.
    */
   private JMenuBar editorMenuBar;
 
@@ -452,8 +452,8 @@ public class FormularMax4000
   private Vector<String> printFunctionNames;
 
   /**
-   * Wird bei jeder Änderung von Formularaspekten gestartet, um nach einer
-   * Verzögerung die Änderungen in das Dokument zu übertragen.
+   * Wird bei jeder Ã„nderung von Formularaspekten gestartet, um nach einer
+   * VerzÃ¶gerung die Ã„nderungen in das Dokument zu Ã¼bertragen.
    */
   private Timer writeChangesTimer;
 
@@ -463,7 +463,7 @@ public class FormularMax4000
   private XSelectionSupplier selectionSupplier;
 
   /**
-   * Wird auf {@link #selectionSupplier} registriert, um Änderungen der
+   * Wird auf {@link #selectionSupplier} registriert, um Ã„nderungen der
    * Cursorselektion zu beobachten.
    */
   private MyXSelectionChangedListener myXSelectionChangedListener;
@@ -471,7 +471,7 @@ public class FormularMax4000
   /**
    * Speichert die Funktionsdialoge-Abschnitte des Formulars. Der FM4000 macht
    * derzeit nichts besonderes mit ihnen, sondern schreibt sie einfach nur ins
-   * Dokument zurück.
+   * Dokument zurÃ¼ck.
    */
   private ConfigThingy funktionsDialogeAbschnitteConf;
 
@@ -480,14 +480,14 @@ public class FormularMax4000
    * mit einer maximaler Heap Size der JVM, die kleiner ist als
    * {@link #LOWEST_ALLOWED_HEAP_SIZE}, zu Speicherplatzproblemen kommen kann.
    * 
-   * Der Wert 5000 wurde vollkommen willkürlich gewählt und ist wahrscheinlich zu
+   * Der Wert 5000 wurde vollkommen willkÃ¼rlich gewÃ¤hlt und ist wahrscheinlich zu
    * hoch. Wir warten auf den ersten Bugreport mit einem {@link OutOfMemoryError} und
    * legen den Wert dann anhand des realen Falles neu fest.
    */
   private static final int CRITICAL_NUMBER_OF_FORMCONTROLS = 5000;
 
   /**
-   * Mindestgröße der maximalen Heap Size der JVM (in Bytes). Sollte die maximale
+   * MindestgrÃ¶ÃŸe der maximalen Heap Size der JVM (in Bytes). Sollte die maximale
    * Heap Size der JVM kleiner als dieser Wert sein, kann es bei Formularen mit mehr
    * Formularsteuerelementen als {@link #CRITICAL_NUMBER_OF_FORMCONTROLS} zu
    * Speicherplatzproblemen kommen.
@@ -510,7 +510,7 @@ public class FormularMax4000
   }
 
   /**
-   * listener wird über globale {@link Broadcast}s informiert.
+   * listener wird Ã¼ber globale {@link Broadcast}s informiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -530,7 +530,7 @@ public class FormularMax4000
   }
 
   /**
-   * Wird bei jeder Änderung einer internen Datenstruktur aufgerufen, die ein Updaten
+   * Wird bei jeder Ã„nderung einer internen Datenstruktur aufgerufen, die ein Updaten
    * des Dokuments erforderlich macht um persistent zu werden.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -541,7 +541,7 @@ public class FormularMax4000
   }
 
   /**
-   * Liefert den {@link IDManager}, der für Objekte im Formular verwendet wird.
+   * Liefert den {@link IDManager}, der fÃ¼r Objekte im Formular verwendet wird.
    * 
    * @see #NAMESPACE_FORMCONTROLMODEL
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -552,16 +552,16 @@ public class FormularMax4000
   }
 
   /**
-   * Startet eine Instanz des FormularMax 4000 für das Dokument des
+   * Startet eine Instanz des FormularMax 4000 fÃ¼r das Dokument des
    * TextDocumentModels model.
    * 
    * @param abortListener
    *          (falls nicht null) wird aufgerufen, nachdem der FormularMax 4000
    *          geschlossen wurde.
    * @param funcLib
-   *          Funktionsbibliothek, die globale Funktionen zur Verfügung stellt.
+   *          Funktionsbibliothek, die globale Funktionen zur VerfÃ¼gung stellt.
    * @param printFuncLib
-   *          Funktionsbibliothek, die Druckfunktionen zur Verfügung stellt.
+   *          Funktionsbibliothek, die Druckfunktionen zur VerfÃ¼gung stellt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormularMax4000(TextDocumentModel model, ActionListener abortListener,
@@ -601,10 +601,10 @@ public class FormularMax4000
   {
     Common.setLookAndFeelOnce();
 
-    // Zuerst überprüfen wir, ob das Formular eine kritische Anzahl an FormControls
-    // sowie eine niedrige Einstellung für die Java Heap Size hat, die zu
-    // OutOfMemoryErrors führen könnte. Wenn ja, wird eine entsprechende Meldung
-    // ausgegeben, dass der Benutzer seine Java-Einstellungen ändern soll und
+    // Zuerst Ã¼berprÃ¼fen wir, ob das Formular eine kritische Anzahl an FormControls
+    // sowie eine niedrige Einstellung fÃ¼r die Java Heap Size hat, die zu
+    // OutOfMemoryErrors fÃ¼hren kÃ¶nnte. Wenn ja, wird eine entsprechende Meldung
+    // ausgegeben, dass der Benutzer seine Java-Einstellungen Ã¤ndern soll und
     // der FormularMax wird nicht gestartet.
     int formControlCount = doc.getFormDescription().query("TYPE", 6, 6).count();
     long maxMemory = Runtime.getRuntime().maxMemory();
@@ -616,11 +616,11 @@ public class FormularMax4000
         doc.getTitle(), maxMemory, formControlCount));
       JOptionPane.showMessageDialog(
         myFrame,
-        L.m("Der FormularMax 4000 kann nicht ausgeführt werden, da der Java-Laufzeitumgebung zu wenig Hauptspeicher zur Verfügung steht.\n"
-          + "Bitte ändern Sie in OpenOffice.org Ihre Java-Einstellungen. Sie finden diese unter \"Extras->Optionen->OpenOffice.org->Java\".\n"
-          + "Dort wählen Sie in der Liste Ihre aktuelle Java-Laufzeitumgebung aus, klicken auf den Button \"Parameter\",\n"
-          + "tragen den neuen Parameter \"-Xmx256m\" ein (Groß-/Kleinschreibung beachten!) und klicken auf \"Zuweisen\".\n"
-          + "Danach ist ein Neustart von OpenOffice.org nötig."),
+        L.m("Der FormularMax 4000 kann nicht ausgefÃ¼hrt werden, da der Java-Laufzeitumgebung zu wenig Hauptspeicher zur VerfÃ¼gung steht.\n"
+          + "Bitte Ã¤ndern Sie in OpenOffice.org Ihre Java-Einstellungen. Sie finden diese unter \"Extras->Optionen->OpenOffice.org->Java\".\n"
+          + "Dort wÃ¤hlen Sie in der Liste Ihre aktuelle Java-Laufzeitumgebung aus, klicken auf den Button \"Parameter\",\n"
+          + "tragen den neuen Parameter \"-Xmx256m\" ein (GroÃŸ-/Kleinschreibung beachten!) und klicken auf \"Zuweisen\".\n"
+          + "Danach ist ein Neustart von OpenOffice.org nÃ¶tig."),
         L.m("Java Heap Size zu gering"), JOptionPane.ERROR_MESSAGE);
       doc.setCurrentFormularMax4000(null);
       return;
@@ -636,7 +636,7 @@ public class FormularMax4000
     // leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     oehrchen = new MyWindowListener();
-    // der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert
+    // der WindowListener sorgt dafÃ¼r, dass auf windowClosing mit abort reagiert
     // wird
     myFrame.addWindowListener(oehrchen);
 
@@ -647,7 +647,7 @@ public class FormularMax4000
       new RightPanel(insertionModelList, formControlModelList, groupModelList,
         sectionModelList, functionLibrary, this);
 
-    // damit sich Slider von JSplitPane vernünftig bewegen lässt.
+    // damit sich Slider von JSplitPane vernÃ¼nftig bewegen lÃ¤sst.
     rightPanel.JComponent().setMinimumSize(new Dimension(100, 0));
     nonExistingRightPanel = new JPanel();
     nonExistingRightPanel.setMinimumSize(new Dimension(0, 0));
@@ -700,8 +700,8 @@ public class FormularMax4000
     // ========================= Bearbeiten ============================
     menu = new JMenu(L.m("Bearbeiten"));
 
-    // ========================= Bearbeiten/Einfügen ============================
-    JMenu submenu = new JMenu(L.m("Standardelemente einfügen"));
+    // ========================= Bearbeiten/EinfÃ¼gen ============================
+    JMenu submenu = new JMenu(L.m("Standardelemente einfÃ¼gen"));
 
     if (!createStandardelementeMenuNew(submenu))
       createStandardelementeMenuOld(submenu);
@@ -873,7 +873,7 @@ public class FormularMax4000
 
     /*
      * Das Entfernen von Bookmarks kann Referenzfelder (Felder die Kopien anderer
-     * Teile des Dokuments enthalten) zerstören, da diese dann ins Leere greifen.
+     * Teile des Dokuments enthalten) zerstÃ¶ren, da diese dann ins Leere greifen.
      * Solange dies nicht erkannt wird, muss die Funktion deaktiviert sein.
      * 
      */
@@ -930,8 +930,8 @@ public class FormularMax4000
   }
 
   /**
-   * Wertet den Konfigurationsabschnitt FormularMax4000/Standardelemente aus und fügt
-   * submenu entsprechende Einträge hinzu.
+   * Wertet den Konfigurationsabschnitt FormularMax4000/Standardelemente aus und fÃ¼gt
+   * submenu entsprechende EintrÃ¤ge hinzu.
    * 
    * @return false, falls der Konfigurationsabschnitt nicht existiert.
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -959,7 +959,7 @@ public class FormularMax4000
             if (tabConf.count() == 1)
             {
               JMenuItem menuItem;
-              menuItem = new JMenuItem(L.m("Empfängerauswahl-Tab"));
+              menuItem = new JMenuItem(L.m("EmpfÃ¤ngerauswahl-Tab"));
               final ConfigThingy tabConfEntry =
                 tabConf.getFirstChild().getFirstChild();
               menuItem.addActionListener(new ActionListener()
@@ -1011,7 +1011,7 @@ public class FormularMax4000
   }
 
   /**
-   * Fügt submenu die alten im WollMux gespeicherten Standardelemente-Einträge hinzu.
+   * FÃ¼gt submenu die alten im WollMux gespeicherten Standardelemente-EintrÃ¤ge hinzu.
    * Sollte nur verwendet werden, wenn der entsprechende Konfigurationsabschnitt in
    * der wollmux,conf fehlt.
    * 
@@ -1020,7 +1020,7 @@ public class FormularMax4000
   private void createStandardelementeMenuOld(JMenu submenu)
   {
     JMenuItem menuItem;
-    menuItem = new JMenuItem(L.m("Empfängerauswahl-Tab"));
+    menuItem = new JMenuItem(L.m("EmpfÃ¤ngerauswahl-Tab"));
     menuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -1031,7 +1031,7 @@ public class FormularMax4000
     });
     submenu.add(menuItem);
 
-    menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, Weiter->"));
+    menuItem = new JMenuItem(L.m("Abbrechen, <-ZurÃ¼ck, Weiter->"));
     menuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -1042,7 +1042,7 @@ public class FormularMax4000
     });
     submenu.add(menuItem);
 
-    menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, PDF, Drucken"));
+    menuItem = new JMenuItem(L.m("Abbrechen, <-ZurÃ¼ck, PDF, Drucken"));
     menuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -1168,7 +1168,7 @@ public class FormularMax4000
           /*
            * Kein Problem. Wir haben die entsprechende Sichtbarkeitsgruppe schon
            * angelegt. Die Initialisierung des visibilityFunctionSelectionProviders
-           * sorgt dafür, dass bei mehrfachen Deklarationen der selben
+           * sorgt dafÃ¼r, dass bei mehrfachen Deklarationen der selben
            * Sichtbarkeitsgruppe die letzte gewinnt. Der obige
            * getFunctionSelection()-Aufruf liefert nur noch die letzte Definition.
            */
@@ -1215,7 +1215,7 @@ public class FormularMax4000
    */
   private ConfigThingy updateDocument(TextDocumentModel doc)
   {
-    Logger.debug(L.m("Übertrage Formularbeschreibung ins Dokument"));
+    Logger.debug(L.m("Ãœbertrage Formularbeschreibung ins Dokument"));
     Map<String, ConfigThingy> mapFunctionNameToConfigThingy =
       new HashMap<String, ConfigThingy>();
     insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
@@ -1226,7 +1226,7 @@ public class FormularMax4000
   }
 
   /**
-   * Ruft {@link #updateDocument(TextDocumentModel)} auf, falls noch Änderungen
+   * Ruft {@link #updateDocument(TextDocumentModel)} auf, falls noch Ã„nderungen
    * anstehen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1235,7 +1235,7 @@ public class FormularMax4000
   {
     if (writeChangesTimer.isRunning())
     {
-      Logger.debug(L.m("Schreibe wartende Änderungen ins Dokument"));
+      Logger.debug(L.m("Schreibe wartende Ã„nderungen ins Dokument"));
       writeChangesTimer.stop();
       try
       {
@@ -1250,8 +1250,8 @@ public class FormularMax4000
   }
 
   /**
-   * Liefert ein ConfigThingy zurück, das den aktuellen Zustand der
-   * Formularbeschreibung repräsentiert. Zum Exportieren der Formularbeschreibung
+   * Liefert ein ConfigThingy zurÃ¼ck, das den aktuellen Zustand der
+   * Formularbeschreibung reprÃ¤sentiert. Zum Exportieren der Formularbeschreibung
    * sollte {@link #updateDocument(XTextDocument)} verwendet werden.
    * 
    * @param mapFunctionNameToConfigThingy
@@ -1295,7 +1295,7 @@ public class FormularMax4000
    * Formulartitel oder die Funktionen des Funktionen-Abschnitts.
    * 
    * @param conf
-   *          der WM-Knoten der über einer beliebigen Anzahl von Formular-Knoten
+   *          der WM-Knoten der Ã¼ber einer beliebigen Anzahl von Formular-Knoten
    *          sitzt.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -1345,7 +1345,7 @@ public class FormularMax4000
   }
 
   /**
-   * Fügt am Anfang der Liste einem Tab ein, dessen Konfiguration aus tabConf kommt
+   * FÃ¼gt am Anfang der Liste einem Tab ein, dessen Konfiguration aus tabConf kommt
    * (Wurzelknoten wird ignoriert, darunter sollten TITLE, Eingabefelder etc, liegen)
    * falls tabConf != null, ansonsten aus einem ConfigThingy was an der URL
    * tabConfUrl gespeichert ist (hier sind TITLE, Eingabefelder, etc, auf oberster
@@ -1369,9 +1369,9 @@ public class FormularMax4000
   }
 
   /**
-   * Hängt die Standardbuttons aus conf (Wurzelknoten "Buttons", darunter direkt die
+   * HÃ¤ngt die Standardbuttons aus conf (Wurzelknoten "Buttons", darunter direkt die
    * Button-Spezifikationen) oder (falls conf==null) aus dem ConfigThingy das an
-   * confUrl gespeichert ist (kein umschließender Abschnitt, sondern direkt die
+   * confUrl gespeichert ist (kein umschlieÃŸender Abschnitt, sondern direkt die
    * Button-Beschreibungen) das Ende der Liste.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1383,7 +1383,7 @@ public class FormularMax4000
       if (conf == null) conf = new ConfigThingy("Buttons", confUrl);
 
       // damit ich parseGrandchildren() verwenden kann muss ich noch einen
-      // Großelternknoten hinzufügen.
+      // GroÃŸelternknoten hinzufÃ¼gen.
       conf = conf.query("Buttons", 0, 0);
 
       int index = leftPanel.getButtonInsertionIndex();
@@ -1397,14 +1397,14 @@ public class FormularMax4000
   }
 
   /**
-   * Parst das Tab conf und fügt entsprechende FormControlModels der
+   * Parst das Tab conf und fÃ¼gt entsprechende FormControlModels der
    * {@link #formControlModelList} hinzu.
    * 
    * @param conf
-   *          der Knoten direkt über "Eingabefelder" und "Buttons".
+   *          der Knoten direkt Ã¼ber "Eingabefelder" und "Buttons".
    * @param idx
    *          falls >= 0 werden die Steuerelemente am entsprechenden Index der Liste
-   *          in die Formularbeschreibung eingefügt, ansonsten ans Ende angehängt.
+   *          in die Formularbeschreibung eingefÃ¼gt, ansonsten ans Ende angehÃ¤ngt.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void parseTab(ConfigThingy conf, int idx)
@@ -1452,12 +1452,12 @@ public class FormularMax4000
   }
 
   /**
-   * Parst die Kinder der Kinder von grandma als Steuerelemente und fügt der
+   * Parst die Kinder der Kinder von grandma als Steuerelemente und fÃ¼gt der
    * {@link #formControlModelList} entsprechende FormControlModels hinzu.
    * 
    * @param idx
    *          falls >= 0 werden die Steuerelemente am entsprechenden Index der Liste
-   *          in die Formularbeschreibung eingefügt, ansonsten ans Ende angehängt.
+   *          in die Formularbeschreibung eingefÃ¼gt, ansonsten ans Ende angehÃ¤ngt.
    * @param killLastGlue
    *          falls true wird das letzte Steuerelement entfernt, wenn es ein glue
    *          ist.
@@ -1495,8 +1495,8 @@ public class FormularMax4000
   }
 
   /**
-   * Scannt das Dokument doc durch und erzeugt {@link FormControlModel}s für alle
-   * Formularfelder, die noch kein umschließendes WollMux-Bookmark haben.
+   * Scannt das Dokument doc durch und erzeugt {@link FormControlModel}s fÃ¼r alle
+   * Formularfelder, die noch kein umschlieÃŸendes WollMux-Bookmark haben.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1518,7 +1518,7 @@ public class FormularMax4000
     }
     catch (Exception x)
     {
-      Logger.error(L.m("Fehler während des Scan-Vorgangs"), x);
+      Logger.error(L.m("Fehler wÃ¤hrend des Scan-Vorgangs"), x);
     }
 
     documentNeedsUpdating();
@@ -1589,17 +1589,17 @@ public class FormularMax4000
   }
 
   /**
-   * Fügt der {@link #formControlModelList} ein neues {@link FormControlModel} hinzu
-   * für das {@link de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl}
+   * FÃ¼gt der {@link #formControlModelList} ein neues {@link FormControlModel} hinzu
+   * fÃ¼r das {@link de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl}
    * control, wobei text der Text sein sollte, der im Dokument vor control steht.
    * Dieser Text wird zur Generierung des Labels herangezogen. Es wird ebenfalls der
    * {@link #insertionModelList} ein entsprechendes {@link InsertionModel}
-   * hinzugefügt. Zusätzlich wird immer ein entsprechendes Bookmark um das Control
-   * herumgelegt, das die Einfügestelle markiert.
+   * hinzugefÃ¼gt. ZusÃ¤tzlich wird immer ein entsprechendes Bookmark um das Control
+   * herumgelegt, das die EinfÃ¼gestelle markiert.
    * 
-   * @return null, falls es sich bei dem Control nur um eine reine Einfügestelle
+   * @return null, falls es sich bei dem Control nur um eine reine EinfÃ¼gestelle
    *         handelt. In diesem Fall wird nur der {@link #insertionModelList} ein
-   *         Element hinzugefügt.
+   *         Element hinzugefÃ¼gt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1706,7 +1706,7 @@ public class FormularMax4000
 
       /*
        * Bestimme die maximal am Ende des Eintrags zu entfernende Anzahl Leerzeichen.
-       * Dies ist die Anzahl an Einträgen, die bis auf folgende Leerzeichen identisch
+       * Dies ist die Anzahl an EintrÃ¤gen, die bis auf folgende Leerzeichen identisch
        * sind MINUS 1.
        */
       String item1 = item;
@@ -1721,7 +1721,7 @@ public class FormularMax4000
         if (item1.equals(item2)) ++n;
       }
 
-      // bis zu N-1 Leerzeichen am Ende löschen, um mehrere gleiche Einträge zu
+      // bis zu N-1 Leerzeichen am Ende lÃ¶schen, um mehrere gleiche EintrÃ¤ge zu
       // erlauben.
       for (; n > 1 && item.endsWith(" "); --n)
         item = item.substring(0, item.length() - 1);
@@ -1766,8 +1766,8 @@ public class FormularMax4000
   }
 
   /**
-   * Fügt {@link #formControlModelList} ein neues {@link FormControlModel} für eine
-   * Checkbox hinzu und liefert es zurück.
+   * FÃ¼gt {@link #formControlModelList} ein neues {@link FormControlModel} fÃ¼r eine
+   * Checkbox hinzu und liefert es zurÃ¼ck.
    * 
    * @param control
    *          das entsprechende
@@ -1794,8 +1794,8 @@ public class FormularMax4000
   }
 
   /**
-   * Fügt {@link #formControlModelList} ein neues {@link FormControlModel} für eine
-   * Auswahlliste hinzu und liefert es zurück.
+   * FÃ¼gt {@link #formControlModelList} ein neues {@link FormControlModel} fÃ¼r eine
+   * Auswahlliste hinzu und liefert es zurÃ¼ck.
    * 
    * @param control
    *          das entsprechende
@@ -1838,8 +1838,8 @@ public class FormularMax4000
   }
 
   /**
-   * Fügt {@link #formControlModelList} ein neues {@link FormControlModel} für ein
-   * Eingabefeld hinzu und liefert es zurück.
+   * FÃ¼gt {@link #formControlModelList} ein neues {@link FormControlModel} fÃ¼r ein
+   * Eingabefeld hinzu und liefert es zurÃ¼ck.
    * 
    * @param control
    *          das entsprechende
@@ -1866,8 +1866,8 @@ public class FormularMax4000
   }
 
   /**
-   * Liefert str zurück minus führende und folgende Whitespace (wobei
-   * Unicode-Leerzeichen) korrekt berücksichtigt werden.
+   * Liefert str zurÃ¼ck minus fÃ¼hrende und folgende Whitespace (wobei
+   * Unicode-Leerzeichen) korrekt berÃ¼cksichtigt werden.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -1892,9 +1892,9 @@ public class FormularMax4000
   }
 
   /**
-   * Macht aus str einen passenden Bezeichner für ein Steuerelement. Falls
+   * Macht aus str einen passenden Bezeichner fÃ¼r ein Steuerelement. Falls
    * insertionOnlyNoLabel == true, so muss der Bezeichner nicht eindeutig sein (dies
-   * ist der Marker für eine reine Einfügestelle, für die kein Steuerelement erzeugt
+   * ist der Marker fÃ¼r eine reine EinfÃ¼gestelle, fÃ¼r die kein Steuerelement erzeugt
    * werden muss).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1951,7 +1951,7 @@ public class FormularMax4000
   };
 
   /**
-   * Initialisiert die GUI für den Quelltexteditor.
+   * Initialisiert die GUI fÃ¼r den Quelltexteditor.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -2016,8 +2016,8 @@ public class FormularMax4000
   }
 
   /**
-   * Öffnet ein Fenster zum Editieren der Formularbeschreibung. Beim Schliessend des
-   * Fensters wird die geänderte Formularbeschreibung neu geparst, falls sie
+   * Ã–ffnet ein Fenster zum Editieren der Formularbeschreibung. Beim Schliessend des
+   * Fensters wird die geÃ¤nderte Formularbeschreibung neu geparst, falls sie
    * syntaktisch korrekt ist.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -2072,7 +2072,7 @@ public class FormularMax4000
     JButton wegDamit = new JButton(L.m("Entfernen"));
     wegDamit.addActionListener(removeFunc);
 
-    JButton machDazu = new JButton(L.m("Hinzufügen"));
+    JButton machDazu = new JButton(L.m("HinzufÃ¼gen"));
     machDazu.addActionListener(addFunc);
 
     JButton ok = new JButton(L.m("OK"));
@@ -2183,9 +2183,9 @@ public class FormularMax4000
     /*
      * Wegen folgendem Java Bug (WONTFIX)
      * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304 sind die folgenden
-     * 3 Zeilen nötig, damit der FormularMax4000 gc'ed werden kann. Die Befehle
-     * sorgen dafür, dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager)
-     * indirekt über den JFrame den FM4000 kennt.
+     * 3 Zeilen nÃ¶tig, damit der FormularMax4000 gc'ed werden kann. Die Befehle
+     * sorgen dafÃ¼r, dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager)
+     * indirekt Ã¼ber den JFrame den FM4000 kennt.
      */
     myFrame.removeWindowListener(oehrchen);
     myFrame.getContentPane().remove(0);
@@ -2208,7 +2208,7 @@ public class FormularMax4000
   }
 
   /**
-   * Schliesst den FM4000 und alle zugehörigen Fenster.
+   * Schliesst den FM4000 und alle zugehÃ¶rigen Fenster.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -2262,9 +2262,9 @@ public class FormularMax4000
   }
 
   /**
-   * Workaround für Problem unter Windows, dass das Layout bei myFrame.pack() die
-   * Taskleiste nicht berücksichtigt (das Fenster also dahinter verschwindet),
-   * zumindest solange nicht bis man die Taskleiste mal in ihrer Größe verändert hat.
+   * Workaround fÃ¼r Problem unter Windows, dass das Layout bei myFrame.pack() die
+   * Taskleiste nicht berÃ¼cksichtigt (das Fenster also dahinter verschwindet),
+   * zumindest solange nicht bis man die Taskleiste mal in ihrer GrÃ¶ÃŸe verÃ¤ndert hat.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -2275,8 +2275,8 @@ public class FormularMax4000
   }
 
   /**
-   * Sorgt dafür, dass die Ausdehnung von frame nicht die maximal erlaubten
-   * Fensterdimensionen überschreitet.
+   * Sorgt dafÃ¼r, dass die Ausdehnung von frame nicht die maximal erlaubten
+   * Fensterdimensionen Ã¼berschreitet.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -2288,7 +2288,7 @@ public class FormularMax4000
     maxWindowBounds = genv.getMaximumWindowBounds();
     String lafName = UIManager.getSystemLookAndFeelClassName();
     if (!lafName.contains("plaf.windows.")) maxWindowBounds.height -= 32; // Sicherheitsabzug
-    // für KDE
+    // fÃ¼r KDE
     // Taskleiste
 
     Rectangle frameBounds = frame.getBounds();
@@ -2344,7 +2344,7 @@ public class FormularMax4000
    * Falls enuAccess != null, wird die entsprechende XEnumeration genommen und ihre
    * Elemente als Paragraphen bzw TextTables interpretiert, deren Inhalt enumeriert
    * wird, um daraus alle enthaltenen Bookmarks UND InputUser Felder zu bestimmen und
-   * ihre Namen zu names hinzuzufügen.
+   * ihre Namen zu names hinzuzufÃ¼gen.
    * 
    * @param doCompare
    *          if true, then text portions will be ignored if they lie outside of
@@ -2375,7 +2375,7 @@ public class FormularMax4000
         if (xs != null)
           handleParagraph(names, xs, compare, range, doCompare);
         else
-        {// unterstützt nicht XEnumerationAccess, ist wohl SwXTextTable
+        {// unterstÃ¼tzt nicht XEnumerationAccess, ist wohl SwXTextTable
           XTextTable table = UNO.XTextTable(nextEle);
           if (table != null) handleTextTable(names, table, compare, range);
         }
@@ -2416,9 +2416,9 @@ public class FormularMax4000
   }
 
   /**
-   * Enumeriert über die Zellen von table und ruft für jede
+   * Enumeriert Ã¼ber die Zellen von table und ruft fÃ¼r jede
    * {@link #handleParagraph(Set, XEnumerationAccess, XTextRangeCompare, XTextRange, boolean)}
-   * auf, wobei für doCompare immer true übergeben wird.
+   * auf, wobei fÃ¼r doCompare immer true Ã¼bergeben wird.
    * 
    * @throws NoSuchElementException
    * @throws WrappedTargetException
@@ -2441,8 +2441,8 @@ public class FormularMax4000
   }
 
   /**
-   * Enumeriert über die TextPortions des Paragraphen para und sammelt alle Bookmarks
-   * und InputUser-Felder darin auf und fügt ihre Namen zu names hinzu.
+   * Enumeriert Ã¼ber die TextPortions des Paragraphen para und sammelt alle Bookmarks
+   * und InputUser-Felder darin auf und fÃ¼gt ihre Namen zu names hinzu.
    * 
    * @param doCompare
    *          if true, then text portions will be ignored if they lie outside of
@@ -2569,7 +2569,7 @@ public class FormularMax4000
   }
 
   /**
-   * Ruft den FormularMax4000 für das aktuelle Vordergrunddokument auf, falls dieses
+   * Ruft den FormularMax4000 fÃ¼r das aktuelle Vordergrunddokument auf, falls dieses
    * ein Textdokument ist.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)

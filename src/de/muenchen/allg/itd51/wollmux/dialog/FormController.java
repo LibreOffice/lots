@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Stellt UI bereit, um ein Formulardokument zu bearbeiten.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,21 +18,21 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 27.12.2005 | BNK | Erstellung
  * 27.01.2006 | BNK | JFrame-Verwaltung nach FormGUI ausgelagert.
  * 02.02.2006 | BNK | Ein/Ausblendungen begonnen
  * 05.05.2006 | BNK | Condition -> Function, kommentiert
- * 17.05.2006 | BNK | AUTOFILL, PLAUSI, Übergabe an FormModel
- * 18.05.2006 | BNK | Fokus-Änderungen an formModel kommunizieren
- *                  | TIP und HOTKEY bei Tabs unterstützen
+ * 17.05.2006 | BNK | AUTOFILL, PLAUSI, Ãœbergabe an FormModel
+ * 18.05.2006 | BNK | Fokus-Ã„nderungen an formModel kommunizieren
+ *                  | TIP und HOTKEY bei Tabs unterstÃ¼tzen
  *                  | leere Tabs ausgrauen
  *                  | nextTab und prevTab implementiert
  * 29.05.2006 | BNK | Umstellung auf UIElementFactory.Context
  * 31.05.2006 | BNK | ACTION "funcDialog"
- * 19.06.2006 | BNK | Auch Werte für Felder, die nicht geautofilled sind an FormModel kommunizieren bei Startup
+ * 19.06.2006 | BNK | Auch Werte fÃ¼r Felder, die nicht geautofilled sind an FormModel kommunizieren bei Startup
  * 10.09.2006 | BNK | [P1007]Abfangen von mehr als 512 Elementen auf einem Tab.
  * 10.09.2006 | BNK | Tabs scrollen, nicht hintereinander gruppieren.
  * 17.11.2006 | BNK | +setValue()
@@ -101,15 +101,15 @@ import de.muenchen.allg.itd51.wollmux.func.Values;
 public class FormController implements UIElementEventHandler
 {
   /**
-   * Wird and FormGUI und FormController in mapIdToPresetValue übergeben, wenn der
+   * Wird and FormGUI und FormController in mapIdToPresetValue Ã¼bergeben, wenn der
    * Wert des entsprechenden Feldes nicht korrekt widerhergestellt werden kann.
-   * ACHTUNG! Diese Konstante muss als Objekt übergeben werden, da sie == verglichen
+   * ACHTUNG! Diese Konstante muss als Objekt Ã¼bergeben werden, da sie == verglichen
    * wird.
    */
-  public final static String FISHY = L.m("!!!PRÜFEN!!!");
+  public final static String FISHY = L.m("!!!PRÃœFEN!!!");
 
   /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
+   * Rand um Textfelder (wird auch fÃ¼r ein paar andere RÃ¤nder verwendet) in Pixeln.
    */
   private final static int TF_BORDER = 4;
 
@@ -121,64 +121,64 @@ public class FormController implements UIElementEventHandler
   /**
    * GridBagLayout hat eine Begrenzung auf maximal 512 Grid-Elemente pro
    * Koordinatenrichtung, deshalb wird verhindert, dass zuviele Elemente auf einem
-   * Tab eingefügt werden, indem maximal soviele wie hier angegeben angezeigt werden.
-   * Der Wert hier ist etwas weniger als 512, um Puffer zu bieten für das Hinzufügen
+   * Tab eingefÃ¼gt werden, indem maximal soviele wie hier angegeben angezeigt werden.
+   * Der Wert hier ist etwas weniger als 512, um Puffer zu bieten fÃ¼r das HinzufÃ¼gen
    * von Elementen, die immer vorhanden sein sollen.
    */
   private final static int GRID_MAX = 500;
 
   /**
-   * Die Farbe mit der Felder mit fehlerhafter Eingabe (PLAUSI oder FISHY) eingefärbt
+   * Die Farbe mit der Felder mit fehlerhafter Eingabe (PLAUSI oder FISHY) eingefÃ¤rbt
    * werden.
    */
   private Color plausiMarkerColor;
 
   /**
-   * Die Farbe mit der Felder normalerweise eingefärbt sind. Gegenstück zu
+   * Die Farbe mit der Felder normalerweise eingefÃ¤rbt sind. GegenstÃ¼ck zu
    * {@link #plausiMarkerColor}.
    */
   private Color normalColor;
 
   /**
-   * Die JTabbedPane, die die ganzen Tabs der GUI enthält.
+   * Die JTabbedPane, die die ganzen Tabs der GUI enthÃ¤lt.
    */
   private JTabbedPane myTabbedPane;
 
   /**
    * tabVisibleCount[i] gibt an, wieviele sichtbare Eingabeelemente (Buttonleiste
-   * wird nicht gezählt) das Tab mit Index i hat. ACHTUNG! Muss mit leerem Array
+   * wird nicht gezÃ¤hlt) das Tab mit Index i hat. ACHTUNG! Muss mit leerem Array
    * starten, weil es ansonsten in increaseTabVisibleCount() eine
    * ArrayIndexOutOfBoundsException gibt!
    */
   private int[] tabVisibleCount = new int[] {};
 
   /**
-   * Die für die Erzeugung der UI Elemente verwendete Factory.
+   * Die fÃ¼r die Erzeugung der UI Elemente verwendete Factory.
    */
   private UIElementFactory uiElementFactory;
 
   /**
-   * Die Funktionsbibliothek, die für das Interpretieren von Plausis etc,
+   * Die Funktionsbibliothek, die fÃ¼r das Interpretieren von Plausis etc,
    * herangezogen wird.
    */
   private FunctionLibrary funcLib;
 
   /**
-   * Die Dialogbibliothek, die die Dialoge liefert, die für die automatische
-   * Befüllung von Formularfeldern benötigt werden.
+   * Die Dialogbibliothek, die die Dialoge liefert, die fÃ¼r die automatische
+   * BefÃ¼llung von Formularfeldern benÃ¶tigt werden.
    */
   private DialogLibrary dialogLib;
 
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
-   * der verwendet wird für das Erzeugen der vertikal angeordneten UI Elemente, die
+   * Ein Kontext fÃ¼r {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
+   * der verwendet wird fÃ¼r das Erzeugen der vertikal angeordneten UI Elemente, die
    * die Formularfelder darstellen.
    */
   private UIElementFactory.Context panelContext;
 
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
-   * der verwendet wird für das Erzeugen der horizontal angeordneten Buttons unter
+   * Ein Kontext fÃ¼r {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
+   * der verwendet wird fÃ¼r das Erzeugen der horizontal angeordneten Buttons unter
    * den Formularfeldern.
    */
   private UIElementFactory.Context buttonContext;
@@ -189,33 +189,33 @@ public class FormController implements UIElementEventHandler
   private Map<Object, Object> functionContext;
 
   /**
-   * Bildet IDs auf die dazugehörigen UIElements ab.
+   * Bildet IDs auf die dazugehÃ¶rigen UIElements ab.
    */
   private Map<String, UIElement> mapIdToUIElement = new HashMap<String, UIElement>();
 
   /**
-   * Bildet IDs auf Lists von UIElements ab, deren Plausi vom UIElement ID abhängt.
+   * Bildet IDs auf Lists von UIElements ab, deren Plausi vom UIElement ID abhÃ¤ngt.
    */
   private Map<String, List<UIElement>> mapIdToListOfUIElementsWithDependingPlausi =
     new HashMap<String, List<UIElement>>();
 
   /**
-   * Bildet IDs auf Lists von UIElements ab, deren AUTOFILL vom UIElement ID abhängt.
+   * Bildet IDs auf Lists von UIElements ab, deren AUTOFILL vom UIElement ID abhÃ¤ngt.
    */
   private Map<String, List<UIElement>> mapIdToListOfUIElementsWithDependingAutofill =
     new HashMap<String, List<UIElement>>();
 
   /**
    * Bildet Namen von Funktionsdialogen auf Lists von UIElements ab, deren AUTOFILL
-   * von diesem Funktionsdialog abhängen.
+   * von diesem Funktionsdialog abhÃ¤ngen.
    */
   private Map<String, List<UIElement>> mapDialogNameToListOfUIElementsWithDependingAutofill =
     new HashMap<String, List<UIElement>>();
 
   /**
-   * Bildet die ID eines UIElements ab auf eine List der Groups, die von Änderungen
+   * Bildet die ID eines UIElements ab auf eine List der Groups, die von Ã„nderungen
    * des UIElements betroffen sind (zum Beispiel weil die Sichtbarkeitsfunktion der
-   * Gruppe von dem UIElement abhängt).
+   * Gruppe von dem UIElement abhÃ¤ngt).
    */
   private Map<String, List<Group>> mapIdToListOfDependingGroups =
     new HashMap<String, List<Group>>();
@@ -226,13 +226,13 @@ public class FormController implements UIElementEventHandler
   private Map<String, Group> mapGroupIdToGroup = new HashMap<String, Group>();
 
   /**
-   * Diese Liste enthält alle UIElements.
+   * Diese Liste enthÃ¤lt alle UIElements.
    */
   private Vector<UIElement> uiElements = new Vector<UIElement>();
 
   /**
    * Die Inhalte der UIElemente aus {@link #mapIdToUIElement} als Values zur
-   * Verfügung gestellt.
+   * VerfÃ¼gung gestellt.
    */
   private Values myUIElementValues = new UIElementMapValues(mapIdToUIElement);
 
@@ -242,7 +242,7 @@ public class FormController implements UIElementEventHandler
   private boolean processUIElementEvents = false;
 
   /**
-   * Das Writer-Dokument, das zum Formular gehört (gekapselt als FormModel).
+   * Das Writer-Dokument, das zum Formular gehÃ¶rt (gekapselt als FormModel).
    */
   private FormModel formModel;
 
@@ -255,23 +255,23 @@ public class FormController implements UIElementEventHandler
    * ACHTUNG! Darf nur im Event Dispatching Thread aufgerufen werden.
    * 
    * @param conf
-   *          der Formular-Knoten, der die Formularbeschreibung enthält.
+   *          der Formular-Knoten, der die Formularbeschreibung enthÃ¤lt.
    * @param model
-   *          das zum Formular gehörende Writer-Dokument (gekapselt als FormModel)
+   *          das zum Formular gehÃ¶rende Writer-Dokument (gekapselt als FormModel)
    * @param mapIdToPresetValue
    *          bildet IDs von Formularfeldern auf Vorgabewerte ab. Falls hier ein Wert
-   *          für ein Formularfeld vorhanden ist, so wird dieser allen anderen
-   *          automatischen Befüllungen vorgezogen. Wird das Objekt {@link #FISHY}
-   *          als Wert für ein Feld übergeben, so wird dieses Feld speziell markiert
-   *          als ungültig bis der Benutzer es manuell ändert.
+   *          fÃ¼r ein Formularfeld vorhanden ist, so wird dieser allen anderen
+   *          automatischen BefÃ¼llungen vorgezogen. Wird das Objekt {@link #FISHY}
+   *          als Wert fÃ¼r ein Feld Ã¼bergeben, so wird dieses Feld speziell markiert
+   *          als ungÃ¼ltig bis der Benutzer es manuell Ã¤ndert.
    * @param functionContext
-   *          der Kontext für Funktionen, die einen benötigen.
+   *          der Kontext fÃ¼r Funktionen, die einen benÃ¶tigen.
    * @param funcLib
    *          die Funktionsbibliothek, die zur Auswertung von Plausis etc.
    *          herangezogen werden soll.
    * @param dialogLib
-   *          die Dialogbibliothek, die die Dialoge bereitstellt, die für automatisch
-   *          zu befüllende Formularfelder benötigt werden.
+   *          die Dialogbibliothek, die die Dialoge bereitstellt, die fÃ¼r automatisch
+   *          zu befÃ¼llende Formularfelder benÃ¶tigt werden.
    * @param abortRequestListener
    *          falls nicht null, wird die
    *          {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}
@@ -295,7 +295,7 @@ public class FormController implements UIElementEventHandler
 
     final ConfigThingy fensterDesc = conf.query("Fenster");
     if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1",
+      throw new ConfigurationErrorException(L.m("SchlÃ¼ssel 'Fenster' fehlt in %1",
         conf.getName()));
 
     initFactories();
@@ -325,7 +325,7 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Liefert ein JPanel, das das gesamte GUI des FormControllers enthält.
+   * Liefert ein JPanel, das das gesamte GUI des FormControllers enthÃ¤lt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -344,10 +344,10 @@ public class FormController implements UIElementEventHandler
    *          ConfigThingy falls der Knoten nicht existiert.
    * @param mapIdToPresetValue
    *          bildet IDs von Formularfeldern auf Vorgabewerte ab. Falls hier ein Wert
-   *          für ein Formularfeld vorhanden ist, so wird dieser allen anderen
-   *          automatischen Befüllungen vorgezogen. Wird das Objekt {@link #FISHY}
-   *          als Wert für ein Feld übergeben, so wird dieses Feld speziell markiert
-   *          als ungültig bis der Benutzer es manuell ändert.
+   *          fÃ¼r ein Formularfeld vorhanden ist, so wird dieser allen anderen
+   *          automatischen BefÃ¼llungen vorgezogen. Wird das Objekt {@link #FISHY}
+   *          als Wert fÃ¼r ein Feld Ã¼bergeben, so wird dieses Feld speziell markiert
+   *          als ungÃ¼ltig bis der Benutzer es manuell Ã¤ndert.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void createGUI(ConfigThingy fensterDesc, ConfigThingy visibilityDesc,
@@ -360,7 +360,7 @@ public class FormController implements UIElementEventHandler
     /*
      * ACHTUNG! Wenn die JTabbedPane noch in ein Panel eingebettet werden soll (dazu
      * gibt es im Augenblick allerdings keinen Grund), so muss bei diesem Panel ein
-     * BorderLayout o.ä. verwendet werden, damit die Weitergabe des Fenster-Resize
+     * BorderLayout o.Ã¤. verwendet werden, damit die Weitergabe des Fenster-Resize
      * ordentlich klappt und die ScrollPane ihre ScrollBalken einblendet.
      * 
      */
@@ -376,7 +376,7 @@ public class FormController implements UIElementEventHandler
     for (ConfigThingy neuesFenster : fensterDesc)
     {
       /*
-       * Die folgende Schleife ist nicht nur eleganter als mehrere try-catch-Blöcke
+       * Die folgende Schleife ist nicht nur eleganter als mehrere try-catch-BlÃ¶cke
        * um get()-Befehle, sie verhindert auch, dass TIP oder HOTKEY aus Versehen von
        * einem enthaltenen Button aufgeschnappt werden.
        */
@@ -425,7 +425,7 @@ public class FormController implements UIElementEventHandler
     }
 
     /*
-     * AUTOFILL Funktionen berechnen und Felder entsprechend befüllen. Werte (egal ob
+     * AUTOFILL Funktionen berechnen und Felder entsprechend befÃ¼llen. Werte (egal ob
      * AUTOFILL oder nicht) an FormModel kommunizieren.
      */
     initialStateForUIElementsNotInMapIdToPresetValue(mapIdToPresetValue);
@@ -497,12 +497,12 @@ public class FormController implements UIElementEventHandler
        */
       Group group = mapGroupIdToGroup.get(groupId);
       if (group.condition != null)
-        Logger.error(L.m("Mehrere Sichtbarkeitsregeln für Gruppe \"%1\" angegeben.",
+        Logger.error(L.m("Mehrere Sichtbarkeitsregeln fÃ¼r Gruppe \"%1\" angegeben.",
           groupId));
       group.condition = cond;
 
       /*
-       * Für jeden Parameter der condition-Funktion ein Mapping in
+       * FÃ¼r jeden Parameter der condition-Funktion ein Mapping in
        * mapIdToListOfDependingGroups erzeugen (falls noch nicht geschehen) und die
        * neue Group in diese Liste eintragen.
        */
@@ -525,7 +525,7 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Berechnet für jedes UIElement, dessen ID nicht als Schlüssel in
+   * Berechnet fÃ¼r jedes UIElement, dessen ID nicht als SchlÃ¼ssel in
    * mapIdToPresetValue ist den AUTOFILL-Wert, setzt das Feld entsprechend und teilt
    * den Wert des Feldes (egal ob AUTOFILL oder nicht) dem FormModel mit.
    * 
@@ -551,7 +551,7 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Falls func nicht null ist, wird uiElement für alle Funktionsdialoge, die func
+   * Falls func nicht null ist, wird uiElement fÃ¼r alle Funktionsdialoge, die func
    * referenziert in die entsprechende Liste in
    * {@link #mapDialogNameToListOfUIElementsWithDependingAutofill} eingetragen.
    * 
@@ -585,7 +585,7 @@ public class FormController implements UIElementEventHandler
   private class DialogWindow
   {
     /**
-     * Das Panel das die GUI-Elemente enthält.
+     * Das Panel das die GUI-Elemente enthÃ¤lt.
      */
     private JPanel myPanel;
 
@@ -593,17 +593,17 @@ public class FormController implements UIElementEventHandler
      * Erzeugt ein neues Tab.
      * 
      * @param tabIndex
-     *          Die Nummer (von 0 gezählt) des Tabs, das dieses DialogWindow
+     *          Die Nummer (von 0 gezÃ¤hlt) des Tabs, das dieses DialogWindow
      *          darstellt.
      * @param conf
      *          der Kind-Knoten des Fenster-Knotens der das Formular beschreibt. conf
      *          ist direkter Elternknoten des Knotens "Eingabefelder".
      * @param mapIdToPresetValue
      *          bildet IDs von Formularfeldern auf Vorgabewerte ab. Falls hier ein
-     *          Wert für ein Formularfeld vorhanden ist, so wird dieser allen anderen
-     *          automatischen Befüllungen vorgezogen. Wird das Objekt {@link #FISHY}
-     *          als Wert für ein Feld übergeben, so wird dieses Feld speziell
-     *          markiert als ungültig bis der Benutzer es manuell ändert.
+     *          Wert fÃ¼r ein Formularfeld vorhanden ist, so wird dieser allen anderen
+     *          automatischen BefÃ¼llungen vorgezogen. Wird das Objekt {@link #FISHY}
+     *          als Wert fÃ¼r ein Feld Ã¼bergeben, so wird dieses Feld speziell
+     *          markiert als ungÃ¼ltig bis der Benutzer es manuell Ã¤ndert.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public DialogWindow(int tabIndex, ConfigThingy conf,
@@ -657,7 +657,7 @@ public class FormController implements UIElementEventHandler
           uiElements.add(uiElement);
 
           /*
-           * Überprüfen, dass die ID des neuen Elements nicht schon verwendet wurde
+           * ÃœberprÃ¼fen, dass die ID des neuen Elements nicht schon verwendet wurde
            * und Fehler ausgeben, falls doppelte Verwendung. Es wird auf jeden Fall
            * weitergemacht und das neue Mapping in mapIdToUIElement gespeichert (aber
            * nur falls die ID nicht leer ist).
@@ -699,21 +699,21 @@ public class FormController implements UIElementEventHandler
           parseGROUPS(uiConf, uiElement);
 
           /*
-           * Plausi-Parameter auswerten und entsprechende Abhängigkeitsmappings
+           * Plausi-Parameter auswerten und entsprechende AbhÃ¤ngigkeitsmappings
            * speichern.
            */
           storeDeps(uiElement);
 
           /**
-           * Dafür sorgen, dass uiElement immer in seiner eigenen Abhängigenliste
-           * steht, damit bei jeder Änderung an uiElement auf jeden Fall die Plausi
-           * neu ausgewertet wird, auch wenn sie nicht von diesem Element abhängt.
-           * Man denke sich zum Beispiel einen Zufallsgenerator als Plausi. Er hängt
-           * zwar nicht vom Wert des Felds ab, sollte aber bei jeder Änderung des
+           * DafÃ¼r sorgen, dass uiElement immer in seiner eigenen AbhÃ¤ngigenliste
+           * steht, damit bei jeder Ã„nderung an uiElement auf jeden Fall die Plausi
+           * neu ausgewertet wird, auch wenn sie nicht von diesem Element abhÃ¤ngt.
+           * Man denke sich zum Beispiel einen Zufallsgenerator als Plausi. Er hÃ¤ngt
+           * zwar nicht vom Wert des Felds ab, sollte aber bei jeder Ã„nderung des
            * Feldes erneut befragt werden.
            * 
-           * Neben der Bedeutung für Plausis ist dies ebenfalls wichtig, damit der
-           * FISHY-Zustand neu gesetzt wird, wenn sich das Feld ändert.
+           * Neben der Bedeutung fÃ¼r Plausis ist dies ebenfalls wichtig, damit der
+           * FISHY-Zustand neu gesetzt wird, wenn sich das Feld Ã¤ndert.
            */
           if (!mapIdToListOfUIElementsWithDependingPlausi.containsKey(uiElement.getId()))
             mapIdToListOfUIElementsWithDependingPlausi.put(uiElement.getId(),
@@ -723,7 +723,7 @@ public class FormController implements UIElementEventHandler
           if (!deps.contains(uiElement)) deps.add(uiElement);
 
           /**************************************************************************
-           * UI Element und evtl. vorhandenes Zusatzlabel zum GUI hinzufügen.
+           * UI Element und evtl. vorhandenes Zusatzlabel zum GUI hinzufÃ¼gen.
            *************************************************************************/
           int compoX = 0;
           int compoWidthIncrement = 0;
@@ -781,14 +781,14 @@ public class FormController implements UIElementEventHandler
         Logger.error(L.m("Zu viele Formularelemente auf einem Tab => nicht alle werden angezeigt"));
 
       /******************************************************************************
-       * Für die Buttons ein eigenes Panel anlegen und mit UIElementen befüllen.
+       * FÃ¼r die Buttons ein eigenes Panel anlegen und mit UIElementen befÃ¼llen.
        *****************************************************************************/
       createButtonPanel(conf, 1);
     }
 
     /**
-     * Fügt myPanel an Koordinate y ein Panel hinzu, das mit Buttons gemäß der
-     * Beschreibung in conf,query("Buttons") befüllt wird.
+     * FÃ¼gt myPanel an Koordinate y ein Panel hinzu, das mit Buttons gemÃ¤ÃŸ der
+     * Beschreibung in conf,query("Buttons") befÃ¼llt wird.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -865,8 +865,8 @@ public class FormController implements UIElementEventHandler
     }
 
     /**
-     * Fügt buttonPanel (muss ein GridBagLayout verwenden) an Index 0 eine
-     * unsichtbare Komponente hinzu, die wenn sie den Fokus bekommt (was nur über die
+     * FÃ¼gt buttonPanel (muss ein GridBagLayout verwenden) an Index 0 eine
+     * unsichtbare Komponente hinzu, die wenn sie den Fokus bekommt (was nur Ã¼ber die
      * TAB-Taste geschehen kann) und zwar von einer anderen Komponente als der
      * 2,Komponente des buttonPanels, einen action "nextTab" Event absetzt, falls es
      * noch ein auf das aktuelle Tab folgendes Tab gibt, das aktiv ist. Falls es kein
@@ -925,7 +925,7 @@ public class FormController implements UIElementEventHandler
 
     /**
      * Falls uiElement eine Plausi und oder ein Autofill hat, werden entsprechende
-     * Abhängigkeiten in den Maps erfasst.
+     * AbhÃ¤ngigkeiten in den Maps erfasst.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
@@ -937,8 +937,8 @@ public class FormController implements UIElementEventHandler
         mapIdToListOfUIElementsWithDependingPlausi;
 
       /**
-       * Für alle Felder von denen die Function abhängt das uiElement in die Liste
-       * der abhängigen UI Elemente einfügen.
+       * FÃ¼r alle Felder von denen die Function abhÃ¤ngt das uiElement in die Liste
+       * der abhÃ¤ngigen UI Elemente einfÃ¼gen.
        */
       for (int f = 0; f < 2; ++f, func = state.autofill, mapIdToListOfDependingUIElements =
         mapIdToListOfUIElementsWithDependingAutofill)
@@ -961,7 +961,7 @@ public class FormController implements UIElementEventHandler
     }
 
     /**
-     * Verarbeitet die GROUPS-Attribute von uiConf (was zu uiElement gehören muss).
+     * Verarbeitet die GROUPS-Attribute von uiConf (was zu uiElement gehÃ¶ren muss).
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -987,7 +987,7 @@ public class FormController implements UIElementEventHandler
     }
 
     /**
-     * Liefert das Panel zurück, dass den ganzen Inhalt dieses Tabs enthält.
+     * Liefert das Panel zurÃ¼ck, dass den ganzen Inhalt dieses Tabs enthÃ¤lt.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -1187,12 +1187,12 @@ public class FormController implements UIElementEventHandler
 
   /**
    * Setzt den Wert des {@link UIElement}s mit ID uiElementId auf value und
-   * behandelt die Änderung so als wäre sie durch den Benutzer erfolgt. ACHTUNG! Die
-   * Verarbeitung läuft asynchron im Event-Dispatching Thread, d.h. diese Funktion
-   * kehrt evtl. bereits vor Abarbeitung zurück.
+   * behandelt die Ã„nderung so als wÃ¤re sie durch den Benutzer erfolgt. ACHTUNG! Die
+   * Verarbeitung lÃ¤uft asynchron im Event-Dispatching Thread, d.h. diese Funktion
+   * kehrt evtl. bereits vor Abarbeitung zurÃ¼ck.
    * 
    * @param callback
-   *          Nach dem Abarbeiten dieser Änderung wird callback.actionPerformed()
+   *          Nach dem Abarbeiten dieser Ã„nderung wird callback.actionPerformed()
    *          aufgerufen falls callback != null. ACHTUNG! Der Aufruf erfolgt im
    *          Event-Dispatching Thread!
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1222,7 +1222,7 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Die zentrale Anlaufstelle für alle von UIElementen ausgelösten Events (siehe
+   * Die zentrale Anlaufstelle fÃ¼r alle von UIElementen ausgelÃ¶sten Events (siehe
    * {@link UIElementEventHandler#processUiElementEvent(UIElement, String, Object[])}).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1244,18 +1244,18 @@ public class FormController implements UIElementEventHandler
 
       if (eventType.equals("valueChanged"))
       {
-        // FISHY-Zustand löschen, weil Wert geändert
+        // FISHY-Zustand lÃ¶schen, weil Wert geÃ¤ndert
         ((UIElementState) source.getAdditionalData()).fishy = false;
 
-        // FormModel benachrichtigen über Änderung von source
-        // da recomputeAutofills() das FormModel über genau diese Änderung nicht
+        // FormModel benachrichtigen Ã¼ber Ã„nderung von source
+        // da recomputeAutofills() das FormModel Ã¼ber genau diese Ã„nderung nicht
         // informiert.
         formModel.valueChanged(source.getId(), source.getString());
 
         Set<UIElement> todo = new HashSet<UIElement>();
         todo.add(source);
         /*
-         * Der folgende Code wird ebenfalls für den eventType funcDialogSelect
+         * Der folgende Code wird ebenfalls fÃ¼r den eventType funcDialogSelect
          * verwendet. Die beiden sollten vermutlich immer synchron gehalten werden.
          */
         Set<UIElement> changedElements = computeChangesCausedByChangeOf(todo);
@@ -1349,7 +1349,7 @@ public class FormController implements UIElementEventHandler
           }
         }
         /*
-         * Der folgende Code wird ebenfalls für den eventType valueChanged verwendet.
+         * Der folgende Code wird ebenfalls fÃ¼r den eventType valueChanged verwendet.
          * Die beiden sollten vermutlich immer synchron gehalten werden.
          */
         Set<UIElement> changedElements = computeChangesCausedByChangeOf(todo);
@@ -1370,8 +1370,8 @@ public class FormController implements UIElementEventHandler
 
   /**
    * Liefert die Menge aller UIElemente (inklusive der aus todo), deren Wert sich
-   * ändert, wenn sich der Wert eines UIElements aus todo ändert (z,B, wegen
-   * AUTOFILLs). ACHTUNG! todo wird durch diese Methode verändert.
+   * Ã¤ndert, wenn sich der Wert eines UIElements aus todo Ã¤ndert (z,B, wegen
+   * AUTOFILLs). ACHTUNG! todo wird durch diese Methode verÃ¤ndert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -1401,7 +1401,7 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Berechnet die Werte mit den AUTOFILL-Funktionen neu für alle UIElemente aus
+   * Berechnet die Werte mit den AUTOFILL-Funktionen neu fÃ¼r alle UIElemente aus
    * elements mit Ausnahme von exception (falls nicht null). Das FormModel wird
    * ebenfalls benachrichtigt.
    * 
@@ -1412,7 +1412,7 @@ public class FormController implements UIElementEventHandler
     // Alle UIElemente in der Reihenfolge ihrer Definition durchgehen,
     // damit die AUTOFILLs in der richtigen Reihenfolge ausgewertet werden
     // (Annahme ist hier, dass jedes AUTOFILL maximal von vorher definierten
-    // Feldern abhängt)
+    // Feldern abhÃ¤ngt)
     Iterator<UIElement> iter = uiElements.iterator();
     while (iter.hasNext())
     {
@@ -1430,8 +1430,8 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Bestimmt und setzt die Sichtbarkeit neu für alle Groups, die von mindestens
-   * einem UIElement mit id aus ids abhängen.
+   * Bestimmt und setzt die Sichtbarkeit neu fÃ¼r alle Groups, die von mindestens
+   * einem UIElement mit id aus ids abhÃ¤ngen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -1491,10 +1491,10 @@ public class FormController implements UIElementEventHandler
       boolean newElementVisible = state.visible();
 
       /*
-       * Der folgende Test ist erforderlich, weil Elemente mehreren Gruppen angehören
-       * können, so dass eine Änderung des Status der Gruppe nicht bedeutet, dass
-       * sich alle Elemente ändern. Falls sich der Zustand eines Elements nicht
-       * geändert hat, dann darf weder increaseTabVisibleCount() noch
+       * Der folgende Test ist erforderlich, weil Elemente mehreren Gruppen angehÃ¶ren
+       * kÃ¶nnen, so dass eine Ã„nderung des Status der Gruppe nicht bedeutet, dass
+       * sich alle Elemente Ã¤ndern. Falls sich der Zustand eines Elements nicht
+       * geÃ¤ndert hat, dann darf weder increaseTabVisibleCount() noch
        * decreaseTabVisibleCount() aufgerufen werden.
        */
       if (oldElementVisible != newElementVisible)
@@ -1515,8 +1515,8 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Erhöht den Zähler von tabVisibleCount[tabIndex] um 1. Sollte das Array nicht
-   * lang genug sein, wird es verlängert. Falls dadurch auf einem Tab eine
+   * ErhÃ¶ht den ZÃ¤hler von tabVisibleCount[tabIndex] um 1. Sollte das Array nicht
+   * lang genug sein, wird es verlÃ¤ngert. Falls dadurch auf einem Tab eine
    * nicht-leere Menge von nicht-statischen Elementen sichtbar ist, so wird das Tab
    * sichtbar geschaltet.
    * 
@@ -1526,10 +1526,10 @@ public class FormController implements UIElementEventHandler
   {
     /*
      * Achtung! Der Aufbau des folgenden Codes ist wichtig! Der Befehl
-     * myTabbedPane.setEnabledAt(tabIndex, true); darf beim ersten erhöhen von 0 auf
-     * 1 noch nicht ausgeführt werden, weil dies geschieht bevor das Tab dem
-     * JTabbedPane hinzugefügt wurde. Deshalb beginnt tabVisibleCount mit dem leeren
-     * Array, damit wir diesen Fall erkennen können.
+     * myTabbedPane.setEnabledAt(tabIndex, true); darf beim ersten erhÃ¶hen von 0 auf
+     * 1 noch nicht ausgefÃ¼hrt werden, weil dies geschieht bevor das Tab dem
+     * JTabbedPane hinzugefÃ¼gt wurde. Deshalb beginnt tabVisibleCount mit dem leeren
+     * Array, damit wir diesen Fall erkennen kÃ¶nnen.
      */
     if (tabIndex >= tabVisibleCount.length)
     {
@@ -1546,7 +1546,7 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Erniedrigt den Zähler von tabVisibleCount[tabIndex] um 1. Falls dadurch auf
+   * Erniedrigt den ZÃ¤hler von tabVisibleCount[tabIndex] um 1. Falls dadurch auf
    * einem Tab keine nicht-statischen Elemente mehr sichtbar ist, so wird das Tab
    * unsichtbar geschaltet.
    * 
@@ -1559,8 +1559,8 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Berechnet alle Plausi-Zustände neu für Elemente, die von mindestens einem
-   * Element mit ID aus ids abhängen.
+   * Berechnet alle Plausi-ZustÃ¤nde neu fÃ¼r Elemente, die von mindestens einem
+   * Element mit ID aus ids abhÃ¤ngen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -1586,7 +1586,7 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Überprüft die Plausi und den fishy-Zustand von uiElement und setzt den
+   * ÃœberprÃ¼ft die Plausi und den fishy-Zustand von uiElement und setzt den
    * Hintergrund entsprechend.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -1622,7 +1622,7 @@ public class FormController implements UIElementEventHandler
     public List<UIElement> uiElements = new Vector<UIElement>(1);
 
     /**
-     * Die Bedingung für die Sichtbarkeit (true = sichtbar) oder null, wenn keine
+     * Die Bedingung fÃ¼r die Sichtbarkeit (true = sichtbar) oder null, wenn keine
      * Sichtbarkeitsbedingung definiert.
      */
     public Function condition = null;
@@ -1644,14 +1644,14 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Speichert diverse Daten über den Zustand eines UIElements.
+   * Speichert diverse Daten Ã¼ber den Zustand eines UIElements.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class UIElementState
   {
     /**
-     * Die Plausi, die dieses Element überprüft (falls vorhanden).
+     * Die Plausi, die dieses Element Ã¼berprÃ¼ft (falls vorhanden).
      */
     public Function plausi = null;
 
@@ -1661,13 +1661,13 @@ public class FormController implements UIElementEventHandler
     public Function autofill = null;
 
     /**
-     * true, wenn das Element als zu prüfen markiert werden soll, solange bis der
+     * true, wenn das Element als zu prÃ¼fen markiert werden soll, solange bis der
      * Benutzer es editiert.
      */
     public boolean fishy = false;
 
     /**
-     * Cachet das Ergebnis der letzten Prüfung von plausi und fishy.
+     * Cachet das Ergebnis der letzten PrÃ¼fung von plausi und fishy.
      */
     public boolean okay = true;
 
@@ -1677,8 +1677,8 @@ public class FormController implements UIElementEventHandler
     public int tabIndex = -1;
 
     /**
-     * Falls nicht null, so enthält diese Collection alle {@link Group}s, zu denen
-     * das UIElement gehört, die im Augenblick unsichtbar sind. D.h. das UIElement
+     * Falls nicht null, so enthÃ¤lt diese Collection alle {@link Group}s, zu denen
+     * das UIElement gehÃ¶rt, die im Augenblick unsichtbar sind. D.h. das UIElement
      * ist genau dann sichtbar, wenn hier null oder eine leere Collection steht.
      */
     public Collection<Group> invisibleGroups = null;
@@ -1695,7 +1695,7 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Stellt den Inhalt einer Map von IDs auf UIElemente als Values zur Verfügung.
+   * Stellt den Inhalt einer Map von IDs auf UIElemente als Values zur VerfÃ¼gung.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1730,21 +1730,21 @@ public class FormController implements UIElementEventHandler
 
   /**
    * Nimmt eine Liste von ConfigThingys, von denen jedes ein "Formular"-Knoten mit
-   * enthaltener Formularbeschreibung ist, und liefert ein neues ConfigThingy zurück,
-   * das eine gemergte Formularbeschreibung enthält. Beim Merge wird von Reitern mit
-   * gleicher ID nur der letzte übernommen. Für die Reihenfolge wird die Reihenfolge
+   * enthaltener Formularbeschreibung ist, und liefert ein neues ConfigThingy zurÃ¼ck,
+   * das eine gemergte Formularbeschreibung enthÃ¤lt. Beim Merge wird von Reitern mit
+   * gleicher ID nur der letzte Ã¼bernommen. FÃ¼r die Reihenfolge wird die Reihenfolge
    * des ersten Auftretens herangezogen. Der TITLE wird zu newTitle. Die Funktionen-
    * und Funktionsdialoge-Abschnitte werden verschmolzen, wobei mehrfach auftretende
    * Funktionen eine Fehlermeldung im Log produzieren (und die letzte Definition
-   * gewinnt). Selbiges gilt auch für die Sichtbarkeit-Abschnitte
+   * gewinnt). Selbiges gilt auch fÃ¼r die Sichtbarkeit-Abschnitte
    * 
    * @param buttonAnpassung
    *          ein ButtonAnpassung-Abschnitt wie bei wollmux:Open dokumentiert, oder
    *          null, wenn keine Anpassung erforderlich. Der oberste Knoten muss nicht
    *          Buttonanpassung sein. In der Tat ist es auch erlaubt, dass ein
    *          &lt;query results> Knoten mit mehreren Buttonanpassung-Abschnitten
-   *          übergeben wird. Es ist nur wichtig, dass alle ...Tab-Abschnitte auf der
-   *          selben Höhe im Baum sind.
+   *          Ã¼bergeben wird. Es ist nur wichtig, dass alle ...Tab-Abschnitte auf der
+   *          selben HÃ¶he im Baum sind.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public static ConfigThingy mergeFormDescriptors(List<ConfigThingy> desc,
@@ -1820,17 +1820,17 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Geht die Enkelkinder von conf,query(sectionName) durch und trägt für jedes ein
+   * Geht die Enkelkinder von conf,query(sectionName) durch und trÃ¤gt fÃ¼r jedes ein
    * Mapping von seinem Namen auf eine Kopie seiner selbst in die Map sectionMap ein.
    * Dabei wird ein vorher vorhandenes Mapping ersetzt. Falls
    * duplicatesAllowed==false, so wird eine Fehlermeldung geloggt, wenn eine
-   * Ersetzung eines Mappings für einen Bezeichner durch ein neues Mapping
+   * Ersetzung eines Mappings fÃ¼r einen Bezeichner durch ein neues Mapping
    * stattfindet.
    * 
    * @param tabNames
    *          falls nicht null, so werden alle Namen von Enkeln, die noch nicht in
    *          idList enthalten sind dieser in der Reihenfolge ihres Auftretens
-   *          hinzugefügt.
+   *          hinzugefÃ¼gt.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static void mergeSection(ConfigThingy conf, String sectionName,
@@ -1848,7 +1848,7 @@ public class FormController implements UIElementEventHandler
         if (tabNames != null && !tabNames.contains(name)) tabNames.add(name);
         if (!duplicatesAllowed && mapFensterIdToConfigThingy.containsKey(name))
           Logger.error(L.m(
-            "Fehler beim Zusammenfassen mehrerer Formulare zum gemeinsamen Ausfüllen: Mehrere \"%1\" Abschnitte enthalten \"%2\"",
+            "Fehler beim Zusammenfassen mehrerer Formulare zum gemeinsamen AusfÃ¼llen: Mehrere \"%1\" Abschnitte enthalten \"%2\"",
             sectionName, name));
 
         mapFensterIdToConfigThingy.put(name, new ConfigThingy(node));
@@ -1860,8 +1860,8 @@ public class FormController implements UIElementEventHandler
    * Passt die in tabConf gespeicherte Beschreibung eines Reiters einer FormularGUI
    * an entsprechend dem Buttonanpassung-Abschnitt in buttonAnpassung. Der oberste
    * Knoten muss nicht Buttonanpassung sein. In der Tat ist es auch erlaubt, dass ein
-   * &lt;query results> Knoten mit mehreren Buttonanpassung-Abschnitten übergeben
-   * wird. Es ist nur wichtig, dass alle ...Tab-Abschnitte auf der selben Höhe im
+   * &lt;query results> Knoten mit mehreren Buttonanpassung-Abschnitten Ã¼bergeben
+   * wird. Es ist nur wichtig, dass alle ...Tab-Abschnitte auf der selben HÃ¶he im
    * Baum sind.
    * 
    * @param tabNum
@@ -1890,7 +1890,7 @@ public class FormController implements UIElementEventHandler
     }
 
     /*
-     * Kopie machen, da wir evtl. Veränderungen vornehmen (z.B. "ALWAYS" entfernen)
+     * Kopie machen, da wir evtl. VerÃ¤nderungen vornehmen (z.B. "ALWAYS" entfernen)
      */
     anpassung = new ConfigThingy(anpassung);
 
@@ -1900,11 +1900,11 @@ public class FormController implements UIElementEventHandler
     Set<String> neverActions = new HashSet<String>();
     List<ActionUIElementPair> alwaysActions = new Vector<ActionUIElementPair>(); // of
     // ActionUIElementPair
-    Iterator<ConfigThingy> anpOuterIter = anpassung.iterator(); // durchläuft die
+    Iterator<ConfigThingy> anpOuterIter = anpassung.iterator(); // durchlÃ¤uft die
     // *Tab Abschnitte
     while (anpOuterIter.hasNext())
     {
-      // durchläuft die NEVER und ALWAYS Angaben
+      // durchlÃ¤uft die NEVER und ALWAYS Angaben
       Iterator<ConfigThingy> anpInnerIter = anpOuterIter.next().iterator();
       while (anpInnerIter.hasNext())
       {
@@ -1933,18 +1933,18 @@ public class FormController implements UIElementEventHandler
     }
 
     /*
-     * Existierende Buttons-Abschnitte durchgehen, ihre Elemente aufsammeln (außer
+     * Existierende Buttons-Abschnitte durchgehen, ihre Elemente aufsammeln (auÃŸer
      * denen, die durch NEVER verboten sind)
      */
     List<ActionUIElementPair> existingUIElements = new Vector<ActionUIElementPair>(); // of
     // ActionUIElementPair
     ConfigThingy buttonsConf = tabConf.query("Buttons");
-    Iterator<ConfigThingy> buttonsOuterIter = buttonsConf.iterator(); // durchläuft
+    Iterator<ConfigThingy> buttonsOuterIter = buttonsConf.iterator(); // durchlÃ¤uft
     // die
     // Buttons-Abschnitte
     while (buttonsOuterIter.hasNext())
     {
-      Iterator<ConfigThingy> buttonsInnerIter = buttonsOuterIter.next().iterator(); // durchläuft
+      Iterator<ConfigThingy> buttonsInnerIter = buttonsOuterIter.next().iterator(); // durchlÃ¤uft
       // die
       // Eingabeelemente
       // im
@@ -1965,7 +1965,7 @@ public class FormController implements UIElementEventHandler
     }
 
     /*
-     * den Buttons-Abschnitt löschen (weil nachher ein neuer generiert wird)
+     * den Buttons-Abschnitt lÃ¶schen (weil nachher ein neuer generiert wird)
      */
     Iterator<ConfigThingy> iter = tabConf.iterator();
     while (iter.hasNext())
@@ -1982,7 +1982,7 @@ public class FormController implements UIElementEventHandler
       ActionUIElementPair act = alwaysActions.get(i);
       /*
        * zuerst schauen, ob schon ein Button entsprechender ACTION vorhanden ist und
-       * falls ja, dann mit dem nächsten Element aus alwaysActions weitermachen.
+       * falls ja, dann mit dem nÃ¤chsten Element aus alwaysActions weitermachen.
        */
       for (ActionUIElementPair act2 : existingUIElements)
       {
@@ -1992,8 +1992,8 @@ public class FormController implements UIElementEventHandler
 
       /*
        * Okay, das Element gibt's noch nicht. Wir versuchen zuerst, eine
-       * Einfügestelle zu finden hinter einem Button mit selber ACTION wie der
-       * Vorgänger in alwaysActions (falls es einen gibt).
+       * EinfÃ¼gestelle zu finden hinter einem Button mit selber ACTION wie der
+       * VorgÃ¤nger in alwaysActions (falls es einen gibt).
        */
       if (i > 0)
       {
@@ -2013,7 +2013,7 @@ public class FormController implements UIElementEventHandler
       }
 
       /*
-       * Wenn wir keine passende Einfügestelle finden konnten, versuchen wir eine
+       * Wenn wir keine passende EinfÃ¼gestelle finden konnten, versuchen wir eine
        * Stelle zu finden vor einem Button mit selber ACTION wie der Nachfolger in
        * alwaysActions (falls es einen gibt).
        */
@@ -2035,14 +2035,14 @@ public class FormController implements UIElementEventHandler
       }
 
       /*
-       * Keine Einfügestelle gefunden? Dann hängen wir den Button einfach ans Ende.
+       * Keine EinfÃ¼gestelle gefunden? Dann hÃ¤ngen wir den Button einfach ans Ende.
        */
       existingUIElements.add(act);
     }
 
     /*
-     * "glue" Elemente am Ende der Buttonliste löschen, da diese dort normalerweise
-     * nicht erwünscht sind.
+     * "glue" Elemente am Ende der Buttonliste lÃ¶schen, da diese dort normalerweise
+     * nicht erwÃ¼nscht sind.
      */
     ListIterator<ActionUIElementPair> liter =
       existingUIElements.listIterator(existingUIElements.size());

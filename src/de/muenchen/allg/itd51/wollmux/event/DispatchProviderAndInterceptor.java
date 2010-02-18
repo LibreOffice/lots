@@ -1,9 +1,9 @@
 /*
  * Dateiname: BasicWollMuxDispatchProvider.java
  * Projekt  : WollMux
- * Funktion : Liefert zu Dispatch-URLs, die der WollMux ohne ein zugehöriges TextDocumentModel behandeln kann XDispatch-Objekte.
+ * Funktion : Liefert zu Dispatch-URLs, die der WollMux ohne ein zugehÃ¶riges TextDocumentModel behandeln kann XDispatch-Objekte.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 28.10.2006 | LUT | Erstellung als DispatchInterceptor
  * 10.01.2007 | LUT | Umbenennung in DispatchHandler: Behandelt jetzt
@@ -56,8 +56,8 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
     XDispatchProviderInterceptor
 {
   /**
-   * Enthält einen XDispatchProvider, der Dispatch-Objekte für alle globalen (d.h.
-   * nicht dokumentgebundenen) Funktionalitäten des WollMux bereitstellt.
+   * EnthÃ¤lt einen XDispatchProvider, der Dispatch-Objekte fÃ¼r alle globalen (d.h.
+   * nicht dokumentgebundenen) FunktionalitÃ¤ten des WollMux bereitstellt.
    */
   public static final XDispatchProviderInterceptor globalWollMuxDispatches =
     new DispatchProviderAndInterceptor();
@@ -68,7 +68,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
 
   /**
    * Falls ungleich null, so ist dieser {@link DispatchProviderAndInterceptor} in der
-   * Lage für model-spezifische URLs {@link DocumentDispatch}-Objekte zu liefern.
+   * Lage fÃ¼r model-spezifische URLs {@link DocumentDispatch}-Objekte zu liefern.
    */
   private XFrame frame = null;
 
@@ -83,7 +83,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
 
   /**
    * Erzeugt einen {@link DispatchProviderAndInterceptor}, der sowohl globale als
-   * auch für model-spezifische URLs behandeln kann.
+   * auch fÃ¼r model-spezifische URLs behandeln kann.
    * 
    * @param model
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -201,20 +201,20 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
     if (frame == null || UNO.XDispatchProviderInterception(frame) == null
       || UNO.XDispatchProvider(frame) == null) return;
 
-    Logger.debug(L.m("Registriere DocumentDispatchInterceptor für frame #%1",
+    Logger.debug(L.m("Registriere DocumentDispatchInterceptor fÃ¼r frame #%1",
       Integer.valueOf(frame.hashCode())));
 
-    // Hier möchte ich wissen, ob der DocumentDispatchInterceptor bereits im
+    // Hier mÃ¶chte ich wissen, ob der DocumentDispatchInterceptor bereits im
     // Frame registriert ist. Ist das der Fall, so darf der
     // DocumentDispatchInterceptor nicht noch einmal registriert werden, weil
     // es sonst zu Endlosschleifen kommt, da sich die Dispatches des
-    // DocumentDispatchInterceptor gegenseitig aufrufen würden.
+    // DocumentDispatchInterceptor gegenseitig aufrufen wÃ¼rden.
     //
     // Leider gibt es keine Methode um aus dem Frame direkt abzulesen, ob der
     // DocumentDispatchInterceptor bereits registriert ist. Dieser Hack
-    // übernimmt das: Er sucht per queryDispatch nach einer Dispatch-URL, die
-    // ausschließlich der WollMux (weiter unten) definiert. Kommt dabei ein
-    // Objekt =! null zurück, so ist der frame bereits registriert, ansonsten
+    // Ã¼bernimmt das: Er sucht per queryDispatch nach einer Dispatch-URL, die
+    // ausschlieÃŸlich der WollMux (weiter unten) definiert. Kommt dabei ein
+    // Objekt =! null zurÃ¼ck, so ist der frame bereits registriert, ansonsten
     // nicht.
     com.sun.star.util.URL url = UNO.getParsedUNOUrl(Dispatch.DISP_wmAbdruck);
     XDispatch disp =
@@ -223,7 +223,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
     boolean alreadyRegistered = disp != null;
 
     if (alreadyRegistered)
-      Logger.debug(L.m("Ignoriere doppelten Aufruf von registerDocumentDispatchInterceptor() für den selben Frame"));
+      Logger.debug(L.m("Ignoriere doppelten Aufruf von registerDocumentDispatchInterceptor() fÃ¼r den selben Frame"));
 
     // DispatchInterceptor registrieren (wenn nicht bereits registriert):
     if (!alreadyRegistered)

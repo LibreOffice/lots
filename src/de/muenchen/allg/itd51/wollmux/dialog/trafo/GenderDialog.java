@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Erlaubt die Bearbeitung der Funktion eines Gender-Feldes.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 21.02.2008 | LUT | Erstellung als GenderDialog
  * -------------------------------------------------------------------
@@ -150,7 +150,7 @@ public class GenderDialog extends TrafoDialog
   }
 
   /**
-   * Schreiberleichterung für throw new IllegalArgumentException();
+   * Schreiberleichterung fÃ¼r throw new IllegalArgumentException();
    * 
    * @throws IllegalArgumentException
    * 
@@ -172,7 +172,7 @@ public class GenderDialog extends TrafoDialog
     genderPanel = new JPanel(new BorderLayout());
     genderPanel.setBorder(BorderFactory.createTitledBorder(
       BorderFactory.createEtchedBorder(),
-      L.m("Verschiedene Texte abhängig vom Geschlecht")));
+      L.m("Verschiedene Texte abhÃ¤ngig vom Geschlecht")));
     Box vbox = Box.createVerticalBox();
     vbox.setBorder(BorderFactory.createEmptyBorder(5, 5, 2, 5));
     genderPanel.add(vbox, BorderLayout.CENTER);
@@ -207,7 +207,7 @@ public class GenderDialog extends TrafoDialog
     addText(vbox, " ");
 
     hbox = Box.createHorizontalBox();
-    label = new JLabel(L.m("Text männl."));
+    label = new JLabel(L.m("Text mÃ¤nnl."));
     labels.add(label);
     maxLabelWidth = DimAdjust.maxWidth(maxLabelWidth, label);
     hbox.add(label);
@@ -226,7 +226,7 @@ public class GenderDialog extends TrafoDialog
     vbox.add(hbox);
     addText(vbox, " ");
 
-    // einheitliche Breite für alle Labels vergeben:
+    // einheitliche Breite fÃ¼r alle Labels vergeben:
     for (Iterator<JLabel> iter = labels.iterator(); iter.hasNext();)
     {
       label = iter.next();
@@ -237,12 +237,12 @@ public class GenderDialog extends TrafoDialog
 
     addText(
       vbox,
-      L.m("Der Text sonst. wird z.B. verwendet, um bei der Anrede\nvon Firmen \"geehrte Damen und Herren\" einzufügen."));
+      L.m("Der Text sonst. wird z.B. verwendet, um bei der Anrede\nvon Firmen \"geehrte Damen und Herren\" einzufÃ¼gen."));
   }
 
   /**
-   * Fügt der JComponent compo abhängig vom Text ein oder mehrere H-Boxen mit dem
-   * Text text hinzu, wobei der Text an Zeilenumbrüchen umgebrochen und linksbündig
+   * FÃ¼gt der JComponent compo abhÃ¤ngig vom Text ein oder mehrere H-Boxen mit dem
+   * Text text hinzu, wobei der Text an ZeilenumbrÃ¼chen umgebrochen und linksbÃ¼ndig
    * dargestellt wird.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -286,14 +286,14 @@ public class GenderDialog extends TrafoDialog
   }
 
   /**
-   * Fügt {@link #genderPanel} in dialog ein und zeigt ihn an.
+   * FÃ¼gt {@link #genderPanel} in dialog ein und zeigt ihn an.
    * 
    * @param dialog
    * @author Matthias Benkmann (D-III-ITD D.10), Christoph Lutz (D-III-ITD D.10)
    */
   private void show(String windowTitle, JDialog dialog)
   {
-    params.isValid = false; // wird später in updateTrafoConf auf true gesetzt.
+    params.isValid = false; // wird spÃ¤ter in updateTrafoConf auf true gesetzt.
 
     dialog.setAlwaysOnTop(true);
     dialog.setTitle(windowTitle);
@@ -374,7 +374,7 @@ public class GenderDialog extends TrafoDialog
   }
 
   /**
-   * Der Windowlistener, der die Close-Action des "X"-Knopfs abfängt und den Dialog
+   * Der Windowlistener, der die Close-Action des "X"-Knopfs abfÃ¤ngt und den Dialog
    * sauber mit abort beendet.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -407,7 +407,7 @@ public class GenderDialog extends TrafoDialog
 
   /**
    * Beendet den Dialog und ruft insbesondere den close-ActionListener der
-   * darüberliegenden Anwendung auf.
+   * darÃ¼berliegenden Anwendung auf.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -416,8 +416,8 @@ public class GenderDialog extends TrafoDialog
     /*
      * Wegen folgendem Java Bug (WONTFIX)
      * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304 sind die folgenden
-     * 3 Zeilen nötig, damit der Dialog gc'ed werden kann. Die Befehle sorgen dafür,
-     * dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager) indirekt über
+     * 3 Zeilen nÃ¶tig, damit der Dialog gc'ed werden kann. Die Befehle sorgen dafÃ¼r,
+     * dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager) indirekt Ã¼ber
      * den JFrame den MailMerge kennt.
      */
     if (myDialog != null)
@@ -468,11 +468,11 @@ public class GenderDialog extends TrafoDialog
    * @param anredeId
    *          Id des geschlechtsbestimmenden Feldes
    * @param textHerr
-   *          Text für Herr
+   *          Text fÃ¼r Herr
    * @param textFrau
-   *          Text für Frau
+   *          Text fÃ¼r Frau
    * @param textSonst
-   *          Text für sonstige Anreden
+   *          Text fÃ¼r sonstige Anreden
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -502,7 +502,7 @@ public class GenderDialog extends TrafoDialog
   }
 
   /**
-   * für Tests
+   * fÃ¼r Tests
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */

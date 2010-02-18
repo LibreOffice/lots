@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Hilfsmethoden zum Textbausteinsystem
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 26.09.2006 | LUT | Erstellung als TextModul
  * -------------------------------------------------------------------
@@ -48,16 +48,16 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
- * Klasse enthält statische Methoden die für das Textbausteinsystem benötigt werden
+ * Klasse enthÃ¤lt statische Methoden die fÃ¼r das Textbausteinsystem benÃ¶tigt werden
  * 
  * @author bettina.bauer
  */
 public class TextModule
 {
   /**
-   * Sucht ab der Stelle range rückwarts nach gültigen Textfragmentbezeichnern mit
-   * Argumenten, legt um jedes einzufügenden Textbaustein ein Dokumentkommando
-   * 'insertFrag' mit den gefundenen Argumenten und liefert true zurück wenn mind.
+   * Sucht ab der Stelle range rÃ¼ckwarts nach gÃ¼ltigen Textfragmentbezeichnern mit
+   * Argumenten, legt um jedes einzufÃ¼genden Textbaustein ein Dokumentkommando
+   * 'insertFrag' mit den gefundenen Argumenten und liefert true zurÃ¼ck wenn mind.
    * ein Dokumentenkommando erzeugt wurde.
    * 
    * @param doc
@@ -65,10 +65,10 @@ public class TextModule
    * @param range
    *          Stelle in der nach Textfragmentbezeichnern gesucht werden soll. Die
    *          Stelle kann ein markierter Bereich sein oder ein kollabierter Cursor
-   *          von dem rückwärts bis zur ersten Zeile die kein Textfragment enthält
+   *          von dem rÃ¼ckwÃ¤rts bis zur ersten Zeile die kein Textfragment enthÃ¤lt
    *          gesucht wird. Meistens handelt es sich um den viewCursor.
    * @param isManual
-   *          kennzeichnet Einfügungen, die manuell vorgenommen worden sind. Setzt
+   *          kennzeichnet EinfÃ¼gungen, die manuell vorgenommen worden sind. Setzt
    *          den optinalen Knoten MODE = "manual"
    */
   public static boolean createInsertFragFromIdentifier(XTextDocument doc,
@@ -78,7 +78,7 @@ public class TextModule
     ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
 
     // holt sich Textbausteine aus .conf und sammelt sie in umgekehrter
-    // Reihenfolge in der LinkedList tbListe. Damit später definierte
+    // Reihenfolge in der LinkedList tbListe. Damit spÃ¤ter definierte
     // Textbaustein Abschnitte immer Vorrang haben.
     LinkedList<ConfigThingy> tbListe = new LinkedList<ConfigThingy>();
     ConfigThingy tbConf = conf.query("Textbausteine");
@@ -93,8 +93,8 @@ public class TextModule
       UNO.XParagraphCursor(range.getText().createTextCursorByRange(range));
 
     // Sonderbehandlung, wenn der viewCursor bereits eine Bereich markiert.
-    // In diesem Fall soll ausschließlich der Inhalt des Bereichs evaluiert
-    // werden. Über einen Vergleich von completeContent und collectedContent
+    // In diesem Fall soll ausschlieÃŸlich der Inhalt des Bereichs evaluiert
+    // werden. Ãœber einen Vergleich von completeContent und collectedContent
     // kann festgestellt werden, ob cursor den Bereich abdeckt (siehe
     // unten).
     String completeContent = cursor.getString();
@@ -122,7 +122,7 @@ public class TextModule
       if (cursor.isStartOfParagraph())
       {
         // zum vorherigen Absatz weiter schalten, dabei matchedInLine
-        // zurücksetzen. Nur weiter machen, wenn matchedInLine==true
+        // zurÃ¼cksetzen. Nur weiter machen, wenn matchedInLine==true
         cursor.goLeft((short) 1, false);
         evaluateNext = matchedInLine;
         matchedInLine = false;
@@ -135,8 +135,8 @@ public class TextModule
       }
 
       // Hier der Vergleich completeContent<->collectedContent: wenn beide
-      // übereinstimmen, kann abgebrochen werden, da der Bereich dann
-      // vollständig evaluiert wurde.
+      // Ã¼bereinstimmen, kann abgebrochen werden, da der Bereich dann
+      // vollstÃ¤ndig evaluiert wurde.
       if (!completeContent.equals("") && completeContent.equals(collectedContent))
         evaluateNext = false;
     } while (evaluateNext);
@@ -145,19 +145,19 @@ public class TextModule
   }
 
   /**
-   * Parsed den übergebenen identifierWithArgs nach allen Abbildungen der Form (MATCH
+   * Parsed den Ã¼bergebenen identifierWithArgs nach allen Abbildungen der Form (MATCH
    * ... FRAG_ID ...), die in den Textbausteine-Abschnitten in tbListe enthalten sind
-   * und liefert null zurück, wenn es keine Übereinstimmung mit den MATCHes gab oder
-   * falls es eine Übereinstimmung gab ein Array, das an der ersten Stelle die neue
-   * frag_id enthält und in den folgenden Stellen die Argumente.
+   * und liefert null zurÃ¼ck, wenn es keine Ãœbereinstimmung mit den MATCHes gab oder
+   * falls es eine Ãœbereinstimmung gab ein Array, das an der ersten Stelle die neue
+   * frag_id enthÃ¤lt und in den folgenden Stellen die Argumente.
    * 
    * @param identifierWithArgs
    *          Ein String in der Form "<identifier>#arg1#...#argN", wobei der
-   *          Separator "#" über den SEPARATOR-Schlüssel in textbausteine verändert
+   *          Separator "#" Ã¼ber den SEPARATOR-SchlÃ¼ssel in textbausteine verÃ¤ndert
    *          werden kann.
    * @param tbListe
    *          Eine Liste, die die Textbausteine-Abschnitte in der Reihenfolge
-   *          enthält, in der sie ausgewertet werden sollen.
+   *          enthÃ¤lt, in der sie ausgewertet werden sollen.
    * @return Stringarray mit (frag_id + args) oder null
    */
   private static String[] parseIdentifier(String identifierWithArgs,
@@ -176,15 +176,15 @@ public class TextModule
   }
 
   /**
-   * Parsed den übergebenen identifierWithArgs nach allen Abbildungen der Form (MATCH
+   * Parsed den Ã¼bergebenen identifierWithArgs nach allen Abbildungen der Form (MATCH
    * ... FRAG_ID ...), die in textbausteine (=ein einzelner Textbausteine-Abschnitt)
-   * enthalten sind und liefert null zurück, wenn es keine Übereinstimmung mit den
-   * MATCHes gab oder falls es eine Übereinstimmung gab ein Array, das an der ersten
-   * Stelle die neue frag_id enthält und in den folgenden Stellen die Argumente.
+   * enthalten sind und liefert null zurÃ¼ck, wenn es keine Ãœbereinstimmung mit den
+   * MATCHes gab oder falls es eine Ãœbereinstimmung gab ein Array, das an der ersten
+   * Stelle die neue frag_id enthÃ¤lt und in den folgenden Stellen die Argumente.
    * 
    * @param identifierWithArgs
    *          Ein String in der Form "<identifier>#arg1#...#argN", wobei der
-   *          Separator "#" über den SEPARATOR-Schlüssel in textbausteine verändert
+   *          Separator "#" Ã¼ber den SEPARATOR-SchlÃ¼ssel in textbausteine verÃ¤ndert
    *          werden kann.
    * @param textbausteine
    *          Beschreibung eines Textbausteinabschnittes in der Form
@@ -194,7 +194,7 @@ public class TextModule
   public static String[] parseIdentifierInTextbausteine(String identifierWithArgs,
       ConfigThingy textbausteine)
   {
-    // Separator für diesen Textbaustein-Block bestimmen
+    // Separator fÃ¼r diesen Textbaustein-Block bestimmen
     String separatorString = "#";
     ConfigThingy separator = textbausteine.query("SEPARATOR");
     if (separator.count() > 0)
@@ -209,13 +209,13 @@ public class TextModule
       }
     }
 
-    // identifierWithArgs splitten und erstes Argument holen, wenn am Schuß
+    // identifierWithArgs splitten und erstes Argument holen, wenn am SchuÃŸ
     // SEPERATOR steht wird -1 noch ein weiteres leeres Element in args[]
     // erzeugt
     String[] args = identifierWithArgs.split(separatorString, -1);
     String first = args[0];
 
-    // Iterieren über alle Knoten der Form "(MATCH ... FRAG_ID ...)"
+    // Iterieren Ã¼ber alle Knoten der Form "(MATCH ... FRAG_ID ...)"
     ConfigThingy mappingsConf = textbausteine.queryByChild("MATCH");
     Iterator<ConfigThingy> iterMappings = mappingsConf.iterator();
     while (iterMappings.hasNext())
@@ -258,7 +258,7 @@ public class TextModule
           }
           catch (java.lang.Exception e)
           {
-            Logger.error(L.m("Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet wird gibt es nicht in MATCH. ")
+            Logger.error(L.m("Die RegulÃ¤re Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet wird gibt es nicht in MATCH. ")
               + e);
           }
           return args;
@@ -277,9 +277,9 @@ public class TextModule
    * @param range
    *          Stelle an der das Bookmark gesetzt werden soll
    * @param args
-   *          Übergebene Parameter
+   *          Ãœbergebene Parameter
    * @param isManual
-   *          kennzeichnet Einfügungen, die manuell vorgenommen worden sind. Setzt
+   *          kennzeichnet EinfÃ¼gungen, die manuell vorgenommen worden sind. Setzt
    *          den optinalen Knoten MODE = "manual"
    */
   public static void createInsertFrag(XTextDocument doc, XTextRange range,
@@ -287,7 +287,7 @@ public class TextModule
 
   {
 
-    // Neues ConfigThingy für "insertFrag Textbaustein" erzeugen:
+    // Neues ConfigThingy fÃ¼r "insertFrag Textbaustein" erzeugen:
     ConfigThingy root = new ConfigThingy("");
     ConfigThingy werte = new ConfigThingy("WM");
     root.addChild(werte);
@@ -333,7 +333,7 @@ public class TextModule
 
   /**
    * Methode springt ab dem aktuellen viewCursor von einem Platzhalterfeld zum
-   * nächsten und fängt dann nochmal von vorne an
+   * nÃ¤chsten und fÃ¤ngt dann nochmal von vorne an
    * 
    * @param viewCursor
    *          Aktueller ViewCursor im Dokument
@@ -353,7 +353,7 @@ public class TextModule
       XEnumeration xEnum = UNO.XEnumerationAccess(cursor).createEnumeration();
       XEnumerationAccess enuAccess;
 
-      // Schleife über den Textbereich
+      // Schleife Ã¼ber den Textbereich
       while (xEnum.hasMoreElements() && found == false)
       {
         Object ele = null;
@@ -369,7 +369,7 @@ public class TextModule
         if (enuAccess != null) // ist wohl ein SwXParagraph
         {
           XEnumeration textPortionEnu = enuAccess.createEnumeration();
-          // Schleife über SwXParagraph und schauen ob es Platzhalterfelder gibt
+          // Schleife Ã¼ber SwXParagraph und schauen ob es Platzhalterfelder gibt
           // diese diese werden dann im Vector placeholders gesammelt
           while (textPortionEnu.hasMoreElements() && found == false)
           {
@@ -393,7 +393,7 @@ public class TextModule
                 textField =
                   UNO.XTextField(UNO.getProperty(textPortion, "TextField"));
                 // Wenn es ein Platzhalterfeld ist, dem Vector placeholders
-                // hinzufügen
+                // hinzufÃ¼gen
 
                 if (UNO.supportsService(textField,
                   "com.sun.star.text.TextField.JumpEdit"))
@@ -416,7 +416,7 @@ public class TextModule
     }
     // Falls kein Platzhalter gefunden wurde wird zur Marke 'setJumpMark'
     // gesprungen falls vorhanden sonst kommt eine Fehlermeldung -->
-    // Übergabeparameter true
+    // Ãœbergabeparameter true
     if (found == false)
     {
       WollMuxEventHandler.handleJumpToMark(doc, true);

@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Speichert Informationen dazu, welche Teile von Views sichtbar sein sollen.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 19.07.2007 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -56,9 +56,9 @@ public class ViewVisibilityDescriptor
   public boolean formControlLineViewType = true;
 
   /**
-   * Anzeigen zusätzlicher Elemente in der
+   * Anzeigen zusÃ¤tzlicher Elemente in der
    * {@link de.muenchen.allg.itd51.wollmux.former.control.OneFormControlLineView},
-   * die von der Art des Controls abhängen.
+   * die von der Art des Controls abhÃ¤ngen.
    */
   public boolean formControlLineViewAdditional = true;
 

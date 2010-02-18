@@ -1,9 +1,9 @@
 /*
  * Dateiname: MailMergeParams.java
  * Projekt  : WollMux
- * Funktion : Dialoge zur Bestimmung der Parameter für den wirklichen Merge (z.B. ob in Gesamtdokument oder auf Drucker geschrieben werden soll.)
+ * Funktion : Dialoge zur Bestimmung der Parameter fÃ¼r den wirklichen Merge (z.B. ob in Gesamtdokument oder auf Drucker geschrieben werden soll.)
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 11.10.2007 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -76,7 +76,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
 import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
 
 /**
- * Dialoge zur Bestimmung der Parameter für den wirklichen Merge (z.B. ob in
+ * Dialoge zur Bestimmung der Parameter fÃ¼r den wirklichen Merge (z.B. ob in
  * Gesamtdokument oder auf Drucker geschrieben werden soll.)
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -84,25 +84,25 @@ import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
 class MailMergeParams
 {
   /**
-   * Tag für {@link TextComponentTags}, das als Platzhalter für die
+   * Tag fÃ¼r {@link TextComponentTags}, das als Platzhalter fÃ¼r die
    * Serienbriefnummer steht.
    */
   static final String TAG_SERIENBRIEFNUMMER = "#SB";
 
   /**
-   * Tag für {@link TextComponentTags}, das als Platzhalter für die Datensatznummer
+   * Tag fÃ¼r {@link TextComponentTags}, das als Platzhalter fÃ¼r die Datensatznummer
    * steht.
    */
   static final String TAG_DATENSATZNUMMER = "#DS";
 
   /**
-   * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
+   * Auf welche Art hat der Benutzer die zu druckenden DatensÃ¤tze ausgewÃ¤hlt.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
    */
   enum DatasetSelectionType {
     /**
-     * Alle Datensätze.
+     * Alle DatensÃ¤tze.
      */
     ALL,
 
@@ -113,7 +113,7 @@ class MailMergeParams
     RANGE,
 
     /**
-     * Die durch {@link MailMergeNew#selectedIndexes} bestimmten Datensätze.
+     * Die durch {@link MailMergeNew#selectedIndexes} bestimmten DatensÃ¤tze.
      */
     INDIVIDUAL;
   }
@@ -123,7 +123,7 @@ class MailMergeParams
     /**
      * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#RANGE}
      * bestimmt dies den ersten zu druckenden Datensatz (wobei der erste Datensatz
-     * die Nummer 1 hat). ACHTUNG! Der Wert hier kann 0 oder größer als
+     * die Nummer 1 hat). ACHTUNG! Der Wert hier kann 0 oder grÃ¶ÃŸer als
      * {@link #rangeEnd} sein. Dies muss dort behandelt werden, wo er verwendet wird.
      */
     public int rangeStart = 1;
@@ -139,7 +139,7 @@ class MailMergeParams
 
     /**
      * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#INDIVIDUAL}
-     * bestimmt dies die Indizes der ausgewählten Datensätze, wobei 1 den ersten
+     * bestimmt dies die Indizes der ausgewÃ¤hlten DatensÃ¤tze, wobei 1 den ersten
      * Datensatz bezeichnet.
      */
     public List<Integer> selectedIndexes = new Vector<Integer>();
@@ -149,13 +149,13 @@ class MailMergeParams
   enum MailMergeType {
     /**
      * Gesamtdokument erzeugen, das alle Serienbriefe in allen Ausfertigungen
-     * enthält.
+     * enthÃ¤lt.
      */
     SINGLE_FILE(L.m("in neues Dokument schreiben")),
 
     /**
      * Eine Datei pro Serienbrief, wobei jede Datei alle Versionen (bei SLV-Druck)
-     * enthält.
+     * enthÃ¤lt.
      */
     MULTI_FILE(L.m("in einzelne Dateien schreiben")),
 
@@ -171,7 +171,7 @@ class MailMergeParams
     ;
 
     /**
-     * Label für die Anzeige dieser Option.
+     * Label fÃ¼r die Anzeige dieser Option.
      */
     private final String menuLabel;
 
@@ -187,13 +187,13 @@ class MailMergeParams
   }
 
   /**
-   * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
+   * Auf welche Art hat der Benutzer die zu druckenden DatensÃ¤tze ausgewÃ¤hlt.
    */
   private DatasetSelectionType datasetSelectionType = DatasetSelectionType.ALL;
 
   /**
    * Falls {@link DatasetSelectionType} != {@link DatasetSelectionType#ALL}, so
-   * bestimmt dies die Indizes der ausgewählten Datensätze.
+   * bestimmt dies die Indizes der ausgewÃ¤hlten DatensÃ¤tze.
    */
   private IndexSelection indexSelection = new IndexSelection();
 
@@ -210,12 +210,12 @@ class MailMergeParams
    * Dialog verwendet, damit die Vorbelegungen erhalten bleiben.
    * 
    * @param parent
-   *          Elternfenster für den anzuzeigenden Dialog.
+   *          Elternfenster fÃ¼r den anzuzeigenden Dialog.
    * 
    * @param mm
    *          Die Methode
    *          {@link MailMergeNew#doMailMerge(de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeType, de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.DatasetSelectionType)}
-   *          wird ausgelöst, wenn der Benutzer den Seriendruck startet.
+   *          wird ausgelÃ¶st, wenn der Benutzer den Seriendruck startet.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -248,7 +248,7 @@ class MailMergeParams
       Box selectBox = Box.createVerticalBox();
       Border border =
         BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY),
-          L.m("Folgende Datensätze verwenden"));
+          L.m("Folgende DatensÃ¤tze verwenden"));
       selectBox.setBorder(border);
 
       hbox = Box.createHorizontalBox();
@@ -340,7 +340,7 @@ class MailMergeParams
 
       hbox = Box.createHorizontalBox();
 
-      // TODO Anwahl muss selben Effekt haben wie das Drücken des "Einzelauswahl"
+      // TODO Anwahl muss selben Effekt haben wie das DrÃ¼cken des "Einzelauswahl"
       // Buttons
       // final JRadioButton einzelauswahlRadioButton = new JRadioButton("");
       // hbox.add(einzelauswahlRadioButton);
@@ -494,12 +494,12 @@ class MailMergeParams
   }
 
   /**
-   * Falls die vom Benutzer gemachten Eingaben anscheinsmäßig korrekt sind, wird true
+   * Falls die vom Benutzer gemachten Eingaben anscheinsmÃ¤ÃŸig korrekt sind, wird true
    * geliefert, ansonsten wird ein modaler Dialog angezeigt mit einer Fehlermeldung
-   * und es wird (nach Beendigung des Dialoges) false zurückgeliefert.
+   * und es wird (nach Beendigung des Dialoges) false zurÃ¼ckgeliefert.
    * 
    * @param parent
-   *          Elternkomponente für die Anzeige modaler Dialoge
+   *          Elternkomponente fÃ¼r die Anzeige modaler Dialoge
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
@@ -513,7 +513,7 @@ class MailMergeParams
       if (dir.length() == 0)
       {
         JOptionPane.showMessageDialog(parent,
-          L.m("Sie müssen ein Zielverzeichnis angeben!"),
+          L.m("Sie mÃ¼ssen ein Zielverzeichnis angeben!"),
           L.m("Zielverzeichnis fehlt"), JOptionPane.ERROR_MESSAGE);
         return false;
       }
@@ -521,7 +521,7 @@ class MailMergeParams
       if (filePattern.getContent().isEmpty())
       {
         JOptionPane.showMessageDialog(parent,
-          L.m("Sie müssen ein Dateinamenmuster angeben!"),
+          L.m("Sie mÃ¼ssen ein Dateinamenmuster angeben!"),
           L.m("Dateinamenmuster fehlt"), JOptionPane.ERROR_MESSAGE);
         return false;
       }
@@ -539,7 +539,7 @@ class MailMergeParams
   }
 
   /**
-   * Erzeugt eine Liste von Actions zum Einfügen von Spezialfeld-Tags in tags.
+   * Erzeugt eine Liste von Actions zum EinfÃ¼gen von Spezialfeld-Tags in tags.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
@@ -584,7 +584,7 @@ class MailMergeParams
       {
         XFolderPicker picker =
           UNO.XFolderPicker(UNO.createUNOService("com.sun.star.ui.dialogs.FolderPicker"));
-        picker.setTitle(L.m("Verzeichnis für die Serienbriefdateien wählen"));
+        picker.setTitle(L.m("Verzeichnis fÃ¼r die Serienbriefdateien wÃ¤hlen"));
         if (startDir != null && startDir.length() > 0)
           try
           {

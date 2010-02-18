@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Implementiert XDispatch und kann alle Dispatch-URLs behandeln, die kein DocumentModel erfordern.
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 05.11.2009 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -46,23 +46,23 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 
 /**
  * Implementiert XDispatch und kann alle Dispatch-URLs behandeln, die kein
- * DocumentModel erfordern. Die dispatch()-Methode funktioniert über Reflection. Jede
+ * DocumentModel erfordern. Die dispatch()-Methode funktioniert Ã¼ber Reflection. Jede
  * Methode dieser Klasse der Form dispatch_name(String arg, PropertyValue[] props)
  * implementiert den Dispatch der URL name, wobei alle Buchstaben in lowercase
  * konvertiert und nichtalphanumerische Zeichen durch Unterstrich ersetzt sind.
  * Beispiel: dispatch__uno_print() implementiert den dispatch der URL ".uno:Print".
  * Man beachte die beiden Unterstriche im Namen. Der erste kommt von "dispatch_" der
- * zweite ist die Ersetzung des ".". Um diese Klasse eine neue URL unterstützen zu
- * lassen genügt es, eine entsprechende dispatch_Name() Methode hinzuzufügen.
+ * zweite ist die Ersetzung des ".". Um diese Klasse eine neue URL unterstÃ¼tzen zu
+ * lassen genÃ¼gt es, eine entsprechende dispatch_Name() Methode hinzuzufÃ¼gen.
  * 
- * Für jede dispatch_name(arg, props) Methode gilt:
+ * FÃ¼r jede dispatch_name(arg, props) Methode gilt:
  * 
- * arg enthält das Argument der URL enthält (z.B. "internerBriefkopf", wenn
+ * arg enthÃ¤lt das Argument der URL enthÃ¤lt (z.B. "internerBriefkopf", wenn
  * url="wollmux:openTemplate#internerBriefkopf" war) Es kann davon ausgegangen
  * werden, dass arg nicht null ist und falls es nicht vorhanden ist den Leerstring
- * enthält.
+ * enthÃ¤lt.
  * 
- * props ist das PropertyValue[], das auch schon der ursprünglichen dispatch Methode
+ * props ist das PropertyValue[], das auch schon der ursprÃ¼nglichen dispatch Methode
  * mitgeliefert wurde.
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
@@ -118,7 +118,7 @@ public class Dispatch implements XDispatch
   public static final String DISP_wmTest = "wollmux:Test";
 
   /**
-   * Liefert zu url den Namen der Methode, die den Dispatch behandeln würde.
+   * Liefert zu url den Namen der Methode, die den Dispatch behandeln wÃ¼rde.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
@@ -131,7 +131,7 @@ public class Dispatch implements XDispatch
   }
 
   /**
-   * Enthält alle aktuell registrierten StatusListener Grund für Auskommentierung:
+   * EnthÃ¤lt alle aktuell registrierten StatusListener Grund fÃ¼r Auskommentierung:
    * Braucht doch keiner, oder?
    */
   // protected final Vector<XStatusListener> statusListener =
@@ -187,10 +187,10 @@ public class Dispatch implements XDispatch
   }
 
   /**
-   * Benachrichtigt den übergebenen XStatusListener listener mittels
-   * listener.statusChanged() über den aktuellen Zustand des DispatchHandlers und
-   * setzt z.B. den Zustände IsEnabled (Standardmäßig wird IsEnabled=true
-   * übermittelt).
+   * Benachrichtigt den Ã¼bergebenen XStatusListener listener mittels
+   * listener.statusChanged() Ã¼ber den aktuellen Zustand des DispatchHandlers und
+   * setzt z.B. den ZustÃ¤nde IsEnabled (StandardmÃ¤ÃŸig wird IsEnabled=true
+   * Ã¼bermittelt).
    * 
    * @param listener
    * @param url

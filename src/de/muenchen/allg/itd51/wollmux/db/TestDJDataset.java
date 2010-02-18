@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Implementierung von DJDataset zu Testzwecken.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,12 +18,12 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 14.10.2005 | BNK | Erstellung
  * 20.10.2005 | BNK | Stark erweitert 
- * 20.10.2005 | BNK | Unterstützung für Fallback
+ * 20.10.2005 | BNK | UnterstÃ¼tzung fÃ¼r Fallback
  * 03.11.2005 | BNK | besser kommentiert
  * -------------------------------------------------------------------
  *
@@ -39,7 +39,7 @@ import java.util.Set;
 
 /**
  * Implementierung von DJDataset zu Testzwecken. Eine zentrale Eigenschaft von
- * TestDJDataset ist, dass es für Spalten, für die kein Wert gesetzt ist den
+ * TestDJDataset ist, dass es fÃ¼r Spalten, fÃ¼r die kein Wert gesetzt ist den
  * Spaltennamen als Antwort auf get()-Anfragen liefern kann, so dass alle Spalten von
  * aussen betrachtet belegt sind.
  * 
@@ -53,7 +53,7 @@ public class TestDJDataset extends DJDatasetBase
   private Map<String, String> fallback = null;
 
   /**
-   * Erzeugt einen TestDJDataset, der jedes Schema unterstützt und als aus dem LOS
+   * Erzeugt einen TestDJDataset, der jedes Schema unterstÃ¼tzt und als aus dem LOS
    * kommend betrachtet wird.
    */
   public TestDJDataset()
@@ -66,18 +66,18 @@ public class TestDJDataset extends DJDatasetBase
    * 
    * @param backingStore
    *          mappt Spaltennamen auf den Spaltenwert des Datensatzes in der
-   *          Hintergrunddatenbank. Es müssen nicht alle Spalten enthalten sein. Der
+   *          Hintergrunddatenbank. Es mÃ¼ssen nicht alle Spalten enthalten sein. Der
    *          Mechanismus zum automatischen Generieren von Spaltenwerten aus dem
    *          Spaltennamen existiert weiter.
    * @param schema
-   *          falls nicht null übergeben wird, erzeugen Zugriffe auf Spalten mit
+   *          falls nicht null Ã¼bergeben wird, erzeugen Zugriffe auf Spalten mit
    *          Namen, die nicht in schema sind Exceptions.
    * @param isFromLOS
    *          legt fest, ob der Datensatz als aus dem LOS kommend betrachtet werden
-   *          soll (also insbesondere ob er {@link #set(String, String)} unterstützen
+   *          soll (also insbesondere ob er {@link #set(String, String)} unterstÃ¼tzen
    *          soll).
    * @param fallback
-   *          falls fallback nicht null ist, so wird falls der Wert für eine Spalte
+   *          falls fallback nicht null ist, so wird falls der Wert fÃ¼r eine Spalte
    *          nicht gesetzt ist (nicht zu verwechseln mit gesetzt auf den leeren
    *          String!) versucht, anhand dieser Map den Spaltennamen auf einen anderen
    *          Spaltennamen umzusetzen, dessen Wert dann geliefert wird.
@@ -90,7 +90,7 @@ public class TestDJDataset extends DJDatasetBase
   }
 
   /**
-   * Liefert die Map, die dem Konstruktor als backingStore Argument übergeben wurde.
+   * Liefert die Map, die dem Konstruktor als backingStore Argument Ã¼bergeben wurde.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

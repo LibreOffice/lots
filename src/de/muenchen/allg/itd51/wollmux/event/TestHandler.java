@@ -1,10 +1,10 @@
 /*
  * Dateiname: TestHandler.java
  * Projekt  : WollMux
- * Funktion : Enthält die DispatchHandler für alle dispatch-Urls, die
+ * Funktion : EnthÃ¤lt die DispatchHandler fÃ¼r alle dispatch-Urls, die
  *            mit "wollmux:Test" anfangen
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -19,8 +19,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 07.05.2007 | LUT | Erstellung als TestHandler.java
  * -------------------------------------------------------------------
@@ -50,10 +50,10 @@ import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog
 import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
 
 /**
- * Enthält die DispatchHandler für alle dispatch-Urls, die mit "wollmux:Test"
- * anfangen und für den automatisierten Test durch wollmux-qatest benötigt werden.
+ * EnthÃ¤lt die DispatchHandler fÃ¼r alle dispatch-Urls, die mit "wollmux:Test"
+ * anfangen und fÃ¼r den automatisierten Test durch wollmux-qatest benÃ¶tigt werden.
  * Der Handler wird nur installiert, wenn die wollmux.conf die Direktive
- * QA_TEST_HANDLER "true" enthält.
+ * QA_TEST_HANDLER "true" enthÃ¤lt.
  * 
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
@@ -61,15 +61,15 @@ public class TestHandler
 {
 
   /**
-   * Dieses File enthält die Argumente, die einem TestHandler übergeben werden sollen
-   * und vor dem Aufruf des Teshandlers über das testtool geschrieben wurden.
+   * Dieses File enthÃ¤lt die Argumente, die einem TestHandler Ã¼bergeben werden sollen
+   * und vor dem Aufruf des Teshandlers Ã¼ber das testtool geschrieben wurden.
    */
   private static final File WOLLMUX_QATEST_ARGS_FILE =
     new File("/tmp/wollmux_qatest.args");
 
   /**
    * Bearbeitet den Test, der im Argument arg spezifiziert ist und im
-   * TextDocumentModel model ausgeführt werden soll.
+   * TextDocumentModel model ausgefÃ¼hrt werden soll.
    * 
    * @param model
    * @param arg
@@ -103,7 +103,7 @@ public class TestHandler
       }
       ((InternalPrintModel) pmod).useInternalPrintFunction(StandardPrint.getInternalPrintFunction(
         "sachleitendeVerfuegungOutput", 10));
-      // Drucken im Hintergrund, damit der WollMux weiterläuft.
+      // Drucken im Hintergrund, damit der WollMux weiterlÃ¤uft.
       new Thread()
       {
         public void run()
@@ -152,7 +152,7 @@ public class TestHandler
 
   /**
    * Liest die Argumente aus der Datei WOLLMUX_QATEST_ARGS_FILE in eine HashMap ein
-   * und liefert diese zurück. Die Argumente werden in der Datei in Zeilen der Form "<key>,<value>"
+   * und liefert diese zurÃ¼ck. Die Argumente werden in der Datei in Zeilen der Form "<key>,<value>"
    * abgelegt erwartet (key darf dabei kein "," enthalten).
    * 
    * @return
@@ -176,7 +176,7 @@ public class TestHandler
     catch (Exception e)
     {
       Logger.error(
-        L.m("Argumentdatei für wollmux-qatest konnte nicht gelesen werden"), e);
+        L.m("Argumentdatei fÃ¼r wollmux-qatest konnte nicht gelesen werden"), e);
     }
     finally
     {

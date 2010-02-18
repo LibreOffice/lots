@@ -1,9 +1,9 @@
 /*
  * Dateiname: OnDemandCardView.java
  * Projekt  : WollMux
- * Funktion : Basisklasse für Views mit CardLayout für eine Menge von Objekten, wobei die einzelnen Karten erst on-demand erzeugt werden.
+ * Funktion : Basisklasse fÃ¼r Views mit CardLayout fÃ¼r eine Menge von Objekten, wobei die einzelnen Karten erst on-demand erzeugt werden.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 19.07.2007 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -47,7 +47,7 @@ import javax.swing.JPanel;
 import de.muenchen.allg.itd51.wollmux.L;
 
 /**
- * Basisklasse für Views mit CardLayout für eine Menge von Objekten, wobei die
+ * Basisklasse fÃ¼r Views mit CardLayout fÃ¼r eine Menge von Objekten, wobei die
  * einzelnen Karten erst on-demand erzeugt werden.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -55,14 +55,14 @@ import de.muenchen.allg.itd51.wollmux.L;
 public abstract class OnDemandCardView implements View
 {
   /**
-   * Wird für das CardLayout verwendet als ID-String des leeren Panels, das angezeigt
-   * wird, wenn keine bestimmte Einfügung ausgewählt ist.
+   * Wird fÃ¼r das CardLayout verwendet als ID-String des leeren Panels, das angezeigt
+   * wird, wenn keine bestimmte EinfÃ¼gung ausgewÃ¤hlt ist.
    */
   private static final String EMPTY_PANEL = "EMPTY_PANEL";
 
   /**
-   * Wird für das CardLayout verwendet als ID-String des Panels, das nur einen Button
-   * anzeigt, der für das momentan ausgewählte Objekt die entsprechende View-Karte
+   * Wird fÃ¼r das CardLayout verwendet als ID-String des Panels, das nur einen Button
+   * anzeigt, der fÃ¼r das momentan ausgewÃ¤hlte Objekt die entsprechende View-Karte
    * aktiviert.
    */
   private static final String INACTIVE_PANEL = "INACTIVE PANEL";
@@ -73,12 +73,12 @@ public abstract class OnDemandCardView implements View
   private ViewChangeListener myViewChangeListener = new MyViewChangeListener();
 
   /**
-   * Das JPanel, das die ganze View enthält.
+   * Das JPanel, das die ganze View enthÃ¤lt.
    */
   private JPanel myPanel;
 
   /**
-   * Das CardLayout, das für {@link #myPanel} verwendet wird.
+   * Das CardLayout, das fÃ¼r {@link #myPanel} verwendet wird.
    */
   private CardLayout cards;
 
@@ -88,7 +88,7 @@ public abstract class OnDemandCardView implements View
   private Object currentModel;
 
   /**
-   * Bildet ein Model auf das zugehörige {@link ViewCardIdPair} ab.
+   * Bildet ein Model auf das zugehÃ¶rige {@link ViewCardIdPair} ab.
    */
   private Map<Object, ViewCardIdPair> mapModel2ViewDescriptor =
     new HashMap<Object, ViewCardIdPair>();
@@ -118,7 +118,7 @@ public abstract class OnDemandCardView implements View
   }
 
   /**
-   * Liefert eine View-Karte für model.
+   * Liefert eine View-Karte fÃ¼r model.
    * 
    * @param viewChangeListener
    *          wird auf die View registriert, damit die View mitteilen kann, wenn Sie
@@ -129,7 +129,7 @@ public abstract class OnDemandCardView implements View
       ViewChangeListener viewChangeListener);
 
   /**
-   * Fügt dieser View eine View-Karte für model hinzu. Falls die zugehörige View eine
+   * FÃ¼gt dieser View eine View-Karte fÃ¼r model hinzu. Falls die zugehÃ¶rige View eine
    * {@link LazyView} ist, wird sie erst bei einem entsprechenden
    * {@link #show(Object)} initialisiert.
    * 
@@ -147,7 +147,7 @@ public abstract class OnDemandCardView implements View
   /**
    * Entfernt view aus diesem Container (falls dort vorhanden). DIESE FUNKTION IST
    * PRIVATE UND MUSS AUCH NICHT PROTECTED SEIN. DAS ENTFERNEN VON VIEWS HANDHABT DIE
-   * OnDemandCardView selbstständig über {@link MyViewChangeListener}.
+   * OnDemandCardView selbststÃ¤ndig Ã¼ber {@link MyViewChangeListener}.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -173,7 +173,7 @@ public abstract class OnDemandCardView implements View
   }
 
   /**
-   * Liefert einen Identifikationsstring für ob zur Verwendung mit einem
+   * Liefert einen Identifikationsstring fÃ¼r ob zur Verwendung mit einem
    * {@link CardLayout}.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -184,7 +184,7 @@ public abstract class OnDemandCardView implements View
   }
 
   /**
-   * Liefert ein JPanel, das nur einen Button enthält zum Aktivieren der One...View
+   * Liefert ein JPanel, das nur einen Button enthÃ¤lt zum Aktivieren der One...View
    * des aktiven Models.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -217,7 +217,7 @@ public abstract class OnDemandCardView implements View
     {
       public void actionPerformed(ActionEvent e)
       {
-        if (currentModel == null) return; // sollte nicht passieren können, aber zur
+        if (currentModel == null) return; // sollte nicht passieren kÃ¶nnen, aber zur
         // Sicherheit
         addItem(currentModel);
         show(currentModel);
@@ -251,9 +251,9 @@ public abstract class OnDemandCardView implements View
   }
 
   /**
-   * Zeigt die passende View-Karte für model an. Dies ist entweder eine richtige
+   * Zeigt die passende View-Karte fÃ¼r model an. Dies ist entweder eine richtige
    * View-Karte, oder die View-Karte zum on-demand aktivieren der Sicht. Falls die
-   * zugehörige View eine {@link LazyView} ist, so wird diese initialisiert.
+   * zugehÃ¶rige View eine {@link LazyView} ist, so wird diese initialisiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

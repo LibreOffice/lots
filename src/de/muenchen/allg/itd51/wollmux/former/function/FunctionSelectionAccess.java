@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Interface zum Zugriff auf eine FunctionSelection.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 27.09.2006 | BNK | Erstellung
  * 16.03.2007 | BNK | +updateFieldReferences()
@@ -45,7 +45,7 @@ public interface FunctionSelectionAccess
 {
 
   /**
-   * Dieser spezielle Funktionsname signalisiert, dass keine Funktion ausgewählt ist.
+   * Dieser spezielle Funktionsname signalisiert, dass keine Funktion ausgewÃ¤hlt ist.
    */
   public static final String NO_FUNCTION = L.m("<keine>");
 
@@ -67,14 +67,14 @@ public interface FunctionSelectionAccess
 
   /**
    * Liefert true gdw diese FunctionSelection eine vom Benutzer manuell eingegebene
-   * Funktion ist, die von {@link #getExpertFunction()} zurückgeliefert werden kann.
+   * Funktion ist, die von {@link #getExpertFunction()} zurÃ¼ckgeliefert werden kann.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isExpert();
 
   /**
-   * Liefert true gdw, keine Funktion ausgewählt ist.
+   * Liefert true gdw, keine Funktion ausgewÃ¤hlt ist.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -82,7 +82,7 @@ public interface FunctionSelectionAccess
 
   /**
    * Liefert true gdw diese FunctionSelection eine Referenz auf eine benannte
-   * Funktion ist und für mindestens einen Parameter dieser Funktion einen Wert
+   * Funktion ist und fÃ¼r mindestens einen Parameter dieser Funktion einen Wert
    * spezifiziert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -98,7 +98,7 @@ public interface FunctionSelectionAccess
   public String getFunctionName();
 
   /**
-   * Liefert die Namen der Funktionsparameter, die die momentan ausgewählte Funktion
+   * Liefert die Namen der Funktionsparameter, die die momentan ausgewÃ¤hlte Funktion
    * erwartet.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -107,19 +107,19 @@ public interface FunctionSelectionAccess
 
   /**
    * Nimmt eine Abbildung von Parameternamen (Strings) auf Parameterwerte ({@link ParamValue}s)
-   * und übernimmt diese direkt als Referenz.
+   * und Ã¼bernimmt diese direkt als Referenz.
    * 
    * @param mapNameToParamValue
-   *          wird direkt als Referenz übernommen.
+   *          wird direkt als Referenz Ã¼bernommen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setParameterValues(Map<String, ParamValue> mapNameToParamValue);
 
   /**
-   * Liefert den für Parameter paramName gesetzten Wert. Ist für paramName kein Wert
-   * gesetzt, so wird dennoch ein ParamValue geliefert, jedoch eines für das
-   * {@link ParamValue#isUnspecified()} true liefert. Das zurückgelieferte Objekt ist
-   * kann vom Aufrufer verändert werden, ohne Auswirkungen auf das
+   * Liefert den fÃ¼r Parameter paramName gesetzten Wert. Ist fÃ¼r paramName kein Wert
+   * gesetzt, so wird dennoch ein ParamValue geliefert, jedoch eines fÃ¼r das
+   * {@link ParamValue#isUnspecified()} true liefert. Das zurÃ¼ckgelieferte Objekt ist
+   * kann vom Aufrufer verÃ¤ndert werden, ohne Auswirkungen auf das
    * FunctionSelectionAccess Objekt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -127,25 +127,25 @@ public interface FunctionSelectionAccess
   public ParamValue getParameterValue(String paramName);
 
   /**
-   * Setzt den Wert für Parameter paramName auf paramValue.
+   * Setzt den Wert fÃ¼r Parameter paramName auf paramValue.
    * 
    * @param paramValue
-   *          wird direkt als Referenz in die internen Datenstrukturen übernommen,
-   *          darf also vom Aufrufer nachher nicht mehr geändert werden.
+   *          wird direkt als Referenz in die internen Datenstrukturen Ã¼bernommen,
+   *          darf also vom Aufrufer nachher nicht mehr geÃ¤ndert werden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setParameterValue(String paramName, ParamValue paramValue);
 
   /**
-   * Ändert den Namen der Funktion auf functionName und die Liste der Namen ihrer
+   * Ã„ndert den Namen der Funktion auf functionName und die Liste der Namen ihrer
    * Parameter auf paramNames.
    * 
    * @param functionName
-   *          hier können auch die Spezialnamen {@link #NO_FUNCTION} oder
+   *          hier kÃ¶nnen auch die Spezialnamen {@link #NO_FUNCTION} oder
    *          {@link #EXPERT_FUNCTION} verwendet werden.
    * @param paramNames
    *          wird ignoriert, falls {@link #NO_FUNCTION} oder
-   *          {@link #EXPERT_FUNCTION} übergeben wird. Wird ansonsten kopiert, nicht
+   *          {@link #EXPERT_FUNCTION} Ã¼bergeben wird. Wird ansonsten kopiert, nicht
    *          direkt als Referenz verwendet.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -153,21 +153,21 @@ public interface FunctionSelectionAccess
 
   /**
    * Liefert eine Kopie der gespeicherten vom Benutzer manuell eingegebenen Funktion.
-   * Ist keine gesetzt, so wird ein ConfigThingy ohne Kinder zurückgeliefert.
+   * Ist keine gesetzt, so wird ein ConfigThingy ohne Kinder zurÃ¼ckgeliefert.
    * 
-   * @return ein Objekt, das der Aufrufer ändern darf.
+   * @return ein Objekt, das der Aufrufer Ã¤ndern darf.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ConfigThingy getExpertFunction();
 
   /**
    * Schaltet den Typ dieser FunctionSelection auf {@link #EXPERT_FUNCTION} und setzt
-   * die zugehörige Funktionsdefinition auf conf. conf muss einen beliebigen
-   * Wurzelknoten haben, wie z.B. "PLAUSI", "AUTOFILL" o.ä. der noch keine
+   * die zugehÃ¶rige Funktionsdefinition auf conf. conf muss einen beliebigen
+   * Wurzelknoten haben, wie z.B. "PLAUSI", "AUTOFILL" o.Ã¤. der noch keine
    * Grundfunktion ist.
    * 
    * @param funConf
-   *          wird kopiert, nicht als Referenz übernommen.
+   *          wird kopiert, nicht als Referenz Ã¼bernommen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setExpertFunction(ConfigThingy funConf);

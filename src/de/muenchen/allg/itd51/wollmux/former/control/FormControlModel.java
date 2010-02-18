@@ -1,9 +1,9 @@
 /*
  * Dateiname: FormControlModel.java
  * Projekt  : WollMux
- * Funktion : Repräsentiert ein Formularsteuerelement.
+ * Funktion : ReprÃ¤sentiert ein Formularsteuerelement.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 07.08.2006 | BNK | Erstellung
  * 29.08.2006 | BNK | kommentiert
@@ -56,14 +56,14 @@ import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupsProvider;
 
 /**
- * Repräsentiert ein Formularsteuerelement.
+ * ReprÃ¤sentiert ein Formularsteuerelement.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class FormControlModel
 {
   /**
-   * {@link Pattern} für legale IDs.
+   * {@link Pattern} fÃ¼r legale IDs.
    */
   private static Pattern ID_PATTERN = Pattern.compile("^([a-zA-Z_][a-zA-Z_0-9]*)");
 
@@ -97,20 +97,20 @@ public class FormControlModel
   public static final String NO_ACTION = "";
 
   /**
-   * Attribut ID für das Attribut "LABEL". F1XME: Eigentlich müsste jede der set...
+   * Attribut ID fÃ¼r das Attribut "LABEL". F1XME: Eigentlich mÃ¼sste jede der set...
    * Funktionen einen entsprechenden Event an die ModelChangeListener absetzen, aber
    * ich habe keine Lust(Zeit), das durchzuziehen. Da derzeit bei den meisten set...
    * Funktionen nur genau eine View den entsprechenden Wert anzeigt ist dies auch
-   * noch nicht erforderlich und wer weiß ob der FM4000 jemals so erweitert wird,
+   * noch nicht erforderlich und wer weiÃŸ ob der FM4000 jemals so erweitert wird,
    * dass es mehrere Views pro Wert gibt. Also warten wir einfach mal ab, bis was
    * kaputt geht.
    */
   public static final int LABEL_ATTR = 0;
 
-  /** Attribut ID für das Attribut "TYPE". */
+  /** Attribut ID fÃ¼r das Attribut "TYPE". */
   public static final int TYPE_ATTR = 1;
 
-  /** Attribut ID für das Attribut "ID". */
+  /** Attribut ID fÃ¼r das Attribut "ID". */
   public static final int ID_ATTR = 2;
 
   /** LABEL. */
@@ -165,14 +165,14 @@ public class FormControlModel
   private FunctionSelection autofill = new FunctionSelection();
 
   /**
-   * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert
+   * Die {@link ModelChangeListener}, die Ã¼ber Ã„nderungen dieses Models informiert
    * werden wollen.
    */
   private List<ModelChangeListener> listeners = new Vector<ModelChangeListener>(1);
 
   /**
-   * Der FormularMax4000 zu dem dieses Model gehört. Dieser wird über Änderungen des
-   * Models informiert, um das Zurückschreiben der Daten in das Dokument anzustoßen.
+   * Der FormularMax4000 zu dem dieses Model gehÃ¶rt. Dieser wird Ã¼ber Ã„nderungen des
+   * Models informiert, um das ZurÃ¼ckschreiben der Daten in das Dokument anzustoÃŸen.
    */
   private FormularMax4000 formularMax4000;
 
@@ -266,7 +266,7 @@ public class FormControlModel
   }
 
   /**
-   * Liefert eine Liste, die die String-Werte aller Kinder von conf enthält.
+   * Liefert eine Liste, die die String-Werte aller Kinder von conf enthÃ¤lt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -283,8 +283,8 @@ public class FormControlModel
 
   /**
    * Liefert eine Menge, die {@link IDManager.ID} Objekte im Namensraum
-   * {@link FormularMax4000#NAMESPACE_GROUPS} für die String-Werte aller Kinder von
-   * conf enthält.
+   * {@link FormularMax4000#NAMESPACE_GROUPS} fÃ¼r die String-Werte aller Kinder von
+   * conf enthÃ¤lt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -391,7 +391,7 @@ public class FormControlModel
   }
 
   /**
-   * Liefert den FormularMax4000 zu dem dieses Model gehört.
+   * Liefert den FormularMax4000 zu dem dieses Model gehÃ¶rt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -672,7 +672,7 @@ public class FormControlModel
   }
 
   /**
-   * Setzt das ID-Attribut. Falls id=="", wird die ID gelöscht.
+   * Setzt das ID-Attribut. Falls id=="", wird die ID gelÃ¶scht.
    * 
    * @throws DuplicateIDException
    *           falls es bereits ein anderes FormControlModel mit der ID id gibt.
@@ -722,7 +722,7 @@ public class FormControlModel
   /**
    * Initialisiert das Feld {@link #id} mit einer inaktiven ID basierend auf idStr
    * (falls noch keine aktive ID idStr existiert, wird idStr verwendet). Falls idStr ==
-   * "", wird die ID gelöscht.
+   * "", wird die ID gelÃ¶scht.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -755,7 +755,7 @@ public class FormControlModel
   /**
    * Initialisiert das Feld {@link #id} mit einer eindeutigen ID basierend auf idStr
    * (falls noch kein FormControlModel mit ID idStr existiert, wird idStr verwendet).
-   * Falls idStr == "", wird die ID gelöscht.
+   * Falls idStr == "", wird die ID gelÃ¶scht.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -887,9 +887,9 @@ public class FormControlModel
   }
 
   /**
-   * Setzt das TYPE-Attribut. Dabei wird der übergebene String in eine der
-   * {@link #COMBOBOX_TYPE *_TYPE-Konstanten} übersetzt. ACHTUNG! Der TYPE von Tabs
-   * kann nicht verändert werden und andere Elemente können auch nicht in Tabs
+   * Setzt das TYPE-Attribut. Dabei wird der Ã¼bergebene String in eine der
+   * {@link #COMBOBOX_TYPE *_TYPE-Konstanten} Ã¼bersetzt. ACHTUNG! Der TYPE von Tabs
+   * kann nicht verÃ¤ndert werden und andere Elemente kÃ¶nnen auch nicht in Tabs
    * verwandelt werden.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -899,7 +899,7 @@ public class FormControlModel
     if (this.type == TAB_TYPE) return; // Tabs bleiben Tabs.
 
     if (type.equals(TAB_TYPE))
-      return; // Andere Elemente können keine Tabs werden
+      return; // Andere Elemente kÃ¶nnen keine Tabs werden
     else if (type.equals(COMBOBOX_TYPE))
       this.type = COMBOBOX_TYPE;
     else if (type.equals(TEXTFIELD_TYPE))
@@ -994,7 +994,7 @@ public class FormControlModel
   }
 
   /**
-   * Ruft für jeden auf diesem Model registrierten {@link ModelChangeListener} die
+   * Ruft fÃ¼r jeden auf diesem Model registrierten {@link ModelChangeListener} die
    * Methode
    * {@link ModelChangeListener#attributeChanged(FormControlModel, int, Object)} auf.
    */
@@ -1010,7 +1010,7 @@ public class FormControlModel
   }
 
   /**
-   * Sagt dem Model, dass es einem Container hinzugefügt wurde.
+   * Sagt dem Model, dass es einem Container hinzugefÃ¼gt wurde.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1022,7 +1022,7 @@ public class FormControlModel
   /**
    * Benachrichtigt alle auf diesem Model registrierten Listener, dass das Model aus
    * seinem Container entfernt wurde. ACHTUNG! Darf nur von einem entsprechenden
-   * Container aufgerufen werden, der das Model enthält.
+   * Container aufgerufen werden, der das Model enthÃ¤lt.
    * 
    * @param index
    *          der Index an dem sich das Model in seinem Container befand.
@@ -1042,7 +1042,7 @@ public class FormControlModel
   }
 
   /**
-   * listener wird über Änderungen des FormControlModels informiert.
+   * listener wird Ã¼ber Ã„nderungen des FormControlModels informiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1052,7 +1052,7 @@ public class FormControlModel
   }
 
   /**
-   * listener wird in Zukunft nicht mehr über Änderungen des FormControlModels
+   * listener wird in Zukunft nicht mehr Ã¼ber Ã„nderungen des FormControlModels
    * informiert.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -1063,7 +1063,7 @@ public class FormControlModel
   }
 
   /**
-   * Interface für Listener, die über Änderungen eines FormControlModels informiert
+   * Interface fÃ¼r Listener, die Ã¼ber Ã„nderungen eines FormControlModels informiert
    * werden wollen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1071,15 +1071,15 @@ public class FormControlModel
   public static interface ModelChangeListener
   {
     /**
-     * Wird aufgerufen wenn ein Attribut des Models sich geändert hat.
+     * Wird aufgerufen wenn ein Attribut des Models sich geÃ¤ndert hat.
      * 
      * @param model
-     *          das FormControlModel, das sich geändert hat.
+     *          das FormControlModel, das sich geÃ¤ndert hat.
      * @param attributeId
      *          eine der {@link FormControlModel#LABEL_ATTR *_ATTR-Konstanten}.
      * @param newValue
      *          der neue Wert des Attributs. Numerische Attribute werden als Integer
-     *          übergeben.
+     *          Ã¼bergeben.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void attributeChanged(FormControlModel model, int attributeId,
@@ -1096,11 +1096,11 @@ public class FormControlModel
 
   /**
    * Diese Klasse leitet Zugriffe weiter an ein FunctionSelection Objekt. Bei
-   * ändernden Zugriffen wird auch noch der FormularMax4000 benachrichtigt, dass das
-   * Dokument geupdatet werden muss. Im Prinzip müsste korrekterweise ein ändernder
+   * Ã¤ndernden Zugriffen wird auch noch der FormularMax4000 benachrichtigt, dass das
+   * Dokument geupdatet werden muss. Im Prinzip mÃ¼sste korrekterweise ein Ã¤ndernder
    * Zugriff auch einen Event an die ModelChangeListener schicken. Allerdings ist
-   * dies derzeit nicht implementiert, weil es derzeit je genau eine View gibt für
-   * AUTOFILL und PLAUSI, so dass konkurrierende Änderungen gar nicht möglich sind.
+   * dies derzeit nicht implementiert, weil es derzeit je genau eine View gibt fÃ¼r
+   * AUTOFILL und PLAUSI, so dass konkurrierende Ã„nderungen gar nicht mÃ¶glich sind.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

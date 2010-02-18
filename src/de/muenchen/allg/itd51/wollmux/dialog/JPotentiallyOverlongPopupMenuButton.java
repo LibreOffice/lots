@@ -1,9 +1,9 @@
 /*
  * Dateiname: JPotentiallyOverlongPopupMenuButton.java
  * Projekt  : WollMux
- * Funktion : Stellt einen Button dar mit einem Popup-Menü, das darauf vorbereitet ist, sehr viele Elemente anzubieten.
+ * Funktion : Stellt einen Button dar mit einem Popup-MenÃ¼, das darauf vorbereitet ist, sehr viele Elemente anzubieten.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 13.02.2008 | BNK | Erstellung
  * 19.06.2008 | BNK | Implemented handling of overlong menus.
@@ -52,7 +52,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 /**
- * Stellt einen Button dar mit einem Popup-Menü, das darauf vorbereitet ist, sehr
+ * Stellt einen Button dar mit einem Popup-MenÃ¼, das darauf vorbereitet ist, sehr
  * viele Elemente anzubieten.
  * 
  * @author Matthias Benkmann (D-III-ITD D.10)
@@ -60,18 +60,18 @@ import javax.swing.WindowConstants;
 public class JPotentiallyOverlongPopupMenuButton extends JButton
 {
   /**
-   * Macht Eclipse glücklich.
+   * Macht Eclipse glÃ¼cklich.
    */
   private static final long serialVersionUID = 3206786778925266706L;
 
   /**
-   * Erzeugt einen Button mit Beschriftung label, bei dessen Betätigung eine
-   * Popup-Menü erscheint, in dem alle Elemente aus actions enthalten sind. Wenn das
-   * Popup-Menü zu lang wäre, um auf den Bildschirm zu passen, passiert etwas
-   * intelligentes. Die Elemente von actions können {@link javax.swing.Action} oder
-   * {@link java.awt.Component} Objekte sein. ACHTUNG! Bei jeder Betätigung des
-   * Buttons wird das Menü neu aufgebaut, d.h. wenn sich die actions ändert, ändert
-   * sich das Menü.
+   * Erzeugt einen Button mit Beschriftung label, bei dessen BetÃ¤tigung eine
+   * Popup-MenÃ¼ erscheint, in dem alle Elemente aus actions enthalten sind. Wenn das
+   * Popup-MenÃ¼ zu lang wÃ¤re, um auf den Bildschirm zu passen, passiert etwas
+   * intelligentes. Die Elemente von actions kÃ¶nnen {@link javax.swing.Action} oder
+   * {@link java.awt.Component} Objekte sein. ACHTUNG! Bei jeder BetÃ¤tigung des
+   * Buttons wird das MenÃ¼ neu aufgebaut, d.h. wenn sich die actions Ã¤ndert, Ã¤ndert
+   * sich das MenÃ¼.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
    */

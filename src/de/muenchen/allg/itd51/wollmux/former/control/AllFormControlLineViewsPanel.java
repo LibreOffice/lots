@@ -1,9 +1,9 @@
 /*
  * Dateiname: AllFormControlLineViewsPanel.java
  * Projekt  : WollMux
- * Funktion : Hält in einem Panel FormControlModelLineViews für alle FormControlModels einer FormControlModelList.
+ * Funktion : HÃ¤lt in einem Panel FormControlModelLineViews fÃ¼r alle FormControlModels einer FormControlModelList.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 30.08.2006 | BNK | Erstellung
  * 10.09.2006 | BNK | [R3208]Tab-Struktur des Formulars bereits im FM4000 anzeigen
@@ -71,7 +71,7 @@ import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList.ItemLi
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 
 /**
- * Hält in einem Panel FormControlModelLineViews für alle
+ * HÃ¤lt in einem Panel FormControlModelLineViews fÃ¼r alle
  * {@link de.muenchen.allg.itd51.wollmux.former.control.FormControlModel} einer
  * {@link de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList}.
  * 
@@ -81,7 +81,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     OneFormControlLineView.ViewChangeListener
 {
   /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
+   * Rand um Textfelder (wird auch fÃ¼r ein paar andere RÃ¤nder verwendet) in Pixeln.
    */
   private final static int TF_BORDER = 4;
 
@@ -91,7 +91,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   private final static int BUTTON_BORDER = 2;
 
   /**
-   * Wird (mit wechselndem gridy Wert) verwendet als Constraints für das Hinzufügen
+   * Wird (mit wechselndem gridy Wert) verwendet als Constraints fÃ¼r das HinzufÃ¼gen
    * von Views zum Panel.
    */
   private GridBagConstraints gbcLineView =
@@ -99,7 +99,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
       GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0);
 
   /**
-   * Wird verwendet als Constraints für das Hinzufügen von Glues zu den Tabs.
+   * Wird verwendet als Constraints fÃ¼r das HinzufÃ¼gen von Glues zu den Tabs.
    */
   private GridBagConstraints gbcBottomGlue =
     new GridBagConstraints(0, FormControlModelList.MAX_MODELS_PER_TAB + 1, 1, 1,
@@ -112,27 +112,27 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   private FormControlModelList formControlModelList;
 
   /**
-   * Das Panel, das alle Komponenten dieser View enthält.
+   * Das Panel, das alle Komponenten dieser View enthÃ¤lt.
    */
   private JPanel myPanel;
 
   /**
-   * Die JTabbedPane, die die Reiter dieser View enthält.
+   * Die JTabbedPane, die die Reiter dieser View enthÃ¤lt.
    */
   private JTabbedPane tabPane;
 
   /**
-   * Das Panel, das die ganzen {@link OneFormControlLineView}s enthält.
+   * Das Panel, das die ganzen {@link OneFormControlLineView}s enthÃ¤lt.
    */
   private JPanel firstTab;
 
   /**
-   * Enthält die {@link ViewDescriptor}s in der richtigen Reihenfolge.
+   * EnthÃ¤lt die {@link ViewDescriptor}s in der richtigen Reihenfolge.
    */
   private Vector<Object> viewDescriptors = new Vector<Object>();
 
   /**
-   * Die Indizes der ausgewählten Elemente in {@link #viewDescriptors}.
+   * Die Indizes der ausgewÃ¤hlten Elemente in {@link #viewDescriptors}.
    */
   private IndexList selection = new IndexList();
 
@@ -142,7 +142,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   private JScrollPane scrollPane;
 
   /**
-   * Der FormularMax4000, zu dem diese View gehört.
+   * Der FormularMax4000, zu dem diese View gehÃ¶rt.
    */
   private FormularMax4000 formularMax4000;
 
@@ -228,7 +228,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     buttonPanel.add(runterButton, gbcButton);
 
     ++gbcButton.gridx;
-    JButton killButton = new JButton(L.m("Löschen"));
+    JButton killButton = new JButton(L.m("LÃ¶schen"));
     killButton.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -313,8 +313,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
   /**
    * Geht die {@link #viewDescriptors} Liste durch und behebt Fehler, die durch
-   * strukturelle Änderungen hervorgerufen wurden. Dabei werden auch neue Tabs in
-   * {@link #tabPane} angelegt bzw. alte entfernt wenn nötig.
+   * strukturelle Ã„nderungen hervorgerufen wurden. Dabei werden auch neue Tabs in
+   * {@link #tabPane} angelegt bzw. alte entfernt wenn nÃ¶tig.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -373,7 +373,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   }
 
   /**
-   * Liefert den Index des ViewDescriptors, der zu view gehört in der Liste
+   * Liefert den Index des ViewDescriptors, der zu view gehÃ¶rt in der Liste
    * {@link #viewDescriptors} oder -1, wenn die view nicht enthalten ist.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -418,8 +418,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   }
 
   /**
-   * Schiebt alle ausgewählten Elemente um einen Platz nach oben, d,h, in Richtung
-   * niedrigerer Indizes. Falls Element 0 ausgewählt ist wird gar nichts getan.
+   * Schiebt alle ausgewÃ¤hlten Elemente um einen Platz nach oben, d,h, in Richtung
+   * niedrigerer Indizes. Falls Element 0 ausgewÃ¤hlt ist wird gar nichts getan.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -428,8 +428,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     if (selection.firstElement() > 0)
     {
       formControlModelList.moveElementsUp(selection.iterator());
-      // Kein fixupSelectionIndices(0, -1) nötig, weil die itemSwapped() Events schon
-      // dafür sorgen
+      // Kein fixupSelectionIndices(0, -1) nÃ¶tig, weil die itemSwapped() Events schon
+      // dafÃ¼r sorgen
     }
   }
 
@@ -452,8 +452,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   }
 
   /**
-   * Schiebt alle ausgewählten Elemente um einen Platz nach unten, d,h, in Richtung
-   * niedrigerer Indizes. Falls das letzte Element ausgewählt ist wird gar nichts
+   * Schiebt alle ausgewÃ¤hlten Elemente um einen Platz nach unten, d,h, in Richtung
+   * niedrigerer Indizes. Falls das letzte Element ausgewÃ¤hlt ist wird gar nichts
    * getan.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -463,13 +463,13 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     if (selection.lastElement() < viewDescriptors.size() - 1)
     {
       formControlModelList.moveElementsDown(selection.reverseIterator());
-      // Kein fixupSelectionIndices(0, 1) nötig, weil die itemSwapped() Events schon
-      // dafür sorgen
+      // Kein fixupSelectionIndices(0, 1) nÃ¶tig, weil die itemSwapped() Events schon
+      // dafÃ¼r sorgen
     }
   }
 
   /**
-   * Löscht alle ausgewählten Elemente.
+   * LÃ¶scht alle ausgewÃ¤hlten Elemente.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -478,10 +478,10 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     /**
      * Die folgende Schleife muss auf diese Weise geschrieben werden und nicht mit
      * einem Iterator, weil es ansonsten eine ConcurrentModificationException gibt,
-     * da über
+     * da Ã¼ber
      * {@link OneFormControlLineView.ViewChangeListener#viewShouldBeRemoved(OneFormControlLineView)}
-     * die Selektion während des remove() gleich verändert wird, was den Iterator
-     * invalidieren würde.
+     * die Selektion wÃ¤hrend des remove() gleich verÃ¤ndert wird, was den Iterator
+     * invalidieren wÃ¼rde.
      */
     while (!selection.isEmpty())
     {
@@ -494,12 +494,12 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   /**
    * Falls mindestens 2 Elemente selektiert sind und alle momentan selektierten
    * Elemente Checkboxen sind, die nicht-leere IDs haben so werden diese entfernt und
-   * stattdessen eine nicht-editierbare ComboBox eingefügt, deren Werte-Liste sich
+   * stattdessen eine nicht-editierbare ComboBox eingefÃ¼gt, deren Werte-Liste sich
    * aus den Labels aller entfernten Checkboxen zusammensetzt. Die Labels aller
-   * selektierten Checkboxen müssen verschieden sein. Ein leeres Label ist jedoch
-   * erlaubt (auch die Combobox enthält dann einen leeren Eintrag).
+   * selektierten Checkboxen mÃ¼ssen verschieden sein. Ein leeres Label ist jedoch
+   * erlaubt (auch die Combobox enthÃ¤lt dann einen leeren Eintrag).
    * 
-   * @return null, falls die Funktion nicht durchgeführt werden konnte (z.B. keine
+   * @return null, falls die Funktion nicht durchgefÃ¼hrt werden konnte (z.B. keine
    *         Checkboxen selektiert oder eine Checkbox hat keine ID). Ansonsten wird
    *         ein {@link ComboboxMergeDescriptor} geliefert, der das Ergebnis der
    *         Operation beschreibt.
@@ -564,7 +564,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   }
 
   /**
-   * Liefert true gdw sich kein ausgewähltes Element auf dem momentan angezeigten Tab
+   * Liefert true gdw sich kein ausgewÃ¤hltes Element auf dem momentan angezeigten Tab
    * befindet.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -583,8 +583,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   }
 
   /**
-   * Falls mindestens ein Element ausgewählt ist wird das sichtbare Tab so gesetzt,
-   * dass das erste ausgewählte Element angezeigt wird.
+   * Falls mindestens ein Element ausgewÃ¤hlt ist wird das sichtbare Tab so gesetzt,
+   * dass das erste ausgewÃ¤hlte Element angezeigt wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -598,9 +598,9 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   }
 
   /**
-   * Liefert den Index des ersten momentan sichtbaren vom Benutzer ausgewählten
-   * Elements oder (falls kein ausgewähltes Element sichtbar ist) den Index des
-   * letzten sichtbaren Elements + 1 oder falls kein Tab ausgewählt ist dann -1.
+   * Liefert den Index des ersten momentan sichtbaren vom Benutzer ausgewÃ¤hlten
+   * Elements oder (falls kein ausgewÃ¤hltes Element sichtbar ist) den Index des
+   * letzten sichtbaren Elements + 1 oder falls kein Tab ausgewÃ¤hlt ist dann -1.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -610,7 +610,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
     /*
      * Zuerst suchen wir die Selektion durch und liefern falls vorhanden das erste
-     * ausgewählte Element, das auf dem sichtbaren Tab ist.
+     * ausgewÃ¤hlte Element, das auf dem sichtbaren Tab ist.
      */
     Iterator<Integer> iter = selection.iterator();
     while (iter.hasNext())
@@ -621,14 +621,14 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     }
 
     /*
-     * Wenn die obige Suche fehlschlägt wird getButtonInsertionIndex() verwendet.
+     * Wenn die obige Suche fehlschlÃ¤gt wird getButtonInsertionIndex() verwendet.
      */
     return getButtonInsertionIndex();
   }
 
   /**
-   * Liefert den Index an dem Buttons auf dem aktuell sichtbaren Tab eingefügt werden
-   * sollten oder -1, falls kein Tab ausgewählt ist. Der zurückgelieferte Wert (falls
+   * Liefert den Index an dem Buttons auf dem aktuell sichtbaren Tab eingefÃ¼gt werden
+   * sollten oder -1, falls kein Tab ausgewÃ¤hlt ist. Der zurÃ¼ckgelieferte Wert (falls
    * nicht -1) entspricht dem Index des letzten sichtbaren Elements + 1.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -646,8 +646,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   }
 
   /**
-   * Fügt vor dem ersten ausgewählten Element (oder ganz am Ende, wenn nichts
-   * ausgewählt ist) ein neues Tab zur Liste hinzu.
+   * FÃ¼gt vor dem ersten ausgewÃ¤hlten Element (oder ganz am Ende, wenn nichts
+   * ausgewÃ¤hlt ist) ein neues Tab zur Liste hinzu.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -661,8 +661,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   }
 
   /**
-   * Fügt vor dem ersten ausgewählten Element (oder ganz am Ende des sichtbaren Tabs,
-   * wenn nichts ausgewählt ist oder die Selektion auf einem unsichtbaren Tab ist)
+   * FÃ¼gt vor dem ersten ausgewÃ¤hlten Element (oder ganz am Ende des sichtbaren Tabs,
+   * wenn nichts ausgewÃ¤hlt ist oder die Selektion auf einem unsichtbaren Tab ist)
    * ein neues Steuerelement zur Liste hinzu.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -709,11 +709,11 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
           switch (state)
           {
-            case -1: // abwählen
+            case -1: // abwÃ¤hlen
               view.unmark();
               selection.remove(index);
               break;
-            case 1: // auswählen
+            case 1: // auswÃ¤hlen
               view.mark();
               selection.add(index);
               break;
@@ -726,9 +726,9 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     public void broadcastViewVisibilitySettings(ViewVisibilityDescriptor desc)
     {
       /*
-       * Unabhängige Kopie des Deskriptors machen, da die OneFormControlLineViews
-       * sich den Deskriptor merken. Eine Kopie reicht für alle
-       * OneFormControlLineViews, da diese keine Änderungen daran vornehmen.
+       * UnabhÃ¤ngige Kopie des Deskriptors machen, da die OneFormControlLineViews
+       * sich den Deskriptor merken. Eine Kopie reicht fÃ¼r alle
+       * OneFormControlLineViews, da diese keine Ã„nderungen daran vornehmen.
        */
       ViewVisibilityDescriptor newDesc = new ViewVisibilityDescriptor(desc);
 

@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Eine einzeilige Sicht auf einen Bereich im Dokument.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 24.03.2009 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -71,7 +71,7 @@ public class OneSectionLineView extends LineView
   private SectionModel model;
 
   /**
-   * Typischerweise ein Container, der die View enthält und daher über Änderungen auf
+   * Typischerweise ein Container, der die View enthÃ¤lt und daher Ã¼ber Ã„nderungen auf
    * dem Laufenden gehalten werden muss.
    */
   private ViewChangeListener bigDaddy;
@@ -82,19 +82,19 @@ public class OneSectionLineView extends LineView
   private MyMouseListener myMouseListener = new MyMouseListener();
 
   /**
-   * Wird vor dem Ändern eines Attributs des Models gesetzt, damit der rekursive
-   * Aufruf des ChangeListeners nicht unnötigerweise das Feld updatet, das wir selbst
+   * Wird vor dem Ã„ndern eines Attributs des Models gesetzt, damit der rekursive
+   * Aufruf des ChangeListeners nicht unnÃ¶tigerweise das Feld updatet, das wir selbst
    * gerade gesetzt haben.
    */
   private boolean ignoreAttributeChanged = false;
 
   /**
-   * Das TextField, das die ID der Gruppe anzeigt und ändern lässt.
+   * Das TextField, das die ID der Gruppe anzeigt und Ã¤ndern lÃ¤sst.
    */
   private JTextField nameBox;
 
   /**
-   * Erzeugt eine neue View für model.
+   * Erzeugt eine neue View fÃ¼r model.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -115,14 +115,14 @@ public class OneSectionLineView extends LineView
     model.addListener(new MyModelChangeListener());
     myPanel.validate();
     // Notwendig, um BoxLayout beim Aufziehen daran zu hindern, die Textfelder
-    // hässlich
+    // hÃ¤sslich
     // hoch zu machen.
     myPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE,
       myPanel.getPreferredSize().height));
   }
 
   /**
-   * Liefert eine Komponente, die den Namen des Bereichs anzeigt und Änderungen an
+   * Liefert eine Komponente, die den Namen des Bereichs anzeigt und Ã„nderungen an
    * das Model weitergibt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -189,7 +189,7 @@ public class OneSectionLineView extends LineView
   }
 
   /**
-   * Liefert das {@link SectionModel} das zu dieser View gehört.
+   * Liefert das {@link SectionModel} das zu dieser View gehÃ¶rt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -225,7 +225,7 @@ public class OneSectionLineView extends LineView
   /**
    * Wird auf alle Teilkomponenten der View registriert. Setzt MousePressed-Events um
    * in Broadcasts, die signalisieren, dass das entsprechende Model selektiert wurde.
-   * Je nachdem ob CTRL gedrückt ist oder nicht wird die Selektion erweitert oder
+   * Je nachdem ob CTRL gedrÃ¼ckt ist oder nicht wird die Selektion erweitert oder
    * ersetzt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)

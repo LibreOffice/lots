@@ -1,10 +1,10 @@
 /*
  * Dateiname: DatasourceJoiner.java
  * Projekt  : WollMux
- * Funktion : stellt eine virtuelle Datenbank zur Verfügung, die ihre Daten
+ * Funktion : stellt eine virtuelle Datenbank zur VerfÃ¼gung, die ihre Daten
  *            aus verschiedenen Hintergrunddatenbanken zieht.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -19,35 +19,35 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 06.10.2005 | BNK | Erstellung
  * 24.10.2005 | BNK | +newDataset()
  * 28.10.2005 | BNK | Arbeit an der Baustelle
  * 02.11.2005 | BNK | Testen und Debuggen
- *                  | Aus Cache wird jetzt auch der ausgewählte gelesen
+ *                  | Aus Cache wird jetzt auch der ausgewÃ¤hlte gelesen
  * 03.11.2005 | BNK | saveCacheAndLOS kriegt jetzt File-Argument
  *                  | saveCacheAndLos implementiert
  * 03.11.2005 | BNK | besser kommentiert
  * 07.11.2005 | BNK | +type "union"
- * 10.11.2005 | BNK | das Suchen der Datensätze für den Refresh hinter die
+ * 10.11.2005 | BNK | das Suchen der DatensÃ¤tze fÃ¼r den Refresh hinter die
  *                  |  Schemaanpassung verschoben.
- *                  | Und nochmal die Reihenfolge umgewürfelt, hoffentlich stimmt's
+ *                  | Und nochmal die Reihenfolge umgewÃ¼rfelt, hoffentlich stimmt's
  *                  | jetzt.
  * 10.11.2005 | BNK | Unicode-Marker an den Anfang der Cache-Datei schreiben
- * 06.12.2005 | BNK | +getStatus() (enthält momentan Info über Datensätze, die nicht
+ * 06.12.2005 | BNK | +getStatus() (enthÃ¤lt momentan Info Ã¼ber DatensÃ¤tze, die nicht
  *                  |   in der Datenbank wiedergefunden werden konnten und deshalb
- *                  |   vermutlich neu eingefügt werden sollten, weil sonst auf
+ *                  |   vermutlich neu eingefÃ¼gt werden sollten, weil sonst auf
  *                  |   Ewigkeit nur der Cache verwendet wird.
- *                  | LOS-only Datensätze werden nun korrekt in dumpData()
+ *                  | LOS-only DatensÃ¤tze werden nun korrekt in dumpData()
  *                  |   wiedergegeben und im Konstruktor restauriert.
- * 12.04.2006 | BNK | [P766]mehrere Datensätze mit gleichem Schlüssel korrekt in
+ * 12.04.2006 | BNK | [P766]mehrere DatensÃ¤tze mit gleichem SchlÃ¼ssel korrekt in
  *                  | cache.conf gespeichert und wieder restauriert, ohne LDAP
  *                  | Anbindung zu verlieren.
  * 18.04.2006 | BNK | Bugfix zur Behebung von P766: ausgewaehlten Datensatz richtig merken
  * 26.05.2006 | BNK | +find(Query)       
- * 30.01.2007 | BNK | Timeout nicht mehr statisch, sondern an Konstruktor übergeben.       
+ * 30.01.2007 | BNK | Timeout nicht mehr statisch, sondern an Konstruktor Ã¼bergeben.       
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -85,7 +85,7 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
- * Stellt eine virtuelle Datenbank zur Verfügung, die ihre Daten aus verschiedenen
+ * Stellt eine virtuelle Datenbank zur VerfÃ¼gung, die ihre Daten aus verschiedenen
  * Hintergrunddatenbanken zieht.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -93,21 +93,21 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
 public class DatasourceJoiner
 {
   /**
-   * Wird an Datasource.find() übergeben, um die maximale Zeit der Bearbeitung einer
+   * Wird an Datasource.find() Ã¼bergeben, um die maximale Zeit der Bearbeitung einer
    * Suchanfrage zu begrenzen, damit nicht im Falle eines Netzproblems alles
    * einfriert.
    */
   private long queryTimeout;
 
   /**
-   * Muster für erlaubte Suchstrings für den Aufruf von find().
+   * Muster fÃ¼r erlaubte Suchstrings fÃ¼r den Aufruf von find().
    */
   private static final Pattern SUCHSTRING_PATTERN =
     Pattern.compile("^\\*?[^*]+\\*?$");
 
   /**
    * Bildet Datenquellenname auf Datasource-Objekt ab. Nur die jeweils zuletzt unter
-   * einem Namen in der Config-Datei aufgeführte Datebank ist hier verzeichnet.
+   * einem Namen in der Config-Datei aufgefÃ¼hrte Datebank ist hier verzeichnet.
    */
   private Map<String, Datasource> nameToDatasource =
     new HashMap<String, Datasource>();
@@ -125,15 +125,15 @@ public class DatasourceJoiner
   protected Datasource mainDatasource;
 
   /**
-   * Repräsentiert den Status eines DatasourceJoiners.
+   * ReprÃ¤sentiert den Status eines DatasourceJoiners.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static class Status
   {
     /**
-     * Eine Liste, die die {@link Dataset}s enthält, die mit einer
-     * Hintergrunddatenbank verknüpft sind, deren Schlüssel jedoch darin nicht mehr
+     * Eine Liste, die die {@link Dataset}s enthÃ¤lt, die mit einer
+     * Hintergrunddatenbank verknÃ¼pft sind, deren SchlÃ¼ssel jedoch darin nicht mehr
      * gefunden wurde und deshalb nicht aktualisiert werden konnte.
      */
     public List<Dataset> lostDatasets = new Vector<Dataset>(0);
@@ -155,19 +155,19 @@ public class DatasourceJoiner
    *          der Name der Datenquelle, auf die sich die Funktionen des DJ
    *          (find(),...) beziehen sollen.
    * @param losCache
-   *          die Datei, in der der DJ die Datensätze des LOS abspeichern soll. Falls
+   *          die Datei, in der der DJ die DatensÃ¤tze des LOS abspeichern soll. Falls
    *          diese Datei existiert, wird sie vom Konstruktor eingelesen und
    *          verwendet.
    * @param context,
    *          der Kontext relativ zu dem Datenquellen URLs in ihrer Beschreibung
    *          auswerten sollen.
    * @param datasourceTimeout
-   *          Zeit in ms, die Suchanfragen maximal brauchen dürfen bevor sie
+   *          Zeit in ms, die Suchanfragen maximal brauchen dÃ¼rfen bevor sie
    *          abgebrochen werden.
    * @throws ConfigurationErrorException
    *           falls ein schwerwiegender Fehler auftritt, der die Arbeit des DJ
-   *           unmöglich macht, wie z.B. wenn die Datenquelle mainSourceName in der
-   *           joinConf fehlt und gleichzeitig kein Cache verfügbar ist.
+   *           unmÃ¶glich macht, wie z.B. wenn die Datenquelle mainSourceName in der
+   *           joinConf fehlt und gleichzeitig kein Cache verfÃ¼gbar ist.
    */
   public DatasourceJoiner(ConfigThingy joinConf, String mainSourceName,
       File losCache, URL context, long datasourceTimeout)
@@ -177,16 +177,16 @@ public class DatasourceJoiner
   }
 
   /**
-   * Nur für die Verwendung durch abgeleitete Klassen, die den parametrisierten
-   * Konstruktor nicht verwenden können, und stattdessen init() benutzen.
+   * Nur fÃ¼r die Verwendung durch abgeleitete Klassen, die den parametrisierten
+   * Konstruktor nicht verwenden kÃ¶nnen, und stattdessen init() benutzen.
    */
   protected DatasourceJoiner()
   {};
 
   /**
    * Erledigt die Initialisierungsaufgaben des Konstruktors mit den gleichen
-   * Parametern. Für die Verwendung durch abgeleitete Klassen, die den
-   * parametrisierten Konstruktor nicht verwenden können.
+   * Parametern. FÃ¼r die Verwendung durch abgeleitete Klassen, die den
+   * parametrisierten Konstruktor nicht verwenden kÃ¶nnen.
    * 
    * @throws ConfigurationErrorException
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -240,7 +240,7 @@ public class DatasourceJoiner
         else if (type.equals("funky"))
           ds = new FunkyDatasource(nameToDatasource, sourceDesc, context);
         else
-          Logger.error(L.m("Ununterstützter Datenquellentyp: %1", type));
+          Logger.error(L.m("UnunterstÃ¼tzter Datenquellentyp: %1", type));
       }
       catch (Exception x)
       {
@@ -256,8 +256,8 @@ public class DatasourceJoiner
           type));
         /*
          * Falls schon eine alte Datenquelle name registriert ist, entferne diese
-         * Registrierung. Ansonsten würde mit der vorher registrierten Datenquelle
-         * weitergearbeitet, was seltsame Effekte zur Folge hätte die schwierig
+         * Registrierung. Ansonsten wÃ¼rde mit der vorher registrierten Datenquelle
+         * weitergearbeitet, was seltsame Effekte zur Folge hÃ¤tte die schwierig
          * nachzuvollziehen sind.
          */
         nameToDatasource.remove(name);
@@ -303,7 +303,7 @@ public class DatasourceJoiner
   }
 
   /**
-   * Liefert das Schema der Hauptdatenquelle zurück.
+   * Liefert das Schema der Hauptdatenquelle zurÃ¼ck.
    * 
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -314,16 +314,16 @@ public class DatasourceJoiner
   }
 
   /**
-   * Durchsucht die Hauptdatenbank (nicht den LOS) nach Datensätzen, die in Spalte
+   * Durchsucht die Hauptdatenbank (nicht den LOS) nach DatensÃ¤tzen, die in Spalte
    * spaltenName den Wert suchString stehen haben. suchString kann vorne und/oder
-   * hinten genau ein Sternchen '*' stehen haben, um Präfix/Suffix/Teilstring-Suche
+   * hinten genau ein Sternchen '*' stehen haben, um PrÃ¤fix/Suffix/Teilstring-Suche
    * zu realisieren. Folgen mehrerer Sternchen oder Sternchen in der Mitte des
    * Suchstrings sind verboten und produzieren eine IllegalArgumentException. Ebenso
-   * verboten ist ein suchString, der nur Sternchen enthält oder einer der leer ist.
-   * Alle Ergebnisse sind {@link DJDataset}s. Die Suche erfolgt grundsätzlich
+   * verboten ist ein suchString, der nur Sternchen enthÃ¤lt oder einer der leer ist.
+   * Alle Ergebnisse sind {@link DJDataset}s. Die Suche erfolgt grundsÃ¤tzlich
    * case-insensitive.
    * <p>
-   * Im folgenden eine Liste möglicher Suchanfragen mit Angabe, ob sie unterstützt
+   * Im folgenden eine Liste mÃ¶glicher Suchanfragen mit Angabe, ob sie unterstÃ¼tzt
    * wird (X) oder nicht (O).
    * </p>
    * 
@@ -332,16 +332,16 @@ public class DatasourceJoiner
    * X           &quot;vorname.nachname&quot;
    * X           &quot;vorname.nachname@muenchen.de&quot;
    * X           &quot;Nam&quot;
-   * O           &quot;ITD5.1&quot;  nicht unterstützt weil Minus vor 5.1 fehlt
+   * O           &quot;ITD5.1&quot;  nicht unterstÃ¼tzt weil Minus vor 5.1 fehlt
    * X           &quot;ITD-5.1&quot;
    * O           &quot;D&quot;   liefert Personen mit Nachname-Anfangsbuchstabe D
    * X           &quot;D-*&quot;
-   * O           &quot;ITD5&quot;    nicht unterstützt weil Minus vor 5 fehlt
+   * O           &quot;ITD5&quot;    nicht unterstÃ¼tzt weil Minus vor 5 fehlt
    * X           &quot;D-HAIII&quot;
    * X           &quot;5.1&quot;
    * X           &quot;D-III-ITD-5.1&quot;
-   * O           &quot;D-HAIII-ITD-5.1&quot;   nicht unterstützt, da HA nicht im lhmOUShortname
-   * O           &quot;D-HAIII-ITD5.1&quot;    nicht unterstützt (siehe oben)
+   * O           &quot;D-HAIII-ITD-5.1&quot;   nicht unterstÃ¼tzt, da HA nicht im lhmOUShortname
+   * O           &quot;D-HAIII-ITD5.1&quot;    nicht unterstÃ¼tzt (siehe oben)
    * 
    * X           &quot;Nam Vorn&quot;
    * X           &quot;Nam, Vorn&quot;
@@ -370,7 +370,7 @@ public class DatasourceJoiner
 
   /**
    * Wie find(spaltenName, suchString), aber mit einer zweiten Spaltenbedingung, die
-   * und-verknüpft wird.
+   * und-verknÃ¼pft wird.
    * 
    * @throws TimeoutException
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -410,7 +410,7 @@ public class DatasourceJoiner
         query.getDatasourceName()));
 
     /*
-     * Suchstrings auf Legalität prüfen.
+     * Suchstrings auf LegalitÃ¤t prÃ¼fen.
      */
     Iterator<QueryPart> iter = query.iterator();
     while (iter.hasNext())
@@ -421,12 +421,12 @@ public class DatasourceJoiner
           suchString));
     }
 
-    // Suche ausführen.
+    // Suche ausfÃ¼hren.
     return source.find(query.getQueryParts(), queryTimeout());
   }
 
   /**
-   * Findet Datensätze, die query (Liste von QueryParts) entsprechen.
+   * Findet DatensÃ¤tze, die query (Liste von QueryParts) entsprechen.
    * 
    * @throws TimeoutException
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -445,18 +445,18 @@ public class DatasourceJoiner
   }
 
   /**
-   * Liefert eine implementierungsabhängige Teilmenge der Datensätze der Datenquelle
-   * mit Name datasourceName. Wenn möglich sollte die Datenquelle hier all ihre
-   * Datensätze zurückliefern oder zumindest soviele wie möglich. Es ist jedoch auch
-   * erlaubt, dass hier gar keine Datensätze zurückgeliefert werden. Wenn sinnvoll
+   * Liefert eine implementierungsabhÃ¤ngige Teilmenge der DatensÃ¤tze der Datenquelle
+   * mit Name datasourceName. Wenn mÃ¶glich sollte die Datenquelle hier all ihre
+   * DatensÃ¤tze zurÃ¼ckliefern oder zumindest soviele wie mÃ¶glich. Es ist jedoch auch
+   * erlaubt, dass hier gar keine DatensÃ¤tze zurÃ¼ckgeliefert werden. Wenn sinnvoll
    * sollte anstatt des Werfens einer TimeoutException ein Teil der Daten
-   * zurückgeliefert werden.
+   * zurÃ¼ckgeliefert werden.
    * 
    * @throws TimeoutException,
    *           falls ein Fehler auftritt oder die Anfrage nicht rechtzeitig beendet
    *           werden konnte. In letzterem Fall ist das Werfen dieser Exception
    *           jedoch nicht Pflicht und die Datenquelle kann stattdessen den Teil der
-   *           Ergebnisse zurückliefern, die in der gegebenen Zeit gewonnen werden
+   *           Ergebnisse zurÃ¼ckliefern, die in der gegebenen Zeit gewonnen werden
    *           konnten. ACHTUNG! Die Ergebnisse sind keine DJDatasets!
    * @throws IllegalArgumentException
    *           falls die Datenquelle nicht existiert.
@@ -479,7 +479,7 @@ public class DatasourceJoiner
   }
 
   /**
-   * Speichert den aktuellen LOS samt zugehörigem Cache in die Datei cacheFile.
+   * Speichert den aktuellen LOS samt zugehÃ¶rigem Cache in die Datei cacheFile.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -521,7 +521,7 @@ public class DatasourceJoiner
   }
 
   /**
-   * Liefert den momentan im Lokalen Override Speicher ausgewählten Datensatz.
+   * Liefert den momentan im Lokalen Override Speicher ausgewÃ¤hlten Datensatz.
    * 
    * @throws DatasetNotFoundException
    *           falls der LOS leer ist (ansonsten ist immer ein Datensatz selektiert).
@@ -533,8 +533,8 @@ public class DatasourceJoiner
   }
 
   /**
-   * Liefert die Anzahl der Datensätze im LOS, die den selben Schlüssel haben wie der
-   * ausgewählte, und die vor diesem in der LOS-Liste gespeichert sind.
+   * Liefert die Anzahl der DatensÃ¤tze im LOS, die den selben SchlÃ¼ssel haben wie der
+   * ausgewÃ¤hlte, und die vor diesem in der LOS-Liste gespeichert sind.
    * 
    * @throws DatasetNotFoundException
    *           falls der LOS leer ist (ansonsten ist immer ein Datensatz selektiert).
@@ -547,7 +547,7 @@ public class DatasourceJoiner
 
   /**
    * Erlaubt es, einen {@link ColumnTransformer} zu setzen, der von
-   * {@link #getSelectedDatasetTransformed()} verwendet wird. Falls null übergeben
+   * {@link #getSelectedDatasetTransformed()} verwendet wird. Falls null Ã¼bergeben
    * wird, wird die Transformation deaktiviert und
    * {@link #getSelectedDatasetTransformed()} liefert das selbe Ergebnis wie
    * {@link #getSelectedDataset()}.
@@ -577,7 +577,7 @@ public class DatasourceJoiner
   }
 
   /**
-   * Liefert alle Datensätze des Lokalen Override Speichers (als
+   * Liefert alle DatensÃ¤tze des Lokalen Override Speichers (als
    * {@link de.muenchen.allg.itd51.wollmux.db.DJDataset}).
    */
   public QueryResults getLOS()
@@ -587,7 +587,7 @@ public class DatasourceJoiner
 
   /**
    * Legt einen neuen Datensatz im LOS an, der nicht mit einer Hintergrunddatenbank
-   * verknüpft ist und liefert ihn zurück. Alle Felder des neuen Datensatzes sind mit
+   * verknÃ¼pft ist und liefert ihn zurÃ¼ck. Alle Felder des neuen Datensatzes sind mit
    * dem Namen der entsprechenden Spalte initialisiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -605,15 +605,15 @@ public class DatasourceJoiner
   private static class LocalOverrideStorage
   {
     /**
-     * Präfix, das vor generierte Schlüssel von LOS-only Datensätzen gesetzt wird, um
-     * diese eindeutig von anderen Schlüsseln unterscheiden zu können.
+     * PrÃ¤fix, das vor generierte SchlÃ¼ssel von LOS-only DatensÃ¤tzen gesetzt wird, um
+     * diese eindeutig von anderen SchlÃ¼sseln unterscheiden zu kÃ¶nnen.
      */
     private static final String LOS_ONLY_MAGIC = "GEHORCHE DEM WOLLMUX!";
 
     /**
-     * Liste aller LOSDJDatasets. Die Liste muss geordnet sein, damit Datensätze mit
-     * gleichem Schlüssel über ihre Position in der Liste identifiziert werden
-     * können.
+     * Liste aller LOSDJDatasets. Die Liste muss geordnet sein, damit DatensÃ¤tze mit
+     * gleichem SchlÃ¼ssel Ã¼ber ihre Position in der Liste identifiziert werden
+     * kÃ¶nnen.
      */
     private List<LOSDJDataset> data = new LinkedList<LOSDJDataset>();
 
@@ -625,18 +625,18 @@ public class DatasourceJoiner
     private Set<String> losSchema = null;
 
     /**
-     * Der ausgewählte Datensatz. Nur dann null, wenn data leer ist.
+     * Der ausgewÃ¤hlte Datensatz. Nur dann null, wenn data leer ist.
      */
     private DJDataset selectedDataset = null;
 
     /**
-     * Basis für die Erzeugung eines Schlüssels für einen LOS-only Datensatz.
+     * Basis fÃ¼r die Erzeugung eines SchlÃ¼ssels fÃ¼r einen LOS-only Datensatz.
      */
     private long nextGeneratedKey = new Date().getTime();
 
     /**
      * Versucht, den Cache und den LOS aus der Datei losCache (ConfigThingy) zu
-     * lesen. %includes in losCache werden relativ zu context aufgelöst.
+     * lesen. %includes in losCache werden relativ zu context aufgelÃ¶st.
      */
     public LocalOverrideStorage(File losCache, URL context)
     { // TESTED
@@ -652,7 +652,7 @@ public class DatasourceJoiner
           /*
            * Falls der Cache korrupt ist sollen keine korrupten Daten in unseren
            * globalen Felder stehen, deswegen erzeugen wir erstmal alles in
-           * temporären Variablen und kopieren diese nachher in die Felder losSchema
+           * temporÃ¤ren Variablen und kopieren diese nachher in die Felder losSchema
            * und this.data.
            */
           Set<String> newSchema = new HashSet<String>();
@@ -679,7 +679,7 @@ public class DatasourceJoiner
                 if (!newSchema.contains(spalte))
                 {
                   Logger.error(L.m(
-                    "%1 enthält korrupten Datensatz (Spalte %2 nicht im Schema) => Cache wird ignoriert!",
+                    "%1 enthÃ¤lt korrupten Datensatz (Spalte %2 nicht im Schema) => Cache wird ignoriert!",
                     losCache.getPath(), spalte));
                   return;
                 }
@@ -698,7 +698,7 @@ public class DatasourceJoiner
               if (!newSchema.contains(spalte))
               {
                 Logger.error(L.m(
-                  "%1 enthält korrupten Datensatz (Spalte %2 nicht im Schema) => Cache wird ignoriert!",
+                  "%1 enthÃ¤lt korrupten Datensatz (Spalte %2 nicht im Schema) => Cache wird ignoriert!",
                   losCache.getPath(), spalte));
                 return;
               }
@@ -750,16 +750,16 @@ public class DatasourceJoiner
     }
 
     /**
-     * Falls es im LOS momentan mindestens einen Datensatz mit Schlüssel selectKey
-     * gibt, so wird der durch sameKeyIndex bezeichnete zum ausgewählten Datensatz,
-     * ansonsten wird, falls der LOS mindestens einen Datensatz enthält, ein
-     * beliebiger Datensatz ausgewählt.
+     * Falls es im LOS momentan mindestens einen Datensatz mit SchlÃ¼ssel selectKey
+     * gibt, so wird der durch sameKeyIndex bezeichnete zum ausgewÃ¤hlten Datensatz,
+     * ansonsten wird, falls der LOS mindestens einen Datensatz enthÃ¤lt, ein
+     * beliebiger Datensatz ausgewÃ¤hlt.
      * 
      * @param sameKeyIndex
-     *          zählt ab 0 und gibt an, der wievielte Datensatz gewählt werden soll,
-     *          wenn mehrere mit gleichem Schlüssel vorhanden sind. Sollte
+     *          zÃ¤hlt ab 0 und gibt an, der wievielte Datensatz gewÃ¤hlt werden soll,
+     *          wenn mehrere mit gleichem SchlÃ¼ssel vorhanden sind. Sollte
      *          sameKeyIndex zu hoch sein, wird der letzte Datensatz mit dem
-     *          entsprechenden Schlüssel ausgewählt.
+     *          entsprechenden SchlÃ¼ssel ausgewÃ¤hlt.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void selectDataset(String selectKey, int sameKeyIndex)
@@ -778,7 +778,7 @@ public class DatasourceJoiner
     }
 
     /**
-     * Generiert einen neuen (eindeutigen) Schlüssel für die Erzeugung eines LOS-only
+     * Generiert einen neuen (eindeutigen) SchlÃ¼ssel fÃ¼r die Erzeugung eines LOS-only
      * Datensatzes.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -789,7 +789,7 @@ public class DatasourceJoiner
     }
 
     /**
-     * Erzeugt einen neuen Datensatz, der nicht mit Hintergrundspeicher verknüpft
+     * Erzeugt einen neuen Datensatz, der nicht mit Hintergrundspeicher verknÃ¼pft
      * ist.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -817,7 +817,7 @@ public class DatasourceJoiner
     public DJDataset copyNonLOSDataset(Dataset ds)
     {
       if (ds instanceof LOSDJDataset)
-        Logger.error(L.m("Diese Funktion darf nicht für LOSDJDatasets aufgerufen werden, da sie immer eine Kopie mit Backing Store erzeugt."));
+        Logger.error(L.m("Diese Funktion darf nicht fÃ¼r LOSDJDatasets aufgerufen werden, da sie immer eine Kopie mit Backing Store erzeugt."));
 
       Map<String, String> dsoverride = new HashMap<String, String>();
       Map<String, String> dscache = new HashMap<String, String>();
@@ -843,7 +843,7 @@ public class DatasourceJoiner
     }
 
     /**
-     * Liefert den momentan im LOS selektierten Datensatz zurück.
+     * Liefert den momentan im LOS selektierten Datensatz zurÃ¼ck.
      * 
      * @throws DatasetNotFoundException
      *           falls der LOS leer ist (sonst ist immer ein Datensatz selektiert).
@@ -858,8 +858,8 @@ public class DatasourceJoiner
     }
 
     /**
-     * Liefert die Anzahl der Datensätze im LOS, die den selben Schlüssel haben wie
-     * der ausgewählte, und die vor diesem in der LOS-Liste gespeichert sind.
+     * Liefert die Anzahl der DatensÃ¤tze im LOS, die den selben SchlÃ¼ssel haben wie
+     * der ausgewÃ¤hlte, und die vor diesem in der LOS-Liste gespeichert sind.
      * 
      * @throws DatasetNotFoundException
      *           falls der LOS leer ist (ansonsten ist immer ein Datensatz
@@ -883,7 +883,7 @@ public class DatasourceJoiner
     }
 
     /**
-     * Läd für die Datensätze des LOS aktuelle Daten aus der Datenbank database.
+     * LÃ¤d fÃ¼r die DatensÃ¤tze des LOS aktuelle Daten aus der Datenbank database.
      * 
      * @param timeout
      *          die maximale Zeit, die database Zeit hat, anfragen zu beantworten.
@@ -899,15 +899,15 @@ public class DatasourceJoiner
        * Zuallererst das Schema anpassen. Insbesondere muss dies VOR dem Leeren von
        * data erfolgen. Dadurch werden die LOS-Speicher der LOSDJDatasets an das neue
        * Schema angepasst, bevor der Speicher geleert wird. Dies ist notwendig, da
-       * die LOS-Speicher später direkt an die aus res neu erzeugten LOSDJDatasets
+       * die LOS-Speicher spÃ¤ter direkt an die aus res neu erzeugten LOSDJDatasets
        * weitergereicht werden.
        */
       this.setSchema(database.getSchema());
 
       /*
-       * Mappt Schlüssel auf Listen mit Datensätzen, die diese Schlüssel haben. Hier
-       * werden Listen verwendet, da mehrere Datensätze denselben Schlüssel haben
-       * können, z.B. wenn der selbe LDAP-Datensatz mehrfach eingefügt wurde um mit
+       * Mappt SchlÃ¼ssel auf Listen mit DatensÃ¤tzen, die diese SchlÃ¼ssel haben. Hier
+       * werden Listen verwendet, da mehrere DatensÃ¤tze denselben SchlÃ¼ssel haben
+       * kÃ¶nnen, z.B. wenn der selbe LDAP-Datensatz mehrfach eingefÃ¼gt wurde um mit
        * verschiedenen Rollen verwendet zu werden.
        */
       Map<String, List<LOSDJDataset>> keyToLOSDJDatasetList =
@@ -932,7 +932,7 @@ public class DatasourceJoiner
         database.getDatasetsByKey(keyToLOSDJDatasetList.keySet(), timeout);
 
       /*
-       * Schlüssel und Index des selektierten Datensatzes feststellen, bevor data
+       * SchlÃ¼ssel und Index des selektierten Datensatzes feststellen, bevor data
        * geleert wird.
        */
       String selectKey = "";
@@ -949,11 +949,11 @@ public class DatasourceJoiner
       selectedDataset = null;
 
       /*
-       * Neue Datensätze auf Basis der Query erzeugen. Dabei werden die LOS-Speicher
+       * Neue DatensÃ¤tze auf Basis der Query erzeugen. Dabei werden die LOS-Speicher
        * von den korrespondierenden alten (gefunden via keyToLOSDJDatasetList) direkt
-       * übernommen. ACHTUNG: Hierbei werden auch temporär im Hintergrundspeicher
-       * "verlorene" Datensätze wieder mit dem Hintergrundspeicher verknüpft. Siehe
-       * langer Kommentar weiter unten. Bei evtl. Änderungen bitte beachten!!!
+       * Ã¼bernommen. ACHTUNG: Hierbei werden auch temporÃ¤r im Hintergrundspeicher
+       * "verlorene" DatensÃ¤tze wieder mit dem Hintergrundspeicher verknÃ¼pft. Siehe
+       * langer Kommentar weiter unten. Bei evtl. Ã„nderungen bitte beachten!!!
        */
 
       for (Dataset sourceDS : res)
@@ -993,24 +993,24 @@ public class DatasourceJoiner
       }
 
       /*
-       * Es ist möglich, dass noch Datensätze aus dem alten LOS übrig sind für die
-       * keine aktuellen Daten gefunden wurden. Dies sind entweder Datensätze, die
-       * von vorneherein nicht mit einer Hintergrunddatenbank verknüpft waren oder
-       * Datensätze, die aufgrund von Änderungen des Hintergrundspeichers nicht mehr
-       * gefunden wurden. Die Datensätze, die von vorneherein nur im LOS existierten
-       * müssen auf jeden Fall erhalten bleiben. Bei den anderen ist es eine gute
+       * Es ist mÃ¶glich, dass noch DatensÃ¤tze aus dem alten LOS Ã¼brig sind fÃ¼r die
+       * keine aktuellen Daten gefunden wurden. Dies sind entweder DatensÃ¤tze, die
+       * von vorneherein nicht mit einer Hintergrunddatenbank verknÃ¼pft waren oder
+       * DatensÃ¤tze, die aufgrund von Ã„nderungen des Hintergrundspeichers nicht mehr
+       * gefunden wurden. Die DatensÃ¤tze, die von vorneherein nur im LOS existierten
+       * mÃ¼ssen auf jeden Fall erhalten bleiben. Bei den anderen ist es eine gute
        * Frage, was sinnvoll ist. Momentan bleiben auch sie erhalten. Das hat
        * folgende Vor- und Nachteile: Vorteile: - Falls das Verschwinden des
-       * Datensatzes nur ein temporäres Problem war, so wird er wenn er wieder im
-       * Hintergrundspeicher auftaucht (und den selben Schlüssel hat) wieder damit
-       * verknüpft. - Der Benutzer verliert nie Einträge seiner Absenderliste
-       * Nachteile: - Der Benutzer merkt evtl. nicht, dass er plötzlich vom
-       * Hintergrundspeicher abgekoppelt ist und bekommt gewünschte Änderungen nicht
-       * mit. - Die Admins haben keine Möglichkeit, einen Eintrag aus der
+       * Datensatzes nur ein temporÃ¤res Problem war, so wird er wenn er wieder im
+       * Hintergrundspeicher auftaucht (und den selben SchlÃ¼ssel hat) wieder damit
+       * verknÃ¼pft. - Der Benutzer verliert nie EintrÃ¤ge seiner Absenderliste
+       * Nachteile: - Der Benutzer merkt evtl. nicht, dass er plÃ¶tzlich vom
+       * Hintergrundspeicher abgekoppelt ist und bekommt gewÃ¼nschte Ã„nderungen nicht
+       * mit. - Die Admins haben keine MÃ¶glichkeit, einen Eintrag aus der
        * Absenderliste eines Benutzers zu entfernen (ausser sie greifen direkt auf
        * sein .wollmux Verzeichnis zu. - Falls ein Datensatz bewusst entfernt wurde
-       * und später ein neuer Datensatz mit dem selben Schlüssel angelegt wird, so
-       * wird der Eintrag in der Absenderliste mit dem neuen Eintrag verknüpft,
+       * und spÃ¤ter ein neuer Datensatz mit dem selben SchlÃ¼ssel angelegt wird, so
+       * wird der Eintrag in der Absenderliste mit dem neuen Eintrag verknÃ¼pft,
        * obwohl dieser nichts mit dem alten zu tun hat.
        */
       Vector<Dataset> lostDatasets = new Vector<Dataset>();
@@ -1043,7 +1043,7 @@ public class DatasourceJoiner
         if (iter2.hasNext()) buffyTheVampireSlayer.append(", ");
       }
       if (buffyTheVampireSlayer.length() > 0)
-        Logger.log(L.m("Die Datensätze mit folgenden Schlüsseln konnten nicht aus der Datenbank aktualisiert werden: ")
+        Logger.log(L.m("Die DatensÃ¤tze mit folgenden SchlÃ¼sseln konnten nicht aus der Datenbank aktualisiert werden: ")
           + buffyTheVampireSlayer);
 
       selectDataset(selectKey, sameKeyIndex);
@@ -1061,7 +1061,7 @@ public class DatasourceJoiner
     } // TESTED
 
     /**
-     * Fügt conf die Beschreibung der Datensätze im LOS als Kinder hinzu.
+     * FÃ¼gt conf die Beschreibung der DatensÃ¤tze im LOS als Kinder hinzu.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -1102,9 +1102,9 @@ public class DatasourceJoiner
     }
 
     /**
-     * Ändert das Datenbankschema. Spalten des alten Schemas, die im neuen nicht mehr
-     * vorhanden sind werden aus den Datensätzen gelöscht. Im neuen Schema
-     * hinzugekommene Spalten werden in den Datensätzen als unbelegt betrachtet.
+     * Ã„ndert das Datenbankschema. Spalten des alten Schemas, die im neuen nicht mehr
+     * vorhanden sind werden aus den DatensÃ¤tzen gelÃ¶scht. Im neuen Schema
+     * hinzugekommene Spalten werden in den DatensÃ¤tzen als unbelegt betrachtet.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -1129,7 +1129,7 @@ public class DatasourceJoiner
       if (spaltenDieWeggefallenSind.isEmpty()
         && spaltenDieDazuGekommenSind.isEmpty()) return;
 
-      Logger.log(L.m("Das Datenbank-Schema wurde geändert. Der Cache wird angepasst."));
+      Logger.log(L.m("Das Datenbank-Schema wurde geÃ¤ndert. Der Cache wird angepasst."));
 
       Iterator<LOSDJDataset> iter = data.iterator();
       while (iter.hasNext())
@@ -1145,7 +1145,7 @@ public class DatasourceJoiner
     }
 
     /**
-     * Liefert die Anzahl der Datensätze im LOS.
+     * Liefert die Anzahl der DatensÃ¤tze im LOS.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -1155,7 +1155,7 @@ public class DatasourceJoiner
     }
 
     /**
-     * Iterator über alle Datensätze im LOS.
+     * Iterator Ã¼ber alle DatensÃ¤tze im LOS.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -1182,7 +1182,7 @@ public class DatasourceJoiner
     private class LOSDJDataset extends DJDatasetBase
     {
       /**
-       * Der Schlüsselwert dieses Datensatzes.
+       * Der SchlÃ¼sselwert dieses Datensatzes.
        */
       private String key;
 
@@ -1195,9 +1195,9 @@ public class DatasourceJoiner
        * @param dsoverride
        *          die Map, deren Werte den lokalen Overrides entsprechen.
        * @param schema
-       *          das Schema des LOS zu dem dieser Datensatz gehört.
+       *          das Schema des LOS zu dem dieser Datensatz gehÃ¶rt.
        * @param key
-       *          der Schlüsselwert dieses Datensatzes.
+       *          der SchlÃ¼sselwert dieses Datensatzes.
        */
       public LOSDJDataset(Map<String, String> dscache,
           Map<String, String> dsoverride, Set<String> schema, String key)
@@ -1220,8 +1220,8 @@ public class DatasourceJoiner
       }
 
       /**
-       * Ändert die Referenz auf das Schema dieses Datensatzes. Eine Anpassung der im
-       * Datensatz gespeicherten Werte geschieht nicht. Dafür muss drop() verwendet
+       * Ã„ndert die Referenz auf das Schema dieses Datensatzes. Eine Anpassung der im
+       * Datensatz gespeicherten Werte geschieht nicht. DafÃ¼r muss drop() verwendet
        * werden.
        * 
        * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1249,7 +1249,7 @@ public class DatasourceJoiner
        */
       public void remove() throws UnsupportedOperationException
       {
-        // dieser Test ist nur der vollständigkeit halber hier, für den
+        // dieser Test ist nur der vollstÃ¤ndigkeit halber hier, fÃ¼r den
         // Falls dass diese Funktion mal in anderen Kontext gecopynpastet
         // wird. Ein LOSDJDataset ist immer aus dem LOS.
         if (!isFromLOS())
@@ -1286,8 +1286,8 @@ public class DatasourceJoiner
 
   /**
    * Ein Wrapper um einfache Datasets, wie sie von Datasources als Ergebnisse von
-   * Anfragen zurückgeliefert werden. Der Wrapper ist notwendig, um die auch für
-   * Fremddatensätze sinnvollen DJDataset Funktionen anbieten zu können, allen voran
+   * Anfragen zurÃ¼ckgeliefert werden. Der Wrapper ist notwendig, um die auch fÃ¼r
+   * FremddatensÃ¤tze sinnvollen DJDataset Funktionen anbieten zu kÃ¶nnen, allen voran
    * copy().
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)

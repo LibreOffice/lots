@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Eine Sicht, die das Bearbeiten von {@link FunctionSelectionAccess} Objekten erlaubt.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,12 +18,12 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 27.09.2006 | BNK | Erstellung
  * 02.03.2007 | BNK | Wenn Feldreferenzen vorhanden sind, dann Funktion in Expertenansicht darstellen.
- * 16.03.2007 | BNK | [R5860]Unterstützung für Feldreferenzen
+ * 16.03.2007 | BNK | [R5860]UnterstÃ¼tzung fÃ¼r Feldreferenzen
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -81,34 +81,34 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 public class FunctionSelectionAccessView implements View
 {
   /**
-   * Eintrag für die Funktionsauswahl-ComboBox, wenn keine Funktion gewünscht ist.
+   * Eintrag fÃ¼r die Funktionsauswahl-ComboBox, wenn keine Funktion gewÃ¼nscht ist.
    */
   private static final String NONE_ITEM = L.m("<keine>");
 
   /**
-   * Eintrag für die Funktionsauswahl-ComboBox, wenn manuelle Eingabe gewünscht ist.
+   * Eintrag fÃ¼r die Funktionsauswahl-ComboBox, wenn manuelle Eingabe gewÃ¼nscht ist.
    */
   private static final String EXPERT_ITEM = L.m("<Code>");
 
   /**
-   * Eintrag für die Funktionsauswahl-ComboBox, wenn manuelle Eingabe eines Strings
-   * gewünscht ist.
+   * Eintrag fÃ¼r die Funktionsauswahl-ComboBox, wenn manuelle Eingabe eines Strings
+   * gewÃ¼nscht ist.
    */
   private static final String STRING_ITEM = L.m("<Wert>");
 
   /**
-   * Eintrag für die ComboBox zum Festlegen eines Parameters, der anzeigt, dass der
+   * Eintrag fÃ¼r die ComboBox zum Festlegen eines Parameters, der anzeigt, dass der
    * Parameter nicht vorbelegt sein soll.
    */
   private static final String UNSPECIFIED_ITEM = L.m("[nicht fest verdrahtet]");
 
   /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
+   * Rand um Textfelder (wird auch fÃ¼r ein paar andere RÃ¤nder verwendet) in Pixeln.
    */
   private final static int TF_BORDER = 4;
 
   /**
-   * Das Panel, das alle Elemente dieser View enthält.
+   * Das Panel, das alle Elemente dieser View enthÃ¤lt.
    */
   private JPanel myPanel;
 
@@ -119,17 +119,17 @@ public class FunctionSelectionAccessView implements View
   private FunctionSelectionAccess funcSel;
 
   /**
-   * Die Funktionsbibliothek, deren Funktionen auswählbar sind.
+   * Die Funktionsbibliothek, deren Funktionen auswÃ¤hlbar sind.
    */
   private FunctionLibrary funcLib;
 
   /**
-   * Die JComboBox, in der der Benutzer die Funktion auswählen kann.
+   * Die JComboBox, in der der Benutzer die Funktion auswÃ¤hlen kann.
    */
   private JComboBox functionSelectorBox;
 
   /**
-   * Der {@link IDManager}, dessen aktive IDs für Feldreferenzen auswählbar sind.
+   * Der {@link IDManager}, dessen aktive IDs fÃ¼r Feldreferenzen auswÃ¤hlbar sind.
    */
   private IDManager idManager;
 
@@ -139,20 +139,20 @@ public class FunctionSelectionAccessView implements View
   private Object namespace;
 
   /**
-   * Wurde die manuelle Eingabe eines Stringliterals als Funktion gewählt, so erfolgt
+   * Wurde die manuelle Eingabe eines Stringliterals als Funktion gewÃ¤hlt, so erfolgt
    * die Eingabe in dieses Eingabefeld.
    */
   private JTextArea literalValueArea;
 
   /**
-   * Wurde die manuelle Experten-Eingabe einer Funktion gewählt, so wird diese über
+   * Wurde die manuelle Experten-Eingabe einer Funktion gewÃ¤hlt, so wird diese Ã¼ber
    * diese Textarea abgewickelt.
    */
   private JTextArea complexFunctionArea;
 
   /**
-   * Damit nicht bei jedem gedrückten Buchstaben ein neues ConfigThingy erzeugt wird,
-   * wird dieser Timer verwendet, um das updaten verzögert und gesammelt anzustoßen.
+   * Damit nicht bei jedem gedrÃ¼ckten Buchstaben ein neues ConfigThingy erzeugt wird,
+   * wird dieser Timer verwendet, um das updaten verzÃ¶gert und gesammelt anzustoÃŸen.
    */
   private Timer updateExpertFunctionTimer;
 
@@ -164,13 +164,13 @@ public class FunctionSelectionAccessView implements View
   private boolean expertFunctionIsComplex;
 
   /**
-   * Erzeugt eine neue View über die funcSel angezeigt und bearbeitet werden kann.
+   * Erzeugt eine neue View Ã¼ber die funcSel angezeigt und bearbeitet werden kann.
    * 
    * @param funcLib
-   *          die Funktionsbibliothek, deren Funktionen auswählbar sein sollen.
+   *          die Funktionsbibliothek, deren Funktionen auswÃ¤hlbar sein sollen.
    * @param idManager
    *          Als Feldreferenzen sind alle aktiven IDs dieses {@link IDManager}s
-   *          auswählbar.
+   *          auswÃ¤hlbar.
    * @param namespace
    *          der Namensraum aus dem die IDs von idManager genommen werden sollen.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -198,7 +198,7 @@ public class FunctionSelectionAccessView implements View
   }
 
   /**
-   * Baut {@link #myPanel} komplett neu auf für den momentanen Zustand des
+   * Baut {@link #myPanel} komplett neu auf fÃ¼r den momentanen Zustand des
    * FunctionSelectionAccess.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -329,7 +329,7 @@ public class FunctionSelectionAccessView implements View
   }
 
   /**
-   * Liefert eine JComboBox zurück über die der Benutzer einen Parameter der Funktion
+   * Liefert eine JComboBox zurÃ¼ck Ã¼ber die der Benutzer einen Parameter der Funktion
    * festlegen kann.
    * 
    * @param paramName
@@ -436,7 +436,7 @@ public class FunctionSelectionAccessView implements View
   }
 
   /**
-   * Aktualisiert die Liste der Einträge in combo, so dass sie den aktiven IDs von
+   * Aktualisiert die Liste der EintrÃ¤ge in combo, so dass sie den aktiven IDs von
    * {@link #idManager} entspricht.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -522,7 +522,7 @@ public class FunctionSelectionAccessView implements View
         // falls die Expertenfunktion leer ist oder nur ein Kind hat und keine Enkel
         // (d.h. wenn die Funktion ein String-Literal ist), dann wird der
         // Spezialeintrag
-        // STRING_ITEM gewählt anstatt EXPERT_ITEM.
+        // STRING_ITEM gewÃ¤hlt anstatt EXPERT_ITEM.
         if (expertFun.count() == 0
           || (expertFun.count() == 1 && expertFun.getFirstChild().count() == 0))
           selectedIndex = string_index;
@@ -540,15 +540,15 @@ public class FunctionSelectionAccessView implements View
 
   /**
    * Schreibt die aktuelle manuelle Eingabe der Expertenfunktion in den
-   * FunctionSelectionAccess zurück.
+   * FunctionSelectionAccess zurÃ¼ck.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void updateExpertFunction()
   {
-    // Falls updateExpertFunction() außer der Reihe aufgerufen wurde muss
-    // der Timer gestoppt werden, damit keine unnötigen (und im Falle, dass sich
-    // Rahmenbedingungen zwischenzeitlich geändert haben fehlerhaften) Aufrufe
+    // Falls updateExpertFunction() auÃŸer der Reihe aufgerufen wurde muss
+    // der Timer gestoppt werden, damit keine unnÃ¶tigen (und im Falle, dass sich
+    // Rahmenbedingungen zwischenzeitlich geÃ¤ndert haben fehlerhaften) Aufrufe
     // erfolgen.
     updateExpertFunctionTimer.stop();
 
@@ -576,7 +576,7 @@ public class FunctionSelectionAccessView implements View
   }
 
   /**
-   * Dieser Listener wird sowohl für
+   * Dieser Listener wird sowohl fÃ¼r
    * {@link FunctionSelectionAccessView#literalValueArea} als auch
    * {@link FunctionSelectionAccessView#complexFunctionArea} verwendet, um auf
    * Benutzereingaben zu reagieren.
@@ -603,7 +603,7 @@ public class FunctionSelectionAccessView implements View
 
   /**
    * Wird auf die Funktionsauswahl-Kombobox registriert und reagiert darauf, dass der
-   * Benutzer eine andere Funktion auswählt.
+   * Benutzer eine andere Funktion auswÃ¤hlt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

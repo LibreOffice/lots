@@ -1,9 +1,9 @@
 /*
 * Dateiname: Function.java
 * Projekt  : WollMux
-* Funktion : Eine Funktion, die einen Wert in Abhängigkeit von Parametern berechnet.
+* Funktion : Eine Funktion, die einen Wert in AbhÃ¤ngigkeit von Parametern berechnet.
 * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
 *
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
+* Ã„nderungshistorie:
+* Datum      | Wer | Ã„nderungsgrund
 * -------------------------------------------------------------------
 * 03.05.2006 | BNK | Erstellung
 * 31.05.2006 | BNK | +getFunctionDialogReferences()
@@ -36,12 +36,12 @@ import java.util.Collection;
 import de.muenchen.allg.itd51.wollmux.L;
 
 /**
- * Eine Funktion, die einen Wert in Abhängigkeit von Parametern berechnet.
+ * Eine Funktion, die einen Wert in AbhÃ¤ngigkeit von Parametern berechnet.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public interface Function
 {
-  public static final String ERROR = L.m("!¤£!FEHLERHAFTE DATEN!¤£!");
+  public static final String ERROR = L.m("!Â¤Â£!FEHLERHAFTE DATEN!Â¤Â£!");
   
   /**
    * Liefert die Namen der Parameter, die die Funktion erwartet.
@@ -51,7 +51,7 @@ public interface Function
   public String[] parameters();
   
   /**
-   * Zu set werden die Namen aller Funktionsdialoge hinzugefügt, die diese
+   * Zu set werden die Namen aller Funktionsdialoge hinzugefÃ¼gt, die diese
    * Funktion referenziert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -60,10 +60,10 @@ public interface Function
   /**
    * Ruft die Funktion mit Argumenten aus parameters auf und liefert das
    * Funktionsergebnis als String. Falls es sich um einen booleschen Wert
-   * handelt, wird der String "true" oder "false" zurückgeliefert.
-   * Falls während der Ausführung ein Fehler auftritt, wird möglicherweise (dies
-   * hängt von der Funktion ab) das String-Objekt
-   * {@link #ERROR} (== vergleichbar) zurückgeliefert. 
+   * handelt, wird der String "true" oder "false" zurÃ¼ckgeliefert.
+   * Falls wÃ¤hrend der AusfÃ¼hrung ein Fehler auftritt, wird mÃ¶glicherweise (dies
+   * hÃ¤ngt von der Funktion ab) das String-Objekt
+   * {@link #ERROR} (== vergleichbar) zurÃ¼ckgeliefert. 
    * @param parameters sollte zu jedem der von {@link #parameters()} gelieferten
    *        Namen einen String-Wert enthalten.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -73,9 +73,9 @@ public interface Function
    /**
    * Ruft die Funktion mit Argumenten aus parameters auf und liefert das
    * Funktionsergebnis als boolean. Falls der Wert seiner Natur nach ein
-   * String ist, so wird true geliefert, falls er (ohne Berücksichtigung von
-   * Groß-/Kleinschreibung) der Zeichenkette "true" entspricht.
-   * Falls während der Ausführung ein Fehler auftritt wird false zurückgeliefert.
+   * String ist, so wird true geliefert, falls er (ohne BerÃ¼cksichtigung von
+   * GroÃŸ-/Kleinschreibung) der Zeichenkette "true" entspricht.
+   * Falls wÃ¤hrend der AusfÃ¼hrung ein Fehler auftritt wird false zurÃ¼ckgeliefert.
    * @param parameters sollte zu jedem der von {@link #parameters()} gelieferten
    *        Namen einen String-Wert enthalten.
 

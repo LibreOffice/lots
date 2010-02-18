@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Anzeige erweiterter Eigenschaften eines FormControlModels.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 24.10.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -49,14 +49,14 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 public class OneFormControlExtView implements LazyView
 {
   /**
-   * Da alle Views ihre eigene {@link JTabbedPane} haben, wird über diese (über
-   * {@link ChangeListener} gepflegte) statische Variable dafür gesorgt, dass beim
+   * Da alle Views ihre eigene {@link JTabbedPane} haben, wird Ã¼ber diese (Ã¼ber
+   * {@link ChangeListener} gepflegte) statische Variable dafÃ¼r gesorgt, dass beim
    * Umschalten von einer auf die andere View trotzdem das selbe Tab selektiert ist.
    */
   private static int selectedTab = 0;
 
   /**
-   * Typischerweise ein Container, der die View enthält und daher über Änderungen auf
+   * Typischerweise ein Container, der die View enthÃ¤lt und daher Ã¼ber Ã„nderungen auf
    * dem Laufenden gehalten werden muss.
    */
   private ViewChangeListener bigDaddy;
@@ -77,8 +77,8 @@ public class OneFormControlExtView implements LazyView
   private GroupModelList groupModelList;
 
   /**
-   * Die Funktionsbibliothek deren Funktionen zur Verfügung gestellt werden sollen
-   * für das Auswählen von Attributen, die eine Funktion erfordern.
+   * Die Funktionsbibliothek deren Funktionen zur VerfÃ¼gung gestellt werden sollen
+   * fÃ¼r das AuswÃ¤hlen von Attributen, die eine Funktion erfordern.
    */
   private FunctionLibrary funcLib;
 
@@ -103,13 +103,13 @@ public class OneFormControlExtView implements LazyView
    * @param model
    *          das Model dessen Daten angezeigt werden sollen.
    * @param funcLib
-   *          die Funktionsbibliothek deren Funktionen zur Verfügung gestellt werden
-   *          sollen für das Auswählen von Attributen, die eine Funktion erfordern.
+   *          die Funktionsbibliothek deren Funktionen zur VerfÃ¼gung gestellt werden
+   *          sollen fÃ¼r das AuswÃ¤hlen von Attributen, die eine Funktion erfordern.
    * @param groupModelList
    *          die Liste mit den Gruppen, die zur Auswahl angeboten werden sollen.
    * @param myViewChangeListener
-   *          typischerweise ein Container, der diese View enthält und über
-   *          Änderungen informiert werden soll.
+   *          typischerweise ein Container, der diese View enthÃ¤lt und Ã¼ber
+   *          Ã„nderungen informiert werden soll.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public OneFormControlExtView(FormControlModel model, FunctionLibrary funcLib,

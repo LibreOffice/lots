@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Implementierungen von FormModel (Zugriff auf die Formularbestandteile eines Dokuments)
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,10 +18,10 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
- * 09.02.2007 | LUT | Übernahme aus DocumentCommandInterpreter
+ * 09.02.2007 | LUT | Ãœbernahme aus DocumentCommandInterpreter
  *                    + MultiDocumentFormModel
  * 28.04.2008 | BNK | [R19466]+save(), +saveAs()
  * -------------------------------------------------------------------
@@ -50,17 +50,17 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
- * Enthält alle Implementierungen von FormModel für den Zugriff auf die
+ * EnthÃ¤lt alle Implementierungen von FormModel fÃ¼r den Zugriff auf die
  * Formularbestandteile eines Dokuments.
  */
 public class FormModelImpl
 {
 
   public static final String MULTI_FORM_TITLE =
-    L.m("Mehrere Formulare gleichzeitig ausfüllen");
+    L.m("Mehrere Formulare gleichzeitig ausfÃ¼llen");
 
   /**
-   * Erzeugt ein FormModel für ein einfaches Formular mit genau einem zugehörigen
+   * Erzeugt ein FormModel fÃ¼r ein einfaches Formular mit genau einem zugehÃ¶rigen
    * Formulardokument.
    * 
    * @param doc
@@ -102,8 +102,8 @@ public class FormModelImpl
 
   /**
    * Erzeugt ein FormModel dem mehrere Formulardokumente zugeordnet sind, die alle in
-   * gleicher Weise über Änderungen (z.B. bei valueChanged()) informiert werden. So
-   * ist ein gleichzeitiges Befüllen meherer Dokumente über nur ein Formular möglich.
+   * gleicher Weise Ã¼ber Ã„nderungen (z.B. bei valueChanged()) informiert werden. So
+   * ist ein gleichzeitiges BefÃ¼llen meherer Dokumente Ã¼ber nur ein Formular mÃ¶glich.
    * Die Formularbeschreibungen der Einzeldokumente und die in ihnen enthaltenen IDs,
    * Funktionen und Dialogfunktionen werden dabei zu einer Gesamtbeschreibung im
    * selben Namensraum zusammengemerged.
@@ -111,8 +111,8 @@ public class FormModelImpl
    * @param docs
    *          Ein Vector mit TextDocumentModel Objekten die dem neuen
    *          MultiDocumentFormModel zugeordnet werden sollen.
-   * @return Ein FormModel, das alle Änderungen auf alle in docs enthaltenen
-   *         Formulardokumente überträgt.
+   * @return Ein FormModel, das alle Ã„nderungen auf alle in docs enthaltenen
+   *         Formulardokumente Ã¼bertrÃ¤gt.
    * @throws InvalidFormDescriptorException
    */
   public static FormModel createMultiDocumentFormModel(
@@ -132,7 +132,7 @@ public class FormModelImpl
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(L.m("Dokument '%1' enthält keine gültige Formularbeschreibung",
+        Logger.error(L.m("Dokument '%1' enthÃ¤lt keine gÃ¼ltige Formularbeschreibung",
           model.getTitle()), e);
       }
     }
@@ -149,10 +149,10 @@ public class FormModelImpl
     DialogLibrary dialogLib =
       WollMuxFiles.parseFunctionDialogs(formConf, mux.getFunctionDialogs(),
         functionContext);
-    // FIXME: hier müsste eine gemergte Variante der Funktionsbibliotheken der
+    // FIXME: hier mÃ¼sste eine gemergte Variante der Funktionsbibliotheken der
     // einzel-TextDocumentModels erzeugt werden, damit auch dokumentlokale
     // Trafos funktionieren - aber wer verwendet schon Multiform? Warten wir mit
-    // der Änderung sie jemand benötigt.
+    // der Ã„nderung sie jemand benÃ¶tigt.
     FunctionLibrary funcLib =
       WollMuxFiles.parseFunctions(formConf, dialogLib, functionContext,
         mux.getGlobalFunctions());
@@ -167,7 +167,7 @@ public class FormModelImpl
     catch (NodeNotFoundException x)
     {}
 
-    // FormModels für die Einzeldokumente erzeugen
+    // FormModels fÃ¼r die Einzeldokumente erzeugen
     Vector /* of FormModel */<FormModel> fms = new Vector<FormModel>();
     for (Iterator<TextDocumentModel> iter = docs.iterator(); iter.hasNext();)
     {
@@ -183,8 +183,8 @@ public class FormModelImpl
   }
 
   /**
-   * Exception die eine ungültige Formularbeschreibung eines Formulardokuments
-   * repräsentiert.
+   * Exception die eine ungÃ¼ltige Formularbeschreibung eines Formulardokuments
+   * reprÃ¤sentiert.
    * 
    * @author christoph.lutz
    */
@@ -199,11 +199,11 @@ public class FormModelImpl
   }
 
   /**
-   * Repräsentiert ein FormModel dem mehrere Formulardokumente zugeordnet sind, die
-   * alle in gleicher Weise über Änderungen (z.B. bei valueChanged()) informiert
-   * werden. So ist ein gleichzeitiges Befüllen meherer Dokumente über nur ein
-   * Formular möglich. Die Formularbeschreibungen der Einzeldokumente und die in
-   * ihnen enthaltenen IDs, Funktionen und Dialogfunktionen müssen dabei vor dem
+   * ReprÃ¤sentiert ein FormModel dem mehrere Formulardokumente zugeordnet sind, die
+   * alle in gleicher Weise Ã¼ber Ã„nderungen (z.B. bei valueChanged()) informiert
+   * werden. So ist ein gleichzeitiges BefÃ¼llen meherer Dokumente Ã¼ber nur ein
+   * Formular mÃ¶glich. Die Formularbeschreibungen der Einzeldokumente und die in
+   * ihnen enthaltenen IDs, Funktionen und Dialogfunktionen mÃ¼ssen dabei vor dem
    * Erzeugen des Objekts zu einer Gesamtbeschreibung zusammengemerged werden.
    * 
    * @author christoph.lutz
@@ -227,34 +227,34 @@ public class FormModelImpl
     private FormGUI formGUI = null;
 
     /**
-     * Konstruktor für ein MultiDocumentFormModel mit den zugehörigen
-     * TextDocumentModel Objekten docs und den zugehörigen FormModel Objekten
+     * Konstruktor fÃ¼r ein MultiDocumentFormModel mit den zugehÃ¶rigen
+     * TextDocumentModel Objekten docs und den zugehÃ¶rigen FormModel Objekten
      * formModels. Das MultiDocumentFormModel leitet alle Anfragen an die
      * mitgelieferten FormModel Objekte weiter.
      * 
      * @param docs
      *          Vektor mit den TextDocumentModel Objekten der Einzeldokumente.
      * @param formModels
-     *          Vektor mit den zu den Einzeldokumenten zugehörigen FormModel-Objekten
-     *          (muss die selbe Größe und die selbe Reihenfolge wie docs haben).
+     *          Vektor mit den zu den Einzeldokumenten zugehÃ¶rigen FormModel-Objekten
+     *          (muss die selbe GrÃ¶ÃŸe und die selbe Reihenfolge wie docs haben).
      * @param mapDocsToFormModels
-     *          enthält die zugeordneten TextDocumentModels.
+     *          enthÃ¤lt die zugeordneten TextDocumentModels.
      * @param formFensterConf
      *          Der Formular-Unterabschnitt des Fenster-Abschnitts von wollmux.conf
-     *          (wird für createFormGUI() benötigt).
+     *          (wird fÃ¼r createFormGUI() benÃ¶tigt).
      * @param formConf
-     *          der Formular-Knoten, der die Formularbeschreibung enthält (wird für
-     *          createFormGUI() benötigt).
+     *          der Formular-Knoten, der die Formularbeschreibung enthÃ¤lt (wird fÃ¼r
+     *          createFormGUI() benÃ¶tigt).
      * @param functionContext
-     *          der Kontext für Funktionen, die einen benötigen (wird für
-     *          createFormGUI() benötigt).
+     *          der Kontext fÃ¼r Funktionen, die einen benÃ¶tigen (wird fÃ¼r
+     *          createFormGUI() benÃ¶tigt).
      * @param funcLib
      *          die Funktionsbibliothek, die zur Auswertung von Trafos, Plausis etc.
      *          herangezogen werden soll.
      * @param dialogLib
-     *          die Dialogbibliothek, die die Dialoge bereitstellt, die für
-     *          automatisch zu befüllende Formularfelder benötigt werden (wird für
-     *          createFormGUI() benötigt).
+     *          die Dialogbibliothek, die die Dialoge bereitstellt, die fÃ¼r
+     *          automatisch zu befÃ¼llende Formularfelder benÃ¶tigt werden (wird fÃ¼r
+     *          createFormGUI() benÃ¶tigt).
      */
     public MultiDocumentFormModel(Vector<TextDocumentModel> docs,
         Vector<FormModel> formModels, final ConfigThingy formFensterConf,
@@ -480,10 +480,10 @@ public class FormModelImpl
      */
     public void startFormGUI()
     {
-      // Als mapIDToPresetValue kann hier eine leere Map übergeben werden, da
-      // Multiform nur beim erstmaligen Öffnen der Vorlagen ausgeführt wird. Zu
+      // Als mapIDToPresetValue kann hier eine leere Map Ã¼bergeben werden, da
+      // Multiform nur beim erstmaligen Ã–ffnen der Vorlagen ausgefÃ¼hrt wird. Zu
       // diesem Zeitpunkt sind noch keine Formularwerte durch Benutzer eingegeben
-      // worden - weder in der FormGUI noch in den Einfügungen im Dokument - und
+      // worden - weder in der FormGUI noch in den EinfÃ¼gungen im Dokument - und
       // somit darf auch diese HashMap keinen Inhalt haben.
       formGUI =
         new FormGUI(formFensterConf, formConf, this, new HashMap<String, String>(),
@@ -492,10 +492,10 @@ public class FormModelImpl
   }
 
   /**
-   * Repräsentiert ein FormModel für ein einfaches Formular mit genau einem
-   * zugehörigen Formulardokument. Diese Klasse sorgt als Wrapper im Wesentlichen nur
-   * dafür, dass alle Methodenaufrufe des FormModels in die ensprechenden
-   * WollMuxEvents verpackt werden und somit korrekt synchronisiert ausgeführt
+   * ReprÃ¤sentiert ein FormModel fÃ¼r ein einfaches Formular mit genau einem
+   * zugehÃ¶rigen Formulardokument. Diese Klasse sorgt als Wrapper im Wesentlichen nur
+   * dafÃ¼r, dass alle Methodenaufrufe des FormModels in die ensprechenden
+   * WollMuxEvents verpackt werden und somit korrekt synchronisiert ausgefÃ¼hrt
    * werden.
    */
   private static class SingleDocumentFormModel implements FormModel
@@ -517,27 +517,27 @@ public class FormModelImpl
     private FormGUI formGUI = null;
 
     /**
-     * Konstruktor für ein SingleDocumentFormModel mit dem zugehörigen
+     * Konstruktor fÃ¼r ein SingleDocumentFormModel mit dem zugehÃ¶rigen
      * TextDocumentModel doc.
      * 
      * @param doc
      *          Das zugeordnete TextDocumentModel.
      * @param formFensterConf
      *          Der Formular-Unterabschnitt des Fenster-Abschnitts von wollmux.conf
-     *          (wird für createFormGUI() benötigt).
+     *          (wird fÃ¼r createFormGUI() benÃ¶tigt).
      * @param formConf
-     *          der Formular-Knoten, der die Formularbeschreibung enthält (wird für
-     *          createFormGUI() benötigt).
+     *          der Formular-Knoten, der die Formularbeschreibung enthÃ¤lt (wird fÃ¼r
+     *          createFormGUI() benÃ¶tigt).
      * @param functionContext
-     *          der Kontext für Funktionen, die einen benötigen (wird für
-     *          createFormGUI() benötigt).
+     *          der Kontext fÃ¼r Funktionen, die einen benÃ¶tigen (wird fÃ¼r
+     *          createFormGUI() benÃ¶tigt).
      * @param funcLib
      *          die Funktionsbibliothek, die zur Auswertung von Trafos, Plausis etc.
      *          herangezogen werden soll.
      * @param dialogLib
-     *          die Dialogbibliothek, die die Dialoge bereitstellt, die für
-     *          automatisch zu befüllende Formularfelder benötigt werden (wird für
-     *          createFormGUI() benötigt).
+     *          die Dialogbibliothek, die die Dialoge bereitstellt, die fÃ¼r
+     *          automatisch zu befÃ¼llende Formularfelder benÃ¶tigt werden (wird fÃ¼r
+     *          createFormGUI() benÃ¶tigt).
      */
     public SingleDocumentFormModel(final TextDocumentModel doc,
         final ConfigThingy formFensterConf, final ConfigThingy formConf,
@@ -552,10 +552,10 @@ public class FormModelImpl
       this.dialogLib = dialogLib;
 
       // Standard-Fensterattribute vor dem Start der Form-GUI sichern um nach
-      // dem Schließen des Formulardokuments die Standard-Werte wieder
-      // herstellen zu können. Die Standard-Attribute ändern sich (OOo-seitig)
+      // dem SchlieÃŸen des Formulardokuments die Standard-Werte wieder
+      // herstellen zu kÃ¶nnen. Die Standard-Attribute Ã¤ndern sich (OOo-seitig)
       // immer dann, wenn ein Dokument (mitsamt Fenster) geschlossen wird. Dann
-      // merkt sich OOo die Position und Größe des zuletzt geschlossenen
+      // merkt sich OOo die Position und GrÃ¶ÃŸe des zuletzt geschlossenen
       // Fensters.
       this.defaultWindowAttributes = getDefaultWindowAttributes();
     }
@@ -648,7 +648,7 @@ public class FormModelImpl
           formGUI = null;
         }
 
-        // Rücksetzen des defaultWindowAttributes auf den Wert vor dem Schließen
+        // RÃ¼cksetzen des defaultWindowAttributes auf den Wert vor dem SchlieÃŸen
         // des Formulardokuments.
         if (defaultWindowAttributes != null)
           setDefaultWindowAttributes(defaultWindowAttributes);
@@ -659,8 +659,8 @@ public class FormModelImpl
      * Diese Hilfsmethode liest das Attribut ooSetupFactoryWindowAttributes aus dem
      * Konfigurationsknoten
      * "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument" der
-     * OOo-Konfiguration, welches die Standard-FensterAttribute enthält, mit denen
-     * neue Fenster für TextDokumente erzeugt werden.
+     * OOo-Konfiguration, welches die Standard-FensterAttribute enthÃ¤lt, mit denen
+     * neue Fenster fÃ¼r TextDokumente erzeugt werden.
      * 
      * @return
      */
@@ -695,7 +695,7 @@ public class FormModelImpl
      * Diese Hilfsmethode setzt das Attribut ooSetupFactoryWindowAttributes aus dem
      * Konfigurationsknoten
      * "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument" der
-     * OOo-Konfiguration auf den neuen Wert value, der (am besten) über einen
+     * OOo-Konfiguration auf den neuen Wert value, der (am besten) Ã¼ber einen
      * vorhergehenden Aufruf von getDefaultWindowAttributes() gewonnen wird.
      * 
      * @param value

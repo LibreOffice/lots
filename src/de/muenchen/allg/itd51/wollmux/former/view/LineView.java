@@ -1,9 +1,9 @@
 /*
  * Dateiname: LineView.java
  * Projekt  : WollMux
- * Funktion : Abstrakte Oberklasse für einzeilige Sichten.
+ * Funktion : Abstrakte Oberklasse fÃ¼r einzeilige Sichten.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 13.09.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -40,7 +40,7 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 public abstract class LineView implements View
 {
   /**
-   * Farbe für den Hintergrund, wenn die View markiert ist.
+   * Farbe fÃ¼r den Hintergrund, wenn die View markiert ist.
    */
   protected static final Color MARKED_BACKGROUND_COLOR = Color.BLUE;
 
@@ -50,7 +50,7 @@ public abstract class LineView implements View
   protected static final int BORDER = 4;
 
   /**
-   * Das Panel, das alle Komponenten dieser View enthält.
+   * Das Panel, das alle Komponenten dieser View enthÃ¤lt.
    */
   protected JPanel myPanel;
 
@@ -60,7 +60,7 @@ public abstract class LineView implements View
   protected Color unmarkedBackgroundColor;
 
   /**
-   * Der FormularMax4000, zu dem diese View gehört.
+   * Der FormularMax4000, zu dem diese View gehÃ¶rt.
    */
   protected FormularMax4000 formularMax4000;
 
@@ -70,7 +70,7 @@ public abstract class LineView implements View
   }
 
   /**
-   * Markiert diese View optisch als ausgewählt.
+   * Markiert diese View optisch als ausgewÃ¤hlt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -80,7 +80,7 @@ public abstract class LineView implements View
   }
 
   /**
-   * Entfernt die optische Markierung als ausgewählt von dieser View.
+   * Entfernt die optische Markierung als ausgewÃ¤hlt von dieser View.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

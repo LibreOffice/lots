@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : managed die Fenster (Writer und FormController) der FormularGUI. 
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 27.01.2006 | BNK | Erstellung
  * 30.01.2006 | BNK | Office-Bean Einbindung
@@ -28,8 +28,8 @@
  * 02.02.2006 | BNK | Fenster zusammengeklebt
  * 05.05.2006 | BNK | Condition -> Function, besser kommentiert 
  * 05.07.2006 | BNK | optische Verbesserungen, insbes. bzgl. arrangeWindows()
- * 19.07.2006 | BNK | mehrere übelste Hacks, damit die Formular-GUI nie unsinnige Größe annimmt beim Starten
- * 14.09.2006 | BNK | üble Hacks hoffentlich robuster gemacht
+ * 19.07.2006 | BNK | mehrere Ã¼belste Hacks, damit die Formular-GUI nie unsinnige GrÃ¶ÃŸe annimmt beim Starten
+ * 14.09.2006 | BNK | Ã¼ble Hacks hoffentlich robuster gemacht
  * 17.11.2006 | BNK | +getController()
  * -------------------------------------------------------------------
  *
@@ -81,8 +81,8 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 public class FormGUI
 {
   /**
-   * Die (vom Betriebssystem gelieferten) Ränder des Formular-GUI-Fensters. Wird
-   * benötigt, um die exakte Platzierung der FormGUI und des Writer-Fensters zu
+   * Die (vom Betriebssystem gelieferten) RÃ¤nder des Formular-GUI-Fensters. Wird
+   * benÃ¶tigt, um die exakte Platzierung der FormGUI und des Writer-Fensters zu
    * bewerkstelligen.
    */
   private Insets windowInsets;
@@ -94,19 +94,19 @@ public class FormGUI
   private Rectangle maxWindowBounds;
 
   /**
-   * Die Größe, die durch pack() für den Frame eingestellt wird.
+   * Die GrÃ¶ÃŸe, die durch pack() fÃ¼r den Frame eingestellt wird.
    */
   private Rectangle naturalFrameBounds;
 
   /**
    * Das Fenster der Formular-GUI. Hier wird der FormController eingebettet. Auch das
-   * Office-Bean wäre hier eingebettet worden, wenn nicht die Entscheidung gegen
-   * seine Verwendung gefallen wäre.
+   * Office-Bean wÃ¤re hier eingebettet worden, wenn nicht die Entscheidung gegen
+   * seine Verwendung gefallen wÃ¤re.
    */
   private JFrame myFrame;
 
   /**
-   * Das zum Formular gehörende Writer-Dokument (als FormModel gekapselt).
+   * Das zum Formular gehÃ¶rende Writer-Dokument (als FormModel gekapselt).
    */
   private FormModel myDoc;
 
@@ -116,13 +116,13 @@ public class FormGUI
   private String formTitle = L.m("Unbenanntes Formular");
 
   /**
-   * Gibt die Lage und Größe des Fensters der FormGUI an, so wie sie von
+   * Gibt die Lage und GrÃ¶ÃŸe des Fensters der FormGUI an, so wie sie von
    * {@link Common#parseDimensions(ConfigThingy)} geliefert wird.
    */
   private Rectangle formGUIBounds;
 
   /**
-   * ActionListener für Buttons mit der ACTION "abort".
+   * ActionListener fÃ¼r Buttons mit der ACTION "abort".
    */
   private ActionListener actionListener_abort = new ActionListener()
   {
@@ -148,24 +148,24 @@ public class FormGUI
    * @param formFensterConf
    *          Der Formular-Unterabschnitt des Fenster-Abschnitts von wollmux.conf.
    * @param conf
-   *          der Formular-Knoten, der die Formularbeschreibung enthält.
+   *          der Formular-Knoten, der die Formularbeschreibung enthÃ¤lt.
    * @param doc
-   *          das zum Formular gehörende Writer-Dokument (gekapselt als FormModel)
+   *          das zum Formular gehÃ¶rende Writer-Dokument (gekapselt als FormModel)
    * @param mapIdToPresetValue
    *          bildet IDs von Formularfeldern auf Vorgabewerte ab. Falls hier ein Wert
-   *          für ein Formularfeld vorhanden ist, so wird dieser allen anderen
-   *          automatischen Befüllungen vorgezogen. Wird das Objekt
-   *          {@link FormController#FISHY} als Wert für ein Feld übergeben, so wird
-   *          dieses Feld speziell markiert als ungültig bis der Benutzer es manuell
-   *          ändert.
+   *          fÃ¼r ein Formularfeld vorhanden ist, so wird dieser allen anderen
+   *          automatischen BefÃ¼llungen vorgezogen. Wird das Objekt
+   *          {@link FormController#FISHY} als Wert fÃ¼r ein Feld Ã¼bergeben, so wird
+   *          dieses Feld speziell markiert als ungÃ¼ltig bis der Benutzer es manuell
+   *          Ã¤ndert.
    * @param functionContext
-   *          der Kontext für Funktionen, die einen benötigen.
+   *          der Kontext fÃ¼r Funktionen, die einen benÃ¶tigen.
    * @param funcLib
    *          die Funktionsbibliothek, die zur Auswertung von Plausis etc.
    *          herangezogen werden soll.
    * @param dialogLib
-   *          die Dialogbibliothek, die die Dialoge bereitstellt, die für automatisch
-   *          zu befüllende Formularfelder benötigt werden.
+   *          die Dialogbibliothek, die die Dialoge bereitstellt, die fÃ¼r automatisch
+   *          zu befÃ¼llende Formularfelder benÃ¶tigt werden.
    */
   public FormGUI(final ConfigThingy formFensterConf, final ConfigThingy conf,
       FormModel doc, final Map<String, String> mapIdToPresetValue,
@@ -223,9 +223,9 @@ public class FormGUI
     // leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     MyWindowListener oehrchen = new MyWindowListener();
-    // der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
+    // der WindowListener sorgt dafÃ¼r, dass auf windowClosing mit abort reagiert wird
     myFrame.addWindowListener(oehrchen);
-    // der ComponentListener sorgt dafür dass bei Verschieben/Größenänderung das
+    // der ComponentListener sorgt dafÃ¼r dass bei Verschieben/GrÃ¶ÃŸenÃ¤nderung das
     // Writer-Fenster ebenfalls angepasst wird.
     myFrame.addComponentListener(oehrchen);
 
@@ -253,24 +253,24 @@ public class FormGUI
      * o maxWindowBounds initialisieren (so wie es eigentlich reichen sollte aber
      * unter KDE leider nicht tut) minus Sicherheitsabzug fuer KDE. Die
      * Initialisierung ist erforderlich, weil vor den folgenden Events schon Events
-     * kommen können, die ein arrangeWindows() erforderlich machen. - Wir
+     * kommen kÃ¶nnen, die ein arrangeWindows() erforderlich machen. - Wir
      * registrieren einen WindowStateListener
      * 
      * o Wir maximieren das Fenster
      * 
      * o Sobald der Event-Handler das erfolgte Maximieren anzeigt, lesen wir die
-     * Größe aus und setzen wieder auf normal.
+     * GrÃ¶ÃŸe aus und setzen wieder auf normal.
      * 
      * o Sobald das Normalsetzen beendet ist deregistriert sich der
      * WindowStateListener und die Fenster werden arrangiert.
      * 
      * Bemerkung: Den Teil mit Normalsetzen kann man vermutlich entfernen, da das
-     * Setzen der Fenstergröße ohnehin den maximierten Zustand verlässt.
+     * Setzen der FenstergrÃ¶ÃŸe ohnehin den maximierten Zustand verlÃ¤sst.
      */
 
     GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
     maxWindowBounds = genv.getMaximumWindowBounds();
-    maxWindowBounds.height -= 32; // Sicherheitsabzug für KDE Taskleiste
+    maxWindowBounds.height -= 32; // Sicherheitsabzug fÃ¼r KDE Taskleiste
 
     myFrame.pack();
     myFrame.setResizable(true);
@@ -316,7 +316,7 @@ public class FormGUI
     if (changeMaxWinBounds)
     {
       Rectangle newBounds = myFrame.getBounds();
-      // sanity check: Falls die neuen Grenzen weniger als 75% der Fläche haben als
+      // sanity check: Falls die neuen Grenzen weniger als 75% der FlÃ¤che haben als
       // die alten (die bis auf die Taskleiste korrekt seien sollten), dann
       // werden sie nicht genommen.
       if (newBounds.width * newBounds.height >= 0.75 * maxWindowBounds.width
@@ -332,7 +332,7 @@ public class FormGUI
   }
 
   /**
-   * Setzt Größe und Ort der FormGUI.
+   * Setzt GrÃ¶ÃŸe und Ort der FormGUI.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -383,7 +383,7 @@ public class FormGUI
       case Common.COORDINATE_UNSPECIFIED: // kein Wert angegeben
         frameBounds.x = maxWindowBounds.x;
         break;
-      default: // Wert angegeben, wird nur einmal berücksichtigt.
+      default: // Wert angegeben, wird nur einmal berÃ¼cksichtigt.
         frameBounds.x = formGUIBounds.x;
         formGUIBounds.x = Common.COORDINATE_UNSPECIFIED;
         break;
@@ -405,16 +405,16 @@ public class FormGUI
       case Common.COORDINATE_UNSPECIFIED: // kein Wert angegeben
         frameBounds.y = maxWindowBounds.y;
         break;
-      default: // Wert angegeben, wird nur einmal berücksichtigt.
+      default: // Wert angegeben, wird nur einmal berÃ¼cksichtigt.
         frameBounds.y = formGUIBounds.y;
         formGUIBounds.y = Common.COORDINATE_UNSPECIFIED;
         break;
     }
 
     /*
-     * Workaround für Bug in Java: Standardmaessig werden die MaximumWindowBounds
-     * nicht berücksichtigt beim ersten Layout (jedoch schon, wenn sich die
-     * Taskleiste verändert).
+     * Workaround fÃ¼r Bug in Java: Standardmaessig werden die MaximumWindowBounds
+     * nicht berÃ¼cksichtigt beim ersten Layout (jedoch schon, wenn sich die
+     * Taskleiste verÃ¤ndert).
      */
     if (frameBounds.y + frameBounds.height > maxWindowBounds.y
       + maxWindowBounds.height)
@@ -439,7 +439,7 @@ public class FormGUI
 
     /*
      * Das Addieren von windowInsets.left und windowInsets.right ist eine Heuristik.
-     * Da sich setWindowPosSize() unter Windows und Linux anders verhält, gibt es
+     * Da sich setWindowPosSize() unter Windows und Linux anders verhÃ¤lt, gibt es
      * keine korrekte Methode (die mir bekannt ist), um die richtige Ausrichtung zu
      * berechnen.
      */
@@ -463,9 +463,9 @@ public class FormGUI
 
   /**
    * Ein WindowListener, der auf den JFrame registriert wird, damit als Reaktion auf
-   * den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird, sowie ein
-   * ComponentListener, der beim Verschieben und Verändern der Größe dafür sorgt,
-   * dass das Writer-Fenster entsprechend mitverändert.
+   * den Schliessen-Knopf auch die ACTION "abort" ausgefÃ¼hrt wird, sowie ein
+   * ComponentListener, der beim Verschieben und VerÃ¤ndern der GrÃ¶ÃŸe dafÃ¼r sorgt,
+   * dass das Writer-Fenster entsprechend mitverÃ¤ndert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -541,7 +541,7 @@ public class FormGUI
   }
 
   /**
-   * Schliesst die FormGUI und alle zugehörigen Fenster.
+   * Schliesst die FormGUI und alle zugehÃ¶rigen Fenster.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

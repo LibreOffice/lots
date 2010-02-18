@@ -1,9 +1,9 @@
 /*
  * Dateiname: WollMuxBar.java
  * Projekt  : WollMux
- * Funktion : Menü-Leiste als zentraler Ausgangspunkt für WollMux-Funktionen
+ * Funktion : MenÃ¼-Leiste als zentraler Ausgangspunkt fÃ¼r WollMux-Funktionen
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,48 +18,48 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 02.01.2006 | BNK | Erstellung
- * 03.01.2006 | BNK | Menüs unterstützt
- * 10.01.2006 | BNK | Icon und Config-File pfadunabhängig über Classloader
+ * 03.01.2006 | BNK | MenÃ¼s unterstÃ¼tzt
+ * 10.01.2006 | BNK | Icon und Config-File pfadunabhÃ¤ngig Ã¼ber Classloader
  *                  | switches --minimize, --topbar, --normalwindow
- * 06.02.2006 | BNK | Menüleiste hinzugefügt
- * 14.02.2006 | BNK | Minimieren rückgängig machen bei Aktivierung der Leiste.
+ * 06.02.2006 | BNK | MenÃ¼leiste hinzugefÃ¼gt
+ * 14.02.2006 | BNK | Minimieren rÃ¼ckgÃ¤ngig machen bei Aktivierung der Leiste.
  * 15.02.2006 | BNK | ordentliches Abort auch bei schliessen des Icon-Fensters
- * 19.04.2006 | BNK | [R1342][R1398]große Aufräumaktion, Umstellung auf WollMuxBarEventHandler
+ * 19.04.2006 | BNK | [R1342][R1398]groÃŸe AufrÃ¤umaktion, Umstellung auf WollMuxBarEventHandler
  * 20.04.2006 | BNK | [R1207][R1205]Icon der WollMuxBar konfigurierbar, Anzeigemodus konfigurierbar
  * 21.04.2006 | BNK | Umgestellt auf UIElementFactory
  *                  | Bitte Warten... in der Senderbox solange noch keine Verbindung besteht
- *                  | Wenn ein Menü mehrfach verwendet wird, so wird jetzt jedes
+ *                  | Wenn ein MenÃ¼ mehrfach verwendet wird, so wird jetzt jedes
  *                  | Mal ein neues erzeugt, um Probleme zu vermeiden, die auftreten
- *                  | könnten, wenn das selbe JMenu an mehreren Stellen in der
+ *                  | kÃ¶nnten, wenn das selbe JMenu an mehreren Stellen in der
  *                  | Komponentenhierarchie erscheint.
- * 24.04.2006 | BNK | kleinere Aufräumarbeiten. Code Review.
+ * 24.04.2006 | BNK | kleinere AufrÃ¤umarbeiten. Code Review.
  * 24.04.2006 | BNK | [R1390]Popup-Fenster, wenn Verbindung zu OOo WollMux nicht hergestellt
  *                  | werden konnte.
  * 24.04.2006 | BNK | [R1460]Popup-Fenster, wenn WollMux nicht konfiguriert.
- * 02.05.2006 | BNK | [R1202 Teil 1] Fensterposition und Größe von WollMuxBar konfigurierbar
+ * 02.05.2006 | BNK | [R1202 Teil 1] Fensterposition und GrÃ¶ÃŸe von WollMuxBar konfigurierbar
  * 29.05.2006 | BNK | in initFactories() Label Typen explizit genullt.
  *                  | Umstellung auf UIElementFactory.Context
  * 16.06.2006 | BNK | Fokusverlust wird simuliert jedes Mal wenn der Benutzer was
- *                  | drückt, damit sich die WollMuxBar dann minimiert.
+ *                  | drÃ¼ckt, damit sich die WollMuxBar dann minimiert.
  * 21.06.2006 | BNK | Gross/Kleinschreibung ignorieren beim Auswertden des MODE
  *                  | Es wird jetzt der letzte Fenster/WollMuxBar-Abschnitt verwendet.
  * 23.06.2006 | BNK | Senderbox von JComboBox auf JPopupMenu umgestellt.    
- * 27.06.2006 | BNK | WIDTH, HEIGHT max korrekt unterstützt 
- * 29.06.2006 | BNK | min, max, center unterstützt    
+ * 27.06.2006 | BNK | WIDTH, HEIGHT max korrekt unterstÃ¼tzt 
+ * 29.06.2006 | BNK | min, max, center unterstÃ¼tzt    
  * 19.07.2006 | BNK | MODE "Icon" repariert 
  * 02.08.2006 | BNK | bessere Fehlermeldung wenn Konfiguration nicht gefunden.    
  * 19.10.2006 | BNK | +ACTION "kill" +ACTION "dumpInfo"    
- * 25.10.2006 | BNK | [P923][R3585]Für den minimierten Zustand wird kein extra Fenster mehr verwendet.
+ * 25.10.2006 | BNK | [P923][R3585]FÃ¼r den minimierten Zustand wird kein extra Fenster mehr verwendet.
  * 25.10.2006 | BNK | Icon-Mode entfernt.
  * 26.10.2006 | LUT | +ACTION "about"
  *                  | +getBuildInfo(), das die buildinfo-Datei der WollMuxBar.jar ausliest
  * 15.01.2007 | BNK | --load hinzugefuegt
  * 23.03.2007 | BNK | openExt implementiert
- * 15.06.2007 | BNK | Beim Download für openExt URL urlEncoden genau wie ConfigThingy für %include
+ * 15.06.2007 | BNK | Beim Download fÃ¼r openExt URL urlEncoden genau wie ConfigThingy fÃ¼r %include
  * 25.06.2007 | BNK | [R7224]Im Minimize-Modus bei Absenderauswahl nicht minimieren
  * 19.07.2007 | BNK | [22882]--load sollte jetzt auch unter Windows funzen
  * -------------------------------------------------------------------
@@ -137,7 +137,7 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
 /**
- * Menü-Leiste als zentraler Ausgangspunkt für WollMux-Funktionen.
+ * MenÃ¼-Leiste als zentraler Ausgangspunkt fÃ¼r WollMux-Funktionen.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -155,7 +155,7 @@ public class WollMuxBar
   private static final String LEERE_LISTE = L.m("<kein Absender vorhanden>");
 
   /**
-   * Präfix für Verzeichnisnamen zum Herunterladen von URLs für ACTION "openExt".
+   * PrÃ¤fix fÃ¼r Verzeichnisnamen zum Herunterladen von URLs fÃ¼r ACTION "openExt".
    */
   private static final String WOLLMUX_DOWNLOAD_DIR_PREFIX =
     "wollmuxbar-temp-download-";
@@ -166,7 +166,7 @@ public class WollMuxBar
   private static final int MINIMIZE_TO_TASKBAR_MODE = 1;
 
   /**
-   * Die WollMuxBar verhält sich wie ein normales Fenster.
+   * Die WollMuxBar verhÃ¤lt sich wie ein normales Fenster.
    */
   private static final int NORMAL_WINDOW_MODE = 2;
 
@@ -176,17 +176,17 @@ public class WollMuxBar
   private static final int ALWAYS_ON_TOP_WINDOW_MODE = 3;
 
   /**
-   * Die WollMuxBar verschwindet am oberen Rand, wenn der Mauscursor sie verlässt.
+   * Die WollMuxBar verschwindet am oberen Rand, wenn der Mauscursor sie verlÃ¤sst.
    */
   private static final int UP_AND_AWAY_WINDOW_MODE = 4;
 
   /**
    * TODO Die WollMuxBar ist vertikal und verschwindet am linken Rand, wenn der
-   * Mauscursor sie verlässt.
+   * Mauscursor sie verlÃ¤sst.
    */
   // private static final int LEFT_AND_AWAY_WINDOW_MODE = 5;
   /**
-   * Der Anzeigemodus für die WollMuxBar (z,B, {@link #UP_AND_AWAY_WINDOW_MODE}).
+   * Der Anzeigemodus fÃ¼r die WollMuxBar (z,B, {@link #UP_AND_AWAY_WINDOW_MODE}).
    */
   private int windowMode;
 
@@ -201,20 +201,20 @@ public class WollMuxBar
   private WollMuxBarEventHandler eventHandler;
 
   /**
-   * Der Rahmen, der die Steuerelemente enthält.
+   * Der Rahmen, der die Steuerelemente enthÃ¤lt.
    */
   private JFrame myFrame;
 
   /**
    * Falls > 0, so ist dies eine von wollmux,conf fest vorgegebene Breite. Falls 0,
-   * so wird die natürliche Breite verwendet. Falls -1, so wird die maximale Breite
+   * so wird die natÃ¼rliche Breite verwendet. Falls -1, so wird die maximale Breite
    * verwendet.
    */
   private int myFrame_width;
 
   /**
-   * Falls > 0, so ist dies eine von wollmux,conf fest vorgegebene Höhe. Falls 0, so
-   * wird die natürliche Höhe verwendet. Falls -1, so wird die maximale Höhe
+   * Falls > 0, so ist dies eine von wollmux,conf fest vorgegebene HÃ¶he. Falls 0, so
+   * wird die natÃ¼rliche HÃ¶he verwendet. Falls -1, so wird die maximale HÃ¶he
    * verwendet.
    */
   private int myFrame_height;
@@ -222,8 +222,8 @@ public class WollMuxBar
   /**
    * Falls >= 0, so ist dies eine von wollmux,conf fest vorgegebene x-Koordinate.
    * Diese wird nur einmal gesetzt. Danach kann der Benutzer das Fenster verschieben,
-   * wenn er möchte. Falls -1, so wird das Fenster zentriert. Falls -2, so wird die
-   * größte sinnvolle Koordinate verwendet. Falls -3, so wird die kleinste sinnvolle
+   * wenn er mÃ¶chte. Falls -1, so wird das Fenster zentriert. Falls -2, so wird die
+   * grÃ¶ÃŸte sinnvolle Koordinate verwendet. Falls -3, so wird die kleinste sinnvolle
    * Koordinate verwendet. Falls Integer.MIN_VALUE, so ist keine Koordinate fest
    * vorgegeben.
    */
@@ -232,26 +232,26 @@ public class WollMuxBar
   /**
    * Falls >= 0, so ist dies eine von wollmux,conf fest vorgegebene y-Koordinate.
    * Diese wird nur einmal gesetzt. Danach kann der Benutzer das Fenster verschieben,
-   * wenn er möchte. Falls -1, so wird das Fenster zentriert. Falls -2, so wird die
-   * größte sinnvolle Koordinate verwendet. Falls -3, so wird die kleinste sinnvolle
+   * wenn er mÃ¶chte. Falls -1, so wird das Fenster zentriert. Falls -2, so wird die
+   * grÃ¶ÃŸte sinnvolle Koordinate verwendet. Falls -3, so wird die kleinste sinnvolle
    * Koordinate verwendet. Falls Integer.MIN_VALUE, so ist keine Koordinate fest
    * vorgegeben.
    */
   private int myFrame_y;
 
   /**
-   * Das Panel für den Inhalt des Fensters der WollMuxBar (myFrame).
+   * Das Panel fÃ¼r den Inhalt des Fensters der WollMuxBar (myFrame).
    */
   private JPanel contentPanel;
 
   /**
-   * Mappt einen Menü-Namen auf ein entsprechendes JPopupMenu.
+   * Mappt einen MenÃ¼-Namen auf ein entsprechendes JPopupMenu.
    */
   private Map<String, JComponent> mapMenuNameToJPopupMenu =
     new HashMap<String, JComponent>();
 
   /**
-   * Mappt einen EXT Attributwert auf die zugehörige
+   * Mappt einen EXT Attributwert auf die zugehÃ¶rige
    * {@link WollMuxBar.ExternalApplication}.
    */
   private Map<String, ExternalApplication> mapExtToExternalApplication =
@@ -263,18 +263,18 @@ public class WollMuxBar
   private UIElementFactory uiElementFactory;
 
   /**
-   * Kontext für GUI-Elemente in JPanels (für Übergabe an die uiElementFactory).
+   * Kontext fÃ¼r GUI-Elemente in JPanels (fÃ¼r Ãœbergabe an die uiElementFactory).
    */
   private UIElementFactory.Context panelContext;
 
   /**
-   * Kontext für GUI-Elemente in JMenus und JPopupMenus (für Übergabe an die
+   * Kontext fÃ¼r GUI-Elemente in JMenus und JPopupMenus (fÃ¼r Ãœbergabe an die
    * uiElementFactory).
    */
   private UIElementFactory.Context menuContext;
 
   /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
+   * Rand um Textfelder (wird auch fÃ¼r ein paar andere RÃ¤nder verwendet) in Pixeln.
    */
   private final static int TF_BORDER = 4;
 
@@ -292,13 +292,13 @@ public class WollMuxBar
 
   private static final String WOLLMUX_CONFIG_ERROR_MESSAGE =
     L.m("Aus Ihrer WollMux-Konfiguration konnte kein Abschnitt \"Symbolleisten\" gelesen werden.\n"
-      + "Die WollMux-Leiste kann daher nicht gestartet werden. Bitte überprüfen Sie, ob in Ihrer wollmux.conf\n"
-      + "der %include für die Konfiguration der WollMuxBar (z.B. wollmuxbar_standard.conf) vorhanden ist und\n"
-      + "überprüfen Sie anhand der wollmux.log ob evtl. beim Verarbeiten eines %includes ein Fehler\n"
+      + "Die WollMux-Leiste kann daher nicht gestartet werden. Bitte Ã¼berprÃ¼fen Sie, ob in Ihrer wollmux.conf\n"
+      + "der %include fÃ¼r die Konfiguration der WollMuxBar (z.B. wollmuxbar_standard.conf) vorhanden ist und\n"
+      + "Ã¼berprÃ¼fen Sie anhand der wollmux.log ob evtl. beim Verarbeiten eines %includes ein Fehler\n"
       + "aufgetreten ist.");
 
   /**
-   * ActionListener für Buttons mit der ACTION "abort".
+   * ActionListener fÃ¼r Buttons mit der ACTION "abort".
    */
   private ActionListener actionListener_abort = new ActionListener()
   {
@@ -309,7 +309,7 @@ public class WollMuxBar
   };
 
   /**
-   * ActionListener für Buttons, denen ein Menü zugeordnet ist.
+   * ActionListener fÃ¼r Buttons, denen ein MenÃ¼ zugeordnet ist.
    */
   private ActionListener actionListener_openMenu = new ActionListener()
   {
@@ -325,7 +325,7 @@ public class WollMuxBar
   private ActionListener closeAction = actionListener_abort;
 
   /**
-   * Aufgerufen wenn der Spezialeintrag "Liste Bearbeiten" in der Senderbox gewählt
+   * Aufgerufen wenn der Spezialeintrag "Liste Bearbeiten" in der Senderbox gewÃ¤hlt
    * wird.
    */
   private ActionListener actionListener_editSenderList = new ActionListener()
@@ -338,7 +338,7 @@ public class WollMuxBar
   };
 
   /**
-   * ActionListener wenn anderer Absender in Senderbox ausgewählt.
+   * ActionListener wenn anderer Absender in Senderbox ausgewÃ¤hlt.
    */
   private ActionListener senderboxActionListener = new ActionListener()
   {
@@ -349,7 +349,7 @@ public class WollMuxBar
   };
 
   /**
-   * Überwacht, ob sich die Maus in irgendwo innerhalb einer Komponente der
+   * Ãœberwacht, ob sich die Maus in irgendwo innerhalb einer Komponente der
    * WollMuxBar befindet.
    */
   private IsInsideMonitor myIsInsideMonitor = new IsInsideMonitor();
@@ -376,7 +376,7 @@ public class WollMuxBar
   private JPanel upAndAwayMinimizedPanel;
 
   /**
-   * Die Menüleiste der WollMuxBar.
+   * Die MenÃ¼leiste der WollMuxBar.
    */
   private JMenuBar menuBar;
 
@@ -408,8 +408,8 @@ public class WollMuxBar
 
     /*
      * Die GUI wird im Event-Dispatching Thread erzeugt wg. Thread-Safety. Auch
-     * eventHandler.connectWithWollMux() wird im EDT ausgeführt, um sicherzustellen,
-     * dass kein updateSenderBoxes() ausgeführt wird, bevor nicht die Senderboxen
+     * eventHandler.connectWithWollMux() wird im EDT ausgefÃ¼hrt, um sicherzustellen,
+     * dass kein updateSenderBoxes() ausgefÃ¼hrt wird, bevor nicht die Senderboxen
      * erzeugt wurden.
      */
     try
@@ -422,7 +422,7 @@ public class WollMuxBar
           {
             /*
              * Dieser Befehl steht VOR dem Aufruf von createGUI(), damit OOo schon
-             * gestartet wird, während wir noch mit GUI aufbauen beschäftigt sind. Es
+             * gestartet wird, wÃ¤hrend wir noch mit GUI aufbauen beschÃ¤ftigt sind. Es
              * ist trotztdem sichergestellt, dass updateSenderboxes() nicht vor der
              * Beendigung von createGUI() aufgerufen werden kann, weil
              * updateSenderboxes() durch den WollMuxBarEventHandler ebenfalls mit
@@ -493,7 +493,7 @@ public class WollMuxBar
       else
       {
         myFrame_x = Integer.parseInt(xStr);
-        // Ja, das folgende ist eine Einschränkung, aber
+        // Ja, das folgende ist eine EinschrÃ¤nkung, aber
         // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
         // obigen Festlegungen
         if (myFrame_x < 0) myFrame_x = 0;
@@ -515,7 +515,7 @@ public class WollMuxBar
       else
       {
         myFrame_y = Integer.parseInt(yStr);
-        // Ja, das folgende ist eine Einschränkung, aber
+        // Ja, das folgende ist eine EinschrÃ¤nkung, aber
         // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
         // obigen Festlegungen
         if (myFrame_y < 0) myFrame_y = 0;
@@ -595,7 +595,7 @@ public class WollMuxBar
     }
 
     // Ein WindowListener, der auf den JFrame registriert wird, damit als
-    // Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
+    // Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgefÃ¼hrt wird.
     myFrame.addWindowListener(new MyWindowListener());
 
     WindowTransformer myWindowTransformer = new WindowTransformer();
@@ -648,7 +648,7 @@ public class WollMuxBar
   }
 
   /**
-   * Passt die Größe und Position der Fenster an.
+   * Passt die GrÃ¶ÃŸe und Position der Fenster an.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -702,7 +702,7 @@ public class WollMuxBar
         break;
       case Integer.MIN_VALUE: // kein Wert angegeben
         break;
-      default: // Wert angegeben, wird nur einmal berücksichtigt.
+      default: // Wert angegeben, wird nur einmal berÃ¼cksichtigt.
         frameLocation.x = myFrame_x;
         myFrame_x = Integer.MIN_VALUE;
         break;
@@ -721,7 +721,7 @@ public class WollMuxBar
         break;
       case Integer.MIN_VALUE: // kein Wert angegeben
         break;
-      default: // Wert angegeben, wird nur einmal berücksichtigt.
+      default: // Wert angegeben, wird nur einmal berÃ¼cksichtigt.
         frameLocation.y = myFrame_y;
         myFrame_y = Integer.MIN_VALUE;
         break;
@@ -737,15 +737,15 @@ public class WollMuxBar
   }
 
   /**
-   * Erzeugt den JFrame für die minimierte Darstellung (WollMux-Logo oder schmaler
+   * Erzeugt den JFrame fÃ¼r die minimierte Darstellung (WollMux-Logo oder schmaler
    * Streifen).
    * 
    * @param title
-   *          der Titel für das Fenster (nur für Anzeige in Taskleiste)
+   *          der Titel fÃ¼r das Fenster (nur fÃ¼r Anzeige in Taskleiste)
    * @param wmBarConf
    *          ConfigThingy des Fenster/WollMuxBar-Abschnitts.
    * @param upAndAwayWidth
-   *          breite des Streifens für Modus "UpAndAway"
+   *          breite des Streifens fÃ¼r Modus "UpAndAway"
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setupMinimizedFrame(String title, ConfigThingy wmBarConf)
@@ -758,26 +758,26 @@ public class WollMuxBar
   }
 
   /**
-   * Fügt der Komponente compo UI Elemente hinzu, eines für jedes Kind von
+   * FÃ¼gt der Komponente compo UI Elemente hinzu, eines fÃ¼r jedes Kind von
    * elementParent.
    * 
    * @param menuConf
-   *          die Kinder dieses ConfigThingys müssen "Menues"-Knoten sein, deren
-   *          Kinder Menübeschreibungen sind für die Menüs, die als UI Elemente
+   *          die Kinder dieses ConfigThingys mÃ¼ssen "Menues"-Knoten sein, deren
+   *          Kinder MenÃ¼beschreibungen sind fÃ¼r die MenÃ¼s, die als UI Elemente
    *          verwendet werden.
    * @param elementParent
    *          das Element, dessen Kinder die UI Elemente beschreiben.
    * @param context
    *          kann die Werte "menu" oder "panel" haben und gibt an, um was es sich
-   *          bei compo handelt. Abhängig vom context werden manche UI Elemente
+   *          bei compo handelt. AbhÃ¤ngig vom context werden manche UI Elemente
    *          anders interpretiert, z.B. werden "button" Elemente im context "menu"
    *          zu JMenuItems.
    * @param compo
-   *          die Komponente zu der die UI Elemente hinzugefügt werden sollen. Falls
+   *          die Komponente zu der die UI Elemente hinzugefÃ¼gt werden sollen. Falls
    *          context nicht "menu" ist, muss compo ein GridBagLayout haben.
    * @param stepx
    *          stepx und stepy geben an, um wieviel mit jedem UI Element die x und die
-   *          y Koordinate innerhalb des GridBagLayouts erhöht werden sollen.
+   *          y Koordinate innerhalb des GridBagLayouts erhÃ¶ht werden sollen.
    *          Sinnvoll sind hier normalerweise nur (0,1) und (1,0).
    * @param stepy
    *          siehe stepx
@@ -792,7 +792,7 @@ public class WollMuxBar
 
   /**
    * Wie addUIElements, aber reicht den Parameter alreadySeen an parseMenu weiter, um
-   * sich gegenseitig enthaltende Menüs zu erkennen.
+   * sich gegenseitig enthaltende MenÃ¼s zu erkennen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -963,28 +963,28 @@ public class WollMuxBar
   }
 
   /**
-   * Parst eine Menübeschreibung und erzeugt ein entsprechendes Menü.
+   * Parst eine MenÃ¼beschreibung und erzeugt ein entsprechendes MenÃ¼.
    * 
    * @param menu
-   *          das JMenu oder JPopupMenu zu dem die UI Elemente hinzugefügt werden
+   *          das JMenu oder JPopupMenu zu dem die UI Elemente hinzugefÃ¼gt werden
    *          sollen.
    * @param menuConf
-   *          die Kinder dieses ConfigThingys müssen "Menues"-Knoten sein, deren
-   *          Kinder Menübeschreibungen sind.
+   *          die Kinder dieses ConfigThingys mÃ¼ssen "Menues"-Knoten sein, deren
+   *          Kinder MenÃ¼beschreibungen sind.
    * @param menuName
-   *          identifiziert das Menü aus menuConf, das geparst wird. Gibt es mehrere,
+   *          identifiziert das MenÃ¼ aus menuConf, das geparst wird. Gibt es mehrere,
    *          so wird das letzte verwendet.
    * @param mapMenuNameToMenu
    *          falls nicht-null, so wird falls bereits ein Eintrag menuName enthalten
-   *          ist, dieser zurückgeliefert, ansonsten wird ein Mapping von menuName
-   *          auf menu hinzugefügt. Falls null, so wird immer ein neues Menü erzeugt,
-   *          außer das menuName ist in alreadySeen, dann gibt es eine Fehlermeldung.
+   *          ist, dieser zurÃ¼ckgeliefert, ansonsten wird ein Mapping von menuName
+   *          auf menu hinzugefÃ¼gt. Falls null, so wird immer ein neues MenÃ¼ erzeugt,
+   *          auÃŸer das menuName ist in alreadySeen, dann gibt es eine Fehlermeldung.
    * @param alreadySeen
    *          falls menuName hier enthalten ist und mapMenuNameToMenu==null dann wird
-   *          eine Fehlermeldung ausgegeben und null zurückgeliefert.
+   *          eine Fehlermeldung ausgegeben und null zurÃ¼ckgeliefert.
    * 
-   * @return menu, falls das Menü erfolgreich aufgebaut werden konnte, null, wenn das
-   *         Menü nicht in menuConf definiert ist oder wenn es in alreadySeen ist und
+   * @return menu, falls das MenÃ¼ erfolgreich aufgebaut werden konnte, null, wenn das
+   *         MenÃ¼ nicht in menuConf definiert ist oder wenn es in alreadySeen ist und
    *         mapMenuNameToMenu == null.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -998,7 +998,7 @@ public class WollMuxBar
     if (mapMenuNameToMenu == null && alreadySeen.contains(menuName))
     {
       Logger.error(L.m(
-        "Menü \"%1\" ist an einer Endlosschleife sich gegenseitig enthaltender Menüs beteiligt",
+        "MenÃ¼ \"%1\" ist an einer Endlosschleife sich gegenseitig enthaltender MenÃ¼s beteiligt",
         menuName));
       return null;
     }
@@ -1011,13 +1011,13 @@ public class WollMuxBar
     catch (Exception x)
     {
       Logger.error(L.m(
-        "Menü \"%1\" nicht definiert oder enthält keinen Abschnitt \"Elemente()\"",
+        "MenÃ¼ \"%1\" nicht definiert oder enthÃ¤lt keinen Abschnitt \"Elemente()\"",
         menuName));
       return null;
     }
 
     /*
-     * Zur Vermeidung von Endlosschleifen müssen die folgenden BEIDEN Statements vor
+     * Zur Vermeidung von Endlosschleifen mÃ¼ssen die folgenden BEIDEN Statements vor
      * dem Aufruf von addUIElementsChecked stehen.
      */
     alreadySeen.add(menuName);
@@ -1135,7 +1135,7 @@ public class WollMuxBar
   }
 
   /**
-   * Behandelt die Events der Eingabeelemente, die über die uiElementFactory erzeugt
+   * Behandelt die Events der Eingabeelemente, die Ã¼ber die uiElementFactory erzeugt
    * wurden (also fast alle).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1200,22 +1200,22 @@ public class WollMuxBar
   }
 
   /**
-   * Erwartet in conf eine Spezifikation gemäß wollmux:Open und bringt einen
-   * Auswahldialog, um die zu öffnenden Vorlagen/Dokumente auszuwählen.
+   * Erwartet in conf eine Spezifikation gemÃ¤ÃŸ wollmux:Open und bringt einen
+   * Auswahldialog, um die zu Ã¶ffnenden Vorlagen/Dokumente auszuwÃ¤hlen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void multiOpenDialog(final ConfigThingy conf)
   {
-    final JFrame multiOpenFrame = new JFrame(L.m("Was möchten Sie öffnen ?"));
+    final JFrame multiOpenFrame = new JFrame(L.m("Was mÃ¶chten Sie Ã¶ffnen ?"));
     multiOpenFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     Box vbox = Box.createVerticalBox();
     multiOpenFrame.getContentPane().add(vbox);
     vbox.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     Box hbox;
     /*
-     * hbox = Box.createHorizontalBox(); hbox.add(new JLabel(L.m("Was möchten Sie
-     * öffnen ?"))); hbox.add(Box.createHorizontalGlue()); vbox.add(hbox);
+     * hbox = Box.createHorizontalBox(); hbox.add(new JLabel(L.m("Was mÃ¶chten Sie
+     * Ã¶ffnen ?"))); hbox.add(Box.createHorizontalGlue()); vbox.add(hbox);
      * vbox.add(Box.createVerticalStrut(5));
      */
     final ConfigThingy openConf = new ConfigThingy(conf); // Kopie machen, die
@@ -1283,7 +1283,7 @@ public class WollMuxBar
     hbox.add(Box.createHorizontalStrut(5));
     hbox.add(Box.createHorizontalGlue());
 
-    button = new JButton(L.m("Öffnen"));
+    button = new JButton(L.m("Ã–ffnen"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -1343,9 +1343,9 @@ public class WollMuxBar
 
   /**
    * Diese Methode liefert die erste Zeile aus der buildinfo-Datei der aktuellen
-   * WollMuxBar zurück. Der Build-Status wird während dem Build-Prozess mit dem
+   * WollMuxBar zurÃ¼ck. Der Build-Status wird wÃ¤hrend dem Build-Prozess mit dem
    * Kommando "svn info" auf das Projektverzeichnis erstellt. Die Buildinfo-Datei
-   * buildinfo enthält die Paketnummer und die svn-Revision und ist in der Datei
+   * buildinfo enthÃ¤lt die Paketnummer und die svn-Revision und ist in der Datei
    * WollMuxBar.jar enthalten.
    * 
    * Kann dieses File nicht gelesen werden, so wird eine entsprechende Ersatzmeldung
@@ -1382,8 +1382,8 @@ public class WollMuxBar
   }
 
   /**
-   * Wird aufgerufen, wenn ein Button aktiviert wird, dem ein Menü zugeordnet ist und
-   * lässt dann das entsprechende Menü aus mapMenuNameToJPopupMenu erscheinen.
+   * Wird aufgerufen, wenn ein Button aktiviert wird, dem ein MenÃ¼ zugeordnet ist und
+   * lÃ¤sst dann das entsprechende MenÃ¼ aus mapMenuNameToJPopupMenu erscheinen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1409,7 +1409,7 @@ public class WollMuxBar
 
   /**
    * Diese Methode wird aufgerufen, wenn in der Senderbox ein anderes Element
-   * ausgewählt wurde und setzt daraufhin den aktuellen Absender im entfernten
+   * ausgewÃ¤hlt wurde und setzt daraufhin den aktuellen Absender im entfernten
    * WollMux neu.
    * 
    * @author Christoph Lutz (D-III-ITD 5.1) TESTED
@@ -1424,12 +1424,12 @@ public class WollMuxBar
   }
 
   /**
-   * Setzt die Einträge aller Senderboxes neu.
+   * Setzt die EintrÃ¤ge aller Senderboxes neu.
    * 
    * @param entries
-   *          die Einträge, die die Senderboxen enthalten sollen.
+   *          die EintrÃ¤ge, die die Senderboxen enthalten sollen.
    * @param current
-   *          der ausgewählte Eintrag
+   *          der ausgewÃ¤hlte Eintrag
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TESTED
    */
   public void updateSenderboxes(String[] entries, String current)
@@ -1439,7 +1439,7 @@ public class WollMuxBar
     {
       Senderbox senderbox = iter.next();
 
-      // alte Items löschen
+      // alte Items lÃ¶schen
       senderbox.removeAllItems();
 
       // neue Items eintragen
@@ -1533,7 +1533,7 @@ public class WollMuxBar
   }
 
   /**
-   * Erzeugt ein Popup-Fenster, das den Benutzer darüber informiert, dass keine
+   * Erzeugt ein Popup-Fenster, das den Benutzer darÃ¼ber informiert, dass keine
    * Verbindung zu OpenOffice hergestellt werden konnte.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1557,7 +1557,7 @@ public class WollMuxBar
 
   /**
    * Ein WindowListener, der auf die JFrames der Leiste registriert wird, damit als
-   * Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
+   * Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgefÃ¼hrt wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1592,7 +1592,7 @@ public class WollMuxBar
 
   /**
    * Wird auf das Leistenfenster als WindowFocusListener registriert, um falls
-   * erforderlich das minimieren anzustoßen.
+   * erforderlich das minimieren anzustoÃŸen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1610,7 +1610,7 @@ public class WollMuxBar
 
   /**
    * Wird auf den Strich am oberen Bildschirmrand registriert im UpAndAway Modus, um
-   * darauf reagieren zu können, wenn die Maus dort eindringt.
+   * darauf reagieren zu kÃ¶nnen, wenn die Maus dort eindringt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1650,7 +1650,7 @@ public class WollMuxBar
   }
 
   /**
-   * Wird auf alle Komponenten der WollMuxBar registriert, um zu überwachen, ob die
+   * Wird auf alle Komponenten der WollMuxBar registriert, um zu Ã¼berwachen, ob die
    * Maus in einer dieser Komponenten ist.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1777,7 +1777,7 @@ public class WollMuxBar
    * {@link #mapExtToExternalApplication}.
    * 
    * @param conf
-   *          Knoten, dessen Kinder "ExterneAnwendungen" Knoten sein müssen.
+   *          Knoten, dessen Kinder "ExterneAnwendungen" Knoten sein mÃ¼ssen.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void parseExternalApplications(ConfigThingy conf)
@@ -1800,7 +1800,7 @@ public class WollMuxBar
         }
         catch (NodeNotFoundException e)
         {
-          Logger.error(L.m("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige EXT-Angabe."));
+          Logger.error(L.m("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthÃ¤lt keine gÃ¼ltige EXT-Angabe."));
           continue;
         }
 
@@ -1826,7 +1826,7 @@ public class WollMuxBar
         }
         catch (NodeNotFoundException e)
         {
-          Logger.error(L.m("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige PROGRAM-Angabe."));
+          Logger.error(L.m("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthÃ¤lt keine gÃ¼ltige PROGRAM-Angabe."));
           continue;
         }
 
@@ -1840,8 +1840,8 @@ public class WollMuxBar
   }
 
   /**
-   * Ruft eine {@link WollMuxBar.ExternalApplication} auf, nachdem falls nötig eine
-   * URL in eine temporäre Datei heruntergeladen wurde.
+   * Ruft eine {@link WollMuxBar.ExternalApplication} auf, nachdem falls nÃ¶tig eine
+   * URL in eine temporÃ¤re Datei heruntergeladen wurde.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1857,16 +1857,16 @@ public class WollMuxBar
      * Erzeugt ein neues OpenExt Objekt.
      * 
      * @param ext
-     *          ID-String für die Anwendung, normalerweise die Dateierweiterung.
+     *          ID-String fÃ¼r die Anwendung, normalerweise die Dateierweiterung.
      *          Falls aus der url kein Dateiname abgeleitet werden konnte wird dieser
-     *          String an einen generierten Dateinamen angehängt.
+     *          String an einen generierten Dateinamen angehÃ¤ngt.
      * @param app
      *          die zu startende {@link WollMuxBar.ExternalApplication}. Falls null,
      *          so wird eine Fehlermeldung geloggt und nichts weiter getan.
      * @param url
-     *          die URL die der Anwendung als Argument übergeben werden soll (bzw.
-     *          die heruntergeladen und als temporäre Datei an die Anwendung
-     *          übergeben werden soll.)
+     *          die URL die der Anwendung als Argument Ã¼bergeben werden soll (bzw.
+     *          die heruntergeladen und als temporÃ¤re Datei an die Anwendung
+     *          Ã¼bergeben werden soll.)
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     public OpenExt(String ext, ExternalApplication app, String url)
@@ -1882,7 +1882,7 @@ public class WollMuxBar
       {
         if (app == null)
         {
-          error(L.m("Für die Erweiterung \"%1\" wurde keine Anwendung definiert.",
+          error(L.m("FÃ¼r die Erweiterung \"%1\" wurde keine Anwendung definiert.",
             ext));
           return;
         }
@@ -1896,7 +1896,7 @@ public class WollMuxBar
           if (!tmpDir.isDirectory() && !tmpDir.canWrite())
           {
             error(L.m(
-              "Temporäres Verzeichnis\n\"%1\"\nexistiert nicht oder kann nicht beschrieben werden!",
+              "TemporÃ¤res Verzeichnis\n\"%1\"\nexistiert nicht oder kann nicht beschrieben werden!",
               tmpDir.getPath()));
             return;
           }
@@ -1913,7 +1913,7 @@ public class WollMuxBar
 
           if (downloadDir == null)
           {
-            error(L.m("Konnte kein temporäres Verzeichnis für den Download der Datei anlegen!"));
+            error(L.m("Konnte kein temporÃ¤res Verzeichnis fÃ¼r den Download der Datei anlegen!"));
             return;
           }
 
@@ -1933,7 +1933,7 @@ public class WollMuxBar
             InputStream istream = srcUrl.openStream();
             if (!destFile.createNewFile())
               throw new IOException(L.m(
-                "Konnte temporäre Datei \"%1\" nicht anlegen", destFile.getPath()));
+                "Konnte temporÃ¤re Datei \"%1\" nicht anlegen", destFile.getPath()));
             FileOutputStream out = new FileOutputStream(destFile);
             byte[] buffy = new byte[4096];
             int len;
@@ -1948,7 +1948,7 @@ public class WollMuxBar
             JOptionPane.showMessageDialog(
               null,
               L.m(
-                "Fehler beim Download der Datei:\n%1\nVerständigen Sie Ihre Systemadministration.",
+                "Fehler beim Download der Datei:\n%1\nVerstÃ¤ndigen Sie Ihre Systemadministration.",
                 x.getMessage()), L.m("Fehlerhafte Konfiguration"),
               JOptionPane.ERROR_MESSAGE);
             return;
@@ -1967,26 +1967,26 @@ public class WollMuxBar
           {
             Process process = proc.start();
             /*
-             * Wenn der gestartete Prozess Ein- oder Ausgabe tätigt, so wird er
-             * blocken, wenn an der anderen Seite nichts hängt das schreibt oder
-             * liest. Am liebsten würden wir natürlich nach /dev/null umleiten, aber
-             * das kann Java nicht (vor allem nicht portabel). Für Stdin ist die
-             * Lösung einfach. Man schließt den Strom. Damit muss jedes Programm
-             * zurecht kommen. Für Stdout/Stderr (oben über redirectErrorStream
+             * Wenn der gestartete Prozess Ein- oder Ausgabe tÃ¤tigt, so wird er
+             * blocken, wenn an der anderen Seite nichts hÃ¤ngt das schreibt oder
+             * liest. Am liebsten wÃ¼rden wir natÃ¼rlich nach /dev/null umleiten, aber
+             * das kann Java nicht (vor allem nicht portabel). FÃ¼r Stdin ist die
+             * LÃ¶sung einfach. Man schlieÃŸt den Strom. Damit muss jedes Programm
+             * zurecht kommen. FÃ¼r Stdout/Stderr (oben Ã¼ber redirectErrorStream
              * zusammengelegt) kann man das zwar auch machen (und das tut der unten
-             * stehende Code auch), aber das ist etwas böse, weil Programme zumindest
-             * unter Unix für gewöhnlich nicht dafür ausgelegt sind, kein
+             * stehende Code auch), aber das ist etwas bÃ¶se, weil Programme zumindest
+             * unter Unix fÃ¼r gewÃ¶hnlich nicht dafÃ¼r ausgelegt sind, kein
              * Stdout+Stderr zu haben. Falls ein Programm damit Probleme hat, kann
              * ein einfaches Shell-Skript als Wrapper verwendet werden, das die
-             * Umleitung nach /dev/null erledigt. Eine alternative Lösung wäre der
+             * Umleitung nach /dev/null erledigt. Eine alternative LÃ¶sung wÃ¤re der
              * unten auskommentierte Code, der einfach Stdout+Stderr ausliest.
-             * Unschön an dieser Lösung ist, dass der Java-Thread weiterläuft solange
-             * wie das externe Programm läuft.
+             * UnschÃ¶n an dieser LÃ¶sung ist, dass der Java-Thread weiterlÃ¤uft solange
+             * wie das externe Programm lÃ¤uft.
              */
             process.getOutputStream().close(); // Prozess daran hindern zu blocken
             // durch Eingabe
-            process.getInputStream().close(); // böse
-            process.getErrorStream().close(); // böse
+            process.getInputStream().close(); // bÃ¶se
+            process.getErrorStream().close(); // bÃ¶se
             /*
              * InputStream istream = process.getInputStream(); byte[] buffy = new
              * byte[256]; while (( 0 <= istream.read(buffy)));
@@ -2001,7 +2001,7 @@ public class WollMuxBar
         }
 
         error(L.m(
-          "Keines der für die Erweiterung \"%1\"konfigurierten Programme konnte gestartet werden!\n%2",
+          "Keines der fÃ¼r die Erweiterung \"%1\"konfigurierten Programme konnte gestartet werden!\n%2",
           ext, errors.toString()));
         return;
 
@@ -2010,7 +2010,7 @@ public class WollMuxBar
       {
         Logger.error(x);
         JOptionPane.showMessageDialog(null, L.m(
-          "%1\nVerständigen Sie Ihre Systemadministration.", x.getMessage()),
+          "%1\nVerstÃ¤ndigen Sie Ihre Systemadministration.", x.getMessage()),
           L.m("Fehlerhafte Konfiguration"), JOptionPane.ERROR_MESSAGE);
         return;
       }
@@ -2020,13 +2020,13 @@ public class WollMuxBar
     {
       Logger.error(errorMsg);
       JOptionPane.showMessageDialog(null, L.m(
-        "%1\nVerständigen Sie Ihre Systemadministration.", errorMsg),
+        "%1\nVerstÃ¤ndigen Sie Ihre Systemadministration.", errorMsg),
         L.m("Fehlerhafte Konfiguration"), JOptionPane.ERROR_MESSAGE);
     }
   }
 
   /**
-   * Öffnet path als Vorlage.
+   * Ã–ffnet path als Vorlage.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -2045,7 +2045,7 @@ public class WollMuxBar
     }
     catch (Exception x)
     {
-      System.err.println(L.m("Versuch, URL \"%1\" zu öffnen gescheitert!", urlStr));
+      System.err.println(L.m("Versuch, URL \"%1\" zu Ã¶ffnen gescheitert!", urlStr));
       x.printStackTrace();
       System.exit(1);
     }
@@ -2122,7 +2122,7 @@ public class WollMuxBar
           else if (windowMode2.equalsIgnoreCase("UpAndAway"))
             windowMode = UP_AND_AWAY_WINDOW_MODE;
           else
-            Logger.error(L.m("Ununterstützer MODE für WollMuxBar-Fenster: '%1'",
+            Logger.error(L.m("UnunterstÃ¼tzer MODE fÃ¼r WollMuxBar-Fenster: '%1'",
               windowMode2));
         }
         catch (Exception x)

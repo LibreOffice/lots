@@ -1,9 +1,9 @@
 /* 
  * Dateiname: AbsenderAuswaehlen.java
  * Projekt  : WollMux
- * Funktion : Implementiert den Absenderdaten auswählen Dialog des BKS
+ * Funktion : Implementiert den Absenderdaten auswÃ¤hlen Dialog des BKS
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,14 +18,14 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 25.10.2005 | BNK | Erstellung
  * 27.10.2005 | BNK | back + CLOSEACTION
- * 02.11.2005 | BNK | Absenderliste nicht mehr mit Vorname = M* befüllen,
+ * 02.11.2005 | BNK | Absenderliste nicht mehr mit Vorname = M* befÃ¼llen,
  *                    weil jetzt der TestDJ schon eine Absenderliste
- *                    mit Einträgen hat.
+ *                    mit EintrÃ¤gen hat.
  * 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
  * 03.01.2005 | BNK | Bug korrigiert;  .gridy = x  sollte .gridx = x sein.
  * 19.05.2006 | BNK | [R1898]Wenn die Liste leer ist, dann gleich den PAL Verwalten Dialog aufrufen
@@ -90,9 +90,9 @@ import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
 
 /**
- * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
- * einen Dialog zum Auswählen eines Eintrages aus der Persönlichen Absenderliste. Die
- * private-Funktionen dürfen NUR aus dem Event-Dispatching Thread heraus aufgerufen
+ * Diese Klasse baut anhand einer als ConfigThingy Ã¼bergebenen Dialogbeschreibung
+ * einen Dialog zum AuswÃ¤hlen eines Eintrages aus der PersÃ¶nlichen Absenderliste. Die
+ * private-Funktionen dÃ¼rfen NUR aus dem Event-Dispatching Thread heraus aufgerufen
  * werden.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -101,16 +101,16 @@ public class AbsenderAuswaehlen
 {
   /**
    * Gibt an, wie die Personen in den Listen angezeigt werden sollen. %{Spalte}
-   * Syntax um entsprechenden Wert des Datensatzes einzufügen.
+   * Syntax um entsprechenden Wert des Datensatzes einzufÃ¼gen.
    */
   private final static String displayTemplate = "%{Nachname}, %{Vorname} (%{Rolle})";
 
   /**
-   * Standardbreite für Textfelder
+   * Standardbreite fÃ¼r Textfelder
    */
   // private final static int TEXTFIELD_DEFAULT_WIDTH = 22;
   /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
+   * Rand um Textfelder (wird auch fÃ¼r ein paar andere RÃ¤nder verwendet) in Pixeln.
    */
   private final static int TF_BORDER = 4;
 
@@ -120,7 +120,7 @@ public class AbsenderAuswaehlen
   private final static int BUTTON_BORDER = 2;
 
   /**
-   * ActionListener für Buttons mit der ACTION "abort".
+   * ActionListener fÃ¼r Buttons mit der ACTION "abort".
    */
   private ActionListener actionListener_abort = new ActionListener()
   {
@@ -131,7 +131,7 @@ public class AbsenderAuswaehlen
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "back".
+   * ActionListener fÃ¼r Buttons mit der ACTION "back".
    */
   private ActionListener actionListener_back = new ActionListener()
   {
@@ -142,7 +142,7 @@ public class AbsenderAuswaehlen
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "editList".
+   * ActionListener fÃ¼r Buttons mit der ACTION "editList".
    */
   private ActionListener actionListener_editList = new ActionListener()
   {
@@ -173,14 +173,14 @@ public class AbsenderAuswaehlen
   private DatasourceJoiner dj;
 
   /**
-   * Die Listbox mit der persönlichen Absenderliste.
+   * Die Listbox mit der persÃ¶nlichen Absenderliste.
    */
   private JList palJList;
 
   /**
    * Der dem
    * {@link #AbsenderAuswaehlen(ConfigThingy, ConfigThingy, DatasourceJoiner, ActionListener) Konstruktor}
-   * übergebene dialogEndListener.
+   * Ã¼bergebene dialogEndListener.
    */
   private ActionListener dialogEndListener;
 
@@ -201,7 +201,7 @@ public class AbsenderAuswaehlen
   private ConfigThingy abConf;
 
   /**
-   * Überwacht Änderungen in der Auswahl und wählt den entsprechenden Datensatz im
+   * Ãœberwacht Ã„nderungen in der Auswahl und wÃ¤hlt den entsprechenden Datensatz im
    * DJ.
    */
   private MyListSelectionListener myListSelectionListener =
@@ -228,8 +228,8 @@ public class AbsenderAuswaehlen
    *          an, die das Beenden des Dialogs veranlasst hat.
    * @throws ConfigurationErrorException
    *           im Falle eines schwerwiegenden Konfigurationsfehlers, der es dem
-   *           Dialog unmöglich macht, zu funktionieren (z.B. dass der "Fenster"
-   *           Schlüssel fehlt.
+   *           Dialog unmÃ¶glich macht, zu funktionieren (z.B. dass der "Fenster"
+   *           SchlÃ¼ssel fehlt.
    */
   public AbsenderAuswaehlen(ConfigThingy conf, ConfigThingy verConf,
       ConfigThingy abConf, DatasourceJoiner dj, ActionListener dialogEndListener)
@@ -243,12 +243,12 @@ public class AbsenderAuswaehlen
 
     ConfigThingy fensterDesc1 = conf.query("Fenster");
     if (fensterDesc1.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1",
+      throw new ConfigurationErrorException(L.m("SchlÃ¼ssel 'Fenster' fehlt in %1",
         conf.getName()));
 
     final ConfigThingy fensterDesc = fensterDesc1.query("Auswaehlen");
     if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Auswaehlen' fehlt in ",
+      throw new ConfigurationErrorException(L.m("SchlÃ¼ssel 'Auswaehlen' fehlt in ",
         conf.getName()));
 
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
@@ -287,7 +287,7 @@ public class AbsenderAuswaehlen
 
     palJList = new JList(new DefaultListModel());
 
-    String title = L.m("TITLE fehlt für Fenster AbsenderAuswaehlen/Auswaehlen");
+    String title = L.m("TITLE fehlt fÃ¼r Fenster AbsenderAuswaehlen/Auswaehlen");
     try
     {
       title = L.m(fensterDesc.get("TITLE").toString());
@@ -347,9 +347,9 @@ public class AbsenderAuswaehlen
   }
 
   /**
-   * Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu. compo muss
+   * FÃ¼gt compo UI Elemente gemÃ¤ss den Kindern von conf.query(key) hinzu. compo muss
    * ein GridBagLayout haben. stepx und stepy geben an um wieviel mit jedem UI
-   * Element die x und die y Koordinate der Zelle erhöht werden soll. Wirklich
+   * Element die x und die y Koordinate der Zelle erhÃ¶ht werden soll. Wirklich
    * sinnvoll sind hier nur (0,1) und (1,0).
    */
   private void addUIElements(ConfigThingy conf, String key, JComponent compo,
@@ -511,7 +511,7 @@ public class AbsenderAuswaehlen
           }
           else
           {
-            Logger.error(L.m("Ununterstützter TYPE für User Interface Element: ",
+            Logger.error(L.m("UnunterstÃ¼tzter TYPE fÃ¼r User Interface Element: ",
               type));
           }
         }
@@ -524,7 +524,7 @@ public class AbsenderAuswaehlen
   }
 
   /**
-   * Wartet auf Doppelklick und führt dann die actionPerformed() Methode eines
+   * Wartet auf Doppelklick und fÃ¼hrt dann die actionPerformed() Methode eines
    * ActionListeners aus.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -556,7 +556,7 @@ public class AbsenderAuswaehlen
   }
 
   /**
-   * Übersetzt den Namen einer ACTION in eine Referenz auf das passende
+   * Ãœbersetzt den Namen einer ACTION in eine Referenz auf das passende
    * actionListener_... Objekt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -580,13 +580,13 @@ public class AbsenderAuswaehlen
       return null;
     }
     else
-      Logger.error(L.m("Ununterstützte ACTION: ", action));
+      Logger.error(L.m("UnunterstÃ¼tzte ACTION: ", action));
 
     return null;
   }
 
   /**
-   * Nimmt eine JList list, die ein DefaultListModel haben muss und ändert ihre
+   * Nimmt eine JList list, die ein DefaultListModel haben muss und Ã¤ndert ihre
    * Wertliste so, dass sie data entspricht. Die Datasets aus data werden nicht
    * direkt als Werte verwendet, sondern in {@link ListElement} Objekte gewrappt.
    * 
@@ -632,7 +632,7 @@ public class AbsenderAuswaehlen
   }
 
   /**
-   * Wrapper um ein DJDataset zum Einfügen in eine JList. Die
+   * Wrapper um ein DJDataset zum EinfÃ¼gen in eine JList. Die
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -689,7 +689,7 @@ public class AbsenderAuswaehlen
   }
 
   /**
-   * Sorgt dafür, dass jeweils nur in einer der beiden Listboxen ein Eintrag
+   * Sorgt dafÃ¼r, dass jeweils nur in einer der beiden Listboxen ein Eintrag
    * selektiert sein kann und dass die entsprechenden Buttons ausgegraut werden wenn
    * kein Eintrag selektiert ist.
    */
@@ -729,7 +729,7 @@ public class AbsenderAuswaehlen
   }
 
   /**
-   * Beendet den Dialog und liefer actionCommand an den dialogEndHandler zurück
+   * Beendet den Dialog und liefer actionCommand an den dialogEndHandler zurÃ¼ck
    * (falls er nicht null ist).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -781,11 +781,11 @@ public class AbsenderAuswaehlen
 
     /**
      * Falls actionPerformed() mit getActionCommand().equals("back") aufgerufen wird,
-     * wird ein neuer AbsenderAuswaehlen Dialog mit den übergebenen Parametern
+     * wird ein neuer AbsenderAuswaehlen Dialog mit den Ã¼bergebenen Parametern
      * erzeugt. Ansonsten wird der dialogEndListener mit actionCommand aufgerufen.
      * Falls actionCommand null ist wird das action command des ActionEvents
-     * weitergereicht, der actionPerformed() übergeben wird. Falls actionPerformed ==
-     * null wird auch die source weitergereicht, ansonsten wird die übergebene source
+     * weitergereicht, der actionPerformed() Ã¼bergeben wird. Falls actionPerformed ==
+     * null wird auch die source weitergereicht, ansonsten wird die Ã¼bergebene source
      * verwendet.
      */
     public MyDialogEndListener(AbsenderAuswaehlen source, ConfigThingy conf,
@@ -828,7 +828,7 @@ public class AbsenderAuswaehlen
 
   /**
    * Ein WindowListener, der auf den JFrame registriert wird, damit als Reaktion auf
-   * den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
+   * den Schliessen-Knopf auch die ACTION "abort" ausgefÃ¼hrt wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -862,16 +862,16 @@ public class AbsenderAuswaehlen
   }
 
   /**
-   * Zerstört den Dialog. Nach Aufruf dieser Funktion dürfen keine weiteren Aufrufe
+   * ZerstÃ¶rt den Dialog. Nach Aufruf dieser Funktion dÃ¼rfen keine weiteren Aufrufe
    * von Methoden des Dialogs erfolgen. Die Verarbeitung erfolgt asynchron. Wurde dem
-   * Konstruktor ein entsprechender ActionListener übergeben, so wird seine
+   * Konstruktor ein entsprechender ActionListener Ã¼bergeben, so wird seine
    * actionPerformed() Funktion aufgerufen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void dispose()
   {
-    // GUI im Event-Dispatching Thread zerstören wg. Thread-Safety.
+    // GUI im Event-Dispatching Thread zerstÃ¶ren wg. Thread-Safety.
     try
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
@@ -887,7 +887,7 @@ public class AbsenderAuswaehlen
   }
 
   /**
-   * Sorgt für das dauernde Neustarten des Dialogs.
+   * Sorgt fÃ¼r das dauernde Neustarten des Dialogs.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

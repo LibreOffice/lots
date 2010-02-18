@@ -1,9 +1,9 @@
 /*
  * Dateiname: DocumentTree.java
  * Projekt  : WollMux
- * Funktion : Stellt die interessanten Teile eines Textdokuments als Baum zur Verfügung.
+ * Funktion : Stellt die interessanten Teile eines Textdokuments als Baum zur VerfÃ¼gung.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 04.08.2006 | BNK | Erstellung
  * 28.08.2006 | BNK | kommentiert
@@ -61,7 +61,7 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXValue;
 
 /**
- * Stellt die interessanten Teile eines Textdokuments als Baum zur Verfügung.
+ * Stellt die interessanten Teile eines Textdokuments als Baum zur VerfÃ¼gung.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -74,28 +74,28 @@ public class DocumentTree
     Pattern.compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'setGroups'.*\\))\\s*\\d*\\z");
 
   /**
-   * Rückgabewert für {@link FormControl#getType()} im Falle einer Checkbox.
+   * RÃ¼ckgabewert fÃ¼r {@link FormControl#getType()} im Falle einer Checkbox.
    */
   public static final int CHECKBOX_CONTROL = 0;
 
   /**
-   * Rückgabewert für {@link FormControl#getType()} im Falle einer Eingabeliste.
+   * RÃ¼ckgabewert fÃ¼r {@link FormControl#getType()} im Falle einer Eingabeliste.
    */
   public static final int DROPDOWN_CONTROL = 1;
 
   /**
-   * Rückgabewert für {@link FormControl#getType()} im Falle eines Eingabefeldes.
+   * RÃ¼ckgabewert fÃ¼r {@link FormControl#getType()} im Falle eines Eingabefeldes.
    */
   public static final int INPUT_CONTROL = 2;
 
   /**
-   * Rückgabewert für {@link Container#getType()} falls die Art des Containers nicht
-   * näher bestimmt ist.
+   * RÃ¼ckgabewert fÃ¼r {@link Container#getType()} falls die Art des Containers nicht
+   * nÃ¤her bestimmt ist.
    */
   public static final int CONTAINER_TYPE = 0;
 
   /**
-   * Rückgabewert für {@link Container#getType()} falls der Container ein Absatz ist.
+   * RÃ¼ckgabewert fÃ¼r {@link Container#getType()} falls der Container ein Absatz ist.
    */
   public static final int PARAGRAPH_TYPE = 1;
 
@@ -105,7 +105,7 @@ public class DocumentTree
   private Node root;
 
   /**
-   * Erzeugt einen neuen Dokumentbaum für das Dokument doc.
+   * Erzeugt einen neuen Dokumentbaum fÃ¼r das Dokument doc.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -158,11 +158,11 @@ public class DocumentTree
   }
 
   /**
-   * Nimmt eine XEnumeration enu von Absätzen und TextTables und fügt für jedes
+   * Nimmt eine XEnumeration enu von AbsÃ¤tzen und TextTables und fÃ¼gt fÃ¼r jedes
    * Element von enu zu nodes einen entsprechenden {@link ContainerNode} hinzu.
    * 
    * @param doc
-   *          das Dokument in dem die Absätze liegen.
+   *          das Dokument in dem die AbsÃ¤tze liegen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void handleParagraphEnumeration(XEnumeration enu, Vector<Node> nodes,
@@ -186,7 +186,7 @@ public class DocumentTree
         handleParagraph(enuAccess, nodes, doc);
       }
       else
-      // unterstützt nicht XEnumerationAccess, ist wohl SwXTextTable
+      // unterstÃ¼tzt nicht XEnumerationAccess, ist wohl SwXTextTable
       {
         XTextTable table = UNO.XTextTable(ele);
         if (table != null) handleTextTable(table, nodes, doc);
@@ -195,11 +195,11 @@ public class DocumentTree
   }
 
   /**
-   * Fügt nodes einen neuen {@link ContainerNode} hinzu, der die Zellen von table
-   * enthält.
+   * FÃ¼gt nodes einen neuen {@link ContainerNode} hinzu, der die Zellen von table
+   * enthÃ¤lt.
    * 
    * @param doc
-   *          das Dokument das die Tabelle enthält.
+   *          das Dokument das die Tabelle enthÃ¤lt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void handleTextTable(XTextTable table, Collection<Node> nodes,
@@ -220,11 +220,11 @@ public class DocumentTree
   }
 
   /**
-   * Fügt nodes einen neuen {@link ParagraphNode} hinzu, der die Inhalte des Absatzes
+   * FÃ¼gt nodes einen neuen {@link ParagraphNode} hinzu, der die Inhalte des Absatzes
    * paragraph.
    * 
    * @param doc
-   *          das Dokument das den Absatz enthält.
+   *          das Dokument das den Absatz enthÃ¤lt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void handleParagraph(XEnumerationAccess paragraph, Collection<Node> nodes,
@@ -401,7 +401,7 @@ public class DocumentTree
   }
 
   /**
-   * Wird von Nodes unterstützt, die ein Bookmark repräsentieren, das eine Einfügung
+   * Wird von Nodes unterstÃ¼tzt, die ein Bookmark reprÃ¤sentieren, das eine EinfÃ¼gung
    * (insertFormValue oder insertValue) darstellt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -437,15 +437,15 @@ public class DocumentTree
     public String getDescriptor();
 
     /**
-     * Legt ein Bookmark mit gewünschtem Namen bmName um das Steuerelement und
-     * liefert den Namen mit dem das Bookmark tatsächlich erzeugt wurde zurück.
+     * Legt ein Bookmark mit gewÃ¼nschtem Namen bmName um das Steuerelement und
+     * liefert den Namen mit dem das Bookmark tatsÃ¤chlich erzeugt wurde zurÃ¼ck.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public String surroundWithBookmark(String bmName);
 
     /**
-     * Liefert den aktuell im Steuerelement eingestellten Wert zurück. Boolesche
+     * Liefert den aktuell im Steuerelement eingestellten Wert zurÃ¼ck. Boolesche
      * Steuerelemente (Checkbox) liefern "true" oder "false".
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -464,11 +464,11 @@ public class DocumentTree
   }
 
   /**
-   * Abstrakte Basis-Klasse für das Besuchen aller Knoten eines DocumentTrees. Dazu
+   * Abstrakte Basis-Klasse fÃ¼r das Besuchen aller Knoten eines DocumentTrees. Dazu
    * wird ein Objekt erzeugt, das von Visitor abgeleitet ist und dann auf diesem
    * Objekt obj die Methode obj.visit(tree) aufgerufen, wobei tree ein DocumentTree
-   * ist. Für jeden Node des Baums wird dann die entsprechende Methode von Visitor
-   * aufgerufen (teilweise mehrfach). Die Methoden können alle false zurückliefern um
+   * ist. FÃ¼r jeden Node des Baums wird dann die entsprechende Methode von Visitor
+   * aufgerufen (teilweise mehrfach). Die Methoden kÃ¶nnen alle false zurÃ¼ckliefern um
    * zu signalisieren, dass das Durchlaufen des Baumes abgebrochen werden soll. Die
    * von Standard-Methoden liefern alle true.
    * 
@@ -482,8 +482,8 @@ public class DocumentTree
     }
 
     /**
-     * Wird für Knoten aufgerufen, die eine Einfügestelle (insertValue,
-     * insertFormValue) repräsentieren.
+     * Wird fÃ¼r Knoten aufgerufen, die eine EinfÃ¼gestelle (insertValue,
+     * insertFormValue) reprÃ¤sentieren.
      * 
      * @return false, wenn keine weiteren Knoten besucht werden sollen.
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -494,7 +494,7 @@ public class DocumentTree
     }
 
     /**
-     * Wird für Knoten aufgerufen, die Formularsteuerelement repräsentieren.
+     * Wird fÃ¼r Knoten aufgerufen, die Formularsteuerelement reprÃ¤sentieren.
      * 
      * @return false, wenn keine weiteren Knoten besucht werden sollen.
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -505,8 +505,8 @@ public class DocumentTree
     }
 
     /**
-     * Wird für Knoten aufgerufen, die im inneren des Baumes liegen, d,h, Kindknoten
-     * haben können. Dies sind zum Beispiel Absätze.
+     * Wird fÃ¼r Knoten aufgerufen, die im inneren des Baumes liegen, d,h, Kindknoten
+     * haben kÃ¶nnen. Dies sind zum Beispiel AbsÃ¤tze.
      * 
      * @param count
      *          Der Knoten wird einmal mit count == 0 besucht bevor der erste
@@ -521,7 +521,7 @@ public class DocumentTree
     }
 
     /**
-     * Wird für Knoten aufgerufen, die Textabschnitte repräsentieren.
+     * Wird fÃ¼r Knoten aufgerufen, die Textabschnitte reprÃ¤sentieren.
      * 
      * @return false, wenn keine weiteren Knoten besucht werden sollen.
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -533,14 +533,14 @@ public class DocumentTree
   }
 
   /**
-   * Oberklasse für die Knoten des Dokumentbaums.
+   * Oberklasse fÃ¼r die Knoten des Dokumentbaums.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static abstract class Node
   {
     /**
-     * Liefert einen Iterator über alle Kindknoten.
+     * Liefert einen Iterator Ã¼ber alle Kindknoten.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -557,7 +557,7 @@ public class DocumentTree
      * diesem Knoten als Wurzel. Es werden die entsprechenden Methoden des
      * {@link Visitor}s visit aufgerufen.
      * 
-     * @return false falls die entsprechende Methode von visit zurückliefert, dass
+     * @return false falls die entsprechende Methode von visit zurÃ¼ckliefert, dass
      *         keine weiteren Knoten mehr besucht werden sollen.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -568,7 +568,7 @@ public class DocumentTree
   }
 
   /**
-   * Implementiert von Knoten, die Nachfahren haben können, z,B, Absätzen.
+   * Implementiert von Knoten, die Nachfahren haben kÃ¶nnen, z,B, AbsÃ¤tzen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -583,7 +583,7 @@ public class DocumentTree
   }
 
   /**
-   * Oberklasse für Knoten, die Nachfahren haben können (z,B, Absätze).
+   * Oberklasse fÃ¼r Knoten, die Nachfahren haben kÃ¶nnen (z,B, AbsÃ¤tze).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

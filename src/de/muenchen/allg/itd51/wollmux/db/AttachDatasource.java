@@ -1,9 +1,9 @@
 /* 
  * Dateiname: AttachDatasource.java
  * Projekt  : WollMux
- * Funktion : Eine Datenquelle, die eine andere Datenquelle um Spalten ergänzt.
+ * Funktion : Eine Datenquelle, die eine andere Datenquelle um Spalten ergÃ¤nzt.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,11 +18,11 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 08.11.2005 | BNK | Erstellung
- * 09.11.2005 | BNK | find() auf Spalten der ATTACH-Datenquelle unterstützt
+ * 09.11.2005 | BNK | find() auf Spalten der ATTACH-Datenquelle unterstÃ¼tzt
  * 10.11.2005 | BNK | korrekte Filterung nach Spalten der ATTACH-Datenquelle
  * -------------------------------------------------------------------
  *
@@ -52,27 +52,27 @@ import de.muenchen.allg.itd51.wollmux.db.checker.DatasetChecker;
 import de.muenchen.allg.itd51.wollmux.db.checker.MatchAllDatasetChecker;
 
 /**
- * Eine Datenquelle, die eine andere Datenquelle um Spalten ergänzt. Zur Erstellung
- * der Menge der Ergebnisdatensätze wird jeder Datensatz aus SOURCE1 genau einmal
+ * Eine Datenquelle, die eine andere Datenquelle um Spalten ergÃ¤nzt. Zur Erstellung
+ * der Menge der ErgebnisdatensÃ¤tze wird jeder Datensatz aus SOURCE1 genau einmal
  * verwendet und jeder Datensatz aus SOURCE2 beliebig oft (auch keinmal).
  * Unterschiede zu einem richtigen Join:<br>
  * <br>
- * a) Verhindert, dass eine Person 2 mal auftaucht, nur weil es 2 Einträge mit
- * Verkehrsverbindungen für ihre Adresse gibt<br>
+ * a) Verhindert, dass eine Person 2 mal auftaucht, nur weil es 2 EintrÃ¤ge mit
+ * Verkehrsverbindungen fÃ¼r ihre Adresse gibt<br>
  * b) Verhindert, dass eine Person rausfliegt, weil es zu ihrer Adresse keine
  * Verkehrsverbindung gibt<br>
- * c) Die Schlüssel der Ergebnisdatensätze bleiben die aus SOURCE1 und werden nicht
+ * c) Die SchlÃ¼ssel der ErgebnisdatensÃ¤tze bleiben die aus SOURCE1 und werden nicht
  * kombiniert aus SOURCE1 und SOURCE2. Das verhindert, dass ein Datensatz bei einer
- * Änderung der Adresse aus der lokalen Absenderliste fliegt, weil er beim
+ * Ã„nderung der Adresse aus der lokalen Absenderliste fliegt, weil er beim
  * Cache-Refresh nicht mehr gefunden wird. <br>
  * <br>
  * In der Ergebnisdatenquelle sind alle Spalten von SOURCE1 unter ihrem
- * ursprünglichen Namen, alle Spalten von SOURCE2 unter dem Namen von SOURCE2
+ * ursprÃ¼nglichen Namen, alle Spalten von SOURCE2 unter dem Namen von SOURCE2
  * konkateniert mit "." konkateniert mit dem Spaltennamen zu finden. <br>
  * <br>
- * Argument gegen automatische Umbenennung/Aliase für Spalten aus SOURCE2, deren Name
- * sich nicht mit einer Spalte aus SOURCE1 stört:<br>
- * <br> - Der Alias würde verschwinden, wenn die Quelle SOURCE1 später einmal um eine
+ * Argument gegen automatische Umbenennung/Aliase fÃ¼r Spalten aus SOURCE2, deren Name
+ * sich nicht mit einer Spalte aus SOURCE1 stÃ¶rt:<br>
+ * <br> - Der Alias wÃ¼rde verschwinden, wenn die Quelle SOURCE1 spÃ¤ter einmal um eine
  * Spalte mit dem entsprechenden Namen erweitert wird. Definitionen, die den Alias
  * verwendet haben verwenden ab da stillschweigend die Spalte aus SOURCE1, was
  * schwierig zu findende Fehler nach sich ziehen kann.
@@ -105,13 +105,13 @@ public class AttachDatasource implements Datasource
    * Erzeugt eine neue AttachDatasource.
    * 
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser AttachDatasource
-   *          bereits vollständig instanziierten Datenquellen.
+   *          enthÃ¤lt alle bis zum Zeitpunkt der Definition dieser AttachDatasource
+   *          bereits vollstÃ¤ndig instanziierten Datenquellen.
    * @param sourceDesc
    *          der "Datenquelle"-Knoten, der die Beschreibung dieser AttachDatasource
-   *          enthält.
+   *          enthÃ¤lt.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
+   *          der Kontext relativ zu dem URLs aufgelÃ¶st werden sollen (zur Zeit nicht
    *          verwendet).
    */
   public AttachDatasource(Map<String, Datasource> nameToDatasource,
@@ -282,7 +282,7 @@ public class AttachDatasource implements Datasource
 
     /*
      * Die ATTACH-Datenquelle ist normalerweise nur untergeordnet und
-     * Spaltenbedingungen dafür schränken die Suchergebnisse wenig ein. Deshalb
+     * Spaltenbedingungen dafÃ¼r schrÃ¤nken die Suchergebnisse wenig ein. Deshalb
      * werten wir falls wir mindestens eine Bedingung an die Hauptdatenquelle haben,
      * die Anfrage auf dieser Datenquelle aus.
      */

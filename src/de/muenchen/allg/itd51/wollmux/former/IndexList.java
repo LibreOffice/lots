@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Verwaltet eine Liste von Indices.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 29.09.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -42,9 +42,9 @@ public class IndexList
   private Vector<Integer> indices = new Vector<Integer>();
 
   /**
-   * Addiert auf alle Indizes in der {@link #indices} Liste größer gleich start den
+   * Addiert auf alle Indizes in der {@link #indices} Liste grÃ¶ÃŸer gleich start den
    * offset. Indizes die dabei < 0 oder > maxindex werden werden aus der Liste
-   * gelöscht.
+   * gelÃ¶scht.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -87,7 +87,7 @@ public class IndexList
   }
 
   /**
-   * Liefert einen Iterator über die Integers in dieser Liste.
+   * Liefert einen Iterator Ã¼ber die Integers in dieser Liste.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

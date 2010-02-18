@@ -1,9 +1,9 @@
 /*
  * Dateiname: XPALChangeEventBroadcaster.idl
  * Projekt  : WollMux
- * Funktion : Interface-Definition für einen Broadcaster von Änderungen an der Persönliche Absenderliste (PAL)
+ * Funktion : Interface-Definition fÃ¼r einen Broadcaster von Ã„nderungen an der PersÃ¶nliche Absenderliste (PAL)
  * 
- * Copyright (C) 2009 Landeshauptstadt München
+ * Copyright (C) 2009 Landeshauptstadt MÃ¼nchen
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,40 +35,40 @@
 module de {  module muenchen {  module allg { module itd51 { module wollmux {
 
 /** 
-  Das Interface XPALChangeEventBroadcasteristener definiert einen Broadcaster, der über
-  Änderungen an der Persönlichen Absenderliste (PAL) informieren kann. Er enthält
+  Das Interface XPALChangeEventBroadcasteristener definiert einen Broadcaster, der Ã¼ber
+  Ã„nderungen an der PersÃ¶nlichen Absenderliste (PAL) informieren kann. Er enthÃ¤lt
   Methoden zum Registrieren und Deregistrieren von XPALChangeEventListenern.
  */ 
 interface XPALChangeEventBroadcaster
 {
     /**
       Diese Methode registriert einen XPALChangeEventListener, der updates
-      empfängt wenn sich die PAL ändert. Nach dem Registrieren wird sofort ein
-      ON_SELECTION_CHANGED Ereignis ausgelöst, welches dafür sort, dass sofort
-      ein erster update aller Listener ausgeführt wird. Die Methode ignoriert
+      empfÃ¤ngt wenn sich die PAL Ã¤ndert. Nach dem Registrieren wird sofort ein
+      ON_SELECTION_CHANGED Ereignis ausgelÃ¶st, welches dafÃ¼r sort, dass sofort
+      ein erster update aller Listener ausgefÃ¼hrt wird. Die Methode ignoriert
       alle XPALChangeEventListenener-Instanzen, die bereits registriert wurden.
-      Mehrfachregistrierung der selben Instanz ist also nicht möglich.
+      Mehrfachregistrierung der selben Instanz ist also nicht mÃ¶glich.
      */
 	void addPALChangeEventListener( [in] XPALChangeEventListener listener);
 
     /**
       Diese Methode registriert einen XPALChangeEventListener, der updates
-      empfängt wenn sich die PAL ändert; nach der Registrierung wird geprüft, ob
+      empfÃ¤ngt wenn sich die PAL Ã¤ndert; nach der Registrierung wird geprÃ¼ft, ob
       der WollMux und der XPALChangeEventListener die selbe WollMux-Konfiguration
       verwenden, wozu der Listener den HashCode wollmuxConfHashCode der aktuellen
-      WollMux-Konfiguration übermittelt. Stimmt wollmuxConfHashCode nicht mit dem
-      HashCode der WollMux-Konfiguration des WollMux überein, so erscheint ein
-      Dialog, der vor möglichen Fehlern warnt. Nach dem Registrieren wird sofort
-      ein ON_SELECTION_CHANGED Ereignis ausgelöst, welches dafür sort, dass
-      sofort ein erster update aller Listener ausgeführt wird. Die Methode
+      WollMux-Konfiguration Ã¼bermittelt. Stimmt wollmuxConfHashCode nicht mit dem
+      HashCode der WollMux-Konfiguration des WollMux Ã¼berein, so erscheint ein
+      Dialog, der vor mÃ¶glichen Fehlern warnt. Nach dem Registrieren wird sofort
+      ein ON_SELECTION_CHANGED Ereignis ausgelÃ¶st, welches dafÃ¼r sort, dass
+      sofort ein erster update aller Listener ausgefÃ¼hrt wird. Die Methode
       ignoriert alle XPALChangeEventListenener-Instanzen, die bereits registriert
-      wurden. Mehrfachregistrierung der selben Instanz ist also nicht möglich.
+      wurden. Mehrfachregistrierung der selben Instanz ist also nicht mÃ¶glich.
       
       @param l
                Der zu registrierende XPALChangeEventListener
       @param wollmuxConfHashCode
-               Der HashCode der WollMux-Config der zur Konsistenzprüfung
-               herangezogen wird und über
+               Der HashCode der WollMux-Config der zur KonsistenzprÃ¼fung
+               herangezogen wird und Ã¼ber
                WollMuxFiles.getWollMuxConf().getStringRepresentation().hashCode()
                erzeugt wird.
      */

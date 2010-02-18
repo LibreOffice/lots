@@ -1,9 +1,9 @@
 /*
  * Dateiname: XWollMux.idl
  * Projekt  : WollMux
- * Funktion : Interface-Definition für den WollMux-Service
+ * Funktion : Interface-Definition fÃ¼r den WollMux-Service
  * 
- * Copyright (C) 2009 Landeshauptstadt München
+ * Copyright (C) 2009 Landeshauptstadt MÃ¼nchen
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,35 +47,35 @@ interface XWollMux
 
     /**
      * Die in diesem Interface beschriebenen Methoden registrieren bzw. deregistrieren
-     * enstprechende Listener vom Typ XEventListener, über die der WollMux
-     * über den Status der Dokumentbearbeitung informiert (z.B. wenn ein Dokument
-     * vollständig bearbeitet/expandiert wurde). Die register-Methode ignoriert alle
+     * enstprechende Listener vom Typ XEventListener, Ã¼ber die der WollMux
+     * Ã¼ber den Status der Dokumentbearbeitung informiert (z.B. wenn ein Dokument
+     * vollstÃ¤ndig bearbeitet/expandiert wurde). Die register-Methode ignoriert alle
      * XEventListenener-Instanzen, die bereits registriert wurden.
-     * Mehrfachregistrierung der selben Instanz sind also nicht möglich.
+     * Mehrfachregistrierung der selben Instanz sind also nicht mÃ¶glich.
      * 
      * Tritt ein entstprechendes Ereignis ein, so erfolgt der Aufruf der
      * entsprechenden Methoden XEventListener.notifyEvent(...) immer gleichzeitig
-     * (d.h. für jeden Listener in einem eigenen Thread).
+     * (d.h. fÃ¼r jeden Listener in einem eigenen Thread).
      * 
      * Der WollMux liefert derzeit folgende Events:
      * 
      * OnWollMuxProcessingFinished: Dieses Event wird erzeugt, wenn ein
-     * Textdokument nach dem Öffnen vollständig vom WollMux bearbeitet und
+     * Textdokument nach dem Ã–ffnen vollstÃ¤ndig vom WollMux bearbeitet und
      * expandiert wurde oder bei allen anderen Dokumenttypen direkt nach dem
-     * Öffnen. D.h. für jedes in OOo geöffnete Dokument erfolgt früher oder später
+     * Ã–ffnen. D.h. fÃ¼r jedes in OOo geÃ¶ffnete Dokument erfolgt frÃ¼her oder spÃ¤ter
      * ein solches Event. Wird ein neuer EventHandler registriert, so werden ihm
-     * für alle bereits offenen OpenOffice.org Dokumente die 
+     * fÃ¼r alle bereits offenen OpenOffice.org Dokumente die 
      * OnWollMuxProcessingFinished Events nachgeliefert.
      */	
     interface com::sun::star::document::XEventBroadcaster;
 
     /**
-      Diese Methode setzt den aktuellen Absender der Persönlichen Absenderliste
+      Diese Methode setzt den aktuellen Absender der PersÃ¶nlichen Absenderliste
       (PAL) auf den Absender sender. Der Absender wird nur gesetzt, wenn die
       Parameter sender und idx in der alphabetisch sortierten Absenderliste des
-      WollMux übereinstimmen - d.h. die Absenderliste der veranlassenden
+      WollMux Ã¼bereinstimmen - d.h. die Absenderliste der veranlassenden
       SenderBox zum Zeitpunkt der Auswahl konsistent zur PAL des WollMux war. 
-      Die Methode verwendet für sender das selben Format wie es vom
+      Die Methode verwendet fÃ¼r sender das selben Format wie es vom
       XPALProvider:getCurrentSender() geliefert wird.
      */
     void setCurrentSender([in] string sender, [in] short index);
@@ -83,29 +83,29 @@ interface XWollMux
     /**
       Diese Methode liefert den Wert zur Datenbankspalte dbSpalte, der dem Wert
       entspricht, den das Dokumentkommando WM(CMD'insertValue' DB_SPALTE'<dbSpalte>')
-      in das Dokument einfügen würde, oder den Leerstring "" wenn dieser Wert
-      nicht bestimmt werden kann (z.B. wenn ein ungültiger Spaltennamen dbSpalte
-      übergeben wurde). So ist es z.B. möglich, aus externen Anwendungen (z.B.
+      in das Dokument einfÃ¼gen wÃ¼rde, oder den Leerstring "" wenn dieser Wert
+      nicht bestimmt werden kann (z.B. wenn ein ungÃ¼ltiger Spaltennamen dbSpalte
+      Ã¼bergeben wurde). So ist es z.B. mÃ¶glich, aus externen Anwendungen (z.B.
       Basic-Makros) auf Werte des aktuell gesetzten Absenders des WollMux
       zuzugreifen.
     
       Anmerkung: Ist die aufrufende Anwendung ein Basic-Makro, so muss damit
       gerechnet werden, dass dieses Makro bereits in einer synchronisierten
-      Umgebung abläuft (das ist Standard bei Basic-Makros). Um Deadlocks in
-      Zusammenhang mit dem WollMux zu vermeiden, darf die Methode also nicht über
+      Umgebung ablÃ¤uft (das ist Standard bei Basic-Makros). Um Deadlocks in
+      Zusammenhang mit dem WollMux zu vermeiden, darf die Methode also nicht Ã¼ber
       den WollMuxEventHandler synchonisiert werden. Aufgrund der fehlenden
       Synchronisierung auf Seiten des WollMux ist die Methode jedoch mit Vorsicht
-      zu genießen. Insbesondere sollten die über diese Methode gelieferten Werte
+      zu genieÃŸen. Insbesondere sollten die Ã¼ber diese Methode gelieferten Werte
       NICHT verwendet werden, um z.B. mit setCurrentSender() Daten des WollMux zu
       manipulieren.
     
-      Zum Auslesen und Reagieren auf Änderungen der PersoenlichenAbsenderlist
+      Zum Auslesen und Reagieren auf Ã„nderungen der PersoenlichenAbsenderlist
       (PAL) sollten die Methoden verwendet werden, die der XPALProvider anbietet.
-      Diese Methoden sind über den WollMuxEventHandler synchronisiert.
+      Diese Methoden sind Ã¼ber den WollMuxEventHandler synchronisiert.
     
       @param dbSpalte
-               Name der Datenbankspalte deren Wert zurückgeliefert werden soll.
-      @return Der Wert der Datenbankspalte dbSpalte des aktuell ausgewählten
+               Name der Datenbankspalte deren Wert zurÃ¼ckgeliefert werden soll.
+      @return Der Wert der Datenbankspalte dbSpalte des aktuell ausgewÃ¤hlten
               Absenders oder "", wenn der Wert nicht bestimmt werden kann.
      */	
     string getValue([in] string dbSpalte);
@@ -116,7 +116,7 @@ interface XWollMux
       entsprechend ersetzt werden.
        
       @param doc
-               Das Dokument, dem die Druckfunktion functionName hinzugefügt werden
+               Das Dokument, dem die Druckfunktion functionName hinzugefÃ¼gt werden
                soll.
       @param functionName
                der Name einer Druckfunktion, die im Abschnitt "Druckfunktionen" der
@@ -140,19 +140,19 @@ interface XWollMux
 
         
     /**
-      Ermöglicht den Zugriff auf WollMux-Funktionen, die spezifisch für das Dokument
-      doc sind. Derzeit ist als doc nur ein c.s.s.t.TextDocument möglich. Wird ein
-      Dokument übergeben, für das der WollMux keine Funktionen anbietet (derzeit zum
-      Beispiel ein Calc-Dokument), so wird null zurückgeliefert. Dass diese Funktion
-      ein nicht-null Objekt zurückliefert bedeutet jedoch nicht zwangsweise, dass der
-      WollMux für das Dokument sinnvolle Funktionen bereitstellt. Es ist möglich, dass
+      ErmÃ¶glicht den Zugriff auf WollMux-Funktionen, die spezifisch fÃ¼r das Dokument
+      doc sind. Derzeit ist als doc nur ein c.s.s.t.TextDocument mÃ¶glich. Wird ein
+      Dokument Ã¼bergeben, fÃ¼r das der WollMux keine Funktionen anbietet (derzeit zum
+      Beispiel ein Calc-Dokument), so wird null zurÃ¼ckgeliefert. Dass diese Funktion
+      ein nicht-null Objekt zurÃ¼ckliefert bedeutet jedoch nicht zwangsweise, dass der
+      WollMux fÃ¼r das Dokument sinnvolle Funktionen bereitstellt. Es ist mÃ¶glich, dass
       Aufrufe der entsprechenden Funktionen des XWollMuxDocument-Interfaces nichts
       tun.
       
-      Hinweis zur Synchronisation: Aufrufe der Funktionen von XWollMuxDocument können
+      Hinweis zur Synchronisation: Aufrufe der Funktionen von XWollMuxDocument kÃ¶nnen
       ohne weitere Synchronisation sofort erfolgen. Jedoch ersetzt
       getWollMuxDocument() keinesfalls die Synchronisation mit dem WollMux.
-      Insbesondere ist es möglich, dass getWollMuxDocument() zurückkehrt BEVOR der
+      Insbesondere ist es mÃ¶glich, dass getWollMuxDocument() zurÃ¼ckkehrt BEVOR der
       WollMux das Dokument doc bearbeitet hat. Vergleiche hierzu die Beschreibung von
       XWollMuxDocument.
       

@@ -1,9 +1,9 @@
 /* 
  * Dateiname: PrintProgressBar.java
  * Projekt  : WollMux
- * Funktion : Implementiert eine Fortschrittsanzeige für den WollMux-Komfortdruck
+ * Funktion : Implementiert eine Fortschrittsanzeige fÃ¼r den WollMux-Komfortdruck
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 04.07.2008 | LUT | Erstellung
  * -------------------------------------------------------------------
@@ -48,7 +48,7 @@ import javax.swing.SwingUtilities;
 import de.muenchen.allg.itd51.wollmux.L;
 
 /**
- * Diese Klasse repräsentiert eine Fortschrittsanzeige für den WollMux-Komfortdruck,
+ * Diese Klasse reprÃ¤sentiert eine Fortschrittsanzeige fÃ¼r den WollMux-Komfortdruck,
  * die damit zurecht kommt, dass potentiell mehrere Druckfunktionen hintereinander
  * geschaltet sind und die Zahl insgesamt zu druckender Versionen sich daher aus der
  * Multiplikation der Werte der einzelnen Druckfunktionen ergibt. Im Fall, dass
@@ -62,56 +62,56 @@ import de.muenchen.allg.itd51.wollmux.L;
 public class PrintProgressBar
 {
   /**
-   * Enthält eine Zuordnung eines Schlüssels, der eine Komfortdruckfunktion
-   * repräsentiert, auf den Maximalwert von dieser Komfortdruckfunktion zu
+   * EnthÃ¤lt eine Zuordnung eines SchlÃ¼ssels, der eine Komfortdruckfunktion
+   * reprÃ¤sentiert, auf den Maximalwert von dieser Komfortdruckfunktion zu
    * erwartender Versionen.
    */
   private HashMap<Object, Integer> maxValues;
 
   /**
-   * Enthält eine Zuordnung eines Schlüssels, der eine Komfortdruckfunktion
-   * repräsentiert, auf den Bearbeitungsstatus der entsprechenden
-   * Komfortdruckfunktion. Für den Bearbeitungsstatus gilt: 0 <= currentValue <=
+   * EnthÃ¤lt eine Zuordnung eines SchlÃ¼ssels, der eine Komfortdruckfunktion
+   * reprÃ¤sentiert, auf den Bearbeitungsstatus der entsprechenden
+   * Komfortdruckfunktion. FÃ¼r den Bearbeitungsstatus gilt: 0 <= currentValue <=
    * maxValue.
    */
   private HashMap<Object, Integer> currentValues;
 
   /**
-   * Enthält die Schlüssel der gerade aktiven Komfortdruckfunktionen in zeitlich
+   * EnthÃ¤lt die SchlÃ¼ssel der gerade aktiven Komfortdruckfunktionen in zeitlich
    * gesehen umgekehrter Registrierungsreihenfolge. D.h. ein maxValue, der zu einem
-   * späteren Zeitpunkt mittels setMaxValue(key, maxValue) registriert wird, wird
-   * immer am Anfang der LinkedList eingefügt.
+   * spÃ¤teren Zeitpunkt mittels setMaxValue(key, maxValue) registriert wird, wird
+   * immer am Anfang der LinkedList eingefÃ¼gt.
    */
   private LinkedList<Object> order;
 
   /**
-   * Enthält den JFrame in dem die Fortschrittsanzeige dargestellt wird.
+   * EnthÃ¤lt den JFrame in dem die Fortschrittsanzeige dargestellt wird.
    */
   private JFrame myFrame;
 
   /**
-   * Enthält den WindowListener, mit dem der "X"-Button des Fensters abgefangen wird.
+   * EnthÃ¤lt den WindowListener, mit dem der "X"-Button des Fensters abgefangen wird.
    */
   private WindowListener oehrchen;
 
   /**
-   * Enthält den Listener der aufgerufen wird, wenn der "X"- oder der
-   * "Abbrechen"-Button betätigt wurde.
+   * EnthÃ¤lt den Listener der aufgerufen wird, wenn der "X"- oder der
+   * "Abbrechen"-Button betÃ¤tigt wurde.
    */
   private ActionListener abortListener;
 
   /**
-   * Enthält die JProgressBar zur Darstellung des Gesamtdruckverlaufs
+   * EnthÃ¤lt die JProgressBar zur Darstellung des Gesamtdruckverlaufs
    */
   private JProgressBar pb;
 
   /**
-   * Enthält das Label mit dem Statustext (z.B. "3 von 10 (=2x5)")
+   * EnthÃ¤lt das Label mit dem Statustext (z.B. "3 von 10 (=2x5)")
    */
   private JLabel statusLabel;
 
   /**
-   * Enthält den Abbrechen-Knopf
+   * EnthÃ¤lt den Abbrechen-Knopf
    */
   private JButton cancelButton;
 
@@ -121,7 +121,7 @@ public class PrintProgressBar
    * 
    * @param abortListener
    *          Der abortListener wird informiert, wenn der "X"-Button oder der
-   *          "Abbrechen"-Knopf des Fensters betätigt wurde.
+   *          "Abbrechen"-Knopf des Fensters betÃ¤tigt wurde.
    */
   public PrintProgressBar(ActionListener abortListener)
   {
@@ -176,7 +176,7 @@ public class PrintProgressBar
   }
 
   /**
-   * Fängt den "X"-Knopf des Fensters ab und ruft in diesem Fall die cancel-Methode
+   * FÃ¤ngt den "X"-Knopf des Fensters ab und ruft in diesem Fall die cancel-Methode
    * auf.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -209,8 +209,8 @@ public class PrintProgressBar
   }
 
   /**
-   * Wird aufgerufen, wenn der "X"- oder "Abbrechen"-Knopf gedrückt wurde und sorgt
-   * dafür, dass das Fenster vollständig disposed und der abortListener informiert
+   * Wird aufgerufen, wenn der "X"- oder "Abbrechen"-Knopf gedrÃ¼ckt wurde und sorgt
+   * dafÃ¼r, dass das Fenster vollstÃ¤ndig disposed und der abortListener informiert
    * wird.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -235,7 +235,7 @@ public class PrintProgressBar
   }
 
   /**
-   * Schließt das Fenster dieser PrintProgressBar ohne den abortListener zu
+   * SchlieÃŸt das Fenster dieser PrintProgressBar ohne den abortListener zu
    * informieren.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -253,7 +253,7 @@ public class PrintProgressBar
   }
 
   /**
-   * Registriert eine Komfortdruckfunktion (vertreten durch den Schlüssel key) mit
+   * Registriert eine Komfortdruckfunktion (vertreten durch den SchlÃ¼ssel key) mit
    * der Maximalzahl der von dieser Komfortdruckfunktion zu erwartenden Versionen
    * oder entfernt eine bereits registrierte Druckfunktion, wenn maxValue==0 ist.
    * Beim Registrieren wird die Zahl der von der Druckfunktion bereits gedruckten
@@ -261,7 +261,7 @@ public class PrintProgressBar
    * war.
    * 
    * @param key
-   *          wird gehashed und repräsentiert die Komfortdruckfunktion, von der
+   *          wird gehashed und reprÃ¤sentiert die Komfortdruckfunktion, von der
    *          maxValue Versionen zu erwarten sind.
    * @param maxValue
    *          die Anzahl der von der Druckfunktion zu erwartenden Versionen oder 0
@@ -275,7 +275,7 @@ public class PrintProgressBar
 
     if (maxValue == 0)
     {
-      // Zähler für key löschen, wenn maxValue==0
+      // ZÃ¤hler fÃ¼r key lÃ¶schen, wenn maxValue==0
       maxValues.remove(key);
       currentValues.remove(key);
       for (Iterator<Object> iter = order.iterator(); iter.hasNext();)
@@ -297,14 +297,14 @@ public class PrintProgressBar
   }
 
   /**
-   * Informiert die PrintProgressBar über den Fortschritt value einer Druckfunktion,
-   * die durch key repräsentiert wird.
+   * Informiert die PrintProgressBar Ã¼ber den Fortschritt value einer Druckfunktion,
+   * die durch key reprÃ¤sentiert wird.
    * 
    * @param key
-   *          repräsentiert eine Druckfunktion, die über den neuen Fortschritt
+   *          reprÃ¤sentiert eine Druckfunktion, die Ã¼ber den neuen Fortschritt
    *          informiert.
    * @param value
-   *          enthält die aktuellen Anzahl der Versionen, die bereits von der
+   *          enthÃ¤lt die aktuellen Anzahl der Versionen, die bereits von der
    *          Druckfunktion gedruckt wurden und muss damit im Bereich 0 <= value <=
    *          maxValue (siehe setMaxValue(...)) liegen.
    * 
@@ -330,8 +330,8 @@ public class PrintProgressBar
    * Fortschrittswert zu berechnen. Die Gesamtzahl ergibt sich aus der Multiplikation
    * der einzelnen Maximal-Werte der registrierten Druckfunktionen. Bei der
    * Berechnung des aktuellen Druckfortschritts spielt die Reihenfolge der
-   * registrierten Druckfunktionen eine Rolle, da das Erhöhen einer früher
-   * registrierten Druckfunktion einschließt, dass die später registrierten
+   * registrierten Druckfunktionen eine Rolle, da das ErhÃ¶hen einer frÃ¼her
+   * registrierten Druckfunktion einschlieÃŸt, dass die spÃ¤ter registrierten
    * Druckfunktionen damit auch schon entsprechend oft durchlaufen wurden.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -360,14 +360,14 @@ public class PrintProgressBar
   }
 
   /**
-   * Enthält die Teile von refresh, die über den Swing-EDT aufgerufen werden.
+   * EnthÃ¤lt die Teile von refresh, die Ã¼ber den Swing-EDT aufgerufen werden.
    * 
    * @param allCurrent
    *          gesamtzahl aller zu erwartenden Versionen
    * @param allMax
    *          gesamtzahl aller bereits gedruckten Versionen
    * @param fromMaxString
-   *          Darstellung abhängig von der Anzahl registrierter Druckfunktionen
+   *          Darstellung abhÃ¤ngig von der Anzahl registrierter Druckfunktionen
    *          entweder "" oder "(=2x5)"
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)

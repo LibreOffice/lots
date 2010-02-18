@@ -3,7 +3,7 @@
 * Projekt  : WollMux
 * Funktion : Speichert den Namen einer Datenquelle sowie eine Suchanfrage darauf.
 * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
 *
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
+* Ã„nderungshistorie:
+* Datum      | Wer | Ã„nderungsgrund
 * -------------------------------------------------------------------
 * 24.05.2006 | BNK | Erstellung
 * 26.05.2006 | BNK | +getQueryParts()
@@ -71,7 +71,7 @@ public class Query implements Iterable<QueryPart>
   public String getDatasourceName() {return dbName;}
   
   /**
-   * Iteriert über die QueryParts, die diese Suchanfrage ausmachen.
+   * Iteriert Ã¼ber die QueryParts, die diese Suchanfrage ausmachen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public Iterator<QueryPart> iterator() {return listOfQueryParts.iterator();}

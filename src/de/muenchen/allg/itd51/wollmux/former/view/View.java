@@ -1,9 +1,9 @@
 /*
  * Dateiname: View.java
  * Projekt  : WollMux
- * Funktion : Über-Interface für alle Views im FormularMax 4000
+ * Funktion : Ãœber-Interface fÃ¼r alle Views im FormularMax 4000
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 29.08.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -33,14 +33,14 @@ package de.muenchen.allg.itd51.wollmux.former.view;
 import javax.swing.JComponent;
 
 /**
- * Über-Interface für alle Views im FormularMax 4000.
+ * Ãœber-Interface fÃ¼r alle Views im FormularMax 4000.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public interface View
 {
   /**
-   * Liefert die Komponente für diese View.
+   * Liefert die Komponente fÃ¼r diese View.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

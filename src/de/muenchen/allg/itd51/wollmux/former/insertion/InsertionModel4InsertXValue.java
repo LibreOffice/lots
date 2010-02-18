@@ -1,9 +1,9 @@
 /*
  * Dateiname: InsertionModel.java
  * Projekt  : WollMux
- * Funktion : Stellt eine Einfügestelle im Dokument (insertValue oder insertFormValue) dar.
+ * Funktion : Stellt eine EinfÃ¼gestelle im Dokument (insertValue oder insertFormValue) dar.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,14 +18,14 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 06.09.2006 | BNK | Erstellung
  * 08.02.2007 | BNK | Beim Generieren von Trafo-Funktionsnamen Timestamp in den Namen codieren.
  * 16.03.2007 | BNK | +getFormularMax4000()
  *                  | +MyTrafoAccess.updateFieldReferences()
- * 29.06.2007 | BNK | [R7343]AUTOSEP unterstützt
+ * 29.06.2007 | BNK | [R7343]AUTOSEP unterstÃ¼tzt
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -61,7 +61,7 @@ import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 
 /**
- * Stellt eine Einfügestelle im Dokument (insertValue oder insertFormValue) dar.
+ * Stellt eine EinfÃ¼gestelle im Dokument (insertValue oder insertFormValue) dar.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -89,25 +89,25 @@ public class InsertionModel4InsertXValue extends InsertionModel
     Pattern.compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'((insertValue)|(insertFormValue))'.*\\))\\s*\\d*\\z");
 
   /**
-   * Attribut-ID-Konstante für
+   * Attribut-ID-Konstante fÃ¼r
    * {@link ModelChangeListener#attributeChanged(InsertionModel, int, Object)}.
    */
   public static final int ID_ATTR = 0;
 
   /**
-   * Konstante für {@link #sourceType}, die angibt, dass die Daten für die Einfügung
+   * Konstante fÃ¼r {@link #sourceType}, die angibt, dass die Daten fÃ¼r die EinfÃ¼gung
    * aus einer externen Datenquelle kommen (insertValue).
    */
   private static final int DATABASE_TYPE = 0;
 
   /**
-   * Konstante für {@link #sourceType}, die angibt, dass die Daten für die Einfügung
+   * Konstante fÃ¼r {@link #sourceType}, die angibt, dass die Daten fÃ¼r die EinfÃ¼gung
    * aus dem Formular kommen (insertFormValue).
    */
   private static final int FORM_TYPE = 1;
 
   /**
-   * Gibt an, um woher die Einfügung ihre Daten bezieht.
+   * Gibt an, um woher die EinfÃ¼gung ihre Daten bezieht.
    * 
    * @see #FORM_TYPE
    * @see #DATABASE_TYPE
@@ -125,26 +125,26 @@ public class InsertionModel4InsertXValue extends InsertionModel
   private List<AutosepInfo> autosep = new Vector<AutosepInfo>();
 
   /**
-   * Das Bookmark, das diese Einfügestelle umschließt.
+   * Das Bookmark, das diese EinfÃ¼gestelle umschlieÃŸt.
    */
   private Bookmark bookmark;
 
   private IDManager.IDChangeListener myIDChangeListener = new MyIDChangeListener();
 
   /**
-   * Erzeugt ein neues InsertionModel für das Bookmark mit Namen bookmarkName, das
+   * Erzeugt ein neues InsertionModel fÃ¼r das Bookmark mit Namen bookmarkName, das
    * bereits im Dokument vorhanden sein muss.
    * 
    * @param doc
    *          das Dokument in dem sich das Bookmark befindet
    * @param funcSelections
-   *          ein FunctionSelectionProvider, der für das TRAFO Attribut eine passende
+   *          ein FunctionSelectionProvider, der fÃ¼r das TRAFO Attribut eine passende
    *          FunctionSelection liefern kann.
    * @param formularMax4000
-   *          Der FormularMax4000 zu dem dieses InsertionModel gehört.
+   *          Der FormularMax4000 zu dem dieses InsertionModel gehÃ¶rt.
    * @throws SyntaxErrorException
    *           wenn bookmarkName nicht korrekte ConfigThingy-Syntax hat oder kein
-   *           korrektes Einfügekommando ist.
+   *           korrektes EinfÃ¼gekommando ist.
    * @throws NoSuchElementException
    *           wenn ein Bookmark dieses Namens in doc nicht existiert.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -155,7 +155,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
   {
     this.formularMax4000 = formularMax4000;
     bookmark = new Bookmark(bookmarkName, doc);
-    // eventuell vorhandene Ziffern am Ende löschen
+    // eventuell vorhandene Ziffern am Ende lÃ¶schen
     String confStr = bookmarkName.replaceAll("\\d*\\z", "");
     URL url = null;
     try
@@ -265,13 +265,13 @@ public class InsertionModel4InsertXValue extends InsertionModel
     {
       // Falls eine externe Funktion referenziert wird, ohne dass irgendwelche
       // ihrer Parameter gebunden wurden, dann nehmen wir direkt den
-      // Original-Funktionsnamen für das TRAFO-Attribut ...
+      // Original-Funktionsnamen fÃ¼r das TRAFO-Attribut ...
       if (trafo.isReference() && !trafo.hasSpecifiedParameters())
       {
         conf.add("TRAFO").add(trafo.getFunctionName());
       }
       else
-      // ... ansonsten müssen wir eine neue Funktion machen.
+      // ... ansonsten mÃ¼ssen wir eine neue Funktion machen.
       {
         int count = 1;
         String funcName;
@@ -305,7 +305,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
   }
 
   /**
-   * Liefert je nach Typ der Einfügung das DB_SPALTE oder ID Attribut.
+   * Liefert je nach Typ der EinfÃ¼gung das DB_SPALTE oder ID Attribut.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -315,18 +315,18 @@ public class InsertionModel4InsertXValue extends InsertionModel
   }
 
   /**
-   * Ändert je nach Type der Einfügung DB_SPALTE oder ID Attribut auf den Wert newId
-   * (falls newId gleich der alten ID ist, wird nichts getan). ACHTUNG! Die Änderung
-   * betrifft nur die Einfügung und wird nicht auf die Formularelemente übertragen
-   * (wogegen umgekehrt Änderungen an den Formularelemente-IDs zu Änderungen der
-   * Einfügungen führen). Hintergrund dieser Implementierung ist, dass man einerseits
-   * normalerweise nicht in der Einfügungen-Sicht IDs von Steuerelementen ändern
-   * möchte und andererseits nur so ermöglicht wird, die Quelle einer Einfügung auf
-   * ein anderes Steuerelement zu ändern.
+   * Ã„ndert je nach Type der EinfÃ¼gung DB_SPALTE oder ID Attribut auf den Wert newId
+   * (falls newId gleich der alten ID ist, wird nichts getan). ACHTUNG! Die Ã„nderung
+   * betrifft nur die EinfÃ¼gung und wird nicht auf die Formularelemente Ã¼bertragen
+   * (wogegen umgekehrt Ã„nderungen an den Formularelemente-IDs zu Ã„nderungen der
+   * EinfÃ¼gungen fÃ¼hren). Hintergrund dieser Implementierung ist, dass man einerseits
+   * normalerweise nicht in der EinfÃ¼gungen-Sicht IDs von Steuerelementen Ã¤ndern
+   * mÃ¶chte und andererseits nur so ermÃ¶glicht wird, die Quelle einer EinfÃ¼gung auf
+   * ein anderes Steuerelement zu Ã¤ndern.
    * 
    * @throws UnknownIDException
-   *           falls diese Einfügung eine Formularwert-Einfügung ist (d.h. das
-   *           ID-Attribut betroffen wäre) und newID dem IDManager im Namensraum
+   *           falls diese EinfÃ¼gung eine Formularwert-EinfÃ¼gung ist (d.h. das
+   *           ID-Attribut betroffen wÃ¤re) und newID dem IDManager im Namensraum
    *           {@link FormularMax4000#NAMESPACE_FORMCONTROLMODEL} unbekannt ist, oder
    *           falls newId der leere String ist. Im Falle des DB_SPALTE Attributs
    *           wird nur geworfen, wenn newId der leere String ist.
@@ -377,8 +377,8 @@ public class InsertionModel4InsertXValue extends InsertionModel
   }
 
   /**
-   * Entfernt das zur Einfügestelle gehörende WollMux-Bookmark, nicht jedoch den
-   * zugehörigen Feldbefehl.
+   * Entfernt das zur EinfÃ¼gestelle gehÃ¶rende WollMux-Bookmark, nicht jedoch den
+   * zugehÃ¶rigen Feldbefehl.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -403,7 +403,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
     {
       if (id != dataId)
       {
-        Logger.error(L.m("Event für eine ID erhalten, die ich nicht kenne: %1",
+        Logger.error(L.m("Event fÃ¼r eine ID erhalten, die ich nicht kenne: %1",
           id.toString()));
         return;
       }

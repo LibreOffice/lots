@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Stellt einen Bereich da (Format/Bereiche...)
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 24.03.2009 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -59,7 +59,7 @@ import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
 public class SectionModel
 {
   /**
-   * Attribut-ID-Konstante für
+   * Attribut-ID-Konstante fÃ¼r
    * {@link ModelChangeListener#attributeChanged(SectionModel, int, Object)}.
    */
   public static final int NAME_ATTR = 0;
@@ -68,12 +68,12 @@ public class SectionModel
     Pattern.compile("\\A(.*)(GROUPS.*[^\\d])\\d*\\z");
 
   /**
-   * Der FormularMax4000 zu dem dieses Model gehört.
+   * Der FormularMax4000 zu dem dieses Model gehÃ¶rt.
    */
   private FormularMax4000 formularMax4000;
 
   /**
-   * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert
+   * Die {@link ModelChangeListener}, die Ã¼ber Ã„nderungen dieses Models informiert
    * werden wollen.
    */
   private List<ModelChangeListener> listeners = new Vector<ModelChangeListener>(1);
@@ -82,17 +82,17 @@ public class SectionModel
   private GroupsProvider groups;
 
   /**
-   * Der TextSections Service über den der Bereich zu diesem SectionModel ansprechbar
+   * Der TextSections Service Ã¼ber den der Bereich zu diesem SectionModel ansprechbar
    * ist.
    */
   private XNameAccess textSections;
 
   /**
-   * Der vollständige Name des Bereichs unter dem er von {@link #textSections}
-   * verwaltet wird. ACHTUNG! Wegen des verzögerten Updates des Dokuments kann dieser
+   * Der vollstÃ¤ndige Name des Bereichs unter dem er von {@link #textSections}
+   * verwaltet wird. ACHTUNG! Wegen des verzÃ¶gerten Updates des Dokuments kann dieser
    * Wert kurzzeitig nicht mit {@link #sectionNamePrefix} zusammenpassen.
    * sectionNamePrefix wird sofort geupdatet, wenn der Benutzer in der GUI den Namen
-   * eines Bereichs ändert, aber {@link #sectionNameComplete}
+   * eines Bereichs Ã¤ndert, aber {@link #sectionNameComplete}
    */
   private String sectionNameComplete;
 
@@ -101,16 +101,16 @@ public class SectionModel
    * vorhanden) oder einen numerischen Suffix (falls vorhanden) steht. Falls diese
    * TextSection keine Sichtbarkeitsgruppen definiert hat, ist dieser Wert der selbe
    * wie {@link #sectionNameComplete} minus ein evtl. vorhandenes numerisches Suffix.
-   * ACHTUNG! Wegen des verzögerten Updates des Dokuments kann dieser Wert kurzzeitig
+   * ACHTUNG! Wegen des verzÃ¶gerten Updates des Dokuments kann dieser Wert kurzzeitig
    * nicht mit {@link #sectionNameComplete} zusammenpassen. sectionNamePrefix wird
-   * sofort geupdatet, wenn der Benutzer in der GUI den Namen eines Bereichs ändert,
+   * sofort geupdatet, wenn der Benutzer in der GUI den Namen eines Bereichs Ã¤ndert,
    * aber {@link #sectionNameComplete} wird erst nachgezogen, wenn das Dokument
    * geupdatet wird.
    */
   private String sectionNamePrefix;
 
   /**
-   * Erzeugt ein neues SectionModel für einen Bereich names sectionName, der über doc
+   * Erzeugt ein neues SectionModel fÃ¼r einen Bereich names sectionName, der Ã¼ber doc
    * ansprechbar ist.
    * 
    * @param formularMax4000
@@ -128,7 +128,7 @@ public class SectionModel
   }
 
   /**
-   * Nimmt den vollständigen Bereichsnamen entgegen und initialisiert
+   * Nimmt den vollstÃ¤ndigen Bereichsnamen entgegen und initialisiert
    * {@link #sectionNameComplete} und {@link #sectionNamePrefix} sowie
    * {@link #groups}.
    * 
@@ -158,7 +158,7 @@ public class SectionModel
           set.add(formularMax4000.getIDManager().getID(
             FormularMax4000.NAMESPACE_GROUPS, iter.next().toString()));
         }
-        // Prefix erst hier ins globale Feld übertragen, wenn keine Exception
+        // Prefix erst hier ins globale Feld Ã¼bertragen, wenn keine Exception
         // geflogen ist.
         sectionNamePrefix = prefix;
         groups.initGroups(set);
@@ -171,7 +171,7 @@ public class SectionModel
   }
 
   /**
-   * Liefert den FormularMax4000 zu dem dieses Model gehört.
+   * Liefert den FormularMax4000 zu dem dieses Model gehÃ¶rt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -182,7 +182,7 @@ public class SectionModel
 
   /**
    * Wenn der Name dieses Bereichs eine GROUPS-Angabe oder/und ein numerisches Suffix
-   * hat, so wird der Name ohne diese Teile zurückgeliefert, ansonsten der komplette
+   * hat, so wird der Name ohne diese Teile zurÃ¼ckgeliefert, ansonsten der komplette
    * Name.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -229,10 +229,10 @@ public class SectionModel
   }
 
   /**
-   * Updatet den Namen des zu diesem Model gehörenden Bereichs.
+   * Updatet den Namen des zu diesem Model gehÃ¶renden Bereichs.
    * 
    * @return false, wenn beim Update etwas schief geht (typischerweise weil der
-   *         Benutzer den Bereich hinterrücks gelöscht oder umbenannt hat)
+   *         Benutzer den Bereich hinterrÃ¼cks gelÃ¶scht oder umbenannt hat)
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
@@ -250,7 +250,7 @@ public class SectionModel
       while (textSections.hasByName(name))
       {
         /*
-         * Wenn unser alter Name ein passender neuer Name ist, müssen wir nix tun.
+         * Wenn unser alter Name ein passender neuer Name ist, mÃ¼ssen wir nix tun.
          */
         if (name.equals(sectionNameComplete)) return true;
         name = nameBase + (count++);
@@ -303,7 +303,7 @@ public class SectionModel
     {
       Object textSection = textSections.getByName(sectionNameComplete);
       if (textSection == null)
-        Logger.error(L.m("Bereich ist plötzlich verschwunden: \"%1\"",
+        Logger.error(L.m("Bereich ist plÃ¶tzlich verschwunden: \"%1\"",
           sectionNameComplete));
       else
         UNO.setProperty(textSection, "IsVisible", Boolean.valueOf(visible));
@@ -362,7 +362,7 @@ public class SectionModel
   }
 
   /**
-   * listener wird über Änderungen des Models informiert.
+   * listener wird Ã¼ber Ã„nderungen des Models informiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -374,7 +374,7 @@ public class SectionModel
   /**
    * Benachrichtigt alle auf diesem Model registrierten Listener, dass das Model aus
    * seinem Container entfernt wurde. ACHTUNG! Darf nur von einem entsprechenden
-   * Container aufgerufen werden, der das Model enthält.
+   * Container aufgerufen werden, der das Model enthÃ¤lt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -390,7 +390,7 @@ public class SectionModel
   }
 
   /**
-   * Ruft für jeden auf diesem Model registrierten {@link ModelChangeListener} die
+   * Ruft fÃ¼r jeden auf diesem Model registrierten {@link ModelChangeListener} die
    * Methode
    * {@link ModelChangeListener#attributeChanged(InsertionModel, int, Object)} auf.
    */
@@ -406,7 +406,7 @@ public class SectionModel
   }
 
   /**
-   * Interface für Listener, die über Änderungen eines Models informiert werden
+   * Interface fÃ¼r Listener, die Ã¼ber Ã„nderungen eines Models informiert werden
    * wollen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -414,15 +414,15 @@ public class SectionModel
   public static interface ModelChangeListener
   {
     /**
-     * Wird aufgerufen wenn ein Attribut des Models sich geändert hat.
+     * Wird aufgerufen wenn ein Attribut des Models sich geÃ¤ndert hat.
      * 
      * @param model
-     *          das SectionModel, das sich geändert hat.
+     *          das SectionModel, das sich geÃ¤ndert hat.
      * @param attributeId
-     *          Welches Attribut hat sich geändert?
+     *          Welches Attribut hat sich geÃ¤ndert?
      * @param newValue
      *          der neue Wert des Attributs. Numerische Attribute werden als Integer
-     *          übergeben.
+     *          Ã¼bergeben.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void attributeChanged(SectionModel model, int attributeId, Object newValue);

@@ -1,9 +1,9 @@
 /*
  * Dateiname: MailMergeNew.java
  * Projekt  : WollMux
- * Funktion : Die neuen erweiterten Serienbrief-Funktionalitäten
+ * Funktion : Die neuen erweiterten Serienbrief-FunktionalitÃ¤ten
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 04.03.2008 | BNK | Herausfaktorisiert aus MailMergeNew
  * -------------------------------------------------------------------
@@ -93,10 +93,10 @@ import de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 
 /**
- * Stellt eine OOo-Datenquelle oder ein offenes Calc-Dokument über ein gemeinsames
- * Interface zur Verfügung. Ist auch zuständig dafür, das Calc-Dokument falls nötig
- * wieder zu öffnen und Änderungen seines Fenstertitels und/oder seiner
- * Speicherstelle zu überwachen. Stellt auch Dialoge zur Verfügung zur Auswahl der
+ * Stellt eine OOo-Datenquelle oder ein offenes Calc-Dokument Ã¼ber ein gemeinsames
+ * Interface zur VerfÃ¼gung. Ist auch zustÃ¤ndig dafÃ¼r, das Calc-Dokument falls nÃ¶tig
+ * wieder zu Ã¶ffnen und Ã„nderungen seines Fenstertitels und/oder seiner
+ * Speicherstelle zu Ã¼berwachen. Stellt auch Dialoge zur VerfÃ¼gung zur Auswahl der
  * Datenquelle.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -104,45 +104,45 @@ import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 public class MailMergeDatasource
 {
   /**
-   * Wert für {@link #sourceType}, der anzeigt, dass keine Datenquelle ausgewählt
+   * Wert fÃ¼r {@link #sourceType}, der anzeigt, dass keine Datenquelle ausgewÃ¤hlt
    * ist.
    */
   private static final int SOURCE_NONE = 0;
 
   /**
-   * Wert für {@link #sourceType}, der anzeigt, dass eine Calc-Tabelle als
-   * Datenquelle ausgewählt ist.
+   * Wert fÃ¼r {@link #sourceType}, der anzeigt, dass eine Calc-Tabelle als
+   * Datenquelle ausgewÃ¤hlt ist.
    */
   private static final int SOURCE_CALC = 1;
 
   /**
-   * Wert für {@link #sourceType}, der anzeigt, dass eine OOo Datenquelle als
-   * Datenquelle ausgewählt ist.
+   * Wert fÃ¼r {@link #sourceType}, der anzeigt, dass eine OOo Datenquelle als
+   * Datenquelle ausgewÃ¤hlt ist.
    */
   private static final int SOURCE_DB = 2;
 
   /**
    * Wenn nach dieser Zeit in ms nicht alle Daten des Seriendruckauftrags ausgelesen
-   * werden konnten, dann wird der Druckauftrag nicht ausgeführt (und muss eventuell
-   * über die Von Bis Auswahl in mehrere Aufträge zerteilt werden).
+   * werden konnten, dann wird der Druckauftrag nicht ausgefÃ¼hrt (und muss eventuell
+   * Ã¼ber die Von Bis Auswahl in mehrere AuftrÃ¤ge zerteilt werden).
    */
   private static final long MAILMERGE_GETCONTENTS_TIMEOUT = 60000;
 
   /**
-   * Timeout für den Login bei einer OOo-Datenquelle.
+   * Timeout fÃ¼r den Login bei einer OOo-Datenquelle.
    */
   private static final long MAILMERGE_LOGIN_TIMEOUT = 5000;
 
   /**
-   * Ein String der möglichst nie in einem vom Benutzer eingegebenen Felder-Anpassen
-   * Feld auftauchen sollte. Wird als Platzhalter für das Einfügen der Zeilennummer
-   * in den Formel-String verwendet. Darf keine Zeichen enthalten, die in regulären
-   * Ausdrücken Bedeutung haben.
+   * Ein String der mÃ¶glichst nie in einem vom Benutzer eingegebenen Felder-Anpassen
+   * Feld auftauchen sollte. Wird als Platzhalter fÃ¼r das EinfÃ¼gen der Zeilennummer
+   * in den Formel-String verwendet. Darf keine Zeichen enthalten, die in regulÃ¤ren
+   * AusdrÃ¼cken Bedeutung haben.
    */
-  private static final String ROW_NUM_PLACEHOLDER = "Ø©¿";
+  private static final String ROW_NUM_PLACEHOLDER = "Ã˜Â©Â¿";
 
   /**
-   * Zeigt an, was derzeit als Datenquelle ausgewählt ist.
+   * Zeigt an, was derzeit als Datenquelle ausgewÃ¤hlt ist.
    */
   private int sourceType = SOURCE_NONE;
 
@@ -150,7 +150,7 @@ public class MailMergeDatasource
    * Wenn {@link #sourceType} == {@link #SOURCE_CALC} und das Calc-Dokument derzeit
    * offen ist, dann ist diese Variable != null. Falls das Dokument nicht offen ist,
    * so ist seine URL in {@link #calcUrl} zu finden. Die Kombination calcDoc == null &&
-   * calcUrl == null && sourceType == SOURCE_CALC ist unzulässig.
+   * calcUrl == null && sourceType == SOURCE_CALC ist unzulÃ¤ssig.
    */
   private XSpreadsheetDocument calcDoc = null;
 
@@ -160,40 +160,40 @@ public class MailMergeDatasource
    * der Wert null. Falls das Dokument nur als UnbenanntX im Speicher existiert, so
    * ist eine Referenz auf das Dokument in {@link #calcDoc} zu finden. Die
    * Kombination calcDoc == null && calcUrl == null && sourceType == SOURCE_CALC ist
-   * unzulässig.
+   * unzulÃ¤ssig.
    */
   private String calcUrl = null;
 
   /**
    * Falls {@link #sourceType} == {@link #SOURCE_DB}, so ist dies der Name der
-   * ausgewählten OOo-Datenquelle, ansonsten null.
+   * ausgewÃ¤hlten OOo-Datenquelle, ansonsten null.
    */
   private String oooDatasourceName = null;
 
   /**
    * Falls {@link #sourceType} == {@link #SOURCE_DB} und die Datenquelle bereits
    * initialisiert wurde (durch {@link #getOOoDatasource()}), so ist dies eine
-   * {@link Datasource} zum Zugriff auf die ausgewählte OOo-Datenquelle, ansonsten
+   * {@link Datasource} zum Zugriff auf die ausgewÃ¤hlte OOo-Datenquelle, ansonsten
    * null.
    */
   private Datasource oooDatasource = null;
 
   /**
    * Speichert den Namen der Tabelle bzw, des Tabellenblattes, die als Quelle der
-   * Serienbriefdaten ausgewählt wurde. Ist niemals null, kann aber der leere String
+   * Serienbriefdaten ausgewÃ¤hlt wurde. Ist niemals null, kann aber der leere String
    * sein oder ein Name, der gar nicht in der entsprechenden Datenquelle existiert.
    */
   private String tableName = "";
 
   /**
-   * Wenn als aktuelle Datenquelle ein Calc-Dokument ausgewählt ist, dann wird dieser
-   * Listener darauf registriert um Änderungen des Speicherorts, so wie das Schließen
-   * des Dokuments zu überwachen.
+   * Wenn als aktuelle Datenquelle ein Calc-Dokument ausgewÃ¤hlt ist, dann wird dieser
+   * Listener darauf registriert um Ã„nderungen des Speicherorts, so wie das SchlieÃŸen
+   * des Dokuments zu Ã¼berwachen.
    */
   private MyCalcListener myCalcListener = new MyCalcListener();
 
   /**
-   * Wird verwendet zum Speichern/Wiedereinlesen der zuletzt ausgewählten
+   * Wird verwendet zum Speichern/Wiedereinlesen der zuletzt ausgewÃ¤hlten
    * Datenquelle.
    */
   private TextDocumentModel mod;
@@ -202,7 +202,7 @@ public class MailMergeDatasource
    * Erzeugt eine neue Datenquelle.
    * 
    * @param mod
-   *          wird verwendet zum Speichern/Wiedereinlesen der zuletzt ausgewählten
+   *          wird verwendet zum Speichern/Wiedereinlesen der zuletzt ausgewÃ¤hlten
    *          Datenquelle.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -213,8 +213,8 @@ public class MailMergeDatasource
   }
 
   /**
-   * Liefert die Titel der Spalten der aktuell ausgewählten Tabelle. Ist derzeit
-   * keine Tabelle ausgewählt oder enthält die ausgewählte Tabelle keine benannten
+   * Liefert die Titel der Spalten der aktuell ausgewÃ¤hlten Tabelle. Ist derzeit
+   * keine Tabelle ausgewÃ¤hlt oder enthÃ¤lt die ausgewÃ¤hlte Tabelle keine benannten
    * Spalten, so wird ein leerer Vector geliefert. Die Reihenfolge der Spalten
    * entspricht der Reihenfolge der Werte, wie sie von
    * {@link #getValuesForDataset(int)} geliefert werden.
@@ -246,12 +246,12 @@ public class MailMergeDatasource
    * Liefert die sichtbaren Inhalte (als Strings) der Zellen aus der rowIndex-ten
    * sichtbaren nicht-leeren Zeile (wobei die erste solche Zeile, diejenige die die
    * Namen for {@link #getColumnNames()} liefert, den Index 0 hat) aus der aktuell
-   * ausgewählten Tabelle. Falls sich die Daten zwischen den Aufrufen der beiden
-   * Methoden nicht geändert haben, passen die zurückgelieferten Daten in Anzahl und
+   * ausgewÃ¤hlten Tabelle. Falls sich die Daten zwischen den Aufrufen der beiden
+   * Methoden nicht geÃ¤ndert haben, passen die zurÃ¼ckgelieferten Daten in Anzahl und
    * Reihenfolge genau zu der von {@link #getColumnNames()} gelieferten Liste.
    * 
-   * Falls rowIndex zu groß ist, wird ein Vektor mit leeren Strings zurückgeliefert.
-   * Im Fehlerfall wird ein leerer Vektor zurückgeliefert.
+   * Falls rowIndex zu groÃŸ ist, wird ein Vektor mit leeren Strings zurÃ¼ckgeliefert.
+   * Im Fehlerfall wird ein leerer Vektor zurÃ¼ckgeliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -277,8 +277,8 @@ public class MailMergeDatasource
   }
 
   /**
-   * Liefert die Anzahl der Datensätze der aktuell ausgewählten Tabelle. Ist derzeit
-   * keine Tabelle ausgewählt oder enthält die ausgewählte Tabelle keine benannten
+   * Liefert die Anzahl der DatensÃ¤tze der aktuell ausgewÃ¤hlten Tabelle. Ist derzeit
+   * keine Tabelle ausgewÃ¤hlt oder enthÃ¤lt die ausgewÃ¤hlte Tabelle keine benannten
    * Spalten, so wird 0 geliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -305,7 +305,7 @@ public class MailMergeDatasource
   }
 
   /**
-   * Liefert true gdw die Funktion {@link #addColumns(Map)} verfügbar ist für diese
+   * Liefert true gdw die Funktion {@link #addColumns(Map)} verfÃ¼gbar ist fÃ¼r diese
    * Datenquelle.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -325,8 +325,8 @@ public class MailMergeDatasource
   }
 
   /**
-   * Liefert den Inhalt der aktuell ausgewählten Serienbriefdatenquelle (leer, wenn
-   * keine ausgewählt).
+   * Liefert den Inhalt der aktuell ausgewÃ¤hlten Serienbriefdatenquelle (leer, wenn
+   * keine ausgewÃ¤hlt).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -352,7 +352,7 @@ public class MailMergeDatasource
   }
 
   /**
-   * Liefert true, wenn derzeit eine Datenquelle ausgewählt ist.
+   * Liefert true, wenn derzeit eine Datenquelle ausgewÃ¤hlt ist.
    * 
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -363,12 +363,12 @@ public class MailMergeDatasource
   }
 
   /**
-   * Lässt den Benutzer über einen Dialog die Datenquelle auswählen.
+   * LÃ¤sst den Benutzer Ã¼ber einen Dialog die Datenquelle auswÃ¤hlen.
    * 
    * @param parent
-   *          der JFrame, zu dem dieser Dialog gehören soll.
+   *          der JFrame, zu dem dieser Dialog gehÃ¶ren soll.
    * @param callback
-   *          wird (im EDT) getriggert, nachdem eine neue Datenquelle ausgewählt
+   *          wird (im EDT) getriggert, nachdem eine neue Datenquelle ausgewÃ¤hlt
    *          wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -376,7 +376,7 @@ public class MailMergeDatasource
       final Runnable callback)
   {
     final JDialog datasourceSelector =
-      new JDialog(parent, L.m("Serienbriefdaten auswählen"), true);
+      new JDialog(parent, L.m("Serienbriefdaten auswÃ¤hlen"), true);
 
     Box vbox = Box.createVerticalBox();
     datasourceSelector.add(vbox);
@@ -432,7 +432,7 @@ public class MailMergeDatasource
     });
     vbox.add(DimAdjust.maxWidthUnlimited(button));
 
-    label = new JLabel(L.m("Aktuell ausgewählte Tabelle"));
+    label = new JLabel(L.m("Aktuell ausgewÃ¤hlte Tabelle"));
     vbox.add(label);
     String str = L.m("<keine>");
     if (sourceType == SOURCE_CALC)
@@ -557,7 +557,7 @@ public class MailMergeDatasource
   }
 
   /**
-   * Öffnet die Datenquelle die durch einen früheren Aufruf von
+   * Ã–ffnet die Datenquelle die durch einen frÃ¼heren Aufruf von
    * storeDatasourceSettings() im Dokument hinterlegt wurde.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1) TESTED
@@ -599,7 +599,7 @@ public class MailMergeDatasource
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type),
+        Logger.error(L.m("Fehlendes Argument fÃ¼r Datenquelle vom Typ '%1':", type),
           e);
       }
     }
@@ -614,7 +614,7 @@ public class MailMergeDatasource
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type),
+        Logger.error(L.m("Fehlendes Argument fÃ¼r Datenquelle vom Typ '%1':", type),
           e);
       }
     }
@@ -625,15 +625,15 @@ public class MailMergeDatasource
   }
 
   /**
-   * Speichert die aktuellen Einstellungen zu dieser Datenquelle im zugehörigen
-   * Dokument persistent ab, damit die Datenquelle beim nächsten mal wieder
-   * automatisch geöffnet/verbunden werden kann.
+   * Speichert die aktuellen Einstellungen zu dieser Datenquelle im zugehÃ¶rigen
+   * Dokument persistent ab, damit die Datenquelle beim nÃ¤chsten mal wieder
+   * automatisch geÃ¶ffnet/verbunden werden kann.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private void storeDatasourceSettings()
   {
-    // ConfigThingy für Einstellungen der Datenquelle erstellen:
+    // ConfigThingy fÃ¼r Einstellungen der Datenquelle erstellen:
     ConfigThingy dq = new ConfigThingy("Datenquelle");
     ConfigThingy arg;
     switch (sourceType)
@@ -670,7 +670,7 @@ public class MailMergeDatasource
   }
 
   /**
-   * Liefert die Anzahl Datensätze aus OOo-Datenquelle oooDatasourceName, Tabelle
+   * Liefert die Anzahl DatensÃ¤tze aus OOo-Datenquelle oooDatasourceName, Tabelle
    * tableName.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
@@ -712,9 +712,9 @@ public class MailMergeDatasource
        * EscapeProcessing == false bedeutet, dass OOo die Query nicht selbst anfassen
        * darf, sondern direkt an die Datenbank weiterleiten soll. Wird dies verwendet
        * ist das Ergebnis (derzeit) immer read-only, da OOo keine Updates von
-       * Statements durchführen kann, die es nicht geparst hat. Siehe Kommentar zu
+       * Statements durchfÃ¼hren kann, die es nicht geparst hat. Siehe Kommentar zu
        * http://qa.openoffice.org/issues/show_bug.cgi?id=78522 Entspricht dem Button
-       * SQL mit grünem Haken (SQL-Kommando direkt ausführen) im Base-Abfrageentwurf.
+       * SQL mit grÃ¼nem Haken (SQL-Kommando direkt ausfÃ¼hren) im Base-Abfrageentwurf.
        */
       xProp.setPropertyValue("EscapeProcessing", Boolean.FALSE);
 
@@ -750,7 +750,7 @@ public class MailMergeDatasource
   }
 
   /**
-   * Liefert str zurück, als Identifier-Name vorbereitet für das Einfügen in
+   * Liefert str zurÃ¼ck, als Identifier-Name vorbereitet fÃ¼r das EinfÃ¼gen in
    * SQL-Statements.
    * 
    * @param str
@@ -765,7 +765,7 @@ public class MailMergeDatasource
   /**
    * Liefert die Anzahl Zeilen in Tabelle tableName von Calc-Dokument calcDoc in
    * denen mindestens eine sichtbare nicht-leere Zelle ist, wobei die erste sichtbare
-   * Zeile nicht gezählt wird, weil diese die Spaltennamen beschreibt.
+   * Zeile nicht gezÃ¤hlt wird, weil diese die Spaltennamen beschreibt.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
    * 
@@ -790,7 +790,7 @@ public class MailMergeDatasource
       }
       catch (Exception x)
       {
-        Logger.error(L.m("Kann Anzahl Datensätze nicht bestimmen"), x);
+        Logger.error(L.m("Kann Anzahl DatensÃ¤tze nicht bestimmen"), x);
       }
     }
 
@@ -862,12 +862,12 @@ public class MailMergeDatasource
   /**
    * Liefert die Daten des rowIndex-ten Datensatzes der Datenquelle oooDatasource
    * (wobei der erste Datensatz die Nummer 1 hat!!!) Falls sich die Daten zwischen
-   * den Aufrufen der beiden Methoden nicht geändert haben, passen die
-   * zurückgelieferten Daten in Anzahl und Reihenfolge genau zu der von
+   * den Aufrufen der beiden Methoden nicht geÃ¤ndert haben, passen die
+   * zurÃ¼ckgelieferten Daten in Anzahl und Reihenfolge genau zu der von
    * {@link #getDbColumnNames(Datasource)} gelieferten Liste.
    * 
-   * Falls rowIndex zu groß ist, wird ein Vektor mit leeren Strings zurückgeliefert.
-   * Im Fehlerfall wird ein leerer Vektor zurückgeliefert.
+   * Falls rowIndex zu groÃŸ ist, wird ein Vektor mit leeren Strings zurÃ¼ckgeliefert.
+   * Im Fehlerfall wird ein leerer Vektor zurÃ¼ckgeliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * 
@@ -876,16 +876,16 @@ public class MailMergeDatasource
   private List<String> getDbValuesForDataset(Datasource oooDatasource, int rowIndex)
   {
     /*
-     * Die folgende Implementierung ist nicht schön. Sie hat die folgenden Probleme
+     * Die folgende Implementierung ist nicht schÃ¶n. Sie hat die folgenden Probleme
      * 
-     * o Liest jedes Mal erneut die ganze Tabelle aus => langsam, übermäßige Garbage
+     * o Liest jedes Mal erneut die ganze Tabelle aus => langsam, Ã¼bermÃ¤ÃŸige Garbage
      * Produktion
      * 
-     * o Kann kein Ergebnis zurückliefern, wenn das Auslesen der gesamten Tabelle
-     * nicht innerhalb des Timeouts möglich ist => Vorschau broken bei langsamen
+     * o Kann kein Ergebnis zurÃ¼ckliefern, wenn das Auslesen der gesamten Tabelle
+     * nicht innerhalb des Timeouts mÃ¶glich ist => Vorschau broken bei langsamen
      * Datenquellen
      * 
-     * Der große Vorteil dieser Implementierung ist ihre Einfachheit.
+     * Der groÃŸe Vorteil dieser Implementierung ist ihre Einfachheit.
      */
 
     List<String> list = getDbColumnNames(oooDatasource);
@@ -934,12 +934,12 @@ public class MailMergeDatasource
    * sichtbaren nicht-leeren Zeile (wobei die erste solche Zeile, diejenige die die
    * Namen for {@link #getColumnNames()} liefert, den Index 0 hat) von Tabellenblatt
    * tableName in Calc-Dokument calcDoc. Falls sich die Daten zwischen den Aufrufen
-   * der beiden Methoden nicht geändert haben, passen die zurückgelieferten Daten in
+   * der beiden Methoden nicht geÃ¤ndert haben, passen die zurÃ¼ckgelieferten Daten in
    * Anzahl und Reihenfolge genau zu der von {@link #getColumnNames()} gelieferten
    * Liste.
    * 
-   * Falls rowIndex zu groß ist, wird ein Vektor mit leeren Strings zurückgeliefert.
-   * Im Fehlerfall wird ein leerer Vektor zurückgeliefert.
+   * Falls rowIndex zu groÃŸ ist, wird ein Vektor mit leeren Strings zurÃ¼ckgeliefert.
+   * Im Fehlerfall wird ein leerer Vektor zurÃ¼ckgeliefert.
    * 
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -978,9 +978,9 @@ public class MailMergeDatasource
 
         /*
          * Erste sichtbare Zeile durchscannen und alle nicht-leeren Zelleninhalte als
-         * Tabellenspaltennamen interpretieren (dies ist nötig, damit die
-         * zurückgelieferten Werte zu denen von getColumnNames() passen). Wurde ein
-         * Tabellenspaltenname identifiziert, so lies den zugehörigen Wert aus der
+         * Tabellenspaltennamen interpretieren (dies ist nÃ¶tig, damit die
+         * zurÃ¼ckgelieferten Werte zu denen von getColumnNames() passen). Wurde ein
+         * Tabellenspaltenname identifiziert, so lies den zugehÃ¶rigen Wert aus der
          * rowIndex-ten Zeile aus.
          */
         int ymin = rowIndexes.first().intValue();
@@ -1029,7 +1029,7 @@ public class MailMergeDatasource
 
   /**
    * Liefert die sichtbaren Zellen aus der Tabelle tableName des Dokuments calcDoc
-   * als QueryResultsWithSchema zurück.
+   * als QueryResultsWithSchema zurÃ¼ck.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1042,12 +1042,12 @@ public class MailMergeDatasource
   }
 
   /**
-   * Präsentiert dem Benutzer einen Dialog, in dem er aus allen registrierten
-   * Datenbanken eine als Datenquelle auswählen kann. Falls es nur eine registrierte
-   * Datenbank gibt, wird diese automatisch gewählt.
+   * PrÃ¤sentiert dem Benutzer einen Dialog, in dem er aus allen registrierten
+   * Datenbanken eine als Datenquelle auswÃ¤hlen kann. Falls es nur eine registrierte
+   * Datenbank gibt, wird diese automatisch gewÃ¤hlt.
    * 
    * @param parent
-   *          der JFrame zu dem der die Dialoge gehören sollen.
+   *          der JFrame zu dem der die Dialoge gehÃ¶ren sollen.
    * @param callback
    *          wird (im EDT) getriggert, nachdem eine neue OOo Datenquelle als
    *          Datenquelle gesetzt wurde.
@@ -1069,12 +1069,12 @@ public class MailMergeDatasource
       return;
     }
 
-    final JDialog dbSelector = new JDialog(parent, L.m("Datenbank auswählen"), true);
+    final JDialog dbSelector = new JDialog(parent, L.m("Datenbank auswÃ¤hlen"), true);
 
     Box vbox = Box.createVerticalBox();
     dbSelector.add(vbox);
 
-    JLabel label = new JLabel(L.m("Welche Datenbank möchten Sie verwenden ?"));
+    JLabel label = new JLabel(L.m("Welche Datenbank mÃ¶chten Sie verwenden ?"));
     vbox.add(label);
 
     for (int i = 0; i < names.size(); ++i)
@@ -1130,12 +1130,12 @@ public class MailMergeDatasource
   }
 
   /**
-   * Präsentiert dem Benutzer einen Dialog, in dem er aus allen offenen Calc-Fenstern
-   * eines als Datenquelle auswählen kann. Falls es nur ein offenes Calc-Fenster
-   * gibt, wird dieses automatisch gewählt.
+   * PrÃ¤sentiert dem Benutzer einen Dialog, in dem er aus allen offenen Calc-Fenstern
+   * eines als Datenquelle auswÃ¤hlen kann. Falls es nur ein offenes Calc-Fenster
+   * gibt, wird dieses automatisch gewÃ¤hlt.
    * 
    * @param parent
-   *          der JFrame zu dem der die Dialoge gehören sollen.
+   *          der JFrame zu dem der die Dialoge gehÃ¶ren sollen.
    * @param callback
    *          wird getriggert (im EDT), nachdem eine neue Calc-Tabelle als
    *          Datenquelle gesetzt wurde.
@@ -1158,12 +1158,12 @@ public class MailMergeDatasource
     }
 
     final JDialog calcWinSelector =
-      new JDialog(parent, L.m("Tabelle auswählen"), true);
+      new JDialog(parent, L.m("Tabelle auswÃ¤hlen"), true);
 
     Box vbox = Box.createVerticalBox();
     calcWinSelector.add(vbox);
 
-    JLabel label = new JLabel(L.m("Welches Calc-Dokument möchten Sie verwenden ?"));
+    JLabel label = new JLabel(L.m("Welches Calc-Dokument mÃ¶chten Sie verwenden ?"));
     vbox.add(label);
 
     for (int i = 0; i < names.size(); ++i)
@@ -1197,12 +1197,12 @@ public class MailMergeDatasource
   }
 
   /**
-   * Öffnet ein neues Calc-Dokument und setzt es als Seriendruckdatenquelle.
+   * Ã–ffnet ein neues Calc-Dokument und setzt es als Seriendruckdatenquelle.
    * 
    * @param parent
-   *          der JFrame zu dem der die Dialoge gehören sollen.
+   *          der JFrame zu dem der die Dialoge gehÃ¶ren sollen.
    * @param wird
-   *          (im EDT) ausgeführt, nachdem das Calc-Dokument als Datenquelle gesetzt
+   *          (im EDT) ausgefÃ¼hrt, nachdem das Calc-Dokument als Datenquelle gesetzt
    *          wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -1211,14 +1211,14 @@ public class MailMergeDatasource
   {
     try
     {
-      Logger.debug(L.m("Öffne neues Calc-Dokument als Datenquelle für Seriendruck"));
+      Logger.debug(L.m("Ã–ffne neues Calc-Dokument als Datenquelle fÃ¼r Seriendruck"));
       XSpreadsheetDocument spread =
         UNO.XSpreadsheetDocument(UNO.loadComponentFromURL("private:factory/scalc",
           true, true));
       XSpreadsheets sheets = spread.getSheets();
       String[] sheetNames = sheets.getElementNames();
 
-      // Lösche alle bis auf das erste Tabellenblatt ohne Änderung des
+      // LÃ¶sche alle bis auf das erste Tabellenblatt ohne Ã„nderung des
       // Modified-Status.
       XModifiable xmo = UNO.XModifiable(spread);
       boolean modified = (xmo != null) ? xmo.isModified() : false;
@@ -1237,11 +1237,11 @@ public class MailMergeDatasource
   }
 
   /**
-   * Öffnet einen FilePicker und falls der Benutzer dort eine Tabelle auswählt, wird
-   * diese geöffnet und als Datenquelle verwendet.
+   * Ã–ffnet einen FilePicker und falls der Benutzer dort eine Tabelle auswÃ¤hlt, wird
+   * diese geÃ¶ffnet und als Datenquelle verwendet.
    * 
    * @param parent
-   *          der JFrame zu dem der die Dialoge gehören sollen.
+   *          der JFrame zu dem der die Dialoge gehÃ¶ren sollen.
    * @param callback
    *          wird getriggert (im EDT), wenn eine neue Calc-Datei als Datenquelle
    *          gesetzt wurde.
@@ -1258,7 +1258,7 @@ public class MailMergeDatasource
       if (files.length == 0) return;
       try
       {
-        Logger.debug(L.m("Öffne %1 als Datenquelle für Seriendruck", files[0]));
+        Logger.debug(L.m("Ã–ffne %1 als Datenquelle fÃ¼r Seriendruck", files[0]));
         try
         {
           getCalcDoc(files[0]);
@@ -1278,13 +1278,13 @@ public class MailMergeDatasource
   }
 
   /**
-   * Bringt einen Dialog, mit dem der Benutzer in der aktuell ausgewählten
-   * Datenquelle eine Tabelle auswählen kann. Falls die Datenquelle genau eine
-   * nicht-leere Tabelle hat, so wird diese ohne Dialog automatisch ausgewählt. Falls
-   * der Benutzer den Dialog abbricht, so wird die erste Tabelle gewählt.
+   * Bringt einen Dialog, mit dem der Benutzer in der aktuell ausgewÃ¤hlten
+   * Datenquelle eine Tabelle auswÃ¤hlen kann. Falls die Datenquelle genau eine
+   * nicht-leere Tabelle hat, so wird diese ohne Dialog automatisch ausgewÃ¤hlt. Falls
+   * der Benutzer den Dialog abbricht, so wird die erste Tabelle gewÃ¤hlt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * @parent Das Hauptfenster, zu dem dieser Dialog gehört. TESTED
+   * @parent Das Hauptfenster, zu dem dieser Dialog gehÃ¶rt. TESTED
    */
   private void selectTable(JFrame parent)
   {
@@ -1298,15 +1298,15 @@ public class MailMergeDatasource
     setTable(names.get(0)); // Falls der Benutzer den Dialog abbricht ohne Auswahl
 
     if (names.size() == 1) return; // Falls es nur eine Tabelle gibt, Dialog
-    // unnötig.
+    // unnÃ¶tig.
 
     final JDialog tableSelector =
-      new JDialog(parent, L.m("Welche Tabelle möchten Sie verwenden ?"), true);
+      new JDialog(parent, L.m("Welche Tabelle mÃ¶chten Sie verwenden ?"), true);
 
     Box vbox = Box.createVerticalBox();
     tableSelector.add(vbox);
 
-    JLabel label = new JLabel(L.m("Welche Tabelle möchten Sie verwenden ?"));
+    JLabel label = new JLabel(L.m("Welche Tabelle mÃ¶chten Sie verwenden ?"));
     vbox.add(label);
 
     Iterator<String> iter = names.iterator();
@@ -1339,8 +1339,8 @@ public class MailMergeDatasource
 
   /**
    * Setzt die zu verwendende Tabelle auf den Namen name und speichert die
-   * Einstellungen persistent im zugehörigen Dokument ab, damit sie bei der nächsten
-   * Bearbeitung des Dokuments wieder verfügbar sind.
+   * Einstellungen persistent im zugehÃ¶rigen Dokument ab, damit sie bei der nÃ¤chsten
+   * Bearbeitung des Dokuments wieder verfÃ¼gbar sind.
    * 
    * @param name
    *          Name der Tabelle die aktuell eingestellt werden soll.
@@ -1415,10 +1415,10 @@ public class MailMergeDatasource
   private static String stripOpenOfficeFromWindowName(String str)
   {
     /*
-     * Sonderfall für OpenOffice
+     * Sonderfall fÃ¼r OpenOffice
      */
     int idx = str.indexOf(" - OpenOffice");
-    /* Fallback für andere Office-Varianten */
+    /* Fallback fÃ¼r andere Office-Varianten */
     if (idx < 0) idx = str.lastIndexOf(" -");
     if (idx > 0) str = str.substring(0, idx);
     return str;
@@ -1426,7 +1426,7 @@ public class MailMergeDatasource
 
   /**
    * Erzeugt einen Button zur Auswahl der Datenquelle aus den aktuell offenen
-   * Calc-Fenstern, dessen Beschriftung davon abhängt, was zur Auswahl steht oder
+   * Calc-Fenstern, dessen Beschriftung davon abhÃ¤ngt, was zur Auswahl steht oder
    * liefert null, wenn nichts zur Auswahl steht. Falls es keine offenen Calc-Fenster
    * gibt, wird null geliefert. Falls es genau ein offenes Calc-Fenster gibt und
    * dieses genau ein nicht-leeres Tabellenblatt hat, so zeigt der Button die
@@ -1464,7 +1464,7 @@ public class MailMergeDatasource
   }
 
   /**
-   * Liefert die Titel und zugehörigen XSpreadsheetDocuments aller offenen
+   * Liefert die Titel und zugehÃ¶rigen XSpreadsheetDocuments aller offenen
    * Calc-Fenster.
    * 
    * @return ein Objekt mit 2 Elementen. Das erste ist eine Liste aller Titel von
@@ -1472,7 +1472,7 @@ public class MailMergeDatasource
    *         {@link #stripOpenOfficeFromWindowName(String)} bearbeitet wurde. Das
    *         zweite Element ist eine Liste von XSpreadsheetDocuments, wobei jeder
    *         Eintrag zum Fenstertitel mit dem selben Index in der ersten Liste
-   *         gehört. Im Fehlerfalle sind beide Listen leer.
+   *         gehÃ¶rt. Im Fehlerfalle sind beide Listen leer.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private MailMergeDatasource.OpenCalcWindows getOpenCalcWindows()
@@ -1507,27 +1507,27 @@ public class MailMergeDatasource
   }
 
   /**
-   * Falls aktuell eine Calc-Tabelle als Datenquelle ausgewählt ist, so wird
-   * versucht, diese zurückzuliefern. Falls nötig wird die Datei anhand von
-   * {@link #calcUrl} neu geöffnet. Falls es aus irgendeinem Grund nicht möglich ist,
-   * diese zurückzuliefern, wird eine
+   * Falls aktuell eine Calc-Tabelle als Datenquelle ausgewÃ¤hlt ist, so wird
+   * versucht, diese zurÃ¼ckzuliefern. Falls nÃ¶tig wird die Datei anhand von
+   * {@link #calcUrl} neu geÃ¶ffnet. Falls es aus irgendeinem Grund nicht mÃ¶glich ist,
+   * diese zurÃ¼ckzuliefern, wird eine
    * {@link de.muenchen.allg.itd51.wollmux.UnavailableException} geworfen. ACHTUNG!
-   * Das zurückgelieferte Objekt könnte bereits disposed sein!
+   * Das zurÃ¼ckgelieferte Objekt kÃ¶nnte bereits disposed sein!
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private XSpreadsheetDocument getCalcDoc() throws UnavailableException
   {
     if (sourceType != SOURCE_CALC)
-      throw new UnavailableException(L.m("Keine Calc-Tabelle ausgewählt"));
+      throw new UnavailableException(L.m("Keine Calc-Tabelle ausgewÃ¤hlt"));
     if (calcDoc != null) return calcDoc;
     return getCalcDoc(calcUrl);
   }
 
   /**
-   * Falls url bereits offen ist oder geöffnet werden kann und ein Tabellendokument
+   * Falls url bereits offen ist oder geÃ¶ffnet werden kann und ein Tabellendokument
    * ist, so wird der {@link #sourceType} auf {@link #SOURCE_CALC} gestellt und die
-   * Calc-Tabelle als neue Datenquelle ausgewählt.
+   * Calc-Tabelle als neue Datenquelle ausgewÃ¤hlt.
    * 
    * @return das Tabellendokument
    * @throws UnavailableException
@@ -1539,7 +1539,7 @@ public class MailMergeDatasource
   {
     /**
      * Falls schon ein offenes Fenster mit der entsprechenden URL existiert, liefere
-     * dieses zurück und setze {@link #calcDoc}.
+     * dieses zurÃ¼ck und setze {@link #calcDoc}.
      */
     XSpreadsheetDocument newCalcDoc = null;
     try
@@ -1562,7 +1562,7 @@ public class MailMergeDatasource
     }
 
     /**
-     * Ansonsten versuchen wir das Dokument zu öffnen.
+     * Ansonsten versuchen wir das Dokument zu Ã¶ffnen.
      */
     if (newCalcDoc == null)
     {
@@ -1585,7 +1585,7 @@ public class MailMergeDatasource
   }
 
   /**
-   * Setzt newCalcDoc als Datenquelle für den Seriendruck.
+   * Setzt newCalcDoc als Datenquelle fÃ¼r den Seriendruck.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1611,9 +1611,9 @@ public class MailMergeDatasource
   }
 
   /**
-   * Falls aktuell eine OOo-Datenquelle als Datenquelle ausgewählt ist, so wird diese
-   * zurückgeliefert. Falls es aus irgendeinem Grund nicht möglich ist, diese
-   * zurückzuliefern, wird eine
+   * Falls aktuell eine OOo-Datenquelle als Datenquelle ausgewÃ¤hlt ist, so wird diese
+   * zurÃ¼ckgeliefert. Falls es aus irgendeinem Grund nicht mÃ¶glich ist, diese
+   * zurÃ¼ckzuliefern, wird eine
    * {@link de.muenchen.allg.itd51.wollmux.UnavailableException} geworfen.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -1622,7 +1622,7 @@ public class MailMergeDatasource
   private Datasource getOOoDatasource() throws UnavailableException
   {
     if (sourceType != SOURCE_DB)
-      throw new UnavailableException(L.m("Keine OOo-Datenquelle ausgewählt"));
+      throw new UnavailableException(L.m("Keine OOo-Datenquelle ausgewÃ¤hlt"));
     if (oooDatasource != null) return oooDatasource;
 
     ConfigThingy conf = new ConfigThingy("Datenquelle");
@@ -1644,7 +1644,7 @@ public class MailMergeDatasource
   }
 
   /**
-   * Setzt die registrierte Datenquelle mit Namen newDsName als neue Datenquelle für
+   * Setzt die registrierte Datenquelle mit Namen newDsName als neue Datenquelle fÃ¼r
    * den Seriendruck.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -1696,8 +1696,8 @@ public class MailMergeDatasource
   }
 
   /**
-   * Falls unterstützt (siehe {@link #supportsAddColumns()}), wird für jedes Mapping
-   * fieldId->subst eine neue Spalte in die Datenbank eingefügt mit Titel fieldId,
+   * Falls unterstÃ¼tzt (siehe {@link #supportsAddColumns()}), wird fÃ¼r jedes Mapping
+   * fieldId->subst eine neue Spalte in die Datenbank eingefÃ¼gt mit Titel fieldId,
    * deren Inhalt durch subst beschrieben wird. Referenzen auf andere Felder
    * innerhalb von subst werden interpretiert als Referenzen auf die Tabellenspalten
    * mit entsprechenden Titeln.
@@ -1820,9 +1820,9 @@ public class MailMergeDatasource
           fieldId);
 
         /*
-         * KEINE zusätzlichen Zeilen mit der Formel belegen, weil ansonsten bei
+         * KEINE zusÃ¤tzlichen Zeilen mit der Formel belegen, weil ansonsten bei
          * Eingabe eines fixen Textes, auch wenn es nur ein Leerzeichen zwischen
-         * <Vorname> und <Nachname> ist, dazu führt, dass 1007 zusätzliche Datensätze
+         * <Vorname> und <Nachname> ist, dazu fÃ¼hrt, dass 1007 zusÃ¤tzliche DatensÃ¤tze
          * erkannt werden.
          */
         for (int y = ymin + 1; y <= ymax + 0; ++y)
@@ -1836,14 +1836,14 @@ public class MailMergeDatasource
       }
       catch (Exception x)
       {
-        Logger.error(L.m("Kann Spalte \"%1\" nicht hinzufügen", fieldId), x);
+        Logger.error(L.m("Kann Spalte \"%1\" nicht hinzufÃ¼gen", fieldId), x);
       }
     }
   }
 
   /**
-   * Liefert die Namen aller relevanten Tabellen der aktuell ausgewählten
-   * Datenquelle. Wenn keine Datenquelle ausgewählt ist, oder es keine Tabellen darin
+   * Liefert die Namen aller relevanten Tabellen der aktuell ausgewÃ¤hlten
+   * Datenquelle. Wenn keine Datenquelle ausgewÃ¤hlt ist, oder es keine Tabellen darin
    * gibt, so wird eine leere Liste geliefert. Eine Tabelle in einem Calc-Dokument
    * ist nur relevant, wenn sie nicht leer ist.
    * 
@@ -1871,8 +1871,8 @@ public class MailMergeDatasource
   }
 
   /**
-   * Liefert die Namen aller Tabellen der aktuell ausgewählten OOo-Datenquelle. Wenn
-   * keine OOo-Datenquelle ausgewählt ist, oder es keine nicht-leere Tabelle gibt, so
+   * Liefert die Namen aller Tabellen der aktuell ausgewÃ¤hlten OOo-Datenquelle. Wenn
+   * keine OOo-Datenquelle ausgewÃ¤hlt ist, oder es keine nicht-leere Tabelle gibt, so
    * wird eine leere Liste geliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1905,9 +1905,9 @@ public class MailMergeDatasource
   }
 
   /**
-   * Liefert die Namen aller nicht-leeren Tabellenblätter von calcDoc. Falls calcDoc ==
+   * Liefert die Namen aller nicht-leeren TabellenblÃ¤tter von calcDoc. Falls calcDoc ==
    * null wird eine leere Liste geliefert. Falls alle Tabellen leer sind, wird
-   * trotzdem eine Liste mit dem Namen der ersten Tabelle zurückgeliefert.
+   * trotzdem eine Liste mit dem Namen der ersten Tabelle zurÃ¼ckgeliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -1993,7 +1993,7 @@ public class MailMergeDatasource
           public void run()
           {
             calcUrl = UNO.XModel(calcDoc).getURL();
-            Logger.debug(L.m("Speicherort der Tabelle hat sich geändert: \"%1\"",
+            Logger.debug(L.m("Speicherort der Tabelle hat sich geÃ¤ndert: \"%1\"",
               calcUrl));
             storeDatasourceSettings();
           }
@@ -2005,7 +2005,7 @@ public class MailMergeDatasource
   /**
    * Liefert die sichtbaren Zellen des Arbeitsblattes mit Namen sheetName aus dem
    * Calc Dokument doc. Die erste sichtbare Zeile der Calc-Tabelle wird herangezogen
-   * als Spaltennamen. Diese Spaltennamen werden zu schema hinzugefügt.
+   * als Spaltennamen. Diese Spaltennamen werden zu schema hinzugefÃ¼gt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -2034,7 +2034,7 @@ public class MailMergeDatasource
              * Erste sichtbare Zeile durchscannen und alle nicht-leeren Zelleninhalte
              * als Tabellenspaltennamen interpretieren. Ein Mapping in
              * mapColumnNameToIndex wird erzeugt, wobei NICHT auf den Index in der
-             * Calc-Tabelle gemappt wird, sondern auf den Index im später für jeden
+             * Calc-Tabelle gemappt wird, sondern auf den Index im spÃ¤ter fÃ¼r jeden
              * Datensatz existierenden String[]-Array.
              */
             int ymin = rowIndexes.first().intValue();
@@ -2055,16 +2055,16 @@ public class MailMergeDatasource
               }
               else
                 iter.remove(); // Spalten mit leerem Spaltennamen werden nicht
-              // benötigt.
+              // benÃ¶tigt.
             }
 
             results.setColumnNameToIndexMap(mapColumnNameToIndex);
 
             /*
-             * Datensätze erzeugen
+             * DatensÃ¤tze erzeugen
              */
             Iterator<Integer> rowIndexIter = rowIndexes.iterator();
-            rowIndexIter.next(); // erste Zeile enthält die Tabellennamen, keinen
+            rowIndexIter.next(); // erste Zeile enthÃ¤lt die Tabellennamen, keinen
             // Datensatz
             while (rowIndexIter.hasNext())
             {
@@ -2101,9 +2101,9 @@ public class MailMergeDatasource
    * @param sheet
    *          das zu scannende Tabellenblatt
    * @param columnIndexes
-   *          diesem Set werden die Spaltenindizes hinzugefügt
+   *          diesem Set werden die Spaltenindizes hinzugefÃ¼gt
    * @param rowIndexes
-   *          diesem Set werden die Zeilenindizes hinzugefügt
+   *          diesem Set werden die Zeilenindizes hinzugefÃ¼gt
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static void getVisibleNonemptyRowsAndColumns(XCellRangesQuery sheet,
@@ -2137,7 +2137,7 @@ public class MailMergeDatasource
   private static class CalcCellQueryResults implements QueryResults
   {
     /**
-     * Bildet einen Spaltennamen auf den Index in dem zu dem Datensatz gehörenden
+     * Bildet einen Spaltennamen auf den Index in dem zu dem Datensatz gehÃ¶renden
      * String[]-Array ab.
      */
     private Map<String, Integer> mapColumnNameToIndex;

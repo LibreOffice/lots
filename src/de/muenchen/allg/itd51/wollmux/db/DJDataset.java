@@ -4,7 +4,7 @@
  * Funktion : Ein vom DJ gelieferter Datensatz, der zu den Methoden von
  *            Dataset noch DJ-spezifische Methoden anbietet.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -19,8 +19,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 14.10.2005 | BNK | Erstellung
  * 24.10.2005 | BNK | +copy()
@@ -48,15 +48,15 @@ public interface DJDataset extends Dataset
   /**
    * Schreibt newValue als neuen Wert des Datensatzes in Spalte columnName in den LOS
    * des DJ, jedoch nur falls der Datensatz bereits aus dem LOS kommt (also
-   * {@link #isFromLOS()} true liefert). Es ist nicht möglich, mit dieser Funktion
-   * einen Spaltenwert als unbelegt (newValue == null) zu überschreiben.
+   * {@link #isFromLOS()} true liefert). Es ist nicht mÃ¶glich, mit dieser Funktion
+   * einen Spaltenwert als unbelegt (newValue == null) zu Ã¼berschreiben.
    * 
    * @throws ColumnNotFoundException
    *           falls keine Spalte namens columnName existiert.
    * @throws UnsupportedOperationException,
    *           falls dieser Datensatz nicht aus dem LOS kommt.
    * @throws IllegalArgumentException,
-   *           falls als newValue null übergeben wird.
+   *           falls als newValue null Ã¼bergeben wird.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void set(String columnName, String newValue)
@@ -66,7 +66,7 @@ public interface DJDataset extends Dataset
   /**
    * Liefert true, falls die Spalte columnName dieses Datensatzes nicht aus den
    * Hintergrunddatenbank kommt, sondern aus dem lokalen Override-Speicher des DJ.
-   * Falls der Datensatz gar nicht mit einer Hintergrunddatenbank verknüpft ist
+   * Falls der Datensatz gar nicht mit einer Hintergrunddatenbank verknÃ¼pft ist
    * (hasBackingStore() == false), so wird hier immer true geliefert, auch wenn der
    * Wert in der Spalte unbelegt ist.
    * 
@@ -78,8 +78,8 @@ public interface DJDataset extends Dataset
 
   /**
    * Liefert true, falls zu diesem Datensatz eine Hintergrunddatenbank existiert, mit
-   * der einige seiner Spalten verknüpft sind, oder über
-   * {@link #discardLocalOverride(String)} verknüpft werden können.
+   * der einige seiner Spalten verknÃ¼pft sind, oder Ã¼ber
+   * {@link #discardLocalOverride(String)} verknÃ¼pft werden kÃ¶nnen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -87,10 +87,10 @@ public interface DJDataset extends Dataset
 
   /**
    * Liefert true, falls dieser Datensatz aus dem Lokalen Override Speicher kommt.
-   * ACHTUNG! Dies bedeutet nicht, dass es eine Spalte gibt, für die
-   * hasLocalOverride(Spalte) true liefert, da der LOS auch Datensätze erlaubt, bei
-   * denen alle Spalten noch mit der Hintergrunddatenbank verknüpft sind. Zum
-   * Beispiel wird ein Datensatz nicht automatisch aus dem LOS entfernt, wenn für
+   * ACHTUNG! Dies bedeutet nicht, dass es eine Spalte gibt, fÃ¼r die
+   * hasLocalOverride(Spalte) true liefert, da der LOS auch DatensÃ¤tze erlaubt, bei
+   * denen alle Spalten noch mit der Hintergrunddatenbank verknÃ¼pft sind. Zum
+   * Beispiel wird ein Datensatz nicht automatisch aus dem LOS entfernt, wenn fÃ¼r
    * alle Spalten discardLocalOverride() aufgerufen wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -98,14 +98,14 @@ public interface DJDataset extends Dataset
   public boolean isFromLOS();
 
   /**
-   * Liefert true, falls this der momentan im LOS ausgewählte Datensatz ist.
+   * Liefert true, falls this der momentan im LOS ausgewÃ¤hlte Datensatz ist.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isSelectedDataset();
 
   /**
-   * Macht this zum im LOS ausgewählten Datensatz.
+   * Macht this zum im LOS ausgewÃ¤hlten Datensatz.
    * 
    * @throws UnsupportedOperationException
    *           falls this nicht aus dem LOS kommt.
@@ -114,18 +114,18 @@ public interface DJDataset extends Dataset
   public void select() throws UnsupportedOperationException;
 
   /**
-   * Verwirft den Wert im LOS für Spalte columnName dieses Datensatzes und verknüpft
+   * Verwirft den Wert im LOS fÃ¼r Spalte columnName dieses Datensatzes und verknÃ¼pft
    * die Spalte wieder mit der Hintergrunddatenbank. ACHTUNG! Ein Datensatz bei dem
-   * der lokale Override für alle Spalten discardet wurde wird NICHT automatisch aus
+   * der lokale Override fÃ¼r alle Spalten discardet wurde wird NICHT automatisch aus
    * dem LOS entfernt. Insbesondere liefert isFromLOS() weiterhin true. Die Spalte
    * muss auf jeden Fall existieren.
    * 
    * @throws ColumnNotFoundException
    *           falls keine Spalte namens columnName existiert.
    * @throws NoBackingStoreException
-   *           falls der Datensatz nie mit einer Hintergrunddatenbank verknüpft war.
+   *           falls der Datensatz nie mit einer Hintergrunddatenbank verknÃ¼pft war.
    *           Keine Exception wird geworfen, falls der die entsprechende Spalte
-   *           bereits mit einer Hintergrunddatenbank verknüpft ist (z.B. weil der
+   *           bereits mit einer Hintergrunddatenbank verknÃ¼pft ist (z.B. weil der
    *           Datensatz gar nicht aus dem LOS kommt).
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -133,9 +133,9 @@ public interface DJDataset extends Dataset
       throws ColumnNotFoundException, NoBackingStoreException;
 
   /**
-   * Legt eine Kopie dieses Datensatzes im LOS an. Achtung! Dies verändert nicht den
-   * Rückgabewert von this.{@link #isFromLOS()}, da this selbst dadurch nicht
-   * verändert wird.
+   * Legt eine Kopie dieses Datensatzes im LOS an. Achtung! Dies verÃ¤ndert nicht den
+   * RÃ¼ckgabewert von this.{@link #isFromLOS()}, da this selbst dadurch nicht
+   * verÃ¤ndert wird.
    * 
    * @return die neue Kopie.
    * 
@@ -145,7 +145,7 @@ public interface DJDataset extends Dataset
 
   /**
    * Entfernt diesen Datensatz aus dem LOS. Achtung! Nach dieser Operation ist der
-   * Datensatz ungültig. Insbesondere ist der Wert von {@link #isFromLOS()} nicht
+   * Datensatz ungÃ¼ltig. Insbesondere ist der Wert von {@link #isFromLOS()} nicht
    * definiert.
    * 
    * @throws UnsupportedOperationException

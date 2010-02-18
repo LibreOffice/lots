@@ -1,9 +1,9 @@
 /*
  * Dateiname: BroadcastObjectSelection.java
  * Projekt  : WollMux
- * Funktion : Nachricht, dass in einer View ein Objekt ausgew‰hlt wurde.
+ * Funktion : Nachricht, dass in einer View ein Objekt ausgew√§hlt wurde.
  * 
- * Copyright (c) 2008 Landeshauptstadt M¸nchen
+ * Copyright (c) 2008 Landeshauptstadt M√ºnchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * ƒnderungshistorie:
- * Datum      | Wer | ƒnderungsgrund
+ * √Ñnderungshistorie:
+ * Datum      | Wer | √Ñnderungsgrund
  * -------------------------------------------------------------------
  * 29.09.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -31,7 +31,7 @@
 package de.muenchen.allg.itd51.wollmux.former;
 
 /**
- * Nachricht, dass in einer View ein Object ausgew‰hlt wurde. Diese Nachricht wird
+ * Nachricht, dass in einer View ein Object ausgew√§hlt wurde. Diese Nachricht wird
  * von anderen Views ausgewertet, um ihre Selektionen ebenfalls anzupassen.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -39,17 +39,17 @@ package de.muenchen.allg.itd51.wollmux.former;
 public abstract class BroadcastObjectSelection implements Broadcast
 {
   /**
-   * das {@link Object} das ausgew‰hlt wurde.
+   * das {@link Object} das ausgew√§hlt wurde.
    */
   private Object myObject;
 
   /**
-   * -1 => abw‰hlen, 1 => anw‰hlen, 0: toggle.
+   * -1 => abw√§hlen, 1 => anw√§hlen, 0: toggle.
    */
   private int state;
 
   /**
-   * true => Selektion erst ganz lˆschen vor an/abw‰hlen des Objektes.
+   * true => Selektion erst ganz l√∂schen vor an/abw√§hlen des Objektes.
    */
   private boolean clearSelection;
 
@@ -57,11 +57,11 @@ public abstract class BroadcastObjectSelection implements Broadcast
    * Erzeugt eine neue Nachricht.
    * 
    * @param myObject
-   *          das {@link Object} das ausgew‰hlt wurde.
+   *          das {@link Object} das ausgew√§hlt wurde.
    * @param state
-   *          -1 => abw‰hlen, 1 => anw‰hlen, 0: toggle
+   *          -1 => abw√§hlen, 1 => anw√§hlen, 0: toggle
    * @param clearSelection
-   *          true => Selektion erst ganz lˆschen vor an/abw‰hlen von myObject.
+   *          true => Selektion erst ganz l√∂schen vor an/abw√§hlen von myObject.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public BroadcastObjectSelection(Object model, int state, boolean clearSelection)
@@ -72,7 +72,7 @@ public abstract class BroadcastObjectSelection implements Broadcast
   }
 
   /**
-   * Liefert -1 f¸r abw‰hlen, 1 f¸r ausw‰hlen, 0 f¸r toggle.
+   * Liefert -1 f√ºr abw√§hlen, 1 f√ºr ausw√§hlen, 0 f√ºr toggle.
    * 
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -83,7 +83,7 @@ public abstract class BroadcastObjectSelection implements Broadcast
   }
 
   /**
-   * true => Selektion erst ganz lˆschen vor an/abw‰hlen des Objekts.
+   * true => Selektion erst ganz l√∂schen vor an/abw√§hlen des Objekts.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -93,7 +93,7 @@ public abstract class BroadcastObjectSelection implements Broadcast
   }
 
   /**
-   * Liefert das Objekt zur¸ck, das de/selektiert wurde.
+   * Liefert das Objekt zur√ºck, das de/selektiert wurde.
    */
   public Object getObject()
   {

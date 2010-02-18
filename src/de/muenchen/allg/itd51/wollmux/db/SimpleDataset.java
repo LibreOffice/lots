@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Eine simple Implementierung des Interfaces Dataset.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 06.12.2005 | BNK | Erstellung
  * 30.05.2006 | BNK | +SimpleDataset(String key, Map data)
@@ -50,10 +50,10 @@ public class SimpleDataset implements Dataset
 
   /**
    * Erzeugt ein SimpleDataset, das eine Kopie von ds ist. Das erzeugte SimpleDataset
-   * ist von schema und ds unabhängig und hält keine Verknüpfungen darauf.
+   * ist von schema und ds unabhÃ¤ngig und hÃ¤lt keine VerknÃ¼pfungen darauf.
    * 
    * @param schema
-   *          enthält die Namen aller zu kopierenden Spalten
+   *          enthÃ¤lt die Namen aller zu kopierenden Spalten
    * @param ds
    *          der zu kopierende Datensatz.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -72,8 +72,8 @@ public class SimpleDataset implements Dataset
   }
 
   /**
-   * Erzeugt ein SimpleDataset, das den Schlüssel key hat und dessen Daten von der
-   * Map data geliefert werden. Das Schema wird implizit durch die Schlüssel
+   * Erzeugt ein SimpleDataset, das den SchlÃ¼ssel key hat und dessen Daten von der
+   * Map data geliefert werden. Das Schema wird implizit durch die SchlÃ¼ssel
    * bestimmt, die data kennt (d.h. wenn data.containsKey(column), dann ist column im
    * Schema). ACHTUNG! Sowohl schema als auch data werden per Referenz eingebunden.
    * 

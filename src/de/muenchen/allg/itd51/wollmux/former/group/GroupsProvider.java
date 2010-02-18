@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : c
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 13.03.2009 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -43,7 +43,7 @@ import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 
 /**
- * Ein Ding, das GROUPS über ihre IDs referenziert.
+ * Ein Ding, das GROUPS Ã¼ber ihre IDs referenziert.
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
@@ -65,7 +65,7 @@ public class GroupsProvider implements Iterable<IDManager.ID>
   /**
    * Erzeugt einen neuen GroupsProvider, der
    * {@link FormularMax4000#documentNeedsUpdating()} aufruft, wenn etwas an seiner
-   * Liste geändert wird.
+   * Liste geÃ¤ndert wird.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
@@ -76,8 +76,8 @@ public class GroupsProvider implements Iterable<IDManager.ID>
 
   /**
    * Liefert die Menge der GROUPS-Werte dieses FormControlModels. Die gelieferte
-   * Liste ist keine Referenz auf die interne Datenstruktur. Hinzufügen und Löschen
-   * von Einträgen muss über
+   * Liste ist keine Referenz auf die interne Datenstruktur. HinzufÃ¼gen und LÃ¶schen
+   * von EintrÃ¤gen muss Ã¼ber
    * {@link #addGroup(de.muenchen.allg.itd51.wollmux.former.IDManager.ID)} bzw.
    * {@link #removeGroup(de.muenchen.allg.itd51.wollmux.former.IDManager.ID)}
    * erfolgen.
@@ -90,7 +90,7 @@ public class GroupsProvider implements Iterable<IDManager.ID>
   }
 
   /**
-   * Fügt id zu den GROUPS hinzu, falls noch nicht enthalten.
+   * FÃ¼gt id zu den GROUPS hinzu, falls noch nicht enthalten.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
@@ -152,7 +152,7 @@ public class GroupsProvider implements Iterable<IDManager.ID>
   }
 
   /**
-   * listener wird benachrichtigt, wenn Gruppen hinzugefügt oder entfernt werden.
+   * listener wird benachrichtigt, wenn Gruppen hinzugefÃ¼gt oder entfernt werden.
    * ACHTUNG! Es wird nur eine {@link WeakReference} auf listener gehalten! Das
    * heisst der Listener muss auf andere Weise am Leben gehalten werden. Andererseits
    * muss er nicht deregistriert werden, wenn er verschwindet.
@@ -177,7 +177,7 @@ public class GroupsProvider implements Iterable<IDManager.ID>
   }
 
   /**
-   * Benachrichtigt alle {@link GroupsChangedListener}, dass id hinzugefügt
+   * Benachrichtigt alle {@link GroupsChangedListener}, dass id hinzugefÃ¼gt
    * (remove==false) oder entfernt (remove==true) wurde.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)

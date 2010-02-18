@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Erzeugt zu ConfigThingys passende UI Elemente.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,19 +18,19 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 05.01.2006 | BNK | Erstellung
  * 21.04.2006 | BNK | +Set supportedActions zum Angeben welche ACTIONs akzeptiert werden
  *                  | +TYPE "menuitem"
  *                  | +ACTION "openTemplate" und "openDocument"
- *                  | null-Werte in den Maps unterstützt
- * 24.04.2006 | BNK | Qualitätssicherung
+ *                  | null-Werte in den Maps unterstÃ¼tzt
+ * 24.04.2006 | BNK | QualitÃ¤tssicherung
  * 29.05.2006 | BNK | ordentliche Context-Klasse
  * 31.05.2006 | BNK | +funcDialog
- * 16.06.2006 | BNK | Beim Ändern eines Checkbox-Werts holt sich die Checkbox jetzt den Fokus
- * 13.09.2006 | BNK | Bei glues werden jetzt MINSIZE, MAXSIZE und PREFSIZE unterstützt.
+ * 16.06.2006 | BNK | Beim Ã„ndern eines Checkbox-Werts holt sich die Checkbox jetzt den Fokus
+ * 13.09.2006 | BNK | Bei glues werden jetzt MINSIZE, MAXSIZE und PREFSIZE unterstÃ¼tzt.
  * 08.01.2007 | BNK | [R4698]WRAP-Attribut bei textareas
  *                  | [R4296]Wenn READONLY, dann nicht fokussierbar
  * 09.01.2007 | BNK | ENTER kann jetzt auch Checkboxen und Buttons aktivieren
@@ -105,46 +105,46 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 public class UIElementFactory
 {
   /**
-   * Standardbreite für Textfelder und Textareas. Wird verwendet, wenn nicht mit
+   * Standardbreite fÃ¼r Textfelder und Textareas. Wird verwendet, wenn nicht mit
    * setTextfieldWidth() ein anderer Wert gesetzt wurde.
    */
   private final static int TEXTFIELD_DEFAULT_WIDTH = 22;
 
   /**
-   * Wird in einer der übergebenen Maps ein TYPE nicht gefunden, so wird stattdessen
-   * nach einem Eintrag für diesen Namen gesucht.
+   * Wird in einer der Ã¼bergebenen Maps ein TYPE nicht gefunden, so wird stattdessen
+   * nach einem Eintrag fÃ¼r diesen Namen gesucht.
    */
   private static final String DEFAULT = "default";
 
   /**
-   * Die Breite (in Zeichen) für Textfields und Textareas. Kann mit
+   * Die Breite (in Zeichen) fÃ¼r Textfields und Textareas. Kann mit
    * {@link #setTextfieldWidth(int)} gesetzt werden.
    */
   private int textfieldWidth = TEXTFIELD_DEFAULT_WIDTH;
 
   /**
    * Erzeugt eine Factory, die aus {@link ConfigThingy}s Objekte des Typs
-   * {@link UIElement} erzeugt. Die zu übergebenen Maps dürfen alle null-Werte
+   * {@link UIElement} erzeugt. Die zu Ã¼bergebenen Maps dÃ¼rfen alle null-Werte
    * enthalten, die den entsprechenden Eigenschaften der erzeugten UIElemente
    * zugewiesen werden.
    * 
    * @param mapTypeToLayoutConstraints
-   *          bildet einen TYPE auf die dazugehörigen layout constraints (d,i, der
+   *          bildet einen TYPE auf die dazugehÃ¶rigen layout constraints (d,i, der
    *          optionale zweite Parameter von
    *          {@link java.awt.Container#add(java.awt.Component, java.lang.Object) java.awt.Container.add()})
-   *          ab. Wird von {@link UIElement#getLayoutConstraints()} zurückgeliefert.
+   *          ab. Wird von {@link UIElement#getLayoutConstraints()} zurÃ¼ckgeliefert.
    * 
    * @param mapTypeToLabelType
    *          bildet einen TYPE auf einen Integer ab, der angibt, ob das UI Element
-   *          ein zusätzliches Label links oder rechts bekommen soll. Mögliche Werte
+   *          ein zusÃ¤tzliches Label links oder rechts bekommen soll. MÃ¶gliche Werte
    *          sind {@link UIElement#LABEL_LEFT}, {@link UIElement#LABEL_RIGHT} und
    *          {@link UIElement#LABEL_NONE}. Wird von
-   *          {@link UIElement#getLabelType()} zurückgeliefert.
+   *          {@link UIElement#getLabelType()} zurÃ¼ckgeliefert.
    * 
    * @param mapTypeToLabelLayoutConstraints
-   *          Für UI Elemente, die ein zusätzliches Label links oder rechts bekommen
+   *          FÃ¼r UI Elemente, die ein zusÃ¤tzliches Label links oder rechts bekommen
    *          sollen (siehe Parameter mapTypeToLabelType) liefert diese Map die
-   *          layout constraints für das Label. Achtung! UI Elemente mit TYPE "label"
+   *          layout constraints fÃ¼r das Label. Achtung! UI Elemente mit TYPE "label"
    *          beziehen ihre layout constraints nicht aus dieser Map, sondern wie alle
    *          anderen UI Elemente auch aus mapTypeToLayoutConstraints.
    * 
@@ -162,7 +162,7 @@ public class UIElementFactory
   {}
 
   /**
-   * Setzt die Breite für erzeugte Textfields und Textareas auf anzahlZeichen.
+   * Setzt die Breite fÃ¼r erzeugte Textfields und Textareas auf anzahlZeichen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -173,7 +173,7 @@ public class UIElementFactory
 
   /**
    * Erzeugt aus der Spezifikation in conf (muss als Kind einen TYPE-Knoten haben)
-   * ein passendes {@link UIElement}. Die folgenden TYPES werden unterstützt
+   * ein passendes {@link UIElement}. Die folgenden TYPES werden unterstÃ¼tzt
    * <dl>
    * <dt>button</dt>
    * <dd>Ein normaler Button.</dd>
@@ -194,7 +194,7 @@ public class UIElementFactory
    * <dd>Eine Checkbox mit integriertem Label das immer rechts ist.</dd>
    * 
    * <dt>listbox</dt>
-   * <dd>Eine Liste von Einträgen.</dd>
+   * <dd>Eine Liste von EintrÃ¤gen.</dd>
    * 
    * <dt>v-separator</dt>
    * <dd>Ein separator mit <b>vertikaler</b> Ausdehnung (z.B. ein senkrechter
@@ -204,7 +204,7 @@ public class UIElementFactory
    * <dt>h-separator</dt>
    * <dd>Ein separator mit <b>horizontaler</b> Ausdehnung (z.B. ein horizontaler
    * Strich). Diese Art Separator wir benutzt, um vertikal angeordnete Elemente zu
-   * trennen (z.B. in einem Pull-Down-Menü).</dd>
+   * trennen (z.B. in einem Pull-Down-MenÃ¼).</dd>
    * 
    * <dt>h-glue</dt>
    * <dd>Leerraum mit <b>horizontaler</b> Ausdehnung. Wird verwendet, um Abstand
@@ -212,17 +212,17 @@ public class UIElementFactory
    * 
    * <dt>v-glue</dt>
    * <dd>Leerraum mit <b>vertikaler</b> Ausdehnung. Wird verwendet, um Abstand
-   * zwischen vertikal angeordneten Elementen zu schaffen (z.B. in Pull-Down-Menüs).</dd>
+   * zwischen vertikal angeordneten Elementen zu schaffen (z.B. in Pull-Down-MenÃ¼s).</dd>
    * 
    * <dt>default</dt>
    * <dd>Dieser TYPE wird als Fallback verwendet, wenn in einer der an den
-   * Konstruktor übergebenen Maps ein TYPE nicht gefunden wird.</dd>
+   * Konstruktor Ã¼bergebenen Maps ein TYPE nicht gefunden wird.</dd>
    * </dl>
    * 
    * @param context
-   *          Liefert Informationen für die Erstellung der UI Elemente. Ist für einen
+   *          Liefert Informationen fÃ¼r die Erstellung der UI Elemente. Ist fÃ¼r einen
    *          TYPE in einer Map kein Mapping angegeben (auch kein null-Wert), so wird
-   *          erst geschaut, ob ein Mapping für "default" vorhanden ist. Falls ja, so
+   *          erst geschaut, ob ein Mapping fÃ¼r "default" vorhanden ist. Falls ja, so
    *          wird dieses der entsprechenden Eigenschaft des erzeugten UIElements
    *          zugewiesen, ansonsten null.
    * 
@@ -280,7 +280,7 @@ public class UIElementFactory
     /*
      * ACHTUNG! Hier wird immer erst mit containsKey() getestet, anstatt nur get() zu
      * machen und auf null zu testen, weil null-Werte in den Maps erlaubt sind und
-     * zurückgeliefert werden sollen.
+     * zurÃ¼ckgeliefert werden sollen.
      */
 
     Object layoutConstraints;
@@ -295,7 +295,7 @@ public class UIElementFactory
     else
       labelLayoutConstraints = context.mapTypeToLabelLayoutConstraints.get(DEFAULT);
     /**
-     * Falls nötig, erzeuge unabhängigen Klon der Layout Constraints.
+     * Falls nÃ¶tig, erzeuge unabhÃ¤ngigen Klon der Layout Constraints.
      */
     if (layoutConstraints instanceof GridBagConstraints)
       layoutConstraints = ((GridBagConstraints) layoutConstraints).clone();
@@ -389,7 +389,7 @@ public class UIElementFactory
       if (!tip.equals("")) textarea.setToolTipText(tip);
 
       /*
-       * Tab auch zum Weiterschalten und Shift-Tab zum Zurückschalten erlauben
+       * Tab auch zum Weiterschalten und Shift-Tab zum ZurÃ¼ckschalten erlauben
        */
       Set<AWTKeyStroke> focusKeys =
         textarea.getFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS);
@@ -594,7 +594,7 @@ public class UIElementFactory
     }
     else
       throw new ConfigurationErrorException(L.m(
-        "Ununterstützter TYPE für GUI Element: \"%1\"", type));
+        "UnunterstÃ¼tzter TYPE fÃ¼r GUI Element: \"%1\"", type));
   }
 
   private void copySpaceBindingToEnter(AbstractButton button)
@@ -784,7 +784,7 @@ public class UIElementFactory
   }
 
   /**
-   * Wartet auf Doppelklick in eine JList und führt dann die actionPerformed()
+   * Wartet auf Doppelklick in eine JList und fÃ¼hrt dann die actionPerformed()
    * Methode eines ActionListeners aus.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -816,22 +816,22 @@ public class UIElementFactory
   }
 
   /**
-   * Liefert einen {@link UIElementActionListener} zurück, der ActionEvents von
+   * Liefert einen {@link UIElementActionListener} zurÃ¼ck, der ActionEvents von
    * uiElement an handler weitergibt, wobei der eventType "action" ist.
    * 
    * @param uiElement
-   *          das uiElement zu dem der ActionListener gehört. Achtung! der
+   *          das uiElement zu dem der ActionListener gehÃ¶rt. Achtung! der
    *          ActionListener wird durch diese Methode nicht auf uiElement
    *          registriert!
    * @param action
    *          wird als erstes Element des args Arrays an die Funktion
    *          {@link UIElementEventHandler#processUiElementEvent(UIElement, String, Object[])}
-   *          übergeben.
+   *          Ã¼bergeben.
    * @param conf
-   *          Manche ACTIONs erfordern zusätzliche Angaben (z.B. WINDOW Attribut für
+   *          Manche ACTIONs erfordern zusÃ¤tzliche Angaben (z.B. WINDOW Attribut fÃ¼r
    *          die ACTION "switchWindow"). Damit diese ausgewertet und an handler
-   *          übergeben werden können muss hier das ConfigThingy des UI Elements
-   *          übergeben werden (also der Knoten, der TYPE als Kind hat).
+   *          Ã¼bergeben werden kÃ¶nnen muss hier das ConfigThingy des UI Elements
+   *          Ã¼bergeben werden (also der Knoten, der TYPE als Kind hat).
    * @param handler
    *          der {@link UIElementEventHandler} an den die Events weitergereicht
    *          werden sollen.
@@ -839,7 +839,7 @@ public class UIElementFactory
    *          Ist action nicht in dieser Menge enthalten gibt es einen Fehler.
    * @return einen ActionListener, den man auf uiElement registrieren kann, damit er
    *         dessen Actions an handler weiterreicht. Im Falle eines Fehlers (z.B.
-   *         fehlende Zusatzangaben für ACTION die dieses erfordert) wird null
+   *         fehlende Zusatzangaben fÃ¼r ACTION die dieses erfordert) wird null
    *         geliefert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -848,7 +848,7 @@ public class UIElementFactory
   {
     if (!supportedActions.contains(action))
     {
-      Logger.error(L.m("Ununterstützte ACTION \"%1\"", action));
+      Logger.error(L.m("UnunterstÃ¼tzte ACTION \"%1\"", action));
       return null;
     }
 
@@ -951,11 +951,11 @@ public class UIElementFactory
   public static class Context
   {
     /**
-     * Bildet einen TYPE auf die dazugehörigen layout constraints (d,i, der optionale
+     * Bildet einen TYPE auf die dazugehÃ¶rigen layout constraints (d,i, der optionale
      * zweite Parameter von
      * {@link java.awt.Container#add(java.awt.Component, java.lang.Object) java.awt.Container.add()})
-     * ab. Darf null-Werte enthalten. Ist für einen TYPE kein Mapping angegeben (auch
-     * kein null-Wert), so wird erst geschaut, ob ein Mapping für "default" vorhanden
+     * ab. Darf null-Werte enthalten. Ist fÃ¼r einen TYPE kein Mapping angegeben (auch
+     * kein null-Wert), so wird erst geschaut, ob ein Mapping fÃ¼r "default" vorhanden
      * ist. Falls ja, so wird dieses der entsprechenden Eigenschaft des erzeugten
      * UIElements zugewiesen, ansonsten null.
      */
@@ -963,24 +963,24 @@ public class UIElementFactory
 
     /**
      * Bildet einen TYPE auf einen Integer ab, der angibt, ob das UI Element ein
-     * zusätzliches Label links oder rechts bekommen soll. Mögliche Werte sind
+     * zusÃ¤tzliches Label links oder rechts bekommen soll. MÃ¶gliche Werte sind
      * {@link UIElement#LABEL_LEFT}, {@link UIElement#LABEL_RIGHT} und
-     * {@link UIElement#LABEL_NONE}. Darf null-Werte enthalten. Ist für einen TYPE
+     * {@link UIElement#LABEL_NONE}. Darf null-Werte enthalten. Ist fÃ¼r einen TYPE
      * kein Mapping angegeben (auch kein null-Wert), so wird erst geschaut, ob ein
-     * Mapping für "default" vorhanden ist. Falls ja, so wird dieses der
+     * Mapping fÃ¼r "default" vorhanden ist. Falls ja, so wird dieses der
      * entsprechenden Eigenschaft des erzeugten UIElements zugewiesen, ansonsten
      * null.
      */
     public Map<String, Integer> mapTypeToLabelType;
 
     /**
-     * Für UI Elemente, die ein zusätzliches Label links oder rechts bekommen sollen
+     * FÃ¼r UI Elemente, die ein zusÃ¤tzliches Label links oder rechts bekommen sollen
      * (siehe {@link #mapTypeToLabelType}) liefert diese Map die layout constraints
-     * für das Label. Achtung! UI Elemente mit TYPE "label" beziehen ihre layout
+     * fÃ¼r das Label. Achtung! UI Elemente mit TYPE "label" beziehen ihre layout
      * constraints nicht aus dieser Map, sondern wie alle anderen UI Elemente auch
-     * aus {@link #mapTypeToLayoutConstraints}. Darf null-Werte enthalten. Ist für
+     * aus {@link #mapTypeToLayoutConstraints}. Darf null-Werte enthalten. Ist fÃ¼r
      * einen TYPE kein Mapping angegeben (auch kein null-Wert), so wird erst
-     * geschaut, ob ein Mapping für "default" vorhanden ist. Falls ja, so wird dieses
+     * geschaut, ob ein Mapping fÃ¼r "default" vorhanden ist. Falls ja, so wird dieses
      * der entsprechenden Eigenschaft des erzeugten UIElements zugewiesen, ansonsten
      * null.
      */
@@ -999,8 +999,8 @@ public class UIElementFactory
     public UIElementEventHandler uiElementEventHandler;
 
     /**
-     * Enthält diese Map für einen TYPE ein Mapping auf einen anderen TYPE, so wird
-     * der andere TYPE verwendet. Dies ist nützlich, um abhängig vom Kontext den TYPE
+     * EnthÃ¤lt diese Map fÃ¼r einen TYPE ein Mapping auf einen anderen TYPE, so wird
+     * der andere TYPE verwendet. Dies ist nÃ¼tzlich, um abhÃ¤ngig vom Kontext den TYPE
      * "separator" entweder auf "h-separator" oder "v-separator" abzubilden.
      */
     public Map<String, String> mapTypeToType;

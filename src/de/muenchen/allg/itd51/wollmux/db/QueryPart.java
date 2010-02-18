@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Teil einer Datenbankabfrage
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 31.10.2005 | BNK | Erstellung
  * 03.11.2005 | BNK | besser kommentiert
@@ -35,12 +35,12 @@ package de.muenchen.allg.itd51.wollmux.db;
 
 /**
  * Teil einer Datenbankabfrage. Zur Zeit einfach nur ein Spaltenname und ein
- * Suchstring. Selektiert werden alle Datensätze, die in der entsprechenden Spalte
+ * Suchstring. Selektiert werden alle DatensÃ¤tze, die in der entsprechenden Spalte
  * den Suchstring haben. Der Suchstring kann vorne und/oder hinten genau ein
- * Sternchen '*' stehen haben, um Präfix/Suffix/Teilstring-Suche zu realisieren.
+ * Sternchen '*' stehen haben, um PrÃ¤fix/Suffix/Teilstring-Suche zu realisieren.
  * Folgen mehrerer Sternchen oder Sternchen in der Mitte des Suchstrings sind
  * verboten und produzieren undefiniertes Verhalten. Ebenso verboten ist ein
- * Suchstring, der nur Sternchen enthält oder einer der leer ist.
+ * Suchstring, der nur Sternchen enthÃ¤lt oder einer der leer ist.
  */
 public class QueryPart
 {

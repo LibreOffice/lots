@@ -1,9 +1,9 @@
 /*
  * Dateiname: PrintParametersDialog.java
  * Projekt  : WollMux
- * Funktion : Dialog für Druckeinstellungen
+ * Funktion : Dialog fÃ¼r Druckeinstellungen
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 03.05.2008 | LUT | Erstellung
  * 08.08.2006 | BNK | Viel Arbeit reingesteckt.
@@ -75,14 +75,14 @@ import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 public class PrintParametersDialog
 {
   /**
-   * Kommando-String, der dem closeActionListener übermittelt wird, wenn der Dialog
-   * über den Drucken-Knopf geschlossen wird.
+   * Kommando-String, der dem closeActionListener Ã¼bermittelt wird, wenn der Dialog
+   * Ã¼ber den Drucken-Knopf geschlossen wird.
    */
   public static final String CMD_SUBMIT = "submit";
 
   /**
-   * Kommando-String, der dem closeActionListener übermittelt wird, wenn der Dialog
-   * über den Abbrechen oder "X"-Knopf geschlossen wird.
+   * Kommando-String, der dem closeActionListener Ã¼bermittelt wird, wenn der Dialog
+   * Ã¼ber den Abbrechen oder "X"-Knopf geschlossen wird.
    */
   public static final String CMD_CANCEL = "cancel";
 
@@ -146,7 +146,7 @@ public class PrintParametersDialog
   }
 
   /**
-   * Mini-Klasse für den Rückgabewert eines Seitenbereichs.
+   * Mini-Klasse fÃ¼r den RÃ¼ckgabewert eines Seitenbereichs.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -169,7 +169,7 @@ public class PrintParametersDialog
   }
 
   /**
-   * Definiert die in diesem Dialog möglichen Einstellungen zur Auswahl des
+   * Definiert die in diesem Dialog mÃ¶glichen Einstellungen zur Auswahl des
    * Seitenbereichs.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -178,7 +178,7 @@ public class PrintParametersDialog
     // TODO: Formatierung nochmal anpassen....
     ALL(L.m("Alles")),
     USER_DEFINED(L.m("Seiten"), "1,3,5,10-100<etwasPlatz>",
-        L.m("Mögliche Eingaben sind z.B. '1', '2-5' oder '1,3,5'")),
+        L.m("MÃ¶gliche Eingaben sind z.B. '1', '2-5' oder '1,3,5'")),
     CURRENT_PAGE(L.m("Aktuelle Seite")),
     CURRENT_AND_FOLLOWING(L.m("Aktuelle Seite bis Dokumentende"));
 
@@ -211,8 +211,8 @@ public class PrintParametersDialog
   };
 
   /**
-   * Liefert ein PageRange-Objekt zurück, das Informationen über den aktuell
-   * ausgewählten Druckbereich enthält.
+   * Liefert ein PageRange-Objekt zurÃ¼ck, das Informationen Ã¼ber den aktuell
+   * ausgewÃ¤hlten Druckbereich enthÃ¤lt.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -222,9 +222,9 @@ public class PrintParametersDialog
   }
 
   /**
-   * Liefert die Anzahl in der GUI eingestellter Kopien als Short zurück; Zeigt der
+   * Liefert die Anzahl in der GUI eingestellter Kopien als Short zurÃ¼ck; Zeigt der
    * Dialog kein Elemente zur Eingabe der Kopien an, oder ist die Eingabe keine
-   * gültige Zahl, so wird new Short((short) 1) zurück geliefert.
+   * gÃ¼ltige Zahl, so wird new Short((short) 1) zurÃ¼ck geliefert.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -243,7 +243,7 @@ public class PrintParametersDialog
   private void createGUI()
   {
     dialog = new JDialog();
-    dialog.setTitle(L.m("Einstellungen für den Druck"));
+    dialog.setTitle(L.m("Einstellungen fÃ¼r den Druck"));
     dialog.addWindowListener(myWindowListener);
     JPanel panel = new JPanel(new BorderLayout());
     panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -285,7 +285,7 @@ public class PrintParametersDialog
     if (showCopyCount) hbox.add(vboxCopies);
     vbox.add(hbox);
 
-    // JRadio-Buttons für den Druckbereich erzeugen
+    // JRadio-Buttons fÃ¼r den Druckbereich erzeugen
     ButtonGroup pageRangeButtons = new ButtonGroup();
     JRadioButton firstButton = null;
     for (final PageRangeType t : PageRangeType.values())
@@ -410,8 +410,8 @@ public class PrintParametersDialog
     /*
      * Wegen folgendem Java Bug (WONTFIX)
      * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304 sind die folgenden
-     * 3 Zeilen nötig, damit der Dialog gc'ed werden kann. Die Befehle sorgen dafür,
-     * dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager) indirekt über
+     * 3 Zeilen nÃ¶tig, damit der Dialog gc'ed werden kann. Die Befehle sorgen dafÃ¼r,
+     * dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager) indirekt Ã¼ber
      * den JFrame den MailMerge kennt.
      */
     if (dialog != null)

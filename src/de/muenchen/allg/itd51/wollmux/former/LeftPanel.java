@@ -1,9 +1,9 @@
 /*
  * Dateiname: LeftPanel.java
  * Projekt  : WollMux
- * Funktion : Der Übercontainer für die linke Hälfte des FormularMax 4000.
+ * Funktion : Der Ãœbercontainer fÃ¼r die linke HÃ¤lfte des FormularMax 4000.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 22.09.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -54,39 +54,39 @@ import de.muenchen.allg.itd51.wollmux.former.section.SectionModelList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 
 /**
- * Der Übercontainer für die linke Hälfte des FormularMax 4000.
+ * Der Ãœbercontainer fÃ¼r die linke HÃ¤lfte des FormularMax 4000.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class LeftPanel implements View
 {
   /**
-   * Hält in einem Panel FormControlModelLineViews für alle {@link FormControlModel}s.
+   * HÃ¤lt in einem Panel FormControlModelLineViews fÃ¼r alle {@link FormControlModel}s.
    */
   private AllFormControlLineViewsPanel allFormControlModelLineViewsPanel;
 
   /**
-   * Hält in einem Panel InsertionModelLineViews für alle {@link InsertionModel}s.
+   * HÃ¤lt in einem Panel InsertionModelLineViews fÃ¼r alle {@link InsertionModel}s.
    */
   private AllInsertionLineViewsPanel allInsertionModelLineViewsPanel;
 
   /**
-   * Hält in einem Panel GroupModelLineViews für alle {@link GroupModel}s.
+   * HÃ¤lt in einem Panel GroupModelLineViews fÃ¼r alle {@link GroupModel}s.
    */
   private AllGroupLineViewsPanel allGroupModelLineViewsPanel;
 
   /**
-   * Hält in einem Panel SectionModelLineViews für alle {@link SectionModel}s.
+   * HÃ¤lt in einem Panel SectionModelLineViews fÃ¼r alle {@link SectionModel}s.
    */
   private AllSectionLineViewsPanel allSectionModelLineViewsPanel;
 
   /**
-   * Enthält alle im linken Panel angezeigten Views.
+   * EnthÃ¤lt alle im linken Panel angezeigten Views.
    */
   private JTabbedPane myTabbedPane;
 
   /**
-   * Der FormularMax4000 zu dem dieses Panel gehört.
+   * Der FormularMax4000 zu dem dieses Panel gehÃ¶rt.
    */
   private FormularMax4000 formularMax4000;
 
@@ -109,7 +109,7 @@ public class LeftPanel implements View
       new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
     myTabbedPane.add(L.m("Formular-GUI"),
       allFormControlModelLineViewsPanel.JComponent());
-    myTabbedPane.add(L.m("Einfügungen"),
+    myTabbedPane.add(L.m("EinfÃ¼gungen"),
       allInsertionModelLineViewsPanel.JComponent());
     myTabbedPane.add(L.m("Sichtbarkeiten"), allGroupModelLineViewsPanel.JComponent());
     myTabbedPane.add(L.m("Bereiche"), allSectionModelLineViewsPanel.JComponent());
@@ -169,8 +169,8 @@ public class LeftPanel implements View
 
   /**
    * Liefert den Index an dem Buttons auf dem aktuell sichtbaren Tab des
-   * {@link AllFormControlLineViewsPanel} eingefügt werden sollten oder -1, falls
-   * dort kein Tab ausgewählt ist. Der zurückgelieferte Wert (falls nicht -1)
+   * {@link AllFormControlLineViewsPanel} eingefÃ¼gt werden sollten oder -1, falls
+   * dort kein Tab ausgewÃ¤hlt ist. Der zurÃ¼ckgelieferte Wert (falls nicht -1)
    * entspricht dem Index des letzten sichtbaren Elements + 1.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -187,7 +187,7 @@ public class LeftPanel implements View
 
   /**
    * Ruft {@link AllFormControlLineViewsPanel#mergeCheckboxesIntoCombobox()} auf und
-   * liefert dessen Ergebnis zurück.
+   * liefert dessen Ergebnis zurÃ¼ck.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

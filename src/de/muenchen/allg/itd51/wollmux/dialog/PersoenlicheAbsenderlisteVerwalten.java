@@ -1,9 +1,9 @@
 /*
  * Dateiname: PersoenlicheAbsenderlisteVerwalten.java
  * Projekt  : WollMux
- * Funktion : Implementiert den Hinzufügen/Entfernen Dialog des BKS
+ * Funktion : Implementiert den HinzufÃ¼gen/Entfernen Dialog des BKS
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,11 +18,11 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 17.10.2005 | BNK | Erstellung
- * 18.10.2005 | BNK | PAL Verwalten GUI großteils implementiert (aber funktionslos)
+ * 18.10.2005 | BNK | PAL Verwalten GUI groÃŸteils implementiert (aber funktionslos)
  * 19.10.2005 | BNK | Suche implementiert
  * 20.10.2005 | BNK | Suche getestet
  * 24.10.2005 | BNK | Restliche ACTIONS implementiert
@@ -38,7 +38,7 @@
  * 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
  * 22.11.2005 | BNK | Bei Initialisierung ist der selectedDataset auch in der Liste 
  *                  | selektiert.
- * 20.01.2006 | BNK | Default-Anrede für Tinchen WollMux ist "Frau"
+ * 20.01.2006 | BNK | Default-Anrede fÃ¼r Tinchen WollMux ist "Frau"
  * 19.10.2006 | BNK | Credits
  * 23.10.2006 | BNK | Bugfix: Bei credits an wurden Personen ohne Mail nicht dargestellt.
  * 06.11.2006 | BNK | auf AlwaysOnTop gesetzt.
@@ -114,8 +114,8 @@ import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
 
 /**
- * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
- * einen Dialog zum Hinzufügen/Entfernen von Einträgen der Persönlichen Absenderliste
+ * Diese Klasse baut anhand einer als ConfigThingy Ã¼bergebenen Dialogbeschreibung
+ * einen Dialog zum HinzufÃ¼gen/Entfernen von EintrÃ¤gen der PersÃ¶nlichen Absenderliste
  * auf. Die private-Funktionen dagegen NUR aus dem Event-Dispatching Thread heraus
  * aufgerufen werden.
  * 
@@ -139,17 +139,17 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   /**
    * Gibt an, wie die Personen in den Listen angezeigt werden sollen. %{Spalte}
-   * Syntax um entsprechenden Wert des Datensatzes einzufügen.
+   * Syntax um entsprechenden Wert des Datensatzes einzufÃ¼gen.
    */
   private final static String displayTemplate = "%{Nachname}, %{Vorname} (%{Rolle})";
 
   /**
-   * Standardbreite für Textfelder
+   * Standardbreite fÃ¼r Textfelder
    */
   private final static int TEXTFIELD_DEFAULT_WIDTH = 22;
 
   /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
+   * Rand um Textfelder (wird auch fÃ¼r ein paar andere RÃ¤nder verwendet) in Pixeln.
    */
   private final static int TF_BORDER = 4;
 
@@ -159,7 +159,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   private final static int BUTTON_BORDER = 2;
 
   /**
-   * ActionListener für Buttons mit der ACTION "abort".
+   * ActionListener fÃ¼r Buttons mit der ACTION "abort".
    */
   private ActionListener actionListener_abort = new ActionListener()
   {
@@ -170,7 +170,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "back".
+   * ActionListener fÃ¼r Buttons mit der ACTION "back".
    */
   private ActionListener actionListener_back = new ActionListener()
   {
@@ -181,7 +181,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "search".
+   * ActionListener fÃ¼r Buttons mit der ACTION "search".
    */
   private ActionListener actionListener_search = new ActionListener()
   {
@@ -192,7 +192,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "addToPAL".
+   * ActionListener fÃ¼r Buttons mit der ACTION "addToPAL".
    */
   private ActionListener actionListener_addToPAL = new ActionListener()
   {
@@ -203,7 +203,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "removeFromPAL".
+   * ActionListener fÃ¼r Buttons mit der ACTION "removeFromPAL".
    */
   private ActionListener actionListener_removeFromPAL = new ActionListener()
   {
@@ -214,7 +214,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "editEntry".
+   * ActionListener fÃ¼r Buttons mit der ACTION "editEntry".
    */
   private ActionListener actionListener_editEntry = new ActionListener()
   {
@@ -225,7 +225,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "copyEntry".
+   * ActionListener fÃ¼r Buttons mit der ACTION "copyEntry".
    */
   private ActionListener actionListener_copyEntry = new ActionListener()
   {
@@ -236,7 +236,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "newPALEntry".
+   * ActionListener fÃ¼r Buttons mit der ACTION "newPALEntry".
    */
   private ActionListener actionListener_newPALEntry = new ActionListener()
   {
@@ -247,7 +247,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "newPALEntry".
+   * ActionListener fÃ¼r Buttons mit der ACTION "newPALEntry".
    */
   private ActionListener actionListener_editNewPALEntry = new ActionListener()
   {
@@ -289,7 +289,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   private JList resultsJList;
 
   /**
-   * Die Listbox mit der persönlichen Absenderliste.
+   * Die Listbox mit der persÃ¶nlichen Absenderliste.
    */
   private JList palJList;
 
@@ -301,7 +301,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   /**
    * Der dem
    * {@link #PersoenlicheAbsenderlisteVerwalten(ConfigThingy, ConfigThingy, DatasourceJoiner, ActionListener) Konstruktor}
-   * übergebene dialogEndListener.
+   * Ã¼bergebene dialogEndListener.
    */
   private ActionListener dialogEndListener;
 
@@ -311,13 +311,13 @@ public class PersoenlicheAbsenderlisteVerwalten
   private ConfigThingy myConf;
 
   /**
-   * Das ConfigThingy, das den Dialog Datensatz Bearbeiten für das Bearbeiten eines
+   * Das ConfigThingy, das den Dialog Datensatz Bearbeiten fÃ¼r das Bearbeiten eines
    * Datensatzes der PAL spezifiziert.
    */
   private ConfigThingy abConf;
 
   /**
-   * Sorgt dafür, dass jeweils nur in einer der beiden Listboxen ein Eintrag
+   * Sorgt dafÃ¼r, dass jeweils nur in einer der beiden Listboxen ein Eintrag
    * selektiert sein kann und dass die entsprechenden Buttons ausgegraut werden wenn
    * kein Eintrag selektiert ist.
    */
@@ -342,8 +342,8 @@ public class PersoenlicheAbsenderlisteVerwalten
    *          an, die das Speichern des Dialogs veranlasst hat.
    * @throws ConfigurationErrorException
    *           im Falle eines schwerwiegenden Konfigurationsfehlers, der es dem
-   *           Dialog unmöglich macht, zu funktionieren (z.B. dass der "Fenster"
-   *           Schlüssel fehlt.
+   *           Dialog unmÃ¶glich macht, zu funktionieren (z.B. dass der "Fenster"
+   *           SchlÃ¼ssel fehlt.
    */
   public PersoenlicheAbsenderlisteVerwalten(ConfigThingy conf, ConfigThingy abConf,
       DatasourceJoiner dj, ActionListener dialogEndListener)
@@ -356,12 +356,12 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     ConfigThingy fensterDesc1 = conf.query("Fenster");
     if (fensterDesc1.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1",
+      throw new ConfigurationErrorException(L.m("SchlÃ¼ssel 'Fenster' fehlt in %1",
         conf.getName()));
 
     final ConfigThingy fensterDesc = fensterDesc1.query("Verwalten");
     if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Verwalten' fehlt in ",
+      throw new ConfigurationErrorException(L.m("SchlÃ¼ssel 'Verwalten' fehlt in ",
         conf.getName()));
 
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
@@ -408,7 +408,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     query = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
 
     String title =
-      L.m("TITLE fehlt für Fenster PersoenlicheAbsenderListeVerwalten/Verwalten");
+      L.m("TITLE fehlt fÃ¼r Fenster PersoenlicheAbsenderListeVerwalten/Verwalten");
     try
     {
       title = L.m(fensterDesc.get("TITLE").toString());
@@ -479,8 +479,8 @@ public class PersoenlicheAbsenderlisteVerwalten
     myFrame.pack();
 
     /**
-     * Beschränkung der Höhe erst nach pack() aufheben, damit Fenster nicht unnötig
-     * groß wird.
+     * BeschrÃ¤nkung der HÃ¶he erst nach pack() aufheben, damit Fenster nicht unnÃ¶tig
+     * groÃŸ wird.
      */
     palJList.setFixedCellHeight(-1);
     resultsJList.setFixedCellHeight(-1);
@@ -497,9 +497,9 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu. compo muss
+   * FÃ¼gt compo UI Elemente gemÃ¤ss den Kindern von conf.query(key) hinzu. compo muss
    * ein GridBagLayout haben. stepx und stepy geben an um wieviel mit jedem UI
-   * Element die x und die y Koordinate der Zelle erhöht werden soll. Wirklich
+   * Element die x und die y Koordinate der Zelle erhÃ¶ht werden soll. Wirklich
    * sinnvoll sind hier nur (0,1) und (1,0).
    */
   private void addUIElements(ConfigThingy conf, String key, JComponent compo,
@@ -712,7 +712,7 @@ public class PersoenlicheAbsenderlisteVerwalten
           }
           else
           {
-            Logger.error(L.m("Ununterstützter TYPE für User Interface Element: ",
+            Logger.error(L.m("UnunterstÃ¼tzter TYPE fÃ¼r User Interface Element: ",
               type));
           }
         }
@@ -725,7 +725,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Wartet auf Doppelklick und führt dann die actionPerformed() Methode eines
+   * Wartet auf Doppelklick und fÃ¼hrt dann die actionPerformed() Methode eines
    * ActionListeners aus.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -757,7 +757,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Nimmt eine JList list, die ein DefaultListModel haben muss und ändert ihre
+   * Nimmt eine JList list, die ein DefaultListModel haben muss und Ã¤ndert ihre
    * Wertliste so, dass sie data entspricht. Die Datasets aus data werden nicht
    * direkt als Werte verwendet, sondern in {@link ListElement} Objekte gewrappt.
    * data == null wird interpretiert als leere Liste. Wenn datasetToSelect != null
@@ -766,7 +766,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * @param append
-   *          Falls true, werden die Elemente an die Liste angehängt anstatt sie zu
+   *          Falls true, werden die Elemente an die Liste angehÃ¤ngt anstatt sie zu
    *          ersetzen.
    */
   private void setListElements(JList list, QueryResults data,
@@ -834,7 +834,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * @param append
-   *          Falls true, werden die Elemente an die Liste angehängt anstatt sie zu
+   *          Falls true, werden die Elemente an die Liste angehÃ¤ngt anstatt sie zu
    *          ersetzen.
    */
   private void setListElements(JList list, QueryResults data, boolean append)
@@ -853,7 +853,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Wrapper um ein DJDataset zum Einfügen in eine JList.
+   * Wrapper um ein DJDataset zum EinfÃ¼gen in eine JList.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -918,7 +918,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Aktiviert oder Deaktiviert die {@link #buttonsToGreyOutIfNothingSelected} gemäss
+   * Aktiviert oder Deaktiviert die {@link #buttonsToGreyOutIfNothingSelected} gemÃ¤ss
    * der Selektion oder nicht Selektion von Werten in den Listboxen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -967,7 +967,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Sorgt dafür, dass jeweils nur in einer der beiden Listboxen ein Eintrag
+   * Sorgt dafÃ¼r, dass jeweils nur in einer der beiden Listboxen ein Eintrag
    * selektiert sein kann und dass die entsprechenden Buttons ausgegraut werden wenn
    * kein Eintrag selektiert ist.
    */
@@ -979,7 +979,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       if (list != palJList && list != resultsJList) return;
 
       /*
-       * Dafür sorgen, dass nie in beiden Listen ein Element selektiert ist.
+       * DafÃ¼r sorgen, dass nie in beiden Listen ein Element selektiert ist.
        */
       JList otherlist = (list == palJList) ? resultsJList : palJList;
       if (list.getSelectedIndex() >= 0) otherlist.clearSelection();
@@ -1012,8 +1012,8 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Beendet den Dialog und ruft falls nötig den dialogEndListener auf wobei das
-   * gegebene actionCommand übergeben wird.
+   * Beendet den Dialog und ruft falls nÃ¶tig den dialogEndListener auf wobei das
+   * gegebene actionCommand Ã¼bergeben wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1050,7 +1050,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Aktualisiert die Werte in der PAL Listbox, löscht die Selektionen in beiden
+   * Aktualisiert die Werte in der PAL Listbox, lÃ¶scht die Selektionen in beiden
    * Listboxen und passt den Ausgegraut-Status der Buttons entsprechend an.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1118,7 +1118,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Erzeugt eine Kopue von orig und ändert ihre Rolle auf "Kopie".
+   * Erzeugt eine Kopue von orig und Ã¤ndert ihre Rolle auf "Kopie".
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1160,7 +1160,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Implementiert die gleichnamige ACTION. Liefert den neuen Datensatz zurück.
+   * Implementiert die gleichnamige ACTION. Liefert den neuen Datensatz zurÃ¼ck.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1200,7 +1200,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   private void search()
   {
-    /* die möglichen Separatorzeichen zwischen Abteilung und Unterabteilung. */
+    /* die mÃ¶glichen Separatorzeichen zwischen Abteilung und Unterabteilung. */
     final String SEP_CHARS = "-/ _";
 
     String queryString = query.getText();
@@ -1226,8 +1226,8 @@ public class PersoenlicheAbsenderlisteVerwalten
     /*
      * Benutzerseitig wir nur ein einzelnes Sternchen am Ende eines Wortes
      * akzeptiert. Deswegen entferne alle anderen Sternchen. Ein Punkt am Ende eines
-     * Wortes wird als Abkürzung interpretiert und durch Sternchen ersetzt. Ausserdem
-     * entferne leere Wörter und berechne neue Arraylänge.
+     * Wortes wird als AbkÃ¼rzung interpretiert und durch Sternchen ersetzt. Ausserdem
+     * entferne leere WÃ¶rter und berechne neue ArraylÃ¤nge.
      */
     int count = queryArray.length;
     for (int i = 0; i < queryArray.length && queryArray[i] != null; ++i)
@@ -1256,7 +1256,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (count == 0) return; // leerer Suchstring (bzw. nur einzelne Sternchen)
 
     /*
-     * Falls mehr als 2 Worte übergeben wurden und ein anderes als das letzte Wort
+     * Falls mehr als 2 Worte Ã¼bergeben wurden und ein anderes als das letzte Wort
      * auf Sternchen endet, so betrachte nur die ersten beiden Worte.
      */
     if (count > 2)
@@ -1337,8 +1337,8 @@ public class PersoenlicheAbsenderlisteVerwalten
           if (wort1.endsWith("*") || wort2.endsWith("*"))
           {
             /*
-             * 2 Worte mit Komma Bei Sternchen in einem oder beiden Wörtern werden
-             * die Wörter direkt als Suchanfrage verwendet in der Reihenfolge
+             * 2 Worte mit Komma Bei Sternchen in einem oder beiden WÃ¶rtern werden
+             * die WÃ¶rter direkt als Suchanfrage verwendet in der Reihenfolge
              * Nachn[*] Vorn[*] Vorn[*] Nachn[*]
              */
             do
@@ -1379,8 +1379,8 @@ public class PersoenlicheAbsenderlisteVerwalten
           if (wort1.endsWith("*"))
           {
             /*
-             * 2 Worte, kein Komma Bei Sternchen im ersten oder in beiden Wörtern
-             * werden die Wörter direkt als Suchanfrage verwendet in der Reihenfolge
+             * 2 Worte, kein Komma Bei Sternchen im ersten oder in beiden WÃ¶rtern
+             * werden die WÃ¶rter direkt als Suchanfrage verwendet in der Reihenfolge
              * Vorn[*] Nachn[*] Nachn[*] Vorn[*]
              */
             do
@@ -1470,7 +1470,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       else if (count > 2)
       {
         /*
-         * Mehr als 2 Worte, aber höchstens das letzte Wort endet auf "*", da der
+         * Mehr als 2 Worte, aber hÃ¶chstens das letzte Wort endet auf "*", da der
          * Fall, dass ein anderes auf "*" endet schon ganz am Anfang abgefangen und
          * auf den Fall count == 2 reduziert wurde.
          * 
@@ -1516,7 +1516,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Übersetzt den Namen einer ACTION in eine Referenz auf das passende
+   * Ãœbersetzt den Namen einer ACTION in eine Referenz auf das passende
    * actionListener_... Objekt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1564,7 +1564,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       return null;
     }
     else
-      Logger.error(L.m("Ununterstützte ACTION: %1", action));
+      Logger.error(L.m("UnunterstÃ¼tzte ACTION: %1", action));
 
     return null;
   }
@@ -1585,11 +1585,11 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     /**
      * Falls actionPerformed() mit getActionCommand().equals("back") aufgerufen wird,
-     * wird ein neuer AbsenderAuswaehlen Dialog mit den übergebenen Parametern
+     * wird ein neuer AbsenderAuswaehlen Dialog mit den Ã¼bergebenen Parametern
      * erzeugt. Ansonsten wird der dialogEndListener mit actionCommand aufgerufen.
      * Falls actionCommand null ist wird das actioncommand und die source des
-     * ActionEvents weitergereicht, der actionPerformed() übergeben wird, ansonsten
-     * werden die übergebenen Werte für actionCommand und source verwendet.
+     * ActionEvents weitergereicht, der actionPerformed() Ã¼bergeben wird, ansonsten
+     * werden die Ã¼bergebenen Werte fÃ¼r actionCommand und source verwendet.
      */
     public MyDialogEndListener(PersoenlicheAbsenderlisteVerwalten source,
         ConfigThingy conf, ConfigThingy abConf, DatasourceJoiner dj,
@@ -1630,7 +1630,7 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   /**
    * Ein WindowListener, der auf den JFrame registriert wird, damit als Reaktion auf
-   * den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
+   * den Schliessen-Knopf auch die ACTION "abort" ausgefÃ¼hrt wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1664,16 +1664,16 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Zerstört den Dialog. Nach Aufruf dieser Funktion dürfen keine weiteren Aufrufe
+   * ZerstÃ¶rt den Dialog. Nach Aufruf dieser Funktion dÃ¼rfen keine weiteren Aufrufe
    * von Methoden des Dialogs erfolgen. Die Verarbeitung erfolgt asynchron. Wurde dem
-   * Konstruktor ein entsprechender ActionListener übergeben, so wird seine
+   * Konstruktor ein entsprechender ActionListener Ã¼bergeben, so wird seine
    * actionPerformed() Funktion aufgerufen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void dispose()
   {
-    // GUI im Event-Dispatching Thread zerstören wg. Thread-Safety.
+    // GUI im Event-Dispatching Thread zerstÃ¶ren wg. Thread-Safety.
     try
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
@@ -1689,7 +1689,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Sorgt für das dauernde Neustarten des Dialogs.
+   * Sorgt fÃ¼r das dauernde Neustarten des Dialogs.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

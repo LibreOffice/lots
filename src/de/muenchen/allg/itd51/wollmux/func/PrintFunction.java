@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Eine durch ein ConfigThingy beschriebene externe Druckfunktion.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 19.09.2006 | LUT | Erstellung
  * -------------------------------------------------------------------
@@ -51,11 +51,11 @@ public class PrintFunction implements Comparable<PrintFunction>
   private int order;
 
   /**
-   * Erzeugt aus einem ConfigThingy (übergeben wird der EXTERN-Knoten) eine
+   * Erzeugt aus einem ConfigThingy (Ã¼bergeben wird der EXTERN-Knoten) eine
    * PrintFunction vom Namen functionName mit dem ORDER-Wert order. Die Werte order
-   * und functionName werden für korrekte Sortierung verschiedener
-   * Druckfuntionktionen und damit für die Bildung einer definierten Reihenfolge bei
-   * der Abarbeitung verschachtelter Druckfunktionen benätigt (siehe compareTo(...)).
+   * und functionName werden fÃ¼r korrekte Sortierung verschiedener
+   * Druckfuntionktionen und damit fÃ¼r die Bildung einer definierten Reihenfolge bei
+   * der Abarbeitung verschachtelter Druckfunktionen benÃ¤tigt (siehe compareTo(...)).
    * 
    * @throws ConfigurationErrorException
    *           falls die Spezifikation in conf fehlerhaft ist.
@@ -69,7 +69,7 @@ public class PrintFunction implements Comparable<PrintFunction>
   }
 
   /**
-   * Liefert den Namen dieser Druckfunktion zurück.
+   * Liefert den Namen dieser Druckfunktion zurÃ¼ck.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -80,7 +80,7 @@ public class PrintFunction implements Comparable<PrintFunction>
 
   /**
    * Ruft die Funktion mit dem XPrintModel pmod als Parameter asynchron (d,h, in
-   * einem eigenen Thread) auf und liefert den Thread zurück.
+   * einem eigenen Thread) auf und liefert den Thread zurÃ¼ck.
    * 
    * @param pmod
    *          das XPrintModel des aktuellen Vordergrunddokuments, das die wichtigsten
@@ -111,14 +111,14 @@ public class PrintFunction implements Comparable<PrintFunction>
   }
 
   /**
-   * Vergleicht this mit otherPrintFunction und liefert -1 zurück, wenn this eine
-   * höhere Priorität besitzt als otherPrintFunction (und damit vor
+   * Vergleicht this mit otherPrintFunction und liefert -1 zurÃ¼ck, wenn this eine
+   * hÃ¶here PrioritÃ¤t besitzt als otherPrintFunction (und damit vor
    * otherPrintFunction abgearbeitet werden soll) und 1, wenn otherPrintFunction eine
-   * höhere Priorität besitzt als this. Die Priorität ergibt sich dabei aus dem
+   * hÃ¶here PrioritÃ¤t besitzt als this. Die PrioritÃ¤t ergibt sich dabei aus dem
    * Attribut ORDER der PrintFunction und deren Namen. Ist die this.order kleiner als
-   * otherPrintFunction.order, so hat this die höhrer Priorität, sind beide
+   * otherPrintFunction.order, so hat this die hÃ¶hrer PrioritÃ¤t, sind beide
    * order-Werte gleich, so wird der Name alphabetisch verglichen und ist this.order
-   * größer als otherPrintFunction.order, so hat otherPrintFunction hörere Priorität.
+   * grÃ¶ÃŸer als otherPrintFunction.order, so hat otherPrintFunction hÃ¶rere PrioritÃ¤t.
    * 
    * @param otherPrintFunction
    *          Die PrintFunction mit der vergleichen werden soll.

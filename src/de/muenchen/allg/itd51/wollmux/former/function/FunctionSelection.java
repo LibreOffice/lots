@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Speichert eine Funktionsauswahl/-def/-konfiguration des Benutzers
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 25.09.2006 | BNK | Erstellung
  * 16.03.2007 | BNK | +updateFieldReferences()
@@ -46,12 +46,12 @@ public class FunctionSelection implements FunctionSelectionAccess
   /**
    * Falls der Benutzer im Experten-Modus eine Funktionsdefinition selbst geschrieben
    * hat, so wird diese hier abgelegt. Das ConfigThingy hat immer einen Wurzelknoten
-   * der keine Basisfunktion ist, d.h. "AUTOFILL", "PLAUSI" oder ähnliches.
+   * der keine Basisfunktion ist, d.h. "AUTOFILL", "PLAUSI" oder Ã¤hnliches.
    */
   private ConfigThingy expertConf = new ConfigThingy("EXPERT");
 
   /**
-   * Der Name der vom Benutzer ausgewählten Funktion.
+   * Der Name der vom Benutzer ausgewÃ¤hlten Funktion.
    */
   private String functionName = NO_FUNCTION;
 
@@ -62,18 +62,18 @@ public class FunctionSelection implements FunctionSelectionAccess
 
   /**
    * Mapped die Namen der Funktionsparameter auf die vom Benutzer konfigurierten
-   * Werte als {@link ParamValue} Objekte. Achtung! Diese Map enthält alle jemals vom
-   * Benutzer gesetzten Werte, nicht nur die für die aktuelle Funktion. Auf diese
+   * Werte als {@link ParamValue} Objekte. Achtung! Diese Map enthÃ¤lt alle jemals vom
+   * Benutzer gesetzten Werte, nicht nur die fÃ¼r die aktuelle Funktion. Auf diese
    * Weise kann der Benutzer die Funktion wechseln, ohne dadurch seine Eingaben von
-   * früher zu verlieren. Bei Funktionen mit Parametern des selben Namens kann dies
-   * je nachdem ob der Name bei beiden Funktionen für das selbe steht oder nicht zu
-   * erwünschter Erleichterung oder zu unerwünschter Verwirrung führen.
+   * frÃ¼her zu verlieren. Bei Funktionen mit Parametern des selben Namens kann dies
+   * je nachdem ob der Name bei beiden Funktionen fÃ¼r das selbe steht oder nicht zu
+   * erwÃ¼nschter Erleichterung oder zu unerwÃ¼nschter Verwirrung fÃ¼hren.
    */
   private Map<String, ParamValue> mapNameToParamValue =
     new HashMap<String, ParamValue>();
 
   /**
-   * Erzeugt eine FunctionSelection für "keine Funktion".
+   * Erzeugt eine FunctionSelection fÃ¼r "keine Funktion".
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -186,8 +186,8 @@ public class FunctionSelection implements FunctionSelectionAccess
   }
 
   /**
-   * Liefert ein ConfigThingy, das diese FunctionSelection repräsentiert (ein leeres,
-   * falls keine Funktion ausgewählt).
+   * Liefert ein ConfigThingy, das diese FunctionSelection reprÃ¤sentiert (ein leeres,
+   * falls keine Funktion ausgewÃ¤hlt).
    * 
    * @param root
    *          der Name des Wurzelknotens des zu liefernden ConfigThingys.
@@ -199,8 +199,8 @@ public class FunctionSelection implements FunctionSelectionAccess
   }
 
   /**
-   * Liefert ein ConfigThingy, das diese FunctionSelection repräsentiert (ein leeres,
-   * falls keine Funktion ausgewählt).
+   * Liefert ein ConfigThingy, das diese FunctionSelection reprÃ¤sentiert (ein leeres,
+   * falls keine Funktion ausgewÃ¤hlt).
    * 
    * @param root
    *          der Name des Wurzelknotens des zu liefernden ConfigThingys.

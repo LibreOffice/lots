@@ -1,9 +1,9 @@
 /*
 * Dateiname: UnavailableException.java
 * Projekt  : WollMux
-* Funktion : Zeigt an, dass die gewünschte(n) Funktion(en)/Daten nicht verfügbar sind.
+* Funktion : Zeigt an, dass die gewÃ¼nschte(n) Funktion(en)/Daten nicht verfÃ¼gbar sind.
 * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
 *
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
+* Ã„nderungshistorie:
+* Datum      | Wer | Ã„nderungsgrund
 * -------------------------------------------------------------------
 * 18.10.2007 | BNK | Erstellung
 * -------------------------------------------------------------------
@@ -31,7 +31,7 @@
 package de.muenchen.allg.itd51.wollmux;
 
 /**
- * Zeigt an, dass die gewünschte(n) Funktion(en)/Daten nicht verfügbar sind.
+ * Zeigt an, dass die gewÃ¼nschte(n) Funktion(en)/Daten nicht verfÃ¼gbar sind.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -39,7 +39,7 @@ public class UnavailableException extends Exception
 {
 
   /**
-   * Unterdrückt Warnung.
+   * UnterdrÃ¼ckt Warnung.
    */
   private static final long serialVersionUID = 5874615503838299278L;
 

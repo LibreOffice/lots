@@ -2,9 +2,9 @@
  * Dateiname: SchemaDatasource.java
  * Projekt  : WollMux
  * Funktion : Datenquelle, die die Daten einer existierenden Datenquelle 
- *            mit geänderten Spalten zur Verfügung stellt. 
+ *            mit geÃ¤nderten Spalten zur VerfÃ¼gung stellt. 
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -19,8 +19,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 09.11.2005 | BNK | Erstellung
  * 10.11.2005 | BNK | Zu SchemaDatasource aufgebohrt
@@ -50,8 +50,8 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
- * Datenquelle, die die Daten einer existierenden Datenquelle mit geänderten Spalten
- * zur Verfügung stellt.
+ * Datenquelle, die die Daten einer existierenden Datenquelle mit geÃ¤nderten Spalten
+ * zur VerfÃ¼gung stellt.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -76,13 +76,13 @@ public class SchemaDatasource implements Datasource
    * Erzeugt eine neue SchemaDatasource.
    * 
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser SchemaDatasource
-   *          bereits vollständig instanziierten Datenquellen.
+   *          enthÃ¤lt alle bis zum Zeitpunkt der Definition dieser SchemaDatasource
+   *          bereits vollstÃ¤ndig instanziierten Datenquellen.
    * @param sourceDesc
    *          der "Datenquelle"-Knoten, der die Beschreibung dieser SchemaDatasource
-   *          enthält.
+   *          enthÃ¤lt.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
+   *          der Kontext relativ zu dem URLs aufgelÃ¶st werden sollen (zur Zeit nicht
    *          verwendet).
    */
   public SchemaDatasource(Map<String, Datasource> nameToDatasource,
@@ -188,10 +188,10 @@ public class SchemaDatasource implements Datasource
     }
 
     /**
-     * Für alle hinzugefügten Spalten, die weder in der Originaldatenbank existieren
+     * FÃ¼r alle hinzugefÃ¼gten Spalten, die weder in der Originaldatenbank existieren
      * noch durch einen RENAME auf eine Spalte der Originaldatenbank abgebildet
-     * werden, füge ein Pseudomapping auf EMPTY_COLUMN hinzu, damit
-     * RenameDataset.get() weiss, dass es für die Spalte null liefern soll.
+     * werden, fÃ¼ge ein Pseudomapping auf EMPTY_COLUMN hinzu, damit
+     * RenameDataset.get() weiss, dass es fÃ¼r die Spalte null liefern soll.
      */
     for (String spalte : columnsToAdd)
     {

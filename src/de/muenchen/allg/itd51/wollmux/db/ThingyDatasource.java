@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Datasource, die ihre Daten aus einer ConfigThingy-Datei bezieht.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 27.10.2005 | BNK | Erstellung
  * 03.11.2005 | BNK | besser kommentiert
@@ -60,13 +60,13 @@ public class ThingyDatasource extends RAMDatasource
    * Erzeugt eine neue ThingyDatasource.
    * 
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser ThingyDatasource
-   *          bereits vollständig instanziierten Datenquellen.
+   *          enthÃ¤lt alle bis zum Zeitpunkt der Definition dieser ThingyDatasource
+   *          bereits vollstÃ¤ndig instanziierten Datenquellen.
    * @param sourceDesc
    *          der "Datenquelle"-Knoten, der die Beschreibung dieser ThingyDatasource
-   *          enthält.
+   *          enthÃ¤lt.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen.
+   *          der Kontext relativ zu dem URLs aufgelÃ¶st werden sollen.
    */
   public ThingyDatasource(Map<String, Datasource> nameToDatasource,
       ConfigThingy sourceDesc, URL context) throws ConfigurationErrorException,
@@ -125,7 +125,7 @@ public class ThingyDatasource extends RAMDatasource
         if (schema.contains(spalte))
           throw new ConfigurationErrorException(
             L.m(
-              "Fehler in Definition von Datenquelle %1: Spalte \"%2\" doppelt aufgeführt im Schema",
+              "Fehler in Definition von Datenquelle %1: Spalte \"%2\" doppelt aufgefÃ¼hrt im Schema",
               name, spalte));
         schema.add(spalte);
         schemaOrdered[i++] = spalte;
@@ -145,7 +145,7 @@ public class ThingyDatasource extends RAMDatasource
           if (!schema.contains(spalte))
             throw new ConfigurationErrorException(
               L.m(
-                "Fehler in Definition von Datenquelle %1: Schluessel-Spalte \"%2\" ist nicht im Schema aufgeführt",
+                "Fehler in Definition von Datenquelle %1: Schluessel-Spalte \"%2\" ist nicht im Schema aufgefÃ¼hrt",
                 name, spalte));
         }
       }
@@ -153,7 +153,7 @@ public class ThingyDatasource extends RAMDatasource
       {
         throw new ConfigurationErrorException(
           L.m(
-            "Fehlende oder fehlerhafte Schluessel(...) Spezifikation für Datenquelle %1",
+            "Fehlende oder fehlerhafte Schluessel(...) Spezifikation fÃ¼r Datenquelle %1",
             name));
       }
 
@@ -215,9 +215,9 @@ public class ThingyDatasource extends RAMDatasource
    *          das Datenbankschema mit erhaltener Spaltenreihenfolge entsprechend
    *          Schema-Sektion.
    * @param keyCols
-   *          die Schlüsselspalten
+   *          die SchlÃ¼sselspalten
    * @throws ConfigurationErrorException
-   *           im Falle von Verstössen gegen diverse Regeln.
+   *           im Falle von VerstÃ¶ssen gegen diverse Regeln.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private Dataset createDataset(ConfigThingy dsDesc, Set<String> schema,
@@ -225,7 +225,7 @@ public class ThingyDatasource extends RAMDatasource
   { // TESTED
     if (!dsDesc.getName().equals(""))
       throw new ConfigurationErrorException(L.m(
-        "Öffnende Klammer erwartet vor \"%1\"", dsDesc.getName()));
+        "Ã–ffnende Klammer erwartet vor \"%1\"", dsDesc.getName()));
     if (dsDesc.count() == 0) return new MyDataset(schema, keyCols);
     try
     {
@@ -246,7 +246,7 @@ public class ThingyDatasource extends RAMDatasource
    * (Spalte1 "Spaltenwert1" Spalte2 "Spaltenwert2 ...) sein.
    * 
    * @throws ConfigurationErrorException
-   *           bei verstössen gegen diverse Regeln
+   *           bei verstÃ¶ssen gegen diverse Regeln
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private Dataset createDatasetUnordered(ConfigThingy dsDesc, Set<String> schema,
@@ -260,7 +260,7 @@ public class ThingyDatasource extends RAMDatasource
       String spalte = spaltenDaten.getName();
       if (!schema.contains(spalte))
         throw new ConfigurationErrorException(L.m(
-          "Datensatz hat Spalte \"%1\", die nicht im Schema aufgeführt ist", spalte));
+          "Datensatz hat Spalte \"%1\", die nicht im Schema aufgefÃ¼hrt ist", spalte));
       String wert = spaltenDaten.toString();
       data.put(spalte, wert);
     }
@@ -272,7 +272,7 @@ public class ThingyDatasource extends RAMDatasource
    * ("Spaltenwert1" "Spaltenwert2 ...) sein.
    * 
    * @throws ConfigurationErrorException
-   *           bei verstössen gegen diverse Regeln
+   *           bei verstÃ¶ssen gegen diverse Regeln
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private Dataset createDatasetOrdered(ConfigThingy dsDesc, Set<String> schema,
@@ -297,7 +297,7 @@ public class ThingyDatasource extends RAMDatasource
 
   private static class MyDataset implements Dataset
   {
-    private static final String KEY_SEPARATOR = "£#%&|";
+    private static final String KEY_SEPARATOR = "Â£#%&|";
 
     private Map<String, String> data;
 
@@ -320,11 +320,11 @@ public class ThingyDatasource extends RAMDatasource
     }
 
     /**
-     * Setzt aus den Werten der Schlüsselspalten separiert durch KEY_SEPARATOR den
-     * Schlüssel zusammen.
+     * Setzt aus den Werten der SchlÃ¼sselspalten separiert durch KEY_SEPARATOR den
+     * SchlÃ¼ssel zusammen.
      * 
      * @param keyCols
-     *          die Namen der Schlüsselspalten
+     *          die Namen der SchlÃ¼sselspalten
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private void initKey(String[] keyCols)

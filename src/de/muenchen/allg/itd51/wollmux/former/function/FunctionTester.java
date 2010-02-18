@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : GUI zum interaktiven Zusammenbauen und Testen von WollMux-Funktionen.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 26.07.2007 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -107,7 +107,7 @@ public class FunctionTester
   private ActionListener abortListener;
 
   /**
-   * Der {@link IDManager}, dessen aktive IDs in Value-Comboboxen auswählbar sind.
+   * Der {@link IDManager}, dessen aktive IDs in Value-Comboboxen auswÃ¤hlbar sind.
    */
   private IDManager idManager;
 
@@ -122,23 +122,23 @@ public class FunctionTester
   private List<ValueBox> valueBoxes = new Vector<ValueBox>();
 
   /**
-   * Die Funktionsbibliothek, deren Funktionen für BIND zur Verfügung stehen.
+   * Die Funktionsbibliothek, deren Funktionen fÃ¼r BIND zur VerfÃ¼gung stehen.
    */
   private FunctionLibrary funcLib;
 
   /**
-   * Kontext für die parse()-Funktionen von {@link FunctionFactory}.
+   * Kontext fÃ¼r die parse()-Funktionen von {@link FunctionFactory}.
    */
   private Map<Object, Object> myContext = new HashMap<Object, Object>();
 
   /**
-   * Liefert die Parameter für das Auswerten der Funktion, wobei die Werte aus
+   * Liefert die Parameter fÃ¼r das Auswerten der Funktion, wobei die Werte aus
    * {@link #valueBoxes} gezogen werden.
    */
   private Values myParameters = new ValueBoxesValues();
 
   /**
-   * Die Funktionsdialogbibliothek, deren Funktionsdialoge für DIALOG zur Verfügung
+   * Die Funktionsdialogbibliothek, deren Funktionsdialoge fÃ¼r DIALOG zur VerfÃ¼gung
    * stehen.
    */
   private DialogLibrary dialogLib;
@@ -148,12 +148,12 @@ public class FunctionTester
    * nur aus dem Event-Dispatching-Thread aufgerufen werden.
    * 
    * @param idManager
-   *          die IDs dieses Managers werden in den ComboBoxen für die
+   *          die IDs dieses Managers werden in den ComboBoxen fÃ¼r die
    *          Werte-Festlegung angeboten.
    * @param namespace
    *          aus dem die IDs genommen werden.
    * @param funcLib
-   *          Die Funktionen dieser Bibliothek stehen für BIND zur Verfügung.
+   *          Die Funktionen dieser Bibliothek stehen fÃ¼r BIND zur VerfÃ¼gung.
    * @param abortListener
    *          falls nicht null wird dieser Listener benachrichtigt, wenn das
    *          FunctionTester-Fenster geschlossen wird.
@@ -172,7 +172,7 @@ public class FunctionTester
     // leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     oehrchen = new MyWindowListener();
-    // der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
+    // der WindowListener sorgt dafÃ¼r, dass auf windowClosing mit abort reagiert wird
     myFrame.addWindowListener(oehrchen);
 
     myPanel = new JPanel(new BorderLayout());
@@ -261,7 +261,7 @@ public class FunctionTester
   }
 
   /**
-   * Aktualisiert die Liste der Einträge in combo, so dass sie den aktiven IDs von
+   * Aktualisiert die Liste der EintrÃ¤ge in combo, so dass sie den aktiven IDs von
    * {@link #idManager} entspricht.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -295,7 +295,7 @@ public class FunctionTester
   }
 
   /**
-   * Liefert ein Panel, das Buttons zum Einfügen von Funktionstemplates in den
+   * Liefert ein Panel, das Buttons zum EinfÃ¼gen von Funktionstemplates in den
    * Code-Edit-Bereich anbietet.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -432,7 +432,7 @@ public class FunctionTester
 
   /**
    * Liefert einen Button, der mit label beschriftet ist und den Code code an Stelle
-   * der aktuellen Selektion im Code-Bereich einfügt.
+   * der aktuellen Selektion im Code-Bereich einfÃ¼gt.
    * 
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -452,7 +452,7 @@ public class FunctionTester
   }
 
   /**
-   * Liefert den aktuellen Wert, der in combo ausgewählt ist, oder errorValue, falls
+   * Liefert den aktuellen Wert, der in combo ausgewÃ¤hlt ist, oder errorValue, falls
    * beim Auswerten ein Fehler auftritt. In letzterem Fall wird auch eine Meldung
    * geloggert.
    * 
@@ -475,7 +475,7 @@ public class FunctionTester
 
   /**
    * Eine Box, die eine ComboBox zur Angabe einer ID und ein Textfield zur Angabe
-   * eines Wertes enthält.
+   * eines Wertes enthÃ¤lt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -546,7 +546,7 @@ public class FunctionTester
 
   /**
    * Stellt den jeweils aktuellen Zustand der {@link FunctionTester#valueBoxes} als
-   * {@link Values} zur Verfügung.
+   * {@link Values} zur VerfÃ¼gung.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

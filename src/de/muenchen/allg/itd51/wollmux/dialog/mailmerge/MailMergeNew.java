@@ -1,9 +1,9 @@
 /*
  * Dateiname: MailMergeNew.java
  * Projekt  : WollMux
- * Funktion : Die neuen erweiterten Serienbrief-Funktionalitäten
+ * Funktion : Die neuen erweiterten Serienbrief-FunktionalitÃ¤ten
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 11.10.2007 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -88,7 +88,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
 import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
 
 /**
- * Die neuen erweiterten Serienbrief-Funktionalitäten.
+ * Die neuen erweiterten Serienbrief-FunktionalitÃ¤ten.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -100,30 +100,30 @@ public class MailMergeNew
   private static final String PROP_QUERYRESULTS = "MailMergeNew_QueryResults";
 
   /**
-   * ID der Property in der das Zielverzeichnis für den Druck in Einzeldokumente
+   * ID der Property in der das Zielverzeichnis fÃ¼r den Druck in Einzeldokumente
    * gespeichert wird.
    */
   private static final String PROP_TARGETDIR = "MailMergeNew_TargetDir";
 
   /**
-   * ID der Property in der das Dateinamenmuster für den Einzeldokumentdruck
+   * ID der Property in der das Dateinamenmuster fÃ¼r den Einzeldokumentdruck
    * gespeichert wird.
    */
   private static final String PROP_FILEPATTERN = "MailMergeNew_FilePattern";
 
   /**
-   * ID der Property, die einen List der Indizes der zu druckenden Datensätze
+   * ID der Property, die einen List der Indizes der zu druckenden DatensÃ¤tze
    * speichert.
    */
   private static final String PROP_MAILMERGENEW_SELECTION = "MailMergeNew_Selection";
 
   /**
-   * Das {@link TextDocumentModel} zu dem Dokument an dem diese Toolbar hängt.
+   * Das {@link TextDocumentModel} zu dem Dokument an dem diese Toolbar hÃ¤ngt.
    */
   private TextDocumentModel mod;
 
   /**
-   * Stellt die Felder und Datensätze für die Serienbriefverarbeitung bereit.
+   * Stellt die Felder und DatensÃ¤tze fÃ¼r die Serienbriefverarbeitung bereit.
    */
   private MailMergeDatasource ds;
 
@@ -134,20 +134,20 @@ public class MailMergeNew
 
   /**
    * Die Nummer des zu previewenden Datensatzes. ACHTUNG! Kann aufgrund von
-   * Veränderung der Daten im Hintergrund größer sein als die Anzahl der Datensätze.
+   * VerÃ¤nderung der Daten im Hintergrund grÃ¶ÃŸer sein als die Anzahl der DatensÃ¤tze.
    * Darauf muss geachtet werden.
    */
   private int previewDatasetNumber = 1;
 
   /**
    * Die beim letzten Aufruf von {@link #updatePreviewFields()} aktuelle Anzahl an
-   * Datensätzen in {@link #ds}.
+   * DatensÃ¤tzen in {@link #ds}.
    */
   private int previewDatasetNumberMax = Integer.MAX_VALUE;
 
   /**
-   * Das Textfield in dem Benutzer direkt eine Datensatznummer für die Vorschau
-   * eingeben können.
+   * Das Textfield in dem Benutzer direkt eine Datensatznummer fÃ¼r die Vorschau
+   * eingeben kÃ¶nnen.
    */
   private JTextField previewDatasetNumberTextfield;
 
@@ -164,7 +164,7 @@ public class MailMergeNew
     new Vector<JComponent>();
 
   /**
-   * Enthält alle elementsDisabledWhen... Collections.
+   * EnthÃ¤lt alle elementsDisabledWhen... Collections.
    */
   private Vector<Collection<JComponent>> listsOfElementsDisabledUnderCertainCircumstances =
     new Vector<Collection<JComponent>>();
@@ -175,7 +175,7 @@ public class MailMergeNew
   private JFrame myFrame;
 
   /**
-   * Der WindowListener, der an {@link #myFrame} hängt.
+   * Der WindowListener, der an {@link #myFrame} hÃ¤ngt.
    */
   private MyWindowListener oehrchen;
 
@@ -188,10 +188,10 @@ public class MailMergeNew
   private MailMergeParams mailMergeParams = new MailMergeParams();
 
   /**
-   * Die zentrale Klasse, die die Serienbrieffunktionalität bereitstellt.
+   * Die zentrale Klasse, die die SerienbrieffunktionalitÃ¤t bereitstellt.
    * 
    * @param mod
-   *          das {@link TextDocumentModel} an dem die Toolbar hängt.
+   *          das {@link TextDocumentModel} an dem die Toolbar hÃ¤ngt.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public MailMergeNew(TextDocumentModel mod, ActionListener abortListener)
@@ -419,7 +419,7 @@ public class MailMergeNew
     tabelleMenu.add(item);
 
     final JMenuItem addColumnsMenuItem =
-      new JMenuItem(L.m("Tabellenspalten ergänzen"));
+      new JMenuItem(L.m("Tabellenspalten ergÃ¤nzen"));
     addColumnsMenuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -446,21 +446,21 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        // Anpassen des Menüpunktes "Felder anpassen"
+        // Anpassen des MenÃ¼punktes "Felder anpassen"
         if (mod.hasSelection())
         {
-          adjustFieldsMenuItem.setText(L.m("Ausgewählte Felder anpassen"));
+          adjustFieldsMenuItem.setText(L.m("AusgewÃ¤hlte Felder anpassen"));
         }
         else
         {
           adjustFieldsMenuItem.setText(L.m("Alle Felder anpassen"));
         }
 
-        // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
-        // entsprechenden Datenquellenfeldern zugeordnet werden können.
-        // Tabellenspalten ergänzen wird außerdem ausgegraut, wenn die Datenquelle
+        // Ausgrauen der Anpassen-KnÃ¶pfe, wenn alle Felder mit den
+        // entsprechenden Datenquellenfeldern zugeordnet werden kÃ¶nnen.
+        // Tabellenspalten ergÃ¤nzen wird auÃŸerdem ausgegraut, wenn die Datenquelle
         // dies
-        // nicht unterstützt
+        // nicht unterstÃ¼tzt
         boolean hasUnmappedFields =
           mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
             ds.getColumnNames())).length > 0;
@@ -498,7 +498,7 @@ public class MailMergeNew
 
   /**
    * Geht alle Komponenten durch, die unter bestimmten Bedingungen ausgegraut werden
-   * müssen und setzt ihren Status korrekt.
+   * mÃ¼ssen und setzt ihren Status korrekt.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
@@ -531,9 +531,9 @@ public class MailMergeNew
   }
 
   /**
-   * Passt {@link #previewDatasetNumber} an, falls sie zu groß oder zu klein ist,
+   * Passt {@link #previewDatasetNumber} an, falls sie zu groÃŸ oder zu klein ist,
    * setzt {@link #previewDatasetNumberMax} und setzt dann falls {@link #previewMode} ==
-   * true alle Feldwerte auf die Werte des entsprechenden Datensatzes. Ruft außerdem
+   * true alle Feldwerte auf die Werte des entsprechenden Datensatzes. Ruft auÃŸerdem
    * {@link #updateEnabledDisabledState()} auf.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
@@ -562,7 +562,7 @@ public class MailMergeNew
 
     if (schema.size() != data.size())
     {
-      Logger.error(L.m("Daten haben sich zwischen dem Auslesen von Schema und Werten verändert"));
+      Logger.error(L.m("Daten haben sich zwischen dem Auslesen von Schema und Werten verÃ¤ndert"));
       return;
     }
 
@@ -582,7 +582,7 @@ public class MailMergeNew
   }
 
   /**
-   * Schliesst den MailMergeNew und alle zugehörigen Fenster.
+   * Schliesst den MailMergeNew und alle zugehÃ¶rigen Fenster.
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
@@ -609,8 +609,8 @@ public class MailMergeNew
   }
 
   /**
-   * Erzeugt eine Liste mit {@link javax.swing.Action}s für alle Namen aus
-   * {@link #ds},getColumnNames(), die ein entsprechendes Seriendruckfeld einfügen.
+   * Erzeugt eine Liste mit {@link javax.swing.Action}s fÃ¼r alle Namen aus
+   * {@link #ds},getColumnNames(), die ein entsprechendes Seriendruckfeld einfÃ¼gen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -641,11 +641,11 @@ public class MailMergeNew
   }
 
   /**
-   * Erzeugt ein JPopupMenu, das Einträge für das Einfügen von Spezialfeldern enthält
+   * Erzeugt ein JPopupMenu, das EintrÃ¤ge fÃ¼r das EinfÃ¼gen von Spezialfeldern enthÃ¤lt
    * und zeigt es an neben invoker an der relativen Position x,y.
    * 
    * @param invoker
-   *          zu welcher Komponente gehört das Popup
+   *          zu welcher Komponente gehÃ¶rt das Popup
    * @param x
    *          Koordinate des Popups im Koordinatenraum von invoker.
    * @param y
@@ -668,7 +668,7 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        // ConfigThingy für leere Gender-Funktion zusammenbauen.
+        // ConfigThingy fÃ¼r leere Gender-Funktion zusammenbauen.
         ConfigThingy genderConf =
           GenderDialog.generateGenderTrafoConf(ds.getColumnNames().get(0), "", "",
             "");
@@ -684,7 +684,7 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        // ConfigThingy für leere WennDannSonst-Funktion zusammenbauen. Aufbau:
+        // ConfigThingy fÃ¼r leere WennDannSonst-Funktion zusammenbauen. Aufbau:
         // IF(STRCMP(VALUE '<firstField>', '') THEN('') ELSE(''))
         ConfigThingy ifConf = new ConfigThingy("IF");
         ConfigThingy strCmpConf = ifConf.add("STRCMP");
@@ -733,22 +733,22 @@ public class MailMergeNew
   }
 
   /**
-   * Öffnet den Dialog zum Einfügen eines Spezialfeldes, das über die Funktion
-   * trafoConf beschrieben ist, erzeugt daraus ein transformiertes Feld und fügt
-   * dieses Feld in das Dokument mod ein; Es erwartet darüber hinaus den Namen des
-   * Buttons buttonName, aus dem das Label des Dialogs, und später der Mouse-Over
+   * Ã–ffnet den Dialog zum EinfÃ¼gen eines Spezialfeldes, das Ã¼ber die Funktion
+   * trafoConf beschrieben ist, erzeugt daraus ein transformiertes Feld und fÃ¼gt
+   * dieses Feld in das Dokument mod ein; Es erwartet darÃ¼ber hinaus den Namen des
+   * Buttons buttonName, aus dem das Label des Dialogs, und spÃ¤ter der Mouse-Over
    * hint erzeugt wird und die Liste der aktuellen Felder, die evtl. im Dialog zur
-   * Verfügung stehen sollen.
+   * VerfÃ¼gung stehen sollen.
    * 
    * @param fieldNames
    *          Eine Liste der Feldnamen, die der Dialog anzeigt, falls er Buttons zum
-   *          Einfügen von Serienbrieffeldern bereitstellt.
+   *          EinfÃ¼gen von Serienbrieffeldern bereitstellt.
    * @param buttonName
    *          Der Name des Buttons, aus dem die Titelzeile des Dialogs und der
    *          Mouse-Over Hint des neu erzeugten Formularfeldes generiert wird.
    * @param trafoConf
    *          ConfigThingy, das die Funktion und damit den aufzurufenden Dialog
-   *          spezifiziert. Der von den Dialogen benötigte äußere Knoten
+   *          spezifiziert. Der von den Dialogen benÃ¶tigte Ã¤uÃŸere Knoten
    *          "Func(...trafoConf...) wird dabei von dieser Methode erzeugt, so dass
    *          trafoConf nur die eigentliche Funktion darstellen muss.
    * 
@@ -785,7 +785,7 @@ public class MailMergeNew
     try
     {
       TrafoDialogFactory.createDialog(params).show(
-        L.m("Spezialfeld %1 einfügen", buttonName), myFrame);
+        L.m("Spezialfeld %1 einfÃ¼gen", buttonName), myFrame);
     }
     catch (UnavailableException e)
     {
@@ -794,10 +794,10 @@ public class MailMergeNew
   }
 
   /**
-   * Prüft, ob sich in der akutellen Selektion ein transformiertes Feld befindet und
-   * liefert ein mit Hilfe der TrafoDialogFactory erzeugtes zugehöriges
-   * TrafoDialog-Objekt zurück, oder null, wenn keine transformierte Funktion
-   * selektiert ist oder für die Trafo kein Dialog existiert.
+   * PrÃ¼ft, ob sich in der akutellen Selektion ein transformiertes Feld befindet und
+   * liefert ein mit Hilfe der TrafoDialogFactory erzeugtes zugehÃ¶riges
+   * TrafoDialog-Objekt zurÃ¼ck, oder null, wenn keine transformierte Funktion
+   * selektiert ist oder fÃ¼r die Trafo kein Dialog existiert.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -843,7 +843,7 @@ public class MailMergeNew
   }
 
   /**
-   * Führt den Seriendruck durch.
+   * FÃ¼hrt den Seriendruck durch.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -878,7 +878,7 @@ public class MailMergeNew
           indexSelection.rangeEnd = t;
         }
         for (int i = indexSelection.rangeStart; i <= indexSelection.rangeEnd; ++i)
-          selected.add(i - 1); // wir zählen ab 0, anders als rangeStart/End
+          selected.add(i - 1); // wir zÃ¤hlen ab 0, anders als rangeStart/End
         break;
     }
 
@@ -971,13 +971,13 @@ public class MailMergeNew
   }
 
   /**
-   * PrintFunction, die das jeweils nächste Element der Seriendruckdaten nimmt und
+   * PrintFunction, die das jeweils nÃ¤chste Element der Seriendruckdaten nimmt und
    * die Seriendruckfelder im Dokument entsprechend setzt. Herangezogen werden die
    * Properties {@link #PROP_QUERYRESULTS} (ein Objekt vom Typ {@link QueryResults})
-   * und "MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält, sowie
+   * und "MailMergeNew_Schema", was ein Set mit den Spaltennamen enthÃ¤lt, sowie
    * {@link #PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der
-   * ausgewählten Datensätze ist (0 ist der erste Datensatz). Dies funktioniert
-   * natürlich nur dann, wenn pmod kein Proxy ist.
+   * ausgewÃ¤hlten DatensÃ¤tze ist (0 ist der erste Datensatz). Dies funktioniert
+   * natÃ¼rlich nur dann, wenn pmod kein Proxy ist.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -1034,7 +1034,7 @@ public class MailMergeNew
 
       /*
        * Wenn wir im Fall des Einzeldokumentdrucks sind, dann wird hier vor dem
-       * Ausdruck für den aktuellen Datensatz ein neues Dokument angelegt.
+       * Ausdruck fÃ¼r den aktuellen Datensatz ein neues Dokument angelegt.
        * lockControllers() soll der Performance-Steigerung dienen.
        */
       XTextDocument outputDoc = null;
@@ -1071,7 +1071,7 @@ public class MailMergeNew
   }
 
   /**
-   * Speichert doc unter dem in outFile angegebenen Dateipfad und schließt dann doc.
+   * Speichert doc unter dem in outFile angegebenen Dateipfad und schlieÃŸt dann doc.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
@@ -1143,8 +1143,8 @@ public class MailMergeNew
    * datensatzNummer und serienbriefNummer ersetzt.
    * 
    * @param totalDatasets
-   *          die Gesamtzahl aller Datensätze (auch der für den aktuellen
-   *          Druckauftrag nicht gewählten). Wird verwendet um datensatzNummer und
+   *          die Gesamtzahl aller DatensÃ¤tze (auch der fÃ¼r den aktuellen
+   *          Druckauftrag nicht gewÃ¤hlten). Wird verwendet um datensatzNummer und
    *          serienbriefNummer mit 0ern zu padden.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -1222,9 +1222,9 @@ public class MailMergeNew
     /*
      * Wegen folgendem Java Bug (WONTFIX)
      * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304 sind die folgenden
-     * 3 Zeilen nötig, damit der MailMerge gc'ed werden kann. Die Befehle sorgen
-     * dafür, dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager)
-     * indirekt über den JFrame den MailMerge kennt.
+     * 3 Zeilen nÃ¶tig, damit der MailMerge gc'ed werden kann. Die Befehle sorgen
+     * dafÃ¼r, dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager)
+     * indirekt Ã¼ber den JFrame den MailMerge kennt.
      */
     myFrame.removeWindowListener(oehrchen);
     myFrame.getContentPane().remove(0);

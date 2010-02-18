@@ -1,9 +1,9 @@
 /*
  * Dateiname: Datasource.java
  * Projekt  : WollMux
- * Funktion : Interface für Datenquellen, die der DJ verwalten kann
+ * Funktion : Interface fÃ¼r Datenquellen, die der DJ verwalten kann
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 27.10.2005 | BNK | Erstellung
  * 28.10.2005 | BNK | Erweiterung
@@ -41,50 +41,50 @@ import java.util.Set;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
- * Interface für Datenquellen, die der DJ verwalten kann. ACHTUNG! Die Konstruktoren
- * dieser Klasse dürfen keine potentiell lange blockierenden Aktionen (zum Beispiel
- * Netzverbindung herstellen) ausführen. Sie dürfen auch nicht versagen, falls
- * irgendeine Rahmenbedingung nicht gegeben ist, die nur für Zugriffe auf die
- * Datensätze relevant ist (z.B. Verbindung zum LDAP-Server). Der Konstruktor darf
- * (und muss) nur dann versagen, wenn es nicht möglich ist, die Datenquelle in einen
- * Zustand zu bringen, in dem sie die Methoden ausführen kann, die unabhängig von den
- * Datensätzen sind. Am wichtigsten sind hier die Methoden zur Abfrage des Schemas.
- * Für die Methoden, die auf Datensätze zugreifen gilt, dass ihr Versagen aufgrund
- * von Rahmenbedingungen (z.B. kein Netz) nicht dazu führen darf, dass das
- * Datenquellen-Objekt in einen unbrauchbaren Zustand gerät. Wo immer sinnvoll sollte
- * es möglich sein, eine Operation zu einem späteren Zeitpunkt zu wiederholen, wenn
- * die Rahmenbedingungen sich geändert haben, und dann sollte die Operation gelingen.
- * Dies bedeutet insbesondere, dass Verbindungsaufbau zu Servern wo nötig jeweils neu
+ * Interface fÃ¼r Datenquellen, die der DJ verwalten kann. ACHTUNG! Die Konstruktoren
+ * dieser Klasse dÃ¼rfen keine potentiell lange blockierenden Aktionen (zum Beispiel
+ * Netzverbindung herstellen) ausfÃ¼hren. Sie dÃ¼rfen auch nicht versagen, falls
+ * irgendeine Rahmenbedingung nicht gegeben ist, die nur fÃ¼r Zugriffe auf die
+ * DatensÃ¤tze relevant ist (z.B. Verbindung zum LDAP-Server). Der Konstruktor darf
+ * (und muss) nur dann versagen, wenn es nicht mÃ¶glich ist, die Datenquelle in einen
+ * Zustand zu bringen, in dem sie die Methoden ausfÃ¼hren kann, die unabhÃ¤ngig von den
+ * DatensÃ¤tzen sind. Am wichtigsten sind hier die Methoden zur Abfrage des Schemas.
+ * FÃ¼r die Methoden, die auf DatensÃ¤tze zugreifen gilt, dass ihr Versagen aufgrund
+ * von Rahmenbedingungen (z.B. kein Netz) nicht dazu fÃ¼hren darf, dass das
+ * Datenquellen-Objekt in einen unbrauchbaren Zustand gerÃ¤t. Wo immer sinnvoll sollte
+ * es mÃ¶glich sein, eine Operation zu einem spÃ¤teren Zeitpunkt zu wiederholen, wenn
+ * die Rahmenbedingungen sich geÃ¤ndert haben, und dann sollte die Operation gelingen.
+ * Dies bedeutet insbesondere, dass Verbindungsaufbau zu Servern wo nÃ¶tig jeweils neu
  * versucht wird und nicht nur einmalig im Konstruktor. In diesem Zusammenhang sei
  * darauf hingewiesen, dass Verbindungen explizit mit close() beendet werden sollten
  * (typischerweise in einem finally() Block, damit der Befehl auch im Ausnahmefall
- * ausgeführt wird), weil die Garbage Collection von Java dies evtl. sehr spät tut.
+ * ausgefÃ¼hrt wird), weil die Garbage Collection von Java dies evtl. sehr spÃ¤t tut.
  * <br>
  * <br>
  * Argumente gegen Datasource-Typ "override": - (korrekte) Suche nur schwierig und
- * ineffizient zu implementieren - würde vermutlich dazu führen, dass Daten im LDAP
- * schlechter gepflegt werden, weil es einfacher ist, einen Override einzuführen
+ * ineffizient zu implementieren - wÃ¼rde vermutlich dazu fÃ¼hren, dass Daten im LDAP
+ * schlechter gepflegt werden, weil es einfacher ist, einen Override einzufÃ¼hren
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public interface Datasource
 {
   /**
-   * Liefert ein Set, das die Titel aller Spalten der Datenquelle enthält.
+   * Liefert ein Set, das die Titel aller Spalten der Datenquelle enthÃ¤lt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public Set<String> getSchema();
 
   /**
-   * Liefert alle Datensätze, deren Schlüssel in der Collection keys enthalten sind.
-   * Man beachte, dass die Eindeutigkeit von Schlüsseln nur eine Empfehlung
-   * darstellt. Die Anzahl der zurückgelieferten Datensätze kann also die Anzahl der
-   * übergebenen Schlüssel übersteigen.
+   * Liefert alle DatensÃ¤tze, deren SchlÃ¼ssel in der Collection keys enthalten sind.
+   * Man beachte, dass die Eindeutigkeit von SchlÃ¼sseln nur eine Empfehlung
+   * darstellt. Die Anzahl der zurÃ¼ckgelieferten DatensÃ¤tze kann also die Anzahl der
+   * Ã¼bergebenen SchlÃ¼ssel Ã¼bersteigen.
    * 
    * @param timeout
    *          die maximale Zeit in Millisekunden, die vergehen darf, bis die Funktion
-   *          zurückkehrt.
+   *          zurÃ¼ckkehrt.
    * @throws TimeoutException,
    *           falls die Anfrage nicht rechtzeitig beendet werden konnte.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -93,14 +93,14 @@ public interface Datasource
       throws TimeoutException;
 
   /**
-   * Liefert alle Datensätze, die alle Bedingungen von query (Liste von
-   * {@link QueryPart}s) erfüllen. Ist query leer, werden keine Datensätze
-   * zurückgeliefert. Enthält query Bedingungen über Spalten, die die Datenbank nicht
-   * hat, werden keine Datensätze zurückgeliefert.
+   * Liefert alle DatensÃ¤tze, die alle Bedingungen von query (Liste von
+   * {@link QueryPart}s) erfÃ¼llen. Ist query leer, werden keine DatensÃ¤tze
+   * zurÃ¼ckgeliefert. EnthÃ¤lt query Bedingungen Ã¼ber Spalten, die die Datenbank nicht
+   * hat, werden keine DatensÃ¤tze zurÃ¼ckgeliefert.
    * 
    * @param timeout
    *          die maximale Zeit in Millisekunden, die vergehen darf, bis die Funktion
-   *          zurückkehrt.
+   *          zurÃ¼ckkehrt.
    * @throws TimeoutException,
    *           falls die Anfrage nicht rechtzeitig beendet werden konnte.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -109,17 +109,17 @@ public interface Datasource
       throws TimeoutException;
 
   /**
-   * Liefert eine implementierungsabhängige Teilmenge der Datensätze der Datenquelle.
-   * Wenn möglich sollte die Datenquelle hier all ihre Datensätze zurückliefern oder
-   * zumindest soviele wie möglich. Es ist jedoch auch erlaubt, dass hier gar keine
-   * Datensätze zurückgeliefert werden. Wenn sinnvoll sollte anstatt des Werfens
-   * einer TimeoutException ein Teil der Daten zurückgeliefert werden.
+   * Liefert eine implementierungsabhÃ¤ngige Teilmenge der DatensÃ¤tze der Datenquelle.
+   * Wenn mÃ¶glich sollte die Datenquelle hier all ihre DatensÃ¤tze zurÃ¼ckliefern oder
+   * zumindest soviele wie mÃ¶glich. Es ist jedoch auch erlaubt, dass hier gar keine
+   * DatensÃ¤tze zurÃ¼ckgeliefert werden. Wenn sinnvoll sollte anstatt des Werfens
+   * einer TimeoutException ein Teil der Daten zurÃ¼ckgeliefert werden.
    * 
    * @throws TimeoutException,
    *           falls ein Fehler auftritt oder die Anfrage nicht rechtzeitig beendet
    *           werden konnte. In letzterem Fall ist das Werfen dieser Exception
    *           jedoch nicht Pflicht und die Datenquelle kann stattdessen den Teil der
-   *           Ergebnisse zurückliefern, die in der gegebenen Zeit gewonnen werden
+   *           Ergebnisse zurÃ¼ckliefern, die in der gegebenen Zeit gewonnen werden
    *           konnten.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

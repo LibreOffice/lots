@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Speichert Daten persistent in einem Writer-Dokument.
  * 
- * Copyright (c) 2008 Landeshauptstadt M¸nchen
+ * Copyright (c) 2008 Landeshauptstadt M√ºnchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * ƒnderungshistorie:
- * Datum      | Wer | ƒnderungsgrund
+ * √Ñnderungshistorie:
+ * Datum      | Wer | √Ñnderungsgrund
  * -------------------------------------------------------------------
  * 09.11.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -64,8 +64,8 @@ public class PersistentData
   private static final String WOLLMUX_FRAME_NAME = "WollMuxDaten";
 
   /**
-   * Maximale L‰nge von Textfeldern, die der WollMux schreibt. Die L‰nge 16000 wurde
-   * gew‰hlt, wegen http://qa.openoffice.org/issues/show_bug.cgi?id=108709.
+   * Maximale L√§nge von Textfeldern, die der WollMux schreibt. Die L√§nge 16000 wurde
+   * gew√§hlt, wegen http://qa.openoffice.org/issues/show_bug.cgi?id=108709.
    */
   private static final int TEXTFIELD_MAXLEN = 16000;
 
@@ -83,7 +83,7 @@ public class PersistentData
   }
 
   /**
-   * Die Methode liefert die unter ID dataId gespeicherten Daten zur¸ck oder null,
+   * Die Methode liefert die unter ID dataId gespeicherten Daten zur√ºck oder null,
    * wenn keine vorhanden sind.
    */
   public String getData(String dataId)
@@ -100,14 +100,14 @@ public class PersistentData
   }
 
   /**
-   * Liefert alle Informations-Textfelder mit Id fieldName zur¸ck.
+   * Liefert alle Informations-Textfelder mit Id fieldName zur√ºck.
    * 
    * @param create
    *          falls true so werden entsprechende Felder angelegt, wenn sie nicht
    *          existieren.
    * @size falls create == true werden soviele Felder angelegt, dass darin size
-   *       Zeichen aufgeteilt in TEXTFIELD_MAXLEN lange Blˆcke untergebracht werden
-   *       kˆnnen. Eventuell vorhandene ¸bersch¸ssige Felder werden gelˆscht. Auch
+   *       Zeichen aufgeteilt in TEXTFIELD_MAXLEN lange Bl√∂cke untergebracht werden
+   *       k√∂nnen. Eventuell vorhandene √ºbersch√ºssige Felder werden gel√∂scht. Auch
    *       bei size == 0 wird mindestens ein Block geliefert.
    * @return leeren Vector falls das Feld nicht existiert und create == false oder
    *         falls ein Fehler auftritt.
@@ -178,7 +178,7 @@ public class PersistentData
             Object textfield =
               UNO.getProperty(textportionEnu.nextElement(), "TextField");
             String author = (String) UNO.getProperty(textfield, "Author");
-            // ACHTUNG! author.equals(fieldName) w‰re falsch, da author null sein
+            // ACHTUNG! author.equals(fieldName) w√§re falsch, da author null sein
             // kann!
             if (fieldName.equals(author))
             {
@@ -189,7 +189,7 @@ public class PersistentData
 
         /*
          * Falls create == true und zuviele Felder gefunden wurden, dann loesche die
-         * ¸berz‰hligen.
+         * √ºberz√§hligen.
          */
         if (create && textfields.size() > blockCount)
         {
@@ -203,7 +203,7 @@ public class PersistentData
 
         /*
          * Falls create == true und zu wenige Felder gefunden wurden, dann erzeuge
-         * zus‰tzliche.
+         * zus√§tzliche.
          */
         if (create && textfields.size() < blockCount)
         {
@@ -231,7 +231,7 @@ public class PersistentData
 
   /**
    * Speichert dataValue mit der id dataId persistent im Dokument. Falls bereits
-   * Daten mit der selben dataId vorhanden sind, werden sie ¸berschrieben.
+   * Daten mit der selben dataId vorhanden sind, werden sie √ºberschrieben.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */

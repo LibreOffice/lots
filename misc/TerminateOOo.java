@@ -3,7 +3,7 @@
  * Projekt  : n/a
  * Funktion : Kleines Tool zum Beenden von OpenOffice.org
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 03.09.2009 | BED | Erstellung
  * -------------------------------------------------------------------
@@ -45,7 +45,7 @@ public class TerminateOOo
 
   /**
    * Stellt eine Verbindung mit OpenOffice.org her (und startet dabei einen
-   * soffice-Prozess, falls noch keiner läuft) und beendet dann OpenOffice.org
+   * soffice-Prozess, falls noch keiner lÃ¤uft) und beendet dann OpenOffice.org
    * mittels XDesktop.terminate(). Das Programm beendet die JVM mit Statuscode 0,
    * wenn das Beenden von Openoffice.org erfolgreich war und mit einem Statuscode !=
    * 0, wenn OpenOffice.org nicht beendet wurde bzw. irgendetwas schief gelaufen ist

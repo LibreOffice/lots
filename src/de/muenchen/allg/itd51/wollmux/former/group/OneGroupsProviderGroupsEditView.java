@@ -1,9 +1,9 @@
 /*
  * Dateiname: OneGroupsProviderGroupsEditView.java
  * Projekt  : WollMux
- * Funktion : Lässt die Liste der Gruppen eines GroupsProvider bearbeiten.
+ * Funktion : LÃ¤sst die Liste der Gruppen eines GroupsProvider bearbeiten.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 13.03.2009 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -50,7 +50,7 @@ import de.muenchen.allg.itd51.wollmux.former.IDManager.IDChangeListener;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 
 /**
- * Lässt die Liste der Gruppen eines {@link GroupsProvider} bearbeiten.
+ * LÃ¤sst die Liste der Gruppen eines {@link GroupsProvider} bearbeiten.
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
@@ -83,14 +83,14 @@ public class OneGroupsProviderGroupsEditView implements View
   private GroupModelList groupModelList;
 
   /**
-   * Listener auf model und groupModelList, der Hinzufügen und entfernen von Gruppen
+   * Listener auf model und groupModelList, der HinzufÃ¼gen und entfernen von Gruppen
    * beobachtet.
    */
   private MyListener myListener;
 
   /**
-   * Wird temporär auf true gesetzt, während einer Aktion die rekursives Aufrufen des
-   * Listeners erzeugen könnte, um diese Rekursion zu durchbrechen.
+   * Wird temporÃ¤r auf true gesetzt, wÃ¤hrend einer Aktion die rekursives Aufrufen des
+   * Listeners erzeugen kÃ¶nnte, um diese Rekursion zu durchbrechen.
    */
   boolean recursion = false;
 
@@ -159,8 +159,8 @@ public class OneGroupsProviderGroupsEditView implements View
   {
 
     /**
-     * Zu groupModelList (d.h. zur Menge aller verfügbaren Gruppen) wurde eine Gruppe
-     * hinzugefügt.
+     * Zu groupModelList (d.h. zur Menge aller verfÃ¼gbaren Gruppen) wurde eine Gruppe
+     * hinzugefÃ¼gt.
      */
     public void itemAdded(GroupModel model, int index)
     {
@@ -172,7 +172,7 @@ public class OneGroupsProviderGroupsEditView implements View
     }
 
     /**
-     * Aus groupModelList (d.h. aus der Menge aller verfügbaren Gruppen) wurde eine
+     * Aus groupModelList (d.h. aus der Menge aller verfÃ¼gbaren Gruppen) wurde eine
      * Gruppe entfernt.
      */
     public void itemRemoved(GroupModel model, int index)
@@ -187,7 +187,7 @@ public class OneGroupsProviderGroupsEditView implements View
 
     /**
      * Zu groupsProvider (d.h. der Liste der selektierten Gruppen) wurde eine Gruppe
-     * hinzugefügt.
+     * hinzugefÃ¼gt.
      */
     public void groupAdded(ID groupID)
     {
@@ -214,7 +214,7 @@ public class OneGroupsProviderGroupsEditView implements View
     }
 
     /**
-     * Die Selektion wurde in der GUI geändert.
+     * Die Selektion wurde in der GUI geÃ¤ndert.
      */
     public void valueChanged(ListSelectionEvent e)
     {
@@ -251,8 +251,8 @@ public class OneGroupsProviderGroupsEditView implements View
     }
 
     /**
-     * Die ID einer der Gruppen aus groupModelList (d.h. der Liste aller verfügbaren
-     * Gruppen) sich geändert.
+     * Die ID einer der Gruppen aus groupModelList (d.h. der Liste aller verfÃ¼gbaren
+     * Gruppen) sich geÃ¤ndert.
      */
     public void idHasChanged(ID id)
     {}

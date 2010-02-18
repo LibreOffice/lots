@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Eine Bibliothek von benannten Functions
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 03.05.2006 | BNK | Erstellung
  * 08.05.2006 | BNK | Fertig implementiert.
@@ -67,7 +67,7 @@ public class FunctionLibrary implements Iterable<Function>
   /**
    * Erzeugt eine Funktionsbibliothek, die baselib referenziert (nicht kopiert!).
    * baselib wird immer dann befragt, wenn die Funktionsbibliothek selbst keine
-   * Funktion des entsprechenden Namens enthält. baselib darf null sein.
+   * Funktion des entsprechenden Namens enthÃ¤lt. baselib darf null sein.
    * 
    * @param baselib
    */
@@ -79,13 +79,13 @@ public class FunctionLibrary implements Iterable<Function>
   /**
    * Erzeugt eine Funktionsbibliothek, die baselib referenziert (nicht kopiert!).
    * baselib wird immer dann befragt, wenn die Funktionsbibliothek selbst keine
-   * Funktion des entsprechenden Namens enthält. baselib darf null sein.
+   * Funktion des entsprechenden Namens enthÃ¤lt. baselib darf null sein.
    * 
    * @param ordered
    *          Falls true liefert der Iterator dieser Funktionsbibliothek die
-   *          Funktionen in Einfügereihenfolge. Ansonsten werden sie in unbestimmter
+   *          Funktionen in EinfÃ¼gereihenfolge. Ansonsten werden sie in unbestimmter
    *          Reihenfolge geliefert. Es sollte offensichtlich sein, dass
-   *          ordered==true mit einem erhöhten Overhead verbunden ist.
+   *          ordered==true mit einem erhÃ¶hten Overhead verbunden ist.
    */
   public FunctionLibrary(FunctionLibrary baselib, boolean ordered)
   {
@@ -97,7 +97,7 @@ public class FunctionLibrary implements Iterable<Function>
   }
 
   /**
-   * Fügt func dieser Funktionsbibliothek unter dem Namen funcName hinzu. Eine
+   * FÃ¼gt func dieser Funktionsbibliothek unter dem Namen funcName hinzu. Eine
    * bereits existierende Funktion mit diesem Namen wird dabei ersetzt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -111,7 +111,7 @@ public class FunctionLibrary implements Iterable<Function>
   }
 
   /**
-   * Liefert die Function namens funcName zurück oder null, falls keine Funktion mit
+   * Liefert die Function namens funcName zurÃ¼ck oder null, falls keine Funktion mit
    * diesem Namen bekannt ist. Wurde die Funktionsbibliothek mit einer Referenz auf
    * eine andere Funktionsbibliothek initialisiert, so wird diese befragt, falls die
    * Funktionsbibliothek selbst keine Funktion des entsprechenden Namens kennt.
@@ -129,10 +129,10 @@ public class FunctionLibrary implements Iterable<Function>
    * Versucht, alle Funktionen namens funcName aus dieser und evtl, verketteter
    * Funktionsbibliotheken zu entfernen.
    * 
-   * @return true, falls nach Ausführung des Befehls {@link #hasFunction(String)) für
-   *         funcName false zurückliefert, false sonst. D.h. true wird geliefert,
+   * @return true, falls nach AusfÃ¼hrung des Befehls {@link #hasFunction(String)) fÃ¼r
+   *         funcName false zurÃ¼ckliefert, false sonst. D.h. true wird geliefert,
    *         wenn alle Funktionen entfernt werden konnten. Falls false
-   *         zurückgeliefert wird, wurden evtl. manche, aber definitiv nicht alle
+   *         zurÃ¼ckgeliefert wird, wurden evtl. manche, aber definitiv nicht alle
    *         Funktionen entfernt. Falls von vorneherein keine Funktion funcName
    *         vorhanden war, wird auch true geliefert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -157,7 +157,7 @@ public class FunctionLibrary implements Iterable<Function>
   }
 
   /**
-   * Liefert die Namen aller Funktionen, die über diese Funktionsbibliothek verfügbar
+   * Liefert die Namen aller Funktionen, die Ã¼ber diese Funktionsbibliothek verfÃ¼gbar
    * sind.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)

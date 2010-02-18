@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -50,27 +50,27 @@ public class StandardPrint
 
   /**
    * Unter diesem Key werden in den Properties eines XPrintModels die Einstellungen
-   * zu den Sachleitenden Verfügungen als Objekte vom Typ List<VerfuegungspunktInfo>
+   * zu den Sachleitenden VerfÃ¼gungen als Objekte vom Typ List<VerfuegungspunktInfo>
    * abgelegt, die von der Druckfunktion SachleitendeVerfuegungOutput wieder
    * ausgelesen werden.
    */
   public static final String PROP_SLV_SETTINGS = "SLV_Settings";
 
   /**
-   * GUI der Sachleitenden Verfügungen: Diese Komfortdruckfunktion erzeugt die GUI,
+   * GUI der Sachleitenden VerfÃ¼gungen: Diese Komfortdruckfunktion erzeugt die GUI,
    * mit deren Hilfe die Steuerdaten (in Form der Properties "SLV_SettingsFromGUI")
-   * für den Druck der Sachleitenden Verfügungen festgelegt werden können und leitet
-   * den Druck mittels pmod.printWithProps() an die nächste Druckfunktion der
+   * fÃ¼r den Druck der Sachleitenden VerfÃ¼gungen festgelegt werden kÃ¶nnen und leitet
+   * den Druck mittels pmod.printWithProps() an die nÃ¤chste Druckfunktion der
    * Aufrufkette (kann z.B. Seriendruck sein) weiter. Damit die SLVs letztendlich
-   * auch wirklich in den benötigten Ausfertigungen gedruckt werden, lädt die
+   * auch wirklich in den benÃ¶tigten Ausfertigungen gedruckt werden, lÃ¤dt die
    * Druckfunktion noch das Ausgabemodul "SachleitendeVerfuegungOutput" zur Liste der
-   * auszuführenden Druckfunktionen hinzu.
+   * auszufÃ¼hrenden Druckfunktionen hinzu.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static void sachleitendeVerfuegung(XPrintModel pmod)
   {
-    // Druckfunktion SachleitendeVerfuegungOutput für SLV-Ausgabe hinzuladen:
+    // Druckfunktion SachleitendeVerfuegungOutput fÃ¼r SLV-Ausgabe hinzuladen:
     try
     {
       pmod.usePrintFunction("SachleitendeVerfuegungOutput");
@@ -108,9 +108,9 @@ public class StandardPrint
   }
 
   /**
-   * Ausgabemodul der Sachleitenden Verfügungen: Diese Komfortdruckfunktion druckt
-   * die Verfügungspunkte aus, die über die GUI ausgewählt wurden. Dabei wird für
-   * jeden Verfügungspunkt die Methode printVerfuegungspunkt(...) ausgeführt.
+   * Ausgabemodul der Sachleitenden VerfÃ¼gungen: Diese Komfortdruckfunktion druckt
+   * die VerfÃ¼gungspunkte aus, die Ã¼ber die GUI ausgewÃ¤hlt wurden. Dabei wird fÃ¼r
+   * jeden VerfÃ¼gungspunkt die Methode printVerfuegungspunkt(...) ausgefÃ¼hrt.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -148,9 +148,9 @@ public class StandardPrint
   }
 
   /**
-   * mit dieser Komfortdruckfuntion habe ich getestet, ob die Parameterübergabe bei
-   * Druckfunktionen (arg als ConfigThingy) funktioniert und ob pmod sich über die
-   * UNO-Mechanismen korrekt inspizieren lässt.
+   * mit dieser Komfortdruckfuntion habe ich getestet, ob die ParameterÃ¼bergabe bei
+   * Druckfunktionen (arg als ConfigThingy) funktioniert und ob pmod sich Ã¼ber die
+   * UNO-Mechanismen korrekt inspizieren lÃ¤sst.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -168,7 +168,7 @@ public class StandardPrint
   }
 
   /**
-   * Druckt das zu pmod gehörende Dokument für jeden Datensatz der aktuell über
+   * Druckt das zu pmod gehÃ¶rende Dokument fÃ¼r jeden Datensatz der aktuell Ã¼ber
    * Bearbeiten/Datenbank austauschen eingestellten Tabelle einmal aus.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -179,10 +179,10 @@ public class StandardPrint
   }
 
   /**
-   * Druckt das zu pmod gehörende Dokument für die Datensätze, die der Benutzer in
-   * einem Dialog auswählt. Für die Anzeige der Datensätze im Dialog wird die Spalte
+   * Druckt das zu pmod gehÃ¶rende Dokument fÃ¼r die DatensÃ¤tze, die der Benutzer in
+   * einem Dialog auswÃ¤hlt. FÃ¼r die Anzeige der DatensÃ¤tze im Dialog wird die Spalte
    * "WollMuxDescription" verwendet. Falls die Spalte "WollMuxSelected" vorhanden ist
-   * und "1", "ja" oder "true" enthält, so ist der entsprechende Datensatz in der
+   * und "1", "ja" oder "true" enthÃ¤lt, so ist der entsprechende Datensatz in der
    * Auswahlliste bereits vorselektiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -193,7 +193,7 @@ public class StandardPrint
   }
 
   /**
-   * Startet den ultimativen MailMerge für pmod.
+   * Startet den ultimativen MailMerge fÃ¼r pmod.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -203,7 +203,7 @@ public class StandardPrint
   }
 
   /**
-   * PrintFunction, die das jeweils nächste Element der Seriendruckdaten nimmt und
+   * PrintFunction, die das jeweils nÃ¤chste Element der Seriendruckdaten nimmt und
    * die Seriendruckfelder im Dokument entsprechend setzt. Siehe
    * {@link MailMergeNew#mailMergeNewSetFormValue(XPrintModel)}.
    * 
@@ -222,11 +222,11 @@ public class StandardPrint
    * Methode mit dem Namen functionName verweist und den Order-Wert order besitzt.
    * 
    * @param functionName
-   *          Enthält den Namen einer in dieser Klasse definierten
+   *          EnthÃ¤lt den Namen einer in dieser Klasse definierten
    *          Standard-Druckfunktion
    * @param order
-   *          enthält den Order-Wert, der für die bestimmung der Reihenfolge der
-   *          Ausführung benötigt wird.
+   *          enthÃ¤lt den Order-Wert, der fÃ¼r die bestimmung der Reihenfolge der
+   *          AusfÃ¼hrung benÃ¶tigt wird.
    * @return die neue Druckfunktion oder null, wenn die Funktion nicht definiert ist.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -252,7 +252,7 @@ public class StandardPrint
   }
 
   /**
-   * Hängt das zu pmod gehörige TextDocument an das im Property
+   * HÃ¤ngt das zu pmod gehÃ¶rige TextDocument an das im Property
    * PrintIntoFile_OutputDocument gespeicherte XTextDocument an. Falls noch kein
    * solches Property existiert, wird ein leeres Dokument angelegt.
    * 
@@ -298,8 +298,8 @@ public class StandardPrint
   }
 
   /**
-   * Erzeugt abhängig von hidden ein sichtbares oder unsichtbares neues leeres
-   * Dokument für {@link PrintIntoFile} und setzt die entsprechenden Properties von
+   * Erzeugt abhÃ¤ngig von hidden ein sichtbares oder unsichtbares neues leeres
+   * Dokument fÃ¼r {@link PrintIntoFile} und setzt die entsprechenden Properties von
    * pmod, damit das Dokument verwendet wird. Dabei wird auf korrekte Synchronisation
    * mit dem WollMux geachtet.
    * 

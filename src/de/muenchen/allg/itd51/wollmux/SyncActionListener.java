@@ -4,7 +4,7 @@
  * Funktion : Vereinfacht die Synchronisation verschiedener Threads mittels 
  *            ActionListener
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -19,8 +19,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 24.09.2009 | LUT | Erstellung als SyncActionListener.java
  * -------------------------------------------------------------------
@@ -34,15 +34,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Diese Klasse vereinfacht die Synchronisation verschiedener Threads über einen
+ * Diese Klasse vereinfacht die Synchronisation verschiedener Threads Ã¼ber einen
  * ActionListener. Die Anwendung erfolgt in der Regel in folgenden Schritten:
  * 
  * SyncActionListener s = new SyncActionListener();
  * aufrufEinerMethodeDieEinenActionListenerErwartet(..., s); EventObject result =
  * s.synchronize();
  * 
- * Es ist sicher gestellt, dass s.synchronize() erst zurück kehrt, wenn der
- * ActionListener benachrichtigt wurde. Dabei wird das EventObject zurück gegeben,
+ * Es ist sicher gestellt, dass s.synchronize() erst zurÃ¼ck kehrt, wenn der
+ * ActionListener benachrichtigt wurde. Dabei wird das EventObject zurÃ¼ck gegeben,
  * mit dem {@link #actionPerformed(ActionEvent)} des Listeners aufgerufen wurde.
  * 
  * @author Christoph Lutz (D-III-ITD-D101)
@@ -50,18 +50,18 @@ import java.awt.event.ActionListener;
 public class SyncActionListener implements ActionListener
 {
   /**
-   * Das lock-Flag über das die Synchronisierung erfolgt.
+   * Das lock-Flag Ã¼ber das die Synchronisierung erfolgt.
    */
   private boolean[] lock = new boolean[] { true };
 
   /**
-   * Enthält nach erfolgter Syncronisierung das zurückgegebene ActionEvent
+   * EnthÃ¤lt nach erfolgter Syncronisierung das zurÃ¼ckgegebene ActionEvent
    */
   private ActionEvent result = null;
 
   /**
-   * Kehrt erst zurück, wenn {@link #actionPerformed(ActionEvent)} des Listeners
-   * aufgerufen wurde und liefert das dabei übermittelte EventObject zurück.
+   * Kehrt erst zurÃ¼ck, wenn {@link #actionPerformed(ActionEvent)} des Listeners
+   * aufgerufen wurde und liefert das dabei Ã¼bermittelte EventObject zurÃ¼ck.
    */
   public ActionEvent synchronize()
   {

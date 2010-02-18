@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Verwaltet eine Liste von SectionModels.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 24.03.2009 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -50,20 +50,20 @@ public class SectionModelList implements Iterable<SectionModel>
   private List<SectionModel> models = new LinkedList<SectionModel>();
 
   /**
-   * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts
+   * Liste aller {@link ItemListener}, die Ã¼ber Ã„nderungen des Listeninhalts
    * informiert werden wollen.
    */
   private List<ItemListener> listeners = new Vector<ItemListener>(1);
 
   /**
-   * Der FormularMax4000 zu dem diese SectionModelList gehört.
+   * Der FormularMax4000 zu dem diese SectionModelList gehÃ¶rt.
    */
   // private FormularMax4000 formularMax4000;
   /**
    * Erzeugt eine neue SectionModelList.
    * 
    * @param formularMax4000
-   *          der FormularMax4000 zu dem diese Liste gehört.
+   *          der FormularMax4000 zu dem diese Liste gehÃ¶rt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public SectionModelList(FormularMax4000 formularMax4000)
@@ -73,7 +73,7 @@ public class SectionModelList implements Iterable<SectionModel>
   }
 
   /**
-   * Fügt model dieser Liste hinzu.
+   * FÃ¼gt model dieser Liste hinzu.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -85,7 +85,7 @@ public class SectionModelList implements Iterable<SectionModel>
   }
 
   /**
-   * Löscht alle bestehenden SectionModels aus der Liste.
+   * LÃ¶scht alle bestehenden SectionModels aus der Liste.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -126,10 +126,10 @@ public class SectionModelList implements Iterable<SectionModel>
   }
 
   /**
-   * Lässt alle in dieser Liste gespeicherten {@link SectionModel}s ihre Name
+   * LÃ¤sst alle in dieser Liste gespeicherten {@link SectionModel}s ihre Name
    * updaten (und damit die entsprechenden GROUPS-Angaben). Falls beim Update eines
    * Bereichs etwas schiefgeht wird das entsprechende {@link SectionModel} aus der
-   * Liste gelöscht. Das Ausführen dieser Funktion triggert also potentiell einige
+   * Liste gelÃ¶scht. Das AusfÃ¼hren dieser Funktion triggert also potentiell einige
    * Listener.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -152,7 +152,7 @@ public class SectionModelList implements Iterable<SectionModel>
   }
 
   /**
-   * Liefert einen Iterator über alle Models dieser Liste.
+   * Liefert einen Iterator Ã¼ber alle Models dieser Liste.
    */
   public Iterator<SectionModel> iterator()
   {
@@ -160,7 +160,7 @@ public class SectionModelList implements Iterable<SectionModel>
   }
 
   /**
-   * listener wird über Änderungen der Liste informiert.
+   * listener wird Ã¼ber Ã„nderungen der Liste informiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -170,11 +170,11 @@ public class SectionModelList implements Iterable<SectionModel>
   }
 
   /**
-   * Benachrichtigt alle ItemListener über das Hinzufügen oder Entfernen von model
+   * Benachrichtigt alle ItemListener Ã¼ber das HinzufÃ¼gen oder Entfernen von model
    * zur bzw. aus der Liste an/von Index index.
    * 
    * @param removed
-   *          falls true, wurde model entfernt, ansonsten hinzugefügt.
+   *          falls true, wurde model entfernt, ansonsten hinzugefÃ¼gt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void notifyListeners(SectionModel model, int index, boolean removed)
@@ -191,15 +191,15 @@ public class SectionModelList implements Iterable<SectionModel>
   }
 
   /**
-   * Interface für Klassen, die interessiert sind, zu erfahren, wenn sich die Liste
-   * ändert.
+   * Interface fÃ¼r Klassen, die interessiert sind, zu erfahren, wenn sich die Liste
+   * Ã¤ndert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static interface ItemListener
   {
     /**
-     * Wird aufgerufen nachdem model zur Liste hinzugefügt wurde (an Index index).
+     * Wird aufgerufen nachdem model zur Liste hinzugefÃ¼gt wurde (an Index index).
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */

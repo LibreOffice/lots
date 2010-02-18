@@ -1,9 +1,9 @@
 /*
  * Dateiname: MailMerge.java
  * Projekt  : WollMux
- * Funktion : Druckfunktionen für den Seriendruck.
+ * Funktion : Druckfunktionen fÃ¼r den Seriendruck.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,13 +18,13 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 05.01.2007 | BNK | Erstellung
  * 15.01.2007 | BNK | Fortschrittsindikator
  * 29.01.2007 | BNK | "Keine Beschreibung vorhanden" durch Datensatznummer ersetzt.
- * 09.03.2007 | BNK | [P1257]Auch Datenquellen unterstützen, die keine Schlüssel haben.
+ * 09.03.2007 | BNK | [P1257]Auch Datenquellen unterstÃ¼tzen, die keine SchlÃ¼ssel haben.
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -98,18 +98,18 @@ import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 public class MailMerge
 {
   /**
-   * Anzahl Millisekunden, die maximal gewartet wird, bis alle Datensätze für den
+   * Anzahl Millisekunden, die maximal gewartet wird, bis alle DatensÃ¤tze fÃ¼r den
    * Serienbrief aus der Datenbank gelesen wurden.
    */
   private static final int DATABASE_TIMEOUT = 20000;
 
   /**
-   * Druckt das zu pmod gehörende Dokument für alle Datensätze (offerSelection==true)
-   * oder die Datensätze, die der Benutzer in einem Dialog auswählt (offerSelection ==
-   * false) aus der aktuell über Bearbeiten/Datenbank austauschen eingestellten
-   * Tabelle. Für die Anzeige der Datensätze im Dialog wird die Spalte
+   * Druckt das zu pmod gehÃ¶rende Dokument fÃ¼r alle DatensÃ¤tze (offerSelection==true)
+   * oder die DatensÃ¤tze, die der Benutzer in einem Dialog auswÃ¤hlt (offerSelection ==
+   * false) aus der aktuell Ã¼ber Bearbeiten/Datenbank austauschen eingestellten
+   * Tabelle. FÃ¼r die Anzeige der DatensÃ¤tze im Dialog wird die Spalte
    * "WollMuxDescription" verwendet. Falls die Spalte "WollMuxSelected" vorhanden ist
-   * und "1", "ja" oder "true" enthält, so ist der entsprechende Datensatz in der
+   * und "1", "ja" oder "true" enthÃ¤lt, so ist der entsprechende Datensatz in der
    * Auswahlliste bereits vorselektiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -135,19 +135,19 @@ public class MailMerge
     String table = (String) UNO.getProperty(settings, "CurrentDatabaseCommand");
     Integer type = (Integer) UNO.getProperty(settings, "CurrentDatabaseCommandType");
 
-    Logger.debug("Ausgewählte Datenquelle: \"" + datasource
+    Logger.debug("AusgewÃ¤hlte Datenquelle: \"" + datasource
       + "\"  Tabelle/Kommando: \"" + table + "\"  Typ: \"" + type + "\"");
 
     mailMerge(pmod, datasource, table, type, offerSelection);
   }
 
   /**
-   * Falls offerSelection == false wird das zu pmod gehörende Dokument für jeden
+   * Falls offerSelection == false wird das zu pmod gehÃ¶rende Dokument fÃ¼r jeden
    * Datensatz aus Tabelle table in Datenquelle datasource einmal ausgedruckt. Falls
-   * offerSelection == true, wird dem Benutzer ein Dialog präsentiert, in dem er die
-   * "WollMuxDescription"-Spalten aller Datensätze angezeigt bekommt und die
-   * auszudruckenden Datensätze auswählen kann. Dabei sind alle Datensätze, die eine
-   * Spalte "WollMuxSelected" haben, die den Wert "true", "ja" oder "1" enthält
+   * offerSelection == true, wird dem Benutzer ein Dialog prÃ¤sentiert, in dem er die
+   * "WollMuxDescription"-Spalten aller DatensÃ¤tze angezeigt bekommt und die
+   * auszudruckenden DatensÃ¤tze auswÃ¤hlen kann. Dabei sind alle DatensÃ¤tze, die eine
+   * Spalte "WollMuxSelected" haben, die den Wert "true", "ja" oder "1" enthÃ¤lt
    * bereits vorselektiert.
    * 
    * @param type
@@ -160,7 +160,7 @@ public class MailMerge
     /*
      * Kann nur mit Tabellennamen umgehen, nicht mit beliebigen Statements. Falls
      * eine andere Art von Kommando eingestellt ist, wird der SuperMailMerge
-     * gestartet, damit der Benutzer eine Tabelle auswählt.
+     * gestartet, damit der Benutzer eine Tabelle auswÃ¤hlt.
      */
     if (datasource == null || datasource.length() == 0 || table == null
       || table.length() == 0 || type == null || type.intValue() != CommandType.TABLE)
@@ -195,7 +195,7 @@ public class MailMerge
     catch (TimeoutException e)
     {
       Logger.error(
-        L.m("Konnte Daten für Serienbrief nicht aus der Datenquelle auslesen"), e);
+        L.m("Konnte Daten fÃ¼r Serienbrief nicht aus der Datenquelle auslesen"), e);
       return;
     }
 
@@ -203,15 +203,15 @@ public class MailMerge
   }
 
   /**
-   * Falls offerSelection == false wird das zu pmod gehörende Dokument für jeden
+   * Falls offerSelection == false wird das zu pmod gehÃ¶rende Dokument fÃ¼r jeden
    * Datensatz aus data einmal ausgedruckt. Falls offerSelection == true, wird dem
-   * Benutzer ein Dialog präsentiert, in dem er die "WollMuxDescription"-Spalten
-   * aller Datensätze angezeigt bekommt und die auszudruckenden Datensätze auswählen
-   * kann. Dabei sind alle Datensätze, die eine Spalte "WollMuxSelected" haben, die
-   * den Wert "true", "ja" oder "1" enthält bereits vorselektiert.
+   * Benutzer ein Dialog prÃ¤sentiert, in dem er die "WollMuxDescription"-Spalten
+   * aller DatensÃ¤tze angezeigt bekommt und die auszudruckenden DatensÃ¤tze auswÃ¤hlen
+   * kann. Dabei sind alle DatensÃ¤tze, die eine Spalte "WollMuxSelected" haben, die
+   * den Wert "true", "ja" oder "1" enthÃ¤lt bereits vorselektiert.
    * 
    * @param schema
-   *          muss die Namen aller Spalten für den MailMerge enthalten.
+   *          muss die Namen aller Spalten fÃ¼r den MailMerge enthalten.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static void mailMerge(XPrintModel pmod, boolean offerSelection,
@@ -255,7 +255,7 @@ public class MailMerge
         catch (Exception e)
         {
           Logger.error(
-            L.m("Spalte \"%1\" fehlt unerklärlicherweise => Abbruch des Drucks",
+            L.m("Spalte \"%1\" fehlt unerklÃ¤rlicherweise => Abbruch des Drucks",
               column), e);
           return;
         }
@@ -364,8 +364,8 @@ public class MailMerge
   }
 
   /**
-   * Wrapper für ein Dataset, um es einerseits in eine JList packen zu können,
-   * andererseits auch dafür, den Zustand ausgewählt oder nicht speichern zu können.
+   * Wrapper fÃ¼r ein Dataset, um es einerseits in eine JList packen zu kÃ¶nnen,
+   * andererseits auch dafÃ¼r, den Zustand ausgewÃ¤hlt oder nicht speichern zu kÃ¶nnen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -429,11 +429,11 @@ public class MailMerge
   }
 
   /**
-   * Präsentiert einen Dialog, der den Benutzer aus list (enthält {@link ListElement}s)
-   * auswählen lässt. ACHTUNG! Diese Methode kehrt erst zurück nachdem der Benutzer
+   * PrÃ¤sentiert einen Dialog, der den Benutzer aus list (enthÃ¤lt {@link ListElement}s)
+   * auswÃ¤hlen lÃ¤sst. ACHTUNG! Diese Methode kehrt erst zurÃ¼ck nachdem der Benutzer
    * den Dialog geschlossen hat.
    * 
-   * @return true, gdw der Benutzer mit Okay bestätigt hat.
+   * @return true, gdw der Benutzer mit Okay bestÃ¤tigt hat.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static boolean selectFromListDialog(final Vector<ListElement> list)
@@ -480,15 +480,15 @@ public class MailMerge
   }
 
   /**
-   * Präsentiert einen Dialog, der den Benutzer aus list (enthält {@link ListElement}s)
-   * auswählen lässt. ACHTUNG! Diese Methode darf nur im Event Dispatching Thread
+   * PrÃ¤sentiert einen Dialog, der den Benutzer aus list (enthÃ¤lt {@link ListElement}s)
+   * auswÃ¤hlen lÃ¤sst. ACHTUNG! Diese Methode darf nur im Event Dispatching Thread
    * aufgerufen werden.
    * 
    * @param result
    *          ein 2-elementiges Array auf das nur synchronisiert zugegriffen wird.
    *          Das erste Element wird auf false gesetzt, sobald der Dialog geschlossen
    *          wird. Das zweite Element wird in diesem Fall auf true gesetzt, wenn der
-   *          Benutzer mir Okay bestätigt hat. Bei sonstigen Arten, den Dialog zu
+   *          Benutzer mir Okay bestÃ¤tigt hat. Bei sonstigen Arten, den Dialog zu
    *          beenden bleibt das zweite Element unangetastet, sollte also mit false
    *          vorbelegt werden.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -496,7 +496,7 @@ public class MailMerge
   private static void createSelectFromListDialog(final Vector<ListElement> list,
       final boolean[] result)
   {
-    final JFrame myFrame = new JFrame(L.m("Gewünschte Ausdrucke wählen"));
+    final JFrame myFrame = new JFrame(L.m("GewÃ¼nschte Ausdrucke wÃ¤hlen"));
     myFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     myFrame.addWindowListener(new WindowListener()
     {
@@ -545,7 +545,7 @@ public class MailMerge
 
     Box top = Box.createVerticalBox();
     top.add(new JLabel(
-      L.m("Bitte wählen Sie, welche Ausdrucke Sie bekommen möchten")));
+      L.m("Bitte wÃ¤hlen Sie, welche Ausdrucke Sie bekommen mÃ¶chten")));
     top.add(Box.createVerticalStrut(5));
     myPanel.add(top, BorderLayout.NORTH);
 
@@ -626,7 +626,7 @@ public class MailMerge
   private static class CalcCellQueryResults implements QueryResults
   {
     /**
-     * Bildet einen Spaltennamen auf den Index in dem zu dem Datensatz gehörenden
+     * Bildet einen Spaltennamen auf den Index in dem zu dem Datensatz gehÃ¶renden
      * String[]-Array ab.
      */
     private Map<String, Integer> mapColumnNameToIndex;
@@ -689,7 +689,7 @@ public class MailMerge
    * Liefert die sichtbaren Zellen des Arbeitsblattes mit Namen sheetName aus dem
    * Calc Dokument, dessen Fenstertitel windowTitle ist. Die erste Zeile der
    * Calc-Tabelle wird herangezogen als Spaltennamen. Diese Spaltennamen werden zu
-   * schema hinzugefügt.
+   * schema hinzugefÃ¼gt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -754,7 +754,7 @@ public class MailMerge
              * Erste sichtbare Zeile durchscannen und alle nicht-leeren Zelleninhalte
              * als Tabellenspaltennamen interpretieren. Ein Mapping in
              * mapColumnNameToIndex wird erzeugt, wobei NICHT auf den Index in der
-             * Calc-Tabelle gemappt wird, sondern auf den Index im später für jeden
+             * Calc-Tabelle gemappt wird, sondern auf den Index im spÃ¤ter fÃ¼r jeden
              * Datensatz existierenden String[]-Array.
              */
             int ymin = rowIndexes.first().intValue();
@@ -775,16 +775,16 @@ public class MailMerge
               }
               else
                 iter.remove(); // Spalten mit leerem Spaltennamen werden nicht
-              // benötigt.
+              // benÃ¶tigt.
             }
 
             results.setColumnNameToIndexMap(mapColumnNameToIndex);
 
             /*
-             * Datensätze erzeugen
+             * DatensÃ¤tze erzeugen
              */
             Iterator<Integer> rowIndexIter = rowIndexes.iterator();
-            rowIndexIter.next(); // erste Zeile enthält die Tabellennamen, keinen
+            rowIndexIter.next(); // erste Zeile enthÃ¤lt die Tabellennamen, keinen
             // Datensatz
             while (rowIndexIter.hasNext())
             {
@@ -815,7 +815,7 @@ public class MailMerge
   }
 
   /**
-   * Startet den ultimativen Seriendruck für pmod.
+   * Startet den ultimativen Seriendruck fÃ¼r pmod.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -854,23 +854,23 @@ public class MailMerge
 
     /**
      * Die ComboBox in der der Benutzer die OOo-Datenquelle bzw, das Calc-Dokument
-     * für den MailMerge auswählen kann.
+     * fÃ¼r den MailMerge auswÃ¤hlen kann.
      */
     private JComboBox datasourceSelector;
 
     /**
-     * Das XPrintModel für diesen MailMerge.
+     * Das XPrintModel fÃ¼r diesen MailMerge.
      */
     private XPrintModel pmod;
 
     /**
-     * Die ComboBox in der der Benutzer die Tabelle für den MailMerge auswählen kann.
+     * Die ComboBox in der der Benutzer die Tabelle fÃ¼r den MailMerge auswÃ¤hlen kann.
      */
     private JComboBox tableSelector;
 
     /**
-     * Der Name der aktuell ausgewählten Datenquelle (bzw, der Titel des ausgewählten
-     * Calc-Dokuments). ACHTUNG! Diese Variable wird initial vom Nicht-EDT befüllt,
+     * Der Name der aktuell ausgewÃ¤hlten Datenquelle (bzw, der Titel des ausgewÃ¤hlten
+     * Calc-Dokuments). ACHTUNG! Diese Variable wird initial vom Nicht-EDT befÃ¼llt,
      * dann aber nur noch im Event Dispatching Thread verwendet bis zu dem Zeitpunkt
      * wo die Datenquellenauswahl beendet ist und der Druck durch den nicht-EDT
      * Thread angeleiert wird.
@@ -878,15 +878,15 @@ public class MailMerge
     private String selectedDatasource = "";
 
     /**
-     * Der Name der aktuell ausgewählten Tabelle. ACHTUNG! Diese Variable wird
-     * initial vom Nicht-EDT befüllt, dann aber nur noch im Event Dispatching Thread
+     * Der Name der aktuell ausgewÃ¤hlten Tabelle. ACHTUNG! Diese Variable wird
+     * initial vom Nicht-EDT befÃ¼llt, dann aber nur noch im Event Dispatching Thread
      * verwendet bis zu dem Zeitpunkt wo die Datenquellenauswahl beendet ist und der
      * Druck durch den nicht-EDT Thread angeleiert wird.
      */
     private String selectedTable = "";
 
     /**
-     * Startet den ultimativen MailMerge. ACHTUNG! Diese Methode kehrt erst zurück,
+     * Startet den ultimativen MailMerge. ACHTUNG! Diese Methode kehrt erst zurÃ¼ck,
      * wenn der Ausdruck abgeschlossen oder abgebrochen wurde.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -932,7 +932,7 @@ public class MailMerge
       }
 
       /*
-       * Aktuell über Bearbeiten/Datenbank austauschen gewählte Datenquelle/Tabelle
+       * Aktuell Ã¼ber Bearbeiten/Datenbank austauschen gewÃ¤hlte Datenquelle/Tabelle
        * bestimmen, falls gesetzt.
        */
       XTextDocument doc = pmod.getTextDocument();
@@ -1001,7 +1001,7 @@ public class MailMerge
     }
 
     /**
-     * Erstellt die GUI für die Auswahl der Datenquelle/Tabelle für den
+     * Erstellt die GUI fÃ¼r die Auswahl der Datenquelle/Tabelle fÃ¼r den
      * SuperMailMerge. Darf nur im EDT aufgerufen werden.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -1078,7 +1078,7 @@ public class MailMerge
       }
 
       /*
-       * Auf Änderungen der Datenquellen-Auswahl-Combobox reagieren.
+       * Auf Ã„nderungen der Datenquellen-Auswahl-Combobox reagieren.
        */
       datasourceSelector.addItemListener(new ItemListener()
       {
@@ -1108,7 +1108,7 @@ public class MailMerge
       hbox.add(tableSelector);
 
       /*
-       * Buttons hinzufügen.
+       * Buttons hinzufÃ¼gen.
        */
 
       hbox = Box.createHorizontalBox();
@@ -1176,14 +1176,14 @@ public class MailMerge
     }
 
     /**
-     * Wird im Nicht-EDT aufgerufen und bestimmt die Tabellen der neu ausgewählten
-     * Datenquelle und lässt dann im EDT die {@link #tableSelector}-ComboBox
+     * Wird im Nicht-EDT aufgerufen und bestimmt die Tabellen der neu ausgewÃ¤hlten
+     * Datenquelle und lÃ¤sst dann im EDT die {@link #tableSelector}-ComboBox
      * updaten.
      * 
      * @param datasourceAndTableName
-     *          das erste Element ist der Name der neu ausgewählten Datenquelle bzw.
+     *          das erste Element ist der Name der neu ausgewÃ¤hlten Datenquelle bzw.
      *          des Calc-Dokuments. Das zweite Element ist der Name der vorher
-     *          ausgewählten Tabelle (oder null). Letzterer wird benötigt, da falls
+     *          ausgewÃ¤hlten Tabelle (oder null). Letzterer wird benÃ¶tigt, da falls
      *          die neue Datenquelle eine Tabelle gleichen Namens besitzt, diese als
      *          aktuelle Auswahl der ComboBox eingestellt werden soll.
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -1286,12 +1286,12 @@ public class MailMerge
     }
 
     /**
-     * Fügt den Aufruf der public-Methode method zur {@link #todo}-Liste hinzu.
+     * FÃ¼gt den Aufruf der public-Methode method zur {@link #todo}-Liste hinzu.
      * 
      * @param method
      *          der Name einer public-Methode.
      * @param param
-     *          Parameter, der der Methode übergeben werden soll, oder null falls die
+     *          Parameter, der der Methode Ã¼bergeben werden soll, oder null falls die
      *          Methode keine Parameter erwartet.
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
@@ -1350,7 +1350,7 @@ public class MailMerge
     }
 
     /**
-     * Löscht die {@link #todo}-Liste und fügt ihr dann einen Befehl zum Setzen von
+     * LÃ¶scht die {@link #todo}-Liste und fÃ¼gt ihr dann einen Befehl zum Setzen von
      * {@link #running} auf false hinzu.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1372,7 +1372,7 @@ public class MailMerge
     }
 
     /**
-     * Führt die public-Methode "method" im EDT aus (ansynchron).
+     * FÃ¼hrt die public-Methode "method" im EDT aus (ansynchron).
      * 
      * @param method
      *          der Name einer public-Methode

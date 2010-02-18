@@ -1,9 +1,9 @@
 /*
  * Dateiname: DatasourceSearchDialog.java
  * Projekt  : WollMux
- * Funktion : Dialog zur Suche nach Daten in einer Datenquelle, die über DIALOG-Funktion verfügbar gemacht werden.
+ * Funktion : Dialog zur Suche nach Daten in einer Datenquelle, die Ã¼ber DIALOG-Funktion verfÃ¼gbar gemacht werden.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 22.05.2006 | BNK | Erstellung
  * 23.05.2006 | BNK | Rohbau
@@ -88,15 +88,15 @@ import de.muenchen.allg.itd51.wollmux.dialog.UIElementFactory.Context;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
- * Dialog zur Suche nach Daten in einer Datenquelle, die über DIALOG-Funktion
- * verfügbar gemacht werden.
+ * Dialog zur Suche nach Daten in einer Datenquelle, die Ã¼ber DIALOG-Funktion
+ * verfÃ¼gbar gemacht werden.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class DatasourceSearchDialog implements Dialog
 {
   /**
-   * Erzeugt einen neuen Dialog, dessen Instanzen Datenquellensuchdialoge gemäß der
+   * Erzeugt einen neuen Dialog, dessen Instanzen Datenquellensuchdialoge gemÃ¤ÃŸ der
    * Beschreibung in conf darstellen. Die Suchergebnisse liefert dj.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -110,7 +110,7 @@ public class DatasourceSearchDialog implements Dialog
   };
 
   /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
+   * Rand um Textfelder (wird auch fÃ¼r ein paar andere RÃ¤nder verwendet) in Pixeln.
    */
   private final static int TF_BORDER = 4;
 
@@ -120,12 +120,12 @@ public class DatasourceSearchDialog implements Dialog
   private final static int BUTTON_BORDER = 2;
 
   /**
-   * Das ConfigThingy, das die Beschreibung des Dialogs enthält.
+   * Das ConfigThingy, das die Beschreibung des Dialogs enthÃ¤lt.
    */
   private ConfigThingy myConf;
 
   /**
-   * Der Instantiator, der diesen Dialog instanziiert hat und auch für die Erstellung
+   * Der Instantiator, der diesen Dialog instanziiert hat und auch fÃ¼r die Erstellung
    * weiterer Instanzen herangezogen wird.
    */
   private Instantiator ilse;
@@ -136,8 +136,8 @@ public class DatasourceSearchDialog implements Dialog
   private Set<String> schema;
 
   /**
-   * data[0] speichert die aktuell ausgewählten Formulardaten. ACHTUNG! Nur in
-   * synchronized(data)-Blöcken verwenden!
+   * data[0] speichert die aktuell ausgewÃ¤hlten Formulardaten. ACHTUNG! Nur in
+   * synchronized(data)-BlÃ¶cken verwenden!
    */
   private Map<String, String>[] data;
 
@@ -147,7 +147,7 @@ public class DatasourceSearchDialog implements Dialog
   private JFrame myFrame;
 
   /**
-   * Die JTabbedPane, die die ganzen Tabs der GUI enthält.
+   * Die JTabbedPane, die die ganzen Tabs der GUI enthÃ¤lt.
    */
   private JTabbedPane myTabbedPane;
 
@@ -157,22 +157,22 @@ public class DatasourceSearchDialog implements Dialog
   private DatasourceJoiner dj;
 
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
-   * der verwendet wird für das Erzeugen von vertikal angeordneten UI Elementen (mit
+   * Ein Kontext fÃ¼r {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
+   * der verwendet wird fÃ¼r das Erzeugen von vertikal angeordneten UI Elementen (mit
    * Ausnahme der Vorschau).
    */
   private UIElementFactory.Context vertiContext;
 
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
-   * der verwendet wird für das Erzeugen der vertikal angeordneten UI Elemente der
+   * Ein Kontext fÃ¼r {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
+   * der verwendet wird fÃ¼r das Erzeugen der vertikal angeordneten UI Elemente der
    * Vorschau.
    */
   private UIElementFactory.Context previewContext;
 
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
-   * der verwendet wird für das Erzeugen von horizontal angeordneten Elementen.
+   * Ein Kontext fÃ¼r {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
+   * der verwendet wird fÃ¼r das Erzeugen von horizontal angeordneten Elementen.
    */
   private UIElementFactory.Context horiContext;
 
@@ -182,26 +182,26 @@ public class DatasourceSearchDialog implements Dialog
   private boolean processUIElementEvents = false;
 
   /**
-   * Wird zur Auflösung von Funktionsreferenzen in Spaltenumsetzung-Abschnitten
+   * Wird zur AuflÃ¶sung von Funktionsreferenzen in Spaltenumsetzung-Abschnitten
    * verwendet.
    */
   private FunctionLibrary funcLib;
 
   /**
-   * Zur Zeit noch nicht unterstützt, aber im Prinzip könnte man in einem
-   * Datenquellensuchdialog ebenfalls wieder Funktionsdialoge verwenden. Diese würden
+   * Zur Zeit noch nicht unterstÃ¼tzt, aber im Prinzip kÃ¶nnte man in einem
+   * Datenquellensuchdialog ebenfalls wieder Funktionsdialoge verwenden. Diese wÃ¼rden
    * dann aus dieser Bibliothek bezogen.
    */
   private DialogLibrary dialogLib;
 
   /**
    * Werden durch diesen Funktionsdialog weitere Funktionsdialoge erzeugt, so wird
-   * dieser Kontext übergeben.
+   * dieser Kontext Ã¼bergeben.
    */
   private Map<Object, Object> context = new HashMap<Object, Object>();
 
   /**
-   * Der show übergebene dialogEndListener.
+   * Der show Ã¼bergebene dialogEndListener.
    */
   private ActionListener dialogEndListener;
 
@@ -215,7 +215,7 @@ public class DatasourceSearchDialog implements Dialog
    * Erzeugt einen neuen DSD.
    * 
    * @param ilse
-   *          der Instantiator, der für instanceFor()-Aufrufe verwendet werden soll.
+   *          der Instantiator, der fÃ¼r instanceFor()-Aufrufe verwendet werden soll.
    * @param conf
    *          die Beschreibung des Dialogs.
    */
@@ -268,7 +268,7 @@ public class DatasourceSearchDialog implements Dialog
     this.funcLib = funcLib;
     this.dialogLib = dialogLib;
 
-    String title = L.m("Datensatz Auswählen");
+    String title = L.m("Datensatz AuswÃ¤hlen");
     try
     {
       title = L.m(myConf.get("TITLE", 1).toString());
@@ -285,12 +285,12 @@ public class DatasourceSearchDialog implements Dialog
     {}
     if (!type.equals("dbSelect"))
       throw new ConfigurationErrorException(L.m(
-        "Ununterstützter TYPE \"%1\" in Funktionsdialog \"%2\"", type,
+        "UnunterstÃ¼tzter TYPE \"%1\" in Funktionsdialog \"%2\"", type,
         myConf.getName()));
 
     final ConfigThingy fensterDesc = myConf.query("Fenster");
     if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1",
+      throw new ConfigurationErrorException(L.m("SchlÃ¼ssel 'Fenster' fehlt in %1",
         myConf.getName()));
 
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
@@ -337,7 +337,7 @@ public class DatasourceSearchDialog implements Dialog
     // leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     MyWindowListener oehrchen = new MyWindowListener();
-    // der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
+    // der WindowListener sorgt dafÃ¼r, dass auf windowClosing mit abort reagiert wird
     myFrame.addWindowListener(oehrchen); // TODO CLOSEACTION statt einfach nur
     // abort()
 
@@ -356,7 +356,7 @@ public class DatasourceSearchDialog implements Dialog
       ConfigThingy neuesFenster = iter.next();
 
       /*
-       * Die folgende Schleife ist nicht nur eleganter als mehrere try-catch-Blöcke
+       * Die folgende Schleife ist nicht nur eleganter als mehrere try-catch-BlÃ¶cke
        * um get()-Befehle, sie verhindert auch, dass TIP oder HOTKEY aus Versehen von
        * einem enthaltenen Button aufgeschnappt werden.
        */
@@ -415,7 +415,7 @@ public class DatasourceSearchDialog implements Dialog
   private class DialogWindow implements UIElementEventHandler
   {
     /**
-     * Das Panel das die GUI-Elemente enthält.
+     * Das Panel das die GUI-Elemente enthÃ¤lt.
      */
     private JPanel myPanel;
 
@@ -425,17 +425,17 @@ public class DatasourceSearchDialog implements Dialog
     private Set<String> dialogWindowSchema;
 
     /**
-     * Die Suchstrategie für Suchanfragen.
+     * Die Suchstrategie fÃ¼r Suchanfragen.
      */
     private SearchStrategy searchStrategy;
 
     /**
-     * Der für die Spaltenumsetzung verantwortliche {@link ColumnTransformer}.
+     * Der fÃ¼r die Spaltenumsetzung verantwortliche {@link ColumnTransformer}.
      */
     private ColumnTransformer columnTransformer;
 
     /**
-     * Legt fest, wie die Datensätze in der Ergebnisliste dargestellt werden sollen.
+     * Legt fest, wie die DatensÃ¤tze in der Ergebnisliste dargestellt werden sollen.
      * Kann Variablen der Form "${name}" enthalten.
      */
     private String displayTemplate = L.m("<Datensatz>");
@@ -451,12 +451,12 @@ public class DatasourceSearchDialog implements Dialog
     private UIElement query = null;
 
     /**
-     * Suche automatisch ausführen, nach Aufbau des Tabs.
+     * Suche automatisch ausfÃ¼hren, nach Aufbau des Tabs.
      */
     private boolean autosearch = false;
 
     /**
-     * Liefert das JPanel, das die Elemente dieses Tabs enthält.
+     * Liefert das JPanel, das die Elemente dieses Tabs enthÃ¤lt.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -466,7 +466,7 @@ public class DatasourceSearchDialog implements Dialog
     }
 
     /**
-     * Die für die Erzeugung der UI Elemente verwendete Factory.
+     * Die fÃ¼r die Erzeugung der UI Elemente verwendete Factory.
      */
     private UIElementFactory uiElementFactory;
 
@@ -480,7 +480,7 @@ public class DatasourceSearchDialog implements Dialog
      * Erzeugt ein neues Tab.
      * 
      * @param tabIndex
-     *          Die Nummer (von 0 gezählt) des Tabs, das dieses DialogWindow
+     *          Die Nummer (von 0 gezÃ¤hlt) des Tabs, das dieses DialogWindow
      *          darstellt.
      * @param conf
      *          der Kind-Knoten des Fenster-Knotens der das Tab beschreibt. conf ist
@@ -539,15 +539,15 @@ public class DatasourceSearchDialog implements Dialog
     }
 
     /**
-     * Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu. compo
+     * FÃ¼gt compo UI Elemente gemÃ¤ss den Kindern von conf.query(key) hinzu. compo
      * muss ein GridBagLayout haben. stepx und stepy geben an um wieviel mit jedem UI
-     * Element die x und die y Koordinate der Zelle erhöht werden soll. Wirklich
+     * Element die x und die y Koordinate der Zelle erhÃ¶ht werden soll. Wirklich
      * sinnvoll sind hier nur (0,1) und (1,0).
      * 
      * @param context
      *          ist der Kontext, der
      *          {@link UIElementFactory#createUIElement(Context, ConfigThingy)}
-     *          übergeben werden soll für die Erzeugung der UIElemente.
+     *          Ã¼bergeben werden soll fÃ¼r die Erzeugung der UIElemente.
      * @param in
      *          dieser Map werden all erzeugten UIElemente registriert, die ein
      *          DB_SPALTE Attribut haben. null ist nicht erlaubt. TESTED
@@ -622,7 +622,7 @@ public class DatasourceSearchDialog implements Dialog
           }
 
           /**************************************************************************
-           * UI Element und evtl. vorhandenes Zusatzlabel zum GUI hinzufügen.
+           * UI Element und evtl. vorhandenes Zusatzlabel zum GUI hinzufÃ¼gen.
            *************************************************************************/
           int compoX = 0;
           int labelmod = 1;
@@ -659,7 +659,7 @@ public class DatasourceSearchDialog implements Dialog
 
     /**
      * Geht alle Elemente von {@link #mapDB_SPALTEtoUIElement} durch und updated die
-     * Felder mit den entsprechenden Werten aus dem Datensatz, der an ele dranhängt.
+     * Felder mit den entsprechenden Werten aus dem Datensatz, der an ele dranhÃ¤ngt.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
@@ -691,7 +691,7 @@ public class DatasourceSearchDialog implements Dialog
     }
 
     /**
-     * Ändert die Werteliste von list so, dass sie data entspricht. Die Datasets aus
+     * Ã„ndert die Werteliste von list so, dass sie data entspricht. Die Datasets aus
      * data werden nicht direkt als Werte verwendet, sondern in {@link ListElement}
      * Objekte gewrappt. data == null wird interpretiert als leere Liste. list kann
      * null sein (dann tut diese Funktion nichts).
@@ -735,7 +735,7 @@ public class DatasourceSearchDialog implements Dialog
     }
 
     /**
-     * Wrapper um ein Dataset zum Einfügen in eine JList.
+     * Wrapper um ein Dataset zum EinfÃ¼gen in eine JList.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -763,9 +763,9 @@ public class DatasourceSearchDialog implements Dialog
     }
 
     /**
-     * Führt die Suchanfrage im Feld {@link #query} aus (falls dieses nicht null ist)
-     * gemäß {@link #searchStrategy} und ändert {@link #resultsList} (falls nicht
-     * null) so dass sie die Suchergebnisse enthält.
+     * FÃ¼hrt die Suchanfrage im Feld {@link #query} aus (falls dieses nicht null ist)
+     * gemÃ¤ÃŸ {@link #searchStrategy} und Ã¤ndert {@link #resultsList} (falls nicht
+     * null) so dass sie die Suchergebnisse enthÃ¤lt.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
@@ -803,7 +803,7 @@ public class DatasourceSearchDialog implements Dialog
     }
 
     /**
-     * Die zentrale Anlaufstelle für alle von UIElementen ausgelösten Events (siehe
+     * Die zentrale Anlaufstelle fÃ¼r alle von UIElementen ausgelÃ¶sten Events (siehe
      * {@link UIElementEventHandler#processUiElementEvent(UIElement, String, Object[])}).
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1042,8 +1042,8 @@ public class DatasourceSearchDialog implements Dialog
    *********************************************************************************/
 
   /**
-   * Eine Suchstrategie liefert für eine gegebene Wortzahl eine Liste von Templates
-   * für Suchanfragen, die der Reihe nach mit den Wörtern probiert werden sollen bis
+   * Eine Suchstrategie liefert fÃ¼r eine gegebene Wortzahl eine Liste von Templates
+   * fÃ¼r Suchanfragen, die der Reihe nach mit den WÃ¶rtern probiert werden sollen bis
    * ein Ergebnis gefunden ist.
    */
   private static class SearchStrategy
@@ -1107,7 +1107,7 @@ public class DatasourceSearchDialog implements Dialog
     /**
      * mapWordcountToListOfQueries wird per Referenz eingebunden und entsprechende
      * Ergebnisse aus dieser Map werden von {@link #getTemplate(int)}
-     * zurückgeliefert.
+     * zurÃ¼ckgeliefert.
      */
     private SearchStrategy(Map<Integer, List<Query>> mapWordcountToListOfQuerys)
     {
@@ -1115,12 +1115,12 @@ public class DatasourceSearchDialog implements Dialog
     }
 
     /**
-     * Liefert eine Liste von Query-Objekten, die jeweils ein Template für eine Query
-     * sind, die bei einer Suchanfrage mit wordcount Wörtern durchgeführt werden
+     * Liefert eine Liste von Query-Objekten, die jeweils ein Template fÃ¼r eine Query
+     * sind, die bei einer Suchanfrage mit wordcount WÃ¶rtern durchgefÃ¼hrt werden
      * soll. Die Querys sollen in der Reihenfolge in der sie in der Liste stehen
-     * durchgeführt werden solange bis eine davon ein Ergebnis liefert.
+     * durchgefÃ¼hrt werden solange bis eine davon ein Ergebnis liefert.
      * 
-     * @return null falls keine Strategie für den gegebenen wordcount vorhanden.
+     * @return null falls keine Strategie fÃ¼r den gegebenen wordcount vorhanden.
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     public List<Query> getTemplate(int wordcount)
@@ -1130,9 +1130,9 @@ public class DatasourceSearchDialog implements Dialog
   }
 
   /**
-   * Nimmt ein Template für eine Suchanfrage entgegen (das Variablen der Form
-   * "${suchanfrageX}" enthalten kann) und instanziiert es mit Wörtern aus words,
-   * wobei nur die ersten wordcount Einträge von words beachtet werden.
+   * Nimmt ein Template fÃ¼r eine Suchanfrage entgegen (das Variablen der Form
+   * "${suchanfrageX}" enthalten kann) und instanziiert es mit WÃ¶rtern aus words,
+   * wobei nur die ersten wordcount EintrÃ¤ge von words beachtet werden.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -1161,10 +1161,10 @@ public class DatasourceSearchDialog implements Dialog
 
   /**
    * Liefert zur Anfrage queryString eine Liste von {@link Query}s, die der Reihe
-   * nach probiert werden sollten, gemäß der Suchstrategie searchStrategy (siehe
-   * {@link #parseSearchstrategy(ConfigThingy)}). Gibt es für die übergebene Anzahl
-   * Wörter keine Suchstrategie, so wird solange das letzte Wort entfernt bis
-   * entweder nichts mehr übrig ist oder eine Suchstrategie für die Anzahl Wörter
+   * nach probiert werden sollten, gemÃ¤ÃŸ der Suchstrategie searchStrategy (siehe
+   * {@link #parseSearchstrategy(ConfigThingy)}). Gibt es fÃ¼r die Ã¼bergebene Anzahl
+   * WÃ¶rter keine Suchstrategie, so wird solange das letzte Wort entfernt bis
+   * entweder nichts mehr Ã¼brig ist oder eine Suchstrategie fÃ¼r die Anzahl WÃ¶rter
    * gefunden wurde.
    * 
    * @return die leere Liste falls keine Liste bestimmt werden konnte.
@@ -1187,8 +1187,8 @@ public class DatasourceSearchDialog implements Dialog
     /*
      * Benutzerseitig wir nur ein einzelnes Sternchen am Ende eines Wortes
      * akzeptiert. Deswegen entferne alle anderen Sternchen. Ein Punkt am Ende eines
-     * Wortes wird als Abkürzung interpretiert und durch Sternchen ersetzt. Ausserdem
-     * entferne leere Wörter und berechne neue Arraylänge.
+     * Wortes wird als AbkÃ¼rzung interpretiert und durch Sternchen ersetzt. Ausserdem
+     * entferne leere WÃ¶rter und berechne neue ArraylÃ¤nge.
      */
     int count = queryArray.length;
     for (int i = 0; i < queryArray.length && queryArray[i] != null; ++i)
@@ -1215,7 +1215,7 @@ public class DatasourceSearchDialog implements Dialog
     }
 
     /*
-     * Passende Suchstrategie finden; falls nötig dazu Wörter am Ende weglassen.
+     * Passende Suchstrategie finden; falls nÃ¶tig dazu WÃ¶rter am Ende weglassen.
      */
     while (count >= 0 && searchStrategy.getTemplate(count) == null)
       --count;
@@ -1259,7 +1259,7 @@ public class DatasourceSearchDialog implements Dialog
         catch (ColumnNotFoundException e)
         {
           Logger.error(L.m(
-            "Fehler beim Auflösen des Platzhalters \"${%1}\": Spalte für den Datensatz nicht definiert",
+            "Fehler beim AuflÃ¶sen des Platzhalters \"${%1}\": Spalte fÃ¼r den Datensatz nicht definiert",
             spalte));
         }
         str = str.substring(0, m.start()) + wert + str.substring(m.end());
@@ -1308,7 +1308,7 @@ public class DatasourceSearchDialog implements Dialog
         }
         catch (Exception x)
         {
-          Logger.error(L.m("Huh? Dies sollte nicht passieren können"), x);
+          Logger.error(L.m("Huh? Dies sollte nicht passieren kÃ¶nnen"), x);
         }
       }
 
@@ -1321,8 +1321,8 @@ public class DatasourceSearchDialog implements Dialog
   }
 
   /**
-   * Beendet den Dialog und ruft falls nötig den dialogEndListener auf wobei das
-   * gegebene actionCommand übergeben wird.
+   * Beendet den Dialog und ruft falls nÃ¶tig den dialogEndListener auf wobei das
+   * gegebene actionCommand Ã¼bergeben wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1338,9 +1338,9 @@ public class DatasourceSearchDialog implements Dialog
   }
 
   /**
-   * Liefert neue Instanzen eines DatasourceSearchDialogs. Alle Dialoge, die über den
+   * Liefert neue Instanzen eines DatasourceSearchDialogs. Alle Dialoge, die Ã¼ber den
    * selben Instantiator erzeugt wurden erzeugen ihrerseits wieder neue Instanzen
-   * über diesen Instantiator, d.h. insbesondere dass
+   * Ã¼ber diesen Instantiator, d.h. insbesondere dass
    * instanceFor(context).instanceFor(context).instanceFor(context) den selben Dialog
    * liefert wie instanceFor(context).
    * 
@@ -1419,7 +1419,7 @@ public class DatasourceSearchDialog implements Dialog
 
   /**
    * Ein WindowListener, der auf den JFrame registriert wird, damit als Reaktion auf
-   * den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
+   * den Schliessen-Knopf auch die ACTION "abort" ausgefÃ¼hrt wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

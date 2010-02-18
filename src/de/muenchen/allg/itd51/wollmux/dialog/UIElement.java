@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Interface das von den konkreten UI Elementen (Combobox etc.) abstrahiert.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,15 +18,15 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 11.01.2006 | BNK | Erstellung
  * 24.04.2006 | BNK | kommentiert.
  * 05.05.2006 | BNK | Condition -> Function
  * 15.05.2006 | BNK | +setString()
  * 18.05.2006 | BNK | +isStatic()
- * 30.05.2006 | BNK | UIElement.Listbox unterstützt jetzt Zusatzfunktionen
+ * 30.05.2006 | BNK | UIElement.Listbox unterstÃ¼tzt jetzt Zusatzfunktionen
  * 16.06.2006 | BNK | +hasFocus(), +takeFocus()
  * 29.09.2006 | BNK | Verbessertes Auslesen von ComboBox-Daten 
  * 25.01.2006 | BNK | [R5038]Hintergrundfarbe von Textareas korrekt setzen
@@ -76,23 +76,23 @@ public interface UIElement extends Value
 {
 
   /**
-   * Gibt an, dass das UI Element kein zusätzliches Label erhalten soll.
+   * Gibt an, dass das UI Element kein zusÃ¤tzliches Label erhalten soll.
    */
   public static final Integer LABEL_NONE = Integer.valueOf(0);
 
   /**
-   * Gibt an, dass links neben dem UI Element ein zusätzliches Label stehen soll.
+   * Gibt an, dass links neben dem UI Element ein zusÃ¤tzliches Label stehen soll.
    */
   public static final Integer LABEL_LEFT = Integer.valueOf(-1);
 
   /**
-   * Gibt an, dass rechts neben dem UI Element ein zusätzliches Label stehen soll.
+   * Gibt an, dass rechts neben dem UI Element ein zusÃ¤tzliches Label stehen soll.
    */
   public static final Integer LABEL_RIGHT = Integer.valueOf(+1);
 
   /**
-   * Liefert die Information, ob das UI Element ein zusätzliches Label links oder
-   * rechts bekommen soll. Mögliche Werte sind {@link #LABEL_LEFT},
+   * Liefert die Information, ob das UI Element ein zusÃ¤tzliches Label links oder
+   * rechts bekommen soll. MÃ¶gliche Werte sind {@link #LABEL_LEFT},
    * {@link #LABEL_RIGHT} und {@link #LABEL_NONE}.
    */
   public Integer getLabelType();
@@ -111,8 +111,8 @@ public interface UIElement extends Value
   public Component getComponent();
 
   /**
-   * Liefert das empfohlene zweite Argument für
-   * {@link java.awt.Container#add(java.awt.Component, java.lang.Object)} für die
+   * Liefert das empfohlene zweite Argument fÃ¼r
+   * {@link java.awt.Container#add(java.awt.Component, java.lang.Object)} fÃ¼r die
    * funktionale Komponente dieses UI Elements.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -120,8 +120,8 @@ public interface UIElement extends Value
   public Object getLayoutConstraints();
 
   /**
-   * Liefert das empfohlene zweite Argument für
-   * {@link java.awt.Container#add(java.awt.Component, java.lang.Object)} für das
+   * Liefert das empfohlene zweite Argument fÃ¼r
+   * {@link java.awt.Container#add(java.awt.Component, java.lang.Object)} fÃ¼r das
    * Zusatz-Label dieses UIElements. Nur definiert, falls getLabelType() nicht
    * LABEL_NONE ist.
    * 
@@ -137,7 +137,7 @@ public interface UIElement extends Value
   public Object getAdditionalData();
 
   /**
-   * Setzt das Objekt, das von getAdditionalData() zurückgeliefert werden soll.
+   * Setzt das Objekt, das von getAdditionalData() zurÃ¼ckgeliefert werden soll.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -146,7 +146,7 @@ public interface UIElement extends Value
   /**
    * Der aktuelle Wert des UI Elements. Falls es sich um ein boolesches Element
    * (Checkbox, Radio Button) handelt, wird im angeschalteten Fall der String "true",
-   * im ungesetzten Fall "false" zurückgeliefert. Im Falle eines Buttons oder eines
+   * im ungesetzten Fall "false" zurÃ¼ckgeliefert. Im Falle eines Buttons oder eines
    * anderen Elements das keinen sinnvollen Wert hat, wird immer "false" geliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -165,9 +165,9 @@ public interface UIElement extends Value
   public boolean getBoolean();
 
   /**
-   * Setzt den aktuellen Wert dieses UI Elements (falls möglich) auf str. Falls es
+   * Setzt den aktuellen Wert dieses UI Elements (falls mÃ¶glich) auf str. Falls es
    * sich um ein boolesches Element (Checkbox etc) handelt, so wird der String "true"
-   * (ohne Berücksichtigung von Gross-/Kleinschreibung) als true und jeder andere
+   * (ohne BerÃ¼cksichtigung von Gross-/Kleinschreibung) als true und jeder andere
    * String als false betrachtet.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -182,7 +182,7 @@ public interface UIElement extends Value
   public String getId();
 
   /**
-   * Setzt eine neue Hintergrundfarbe für das UIElement.
+   * Setzt eine neue Hintergrundfarbe fÃ¼r das UIElement.
    */
   public void setBackground(Color bg);
 
@@ -194,7 +194,7 @@ public interface UIElement extends Value
   public void setVisible(boolean vis);
 
   /**
-   * Liefert true, wenn das Element keine Änderungen erlaubt (z,B, ein Separator oder
+   * Liefert true, wenn das Element keine Ã„nderungen erlaubt (z,B, ein Separator oder
    * ein Label).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -209,14 +209,14 @@ public interface UIElement extends Value
   public boolean hasFocus();
 
   /**
-   * Sagt dem UIElement, es soll versuchen, den Eingabefokus zu übernehmen.
+   * Sagt dem UIElement, es soll versuchen, den Eingabefokus zu Ã¼bernehmen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void takeFocus();
 
   /**
-   * Abstrakte Basis-Klasse für UIElemente.
+   * Abstrakte Basis-Klasse fÃ¼r UIElemente.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -549,7 +549,7 @@ public interface UIElement extends Value
     }
 
     /**
-     * Löscht alle alten Einträge dieser ListBox und ersetzt sie durch die Einträge
+     * LÃ¶scht alle alten EintrÃ¤ge dieser ListBox und ersetzt sie durch die EintrÃ¤ge
      * von newEntries (beliebige Objects).
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -576,9 +576,9 @@ public interface UIElement extends Value
     }
 
     /**
-     * Falls Mehrfachauswahl möglich ist werden alle gültigen Indizes (Numbers,
-     * gezählt ab 0) aus indices selektiert, falls nur Einfachauswahl möglich wird
-     * nur der erste gültige Index selektiert.
+     * Falls Mehrfachauswahl mÃ¶glich ist werden alle gÃ¼ltigen Indizes (Numbers,
+     * gezÃ¤hlt ab 0) aus indices selektiert, falls nur Einfachauswahl mÃ¶glich wird
+     * nur der erste gÃ¼ltige Index selektiert.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      * 

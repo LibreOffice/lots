@@ -1,9 +1,9 @@
 /*
  * Dateiname: ParamValue.java
  * Projekt  : WollMux
- * Funktion : Repräsentiert einen vom Benutzer konfigurierten Parameter für eine Funktion.
+ * Funktion : ReprÃ¤sentiert einen vom Benutzer konfigurierten Parameter fÃ¼r eine Funktion.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 25.09.2006 | BNK | Erstellung
  * 16.03.2007 | BNK | +setFieldReference()
@@ -35,7 +35,7 @@ package de.muenchen.allg.itd51.wollmux.former.function;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 
 /**
- * Repräsentiert einen vom Benutzer konfigurierten Parameter für eine Funktion.
+ * ReprÃ¤sentiert einen vom Benutzer konfigurierten Parameter fÃ¼r eine Funktion.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -57,7 +57,7 @@ public class ParamValue
   public static final int LITERAL = 2;
 
   /**
-   * Falls {@link #type} == {@link #LITERAL} enthält dies ein Literal.
+   * Falls {@link #type} == {@link #LITERAL} enthÃ¤lt dies ein Literal.
    */
   private String literal;
 

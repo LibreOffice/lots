@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Eine Menge benannter Values.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 04.05.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -42,7 +42,7 @@ public interface Values
   /**
    * Liefert true genau dann wenn ein Wert mit der ID id vorhanden ist (ACHTUNG, bei
    * mit BIND zusammengesetzten Funktionen bekommt die gebundene Funktion unter
-   * Umständen hier keine akkurate Antwort).
+   * UmstÃ¤nden hier keine akkurate Antwort).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -51,7 +51,7 @@ public interface Values
   /**
    * Der aktuelle Wert des mit id identifizierten Values als String. Falls es sich um
    * einen booleschen Wert handelt, wird der String "true" oder "false"
-   * zurückgeliefert. Falls kein Wert mit dieser id vorhanden ist wird der leere
+   * zurÃ¼ckgeliefert. Falls kein Wert mit dieser id vorhanden ist wird der leere
    * String geliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -60,7 +60,7 @@ public interface Values
 
   /**
    * Der aktuelle Wert des mit id identifizierten Values als boolean. Falls der Wert
-   * seiner Natur nach ein String ist, so ist das Ergebnis implementierungsabhängig.
+   * seiner Natur nach ein String ist, so ist das Ergebnis implementierungsabhÃ¤ngig.
    * Falls kein Wert mit dieser id vorhanden ist wird false geliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -68,8 +68,8 @@ public interface Values
   public boolean getBoolean(String id);
 
   /**
-   * Dummy-Klasse, die ein Values-Interface zur Verfügung stellt, das keine Werte
-   * enthält.
+   * Dummy-Klasse, die ein Values-Interface zur VerfÃ¼gung stellt, das keine Werte
+   * enthÃ¤lt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -101,7 +101,7 @@ public interface Values
     private HashMap<String, String> values = new HashMap<String, String>();
 
     /**
-     * Fügt den Wert value hinzu, identifiziert mit id. Ein bereits vorhandener Wert
+     * FÃ¼gt den Wert value hinzu, identifiziert mit id. Ein bereits vorhandener Wert
      * wird ersetzt. Falls value==null, so wird der Aufruf behandelt wie
      * {@link #remove(String)}.
      * 

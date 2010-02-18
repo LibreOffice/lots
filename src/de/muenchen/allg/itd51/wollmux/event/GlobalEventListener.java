@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Reagiert auf globale Ereignisse
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,26 +18,26 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 14.10.2005 | LUT | Erstellung
  * 09.11.2005 | LUT | + Logfile wird jetzt erweitert (append-modus)
  *                    + verwenden des Konfigurationsparameters SENDER_SOURCE
- *                    + Erster Start des wollmux über wm_configured feststellen.
+ *                    + Erster Start des wollmux Ã¼ber wm_configured feststellen.
  * 05.12.2005 | BNK | line.separator statt \n     
  * 13.04.2006 | BNK | .wollmux/ Handling ausgegliedert in WollMuxFiles.
- * 20.04.2006 | LUT | Überarbeitung Code-Kommentare  
+ * 20.04.2006 | LUT | Ãœberarbeitung Code-Kommentare  
  * 20.04.2006 | BNK | DEFAULT_CONTEXT ausgegliedert nach WollMuxFiles
- * 21.04.2006 | LUT | + Robusteres Verhalten bei Fehlern während dem Einlesen 
+ * 21.04.2006 | LUT | + Robusteres Verhalten bei Fehlern wÃ¤hrend dem Einlesen 
  *                    von Konfigurationsdateien; 
  *                    + wohldefinierte Datenstrukturen
- *                    + Flag für EventProcessor: acceptEvents
+ *                    + Flag fÃ¼r EventProcessor: acceptEvents
  * 08.05.2006 | LUT | + isDebugMode()
  * 10.05.2006 | BNK | +parseGlobalFunctions()
  *                  | +parseFunctionDialogs()
  * 26.05.2006 | BNK | DJ initialisierung ausgelagert nacht WollMuxFiles
- * 06.06.2006 | LUT | + Ablösung der Event-Klasse durch saubere Objektstruktur
+ * 06.06.2006 | LUT | + AblÃ¶sung der Event-Klasse durch saubere Objektstruktur
  * 19.12.2006 | BAB | + setzen von Shortcuts im Konstruktor
  * 29.12.2006 | BNK | +registerDatasources()
  * 27.03.2007 | BNK | Default-oooEinstellungen ausgelagert nach data/...
@@ -60,11 +60,11 @@ import de.muenchen.allg.itd51.wollmux.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.Logger;
 
 /**
- * Der GlobalEventListener sorgt dafür, dass der WollMux alle wichtigen globalen
+ * Der GlobalEventListener sorgt dafÃ¼r, dass der WollMux alle wichtigen globalen
  * Ereignisse wie z.B. ein OnNew on OnLoad abfangen und darauf reagieren kann. In
  * diesem Fall wird die Methode notifyEvent aufgerufen. Wichtig ist dabei, dass der
- * Verarbeitungsstatus für alle Dokumenttypen (auch nicht-Textdokumente) erfasst
- * wird, damit der WollMux auch für diese Komponenten onWollMuxProcessingFinished
+ * Verarbeitungsstatus fÃ¼r alle Dokumenttypen (auch nicht-Textdokumente) erfasst
+ * wird, damit der WollMux auch fÃ¼r diese Komponenten onWollMuxProcessingFinished
  * liefern kann.
  * 
  * @author christoph.lutz
@@ -90,8 +90,8 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
    */
   public void notifyEvent(com.sun.star.document.EventObject docEvent)
   {
-    // Der try-catch-Block verhindert, daß die Funktion und damit der
-    // ganze Listener ohne Fehlermeldung abstürzt.
+    // Der try-catch-Block verhindert, daÃŸ die Funktion und damit der
+    // ganze Listener ohne Fehlermeldung abstÃ¼rzt.
     try
     {
       /*
@@ -123,15 +123,15 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       if (compo == null) return;
       XTextDocument xTextDoc = UNO.XTextDocument(compo);
 
-      // Die Events OnLoad und OnNew kommen nur bei sichtbar geöffneten Dokumenten.
-      // Das macht die Events für unsichtbar geöffnete Dokumente unbrauchbar. Nur
-      // falls das Event OnViewCreated nicht empfangen wurden (z.B. möglicherweise
-      // bei alten OOo-Verisonen), greift als Fallback die Dokumentbearbeitung über
+      // Die Events OnLoad und OnNew kommen nur bei sichtbar geÃ¶ffneten Dokumenten.
+      // Das macht die Events fÃ¼r unsichtbar geÃ¶ffnete Dokumente unbrauchbar. Nur
+      // falls das Event OnViewCreated nicht empfangen wurden (z.B. mÃ¶glicherweise
+      // bei alten OOo-Verisonen), greift als Fallback die Dokumentbearbeitung Ã¼ber
       // OnNew bzw. OnLoad.
       // Im Gegensatz zu OnLoad oder OnNew wird das Event OnViewCreated auch bei
-      // unsichtbar geöffneten Dokumenten erzeugt. Daher wird nun hauptsächlich
+      // unsichtbar geÃ¶ffneten Dokumenten erzeugt. Daher wird nun hauptsÃ¤chlich
       // dieses Event zur Initiierung der Dokumentbearbeitung verwendet.
-      // Es gibt Situationen (vorsynchronized allem beim Anlegen und Öffnen von
+      // Es gibt Situationen (vorsynchronized allem beim Anlegen und Ã–ffnen von
       // .odbs), wo
       // OnCreate oder OnLoadFinished kommt, ohne dass einer der anderen Events
       // kommt.

@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Anzeige erweiterter Eigenschaften eines InsertionModels.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 27.10.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -45,7 +45,7 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 public class OneInsertionExtView implements View
 {
   /**
-   * Typischerweise ein Container, der die View enthält und daher über Änderungen auf
+   * Typischerweise ein Container, der die View enthÃ¤lt und daher Ã¼ber Ã„nderungen auf
    * dem Laufenden gehalten werden muss.
    */
   private ViewChangeListener bigDaddy;
@@ -66,11 +66,11 @@ public class OneInsertionExtView implements View
    * @param model
    *          das Model dessen Daten angezeigt werden sollen.
    * @param funcLib
-   *          die Funktionsbibliothek deren Funktionen zur Verfügung gestellt werden
-   *          sollen für das Auswählen von Attributen, die eine Funktion erfordern.
+   *          die Funktionsbibliothek deren Funktionen zur VerfÃ¼gung gestellt werden
+   *          sollen fÃ¼r das AuswÃ¤hlen von Attributen, die eine Funktion erfordern.
    * @param myViewChangeListener
-   *          typischerweise ein Container, der diese View enthält und über
-   *          Änderungen informiert werden soll.
+   *          typischerweise ein Container, der diese View enthÃ¤lt und Ã¼ber
+   *          Ã„nderungen informiert werden soll.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public OneInsertionExtView(InsertionModel model, FunctionLibrary funcLib,
@@ -80,7 +80,7 @@ public class OneInsertionExtView implements View
     this.model = model;
     myTabbedPane = new JTabbedPane();
 
-    // als ViewChangeListener wird null übergeben, weil die OneInsertionExtView sich
+    // als ViewChangeListener wird null Ã¼bergeben, weil die OneInsertionExtView sich
     // nachher
     // direkt auf dem Model als Listener registriert.
     OneInsertionTrafoView trafoView =

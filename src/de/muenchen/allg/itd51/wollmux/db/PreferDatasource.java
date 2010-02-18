@@ -2,9 +2,9 @@
  * Dateiname: PreferDatasource.java
  * Projekt  : WollMux
  * Funktion : Datasource, die Daten einer Datenquelle von Datein einer andere
- *            Datenquelle verdecken lässt.
+ *            Datenquelle verdecken lÃ¤sst.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -19,8 +19,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 07.11.2005 | BNK | Erstellung
  * 11.11.2005 | BNK | getestet und debuggt
@@ -51,11 +51,11 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
  * Datasource, die Daten einer Datenquelle A von Dateien einer anderen Datenquelle B
- * verdecken lässt. Dies funktioniert so, dass Anfragen erst an Datenquelle A
- * gestellt werden und dann für alle Ergebnisdatensätze geprüft wird, ob ein
- * Datensatz (oder mehrere Datensätze) mit gleichem Schlüssel in Datenquelle B ist.
- * Falls dies so ist, werden für diesen Schlüssel nur die Datensätze aus Datenquelle
- * B zurückgeliefert.
+ * verdecken lÃ¤sst. Dies funktioniert so, dass Anfragen erst an Datenquelle A
+ * gestellt werden und dann fÃ¼r alle ErgebnisdatensÃ¤tze geprÃ¼ft wird, ob ein
+ * Datensatz (oder mehrere DatensÃ¤tze) mit gleichem SchlÃ¼ssel in Datenquelle B ist.
+ * Falls dies so ist, werden fÃ¼r diesen SchlÃ¼ssel nur die DatensÃ¤tze aus Datenquelle
+ * B zurÃ¼ckgeliefert.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -77,13 +77,13 @@ public class PreferDatasource implements Datasource
    * Erzeugt eine neue PreferDatasource.
    * 
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser PreferDatasource
-   *          bereits vollständig instanziierten Datenquellen.
+   *          enthÃ¤lt alle bis zum Zeitpunkt der Definition dieser PreferDatasource
+   *          bereits vollstÃ¤ndig instanziierten Datenquellen.
    * @param sourceDesc
    *          der "Datenquelle"-Knoten, der die Beschreibung dieser PreferDatasource
-   *          enthält.
+   *          enthÃ¤lt.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
+   *          der Kontext relativ zu dem URLs aufgelÃ¶st werden sollen (zur Zeit nicht
    *          verwendet).
    */
   public PreferDatasource(Map<String, Datasource> nameToDatasource,
@@ -134,11 +134,11 @@ public class PreferDatasource implements Datasource
           name, source2Name));
 
     /*
-     * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um sie
+     * Anmerkung: Die folgende Bedingung ist "unnÃ¶tig" streng, aber um sie
      * aufzuweichen (z.B. Gesamtschema ist immer Schema von bevorzugter Datenquelle)
-     * wäre es erforderlich, einen Dataset-Wrapper zu implementieren, der dafür
-     * sorgt, dass alle Datasets, die in QueryResults zurück- geliefert werden das
-     * selbe Schema haben. Solange dafür keine Notwendigkeit ersichtlich ist, spare
+     * wÃ¤re es erforderlich, einen Dataset-Wrapper zu implementieren, der dafÃ¼r
+     * sorgt, dass alle Datasets, die in QueryResults zurÃ¼ck- geliefert werden das
+     * selbe Schema haben. Solange dafÃ¼r keine Notwendigkeit ersichtlich ist, spare
      * ich mir diesen Aufwand.
      */
     Set<String> schema1 = source1.getSchema();
@@ -268,10 +268,10 @@ public class PreferDatasource implements Datasource
       }
 
       /**
-       * Datensätze für die ein Korrekturdatensatz vorliegt, dieaber nicht in
-       * overrideResults auftauchen (weil die Korrektur dafür gesorgt hat, dass die
-       * Suchbedingung nicht mehr passt) müssen auch mit ihrem Schlüssel auf die
-       * Blacklist. Deswegen müssen wir diese Datensätze suchen.
+       * DatensÃ¤tze fÃ¼r die ein Korrekturdatensatz vorliegt, dieaber nicht in
+       * overrideResults auftauchen (weil die Korrektur dafÃ¼r gesorgt hat, dass die
+       * Suchbedingung nicht mehr passt) mÃ¼ssen auch mit ihrem SchlÃ¼ssel auf die
+       * Blacklist. Deswegen mÃ¼ssen wir diese DatensÃ¤tze suchen.
        */
       timeout = endTime - System.currentTimeMillis();
       if (timeout <= 0) throw new TimeoutException();

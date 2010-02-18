@@ -1,9 +1,9 @@
 /* 
  * Dateiname: FunkyDatasource.java
  * Projekt  : WollMux
- * Funktion : Datasource, die mit WollMux-Funktionen berechnete Spalten ermöglicht.
+ * Funktion : Datasource, die mit WollMux-Funktionen berechnete Spalten ermÃ¶glicht.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 24.10.2008 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -46,10 +46,10 @@ import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
- * Datasource, die mit WollMux-Funktionen berechnete Spalten ermöglicht. ACHTUNG!
- * Diese Datasource verhält sich bei Suchanfragen nicht entsprechend dem normalen
+ * Datasource, die mit WollMux-Funktionen berechnete Spalten ermÃ¶glicht. ACHTUNG!
+ * Diese Datasource verhÃ¤lt sich bei Suchanfragen nicht entsprechend dem normalen
  * Verhalten einer Datasource, da sie immer auf den Originaldaten sucht, jedoch
- * transformierte Datensätze zurückliefert.
+ * transformierte DatensÃ¤tze zurÃ¼ckliefert.
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
@@ -67,13 +67,13 @@ public class FunkyDatasource implements Datasource
    * Erzeugt eine neue FunkyDatasource.
    * 
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser UnionDatasource
-   *          bereits vollständig instanziierten Datenquellen.
+   *          enthÃ¤lt alle bis zum Zeitpunkt der Definition dieser UnionDatasource
+   *          bereits vollstÃ¤ndig instanziierten Datenquellen.
    * @param sourceDesc
    *          der "Datenquelle"-Knoten, der die Beschreibung dieser UnionDatasource
-   *          enthält.
+   *          enthÃ¤lt.
    * @param urlContext
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
+   *          der Kontext relativ zu dem URLs aufgelÃ¶st werden sollen (zur Zeit nicht
    *          verwendet).
    */
   public FunkyDatasource(Map<String, Datasource> nameToDatasource,
@@ -112,12 +112,12 @@ public class FunkyDatasource implements Datasource
      * 
      * Zum Zeitpunkt wo der DJ initialisiert wird sind die Funktions- und
      * Dialogbibliothek des WollMuxSingleton noch nicht initialisiert, deswegen
-     * können sie hier nicht verwendet werden. Man könnte die Reihenfolge natürlich
-     * ändern, aber diese Reihenfolgeabhängigkeit gefällt mir nicht. Besser wäre auch
+     * kÃ¶nnen sie hier nicht verwendet werden. Man kÃ¶nnte die Reihenfolge natÃ¼rlich
+     * Ã¤ndern, aber diese ReihenfolgeabhÃ¤ngigkeit gefÃ¤llt mir nicht. Besser wÃ¤re auch
      * bei den Funktionen WollMuxSingleton.getFunctionDialogs() und
      * WollMuxSingleton.getGlobalFunctions() eine on-demand initialisierung nach dem
-     * Prinzip if (... == null) initialisieren. Aber das heben wir uns für einen
-     * Zeitpunkt auf, wo es benötigt wird und nehmen jetzt erst mal leere
+     * Prinzip if (... == null) initialisieren. Aber das heben wir uns fÃ¼r einen
+     * Zeitpunkt auf, wo es benÃ¶tigt wird und nehmen jetzt erst mal leere
      * Dummy-Bibliotheken.
      */
     FunctionLibrary funcLib = new FunctionLibrary();

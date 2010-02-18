@@ -1,9 +1,9 @@
 /*
  * Dateiname: IDManager.java
  * Projekt  : WollMux
- * Funktion : Verwaltet Objekte, die ID-Strings repräsentieren.
+ * Funktion : Verwaltet Objekte, die ID-Strings reprÃ¤sentieren.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 11.07.2007 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -44,9 +44,9 @@ import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.L;
 
 /**
- * verwaltet Objekte, die ID-Strings repräsentieren. Die ID-Objekte können an
+ * verwaltet Objekte, die ID-Strings reprÃ¤sentieren. Die ID-Objekte kÃ¶nnen an
  * mehreren Stellen verwendet werden und da jedes ID-Objekt alle seine Verwender
- * kennt (wenn sie sich als Listener registrieren) können Änderungen an der ID allen
+ * kennt (wenn sie sich als Listener registrieren) kÃ¶nnen Ã„nderungen an der ID allen
  * Verwendern mitgeteilt werden.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -59,15 +59,15 @@ public class IDManager
   /**
    * Liefert ein {@link IDManager.ID}-Objekt zur String-ID id im Namensraum
    * namespace. Falls dieser Manager zu dieser String-ID noch kein Objekt hatte, wird
-   * ein neues angelegt, ansonsten das bereits existierende zurückgeliefert. Wird ein
+   * ein neues angelegt, ansonsten das bereits existierende zurÃ¼ckgeliefert. Wird ein
    * neues ID-Objekt angelegt, so ist dieses inaktiv (siehe
    * {@link IDManager.ID#isActive()}). Diese Funktion darf also nur von Aufrufern
-   * verwendet werden, die die ID als Referenz auf ein anderes Objekt benötigen.
-   * Aufrufer, die sich selbst mit der ID identifizieren wollen müssen
+   * verwendet werden, die die ID als Referenz auf ein anderes Objekt benÃ¶tigen.
+   * Aufrufer, die sich selbst mit der ID identifizieren wollen mÃ¼ssen
    * {@link #getActiveID(Object, String)} verwenden.
    * 
    * @param namespace
-   *          ein beliebiger Identifikator für den gewünschten Namensraum.
+   *          ein beliebiger Identifikator fÃ¼r den gewÃ¼nschten Namensraum.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public ID getID(Object namespace, String id)
@@ -85,7 +85,7 @@ public class IDManager
 
   /**
    * Falls dieser Manager im Namensraum namespace ein Objekt mit String-ID id hat, so
-   * wird dieses zurückgeliefert, ansonsten null.
+   * wird dieses zurÃ¼ckgeliefert, ansonsten null.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -101,17 +101,17 @@ public class IDManager
   }
 
   /**
-   * Falls im angegebenen namespace bereits ein ID Objekt für die String-ID id
+   * Falls im angegebenen namespace bereits ein ID Objekt fÃ¼r die String-ID id
    * existiert und dieses {@link IDManager.ID#isActive()} aktiv ist, so wird eine
    * {@link DuplicateIDException} geworfen, ansonsten wird das existierende ID Objekt
    * aktiviert oder (falls noch keins existierte) ein aktiviertes ID Objekt neu
-   * angelegt und dann zurückgeliefert. Diese Funktion ist dafür vorgesehen, von
+   * angelegt und dann zurÃ¼ckgeliefert. Diese Funktion ist dafÃ¼r vorgesehen, von
    * Aufrufern verwendet zu werden, die sich selbst mit der ID identifizieren wollen.
-   * Aufrufer, die die ID als Referenz auf ein anderes Objekt verwenden, müssen
+   * Aufrufer, die die ID als Referenz auf ein anderes Objekt verwenden, mÃ¼ssen
    * {@link #getID(Object, String)} verwenden.
    * 
    * @param namespace
-   *          ein beliebiger Identifikator für den gewünschten Namensraum.
+   *          ein beliebiger Identifikator fÃ¼r den gewÃ¼nschten Namensraum.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ID getActiveID(Object namespace, String id) throws DuplicateIDException
@@ -123,8 +123,8 @@ public class IDManager
 
   /**
    * Liefert eine {@link Collection} mit allen {@link IDManager.ID} Objekten, die im
-   * Namensraum namespace registriert sind. ACHTUNG! Die zurückgegebene Collection
-   * darf nicht geändert oder gespeichert werden, da sie direkt eine interne
+   * Namensraum namespace registriert sind. ACHTUNG! Die zurÃ¼ckgegebene Collection
+   * darf nicht geÃ¤ndert oder gespeichert werden, da sie direkt eine interne
    * Datenstruktur ist!
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -139,26 +139,26 @@ public class IDManager
   }
 
   /**
-   * Ein Objekt, das eine String-ID repräsentiert.
+   * Ein Objekt, das eine String-ID reprÃ¤sentiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static class ID
   {
     /**
-     * Die String-ID, die dieses Objekt repräsentiert.
+     * Die String-ID, die dieses Objekt reprÃ¤sentiert.
      */
     private String id;
 
     /**
      * Die Map des verwaltenden IDManagers, in der diese ID gespeichert ist. Wird
-     * verwendet, um Kollisionen zu überprüfen und das Mapping anzupassen, wenn der
-     * ID-String dieses Objekts geändert wird.
+     * verwendet, um Kollisionen zu Ã¼berprÃ¼fen und das Mapping anzupassen, wenn der
+     * ID-String dieses Objekts geÃ¤ndert wird.
      */
     private Map<String, ID> mapString2ID;
 
     /**
-     * true bedeutet, dass irgendwo ein Objekt tatsächlich verwendet wird, das sich
+     * true bedeutet, dass irgendwo ein Objekt tatsÃ¤chlich verwendet wird, das sich
      * mit dieser ID identifiziert. False bedeutet, dass alle Verwender dieser ID
      * damit nur ein anderes Objekt referenzieren wollen (das derzeit nicht
      * existiert).
@@ -181,7 +181,7 @@ public class IDManager
     }
 
     /**
-     * Liefert true, wenn irgendwo ein Objekt tatsächlich verwendet wird, das sich
+     * Liefert true, wenn irgendwo ein Objekt tatsÃ¤chlich verwendet wird, das sich
      * mit dieser ID identifiziert. False bedeutet, dass alle Verwender dieser ID
      * damit nur ein anderes Objekt referenzieren wollen (das derzeit nicht
      * existiert).
@@ -216,12 +216,12 @@ public class IDManager
     }
 
     /**
-     * listen wird benachrichtigt, wenn sich dieses ID-Objekt ändert. ACHTUNG! listen
-     * wird nur über eine {@link java.lang.ref.WeakReference} referenziert. Das
+     * listen wird benachrichtigt, wenn sich dieses ID-Objekt Ã¤ndert. ACHTUNG! listen
+     * wird nur Ã¼ber eine {@link java.lang.ref.WeakReference} referenziert. Das
      * heisst, dass der Aufrufer selbst eine Referenz auf den Listener am Leben
-     * erhalten muss. Dafür ist der Aufruf von
+     * erhalten muss. DafÃ¼r ist der Aufruf von
      * {@link #removeIDChangeListener(IDChangeListener)} nur notwendig, wenn man
-     * keine Events mehr empfangen möcht, nicht jedoch vor der Zerstörung des
+     * keine Events mehr empfangen mÃ¶cht, nicht jedoch vor der ZerstÃ¶rung des
      * Listeners.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -241,11 +241,11 @@ public class IDManager
     }
 
     /**
-     * listen wird NICHT MEHR benachrichtigt, wenn sich dieses ID-Objekt ändert.
+     * listen wird NICHT MEHR benachrichtigt, wenn sich dieses ID-Objekt Ã¤ndert.
      * ACHTUNG! listen wird von {@link #addIDChangeListener(IDChangeListener)} nur
-     * über eine {@link java.lang.ref.WeakReference} referenziert. Daher ist der
+     * Ã¼ber eine {@link java.lang.ref.WeakReference} referenziert. Daher ist der
      * Aufruf von {@link #removeIDChangeListener(IDChangeListener)} nur notwendig,
-     * wenn man keine Events mehr empfangen möcht, nicht jedoch vor der Zerstörung
+     * wenn man keine Events mehr empfangen mÃ¶cht, nicht jedoch vor der ZerstÃ¶rung
      * des Listeners.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -262,7 +262,7 @@ public class IDManager
     }
 
     /**
-     * Ändert die String-ID dieses Objekts auf newID und benachrichtigt alle
+     * Ã„ndert die String-ID dieses Objekts auf newID und benachrichtigt alle
      * {@link IDManager.IDChangeListener}. Falls newID == {@link #getID()}, so
      * passiert nichts, es werden keine Listener benachrichtigt und es gibt keine
      * Exception. ACHTUNG! Normalerweise darf diese Funktion nur von dem Objekt
@@ -279,19 +279,19 @@ public class IDManager
       if (newID.equals(id)) return;
       /*
        * Achtung! Hier wird bewusst nicht nach aktiven und inaktiven IDs
-       * unterschieden. Man könnte versucht sein, Kollisionen mit inaktiven IDs
-       * zuzulassen und so aufzulösen, dass die aktive ID die inaktive ID
-       * "aufsammelt". Vorteile: Anlegen einer Einfügung mit nicht vergebener ID und
-       * nachträgliches erzeugen eines Controls mit dieser ID würde funktionieren
-       * Nachteile: - Während des Tippens einer neuen ID würde evtl. schon eine
+       * unterschieden. Man kÃ¶nnte versucht sein, Kollisionen mit inaktiven IDs
+       * zuzulassen und so aufzulÃ¶sen, dass die aktive ID die inaktive ID
+       * "aufsammelt". Vorteile: Anlegen einer EinfÃ¼gung mit nicht vergebener ID und
+       * nachtrÃ¤gliches erzeugen eines Controls mit dieser ID wÃ¼rde funktionieren
+       * Nachteile: - WÃ¤hrend des Tippens einer neuen ID wÃ¼rde evtl. schon eine
        * ungewollte ID aufgesammelt. Beispiel: inaktive IDs "Anrede" und "Anrede2"
-       * existieren parallel. Es würde bereits "Anrede" aufgesammelt während des
-       * Tippens, auch wenn am Ende "Anrede2" gewünscht ist. - Eventuell noch
-       * weitere. Die Folgen sind nicht so leicht abzuschätzen.
+       * existieren parallel. Es wÃ¼rde bereits "Anrede" aufgesammelt wÃ¤hrend des
+       * Tippens, auch wenn am Ende "Anrede2" gewÃ¼nscht ist. - Eventuell noch
+       * weitere. Die Folgen sind nicht so leicht abzuschÃ¤tzen.
        */
       if (mapString2ID.containsKey(newID))
         throw new DuplicateIDException(L.m(
-          "Kollision beim Versuch ID von \"%1\" auf \"%2\" zu ändern", id, newID));
+          "Kollision beim Versuch ID von \"%1\" auf \"%2\" zu Ã¤ndern", id, newID));
       mapString2ID.remove(id);
       id = newID;
       mapString2ID.put(id, this);
@@ -308,7 +308,7 @@ public class IDManager
     }
 
     /**
-     * Liefert die String-ID zurück, die dieses Objekt repräsentiert.
+     * Liefert die String-ID zurÃ¼ck, die dieses Objekt reprÃ¤sentiert.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -326,10 +326,10 @@ public class IDManager
     }
 
     /**
-     * Liefert true, wenn this == obj, da über den IDManager sichergestellt wird,
+     * Liefert true, wenn this == obj, da Ã¼ber den IDManager sichergestellt wird,
      * dass zu einem ID-String in einem Namensraum jeweils nur ein einziges ID-Objekt
-     * existiert. Dies ist auch Voraussetzung dafür, dass die IDs ihre Funktion
-     * erfüllen können.
+     * existiert. Dies ist auch Voraussetzung dafÃ¼r, dass die IDs ihre Funktion
+     * erfÃ¼llen kÃ¶nnen.
      */
     public boolean equals(Object obj)
     {
@@ -344,7 +344,7 @@ public class IDManager
 
   /**
    * Ein IDChangeListener wird benachrichtigt, wenn sich ein {@link IDManager.ID}
-   * Objekt ändert.
+   * Objekt Ã¤ndert.
    * 
    * @see IDManager.ID#addIDChangeListener(IDChangeListener)
    * @author Matthias Benkmann (D-III-ITD 5.1)

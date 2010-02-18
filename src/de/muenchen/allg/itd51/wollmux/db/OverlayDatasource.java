@@ -1,9 +1,9 @@
 /* 
  * Dateiname: OverlayDatasource.java
  * Projekt  : WollMux
- * Funktion : Eine Datenquelle, die eine andere Datenquelle um Spalten ergänzt und Spaltenwerte ersetzen kann.
+ * Funktion : Eine Datenquelle, die eine andere Datenquelle um Spalten ergÃ¤nzt und Spaltenwerte ersetzen kann.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 28.10.2008 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -51,23 +51,23 @@ import de.muenchen.allg.itd51.wollmux.db.checker.DatasetChecker;
 import de.muenchen.allg.itd51.wollmux.db.checker.MatchAllDatasetChecker;
 
 /**
- * Eine Datenquelle, die eine andere Datenquelle um Spalten ergänzt und einzelne
- * Spaltenwerte ersetzen kann. Zur Erstellung der Menge der Ergebnisdatensätze wird
+ * Eine Datenquelle, die eine andere Datenquelle um Spalten ergÃ¤nzt und einzelne
+ * Spaltenwerte ersetzen kann. Zur Erstellung der Menge der ErgebnisdatensÃ¤tze wird
  * jeder Datensatz aus SOURCE1 genau einmal verwendet und jeder Datensatz aus SOURCE2
  * beliebig oft (auch keinmal). Unterschiede zu einem richtigen Join:<br>
  * <br>
- * a) Verhindert, dass eine Person 2 mal auftaucht, nur weil es 2 Einträge mit
- * Verkehrsverbindungen für ihre Adresse gibt<br>
+ * a) Verhindert, dass eine Person 2 mal auftaucht, nur weil es 2 EintrÃ¤ge mit
+ * Verkehrsverbindungen fÃ¼r ihre Adresse gibt<br>
  * b) Verhindert, dass eine Person rausfliegt, weil es zu ihrer Adresse keine
  * Verkehrsverbindung gibt<br>
- * c) Die Schlüssel der Ergebnisdatensätze bleiben die aus SOURCE1 und werden nicht
+ * c) Die SchlÃ¼ssel der ErgebnisdatensÃ¤tze bleiben die aus SOURCE1 und werden nicht
  * kombiniert aus SOURCE1 und SOURCE2. Das verhindert, dass ein Datensatz bei einer
- * Änderung der Adresse aus der lokalen Absenderliste fliegt, weil er beim
+ * Ã„nderung der Adresse aus der lokalen Absenderliste fliegt, weil er beim
  * Cache-Refresh nicht mehr gefunden wird. <br>
  * <br>
- * In der Ergebnisdatenquelle sind alle Spalten unter ihren ursprünglichen Namen
- * verfügbar (Unterschied zu {@link AttachDatasource}). Konflikte werden über den
- * MODE-Spezifizierer aufgelöst (siehe wollmux.conf Doku).<br>
+ * In der Ergebnisdatenquelle sind alle Spalten unter ihren ursprÃ¼nglichen Namen
+ * verfÃ¼gbar (Unterschied zu {@link AttachDatasource}). Konflikte werden Ã¼ber den
+ * MODE-Spezifizierer aufgelÃ¶st (siehe wollmux.conf Doku).<br>
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
@@ -94,7 +94,7 @@ public class OverlayDatasource implements Datasource
   private String[] match2;
 
   /**
-   * Enthält die Namen aller Spaltennamen für die es ein i gibt, so dass
+   * EnthÃ¤lt die Namen aller Spaltennamen fÃ¼r die es ein i gibt, so dass
    * Spaltenname,equals(match1[i]) und match1[i],equals(match2[i]).
    */
   private Set<String> commonMatchColumns;
@@ -113,13 +113,13 @@ public class OverlayDatasource implements Datasource
    * Erzeugt eine neue OverlayDatasource.
    * 
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser OverlayDatasource
-   *          bereits vollständig instanziierten Datenquellen.
+   *          enthÃ¤lt alle bis zum Zeitpunkt der Definition dieser OverlayDatasource
+   *          bereits vollstÃ¤ndig instanziierten Datenquellen.
    * @param sourceDesc
    *          der "Datenquelle"-Knoten, der die Beschreibung dieser OverlayDatasource
-   *          enthält.
+   *          enthÃ¤lt.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
+   *          der Kontext relativ zu dem URLs aufgelÃ¶st werden sollen (zur Zeit nicht
    *          verwendet).
    */
   public OverlayDatasource(Map<String, Datasource> nameToDatasource,
@@ -299,10 +299,10 @@ public class OverlayDatasource implements Datasource
       {
         if (schema2.contains(p.getColumnName())
         /*
-         * Wichtige Optimierung: Bedingungen für Spalten, die in beiden Datenquellen
-         * vorkommen, die geMATCHt werden (commonMatchColumns), dürfen nicht nach
-         * queryBoth gesteckt werden, da dies im schlechtesten Fall dazu führt, dass
-         * (unnötigerweise) der ineffizienteste Code-Pfad in dieser Funktion genommen
+         * Wichtige Optimierung: Bedingungen fÃ¼r Spalten, die in beiden Datenquellen
+         * vorkommen, die geMATCHt werden (commonMatchColumns), dÃ¼rfen nicht nach
+         * queryBoth gesteckt werden, da dies im schlechtesten Fall dazu fÃ¼hrt, dass
+         * (unnÃ¶tigerweise) der ineffizienteste Code-Pfad in dieser Funktion genommen
          * wird.
          */
         && !commonMatchColumns.contains(p.getColumnName()))
@@ -316,7 +316,7 @@ public class OverlayDatasource implements Datasource
 
     /*
      * Die OVERLAY-Datenquelle ist normalerweise nur untergeordnet und
-     * Spaltenbedingungen dafür schränken die Suchergebnisse wenig ein. Deshalb
+     * Spaltenbedingungen dafÃ¼r schrÃ¤nken die Suchergebnisse wenig ein. Deshalb
      * werten wir falls wir mindestens eine Bedingung haben, die exklusiv die
      * Hauptdatenquelle betrifft, die Anfrage auf dieser Basis aus.
      */
@@ -336,12 +336,12 @@ public class OverlayDatasource implements Datasource
     }
     else if (queryOnly2.size() > 0)
     { /*
-       * in diesem Fall haben wir nur Bedingungen für Spalten, die entweder bei
+       * in diesem Fall haben wir nur Bedingungen fÃ¼r Spalten, die entweder bei
        * beiden Datenquellen vorkommen oder nur in der OVERLAY-Datenquelle. Auf jeden
        * Fall haben wir mindestens eine Spaltenbedingung, die nur die
-       * OVERLAY-Datenquelle betrifft. Wir führen die Suche mit den Bedingungen der
-       * OVERLAY-Datenquelle durch, ergänzen dann daraus alle möglichen Datasets und
-       * Filtern dann nochmal mit den Spaltenbedingungen für die gemeinsamen Spalten.
+       * OVERLAY-Datenquelle betrifft. Wir fÃ¼hren die Suche mit den Bedingungen der
+       * OVERLAY-Datenquelle durch, ergÃ¤nzen dann daraus alle mÃ¶glichen Datasets und
+       * Filtern dann nochmal mit den Spaltenbedingungen fÃ¼r die gemeinsamen Spalten.
        */
 
       QueryResults results = source2.find(queryOnly2, timeout);
@@ -355,22 +355,22 @@ public class OverlayDatasource implements Datasource
     else
     { /*
        * An der Abfrage sind nur Spalten beteiligt, die in beiden Datenquellen
-       * vorhanden sind. Hier wird's kompliziert, weil für jeden Spaltenwert getrennt
+       * vorhanden sind. Hier wird's kompliziert, weil fÃ¼r jeden Spaltenwert getrennt
        * der Wert jeweils aus der einen oder der anderen Datenquelle kommen kann.
-       * Deswegen lassen sich weder aus SOURCE noch aus OVERLAY Datensätze bestimmen,
-       * die definitiv zum Ergebnisraum gehören. Wir müssen also auf Basis beider
+       * Deswegen lassen sich weder aus SOURCE noch aus OVERLAY DatensÃ¤tze bestimmen,
+       * die definitiv zum Ergebnisraum gehÃ¶ren. Wir mÃ¼ssen also auf Basis beider
        * Datenquellen entsprechende Kandidaten bestimmen. Leider entsteht dabei das
-       * Problem der Duplikatelimination. Da die Schlüssel von Datensätzen nicht
-       * zwingend eindeutig sind, ist es nicht so leicht, diese durchzuführen.
+       * Problem der Duplikatelimination. Da die SchlÃ¼ssel von DatensÃ¤tzen nicht
+       * zwingend eindeutig sind, ist es nicht so leicht, diese durchzufÃ¼hren.
        */
 
       /*
        * Wegen dem Problem, das im Ergebnisdatensatz evtl. Spalte 1 aus SOURCE und
-       * Spalte 2 aus OVERLAY kommt, können wir nicht nach mehreren
-       * Spaltenbedingungen aus queryBoth gleichzeitig suchen. Wir müssen uns also
+       * Spalte 2 aus OVERLAY kommt, kÃ¶nnen wir nicht nach mehreren
+       * Spaltenbedingungen aus queryBoth gleichzeitig suchen. Wir mÃ¼ssen uns also
        * eine Spaltenbedingung heraussuchen, nach dieser suchen und dann mit einem
-       * Filter, der die komplette Suchbedingung aus query testet die Datensätze
-       * rausfiltern, die tatsächlich die gesuchten sind.
+       * Filter, der die komplette Suchbedingung aus query testet die DatensÃ¤tze
+       * rausfiltern, die tatsÃ¤chlich die gesuchten sind.
        */
 
       DatasetChecker filter = DatasetChecker.makeChecker(query);
@@ -392,19 +392,19 @@ public class OverlayDatasource implements Datasource
       results2 = overlayColumnsReversed(results2, timeout, filter);
 
       /*
-       * An dieser Stelle haben wir alle gesuchten Datensätze. Allerdings kann es
-       * zwischen results1 und results2 Überschneidungen geben. Dies ist das oben
+       * An dieser Stelle haben wir alle gesuchten DatensÃ¤tze. Allerdings kann es
+       * zwischen results1 und results2 Ãœberschneidungen geben. Dies ist das oben
        * angesprochene Duplikat-Problem. Um die Duplikate zu eliminieren gehen wir
        * wie folgt vor:
        * 
-       * 1. Alle Datensatzschlüssel bestimmen, die sowohl in results1 als auch in
+       * 1. Alle DatensatzschlÃ¼ssel bestimmen, die sowohl in results1 als auch in
        * results2 vorkommen.
        * 
-       * 2. Alle Datensätze mit Schlüsseln aus 1. entfernen aus den results Listen
+       * 2. Alle DatensÃ¤tze mit SchlÃ¼sseln aus 1. entfernen aus den results Listen
        * 
-       * 3. In einer weiteren Abfrage alle Datensätze mit den Schlüsseln aus 1.
-       * bestimmen und diejenigen, die die Filterbedingung erfüllen den Ergebnissen
-       * wieder hinzufügen.
+       * 3. In einer weiteren Abfrage alle DatensÃ¤tze mit den SchlÃ¼sseln aus 1.
+       * bestimmen und diejenigen, die die Filterbedingung erfÃ¼llen den Ergebnissen
+       * wieder hinzufÃ¼gen.
        */
       HashSet<String> results1Keys = new HashSet<String>();
       for (Dataset ds : results1)
@@ -443,8 +443,8 @@ public class OverlayDatasource implements Datasource
 
   /**
    * Versucht, den QueryPart aus query (darf nicht leer sein) zu bestimmen, der den
-   * Ergebnisraum einer Suchanfrage am meisten einschränkt und liefert diesen zurück.
-   * Kriterium hierfür ist die Anzahl der Sternchen und die Anzahl der
+   * Ergebnisraum einer Suchanfrage am meisten einschrÃ¤nkt und liefert diesen zurÃ¼ck.
+   * Kriterium hierfÃ¼r ist die Anzahl der Sternchen und die Anzahl der
    * Nicht-Sternchen-Zeichen im Suchstring.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)

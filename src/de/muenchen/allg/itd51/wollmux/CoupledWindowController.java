@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Diese Klasse steuert die Ankopplung von Fenstern an ein XTopWindow-Hauptfenster von OOo.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 22.01.2008 | LUT | Erstellung als CoupledWindowController
  * -------------------------------------------------------------------
@@ -46,26 +46,26 @@ import com.sun.star.uno.XInterface;
 import de.muenchen.allg.afid.UNO;
 
 /**
- * Diese Klasse steuert die logische Ankopplung von eigentlich unabhängigen Fenstern
+ * Diese Klasse steuert die logische Ankopplung von eigentlich unabhÃ¤ngigen Fenstern
  * an ein XTopWindow-Hauptfenster von OOo. Die angekoppelten Fenster werden nur
- * sichtbar, wenn das Hauptfenster den Fokus erhält. Verliert das Hauptfenster oder
+ * sichtbar, wenn das Hauptfenster den Fokus erhÃ¤lt. Verliert das Hauptfenster oder
  * ein angeoppeltes Fenster den Fokus an ein Fenster, das nicht vom
- * CoupledWindowController überwacht wird, so werden alle angekoppelten Fenster
+ * CoupledWindowController Ã¼berwacht wird, so werden alle angekoppelten Fenster
  * unsichtbar gestellt.
  * 
  * ACHTUNG: Die Windowmanager unter Windows und auf dem Basisclient verhalten sich
- * unterschiedlich und es werden unterschiedliche Ereignisse für gleiche Aktionen
- * generiert: z.B. erhält die Seriendruckleiste (das erste Beispiel eines
+ * unterschiedlich und es werden unterschiedliche Ereignisse fÃ¼r gleiche Aktionen
+ * generiert: z.B. erhÃ¤lt die Seriendruckleiste (das erste Beispiel eines
  * angekoppelten Fensters) auf dem Basisclient immer den Fokus, wenn
  * setCoupledWindowsVisible(true) aufgerufen wurde. Unter Windows wird das Fenster
- * zwar kurz aktiv, bekommt aber nicht den Fokus. Auch Situationen wie das Schließen
- * eines AWT-Fensters, das ein Parent-Window gesetzt hat, führen zu unterschiedlichen
- * Events auf dem Basisclient und unter Windows. Es ist auch nicht gewährleistet,
+ * zwar kurz aktiv, bekommt aber nicht den Fokus. Auch Situationen wie das SchlieÃŸen
+ * eines AWT-Fensters, das ein Parent-Window gesetzt hat, fÃ¼hren zu unterschiedlichen
+ * Events auf dem Basisclient und unter Windows. Es ist auch nicht gewÃ¤hrleistet,
  * dass die Ereignisse Deaktivierung/Aktivierung beim Fensterwechsel immer in der
- * selben Reihenfolge eintreffen. Diese Klasse enthält einen Stand, der nach langer
- * Arbeit und Probiererei nun endlich in den meisten Fällen funktioniert. Wenn hier
- * etwas geändert werden muss, dann unbedingt unter Windows und auf dem Basisclient
- * ausführlich testen!!!
+ * selben Reihenfolge eintreffen. Diese Klasse enthÃ¤lt einen Stand, der nach langer
+ * Arbeit und Probiererei nun endlich in den meisten FÃ¤llen funktioniert. Wenn hier
+ * etwas geÃ¤ndert werden muss, dann unbedingt unter Windows und auf dem Basisclient
+ * ausfÃ¼hrlich testen!!!
  * 
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
@@ -73,30 +73,30 @@ public class CoupledWindowController
 {
 
   /**
-   * Enthält alle mit addCoupledWindow registrierten angekoppelten Fenster. Dieses
-   * Feld ist als ArrayList angelegt, damit gewährleistet ist, dass die Fenster immer
+   * EnthÃ¤lt alle mit addCoupledWindow registrierten angekoppelten Fenster. Dieses
+   * Feld ist als ArrayList angelegt, damit gewÃ¤hrleistet ist, dass die Fenster immer
    * in der Reihenfolge der Registrierung sichtbar/unsichtbar geschalten werden (also
-   * nicht in willkürlicher Reihenfolge, die ein HashSet mit sich bringen würde).
+   * nicht in willkÃ¼rlicher Reihenfolge, die ein HashSet mit sich bringen wÃ¼rde).
    */
   private ArrayList<CoupledWindow> coupledWindows = new ArrayList<CoupledWindow>();
 
   /**
-   * Enthält eine Liste mit WeakReference-Objekten, die auf Unterfenster von
+   * EnthÃ¤lt eine Liste mit WeakReference-Objekten, die auf Unterfenster von
    * coupledWindows zeigen, die die verschiedenen CoupledWindowListener aufsammeln.
    */
   private ArrayList<WeakReference<Window>> collectedChildWindows =
     new ArrayList<WeakReference<Window>>();
 
   /**
-   * Enthält den WindowStateWatcher, mit dem der Fensterstatus überwacht und die
+   * EnthÃ¤lt den WindowStateWatcher, mit dem der Fensterstatus Ã¼berwacht und die
    * notwendigen Aktionen angestossen werden.
    */
   private WindowStateWatcher windowState = new WindowStateWatcher();
 
   /**
-   * Der WindowStateWatcher überwacht den Fensterstatus der angekoppelten Fenster und
-   * stößt ggf. die notwendigen Aktionen an. Der WindowStateWatcher enthält die
-   * Listener, mit denen das Hauptfenster und die angeoppelten Fenster überwacht
+   * Der WindowStateWatcher Ã¼berwacht den Fensterstatus der angekoppelten Fenster und
+   * stÃ¶ÃŸt ggf. die notwendigen Aktionen an. Der WindowStateWatcher enthÃ¤lt die
+   * Listener, mit denen das Hauptfenster und die angeoppelten Fenster Ã¼berwacht
    * werden und weiss immer bescheid, welches (registrierte) Fenster aktuell den
    * Fokus besitzt. Er veranlasst entsprechende Aktionen, wenn das Hauptfenster den
    * Fokus bekommt oder die Anwendung den Fokus an ein fremdes Fenster abgibt.
@@ -111,20 +111,20 @@ public class CoupledWindowController
     private static final int DEACTIVATION_TIMEOUT = 200;
 
     /**
-     * Enthält das aktuell aktive Fenster oder null, wenn kein Fenster aktiv ist.
+     * EnthÃ¤lt das aktuell aktive Fenster oder null, wenn kein Fenster aktiv ist.
      */
     private XTopWindowOrAWTWindow[] activeWindow =
       new XTopWindowOrAWTWindow[] { null };
 
     /**
-     * Enthält eine eindeutige Nummer, die dem zuletzt gestarteten Warte-Thread für
-     * ein TimeoutEvent übergeben wurde.
+     * EnthÃ¤lt eine eindeutige Nummer, die dem zuletzt gestarteten Warte-Thread fÃ¼r
+     * ein TimeoutEvent Ã¼bergeben wurde.
      */
     private int lastValidTimeoutEvent = 0;
 
     /**
      * Nachdem alle angekoppelten Fenster unsichtbar gestellt wurden, wird dieses
-     * Flag auf true gesetzt und gibt an, dass die Reaktivierung ausschließlich durch
+     * Flag auf true gesetzt und gibt an, dass die Reaktivierung ausschlieÃŸlich durch
      * des Hauptfenster veranlasst werden darf.
      */
     private boolean acceptMainWindowOnly = true;
@@ -132,15 +132,15 @@ public class CoupledWindowController
     /**
      * Behandelt ein timeoutEvent, das beim Fokusverlust an ein fremdes Fenster
      * erzeugt wird. Ein Timeout-Event hat eine eindeutige Nummer, die mit
-     * lastValideTimeoutEvent übereinstimmen muss, damit das Event gültig ist (dient
-     * dazu, damit ein bereits laufender Warte-Thread nicht abgewürgt werden muss,
-     * wenn bereits der nächste - dann gültige - Warte-Thread angestossen wurde). Ist
+     * lastValideTimeoutEvent Ã¼bereinstimmen muss, damit das Event gÃ¼ltig ist (dient
+     * dazu, damit ein bereits laufender Warte-Thread nicht abgewÃ¼rgt werden muss,
+     * wenn bereits der nÃ¤chste - dann gÃ¼ltige - Warte-Thread angestossen wurde). Ist
      * kein aktives Fenster vorhanden, so werden alle angekoppelten Fenster
      * unsichtbar gemacht.
      * 
      * @param nr
      *          eindeutige Nummer des timeout-Events, die mit lastValidTimeoutEvent
-     *          übereinstimmen muss, damit das Event ausgeführt wird.
+     *          Ã¼bereinstimmen muss, damit das Event ausgefÃ¼hrt wird.
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
@@ -150,7 +150,7 @@ public class CoupledWindowController
       {
         if (nr != lastValidTimeoutEvent)
         {
-          Logger.debug2(L.m("ignoriere ungültiges timeout event"));
+          Logger.debug2(L.m("ignoriere ungÃ¼ltiges timeout event"));
           return;
         }
 
@@ -169,15 +169,15 @@ public class CoupledWindowController
     }
 
     /**
-     * Registriert die Aktivierung eines Fensters, das durch den Schlüssel key
+     * Registriert die Aktivierung eines Fensters, das durch den SchlÃ¼ssel key
      * eindeutig beschrieben wird.
      * 
      * @param key
-     *          der Schlüssel des derzeit aktiven Fensters, mit dem das Fenster
-     *          später deaktiviert werden kann.
+     *          der SchlÃ¼ssel des derzeit aktiven Fensters, mit dem das Fenster
+     *          spÃ¤ter deaktiviert werden kann.
      * @param isMainWindow
      *          Das Hauptfenster hat eine Sonderrolle, da nur die Aktivierung des
-     *          Hauptfenster das acceptMainWindow-Flag zurücksetzen darf. Über diesen
+     *          Hauptfenster das acceptMainWindow-Flag zurÃ¼cksetzen darf. Ãœber diesen
      *          Parameter kann angegeben werden, ob das Fenster als Hauptfenster
      *          interpretiert gewertet werden soll.
      * 
@@ -210,8 +210,8 @@ public class CoupledWindowController
     }
 
     /**
-     * Registriert die Deaktivierung eines Fensters, das durch den Schlüssel key
-     * eindeutig beschrieben ist. Key muss dabei identisch mit dem Schlüssel sein,
+     * Registriert die Deaktivierung eines Fensters, das durch den SchlÃ¼ssel key
+     * eindeutig beschrieben ist. Key muss dabei identisch mit dem SchlÃ¼ssel sein,
      * mit dem das Fenster aktiviert wurde, sonst wird auch nichts unternommen. Eine
      * bestimmte Zeit nach dem Deaktivieren des Fensters wird ein Timeout-Event
      * abgesetzt.
@@ -241,8 +241,8 @@ public class CoupledWindowController
     }
 
     /**
-     * Erzeugt nach einer bestimmten Zeit ein Timeout-Event über das die
-     * angekoppelten Fenster unsichtbar geschalten werden, wenn bei Ausführung des
+     * Erzeugt nach einer bestimmten Zeit ein Timeout-Event Ã¼ber das die
+     * angekoppelten Fenster unsichtbar geschalten werden, wenn bei AusfÃ¼hrung des
      * Timeout-Events kein Fenster aktiv ist.
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
@@ -268,7 +268,7 @@ public class CoupledWindowController
     }
 
     /**
-     * Enthält den WindowListener der das Hauptfenster überwacht.
+     * EnthÃ¤lt den WindowListener der das Hauptfenster Ã¼berwacht.
      */
     private final XTopWindowListener topWindowListener = new XTopWindowListener()
     {
@@ -321,7 +321,7 @@ public class CoupledWindowController
     };
 
     /**
-     * Enthält den WindowListener mit dem angekoppelte Fenster überwacht werden
+     * EnthÃ¤lt den WindowListener mit dem angekoppelte Fenster Ã¼berwacht werden
      */
     private final WindowListener coupledWindowListener = new WindowListener()
     {
@@ -345,9 +345,9 @@ public class CoupledWindowController
       {
         // Wird der Fokus an ein Unterfenster eines registrierten Fensters
         // abgegeben, so wird dieses Fenster aufgesammelt und ein
-        // coupledWindowListener registriert, über den Statusänderungen dieses
-        // Fensters mitverfolgt werden können. Die Zugehörigkeit des
-        // Unterfensters zum Parent wird über eine Rückwärtssuche in der
+        // coupledWindowListener registriert, Ã¼ber den StatusÃ¤nderungen dieses
+        // Fensters mitverfolgt werden kÃ¶nnen. Die ZugehÃ¶rigkeit des
+        // Unterfensters zum Parent wird Ã¼ber eine RÃ¼ckwÃ¤rtssuche in der
         // Owner-Hierarchie des OppositeWindows festgestellt.
         Window w = e.getOppositeWindow();
         while (w != null)
@@ -386,11 +386,11 @@ public class CoupledWindowController
     };
 
     /**
-     * Fügt eine WeakReference auf das Unterfenster childWindow zu
+     * FÃ¼gt eine WeakReference auf das Unterfenster childWindow zu
      * collectedChildWindows hinzu und registriert einen coupledWindowListener auf
      * childWindow, aber nur dann, wenn das Fenster nicht bereits registriert ist.
-     * Bei der Prüfung, ob das Fenster bereits registriert ist, werden alle
-     * WeakReference-Objekte aus der Liste collectedChildWindows gelöscht, deren
+     * Bei der PrÃ¼fung, ob das Fenster bereits registriert ist, werden alle
+     * WeakReference-Objekte aus der Liste collectedChildWindows gelÃ¶scht, deren
      * referenzierte Objekte nicht mehr existent sind.
      * 
      * @param childWindow
@@ -441,10 +441,10 @@ public class CoupledWindowController
   }
 
   /**
-   * Löst die Bindung eines angekoppelten Fensters window an das Hauptfenster.
+   * LÃ¶st die Bindung eines angekoppelten Fensters window an das Hauptfenster.
    * 
    * @param window
-   *          das Fenster, dessen Bindung zum Hauptfenster gelöst werden soll. Ist
+   *          das Fenster, dessen Bindung zum Hauptfenster gelÃ¶st werden soll. Ist
    *          das Fenster nicht angekoppelt, dann passiert nichts.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -498,10 +498,10 @@ public class CoupledWindowController
 
   /**
    * Deregistriert ein Hauptfenster und sollte aufgerufen werden, wenn der Controller
-   * nicht mehr benötigt wird und aufgeräumt werden kann.
+   * nicht mehr benÃ¶tigt wird und aufgerÃ¤umt werden kann.
    * 
    * @param w
-   *          Das XTopWindow welches früher als Hauptfenster diente.
+   *          Das XTopWindow welches frÃ¼her als Hauptfenster diente.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -532,8 +532,8 @@ public class CoupledWindowController
   {
     /**
      * Setzt das angekoppelte Fenster auf sichtbar oder unsichtbar und kann dabei
-     * auch den Fokus erhalten (Das ist eine unschöner Nebeneffekt der AWT-Methode
-     * setVisible(...), der hier berücksichtigt ist). Ändert visible nicht den
+     * auch den Fokus erhalten (Das ist eine unschÃ¶ner Nebeneffekt der AWT-Methode
+     * setVisible(...), der hier berÃ¼cksichtigt ist). Ã„ndert visible nicht den
      * Sichtbarkeitsstatus des Fenster, so hat diese Methode keine Auswirkung.
      * 
      * @param visible
@@ -543,7 +543,7 @@ public class CoupledWindowController
     public void setVisible(boolean visible);
 
     /**
-     * Registriert auf dem angekoppelten Fenster einen WindowListener über den das
+     * Registriert auf dem angekoppelten Fenster einen WindowListener Ã¼ber den das
      * Hauptfenster mitkriegen kann, dass ein angekoppeltes Fenster den Fokus an ein
      * fremdes, nicht angekoppeles, Fenster verloren hat und somit auch alle
      * angekoppelten Fenster unsichtbar gestellt werden sollen.
@@ -571,7 +571,7 @@ public class CoupledWindowController
   }
 
   /**
-   * Diese Klasse repräsentiert ein CoupledWindow-Objekt, dem ein
+   * Diese Klasse reprÃ¤sentiert ein CoupledWindow-Objekt, dem ein
    * java.awt.Window-Objekt zugrundeliegt und implementiert die Methoden hashCode()
    * und equals() damit das Objekt sinnvoll verglichen und in einer HashMap verwaltet
    * werden kann.
@@ -684,7 +684,7 @@ public class CoupledWindowController
     {
       if (win == null)
       {
-        Logger.error(L.m("Großes Problem"));
+        Logger.error(L.m("GroÃŸes Problem"));
         throw new NullPointerException();
       }
       this.window = win;
@@ -696,7 +696,7 @@ public class CoupledWindowController
       this.window = UNO.XInterface(win);
       if (window == null)
       {
-        Logger.error(L.m("Großes Problem"));
+        Logger.error(L.m("GroÃŸes Problem"));
         throw new NullPointerException();
       }
       this.hash = UnoRuntime.generateOid(win).hashCode();

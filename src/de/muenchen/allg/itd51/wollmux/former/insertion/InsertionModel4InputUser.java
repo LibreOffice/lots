@@ -1,9 +1,9 @@
 /*
  * Dateiname: InsertionModel4InputUser.java
  * Projekt  : WollMux
- * Funktion : InsertionModel für InputUser Felder.
+ * Funktion : InsertionModel fÃ¼r InputUser Felder.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 30.06.2008 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -77,15 +77,15 @@ public class InsertionModel4InputUser extends InsertionModel
   private XTextDocument doc;
 
   /**
-   * Erzeugt ein neues InsertionModel für das InputUser Textfeld textField.
+   * Erzeugt ein neues InsertionModel fÃ¼r das InputUser Textfeld textField.
    * 
    * @param doc
    *          das Dokument in dem sich das InputUser-Feld befindet
    * @param funcSelections
-   *          ein FunctionSelectionProvider, der für das Feld eine passende
+   *          ein FunctionSelectionProvider, der fÃ¼r das Feld eine passende
    *          FunctionSelection liefern kann.
    * @param formularMax4000
-   *          Der FormularMax4000 zu dem dieses InsertionModel gehört.
+   *          Der FormularMax4000 zu dem dieses InsertionModel gehÃ¶rt.
    * @throws SyntaxErrorException
    *           wenn das Content-Property von textField nicht korrekte
    *           ConfigThingy-Syntax hat oder keine korrekte Funktionsreferenz ist.
@@ -239,13 +239,13 @@ public class InsertionModel4InputUser extends InsertionModel
 
     // Falls eine externe Funktion referenziert wird, ohne dass irgendwelche
     // ihrer Parameter gebunden wurden, dann nehmen wir direkt den
-    // Original-Funktionsnamen für das TRAFO-Attribut ...
+    // Original-Funktionsnamen fÃ¼r das TRAFO-Attribut ...
     if (trafo.isReference() && !trafo.hasSpecifiedParameters())
     {
       conf.add("FUNCTION").add(trafo.getFunctionName());
     }
     else
-    // ... ansonsten müssen wir eine neue Funktion machen.
+    // ... ansonsten mÃ¼ssen wir eine neue Funktion machen.
     {
       int count = 1;
       String funcName;

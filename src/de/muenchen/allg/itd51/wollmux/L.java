@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Funktionen zur Lokalisierung.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 19.02.2008 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -47,14 +47,14 @@ public class L
   private static StringBuilder debugMessages;
 
   /**
-   * Wird für die aktuelle Sprache initialisiert und bildet einen Originalstring auf
-   * einen übersetzten String ab.
+   * Wird fÃ¼r die aktuelle Sprache initialisiert und bildet einen Originalstring auf
+   * einen Ã¼bersetzten String ab.
    */
   private static final Map<String, String> mapMessageToTranslation =
     new HashMap<String, String>();
 
   /**
-   * Falls für original eine Übersetzung verfügbar ist, wird diese zurückgeliefert,
+   * Falls fÃ¼r original eine Ãœbersetzung verfÃ¼gbar ist, wird diese zurÃ¼ckgeliefert,
    * ansonsten der Originalstring.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10) TESTED
@@ -69,7 +69,7 @@ public class L
   }
 
   /**
-   * Falls für original eine Übersetzung verfügbar ist, wird diese zurückgeliefert,
+   * Falls fÃ¼r original eine Ãœbersetzung verfÃ¼gbar ist, wird diese zurÃ¼ckgeliefert,
    * ansonsten der Originalstring. Dabei werden alle Vorkommen von "%1" durch
    * insertion1 ersetzt.
    * 
@@ -83,7 +83,7 @@ public class L
   }
 
   /**
-   * Falls für original eine Übersetzung verfügbar ist, wird diese zurückgeliefert,
+   * Falls fÃ¼r original eine Ãœbersetzung verfÃ¼gbar ist, wird diese zurÃ¼ckgeliefert,
    * ansonsten der Originalstring. Dabei werden alle Vorkommen von "%1" durch
    * insertion1 und von "%2" durch insertion2 ersetzt.
    * 
@@ -115,7 +115,7 @@ public class L
 
   /**
    * Ersetzt in where alle Vorkommen von what durch withWhat und liefert das Ergebnis
-   * zurück.
+   * zurÃ¼ck.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10) TESTED
    */
@@ -135,7 +135,7 @@ public class L
   }
 
   /**
-   * Liefert alle während der Initialisierung aufgelaufenen Debug-Messages zurück und
+   * Liefert alle wÃ¤hrend der Initialisierung aufgelaufenen Debug-Messages zurÃ¼ck und
    * gibt dann ihren Speicher frei.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -155,7 +155,7 @@ public class L
   }
 
   /**
-   * Initialisiert die Übersetzungs-Map mit l10n.
+   * Initialisiert die Ãœbersetzungs-Map mit l10n.
    * 
    * @param l10n
    *          ein beliebiger Knoten mit "L10n"-Unterknoten.

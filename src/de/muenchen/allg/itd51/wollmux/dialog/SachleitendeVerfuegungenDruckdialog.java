@@ -1,9 +1,9 @@
 /* 
  * Dateiname: SachleitendeVerfuegungenDruckdialog.java
  * Projekt  : WollMux
- * Funktion : Implementiert den Dialog zum Drucken von Sachleitenden Verfügungen
+ * Funktion : Implementiert den Dialog zum Drucken von Sachleitenden VerfÃ¼gungen
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 09.10.2006 | LUT | Erstellung (basierend auf AbsenderAuswaehlen.java)
  * -------------------------------------------------------------------
@@ -77,33 +77,33 @@ import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.Verfuegungspunkt;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 
 /**
- * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
- * einen Dialog zum Drucken von Sachleitenden Verfügungen. Die private-Funktionen
- * dürfen NUR aus dem Event-Dispatching Thread heraus aufgerufen werden.
+ * Diese Klasse baut anhand einer als ConfigThingy Ã¼bergebenen Dialogbeschreibung
+ * einen Dialog zum Drucken von Sachleitenden VerfÃ¼gungen. Die private-Funktionen
+ * dÃ¼rfen NUR aus dem Event-Dispatching Thread heraus aufgerufen werden.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
  */
 public class SachleitendeVerfuegungenDruckdialog
 {
   /**
-   * Kommando-String, der dem closeActionListener übermittelt wird, wenn der Dialog
-   * über den Drucken-Knopf geschlossen wird.
+   * Kommando-String, der dem closeActionListener Ã¼bermittelt wird, wenn der Dialog
+   * Ã¼ber den Drucken-Knopf geschlossen wird.
    */
   public static final String CMD_SUBMIT = "submit";
 
   /**
-   * Kommando-String, der dem closeActionListener übermittelt wird, wenn der Dialog
-   * über den Abbrechen oder "X"-Knopf geschlossen wird.
+   * Kommando-String, der dem closeActionListener Ã¼bermittelt wird, wenn der Dialog
+   * Ã¼ber den Abbrechen oder "X"-Knopf geschlossen wird.
    */
   public static final String CMD_CANCEL = "cancel";
 
   /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
+   * Rand um Textfelder (wird auch fÃ¼r ein paar andere RÃ¤nder verwendet) in Pixeln.
    */
   private final static int TF_BORDER = 4;
 
   /**
-   * Rand über und unter einem horizontalen Separator (in Pixeln).
+   * Rand Ã¼ber und unter einem horizontalen Separator (in Pixeln).
    */
   private final static int SEP_BORDER = 7;
 
@@ -113,13 +113,13 @@ public class SachleitendeVerfuegungenDruckdialog
   private final static int BUTTON_BORDER = 2;
 
   /**
-   * Anzahl der Zeichen, nach der der Text der Verfügungspunkte abgeschnitten wird,
+   * Anzahl der Zeichen, nach der der Text der VerfÃ¼gungspunkte abgeschnitten wird,
    * damit der Dialog nicht platzt.
    */
   private final static int CONTENT_CUT = 75;
 
   /**
-   * ActionListener für Buttons mit der ACTION "printElement".
+   * ActionListener fÃ¼r Buttons mit der ACTION "printElement".
    */
   private ActionListener actionListener_printElement = new ActionListener()
   {
@@ -132,7 +132,7 @@ public class SachleitendeVerfuegungenDruckdialog
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "printAll".
+   * ActionListener fÃ¼r Buttons mit der ACTION "printAll".
    */
   private ActionListener actionListener_printAll = new ActionListener()
   {
@@ -144,7 +144,7 @@ public class SachleitendeVerfuegungenDruckdialog
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "abort".
+   * ActionListener fÃ¼r Buttons mit der ACTION "abort".
    */
   private ActionListener actionListener_abort = new ActionListener()
   {
@@ -155,7 +155,7 @@ public class SachleitendeVerfuegungenDruckdialog
   };
 
   /**
-   * ChangeListener für Änderungen an den Spinnern.
+   * ChangeListener fÃ¼r Ã„nderungen an den Spinnern.
    */
   private ChangeListener spinnerChangeListener = new ChangeListener()
   {
@@ -166,8 +166,8 @@ public class SachleitendeVerfuegungenDruckdialog
   };
 
   /**
-   * ChangeListener für Änderungen an den ComboBoxen, der eine Änderung des
-   * ausgewählten Elements unmöglich macht.
+   * ChangeListener fÃ¼r Ã„nderungen an den ComboBoxen, der eine Ã„nderung des
+   * ausgewÃ¤hlten Elements unmÃ¶glich macht.
    */
   private ItemListener cboxItemListener = new ItemListener()
   {
@@ -203,7 +203,7 @@ public class SachleitendeVerfuegungenDruckdialog
   private JSpinner[] elementCountSpinner;
 
   /**
-   * Die Array mit allen comboBoxen, die verfügungspunkte+zuleitungszeilen
+   * Die Array mit allen comboBoxen, die verfÃ¼gungspunkte+zuleitungszeilen
    * beinhalten.
    */
   private JComboBox[] elementComboBoxes;
@@ -214,25 +214,25 @@ public class SachleitendeVerfuegungenDruckdialog
   private JButton[] printElementButtons;
 
   /**
-   * Enthält das TextFeld, das die Summe aller Ausfertigungen anzeigt.
+   * EnthÃ¤lt das TextFeld, das die Summe aller Ausfertigungen anzeigt.
    */
   private JTextField allElementCountTextField;
 
   /**
    * Der dem
    * {@link #AbsenderAuswaehlen(ConfigThingy, ConfigThingy, DatasourceJoiner, ActionListener) Konstruktor}
-   * übergebene dialogEndListener.
+   * Ã¼bergebene dialogEndListener.
    */
   private ActionListener dialogEndListener;
 
   /**
-   * Vector of Verfuegungspunkt, der die Beschreibungen der Verfügungspunkte enthält.
+   * Vector of Verfuegungspunkt, der die Beschreibungen der VerfÃ¼gungspunkte enthÃ¤lt.
    */
   private Vector<Verfuegungspunkt> verfuegungspunkte;
 
   /**
-   * Nach jedem Aufruf von printAll oder printElement enthält diese Methode die
-   * aktuelle Liste Einstellungen für die zu druckenden Verfügungspunkte.
+   * Nach jedem Aufruf von printAll oder printElement enthÃ¤lt diese Methode die
+   * aktuelle Liste Einstellungen fÃ¼r die zu druckenden VerfÃ¼gungspunkte.
    */
   private List<VerfuegungspunktInfo> currentSettings;
 
@@ -249,12 +249,12 @@ public class SachleitendeVerfuegungenDruckdialog
    *          geschlossen wurde. Das actionCommand des ActionEvents gibt die Aktion
    *          an, die das Beenden des Dialogs veranlasst hat.
    * @param verfuegungspunkte
-   *          Vector of Verfuegungspunkt, der die Beschreibungen der Verfügungspunkte
-   *          enthält.
+   *          Vector of Verfuegungspunkt, der die Beschreibungen der VerfÃ¼gungspunkte
+   *          enthÃ¤lt.
    * @throws ConfigurationErrorException
    *           im Falle eines schwerwiegenden Konfigurationsfehlers, der es dem
-   *           Dialog unmöglich macht, zu funktionieren (z.B. dass der "Fenster"
-   *           Schlüssel fehlt.
+   *           Dialog unmÃ¶glich macht, zu funktionieren (z.B. dass der "Fenster"
+   *           SchlÃ¼ssel fehlt.
    */
   public SachleitendeVerfuegungenDruckdialog(ConfigThingy conf,
       Vector<Verfuegungspunkt> verfuegungspunkte, ActionListener dialogEndListener)
@@ -266,12 +266,12 @@ public class SachleitendeVerfuegungenDruckdialog
 
     ConfigThingy fensterDesc1 = conf.query("Fenster");
     if (fensterDesc1.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1",
+      throw new ConfigurationErrorException(L.m("SchlÃ¼ssel 'Fenster' fehlt in %1",
         conf.getName()));
 
     final ConfigThingy fensterDesc = fensterDesc1.query("Drucken");
     if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Drucken' fehlt in %1",
+      throw new ConfigurationErrorException(L.m("SchlÃ¼ssel 'Drucken' fehlt in %1",
         conf.getName()));
 
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
@@ -297,7 +297,7 @@ public class SachleitendeVerfuegungenDruckdialog
   }
 
   /**
-   * Enthält die Einstellungen, die zu einem Verfügungspunkt im Dialog getroffen
+   * EnthÃ¤lt die Einstellungen, die zu einem VerfÃ¼gungspunkt im Dialog getroffen
    * wurden.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -330,7 +330,7 @@ public class SachleitendeVerfuegungenDruckdialog
 
   /**
    * Liefert die aktuellen in diesem Dialog getroffenen Einstellungen als Liste von
-   * VerfuegungspunktInfo-Objekten zurück.
+   * VerfuegungspunktInfo-Objekten zurÃ¼ck.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -384,7 +384,7 @@ public class SachleitendeVerfuegungenDruckdialog
       printElementButtons[i] = new JButton();
     }
 
-    String title = L.m("TITLE fehlt für Fenster Drucken");
+    String title = L.m("TITLE fehlt fÃ¼r Fenster Drucken");
     try
     {
       title = fensterDesc.get("TITLE").toString();
@@ -423,7 +423,7 @@ public class SachleitendeVerfuegungenDruckdialog
         verfPunktPanel, 1, 0);
     }
 
-    // separator zwischen Verfügungspunkte und Summenzeile hinzufügen
+    // separator zwischen VerfÃ¼gungspunkte und Summenzeile hinzufÃ¼gen
     GridBagConstraints gbcSeparator =
       new GridBagConstraints(0, 0, GridBagConstraints.REMAINDER, 1, 1.0, 0.0,
         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0,
@@ -452,11 +452,11 @@ public class SachleitendeVerfuegungenDruckdialog
   }
 
   /**
-   * Wenn value mehr als CONTENT_CUT Zeichen besitzt, dann wird eine gekürzte Form
-   * von value zurückgeliefert (mit "..." ergänzt) oder ansonsten value selbst.
+   * Wenn value mehr als CONTENT_CUT Zeichen besitzt, dann wird eine gekÃ¼rzte Form
+   * von value zurÃ¼ckgeliefert (mit "..." ergÃ¤nzt) oder ansonsten value selbst.
    * 
    * @param value
-   *          der zu kürzende String
+   *          der zu kÃ¼rzende String
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -469,9 +469,9 @@ public class SachleitendeVerfuegungenDruckdialog
   }
 
   /**
-   * Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu. compo muss
+   * FÃ¼gt compo UI Elemente gemÃ¤ss den Kindern von conf.query(key) hinzu. compo muss
    * ein GridBagLayout haben. stepx und stepy geben an um wieviel mit jedem UI
-   * Element die x und die y Koordinate der Zelle erhöht werden soll. Wirklich
+   * Element die x und die y Koordinate der Zelle erhÃ¶ht werden soll. Wirklich
    * sinnvoll sind hier nur (0,1) und (1,0).
    */
   private void addUIElements(ConfigThingy conf, String key, int verfPunktNr,
@@ -550,15 +550,15 @@ public class SachleitendeVerfuegungenDruckdialog
             uiElement.setText(labelText);
             // FIXME: Hier werden alle Labels mit dem Text 'Seiten' rausgefiltert,
             // damit auch bei einer nicht aktualisierten Standard-Config ein
-            // sinnvoller Dialog angezeigt wird. Früher konnte über diesen Dialog
+            // sinnvoller Dialog angezeigt wird. FrÃ¼her konnte Ã¼ber diesen Dialog
             // noch der Seitenbereich eingestellt werden konnte. Passend dazu
-            // existierte in alten Standard-Configs noch die Spaltenüberschrift
+            // existierte in alten Standard-Configs noch die SpaltenÃ¼berschrift
             // "Seiten". Seit der Existent der Druckfunktion 'Gesamtdokument
-            // erstellen' gibt es jedoch keinen Sinn mehr, den Seitenbereich über
-            // diesen Dialog zu steuern. Die Möglichkeit zur Einstellung ist daher
-            // aus dem Dialog entfernt worden, die notwendigen Änderungen der
+            // erstellen' gibt es jedoch keinen Sinn mehr, den Seitenbereich Ã¼ber
+            // diesen Dialog zu steuern. Die MÃ¶glichkeit zur Einstellung ist daher
+            // aus dem Dialog entfernt worden, die notwendigen Ã„nderungen der
             // Standardkonfig machen aber die Referate, worauf wir keine Einfluss
-            // haben. AUFGABE: ab März 2009 (ein Jahr nach der Änderung) sollten alle
+            // haben. AUFGABE: ab MÃ¤rz 2009 (ein Jahr nach der Ã„nderung) sollten alle
             // Referate die entsprechend angepasste Standard-Config installiert
             // haben. Dann muss dieses 'if' wieder aus dem Code rausfliegen!!!
             if (!"Seiten".equals(labelText)) compo.add(uiElement, gbcLabel);
@@ -607,7 +607,7 @@ public class SachleitendeVerfuegungenDruckdialog
               comboBox.addItemListener(cboxItemListener);
             }
 
-            // Behandlung des nicht mehr unterstützten Elementtyps "pageRange"
+            // Behandlung des nicht mehr unterstÃ¼tzten Elementtyps "pageRange"
             else if (id.equals("pageRange"))
             {
               comboBox = null;
@@ -686,7 +686,7 @@ public class SachleitendeVerfuegungenDruckdialog
           }
           else
           {
-            Logger.error(L.m("Ununterstützter TYPE für User Interface Element: %1",
+            Logger.error(L.m("UnunterstÃ¼tzter TYPE fÃ¼r User Interface Element: %1",
               type));
           }
         }
@@ -712,7 +712,7 @@ public class SachleitendeVerfuegungenDruckdialog
   }
 
   /**
-   * Übersetzt den Namen einer ACTION in eine Referenz auf das passende
+   * Ãœbersetzt den Namen einer ACTION in eine Referenz auf das passende
    * actionListener_... Objekt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
@@ -725,8 +725,8 @@ public class SachleitendeVerfuegungenDruckdialog
     }
     if (action.equals("back"))
     {
-      // diese Aktion wird nicht mehr unterstützt, verhält sich aber aus Gründen der
-      // Abwärtskompatibilität wie abort.
+      // diese Aktion wird nicht mehr unterstÃ¼tzt, verhÃ¤lt sich aber aus GrÃ¼nden der
+      // AbwÃ¤rtskompatibilitÃ¤t wie abort.
       return actionListener_abort;
     }
     else if (action.equals("printElement"))
@@ -739,10 +739,10 @@ public class SachleitendeVerfuegungenDruckdialog
     }
     else if (action.equals("printSettings"))
     {
-      // FIXME: diese Aktion wird nicht mehr unterstützt, darf aber aus Gründen der
-      // Abwärtskompatibilität nicht zu einem Fehler führen. Diese Aktion kann aber
-      // nach einem Jahr, also ab März 2009 ebenfalls entfernt werden, da bis dahin
-      // die entsprechende Standard-config hoffentlich überall im Einsatz ist.
+      // FIXME: diese Aktion wird nicht mehr unterstÃ¼tzt, darf aber aus GrÃ¼nden der
+      // AbwÃ¤rtskompatibilitÃ¤t nicht zu einem Fehler fÃ¼hren. Diese Aktion kann aber
+      // nach einem Jahr, also ab MÃ¤rz 2009 ebenfalls entfernt werden, da bis dahin
+      // die entsprechende Standard-config hoffentlich Ã¼berall im Einsatz ist.
       return null;
     }
     else if (action.equals(""))
@@ -750,7 +750,7 @@ public class SachleitendeVerfuegungenDruckdialog
       return null;
     }
     else
-      Logger.error(L.m("Ununterstützte ACTION: %1", action));
+      Logger.error(L.m("UnunterstÃ¼tzte ACTION: %1", action));
 
     return null;
   }
@@ -769,7 +769,7 @@ public class SachleitendeVerfuegungenDruckdialog
   }
 
   /**
-   * Löscht currentSettings und schreibt für alle Verfügungspunkte entsprechende
+   * LÃ¶scht currentSettings und schreibt fÃ¼r alle VerfÃ¼gungspunkte entsprechende
    * VerfuegungspunktInfo-Objekte nach currentSettings.
    * 
    * @author christoph.lutz
@@ -784,7 +784,7 @@ public class SachleitendeVerfuegungenDruckdialog
   }
 
   /**
-   * Bestimmt die Nummer des Verfügungspunktes, dem JButton button zugeordnet ist und
+   * Bestimmt die Nummer des VerfÃ¼gungspunktes, dem JButton button zugeordnet ist und
    * schreibt dessen VerfuegungspunktInfo als einziges Element nach currentSettings.
    * 
    * @author christoph.lutz
@@ -802,9 +802,9 @@ public class SachleitendeVerfuegungenDruckdialog
   }
 
   /**
-   * Ermittelt die Druckdaten (Verfügungspunkt, Anzahl-Ausfertigungen, ...) zum
-   * Verfügungspunkt verfPunkt und liefert sie als VerfuegungspunktInfo-Objekt
-   * zurück.
+   * Ermittelt die Druckdaten (VerfÃ¼gungspunkt, Anzahl-Ausfertigungen, ...) zum
+   * VerfÃ¼gungspunkt verfPunkt und liefert sie als VerfuegungspunktInfo-Objekt
+   * zurÃ¼ck.
    * 
    * @author christoph.lutz
    */
@@ -830,7 +830,7 @@ public class SachleitendeVerfuegungenDruckdialog
 
   /**
    * Ein WindowListener, der auf den JFrame registriert wird, damit als Reaktion auf
-   * den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
+   * den Schliessen-Knopf auch die ACTION "abort" ausgefÃ¼hrt wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

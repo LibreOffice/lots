@@ -1,9 +1,9 @@
 /*
  * Dateiname: ColumnTransformer.java
  * Projekt  : WollMux
- * Funktion : Nimmt ein Dataset und stellt mit Hilfe von WollMux-Funktionen aus dessen Spalten berechnete Pseudo-Spalten zur Verfügung.
+ * Funktion : Nimmt ein Dataset und stellt mit Hilfe von WollMux-Funktionen aus dessen Spalten berechnete Pseudo-Spalten zur VerfÃ¼gung.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 21.10.2008 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -48,19 +48,19 @@ import de.muenchen.allg.itd51.wollmux.func.Values;
 
 /**
  * Nimmt ein Dataset und stellt mit Hilfe von WollMux-Funktionen aus dessen Spalten
- * berechnete Pseudo-Spalten zur Verfügung.
+ * berechnete Pseudo-Spalten zur VerfÃ¼gung.
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
 public class ColumnTransformer
 {
   /**
-   * Die Namen aller Pseudospalten, die für diesen ColumnTransformer definiert sind.
+   * Die Namen aller Pseudospalten, die fÃ¼r diesen ColumnTransformer definiert sind.
    */
   private Set<String> schema = new HashSet<String>();
 
   /**
-   * Bildet den Namen einer Pseudospalte auf die zugehörige Funktion ab.
+   * Bildet den Namen einer Pseudospalte auf die zugehÃ¶rige Funktion ab.
    */
   private Map<String, Function> columnTranslations = new HashMap<String, Function>();
 
@@ -76,9 +76,9 @@ public class ColumnTransformer
    * </pre>
    * 
    * NameX ist jeweils der Name, der zum Zugriff auf den entsprechenden Funktionswert
-   * an {@link #get(String, Dataset)} übergeben werden muss. Innerhalb der
+   * an {@link #get(String, Dataset)} Ã¼bergeben werden muss. Innerhalb der
    * WollMux-Funktionen verwendete Aufrufe der VALUE-Grundfunktion beziehen sich
-   * IMMER auf die untransformierten Spalten des zu übersetzenden {@link Dataset}s,
+   * IMMER auf die untransformierten Spalten des zu Ã¼bersetzenden {@link Dataset}s,
    * NIEMALS auf Pseudospalten. Wird der selbe NameX mehrfach verwendet, so gilt nur
    * die letzte Definition.
    * 
@@ -101,7 +101,7 @@ public class ColumnTransformer
 
   /**
    * Initialisiert einen ColumnTransformer mit allen Abschnitten, die
-   * trafoConf,query(nodeName, 1) zurückliefert.
+   * trafoConf,query(nodeName, 1) zurÃ¼ckliefert.
    * 
    * @see #ColumnTransformer(ConfigThingy, FunctionLibrary, DialogLibrary, Map)
    * 
@@ -127,8 +127,8 @@ public class ColumnTransformer
 
   /**
    * Liefert true gdw eine Pseudospalte namens name definiert ist, d,h, wenn
-   * {@link #get(String, Dataset)} für diesen Namen einen berechneten Wert und nicht
-   * direkt den Wert des {@link Dataset}s zurückliefert.
+   * {@link #get(String, Dataset)} fÃ¼r diesen Namen einen berechneten Wert und nicht
+   * direkt den Wert des {@link Dataset}s zurÃ¼ckliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
@@ -139,15 +139,15 @@ public class ColumnTransformer
 
   /**
    * trafoConf hat den selben Aufbau wie bei {@link #ColumnTransformer(ConfigThingy)}
-   * beschrieben. Die entsprechenden Übersetzungen werden hinzugefügt. Wird eine
-   * Pseudospalte definiert mit einem Namen der bereits in einer früheren
+   * beschrieben. Die entsprechenden Ãœbersetzungen werden hinzugefÃ¼gt. Wird eine
+   * Pseudospalte definiert mit einem Namen der bereits in einer frÃ¼heren
    * Transformationsbeschreibung verwendet wurde, so wird die entsprechende
    * Pseudospalte neu definiert. Die VALUE-Grundfunktion innerhalb der
    * WollMux-Funktionen bezieht sich auf jeden Fall IMMER auf die entsprechenden
    * untransformierten Spalten des Datensatzes, NIEMALS auf Pseudospalten.
    * 
    * ACHTUNG! Beeinflusst auch {@link Dataset}s und {@link QueryResults}, die von
-   * früheren Aufrufen zu {@link #transform(Dataset)} bzw.
+   * frÃ¼heren Aufrufen zu {@link #transform(Dataset)} bzw.
    * {@link #transform(QueryResults)} geliefert wurden.
    * 
    * @param funcLib
@@ -182,7 +182,7 @@ public class ColumnTransformer
       {
         Logger.error(
           L.m(
-            "Fehler beim Parsen der Spaltenumsetzungsfunktion für Ergebnisspalte \"%1\"",
+            "Fehler beim Parsen der Spaltenumsetzungsfunktion fÃ¼r Ergebnisspalte \"%1\"",
             name), e);
       }
     }
@@ -194,8 +194,8 @@ public class ColumnTransformer
   }
 
   /**
-   * Fügt alle Transformationen aus allen Abschnitten, die
-   * trafoConf,query(nodeName,1) zurückliefert zu diesem ColumnTransformer hinzu.
+   * FÃ¼gt alle Transformationen aus allen Abschnitten, die
+   * trafoConf,query(nodeName,1) zurÃ¼ckliefert zu diesem ColumnTransformer hinzu.
    * 
    * @see #addTrafos(ConfigThingy, FunctionLibrary, DialogLibrary, Map)
    * 
@@ -222,8 +222,8 @@ public class ColumnTransformer
 
   /**
    * Liefert die Menge aller Namen von Pseudospalten, die definiert sind, d,h, alle
-   * Namen für die {@link #get(String, Dataset)} einen berechneten Wert und nicht
-   * direkt den Wert des {@link Dataset}s zurückliefert.
+   * Namen fÃ¼r die {@link #get(String, Dataset)} einen berechneten Wert und nicht
+   * direkt den Wert des {@link Dataset}s zurÃ¼ckliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
@@ -236,12 +236,12 @@ public class ColumnTransformer
 
   /**
    * Liefert den Wert der Pseudospalte columnName, der anhand der Umsetzungsregeln
-   * aus dem {@link Dataset} ds berechnet wird. Falls keine Umsetzungsregel für
+   * aus dem {@link Dataset} ds berechnet wird. Falls keine Umsetzungsregel fÃ¼r
    * columnName existiert, wird direkt der Wert der Spalte columnName von ds
-   * zurückgeliefert (null falls nicht belegt).
+   * zurÃ¼ckgeliefert (null falls nicht belegt).
    * 
    * @throws ColumnNotFoundException
-   *           falls weder eine Umsetzungsregel für columnName definiert ist noch ds
+   *           falls weder eine Umsetzungsregel fÃ¼r columnName definiert ist noch ds
    *           eine Spalte mit diesem Namen besitzt.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -257,10 +257,10 @@ public class ColumnTransformer
 
   /**
    * Liefert ein {@link Dataset}, das eine transformierte Sicht von ds darstellt.
-   * ACHTUNG! Die Berechnung der Spalten wird on-demand durchgeführt, d.h. spätere
+   * ACHTUNG! Die Berechnung der Spalten wird on-demand durchgefÃ¼hrt, d.h. spÃ¤tere
    * Aufrufe von
    * {@link #addTrafos(ConfigThingy, FunctionLibrary, DialogLibrary, Map)} wirken
-   * sich auf das zurückgelieferte {@link Dataset} aus.
+   * sich auf das zurÃ¼ckgelieferte {@link Dataset} aus.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
@@ -272,7 +272,7 @@ public class ColumnTransformer
   /**
    * Liefert {@link QueryResults}, die eine transformierte Sicht von qres
    * darstellen. ACHTUNG! Die Berechnung der {@link Dataset}s wird on-demand
-   * durchgeführt, d.h. spätere Aufrufe von
+   * durchgefÃ¼hrt, d.h. spÃ¤tere Aufrufe von
    * {@link #addTrafos(ConfigThingy, FunctionLibrary, DialogLibrary, Map)} wirken
    * sich auf die {@link Dataset}s der {@link QueryResults} aus.
    * 
@@ -286,7 +286,7 @@ public class ColumnTransformer
   }
 
   /**
-   * Stellt die Spalten eines Datasets als Values zur Verfügung.
+   * Stellt die Spalten eines Datasets als Values zur VerfÃ¼gung.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -333,7 +333,7 @@ public class ColumnTransformer
 
   /**
    * Wendet Spaltenumsetzungen auf QueryResults an und stellt das Ergebnis wieder als
-   * QueryResults zur Verfügung.
+   * QueryResults zur VerfÃ¼gung.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -345,7 +345,7 @@ public class ColumnTransformer
     private QueryResults qres;
 
     /**
-     * Die QueryResults res werden mit dem columnTransformer übersetzt.
+     * Die QueryResults res werden mit dem columnTransformer Ã¼bersetzt.
      */
     public TranslatedQueryResults(QueryResults res)
     {

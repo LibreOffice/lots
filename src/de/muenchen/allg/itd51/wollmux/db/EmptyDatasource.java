@@ -1,9 +1,9 @@
 /*
  * Dateiname: EmptyDatasource.java
  * Projekt  : WollMux
- * Funktion : Eine Datenquelle, die keine Datensätze enthält.
+ * Funktion : Eine Datenquelle, die keine DatensÃ¤tze enthÃ¤lt.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 28.10.2005 | BNK | Erstellung
  * 28.10.2005 | BNK | +getName()
@@ -40,7 +40,7 @@ import java.util.Vector;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
- * Eine Datenquelle, die keine Datensätze enthält.
+ * Eine Datenquelle, die keine DatensÃ¤tze enthÃ¤lt.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */

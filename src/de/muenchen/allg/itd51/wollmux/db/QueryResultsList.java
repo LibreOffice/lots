@@ -2,9 +2,9 @@
 * Dateiname: QueryResultsList.java
 * Projekt  : WollMux
 * Funktion : Eine einfache Klasse um eine Liste als QueryResults zur
-*            Verfügung zu stellen.
+*            VerfÃ¼gung zu stellen.
 * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -19,8 +19,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
 *
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
+* Ã„nderungshistorie:
+* Datum      | Wer | Ã„nderungsgrund
 * -------------------------------------------------------------------
 * 28.10.2005 | BNK | Erstellung
 * 03.11.2005 | BNK | besser kommentiert
@@ -38,7 +38,7 @@ import java.util.Vector;
 
 /**
  * Eine einfache Klasse um eine Liste als QueryResults zur
- *  Verfügung zu stellen.
+ *  VerfÃ¼gung zu stellen.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class QueryResultsList implements QueryResults
@@ -49,11 +49,11 @@ public class QueryResultsList implements QueryResults
   private List<Dataset> data;
   
   /**
-   * Erzeugt eine neue QueryResultsList, die die Elemente enthält 
-   * die iter zurückliefert (müssen Datasets sein!).
+   * Erzeugt eine neue QueryResultsList, die die Elemente enthÃ¤lt 
+   * die iter zurÃ¼ckliefert (mÃ¼ssen Datasets sein!).
    * @param count dient der Optimierung und sollte die Anzahl der Elemente
-   * enthalten, die der Iterator zurückliefern wird. Ist dies nicht bekannt,
-   * kann 0 übergeben werden.
+   * enthalten, die der Iterator zurÃ¼ckliefern wird. Ist dies nicht bekannt,
+   * kann 0 Ã¼bergeben werden.
    */
   public QueryResultsList(Iterator<? extends Dataset> iter, int count)
   {
@@ -63,7 +63,7 @@ public class QueryResultsList implements QueryResults
 
   /**
    * Erzeugt eine neue QueryResultsList aus einer bestehenden Liste.
-   * Achtung! Die Liste wird nicht kopiert, sondern als Referenz übernommen.
+   * Achtung! Die Liste wird nicht kopiert, sondern als Referenz Ã¼bernommen.
    */
   @SuppressWarnings("unchecked")
   public QueryResultsList(List<? extends Dataset> datasets)

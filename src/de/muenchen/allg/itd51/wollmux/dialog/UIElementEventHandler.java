@@ -1,9 +1,9 @@
 /*
  * Dateiname: UIElementEventHandler.java
  * Projekt  : WollMux
- * Funktion : Interface für Klassen, die auf Events reagieren, die von UIElements verursacht werden.
+ * Funktion : Interface fÃ¼r Klassen, die auf Events reagieren, die von UIElements verursacht werden.
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 11.01.2006 | BNK | Erstellung
  * 24.04.2006 | BNK | Kommentiert.
@@ -31,7 +31,7 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 /**
- * Interface für Klassen, die auf Events reagieren, die von UIElements verursacht
+ * Interface fÃ¼r Klassen, die auf Events reagieren, die von UIElements verursacht
  * werden.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -44,25 +44,25 @@ public interface UIElementEventHandler
    * @param source
    *          das UIElement auf dem der Event registriert wurde.
    * @param eventType
-   *          die Art des Events. Zur Zeit werden folgende Typen unterstützt (diese
-   *          Liste kann erweitert werden, auch für existierende UIElemente; ein
-   *          Handler sollte also zwingend den Typ überprüfen und unbekannte Typen
+   *          die Art des Events. Zur Zeit werden folgende Typen unterstÃ¼tzt (diese
+   *          Liste kann erweitert werden, auch fÃ¼r existierende UIElemente; ein
+   *          Handler sollte also zwingend den Typ Ã¼berprÃ¼fen und unbekannte Typen
    *          ohne Fehlermeldung ignorieren):
    *          <dl>
    *          <dt>action</dt>
-   *          <dd>Eine ACTION wurde ausgelöst (normalerweise durch einen Button).
-   *          Das Array args enthält als erstes Element den Namen der ACTION. Falls
-   *          die ACTION weitere Parameter benötigt, so werden diese in den folgenden
-   *          Arrayelementen übergeben.</dd>
+   *          <dd>Eine ACTION wurde ausgelÃ¶st (normalerweise durch einen Button).
+   *          Das Array args enthÃ¤lt als erstes Element den Namen der ACTION. Falls
+   *          die ACTION weitere Parameter benÃ¶tigt, so werden diese in den folgenden
+   *          Arrayelementen Ã¼bergeben.</dd>
    *          <dt>valueChanged</dt>
-   *          <dd>Wird von Elementen ausgelöst, die der Benutzer bearbeiten kann
-   *          (zum Beispiel TextFields), wenn der Wert geändert wurde. Achtung! Es
-   *          ist nicht garantiert, dass der Wert sich tatsächlich geändert hat.
-   *          Dieser Event wird auch ausgelöst, wenn der Benutzer aus einer Auswahl
-   *          (z.B. ComboBox) ein Element ausgewählt hat.</dd>
+   *          <dd>Wird von Elementen ausgelÃ¶st, die der Benutzer bearbeiten kann
+   *          (zum Beispiel TextFields), wenn der Wert geÃ¤ndert wurde. Achtung! Es
+   *          ist nicht garantiert, dass der Wert sich tatsÃ¤chlich geÃ¤ndert hat.
+   *          Dieser Event wird auch ausgelÃ¶st, wenn der Benutzer aus einer Auswahl
+   *          (z.B. ComboBox) ein Element ausgewÃ¤hlt hat.</dd>
    *          <dt>focus</dt>
-   *          <dd>Wird von Elementen ausgelöst, wenn sie den Focus bekommen oder
-   *          verloren haben. Das Array args enthält als erstes Element entweder den
+   *          <dd>Wird von Elementen ausgelÃ¶st, wenn sie den Focus bekommen oder
+   *          verloren haben. Das Array args enthÃ¤lt als erstes Element entweder den
    *          String "lost", falls der Focus verloren wurde, oder "gained", falls das
    *          Element den Focus bekommen hat.</dd>
    *          </dl>

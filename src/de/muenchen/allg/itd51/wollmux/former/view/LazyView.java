@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Eine View die erst wenn sie das erste mal angezeigt wird initialisiert wird.
  * 
- * Copyright (c) 2010 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 22.01.2010 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -39,7 +39,7 @@ public interface LazyView extends View
   /**
    * Muss aufgerufen werden, wenn die View angezeigt wird. Dies veranlasst die View,
    * sich komplett zu initialisieren. Vor dem Aufruf dieser Funktion ist nicht
-   * garantiert, dass in der View tatsächlich Inhalt angezeigt wird.
+   * garantiert, dass in der View tatsÃ¤chlich Inhalt angezeigt wird.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
@@ -47,7 +47,7 @@ public interface LazyView extends View
 
   /**
    * Sollte (muss aber nicht) aufgerufen werden, wenn die View nicht mehr angezeigt
-   * wird. Sie kann dann falls möglich Ressourcen freigeben.
+   * wird. Sie kann dann falls mÃ¶glich Ressourcen freigeben.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */

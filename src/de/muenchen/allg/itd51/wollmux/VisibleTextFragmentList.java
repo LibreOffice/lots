@@ -1,10 +1,10 @@
 /*
  * Dateiname: VisibleTextFragmentList.java
  * Projekt  : WollMux
- * Funktion : Repräsentiert die ausgewertete Liste aller in wollmux.conf definierten
+ * Funktion : ReprÃ¤sentiert die ausgewertete Liste aller in wollmux.conf definierten
  *            Textfragmente.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -19,13 +19,13 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 13.10.2005 | LUT | Erstellung
  * 20.04.2006 | LUT | Testen ob FRAG_IDs Identifier sind
  * 21.04.2006 | LUT | + Keine Warnung wenn keine Textfragmente definiert - Eine
- *                      Konfiguration ohne Textfragmente kann durchaus gewünscht sein.
+ *                      Konfiguration ohne Textfragmente kann durchaus gewÃ¼nscht sein.
  *                    + getURLByID: ConfigurationErrorException statt NodeNotFoundException
  * -------------------------------------------------------------------
  *
@@ -48,9 +48,9 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
 
 /**
- * TODO: überarbeiten! Die VisibleTextFragmentList repräsentiert die ausgewertete
+ * TODO: Ã¼berarbeiten! Die VisibleTextFragmentList reprÃ¤sentiert die ausgewertete
  * Liste aller in den Konfigurationsdateien beschriebener "Textfragmente" Abschnitte.
- * Sie kümmert sich insbesondere um das Auswerten der Variablen in den URL-Attributen
+ * Sie kÃ¼mmert sich insbesondere um das Auswerten der Variablen in den URL-Attributen
  * und um die Beachtung der Vorrangregelung: Immer das zuletzt definierte
  * Textfragment oder die zuletzt definierte Variable gewinnt.
  * 
@@ -66,13 +66,13 @@ public class VisibleTextFragmentList
   private static final int MAXCOUNT = 100;
 
   /**
-   * Ersetzen der zu dem Block gehörende Variable VAR durch den Wert VALUE
+   * Ersetzen der zu dem Block gehÃ¶rende Variable VAR durch den Wert VALUE
    * 
    * @param node
-   *          Knoten der die Url enthält die benötigt wird um die Variable zu
+   *          Knoten der die Url enthÃ¤lt die benÃ¶tigt wird um die Variable zu
    *          bestimmen die von ihm aus sichtbar ist.
    * @param root
-   *          das ConfigThingy das die gesamte Configuration enthält
+   *          das ConfigThingy das die gesamte Configuration enthÃ¤lt
    * @return
    * @throws EndlessLoopException
    */
@@ -114,7 +114,7 @@ public class VisibleTextFragmentList
     Matcher m = var.matcher(string);
 
     // Variablen so lange ersetzen, bis keine Variable mehr gefunden wird.
-    // Vermeidung von möglichen Endlosloops durch Abbruch nach MAXCOUNT
+    // Vermeidung von mÃ¶glichen Endlosloops durch Abbruch nach MAXCOUNT
     // Ersetzungen.
     int count = 0;
     while (m.find() && MAXCOUNT > ++count)
@@ -147,7 +147,7 @@ public class VisibleTextFragmentList
   }
 
   /**
-   * Gibt die URLs des unter der frag_id definierten Textfragmente zurück.
+   * Gibt die URLs des unter der frag_id definierten Textfragmente zurÃ¼ck.
    * 
    * @param frag_id
    *          Die ID des gesuchten Textfragments.

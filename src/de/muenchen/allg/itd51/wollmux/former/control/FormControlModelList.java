@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Verwaltet eine Liste von FormControlModels.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,15 +18,15 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 07.08.2006 | BNK | Erstellung
  * 29.08.2006 | BNK | kommentiert.
- * 10.09.2006 | BNK | [R3207]Maximale Anzahl von Steuerelementen pro Tab wird überwacht.
- * 10.09.2006 | BNK | automatisch Tab einfügen, wenn nach Button ein in der Button-Zeile
+ * 10.09.2006 | BNK | [R3207]Maximale Anzahl von Steuerelementen pro Tab wird Ã¼berwacht.
+ * 10.09.2006 | BNK | automatisch Tab einfÃ¼gen, wenn nach Button ein in der Button-Zeile
  *                    unsinniges Element auftaucht.
- * 16.03.2007 | BNK | Für jedes hinzugekommene FormControlModel die ID broadcasten. 
+ * 16.03.2007 | BNK | FÃ¼r jedes hinzugekommene FormControlModel die ID broadcasten. 
  * 12.07.2007 | BNK | Umgestellt auf Verwendung von IDManager.
  * -------------------------------------------------------------------
  *
@@ -53,7 +53,7 @@ import de.muenchen.allg.itd51.wollmux.former.IDManager;
 public class FormControlModelList
 {
   /**
-   * Die FormControlModelList erzwingt einen Tab nach spätestens sovielen
+   * Die FormControlModelList erzwingt einen Tab nach spÃ¤testens sovielen
    * FormControlModels. Dies sorgt Problemen mit GridBagLayout vor.
    */
   public static final int MAX_MODELS_PER_TAB = 500;
@@ -64,13 +64,13 @@ public class FormControlModelList
   private Vector<FormControlModel> models = new Vector<FormControlModel>();
 
   /**
-   * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts
+   * Liste aller {@link ItemListener}, die Ã¼ber Ã„nderungen des Listeninhalts
    * informiert werden wollen.
    */
   private List<ItemListener> listeners = new Vector<ItemListener>(1);
 
   /**
-   * Der FormularMax4000 zu dem diese Liste gehört.
+   * Der FormularMax4000 zu dem diese Liste gehÃ¶rt.
    */
   private FormularMax4000 formularMax4000;
 
@@ -80,7 +80,7 @@ public class FormControlModelList
   }
 
   /**
-   * Löscht alle bestehenden FormControlModels aus der Liste.
+   * LÃ¶scht alle bestehenden FormControlModels aus der Liste.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -105,7 +105,7 @@ public class FormControlModelList
   }
 
   /**
-   * Liefert true gdw diese Liste keine Elemente enthält.
+   * Liefert true gdw diese Liste keine Elemente enthÃ¤lt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -115,12 +115,12 @@ public class FormControlModelList
   }
 
   /**
-   * Liefert einen Iterator über alle {@link FormControlModel}s in dieser Liste.
-   * ACHTUNG! Es dürfen keine Veränderungen über den Iterator (z.B.
-   * {@link Iterator#remove()}) vorgenommen werden. Auch dürfen während der
-   * Iteration keine Veränderungen an der InsertionModelList vorkommen, da der
+   * Liefert einen Iterator Ã¼ber alle {@link FormControlModel}s in dieser Liste.
+   * ACHTUNG! Es dÃ¼rfen keine VerÃ¤nderungen Ã¼ber den Iterator (z.B.
+   * {@link Iterator#remove()}) vorgenommen werden. Auch dÃ¼rfen wÃ¤hrend der
+   * Iteration keine VerÃ¤nderungen an der InsertionModelList vorkommen, da der
    * Iterator direkt auf der internen Datenstruktur arbeitet und es daher zur
-   * {@link java.util.ConcurrentModificationException} kommen würde.
+   * {@link java.util.ConcurrentModificationException} kommen wÃ¼rde.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -147,8 +147,8 @@ public class FormControlModelList
 
   /**
    * Macht aus str einen Identifier, der noch von keinem FormControlModel dieser
-   * Liste verwendet wird und liefert diesen Identifier zurück. Falls str == "" wird
-   * str zurückgeliefert.
+   * Liste verwendet wird und liefert diesen Identifier zurÃ¼ck. Falls str == "" wird
+   * str zurÃ¼ckgeliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -182,9 +182,9 @@ public class FormControlModelList
   }
 
   /**
-   * Falls idx >= 0 wird model an Index idx in die Liste eingefügt (das Element das
+   * Falls idx >= 0 wird model an Index idx in die Liste eingefÃ¼gt (das Element das
    * sich vorher an diesem Index befand hat danach Index idx+1); falls idx < 0 wird
-   * model an das Ende der Liste angehängt.
+   * model an das Ende der Liste angehÃ¤ngt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -200,7 +200,7 @@ public class FormControlModelList
   }
 
   /**
-   * model wird an das Ende der Liste angehängt.
+   * model wird an das Ende der Liste angehÃ¤ngt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -229,11 +229,11 @@ public class FormControlModelList
   }
 
   /**
-   * Schiebt die ausgewählten FormControlModels in der Liste nach oben, d,h,
+   * Schiebt die ausgewÃ¤hlten FormControlModels in der Liste nach oben, d,h,
    * reduziert ihre Indizes um 1.
    * 
    * @param iter
-   *          iteriert über eine Menge von Integer-Objekten, die die Indizes der zu
+   *          iteriert Ã¼ber eine Menge von Integer-Objekten, die die Indizes der zu
    *          verschiebenden FormControlModels spezifizieren. Die Liste muss
    *          aufsteigend sortiert sein, sonst ist das Ergebnis unbestimmt. Ist das
    *          erste Element von indices die 0, so wird nichts getan. Ansonsten werden
@@ -259,16 +259,16 @@ public class FormControlModelList
   }
 
   /**
-   * Schiebt die ausgewählten FormControlModels in der Liste nach unten, d,h, erhöht
+   * Schiebt die ausgewÃ¤hlten FormControlModels in der Liste nach unten, d,h, erhÃ¶ht
    * ihre Indizes um 1.
    * 
    * @param iter
-   *          iteriert von hinten (d.h. startet hinter dem letzten Element) über eine
+   *          iteriert von hinten (d.h. startet hinter dem letzten Element) Ã¼ber eine
    *          Menge von Integer-Objekten, die die Indizes der zu verschiebenden
    *          FormControlModels spezifizieren. Die Liste muss aufsteigend sortiert
-   *          sein (von vorne gesehen, d.h. iter startet hinter dem größten Wert),
+   *          sein (von vorne gesehen, d.h. iter startet hinter dem grÃ¶ÃŸten Wert),
    *          sonst ist das Ergebnis unbestimmt. Ist das letzte Element der Liste der
-   *          höchste mögliche Index, so wird nichts getan. Ansonsten werden die
+   *          hÃ¶chste mÃ¶gliche Index, so wird nichts getan. Ansonsten werden die
    *          Indizes i aus indices von hinten beginnend abgearbeitet und Element i
    *          wird mit Element i+1 vertauscht.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -292,7 +292,7 @@ public class FormControlModelList
 
   /**
    * Liefert ein ConfigThingy, dessen Wurzel ein "Fenster"-Knoten ist und alle
-   * FormControlModels dieser Liste enthält.
+   * FormControlModels dieser Liste enthÃ¤lt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -366,7 +366,7 @@ public class FormControlModelList
   }
 
   /**
-   * Liefert (TYPE "glue") zurück.
+   * Liefert (TYPE "glue") zurÃ¼ck.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -378,8 +378,8 @@ public class FormControlModelList
   }
 
   /**
-   * Erzeugt ein ConfigThingy für den Reiter tab, hängt es an conf an und liefert es
-   * zurück. Das erzeugte ConfigThingy hat folgenden Aufbau: <br>
+   * Erzeugt ein ConfigThingy fÃ¼r den Reiter tab, hÃ¤ngt es an conf an und liefert es
+   * zurÃ¼ck. Das erzeugte ConfigThingy hat folgenden Aufbau: <br>
    * ReiterId(TITLE "title" CLOSEACTION "action" TIP "tip" HOTKEY "hotkey")
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -397,7 +397,7 @@ public class FormControlModelList
   }
 
   /**
-   * listener wird über Änderungen der Liste informiert.
+   * listener wird Ã¼ber Ã„nderungen der Liste informiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -407,7 +407,7 @@ public class FormControlModelList
   }
 
   /**
-   * Benachrichtigt alle ItemListener über das Hinzufügen von model zur Liste an
+   * Benachrichtigt alle ItemListener Ã¼ber das HinzufÃ¼gen von model zur Liste an
    * Index index.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -424,7 +424,7 @@ public class FormControlModelList
   }
 
   /**
-   * Benachrichtigt alle ItemListener über das Vertauschen der Models mit Indizes
+   * Benachrichtigt alle ItemListener Ã¼ber das Vertauschen der Models mit Indizes
    * index1 und index2.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -441,15 +441,15 @@ public class FormControlModelList
   }
 
   /**
-   * Interface für Klassen, die interessiert sind, zu erfahren, wenn sich die Liste
-   * ändert.
+   * Interface fÃ¼r Klassen, die interessiert sind, zu erfahren, wenn sich die Liste
+   * Ã¤ndert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static interface ItemListener
   {
     /**
-     * Wird aufgerufen nachdem model zur Liste hinzugefügt wurde (an Index index).
+     * Wird aufgerufen nachdem model zur Liste hinzugefÃ¼gt wurde (an Index index).
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */

@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Stellt die Sichtbarkeitsfunktion einer Sichtbarkeitsgruppe dar und erlaubt deren Bearbeitung.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 13.03.2009 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -44,7 +44,7 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 public class OneGroupFuncView extends FunctionSelectionAccessView
 {
   /**
-   * Typischerweise ein Container, der die View enthält und daher über Änderungen auf
+   * Typischerweise ein Container, der die View enthÃ¤lt und daher Ã¼ber Ã„nderungen auf
    * dem Laufenden gehalten werden muss.
    */
   private ViewChangeListener bigDaddy;

@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Ein Dialog, der dem Benutzer erlaubt verschiedenen Werte zu setzen.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 04.05.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -43,14 +43,14 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 public interface Dialog
 {
   /**
-   * Liefert die Instanz dieses Dialogs für den gegebenen context (neu erstellt,
+   * Liefert die Instanz dieses Dialogs fÃ¼r den gegebenen context (neu erstellt,
    * falls bisher noch nicht verwendet).
    * 
    * @param context
-   *          Für jeden Kontext hält der Dialog eine unabhängige Kopie von seinem
-   *          Zustand vor. Auf diese Weise lässt sich der Dialog an verschiedenen
-   *          Stellen unabhängig voneinander einsetzen. ACHTUNG! Diese Map wird nicht
-   *          als Schlüssel verwendet, sondern in ihr werden Werte abgelegt.
+   *          FÃ¼r jeden Kontext hÃ¤lt der Dialog eine unabhÃ¤ngige Kopie von seinem
+   *          Zustand vor. Auf diese Weise lÃ¤sst sich der Dialog an verschiedenen
+   *          Stellen unabhÃ¤ngig voneinander einsetzen. ACHTUNG! Diese Map wird nicht
+   *          als SchlÃ¼ssel verwendet, sondern in ihr werden Werte abgelegt.
    * @throws ConfigurationErrorException
    *           wenn der Dialog mit fehlerhaften Daten initialisiert wurde (und der
    *           Fehler erst bei der Instanziierung diagnostiziert werden konnte).
@@ -62,16 +62,16 @@ public interface Dialog
   /**
    * Liefert den durch id identifizierten Wert des Dialogs. Falls der Dialog noch
    * nicht aufgerufen wurde wird ein Standardwert geliefert (typischerweise der leere
-   * String). Der Rückgabewert null ist ebenfalls möglich und signalisiert, dass der
-   * Dialog das entsprechende Feld nicht hat und auch nie haben wird. Die Rückgabe
+   * String). Der RÃ¼ckgabewert null ist ebenfalls mÃ¶glich und signalisiert, dass der
+   * Dialog das entsprechende Feld nicht hat und auch nie haben wird. Die RÃ¼ckgabe
    * von null ist in diesem Fall allerdings nicht verpflichtend, sondern es ist
-   * ebenfalls der leere String möglich. Die Rückgabe von null sollte jedoch
-   * erfolgen, falls es dem Dialog irgendwie möglich ist.
+   * ebenfalls der leere String mÃ¶glich. Die RÃ¼ckgabe von null sollte jedoch
+   * erfolgen, falls es dem Dialog irgendwie mÃ¶glich ist.
    * 
-   * Diese Funktion darf nur für mit instanceFor() erzeugte Instanzen aufgerufen
+   * Diese Funktion darf nur fÃ¼r mit instanceFor() erzeugte Instanzen aufgerufen
    * werden. Ansonsten liefert sie immer null. Diese Funktion ist Thread-safe.
    * Insbesondere muss sie nicht im EDT aufgerufen werden. Sie kann sowohl vor,
-   * während als auch nach dem Aufruf von show() aufgerufen werden, auch nachdem der
+   * wÃ¤hrend als auch nach dem Aufruf von show() aufgerufen werden, auch nachdem der
    * Dialog schon geschlossen wurde.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -79,14 +79,14 @@ public interface Dialog
   public Object getData(String id);
 
   /**
-   * Liefert eine Menge von ids, für die {@link #getData(String)} niemals null
-   * liefert. Dies ist nicht zwangsweise eine vollständige Liste aller ids, für die
-   * der Dialog Werte zurückliefern kann. Es ist ebenfalls nicht garantiert, dass der
-   * Dialog jemeils für eine dieser ids etwas anderes als den leeren String
-   * zurückliefert. Diese Funktion kann schon vor instanceFor() aufgerufen werden, es
-   * ist jedoch möglich, dass bei Aufruf für eine mit instanceFor() erzeugte Instanz
-   * mehr Information (d.h. eine größere Menge) zurückgeliefert wird. Das
-   * zurückgelieferte Objekt darf verändert werden. Dies hat keine Auswirkungen auf
+   * Liefert eine Menge von ids, fÃ¼r die {@link #getData(String)} niemals null
+   * liefert. Dies ist nicht zwangsweise eine vollstÃ¤ndige Liste aller ids, fÃ¼r die
+   * der Dialog Werte zurÃ¼ckliefern kann. Es ist ebenfalls nicht garantiert, dass der
+   * Dialog jemeils fÃ¼r eine dieser ids etwas anderes als den leeren String
+   * zurÃ¼ckliefert. Diese Funktion kann schon vor instanceFor() aufgerufen werden, es
+   * ist jedoch mÃ¶glich, dass bei Aufruf fÃ¼r eine mit instanceFor() erzeugte Instanz
+   * mehr Information (d.h. eine grÃ¶ÃŸere Menge) zurÃ¼ckgeliefert wird. Das
+   * zurÃ¼ckgelieferte Objekt darf verÃ¤ndert werden. Dies hat keine Auswirkungen auf
    * den Dialog.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -94,7 +94,7 @@ public interface Dialog
   public Collection<String> getSchema();
 
   /**
-   * Zeigt den Dialog an. Diese Funktion darf nur für mit instanceFor() erzeugte
+   * Zeigt den Dialog an. Diese Funktion darf nur fÃ¼r mit instanceFor() erzeugte
    * Instanzen aufgerufen werden. Ansonsten tut sie nichts.
    * 
    * @param dialogEndListener
@@ -105,10 +105,10 @@ public interface Dialog
    *          an, die das Beenden des Dialogs veranlasst hat.
    * @param funcLib
    *          falls der Dialog Funktionen auswertet, so werden Referenzen auf
-   *          Funktionen mit dieser Bibliothek aufgelöst.
+   *          Funktionen mit dieser Bibliothek aufgelÃ¶st.
    * @param dialogLib
-   *          falls der Dialog wiederum Funktionsdialoge unterstützt, so werden
-   *          Referenzen auf Funktionsdialoge über diese Bibliothek aufgelöst.
+   *          falls der Dialog wiederum Funktionsdialoge unterstÃ¼tzt, so werden
+   *          Referenzen auf Funktionsdialoge Ã¼ber diese Bibliothek aufgelÃ¶st.
    * @throws ConfigurationErrorException
    *           wenn der Dialog mit fehlerhaften Daten initialisiert wurde (und der
    *           Fehler erst bei der Anzeige diagnostiziert werden konnte).

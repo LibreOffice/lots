@@ -1,9 +1,9 @@
 /*
  * Dateiname: QueryResultsWithSchema.java
  * Projekt  : WollMux
- * Funktion : Ein Container für Ergebnisse einer Datenbankafrage zusammen mit dem zugehörigen Schema.
+ * Funktion : Ein Container fÃ¼r Ergebnisse einer Datenbankafrage zusammen mit dem zugehÃ¶rigen Schema.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 04.03.2008 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -36,7 +36,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Ein Container für Ergebnisse einer Datenbankafrage zusammen mit dem zugehörigen
+ * Ein Container fÃ¼r Ergebnisse einer Datenbankafrage zusammen mit dem zugehÃ¶rigen
  * Schema.
  * 
  * @author Matthias Benkmann (D-III-ITD D.10)
@@ -58,7 +58,7 @@ public class QueryResultsWithSchema implements QueryResults
 
   /**
    * Erzeugt ein neues QueryResultsWithSchema, das den Inhalt von res und das Schema
-   * schema zusammenfasst. ACHTUNG! res und schema werden als Referenzen übernommen.
+   * schema zusammenfasst. ACHTUNG! res und schema werden als Referenzen Ã¼bernommen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

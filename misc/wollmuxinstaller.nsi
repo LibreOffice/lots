@@ -24,7 +24,7 @@
 Name "WollMux ${VERSION}"
 OutFile "wollmux-${VERSION}-installer.exe"
 Caption "WollMux Installer"
-BrandingText "(c) Landeshauptstadt München" ;; string to replace "Nullsoft Install System vX.XX" at the bottom of install window
+BrandingText "(c) Landeshauptstadt MÃ¼nchen" ;; string to replace "Nullsoft Install System vX.XX" at the bottom of install window
 
 ; RequestExecutionLevel admin ;; needed to set ExecutionLevel for Vista/Windows 7 - works only with NSIS ver. 2.21+
 AllowRootDirInstall true ;; not necessary but why restrict the user?
@@ -36,7 +36,7 @@ ShowUninstDetails hide
 InstallDir "$PROGRAMFILES\WollMux" ;; default ($INSTDIR will be overwritten in .onInit function if "--INSTDIR=" command line parameter is set)
 
 # Installer & Uninstaller Pages
-Page components ;; Soll der User überhaupt was auswählen dürfen?
+Page components ;; Soll der User Ã¼berhaupt was auswÃ¤hlen dÃ¼rfen?
 Page directory
 Page instfiles
 UninstPage uninstConfirm

@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Ein Wert, der als verschiedene Datentypen abrufbar ist.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 02.02.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -39,7 +39,7 @@ public interface Value
 {
   /**
    * Der aktuelle Wert als String. Falls es sich um einen booleschen Wert handelt,
-   * wird der String "true" oder "false" zurückgeliefert.
+   * wird der String "true" oder "false" zurÃ¼ckgeliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -47,7 +47,7 @@ public interface Value
 
   /**
    * Der aktuelle Wert als boolean. Falls der Wert seiner Natur nach ein String ist,
-   * so ist das Ergebnis abhängig von der konkreten Implementierung.
+   * so ist das Ergebnis abhÃ¤ngig von der konkreten Implementierung.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

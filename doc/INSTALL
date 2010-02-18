@@ -123,7 +123,7 @@ Rebuilding classes.tar.gz on a Debian system requires the package mingw32.
   on a standard Debian or Ubuntu system. If you want a Debian package that works
   on these systems, you will have to add a debian/ directory inside the WollMux
   directory. If debian/ is present, it will be used. Otherwise the lhmdeb/ 
-  directory is used, which only works for the Landeshauptstadt München's 
+  directory is used, which only works for the Landeshauptstadt MÃ¼nchen's 
   Basisclient.
 
 == Building a Windows installer ===

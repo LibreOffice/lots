@@ -1,9 +1,9 @@
 /*
  * Dateiname: SachleitendeVerfuegung.java
  * Projekt  : WollMux
- * Funktion : Hilfen für Sachleitende Verfügungen.
+ * Funktion : Hilfen fÃ¼r Sachleitende VerfÃ¼gungen.
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 26.09.2006 | LUT | Erstellung als SachleitendeVerfuegung
  * 31.07.2009 | BED | +"copyOnly"
@@ -110,9 +110,9 @@ public class SachleitendeVerfuegung
   private static final String ParaStyleNameZuleitungszeile =
     "WollMuxZuleitungszeile";
 
-  private static final String ParaStyleNameDefault = "Fließtext";
+  private static final String ParaStyleNameDefault = "FlieÃŸtext";
 
-  private static final String CharStyleNameDefault = "Fließtext";
+  private static final String CharStyleNameDefault = "FlieÃŸtext";
 
   private static final String CharStyleNameRoemischeZiffer =
     "WollMuxRoemischeZiffer";
@@ -123,8 +123,8 @@ public class SachleitendeVerfuegung
   private static final String zifferPattern = "^([XIV]+|\\d+)\\.\t";
 
   /**
-   * Enthält einen Vector mit den ersten 15 römischen Ziffern. Mehr wird in
-   * Sachleitenden Verfügungen sicherlich nicht benötigt :-)
+   * EnthÃ¤lt einen Vector mit den ersten 15 rÃ¶mischen Ziffern. Mehr wird in
+   * Sachleitenden VerfÃ¼gungen sicherlich nicht benÃ¶tigt :-)
    */
   private static final String[] romanNumbers =
     new String[] {
@@ -132,15 +132,15 @@ public class SachleitendeVerfuegung
       "XII.", "XIII.", "XIV.", "XV." };
 
   /**
-   * Setzt das Absatzformat des Absatzes, der range berührt, auf
-   * "WollMuxVerfuegungspunkt" ODER setzt alle in range enthaltenen Verfügungspunkte
-   * auf Fließtext zurück, wenn range einen oder mehrere Verfügungspunkte berührt.
+   * Setzt das Absatzformat des Absatzes, der range berÃ¼hrt, auf
+   * "WollMuxVerfuegungspunkt" ODER setzt alle in range enthaltenen VerfÃ¼gungspunkte
+   * auf FlieÃŸtext zurÃ¼ck, wenn range einen oder mehrere VerfÃ¼gungspunkte berÃ¼hrt.
    * 
    * @param range
    *          Die XTextRange, in der sich zum Zeitpunkt des Aufrufs der Cursor
    *          befindet.
-   * @return die Position zurück, auf die der ViewCursor gesetzt werden soll oder
-   *         null, falls der ViewCursor unverändert bleibt.
+   * @return die Position zurÃ¼ck, auf die der ViewCursor gesetzt werden soll oder
+   *         null, falls der ViewCursor unverÃ¤ndert bleibt.
    */
   public static XTextRange insertVerfuegungspunkt(TextDocumentModel model,
       XTextRange range)
@@ -153,13 +153,13 @@ public class SachleitendeVerfuegung
     XParagraphCursor cursor =
       UNO.XParagraphCursor(range.getText().createTextCursorByRange(range));
 
-    // Enthält der markierte Bereich bereits Verfuegungspunkte, so werden diese
-    // gelöscht
+    // EnthÃ¤lt der markierte Bereich bereits Verfuegungspunkte, so werden diese
+    // gelÃ¶scht
     boolean deletedAtLeastOne = removeAllVerfuegungspunkte(cursor);
 
     if (!deletedAtLeastOne)
     {
-      // neuen Verfügungspunkt setzen:
+      // neuen VerfÃ¼gungspunkt setzen:
       cursor.collapseToStart();
       cursor.gotoStartOfParagraph(false);
       cursor.gotoEndOfParagraph(true);
@@ -169,26 +169,26 @@ public class SachleitendeVerfuegung
         formatVerfuegungspunkt(cursor);
     }
 
-    // Ziffernanpassung durchführen:
+    // Ziffernanpassung durchfÃ¼hren:
     ziffernAnpassen(model);
 
     return null;
   }
 
   /**
-   * Erzeugt am Ende des Paragraphen, der von range berührt wird, einen neuen
+   * Erzeugt am Ende des Paragraphen, der von range berÃ¼hrt wird, einen neuen
    * Paragraphen, setzt diesen auf das Absatzformat WollMuxVerfuegungspunktAbdruck
-   * und belegt ihn mit dem String "Abdruck von <Vorgänger>" ODER löscht alle
-   * Verfügungspunkte die der range berührt, wenn in ihm mindestens ein bereits
-   * bestehender Verfügungspunkt enthalten ist.
+   * und belegt ihn mit dem String "Abdruck von <VorgÃ¤nger>" ODER lÃ¶scht alle
+   * VerfÃ¼gungspunkte die der range berÃ¼hrt, wenn in ihm mindestens ein bereits
+   * bestehender VerfÃ¼gungspunkt enthalten ist.
    * 
    * @param doc
-   *          Das Dokument, in dem der Verfügungspunkt eingefügt werden soll (wird
-   *          für die Ziffernanpassung benötigt)
+   *          Das Dokument, in dem der VerfÃ¼gungspunkt eingefÃ¼gt werden soll (wird
+   *          fÃ¼r die Ziffernanpassung benÃ¶tigt)
    * @param cursor
-   *          Der Cursor, in dessen Bereich nach Verfügungspunkten gesucht wird.
-   * @return die Position zurück, auf die der ViewCursor gesetzt werden soll oder
-   *         null, falls der ViewCursor unverändert bleibt.
+   *          Der Cursor, in dessen Bereich nach VerfÃ¼gungspunkten gesucht wird.
+   * @return die Position zurÃ¼ck, auf die der ViewCursor gesetzt werden soll oder
+   *         null, falls der ViewCursor unverÃ¤ndert bleibt.
    */
   public static XTextRange insertAbdruck(TextDocumentModel model, XTextRange range)
   {
@@ -200,16 +200,16 @@ public class SachleitendeVerfuegung
     XParagraphCursor cursor =
       UNO.XParagraphCursor(range.getText().createTextCursorByRange(range));
 
-    // Enthält der markierte Bereich bereits Verfuegungspunkte, so werden diese
-    // gelöscht
+    // EnthÃ¤lt der markierte Bereich bereits Verfuegungspunkte, so werden diese
+    // gelÃ¶scht
     boolean deletedAtLeastOne = removeAllAbdruecke(cursor);
 
     if (!deletedAtLeastOne)
     {
-      // Abdruck einfügen, wenn kein Verfügungspunkt gelöscht wurde:
+      // Abdruck einfÃ¼gen, wenn kein VerfÃ¼gungspunkt gelÃ¶scht wurde:
 
       // Startposition des cursors setzen. Bereiche werden auf den Anfang
-      // kollabiert. Bei Verfügungspunkten wird am Absatzende eingefügt.
+      // kollabiert. Bei VerfÃ¼gungspunkten wird am Absatzende eingefÃ¼gt.
       cursor.collapseToStart();
       if (isVerfuegungspunkt(cursor)) cursor.gotoEndOfParagraph(false);
 
@@ -231,17 +231,17 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Formatiert alle Paragraphen die der TextRange range berührt mit dem Absatzformat
+   * Formatiert alle Paragraphen die der TextRange range berÃ¼hrt mit dem Absatzformat
    * WollMuxZuleitungszeile und markiert diese Zeilen damit auch semantisch als
    * Zuleitungszeilen ODER setzt das Absatzformat der ensprechenden Paragraphen
-   * wieder auf Fließtext zurück, wenn mindestens ein Paragraph bereits eine
+   * wieder auf FlieÃŸtext zurÃ¼ck, wenn mindestens ein Paragraph bereits eine
    * Zuleitungszeile ist.
    * 
    * @param doc
    *          Das Dokument in dem die sich range befindet.
    * @param range
-   * @return die Position zurück, auf die der ViewCursor gesetzt werden soll oder
-   *         null, falls der ViewCursor unverändert bleibt.
+   * @return die Position zurÃ¼ck, auf die der ViewCursor gesetzt werden soll oder
+   *         null, falls der ViewCursor unverÃ¤ndert bleibt.
    */
   public static XTextRange insertZuleitungszeile(TextDocumentModel model,
       XTextRange range)
@@ -260,7 +260,7 @@ public class SachleitendeVerfuegung
     if (!deletedAtLeastOne && UNO.XEnumerationAccess(cursor) != null)
     {
       // Im cursor enthaltene Paragraphen einzeln iterieren und je nach Typ
-      // entweder eine Zuleitungszeile oder einen Verfügungspunkt mit Zuleitung
+      // entweder eine Zuleitungszeile oder einen VerfÃ¼gungspunkt mit Zuleitung
       // setzen.
       XEnumeration paragraphs = UNO.XEnumerationAccess(cursor).createEnumeration();
       while (paragraphs.hasMoreElements())
@@ -277,7 +277,7 @@ public class SachleitendeVerfuegung
         {
           if (isAbdruck(par))
           {
-            if (cursor.isCollapsed()) // Ignorieren, wenn Bereich ausgewählt.
+            if (cursor.isCollapsed()) // Ignorieren, wenn Bereich ausgewÃ¤hlt.
             {
               // Zuleitung in neuer Zeile erzeugen:
               par.getEnd().setString("\r");
@@ -300,16 +300,16 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Diese Methode löscht alle Verfügungspunkte, die der Bereich des Cursors cursor
-   * berührt, und liefert true zurück, wenn mindestens ein Verfügungspunkt gelöscht
-   * wurde oder false, wenn sich in dem Bereich des Cursors kein Verfügungspunkt
+   * Diese Methode lÃ¶scht alle VerfÃ¼gungspunkte, die der Bereich des Cursors cursor
+   * berÃ¼hrt, und liefert true zurÃ¼ck, wenn mindestens ein VerfÃ¼gungspunkt gelÃ¶scht
+   * wurde oder false, wenn sich in dem Bereich des Cursors kein VerfÃ¼gungspunkt
    * befand.
    * 
    * @param cursor
-   *          Der Cursor, in dessen Bereich nach Verfügungspunkten gesucht wird.
+   *          Der Cursor, in dessen Bereich nach VerfÃ¼gungspunkten gesucht wird.
    * 
-   * @return true, wenn mindestens ein Verfügungspunkt gelöscht wurde oder false,
-   *         wenn kein der cursor keinen Verfügungspunkt berührt.
+   * @return true, wenn mindestens ein VerfÃ¼gungspunkt gelÃ¶scht wurde oder false,
+   *         wenn kein der cursor keinen VerfÃ¼gungspunkt berÃ¼hrt.
    */
   private static boolean removeAllVerfuegungspunkte(XParagraphCursor cursor)
   {
@@ -336,7 +336,7 @@ public class SachleitendeVerfuegung
             isVerfuegungspunktMitZuleitung(par);
           if (isVerfuegungspunkt(par))
           {
-            // Einen evtl. bestehenden Verfuegungspunkt zurücksetzen
+            // Einen evtl. bestehenden Verfuegungspunkt zurÃ¼cksetzen
             removeSingleVerfuegungspunkt(par);
             deletedAtLeastOne = true;
           }
@@ -348,15 +348,15 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Diese Methode löscht alle Abdruck-Zeilen, die der Bereich des Cursors cursor
-   * berührt, und liefert true zurück, wenn mindestens ein Abdruck gelöscht wurde
+   * Diese Methode lÃ¶scht alle Abdruck-Zeilen, die der Bereich des Cursors cursor
+   * berÃ¼hrt, und liefert true zurÃ¼ck, wenn mindestens ein Abdruck gelÃ¶scht wurde
    * oder false, wenn sich in dem Bereich des Cursors kein Abdruck befand.
    * 
    * @param cursor
-   *          Der Cursor, in dessen Bereich nach Abdrücken gesucht wird.
+   *          Der Cursor, in dessen Bereich nach AbdrÃ¼cken gesucht wird.
    * 
-   * @return true, wenn mindestens ein Abdruck gelöscht wurde oder false, wenn kein
-   *         der cursor keinen Verfügungspunkt berührt.
+   * @return true, wenn mindestens ein Abdruck gelÃ¶scht wurde oder false, wenn kein
+   *         der cursor keinen VerfÃ¼gungspunkt berÃ¼hrt.
    */
   private static boolean removeAllAbdruecke(XParagraphCursor cursor)
   {
@@ -381,7 +381,7 @@ public class SachleitendeVerfuegung
         {
           if (isAbdruck(par))
           {
-            // Einen evtl. bestehenden Verfuegungspunkt zurücksetzen
+            // Einen evtl. bestehenden Verfuegungspunkt zurÃ¼cksetzen
             removeSingleVerfuegungspunkt(par);
             deletedAtLeastOne = true;
           }
@@ -392,16 +392,16 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Diese Methode löscht alle Zuleitungszeilen, die der Bereich des Cursors cursor
-   * berührt, und liefert true zurück, wenn mindestens eine Zuleitungszeile gelöscht
+   * Diese Methode lÃ¶scht alle Zuleitungszeilen, die der Bereich des Cursors cursor
+   * berÃ¼hrt, und liefert true zurÃ¼ck, wenn mindestens eine Zuleitungszeile gelÃ¶scht
    * wurde oder false, wenn sich in dem Bereich des Cursors keine Zuleitungszeile
    * befand.
    * 
    * @param cursor
    *          Der Cursor, in dessen Bereich nach Zuleitungszeilen gesucht wird.
    * 
-   * @return true, wenn mindestens eine Zuleitungszeile gelöscht wurde oder false,
-   *         wenn kein der cursor keine Zuleitungszeile berührt.
+   * @return true, wenn mindestens eine Zuleitungszeile gelÃ¶scht wurde oder false,
+   *         wenn kein der cursor keine Zuleitungszeile berÃ¼hrt.
    */
   private static boolean removeAllZuleitungszeilen(XParagraphCursor cursor)
   {
@@ -426,13 +426,13 @@ public class SachleitendeVerfuegung
         {
           if (isZuleitungszeile(par))
           {
-            // Zuleitungszeile zurücksetzen
+            // Zuleitungszeile zurÃ¼cksetzen
             formatDefault(par);
             deletedAtLeastOne = true;
           }
           else if (isVerfuegungspunktMitZuleitung(par))
           {
-            // Zuleitung aus Verfügungspunkt entfernen:
+            // Zuleitung aus VerfÃ¼gungspunkt entfernen:
             formatVerfuegungspunkt(par);
             deletedAtLeastOne = true;
           }
@@ -443,9 +443,9 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Löscht die römische Ziffer+PUNKT+Tab aus einem als
+   * LÃ¶scht die rÃ¶mische Ziffer+PUNKT+Tab aus einem als
    * "WollMuxVerfuegungspunkt[...]" markierten Absatz heraus und setzt das
-   * Absatzformat auf "Fließtext" zurück.
+   * Absatzformat auf "FlieÃŸtext" zurÃ¼ck.
    * 
    * @param par
    *          der Cursor, der sich in der entsprechenden Zeile befinden muss.
@@ -454,23 +454,23 @@ public class SachleitendeVerfuegung
   {
     formatDefault(par);
 
-    // Prüfe, ob der Absatz mit einer römischen Ziffer beginnt.
+    // PrÃ¼fe, ob der Absatz mit einer rÃ¶mischen Ziffer beginnt.
     XTextCursor zifferOnly = getZifferOnly(par, false);
 
-    // römische Ziffer löschen.
+    // rÃ¶mische Ziffer lÃ¶schen.
     if (zifferOnly != null) zifferOnly.setString("");
 
     // wenn es sich bei dem Paragraphen um einen Abdruck handelt, wird dieser
-    // vollständig gelöscht.
+    // vollstÃ¤ndig gelÃ¶scht.
     if (isAbdruck(par))
     {
-      // Den Absatz mit dem String "Ziffer.\tAbdruck von..." löschen
+      // Den Absatz mit dem String "Ziffer.\tAbdruck von..." lÃ¶schen
       par.setString("");
 
       XParagraphCursor parDeleter =
         UNO.XParagraphCursor(par.getText().createTextCursorByRange(par.getEnd()));
 
-      // Löscht das Leerzeichen vor dem Abdruck und nach dem Abdruck (falls eine
+      // LÃ¶scht das Leerzeichen vor dem Abdruck und nach dem Abdruck (falls eine
       // Leerzeile folgt)
       parDeleter.goLeft((short) 1, true);
       parDeleter.setString("");
@@ -483,8 +483,8 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Formatiert den übergebenen Absatz paragraph in der Standardschriftart
-   * "Fließtext".
+   * Formatiert den Ã¼bergebenen Absatz paragraph in der Standardschriftart
+   * "FlieÃŸtext".
    * 
    * @param paragraph
    */
@@ -495,7 +495,7 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Formatiert den übergebenen Absatz paragraph als Abdruck.
+   * Formatiert den Ã¼bergebenen Absatz paragraph als Abdruck.
    * 
    * @param paragraph
    */
@@ -506,7 +506,7 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Formatiert den übergebenen Absatz paragraph als Verfügungspunkt mit
+   * Formatiert den Ã¼bergebenen Absatz paragraph als VerfÃ¼gungspunkt mit
    * Zuleitungszeile.
    * 
    * @param paragraph
@@ -519,7 +519,7 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Formatiert den übergebenen Absatz paragraph als Verfügungspunkt.
+   * Formatiert den Ã¼bergebenen Absatz paragraph als VerfÃ¼gungspunkt.
    * 
    * @param paragraph
    */
@@ -530,7 +530,7 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Formatiert den übergebenen Absatz paragraph als Zuleitungszeile.
+   * Formatiert den Ã¼bergebenen Absatz paragraph als Zuleitungszeile.
    * 
    * @param paragraph
    */
@@ -541,7 +541,7 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Holt sich aus dem übergebenen Absatz paragraph nur den Breich der römischen
+   * Holt sich aus dem Ã¼bergebenen Absatz paragraph nur den Breich der rÃ¶mischen
    * Ziffer (+Tab) und formatiert diesen im Zeichenformat WollMuxRoemischeZiffer.
    * 
    * @param paragraph
@@ -561,11 +561,11 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Liefert true, wenn es sich bei dem übergebenen Absatz paragraph um einen als
+   * Liefert true, wenn es sich bei dem Ã¼bergebenen Absatz paragraph um einen als
    * Verfuegungspunkt markierten Absatz handelt.
    * 
    * @param paragraph
-   *          Das Objekt mit der Property ParaStyleName, die für den Vergleich
+   *          Das Objekt mit der Property ParaStyleName, die fÃ¼r den Vergleich
    *          herangezogen wird.
    * @return true, wenn der Name des Absatzformates mit "WollMuxVerfuegungspunkt"
    *         beginnt.
@@ -584,11 +584,11 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Liefert true, wenn es sich bei dem übergebenen Absatz paragraph um einen als
+   * Liefert true, wenn es sich bei dem Ã¼bergebenen Absatz paragraph um einen als
    * VerfuegungspunktMitZuleitung markierten Absatz handelt.
    * 
    * @param paragraph
-   *          Das Objekt mit der Property ParaStyleName, die für den Vergleich
+   *          Das Objekt mit der Property ParaStyleName, die fÃ¼r den Vergleich
    *          herangezogen wird.
    * @return true, wenn der Name des Absatzformates mit
    *         "WollMuxVerfuegungspunktMitZuleitung" beginnt.
@@ -607,11 +607,11 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Liefert true, wenn es sich bei dem übergebenen Absatz paragraph um einen als
+   * Liefert true, wenn es sich bei dem Ã¼bergebenen Absatz paragraph um einen als
    * Zuleitungszeile markierten Absatz handelt.
    * 
    * @param paragraph
-   *          Das Objekt mit der Property ParaStyleName, die für den Vergleich
+   *          Das Objekt mit der Property ParaStyleName, die fÃ¼r den Vergleich
    *          herangezogen wird.
    * @return true, wenn der Name des Absatzformates mit "WollMuxZuleitungszeile"
    *         beginnt.
@@ -630,31 +630,31 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Liefert true, wenn der übergebene Paragraph paragraph den für Abdrucke typischen
-   * String in der Form "Abdruck von I[, II, ...][ und n]" enthält, andernfalls
+   * Liefert true, wenn der Ã¼bergebene Paragraph paragraph den fÃ¼r Abdrucke typischen
+   * String in der Form "Abdruck von I[, II, ...][ und n]" enthÃ¤lt, andernfalls
    * false.
    * 
    * @param paragraph
-   *          der zu prüfende Paragraph
+   *          der zu prÃ¼fende Paragraph
    * @return
    */
   private static boolean isAbdruck(XTextRange paragraph)
   {
     String str = paragraph.getString();
     return str.contains(L.m("Abdruck von I."))
-      || str.contains(L.m("Abdruck von <Vorgänger>."));
+      || str.contains(L.m("Abdruck von <VorgÃ¤nger>."));
   }
 
   /**
    * Liefert den letzten Teil suffix, der am Ende eines Abdruck-Strings der Form
    * "Abdruck von I[, II, ...][ und n]<suffix>" gefunden wird oder "", wenn der kein
    * Teil gefunden wurde. Das entspricht dem Text, den der Benutzer manuell
-   * hinzugefügt hat.
+   * hinzugefÃ¼gt hat.
    * 
    * @param paragraph
-   *          der Paragraph, der den Abdruck-String enthält.
-   * @return den suffix des Abdruck-Strings, der überlicherweise vom Benutzer manuell
-   *         hinzugefügt wurde.
+   *          der Paragraph, der den Abdruck-String enthÃ¤lt.
+   * @return den suffix des Abdruck-Strings, der Ã¼berlicherweise vom Benutzer manuell
+   *         hinzugefÃ¼gt wurde.
    */
   private static String getAbdruckSuffix(XTextRange paragraph)
   {
@@ -668,22 +668,22 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Zählt die Anzahl Verfügungspunkte im Dokument vor der Position von
-   * range.getStart() (einschließlich) und liefert deren Anzahl zurück, wobei auch
-   * ein evtl. vorhandener Rahmen WollMuxVerfuegungspunkt1 mit gezählt wird.
+   * ZÃ¤hlt die Anzahl VerfÃ¼gungspunkte im Dokument vor der Position von
+   * range.getStart() (einschlieÃŸlich) und liefert deren Anzahl zurÃ¼ck, wobei auch
+   * ein evtl. vorhandener Rahmen WollMuxVerfuegungspunkt1 mit gezÃ¤hlt wird.
    * 
    * @param doc
-   *          Das Dokument in dem sich range befindet (wird benötigt für den Rahmen
+   *          Das Dokument in dem sich range befindet (wird benÃ¶tigt fÃ¼r den Rahmen
    *          WollMuxVerfuegungspunkt1)
    * @param range
-   *          Die TextRange, bei der mit der Zählung begonnen werden soll.
-   * @return die Anzahl Verfügungspunkte vor und mit range.getStart()
+   *          Die TextRange, bei der mit der ZÃ¤hlung begonnen werden soll.
+   * @return die Anzahl VerfÃ¼gungspunkte vor und mit range.getStart()
    */
   public static int countVerfPunkteBefore(XTextDocument doc, XParagraphCursor range)
   {
     int count = 0;
 
-    // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
+    // ZÃ¤hler fÃ¼r Verfuegungspunktnummer auf 1 initialisieren, wenn ein
     // Verfuegungspunkt1 vorhanden ist.
     XTextRange punkt1 = getVerfuegungspunkt1(doc);
     if (punkt1 != null) count++;
@@ -699,32 +699,32 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Sucht nach allen Absätzen im Haupttextbereich des Dokuments doc (also nicht in
+   * Sucht nach allen AbsÃ¤tzen im Haupttextbereich des Dokuments doc (also nicht in
    * Frames), deren Absatzformatname mit "WollMuxVerfuegungspunkt" beginnt und
-   * numeriert die bereits vorhandenen römischen Ziffern neu durch oder erzeugt eine
-   * neue Ziffer, wenn in einem entsprechenden Verfügungspunkt noch keine Ziffer
+   * numeriert die bereits vorhandenen rÃ¶mischen Ziffern neu durch oder erzeugt eine
+   * neue Ziffer, wenn in einem entsprechenden VerfÃ¼gungspunkt noch keine Ziffer
    * gesetzt wurde. Ist ein Rahmen mit dem Namen WollMuxVerfuegungspunkt1 vorhanden,
-   * der einen als Verfügungpunkt markierten Paragraphen enthält, so wird dieser
-   * Paragraph immer (gemäß Konzept) als Verfügungspunkt "I" behandelt.
+   * der einen als VerfÃ¼gungpunkt markierten Paragraphen enthÃ¤lt, so wird dieser
+   * Paragraph immer (gemÃ¤ÃŸ Konzept) als VerfÃ¼gungspunkt "I" behandelt.
    * 
    * @param doc
-   *          Das Dokument, in dem alle Verfügungspunkte angepasst werden sollen.
+   *          Das Dokument, in dem alle VerfÃ¼gungspunkte angepasst werden sollen.
    */
   public static void ziffernAnpassen(TextDocumentModel model)
   {
     XTextRange punkt1 = getVerfuegungspunkt1(model.doc);
 
-    // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
+    // ZÃ¤hler fÃ¼r Verfuegungspunktnummer auf 1 initialisieren, wenn ein
     // Verfuegungspunkt1 vorhanden ist.
     int count = 0;
     if (punkt1 != null) count++;
 
     // Paragraphen des Texts enumerieren und dabei alle Verfuegungspunkte neu
-    // nummerieren. Die Enumeration erfolgt über einen ParagraphCursor, da sich
-    // dieser stabiler verhält als das Durchgehen der XEnumerationAccess, bei
-    // der es zu OOo-Abstürzen kam. Leider konnte ich das Problem nicht exakt
+    // nummerieren. Die Enumeration erfolgt Ã¼ber einen ParagraphCursor, da sich
+    // dieser stabiler verhÃ¤lt als das Durchgehen der XEnumerationAccess, bei
+    // der es zu OOo-AbstÃ¼rzen kam. Leider konnte ich das Problem nicht exakt
     // genug isolieren um ein entsprechende Ticket bei OOo dazu aufmachen zu
-    // können, da der Absturz nur sporadisch auftrat.
+    // kÃ¶nnen, da der Absturz nur sporadisch auftrat.
     XParagraphCursor cursor =
       UNO.XParagraphCursor(model.doc.getText().createTextCursorByRange(
         model.doc.getText().getStart()));
@@ -749,7 +749,7 @@ public class SachleitendeVerfuegung
         }
         else
         {
-          // Behandlung von normalen Verfügungspunkten:
+          // Behandlung von normalen VerfÃ¼gungspunkten:
           String numberStr = romanNumber(count) + "\t";
           XTextRange zifferOnly = getZifferOnly(cursor, false);
           if (zifferOnly != null)
@@ -784,8 +784,8 @@ public class SachleitendeVerfuegung
     }
 
     // Setzte die Druckfunktion SachleitendeVerfuegung wenn mindestens manuell
-    // eingefügter Verfügungspunkt vorhanden ist. Ansonsten setze die
-    // Druckfunktion zurück.
+    // eingefÃ¼gter VerfÃ¼gungspunkt vorhanden ist. Ansonsten setze die
+    // Druckfunktion zurÃ¼ck.
     int effectiveCount = (punkt1 != null) ? count - 1 : count;
     if (effectiveCount > 0)
       model.addPrintFunction(PRINT_FUNCTION_NAME);
@@ -794,18 +794,18 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Liefert eine XTextRange, die genau die römische Ziffer (falls vorhanden mit
-   * darauf folgendem \t-Zeichen) am Beginn eines Absatzes umschließt oder null,
+   * Liefert eine XTextRange, die genau die rÃ¶mische Ziffer (falls vorhanden mit
+   * darauf folgendem \t-Zeichen) am Beginn eines Absatzes umschlieÃŸt oder null,
    * falls keine Ziffer gefunden wurde. Bei der Suche nach der Ziffer werden nur die
-   * ersten 7 Zeichen des Absatzes geprüft.
+   * ersten 7 Zeichen des Absatzes geprÃ¼ft.
    * 
    * @param par
-   *          die TextRange, die den Paragraphen umschließt, in dessen Anfang nach
-   *          der römischen Ziffer gesucht werden soll.
+   *          die TextRange, die den Paragraphen umschlieÃŸt, in dessen Anfang nach
+   *          der rÃ¶mischen Ziffer gesucht werden soll.
    * @param includeNoTab
-   *          ist includeNoTab == true, so enthält der cursor immer nur die Ziffer
+   *          ist includeNoTab == true, so enthÃ¤lt der cursor immer nur die Ziffer
    *          ohne das darauf folgende Tab-Zeichen.
-   * @return die TextRange, die genau die römische Ziffer umschließt falls eine
+   * @return die TextRange, die genau die rÃ¶mische Ziffer umschlieÃŸt falls eine
    *         gefunden wurde oder null, falls keine Ziffer gefunden wurde.
    */
   private static XTextCursor getZifferOnly(XTextRange par, boolean includeNoTab)
@@ -871,14 +871,14 @@ public class SachleitendeVerfuegung
 
   /**
    * Erzeugt einen String in der Form "i.<tab>Abdruck von I.[, II., ...][ und
-   * <i-1>]", der passend zu einem Abdruck mit der Verfügungsnummer number angezeigt
+   * <i-1>]", der passend zu einem Abdruck mit der VerfÃ¼gungsnummer number angezeigt
    * werden soll.
    * 
    * @param number
-   *          Die Nummer des Verfügungspunktes des Abdrucks
+   *          Die Nummer des VerfÃ¼gungspunktes des Abdrucks
    * @return String in der Form "Abdruck von I.[, II., ...][ und <i-1>]" oder
-   *         AbdruckDefaultStr, wenn der Verfügungspunkt bei i==0 und i==1 keinen
-   *         Vorgänger besitzen kann.
+   *         AbdruckDefaultStr, wenn der VerfÃ¼gungspunkt bei i==0 und i==1 keinen
+   *         VorgÃ¤nger besitzen kann.
    */
   private static String abdruckString(int number)
   {
@@ -890,16 +890,16 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Liefert die römische Zahl zum übgebenen integer Wert i. Die römischen Zahlen
+   * Liefert die rÃ¶mische Zahl zum Ã¼bgebenen integer Wert i. Die rÃ¶mischen Zahlen
    * werden dabei aus dem begrenzten Array romanNumbers ausgelesen. Ist i-1 kein
-   * gültiger Index des Arrays, so sieht der Rückgabewert wie folgt aus "<dezimalzahl(i)>.".
-   * Hier kann bei Notwendigkeit natürlich auch ein Berechnungsschema für römische
-   * Zahlen implementiert werden, was für die Sachleitenden Verfügungen vermutlich
+   * gÃ¼ltiger Index des Arrays, so sieht der RÃ¼ckgabewert wie folgt aus "<dezimalzahl(i)>.".
+   * Hier kann bei Notwendigkeit natÃ¼rlich auch ein Berechnungsschema fÃ¼r rÃ¶mische
+   * Zahlen implementiert werden, was fÃ¼r die Sachleitenden VerfÃ¼gungen vermutlich
    * aber nicht erforderlich sein wird.
    * 
    * @param i
-   *          Die Zahl, zu der eine römische Zahl geliefert werden soll.
-   * @return Die römische Zahl, oder "<dezimalzahl(i)>, wenn i-1 nicht in den
+   *          Die Zahl, zu der eine rÃ¶mische Zahl geliefert werden soll.
+   * @return Die rÃ¶mische Zahl, oder "<dezimalzahl(i)>, wenn i-1 nicht in den
    *         Arraygrenzen von romanNumbers.
    */
   private static String romanNumber(int i)
@@ -911,35 +911,35 @@ public class SachleitendeVerfuegung
 
   /**
    * Erzeugt einen Vector mit Elementen vom Typ Verfuegungspunkt, der dem Druckdialog
-   * übergeben werden kann und alle für den Druckdialog notwendigen Informationen
-   * enthält.
+   * Ã¼bergeben werden kann und alle fÃ¼r den Druckdialog notwendigen Informationen
+   * enthÃ¤lt.
    * 
    * @param doc
    *          Das zu scannende Dokument
-   * @return Vector of Verfuegungspunkt, der für jeden Verfuegungspunkt im Dokument
-   *         doc einen Eintrag enthält.
+   * @return Vector of Verfuegungspunkt, der fÃ¼r jeden Verfuegungspunkt im Dokument
+   *         doc einen Eintrag enthÃ¤lt.
    */
   private static Vector<Verfuegungspunkt> scanVerfuegungspunkte(XTextDocument doc)
   {
     Vector<Verfuegungspunkt> verfuegungspunkte = new Vector<Verfuegungspunkt>();
 
-    // Verfügungspunkt1 hinzufügen wenn verfügbar.
+    // VerfÃ¼gungspunkt1 hinzufÃ¼gen wenn verfÃ¼gbar.
     XTextRange punkt1 = getVerfuegungspunkt1(doc);
     if (punkt1 != null)
     {
       Verfuegungspunkt original = new Verfuegungspunkt(L.m("I. Original"));
-      original.addZuleitungszeile(L.m("Empfänger siehe Empfängerfeld"));
+      original.addZuleitungszeile(L.m("EmpfÃ¤nger siehe EmpfÃ¤ngerfeld"));
       verfuegungspunkte.add(original);
     }
 
     Verfuegungspunkt currentVerfpunkt = null;
 
-    // Paragraphen des Texts enumerieren und Verfügungspunkte erstellen. Die
-    // Enumeration erfolgt über einen ParagraphCursor, da sich
-    // dieser stabiler verhält als das Durchgehen der XEnumerationAccess, bei
-    // der es zu OOo-Abstürzen kam. Leider konnte ich das Problem nicht exakt
+    // Paragraphen des Texts enumerieren und VerfÃ¼gungspunkte erstellen. Die
+    // Enumeration erfolgt Ã¼ber einen ParagraphCursor, da sich
+    // dieser stabiler verhÃ¤lt als das Durchgehen der XEnumerationAccess, bei
+    // der es zu OOo-AbstÃ¼rzen kam. Leider konnte ich das Problem nicht exakt
     // genug isolieren um ein entsprechende Ticket bei OOo dazu aufmachen zu
-    // können, da der Absturz nur sporadisch auftrat.
+    // kÃ¶nnen, da der Absturz nur sporadisch auftrat.
     XParagraphCursor cursor =
       UNO.XParagraphCursor(doc.getText().createTextCursorByRange(
         doc.getText().getStart()));
@@ -957,13 +957,13 @@ public class SachleitendeVerfuegung
         verfuegungspunkte.add(currentVerfpunkt);
       }
 
-      // Zuleitungszeilen hinzufügen (auch wenn der Paragraph Verfügungspunkt
+      // Zuleitungszeilen hinzufÃ¼gen (auch wenn der Paragraph VerfÃ¼gungspunkt
       // und Zuleitungszeile zugleich ist)
       if ((isZuleitungszeile(cursor) || isVerfuegungspunktMitZuleitung(cursor))
         && currentVerfpunkt != null)
       {
         String zuleit = cursor.getString();
-        // nicht leere Zuleitungszeilen zum Verfügungspunkt hinzufügen.
+        // nicht leere Zuleitungszeilen zum VerfÃ¼gungspunkt hinzufÃ¼gen.
         if (!(zuleit.length() == 0)) currentVerfpunkt.addZuleitungszeile(zuleit);
       }
     } while (cursor.gotoNextParagraph(false));
@@ -972,39 +972,39 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Repräsentiert einen vollständigen Verfügungspunkt, der aus Überschrift (römische
-   * Ziffer + Überschrift) und Inhalt besteht. Die Klasse bietet Methden an, über die
-   * auf alle für den Druck wichtigen Eigenschaften des Verfügungspunktes zugegriffen
-   * werden kann (z.B. Überschrift, Anzahl Zuleitungszeilen, ...)
+   * ReprÃ¤sentiert einen vollstÃ¤ndigen VerfÃ¼gungspunkt, der aus Ãœberschrift (rÃ¶mische
+   * Ziffer + Ãœberschrift) und Inhalt besteht. Die Klasse bietet Methden an, Ã¼ber die
+   * auf alle fÃ¼r den Druck wichtigen Eigenschaften des VerfÃ¼gungspunktes zugegriffen
+   * werden kann (z.B. Ãœberschrift, Anzahl Zuleitungszeilen, ...)
    * 
    * @author christoph.lutz
    */
   public static class Verfuegungspunkt
   {
     /**
-     * Enthält den vollständigen Text der erste Zeile des Verfügungspunktes
-     * einschließlich der römischen Ziffer.
+     * EnthÃ¤lt den vollstÃ¤ndigen Text der erste Zeile des VerfÃ¼gungspunktes
+     * einschlieÃŸlich der rÃ¶mischen Ziffer.
      */
     protected String heading;
 
     /**
-     * Vector of String, der alle Zuleitungszeilen enthält, die mit addParagraph
-     * hinzugefügt wurden.
+     * Vector of String, der alle Zuleitungszeilen enthÃ¤lt, die mit addParagraph
+     * hinzugefÃ¼gt wurden.
      */
     protected Vector<String> zuleitungszeilen;
 
     /**
-     * Enthält die Anzahl der Ausdrucke, die mindestens ausgedruckt werden sollen.
+     * EnthÃ¤lt die Anzahl der Ausdrucke, die mindestens ausgedruckt werden sollen.
      */
     protected int minNumberOfCopies;
 
     /**
-     * Erzeugt einen neuen Verfügungspunkt, wobei firstPar der Absatz ist, der die
-     * erste Zeile mit der römischen Ziffer und der Überschrift enthält.
+     * Erzeugt einen neuen VerfÃ¼gungspunkt, wobei firstPar der Absatz ist, der die
+     * erste Zeile mit der rÃ¶mischen Ziffer und der Ãœberschrift enthÃ¤lt.
      * 
      * @param heading
-     *          Text der ersten Zeile des Verfügungspunktes mit der römischen Ziffer
-     *          und der Überschrift.
+     *          Text der ersten Zeile des VerfÃ¼gungspunktes mit der rÃ¶mischen Ziffer
+     *          und der Ãœberschrift.
      */
     public Verfuegungspunkt(String heading)
     {
@@ -1014,11 +1014,11 @@ public class SachleitendeVerfuegung
     }
 
     /**
-     * Fügt einen weitere Zuleitungszeile des Verfügungspunktes hinzu (wenn paragraph
+     * FÃ¼gt einen weitere Zuleitungszeile des VerfÃ¼gungspunktes hinzu (wenn paragraph
      * nicht null ist).
      * 
      * @param paragraph
-     *          XTextRange, das den gesamten Paragraphen der Zuleitungszeile enthält.
+     *          XTextRange, das den gesamten Paragraphen der Zuleitungszeile enthÃ¤lt.
      */
     public void addZuleitungszeile(String zuleitung)
     {
@@ -1026,11 +1026,11 @@ public class SachleitendeVerfuegung
     }
 
     /**
-     * Liefert die Anzahl der Ausfertigungen zurück, mit denen der Verfügungspunkt
-     * ausgeduckt werden soll; Die Anzahl erhöht sich mit jeder hinzugefügten
+     * Liefert die Anzahl der Ausfertigungen zurÃ¼ck, mit denen der VerfÃ¼gungspunkt
+     * ausgeduckt werden soll; Die Anzahl erhÃ¶ht sich mit jeder hinzugefÃ¼gten
      * Zuleitungszeile. Der Mindestwert kann mit setMinNumberOfCopies gesetzt werden.
      * 
-     * @return Anzahl der Ausfertigungen mit denen der Verfügungspunkt gedruckt
+     * @return Anzahl der Ausfertigungen mit denen der VerfÃ¼gungspunkt gedruckt
      *         werden soll.
      */
     public int getNumberOfCopies()
@@ -1046,7 +1046,7 @@ public class SachleitendeVerfuegung
      * auch dann wenn z.B. keine Zuleitungszeilen vorhanden sind.
      * 
      * @param minNumberOfCopies
-     *          Anzahl der Ausfertigungen mit denen der Verfügungspunkt mindestens
+     *          Anzahl der Ausfertigungen mit denen der VerfÃ¼gungspunkt mindestens
      *          ausgedruckt werden soll.
      */
     public void setMinNumberOfCopies(int minNumberOfCopies)
@@ -1056,7 +1056,7 @@ public class SachleitendeVerfuegung
 
     /**
      * Liefert einen Vector of Strings, der die Texte der Zuleitungszeilen
-     * beinhaltet, die dem Verfügungspunkt mit addParagraph hinzugefügt wurden.
+     * beinhaltet, die dem VerfÃ¼gungspunkt mit addParagraph hinzugefÃ¼gt wurden.
      * 
      * @return Vector of Strings mit den Texten der Zuleitungszeilen.
      */
@@ -1066,11 +1066,11 @@ public class SachleitendeVerfuegung
     }
 
     /**
-     * Liefert den Text der Überschrift des Verfügungspunktes einschließlich der
-     * römischen Ziffer als String zurück, wobei mehrfache Leerzeichen (\s+) durch
+     * Liefert den Text der Ãœberschrift des VerfÃ¼gungspunktes einschlieÃŸlich der
+     * rÃ¶mischen Ziffer als String zurÃ¼ck, wobei mehrfache Leerzeichen (\s+) durch
      * einfache Leerzeichen ersetzt werden.
      * 
-     * @return römischer Ziffer + Überschrift
+     * @return rÃ¶mischer Ziffer + Ãœberschrift
      */
     public String getHeading()
     {
@@ -1084,12 +1084,12 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Zeigt den Druckdialog für Sachleitende Verfügungen an und liefert die dort
-   * getroffenen Einstellungen als Liste von VerfuegungspunktInfo-Objekten zurück,
+   * Zeigt den Druckdialog fÃ¼r Sachleitende VerfÃ¼gungen an und liefert die dort
+   * getroffenen Einstellungen als Liste von VerfuegungspunktInfo-Objekten zurÃ¼ck,
    * oder null, wenn Fehler auftraten oder der Druckvorgang abgebrochen wurde.
    * 
    * @param doc
-   *          Das Dokument, aus dem die anzuzeigenden Verfügungspunkte ausgelesen
+   *          Das Dokument, aus dem die anzuzeigenden VerfÃ¼gungspunkte ausgelesen
    *          werden.
    */
   public static List<VerfuegungspunktInfo> callPrintDialog(XTextDocument doc)
@@ -1099,7 +1099,7 @@ public class SachleitendeVerfuegung
     while (iter.hasNext())
     {
       Verfuegungspunkt vp = iter.next();
-      String text = L.m("Verfügungspunkt '%1'", vp.getHeading());
+      String text = L.m("VerfÃ¼gungspunkt '%1'", vp.getHeading());
       Iterator<String> zuleits = vp.getZuleitungszeilen().iterator();
       while (zuleits.hasNext())
       {
@@ -1121,12 +1121,12 @@ public class SachleitendeVerfuegung
     catch (NodeNotFoundException e)
     {
       Logger.error(
-        L.m("Fehlende Dialogbeschreibung für den Dialog 'SachleitendeVerfuegungenDruckdialog'."),
+        L.m("Fehlende Dialogbeschreibung fÃ¼r den Dialog 'SachleitendeVerfuegungenDruckdialog'."),
         e);
       return null;
     }
 
-    // Dialog ausführen und Rückgabewert zurückliefern.
+    // Dialog ausfÃ¼hren und RÃ¼ckgabewert zurÃ¼ckliefern.
     try
     {
       SyncActionListener s = new SyncActionListener();
@@ -1149,11 +1149,11 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Liefert die Anzahl der im XTextDocument doc enthaltenen Verfügungspunkte zurück.
+   * Liefert die Anzahl der im XTextDocument doc enthaltenen VerfÃ¼gungspunkte zurÃ¼ck.
    * 
    * @param doc
-   *          das TextDocument in dem gezählt werden soll.
-   * @return die Anzahl der im XTextDocument doc enthaltenen Verfügungspunkte
+   *          das TextDocument in dem gezÃ¤hlt werden soll.
+   * @return die Anzahl der im XTextDocument doc enthaltenen VerfÃ¼gungspunkte
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -1166,23 +1166,23 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Druckt den Verfügungpunkt Nummer verfPunkt aus dem Dokument aus, das im
+   * Druckt den VerfÃ¼gungpunkt Nummer verfPunkt aus dem Dokument aus, das im
    * XPrintModel pmod hinterlegt ist.
    * 
    * @param pmod
    *          Das PrintModel zu diesem Druckvorgang.
    * @param verfPunkt
-   *          Die Nummer des auszuduruckenden Verfügungspunktes, wobei alle folgenden
-   *          Verfügungspunkte ausgeblendet werden.
+   *          Die Nummer des auszuduruckenden VerfÃ¼gungspunktes, wobei alle folgenden
+   *          VerfÃ¼gungspunkte ausgeblendet werden.
    * @param isDraft
-   *          wenn isDraft==true, werden alle draftOnly-Blöcke eingeblendet,
+   *          wenn isDraft==true, werden alle draftOnly-BlÃ¶cke eingeblendet,
    *          ansonsten werden sie ausgeblendet.
    * @param isOriginal
-   *          wenn isOriginal, wird die Ziffer des Verfügungspunktes I ausgeblendet
-   *          und alle notInOriginal-Blöcke ebenso. Andernfalls sind Ziffer und
-   *          notInOriginal-Blöcke eingeblendet.
+   *          wenn isOriginal, wird die Ziffer des VerfÃ¼gungspunktes I ausgeblendet
+   *          und alle notInOriginal-BlÃ¶cke ebenso. Andernfalls sind Ziffer und
+   *          notInOriginal-BlÃ¶cke eingeblendet.
    * @param copyCount
-   *          enthält die Anzahl der Kopien, die von diesem Verfügungspunkt erstellt
+   *          enthÃ¤lt die Anzahl der Kopien, die von diesem VerfÃ¼gungspunkt erstellt
    *          werden sollen.
    * @throws PrintFailedException
    */
@@ -1193,8 +1193,8 @@ public class SachleitendeVerfuegung
 
     // Steht der viewCursor in einem Bereich, der im folgenden ausgeblendet
     // wird, dann wird der ViewCursor in einen sichtbaren Bereich verschoben. Um
-    // den viewCursor wieder herstellen zu können, wird er hier gesichert und
-    // später wieder hergestellt.
+    // den viewCursor wieder herstellen zu kÃ¶nnen, wird er hier gesichert und
+    // spÃ¤ter wieder hergestellt.
     XTextCursor vc = null;
     XTextCursor oldViewCursor = null;
     XTextViewCursorSupplier suppl =
@@ -1202,7 +1202,7 @@ public class SachleitendeVerfuegung
     if (suppl != null) vc = suppl.getViewCursor();
     if (vc != null) oldViewCursor = vc.getText().createTextCursorByRange(vc);
 
-    // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
+    // ZÃ¤hler fÃ¼r Verfuegungspunktnummer auf 1 initialisieren, wenn ein
     // Verfuegungspunkt1 vorhanden ist.
     XTextRange punkt1 = getVerfuegungspunkt1(doc);
     int count = 0;
@@ -1233,7 +1233,7 @@ public class SachleitendeVerfuegung
     }
   } while (setInvisibleRange == null && cursor.gotoNextParagraph(false));
 
-    // Prüfen, welche Textsections im ausgeblendeten Bereich liegen und diese
+    // PrÃ¼fen, welche Textsections im ausgeblendeten Bereich liegen und diese
     // ebenfalls ausblenden (und den alten Stand merken):
     List<XTextSection> hidingSections =
       getSectionsFromPosition(pmod.getTextDocument(), setInvisibleRange);
@@ -1250,10 +1250,10 @@ public class SachleitendeVerfuegung
       catch (IllegalArgumentException x)
       {}
 
-    // ensprechende Verfügungspunkte ausblenden
+    // ensprechende VerfÃ¼gungspunkte ausblenden
     if (setInvisibleRange != null) UNO.hideTextRange(setInvisibleRange, true);
 
-    // Ein/Ausblenden Druckblöcke (z.B. draftOnly):
+    // Ein/Ausblenden DruckblÃ¶cke (z.B. draftOnly):
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_DRAFT_ONLY, isDraft, false);
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_NOT_IN_ORIGINAL, !isOriginal, false);
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, isOriginal, false);
@@ -1291,7 +1291,7 @@ public class SachleitendeVerfuegung
     pmod.setGroupVisible(GROUP_ID_SLV_ALL_VERSIONS, true);
     pmod.setGroupVisible(GROUP_ID_SLV_COPY_ONLY, true);
 
-    // Alte Eigenschaften der Druckblöcke wieder herstellen:
+    // Alte Eigenschaften der DruckblÃ¶cke wieder herstellen:
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_DRAFT_ONLY, true, true);
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_NOT_IN_ORIGINAL, true, true);
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, true, true);
@@ -1305,7 +1305,7 @@ public class SachleitendeVerfuegung
       if (oldState != null) UNO.setProperty(section, "IsVisible", oldState);
     }
 
-    // Verfügungspunkte wieder einblenden:
+    // VerfÃ¼gungspunkte wieder einblenden:
     if (setInvisibleRange != null) UNO.hideTextRange(setInvisibleRange, false);
 
     // ViewCursor wieder herstellen:
@@ -1313,10 +1313,10 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Workaround für OOo-Issue 103137, der das selbe macht, wie
+   * Workaround fÃ¼r OOo-Issue 103137, der das selbe macht, wie
    * {@link #printVerfuegungspunkt(XPrintModel, int, boolean, boolean, short)} nach
-   * Beendigung des Drucks eines Originals - es setzt alle Verfügungspunkte,
-   * Druckblöcke und Sichtbarkeitsgruppen aus model auf sichtbar.
+   * Beendigung des Drucks eines Originals - es setzt alle VerfÃ¼gungspunkte,
+   * DruckblÃ¶cke und Sichtbarkeitsgruppen aus model auf sichtbar.
    */
   public static void workaround103137(TextDocumentModel model)
   {
@@ -1365,14 +1365,14 @@ public class SachleitendeVerfuegung
     WollMuxEventHandler.handleSetVisibleState(model, GROUP_ID_SLV_COPY_ONLY, true,
       null);
 
-    // Druckblöcke wieder einblenden:
+    // DruckblÃ¶cke wieder einblenden:
     model.setPrintBlocksProps(BLOCKNAME_SLV_DRAFT_ONLY, true, true);
     model.setPrintBlocksProps(BLOCKNAME_SLV_NOT_IN_ORIGINAL, true, true);
     model.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, true, true);
     model.setPrintBlocksProps(BLOCKNAME_SLV_ALL_VERSIONS, true, true);
     model.setPrintBlocksProps(BLOCKNAME_SLV_COPY_ONLY, true, true);
 
-    // Verfügungspunkte wieder einblenden:
+    // VerfÃ¼gungspunkte wieder einblenden:
     if (setInvisibleRange != null) UNO.hideTextRange(setInvisibleRange, false);
   }
 
@@ -1381,7 +1381,7 @@ public class SachleitendeVerfuegung
    * der selben Position oder hinter der Position der TextRange pos liegt.
    * 
    * @param doc
-   *          Textdokument in dem alle enthaltenen Textsections geprüft werden.
+   *          Textdokument in dem alle enthaltenen Textsections geprÃ¼ft werden.
    * @param pos
    *          Position, ab der die TextSections in den Vector aufgenommen werden
    *          sollen.
@@ -1459,15 +1459,15 @@ public class SachleitendeVerfuegung
   /**
    * Erzeugt im Dokument doc ein neues Absatzformat (=ParagraphStyle) mit dem Namen
    * name und dem ParentStyle parentStyleName und liefert das neu erzeugte
-   * Absatzformat zurück oder null, falls das Erzeugen nicht funktionierte.
+   * Absatzformat zurÃ¼ck oder null, falls das Erzeugen nicht funktionierte.
    * 
    * @param doc
    *          das Dokument in dem das Absatzformat name erzeugt werden soll.
    * @param name
    *          der Name des zu erzeugenden Absatzformates
    * @param parentStyleName
-   *          Name des Vorgänger-Styles von dem die Eigenschaften dieses Styles
-   *          abgeleitet werden soll oder null, wenn kein Vorgänger gesetzt werden
+   *          Name des VorgÃ¤nger-Styles von dem die Eigenschaften dieses Styles
+   *          abgeleitet werden soll oder null, wenn kein VorgÃ¤nger gesetzt werden
    *          soll (in diesem Fall wird automatisch "Standard" verwendet)
    * @return das neu erzeugte Absatzformat oder null, falls das Absatzformat nicht
    *         erzeugt werden konnte.
@@ -1520,15 +1520,15 @@ public class SachleitendeVerfuegung
   /**
    * Erzeugt im Dokument doc ein neues Zeichenformat (=CharacterStyle) mit dem Namen
    * name und dem ParentStyle parentStyleName und liefert das neu erzeugte
-   * Zeichenformat zurück oder null, falls das Erzeugen nicht funktionierte.
+   * Zeichenformat zurÃ¼ck oder null, falls das Erzeugen nicht funktionierte.
    * 
    * @param doc
    *          das Dokument in dem das Zeichenformat name erzeugt werden soll.
    * @param name
    *          der Name des zu erzeugenden Zeichenformates
    * @param parentStyleName
-   *          Name des Vorgänger-Styles von dem die Eigenschaften dieses Styles
-   *          abgeleitet werden soll oder null, wenn kein Vorgänger gesetzt werden
+   *          Name des VorgÃ¤nger-Styles von dem die Eigenschaften dieses Styles
+   *          abgeleitet werden soll oder null, wenn kein VorgÃ¤nger gesetzt werden
    *          soll (in diesem Fall wird automatisch "Standard" verwendet)
    * @return das neu erzeugte Zeichenformat oder null, falls das Zeichenformat nicht
    *         erzeugt werden konnte.
@@ -1557,7 +1557,7 @@ public class SachleitendeVerfuegung
    * Liefert den Styles vom Typ type des Dokuments doc.
    * 
    * @param doc
-   *          Das Dokument, dessen StyleContainer zurückgeliefert werden soll.
+   *          Das Dokument, dessen StyleContainer zurÃ¼ckgeliefert werden soll.
    * @param type
    *          kann z.B. CHARACTER_STYLE oder PARAGRAPH_STYLE sein.
    * @return Liefert den Container der Styles vom Typ type des Dokuments doc oder
@@ -1577,7 +1577,7 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Falls die für Sachleitenden Verfügungen notwendigen Absatz- und Zeichenformate
+   * Falls die fÃ¼r Sachleitenden VerfÃ¼gungen notwendigen Absatz- und Zeichenformate
    * nicht bereits existieren, werden sie hier erzeugt und mit fest verdrahteten
    * Werten vorbelegt.
    * 

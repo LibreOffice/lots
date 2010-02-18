@@ -1,10 +1,10 @@
 /*
  * Dateiname: DJDatasetListElement.java
  * Projekt  : WollMux
- * Funktion : Wrapper um ein vom DJ gelieferten Datensatz für die Darstellung 
+ * Funktion : Wrapper um ein vom DJ gelieferten Datensatz fÃ¼r die Darstellung 
  *            in einer Liste.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -19,8 +19,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 03.11.2005 | LUT | Erstellung
  * -------------------------------------------------------------------
@@ -40,20 +40,20 @@ public class DJDatasetListElement implements Comparable<DJDatasetListElement>
 {
   /**
    * Gibt an, wie die Personen in den Listen angezeigt werden sollen. %{Spalte}
-   * Syntax um entsprechenden Wert des Datensatzes einzufügen.
+   * Syntax um entsprechenden Wert des Datensatzes einzufÃ¼gen.
    */
   private final static String displayTemplate = "%{Nachname}, %{Vorname} (%{Rolle})";
 
   /**
-   * Enthält das DJDataset-Element.
+   * EnthÃ¤lt das DJDataset-Element.
    */
   private DJDataset ds;
 
   /**
-   * Erzeugt ein neues DJDatasetListElement für die Darstellung in einer Liste.
+   * Erzeugt ein neues DJDatasetListElement fÃ¼r die Darstellung in einer Liste.
    * 
    * @param ds
-   *          Das DJDatasetElement das über das DJDatasetListElement dargestellt
+   *          Das DJDatasetElement das Ã¼ber das DJDatasetListElement dargestellt
    *          werden soll.
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
@@ -123,11 +123,11 @@ public class DJDatasetListElement implements Comparable<DJDatasetListElement>
   }
 
   /**
-   * Vergleicht die String-Repräsentation (toString()) zweier Listenelemente über die
+   * Vergleicht die String-ReprÃ¤sentation (toString()) zweier Listenelemente Ã¼ber die
    * compareTo()-Methode der Klasse String.
    * 
    * @param o
-   * @return Rückgabewert von this.toString().compareTo(o.toString())
+   * @return RÃ¼ckgabewert von this.toString().compareTo(o.toString())
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
   public int compareTo(DJDatasetListElement o)

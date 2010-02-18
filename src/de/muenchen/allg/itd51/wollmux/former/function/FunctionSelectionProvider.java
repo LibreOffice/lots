@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Liefert {@link FunctionSelection}s.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,11 +18,11 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 25.09.2006 | BNK | Erstellung
- * 16.11.2006 | BNK | null funclib unterstützt
+ * 16.11.2006 | BNK | null funclib unterstÃ¼tzt
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -55,7 +55,7 @@ public class FunctionSelectionProvider
   private FunctionLibrary funcLib;
 
   /**
-   * Bildet Funktionsnamen auf dazugehörige FunctionSelections ab.
+   * Bildet Funktionsnamen auf dazugehÃ¶rige FunctionSelections ab.
    */
   private Map<String, FunctionSelection> mapNameToFunctionSelection;
 
@@ -65,7 +65,7 @@ public class FunctionSelectionProvider
   private IDManager idManager;
 
   /**
-   * Der Namensraum von {@link #idManager} aus dem die IDs für Feldreferenzen kommen.
+   * Der Namensraum von {@link #idManager} aus dem die IDs fÃ¼r Feldreferenzen kommen.
    */
   private Object namespace;
 
@@ -77,10 +77,10 @@ public class FunctionSelectionProvider
    * solchen aus funcLib.
    * 
    * @param idManager
-   *          der IDManager, dessen IDs für Feldreferenzen (VALUE "&lt;id>")verwendet
+   *          der IDManager, dessen IDs fÃ¼r Feldreferenzen (VALUE "&lt;id>")verwendet
    *          werden sollen.
    * @param namespace
-   *          der Namensraum von idManager, aus dem die IDs für Feldreferenzen
+   *          der Namensraum von idManager, aus dem die IDs fÃ¼r Feldreferenzen
    *          kommen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -105,9 +105,9 @@ public class FunctionSelectionProvider
    * Liefert eine FunctionSelection zur Funktion mit Name funcName. Falls funcName
    * diesem FunctionSelectionProvider nicht bekannt ist, wird trotzdem eine
    * FunctionSelection geliefert, falls vorhanden mit den Parameterinformationen aus
-   * der {@link FunctionLibrary}, die dem Konstruktor übergeben wurde ansonsten mit
+   * der {@link FunctionLibrary}, die dem Konstruktor Ã¼bergeben wurde ansonsten mit
    * einer leeren Parameterliste. Die gelieferte FunctionSelection ist auf jeden Fall
-   * neu erstellt und unabhängig von anderen für den selben Namen früher gelieferten
+   * neu erstellt und unabhÃ¤ngig von anderen fÃ¼r den selben Namen frÃ¼her gelieferten
    * FunctionSelections.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -170,8 +170,8 @@ public class FunctionSelectionProvider
 
     /**
      * Wir haben es mit einem einzelnen BIND zu tun. Wir versuchen, diesen zu parsen.
-     * Wenn wir das nicht können, dann liefern wir das ganze als Expert-Funktion
-     * zurück, ansonsten setzen wir das BIND entsprechend um.
+     * Wenn wir das nicht kÃ¶nnen, dann liefern wir das ganze als Expert-Funktion
+     * zurÃ¼ck, ansonsten setzen wir das BIND entsprechend um.
      */
     Map<String, ParamValue> mapNameToParamValue = new HashMap<String, ParamValue>();
     String funcName = null;
@@ -199,7 +199,7 @@ public class FunctionSelectionProvider
         catch (NodeNotFoundException x)
         {
           // Kann nicht passieren, weil childConf.count() getestet wurde. Ist nur hier
-          // um Compiler-Warnungen und findBugs zu besänftigen
+          // um Compiler-Warnungen und findBugs zu besÃ¤nftigen
           throw new RuntimeException(x);
         }
 

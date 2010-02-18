@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Erzeugt zu einem Satz von Parametern einen passenden TrafoDialog.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 01.02.2008 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -50,13 +50,13 @@ public class TrafoDialogFactory
 
   /**
    * Versucht, einen zu params passenden Dialog zu instanziieren und liefert ihn
-   * zurück, falls es klappt.
+   * zurÃ¼ck, falls es klappt.
    * 
    * @param params
    *          spezifiziert die Informationen, die der Dialog braucht und bestimmt,
-   *          was für ein Dialog angezeigt wird. ACHTUNG! Das Objekt darf nach dem
-   *          Aufruf dieser Methode nicht mehr verändert werden, da der Dialog es
-   *          evtl. permanent speichert und für seine Arbeit verwendet.
+   *          was fÃ¼r ein Dialog angezeigt wird. ACHTUNG! Das Objekt darf nach dem
+   *          Aufruf dieser Methode nicht mehr verÃ¤ndert werden, da der Dialog es
+   *          evtl. permanent speichert und fÃ¼r seine Arbeit verwendet.
    * 
    * @throws UnavailableException
    *           wenn kein passender Dialog gefunden wurde.
@@ -81,7 +81,7 @@ public class TrafoDialogFactory
     }
 
     throw new UnavailableException(L.m(
-      "Kein Dialog verfügbar für die übergebenen Parameter: %1", params));
+      "Kein Dialog verfÃ¼gbar fÃ¼r die Ã¼bergebenen Parameter: %1", params));
   }
 
 }

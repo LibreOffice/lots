@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : zentraler UNO-Service WollMux 
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,15 +18,15 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 14.10.2005 | LUT | Erstellung
  * 09.11.2005 | LUT | + Logfile wird jetzt erweitert (append-modus)
  *                    + verwenden des Konfigurationsparameters SENDER_SOURCE
- *                    + Erster Start des wollmux über wm_configured feststellen.
+ *                    + Erster Start des wollmux Ã¼ber wm_configured feststellen.
  * 05.12.2005 | BNK | line.separator statt \n                 |  
- * 06.06.2006 | LUT | + Ablösung der Event-Klasse durch saubere Objektstruktur
+ * 06.06.2006 | LUT | + AblÃ¶sung der Event-Klasse durch saubere Objektstruktur
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -64,11 +64,11 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 /**
  * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service hat
  * folgende Funktionen: Als XDispatchProvider und XDispatch behandelt er alle
- * "wollmux:kommando..." URLs und als XWollMux stellt er die Schnittstelle für
+ * "wollmux:kommando..." URLs und als XWollMux stellt er die Schnittstelle fÃ¼r
  * externe UNO-Komponenten dar. Der Service wird beim Starten von OpenOffice.org
- * automatisch (mehrfach) instanziiert, wenn OOo einen dispatchprovider für die in
- * der Datei Addons.xcu enthaltenen wollmux:... dispatches besorgen möchte (dies
- * geschieht auch bei unsichtbar geöffneten Dokumenten). Als Folge wird das
+ * automatisch (mehrfach) instanziiert, wenn OOo einen dispatchprovider fÃ¼r die in
+ * der Datei Addons.xcu enthaltenen wollmux:... dispatches besorgen mÃ¶chte (dies
+ * geschieht auch bei unsichtbar geÃ¶ffneten Dokumenten). Als Folge wird das
  * WollMux-Singleton bei OOo-Start (einmalig) initialisiert.
  */
 public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider,
@@ -76,7 +76,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
 {
 
   /**
-   * Dieses Feld entält eine Liste aller Services, die dieser UNO-Service
+   * Dieses Feld entÃ¤lt eine Liste aller Services, die dieser UNO-Service
    * implementiert.
    */
   private static final java.lang.String[] SERVICENAMES =
@@ -86,7 +86,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * Der Konstruktor initialisiert das WollMuxSingleton und startet damit den
    * eigentlichen WollMux. Der Konstuktor wird aufgerufen, bevor OpenOffice.org die
    * Methode executeAsync() aufrufen kann, die bei einem ON_FIRST_VISIBLE_TASK-Event
-   * über den Job-Mechanismus ausgeführt wird.
+   * Ã¼ber den Job-Mechanismus ausgefÃ¼hrt wird.
    * 
    * @param context
    */
@@ -155,9 +155,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Diese Methode liefert eine Factory zurück, die in der Lage ist den UNO-Service
-   * zu erzeugen. Die Methode wird von UNO intern benötigt. Die Methoden
-   * __getComponentFactory und __writeRegistryServiceInfo stellen das Herzstück des
+   * Diese Methode liefert eine Factory zurÃ¼ck, die in der Lage ist den UNO-Service
+   * zu erzeugen. Die Methode wird von UNO intern benÃ¶tigt. Die Methoden
+   * __getComponentFactory und __writeRegistryServiceInfo stellen das HerzstÃ¼ck des
    * UNO-Service dar.
    * 
    * @param sImplName
@@ -175,7 +175,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   /**
    * Diese Methode registriert den UNO-Service. Sie wird z.B. beim unopkg-add im
    * Hintergrund aufgerufen. Die Methoden __getComponentFactory und
-   * __writeRegistryServiceInfo stellen das Herzstück des UNO-Service dar.
+   * __writeRegistryServiceInfo stellen das HerzstÃ¼ck des UNO-Service dar.
    * 
    * @param xRegKey
    * @return
@@ -187,12 +187,12 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Diese Methode registriert einen XPALChangeEventListener, der updates empfängt
-   * wenn sich die PAL ändert. Nach dem Registrieren wird sofort ein
-   * ON_SELECTION_CHANGED Ereignis ausgelöst, welches dafür sort, dass sofort ein
-   * erster update aller Listener ausgeführt wird. Die Methode ignoriert alle
+   * Diese Methode registriert einen XPALChangeEventListener, der updates empfÃ¤ngt
+   * wenn sich die PAL Ã¤ndert. Nach dem Registrieren wird sofort ein
+   * ON_SELECTION_CHANGED Ereignis ausgelÃ¶st, welches dafÃ¼r sort, dass sofort ein
+   * erster update aller Listener ausgefÃ¼hrt wird. Die Methode ignoriert alle
    * XPALChangeEventListenener-Instanzen, die bereits registriert wurden.
-   * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
+   * Mehrfachregistrierung der selben Instanz ist also nicht mÃ¶glich.
    * 
    * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventBroadcaster#addPALChangeEventListener(de.muenchen.allg.itd51.wollmux.XPALChangeEventListener)
    */
@@ -202,23 +202,23 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Diese Methode registriert einen XPALChangeEventListener, der updates empfängt
-   * wenn sich die PAL ändert; nach der Registrierung wird geprüft, ob der WollMux
+   * Diese Methode registriert einen XPALChangeEventListener, der updates empfÃ¤ngt
+   * wenn sich die PAL Ã¤ndert; nach der Registrierung wird geprÃ¼ft, ob der WollMux
    * und der XPALChangeEventListener die selbe WollMux-Konfiguration verwenden, wozu
    * der Listener den HashCode wollmuxConfHashCode der aktuellen
-   * WollMux-Konfiguration übermittelt. Stimmt wollmuxConfHashCode nicht mit dem
-   * HashCode der WollMux-Konfiguration des WollMux überein, so erscheint ein Dialog,
-   * der vor möglichen Fehlern warnt. Nach dem Registrieren wird sofort ein
-   * ON_SELECTION_CHANGED Ereignis ausgelöst, welches dafür sort, dass sofort ein
-   * erster update aller Listener ausgeführt wird. Die Methode ignoriert alle
+   * WollMux-Konfiguration Ã¼bermittelt. Stimmt wollmuxConfHashCode nicht mit dem
+   * HashCode der WollMux-Konfiguration des WollMux Ã¼berein, so erscheint ein Dialog,
+   * der vor mÃ¶glichen Fehlern warnt. Nach dem Registrieren wird sofort ein
+   * ON_SELECTION_CHANGED Ereignis ausgelÃ¶st, welches dafÃ¼r sort, dass sofort ein
+   * erster update aller Listener ausgefÃ¼hrt wird. Die Methode ignoriert alle
    * XPALChangeEventListenener-Instanzen, die bereits registriert wurden.
-   * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
+   * Mehrfachregistrierung der selben Instanz ist also nicht mÃ¶glich.
    * 
    * @param l
    *          Der zu registrierende XPALChangeEventListener
    * @param wollmuxConfHashCode
-   *          Der HashCode der WollMux-Config der zur Konsistenzprüfung herangezogen
-   *          wird und über
+   *          Der HashCode der WollMux-Config der zur KonsistenzprÃ¼fung herangezogen
+   *          wird und Ã¼ber
    *          WollMuxFiles.getWollMuxConf().getStringRepresentation().hashCode()
    *          erzeugt wird.
    * 
@@ -234,25 +234,25 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Diese Methode registriert einen Listener im WollMux, über den der WollMux über
+   * Diese Methode registriert einen Listener im WollMux, Ã¼ber den der WollMux Ã¼ber
    * den Status der Dokumentbearbeitung informiert (z.B. wenn ein Dokument
-   * vollständig bearbeitet/expandiert wurde). Die Methode ignoriert alle
+   * vollstÃ¤ndig bearbeitet/expandiert wurde). Die Methode ignoriert alle
    * XEventListenener-Instanzen, die bereits registriert wurden.
-   * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
+   * Mehrfachregistrierung der selben Instanz ist also nicht mÃ¶glich.
    * 
    * Tritt ein entstprechendes Ereignis ein, so erfolgt der Aufruf der entsprechenden
-   * Methoden XEventListener.notifyEvent(...) immer gleichzeitig (d.h. für jeden
+   * Methoden XEventListener.notifyEvent(...) immer gleichzeitig (d.h. fÃ¼r jeden
    * Listener in einem eigenen Thread).
    * 
    * Der WollMux liefert derzeit folgende Events:
    * 
    * OnWollMuxProcessingFinished: Dieses Event wird erzeugt, wenn ein Textdokument
-   * nach dem Öffnen vollständig vom WollMux bearbeitet und expandiert wurde oder bei
-   * allen anderen Dokumenttypen direkt nach dem Öffnen. D.h. für jedes in OOo
-   * geöffnete Dokument erfolgt früher oder später ein solches Event.
+   * nach dem Ã–ffnen vollstÃ¤ndig vom WollMux bearbeitet und expandiert wurde oder bei
+   * allen anderen Dokumenttypen direkt nach dem Ã–ffnen. D.h. fÃ¼r jedes in OOo
+   * geÃ¶ffnete Dokument erfolgt frÃ¼her oder spÃ¤ter ein solches Event.
    * 
    * @param l
-   *          Der XEventListener, der bei Statusänderungen der Dokumentbearbeitung
+   *          Der XEventListener, der bei StatusÃ¤nderungen der Dokumentbearbeitung
    *          informiert werden soll.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -290,12 +290,12 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Diese Methode setzt den aktuellen Absender der Persönlichen Absenderliste (PAL)
+   * Diese Methode setzt den aktuellen Absender der PersÃ¶nlichen Absenderliste (PAL)
    * auf den Absender sender. Der Absender wird nur gesetzt, wenn die Parameter
    * sender und idx in der alphabetisch sortierten Absenderliste des WollMux
-   * übereinstimmen - d.h. die Absenderliste der veranlassenden SenderBox zum
+   * Ã¼bereinstimmen - d.h. die Absenderliste der veranlassenden SenderBox zum
    * Zeitpunkt der Auswahl konsistent zur PAL des WollMux war. Die Methode verwendet
-   * für sender das selben Format wie es vom XPALProvider:getCurrentSender()
+   * fÃ¼r sender das selben Format wie es vom XPALProvider:getCurrentSender()
    * geliefert wird.
    */
   public void setCurrentSender(String sender, short idx)
@@ -307,27 +307,27 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   /**
    * Diese Methode liefert den Wert zur Datenbankspalte dbSpalte, der dem Wert
    * entspricht, den das Dokumentkommando WM(CMD'insertValue' DB_SPALTE'<dbSpalte>')
-   * in das Dokument einfügen würde, oder den Leerstring "" wenn dieser Wert nicht
-   * bestimmt werden kann (z.B. wenn ein ungültiger Spaltennamen dbSpalte übergeben
-   * wurde). So ist es z.B. möglich, aus externen Anwendungen (z.B. Basic-Makros) auf
+   * in das Dokument einfÃ¼gen wÃ¼rde, oder den Leerstring "" wenn dieser Wert nicht
+   * bestimmt werden kann (z.B. wenn ein ungÃ¼ltiger Spaltennamen dbSpalte Ã¼bergeben
+   * wurde). So ist es z.B. mÃ¶glich, aus externen Anwendungen (z.B. Basic-Makros) auf
    * Werte des aktuell gesetzten Absenders des WollMux zuzugreifen.
    * 
    * Anmerkung: Ist die aufrufende Anwendung ein Basic-Makro, so muss damit gerechnet
-   * werden, dass dieses Makro bereits in einer synchronisierten Umgebung abläuft
+   * werden, dass dieses Makro bereits in einer synchronisierten Umgebung ablÃ¤uft
    * (das ist Standard bei Basic-Makros). Um Deadlocks in Zusammenhang mit dem
-   * WollMux zu vermeiden, darf die Methode also nicht über den WollMuxEventHandler
+   * WollMux zu vermeiden, darf die Methode also nicht Ã¼ber den WollMuxEventHandler
    * synchonisiert werden. Aufgrund der fehlenden Synchronisierung auf Seiten des
-   * WollMux ist die Methode jedoch mit Vorsicht zu genießen. Insbesondere sollten
-   * die über diese Methode gelieferten Werte NICHT verwendet werden, um z.B. mit
+   * WollMux ist die Methode jedoch mit Vorsicht zu genieÃŸen. Insbesondere sollten
+   * die Ã¼ber diese Methode gelieferten Werte NICHT verwendet werden, um z.B. mit
    * setCurrentSender() Daten des WollMux zu manipulieren.
    * 
-   * Zum Auslesen und Reagieren auf Änderungen der PersoenlichenAbsenderlist (PAL)
+   * Zum Auslesen und Reagieren auf Ã„nderungen der PersoenlichenAbsenderlist (PAL)
    * sollten die Methoden verwendet werden, die der XPALProvider anbietet. Diese
-   * Methoden sind über den WollMuxEventHandler synchronisiert.
+   * Methoden sind Ã¼ber den WollMuxEventHandler synchronisiert.
    * 
    * @param dbSpalte
-   *          Name der Datenbankspalte deren Wert zurückgeliefert werden soll.
-   * @return Der Wert der Datenbankspalte dbSpalte des aktuell ausgewählten Absenders
+   *          Name der Datenbankspalte deren Wert zurÃ¼ckgeliefert werden soll.
+   * @return Der Wert der Datenbankspalte dbSpalte des aktuell ausgewÃ¤hlten Absenders
    *         oder "", wenn der Wert nicht bestimmt werden kann.
    */
   public String getValue(String dbSpalte)
@@ -353,7 +353,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * entsprechend ersetzt werden.
    * 
    * @param doc
-   *          Das Dokument, dem die Druckfunktion functionName hinzugefügt werden
+   *          Das Dokument, dem die Druckfunktion functionName hinzugefÃ¼gt werden
    *          soll.
    * @param functionName
    *          der Name einer Druckfunktion, die im Abschnitt "Druckfunktionen" der
@@ -388,19 +388,19 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Ermöglicht den Zugriff auf WollMux-Funktionen, die spezifisch für das Dokument
-   * doc sind. Derzeit ist als doc nur ein c.s.s.t.TextDocument möglich. Wird ein
-   * Dokument übergeben, für das der WollMux keine Funktionen anbietet (derzeit zum
-   * Beispiel ein Calc-Dokument), so wird null zurückgeliefert. Dass diese Funktion
-   * ein nicht-null Objekt zurückliefert bedeutet jedoch nicht zwangsweise, dass der
-   * WollMux für das Dokument sinnvolle Funktionen bereitstellt. Es ist möglich, dass
+   * ErmÃ¶glicht den Zugriff auf WollMux-Funktionen, die spezifisch fÃ¼r das Dokument
+   * doc sind. Derzeit ist als doc nur ein c.s.s.t.TextDocument mÃ¶glich. Wird ein
+   * Dokument Ã¼bergeben, fÃ¼r das der WollMux keine Funktionen anbietet (derzeit zum
+   * Beispiel ein Calc-Dokument), so wird null zurÃ¼ckgeliefert. Dass diese Funktion
+   * ein nicht-null Objekt zurÃ¼ckliefert bedeutet jedoch nicht zwangsweise, dass der
+   * WollMux fÃ¼r das Dokument sinnvolle Funktionen bereitstellt. Es ist mÃ¶glich, dass
    * Aufrufe der entsprechenden Funktionen des XWollMuxDocument-Interfaces nichts
    * tun.
    * 
-   * Hinweis zur Synchronisation: Aufrufe der Funktionen von XWollMuxDocument können
+   * Hinweis zur Synchronisation: Aufrufe der Funktionen von XWollMuxDocument kÃ¶nnen
    * ohne weitere Synchronisation sofort erfolgen. Jedoch ersetzt
    * getWollMuxDocument() keinesfalls die Synchronisation mit dem WollMux.
-   * Insbesondere ist es möglich, dass getWollMuxDocument() zurückkehrt BEVOR der
+   * Insbesondere ist es mÃ¶glich, dass getWollMuxDocument() zurÃ¼ckkehrt BEVOR der
    * WollMux das Dokument doc bearbeitet hat. Vergleiche hierzu die Beschreibung von
    * XWollMuxDocument.
    * 
@@ -421,7 +421,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Implementiert XWollMuxDocument für alle dokumentspezifischen Aktionen
+   * Implementiert XWollMuxDocument fÃ¼r alle dokumentspezifischen Aktionen
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -440,12 +440,12 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     /**
      * Nimmt die Druckfunktion functionName in die Liste der Druckfunktionen des
      * Dokuments auf. Die Druckfunktion wird dabei automatisch aktiv, wenn das
-     * Dokument das nächste mal mit Datei->Drucken gedruckt werden soll. Ist die
+     * Dokument das nÃ¤chste mal mit Datei->Drucken gedruckt werden soll. Ist die
      * Druckfunktion bereits in der Liste der Druckfunktionen des Dokuments
      * enthalten, so geschieht nichts.
      * 
-     * Hinweis: Die Ausführung erfolgt asynchron, d.h. addPrintFunction() kehrt unter
-     * Umständen bereits zurück BEVOR die Methode ihre Wirkung entfaltet hat.
+     * Hinweis: Die AusfÃ¼hrung erfolgt asynchron, d.h. addPrintFunction() kehrt unter
+     * UmstÃ¤nden bereits zurÃ¼ck BEVOR die Methode ihre Wirkung entfaltet hat.
      * 
      * @param functionName
      *          der Name einer Druckfunktion, die im Abschnitt "Druckfunktionen" der
@@ -459,13 +459,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     }
 
     /**
-     * Löscht die Druckfunktion functionName aus der Liste der Druckfunktionen des
-     * Dokuments. Die Druckfunktion wird damit ab dem nächsten Aufruf von
+     * LÃ¶scht die Druckfunktion functionName aus der Liste der Druckfunktionen des
+     * Dokuments. Die Druckfunktion wird damit ab dem nÃ¤chsten Aufruf von
      * Datei->Drucken nicht mehr aufgerufen. Ist die Druckfunktion nicht in der Liste
      * der Druckfunktionen des Dokuments enthalten, so geschieht nichts.
      * 
-     * Hinweis: Die Ausführung erfolgt asynchron, d.h. removePrintFunction() kehrt
-     * unter Umständen bereits zurück BEVOR die Methode ihre Wirkung entfaltet hat.
+     * Hinweis: Die AusfÃ¼hrung erfolgt asynchron, d.h. removePrintFunction() kehrt
+     * unter UmstÃ¤nden bereits zurÃ¼ck BEVOR die Methode ihre Wirkung entfaltet hat.
      * 
      * @param functionName
      *          der Name einer Druckfunktion, die im Dokument gesetzt ist.
@@ -480,8 +480,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     /**
      * Setzt den Wert mit ID id in der FormularGUI auf Wert mit allen Folgen, die das
      * nach sich zieht (PLAUSIs, AUTOFILLs, Ein-/Ausblendungen,...). Es ist nicht
-     * garantiert, dass der Befehl ausgeführt wird, bevor updateFormGUI() aufgerufen
-     * wurde. Eine Implementierung mit einer Queue ist möglich.
+     * garantiert, dass der Befehl ausgefÃ¼hrt wird, bevor updateFormGUI() aufgerufen
+     * wurde. Eine Implementierung mit einer Queue ist mÃ¶glich.
      * 
      * @param id
      * @param value
@@ -497,15 +497,15 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
 
     /**
      * Setzt den Wert, der bei insertValue-Dokumentkommandos mit DB_SPALTE "dbSpalte"
-     * eingefügt werden soll auf Wert. Es ist nicht garantiert, dass der neue Wert im
+     * eingefÃ¼gt werden soll auf Wert. Es ist nicht garantiert, dass der neue Wert im
      * Dokument sichtbar wird, bevor updateInsertFields() aufgerufen wurde. Eine
-     * Implementierung mit einer Queue ist möglich.
+     * Implementierung mit einer Queue ist mÃ¶glich.
      * 
      * @param dbSpalte
-     *          enthält den Namen der Absenderdatenspalte, deren Wert geändert werden
+     *          enthÃ¤lt den Namen der Absenderdatenspalte, deren Wert geÃ¤ndert werden
      *          soll.
      * @param value
-     *          enthält den neuen Wert für dbSpalte.
+     *          enthÃ¤lt den neuen Wert fÃ¼r dbSpalte.
      * 
      * @author Christoph Lutz (D-III-ITD-D101)
      */
@@ -515,8 +515,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     }
 
     /**
-     * Sorgt für die Ausführung aller noch nicht ausgeführten setFormValue()
-     * Kommandos. Die Methode kehrt garantiert erst zurück, wenn alle
+     * Sorgt fÃ¼r die AusfÃ¼hrung aller noch nicht ausgefÃ¼hrten setFormValue()
+     * Kommandos. Die Methode kehrt garantiert erst zurÃ¼ck, wenn alle
      * setFormValue()-Kommandos ihre Wirkung im WollMux und im entsprechenden
      * Dokument entfaltet haben.
      * 
@@ -525,13 +525,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     public void updateFormGUI()
     {
     // Wird implementiert, wenn setFormValue(...) so umgestellt werden soll, dass die
-    // Änderungen vorerst nur in einer queue gesammelt werden und mit dieser Methode
+    // Ã„nderungen vorerst nur in einer queue gesammelt werden und mit dieser Methode
     // aktiv werden sollen.
     }
 
     /**
-     * Sorgt für die Ausführung aller noch nicht ausgeführten setInsertValue()
-     * Kommandos. Die Methode kehrt garantiert erst zurück, wenn alle
+     * Sorgt fÃ¼r die AusfÃ¼hrung aller noch nicht ausgefÃ¼hrten setInsertValue()
+     * Kommandos. Die Methode kehrt garantiert erst zurÃ¼ck, wenn alle
      * setInsertValue()-Kommandos ihre Wirkung im WollMux und im entsprechenden
      * Dokument entfaltet haben.
      * 

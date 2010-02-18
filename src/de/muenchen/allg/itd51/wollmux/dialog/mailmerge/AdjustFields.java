@@ -1,9 +1,9 @@
 /*
  * Dateiname: AdjustFields.java
  * Projekt  : WollMux
- * Funktion : "Felder anpassen" Dialog der neuen erweiterten Serienbrief-Funktionalitäten
+ * Funktion : "Felder anpassen" Dialog der neuen erweiterten Serienbrief-FunktionalitÃ¤ten
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 11.10.2007 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -70,7 +70,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton
 import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
 
 /**
- * "Felder anpassen" Dialog der neuen erweiterten Serienbrief-Funktionalitäten.
+ * "Felder anpassen" Dialog der neuen erweiterten Serienbrief-FunktionalitÃ¤ten.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -78,8 +78,8 @@ class AdjustFields
 {
   /**
    * Diese Methode zeigt den Dialog an, mit dem die Felder im Dokument an eine
-   * Datenquelle angepasst werden können, die nicht die selben Spalten enthält wie
-   * die Datenquelle, für die das Dokument gemacht wurde.
+   * Datenquelle angepasst werden kÃ¶nnen, die nicht die selben Spalten enthÃ¤lt wie
+   * die Datenquelle, fÃ¼r die das Dokument gemacht wurde.
    * 
    * @param parent
    *          das Elternfenster des anzuzeigenden Dialogs
@@ -113,8 +113,8 @@ class AdjustFields
   }
 
   /**
-   * Diese Methode zeigt den Dialog an, mit dem die Spalten der Tabelle ergänzt
-   * werden können, wenn es zu Feldern im Dokument keine passenden Spalten in der
+   * Diese Methode zeigt den Dialog an, mit dem die Spalten der Tabelle ergÃ¤nzt
+   * werden kÃ¶nnen, wenn es zu Feldern im Dokument keine passenden Spalten in der
    * Tabelle gibt.
    * 
    * @param parent
@@ -138,21 +138,21 @@ class AdjustFields
         ds.addColumns(mapIdToSubstitution);
       }
     };
-    showFieldMappingDialog(parent, fieldIDs, L.m("Tabellenspalten ergänzen"),
-      L.m("Spalte"), L.m("Vorbelegung"), L.m("Spalten ergänzen"),
+    showFieldMappingDialog(parent, fieldIDs, L.m("Tabellenspalten ergÃ¤nzen"),
+      L.m("Spalte"), L.m("Vorbelegung"), L.m("Spalten ergÃ¤nzen"),
       ds.getColumnNames(), submitActionListener, true);
   }
 
   /**
-   * Zeigt einen Dialog mit dem bestehende Felder fieldIDs über ein Textfeld neu
-   * belegt werden können; für die neue Belegung stehen die neuen Felder der
-   * aktuellen Datasource und Freitext zur Verfügung. Die Felder fieldIDs werden
-   * dabei in der Reihenfolge angezeigt, in der sie in der Liste aufgeführt sind, ein
-   * bereits aufgeführtes Feld wird aber nicht zweimal angezeigt. Ist bei einem Feld
+   * Zeigt einen Dialog mit dem bestehende Felder fieldIDs Ã¼ber ein Textfeld neu
+   * belegt werden kÃ¶nnen; fÃ¼r die neue Belegung stehen die neuen Felder der
+   * aktuellen Datasource und Freitext zur VerfÃ¼gung. Die Felder fieldIDs werden
+   * dabei in der Reihenfolge angezeigt, in der sie in der Liste aufgefÃ¼hrt sind, ein
+   * bereits aufgefÃ¼hrtes Feld wird aber nicht zweimal angezeigt. Ist bei einem Feld
    * die Eigenschaft isTransformed()==true und ignoreIsTransformed == false, dann
-   * wird für dieses Feld nur die Eingabe einer 1-zu-1 Zuordnung von Feldern
-   * akzeptiert, das andere Zuordnungen für transformierte Felder derzeit nicht
-   * unterstützt werden.
+   * wird fÃ¼r dieses Feld nur die Eingabe einer 1-zu-1 Zuordnung von Feldern
+   * akzeptiert, das andere Zuordnungen fÃ¼r transformierte Felder derzeit nicht
+   * unterstÃ¼tzt werden.
    * 
    * @param parent
    *          Das Elternfenster dieses Dialogs.
@@ -163,28 +163,28 @@ class AdjustFields
    * @param title
    *          Die Titelzeile des Dialogs
    * @param labelOldFields
-   *          Die Spaltenüberschrift für die linke Spalte, in der die alten Felder
+   *          Die SpaltenÃ¼berschrift fÃ¼r die linke Spalte, in der die alten Felder
    *          angezeigt werden.
    * @param labelNewFields
-   *          Die Spaltenüberschrift für die rechte Spalte, in dem die neue Zuordnung
+   *          Die SpaltenÃ¼berschrift fÃ¼r die rechte Spalte, in dem die neue Zuordnung
    *          getroffen wird.
    * @param labelSubmitButton
    *          Die Beschriftung des Submit-Knopfes unten rechts, der die entsprechende
-   *          Aktion auslöst.
+   *          Aktion auslÃ¶st.
    * @param fieldNames
    *          Die Namen aller Serienbrieffelder, die in dem Mapping verwendet werden
-   *          können.
+   *          kÃ¶nnen.
    * @param submitActionListener
-   *          Nach Beendigung des Dialogs über den Submit-Knopf (unten rechts) wird
+   *          Nach Beendigung des Dialogs Ã¼ber den Submit-Knopf (unten rechts) wird
    *          die Methode submitActionListener.actionPerformed(actionEvent) in einem
-   *          separaten Thread aufgerufen. Dort kann der Code stehen, der gewünschten
-   *          Aktionen durchführt. Der ActionListener bekommt dabei in actionEvent
-   *          eine HashMap übergeben, die eine Zuordnung von den alten fieldIDs auf
-   *          den jeweiligen im Dialog gewählten Ersatzstring enthält.
+   *          separaten Thread aufgerufen. Dort kann der Code stehen, der gewÃ¼nschten
+   *          Aktionen durchfÃ¼hrt. Der ActionListener bekommt dabei in actionEvent
+   *          eine HashMap Ã¼bergeben, die eine Zuordnung von den alten fieldIDs auf
+   *          den jeweiligen im Dialog gewÃ¤hlten Ersatzstring enthÃ¤lt.
    * @param ignoreIsTransformed
    *          falls true, werden Felder mit isTransformed()==true nicht speziell
-   *          behandelt und es gibt keine Einschränkungen bzw. der
-   *          Auswahlmöglichkeiten.
+   *          behandelt und es gibt keine EinschrÃ¤nkungen bzw. der
+   *          AuswahlmÃ¶glichkeiten.
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private static void showFieldMappingDialog(JFrame parent,
@@ -282,7 +282,7 @@ class AdjustFields
       };
       mapTextComponentTagsToFieldname.put(field, fieldId);
       Box fbox = Box.createHorizontalBox();
-      hbox.add(fbox); // fbox für zeilenbündige Ausrichtung benötigt
+      hbox.add(fbox); // fbox fÃ¼r zeilenbÃ¼ndige Ausrichtung benÃ¶tigt
       fbox.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
       field.getJTextComponent().addFocusListener(new FocusListener()
       {
@@ -300,7 +300,7 @@ class AdjustFields
       itemBox.add(hbox);
     }
 
-    // einheitliche Breite für alle Labels vergeben:
+    // einheitliche Breite fÃ¼r alle Labels vergeben:
     for (Iterator<JLabel> iter = labels.iterator(); iter.hasNext();)
     {
       label = iter.next();

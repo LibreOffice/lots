@@ -1,9 +1,9 @@
 /*
  * Dateiname: DJDatasetBase.java
  * Projekt  : WollMux
- * Funktion : Basisklasse für DJDataset-Implementierungen
+ * Funktion : Basisklasse fÃ¼r DJDataset-Implementierungen
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 28.10.2005 | BNK | Erstellung
  * 03.11.2005 | BNK | besser kommentiert.
@@ -37,14 +37,14 @@ import java.util.Set;
 import de.muenchen.allg.itd51.wollmux.L;
 
 /**
- * Basisklasse für DJDataset-Implementierungen.
+ * Basisklasse fÃ¼r DJDataset-Implementierungen.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public abstract class DJDatasetBase implements DJDataset
 {
   /**
-   * Bildet Spaltennamen auf (String-)Werte ab. Die Daten in myLOS repräsentieren den
+   * Bildet Spaltennamen auf (String-)Werte ab. Die Daten in myLOS reprÃ¤sentieren den
    * lokalen Override, die in myBS die (gecachten) Daten aus der
    * Hintergrunddatenbank. myLOS kann null sein, dann wird der Datensatz als nicht
    * aus dem LOS kommend betrachtet.
@@ -52,10 +52,10 @@ public abstract class DJDatasetBase implements DJDataset
   protected Map<String, String> myLOS;
 
   /**
-   * Bildet Spaltennamen auf (String-)Werte ab. Die Daten in myLOS repräsentieren den
+   * Bildet Spaltennamen auf (String-)Werte ab. Die Daten in myLOS reprÃ¤sentieren den
    * lokalen Override, die in myBS die (gecachten) Daten aus der
    * Hintergrunddatenbank. myBS kann null sein, dann wird der Datensatz als nur aus
-   * dem LOS kommend und nicht mit einer Hintergrunddatenbank verknüpft betrachtet.
+   * dem LOS kommend und nicht mit einer Hintergrunddatenbank verknÃ¼pft betrachtet.
    */
   protected Map<String, String> myBS;
 
@@ -71,16 +71,16 @@ public abstract class DJDatasetBase implements DJDataset
    * @param backingStore
    *          mappt Spaltennamen auf den Spaltenwert des Datensatzes in der
    *          Hintergrunddatenbank. Spalten, die nicht enthalten sind werden als im
-   *          Datensatz unbelegt betrachtet. Als backingStore kann null übergeben
-   *          werden (für einen Datensatz, der nur aus dem LOS kommt ohne
+   *          Datensatz unbelegt betrachtet. Als backingStore kann null Ã¼bergeben
+   *          werden (fÃ¼r einen Datensatz, der nur aus dem LOS kommt ohne
    *          Hintergrundspeicher).
    * @param overrideStore
    *          mappt Spaltenname auf den Spaltenwert im LOS- Ist eine Spalte nicht
-   *          vorhanden, so hat sie keinen Override im LOS. Wird für overrideStore
-   *          null übergeben, so wird der Datensatz als nicht aus dem LOS kommend
+   *          vorhanden, so hat sie keinen Override im LOS. Wird fÃ¼r overrideStore
+   *          null Ã¼bergeben, so wird der Datensatz als nicht aus dem LOS kommend
    *          betrachtet.
    * @param schema
-   *          falls nicht null übergeben wird, erzeugen Zugriffe auf Spalten mit
+   *          falls nicht null Ã¼bergeben wird, erzeugen Zugriffe auf Spalten mit
    *          Namen, die nicht in schema sind Exceptions.
    */
   public DJDatasetBase(Map<String, String> backingStore,
@@ -92,7 +92,7 @@ public abstract class DJDatasetBase implements DJDataset
   }
 
   /**
-   * Liefert die Map, die dem Konstruktor als backingStore Argument übergeben wurde.
+   * Liefert die Map, die dem Konstruktor als backingStore Argument Ã¼bergeben wurde.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -102,7 +102,7 @@ public abstract class DJDatasetBase implements DJDataset
   }
 
   /**
-   * Liefert die Map, die dem Konstruktor als overrideStore Argument übergeben wurde.
+   * Liefert die Map, die dem Konstruktor als overrideStore Argument Ã¼bergeben wurde.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -116,7 +116,7 @@ public abstract class DJDatasetBase implements DJDataset
    * (override hat vorrang vor backing store). Falls schema nicht null ist, wird eine
    * ColumnNotFoundException geworfen, wenn versucht wird auf eine Spalte
    * zuzugreifen, die nicht im schema ist. Falls weder backing store noch override
-   * Speicher einen Wert für diese Spalte haben, so wird null geliefert (nicht
+   * Speicher einen Wert fÃ¼r diese Spalte haben, so wird null geliefert (nicht
    * verwechseln mit Zugriff auf eine nicht existierende Spalte!).
    */
   public String get(String spaltenName) throws ColumnNotFoundException
@@ -148,7 +148,7 @@ public abstract class DJDatasetBase implements DJDataset
   {
     if (!isFromLOS())
       throw new UnsupportedOperationException(
-        L.m("Nur Datensätze aus dem LOS können manipuliert werden"));
+        L.m("Nur DatensÃ¤tze aus dem LOS kÃ¶nnen manipuliert werden"));
     if (newValue == null)
       throw new IllegalArgumentException(L.m("Override kann nicht null sein"));
     myLOS.put(columnName, newValue);
@@ -160,7 +160,7 @@ public abstract class DJDatasetBase implements DJDataset
     if (!isFromLOS()) return;
     if (!hasBackingStore())
       throw new NoBackingStoreException(
-        L.m("Datensatz nicht mit Hintergrundspeicher verknüpft"));
+        L.m("Datensatz nicht mit Hintergrundspeicher verknÃ¼pft"));
     myLOS.remove(columnName);
   }
 

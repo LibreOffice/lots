@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Verwaltet Informationen zu allen offenen OOo-Dokumenten
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 27.10.2009 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -49,7 +49,7 @@ public class DocumentManager
     new HashMap<HashableComponent, Info>();
 
   /**
-   * Fügt compo den gemanageten Objekten hinzu, wobei die für Textdokumente
+   * FÃ¼gt compo den gemanageten Objekten hinzu, wobei die fÃ¼r Textdokumente
    * relevanten Informationen hinterlegt werden.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -61,8 +61,8 @@ public class DocumentManager
   }
 
   /**
-   * Fügt compo den gemanageten Objekten hinzu, ohne weitere Informationen zu
-   * hinterlegen. compo ist also ein Objekt, an dem für den WollMux nur interessant
+   * FÃ¼gt compo den gemanageten Objekten hinzu, ohne weitere Informationen zu
+   * hinterlegen. compo ist also ein Objekt, an dem fÃ¼r den WollMux nur interessant
    * ist, dass es existiert.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -74,7 +74,7 @@ public class DocumentManager
   }
 
   /**
-   * Entfernt alle Informationen über compo (falls vorhanden) aus diesem Manager.
+   * Entfernt alle Informationen Ã¼ber compo (falls vorhanden) aus diesem Manager.
    * 
    * @return die entfernten Informationen oder null falls keine vorhanden.
    * 
@@ -86,7 +86,7 @@ public class DocumentManager
   }
 
   /**
-   * Liefert die über dieses Objekt bekannten Informationen oder null, falls das
+   * Liefert die Ã¼ber dieses Objekt bekannten Informationen oder null, falls das
    * Objekt dem Manager nicht bekannt ist.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -98,7 +98,7 @@ public class DocumentManager
   }
 
   /**
-   * Fügt infoCollector alle Dokumente hinzu für die das
+   * FÃ¼gt infoCollector alle Dokumente hinzu fÃ¼r die das
    * OnWollMuxProcessingFinished-Event bereits verschickt wurde.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -119,7 +119,7 @@ public class DocumentManager
 
   /**
    * Setzt in den Informationen zu compo (falls dem DocumentManager bekannt) das Flag
-   * das anzeigt, dass das OnWollMuxProcessingFinished-Event für diese Komponente
+   * das anzeigt, dass das OnWollMuxProcessingFinished-Event fÃ¼r diese Komponente
    * bereits verschickt wurde.
    * 
    * @param compo
@@ -136,13 +136,13 @@ public class DocumentManager
   public static class Info
   {
     /**
-     * Gibt an ob für das Dokument bereits ein OnWollMuxProcessingFinished-Event an
+     * Gibt an ob fÃ¼r das Dokument bereits ein OnWollMuxProcessingFinished-Event an
      * die Listener verschickt wurde.
      */
     private boolean processingFinished = false;
 
     /**
-     * Liefert true gdw für das Dokument bereits ein
+     * Liefert true gdw fÃ¼r das Dokument bereits ein
      * OnWollMuxProcessingFinished-Event an die Listener verschickt wurde.
      * 
      * @author Matthias Benkmann (D-III-ITD-D101)
@@ -153,7 +153,7 @@ public class DocumentManager
     }
 
     /**
-     * Liefert das zu diesem Dokument gehörige TextDocumentModel. Falls es noch nicht
+     * Liefert das zu diesem Dokument gehÃ¶rige TextDocumentModel. Falls es noch nicht
      * angelegt wurde, wird es angelegt.
      * 
      * @throws UnsupportedOperationException
@@ -202,7 +202,7 @@ public class DocumentManager
 
     /**
      * Auf die Methoden getTextDocumentModel() und hasTextDocumentModel() wird
-     * möglicherweise aus verschiedenen Threads zugegriffen (WollMux Event Queue und
+     * mÃ¶glicherweise aus verschiedenen Threads zugegriffen (WollMux Event Queue und
      * Event Handler im Singleton), daher ist synchronized notwendig.
      */
     public synchronized TextDocumentModel getTextDocumentModel()

@@ -3,7 +3,7 @@
 * Projekt  : WollMux
 * Funktion : Ein Dialog zum Bearbeiten einer TRAFO-Funktion.
 * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
 *
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
+* Ã„nderungshistorie:
+* Datum      | Wer | Ã„nderungsgrund
 * -------------------------------------------------------------------
 * 01.02.2008 | BNK | Erstellung
 * -------------------------------------------------------------------
@@ -44,7 +44,7 @@ public abstract class TrafoDialog
   /**
    * Darf erst aufgerufen werden, wenn der Dialog beendet wurde
    * (siehe {@link TrafoDialogParameters#closeAction}) und liefert dann
-   * Informationen über den Endzustand des Dialogs.
+   * Informationen Ã¼ber den Endzustand des Dialogs.
    * @author Matthias Benkmann (D-III-ITD D.10)
    */
   public abstract TrafoDialogParameters getExitStatus();
@@ -53,7 +53,7 @@ public abstract class TrafoDialog
    * Zeigt den Dialog an.
    * 
    * @param owner
-   *          der Dialog zu dem dieser Dialog gehört. Vergleiche auch
+   *          der Dialog zu dem dieser Dialog gehÃ¶rt. Vergleiche auch
    *          {@link #show(Frame, ActionListener)}
    *          Darf null sein.
    * 
@@ -65,7 +65,7 @@ public abstract class TrafoDialog
    * Zeigt den Dialog an.
    * 
    * @param owner
-   *          der Frame zu dem dieser Dialog gehört. Vergleiche auch *
+   *          der Frame zu dem dieser Dialog gehÃ¶rt. Vergleiche auch *
    *          {@link #show(Dialog, ActionListener)}
    *          Darf null sein.
    *
@@ -74,7 +74,7 @@ public abstract class TrafoDialog
   public abstract void show(String windowTitle, Frame owner);
   
   /**
-   * Schließt den Dialog. Darf nur aufgerufen werden, wenn er gerade angezeigt wird.
+   * SchlieÃŸt den Dialog. Darf nur aufgerufen werden, wenn er gerade angezeigt wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

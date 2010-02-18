@@ -1,9 +1,9 @@
 /*
  * Dateiname: AllSectionLineViewsPanel.java
  * Projekt  : WollMux
- * Funktion : Enthält alle OneSectionLineViews.
+ * Funktion : EnthÃ¤lt alle OneSectionLineViews.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 24.03.2009 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -69,7 +69,7 @@ import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
 /**
- * Enthält alle OneSectionLineViews.
+ * EnthÃ¤lt alle OneSectionLineViews.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -81,7 +81,7 @@ public class AllSectionLineViewsPanel implements View
   private final static int BUTTON_BORDER = 2;
 
   /**
-   * Der {@link FormularMax4000} zu dem diese View gehört.
+   * Der {@link FormularMax4000} zu dem diese View gehÃ¶rt.
    */
   private FormularMax4000 formularMax4000;
 
@@ -91,19 +91,19 @@ public class AllSectionLineViewsPanel implements View
   private ViewChangeListener myViewChangeListener;
 
   /**
-   * Das JPanel, das die ganze View enthält.
+   * Das JPanel, das die ganze View enthÃ¤lt.
    */
   private JPanel myPanel;
 
   /**
    * Das JPanel, das die
    * {@link de.muenchen.allg.itd51.wollmux.former.section.OneSectionLineView}s
-   * enthält.
+   * enthÃ¤lt.
    */
   private JPanel mainPanel;
 
   /**
-   * Die JScrollPane, die {@link #mainPanel} enthält.
+   * Die JScrollPane, die {@link #mainPanel} enthÃ¤lt.
    */
   private JScrollPane scrollPane;
 
@@ -118,7 +118,7 @@ public class AllSectionLineViewsPanel implements View
   private IndexList selection = new IndexList();
 
   /**
-   * Die Liste der Models, zu denen diese View die LineViews enthält.
+   * Die Liste der Models, zu denen diese View die LineViews enthÃ¤lt.
    */
   private SectionModelList sectionModelList;
 
@@ -205,10 +205,10 @@ public class AllSectionLineViewsPanel implements View
    * dem Beginn der aktuellen Selektion (oder dem Dokumentbeginn, falls es keinen
    * solchen gibt) und endend beim ersten harten Seitenumbruch nach dem Ende der
    * aktuellen Selektion (oder dem Dokumentende, falls es keinen solchen gibt) und
-   * erzeugt ein zugehöriges {@link SectionModel} und fügt es zu
+   * erzeugt ein zugehÃ¶riges {@link SectionModel} und fÃ¼gt es zu
    * {@link #sectionModelList} hinzu.
    * 
-   * ACHTUNG! Derzeit wird nur BreakType.PAGE_BEFORE unterstützt. Andere Breaks
+   * ACHTUNG! Derzeit wird nur BreakType.PAGE_BEFORE unterstÃ¼tzt. Andere Breaks
    * werden ignoriert.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -240,7 +240,7 @@ public class AllSectionLineViewsPanel implements View
       while (true)
       {
         /*
-         * Es ist wichtig, dass diese Schleife andersrum aufgebaut ist als die für
+         * Es ist wichtig, dass diese Schleife andersrum aufgebaut ist als die fÃ¼r
          * cursor1. Der Test, ob wir das Ende des Dokuments erreicht haben bzw. das
          * um einen Absatz weiterwandern muss vor dem Test auf einen Seitenumbruch
          * geschehen, da wir ansonsten wenn der Cursor bereits zu Anfang in einem
@@ -293,7 +293,7 @@ public class AllSectionLineViewsPanel implements View
 
   /**
    * Erzeugt einen neuen Bereich an der Stelle der aktuellen Selektion und erzeugt
-   * ein zugehöriges {@link SectionModel} und fügt es zu {@link #sectionModelList}
+   * ein zugehÃ¶riges {@link SectionModel} und fÃ¼gt es zu {@link #sectionModelList}
    * hinzu.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -316,8 +316,8 @@ public class AllSectionLineViewsPanel implements View
   }
 
   /**
-   * Erzeugt einen neuen Textbereich, der range umschließt und erzeugt ein
-   * zugehöriges {@link SectionModel} und fügt es zu {@link #sectionModelList} hinzu.
+   * Erzeugt einen neuen Textbereich, der range umschlieÃŸt und erzeugt ein
+   * zugehÃ¶riges {@link SectionModel} und fÃ¼gt es zu {@link #sectionModelList} hinzu.
    * 
    * @throws Exception,
    *           wenn was schief geht
@@ -344,7 +344,7 @@ public class AllSectionLineViewsPanel implements View
   }
 
   /**
-   * Fügt dieser View eine {@link OneSectionLineView} für model hinzu.
+   * FÃ¼gt dieser View eine {@link OneSectionLineView} fÃ¼r model hinzu.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -355,7 +355,7 @@ public class AllSectionLineViewsPanel implements View
     views.add(view);
 
     /*
-     * view vor dem letzten Element von mainPanel einfügen, weil das letzte Element
+     * view vor dem letzten Element von mainPanel einfÃ¼gen, weil das letzte Element
      * immer ein Glue sein soll.
      */
     mainPanel.add(view.JComponent(), mainPanel.getComponentCount() - 1);
@@ -398,7 +398,7 @@ public class AllSectionLineViewsPanel implements View
   }
 
   /**
-   * Löscht alle ausgewählten Elemente.
+   * LÃ¶scht alle ausgewÃ¤hlten Elemente.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -407,9 +407,9 @@ public class AllSectionLineViewsPanel implements View
     /**
      * Die folgende Schleife muss auf diese Weise geschrieben werden und nicht mit
      * einem Iterator, weil es ansonsten eine ConcurrentModificationException gibt,
-     * da über {@link ViewChangeListener#viewShouldBeRemoved(View)} die Selektion
-     * während des remove() gleich verändert wird, was den Iterator invalidieren
-     * würde.
+     * da Ã¼ber {@link ViewChangeListener#viewShouldBeRemoved(View)} die Selektion
+     * wÃ¤hrend des remove() gleich verÃ¤ndert wird, was den Iterator invalidieren
+     * wÃ¼rde.
      */
     while (!selection.isEmpty())
     {
@@ -466,11 +466,11 @@ public class AllSectionLineViewsPanel implements View
 
           switch (state)
           {
-            case -1: // abwählen
+            case -1: // abwÃ¤hlen
               view.unmark();
               selection.remove(index);
               break;
-            case 1: // auswählen
+            case 1: // auswÃ¤hlen
               view.mark();
               selection.add(index);
               break;

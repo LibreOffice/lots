@@ -1,9 +1,9 @@
 /*
  * Dateiname: XPALProvider.idl
  * Projekt  : WollMux
- * Funktion : Interface-Definition für Lesezugriff auf die Persönliche Absenderliste (PAL)
+ * Funktion : Interface-Definition fÃ¼r Lesezugriff auf die PersÃ¶nliche Absenderliste (PAL)
  * 
- * Copyright (C) 2009 Landeshauptstadt München
+ * Copyright (C) 2009 Landeshauptstadt MÃ¼nchen
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,27 +36,27 @@ module de {  module muenchen {  module allg { module itd51 { module wollmux {
  
 /** 
   Das Interface XPALProvider stellt Methoden zum Auslesen der aktuellen
-  Persönliche Absenderliste (PAL) zur Verfügung.
+  PersÃ¶nliche Absenderliste (PAL) zur VerfÃ¼gung.
  */
 interface XPALProvider
 {
     /**
       Diese Methode liefert eine alphabethisch aufsteigend sortierte Liste aller
-      Einträge der Persönlichen Absenderliste (PAL) in einem String-Array, wobei
-      die einzelnen Einträge in der Form "<Nachname>, <Vorname> (<Rolle>)"
+      EintrÃ¤ge der PersÃ¶nlichen Absenderliste (PAL) in einem String-Array, wobei
+      die einzelnen EintrÃ¤ge in der Form "<Nachname>, <Vorname> (<Rolle>)"
       sind.
      */
 	sequence< string > getPALEntries();
 
     /**
-      Diese Methode liefert den aktuell aus der persönlichen Absenderliste (PAL)
-      ausgewählten Absender im Format "<Nachname>, <Vorname> (<Rolle>)" zurück.
-      Ist die PAL leer oder noch kein Absender ausgewählt, so liefert die Methode
-      den Leerstring "" zurück. Dieser Sonderfall sollte natürlich entsprechend
+      Diese Methode liefert den aktuell aus der persÃ¶nlichen Absenderliste (PAL)
+      ausgewÃ¤hlten Absender im Format "<Nachname>, <Vorname> (<Rolle>)" zurÃ¼ck.
+      Ist die PAL leer oder noch kein Absender ausgewÃ¤hlt, so liefert die Methode
+      den Leerstring "" zurÃ¼ck. Dieser Sonderfall sollte natÃ¼rlich entsprechend
       durch die aufrufende Methode behandelt werden.
       
-      @return den aktuell aus der PAL ausgewählten Absender als String. Ist kein
-              Absender ausgewählt wird der Leerstring "" zurückgegeben.
+      @return den aktuell aus der PAL ausgewÃ¤hlten Absender als String. Ist kein
+              Absender ausgewÃ¤hlt wird der Leerstring "" zurÃ¼ckgegeben.
      */
 	string getCurrentSender();
 };

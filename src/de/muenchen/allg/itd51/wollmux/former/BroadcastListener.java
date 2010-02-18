@@ -1,9 +1,9 @@
 /*
  * Dateiname: BroadcastListener.java
  * Projekt  : WollMux
- * Funktion : Abstrakte Basisklasse für Horcher auf dem globalen Broadcast-Kanal.
+ * Funktion : Abstrakte Basisklasse fÃ¼r Horcher auf dem globalen Broadcast-Kanal.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 04.09.2006 | BNK | Erstellung
  * 16.03.2007 | BNK | +broadcastNewFormControlId()
@@ -34,11 +34,11 @@ package de.muenchen.allg.itd51.wollmux.former;
 import java.util.Set;
 
 /**
- * Abstrakte Basisklasse für Horcher auf dem globalen Broadcast-Kanal. Der globale
- * Broadcast-Kanal wird für Nachrichten verwendet, die verschiedene permanente
- * Objekte erreichen müssen, die aber von (transienten) Objekten ausgehen, die mit
+ * Abstrakte Basisklasse fÃ¼r Horcher auf dem globalen Broadcast-Kanal. Der globale
+ * Broadcast-Kanal wird fÃ¼r Nachrichten verwendet, die verschiedene permanente
+ * Objekte erreichen mÃ¼ssen, die aber von (transienten) Objekten ausgehen, die mit
  * diesen globalen Objekten wegen des Ausuferns der Verbindungen nicht in einer
- * Beziehung stehen sollen. BroadcastListener dürfen nur permanente Objekte sein,
+ * Beziehung stehen sollen. BroadcastListener dÃ¼rfen nur permanente Objekte sein,
  * d.h. Objekte deren Lebensdauer nicht vor Beenden des FM4000 endet.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -82,7 +82,7 @@ public abstract class BroadcastListener
   {}
 
   /**
-   * Eine View die Views aller InsertionModel enthält wurde ausgewählt.
+   * Eine View die Views aller InsertionModel enthÃ¤lt wurde ausgewÃ¤hlt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -90,7 +90,7 @@ public abstract class BroadcastListener
   {}
 
   /**
-   * Eine View die Views aller FormControlModels enthält wurde ausgewählt.
+   * Eine View die Views aller FormControlModels enthÃ¤lt wurde ausgewÃ¤hlt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -98,7 +98,7 @@ public abstract class BroadcastListener
   {}
 
   /**
-   * Eine View die Views aller GroupModels enthält wurde ausgewählt.
+   * Eine View die Views aller GroupModels enthÃ¤lt wurde ausgewÃ¤hlt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -106,7 +106,7 @@ public abstract class BroadcastListener
   {}
 
   /**
-   * Eine View die Views aller SectionModels enthält wurde ausgewählt.
+   * Eine View die Views aller SectionModels enthÃ¤lt wurde ausgewÃ¤hlt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -114,7 +114,7 @@ public abstract class BroadcastListener
   {}
 
   /**
-   * Eine Menge von Bookmarks wurde ausgewählt.
+   * Eine Menge von Bookmarks wurde ausgewÃ¤hlt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -122,7 +122,7 @@ public abstract class BroadcastListener
   {}
 
   /**
-   * Der {@link ViewVisibilityDescriptor} hat sich geändert.
+   * Der {@link ViewVisibilityDescriptor} hat sich geÃ¤ndert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

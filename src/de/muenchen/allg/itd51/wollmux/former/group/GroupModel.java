@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Eine Sichtbarkeitsgruppe.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 15.11.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -56,13 +56,13 @@ import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 public class GroupModel
 {
   /**
-   * {@link Pattern} für legale IDs.
+   * {@link Pattern} fÃ¼r legale IDs.
    */
   private static Pattern ID_PATTERN = Pattern.compile("^([a-zA-Z_][a-zA-Z_0-9]*)");
 
   /**
-   * Für {@link ModelChangeListener#attributeChanged(GroupModel, int, Object)}, gibt
-   * an, dass die ID (der Name) der Gruppe sich geändert hat.
+   * FÃ¼r {@link ModelChangeListener#attributeChanged(GroupModel, int, Object)}, gibt
+   * an, dass die ID (der Name) der Gruppe sich geÃ¤ndert hat.
    */
   public static final int ID_ATTR = 0;
 
@@ -72,23 +72,23 @@ public class GroupModel
   private IDManager.ID id;
 
   /**
-   * Die Sichtbarkeitsbedingung für diese Gruppe.
+   * Die Sichtbarkeitsbedingung fÃ¼r diese Gruppe.
    */
   private FunctionSelection condition;
 
   /**
-   * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert
+   * Die {@link ModelChangeListener}, die Ã¼ber Ã„nderungen dieses Models informiert
    * werden wollen.
    */
   private List<ModelChangeListener> listeners = new Vector<ModelChangeListener>(1);
 
   /**
-   * Der FormularMax4000 zu dem dieses Model gehört.
+   * Der FormularMax4000 zu dem dieses Model gehÃ¶rt.
    */
   private FormularMax4000 formularMax4000;
 
   /**
-   * Listener der Änderungen an {@link #id} überwacht.
+   * Listener der Ã„nderungen an {@link #id} Ã¼berwacht.
    */
   private MyIDChangeListener myIDChangeListener;
 
@@ -96,17 +96,17 @@ public class GroupModel
    * Erzeugt eine neue Gruppe mit Name/ID id. ACHTUNG! id muss activated sein!
    * 
    * @param condition
-   *          wird direkt als Referenz übernommen und bestimmt die
+   *          wird direkt als Referenz Ã¼bernommen und bestimmt die
    *          Sichtbarkeitsbedingung dieser Gruppe.
    * @param formularMax4000
-   *          der {@link FormularMax4000} zu dem diese Gruppe gehört.
+   *          der {@link FormularMax4000} zu dem diese Gruppe gehÃ¶rt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public GroupModel(IDManager.ID id, FunctionSelection condition,
       FormularMax4000 formularMax4000)
   {
     this.id = id;
-    // Achtung! Wir müssen eine Referenz halten (siehe addIdChangeListener())
+    // Achtung! Wir mÃ¼ssen eine Referenz halten (siehe addIdChangeListener())
     myIDChangeListener = new MyIDChangeListener();
     id.addIDChangeListener(myIDChangeListener);
     this.condition = condition;
@@ -114,7 +114,7 @@ public class GroupModel
   }
 
   /**
-   * Liefert den FormularMax4000 zu dem dieses Model gehört.
+   * Liefert den FormularMax4000 zu dem dieses Model gehÃ¶rt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -126,7 +126,7 @@ public class GroupModel
   /**
    * Benachrichtigt alle auf diesem Model registrierten Listener, dass das Model aus
    * seinem Container entfernt wurde. ACHTUNG! Darf nur von einem entsprechenden
-   * Container aufgerufen werden, der das Model enthält.
+   * Container aufgerufen werden, der das Model enthÃ¤lt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -142,7 +142,7 @@ public class GroupModel
   }
 
   /**
-   * listener wird über Änderungen des Models informiert.
+   * listener wird Ã¼ber Ã„nderungen des Models informiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -174,7 +174,7 @@ public class GroupModel
   }
 
   /**
-   * Liefert die {@link IDManager.ID} dieser Sichtbarkeitsgruppe zurück.
+   * Liefert die {@link IDManager.ID} dieser Sichtbarkeitsgruppe zurÃ¼ck.
    * 
    * @return
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -186,7 +186,7 @@ public class GroupModel
   }
 
   /**
-   * Setzt newID als neuen Namen für diese Sichtbarkeitsgruppe und benachrichtigt
+   * Setzt newID als neuen Namen fÃ¼r diese Sichtbarkeitsgruppe und benachrichtigt
    * alle mittels
    * {@link #addListener(de.muenchen.allg.itd51.wollmux.former.group.GroupModel.ModelChangeListener)}
    * registrierten Listener.
@@ -203,7 +203,7 @@ public class GroupModel
   {
     if (!isLegalID(newID))
       throw new SyntaxErrorException(L.m(
-        "'%1' ist keine syntaktisch korrekte ID für Sichtbarkeitsgruppen", newID));
+        "'%1' ist keine syntaktisch korrekte ID fÃ¼r Sichtbarkeitsgruppen", newID));
     id.setID(newID);
     /**
      * IDManager.ID ruft MyIDChangeListener.idHasChanged() auf, was wiederum die
@@ -222,7 +222,7 @@ public class GroupModel
   }
 
   /**
-   * Liefert ein ConfigThingy zurück, dessen Name der Name der Gruppe ist und dessen
+   * Liefert ein ConfigThingy zurÃ¼ck, dessen Name der Name der Gruppe ist und dessen
    * Inhalt die Definition der Sichtbarkeitsfunktion der Gruppe ist.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -233,7 +233,7 @@ public class GroupModel
   }
 
   /**
-   * Ruft für jeden auf diesem Model registrierten {@link ModelChangeListener} die
+   * Ruft fÃ¼r jeden auf diesem Model registrierten {@link ModelChangeListener} die
    * Methode {@link ModelChangeListener#attributeChanged(GroupModel, int, Object)}
    * auf.
    */
@@ -249,7 +249,7 @@ public class GroupModel
   }
 
   /**
-   * Interface für Listener, die über Änderungen eines Models informiert werden
+   * Interface fÃ¼r Listener, die Ã¼ber Ã„nderungen eines Models informiert werden
    * wollen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -257,15 +257,15 @@ public class GroupModel
   public static interface ModelChangeListener
   {
     /**
-     * Wird aufgerufen wenn ein Attribut des Models sich geändert hat.
+     * Wird aufgerufen wenn ein Attribut des Models sich geÃ¤ndert hat.
      * 
      * @param model
-     *          das Model, das sich geändert hat.
+     *          das Model, das sich geÃ¤ndert hat.
      * @param attributeId
      *          eine der {@link GroupModel#ID_ATTR Attribut-ID-Konstanten}.
      * @param newValue
      *          der neue Wert des Attributs. Die ID wird als {@link IDManager.ID}
-     *          übergeben.
+     *          Ã¼bergeben.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void attributeChanged(GroupModel model, int attributeId, Object newValue);
@@ -289,11 +289,11 @@ public class GroupModel
 
   /**
    * Diese Klasse leitet Zugriffe weiter an das Objekt {@link GroupModel#condition}.
-   * Bei ändernden Zugriffen wird auch noch der FormularMax4000 benachrichtigt, dass
-   * das Dokument geupdatet werden muss. Im Prinzip müsste korrekterweise ein
-   * ändernder Zugriff auch einen Event an die ModelChangeListener schicken.
+   * Bei Ã¤ndernden Zugriffen wird auch noch der FormularMax4000 benachrichtigt, dass
+   * das Dokument geupdatet werden muss. Im Prinzip mÃ¼sste korrekterweise ein
+   * Ã¤ndernder Zugriff auch einen Event an die ModelChangeListener schicken.
    * Allerdings ist dies derzeit nicht implementiert, weil es derzeit genau eine View
-   * gibt für die Condition, so dass konkurrierende Änderungen gar nicht möglich
+   * gibt fÃ¼r die Condition, so dass konkurrierende Ã„nderungen gar nicht mÃ¶glich
    * sind.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)

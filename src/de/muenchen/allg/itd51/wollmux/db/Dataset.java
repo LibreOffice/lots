@@ -1,9 +1,9 @@
 /*
  * Dateiname: Dataset.java
  * Projekt  : WollMux
- * Funktion : Interface für Datensätze einer Tabelle.
+ * Funktion : Interface fÃ¼r DatensÃ¤tze einer Tabelle.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 06.10.2005 | BNK | Erstellung
  * 14.10.2005 | BNK | ->Interface
@@ -33,7 +33,7 @@
 package de.muenchen.allg.itd51.wollmux.db;
 
 /**
- * Interface für Datensätze einer Tabelle.
+ * Interface fÃ¼r DatensÃ¤tze einer Tabelle.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -52,7 +52,7 @@ public interface Dataset
   public String get(String columnName) throws ColumnNotFoundException;
 
   /**
-   * Liefert den Schlüsselwert dieses Datensatzes. Dieser sollte den Datensatz in
+   * Liefert den SchlÃ¼sselwert dieses Datensatzes. Dieser sollte den Datensatz in
    * seiner Datenbank eindeutig identifizieren muss es aber nicht.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)

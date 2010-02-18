@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -24,8 +24,8 @@ package de.muenchen.allg.itd51.wollmux.db.checker;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 
 /**
- * Ein DatasetChecker, der überprüft ob der Wert einer gegebenen Spalte einen
- * bestimmten Teilstring (CASE-INSENSITIVE) enthält.
+ * Ein DatasetChecker, der Ã¼berprÃ¼ft ob der Wert einer gegebenen Spalte einen
+ * bestimmten Teilstring (CASE-INSENSITIVE) enthÃ¤lt.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */

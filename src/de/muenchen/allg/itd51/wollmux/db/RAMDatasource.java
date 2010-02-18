@@ -1,10 +1,10 @@
 /*
  * Dateiname: RAMDatasource.java
  * Projekt  : WollMux
- * Funktion : Oberklasse für Datasources, die ihre Daten vollständig
+ * Funktion : Oberklasse fÃ¼r Datasources, die ihre Daten vollstÃ¤ndig
  *            im Speicher halten
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -19,8 +19,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 31.10.2005 | BNK | Erstellung
  * 03.11.2005 | BNK | besser kommentiert
@@ -44,7 +44,7 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.db.checker.DatasetChecker;
 
 /**
- * Oberklasse für Datasources, die ihre Daten vollständig im Speicher halten
+ * Oberklasse fÃ¼r Datasources, die ihre Daten vollstÃ¤ndig im Speicher halten
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -74,7 +74,7 @@ public class RAMDatasource implements Datasource
    * @param schema
    *          das Schema der Datenquelle
    * @param data
-   *          die Datensätze der Datenquelle
+   *          die DatensÃ¤tze der Datenquelle
    */
   public RAMDatasource(String name, Set<String> schema, List<Dataset> data)
   {
@@ -82,7 +82,7 @@ public class RAMDatasource implements Datasource
   }
 
   /**
-   * Führt die Initialisierungsaktionen des Konstruktors mit den gleichen Parametern
+   * FÃ¼hrt die Initialisierungsaktionen des Konstruktors mit den gleichen Parametern
    * aus. Diese Methode sollte von abgeleiteten Klassen verwendet werden, wenn sie
    * den Konstruktor ohne Argumente verwenden.
    * 
@@ -97,7 +97,7 @@ public class RAMDatasource implements Datasource
 
   /**
    * Erzeugt eine uninitialisierte RAMDatasource. Eine abgeleitete Klasse, die diesen
-   * Konstruktor verwendet sollte init() aufrufen, um die nötigen Initialisierungen
+   * Konstruktor verwendet sollte init() aufrufen, um die nÃ¶tigen Initialisierungen
    * zu erledigen.
    */
   protected RAMDatasource()

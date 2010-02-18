@@ -1,9 +1,9 @@
 /*
  * Dateiname: ConfigThingy.java
  * Projekt  : WollMux
- * Funktion : Parsen und Repräsentation von WollMux-Konfigurationsdateien
+ * Funktion : Parsen und ReprÃ¤sentation von WollMux-Konfigurationsdateien
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,19 +18,19 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 05.10.2005 | BNK | Erstellung
  * 10.10.2005 | BNK | Parser fertiggestellt
- *                  | InputStream -> URL, Unterstützung von includes
+ *                  | InputStream -> URL, UnterstÃ¼tzung von includes
  *                  | alles ab # ist jetzt Kommentar
- *                  | Testprogramm hinzugefügt
- * 11.10.2005 | BNK | Einbetten von Zeilenumbrüchen mittels %n
- *                  | Ausführlich kommentiert
+ *                  | Testprogramm hinzugefÃ¼gt
+ * 11.10.2005 | BNK | Einbetten von ZeilenumbrÃ¼chen mittels %n
+ *                  | AusfÃ¼hrlich kommentiert
  * 12.10.2005 | BNK | get() benennt jetzt Ergebnisknoten "<query results>"
  * 13.10.2005 | BNK | Der InputStream von dem die Daten gelesen werden ist
- *                  | jetzt unabhängig von der Kontext-URL.
+ *                  | jetzt unabhÃ¤ngig von der Kontext-URL.
  *                  | '..' Strings sind jetzt auch erlaubt
  * 13.10.2005 | BNK | Von InputStream auf Reader umgestellt.                  
  * 13.10.2005 | BNK | +query(), +queryByChild()
@@ -47,7 +47,7 @@
  * 03.11.2005 | BNK | +stringRepresentation(chilrenOnly, stringChar)
  *                  | Default stringChar ist jetzt wieder "
  *                  | +Warnung, dass mittels add(String) ConfigThingys produziert
- *                  | werden können, die den Syntaxregeln widersprechen.
+ *                  | werden kÃ¶nnen, die den Syntaxregeln widersprechen.
  * 03.11.2005 | BNK | BOM (\uFEFF) auf Whitespace-Liste gesetzt 
  * 07.11.2005 | BNK | +setName()
  * 06.02.2006 | BNK | addChild() public
@@ -57,14 +57,14 @@
  * 22.05.2006 | BNK | get und Konsorten erlauben jetzt ein maxlevel Argument
  * 13.11.2006 | BNK | %uXXXX Syntax wird verstanden und stringRepresentation(..,..,..) erzeugt sie.
  * 14.11.2006 | BNK | %-Escapes am Anfang eines Strings werden korrekt geparst.
- * 15.06.2007 | BNK | urlEncode() Sonderbehandlung für Leerzeichen ("%20" statt "+")
- *                  | urlEncode() public gemacht. Nicht wirklich schöne Lösung, aber mei.
+ * 15.06.2007 | BNK | urlEncode() Sonderbehandlung fÃ¼r Leerzeichen ("%20" statt "+")
+ *                  | urlEncode() public gemacht. Nicht wirklich schÃ¶ne LÃ¶sung, aber mei.
  * 02.08.2007 | BNK | +ConfigThingy(String, String)       
  * 07.08.2007 | BNK | Bei Syntaxfehlern im Exceptiontext den beanstandeten Text angeben.
  * 10.08.2007 | BNK | Fehler bei der stringRepresentation() von Listen mit nur einem Element behoben.
  * 25.02.2008 | BNK | ConfigThingy generisiert
  * 12.06.2009 | BED | get, query und queryByChild um jeweils eine Version mit minlevel Argument erweitert
- * 19.08.2009 | BNK | [R52737]FIXED: Lange Strings führen zu StackOverflowError in ConfigThingy
+ * 19.08.2009 | BNK | [R52737]FIXED: Lange Strings fÃ¼hren zu StackOverflowError in ConfigThingy
  * 11.01.2010 | BED | [R67584] +trimConfigThingy() zur Speicheroptimierung
  * -------------------------------------------------------------------
  *
@@ -92,7 +92,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Ein ConfigThingy repräsentiert einen Knoten eines Baumes, der durch das Parsen
+ * Ein ConfigThingy reprÃ¤sentiert einen Knoten eines Baumes, der durch das Parsen
  * einer WollMux-Konfigurationsdatei entsteht.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -102,12 +102,12 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   /**
    * Wegen JIT bug http://bugs.sun.com/view_bug.do?bug_id=6196102, den die
    * hirnverbrannten Idioten von Sun seit 2004 nicht behoben haben, weil es Ihnen
-   * egal ist, ob irgendwo geschäftskritische Anwendungen abschmieren und Entwickler
-   * viel Zeit investieren um Heisenbugs zu jagen, und überhaupt, wer arbeitet denn
-   * schon mit so großen Zahlen. Wenn viele amerikanische Teenager nicht bis 3 zählen
-   * können, kann man doch nicht erwarten, dass Java zuverlässig weiß dass die Zahl 2
-   * kleiner ist als 2147483647 und nicht größer. Computer sind ja auch nur Menschen
-   * und können bei so großen Zahlen schon mal einen Fehler machen.
+   * egal ist, ob irgendwo geschÃ¤ftskritische Anwendungen abschmieren und Entwickler
+   * viel Zeit investieren um Heisenbugs zu jagen, und Ã¼berhaupt, wer arbeitet denn
+   * schon mit so groÃŸen Zahlen. Wenn viele amerikanische Teenager nicht bis 3 zÃ¤hlen
+   * kÃ¶nnen, kann man doch nicht erwarten, dass Java zuverlÃ¤ssig weiÃŸ dass die Zahl 2
+   * kleiner ist als 2147483647 und nicht grÃ¶ÃŸer. Computer sind ja auch nur Menschen
+   * und kÃ¶nnen bei so groÃŸen Zahlen schon mal einen Fehler machen.
    */
   private static final int INTEGER_MAX = Integer.MAX_VALUE - 1;
 
@@ -117,23 +117,23 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   public static final String CHARSET = "UTF-8";
 
   /**
-   * Pattern für Unicode Buchstaben und Ziffern.
+   * Pattern fÃ¼r Unicode Buchstaben und Ziffern.
    */
   private static final Pattern NON_LETTER_OR_DIGITS =
     Pattern.compile("\\P{javaLetterOrDigit}");
 
   /**
-   * Pattern für Zeichen, die in ConfigThingys escapet werden müssen.
+   * Pattern fÃ¼r Zeichen, die in ConfigThingys escapet werden mÃ¼ssen.
    */
   private static final Pattern CONFIGTHINGY_SPECIAL = Pattern.compile("[%\n\r\"']");
 
   /**
-   * Einrückung für stringRepresentation().
+   * EinrÃ¼ckung fÃ¼r stringRepresentation().
    */
   private static final String INDENT = "  ";
 
   /**
-   * Default-Wert für den minlevel-Parameter, falls die get- bzw. query-Methoden ohne
+   * Default-Wert fÃ¼r den minlevel-Parameter, falls die get- bzw. query-Methoden ohne
    * explizite Angabe von minlevel verwendet werden. Suchtiefe 1 bedeutet, dass this
    * von der Suche ausgenommen ist und nur nach Nachfahrenknoten gesucht wird.
    */
@@ -142,7 +142,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   /** Die Kindknoten. */
   private Vector<ConfigThingy> children;
 
-  /** Der Name des Knotens. Bei Blättern ist dies der (String-)Wert des Knotens. */
+  /** Der Name des Knotens. Bei BlÃ¤ttern ist dies der (String-)Wert des Knotens. */
   private String name;
 
   /**
@@ -152,7 +152,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    *          der Name der Wurzel des erzeugten ConfigThingy-Baumes.
    * @throws IOException
    *           falls das Laden von Daten von url (oder einer includeten URL)
-   *           fehlschlägt.
+   *           fehlschlÃ¤gt.
    * @throws SyntaxErrorException
    * @throws SyntaxErrorException
    *           falls beim Parsen der Daten von url ein syntaktischer Fehler gefunden
@@ -166,12 +166,12 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
   /**
    * Parst den String confString im Kontext der null URL (d,h, includes mit relativen
-   * URLs dürfen in confString nicht vorkommen).
+   * URLs dÃ¼rfen in confString nicht vorkommen).
    * 
    * @param name
    *          der Name der Wurzel des erzeugten ConfigThingy-Baumes.
    * @throws IOException
-   *           falls das Laden vonr einer includeten URL fehlschlägt.
+   *           falls das Laden vonr einer includeten URL fehlschlÃ¤gt.
    * @throws SyntaxErrorException
    *           falls beim Parsen der Daten ein syntaktischer Fehler gefunden wird.
    */
@@ -189,7 +189,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    *          der Name der Wurzel des erzeugten ConfigThingy-Baumes.
    * @throws IOException
    *           falls das Laden von Daten von url (oder einer includeten URL)
-   *           fehlschlägt.
+   *           fehlschlÃ¤gt.
    * @throws SyntaxErrorException
    *           falls beim Parsen der Daten von url ein syntaktischer Fehler gefunden
    *           wird.
@@ -214,8 +214,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
   /**
    * Erzeugt ein ConfigThingy mit Name/Wert name, ohne Kinder. Achtung! Mit dieser
-   * Methode ist es möglich, ConfigThingys zu erzeugen, die sich nicht an die
-   * Syntaxbeschränkungen des Parsers für Schlüssel halten. Wird so ein ConfigThingy
+   * Methode ist es mÃ¶glich, ConfigThingys zu erzeugen, die sich nicht an die
+   * SyntaxbeschrÃ¤nkungen des Parsers fÃ¼r SchlÃ¼ssel halten. Wird so ein ConfigThingy
    * mittels stringRepresentation() in Text konvertiert, entsteht etwas, das der
    * Parser nicht wieder einlesen kann.
    */
@@ -236,7 +236,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Fügt diesem ConfigThingy unabhängige Kopien aller Kinder von conf hinzu. Die
+   * FÃ¼gt diesem ConfigThingy unabhÃ¤ngige Kopien aller Kinder von conf hinzu. Die
    * Kinder werden samt aller Nachfahren kopiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -253,7 +253,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Parst die Daten aus read im Kontext von url und hängt die entsprechenden Knoten
+   * Parst die Daten aus read im Kontext von url und hÃ¤ngt die entsprechenden Knoten
    * als Kinder an this an.
    * 
    * @throws IOException
@@ -297,7 +297,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
             else
             {
               throw new SyntaxErrorException(token2.url()
-                + ": URL-String (umschlossen von Gänsefüßchen) erwartet in Zeile "
+                + ": URL-String (umschlossen von GÃ¤nsefÃ¼ÃŸchen) erwartet in Zeile "
                 + token2.line() + " bei Zeichen " + token2.position());
             }
             break;
@@ -357,7 +357,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       if (stack.size() > 1)
       {
         throw new SyntaxErrorException(token1.url() + ": " + (stack.size() - 1)
-          + " schließende Klammern fehlen");
+          + " schlieÃŸende Klammern fehlen");
       }
       trimConfigThingy();
     }
@@ -390,8 +390,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   /**
    * Jagt alle in URLs verbotenen Zeichen durch URLEncoder,encode(ch,{@link #CHARSET}).
    * Das Leerzeichen bekommt eine Sonderbehandlung (Umsetzung nach %20), weil
-   * URLEncoder.encode() es nach "+" umsetzen würde, was zumindest bei unseren
-   * Webservern nicht zum gewünschten Ergebnis führt.
+   * URLEncoder.encode() es nach "+" umsetzen wÃ¼rde, was zumindest bei unseren
+   * Webservern nicht zum gewÃ¼nschten Ergebnis fÃ¼hrt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -427,8 +427,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Fügt dem ConfigThingy ein weiteres Kind hinzu. ACHTUNG! child wird nicht
-   * kopiert, sondern als Refernz eingefügt!
+   * FÃ¼gt dem ConfigThingy ein weiteres Kind hinzu. ACHTUNG! child wird nicht
+   * kopiert, sondern als Refernz eingefÃ¼gt!
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -438,10 +438,10 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Fügt ein neues Kind namens childName als letztes Kind an und liefert eine
-   * Referenz auf das neue Kind. Achtung! Mit dieser Methode ist es möglich,
-   * ConfigThingys zu erzeugen, die sich nicht an die Syntaxbeschränkungen des
-   * Parsers für Schlüssel halten. Wird so ein ConfigThingy mittels
+   * FÃ¼gt ein neues Kind namens childName als letztes Kind an und liefert eine
+   * Referenz auf das neue Kind. Achtung! Mit dieser Methode ist es mÃ¶glich,
+   * ConfigThingys zu erzeugen, die sich nicht an die SyntaxbeschrÃ¤nkungen des
+   * Parsers fÃ¼r SchlÃ¼ssel halten. Wird so ein ConfigThingy mittels
    * stringRepresentation() in Text konvertiert, entsteht etwas, das der Parser nicht
    * wieder einlesen kann.
    * 
@@ -455,7 +455,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Liefert die Anzahl der Kinder zurück.
+   * Liefert die Anzahl der Kinder zurÃ¼ck.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -465,7 +465,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Liefert einen Iterator über die Kinder dieses ConfigThingys.
+   * Liefert einen Iterator Ã¼ber die Kinder dieses ConfigThingys.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -519,7 +519,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Liefert den Namen dieses Knotens des Config-Baumes zurück. Im Falle eines
+   * Liefert den Namen dieses Knotens des Config-Baumes zurÃ¼ck. Im Falle eines
    * Blattes entspricht dies dem (String-)Wert.
    * 
    * @return
@@ -531,9 +531,9 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Ändert den Namen dieses Knotens auf newName. Achtung! Mit dieser Methode ist es
-   * möglich, ConfigThingys zu erzeugen, die sich nicht an die Syntaxbeschränkungen
-   * des Parsers für Schlüssel halten. Wird so ein ConfigThingy mittels
+   * Ã„ndert den Namen dieses Knotens auf newName. Achtung! Mit dieser Methode ist es
+   * mÃ¶glich, ConfigThingys zu erzeugen, die sich nicht an die SyntaxbeschrÃ¤nkungen
+   * des Parsers fÃ¼r SchlÃ¼ssel halten. Wird so ein ConfigThingy mittels
    * stringRepresentation() in Text konvertiert, entsteht etwas, das der Parser nicht
    * wieder einlesen kann.
    * 
@@ -585,7 +585,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
   /**
    * Durchsucht den Teilbaum mit Wurzel this nach Knoten mit Name name auf Suchtiefe
-   * searchlevel und fügt sie (oder falls getParents==true ihre Eltern) in die Liste
+   * searchlevel und fÃ¼gt sie (oder falls getParents==true ihre Eltern) in die Liste
    * found ein.
    * 
    * @param parent
@@ -594,23 +594,23 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    *          der Name nach dem zu suchen ist.
    * @param found
    *          in diese Liste werden die gefundenen Knoten (oder falls
-   *          getParents==true ihre Eltern) eingefügt. Jeder Knoten taucht maximal
+   *          getParents==true ihre Eltern) eingefÃ¼gt. Jeder Knoten taucht maximal
    *          einmal in dieser Liste auf, d.h. falls getParents==true und ein Knoten
    *          mehrere Kinder mit Name name hat, wird dieser Knoten trotzdem nur
-   *          einmal eingefügt.
+   *          einmal eingefÃ¼gt.
    * @param parentLevel
    *          die Suchtiefe bei Breitensuche von parent, d.h. this hat Suchtiefe
    *          parentLevel + 1
    * @param searchLevel
    *          die Suchtiefe bei Breitensuche auf der die Knoten gesucht werden
-   *          sollen. Knoten auf anderen Suchtiefen werden nicht in found eingefügt.
+   *          sollen. Knoten auf anderen Suchtiefen werden nicht in found eingefÃ¼gt.
    * @param getParents
    *          falls true werden die Elternknoten statt der gefundenen Knoten
-   *          eingefügt. Jeder Elternknoten wird allerdings grundsätzlich nur einmal
-   *          eingefügt, auch wenn er mehrere passende Kinder hat.
+   *          eingefÃ¼gt. Jeder Elternknoten wird allerdings grundsÃ¤tzlich nur einmal
+   *          eingefÃ¼gt, auch wenn er mehrere passende Kinder hat.
    * @return true falls noch mindestens ein Knoten mit Suchtiefe searchlevel erreicht
-   *         wurde, d.h. falls eine Suche mit höherem searchlevel prinzipiell
-   *         Ergebnisse bringen könnte.
+   *         wurde, d.h. falls eine Suche mit hÃ¶herem searchlevel prinzipiell
+   *         Ergebnisse bringen kÃ¶nnte.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private boolean rollcall(ConfigThingy parent, String name,
@@ -645,18 +645,18 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Führt eine Breitensuche nach Nachfahrenknoten von this durch, die name als Name
+   * FÃ¼hrt eine Breitensuche nach Nachfahrenknoten von this durch, die name als Name
    * haben.
    * 
    * @return Falls es entsprechende Knoten gibt, wird die niedrigste Suchtiefe
    *         bestimmt auf der entsprechende Knoten zu finden sind und es werden alle
-   *         Knoten auf dieser Suchtiefe zurückgeliefert. Falls dies genau einer ist,
-   *         wird er direkt zurückgeliefert, ansonsten wird ein ConfigThingy mit
+   *         Knoten auf dieser Suchtiefe zurÃ¼ckgeliefert. Falls dies genau einer ist,
+   *         wird er direkt zurÃ¼ckgeliefert, ansonsten wird ein ConfigThingy mit
    *         Namen "<query results>" geliefert, das diese Knoten (und nur diese) als
    *         Kinder hat.
    * @throws NodeNotFoundException
    *           falls keine entsprechenden Knoten gefunden wurden. Falls das nicht
-   *           gewünscht ist, kann {@link #query(String)} benutzt werden.
+   *           gewÃ¼nscht ist, kann {@link #query(String)} benutzt werden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ConfigThingy get(String name) throws NodeNotFoundException
@@ -666,7 +666,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
   /**
    * Wie {@link #get(String)}, es werden aber maximal Ergebnisse von Suchtiefe
-   * maxlevel (0 ist this) zurückgeliefert.
+   * maxlevel (0 ist this) zurÃ¼ckgeliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -677,8 +677,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
   /**
    * Wie {@link #get(String)}, es werden aber nur Ergebnisse, deren Suchtiefe
-   * kleiner/gleich maxlevel und größer/gleich minlevel ist (0 ist this),
-   * zurückgeliefert.
+   * kleiner/gleich maxlevel und grÃ¶ÃŸer/gleich minlevel ist (0 ist this),
+   * zurÃ¼ckgeliefert.
    * 
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
@@ -694,8 +694,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Wie {@link #get(String)}, aber es wird grundsätzlich ein ConfigThingy mit Namen
-   * "&lt;query results>" über die Resultate gesetzt. Im Falle, dass es keine
+   * Wie {@link #get(String)}, aber es wird grundsÃ¤tzlich ein ConfigThingy mit Namen
+   * "&lt;query results>" Ã¼ber die Resultate gesetzt. Im Falle, dass es keine
    * Resultate gibt, wird nicht null sondern ein ConfigThingy ohne Kinder geliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -706,8 +706,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Wie {@link #get(String, int)}, aber es wird grundsätzlich ein ConfigThingy mit
-   * Namen "<query results>" über die Resultate gesetzt. Im Falle, dass es keine
+   * Wie {@link #get(String, int)}, aber es wird grundsÃ¤tzlich ein ConfigThingy mit
+   * Namen "<query results>" Ã¼ber die Resultate gesetzt. Im Falle, dass es keine
    * Resultate gibt, wird nicht null sondern ein ConfigThingy ohne Kinder geliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -718,8 +718,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Wie {@link #get(String, int, int)}, aber es wird grundsätzlich ein ConfigThingy
-   * mit Namen "<query results>" über die Resultate gesetzt. Im Falle, dass es keine
+   * Wie {@link #get(String, int, int)}, aber es wird grundsÃ¤tzlich ein ConfigThingy
+   * mit Namen "<query results>" Ã¼ber die Resultate gesetzt. Im Falle, dass es keine
    * Resultate gibt, wird nicht null sondern ein ConfigThingy ohne Kinder geliefert.
    * 
    * @author Daniel Benkmann (D-III-ITD-D101)
@@ -731,13 +731,13 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
   /**
    * Wie {@link #get(String)}, aber es werden die Elternknoten der gefundenen Knoten
-   * zurückgeliefert anstatt der Knoten selbst. Es ist zu beachten, dass jeder
+   * zurÃ¼ckgeliefert anstatt der Knoten selbst. Es ist zu beachten, dass jeder
    * Elternknoten nur genau einmal in den Ergebnissen enthalten ist, auch wenn er
    * mehrere passende Kinder hat,
    * 
    * @throws NodeNotFoundException
    *           falls keine entsprechenden Knoten gefunden wurden. Falls das nicht
-   *           gewünscht ist, kann {@link #query(String)} benutzt werden.
+   *           gewÃ¼nscht ist, kann {@link #query(String)} benutzt werden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ConfigThingy getByChild(String name) throws NodeNotFoundException
@@ -747,13 +747,13 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
   /**
    * Wie {@link #get(String, int)}, aber es werden die Elternknoten der gefundenen
-   * Knoten zurückgeliefert anstatt der Knoten selbst. Es ist zu beachten, dass jeder
+   * Knoten zurÃ¼ckgeliefert anstatt der Knoten selbst. Es ist zu beachten, dass jeder
    * Elternknoten nur genau einmal in den Ergebnissen enthalten ist, auch wenn er
    * mehrere passende Kinder hat,
    * 
    * @throws NodeNotFoundException
    *           falls keine entsprechenden Knoten gefunden wurden. Falls das nicht
-   *           gewünscht ist, kann {@link #query(String, int)} benutzt werden.
+   *           gewÃ¼nscht ist, kann {@link #query(String, int)} benutzt werden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ConfigThingy getByChild(String name, int maxlevel)
@@ -764,13 +764,13 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
   /**
    * Wie {@link #get(String, int, int)}, aber es werden die Elternknoten der
-   * gefundenen Knoten zurückgeliefert anstatt der Knoten selbst. Es ist zu beachten,
+   * gefundenen Knoten zurÃ¼ckgeliefert anstatt der Knoten selbst. Es ist zu beachten,
    * dass jeder Elternknoten nur genau einmal in den Ergebnissen enthalten ist, auch
    * wenn er mehrere passende Kinder hat,
    * 
    * @throws NodeNotFoundException
    *           falls keine entsprechenden Knoten gefunden wurden. Falls das nicht
-   *           gewünscht ist, kann {@link #query(String, int, int)} benutzt werden.
+   *           gewÃ¼nscht ist, kann {@link #query(String, int, int)} benutzt werden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
@@ -787,7 +787,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
   /**
    * Wie {@link #query(String)}, aber es werden die Elternknoten der gefundenen
-   * Knoten zurückgeliefert anstatt der Knoten selbst. Es ist zu beachten, dass jeder
+   * Knoten zurÃ¼ckgeliefert anstatt der Knoten selbst. Es ist zu beachten, dass jeder
    * Elternknoten nur genau einmal in den Ergebnissen enthalten ist, auch wenn er
    * mehrere passende Kinder hat,
    * 
@@ -800,7 +800,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
   /**
    * Wie {@link #query(String, int)}, aber es werden die Elternknoten der gefundenen
-   * Knoten zurückgeliefert anstatt der Knoten selbst. Es ist zu beachten, dass jeder
+   * Knoten zurÃ¼ckgeliefert anstatt der Knoten selbst. Es ist zu beachten, dass jeder
    * Elternknoten nur genau einmal in den Ergebnissen enthalten ist, auch wenn er
    * mehrere passende Kinder hat,
    * 
@@ -813,7 +813,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
   /**
    * Wie {@link #query(String, int, int)}, aber es werden die Elternknoten der
-   * gefundenen Knoten zurückgeliefert anstatt der Knoten selbst. Es ist zu beachten,
+   * gefundenen Knoten zurÃ¼ckgeliefert anstatt der Knoten selbst. Es ist zu beachten,
    * dass jeder Elternknoten nur genau einmal in den Ergebnissen enthalten ist, auch
    * wenn er mehrere passende Kinder hat,
    * 
@@ -825,7 +825,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Falls getParents == false verhält sich diese Funktion wie
+   * Falls getParents == false verhÃ¤lt sich diese Funktion wie
    * {@link #get(String, int, int)}, falls getParents == true wie
    * {@link #getByChild(String, int, int)}.
    * 
@@ -850,7 +850,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Falls getParents == false verhält sich diese Funktion wie
+   * Falls getParents == false verhÃ¤lt sich diese Funktion wie
    * {@link #get(String, int)}, falls getParents == true wie
    * {@link #getByChild(String, int)}.
    * 
@@ -863,7 +863,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
   /**
    * Falls der Knoten this ein Blatt ist wird der Name des Knotens geliefert,
-   * ansonsten die Konkatenation aller Blätter des unter this liegenden Teilbaums.
+   * ansonsten die Konkatenation aller BlÃ¤tter des unter this liegenden Teilbaums.
    */
   public String toString()
   {
@@ -875,12 +875,12 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Gibt eine String-Darstellung des kompletten ConfigThingy-Baumes zurück, die
+   * Gibt eine String-Darstellung des kompletten ConfigThingy-Baumes zurÃ¼ck, die
    * geeignet ist, in eine Datei gespeichert und von dort wieder als ConfigThingy
    * geparst zu werden.
    * 
    * @param childrenOnly
-   *          wenn true wird keine äusserste Verschachtelung mit dem Namen von this
+   *          wenn true wird keine Ã¤usserste Verschachtelung mit dem Namen von this
    *          erzeugt.
    * @param stringChar
    *          das Zeichen, das zum Einschliessen von Strings verwendet werden soll.
@@ -996,7 +996,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Hängt eine textuelle Darstellung diese ConfigThingys an buf an. Jeder Zeile wird
+   * HÃ¤ngt eine textuelle Darstellung diese ConfigThingys an buf an. Jeder Zeile wird
    * childPrefix vorangestellt.
    * 
    * @param escapeAll
@@ -1013,12 +1013,12 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       buf.append(stringChar + escapeString(getName(), stringChar, escapeAll)
         + stringChar);
     }
-    else if (count() == 1 && getFirstChildNoThrow().count() == 0) // Schlüssel-Wert-Paar
+    else if (count() == 1 && getFirstChildNoThrow().count() == 0) // SchlÃ¼ssel-Wert-Paar
     {
       /*
-       * Normalerweise werden Schlüssel-Wert-Paare ohne Klammern repräsentiert, aber
-       * im Spezialfall, dass der Schlüssel leer ist (Liste mit nur einem Element)
-       * dürfen die Klammern nicht weggelassen werden.
+       * Normalerweise werden SchlÃ¼ssel-Wert-Paare ohne Klammern reprÃ¤sentiert, aber
+       * im Spezialfall, dass der SchlÃ¼ssel leer ist (Liste mit nur einem Element)
+       * dÃ¼rfen die Klammern nicht weggelassen werden.
        */
       buf.append(getName());
       if (getName().length() == 0)
@@ -1136,7 +1136,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
     /**
      * Liefert die Position des ersten Zeichens dieses Tokens in seiner Zeile,
-     * gezählt ab 1.
+     * gezÃ¤hlt ab 1.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -1150,10 +1150,10 @@ public class ConfigThingy implements Iterable<ConfigThingy>
     public int type();
 
     /**
-     * Liefert die Textrepräsentation dieses Tokens. Diese ist NICHT zwangsweise
+     * Liefert die TextreprÃ¤sentation dieses Tokens. Diese ist NICHT zwangsweise
      * identisch mit der Zeichenfolge aus der dieses Token geparst wurde. Zum
-     * Beispiel tauchen Trennzeichen wie die Gänsefüßchen zur Abgrenzung von Strings
-     * in dem hier zurückgelieferten String nicht auf. Ebensowenig sind in diesem
+     * Beispiel tauchen Trennzeichen wie die GÃ¤nsefÃ¼ÃŸchen zur Abgrenzung von Strings
+     * in dem hier zurÃ¼ckgelieferten String nicht auf. Ebensowenig sind in diesem
      * String Escape-Sequenzen zu finden, die im Eingabedatenstrom verwendet werden,
      * um bestimmte Zeichen wie z.B. Newline darzustellen.
      * 
@@ -1163,7 +1163,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Abstrakte Basis-Klasse für Tokens, die ihren {@link #contentString()} Wert in
+   * Abstrakte Basis-Klasse fÃ¼r Tokens, die ihren {@link #contentString()} Wert in
    * einer String-Variable speichern.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1207,7 +1207,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Token für einen String gemäß Syntax für WollMux-Config-Dateien.
+   * Token fÃ¼r einen String gemÃ¤ÃŸ Syntax fÃ¼r WollMux-Config-Dateien.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1217,8 +1217,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
      * Erzeugt ein neues StringToken
      * 
      * @param tokenData
-     *          ein String, für den {@link #atStartOf(String)} einen Wert größer 0
-     *          zurückliefert.
+     *          ein String, fÃ¼r den {@link #atStartOf(String)} einen Wert grÃ¶ÃŸer 0
+     *          zurÃ¼ckliefert.
      */
     public StringToken(String tokenData, URL url, int line, int position)
     {
@@ -1314,8 +1314,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
     }
 
     /**
-     * Liefert die Länge des längsten Prefixes von str, das sich als Token dieser
-     * Klasse interpretieren lässt.
+     * Liefert die LÃ¤nge des lÃ¤ngsten Prefixes von str, das sich als Token dieser
+     * Klasse interpretieren lÃ¤sst.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -1338,14 +1338,14 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Ein Token für einen Schlüssel gemäß Syntax für WollMux-Config-Dateien.
+   * Ein Token fÃ¼r einen SchlÃ¼ssel gemÃ¤ÃŸ Syntax fÃ¼r WollMux-Config-Dateien.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class KeyToken extends StringContentToken
   {
     /**
-     * Regex zur Identifikation von legalen Schlüsseln.
+     * Regex zur Identifikation von legalen SchlÃ¼sseln.
      */
     private static Pattern p = Pattern.compile("^([a-zA-Z_][a-zA-Z_0-9]*)");
 
@@ -1353,8 +1353,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
      * Erzeugt ein neues KeyToken
      * 
      * @param tokenData
-     *          ein String, für den {@link #atStartOf(String)} einen Wert größer 0
-     *          zurückliefert.
+     *          ein String, fÃ¼r den {@link #atStartOf(String)} einen Wert grÃ¶ÃŸer 0
+     *          zurÃ¼ckliefert.
      */
     public KeyToken(String tokenData, URL url, int line, int position)
     {
@@ -1370,8 +1370,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
     }
 
     /**
-     * Liefert die Länge des längsten Prefixes von str, das sich als Token dieser
-     * Klasse interpretieren lässt.
+     * Liefert die LÃ¤nge des lÃ¤ngsten Prefixes von str, das sich als Token dieser
+     * Klasse interpretieren lÃ¤sst.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -1384,7 +1384,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Token für öffnende runde Klammer.
+   * Token fÃ¼r Ã¶ffnende runde Klammer.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1413,7 +1413,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Token für schließende runde Klammer.
+   * Token fÃ¼r schlieÃŸende runde Klammer.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1442,7 +1442,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Token für den String "%include".
+   * Token fÃ¼r den String "%include".
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1462,8 +1462,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
     }
 
     /**
-     * Liefert die Länge des längsten Prefixes von str, das sich als Token dieser
-     * Klasse interpretieren lässt.
+     * Liefert die LÃ¤nge des lÃ¤ngsten Prefixes von str, das sich als Token dieser
+     * Klasse interpretieren lÃ¤sst.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -1474,9 +1474,9 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Token für einen Kommentar gemäß Syntax von WollMux-Config-Dateien. ACHTUNG:
+   * Token fÃ¼r einen Kommentar gemÃ¤ÃŸ Syntax von WollMux-Config-Dateien. ACHTUNG:
    * Tokens dieser Klasse werden derzeit von {@link ConfigThingy#tokenize(URL)} nicht
-   * zurückgeliefert, sondern verworfen.
+   * zurÃ¼ckgeliefert, sondern verworfen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1501,8 +1501,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
     }
 
     /**
-     * Liefert die Länge des längsten Prefixes von str, das sich als Token dieser
-     * Klasse interpretieren lässt.
+     * Liefert die LÃ¤nge des lÃ¤ngsten Prefixes von str, das sich als Token dieser
+     * Klasse interpretieren lÃ¤sst.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -1602,9 +1602,9 @@ public class ConfigThingy implements Iterable<ConfigThingy>
           }
           else if (0 != (tokenLength = LineCommentToken.atStartOf(line)))
           {
-            // LineCommentTokens werden nicht in tokens eingefügt, weil
+            // LineCommentTokens werden nicht in tokens eingefÃ¼gt, weil
             // der Parser im Fall von 2er Paaren wie KEY STRING nicht in
-            // der Lage ist über Kommentare hinwegzulesen. Anstatt ihm das
+            // der Lage ist Ã¼ber Kommentare hinwegzulesen. Anstatt ihm das
             // Einzubauen ist es einfacher, Kommentare einfach wegzuschmeissen.
             // tokens.add(new LineCommentToken(line,url,lineNo,pos+1));
           }
@@ -1663,7 +1663,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    * @param args
    *          url [ get1 get2 ... ], dabei ist url die URL einer zu lesenden
    *          Config-Datei. Das Programm gibt den sich daraus ergebenden
-   *          ConfigThingy-Baum aus. Optional können noch weitere Argumente übergeben
+   *          ConfigThingy-Baum aus. Optional kÃ¶nnen noch weitere Argumente Ã¼bergeben
    *          werden, die einen get-Pfad angeben
    *          (configthingy.get(get1).get(get2)...) dessen Ergebnis ausgegeben wird.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1728,7 +1728,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       }
       else
       {
-        System.out.println("Dies ist der Teilbaum für " + getstr + ": \n\n");
+        System.out.println("Dies ist der Teilbaum fÃ¼r " + getstr + ": \n\n");
         System.out.println(treeDump(conf, ""));
         System.out.println("\n\nDies ist der toString() Wert des Teilbaums:\n"
           + "\"" + conf.toString() + "\"");
@@ -1742,7 +1742,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       }
       else
       {
-        System.out.println("Dies ist der Teilbaum für " + getbychildstr + ": \n\n");
+        System.out.println("Dies ist der Teilbaum fÃ¼r " + getbychildstr + ": \n\n");
         System.out.println(treeDump(byChild, ""));
         System.out.println("\n\nDies ist der toString() Wert des Teilbaums:\n"
           + "\"" + byChild.toString() + "\"");

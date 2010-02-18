@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Interpretiert die in einem Dokument enthaltenen Dokumentkommandos.
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,22 +18,22 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 14.10.2005 | LUT | Erstellung als WMCommandInterpreter
  * 24.10.2005 | LUT | + Sauberes umschliessen von Bookmarks in 
  *                      executeInsertFrag.
  *                    + Abschalten der lock-Controllers  
- * 02.05.2006 | LUT | Komplett-Überarbeitung und Umbenennung in
+ * 02.05.2006 | LUT | Komplett-Ãœberarbeitung und Umbenennung in
  *                    DocumentCommandInterpreter.
- * 05.05.2006 | BNK | Dummy-Argument zum Aufruf des FormGUI Konstruktors hinzugefügt.
- * 17.05.2006 | LUT | Doku überarbeitet.
+ * 05.05.2006 | BNK | Dummy-Argument zum Aufruf des FormGUI Konstruktors hinzugefÃ¼gt.
+ * 17.05.2006 | LUT | Doku Ã¼berarbeitet.
  * 22.08.2006 | BNK | cleanInsertMarks() und EmptyParagraphCleaner verschmolzen zu
  *                  | SurroundingGarbageCollector und dabei komplettes Rewrite.
- * 23.08.2006 | BNK | nochmal Rewrite. Ich glaube dieser Code hält den Rekord im WollMux
+ * 23.08.2006 | BNK | nochmal Rewrite. Ich glaube dieser Code hÃ¤lt den Rekord im WollMux
  *                  | was rewrites angeht.
- * 08.07.2009 | BED | Anpassung an die Änderungen in DocumentCommand (R48539)
+ * 08.07.2009 | BED | Anpassung an die Ã„nderungen in DocumentCommand (R48539)
  * 16.12.2009 | ERT | Cast XTextField-Interface entfernt
  * -------------------------------------------------------------------
  *
@@ -98,7 +98,7 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
- * Diese Klasse repräsentiert den Kommando-Interpreter zur Auswertung von
+ * Diese Klasse reprÃ¤sentiert den Kommando-Interpreter zur Auswertung von
  * WollMux-Kommandos in einem gegebenen Textdokument.
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -109,21 +109,21 @@ public class DocumentCommandInterpreter
   private TextDocumentModel model;
 
   /**
-   * Enthält die Instanz auf das zentrale WollMuxSingleton.
+   * EnthÃ¤lt die Instanz auf das zentrale WollMuxSingleton.
    */
   private WollMuxSingleton mux;
 
   /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
-   * Dokumentkommandos im übergebenen Dokument xDoc scannen und interpretieren kann.
+   * Dokumentkommandos im Ã¼bergebenen Dokument xDoc scannen und interpretieren kann.
    * 
    * @param xDoc
-   *          Das Dokument, dessen Kommandos ausgeführt werden sollen.
+   *          Das Dokument, dessen Kommandos ausgefÃ¼hrt werden sollen.
    * @param mux
    *          Die Instanz des zentralen WollMux-Singletons
    * @param frag_urls
-   *          Eine Liste mit fragment-urls, die für das Kommando insertContent
-   *          benötigt wird.
+   *          Eine Liste mit fragment-urls, die fÃ¼r das Kommando insertContent
+   *          benÃ¶tigt wird.
    */
   public DocumentCommandInterpreter(TextDocumentModel model, WollMuxSingleton mux)
   {
@@ -133,13 +133,13 @@ public class DocumentCommandInterpreter
 
   /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
-   * Dokumentkommandos im übergebenen Dokument xDoc scannen und interpretieren kann.
+   * Dokumentkommandos im Ã¼bergebenen Dokument xDoc scannen und interpretieren kann.
    * 
    * @param xDoc
-   *          Das Dokument, dessen Kommandos ausgeführt werden sollen.
+   *          Das Dokument, dessen Kommandos ausgefÃ¼hrt werden sollen.
    * @param frag_urls
-   *          Eine Liste mit fragment-urls, die für das Kommando insertContent
-   *          benötigt wird.
+   *          Eine Liste mit fragment-urls, die fÃ¼r das Kommando insertContent
+   *          benÃ¶tigt wird.
    */
   public DocumentCommandInterpreter(TextDocumentModel model)
   {
@@ -149,7 +149,7 @@ public class DocumentCommandInterpreter
 
   /**
    * Diese Methode sollte vor {@link #executeTemplateCommands()} aufgerufen werden
-   * und sorgt dafür, dass alle globalen Einstellungen des Dokuments (setType,
+   * und sorgt dafÃ¼r, dass alle globalen Einstellungen des Dokuments (setType,
    * setPrintFunction) an das TextDocumentModel weitergereicht werden.
    */
   public void scanGlobalDocumentCommands()
@@ -169,13 +169,13 @@ public class DocumentCommandInterpreter
    * TextDocumentModel weiter. Zudem wird von dieser Methode auch noch
    * {@link TextDocumentModel#collectNonWollMuxFormFields()} aufgerufen, so dass auch
    * alle Formularfelder aufgesammelt werden, die nicht von WollMux-Kommandos umgeben
-   * sind, jedoch trotzdem vom WollMux verstanden und befüllt werden.
+   * sind, jedoch trotzdem vom WollMux verstanden und befÃ¼llt werden.
    * 
    * Diese Methode wurde aus der Methode {@link #scanGlobalDocumentCommands()}
-   * ausgelagert, die früher neben den globalen Dokumentkommandos auch die
-   * insertFormValue-Kommandos bearbeitet hat. Die Auslagerung geschah hauptsächlich
-   * aus Performance-Optimierungsgründen, da so beim OnProcessTextDocument-Event nur
-   * einmal die insertFormValue-Kommandos ausgewertet werden müssen.
+   * ausgelagert, die frÃ¼her neben den globalen Dokumentkommandos auch die
+   * insertFormValue-Kommandos bearbeitet hat. Die Auslagerung geschah hauptsÃ¤chlich
+   * aus Performance-OptimierungsgrÃ¼nden, da so beim OnProcessTextDocument-Event nur
+   * einmal die insertFormValue-Kommandos ausgewertet werden mÃ¼ssen.
    * 
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
@@ -194,8 +194,8 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Über diese Methode wird die Ausführung der Kommandos gestartet, die für das
-   * Expandieren und Befüllen von Dokumenten notwendig sind.
+   * Ãœber diese Methode wird die AusfÃ¼hrung der Kommandos gestartet, die fÃ¼r das
+   * Expandieren und BefÃ¼llen von Dokumenten notwendig sind.
    * 
    * @throws WMCommandsFailedException
    */
@@ -204,44 +204,44 @@ public class DocumentCommandInterpreter
     Logger.debug("executeTemplateCommands");
     boolean modified = model.getDocumentModified();
 
-    // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
+    // ZÃ¤hler fÃ¼r aufgetretene Fehler bei der Bearbeitung der Kommandos.
     int errors = 0;
 
     // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
-    // können, damit der DocumentCommandTree vollständig aufgebaut werden
+    // kÃ¶nnen, damit der DocumentCommandTree vollstÃ¤ndig aufgebaut werden
     // kann.
     errors +=
       new DocumentExpander(model.getFragUrls()).execute(model.getDocumentCommands());
 
-    // Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
+    // ÃœbertrÃ¤gt beim Ã¼bergebenen XTextDocument doc die Eigenschaften der
     // Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls
     // Seitenvorlage Wollmuxseite vorhanden ist.
     pageStyleWollmuxseiteToStandard(model.doc);
 
-    // Ziffern-Anpassen der Sachleitenden Verfügungen aufrufen:
+    // Ziffern-Anpassen der Sachleitenden VerfÃ¼gungen aufrufen:
     SachleitendeVerfuegung.ziffernAnpassen(model);
 
-    // Jetzt können die TextFelder innerhalb der updateFields Kommandos
+    // Jetzt kÃ¶nnen die TextFelder innerhalb der updateFields Kommandos
     // geupdatet werden. Durch die Auslagerung in einen extra Schritt wird die
     // Reihenfolge der Abarbeitung klar definiert (zuerst die updateFields
     // Kommandos, dann die anderen Kommandos). Dies ist wichtig, da
     // insbesondere das updateFields Kommando exakt mit einem anderen Kommando
-    // übereinander liegen kann. Ausserdem liegt updateFields thematisch näher
+    // Ã¼bereinander liegen kann. Ausserdem liegt updateFields thematisch nÃ¤her
     // am expandieren der Textfragmente, da updateFields im Prinzip nur dessen
-    // Schwäche beseitigt.
+    // SchwÃ¤che beseitigt.
     errors += new TextFieldUpdater().execute(model.getDocumentCommands());
 
-    // Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
+    // Hauptverarbeitung: Jetzt alle noch Ã¼brigen DocumentCommands (z.B.
     // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
     errors += new MainProcessor().execute(model.getDocumentCommands());
 
-    // Da keine neuen Elemente mehr eingefügt werden müssen, können
+    // Da keine neuen Elemente mehr eingefÃ¼gt werden mÃ¼ssen, kÃ¶nnen
     // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
-    // InsertContent-Kommandos gelöscht werden.
+    // InsertContent-Kommandos gelÃ¶scht werden.
     // errors += cleanInsertMarks(tree);
 
     // Erst nachdem die INSERT_MARKS entfernt wurden, lassen sich leere
-    // Absätze zum Beginn und Ende der insertFrag bzw. insertContent-Kommandos
+    // AbsÃ¤tze zum Beginn und Ende der insertFrag bzw. insertContent-Kommandos
     // sauber erkennen und entfernen.
     // errors += new EmptyParagraphCleaner().execute(tree);
     SurroundingGarbageCollector collect = new SurroundingGarbageCollector();
@@ -264,13 +264,13 @@ public class DocumentCommandInterpreter
     {
       throw new WMCommandsFailedException(
         L.m(
-          "Die verwendete Vorlage enthält %1 Fehler.\n\nBitte kontaktieren Sie Ihre Systemadministration.",
+          "Die verwendete Vorlage enthÃ¤lt %1 Fehler.\n\nBitte kontaktieren Sie Ihre Systemadministration.",
           ((errors == 1) ? "einen" : "" + errors)));
     }
   }
 
   /**
-   * Überträgt beim übergebenen XTextDocument doc die Eigenschaften der Seitenvorlage
+   * ÃœbertrÃ¤gt beim Ã¼bergebenen XTextDocument doc die Eigenschaften der Seitenvorlage
    * Wollmuxseite auf die Seitenvorlage Standard, falls Seitenvorlage Wollmuxseite
    * vorhanden ist.
    * 
@@ -308,7 +308,7 @@ public class DocumentCommandInterpreter
 
     // Falls eine Seitenvorlage Wollmuxseite vorhanden ist, werden deren
     // Properties ausgelesen und alle, die nicht READONLY sind, auf die
-    // Seitenvorlage Standard übertragen.
+    // Seitenvorlage Standard Ã¼bertragen.
     if (styleWollmuxseite != null)
     {
       XMultiPropertySet multiPropertySetWollmuxseite =
@@ -317,7 +317,7 @@ public class DocumentCommandInterpreter
         multiPropertySetWollmuxseite.getPropertySetInfo();
       Property[] propertys = propertySetInfo.getProperties();
       HashSet<String> set = new HashSet<String>();
-      // Schleife über die Properties der Wollmuxseite. Wenn die Properties
+      // Schleife Ã¼ber die Properties der Wollmuxseite. Wenn die Properties
       // nicht read-only sind werden sie in einem HashSet set
       // zwischengespeichert.
       for (int i = 0; i < propertys.length; i++)
@@ -331,31 +331,31 @@ public class DocumentCommandInterpreter
         }
       }
       // In der Property "HeaderText" und "FooterText" befindet sich der Text
-      // aus der Kopf-/Fußzeile, würde dieser mit der Seitenvorlage
-      // "Wollmuxseite" überschrieben geht der Text verloren.
+      // aus der Kopf-/FuÃŸzeile, wÃ¼rde dieser mit der Seitenvorlage
+      // "Wollmuxseite" Ã¼berschrieben geht der Text verloren.
       set.remove("HeaderText");
       set.remove("FooterText");
-      // Die Property "FollowStyle" wird nicht übertragen da sie in der
+      // Die Property "FollowStyle" wird nicht Ã¼bertragen da sie in der
       // Seitenvorlage "Wollmuxseite" Wollmuxseite ist und so die Folgeseiten
-      // ein Seitenformat "Wollmuxseite" bekommen würden.
+      // ein Seitenformat "Wollmuxseite" bekommen wÃ¼rden.
       set.remove("FollowStyle");
       int size;
-      // Schleife wird so lange durchlaufen bis sich die Größe des HashSet set
-      // nicht mehr ändert. Es gibt Properties die auf das erste Mal nicht
-      // gesetzt werden können, weil es Abhängigkeiten zu anderen Properties
-      // gibt die zuerst gesetzt werden müssen. z.B muß die Property für
-      // Kopfzeile "HeaderIsOn" oder für Fußzeile "FooterIsOn" "true"
-      // sein, damit anderen Properties der Kopf-/Fußzeile verändert werden
-      // können. Die Property "UserDefinesAttributes" wird nie gesetzt und
-      // "TextColumns" wird nicht als geändert erkannt.
+      // Schleife wird so lange durchlaufen bis sich die GrÃ¶ÃŸe des HashSet set
+      // nicht mehr Ã¤ndert. Es gibt Properties die auf das erste Mal nicht
+      // gesetzt werden kÃ¶nnen, weil es AbhÃ¤ngigkeiten zu anderen Properties
+      // gibt die zuerst gesetzt werden mÃ¼ssen. z.B muÃŸ die Property fÃ¼r
+      // Kopfzeile "HeaderIsOn" oder fÃ¼r FuÃŸzeile "FooterIsOn" "true"
+      // sein, damit anderen Properties der Kopf-/FuÃŸzeile verÃ¤ndert werden
+      // kÃ¶nnen. Die Property "UserDefinesAttributes" wird nie gesetzt und
+      // "TextColumns" wird nicht als geÃ¤ndert erkannt.
       do
       {
         size = set.size();
-        // Schleife über die HashSet set. Über den Property-Name (aus dem
+        // Schleife Ã¼ber die HashSet set. Ãœber den Property-Name (aus dem
         // HashSet) wird die entsprechende Property aus der Seitenvorlage
-        // "Wollmux" geholt und dann in die Seitenvorlage "Standard" übertragen
-        // und anschließend wenn dies funktioniert hat, wird der Property-Name
-        // aus dem Iterator gelöscht.
+        // "Wollmux" geholt und dann in die Seitenvorlage "Standard" Ã¼bertragen
+        // und anschlieÃŸend wenn dies funktioniert hat, wird der Property-Name
+        // aus dem Iterator gelÃ¶scht.
         for (Iterator<String> iter = set.iterator(); iter.hasNext();)
         {
           String element = iter.next();
@@ -371,9 +371,9 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Hierbei handelt es sich um einen minimalen Scanner, der zu aller erst abläuft
+   * Hierbei handelt es sich um einen minimalen Scanner, der zu aller erst ablÃ¤uft
    * und die globalen Einstellungen des Dokuments (setType, setPrintFunction)
-   * ausliest und dem TextDocumentModel zur Verfügung stellt.
+   * ausliest und dem TextDocumentModel zur VerfÃ¼gung stellt.
    * 
    * @author christoph.lutz
    */
@@ -387,7 +387,7 @@ public class DocumentCommandInterpreter
     /**
      * Legacy-Methode: Stellt sicher, dass die im veralteten Dokumentkommando
      * SetPrintFunction gesetzten Werte in die persistenten Daten des Dokuments
-     * übertragen werden und das Dokumentkommando danach gelöscht wird.
+     * Ã¼bertragen werden und das Dokumentkommando danach gelÃ¶scht wird.
      */
     public int executeCommand(SetPrintFunction cmd)
     {
@@ -400,8 +400,8 @@ public class DocumentCommandInterpreter
     {
       model.setType(cmd.getType());
 
-      // Wenn eine Mischvorlage zum Bearbeiten geöffnet wurde soll der typ
-      // "templateTemplate" NICHT gelöscht werden, ansonsten schon.
+      // Wenn eine Mischvorlage zum Bearbeiten geÃ¶ffnet wurde soll der typ
+      // "templateTemplate" NICHT gelÃ¶scht werden, ansonsten schon.
       if (!(model.hasURL() && cmd.getType().equalsIgnoreCase("templateTemplate")))
         cmd.markDone(true);
       return 0;
@@ -412,7 +412,7 @@ public class DocumentCommandInterpreter
   /**
    * Scanner, der die InsertFormValue-Kommandos des Dokuments abarbeitet und ein
    * Mapping von IDs zu FormFields aufbaut, das dann dem TextDocumentModel zur
-   * Verfügung gestellt werden kann.
+   * VerfÃ¼gung gestellt werden kann.
    */
   private class InsertFormValueCommandsScanner extends DocumentCommands.Executor
   {
@@ -449,7 +449,7 @@ public class DocumentCommandInterpreter
       {
         field.setCommand(cmd);
 
-        // sortiertes Hinzufügen des neuen FormFields zur Liste:
+        // sortiertes HinzufÃ¼gen des neuen FormFields zur Liste:
         ListIterator<FormField> iter = fields.listIterator();
         while (iter.hasNext())
         {
@@ -469,13 +469,13 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Der SurroundingGarbageCollector erfasst leere Absätze und Einfügemarker um
+   * Der SurroundingGarbageCollector erfasst leere AbsÃ¤tze und EinfÃ¼gemarker um
    * Dokumentkommandos herum.
    */
   private class SurroundingGarbageCollector extends DocumentCommands.Executor
   {
     /**
-     * Speichert Muellmann-Objekte, die zu löschenden Müll entfernen.
+     * Speichert Muellmann-Objekte, die zu lÃ¶schenden MÃ¼ll entfernen.
      */
     private List<Muellmann> muellmaenner = new Vector<Muellmann>();
 
@@ -518,7 +518,7 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Diese Methode erfasst leere Absätze und Einfügemarker, die sich um die im
+     * Diese Methode erfasst leere AbsÃ¤tze und EinfÃ¼gemarker, die sich um die im
      * Kommandobaum tree enthaltenen Dokumentkommandos befinden.
      */
     private int execute(DocumentCommands commands)
@@ -535,7 +535,7 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Löscht die vorher als Müll identifizierten Inhalte. type filter text
+     * LÃ¶scht die vorher als MÃ¼ll identifizierten Inhalte. type filter text
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
@@ -562,15 +562,15 @@ public class DocumentCommandInterpreter
       if (cmd.hasInsertMarks())
       {
         // ist der ManualMode gesetzt, so darf ein leerer Paragraph am Ende des
-        // Dokuments nicht gelöscht werden, da sonst der ViewCursor auf den
-        // Start des Textbereiches zurück gesetzt wird. Im Falle der
-        // automatischen Einfügung soll aber ein leerer Paragraph am Ende
-        // gelöscht werden.
+        // Dokuments nicht gelÃ¶scht werden, da sonst der ViewCursor auf den
+        // Start des Textbereiches zurÃ¼ck gesetzt wird. Im Falle der
+        // automatischen EinfÃ¼gung soll aber ein leerer Paragraph am Ende
+        // gelÃ¶scht werden.
         collectSurroundingGarbageForCommand(cmd, cmd.isManualMode());
       }
       cmd.unsetHasInsertMarks();
 
-      // Kommando löschen wenn der WollMux nicht im debugModus betrieben wird.
+      // Kommando lÃ¶schen wenn der WollMux nicht im debugModus betrieben wird.
       cmd.markDone(!mux.isDebugMode());
 
       return 0;
@@ -584,7 +584,7 @@ public class DocumentCommandInterpreter
       }
       cmd.unsetHasInsertMarks();
 
-      // Kommando löschen wenn der WollMux nicht im debugModus betrieben wird.
+      // Kommando lÃ¶schen wenn der WollMux nicht im debugModus betrieben wird.
       cmd.markDone(!mux.isDebugMode());
 
       return 0;
@@ -593,9 +593,9 @@ public class DocumentCommandInterpreter
     // Helper-Methoden:
 
     /**
-     * Diese Methode erfasst Einfügemarken und leere Absätze zum Beginn und zum Ende
-     * des übergebenen Dokumentkommandos cmd, wobei über removeAnLastEmptyParagraph
-     * gesteuert werden kann, ob ein Absatz am Ende eines Textes gelöscht werden soll
+     * Diese Methode erfasst EinfÃ¼gemarken und leere AbsÃ¤tze zum Beginn und zum Ende
+     * des Ã¼bergebenen Dokumentkommandos cmd, wobei Ã¼ber removeAnLastEmptyParagraph
+     * gesteuert werden kann, ob ein Absatz am Ende eines Textes gelÃ¶scht werden soll
      * (bei true) oder nicht (bei false).
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -604,46 +604,46 @@ public class DocumentCommandInterpreter
         boolean removeAnLastEmptyParagraph)
     {
       /*
-       * Im folgenden steht eine 0 in der ersten Stelle dafür, dass vor dem
-       * Einfügemarker kein Text mehr steht (der Marker also am Anfang des Absatzes
-       * ist). Eine 0 an der zweiten Stelle steht dafür, dass hinter dem
-       * Einfügemarker kein Text mehr folgt (der Einfügemarker also am Ende des
+       * Im folgenden steht eine 0 in der ersten Stelle dafÃ¼r, dass vor dem
+       * EinfÃ¼gemarker kein Text mehr steht (der Marker also am Anfang des Absatzes
+       * ist). Eine 0 an der zweiten Stelle steht dafÃ¼r, dass hinter dem
+       * EinfÃ¼gemarker kein Text mehr folgt (der EinfÃ¼gemarker also am Ende des
        * Absatzes steht). Ein "T" an dritter Stelle gibt an, dass hinter dem Absatz
-       * des Einfügemarkers eine Tabelle folgt. Ein "E" an dritter Stelle gibt an,
-       * dass hinter dem Cursor das Dokument aufhört und kein weiterer Absatz kommt.
+       * des EinfÃ¼gemarkers eine Tabelle folgt. Ein "E" an dritter Stelle gibt an,
+       * dass hinter dem Cursor das Dokument aufhÃ¶rt und kein weiterer Absatz kommt.
        * 
-       * Startmarke: Grundsätzlich gibt es die folgenden Fälle zu unterscheiden.
+       * Startmarke: GrundsÃ¤tzlich gibt es die folgenden FÃ¤lle zu unterscheiden.
        * 
-       * 00: Einfügemarker und Zeilenumbruch DAHINTER löschen
+       * 00: EinfÃ¼gemarker und Zeilenumbruch DAHINTER lÃ¶schen
        * 
-       * 01: nur Einfügemarker löschen
+       * 01: nur EinfÃ¼gemarker lÃ¶schen
        * 
-       * 10: nur Einfügemarker löschen
+       * 10: nur EinfÃ¼gemarker lÃ¶schen
        * 
-       * 11: nur Einfügemarker löschen
+       * 11: nur EinfÃ¼gemarker lÃ¶schen
        * 
-       * 00T: Einfügemarker und Zeilenumbruch DAVOR löschen
+       * 00T: EinfÃ¼gemarker und Zeilenumbruch DAVOR lÃ¶schen
        * 
-       * Die Fälle 01T, 10T und 11T werden nicht unterstützt.
+       * Die FÃ¤lle 01T, 10T und 11T werden nicht unterstÃ¼tzt.
        * 
-       * Endmarke: Es gibt die folgenden Fälle:
+       * Endmarke: Es gibt die folgenden FÃ¤lle:
        * 
-       * 00: Einfügemarker und Zeilenumbruch DAHINTER löschen
+       * 00: EinfÃ¼gemarker und Zeilenumbruch DAHINTER lÃ¶schen
        * 
-       * 00E: Einfügemarker und Zeilenumbruch DAVOR löschen
+       * 00E: EinfÃ¼gemarker und Zeilenumbruch DAVOR lÃ¶schen
        * 
-       * 01, 10, 11: Einfügemarker löschen
+       * 01, 10, 11: EinfÃ¼gemarker lÃ¶schen
        * 
-       * DO NOT TOUCH THIS CODE ! Dieser Code ist komplex und fehleranfällig.
-       * Kleinste Änderungen können dafür sorgen, dass irgendeine der 1000e von
-       * Vorlagen plötzlich anders dargestellt wird. Das gewünschte Verhalten dieses
-       * Codes ist in diesem Kommentar vollständig dokumentiert und Änderungen
+       * DO NOT TOUCH THIS CODE ! Dieser Code ist komplex und fehleranfÃ¤llig.
+       * Kleinste Ã„nderungen kÃ¶nnen dafÃ¼r sorgen, dass irgendeine der 1000e von
+       * Vorlagen plÃ¶tzlich anders dargestellt wird. Das gewÃ¼nschte Verhalten dieses
+       * Codes ist in diesem Kommentar vollstÃ¤ndig dokumentiert und Ã„nderungen
        * sollten nur erfolgen, falls obiger Kommentar nicht korrekt umgesetzt wurde.
        * Um neue Anforderungen umzusetzen sollten unbedingt alle anderen
-       * Möglichkeiten in Betracht gezogen werden bevor hier eine Änderung erfolgt.
-       * Sollte eine Änderung unumgehbar sein, so ist sie VOR der Implementierung im
+       * MÃ¶glichkeiten in Betracht gezogen werden bevor hier eine Ã„nderung erfolgt.
+       * Sollte eine Ã„nderung unumgehbar sein, so ist sie VOR der Implementierung im
        * Wiki und in obigem Kommentar zu dokumentieren. Dabei ist darauf zu achten,
-       * dass ein neuer Fall sich mit keinem der anderen Fälle überschneidet.
+       * dass ein neuer Fall sich mit keinem der anderen FÃ¤lle Ã¼berschneidet.
        * 
        */
       XParagraphCursor[] start = cmd.getStartMark();
@@ -664,10 +664,10 @@ public class DocumentCommandInterpreter
 
       // Endemarke auswerten:
 
-      // Prüfen ob der Cursor am Ende des Dokuments steht. Anmerkung: hier kann
+      // PrÃ¼fen ob der Cursor am Ende des Dokuments steht. Anmerkung: hier kann
       // nicht der bereits vorhandene cursor end[1] zum Testen verwendet werden,
-      // weil dieser durch den goRight verändert würde. Man könnte ihn zwar mit
-      // goLeft nachträglich wieder zurück schieben, aber das funzt nicht wenn
+      // weil dieser durch den goRight verÃ¤ndert wÃ¼rde. Man kÃ¶nnte ihn zwar mit
+      // goLeft nachtrÃ¤glich wieder zurÃ¼ck schieben, aber das funzt nicht wenn
       // danach eine Tabelle kommt.
       XParagraphCursor docEndTest = cmd.getEndMark()[1];
       boolean isEndOfDocument = !docEndTest.goRight((short) 1, false);
@@ -688,8 +688,8 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Der DocumentExpander sorgt dafür, dass das Dokument nach Ausführung der
-   * enthaltenen Kommandos komplett aufgebaut ist und alle Textfragmente eingefügt
+   * Der DocumentExpander sorgt dafÃ¼r, dass das Dokument nach AusfÃ¼hrung der
+   * enthaltenen Kommandos komplett aufgebaut ist und alle Textfragmente eingefÃ¼gt
    * wurden.
    * 
    * @author christoph.lutz
@@ -701,13 +701,13 @@ public class DocumentCommandInterpreter
 
     private int fragUrlsCount = 0;
 
-    // Markierung des ersten nicht ausgefüllten Platzhalter nach dem Einfügen
+    // Markierung des ersten nicht ausgefÃ¼llten Platzhalter nach dem EinfÃ¼gen
     // von Textbausteinen
     private boolean firstEmptyPlaceholder = false;
 
     /**
      * Erzeugt einen neuen DocumentExpander, mit der Liste fragUrls, die die URLs
-     * beschreibt, von denen die Textfragmente für den insertContent Befehl bezogen
+     * beschreibt, von denen die Textfragmente fÃ¼r den insertContent Befehl bezogen
      * werden sollen.
      * 
      * @param fragUrls
@@ -719,8 +719,8 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Führt die Dokumentkommandos von commands aus, welche so lange aktualisiert
-     * werden, bis das Dokument vollständig aufgebaut ist. Die Dokumentkommandos
+     * FÃ¼hrt die Dokumentkommandos von commands aus, welche so lange aktualisiert
+     * werden, bis das Dokument vollstÃ¤ndig aufgebaut ist. Die Dokumentkommandos
      * OverrideFrags erhalten dabei eine Sonderrolle, da sie bereits vor den anderen
      * Dokumentkommandos (insertFrag/insertContent) abgefeiert werden.
      * 
@@ -733,7 +733,7 @@ public class DocumentCommandInterpreter
       int errors = 0;
 
       // so lange wiederholen, bis sich der Baum durch das Expandieren nicht
-      // mehr ändert.
+      // mehr Ã¤ndert.
       do
       {
         errors += executeOverrideFrags(commands);
@@ -744,11 +744,11 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * führt alle OverrideFrag-Kommandos aus commands aus, wenn sie nicht den Status
+     * fÃ¼hrt alle OverrideFrag-Kommandos aus commands aus, wenn sie nicht den Status
      * DONE=true oder ERROR=true besitzen.
      * 
      * @param commands
-     * @return Anzahl der bei der Ausführung aufgetretenen Fehler.
+     * @return Anzahl der bei der AusfÃ¼hrung aufgetretenen Fehler.
      */
     protected int executeOverrideFrags(DocumentCommands commands)
     {
@@ -762,7 +762,7 @@ public class DocumentCommandInterpreter
 
         if (cmd.isDone() == false && cmd.hasError() == false)
         {
-          // Kommando ausführen und Fehler zählen
+          // Kommando ausfÃ¼hren und Fehler zÃ¤hlen
           errors += cmd.execute(this);
         }
       }
@@ -770,10 +770,10 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Wertet ein OverrideFrag-Kommandos aus, über das Fragmente umgemapped werden
-     * können, und setzt das Kommando sofort auf DONE. Dies geschieht vor der
+     * Wertet ein OverrideFrag-Kommandos aus, Ã¼ber das Fragmente umgemapped werden
+     * kÃ¶nnen, und setzt das Kommando sofort auf DONE. Dies geschieht vor der
      * Bearbeitung der anderen Kommandos (insertFrag/insertContent), da das mapping
-     * beim insertFrag/insertContent benötigt wird.
+     * beim insertFrag/insertContent benÃ¶tigt wird.
      */
     public int executeCommand(OverrideFrag cmd)
     {
@@ -792,9 +792,9 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Diese Methode fügt das Textfragment frag_id in den gegebenen Bookmark
+     * Diese Methode fÃ¼gt das Textfragment frag_id in den gegebenen Bookmark
      * bookmarkName ein. Im Fehlerfall wird eine entsprechende Fehlermeldung
-     * eingefügt.
+     * eingefÃ¼gt.
      */
     public int executeCommand(InsertFrag cmd)
     {
@@ -808,7 +808,7 @@ public class DocumentCommandInterpreter
         fragId = model.getOverrideFrag(cmd.getFragID());
 
         // Bei leeren FragIds wird der Text unter dem Dokumentkommando
-        // gelöscht und das Dokumentkommando auf DONE gesetzt.
+        // gelÃ¶scht und das Dokumentkommando auf DONE gesetzt.
         if (fragId.length() == 0)
         {
           cmd.setTextRangeString("");
@@ -823,7 +823,7 @@ public class DocumentCommandInterpreter
             "Das Textfragment mit der FRAG_ID '%1' ist nicht definiert!",
             cmd.getFragID()));
         }
-        // Iterator über URLs
+        // Iterator Ã¼ber URLs
         Iterator<String> iter = urls.iterator();
         while (iter.hasNext() && found == false)
         {
@@ -832,10 +832,10 @@ public class DocumentCommandInterpreter
           {
             URL url = WollMuxFiles.makeURL(urlStr);
 
-            Logger.debug(L.m("Füge Textfragment '%1' von URL '%2' ein.",
+            Logger.debug(L.m("FÃ¼ge Textfragment '%1' von URL '%2' ein.",
               cmd.getFragID(), url.toExternalForm()));
 
-            // styles bzw. fragment einfügen:
+            // styles bzw. fragment einfÃ¼gen:
             if (cmd.importStylesOnly())
               insertStylesFromURL(cmd, cmd.getStyles(), url);
             else
@@ -846,7 +846,7 @@ public class DocumentCommandInterpreter
           catch (java.lang.Exception e)
           {
             // Exception wird nicht beachtet. Wenn die aktuelle URL nicht
-            // funktioniert wird die nächste URL ausgewertet
+            // funktioniert wird die nÃ¤chste URL ausgewertet
             errors += e.getLocalizedMessage() + "\n\n";
             Logger.debug(e);
             continue;
@@ -867,7 +867,7 @@ public class DocumentCommandInterpreter
         {
           Logger.error(e);
           WollMuxSingleton.showInfoModal(L.m("WollMux-Fehler"), L.m(
-            "Das Textfragment mit der FRAG_ID '%1' konnte nicht eingefügt werden:",
+            "Das Textfragment mit der FRAG_ID '%1' konnte nicht eingefÃ¼gt werden:",
             cmd.getFragID())
             + "\n\n" + e.getMessage());
         }
@@ -879,16 +879,16 @@ public class DocumentCommandInterpreter
         return 1;
       }
 
-      // Kommando als Done markieren aber noch aufheben. Gelöscht wird das
+      // Kommando als Done markieren aber noch aufheben. GelÃ¶scht wird das
       // Bookmark dann erst durch den SurroundingGarbageCollector.
       cmd.markDone(false);
       return 0;
     }
 
     /**
-     * Diese Methode fügt das nächste Textfragment aus der dem WMCommandInterpreter
-     * übergebenen frag_urls liste ein. Im Fehlerfall wird eine entsprechende
-     * Fehlermeldung eingefügt.
+     * Diese Methode fÃ¼gt das nÃ¤chste Textfragment aus der dem WMCommandInterpreter
+     * Ã¼bergebenen frag_urls liste ein. Im Fehlerfall wird eine entsprechende
+     * Fehlermeldung eingefÃ¼gt.
      */
     public int executeCommand(InsertContent cmd)
     {
@@ -899,7 +899,7 @@ public class DocumentCommandInterpreter
 
         try
         {
-          Logger.debug(L.m("Füge Textfragment von URL '%1' ein.", urlStr));
+          Logger.debug(L.m("FÃ¼ge Textfragment von URL '%1' ein.", urlStr));
 
           insertDocumentFromURL(cmd, WollMuxFiles.makeURL(urlStr));
         }
@@ -910,7 +910,7 @@ public class DocumentCommandInterpreter
           return 1;
         }
       }
-      // Kommando als Done markieren aber noch aufheben. Gelöscht wird das
+      // Kommando als Done markieren aber noch aufheben. GelÃ¶scht wird das
       // Bookmark dann erst durch den SurroundingGarbageCollector.
       cmd.markDone(false);
       return 0;
@@ -919,15 +919,15 @@ public class DocumentCommandInterpreter
     // Helper-Methoden:
 
     /**
-     * Die Methode fügt das externe Dokument von der URL url an die Stelle von cmd
-     * ein. Die Methode enthält desweiteren notwendige Workarounds für die Bugs des
+     * Die Methode fÃ¼gt das externe Dokument von der URL url an die Stelle von cmd
+     * ein. Die Methode enthÃ¤lt desweiteren notwendige Workarounds fÃ¼r die Bugs des
      * insertDocumentFromURL der UNO-API. public int execute(DocumentCommandTree
      * tree) { return executeDepthFirst(tree, false); }
      * 
      * @param cmd
-     *          Einfügeposition
+     *          EinfÃ¼geposition
      * @param url
-     *          die URL des einzufügenden Textfragments
+     *          die URL des einzufÃ¼genden Textfragments
      * @throws java.io.IOException
      * @throws IOException
      * @throws IllegalArgumentException
@@ -938,8 +938,8 @@ public class DocumentCommandInterpreter
         throws IllegalArgumentException, java.io.IOException, IOException
     {
       // Workaround: OOo friert ein, wenn ressource bei insertDocumentFromURL
-      // nicht auflösbar. http://qa.openoffice.org/issues/show_bug.cgi?id=57049
-      // Hier wird versucht, die URL über den java-Klasse url aufzulösen und bei
+      // nicht auflÃ¶sbar. http://qa.openoffice.org/issues/show_bug.cgi?id=57049
+      // Hier wird versucht, die URL Ã¼ber den java-Klasse url aufzulÃ¶sen und bei
       // Fehlern abgebrochen.
       WollMuxSingleton.checkURL(url);
 
@@ -972,8 +972,8 @@ public class DocumentCommandInterpreter
         Logger.error(e);
       }
 
-      // Liste aller TextFrames vor dem Einfügen zusammenstellen (benötigt für
-      // das Updaten der enthaltenen TextFields später).
+      // Liste aller TextFrames vor dem EinfÃ¼gen zusammenstellen (benÃ¶tigt fÃ¼r
+      // das Updaten der enthaltenen TextFields spÃ¤ter).
       HashSet<String> textFrames = new HashSet<String>();
       if (UNO.XTextFramesSupplier(model.doc) != null)
       {
@@ -985,7 +985,7 @@ public class DocumentCommandInterpreter
         }
       }
 
-      // Textfragment (mit Insert Marks) einfügen:
+      // Textfragment (mit Insert Marks) einfÃ¼gen:
       XTextCursor insCursor = cmd.getTextCursorWithinInsertMarks();
       if (UNO.XDocumentInsertable(insCursor) != null && urlStr != null)
       {
@@ -993,7 +993,7 @@ public class DocumentCommandInterpreter
           new PropertyValue[] {});
       }
 
-      // Workaround: ParagraphStyleName für den letzten eingefügten Paragraphen
+      // Workaround: ParagraphStyleName fÃ¼r den letzten eingefÃ¼gten Paragraphen
       // wieder setzen (siehe oben).
       if (endCursor.xPropertySet() != null && paraStyleName != null)
       {
@@ -1012,25 +1012,25 @@ public class DocumentCommandInterpreter
      * Diese Methode importiert alle in styles angegebenen Formatvorlagen aus dem
      * durch url beschriebenen Fragment definiert und ersetzt dabei auch die bereits
      * bestehenden Formatvorlagen des aktuellen Dokuments. Nach der erfolgreichen
-     * Einfügung der Formatvorlagen wird der Inhalt des Dokumentkommandos gelöscht,
-     * da ja mit dem Einfügen keine Textinhalte eingefügt werden.
+     * EinfÃ¼gung der Formatvorlagen wird der Inhalt des Dokumentkommandos gelÃ¶scht,
+     * da ja mit dem EinfÃ¼gen keine Textinhalte eingefÃ¼gt werden.
      * 
      * @param cmd
-     *          das Dokumentkommando dessen Inhalt nach dem erfolgreichen Einfügen
-     *          gelöscht wird.
+     *          das Dokumentkommando dessen Inhalt nach dem erfolgreichen EinfÃ¼gen
+     *          gelÃ¶scht wird.
      * @param styles
      *          ein Set mit den in Kleinbuchstaben geschriebenen Namen der zu
      *          importierenden styles.
      * @param url
-     *          die URL des einzufügenden Textfragments
+     *          die URL des einzufÃ¼genden Textfragments
      * @throws java.io.IOException
      * @throws IOException
      */
     private void insertStylesFromURL(DocumentCommand cmd, Set<String> styles, URL url)
         throws java.io.IOException, IOException
     {
-      // Workaround für Einfrierfehler von OOo, wenn ressource nicht auflösbar
-      // (ich habe nicht geprüft, ob das für insertStylesFromURL notwendig ist,
+      // Workaround fÃ¼r Einfrierfehler von OOo, wenn ressource nicht auflÃ¶sbar
+      // (ich habe nicht geprÃ¼ft, ob das fÃ¼r insertStylesFromURL notwendig ist,
       // aber schaden kann es bestimmt nicht)
       WollMuxSingleton.checkURL(url);
 
@@ -1038,7 +1038,7 @@ public class DocumentCommandInterpreter
       // verarbeitet werden kann.
       String urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
 
-      // Styles einfügen:
+      // Styles einfÃ¼gen:
       try
       {
         UnoProps props = new UnoProps();
@@ -1062,18 +1062,18 @@ public class DocumentCommandInterpreter
         Logger.error(e);
       }
 
-      // Textinhalt löschen
+      // Textinhalt lÃ¶schen
       cmd.setTextRangeString("");
     }
 
     /**
-     * Diese Methode füllt die Einfuegestellen(Platzhalter) aus dem eingefügten
-     * Textbaustein mit den übergebenen Argumente args
+     * Diese Methode fÃ¼llt die Einfuegestellen(Platzhalter) aus dem eingefÃ¼gten
+     * Textbaustein mit den Ã¼bergebenen Argumente args
      * 
      * @param range
-     *          der Bereich des eingefügten Textbausteins
+     *          der Bereich des eingefÃ¼gten Textbausteins
      * @param args
-     *          Argumente die beim Aufruf zum Einfügen übergeben werden
+     *          Argumente die beim Aufruf zum EinfÃ¼gen Ã¼bergeben werden
      */
     private void fillPlaceholders(XTextDocument doc, XTextCursor viewCursor,
         XTextRange range, Vector<String> args)
@@ -1086,7 +1086,7 @@ public class DocumentCommandInterpreter
 
       XEnumeration xEnum = UNO.XEnumerationAccess(range).createEnumeration();
       XEnumerationAccess enuAccess;
-      // Schleife über den Textbereich
+      // Schleife Ã¼ber den Textbereich
       while (xEnum.hasMoreElements())
       {
         Object ele = null;
@@ -1102,7 +1102,7 @@ public class DocumentCommandInterpreter
         if (enuAccess != null) // ist wohl ein SwXParagraph
         {
           XEnumeration textPortionEnu = enuAccess.createEnumeration();
-          // Schleife über SwXParagraph und schauen ob es Platzhalterfelder gibt
+          // Schleife Ã¼ber SwXParagraph und schauen ob es Platzhalterfelder gibt
           // diese diese werden dann im Vector placeholders gesammelt
           while (textPortionEnu.hasMoreElements())
           {
@@ -1126,7 +1126,7 @@ public class DocumentCommandInterpreter
                 textField =
                   UNO.XTextField(UNO.getProperty(textPortion, "TextField"));
                 // Wenn es ein Platzhalterfeld ist, dem Vector placeholders
-                // hinzufügen
+                // hinzufÃ¼gen
                 if (UNO.supportsService(textField,
                   "com.sun.star.text.TextField.JumpEdit"))
                 {
@@ -1142,8 +1142,8 @@ public class DocumentCommandInterpreter
         }
       }
 
-      // Enumeration über den Vector placeholders mit Platzhalterfeldern die mit
-      // den übergebenen Argumenten gefüllt werden
+      // Enumeration Ã¼ber den Vector placeholders mit Platzhalterfeldern die mit
+      // den Ã¼bergebenen Argumenten gefÃ¼llt werden
       Enumeration<XTextField> enumPlaceholders = placeholders.elements();
       for (int j = 0; j < args.size() && j < placeholders.size(); j++)
       {
@@ -1151,14 +1151,14 @@ public class DocumentCommandInterpreter
         XTextField textField = UNO.XTextField(placeholderObj);
         XTextRange textFieldAnchor = textField.getAnchor();
 
-        // bei einem Parameter ohne Inhalt bleibt die Einfügestelle und die
-        // erste ist nach dem Einfügen markiert sonst wird
+        // bei einem Parameter ohne Inhalt bleibt die EinfÃ¼gestelle und die
+        // erste ist nach dem EinfÃ¼gen markiert sonst wird
         // sie ersetzt
         if (!(args.elementAt(j).equals("")))
         {
           textFieldAnchor.setString(args.elementAt(j));
-          // setzen des ViewCursor auf die erste nicht ausgefüllte Einfügestelle
-          // nach dem Einfügen des Textbausteines
+          // setzen des ViewCursor auf die erste nicht ausgefÃ¼llte EinfÃ¼gestelle
+          // nach dem EinfÃ¼gen des Textbausteines
         }
         else if (firstEmptyPlaceholder != true)
         {
@@ -1172,9 +1172,9 @@ public class DocumentCommandInterpreter
         }
       }
 
-      // wenn weniger Parameter als Einfügestellen angegeben wurden wird nach
-      // dem Einfügen des Textbaustein und füllen der Argumente, die erste
-      // unausgefüllte Einfügestelle markiert.
+      // wenn weniger Parameter als EinfÃ¼gestellen angegeben wurden wird nach
+      // dem EinfÃ¼gen des Textbaustein und fÃ¼llen der Argumente, die erste
+      // unausgefÃ¼llte EinfÃ¼gestelle markiert.
       if (placeholders.size() > args.size())
       {
         if (firstEmptyPlaceholder == false)
@@ -1186,14 +1186,14 @@ public class DocumentCommandInterpreter
         }
       }
 
-      // Wenn nach dem Einfügen keine Platzhalter vorhanden ist springt der
+      // Wenn nach dem EinfÃ¼gen keine Platzhalter vorhanden ist springt der
       // Cursor auf die definierte Marke setJumpMark (falls Vorhanden)
       if (placeholders.size() <= args.size())
       {
         WollMuxEventHandler.handleJumpToMark(doc, false);
       }
 
-      // Wenn mehr Platzhalter angegeben als Einfügestellen vorhanden, erscheint
+      // Wenn mehr Platzhalter angegeben als EinfÃ¼gestellen vorhanden, erscheint
       // ein Eintrag in der wollmux.log. Wenn in einer Conf Datei im Bereich
       // Textbausteine dort im Bereich Warnungen ein Eintrag mit
       // MSG_TOO_MANY_ARGS "true|on|1" ist, erscheint die Fehlermeldung in einem
@@ -1226,7 +1226,7 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Der Hauptverarbeitungsschritt, in dem vor allem die Textinhalte gefüllt werden.
+   * Der Hauptverarbeitungsschritt, in dem vor allem die Textinhalte gefÃ¼llt werden.
    * 
    * @author christoph.lutz
    * 
@@ -1254,8 +1254,8 @@ public class DocumentCommandInterpreter
 
     /**
      * Besitzt das Dokument ein (inzwischen veraltetes) Form-Dokumentkommando, so
-     * wird dieses in die persistenten Daten des Dokuments kopiert und die zugehörige
-     * Notiz gelöscht, wenn nicht bereits eine Formularbeschreibung dort existiert.
+     * wird dieses in die persistenten Daten des Dokuments kopiert und die zugehÃ¶rige
+     * Notiz gelÃ¶scht, wenn nicht bereits eine Formularbeschreibung dort existiert.
      */
     public int executeCommand(DocumentCommand.Form cmd)
     {
@@ -1275,7 +1275,7 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Diese Methode bearbeitet ein InvalidCommand und fügt ein Fehlerfeld an der
+     * Diese Methode bearbeitet ein InvalidCommand und fÃ¼gt ein Fehlerfeld an der
      * Stelle des Dokumentkommandos ein.
      */
     public int executeCommand(DocumentCommand.InvalidCommand cmd)
@@ -1286,8 +1286,8 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Diese Methode fügt einen Spaltenwert aus dem aktuellen Datensatz der
-     * Absenderdaten ein. Im Fehlerfall wird die Fehlermeldung eingefügt.
+     * Diese Methode fÃ¼gt einen Spaltenwert aus dem aktuellen Datensatz der
+     * Absenderdaten ein. Im Fehlerfall wird die Fehlermeldung eingefÃ¼gt.
      */
     public int executeCommand(DocumentCommand.InsertValue cmd)
     {
@@ -1301,12 +1301,12 @@ public class DocumentCommandInterpreter
         value = ds.get(spaltenname);
         if (value == null) value = "";
 
-        // ggf. TRAFO durchführen
+        // ggf. TRAFO durchfÃ¼hren
         value = model.getTransformedValue(cmd.getTrafoName(), value);
       }
       catch (DatasetNotFoundException e)
       {
-        value = L.m("<FEHLER: Kein Absender ausgewählt!>");
+        value = L.m("<FEHLER: Kein Absender ausgewÃ¤hlt!>");
       }
       catch (ColumnNotFoundException e)
       {
@@ -1336,7 +1336,7 @@ public class DocumentCommandInterpreter
   private class TextFieldUpdater extends DocumentCommands.Executor
   {
     /**
-     * Ausführung starten
+     * AusfÃ¼hrung starten
      */
     private int execute(DocumentCommands commands)
     {
@@ -1356,7 +1356,7 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Diese Methode updated alle TextFields, die das Kommando cmd umschließt.
+     * Diese Methode updated alle TextFields, die das Kommando cmd umschlieÃŸt.
      */
     public int executeCommand(UpdateFields cmd)
     {
@@ -1398,7 +1398,7 @@ public class DocumentCommandInterpreter
         }
       }
 
-      // jetzt noch update selbst aufrufen (wenn verfügbar):
+      // jetzt noch update selbst aufrufen (wenn verfÃ¼gbar):
       try
       {
         UnoService textField = element.getPropertyValue("TextField");
@@ -1412,10 +1412,10 @@ public class DocumentCommandInterpreter
     }
   }
 
-  // Übergreifende Helper-Methoden:
+  // Ãœbergreifende Helper-Methoden:
 
   /**
-   * Diese Methode fügt ein Fehler-Feld an die Stelle des Dokumentkommandos ein.
+   * Diese Methode fÃ¼gt ein Fehler-Feld an die Stelle des Dokumentkommandos ein.
    */
   private void insertErrorField(DocumentCommand cmd, java.lang.Exception e)
   {
@@ -1438,7 +1438,7 @@ public class DocumentCommandInterpreter
     XTextCursor insCursor = cmd.getTextCursor();
     if (insCursor == null)
     {
-      Logger.error(L.m("Kann Fehler-Feld nicht einfügen, da kein InsertCursor erzeugt werden konnte."));
+      Logger.error(L.m("Kann Fehler-Feld nicht einfÃ¼gen, da kein InsertCursor erzeugt werden konnte."));
       return;
       // Anmerkung: Aufruf von cmd.setTextRangeString() oben macht nichts, falls kein
       // InsertCursor erzeugt werden kann, daher kein Problem, dass die Abfrage nach
@@ -1449,7 +1449,7 @@ public class DocumentCommandInterpreter
     UNO.setProperty(insCursor, "CharColor", Integer.valueOf(0xff0000));
     UNO.setProperty(insCursor, "CharWeight", Float.valueOf(FontWeight.BOLD));
 
-    // Ein Annotation-Textfield erzeugen und einfügen:
+    // Ein Annotation-Textfield erzeugen und einfÃ¼gen:
     try
     {
       XTextRange range = insCursor.getEnd();

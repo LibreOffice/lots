@@ -3,7 +3,7 @@
 * Projekt  : WollMux
 * Funktion : wird geworfen, wenn eine Fehlkonfiguration festgestellt wird (d.h. Benutzer hat Config verbockt)
 * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
 *
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
+* Ã„nderungshistorie:
+* Datum      | Wer | Ã„nderungsgrund
 * -------------------------------------------------------------------
 * 11.10.2005 | BNK | Erstellung
 * 13.10.2005 | BNK | +serialVersionUID
@@ -39,7 +39,7 @@ package de.muenchen.allg.itd51.wollmux;
 public class ConfigurationErrorException extends Exception
 {
   /**
-   * keine Ahnung, was das soll, aber es macht Eclipse glücklich.
+   * keine Ahnung, was das soll, aber es macht Eclipse glÃ¼cklich.
    */
   private static final long serialVersionUID = -2457549809413613658L;
   public ConfigurationErrorException() {};

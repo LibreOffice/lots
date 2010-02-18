@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Dient der thread-safen Kommunikation der WollMuxBar mit dem WollMux im OOo.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,12 +18,12 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 18.04.2006 | BNK | Erstellung
- * 21.04.2006 | BNK | Vernünftige Meldung wenn keine Verbindung zum OOo WOllMux hergestellt werden konnte
- * 24.04.2006 | BNK | kleinere Aufräumarbeiten. Code Review.
+ * 21.04.2006 | BNK | VernÃ¼nftige Meldung wenn keine Verbindung zum OOo WOllMux hergestellt werden konnte
+ * 24.04.2006 | BNK | kleinere AufrÃ¤umarbeiten. Code Review.
  * 24.04.2006 | BNK | [R1390]Popup-Fenster, wenn Verbindung zu OOo WollMux nicht hergestellt
  *                  | werden konnte.
  * -------------------------------------------------------------------
@@ -76,15 +76,15 @@ public class WollMuxBarEventHandler
   private List<Event> eventQueue = new LinkedList<Event>();
 
   /**
-   * Die WollMuxBar, für die Events behandelt werden.
+   * Die WollMuxBar, fÃ¼r die Events behandelt werden.
    */
   private WollMuxBar wollmuxbar;
 
   /**
    * Der WollMux-Service, mit dem die WollMuxBar Informationen austauscht. Der
-   * WollMux-Service sollte nicht über dieses Feld, sondern ausschließlich über die
-   * Methode getRemoteWollMux bezogen werden, da diese mit einem möglichen Schließen
-   * von OOo während die WollMuxBar läuft klarkommt.
+   * WollMux-Service sollte nicht Ã¼ber dieses Feld, sondern ausschlieÃŸlich Ã¼ber die
+   * Methode getRemoteWollMux bezogen werden, da diese mit einem mÃ¶glichen SchlieÃŸen
+   * von OOo wÃ¤hrend die WollMuxBar lÃ¤uft klarkommt.
    * 
    * ACHTUNG! Diese Variable ist absichtlich ein Object, kein XWollMux, um den
    * queryInterface-Aufruf zu erzwingen, damit ein Disposed Zustand erkannt wird.
@@ -125,8 +125,8 @@ public class WollMuxBarEventHandler
 
     myThread = new EventProcessor();
     /*
-     * Weil wir den Terminate-Event ausführen müssen, um uns korrekt vom WollMux
-     * abzumelden dürfen wir kein Daemon sein.
+     * Weil wir den Terminate-Event ausfÃ¼hren mÃ¼ssen, um uns korrekt vom WollMux
+     * abzumelden dÃ¼rfen wir kein Daemon sein.
      */
     myThread.setDaemon(false);
   }
@@ -161,7 +161,7 @@ public class WollMuxBarEventHandler
   }
 
   /**
-   * Startet OOo falls noetig und stellt Kontakt mit dem WollMux her, um über den
+   * Startet OOo falls noetig und stellt Kontakt mit dem WollMux her, um Ã¼ber den
    * aktuellen Senderbox-Inhalt informiert zu werden.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -172,13 +172,13 @@ public class WollMuxBarEventHandler
   }
 
   /**
-   * Erzeugt eine wollmuxUrl und übergibt sie dem WollMux zur Bearbeitung.
+   * Erzeugt eine wollmuxUrl und Ã¼bergibt sie dem WollMux zur Bearbeitung.
    * 
    * @param dispatchCmd
-   *          das Kommando, das der WollMux ausführen soll. (z.B. "openTemplate")
+   *          das Kommando, das der WollMux ausfÃ¼hren soll. (z.B. "openTemplate")
    * @param arg
    *          ein optionales Argument (z.B. "{fragid}"). Ist das Argument null oder
-   *          der Leerstring, so wird es nicht mit übergeben.
+   *          der Leerstring, so wird es nicht mit Ã¼bergeben.
    */
   public void handleWollMuxUrl(String dispatchCmd, String arg)
   {
@@ -186,12 +186,12 @@ public class WollMuxBarEventHandler
   }
 
   /**
-   * Lässt die Senderboxes sich updaten.
+   * LÃ¤sst die Senderboxes sich updaten.
    * 
    * @param entries
-   *          die Einträge der PAL
+   *          die EintrÃ¤ge der PAL
    * @param current
-   *          der ausgewählte Eintrag
+   *          der ausgewÃ¤hlte Eintrag
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void handleSenderboxUpdate(String[] entries, String current)
@@ -200,10 +200,10 @@ public class WollMuxBarEventHandler
   }
 
   /**
-   * Teilt dem WollMux mit, dass PAL Eintrag entry gewählt wurde, der der index-te
-   * Eintrag der PAL (gezählt ab 0) ist. Es werden sowohl der Eintrag als auch der
-   * Index übergeben, damit der WollMux auf Konsistenz prüfen kann. Schließlich ist
-   * es möglich, dass in der Zwischenzeit konkurrierende Änderungen der Senderbox
+   * Teilt dem WollMux mit, dass PAL Eintrag entry gewÃ¤hlt wurde, der der index-te
+   * Eintrag der PAL (gezÃ¤hlt ab 0) ist. Es werden sowohl der Eintrag als auch der
+   * Index Ã¼bergeben, damit der WollMux auf Konsistenz prÃ¼fen kann. SchlieÃŸlich ist
+   * es mÃ¶glich, dass in der Zwischenzeit konkurrierende Ã„nderungen der Senderbox
    * stattgefunden haben.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -214,8 +214,8 @@ public class WollMuxBarEventHandler
   }
 
   /**
-   * Lässt den EventHandler sich ordnungsgemäß deinitialisieren und seine Verbindung
-   * zum entfernten WollMux lösen, sowie seinen Bearbeitungsthread beenden. Achtung!
+   * LÃ¤sst den EventHandler sich ordnungsgemÃ¤ÃŸ deinitialisieren und seine Verbindung
+   * zum entfernten WollMux lÃ¶sen, sowie seinen Bearbeitungsthread beenden. Achtung!
    * Es sollte die Methode waitForThreadTermination() verwendet werden, bevor mit
    * System.exit() die JVM beendet wird.
    * 
@@ -234,7 +234,7 @@ public class WollMuxBarEventHandler
   private void handle(Event e)
   {
     if (WollMuxFiles.isDebugMode())
-      Logger.debug2(L.m("Füge %1 zur Event-Queue hinzu",
+      Logger.debug2(L.m("FÃ¼ge %1 zur Event-Queue hinzu",
         e.getClass().getSimpleName()));
     synchronized (eventQueue)
     {
@@ -244,7 +244,7 @@ public class WollMuxBarEventHandler
   }
 
   /**
-   * Interface für die Events, die dieser EventHandler abarbeitet.
+   * Interface fÃ¼r die Events, die dieser EventHandler abarbeitet.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -306,7 +306,7 @@ public class WollMuxBarEventHandler
 
     public void process()
     {
-      // GUI-Funktionen im Event-Dispatching Thread ausführen wg. Thread-Safety.
+      // GUI-Funktionen im Event-Dispatching Thread ausfÃ¼hren wg. Thread-Safety.
       try
       {
         final WollMuxBar wmbar = wollmuxbar;
@@ -449,7 +449,7 @@ public class WollMuxBarEventHandler
   }
 
   /**
-   * Diese Methode liefert eine Instanz auf den entfernten WollMux zurück, wobei der
+   * Diese Methode liefert eine Instanz auf den entfernten WollMux zurÃ¼ck, wobei der
    * connect-Parameter steuert, ob falls notwendig eine neue UNO-Verbindung aufgebaut
    * wird.
    * 
@@ -458,12 +458,12 @@ public class WollMuxBarEventHandler
    *          zu verwenden, um das WollMux-Objekt zu bekommen. Der Parameter connect
    *          steuert das Verhalten, falls entweder bisher keine Verbindung mit OOo
    *          hergestellt wurde oder die Verbindung abgerissen ist. Falls connect ==
-   *          false, so wird in diesen Fällen null zurückgeliefert ohne dass versucht
+   *          false, so wird in diesen FÃ¤llen null zurÃ¼ckgeliefert ohne dass versucht
    *          wird, eine neue Verbindung aufzubauen. Falls connect == true, so wird
    *          versucht, eine neue Verbindung aufzubauen.
    * 
-   * @return Instanz eines gültigen WollMux. Konnte oder sollte keine Verbindung
-   *         hergestellt werden, so wird null zurückgeliefert. TESTED
+   * @return Instanz eines gÃ¼ltigen WollMux. Konnte oder sollte keine Verbindung
+   *         hergestellt werden, so wird null zurÃ¼ckgeliefert. TESTED
    */
   private XWollMux getRemoteWollMux(boolean connect)
   {
@@ -584,7 +584,7 @@ public class WollMuxBarEventHandler
             }
             catch (Exception x)
             {
-              Logger.debug("Konnte Komponente nicht schließen. Versuche es über den Frame nochmal");
+              Logger.debug("Konnte Komponente nicht schlieÃŸen. Versuche es Ã¼ber den Frame nochmal");
               try
               {
                 /*
@@ -595,7 +595,7 @@ public class WollMuxBarEventHandler
               }
               catch (Exception y)
               {
-                Logger.error("Konnte Komponente weder direkt noch über den Frame schließen");
+                Logger.error("Konnte Komponente weder direkt noch Ã¼ber den Frame schlieÃŸen");
               }
             }
           }

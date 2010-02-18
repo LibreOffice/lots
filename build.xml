@@ -95,7 +95,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="VERSION_FILE" value="${MISC}/version"/>
 	<property name="CHANGELOG_FILE" value="doc/ChangeLog"/>
 
-	<property name="SRC_ENCODING" value="ISO8859-1" />
+	<property name="SRC_ENCODING" value="UTF-8" />
 	
 	<property name="WollMux_REG_NAME" value="de.muenchen.allg.itd51.wollmux.comp.WollMux" />
 	<property name="WollMux_COMPJAR" value="${RDB_DIR}/${COMPONENT}.uno.jar" />

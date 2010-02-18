@@ -1,9 +1,9 @@
 /*
 * Dateiname: DuplicateIDException.java
 * Projekt  : WollMux
-* Funktion : Wird geworfen, wenn versucht wird, die ID eines Elementes auf einen bereits von einem anderen Element verwendeten Wert zu ändern.
+* Funktion : Wird geworfen, wenn versucht wird, die ID eines Elementes auf einen bereits von einem anderen Element verwendeten Wert zu Ã¤ndern.
 * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
 *
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
+* Ã„nderungshistorie:
+* Datum      | Wer | Ã„nderungsgrund
 * -------------------------------------------------------------------
 * 11.07.2007 | BNK | Erstellung
 * -------------------------------------------------------------------
@@ -32,14 +32,14 @@ package de.muenchen.allg.itd51.wollmux;
 
 /**
  * Wird geworfen, wenn versucht wird, die ID eines Elementes auf einen bereits von
- * einem anderen Element verwendeten Wert zu ändern.
+ * einem anderen Element verwendeten Wert zu Ã¤ndern.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class DuplicateIDException extends Exception
 {
   /**
-   * keine Ahnung, was das soll, aber es macht Eclipse glücklich.
+   * keine Ahnung, was das soll, aber es macht Eclipse glÃ¼cklich.
    */
   private static final long serialVersionUID = 4349143792168156649L;
   public DuplicateIDException() {};

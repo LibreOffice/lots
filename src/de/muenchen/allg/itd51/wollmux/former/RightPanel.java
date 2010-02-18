@@ -1,9 +1,9 @@
 /*
  * Dateiname: RightPanel.java
  * Projekt  : WollMux
- * Funktion : Managet die rechte Hälfte des FM4000.
+ * Funktion : Managet die rechte HÃ¤lfte des FM4000.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 28.09.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -47,48 +47,48 @@ import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
- * Managet die rechte Hälfte des FM4000.
+ * Managet die rechte HÃ¤lfte des FM4000.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class RightPanel implements View
 {
   /**
-   * Identifikationsstring für {@link CardLayout}.
+   * Identifikationsstring fÃ¼r {@link CardLayout}.
    */
   private static final String ALL_INSERTION_TRAFO_VIEWS_PANEL =
     "ALL_INSERTION_TRAFO_VIEWS_PANEL";
 
   /**
-   * Identifikationsstring für {@link CardLayout}.
+   * Identifikationsstring fÃ¼r {@link CardLayout}.
    */
   private static final String ALL_FORMCONTROL_EXT_VIEWS_PANEL =
     "ALL_FORMCONTROL_EXT_VIEWS_PANEL";
 
   /**
-   * Identifikationsstring für {@link CardLayout}.
+   * Identifikationsstring fÃ¼r {@link CardLayout}.
    */
   private static final String ALL_GROUP_FUNC_VIEWS_PANEL =
     "ALL_GROUP_FUNC_VIEWS_PANEL";
 
   /**
-   * Identifikationsstring für {@link CardLayout}.
+   * Identifikationsstring fÃ¼r {@link CardLayout}.
    */
   private static final String ALL_SECTION_EXT_VIEWS_PANEL =
     "ALL_SECTION_EXT_VIEWS_PANEL";
 
   /**
-   * Das JPanel, dass alle Inhalte dieser View enthält.
+   * Das JPanel, dass alle Inhalte dieser View enthÃ¤lt.
    */
   private JPanel myPanel;
 
   /**
-   * Das CardLayout für myPanel.
+   * Das CardLayout fÃ¼r myPanel.
    */
   private CardLayout cards;
 
   /**
-   * Erzeugt ein neues RightPanel. Zur Erläuterung der Parameter siehe
+   * Erzeugt ein neues RightPanel. Zur ErlÃ¤uterung der Parameter siehe
    * {@link de.muenchen.allg.itd51.wollmux.former.insertion.AllInsertionTrafoViewsPanel#AllInsertionTrafoViewsPanel(InsertionModelList, FunctionLibrary, FormularMax4000)}
    * und
    * {@link de.muenchen.allg.itd51.wollmux.former.control.AllFormControlExtViewsPanel#AllFormControlExtViewsPanel(FormControlModelList, FunctionLibrary, FormularMax4000)}.

@@ -1,9 +1,9 @@
 /*
  * Dateiname: AllGroupLineViewsPanel.java
  * Projekt  : WollMux
- * Funktion : Enthält alle OneGroupLineViews
+ * Funktion : EnthÃ¤lt alle OneGroupLineViews
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 12.03.2009 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -62,7 +62,7 @@ import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
 /**
- * Enthält alle OneInsertionLineViews.
+ * EnthÃ¤lt alle OneInsertionLineViews.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -74,7 +74,7 @@ public class AllGroupLineViewsPanel implements View
   private final static int BUTTON_BORDER = 2;
 
   /**
-   * Der {@link FormularMax4000} zu dem diese View gehört.
+   * Der {@link FormularMax4000} zu dem diese View gehÃ¶rt.
    */
   private FormularMax4000 formularMax4000;
 
@@ -84,18 +84,18 @@ public class AllGroupLineViewsPanel implements View
   private ViewChangeListener myViewChangeListener;
 
   /**
-   * Das JPanel, das die ganze View enthält.
+   * Das JPanel, das die ganze View enthÃ¤lt.
    */
   private JPanel myPanel;
 
   /**
    * Das JPanel, das die
-   * {@link de.muenchen.allg.itd51.wollmux.former.group.OneGroupLineView}s enthält.
+   * {@link de.muenchen.allg.itd51.wollmux.former.group.OneGroupLineView}s enthÃ¤lt.
    */
   private JPanel mainPanel;
 
   /**
-   * Die JScrollPane, die {@link #mainPanel} enthält.
+   * Die JScrollPane, die {@link #mainPanel} enthÃ¤lt.
    */
   private JScrollPane scrollPane;
 
@@ -110,7 +110,7 @@ public class AllGroupLineViewsPanel implements View
   private IndexList selection = new IndexList();
 
   /**
-   * Die Liste der Models, zu denen diese View die LineViews enthält.
+   * Die Liste der Models, zu denen diese View die LineViews enthÃ¤lt.
    */
   private GroupModelList groupModelList;
 
@@ -151,7 +151,7 @@ public class AllGroupLineViewsPanel implements View
       new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
         GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
           BUTTON_BORDER, BUTTON_BORDER), 0, 0);
-    JButton button = new JButton(L.m("Löschen"));
+    JButton button = new JButton(L.m("LÃ¶schen"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -202,7 +202,7 @@ public class AllGroupLineViewsPanel implements View
   }
 
   /**
-   * Fügt dieser View eine {@link OneGroupLineView} für model hinzu.
+   * FÃ¼gt dieser View eine {@link OneGroupLineView} fÃ¼r model hinzu.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -213,7 +213,7 @@ public class AllGroupLineViewsPanel implements View
     views.add(view);
 
     /*
-     * view vor dem letzten Element von mainPanel einfügen, weil das letzte Element
+     * view vor dem letzten Element von mainPanel einfÃ¼gen, weil das letzte Element
      * immer ein Glue sein soll.
      */
     mainPanel.add(view.JComponent(), mainPanel.getComponentCount() - 1);
@@ -256,7 +256,7 @@ public class AllGroupLineViewsPanel implements View
   }
 
   /**
-   * Löscht alle ausgewählten Elemente.
+   * LÃ¶scht alle ausgewÃ¤hlten Elemente.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -265,9 +265,9 @@ public class AllGroupLineViewsPanel implements View
     /**
      * Die folgende Schleife muss auf diese Weise geschrieben werden und nicht mit
      * einem Iterator, weil es ansonsten eine ConcurrentModificationException gibt,
-     * da über {@link ViewChangeListener#viewShouldBeRemoved(View)} die Selektion
-     * während des remove() gleich verändert wird, was den Iterator invalidieren
-     * würde.
+     * da Ã¼ber {@link ViewChangeListener#viewShouldBeRemoved(View)} die Selektion
+     * wÃ¤hrend des remove() gleich verÃ¤ndert wird, was den Iterator invalidieren
+     * wÃ¼rde.
      */
     while (!selection.isEmpty())
     {
@@ -277,9 +277,9 @@ public class AllGroupLineViewsPanel implements View
       groupModelList.remove(model);
 
       /**
-       * Es gibt keine Möglichkeit, eine ID aus dem IDManager zu entfernen und ein
+       * Es gibt keine MÃ¶glichkeit, eine ID aus dem IDManager zu entfernen und ein
        * Inaktivieren reicht nicht, um Namenskollisionen zu verhindern. Deswegen
-       * benennen wir die ID einfach um in einen zufälligen String.
+       * benennen wir die ID einfach um in einen zufÃ¤lligen String.
        */
       IDManager.ID id = model.getID();
       while (true)
@@ -342,11 +342,11 @@ public class AllGroupLineViewsPanel implements View
 
           switch (state)
           {
-            case -1: // abwählen
+            case -1: // abwÃ¤hlen
               view.unmark();
               selection.remove(index);
               break;
-            case 1: // auswählen
+            case 1: // auswÃ¤hlen
               view.mark();
               selection.add(index);
               break;

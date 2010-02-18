@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Erzeugt Functions aus ConfigThingys.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 03.05.2006 | BNK | Erstellung
  * 08.05.2006 | BNK | Testing und Debugging, mehr Grund-Funktionen
@@ -28,13 +28,13 @@
  *                  | MATCH.getString() kann jetzt Function.ERROR liefern
  * 31.05.2006 | BNK | +getFunctionDialogReferences()
  * 26.07.2006 | BNK | +REPLACE-Grundfunktion
- * 05.12.2006 | BNK | WollMuxFiles.getClassLoader() wird für ExternalFunctions übergeben.
+ * 05.12.2006 | BNK | WollMuxFiles.getClassLoader() wird fÃ¼r ExternalFunctions Ã¼bergeben.
  * 21.03.2007 | BNK | BIND erweitert so dass auch direkt eine Funktion als FUNCTION verwendet werden kann.
  * 25.07.2007 | BNK | +DIVIDE/FORMAT
  * 03.08.2007 | BNK | +SUM,MINUS,PRODUCT,DIFF,ABS,SIGN
  * 08.08.2007 | BNK | SELECT-Verhalten im Fehlerfalle entsprechend Doku implementiert
  *                  | +NUMCMP, LE, GE, GT, LT 
- * 09.08.2007 | BNK | +ISERROR, ISERRORSTRING, ONERROR (für SELECT)
+ * 09.08.2007 | BNK | +ISERROR, ISERRORSTRING, ONERROR (fÃ¼r SELECT)
  * 01.02.2008 | BNK | +LENGTH
  * 07.03.2008 | BNK | [R16048] doppelte Parameter eliminieren
  * -------------------------------------------------------------------
@@ -111,23 +111,23 @@ public class FunctionFactory
    * wird null geliefert. Hat conf genau einen Enkel, so wird eine Funktion
    * geliefert, die diesem Enkel entspricht. Hat conf mehr als einen Enkel, so wird
    * eine Funktion geliefert, die alle Enkel als Booleans auswertet und
-   * UND-verknüpft.
+   * UND-verknÃ¼pft.
    * 
    * @param funcLib
    *          die Funktionsbibliothek anhand derer Referenzen auf Funktionen
-   *          aufgelöst werden sollen.
+   *          aufgelÃ¶st werden sollen.
    * @param dialogLib
-   *          die Dialogbibliothek anhand derer Referenzen auf Dialoge aufgelöst
+   *          die Dialogbibliothek anhand derer Referenzen auf Dialoge aufgelÃ¶st
    *          werden sollen.
    * @param context
-   *          Manche Grundfunktionen (insbes. DIALOG) halten kontextabhängige Werte.
+   *          Manche Grundfunktionen (insbes. DIALOG) halten kontextabhÃ¤ngige Werte.
    *          Zur Unterscheidung der verschiedenen Instanzen dient die context Map,
    *          in der die verschiedenen Instanzen abgelegt werden. Wird hier null
-   *          übergeben, dann wird eine ConfigurationErrorException geworfen, wenn
-   *          conf eine Funktion enthält, die einen Kontext benötigt.
+   *          Ã¼bergeben, dann wird eine ConfigurationErrorException geworfen, wenn
+   *          conf eine Funktion enthÃ¤lt, die einen Kontext benÃ¶tigt.
    * @throws ConfigurationErrorException
    *           falls conf keine korrekte Funktionsbeschreibung ist oder die Funktion
-   *           einen context benötigt aber null übergeben wurde.
+   *           einen context benÃ¶tigt aber null Ã¼bergeben wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public static Function parseGrandchildren(ConfigThingy conf,
@@ -158,23 +158,23 @@ public class FunctionFactory
    * Erzeugt ein Function-Objekt aus den KINDERN von conf. Hat conf keine Kinder, so
    * wird null geliefert. Hat conf genau ein Kind, so wird eine Funktion geliefert,
    * die diesem Kind entspricht. Hat conf mehr als ein Kind, so wird eine Funktion
-   * geliefert, die alle Kinder als Booleans auswertet und UND-verknüpft.
+   * geliefert, die alle Kinder als Booleans auswertet und UND-verknÃ¼pft.
    * 
    * @param funcLib
    *          die Funktionsbibliothek anhand derer Referenzen auf Funktionen
-   *          aufgelöst werden sollen.
+   *          aufgelÃ¶st werden sollen.
    * @param dialogLib
-   *          die Dialogbibliothek anhand derer Referenzen auf Dialoge aufgelöst
+   *          die Dialogbibliothek anhand derer Referenzen auf Dialoge aufgelÃ¶st
    *          werden sollen.
    * @param context
-   *          Manche Grundfunktionen (insbes. DIALOG) halten kontextabhängige Werte.
+   *          Manche Grundfunktionen (insbes. DIALOG) halten kontextabhÃ¤ngige Werte.
    *          Zur Unterscheidung der verschiedenen Instanzen dient die context Map,
    *          in der die verschiedenen Instanzen abgelegt werden. Wird hier null
-   *          übergeben, dann wird eine ConfigurationErrorException geworfen, wenn
-   *          conf eine Funktion enthält, die einen Kontext benötigt.
+   *          Ã¼bergeben, dann wird eine ConfigurationErrorException geworfen, wenn
+   *          conf eine Funktion enthÃ¤lt, die einen Kontext benÃ¶tigt.
    * @throws ConfigurationErrorException
    *           falls conf keine korrekte Funktionsbeschreibung ist oder die Funktion
-   *           einen context benötigt aber null übergeben wurde.
+   *           einen context benÃ¶tigt aber null Ã¼bergeben wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public static Function parseChildren(ConfigThingy conf, FunctionLibrary funcLib,
@@ -202,19 +202,19 @@ public class FunctionFactory
    * 
    * @param funcLib
    *          die Funktionsbibliothek anhand derer Referenzen auf Funktionen
-   *          aufgelöst werden sollen.
+   *          aufgelÃ¶st werden sollen.
    * @param dialogLib
-   *          die Dialogbibliothek anhand derer Referenzen auf Dialoge aufgelöst
+   *          die Dialogbibliothek anhand derer Referenzen auf Dialoge aufgelÃ¶st
    *          werden sollen.
    * @param context
-   *          Manche Grundfunktionen (insbes. DIALOG) halten kontextabhängige Werte.
+   *          Manche Grundfunktionen (insbes. DIALOG) halten kontextabhÃ¤ngige Werte.
    *          Zur Unterscheidung der verschiedenen Instanzen dient die context Map,
    *          in der die verschiedenen Instanzen abgelegt werden. Wird hier null
-   *          übergeben, dann wird eine ConfigurationErrorException geworfen, wenn
-   *          conf eine Funktion enthält, die einen Kontext benötigt.
+   *          Ã¼bergeben, dann wird eine ConfigurationErrorException geworfen, wenn
+   *          conf eine Funktion enthÃ¤lt, die einen Kontext benÃ¶tigt.
    * @throws ConfigurationErrorException
    *           falls conf keine korrekte Funktionsbeschreibung ist oder die Funktion
-   *           einen context benötigt aber null übergeben wurde.
+   *           einen context benÃ¶tigt aber null Ã¼bergeben wurde.
    * 
    * TESTED
    */
@@ -346,11 +346,11 @@ public class FunctionFactory
 
     if (name.length() == 0)
       throw new ConfigurationErrorException(
-        L.m("Öffnende Klammer ohne voranstehenden Funktionsnamen gefunden. ")
+        L.m("Ã–ffnende Klammer ohne voranstehenden Funktionsnamen gefunden. ")
           + outputErrorPosition(conf));
     else
       throw new ConfigurationErrorException(L.m(
-        "\"%1\" ist keine unterstützte Grundfunktion. ", name)
+        "\"%1\" ist keine unterstÃ¼tzte Grundfunktion. ", name)
         + outputErrorPosition(conf));
   }
 
@@ -439,7 +439,7 @@ public class FunctionFactory
 
     if (context == null)
       throw new ConfigurationErrorException(
-        L.m("DIALOG-Funktion ist kontextabhängig und kann deshalb hier nicht verwendet werden."));
+        L.m("DIALOG-Funktion ist kontextabhÃ¤ngig und kann deshalb hier nicht verwendet werden."));
 
     return new DialogFunction(dialogName, dialog, dataName, context);
   }
@@ -473,7 +473,7 @@ public class FunctionFactory
     Iterator<ConfigThingy> iter = conf.iterator();
     ConfigThingy condition;
     do
-    { // oben wurde überprüft, dass es genau einen Knoten gibt, der nicht ELSE oder
+    { // oben wurde Ã¼berprÃ¼ft, dass es genau einen Knoten gibt, der nicht ELSE oder
       // THEN ist
       condition = iter.next();
     } while (condition.getName().equals("THEN") || condition.getName().equals("ELSE"));
@@ -536,7 +536,7 @@ public class FunctionFactory
     catch (NodeNotFoundException x)
     {
       /* Kann nicht sein, weil count() getestet wurde. Statement ist nur hier,
-       * um Warnungen des Compilers und von findBugs zu besänftigen. */
+       * um Warnungen des Compilers und von findBugs zu besÃ¤nftigen. */
       throw new RuntimeException(x);
     }
 
@@ -570,7 +570,7 @@ public class FunctionFactory
     catch (NodeNotFoundException e)
     {
       /* Kann nicht sein, weil count() getestet wurde. Statement ist nur hier,
-       * um Warnungen des Compilers und von findBugs zu besänftigen. */
+       * um Warnungen des Compilers und von findBugs zu besÃ¤nftigen. */
       throw new RuntimeException(e);
     }
 
@@ -748,7 +748,7 @@ public class FunctionFactory
         ConfigThingy set = iter.next();
         if (set.count() != 2)
           throw new ConfigurationErrorException(
-            L.m("BIND: SET benötigt genau 2 Parameter"));
+            L.m("BIND: SET benÃ¶tigt genau 2 Parameter"));
 
         String name;
         Function setFunc;
@@ -772,16 +772,16 @@ public class FunctionFactory
         setFunc.getFunctionDialogReferences(functionDialogReferences);
 
         /*
-         * name wurde gebunden, wird also nicht mehr als Parameter benötigt, außer
-         * wenn eine der setFuncs den Parameter benötigt. In diesem Fall ist der
+         * name wurde gebunden, wird also nicht mehr als Parameter benÃ¶tigt, auÃŸer
+         * wenn eine der setFuncs den Parameter benÃ¶tigt. In diesem Fall ist der
          * Parameter in setFuncParams erfasst und wird nachher wieder zu myparams
-         * hinzugefügt.
+         * hinzugefÃ¼gt.
          */
         myParams.remove(name);
       }
 
       /*
-       * Parameter der setFuncs den benötigten Parametern hinzufügen und in String[]
+       * Parameter der setFuncs den benÃ¶tigten Parametern hinzufÃ¼gen und in String[]
        * konvertieren.
        */
       myParams.addAll(setFuncParams);
@@ -830,15 +830,15 @@ public class FunctionFactory
       {
         /*
          * ACHTUNG! Wenn die id an eine Funktion gebunden ist, dann liefern wir immer
-         * true, auch wenn die Funktion evtl. einen Fehler liefert. Es gäbe 2
+         * true, auch wenn die Funktion evtl. einen Fehler liefert. Es gÃ¤be 2
          * alternative Verhaltensweisen: - nur true liefern, wenn
-         * values.hasValue(id2) == true für alle Parameter, die die Funktion
+         * values.hasValue(id2) == true fÃ¼r alle Parameter, die die Funktion
          * erwartet. Nachteil: Zu strikt bei Funktionen, bei denen manche Argumente
-         * optional sind - die Funktion ausführen und sehen, ob sie einen Fehler
-         * liefert Nachteil: Die Funktion wird zu einem Zeitpunkt ausgeführt, zu dem
-         * dies evtl. nicht erwartet wird. Außerdem wird die Funktion einmal mehr
-         * ausgeführt. Bei externen Funktionen (insbes. Basic-Makros) ist dies nicht
-         * wünschenswert.
+         * optional sind - die Funktion ausfÃ¼hren und sehen, ob sie einen Fehler
+         * liefert Nachteil: Die Funktion wird zu einem Zeitpunkt ausgefÃ¼hrt, zu dem
+         * dies evtl. nicht erwartet wird. AuÃŸerdem wird die Funktion einmal mehr
+         * ausgefÃ¼hrt. Bei externen Funktionen (insbes. Basic-Makros) ist dies nicht
+         * wÃ¼nschenswert.
          */
         if (mapParamNameToSetFunction.containsKey(id)) return true;
         return (values.hasValue(id));
@@ -1026,7 +1026,7 @@ public class FunctionFactory
         Object result = func.invoke(parameters);
         if (result == null)
           throw new Exception(
-            L.m("Unbekannter Fehler beim Ausführen einer externen Funktion"));
+            L.m("Unbekannter Fehler beim AusfÃ¼hren einer externen Funktion"));
         return result.toString();
       }
       catch (Exception e)
@@ -1153,13 +1153,13 @@ public class FunctionFactory
     }
 
     /**
-     * Liefert true, wenn conf von handleParam bereits vollständig behandelt wurde
+     * Liefert true, wenn conf von handleParam bereits vollstÃ¤ndig behandelt wurde
      * und nicht mehr als Subfunktion erfasst werden soll. Diese Funktion wird von
-     * Unterklassen überschrieben, um spezielle Parameter zu behandeln. ACHTUNG! Wird
-     * diese Methode überschrieben, so sind normalerweise auch
+     * Unterklassen Ã¼berschrieben, um spezielle Parameter zu behandeln. ACHTUNG! Wird
+     * diese Methode Ã¼berschrieben, so sind normalerweise auch
      * {@link #getAdditionalParams()} und
-     * {@link #getFunctionDialogReferences(Collection)} zu überschreiben, um die
-     * zusätzlichen Funktionen aus dem behandelten Parameter zu behandeln.
+     * {@link #getFunctionDialogReferences(Collection)} zu Ã¼berschreiben, um die
+     * zusÃ¤tzlichen Funktionen aus dem behandelten Parameter zu behandeln.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -1171,7 +1171,7 @@ public class FunctionFactory
     }
 
     /**
-     * Liefert die Namen der Parameter der zusätzlichen Funktionen, die von
+     * Liefert die Namen der Parameter der zusÃ¤tzlichen Funktionen, die von
      * {@link #handleParam(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}
      * geparst wurden oder null, falls es keine gibt.
      * 
@@ -1191,13 +1191,13 @@ public class FunctionFactory
     {
       this.subFunction = subFunction;
 
-      // Ein Set wäre performanter, aber so wird die Reihenfolge beibehalten. Evtl.
+      // Ein Set wÃ¤re performanter, aber so wird die Reihenfolge beibehalten. Evtl.
       // macht es Sinn, auch die anderen Function-Klassen, die im Moment Sets
       // verwenden auf das Konstrukt mit Liste und contains()-Test umzustellen und
       // dadurch eine wohldefinierte Reihenfolge zu erreichen. Derzeit ist der Bedarf
-      // dafür aber nicht gegeben, insbes. da insertFunctionValue umgeschrieben
+      // dafÃ¼r aber nicht gegeben, insbes. da insertFunctionValue umgeschrieben
       // werden soll und der FM4000 bereits umgeschrieben wurde um nicht von der
-      // Reihenfolge abzuhängen.
+      // Reihenfolge abzuhÃ¤ngen.
       ArrayList<String> deps = new ArrayList<String>();
       for (Function f : subFunction)
       {
@@ -1505,24 +1505,24 @@ public class FunctionFactory
     }
 
     /**
-     * Startet eine neue Auswertung der Funktion für Parameter parameters. Im Falle
-     * einer Summen-Funktion würde dies den Summenzähler mit 0 initialisieren.
+     * Startet eine neue Auswertung der Funktion fÃ¼r Parameter parameters. Im Falle
+     * einer Summen-Funktion wÃ¼rde dies den SummenzÃ¤hler mit 0 initialisieren.
      * 
      * @return Falls zu diesem Zeitpunkt bereits ein Ergebnis bestimmt werden kann
-     *         (z.B. Function.ERROR, wenn ein benötigter Parameter nicht in
-     *         parameters übergeben wurde), so wird dieses zurückgeliefert, ansonsten
+     *         (z.B. Function.ERROR, wenn ein benÃ¶tigter Parameter nicht in
+     *         parameters Ã¼bergeben wurde), so wird dieses zurÃ¼ckgeliefert, ansonsten
      *         null.
      */
     protected abstract String initComputation(Values parameters);
 
     /**
-     * Fügt den Wert num der aktuellen Berechnung hinzu. Im Falle einer
-     * Summen-Funktion würde er auf den Summen-Zähler addiert. Darf eine Exception
-     * werfen. In diesem Fall wird die Funktion Function.ERROR zurückliefern.
+     * FÃ¼gt den Wert num der aktuellen Berechnung hinzu. Im Falle einer
+     * Summen-Funktion wÃ¼rde er auf den Summen-ZÃ¤hler addiert. Darf eine Exception
+     * werfen. In diesem Fall wird die Funktion Function.ERROR zurÃ¼ckliefern.
      * 
      * @return Falls zu diesem Zeitpunkt bereits ein Ergebnis bestimmt werden kann
      *         (z.B. im Falle einer Vergleichsfunktion, die Kurzschlussauswertung
-     *         macht), so wird dieses zurückgeliefert, ansonsten null.
+     *         macht), so wird dieses zurÃ¼ckgeliefert, ansonsten null.
      */
     protected abstract String addToComputation(BigDecimal num);
 
@@ -1563,27 +1563,27 @@ public class FunctionFactory
       /*
        * Falls der Dezimaltrenner nicht '.' ist, ersetzte alle '.' durch etwas, das
        * kein Dezimaltrenner ist, um eine NumberFormatException beim Konvertieren zu
-       * provozieren. Dies ist eine Vorsichtsmaßnahme, da '.' zum Beispiel in
+       * provozieren. Dies ist eine VorsichtsmaÃŸnahme, da '.' zum Beispiel in
        * Deutschland alls Gruppierungszeichen verwendet wird und wir wollen nicht
-       * fälschlicher weise "100.000" als 100 interpretieren, wenn die eingebende
+       * fÃ¤lschlicher weise "100.000" als 100 interpretieren, wenn die eingebende
        * Person 100000 gemeint hat.
        */
-      if (decimalPoint != '.') str = str.replace('.', 'ß');
+      if (decimalPoint != '.') str = str.replace('.', 'ÃŸ');
 
       return new BigDecimal(str.replace(decimalPoint, '.'));
     }
 
     /**
-     * Liefert eine Stringrepräsentation von num
+     * Liefert eine StringreprÃ¤sentation von num
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     protected String formatBigDecimal(BigDecimal num)
     {
       /*
-       * Workaround für Bug
+       * Workaround fÃ¼r Bug
        * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6480539
-       * stripTrailingZeros() funktioniert nicht für 0.
+       * stripTrailingZeros() funktioniert nicht fÃ¼r 0.
        */
       String result;
       if (num.compareTo(BigDecimal.ZERO) == 0)
@@ -1770,15 +1770,15 @@ public class FunctionFactory
      * wird (entspricht compareTo Ergebnis 0). cmp1 und cmp2 sind Abbruchergebnisse
      * dieses Vergleichs. Sobald ein compareTo cmp1 oder cmp2 liefert bricht die
      * Berechnung ab und es wird das Ergebnis "false" geliefert. Falls ein compareTo
-     * +1 liefert und ein späteres compareTo -1, so wird abgebrochen und als Ergebnis
-     * "0" geliefert. Analog wenn ein compareTo -1 liefert und eine späteres +1.
+     * +1 liefert und ein spÃ¤teres compareTo -1, so wird abgebrochen und als Ergebnis
+     * "0" geliefert. Analog wenn ein compareTo -1 liefert und eine spÃ¤teres +1.
      * Falls result nicht null ist, so wird dieser String als Ergebnis geliefert,
      * wenn nicht wie oben beschrieben mit "false" oder "0" abgebrochen wurde. Falls
      * result null ist, so wird falls alle compareTos 0 geliefert haben "true"
      * geliefert. Falls mindestens ein compareTo -1 geliefert hat wird "-1"
-     * zurückgeliefert. Falls mindestens ein compareTo +1 geliefert hat wird "1"
+     * zurÃ¼ckgeliefert. Falls mindestens ein compareTo +1 geliefert hat wird "1"
      * geliefert. Der Fall, dass ein compareTo -1 und ein anderer +1 geliefert hat
-     * wird wie bereits oben beschrieben schon früher abgefangen.
+     * wird wie bereits oben beschrieben schon frÃ¼her abgefangen.
      * 
      * @throws ConfigurationErrorException
      *           falls nicht mindestens 2 Unterfunktionen in conf enthalten sind.
@@ -2009,15 +2009,15 @@ public class FunctionFactory
       /*
        * Falls der Dezimaltrenner nicht '.' ist, ersetzte alle '.' durch etwas, das
        * kein Dezimaltrenner ist, um eine NumberFormatException beim Konvertieren zu
-       * provozieren. Dies ist eine Vorsichtsmaßnahme, da '.' zum Beispiel in
+       * provozieren. Dies ist eine VorsichtsmaÃŸnahme, da '.' zum Beispiel in
        * Deutschland alls Gruppierungszeichen verwendet wird und wir wollen nicht
-       * fälschlicher weise "100.000" als 100 interpretieren, wenn die eingebende
+       * fÃ¤lschlicher weise "100.000" als 100 interpretieren, wenn die eingebende
        * Person 100000 gemeint hat.
        */
       if (decimalPoint != '.')
       {
-        dividend = dividend.replace('.', 'ß');
-        divisor = divisor.replace('.', 'ß');
+        dividend = dividend.replace('.', 'ÃŸ');
+        divisor = divisor.replace('.', 'ÃŸ');
       }
 
       BigDecimal bigResult;
@@ -2039,9 +2039,9 @@ public class FunctionFactory
        */
 
       /*
-       * Workaround für Bug
+       * Workaround fÃ¼r Bug
        * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6480539
-       * stripTrailingZeros() funktioniert nicht für 0.
+       * stripTrailingZeros() funktioniert nicht fÃ¼r 0.
        */
       String result;
       if (bigResult.compareTo(BigDecimal.ZERO) == 0)
@@ -2180,7 +2180,7 @@ public class FunctionFactory
     values.put("GibtMilch", "false");
     values.put("Anrede", "Herr");
     values.put("TextWeibl", "(weibl.)");
-    values.put("TextMaennl", "(männl.)");
+    values.put("TextMaennl", "(mÃ¤nnl.)");
 
     funcStr = "OR(VALUE('Fehler') VALUE('LegtEier') VALUE('GibtMilch'))";
     funcThingy =

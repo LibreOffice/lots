@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Erlaubt die Bearbeitung der Funktion eines Wenn-Dann-Sonst-Feldes.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 01.02.2008 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -84,23 +84,23 @@ public class IfThenElseDialog extends TrafoDialog
         BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
   /**
-   * Das Panel, das den Dialoginhalt präsentiert.
+   * Das Panel, das den Dialoginhalt prÃ¤sentiert.
    */
   private JIfThenElsePanel ifThenElsePanel;
 
   /**
    * Das Objekt, das den Startinhalt des Dialogs spezifiziert (und am Ende verwendet
-   * wird, um den Rückgabewert zu speichern).
+   * wird, um den RÃ¼ckgabewert zu speichern).
    */
   private TrafoDialogParameters params;
 
   /**
-   * Wenn der Dialog angezeigt wird ist dies der zugehörige JDialog.
+   * Wenn der Dialog angezeigt wird ist dies der zugehÃ¶rige JDialog.
    */
   private JDialog myDialog;
 
   /**
-   * Der WindowListener, der an {@link #myDialog} hängt.
+   * Der WindowListener, der an {@link #myDialog} hÃ¤ngt.
    */
   private MyWindowListener oehrchen;
 
@@ -153,7 +153,7 @@ public class IfThenElseDialog extends TrafoDialog
     }
 
     /**
-     * Die Einträge für {@link #testSelector}.
+     * Die EintrÃ¤ge fÃ¼r {@link #testSelector}.
      */
     private static final TestType[] testTypes =
       {
@@ -163,7 +163,7 @@ public class IfThenElseDialog extends TrafoDialog
         new TestType(L.m("numerisch <="), "LE"),
         new TestType(L.m("numerisch >"), "GT"),
         new TestType(L.m("numerisch >="), "GE"),
-        new TestType(L.m("regulärer A."), "MATCH") };
+        new TestType(L.m("regulÃ¤rer A."), "MATCH") };
 
     /**
      * Auswahl des zu vergleichenden Feldes.
@@ -181,14 +181,14 @@ public class IfThenElseDialog extends TrafoDialog
     private JComboBox testSelector;
 
     /**
-     * Eingabefeld für den Vergleichswert.
+     * Eingabefeld fÃ¼r den Vergleichswert.
      */
     private JTextField compareTo;
 
     private static class ConditionalResult
     {
       /**
-       * Texteingabe für den Dann oder Sonst-Teil, wenn {@link #type} == 0. Ist
+       * Texteingabe fÃ¼r den Dann oder Sonst-Teil, wenn {@link #type} == 0. Ist
        * niemals null.
        */
       public TextComponentTags text;
@@ -205,7 +205,7 @@ public class IfThenElseDialog extends TrafoDialog
       public JIfThenElsePanel panel;
 
       /**
-       * 0 => {@link #text} zählt. 1 => {@link #panel} zählt.
+       * 0 => {@link #text} zÃ¤hlt. 1 => {@link #panel} zÃ¤hlt.
        */
       public int type;
     }
@@ -224,13 +224,13 @@ public class IfThenElseDialog extends TrafoDialog
 
     /**
      * Erzeugt eine Dialog-Komponente, die mit den Werten aus conf vorbelegt ist,
-     * wobei fieldNames die angebotenen Feldnamen als Strings enthält. Der oberste
+     * wobei fieldNames die angebotenen Feldnamen als Strings enthÃ¤lt. Der oberste
      * Knoten von conf ist ein beliebiger Bezeichner (typischwerweise der
      * Funktionsname).
      * 
      * @param packNecessary
      *          wird aufgerufen, wannimmer sich im Panelinhalt soviel getan hat, dass
-     *          ein erneutes pack() sinnvoll wäre.
+     *          ein erneutes pack() sinnvoll wÃ¤re.
      * 
      * @throws IllegalArgumentException
      *           falls conf nicht verstanden wird.
@@ -263,7 +263,7 @@ public class IfThenElseDialog extends TrafoDialog
             parseCondition(ifConf, fieldNames);
             parseThenElse(thenConf, thenResult, fieldNames);
             parseThenElse(elseConf, elseResult, fieldNames);
-            buildGUI(fieldNames); // GUI Elemente in this einfügen (wir erben ja von
+            buildGUI(fieldNames); // GUI Elemente in this einfÃ¼gen (wir erben ja von
             // JPanel).
             return;
           }
@@ -304,12 +304,12 @@ public class IfThenElseDialog extends TrafoDialog
     }
 
     /**
-     * Fügt zu guiContainer die GUI-Elemente zum Bearbeiten von conditionalResult
+     * FÃ¼gt zu guiContainer die GUI-Elemente zum Bearbeiten von conditionalResult
      * hinzu.
      * 
      * @param fieldNames
-     *          die Namen der Felder, die über einen Button in den Text eingefügt
-     *          werden können.
+     *          die Namen der Felder, die Ã¼ber einen Button in den Text eingefÃ¼gt
+     *          werden kÃ¶nnen.
      * @param label
      *          "Dann" oder "Sonst" (wird zur Beschriftung verwendet)
      * @author Matthias Benkmann (D-III-ITD D.10)
@@ -425,11 +425,11 @@ public class IfThenElseDialog extends TrafoDialog
     /**
      * Erzeugt {@link #fieldSelector}, {@link #notSelector}, {@link #testSelector}
      * und {@link #compareTo} auf Basis von conf. Falls das Vergleichsfeld nicht in
-     * fieldNames gelistet ist wird es hinzugefügt. genau = STRCMP(VALUE "feld"
+     * fieldNames gelistet ist wird es hinzugefÃ¼gt. genau = STRCMP(VALUE "feld"
      * "vergleichswert") numerisch = NUMCMP(VALUE "feld" "vergleichswert") numerisch <
      * LT(VALUE "feld" "vergleichswert") numerisch > GT(VALUE "feld"
      * "vergleichswert") numerisch <= LE(VALUE "feld" "vergleichswert") numerisch >=
-     * GE(VALUE "feld" "vergleichswert") regulärer A. MATCH(VALUE "feld"
+     * GE(VALUE "feld" "vergleichswert") regulÃ¤rer A. MATCH(VALUE "feld"
      * "vergleichswert")
      * 
      * @throws IllegalArgumentException
@@ -564,7 +564,7 @@ public class IfThenElseDialog extends TrafoDialog
     }
 
     /**
-     * Liefert ein frisches ConfigThingy, das die von diesem Panel repräsentierte
+     * Liefert ein frisches ConfigThingy, das die von diesem Panel reprÃ¤sentierte
      * Trafo darstellt. Oberster Knoten ist immer "IF".
      * 
      * @author Matthias Benkmann (D-III-ITD D.10) TESTED
@@ -607,7 +607,7 @@ public class IfThenElseDialog extends TrafoDialog
   }
 
   /**
-   * Fügt {@link #ifThenElsePanel} in dialog ein und zeigt ihn an.
+   * FÃ¼gt {@link #ifThenElsePanel} in dialog ein und zeigt ihn an.
    * 
    * @param dialog
    * @author Matthias Benkmann (D-III-ITD D.10) TESTED
@@ -654,7 +654,7 @@ public class IfThenElseDialog extends TrafoDialog
   }
 
   /**
-   * Führt myDialog.pack() aus (falls myDialog nicht null) und setzt ihn sichtbar in
+   * FÃ¼hrt myDialog.pack() aus (falls myDialog nicht null) und setzt ihn sichtbar in
    * der Mitte des Bildschirms.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
@@ -699,8 +699,8 @@ public class IfThenElseDialog extends TrafoDialog
     /*
      * Wegen folgendem Java Bug (WONTFIX)
      * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304 sind die folgenden
-     * 3 Zeilen nötig, damit der Dialog gc'ed werden kann. Die Befehle sorgen dafür,
-     * dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager) indirekt über
+     * 3 Zeilen nÃ¶tig, damit der Dialog gc'ed werden kann. Die Befehle sorgen dafÃ¼r,
+     * dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager) indirekt Ã¼ber
      * den JFrame den MailMerge kennt.
      */
     if (myDialog != null)

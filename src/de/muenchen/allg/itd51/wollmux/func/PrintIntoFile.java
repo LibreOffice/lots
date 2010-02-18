@@ -1,9 +1,9 @@
 /*
  * Dateiname: PrintIntoFile.java
  * Projekt  : WollMux
- * Funktion : "Druck"funktion, die das zu druckende Dokument an ein Ergebnisdokument anh‰ngt.
+ * Funktion : "Druck"funktion, die das zu druckende Dokument an ein Ergebnisdokument anh√§ngt.
  * 
- * Copyright (c) 2008 Landeshauptstadt M¸nchen
+ * Copyright (c) 2008 Landeshauptstadt M√ºnchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,12 +18,12 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * ƒnderungshistorie:
- * Datum      | Wer | ƒnderungsgrund
+ * √Ñnderungshistorie:
+ * Datum      | Wer | √Ñnderungsgrund
  * -------------------------------------------------------------------
  * 29.10.2007 | BNK | Erstellung
  * 29.01.2008 | BNK | Fertigstellung
- * 30.01.2008 | BNK | Workaround f¸r Issue 73229
+ * 30.01.2008 | BNK | Workaround f√ºr Issue 73229
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -83,26 +83,26 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
- * "Druck"funktion, die das zu druckende Dokument an ein Ergebnisdokument anh‰ngt.
+ * "Druck"funktion, die das zu druckende Dokument an ein Ergebnisdokument anh√§ngt.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class PrintIntoFile
 {
   /**
-   * Pr‰fix, das vor den Namen des angelegten tempor‰ren Verzeichnisses gesetzt wird.
+   * Pr√§fix, das vor den Namen des angelegten tempor√§ren Verzeichnisses gesetzt wird.
    */
   private static final String TEMP_DIR_PREFIX = "wollmux-seriendruck-";
 
   /**
-   * H‰ngt den Inhalt von inputDoc an outputDoc an.
+   * H√§ngt den Inhalt von inputDoc an outputDoc an.
    * 
    * @param firstAppend
    *          muss auf true gesetzt werden, wenn dies das erste Mal ist, das etwas an
-   *          das Gesamtdokument angeh‰ngt wird. In diesem Fall werden die Formate
-   *          aus inputDoc zuerst nach outputDoc ¸bertragen und es wird kein
-   *          Zeilenumbruch eingef¸gt. Auﬂerdem werden in diesem Fall die
-   *          com.sun.star.document.Settings von inputDoc auf outputDoc ¸bertragen.
+   *          das Gesamtdokument angeh√§ngt wird. In diesem Fall werden die Formate
+   *          aus inputDoc zuerst nach outputDoc √ºbertragen und es wird kein
+   *          Zeilenumbruch eingef√ºgt. Au√üerdem werden in diesem Fall die
+   *          com.sun.star.document.Settings von inputDoc auf outputDoc √ºbertragen.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public static void appendToFile(XTextDocument outputDoc, XTextDocument inputDoc,
@@ -148,7 +148,7 @@ public class PrintIntoFile
       else
       // if (!firstAppend)
       {
-        // Neuen Absatz am Ende einf¸gen f¸r den Seitenumbruch
+        // Neuen Absatz am Ende einf√ºgen f√ºr den Seitenumbruch
         text.getEnd().setString("\r");
       }
 
@@ -161,28 +161,28 @@ public class PrintIntoFile
       if (!firstAppend)
       {
         /**
-         * Format-->Absatz-->Textfluss-->Umbr¸che--> Checkbox "mit Seitenvorlage" -->
+         * Format-->Absatz-->Textfluss-->Umbr√ºche--> Checkbox "mit Seitenvorlage" -->
          * Seitennummer 1 (Seitennummer mit 1 beginnen nach dem Seitenumbruch)
-         * ACHTUNG! OOo l‰sst ungerade Seitennummern nur auf wirklich ungeraden
+         * ACHTUNG! OOo l√§sst ungerade Seitennummern nur auf wirklich ungeraden
          * Seiten zu. Ist die betreffende Seite eine gerade Seite, so wird durch das
-         * Setzen von PageNumberOffset auf 1 eine leere Seite davor eingef¸gt! Siehe
+         * Setzen von PageNumberOffset auf 1 eine leere Seite davor eingef√ºgt! Siehe
          * dazu auch den Kommentar weiter unten bei pageNumberOffset
          */
         UNO.setProperty(cursor, "PageNumberOffset", Short.valueOf((short) 1));
       }
 
       /**
-       * OOo l‰sst nicht zu, dass eine Seite mit gerader realer Nummer eine ungerade
+       * OOo l√§sst nicht zu, dass eine Seite mit gerader realer Nummer eine ungerade
        * Seitenummer bekommt (durch einen Seitenumbruch mit gesetztem
-       * PageNumberOffset (wie wir ihn ein St¸ck weiter oben eingef¸gt haben). Wird
-       * dies doch getan, dann f¸gt OOo eine leere Seite ein, die zwar gez‰hlt, aber
+       * PageNumberOffset (wie wir ihn ein St√ºck weiter oben eingef√ºgt haben). Wird
+       * dies doch getan, dann f√ºgt OOo eine leere Seite ein, die zwar gez√§hlt, aber
        * nicht angezeigt wird. Es ist also wichtig das pageNumberOffset so wie hier
-       * nach dem Einf¸gen des Seitenumbruchs zu berechnen, weil der eine eingef¸gte
-       * Seitenumbruch evtl. die Seitenanzahl um 2 steigen l‰sst.
+       * nach dem Einf√ºgen des Seitenumbruchs zu berechnen, weil der eine eingef√ºgte
+       * Seitenumbruch evtl. die Seitenanzahl um 2 steigen l√§sst.
        */
       int pageNumberOffset =
         ((Number) UNO.getProperty(outputDoc.getCurrentController(), "PageCount")).intValue();
-      --pageNumberOffset; // Die gerade eben angeh‰ngte Seite darf nicht mitgez‰hlt
+      --pageNumberOffset; // Die gerade eben angeh√§ngte Seite darf nicht mitgez√§hlt
       // werden.
 
       // String[] frameNames =
@@ -206,7 +206,7 @@ public class PrintIntoFile
       }
 
       /**
-       * Einf¸gen des 2. Dokuments OOo Issue 37417 beachten --> When inserting a
+       * Einf√ºgen des 2. Dokuments OOo Issue 37417 beachten --> When inserting a
        * document (via "Insert->Document") on the first paragraph of a page after a
        * pagebreak, and the document contains only one paragraph, the pagebreak will
        * be removed. Inserting documents with more than one paragraph works as
@@ -222,7 +222,7 @@ public class PrintIntoFile
 
       cursor.collapseToStart();
 
-      // Workaround f¸r
+      // Workaround f√ºr
       // http://www.openoffice.org/issues/show_bug.cgi?id=73229
       if (startsWithSection
         && !rangeStartTouchesNewSection(cursor, oldSections, outputDoc))
@@ -275,7 +275,7 @@ public class PrintIntoFile
 
   /**
    * Liefert true gdw der Anfang von range mit dem Anfang einer Section aus doc
-   * zusammenf‰llt, deren Name nicht in oldSections ist.
+   * zusammenf√§llt, deren Name nicht in oldSections ist.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -298,7 +298,7 @@ public class PrintIntoFile
         }
         catch (Exception x)
         {
-          // keine Logger-Meldung. Dies tritt regul‰r auf bei Bereichen, die in
+          // keine Logger-Meldung. Dies tritt regul√§r auf bei Bereichen, die in
           // anderen
           // Rahmen liegen und daher nicht mit einem Cursor im Dokumenthaupttext
           // vergleichbar sind.
@@ -310,7 +310,7 @@ public class PrintIntoFile
 
   /**
    * Liefert true gdw der Start von doc mit dem Starter einer Section von doc
-   * zusammenf‰llt.
+   * zusammenf√§llt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -337,10 +337,10 @@ public class PrintIntoFile
   }
 
   /**
-   * Latscht mit dem Cursor solange die Paragraphen durch bis zum Ende und f¸r jedes
+   * Latscht mit dem Cursor solange die Paragraphen durch bis zum Ende und f√ºr jedes
    * PageDescName Property wird das entsprechende Seitenformat auf ein neues kopiert
    * mit einem noch nicht verwendeten Namen und das PageDescName-Property
-   * entsprechend ge‰ndert, dass es auf das neue Format verweist. Das selbe Format
+   * entsprechend ge√§ndert, dass es auf das neue Format verweist. Das selbe Format
    * wird jeweils nur einmal kopiert.
    * 
    * @param doc
@@ -518,14 +518,14 @@ public class PrintIntoFile
   }
 
   /**
-   * Speichert inputDoc in einer tempor‰ren Datei und liefert eine UNO-taugliche URL
-   * zu dieser Datei zur¸ck.
+   * Speichert inputDoc in einer tempor√§ren Datei und liefert eine UNO-taugliche URL
+   * zu dieser Datei zur√ºck.
    * 
    * @param inputDoc
    *          das zu speichernde Dokument
    * @param dest
    *          Muss ein 2-elementiges Array sein. dest[0] wird auf ein neu angelegtes
-   *          tempor‰res Verzeichnis gesetzt, temp[1] auf die Datei darin, in der das
+   *          tempor√§res Verzeichnis gesetzt, temp[1] auf die Datei darin, in der das
    *          Dok. gespeichert wurde.
    * @throws IOException
    *           falls was schief geht.
@@ -539,14 +539,14 @@ public class PrintIntoFile
       throws IOException, MalformedURLException, com.sun.star.io.IOException
   {
     /**
-     * Zuerst inputDoc in eine tempor‰re Datei schreiben
+     * Zuerst inputDoc in eine tempor√§re Datei schreiben
      */
     File tmpDir = new File(System.getProperty("java.io.tmpdir"));
     if (!tmpDir.isDirectory() && !tmpDir.canWrite())
     {
       throw new IOException(
         L.m(
-          "Tempor‰res Verzeichnis\n\"%1\"\nexistiert nicht oder kann nicht beschrieben werden!",
+          "Tempor√§res Verzeichnis\n\"%1\"\nexistiert nicht oder kann nicht beschrieben werden!",
           tmpDir.getPath()));
     }
 
@@ -562,7 +562,7 @@ public class PrintIntoFile
     if (dest[0] == null)
     {
       throw new IOException(
-        L.m("Konnte kein tempor‰res Verzeichnis f¸r die tempor‰ren Seriendruckdaten anlegen!"));
+        L.m("Konnte kein tempor√§res Verzeichnis f√ºr die tempor√§ren Seriendruckdaten anlegen!"));
     }
 
     dest[1] = new File(dest[0], "serienbrief.odt");
@@ -572,7 +572,7 @@ public class PrintIntoFile
     UnoProps arguments = new UnoProps();
     arguments.setPropertyValue("Overwrite", Boolean.FALSE);
     // FilterName setzen auskommentiert, damit OOo automatisch den besten Filter
-    // w‰hlt
+    // w√§hlt
     arguments.setPropertyValue("FilterName", "writer8"); // found in
     // /opt/openoffice.org/share/registry/modules/org/openoffice/TypeDetection/Filter/fcfg_writer_filters.xcu
     UNO.XStorable(inputDoc).storeToURL(url, arguments.getProps());
@@ -643,7 +643,7 @@ public class PrintIntoFile
           }
         });
         myFrame.add(button);
-        button = new JButton("Dokument anh‰ngen");
+        button = new JButton("Dokument anh√§ngen");
         button.addActionListener(new ActionListener()
         {
           public void actionPerformed(ActionEvent e)
@@ -652,7 +652,7 @@ public class PrintIntoFile
 
             /*
              * Wenn das aktuelle Vordergrunddok ein Textdokument ist und nicht das
-             * Gesamtdokument, so w‰hle es aus.
+             * Gesamtdokument, so w√§hle es aus.
              */
             XTextDocument inputDoc =
               UNO.XTextDocument(UNO.desktop.getCurrentComponent());
@@ -678,7 +678,7 @@ public class PrintIntoFile
 
             /*
              * Falls wir keinen andere Kandidaten gefunden haben, so will der
-             * Benutzer wohl das Gesamtdokument an sich selbst anh‰ngen.
+             * Benutzer wohl das Gesamtdokument an sich selbst anh√§ngen.
              */
             if (inputDoc == null) inputDoc = doc[0];
 

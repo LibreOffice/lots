@@ -3,7 +3,7 @@
 * Projekt  : WollMux
 * Funktion : Eine Bibliothek von benannten Dialogs
 * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
 *
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
+* Ã„nderungshistorie:
+* Datum      | Wer | Ã„nderungsgrund
 * -------------------------------------------------------------------
 * 03.05.2006 | BNK | Erstellung
 * -------------------------------------------------------------------
@@ -54,7 +54,7 @@ public class DialogLibrary
   /**
    * Erzeugt eine Dialogsbibliothek, die baselib referenziert (nicht kopiert!).
    * baselib wird immer dann befragt, wenn die Dialogsbibliothek selbst keinen
-   * Dialog des entsprechenden Namens enthält.  
+   * Dialog des entsprechenden Namens enthÃ¤lt.  
    * @param baselib
    */
   public DialogLibrary(DialogLibrary baselib)
@@ -63,7 +63,7 @@ public class DialogLibrary
   }
 
   /**
-   * Fügt dialog dieser Dialogsbibliothek unter dem Namen dlgName hinzu.
+   * FÃ¼gt dialog dieser Dialogsbibliothek unter dem Namen dlgName hinzu.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void add(String dlgName, Dialog dialog)
@@ -73,7 +73,7 @@ public class DialogLibrary
   }
 
   /**
-   * Liefert den Dialog namens dlgName zurück oder null, falls kein Dialog
+   * Liefert den Dialog namens dlgName zurÃ¼ck oder null, falls kein Dialog
    * mit diesem Namen bekannt ist. Wurde die Dialogsbibliothek mit einer
    * Referenz auf eine andere Bibliothek initialisiert, so wird diese
    * befragt, falls die Dialogsbibliothek selbst keinen Dialog des entsprechenden

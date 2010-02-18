@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Logging-Mechanismus zum Schreiben von Nachrichten auf eine PrintStream.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 13.10.2005 | LUT | Erstellung
  * 14.10.2005 | BNK | Kommentar korrigiert: Standard ist LOG nicht NONE
@@ -30,14 +30,14 @@
  * 31.10.2005 | BNK | +error(msg, e)
  *                  | "critical" -> "error"
  * 02.11.2005 | BNK | LOG aus Default-Modus
- * 24.11.2005 | BNK | In init() das Logfile nicht löschen.
+ * 24.11.2005 | BNK | In init() das Logfile nicht lÃ¶schen.
  * 05.12.2005 | BNK | line.separator statt \n
  * 06.12.2005 | BNK | bessere Separatoren, kein Test mehr in init, ob Logfile schreibbar
  * 20.04.2006 | BNK | bessere Datum/Zeitangabe, Angabe des Aufrufers
  * 24.04.2006 | BNK | korrekte Monatsangabe.
  * 15.05.2006 | BNK | Cause ausgeben in printException()
  * 16.05.2006 | BNK | println() und printException() vereinheitlicht
- * 30.05.2006 | BNK | bei init(PrintStream,...) den file zurücksetzen, damit
+ * 30.05.2006 | BNK | bei init(PrintStream,...) den file zurÃ¼cksetzen, damit
  *                  | die Zuweisung auch wirksam wird.
  * -------------------------------------------------------------------
  *
@@ -56,17 +56,17 @@ import java.util.Calendar;
 /**
  * <p>
  * Der Logger ist ein simpler Logging Mechanismus, der im Programmablauf auftretende
- * Nachrichten verschiedener Prioritäten entgegennimmt und die Nachrichten
+ * Nachrichten verschiedener PrioritÃ¤ten entgegennimmt und die Nachrichten
  * entsprechend der Einstellung des Logging-Modus auf einem PrintStream ausgibt
- * (Standardeinstellung: System.err). Die Logging-Nachrichten werden über
- * unterschiedliche Methodenaufrufe entsprechend der Logging-Priorität abgesetzt.
- * Folgende Methoden stehen dafür zur Verfügung: error(), log(), debug(), debug2()
+ * (Standardeinstellung: System.err). Die Logging-Nachrichten werden Ã¼ber
+ * unterschiedliche Methodenaufrufe entsprechend der Logging-PrioritÃ¤t abgesetzt.
+ * Folgende Methoden stehen dafÃ¼r zur VerfÃ¼gung: error(), log(), debug(), debug2()
  * </p>
  * <p>
- * Der Logging-Modus kann über die init()-Methode initialisiert werden. Er
- * beschreibt, welche Nachrichten aus den Prioritätsstufen angezeigt werden und
- * welche nicht. Jeder Logging Modus zeigt die Nachrichten seiner Priorität und die
- * Nachrichten der höheren Prioritätsstufen an. Standardmässig ist der Modus
+ * Der Logging-Modus kann Ã¼ber die init()-Methode initialisiert werden. Er
+ * beschreibt, welche Nachrichten aus den PrioritÃ¤tsstufen angezeigt werden und
+ * welche nicht. Jeder Logging Modus zeigt die Nachrichten seiner PrioritÃ¤t und die
+ * Nachrichten der hÃ¶heren PrioritÃ¤tsstufen an. StandardmÃ¤ssig ist der Modus
  * Logging.LOG voreingestellt.
  * </p>
  */
@@ -89,45 +89,45 @@ public class Logger
   public static final int NONE = 0;
 
   /**
-   * Der Logging-Modus <code>ERROR</code> zeigt Nachrichten der höchsten
-   * Prioritätsstufe "ERROR" an. ERROR enthält Nachrichten, die den Programmablauf
+   * Der Logging-Modus <code>ERROR</code> zeigt Nachrichten der hÃ¶chsten
+   * PrioritÃ¤tsstufe "ERROR" an. ERROR enthÃ¤lt Nachrichten, die den Programmablauf
    * beeinflussen - z.B. Fehlermeldungen und Exceptions.
    */
   public static final int ERROR = 1;
 
   /**
    * Der Logging-Modus <code>LOG</code> ist der Standard Modus. Er zeigt
-   * Nachrichten und wichtige Programminformationen an, die im täglichen Einsatz
+   * Nachrichten und wichtige Programminformationen an, die im tÃ¤glichen Einsatz
    * interessant sind. Dieser Modus ist die Defaulteinstellung.
    */
   public static final int LOG = 3;
 
   /**
    * Der Logging-Modus <code>DEBUG</code> wird genutzt, um detaillierte
-   * Informationen über den Programmablauf auszugeben. Er ist vor allem für
+   * Informationen Ã¼ber den Programmablauf auszugeben. Er ist vor allem fÃ¼r
    * DEBUG-Zwecke geeignet.
    */
   public static final int DEBUG = 5;
 
   /**
-   * Der Logging-Modus <code>ALL</code> gibt uneingeschränkt alle Nachrichten aus.
-   * Er enthält auch Nachrichten der Priorität debug2, die sehr detaillierte
-   * Informationen ausgibt, die selbst für normale DEBUG-Zwecke zu genau sind.
+   * Der Logging-Modus <code>ALL</code> gibt uneingeschrÃ¤nkt alle Nachrichten aus.
+   * Er enthÃ¤lt auch Nachrichten der PrioritÃ¤t debug2, die sehr detaillierte
+   * Informationen ausgibt, die selbst fÃ¼r normale DEBUG-Zwecke zu genau sind.
    */
   public static final int ALL = 7;
 
   /**
-   * Das Feld <code>mode</code> enthält den aktuellen Logging-Mode
+   * Das Feld <code>mode</code> enthÃ¤lt den aktuellen Logging-Mode
    */
   private static int mode = LOG;
 
   /**
-   * Über die Methode init wird der Logger mit einem PrintStream und einem
+   * Ãœber die Methode init wird der Logger mit einem PrintStream und einem
    * Logging-Modus initialisiert. Ohne diese Methode schreibt der Logger auf
    * System.err im Modus LOG.
    * 
    * @param loggingMode
-   *          Der neue Logging-Modus kann über die statischen Felder Logger.MODUS (z.
+   *          Der neue Logging-Modus kann Ã¼ber die statischen Felder Logger.MODUS (z.
    *          B. Logger.DEBUG) angegeben werden.
    */
   public static void init(PrintStream outputPrintStream, int loggingMode)
@@ -141,14 +141,14 @@ public class Logger
   }
 
   /**
-   * Über die Methode init wird der Logger mit einer Ausgabedatei und einem
+   * Ãœber die Methode init wird der Logger mit einer Ausgabedatei und einem
    * Logging-Modus initialisiert. Ohne diese Methode schreibt der Logger auf
    * System.err im Modus LOG.
    * 
    * @param outputFile
    *          Datei, in die die Ausgaben geschrieben werden.
    * @param loggingMode
-   *          Der neue Logging-Modus kann über die statischen Felder Logger.MODUS (z.
+   *          Der neue Logging-Modus kann Ã¼ber die statischen Felder Logger.MODUS (z.
    *          B. Logger.DEBUG) angegeben werden.
    * @throws FileNotFoundException
    */
@@ -161,12 +161,12 @@ public class Logger
   }
 
   /**
-   * Über die Methode init wird der Logger in dem Logging-Modus loggingMode
+   * Ãœber die Methode init wird der Logger in dem Logging-Modus loggingMode
    * initialisiert. Ohne diese Methode schreibt der Logger auf System.err im Modus
    * LOG.
    * 
    * @param loggingMode
-   *          Der neue Logging-Modus kann über die statischen Felder Logger.MODUS (z.
+   *          Der neue Logging-Modus kann Ã¼ber die statischen Felder Logger.MODUS (z.
    *          B. Logger.DEBUG) angegeben werden.
    */
   public static void init(int loggingMode)
@@ -177,13 +177,13 @@ public class Logger
   }
 
   /**
-   * Über die Methode init wird der Logger in dem Logging-Modus loggingMode
-   * initialisiert, der in Form eines den obigen Konstanten-Namen übereinstimmenden
+   * Ãœber die Methode init wird der Logger in dem Logging-Modus loggingMode
+   * initialisiert, der in Form eines den obigen Konstanten-Namen Ã¼bereinstimmenden
    * Strings vorliegt. Ohne diese Methode schreibt der Logger auf System.err im Modus
    * LOG.
    * 
    * @param loggingMode
-   *          Der neue Logging-Modus kann über die statischen Felder Logger.MODUS (z.
+   *          Der neue Logging-Modus kann Ã¼ber die statischen Felder Logger.MODUS (z.
    *          B. Logger.DEBUG) angegeben werden.
    */
   public static void init(String loggingMode)
@@ -196,9 +196,9 @@ public class Logger
   }
 
   /**
-   * Nachricht der höchsten Priorität "error" absetzen. Als "error" sind nur
-   * Ereignisse einzustufen, die den Programmablauf unvorhergesehen verändern oder
-   * die weitere Ausführung unmöglich machen.
+   * Nachricht der hÃ¶chsten PrioritÃ¤t "error" absetzen. Als "error" sind nur
+   * Ereignisse einzustufen, die den Programmablauf unvorhergesehen verÃ¤ndern oder
+   * die weitere AusfÃ¼hrung unmÃ¶glich machen.
    * 
    * @param msg
    *          Die Logging-Nachricht
@@ -231,8 +231,8 @@ public class Logger
   }
 
   /**
-   * Nachricht der Priorität "log" absetzen. "log" enthält alle Nachrichten, die für
-   * den täglichen Programmablauf beim Endanwender oder zur Auffindung der gängigsten
+   * Nachricht der PrioritÃ¤t "log" absetzen. "log" enthÃ¤lt alle Nachrichten, die fÃ¼r
+   * den tÃ¤glichen Programmablauf beim Endanwender oder zur Auffindung der gÃ¤ngigsten
    * Bedienfehler interessant sind.
    * 
    * @param msg
@@ -255,8 +255,8 @@ public class Logger
   }
 
   /**
-   * Nachricht der Priorität "debug" absetzen. Die debug-Priorität dient zu debugging
-   * Zwecken. Sie enthält Informationen, die für Programmentwickler interessant sind.
+   * Nachricht der PrioritÃ¤t "debug" absetzen. Die debug-PrioritÃ¤t dient zu debugging
+   * Zwecken. Sie enthÃ¤lt Informationen, die fÃ¼r Programmentwickler interessant sind.
    * 
    * @param msg
    *          Die Logging-Nachricht
@@ -278,10 +278,10 @@ public class Logger
   }
 
   /**
-   * Nachricht der geringsten Priorität "debug2" absetzen. Das sind Meldungen, die im
-   * Normalfall selbst für debugging-Zwecke zu detailliert sind. Beispielsweise
-   * Logging-Meldungen von privaten Unterfunktionen, die die Ausgabe nur unnötig
-   * unübersichtlich machen, aber nicht zum schnellen Auffinden von Standard-Fehlern
+   * Nachricht der geringsten PrioritÃ¤t "debug2" absetzen. Das sind Meldungen, die im
+   * Normalfall selbst fÃ¼r debugging-Zwecke zu detailliert sind. Beispielsweise
+   * Logging-Meldungen von privaten Unterfunktionen, die die Ausgabe nur unnÃ¶tig
+   * unÃ¼bersichtlich machen, aber nicht zum schnellen Auffinden von Standard-Fehlern
    * geeignet sind. "debug2" ist geeignet, um ganz spezielle Fehler ausfindig zu
    * machen.
    * 

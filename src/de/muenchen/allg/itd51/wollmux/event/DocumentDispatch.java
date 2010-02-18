@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Implementiert XDispatch und kann alle Dispatch-URLs behandeln, die ein DocumentModel erfordern.
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 05.11.2009 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -43,20 +43,20 @@ import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 
 /**
  * Implementiert XDispatch und kann alle Dispatch-URLs behandeln, die ein
- * DocumentModel erfordern. Nähere Infos zur Funktionsweise siehe {@link Dispatch}.
+ * DocumentModel erfordern. NÃ¤here Infos zur Funktionsweise siehe {@link Dispatch}.
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
 public class DocumentDispatch extends Dispatch
 {
   /**
-   * Ein XDispatch-Objekt, das die ursprüngliche Standard-Aktion der URL url ist.
+   * Ein XDispatch-Objekt, das die ursprÃ¼ngliche Standard-Aktion der URL url ist.
    * 
    */
   private XDispatch origDisp;
 
   /**
-   * Zu origDisp passender URL um das Standardverhalten auszulösen.
+   * Zu origDisp passender URL um das Standardverhalten auszulÃ¶sen.
    */
   private com.sun.star.util.URL origUrl;
 
@@ -69,12 +69,12 @@ public class DocumentDispatch extends Dispatch
    * Erzeugt einen neuen DocumentDispatch.
    * 
    * @param origDisp
-   *          Ein XDispatch-Objekt, das die ursprüngliche Standard-Aktion der URL url
-   *          auslösen kann.
+   *          Ein XDispatch-Objekt, das die ursprÃ¼ngliche Standard-Aktion der URL url
+   *          auslÃ¶sen kann.
    * @param origUrl
-   *          Zu origDisp passender URL um das Standardverhalten auszulösen.
+   *          Zu origDisp passender URL um das Standardverhalten auszulÃ¶sen.
    * @param frame
-   *          der Frame des Textdokuments in dessen Kontext der Dispatch ausgeführt
+   *          der Frame des Textdokuments in dessen Kontext der Dispatch ausgefÃ¼hrt
    *          werden soll.
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
@@ -88,7 +88,7 @@ public class DocumentDispatch extends Dispatch
   }
 
   /**
-   * Wenn wir ein Original-Dispatch-Objekt haben, überlassen wir diesem das managen
+   * Wenn wir ein Original-Dispatch-Objekt haben, Ã¼berlassen wir diesem das managen
    * des Status.
    * 
    * @see #removeStatusListener(XStatusListener, URL)
@@ -102,7 +102,7 @@ public class DocumentDispatch extends Dispatch
   }
 
   /**
-   * Wenn wir ein Original-Dispatch-Objekt haben, überlassen wir diesem das managen
+   * Wenn wir ein Original-Dispatch-Objekt haben, Ã¼berlassen wir diesem das managen
    * des Status.
    * 
    * @see #addStatusListener(XStatusListener, URL)

@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Datasource, die die Vereinigung 2er Datasources darstellt
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 07.11.2005 | BNK | Erstellung
  * 10.11.2005 | BNK | getestet und debuggt
@@ -70,13 +70,13 @@ public class UnionDatasource implements Datasource
    * Erzeugt eine neue UnionDatasource.
    * 
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser UnionDatasource
-   *          bereits vollständig instanziierten Datenquellen.
+   *          enthÃ¤lt alle bis zum Zeitpunkt der Definition dieser UnionDatasource
+   *          bereits vollstÃ¤ndig instanziierten Datenquellen.
    * @param sourceDesc
    *          der "Datenquelle"-Knoten, der die Beschreibung dieser UnionDatasource
-   *          enthält.
+   *          enthÃ¤lt.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
+   *          der Kontext relativ zu dem URLs aufgelÃ¶st werden sollen (zur Zeit nicht
    *          verwendet).
    */
   public UnionDatasource(Map<String, Datasource> nameToDatasource,
@@ -127,11 +127,11 @@ public class UnionDatasource implements Datasource
           name, source2Name));
 
     /*
-     * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um sie
-     * aufzuweichen (z.B. Gesamtschema ist Vereinigung der Schemata) wäre es
-     * erforderlich, einen Dataset-Wrapper zu implementieren, der dafür sorgt, dass
-     * alle Datasets, die in QueryResults zurück- geliefert werden das selbe Schema
-     * haben. Solange dafür keine Notwendigkeit ersichtlich ist, spare ich mir diesen
+     * Anmerkung: Die folgende Bedingung ist "unnÃ¶tig" streng, aber um sie
+     * aufzuweichen (z.B. Gesamtschema ist Vereinigung der Schemata) wÃ¤re es
+     * erforderlich, einen Dataset-Wrapper zu implementieren, der dafÃ¼r sorgt, dass
+     * alle Datasets, die in QueryResults zurÃ¼ck- geliefert werden das selbe Schema
+     * haben. Solange dafÃ¼r keine Notwendigkeit ersichtlich ist, spare ich mir diesen
      * Aufwand.
      */
     Set<String> schema1 = source1.getSchema();

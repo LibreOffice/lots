@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -28,7 +28,7 @@ import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.QueryPart;
 
 /**
- * Ein DatasetChecker überprüft, ob für ein Dataset eine bestimmte Bedingung erfüllt
+ * Ein DatasetChecker Ã¼berprÃ¼ft, ob fÃ¼r ein Dataset eine bestimmte Bedingung erfÃ¼llt
  * ist.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -43,8 +43,8 @@ public abstract class DatasetChecker
    *          der Name der zu checkenden Spalte
    * @param query
    *          ein Suchstring, der am Anfang und/oder Ende genau 1 Sternchen haben
-   *          kann für Präfix/Suffix/Teilstringsuche
-   * @return ein DatasetChecker, der Datensätze überprüft darauf, ob sie in Spalte
+   *          kann fÃ¼r PrÃ¤fix/Suffix/Teilstringsuche
+   * @return ein DatasetChecker, der DatensÃ¤tze Ã¼berprÃ¼ft darauf, ob sie in Spalte
    *         columnName den Suchstring query stehen haben.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -70,7 +70,7 @@ public abstract class DatasetChecker
 
   /**
    * Erzeugt einen DatasetChecker, der die Bedingungen einer Liste von QueryParts
-   * (und-verknüpft) überprüft.
+   * (und-verknÃ¼pft) Ã¼berprÃ¼ft.
    * 
    * @param query
    *          Liste von QueryParts.
@@ -98,8 +98,8 @@ public abstract class DatasetChecker
   public abstract boolean matches(Dataset ds);
 
   /**
-   * Liefert einen DatasetChecker zurück, der die Bedingung von this und zusätzlich
-   * die Bedingung von check2 prüft. Die matches() Funktion des zurückgelieferten
+   * Liefert einen DatasetChecker zurÃ¼ck, der die Bedingung von this und zusÃ¤tzlich
+   * die Bedingung von check2 prÃ¼ft. Die matches() Funktion des zurÃ¼ckgelieferten
    * Checkers liefert nur true, wenn die matches() Methoden von beiden Checkern true
    * liefern.
    * 
@@ -111,8 +111,8 @@ public abstract class DatasetChecker
   }
 
   /**
-   * Liefert einen DatasetChecker zurück, der die Bedingung von this und zusätzlich
-   * die Bedingung von check2 prüft. Die matches() Funktion des zurückgelieferten
+   * Liefert einen DatasetChecker zurÃ¼ck, der die Bedingung von this und zusÃ¤tzlich
+   * die Bedingung von check2 prÃ¼ft. Die matches() Funktion des zurÃ¼ckgelieferten
    * Checkers liefert true, wenn die matches() Methode von mindestens einem der
    * beiden Checker true liefert.
    * 

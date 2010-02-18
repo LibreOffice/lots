@@ -1,9 +1,9 @@
 /*
  * Dateiname: AllSectionExtViewsPanel.java
  * Projekt  : WollMux
- * Funktion : Eine View, die alle OneSectionExtViews enthält.
+ * Funktion : Eine View, die alle OneSectionExtViews enthÃ¤lt.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 26.03.2009 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -43,14 +43,14 @@ import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
 /**
  * Eine View, die alle
- * {@link de.muenchen.allg.itd51.wollmux.former.section.OneSectionExtView}s enthält.
+ * {@link de.muenchen.allg.itd51.wollmux.former.section.OneSectionExtView}s enthÃ¤lt.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AllSectionExtViewsPanel extends OnDemandCardView
 {
   /**
-   * Diese Sichtbarkeitsgruppen stehen zur Auswahl für das GROUPS-Attribut.
+   * Diese Sichtbarkeitsgruppen stehen zur Auswahl fÃ¼r das GROUPS-Attribut.
    */
   private GroupModelList groupModelList;
 

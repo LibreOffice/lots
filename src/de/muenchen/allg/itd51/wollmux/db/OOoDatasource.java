@@ -1,9 +1,9 @@
 /*
  * Dateiname: OOoDatasource.java
  * Projekt  : WollMux
- * Funktion : Stellt eine OOo-Datenquelle als WollMux-Datenquelle zur Verfügung
+ * Funktion : Stellt eine OOo-Datenquelle als WollMux-Datenquelle zur VerfÃ¼gung
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,13 +18,13 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 19.12.2006 | BNK | Erstellung
  * 21.12.2006 | BNK | Fertig+Test
- * 22.12.2006 | BNK | USER und PASSWORD unterstützt
- * 09.03.2007 | BNK | [P1257]Neuer Konstruktor, der Datenquelle auch ohne Angabe von Schlüssel erlaubt
+ * 22.12.2006 | BNK | USER und PASSWORD unterstÃ¼tzt
+ * 09.03.2007 | BNK | [P1257]Neuer Konstruktor, der Datenquelle auch ohne Angabe von SchlÃ¼ssel erlaubt
  * 20.09.2007 | BNK | EscapeProcessing = false setzen in Abfragen, "|" als ESCAPE-Zeichen
  * -------------------------------------------------------------------
  *
@@ -65,32 +65,32 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
- * Stellt eine OOo-Datenquelle als WollMux-Datenquelle zur Verfügung.
+ * Stellt eine OOo-Datenquelle als WollMux-Datenquelle zur VerfÃ¼gung.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class OOoDatasource implements Datasource
 {
   /**
-   * Maximale Zeit in Sekunden, die die Datenquelle für die Verbindungsaufnahme mit
+   * Maximale Zeit in Sekunden, die die Datenquelle fÃ¼r die Verbindungsaufnahme mit
    * der Datenbank brauchen darf.
    */
   private static final int LOGIN_TIMEOUT = 5;
 
   /**
-   * Konstante für {@link #sqlSyntax}, die angibt, dass SQL Queries in Oracle-Syntax
+   * Konstante fÃ¼r {@link #sqlSyntax}, die angibt, dass SQL Queries in Oracle-Syntax
    * abgesetzt werden sollen.
    */
   private static final int SQL_SYNTAX_ANSI = 0;
 
   /**
-   * Konstante für {@link #sqlSyntax}, die angibt, dass SQL Queries in Oracle-Syntax
+   * Konstante fÃ¼r {@link #sqlSyntax}, die angibt, dass SQL Queries in Oracle-Syntax
    * abgesetzt werden sollen.
    */
   private static final int SQL_SYNTAX_ORACLE = 1;
 
   /**
-   * Konstante für {@link #sqlSyntax}, die angibt, dass SQL Queries in MySQL-Syntax
+   * Konstante fÃ¼r {@link #sqlSyntax}, die angibt, dass SQL Queries in MySQL-Syntax
    * abgesetzt werden sollen.
    */
   private static final int SQL_SYNTAX_MYSQL = 2;
@@ -110,7 +110,7 @@ public class OOoDatasource implements Datasource
    * <quote symbol> ::= <quote><quote> (2 consecutive quote characters) (Lexical elements, 143 Foundation)
   In einem <character string literal> werden einzelne <quote>s durch <quote symbol> ersetzt.(Lexical elements, 143 Foundation)
   
-   o**** Datensätze zu vorgegebener Schlüsselliste finden *********
+   o**** DatensÃ¤tze zu vorgegebener SchlÃ¼sselliste finden *********
    
   SELECT * FROM "<id>" WHERE ("<colId>"='<colVal>' AND "<colId>"='<colVal>' AND ...) OR (...) OR ...;
 
@@ -118,17 +118,17 @@ public class OOoDatasource implements Datasource
   
   In <colVal> sind Quotes durch <quote symbol> ersetzt.
   
-  o ***** Datensätze finden, die bestimmte Kriterien erfüllen ********
+  o ***** DatensÃ¤tze finden, die bestimmte Kriterien erfÃ¼llen ********
   
   8.5 <like predicate> (385 Foundation)
   Der String hinter ESCAPE muss genau ein Zeichen lang sein. Ansonsten gibt es eine Exception (387 Foundation, 8.5 General Rules 3b))
-  _ und % sowie das ESCAPE-Zeichen selbst müssen im String-Ausdruck hinter LIKE escapet werden (durch Voranstellen des Escape-Zeichens). Andere Zeichen dürfen nicht escapet werden.
+  _ und % sowie das ESCAPE-Zeichen selbst mÃ¼ssen im String-Ausdruck hinter LIKE escapet werden (durch Voranstellen des Escape-Zeichens). Andere Zeichen dÃ¼rfen nicht escapet werden.
 
   SELECT * FROM "<id>" WHERE (lower("<colId>") LIKE lower('<pattern>') ESCAPE '|') AND (...) AND ...;
   In <id> und <colId> sind Doublequotes durch <doublequote symbol> ersetzt.
   In <pattern> sind "_",  "%" und "|" ersetzt durch "|_", "|%" und "||".
   
-   ***** Alle Datensätze auslesen ******
+   ***** Alle DatensÃ¤tze auslesen ******
 
   SELECT * FROM "<id>";
   In <id> sind Doublequotes durch <doublequote symbol> ersetzt.
@@ -161,23 +161,23 @@ public class OOoDatasource implements Datasource
   private Set<String> schema;
 
   /**
-   * Die Namen der Spalten, die den Primärschlüssel bilden.
+   * Die Namen der Spalten, die den PrimÃ¤rschlÃ¼ssel bilden.
    */
   private String[] keyColumns;
 
   /**
-   * Benutzername für den Login bei der Datenbank.
+   * Benutzername fÃ¼r den Login bei der Datenbank.
    */
   private String userName = "";
 
   /**
-   * Passwort für den Login bei der Datenbank.
+   * Passwort fÃ¼r den Login bei der Datenbank.
    */
   private String password = "";
 
   /**
    * Wie {@link #OOoDatasource(Map, ConfigThingy, URL, boolean)}, wobei noKey==false
-   * übergeben wird.
+   * Ã¼bergeben wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -191,19 +191,19 @@ public class OOoDatasource implements Datasource
    * Erzeugt eine neue OOoDatasource.
    * 
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser OOoDatasource
-   *          bereits vollständig instanziierten Datenquellen (zur Zeit nicht
+   *          enthÃ¤lt alle bis zum Zeitpunkt der Definition dieser OOoDatasource
+   *          bereits vollstÃ¤ndig instanziierten Datenquellen (zur Zeit nicht
    *          verwendet).
    * @param sourceDesc
    *          der "Datenquelle"-Knoten, der die Beschreibung dieser OOoDatasource
-   *          enthält.
+   *          enthÃ¤lt.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
+   *          der Kontext relativ zu dem URLs aufgelÃ¶st werden sollen (zur Zeit nicht
    *          verwendet).
    * @param noKey
-   *          Falls true, so wird immer die erste Spalte als Schlüsselspalte
+   *          Falls true, so wird immer die erste Spalte als SchlÃ¼sselspalte
    *          verwendet. Diese Option sollte nur verwendet werden, wenn keine
-   *          Operationen getätigt werden sollen, die den Schlüssel verwenden.
+   *          Operationen getÃ¤tigt werden sollen, die den SchlÃ¼ssel verwenden.
    * @throws ConfigurationErrorException
    *           falls in der Definition in sourceDesc ein Fehler ist. Falls sourceDesc
    *           keinen Schema-Unterabschnitt aufweist, wird versucht, das Schema von
@@ -275,7 +275,7 @@ public class OOoDatasource implements Datasource
         sqlSyntax = SQL_SYNTAX_MYSQL;
       else
         throw new ConfigurationErrorException(L.m(
-          "SQL_SYNTAX \"%1\" nicht unterstützt", sqlSyntaxStr));
+          "SQL_SYNTAX \"%1\" nicht unterstÃ¼tzt", sqlSyntaxStr));
     }
     catch (NodeNotFoundException x)
     {}
@@ -321,7 +321,7 @@ public class OOoDatasource implements Datasource
         XConnection conn = ds.getConnection(userName, password);
 
         /*
-         * Laut IDL-Doku zu "View" müssen hier auch die Views enthalten sein.
+         * Laut IDL-Doku zu "View" mÃ¼ssen hier auch die Views enthalten sein.
          */
         XNameAccess tables = UNO.XTablesSupplier(conn).getTables();
         Object table = tables.getByName(oooTableName);
@@ -346,7 +346,7 @@ public class OOoDatasource implements Datasource
             parseKey(schluesselConf); // Test ob kein Schluessel vorhanden siehe
           // weiter unten
           else
-          { // Schlüssel von Datenbank abfragen.
+          { // SchlÃ¼ssel von Datenbank abfragen.
             try
             {
               XKeysSupplier keysSupp = UNO.XKeysSupplier(table);
@@ -361,7 +361,7 @@ public class OOoDatasource implements Datasource
             {
               throw new ConfigurationErrorException(
                 L.m(
-                  "Datenquelle \"%1\": Keine Schluessel-Spalten definiert. Automatisches bestimmen der Schlüsselspalten nicht möglich",
+                  "Datenquelle \"%1\": Keine Schluessel-Spalten definiert. Automatisches bestimmen der SchlÃ¼sselspalten nicht mÃ¶glich",
                   datasourceName), x);
             }
             // Test ob kein Schluessel vorhanden siehe weiter unten
@@ -502,9 +502,9 @@ public class OOoDatasource implements Datasource
    * @param timeout
    *          maximale Zeit in Millisekunden, die die Anfrage dauern darf.
    * @param throwOnTimeout
-   *          falls true wird im Falle des überschreitens des Timeouts eine
-   *          TimeoutException geworfen, ansonsten wird die unvollständige
-   *          Ergebnisliste zurückgeliefert.
+   *          falls true wird im Falle des Ã¼berschreitens des Timeouts eine
+   *          TimeoutException geworfen, ansonsten wird die unvollstÃ¤ndige
+   *          Ergebnisliste zurÃ¼ckgeliefert.
    * @author bettina.bauer, Matthias Benkmann
    */
   private QueryResults sqlQuery(String query, long timeout, boolean throwOnTimeout)
@@ -560,9 +560,9 @@ public class OOoDatasource implements Datasource
        * EscapeProcessing == false bedeutet, dass OOo die Query nicht selbst anfassen
        * darf, sondern direkt an die Datenbank weiterleiten soll. Wird dies verwendet
        * ist das Ergebnis (derzeit) immer read-only, da OOo keine Updates von
-       * Statements durchführen kann, die es nicht geparst hat. Siehe Kommentar zu
+       * Statements durchfÃ¼hren kann, die es nicht geparst hat. Siehe Kommentar zu
        * http://qa.openoffice.org/issues/show_bug.cgi?id=78522 Entspricht dem Button
-       * SQL mit grünem Haken (SQL-Kommando direkt ausführen) im Base-Abfrageentwurf.
+       * SQL mit grÃ¼nem Haken (SQL-Kommando direkt ausfÃ¼hren) im Base-Abfrageentwurf.
        */
       xProp.setPropertyValue("EscapeProcessing", Boolean.FALSE);
 
@@ -623,7 +623,7 @@ public class OOoDatasource implements Datasource
 
   /**
    * Liefert eine Abbildung der Spaltennamen aus {@link #schema} auf Integer-Indizes,
-   * die die Spaltennummern für XRow(results)::getString() sind. Falls eine Spalte
+   * die die Spaltennummern fÃ¼r XRow(results)::getString() sind. Falls eine Spalte
    * nicht existiert, ist ihr index <= 0.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -649,7 +649,7 @@ public class OOoDatasource implements Datasource
   }
 
   /**
-   * Liefert abhängig von {@link #sqlSyntax} den "richtigen" Namen der
+   * Liefert abhÃ¤ngig von {@link #sqlSyntax} den "richtigen" Namen der
    * lower()-Funktion.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -666,7 +666,7 @@ public class OOoDatasource implements Datasource
   }
 
   /**
-   * Liefert str zurück, als String-Literal vorbereitet für das Einfügen in
+   * Liefert str zurÃ¼ck, als String-Literal vorbereitet fÃ¼r das EinfÃ¼gen in
    * SQL-Statements.
    * 
    * @param str
@@ -679,7 +679,7 @@ public class OOoDatasource implements Datasource
   }
 
   /**
-   * Liefert str zurück, als Identifier-Name vorbereitet für das Einfügen in
+   * Liefert str zurÃ¼ck, als Identifier-Name vorbereitet fÃ¼r das EinfÃ¼gen in
    * SQL-Statements.
    * 
    * @param str
@@ -693,7 +693,7 @@ public class OOoDatasource implements Datasource
 
   /**
    * Ersetzt das * Wildcard so dass ein SQL-Suchmuster entsteht und escapet Zeichen,
-   * die für SQL eine Bedeutung haben mit "|".
+   * die fÃ¼r SQL eine Bedeutung haben mit "|".
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -721,10 +721,10 @@ public class OOoDatasource implements Datasource
     }
 
     /**
-     * Setzt aus den Werten der Schlüsselspalten den Schlüssel zusammen.
+     * Setzt aus den Werten der SchlÃ¼sselspalten den SchlÃ¼ssel zusammen.
      * 
      * @param keyCols
-     *          die Namen der Schlüsselspalten
+     *          die Namen der SchlÃ¼sselspalten
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private void initKey(String[] keyCols)
@@ -802,7 +802,7 @@ public class OOoDatasource implements Datasource
 
         System.out.print(col + "=" + val + " ");
       }
-      System.out.println("  (Schlüssel: \"" + data.getKey() + "\")");
+      System.out.println("  (SchlÃ¼ssel: \"" + data.getKey() + "\")");
     }
   }
 
@@ -810,10 +810,10 @@ public class OOoDatasource implements Datasource
    * Gibt results aus.
    * 
    * @param query
-   *          ein String der in die Überschrift der Ausgabe geschrieben wird, damit
+   *          ein String der in die Ãœberschrift der Ausgabe geschrieben wird, damit
    *          der Benutzer sieht, was er angezeigt bekommt.
    * @param schema
-   *          bestimmt, welche Spalten angezeigt werden von den Datensätzen aus
+   *          bestimmt, welche Spalten angezeigt werden von den DatensÃ¤tzen aus
    *          results.
    * @param results
    *          die Ergebnisse der Anfrage.
@@ -927,17 +927,17 @@ public class OOoDatasource implements Datasource
         System.out.print("\"" + iter.next() + "\" ");
       }
       System.out.println();
-      System.out.print("Schlüsselspalten: ");
+      System.out.print("SchlÃ¼sselspalten: ");
       for (int i = 0; i < ds.keyColumns.length; ++i)
         System.out.print("\"" + ds.keyColumns[i] + "\" ");
 
-      System.out.println("Datensätze:");
+      System.out.println("DatensÃ¤tze:");
       QueryResults res = ds.getContents(1000000);
       Vector<String> keys = new Vector<String>();
       printQueryResults(schema, res, keys);
 
       keys.remove(0);
-      System.out.println("Rufe Datensätze für folgende Schlüssel ab:");
+      System.out.println("Rufe DatensÃ¤tze fÃ¼r folgende SchlÃ¼ssel ab:");
       iter = keys.iterator();
       while (iter.hasNext())
         System.out.println("    " + iter.next());

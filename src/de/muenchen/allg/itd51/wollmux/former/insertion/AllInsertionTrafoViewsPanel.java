@@ -1,9 +1,9 @@
 /*
  * Dateiname: AllInsertionTrafoViewsPanel.java
  * Projekt  : WollMux
- * Funktion : Eine View, die alle OneInsertionExtViews enthält.
+ * Funktion : Eine View, die alle OneInsertionExtViews enthÃ¤lt.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 28.09.2006 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -44,7 +44,7 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 /**
  * Eine View, die alle
  * {@link de.muenchen.allg.itd51.wollmux.former.insertion.OneInsertionExtView}s
- * enthält.
+ * enthÃ¤lt.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -52,7 +52,7 @@ public class AllInsertionTrafoViewsPanel extends OnDemandCardView
 {
 
   /**
-   * Die Funktionsbibliothek, die die Funktionen enthält, die die Views zur Auswahl
+   * Die Funktionsbibliothek, die die Funktionen enthÃ¤lt, die die Views zur Auswahl
    * anbieten sollen.
    */
   private FunctionLibrary funcLib;
@@ -62,7 +62,7 @@ public class AllInsertionTrafoViewsPanel extends OnDemandCardView
    * insertionModelList anzeigt.
    * 
    * @param funcLib
-   *          die Funktionsbibliothek, die die Funktionen enthält, die die Views zur
+   *          die Funktionsbibliothek, die die Funktionen enthÃ¤lt, die die Views zur
    *          Auswahl anbieten sollen.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */

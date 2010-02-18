@@ -1,11 +1,11 @@
 /*
  * Dateiname: FormFieldFactory.java
  * Projekt  : WollMux
- * Funktion : Repräsentiert eine Fabrik, die an der Stelle von 
+ * Funktion : ReprÃ¤sentiert eine Fabrik, die an der Stelle von 
  *            WM('insertFormValue'...)-Bookmark entsprechende FormField-Elemente
  *            erzeugt.
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -20,17 +20,17 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 08.06.2006 | LUT | Erstellung als FormField
- * 14.06.2006 | LUT | Umbenennung in FormFieldFactory und Unterstützung
+ * 14.06.2006 | LUT | Umbenennung in FormFieldFactory und UnterstÃ¼tzung
  *                    von Checkboxen.
  * 07.09.2006 | BNK | Rewrite
  * 12.09.2006 | BNK | Bugfix: Bookmarks ohne Ausdehnung wurden nicht gefunden.
  * 03.01.2007 | BNK | +TextFieldFormField
  *                  | +createFormField(doc, textfield)
- * 08.07.2009 | BED | Änderungen im Rahmen von R48539 (#2867)
+ * 08.07.2009 | BED | Ã„nderungen im Rahmen von R48539 (#2867)
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -63,7 +63,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.TextRangeRelation.TreeRelation;
 
 /**
- * Repräsentiert eine Fabrik, die an der Stelle von WM('insertFormValue'...)-Bookmark
+ * ReprÃ¤sentiert eine Fabrik, die an der Stelle von WM('insertFormValue'...)-Bookmark
  * entsprechende FormField-Elemente erzeugt.
  * 
  * @author lut
@@ -77,16 +77,16 @@ public final class FormFieldFactory
    * Erzeugt ein Formularfeld im Dokument doc an der Stelle des
    * InsertFormValue-Kommandos cmd. Ist unter dem bookmark bereits ein
    * Formularelement (derzeit TextFeld vom Typ Input, DropDown oder eine Checkbox)
-   * vorhanden, so wird dieses Feld als Formularelement für die Darstellung des
+   * vorhanden, so wird dieses Feld als Formularelement fÃ¼r die Darstellung des
    * Wertes des Formularfeldes genutzt. Ist innerhalb des Bookmarks noch kein
    * Formularelement vorhanden, so wird ein DynamicInputFormField an der Stelle des
    * Bookmarks erzeugt, das erst dann ein InputField-Textfeld im Dokument anlegt,
    * wenn auf das Textfeld schreibend zugegriffen wird.
    * 
    * @param doc
-   *          das Dokument, zu dem das Formularfeld gehört.
+   *          das Dokument, zu dem das Formularfeld gehÃ¶rt.
    * @param cmd
-   *          das zugehörige insertFormValue-Kommando.
+   *          das zugehÃ¶rige insertFormValue-Kommando.
    */
   public static FormField createFormField(XTextDocument doc, InsertFormValue cmd,
       Map<String, FormField> bookmarkNameToFormField)
@@ -97,7 +97,7 @@ public final class FormFieldFactory
 
     /*
      * Falls die range in einer Tabellenzelle liegt, wird sie auf die ganze Zelle
-     * ausgeweitet, damit die ganze Zelle gescannt wird (Workaround für Bug
+     * ausgeweitet, damit die ganze Zelle gescannt wird (Workaround fÃ¼r Bug
      * http://qa.openoffice.org/issues/show_bug.cgi?id=68261)
      */
     XTextRange range = cmd.getAnchor();
@@ -128,14 +128,14 @@ public final class FormFieldFactory
   }
 
   /**
-   * Erzeugt ein neues FormField für das Serienbrieffeld textfield vom Typ
+   * Erzeugt ein neues FormField fÃ¼r das Serienbrieffeld textfield vom Typ
    * c,s,s,text,textfield,Database, das im Dokument doc liegt. Die Methoden
    * {@link Object#equals(java.lang.Object)} und {@link Object#hashCode()} beziehen
    * sich auf das zugrundeliegende UNO-Objekt, wobei verschiedene Proxies des selben
    * Objekts als gleich behandelt werden.
    * 
    * @param doc
-   *          das zugehörige Dokument doc
+   *          das zugehÃ¶rige Dokument doc
    * @param textfield
    *          ein Serienbrieffeld vom Typ css.text.textfield.Database.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -147,25 +147,25 @@ public final class FormFieldFactory
   }
 
   /**
-   * Erzeugt ein neues FormField für ein Eingabefeld einer Benutzervariablen vom Typ
-   * c,s,s,text,textfield,InputUser und den zugehörigen TextFieldMaster master die im
+   * Erzeugt ein neues FormField fÃ¼r ein Eingabefeld einer Benutzervariablen vom Typ
+   * c,s,s,text,textfield,InputUser und den zugehÃ¶rigen TextFieldMaster master die im
    * Dokument doc liegen. Die Methoden {@link Object#equals(java.lang.Object)} und
    * {@link Object#hashCode()} beziehen sich auf das zugrundeliegende UNO-Objekt,
    * wobei verschiedene Proxies des selben Objekts als gleich behandelt werden.
    * 
    * @param doc
-   *          das zugehörige Dokument doc
+   *          das zugehÃ¶rige Dokument doc
    * @param textfield
    *          das InputUser-Objekt.
    * @param master
    *          bei InputUser-Objekten kann auf den angezeigten Wert nicht direkt
-   *          zugegriffen werden. Diese Zugriffe erfolgen über einen TextFieldMaster,
+   *          zugegriffen werden. Diese Zugriffe erfolgen Ã¼ber einen TextFieldMaster,
    *          der dem InputUser-Objekt zugeordnet ist. VORSICHT: Das Objekt
    *          textfield.TextFieldMaster ist dabei nicht als Master geeignet, da
-   *          dieser Master keine direkte Möglichkeit zum Setzen der Anzeigewerte
-   *          anbietet. Das statt dessen geeignete TextFieldMaster-Objekt muss über
+   *          dieser Master keine direkte MÃ¶glichkeit zum Setzen der Anzeigewerte
+   *          anbietet. Das statt dessen geeignete TextFieldMaster-Objekt muss Ã¼ber
    *          doc.getTextFieldMasters() bezogen werden, wobei textfield und master
-   *          dann zusammen gehören, wenn textfield.Content.equals(master.Name) gilt.
+   *          dann zusammen gehÃ¶ren, wenn textfield.Content.equals(master.Name) gilt.
    * @return
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -177,9 +177,9 @@ public final class FormFieldFactory
   }
 
   /**
-   * Geht die XEnumeration enu von Absätzen und TextTables durch und erzeugt für alle
-   * in Absätzen (nicht TextTables) enthaltenen insertFormValue-Bookmarks
-   * entsprechende Einträge in mapBookmarkNameToFormField. Falls nötig wird das
+   * Geht die XEnumeration enu von AbsÃ¤tzen und TextTables durch und erzeugt fÃ¼r alle
+   * in AbsÃ¤tzen (nicht TextTables) enthaltenen insertFormValue-Bookmarks
+   * entsprechende EintrÃ¤ge in mapBookmarkNameToFormField. Falls nÃ¶tig wird das
    * entsprechende FormField erzeugt.
    * 
    * @param doc
@@ -210,9 +210,9 @@ public final class FormFieldFactory
   }
 
   /**
-   * Geht die XEnumeration enuAccess von TextPortions durch und erzeugt für alle
-   * enthaltenen insertFormValue-Bookmarks entsprechende Einträge in
-   * mapBookmarkNameToFormField. Falls nötig wird das entsprechende FormField
+   * Geht die XEnumeration enuAccess von TextPortions durch und erzeugt fÃ¼r alle
+   * enthaltenen insertFormValue-Bookmarks entsprechende EintrÃ¤ge in
+   * mapBookmarkNameToFormField. Falls nÃ¶tig wird das entsprechende FormField
    * erzeugt.
    * 
    * @param doc
@@ -381,8 +381,8 @@ public final class FormFieldFactory
   }
 
   /**
-   * Fügt ein neues Eingabefeld innerhalb des Bookmarks bookmark ein, erzeugt ein
-   * dazugehöriges FormField und setzt ein passendes Mapping von bookmarkName auf
+   * FÃ¼gt ein neues Eingabefeld innerhalb des Bookmarks bookmark ein, erzeugt ein
+   * dazugehÃ¶riges FormField und setzt ein passendes Mapping von bookmarkName auf
    * dieses FormField in mapBookmarkNameToFormField
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
@@ -435,9 +435,9 @@ public final class FormFieldFactory
   interface FormField extends Comparable<FormField>
   {
     /**
-     * FIXME Unschöne Fixup-Funktion, die in FormScanner.executeCommand() aufgerufen
+     * FIXME UnschÃ¶ne Fixup-Funktion, die in FormScanner.executeCommand() aufgerufen
      * wird, da der Scan von Tabellenzellen nur die Bookmarks, aber nicht die
-     * zugehörigen Commands kennt.
+     * zugehÃ¶rigen Commands kennt.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -445,8 +445,8 @@ public final class FormFieldFactory
 
     /**
      * Wenn das Feld die 1-zu-1 Ersetzung der Referenz auf die ID oldFieldId durch
-     * eine neue ID newFieldId unterstützt, dann wird diese Ersetzung vorgenommen und
-     * true zurückgeliefert, ansonsten false.
+     * eine neue ID newFieldId unterstÃ¼tzt, dann wird diese Ersetzung vorgenommen und
+     * true zurÃ¼ckgeliefert, ansonsten false.
      */
     public abstract boolean substituteFieldID(String oldFieldId, String newFieldId);
 
@@ -462,11 +462,11 @@ public final class FormFieldFactory
     public abstract String getTrafoName();
 
     /**
-     * Eine Rückgabe von true gibt an, dass die Trafo (falls definiert) nur einen
-     * Parameter sinnvoll verarbeiten kann. Ein derartiges Verhalten ist für alle
+     * Eine RÃ¼ckgabe von true gibt an, dass die Trafo (falls definiert) nur einen
+     * Parameter sinnvoll verarbeiten kann. Ein derartiges Verhalten ist fÃ¼r alle
      * Dokumentkommandos WM(CMD'insertFormValue' ID'<id>' TRAFO '<trafo>')
-     * spezifiziert. In diesem Fall erwartet die Trafo für jeden in der Funktion
-     * geforderten Parameter den Wert von <id>; Eine Rückgabe von false beschreibt,
+     * spezifiziert. In diesem Fall erwartet die Trafo fÃ¼r jeden in der Funktion
+     * geforderten Parameter den Wert von <id>; Eine RÃ¼ckgabe von false beschreibt,
      * dass die Trafo auch mehrere Parameter verarbeiten kann (wie z.B.
      * InputUserFields der Fall).
      * 
@@ -483,7 +483,7 @@ public final class FormFieldFactory
     public abstract void setValue(String value);
 
     /**
-     * Diese Methode liefert den aktuellen Wert des Formularfeldes als String zurück
+     * Diese Methode liefert den aktuellen Wert des Formularfeldes als String zurÃ¼ck
      * oder den Leerstring, falls der Wert nicht bestimmt werden kann.
      * 
      * @return der aktuelle Wert des Formularfeldes als String
@@ -498,7 +498,7 @@ public final class FormFieldFactory
     public abstract void focus();
 
     /**
-     * Löscht das Formularfeld aus dem Dokument
+     * LÃ¶scht das Formularfeld aus dem Dokument
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
@@ -519,15 +519,15 @@ public final class FormFieldFactory
     /**
      * Erzeugt ein Formularfeld im Dokument doc an der Stelle des
      * InsertFormValue-Kommandos cmd. Ist unter dem bookmark bereits ein TextFeld vom
-     * Typ InputField vorhanden, so wird dieses Feld als inputField für die
+     * Typ InputField vorhanden, so wird dieses Feld als inputField fÃ¼r die
      * Darstellung des Wertes des Formularfeldes genutzt. Ist innerhalb des Bookmarks
      * noch kein InputField vorhanden, so wird ein neues InputField in den Bookmark
-     * eingefügt.
+     * eingefÃ¼gt.
      * 
      * @param doc
-     *          das Dokument, zu dem das Formularfeld gehört.
+     *          das Dokument, zu dem das Formularfeld gehÃ¶rt.
      * @param cmd
-     *          das zugehörige insertFormValue-Kommando.
+     *          das zugehÃ¶rige insertFormValue-Kommando.
      * @param focusRange
      *          Beschreibt die range, auf die der ViewCursor beim Aufruf der
      *          focus()-methode gesetzt werden soll. Der Parameter ist erforderlich,
@@ -552,7 +552,7 @@ public final class FormFieldFactory
 
     /**
      * Diese Methode liest den Inhalt des internen Formularelements und liefert den
-     * Wert als String zurück.
+     * Wert als String zurÃ¼ck.
      * 
      * @param value
      *          der neue Wert des Formularelements.
@@ -590,9 +590,9 @@ public final class FormFieldFactory
 
     /**
      * Vergleicht die Positionen der Dokumentkommandos der Formularfelder im Dokument
-     * liefert -1 zurück, wenn this vor other liegt, 1, wenn this nach other liegt
+     * liefert -1 zurÃ¼ck, wenn this vor other liegt, 1, wenn this nach other liegt
      * und beide Formularfelder dem selben Text-Objekt zugeordnet sind und 0, wenn
-     * sich die Dokumentkommandos überlappen; lässt sich die Ordnung nicht bestimmen,
+     * sich die Dokumentkommandos Ã¼berlappen; lÃ¤sst sich die Ordnung nicht bestimmen,
      * da die Text-Objekte sich unterscheiden, dann wird -1 geliefert.
      * 
      * @param other
@@ -645,7 +645,7 @@ public final class FormFieldFactory
   }
 
   /**
-   * Repräsentiert ein FormField, das den Formularwert in einem Input-Field
+   * ReprÃ¤sentiert ein FormField, das den Formularwert in einem Input-Field
    * darstellt.
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
@@ -687,7 +687,7 @@ public final class FormFieldFactory
   }
 
   /**
-   * Repräsentiert ein FormField-Objekt, das zunächst kein Formularelement enthält,
+   * ReprÃ¤sentiert ein FormField-Objekt, das zunÃ¤chst kein Formularelement enthÃ¤lt,
    * aber eines vom Typ c,s,s,text,TextField,InputField erzeugt, wenn mittels focus()
    * oder setFormElementValue(...) darauf zugegriffen wird und der zu setzende Wert
    * nicht der Leerstring ist.
@@ -705,7 +705,7 @@ public final class FormFieldFactory
     public void setCommand(InsertFormValue cmd)
     {
       super.setCommand(cmd);
-      // ursprünglich R43846 (#2439), überarbeitet nach R48539 (#2867)
+      // ursprÃ¼nglich R43846 (#2439), Ã¼berarbeitet nach R48539 (#2867)
       if (inputField == null)
       {
         XTextCursor cursor = cmd.getTextCursor();
@@ -720,9 +720,9 @@ public final class FormFieldFactory
 
             String trimmedText = textSurroundedByBookmark.trim();
             Pattern p = Workarounds.workaroundForIssue101249();
-            // Für die Überprüfung des Patterns verwenden wir den getrimmten Text, da
-            // wir auch die Fälle erwischen wollen, wo vielleicht aus Versehen ein
-            // Leerzeichen am Anfang reingerutscht ist. Besser wäre es aber eventuell
+            // FÃ¼r die ÃœberprÃ¼fung des Patterns verwenden wir den getrimmten Text, da
+            // wir auch die FÃ¤lle erwischen wollen, wo vielleicht aus Versehen ein
+            // Leerzeichen am Anfang reingerutscht ist. Besser wÃ¤re es aber eventuell
             // das direkt ins Pattern einzubauen, statt hier zu trimmen.
 
             if (textSurroundedByBookmark.length() > 0
@@ -748,7 +748,7 @@ public final class FormFieldFactory
       if (value.length() == 0)
       {
         // wenn kein inputField vorhanden ist, so wird der Inhalt des Bookmarks
-        // gelöscht
+        // gelÃ¶scht
         if (inputField == null)
         {
           cmd.setTextRangeString("");
@@ -768,7 +768,7 @@ public final class FormFieldFactory
 
       String bookmarkName = cmd.getBookmarkName();
 
-      Logger.debug2(L.m("Erzeuge neues Input-Field für Bookmark \"%1\"",
+      Logger.debug2(L.m("Erzeuge neues Input-Field fÃ¼r Bookmark \"%1\"",
         bookmarkName));
       try
       {
@@ -790,7 +790,7 @@ public final class FormFieldFactory
   }
 
   /**
-   * Repräsentiert ein FormField, das den Formularwert in einem DropDown-Field
+   * ReprÃ¤sentiert ein FormField, das den Formularwert in einem DropDown-Field
    * darstellt.
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
@@ -814,9 +814,9 @@ public final class FormFieldFactory
 
     public void setValue(String value)
     {
-      // DropDownFormFelder können in OOo nicht mit dem Leerstring belegt
-      // werden. Die Verwendung des Leerstrings fürht dazu, dass ein anderes als
-      // das ausgewählte Element angezeigt wird. Daher werden Leerstrings auf
+      // DropDownFormFelder kÃ¶nnen in OOo nicht mit dem Leerstring belegt
+      // werden. Die Verwendung des Leerstrings fÃ¼rht dazu, dass ein anderes als
+      // das ausgewÃ¤hlte Element angezeigt wird. Daher werden Leerstrings auf
       // ein Leerzeichen umgeschrieben. OOo-Issue: #70087
       if (value.equals("")) value = " ";
 
@@ -829,12 +829,12 @@ public final class FormFieldFactory
     }
 
     /**
-     * Die Methode prüft, ob der String value bereits in der zum Zeitpunkt des
-     * Konstruktoraufrufs eingelesenen Liste oritItemList der erlaubten Einträge der
+     * Die Methode prÃ¼ft, ob der String value bereits in der zum Zeitpunkt des
+     * Konstruktoraufrufs eingelesenen Liste oritItemList der erlaubten EintrÃ¤ge der
      * ComboBox vorhanden ist und erweitert die Liste um value, falls nicht.
      * 
      * @param value
-     *          der Wert, der ggf. an in die Liste der erlaubten Einträge aufgenommen
+     *          der Wert, der ggf. an in die Liste der erlaubten EintrÃ¤ge aufgenommen
      *          wird.
      */
     private void extendItemsList(String value)
@@ -879,7 +879,7 @@ public final class FormFieldFactory
   }
 
   /**
-   * Repräsentiert ein FormField, das den Formularwert in einer Checkbox darstellt.
+   * ReprÃ¤sentiert ein FormField, das den Formularwert in einer Checkbox darstellt.
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
@@ -891,15 +891,15 @@ public final class FormFieldFactory
      * Erzeugt eine neue CheckboxFormField, das eine bereits im Dokument doc
      * bestehende Checkbox checkbox vom Service-Typ
      * com.sun.star.form.component.CheckBox an der Stelle des Kommandos cmd
-     * repräsentiert.
+     * reprÃ¤sentiert.
      * 
      * @param doc
      *          Das Dokument in dem sich das Checkbox-Formularfeld-Kommando befindet
      * @param cmd
-     *          das zum Formularfeld zugehörige insertFormValue-Kommando
+     *          das zum Formularfeld zugehÃ¶rige insertFormValue-Kommando
      * @param checkbox
      *          Ein UNO-Service vom Typ von com.sun.star.form.component.CheckBox das
-     *          den Zugriff auf das entsprechende FormControl-Element ermöglicht.
+     *          den Zugriff auf das entsprechende FormControl-Element ermÃ¶glicht.
      * @param focusRange
      *          Beschreibt die range, auf die der ViewCursor beim Aufruf der
      *          focus()-methode gesetzt werden soll.
@@ -942,7 +942,7 @@ public final class FormFieldFactory
   /**
    * Kapselt ein Serienbrieffeld UNO-Objekt vom Typ c,s,s,text,textfield,Database als
    * FormField. In einem Serienbrieffeld kann keine TRAFO-Funktion gesetzt werden -
-   * deshalb liefert die Methode getTrafoName() immer null zurück. Die Objekte dieser
+   * deshalb liefert die Methode getTrafoName() immer null zurÃ¼ck. Die Objekte dieser
    * Klasse betrachten zum Zwecke von equals() und hashCode() die zugrundeliegenden
    * UNO-Objekte.
    * 
@@ -1035,22 +1035,22 @@ public final class FormFieldFactory
 
     public boolean singleParameterTrafo()
     {
-      // Der Rückgabewert spielt keine Rolle da diese Felder immer untransformiert
+      // Der RÃ¼ckgabewert spielt keine Rolle da diese Felder immer untransformiert
       // sind.
       return false;
     }
   }
 
   /**
-   * Kapselt ein Eingabefeld für eine Benutzervariable vom Typ
-   * c,s,s,text,textfield,InputUser und den zugehörigen TextFieldMaster master als
+   * Kapselt ein Eingabefeld fÃ¼r eine Benutzervariable vom Typ
+   * c,s,s,text,textfield,InputUser und den zugehÃ¶rigen TextFieldMaster master als
    * FormField. Bei InputUser-Objekten kann auf den angezeigten Wert nicht direkt
-   * zugegriffen werden. Diese Zugriffe erfolgen über einen TextFieldMaster, der dem
+   * zugegriffen werden. Diese Zugriffe erfolgen Ã¼ber einen TextFieldMaster, der dem
    * InputUser-Objekt zugeordnet ist. VORSICHT: Das Objekt textfield.TextFieldMaster
-   * ist dabei nicht als Master geeignet, da dieser Master keine direkte Möglichkeit
+   * ist dabei nicht als Master geeignet, da dieser Master keine direkte MÃ¶glichkeit
    * zum Setzen der Anzeigewerte anbietet. Das statt dessen geeignete
-   * TextFieldMaster-Objekt muss über doc.getTextFieldMasters() bezogen werden, wobei
-   * textfield und master dann zusammen gehören, wenn
+   * TextFieldMaster-Objekt muss Ã¼ber doc.getTextFieldMasters() bezogen werden, wobei
+   * textfield und master dann zusammen gehÃ¶ren, wenn
    * textfield.Content.equals(master.Name) gilt. Die Objekte dieser Klasse betrachten
    * zum Zwecke von equals() und hashCode() die zugrundeliegenden UNO-Objekte.
    * 

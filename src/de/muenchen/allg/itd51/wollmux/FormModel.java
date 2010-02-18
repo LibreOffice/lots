@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Erlaubt Zugriff auf die Formularbestandteile eines Dokuments abstrahiert von den dahinterstehenden OOo-Objekten.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 27.12.2005 | BNK | Erstellung
  * 28.04.2008 | BNK | +save(), +saveAs()
@@ -36,13 +36,13 @@ import java.awt.event.ActionListener;
 /**
  * Erlaubt Zugriff auf die Formularbestandteile eines Dokuments abstrahiert von den
  * dahinterstehenden OOo-Objekten. ACHTUNG! Der FormController ruft die Methoden
- * dieser Klasse aus dem Event Dispatching Thread auf. Dort dürfen sie aber meist
- * nicht laufen. Deshalb müssen alle entsprechenden Methoden über den
+ * dieser Klasse aus dem Event Dispatching Thread auf. Dort dÃ¼rfen sie aber meist
+ * nicht laufen. Deshalb mÃ¼ssen alle entsprechenden Methoden Ã¼ber den
  * WollMuxEventHandler ein Event Objekt erzeugen und in die WollMux-Queue zur
- * späteren Ausführung schieben. Es muss dafür gesorgt werden, dass das FormModel
+ * spÃ¤teren AusfÃ¼hrung schieben. Es muss dafÃ¼r gesorgt werden, dass das FormModel
  * Objekt auch funktioniert, wenn das zugrundeliegende Office-Dokument disposed
  * wurde, da der FormController evtl. im Moment des disposens darauf zugreifen
- * möchte. Hoffentlich löst obiges Umsetzen der Aufrufe in Event-Objekte dieses
+ * mÃ¶chte. Hoffentlich lÃ¶st obiges Umsetzen der Aufrufe in Event-Objekte dieses
  * Problem schon weitgehend.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -51,22 +51,22 @@ public interface FormModel
 {
 
   /**
-   * Setzt die Position und Größe des Fensters des zugehörigen Dokuments auf die
-   * vorgegebenen Werte setzt. ACHTUNG: Die Maßangaben beziehen sich auf die linke
+   * Setzt die Position und GrÃ¶ÃŸe des Fensters des zugehÃ¶rigen Dokuments auf die
+   * vorgegebenen Werte setzt. ACHTUNG: Die MaÃŸangaben beziehen sich auf die linke
    * obere Ecke des Fensterinhalts OHNE die Titelzeile und die Fensterdekoration des
-   * Rahmens. Um die linke obere Ecke des gesamten Fensters richtig zu setzen, müssen
-   * die Größenangaben des Randes der Fensterdekoration und die Höhe der Titelzeile
+   * Rahmens. Um die linke obere Ecke des gesamten Fensters richtig zu setzen, mÃ¼ssen
+   * die GrÃ¶ÃŸenangaben des Randes der Fensterdekoration und die HÃ¶he der Titelzeile
    * VOR dem Aufruf der Methode entsprechend eingerechnet werden.
    * 
    * @param docX
    *          Die linke obere Ecke des Fensterinhalts X-Koordinate der Position in
-   *          Pixel, gezählt von links oben.
+   *          Pixel, gezÃ¤hlt von links oben.
    * @param docY
-   *          Die Y-Koordinate der Position in Pixel, gezählt von links oben.
+   *          Die Y-Koordinate der Position in Pixel, gezÃ¤hlt von links oben.
    * @param docWidth
-   *          Die Größe des Dokuments auf der X-Achse in Pixel
+   *          Die GrÃ¶ÃŸe des Dokuments auf der X-Achse in Pixel
    * @param docHeight
-   *          Die Größe des Dokuments auf der Y-Achse in Pixel. Auch hier wird die
+   *          Die GrÃ¶ÃŸe des Dokuments auf der Y-Achse in Pixel. Auch hier wird die
    *          Titelzeile des Rahmens nicht beachtet und muss vorher entsprechend
    *          eingerechnet werden.
    * 
@@ -75,7 +75,7 @@ public interface FormModel
   public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight);
 
   /**
-   * Setzt den Sichtbarkeitsstatus des Fensters des zugehörigen Dokuments auf vis
+   * Setzt den Sichtbarkeitsstatus des Fensters des zugehÃ¶rigen Dokuments auf vis
    * (true=sichtbar, false=unsichtbar).
    * 
    * @param vis
@@ -86,9 +86,9 @@ public interface FormModel
   public void setWindowVisible(boolean vis);
 
   /**
-   * Versucht das Dokument zu schließen. Wurde das Dokument verändert
+   * Versucht das Dokument zu schlieÃŸen. Wurde das Dokument verÃ¤ndert
    * (Modified-Status des Dokuments==true), so erscheint der Dialog
-   * "Speichern"/"Verwerfen"/"Abbrechen" (über den ein sofortiges Schließen des
+   * "Speichern"/"Verwerfen"/"Abbrechen" (Ã¼ber den ein sofortiges SchlieÃŸen des
    * Dokuments durch den Benutzer verhindert werden kann)
    * 
    * @author christoph.lutz
@@ -109,11 +109,11 @@ public interface FormModel
   public void setVisibleState(String groupId, boolean visible);
 
   /**
-   * Setzt den Wert aller Formularfelder im Dokument, die von fieldId abhängen auf
+   * Setzt den Wert aller Formularfelder im Dokument, die von fieldId abhÃ¤ngen auf
    * den neuen Wert newValue (bzw. auf das Ergebnis der zu diesem Formularelement
    * hinterlegten Trafo-Funktion).
    * 
-   * Es ist nicht garantiert, dass sich der Wert tatsächlich geändert hat. Die
+   * Es ist nicht garantiert, dass sich der Wert tatsÃ¤chlich geÃ¤ndert hat. Die
    * fieldId kann leer sein (aber nie null).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -121,8 +121,8 @@ public interface FormModel
   public void valueChanged(String fieldId, String newValue);
 
   /**
-   * Das Formularfeld im Dokument mit der ID fieldId erhält den Fokus. Gibt es im
-   * Dokument mehrere Formularfelder, die von der ID abhängen, so erhält immer das
+   * Das Formularfeld im Dokument mit der ID fieldId erhÃ¤lt den Fokus. Gibt es im
+   * Dokument mehrere Formularfelder, die von der ID abhÃ¤ngen, so erhÃ¤lt immer das
    * erste Formularfeld den Fokus - bevorzugt werden dabei auch die nicht
    * transformierten Formularfelder.
    * 
@@ -148,8 +148,8 @@ public interface FormModel
    * wird und das FormModel entsprechend handeln soll um sicherzustellen, dass das
    * Dokument in Zukunft nicht mehr angesprochen wird.
    * 
-   * Abhängig von der Implementierung des FormModels werden unterschiedliche Aktionen
-   * erledigt. Dazu gehören z.B. das Beenden einer bereits gestarteten FormGUI oder
+   * AbhÃ¤ngig von der Implementierung des FormModels werden unterschiedliche Aktionen
+   * erledigt. Dazu gehÃ¶ren z.B. das Beenden einer bereits gestarteten FormGUI oder
    * das Wiederherstellen der Fensterattribute des Dokumentfensters auf die Werte,
    * die das Fenster vor dem Starten der FormGUI hatte.
    * 
@@ -161,7 +161,7 @@ public interface FormModel
   public void disposing(TextDocumentModel source);
 
   /**
-   * Teilt der FormGUI die zu diesem FormModel gehört mit, dass der Wert des
+   * Teilt der FormGUI die zu diesem FormModel gehÃ¶rt mit, dass der Wert des
    * Formularfeldes mit der id fieldId auf den neuen Wert value gesetzt werden soll
    * und ruft nach erfolgreicher aktion die Methode actionPerformed(ActionEvent arg0)
    * des Listeners listener.
@@ -195,7 +195,7 @@ public interface FormModel
   public void print();
 
   /**
-   * Exportiert das Dokument als PDF. Bei Multi-Form wird die Aktion für alle
+   * Exportiert das Dokument als PDF. Bei Multi-Form wird die Aktion fÃ¼r alle
    * Formulare der Reihe nach aufgerufen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -203,7 +203,7 @@ public interface FormModel
   public void pdf();
 
   /**
-   * Speichert das Dokument (Datei/Speichern). Bei Multi-Form wird die Aktion für
+   * Speichert das Dokument (Datei/Speichern). Bei Multi-Form wird die Aktion fÃ¼r
    * alle Formulare der Reihe nach aufgerufen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -212,16 +212,16 @@ public interface FormModel
 
   /**
    * Speichert das Dokument (Datei/Speichern unter...). Bei Multi-Form wird die
-   * Aktion für alle Formulare der Reihe nach aufgerufen.
+   * Aktion fÃ¼r alle Formulare der Reihe nach aufgerufen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void saveAs();
 
   /**
-   * Über diese Methode kann der FormController das FormModel informieren, dass er
-   * vollständig initialisiert wurde und notwendige Aktionen wie z.B. das
-   * zurücksetzen des modified-Status des Dokuments durchgeführt werden sollen.
+   * Ãœber diese Methode kann der FormController das FormModel informieren, dass er
+   * vollstÃ¤ndig initialisiert wurde und notwendige Aktionen wie z.B. das
+   * zurÃ¼cksetzen des modified-Status des Dokuments durchgefÃ¼hrt werden sollen.
    */
   public void formControllerInitCompleted();
 }
