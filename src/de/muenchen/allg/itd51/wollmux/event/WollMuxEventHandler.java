@@ -102,6 +102,7 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XStringSubstitution;
+import com.sun.star.view.DocumentZoomType;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -4151,6 +4152,19 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       boolean hasPrintFunction = model.getPrintFunctions().size() > 0;
+
+      if (Workarounds.applyWorkaroundForOOoIssue96281())
+      {
+        try
+        {
+          Object viewSettings =
+            UNO.XViewSettingsSupplier(model.doc.getCurrentController()).getViewSettings();
+          UNO.setProperty(viewSettings, "ZoomType", DocumentZoomType.BY_VALUE);
+          UNO.setProperty(viewSettings, "ZoomValue", Short.valueOf((short) 100));
+        }
+        catch (java.lang.Exception e)
+        {}
+      }
 
       if (hasPrintFunction)
       {

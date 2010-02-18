@@ -71,6 +71,8 @@ public class Workarounds
 
   private static Boolean workaround102164 = null;
 
+  private static Boolean workaround96281 = null;
+
   private static ClassLoader workaround102164CL = null;
 
   private static Boolean applyWorkaround(String issueNumber)
@@ -166,6 +168,29 @@ public class Workarounds
     }
 
     return workaround103137.booleanValue();
+  }
+
+  /**
+   * Issue #96281 betrifft OOo 3.1 und 3.2. Ob es in 3.3 gelöst sein wird wissen wir
+   * nicht. Seien wir einfach mal pessimistisch.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public static boolean applyWorkaroundForOOoIssue96281()
+  {
+    if (workaround96281 == null)
+    {
+      String version = getOOoVersion();
+      if (version != null
+        && (version.startsWith("3.1") || version.startsWith("3.2") || version.startsWith("3.3")))
+      {
+        workaround96281 = applyWorkaround("96281");
+      }
+      else
+        workaround96281 = Boolean.FALSE;
+    }
+
+    return workaround96281.booleanValue();
   }
 
   /**
