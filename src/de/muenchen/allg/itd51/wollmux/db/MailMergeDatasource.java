@@ -1895,6 +1895,9 @@ public class MailMergeDatasource
         XNameAccess tables = UNO.XTablesSupplier(conn).getTables();
         for (String name : tables.getElementNames())
           tableNames.add(name);
+        XNameAccess queries = UNO.XQueriesSupplier(conn).getQueries();
+        for (String name : queries.getElementNames())
+          tableNames.add(name);
       }
       catch (Exception x)
       {
