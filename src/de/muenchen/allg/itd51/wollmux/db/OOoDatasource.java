@@ -324,8 +324,32 @@ public class OOoDatasource implements Datasource
          * Laut IDL-Doku zu "View" müssen hier auch die Views enthalten sein.
          */
         XNameAccess tables = UNO.XTablesSupplier(conn).getTables();
-        Object table = tables.getByName(oooTableName);
-        XNameAccess columns = UNO.XColumnsSupplier(table).getColumns();
+        XNameAccess columns = null;
+        Object table = null;
+        try
+        {
+          table = tables.getByName(oooTableName);
+          columns = UNO.XColumnsSupplier(table).getColumns();
+        }
+        catch (Exception x)
+        {
+          Logger.debug(L.m(
+            "Tabelle \"%1\" nicht gefunden. Versuche es als Namen einer Query zu nehmen",
+            oooTableName));
+          try
+          {
+            XNameAccess queries = UNO.XQueriesSupplier(conn).getQueries();
+            table = queries.getByName(oooTableName);
+            columns = UNO.XColumnsSupplier(table).getColumns();
+          }
+          catch (Exception y)
+          {
+            throw new ConfigurationErrorException(
+              L.m(
+                "Tabelle oder Abfrage \"%1\" existiert nicht in Datenquelle \"%2\" oder Fehler beim Bestimmen der Spalten ",
+                oooTableName, oooDatasourceName), y);
+          }
+        }
         String[] colNames = columns.getElementNames();
         for (int i = 0; i < colNames.length; ++i)
           schema.add(colNames[i]);
