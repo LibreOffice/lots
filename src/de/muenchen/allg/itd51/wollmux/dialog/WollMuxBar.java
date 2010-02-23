@@ -325,8 +325,8 @@ public class WollMuxBar
   private ActionListener closeAction = actionListener_abort;
 
   /**
-   * Aufgerufen wenn der Spezialeintrag "Liste Bearbeiten" in der Senderbox gewählt
-   * wird.
+   * Aufgerufen wenn der Spezialeintrag "Absenderliste verwalten..." in der Senderbox
+   * gewählt wird.
    */
   private ActionListener actionListener_editSenderList = new ActionListener()
   {
@@ -1455,8 +1455,8 @@ public class WollMuxBar
         senderbox.addItem(LEERE_LISTE, null, null, myIsInsideMonitor);
 
       senderbox.addSeparator();
-      senderbox.addItem(L.m("Liste Bearbeiten"), actionListener_editSenderList,
-        null, myIsInsideMonitor);
+      senderbox.addItem(L.m("Absenderliste verwalten..."),
+        actionListener_editSenderList, null, myIsInsideMonitor);
 
       if (current != null && !current.equals(""))
         senderbox.setSelectedItem(current);
