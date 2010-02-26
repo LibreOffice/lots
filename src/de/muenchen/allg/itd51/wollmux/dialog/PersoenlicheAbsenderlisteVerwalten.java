@@ -42,6 +42,7 @@
  * 19.10.2006 | BNK | Credits
  * 23.10.2006 | BNK | Bugfix: Bei credits an wurden Personen ohne Mail nicht dargestellt.
  * 06.11.2006 | BNK | auf AlwaysOnTop gesetzt.
+ * 26.02.2010 | BED | WollMux-Icon für Frame; Löschen aus PAL-Liste mit ENTF-Taste 
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -60,6 +61,8 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
@@ -403,6 +406,21 @@ public class PersoenlicheAbsenderlisteVerwalten
     ListCellRenderer myRenderer = new MyListCellRenderer();
     resultsJList.setCellRenderer(myRenderer);
     palJList = new JList(new DefaultListModel());
+
+    // KeyListener hinzufügen, damit Einträge in der PAL-Liste durch Drücken der
+    // ENTF-Taste gelöscht werden können
+    palJList.addKeyListener(new KeyAdapter()
+    {
+      public void keyPressed(KeyEvent e)
+      {
+        super.keyPressed(e);
+        if (e.getKeyCode() == KeyEvent.VK_DELETE)
+        {
+          removeFromPAL();
+        }
+      }
+    });
+
     palJList.setCellRenderer(myRenderer);
     query = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
 
@@ -1733,11 +1751,11 @@ public class PersoenlicheAbsenderlisteVerwalten
     String confFile = "testdata/PAL.conf";
     String abConfFile = "testdata/AbsenderdatenBearbeiten.conf";
     ConfigThingy conf =
-      new ConfigThingy("", new URL(new File(System.getProperty("user.dir")).toURL(),
-        confFile));
+      new ConfigThingy("", new URL(
+        new File(System.getProperty("user.dir")).toURI().toURL(), confFile));
     ConfigThingy abConf =
-      new ConfigThingy("", new URL(new File(System.getProperty("user.dir")).toURL(),
-        abConfFile));
+      new ConfigThingy("", new URL(
+        new File(System.getProperty("user.dir")).toURI().toURL(), abConfFile));
     TestDatasourceJoiner dj = new TestDatasourceJoiner();
     RunTest test =
       new RunTest(conf.get("PersoenlicheAbsenderliste"),
