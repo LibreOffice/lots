@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Enthält von den Dialogen gemeinsam genutzten Code.
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -26,6 +26,7 @@
  *                  | refak. von setLookAndFeel() zu setLookAndFeelOnce()
  * 27.07.2006 | BNK | "auto" Wert explizit parsen.
  * 29.07.2009 | BED | +configureTextFieldBehaviour()
+ * 26.02.2010 | BED | +setWollMuxIcon(JFrame)
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -34,14 +35,20 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
+import javax.swing.JFrame;
 import javax.swing.JTextField;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -157,8 +164,8 @@ public class Common
    * überschreiben.
    * 
    * Dazu installieren wir im aktuellen {@link KeyboardFocusManager} einen
-   * {@link KeyEventPostProcessor}, der beim Loslassen ({@link KeyEvent#KEY_RELEASED})
-   * der Tabulator-Taste überprüft, ob das KeyEvent von einem JTextField ausgelöst
+   * {@link KeyEventPostProcessor}, der beim Loslassen ({@link KeyEvent#KEY_RELEASED}
+   * ) der Tabulator-Taste überprüft, ob das KeyEvent von einem JTextField ausgelöst
    * wurde und in diesem Fall allen Text in dem Textfeld selektiert.
    * 
    * Sollte irgendwann mal RFE 4493590
@@ -346,5 +353,43 @@ public class Common
     {}
 
     return r;
+  }
+
+  /**
+   * Sets the icon of the passed in JFrame to the WollMux icon.
+   * 
+   * At the moment this method works only with Java 6 because we use the
+   * "setIconImages" method; we could have used the "setIconImage" method from Java 5
+   * instead but the result looks absolutely terrible under KDE using Java 5; to
+   * avoid this the following is realized using the reflection API so that it only
+   * works when you use Java 6 but doesn't cause any problems in our build
+   * environment that uses Java 5. When we completely switch to Java 6 this code can
+   * be cleaned up.
+   * 
+   * @param myFrame
+   *          JFrame which should get the WollMux icon
+   * @author Daniel Benkmann
+   */
+  public static void setWollMuxIcon(JFrame myFrame)
+  {
+    try
+    {
+      List<Image> iconList = new ArrayList<Image>();
+      iconList.add(Toolkit.getDefaultToolkit().createImage(
+        Common.class.getClassLoader().getResource("data/wollmux_icon32x32.png")));
+
+      Class<?> cls = myFrame.getClass();
+      Class<?>[] parameterTypes = new Class[1];
+      parameterTypes[0] = Class.forName("java.util.List");
+      Method method = cls.getMethod("setIconImages", parameterTypes);
+      Object[] args = new Object[1];
+      args[0] = iconList;
+      method.invoke(myFrame, args);
+    }
+    catch (Throwable e)
+    {
+      // you probably didn't use Java 6 (or above)
+      // -> no icon for you
+    }
   }
 }

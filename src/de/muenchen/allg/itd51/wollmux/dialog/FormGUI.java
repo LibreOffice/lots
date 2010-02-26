@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : managed die Fenster (Writer und FormController) der FormularGUI. 
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -31,10 +31,10 @@
  * 19.07.2006 | BNK | mehrere übelste Hacks, damit die Formular-GUI nie unsinnige Größe annimmt beim Starten
  * 14.09.2006 | BNK | üble Hacks hoffentlich robuster gemacht
  * 17.11.2006 | BNK | +getController()
+ * 26.02.2010 | BED | WollMux-Icon für FormGUI-Frame
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
@@ -228,6 +228,9 @@ public class FormGUI
     // der ComponentListener sorgt dafür dass bei Verschieben/Größenänderung das
     // Writer-Fenster ebenfalls angepasst wird.
     myFrame.addComponentListener(oehrchen);
+
+    // WollMux-Icon für das FormGUI-Fenster
+    Common.setWollMuxIcon(myFrame);
 
     try
     {
@@ -682,8 +685,8 @@ public class FormGUI
     Logger.init(System.err, Logger.DEBUG);
     String confFile = "testdata/formulartest.conf";
     ConfigThingy conf =
-      new ConfigThingy("", new URL(new File(System.getProperty("user.dir")).toURL(),
-        confFile));
+      new ConfigThingy("", new URL(
+        new File(System.getProperty("user.dir")).toURI().toURL(), confFile));
     XTextDocument doc =
       UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true,
         true));

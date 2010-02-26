@@ -78,7 +78,6 @@ import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -96,9 +95,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -558,33 +555,8 @@ public class WollMuxBar
     // leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
-    // the following code sets the icon for the WollMuxBar frame;
-    // at the moment this works only with Java 6 because we use the
-    // "setIconImages" method; we could have used the "setIconImage" method
-    // from Java 5 instead but the result looks absolutely terrible under KDE
-    // using Java 5; to avoid this the following is realized using the
-    // reflection API so that it only works when you use Java 6 but doesn't
-    // cause any problems in our build environment that uses Java 5.
-    // When we completely switch to Java 6 this code can be cleaned up.
-    try
-    {
-      List<Image> iconList = new ArrayList<Image>();
-      iconList.add(Toolkit.getDefaultToolkit().createImage(
-        this.getClass().getClassLoader().getResource("data/wollmux_icon32x32.png")));
-
-      Class<?> cls = myFrame.getClass();
-      Class<?>[] parameterTypes = new Class[1];
-      parameterTypes[0] = Class.forName("java.util.List");
-      Method method = cls.getMethod("setIconImages", parameterTypes);
-      Object[] args = new Object[1];
-      args[0] = iconList;
-      method.invoke(myFrame, args);
-    }
-    catch (Throwable e)
-    {
-      // you probably didn't use Java 6 (or above)
-      // -> no icon for you
-    }
+    // set the icon for the WollMuxBar frame
+    Common.setWollMuxIcon(myFrame);
 
     if (windowMode == UP_AND_AWAY_WINDOW_MODE)
     {
