@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Implementiert den Hinzufügen/Entfernen Dialog des BKS
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -45,7 +45,6 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
@@ -300,8 +299,8 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   /**
    * Der dem
-   * {@link #PersoenlicheAbsenderlisteVerwalten(ConfigThingy, ConfigThingy, DatasourceJoiner, ActionListener) Konstruktor}
-   * übergebene dialogEndListener.
+   * {@link #PersoenlicheAbsenderlisteVerwalten(ConfigThingy, ConfigThingy, DatasourceJoiner, ActionListener)
+   * Konstruktor} übergebene dialogEndListener.
    */
   private ActionListener dialogEndListener;
 
@@ -430,6 +429,8 @@ public class PersoenlicheAbsenderlisteVerwalten
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     myFrame.addWindowListener(new MyWindowListener());
     myFrame.setAlwaysOnTop(true);
+    // WollMux-Icon für PAL-Frame
+    Common.setWollMuxIcon(myFrame);
 
     mainPanel = new JPanel(new BorderLayout());
     mainPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));

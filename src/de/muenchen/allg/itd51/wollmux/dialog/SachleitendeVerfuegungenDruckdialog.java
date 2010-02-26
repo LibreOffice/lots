@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Implementiert den Dialog zum Drucken von Sachleitenden Verfügungen
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -25,7 +25,6 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
@@ -220,8 +219,8 @@ public class SachleitendeVerfuegungenDruckdialog
 
   /**
    * Der dem
-   * {@link #AbsenderAuswaehlen(ConfigThingy, ConfigThingy, DatasourceJoiner, ActionListener) Konstruktor}
-   * übergebene dialogEndListener.
+   * {@link #AbsenderAuswaehlen(ConfigThingy, ConfigThingy, DatasourceJoiner, ActionListener)
+   * Konstruktor} übergebene dialogEndListener.
    */
   private ActionListener dialogEndListener;
 
@@ -404,6 +403,8 @@ public class SachleitendeVerfuegungenDruckdialog
     // leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     myFrame.addWindowListener(new MyWindowListener());
+    // WollMux-Icon für das Fenster
+    Common.setWollMuxIcon(myFrame);
 
     mainPanel = new JPanel(new BorderLayout());
     mainPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));

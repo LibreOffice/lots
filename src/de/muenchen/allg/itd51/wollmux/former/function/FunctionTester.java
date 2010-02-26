@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : GUI zum interaktiven Zusammenbauen und Testen von WollMux-Funktionen.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -25,7 +25,6 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.former.function;
@@ -66,6 +65,7 @@ import javax.swing.text.JTextComponent;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.func.Function;
@@ -174,6 +174,8 @@ public class FunctionTester
     oehrchen = new MyWindowListener();
     // der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
     myFrame.addWindowListener(oehrchen);
+    // WollMux-Icon für den Funktionstester
+    Common.setWollMuxIcon(myFrame);
 
     myPanel = new JPanel(new BorderLayout());
     myPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));

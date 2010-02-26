@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Dynamisches Erzeugen eines Swing-GUIs für das Bearbeiten eines Datensatzes anhand von ConfigThingy
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -45,7 +45,6 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
@@ -347,6 +346,8 @@ public class DatensatzBearbeiten
     // leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     myFrame.addWindowListener(new MyWindowListener());
+    // WollMux-Icon für den Frame
+    Common.setWollMuxIcon(myFrame);
 
     cardLayout = new CardLayout();
     cardPanel = new JPanel(cardLayout);
@@ -906,9 +907,9 @@ public class DatensatzBearbeiten
     private String name;
 
     /**
-     * Alle {@link DataControl}s zu dieser Dialogseite. Falls die
-     * Konfigurationsdaten des Dialogs fehlerhaft sind kann es sein, dass nicht zu
-     * jedem Control ein DataControl existiert.
+     * Alle {@link DataControl}s zu dieser Dialogseite. Falls die Konfigurationsdaten
+     * des Dialogs fehlerhaft sind kann es sein, dass nicht zu jedem Control ein
+     * DataControl existiert.
      */
     private List<DataControl> dataControls = new Vector<DataControl>();
 

@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Dialog zur Suche nach Daten in einer Datenquelle, die über DIALOG-Funktion verfügbar gemacht werden.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -33,7 +33,6 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
@@ -340,6 +339,9 @@ public class DatasourceSearchDialog implements Dialog
     // der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
     myFrame.addWindowListener(oehrchen); // TODO CLOSEACTION statt einfach nur
     // abort()
+
+    // WollMux-Icon für den Frame
+    Common.setWollMuxIcon(myFrame);
 
     JPanel contentPanel = new JPanel();
     myFrame.getContentPane().add(contentPanel);
@@ -804,7 +806,8 @@ public class DatasourceSearchDialog implements Dialog
 
     /**
      * Die zentrale Anlaufstelle für alle von UIElementen ausgelösten Events (siehe
-     * {@link UIElementEventHandler#processUiElementEvent(UIElement, String, Object[])}).
+     * {@link UIElementEventHandler#processUiElementEvent(UIElement, String, Object[])}
+     * ).
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */

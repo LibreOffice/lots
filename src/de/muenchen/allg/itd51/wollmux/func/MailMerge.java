@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Druckfunktionen für den Seriendruck.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -28,7 +28,6 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.func;
@@ -94,6 +93,7 @@ import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.Datasource;
 import de.muenchen.allg.itd51.wollmux.db.OOoDatasource;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.dialog.Common;
 
 public class MailMerge
 {
@@ -105,8 +105,8 @@ public class MailMerge
 
   /**
    * Druckt das zu pmod gehörende Dokument für alle Datensätze (offerSelection==true)
-   * oder die Datensätze, die der Benutzer in einem Dialog auswählt (offerSelection ==
-   * false) aus der aktuell über Bearbeiten/Datenbank austauschen eingestellten
+   * oder die Datensätze, die der Benutzer in einem Dialog auswählt (offerSelection
+   * == false) aus der aktuell über Bearbeiten/Datenbank austauschen eingestellten
    * Tabelle. Für die Anzeige der Datensätze im Dialog wird die Spalte
    * "WollMuxDescription" verwendet. Falls die Spalte "WollMuxSelected" vorhanden ist
    * und "1", "ja" oder "true" enthält, so ist der entsprechende Datensatz in der
@@ -290,6 +290,7 @@ public class MailMerge
           public void run()
           {
             myFrame = new JFrame(L.m("Seriendruck"));
+            Common.setWollMuxIcon(myFrame);
             Box vbox = Box.createVerticalBox();
             myFrame.getContentPane().add(vbox);
             Box hbox = Box.createHorizontalBox();
@@ -429,9 +430,9 @@ public class MailMerge
   }
 
   /**
-   * Präsentiert einen Dialog, der den Benutzer aus list (enthält {@link ListElement}s)
-   * auswählen lässt. ACHTUNG! Diese Methode kehrt erst zurück nachdem der Benutzer
-   * den Dialog geschlossen hat.
+   * Präsentiert einen Dialog, der den Benutzer aus list (enthält {@link ListElement}
+   * s) auswählen lässt. ACHTUNG! Diese Methode kehrt erst zurück nachdem der
+   * Benutzer den Dialog geschlossen hat.
    * 
    * @return true, gdw der Benutzer mit Okay bestätigt hat.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -480,8 +481,8 @@ public class MailMerge
   }
 
   /**
-   * Präsentiert einen Dialog, der den Benutzer aus list (enthält {@link ListElement}s)
-   * auswählen lässt. ACHTUNG! Diese Methode darf nur im Event Dispatching Thread
+   * Präsentiert einen Dialog, der den Benutzer aus list (enthält {@link ListElement}
+   * s) auswählen lässt. ACHTUNG! Diese Methode darf nur im Event Dispatching Thread
    * aufgerufen werden.
    * 
    * @param result
@@ -1177,8 +1178,7 @@ public class MailMerge
 
     /**
      * Wird im Nicht-EDT aufgerufen und bestimmt die Tabellen der neu ausgewählten
-     * Datenquelle und lässt dann im EDT die {@link #tableSelector}-ComboBox
-     * updaten.
+     * Datenquelle und lässt dann im EDT die {@link #tableSelector}-ComboBox updaten.
      * 
      * @param datasourceAndTableName
      *          das erste Element ist der Name der neu ausgewählten Datenquelle bzw.

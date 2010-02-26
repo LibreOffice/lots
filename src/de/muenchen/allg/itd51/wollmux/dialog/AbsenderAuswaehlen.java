@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Implementiert den Absenderdaten auswählen Dialog des BKS
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -29,10 +29,10 @@
  * 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
  * 03.01.2005 | BNK | Bug korrigiert;  .gridy = x  sollte .gridx = x sein.
  * 19.05.2006 | BNK | [R1898]Wenn die Liste leer ist, dann gleich den PAL Verwalten Dialog aufrufen
+ * 26.02.2010 | BED | WollMux-Icon für das Fenster
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
@@ -179,8 +179,8 @@ public class AbsenderAuswaehlen
 
   /**
    * Der dem
-   * {@link #AbsenderAuswaehlen(ConfigThingy, ConfigThingy, DatasourceJoiner, ActionListener) Konstruktor}
-   * übergebene dialogEndListener.
+   * {@link #AbsenderAuswaehlen(ConfigThingy, ConfigThingy, DatasourceJoiner, ActionListener)
+   * Konstruktor} übergebene dialogEndListener.
    */
   private ActionListener dialogEndListener;
 
@@ -308,6 +308,8 @@ public class AbsenderAuswaehlen
     // leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     myFrame.addWindowListener(new MyWindowListener());
+    // WollMux-Icon für AbsenderAuswaehlen-Frame
+    Common.setWollMuxIcon(myFrame);
 
     mainPanel = new JPanel(new BorderLayout());
     mainPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));

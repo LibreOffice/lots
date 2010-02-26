@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Die neuen erweiterten Serienbrief-Funktionalitäten
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -25,7 +25,6 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
@@ -73,6 +72,7 @@ import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.QueryResultsWithSchema;
+import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
@@ -241,6 +241,9 @@ public class MailMergeNew
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     oehrchen = new MyWindowListener();
     myFrame.addWindowListener(oehrchen);
+
+    // WollMux-Icon für den Seriendruck-Frame
+    Common.setWollMuxIcon(myFrame);
 
     Box hbox = Box.createHorizontalBox();
     myFrame.add(hbox);
@@ -532,9 +535,9 @@ public class MailMergeNew
 
   /**
    * Passt {@link #previewDatasetNumber} an, falls sie zu groß oder zu klein ist,
-   * setzt {@link #previewDatasetNumberMax} und setzt dann falls {@link #previewMode} ==
-   * true alle Feldwerte auf die Werte des entsprechenden Datensatzes. Ruft außerdem
-   * {@link #updateEnabledDisabledState()} auf.
+   * setzt {@link #previewDatasetNumberMax} und setzt dann falls {@link #previewMode}
+   * == true alle Feldwerte auf die Werte des entsprechenden Datensatzes. Ruft
+   * außerdem {@link #updateEnabledDisabledState()} auf.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
    * 
@@ -1075,7 +1078,7 @@ public class MailMergeNew
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private static void saveAndCloseOutputFileForMailmerge(File outFile,
       XTextDocument doc)
@@ -1149,7 +1152,7 @@ public class MailMergeNew
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private static File makeOutputPath(String targetDir,
       TextComponentTags filePattern, Dataset ds, int datensatzNummer,

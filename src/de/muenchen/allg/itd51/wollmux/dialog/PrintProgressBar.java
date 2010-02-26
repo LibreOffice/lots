@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Implementiert eine Fortschrittsanzeige für den WollMux-Komfortdruck
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -25,7 +25,6 @@
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
@@ -145,9 +144,14 @@ public class PrintProgressBar
    */
   private void createGui()
   {
+    Common.setLookAndFeelOnce();
+
     myFrame = new JFrame(L.m("Drucke"));
     oehrchen = new MyWindowListener();
     myFrame.addWindowListener(oehrchen);
+
+    // WollMux-Icon für den Frame
+    Common.setWollMuxIcon(myFrame);
 
     JPanel panel = new JPanel();
 
