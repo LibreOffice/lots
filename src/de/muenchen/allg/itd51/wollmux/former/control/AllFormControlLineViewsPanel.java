@@ -240,7 +240,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     buttonPanel.add(killButton, gbcButton);
 
     ++gbcButton.gridx;
-    JButton tabButton = new JButton(L.m("Tab"));
+    JButton tabButton = new JButton(L.m("Neuer Reiter"));
     tabButton.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -253,7 +253,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     buttonPanel.add(tabButton, gbcButton);
 
     ++gbcButton.gridx;
-    JButton newButton = new JButton(L.m("Neu"));
+    JButton newButton = new JButton(L.m("Neues Label"));
     newButton.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)

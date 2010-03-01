@@ -197,7 +197,7 @@ public class FormularMax4000
   private static final int GENERATED_LABEL_MAXLENGTH = 30;
 
   /**
-   * URL des Quelltexts für den Standard-Empfängerauswahl-Tab.
+   * URL des Quelltexts für den Standard-Empfängerauswahl-Reiter.
    */
   private final URL EMPFAENGER_TAB_URL =
     this.getClass().getClassLoader().getResource(
@@ -961,7 +961,7 @@ public class FormularMax4000
             if (tabConf.count() == 1)
             {
               JMenuItem menuItem;
-              menuItem = new JMenuItem(L.m("Empfängerauswahl-Tab"));
+              menuItem = new JMenuItem(L.m("Empfängerauswahl-Reiter"));
               final ConfigThingy tabConfEntry =
                 tabConf.getFirstChild().getFirstChild();
               menuItem.addActionListener(new ActionListener()
@@ -1022,7 +1022,7 @@ public class FormularMax4000
   private void createStandardelementeMenuOld(JMenu submenu)
   {
     JMenuItem menuItem;
-    menuItem = new JMenuItem(L.m("Empfängerauswahl-Tab"));
+    menuItem = new JMenuItem(L.m("Empfängerauswahl-Reiter"));
     menuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
