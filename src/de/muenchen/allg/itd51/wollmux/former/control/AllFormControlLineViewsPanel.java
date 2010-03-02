@@ -240,7 +240,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     buttonPanel.add(killButton, gbcButton);
 
     ++gbcButton.gridx;
-    JButton tabButton = new JButton(L.m("Neuer Reiter"));
+    JButton tabButton = new JButton(L.m("Neuer Tab"));
     tabButton.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
