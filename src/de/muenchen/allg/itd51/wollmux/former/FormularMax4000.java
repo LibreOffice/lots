@@ -167,7 +167,7 @@ public class FormularMax4000
   /**
    * Default-Name für ein neues Tab.
    */
-  public static final String STANDARD_TAB_NAME = L.m("Reiter");
+  public static final String STANDARD_TAB_NAME = L.m("Tab");
 
   /**
    * Die Namen der Parameter, die die Gender-Trafo erwartet. ACHTUNG! Diese müssen
