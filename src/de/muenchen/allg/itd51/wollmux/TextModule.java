@@ -22,6 +22,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 26.09.2006 | LUT | Erstellung als TextModul
+ * 03.03.2010 | ERT | Verhindern von Überlagern von insertFrag-Bookmarks
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -30,6 +31,7 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +48,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.ooo.TextDocument;
 
 /**
  * Klasse enthält statische Methoden die für das Textbausteinsystem benötigt werden
@@ -114,9 +117,21 @@ public class TextModule
       if (results != null)
       {
         matchedInLine = true;
-        createInsertFrag(doc, cursor, results, isManual);
+
+        HashSet<String> bms =
+          TextDocument.getBookmarkNamesStartingWith("WM(CMD 'insertFrag'", cursor);
+
+        if (bms.size() == 0)
+        {
+          createInsertFrag(doc, cursor, results, isManual);
+          result = true;
+        }
+        else
+        {
+          result = isManual;
+        }
+
         cursor.collapseToStart();
-        result = true;
       }
 
       if (cursor.isStartOfParagraph())
@@ -269,8 +284,8 @@ public class TextModule
   }
 
   /**
-   * Erzeugt ein Bookmark vom Typ "WM(CMD'insertFrag' FRAG_ID '<args[0]>' ARGS('<args[1]>'
-   * '...' '<args[n]>')" im Dokument doc an der Stelle range.
+   * Erzeugt ein Bookmark vom Typ "WM(CMD'insertFrag' FRAG_ID '<args[0]>'
+   * ARGS('<args[1]>' '...' '<args[n]>')" im Dokument doc an der Stelle range.
    * 
    * @param doc
    *          Aktuelles Textdokument
