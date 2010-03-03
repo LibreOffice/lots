@@ -1,29 +1,74 @@
  ==================== Neu in dieser Version ====================
 
-    * FormularMax_4000: Das Menü Einfügen/Standardelemente einfügen ist
-      jetzt über die wollmux.conf konfigurierbar. Dadurch kann jedes Referat
-      dort häufig verwendete Tabs oder Gruppen von Buttons konfigurieren und
-      sie so Vorlagenerstellern zugänglich machen. In der nächsten
-      Standardkonfiguration wird eine entsprechende Konfigurationsdatei
-      enthalten sein. Diese enthält zusätzlich zu den bisherigen Einträgen
-      auch einen Eintrag Abbrechen, <-Zurück, Speichern, Drucken, der die
-      entsprechenden Buttons einfügt. Ist ein entsprechender
-      Konfigurationsabschnitt nicht vorhanden (z.B. bei einer alten
-      Konfiguration), wird als Fallback das alte Menü angeboten.
+    * FormularMax_4000:
+          o Das Menü Einfügen/Standardelemente einfügen ist jetzt über die
+            wollmux.conf konfigurierbar. Dadurch kann jedes Referat dort
+            häufig verwendete Tabs oder Gruppen von Buttons konfigurieren und
+            sie so Vorlagenerstellern zugänglich machen. Ab der WollMux-
+            Standardkonfiguration 6.1.2 ist eine entsprechende
+            Konfigurationsdatei enthalten. Diese enthält zusätzlich zu den
+            bisherigen Einträgen auch einen Eintrag Abbrechen, <-Zurück,
+            Speichern, Drucken, der die entsprechenden Buttons einfügt. Ist
+            ein entsprechender Konfigurationsabschnitt nicht vorhanden (z.B.
+            bei einer alten Konfiguration), wird als Fallback das alte Menü
+            angeboten.
+          o Illegale Namen für Sichtbarkeitsgruppen werden nicht mehr
+            akzeptiert. Dies verhindert, dass man sich durch falsche Benennung
+            einer Sichtbarkeitsgruppe die Formularbeschreibung zerschießt.
+          o Dank einer Optimierung des Speicherbedarfs können jetzt komplexere
+            Formulare ohne Heraufsetzen der Java Heap Size bearbeitet werden.
+          o Der Button "Tab" wurde umbenannt in "Neuer Tab"; der Button "Neu"
+            wurde umbenannt in "Neues Label".
+          o Aus Konsistenzgründen ist der Defaultname für neue Tabs jetzt
+            "Tab" und nicht mehr "Reiter".
     * Wenn die WollMuxBar mit Java 6 gestartet wird, so hat sie nun ihr eigenes
       WollMux-Icon in der Taskleiste und beim Umschalten mittels Alt+Tabulator.
-      Unter Java 5 ist das Verhalten unverändert und das Default-Java-Icon
-      wird verwendet.
+      Dasselbe gilt für alle anderen Fenster, die vom WollMux erzeugt werden,
+      sofern in OpenOffice.org Java 6 verwendet wird. Unter Java 5 ist das
+      Verhalten unverändert und das Default-Java-Icon wird verwendet.
     * Windows-Installer und wollmuxbar.exe produzieren nun eine verständliche
       Fehlermeldung, wenn auf dem System keine Java-Installation gefunden
       wurde.
     * Der Windows-Installer deinstalliert vor der Installation der WollMux-
       Extension nun auch alte WollMux.uno.pkg-Extensions.
+    * Die Funktionalität "Fehlerinfos erstellen" wurde so erweitert, dass die
+      generierte Dump-Datei nun auch Informationen über die
+      Speichereinstellungen der Java Virtual Machine enthält. Diese
+      Informationen erleichtern in bestimmten Fällen die Fehlerdiagnose.
+    * Über den Konfigurationsabschnitt_Dokumentaktionen lässt sich abhängig
+      von Eigenschaften des Dokuments steuern, wie der WollMux damit umgeht.
+    * OOo 3.x hat einen Bug, der dafür sorgt, dass wenn in eine Textarea eines
+      WollMux-Formulars mehr als 16400 Zeichen eingegeben werden nach dem
+      Speichern und Wiederladen des Dokuments die Inhalte des Formulars
+      verloren gehen. Diese Version des WollMux hat einen Workaround für
+      diesen Bug. Dieser greift allerdings nur bei Dokumenten, die mit dieser
+      neuen Version des WollMux ausgefüllt wurden. Altdokumente die mit dem
+      nicht betroffenen OOo 2.x erstellt wurden und von dem Problem betroffen
+      sind, lassen sich trotzdem nicht ohne Datenverlust in OOo 3.x öffnen.
+    * Diverse Probleme im Zusammenhang mit OOo 3.2 behoben.
+    * Beim WollMux-Seriendruck wird jetzt "Seite N von M" korrekt erzeugt.
+    * OOo ab Version 3.1 hat einen Bug der dafür sorgt, dass in manchen
+      Fällen der Anzeigemaßstab auch auf den Ausdruck übertragen wird. Dies
+      führt insbesondere bei WollMux-Formularen (wo der Anzeigemaßstab auf 4:
+      3 Monitoren typischerweise sehr klein ist) zu geschrumpften Ausdrucken.
+      Diese WollMux-Version setzt als Workaround vor jedem Ausdruck den
+      Maßstab auf "100%".
+    * Der Menüpunkt "Liste Bearbeiten" bei der Auswahl des Absenders in der
+      WollMuxBar wurde aus Konsistenzgründen umbenannt in "Absenderliste
+      verwalten...".
+    * Im WollMux-Dialogfenster "Absenderliste Verwalten" können Einträge der
+      Persönlichen Absenderliste nun auch über die DEL/Entf-Taste gelöscht
+      werden.
+    * WollMux-Datenquellen und der WollMux-Seriendruck unterstützen jetzt
+      Abfragen als wären es Tabellen.
 
     * Der WollMux funktioniert jetzt auch wenn die KDE/GNOME Desktop-
       Integration von OOo aktiv ist. Früher musste man OOo mit der
       Environment-Variable OOO_FORCE_DESKTOP=none starten. Dies ist nun nicht
       mehr der Fall.
+    * WollMux-Notizen werden jetzt unsichtbar geschaltet, damit der Benutzer
+      nicht mit dem Code der WollMux-Formularbeschreibung konfrontiert wird.
+    * Die Lizenz wurde geändert von EUPL 1.0 auf EUPL x.y (beliebige Version).
 
 
  ==================== Neu in Version 5.9.3 ====================
