@@ -34,6 +34,8 @@
  *                    + Zeilenumbrüche in showInfoModal, damit keine unlesbaren
  *                      Fehlermeldungen mehr ausgegeben werden.
  * 16.12.2009 | ERT | Cast XTextContent-Interface entfernt
+ * 03.03.2010 | ERT | getBookmarkNamesStartingWith nach UnoHelper TextDocument verschoben
+ * 03.03.2010 | ERT | Verhindern von Überlagern von insertFrag-Bookmarks
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -85,8 +87,6 @@ import javax.swing.JPanel;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
-import com.sun.star.container.XEnumeration;
-import com.sun.star.container.XNamed;
 import com.sun.star.document.XEventListener;
 import com.sun.star.form.binding.InvalidBindingStateException;
 import com.sun.star.frame.DispatchResultEvent;
@@ -145,6 +145,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.ooo.TextDocument;
 
 /**
  * Ermöglicht die Einstellung neuer WollMuxEvents in die EventQueue.
@@ -374,7 +375,6 @@ public class WollMuxEventHandler
        * 2. dies typischerweise passiert, wenn der Benutzer das Dokument geschlossen
        * hat, bevor der WollMux fertig war. In diesem Fall will er nicht mit einer
        * Meldung belästigt werden.
-       * 
        */
       if (c instanceof RuntimeException) return;
 
@@ -1087,21 +1087,21 @@ public class WollMuxEventHandler
    *          {@link DocumentManager.Info#hasTextDocumentModel()} verwendet werden.
    * 
    * 
-   * ACHTUNG! ACHTUNG! Die Implementierung wurde extra so gewählt, dass hier ein
-   * DocumentManager.Info anstatt direkt eines TextDocumentModel übergeben wird. Es
-   * kam nämlich bei einem Dokument, das schnell geöffnet und gleich wieder
-   * geschlossen wurde zu folgendem Deadlock:
+   *          ACHTUNG! ACHTUNG! Die Implementierung wurde extra so gewählt, dass hier
+   *          ein DocumentManager.Info anstatt direkt eines TextDocumentModel
+   *          übergeben wird. Es kam nämlich bei einem Dokument, das schnell geöffnet
+   *          und gleich wieder geschlossen wurde zu folgendem Deadlock:
    * 
-   * {@link OnProcessTextDocument} =>
-   * {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#getTextDocumentModel()} =>
-   * {@link TextDocumentModel#TextDocumentModel(XTextDocument)} =>
-   * {@link DispatchProviderAndInterceptor#registerDocumentDispatchInterceptor(XFrame)} =>
-   * OOo Proxy =>
-   * {@link GlobalEventListener#notifyEvent(com.sun.star.document.EventObject)}
-   * ("OnUnload") =>
-   * {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#hasTextDocumentModel()}
+   *          {@link OnProcessTextDocument} =>
+   *          {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#getTextDocumentModel()}
+   *          => {@link TextDocumentModel#TextDocumentModel(XTextDocument)} =>
+   *          {@link DispatchProviderAndInterceptor#registerDocumentDispatchInterceptor(XFrame)}
+   *          => OOo Proxy =>
+   *          {@link GlobalEventListener#notifyEvent(com.sun.star.document.EventObject)}
+   *          ("OnUnload") =>
+   *          {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#hasTextDocumentModel()}
    * 
-   * Da {@link TextDocumentInfo} synchronized ist kam es zum Deadlock.
+   *          Da {@link TextDocumentInfo} synchronized ist kam es zum Deadlock.
    * 
    */
   public static void handleTextDocumentClosed(DocumentManager.Info docInfo)
@@ -1474,7 +1474,8 @@ public class WollMuxEventHandler
   /**
    * Öffnet ein oder mehrere Dokumente anhand der Beschreibung openConfStr
    * (ConfigThingy-Syntax) und ist ausführlicher beschrieben unter
-   * http://limux.tvc.muenchen.de/wiki/index.php/Schnittstellen_des_WollMux_f%C3%BCr_Experten#wollmux:Open
+   * http://limux.tvc.muenchen
+   * .de/wiki/index.php/Schnittstellen_des_WollMux_f%C3%BCr_Experten#wollmux:Open
    * 
    * Dieses Event wird gestartet, wenn der WollMux-Service (...comp.WollMux) das
    * Dispatch-Kommando wollmux:open empfängt.
@@ -1755,9 +1756,9 @@ public class WollMuxEventHandler
    *          Name des Senders in der Form "Nachname, Vorname (Rolle)" wie sie auch
    *          der PALProvider bereithält.
    * @param idx
-   *          der zum Sender senderName passende index in der sortierten Senderliste -
-   *          dient zur Konsistenz-Prüfung, damit kein Sender gesetzt wird, wenn die
-   *          PAL der setzenden Komponente nicht mit der PAL des WollMux
+   *          der zum Sender senderName passende index in der sortierten Senderliste
+   *          - dient zur Konsistenz-Prüfung, damit kein Sender gesetzt wird, wenn
+   *          die PAL der setzenden Komponente nicht mit der PAL des WollMux
    *          übereinstimmt.
    */
   public static void handleSetSender(String senderName, int idx)
@@ -2520,8 +2521,8 @@ public class WollMuxEventHandler
        * Evaluierung über getValueForKey() erfolgt, die von jeder konkreten Klasse
        * implementiert wird. Evaluate() stellt auch sicher, dass die von
        * getValueForKey() zurückgelieferten Werte nicht selbst Variablen enthalten
-       * können (indem die Variablenbegrenzer "${" und "}" durch "<" bzw. ">"
-       * ersetzt werden.
+       * können (indem die Variablenbegrenzer "${" und "}" durch "<" bzw. ">" ersetzt
+       * werden.
        * 
        * @param exp
        *          der zu evaluierende Ausdruck
@@ -3393,7 +3394,8 @@ public class WollMuxEventHandler
       }
       String bookmarkName = bookmarkStart + hcAtt + ")";
 
-      Set<String> bmNames = getBookmarkNamesStartingWith(bookmarkStart, range);
+      Set<String> bmNames =
+        TextDocument.getBookmarkNamesStartingWith(bookmarkStart, range);
 
       if (bmNames.size() > 0)
       {
@@ -3474,65 +3476,6 @@ public class WollMuxEventHandler
           attribute));
         return null;
       }
-    }
-
-    /**
-     * Liefert die Namen aller Bookmarks, die in im Bereich range existieren und
-     * (case insesitive) mit dem Namen bookmarkName anfangen.
-     * 
-     * @param bookmarkName
-     * @param range
-     */
-    private static HashSet<String> getBookmarkNamesStartingWith(String bookmarkName,
-        XTextRange range)
-    {
-      // Hier findet eine iteration des über den XEnumerationAccess des ranges
-      // statt. Man könnte statt dessen auch über range-compare mit den bereits
-      // bestehenden Blöcken aus TextDocumentModel.get<blockname>Blocks()
-      // vergleichen...
-      bookmarkName = bookmarkName.toLowerCase();
-      HashSet<String> found = new HashSet<String>();
-      HashSet<String> started = new HashSet<String>();
-      XTextCursor cursor = range.getText().createTextCursorByRange(range);
-      if (UNO.XEnumerationAccess(cursor) != null)
-      {
-        XEnumeration xenum = UNO.XEnumerationAccess(cursor).createEnumeration();
-        while (xenum.hasMoreElements())
-        {
-          XEnumeration parEnum = null;
-          try
-          {
-            parEnum =
-              UNO.XEnumerationAccess(xenum.nextElement()).createEnumeration();
-          }
-          catch (java.lang.Exception e)
-          {}
-
-          while (parEnum != null && parEnum.hasMoreElements())
-          {
-            try
-            {
-              Object element = parEnum.nextElement();
-              XNamed bookmark = UNO.XNamed(UNO.getProperty(element, "Bookmark"));
-              String name = (bookmark != null) ? bookmark.getName() : "";
-
-              if (name.toLowerCase().startsWith(bookmarkName))
-              {
-                boolean isStart =
-                  ((Boolean) UNO.getProperty(element, "IsStart")).booleanValue();
-                if (isStart)
-                  started.add(name);
-                else if (started.contains(name)) found.add(name);
-              }
-            }
-            catch (Exception ex)
-            {
-              Logger.error(ex);
-            }
-          }
-        }
-      }
-      return found;
     }
 
     public String toString()
@@ -3930,6 +3873,15 @@ public class WollMuxEventHandler
         {
           WollMuxSingleton.showInfoModal(L.m("WollMux-Fehler"),
             L.m("An der Einfügestelle konnte kein Textbaustein gefunden werden."));
+        }
+      }
+      else
+      {
+        if (!atLeastOne)
+        {
+          WollMuxSingleton.showInfoModal(
+            L.m("WollMux-Fehler"),
+            L.m("An der Einfügestelle befindet sich bereits ein Verweis auf einen Textbaustein."));
         }
       }
     }
