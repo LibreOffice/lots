@@ -224,7 +224,8 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<target name="compileidl">
 		<echo level="info">idlc: Creating .urd files</echo>
 		<apply executable="idlc" dest="${MY_IDL}">
-			<arg line="-C -I${SDK_IDL}" />
+			<arg value="-C" />
+			<arg value="-I${SDK_IDL}" />
 			<fileset dir="${MY_IDL}" includes="**/*.idl" />
 			<mapper type="glob" from="*.idl" to="*.urd"/>
 		</apply>
