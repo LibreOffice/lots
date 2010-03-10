@@ -10,5 +10,6 @@ dist/WollMux.oxt
 dist/WollMuxBar.jar
 dist/md5sums.txt
 dist/wollmux-*.tar.gz
+dist/WollMux.update.xml
 oxt/WollMux.uno.jar
 *~
