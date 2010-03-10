@@ -35,6 +35,7 @@
  *                  | was rewrites angeht.
  * 08.07.2009 | BED | Anpassung an die Änderungen in DocumentCommand (R48539)
  * 16.12.2009 | ERT | Cast XTextField-Interface entfernt
+ * 08.03.2010 | ERT | [R33088]Bessere Fehlermeldungen im Zusammenhang mit overrideFrag
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -644,7 +645,6 @@ public class DocumentCommandInterpreter
        * Sollte eine Änderung unumgehbar sein, so ist sie VOR der Implementierung im
        * Wiki und in obigem Kommentar zu dokumentieren. Dabei ist darauf zu achten,
        * dass ein neuer Fall sich mit keinem der anderen Fälle überschneidet.
-       * 
        */
       XParagraphCursor[] start = cmd.getStartMark();
       XParagraphCursor[] end = cmd.getEndMark();
@@ -866,10 +866,13 @@ public class DocumentCommandInterpreter
         if (cmd.isManualMode())
         {
           Logger.error(e);
-          WollMuxSingleton.showInfoModal(L.m("WollMux-Fehler"), L.m(
-            "Das Textfragment mit der FRAG_ID '%1' konnte nicht eingefügt werden:",
-            cmd.getFragID())
-            + "\n\n" + e.getMessage());
+          WollMuxSingleton.showInfoModal(
+            L.m("WollMux-Fehler"),
+            L.m(
+              "Das Textfragment mit der FRAG_ID '%1' %2 konnte nicht eingefügt werden:",
+              cmd.getFragID(), ((fragId.equals(cmd.getFragID()) ? "" : L.m(
+                "(Override für Fragment '%1')", fragId))))
+              + "\n\n" + e.getMessage());
         }
         else
         {
