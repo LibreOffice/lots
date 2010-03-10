@@ -40,6 +40,7 @@
  * 28.03.2007 | BNK | Buttonanpassung verarbeiten bei mergeFormDescriptors().
  * 10.12.2007 | BNK | [R3582]Vertikale Scrollbar immer anzeigen
  * 28.04.2008 | BNK | [R19465]Fokus auf erstem Element, nicht auf Tab
+ * 08.03.2010 | ERT | [R6331]Scrollfunktion in der wollmux formular gui
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -50,11 +51,13 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
@@ -362,7 +365,6 @@ public class FormController implements UIElementEventHandler
      * gibt es im Augenblick allerdings keinen Grund), so muss bei diesem Panel ein
      * BorderLayout o.ä. verwendet werden, damit die Weitergabe des Fenster-Resize
      * ordentlich klappt und die ScrollPane ihre ScrollBalken einblendet.
-     * 
      */
     // contentPanel = new JPanel();
     myTabbedPane =
@@ -656,6 +658,8 @@ public class FormController implements UIElementEventHandler
 
           uiElements.add(uiElement);
 
+          addFocusListener(uiElement);
+
           /*
            * Überprüfen, dass die ID des neuen Elements nicht schon verwendet wurde
            * und Fehler ausgeben, falls doppelte Verwendung. Es wird auf jeden Fall
@@ -924,6 +928,31 @@ public class FormController implements UIElementEventHandler
     }
 
     /**
+     * Fügt einem Steuerelement einen FocusListener hinzu, der dafür sorgt, daß der
+     * Container zu dem Element hinscrollt, sobald es den Fokus erhält.
+     * 
+     * @param uiElement
+     *          das Steuerelement, das überwacht werden soll.
+     * @author Andor Ertsey (D-III-ITD-D101)
+     */
+    private void addFocusListener(UIElement uiElement)
+    {
+      uiElement.getComponent().addFocusListener(new FocusAdapter()
+      {
+        public void focusGained(FocusEvent e)
+        {
+          Container c = e.getComponent().getParent();
+
+          if (c != null && c instanceof JComponent)
+          {
+            ((JComponent) c).scrollRectToVisible(e.getComponent().getBounds());
+            c.repaint();
+          }
+        }
+      });
+    }
+
+    /**
      * Falls uiElement eine Plausi und oder ein Autofill hat, werden entsprechende
      * Abhängigkeiten in den Maps erfasst.
      * 
@@ -1153,7 +1182,7 @@ public class FormController implements UIElementEventHandler
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TODO Testen
+   *         TODO Testen
    */
   public boolean isInputOkay()
   {
@@ -1186,8 +1215,8 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Setzt den Wert des {@link UIElement}s mit ID uiElementId auf value und
-   * behandelt die Änderung so als wäre sie durch den Benutzer erfolgt. ACHTUNG! Die
+   * Setzt den Wert des {@link UIElement}s mit ID uiElementId auf value und behandelt
+   * die Änderung so als wäre sie durch den Benutzer erfolgt. ACHTUNG! Die
    * Verarbeitung läuft asynchron im Event-Dispatching Thread, d.h. diese Funktion
    * kehrt evtl. bereits vor Abarbeitung zurück.
    * 
@@ -1223,7 +1252,8 @@ public class FormController implements UIElementEventHandler
 
   /**
    * Die zentrale Anlaufstelle für alle von UIElementen ausgelösten Events (siehe
-   * {@link UIElementEventHandler#processUiElementEvent(UIElement, String, Object[])}).
+   * {@link UIElementEventHandler#processUiElementEvent(UIElement, String, Object[])}
+   * ).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
