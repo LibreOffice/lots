@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
@@ -58,10 +59,17 @@ import de.muenchen.allg.ooo.TextDocument;
 public class TextModule
 {
   /**
+   * Pattern, das insertFrag-Bookmarks matcht.
+   */
+  private static final Pattern INSERTFRAG_PATTERN =
+    DocumentCommands.getPatternForCommand("insertFrag");
+
+  /**
    * Sucht ab der Stelle range rückwarts nach gültigen Textfragmentbezeichnern mit
-   * Argumenten, legt um jedes einzufügenden Textbaustein ein Dokumentkommando
-   * 'insertFrag' mit den gefundenen Argumenten und liefert true zurück wenn mind.
-   * ein Dokumentenkommando erzeugt wurde.
+   * Argumenten, legt um jeden einzufügenden Textbaustein ein Dokumentkommando
+   * 'insertFrag' mit den gefundenen Argumenten. Aufgehört wird beim ersten Absatz in
+   * dem kein Textbausteinbezeichner identifiziert werden konnte oder wo bereits ein
+   * insertFrag vorhanden war.
    * 
    * @param doc
    *          Aktuelle Textdocument in dem gesucht werden soll
@@ -72,12 +80,18 @@ public class TextModule
    *          gesucht wird. Meistens handelt es sich um den viewCursor.
    * @param isManual
    *          kennzeichnet Einfügungen, die manuell vorgenommen worden sind. Setzt
-   *          den optinalen Knoten MODE = "manual"
+   *          den optionalen Knoten MODE = "manual"
+   * 
+   * @throws WollMuxFehlerException
+   *           falls ein Problem aufgetreten ist (z.B. kein Textbaustein erkannt oder
+   *           bereits ein insertFrag-Befehl vorhanden). Eine Exception wird genau
+   *           dann geworfen, wenn gar kein Textbausteinverweis eingefügt werden
+   *           konnte. Wurde mindestens einer eingefügt, wird keine Exception
+   *           geworfen, sondern an der Fehlerstelle mit dem Scan aufgehört.
    */
-  public static boolean createInsertFragFromIdentifier(XTextDocument doc,
-      XTextRange range, boolean isManual)
+  public static void createInsertFragFromIdentifier(XTextDocument doc,
+      XTextRange range, boolean isManual) throws WollMuxFehlerException
   {
-    boolean result = false;
     ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
 
     // holt sich Textbausteine aus .conf und sammelt sie in umgekehrter
@@ -104,9 +118,9 @@ public class TextModule
     String collectedContent = "";
     if (!completeContent.equals("")) cursor.collapseToEnd();
 
-    boolean matchedInLine = false;
-    boolean evaluateNext = false;
-    do
+    boolean processedAtLeastOneTBSuccessfully = false;
+    boolean foundAtLeastOneTBInCurrentParagraph = false;
+    while (true)
     {
       String identifierWithArgs = cursor.getString();
       if (!identifierWithArgs.equals(""))
@@ -116,47 +130,77 @@ public class TextModule
 
       if (results != null)
       {
-        matchedInLine = true;
+        foundAtLeastOneTBInCurrentParagraph = true;
 
+        /*
+         * Schauen, ob bereits ein insertFrag-Befehl vorhanden ist, um zu verhindern,
+         * dass ein zweiter darüber gelegt wird, da dies diverses Fehlverhalten
+         * produzieren kann.
+         */
         HashSet<String> bms =
-          TextDocument.getBookmarkNamesStartingWith("WM(CMD 'insertFrag'", cursor);
+          TextDocument.getBookmarkNamesMatching(INSERTFRAG_PATTERN, cursor);
 
         if (bms.size() == 0)
         {
           createInsertFrag(doc, cursor, results, isManual);
-          result = true;
+          processedAtLeastOneTBSuccessfully = true;
+
+          // Cursor kollabieren, damit beim Weitersuchen nicht der gerade schon
+          // verarbeitete Textbausteinbezeichner noch als Teil des nächsten
+          // Bezeichners verwendet wird.
+          // Die Textbausteinsuche verhält sich also im Gegensatz zur üblichen Art
+          // des Matchens von regulären Ausdrücken NICHT greedy, sondern wir nehmen
+          // den kürzesten matchenden Bezeichner
+          cursor.collapseToStart();
         }
         else
         {
-          result = isManual;
+          /*
+           * Es wurde bereits ein insertFrag-Kommando an der aktuellen Cursorposition
+           * gefunden.
+           * 
+           * Wir werfen nur dann einen Fehler, wenn wir noch gar keinen Textbaustein
+           * verarbeitet haben. Ansonsten hören wir einfach nur auf ohne Fehler. Es
+           * ist ein absolut legitimer Anwendungsfall, dass ein Anwender erst "TB1"
+           * tippt und dann "TextbausteinVERWEIS einfügen" (man beachte: nur beim
+           * Einfügen eines VERWEISEs ist es möglich, dass ein insertFrag Bookmark
+           * existiert.) macht und dann einen Absatz runtergeht und "TB2" tippt und
+           * wieder "Textbausteinverweis einfügen" macht.
+           */
+          if (!processedAtLeastOneTBSuccessfully)
+            throw new WollMuxFehlerException(
+              L.m("An der Einfügestelle befindet sich bereits ein Verweis auf einen Textbaustein."));
+          else
+            break;
         }
-
-        cursor.collapseToStart();
       }
 
       if (cursor.isStartOfParagraph())
       {
-        // zum vorherigen Absatz weiter schalten, dabei matchedInLine
-        // zurücksetzen. Nur weiter machen, wenn matchedInLine==true
+        // Falls wir in der ganzen Zeile nichts gefunden haben, dann aufhören.
+        if (!foundAtLeastOneTBInCurrentParagraph) break;
+
+        // zum vorherigen Absatz weiter schalten, dabei matchedInLine zurücksetzen.
         cursor.goLeft((short) 1, false);
-        evaluateNext = matchedInLine;
-        matchedInLine = false;
+        foundAtLeastOneTBInCurrentParagraph = false;
       }
       else
       {
-        // ein Zeichen nach links gehen und weiter machen.
+        // ein Zeichen nach links gehen (dabei Cursorrange wachsen lassen) und weiter
+        // machen.
         cursor.goLeft((short) 1, true);
-        evaluateNext = true;
       }
 
       // Hier der Vergleich completeContent<->collectedContent: wenn beide
       // übereinstimmen, kann abgebrochen werden, da der Bereich dann
       // vollständig evaluiert wurde.
-      if (!completeContent.equals("") && completeContent.equals(collectedContent))
-        evaluateNext = false;
-    } while (evaluateNext);
+      if (completeContent.length() > 0 && completeContent.equals(collectedContent))
+        break;
+    }
 
-    return result;
+    if (!processedAtLeastOneTBSuccessfully)
+      throw new WollMuxFehlerException(
+        L.m("An der Einfügestelle konnte kein Textbaustein gefunden werden."));
   }
 
   /**
@@ -284,8 +328,8 @@ public class TextModule
   }
 
   /**
-   * Erzeugt ein Bookmark vom Typ "WM(CMD'insertFrag' FRAG_ID '<args[0]>'
-   * ARGS('<args[1]>' '...' '<args[n]>')" im Dokument doc an der Stelle range.
+   * Erzeugt ein Bookmark vom Typ "WM(CMD'insertFrag' FRAG_ID '<args[0]>' ARGS('<args[1]>'
+   * '...' '<args[n]>')" im Dokument doc an der Stelle range.
    * 
    * @param doc
    *          Aktuelles Textdokument

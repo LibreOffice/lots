@@ -158,6 +158,21 @@ public class DocumentCommands implements Iterable<DocumentCommand>
   private HashSet<DocumentCommand> allVersionsCommands;
 
   /**
+   * Liefert ein {@link Pattern}, das auf Bookmarknamen für das WollMux-Kommando
+   * wollmuxCommand matcht. Das Pattern berücksichtigt optionale Whitespace sowie die
+   * optionale Zahl am Ende des Bookmarknamens. wollmuxCommand wird direkt ohne
+   * Escaping in den regulären Ausdruck eingebaut. Es ist also möglich, \w* zu
+   * übergeben, um alle Kommandos zu matchen.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public static Pattern getPatternForCommand(String wollmuxCommand)
+  {
+    return Pattern.compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'" + wollmuxCommand
+      + "'.*\\))\\s*\\d*\\z");
+  }
+
+  /**
    * Erzeugt einen neuen Container für DocumentCommands im TextDocument doc.
    * 
    * @param doc

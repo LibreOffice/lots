@@ -113,6 +113,7 @@ import de.muenchen.allg.itd51.wollmux.Bookmark;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.DocumentCommandInterpreter;
+import de.muenchen.allg.itd51.wollmux.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.FormModelImpl;
@@ -125,6 +126,7 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.VisibilityElement;
 import de.muenchen.allg.itd51.wollmux.VisibleTextFragmentList;
 import de.muenchen.allg.itd51.wollmux.WMCommandsFailedException;
+import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
@@ -292,28 +294,7 @@ public class WollMuxEventHandler
     public void process();
   }
 
-  /**
-   * Repräsentiert einen Fehler, der benutzersichtbar in einem Fehlerdialog angezeigt
-   * wird.
-   * 
-   * @author christoph.lutz
-   */
-  private static class WollMuxFehlerException extends java.lang.Exception
-  {
-    private static final long serialVersionUID = 3618646713098791791L;
-
-    public WollMuxFehlerException(String msg)
-    {
-      super(msg);
-    }
-
-    public WollMuxFehlerException(String msg, java.lang.Exception e)
-    {
-      super(msg, e);
-    }
-  }
-
-  private static class CantStartDialogException extends WollMuxFehlerException
+  public static class CantStartDialogException extends WollMuxFehlerException
   {
     private static final long serialVersionUID = -1130975078605219254L;
 
@@ -1087,21 +1068,21 @@ public class WollMuxEventHandler
    *          {@link DocumentManager.Info#hasTextDocumentModel()} verwendet werden.
    * 
    * 
-   *          ACHTUNG! ACHTUNG! Die Implementierung wurde extra so gewählt, dass hier
-   *          ein DocumentManager.Info anstatt direkt eines TextDocumentModel
-   *          übergeben wird. Es kam nämlich bei einem Dokument, das schnell geöffnet
-   *          und gleich wieder geschlossen wurde zu folgendem Deadlock:
+   * ACHTUNG! ACHTUNG! Die Implementierung wurde extra so gewählt, dass hier ein
+   * DocumentManager.Info anstatt direkt eines TextDocumentModel übergeben wird. Es
+   * kam nämlich bei einem Dokument, das schnell geöffnet und gleich wieder
+   * geschlossen wurde zu folgendem Deadlock:
    * 
-   *          {@link OnProcessTextDocument} =>
-   *          {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#getTextDocumentModel()}
-   *          => {@link TextDocumentModel#TextDocumentModel(XTextDocument)} =>
-   *          {@link DispatchProviderAndInterceptor#registerDocumentDispatchInterceptor(XFrame)}
-   *          => OOo Proxy =>
-   *          {@link GlobalEventListener#notifyEvent(com.sun.star.document.EventObject)}
-   *          ("OnUnload") =>
-   *          {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#hasTextDocumentModel()}
+   * {@link OnProcessTextDocument} =>
+   * {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#getTextDocumentModel()} =>
+   * {@link TextDocumentModel#TextDocumentModel(XTextDocument)} =>
+   * {@link DispatchProviderAndInterceptor#registerDocumentDispatchInterceptor(XFrame)} =>
+   * OOo Proxy =>
+   * {@link GlobalEventListener#notifyEvent(com.sun.star.document.EventObject)}
+   * ("OnUnload") =>
+   * {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#hasTextDocumentModel()}
    * 
-   *          Da {@link TextDocumentInfo} synchronized ist kam es zum Deadlock.
+   * Da {@link TextDocumentInfo} synchronized ist kam es zum Deadlock.
    * 
    */
   public static void handleTextDocumentClosed(DocumentManager.Info docInfo)
@@ -1756,9 +1737,9 @@ public class WollMuxEventHandler
    *          Name des Senders in der Form "Nachname, Vorname (Rolle)" wie sie auch
    *          der PALProvider bereithält.
    * @param idx
-   *          der zum Sender senderName passende index in der sortierten Senderliste
-   *          - dient zur Konsistenz-Prüfung, damit kein Sender gesetzt wird, wenn
-   *          die PAL der setzenden Komponente nicht mit der PAL des WollMux
+   *          der zum Sender senderName passende index in der sortierten Senderliste -
+   *          dient zur Konsistenz-Prüfung, damit kein Sender gesetzt wird, wenn die
+   *          PAL der setzenden Komponente nicht mit der PAL des WollMux
    *          übereinstimmt.
    */
   public static void handleSetSender(String senderName, int idx)
@@ -2521,8 +2502,8 @@ public class WollMuxEventHandler
        * Evaluierung über getValueForKey() erfolgt, die von jeder konkreten Klasse
        * implementiert wird. Evaluate() stellt auch sicher, dass die von
        * getValueForKey() zurückgelieferten Werte nicht selbst Variablen enthalten
-       * können (indem die Variablenbegrenzer "${" und "}" durch "<" bzw. ">" ersetzt
-       * werden.
+       * können (indem die Variablenbegrenzer "${" und "}" durch "<" bzw. ">"
+       * ersetzt werden.
        * 
        * @param exp
        *          der zu evaluierende Ausdruck
@@ -3394,8 +3375,9 @@ public class WollMuxEventHandler
       }
       String bookmarkName = bookmarkStart + hcAtt + ")";
 
+      Pattern bookmarkPattern = DocumentCommands.getPatternForCommand(blockname);
       Set<String> bmNames =
-        TextDocument.getBookmarkNamesStartingWith(bookmarkStart, range);
+        TextDocument.getBookmarkNamesMatching(bookmarkPattern, range);
 
       if (bmNames.size() > 0)
       {
@@ -3857,32 +3839,17 @@ public class WollMuxEventHandler
 
     }
 
-    protected void doit() throws WollMuxFehlerException
+    protected void doit()
     {
       XTextCursor viewCursor = model.getViewCursor();
-      boolean atLeastOne =
+      try
+      {
         TextModule.createInsertFragFromIdentifier(model.doc, viewCursor, reprocess);
-
-      if (reprocess)
-      {
-        if (atLeastOne)
-        {
-          handleReprocessTextDocument(model);
-        }
-        else
-        {
-          WollMuxSingleton.showInfoModal(L.m("WollMux-Fehler"),
-            L.m("An der Einfügestelle konnte kein Textbaustein gefunden werden."));
-        }
+        if (reprocess) handleReprocessTextDocument(model);
       }
-      else
+      catch (WollMuxFehlerException e)
       {
-        if (!atLeastOne)
-        {
-          WollMuxSingleton.showInfoModal(
-            L.m("WollMux-Fehler"),
-            L.m("An der Einfügestelle befindet sich bereits ein Verweis auf einen Textbaustein."));
-        }
+        WollMuxSingleton.showInfoModal(L.m("WollMux-Fehler"), e.getMessage());
       }
     }
 
