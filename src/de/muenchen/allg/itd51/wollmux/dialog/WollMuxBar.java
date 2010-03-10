@@ -1606,11 +1606,14 @@ public class WollMuxBar
 
     private final ConfigThingy menuConf;
 
-    public SearchBox(String label, ConfigThingy menuConf)
+    private boolean ignoreNextFocusRequest;
+
+    public SearchBox(final String label, ConfigThingy menuConf)
     {
       this.textField = new JTextField(L.m(label));
       this.menu = new JPopupMenu();
       this.menuConf = menuConf;
+      this.ignoreNextFocusRequest = false;
 
       textField.addActionListener(new ActionListener()
       {
@@ -1639,11 +1642,26 @@ public class WollMuxBar
 
         public void focusGained(FocusEvent arg0)
         {
+          if (ignoreNextFocusRequest)
+          {
+            ignoreNextFocusRequest = false;
+            return;
+          }
+
+          // "Suchen..." löschen wenn der erste nutzerinitiiert Focus kommt
+          if (arg0.getOppositeComponent() != null
+            && textField.getText().equals(label)) textField.setText("");
+
+          // Menü sichtbar machen, wenn nicht bereits sichtbar
           if (menu.getComponentCount() > 0 && !menu.isVisible())
           {
             menu.setVisible(true);
             textField.requestFocusInWindow();
           }
+
+          // den ganzen Text markieren
+          textField.setSelectionStart(0);
+          textField.setSelectionEnd(textField.getText().length());
         }
       });
 
@@ -1733,6 +1751,7 @@ public class WollMuxBar
             - MAX_SHOWN)));
         }
         menu.show(textField, 0, textField.getHeight());
+        ignoreNextFocusRequest = true;
         textField.requestFocusInWindow();
       }
     }
