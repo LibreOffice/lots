@@ -13,3 +13,6 @@ dist/wollmux-*.tar.gz
 dist/WollMux.update.xml
 oxt/WollMux.uno.jar
 *~
+
+syntax: regexp
+^dist/deb$
