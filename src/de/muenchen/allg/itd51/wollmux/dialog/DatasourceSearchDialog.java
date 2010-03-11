@@ -30,6 +30,7 @@
  * 29.06.2006 | BNK | setResizable(true)
  * 10.07.2006 | BNK | suchanfrageX statt wortX als Platzhalter.
  * 03.08.2006 | BNK | +getSchema()
+ * 11.03.2010 | BED | Einsatz von FrameWorker für Suche + Meldung bei Timeout
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -66,8 +67,10 @@ import java.util.regex.Pattern;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -774,34 +777,66 @@ public class DatasourceSearchDialog implements Dialog
     public void search()
     {
       if (query == null) return;
-      List<Query> queries = parseQuery(searchStrategy, query.getString());
 
-      QueryResults results = null;
-      try
+      // Erzeugen eines Runnable-Objekts, das die Geschäftslogik enthält und nachher
+      // an FrameWorker.disableFrameAndWork übergeben werden kann.
+      Runnable r = new Runnable()
       {
-        Iterator<Query> iter = queries.iterator();
-        while (iter.hasNext())
+        public void run()
         {
-          Query query = iter.next();
-          if (query.numberOfQueryParts() == 0)
-            results = dj.getContentsOf(query.getDatasourceName());
-          else
-            results = dj.find(query);
+          List<Query> queries = parseQuery(searchStrategy, query.getString());
 
-          if (!results.isEmpty()) break;
+          QueryResults results = null;
+          try
+          {
+            Iterator<Query> iter = queries.iterator();
+            while (iter.hasNext())
+            {
+              Query query = iter.next();
+              if (query.numberOfQueryParts() == 0)
+                results = dj.getContentsOf(query.getDatasourceName());
+              else
+                results = dj.find(query);
+
+              if (!results.isEmpty()) break;
+            }
+          }
+          catch (TimeoutException x)
+          {
+            JOptionPane.showMessageDialog(
+              myFrame,
+              L.m("Das Bearbeiten Ihrer Suchanfrage hat zu lange gedauert und wurde deshalb abgebrochen.\n"
+                + "Grund hierfür könnte ein Problem mit der Datenquelle sein oder mit dem verwendeten\n"
+                + "Suchbegriff, der auf zu viele Ergebnisse zutrifft.\n"
+                + "Bitte versuchen Sie eine andere, präzisere Suchanfrage."),
+              L.m("Timeout bei Suchanfrage"), JOptionPane.WARNING_MESSAGE);
+            Logger.error(x);
+          }
+          catch (IllegalArgumentException x)
+          {
+            Logger.error(x);
+          } // wird bei illegalen Suchanfragen geworfen
+
+          if (results != null && resultsList != null)
+          {
+            // Wir benötigen finalResults, da eine nicht-finale Variable nicht in der
+            // unten definierten anonymen Runnable-Klasse referenziert werden darf.
+            final QueryResults finalResults = results;
+
+            // Folgendes muss im Event Dispatch Thread ausgeführt werden
+            SwingUtilities.invokeLater(new Runnable()
+            {
+              public void run()
+              {
+                setListElements(resultsList,
+                  columnTransformer.transform(finalResults));
+              }
+            });
+          }
         }
-      }
-      catch (TimeoutException x)
-      {
-        Logger.error(x);
-      }
-      catch (IllegalArgumentException x)
-      {
-        Logger.error(x);
-      } // wird bei illegalen Suchanfragen geworfen
+      }; // Ende des Erzeugens des Runnable-Objekts r
 
-      if (results != null && resultsList != null)
-        setListElements(resultsList, columnTransformer.transform(results));
+      FrameWorker.disableFrameAndWork(myFrame, r, true);
     }
 
     /**
@@ -1464,8 +1499,8 @@ public class DatasourceSearchDialog implements Dialog
     Logger.init(System.err, Logger.DEBUG);
     String confFile = "testdata/formulartest.conf";
     ConfigThingy conf =
-      new ConfigThingy("", new URL(new File(System.getProperty("user.dir")).toURL(),
-        confFile));
+      new ConfigThingy("", new URL(
+        new File(System.getProperty("user.dir")).toURI().toURL(), confFile));
     Dialog dialog =
       DatasourceSearchDialog.create(conf.get("Funktionsdialoge").get(
         "Empfaengerauswahl"), WollMuxFiles.getDatasourceJoiner());
