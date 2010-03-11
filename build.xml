@@ -372,7 +372,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		</exec>
 
 		<exec dir="${PACKAGE_DIR}" executable="tar" failifexecutionfails="true" failonerror="true">
-			<arg line="-czf wollmux-${VERSION}.tar.gz --exclude=.git --exclude=.svn --exclude=.gitignore --exclude=debian wollmux-${VERSION}" />
+			<arg line="-czf wollmux-${VERSION}.tar.gz --exclude=.hg --exclude=.git --exclude=.svn --exclude=.gitignore --exclude=debian wollmux-${VERSION}" />
 		</exec>
 		
 		<delete dir="${TAR_BUILD_DIR}" />
@@ -384,12 +384,12 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 			<available file="debian/rules" />
 		</condition>
 		<copy todir="${DEB_BUILD_DIR}" >
-			<fileset dir="." includes="**/*" excludes="${DEB_BUILD_DIR}" /> 
-			<fileset dir="." includes="**/.*" excludes="${DEB_BUILD_DIR}" />
+			<fileset dir="." includes="**/*" excludes="${DEB_BUILD_DIR} **/.hg/** **/.hg" /> 
+			<fileset dir="." includes="**/.*" excludes="${DEB_BUILD_DIR} **/.hg/** **/.hg" />
 		</copy>
 		<copy todir="${DEB_BUILD_DIR}/UNOHelper" >
-			<fileset dir="${UNOHELPER_DIR}" includes="**/*" excludes="bin/**" /> 
-			<fileset dir="${UNOHELPER_DIR}" includes="**/.*"/>
+			<fileset dir="${UNOHELPER_DIR}" includes="**/*" excludes="bin/** **/.hg/** **/.hg" /> 
+			<fileset dir="${UNOHELPER_DIR}" includes="**/.*" excludes="**/.hg/** **/.hg" />
 		</copy>
 		
 		<exec dir="${DEB_BUILD_DIR}" executable="ant" failifexecutionfails="true" failonerror="true">
@@ -404,11 +404,11 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		</exec>
 		
 		<exec dir="${PACKAGE_DIR}/deb" executable="tar" failifexecutionfails="true" failonerror="true">
-			<arg line="-czf wollmux_${VERSION}.orig.tar.gz --exclude=.git --exclude=.svn --exclude=.gitignore --exclude=debian wollmux-${VERSION}" />
+			<arg line="-czf wollmux_${VERSION}.orig.tar.gz --exclude=.hg --exclude=.git --exclude=.svn --exclude=.gitignore --exclude=debian wollmux-${VERSION}" />
 		</exec>
 		
 		<exec dir="${DEB_BUILD_DIR}" executable="dpkg-buildpackage" failifexecutionfails="true" failonerror="true">
-			<arg line="-uc -us -sa -rfakeroot -I.git -I.svn -I.gitignore" />
+			<arg line="-uc -us -sa -rfakeroot -I.hg -I.git -I.svn -I.gitignore" />
 		</exec> 
 		<delete dir="${DEB_BUILD_DIR}" />
 	</target>
