@@ -51,6 +51,7 @@ import com.sun.star.text.XTextRange;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.Bookmark;
+import de.muenchen.allg.itd51.wollmux.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.UnknownIDException;
@@ -86,7 +87,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
    * Pattern zum Erkennen von insertValue und insertFormValue-Bookmarks.
    */
   public static final Pattern INSERTION_BOOKMARK =
-    Pattern.compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'((insertValue)|(insertFormValue))'.*\\))\\s*\\d*\\z");
+    DocumentCommands.getPatternForCommand("((insertValue)|(insertFormValue))");
 
   /**
    * Attribut-ID-Konstante für

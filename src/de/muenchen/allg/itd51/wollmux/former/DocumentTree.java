@@ -56,6 +56,7 @@ import com.sun.star.text.XTextTable;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.Bookmark;
+import de.muenchen.allg.itd51.wollmux.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXValue;
@@ -71,7 +72,7 @@ public class DocumentTree
    * Pattern zum Erkennen von setGroups-Bookmarks.
    */
   private static final Pattern GROUP_BOOKMARK =
-    Pattern.compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'setGroups'.*\\))\\s*\\d*\\z");
+    DocumentCommands.getPatternForCommand("setGroups");
 
   /**
    * Rückgabewert für {@link FormControl#getType()} im Falle einer Checkbox.

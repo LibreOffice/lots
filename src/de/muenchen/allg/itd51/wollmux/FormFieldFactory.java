@@ -71,7 +71,7 @@ import de.muenchen.allg.itd51.wollmux.TextRangeRelation.TreeRelation;
 public final class FormFieldFactory
 {
   public static final Pattern INSERTFORMVALUE =
-    Pattern.compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'((insertFormValue))'.*\\))\\s*\\d*\\z");
+    DocumentCommands.getPatternForCommand("insertFormValue");
 
   /**
    * Erzeugt ein Formularfeld im Dokument doc an der Stelle des

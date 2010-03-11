@@ -162,7 +162,9 @@ public class DocumentCommands implements Iterable<DocumentCommand>
    * wollmuxCommand matcht. Das Pattern berücksichtigt optionale Whitespace sowie die
    * optionale Zahl am Ende des Bookmarknamens. wollmuxCommand wird direkt ohne
    * Escaping in den regulären Ausdruck eingebaut. Es ist also möglich, \w* zu
-   * übergeben, um alle Kommandos zu matchen.
+   * übergeben, um alle Kommandos zu matchen. Gruppe 1 des Ausdrucks umschließt das
+   * ganze Kommando ab "WM" bis inklusive der letzten Klammer vor dem optionalen
+   * Zahlenteil am Ende.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
