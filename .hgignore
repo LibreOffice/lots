@@ -1,18 +1,25 @@
 syntax: glob
+localization.conf
+localizedConfigStrings.conf
 oxt/WollMux.rdb
 idl/de/muenchen/allg/itd51/wollmux/*.urd
 idl/de/muenchen/allg/itd51/wollmux/*.class
 bin/de
 bin/data
 bin/com
+dist/deb/wollmux-*.tar.gz
 dist/deb/wollmux_*.orig.tar.gz
+dist/deb/openoffice.org-wollmux_*.deb
+dist/deb/wollmux*.deb
+dist/deb/wollmux*.dsc
+dist/deb/wollmux*.diff.gz
+dist/deb/wollmux*.changes
 dist/WollMux.oxt
+dist/WollMux.uno.pkg
 dist/WollMuxBar.jar
 dist/md5sums.txt
-dist/wollmux-*.tar.gz
 dist/WollMux.update.xml
+dist/TerminateOOo.jar
+dist/wollmux-*-installer.exe
 oxt/WollMux.uno.jar
 *~
-
-syntax: regexp
-^dist/deb$
