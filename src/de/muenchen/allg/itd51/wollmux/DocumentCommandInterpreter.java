@@ -867,7 +867,7 @@ public class DocumentCommandInterpreter
         {
           String msg =
             L.m(
-              "Das Textbaustein mit der Bezeichnung (FRAG_ID) '%1' %2 konnte nicht eingefügt werden:",
+              "Der Textbaustein mit der Bezeichnung (FRAG_ID) '%1' %2 konnte nicht eingefügt werden:",
               cmd.getFragID(), ((fragId.equals(cmd.getFragID()) ? "" : L.m(
                 "(Override für Fragment '%1')", fragId))))
               + "\n\n" + e.getMessage();
