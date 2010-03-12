@@ -865,14 +865,16 @@ public class DocumentCommandInterpreter
       {
         if (cmd.isManualMode())
         {
-          Logger.error(e);
-          WollMuxSingleton.showInfoModal(
-            L.m("WollMux-Fehler"),
+          String msg =
             L.m(
-              "Das Textfragment mit der FRAG_ID '%1' %2 konnte nicht eingefügt werden:",
+              "Das Textbaustein mit der Bezeichnung (FRAG_ID) '%1' %2 konnte nicht eingefügt werden:",
               cmd.getFragID(), ((fragId.equals(cmd.getFragID()) ? "" : L.m(
                 "(Override für Fragment '%1')", fragId))))
-              + "\n\n" + e.getMessage());
+              + "\n\n" + e.getMessage();
+
+          Logger.error(msg);
+
+          WollMuxSingleton.showInfoModal(L.m("WollMux-Fehler"), msg);
         }
         else
         {
