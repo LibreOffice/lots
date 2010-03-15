@@ -474,7 +474,7 @@ public class TextDocumentModel
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private void parseInitialOverrideFragMap(ConfigThingy initialOverrideFragMap)
   {
@@ -1109,12 +1109,20 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert true, wenn das Dokument eine nicht leere Formularbeschreibung mit einem
-   * Fenster-Abschnitt enthält. In diesem Fall soll die FormGUI gestartet werden.
+   * Liefert true, wenn das Dokument eine nicht-leere Formularbeschreibung mit einem
+   * nicht-leeren Fenster-Abschnitt enthält. In diesem Fall soll die FormGUI
+   * gestartet werden.
    */
   synchronized public boolean hasFormGUIWindow()
   {
-    return getFormDescription().query("Formular").query("Fenster").count() != 0;
+    try
+    {
+      return getFormDescription().query("Formular").query("Fenster").getLastChild().count() != 0;
+    }
+    catch (NodeNotFoundException e)
+    {
+      return false;
+    }
   }
 
   /**
@@ -1222,8 +1230,10 @@ public class TextDocumentModel
    *          ...
    *     )
    *   )
-   * </pre>. Das Argument ARG ist dabei optional und wird nur gesetzt, wenn ARG
-   * nicht leer ist.
+   * </pre>
+   * 
+   * . Das Argument ARG ist dabei optional und wird nur gesetzt, wenn ARG nicht leer
+   * ist.
    * 
    * Anmerkungen:
    * 
@@ -1583,7 +1593,7 @@ public class TextDocumentModel
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private ConfigThingy applyFormularanpassung(ConfigThingy formularConf)
   {
@@ -1653,7 +1663,7 @@ public class TextDocumentModel
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private boolean matches(ConfigThingy conf, ConfigThingy matchConf)
   {
@@ -1794,8 +1804,8 @@ public class TextDocumentModel
   }
 
   /**
-   * Ersetzt die Formularbeschreibung dieses Dokuments durch die aus conf. Falls conf ==
-   * null, so wird die Formularbeschreibung gelöscht. ACHTUNG! conf wird nicht
+   * Ersetzt die Formularbeschreibung dieses Dokuments durch die aus conf. Falls conf
+   * == null, so wird die Formularbeschreibung gelöscht. ACHTUNG! conf wird nicht
    * kopiert sondern als Referenz eingebunden.
    * 
    * @param conf
@@ -1935,8 +1945,8 @@ public class TextDocumentModel
    *          Ein ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )",
    *          wobei Bezeichner ein beliebiger Bezeichner ist und FUNKTIONSDEFINITION
    *          ein erlaubter Parameter für
-   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)},
-   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
+   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}
+   *          , d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
    *          Funktionsname, z.B. "AND" sein. Der Bezeichner wird NICHT als Name der
    *          TRAFO verwendet. Stattdessen wird ein neuer eindeutiger TRAFO-Name
    *          generiert.
@@ -2797,8 +2807,8 @@ public class TextDocumentModel
    * Dokumentkommandos überschrieben wird (wenn r keine Ausdehnung hat, wird ein
    * kollabiertes Bookmark erzeugt und es kann logischerweise auch nichts
    * überschrieben werden). cmdStr muss nur das gewünschte Kommando enthalten ohne
-   * eine abschließende Zahl, die zur Herstellung eindeutiger Bookmarks benötigt wird -
-   * diese Zahl wird bei Bedarf automatisch an den Bookmarknamen angehängt.
+   * eine abschließende Zahl, die zur Herstellung eindeutiger Bookmarks benötigt wird
+   * - diese Zahl wird bei Bedarf automatisch an den Bookmarknamen angehängt.
    * 
    * @param r
    *          Die TextRange, an der das neue Bookmark mit diesem Dokumentkommando
@@ -2982,7 +2992,7 @@ public class TextDocumentModel
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   public int evaluateDocumentActions(Iterator<Function> funcs)
   {
@@ -3164,8 +3174,8 @@ public class TextDocumentModel
    * verwendet dieses Dokumentkommando keine Funktion, so wird null zurück geliefert.
    * 
    * @param cmdStr
-   *          Ein Kommandostring eines Dokumentkommandos in der Form "WM(CMD '<command>'
-   *          ...)"
+   *          Ein Kommandostring eines Dokumentkommandos in der Form "WM(CMD
+   *          '<command>' ...)"
    * @return
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -3209,8 +3219,8 @@ public class TextDocumentModel
    *          ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )", wobei
    *          Bezeichner ein beliebiger Bezeichner ist und FUNKTIONSDEFINITION ein
    *          erlaubter Parameter für
-   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)},
-   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
+   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}
+   *          , d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
    *          Funktionsname, z.B. "AND" sein. Der Bezeichner wird NICHT als Name der
    *          TRAFO verwendet. Stattdessen wird ein neuer eindeutiger TRAFO-Name
    *          generiert.
@@ -3423,8 +3433,8 @@ public class TextDocumentModel
    *          ein ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )",
    *          wobei Bezeichner ein beliebiger Bezeichner ist und FUNKTIONSDEFINITION
    *          ein erlaubter Parameter für
-   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)},
-   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
+   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}
+   *          , d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
    *          Funktionsname, z.B. "AND" sein. Der Bezeichner wird NICHT verwendet.
    *          Der Name der TRAFO wird ausschließlich durch trafoName festgelegt.
    * @throws UnavailableException
