@@ -198,14 +198,14 @@ abstract public class DocumentCommand
 
   /**
    * Liefert einen TextCursor für die TextRange, an der das Bookmark dieses
-   * {@link DocumentCommand}s verankert ist, zurück oder <code>null</code>, falls
-   * das Bookmark nicht mehr existiert (zum Beispiel weil es inzwischen gelöscht
-   * wurde). Aufgrund von OOo-Issue #67869 ist es im allgemeinen besser den von
-   * dieser Methode erzeugten Cursor statt direkt die TextRange zu verwenden, da sich
-   * mit dem Cursor der Inhalt des Bookmarks sicherer enumerieren lässt. Der von
-   * dieser Methode zurückgelieferte TextCursor sollte allerdings nicht verwendet
-   * werden, um direkt Text innerhalb eines Bookmarks einzufügen! Dafür sind die
-   * Methoden {@link #setTextRangeString(String)},
+   * {@link DocumentCommand}s verankert ist, zurück oder <code>null</code>, falls das
+   * Bookmark nicht mehr existiert (zum Beispiel weil es inzwischen gelöscht wurde).
+   * Aufgrund von OOo-Issue #67869 ist es im allgemeinen besser den von dieser
+   * Methode erzeugten Cursor statt direkt die TextRange zu verwenden, da sich mit
+   * dem Cursor der Inhalt des Bookmarks sicherer enumerieren lässt. Der von dieser
+   * Methode zurückgelieferte TextCursor sollte allerdings nicht verwendet werden, um
+   * direkt Text innerhalb eines Bookmarks einzufügen! Dafür sind die Methoden
+   * {@link #setTextRangeString(String)},
    * {@link #insertTextContentIntoBookmark(XTextContent, boolean)} und
    * {@link #getTextCursorWithinInsertMarks()} da.
    * 
@@ -246,13 +246,13 @@ abstract public class DocumentCommand
   /**
    * Liefert einen TextCursor ohne Ausdehnung zum Einfügen von Inhalt innerhalb des
    * Bookmarks dieses {@link DocumentCommand}s zurück, wobei der ursprünglich
-   * enthaltene Inhalt des Ankers des Bookmarks durch zwei Insert Marks ({@link #INSERT_MARK_OPEN}
-   * und {@link #INSERT_MARK_CLOSE}) ersetzt wird. Sollte das Bookmark kollabiert
-   * gewesen sein, so wird es zunächst dekollabiert, so dass die Insert Marks
-   * innerhalb des Bookmarks eingefügt werden können. Der zurückgelieferte Cursor
-   * besitzt keine Ausdehnung und befindet sich zwischen den beiden eingefügten
-   * Insert Marks. Falls das Bookmark nicht mehr existiert liefert die Methode
-   * <code>null</code> zurück.
+   * enthaltene Inhalt des Ankers des Bookmarks durch zwei Insert Marks (
+   * {@link #INSERT_MARK_OPEN} und {@link #INSERT_MARK_CLOSE}) ersetzt wird. Sollte
+   * das Bookmark kollabiert gewesen sein, so wird es zunächst dekollabiert, so dass
+   * die Insert Marks innerhalb des Bookmarks eingefügt werden können. Der
+   * zurückgelieferte Cursor besitzt keine Ausdehnung und befindet sich zwischen den
+   * beiden eingefügten Insert Marks. Falls das Bookmark nicht mehr existiert liefert
+   * die Methode <code>null</code> zurück.
    * 
    * @return TextCursor zum Einfügen innerhalb von Insert Marks oder
    *         <code>null</code>
@@ -1209,7 +1209,7 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * dieses Kommando sorgt dafür, dass alle unter dem Bookmark liegenden TextFields
+   * Dieses Kommando sorgt dafür, dass alle unter dem Bookmark liegenden TextFields
    * geupdatet werden.
    */
   static public class UpdateFields extends DocumentCommand
@@ -1327,11 +1327,10 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Über dieses Dokumentkommando kann der Typ des Dokuments festgelegt werden. Es
-   * gibt die Typen SETTYPE_normalTemplate, SETTYPE_templateTemplate und
-   * SETTYPE_formDocument. Die SetType-Kommandos werden bereits im
-   * OnProcessTextDocument-Event verarbeitet und spielen daher keine Rolle mehr für
-   * den DocumentCommandInterpreter.
+   * Über dieses Dokumentkommando können Druckfunktionen festgelegt werden, die beim
+   * Drucken ausgeführt werden sollen. Die SetPrintFunction-Kommandos werden bereits
+   * im OnProcessTextDocument-Event verarbeitet und spielen daher keine Rolle mehr
+   * für den DocumentCommandInterpreter.
    */
   static public class SetPrintFunction extends DocumentCommand
   {
