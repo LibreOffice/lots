@@ -98,6 +98,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -286,8 +287,8 @@ public class WollMuxBar
   private List<String> menuOrder = new ArrayList<String>();
 
   /**
-   * Enthält nach dem Aufruf von initMenuOrder(...) eine Zuordnung von MenüIDs zu den
-   * mit vollständigen Pfaden (der Menünavigation) aufgeführten Namen der Menüs
+   * EnthÃ¤lt nach dem Aufruf von initMenuOrder(...) eine Zuordnung von MenÃ¼IDs zu den
+   * mit vollstÃ¤ndigen Pfaden (der MenÃ¼navigation) aufgefÃ¼hrten Namen der MenÃ¼s
    */
   private Map<String, String> mapMenuIDToLabel = new HashMap<String, String>();
 
@@ -1550,22 +1551,22 @@ public class WollMuxBar
 
   /**
    * Diese Methode initialisiert die Datenstrukturen menuOrder und mapMenuIDToLabel
-   * zur Verwendung für die Searchbox. Dabei werden ausgehend von currentMenu alle
-   * dort beschriebenen Untermenüs zu menuOrder hinzugefügt; Weitere Unter-Untermenüs
-   * werden rekursiv durchsucht und ebenfalls angehängt.
+   * zur Verwendung fÃ¼r die Searchbox. Dabei werden ausgehend von currentMenu alle
+   * dort beschriebenen UntermenÃ¼s zu menuOrder hinzugefÃ¼gt; Weitere Unter-UntermenÃ¼s
+   * werden rekursiv durchsucht und ebenfalls angehÃ¤ngt.
    * 
-   * enthält menuOrder ausgehend vom Startmenü currentMenu (in gegebener Reihenfolge)
-   * alle Menüs und Untermenüs
+   * enthÃ¤lt menuOrder ausgehend vom StartmenÃ¼ currentMenu (in gegebener Reihenfolge)
+   * alle MenÃ¼s und UntermenÃ¼s
    * 
    * @param allMenues
    *          Erwartet die "Menues"-Knoten der WollMux-Konfiguration, in denen die
-   *          verfügbaren Menü-IDs aller möglichen Menüs beschrieben sind.
+   *          verfÃ¼gbaren MenÃ¼-IDs aller mÃ¶glichen MenÃ¼s beschrieben sind.
    * @param currentMenu
    *          Ausgehend von currentMenu werden rekursiv alle enthaltenen Unter- und
-   *          Unter-Untermenüs zu menuOrder hinzugefügt.
+   *          Unter-UntermenÃ¼s zu menuOrder hinzugefÃ¼gt.
    * @param path
-   *          Beschreibt den Namen des jeweils übergeordneten Menüs (initial sollte
-   *          "" übergeben werden), aus dem der Name für mapMenuIDToLabel
+   *          Beschreibt den Namen des jeweils Ã¼bergeordneten MenÃ¼s (initial sollte ""
+   *          Ã¼bergeben werden), aus dem der Name fÃ¼r mapMenuIDToLabel
    *          zusammengesetzt wird.
    * @author Christoph Lutz (privat)
    */
@@ -1590,9 +1591,9 @@ public class WollMuxBar
   }
 
   /**
-   * Implementiert eine SearchBox, die in einem JTextField nach Menüeinträgen der
-   * WollMuxBar suchen kann und so den Schnellzugriff auf bestimmte Menüeinträge
-   * ermöglicht.
+   * Implementiert eine SearchBox, die in einem JTextField nach MenÃ¼eintrÃ¤gen der
+   * WollMuxBar suchen kann und so den Schnellzugriff auf bestimmte MenÃ¼eintrÃ¤ge
+   * ermÃ¶glicht.
    * 
    * @author Christoph Lutz (privat)
    */
@@ -1648,11 +1649,11 @@ public class WollMuxBar
             return;
           }
 
-          // "Suchen..." löschen wenn der erste nutzerinitiiert Focus kommt
+          // "Suchen..." lÃ¶schen wenn der erste nutzerinitiiert Focus kommt
           if (arg0.getOppositeComponent() != null
             && textField.getText().equals(label)) textField.setText("");
 
-          // Menü sichtbar machen, wenn nicht bereits sichtbar
+          // MenÃ¼ sichtbar machen, wenn nicht bereits sichtbar
           if (menu.getComponentCount() > 0 && !menu.isVisible())
           {
             menu.setVisible(true);
@@ -1759,15 +1760,15 @@ public class WollMuxBar
     /**
      * Liefert true gdw. das durch button beschriebene Element ein button ist
      * (TYPE-Attribut muss "button" sein) und alle in words enthaltenen strings ohne
-     * Beachtung der Groß-/Kleinschreibung im Wert des LABEL-Attributs (das natürlich
+     * Beachtung der GroÃŸ-/Kleinschreibung im Wert des LABEL-Attributs (das natÃ¼rlich
      * vorhanden sein muss) vorkommen.
      * 
      * @param button
      *          Den ConfigThingy-Knoten, der ein UI-Element beschreibt, wie z.B.
      *          "(TYPE 'button' LABEL 'Hallo' ...)"
      * @param words
-     *          Diese Wörter müssen ALLE im LABEL vorkommen (ohne Beachtung der
-     *          Groß-/Kleinschreibung).
+     *          Diese WÃ¶rter mÃ¼ssen ALLE im LABEL vorkommen (ohne Beachtung der
+     *          GroÃŸ-/Kleinschreibung).
      */
     private boolean buttonMatches(ConfigThingy button, String[] words)
     {
