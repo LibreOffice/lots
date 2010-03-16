@@ -131,8 +131,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       // Im Gegensatz zu OnLoad oder OnNew wird das Event OnViewCreated auch bei
       // unsichtbar geöffneten Dokumenten erzeugt. Daher wird nun hauptsächlich
       // dieses Event zur Initiierung der Dokumentbearbeitung verwendet.
-      // Es gibt Situationen (vorsynchronized allem beim Anlegen und Öffnen von
-      // .odbs), wo
+      // Es gibt Situationen (vor allem beim Anlegen und Öffnen von .odbs), wo
       // OnCreate oder OnLoadFinished kommt, ohne dass einer der anderen Events
       // kommt.
       if ((event.equals("OnViewCreated") || event.equals("OnLoad")
