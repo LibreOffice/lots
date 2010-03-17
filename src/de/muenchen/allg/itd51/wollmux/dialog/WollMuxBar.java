@@ -882,7 +882,7 @@ public class WollMuxBar
         }
         else if (type.equals("searchbox"))
         {
-          String label = L.m("suchen...");
+          String label = L.m("Suchen...");
           try
           {
             String str = uiElementDesc.get("LABEL").toString();
@@ -893,6 +893,8 @@ public class WollMuxBar
 
           SearchBox searchBox = new SearchBox(label, menuConf);
           JTextField sfield = searchBox.getTextField();
+          sfield.setMinimumSize(sfield.getPreferredSize());
+          sfield.setMaximumSize(sfield.getPreferredSize());
 
           gbcMenuButton.gridx = x;
           gbcMenuButton.gridy = y;
@@ -1601,6 +1603,8 @@ public class WollMuxBar
   {
     private static final int MAX_SHOWN = 20;
 
+    private static final int TEXTFIELD_COLUMNS = 12;
+
     private final JTextField textField;
 
     private final JPopupMenu menu;
@@ -1611,7 +1615,7 @@ public class WollMuxBar
 
     public SearchBox(final String label, ConfigThingy menuConf)
     {
-      this.textField = new JTextField(L.m(label));
+      this.textField = new JTextField(L.m(label), TEXTFIELD_COLUMNS);
       this.menu = new JPopupMenu();
       this.menuConf = menuConf;
       this.ignoreNextFocusRequest = false;
