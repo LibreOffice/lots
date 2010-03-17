@@ -811,7 +811,7 @@ public class DocumentCommandInterpreter
         // gelöscht und das Dokumentkommando auf DONE gesetzt.
         if (fragId.length() == 0)
         {
-          cmd.setTextRangeString("");
+          clearTextRange(cmd);
           cmd.markDone(false);
           return 0;
         }
@@ -924,10 +924,25 @@ public class DocumentCommandInterpreter
     // Helper-Methoden:
 
     /**
+     * Löscht den Inhalt der TextRange von cmd, wobei Workarounds für
+     * OpenOffice-Probleme angewendet werden. Insbesondere werden InsertMarks um die
+     * Stelle herumgelegt vor dem Löschen, wie dies auch bei
+     * {@link #insertDocumentFromURL(DocumentCommand, URL)} geschieht.
+     * 
+     * @param cmd
+     *          Einfügeposition
+     */
+    private void clearTextRange(DocumentCommand cmd)
+    {
+      // Leeren Text (mit Insert Marks) einfügen:
+      XTextCursor insCursor = cmd.getTextCursorWithinInsertMarks();
+      insCursor.setString("");
+    }
+
+    /**
      * Die Methode fügt das externe Dokument von der URL url an die Stelle von cmd
      * ein. Die Methode enthält desweiteren notwendige Workarounds für die Bugs des
-     * insertDocumentFromURL der UNO-API. public int execute(DocumentCommandTree
-     * tree) { return executeDepthFirst(tree, false); }
+     * insertDocumentFromURL der UNO-API.
      * 
      * @param cmd
      *          Einfügeposition
