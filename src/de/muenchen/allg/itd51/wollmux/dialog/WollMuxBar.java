@@ -872,8 +872,8 @@ public class WollMuxBar
 
           senderboxes.add(senderbox);
 
-          gbcMenuButton.gridx = x;
-          gbcMenuButton.gridy = y;
+          gbcSenderbox.gridx = x;
+          gbcSenderbox.gridy = y;
           button.addMouseListener(myIsInsideMonitor);
           if (context.equals("menu"))
             compo.add(button);
