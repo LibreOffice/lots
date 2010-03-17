@@ -623,7 +623,7 @@ public class WollMuxBar
       if (menubar.count() > 0)
       {
         ConfigThingy menueConf = conf.query("Menues");
-        initMenuOrder(menueConf, menubar, "");
+        initMenuOrder(menueConf, menubar.getLastChild(), "");
         addUIElements(menueConf, menubar.getLastChild(), menuBar, 1, 0, "menu");
       }
     }
@@ -1565,8 +1565,8 @@ public class WollMuxBar
    *          Ausgehend von currentMenu werden rekursiv alle enthaltenen Unter- und
    *          Unter-Untermenüs zu menuOrder hinzugefügt.
    * @param path
-   *          Beschreibt den Namen des jeweils übergeordneten Menüs (initial sollte ""
-   *          übergeben werden), aus dem der Name für mapMenuIDToLabel
+   *          Beschreibt den Namen des jeweils übergeordneten Menüs (initial sollte
+   *          "" übergeben werden), aus dem der Name für mapMenuIDToLabel
    *          zusammengesetzt wird.
    * @author Christoph Lutz (privat)
    */
@@ -1581,7 +1581,7 @@ public class WollMuxBar
         String label = path + sub.get("LABEL").toString();
         menuOrder.add(id);
         mapMenuIDToLabel.put(id, label);
-        initMenuOrder(allMenues, allMenues.get(id), label + " / ");
+        initMenuOrder(allMenues, allMenues.query(id).getLastChild(), label + " / ");
       }
       catch (NodeNotFoundException e)
       {
