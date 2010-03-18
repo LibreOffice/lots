@@ -393,7 +393,12 @@ public class DatasourceJoiner
 
   /**
    * Durchsucht eine beliebige Datenquelle unter Angabe einer beliebigen Anzahl von
-   * Spaltenbedingungen. ACHTUNG! Die Ergebnisse sind keine DJDatasets!
+   * Spaltenbedingungen. ACHTUNG! Die Ergebnisse sind keine DJDatasets, weil diese
+   * Methode nur die Datensätze der in der Query benannten Datenquelle durchreicht.
+   * Diese Methode ist also nur deswegen Teil des DJs, weil der DJ die ganzen
+   * Datenquellen kennt. Ein Wrappen der Datensätze in DJDatasets wäre also nicht
+   * sinnvoll, da es damit möglich wäre durch die copy() Methode Datensätze in den
+   * LOS zu kopieren, die gar nicht aus der SENDER_SOURCE kommen.
    * 
    * @throws TimeoutException
    * @throws IllegalArgumentException
