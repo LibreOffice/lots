@@ -401,8 +401,9 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Liefert true zurück, wenn das Dokumentkommando insertMarks besitzt, die zuvor
-   * über den Aufruf von createInsertCursor() erzeugt worden sind, ansonsten false.
+   * Liefert <code>true</code> zurück, wenn das Dokumentkommando insertMarks besitzt,
+   * die zuvor über den Aufruf von {@link #getTextCursorWithinInsertMarks()} erzeugt
+   * worden sind, ansonsten <code>false</code>.
    */
   public boolean hasInsertMarks()
   {
@@ -411,7 +412,8 @@ abstract public class DocumentCommand
 
   /**
    * Teilt dem Dokumentkommando mit, dass die insertMarks des Dokumentkommandos
-   * entfernt wurden und hasInsertMarks() in Folge dessen false zurück liefern muss.
+   * entfernt wurden und {@link #hasInsertMarks()} in Folge dessen <code>false</code>
+   * zurück liefern muss.
    */
   public void unsetHasInsertMarks()
   {
