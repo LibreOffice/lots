@@ -50,7 +50,6 @@ import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.DropMode;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -226,7 +225,7 @@ public class MenuManager
     myTree.setEditable(false);
     myTree.setDragEnabled(true);
     myTree.setTransferHandler(new MyTransferHandler());
-    myTree.setDropMode(DropMode.ON_OR_INSERT);
+    // FIXME: myTree.setDropMode(DropMode.ON_OR_INSERT);
     myTree.setExpandsSelectedPaths(true);
     myTree.setRootVisible(false);
     myTree.setToggleClickCount(1);
@@ -1381,102 +1380,103 @@ public class MenuManager
      * Liefert true gdw path ein Nachfahre eines Favoriten-Menü-Knotens oder selbst
      * so ein Knoten ist.
      */
-    private boolean isInFavoritesMenu(TreePath path)
-    {
-      for (int i = path.getPathCount() - 1; i > 1; --i)
-      {
-        if (((Node) path.getPathComponent(i)).isFavoritesMenu()) return true;
-      }
-      return false;
-    }
+    // private boolean isInFavoritesMenu(TreePath path)
+    // {
+    // for (int i = path.getPathCount() - 1; i > 1; --i)
+    // {
+    // if (((Node) path.getPathComponent(i)).isFavoritesMenu()) return true;
+    // }
+    // return false;
+    // }
+    //
+    // public boolean canImport(TransferHandler.TransferSupport trans)
+    // {
+    // try
+    // {
+    // MyTransferable transferable =
+    // (MyTransferable) trans.getTransferable().getTransferData(
+    // TRANSFER_DATAFLAVORS[0]);
+    //
+    // // Feststellen, ob alle markierten Elemente in einem Favoriten-Menü sind.
+    // TreePath[] sources = transferable.getDraggedStuff();
+    // boolean allinfavorites = true;
+    // for (TreePath path : sources)
+    // {
+    // if (!isInFavoritesMenu(path))
+    // {
+    // allinfavorites = false;
+    // break;
+    // }
+    // }
+    //
+    // JTree.DropLocation location = (JTree.DropLocation) trans.getDropLocation();
+    // TreePath dropPath = location.getPath();
+    // // kann weder auf noch in wurzel was droppen
+    // if (dropPath.getPathCount() < 2) return false;
+    //
+    // // Falls das dropTarget innerhalb von mindestens einer der Selektionen liegt,
+    // // dürfen wir nicht droppen, weil sonst der Node gelöscht würde
+    // for (TreePath path : sources)
+    // {
+    // if (path.isDescendant(dropPath)) return false;
+    // }
+    //
+    // // Falls wir von außerhalb eines Favoriten-Menüs in ein solches droppen, dann
+    // // immer COPY nehmen.
+    // if (isInFavoritesMenu(dropPath) && !allinfavorites)
+    // if (trans.isDrop()) trans.setDropAction(COPY);
+    //
+    // return true;
+    // }
+    // catch (Exception x)
+    // {
+    // return false;
+    // }
+    // }
+    //
+    // FIXME: public boolean importData(TransferHandler.TransferSupport trans)
+    // {
+    // if (!canImport(trans)) return false;
+    //
+    // JTree.DropLocation location = (JTree.DropLocation) trans.getDropLocation();
+    // int childIndex = location.getChildIndex();
+    // TreePath dropPath = location.getPath();
+    // Node dropTarget = (Node) dropPath.getLastPathComponent();
+    //
+    // // Falls Drop auf einem Objekt, übersetzen in Einfügung dahinter bzw. am Ende
+    // if (childIndex < 0)
+    // {
+    // if (!dropTarget.isMenuOrBar())
+    // {
+    // Node oldDropTarget = dropTarget;
+    // dropPath = dropPath.getParentPath();
+    // dropTarget = (Node) dropPath.getLastPathComponent();
+    // childIndex = myTreeModel.getIndexOfChild(dropTarget, oldDropTarget);
+    // }
+    // else
+    // childIndex = dropTarget.children.size();
+    // }
+    //
+    // int action = trans.getDropAction();
+    // if (action == MOVE || action == COPY)
+    // {
+    // try
+    // {
+    // MyTransferable transferable =
+    // (MyTransferable) trans.getTransferable().getTransferData(
+    // TRANSFER_DATAFLAVORS[0]);
+    // TreePath[] paths = transferable.getDraggedStuff();
+    // myTreeModel.copy(paths, dropPath, childIndex);
+    // return true;
+    // }
+    // catch (Exception x)
+    // {
+    // Logger.error(x);
+    // }
+    // }
+    // return false;
+    // }
 
-    public boolean canImport(TransferHandler.TransferSupport trans)
-    {
-      try
-      {
-        MyTransferable transferable =
-          (MyTransferable) trans.getTransferable().getTransferData(
-            TRANSFER_DATAFLAVORS[0]);
-
-        // Feststellen, ob alle markierten Elemente in einem Favoriten-Menü sind.
-        TreePath[] sources = transferable.getDraggedStuff();
-        boolean allinfavorites = true;
-        for (TreePath path : sources)
-        {
-          if (!isInFavoritesMenu(path))
-          {
-            allinfavorites = false;
-            break;
-          }
-        }
-
-        JTree.DropLocation location = (JTree.DropLocation) trans.getDropLocation();
-        TreePath dropPath = location.getPath();
-        // kann weder auf noch in wurzel was droppen
-        if (dropPath.getPathCount() < 2) return false;
-
-        // Falls das dropTarget innerhalb von mindestens einer der Selektionen liegt,
-        // dürfen wir nicht droppen, weil sonst der Node gelöscht würde
-        for (TreePath path : sources)
-        {
-          if (path.isDescendant(dropPath)) return false;
-        }
-
-        // Falls wir von außerhalb eines Favoriten-Menüs in ein solches droppen, dann
-        // immer COPY nehmen.
-        if (isInFavoritesMenu(dropPath) && !allinfavorites)
-          if (trans.isDrop()) trans.setDropAction(COPY);
-
-        return true;
-      }
-      catch (Exception x)
-      {
-        return false;
-      }
-    }
-
-    public boolean importData(TransferHandler.TransferSupport trans)
-    {
-      if (!canImport(trans)) return false;
-
-      JTree.DropLocation location = (JTree.DropLocation) trans.getDropLocation();
-      int childIndex = location.getChildIndex();
-      TreePath dropPath = location.getPath();
-      Node dropTarget = (Node) dropPath.getLastPathComponent();
-
-      // Falls Drop auf einem Objekt, übersetzen in Einfügung dahinter bzw. am Ende
-      if (childIndex < 0)
-      {
-        if (!dropTarget.isMenuOrBar())
-        {
-          Node oldDropTarget = dropTarget;
-          dropPath = dropPath.getParentPath();
-          dropTarget = (Node) dropPath.getLastPathComponent();
-          childIndex = myTreeModel.getIndexOfChild(dropTarget, oldDropTarget);
-        }
-        else
-          childIndex = dropTarget.children.size();
-      }
-
-      int action = trans.getDropAction();
-      if (action == MOVE || action == COPY)
-      {
-        try
-        {
-          MyTransferable transferable =
-            (MyTransferable) trans.getTransferable().getTransferData(
-              TRANSFER_DATAFLAVORS[0]);
-          TreePath[] paths = transferable.getDraggedStuff();
-          myTreeModel.copy(paths, dropPath, childIndex);
-          return true;
-        }
-        catch (Exception x)
-        {
-          Logger.error(x);
-        }
-      }
-      return false;
-    }
   }
 
   private class MyTransferable implements Transferable

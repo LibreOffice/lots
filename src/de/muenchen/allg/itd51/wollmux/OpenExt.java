@@ -276,7 +276,8 @@ public class OpenExt
       }
       catch (Exception x)
       {
-        throw new IOException(L.m("Fehler beim Speichern der Datei"), x);
+        throw new IOException(L.m("Fehler beim Speichern der Datei: %1",
+          x.getMessage()));
       }
     }
     else if (download)
