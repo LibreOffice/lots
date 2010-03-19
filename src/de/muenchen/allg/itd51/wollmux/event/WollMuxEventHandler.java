@@ -2211,9 +2211,9 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein Event, das das übergebene Dokument in eine temporäre Datei speichert
+   * Erzeugt ein Event, das das Ã¼bergebene Dokument in eine temporÃ¤re Datei speichert
    * und eine externe Anwendung mit dieser aufruft, wobei der
-   * ExterneAnwendungen-Abschnitt zu ext die näheren Details wie den FILTER regelt.
+   * ExterneAnwendungen-Abschnitt zu ext die nÃ¤heren Details wie den FILTER regelt.
    * 
    * @param model
    *          Das an die externe Anwendung weiterzureichende TextDocumentModel.
@@ -2227,7 +2227,7 @@ public class WollMuxEventHandler
   }
 
   /**
-   * Dieses Event wird vom FormModelImpl ausgelöst, wenn der Benutzer die Aktion
+   * Dieses Event wird vom FormModelImpl ausgelÃ¶st, wenn der Benutzer die Aktion
    * "closeAndOpenExt" aktiviert hat.
    * 
    * @author matthias.benkmann

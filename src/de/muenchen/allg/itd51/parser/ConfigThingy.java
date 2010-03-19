@@ -869,7 +869,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   {
     if (children.isEmpty()) return name;
 
-    // Optimierung: Nicht unnötig StringBuilder produzieren
+    // Optimierung: Nicht unnÃ¶tig StringBuilder produzieren
     if (children.size() == 1) return children.get(0).toString();
 
     StringBuilder buf = new StringBuilder();

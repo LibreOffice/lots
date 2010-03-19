@@ -40,27 +40,27 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 public class OpenExt
 {
   /**
-   * Präfix für Verzeichnisnamen zum Herunterladen von URLs für ACTION "openExt".
+   * PrÃ¤fix fÃ¼r Verzeichnisnamen zum Herunterladen von URLs fÃ¼r ACTION "openExt".
    */
   private static final String WOLLMUX_DOWNLOAD_DIR_PREFIX =
     "wollmuxbar-temp-download-";
 
   /**
-   * Der ext Parameter den der Konstruktor übergeben bekommt.
+   * Der ext Parameter den der Konstruktor Ã¼bergeben bekommt.
    */
   private String ext;
 
   /**
    * true, falls DOWNLOAD "true" bei der entsprechenden Anwendung spezifiziert wurde.
-   * Sorgt dafür, dass die Datei vor dem Aufruf der externen Anwendung lokal
+   * Sorgt dafÃ¼r, dass die Datei vor dem Aufruf der externen Anwendung lokal
    * gespeichert und der externen Anwendung ein Dateipfad anstelle einer URL
-   * übergeben wird.
+   * Ã¼bergeben wird.
    */
   private boolean download = false;
 
   /**
    * true, falls PIPE "true" bei der entsprechenden Anwendung spezifiziert wurde.
-   * Sorgt dafür, dass stdout und stderr von einem Thread offen gehalten und geleert
+   * Sorgt dafÃ¼r, dass stdout und stderr von einem Thread offen gehalten und geleert
    * werden. Manche Programme brauchen das.
    */
   private boolean pipe = false;
@@ -74,9 +74,9 @@ public class OpenExt
   private List<String> programs = new Vector<String>();
 
   /**
-   * Falls vorhanden, die FILTER-Angabe. Mögliche FILTER sind hier zu
+   * Falls vorhanden, die FILTER-Angabe. MÃ¶gliche FILTER sind hier zu
    * finden:basis-link/share/registry/modules/org/openoffice/TypeDetection/Filter.
-   * Zusätzliche Optionen des PDF Filters sind hier:
+   * ZusÃ¤tzliche Optionen des PDF Filters sind hier:
    * http://specs.openoffice.org/appwide/pdf_export/PDFExportDialog.odt
    */
   private String filter = null;
@@ -103,14 +103,14 @@ public class OpenExt
   private boolean haveStored = false;
 
   /**
-   * Erzeugt ein neues OpenExt Objekt für die Erweitertung ext, wobei Informationen
-   * über die externe Applikation aus wollmuxConf,query("ExterneAnwendungen")
+   * Erzeugt ein neues OpenExt Objekt fÃ¼r die Erweitertung ext, wobei Informationen
+   * Ã¼ber die externe Applikation aus wollmuxConf,query("ExterneAnwendungen")
    * genommen werden.
    * 
    * ACHTUNG! Jedes OpenExt-Objekt kann nur einmal benutzt werden.
    * 
    * @throws ConfigurationErrorException
-   *           falls für ext keine externe Anwendung (korrekt) definiert wurde.
+   *           falls fÃ¼r ext keine externe Anwendung (korrekt) definiert wurde.
    */
   public OpenExt(String ext, ConfigThingy wollmuxConf)
       throws ConfigurationErrorException
@@ -131,7 +131,7 @@ public class OpenExt
         extConf = appConf.query("EXT");
         if (extConf.count() == 0)
         {
-          Logger.error(L.m("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige EXT-Angabe."));
+          Logger.error(L.m("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthÃ¤lt keine gÃ¼ltige EXT-Angabe."));
           continue;
         }
 
@@ -156,7 +156,7 @@ public class OpenExt
         }
         catch (NodeNotFoundException e)
         {
-          Logger.error(L.m("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige PROGRAM-Angabe."));
+          Logger.error(L.m("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthÃ¤lt keine gÃ¼ltige PROGRAM-Angabe."));
           continue;
         }
 
@@ -186,8 +186,8 @@ public class OpenExt
   /**
    * Liefert die Liste der Programme in der Reihenfolge in der
    * {@link #launch(de.muenchen.allg.itd51.wollmux.OpenExt.ExceptionHandler)}
-   * versuchen wird, sie auszuführen. Die gelieferte Liste ist eine Referenz auf die
-   * internen Daten. Es ist also möglich, sie vor dem Aufruf von launch zu verändern.
+   * versuchen wird, sie auszufÃ¼hren. Die gelieferte Liste ist eine Referenz auf die
+   * internen Daten. Es ist also mÃ¶glich, sie vor dem Aufruf von launch zu verÃ¤ndern.
    * 
    * TESTED
    */
@@ -198,9 +198,9 @@ public class OpenExt
 
   /**
    * Legt url als die Datei fest mit der die externe Anwendung gestartet werden soll.
-   * Ob die URL selbst als Parameter an das Programm übergeben wird oder ob der
+   * Ob die URL selbst als Parameter an das Programm Ã¼bergeben wird oder ob der
    * Inhalt der URL heruntergeladen und in eine Datei gespeichert wird, deren Pfad
-   * als Parameter übergeben wird, wird durch die DOWNLOAD-Angabe in der Definition
+   * als Parameter Ã¼bergeben wird, wird durch die DOWNLOAD-Angabe in der Definition
    * der externen Anwendung in der wollmux.conf bestimmt.
    * 
    * @see #setSource(XStorable)
@@ -215,12 +215,12 @@ public class OpenExt
 
   /**
    * Legt doc als die Datei fest mit der die externe Andwendung gestartet werden
-   * soll. Die Datei wird immer zuerst in eine temporäre Datei exportiert bevor die
+   * soll. Die Datei wird immer zuerst in eine temporÃ¤re Datei exportiert bevor die
    * externe Anwendung aufgerufen wird. In welchem Format gespeichert wird, bestimmt
    * die FILTER-Angabe in der Definition der externen Anwendung. Ob die Datei als
-   * Pfad oder als file: URL an die externe Anwendung übergeben wird bestimmt die
-   * DOWNLOAD-Angabe. Als Dateierweiterung für die temporäre Datei wird das dem
-   * Konstruktor übergebenene ext verwendet. Werden mehrere setSource() Funktionen
+   * Pfad oder als file: URL an die externe Anwendung Ã¼bergeben wird bestimmt die
+   * DOWNLOAD-Angabe. Als Dateierweiterung fÃ¼r die temporÃ¤re Datei wird das dem
+   * Konstruktor Ã¼bergebenene ext verwendet. Werden mehrere setSource() Funktionen
    * aufgerufen, so gewinnt die letzte.
    * 
    * @throws ConfigurationErrorException
@@ -235,7 +235,7 @@ public class OpenExt
   {
     if (filter == null)
       throw new ConfigurationErrorException(L.m(
-        "FILTER-Angabe fehlt bei Anwendung für \"%1\"", ext));
+        "FILTER-Angabe fehlt bei Anwendung fÃ¼r \"%1\"", ext));
     this.doc = doc;
     this.url = null;
   }
@@ -243,7 +243,7 @@ public class OpenExt
   /**
    * Speichert die Datei auf der Festplatte, falls download==true oder die Quelle ein
    * XStorable ist. In letzterem Fall wird ein Export gemacht, der die Quell-URL des
-   * Dokuments nicht ändert.
+   * Dokuments nicht Ã¤ndert.
    * 
    * @throws IOException
    *           falls beim Speichern ein Problem aufgetreten ist. *
@@ -291,7 +291,7 @@ public class OpenExt
 
       InputStream istream = url.openStream();
       if (!destFile.createNewFile())
-        throw new IOException(L.m("Konnte temporäre Datei \"%1\" nicht anlegen",
+        throw new IOException(L.m("Konnte temporÃ¤re Datei \"%1\" nicht anlegen",
           destFile.getPath()));
       FileOutputStream out = new FileOutputStream(destFile);
       byte[] buffy = new byte[4096];
@@ -311,7 +311,7 @@ public class OpenExt
 
   /**
    * Generiert aus fileName (kann leerer String oder null sein) einen Dateinamen und
-   * legt ein temporärers Verzeichnis an. Aus der Zusammensetzung von beidem wird
+   * legt ein temporÃ¤rers Verzeichnis an. Aus der Zusammensetzung von beidem wird
    * {@link #destFile} generiert.
    * 
    * TESTED
@@ -323,7 +323,7 @@ public class OpenExt
     if (!tmpDir.isDirectory() || !tmpDir.canWrite())
       throw new IOException(
         L.m(
-          "Temporäres Verzeichnis\n\"%1\"\nexistiert nicht oder kann nicht beschrieben werden!",
+          "TemporÃ¤res Verzeichnis\n\"%1\"\nexistiert nicht oder kann nicht beschrieben werden!",
           tmpDir.getPath()));
 
     File downloadDir = null;
@@ -338,7 +338,7 @@ public class OpenExt
 
     if (downloadDir == null)
       throw new IOException(
-        L.m("Konnte kein temporäres Verzeichnis für den Download der Datei anlegen!"));
+        L.m("Konnte kein temporÃ¤res Verzeichnis fÃ¼r den Download der Datei anlegen!"));
 
     if (fileName.length() == 0) fileName = "temp";
     if (!fileName.endsWith("." + ext)) fileName += "." + ext;
@@ -353,10 +353,10 @@ public class OpenExt
   }
 
   /**
-   * Startet die externe Anwendung nachdem falls nötig die Quelldatei heruntergeladen
+   * Startet die externe Anwendung nachdem falls nÃ¶tig die Quelldatei heruntergeladen
    * bzw, exportiert wurde (d.h. falls noch nicht geschehen wird
    * {@link #storeIfNecessary()} aufgerufen). ACHTUNG! Der Aufruf erfolgt immer in
-   * einem eigenen Thread. Diese Methode kehrt also sofort zurück.
+   * einem eigenen Thread. Diese Methode kehrt also sofort zurÃ¼ck.
    * 
    * Hinweis: Es macht einen Unterschied ob man {@link #storeIfNecessary()} vor dem
    * Aufruf dieser Methode explizit aufruft oder nicht. Ruft man
@@ -366,7 +366,7 @@ public class OpenExt
    * 
    * ACHTUNG! Im Fall, dass /loadComponentFromURL/ bei den zu versuchenden Programmen ({@link #getPrograms()})
    * dabei ist, geht diese Methode davon aus, dass eine funktionierende
-   * OOo-Verbindung über {@link UNO} besteht.
+   * OOo-Verbindung Ã¼ber {@link UNO} besteht.
    * 
    * @param handler
    *          wird im Falle einer Exception im von launch gestarteten Thread
@@ -434,7 +434,7 @@ public class OpenExt
 
         handler.handle(new Exception(
           L.m(
-            "Keines der für die Erweiterung \"%1\"konfigurierten Programme konnte gestartet werden!\n%2",
+            "Keines der fÃ¼r die Erweiterung \"%1\"konfigurierten Programme konnte gestartet werden!\n%2",
             ext, errors.toString())));
       }
 
@@ -455,8 +455,8 @@ public class OpenExt
    * </pre>
    * 
    * wobei die Reihenfolge der Parameter beliebig ist und nicht alle angegeben werden
-   * müssen. Obiges Beispiel zeigt die Default-Werte. Das folgende command ist also
-   * äquivalent
+   * mÃ¼ssen. Obiges Beispiel zeigt die Default-Werte. Das folgende command ist also
+   * Ã¤quivalent
    * 
    * <pre>
    * /loadComponentFromURL/
@@ -466,7 +466,7 @@ public class OpenExt
    *          die URL der zu ladenden Datei
    * 
    * @param errors
-   *          Fehler beim Laden der Datei werden hier angehängt.
+   *          Fehler beim Laden der Datei werden hier angehÃ¤ngt.
    * 
    * @return true wenn die Datei geladen werden konnte.
    */
@@ -511,7 +511,7 @@ public class OpenExt
   }
 
   /**
-   * Versucht, einen Prozess zu starten zur Ausführung von command mit
+   * Versucht, einen Prozess zu starten zur AusfÃ¼hrung von command mit
    * Kommandozeilenargument appArgument.
    * 
    * @param pipe
@@ -520,7 +520,7 @@ public class OpenExt
    *          geschlossen. stdin wird immer geschlossen.
    * 
    * @param errors
-   *          Fehler beim Ausführen des Prozesses werden hier angehängt.
+   *          Fehler beim AusfÃ¼hren des Prozesses werden hier angehÃ¤ngt.
    * 
    * @return true wenn der Prozess gestartet werden konnte.
    */
@@ -537,26 +537,26 @@ public class OpenExt
       process.getOutputStream().close();
 
       /*
-       * Wenn der gestartete Prozess Ein- oder Ausgabe tätigt, so wird er blocken,
-       * wenn an der anderen Seite nichts hängt das schreibt oder liest. Am liebsten
-       * würden wir natürlich nach /dev/null umleiten, aber das kann Java nicht (vor
-       * allem nicht portabel). Für Stdin ist die Lösung einfach. Man schließt den
-       * Strom. Damit muss jedes Programm zurecht kommen. Für Stdout/Stderr (oben
-       * über redirectErrorStream zusammengelegt) kann man das zwar auch machen (und
-       * das tut der unten stehende Code auch), aber das ist etwas böse, weil
-       * Programme zumindest unter Unix für gewöhnlich nicht dafür ausgelegt sind,
+       * Wenn der gestartete Prozess Ein- oder Ausgabe tÃ¤tigt, so wird er blocken,
+       * wenn an der anderen Seite nichts hÃ¤ngt das schreibt oder liest. Am liebsten
+       * wÃ¼rden wir natÃ¼rlich nach /dev/null umleiten, aber das kann Java nicht (vor
+       * allem nicht portabel). FÃ¼r Stdin ist die LÃ¶sung einfach. Man schlieÃŸt den
+       * Strom. Damit muss jedes Programm zurecht kommen. FÃ¼r Stdout/Stderr (oben
+       * Ã¼ber redirectErrorStream zusammengelegt) kann man das zwar auch machen (und
+       * das tut der unten stehende Code auch), aber das ist etwas bÃ¶se, weil
+       * Programme zumindest unter Unix fÃ¼r gewÃ¶hnlich nicht dafÃ¼r ausgelegt sind,
        * kein Stdout+Stderr zu haben. Falls ein Programm damit Probleme hat, kann ein
        * einfaches Shell-Skript als Wrapper verwendet werden, das die Umleitung nach
        * /dev/null erledigt.
        * 
-       * Eine alternative Lösung ist der durch pipe==true angetriggerte Code, der
-       * einfach Stdout+Stderr ausliest. Unschön an dieser Lösung ist, dass der
-       * Java-Thread weiterläuft solange wie das externe Programm läuft.
+       * Eine alternative LÃ¶sung ist der durch pipe==true angetriggerte Code, der
+       * einfach Stdout+Stderr ausliest. UnschÃ¶n an dieser LÃ¶sung ist, dass der
+       * Java-Thread weiterlÃ¤uft solange wie das externe Programm lÃ¤uft.
        */
       if (pipe == false)
       {
-        process.getInputStream().close(); // böse
-        process.getErrorStream().close(); // böse
+        process.getInputStream().close(); // bÃ¶se
+        process.getErrorStream().close(); // bÃ¶se
       }
       else
       {

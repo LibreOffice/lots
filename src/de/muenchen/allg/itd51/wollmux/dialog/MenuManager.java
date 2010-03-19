@@ -86,17 +86,17 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 
 /**
- * Eine GUI zum Bearbeiten der Menüstruktur der WollMuxBar.
+ * Eine GUI zum Bearbeiten der MenÃ¼struktur der WollMuxBar.
  */
 public class MenuManager
 {
   /**
-   * Regex zur Identifikation von legalen Schlüsseln.
+   * Regex zur Identifikation von legalen SchlÃ¼sseln.
    */
   private static Pattern KEY_PATTERN = Pattern.compile("^([a-zA-Z_][a-zA-Z_0-9]*)");
 
   private static final String UIELEMENT_WITHOUT_TYPE_ERR =
-    L.m("Menüeintrag ohne TYPE-Attribut gefunden");
+    L.m("MenÃ¼eintrag ohne TYPE-Attribut gefunden");
 
   /**
    * Text der an verschiedenen Stellen verwendet wird.
@@ -133,8 +133,8 @@ public class MenuManager
   private ConfigThingy userConf;
 
   /**
-   * Die Wurzel des Menübaumes. Direkt darunter liegen die {@link Node}s für
-   * Buttonleiste und Menüleiste.
+   * Die Wurzel des MenÃ¼baumes. Direkt darunter liegen die {@link Node}s fÃ¼r
+   * Buttonleiste und MenÃ¼leiste.
    */
   private Node menuTreeRoot;
 
@@ -154,12 +154,12 @@ public class MenuManager
   private JTree myTree;
 
   /**
-   * Das zu {@link #myTree} gehörende {@link MyTreeModel}.
+   * Das zu {@link #myTree} gehÃ¶rende {@link MyTreeModel}.
    */
   private MyTreeModel myTreeModel;
 
   /**
-   * Das "Bearbeiten" Menü als Popup für den Rechts-Klick.
+   * Das "Bearbeiten" MenÃ¼ als Popup fÃ¼r den Rechts-Klick.
    */
   private JPopupMenu editMenuPopup = new JPopupMenu();
 
@@ -170,7 +170,7 @@ public class MenuManager
   private JFileChooser fileChooser;
 
   /**
-   * Wird nach dem Schließen des Dialogs aufgerufen.
+   * Wird nach dem SchlieÃŸen des Dialogs aufgerufen.
    */
   private ActionListener finishedAction;
 
@@ -180,13 +180,13 @@ public class MenuManager
   private List<ConfigID> configIDs;
 
   /**
-   * Das Menü "CONF_IDs".
+   * Das MenÃ¼ "CONF_IDs".
    */
   private JMenu confidsMenu;
 
   /**
-   * Zeigt eine GUI an, über die die Menüstruktur der WollMuxBar bearbeitet werden
-   * kann. Alle Änderungen werden in die Datei wollmuxbar.conf geschrieben.
+   * Zeigt eine GUI an, Ã¼ber die die MenÃ¼struktur der WollMuxBar bearbeitet werden
+   * kann. Alle Ã„nderungen werden in die Datei wollmuxbar.conf geschrieben.
    * 
    * @param defaultConf
    *          Die vom Administrator vorgegebene wollmux.conf
@@ -214,7 +214,7 @@ public class MenuManager
 
   private void createGUI()
   {
-    myFrame = new JFrame(L.m("Menü-Manager"));
+    myFrame = new JFrame(L.m("MenÃ¼-Manager"));
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     oehrchen = new MyWindowListener();
     myFrame.addWindowListener(oehrchen);
@@ -257,7 +257,7 @@ public class MenuManager
       }
     });
     menu.add(menuItem);
-    menuItem = new JMenuItem(new AbstractAction(L.m("Schließen"))
+    menuItem = new JMenuItem(new AbstractAction(L.m("SchlieÃŸen"))
     {
       public void actionPerformed(ActionEvent e)
       {
@@ -303,7 +303,7 @@ public class MenuManager
 
     Collections.sort(configIDs);
 
-    JMenu add = new JMenu(L.m("Hinzufügen"));
+    JMenu add = new JMenu(L.m("HinzufÃ¼gen"));
     for (ConfigID cid : configIDs)
     {
       final String id = cid.id;
@@ -317,7 +317,7 @@ public class MenuManager
     }
     confidsMenu.add(add);
 
-    JMenu addRecursive = new JMenu(L.m("Rekursiv hinzufügen"));
+    JMenu addRecursive = new JMenu(L.m("Rekursiv hinzufÃ¼gen"));
     for (ConfigID cid : configIDs)
     {
       final String id = cid.id;
@@ -431,7 +431,7 @@ public class MenuManager
       }
       else
       {
-        hbox.add(new JButton(new AbstractAction(L.m("Löschen"))
+        hbox.add(new JButton(new AbstractAction(L.m("LÃ¶schen"))
         {
           public void actionPerformed(ActionEvent e)
           {
@@ -470,7 +470,7 @@ public class MenuManager
         {
           {
             String msg =
-              L.m("Die CONF_ID darf nur Ziffern, Buchstaben und Unterstriche enthalten.\nAußerdem darf sie nicht mit einer Ziffer beginnen.");
+              L.m("Die CONF_ID darf nur Ziffern, Buchstaben und Unterstriche enthalten.\nAuÃŸerdem darf sie nicht mit einer Ziffer beginnen.");
             JOptionPane.showMessageDialog(myDialog, msg, L.m("Syntaxfehler"),
               JOptionPane.ERROR_MESSAGE);
             return;
@@ -518,7 +518,7 @@ public class MenuManager
   }
 
   /**
-   * Fügt menu die Menüpunkte für das Bearbeiten-Menü hinzu.
+   * FÃ¼gt menu die MenÃ¼punkte fÃ¼r das Bearbeiten-MenÃ¼ hinzu.
    * 
    */
   private void createEditMenu(JComponent menu)
@@ -540,7 +540,7 @@ public class MenuManager
     });
     menu.add(menuItem);
     addSeparator(menu);
-    menuItem = new JMenuItem(new AbstractAction(L.m("Neues (Unter)Menü"))
+    menuItem = new JMenuItem(new AbstractAction(L.m("Neues (Unter)MenÃ¼"))
     {
       public void actionPerformed(ActionEvent e)
       {
@@ -573,7 +573,7 @@ public class MenuManager
     });
     menu.add(menuItem);
     addSeparator(menu);
-    menuItem = new JMenuItem(new AbstractAction(L.m("Löschen"))
+    menuItem = new JMenuItem(new AbstractAction(L.m("LÃ¶schen"))
     {
       public void actionPerformed(ActionEvent e)
       {
@@ -584,7 +584,7 @@ public class MenuManager
   }
 
   /**
-   * Fügt menu einen für die jeweilige Menüart passenden Separator hinzu.
+   * FÃ¼gt menu einen fÃ¼r die jeweilige MenÃ¼art passenden Separator hinzu.
    * 
    */
   private void addSeparator(JComponent menu)
@@ -596,7 +596,7 @@ public class MenuManager
   }
 
   /**
-   * Liefert das empfohlene Startverzeichnis für einen {@link JFileChooser}.
+   * Liefert das empfohlene Startverzeichnis fÃ¼r einen {@link JFileChooser}.
    * 
    * TESTED
    */
@@ -616,9 +616,9 @@ public class MenuManager
   /**
    * Versucht aus der absoluten URL von file eine URL zu machen, die relativ zum
    * DEFAULT_CONTEXT ist. Alternativ wird die Variable ${user.home} in die URL
-   * eingebaut, wenn sie unterhalb dieses Verzeichnisses liegt und dies günstiger
+   * eingebaut, wenn sie unterhalb dieses Verzeichnisses liegt und dies gÃ¼nstiger
    * erscheint. Falls diese Heuristiken nicht fruchten wird eine absolute URL
-   * zurückgeliefert.
+   * zurÃ¼ckgeliefert.
    * 
    * TESTED
    */
@@ -679,8 +679,8 @@ public class MenuManager
   {
     String canonicalPath;
     /*
-     * Derzeit auskommentiert, weil ich nicht sicher bin, ob das Auflösen von
-     * Symlinks nicht in manchen Anwendungsfällen stört.
+     * Derzeit auskommentiert, weil ich nicht sicher bin, ob das AuflÃ¶sen von
+     * Symlinks nicht in manchen AnwendungsfÃ¤llen stÃ¶rt.
      */
     // try
     // {
@@ -751,7 +751,7 @@ public class MenuManager
     }
 
     /**
-     * Fügt allen momentan ausgewählten Knoten des Baums die CONF_ID id hinzu.
+     * FÃ¼gt allen momentan ausgewÃ¤hlten Knoten des Baums die CONF_ID id hinzu.
      * 
      * TESTED
      */
@@ -767,7 +767,7 @@ public class MenuManager
     }
 
     /**
-     * Fügt allen momentan ausgewählten Knoten des Baums sowie all ihren Nachfahren
+     * FÃ¼gt allen momentan ausgewÃ¤hlten Knoten des Baums sowie all ihren Nachfahren
      * die CONF_ID id hinzu.
      * 
      * TESTED
@@ -781,7 +781,7 @@ public class MenuManager
     }
 
     /**
-     * Fügt path und allen seinen Nachfahren die CONF_ID id hinzu.
+     * FÃ¼gt path und allen seinen Nachfahren die CONF_ID id hinzu.
      * 
      * TESTED
      */
@@ -794,7 +794,7 @@ public class MenuManager
     }
 
     /**
-     * Entfernt von allen momentan ausgewählten Knoten des Baums die CONF_ID id.
+     * Entfernt von allen momentan ausgewÃ¤hlten Knoten des Baums die CONF_ID id.
      * 
      * TESTED
      */
@@ -810,7 +810,7 @@ public class MenuManager
     }
 
     /**
-     * Entfernt von allen momentan ausgewählten Knoten des Baums sowie all ihren
+     * Entfernt von allen momentan ausgewÃ¤hlten Knoten des Baums sowie all ihren
      * Nachfahren die CONF_ID id.
      * 
      * TESTED
@@ -837,9 +837,9 @@ public class MenuManager
     }
 
     /**
-     * Überträgt die Unterschiede zwischen tempConfigIDs und
+     * ÃœbertrÃ¤gt die Unterschiede zwischen tempConfigIDs und
      * {@link MenuManager#configIDs} auf den Baum und setzt dann configIDs auf
-     * tempConfigIDs. Das CONF_IDs Menü wird ebenfalls neu aufgebaut.
+     * tempConfigIDs. Das CONF_IDs MenÃ¼ wird ebenfalls neu aufgebaut.
      * 
      * TESTED
      */
@@ -876,7 +876,7 @@ public class MenuManager
     {
       for (TreePath path : paths)
       {
-        // Root und die Leisten können nicht gelöscht werden.
+        // Root und die Leisten kÃ¶nnen nicht gelÃ¶scht werden.
         if (path.getPathCount() < 3) continue;
         TreePath parentPath = path.getParentPath();
         Node removedNode = (Node) path.getLastPathComponent();
@@ -899,7 +899,7 @@ public class MenuManager
     }
 
     /**
-     * Fügt Kopien von den Nodes die durch paths beschrieben sind an index in den
+     * FÃ¼gt Kopien von den Nodes die durch paths beschrieben sind an index in den
      * Node identifiziert durch parentPath ein.
      * 
      * TESTED
@@ -910,7 +910,7 @@ public class MenuManager
 
       for (TreePath path : paths)
       {
-        // Root und die Leisten können nicht kopiert werden.
+        // Root und die Leisten kÃ¶nnen nicht kopiert werden.
         if (path.getPathCount() < 3) continue;
         Node sourceNode = (Node) path.getLastPathComponent();
         parentNode.recursiveCopy(sourceNode, index);
@@ -932,7 +932,7 @@ public class MenuManager
     }
 
     /**
-     * Fügt newNode (was ein neuer unabhängiger Node sein muss) als Referenz in den
+     * FÃ¼gt newNode (was ein neuer unabhÃ¤ngiger Node sein muss) als Referenz in den
      * durch parentPath bezeichneten Knoten ein an Position index.
      * 
      * TESTED
@@ -958,7 +958,7 @@ public class MenuManager
     }
 
     /**
-     * Nimmt das erste aktuell ausgewählte Menü und reinitialisiert es, wobei nur
+     * Nimmt das erste aktuell ausgewÃ¤hlte MenÃ¼ und reinitialisiert es, wobei nur
      * Daten aus {@link MenuManager#defaultConf} verwendet werden, keine aus
      * userConf.
      * 
@@ -970,8 +970,8 @@ public class MenuManager
       TreePath selection = myTree.getSelectionPath();
       if (selection == null) return;
       if (!confirm(
-        L.m("Änderungen aufheben?"),
-        L.m("Wollen Sie wirklich alle Änderungen\ndes ausgewählten Menüs und\naller Untermenüs aufheben?")))
+        L.m("Ã„nderungen aufheben?"),
+        L.m("Wollen Sie wirklich alle Ã„nderungen\ndes ausgewÃ¤hlten MenÃ¼s und\naller UntermenÃ¼s aufheben?")))
         return;
       if (selection.getPathCount() == 1)
       {
@@ -1011,7 +1011,7 @@ public class MenuManager
       else
       { // if (selection.getPathCount() > 2)
         Node node = (Node) selection.getLastPathComponent();
-        if (!node.isMenuOrBar()) return; // Wir können nur ganze Menüs
+        if (!node.isMenuOrBar()) return; // Wir kÃ¶nnen nur ganze MenÃ¼s
         // wiederherstellen
 
         String menuId = null;
@@ -1021,7 +1021,7 @@ public class MenuManager
         }
         catch (NodeNotFoundException x)
         {
-          // Unmöglich, da der initiale Parse-Durchgang schon getestet hat.
+          // UnmÃ¶glich, da der initiale Parse-Durchgang schon getestet hat.
         }
 
         ActiveConfigSection menuSection;
@@ -1055,8 +1055,8 @@ public class MenuManager
     {
       if (!allowedInsertPositionSelected(true)) return;
       String menuName =
-        JOptionPane.showInputDialog(myFrame, L.m("Name des neuen Menüs"),
-          L.m("Neues (Unter)Menü"), JOptionPane.QUESTION_MESSAGE);
+        JOptionPane.showInputDialog(myFrame, L.m("Name des neuen MenÃ¼s"),
+          L.m("Neues (Unter)MenÃ¼"), JOptionPane.QUESTION_MESSAGE);
       if (menuName == null || menuName.length() == 0) return;
       ConfigThingy conf = new ConfigThingy("");
       conf.add("TYPE").add("menu");
@@ -1098,7 +1098,7 @@ public class MenuManager
     }
 
     /**
-     * Liefert true gdw, node selbst oder ein Nachfahre ein Menü ist mit
+     * Liefert true gdw, node selbst oder ein Nachfahre ein MenÃ¼ ist mit
      * MENU-Attribut id.
      * 
      * TESTED
@@ -1115,9 +1115,9 @@ public class MenuManager
     }
 
     /**
-     * Fügt vor dem ersten ausgewählten Element (falls vorhanden und falls erlaubt)
-     * einen Separator ein und liefert dessen TreePath zurück (oder null falls keiner
-     * eingefügt wurde).
+     * FÃ¼gt vor dem ersten ausgewÃ¤hlten Element (falls vorhanden und falls erlaubt)
+     * einen Separator ein und liefert dessen TreePath zurÃ¼ck (oder null falls keiner
+     * eingefÃ¼gt wurde).
      */
     public TreePath newSeparator()
     {
@@ -1128,38 +1128,38 @@ public class MenuManager
     }
 
     /**
-     * Liefer true, wenn eine erlaubte Einfügeposition selektiert ist.
+     * Liefer true, wenn eine erlaubte EinfÃ¼geposition selektiert ist.
      * 
      * @param barsAllowed
-     *          falls true gilt eine selektierte Menü- oder Buttonleiste als legal.
+     *          falls true gilt eine selektierte MenÃ¼- oder Buttonleiste als legal.
      */
     private boolean allowedInsertPositionSelected(boolean barsAllowed)
     {
       TreePath selectedPath = myTree.getSelectionPath();
       if (selectedPath == null) return false;
-      // Kann auf/in/vor Wurzel nichts einfügen
+      // Kann auf/in/vor Wurzel nichts einfÃ¼gen
       if (selectedPath.getPathCount() < 2) return false;
       if (!barsAllowed && selectedPath.getPathCount() < 3) return false;
       return true;
     }
 
     /**
-     * Fügt vor dem ersten ausgewählten Element (falls vorhanden und falls erlaubt)
-     * newNode ein (was ein frischer unabhängiger Node sein muss) und liefert den
-     * TreePath des neuen Knoten zurück (oder null falls keiner eingefügt wurde).
+     * FÃ¼gt vor dem ersten ausgewÃ¤hlten Element (falls vorhanden und falls erlaubt)
+     * newNode ein (was ein frischer unabhÃ¤ngiger Node sein muss) und liefert den
+     * TreePath des neuen Knoten zurÃ¼ck (oder null falls keiner eingefÃ¼gt wurde).
      * 
      * @param appendIfMenuSelected
-     *          falls true, so wird wenn ein Menü selektiert ist, ans Ende von diesem
-     *          angehängt. Falls false, so wird auch bei selektiertem Menü davor
-     *          eingefügt. In letzterem Fall sind die Menü- und Buttonleiste keine
-     *          legalen Einfügepositionen und diese funktioniert tut nichts.
+     *          falls true, so wird wenn ein MenÃ¼ selektiert ist, ans Ende von diesem
+     *          angehÃ¤ngt. Falls false, so wird auch bei selektiertem MenÃ¼ davor
+     *          eingefÃ¼gt. In letzterem Fall sind die MenÃ¼- und Buttonleiste keine
+     *          legalen EinfÃ¼gepositionen und diese funktioniert tut nichts.
      * 
      */
     private TreePath newNode(Node newNode, boolean appendIfMenuSelected)
     {
       TreePath selectedPath = myTree.getSelectionPath();
       if (selectedPath == null) return null;
-      // Kann vor/auf/in Wurzel nichts einfügen
+      // Kann vor/auf/in Wurzel nichts einfÃ¼gen
       if (selectedPath.getPathCount() < 2) return null;
       if (!appendIfMenuSelected && selectedPath.getPathCount() < 3) return null;
 
@@ -1181,10 +1181,10 @@ public class MenuManager
     };
 
     /**
-     * Lässt den Benutzer in einem FileChooser Dateien auswählen und fügt für diese
-     * entsprechende openExt-Menüeinträge ein. Wenn derzeit ein Menü selektiert ist,
-     * werden die Einträge an dessen Ende angefügt. Ist ein anderer Eintrag
-     * selektiert, so werden die Einträge davor eingefügt.
+     * LÃ¤sst den Benutzer in einem FileChooser Dateien auswÃ¤hlen und fÃ¼gt fÃ¼r diese
+     * entsprechende openExt-MenÃ¼eintrÃ¤ge ein. Wenn derzeit ein MenÃ¼ selektiert ist,
+     * werden die EintrÃ¤ge an dessen Ende angefÃ¼gt. Ist ein anderer Eintrag
+     * selektiert, so werden die EintrÃ¤ge davor eingefÃ¼gt.
      * 
      * TESTED
      */
@@ -1213,9 +1213,9 @@ public class MenuManager
     }
 
     /**
-     * Falls momentan ein Menü selektiert ist, wird ein openExt-Eintrag für file an
+     * Falls momentan ein MenÃ¼ selektiert ist, wird ein openExt-Eintrag fÃ¼r file an
      * sein Ende gesetzt. Falls was anderes selektiert ist, wird der Eintrag davor
-     * eingefügt.
+     * eingefÃ¼gt.
      * 
      * TESTED
      */
@@ -1256,8 +1256,8 @@ public class MenuManager
     }
 
     /**
-     * Öffnet einen modalen Dialog über den das zugehörige ConfigThingy des ersten
-     * ausgewählten Elements des Baumes bearbeitet werden kann.
+     * Ã–ffnet einen modalen Dialog Ã¼ber den das zugehÃ¶rige ConfigThingy des ersten
+     * ausgewÃ¤hlten Elements des Baumes bearbeitet werden kann.
      * 
      * TESTED
      */
@@ -1299,7 +1299,7 @@ public class MenuManager
 
     /**
      * Markiert den Elternknoten von selectedPath als userModified und benachrichtigt
-     * die Listener sowohl über die Änderung von selectedPath als auch von dem
+     * die Listener sowohl Ã¼ber die Ã„nderung von selectedPath als auch von dem
      * Elternpfad.
      */
     private void nodeHasBeenModified(TreePath selectedPath)
@@ -1319,7 +1319,7 @@ public class MenuManager
 
   /**
    * Zeigt einen modalen Dialog an mit Titel title und Frage message und liefert
-   * true, wenn der Benutzer Ja anwählt.
+   * true, wenn der Benutzer Ja anwÃ¤hlt.
    * 
    */
   private boolean confirm(String title, String message)
@@ -1329,9 +1329,9 @@ public class MenuManager
   }
 
   /**
-   * Bringt eine Warnung, wenn nichts ausgewählt ist.
+   * Bringt eine Warnung, wenn nichts ausgewÃ¤hlt ist.
    * 
-   * @return true wenn die Warnung gebracht wurde (d.h. wenn nichts ausgewählt ist).
+   * @return true wenn die Warnung gebracht wurde (d.h. wenn nichts ausgewÃ¤hlt ist).
    * 
    */
   private boolean warnIfNoSelection()
@@ -1339,8 +1339,8 @@ public class MenuManager
     if (myTree.getSelectionCount() == 0)
     {
       JOptionPane.showMessageDialog(myFrame,
-        L.m("Bitte wählen Sie mindestens einen Eintrag aus!"),
-        L.m("Nichts ausgewählt"), JOptionPane.INFORMATION_MESSAGE);
+        L.m("Bitte wÃ¤hlen Sie mindestens einen Eintrag aus!"),
+        L.m("Nichts ausgewÃ¤hlt"), JOptionPane.INFORMATION_MESSAGE);
       return true;
     }
     return false;
@@ -1378,7 +1378,7 @@ public class MenuManager
     }
 
     /**
-     * Liefert true gdw path ein Nachfahre eines Favoriten-Menü-Knotens oder selbst
+     * Liefert true gdw path ein Nachfahre eines Favoriten-MenÃ¼-Knotens oder selbst
      * so ein Knoten ist.
      */
     private boolean isInFavoritesMenu(TreePath path)
@@ -1398,7 +1398,7 @@ public class MenuManager
           (MyTransferable) trans.getTransferable().getTransferData(
             TRANSFER_DATAFLAVORS[0]);
 
-        // Feststellen, ob alle markierten Elemente in einem Favoriten-Menü sind.
+        // Feststellen, ob alle markierten Elemente in einem Favoriten-MenÃ¼ sind.
         TreePath[] sources = transferable.getDraggedStuff();
         boolean allinfavorites = true;
         for (TreePath path : sources)
@@ -1416,13 +1416,13 @@ public class MenuManager
         if (dropPath.getPathCount() < 2) return false;
 
         // Falls das dropTarget innerhalb von mindestens einer der Selektionen liegt,
-        // dürfen wir nicht droppen, weil sonst der Node gelöscht würde
+        // dÃ¼rfen wir nicht droppen, weil sonst der Node gelÃ¶scht wÃ¼rde
         for (TreePath path : sources)
         {
           if (path.isDescendant(dropPath)) return false;
         }
 
-        // Falls wir von außerhalb eines Favoriten-Menüs in ein solches droppen, dann
+        // Falls wir von auÃŸerhalb eines Favoriten-MenÃ¼s in ein solches droppen, dann
         // immer COPY nehmen.
         if (isInFavoritesMenu(dropPath) && !allinfavorites)
           if (trans.isDrop()) trans.setDropAction(COPY);
@@ -1444,7 +1444,7 @@ public class MenuManager
       TreePath dropPath = location.getPath();
       Node dropTarget = (Node) dropPath.getLastPathComponent();
 
-      // Falls Drop auf einem Objekt, übersetzen in Einfügung dahinter bzw. am Ende
+      // Falls Drop auf einem Objekt, Ã¼bersetzen in EinfÃ¼gung dahinter bzw. am Ende
       if (childIndex < 0)
       {
         if (!dropTarget.isMenuOrBar())
@@ -1507,7 +1507,7 @@ public class MenuManager
       }
       else if (flavor.equals(TRANSFER_DATAFLAVORS[1]))
       {
-        // FIXME: Wenn Export des Baums implementiert ist, hier nachrüsten
+        // FIXME: Wenn Export des Baums implementiert ist, hier nachrÃ¼sten
         return new ByteArrayInputStream("FIXME".getBytes("utf-8"));
       }
       else
@@ -1593,8 +1593,8 @@ public class MenuManager
   {
     int answer =
       JOptionPane.showConfirmDialog(myFrame,
-        L.m("Sie verlassen den Menü-Manager.\nWollen Sie das Menü speichern?"),
-        L.m("Menü-Manager verlassen?"), JOptionPane.YES_NO_CANCEL_OPTION,
+        L.m("Sie verlassen den MenÃ¼-Manager.\nWollen Sie das MenÃ¼ speichern?"),
+        L.m("MenÃ¼-Manager verlassen?"), JOptionPane.YES_NO_CANCEL_OPTION,
         JOptionPane.QUESTION_MESSAGE);
 
     if (answer == JOptionPane.YES_OPTION)
@@ -1613,8 +1613,8 @@ public class MenuManager
     /*
      * Wegen folgendem Java Bug (WONTFIX)
      * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304 sind die folgenden
-     * 3 Zeilen nötig, damit die GUI gc'ed werden kann. Die Befehle sorgen dafür,
-     * dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager) indirekt über
+     * 3 Zeilen nÃ¶tig, damit die GUI gc'ed werden kann. Die Befehle sorgen dafÃ¼r,
+     * dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager) indirekt Ã¼ber
      * den JFrame die GUI kennt.
      */
     myFrame.removeWindowListener(oehrchen);
@@ -1636,26 +1636,26 @@ public class MenuManager
     public String label;
 
     /**
-     * Die Kindknoten (nie null, aber womöglich leer).
+     * Die Kindknoten (nie null, aber womÃ¶glich leer).
      */
     public List<Node> children;
 
     /**
      * true gdw die Liste der Kindknoten aus der Benutzerkonfiguration kommt und
      * nicht aus der globalen Systemkonfiguration. ACHTUNG! Wenn das Label eines
-     * Knotens geändert wird, setzt das nicht dessen userModified-Flag sondern das,
-     * des Vaterknotens. Dies liegt daran, dass das LABEL im aufrufenden Menü
-     * vergeben wird und nicht im aufgerufenen Menü.
+     * Knotens geÃ¤ndert wird, setzt das nicht dessen userModified-Flag sondern das,
+     * des Vaterknotens. Dies liegt daran, dass das LABEL im aufrufenden MenÃ¼
+     * vergeben wird und nicht im aufgerufenen MenÃ¼.
      */
     public boolean userModified;
 
     /**
-     * Das ConfigThingy das zu dem Node gehört. Mit Ausnahme der Wurzel und beiden
-     * darunterliegenden Knoten für Button- und Menüleiste, ist dies ein
+     * Das ConfigThingy das zu dem Node gehÃ¶rt. Mit Ausnahme der Wurzel und beiden
+     * darunterliegenden Knoten fÃ¼r Button- und MenÃ¼leiste, ist dies ein
      * UIElement-beschreibendes ConfigThingy. ACHTUNG! Dies ist eine von defaultConf
-     * bzw. userConf unabhängige Kopie. An ihr darf alles verändert werden außer bei
-     * Menüs das MENU-Attribut (weil sonst "Standard wiederherstellen" nicht mehr
-     * funktionieren würde).
+     * bzw. userConf unabhÃ¤ngige Kopie. An ihr darf alles verÃ¤ndert werden auÃŸer bei
+     * MenÃ¼s das MENU-Attribut (weil sonst "Standard wiederherstellen" nicht mehr
+     * funktionieren wÃ¼rde).
      */
     public ConfigThingy conf;
 
@@ -1699,7 +1699,7 @@ public class MenuManager
     }
 
     /**
-     * Liefert true gdw diese Node ein Menü oder die Button- oder die Menüleiste
+     * Liefert true gdw diese Node ein MenÃ¼ oder die Button- oder die MenÃ¼leiste
      * darstellt.
      */
     public boolean isMenuOrBar()
@@ -1716,7 +1716,7 @@ public class MenuManager
     }
 
     /**
-     * Liefert true gdw dies ein Menü ist, in dem der Benutzer Favoriten ablegt.
+     * Liefert true gdw dies ein MenÃ¼ ist, in dem der Benutzer Favoriten ablegt.
      */
     public boolean isFavoritesMenu()
     {
@@ -1732,7 +1732,7 @@ public class MenuManager
 
     /**
      * Liefert den Wert des MENU-Attributs oder null, falls es sich bei diesem Node
-     * nicht um ein Menü handelt.
+     * nicht um ein MenÃ¼ handelt.
      */
     public String menuId()
     {
@@ -1756,7 +1756,7 @@ public class MenuManager
     }
 
     /**
-     * Fügt eine Kopie von sourceNode unter Index index in die Kinder von this ein.
+     * FÃ¼gt eine Kopie von sourceNode unter Index index in die Kinder von this ein.
      * Falls sourceNode Kinder hat, so werden diese rekursiv in den kopierten Knoten
      * kopiert.
      * 
@@ -1778,16 +1778,16 @@ public class MenuManager
     }
 
     /**
-     * Fügt diesem Knoten die CONF_ID id hinzu falls nicht bereits vorhanden. Bei
-     * Knoten, die keine CONF_ID unterstützen wird ohne etwas zu tun false geliefert.
+     * FÃ¼gt diesem Knoten die CONF_ID id hinzu falls nicht bereits vorhanden. Bei
+     * Knoten, die keine CONF_ID unterstÃ¼tzen wird ohne etwas zu tun false geliefert.
      * 
-     * @return true wenn id neu hinzugefügt wurde (d.h. nicht bereits vorhanden war)
+     * @return true wenn id neu hinzugefÃ¼gt wurde (d.h. nicht bereits vorhanden war)
      * 
      * TESTED
      */
     public boolean addConfID(String id)
     {
-      // Falls wir einer der oberen Knoten sind, die kein CONF_ID unterstützen.
+      // Falls wir einer der oberen Knoten sind, die kein CONF_ID unterstÃ¼tzen.
       if (conf.getName().length() > 0) return false;
 
       ConfigThingy conf_id_conf = conf.query("CONF_ID");
@@ -1842,7 +1842,7 @@ public class MenuManager
 
   /**
    * Parst die WollMuxBarKonfigurationen-Abschnitte und liefert eine Liste mit den
-   * vorhandenen ConfigIDs zurück.
+   * vorhandenen ConfigIDs zurÃ¼ck.
    * 
    * TESTED
    */
@@ -1912,7 +1912,7 @@ public class MenuManager
 
   /**
    * Parst die Symbolleisten, Briefkopfleiste, Menueleiste und Menues-Abschnitte und
-   * liefert den Wurzel-Knoten des Ergebnisbaumes zurück.
+   * liefert den Wurzel-Knoten des Ergebnisbaumes zurÃ¼ck.
    * 
    * TESTED
    */
@@ -1951,7 +1951,7 @@ public class MenuManager
     root.children.add(buttonleisteNode);
 
     Node menueleisteNode =
-      new Node(L.m("Menüleiste"), new ArrayList<Node>(),
+      new Node(L.m("MenÃ¼leiste"), new ArrayList<Node>(),
         menueleisteSection.userModified, menueleisteSection.conf);
     root.children.add(menueleisteNode);
 
@@ -1964,16 +1964,16 @@ public class MenuManager
   }
 
   /**
-   * Wertet die Kinder von menuConf aus, die die übliche Form für UIElemente haben
-   * müssen. Für jedes so beschriebene UIElement wird in node.children ein weiterer
-   * Node hinzugefügt. Falls der TYPE des UIElements "menu" lautet, so wird dieses
-   * Menü aus defaultConf bzw. userConf herausgesucht (die letzte Instanz gewinnt,
-   * wobei userConf als nach defaultConf stehend zählt) und rekursiv verarbeitet.
+   * Wertet die Kinder von menuConf aus, die die Ã¼bliche Form fÃ¼r UIElemente haben
+   * mÃ¼ssen. FÃ¼r jedes so beschriebene UIElement wird in node.children ein weiterer
+   * Node hinzugefÃ¼gt. Falls der TYPE des UIElements "menu" lautet, so wird dieses
+   * MenÃ¼ aus defaultConf bzw. userConf herausgesucht (die letzte Instanz gewinnt,
+   * wobei userConf als nach defaultConf stehend zÃ¤hlt) und rekursiv verarbeitet.
    * 
    * @param alreadySeen
-   *          Um rekursive Menüstrukturen zu unterbinden wird hier bei jedem
-   *          Rekursschritt die ID des rekursiv betretenen Menüs hineingesteckt und
-   *          der Aufbau wird abgebrochen wenn ein Menü hier bereits vorhanden ist.
+   *          Um rekursive MenÃ¼strukturen zu unterbinden wird hier bei jedem
+   *          Rekursschritt die ID des rekursiv betretenen MenÃ¼s hineingesteckt und
+   *          der Aufbau wird abgebrochen wenn ein MenÃ¼ hier bereits vorhanden ist.
    * 
    * TESTED
    */
@@ -2004,14 +2004,14 @@ public class MenuManager
         }
         catch (NodeNotFoundException x)
         {
-          Logger.error(L.m("'menu' Menüeintrag ohne MENU-Attribut gefunden"));
+          Logger.error(L.m("'menu' MenÃ¼eintrag ohne MENU-Attribut gefunden"));
           continue;
         }
 
         if (alreadySeen.contains(menuId))
         {
           Logger.error(L.m(
-            "Menü '%1' enthält sich direkt oder indirekt selbst als Untermenü",
+            "MenÃ¼ '%1' enthÃ¤lt sich direkt oder indirekt selbst als UntermenÃ¼",
             menuId));
           continue;
         }
@@ -2032,7 +2032,7 @@ public class MenuManager
         }
         catch (NodeNotFoundException x)
         {
-          Logger.error(L.m("Menü '%1' nicht definiert", menuId));
+          Logger.error(L.m("MenÃ¼ '%1' nicht definiert", menuId));
           continue;
         }
       }
@@ -2045,8 +2045,8 @@ public class MenuManager
 
   private void save()
   {
-    if (!confirm(L.m("Menü speichern?"),
-      L.m("Wollen Sie das neue Menü wirklich speichern?"))) return;
+    if (!confirm(L.m("MenÃ¼ speichern?"),
+      L.m("Wollen Sie das neue MenÃ¼ wirklich speichern?"))) return;
 
     doSave();
   }
@@ -2096,13 +2096,13 @@ public class MenuManager
     boolean mustWriteConfigIDs = false;
     for (ConfigID cid : configIDs)
     {
-      // Sicherstellen, dass keine überflüssigen label_user vorhanden sind
+      // Sicherstellen, dass keine Ã¼berflÃ¼ssigen label_user vorhanden sind
       if (cid.label_user != null && cid.label_user.equals(cid.label_default))
         cid.label_user = null;
       if (cid.label_user != null)
       {
         mustWriteConfigIDs = true;
-        // Nicht break; weil das Aufräumen der label_user für alle benötigt wird
+        // Nicht break; weil das AufrÃ¤umen der label_user fÃ¼r alle benÃ¶tigt wird
       }
     }
 
@@ -2144,8 +2144,8 @@ public class MenuManager
   }
 
   /**
-   * Fügt conf für jedes Menü im Teilbaum der node als Wurzel hat, wenn es
-   * userModified gesetzt hat, einen Abschnitt für dieses Menü hinzu.
+   * FÃ¼gt conf fÃ¼r jedes MenÃ¼ im Teilbaum der node als Wurzel hat, wenn es
+   * userModified gesetzt hat, einen Abschnitt fÃ¼r dieses MenÃ¼ hinzu.
    * 
    * TESTED
    */
@@ -2174,7 +2174,7 @@ public class MenuManager
   }
 
   /**
-   * Liefert ein für das UIElement conf passendes Label für die Anzeige im Baum.
+   * Liefert ein fÃ¼r das UIElement conf passendes Label fÃ¼r die Anzeige im Baum.
    * 
    */
   private static String getLabel(ConfigThingy conf)
@@ -2238,7 +2238,7 @@ public class MenuManager
   }
 
   /**
-   * Steht für einen Konfigurationsabschnitt in der wollmux,conf der nach dem
+   * Steht fÃ¼r einen Konfigurationsabschnitt in der wollmux,conf der nach dem
    * Letzter-Gewinnt-Prinzip bestimmt wurde.
    */
   private static class ActiveConfigSection

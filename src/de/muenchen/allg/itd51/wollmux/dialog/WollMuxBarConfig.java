@@ -53,7 +53,7 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 
 /**
- * Verwaltet die Konfiguration der WollMuxbar und bietet einen Dialog zum Ändern
+ * Verwaltet die Konfiguration der WollMuxbar und bietet einen Dialog zum Ã„ndern
  * derselben.
  */
 public class WollMuxBarConfig
@@ -69,7 +69,7 @@ public class WollMuxBarConfig
   static final int MINIMIZE_TO_TASKBAR_MODE = 1;
 
   /**
-   * Die WollMuxBar verhält sich wie ein normales Fenster.
+   * Die WollMuxBar verhÃ¤lt sich wie ein normales Fenster.
    */
   static final int NORMAL_WINDOW_MODE = 2;
 
@@ -79,12 +79,12 @@ public class WollMuxBarConfig
   static final int ALWAYS_ON_TOP_WINDOW_MODE = 3;
 
   /**
-   * Die WollMuxBar verschwindet am oberen Rand, wenn der Mauscursor sie verlässt.
+   * Die WollMuxBar verschwindet am oberen Rand, wenn der Mauscursor sie verlÃ¤sst.
    */
   static final int UP_AND_AWAY_WINDOW_MODE = 4;
 
   /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
+   * Rand um Textfelder (wird auch fÃ¼r ein paar andere RÃ¤nder verwendet) in Pixeln.
    */
   private final static int TF_BORDER = 4;
 
@@ -99,68 +99,68 @@ public class WollMuxBarConfig
   private String myFrame_title;
 
   /**
-   * Der zentrale Vorgabewert aus der wollmux.conf für {@link #myFrame_title}.
+   * Der zentrale Vorgabewert aus der wollmux.conf fÃ¼r {@link #myFrame_title}.
    */
   private String myFrame_title_default;
 
   /**
    * Falls > 0, so ist dies eine von wollmux,conf fest vorgegebene Breite. Falls 0,
-   * so wird die natürliche Breite verwendet. Falls -1, so wird die maximale Breite
+   * so wird die natÃ¼rliche Breite verwendet. Falls -1, so wird die maximale Breite
    * verwendet.
    */
   private int myFrame_width;
 
   /**
-   * Der zentrale Vorgabewert aus der wollmux.conf für {@link #myFrame_width}.
+   * Der zentrale Vorgabewert aus der wollmux.conf fÃ¼r {@link #myFrame_width}.
    */
   private int myFrame_width_default;
 
   /**
-   * Falls > 0, so ist dies eine von wollmux,conf fest vorgegebene Höhe. Falls 0, so
-   * wird die natürliche Höhe verwendet. Falls -1, so wird die maximale Höhe
+   * Falls > 0, so ist dies eine von wollmux,conf fest vorgegebene HÃ¶he. Falls 0, so
+   * wird die natÃ¼rliche HÃ¶he verwendet. Falls -1, so wird die maximale HÃ¶he
    * verwendet.
    */
   private int myFrame_height;
 
   /**
-   * Der zentrale Vorgabewert aus der wollmux.conf für {@link #myFrame_height}.
+   * Der zentrale Vorgabewert aus der wollmux.conf fÃ¼r {@link #myFrame_height}.
    */
   private int myFrame_height_default;
 
   /**
    * Falls >= 0, so ist dies eine von wollmux,conf fest vorgegebene x-Koordinate.
-   * Falls -1, so wird das Fenster zentriert. Falls -2, so wird die größte sinnvolle
+   * Falls -1, so wird das Fenster zentriert. Falls -2, so wird die grÃ¶ÃŸte sinnvolle
    * Koordinate verwendet. Falls -3, so wird die kleinste sinnvolle Koordinate
    * verwendet. Falls Integer.MIN_VALUE, so ist keine Koordinate fest vorgegeben.
    */
   private int myFrame_x;
 
   /**
-   * Der zentrale Vorgabewert aus der wollmux.conf für {@link #myFrame_x}.
+   * Der zentrale Vorgabewert aus der wollmux.conf fÃ¼r {@link #myFrame_x}.
    */
   private int myFrame_x_default;
 
   /**
    * Falls >= 0, so ist dies eine von wollmux,conf fest vorgegebene y-Koordinate.
-   * Falls -1, so wird das Fenster zentriert. Falls -2, so wird die größte sinnvolle
+   * Falls -1, so wird das Fenster zentriert. Falls -2, so wird die grÃ¶ÃŸte sinnvolle
    * Koordinate verwendet. Falls -3, so wird die kleinste sinnvolle Koordinate
    * verwendet. Falls Integer.MIN_VALUE, so ist keine Koordinate fest vorgegeben.
    */
   private int myFrame_y;
 
   /**
-   * Der zentrale Vorgabewert aus der wollmux.conf für {@link #myFrame_y}.
+   * Der zentrale Vorgabewert aus der wollmux.conf fÃ¼r {@link #myFrame_y}.
    */
   private int myFrame_y_default;
 
   /**
-   * Der Anzeigemodus für die WollMuxBar (z,B,
+   * Der Anzeigemodus fÃ¼r die WollMuxBar (z,B,
    * {@link WollMuxBarConfig#UP_AND_AWAY_WINDOW_MODE}).
    */
   private int windowMode;
 
   /**
-   * Der zentrale Vorgabewert aus der wollmux.conf für {@link #windowMode}.
+   * Der zentrale Vorgabewert aus der wollmux.conf fÃ¼r {@link #windowMode}.
    */
   private int windowMode_default;
 
@@ -208,7 +208,7 @@ public class WollMuxBarConfig
     this.defaultConf = defaultConf;
 
     /*
-     * defaultConf: Defaults setzen für den Fall eines unvollständigen
+     * defaultConf: Defaults setzen fÃ¼r den Fall eines unvollstÃ¤ndigen
      * Fensterabschnitts
      */
     myFrame_title_default = WollMuxBarConfig.DEFAULT_TITLE;
@@ -244,7 +244,7 @@ public class WollMuxBarConfig
     }
 
     /*
-     * userConf: Defaults setzen für den Fall eines unvollständigen Fensterabschnitts
+     * userConf: Defaults setzen fÃ¼r den Fall eines unvollstÃ¤ndigen Fensterabschnitts
      */
     myFrame_title = WollMuxBarConfig.DEFAULT_TITLE;
     windowMode = WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE;
@@ -286,7 +286,7 @@ public class WollMuxBarConfig
     }
 
     /*
-     * Falls ein winMode übergeben wurde overridet er userConf und defaultConf
+     * Falls ein winMode Ã¼bergeben wurde overridet er userConf und defaultConf
      */
     if (winMode > 0) windowMode = winMode;
 
@@ -313,7 +313,7 @@ public class WollMuxBarConfig
   }
 
   /**
-   * Liefert true gdw conf_id aktiv ist (d.h. damit markierte Menüelemente angezeigt
+   * Liefert true gdw conf_id aktiv ist (d.h. damit markierte MenÃ¼elemente angezeigt
    * werden sollen).
    */
   public boolean isIDActive(String conf_id)
@@ -331,7 +331,7 @@ public class WollMuxBarConfig
   }
 
   /**
-   * Liefert das gewünschte Fensterverhalten der WollMuxBar, z.B.
+   * Liefert das gewÃ¼nschte Fensterverhalten der WollMuxBar, z.B.
    * {@link  #UP_AND_AWAY_WINDOW_MODE}.
    */
   public int getWindowMode()
@@ -341,7 +341,7 @@ public class WollMuxBarConfig
 
   /**
    * Liefert die konfigurierte Breite der WollMuxBar. Falls > 0, so ist dies eine von
-   * wollmux,conf fest vorgegebene Breite. Falls 0, so wird die natürliche Breite
+   * wollmux,conf fest vorgegebene Breite. Falls 0, so wird die natÃ¼rliche Breite
    * verwendet. Falls -1, so wird die maximale Breite verwendet.
    */
   public int getWidth()
@@ -350,9 +350,9 @@ public class WollMuxBarConfig
   }
 
   /**
-   * Liefert die konfigurierte Höhe der WollMuxBar. Falls > 0, so ist dies eine von
-   * wollmux,conf fest vorgegebene Höhe. Falls 0, so wird die natürliche Höhe
-   * verwendet. Falls -1, so wird die maximale Höhe verwendet.
+   * Liefert die konfigurierte HÃ¶he der WollMuxBar. Falls > 0, so ist dies eine von
+   * wollmux,conf fest vorgegebene HÃ¶he. Falls 0, so wird die natÃ¼rliche HÃ¶he
+   * verwendet. Falls -1, so wird die maximale HÃ¶he verwendet.
    */
   public int getHeight()
   {
@@ -362,12 +362,12 @@ public class WollMuxBarConfig
   /**
    * Liefert die konfigurierte X-Position der WollMuxBar. Falls >= 0, so ist dies
    * eine von wollmux,conf fest vorgegebene x-Koordinate. Falls -1, so wird das
-   * Fenster zentriert. Falls -2, so wird die größte sinnvolle Koordinate verwendet.
+   * Fenster zentriert. Falls -2, so wird die grÃ¶ÃŸte sinnvolle Koordinate verwendet.
    * Falls -3, so wird die kleinste sinnvolle Koordinate verwendet. Falls
    * Integer.MIN_VALUE, so ist keine Koordinate fest vorgegeben.
    * 
    * ACHTUNG! Ist hier ein fester Wert gesetzt, so sollte dieser nur einmal so
-   * gesetzt werden. Danach sollte der Benutzer das Fenster frei verschieben können.
+   * gesetzt werden. Danach sollte der Benutzer das Fenster frei verschieben kÃ¶nnen.
    */
   public int getX()
   {
@@ -377,12 +377,12 @@ public class WollMuxBarConfig
   /**
    * Liefert die konfigurierte Y-Position der WollMuxBar. Falls >= 0, so ist dies
    * eine von wollmux,conf fest vorgegebene y-Koordinate. Falls -1, so wird das
-   * Fenster zentriert. Falls -2, so wird die größte sinnvolle Koordinate verwendet.
+   * Fenster zentriert. Falls -2, so wird die grÃ¶ÃŸte sinnvolle Koordinate verwendet.
    * Falls -3, so wird die kleinste sinnvolle Koordinate verwendet. Falls
    * Integer.MIN_VALUE, so ist keine Koordinate fest vorgegeben.
    * 
    * ACHTUNG! Ist hier ein fester Wert gesetzt, so sollte dieser nur einmal so
-   * gesetzt werden. Danach sollte der Benutzer das Fenster frei verschieben können.
+   * gesetzt werden. Danach sollte der Benutzer das Fenster frei verschieben kÃ¶nnen.
    */
   public int getY()
   {
@@ -392,7 +392,7 @@ public class WollMuxBarConfig
   /**
    * Zeigt einen Dialog zum Bearbeiten der Optionen. Bei Beendigung mit "OK" wird
    * finishedAction aufgerufen mit ActionCommand "OK". Bei negativer Beendigung
-   * erfolgt kein Aufruf des ActionListeners. Diese Methode kann in und außerhalb des
+   * erfolgt kein Aufruf des ActionListeners. Diese Methode kann in und auÃŸerhalb des
    * EDT aufgerufen werden.
    * 
    * TESTED
@@ -525,7 +525,7 @@ public class WollMuxBarConfig
     ++y;
     gbcLabel.gridx = x++;
     gbcLabel.gridy = y;
-    mainPanel.add(new JLabel(L.m("Höhe")), gbcLabel);
+    mainPanel.add(new JLabel(L.m("HÃ¶he")), gbcLabel);
     final JComboBox inputHeight = new JComboBox(new String[] {
       "auto", "max" });
     inputHeight.setEditable(true);
@@ -543,7 +543,7 @@ public class WollMuxBarConfig
     ++y;
     gbcLabel.gridx = x++;
     gbcLabel.gridy = y;
-    mainPanel.add(new JLabel(L.m("Aktive Menügruppen")), gbcLabel);
+    mainPanel.add(new JLabel(L.m("Aktive MenÃ¼gruppen")), gbcLabel);
 
     x = 0;
     ++y;
@@ -629,7 +629,7 @@ public class WollMuxBarConfig
   /**
    * Liefert die zu den selektierten Checkboxen aus checkboxes, die durch
    * {@link #addCheckboxesForConfIDs(JPanel, GridBagConstraints, List)} erzeugt
-   * worden sein müssen, zugehörigen CONF_IDs.
+   * worden sein mÃ¼ssen, zugehÃ¶rigen CONF_IDs.
    * 
    * TESTED
    */
@@ -656,10 +656,10 @@ public class WollMuxBarConfig
   /**
    * Setzt die Checkboxen aus checkboxes, die durch
    * {@link #addCheckboxesForConfIDs(JPanel, GridBagConstraints, List)} erzeugt
-   * worden sein müssen, auf die Zustände auf die sie von
+   * worden sein mÃ¼ssen, auf die ZustÃ¤nde auf die sie von
    * {@link #addCheckboxesForConfIDs(JPanel, GridBagConstraints, List)} gesetzt
-   * worden wären, wenn für das Bestimmen von {@link #conf_ids} nur
-   * {@link #defaultConf} herangezogen worden wäre.
+   * worden wÃ¤ren, wenn fÃ¼r das Bestimmen von {@link #conf_ids} nur
+   * {@link #defaultConf} herangezogen worden wÃ¤re.
    * 
    * TESTED
    */
@@ -694,11 +694,11 @@ public class WollMuxBarConfig
   }
 
   /**
-   * Fügt mainPanel je eine Checkbox für jede in einem
+   * FÃ¼gt mainPanel je eine Checkbox fÃ¼r jede in einem
    * WollMuxBarKonfigurationen/Labels-Abschnitt definierte CONF_ID hinzu, wobei
-   * gbcCheckbox als LayoutConstraints übergeben wird (es wird jeweils y eins
-   * raufgezählt). Die so erstellten Checkboxen werden außerdem zur Liste checkboxes
-   * hinzugefügt. Der initiale Aktivierungswert der Checkboxen richtet sich nach
+   * gbcCheckbox als LayoutConstraints Ã¼bergeben wird (es wird jeweils y eins
+   * raufgezÃ¤hlt). Die so erstellten Checkboxen werden auÃŸerdem zur Liste checkboxes
+   * hinzugefÃ¼gt. Der initiale Aktivierungswert der Checkboxen richtet sich nach
    * {@link #conf_ids}.
    * 
    * TESTED
@@ -724,7 +724,7 @@ public class WollMuxBarConfig
   }
 
   /**
-   * Wählt das Item von combo aus, das equals zu str ist. Falls keines vorhanden ist,
+   * WÃ¤hlt das Item von combo aus, das equals zu str ist. Falls keines vorhanden ist,
    * wird str direkt gesetzt (ergibt nur bei einer editable ComboBox Sinn).
    */
   private void setCombo(JComboBox combo, String str)
@@ -773,10 +773,10 @@ public class WollMuxBarConfig
       && myFrame_y == myFrame_y_default && myFrame_width == myFrame_width_default
       && myFrame_height == myFrame_height_default)
     {
-      // Falls gegenüber den Werten aus defaultConf nichts geändert wurde, dann
+      // Falls gegenÃ¼ber den Werten aus defaultConf nichts geÃ¤ndert wurde, dann
       // schreiben wir keinen Fenster-Abschnitt in die wollmuxbar.conf. Der
-      // Schreibcode wird allerdings trotzdem ausgeführt, damit eine eventuell oben
-      // durchgeführte Löschung eines Fenster-Abschnitts aktiv wird.
+      // Schreibcode wird allerdings trotzdem ausgefÃ¼hrt, damit eine eventuell oben
+      // durchgefÃ¼hrte LÃ¶schung eines Fenster-Abschnitts aktiv wird.
     }
     else
     {
@@ -885,8 +885,8 @@ public class WollMuxBarConfig
 
   /**
    * Liefert den passenden Integer-Wert zu xy (Zahl, "auto", "min", "max", "center").
-   * Falls kein parsbarer Wert, so wird ein Fehler geloggert und der int für "auto"
-   * zurückgeliefert.
+   * Falls kein parsbarer Wert, so wird ein Fehler geloggert und der int fÃ¼r "auto"
+   * zurÃ¼ckgeliefert.
    * 
    */
   private int getXY(String xy)
@@ -904,7 +904,7 @@ public class WollMuxBarConfig
       try
       {
         value = Integer.parseInt(xy);
-        // Ja, das folgende ist eine Einschränkung, aber
+        // Ja, das folgende ist eine EinschrÃ¤nkung, aber
         // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
         // obigen Festlegungen
         if (value < 0) value = 0;
@@ -920,7 +920,7 @@ public class WollMuxBarConfig
 
   /**
    * Liefert den passenden int zu widthOrHeight (Zahl, "max", "auto"). Ist der Wert
-   * nicht parsbar, wird ein Fehler geloggert und der int für "auto" geliefert.
+   * nicht parsbar, wird ein Fehler geloggert und der int fÃ¼r "auto" geliefert.
    */
   private int getWidthHeight(String widthOrHeight)
   {
@@ -946,10 +946,10 @@ public class WollMuxBarConfig
 
   /**
    * Liefert die zum String windowMode ("AlwaysOnTop", "Window", "Minimize", oder
-   * "UpAndAway" in beliebiger Groß-/Kleinschreibung) gehörige Konstante (z.B.
+   * "UpAndAway" in beliebiger GroÃŸ-/Kleinschreibung) gehÃ¶rige Konstante (z.B.
    * {@link #UP_AND_AWAY_WINDOW_MODE}).
    * 
-   * Enthält der String keinen identifizierbaren Wert, wird ein Fehler geloggert und
+   * EnthÃ¤lt der String keinen identifizierbaren Wert, wird ein Fehler geloggert und
    * {@link #UP_AND_AWAY_WINDOW_MODE} geliefert.
    */
   private int getWindowMode(String windowMode)
@@ -964,7 +964,7 @@ public class WollMuxBarConfig
     else if (windowMode.equalsIgnoreCase("UpAndAway"))
       windowModeInt = WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE;
     else
-      Logger.error(L.m("Ununterstützer MODE für WollMuxBar-Fenster: '%1'",
+      Logger.error(L.m("UnunterstÃ¼tzer MODE fÃ¼r WollMuxBar-Fenster: '%1'",
         windowMode));
     return windowModeInt;
   }

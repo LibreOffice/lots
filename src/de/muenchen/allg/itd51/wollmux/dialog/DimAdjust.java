@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Statische Methoden zur Justierung der max.,pref.,min. Size einer JComponent.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,8 +18,8 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * Ã„nderungshistorie:
+ * Datum      | Wer | Ã„nderungsgrund
  * -------------------------------------------------------------------
  * 19.10.2007 | BNK | Erstellung
  * -------------------------------------------------------------------
@@ -43,7 +43,7 @@ public class DimAdjust
 {
 
   /**
-   * Setzt die maximale Breite von compo auf unendlich und liefert compo zurück.
+   * Setzt die maximale Breite von compo auf unendlich und liefert compo zurÃ¼ck.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -56,8 +56,8 @@ public class DimAdjust
   }
 
   /**
-   * Setzt die maximale Breite von compo auf unendlich, die maximale Höhe auf die
-   * bevorzugte Höhe und liefert compo zurück.
+   * Setzt die maximale Breite von compo auf unendlich, die maximale HÃ¶he auf die
+   * bevorzugte HÃ¶he und liefert compo zurÃ¼ck.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -112,7 +112,7 @@ public class DimAdjust
   }
 
   /**
-   * Liefert das Maximum der beiden Werte w und der preferred-width von compo zurück.
+   * Liefert das Maximum der beiden Werte w und der preferred-width von compo zurÃ¼ck.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */

@@ -1243,7 +1243,7 @@ public class WollMuxFiles
   }
 
   /**
-   * Schreibt die Kinder von conf (also keinen umschlieﬂenden Wurzel-Abschnitt) in
+   * Schreibt die Kinder von conf (also keinen umschlie√üenden Wurzel-Abschnitt) in
    * die Datei file.
    */
   public static void writeConfToFile(File file, ConfigThingy conf)

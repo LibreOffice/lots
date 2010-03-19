@@ -67,14 +67,14 @@ public class UIElementConfigThingyEditor
 {
   /**
    * Dieser String wird herangezogen um die Breite der JLabels mit den Attributnamen
-   * zu bestimmen. Kein Attribut sollte je l�nger sein als dieser String.
+   * zu bestimmen. Kein Attribut sollte je länger sein als dieser String.
    */
   private static final String MAX_ATTRIBUTE_NAME_STRING = "MSBRULEZ";
 
   /**
-   * Bildet den Namen eines Attributs auf die Liste aller ACTIONs ab f�r die dieses
+   * Bildet den Namen eines Attributs auf die Liste aller ACTIONs ab für die dieses
    * Attribut erforderlich ist. Wenn ein Attribut nicht in der Map enthalten ist als
-   * Schl�ssel, so wird es f�r alle ACTIONs angezeigt.
+   * Schlüssel, so wird es für alle ACTIONs angezeigt.
    */
   private static Map<String, String[]> mapAttributeNameToListOfActionsForWhichItIsNeeded;
   static
@@ -91,7 +91,7 @@ public class UIElementConfigThingyEditor
       new String[] { "open" });
 
     /*
-     * FAVO und menu sind nur bei Men�s interessant, geh�ren also nicht zu einer
+     * FAVO und menu sind nur bei Menüs interessant, gehören also nicht zu einer
      * ACTION Damit sie nicht immer ausgegeben werden, ordnen wir sie einer
      * Fantasie-ACTION zu
      */
@@ -328,15 +328,15 @@ public class UIElementConfigThingyEditor
   /**
    * Zeigt einen Dialog zum Bearbeiten von originalConf an, was ein
    * UIElement-beschreibendes ConfigThingy sein muss. Diese Funktion kehrt sofort
-   * zur�ck, nicht erst wenn der Dialog geschlossen wurde.
+   * zurück, nicht erst wenn der Dialog geschlossen wurde.
    * 
    * @param parent
    *          zu dieser Komponente ist der Dialog modal
    * @param listen
    *          wird wenn der Benutzer das Editieren beendet hat aufgerufen. Als
    *          ActionCommand des {@link ActionEvent}s wird "OK" oder "CANCEL"
-   *          �bergeben. Im "OK" Fall wird als Source das ge�nderte ConfigThingy
-   *          �bergeben.
+   *          übergeben. Im "OK" Fall wird als Source das geänderte ConfigThingy
+   *          übergeben.
    * 
    */
   public static void showEditDialog(Frame parent, ConfigThingy originalConf,
@@ -387,7 +387,7 @@ public class UIElementConfigThingyEditor
     protected Box hboxAroundMyTextComponent;
 
     /**
-     * Erzeugt einen Editor f�r ein Text-Attribut.
+     * Erzeugt einen Editor für ein Text-Attribut.
      * 
      * @param attributeName
      *          der Name des Attributs.
@@ -396,7 +396,7 @@ public class UIElementConfigThingyEditor
      *          lines Zeilen.
      * @param addGlue
      *          falls true wird ein vertikaler glue unter der Textkomponente
-     *          eingef�gt
+     *          eingefügt
      */
     public JTextAttributeEditor(String attributeName, int lines, boolean addGlue)
     {
@@ -511,7 +511,7 @@ public class UIElementConfigThingyEditor
       hbox.add(check);
       hbox.add(new JLabel(
         " ("
-          + L.m("Ist diese Checkbox aktiviert, wird das Men� als Favoriten-Men� behandelt")
+          + L.m("Ist diese Checkbox aktiviert, wird das Menü als Favoriten-Menü behandelt")
           + ")"));
       hbox.add(Box.createHorizontalGlue());
       mainEditorVBox.add(hbox);

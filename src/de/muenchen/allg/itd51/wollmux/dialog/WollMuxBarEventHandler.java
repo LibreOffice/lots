@@ -228,8 +228,8 @@ public class WollMuxBarEventHandler
 
   /**
    * Versucht, eine WollMux-Verbindung aufzubauen falls im Moment keine besteht und
-   * führt dann run aus. ACHTUNG! run wird auch ausgeführt, wenn das Herstellen der
-   * Verbindung fehlschlägt.
+   * fÃ¼hrt dann run aus. ACHTUNG! run wird auch ausgefÃ¼hrt, wenn das Herstellen der
+   * Verbindung fehlschlÃ¤gt.
    */
   public void handleDoWithConnection(Runnable run)
   {
@@ -530,7 +530,7 @@ public class WollMuxBarEventHandler
       }
 
       /*
-       * Die UNO-Funktionalitäten ebenfalls initialisieren.
+       * Die UNO-FunktionalitÃ¤ten ebenfalls initialisieren.
        */
       try
       {

@@ -196,7 +196,7 @@ public class WollMuxBar
    * feste Koordinate gesetzt ist, der Benutzer trotzdem das Fenster frei verschieben
    * kann nachdem es einmal an die feste Koordinate gesetzt wurde.
    * 
-   * Au�erdem wird dieser Wert immer auf 0 gesetzt wenn der
+   * Außerdem wird dieser Wert immer auf 0 gesetzt wenn der
    * {@link WollMuxBarConfig#UP_AND_AWAY_WINDOW_MODE} gesetzt ist.
    */
   private int myFrame_y;
@@ -204,8 +204,8 @@ public class WollMuxBar
   /**
    * Das Verhalten der WollMuxBar wird nur einmal aus {@link #config} ausgelesen und
    * dann hier gecachet, weil es ansonsten zu komischen Effekten kommen kann, wenn
-   * �ber den Optionen-Dialog das Fensterverhalten ver�ndert wird und Handler wie
-   * z.B. der der auf Focus-Ver�nderungen reagiert, das Fensterverhalten auswerten
+   * über den Optionen-Dialog das Fensterverhalten verändert wird und Handler wie
+   * z.B. der der auf Focus-Veränderungen reagiert, das Fensterverhalten auswerten
    * bevor der {@link #reinit()} stattgefunden hat.
    */
   private int windowMode;
@@ -226,7 +226,7 @@ public class WollMuxBar
   private JFrame myFrame;
 
   /**
-   * Das Panel f�r den Inhalt des Fensters der WollMuxBar (myFrame).
+   * Das Panel für den Inhalt des Fensters der WollMuxBar (myFrame).
    */
   private JPanel contentPanel;
 
@@ -641,7 +641,7 @@ public class WollMuxBar
    * Streifen).
    * 
    * @param title
-   *          der Titel f�r das Fenster (nur f�r Anzeige in Taskleiste)
+   *          der Titel für das Fenster (nur für Anzeige in Taskleiste)
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setupMinimizedFrame(String title)
@@ -1273,7 +1273,7 @@ public class WollMuxBar
   }
 
   /**
-   * Startet den {@link MenuManager} und f�hrt dann eine Reinitialisierung der
+   * Startet den {@link MenuManager} und führt dann eine Reinitialisierung der
    * WollMuxBar aus.
    * 
    */
@@ -1289,7 +1289,7 @@ public class WollMuxBar
   }
 
   /**
-   * Zeigt den Optionsdialog von {@link WollMuxBarConfig} und f�hrt dann eine
+   * Zeigt den Optionsdialog von {@link WollMuxBarConfig} und führt dann eine
    * Reinitialisierung der WollMuxBar aus.
    * 
    */
@@ -1299,16 +1299,16 @@ public class WollMuxBar
     {
       public void actionPerformed(ActionEvent e)
       {
-        // derzeit ist der OK-Vergleich unn�tig, da bei negativer Beendigung des
+        // derzeit ist der OK-Vergleich unnötig, da bei negativer Beendigung des
         // Dialogs der ActionListener eh
-        // nicht aufgerufen wird. Aber das kann sich �ndern.
+        // nicht aufgerufen wird. Aber das kann sich ändern.
         if (e.getActionCommand().equals("OK")) reinit();
       }
     });
   }
 
   /**
-   * L�sst die WollMuxBar sich komplett neu starten.
+   * Lässt die WollMuxBar sich komplett neu starten.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
@@ -1938,7 +1938,7 @@ public class WollMuxBar
   private void minimize()
   {
     /*
-     * Minimieren st�rt die Anzeige des modalen Options-Dialogs (zumindest unter
+     * Minimieren stört die Anzeige des modalen Options-Dialogs (zumindest unter
      * manchen Window-Managern).
      */
     if (config.isDialogVisible()) return;
@@ -2004,7 +2004,7 @@ public class WollMuxBar
   }
 
   /**
-   * F�hrt die gleichnamige ACTION aus.
+   * Führt die gleichnamige ACTION aus.
    * 
    * TESTED
    */
@@ -2087,7 +2087,7 @@ public class WollMuxBar
   private void error(String errorMsg)
   {
     JOptionPane.showMessageDialog(null, L.m(
-      "%1\nVerst�ndigen Sie Ihre Systemadministration.", errorMsg),
+      "%1\nVerständigen Sie Ihre Systemadministration.", errorMsg),
       L.m("Fehlerhafte Konfiguration"), JOptionPane.ERROR_MESSAGE);
   }
 
