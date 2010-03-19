@@ -96,6 +96,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -195,7 +196,7 @@ public class WollMuxBar
    * feste Koordinate gesetzt ist, der Benutzer trotzdem das Fenster frei verschieben
    * kann nachdem es einmal an die feste Koordinate gesetzt wurde.
    * 
-   * Außerdem wird dieser Wert immer auf 0 gesetzt wenn der
+   * Auï¿½erdem wird dieser Wert immer auf 0 gesetzt wenn der
    * {@link WollMuxBarConfig#UP_AND_AWAY_WINDOW_MODE} gesetzt ist.
    */
   private int myFrame_y;
@@ -203,8 +204,8 @@ public class WollMuxBar
   /**
    * Das Verhalten der WollMuxBar wird nur einmal aus {@link #config} ausgelesen und
    * dann hier gecachet, weil es ansonsten zu komischen Effekten kommen kann, wenn
-   * über den Optionen-Dialog das Fensterverhalten verändert wird und Handler wie
-   * z.B. der der auf Focus-Veränderungen reagiert, das Fensterverhalten auswerten
+   * ï¿½ber den Optionen-Dialog das Fensterverhalten verï¿½ndert wird und Handler wie
+   * z.B. der der auf Focus-Verï¿½nderungen reagiert, das Fensterverhalten auswerten
    * bevor der {@link #reinit()} stattgefunden hat.
    */
   private int windowMode;
@@ -225,7 +226,7 @@ public class WollMuxBar
   private JFrame myFrame;
 
   /**
-   * Das Panel für den Inhalt des Fensters der WollMuxBar (myFrame).
+   * Das Panel fï¿½r den Inhalt des Fensters der WollMuxBar (myFrame).
    */
   private JPanel contentPanel;
 
@@ -640,7 +641,7 @@ public class WollMuxBar
    * Streifen).
    * 
    * @param title
-   *          der Titel für das Fenster (nur für Anzeige in Taskleiste)
+   *          der Titel fï¿½r das Fenster (nur fï¿½r Anzeige in Taskleiste)
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setupMinimizedFrame(String title)
@@ -1272,7 +1273,7 @@ public class WollMuxBar
   }
 
   /**
-   * Startet den {@link MenuManager} und führt dann eine Reinitialisierung der
+   * Startet den {@link MenuManager} und fï¿½hrt dann eine Reinitialisierung der
    * WollMuxBar aus.
    * 
    */
@@ -1288,7 +1289,7 @@ public class WollMuxBar
   }
 
   /**
-   * Zeigt den Optionsdialog von {@link WollMuxBarConfig} und führt dann eine
+   * Zeigt den Optionsdialog von {@link WollMuxBarConfig} und fï¿½hrt dann eine
    * Reinitialisierung der WollMuxBar aus.
    * 
    */
@@ -1298,16 +1299,16 @@ public class WollMuxBar
     {
       public void actionPerformed(ActionEvent e)
       {
-        // derzeit ist der OK-Vergleich unnötig, da bei negativer Beendigung des
+        // derzeit ist der OK-Vergleich unnï¿½tig, da bei negativer Beendigung des
         // Dialogs der ActionListener eh
-        // nicht aufgerufen wird. Aber das kann sich ändern.
+        // nicht aufgerufen wird. Aber das kann sich ï¿½ndern.
         if (e.getActionCommand().equals("OK")) reinit();
       }
     });
   }
 
   /**
-   * Lässt die WollMuxBar sich komplett neu starten.
+   * Lï¿½sst die WollMuxBar sich komplett neu starten.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
@@ -1527,8 +1528,8 @@ public class WollMuxBar
    *          Ausgehend von currentMenu werden rekursiv alle enthaltenen Unter- und
    *          Unter-UntermenÃ¼s zu menuOrder hinzugefÃ¼gt.
    * @param path
-   *          Beschreibt den Namen des jeweils Ã¼bergeordneten MenÃ¼s (initial sollte
-   *          "" Ã¼bergeben werden), aus dem der Name fÃ¼r mapMenuIDToLabel
+   *          Beschreibt den Namen des jeweils Ã¼bergeordneten MenÃ¼s (initial sollte ""
+   *          Ã¼bergeben werden), aus dem der Name fÃ¼r mapMenuIDToLabel
    *          zusammengesetzt wird.
    * @author Christoph Lutz (privat)
    */
@@ -1937,7 +1938,7 @@ public class WollMuxBar
   private void minimize()
   {
     /*
-     * Minimieren stört die Anzeige des modalen Options-Dialogs (zumindest unter
+     * Minimieren stï¿½rt die Anzeige des modalen Options-Dialogs (zumindest unter
      * manchen Window-Managern).
      */
     if (config.isDialogVisible()) return;
@@ -2003,7 +2004,7 @@ public class WollMuxBar
   }
 
   /**
-   * Führt die gleichnamige ACTION aus.
+   * Fï¿½hrt die gleichnamige ACTION aus.
    * 
    * TESTED
    */
@@ -2086,7 +2087,7 @@ public class WollMuxBar
   private void error(String errorMsg)
   {
     JOptionPane.showMessageDialog(null, L.m(
-      "%1\nVerständigen Sie Ihre Systemadministration.", errorMsg),
+      "%1\nVerstï¿½ndigen Sie Ihre Systemadministration.", errorMsg),
       L.m("Fehlerhafte Konfiguration"), JOptionPane.ERROR_MESSAGE);
   }
 

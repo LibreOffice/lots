@@ -20,9 +20,9 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -67,14 +67,14 @@ public class UIElementConfigThingyEditor
 {
   /**
    * Dieser String wird herangezogen um die Breite der JLabels mit den Attributnamen
-   * zu bestimmen. Kein Attribut sollte je länger sein als dieser String.
+   * zu bestimmen. Kein Attribut sollte je lï¿½nger sein als dieser String.
    */
   private static final String MAX_ATTRIBUTE_NAME_STRING = "MSBRULEZ";
 
   /**
-   * Bildet den Namen eines Attributs auf die Liste aller ACTIONs ab für die dieses
+   * Bildet den Namen eines Attributs auf die Liste aller ACTIONs ab fï¿½r die dieses
    * Attribut erforderlich ist. Wenn ein Attribut nicht in der Map enthalten ist als
-   * Schlüssel, so wird es für alle ACTIONs angezeigt.
+   * Schlï¿½ssel, so wird es fï¿½r alle ACTIONs angezeigt.
    */
   private static Map<String, String[]> mapAttributeNameToListOfActionsForWhichItIsNeeded;
   static
@@ -91,7 +91,7 @@ public class UIElementConfigThingyEditor
       new String[] { "open" });
 
     /*
-     * FAVO und menu sind nur bei Menüs interessant, gehören also nicht zu einer
+     * FAVO und menu sind nur bei Menï¿½s interessant, gehï¿½ren also nicht zu einer
      * ACTION Damit sie nicht immer ausgegeben werden, ordnen wir sie einer
      * Fantasie-ACTION zu
      */
@@ -111,7 +111,7 @@ public class UIElementConfigThingyEditor
 
   private JTextAttributeEditor label;
 
-  private Window parent;
+  private Frame parent;
 
   private ConfigThingy conf;
 
@@ -121,7 +121,7 @@ public class UIElementConfigThingyEditor
 
   private JDialog myDialog;
 
-  private UIElementConfigThingyEditor(Window parent, ConfigThingy conf,
+  private UIElementConfigThingyEditor(Frame parent, ConfigThingy conf,
       ActionListener finishedListener)
   {
     this.parent = parent;
@@ -328,18 +328,18 @@ public class UIElementConfigThingyEditor
   /**
    * Zeigt einen Dialog zum Bearbeiten von originalConf an, was ein
    * UIElement-beschreibendes ConfigThingy sein muss. Diese Funktion kehrt sofort
-   * zurück, nicht erst wenn der Dialog geschlossen wurde.
+   * zurï¿½ck, nicht erst wenn der Dialog geschlossen wurde.
    * 
    * @param parent
    *          zu dieser Komponente ist der Dialog modal
    * @param listen
    *          wird wenn der Benutzer das Editieren beendet hat aufgerufen. Als
    *          ActionCommand des {@link ActionEvent}s wird "OK" oder "CANCEL"
-   *          übergeben. Im "OK" Fall wird als Source das geänderte ConfigThingy
-   *          übergeben.
+   *          ï¿½bergeben. Im "OK" Fall wird als Source das geï¿½nderte ConfigThingy
+   *          ï¿½bergeben.
    * 
    */
-  public static void showEditDialog(Window parent, ConfigThingy originalConf,
+  public static void showEditDialog(Frame parent, ConfigThingy originalConf,
       ActionListener listen)
   {
     new UIElementConfigThingyEditor(parent, originalConf, listen);
@@ -387,7 +387,7 @@ public class UIElementConfigThingyEditor
     protected Box hboxAroundMyTextComponent;
 
     /**
-     * Erzeugt einen Editor für ein Text-Attribut.
+     * Erzeugt einen Editor fï¿½r ein Text-Attribut.
      * 
      * @param attributeName
      *          der Name des Attributs.
@@ -396,7 +396,7 @@ public class UIElementConfigThingyEditor
      *          lines Zeilen.
      * @param addGlue
      *          falls true wird ein vertikaler glue unter der Textkomponente
-     *          eingefügt
+     *          eingefï¿½gt
      */
     public JTextAttributeEditor(String attributeName, int lines, boolean addGlue)
     {
@@ -511,7 +511,7 @@ public class UIElementConfigThingyEditor
       hbox.add(check);
       hbox.add(new JLabel(
         " ("
-          + L.m("Ist diese Checkbox aktiviert, wird das Menü als Favoriten-Menü behandelt")
+          + L.m("Ist diese Checkbox aktiviert, wird das Menï¿½ als Favoriten-Menï¿½ behandelt")
           + ")"));
       hbox.add(Box.createHorizontalGlue());
       mainEditorVBox.add(hbox);
