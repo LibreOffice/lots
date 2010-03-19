@@ -57,10 +57,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -83,9 +81,9 @@ import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnTransformer;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.db.Query;
-import de.muenchen.allg.itd51.wollmux.db.QueryPart;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.db.Search;
+import de.muenchen.allg.itd51.wollmux.db.SearchStrategy;
 import de.muenchen.allg.itd51.wollmux.dialog.UIElementFactory.Context;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
@@ -784,22 +782,10 @@ public class DatasourceSearchDialog implements Dialog
       {
         public void run()
         {
-          List<Query> queries = parseQuery(searchStrategy, query.getString());
-
           QueryResults results = null;
           try
           {
-            Iterator<Query> iter = queries.iterator();
-            while (iter.hasNext())
-            {
-              Query query = iter.next();
-              if (query.numberOfQueryParts() == 0)
-                results = dj.getContentsOf(query.getDatasourceName());
-              else
-                results = dj.find(query);
-
-              if (!results.isEmpty()) break;
-            }
+            results = Search.search(query.getString(), searchStrategy, dj, false);
           }
           catch (TimeoutException x)
           {
@@ -836,6 +822,7 @@ public class DatasourceSearchDialog implements Dialog
         }
       }; // Ende des Erzeugens des Runnable-Objekts r
 
+      // Frame disablen und Suche in eigenem Thread starten
       FrameWorker.disableFrameAndWork(myFrame, r, true);
     }
 
@@ -1078,201 +1065,6 @@ public class DatasourceSearchDialog implements Dialog
   /**********************************************************************************
    * end of class DialogWindow
    *********************************************************************************/
-
-  /**
-   * Eine Suchstrategie liefert für eine gegebene Wortzahl eine Liste von Templates
-   * für Suchanfragen, die der Reihe nach mit den Wörtern probiert werden sollen bis
-   * ein Ergebnis gefunden ist.
-   */
-  private static class SearchStrategy
-  {
-    /**
-     * Bildet eine Wortanzahl ab auf eine Liste von Query Objekten, die passende
-     * Templates darstellen.
-     */
-    private Map<Integer, List<Query>> mapWordcountToListOfQuerys;
-
-    /**
-     * Parst den "Suchstrategie"-Abschnitt von conf und liefert eine entsprechende
-     * SearchStrategy.
-     * 
-     * @param conf
-     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-     */
-    public static SearchStrategy parse(ConfigThingy conf)
-    {
-      Map<Integer, List<Query>> mapWordcountToListOfQuerys =
-        new HashMap<Integer, List<Query>>();
-      conf = conf.query("Suchstrategie");
-      Iterator<ConfigThingy> parentIter = conf.iterator();
-      while (parentIter.hasNext())
-      {
-        Iterator<ConfigThingy> iter = parentIter.next().iterator();
-        while (iter.hasNext())
-        {
-          ConfigThingy queryConf = iter.next();
-          String datasource = queryConf.getName();
-          List<QueryPart> listOfQueryParts = new Vector<QueryPart>();
-          Iterator<ConfigThingy> columnIter = queryConf.iterator();
-          int wordcount = 0;
-          while (columnIter.hasNext())
-          {
-            ConfigThingy qconf = columnIter.next();
-            String columnName = qconf.getName();
-            String searchString = qconf.toString();
-            Matcher m =
-              Pattern.compile("\\$\\{suchanfrage[1-9]\\}").matcher(searchString);
-            while (m.find())
-            {
-              int wordnum = searchString.charAt(m.end() - 2) - '0';
-              if (wordnum > wordcount) wordcount = wordnum;
-            }
-            listOfQueryParts.add(new QueryPart(columnName, searchString));
-          }
-
-          Integer wc = Integer.valueOf(wordcount);
-          if (!mapWordcountToListOfQuerys.containsKey(wc))
-            mapWordcountToListOfQuerys.put(wc, new Vector<Query>());
-
-          List<Query> listOfQueries = mapWordcountToListOfQuerys.get(wc);
-          listOfQueries.add(new Query(datasource, listOfQueryParts));
-        }
-      }
-
-      return new SearchStrategy(mapWordcountToListOfQuerys);
-    }
-
-    /**
-     * mapWordcountToListOfQueries wird per Referenz eingebunden und entsprechende
-     * Ergebnisse aus dieser Map werden von {@link #getTemplate(int)}
-     * zurückgeliefert.
-     */
-    private SearchStrategy(Map<Integer, List<Query>> mapWordcountToListOfQuerys)
-    {
-      this.mapWordcountToListOfQuerys = mapWordcountToListOfQuerys;
-    }
-
-    /**
-     * Liefert eine Liste von Query-Objekten, die jeweils ein Template für eine Query
-     * sind, die bei einer Suchanfrage mit wordcount Wörtern durchgeführt werden
-     * soll. Die Querys sollen in der Reihenfolge in der sie in der Liste stehen
-     * durchgeführt werden solange bis eine davon ein Ergebnis liefert.
-     * 
-     * @return null falls keine Strategie für den gegebenen wordcount vorhanden.
-     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-     */
-    public List<Query> getTemplate(int wordcount)
-    {
-      return mapWordcountToListOfQuerys.get(Integer.valueOf(wordcount));
-    }
-  }
-
-  /**
-   * Nimmt ein Template für eine Suchanfrage entgegen (das Variablen der Form
-   * "${suchanfrageX}" enthalten kann) und instanziiert es mit Wörtern aus words,
-   * wobei nur die ersten wordcount Einträge von words beachtet werden.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-   */
-  private Query resolveTemplate(Query template, String[] words, int wordcount)
-  {
-    String dbName = template.getDatasourceName();
-    List<QueryPart> listOfQueryParts = new Vector<QueryPart>();
-    Iterator<QueryPart> qpIter = template.iterator();
-    while (qpIter.hasNext())
-    {
-      QueryPart templatePart = qpIter.next();
-      String str = templatePart.getSearchString();
-
-      for (int i = 0; i < wordcount; ++i)
-      {
-        str =
-          str.replaceAll("\\$\\{suchanfrage" + (i + 1) + "\\}", words[i].replaceAll(
-            "\\$", "\\\\\\$"));
-      }
-
-      QueryPart part = new QueryPart(templatePart.getColumnName(), str);
-      listOfQueryParts.add(part);
-    }
-    return new Query(dbName, listOfQueryParts);
-  }
-
-  /**
-   * Liefert zur Anfrage queryString eine Liste von {@link Query}s, die der Reihe
-   * nach probiert werden sollten, gemäß der Suchstrategie searchStrategy (siehe
-   * {@link #parseSearchstrategy(ConfigThingy)}). Gibt es für die übergebene Anzahl
-   * Wörter keine Suchstrategie, so wird solange das letzte Wort entfernt bis
-   * entweder nichts mehr übrig ist oder eine Suchstrategie für die Anzahl Wörter
-   * gefunden wurde.
-   * 
-   * @return die leere Liste falls keine Liste bestimmt werden konnte.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-   */
-  private List<Query> parseQuery(SearchStrategy searchStrategy, String queryString)
-  {
-    List<Query> queryList = new Vector<Query>();
-
-    /*
-     * Kommata durch Space ersetzen (d.h. "Benkmann,Matthias" -> "Benkmann Matthias")
-     */
-    queryString = queryString.replaceAll(",", " ");
-
-    /*
-     * Suchstring zerlegen.
-     */
-    String[] queryArray = queryString.trim().split("\\p{Space}+");
-
-    /*
-     * Benutzerseitig wir nur ein einzelnes Sternchen am Ende eines Wortes
-     * akzeptiert. Deswegen entferne alle anderen Sternchen. Ein Punkt am Ende eines
-     * Wortes wird als Abkürzung interpretiert und durch Sternchen ersetzt. Ausserdem
-     * entferne leere Wörter und berechne neue Arraylänge.
-     */
-    int count = queryArray.length;
-    for (int i = 0; i < queryArray.length && queryArray[i] != null; ++i)
-    {
-      boolean suffixStar =
-        queryArray[i].endsWith("*") || queryArray[i].endsWith(".");
-      if (queryArray[i].endsWith("."))
-        queryArray[i] = queryArray[i].substring(0, queryArray[i].length() - 1);
-
-      queryArray[i] = queryArray[i].replaceAll("\\*", "");
-      if (queryArray[i].length() == 0)
-      {
-        for (int j = i + 1; j < queryArray.length; ++j)
-          queryArray[j - 1] = queryArray[j];
-
-        --count;
-        --i;
-        queryArray[queryArray.length - 1] = null;
-      }
-      else
-      {
-        if (suffixStar) queryArray[i] = queryArray[i] + "*";
-      }
-    }
-
-    /*
-     * Passende Suchstrategie finden; falls nötig dazu Wörter am Ende weglassen.
-     */
-    while (count >= 0 && searchStrategy.getTemplate(count) == null)
-      --count;
-
-    /*
-     * keine Suchstrategie gefunden
-     */
-    if (count < 0) return queryList;
-
-    List<Query> templateList = searchStrategy.getTemplate(count);
-    Iterator<Query> iter = templateList.iterator();
-    while (iter.hasNext())
-    {
-      Query template = iter.next();
-      queryList.add(resolveTemplate(template, queryArray, count));
-    }
-
-    return queryList;
-  }
 
   /**
    * Ersetzt "${SPALTENNAME}" in str durch den Wert der entsprechenden Spalte im

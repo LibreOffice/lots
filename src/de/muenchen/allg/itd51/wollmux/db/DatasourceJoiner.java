@@ -4,7 +4,7 @@
  * Funktion : stellt eine virtuelle Datenbank zur Verfügung, die ihre Daten
  *            aus verschiedenen Hintergrunddatenbanken zieht.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -47,11 +47,11 @@
  *                  | Anbindung zu verlieren.
  * 18.04.2006 | BNK | Bugfix zur Behebung von P766: ausgewaehlten Datensatz richtig merken
  * 26.05.2006 | BNK | +find(Query)       
- * 30.01.2007 | BNK | Timeout nicht mehr statisch, sondern an Konstruktor übergeben.       
+ * 30.01.2007 | BNK | Timeout nicht mehr statisch, sondern an Konstruktor übergeben.
+ * 19.03.2010 | BED | +getContentsOfMainDatasource()
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.db;
@@ -158,7 +158,7 @@ public class DatasourceJoiner
    *          die Datei, in der der DJ die Datensätze des LOS abspeichern soll. Falls
    *          diese Datei existiert, wird sie vom Konstruktor eingelesen und
    *          verwendet.
-   * @param context,
+   * @param context
    *          der Kontext relativ zu dem Datenquellen URLs in ihrer Beschreibung
    *          auswerten sollen.
    * @param datasourceTimeout
@@ -431,7 +431,10 @@ public class DatasourceJoiner
   }
 
   /**
-   * Findet Datensätze, die query (Liste von QueryParts) entsprechen.
+   * Findet Datensätze in der Hauptdatenquelle, die query (Liste von QueryParts)
+   * entsprechen.
+   * 
+   * Die Ergebnisse sind {@link DJDataset}s!
    * 
    * @throws TimeoutException
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -457,12 +460,14 @@ public class DatasourceJoiner
    * sollte anstatt des Werfens einer TimeoutException ein Teil der Daten
    * zurückgeliefert werden.
    * 
-   * @throws TimeoutException,
+   * ACHTUNG! Die Ergebnisse sind keine DJDatasets!
+   * 
+   * @throws TimeoutException
    *           falls ein Fehler auftritt oder die Anfrage nicht rechtzeitig beendet
    *           werden konnte. In letzterem Fall ist das Werfen dieser Exception
    *           jedoch nicht Pflicht und die Datenquelle kann stattdessen den Teil der
    *           Ergebnisse zurückliefern, die in der gegebenen Zeit gewonnen werden
-   *           konnten. ACHTUNG! Die Ergebnisse sind keine DJDatasets!
+   *           konnten.
    * @throws IllegalArgumentException
    *           falls die Datenquelle nicht existiert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -476,6 +481,38 @@ public class DatasourceJoiner
         datasourceName));
 
     return source.getContents(queryTimeout());
+  }
+
+  /**
+   * Liefert eine implementierungsabhängige Teilmenge der Datensätze der
+   * Hauptdatenquelle. Wenn möglich sollte die Datenquelle hier all ihre Datensätze
+   * zurückliefern oder zumindest soviele wie möglich. Es ist jedoch auch erlaubt,
+   * dass hier gar keine Datensätze zurückgeliefert werden. Wenn sinnvoll sollte
+   * anstatt des Werfens einer {@link TimeoutException} ein Teil der Daten
+   * zurückgeliefert werden.
+   * 
+   * Die Ergebnisse sind DJDatasets!
+   * 
+   * @return
+   * @throws TimeoutException
+   *           falls ein Fehler auftritt oder die Anfrage nicht rechtzeitig beendet
+   *           werden konnte. In letzterem Fall ist das Werfen dieser Exception
+   *           jedoch nicht Pflicht und die Datenquelle kann stattdessen den Teil der
+   *           Ergebnisse zurückliefern, die in der gegebenen Zeit gewonnen werden
+   *           konnten.
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  public QueryResults getContentsOfMainDatasource() throws TimeoutException
+  {
+    QueryResults res = mainDatasource.getContents(queryTimeout());
+    List<DJDatasetWrapper> djDatasetsList = new Vector<DJDatasetWrapper>(res.size());
+    Iterator<Dataset> iter = res.iterator();
+    while (iter.hasNext())
+    {
+      Dataset ds = iter.next();
+      djDatasetsList.add(new DJDatasetWrapper(ds));
+    }
+    return new QueryResultsList(djDatasetsList);
   }
 
   protected long queryTimeout()
