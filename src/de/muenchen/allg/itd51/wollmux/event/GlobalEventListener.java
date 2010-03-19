@@ -107,20 +107,16 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       String event = docEvent.EventName;
       Logger.debug2(event);
 
-      String url = "";
-      XModel modelSource = UNO.XModel(docEvent.Source);
-      if (modelSource != null)
-        url = modelSource.getURL();
-      else
-        return;
+      XModel compo = UNO.XModel(docEvent.Source);
+      if (compo == null) return;
+
+      String url = compo.getURL();
 
       Logger.debug2(url);
       int idx = url.lastIndexOf('/') - 4;
       if (url.startsWith(".tmp/sv", idx) && url.endsWith(".tmp")) return;
       // --------------
 
-      XComponent compo = UNO.XComponent(docEvent.Source);
-      if (compo == null) return;
       XTextDocument xTextDoc = UNO.XTextDocument(compo);
 
       // Die Events OnLoad und OnNew kommen nur bei sichtbar geöffneten Dokumenten.
@@ -141,7 +137,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
         if (xTextDoc != null)
         {
           docManager.addTextDocument(xTextDoc);
-          WollMuxEventHandler.handleProcessTextDocument(xTextDoc);
+          // Verarbeitet wird das Dokument erst auf OnViewCreated hin
         }
         else
         {
@@ -150,7 +146,30 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
             WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
         }
       }
-      else if ((event.equals("OnUnload") && compo != null))
+
+      // Textdokumente werden grundsätzlich immer bei OnViewCreated verarbeitet, da
+      // die anderen Events potentiell zu früh kommen, vor allem für den Test auf
+      // Sichtbarkeit.
+      if (xTextDoc != null && event.equals("OnViewCreated"))
+      {
+        boolean visible = false;
+        try
+        {
+          visible =
+            Boolean.FALSE.equals(UNO.getProperty(
+              compo.getCurrentController().getFrame(), "IsHidden"));
+        }
+        catch (Exception x)
+        {
+          // Falls der Zugriff auf den aktuellen Controller/Frame scheitert
+          // (NullPointerException), dann ist das Dokument nicht sichtbar. Ein
+          // null-Frame ist genauso unsichtbar wie ein Frame mit IsHidden==true.
+        }
+
+        WollMuxEventHandler.handleProcessTextDocument(xTextDoc, visible);
+      }
+
+      if (event.equals("OnUnload"))
       {
         DocumentManager.Info info = docManager.remove(compo);
         /**

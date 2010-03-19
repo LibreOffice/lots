@@ -1121,10 +1121,14 @@ public class WollMuxEventHandler
    * 
    * @param xTextDoc
    *          Das XTextDocument, das durch den WollMux verarbeitet werden soll.
+   * @param visible
+   *          false zeigt an, dass das Dokument (bzw. das zugehörige Fenster)
+   *          unsichtbar ist.
    */
-  public static void handleProcessTextDocument(XTextDocument xTextDoc)
+  public static void handleProcessTextDocument(XTextDocument xTextDoc,
+      boolean visible)
   {
-    handle(new OnProcessTextDocument(xTextDoc));
+    handle(new OnProcessTextDocument(xTextDoc, visible));
   }
 
   /**
@@ -1138,9 +1142,12 @@ public class WollMuxEventHandler
   {
     XTextDocument xTextDoc;
 
-    public OnProcessTextDocument(XTextDocument xTextDoc)
+    boolean visible;
+
+    public OnProcessTextDocument(XTextDocument xTextDoc, boolean visible)
     {
       this.xTextDoc = xTextDoc;
+      this.visible = visible;
     }
 
     protected void doit() throws WollMuxFehlerException
@@ -1150,15 +1157,16 @@ public class WollMuxEventHandler
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
       TextDocumentModel model = mux.getTextDocumentModel(xTextDoc);
 
-      // Konfigurationsabschnitt Textdokument verarbeiten:
-      try
-      {
-        ConfigThingy tds =
-          mux.getWollmuxConf().query("Fenster").query("Textdokument").getLastChild();
-        model.setWindowViewSettings(tds);
-      }
-      catch (NodeNotFoundException e)
-      {}
+      // Konfigurationsabschnitt Textdokument verarbeiten falls Dok sichtbar:
+      if (visible)
+        try
+        {
+          ConfigThingy tds =
+            mux.getWollmuxConf().query("Fenster").query("Textdokument").getLastChild();
+          model.setWindowViewSettings(tds);
+        }
+        catch (NodeNotFoundException e)
+        {}
 
       // Workaround für OOo-Issue 103137 ggf. anwenden:
       if (Workarounds.applyWorkaroundForOOoIssue103137())
@@ -1205,14 +1213,15 @@ public class WollMuxEventHandler
         // wird. Dies würde unsinnige Ergebnisse verursachen.
         if (actions != 0 && model.isFormDocument())
         {
-          // Konfigurationsabschnitt Fenster/Formular verarbeiten
-          try
-          {
-            model.setDocumentZoom(mux.getWollmuxConf().query("Fenster").query(
-              "Formular").getLastChild().query("ZOOM"));
-          }
-          catch (java.lang.Exception e)
-          {}
+          // Konfigurationsabschnitt Fenster/Formular verarbeiten falls Dok sichtbar
+          if (visible)
+            try
+            {
+              model.setDocumentZoom(mux.getWollmuxConf().query("Fenster").query(
+                "Formular").getLastChild().query("ZOOM"));
+            }
+            catch (java.lang.Exception e)
+            {}
 
           // FormGUI starten, falls es kein Teil eines Multiform-Dokuments ist.
           if (!model.isPartOfMultiformDocument())
@@ -1220,7 +1229,7 @@ public class WollMuxEventHandler
             FormModel fm;
             try
             {
-              fm = FormModelImpl.createSingleDocumentFormModel(model);
+              fm = FormModelImpl.createSingleDocumentFormModel(model, visible);
             }
             catch (InvalidFormDescriptorException e)
             {

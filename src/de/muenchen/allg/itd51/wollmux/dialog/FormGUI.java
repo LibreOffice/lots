@@ -166,11 +166,13 @@ public class FormGUI
    * @param dialogLib
    *          die Dialogbibliothek, die die Dialoge bereitstellt, die für automatisch
    *          zu befüllende Formularfelder benötigt werden.
+   * @param visible
+   *          false zeigt an, dass die FormGUI unsichtbar bleiben soll.
    */
   public FormGUI(final ConfigThingy formFensterConf, final ConfigThingy conf,
       FormModel doc, final Map<String, String> mapIdToPresetValue,
       final Map<Object, Object> functionContext, final FunctionLibrary funcLib,
-      final DialogLibrary dialogLib)
+      final DialogLibrary dialogLib, final boolean visible)
   {
     myDoc = doc;
 
@@ -191,7 +193,7 @@ public class FormGUI
           try
           {
             createGUI(formFensterConf, conf, mapIdToPresetValue, functionContext,
-              funcLib, dialogLib);
+              funcLib, dialogLib, visible);
           }
           catch (Exception x)
           {
@@ -214,7 +216,7 @@ public class FormGUI
 
   private void createGUI(ConfigThingy formFensterConf, ConfigThingy conf,
       Map<String, String> mapIdToPresetValue, Map<Object, Object> functionContext,
-      FunctionLibrary funcLib, DialogLibrary dialogLib)
+      FunctionLibrary funcLib, DialogLibrary dialogLib, boolean visible)
   {
     Common.setLookAndFeelOnce();
 
@@ -277,7 +279,7 @@ public class FormGUI
 
     myFrame.pack();
     myFrame.setResizable(true);
-    myFrame.setVisible(true);
+    myFrame.setVisible(visible);
 
     naturalFrameBounds = myFrame.getBounds();
 
@@ -718,7 +720,7 @@ public class FormGUI
     catch (Exception x)
     {}
     new FormGUI(formFensterConf, conf.get("Formular"), model, mapIdToPresetValue,
-      functionContext, funcLib, dialogLib);
+      functionContext, funcLib, dialogLib, true);
   }
 
 }

@@ -65,11 +65,14 @@ public class FormModelImpl
    * 
    * @param doc
    *          Das Dokument zu dem ein FormModel erzeugt werden soll.
+   * @param visible
+   *          false zeigt an, dass das Dokument unsichtbar ist (und es die FormGUI
+   *          auch sein sollte).
    * @return ein FormModel dem genau ein Formulardokument zugeordnet ist.
    * @throws InvalidFormDescriptorException
    */
-  public static FormModel createSingleDocumentFormModel(TextDocumentModel doc)
-      throws InvalidFormDescriptorException
+  public static FormModel createSingleDocumentFormModel(TextDocumentModel doc,
+      boolean visible) throws InvalidFormDescriptorException
   {
 
     // Abschnitt "Formular" holen:
@@ -97,7 +100,8 @@ public class FormModelImpl
     }
 
     return new FormModelImpl.SingleDocumentFormModel(doc, formFensterConf, formConf,
-      doc.getFunctionContext(), doc.getFunctionLibrary(), doc.getDialogLibrary());
+      doc.getFunctionContext(), doc.getFunctionLibrary(), doc.getDialogLibrary(),
+      visible);
   }
 
   /**
@@ -174,7 +178,7 @@ public class FormModelImpl
       TextDocumentModel doc = iter.next();
       FormModel fm =
         new FormModelImpl.SingleDocumentFormModel(doc, formFensterConf, formConf,
-          functionContext, funcLib, dialogLib);
+          functionContext, funcLib, dialogLib, true);
       fms.add(fm);
     }
 
@@ -487,7 +491,7 @@ public class FormModelImpl
       // somit darf auch diese HashMap keinen Inhalt haben.
       formGUI =
         new FormGUI(formFensterConf, formConf, this, new HashMap<String, String>(),
-          functionContext, funcLib, dialogLib);
+          functionContext, funcLib, dialogLib, true);
     }
   }
 
@@ -511,6 +515,8 @@ public class FormModelImpl
     private final FunctionLibrary funcLib;
 
     private final DialogLibrary dialogLib;
+
+    private final boolean visible;
 
     private final String defaultWindowAttributes;
 
@@ -538,11 +544,13 @@ public class FormModelImpl
      *          die Dialogbibliothek, die die Dialoge bereitstellt, die für
      *          automatisch zu befüllende Formularfelder benötigt werden (wird für
      *          createFormGUI() benötigt).
+     * @param visible
+     *          false zeigt an, dass die FormGUI unsichtbar sein soll.
      */
     public SingleDocumentFormModel(final TextDocumentModel doc,
         final ConfigThingy formFensterConf, final ConfigThingy formConf,
         final Map<Object, Object> functionContext, final FunctionLibrary funcLib,
-        final DialogLibrary dialogLib)
+        final DialogLibrary dialogLib, boolean visible)
     {
       this.doc = doc;
       this.formFensterConf = formFensterConf;
@@ -550,6 +558,7 @@ public class FormModelImpl
       this.functionContext = functionContext;
       this.funcLib = funcLib;
       this.dialogLib = dialogLib;
+      this.visible = visible;
 
       // Standard-Fensterattribute vor dem Start der Form-GUI sichern um nach
       // dem Schließen des Formulardokuments die Standard-Werte wieder
@@ -557,7 +566,10 @@ public class FormModelImpl
       // immer dann, wenn ein Dokument (mitsamt Fenster) geschlossen wird. Dann
       // merkt sich OOo die Position und Größe des zuletzt geschlossenen
       // Fensters.
-      this.defaultWindowAttributes = getDefaultWindowAttributes();
+      if (visible)
+        this.defaultWindowAttributes = getDefaultWindowAttributes();
+      else
+        this.defaultWindowAttributes = null;
     }
 
     /*
@@ -577,7 +589,14 @@ public class FormModelImpl
      */
     public void setWindowVisible(boolean vis)
     {
-      WollMuxEventHandler.handleSetWindowVisible(doc, vis);
+      /*
+       * Einmal unsichtbar, immer unsichtbar. Weiß nicht, ob das sinnvoll ist, aber
+       * die ganze Methode wird soweit ich sehen kann derzeit nicht verwendet, also
+       * ist es egal. Falls es hier erlaubt wird, das Fenster sichtbar zu schalten,
+       * dann müsste noch einiges anderes geändert werden, z.B. müsste die FormGUI
+       * sichtbar werden.
+       */
+      if (visible) WollMuxEventHandler.handleSetWindowVisible(doc, vis);
     }
 
     /*
@@ -588,8 +607,9 @@ public class FormModelImpl
      */
     public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
     {
-      WollMuxEventHandler.handleSetWindowPosSize(doc, docX, docY, docWidth,
-        docHeight);
+      if (visible)
+        WollMuxEventHandler.handleSetWindowPosSize(doc, docX, docY, docWidth,
+          docHeight);
     }
 
     /*
@@ -622,7 +642,7 @@ public class FormModelImpl
      */
     public void focusGained(String fieldId)
     {
-      WollMuxEventHandler.handleFocusFormField(doc, fieldId);
+      if (visible) WollMuxEventHandler.handleFocusFormField(doc, fieldId);
     }
 
     /*
@@ -792,7 +812,7 @@ public class FormModelImpl
       HashMap<String, String> idToPresetValue = doc.getIDToPresetValue();
       formGUI =
         new FormGUI(formFensterConf, formConf, this, idToPresetValue,
-          functionContext, funcLib, dialogLib);
+          functionContext, funcLib, dialogLib, visible);
     }
   }
 }
