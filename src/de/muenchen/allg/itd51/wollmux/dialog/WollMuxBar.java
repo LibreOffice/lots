@@ -253,7 +253,6 @@ public class WollMuxBar
   private UIElementFactory.Context menuContext;
 
   /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
    * Enthält nach dem Aufruf von initMenuOrder(...) eine Liste aller IDs von Menüs
    * und deren per Tiefensuche ermittelten Untermenüs
    */
@@ -1528,8 +1527,8 @@ public class WollMuxBar
    *          Ausgehend von currentMenu werden rekursiv alle enthaltenen Unter- und
    *          Unter-Untermenüs zu menuOrder hinzugefügt.
    * @param path
-   *          Beschreibt den Namen des jeweils übergeordneten Menüs (initial sollte ""
-   *          übergeben werden), aus dem der Name für mapMenuIDToLabel
+   *          Beschreibt den Namen des jeweils übergeordneten Menüs (initial sollte
+   *          "" übergeben werden), aus dem der Name für mapMenuIDToLabel
    *          zusammengesetzt wird.
    * @author Christoph Lutz (privat)
    */
