@@ -36,6 +36,7 @@
  * 16.12.2009 | ERT | Cast XTextContent-Interface entfernt
  * 03.03.2010 | ERT | getBookmarkNamesStartingWith nach UnoHelper TextDocument verschoben
  * 03.03.2010 | ERT | Verhindern von Überlagern von insertFrag-Bookmarks
+ * 23.03.2010 | ERT | [R59480] Meldung beim Ausführen von "Textbausteinverweis einfügen"
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -1069,21 +1070,21 @@ public class WollMuxEventHandler
    *          {@link DocumentManager.Info#hasTextDocumentModel()} verwendet werden.
    * 
    * 
-   * ACHTUNG! ACHTUNG! Die Implementierung wurde extra so gewählt, dass hier ein
-   * DocumentManager.Info anstatt direkt eines TextDocumentModel übergeben wird. Es
-   * kam nämlich bei einem Dokument, das schnell geöffnet und gleich wieder
-   * geschlossen wurde zu folgendem Deadlock:
+   *          ACHTUNG! ACHTUNG! Die Implementierung wurde extra so gewählt, dass hier
+   *          ein DocumentManager.Info anstatt direkt eines TextDocumentModel
+   *          übergeben wird. Es kam nämlich bei einem Dokument, das schnell geöffnet
+   *          und gleich wieder geschlossen wurde zu folgendem Deadlock:
    * 
-   * {@link OnProcessTextDocument} =>
-   * {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#getTextDocumentModel()} =>
-   * {@link TextDocumentModel#TextDocumentModel(XTextDocument)} =>
-   * {@link DispatchProviderAndInterceptor#registerDocumentDispatchInterceptor(XFrame)} =>
-   * OOo Proxy =>
-   * {@link GlobalEventListener#notifyEvent(com.sun.star.document.EventObject)}
-   * ("OnUnload") =>
-   * {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#hasTextDocumentModel()}
+   *          {@link OnProcessTextDocument} =>
+   *          {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#getTextDocumentModel()}
+   *          => {@link TextDocumentModel#TextDocumentModel(XTextDocument)} =>
+   *          {@link DispatchProviderAndInterceptor#registerDocumentDispatchInterceptor(XFrame)}
+   *          => OOo Proxy =>
+   *          {@link GlobalEventListener#notifyEvent(com.sun.star.document.EventObject)}
+   *          ("OnUnload") =>
+   *          {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#hasTextDocumentModel()}
    * 
-   * Da {@link TextDocumentInfo} synchronized ist kam es zum Deadlock.
+   *          Da {@link TextDocumentInfo} synchronized ist kam es zum Deadlock.
    * 
    */
   public static void handleTextDocumentClosed(DocumentManager.Info docInfo)
@@ -1747,9 +1748,9 @@ public class WollMuxEventHandler
    *          Name des Senders in der Form "Nachname, Vorname (Rolle)" wie sie auch
    *          der PALProvider bereithält.
    * @param idx
-   *          der zum Sender senderName passende index in der sortierten Senderliste -
-   *          dient zur Konsistenz-Prüfung, damit kein Sender gesetzt wird, wenn die
-   *          PAL der setzenden Komponente nicht mit der PAL des WollMux
+   *          der zum Sender senderName passende index in der sortierten Senderliste
+   *          - dient zur Konsistenz-Prüfung, damit kein Sender gesetzt wird, wenn
+   *          die PAL der setzenden Komponente nicht mit der PAL des WollMux
    *          übereinstimmt.
    */
   public static void handleSetSender(String senderName, int idx)
@@ -2056,7 +2057,7 @@ public class WollMuxEventHandler
 
   /**
    * Erzeugt ein Event, das die Position und Größe des übergebenen Dokument-Fensters
-   * auf die vorgegebenen Werte setzt. AHTUNG: Die Maßangaben beziehen sich auf die
+   * auf die vorgegebenen Werte setzt. ACHTUNG: Die Maßangaben beziehen sich auf die
    * linke obere Ecke des Fensterinhalts OHNE die Titelzeile und die
    * Fensterdekoration des Rahmens. Um die linke obere Ecke des gesamten Fensters
    * richtig zu setzen, müssen die Größenangaben des Randes der Fensterdekoration und
@@ -2580,8 +2581,8 @@ public class WollMuxEventHandler
        * Evaluierung über getValueForKey() erfolgt, die von jeder konkreten Klasse
        * implementiert wird. Evaluate() stellt auch sicher, dass die von
        * getValueForKey() zurückgelieferten Werte nicht selbst Variablen enthalten
-       * können (indem die Variablenbegrenzer "${" und "}" durch "<" bzw. ">"
-       * ersetzt werden.
+       * können (indem die Variablenbegrenzer "${" und "}" durch "<" bzw. ">" ersetzt
+       * werden.
        * 
        * @param exp
        *          der zu evaluierende Ausdruck
@@ -3924,6 +3925,9 @@ public class WollMuxEventHandler
       {
         TextModule.createInsertFragFromIdentifier(model.doc, viewCursor, reprocess);
         if (reprocess) handleReprocessTextDocument(model);
+        if (!reprocess)
+          WollMuxSingleton.showInfoModal(L.m("WollMux"),
+            "Der Textbausteinverweis wurde eingefügt.");
       }
       catch (WollMuxFehlerException e)
       {
