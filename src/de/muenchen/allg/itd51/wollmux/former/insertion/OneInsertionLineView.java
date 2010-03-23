@@ -22,6 +22,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 13.09.2006 | BNK | Erstellung
+ * 23.03.2010 | ERT | [R5721]Unterstützung für Shift-Klick
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -237,11 +238,14 @@ public class OneInsertionLineView extends LineView
 
     public void mousePressed(MouseEvent e)
     {
-      int state = 1;
+      int state = BroadcastObjectSelection.STATE_NORMAL_CLICK;
       if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK)
-        state = 0;
+        state = BroadcastObjectSelection.STATE_CTRL_CLICK;
+      else if ((e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK)
+        state = BroadcastObjectSelection.STATE_SHIFT_CLICK;
+
       formularMax4000.broadcast(new BroadcastObjectSelection(getModel(), state,
-        state != 0)
+        state == BroadcastObjectSelection.STATE_NORMAL_CLICK)
       {
         public void sendTo(BroadcastListener listener)
         {
@@ -249,7 +253,8 @@ public class OneInsertionLineView extends LineView
         }
       });
 
-      if (state != 0) getModel().selectWithViewCursor();
+      if (state == BroadcastObjectSelection.STATE_NORMAL_CLICK)
+        getModel().selectWithViewCursor();
     }
 
     public void mouseReleased(MouseEvent e)

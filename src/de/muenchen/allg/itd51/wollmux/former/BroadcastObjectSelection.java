@@ -22,6 +22,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 29.09.2006 | BNK | Erstellung
+ * 23.03.2010 | ERT | Konstanten für Selektion
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -38,6 +39,12 @@ package de.muenchen.allg.itd51.wollmux.former;
  */
 public abstract class BroadcastObjectSelection implements Broadcast
 {
+  public final static int STATE_NORMAL_CLICK = 1;
+
+  public final static int STATE_CTRL_CLICK = 0;
+
+  public final static int STATE_SHIFT_CLICK = 2;
+
   /**
    * das {@link Object} das ausgewählt wurde.
    */

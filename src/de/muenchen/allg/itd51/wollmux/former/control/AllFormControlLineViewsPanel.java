@@ -24,6 +24,7 @@
  * 30.08.2006 | BNK | Erstellung
  * 10.09.2006 | BNK | [R3208]Tab-Struktur des Formulars bereits im FM4000 anzeigen
  * 19.01.2007 | BNK | [R5406]+broadcastViewVisibilitySettings()
+ * 23.03.2010 | ERT | [R5721]Unterstützung für Shift-Klick
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -697,15 +698,24 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     { // TESTED
       if (b.getClearSelection()) clearSelection();
       FormControlModel model = (FormControlModel) b.getObject();
+
+      int selindex = -1;
+
       for (int index = 0; index < viewDescriptors.size(); ++index)
       {
         OneFormControlLineView view =
           ((ViewDescriptor) viewDescriptors.get(index)).view;
+
         if (view.getModel() == model)
         {
           int state = b.getState();
-          if (state == 0) // toggle
+          if (state == BroadcastObjectSelection.STATE_CTRL_CLICK) // toggle
             state = selection.contains(index) ? -1 : 1;
+          else if (state == BroadcastObjectSelection.STATE_SHIFT_CLICK)
+          {
+            state = 1;
+            selindex = index;
+          }
 
           switch (state)
           {
@@ -717,6 +727,21 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
               view.mark();
               selection.add(index);
               break;
+          }
+        }
+        else if (b.getState() == BroadcastObjectSelection.STATE_SHIFT_CLICK)
+        {
+          boolean sel = false;
+          if ((selindex == -1 && (index > selection.firstElement() || index > selection.lastElement())))
+            sel = true;
+          else if (selindex != -1
+            && (index > selindex && (index < selection.firstElement() || index < selection.lastElement())))
+            sel = true;
+
+          if (sel)
+          {
+            view.mark();
+            selection.add(index);
           }
         }
       }

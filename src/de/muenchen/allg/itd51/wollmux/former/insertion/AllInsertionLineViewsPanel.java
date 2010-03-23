@@ -22,6 +22,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 13.09.2006 | BNK | Erstellung
+ * 23.03.2010 | ERT | [R5721]Unterstützung für Shift-Klick
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -323,14 +324,23 @@ public class AllInsertionLineViewsPanel implements View
     {
       if (b.getClearSelection()) clearSelection();
       InsertionModel model = (InsertionModel) b.getObject();
+
+      int selindex = -1;
+
       for (int index = 0; index < views.size(); ++index)
       {
         OneInsertionLineView view = views.get(index);
+
         if (view.getModel() == model)
         {
           int state = b.getState();
-          if (state == 0) // toggle
+          if (state == BroadcastObjectSelection.STATE_CTRL_CLICK) // toggle
             state = selection.contains(index) ? -1 : 1;
+          else if (state == BroadcastObjectSelection.STATE_SHIFT_CLICK)
+          {
+            state = 1;
+            selindex = index;
+          }
 
           switch (state)
           {
@@ -344,8 +354,22 @@ public class AllInsertionLineViewsPanel implements View
               break;
           }
         }
-      }
+        else if (b.getState() == BroadcastObjectSelection.STATE_SHIFT_CLICK)
+        {
+          boolean sel = false;
+          if ((selindex == -1 && (index > selection.firstElement() || index > selection.lastElement())))
+            sel = true;
+          else if (selindex != -1
+            && (index > selindex && (index < selection.firstElement() || index < selection.lastElement())))
+            sel = true;
 
+          if (sel)
+          {
+            view.mark();
+            selection.add(index);
+          }
+        }
+      }
     }
   }
 

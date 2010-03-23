@@ -115,7 +115,7 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
   {
     public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
     {
-      if (b.getState() == 1)
+      if (b.getState() == BroadcastObjectSelection.STATE_NORMAL_CLICK)
       {
         show(b.getObject());
       }

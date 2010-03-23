@@ -22,6 +22,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 12.03.2009 | BNK | Erstellung
+ * 23.03.2010 | ERT | [R5721]Unterstützung für Shift-Klick
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD D.10)
@@ -331,14 +332,22 @@ public class AllGroupLineViewsPanel implements View
     {
       if (b.getClearSelection()) clearSelection();
       GroupModel model = (GroupModel) b.getObject();
+
+      int selindex = -1;
+
       for (int index = 0; index < views.size(); ++index)
       {
         OneGroupLineView view = views.get(index);
         if (view.getModel() == model)
         {
           int state = b.getState();
-          if (state == 0) // toggle
+          if (state == BroadcastObjectSelection.STATE_CTRL_CLICK) // toggle
             state = selection.contains(index) ? -1 : 1;
+          else if (state == BroadcastObjectSelection.STATE_SHIFT_CLICK)
+          {
+            state = 1;
+            selindex = index;
+          }
 
           switch (state)
           {
@@ -352,6 +361,22 @@ public class AllGroupLineViewsPanel implements View
               break;
           }
         }
+        else if (b.getState() == BroadcastObjectSelection.STATE_SHIFT_CLICK)
+        {
+          boolean sel = false;
+          if ((selindex == -1 && (index > selection.firstElement() || index > selection.lastElement())))
+            sel = true;
+          else if (selindex != -1
+            && (index > selindex && (index < selection.firstElement() || index < selection.lastElement())))
+            sel = true;
+
+          if (sel)
+          {
+            view.mark();
+            selection.add(index);
+          }
+        }
+
       }
     }
   }

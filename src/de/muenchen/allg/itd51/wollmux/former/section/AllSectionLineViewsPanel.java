@@ -22,6 +22,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 24.03.2009 | BNK | Erstellung
+ * 23.03.2010 | ERT | [R5721]Unterstützung für Shift-Klick
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD D.10)
@@ -213,7 +214,7 @@ public class AllSectionLineViewsPanel implements View
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private void createNewSectionFromAllPagesTouchedBySelection()
   {
@@ -272,7 +273,7 @@ public class AllSectionLineViewsPanel implements View
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private boolean firstParagraphOfRangeHasHardBreak(XTextRange range)
   {
@@ -298,7 +299,7 @@ public class AllSectionLineViewsPanel implements View
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private void createNewSectionFromSelection()
   {
@@ -319,11 +320,11 @@ public class AllSectionLineViewsPanel implements View
    * Erzeugt einen neuen Textbereich, der range umschließt und erzeugt ein
    * zugehöriges {@link SectionModel} und fügt es zu {@link #sectionModelList} hinzu.
    * 
-   * @throws Exception,
-   *           wenn was schief geht
+   * @throws Exception
+   *           , wenn was schief geht
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private void createNewSectionFromTextRange(XTextRange range) throws Exception
   {
@@ -455,14 +456,22 @@ public class AllSectionLineViewsPanel implements View
     {
       if (b.getClearSelection()) clearSelection();
       SectionModel model = (SectionModel) b.getObject();
+
+      int selindex = -1;
+
       for (int index = 0; index < views.size(); ++index)
       {
         OneSectionLineView view = views.get(index);
         if (view.getModel() == model)
         {
           int state = b.getState();
-          if (state == 0) // toggle
+          if (state == BroadcastObjectSelection.STATE_CTRL_CLICK) // toggle
             state = selection.contains(index) ? -1 : 1;
+          else if (state == BroadcastObjectSelection.STATE_SHIFT_CLICK)
+          {
+            state = 1;
+            selindex = index;
+          }
 
           switch (state)
           {
@@ -476,6 +485,22 @@ public class AllSectionLineViewsPanel implements View
               break;
           }
         }
+        else if (b.getState() == BroadcastObjectSelection.STATE_SHIFT_CLICK)
+        {
+          boolean sel = false;
+          if ((selindex == -1 && (index > selection.firstElement() || index > selection.lastElement())))
+            sel = true;
+          else if (selindex != -1
+            && (index > selindex && (index < selection.firstElement() || index < selection.lastElement())))
+            sel = true;
+
+          if (sel)
+          {
+            view.mark();
+            selection.add(index);
+          }
+        }
+
       }
     }
   }

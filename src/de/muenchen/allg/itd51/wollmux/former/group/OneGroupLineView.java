@@ -23,6 +23,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 13.03.2009 | BNK | Erstellung
+ * 23.03.2010 | ERT | [R5721]Unterstützung für Shift-Klick
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD D.10)
@@ -220,11 +221,14 @@ public class OneGroupLineView extends LineView
 
     public void mousePressed(MouseEvent e)
     {
-      int state = 1;
+      int state = BroadcastObjectSelection.STATE_NORMAL_CLICK;
       if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK)
-        state = 0;
+        state = BroadcastObjectSelection.STATE_CTRL_CLICK;
+      else if ((e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK)
+        state = BroadcastObjectSelection.STATE_SHIFT_CLICK;
+
       formularMax4000.broadcast(new BroadcastObjectSelection(getModel(), state,
-        state != 0)
+        state == BroadcastObjectSelection.STATE_NORMAL_CLICK)
       {
         public void sendTo(BroadcastListener listener)
         {
