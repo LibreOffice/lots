@@ -1576,6 +1576,11 @@ public class TextDocumentModel
       addToFormDescription(formularConf,
         persistentData.getData(DATA_ID_FORMULARBESCHREIBUNG));
       formularConf = applyFormularanpassung(formularConf);
+
+      ConfigThingy title = formularConf.query("TITLE");
+      if (title.count() > 0)
+        Logger.debug(L.m("Formular %1 eingelesen.", title.stringRepresentation(true,
+          '\'')));
     }
 
     return formularConf;
