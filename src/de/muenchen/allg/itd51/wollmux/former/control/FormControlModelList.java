@@ -236,9 +236,9 @@ public class FormControlModelList
    *          iteriert über eine Menge von Integer-Objekten, die die Indizes der zu
    *          verschiebenden FormControlModels spezifizieren. Die Liste muss
    *          aufsteigend sortiert sein, sonst ist das Ergebnis unbestimmt. Ist das
-   *          erste Element von indices die 0, so wird nichts getan. Ansonsten werden
-   *          die Indizes i aus indices der Reihe nach abgearbeitet und Element i
-   *          wird mit Element i-1 vertauscht.
+   *          erste Element von indices die 0 oder 1, so wird nichts getan. Ansonsten
+   *          werden die Indizes i aus indices der Reihe nach abgearbeitet und
+   *          Element i wird mit Element i-1 vertauscht.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void moveElementsUp(Iterator<Integer> iter)
@@ -247,7 +247,7 @@ public class FormControlModelList
     while (iter.hasNext())
     {
       int idx = iter.next().intValue();
-      if (idx <= 0) return;
+      if (idx <= 1) return;
       FormControlModel model1 = models.get(idx - 1);
       FormControlModel model2 = models.get(idx);
       haveMovedTab = haveMovedTab || model1.isTab() || model2.isTab();
@@ -270,7 +270,8 @@ public class FormControlModelList
    *          sonst ist das Ergebnis unbestimmt. Ist das letzte Element der Liste der
    *          höchste mögliche Index, so wird nichts getan. Ansonsten werden die
    *          Indizes i aus indices von hinten beginnend abgearbeitet und Element i
-   *          wird mit Element i+1 vertauscht.
+   *          wird mit Element i+1 vertauscht. Element 0 wird dabei niemals
+   *          angefasst, auch wenn Index 0 in der Liste ist.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void moveElementsDown(ListIterator<Integer> iter)
@@ -280,6 +281,7 @@ public class FormControlModelList
     {
       int idx = iter.previous().intValue();
       if (idx >= models.size() - 1) return;
+      if (idx == 0) break;
       FormControlModel model1 = models.get(idx + 1);
       FormControlModel model2 = models.get(idx);
       haveMovedTab = haveMovedTab || model1.isTab() || model2.isTab();
