@@ -3927,7 +3927,7 @@ public class WollMuxEventHandler
         if (reprocess) handleReprocessTextDocument(model);
         if (!reprocess)
           WollMuxSingleton.showInfoModal(L.m("WollMux"),
-            "Der Textbausteinverweis wurde eingefügt.");
+            L.m("Der Textbausteinverweis wurde eingefügt."));
       }
       catch (WollMuxFehlerException e)
       {
