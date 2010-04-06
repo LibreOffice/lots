@@ -258,7 +258,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   };
 
   /**
-   * ActionListener für Buttons mit der ACTION "newPALEntry".
+   * ActionListener für Buttons mit der ACTION "editNewPALEntry".
    */
   private ActionListener actionListener_editNewPALEntry = new ActionListener()
   {
