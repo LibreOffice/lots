@@ -72,12 +72,9 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -113,6 +110,7 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
@@ -139,6 +137,15 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   public static final String DEFAULT_ANREDE = "Frau";
 
+  /**
+   * Gibt an, wie die Personen in den Listen angezeigt werden sollen, wenn es nicht
+   * explizit in der Konfiguration über das DISPLAY-Attribut für eine listbox
+   * festgelegt ist. %{Spalte}-Syntax um entsprechenden Wert des Datensatzes
+   * einzufügen, z.B. "%{Nachname}, %{Vorname}" für die Anzeige "Meier, Hans" etc.
+   */
+  private static final String DEFAULT_DISPLAYTEMPLATE =
+    "%{Nachname}, %{Vorname} (%{Rolle})";
+
   private final URL MB_URL =
     this.getClass().getClassLoader().getResource("data/mb.png");
 
@@ -147,12 +154,6 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private final URL DB_URL =
     this.getClass().getClassLoader().getResource("data/db.png");
-
-  /**
-   * Gibt an, wie die Personen in den Listen angezeigt werden sollen. %{Spalte}
-   * Syntax um entsprechenden Wert des Datensatzes einzufügen.
-   */
-  private final static String displayTemplate = "%{Nachname}, %{Vorname} (%{Rolle})";
 
   /**
    * Standardbreite für Textfelder
@@ -305,6 +306,26 @@ public class PersoenlicheAbsenderlisteVerwalten
   private JList palJList;
 
   /**
+   * Gibt an, wie die Suchresultate in der {@link #resultsJList} angezeigt werden
+   * sollen. Wird im Konstruktor mit {@link #DEFAULT_DISPLAYTEMPLATE} initialisiert,
+   * kann aber in der Konfiguration bei der "listbox" mit ID "suchanfrage" durch
+   * Angeben des DISPLAY-Attributs überschrieben werden. %{Spalte}-Syntax um
+   * entsprechenden Wert des Datensatzes einzufügen, z.B. "%{Nachname}, %{Vorname}"
+   * für die Anzeige "Meier, Hans" etc.
+   */
+  private String resultsDisplayTemplate;
+
+  /**
+   * Gibt an, wie die Suchresultate in der {@link #palJList} angezeigt werden sollen.
+   * Wird im Konstruktor mit {@link #DEFAULT_DISPLAYTEMPLATE} initialisiert, kann
+   * aber in der Konfiguration bei der "listbox" mit ID "suchanfrage" durch Angeben
+   * des DISPLAY-Attributs überschrieben werden. %{Spalte}-Syntax um entsprechenden
+   * Wert des Datensatzes einzufügen, z.B. "%{Nachname}, %{Vorname}" für die Anzeige
+   * "Meier, Hans" etc.
+   */
+  private String palDisplayTemplate;
+
+  /**
    * Das Textfeld in dem der Benutzer seine Suchanfrage eintippt.
    */
   private JTextField query;
@@ -376,6 +397,8 @@ public class PersoenlicheAbsenderlisteVerwalten
     this.myConf = conf;
     this.abConf = abConf;
     this.dialogEndListener = dialogEndListener;
+    this.resultsDisplayTemplate = DEFAULT_DISPLAYTEMPLATE;
+    this.palDisplayTemplate = DEFAULT_DISPLAYTEMPLATE;
 
     // Falls in der Konfiguration ein Suchstrategie-Abschnitt existiert, parsen wir
     // diesen um eine SearchStrategy zu erhalten
@@ -533,7 +556,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
     catch (DatasetNotFoundException x)
     {}
-    setListElements(palJList, dj.getLOS(), dsToSelect, false);
+    setListElements(palJList, dj.getLOS(), palDisplayTemplate, false, dsToSelect);
 
     updateButtonStates();
 
@@ -688,11 +711,29 @@ public class PersoenlicheAbsenderlisteVerwalten
 
             JList list;
             if (id.equals("suchergebnis"))
+            {
               list = resultsJList;
+              try
+              {
+                resultsDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
+              }
+              catch (NodeNotFoundException e)
+              {}
+            }
             else if (id.equals("pal"))
+            {
               list = palJList;
+              try
+              {
+                palDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
+              }
+              catch (NodeNotFoundException e)
+              {}
+            }
             else
+            {
               list = new JList(new DefaultListModel());
+            }
 
             list.setVisibleRowCount(lines);
             list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -820,26 +861,38 @@ public class PersoenlicheAbsenderlisteVerwalten
   /**
    * Nimmt eine JList list, die ein DefaultListModel haben muss und ändert ihre
    * Wertliste so, dass sie data entspricht. Die Datasets aus data werden nicht
-   * direkt als Werte verwendet, sondern in {@link ListElement} Objekte gewrappt.
-   * data == null wird interpretiert als leere Liste. Wenn datasetToSelect != null
-   * ist, so wird der entsprechende Datensatz in der Liste selektiert, wenn er darin
-   * vorhanden ist.
+   * direkt als Werte verwendet, sondern in {@link DJDatasetListElement}-Objekte
+   * gewrappt, deren Inhalt entsprechend des übergebenen displayTemplates angezeigt
+   * wird. data == null wird interpretiert als leere Liste. Wenn datasetToSelect !=
+   * null ist, so wird der entsprechende Datensatz in der Liste selektiert, wenn er
+   * darin vorhanden ist.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @param list
+   *          die Liste deren Wertliste geändert werden soll
+   * @param data
+   *          enthält die Datensätze, mit denen die Liste gefüllt werden soll
+   * @param displayTemplate
+   *          gibt an wie die Datensätze in der Liste als Strings repräsentiert
+   *          werden sollen, siehe z.B. {@link #DEFAULT_DISPLAYTEMPLATE}.
    * @param append
    *          Falls true, werden die Elemente an die Liste angehängt anstatt sie zu
    *          ersetzen.
+   * @param datasetToSelect
+   *          gibt den Datensatz an, der selektiert werden soll. Wenn
+   *          <code>null</code> übergeben wird, wird entsprechend kein Datensatz
+   *          ausgewählt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setListElements(JList list, QueryResults data,
-      Dataset datasetToSelect, boolean append)
+      String displayTemplate, boolean append, Dataset datasetToSelect)
   {
     int selectedIndex = -1;
-    ListElement[] elements;
+    DJDatasetListElement[] elements;
     if (data == null)
-      elements = new ListElement[] {};
+      elements = new DJDatasetListElement[] {};
     else
     {
-      elements = new ListElement[data.size()];
+      elements = new DJDatasetListElement[data.size()];
       Iterator<Dataset> iter = data.iterator();
       int i = 0;
       while (iter.hasNext())
@@ -866,15 +919,9 @@ public class PersoenlicheAbsenderlisteVerwalten
             icon = new ImageIcon(DB_URL);
         }
 
-        elements[i++] = new ListElement(ds, icon);
+        elements[i++] = new DJDatasetListElement(ds, displayTemplate, icon);
       }
-      Arrays.sort(elements, new Comparator<Object>()
-      {
-        public int compare(Object o1, Object o2)
-        {
-          return o1.toString().compareTo(o2.toString());
-        }
-      });
+      Arrays.sort(elements);
     }
 
     DefaultListModel listModel = (DefaultListModel) list.getModel();
@@ -892,92 +939,25 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * wie {@link #setListElements(JList, QueryResults, Dataset, boolean)}, aber es
-   * wird kein Datensatz selektiert.
+   * Wie {@link #setListElements(JList, QueryResults, String, boolean, Dataset)},
+   * aber es wird kein Datensatz selektiert.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @param list
+   *          die Liste deren Wertliste geändert werden soll
+   * @param data
+   *          enthält die Datensätze, mit denen die Liste gefüllt werden soll
+   * @param displayTemplate
+   *          gibt an wie die Datensätze in der Liste als Strings repräsentiert
+   *          werden sollen, siehe z.B. {@link #DEFAULT_DISPLAYTEMPLATE}.
    * @param append
    *          Falls true, werden die Elemente an die Liste angehängt anstatt sie zu
    *          ersetzen.
-   */
-  private void setListElements(JList list, QueryResults data, boolean append)
-  {
-    setListElements(list, data, null, append);
-  }
-
-  /**
-   * Liefert zu einem Datensatz den in einer Listbox anzuzeigenden String.
-   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private String getDisplayString(DJDataset ds)
+  private void setListElements(JList list, QueryResults data,
+      String displayTemplate, boolean append)
   {
-    return substituteVars(displayTemplate, ds);
-  }
-
-  /**
-   * Wrapper um ein DJDataset zum Einfügen in eine JList.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private class ListElement
-  {
-    private String displayString;
-
-    private DJDataset ds;
-
-    private Icon icon;
-
-    public ListElement(DJDataset ds, Icon icon)
-    {
-      displayString = getDisplayString(ds);
-      this.ds = ds;
-      this.icon = icon;
-    }
-
-    public String toString()
-    {
-      return displayString;
-    }
-
-    public Icon getIcon()
-    {
-      return icon;
-    }
-
-    public DJDataset getDataset()
-    {
-      return ds;
-    }
-  }
-
-  /**
-   * Ersetzt "%{SPALTENNAME}" in str durch den Wert der entsprechenden Spalte im
-   * datensatz.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public String substituteVars(String str, Dataset datensatz)
-  {
-    Pattern p = Pattern.compile("%\\{([a-zA-Z0-9]+)\\}");
-    Matcher m = p.matcher(str);
-    if (m.find()) do
-    {
-      String spalte = m.group(1);
-      String wert = spalte;
-      try
-      {
-        String wert2 = datensatz.get(spalte);
-        if (wert2 != null) wert = wert2.replaceAll("%", "");
-      }
-      catch (ColumnNotFoundException e)
-      {
-        Logger.error(e);
-      }
-      str = str.substring(0, m.start()) + wert + str.substring(m.end());
-      m = p.matcher(str);
-    } while (m.find());
-    return str;
+    setListElements(list, data, displayTemplate, append, null);
   }
 
   /**
@@ -1013,7 +993,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     {
       try
       {
-        ListElement ele = (ListElement) value;
+        DJDatasetListElement ele = (DJDatasetListElement) value;
 
         Icon icon = ele.getIcon();
         if (icon != null)
@@ -1097,13 +1077,13 @@ public class PersoenlicheAbsenderlisteVerwalten
     Object[] sel = resultsJList.getSelectedValues();
     addEntries: for (int i = 0; i < sel.length; ++i)
     {
-      ListElement e = (ListElement) sel[i];
+      DJDatasetListElement e = (DJDatasetListElement) sel[i];
       DJDataset ds = e.getDataset();
-      String eStr = getDisplayString(ds);
+      String eStr = e.toString();
       ListModel model = palJList.getModel();
       for (int j = model.getSize() - 1; j >= 0; --j)
       {
-        ListElement e2 = (ListElement) model.getElementAt(j);
+        DJDatasetListElement e2 = (DJDatasetListElement) model.getElementAt(j);
         if (e2.toString().equals(eStr)) continue addEntries;
       }
       ds.copy();
@@ -1120,7 +1100,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   private void listsHaveChanged()
   {
-    setListElements(palJList, dj.getLOS(), false);
+    setListElements(palJList, dj.getLOS(), palDisplayTemplate, false);
     palJList.clearSelection();
     resultsJList.clearSelection();
     updateButtonStates();
@@ -1136,7 +1116,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     Object[] sel = palJList.getSelectedValues();
     for (int i = 0; i < sel.length; ++i)
     {
-      ListElement e = (ListElement) sel[i];
+      DJDatasetListElement e = (DJDatasetListElement) sel[i];
       e.getDataset().remove();
     }
 
@@ -1150,11 +1130,11 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   private void editEntry()
   {
-    ListElement e = (ListElement) palJList.getSelectedValue();
+    DJDatasetListElement e = (DJDatasetListElement) palJList.getSelectedValue();
     DJDataset ds;
     if (e == null)
     {
-      e = (ListElement) resultsJList.getSelectedValue();
+      e = (DJDatasetListElement) resultsJList.getSelectedValue();
       if (e == null) return;
       ds = e.getDataset().copy();
     }
@@ -1208,14 +1188,14 @@ public class PersoenlicheAbsenderlisteVerwalten
     Object[] sel = resultsJList.getSelectedValues();
     for (int i = 0; i < sel.length; ++i)
     {
-      ListElement e = (ListElement) sel[i];
+      DJDatasetListElement e = (DJDatasetListElement) sel[i];
       copyDJDataset(e.getDataset());
     }
 
     sel = palJList.getSelectedValues();
     for (int i = 0; i < sel.length; ++i)
     {
-      ListElement e = (ListElement) sel[i];
+      DJDatasetListElement e = (DJDatasetListElement) sel[i];
       copyDJDataset(e.getDataset());
     }
 
@@ -1307,7 +1287,8 @@ public class PersoenlicheAbsenderlisteVerwalten
           public void run()
           {
             // kann mit finalResults == null umgehen
-            setListElements(resultsJList, finalResults, false);
+            setListElements(resultsJList, finalResults, resultsDisplayTemplate,
+              false);
             updateButtonStates();
           }
         });
@@ -1325,11 +1306,11 @@ public class PersoenlicheAbsenderlisteVerwalten
     try
     {
       results = dj.find("Mail", "matthias.benkmann@muenchen.de");
-      setListElements(resultsJList, results, false);
+      setListElements(resultsJList, results, resultsDisplayTemplate, false);
       results = dj.find("Mail", "christoph.lutz@muenchen.de");
-      setListElements(resultsJList, results, true);
+      setListElements(resultsJList, results, resultsDisplayTemplate, true);
       results = dj.find("Mail", "daniel.benkmann@muenchen.de");
-      setListElements(resultsJList, results, true);
+      setListElements(resultsJList, results, resultsDisplayTemplate, true);
     }
     catch (TimeoutException x)
     {

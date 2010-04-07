@@ -23,10 +23,11 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 03.11.2005 | LUT | Erstellung
+ * 06.04.2010 | BED | +Icon
+ * 07.04.2010 | BED | displayTemplate als Instanzvariable
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.db;
@@ -34,15 +35,18 @@ package de.muenchen.allg.itd51.wollmux.db;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.Icon;
+
 import de.muenchen.allg.itd51.wollmux.Logger;
 
 public class DJDatasetListElement implements Comparable<DJDatasetListElement>
 {
   /**
-   * Gibt an, wie die Personen in den Listen angezeigt werden sollen. %{Spalte}
-   * Syntax um entsprechenden Wert des Datensatzes einzufügen.
+   * Gibt an, wie die Personen in den Listen angezeigt werden sollen.
+   * %{Spalte}-Syntax um entsprechenden Wert des Datensatzes einzufügen, z.B.
+   * "%{Nachname}, %{Vorname}" für die Anzeige "Meier, Hans" etc.
    */
-  private final static String displayTemplate = "%{Nachname}, %{Vorname} (%{Rolle})";
+  private String displayTemplate;
 
   /**
    * Enthält das DJDataset-Element.
@@ -50,17 +54,50 @@ public class DJDatasetListElement implements Comparable<DJDatasetListElement>
   private DJDataset ds;
 
   /**
-   * Erzeugt ein neues DJDatasetListElement für die Darstellung in einer Liste.
+   * Optionales Icon, das in der Liste angezeigt werden soll.
+   */
+  private Icon icon;
+
+  /**
+   * Erzeugt ein neues DJDatasetListElement für die Darstellung in einer Liste (ohne
+   * Icon).
    * 
    * @param ds
    *          Das DJDatasetElement das über das DJDatasetListElement dargestellt
    *          werden soll.
+   * @param displayTemplate
+   *          gibt an, wie die Personen in den Listen angezeigt werden sollen.
+   *          %{Spalte}-Syntax um entsprechenden Wert des Datensatzes einzufügen,
+   *          z.B. "%{Nachname}, %{Vorname}" für die Anzeige "Meier, Hans" etc.
    * 
-   * @author Christoph Lutz (D-III-ITD 5.1)
+   * @author Daniel Benkmann (D-III-ITD-D101)
    */
-  public DJDatasetListElement(DJDataset ds)
+  public DJDatasetListElement(DJDataset ds, String displayTemplate)
+  {
+    this(ds, displayTemplate, null);
+  }
+
+  /**
+   * Erzeugt ein neues DJDatasetListElement für die Darstellung in einer Liste.
+   * 
+   * @param ds
+   *          das DJDatasetElement das über das DJDatasetListElement dargestellt
+   *          werden soll.
+   * @param displayTemplate
+   *          gibt an, wie die Personen in den Listen angezeigt werden sollen.
+   *          %{Spalte}-Syntax um entsprechenden Wert des Datensatzes einzufügen,
+   *          z.B. "%{Nachname}, %{Vorname}" für die Anzeige "Meier, Hans" etc.
+   * @param icon
+   *          das Icon, das in der Liste für das Element verwendet werden soll. Falls
+   *          kein Icon vorhanden ist, kann <code>null</code> übergeben werden.
+   * 
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  public DJDatasetListElement(DJDataset ds, String displayTemplate, Icon icon)
   {
     this.ds = ds;
+    this.displayTemplate = displayTemplate;
+    this.icon = icon;
   }
 
   /**
@@ -84,6 +121,19 @@ public class DJDatasetListElement implements Comparable<DJDatasetListElement>
   }
 
   /**
+   * Liefert das Icon dieses DJDatasetListElements zurück.
+   * 
+   * @return das Icon dieses DJDatasetListElements. Falls kein Icon vorhanden ist,
+   *         wird <code>null</code> zurückgeliefert.
+   * 
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  public Icon getIcon()
+  {
+    return this.icon;
+  }
+
+  /**
    * Liefert zu einem Datensatz den in einer Listbox anzuzeigenden String.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -99,7 +149,7 @@ public class DJDatasetListElement implements Comparable<DJDatasetListElement>
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private String substituteVars(String str, Dataset datensatz)
+  private static String substituteVars(String str, Dataset datensatz)
   {
     Pattern p = Pattern.compile("%\\{([a-zA-Z0-9]+)\\}");
     Matcher m = p.matcher(str);
@@ -123,10 +173,11 @@ public class DJDatasetListElement implements Comparable<DJDatasetListElement>
   }
 
   /**
-   * Vergleicht die String-Repräsentation (toString()) zweier Listenelemente über die
-   * compareTo()-Methode der Klasse String.
+   * Vergleicht die String-Repräsentation ({@link #toString()}) zweier Listenelemente
+   * über die compareTo()-Methode der Klasse String.
    * 
    * @param o
+   *          das DJDatasetListElement mit dem verglichen werden soll
    * @return Rückgabewert von this.toString().compareTo(o.toString())
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
@@ -135,10 +186,24 @@ public class DJDatasetListElement implements Comparable<DJDatasetListElement>
     return this.toString().compareTo(o.toString());
   }
 
+  /**
+   * Liefert <code>true</code> zurück, wenn die String-Repräsentation (
+   * {@link #toString()}) des übergebenen DJDatasetListElements gleich (im Hinblick
+   * auf {@link String#equals(Object)} ist zu der String-Repräsentation von this.
+   * 
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
   public boolean equals(Object o)
   {
-    if (o == null) return false;
-    return this.toString().equals(o.toString());
+    if (this == o)
+    {
+      return true;
+    }
+    if (o instanceof DJDatasetListElement)
+    {
+      return this.toString().equals(o.toString());
+    }
+    return false;
   }
 
   public int hashCode()

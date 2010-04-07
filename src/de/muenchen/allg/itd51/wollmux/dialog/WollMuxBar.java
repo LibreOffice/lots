@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Menü-Leiste als zentraler Ausgangspunkt für WollMux-Funktionen
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -65,7 +65,6 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
@@ -392,8 +391,8 @@ public class WollMuxBar
    * @param winMode
    *          Anzeigemodus, z.B. {@link WollMuxBarConfig#UP_AND_AWAY_WINDOW_MODE}.
    * @param conf
-   *          combinedConf(wollmuxConf(<Inhalt der wollmux.conf>) wollmuxbarConf(<Inhalt
-   *          der wollmuxbar.conf>)
+   *          combinedConf(wollmuxConf(<Inhalt der wollmux.conf>)
+   *          wollmuxbarConf(<Inhalt der wollmuxbar.conf>)
    * @param defaultConf
    *          die wollmux.conf
    * @param userConf
@@ -1426,8 +1425,16 @@ public class WollMuxBar
       {
         for (int i = 0; i < entries.length; i++)
         {
-          senderbox.addItem(entries[i], senderboxActionListener, "" + i + ":"
-            + entries[i], myIsInsideMonitor);
+          String entry = entries[i];
+          // Da die anzuzeigenden Einträge in der Regel irgendwo aus der PAL kommen
+          // und über einen XPALProvider bekommen wurden, hängt am Eintrag-Ende
+          // noch der Schlüssel des zugrundeliegenden Datensatzes getrennt mit
+          // "§§%=%§§" an. Diesen wollen wir aber nicht in der WollMuxBar-Senderbox
+          // anzeigen, weshalb wir ihn an dieser Stelle abschneiden.
+          // (Dabei hoffen wir einfach, dass "§§%=%§§" nur einmal vorkommt.)
+          String entryNoKey = entry.split("§§%=%§§")[0];
+          senderbox.addItem(entryNoKey, senderboxActionListener, "" + i + ":"
+            + entry, myIsInsideMonitor);
         }
       }
       else
@@ -1438,7 +1445,16 @@ public class WollMuxBar
         actionListener_editSenderList, null, myIsInsideMonitor);
 
       if (current != null && !current.equals(""))
-        senderbox.setSelectedItem(current);
+      {
+        // Da die anzuzeigenden Einträge in der Regel irgendwo aus der PAL kommen
+        // und über einen XPALProvider bekommen wurden, hängt am Eintrag-Ende
+        // noch der Schlüssel des zugrundeliegenden Datensatzes getrennt mit
+        // "§§%=%§§" an. Diesen wollen wir aber nicht in der WollMuxBar-Senderbox
+        // anzeigen, weshalb wir ihn an dieser Stelle abschneiden.
+        // (Dabei hoffen wir einfach, dass "§§%=%§§" nur einmal vorkommt.)
+        String currentNoKey = current.split("§§%=%§§")[0];
+        senderbox.setSelectedItem(currentNoKey);
+      }
     }
 
     setSizeAndLocation();

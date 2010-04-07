@@ -1778,20 +1778,21 @@ public class WollMuxEventHandler
 
     protected void doit()
     {
-      DJDatasetListElement[] pal =
-        WollMuxSingleton.getInstance().getSortedPALEntries();
+      String[] pal = WollMuxSingleton.getInstance().getPALEntries();
 
       // nur den neuen Absender setzen, wenn index und sender übereinstimmen,
       // d.h.
       // die Absenderliste der entfernten WollMuxBar konsistent war.
       if (idx >= 0 && idx < pal.length && pal[idx].toString().equals(senderName))
       {
-        pal[idx].getDataset().select();
+        DJDatasetListElement[] palDatasets =
+          WollMuxSingleton.getInstance().getSortedPALEntries();
+        palDatasets[idx].getDataset().select();
       }
       else
       {
         Logger.error(L.m(
-          "Setzen des Senders '%1' schlug fehl, da der index '%2' nicht mit der PAL übereinstimmt (Inkosistenzen?)",
+          "Setzen des Senders '%1' schlug fehl, da der index '%2' nicht mit der PAL übereinstimmt (Inkonsistenzen?)",
           senderName, idx));
       }
 

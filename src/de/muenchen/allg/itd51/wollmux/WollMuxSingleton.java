@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Singleton für zentrale WollMux-Methoden.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -41,11 +41,11 @@
  * 19.12.2006 | BAB | + setzen von Shortcuts im Konstruktor
  * 29.12.2006 | BNK | +registerDatasources()
  * 27.03.2007 | BNK | Default-oooEinstellungen ausgelagert nach data/...
- * 16.12.2009 | ERT | Cast XTextField-Interface entfernt 
+ * 16.12.2009 | ERT | Cast XTextField-Interface entfernt
+ * 07.04.2010 | BED | Konfigurierbares SENDER_DISPLAYTEMPLATE 
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 
@@ -105,7 +105,7 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 
 /**
- * Diese Klasse ist ein Singleton, welcher den WollMux initialisiert und alle
+ * Diese Klasse ist ein Singleton, welches den WollMux initialisiert und alle
  * zentralen WollMux-Methoden zur Verfügung stellt. Selbst der WollMux-Service
  * de.muenchen.allg.itd51.wollmux.comp.WollMux, der früher zentraler Anlaufpunkt war,
  * bedient sich größtenteils aus den zentralen Methoden des Singletons.
@@ -113,6 +113,15 @@ import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 public class WollMuxSingleton implements XPALProvider
 {
   public static final String OVERRIDE_FRAG_DB_SPALTE = "OVERRIDE_FRAG_DB_SPALTE";
+
+  /**
+   * Default-Wert für {@link #senderDisplayTemplate}, wenn kein Wert in der
+   * Konfiguration explizit angegeben ist.
+   */
+  private static final String DEFAULT_SENDER_DISPLAYTEMPLATE =
+    "%{Nachname}, %{Vorname} (%{Rolle})";
+
+  public static final String SENDER_KEY_SEPARATOR = "§§%=%§§";
 
   private static WollMuxSingleton singletonInstance = null;
 
@@ -142,10 +151,21 @@ public class WollMuxSingleton implements XPALProvider
   private PrintFunctionLibrary globalPrintFunctions;
 
   /**
-   * Der Wert von {@link #OVERRIDE_FRAG_DB_SPALTE}, d,h, der Name der Spalte, die
-   * die persönliche OverrideFrag-Liste enthält. "" falls nicht definiert.
+   * Der Wert von {@link #OVERRIDE_FRAG_DB_SPALTE}, d,h, der Name der Spalte, die die
+   * persönliche OverrideFrag-Liste enthält. "" falls nicht definiert.
    */
   private String overrideFragDbSpalte;
+
+  /**
+   * Gibt an, wie die String-Repräsentation von PAL-Einträgen aussehen, die über die
+   * XPALProvider-Methoden zurückgeliefert werden. Syntax mit %{Spalte} um
+   * entsprechenden Wert des Datensatzes anzuzeigen, z.B. "%{Nachname}, %{Vorname}"
+   * für die Anzeige in der Form "Meier, Hans" etc. Kann in der WollMux-Konfiguration
+   * über SENDER_DISPLAYTEMPLATE gesetzt werden. Falls kein Wert in der
+   * WollMux-Konfiguration gesetzt wird, wird {@link #DEFAULT_SENDER_DISPLAYTEMPLATE}
+   * verwendet.
+   */
+  private String senderDisplayTemplate;
 
   /**
    * Enthält den default XComponentContext in dem der WollMux (bzw. das OOo) läuft.
@@ -217,6 +237,16 @@ public class WollMuxSingleton implements XPALProvider
     // erfolgreich.
     if (getDatasourceJoiner() == null) successfulStartup = false;
 
+    // Setzen von senderDisplayTemplate
+    this.senderDisplayTemplate = DEFAULT_SENDER_DISPLAYTEMPLATE;
+    try
+    {
+      this.senderDisplayTemplate =
+        WollMuxFiles.getWollmuxConf().query("SENDER_DISPLAYTEMPLATE").getLastChild().toString();
+    }
+    catch (NodeNotFoundException e)
+    {}
+
     /*
      * Globale Funktionsdialoge parsen. ACHTUNG! Muss vor parseGlobalFunctions()
      * erfolgen. Als context wird null übergeben, weil globale Funktionen keinen
@@ -242,7 +272,7 @@ public class WollMuxSingleton implements XPALProvider
     globalPrintFunctions =
       WollMuxFiles.parsePrintFunctions(WollMuxFiles.getWollmuxConf());
 
-    /**
+    /*
      * Dokumentaktionen parsen. Diese haben weder Kontext noch Dialoge.
      */
     documentActionFunctions = new FunctionLibrary(null, true);
@@ -271,7 +301,8 @@ public class WollMuxSingleton implements XPALProvider
      * endlosschleifen mit dem ProtocolHandler möglich sind. Evtl. auch lösbar
      * dadurch, dass URLS, die mit ignorecase("wollmux:") anfangen, niemals an den
      * Slave delegiert werden. Ist aber nicht so schön als Lösung.
-     * UNO.XDispatchProviderInterception(UNO.desktop).registerDispatchProviderInterceptor(
+     * UNO.XDispatchProviderInterception
+     * (UNO.desktop).registerDispatchProviderInterceptor(
      * DispatchHandler.globalWollMuxDispatches);
      */
 
@@ -838,9 +869,15 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Diese Methode liefert eine alphabethisch aufsteigend sortierte Liste aller
-   * Einträge der Persönlichen Absenderliste (PAL) in einem String-Array, wobei die
-   * einzelnen Einträge in der Form "<Nachname>, <Vorname> (<Rolle>)" sind.
+   * Diese Methode liefert eine alphabethisch aufsteigend sortierte Liste mit
+   * String-Repräsentationen aller Einträge der Persönlichen Absenderliste (PAL) in
+   * einem String-Array. Die genaue Form der String-Repräsentationen ist abhängig von
+   * {@link #senderDisplayTemplate}, das in der WollMux-Konfiguration über den Wert
+   * von SENDER_DISPLAYTEMPLATE gesetzt werden kann. Unabhängig von
+   * {@link #senderDisplayTemplate} enthalten die über diese Methode
+   * zurückgelieferten String-Repräsentationen der PAL-Einträge aber auf jeden Fall
+   * immer am Ende den String "§§%=%§§" gefolgt vom Schlüssel des entsprechenden
+   * Eintrags!
    * 
    * @see de.muenchen.allg.itd51.wollmux.XPALProvider#getPALEntries()
    */
@@ -850,7 +887,8 @@ public class WollMuxSingleton implements XPALProvider
     String[] elements = new String[pal.length];
     for (int i = 0; i < pal.length; i++)
     {
-      elements[i] = pal[i].toString();
+      elements[i] =
+        pal[i].toString() + SENDER_KEY_SEPARATOR + pal[i].getDataset().getKey();
     }
     return elements;
   }
@@ -858,6 +896,14 @@ public class WollMuxSingleton implements XPALProvider
   /**
    * Diese Methode liefert alle DJDatasetListElemente der Persönlichen Absenderliste
    * (PAL) in alphabetisch aufsteigend sortierter Reihenfolge.
+   * 
+   * Wichtig: Diese Methode ist nicht im XPALProvider-Interface enthalten. Die
+   * String-Repräsentation der zurückgelieferten DJDatasetListElements entsprechen
+   * zwar {@link #senderDisplayTemplate}, aber sie enthalten im Gegensatz zu den
+   * Strings, die man über {@link #getPALEntries()} erhält, NICHT zwangsläufig am
+   * Ende die Schlüssel der Datensätze. Wenn man nicht direkt an die Dataset-Objekte
+   * der PAL heran will, sollte man statt dieser Methode auf jeden Fall besser
+   * {@link #getPALEntries()} verwenden!
    * 
    * @return alle DJDatasetListElemente der Persönlichen Absenderliste (PAL) in
    *         alphabetisch aufsteigend sortierter Reihenfolge.
@@ -871,18 +917,24 @@ public class WollMuxSingleton implements XPALProvider
     Iterator<Dataset> iter = data.iterator();
     int i = 0;
     while (iter.hasNext())
-      elements[i++] = new DJDatasetListElement((DJDataset) iter.next());
+      elements[i++] =
+        new DJDatasetListElement((DJDataset) iter.next(), senderDisplayTemplate);
     Arrays.sort(elements);
 
     return elements;
   }
 
   /**
-   * Diese Methode liefert den aktuell aus der persönlichen Absenderliste (PAL)
-   * ausgewählten Absender im Format "<Nachname>, <Vorname> (<Rolle>)" zurück. Ist
-   * die PAL leer oder noch kein Absender ausgewählt, so liefert die Methode den
-   * Leerstring "" zurück. Dieser Sonderfall sollte natürlich entsprechend durch die
-   * aufrufende Methode behandelt werden.
+   * Diese Methode liefert eine String-Repräsentation des aktuell aus der
+   * persönlichen Absenderliste (PAL) ausgewählten Absenders zurück. Die genaue Form
+   * der String-Repräsentation ist abhängig von {@link #senderDisplayTemplate}, das
+   * in der WollMux-Konfiguration über den Wert von SENDER_DISPLAYTEMPLATE gesetzt
+   * werden kann. Unabhängig von {@link #senderDisplayTemplate} enthält die über
+   * diese Methode zurückgelieferte String-Repräsentation aber auf jeden Fall immer
+   * am Ende den String "§§%=%§§" gefolgt vom Schlüssel des aktuell ausgewählten
+   * Absenders. Ist die PAL leer oder noch kein Absender ausgewählt, so liefert die
+   * Methode den Leerstring "" zurück. Dieser Sonderfall sollte natürlich
+   * entsprechend durch die aufrufende Methode behandelt werden.
    * 
    * @see de.muenchen.allg.itd51.wollmux.XPALProvider#getCurrentSender()
    * 
@@ -894,7 +946,8 @@ public class WollMuxSingleton implements XPALProvider
     try
     {
       DJDataset selected = getDatasourceJoiner().getSelectedDataset();
-      return new DJDatasetListElement(selected).toString();
+      return new DJDatasetListElement(selected, senderDisplayTemplate).toString()
+        + SENDER_KEY_SEPARATOR + selected.getKey();
     }
     catch (DatasetNotFoundException e)
     {
@@ -980,7 +1033,7 @@ public class WollMuxSingleton implements XPALProvider
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   /* package private */ConfigThingy getInitialOverrideFragMap()
   {
