@@ -563,9 +563,10 @@ public class OpenExt
       {
         InputStream istream = process.getInputStream();
         byte[] buffy = new byte[256];
-        while ((0 <= istream.read(buffy)))
+        int count;
+        while ((0 <= (count = istream.read(buffy))))
         {
-          Logger.log(new String(buffy));
+          Logger.log(new String(buffy, 0, count));
         }
       }
     }
