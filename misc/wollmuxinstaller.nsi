@@ -238,7 +238,7 @@ Function .onInit
 	# Inform User that we will try to close OpenOffice.org
 	MessageBox MB_OKCANCEL|MB_ICONINFORMATION $(TryToKillOOoMessage) /SD IDOK IDOK +2
 	Abort
-	# Check if OpenOffice is running. If so abort installation with message.
+	# Try to kill OOo using TerminateOOo.jar. If unsuccessful abort installation with message.
 	File /oname=$TEMP\TerminateOOo.jar ${FILESDIR}\TerminateOOo.jar ;; extract TerminateOOo.jar to temporary directory
 	Call GetJRE
 	Pop $R0
@@ -249,7 +249,7 @@ Function .onInit
 	ClearErrors
 	ExecWait '"$R0" -jar "$TEMP\TerminateOOo.jar"' ;; does not work if WollMuxBar is running with "--quickstarter" option
 	IfErrors 0 +4
-	  MessageBox MB_OK|MB_ICONEXCLAMATION $(OOoRunningMessage) /SD IDOK ;; we also get this error if no Java was found
+	  MessageBox MB_OK|MB_ICONEXCLAMATION $(OOoRunningMessage) /SD IDOK ;; we would also get this error if no Java was found, but we check for that above
 	  Delete $TEMP\TerminateOOo.jar
 	  Abort
 	
@@ -295,21 +295,22 @@ Function un.onInit
 	# Inform User that we will try to close OpenOffice.org
 	MessageBox MB_OKCANCEL|MB_ICONINFORMATION $(TryToKillOOoMessage) /SD IDOK IDOK +2
 	Abort
-	# Check if OpenOffice is running. If so abort installation with message.
+	# Try to kill OOo using TerminateOOo.jar. If that doesn't work we give the user the option to try to uninstall anyway.
 	File /oname=$TEMP\TerminateOOo.jar ${FILESDIR}\TerminateOOo.jar ;; extract TerminateOOo.jar to temporary directory
 	Call un.GetJRE
 	Pop $R0
 	StrCmp $R0 "NOTFOUND" 0 +4 ;; check if Java was found
-	  MessageBox MB_OK|MB_ICONEXCLAMATION $(NoJavaFoundMessage) /SD IDOK
+	  MessageBox MB_YESNO|MB_ICONEXCLAMATION $(OOoKillFailedMessage) /SD IDYES IDYES skipKillOOo
 	  Delete $TEMP\TerminateOOo.jar
 	  Abort
 	ClearErrors
 	ExecWait '"$R0" -jar "$TEMP\TerminateOOo.jar"' ;; does not work if WollMuxBar is running with "--quickstarter" option
 	IfErrors 0 +4
-	  MessageBox MB_OK|MB_ICONEXCLAMATION $(OOoRunningMessage) /SD IDOK ;; we also get this error if no Java was found
+	  MessageBox MB_YESNO|MB_ICONEXCLAMATION $(OOoKillFailedMessage) /SD IDYES IDYES skipKillOOo ;; we would also get this error if no Java was found, but we check for that above
 	  Delete $TEMP\TerminateOOo.jar
 	  Abort
-	
+
+  skipKillOOo:	  
 	Delete $TEMP\TerminateOOo.jar
 	
 	Pop $R0

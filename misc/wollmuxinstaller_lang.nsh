@@ -22,7 +22,7 @@ LangString NeedAdminMessage ${LANG_GERMAN} "Sie benötigen Administrator-Rechte u
 LangString TryToKillOOoMessage ${LANG_ENGLISH} "OpenOffice.org must be closed before execution of this program.$\n\
 												The program will now check if any OOo windows are open and try to close them.$\n\
 												This can take a few seconds."
-LangString TryToKillOOoMessage ${LANG_GERMAN} "OpenOffice.org muss vor dem Ausführen dieses Programms geschlossen werden.$\n\
+LangString TryToKillOOoMessage ${LANG_GERMAN} "OpenOffice.org muss vor dem Ausführen dieses Programms beendet werden.$\n\
 											   Das Programm überprüft nun, ob irgendwelche OOo-Fenster offen sind und versucht diese zu schließen.$\n\
 											   Dieser Vorgang kann einige Sekunden dauern."
 LangString OOoRunningMessage ${LANG_ENGLISH} "OpenOffice.org or the OpenOffice.org quickstarter could not be closed!$\n\
@@ -69,6 +69,18 @@ LangString DesktopShortcutErrorMessage ${LANG_GERMAN} "Konnte keine Desktop-Verk
 
 
 # Uninstaller Messages
+LangString OOoKillFailedMessage ${LANG_ENGLISH} "OpenOffice.org could not be closed. This could have several reasons:$\n\
+                                                 - No Java found$\n\
+										         - No OpenOffice.org found (maybe it isn't installed)$\n\
+										         - Something is keeping an OpenOffice.org process alive$\n\
+										         If you are sure that no OpenOffice.org process is running you can safely continue the uninstallation.$\n\
+										         Do you want to continue?"
+LangString OOoKillFailedMessage ${LANG_GERMAN} "OpenOffice.org konnte nicht beendet werden. Dies kann verschiedene Gründe haben:$\n\
+											   - Kein Java gefunden$\n\
+											   - Kein OpenOffice.org gefunden (evtl. ist es nicht installiert)$\n\
+											   - Irgendein Programm hält einen OpenOffice.org-Prozess am Leben$\n\
+											   Wenn Sie sich sicher sind, dass kein OpenOffice.org-Prozess mehr läuft, können Sie die Deinstallation einfach fortsetzen.$\n\
+											   Möchten Sie fortsetzen?"
 LangString unNoOOoFoundMessage ${LANG_ENGLISH} "Could not uninstall WollMux.oxt because no OpenOffice.org installation was found!$\n\
 											    Please uninstall WollMux.oxt manually using the OpenOffice.org extension manager."
 LangString unNoOOoFoundMessage ${LANG_GERMAN} "Konnte Wollmux.oxt nicht deinstallieren, da keine OpenOffice.org-Installation gefunden wurde!$\n\
