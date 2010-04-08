@@ -30,6 +30,7 @@
  * 03.01.2005 | BNK | Bug korrigiert;  .gridy = x  sollte .gridx = x sein.
  * 19.05.2006 | BNK | [R1898]Wenn die Liste leer ist, dann gleich den PAL Verwalten Dialog aufrufen
  * 26.02.2010 | BED | WollMux-Icon für das Fenster
+ * 08.04.2010 | BED | [R52334] Anzeige über DISPLAY-Attribut konfigurierbar
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -56,8 +57,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -82,8 +81,8 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
@@ -100,10 +99,13 @@ import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
 public class AbsenderAuswaehlen
 {
   /**
-   * Gibt an, wie die Personen in den Listen angezeigt werden sollen. %{Spalte}
-   * Syntax um entsprechenden Wert des Datensatzes einzufügen.
+   * Gibt an, wie die Personen in den Listen angezeigt werden sollen, wenn es nicht
+   * explizit in der Konfiguration über das DISPLAY-Attribut für eine listbox
+   * festgelegt ist. %{Spalte}-Syntax um entsprechenden Wert des Datensatzes
+   * einzufügen, z.B. "%{Nachname}, %{Vorname}" für die Anzeige "Meier, Hans" etc.
    */
-  private final static String displayTemplate = "%{Nachname}, %{Vorname} (%{Rolle})";
+  private static final String DEFAULT_DISPLAYTEMPLATE =
+    "%{Nachname}, %{Vorname} (%{Rolle})";
 
   /**
    * Standardbreite für Textfelder
@@ -178,6 +180,16 @@ public class AbsenderAuswaehlen
   private JList palJList;
 
   /**
+   * Gibt an, wie die Suchresultate in der {@link #palJList} angezeigt werden sollen.
+   * Wird im Konstruktor mit {@link #DEFAULT_DISPLAYTEMPLATE} initialisiert, kann
+   * aber in der Konfiguration bei der "listbox" mit ID "suchanfrage" durch Angeben
+   * des DISPLAY-Attributs überschrieben werden. %{Spalte}-Syntax um entsprechenden
+   * Wert des Datensatzes einzufügen, z.B. "%{Nachname}, %{Vorname}" für die Anzeige
+   * "Meier, Hans" etc.
+   */
+  private String palDisplayTemplate;
+
+  /**
    * Der dem
    * {@link #AbsenderAuswaehlen(ConfigThingy, ConfigThingy, DatasourceJoiner, ActionListener)
    * Konstruktor} übergebene dialogEndListener.
@@ -240,6 +252,7 @@ public class AbsenderAuswaehlen
     this.abConf = abConf;
     this.verConf = verConf;
     this.dialogEndListener = dialogEndListener;
+    this.palDisplayTemplate = DEFAULT_DISPLAYTEMPLATE;
 
     ConfigThingy fensterDesc1 = conf.query("Fenster");
     if (fensterDesc1.count() == 0)
@@ -331,7 +344,7 @@ public class AbsenderAuswaehlen
     }
     else
     {
-      setListElements(palJList, dj.getLOS());
+      setListElements(palJList, dj.getLOS(), palDisplayTemplate);
       selectSelectedDataset(palJList);
 
       myFrame.pack();
@@ -449,9 +462,19 @@ public class AbsenderAuswaehlen
 
             JList list;
             if (id.equals("pal"))
+            {
               list = palJList;
+              try
+              {
+                palDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
+              }
+              catch (NodeNotFoundException e)
+              {}
+            }
             else
+            {
               list = new JList(new DefaultListModel());
+            }
 
             list.setVisibleRowCount(lines);
             list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -590,17 +613,28 @@ public class AbsenderAuswaehlen
   /**
    * Nimmt eine JList list, die ein DefaultListModel haben muss und ändert ihre
    * Wertliste so, dass sie data entspricht. Die Datasets aus data werden nicht
-   * direkt als Werte verwendet, sondern in {@link ListElement} Objekte gewrappt.
+   * direkt als Werte verwendet, sondern in {@link DJDatasetListElement}-Objekte
+   * gewrappt, deren Inhalt entsprechend des übergebenen displayTemplates angezeigt
+   * wird.
+   * 
+   * @param list
+   *          die Liste deren Wertliste geändert werden soll
+   * @param data
+   *          enthält die Datensätze, mit denen die Liste gefüllt werden soll
+   * @param displayTemplate
+   *          gibt an wie die Datensätze in der Liste als Strings repräsentiert
+   *          werden sollen, siehe z.B. {@link #DEFAULT_DISPLAYTEMPLATE}.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void setListElements(JList list, QueryResults data)
+  private void setListElements(JList list, QueryResults data, String displayTemplate)
   {
     Object[] elements = new Object[data.size()];
     Iterator<Dataset> iter = data.iterator();
     int i = 0;
     while (iter.hasNext())
-      elements[i++] = new ListElement((DJDataset) iter.next());
+      elements[i++] =
+        new DJDatasetListElement((DJDataset) iter.next(), displayTemplate);
     Arrays.sort(elements, new Comparator<Object>()
     {
       public int compare(Object o1, Object o2)
@@ -619,75 +653,8 @@ public class AbsenderAuswaehlen
   {
     DefaultListModel listModel = (DefaultListModel) list.getModel();
     for (int i = 0; i < listModel.size(); ++i)
-      if (((ListElement) listModel.get(i)).getDataset().isSelectedDataset())
+      if (((DJDatasetListElement) listModel.get(i)).getDataset().isSelectedDataset())
         list.setSelectedValue(listModel.get(i), true);
-  }
-
-  /**
-   * Liefert zu einem Datensatz den in einer Listbox anzuzeigenden String.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private String getDisplayString(DJDataset ds)
-  {
-    return substituteVars(displayTemplate, ds);
-  }
-
-  /**
-   * Wrapper um ein DJDataset zum Einfügen in eine JList. Die
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private class ListElement
-  {
-    private String displayString;
-
-    private DJDataset ds;
-
-    public ListElement(DJDataset ds)
-    {
-      displayString = getDisplayString(ds);
-      this.ds = ds;
-    }
-
-    public String toString()
-    {
-      return displayString;
-    }
-
-    public DJDataset getDataset()
-    {
-      return ds;
-    }
-  }
-
-  /**
-   * Ersetzt "%{SPALTENNAME}" in str durch den Wert der entsprechenden Spalte im
-   * datensatz.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public String substituteVars(String str, Dataset datensatz)
-  {
-    Pattern p = Pattern.compile("%\\{([a-zA-Z0-9]+)\\}");
-    Matcher m = p.matcher(str);
-    if (m.find()) do
-    {
-      String spalte = m.group(1);
-      String wert = spalte;
-      try
-      {
-        String wert2 = datensatz.get(spalte);
-        if (wert2 != null) wert = wert2.replaceAll("%", "");
-      }
-      catch (ColumnNotFoundException e)
-      {
-        Logger.error(e);
-      }
-      str = str.substring(0, m.start()) + wert + str.substring(m.end());
-      m = p.matcher(str);
-    } while (m.find());
-    return str;
   }
 
   /**
@@ -702,7 +669,7 @@ public class AbsenderAuswaehlen
       JList list = (JList) e.getSource();
       if (list != palJList) return;
 
-      ListElement ele = (ListElement) list.getSelectedValue();
+      DJDatasetListElement ele = (DJDatasetListElement) list.getSelectedValue();
       if (ele == null)
         selectSelectedDataset(list);
       else
