@@ -69,6 +69,8 @@ public class Workarounds
 
   private static Boolean workaround103137 = null;
 
+  private static Boolean workaroundSetWindowPosSize = null;
+
   private static Boolean workaround102164 = null;
 
   private static Boolean workaround96281 = null;
@@ -273,4 +275,73 @@ public class Workarounds
     }
     return workaround101283;
   }
+
+  /**
+   * setWindowPosSize() aus einem Java-Thread (nicht Beanshell) heraus friert unter
+   * Windows OOo ein.
+   * 
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public static boolean workaroundForSetWindowPosSizeFreeze()
+  {
+    if (workaroundSetWindowPosSize == null)
+    {
+      String version = getOOoVersion();
+      if (version != null
+        && (version.startsWith("3.0") || version.startsWith("3.1"))
+        && System.getProperty("os.name").contains("Windows"))
+      {
+        workaroundSetWindowPosSize = applyWorkaround("setWindowPosSize");
+      }
+      else
+        workaroundSetWindowPosSize = Boolean.FALSE;
+    }
+
+    return workaroundSetWindowPosSize.booleanValue();
+  }
+
+  // Unbenutzer alternativer Workaround für das setWindowPosSizeFreeze Problem
+  // /**
+  // * setWindowPosSize() aus einem Java-Thread (nicht Beanshell) heraus friert unter
+  // * Windows OOo ein.
+  // *
+  // *
+  // * @author Matthias Benkmann (D-III-ITD-D101)
+  // */
+  // public static boolean workaroundForSetWindowPosSizeFreeze(JFrame frame)
+  // {
+  // if (workaroundSetWindowPosSize == null)
+  // {
+  // String version = getOOoVersion();
+  // if (version != null
+  // && (version.startsWith("3.0") || version.startsWith("3.1"))
+  // && System.getProperty("os.name").contains("Windows"))
+  // {
+  // workaroundSetWindowPosSize = applyWorkaround("setWindowPosSize");
+  // }
+  // else
+  // workaroundSetWindowPosSize = Boolean.FALSE;
+  // }
+  //
+  // if (workaroundSetWindowPosSize.booleanValue())
+  // {
+  // try
+  // {
+  // if (frame.isActive()) return true;
+  // PointerInfo info = MouseInfo.getPointerInfo();
+  // Rectangle r = frame.getBounds();
+  // if (!r.contains(info.getLocation()))
+  // new Robot().mouseMove(r.x + r.width / 2, r.y + r.height / 2);
+  // }
+  // catch (Exception x)
+  // {
+  // Logger.error(x);
+  // }
+  // return true;
+  // }
+  //
+  // return false;
+  // }
+
 }

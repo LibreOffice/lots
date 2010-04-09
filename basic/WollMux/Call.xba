@@ -2,6 +2,8 @@
 <!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
 <script:module xmlns:script="http://openoffice.org/2000/script" script:name="Call" script:language="StarBasic">REM  *****  BASIC  *****
 
+Option explicit
+
 Sub functionDialogEmpfaengerauswahl
   dispatchURL(&quot;wollmux:FunctionDialog#Empfaengerauswahl&quot;)
 End Sub
@@ -56,5 +58,12 @@ Sub dispatchURL(urlStr as String)
   dim args() as new com.sun.star.beans.PropertyValue
   dispatch.dispatch(url, args)
 End Sub
+
+Sub WollMux_setWindowPosSize(doc as Variant, x as Long, y as Long, width as Long, height as Long)
+  on error goto fehler
+  doc.CurrentController.Frame.ContainerWindow.setPosSize(x, y, width, height,com.sun.star.awt.PosSize.POSSIZE)
+fehler:
+End Sub
+
 
 </script:module>

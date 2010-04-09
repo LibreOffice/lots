@@ -43,6 +43,7 @@ import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -57,6 +58,7 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
 import com.sun.star.awt.PosSize;
@@ -71,6 +73,7 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
@@ -111,6 +114,14 @@ public class FormGUI
   private FormModel myDoc;
 
   /**
+   * Ein Timer, der dafür sorgt, dass (insbesondere beim manuellen Resizen des
+   * Fensters) nicht unnötig viele Resizes des OOo-Fensters durchgeführt werden. Dies
+   * schadet einerseits der Stabilität von OOo und andererseits ist es ein
+   * Performance-Problem.
+   */
+  private WindowPosSizeSetter windowPosSizeSetter = new WindowPosSizeSetter();
+
+  /**
    * Der Titel des Formularfensters (falls nicht anderweitig spezifiziert).
    */
   private String formTitle = L.m("Unbenanntes Formular");
@@ -120,6 +131,8 @@ public class FormGUI
    * {@link Common#parseDimensions(ConfigThingy)} geliefert wird.
    */
   private Rectangle formGUIBounds;
+
+  private boolean haveAppliedWorkaroundForWindowPosSizeFreeze = false;
 
   /**
    * ActionListener für Buttons mit der ACTION "abort".
@@ -463,7 +476,74 @@ public class FormGUI
      */
     int docHeight =
       maxWindowBounds.y + maxWindowBounds.height - docY - 2 * windowInsets.bottom;
-    myDoc.setWindowPosSize(docX, docY, docWidth, docHeight);
+
+    windowPosSizeSetter.setWindowPosSize(docX, docY, docWidth, docHeight);
+  }
+
+  private class WindowPosSizeSetter extends Timer implements ActionListener
+  {
+    private int x;
+
+    private int y;
+
+    private int width;
+
+    private int height;
+
+    public WindowPosSizeSetter()
+    {
+      super(100, null);
+      addActionListener(this);
+      setRepeats(false);
+      setCoalesce(true);
+    }
+
+    public void setWindowPosSize(int x, int y, int width, int height)
+    {
+      this.x = x;
+      this.y = y;
+      this.width = width;
+      this.height = height;
+      restart();
+    }
+
+    public void actionPerformed(ActionEvent e)
+    {
+
+      /*
+       * Wir machen das hier nur einmal, damit der Cursor nur beim Initialen Öffnen
+       * der Vorlage verschoben wird. Würden wir den Cursor jedes Mal verschieben
+       * hätten wir das Problem, dass Resizing durch Draggen der Kante des Fensters
+       * nicht mehr vernünftig funktionieren würde. Eigentlich ist ja als Workaround
+       * für den Freeze das setWindowPosSize() in ein Basic-Makro ausgelagert worden.
+       * Leider hat sich im Test gezeigt, dass der Freeze dadurch zwar wesentlich
+       * seltener, aber eben leider nicht gar nicht mehr auftritt.
+       */
+      if (!haveAppliedWorkaroundForWindowPosSizeFreeze
+        && Workarounds.workaroundForSetWindowPosSizeFreeze())
+      {
+        haveAppliedWorkaroundForWindowPosSizeFreeze = true;
+        Rectangle frameBounds = myFrame.getBounds();
+        try
+        {
+          Logger.debug("Verschiebe Cursor zu "
+            + (frameBounds.x + frameBounds.width / 2) + ", "
+            + (frameBounds.y + frameBounds.height / 2));
+          new Robot().mouseMove(frameBounds.x + frameBounds.width / 2, frameBounds.y
+            + frameBounds.height / 2);
+
+          // Falls OOo etwas Zeit benötigt, um das verschieben des Cursors zu
+          // verarbeiten.
+          Thread.sleep(100);
+        }
+        catch (Exception x)
+        {
+          Logger.error(x);
+        }
+      }
+
+      myDoc.setWindowPosSize(x, y, width, height);
+    }
   }
 
   /**
