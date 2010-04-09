@@ -117,6 +117,12 @@ public class WollMuxSingleton implements XPALProvider
   /**
    * Default-Wert für {@link #senderDisplayTemplate}, wenn kein Wert in der
    * Konfiguration explizit angegeben ist.
+   * 
+   * An dieser Stelle einen Default-Wert hardzucodieren (der noch dazu LHM-spezifisch
+   * ist!) ist sehr unschön und wurde nur gemacht um abwärtskompatibel zu alten
+   * WollMux-Konfigurationen zu bleiben. Sobald sichergestellt ist, dass überall auf
+   * eine neue WollMux-Konfiguration geupdatet wurde, sollte man diesen Fallback
+   * wieder entfernen.
    */
   private static final String DEFAULT_SENDER_DISPLAYTEMPLATE =
     "%{Nachname}, %{Vorname} (%{Rolle})";
@@ -161,9 +167,7 @@ public class WollMuxSingleton implements XPALProvider
    * XPALProvider-Methoden zurückgeliefert werden. Syntax mit %{Spalte} um
    * entsprechenden Wert des Datensatzes anzuzeigen, z.B. "%{Nachname}, %{Vorname}"
    * für die Anzeige in der Form "Meier, Hans" etc. Kann in der WollMux-Konfiguration
-   * über SENDER_DISPLAYTEMPLATE gesetzt werden. Falls kein Wert in der
-   * WollMux-Konfiguration gesetzt wird, wird {@link #DEFAULT_SENDER_DISPLAYTEMPLATE}
-   * verwendet.
+   * über SENDER_DISPLAYTEMPLATE gesetzt werden.
    */
   private String senderDisplayTemplate;
 
@@ -245,7 +249,19 @@ public class WollMuxSingleton implements XPALProvider
         WollMuxFiles.getWollmuxConf().query("SENDER_DISPLAYTEMPLATE").getLastChild().toString();
     }
     catch (NodeNotFoundException e)
-    {}
+    {
+      Logger.log(L.m("Keine Einstellung für SENDER_DISPLAYTEMPLATE gefunden! Verwende Fallback."));
+      // SENDER_DISPLAYTEMPLATE sollte eigentlich verpflichtend sein und wir
+      // sollten an dieser Stelle einen echten Error loggen bzw. eine
+      // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
+      // dies allerdings nicht, da das SENDER_DISPLAYTEMPLATE erst mit
+      // WollMux 6.4.0 eingeführt wurde und wir abwärtskompatibel zu alten
+      // WollMux-Konfigurationen bleiben müssen und Benutzer alter
+      // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
+      // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
+      // sollte nach ausreichend Zeit genauso wie DEFAULT_SENDER_DISPLAYTEMPLATE
+      // entfernt werden (bzw. wie oben gesagt überarbeitet).
+    }
 
     /*
      * Globale Funktionsdialoge parsen. ACHTUNG! Muss vor parseGlobalFunctions()

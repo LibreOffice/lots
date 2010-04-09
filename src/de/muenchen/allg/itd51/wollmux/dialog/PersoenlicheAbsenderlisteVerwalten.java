@@ -142,6 +142,12 @@ public class PersoenlicheAbsenderlisteVerwalten
    * explizit in der Konfiguration über das DISPLAY-Attribut für eine listbox
    * festgelegt ist. %{Spalte}-Syntax um entsprechenden Wert des Datensatzes
    * einzufügen, z.B. "%{Nachname}, %{Vorname}" für die Anzeige "Meier, Hans" etc.
+   * 
+   * An dieser Stelle einen Default-Wert hardzucodieren (der noch dazu LHM-spezifisch
+   * ist!) ist sehr unschön und wurde nur gemacht um abwärtskompatibel zu alten
+   * WollMux-Konfigurationen zu bleiben. Sobald sichergestellt ist, dass überall auf
+   * eine neue WollMux-Konfiguration geupdatet wurde, sollte man diesen Fallback
+   * wieder entfernen.
    */
   private static final String DEFAULT_DISPLAYTEMPLATE =
     "%{Nachname}, %{Vorname} (%{Rolle})";
@@ -169,6 +175,11 @@ public class PersoenlicheAbsenderlisteVerwalten
    * Rand um Buttons (in Pixeln).
    */
   private final static int BUTTON_BORDER = 2;
+
+  /**
+   * Standardanzahl an Zeilen in einer Listbox.
+   */
+  private static final int LISTBOX_DEFAULT_LINES = 10;
 
   /**
    * ActionListener für Buttons mit der ACTION "abort".
@@ -307,19 +318,17 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   /**
    * Gibt an, wie die Suchresultate in der {@link #resultsJList} angezeigt werden
-   * sollen. Wird im Konstruktor mit {@link #DEFAULT_DISPLAYTEMPLATE} initialisiert,
-   * kann aber in der Konfiguration bei der "listbox" mit ID "suchanfrage" durch
-   * Angeben des DISPLAY-Attributs überschrieben werden. %{Spalte}-Syntax um
-   * entsprechenden Wert des Datensatzes einzufügen, z.B. "%{Nachname}, %{Vorname}"
-   * für die Anzeige "Meier, Hans" etc.
+   * sollen. Der Wert wird in der Konfiguration dieses Dialogs bei der "listbox" mit
+   * ID "suchanfrage" durch Angeben des DISPLAY-Attributs konfiguriert.
+   * %{Spalte}-Syntax um entsprechenden Wert des Datensatzes einzufügen, z.B.
+   * "%{Nachname}, %{Vorname}" für die Anzeige "Meier, Hans" etc.
    */
   private String resultsDisplayTemplate;
 
   /**
    * Gibt an, wie die Suchresultate in der {@link #palJList} angezeigt werden sollen.
-   * Wird im Konstruktor mit {@link #DEFAULT_DISPLAYTEMPLATE} initialisiert, kann
-   * aber in der Konfiguration bei der "listbox" mit ID "suchanfrage" durch Angeben
-   * des DISPLAY-Attributs überschrieben werden. %{Spalte}-Syntax um entsprechenden
+   * Der Wert wird in der Konfiguration bei der "listbox" mit ID "suchanfrage" durch
+   * Angeben des DISPLAY-Attributs konfiguriert. %{Spalte}-Syntax um entsprechenden
    * Wert des Datensatzes einzufügen, z.B. "%{Nachname}, %{Vorname}" für die Anzeige
    * "Meier, Hans" etc.
    */
@@ -338,6 +347,9 @@ public class PersoenlicheAbsenderlisteVerwalten
   /**
    * URL der Konfiguration der Fallback-Suchstrategie, falls kein
    * Suchstrategie-Abschnitt für den PAL-Dialog definiert wurde.
+   * 
+   * Dieser Fallback wurde eingebaut, um mit alten WollMux-Konfigurationen kompatibel
+   * zu bleiben, sollte nach ausreichend Zeit aber wieder entfernt werden!
    */
   private final URL DEFAULT_SUCHSTRATEGIE_URL =
     this.getClass().getClassLoader().getResource("data/PAL_suchstrategie.conf");
@@ -408,8 +420,20 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
     else
     {
+      Logger.log(L.m("Kein Suchstrategie-Abschnitt für den PersoenlicheAbsenderliste-Dialog "
+        + "angegeben! Verwende Default-Suchstrategie."));
       // Es gibt keinen Suchstrategie-Abschnitt in der Konfiguration, also verwenden
       // wir die Default-Suchstrategie
+      // Eigentlich sollte der Suchstrategie-Abschnitt aber verpflichtend sein und
+      // wir sollten an dieser Stelle einen echten Error loggen bzw. eine
+      // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
+      // dies allerdings nicht, da das Konfigurieren der Suchstrategie erst mit
+      // WollMux 6.3.2 eingeführt wurde und wir abwärtskompatibel zu alten
+      // WollMux-Konfigurationen bleiben müssen und Benutzer alter
+      // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
+      // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
+      // sollte nach ausreichend Zeit genauso wie DEFAULT_SUCHSTRATEGIE_URL
+      // entfernt werden (bzw. wie oben gesagt überarbeitet).
       try
       {
         this.searchStrategy =
@@ -701,7 +725,7 @@ public class PersoenlicheAbsenderlisteVerwalten
           }
           else if (type.equals("listbox"))
           {
-            int lines = 10;
+            int lines = LISTBOX_DEFAULT_LINES;
             try
             {
               lines = Integer.parseInt(uiElementDesc.get("LINES").toString());
@@ -718,7 +742,20 @@ public class PersoenlicheAbsenderlisteVerwalten
                 resultsDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
               }
               catch (NodeNotFoundException e)
-              {}
+              {
+                Logger.log(L.m("Kein DISPLAY-Attribut für die listbox mit ID \"suchergebnis\" "
+                  + "im PersoenlicheAbsenderliste-Dialog angegeben! Verwende Fallback."));
+                // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
+                // sollten an dieser Stelle einen echten Error loggen bzw. eine
+                // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
+                // dies allerdings nicht, da das DISPLAY-Attribut erst mit
+                // WollMux 6.4.0 eingeführt wurde und wir abwärtskompatibel zu alten
+                // WollMux-Konfigurationen bleiben müssen und Benutzer alter
+                // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
+                // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
+                // sollte nach ausreichend Zeit genauso wie DEFAULT_DISPLAYTEMPLATE
+                // entfernt werden (bzw. wie oben gesagt überarbeitet).
+              }
             }
             else if (id.equals("pal"))
             {
@@ -728,7 +765,20 @@ public class PersoenlicheAbsenderlisteVerwalten
                 palDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
               }
               catch (NodeNotFoundException e)
-              {}
+              {
+                Logger.log(L.m("Kein DISPLAY-Attribut für die listbox mit ID \"pal\" "
+                  + "im PersoenlicheAbsenderliste-Dialog angegeben! Verwende Fallback."));
+                // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
+                // sollten an dieser Stelle einen echten Error loggen bzw. eine
+                // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
+                // dies allerdings nicht, da das DISPLAY-Attribut erst mit
+                // WollMux 6.4.0 eingeführt wurde und wir abwärtskompatibel zu alten
+                // WollMux-Konfigurationen bleiben müssen und Benutzer alter
+                // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
+                // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
+                // sollte nach ausreichend Zeit genauso wie DEFAULT_DISPLAYTEMPLATE
+                // entfernt werden (bzw. wie oben gesagt überarbeitet).
+              }
             }
             else
             {

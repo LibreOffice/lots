@@ -99,18 +99,21 @@ import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
 public class AbsenderAuswaehlen
 {
   /**
-   * Gibt an, wie die Personen in den Listen angezeigt werden sollen, wenn es nicht
-   * explizit in der Konfiguration über das DISPLAY-Attribut für eine listbox
-   * festgelegt ist. %{Spalte}-Syntax um entsprechenden Wert des Datensatzes
-   * einzufügen, z.B. "%{Nachname}, %{Vorname}" für die Anzeige "Meier, Hans" etc.
+   * Default-Wert dafür, wie die Personen in der Absenderliste angezeigt werden
+   * sollen, wenn es nicht explizit in der Konfiguration über das DISPLAY-Attribut
+   * für eine listbox festgelegt ist. %{Spalte}-Syntax um entsprechenden Wert des
+   * Datensatzes einzufügen, z.B. "%{Nachname}, %{Vorname}" für die Anzeige
+   * "Meier, Hans" etc.
+   * 
+   * An dieser Stelle einen Default-Wert hardzucodieren (der noch dazu LHM-spezifisch
+   * ist!) ist sehr unschön und wurde nur gemacht um abwärtskompatibel zu alten
+   * WollMux-Konfigurationen zu bleiben. Sobald sichergestellt ist, dass überall auf
+   * eine neue WollMux-Konfiguration geupdatet wurde, sollte man diesen Fallback
+   * wieder entfernen.
    */
   private static final String DEFAULT_DISPLAYTEMPLATE =
     "%{Nachname}, %{Vorname} (%{Rolle})";
 
-  /**
-   * Standardbreite für Textfelder
-   */
-  // private final static int TEXTFIELD_DEFAULT_WIDTH = 22;
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
    */
@@ -181,9 +184,8 @@ public class AbsenderAuswaehlen
 
   /**
    * Gibt an, wie die Suchresultate in der {@link #palJList} angezeigt werden sollen.
-   * Wird im Konstruktor mit {@link #DEFAULT_DISPLAYTEMPLATE} initialisiert, kann
-   * aber in der Konfiguration bei der "listbox" mit ID "suchanfrage" durch Angeben
-   * des DISPLAY-Attributs überschrieben werden. %{Spalte}-Syntax um entsprechenden
+   * Der Wert wird in der Konfiguration bei der "listbox" mit ID "suchanfrage" durch
+   * Angeben des DISPLAY-Attributs konfiguriert. %{Spalte}-Syntax um entsprechenden
    * Wert des Datensatzes einzufügen, z.B. "%{Nachname}, %{Vorname}" für die Anzeige
    * "Meier, Hans" etc.
    */
@@ -469,7 +471,20 @@ public class AbsenderAuswaehlen
                 palDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
               }
               catch (NodeNotFoundException e)
-              {}
+              {
+                Logger.log(L.m("Kein DISPLAY-Attribut für die listbox mit ID \"pal\" "
+                  + "im AbsenderAuswaehlen-Dialog angegeben! Verwende Fallback."));
+                // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
+                // sollten an dieser Stelle einen echten Error loggen bzw. eine
+                // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
+                // dies allerdings nicht, da das DISPLAY-Attribut erst mit
+                // WollMux 6.4.0 eingeführt wurde und wir abwärtskompatibel zu alten
+                // WollMux-Konfigurationen bleiben müssen und Benutzer alter
+                // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
+                // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
+                // sollte nach ausreichend Zeit genauso wie DEFAULT_DISPLAYTEMPLATE
+                // entfernt werden (bzw. wie oben gesagt überarbeitet).
+              }
             }
             else
             {
