@@ -892,10 +892,10 @@ public class SachleitendeVerfuegung
   /**
    * Liefert die römische Zahl zum übgebenen integer Wert i. Die römischen Zahlen
    * werden dabei aus dem begrenzten Array romanNumbers ausgelesen. Ist i-1 kein
-   * gültiger Index des Arrays, so sieht der Rückgabewert wie folgt aus "<dezimalzahl(i)>.".
-   * Hier kann bei Notwendigkeit natürlich auch ein Berechnungsschema für römische
-   * Zahlen implementiert werden, was für die Sachleitenden Verfügungen vermutlich
-   * aber nicht erforderlich sein wird.
+   * gültiger Index des Arrays, so sieht der Rückgabewert wie folgt aus
+   * "<dezimalzahl(i)>.". Hier kann bei Notwendigkeit natürlich auch ein
+   * Berechnungsschema für römische Zahlen implementiert werden, was für die
+   * Sachleitenden Verfügungen vermutlich aber nicht erforderlich sein wird.
    * 
    * @param i
    *          Die Zahl, zu der eine römische Zahl geliefert werden soll.
@@ -1334,15 +1334,18 @@ public class SachleitendeVerfuegung
     {
       cursor.gotoEndOfParagraph(true);
 
-      if (isVerfuegungspunkt(cursor)) if (punkt1 == null)
+      if (isVerfuegungspunkt(cursor))
       {
-        punkt1 = cursor.getText().createTextCursorByRange(cursor);
-      }
-      else
-      {
-        cursor.collapseToStart();
-        cursor.gotoRange(cursor.getText().getEnd(), true);
-        setInvisibleRange = cursor;
+        if (punkt1 == null)
+        {
+          punkt1 = cursor.getText().createTextCursorByRange(cursor);
+        }
+        else
+        {
+          cursor.collapseToStart();
+          cursor.gotoRange(cursor.getText().getEnd(), true);
+          setInvisibleRange = cursor;
+        }
       }
     } while (setInvisibleRange == null && cursor.gotoNextParagraph(false));
 
