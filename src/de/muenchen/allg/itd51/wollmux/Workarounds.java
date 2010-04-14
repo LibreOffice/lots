@@ -287,7 +287,7 @@ public class Workarounds
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
-  public static void workaroundForToolbarHoverFreeze()
+  public static boolean workaroundForToolbarHoverFreeze()
   {
     if (workaroundToolbarHoverFreeze == null)
     {
@@ -310,12 +310,15 @@ public class Workarounds
         PointerInfo info = MouseInfo.getPointerInfo();
         Point p = info.getLocation();
         robot.mouseMove(p.x, 0);
+        Thread.sleep(100);
       }
       catch (Exception x)
       {
         Logger.error(x);
       }
     }
+
+    return workaroundToolbarHoverFreeze;
   }
 
   // Unbenutzer alternativer Workaround für das setWindowPosSizeFreeze Problem

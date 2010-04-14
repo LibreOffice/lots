@@ -1081,28 +1081,24 @@ public class WollMuxBar
       }
       else if (action.equals("openDocument"))
       {
-        Workarounds.workaroundForToolbarHoverFreeze();
-        minimize();
+        if (!Workarounds.workaroundForToolbarHoverFreeze()) minimize();
         eventHandler.handleWollMuxUrl(Dispatch.DISP_wmOpenDocument,
           args[1].toString());
       }
       else if (action.equals("openTemplate"))
       {
-        Workarounds.workaroundForToolbarHoverFreeze();
-        minimize();
+        if (!Workarounds.workaroundForToolbarHoverFreeze()) minimize();
         eventHandler.handleWollMuxUrl(Dispatch.DISP_wmOpenTemplate,
           args[1].toString());
       }
       else if (action.equals("open"))
       {
-        Workarounds.workaroundForToolbarHoverFreeze();
-        minimize();
+        if (!Workarounds.workaroundForToolbarHoverFreeze()) minimize();
         multiOpenDialog((ConfigThingy) args[1]);
       }
       else if (action.equals("openExt"))
       {
-        Workarounds.workaroundForToolbarHoverFreeze();
-        minimize();
+        if (!Workarounds.workaroundForToolbarHoverFreeze()) minimize();
         openExt((String) args[1], (String) args[2]);
       }
       else if (action.equals("dumpInfo"))
