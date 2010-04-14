@@ -2,7 +2,7 @@
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0.
+ * version 1.0 (or any later version).
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -359,7 +359,7 @@ public class MenuManager
     confidsMenu.add(removeRecursive);
 
     confidsMenu.addSeparator();
-    confidsMenu.add(new JMenuItem(new AbstractAction(L.m("Liste Bearbeiten"))
+    confidsMenu.add(new JMenuItem(new AbstractAction(L.m("Liste bearbeiten"))
     {
       public void actionPerformed(ActionEvent e)
       {
@@ -1476,7 +1476,6 @@ public class MenuManager
     // }
     // return false;
     // }
-
   }
 
   private class MyTransferable implements Transferable

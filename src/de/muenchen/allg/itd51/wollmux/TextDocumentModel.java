@@ -65,7 +65,6 @@ import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.lang.XMultiServiceFactory;
-import com.sun.star.script.provider.XScript;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextContent;
@@ -2418,37 +2417,8 @@ public class TextDocumentModel
   {
     try
     {
-      if (Workarounds.workaroundForSetWindowPosSizeFreeze())
-      {
-        new Thread() // Zur Sicherheit, damit Basic Thread nicht WollMux blockt
-        {
-          public void run()
-          {
-            try
-            {
-              XScript script =
-                UNO.masterScriptProvider.getScript("vnd.sun.star.script:WollMux.Call.WollMux_setWindowPosSize?language=Basic&location=application");
-
-              short[][] aOutParamIndex = new short[][] { new short[0] };
-              Object[][] aOutParam = new Object[][] { new Object[0] };
-              Object[] args =
-                new Object[] {
-                  doc, Integer.valueOf(docX), Integer.valueOf(docY),
-                  Integer.valueOf(docWidth), Integer.valueOf(docHeight) };
-              script.invoke(args, aOutParamIndex, aOutParam);
-            }
-            catch (Exception x)
-            {
-              Logger.error(x);
-            }
-          }
-        }.start();
-      }
-      else
-      {
-        getFrame().getContainerWindow().setPosSize(docX, docY, docWidth, docHeight,
-          PosSize.POSSIZE);
-      }
+      getFrame().getContainerWindow().setPosSize(docX, docY, docWidth, docHeight,
+        PosSize.POSSIZE);
     }
     catch (java.lang.Exception e)
     {}

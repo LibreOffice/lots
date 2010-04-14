@@ -140,6 +140,7 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
 /**
@@ -391,8 +392,8 @@ public class WollMuxBar
    * @param winMode
    *          Anzeigemodus, z.B. {@link WollMuxBarConfig#UP_AND_AWAY_WINDOW_MODE}.
    * @param conf
-   *          combinedConf(wollmuxConf(<Inhalt der wollmux.conf>)
-   *          wollmuxbarConf(<Inhalt der wollmuxbar.conf>)
+   *          combinedConf(wollmuxConf(<Inhalt der wollmux.conf>) wollmuxbarConf(<Inhalt
+   *          der wollmuxbar.conf>)
    * @param defaultConf
    *          die wollmux.conf
    * @param userConf
@@ -1080,23 +1081,27 @@ public class WollMuxBar
       }
       else if (action.equals("openDocument"))
       {
+        Workarounds.workaroundForToolbarHoverFreeze();
         minimize();
         eventHandler.handleWollMuxUrl(Dispatch.DISP_wmOpenDocument,
           args[1].toString());
       }
       else if (action.equals("openTemplate"))
       {
+        Workarounds.workaroundForToolbarHoverFreeze();
         minimize();
         eventHandler.handleWollMuxUrl(Dispatch.DISP_wmOpenTemplate,
           args[1].toString());
       }
       else if (action.equals("open"))
       {
+        Workarounds.workaroundForToolbarHoverFreeze();
         minimize();
         multiOpenDialog((ConfigThingy) args[1]);
       }
       else if (action.equals("openExt"))
       {
+        Workarounds.workaroundForToolbarHoverFreeze();
         minimize();
         openExt((String) args[1], (String) args[2]);
       }
@@ -1543,8 +1548,8 @@ public class WollMuxBar
    *          Ausgehend von currentMenu werden rekursiv alle enthaltenen Unter- und
    *          Unter-Untermenüs zu menuOrder hinzugefügt.
    * @param path
-   *          Beschreibt den Namen des jeweils übergeordneten Menüs (initial sollte
-   *          "" übergeben werden), aus dem der Name für mapMenuIDToLabel
+   *          Beschreibt den Namen des jeweils übergeordneten Menüs (initial sollte ""
+   *          übergeben werden), aus dem der Name für mapMenuIDToLabel
    *          zusammengesetzt wird.
    * @author Christoph Lutz (privat)
    */

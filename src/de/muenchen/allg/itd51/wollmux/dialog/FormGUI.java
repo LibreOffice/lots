@@ -43,7 +43,6 @@ import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -73,7 +72,6 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
@@ -131,8 +129,6 @@ public class FormGUI
    * {@link Common#parseDimensions(ConfigThingy)} geliefert wird.
    */
   private Rectangle formGUIBounds;
-
-  private boolean haveAppliedWorkaroundForWindowPosSizeFreeze = false;
 
   /**
    * ActionListener für Buttons mit der ACTION "abort".
@@ -509,39 +505,6 @@ public class FormGUI
 
     public void actionPerformed(ActionEvent e)
     {
-
-      /*
-       * Wir machen das hier nur einmal, damit der Cursor nur beim Initialen Öffnen
-       * der Vorlage verschoben wird. Würden wir den Cursor jedes Mal verschieben
-       * hätten wir das Problem, dass Resizing durch Draggen der Kante des Fensters
-       * nicht mehr vernünftig funktionieren würde. Eigentlich ist ja als Workaround
-       * für den Freeze das setWindowPosSize() in ein Basic-Makro ausgelagert worden.
-       * Leider hat sich im Test gezeigt, dass der Freeze dadurch zwar wesentlich
-       * seltener, aber eben leider nicht gar nicht mehr auftritt.
-       */
-      if (!haveAppliedWorkaroundForWindowPosSizeFreeze
-        && Workarounds.workaroundForSetWindowPosSizeFreeze())
-      {
-        haveAppliedWorkaroundForWindowPosSizeFreeze = true;
-        Rectangle frameBounds = myFrame.getBounds();
-        try
-        {
-          Logger.debug("Verschiebe Cursor zu "
-            + (frameBounds.x + frameBounds.width / 2) + ", "
-            + (frameBounds.y + frameBounds.height / 2));
-          new Robot().mouseMove(frameBounds.x + frameBounds.width / 2, frameBounds.y
-            + frameBounds.height / 2);
-
-          // Falls OOo etwas Zeit benötigt, um das verschieben des Cursors zu
-          // verarbeiten.
-          Thread.sleep(100);
-        }
-        catch (Exception x)
-        {
-          Logger.error(x);
-        }
-      }
-
       myDoc.setWindowPosSize(x, y, width, height);
     }
   }

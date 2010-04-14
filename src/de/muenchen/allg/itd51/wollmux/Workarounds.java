@@ -29,6 +29,10 @@
  * 
  */package de.muenchen.allg.itd51.wollmux;
 
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.PointerInfo;
+import java.awt.Robot;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.regex.Pattern;
@@ -69,7 +73,7 @@ public class Workarounds
 
   private static Boolean workaround103137 = null;
 
-  private static Boolean workaroundSetWindowPosSize = null;
+  private static Boolean workaroundToolbarHoverFreeze = null;
 
   private static Boolean workaround102164 = null;
 
@@ -277,28 +281,41 @@ public class Workarounds
   }
 
   /**
-   * setWindowPosSize() aus einem Java-Thread (nicht Beanshell) heraus friert unter
-   * Windows OOo ein.
-   * 
+   * Wenn bestimmte Aktionen getätigt werden (z.B. setWindowPosSize()) während der
+   * Mauszeiger über einer OOo-Toolbar schwebt, dann friert OOo 3.0 und 3.1 unter
+   * Windows ein.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
-  public static boolean workaroundForSetWindowPosSizeFreeze()
+  public static void workaroundForToolbarHoverFreeze()
   {
-    if (workaroundSetWindowPosSize == null)
+    if (workaroundToolbarHoverFreeze == null)
     {
       String version = getOOoVersion();
       if (version != null
         && (version.startsWith("3.0") || version.startsWith("3.1"))
         && System.getProperty("os.name").contains("Windows"))
       {
-        workaroundSetWindowPosSize = applyWorkaround("setWindowPosSize");
+        workaroundToolbarHoverFreeze = applyWorkaround("ToolbarHoverFreeze");
       }
       else
-        workaroundSetWindowPosSize = Boolean.FALSE;
+        workaroundToolbarHoverFreeze = Boolean.FALSE;
     }
 
-    return workaroundSetWindowPosSize.booleanValue();
+    if (workaroundToolbarHoverFreeze)
+    {
+      try
+      {
+        Robot robot = new Robot();
+        PointerInfo info = MouseInfo.getPointerInfo();
+        Point p = info.getLocation();
+        robot.mouseMove(p.x, 0);
+      }
+      catch (Exception x)
+      {
+        Logger.error(x);
+      }
+    }
   }
 
   // Unbenutzer alternativer Workaround für das setWindowPosSizeFreeze Problem
