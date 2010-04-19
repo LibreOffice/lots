@@ -473,7 +473,7 @@ public class UIElementConfigThingyEditor
     {
       super("TYPE", false);
       combo = new JComboBox(new String[] {
-        "button", "separator", "glue", "senderbox" }); // "menu" NICHT!
+        "button", "separator", "glue", "senderbox", "searchbox" }); // "menu" NICHT!
       prepareComboBox(combo, "TYPE");
 
       if (combo.getSelectedItem().equals("menu")) combo.setEnabled(false);
