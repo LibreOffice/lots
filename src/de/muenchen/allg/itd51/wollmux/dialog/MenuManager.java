@@ -184,6 +184,13 @@ public class MenuManager
   private JMenu confidsMenu;
 
   /**
+   * Flag, das auf <code>true</code> gesetzt wird, wenn etwas am/im Menübaum oder den
+   * CONF_IDs geändert wurde. Wird verwendet, um zu überprüfen, ob beim Schließen des
+   * Menü-Manager eine Aufforderung zum Speichern kommen soll.
+   */
+  private boolean modified = false;
+
+  /**
    * Zeigt eine GUI an, über die die Menüstruktur der WollMuxBar bearbeitet werden
    * kann. Alle Änderungen werden in die Datei wollmuxbar.conf geschrieben.
    * 
@@ -221,6 +228,7 @@ public class MenuManager
     Common.setWollMuxIcon(myFrame);
 
     myTreeModel = new MyTreeModel();
+    myTreeModel.addTreeModelListener(new MyTreeModelLister());
     myTree = new JTree(myTreeModel);
     myTree.setEditable(false);
     myTree.setDragEnabled(true);
@@ -839,6 +847,7 @@ public class MenuManager
      * Überträgt die Unterschiede zwischen tempConfigIDs und
      * {@link MenuManager#configIDs} auf den Baum und setzt dann configIDs auf
      * tempConfigIDs. Das CONF_IDs Menü wird ebenfalls neu aufgebaut.
+     * {@link MenuManager#modified} wird auf <code>true</code> gesetzt.
      * 
      * TESTED
      */
@@ -863,6 +872,7 @@ public class MenuManager
       }
 
       configIDs = tempConfigIDs;
+      modified = true;
       rebuildCONF_IDsMenu();
     }
 
@@ -1588,23 +1598,59 @@ public class MenuManager
 
   }
 
+  /**
+   * Wird an {@link MenuManager#myTreeModel} registriert und setzt bei Veränderungen
+   * das {@link MenuManager#modified}-Flag auf <code>true</code>.
+   * 
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  private class MyTreeModelLister implements TreeModelListener
+  {
+    public void treeNodesChanged(TreeModelEvent e)
+    {
+      modified = true;
+    }
+
+    public void treeNodesInserted(TreeModelEvent e)
+    {
+      modified = true;
+    }
+
+    public void treeNodesRemoved(TreeModelEvent e)
+    {
+      modified = true;
+    }
+
+    public void treeStructureChanged(TreeModelEvent e)
+    {
+      modified = true;
+    }
+  }
+
   private void closeAfterQuestion()
   {
-    int answer =
-      JOptionPane.showConfirmDialog(myFrame,
-        L.m("Sie verlassen den Menü-Manager.\nWollen Sie das Menü speichern?"),
-        L.m("Menü-Manager verlassen?"), JOptionPane.YES_NO_CANCEL_OPTION,
-        JOptionPane.QUESTION_MESSAGE);
-
-    if (answer == JOptionPane.YES_OPTION)
+    if (modified)
     {
-      doSave();
+      int answer =
+        JOptionPane.showConfirmDialog(myFrame,
+          L.m("Sie verlassen den Menü-Manager.\nWollen Sie das Menü speichern?"),
+          L.m("Menü-Manager verlassen?"), JOptionPane.YES_NO_CANCEL_OPTION,
+          JOptionPane.QUESTION_MESSAGE);
+
+      if (answer == JOptionPane.YES_OPTION)
+      {
+        doSave();
+        dispose();
+      }
+      else if (answer == JOptionPane.NO_OPTION)
+        dispose();
+      else
+        return;
+    }
+    else
+    {
       dispose();
     }
-    else if (answer == JOptionPane.NO_OPTION)
-      dispose();
-    else
-      return;
   }
 
   private void dispose()
@@ -1782,7 +1828,7 @@ public class MenuManager
      * 
      * @return true wenn id neu hinzugefügt wurde (d.h. nicht bereits vorhanden war)
      * 
-     * TESTED
+     *         TESTED
      */
     public boolean addConfID(String id)
     {
@@ -1813,7 +1859,7 @@ public class MenuManager
      * 
      * @return true wenn eine CONF_ID entfernt wurde
      * 
-     * TESTED
+     *         TESTED
      */
     public boolean removeConfID(String id)
     {
@@ -1974,7 +2020,7 @@ public class MenuManager
    *          Rekursschritt die ID des rekursiv betretenen Menüs hineingesteckt und
    *          der Aufbau wird abgebrochen wenn ein Menü hier bereits vorhanden ist.
    * 
-   * TESTED
+   *          TESTED
    */
   private static void parseMenuTreeRecursive(Node node, ConfigThingy menuConf,
       ConfigThingy defaultConf, ConfigThingy userConf, Set<String> alreadySeen)
@@ -2132,6 +2178,7 @@ public class MenuManager
     try
     {
       WollMuxFiles.writeConfToFile(wollmuxbarConfFile, userConf);
+      modified = false;
     }
     catch (Exception x)
     {
@@ -2211,7 +2258,7 @@ public class MenuManager
    * @throws NodeNotFoundException
    *           falls kein entsprechender Abschnitt gefunden wurde.
    * 
-   * TESTED
+   *           TESTED
    */
   private static ActiveConfigSection getActiveConfigSection(String[] sectionPath,
       ConfigThingy defaultConf, ConfigThingy userConf) throws NodeNotFoundException
