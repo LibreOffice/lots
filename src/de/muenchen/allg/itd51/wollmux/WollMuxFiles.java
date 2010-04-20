@@ -129,6 +129,11 @@ public class WollMuxFiles
    */
   private final static String WOLLMUX_CONF_PATH_VALUE_NAME = "ConfigPath";
 
+  private static final String WOLLMUX_CONF_NOT_FOUND_MESSAGE =
+    L.m("Es konnte keine WollMux-Konfiguration (wollmux.conf) gefunden werden!\n"
+      + "Die meisten WollMux-Funktionen werden daher nicht korrekt funktionieren.\n"
+      + "Es wurde erfolglos versucht die Datei wollmux.conf an folgenden Orten zu finden:\n");
+
   private static final long DATASOURCE_TIMEOUT = 10000;
 
   /**
@@ -221,15 +226,17 @@ public class WollMuxFiles
    * 
    * <ol>
    * <li>unter dem Dateipfad (inkl. Dateiname!), der im Registrierungswert
-   * "ConfigPath" des Schlüssels HKCU\Software\WollMux\ festgelegt ist (nur Windows!)</li>
-   * <li>$HOME/.wollmux/wollmux.conf (wobei $HOME unter Windows das
-   * Profilverzeichnis bezeichnet)</li>
+   * "ConfigPath" des Schlüssels HKCU\Software\WollMux\ festgelegt ist (nur Windows!)
+   * </li>
+   * <li>$HOME/.wollmux/wollmux.conf (wobei $HOME unter Windows das Profilverzeichnis
+   * bezeichnet)</li>
    * <li>unter dem Dateipfad (inkl. Dateiname!), der im Registrierungswert
-   * "ConfigPath" des Schlüssels HKLM\Software\WollMux\ festgelegt ist (nur Windows!)</li>
+   * "ConfigPath" des Schlüssels HKLM\Software\WollMux\ festgelegt ist (nur Windows!)
+   * </li>
    * <li>unter dem Dateipfad, der in der Konstanten
    * {@link #C_PROGRAMME_WOLLMUX_WOLLMUX_CONF} festgelegt ist (nur Windows!)</li>
-   * <li>unter dem Dateipfad, der in der Konstanten
-   * {@link #ETC_WOLLMUX_WOLLMUX_CONF} festgelegt ist (nur Linux!)</li>
+   * <li>unter dem Dateipfad, der in der Konstanten {@link #ETC_WOLLMUX_WOLLMUX_CONF}
+   * festgelegt ist (nur Linux!)</li>
    * </ol>
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -252,6 +259,8 @@ public class WollMuxFiles
     wollmuxLogFile = new File(wollmuxDir, "wollmux.log");
 
     StringBuilder debug2Messages = new StringBuilder();
+    // Zum Aufsammeln der Pfade, an denen die wollmux.conf gesucht wurde:
+    StringBuilder searchPaths = new StringBuilder();
 
     // Logger initialisieren:
     Logger.init(wollmuxLogFile, Logger.LOG);
@@ -273,6 +282,7 @@ public class WollMuxFiles
           WollMuxRegistryAccess.getStringValueFromRegistry("HKEY_CURRENT_USER",
             WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
         wollmuxConfFile = new File(wollmuxConfPath);
+        searchPaths.append(wollmuxConfFile.getPath() + "\n");
       }
       catch (WollMuxRegistryAccessException e)
       {
@@ -286,6 +296,7 @@ public class WollMuxFiles
     if (wollmuxConfFile == null || !wollmuxConfFile.exists())
     {
       wollmuxConfFile = new File(wollmuxDir, "wollmux.conf");
+      searchPaths.append(wollmuxConfFile.getPath() + "\n");
 
       // Falls wollmux.conf im .wollmux-Verzeichnis nicht existiert
       if (!wollmuxConfFile.exists())
@@ -302,6 +313,7 @@ public class WollMuxFiles
                 WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
 
             wollmuxConfFile = new File(wollmuxConfPath);
+            searchPaths.append(wollmuxConfFile.getPath() + "\n");
           }
           catch (WollMuxRegistryAccessException e)
           {
@@ -323,6 +335,7 @@ public class WollMuxFiles
           }
 
           wollmuxConfFile = new File(wollmuxConfPath);
+          searchPaths.append(wollmuxConfFile.getPath() + "\n");
           debug2Messages.append("Final wollmux.conf fallback: ");
           debug2Messages.append(wollmuxConfPath);
         }
@@ -335,16 +348,27 @@ public class WollMuxFiles
     wollmuxConf = new ConfigThingy("wollmuxConf");
 
     SlowServerWatchdog fido = new SlowServerWatchdog(SLOW_SERVER_TIMEOUT);
-    fido.start();
 
-    // Jetzt versuchen, die wollmux.conf zu parsen
-    try
+    // Jetzt versuchen, die wollmux.conf zu parsen, falls sie existiert
+    if (wollmuxConfFile.exists())
     {
-      wollmuxConf = new ConfigThingy("wollmuxConf", wollmuxConfFile.toURI().toURL());
+      fido.start();
+      try
+      {
+        wollmuxConf =
+          new ConfigThingy("wollmuxConf", wollmuxConfFile.toURI().toURL());
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+      }
     }
-    catch (Exception e)
-    {
-      Logger.error(e);
+    else
+    { // wollmux.conf existiert nicht
+      Logger.error(WOLLMUX_CONF_NOT_FOUND_MESSAGE + searchPaths);
+      JOptionPane.showMessageDialog(null, WOLLMUX_CONF_NOT_FOUND_MESSAGE
+        + searchPaths, L.m("Keine WollMux-Konfiguration gefunden"),
+        JOptionPane.ERROR_MESSAGE);
     }
 
     fido.dontBark();
