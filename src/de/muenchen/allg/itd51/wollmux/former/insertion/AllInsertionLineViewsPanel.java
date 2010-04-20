@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Enthält alle OneInsertionLineViews.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -23,10 +23,10 @@
  * -------------------------------------------------------------------
  * 13.09.2006 | BNK | Erstellung
  * 23.03.2010 | ERT | [R5721]Unterstützung für Shift-Klick
+ * 20.04.2010 | BED | "Löschen"-Button weg, "DeMux" umbenannt in "Entfernen (DeMux)" 
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
@@ -149,18 +149,7 @@ public class AllInsertionLineViewsPanel implements View
       new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
         GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
           BUTTON_BORDER, BUTTON_BORDER), 0, 0);
-    JButton button = new JButton(L.m("Löschen"));
-    button.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        deleteSelectedElements();
-      }
-    });
-    buttonPanel.add(button, gbcButton);
-
-    ++gbcButton.gridx;
-    button = new JButton(L.m("DeMux"));
+    JButton button = new JButton(L.m("Entfernen (DeMux)"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
