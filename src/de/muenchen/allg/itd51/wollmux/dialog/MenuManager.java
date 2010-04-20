@@ -163,10 +163,28 @@ public class MenuManager
   private JPopupMenu editMenuPopup = new JPopupMenu();
 
   /**
-   * Der {@link JFileChooser} wird nach erstmaliger Initialisierung immer wieder
-   * verwendet, damit das zuletzt gesetzte Verzeichnis immer wieder angeboten.
+   * Dieser {@link JFileChooser} wird zum Öffnen verwendet und nach erstmaliger
+   * Initialisierung immer wieder verwendet, damit das zuletzt gesetzte Verzeichnis
+   * beim Erneuten Öffnen des FileChoosers nicht vergessen wird. Vor dem Verwenden
+   * muss entsprechend immer erst getestet werden, ob der FileChooser bereits
+   * initialisiert ist (also nicht <code>null</code>). Da das Verzeichnis, aus dem
+   * man z.B. Vorlagen öffnet, in der Regel nicht dasselbe ist, in das man z.B. einen
+   * Export des Menü macht, gibt es zum Speichern einen eigenen FileChooser:
+   * {@link #saveFileChooser}.
    */
-  private JFileChooser fileChooser;
+  private JFileChooser openFileChooser;
+
+  /**
+   * Dieser {@link JFileChooser} wird zum Speichern verwendet und nach erstmaliger
+   * Initialisierung immer wieder verwendet, damit das zuletzt gesetzte Verzeichnis
+   * beim Erneuten Öffnen des FileChoosers nicht vergessen wird. Vor dem Verwenden
+   * muss entsprechend immer erst getestet werden, ob der FileChooser bereits
+   * initialisiert ist (also nicht <code>null</code>). Da das Verzeichnis, aus dem
+   * man z.B. Vorlagen öffnet, in der Regel nicht dasselbe ist, in das man z.B. einen
+   * Export des Menü macht, gibt es zum Öffnen einen eigenen FileChooser:
+   * {@link #openFileChooser}.
+   */
+  private JFileChooser saveFileChooser;
 
   /**
    * Wird nach dem Schließen des Dialogs aufgerufen.
@@ -261,6 +279,14 @@ public class MenuManager
       public void actionPerformed(ActionEvent e)
       {
         save();
+      }
+    });
+    menu.add(menuItem);
+    menuItem = new JMenuItem(new AbstractAction(L.m("Exportieren..."))
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        saveAll();
       }
     });
     menu.add(menuItem);
@@ -603,11 +629,12 @@ public class MenuManager
   }
 
   /**
-   * Liefert das empfohlene Startverzeichnis für einen {@link JFileChooser}.
+   * Liefert das empfohlene Startverzeichnis für einen {@link JFileChooser}, der zum
+   * Öffnen verwendet wird (insbesondere {@link #openFileChooser}).
    * 
    * TESTED
    */
-  private File getFileChooserStartDirectory()
+  private File getOpenFileChooserStartDirectory()
   {
     try
     {
@@ -1202,22 +1229,22 @@ public class MenuManager
       if (!allowedInsertPositionSelected(true))
       ;
 
-      if (fileChooser == null)
+      if (openFileChooser == null)
       {
-        fileChooser = new JFileChooser(getFileChooserStartDirectory());
+        openFileChooser = new JFileChooser(getOpenFileChooserStartDirectory());
       }
 
-      fileChooser.setMultiSelectionEnabled(true);
-      fileChooser.setAcceptAllFileFilterUsed(true);
-      fileChooser.setFileHidingEnabled(false);
-      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-      fileChooser.setDialogTitle(NEW_FILES_TEXT);
-      fileChooser.setSelectedFiles(new File[] {});
+      openFileChooser.setMultiSelectionEnabled(true);
+      openFileChooser.setAcceptAllFileFilterUsed(true);
+      openFileChooser.setFileHidingEnabled(false);
+      openFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      openFileChooser.setDialogTitle(NEW_FILES_TEXT);
+      openFileChooser.setSelectedFiles(new File[] {});
 
-      if (fileChooser.showOpenDialog(myFrame) != JFileChooser.APPROVE_OPTION)
+      if (openFileChooser.showOpenDialog(myFrame) != JFileChooser.APPROVE_OPTION)
         return;
 
-      for (File file : fileChooser.getSelectedFiles())
+      for (File file : openFileChooser.getSelectedFiles())
         newFile(file);
     }
 
@@ -1639,7 +1666,9 @@ public class MenuManager
 
       if (answer == JOptionPane.YES_OPTION)
       {
-        doSave();
+        File wollmuxbarConfFile =
+          new File(WollMuxFiles.getWollMuxDir(), WollMuxBar.WOLLMUXBAR_CONF);
+        doSave(false, wollmuxbarConfFile);
         dispose();
       }
       else if (answer == JOptionPane.NO_OPTION)
@@ -2093,10 +2122,29 @@ public class MenuManager
     if (!confirm(L.m("Menü speichern?"),
       L.m("Wollen Sie das neue Menü wirklich speichern?"))) return;
 
-    doSave();
+    File wollmuxbarConfFile =
+      new File(WollMuxFiles.getWollMuxDir(), WollMuxBar.WOLLMUXBAR_CONF);
+    doSave(false, wollmuxbarConfFile);
   }
 
-  private void doSave()
+  private void saveAll()
+  {
+    if (saveFileChooser == null)
+    {
+      saveFileChooser = new JFileChooser(WollMuxFiles.getWollMuxDir());
+    }
+    saveFileChooser.setFileHidingEnabled(false);
+    saveFileChooser.setDialogTitle("Exportieren");
+    int returnVal = saveFileChooser.showSaveDialog(myFrame);
+
+    if (returnVal == JFileChooser.APPROVE_OPTION)
+    {
+      File file = saveFileChooser.getSelectedFile();
+      doSave(true, file);
+    }
+  }
+
+  private void doSave(boolean saveAll, File confFile)
   {
     ConfigThingy conf = userConf;
     Iterator<ConfigThingy> iter = conf.iterator();
@@ -2121,7 +2169,7 @@ public class MenuManager
     }
 
     Node buttonleiste = menuTreeRoot.children.get(0);
-    if (buttonleiste.userModified)
+    if (saveAll || buttonleiste.userModified)
     {
       ConfigThingy subconf = conf.add("Symbolleisten").add("Briefkopfleiste");
       for (Node child : buttonleiste.children)
@@ -2129,14 +2177,14 @@ public class MenuManager
     }
 
     Node menueleiste = menuTreeRoot.children.get(1);
-    if (menueleiste.userModified)
+    if (saveAll || menueleiste.userModified)
     {
       ConfigThingy subconf = conf.add("Menueleiste");
       for (Node child : menueleiste.children)
         subconf.addChild(new ConfigThingy(child.conf));
     }
 
-    addUserModifiedMenuesRecursive(menuTreeRoot, conf.add("Menues"));
+    addMenuesRecursive(menuTreeRoot, conf.add("Menues"), !saveAll);
 
     boolean mustWriteConfigIDs = false;
     for (ConfigID cid : configIDs)
@@ -2151,7 +2199,7 @@ public class MenuManager
       }
     }
 
-    if (mustWriteConfigIDs)
+    if (saveAll || mustWriteConfigIDs)
     {
       ConfigThingy wmbk;
       try
@@ -2165,19 +2213,25 @@ public class MenuManager
 
       ConfigThingy labelsConf = wmbk.add("Labels");
       for (ConfigID cid : configIDs)
+      {
         if (cid.label_user != null)
         {
           ConfigThingy entry = labelsConf.add("");
           entry.add("CONF_ID").add(cid.id);
           entry.add("LABEL").add(cid.label_user);
         }
+        else if (saveAll && cid.label_default != null)
+        {
+          ConfigThingy entry = labelsConf.add("");
+          entry.add("CONF_ID").add(cid.id);
+          entry.add("LABEL").add(cid.label_default);
+        }
+      }
     }
 
-    File wollmuxbarConfFile =
-      new File(WollMuxFiles.getWollMuxDir(), WollMuxBar.WOLLMUXBAR_CONF);
     try
     {
-      WollMuxFiles.writeConfToFile(wollmuxbarConfFile, userConf);
+      WollMuxFiles.writeConfToFile(confFile, userConf);
       modified = false;
     }
     catch (Exception x)
@@ -2190,15 +2244,15 @@ public class MenuManager
   }
 
   /**
-   * Fügt conf für jedes Menü im Teilbaum der node als Wurzel hat, wenn es
-   * userModified gesetzt hat, einen Abschnitt für dieses Menü hinzu.
-   * 
-   * TESTED
+   * Fügt conf für jedes Menü im Teilbaum, der node als Wurzel hat, einen Abschnitt
+   * für dieses Menü hinzu, wobei abhängig von onlyUserModified nur solche Menüs
+   * hinzugefügt werden, bei denen Änderungen vom Benutzer vorliegen.
    */
-  private void addUserModifiedMenuesRecursive(Node node, ConfigThingy conf)
+  private void addMenuesRecursive(Node node, ConfigThingy conf,
+      boolean onlyUserModified)
   {
     String menu = null;
-    if (node.userModified)
+    if (!onlyUserModified || node.userModified)
     {
       try
       {
@@ -2216,7 +2270,7 @@ public class MenuManager
     }
 
     for (Node child : node.children)
-      addUserModifiedMenuesRecursive(child, conf);
+      addMenuesRecursive(child, conf, onlyUserModified);
   }
 
   /**
