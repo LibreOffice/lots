@@ -472,8 +472,9 @@ public class AbsenderAuswaehlen
               }
               catch (NodeNotFoundException e)
               {
-                Logger.log(L.m("Kein DISPLAY-Attribut für die listbox mit ID \"pal\" "
-                  + "im AbsenderAuswaehlen-Dialog angegeben! Verwende Fallback."));
+                Logger.log(L.m(
+                  "Kein DISPLAY-Attribut für die listbox mit ID \"pal\" im AbsenderAuswaehlen-Dialog angegeben! Verwende Fallback: %1",
+                  DEFAULT_DISPLAYTEMPLATE));
                 // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
                 // sollten an dieser Stelle einen echten Error loggen bzw. eine
                 // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun

@@ -250,7 +250,9 @@ public class WollMuxSingleton implements XPALProvider
     }
     catch (NodeNotFoundException e)
     {
-      Logger.log(L.m("Keine Einstellung für SENDER_DISPLAYTEMPLATE gefunden! Verwende Fallback."));
+      Logger.log(L.m(
+        "Keine Einstellung für SENDER_DISPLAYTEMPLATE gefunden! Verwende Fallback: %1",
+        DEFAULT_SENDER_DISPLAYTEMPLATE));
       // SENDER_DISPLAYTEMPLATE sollte eigentlich verpflichtend sein und wir
       // sollten an dieser Stelle einen echten Error loggen bzw. eine
       // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
