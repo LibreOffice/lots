@@ -366,9 +366,6 @@ public class WollMuxFiles
     else
     { // wollmux.conf existiert nicht
       Logger.error(WOLLMUX_CONF_NOT_FOUND_MESSAGE + searchPaths);
-      JOptionPane.showMessageDialog(null, WOLLMUX_CONF_NOT_FOUND_MESSAGE
-        + searchPaths, L.m("Keine WollMux-Konfiguration gefunden"),
-        JOptionPane.ERROR_MESSAGE);
     }
 
     fido.dontBark();
