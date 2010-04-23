@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Parsen und Repräsentation von WollMux-Konfigurationsdateien
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -66,6 +66,7 @@
  * 12.06.2009 | BED | get, query und queryByChild um jeweils eine Version mit minlevel Argument erweitert
  * 19.08.2009 | BNK | [R52737]FIXED: Lange Strings führen zu StackOverflowError in ConfigThingy
  * 11.01.2010 | BED | [R67584] +trimConfigThingy() zur Speicheroptimierung
+ * 23.04.2010 | BED | Non-breaking spaces werden auch als Whitespace erkannt
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -388,8 +389,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Jagt alle in URLs verbotenen Zeichen durch URLEncoder,encode(ch,{@link #CHARSET}).
-   * Das Leerzeichen bekommt eine Sonderbehandlung (Umsetzung nach %20), weil
+   * Jagt alle in URLs verbotenen Zeichen durch URLEncoder,encode(ch,{@link #CHARSET}
+   * ). Das Leerzeichen bekommt eine Sonderbehandlung (Umsetzung nach %20), weil
    * URLEncoder.encode() es nach "+" umsetzen würde, was zumindest bei unseren
    * Webservern nicht zum gewünschten Ergebnis führt.
    * 
@@ -929,8 +930,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Wie
-   * {@link #stringRepresentation(boolean, char) stringRepresentation(false, '"')}.
+   * Wie {@link #stringRepresentation(boolean, char) stringRepresentation(false,
+   * '"')}.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1565,7 +1566,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
     String line;
 
     int lineNo = 0;
-    Pattern whitespace = Pattern.compile("^(\\p{Space}|,|;|\\uFEFF)+");
+    Pattern whitespace = Pattern.compile("^(\\p{Space}|\\u00A0|,|;|\\uFEFF)+");
     while (null != (line = in.readLine()))
     {
       ++lineNo;
