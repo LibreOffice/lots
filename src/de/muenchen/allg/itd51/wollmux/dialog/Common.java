@@ -358,7 +358,7 @@ public class Common
   /**
    * Sets the icon of the passed in JFrame to the WollMux icon.
    * 
-   * At the moment this method works only with Java 6 because we use the
+   * FIXME: At the moment this method works only with Java 6 because we use the
    * "setIconImages" method; we could have used the "setIconImage" method from Java 5
    * instead but the result looks absolutely terrible under KDE using Java 5; to
    * avoid this the following is realized using the reflection API so that it only
