@@ -292,8 +292,8 @@ public class Workarounds
     if (workaroundToolbarHoverFreeze == null)
     {
       String version = getOOoVersion();
-      if (version != null
-        && (version.startsWith("3.0") || version.startsWith("3.1"))
+      if (version == null) return false;
+      if ((version.startsWith("3.0") || version.startsWith("3.1"))
         && System.getProperty("os.name").contains("Windows"))
       {
         workaroundToolbarHoverFreeze = applyWorkaround("ToolbarHoverFreeze");

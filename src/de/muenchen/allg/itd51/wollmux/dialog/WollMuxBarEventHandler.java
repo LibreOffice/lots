@@ -58,6 +58,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
@@ -535,6 +536,13 @@ public class WollMuxBarEventHandler
       try
       {
         UNO.init(ctx.getServiceManager());
+
+        /*
+         * Erst bei bestehender Verbindung kann die Versionsnummer von OOo bestimmt
+         * werden. Nach diesem Aufruf hier funktionieren die entsprechenden Aufrufe
+         * der Workarounds Funktionen.
+         */
+        Workarounds.getOOoVersion();
       }
       catch (Exception e)
       {
