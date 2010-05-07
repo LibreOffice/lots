@@ -14,7 +14,7 @@ include /usr/share/cdbs/1/class/ant.mk
 include /usr/share/openoffice.org-devscripts/ooo-extension.mk
 
 # JAVA_HOME := /usr/lib/jvm/default-java
-JAVA_HOME := /usr/lib/j2sdk1.5-sun
+JAVA_HOME := /usr/lib/j2sdk1.6-sun
 ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
 
 # Debian SDK path
