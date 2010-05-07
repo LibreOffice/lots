@@ -37,6 +37,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.regex.Pattern;
 
+import javax.swing.JOptionPane;
+
 import com.sun.star.container.XNameAccess;
 import com.sun.star.lang.XMultiServiceFactory;
 
@@ -319,6 +321,49 @@ public class Workarounds
     }
 
     return workaroundToolbarHoverFreeze;
+  }
+
+  /**
+   * Prüft, ob das Programm mit Java 5 ausgeführt wird, und liefert <code>true</code>
+   * zurück, wenn dies der Fall ist. Wenn showMessage=true übergeben wird, wird
+   * außerdem ein Meldungsdialog angezeigt, der darauf hinweist dass das gewünschte
+   * Feature nicht mit Java 5 ausgeführt werden kann und es wird eine entsprechende
+   * Meldung geloggt.
+   * 
+   * Es wird explizit nur auf Java 1.5 geprüft, da Java-Versionen kleiner 1.5 ohnehin
+   * nicht vom WollMux unterstützt werden. Der Check auf die Systemproperty
+   * "java.version" ist freilich nicht der sicherste, da diese Variable z.B. auch vom
+   * Benutzer überschrieben werden kann, aber für unsere Zwecke sollte er in 99,9%
+   * der Fälle ausreichend sein.
+   * 
+   * @param featureName
+   *          Name des Features, das nicht mit Java 5 ausgeführt werden kann. Dieser
+   *          String wird in der Log-Meldung verwendet.
+   * @param showMessage
+   *          Falls <code>true</code> wird eine benutzersichtbare Meldung angezeigt,
+   *          die darauf hinweist, dass ein Feature nicht mit Java 5 ausführbar ist
+   *          und eine Meldung geloggt.
+   * @return <code>true</code>, wenn das Programm mit Java 5 ausgeführt wird,
+   *         <code>false</code> sonst
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  public static boolean workaroundForJava5(String featureName, boolean showMessage)
+  {
+    if (System.getProperty("java.version").startsWith("1.5"))
+    {
+      if (showMessage)
+      {
+        Logger.debug(L.m(
+          "Versuch das Feature \"%1\" mit Java 5 zu starten wurde verhindert.",
+          featureName));
+        JOptionPane.showMessageDialog(
+          null,
+          L.m("Dieses Feature ist nur verfügbar, wenn Java 6 oder höher eingesetzt wird."),
+          L.m("Inkompatible Java-Version"), JOptionPane.ERROR_MESSAGE);
+      }
+      return true;
+    }
+    return false;
   }
 
   // Unbenutzer alternativer Workaround für das setWindowPosSizeFreeze Problem
