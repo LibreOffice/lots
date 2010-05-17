@@ -41,10 +41,10 @@
  * 19.12.2006 | BAB | + setzen von Shortcuts im Konstruktor
  * 29.12.2006 | BNK | +registerDatasources()
  * 27.03.2007 | BNK | Default-oooEinstellungen ausgelagert nach data/...
+ * 17.05.2010 | BED | Workaround für Issue #100374 bei OnSave/OnSaveAs-Events
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 
@@ -58,6 +58,7 @@ import com.sun.star.text.XTextDocument;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.Workarounds;
 
 /**
  * Der GlobalEventListener sorgt dafür, dass der WollMux alle wichtigen globalen
@@ -100,10 +101,6 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
        */
       if (docEvent.Source == null) return;
 
-      /*
-       * Workaround for #3091: Die unsichtbaren Dokumente, die beim OOo-Seriendruck
-       * anfallen nicht bearbeiten.
-       */
       String event = docEvent.EventName;
       Logger.debug2(event);
 
@@ -113,6 +110,10 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       String url = compo.getURL();
 
       Logger.debug2(url);
+      /*
+       * Workaround for #3091: Die unsichtbaren Dokumente, die beim OOo-Seriendruck
+       * anfallen nicht bearbeiten.
+       */
       int idx = url.lastIndexOf('/') - 4;
       if (url.startsWith(".tmp/sv", idx) && url.endsWith(".tmp")) return;
       // --------------
@@ -173,12 +174,29 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       {
         DocumentManager.Info info = docManager.remove(compo);
         /**
-         * ACHTUNG! ACHTUNG! Zu folgender Zeile unbedingt
-         * {@link WollMuxEventHandler#handleTextDocumentClosed(DocumentManager.Info}
-         * lesen. Hier darf AUF KEINEN FALL info.hasTextDocumentModel() getestet oder
+         * ACHTUNG! ACHTUNG! Zu folgender Zeile unbedingt {@link
+         * WollMuxEventHandler#handleTextDocumentClosed(DocumentManager.Info} lesen.
+         * Hier darf AUF KEINEN FALL info.hasTextDocumentModel() getestet oder
          * info.getTextDocumentModel() aufgerufen werden!
          */
         WollMuxEventHandler.handleTextDocumentClosed(info);
+      }
+
+      // Falls die OOo-Version von Issue 100374 betroffen ist, fangen wir noch
+      // die "OnSave"- und "OnSaveAs"-Events ab, um alle Notizen zu löschen und
+      // wieder neu anzulegen. Ansonsten gehen beim Speichern die vom WollMux in
+      // den Notizen veränderten Daten verloren.
+      if (Workarounds.applyWorkaroundForOOoIssue100374())
+      {
+        if (xTextDoc != null && (event.equals("OnSave") || event.equals("OnSaveAs")))
+        {
+          // Alle Notizen löschen und mit selbem Inhalt neu anlegen
+          DocumentManager.Info info = docManager.getInfo(xTextDoc);
+          if (info != null)
+          {
+            info.getTextDocumentModel().rewritePersistantData();
+          }
+        }
       }
     }
     catch (Exception e)

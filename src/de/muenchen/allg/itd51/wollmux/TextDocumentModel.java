@@ -27,6 +27,7 @@
  * 08.04.2007 | BNK | [R18119]Druckfunktion inkompatibel mit Versionen <3.11.1
  * 08.07.2009 | BED | addToCurrentFormDescription(...) löscht jetzt nicht nur Notiz
  *                  | sondern kompletten Bookmark-Inhalt und Bookmark wird kollabiert
+ * 17.05.2010 | BED | +rewritePersistantData() (für Workaround für Issue #100374)
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -474,7 +475,7 @@ public class TextDocumentModel
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private void parseInitialOverrideFragMap(ConfigThingy initialOverrideFragMap)
   {
@@ -1230,8 +1231,10 @@ public class TextDocumentModel
    *          ...
    *     )
    *   )
-   * </pre> . Das Argument ARG ist dabei optional und wird nur gesetzt, wenn ARG
-   * nicht leer ist.
+   * </pre>
+   * 
+   * . Das Argument ARG ist dabei optional und wird nur gesetzt, wenn ARG nicht leer
+   * ist.
    * 
    * Anmerkungen:
    * 
@@ -1511,6 +1514,26 @@ public class TextDocumentModel
   }
 
   /**
+   * Schreibt die in {@link #persistentData} gespeicherten Daten neu, d.h. die Daten
+   * werden erst komplett gelöscht und dann dieselben Daten erneut neu angelegt.
+   * 
+   * FIXME: Diese Methode wird nur für den Workaround für Issue 100374 benötigt. Sie
+   * kann also theoretisch entfernt werden, sobald der Workaround rausfliegt.
+   * 
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  public synchronized void rewritePersistantData()
+  {
+    persistentData.rewriteData(DATA_ID_FORMULARBESCHREIBUNG);
+    persistentData.rewriteData(DATA_ID_FORMULARWERTE);
+    persistentData.rewriteData(DATA_ID_PRINTFUNCTION);
+    persistentData.rewriteData(DATA_ID_SERIENDRUCK);
+    persistentData.rewriteData(DATA_ID_SETTYPE);
+    persistentData.rewriteData(DATA_ID_TOUCH_OOOVERSION);
+    persistentData.rewriteData(DATA_ID_TOUCH_WOLLMUXVERSION);
+  }
+
+  /**
    * Fügt an Stelle range ein Serienbrieffeld ein, das auf die Spalte fieldId
    * zugreift und mit dem Wert "" vorbelegt ist, falls noch kein Wert für fieldId
    * gesetzt wurde. Das Serienbrieffeld wird im WollMux registriert und kann damit
@@ -1596,7 +1619,7 @@ public class TextDocumentModel
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private ConfigThingy applyFormularanpassung(ConfigThingy formularConf)
   {
@@ -1666,7 +1689,7 @@ public class TextDocumentModel
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private boolean matches(ConfigThingy conf, ConfigThingy matchConf)
   {
@@ -1807,8 +1830,8 @@ public class TextDocumentModel
   }
 
   /**
-   * Ersetzt die Formularbeschreibung dieses Dokuments durch die aus conf. Falls conf ==
-   * null, so wird die Formularbeschreibung gelöscht. ACHTUNG! conf wird nicht
+   * Ersetzt die Formularbeschreibung dieses Dokuments durch die aus conf. Falls conf
+   * == null, so wird die Formularbeschreibung gelöscht. ACHTUNG! conf wird nicht
    * kopiert sondern als Referenz eingebunden.
    * 
    * @param conf
@@ -1948,8 +1971,8 @@ public class TextDocumentModel
    *          Ein ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )",
    *          wobei Bezeichner ein beliebiger Bezeichner ist und FUNKTIONSDEFINITION
    *          ein erlaubter Parameter für
-   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)} ,
-   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
+   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}
+   *          , d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
    *          Funktionsname, z.B. "AND" sein. Der Bezeichner wird NICHT als Name der
    *          TRAFO verwendet. Stattdessen wird ein neuer eindeutiger TRAFO-Name
    *          generiert.
@@ -2810,8 +2833,8 @@ public class TextDocumentModel
    * Dokumentkommandos überschrieben wird (wenn r keine Ausdehnung hat, wird ein
    * kollabiertes Bookmark erzeugt und es kann logischerweise auch nichts
    * überschrieben werden). cmdStr muss nur das gewünschte Kommando enthalten ohne
-   * eine abschließende Zahl, die zur Herstellung eindeutiger Bookmarks benötigt wird -
-   * diese Zahl wird bei Bedarf automatisch an den Bookmarknamen angehängt.
+   * eine abschließende Zahl, die zur Herstellung eindeutiger Bookmarks benötigt wird
+   * - diese Zahl wird bei Bedarf automatisch an den Bookmarknamen angehängt.
    * 
    * @param r
    *          Die TextRange, an der das neue Bookmark mit diesem Dokumentkommando
@@ -2995,7 +3018,7 @@ public class TextDocumentModel
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   public int evaluateDocumentActions(Iterator<Function> funcs)
   {
@@ -3177,8 +3200,8 @@ public class TextDocumentModel
    * verwendet dieses Dokumentkommando keine Funktion, so wird null zurück geliefert.
    * 
    * @param cmdStr
-   *          Ein Kommandostring eines Dokumentkommandos in der Form "WM(CMD '<command>'
-   *          ...)"
+   *          Ein Kommandostring eines Dokumentkommandos in der Form "WM(CMD
+   *          '<command>' ...)"
    * @return
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -3222,8 +3245,8 @@ public class TextDocumentModel
    *          ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )", wobei
    *          Bezeichner ein beliebiger Bezeichner ist und FUNKTIONSDEFINITION ein
    *          erlaubter Parameter für
-   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)} ,
-   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
+   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}
+   *          , d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
    *          Funktionsname, z.B. "AND" sein. Der Bezeichner wird NICHT als Name der
    *          TRAFO verwendet. Stattdessen wird ein neuer eindeutiger TRAFO-Name
    *          generiert.
@@ -3436,8 +3459,8 @@ public class TextDocumentModel
    *          ein ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )",
    *          wobei Bezeichner ein beliebiger Bezeichner ist und FUNKTIONSDEFINITION
    *          ein erlaubter Parameter für
-   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)} ,
-   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
+   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}
+   *          , d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
    *          Funktionsname, z.B. "AND" sein. Der Bezeichner wird NICHT verwendet.
    *          Der Name der TRAFO wird ausschließlich durch trafoName festgelegt.
    * @throws UnavailableException

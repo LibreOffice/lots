@@ -22,10 +22,10 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 09.11.2006 | BNK | Erstellung
+ * 17.05.2010 | BED | +rewriteData(dataId)
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux;
@@ -237,15 +237,6 @@ public class PersistentData
    */
   public void setData(String dataId, String dataValue)
   {
-    if (Workarounds.applyWorkaroundForOOoIssue100374())
-    {
-      // Notizen werden beim zweiten Schreibzugriff nicht korrekt geschrieben. Durch
-      // das vorherige Entfernen aller bereits bestehenden Notizen wird die Notiz in
-      // getWollMuxTextFields(...) neu angelegt und dadurch das erste Mal
-      // beschrieben.
-      removeData(dataId);
-    }
-
     Vector<Object> textfields =
       getWollMuxTextFields(dataId, true, dataValue.length());
     if (textfields.size() == 0)
@@ -295,6 +286,28 @@ public class PersistentData
           Logger.error(x);
         }
       }
+    }
+  }
+
+  /**
+   * Entfernt zuerst die mit dataId bezeichneten Daten (falls vorhanden) und
+   * speichert dann den alten Wert wieder neu unter dataId. In aller Regel sollte der
+   * Zustand der Daten nach Aufruf dieser Methode also völlig unverändert sein.
+   * 
+   * FIXME: Diese Methode wird nur für den Workaround für Issue 100374 benötigt. Sie
+   * kann also theoretisch entfernt werden, sobald der Workaround rausfliegt.
+   * 
+   * @param dataId
+   *          die ID der Daten die neu geschrieben werden sollen.
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  public void rewriteData(String dataId)
+  {
+    String oldValue = getData(dataId);
+    if (oldValue != null)
+    {
+      removeData(dataId);
+      setData(dataId, oldValue);
     }
   }
 
