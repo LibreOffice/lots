@@ -127,6 +127,11 @@ public class WollMuxSingleton implements XPALProvider
   private static final String DEFAULT_SENDER_DISPLAYTEMPLATE =
     "%{Nachname}, %{Vorname} (%{Rolle})";
 
+  /**
+   * Der String, der in der String-Repräsentation von PAL-Einträgen, den Schlüssel
+   * des PAL-Eintrags vom Rest des PAL-Eintrags abtrennt (siehe auch Dokumentation
+   * der Methoden des {@link XPALProvider}-Interfaces.
+   */
   public static final String SENDER_KEY_SEPARATOR = "§§%=%§§";
 
   private static WollMuxSingleton singletonInstance = null;
