@@ -288,7 +288,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	
 	<target name="WollMuxBar.jar" depends="makeversion, compile">
 		<delete file="${WOLLMUXBAR_JAR}" />
-		<jar destfile="${WOLLMUXBAR_JAR}">
+		<jar destfile="${WOLLMUXBAR_JAR}" duplicate="preserve">
 <!--			<fileset dir="${BIN}" includes="**/WollMuxBar*,**/dialog/UIElement*,**/ConfigThingy*,**/NodeNotFoundException*,**/SyntaxErrorException*,**/ConfigurationErrorException*,**/DispatchHandler*,**/L.class,**/Logger*,**/WollMuxFiles*,**/WollMuxBarEventHandler*,**/dialog/Common*,**/XPAL*,**/XWollMux*" />
 			<fileset dir="${UNOHELPER_BIN}" includes="**/afid/*" /> -->
 			<fileset dir="${BIN}" includes="**/*.class"/>
@@ -308,7 +308,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	
 	<target name="WollMux.uno.jar" depends="compile, compileidl, makeversion">
 		<delete file="${WollMux_COMPJAR}" />
-		<jar destfile="${WollMux_COMPJAR}">
+		<jar destfile="${WollMux_COMPJAR}" duplicate="preserve">
 			<fileset dir="${BIN}" includes="**/*.class"/>
 			<fileset dir="${MY_IDL}" includes="**/*.class"/>
 			<fileset dir="${UNOHELPER_BIN}" includes="**/*.class" />
@@ -444,7 +444,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		/>
 
 		<delete file="${TERMINATEOOO_JAR}" />
-		<jar destfile="${TERMINATEOOO_JAR}">
+		<jar destfile="${TERMINATEOOO_JAR}" duplicate="preserve">
 			<fileset dir="${BIN}" includes="${TERMINATEOOO_MAIN_CLASS}.class" />
 			<fileset dir="${TOOLING}" includes="**/*" />
 			<manifest>
