@@ -148,7 +148,7 @@ public class UIElementConfigThingyEditor
     myDialog.setContentPane(myBox);
     myBox.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
-    label = new JTextAttributeEditor("LABEL", 0, false);
+    label = new JTextAttributeEditor("LABEL", 0, false, false);
     myDialog.add(label);
     attributeEditors.add(label);
 
@@ -168,11 +168,12 @@ public class UIElementConfigThingyEditor
     myDialog.add(action);
     attributeEditors.add(action);
 
-    JTextAttributeEditor fragid = new JTextAttributeEditor("FRAG_ID", 0, false);
+    JTextAttributeEditor fragid =
+      new JTextAttributeEditor("FRAG_ID", 0, false, false);
     myDialog.add(fragid);
     attributeEditors.add(fragid);
 
-    menu = new JTextAttributeEditor("MENU", 0, false);
+    menu = new JTextAttributeEditor("MENU", 0, false, false);
     myDialog.add(menu);
     attributeEditors.add(menu);
 
@@ -180,11 +181,11 @@ public class UIElementConfigThingyEditor
     myDialog.add(ext);
     attributeEditors.add(ext);
 
-    JTextAttributeEditor url = new JTextAttributeEditor("URL", 0, false);
+    JTextAttributeEditor url = new JTextAttributeEditor("URL", 0, false, false);
     myDialog.add(url);
     attributeEditors.add(url);
 
-    JTextAttributeEditor open = new JTextAttributeEditor("OPEN", 4, false);
+    JTextAttributeEditor open = new JTextAttributeEditor("OPEN", 10, false, true);
     myDialog.add(open);
     attributeEditors.add(open);
 
@@ -397,8 +398,11 @@ public class UIElementConfigThingyEditor
      * @param addGlue
      *          falls true wird ein vertikaler glue unter der Textkomponente
      *          eingefügt
+     * @param scrollable
+     *          falls <code>true</code> zeigt der Editor bei Bedarf ScrollBars an
      */
-    public JTextAttributeEditor(String attributeName, int lines, boolean addGlue)
+    public JTextAttributeEditor(String attributeName, int lines, boolean addGlue,
+        boolean scrollable)
     {
       super(attributeName, false);
 
@@ -419,8 +423,16 @@ public class UIElementConfigThingyEditor
 
         JPanel panel = new JPanel(new GridLayout(1, 1));
         JScrollPane scrollPane = new JScrollPane(ta);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        if (scrollable)
+        {
+          scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+          scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        }
+        else
+        {
+          scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+          scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        }
         panel.add(scrollPane);
 
         myTextComponent = ta;
@@ -432,7 +444,16 @@ public class UIElementConfigThingyEditor
 
       try
       {
-        myTextComponent.setText(conf.get(attributeName).toString());
+        if (attributeName.equals("OPEN"))
+        {
+          myTextComponent.setEnabled(false);
+          myTextComponent.setText(conf.get(attributeName).stringRepresentation(true,
+            '"'));
+        }
+        else
+        {
+          myTextComponent.setText(conf.get(attributeName).toString());
+        }
       }
       catch (NodeNotFoundException x)
       {}
@@ -453,7 +474,7 @@ public class UIElementConfigThingyEditor
      */
     public JShortTextAttributeEditor(String attributeName, int len)
     {
-      super(attributeName, 0, false);
+      super(attributeName, 0, false, false);
       String str = myTextComponent.getText();
       StringBuilder buffy = new StringBuilder("X");
       while (len-- > 1)
@@ -532,6 +553,7 @@ public class UIElementConfigThingyEditor
     {
       super("ACTION", false);
       Vector<String> actions = new Vector<String>(WollMuxBar.SUPPORTED_ACTIONS);
+      actions.remove("open"); // FIXME: "open"-Actions werden nicht unterstützt!
       Collections.sort(actions);
       combo = new JComboBox(actions);
 
