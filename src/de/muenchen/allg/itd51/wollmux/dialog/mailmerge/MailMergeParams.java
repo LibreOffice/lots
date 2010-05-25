@@ -22,6 +22,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 11.10.2007 | BNK | Erstellung
+ * 25.05.2010 | ERT | GUI für PDF-Gesamtdruck
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)

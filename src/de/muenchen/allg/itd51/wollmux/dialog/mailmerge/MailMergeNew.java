@@ -1,9 +1,9 @@
 /*
  * Dateiname: MailMergeNew.java
  * Projekt  : WollMux
- * Funktion : Die neuen erweiterten Serienbrief-Funktionalit�ten
+ * Funktion : Die neuen erweiterten Serienbrief-Funktionalitäten
  * 
- * Copyright (c) 2008 Landeshauptstadt M�nchen
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,14 +18,14 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * �nderungshistorie:
- * Datum      | Wer | �nderungsgrund
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 11.10.2007 | BNK | Erstellung
+ * 25.05.2010 | ERT | Aufruf von PDFGesamtdruck-Druckfunktion
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
@@ -36,10 +36,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -77,6 +74,7 @@ import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.QueryResultsWithSchema;
+import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
@@ -163,7 +161,7 @@ public class MailMergeNew
 
   /**
    * Die beim letzten Aufruf von {@link #updatePreviewFields()} aktuelle Anzahl an
-   * Datens�tzen in {@link #ds}.
+   * Datensätzen in {@link #ds}.
    */
   private int previewDatasetNumberMax = Integer.MAX_VALUE;
 
@@ -186,7 +184,7 @@ public class MailMergeNew
     new Vector<JComponent>();
 
   /**
-   * Enth�lt alle elementsDisabledWhen... Collections.
+   * Enthält alle elementsDisabledWhen... Collections.
    */
   private Vector<Collection<JComponent>> listsOfElementsDisabledUnderCertainCircumstances =
     new Vector<Collection<JComponent>>();
@@ -197,7 +195,7 @@ public class MailMergeNew
   private JFrame myFrame;
 
   /**
-   * Der WindowListener, der an {@link #myFrame} h�ngt.
+   * Der WindowListener, der an {@link #myFrame} hängt.
    */
   private MyWindowListener oehrchen;
 
@@ -263,6 +261,9 @@ public class MailMergeNew
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     oehrchen = new MyWindowListener();
     myFrame.addWindowListener(oehrchen);
+
+    // WollMux-Icon für den Seriendruck-Frame
+    Common.setWollMuxIcon(myFrame);
 
     Box hbox = Box.createHorizontalBox();
     myFrame.add(hbox);
@@ -336,7 +337,7 @@ public class MailMergeNew
         }
       }
     });
-    hbox.add(DimAdjust.fixedSize(button));
+    hbox.add(DimAdjust.fixedPreferredSize(button));
     elementsDisabledWhenNoDatasourceSelected.add(button);
 
     button = new JButton("|<");
@@ -481,7 +482,8 @@ public class MailMergeNew
         // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
         // entsprechenden Datenquellenfeldern zugeordnet werden können.
         // Tabellenspalten ergänzen wird außerdem ausgegraut, wenn die Datenquelle
-        // dies nicht unterstützt
+        // dies
+        // nicht unterstützt
         boolean hasUnmappedFields =
           mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
             ds.getColumnNames())).length > 0;
@@ -689,7 +691,7 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        // ConfigThingy f�r leere Gender-Funktion zusammenbauen.
+        // ConfigThingy für leere Gender-Funktion zusammenbauen.
         ConfigThingy genderConf =
           GenderDialog.generateGenderTrafoConf(ds.getColumnNames().get(0), "", "",
             "");
@@ -705,7 +707,7 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        // ConfigThingy f�r leere WennDannSonst-Funktion zusammenbauen. Aufbau:
+        // ConfigThingy für leere WennDannSonst-Funktion zusammenbauen. Aufbau:
         // IF(STRCMP(VALUE '<firstField>', '') THEN('') ELSE(''))
         ConfigThingy ifConf = new ConfigThingy("IF");
         ConfigThingy strCmpConf = ifConf.add("STRCMP");
@@ -986,7 +988,7 @@ public class MailMergeNew
           {
             try
             {
-              outputDoc = StandardPrint.createNewTargetDocument(pmod, false);
+              outputDoc = StandardPrint.createNewTargetDocument(pmod, true);
               outputDoc.lockControllers();
             }
             catch (java.lang.Exception e)
@@ -1031,38 +1033,6 @@ public class MailMergeNew
         Logger.debug(L.m("printIntoFile finished after %1 seconds", duration));
       }
     }.start();
-  }
-
-  private class ProcessHandler extends Thread
-  {
-    InputStream inpStr;
-
-    String strType;
-
-    public ProcessHandler(InputStream inpStr, String strType)
-    {
-      this.inpStr = inpStr;
-      this.strType = strType;
-    }
-
-    public void run()
-    {
-      try
-      {
-        InputStreamReader inpStrd = new InputStreamReader(inpStr);
-        BufferedReader buffRd = new BufferedReader(inpStrd);
-        String line = null;
-        while ((line = buffRd.readLine()) != null)
-        {
-          System.out.println(strType + ": " + line);
-        }
-        buffRd.close();
-      }
-      catch (Exception e)
-      {
-        System.out.println(e);
-      }
-    }
   }
 
   /**
