@@ -50,6 +50,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -84,8 +85,8 @@ import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
 class MailMergeParams
 {
   /**
-   * Tag für {@link TextComponentTags}, das als Platzhalter für die
-   * Serienbriefnummer steht.
+   * Tag für {@link TextComponentTags}, das als Platzhalter für die Serienbriefnummer
+   * steht.
    */
   static final String TAG_SERIENBRIEFNUMMER = "#SB";
 
@@ -152,6 +153,11 @@ class MailMergeParams
      * enthält.
      */
     SINGLE_FILE(L.m("in neues Dokument schreiben")),
+
+    /**
+     * Alle Ausfertigungen in ein großes pdf-Dokument schreiben
+     */
+    SINGLE_PDF_FILE(L.m("PDF-Gesamtdokument erzeugen")),
 
     /**
      * Eine Datei pro Serienbrief, wobei jede Datei alle Versionen (bei SLV-Druck)
@@ -238,7 +244,8 @@ class MailMergeParams
 
       Vector<MailMergeType> types = new Vector<MailMergeType>();
       for (MailMergeType type : MailMergeType.values())
-        types.add(type);
+        if (!type.equals(MailMergeType.SINGLE_PDF_FILE)
+          || mm.hasPrintfunction("PDFGesamtdokument")) types.add(type);
       final JComboBox typeBox = new JComboBox(types);
       hbox.add(typeBox);
 
@@ -442,11 +449,23 @@ class MailMergeParams
       vbox.add(multiFileParamsGUI);
       multiFileParamsGUI.setVisible(false);
 
+      // singlePDFFileParamsGUI
+      final Box singlePDFFileParamsGUI = Box.createVerticalBox();
+      hbox = Box.createHorizontalBox();
+      final JCheckBox cbDuplex = new JCheckBox("Doppelseitig");
+      hbox.add(cbDuplex);
+      hbox.add(Box.createHorizontalGlue());
+      singlePDFFileParamsGUI.add(hbox);
+
+      vbox.add(singlePDFFileParamsGUI);
+      singlePDFFileParamsGUI.setVisible(false);
+
       typeBox.addItemListener(new ItemListener()
       {
         public void itemStateChanged(ItemEvent e)
         {
           multiFileParamsGUI.setVisible((MailMergeType) typeBox.getSelectedItem() == MailMergeType.MULTI_FILE);
+          singlePDFFileParamsGUI.setVisible((MailMergeType) typeBox.getSelectedItem() == MailMergeType.SINGLE_PDF_FILE);
           dialog.pack();
         }
       });
@@ -475,7 +494,7 @@ class MailMergeParams
           dialog.dispose();
           mm.doMailMerge((MailMergeType) typeBox.getSelectedItem(),
             datasetSelectionType, indexSelection, targetDirectory.getText(),
-            textTags);
+            cbDuplex.isSelected(), textTags);
         }
       });
       hbox.add(button);

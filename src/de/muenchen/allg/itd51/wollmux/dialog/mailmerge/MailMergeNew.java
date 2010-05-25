@@ -1,9 +1,9 @@
 /*
  * Dateiname: MailMergeNew.java
  * Projekt  : WollMux
- * Funktion : Die neuen erweiterten Serienbrief-Funktionalitäten
+ * Funktion : Die neuen erweiterten Serienbrief-Funktionalit�ten
  * 
- * Copyright (c) 2010 Landeshauptstadt München
+ * Copyright (c) 2008 Landeshauptstadt M�nchen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -18,13 +18,14 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
+ * �nderungshistorie:
+ * Datum      | Wer | �nderungsgrund
  * -------------------------------------------------------------------
  * 11.10.2007 | BNK | Erstellung
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
@@ -35,7 +36,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -58,6 +62,7 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XStorable;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -72,7 +77,6 @@ import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.QueryResultsWithSchema;
-import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
@@ -118,6 +122,24 @@ public class MailMergeNew
   private static final String PROP_MAILMERGENEW_SELECTION = "MailMergeNew_Selection";
 
   /**
+   * ID der Property, die den Pfad des PDF-Gesamtdokuments speichert.
+   */
+  private static final String PROP_PDFOUTPUT = "MailMergeNew_PDFOutput";
+
+  /**
+   * ID der Property, die den temporären Pfad speichert, an dem die einzelnen
+   * PDF-Dateien gespeichert werden, bevor sie zu einem Gesmatdokument zusammengefügt
+   * werden.
+   */
+  private static final String PROP_PDFTMPDIR = "MailMergeNew_PDFTempDir";
+
+  /**
+   * ID der Property, die speichert, ob ein PDF-Gesamtdokument im Duplexmodus erstell
+   * werden soll.
+   */
+  private static final String PROP_DUPLEX = "MailMergeNew_Duplex";
+
+  /**
    * Das {@link TextDocumentModel} zu dem Dokument an dem diese Toolbar hängt.
    */
   private TextDocumentModel mod;
@@ -141,7 +163,7 @@ public class MailMergeNew
 
   /**
    * Die beim letzten Aufruf von {@link #updatePreviewFields()} aktuelle Anzahl an
-   * Datensätzen in {@link #ds}.
+   * Datens�tzen in {@link #ds}.
    */
   private int previewDatasetNumberMax = Integer.MAX_VALUE;
 
@@ -164,7 +186,7 @@ public class MailMergeNew
     new Vector<JComponent>();
 
   /**
-   * Enthält alle elementsDisabledWhen... Collections.
+   * Enth�lt alle elementsDisabledWhen... Collections.
    */
   private Vector<Collection<JComponent>> listsOfElementsDisabledUnderCertainCircumstances =
     new Vector<Collection<JComponent>>();
@@ -175,7 +197,7 @@ public class MailMergeNew
   private JFrame myFrame;
 
   /**
-   * Der WindowListener, der an {@link #myFrame} hängt.
+   * Der WindowListener, der an {@link #myFrame} h�ngt.
    */
   private MyWindowListener oehrchen;
 
@@ -241,9 +263,6 @@ public class MailMergeNew
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     oehrchen = new MyWindowListener();
     myFrame.addWindowListener(oehrchen);
-
-    // WollMux-Icon für den Seriendruck-Frame
-    Common.setWollMuxIcon(myFrame);
 
     Box hbox = Box.createHorizontalBox();
     myFrame.add(hbox);
@@ -317,7 +336,7 @@ public class MailMergeNew
         }
       }
     });
-    hbox.add(DimAdjust.fixedPreferredSize(button));
+    hbox.add(DimAdjust.fixedSize(button));
     elementsDisabledWhenNoDatasourceSelected.add(button);
 
     button = new JButton("|<");
@@ -462,8 +481,7 @@ public class MailMergeNew
         // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
         // entsprechenden Datenquellenfeldern zugeordnet werden können.
         // Tabellenspalten ergänzen wird außerdem ausgegraut, wenn die Datenquelle
-        // dies
-        // nicht unterstützt
+        // dies nicht unterstützt
         boolean hasUnmappedFields =
           mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
             ds.getColumnNames())).length > 0;
@@ -541,7 +559,7 @@ public class MailMergeNew
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
    * 
-   * TESTED
+   *         TESTED
    */
   private void updatePreviewFields()
   {
@@ -671,7 +689,7 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        // ConfigThingy für leere Gender-Funktion zusammenbauen.
+        // ConfigThingy f�r leere Gender-Funktion zusammenbauen.
         ConfigThingy genderConf =
           GenderDialog.generateGenderTrafoConf(ds.getColumnNames().get(0), "", "",
             "");
@@ -687,7 +705,7 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        // ConfigThingy für leere WennDannSonst-Funktion zusammenbauen. Aufbau:
+        // ConfigThingy f�r leere WennDannSonst-Funktion zusammenbauen. Aufbau:
         // IF(STRCMP(VALUE '<firstField>', '') THEN('') ELSE(''))
         ConfigThingy ifConf = new ConfigThingy("IF");
         ConfigThingy strCmpConf = ifConf.add("STRCMP");
@@ -852,7 +870,7 @@ public class MailMergeNew
    */
   void doMailMerge(final MailMergeType mailMergeType,
       DatasetSelectionType datasetSelectionType, IndexSelection indexSelection,
-      String dir, TextComponentTags filePattern)
+      String dir, final boolean duplex, TextComponentTags filePattern)
   {
     mod.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
@@ -886,6 +904,7 @@ public class MailMergeNew
     }
 
     final XPrintModel pmod = mod.createPrintModel(true);
+    File pdf;
     try
     {
       pmod.setPropertyValue("MailMergeNew_Schema", data.getSchema());
@@ -895,6 +914,12 @@ public class MailMergeNew
       {
         pmod.setPropertyValue(PROP_TARGETDIR, dir);
         pmod.setPropertyValue(PROP_FILEPATTERN, filePattern);
+      }
+      else if (mailMergeType == MailMergeType.SINGLE_PDF_FILE)
+      {
+        pmod.setPropertyValue(PROP_DUPLEX, duplex);
+        pdf = File.createTempFile("wollmux", ".pdf");
+        pmod.setPropertyValue(PROP_PDFOUTPUT, pdf.getAbsolutePath());
       }
     }
     catch (Exception x)
@@ -914,6 +939,18 @@ public class MailMergeNew
       if (mailMergeType == MailMergeType.SINGLE_FILE
         || mailMergeType == MailMergeType.MULTI_FILE)
         pmod.usePrintFunction("Gesamtdokument");
+      else if (mailMergeType == MailMergeType.SINGLE_PDF_FILE)
+      {
+        String tmpdir = "/tmp/seriendruck";
+        pmod.setPropertyValue(PROP_PDFTMPDIR, tmpdir);
+        File tempdir = new File(tmpdir);
+        if (tempdir.exists())
+        {
+          for (File f : tempdir.listFiles())
+            f.delete();
+        }
+        pmod.usePrintFunction("PDFGesamtdokument");
+      }
     }
     catch (NoSuchMethodException e)
     {
@@ -923,6 +960,12 @@ public class MailMergeNew
         L.m(
           "Eine notwendige Druckfunktion ist nicht definiert. Bitte wenden Sie sich an Ihre Systemadministration damit Ihre Konfiguration entsprechend erweitert bzw. aktualisiert werden kann.\n\n%1",
           e));
+      pmod.cancel();
+      return;
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
       pmod.cancel();
       return;
     }
@@ -943,7 +986,7 @@ public class MailMergeNew
           {
             try
             {
-              outputDoc = StandardPrint.createNewTargetDocument(pmod, true);
+              outputDoc = StandardPrint.createNewTargetDocument(pmod, false);
               outputDoc.lockControllers();
             }
             catch (java.lang.Exception e)
@@ -960,17 +1003,66 @@ public class MailMergeNew
         {
           // lockControllers des Gesamtdokuments aufheben und das Gesamtdokument
           // anzeigen.
-          if (outputDoc != null)
+          if (mailMergeType != MailMergeType.SINGLE_PDF_FILE)
           {
-            outputDoc.unlockControllers();
-            outputDoc.getCurrentController().getFrame().getContainerWindow().setVisible(
-              true);
+            if (outputDoc != null)
+            {
+              outputDoc.unlockControllers();
+              outputDoc.getCurrentController().getFrame().getContainerWindow().setVisible(
+                true);
+            }
+          }
+          else
+          {
+            try
+            {
+              // PDF-Gesamtdokument in Adobe Reader öffnen
+              String pdfpath =
+                AnyConverter.toString(pmod.getPropertyValue(PROP_PDFOUTPUT));
+              Process proc = Runtime.getRuntime().exec("acroread " + pdfpath);
+            }
+            catch (Exception ex)
+            {
+              ex.printStackTrace();
+            }
           }
         }
         long duration = (System.currentTimeMillis() - startTime) / 1000;
         Logger.debug(L.m("printIntoFile finished after %1 seconds", duration));
       }
     }.start();
+  }
+
+  private class ProcessHandler extends Thread
+  {
+    InputStream inpStr;
+
+    String strType;
+
+    public ProcessHandler(InputStream inpStr, String strType)
+    {
+      this.inpStr = inpStr;
+      this.strType = strType;
+    }
+
+    public void run()
+    {
+      try
+      {
+        InputStreamReader inpStrd = new InputStreamReader(inpStr);
+        BufferedReader buffRd = new BufferedReader(inpStrd);
+        String line = null;
+        while ((line = buffRd.readLine()) != null)
+        {
+          System.out.println(strType + ": " + line);
+        }
+        buffRd.close();
+      }
+      catch (Exception e)
+      {
+        System.out.println(e);
+      }
+    }
   }
 
   /**
@@ -1261,5 +1353,27 @@ public class MailMergeNew
     while (mm.myFrame != null)
       Thread.sleep(1000);
     System.exit(0);
+  }
+
+  /**
+   * Prüft, ob eine Komfordruckfunktion vorhanden ist.
+   * 
+   * @param name
+   *          Name der Druckfunktion
+   * @return
+   * @author Andor Ertsey (D-III-ITD-D101)
+   */
+  public boolean hasPrintfunction(String name)
+  {
+    final XPrintModel pmod = mod.createPrintModel(true);
+    try
+    {
+      pmod.usePrintFunction(name);
+      return true;
+    }
+    catch (NoSuchMethodException ex)
+    {
+      return false;
+    }
   }
 }
