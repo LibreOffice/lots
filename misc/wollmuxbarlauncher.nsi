@@ -29,7 +29,7 @@ ShowInstDetails nevershow
 Section ""
   Call GetJRE
   Pop $R0
-  StrCmp $R0 "NOTFOUND" 0 +3
+  StrCmp $R0 "NOTFOUND" 0 +2
     MessageBox MB_OK|MB_ICONEXCLAMATION "Could not execute WollMuxBar because no Java executable was found!"
   
   ;; get command line parameters
