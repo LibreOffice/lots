@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Erzeugt zu ConfigThingys passende UI Elemente.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -36,10 +36,10 @@
  * 09.01.2007 | BNK | ENTER kann jetzt auch Checkboxen und Buttons aktivieren
  * 07.02.2007 | BNK | +ACTION "open"
  * 23.03.2007 | BNK | openExt implementiert
+ * 02.06.2010 | BED | Unterstützung von ACTION "saveTempAndOpenExt"
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
@@ -131,15 +131,16 @@ public class UIElementFactory
    * @param mapTypeToLayoutConstraints
    *          bildet einen TYPE auf die dazugehörigen layout constraints (d,i, der
    *          optionale zweite Parameter von
-   *          {@link java.awt.Container#add(java.awt.Component, java.lang.Object) java.awt.Container.add()})
-   *          ab. Wird von {@link UIElement#getLayoutConstraints()} zurückgeliefert.
+   *          {@link java.awt.Container#add(java.awt.Component, java.lang.Object)
+   *          java.awt.Container.add()}) ab. Wird von
+   *          {@link UIElement#getLayoutConstraints()} zurückgeliefert.
    * 
    * @param mapTypeToLabelType
    *          bildet einen TYPE auf einen Integer ab, der angibt, ob das UI Element
    *          ein zusätzliches Label links oder rechts bekommen soll. Mögliche Werte
    *          sind {@link UIElement#LABEL_LEFT}, {@link UIElement#LABEL_RIGHT} und
-   *          {@link UIElement#LABEL_NONE}. Wird von
-   *          {@link UIElement#getLabelType()} zurückgeliefert.
+   *          {@link UIElement#LABEL_NONE}. Wird von {@link UIElement#getLabelType()}
+   *          zurückgeliefert.
    * 
    * @param mapTypeToLabelLayoutConstraints
    *          Für UI Elemente, die ein zusätzliches Label links oder rechts bekommen
@@ -153,8 +154,8 @@ public class UIElementFactory
    *          anderen produzieren eine Fehlermeldung.
    * 
    * @param handler
-   *          ist der {@link UIElementEventHandler}, an den die erzeugten UI
-   *          Elemente ihre Ereignisse melden.
+   *          ist der {@link UIElementEventHandler}, an den die erzeugten UI Elemente
+   *          ihre Ereignisse melden.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -925,6 +926,20 @@ public class UIElementFactory
             action, ext.toString() });
       }
     }
+    else if (action.equals("saveTempAndOpenExt"))
+    {
+      ConfigThingy ext = conf.query("EXT");
+      if (ext.count() != 1)
+      {
+        Logger.error(L.m("ACTION \"%1\" erfordert genau ein Attribut EXT", action));
+      }
+      else
+      {
+        return new UIElementActionListener(handler, uiElement, false, "action",
+          new Object[] {
+            action, ext.toString() });
+      }
+    }
     else if (action.equals("open"))
     {
       try
@@ -967,11 +982,12 @@ public class UIElementFactory
     /**
      * Bildet einen TYPE auf die dazugehörigen layout constraints (d,i, der optionale
      * zweite Parameter von
-     * {@link java.awt.Container#add(java.awt.Component, java.lang.Object) java.awt.Container.add()})
-     * ab. Darf null-Werte enthalten. Ist für einen TYPE kein Mapping angegeben (auch
-     * kein null-Wert), so wird erst geschaut, ob ein Mapping für "default" vorhanden
-     * ist. Falls ja, so wird dieses der entsprechenden Eigenschaft des erzeugten
-     * UIElements zugewiesen, ansonsten null.
+     * {@link java.awt.Container#add(java.awt.Component, java.lang.Object)
+     * java.awt.Container.add()}) ab. Darf null-Werte enthalten. Ist für einen TYPE
+     * kein Mapping angegeben (auch kein null-Wert), so wird erst geschaut, ob ein
+     * Mapping für "default" vorhanden ist. Falls ja, so wird dieses der
+     * entsprechenden Eigenschaft des erzeugten UIElements zugewiesen, ansonsten
+     * null.
      */
     public Map<String, ?> mapTypeToLayoutConstraints;
 

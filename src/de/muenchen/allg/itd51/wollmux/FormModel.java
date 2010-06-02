@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Erlaubt Zugriff auf die Formularbestandteile eines Dokuments abstrahiert von den dahinterstehenden OOo-Objekten.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -23,10 +23,10 @@
  * -------------------------------------------------------------------
  * 27.12.2005 | BNK | Erstellung
  * 28.04.2008 | BNK | +save(), +saveAs()
+ * 02.06.2010 | BED | +saveTempAndOpenExt
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux;
@@ -220,10 +220,17 @@ public interface FormModel
 
   /**
    * Speichert dieses Formular in eine temporäre Datei unter Verwendung des in in
+   * ExterneAnwendungen für ext festgelegten FILTERs, startet dann die zugehörige
+   * externe Anwendung mit dieser Datei und schließt das Formular.
+   */
+  public void closeAndOpenExt(String ext);
+
+  /**
+   * Speichert dieses Formular in eine temporäre Datei unter Verwendung des in in
    * ExterneAnwendungen für ext festgelegten FILTERs und startet dann die zugehörige
    * externe Anwendung mit dieser Datei.
    */
-  public void closeAndOpenExt(String ext);
+  public void saveTempAndOpenExt(String ext);
 
   /**
    * Über diese Methode kann der FormController das FormModel informieren, dass er

@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Implementierungen von FormModel (Zugriff auf die Formularbestandteile eines Dokuments)
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -24,10 +24,10 @@
  * 09.02.2007 | LUT | Übernahme aus DocumentCommandInterpreter
  *                    + MultiDocumentFormModel
  * 28.04.2008 | BNK | [R19466]+save(), +saveAs()
+ * 02.06.2010 | BED | +saveTempAndOpenExt
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux;
@@ -278,7 +278,7 @@ public class FormModelImpl
      * (non-Javadoc)
      * 
      * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowPosSize(int, int, int,
-     *      int)
+     * int)
      */
     public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
     {
@@ -320,8 +320,9 @@ public class FormModelImpl
     /*
      * (non-Javadoc)
      * 
-     * @see de.muenchen.allg.itd51.wollmux.FormModel#setVisibleState(java.lang.String,
-     *      boolean)
+     * @see
+     * de.muenchen.allg.itd51.wollmux.FormModel#setVisibleState(java.lang.String,
+     * boolean)
      */
     public void setVisibleState(String groupId, boolean visible)
     {
@@ -336,7 +337,7 @@ public class FormModelImpl
      * (non-Javadoc)
      * 
      * @see de.muenchen.allg.itd51.wollmux.FormModel#valueChanged(java.lang.String,
-     *      java.lang.String)
+     * java.lang.String)
      */
     public void valueChanged(String fieldId, String newValue)
     {
@@ -430,6 +431,15 @@ public class FormModelImpl
       }
     }
 
+    public void saveTempAndOpenExt(String ext)
+    {
+      for (int i = 0; i < docs.size(); i++)
+      {
+        FormModel fm = formModels.get(i);
+        fm.saveTempAndOpenExt(ext);
+      }
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -447,7 +457,9 @@ public class FormModelImpl
     /*
      * (non-Javadoc)
      * 
-     * @see de.muenchen.allg.itd51.wollmux.FormModel#disposing(de.muenchen.allg.itd51.wollmux.TextDocumentModel)
+     * @see
+     * de.muenchen.allg.itd51.wollmux.FormModel#disposing(de.muenchen.allg.itd51.
+     * wollmux.TextDocumentModel)
      * 
      * TESTED
      */
@@ -478,7 +490,7 @@ public class FormModelImpl
      * (non-Javadoc)
      * 
      * @see de.muenchen.allg.itd51.wollmux.FormModel#setValue(java.lang.String,
-     *      java.lang.String, java.awt.event.ActionListener)
+     * java.lang.String, java.awt.event.ActionListener)
      */
     public void setValue(String fieldId, String value, ActionListener listener)
     {
@@ -596,6 +608,11 @@ public class FormModelImpl
       WollMuxEventHandler.handleCloseAndOpenExt(doc, ext);
     }
 
+    public void saveTempAndOpenExt(String ext)
+    {
+      WollMuxEventHandler.handleSaveTempAndOpenExt(doc, ext);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -617,7 +634,7 @@ public class FormModelImpl
      * (non-Javadoc)
      * 
      * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowPosSize(int, int, int,
-     *      int)
+     * int)
      */
     public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
     {
@@ -629,8 +646,9 @@ public class FormModelImpl
     /*
      * (non-Javadoc)
      * 
-     * @see de.muenchen.allg.itd51.wollmux.FormModel#setVisibleState(java.lang.String,
-     *      boolean)
+     * @see
+     * de.muenchen.allg.itd51.wollmux.FormModel#setVisibleState(java.lang.String,
+     * boolean)
      */
     public void setVisibleState(String groupId, boolean visible)
     {
@@ -641,7 +659,7 @@ public class FormModelImpl
      * (non-Javadoc)
      * 
      * @see de.muenchen.allg.itd51.wollmux.FormModel#valueChanged(java.lang.String,
-     *      java.lang.String)
+     * java.lang.String)
      */
     public void valueChanged(String fieldId, String newValue)
     {
@@ -670,7 +688,9 @@ public class FormModelImpl
     /*
      * (non-Javadoc)
      * 
-     * @see de.muenchen.allg.itd51.wollmux.FormModel#disposed(de.muenchen.allg.itd51.wollmux.TextDocumentModel)
+     * @see
+     * de.muenchen.allg.itd51.wollmux.FormModel#disposed(de.muenchen.allg.itd51.wollmux
+     * .TextDocumentModel)
      */
     public void disposing(TextDocumentModel source)
     {
@@ -808,7 +828,7 @@ public class FormModelImpl
      * (non-Javadoc)
      * 
      * @see de.muenchen.allg.itd51.wollmux.FormModel#setValue(java.lang.String,
-     *      java.lang.String, java.awt.event.ActionListener)
+     * java.lang.String, java.awt.event.ActionListener)
      */
     public void setValue(String fieldId, String value, ActionListener listener)
     {

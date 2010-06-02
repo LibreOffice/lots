@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Stellt UI bereit, um ein Formulardokument zu bearbeiten.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -41,10 +41,10 @@
  * 10.12.2007 | BNK | [R3582]Vertikale Scrollbar immer anzeigen
  * 28.04.2008 | BNK | [R19465]Fokus auf erstem Element, nicht auf Tab
  * 08.03.2010 | ERT | [R6331]Scrollfunktion in der wollmux formular gui
+ * 02.06.2010 | BED | Unterstützung von ACTION "saveTempAndOpenExt"
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
@@ -1151,6 +1151,7 @@ public class FormController implements UIElementEventHandler
     supportedActions.add("saveAs");
     supportedActions.add("printForm");
     supportedActions.add("closeAndOpenExt");
+    supportedActions.add("saveTempAndOpenExt");
     panelContext.supportedActions = supportedActions;
     buttonContext.supportedActions = supportedActions;
 
@@ -1343,6 +1344,10 @@ public class FormController implements UIElementEventHandler
         else if (action.equals("closeAndOpenExt"))
         {
           formModel.closeAndOpenExt((String) args[1]);
+        }
+        else if (action.equals("saveTempAndOpenExt"))
+        {
+          formModel.saveTempAndOpenExt((String) args[1]);
         }
         else if (action.equals("printForm"))
         {

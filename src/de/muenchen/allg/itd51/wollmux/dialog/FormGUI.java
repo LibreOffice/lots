@@ -32,6 +32,7 @@
  * 14.09.2006 | BNK | üble Hacks hoffentlich robuster gemacht
  * 17.11.2006 | BNK | +getController()
  * 26.02.2010 | BED | WollMux-Icon für FormGUI-Frame
+ * 02.06.2010 | BED | +saveTempAndOpenExt
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -714,6 +715,11 @@ public class FormGUI
     public void closeAndOpenExt(String ext)
     {
       Logger.log("closeAndOpenExt(" + ext + ")");
+    }
+
+    public void saveTempAndOpenExt(String ext)
+    {
+      Logger.log("saveTempAndOpenExt(" + ext + ")");
     }
   }
 

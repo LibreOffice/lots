@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Ermöglicht die Einstellung neuer WollMuxEvents in die EventQueue.
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -37,6 +37,7 @@
  * 03.03.2010 | ERT | getBookmarkNamesStartingWith nach UnoHelper TextDocument verschoben
  * 03.03.2010 | ERT | Verhindern von Überlagern von insertFrag-Bookmarks
  * 23.03.2010 | ERT | [R59480] Meldung beim Ausführen von "Textbausteinverweis einfügen"
+ * 02.06.2010 | BED | +handleSaveTempAndOpenExt
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -2213,9 +2214,10 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein Event, das das übergebene Dokument in eine temporäre Datei speichert
-   * und eine externe Anwendung mit dieser aufruft, wobei der
-   * ExterneAnwendungen-Abschnitt zu ext die näheren Details wie den FILTER regelt.
+   * Erzeugt ein Event, das das übergebene Dokument in eine temporäre Datei
+   * speichert, eine externe Anwendung mit dieser aufruft und das Dokument dann
+   * schließt, wobei der ExterneAnwendungen-Abschnitt zu ext die näheren Details wie
+   * den FILTER regelt.
    * 
    * @param model
    *          Das an die externe Anwendung weiterzureichende TextDocumentModel.
@@ -2269,6 +2271,71 @@ public class WollMuxEventHandler
 
       model.setDocumentModified(false);
       model.close();
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(#" + model.hashCode() + ", " + ext
+        + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein Event, das das übergebene Dokument in eine temporäre Datei speichert
+   * und eine externe Anwendung mit dieser aufruft, wobei der
+   * ExterneAnwendungen-Abschnitt zu ext die näheren Details wie den FILTER regelt.
+   * 
+   * @param model
+   *          Das an die externe Anwendung weiterzureichende TextDocumentModel.
+   * @param ext
+   *          identifiziert den entsprechenden Eintrag im Abschnitt
+   *          ExterneAnwendungen.
+   */
+  public static void handleSaveTempAndOpenExt(TextDocumentModel model, String ext)
+  {
+    handle(new OnSaveTempAndOpenExt(model, ext));
+  }
+
+  /**
+   * Dieses Event wird vom FormModelImpl ausgelöst, wenn der Benutzer die Aktion
+   * "saveTempAndOpenExt" aktiviert hat.
+   * 
+   * @author matthias.benkmann
+   */
+  private static class OnSaveTempAndOpenExt extends BasicEvent
+  {
+    private TextDocumentModel model;
+
+    private String ext;
+
+    public OnSaveTempAndOpenExt(TextDocumentModel model, String ext)
+    {
+      this.model = model;
+      this.ext = ext;
+    }
+
+    protected void doit()
+    {
+      try
+      {
+        OpenExt openExt = new OpenExt(ext, WollMuxFiles.getWollmuxConf());
+        openExt.setSource(UNO.XStorable(model.doc));
+        openExt.storeIfNecessary();
+        openExt.launch(new OpenExt.ExceptionHandler()
+        {
+          public void handle(Exception x)
+          {
+            Logger.error(x);
+          }
+        });
+      }
+      catch (Exception x)
+      {
+        Logger.error(x);
+        return;
+      }
     }
 
     public String toString()
