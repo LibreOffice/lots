@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Logging-Mechanismus zum Schreiben von Nachrichten auf eine PrintStream.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -39,10 +39,10 @@
  * 16.05.2006 | BNK | println() und printException() vereinheitlicht
  * 30.05.2006 | BNK | bei init(PrintStream,...) den file zurücksetzen, damit
  *                  | die Zuweisung auch wirksam wird.
+ * 18.06.2010 | BED | Sekundenausgabe hinzugefügt
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  */
 
 package de.muenchen.allg.itd51.wollmux;
@@ -96,22 +96,21 @@ public class Logger
   public static final int ERROR = 1;
 
   /**
-   * Der Logging-Modus <code>LOG</code> ist der Standard Modus. Er zeigt
-   * Nachrichten und wichtige Programminformationen an, die im täglichen Einsatz
-   * interessant sind. Dieser Modus ist die Defaulteinstellung.
+   * Der Logging-Modus <code>LOG</code> ist der Standard Modus. Er zeigt Nachrichten
+   * und wichtige Programminformationen an, die im täglichen Einsatz interessant
+   * sind. Dieser Modus ist die Defaulteinstellung.
    */
   public static final int LOG = 3;
 
   /**
-   * Der Logging-Modus <code>DEBUG</code> wird genutzt, um detaillierte
-   * Informationen über den Programmablauf auszugeben. Er ist vor allem für
-   * DEBUG-Zwecke geeignet.
+   * Der Logging-Modus <code>DEBUG</code> wird genutzt, um detaillierte Informationen
+   * über den Programmablauf auszugeben. Er ist vor allem für DEBUG-Zwecke geeignet.
    */
   public static final int DEBUG = 5;
 
   /**
-   * Der Logging-Modus <code>ALL</code> gibt uneingeschränkt alle Nachrichten aus.
-   * Er enthält auch Nachrichten der Priorität debug2, die sehr detaillierte
+   * Der Logging-Modus <code>ALL</code> gibt uneingeschränkt alle Nachrichten aus. Er
+   * enthält auch Nachrichten der Priorität debug2, die sehr detaillierte
    * Informationen ausgibt, die selbst für normale DEBUG-Zwecke zu genau sind.
    */
   public static final int ALL = 7;
@@ -294,8 +293,8 @@ public class Logger
   }
 
   /**
-   * Wie {@link #debug2(String)}, nur dass statt dem String eine Exception
-   * ausgegeben wird.
+   * Wie {@link #debug2(String)}, nur dass statt dem String eine Exception ausgegeben
+   * wird.
    * 
    * @param e
    */
@@ -335,17 +334,20 @@ public class Logger
       int month = now.get(Calendar.MONTH) + 1;
       int hour = now.get(Calendar.HOUR_OF_DAY);
       int minute = now.get(Calendar.MINUTE);
+      int second = now.get(Calendar.SECOND);
       String dayStr = "" + day;
       String monthStr = "" + month;
       String hourStr = "" + hour;
       String minuteStr = "" + minute;
+      String secondStr = "" + second;
       if (day < 10) dayStr = "0" + dayStr;
       if (month < 10) monthStr = "0" + monthStr;
       if (hour < 10) hourStr = "0" + hourStr;
       if (minute < 10) minuteStr = "0" + minuteStr;
+      if (second < 10) secondStr = "0" + secondStr;
       prefix =
         "" + now.get(Calendar.YEAR) + "-" + monthStr + "-" + dayStr + " " + hourStr
-          + ":" + minuteStr + " " + prefix;
+          + ":" + minuteStr + ":" + secondStr + " " + prefix;
 
       // Ausgabe schreiben:
       if (msg != null)
