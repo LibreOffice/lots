@@ -44,6 +44,7 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -375,8 +376,9 @@ public class Common
     try
     {
       List<Image> iconList = new ArrayList<Image>();
-      iconList.add(Toolkit.getDefaultToolkit().createImage(
-        Common.class.getClassLoader().getResource("data/wollmux_icon32x32.png")));
+      URL url =
+        Common.class.getClassLoader().getResource("data/wollmux_icon32x32.png");
+      if (url != null) iconList.add(Toolkit.getDefaultToolkit().createImage(url));
 
       Class<?> cls = myFrame.getClass();
       Class<?>[] parameterTypes = new Class[1];
