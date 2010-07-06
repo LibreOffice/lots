@@ -61,6 +61,7 @@ import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XIndexAccess;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNamed;
+import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.style.XStyleFamiliesSupplier;
 import com.sun.star.style.XStyleLoader;
@@ -248,6 +249,7 @@ public class PrintIntoFile
       pageCount -= pageNumberOffset;
       fixPageCountFields(UNO.XTextFieldsSupplier(outputDoc).getTextFields(),
         pageCount);
+      fixInputUserFields(UNO.XTextFieldsSupplier(outputDoc).getTextFields());
 
       oldShapes = null;
       System.gc();
@@ -444,8 +446,7 @@ public class PrintIntoFile
     {
       Object textfield = enu.nextElement();
       // Der eigentlich redundante Test auf das Property NumberingType ist eine
-      // Optimierung,
-      // da supportsService sehr langsam ist.
+      // Optimierung, da supportsService sehr langsam ist.
       if (UNO.getProperty(textfield, "NumberingType") != null
         && UNO.supportsService(textfield, "com.sun.star.text.textfield.PageCount"))
       {
@@ -453,6 +454,51 @@ public class PrintIntoFile
         XTextCursor cursor =
           range.getText().createTextCursorByRange(range.getStart());
         cursor.setString(pc);
+        TextDocument.copyDirectValueCharAttributes(UNO.XPropertyState(range),
+          UNO.XPropertySet(cursor));
+        range.setString("");
+      }
+    }
+  }
+
+  /**
+   * Ersetzt alle Textfelder vom Typ c,s,s,t,textfield,InputUser durch ihren
+   * Stringwert. Diese Ersetzung ist notwendig, da InputUser-Felder als
+   * Seriendruck-Spezialfelder (z.B. Wenn...Dann...Sonst...) verwendet werden und sie
+   * dokumentglobal nur den selben Wert haben können. Der Fix wurde in der
+   * Vergangenheit auf alle Textfelder des Dokuments angewandt, womit aber
+   * PageNumber-Felder (Gesamtseitenzahl) unbrauchbar wurden.
+   * 
+   * @author Matthias Benkmann (D-III-ITD D.10), Christoph Lutz (D-III-ITD D.10)
+   * @throws WrappedTargetException
+   * @throws NoSuchElementException
+   */
+  private static void fixInputUserFields(XEnumerationAccess textFields)
+      throws NoSuchElementException, WrappedTargetException
+  {
+    XEnumeration enu = textFields.createEnumeration();
+    while (enu.hasMoreElements())
+    {
+      Object textfield = enu.nextElement();
+
+      // Der eigentlich Test, ob der Inhalt des Content-Properties mit "WM(FUNCTION"
+      // beginnt ist eine Optimierung, da in der Regel nur die betroffenen
+      // InputUser-Textfelder mit diesem Text anfangen und supportsService sehr
+      // langsam ist.
+      String content = null;
+      try
+      {
+        content = AnyConverter.toString(UNO.getProperty(textfield, "Content"));
+      }
+      catch (IllegalArgumentException e)
+      {}
+      if (content != null && content.startsWith("WM(FUNCTION")
+        && UNO.supportsService(textfield, "com.sun.star.text.TextField.InputUser"))
+      {
+        XTextRange range = UNO.XTextContent(textfield).getAnchor();
+        XTextCursor cursor =
+          range.getText().createTextCursorByRange(range.getStart());
+        cursor.setString(cursor.getString());
         TextDocument.copyDirectValueCharAttributes(UNO.XPropertyState(range),
           UNO.XPropertySet(cursor));
         range.setString("");
