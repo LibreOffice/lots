@@ -462,12 +462,22 @@ public class PrintIntoFile
   }
 
   /**
-   * Ersetzt alle Textfelder vom Typ c,s,s,t,textfield,InputUser durch ihren
-   * Stringwert. Diese Ersetzung ist notwendig, da InputUser-Felder als
-   * Seriendruck-Spezialfelder (z.B. Wenn...Dann...Sonst...) verwendet werden und sie
-   * dokumentglobal nur den selben Wert haben können. Der Fix wurde in der
-   * Vergangenheit auf alle Textfelder des Dokuments angewandt, womit aber
-   * PageNumber-Felder (Gesamtseitenzahl) unbrauchbar wurden.
+   * Ersetzt alle vom WollMux-Seriendruck verwendeten Textfelder vom Typ
+   * c,s,s,t,textfield,InputUser durch ihren Stringwert. Diese Ersetzung ist
+   * notwendig, da InputUser-Felder als Spezialfelder (z.B. Wenn...Dann...Sonst...)
+   * verwendet werden und sie dokumentglobal nur den selben Wert haben können.
+   * 
+   * Felder vom Typ c.s.s.t.textfield.User verwenden ebenfalls einen dokumentglobalen
+   * Textfieldmaster, müssen aber nicht durch die textuelle Repräsentation ersetzt
+   * werden, da sich mit dem Seriendruck nur die durch WollMux gesetzten
+   * Textfieldmaster ändern können und es kein Szenario gibt, mit dem davon abhängige
+   * User-Felder in ein Dokument eingefügt werden können (Es kann über die OOo-GUI
+   * kein User-Feld auf "WM(Function 'Autofunction....')" eingefügt werden, da der
+   * Name ein Leerzeichen enthält.
+   * 
+   * Der Fix wurde in der Vergangenheit auf alle Textfelder des Dokuments angewandt,
+   * womit aber PageNumber-Felder in Kopf- und Fußzeilen unbrauchbar wurden. Daher
+   * gibt es jetzt nur noch eine "Whitelist" von Feldern, die ersetzt werden.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10), Christoph Lutz (D-III-ITD D.10)
    * @throws WrappedTargetException
