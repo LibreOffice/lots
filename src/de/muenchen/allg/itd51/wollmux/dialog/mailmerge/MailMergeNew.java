@@ -59,7 +59,6 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XStorable;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
-import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -118,24 +117,6 @@ public class MailMergeNew
    * speichert.
    */
   private static final String PROP_MAILMERGENEW_SELECTION = "MailMergeNew_Selection";
-
-  /**
-   * ID der Property, die den Pfad des PDF-Gesamtdokuments speichert.
-   */
-  private static final String PROP_PDFOUTPUT = "MailMergeNew_PDFOutput";
-
-  /**
-   * ID der Property, die den temporären Pfad speichert, an dem die einzelnen
-   * PDF-Dateien gespeichert werden, bevor sie zu einem Gesmatdokument zusammengefügt
-   * werden.
-   */
-  private static final String PROP_PDFTMPDIR = "MailMergeNew_PDFTempDir";
-
-  /**
-   * ID der Property, die speichert, ob ein PDF-Gesamtdokument im Duplexmodus erstell
-   * werden soll.
-   */
-  private static final String PROP_DUPLEX = "MailMergeNew_Duplex";
 
   /**
    * Das {@link TextDocumentModel} zu dem Dokument an dem diese Toolbar hängt.
@@ -872,7 +853,7 @@ public class MailMergeNew
    */
   void doMailMerge(final MailMergeType mailMergeType,
       DatasetSelectionType datasetSelectionType, IndexSelection indexSelection,
-      String dir, final boolean duplex, TextComponentTags filePattern)
+      String dir, TextComponentTags filePattern)
   {
     mod.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
@@ -906,7 +887,6 @@ public class MailMergeNew
     }
 
     final XPrintModel pmod = mod.createPrintModel(true);
-    File pdf;
     try
     {
       pmod.setPropertyValue("MailMergeNew_Schema", data.getSchema());
@@ -916,12 +896,6 @@ public class MailMergeNew
       {
         pmod.setPropertyValue(PROP_TARGETDIR, dir);
         pmod.setPropertyValue(PROP_FILEPATTERN, filePattern);
-      }
-      else if (mailMergeType == MailMergeType.SINGLE_PDF_FILE)
-      {
-        pmod.setPropertyValue(PROP_DUPLEX, duplex);
-        pdf = File.createTempFile("wollmux", ".pdf");
-        pmod.setPropertyValue(PROP_PDFOUTPUT, pdf.getAbsolutePath());
       }
     }
     catch (Exception x)
@@ -942,17 +916,7 @@ public class MailMergeNew
         || mailMergeType == MailMergeType.MULTI_FILE)
         pmod.usePrintFunction("Gesamtdokument");
       else if (mailMergeType == MailMergeType.SINGLE_PDF_FILE)
-      {
-        String tmpdir = "/tmp/seriendruck";
-        pmod.setPropertyValue(PROP_PDFTMPDIR, tmpdir);
-        File tempdir = new File(tmpdir);
-        if (tempdir.exists())
-        {
-          for (File f : tempdir.listFiles())
-            f.delete();
-        }
         pmod.usePrintFunction("PDFGesamtdokument");
-      }
     }
     catch (NoSuchMethodException e)
     {
@@ -962,12 +926,6 @@ public class MailMergeNew
         L.m(
           "Eine notwendige Druckfunktion ist nicht definiert. Bitte wenden Sie sich an Ihre Systemadministration damit Ihre Konfiguration entsprechend erweitert bzw. aktualisiert werden kann.\n\n%1",
           e));
-      pmod.cancel();
-      return;
-    }
-    catch (Exception e)
-    {
-      Logger.error(e);
       pmod.cancel();
       return;
     }
@@ -1005,28 +963,11 @@ public class MailMergeNew
         {
           // lockControllers des Gesamtdokuments aufheben und das Gesamtdokument
           // anzeigen.
-          if (mailMergeType != MailMergeType.SINGLE_PDF_FILE)
+          if (outputDoc != null && mailMergeType != MailMergeType.SINGLE_PDF_FILE)
           {
-            if (outputDoc != null)
-            {
-              outputDoc.unlockControllers();
-              outputDoc.getCurrentController().getFrame().getContainerWindow().setVisible(
-                true);
-            }
-          }
-          else
-          {
-            try
-            {
-              // PDF-Gesamtdokument in Adobe Reader öffnen
-              String pdfpath =
-                AnyConverter.toString(pmod.getPropertyValue(PROP_PDFOUTPUT));
-              Process proc = Runtime.getRuntime().exec("acroread " + pdfpath);
-            }
-            catch (Exception ex)
-            {
-              ex.printStackTrace();
-            }
+            outputDoc.unlockControllers();
+            outputDoc.getCurrentController().getFrame().getContainerWindow().setVisible(
+              true);
           }
         }
         long duration = (System.currentTimeMillis() - startTime) / 1000;

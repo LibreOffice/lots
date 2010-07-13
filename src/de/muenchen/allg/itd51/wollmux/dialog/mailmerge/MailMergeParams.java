@@ -51,7 +51,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -450,23 +449,11 @@ class MailMergeParams
       vbox.add(multiFileParamsGUI);
       multiFileParamsGUI.setVisible(false);
 
-      // singlePDFFileParamsGUI
-      final Box singlePDFFileParamsGUI = Box.createVerticalBox();
-      hbox = Box.createHorizontalBox();
-      final JCheckBox cbDuplex = new JCheckBox("Doppelseitig");
-      hbox.add(cbDuplex);
-      hbox.add(Box.createHorizontalGlue());
-      singlePDFFileParamsGUI.add(hbox);
-
-      vbox.add(singlePDFFileParamsGUI);
-      singlePDFFileParamsGUI.setVisible(false);
-
       typeBox.addItemListener(new ItemListener()
       {
         public void itemStateChanged(ItemEvent e)
         {
           multiFileParamsGUI.setVisible((MailMergeType) typeBox.getSelectedItem() == MailMergeType.MULTI_FILE);
-          singlePDFFileParamsGUI.setVisible((MailMergeType) typeBox.getSelectedItem() == MailMergeType.SINGLE_PDF_FILE);
           dialog.pack();
         }
       });
@@ -495,7 +482,7 @@ class MailMergeParams
           dialog.dispose();
           mm.doMailMerge((MailMergeType) typeBox.getSelectedItem(),
             datasetSelectionType, indexSelection, targetDirectory.getText(),
-            cbDuplex.isSelected(), textTags);
+            textTags);
         }
       });
       hbox.add(button);

@@ -83,8 +83,6 @@ public class Workarounds
 
   private static ClassLoader workaround102164CL = null;
 
-  private static Boolean workaroundPDFGesamtdokumentCrash = null;
-
   private static Boolean applyWorkaround(String issueNumber)
   {
     Logger.debug("Workaround für Issue "
@@ -410,19 +408,4 @@ public class Workarounds
   //
   // return false;
   // }
-
-  /**
-   * Beim Drucken in ein PDF-Gesamtdokument mit der gleichnamigen Druckfunktion kann
-   * es bei sehr großen Druckaufträgen (> 1000 Seiten) zum Absturz von OOo kommen.
-   * 
-   * @author Andor Ertsey (D-III-ITD-D101)
-   */
-  public static Boolean workaroundPDFGesamtdokumentCrash()
-  {
-    if (workaroundPDFGesamtdokumentCrash == null)
-    {
-      workaroundPDFGesamtdokumentCrash = applyWorkaround("PDFGesamtdokumentCrash");
-    }
-    return workaroundPDFGesamtdokumentCrash;
-  }
 }
