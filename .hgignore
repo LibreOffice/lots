@@ -17,6 +17,7 @@ dist/deb/wollmux*.changes
 dist/WollMux.oxt
 dist/WollMux.uno.pkg
 dist/WollMuxBar.jar
+dist/WollMuxInterfaces.jar
 dist/md5sums.txt
 dist/WollMux.update.xml
 dist/TerminateOOo.jar

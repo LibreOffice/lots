@@ -122,6 +122,9 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="WOLLMUXBAR_EXE_NAME" value="wollmuxbar.exe" />
 	<property name="WOLLMUXBAR_EXE" value="${PACKAGE_DIR}/${WOLLMUXBAR_EXE_NAME}" />
 	
+	<property name="WOLLMUXINTERFACES_JAR_NAME" value="WollMuxInterfaces.jar" />
+	<property name="WOLLMUXINTERFACES_JAR" value="${PACKAGE_DIR}/${WOLLMUXINTERFACES_JAR_NAME}" />
+	
 	<property name="TERMINATEOOO_JAR_NAME" value="TerminateOOo.jar" />
 	<property name="TERMINATEOOO_JAR" value="${PACKAGE_DIR}/${TERMINATEOOO_JAR_NAME}" />
 	
@@ -150,7 +153,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 
 	<target name="all" depends="debug,WollMuxBar.jar,WollMux.oxt,md5sum" />
 	
-	<target name="snapshot" depends="clean, makechangelog, debug, all, .tar.gz, deb, wininstaller" />
+	<target name="snapshot" depends="clean, makechangelog, debug, all, .tar.gz, deb, wininstaller, WollMuxInterfaces.jar" />
 
 	<!-- The debug target doesn't do anything by itself, but for any targets executed later
 	     the DEBUG property will be set. --> 
@@ -318,6 +321,15 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 			<manifest>
 				<attribute name="RegistrationClassName" value="${WollMux_REG_NAME}" />
 			</manifest>
+		</jar>
+	</target>
+
+	<!-- Erzeugt ein jar-Paket mit den exportierten Interfaces des WollMux -->
+	<target name="WollMuxInterfaces.jar" depends="compile, compileidl, makeversion">
+		<delete file="${WOLLMUXINTERFACES_JAR}" />
+		<jar destfile="${WOLLMUXINTERFACES_JAR}" duplicate="preserve">
+			<fileset dir="${MY_IDL}" includes="**/*.class"/>
+			<fileset file="${BUILD_INFO_FILE}" />
 		</jar>
 	</target>
 
