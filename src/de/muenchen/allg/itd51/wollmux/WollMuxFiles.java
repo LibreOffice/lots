@@ -228,15 +228,15 @@ public class WollMuxFiles
    * <li>unter dem Dateipfad (inkl. Dateiname!), der im Registrierungswert
    * "ConfigPath" des Schlüssels HKCU\Software\WollMux\ festgelegt ist (nur Windows!)
    * </li>
-   * <li>$HOME/.wollmux/wollmux.conf (wobei $HOME unter Windows das Profilverzeichnis
-   * bezeichnet)</li>
+   * <li>$HOME/.wollmux/wollmux.conf (wobei $HOME unter Windows das
+   * Profilverzeichnis bezeichnet)</li>
    * <li>unter dem Dateipfad (inkl. Dateiname!), der im Registrierungswert
    * "ConfigPath" des Schlüssels HKLM\Software\WollMux\ festgelegt ist (nur Windows!)
    * </li>
    * <li>unter dem Dateipfad, der in der Konstanten
    * {@link #C_PROGRAMME_WOLLMUX_WOLLMUX_CONF} festgelegt ist (nur Windows!)</li>
-   * <li>unter dem Dateipfad, der in der Konstanten {@link #ETC_WOLLMUX_WOLLMUX_CONF}
-   * festgelegt ist (nur Linux!)</li>
+   * <li>unter dem Dateipfad, der in der Konstanten
+   * {@link #ETC_WOLLMUX_WOLLMUX_CONF} festgelegt ist (nur Linux!)</li>
    * </ol>
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1381,7 +1381,7 @@ public class WollMuxFiles
     {
       try
       {
-        return super.loadClass(name);
+        return super.findClass(name);
       }
       catch (ClassNotFoundException x)
       {
