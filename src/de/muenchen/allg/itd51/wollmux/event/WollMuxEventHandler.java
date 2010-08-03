@@ -91,9 +91,7 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.document.XEventListener;
 import com.sun.star.form.binding.InvalidBindingStateException;
-import com.sun.star.frame.DispatchResultEvent;
 import com.sun.star.frame.XDispatch;
-import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XFrames;
 import com.sun.star.lang.EventObject;
@@ -102,7 +100,6 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.RuntimeException;
-import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XStringSubstitution;
 import com.sun.star.view.DocumentZoomType;
 
@@ -504,31 +501,6 @@ public class WollMuxEventHandler
       public void actionPerformed(ActionEvent arg0)
       {
         actionEvent = arg0;
-        setUnlock();
-      }
-    }
-
-    /**
-     * Dieser DispatchResultListener kann der Methode
-     * XNotifyableDispatch.dispatchWithNotification übergeben werden und sorgt in
-     * Verbindung mit den Methoden setLock() und waitForUnlock() dafür, dass ein
-     * Dispatch quasi synchron ausgeführt werden kann.
-     */
-    protected UnlockDispatchResultListener unlockDispatchResultListener =
-      new UnlockDispatchResultListener();
-
-    protected class UnlockDispatchResultListener implements XDispatchResultListener
-    {
-      public DispatchResultEvent resultEvent = null;
-
-      public void disposing(EventObject arg0)
-      {
-        setUnlock();
-      }
-
-      public void dispatchFinished(DispatchResultEvent arg0)
-      {
-        resultEvent = arg0;
         setUnlock();
       }
     }
@@ -2805,11 +2777,6 @@ public class WollMuxEventHandler
             L.m("Die Konfiguration des WollMux muss neu eingelesen werden.\n\nBitte beenden Sie den WollMux und OpenOffice.org und schießen Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab.")));
       }
 
-    }
-
-    public boolean requires(Object o)
-    {
-      return UnoRuntime.areSame(listener, UNO.XInterface(o));
     }
 
     public String toString()

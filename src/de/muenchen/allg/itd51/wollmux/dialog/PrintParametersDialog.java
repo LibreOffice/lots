@@ -142,7 +142,7 @@ public class PrintParametersDialog
     this.doc = doc;
     this.showCopyCount = showCopyCount;
     this.closeActionListener = listener;
-    createGUI();
+    createGUI(); // FIXME: sollte doch im EDT aufgerufen werden, oder nicht?
   }
 
   /**
