@@ -35,12 +35,19 @@
  */
 package de.muenchen.allg.itd51.wollmux.event;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.DispatchDescriptor;
+import com.sun.star.frame.FrameAction;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
 import com.sun.star.frame.XDispatchProviderInterceptor;
 import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XFrameActionListener;
+import com.sun.star.lang.EventObject;
+import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
@@ -62,6 +69,18 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   public static final XDispatchProviderInterceptor globalWollMuxDispatches =
     new DispatchProviderAndInterceptor();
 
+  /**
+   * Einthält eine Liste aller jemals registrierten dokumentgebundener
+   * {@link DispatchProviderAndInterceptor}-Objekte; Die Liste wird benötigt um
+   * festzustellen, ob der WollMux bereits einen
+   * {@link DispatchProviderAndInterceptor} auf einem Frame registriert hat
+   * (Vermeidung von Doppeleintragungen) und um
+   * {@link DispatchProviderAndInterceptor}-Objekte deregistrieren zu können, wenn
+   * das zugehörige Textdokument geschlossen wird.
+   */
+  private static final Set<DispatchProviderAndInterceptor> documentDispatchProviderAndInterceptors =
+    new HashSet<DispatchProviderAndInterceptor>();
+
   private XDispatchProvider slave = null;
 
   private XDispatchProvider master = null;
@@ -73,12 +92,20 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   private XFrame frame = null;
 
   /**
+   * Bei dokumentgebundenen {@link DispatchProviderAndInterceptor}-Objekten wird auf
+   * dem Frame zusätzlich ein {@link XFrameActionListener} registriert um überwachen
+   * zu können, wann der {@link DispatchProviderAndInterceptor} deregistriert werden
+   * soll. Dieser {@link XFrameActionListener} ist hier hinterlegt.
+   */
+  private XFrameActionListener frameActionListener = null;
+
+  /**
    * Erzeugt einen {@link DispatchProviderAndInterceptor}, der nur globale URLs
    * behandeln kann.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
-  public DispatchProviderAndInterceptor()
+  private DispatchProviderAndInterceptor()
   {}
 
   /**
@@ -89,7 +116,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
    */
-  public DispatchProviderAndInterceptor(XFrame frame)
+  private DispatchProviderAndInterceptor(XFrame frame)
   {
     this.frame = frame;
   }
@@ -120,7 +147,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   protected boolean hasMethod(Class<?> c, String methodName)
   {
@@ -139,7 +166,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
    * (non-Javadoc)
    * 
    * @see com.sun.star.frame.XDispatchProvider#queryDispatch(com.sun.star.util.URL,
-   *      java.lang.String, int)
+   * java.lang.String, int)
    */
   public XDispatch queryDispatch(URL url, String frameName, int fsFlag)
   {
@@ -164,7 +191,8 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   /*
    * (non-Javadoc)
    * 
-   * @see com.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.DispatchDescriptor[])
+   * @seecom.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.
+   * DispatchDescriptor[])
    */
   public XDispatch[] queryDispatches(DispatchDescriptor[] seqDescripts)
   {
@@ -195,43 +223,130 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   /**
    * Registriert einen DocumentDispatchProvider im Frame frame (nur dann, wenn er
    * nicht bereits registriert wurde).
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101), Christoph Lutz (D-III-ITD-D101)
+   *         TESTED
    */
   public static void registerDocumentDispatchInterceptor(XFrame frame)
   {
     if (frame == null || UNO.XDispatchProviderInterception(frame) == null
       || UNO.XDispatchProvider(frame) == null) return;
 
-    Logger.debug(L.m("Registriere DocumentDispatchInterceptor für frame #%1",
-      Integer.valueOf(frame.hashCode())));
-
-    // Hier möchte ich wissen, ob der DocumentDispatchInterceptor bereits im
-    // Frame registriert ist. Ist das der Fall, so darf der
-    // DocumentDispatchInterceptor nicht noch einmal registriert werden, weil
-    // es sonst zu Endlosschleifen kommt, da sich die Dispatches des
-    // DocumentDispatchInterceptor gegenseitig aufrufen würden.
-    //
-    // Leider gibt es keine Methode um aus dem Frame direkt abzulesen, ob der
-    // DocumentDispatchInterceptor bereits registriert ist. Dieser Hack
-    // übernimmt das: Er sucht per queryDispatch nach einer Dispatch-URL, die
-    // ausschließlich der WollMux (weiter unten) definiert. Kommt dabei ein
-    // Objekt =! null zurück, so ist der frame bereits registriert, ansonsten
-    // nicht.
-    com.sun.star.util.URL url = UNO.getParsedUNOUrl(Dispatch.DISP_wmAbdruck);
-    XDispatch disp =
-      UNO.XDispatchProvider(frame).queryDispatch(url, "_self",
-        com.sun.star.frame.FrameSearchFlag.SELF);
-    boolean alreadyRegistered = disp != null;
-
-    if (alreadyRegistered)
-      Logger.debug(L.m("Ignoriere doppelten Aufruf von registerDocumentDispatchInterceptor() für den selben Frame"));
-
     // DispatchInterceptor registrieren (wenn nicht bereits registriert):
-    if (!alreadyRegistered)
+    if (getRegisteredDPI(frame) == null)
     {
-      XDispatchProviderInterceptor dpi = new DispatchProviderAndInterceptor(frame);
+      DispatchProviderAndInterceptor dpi = new DispatchProviderAndInterceptor(frame);
+
+      Logger.debug(L.m("Registriere DocumentDispatchInterceptor #%1 für frame #%2",
+        Integer.valueOf(dpi.hashCode()), Integer.valueOf(frame.hashCode())));
+
       UNO.XDispatchProviderInterception(frame).registerDispatchProviderInterceptor(
         dpi);
+      registerDPI(dpi);
+
+      dpi.frameActionListener = new DPIFrameActionListener();
+      frame.addFrameActionListener(dpi.frameActionListener);
+    }
+    else
+      Logger.debug(L.m(
+        "Ignoriere doppelten Aufruf von registerDocumentDispatchInterceptor() für den selben Frame #%1",
+        Integer.valueOf(frame.hashCode())));
+  }
+
+  /**
+   * Wird gleichzeitig mit der Registrierung eines
+   * {@link DispatchProviderAndInterceptor}-Objekts auf einem Frame registriert und
+   * dient zur Überwachung des Frames, um den {@link DispatchProviderAndInterceptor}
+   * wieder freigeben zu können, wenn der Frame disposed wird (drücken auf den großen
+   * "X"-Button) bzw. wenn der Frame nicht mehr an das XTextDocument gebunden ist
+   * (z.B. beim Drücken des kleinen "X"-Buttons)
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
+   */
+  private static class DPIFrameActionListener implements XFrameActionListener
+  {
+    public void disposing(EventObject e)
+    {
+      deregisterDPI(getRegisteredDPI(UNO.XFrame(e.Source)));
+    }
+
+    public void frameAction(com.sun.star.frame.FrameActionEvent e)
+    {
+      if (e.Action == FrameAction.COMPONENT_REATTACHED)
+      {
+        DispatchProviderAndInterceptor dpi = getRegisteredDPI(UNO.XFrame(e.Source));
+        if (dpi != null && dpi.frame != null
+          && UNO.XTextDocument(dpi.frame.getController().getModel()) == null)
+        {
+          if (dpi.frameActionListener != null)
+          {
+            dpi.frame.removeFrameActionListener(dpi.frameActionListener);
+            dpi.frameActionListener = null;
+          }
+
+          Logger.debug(L.m(
+            "Deregistrierung von DocumentDispatchInterceptor #%1 aus frame #%2",
+            Integer.valueOf(dpi.hashCode()), Integer.valueOf(dpi.frame.hashCode())));
+          UNO.XDispatchProviderInterception(dpi.frame).releaseDispatchProviderInterceptor(
+            dpi);
+          dpi.frame.contextChanged();
+          deregisterDPI(dpi);
+        }
+      }
     }
   }
 
+  /**
+   * Merkt sich den übergebenen dokumentgebundenen DispatchProviderAndInterceptor in
+   * einem internen statischen Set; Der Zugriff auf dieses Set erfolgt
+   * synchronisiert. Ist dpi==null wird nichts gemacht.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
+   */
+  private static void registerDPI(DispatchProviderAndInterceptor dpi)
+  {
+    if (dpi == null) return;
+    synchronized (documentDispatchProviderAndInterceptors)
+    {
+      documentDispatchProviderAndInterceptors.add(dpi);
+    }
+  }
+
+  /**
+   * Entfernt den übergebenen dokumentgebundenen DispatchProviderAndInterceptor aus
+   * einem internen statischen Set; Der Zugriff auf dieses Set erfolgt
+   * synchronisiert. Ist dpi==null wird nichts gemacht.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
+   */
+  private static void deregisterDPI(DispatchProviderAndInterceptor dpi)
+  {
+    if (dpi == null) return;
+    synchronized (documentDispatchProviderAndInterceptors)
+    {
+      Logger.debug(L.m("Interne Freigabe des DocumentDispatchInterceptor #%1",
+        Integer.valueOf(dpi.hashCode())));
+      documentDispatchProviderAndInterceptors.remove(dpi);
+    }
+  }
+
+  /**
+   * Liefert den für frame bereits vom WollMux registrierten
+   * {@link DispatchProviderAndInterceptor} zurück, oder null, wenn der WollMux auf
+   * diesen Frame noch keinen {@link DispatchProviderAndInterceptor} registriert hat;
+   * Die Abfrage auf das interne Set der registrierten
+   * {@link DispatchProviderAndInterceptor}-Objekten ist synchronisiert.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
+   */
+  private static DispatchProviderAndInterceptor getRegisteredDPI(XFrame frame)
+  {
+    if (frame == null) return null;
+    synchronized (documentDispatchProviderAndInterceptors)
+    {
+      for (DispatchProviderAndInterceptor dpi : documentDispatchProviderAndInterceptors)
+        if (dpi.frame != null && UnoRuntime.areSame(dpi.frame, frame)) return dpi;
+    }
+    return null;
+  }
 }
