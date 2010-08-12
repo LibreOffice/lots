@@ -46,7 +46,7 @@ print " " x 1,"=" x 20, " Neu in dieser Version ", "=" x 20;
 print $page->{"Roadmap des WollMux"}->{"Zukunft"}->{"Nächste Version"}->{"Release Notes"}->{"text"};
 print $page->{"Roadmap des WollMux"}->{"Zukunft"}->{"Nächste Version"}->{"Release Notes Erweitert"}->{"text"};
 
-my $oldversions = $page->{"Vergangenheit"}->{"WollMux"};
+my $oldversions = $page->{"Roadmap des WollMux"}->{"Vergangenheit"};
 for my $version (reverse sort versionsort keys %$oldversions)
 {
   if ($version ne "text")
@@ -63,20 +63,45 @@ for my $version (reverse sort versionsort keys %$oldversions)
 sub versionsort($$)
 {
   my ($a, $b) = @_;
-  my ($a1,$a2,$a3) = ($a =~ m/[^0-9]*([0-9]+)\.([0-9]+)\.([0-9]+)/);
-  my ($b1,$b2,$b3) = ($b =~ m/[^0-9]*([0-9]+)\.([0-9]+)\.([0-9]+)/);
+  my ($a1,$a2,$a3,$a4,$a5) = ($a =~ m/[^0-9]*([0-9]+)\.([0-9]+)(\.([0-9]+))?([a-zA-Z])?/);
+  my ($b1,$b2,$b3,$b4,$b5) = ($b =~ m/[^0-9]*([0-9]+)\.([0-9]+)(\.([0-9]+))?([a-zA-Z])?/);
   if (!defined($a1))
   {
     return -1 if defined($b1);
     return 0;
   }
   return 1 if !defined($b1);
+  
+  if (!defined($a4))
+  {
+      $a4 = 0;
+  }
+  if (!defined($b4))
+  {
+      $b4 = 0;
+  }
 
   if ($a1 == $b1)
   {
     if ($a2 == $b2)
     {
-      return $a3 <=> $b3;
+      if ($a4 == $b4)
+      {
+        if (defined($a5))
+        {
+          return 1 if !defined($b5);
+          return $a5 cmp $b5;
+        }
+        else
+        {
+          return -1 if defined($b5);
+          return 0;
+        }
+      }
+      else
+      {
+        return $a3 <=> $b3;
+      }
     }
     else
     {
