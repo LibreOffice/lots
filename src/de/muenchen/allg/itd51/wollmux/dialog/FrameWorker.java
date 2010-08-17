@@ -270,7 +270,7 @@ public class FrameWorker implements Runnable
    * 
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
-  private class EventConsumer implements KeyListener, MouseInputListener
+  private static class EventConsumer implements KeyListener, MouseInputListener
   {
 
     /**
