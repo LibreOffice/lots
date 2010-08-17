@@ -2,41 +2,46 @@
 
 if [ $# != 4 ]; then
   echo 1>&2 "USAGE: makeversion <versionfile> <buildinfofile> <descriptionxmlfile> <updatexmlfile>"
-  echo 1>&2 "If <versionfile> exists and contains a version number identical to the generated"
-  echo 1>&2 "version number PLUS some other string, the other string is preserved."
-  echo 1>&2 "E.g.: If the generated version number would be '4.5.1' and <versionfile> contains"
-  echo 1>&2 "'4.5.1.2', then the newly generated version will be '4.5.1.2'."
-  echo 1>&2 "But if <versionfile> contains '1.2.3.4', the generated version will be"
-  echo 1>&2 "'4.5.1', NOT '4.5.1.4'."
+  echo 1>&2 "If <versionfile> exists and contains a version number that does not contain 'rev'"
+  echo 1>&2 "the version number from <versionfile> is used."
   exit 1
 fi
 
-date=$(LC_ALL=C svn info|grep "^Last Changed Date"|sed -n 's/.*\([0-9]\{4\}-[0-9][0-9]-[0-9][0-9]\).*/\1/p')
-rev=$(LC_ALL=C svn info|grep "^Revision"|sed -n 's/.* \([0-9]\+\).*/\1/p')
-if [ -z "$date" ]; then
-  echo 1>&2 "Getting SVN version info failed => Trying GIT"
-  date=$(git log -1 --date=short|grep ^Date:|head -n 1|sed -n 's/.*\([0-9]\{4\}-[0-9][0-9]-[0-9][0-9]\).*/\1/p')
-  rev=$(git log -1 --date=short|sed -n 's/^commit \(.*\)/\1/p'|head -n 1)
-  if [ -z "$date" ]; then
-    echo 1>&2 "Getting GIT version info failed => Trying HG"
+#date=$(LC_ALL=C svn info|grep "^Last Changed Date"|sed -n 's/.*\([0-9]\{4\}-[0-9][0-9]-[0-9][0-9]\).*/\1/p')
+#rev=$(LC_ALL=C svn info|grep "^Revision"|sed -n 's/.* \([0-9]\+\).*/\1/p')
+#if [ -z "$date" ]; then
+#  echo 1>&2 "Getting SVN version info failed => Trying GIT"
+#  date=$(git log -1 --date=short|grep ^Date:|head -n 1|sed -n 's/.*\([0-9]\{4\}-[0-9][0-9]-[0-9][0-9]\).*/\1/p')
+#  rev=$(git log -1 --date=short|sed -n 's/^commit \(.*\)/\1/p'|head -n 1)
+#  if [ -z "$date" ]; then
+#    echo 1>&2 "Getting GIT version info failed => Trying HG"
     date=$(hg log -l 1 --style=compact|head -n 1|sed -n 's/.*\([0-9]\{4\}-[0-9][0-9]-[0-9][0-9]\).*/\1/p')
-    rev=$( hg log -l 1 --style=compact|head -n 1|sed 's/^.*\( [0-9a-zA-Z]\{12,12\} \).*$/\1/')
+    rev=$( hg log -l 1 --style=compact|head -n 1|sed 's/^.*\([0-9a-zA-Z]\{12,12\}\).*$/\1/')
+    localrev=$(hg log -l 1 --style=compact|head -n 1|cut -d "[" -f 1)
     test -z "$date" && echo 1>&2 "Getting HG version info failed => Falling back to shipped version info"
-  fi
-fi
+#  fi
+#fi
 
 test -z "$date" && exit 1
 test -z "$rev" && exit 1
 
-v1=$((${date%%-*} - 2004))
+v1=$((${date%%-*} - 2000))
 v2=$(echo $date| sed 's/[^-]*-0\?\([^-]*\)-.*/\1/')
-v3=$(( $(echo ${date##*-}| sed 's/^0\?\(.*\)/\1/') / 10 ))
+#v3=$(( $(echo ${date##*-}| sed 's/^0\?\(.*\)/\1/') / 10 ))
 
-version="$v1.$v2.$v3"
+version="$v1.${v2}rev$localrev"
 
+#if [ -e "$1" ]; then
+#  dotversion=$(sed -n "s/^$version//p" "$1")
+#  version=${version}${dotversion}
+#fi
+
+# check if <versionfile> contains "rev", if not we use the version number from <versionfile>
 if [ -e "$1" ]; then
-  dotversion=$(sed -n "s/^$version//p" "$1")
-  version=${version}${dotversion}
+  head -n 1 "$1"|grep -q "rev"
+  if [ $? -ne 0 ]; then
+    version=$(head -n 1 "$1")
+  fi
 fi
 
 echo "$version" >"$1" 
