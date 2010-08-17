@@ -1381,6 +1381,8 @@ public class WollMuxFiles
     {
       try
       {
+        Class<?> c = findLoadedClass(name);
+        if (c != null) return c;
         return super.findClass(name);
       }
       catch (ClassNotFoundException x)
