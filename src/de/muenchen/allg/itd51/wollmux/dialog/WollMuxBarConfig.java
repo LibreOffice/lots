@@ -332,7 +332,7 @@ public class WollMuxBarConfig
 
   /**
    * Liefert das gewünschte Fensterverhalten der WollMuxBar, z.B.
-   * {@link  #UP_AND_AWAY_WINDOW_MODE}.
+   * {@link #UP_AND_AWAY_WINDOW_MODE}.
    */
   public int getWindowMode()
   {
@@ -420,6 +420,7 @@ public class WollMuxBarConfig
 
   private void createGUI(final JFrame parent, final ActionListener finishedAction)
   {
+    this.parent = parent;
     myDialog = new JDialog(parent, L.m("Optionen"));
     myDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     myDialog.setModal(true);
