@@ -1,74 +1,115 @@
  ==================== Neu in dieser Version ====================
 
-    * Beim Wechseln der Eingabefelder mit der Tabulatortaste in der Formular-
-      GUI wird der Formularinhalt nun gescrollt, wenn das aktuelle
-      Steuerelement nicht sichtbar ist.
-    * Im FormularMax 4000 kann jetzt ein Bereich von Elementen mit gedrückter
-      Umstelltaste (SHIFT) ausgewählt werden.
-    * Während im Dialog zum Verwalten der Persönlichen Absenderliste eine
-      Suche durchgeführt wird, ist nun in der grafischen Benutzeroberfläche
-      klar ersichtlich, dass die Suche läuft. Wenn die Suche aufgrund eines
-      Timeouts abgebrochen wird, erscheint nun ein entsprechender Hinweis.
-    * Die Strategie mit der im Dialog zur Verwaltung der Persönlichen
-      Absenderliste die als SENDER_SOURCE festgelegte Datenquelle durchsucht
-      werden soll, kann nun in der WollMux-Konfiguration im Abschnitt Dialoge/
-      PersoenlicheAbsenderliste/Suchstrategie konfiguriert werden.
-    * Für GUI-Elemente mit ID "pal" oder "suchergebnis" im Dialog_zur
-      Verwaltung_der_Persönlichen_Absenderliste und GUI-Elemente mit ID "pal"
-      im AbsenderAuswählen-Dialog existiert nun das Attribut DISPLAY, über
-      das die Darstellung der Absenderliste bzw. der Suchergebnisse
-      konfiguriert werden kann.
-    * Der WollMux öffnet jetzt nur noch eine Formular-GUI, wenn die Vorlage im
-      "Fenster"-Abschnitt ihrer Formularbeschreibung wirklich Inhalt enthält.
-      Früher konnte es in seltenen Fällen (z.B. wenn in der Vorlage
-      Spezialfelder des WollMux-Seriendrucks enthalten waren) vorkommen, dass
-      eine leere Formular-GUI geöffnet wurde.
-    * In sehr seltenen Fällen konnte es bisher bei Verwendung von
-      overrideFrag-Kommandos ohne NEW_FRAG_ID zu Abstürzen kommen. Dieses
-      Problem ist nun behoben.
-    * Wird ein Dokument durch eine externe Anwendung (z.B. WIM) unsichtbar
-      geöffnet, so erscheint keine Formular-GUI mehr. Die Formular-GUI
-      existiert jedoch unsichtbar und alle Formularfunktionen stehen für die
-      Fernsteuerung durch die externe Anwendung zur Verfügung.
-    * In einer WollMux-Formularbeschreibung kann die neue ACTION
-      "closeAndOpenExt" verwendet werden. Diese schreibt das Formular in eine
-      temporäre Datei eines beliebigen Formats (z.B. odt oder pdf), schließt
-      es ohne Benutzerrückfrage und öffnet dann die temporäre Datei mit der
-      externen Anwendung. Dies kann z.B. verwendet werden um ein Formular auf
-      Knopfdruck per E-Mail an eine vorgegebene Adresse zu versenden.
-    * Der Windows-Uninstaller des WollMux kann nun auch ausgeführt werden,
-      wenn kein OpenOffice.org auf dem System installiert ist. In diesem Fall
-      kann natürlich nicht die OpenOffice.Org-Extension deinstalliert werden,
-      aber der Uninstaller räumt alle übrigen Dateien und Registry-Einträge
-      des WollMux korrekt auf.
+    * Hinweis: Grundsätzlich sollten Sie bei einem Update auf eine neue
+      WollMux-Version immer sowohl die WollMux-Extension (.oxt) als auch die
+      WollMuxBar (WollMuxBar.jar) auf die neue Version updaten. Tun Sie dies
+      nicht, so kann es in dieser Version des WollMux zu Anzeigefehlern in der
+      Senderbox der WollMuxBar kommen!
+    * Bugfixes:
+          o Ein Problem wurde behoben, das bei der Weiterverwendung eines
+            OpenOffice.org-Fensters auftrat, in dem zuvor ein Textdokument
+            geöffnet war, das über Datei->Schließen bzw. den kleinen "X"-
+            Knopf geschlossen wurde. Wurde in diesem leeren Fenster ein neues
+            Dokument (z.B. ein Calc-Dokument) aufgemacht, so konnte dieses
+            Dokument nicht mit Datei->Drucken ausgedruckt werden.
+          o In sehr seltenen Fällen konnte es in früheren WollMux-Versionen
+            bei Verwendung von overrideFrag-Kommandos ohne NEW_FRAG_ID zu
+            Abstürzen kommen. Dieses Problem ist nun behoben.
+          o Der Windows-Uninstaller des WollMux kann nun auch ausgeführt
+            werden, wenn kein OpenOffice.org auf dem System installiert ist. In
+            diesem Fall kann natürlich nicht die OpenOffice.Org-Extension
+            (WollMux.oxt) deinstalliert werden, aber der Uninstaller räumt
+            jetzt alle übrigen Dateien und Registry-Einträge des WollMux
+            korrekt auf.
+          o Der WollMux öffnet jetzt nur noch eine Formular-GUI, wenn die
+            Vorlage im "Fenster"-Abschnitt ihrer Formularbeschreibung wirklich
+            Inhalt enthält. Früher konnte es in seltenen Fällen (z.B. wenn
+            in der Vorlage Spezialfelder des WollMux-Seriendrucks enthalten
+            waren) vorkommen, dass eine leere Formular-GUI geöffnet wurde.
+          o Ein Fehler wurde behoben, durch den Menü-Elemente mit TYPE
+            "senderbox" in der WollMuxBar nur ganz links platziert werden
+            konnten.
+          o Bei WollMux-Formularen mit einer sehr langen Formularbeschreibung
+            konnte es in älteren WollMux-Versionen aufgrund eines
+            Speicherlecks in OpenOffice.org bei längerer Arbeit mit diesen
+            Formularen zu sehr hohem Speicherverbrauch kommen, der letztlich
+            sogar zu Abstürzen führen konnte. Betroffen von diesem Problem
+            war ausschließlich OOo 3.0.1, in späteren OOo-Versionen ist das
+            Speicherleck behoben. Das OOo 3.0.1, das mit dem LiMux-Basisclient
+            2.4 und 3.0 ausgeliefert wird, war ebenfalls nicht von dem Problem
+            betroffen. Für alle anderen OOo-Versionen wurde in den WollMux ein
+            Workaround eingebaut.
+          o Behebung eines Fehlers im WollMux-Seriendruck: Spezialfelder des
+            WollMux-Seriendrucks (z.B. "Gender" oder "Wenn...Dann...Sonst...")
+            erhielten beim Drucken mit der Option "in neues Dokument schreiben"
+            (Gesamtdokument) für alle Datensätze den selben Wert. (Dieser
+            Bugfix war bereits im WollMux-Release 6.3.0b enthalten und ist hier
+            nur der Vollständigkeit halber nochmals aufgeführt)
+    * Usability-Verbesserungen:
+          o Beim Wechseln der Eingabefelder mit der Tabulatortaste in der
+            Formular-GUI wird der Formularinhalt nun weitergescrollt, wenn das
+            aktuelle Steuerelement nicht mehr sichtbar ist.
+          o Im FormularMax 4000 kann jetzt ein Bereich von mehreren Elementen
+            mit gedrückter Umstelltaste (SHIFT) ausgewählt werden.
+          o Während im Dialog zum Verwalten der Persönlichen Absenderliste
+            eine Suche durchgeführt wird, ist nun in der grafischen
+            Benutzeroberfläche klar ersichtlich, dass die Suche läuft. Wenn
+            die Suche aufgrund eines Timeouts abgebrochen wird, erscheint jetzt
+            ein entsprechender Hinweis.
+    * WollMux-Seriendruck:
+          o Der Seriendruck kann jetzt auch in ein PDF-Gesamtdokument drucken.
+            Dies ist deutlich schneller als der bisherige Druck in ein
+            Gesamtdokument. Voraussetzung ist die Installation des Plugins mit
+            der entsprechenden Druckfunktion aus der WollMux-
+            Standardkonfiguration (enthalten ab Standardkonfig-Release 10.8;
+            kann manuell in alte Konfigurationen nachinstalliert werden).
     * WollMuxBar:
-          o In der WollMuxBar steht eine neue ACTION "menuManager" zur
-            Verfügung. Diese ruft ein interaktives Tool zur Bearbeitung der
-            WollMuxBar-Menüstruktur auf.
-          o Die WollMuxBar hat einen neuen Kommandozeilenschalter --mm. Dieser
-            ruft direkt den Menü-Manager auf. Dies ist nützlich zum
-            Bootstrappen wenn es noch kein Menü gibt oder auch wenn der Menü-
-            Manager nicht im WollMuxBar-Menü vorhanden ist.
+          o Die WollMuxBar unterstützt ein neues Menü-Element mit TYPE
+            "searchbox". Mit diesem Menü-Element kann die neue Suchfunktion
+            der WollMuxBar aktiviert werden.
           o In der WollMuxBar steht eine neue ACTION "options" zur Verfügung.
-            Diese ruft den Options-Dialog auf. Dort lassen sich alle möglichen
-            Einstellungen des WollMuxBar-Fenster-Abschnitts konfigurieren.
-          o Die WollMuxBar erlaubt die Einrichtung verschiedener Menü-Gruppen,
-            die über den Optionen-Dialog an- oder abgewählt werden können
-            und die zugehörigen Buttons/Vorlagen/Menüs ein- oder ausblenden.
-          o In den Konfigurations-Abschnitten Symbolleisten/Briefkopfleiste,
-            Menueleiste und Menues können alle Elemente vom TYPE "button" mit
+            Diese ruft den Optionen-Dialog auf. Dort lassen sich alle
+            möglichen Einstellungen des WollMuxBar-Fenster-Abschnitts
+            konfigurieren.
+          o Die WollMuxBar erlaubt jetzt die Einrichtung verschiedener Menü-
+            Gruppen, die über den Optionen-Dialog an- oder abgewählt werden
+            können und die zugehörigen Buttons/Vorlagen/Menüs ein- oder
+            ausblenden. Die Zuordnung von Elementen zu Menü-Gruppen geschieht
+            über das neue Attribut_CONF_ID, das Einrichten der Menü-Gruppen
+            muss im Abschnitt_WollMuxBarKonfigurationen der WollMux-
+            Konfiguration vorgenommen werden.
+          o In den Konfigurations-Abschnitten_Symbolleisten/Briefkopfleiste,
+            Menueleiste_und_Menues können alle Elemente vom TYPE "button" mit
             ACTION "openExt" im zugehörigen Attribut URL die Variable "$
             {user.home} verwenden. Sie wird ersetzt durch die "file:" URL des
             Benutzerverzeichnisses.
           o Die Darstellung der Absender in der Senderbox kann nun über das
             Setzen von SENDER_DISPLAYTEMPLATE in der WollMux-Konfiguration
             angepasst werden.
-          o Die WollMuxBar unterstützt ein neues Menü-Element mit TYPE
-            "searchbox". Mit diesem Menü-Element kann die neue Suchfunktion
-            der WollMuxBar aktiviert werden.
-          o Ein Fehler wurde behoben, durch den Menü-Elemente mit TYPE
-            "senderbox" in der WollMuxBar nur ganz links platziert werden
-            konnten.
+    * Allgemeine Verbesserungen:
+          o Die Strategie mit der im Dialog zur Verwaltung der Persönlichen
+            Absenderliste die als SENDER_SOURCE festgelegte Datenquelle
+            durchsucht werden soll, kann nun in der WollMux-Konfiguration im
+            Abschnitt Dialoge/PersoenlicheAbsenderliste/Suchstrategie
+            konfiguriert werden.
+          o Für GUI-Elemente mit ID "pal" oder "suchergebnis" im Dialog_zur
+            Verwaltung_der_Persönlichen_Absenderliste und GUI-Elemente mit ID
+            "pal" im AbsenderAuswählen-Dialog existiert nun das Attribut
+            DISPLAY, über das die Darstellung der Absenderliste bzw. der
+            Suchergebnisse konfiguriert werden kann.
+          o Wird ein Dokument durch eine externe Anwendung (z.B. WIM)
+            unsichtbar geöffnet, so erscheint keine Formular-GUI mehr. Die
+            Formular-GUI existiert jedoch unsichtbar und alle
+            Formularfunktionen stehen für die Fernsteuerung durch die externe
+            Anwendung zur Verfügung.
+          o In einer WollMux-Formularbeschreibung können die neuen ACTIONs
+            "closeAndOpenExt" und "saveTempAndOpenExt" verwendet werden. Diese
+            schreiben das Formular in eine temporäre Datei eines beliebigen
+            Formats (z.B. odt oder pdf), schließen es ohne Benutzerrückfrage
+            (nur im Falle von "closeAndOpenExt") und öffnen dann die
+            temporäre Datei mit der externen Anwendung.
+          o Die Zeitangaben in den Logausgaben der wollmux.log sind nun
+            sekundengenau.
 
     * Das Interface XPALProvider hat sich dementsprechend verändert, dass die
       String-Repräsentationen von Absendern, die von den Methoden
@@ -104,17 +145,17 @@
       Hidden=false/")
       Die Parameter sind optional und ihre Reihenfolge ist beliebig.
       Für MacroExecutionMode stehen folgende Konstanten zur Verfügung
- # NEVER_EXECUTE = 0;
- # FROM_LIST = 1;
- # ALWAYS_EXECUTE = 2;
- # USE_CONFIG = 3;
- # ALWAYS_EXECUTE_NO_WARN = 4;
- # USE_CONFIG_REJECT_CONFIRMATION = 5;
- # USE_CONFIG_APPROVE_CONFIRMATION = 6;
- # FROM_LIST_NO_WARN = 7;
- # FROM_LIST_AND_SIGNED_WARN = 8;
- # FROM_LIST_AND_SIGNED_NO_WARN = 9;
-Näheres siehe in der IDL-Doku_zu_loadComponentFromURL.
+      (näheres siehe in der IDL-Doku_zu_loadComponentFromURL):
+      # NEVER_EXECUTE = 0;
+      # FROM_LIST = 1;
+      # ALWAYS_EXECUTE = 2;
+      # USE_CONFIG = 3;
+      # ALWAYS_EXECUTE_NO_WARN = 4;
+      # USE_CONFIG_REJECT_CONFIRMATION = 5;
+      # USE_CONFIG_APPROVE_CONFIRMATION = 6;
+      # FROM_LIST_NO_WARN = 7;
+      # FROM_LIST_AND_SIGNED_WARN = 8;
+      # FROM_LIST_AND_SIGNED_NO_WARN = 9;
     * Im Konfigurations-Abschnitt ExterneAnwendungen kann bei der Deklaration
       einer externen Anwendung das zusätzliche Attribut_FILTER angegeben
       werden. Es bezeichnet den zu verwendenden Export-Filter, wenn der WollMux
@@ -127,6 +168,34 @@ Näheres siehe in der IDL-Doku_zu_loadComponentFromURL.
       oor:name= steht. Es ist darauf zu achten, dass in der darauffolgenden
       Flags-Zeile das Wort "EXPORT" steht, sonst kann der Filter nicht zum
       Speichern verwendet werden.
+
+
+ ==================== Neu in Version 6.3.0b ====================
+
+    * Behebung eines Fehlers im WollMux-Seriendruck: Spezialfelder des WollMux-
+      Seriendrucks (z.B. "Gender" oder "Wenn...Dann...Sonst...") erhielten beim
+      Drucken mit der Option "in neues Dokument schreiben" (Gesamtdokument)
+      für alle Datensätze den selben Wert.
+
+
+
+ ==================== Neu in Version 6.3.0a ====================
+
+    * Betrifft nur Windows: Schwebt der Mauszeiger über einer Symbolleiste von
+      OpenOffice.org Writer während die Fenstergröße geändert wird, so
+      friert OpenOffice.org manchmal vollständig ein. Da bei jedem WollMux-
+      Formular die Fenstergröße geändert wird, um die WollMux-FormularGUI
+      und das Writer-Fenster nebeneinander anzuordnen, ist das Auftreten des
+      Problems sehr wahrscheinlich. Da die WollMux-FormularGUI weiterhin
+      bearbeitet werden kann, bemerkt der Benutzer das Problem oft erst
+      später, was dazu führt, dass Benutzer über Abstürze in ganz
+      verschiedenen Situationen klagen.
+      Der WollMux enthält folgenden Worakround für dieses Problem: Um die
+      Wahrscheinlichkeit eines Einfrierens zu minimieren, wird der Mauszeiger
+      beim Öffnen eines Dokuments über die WollMux-Bar an den oberen
+      Bildschirmrand verschoben. Damit der Workaround wirksam ist, darf der
+      Anwender den Mauszeiger solange nicht verschieben, bis das Dokument
+      vollständig aufgebaut ist.
 
 
  ==================== Neu in Version 6.3.0 ====================
