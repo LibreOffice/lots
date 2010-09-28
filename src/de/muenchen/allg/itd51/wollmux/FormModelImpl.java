@@ -39,9 +39,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
+import com.sun.star.frame.XFrame;
+
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
@@ -514,6 +517,11 @@ public class FormModelImpl
         new FormGUI(formFensterConf, formConf, this, new HashMap<String, String>(),
           functionContext, funcLib, dialogLib, true);
     }
+
+    public String getWindowTitle()
+    {
+      return null;
+    }
   }
 
   /**
@@ -847,6 +855,21 @@ public class FormModelImpl
       formGUI =
         new FormGUI(formFensterConf, formConf, this, idToPresetValue,
           functionContext, funcLib, dialogLib, visible);
+    }
+
+    public String getWindowTitle()
+    {
+      try
+      {
+        XFrame frame = UNO.XModel(doc.doc).getCurrentController().getFrame();
+        String frameTitle = (String) UNO.getProperty(frame, "Title");
+        frameTitle = MailMergeDatasource.stripOpenOfficeFromWindowName(frameTitle);
+        return frameTitle;
+      }
+      catch (Exception x)
+      {
+        return null;
+      }
     }
   }
 }

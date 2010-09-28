@@ -121,9 +121,14 @@ public class FormGUI
   private WindowPosSizeSetter windowPosSizeSetter = new WindowPosSizeSetter();
 
   /**
-   * Der Titel des Formularfensters (falls nicht anderweitig spezifiziert).
+   * Der Titel des Formulars (falls nicht anderweitig spezifiziert).
    */
   private String formTitle = L.m("Unbenanntes Formular");
+
+  /**
+   * Der Titel des FormularGUI-Fensters (falls nicht anderweitig spezifiziert).
+   */
+  private String formGUITitle = formTitle;
 
   /**
    * Gibt die Lage und Größe des Fensters der FormGUI an, so wie sie von
@@ -151,6 +156,11 @@ public class FormGUI
    * Der {@link FormController} dieser FormGUI.
    */
   private FormController formController;
+
+  /**
+   * Der Titel des FormModels, hier gespeichert, um Veränderungen zu bemerken.
+   */
+  private String frameTitle;
 
   /**
    * Zeigt eine neue Formular-GUI an.
@@ -193,6 +203,14 @@ public class FormGUI
     catch (Exception x)
     {}
 
+    try
+    {
+      frameTitle = doc.getWindowTitle();
+      if (frameTitle != null) formGUITitle = frameTitle + " - " + formTitle;
+    }
+    catch (Exception x)
+    {}
+
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try
     {
@@ -231,7 +249,7 @@ public class FormGUI
     Common.setLookAndFeelOnce();
 
     // Create and set up the window.
-    myFrame = new JFrame(formTitle);
+    myFrame = new JFrame(formGUITitle);
     // leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     MyWindowListener oehrchen = new MyWindowListener();
@@ -524,7 +542,25 @@ public class FormGUI
     {}
 
     public void windowActivated(WindowEvent e)
-    {}
+    {
+      updateTitle();
+    }
+
+    private void updateTitle()
+    {
+      try
+      {
+        String frameTitle2 = myDoc.getWindowTitle();
+        if (frameTitle2 != frameTitle)
+        {
+          frameTitle = frameTitle2;
+          formGUITitle = frameTitle + " - " + formTitle;
+          myFrame.setTitle(formGUITitle);
+        }
+      }
+      catch (Exception x)
+      {}
+    }
 
     public void windowClosed(WindowEvent e)
     {}
@@ -720,6 +756,11 @@ public class FormGUI
     public void saveTempAndOpenExt(String ext)
     {
       Logger.log("saveTempAndOpenExt(" + ext + ")");
+    }
+
+    public String getWindowTitle()
+    {
+      return "Fenstertitte";
     }
   }
 

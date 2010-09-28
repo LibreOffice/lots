@@ -238,4 +238,10 @@ public interface FormModel
    * zurücksetzen des modified-Status des Dokuments durchgeführt werden sollen.
    */
   public void formControllerInitCompleted();
+
+  /**
+   * Liefert den Titel des zum FormModel gehörenden Fensters oder null, falls kein
+   * Titel bekannt oder nicht anwendbar (z.B. Multi-Form).
+   */
+  public String getWindowTitle();
 }

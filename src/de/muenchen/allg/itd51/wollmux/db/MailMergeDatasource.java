@@ -149,8 +149,8 @@ public class MailMergeDatasource
   /**
    * Wenn {@link #sourceType} == {@link #SOURCE_CALC} und das Calc-Dokument derzeit
    * offen ist, dann ist diese Variable != null. Falls das Dokument nicht offen ist,
-   * so ist seine URL in {@link #calcUrl} zu finden. Die Kombination calcDoc == null &&
-   * calcUrl == null && sourceType == SOURCE_CALC ist unzulässig.
+   * so ist seine URL in {@link #calcUrl} zu finden. Die Kombination calcDoc == null
+   * && calcUrl == null && sourceType == SOURCE_CALC ist unzulässig.
    */
   private XSpreadsheetDocument calcDoc = null;
 
@@ -487,7 +487,7 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD-5.1)
    * 
-   * TESTED
+   *         TESTED
    */
   public void toFront()
   {
@@ -675,7 +675,7 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
    * 
-   * TESTED
+   *         TESTED
    */
   private int getDbNumberOfDatasets()
   {
@@ -769,7 +769,7 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
    * 
-   * TESTED
+   *         TESTED
    */
   private int getNumberOfDatasets(XSpreadsheetDocument calcDoc, String tableName)
   {
@@ -871,7 +871,7 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * 
-   * TESTED
+   *         TESTED
    */
   private List<String> getDbValuesForDataset(Datasource oooDatasource, int rowIndex)
   {
@@ -1017,7 +1017,7 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * 
-   * TESTED
+   *         TESTED
    */
   private QueryResultsWithSchema getDbData(Datasource oooDatasource)
       throws Exception
@@ -1111,7 +1111,7 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private List<String> getRegisteredDatabaseNames()
   {
@@ -1412,7 +1412,8 @@ public class MailMergeDatasource
 
   }
 
-  private static String stripOpenOfficeFromWindowName(String str)
+  // FIXME: Refaktorisieren an sinnvolle Stelle, am besten in UNOHelper
+  public static String stripOpenOfficeFromWindowName(String str)
   {
     /*
      * Sonderfall für OpenOffice
@@ -1649,7 +1650,7 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private void getOOoDatasource(String newDsName)
   {
@@ -1682,7 +1683,7 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private static String getCalcColumnNameForColumnIndex(int col)
   {
@@ -1704,7 +1705,7 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   public void addColumns(Map<String, FieldSubstitution> mapIdToSubstitution)
   {
@@ -1877,7 +1878,7 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * 
-   * TESTED
+   *         TESTED
    */
   private List<String> getDbTableNames()
   {
@@ -1908,8 +1909,8 @@ public class MailMergeDatasource
   }
 
   /**
-   * Liefert die Namen aller nicht-leeren Tabellenblätter von calcDoc. Falls calcDoc ==
-   * null wird eine leere Liste geliefert. Falls alle Tabellen leer sind, wird
+   * Liefert die Namen aller nicht-leeren Tabellenblätter von calcDoc. Falls calcDoc
+   * == null wird eine leere Liste geliefert. Falls alle Tabellen leer sind, wird
    * trotzdem eine Liste mit dem Namen der ersten Tabelle zurückgeliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
