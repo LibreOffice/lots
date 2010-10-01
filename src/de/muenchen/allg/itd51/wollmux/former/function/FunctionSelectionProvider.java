@@ -23,6 +23,7 @@
  * -------------------------------------------------------------------
  * 25.09.2006 | BNK | Erstellung
  * 16.11.2006 | BNK | null funclib unterstützt
+ * 01.10.2010 | ERT | fehlende null-Prüfung in getFunctionSelection
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -198,7 +199,8 @@ public class FunctionSelectionProvider
         }
         catch (NodeNotFoundException x)
         {
-          // Kann nicht passieren, weil childConf.count() getestet wurde. Ist nur hier
+          // Kann nicht passieren, weil childConf.count() getestet wurde. Ist nur
+          // hier
           // um Compiler-Warnungen und findBugs zu besänftigen
           throw new RuntimeException(x);
         }
@@ -227,7 +229,10 @@ public class FunctionSelectionProvider
 
     if (funcName == null) return funcSel;
 
-    Function func = funcLib.get(funcName);
+    Function func = null;
+
+    if (funcLib != null) func = funcLib.get(funcName);
+
     if (func != null)
     {
       funcSel.setFunction(funcName, func.parameters());
