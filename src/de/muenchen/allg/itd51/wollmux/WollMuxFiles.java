@@ -42,6 +42,7 @@
  *                  | andere Strategie für Suche nach wollmux.conf in setupWollMuxDir()
  *                  | Verzeichnis der wollmux.conf als Default für DEFAULT_CONTEXT
  * 12.01.2010 | BED | dumpInfo() gibt nun auch JVM Heap Size + verwendeten Speicher aus
+ * 07.10.2010 | ERT | dumpInfo() erweitert um No. of Processors, Physical Memory und Swap Size
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -61,6 +62,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -80,6 +82,7 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import com.sun.management.OperatingSystemMXBean;
 import com.sun.star.beans.Property;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.lib.loader.WollMuxRegistryAccess;
@@ -228,15 +231,15 @@ public class WollMuxFiles
    * <li>unter dem Dateipfad (inkl. Dateiname!), der im Registrierungswert
    * "ConfigPath" des Schlüssels HKCU\Software\WollMux\ festgelegt ist (nur Windows!)
    * </li>
-   * <li>$HOME/.wollmux/wollmux.conf (wobei $HOME unter Windows das
-   * Profilverzeichnis bezeichnet)</li>
+   * <li>$HOME/.wollmux/wollmux.conf (wobei $HOME unter Windows das Profilverzeichnis
+   * bezeichnet)</li>
    * <li>unter dem Dateipfad (inkl. Dateiname!), der im Registrierungswert
    * "ConfigPath" des Schlüssels HKLM\Software\WollMux\ festgelegt ist (nur Windows!)
    * </li>
    * <li>unter dem Dateipfad, der in der Konstanten
    * {@link #C_PROGRAMME_WOLLMUX_WOLLMUX_CONF} festgelegt ist (nur Windows!)</li>
-   * <li>unter dem Dateipfad, der in der Konstanten
-   * {@link #ETC_WOLLMUX_WOLLMUX_CONF} festgelegt ist (nur Linux!)</li>
+   * <li>unter dem Dateipfad, der in der Konstanten {@link #ETC_WOLLMUX_WOLLMUX_CONF}
+   * festgelegt ist (nur Linux!)</li>
    * </ol>
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1059,10 +1062,21 @@ public class WollMuxFiles
       long maxMemory = Runtime.getRuntime().maxMemory();
       long totalMemory = Runtime.getRuntime().totalMemory();
       long freeMemory = Runtime.getRuntime().freeMemory();
+      OperatingSystemMXBean osmb =
+        (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+      out.write("No. of Processors: " + osmb.getAvailableProcessors() + "\n");
       out.write("Maximum Heap Size: " + (maxMemory / 1024) + " KB\n");
       out.write("Currently Allocated Heap Size: " + (totalMemory / 1024) + " KB\n");
       out.write("Currently Used Memory: " + ((totalMemory - freeMemory) / 1024)
         + " KB\n");
+      out.write("Maximum Physical Memory: "
+        + (osmb.getTotalPhysicalMemorySize() / 1024) + " KB\n");
+      out.write("Free Physical Memory: " + (osmb.getFreePhysicalMemorySize() / 1024)
+        + " KB\n");
+      out.write("Maximum Swap Size: " + (osmb.getTotalSwapSpaceSize() / 1024)
+        + " KB\n");
+      out.write("Free Swap Size: " + (osmb.getFreeSwapSpaceSize() / 1024) + " KB\n");
+
       out.write("===================== END java-memoryinfo ==================\n");
 
       out.write("===================== START wollmuxConfFile ==================\n");
