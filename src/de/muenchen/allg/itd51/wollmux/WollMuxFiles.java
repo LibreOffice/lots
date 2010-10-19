@@ -43,6 +43,7 @@
  *                  | Verzeichnis der wollmux.conf als Default für DEFAULT_CONTEXT
  * 12.01.2010 | BED | dumpInfo() gibt nun auch JVM Heap Size + verwendeten Speicher aus
  * 07.10.2010 | ERT | dumpInfo() erweitert um No. of Processors, Physical Memory und Swap Size
+ * 19.10.2010 | ERT | dumpInfo() erweitert um IP-Adresse und OOo-Version
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
