@@ -989,6 +989,19 @@ public class WollMuxFiles
       out.write(WollMuxSingleton.getInstance().getBuildInfo() + "\n");
       StringBuilder buffy = new StringBuilder();
 
+      // IP-Adresse für localhost
+      try
+      {
+        InetAddress addr = InetAddress.getLocalHost();
+        out.write("Host: " + addr.getHostName() + " (" + addr.getHostAddress()
+          + ")\n");
+      }
+      catch (UnknownHostException ex)
+      {
+        Logger.error(ex);
+        buffy.append("------");
+      }
+
       /*
        * IP-Adressen bestimmen
        */
@@ -1105,6 +1118,8 @@ public class WollMuxFiles
       out.write("===================== END wollmux.log ==================\n");
 
       out.write("===================== START OOo-Configuration dump ==================\n");
+      out.write(dumpOOoConfiguration("/org.openoffice.Setup/Product") + "\n");
+      out.write(dumpOOoConfiguration("/org.openoffice.Setup/L10N") + "\n");
       out.write(dumpOOoConfiguration("/org.openoffice.Office.Paths/") + "\n");
       out.write(dumpOOoConfiguration("/org.openoffice.Office.Writer/") + "\n");
       out.write(dumpOOoConfiguration("/org.openoffice.Inet/") + "\n");
