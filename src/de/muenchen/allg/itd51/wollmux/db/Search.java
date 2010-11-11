@@ -22,6 +22,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 18.03.2010 | BED | Erstellung
+ * 11.11.2010 | BED | Leerstring als Sucheingabe wieder möglich
  * -------------------------------------------------------------------
  *
  * @author Daniel Benkmann (D-III-ITD-D101)
@@ -81,8 +82,7 @@ public class Search
       SearchStrategy searchStrategy, DatasourceJoiner dj, boolean useDjMainDatasource)
       throws TimeoutException, IllegalArgumentException
   {
-    if (queryString == null || queryString.length() == 0 || searchStrategy == null
-      || dj == null) return null;
+    if (queryString == null || searchStrategy == null || dj == null) return null;
 
     List<Query> queries = parseQuery(searchStrategy, queryString);
 
