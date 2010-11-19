@@ -216,7 +216,7 @@ public class FunctionFactory
    *           falls conf keine korrekte Funktionsbeschreibung ist oder die Funktion
    *           einen context benötigt aber null übergeben wurde.
    * 
-   * TESTED
+   *           TESTED
    */
   public static Function parse(ConfigThingy conf, FunctionLibrary funcLib,
       DialogLibrary dialogLib, Map<Object, Object> context)
@@ -249,6 +249,10 @@ public class FunctionFactory
     else if (name.equals("REPLACE"))
     {
       return parseREPLACE(conf, funcLib, dialogLib, context);
+    }
+    else if (name.equals("SPLIT"))
+    {
+      return parseSPLIT(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("IF"))
     {
@@ -476,7 +480,8 @@ public class FunctionFactory
     { // oben wurde überprüft, dass es genau einen Knoten gibt, der nicht ELSE oder
       // THEN ist
       condition = iter.next();
-    } while (condition.getName().equals("THEN") || condition.getName().equals("ELSE"));
+    } while (condition.getName().equals("THEN")
+      || condition.getName().equals("ELSE"));
 
     Function ifFun = parse(condition, funcLib, dialogLib, context);
     Function thenFun = parseChildren(thenConf, funcLib, dialogLib, context);
@@ -516,6 +521,52 @@ public class FunctionFactory
     return new ReplaceFunction(strFun, p, repFun);
   }
 
+  private static Function parseSPLIT(ConfigThingy conf, FunctionLibrary funcLib,
+      DialogLibrary dialogLib, Map<Object, Object> context)
+      throws ConfigurationErrorException
+  {
+    if (conf.count() != 3)
+      throw new ConfigurationErrorException(L.m(
+        "Funktion vom Typ \"SPLIT\" erfordert genau 3 Parameter, nicht %1",
+        conf.count()));
+
+    Function strFun;
+    Function reFun;
+    int idx;
+
+    Iterator<ConfigThingy> iter = conf.iterator();
+    strFun = parse(iter.next(), funcLib, dialogLib, context);
+    reFun = parse(iter.next(), funcLib, dialogLib, context);
+
+    idx = -1;
+    try
+    {
+      ConfigThingy idxConf = iter.next();
+      if (idxConf.count() == 0)
+      {
+        idx = Integer.parseInt(idxConf.toString());
+      }
+    }
+    catch (Exception x)
+    {}
+    if (idx < 0)
+      throw new ConfigurationErrorException(L.m(
+        "Index-Argument von %1 muss \"<NichtNegativeGanzeZahl>\" sein",
+        conf.getName()));
+
+    String regex = reFun.getString(noValues);
+    Pattern p;
+    try
+    {
+      p = Pattern.compile(regex);
+    }
+    catch (PatternSyntaxException x)
+    {
+      throw new ConfigurationErrorException(L.m("Fehler in regex \"%1\"", regex), x);
+    }
+    return new SplitFunction(strFun, p, idx);
+  }
+
   private static Function parseMATCH(ConfigThingy conf, FunctionLibrary funcLib,
       DialogLibrary dialogLib, Map<Object, Object> context)
       throws ConfigurationErrorException
@@ -535,8 +586,10 @@ public class FunctionFactory
     }
     catch (NodeNotFoundException x)
     {
-      /* Kann nicht sein, weil count() getestet wurde. Statement ist nur hier,
-       * um Warnungen des Compilers und von findBugs zu besänftigen. */
+      /*
+       * Kann nicht sein, weil count() getestet wurde. Statement ist nur hier, um
+       * Warnungen des Compilers und von findBugs zu besänftigen.
+       */
       throw new RuntimeException(x);
     }
 
@@ -569,8 +622,10 @@ public class FunctionFactory
     }
     catch (NodeNotFoundException e)
     {
-      /* Kann nicht sein, weil count() getestet wurde. Statement ist nur hier,
-       * um Warnungen des Compilers und von findBugs zu besänftigen. */
+      /*
+       * Kann nicht sein, weil count() getestet wurde. Statement ist nur hier, um
+       * Warnungen des Compilers und von findBugs zu besänftigen.
+       */
       throw new RuntimeException(e);
     }
 
@@ -1116,6 +1171,49 @@ public class FunctionFactory
     {
       input.getFunctionDialogReferences(set);
       replace.getFunctionDialogReferences(set);
+    }
+
+    public boolean getBoolean(Values parameters)
+    {
+      return getString(parameters).equalsIgnoreCase("true");
+    }
+  }
+
+  private static class SplitFunction implements Function
+  {
+    private String regex;
+
+    private Function input;
+
+    private int index;
+
+    private String[] params;
+
+    public SplitFunction(Function input, Pattern p, int idx)
+    {
+      this.regex = p.toString();
+      this.input = input;
+      this.index = idx;
+      this.params = input.parameters();
+    }
+
+    public String getString(Values parameters)
+    {
+      String str = input.getString(parameters);
+      if (str == Function.ERROR) return Function.ERROR;
+      String[] a = str.split(regex);
+      if (index < 0 || index >= a.length) return "";
+      return a[index];
+    }
+
+    public String[] parameters()
+    {
+      return params;
+    }
+
+    public void getFunctionDialogReferences(Collection<String> set)
+    {
+      input.getFunctionDialogReferences(set);
     }
 
     public boolean getBoolean(Values parameters)
@@ -2322,6 +2420,36 @@ public class FunctionFactory
       values);
 
     funcStr = "AND()";
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
+    printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
+      values);
+
+    funcStr = "SPLIT('a##b#c', '#+', '0')";
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
+    printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
+      values);
+
+    funcStr = "SPLIT('a##b#c', '#+', '1')";
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
+    printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
+      values);
+
+    funcStr = "SPLIT('a##b#c', '#+', '2')";
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
+    printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
+      values);
+
+    funcStr = "SPLIT('a##b#c', '#+', '3')";
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
+    printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
+      values);
+
+    funcStr = "SPLIT('a#b#c', '#+', '4')";
     funcThingy =
       new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),

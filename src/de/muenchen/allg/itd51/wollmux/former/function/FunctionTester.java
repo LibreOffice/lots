@@ -311,6 +311,8 @@ public class FunctionTester
     functionInsertPanel.add(makeCodeInsertionButton("MATCH", "MATCH(String, RegEx)"));
     functionInsertPanel.add(makeCodeInsertionButton("REPLACE",
       "REPLACE(String, \"RegEx\", \"RepStr\")"));
+    functionInsertPanel.add(makeCodeInsertionButton("SPLIT",
+      "SPLIT(String, \"RegEx\", Zahl)"));
     functionInsertPanel.add(makeCodeInsertionButton("CAT",
       "CAT(String1, String2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("FORMAT",
