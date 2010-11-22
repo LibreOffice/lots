@@ -51,30 +51,13 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 
 *****************************************************************-->
 
-<!-- You will probably have to change the following paths to match your system -->
-
-	        <!-- Directory containing types.rdb -->
-	<property name="OOO_TYPES_DIR" value="/opt/openoffice.org/program" />
-
-	        <!-- Directory containing offapi.rdb (OOo 3.x only, ignore for 2.x) -->
-        <property name="OOO_OFFAPI_DIR" value="/opt/openoffice.org3/basis-link/program" />
-
-	        <!-- Directory containing juh.jar, jurt.jar and ridl.jar -->
-	<property name="OOOCLS1" value="/opt/openoffice.org/program/classes" />
-
-	        <!-- Directory containing unoil.jar --> 
-	<property name="OOOCLS2" value="/opt/openoffice.org/program/classes" />
-
-	        <!-- Directory containing subdirectories idl/ and classes/ -->
-	<property name="OOO_SDK" value="/opt/openoffice.org_sdk" />
-	
-<!--	The following would be typical settings for a Windows system -->
-<!--	<property name="OOO_URE_DIR" value="C:\Program Files\OpenOffice.org 3\URE"/>
-	<property name="OOO_TYPES_DIR" value="${OOO_URE_DIR}\misc" />
-	<property name="OOO_OFFAPI_DIR" value="C:\Program Files\OpenOffice.org 3\Basis\program" />
-	<property name="OOOCLS1" value="${OOO_URE_DIR}\java" />
-	<property name="OOOCLS2" value="${OOO_OFFAPI_DIR}\classes" />
-	<property name="OOO_SDK" value="C:\Program Files\OpenOffice.org 3\Basis\sdk" /> -->
+	<condition property="os.family" value="unix">  
+		<os family="unix"/>  
+	</condition>  
+	<condition property="os.family" value="windows">  
+		<os family="windows"/>  
+	</condition>  
+	<property file="${os.family}.properties"/>  
 
 
 <!-- If you follow the INSTALL instructions exactly, you won't have to change this path --> 	
@@ -226,6 +209,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	
 	<!-- Das Target compileidl erzeugt das rdb-file und die java-Interfaces -->
 	<target name="compileidl">
+		<echo message="Types dir: ${OOO_TYPES_DIR}"/>
 		<echo level="info">idlc: Creating .urd files</echo>
 		<apply executable="idlc" dest="${MY_IDL}">
 			<arg value="-C" />
