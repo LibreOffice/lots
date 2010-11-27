@@ -185,16 +185,34 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		<delete dir="${PACKAGE_DIR}/deb" />
 	</target>
 	
-	<target name="makeversion" unless="isWindows">
-		<exec executable="bash" failifexecutionfails="false">
-			<arg line="misc/makeversion ${VERSION_FILE} ${BUILD_INFO_FILE} ${DESCRIPTION_XML} ${UPDATE_XML}"/>
-		</exec>		
+	<target name="makeversion" depends="makeversion_unix, makeversion_windows">
 		<loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true">
 			<filterchain>
 				<striplinebreaks/>
 			</filterchain>
 		</loadfile>
 		<echo message="WollMux-Version is ${VERSION}" />
+	</target>
+	
+	<target name="makeversion_unix" unless="isWindows">
+		<exec executable="bash" failifexecutionfails="false">
+			<arg file="${MISC}/makeversion"/>
+			<arg file="${VERSION_FILE}"/>
+			<arg file="${BUILD_INFO_FILE}"/>
+			<arg file="${DESCRIPTION_XML}"/>
+			<arg file="${UPDATE_XML}"/>
+		</exec>
+	</target>
+	
+	<target name="makeversion_windows" if="isWindows">
+		<exec executable="cmd" failifexecutionfails="false">
+			<arg value="/c"/>
+			<arg file="${MISC}/makeversion.bat"/>
+			<arg file="${VERSION_FILE}"/>
+			<arg file="${BUILD_INFO_FILE}"/>
+			<arg file="${DESCRIPTION_XML}"/>
+			<arg file="${UPDATE_XML}"/>
+		</exec>
 	</target>
 	
 	<available file="debian/rules" property="debian.native" />
