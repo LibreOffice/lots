@@ -350,6 +350,13 @@ public class TextDocumentModel
   private boolean haveUpdatedLastTouchedByVersionInfo = false;
 
   /**
+   * Wird ausschließlich im Konstruktor gesetzt und gibt an, ob das Dokument bereits
+   * beim Öffnen (also vor der Bearbeitung durch den WollMux) Merkmale eines
+   * WollMux-Formulardokuments enthielt.
+   */
+  private boolean alreadyTouchedAsFormDocument;
+
+  /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie direkt
    * aufgerufen werden, da neue TextDocumentModels über das WollMuxSingleton (siehe
    * WollMuxSingleton.getTextDocumentModel()) erzeugt und verwaltet werden.
@@ -382,6 +389,8 @@ public class TextDocumentModel
 
     // Auslesen der Persistenten Daten:
     this.persistentData = new PersistentData(doc);
+    String setTypeData = persistentData.getData(DATA_ID_SETTYPE);
+    alreadyTouchedAsFormDocument = "formDocument".equals(setTypeData);
     parsePrintFunctions(persistentData.getData(DATA_ID_PRINTFUNCTION));
     parseFormValues(persistentData.getData(DATA_ID_FORMULARWERTE));
     lastTouchedByWollMuxVersion =
@@ -394,7 +403,7 @@ public class TextDocumentModel
     // Type auswerten
     this.isTemplate = !hasURL();
     this.isFormDocument = false;
-    setType(persistentData.getData(DATA_ID_SETTYPE));
+    setType(setTypeData);
 
     /**
      * Dispatch Handler in eigenem Event registrieren, da es Deadlocks gegeben hat.
@@ -719,6 +728,33 @@ public class TextDocumentModel
   {
     HashMap<String, String> idToPresetValue = new HashMap<String, String>();
     Set<String> ids = new HashSet<String>(formFieldValues.keySet());
+
+    // Workaround für #5031 (Sammelticket für Datenverlust aufgrund eines leeren oder
+    // nicht existierenden WollMuxFormularwerte-Abschnitts).
+    if (Workarounds.applyWorkaroundForTracTicket5031(
+      persistentData.getData(DATA_ID_FORMULARWERTE), alreadyTouchedAsFormDocument))
+    {
+      WollMuxSingleton.showInfoModal(
+        L.m("WollMux-Warnung"),
+        L.m("Der WollMux kann die Formulareingaben der FormGUI nicht finden. "
+          + "Vermutlich ist das Dokument in einem früheren Bearbeitungsvorgang "
+          + "beschädigt worden.\n\n"
+          + "Der WollMux versucht nun, die Formulareingaben wieder herzustellen, "
+          + "kann aber nur die Werte rekonstruieren, die sichtbar im Dokument "
+          + "angezeigt werden. Bitte prüfen Sie daher, ob alle Formularwerte den "
+          + "richtigen Inhalt haben. Werte die der WollMux nicht herstellen konnte, "
+          + "werden in der FormGUI rot hinterlegt.\n\n"
+          + "Bitte korrigieren Sie die rot hinterlegten Felder!\n\n"
+          + "Es wäre schön, wenn Sie parallel dazu von Ihrem SIV ein Ticket aufmachen "
+          + "lassen könnten, dem Sie das fehlerhafte Originaldokument beifügen, damit "
+          + "die Ursache des Datenverlusts untersucht werden kann."));
+      ids = getAllFieldIDs();
+      // jetzt noch die IDs der Formularbeschreibung ergänzen, damit auch die
+      // Formularfelder geprüft werden, die nur in der Formularbeschreibung
+      // existieren, aber keine Repräsentation im Dokument haben.
+      for (ConfigThingy id : getFormDescription().query("Eingabefelder").query("ID"))
+        ids.add(id.toString());
+    }
 
     // mapIdToPresetValue vorbelegen: Gibt es zu id mindestens ein untransformiertes
     // Feld, so wird der Wert dieses Feldes genommen. Gibt es kein untransformiertes
