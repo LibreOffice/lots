@@ -62,6 +62,7 @@
  * 15.06.2007 | BNK | Beim Download für openExt URL urlEncoden genau wie ConfigThingy für %include
  * 25.06.2007 | BNK | [R7224]Im Minimize-Modus bei Absenderauswahl nicht minimieren
  * 19.07.2007 | BNK | [22882]--load sollte jetzt auch unter Windows funzen
+ * 17.12.2010 | ERT | [#5704] Menü der Senderbox wird versteckt, wenn die WollMuxBar unsichtbar wird
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -125,6 +126,8 @@ import javax.swing.JTextField;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
@@ -392,8 +395,8 @@ public class WollMuxBar
    * @param winMode
    *          Anzeigemodus, z.B. {@link WollMuxBarConfig#UP_AND_AWAY_WINDOW_MODE}.
    * @param conf
-   *          combinedConf(wollmuxConf(<Inhalt der wollmux.conf>) wollmuxbarConf(<Inhalt
-   *          der wollmuxbar.conf>)
+   *          combinedConf(wollmuxConf(<Inhalt der wollmux.conf>)
+   *          wollmuxbarConf(<Inhalt der wollmuxbar.conf>)
    * @param defaultConf
    *          die wollmux.conf
    * @param userConf
@@ -1519,6 +1522,23 @@ public class WollMuxBar
       {
         this.menu = menu;
         this.button = button;
+        this.button.putClientProperty("menu", menu);
+
+        button.addAncestorListener(new AncestorListener()
+        {
+
+          public void ancestorRemoved(AncestorEvent event)
+          {
+            if (event.getComponent().isVisible())
+              ((JPopupMenu) event.getComponent().getClientProperty("menu")).setVisible(false);
+          }
+
+          public void ancestorMoved(AncestorEvent event)
+          {}
+
+          public void ancestorAdded(AncestorEvent event)
+          {}
+        });
       }
 
       public void setSelectedItem(String item)
@@ -1544,8 +1564,8 @@ public class WollMuxBar
    *          Ausgehend von currentMenu werden rekursiv alle enthaltenen Unter- und
    *          Unter-Untermenüs zu menuOrder hinzugefügt.
    * @param path
-   *          Beschreibt den Namen des jeweils übergeordneten Menüs (initial sollte ""
-   *          übergeben werden), aus dem der Name für mapMenuIDToLabel
+   *          Beschreibt den Namen des jeweils übergeordneten Menüs (initial sollte
+   *          "" übergeben werden), aus dem der Name für mapMenuIDToLabel
    *          zusammengesetzt wird.
    * @author Christoph Lutz (privat)
    */
