@@ -23,6 +23,7 @@
  * -------------------------------------------------------------------
  * 11.10.2007 | BNK | Erstellung
  * 25.05.2010 | ERT | GUI für PDF-Gesamtdruck
+ * 20.12.2010 | ERT | Defaultwerte für Druckdialog von ... bis
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -311,13 +312,17 @@ class MailMergeParams
             indexSelection.rangeStart = Integer.parseInt(start.getText());
           }
           catch (Exception x)
-          {}
+          {
+            indexSelection.rangeStart = 0;
+          }
           try
           {
             indexSelection.rangeEnd = Integer.parseInt(end.getText());
           }
           catch (Exception x)
-          {}
+          {
+            indexSelection.rangeEnd = 0;
+          }
         }
 
         public void insertUpdate(DocumentEvent e)

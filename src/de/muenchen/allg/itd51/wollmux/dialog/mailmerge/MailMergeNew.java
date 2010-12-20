@@ -23,6 +23,8 @@
  * -------------------------------------------------------------------
  * 11.10.2007 | BNK | Erstellung
  * 25.05.2010 | ERT | Aufruf von PDFGesamtdruck-Druckfunktion
+ * 20.12.2010 | ERT | Bei ungültigem indexSelection.rangeEnd wird der 
+ *                    Wert auf den letzten Datensatz gesetzt
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -870,7 +872,7 @@ public class MailMergeNew
         break;
       case RANGE:
         if (indexSelection.rangeStart < 1) indexSelection.rangeStart = 1;
-        if (indexSelection.rangeEnd < 1) indexSelection.rangeEnd = 1;
+        if (indexSelection.rangeEnd < 1) indexSelection.rangeEnd = data.size();
         if (indexSelection.rangeEnd > data.size())
           indexSelection.rangeEnd = data.size();
         if (indexSelection.rangeStart > data.size())
