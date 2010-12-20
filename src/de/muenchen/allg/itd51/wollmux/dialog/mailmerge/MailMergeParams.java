@@ -311,13 +311,17 @@ class MailMergeParams
             indexSelection.rangeStart = Integer.parseInt(start.getText());
           }
           catch (Exception x)
-          {}
+          {
+            indexSelection.rangeStart = 0;
+          }
           try
           {
             indexSelection.rangeEnd = Integer.parseInt(end.getText());
           }
           catch (Exception x)
-          {}
+          {
+            indexSelection.rangeEnd = 0;
+          }
         }
 
         public void insertUpdate(DocumentEvent e)

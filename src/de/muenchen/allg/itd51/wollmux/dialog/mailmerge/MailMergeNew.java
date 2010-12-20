@@ -870,7 +870,7 @@ public class MailMergeNew
         break;
       case RANGE:
         if (indexSelection.rangeStart < 1) indexSelection.rangeStart = 1;
-        if (indexSelection.rangeEnd < 1) indexSelection.rangeEnd = 1;
+        if (indexSelection.rangeEnd < 1) indexSelection.rangeEnd = data.size();
         if (indexSelection.rangeEnd > data.size())
           indexSelection.rangeEnd = data.size();
         if (indexSelection.rangeStart > data.size())
