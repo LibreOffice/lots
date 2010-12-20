@@ -734,20 +734,11 @@ public class TextDocumentModel
     if (Workarounds.applyWorkaroundForTracTicket5031(
       persistentData.getData(DATA_ID_FORMULARWERTE), alreadyTouchedAsFormDocument))
     {
-      WollMuxSingleton.showInfoModal(
-        L.m("WollMux-Warnung"),
-        L.m("Der WollMux kann die Formulareingaben der FormGUI nicht finden. "
-          + "Vermutlich ist das Dokument in einem früheren Bearbeitungsvorgang "
-          + "beschädigt worden.\n\n"
-          + "Der WollMux versucht nun, die Formulareingaben wieder herzustellen, "
-          + "kann aber nur die Werte rekonstruieren, die sichtbar im Dokument "
-          + "angezeigt werden. Bitte prüfen Sie daher, ob alle Formularwerte den "
-          + "richtigen Inhalt haben. Werte die der WollMux nicht herstellen konnte, "
-          + "werden in der FormGUI rot hinterlegt.\n\n"
-          + "Bitte korrigieren Sie die rot hinterlegten Felder!\n\n"
-          + "Es wäre schön, wenn Sie parallel dazu von Ihrem SIV ein Ticket aufmachen "
-          + "lassen könnten, dem Sie das fehlerhafte Originaldokument beifügen, damit "
-          + "die Ursache des Datenverlusts untersucht werden kann."));
+      WollMuxSingleton.showInfoModal(L.m("WollMux-Warnung"),
+        L.m("WollMux-Formulardaten nicht gefunden.\n\nDer WollMux versucht, die "
+          + "fehlenden Formulardaten wieder herzustellen. Nicht rekonstruierbare "
+          + "Felder werden im Formular rot hinterlegt. Bitte prüfen und "
+          + "korrigieren Sie diese Felder."));
       ids = getAllFieldIDs();
       // jetzt noch die IDs der Formularbeschreibung ergänzen, damit auch die
       // Formularfelder geprüft werden, die nur in der Formularbeschreibung
