@@ -406,7 +406,8 @@ public class Workarounds
   {
     boolean apply =
       alreadyTouchedAsFormDocument && (werteStr == null || werteStr.length() == 0);
-    if (apply) Logger.debug(L.m("Workaround für Trac-Ticket 5031 aktiv."));
+    if (apply)
+      Logger.log(L.m("Formulardokument ohne Formularwerte-Abschnitt gefunden! Workaround zur Rekonstruierung der Formularwerte aktiv."));
     return apply;
   }
 
