@@ -93,6 +93,7 @@ import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.db.DatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
@@ -495,6 +496,26 @@ public class WollMuxSingleton implements XPALProvider
   public DatasourceJoiner getDatasourceJoiner()
   {
     return WollMuxFiles.getDatasourceJoiner();
+  }
+
+  /**
+   * Diese Methode liefert eine Liste mit den über {@link #senderDisplayTemplate}
+   * definierten String-Repräsentation aller verlorenen gegangenen Datensätze des
+   * DatasourceJoiner (gemäß {@link DatasourceJoiner.Status.lostDatasets}) zurück.
+   * Die genaue Form der String-Repräsentation ist abhängig von
+   * {@link #senderDisplayTemplate}, das in der WollMux-Konfiguration über den Wert
+   * von SENDER_DISPLAYTEMPLATE gesetzt werden kann. Gibt es keine verloren
+   * gegangenen Datensätze, so bleibt die Liste leer.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public List<String> getsLostDatasetDisplayStrings()
+  {
+    DatasourceJoiner dj = getDatasourceJoiner();
+    ArrayList<String> list = new ArrayList<String>();
+    for (Dataset ds : dj.getStatus().lostDatasets)
+      list.add(new DatasetListElement(ds, senderDisplayTemplate).toString());
+    return list;
   }
 
   /**

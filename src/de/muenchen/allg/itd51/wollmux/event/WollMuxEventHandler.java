@@ -135,7 +135,6 @@ import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo;
 import de.muenchen.allg.itd51.wollmux.FormModelImpl.InvalidFormDescriptorException;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -2364,24 +2363,11 @@ public class WollMuxEventHandler
       {
         // Liste der nicht zuordnenbaren Datensätze erstellen und ausgeben:
         String names = "";
-        List<Dataset> l = dsj.getStatus().lostDatasets;
-        if (l.size() > 0)
+        List<String> lost = mux.getsLostDatasetDisplayStrings();
+        if (lost.size() > 0)
         {
-          Iterator<Dataset> i = l.iterator();
-          while (i.hasNext())
-          {
-            Dataset ds = i.next();
-            try
-            {
-              names += "- " + ds.get("Nachname") + ", ";
-              names += ds.get("Vorname") + " (";
-              names += ds.get("Rolle") + ")\n";
-            }
-            catch (ColumnNotFoundException x)
-            {
-              Logger.error(x);
-            }
-          }
+          for (String l : lost)
+            names += "- " + l + "\n";
           String message =
             L.m("Die folgenden Datensätze konnten nicht "
               + "aus der Datenbank aktualisiert werden:\n\n" + "%1\n"

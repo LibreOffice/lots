@@ -32,31 +32,14 @@
  */
 package de.muenchen.allg.itd51.wollmux.db;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.swing.Icon;
 
-import de.muenchen.allg.itd51.wollmux.Logger;
-
-public class DJDatasetListElement implements Comparable<DJDatasetListElement>
+public class DJDatasetListElement extends DatasetListElement
 {
-  /**
-   * Gibt an, wie die Personen in den Listen angezeigt werden sollen.
-   * %{Spalte}-Syntax um entsprechenden Wert des Datensatzes einzufügen, z.B.
-   * "%{Nachname}, %{Vorname}" für die Anzeige "Meier, Hans" etc.
-   */
-  private String displayTemplate;
-
   /**
    * Enthält das DJDataset-Element.
    */
   private DJDataset ds;
-
-  /**
-   * Optionales Icon, das in der Liste angezeigt werden soll.
-   */
-  private Icon icon;
 
   /**
    * Erzeugt ein neues DJDatasetListElement für die Darstellung in einer Liste (ohne
@@ -95,17 +78,8 @@ public class DJDatasetListElement implements Comparable<DJDatasetListElement>
    */
   public DJDatasetListElement(DJDataset ds, String displayTemplate, Icon icon)
   {
+    super(ds, displayTemplate, icon);
     this.ds = ds;
-    this.displayTemplate = displayTemplate;
-    this.icon = icon;
-  }
-
-  /**
-   * Liefert den in der Listbox anzuzeigenden String.
-   */
-  public String toString()
-  {
-    return getDisplayString(ds);
   }
 
   /**
@@ -118,96 +92,5 @@ public class DJDatasetListElement implements Comparable<DJDatasetListElement>
   public DJDataset getDataset()
   {
     return ds;
-  }
-
-  /**
-   * Liefert das Icon dieses DJDatasetListElements zurück.
-   * 
-   * @return das Icon dieses DJDatasetListElements. Falls kein Icon vorhanden ist,
-   *         wird <code>null</code> zurückgeliefert.
-   * 
-   * @author Daniel Benkmann (D-III-ITD-D101)
-   */
-  public Icon getIcon()
-  {
-    return this.icon;
-  }
-
-  /**
-   * Liefert zu einem Datensatz den in einer Listbox anzuzeigenden String.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private String getDisplayString(DJDataset ds)
-  {
-    return substituteVars(displayTemplate, ds);
-  }
-
-  /**
-   * Ersetzt "%{SPALTENNAME}" in str durch den Wert der entsprechenden Spalte im
-   * datensatz.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private static String substituteVars(String str, Dataset datensatz)
-  {
-    Pattern p = Pattern.compile("%\\{([a-zA-Z0-9]+)\\}");
-    Matcher m = p.matcher(str);
-    if (m.find()) do
-    {
-      String spalte = m.group(1);
-      String wert = spalte;
-      try
-      {
-        String wert2 = datensatz.get(spalte);
-        if (wert2 != null) wert = wert2.replaceAll("%", "");
-      }
-      catch (ColumnNotFoundException e)
-      {
-        Logger.error(e);
-      }
-      str = str.substring(0, m.start()) + wert + str.substring(m.end());
-      m = p.matcher(str);
-    } while (m.find());
-    return str;
-  }
-
-  /**
-   * Vergleicht die String-Repräsentation ({@link #toString()}) zweier Listenelemente
-   * über die compareTo()-Methode der Klasse String.
-   * 
-   * @param o
-   *          das DJDatasetListElement mit dem verglichen werden soll
-   * @return Rückgabewert von this.toString().compareTo(o.toString())
-   * @author Christoph Lutz (D-III-ITD 5.1)
-   */
-  public int compareTo(DJDatasetListElement o)
-  {
-    return this.toString().compareTo(o.toString());
-  }
-
-  /**
-   * Liefert <code>true</code> zurück, wenn die String-Repräsentation (
-   * {@link #toString()}) des übergebenen DJDatasetListElements gleich (im Hinblick
-   * auf {@link String#equals(Object)} ist zu der String-Repräsentation von this.
-   * 
-   * @author Daniel Benkmann (D-III-ITD-D101)
-   */
-  public boolean equals(Object o)
-  {
-    if (this == o)
-    {
-      return true;
-    }
-    if (o instanceof DJDatasetListElement)
-    {
-      return this.toString().equals(o.toString());
-    }
-    return false;
-  }
-
-  public int hashCode()
-  {
-    return this.toString().hashCode();
   }
 }
