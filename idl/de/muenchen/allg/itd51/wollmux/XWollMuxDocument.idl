@@ -33,6 +33,7 @@
 
 #include <com/sun/star/document/XEventBroadcaster.idl>
 #include <com/sun/star/text/XTextDocument.idl>
+#include <com/sun/star/beans/PropertyValues.idl>
  
 module de {  module muenchen {  module allg { module itd51 { module wollmux {
 
@@ -70,6 +71,21 @@ interface XWollMuxDocument
     void setInsertValue([in] string dbSpalte, [in] string value);
 
     /**
+       Liefert die InsertValue-Werte der zum aktuellen Zeitpunkt in einer Senderbox
+       ausgewählten Absenderdaten (kann von den aktuell in diesem WollMux-Dokument
+       gesetzten Absenderdaten abweichen) in einem Array von PropertyValue-Objekten
+       zurück. Jeder Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit
+       allen Einträgen die zu dem Zeitpunkt gültig sind.
+       
+       @return Array von PropertyValue-Objekten mit den aktuell im WollMux gesetzten
+               Absenderdaten. Gibt es keine Absenderdaten, so ist das Array leer
+               (aber != null).
+       
+       @author Christoph Lutz (D-III-ITD-D101)
+     */
+    com::sun::star::beans::PropertyValues getInsertValuesSelected();
+
+    /**
        Setzt den Wert mit ID id in der FormularGUI auf Wert mit allen Folgen, die das
        nach sich zieht (PLAUSIs, AUTOFILLs, Ein-/Ausblendungen,...). Es ist nicht
        garantiert, dass der Befehl ausgeführt wird, bevor updateFormGUI() aufgerufen
@@ -79,6 +95,18 @@ interface XWollMuxDocument
        @param value
      */
     void setFormValue([in] string id, [in] string value);
+
+    /**
+       Liefert die zum aktuellen Zeitpunkt gesetzten Formularwerte dieses
+       WollMux-Dokuments in einem Array von PropertyValue-Objekten zurück. Jeder
+       Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit allen Einträgen
+       die zu dem Zeitpunkt gültig sind.
+       
+       @return Array von PropertyValue-Objekten mit den aktuell gesetzten
+               Formularwerten dieses WollMux-Dokuments. Gibt es keine Formularwerte
+               im Dokument, so ist das Array leer (aber != null).
+     */
+    com::sun::star::beans::PropertyValues getFormValues();    
 
     /**
        Sorgt für die Ausführung aller noch nicht ausgeführten setInsertValue()

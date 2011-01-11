@@ -1430,6 +1430,18 @@ public class TextDocumentModel
   }
 
   /**
+   * Liefert die zum aktuellen Stand gesetzten Formularwerte in einer Map mit ID als
+   * Schlüssel. Änderungen an der zurückgelieferten Map zeigen keine Wirkung im
+   * TextDocumentModel (da nur eine Kopie der internen Map zurückgegeben wird).
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  synchronized public Map<String, String> getFormFieldValues()
+  {
+    return new HashMap<String, String>(formFieldValues);
+  }
+
+  /**
    * Liefert den ViewCursor des aktuellen Dokuments oder null, wenn kein Controller
    * (oder auch kein ViewCursor) für das Dokument verfügbar ist.
    * 
@@ -1892,13 +1904,13 @@ public class TextDocumentModel
       formFieldValues.remove(fieldId);
     else
       formFieldValues.put(fieldId, value);
-    persistentData.setData(DATA_ID_FORMULARWERTE, getFormFieldValues());
+    persistentData.setData(DATA_ID_FORMULARWERTE, getFormFieldValuesString());
   }
 
   /**
    * Serialisiert die aktuellen Werte aller Fomularfelder.
    */
-  private String getFormFieldValues()
+  private String getFormFieldValuesString()
   {
     // Neues ConfigThingy für "Formularwerte"-Abschnitt erzeugen:
     ConfigThingy werte = new ConfigThingy("WM");

@@ -37,7 +37,9 @@
 package de.muenchen.allg.itd51.wollmux.comp;
 
 import java.util.HashMap;
+import java.util.Map;
 
+import com.sun.star.beans.PropertyValue;
 import com.sun.star.document.XEventListener;
 import com.sun.star.frame.DispatchDescriptor;
 import com.sun.star.frame.XDispatch;
@@ -52,12 +54,18 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.SyncActionListener;
+import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
 import de.muenchen.allg.itd51.wollmux.XWollMuxDocument;
+import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.event.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
@@ -134,20 +142,21 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * (non-Javadoc)
    * 
    * @see com.sun.star.frame.XDispatchProvider#queryDispatch(com.sun.star.util.URL,
-   *      java.lang.String, int)
+   * java.lang.String, int)
    */
   public XDispatch queryDispatch( /* IN */com.sun.star.util.URL aURL,
   /* IN */String sTargetFrameName,
   /* IN */int iSearchFlags)
   {
-    return DispatchProviderAndInterceptor.globalWollMuxDispatches.queryDispatch(aURL,
-      sTargetFrameName, iSearchFlags);
+    return DispatchProviderAndInterceptor.globalWollMuxDispatches.queryDispatch(
+      aURL, sTargetFrameName, iSearchFlags);
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see com.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.DispatchDescriptor[])
+   * @seecom.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.
+   * DispatchDescriptor[])
    */
   public XDispatch[] queryDispatches( /* IN */DispatchDescriptor[] seqDescripts)
   {
@@ -544,6 +553,69 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
       SyncActionListener s = new SyncActionListener();
       WollMuxEventHandler.handleSetInsertValues(doc, m, s);
       s.synchronize();
+    }
+
+    /**
+     * Liefert die zum aktuellen Zeitpunkt gesetzten Formularwerte dieses
+     * WollMux-Dokuments in einem Array von PropertyValue-Objekten zurück. Jeder
+     * Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit allen Einträgen
+     * die zu dem Zeitpunkt gültig sind.
+     * 
+     * @return Array von PropertyValue-Objekten mit den aktuell gesetzten
+     *         Formularwerten dieses WollMux-Dokuments. Gibt es keine Formularwerte
+     *         im Dokument, so ist das Array leer (aber != null).
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public PropertyValue[] getFormValues()
+    {
+      UnoProps p = new UnoProps();
+      TextDocumentModel model =
+        WollMuxSingleton.getInstance().getTextDocumentModel(doc);
+      Map<String, String> id2value = model.getFormFieldValues();
+      for (String id : id2value.keySet())
+      {
+        String val = id2value.get(id);
+        if (val != null) p.setPropertyValue(id, val);
+      }
+      return p.getProps();
+    }
+
+    /**
+     * Liefert die InsertValue-Werte der zum aktuellen Zeitpunkt in einer Senderbox
+     * ausgewählten Absenderdaten (kann von den aktuell in diesem WollMux-Dokument
+     * gesetzten Absenderdaten abweichen) in einem Array von PropertyValue-Objekten
+     * zurück. Jeder Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit
+     * allen Einträgen die zu dem Zeitpunkt gültig sind.
+     * 
+     * @return Array von PropertyValue-Objekten mit den aktuell im WollMux gesetzten
+     *         Absenderdaten. Gibt es keine Absenderdaten, so ist das Array leer
+     *         (aber != null).
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public PropertyValue[] getInsertValuesSelected()
+    {
+      DatasourceJoiner dj = WollMuxSingleton.getInstance().getDatasourceJoiner();
+      UnoProps p = new UnoProps();
+      try
+      {
+        DJDataset ds = dj.getSelectedDataset();
+        for (String key : dj.getMainDatasourceSchema())
+        {
+          String val;
+          try
+          {
+            val = ds.get(key);
+            if (val != null) p.setPropertyValue(key, val);
+          }
+          catch (ColumnNotFoundException x1)
+          {}
+        }
+      }
+      catch (DatasetNotFoundException x)
+      {}
+      return p.getProps();
     }
   }
 }
