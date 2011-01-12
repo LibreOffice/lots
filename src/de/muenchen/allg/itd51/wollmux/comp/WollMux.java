@@ -303,9 +303,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * auf den Absender sender. Der Absender wird nur gesetzt, wenn die Parameter
    * sender und idx in der alphabetisch sortierten Absenderliste des WollMux
    * übereinstimmen - d.h. die Absenderliste der veranlassenden SenderBox zum
-   * Zeitpunkt der Auswahl konsistent zur PAL des WollMux war. Die Methode verwendet
-   * für sender das selben Format wie es vom XPALProvider:getCurrentSender()
-   * geliefert wird.
+   * Zeitpunkt der Auswahl konsistent zur PAL des WollMux war. Die Methode erwartet
+   * für sender das selben Format wie es von {@link XPALProvider.getCurrentSender()}
+   * bzw. {@link XPALProvider.getPALEntries()} geliefert wird.
    */
   public void setCurrentSender(String sender, short idx)
   {
@@ -314,25 +314,58 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Diese Methode liefert den Wert zur Datenbankspalte dbSpalte, der dem Wert
-   * entspricht, den das Dokumentkommando WM(CMD'insertValue' DB_SPALTE'<dbSpalte>')
-   * in das Dokument einfügen würde, oder den Leerstring "" wenn dieser Wert nicht
-   * bestimmt werden kann (z.B. wenn ein ungültiger Spaltennamen dbSpalte übergeben
-   * wurde). So ist es z.B. möglich, aus externen Anwendungen (z.B. Basic-Makros) auf
-   * Werte des aktuell gesetzten Absenders des WollMux zuzugreifen.
+   * Liefert die zum aktuellen Zeitpunkt im WollMux ausgewählten Absenderdaten (die
+   * über das Dokumentkommandos WM(CMD'insertValue' DB_SPALTE'<dbSpalte>') in ein
+   * Dokument eingefügt würden) in einem Array von {@link PropertyValue}-Objekten
+   * zurück. Dabei repräsentieren die Attribute {@link PropertyValue.Name} die
+   * verfügbaren DB_SPALTEn und die Attribute {@link PropertyValue.Value} die zu
+   * DB_SPALTE zugehörigen Absenderdaten.
    * 
-   * Anmerkung: Ist die aufrufende Anwendung ein Basic-Makro, so muss damit gerechnet
-   * werden, dass dieses Makro bereits in einer synchronisierten Umgebung abläuft
-   * (das ist Standard bei Basic-Makros). Um Deadlocks in Zusammenhang mit dem
-   * WollMux zu vermeiden, darf die Methode also nicht über den WollMuxEventHandler
-   * synchonisiert werden. Aufgrund der fehlenden Synchronisierung auf Seiten des
-   * WollMux ist die Methode jedoch mit Vorsicht zu genießen. Insbesondere sollten
-   * die über diese Methode gelieferten Werte NICHT verwendet werden, um z.B. mit
-   * setCurrentSender() Daten des WollMux zu manipulieren.
+   * Jeder Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit allen
+   * Einträgen die zu dem Zeitpunkt gültig sind. Eine Änderung der Werte des
+   * Rückgabeobjekts hat daher keine Auswirkung auf den WollMux.
    * 
-   * Zum Auslesen und Reagieren auf Änderungen der PersoenlichenAbsenderlist (PAL)
-   * sollten die Methoden verwendet werden, die der XPALProvider anbietet. Diese
-   * Methoden sind über den WollMuxEventHandler synchronisiert.
+   * @return Array von PropertyValue-Objekten mit den aktuell im WollMux gesetzten
+   *         Absenderdaten. Gibt es keine Absenderdaten, so ist das Array leer (aber
+   *         != null).
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public PropertyValue[] getInsertValues()
+  {
+    // Diese Methode nimmt keine Synchronisierung über den WollMuxEventHandler vor,
+    // da das reine Auslesen der Datenstrukturen unkritisch ist.
+    DatasourceJoiner dj = WollMuxSingleton.getInstance().getDatasourceJoiner();
+    UnoProps p = new UnoProps();
+    try
+    {
+      DJDataset ds = dj.getSelectedDataset();
+      for (String key : dj.getMainDatasourceSchema())
+      {
+        String val;
+        try
+        {
+          val = ds.get(key);
+          if (val != null) p.setPropertyValue(key, val);
+        }
+        catch (ColumnNotFoundException x1)
+        {}
+      }
+    }
+    catch (DatasetNotFoundException x)
+    {}
+    return p.getProps();
+  }
+
+  /**
+   * Diese Methode liefert den Wert der Absenderdaten zur Datenbankspalte dbSpalte,
+   * der dem Wert entspricht, den das Dokumentkommando WM(CMD'insertValue'
+   * DB_SPALTE'<dbSpalte>') in das Dokument einfügen würde, oder den Leerstring ""
+   * wenn dieser Wert nicht bestimmt werden kann (z.B. wenn ein ungültiger
+   * Spaltennamen dbSpalte übergeben wurde).
+   * 
+   * Anmerkung: Diese Methode wird durch die Methode getInsertValues() ergänzt die
+   * alle Spaltennamen und Spaltenwerte zurück liefern kann.
    * 
    * @param dbSpalte
    *          Name der Datenbankspalte deren Wert zurückgeliefert werden soll.
@@ -341,6 +374,17 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    */
   public String getValue(String dbSpalte)
   {
+    /*
+     * Diese Methode nimmt keine Synchronisierung über den WollMuxEventHandler vor,
+     * da das reine Auslesen der Datenstrukturen unkritisch ist.
+     * 
+     * Im Test hatte ich einmal eine über den WollMuxEventHandler synchronisierte
+     * Variante der Funktion getestet und beim Aufruf der Funktion über ein
+     * Basic-Makro kam es zu einem Deadlock (Das Basic-Makro bekommt exclusiven
+     * Zugriff auf OOo-Objekte; bereits laufende Events des WollMux, die evtl. mit
+     * OOo-Objekten arbeiten müssen warten; WollMux-Eventqueue wird nicht weiter
+     * abgearbeitet; Deadlock).
+     */
     try
     {
       String value =
@@ -492,8 +536,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
      * garantiert, dass der Befehl ausgeführt wird, bevor updateFormGUI() aufgerufen
      * wurde. Eine Implementierung mit einer Queue ist möglich.
      * 
+     * Anmerkung: Eine Liste aller verfügbaren IDs kann über die Methode
+     * XWollMuxDocument.getFormValues() gewonnen werden.
+     * 
      * @param id
+     *          ID zu der der neue Formularwert gesetzt werden soll.
      * @param value
+     *          Der neu zu setzende Formularwert.
      * 
      * @author Christoph Lutz (D-III-ITD-D101)
      */
@@ -509,6 +558,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
      * eingefügt werden soll auf Wert. Es ist nicht garantiert, dass der neue Wert im
      * Dokument sichtbar wird, bevor updateInsertFields() aufgerufen wurde. Eine
      * Implementierung mit einer Queue ist möglich.
+     * 
+     * Anmerkung: Eine Liste aller verfügbaren DB_SPALTEn kann mit der Methode
+     * XWollMux.getInsertValues() gewonnen werden.
      * 
      * @param dbSpalte
      *          enthält den Namen der Absenderdatenspalte, deren Wert geändert werden
@@ -557,9 +609,14 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
 
     /**
      * Liefert die zum aktuellen Zeitpunkt gesetzten Formularwerte dieses
-     * WollMux-Dokuments in einem Array von PropertyValue-Objekten zurück. Jeder
-     * Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit allen Einträgen
-     * die zu dem Zeitpunkt gültig sind.
+     * WollMux-Dokuments in einem Array von PropertyValue-Objekten zurück. Dabei
+     * repräsentieren die Attribute {@link PropertyValue.Name} die verfügbaren IDs
+     * und die Attribute {@link PropertyValue.Value} die zu ID zugehörigen
+     * Formularwerte.
+     * 
+     * Jeder Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit allen
+     * Einträgen die zu dem Zeitpunkt gültig sind. Eine Änderung der Werte des
+     * Rückgabeobjekts hat daher keine Auswirkung auf den WollMux.
      * 
      * @return Array von PropertyValue-Objekten mit den aktuell gesetzten
      *         Formularwerten dieses WollMux-Dokuments. Gibt es keine Formularwerte
@@ -578,43 +635,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
         String val = id2value.get(id);
         if (val != null) p.setPropertyValue(id, val);
       }
-      return p.getProps();
-    }
-
-    /**
-     * Liefert die InsertValue-Werte der zum aktuellen Zeitpunkt in einer Senderbox
-     * ausgewählten Absenderdaten (kann von den aktuell in diesem WollMux-Dokument
-     * gesetzten Absenderdaten abweichen) in einem Array von PropertyValue-Objekten
-     * zurück. Jeder Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit
-     * allen Einträgen die zu dem Zeitpunkt gültig sind.
-     * 
-     * @return Array von PropertyValue-Objekten mit den aktuell im WollMux gesetzten
-     *         Absenderdaten. Gibt es keine Absenderdaten, so ist das Array leer
-     *         (aber != null).
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
-     */
-    public PropertyValue[] getInsertValuesSelected()
-    {
-      DatasourceJoiner dj = WollMuxSingleton.getInstance().getDatasourceJoiner();
-      UnoProps p = new UnoProps();
-      try
-      {
-        DJDataset ds = dj.getSelectedDataset();
-        for (String key : dj.getMainDatasourceSchema())
-        {
-          String val;
-          try
-          {
-            val = ds.get(key);
-            if (val != null) p.setPropertyValue(key, val);
-          }
-          catch (ColumnNotFoundException x1)
-          {}
-        }
-      }
-      catch (DatasetNotFoundException x)
-      {}
       return p.getProps();
     }
   }
