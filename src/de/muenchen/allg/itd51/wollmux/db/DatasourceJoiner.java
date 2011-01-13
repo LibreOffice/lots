@@ -525,6 +525,7 @@ public class DatasourceJoiner
    */
   public void saveCacheAndLOS(File cacheFile) throws IOException
   {
+    Logger.debug(L.m("Speichere Cache nach %1.", cacheFile));
     Set<String> schema = myLOS.getSchema();
     if (schema == null)
     {
