@@ -781,7 +781,7 @@ public class WollMuxEventHandler
       Font largeFont = label.getFont().deriveFont(15.0f);
       label.setFont(largeFont);
       copyrightPanel.add(label);
-      label = new JLabel("Copyright (c) 2005-2010 Landeshauptstadt München");
+      label = new JLabel("Copyright (c) 2005-2011 Landeshauptstadt München");
       label.setFont(largeFont);
       copyrightPanel.add(label);
       label = new JLabel(L.m("Lizenz: %1", "European Union Public License"));
@@ -834,6 +834,11 @@ public class WollMuxEventHandler
       authorPanel2.add(hbox);
       hbox = Box.createHorizontalBox();
       hbox.add(new JLabel("Bettina Bauer"));
+      hbox.add(Box.createHorizontalGlue());
+      authorPanel2.add(Box.createVerticalStrut(authorSpacing));
+      authorPanel2.add(hbox);
+      hbox = Box.createHorizontalBox();
+      hbox.add(new JLabel("Andor Ertsey"));
       hbox.add(Box.createHorizontalGlue());
       authorPanel2.add(Box.createVerticalStrut(authorSpacing));
       authorPanel2.add(hbox);
