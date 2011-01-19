@@ -733,19 +733,7 @@ public class TextDocumentModel
     // nicht existierenden WollMuxFormularwerte-Abschnitts).
     if (Workarounds.applyWorkaroundForTracTicket5031(
       persistentData.getData(DATA_ID_FORMULARWERTE), alreadyTouchedAsFormDocument))
-    {
-      WollMuxSingleton.showInfoModal(L.m("WollMux-Warnung"),
-        L.m("WollMux-Formulardaten nicht gefunden.\n\nDer WollMux versucht, die "
-          + "fehlenden Formulardaten wieder herzustellen. Nicht rekonstruierbare "
-          + "Felder werden im Formular rot hinterlegt. Bitte prüfen und "
-          + "korrigieren Sie diese Felder."));
-      ids = getAllFieldIDs();
-      // jetzt noch die IDs der Formularbeschreibung ergänzen, damit auch die
-      // Formularfelder geprüft werden, die nur in der Formularbeschreibung
-      // existieren, aber keine Repräsentation im Dokument haben.
-      for (ConfigThingy id : getFormDescription().query("Eingabefelder").query("ID"))
-        ids.add(id.toString());
-    }
+      return getIdToPresetValueEmptyFormularwerte();
 
     // mapIdToPresetValue vorbelegen: Gibt es zu id mindestens ein untransformiertes
     // Feld, so wird der Wert dieses Feldes genommen. Gibt es kein untransformiertes
@@ -784,6 +772,80 @@ public class TextDocumentModel
       if (!idToPresetValue.containsKey(id))
         idToPresetValue.put(id, FormController.FISHY);
     }
+    return idToPresetValue;
+  }
+
+  /**
+   * Diese Methode wird ausschließlich für den Workaround für Ticket #5031
+   * (Datenverlust bei fehlendem Formularwerteabschnitt) benötigt und liefert eine
+   * idToPresetValue-Map zurück, die alle IDs, die im Dokument und in der
+   * Formularbeschreibung verwendet werden, auf den Wert Fishy mapped,
+   * setValue-Events für widerherstellbare Werte in den WollMuxEventHandler einspeist
+   * und einen Warndialog bringt. Die FISHY-Werte werden geliefert, damit nicht mehr
+   * herstellbare Werte als "Prüfen" markiert werden. Die setValue-Events für wieder
+   * herstellbare Werte werden benötigt, damit Autofills neu berechnet werden und die
+   * Werte persistent gespeichert werden.
+   * 
+   * @return map mit allen ids gemapped auf FISHY
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
+   */
+  private HashMap<String, String> getIdToPresetValueEmptyFormularwerte()
+  {
+    WollMuxSingleton.showInfoModal(L.m("WollMux-Warnung"),
+      L.m("WollMux-Formulardaten nicht gefunden.\n\nDer WollMux versucht, die "
+        + "fehlenden Formulardaten wieder herzustellen. Nicht rekonstruierbare "
+        + "Felder werden im Formular rot hinterlegt. Bitte prüfen und "
+        + "korrigieren Sie diese Felder."));
+
+    HashMap<String, String> idToPresetValue = new HashMap<String, String>();
+    Set<String> ids = new HashSet<String>();
+    ids.addAll(getAllFieldIDs());
+    for (ConfigThingy id : getFormDescription().query("Eingabefelder").query("ID"))
+      ids.add(id.toString());
+
+    // mapIdToPresetValue vorbelegen: Gibt es zu id mindestens ein untransformiertes
+    // Feld, so wird der Wert dieses Feldes genommen.
+    for (String id : ids)
+    {
+      List<FormField> fields = new ArrayList<FormField>();
+      if (idToFormFields.get(id) != null) fields.addAll(idToFormFields.get(id));
+      if (idToTextFieldFormFields.get(id) != null)
+        fields.addAll(idToTextFieldFormFields.get(id));
+
+      String value = getFirstUntransformedValue(fields);
+      if (value != null) idToPresetValue.put(id, value);
+    }
+
+    // Alle id's herauslöschen, deren Felder-Werte nicht konsistent sind.
+    for (String id : ids)
+    {
+      String value = idToPresetValue.get(id);
+      if (value != null)
+      {
+        boolean fieldValuesConsistent =
+          fieldValuesConsistent(idToFormFields.get(id), idToPresetValue, value)
+            && fieldValuesConsistent(idToTextFieldFormFields.get(id),
+              idToPresetValue, value);
+        if (!fieldValuesConsistent) idToPresetValue.remove(id);
+      }
+    }
+
+    // SetValue-Events für alle Formularwerte != null absetzen, damit die Werte
+    // nachträglich über die FormGUI verarbeitet werden (notwendig, damit AUTOFILLS
+    // neu berechnet werden).
+    for (String id : idToPresetValue.keySet())
+    {
+      String value = idToPresetValue.get(id);
+      if (value != null)
+        WollMuxEventHandler.handleSetFormValue(doc, id, value, null);
+    }
+
+    // Alle Formularwerte FISHY setzen, dabei sowohl die Einfügungen im Dokument als
+    // auch die Eingabefelder der Formularbeschreibung berücksichtigen.
+    idToPresetValue.clear();
+    for (String id : ids)
+      idToPresetValue.put(id, FormController.FISHY);
     return idToPresetValue;
   }
 
