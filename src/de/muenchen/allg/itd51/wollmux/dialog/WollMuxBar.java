@@ -86,6 +86,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
@@ -1617,6 +1618,24 @@ public class WollMuxBar
       this.menuConf = menuConf;
       this.ignoreNextFocusRequest = false;
 
+      this.textField.putClientProperty("menu", menu);
+
+      this.textField.addAncestorListener(new AncestorListener()
+      {
+
+        public void ancestorRemoved(AncestorEvent event)
+        {
+          if (event.getComponent().isVisible())
+            ((JPopupMenu) event.getComponent().getClientProperty("menu")).setVisible(false);
+        }
+
+        public void ancestorMoved(AncestorEvent event)
+        {}
+
+        public void ancestorAdded(AncestorEvent event)
+        {}
+      });
+
       textField.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent arg0)
@@ -1633,6 +1652,20 @@ public class WollMuxBar
                 return;
               }
             }
+          }
+        }
+      });
+
+      // Der MouseListener wird benötigt, um den 'Suchen...'-String zu löschen, wenn
+      // das Suchfeld direkt nach dem Start angeklickt wird. Dann hat das Suchfeld
+      // bereits den Fokus und der FocusListener wird nicht ausgelöst.
+      textField.addMouseListener(new MouseAdapter()
+      {
+        public void mousePressed(MouseEvent e)
+        {
+          if (textField.hasFocus() && textField.getText().equals(label))
+          {
+            textField.setText("");
           }
         }
       });
