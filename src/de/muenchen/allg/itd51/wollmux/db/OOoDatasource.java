@@ -26,6 +26,7 @@
  * 22.12.2006 | BNK | USER und PASSWORD unterstützt
  * 09.03.2007 | BNK | [P1257]Neuer Konstruktor, der Datenquelle auch ohne Angabe von Schlüssel erlaubt
  * 20.09.2007 | BNK | EscapeProcessing = false setzen in Abfragen, "|" als ESCAPE-Zeichen
+ * 11.01.2011 | Ärztekammer Schleswig-Holstein (Michael Stramm) | Erweitert um die Unterstützung von PervasiveSQL
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -96,6 +97,12 @@ public class OOoDatasource implements Datasource
   private static final int SQL_SYNTAX_MYSQL = 2;
 
   /**
+   * Konstante für {@link #sqlSyntax}, die angibt, dass SQL Queries in PervasiveSQL-Syntax
+   * abgesetzt werden sollen.
+   */
+  private static final int SQL_SYNTAX_PERVASIVESQL = 3;
+
+  /**
    * Welche Syntax soll verwendet werden.
    * 
    * Default ist Oracle-Syntax.
@@ -137,6 +144,10 @@ public class OOoDatasource implements Datasource
   Wie ANSI
    ****** MySQL *******
   Wie ANSI, aber mit lcase() statt lower()
+   ****** PervasiveSQL *******
+  Wie ANSI, aber rechts vom LIKE dürfen nur einfache Konstanten (also kein lower oder lcase)
+  stehen. Außerdem wird "DATENBANK.TABELLE" nicht unterstützt. Nur "DATENBANK"."TABELLE",
+  DATENBANK."TABELLE" oder "TABELLE".
    */
   private int sqlSyntax = SQL_SYNTAX_ANSI;
 
@@ -273,6 +284,8 @@ public class OOoDatasource implements Datasource
         sqlSyntax = SQL_SYNTAX_ORACLE;
       else if (sqlSyntaxStr.equalsIgnoreCase("mysql"))
         sqlSyntax = SQL_SYNTAX_MYSQL;
+      else if (sqlSyntaxStr.equalsIgnoreCase("pervasivesql"))
+        sqlSyntax = SQL_SYNTAX_PERVASIVESQL;
       else
         throw new ConfigurationErrorException(L.m(
           "SQL_SYNTAX \"%1\" nicht unterstützt", sqlSyntaxStr));
@@ -502,10 +515,28 @@ public class OOoDatasource implements Datasource
       buffy.append(sqlIdentifier(part.getColumnName()));
       buffy.append(')');
       buffy.append(" LIKE ");
-      buffy.append(sqlLower());
-      buffy.append('(');
-      buffy.append(sqlLiteral(sqlSearchPattern(part.getSearchString())));
-      buffy.append(") ESCAPE '|'");
+
+      switch ( sqlSyntax ) {
+        case SQL_SYNTAX_PERVASIVESQL:{
+
+          // Rechts vom LIKE können nur einfache Konstanten und keine Funktionen wie
+          // lcase oder lower genutzt werden. Daher wird hier über die Java Methode
+          // toLowerCase der zu suchende String in Kleinbuchstaben umgewandelt.
+          // Die Inhalte der zu durchsuchenden Spalte können wiederum mit lcase/lower
+          // behandelt werden. Somit ist sichergestellt, dass der durchsuchende und der zu
+          // suchende String nur Kleinbuchstaben enthält.
+          buffy.append(sqlLiteral(sqlSearchPattern(part.getSearchString())).toLowerCase());
+
+        }; break;
+        default:{
+
+          buffy.append(sqlLower());
+          buffy.append('(');
+          buffy.append(sqlLiteral(sqlSearchPattern(part.getSearchString())));
+          buffy.append(") ESCAPE '|'");
+
+        }; break;
+      }
 
       buffy.append(')');
     }
@@ -710,8 +741,22 @@ public class OOoDatasource implements Datasource
    *          beginnt und endet immer mit einem Doublequote.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private static String sqlIdentifier(String str)
+  private String sqlIdentifier(String str)
   {
+    switch (sqlSyntax)
+    {
+      case SQL_SYNTAX_PERVASIVESQL:{
+
+        // PervasiveSQL unterstützt "DATENBANK.TABELLE" nicht, wird somit in "TABELLE" geändert
+        if ( str.contains( "." ) ) {
+
+          int dot = str.indexOf( "." ) + 1;
+          str = str.substring( dot );
+
+        }
+
+      }; break;
+    }
     return "\"" + str.replaceAll("\"", "\"\"") + "\"";
   }
 
