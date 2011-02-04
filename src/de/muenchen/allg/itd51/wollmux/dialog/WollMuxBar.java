@@ -63,6 +63,7 @@
  * 25.06.2007 | BNK | [R7224]Im Minimize-Modus bei Absenderauswahl nicht minimieren
  * 19.07.2007 | BNK | [22882]--load sollte jetzt auch unter Windows funzen
  * 17.12.2010 | ERT | [#5704] Menü der Senderbox wird versteckt, wenn die WollMuxBar unsichtbar wird
+ * 19.01.2010 | ERT | Menü der Suchbox wird versteckt, wenn die WollMuxBar unsichtbar wird
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
