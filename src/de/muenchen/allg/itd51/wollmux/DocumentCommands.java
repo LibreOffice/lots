@@ -223,8 +223,8 @@ public class DocumentCommands implements Iterable<DocumentCommand>
    * Dokumentkommandos überschrieben wird (wenn r keine Ausdehnung hat, wird ein
    * kollabiertes Bookmark erzeugt und es kann logischerweise auch nichts
    * überschrieben werden). cmdStr muss nur das gewünschte Kommando enthalten ohne
-   * eine abschließende Zahl, die zur Herstellung eindeutiger Bookmarks benötigt wird -
-   * diese Zahl wird bei Bedarf automatisch an den Bookmarknamen angehängt.
+   * eine abschließende Zahl, die zur Herstellung eindeutiger Bookmarks benötigt wird
+   * - diese Zahl wird bei Bedarf automatisch an den Bookmarknamen angehängt.
    * 
    * @param r
    *          Die TextRange, an der das neue Bookmark mit diesem Dokumentkommando
@@ -275,22 +275,29 @@ public class DocumentCommands implements Iterable<DocumentCommand>
 
     // Bookmarks scannen und HashSet mit allen neuen Dokumentkommandos aufbauen:
     HashSet<DocumentCommand> newDocumentCommands = new HashSet<DocumentCommand>();
-    String[] bookmarkNames = doc.getBookmarks().getElementNames();
-    for (int i = 0; i < bookmarkNames.length; i++)
+    try
     {
-      String name = bookmarkNames[i];
-      Matcher m = wmCmdPattern.matcher(name);
-
-      if (m.find() && !knownBookmarks.contains(name))
+      String[] bookmarkNames = doc.getBookmarks().getElementNames();
+      for (int i = 0; i < bookmarkNames.length; i++)
       {
-        DocumentCommand cmd = createCommand(name, m.group(1), doc);
-        if (cmd != null) newDocumentCommands.add(cmd);
-      }
-    }
+        String name = bookmarkNames[i];
+        Matcher m = wmCmdPattern.matcher(name);
 
-    // lokale Kommandosets aktualisieren:
-    removeRetiredDocumentCommands(retiredDocumentCommands);
-    addNewDocumentCommands(newDocumentCommands);
+        if (m.find() && !knownBookmarks.contains(name))
+        {
+          DocumentCommand cmd = createCommand(name, m.group(1), doc);
+          if (cmd != null) newDocumentCommands.add(cmd);
+        }
+      }
+
+      // lokale Kommandosets aktualisieren:
+      removeRetiredDocumentCommands(retiredDocumentCommands);
+      addNewDocumentCommands(newDocumentCommands);
+    }
+    catch (Exception e)
+    {
+      Logger.debug2(e);
+    }
 
     Logger.debug2(L.m(
       "updateBookmarks fertig nach %1 ms. Entfernte/Neue Dokumentkommandos: ",

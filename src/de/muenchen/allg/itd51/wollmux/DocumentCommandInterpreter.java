@@ -283,12 +283,12 @@ public class DocumentCommandInterpreter
   {
 
     XStyleFamiliesSupplier styleFamiliesSupplier = UNO.XStyleFamiliesSupplier(doc);
-    XNameAccess nameAccess = styleFamiliesSupplier.getStyleFamilies();
 
     XNameContainer nameContainer = null;
     // Holt die Seitenvorlagen
     try
     {
+      XNameAccess nameAccess = styleFamiliesSupplier.getStyleFamilies();
       nameContainer = UNO.XNameContainer(nameAccess.getByName("PageStyles"));
     }
     catch (java.lang.Exception e)
