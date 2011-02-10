@@ -59,6 +59,12 @@ import de.muenchen.allg.afid.UNO;
 public class PersistentData
 {
   /**
+   * Property von doc zur Steuerung der Änderungsverfolgung, die beim Schreiben von
+   * WollMux-Metadaten temporär ausgeschaltet werden muss.
+   */
+  private static final String RECORD_CHANGES = "RecordChanges";
+
+  /**
    * Der Name des Frames in dem der WollMux seine Metadaten speichert.
    */
   private static final String WOLLMUX_FRAME_NAME = "WollMuxDaten";
@@ -237,11 +243,14 @@ public class PersistentData
    */
   public void setData(String dataId, String dataValue)
   {
+    Object recordChanges = UNO.getProperty(doc, RECORD_CHANGES);
+    UNO.setProperty(doc, RECORD_CHANGES, false);
     Vector<Object> textfields =
       getWollMuxTextFields(dataId, true, dataValue.length());
     if (textfields.size() == 0)
     {
       Logger.error(L.m("Konnte WollMux-Textfeld(er) \"%1\" nicht anlegen", dataId));
+      UNO.setProperty(doc, RECORD_CHANGES, recordChanges);
       return;
     }
 
@@ -261,6 +270,7 @@ public class PersistentData
 
       UNO.setProperty(iter.next(), "Content", str);
     }
+    UNO.setProperty(doc, RECORD_CHANGES, recordChanges);
   }
 
   /**
@@ -270,6 +280,8 @@ public class PersistentData
    */
   public void removeData(String dataId)
   {
+    Object recordChanges = UNO.getProperty(doc, RECORD_CHANGES);
+    UNO.setProperty(doc, RECORD_CHANGES, false);
     Vector<Object> textfields = getWollMuxTextFields(dataId, false, 0);
     if (textfields.size() > 0)
     {
@@ -287,6 +299,7 @@ public class PersistentData
         }
       }
     }
+    UNO.setProperty(doc, RECORD_CHANGES, recordChanges);
   }
 
   /**

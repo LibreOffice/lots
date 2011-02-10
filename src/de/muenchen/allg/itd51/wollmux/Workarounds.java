@@ -366,6 +366,51 @@ public class Workarounds
     return false;
   }
 
+  /**
+   * Trac-Ticket 5031 beschreibt mehrere Fälle, in denen WollMux-Formulardokumente
+   * aus bisher unbekanntem Grund ihren Formularwerteabschnitt verloren haben. In
+   * einem Fall enthielt ein Formulardokument gar keine Notiz "WollMuxFormularwerte",
+   * ein anderes Formulardokument enthielt eine solche Notiz aber mit leerem
+   * Dateninhalt, wiederum eine andere Notiz enthielt eine leere Notiz ohne
+   * dc:creator-Attribut, die mutmaßlich früher einmal eine
+   * WollMuxFormularwerte-Notiz war.
+   * 
+   * Falls das Dokument vor dieser Verarbeitung durch den WollMux bereits einmal
+   * durch den WollMux als Formulardokument markiert worden ist, entsteht ein nicht
+   * zulässiger Zustand, wenn der Formularwerte-Abschnitt fehlt. Diese Methode
+   * liefert true, wenn der Fall vorliegt und ein entsprechender Workaround
+   * angewendet werden soll.
+   * 
+   * Da die Ursache, die zu dem nicht zulässigen Stand geführt hat derzeit noch nicht
+   * bekannt ist, und die Symptome auch in drei Fällen unterschiedlich waren (s.o.),
+   * kann dieser Workaround derzeit leider nicht zeitlich beschränkt werden. Die
+   * Vermutung liegt nahe, dass der Fehler im Zusammenhang mit den OOo-Issues 100374
+   * und 108709 (also den Änderungen an OOo 3.0 bezüglich des Notizen-Systems)
+   * zusammen hängt. Die Hoffnung ist, dass solche kaputten Dokumente nicht mehr
+   * auftreten, wenn diese beiden Fehler gefixed sind.
+   * 
+   * @param werteStr
+   *          Den Wert den PersistantData zur ID "WollMuxFormularwerte" zurück gibt
+   *          (kann null sein, wenn die Notiz bisher nicht existiert, oder != null,
+   *          wenn sie bereits existiert).
+   * @param alreadyTouchedAsFormDocument
+   *          Gibt an, ob das Dokument vor dieser Verarbeitung durch den WollMux
+   *          bereits Formulardokument-Merkmale enthielt (z.B. eine Notiz SetType mit
+   *          dem Wert "formularDokument")
+   * @return true, wenn der Workaround anzuwenden ist.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static boolean applyWorkaroundForTracTicket5031(String werteStr,
+      boolean alreadyTouchedAsFormDocument)
+  {
+    boolean apply =
+      alreadyTouchedAsFormDocument && (werteStr == null || werteStr.length() == 0);
+    if (apply)
+      Logger.log(L.m("Formulardokument ohne Formularwerte-Abschnitt gefunden! Workaround zur Rekonstruierung der Formularwerte aktiv."));
+    return apply;
+  }
+
   // Unbenutzer alternativer Workaround für das setWindowPosSizeFreeze Problem
   // /**
   // * setWindowPosSize() aus einem Java-Thread (nicht Beanshell) heraus friert unter
