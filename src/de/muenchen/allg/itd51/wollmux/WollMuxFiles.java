@@ -44,6 +44,7 @@
  * 12.01.2010 | BED | dumpInfo() gibt nun auch JVM Heap Size + verwendeten Speicher aus
  * 07.10.2010 | ERT | dumpInfo() erweitert um No. of Processors, Physical Memory und Swap Size
  * 19.10.2010 | ERT | dumpInfo() erweitert um IP-Adresse und OOo-Version
+ * 22.02.2011 | ERT | dumpInfo() erweitert um LHM-Version
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -85,12 +86,16 @@ import javax.swing.SwingUtilities;
 
 import com.sun.management.OperatingSystemMXBean;
 import com.sun.star.beans.Property;
+import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.XNameAccess;
+import com.sun.star.lang.XMultiComponentFactory;
+import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.lib.loader.WollMuxRegistryAccess;
 import com.sun.star.lib.loader.WollMuxRegistryAccessException;
 import com.sun.star.sdbc.XConnection;
 import com.sun.star.sdbc.XDataSource;
 import com.sun.star.uno.AnyConverter;
+import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XStringSubstitution;
 
 import de.muenchen.allg.afid.UNO;
@@ -1022,6 +1027,11 @@ public class WollMuxFiles
         buffy.append("------");
       }
 
+      out.write("OOo-Version: \""
+        + getConfigValue("/org.openoffice.Setup/Product", "ooSetupVersion") + "\n");
+      out.write("LHM-Version: \""
+        + getConfigValue("/de.muenchen.LHM.LHMBuild/Version", "lhmVersion") + "\n");
+
       out.write("DEFAULT_CONTEXT: \"" + getDEFAULT_CONTEXT() + "\" (" + buffy
         + ")\n");
       out.write("CONF_VERSION: "
@@ -1164,6 +1174,40 @@ public class WollMuxFiles
       return null;
     }
     return dumpFile.getAbsolutePath();
+  }
+
+  private static String getConfigValue(String path, String name)
+  {
+    try
+    {
+      XMultiComponentFactory xMultiComponentFactory =
+        UNO.defaultContext.getServiceManager();
+      Object oProvider =
+        xMultiComponentFactory.createInstanceWithContext(
+          "com.sun.star.configuration.ConfigurationProvider", UNO.defaultContext);
+      XMultiServiceFactory xConfigurationServiceFactory =
+        (XMultiServiceFactory) UnoRuntime.queryInterface(XMultiServiceFactory.class,
+          oProvider);
+
+      PropertyValue[] lArgs = new PropertyValue[1];
+      lArgs[0] = new PropertyValue();
+      lArgs[0].Name = "nodepath";
+      lArgs[0].Value = path;
+
+      Object configAccess =
+        xConfigurationServiceFactory.createInstanceWithArguments(
+          "com.sun.star.configuration.ConfigurationAccess", lArgs);
+
+      XNameAccess xNameAccess =
+        (XNameAccess) UnoRuntime.queryInterface(XNameAccess.class, configAccess);
+
+      return xNameAccess.getByName(name).toString();
+    }
+    catch (Exception ex)
+    {
+      Logger.log(ex);
+      return "";
+    }
   }
 
   /**
