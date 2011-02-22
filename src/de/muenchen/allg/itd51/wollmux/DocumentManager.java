@@ -76,11 +76,14 @@ public class DocumentManager
   /**
    * Entfernt alle Informationen über compo (falls vorhanden) aus diesem Manager.
    * 
+   * compo wird hier zur Optimierung nur als Object erwartet (spart einen
+   * vorangehenden UNO-Cast auf XComponent).
+   * 
    * @return die entfernten Informationen oder null falls keine vorhanden.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
-  public synchronized Info remove(XComponent compo)
+  public synchronized Info remove(Object compo)
   {
     return info.remove(new HashableComponent(compo));
   }
@@ -103,7 +106,7 @@ public class DocumentManager
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   public synchronized void getProcessedDocuments(Collection<XComponent> infoCollector)
   {
@@ -125,12 +128,26 @@ public class DocumentManager
    * @param compo
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   public synchronized void setProcessingFinished(XComponent compo)
   {
     Info nfo = info.get(new HashableComponent(compo));
     if (nfo != null) nfo.setProcessingFinished();
+  }
+
+  /**
+   * Setzt in den Informationen zu compo (falls dem DocumentManager bekannt) das Flag
+   * das anzeigt, dass das Compo ein frisch, mit einer Factory erzeugtes Dokument
+   * ist.
+   * 
+   * @param compo
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public synchronized void setFresh(XComponent compo)
+  {
+    Info nfo = info.get(new HashableComponent(compo));
+    if (nfo != null) nfo.setFresh();
   }
 
   public static class Info
@@ -142,6 +159,14 @@ public class DocumentManager
     private boolean processingFinished = false;
 
     /**
+     * Gibt an, ob das Dokument gerade über eine Factory (wie z.B. über Datei->Neu)
+     * als frisches, leeres Dokument erzeugt wurde. Bitte nicht verwechseln: Ein
+     * frisches Dokument ist komplett leer und auch NICHT von einer Vorlage
+     * abgeleitet.
+     */
+    private boolean fresh = false;
+
+    /**
      * Liefert true gdw für das Dokument bereits ein
      * OnWollMuxProcessingFinished-Event an die Listener verschickt wurde.
      * 
@@ -150,6 +175,19 @@ public class DocumentManager
     public boolean isProcessingFinished()
     {
       return processingFinished;
+    }
+
+    /**
+     * Liefert true, wenn das Dokument gerade über eine Factory (wie z.B. über
+     * Datei->Neu) als frisches, leeres Dokument erzeugt wurde. Bitte nicht
+     * verwechseln: Ein frisches Dokument ist initial komplett leer und auch NICHT
+     * von einer Vorlage abgeleitet.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public boolean isFresh()
+    {
+      return fresh;
     }
 
     /**
@@ -186,6 +224,16 @@ public class DocumentManager
     private void setProcessingFinished()
     {
       processingFinished = true;
+    }
+
+    /**
+     * Setzt das Flag, das mit {@link #isFresh()} abgefragt wird auf true.
+     * 
+     * @author Matthias Benkmann (D-III-ITD-D101)
+     */
+    private void setFresh()
+    {
+      fresh = true;
     }
   }
 

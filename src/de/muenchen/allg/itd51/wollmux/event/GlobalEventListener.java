@@ -59,6 +59,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
+import de.muenchen.allg.itd51.wollmux.DocumentManager.Info;
 
 /**
  * Der GlobalEventListener sorgt dafür, dass der WollMux alle wichtigen globalen
@@ -72,17 +73,21 @@ import de.muenchen.allg.itd51.wollmux.Workarounds;
  */
 public class GlobalEventListener implements com.sun.star.document.XEventListener
 {
+  private static final String ON_SAVE_AS = "OnSaveAs";
+
+  private static final String ON_SAVE = "OnSave";
+
+  private static final String ON_UNLOAD = "OnUnload";
+
+  private static final String ON_CREATE = "OnCreate";
+
+  private static final String ON_VIEW_CREATED = "OnViewCreated";
+
   private DocumentManager docManager;
 
   public GlobalEventListener(DocumentManager docManager)
   {
     this.docManager = docManager;
-  }
-
-  private boolean seenAlready(XComponent compo)
-  {
-    if (compo == null) return false;
-    return docManager.getInfo(compo) != null;
   }
 
   /**
@@ -95,113 +100,217 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     // ganze Listener ohne Fehlermeldung abstürzt.
     try
     {
-      /*
-       * Extra Test ohne Cast nach XComponent, weil queryInterface im Seriendruckfall
-       * schon signifikanten Overhead erzeugt.
-       */
+      // Zur Optimierung werden hier gemeinsame Code-Teile auf das Nötigste
+      // reduziert. Es gibt viele Events, die den WollMux überhaupt nicht
+      // interessieren, da sollte der WollMux nichts tun (auch ein UNO-Cast kann hier
+      // schon unnötig Performance fressen)
       if (docEvent.Source == null) return;
-
       String event = docEvent.EventName;
-      Logger.debug2(event);
 
-      XModel compo = UNO.XModel(docEvent.Source);
-      if (compo == null) return;
-
-      String url = compo.getURL();
-
-      Logger.debug2(url);
-      /*
-       * Workaround for #3091: Die unsichtbaren Dokumente, die beim OOo-Seriendruck
-       * anfallen nicht bearbeiten.
-       */
-      int idx = url.lastIndexOf('/') - 4;
-      if (url.startsWith(".tmp/sv", idx) && url.endsWith(".tmp")) return;
-      // --------------
-
-      XTextDocument xTextDoc = UNO.XTextDocument(compo);
-
-      // Die Events OnLoad und OnNew kommen nur bei sichtbar geöffneten Dokumenten.
-      // Das macht die Events für unsichtbar geöffnete Dokumente unbrauchbar. Nur
-      // falls das Event OnViewCreated nicht empfangen wurden (z.B. möglicherweise
-      // bei alten OOo-Verisonen), greift als Fallback die Dokumentbearbeitung über
-      // OnNew bzw. OnLoad.
-      // Im Gegensatz zu OnLoad oder OnNew wird das Event OnViewCreated auch bei
-      // unsichtbar geöffneten Dokumenten erzeugt. Daher wird nun hauptsächlich
-      // dieses Event zur Initiierung der Dokumentbearbeitung verwendet.
-      // Es gibt Situationen (vor allem beim Anlegen und Öffnen von .odbs), wo
-      // OnCreate oder OnLoadFinished kommt, ohne dass einer der anderen Events
-      // kommt.
-      if ((event.equals("OnViewCreated") || event.equals("OnLoad")
-        || event.equals("OnNew") || event.equals("OnCreate") || event.equals("OnLoadFinished"))
-        && !seenAlready(compo))
-      {
-        if (xTextDoc != null)
-        {
-          docManager.addTextDocument(xTextDoc);
-          // Verarbeitet wird das Dokument erst auf OnViewCreated hin
-        }
-        else
-        {
-          docManager.add(compo);
-          WollMuxEventHandler.handleNotifyDocumentEventListener(null,
-            WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
-        }
-      }
-
-      // Textdokumente werden grundsätzlich immer bei OnViewCreated verarbeitet, da
-      // die anderen Events potentiell zu früh kommen, vor allem für den Test auf
-      // Sichtbarkeit.
-      if (xTextDoc != null && event.equals("OnViewCreated"))
-      {
-        boolean visible = false;
-        try
-        {
-          visible =
-            Boolean.FALSE.equals(UNO.getProperty(
-              compo.getCurrentController().getFrame(), "IsHidden"));
-        }
-        catch (Exception x)
-        {
-          // Falls der Zugriff auf den aktuellen Controller/Frame scheitert
-          // (NullPointerException), dann ist das Dokument nicht sichtbar. Ein
-          // null-Frame ist genauso unsichtbar wie ein Frame mit IsHidden==true.
-        }
-
-        WollMuxEventHandler.handleProcessTextDocument(xTextDoc, visible);
-      }
-
-      if (event.equals("OnUnload"))
-      {
-        DocumentManager.Info info = docManager.remove(compo);
-        /**
-         * ACHTUNG! ACHTUNG! Zu folgender Zeile unbedingt {@link
-         * WollMuxEventHandler#handleTextDocumentClosed(DocumentManager.Info} lesen.
-         * Hier darf AUF KEINEN FALL info.hasTextDocumentModel() getestet oder
-         * info.getTextDocumentModel() aufgerufen werden!
-         */
-        WollMuxEventHandler.handleTextDocumentClosed(info);
-      }
-
-      // Falls die OOo-Version von Issue 100374 betroffen ist, fangen wir noch
-      // die "OnSave"- und "OnSaveAs"-Events ab, um alle Notizen zu löschen und
-      // wieder neu anzulegen. Ansonsten gehen beim Speichern die vom WollMux in
-      // den Notizen veränderten Daten verloren.
-      if (Workarounds.applyWorkaroundForOOoIssue100374())
-      {
-        if (xTextDoc != null && (event.equals("OnSave") || event.equals("OnSaveAs")))
-        {
-          // Alle Notizen löschen und mit selbem Inhalt neu anlegen
-          DocumentManager.Info info = docManager.getInfo(xTextDoc);
-          if (info != null)
-          {
-            info.getTextDocumentModel().rewritePersistantData();
-          }
-        }
-      }
+      if (ON_CREATE.equals(event))
+        onCreate(docEvent.Source);
+      else if (ON_VIEW_CREATED.equals(event))
+        onViewCreated(docEvent.Source);
+      else if (ON_UNLOAD.equals(event))
+        onUnload(docEvent.Source);
+      else if (ON_SAVE.equals(event))
+        onSaveOrSaveAs(docEvent.Source);
+      else if (ON_SAVE_AS.equals(event)) onSaveOrSaveAs(docEvent.Source);
     }
     catch (Exception e)
     {
       Logger.error(e);
+    }
+  }
+
+  /**
+   * OnCreate ist das erste Event das aufgerufen wird, wenn ein neues leeres Dokument
+   * über eine Factory erzeugt wird wie z.B. mit loadComponentFromURL(...
+   * "private:factory/swriter" ...) oder in OOo über Datei->Neu. Auch OOo erzeugt
+   * manchmal im Hintergrund unsichtbare leere Dokumente über die Factory. Bekannt
+   * sind folgende Fälle: Beim OOo-Seriendruck über den Seriendruck-Assistent (für
+   * jeden Datensatz); Beim Einfügen von Autotexten (z.B. mit "bt<F3>" in OOo).
+   * 
+   * Das Event kommt nicht, wenn ein Dokument von einer Datei geladen oder von einer
+   * Vorlage erzeugt wird. Das Event kommt auch dann nicht, wenn eine Vorlagendatei
+   * als Standardvorlage für neue Dokumente definiert ist und Datei->Neu verwendet
+   * wird.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private void onCreate(Object source)
+  {
+    XComponent compo = UNO.XComponent(source);
+    if (compo == null) return;
+
+    Info i = docManager.getInfo(compo);
+    if (i == null)
+    {
+      XTextDocument xTextDoc = UNO.XTextDocument(source);
+      if (xTextDoc != null)
+      {
+        docManager.addTextDocument(xTextDoc);
+        docManager.setFresh(xTextDoc);
+        // Verarbeitet wird das Dokument erst auf OnViewCreated hin
+      }
+      else
+      {
+        docManager.add(compo);
+        docManager.setFresh(compo);
+        WollMuxEventHandler.handleNotifyDocumentEventListener(null,
+          WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
+      }
+    }
+  }
+
+  /**
+   * OnViewCreated kommt, wenn ein Dokument seitens OOo vollständig aufgebaut ist.
+   * Das Event kommt bei allen Dokumenten, egal ob sie neu erzeugt, geladen, sichtbar
+   * oder unsichtbar sind.
+   * 
+   * Da das Event in allen möglichen Fällen kommt, und die Bearbeitung von
+   * unsichtbaren Dokumenten durch den WollMux für eine andere stadtinterne Anwendung
+   * (JavaComm) notwendig ist, wird in diesem Event die eigentliche Verarbeitung von
+   * Dokumenten durch den WollMux angestoßen.
+   * 
+   * Ausgenommen von der Verarbeitung werden temporäre Dokumente des OOo-Seriendrucks
+   * und alle gerade erzeugten, unsichtbaren Textdokumente.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private void onViewCreated(Object source)
+  {
+    XModel compo = UNO.XModel(source);
+    if (compo == null) return;
+
+    // Temporäre, unsichtbare Textdokumente des OOo-Seriendrucks ausfiltern.
+    if (isTempMailMergeDocument(compo))
+    {
+      // docManager.remove(source) ist hier nicht erforderlich, weil für Dokumente
+      // mit URL kein OnCreate-Event kommt.
+      return;
+    }
+    Info docInfo = docManager.getInfo(compo);
+    XTextDocument xTextDoc = UNO.XTextDocument(compo);
+    if (xTextDoc != null && docInfo != null && docInfo.isFresh()
+      && isDocumentHidden(compo))
+    {
+      docManager.remove(compo);
+      return;
+    }
+
+    if (docInfo == null)
+    {
+      if (xTextDoc != null)
+        docManager.addTextDocument(xTextDoc);
+      else
+      {
+        docManager.add(compo);
+        WollMuxEventHandler.handleNotifyDocumentEventListener(null,
+          WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
+      }
+    }
+
+    if (xTextDoc != null)
+      WollMuxEventHandler.handleProcessTextDocument(xTextDoc,
+        !isDocumentHidden(compo));
+  }
+
+  /**
+   * onSave oder onSaveAs werden beim Speichern von Dokumenten aufgerufen.
+   * 
+   * Wir verwenden diese beiden Events derzeit nur für einen Workaround für
+   * Issue100374, so dass die Methode wieder entfernt werden kann, wenn der
+   * Workaround nicht mehr benötigt wird.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private void onSaveOrSaveAs(Object source)
+  {
+    // Falls die OOo-Version von Issue 100374 betroffen ist, fangen wir noch
+    // die "OnSave"- und "OnSaveAs"-Events ab, um alle Notizen zu löschen und
+    // wieder neu anzulegen. Ansonsten gehen beim Speichern die vom WollMux in
+    // den Notizen veränderten Daten verloren.
+    if (Workarounds.applyWorkaroundForOOoIssue100374())
+    {
+      XTextDocument xTextDoc = UNO.XTextDocument(source);
+      // Alle Notizen löschen und mit selbem Inhalt neu anlegen
+      DocumentManager.Info info = docManager.getInfo(xTextDoc);
+      if (info != null)
+      {
+        info.getTextDocumentModel().rewritePersistantData();
+      }
+    }
+  }
+
+  /**
+   * OnUnlaod kommt als letztes Event wenn ein Dokument geschlossen wurde. Wir nutzen
+   * dieses Event um den docManager aufzuräumen und angeschlossene Listener zu
+   * informieren.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private void onUnload(Object source)
+  {
+    DocumentManager.Info info = docManager.remove(source);
+    // info kann auch null sein, wenn es sich z.B. um ein temporäres Dokument des
+    // Seriendrucks handelt
+    /**
+     * ACHTUNG! ACHTUNG! Zu folgender Zeile unbedingt {@link
+     * WollMuxEventHandler#handleTextDocumentClosed(DocumentManager.Info} lesen. Hier
+     * darf AUF KEINEN FALL info.hasTextDocumentModel() getestet oder
+     * info.getTextDocumentModel() aufgerufen werden!
+     */
+    if (info != null) WollMuxEventHandler.handleTextDocumentClosed(info);
+  }
+
+  /**
+   * Liefert zurück, ob es sich bei dem Dokument source um ein Temporäres Dokument
+   * des OOo-Seriendrucks handelt und wird benötigt um solche Dokumente im Workaround
+   * für Ticket #3091 zu ignorieren. Dabei kann diese Methode nur Dokumente erkennen,
+   * die anhand der Eigenschaft URL als temporäre Datei zu erkennen sind.
+   * 
+   * Anmerkung: Der OOo-Seriendruck kann über Datei->Drucken und über
+   * Extras->Seriendruck-Assistent gestartet werden. Verschiedene OOo-Versionen
+   * verhalten sich diesbezüglich verschieden:
+   * 
+   * OOo 3.0.1 erzeugt in beiden Varianten für jeden Datensatz eine unsichtbare
+   * temporäre Datei mit einer URL, die eine Erkennung der temporären Datei zulässt.
+   * 
+   * OOo 3.2.1 erzeugt nur noch über Datei->Drucken temoräre Dateien mit gesetzter
+   * URL. Über Extras->Seriendruck-Assistent ist die URL-Eigenschaft jedoch nicht
+   * mehr gesetzt, so dass diese Methode nicht mehr ausreicht, um temporäre Dokumente
+   * des Seriendrucks zu identifizieren.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private boolean isTempMailMergeDocument(XModel compo)
+  {
+    String url = compo.getURL();
+    Logger.debug2(url);
+    int idx = url.lastIndexOf('/') - 4;
+    return (url.startsWith(".tmp/sv", idx) && url.endsWith(".tmp"));
+  }
+
+  /**
+   * Liefert false zurück, wenn das Dokument sichtbar ist und true, wenn das Dokument
+   * unsichtbar ist oder keine View besitzt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private boolean isDocumentHidden(XModel compo)
+  {
+    try
+    {
+      return Boolean.TRUE.equals(UNO.getProperty(
+        compo.getCurrentController().getFrame(), "IsHidden"));
+    }
+    catch (Exception x)
+    {
+      // Falls der Zugriff auf den aktuellen Controller/Frame scheitert
+      // (NullPointerException), dann ist das Dokument nicht sichtbar. Ein
+      // null-Frame ist genauso unsichtbar wie ein Frame mit IsHidden==true.
+      return true;
     }
   }
 
