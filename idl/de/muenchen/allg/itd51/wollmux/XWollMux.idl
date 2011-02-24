@@ -66,7 +66,12 @@ interface XWollMux
      * Öffnen. D.h. für jedes in OOo geöffnete Dokument erfolgt früher oder später
      * ein solches Event. Wird ein neuer EventHandler registriert, so werden ihm
      * für alle bereits offenen OpenOffice.org Dokumente die 
-     * OnWollMuxProcessingFinished Events nachgeliefert.
+     * OnWollMuxProcessingFinished Events nachgeliefert. Dies gilt auch für
+     * unsichtbar in OOo geladene Dokumente mit Ausnahme von temporären Dokumenten
+     * des OpenOffice.org-Seriendrucks (die beim Seriendruck massenweise für jeden
+     * Datensatz angelegt werden) oder von temporären Dokumenten, die für die 
+     * Einfügung von Autotexten im Hintergrund erzeugt werden. Solche Dokumente 
+     * werden durch den WollMux nicht verarbeitet. 
      */	
     interface com::sun::star::document::XEventBroadcaster;
 

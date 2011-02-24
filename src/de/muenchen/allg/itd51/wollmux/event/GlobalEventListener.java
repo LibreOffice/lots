@@ -143,24 +143,14 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     XComponent compo = UNO.XComponent(source);
     if (compo == null) return;
 
-    Info i = docManager.getInfo(compo);
-    if (i == null)
-    {
-      XTextDocument xTextDoc = UNO.XTextDocument(source);
-      if (xTextDoc != null)
-      {
-        docManager.addTextDocument(xTextDoc);
-        docManager.setFresh(xTextDoc);
-        // Verarbeitet wird das Dokument erst auf OnViewCreated hin
-      }
-      else
-      {
-        docManager.add(compo);
-        docManager.setFresh(compo);
-        WollMuxEventHandler.handleNotifyDocumentEventListener(null,
-          WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
-      }
-    }
+    // durch das Hinzufügen zum docManager kann im Event onViewCreated erkannt
+    // werden, dass das Dokument frisch erzeugt wurde:
+    XTextDocument xTextDoc = UNO.XTextDocument(source);
+    if (xTextDoc != null)
+      docManager.addTextDocument(xTextDoc);
+    else
+      docManager.add(compo);
+    // Verarbeitet wird das Dokument erst bei onViewCreated
   }
 
   /**
@@ -183,7 +173,9 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     XModel compo = UNO.XModel(source);
     if (compo == null) return;
 
-    // Temporäre, unsichtbare Textdokumente des OOo-Seriendrucks ausfiltern.
+    // Keine Aktion bei neu (mit Create) erzeugten und temporären, unsichtbaren
+    // Textdokumente des OOo-Seriendrucks. Sicherstellen, dass diese Dokumente auch
+    // nicht im docManager mitgeführt werden.
     if (isTempMailMergeDocument(compo))
     {
       // docManager.remove(source) ist hier nicht erforderlich, weil für Dokumente
@@ -191,29 +183,27 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       return;
     }
     Info docInfo = docManager.getInfo(compo);
+    // docInfo ist != null, wenn das Dokument mit Create erzeugt wurde.
     XTextDocument xTextDoc = UNO.XTextDocument(compo);
-    if (xTextDoc != null && docInfo != null && docInfo.isFresh()
-      && isDocumentHidden(compo))
+    if (xTextDoc != null && docInfo != null && isDocumentHidden(compo))
     {
       docManager.remove(compo);
       return;
     }
 
-    if (docInfo == null)
-    {
-      if (xTextDoc != null)
-        docManager.addTextDocument(xTextDoc);
-      else
-      {
-        docManager.add(compo);
-        WollMuxEventHandler.handleNotifyDocumentEventListener(null,
-          WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
-      }
-    }
-
+    // Dokument ggf. in docManager aufnehmen und abhängig vom Typ verarbeiten.
     if (xTextDoc != null)
+    {
+      if (docInfo == null) docManager.addTextDocument(xTextDoc);
       WollMuxEventHandler.handleProcessTextDocument(xTextDoc,
         !isDocumentHidden(compo));
+    }
+    else
+    {
+      if (docInfo == null) docManager.add(compo);
+      WollMuxEventHandler.handleNotifyDocumentEventListener(null,
+        WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
+    }
   }
 
   /**
@@ -223,7 +213,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
    * Issue100374, so dass die Methode wieder entfernt werden kann, wenn der
    * Workaround nicht mehr benötigt wird.
    * 
-   * @author Christoph Lutz (D-III-ITD-D101)
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private void onSaveOrSaveAs(Object source)
   {
@@ -248,7 +238,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
    * dieses Event um den docManager aufzuräumen und angeschlossene Listener zu
    * informieren.
    * 
-   * @author Christoph Lutz (D-III-ITD-D101)
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private void onUnload(Object source)
   {
