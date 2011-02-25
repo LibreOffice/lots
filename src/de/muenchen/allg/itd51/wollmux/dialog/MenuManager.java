@@ -84,7 +84,6 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.Workarounds;
 
 /**
  * Eine GUI zum Bearbeiten der Menüstruktur der WollMuxBar.
@@ -224,25 +223,34 @@ public class MenuManager
   public MenuManager(ConfigThingy defaultConf, ConfigThingy userConf,
       ActionListener finishedAction)
   {
-    // Der Menü Manager verwendet Klassen und Methoden, die erst ab Java 6 verfügbar
-    // sind. Wird Java 5 eingesetzt, verhindern wir, dass der Menü Manager gestartet
-    // wird.
-    // FIXME: Test kann rausfliegen sobald wir offiziell Java 5 nicht mehr supporten
-    if (!Workarounds.workaroundForJava5("Menü Manager", true))
-    {
-      this.defaultConf = defaultConf;
-      this.userConf = userConf;
-      this.finishedAction = finishedAction;
-      this.menuTreeRoot = parseMenuTree(defaultConf, userConf);
-      this.configIDs = parseConfigIDs(defaultConf, userConf);
-      SwingUtilities.invokeLater(new Runnable()
-      {
-        public void run()
-        {
-          createGUI();
-        }
-      });
-    }
+    // Menü Manager wird für WollMux-Release 11.2 deaktiviert
+    Logger.debug(L.m("Versuch den Menü Manager mit WollMux 11.2 zu starten wurde verhindert."));
+    JOptionPane.showMessageDialog(null,
+      L.m("Dieses Feature ist nicht in dieser WollMux-Version verfügbar."),
+      L.m("Feature nicht verfügbar"), JOptionPane.ERROR_MESSAGE);
+
+    // // Der Menü Manager verwendet Klassen und Methoden, die erst ab Java 6
+    // verfügbar
+    // // sind. Wird Java 5 eingesetzt, verhindern wir, dass der Menü Manager
+    // gestartet
+    // // wird.
+    // // FIXME: Test kann rausfliegen sobald wir offiziell Java 5 nicht mehr
+    // supporten
+    // if (!Workarounds.workaroundForJava5("Menü Manager", true))
+    // {
+    // this.defaultConf = defaultConf;
+    // this.userConf = userConf;
+    // this.finishedAction = finishedAction;
+    // this.menuTreeRoot = parseMenuTree(defaultConf, userConf);
+    // this.configIDs = parseConfigIDs(defaultConf, userConf);
+    // SwingUtilities.invokeLater(new Runnable()
+    // {
+    // public void run()
+    // {
+    // createGUI();
+    // }
+    // });
+    // }
   }
 
   private void createGUI()
