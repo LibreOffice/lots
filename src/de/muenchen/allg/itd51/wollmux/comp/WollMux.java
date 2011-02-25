@@ -38,6 +38,7 @@ package de.muenchen.allg.itd51.wollmux.comp;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.document.XEventListener;
@@ -630,11 +631,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
       TextDocumentModel model =
         WollMuxSingleton.getInstance().getTextDocumentModel(doc);
       Map<String, String> id2value = model.getFormFieldValues();
-      for (String id : id2value.keySet())
-      {
-        String val = id2value.get(id);
-        if (val != null) p.setPropertyValue(id, val);
-      }
+      for (Entry<String, String> e : id2value.entrySet())
+        if (e.getValue() != null) p.setPropertyValue(e.getKey(), e.getValue());
       return p.getProps();
     }
   }
