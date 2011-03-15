@@ -26,8 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sun.star.beans.UnknownPropertyException;
-import com.sun.star.document.EventObject;
-import com.sun.star.document.XEventListener;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
@@ -43,7 +41,6 @@ import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 public class StandardPrint
 {
@@ -315,52 +312,12 @@ public class StandardPrint
   public static XTextDocument createNewTargetDocument(final XPrintModel pmod,
       boolean hidden) throws Exception
   {
-    XTextDocument outputDoc;
-    final XTextDocument[] compo = new XTextDocument[] {
-      null, null };
-
-    WollMuxEventHandler.handleAddDocumentEventListener(new XEventListener()
-    {
-      public void notifyEvent(EventObject arg0)
-      {
-        if (arg0.EventName.equals(WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED))
-        {
-          synchronized (compo)
-          {
-            if (!UnoRuntime.areSame(compo[0], arg0.Source)) return;
-            WollMuxEventHandler.handleRemoveDocumentEventListener(this);
-            compo[1] = compo[0];
-            compo.notifyAll();
-          }
-        }
-      }
-
-      public void disposing(com.sun.star.lang.EventObject arg0)
-      {}
-    });
-
-    synchronized (compo)
-    {
-      outputDoc =
-        compo[0] =
+    XTextDocument outputDoc =
           UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter",
             true, true, hidden));
-      pmod.setPropertyValue("PrintIntoFile_OutputDocument", compo[0]);
+      pmod.setPropertyValue("PrintIntoFile_OutputDocument", outputDoc);
 
-      try
-      {
-        // max. 30s Warten, dann machen wir weiter, auch ohne Synchronisation
-        long endTime = 30 * 1000 + System.currentTimeMillis();
-        while (compo[1] == null)
-        {
-          long ctime = System.currentTimeMillis();
-          if (ctime >= endTime) break;
-          compo.wait(endTime - ctime);
-        }
-      }
-      catch (InterruptedException i)
-      {}
-    }
+    
 
     return outputDoc;
   }
