@@ -33,7 +33,7 @@ for /f "delims=- tokens=1-2" %%a in (
 'hg log -l1 --template "{date|shortdate}"'
 ) do (
 set /a v1=%%a - 2000
-set v2=%%b
+set /a v2=%%b
 )
 
 REM Get local revision number of last commit
