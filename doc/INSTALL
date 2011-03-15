@@ -6,8 +6,8 @@ The following software needs to be installed in order to build WollMux.
 
 - Apache Ant version 1.6.2 or greater (http://ant.apache.org/)
 - Java SDK 1.6 or later (http://java.sun.com/)
-- OpenOffice.org 2.0 or later
-- OpenOffice.org SDK 2.0 or later
+- OpenOffice.org 3.0 or later
+- OpenOffice.org SDK 3.0 or later
 - (optional, for building Debian package) dpkg-dev, fakeroot
 - (optional, for working with development snapshot) git
 - (optional, for building the Windows installer) nsis
