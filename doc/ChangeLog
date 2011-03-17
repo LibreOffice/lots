@@ -1,32 +1,13 @@
- ==================== Neu in dieser Version ====================
+
+ ==================== Neu in Version 11.2a ====================
 
     * Bugfixes:
-          o Es wurde ein Fehler beseitigt, der dafür sorgte, dass es bei der
-            Bearbeitung eines WollMux-Formulars mit aktivierter
-            Änderungsverfolgung zum Verlust des WollMuxFormularwerte-
-            Abschnitts kommen konnte.
-          o Außerdem ist der WollMux nun in der Lage, einen fehlenden
-            WollMuxFormularwerte-Abschnitt teilweise zu rekonstruieren. Nicht
-            wiederherstellbare Formulardaten werden in der FormGUI rot
-            hinterlegt und können so manuell korrigiert werden.
           o Temporäre Dokumente des OpenOffice.org-Seriendruck werden nun auch
             beim Verbinden über Extras->Seriendruck-Assistent durch den
             WollMux ignoriert. Damit entfallen benutzersichtbare "Runtime-
             Exceptions", die mit OOo 3.2.1 in manchen Fällen auftraten.
             Generell konnte der OOo-Seriendruck in Verbindung mit dem WollMux
             beschleunigt werden.
-          o Beim WollMux-Seriendruck wurde ein Fehlverhalten der Von-Bis-Felder
-            der Datensatzauswahl korrigiert, wenn kein Inhalt eingetragen wird.
-          o Die Trefferliste der Senderbox und das Menü der Suchbox werden
-            jetzt geschlossen, wenn die WollMux-Leiste minimiert wird.
-          o Es wurde ein Fehler im FormularMax4000 behoben, der das Bearbeiten
-            eines Formulars unmöglich gemacht hat, wenn Sichtbarkeiten direkt
-            an den Rückgabewert von Funktionen gebunden wurden.
-          o Seit WollMux 6.4.0 war es nicht mehr möglich bei der Suche im
-            Empfängerauswahldialog und Persönlicher Absenderliste bei
-            geeigneter Suchstrategie per Eingabe eines Leerstrings sämtliche
-            Datensätze als Suchergebnis anzuzeigen. Dies ist nun wieder
-            möglich.
           o Die Anzeige der nicht synchronisierbaren Datensätze aus der
             persönlichen Absenderliste bei der WollMux-Initialisierung erfolgt
             nun ebenfalls nach der in SENDER_DISPLAYTEMPLATE definierten
@@ -61,6 +42,31 @@
     * Integration eines Patches der Ärztekammer Schleswig-Holstein (Michael
       Stramm) zur Erweiterung der Datenquellen vom Typ ooo um die
       Unterstützung von Pervasive-SQL
+
+
+ ==================== Neu in Version 10.8a ====================
+
+    * Bugfixes:
+          o Es wurde ein Fehler beseitigt, der dafür sorgte, dass es bei der
+            Bearbeitung eines WollMux-Formulars mit aktivierter
+            Änderungsverfolgung zum Verlust des WollMuxFormularwerte-
+            Abschnitts kommen konnte.
+          o Außerdem ist der WollMux nun in der Lage, einen fehlenden
+            WollMuxFormularwerte-Abschnitt teilweise zu rekonstruieren. Nicht
+            wiederherstellbare Formulardaten werden in der FormGUI rot
+            hinterlegt und können so manuell korrigiert werden.
+          o Beim WollMux-Seriendruck wurde ein Fehlverhalten der Von-Bis-Felder
+            der Datensatzauswahl korrigiert, wenn kein Inhalt eingetragen wird.
+          o Die Trefferliste der Senderbox und das Menü der Suchbox werden
+            jetzt geschlossen, wenn die WollMux-Leiste minimiert wird.
+          o Es wurde ein Fehler im FormularMax4000 behoben, der das Bearbeiten
+            eines Formulars unmöglich gemacht hat, wenn Sichtbarkeiten direkt
+            an den Rückgabewert von Funktionen gebunden wurden.
+          o Seit WollMux 6.4.0 war es nicht mehr möglich bei der Suche im
+            Empfängerauswahldialog und Persönlicher Absenderliste bei
+            geeigneter Suchstrategie per Eingabe eines Leerstrings sämtliche
+            Datensätze als Suchergebnis anzuzeigen. Dies ist nun wieder
+            möglich
 
 
  ==================== Neu in Version 10.8 ====================
