@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2011 Landeshauptstadt München
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -17,7 +17,6 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @author Christoph Lutz (D-III-ITD-5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.func;
@@ -26,8 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sun.star.beans.UnknownPropertyException;
-import com.sun.star.document.EventObject;
-import com.sun.star.document.XEventListener;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
@@ -43,7 +40,6 @@ import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 public class StandardPrint
 {
@@ -300,8 +296,7 @@ public class StandardPrint
   /**
    * Erzeugt abhängig von hidden ein sichtbares oder unsichtbares neues leeres
    * Dokument für {@link PrintIntoFile} und setzt die entsprechenden Properties von
-   * pmod, damit das Dokument verwendet wird. Dabei wird auf korrekte Synchronisation
-   * mit dem WollMux geachtet.
+   * pmod, damit das Dokument verwendet wird.
    * 
    * @param pmod
    *          Das XPrintModel in dem die Property gesetzt wird
@@ -315,52 +310,10 @@ public class StandardPrint
   public static XTextDocument createNewTargetDocument(final XPrintModel pmod,
       boolean hidden) throws Exception
   {
-    XTextDocument outputDoc;
-    final XTextDocument[] compo = new XTextDocument[] {
-      null, null };
-
-    WollMuxEventHandler.handleAddDocumentEventListener(new XEventListener()
-    {
-      public void notifyEvent(EventObject arg0)
-      {
-        if (arg0.EventName.equals(WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED))
-        {
-          synchronized (compo)
-          {
-            if (!UnoRuntime.areSame(compo[0], arg0.Source)) return;
-            WollMuxEventHandler.handleRemoveDocumentEventListener(this);
-            compo[1] = compo[0];
-            compo.notifyAll();
-          }
-        }
-      }
-
-      public void disposing(com.sun.star.lang.EventObject arg0)
-      {}
-    });
-
-    synchronized (compo)
-    {
-      outputDoc =
-        compo[0] =
-          UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter",
-            true, true, hidden));
-      pmod.setPropertyValue("PrintIntoFile_OutputDocument", compo[0]);
-
-      try
-      {
-        // max. 30s Warten, dann machen wir weiter, auch ohne Synchronisation
-        long endTime = 30 * 1000 + System.currentTimeMillis();
-        while (compo[1] == null)
-        {
-          long ctime = System.currentTimeMillis();
-          if (ctime >= endTime) break;
-          compo.wait(endTime - ctime);
-        }
-      }
-      catch (InterruptedException i)
-      {}
-    }
+    XTextDocument outputDoc =
+      UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true,
+        true, hidden));
+    pmod.setPropertyValue("PrintIntoFile_OutputDocument", outputDoc);
 
     return outputDoc;
   }
