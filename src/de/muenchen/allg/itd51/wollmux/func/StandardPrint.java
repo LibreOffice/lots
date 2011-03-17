@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2011 Landeshauptstadt München
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -17,7 +17,6 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @author Christoph Lutz (D-III-ITD-5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.func;
@@ -297,8 +296,7 @@ public class StandardPrint
   /**
    * Erzeugt abhängig von hidden ein sichtbares oder unsichtbares neues leeres
    * Dokument für {@link PrintIntoFile} und setzt die entsprechenden Properties von
-   * pmod, damit das Dokument verwendet wird. Dabei wird auf korrekte Synchronisation
-   * mit dem WollMux geachtet.
+   * pmod, damit das Dokument verwendet wird.
    * 
    * @param pmod
    *          Das XPrintModel in dem die Property gesetzt wird
@@ -313,11 +311,9 @@ public class StandardPrint
       boolean hidden) throws Exception
   {
     XTextDocument outputDoc =
-          UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter",
-            true, true, hidden));
-      pmod.setPropertyValue("PrintIntoFile_OutputDocument", outputDoc);
-
-    
+      UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true,
+        true, hidden));
+    pmod.setPropertyValue("PrintIntoFile_OutputDocument", outputDoc);
 
     return outputDoc;
   }
