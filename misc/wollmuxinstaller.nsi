@@ -43,10 +43,17 @@ UninstPage uninstConfirm
 UninstPage instFiles
 
 
+# VARIABLE DECLARATIONS:
+# 
 # The sharedSwitch variable is used by the unopkg call in the installer section
 # It is declared here because it is not only used in the installer section but also in .onInit
 # since the optional "--LOCAL" command line parameter can overwrite it
 Var sharedSwitch
+# 
+# The cmdParameters variable is used to store the command line parameters given in the call
+# of the installer or uninstaller. It is declared here globally because it is not only used
+# in .onInit but also in un.onInit and GetOOoPath
+Var cmdParameters
 
 
 
@@ -204,7 +211,6 @@ Function .onInit
 	StrCpy $sharedSwitch "--shared" ;; "--shared" is default
 	
 	# Get command line parameters
-	Var /GLOBAL cmdParameters
 	${GetParameters} $cmdParameters
 	
 	# Set SilentInstall if command line parameter "--SILENT" was used
@@ -235,6 +241,11 @@ Function .onInit
 	
   skipadmincheck:
 	
+	# Check if command line parameter "--NOKILL" was used - if so we skip execution of TerminateOOo.jar
+	ClearErrors
+	${GetOptions} $cmdParameters "--NOKILL" $R1 ;; read optional "--NOKILL" parameter
+	IfErrors 0 skipKillOOo
+	
 	# Inform User that we will try to close OpenOffice.org
 	MessageBox MB_OKCANCEL|MB_ICONINFORMATION $(TryToKillOOoMessage) /SD IDOK IDOK +2
 	Abort
@@ -254,6 +265,8 @@ Function .onInit
 	  Abort
 	
 	Delete $TEMP\TerminateOOo.jar
+	
+  skipKillOOo:
 	
 	# Set $INSTDIR if command line parameter "--INSTDIR=" was used (this is done in .onInit so the directory page contains the right value when it is displayed)
 	ClearErrors
@@ -281,7 +294,12 @@ FunctionEnd
 
 Function un.onInit
 	Push $R0
-	;; check if user is admin or power user - if not abort
+	Push $R1
+	
+	# Get command line parameters
+	${GetParameters} $cmdParameters
+	
+	# Check if user is admin or power user - if not abort
 	UserInfo::GetAccountType
 	Pop $R0
 	StrCmp $R0 "Admin" +4
@@ -289,8 +307,13 @@ Function un.onInit
 	MessageBox MB_OK|MB_ICONEXCLAMATION $(NeedAdminMessage) /SD IDOK
 	Abort
 	
-	# set context to "all users" for uninstallation
+	# Set context to "all users" for uninstallation
 	SetShellVarContext all ;; default is "current"
+	
+	# Check if command line parameter "--NOKILL" was used - if so we skip execution of TerminateOOo.jar
+	ClearErrors
+	${GetOptions} $cmdParameters "--NOKILL" $R1 ;; read optional "--NOKILL" parameter
+	IfErrors 0 skipKillOOo
 	
 	# Inform User that we will try to close OpenOffice.org
 	MessageBox MB_OKCANCEL|MB_ICONINFORMATION $(TryToKillOOoMessage) /SD IDOK IDOK +2
@@ -313,20 +336,31 @@ Function un.onInit
   skipKillOOo:	  
 	Delete $TEMP\TerminateOOo.jar
 	
+	Pop $R1
 	Pop $R0
 FunctionEnd
 
 
 !macro GetOOOPath UN
 Function ${UN}GetOOoPath
-	# This function returns the full path of the current OpenOffice.org installation.
+	# This function returns the full path of the current OpenOffice.org (or LibreOffice) installation.
 	# It looks in:
 	#  1 - the registry value "" (default) of the key "HKCU\Software\OpenOffice.org\UNO\InstallPath"
 	#  2 - the registry value "" (default) of the key "HKLM\Software\OpenOffice.org\UNO\InstallPath"
+	#  3 - the registry value "" (default) of the key "HKCU\Software\LibreOffice\UNO\InstallPath"
+	#  4 - the registry value "" (default) of the key "HKLM\Software\LibreOffice\UNO\InstallPath"
 	#
-	# If the path could not be found the string "NOTFOUND" is returned
+	# If the path could not be found the string "NOTFOUND" is returned.
+	# If the command line parameter "--LIBRE" is set we skip the search in 1) and 2).
+	
 
 	Push $R0
+	Push $R1
+	
+	# Check if command line parameter "--LIBRE" was used - if so we skip search for OpenOffice.org registry keys
+	ClearErrors
+	${GetOptions} $cmdParameters "--LIBRE" $R1 ;; read optional "--LIBRE" parameter
+	IfErrors 0 skipOOoReg
 	
 	ClearErrors
 	ReadRegStr $R0 HKCU "Software\OpenOffice.org\UNO\InstallPath" ""
@@ -341,8 +375,24 @@ Function ${UN}GetOOoPath
 	StrCmp $R0 "" +2  ;; check if entry is empty
 	IfFileExists $R0\*.* OOoFound  ;; 2) found path in the HKLM OOo registry key
 	StrCpy $R0 "NOTFOUND"
+	
+  skipOOoReg:
+	ClearErrors
+	ReadRegStr $R0 HKCU "Software\LibreOffice\UNO\InstallPath" ""
+	IfErrors +3
+	StrCmp $R0 "" +2  ;; check if entry is empty
+	IfFileExists $R0\*.* OOoFound  ;; 3) found path in the HKCU LibreOffice registry key
+	StrCpy $R0 "NOTFOUND"
+
+	ClearErrors
+	ReadRegStr $R0 HKLM "Software\LibreOffice\UNO\InstallPath" ""
+	IfErrors +3
+	StrCmp $R0 "" +2  ;; check if entry is empty
+	IfFileExists $R0\*.* OOoFound  ;; 4) found path in the HKLM LibreOffice registry key
+	StrCpy $R0 "NOTFOUND"
  
   OOoFound:
+	Pop $R1
 	Exch $R0
 FunctionEnd
 !macroend
