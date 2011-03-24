@@ -79,6 +79,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
@@ -90,6 +91,7 @@ import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.dialog.UIElement.Textarea;
 import de.muenchen.allg.itd51.wollmux.dialog.UIElementFactory.Context;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
@@ -937,15 +939,21 @@ public class FormController implements UIElementEventHandler
      */
     private void addFocusListener(UIElement uiElement)
     {
-      uiElement.getComponent().addFocusListener(new FocusAdapter()
+      Component c = uiElement.getComponent();
+      if (uiElement instanceof Textarea) c = ((Textarea) uiElement).getTextArea();
+
+      c.addFocusListener(new FocusAdapter()
       {
         public void focusGained(FocusEvent e)
         {
           Container c = e.getComponent().getParent();
+          if (e.getComponent() instanceof JTextArea) c = c.getParent();
 
           if (c != null && c instanceof JComponent)
           {
-            ((JComponent) c).scrollRectToVisible(e.getComponent().getBounds());
+            java.awt.Rectangle b = e.getComponent().getBounds();
+            b.x = 0;
+            ((JComponent) c).scrollRectToVisible(b);
             c.repaint();
           }
         }
