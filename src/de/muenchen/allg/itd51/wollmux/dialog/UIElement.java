@@ -634,6 +634,18 @@ public interface UIElement extends Value
       return textAreaComponent;
     }
 
+    /**
+     * Da getComponent das Panel zurückliefert, in dem sich die Textarea befindet,
+     * gibt diese Funktion das eigentliche JTextArea-Objekt zurück.
+     * 
+     * @return
+     * @author Andor Ertsey (D-III-ITD-D101)
+     */
+    public JTextArea getTextArea()
+    {
+      return textarea;
+    }
+
     public String getString()
     {
       return textarea.getText();
