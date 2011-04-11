@@ -1,5 +1,4 @@
-
- ==================== Neu in Version 11.2a ====================
+ ==================== Neu in Version 11.2b ====================
 
     * Bugfixes:
           o Temporäre Dokumente des OpenOffice.org-Seriendruck werden nun auch
@@ -8,6 +7,10 @@
             Exceptions", die mit OOo 3.2.1 in manchen Fällen auftraten.
             Generell konnte der OOo-Seriendruck in Verbindung mit dem WollMux
             beschleunigt werden.
+          o Beim Durchblättern der Steuerelemente in der Formular-GUI mittels
+            Tabulatortaste wird der Inhalt der Formular-GUI jetzt linksbündig
+            gescrollt. Die Formular-GUI wird jetzt auch korrekt gescrollt, wenn
+            eine Textarea den Fokus erhält.
           o Die Anzeige der nicht synchronisierbaren Datensätze aus der
             persönlichen Absenderliste bei der WollMux-Initialisierung erfolgt
             nun ebenfalls nach der in SENDER_DISPLAYTEMPLATE definierten
@@ -38,6 +41,10 @@
             (<Argument>,_<RegEx>,_<Index>) zur Verfügung, mit der
             beispielsweise leichter als bisher Leerzeilen aus Adressen entfernt
             werden können.
+          o Der Windows-Installer des WollMux kennt nun zwei neue
+            Kommandozeilenparameter: --NOKILL und --LIBRE. Eine Beschreibung
+            dieser Parameter finden Sie auf der Wiki-Seite "WollMux
+            installieren".
 
     * Integration eines Patches der Ärztekammer Schleswig-Holstein (Michael
       Stramm) zur Erweiterung der Datenquellen vom Typ ooo um die
