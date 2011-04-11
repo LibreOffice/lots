@@ -26,7 +26,7 @@ OutFile "wollmux-${VERSION}-installer.exe"
 Caption "WollMux Installer"
 BrandingText "(c) Landeshauptstadt München" ;; string to replace "Nullsoft Install System vX.XX" at the bottom of install window
 
-; RequestExecutionLevel admin ;; needed to set ExecutionLevel for Vista/Windows 7 - works only with NSIS ver. 2.21+
+RequestExecutionLevel admin ;; needed to set ExecutionLevel for Vista/Windows 7 - works only with NSIS ver. 2.21+
 AllowRootDirInstall true ;; not necessary but why restrict the user?
 AllowSkipFiles off
 ShowInstDetails hide
