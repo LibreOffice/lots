@@ -612,7 +612,9 @@ public class FormGUI
   private void abort()
   {
     myDoc.close();
-    myFrame.dispose();
+    // Achtung: Der Frame darf hier nicht disposed werden, da bei einem modifizierten
+    // Writer-Dokument zuerst die Sicherheitsabfrage "Speichern/Verwerfen/Abbrechen?"
+    // kommt und im Abbrechen-Fall die Form-GUI nicht geschlossen werden soll.
   }
 
   /**
