@@ -1613,23 +1613,14 @@ public class TextDocumentModel
   }
 
   /**
-   * Schreibt die in {@link #persistentData} gespeicherten Daten neu, d.h. die Daten
-   * werden erst komplett gelöscht und dann dieselben Daten erneut neu angelegt.
+   * Stellt sicher, dass persistente Daten dieses Dokuments auch tatsächlich
+   * persistiert werden.
    * 
-   * FIXME: Diese Methode wird nur für den Workaround für Issue 100374 benötigt. Sie
-   * kann also theoretisch entfernt werden, sobald der Workaround rausfliegt.
-   * 
-   * @author Daniel Benkmann (D-III-ITD-D101)
+   * @author Christoph Lutz (D-III-ITD-D101)
    */
-  public synchronized void rewritePersistantData()
+  synchronized public void flushPersistentData()
   {
-    persistentData.rewriteData(DATA_ID_FORMULARBESCHREIBUNG);
-    persistentData.rewriteData(DATA_ID_FORMULARWERTE);
-    persistentData.rewriteData(DATA_ID_PRINTFUNCTION);
-    persistentData.rewriteData(DATA_ID_SERIENDRUCK);
-    persistentData.rewriteData(DATA_ID_SETTYPE);
-    persistentData.rewriteData(DATA_ID_TOUCH_OOOVERSION);
-    persistentData.rewriteData(DATA_ID_TOUCH_WOLLMUXVERSION);
+    persistentData.flush();
   }
 
   /**

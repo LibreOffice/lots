@@ -58,7 +58,6 @@ import com.sun.star.text.XTextDocument;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.DocumentManager.Info;
 
 /**
@@ -207,30 +206,18 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
   }
 
   /**
-   * onSave oder onSaveAs werden beim Speichern von Dokumenten aufgerufen.
+   * OnSave oder OnSaveAs-Events werden beim Speichern von Dokumenten aufgerufen.
    * 
-   * Wir verwenden diese beiden Events derzeit nur für einen Workaround für
-   * Issue100374, so dass die Methode wieder entfernt werden kann, wenn der
-   * Workaround nicht mehr benötigt wird.
+   * Wir verwenden diese beiden Events um die persistenten Daten des WollMux sicher
+   * zu persistieren (flush).
    * 
-   * @author Christoph Lutz (D-III-ITD-D101) TESTED
+   * @author Christoph Lutz (D-III-ITD-D101)
    */
   private void onSaveOrSaveAs(Object source)
   {
-    // Falls die OOo-Version von Issue 100374 betroffen ist, fangen wir noch
-    // die "OnSave"- und "OnSaveAs"-Events ab, um alle Notizen zu löschen und
-    // wieder neu anzulegen. Ansonsten gehen beim Speichern die vom WollMux in
-    // den Notizen veränderten Daten verloren.
-    if (Workarounds.applyWorkaroundForOOoIssue100374())
-    {
-      XTextDocument xTextDoc = UNO.XTextDocument(source);
-      // Alle Notizen löschen und mit selbem Inhalt neu anlegen
-      DocumentManager.Info info = docManager.getInfo(xTextDoc);
-      if (info != null)
-      {
-        info.getTextDocumentModel().rewritePersistantData();
-      }
-    }
+    XTextDocument xTextDoc = UNO.XTextDocument(source);
+    DocumentManager.Info info = docManager.getInfo(xTextDoc);
+    if (info != null) info.getTextDocumentModel().flushPersistentData();
   }
 
   /**
