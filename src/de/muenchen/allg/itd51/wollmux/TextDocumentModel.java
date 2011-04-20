@@ -267,7 +267,7 @@ public class TextDocumentModel
   /**
    * Verantwortlich für das Speichern persistenter Daten.
    */
-  private PersistentData persistentData;
+  private PersistentDataContainer persistentData;
 
   /**
    * Enthält die Kommandos dieses Dokuments.
@@ -389,7 +389,7 @@ public class TextDocumentModel
     setDocumentModified(modified);
 
     // Auslesen der Persistenten Daten:
-    this.persistentData = new PersistentData(doc);
+    this.persistentData = PersistentData.createPersistentDataContainer(doc);
     String setTypeData = persistentData.getData(DATA_ID_SETTYPE);
     alreadyTouchedAsFormDocument = "formDocument".equals(setTypeData);
     parsePrintFunctions(persistentData.getData(DATA_ID_PRINTFUNCTION));
