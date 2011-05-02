@@ -81,9 +81,14 @@ public class PersistentData
   private static final String PERSISTENT_DATA_MODE = "PERSISTENT_DATA_MODE";
 
   /**
-   * Wert 'legacy' des Attributs PERSISTENT_DATA_MODE
+   * Wert 'annotation' des Attributs PERSISTENT_DATA_MODE
    */
-  private static final String PERSISTENT_DATA_MODE_LEGACY = "legacy";
+  private static final String PERSISTENT_DATA_MODE_ANNOTATION = "annotation";
+
+  /**
+   * Wert 'transition' des Attributs PERSISTENT_DATA_MODE
+   */
+  private static final String PERSISTENT_DATA_MODE_TRANSITION = "transition";
 
   /**
    * Wert 'rdf' des Attributs PERSISTENT_DATA_MODE
@@ -91,16 +96,73 @@ public class PersistentData
   private static final String PERSISTENT_DATA_MODE_RDF = "rdf";
 
   /**
-   * Liefert abhängig von der Konfigurationseinstellung PERSISTENT_DATA_MODE den
-   * dazugehörigen PersistentDataContainer für das Dokument doc.
+   * Wert 'rdfReadLegacy' des Attributs PERSISTENT_DATA_MODE
+   */
+  private static final String PERSISTENT_DATA_MODE_rdfReadLegacy = "rdfReadLegacy";
+
+  /**
+   * Liefert abhängig von der Konfigurationseinstellung PERSISTENT_DATA_MODE
+   * (annotation|transition|rdfReadLegacy|rdf) den dazugehörigen
+   * PersistentDataContainer für das Dokument doc.
    * 
-   * @author Christoph Lutz (D-III-ITD-D101)
+   * Die folgende Aufstellung zeigt das Verhalten der verschiedenen Einstellungen
+   * bezüglich der möglichen Kombinationen von Metadaten in den Ausgangsdokumenten
+   * und der Aktualisierung der Metadaten in den Ergebnisdokumenten. Ein "*"
+   * symbolisiert dabei, welcher Metadatencontainer jeweils aktuell ist bzw. bei
+   * Dokumentänderungen aktualisiert wird.
+   * 
+   * Ausgangsdokument -> bearbeitet durch -> Ergebnisdokument
+   * 
+   * [N*] -> annotation-Mode (WollMux-Alt) -> [N*]
+   * 
+   * [N*] -> transition-Mode -> [N*R*]
+   * 
+   * [N*] -> rdfReadLegacy-Mode -> [R*]
+   * 
+   * [N*] -> rdf-Mode: NICHT UNTERSTÜTZT
+   * 
+   * [N*R*] -> annotation-Mode (WollMux-Alt) -> [N*R]
+   * 
+   * [N*R*] -> transition-Mode -> [N*R*]
+   * 
+   * [N*R*] -> rdfReadLegacy-Mode -> [R*]
+   * 
+   * [N*R*] -> rdf-Mode -> [NR*]
+   * 
+   * [N*R] -> annotation-Mode (WollMux-Alt) -> [N*R]
+   * 
+   * [N*R] -> transition-Mode -> [N*R*]
+   * 
+   * [N*R] -> rdfReadLegacy-Mode -> [R*]
+   * 
+   * [N*R] -> rdf-Mode: NICHT UNTERSTÜTZT
+   * 
+   * [NR*] -> annotation-Mode (WollMux-Alt) : NICHT UNTERSTÜTZT
+   * 
+   * [NR*] -> transition-Mode: NICHT UNTERSTÜTZT
+   * 
+   * [NR*] -> rdfReadLegacy-Mode: NICHT UNTERSTÜTZT
+   * 
+   * [NR*] -> rdf -> [NR*]
+   * 
+   * [R*] -> annotation-Mode (WollMux-Alt): NICHT UNTERSTÜTZT
+   * 
+   * [R*] -> transition-Mode -> [N*R*]
+   * 
+   * [R*] -> rdfReadLegacy-Mode -> [R*]
+   * 
+   * [R*] -> rdf-Mode -> [R*]
+   * 
+   * Agenda: [N]=Dokument mit Notizen; [R]=Dokument mit RDF-Metadaten; [NR]=Dokument
+   * mit Notizen und RDF-Metadaten; *=N/R enthält aktuellen Stand;
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   public static PersistentDataContainer createPersistentDataContainer(
       XTextDocument doc)
   {
     ConfigThingy wmConf = WollMuxSingleton.getInstance().getWollmuxConf();
-    String pdMode = PERSISTENT_DATA_MODE_LEGACY;
+    String pdMode = PERSISTENT_DATA_MODE_TRANSITION;
     try
     {
       pdMode = wmConf.query(PERSISTENT_DATA_MODE).getLastChild().toString();
@@ -108,51 +170,61 @@ public class PersistentData
     catch (NodeNotFoundException e)
     {
       Logger.log(L.m("Attribut %1 nicht gefunden. Verwende Voreinstellung '%2'.",
-        PERSISTENT_DATA_MODE, PERSISTENT_DATA_MODE_LEGACY));
+        PERSISTENT_DATA_MODE, PERSISTENT_DATA_MODE_TRANSITION));
     }
 
-    if (PERSISTENT_DATA_MODE_LEGACY.equals(pdMode))
+    try
     {
-      return new LegacyModeDataContainer(doc);
-    }
-    else if (PERSISTENT_DATA_MODE_RDF.equals(pdMode))
-    {
-      try
+      if (PERSISTENT_DATA_MODE_TRANSITION.equals(pdMode))
+      {
+        return new TransitionModeDataContainer(doc);
+      }
+      else if (PERSISTENT_DATA_MODE_rdfReadLegacy.equals(pdMode))
+      {
+        return new RDFReadLegacyModeDataContainer(doc);
+      }
+      else if (PERSISTENT_DATA_MODE_RDF.equals(pdMode))
       {
         return new RDFBasedPersistentDataContainer(doc);
       }
-      catch (RDFMetadataNotSupportedException e)
+      else if (PERSISTENT_DATA_MODE_ANNOTATION.equals(pdMode))
       {
-        Logger.log(L.m(
-          "Die Einstellung '%1' für Attribut '%2' ist mit dieser OpenOffice.org-Version nicht kompatibel. Verwende Voreinstellung '%3' statt dessen.",
-          pdMode, PERSISTENT_DATA_MODE, PERSISTENT_DATA_MODE_LEGACY));
-        return new LegacyModeDataContainer(doc);
+        return new AnnotationBasedPersistentDataContainer(doc);
+      }
+      else
+      {
+        Logger.error(L.m(
+          "Ungültiger Wert '%1' für Attribut %2. Verwende Voreinstellung '%3' statt dessen.",
+          pdMode, PERSISTENT_DATA_MODE, PERSISTENT_DATA_MODE_TRANSITION));
+        return new TransitionModeDataContainer(doc);
       }
     }
-    else
+    catch (RDFMetadataNotSupportedException e)
     {
-      Logger.log(L.m(
-        "Ungültiger Wert '%1' für Attribut '%2'. Verwende Voreinstellung '%3' statt dessen.",
-        pdMode, PERSISTENT_DATA_MODE, PERSISTENT_DATA_MODE_LEGACY));
-      return new LegacyModeDataContainer(doc);
+      // TODO: Disen Zweig noch testen
+      Logger.error(L.m(
+        "Die Einstellung '%1' für Attribut %2 ist mit dieser OpenOffice.org-Version nicht kompatibel. Verwende Einstellung '%3' statt dessen.",
+        pdMode, PERSISTENT_DATA_MODE, PERSISTENT_DATA_MODE_ANNOTATION));
+      return new AnnotationBasedPersistentDataContainer(doc);
     }
   }
 
   /**
-   * Implementiert den DatenContainer für den legacy-Modus, bei dem Metadaten sowohl
-   * in den Notizen als auch in den RDF-Daten abgelegt werden. Vorrang beim Lesen
-   * haben immer die in den Notizen hinterlegten Daten, damit sichergestellt ist,
-   * dass Dokumente, die mit alten WollMux-Versionen bearbeitet wurden, auch korrekt
-   * gelesen werden. Jede Schreibaktion führt dazu, dass neben den Notizen auch in
-   * die RDF-Daten geschrieben wird (CopyOnWrite). Jede Leseaktion führt dazu, dass
-   * der aus den Notzien gelesene Wert in die RDF-Daten kopiert wird (CopyOnRead),
-   * wobei sich hierbei der der Modified-Status des Dokuments nicht ändert.
+   * Implementiert den DatenContainer für den transition-Modus, bei dem Metadaten
+   * sowohl in den Notizen als auch in den RDF-Daten aktualisiert werden. Vorrang
+   * beim Lesen haben immer die in den Notizen hinterlegten Daten, damit
+   * sichergestellt ist, dass Dokumente, die mit alten WollMux-Versionen bearbeitet
+   * wurden, auch korrekt gelesen werden. Jede Schreibaktion führt dazu, dass neben
+   * den Notizen auch in die RDF-Daten geschrieben wird (CopyOnWrite). Jede
+   * Leseaktion aus einem Container (Notizen bzw. RDF) führt dazu, dass der jeweils
+   * andere Container aktualisiert wird (CopyOnRead), wobei sich dabei aber der
+   * Modified-Status des Dokuments nicht ändern darf.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
-  private static class LegacyModeDataContainer implements PersistentDataContainer
+  private static class TransitionModeDataContainer implements
+      PersistentDataContainer
   {
-
     private PersistentDataContainer rdfData;
 
     private PersistentDataContainer legacy;
@@ -161,16 +233,13 @@ public class PersistentData
 
     /**
      * Erzeugt einen neuen persistenten Datenspeicher im Dokument doc.
+     * 
+     * @throws RDFMetadataNotSupportedException
      */
-    public LegacyModeDataContainer(XTextDocument doc)
+    public TransitionModeDataContainer(XTextDocument doc)
+        throws RDFMetadataNotSupportedException
     {
-      this.rdfData = null;
-      try
-      {
-        this.rdfData = new RDFBasedPersistentDataContainer(doc);
-      }
-      catch (RDFMetadataNotSupportedException e)
-      {}
+      this.rdfData = new RDFBasedPersistentDataContainer(doc);
       this.legacy = new AnnotationBasedPersistentDataContainer(doc);
       this.doc = doc;
     }
@@ -181,28 +250,46 @@ public class PersistentData
      * @see
      * de.muenchen.allg.itd51.wollmux.PersistentDataContainer#getData(java.lang.String
      * )
+     * 
+     * TESTED
      */
     public String getData(String dataId)
     {
       String data = legacy.getData(dataId);
       if (data != null)
       {
-        // CopyOnRead, dabei Modified-Status des Dokuments unangetastet lassen
-        XModifiable mod = UNO.XModifiable(doc);
-        boolean modState = false;
-        if (mod != null) modState = mod.isModified();
-
-        if (rdfData != null) rdfData.setData(dataId, data);
-
-        if (mod != null) try
-        {
-          mod.setModified(modState);
-        }
-        catch (Exception e)
-        {}
+        copyOnRead(rdfData, dataId, data);
+        return data;
       }
-      else if (rdfData != null) data = rdfData.getData(dataId);
+
+      data = rdfData.getData(dataId);
+      if (data != null)
+      {
+        copyOnRead(legacy, dataId, data);
+      }
       return data;
+    }
+
+    /**
+     * Ruft c.setData(dataId, data) auf, wobei der Modified-Status des Dokuments
+     * unangetastet bleibt.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101) TESTED
+     */
+    private void copyOnRead(PersistentDataContainer c, String dataId, String data)
+    {
+      XModifiable mod = UNO.XModifiable(doc);
+      boolean modState = false;
+      if (mod != null) modState = mod.isModified();
+
+      c.setData(dataId, data);
+
+      if (mod != null) try
+      {
+        mod.setModified(modState);
+      }
+      catch (Exception e)
+      {}
     }
 
     /*
@@ -211,22 +298,25 @@ public class PersistentData
      * @see
      * de.muenchen.allg.itd51.wollmux.PersistentDataContainer#setData(java.lang.String
      * , java.lang.String)
+     * 
+     * TESTED
      */
     public void setData(String dataId, String dataValue)
     {
       legacy.setData(dataId, dataValue);
-      // CopyOnWrite
-      if (rdfData != null) rdfData.setData(dataId, dataValue);
+      rdfData.setData(dataId, dataValue); // CopyOnWrite
     }
 
     /*
      * (non-Javadoc)
      * 
      * @see de.muenchen.allg.itd51.wollmux.PersistentDataContainer#flush()
+     * 
+     * TESTED
      */
     public void flush()
     {
-      if (rdfData != null) rdfData.flush();
+      rdfData.flush();
       legacy.flush();
     }
 
@@ -239,8 +329,152 @@ public class PersistentData
      */
     public void removeData(String dataId)
     {
-      if (rdfData != null) rdfData.removeData(dataId);
+      rdfData.removeData(dataId);
       legacy.removeData(dataId);
+    }
+  }
+
+  /**
+   * Implementiert den DatenContainer für den rdf-Modus. Dieser Modus verhält sich
+   * wie folgt:
+   * 
+   * Beim Lesen: Existiert eine Notiz mit Metadaten, so wird diese vorrangig gelesen
+   * (damit sichergestellt ist, dass Dokumente, die mit alten WollMux-Versionen
+   * bearbeitet wurden, auch korrekt gelesen werden). Ansonsten werden die
+   * RDF-Metadaten ausgelesen. Nach dem Lesen einer Notiz wird die Notiz anschließend
+   * gelöscht und ohne Änderung des Modified-Status des Dokuments in die RDF-Daten
+   * übertragen (CopyOnRead).
+   * 
+   * Beim Schreiben: Beim Schreiben wird ausschließlich in die RDF-Metadaten
+   * geschrieben.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private static class RDFReadLegacyModeDataContainer implements
+      PersistentDataContainer
+  {
+    private PersistentDataContainer rdfData;
+
+    private PersistentDataContainer legacy;
+
+    private XTextDocument doc;
+
+    private HashSet<String> removedFromLegacy;
+
+    /**
+     * Erzeugt einen neuen persistenten Datenspeicher im Dokument doc.
+     * 
+     * @throws RDFMetadataNotSupportedException
+     */
+    public RDFReadLegacyModeDataContainer(XTextDocument doc)
+        throws RDFMetadataNotSupportedException
+    {
+      this.rdfData = new RDFBasedPersistentDataContainer(doc);
+      this.legacy = new AnnotationBasedPersistentDataContainer(doc);
+      this.doc = doc;
+      this.removedFromLegacy = new HashSet<String>();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * de.muenchen.allg.itd51.wollmux.PersistentDataContainer#getData(java.lang.String
+     * )
+     * 
+     * TESTED
+     */
+    public String getData(String dataId)
+    {
+      String data = legacy.getData(dataId);
+      if (data != null)
+      {
+        copyOnRead(rdfData, dataId, data);
+        ensureRemovedFromLegacy(dataId);
+      }
+      else
+      {
+        data = rdfData.getData(dataId);
+      }
+      return data;
+    }
+
+    /**
+     * Stellt sicher, dass dataId aus den Notizen gelöscht wurde, bzw. löscht das
+     * Element falls es noch nicht gelöscht wurde.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101) TESTED
+     */
+    private void ensureRemovedFromLegacy(String dataId)
+    {
+      if (!removedFromLegacy.contains(dataId))
+      {
+        removedFromLegacy.add(dataId);
+        legacy.removeData(dataId);
+      }
+    }
+
+    /**
+     * Ruft c.setData(dataId, data) auf, wobei der Modified-Status des Dokuments
+     * unangetastet bleibt.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101) TESTED
+     */
+    private void copyOnRead(PersistentDataContainer c, String dataId, String data)
+    {
+      XModifiable mod = UNO.XModifiable(doc);
+      boolean modState = false;
+      if (mod != null) modState = mod.isModified();
+
+      c.setData(dataId, data);
+
+      if (mod != null) try
+      {
+        mod.setModified(modState);
+      }
+      catch (Exception e)
+      {}
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * de.muenchen.allg.itd51.wollmux.PersistentDataContainer#setData(java.lang.String
+     * , java.lang.String)
+     * 
+     * TESTED
+     */
+    public void setData(String dataId, String dataValue)
+    {
+      rdfData.setData(dataId, dataValue);
+      ensureRemovedFromLegacy(dataId);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.PersistentDataContainer#flush()
+     * 
+     * TESTED
+     */
+    public void flush()
+    {
+      rdfData.flush();
+      legacy.flush();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * de.muenchen.allg.itd51.wollmux.PersistentDataContainer#removeData(java.lang.
+     * String)
+     */
+    public void removeData(String dataId)
+    {
+      rdfData.removeData(dataId);
+      ensureRemovedFromLegacy(dataId);
     }
   }
 
@@ -410,6 +644,8 @@ public class PersistentData
      * @see
      * de.muenchen.allg.itd51.wollmux.PersistentData.DataContainer#getData(java.lang
      * .String)
+     * 
+     * TESTED
      */
     public String getData(String dataId)
     {
@@ -441,6 +677,8 @@ public class PersistentData
      * @see
      * de.muenchen.allg.itd51.wollmux.PersistentData.DataContainer#setData(java.lang
      * .String, java.lang.String)
+     * 
+     * TESTED
      */
     public void setData(String dataId, String dataValue)
     {
@@ -471,6 +709,8 @@ public class PersistentData
      * @see
      * de.muenchen.allg.itd51.wollmux.PersistentData.DataContainer#removeData(java
      * .lang.String)
+     * 
+     * TESTED
      */
     public void removeData(String dataId)
     {
@@ -493,6 +733,8 @@ public class PersistentData
      * (non-Javadoc)
      * 
      * @see de.muenchen.allg.itd51.wollmux.PersistentData.DataContainer#flush()
+     * 
+     * TESTED
      */
     public void flush()
     {
@@ -767,6 +1009,7 @@ public class PersistentData
         }
       }
       UNO.setProperty(doc, RECORD_CHANGES, recordChanges);
+      modifiedDataIDs.remove(dataId);
     }
 
     /**
