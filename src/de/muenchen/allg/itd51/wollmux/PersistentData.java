@@ -175,19 +175,19 @@ public class PersistentData
 
     try
     {
-      if (PERSISTENT_DATA_MODE_TRANSITION.equals(pdMode))
+      if (PERSISTENT_DATA_MODE_TRANSITION.equalsIgnoreCase(pdMode))
       {
         return new TransitionModeDataContainer(doc);
       }
-      else if (PERSISTENT_DATA_MODE_rdfReadLegacy.equals(pdMode))
+      else if (PERSISTENT_DATA_MODE_rdfReadLegacy.equalsIgnoreCase(pdMode))
       {
         return new RDFReadLegacyModeDataContainer(doc);
       }
-      else if (PERSISTENT_DATA_MODE_RDF.equals(pdMode))
+      else if (PERSISTENT_DATA_MODE_RDF.equalsIgnoreCase(pdMode))
       {
         return new RDFBasedPersistentDataContainer(doc);
       }
-      else if (PERSISTENT_DATA_MODE_ANNOTATION.equals(pdMode))
+      else if (PERSISTENT_DATA_MODE_ANNOTATION.equalsIgnoreCase(pdMode))
       {
         return new AnnotationBasedPersistentDataContainer(doc);
       }
