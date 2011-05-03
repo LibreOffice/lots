@@ -61,7 +61,6 @@ import com.sun.star.text.XText;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextFramesSupplier;
-import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XModifiable;
 
 import de.muenchen.allg.afid.UNO;
@@ -162,15 +161,16 @@ public class PersistentData
       XTextDocument doc)
   {
     ConfigThingy wmConf = WollMuxSingleton.getInstance().getWollmuxConf();
-    String pdMode = PERSISTENT_DATA_MODE_TRANSITION;
+    String pdMode;
     try
     {
       pdMode = wmConf.query(PERSISTENT_DATA_MODE).getLastChild().toString();
     }
     catch (NodeNotFoundException e)
     {
-      Logger.log(L.m("Attribut %1 nicht gefunden. Verwende Voreinstellung '%2'.",
-        PERSISTENT_DATA_MODE, PERSISTENT_DATA_MODE_TRANSITION));
+      pdMode = PERSISTENT_DATA_MODE_TRANSITION;
+      Logger.debug(L.m("Attribut %1 nicht gefunden. Verwende Voreinstellung '%2'.",
+        PERSISTENT_DATA_MODE, pdMode));
     }
 
     try
@@ -201,8 +201,7 @@ public class PersistentData
     }
     catch (RDFMetadataNotSupportedException e)
     {
-      // TODO: Disen Zweig noch testen
-      Logger.error(L.m(
+      Logger.log(L.m(
         "Die Einstellung '%1' für Attribut %2 ist mit dieser OpenOffice.org-Version nicht kompatibel. Verwende Einstellung '%3' statt dessen.",
         pdMode, PERSISTENT_DATA_MODE, PERSISTENT_DATA_MODE_ANNOTATION));
       return new AnnotationBasedPersistentDataContainer(doc);
@@ -485,12 +484,7 @@ public class PersistentData
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static class RDFMetadataNotSupportedException extends Exception
-  {
-    public RDFMetadataNotSupportedException(Exception e)
-    {
-      super(e);
-    }
-  }
+  {}
 
   /**
    * Implementiert die neue Zugriffsmethode auf persistente Daten im neuen
@@ -559,16 +553,16 @@ public class PersistentData
     {
       try
       {
-        xDMA = UnoRuntime.queryInterface(XDocumentMetadataAccess.class, doc);
-        if (xDMA == null) throw new RDFMetadataNotSupportedException(null);
+        xDMA = UNO.XDocumentMetadataAccess(doc);
+        if (xDMA == null) throw new RDFMetadataNotSupportedException();
         xRepos = xDMA.getRDFRepository();
         if (wollmuxDatenURI == null)
           wollmuxDatenURI = URI.create(UNO.defaultContext, WOLLMUX_DATEN_URI_STR);
         this.doc = doc;
       }
-      catch (Exception e)
+      catch (Throwable e)
       {
-        throw new RDFMetadataNotSupportedException(e);
+        throw new RDFMetadataNotSupportedException();
       }
     }
 
@@ -1037,14 +1031,15 @@ public class PersistentData
     /*
      * (non-Javadoc)
      * 
-     * @see de.muenchen.allg.itd51.wollmux.PersistentData.DataContainer#flush() TODO:
-     * testen
+     * @see de.muenchen.allg.itd51.wollmux.PersistentData.DataContainer#flush()
+     * 
+     * TESTED
      */
     public void flush()
     {
       if (Workarounds.applyWorkaroundForOOoIssue100374())
       {
-        for (String dataId : modifiedDataIDs)
+        for (String dataId : new HashSet<String>(modifiedDataIDs))
           rewriteData(dataId);
         modifiedDataIDs.clear();
       }
