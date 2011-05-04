@@ -30,12 +30,15 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import javax.swing.JFrame;
 
 import com.sun.star.awt.XTopWindow;
 import com.sun.star.awt.XTopWindowListener;
@@ -589,23 +592,36 @@ public class CoupledWindowController
 
     public void setVisible(final boolean visible)
     {
-      try
+      if (window instanceof JFrame)
       {
-        javax.swing.SwingUtilities.invokeLater(new Runnable()
+        final JFrame frame = (JFrame) window;
+        try
         {
-          public void run()
+          javax.swing.SwingUtilities.invokeLater(new Runnable()
           {
-            try
+            public void run()
             {
-              if (window.isVisible() != visible) window.setVisible(visible);
+              try
+              {
+                if (visible)
+                {
+                  if (frame.getState() != Frame.NORMAL)
+                    frame.setState(Frame.NORMAL);
+                }
+                else
+                {
+                  if (frame.getState() != Frame.ICONIFIED)
+                    frame.setState(Frame.ICONIFIED);
+                }
+              }
+              catch (Exception x)
+              {}
             }
-            catch (Exception x)
-            {}
-          }
-        });
+          });
+        }
+        catch (Exception x)
+        {}
       }
-      catch (Exception x)
-      {}
     }
 
     public void addWindowListener(final WindowListener l)

@@ -119,17 +119,16 @@ public class SachleitendeVerfuegung
 
   private static final String FrameNameVerfuegungspunkt1 =
     "WollMuxVerfuegungspunkt1";
-
-  private static final String zifferPattern = "^([XIV]+|\\d+)\\.\t";
+  //JG: setzte den ZifferPatter entsprechend der Config
+  private static final String zifferPattern = getNumberPattern();
 
   /**
-   * Enthält einen Vector mit den ersten 15 römischen Ziffern. Mehr wird in
+   * Enthält einen Vector mit den ersten 15 Ziffern. Mehr wird in
    * Sachleitenden Verfügungen sicherlich nicht benötigt :-)
    */
-  private static final String[] romanNumbers =
-    new String[] {
-      "I.", "II.", "III.", "IV.", "V.", "VI.", "VII.", "VIII.", "IX.", "X.", "XI.",
-      "XII.", "XIII.", "XIV.", "XV." };
+  //JG: setze Nummern-Array und Abdruckname entsprechend der Config
+  private static final String[] romanNumbers =getNumbers();
+  private static final String copyName=getCopyName();
 
   /**
    * Setzt das Absatzformat des Absatzes, der range berührt, auf
@@ -640,9 +639,10 @@ public class SachleitendeVerfuegung
    */
   private static boolean isAbdruck(XTextRange paragraph)
   {
+	  //JG:"Abdruck" durch generische Zuweisung ersetzt
     String str = paragraph.getString();
-    return str.contains(L.m("Abdruck von I."))
-      || str.contains(L.m("Abdruck von <Vorgänger>."));
+    return str.contains(L.m(copyName+" von "+romanNumbers[0]))
+      || str.contains(L.m(copyName+" von <Vorgänger>."));
   }
 
   /**
@@ -658,10 +658,11 @@ public class SachleitendeVerfuegung
    */
   private static String getAbdruckSuffix(XTextRange paragraph)
   {
+	  //JG:"Abdruck" durch generische Zuweisung ersetzt und Pattern erweitert
     String str = paragraph.getString();
     Matcher m =
       Pattern.compile(
-        "[XIV0-9]+\\.\\s*Abdruck von I\\.(, [XIV0-9]+\\.)*( und [XIV0-9]+\\.)?(.*)").matcher(
+        "[XIV0-9]+\\.\\s*"+copyName+" von I\\.(, [XIV0-9]+\\.)*( und [XIV0-9]+\\.)?(.*)").matcher(
         str);
     if (m.matches()) return m.group(3);
     return "";
@@ -882,7 +883,8 @@ public class SachleitendeVerfuegung
    */
   private static String abdruckString(int number)
   {
-    String str = romanNumber(number) + "\t" + L.m("Abdruck von ") + romanNumber(1);
+	  //JG:"Abdruck" durch generische Zuweisung ersetzt
+    String str = romanNumber(number) + "\t" + L.m(copyName+" von ") + romanNumber(1);
     for (int j = 2; j < (number - 1); ++j)
       str += ", " + romanNumber(j);
     if (number >= 3) str += L.m(" und ") + romanNumber(number - 1);
@@ -927,7 +929,7 @@ public class SachleitendeVerfuegung
     XTextRange punkt1 = getVerfuegungspunkt1(doc);
     if (punkt1 != null)
     {
-      Verfuegungspunkt original = new Verfuegungspunkt(L.m("I. Original"));
+      Verfuegungspunkt original = new Verfuegungspunkt(L.m(romanNumbers[0]+" Original"));
       original.addZuleitungszeile(L.m("Empfänger siehe Empfängerfeld"));
       verfuegungspunkte.add(original);
     }
@@ -1676,5 +1678,117 @@ public class SachleitendeVerfuegung
       UNO.setProperty(style, "FollowStyle", CharStyleNameDefault);
       UNO.setProperty(style, "CharWeight", Float.valueOf(FontWeight.BOLD));
     }
+  }
+  
+  /**
+   * Wertet die wollmux,conf-Direktive ABDRUCK_NAME aus und setzt diese entsprechend
+   * in der OOo Erweiterung. Ist kein ABDRUCK_NAME gegeben, so wird "Abdruck" als
+   * Standardwert gesetzt.
+   * (JG:)
+   * @return Kopiebezeichner als String
+   */
+  private static String getCopyName()
+  {
+	String name=null;
+	ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
+    ConfigThingy nan = conf.query("SachleitendeVerfuegungen").query("ABDRUCK_NAME");
+    if (nan.count() > 0)
+    {
+      try
+      {
+        name = nan.getLastChild().toString();
+        Logger.debug("Set copyName to \""+name+"\"");
+      }
+      catch (NodeNotFoundException x)
+      {
+        Logger.error(x);
+      }
+    }
+    if (name==null||name.length()<1||name.equalsIgnoreCase("null")){
+    	name="Abdruck";
+    }
+    return name;
+  }
+  
+  /**
+   * Wertet die wollmux,conf-Direktive NUMBERS aus und setzt diese entsprechend
+   * in der OOo Erweiterung. Ist kein Wert gegeben, so werden römische Ziffern
+   * verwendet.
+   * (JG:)
+   * @return Ziffern als String array
+   */
+  private static String [] getNumbers()
+  {
+	String name=null;
+	String numberArray[]=null;
+	ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
+    ConfigThingy nan = conf.query("SachleitendeVerfuegungen").query("NUMBERS");
+    if (nan.count() > 0)
+    {
+      try
+      {
+        name = nan.getLastChild().toString();
+        Logger.debug("Set number formatting to \""+name+"\"");
+      }
+      catch (NodeNotFoundException x)
+      {
+        Logger.error(x);
+      }
+    }
+    //if roman or nothing is selected switch to roman
+    if (name==null||name.equalsIgnoreCase("roman")){
+    	numberArray=new String[] {
+    		      "I.", "II.", "III.", "IV.", "V.", "VI.", "VII.", "VIII.", "IX.", "X.", "XI.",
+    		      "XII.", "XIII.", "XIV.", "XV." };
+    }
+    //if arabic is selected set numberArray to arabic numbers
+    else if (name==null||name.equalsIgnoreCase("arabic")){
+    	numberArray=new String[] {
+    		      "1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.", "10.", "11.",
+    		      "12.", "13.", "14.", "15." };		
+    }else {
+    	//the default value is roman
+    	numberArray=new String[] {
+  		      "I.", "II.", "III.", "IV.", "V.", "VI.", "VII.", "VIII.", "IX.", "X.", "XI.",
+  		      "XII.", "XIII.", "XIV.", "XV." };
+    }
+    return numberArray;
+  }
+  
+  /**
+   * Wertet die wollmux,conf-Direktive NUMBERS aus und setzt entsprechend dieser
+   * den Ziffer-Pattern.
+   * (JG:)
+   * @return Ziffer-Pattern als String
+   */
+  private static String getNumberPattern()
+  {
+	String pattern=null;
+	ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
+    ConfigThingy nan = conf.query("SachleitendeVerfuegungen").query("NUMBERS");
+    if (nan.count() > 0)
+    {
+      try
+      {
+    	  pattern = nan.getLastChild().toString();
+        Logger.debug("Set number pattern to \""+pattern+"\"");
+      }
+      catch (NodeNotFoundException x)
+      {
+        Logger.error(x);
+      }
+    }
+    //if roman or nothing is selected switch to roman
+    if (pattern==null||pattern.equalsIgnoreCase("roman")){
+    	pattern = "^([XIV]+|\\d+)\\.\t";
+    }
+    //if arabic is selected set numberArray to arabic numbers
+    else if (pattern==null||pattern.equalsIgnoreCase("arabic")){
+    	pattern= "^([XIV0-9]+|\\d+)\\.\t";	
+    }else {
+    	//the default value is roman
+    	pattern = "^([XIV]+|\\d+)\\.\t";
+    }
+    return pattern;
   }
 }
