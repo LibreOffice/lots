@@ -24,6 +24,8 @@
  * 29.10.2007 | BNK | Erstellung
  * 29.01.2008 | BNK | Fertigstellung
  * 30.01.2008 | BNK | Workaround für Issue 73229
+ * 04.05.2011 | ERT | (ERT)[R120366][#6797]In appendToFile wurde das 
+ *                    Property PageStyleName nicht korrekt ausgelesen.
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -116,10 +118,19 @@ public class PrintIntoFile
     {
       String url = storeInTemporaryFile(inputDoc, dest);
 
-      String inputDocFirstPageStyleName =
-        (String) UNO.getProperty(
-          UNO.XEnumerationAccess(inputDoc.getText()).createEnumeration().nextElement(),
-          "PageStyleName");
+      String inputDocFirstPageStyleName = "";
+      XEnumeration enu =
+        UNO.XEnumerationAccess(inputDoc.getText()).createEnumeration();
+      while (enu.hasMoreElements())
+      {
+        Object o = enu.nextElement();
+        Object prop = UNO.getProperty(o, "PageStyleName");
+        if (prop != null)
+        {
+          inputDocFirstPageStyleName = (String) prop;
+          break;
+        }
+      }
 
       boolean startsWithSection = startsWithSection(inputDoc);
 
