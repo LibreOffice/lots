@@ -125,9 +125,9 @@ public class PrintIntoFile
       {
         Object o = enu.nextElement();
         Object prop = UNO.getProperty(o, "PageStyleName");
-        if (prop != null)
+        if (AnyConverter.isString(prop))
         {
-          inputDocFirstPageStyleName = (String) prop;
+          inputDocFirstPageStyleName = AnyConverter.toString(prop);
           break;
         }
       }
