@@ -41,8 +41,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Vector;
 
@@ -54,6 +52,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -66,12 +65,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
-import com.sun.star.ui.dialogs.ExecutableDialogResults;
-import com.sun.star.ui.dialogs.XFolderPicker;
-
-import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
@@ -388,37 +382,17 @@ class MailMergeParams
       hbox = Box.createHorizontalBox();
       final JTextField targetDirectory = new JTextField();
       hbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(targetDirectory));
-      hbox.add(new JButton(new AbstractAction("Suchen...")
+      hbox.add(new JButton(new AbstractAction(L.m("Suchen..."))
       {
         public void actionPerformed(ActionEvent e)
         {
-          parent.setAlwaysOnTop(false);
-          dialog.setAlwaysOnTop(false);
-          dialog.setEnabled(false);
-          dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-          final DirectoryPicker dirPicker = new DirectoryPicker();
-          dirPicker.pickDir(targetDirectory.getText(), new Runnable()
-          {
-            public void run()
-            {
-              dialog.setEnabled(true);
-              dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-              parent.setAlwaysOnTop(true);
-              dialog.setAlwaysOnTop(true);
-              if (dirPicker.result != null)
-              {
-                try
-                {
-                  File dir = new File(new URI(dirPicker.result));
-                  targetDirectory.setText(dir.getAbsolutePath());
-                }
-                catch (URISyntaxException x)
-                {
-                  Logger.error(x);
-                }
-              }
-            }
-          });
+          final JFileChooser fc = new JFileChooser(targetDirectory.getText());
+          fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          fc.setMultiSelectionEnabled(false);
+          fc.setDialogTitle(L.m("Verzeichnis für die Serienbriefdateien wählen"));
+          int ret = fc.showSaveDialog(dialog);
+          if (ret == JFileChooser.APPROVE_OPTION)
+            targetDirectory.setText(fc.getSelectedFile().getAbsolutePath());
         }
       }));
 
@@ -574,49 +548,4 @@ class MailMergeParams
     });
     return actions;
   }
-
-  private static class DirectoryPicker extends Thread
-  {
-    private Runnable runnable;
-
-    private String startDir;
-
-    public String result = null;
-
-    public void pickDir(String startDir, Runnable runnable)
-    {
-      this.runnable = runnable;
-      this.startDir = startDir;
-      this.start();
-    }
-
-    public void run()
-    {
-      try
-      {
-        XFolderPicker picker =
-          UNO.XFolderPicker(UNO.createUNOService("com.sun.star.ui.dialogs.FolderPicker"));
-        picker.setTitle(L.m("Verzeichnis für die Serienbriefdateien wählen"));
-        if (startDir != null && startDir.length() > 0)
-          try
-          {
-            picker.setDisplayDirectory(UNO.getParsedUNOUrl("file:" + startDir).Complete);
-          }
-          catch (Exception x)
-          {}
-
-        if (picker.execute() == ExecutableDialogResults.OK)
-        {
-          result = picker.getDirectory();
-        }
-      }
-      catch (Exception x)
-      {
-        Logger.error(x);
-      }
-      runnable.run();
-    }
-
-  }
-
 }
