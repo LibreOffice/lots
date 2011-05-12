@@ -5,7 +5,7 @@
  *            WM('insertFormValue'...)-Bookmark entsprechende FormField-Elemente
  *            erzeugt.
  * 
- * Copyright (c) 2009 Landeshauptstadt München
+ * Copyright (c) 2011 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -31,6 +31,7 @@
  * 03.01.2007 | BNK | +TextFieldFormField
  *                  | +createFormField(doc, textfield)
  * 08.07.2009 | BED | Änderungen im Rahmen von R48539 (#2867)
+ * 12.05.2011 | BED | Refresh von Textfeldern mit XRefreshable.refresh() [#6840]
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -57,6 +58,7 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.UnoRuntime;
+import com.sun.star.util.XRefreshable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
@@ -663,10 +665,18 @@ public final class FormFieldFactory
 
     public void setValue(String value)
     {
-      if (inputField != null && UNO.XUpdatable(inputField) != null)
+      if (inputField != null && doc != null)
       {
+        // Neuen Inhalt in inputField schreiben
         UNO.setProperty(inputField, "Content", value);
-        UNO.XUpdatable(inputField).update();
+
+        // Refresh auf alle Textfelder im Dokument, damit neuer Inhalt angezeigt wird
+        XEnumerationAccess textFields = UNO.XTextFieldsSupplier(doc).getTextFields();
+        XRefreshable xRefreshable = UNO.XRefreshable(textFields);
+        if (xRefreshable != null)
+        {
+          xRefreshable.refresh();
+        }
       }
     }
 
@@ -922,7 +932,9 @@ public final class FormFieldFactory
     /*
      * (non-Javadoc)
      * 
-     * @see de.muenchen.allg.itd51.wollmux.FormFieldFactory.BasicFormField#getFormElementValue()
+     * @see
+     * de.muenchen.allg.itd51.wollmux.FormFieldFactory.BasicFormField#getFormElementValue
+     * ()
      */
     public String getFormElementValue()
     {
