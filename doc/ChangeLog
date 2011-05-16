@@ -1,4 +1,4 @@
- ==================== Neu in Version 11.2b ====================
+ ==================== Neu in Version 11.2c ====================
 
     * Bugfixes:
           o Temporäre Dokumente des OpenOffice.org-Seriendruck werden nun auch
@@ -10,11 +10,26 @@
           o Beim Durchblättern der Steuerelemente in der Formular-GUI mittels
             Tabulatortaste wird der Inhalt der Formular-GUI jetzt linksbündig
             gescrollt. Die Formular-GUI wird jetzt auch korrekt gescrollt, wenn
-            eine Textarea den Fokus erhält.
+            eine Textarea den Fokus erhält (dies hat zudem den gewünschten
+            Nebeneffekt, dass nun keine Tabs mehr in eine Textarea beim Druck
+            auf die Tabulatortaste eingefügt werden).
           o Die Anzeige der nicht synchronisierbaren Datensätze aus der
             persönlichen Absenderliste bei der WollMux-Initialisierung erfolgt
             nun ebenfalls nach der in SENDER_DISPLAYTEMPLATE definierten
             Formatierung.
+          o Die Formular-GUI konnte in einem speziellen Fall unabhängig vom
+            zugehörigen Dokument geschlossen werden (durch Klick auf den
+            Abbrechen-Button in der Formular-GUI eines modifizierten Dokuments
+            und anschließendem Klick auf "Abbrechen" in der Sicherheitsabfrage
+            "Speichern/Verwerfen/Abbrechen?"). Dieser Bug ist nun behoben.
+          o Bei der Verwendung der Druckoption "in einzelne Dateien schreiben"
+            des WollMux-Seriendrucks verschwand unter Windows nach der Auswahl
+            eines Zielverzeichnises über "Suchen..." der Druckdialog. Dieser
+            Bug ist nun behoben.
+          o Bei Verwendung von OpenOffice.org 3.2.1 (und späteren Versionen)
+            wurden alle Checkboxen im Dokument nicht mehr angezeigt, wenn über
+            die WollMux-Formular-GUI Eingabefelder im Dokument befüllt wurden.
+            Dieser Bug ist nun behoben.
     * Allgemeine Verbesserungen:
           o Die Dump-Info-Datei, die vom WollMux zur Diagnose von Fehlern
             generiert werden kann, enthält nun auch Informationen über IP-
