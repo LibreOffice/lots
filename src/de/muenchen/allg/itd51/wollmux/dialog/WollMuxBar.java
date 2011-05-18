@@ -95,8 +95,12 @@ import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -104,6 +108,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -125,6 +130,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
@@ -181,6 +187,20 @@ public class WollMuxBar
     SUPPORTED_ACTIONS.add("menuManager");
     SUPPORTED_ACTIONS.add("options");
   }
+
+  /**
+   * Im Prinzip ist WollMuxBar ein Singleton, wobei instance die aktuell aktive
+   * Instanz der WollMuxBar enthält. Wird gesetzt in
+   * readWollMuxBarConfAndStartWollMuxBar(...) und gelöscht in WollMuxBar.abort()
+   */
+  private static WollMuxBar instance = null;
+
+  /**
+   * Wird in startWollMuxBar(args) und in terminate(status) verwendet um
+   * sicherzustellen, dass das Programm erst bei Beendigung der letzten laufenden
+   * Instanz beendet wird.
+   */
+  private static Integer startedCounter = 0;
 
   /**
    * Verwaltet die Konfiguration der WollMuxBar.
@@ -1269,11 +1289,12 @@ public class WollMuxBar
    */
   private void abort()
   {
+    instance = null;
     eventHandler.handleTerminate();
     myFrame.dispose();
     eventHandler.waitForThreadTermination();
 
-    System.exit(0);
+    terminate(0);
   }
 
   /**
@@ -2156,8 +2177,8 @@ public class WollMuxBar
 
   private void error(String errorMsg)
   {
-    JOptionPane.showMessageDialog(null, L.m(
-      "%1\nVerständigen Sie Ihre Systemadministration.", errorMsg),
+    JOptionPane.showMessageDialog(null,
+      L.m("%1\nVerständigen Sie Ihre Systemadministration.", errorMsg),
       L.m("Fehlerhafte Konfiguration"), JOptionPane.ERROR_MESSAGE);
   }
 
@@ -2177,62 +2198,147 @@ public class WollMuxBar
       URL toOpenUrl = toOpen.toURI().toURL();
       urlStr = UNO.getParsedUNOUrl(toOpenUrl.toExternalForm()).Complete;
       UNO.loadComponentFromURL(urlStr, true, MacroExecMode.USE_CONFIG);
-      System.exit(0);
+      System.exit(0); // terminate() hier nicht notwendig (noch keine instanz)
     }
     catch (Exception x)
     {
       System.err.println(L.m("Versuch, URL \"%1\" zu öffnen gescheitert!", urlStr));
       x.printStackTrace();
-      System.exit(1);
+      System.exit(1); // terminate() hier nicht notwendig (noch keine instanz)
     }
   }
 
   /**
-   * Startet die WollMuxBar.
+   * Startet die WollMuxBar, wobei die Argumente --load, --fifo und --firstrun
+   * unabhängig von den restlichen Argumenten der WollMuxBar zuerst ausgewertet
+   * werden.
+   * 
+   * @param args
+   *          --fifo, --firstrun, --load, --mm. Außerdem --minimize, --topbar,
+   *          --normalwindow um das Anzeigeverhalten festzulegen.
+   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
+   */
+  public static void main(String[] args)
+  {
+    // Logger.init(Logger.DEBUG); // Logger wird erst in startWollMuxBar korrekt
+    // initialisiert. Daher hier für Debug-Zwecke per Hand initialisieren.
+
+    // Schalter --fifo und --firstrun und --load vorgezogen behandeln:
+    List<String> restArgs = new ArrayList<String>();
+    boolean firstrun = false;
+    String fifoName = null;
+    for (int i = 0; i < args.length; ++i)
+    {
+      String arg = args[i];
+      if (arg.equals("--firstrun"))
+        firstrun = true;
+      else if (arg.equals("--fifo"))
+      {
+        if (i == args.length - 1)
+        {
+          System.err.println(L.m("--fifo erwartet genau einen weiteren Parameter!"));
+          System.exit(1); // terminate() hier nicht notwendig (noch keine instanz)
+        }
+        i++; // nächsten Parameter auslesen
+        fifoName = args[i];
+        if (!"-".equals(fifoName) && !new File(fifoName).canRead())
+        {
+          System.err.println(L.m("fifo-Datei '%1' kann nicht gelesen werden!",
+            fifoName));
+          System.exit(1); // terminate() hier nicht notwendig (noch keine instanz)
+        }
+      }
+      else if (arg.equals("--load"))
+      {
+        if (i == args.length - 1)
+        {
+          System.err.println(L.m("--load erwartet genau einen weiteren Parameter!"));
+          System.exit(1); // terminate() hier nicht notwendig (noch keine instanz)
+        }
+        i++; // nächsten Paramter auslesen
+        String loadArg = args[i];
+        if (loadArg.length() == 0) terminate(0);
+        load(loadArg);
+        // sollte nie erreicht werden, da load() exit() aufruft.
+        System.exit(1); // terminate() hier nicht notwendig (noch keine instanz)
+      }
+      else
+      {
+        restArgs.add(arg);
+      }
+    }
+
+    // Ist --fifo gesetzt, wird WollMuxBar über fifo-Modus gestartet, andernfalls
+    // direkt.
+    if (fifoName != null)
+    {
+      FifoHandler.handleFifo(fifoName, firstrun, restArgs);
+    }
+    else
+    {
+      startWollMuxBar(restArgs);
+    }
+  }
+
+  /**
+   * Startet die WollMuxBar und kann aus mehreren Threads aufgerufen werden, da
+   * synchronized.
    * 
    * @param args
    *          --minimize, --topbar, --normalwindow um das Anzeigeverhalten
    *          festzulegen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static void main(String[] args)
+  synchronized public static void startWollMuxBar(List<String> args)
   {
+    Logger.debug(L.m("Starte WollMuxBar mit args '%1'.", niceArgs(args)));
+    synchronized (startedCounter)
+    {
+      startedCounter++;
+    }
+
+    // Läuft bereits eine WollMuxBar, so wird diese hier zunächst geschlossen:
+    if (instance != null)
+    {
+      try
+      {
+        SwingUtilities.invokeAndWait(new Runnable()
+        {
+          public void run()
+          {
+            instance.abort();
+          }
+        });
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+      }
+    }
+
+    // neue Instanz starten:
     int windowMode = -1;
     boolean quickstarter = false;
     boolean menumanager = false;
-    if (args.length > 0)
+    Iterator<String> i = args.iterator();
+    while (i.hasNext())
     {
-      for (int i = 0; i < args.length; ++i)
+      String arg = i.next();
+
+      if (arg.equals("--minimize"))
+        windowMode = WollMuxBarConfig.MINIMIZE_TO_TASKBAR_MODE;
+      else if (arg.equals("--topbar"))
+        windowMode = WollMuxBarConfig.ALWAYS_ON_TOP_WINDOW_MODE;
+      else if (arg.equals("--normalwindow"))
+        windowMode = WollMuxBarConfig.NORMAL_WINDOW_MODE;
+      else if (arg.equals("--quickstarter"))
+        quickstarter = true;
+      else if (arg.equals("--mm"))
+        menumanager = true;
+      else
       {
-        String arg = args[i];
-
-        if (arg.equals("--minimize"))
-          windowMode = WollMuxBarConfig.MINIMIZE_TO_TASKBAR_MODE;
-        else if (arg.equals("--topbar"))
-          windowMode = WollMuxBarConfig.ALWAYS_ON_TOP_WINDOW_MODE;
-        else if (arg.equals("--normalwindow"))
-          windowMode = WollMuxBarConfig.NORMAL_WINDOW_MODE;
-        else if (arg.equals("--quickstarter"))
-          quickstarter = true;
-        else if (arg.equals("--mm"))
-          menumanager = true;
-        else if (arg.equals("--load"))
-        {
-          if (i == args.length - 1)
-          {
-            System.err.println(L.m("--load erwartet genau einen weiteren Parameter!"));
-            System.exit(1);
-          }
-
-          if (args[i + 1].length() == 0) System.exit(0);
-          load(args[i + 1]);
-          System.exit(1); // sollte nie erreicht werden, da load() exit() aufruft.
-        }
-        else
-        {
-          System.err.println(L.m("Unbekannter Aufrufparameter: %1", arg));
-          System.exit(1);
-        }
+        System.err.println(L.m("Unbekannter Aufrufparameter: %1", arg));
+        terminate(1);
       }
 
     }
@@ -2243,6 +2349,236 @@ public class WollMuxBar
 
     readWollMuxBarConfAndStartWollMuxBar(windowMode, quickstarter, menumanager,
       wollmuxConf);
+  }
+
+  /**
+   * Wird die letzte mit startWollMuxBar() gestartete Instanz beendet, so räumt diese
+   * Methode zunächst auf und macht dann einen System.exit(status). Diese Methode
+   * MUSS an allen Stellen verwendet werden, an denen normalerweise System.exit()
+   * verwendet würde (außer der System.exit()-Aufruf wird explizit per Kommentar
+   * begründet).
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private static void terminate(int status)
+  {
+    synchronized (startedCounter)
+    {
+      startedCounter--;
+      if (startedCounter <= 0)
+      {
+        Logger.debug(L.m("Beende WollMuxBar mit Status %1.", status));
+        FifoHandler.terminate();
+        System.exit(status);
+      }
+    }
+  }
+
+  /**
+   * Enthält alle Daten und Methoden die für den Fifo-Modus notwendig sind. Im
+   * Fifo-Modus gibt es eine WollMuxBar, die als Server-Prozess fungiert, der auf
+   * einer fifo-Pipe lauscht und später aufgerufene WollMuxBar-Prozesse, die als
+   * Clients auftreten. Beim Aufruf der WollMuxBar werden alle Argumente dieses
+   * Aufrufs an den Server-Prozess weitergeleitet, der sie dann an zentraler Stelle
+   * abhängig vom bisherigen Kontext (z.B. WollMuxBar ist bereits geöffnet) behandeln
+   * kann.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private static class FifoHandler
+  {
+    /**
+     * Enthält einen in dieser VM statischen Zufallswert um die FifoHandler
+     * verschiedener WollMuxBar-Aufrufe in Debugausgaben voneinander unterscheiden zu
+     * können.
+     */
+    private static int randInt = new Random().nextInt();
+
+    /**
+     * Enthält den Thread des aktuell laufenden fifo-Listener-Servers (falls
+     * vorhanden), oder null.
+     */
+    private static Thread fifoListenerThread = null;
+
+    /**
+     * Enthält das File-Objekt auf die verwendete fifo-Datei.
+     */
+    private static File fifo = null;
+
+    /**
+     * Behandelt den Aufruf der WollMuxBar mit den Argumenten args im Fifo-Modus, bei
+     * dem über die Pipe fifoName zwischen den Prozessen kommuniziert wird; Ist
+     * firstrun angegeben, so weiß der Handler, dass er nicht erst nach einem
+     * entfernten "Server" suchen muss, sondern diese Instanz der Server sein soll
+     * und sofort gestartet werden kann.
+     * 
+     * @param fifoName
+     *          Filename der Fifo-Pipe
+     * @param firstrun
+     *          Shortcut zum Überspringen des Tests nach einer entfernten WollMuxBar
+     * @param args
+     *          Die Argumente, mit der die WollMuxBar gestartet werden soll.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public static void handleFifo(String fifoName, boolean firstrun,
+        final List<String> args)
+    {
+      fifo = new File(fifoName);
+      if (firstrun)
+      {
+        // Der firstrun-Schalter dient der Beschleunigung, dass callRemoteApplication
+        // nicht nutzlos aufgerufen werden muss und damit in einen Timeout laufen
+        // würde. Deshalb wird startWollMuxBar direkt aufgerufen.
+        startFifoListener(fifo);
+        startWollMuxBar(args);
+      }
+      else if (callRemoteApplication(fifo, args))
+      {
+        Logger.debug(L.m("%1: Entfernter Aufruf bestätigt.", randInt));
+        // startWollMuxBar(args) wird in der entfernten WollMuxBar ausgeführt.
+        System.exit(0); // terminate() hier nicht notwendig (noch keine instanz)
+      }
+      else
+      {
+        Logger.debug(L.m("%1: Entfernter Aufruf missglückt.", randInt));
+        startFifoListener(fifo);
+        // startWollMuxBar(args) wird indirekt aufgerufen, da das obige
+        // callRemoteApplication() bereits in die Pipe geschrieben hat und
+        // startFifoListener(fifo) das erste Element aus der Pipe ausliest und damit
+        // die WollMuxBar startet.
+      }
+    }
+
+    /**
+     * Startet einen Listener, der in einem eigenen Server-Thread auf der fifo-Pipe
+     * fifo lauscht und übergebene Argumente externer WollMuxBar-Aufrufe bearbeitet.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    private static void startFifoListener(final File fifo)
+    {
+      Logger.debug(L.m("%1: Starte Fifo-Listener mit Fifo-Pipe '%2'.", randInt, fifo));
+      fifoListenerThread = new Thread()
+      {
+        public void run()
+        {
+          while (true)
+          {
+            try
+            {
+              // Die folgende Zeile blockt so lange, bis sich ein Client-Prozess
+              // connected.
+              ObjectInputStream ois =
+                new ObjectInputStream(new FileInputStream(fifo));
+              try
+              {
+                @SuppressWarnings("unchecked")
+                final List<String> args = (List<String>) ois.readObject();
+                new Thread()
+                {
+                  public void run()
+                  {
+                    startWollMuxBar(args);
+                  }
+                }.start();
+              }
+              catch (ClassNotFoundException e)
+              {
+                Logger.error(e);
+              }
+              ois.close();
+            }
+            catch (IOException e)
+            {
+              Logger.debug(L.m("%1: Lesevorgang von FIFO-Pipe '%2' unterbrochen.",
+                randInt, fifo));
+              Logger.debug(e);
+            }
+          }
+        }
+      };
+      fifoListenerThread.start();
+    }
+
+    /**
+     * Versucht args über die fifo-Pipe fifo an einen evtl. gerade laufende
+     * Server-Prozess weiter zu geben und liefert true zurück, wenn das geklappt hat,
+     * oder false, wenn kein Server gelauscht hat und daher ein Timeout (von derzeit
+     * 2s) aktiv werden musste.
+     * 
+     * @param fifo
+     *          Die fifo, über die der entfernte Aufruf versucht werden soll.
+     * @param args
+     *          Die Argumente, mit denen die WollMuxBar über den entfernten
+     *          Server-Prozess ausgeführt werden soll.
+     * @return true, wenn ein Server-Prozess an die Pipe connected ist und den Aufruf
+     *         angenommen hat oder false, wenn innerhalb des Timeouts (2s) kein
+     *         Serverprozess verbunden ist.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    private static boolean callRemoteApplication(final File fifo,
+        final List<String> args)
+    {
+      Logger.debug(L.m("%1: Versuche entfernte WollMuxBar aufzurufen mit '%2'.",
+        randInt, niceArgs(args)));
+      final boolean[] fertig = new boolean[] { false };
+      Thread t = new Thread()
+      {
+        public void run()
+        {
+          try
+          {
+            // Der folgende Aufruf blockt so lange, bis sich ein Serverprozess
+            // connected.
+            ObjectOutputStream o =
+              new ObjectOutputStream(new FileOutputStream(fifo));
+            o.writeObject(args);
+            synchronized (fertig)
+            {
+              fertig[0] = true;
+              fertig.notify();
+            }
+          }
+          catch (Exception e)
+          {
+            Logger.error(e);
+          }
+        }
+      };
+      t.start();
+      try
+      {
+        synchronized (fertig)
+        {
+          fertig.wait(2000);
+        }
+      }
+      catch (InterruptedException e)
+      {}
+      return fertig[0];
+    }
+
+    /**
+     * Sollte vor der Beendigung des Prozesses aufgerufen werden und sorgt dafür,
+     * dass das fifo-File des Server-Prozesses (falls er hier läuft) beim Beenden
+     * gelöscht wird und auch sonst aufgeräumt wird.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public static void terminate()
+    {
+      if (fifoListenerThread != null)
+      {
+        if (fifo != null)
+        {
+          Logger.debug(L.m("%1: Lösche fifo-File '%2'.", randInt, fifo));
+          fifo.delete();
+        }
+        fifoListenerThread = null;
+      }
+    }
   }
 
   /**
@@ -2288,7 +2624,6 @@ public class WollMuxBar
     {
       Logger.debug(L.m("WollMuxBar gestartet"));
 
-      WollMuxBar bar = null;
       if (combinedConf.query("Symbolleisten").count() == 0)
       {
         Logger.error(WOLLMUX_CONFIG_ERROR_MESSAGE);
@@ -2296,14 +2631,14 @@ public class WollMuxBar
           L.m("Fehlerhafte Konfiguration"), JOptionPane.ERROR_MESSAGE);
       }
       else
-        bar =
+        instance =
           new WollMuxBar(windowMode, combinedConf, wollmuxConf, wollmuxbarConf,
             quickstarter);
 
       if (menumanager)
       {
-        if (bar != null)
-          bar.menuManager();
+        if (instance != null)
+          instance.menuManager();
         else
           new MenuManager(wollmuxConf, wollmuxbarConf, null);
       }
@@ -2313,5 +2648,19 @@ public class WollMuxBar
     {
       Logger.error(x);
     }
+  }
+
+  /**
+   * Konkatiniert args in eine Stringzeile für Debugausgaben.
+   */
+  private static String niceArgs(List<String> args)
+  {
+    StringBuffer buffy = new StringBuffer();
+    for (String s : args)
+      if (buffy.length() == 0)
+        buffy.append(s);
+      else
+        buffy.append(" " + s);
+    return buffy.toString();
   }
 }

@@ -5,4 +5,11 @@ case "_$1" in
   _) ;;
   *) set -- --load "$@" ;;
 esac
-exec java -jar "${JAR_FILE}" --quickstarter "$@"
+
+FIFO="/tmp/wollmuxbar_$USER"
+if [ ! -p $FIFO ]; then
+  mkfifo $FIFO
+  set -- --firstrun "$@"
+fi
+
+exec java -jar "${JAR_FILE}" --quickstarter --fifo $FIFO "$@"
