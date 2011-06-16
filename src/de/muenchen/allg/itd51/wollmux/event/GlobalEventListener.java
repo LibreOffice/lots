@@ -59,7 +59,6 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.DocumentManager.Info;
-import de.muenchen.allg.itd51.wollmux.func.PrintIntoFile;
 
 /**
  * Der GlobalEventListener sorgt dafür, dass der WollMux alle wichtigen globalen
@@ -244,10 +243,9 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
 
   /**
    * Liefert zurück, ob es sich bei dem Dokument source um ein Temporäres Dokument
-   * des OOo/WollMux-Seriendrucks handelt und wird benötigt um solche Dokumente im
-   * Workaround für Ticket #3091 zu ignorieren. Dabei kann diese Methode nur
-   * Dokumente erkennen, die anhand der Eigenschaft URL als temporäre Datei zu
-   * erkennen sind.
+   * des OOo-Seriendrucks handelt und wird benötigt um solche Dokumente im Workaround
+   * für Ticket #3091 zu ignorieren. Dabei kann diese Methode nur Dokumente erkennen,
+   * die anhand der Eigenschaft URL als temporäre Datei zu erkennen sind.
    * 
    * Anmerkung: Der OOo-Seriendruck kann über Datei->Drucken und über
    * Extras->Seriendruck-Assistent gestartet werden. Verschiedene OOo-Versionen
@@ -268,8 +266,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     String url = compo.getURL();
     Logger.debug2(url);
     int idx = url.lastIndexOf('/') - 4;
-    return (url.startsWith(".tmp/sv", idx) && url.endsWith(".tmp"))
-      || PrintIntoFile.isTempFile(url);
+    return (url.startsWith(".tmp/sv", idx) && url.endsWith(".tmp"));
   }
 
   /**
