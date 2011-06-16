@@ -44,11 +44,9 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -70,19 +68,21 @@ import com.sun.star.style.XStyleLoader;
 import com.sun.star.text.TextContentAnchorType;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XText;
+import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextRangeCompare;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.UnoRuntime;
+import com.sun.star.util.CloseVetoException;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
@@ -92,6 +92,11 @@ import de.muenchen.allg.ooo.TextDocument;
  */
 public class PrintIntoFile
 {
+  /**
+   * Dateiname einer temporären Datei.
+   */
+  private static final String TEMP_FILE_NAME = "serienbrief.odt";
+
   /**
    * Präfix, das vor den Namen des angelegten temporären Verzeichnisses gesetzt wird.
    */
@@ -106,164 +111,68 @@ public class PrintIntoFile
    *          aus inputDoc zuerst nach outputDoc übertragen und es wird kein
    *          Zeilenumbruch eingefügt. Außerdem werden in diesem Fall die
    *          com.sun.star.document.Settings von inputDoc auf outputDoc übertragen.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   * @param knownPageStyles
+   *          HashSet in dem die Namen von bereits bekannten PageStyles aufgeführt
+   *          werden um sicherstellen zu können, dass neu PageStyles bei der
+   *          notwendigen Umbenennung eindeutig benannt werden.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
    */
   public static void appendToFile(XTextDocument outputDoc, XTextDocument inputDoc,
-      boolean firstAppend)
+      HashSet<String> knownPageStyles, boolean firstAppend)
   {
+    // dest[0] ist das temp. Verzeichnis, dest[1] die temp. Datei darin
     File[] dest = new File[] {
-      null, null }; // dest[0] ist das temp. Verzeichnis, dest[1] die temp. Datei
-    // darin
+      null, null };
     try
     {
       String url = storeInTemporaryFile(inputDoc, dest);
 
-      String inputDocFirstPageStyleName = "";
-      XEnumeration enu =
-        UNO.XEnumerationAccess(inputDoc.getText()).createEnumeration();
-      while (enu.hasMoreElements())
-      {
-        Object o = enu.nextElement();
-        Object prop = UNO.getProperty(o, "PageStyleName");
-        if (AnyConverter.isString(prop))
-        {
-          inputDocFirstPageStyleName = AnyConverter.toString(prop);
-          break;
-        }
-      }
-
-      boolean startsWithSection = startsWithSection(inputDoc);
-
-      XText text = outputDoc.getText();
+      // Ausgabedokument initialisieren
       if (firstAppend)
-      {
-        UnoProps props = new UnoProps();
-        props.setPropertyValue("OverwriteStyles", Boolean.TRUE);
-        props.setPropertyValue("LoadCellStyles", Boolean.TRUE);
-        props.setPropertyValue("LoadTextStyles", Boolean.TRUE);
-        props.setPropertyValue("LoadFrameStyles", Boolean.TRUE);
-        props.setPropertyValue("LoadPageStyles", Boolean.TRUE);
-        props.setPropertyValue("LoadNumberingStyles", Boolean.TRUE);
-        XStyleFamiliesSupplier sfs = UNO.XStyleFamiliesSupplier(outputDoc);
-        XStyleLoader loader = UNO.XStyleLoader(sfs.getStyleFamilies());
-        loader.loadStylesFromURL(url, props.getProps());
+        initializeOutputDocumentFormatsAndSettings(outputDoc, inputDoc, url);
 
-        XPropertySet inSettings =
-          UNO.XPropertySet(UNO.XMultiServiceFactory(inputDoc).createInstance(
-            "com.sun.star.document.Settings"));
-        XPropertySet outSettings =
-          UNO.XPropertySet(UNO.XMultiServiceFactory(outputDoc).createInstance(
-            "com.sun.star.document.Settings"));
-
-        TextDocument.copySimpleProperties(inSettings, outSettings);
-      }
-      else
-      // if (!firstAppend)
-      {
-        // Neuen Absatz am Ende einfügen für den Seitenumbruch
-        text.getEnd().setString("\r");
-      }
-
-      XTextCursor cursor = text.createTextCursorByRange(text.getEnd());
-      if (!(firstAppend && "Standard".equals(inputDocFirstPageStyleName)))
-      {
-        UNO.setProperty(cursor, "PageDescName", inputDocFirstPageStyleName);
-      }
-
-      if (!firstAppend)
-      {
-        /**
-         * Format-->Absatz-->Textfluss-->Umbrüche--> Checkbox "mit Seitenvorlage" -->
-         * Seitennummer 1 (Seitennummer mit 1 beginnen nach dem Seitenumbruch)
-         * ACHTUNG! OOo lässt ungerade Seitennummern nur auf wirklich ungeraden
-         * Seiten zu. Ist die betreffende Seite eine gerade Seite, so wird durch das
-         * Setzen von PageNumberOffset auf 1 eine leere Seite davor eingefügt! Siehe
-         * dazu auch den Kommentar weiter unten bei pageNumberOffset
-         */
-        UNO.setProperty(cursor, "PageNumberOffset", Short.valueOf((short) 1));
-      }
-
-      /**
-       * OOo lässt nicht zu, dass eine Seite mit gerader realer Nummer eine ungerade
-       * Seitenummer bekommt (durch einen Seitenumbruch mit gesetztem
-       * PageNumberOffset (wie wir ihn ein Stück weiter oben eingefügt haben). Wird
-       * dies doch getan, dann fügt OOo eine leere Seite ein, die zwar gezählt, aber
-       * nicht angezeigt wird. Es ist also wichtig das pageNumberOffset so wie hier
-       * nach dem Einfügen des Seitenumbruchs zu berechnen, weil der eine eingefügte
-       * Seitenumbruch evtl. die Seitenanzahl um 2 steigen lässt.
-       */
-      int pageNumberOffset =
+      // pageOffset bestimmen:
+      int pageOffset =
         ((Number) UNO.getProperty(outputDoc.getCurrentController(), "PageCount")).intValue();
-      --pageNumberOffset; // Die gerade eben angehängte Seite darf nicht mitgezählt
-      // werden.
+      // Ein leeres Dokument hat immer eine Seite, auch wenn es für die
+      // Offset-Zählung leer ist.
+      if (pageOffset == 1) pageOffset = 0;
+      // PageOffset muss eine gerade Zahl sein, da OOo automatisch eine Leerseite
+      // einfügt, wenn weiter unten der Seitenumbruch eingefügt wird.
+      if (pageOffset % 2 != 0) pageOffset++;
 
-      // String[] frameNames =
-      // UNO.XTextFramesSupplier(outputDoc).getTextFrames().getElementNames();
-      // String[] imageNames =
-      // UNO.XTextGraphicObjectsSupplier(outputDoc).getGraphicObjects().getElementNames();
-      XIndexAccess shapes =
-        UNO.XIndexAccess(UNO.XDrawPageSupplier(outputDoc).getDrawPage());
-      Set<HashableComponent> oldShapes =
-        new HashSet<HashableComponent>(shapes.getCount());
-      int shapeCount = shapes.getCount();
-      for (int i = 0; i < shapeCount; ++i)
-        oldShapes.add(new HashableComponent(shapes.getByIndex(i)));
+      // Temporäres Dokument vorbereiten für Merge über insertDocumentFromURL()
+      String firstPageStyleName =
+        prepareTemporaryDocumentForMailMergeInsertion(url, pageOffset,
+          knownPageStyles);
 
-      Set<String> oldSections = new HashSet<String>();
-      if (startsWithSection)
-      {
-        String[] sectionNames =
-          UNO.XTextSectionsSupplier(outputDoc).getTextSections().getElementNames();
-        oldSections.addAll(Arrays.asList(sectionNames));
-      }
-
-      /**
-       * Einfügen des 2. Dokuments OOo Issue 37417 beachten --> When inserting a
-       * document (via "Insert->Document") on the first paragraph of a page after a
-       * pagebreak, and the document contains only one paragraph, the pagebreak will
-       * be removed. Inserting documents with more than one paragraph works as
-       * expected.
-       */
-      cursor = text.createTextCursorByRange(text.getEnd());
-      Logger.debug2("================= OID dump BEFORE insert ==================");
-      dumpOids(outputDoc);
+      // Einfügen des zweiten Dokuments
+      XText text = outputDoc.getText();
+      XTextCursor cursor = text.createTextCursorByRange(text.getEnd());
+      if (!firstAppend) cursor.setString("\r");
       UNO.XDocumentInsertable(cursor).insertDocumentFromURL(url,
         new PropertyValue[] {});
-      Logger.debug2("================= OID dump AFTER insert ==================");
-      dumpOids(outputDoc);
 
+      /*
+       * FIXME: OOo Issue 37417 beachten --> When inserting a document (via
+       * "Insert->Document") on the first paragraph of a page after a pagebreak, and
+       * the document contains only one paragraph, the pagebreak will be removed.
+       * Inserting documents with more than one paragraph works as expected.
+       */
+
+      // Seitenumbruch an der ersten eingefügten Seite nachträglich explizit setzen
+      // und PageNumberOffset auf 1 resetten.
       cursor.collapseToStart();
-
-      // Workaround für
-      // http://www.openoffice.org/issues/show_bug.cgi?id=73229
-      if (startsWithSection
-        && !rangeStartTouchesNewSection(cursor, oldSections, outputDoc))
-        TextDocument.disappearParagraph(cursor);
-
-      XParagraphCursor paraCursor = UNO.XParagraphCursor(cursor);
-      XNameAccess inputDocPageStyles =
-        UNO.XNameAccess(UNO.XStyleFamiliesSupplier(inputDoc).getStyleFamilies().getByName(
-          "PageStyles"));
-      renamePageStyles(paraCursor, outputDoc, inputDocPageStyles);
-
-      if (!firstAppend)
-      {
-        // fixPageAnchoredObjects(UNO.XTextFramesSupplier(outputDoc).getTextFrames(),
-        // frameNames, pageNumberOffset);
-        // fixPageAnchoredObjects(UNO.XTextGraphicObjectsSupplier(outputDoc).getGraphicObjects(),
-        // imageNames, pageNumberOffset);
-        fixPageAnchoredObjects(shapes, oldShapes, pageNumberOffset);
-      }
-
-      int pageCount =
-        ((Number) UNO.getProperty(outputDoc.getCurrentController(), "PageCount")).intValue();
-      pageCount -= pageNumberOffset;
-      fixPageCountFields(UNO.XTextFieldsSupplier(outputDoc).getTextFields(),
-        pageCount);
-      fixInputUserFields(UNO.XTextFieldsSupplier(outputDoc).getTextFields());
-
-      oldShapes = null;
-      System.gc();
+      UNO.setProperty(cursor, "PageDescName", firstPageStyleName);
+      /*
+       * Format-->Absatz-->Textfluss-->Umbrüche--> Checkbox "mit Seitenvorlage" -->
+       * Seitennummer 1 (Seitennummer mit 1 beginnen nach dem Seitenumbruch) ACHTUNG!
+       * OOo lässt ungerade Seitennummern nur auf wirklich ungeraden Seiten zu. Ist
+       * die betreffende Seite eine gerade Seite, so wird durch das Setzen von
+       * PageNumberOffset auf 1 eine leere Seite davor eingefügt!
+       */
+      UNO.setProperty(cursor, "PageNumberOffset", Short.valueOf((short) 1));
     }
     catch (Exception x)
     {
@@ -287,47 +196,193 @@ public class PrintIntoFile
   }
 
   /**
-   * Liefert true gdw der Anfang von range mit dem Anfang einer Section aus doc
-   * zusammenfällt, deren Name nicht in oldSections ist.
+   * Initialisiert das Ausgabedokument outputDoc für den WollMux-Seriendruck mit den
+   * dafür notwendigen Formatvorlagen und Settings aus dem Eingangsdokument inputDoc
+   * (bzw. der serialisierten und der in url spezifizierten Variante von inputDoc).
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   * @param outputDoc
+   *          Enthält das Ausgabedokument für den MailMerge
+   * @param inputDoc
+   *          Enthält das Dokument, das später an das Ausgabedokument angehängt
+   *          werden soll
+   * @param url
+   *          Beschreibt die temporäre, direkt aus inputDoc abgeleitete Eingangsdatei
+   *          und wird benötigt, um initial Styles mit loadStylesFromURL in das
+   *          Ausgabedokument zu laden.
+   * @throws Exception
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
    */
-  private static boolean rangeStartTouchesNewSection(XTextRange range,
-      Set<String> oldSectionNames, XTextDocument doc)
+  private static void initializeOutputDocumentFormatsAndSettings(
+      XTextDocument outputDoc, XTextDocument inputDoc, String url) throws Exception
   {
-    XTextRange docText = doc.getText();
-    XTextRangeCompare compare = UNO.XTextRangeCompare(docText);
-    XNameAccess sections = UNO.XTextSectionsSupplier(doc).getTextSections();
-    String[] names = sections.getElementNames();
-    for (int i = 0; i < names.length; ++i)
-    {
-      if (!oldSectionNames.contains(names[i]))
-      {
-        try
-        {
-          XTextRange sectionRange =
-            UNO.XTextContent(sections.getByName(names[i])).getAnchor();
-          if (compare.compareRegionStarts(range, sectionRange) == 0) return true;
-        }
-        catch (Exception x)
-        {
-          // keine Logger-Meldung. Dies tritt regulär auf bei Bereichen, die in
-          // anderen
-          // Rahmen liegen und daher nicht mit einem Cursor im Dokumenthaupttext
-          // vergleichbar sind.
-        }
-      }
-    }
-    return false;
+    UnoProps props = new UnoProps();
+    props.setPropertyValue("OverwriteStyles", Boolean.TRUE);
+    props.setPropertyValue("LoadCellStyles", Boolean.TRUE);
+    props.setPropertyValue("LoadTextStyles", Boolean.TRUE);
+    props.setPropertyValue("LoadFrameStyles", Boolean.TRUE);
+    props.setPropertyValue("LoadPageStyles", Boolean.TRUE);
+    props.setPropertyValue("LoadNumberingStyles", Boolean.TRUE);
+    XStyleFamiliesSupplier sfs = UNO.XStyleFamiliesSupplier(outputDoc);
+    XStyleLoader loader = UNO.XStyleLoader(sfs.getStyleFamilies());
+    loader.loadStylesFromURL(url, props.getProps());
+
+    XPropertySet inSettings =
+      UNO.XPropertySet(UNO.XMultiServiceFactory(inputDoc).createInstance(
+        "com.sun.star.document.Settings"));
+    XPropertySet outSettings =
+      UNO.XPropertySet(UNO.XMultiServiceFactory(outputDoc).createInstance(
+        "com.sun.star.document.Settings"));
+
+    TextDocument.copySimpleProperties(inSettings, outSettings);
   }
 
   /**
-   * Liefert true gdw der Start von doc mit dem Starter einer Section von doc
-   * zusammenfällt.
+   * Öffnet das durch url beschriebene Dokument und bereitet es so für die weitere
+   * Bearbeitung vor, dass es später ohne weitere Anpassungen mit
+   * XDocumentInsertable.insertDocumentFromURL(url, new PropertyValue[] {}) an das
+   * Hauptdokument angehängt werden kann, welches bereits pageNumberOffset belegte
+   * Seiten enthält.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   * Eigentlich macht XDocumentInsertable.insertDocumentFromURL(url, new
+   * PropertyValue[] {}) schon einige Anpassungen wie z.B. die Umbenennung von
+   * Bookmarks oder Textrahmen. Einige, speziell für unseren Merge notwendigen
+   * Anpassungen macht insertDocumentFromURL aber nicht wie z.B. die Ersetzung von
+   * InputUser-Feldern durch die Textrepräsentation oder das Setzen der PageOffsets
+   * bei an der Seite verankerten Elementen. Diese noch notwendigen Anpassungen
+   * werden hier erledigt.
+   * 
+   * Früher wurden für die Anpassungen immer alle Elemente des Gesamtdokuments
+   * durchgegangen, was mit steigender Größe des Gesamtdokuments zu deutlichen
+   * Performanceeinbußen führte. Mit Hilfe des temporären Dokuments, das in dieser
+   * Methode geöffnet und angepasst wird, sind die Anpassungen nur noch auf das
+   * temporäre Dokument beschränkt und die Laufzeit bleibt damit linear.
+   * 
+   * @param url
+   *          Beschreibt das temporäre Dokument
+   * @param pageNumberOffset
+   *          Offset, der auf die Seitennummer von an der Seite verankerten Elemente
+   *          addiert werden muss.
+   * @param knownPageStyles
+   *          HashSet in dem die Namen von bereits bekannten PageStyles aufgeführt
+   *          werden um sicherstellen zu können, dass neu PageStyles bei der
+   *          notwendigen Umbenennung eindeutig benannt werden.
+   * @return Liefert den neuen Namen des PageStyles der ersten Dokumentseite zurück
+   *         und wird im späteren Verlauf für die Einfügung des Seitenumbruchs in das
+   *         Gesamtdokument benötigt.
+   * @throws com.sun.star.io.IOException
+   * @throws IllegalArgumentException
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
    */
-  private static boolean startsWithSection(XTextDocument doc)
+  private static String prepareTemporaryDocumentForMailMergeInsertion(String url,
+      int pageNumberOffset, HashSet<String> knownPageStyles)
+      throws com.sun.star.io.IOException, IllegalArgumentException
+  {
+    XTextDocument doc =
+      UNO.XTextDocument(UNO.loadComponentFromURL(url, false, true, true));
+
+    // Felder mit Gesamtseitenzahl des Dokuments durch aktuellen festen Wert ersetzen
+    fixPageCountFields(UNO.XTextFieldsSupplier(doc).getTextFields(),
+      ((Number) UNO.getProperty(doc.getCurrentController(), "PageCount")).intValue());
+
+    // InputUser-Felder durch aktuellen festen Wert ersetzen
+    fixInputUserFields(UNO.XTextFieldsSupplier(doc).getTextFields());
+
+    // Falls das Dokument mit Seitenformat "Standard" beginnt, so wird dieses
+    // explizit als Seitenformat gesetzt, damit es von renamePageStyles() mit erkannt
+    // und behandelt wird.
+    String firstPageStyleName = getFirstPageStyle(doc);
+    XTextCursor cursor =
+      doc.getText().createTextCursorByRange(doc.getText().getStart());
+    if ("Standard".equals(firstPageStyleName))
+      UNO.setProperty(cursor, "PageDescName", firstPageStyleName);
+
+    // Alle verwendeten PageStyles umbenennen
+    cursor.collapseToStart();
+    XParagraphCursor paraCursor = UNO.XParagraphCursor(cursor);
+    Map<String, String> mapOldPageStyleName2NewPageStyleName =
+      new HashMap<String, String>();
+    renamePageStyles(paraCursor, doc, mapOldPageStyleName2NewPageStyleName,
+      knownPageStyles);
+
+    // An der Seite verankerte Objekte mit neuem pageNumberOffset versehen.
+    fixPageAnchoredObjects(
+      UNO.XIndexAccess(UNO.XDrawPageSupplier(doc).getDrawPage()), pageNumberOffset);
+
+    // Workaround für http://www.openoffice.org/issues/show_bug.cgi?id=73229
+    if (Workarounds.applyWorkaroundForOOoIssue73229())
+    {
+      XTextContent startingSection = getSectionAtDocumentStart(doc);
+      if (startingSection != null)
+        try
+        {
+          startingSection.getAnchor().getText().removeTextContent(startingSection);
+        }
+        catch (NoSuchElementException e)
+        {
+          Logger.error(
+            "Workaround für Issue 73229: Kann Textbereich nicht aufheben.", e);
+        }
+    }
+
+    UNO.XStorable(doc).store();
+    try
+    {
+      UNO.XCloseable(doc).close(false);
+    }
+    catch (CloseVetoException e)
+    {
+      // Bei meinen temporären Dokumenten hat niemand anderes mitzureden. Deshalb
+      // Holzhammer-Methode.
+      doc.dispose();
+    }
+
+    return mapOldPageStyleName2NewPageStyleName.get(firstPageStyleName);
+  }
+
+  /**
+   * Liefer den Namen des PageStyles der ersten Dokumentseite von doc zurück oder
+   * null, falls aufgrund einer Exception der PageStyle nicht bestimmt werden kann.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private static String getFirstPageStyle(XTextDocument doc)
+  {
+    XEnumeration enu = UNO.XEnumerationAccess(doc.getText()).createEnumeration();
+    while (enu.hasMoreElements())
+    {
+      Object o = null;
+      try
+      {
+        o = enu.nextElement();
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+        return null;
+      }
+      Object prop = UNO.getProperty(o, "PageStyleName");
+      if (AnyConverter.isString(prop))
+      {
+        try
+        {
+          return AnyConverter.toString(prop);
+        }
+        catch (IllegalArgumentException e)
+        {}
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Falls das Dokument mit einer Section startet, so wird das XTextContent-Objekt
+   * dieser Section zurück geliefert, andernfalls null.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
+   */
+  private static XTextContent getSectionAtDocumentStart(XTextDocument doc)
   {
     XTextRange docText = doc.getText();
     XTextRangeCompare compare = UNO.XTextRangeCompare(docText);
@@ -337,16 +392,16 @@ public class PrintIntoFile
     {
       try
       {
-        XTextRange range =
-          UNO.XTextContent(sections.getByName(names[i])).getAnchor();
-        if (compare.compareRegionStarts(docText, range) == 0) return true;
+        XTextContent section = UNO.XTextContent(sections.getByName(names[i]));
+        XTextRange range = section.getAnchor();
+        if (compare.compareRegionStarts(docText, range) == 0) return section;
       }
       catch (Exception x)
       {
         Logger.error(x);
       }
     }
-    return false;
+    return null;
   }
 
   /**
@@ -358,17 +413,23 @@ public class PrintIntoFile
    * 
    * @param doc
    *          das Dokument in dem der Cursor wandert
+   * @param knownPageStyles
+   *          HashSet in dem die Namen von bereits bekannten PageStyles aufgeführt
+   *          werden um sicherstellen zu können, dass neu PageStyles bei der
+   *          notwendigen Umbenennung eindeutig benannt werden.
    * @param oldPageStyles
    *          die PageStyles Familie des alten Dokuments
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
    */
   private static void renamePageStyles(XParagraphCursor cursor, XTextDocument doc,
-      XNameAccess oldPageStyles)
+      Map<String, String> mapOldPageStyleName2NewPageStyleName,
+      HashSet<String> knownPageStyles)
   {
-    XNameAccess newPageStyles;
+    XNameAccess pageStyles;
     try
     {
-      newPageStyles =
+      pageStyles =
         UNO.XNameAccess(UNO.XStyleFamiliesSupplier(doc).getStyleFamilies().getByName(
           "PageStyles"));
     }
@@ -377,9 +438,7 @@ public class PrintIntoFile
       Logger.error(x);
       return;
     }
-    Map<String, String> mapOldPageStyleName2NewPageStyleName =
-      new HashMap<String, String>();
-    while (true)
+    do
     {
       try
       {
@@ -392,13 +451,14 @@ public class PrintIntoFile
           if (newPageStyleName == null)
           {
             XPropertySet oldStyle =
-              UNO.XPropertySet(oldPageStyles.getByName(pageDescName));
+              UNO.XPropertySet(pageStyles.getByName(pageDescName));
             do
             {
               newPageStyleName = pageDescName + (int) (Math.random() * 1000000.0);
-            } while (newPageStyles.hasByName(newPageStyleName));
+            } while (knownPageStyles.contains(newPageStyleName));
             TextDocument.copyPageStyle(doc, oldStyle, newPageStyleName);
             mapOldPageStyleName2NewPageStyleName.put(pageDescName, newPageStyleName);
+            knownPageStyles.add(newPageStyleName);
           }
           UNO.setProperty(cursor, "PageDescName", newPageStyleName);
         }
@@ -407,36 +467,7 @@ public class PrintIntoFile
       {
         Logger.error(x);
       }
-      if (!cursor.gotoNextParagraph(false)) break;
-    }
-  }
-
-  /**
-   * Gibt die OIDs aller Shapes von outputDoc aus.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private static void dumpOids(XTextDocument outputDoc)
-  {
-    if (!WollMuxFiles.isDebugMode()) return;
-    XIndexAccess shapes =
-      UNO.XIndexAccess(UNO.XDrawPageSupplier(outputDoc).getDrawPage());
-    int shapeCount = shapes.getCount();
-    try
-    {
-      for (int i = 0; i < shapeCount; ++i)
-      {
-        Object ob = shapes.getByIndex(i);
-        XNamed named = UNO.XNamed(ob);
-        String name = "<Unknown>";
-        if (named != null) name = named.getName();
-        Logger.debug2(name + " -> " + UnoRuntime.generateOid(ob));
-      }
-    }
-    catch (Exception x)
-    {
-      Logger.debug2(x);
-    }
+    } while (cursor.gotoNextParagraph(false));
   }
 
   /**
@@ -444,18 +475,23 @@ public class PrintIntoFile
    * pageCount.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * @throws WrappedTargetException
-   * @throws NoSuchElementException
-   *           sollte nie geworfen werden
    */
   private static void fixPageCountFields(XEnumerationAccess textFields, int pageCount)
-      throws NoSuchElementException, WrappedTargetException
   {
     String pc = "" + pageCount;
     XEnumeration enu = textFields.createEnumeration();
     while (enu.hasMoreElements())
     {
-      Object textfield = enu.nextElement();
+      Object textfield;
+      try
+      {
+        textfield = enu.nextElement();
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+        return;
+      }
       // Der eigentlich redundante Test auf das Property NumberingType ist eine
       // Optimierung, da supportsService sehr langsam ist.
       if (UNO.getProperty(textfield, "NumberingType") != null
@@ -495,12 +531,20 @@ public class PrintIntoFile
    * @throws NoSuchElementException
    */
   private static void fixInputUserFields(XEnumerationAccess textFields)
-      throws NoSuchElementException, WrappedTargetException
   {
     XEnumeration enu = textFields.createEnumeration();
     while (enu.hasMoreElements())
     {
-      Object textfield = enu.nextElement();
+      Object textfield;
+      try
+      {
+        textfield = enu.nextElement();
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+        return;
+      }
 
       // Der eigentlich Test, ob der Inhalt des Content-Properties mit "WM(FUNCTION"
       // beginnt ist eine Optimierung, da in der Regel nur die betroffenen
@@ -511,7 +555,7 @@ public class PrintIntoFile
       {
         content = AnyConverter.toString(UNO.getProperty(textfield, "Content"));
       }
-      catch (IllegalArgumentException e)
+      catch (Exception e)
       {}
       if (content != null && content.startsWith("WM(FUNCTION")
         && UNO.supportsService(textfield, "com.sun.star.text.TextField.InputUser"))
@@ -534,7 +578,7 @@ public class PrintIntoFile
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static void fixPageAnchoredObjects(XIndexAccess objects,
-      Set<HashableComponent> old, int pageNumberOffset)
+      int pageNumberOffset)
   {
     int count = objects.getCount();
     for (int i = 0; i < count; ++i)
@@ -542,38 +586,32 @@ public class PrintIntoFile
       try
       {
         Object ob = objects.getByIndex(i);
-        XNamed named = UNO.XNamed(ob);
         String name = "<Unknown>";
-        if (named != null) name = named.getName();
-        if (!old.contains(new HashableComponent(ob)))
+        if (WollMuxFiles.isDebugMode())
         {
-          if (TextContentAnchorType.AT_PAGE.equals(UNO.getProperty(ob, "AnchorType")))
+          XNamed named = UNO.XNamed(ob);
+          if (named != null) name = named.getName();
+        }
+        if (TextContentAnchorType.AT_PAGE.equals(UNO.getProperty(ob, "AnchorType")))
+        {
+          int oldPageNo = ((Number) UNO.getProperty(ob, "AnchorPageNo")).intValue();
+          int newPageNo = oldPageNo + pageNumberOffset;
+          Logger.debug2(L.m("Verschiebe \"%1\" von Seite %2 nach Seite %3", name,
+            oldPageNo, newPageNo));
+          Object afterMovePageNo =
+            UNO.setProperty(ob, "AnchorPageNo", Short.valueOf((short) newPageNo));
+          if (null == afterMovePageNo
+            || ((Number) afterMovePageNo).intValue() != newPageNo)
           {
-            int oldPageNo =
-              ((Number) UNO.getProperty(ob, "AnchorPageNo")).intValue();
-            int newPageNo = oldPageNo + pageNumberOffset;
-            Logger.debug2(L.m("Verschiebe \"%1\" von Seite %2 nach Seite %3", name,
-              oldPageNo, newPageNo));
-            Object afterMovePageNo =
-              UNO.setProperty(ob, "AnchorPageNo", Short.valueOf((short) newPageNo));
-            if (null == afterMovePageNo
-              || ((Number) afterMovePageNo).intValue() != newPageNo)
-            {
-              Logger.error(L.m(
-                "Kann AnchorPageNo von Objekt #\"%1\" nicht auf %2 setzen", i,
-                newPageNo));
-            }
-          }
-          else
-          {
-            Logger.debug2(L.m(
-              "Verschiebe \"%1\" NICHT, weil zwar neu dazugekommen, aber nicht an der Seite verankert",
-              name));
+            Logger.error(L.m(
+              "Kann AnchorPageNo von Objekt #\"%1\" nicht auf %2 setzen", i,
+              newPageNo));
           }
         }
         else
         {
-          Logger.debug2(L.m("Verschiebe \"%1\" NICHT, weil nicht neu dazugekommen",
+          Logger.debug2(L.m(
+            "Verschiebe \"%1\" NICHT, weil zwar neu dazugekommen, aber nicht an der Seite verankert",
             name));
         }
       }
@@ -632,7 +670,7 @@ public class PrintIntoFile
         L.m("Konnte kein temporäres Verzeichnis für die temporären Seriendruckdaten anlegen!"));
     }
 
-    dest[1] = new File(dest[0], "serienbrief.odt");
+    dest[1] = new File(dest[0], TEMP_FILE_NAME);
     String url =
       UNO.getParsedUNOUrl(dest[1].toURI().toURL().toExternalForm()).Complete;
 
@@ -644,6 +682,19 @@ public class PrintIntoFile
     // /opt/openoffice.org/share/registry/modules/org/openoffice/TypeDetection/Filter/fcfg_writer_filters.xcu
     UNO.XStorable(inputDoc).storeToURL(url, arguments.getProps());
     return url;
+  }
+
+  /**
+   * Liefert true gdw es sich bei dem in url beschriebenen File um eine temporäre
+   * Datei der PrintIntoFile-Druckfunktion (des WollMux-Seriendrucks) handelt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static boolean isTempFile(String url)
+  {
+    boolean b =
+      url.matches(".*/" + TEMP_DIR_PREFIX + "\\d+/" + TEMP_FILE_NAME + "/?$");
+    return b;
   }
 
   /**
@@ -660,6 +711,7 @@ public class PrintIntoFile
       public void run()
       {
         final XTextDocument[] doc = new XTextDocument[] { null };
+        final Object[] knownPageStyles = new Object[] { null };
         final boolean[] firstAppend = new boolean[] { true };
 
         JFrame myFrame = new JFrame("PrintIntoFile");
@@ -697,6 +749,7 @@ public class PrintIntoFile
               catch (Exception x)
               {}
               doc[0] = null;
+              knownPageStyles[0] = null;
             }
             firstAppend[0] = true;
             try
@@ -704,6 +757,7 @@ public class PrintIntoFile
               doc[0] =
                 UNO.XTextDocument(UNO.loadComponentFromURL(
                   "private:factory/swriter", true, true));
+              knownPageStyles[0] = new HashSet<String>();
             }
             catch (Exception x)
             {}
@@ -749,7 +803,9 @@ public class PrintIntoFile
              */
             if (inputDoc == null) inputDoc = doc[0];
 
-            appendToFile(doc[0], inputDoc, firstAppend[0]);
+            @SuppressWarnings("unchecked")
+            HashSet<String> kps = (HashSet<String>) knownPageStyles[0];
+            appendToFile(doc[0], inputDoc, kps, firstAppend[0]);
             firstAppend[0] = false;
           }
         });
@@ -776,5 +832,4 @@ public class PrintIntoFile
 
     System.exit(0);
   }
-
 }

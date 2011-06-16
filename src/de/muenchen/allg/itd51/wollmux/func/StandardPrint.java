@@ -22,6 +22,7 @@
 package de.muenchen.allg.itd51.wollmux.func;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import com.sun.star.beans.UnknownPropertyException;
@@ -269,6 +270,20 @@ public class StandardPrint
       outputDoc = createNewTargetDocument(pmod, false);
     }
 
+    HashSet<String> knownPageStyles = null;
+    try
+    {
+      @SuppressWarnings("unchecked")
+      HashSet<String> tmp =
+        (HashSet<String>) pmod.getPropertyValue("PrintIntoFile_KnownPageStyles");
+      knownPageStyles = tmp;
+    }
+    catch (UnknownPropertyException e)
+    {
+      // darf nicht vorkommen, da Property in createNewTargetDocument gesetzt wird.
+      Logger.error(e);
+    }
+
     boolean firstAppend = true;
     try
     {
@@ -287,7 +302,8 @@ public class StandardPrint
     catch (UnknownPropertyException e)
     {}
 
-    PrintIntoFile.appendToFile(outputDoc, pmod.getTextDocument(), firstAppend);
+    PrintIntoFile.appendToFile(outputDoc, pmod.getTextDocument(), knownPageStyles,
+      firstAppend);
 
     if (firstAppend)
       pmod.setPropertyValue("PrintIntoFile_PreviousOutputDocument", outputDoc);
@@ -314,6 +330,7 @@ public class StandardPrint
       UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true,
         true, hidden));
     pmod.setPropertyValue("PrintIntoFile_OutputDocument", outputDoc);
+    pmod.setPropertyValue("PrintIntoFile_KnownPageStyles", new HashSet<String>());
 
     return outputDoc;
   }

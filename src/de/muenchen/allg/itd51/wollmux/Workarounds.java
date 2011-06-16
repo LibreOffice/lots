@@ -79,6 +79,8 @@ public class Workarounds
 
   private static Boolean workaround102164 = null;
 
+  private static Boolean workaround73229 = null;
+
   private static Boolean workaround96281 = null;
 
   private static ClassLoader workaround102164CL = null;
@@ -114,6 +116,22 @@ public class Workarounds
     }
 
     return workaround100374.booleanValue();
+  }
+
+  /**
+   * Issue #73229 betrifft den WollMux-Seriendruck in ein Gesamtdokument und ist
+   * aktuell für OOo Later priorisiert - wird also nicht in absehbarer Zeit behoben
+   * sein.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static boolean applyWorkaroundForOOoIssue73229()
+  {
+    if (workaround73229 == null)
+    {
+      workaround73229 = applyWorkaround("73229");
+    }
+    return workaround73229.booleanValue();
   }
 
   /**
