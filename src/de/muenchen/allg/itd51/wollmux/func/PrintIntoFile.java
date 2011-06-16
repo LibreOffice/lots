@@ -83,6 +83,7 @@ import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
@@ -236,9 +237,12 @@ public class PrintIntoFile
 
       // Workaround für
       // http://www.openoffice.org/issues/show_bug.cgi?id=73229
-      if (startsWithSection
-        && !rangeStartTouchesNewSection(cursor, oldSections, outputDoc))
-        TextDocument.disappearParagraph(cursor);
+      if (Workarounds.applyWorkaroundForOOoIssue73229())
+      {
+        if (startsWithSection
+          && !rangeStartTouchesNewSection(cursor, oldSections, outputDoc))
+          TextDocument.disappearParagraph(cursor);
+      }
 
       XParagraphCursor paraCursor = UNO.XParagraphCursor(cursor);
       XNameAccess inputDocPageStyles =
