@@ -6,7 +6,7 @@ if [ $# != 2 ]; then
 fi
 
 version="$(cat "$1")"
-echo "wollmux (${version}-0lhm1) akon; urgency=low
+echo "wollmux (${version}-0lhm1) plophos; urgency=low
 
     * Version bump.
 
