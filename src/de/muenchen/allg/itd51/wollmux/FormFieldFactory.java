@@ -32,6 +32,7 @@
  *                  | +createFormField(doc, textfield)
  * 08.07.2009 | BED | Änderungen im Rahmen von R48539 (#2867)
  * 12.05.2011 | BED | Refresh von Textfeldern mit XRefreshable.refresh() [#6840]
+ * 17.06.2011 | BED | Nachbesserungen für [#6840], überall XRefreshable.refresh()
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -830,11 +831,18 @@ public final class FormFieldFactory
       // ein Leerzeichen umgeschrieben. OOo-Issue: #70087
       if (value.equals("")) value = " ";
 
-      if (dropdownField != null && UNO.XUpdatable(dropdownField) != null)
+      if (dropdownField != null && doc != null)
       {
         extendItemsList(value);
         UNO.setProperty(dropdownField, "SelectedItem", value);
-        UNO.XUpdatable(dropdownField).update();
+
+        // Refresh auf alle Textfelder im Dokument, damit neuer Inhalt angezeigt wird
+        XEnumerationAccess textFields = UNO.XTextFieldsSupplier(doc).getTextFields();
+        XRefreshable xRefreshable = UNO.XRefreshable(textFields);
+        if (xRefreshable != null)
+        {
+          xRefreshable.refresh();
+        }
       }
     }
 
@@ -1091,9 +1099,18 @@ public final class FormFieldFactory
 
     public void setValue(final String value)
     {
-      if (value == null) return;
-      UNO.setProperty(master, "Content", value);
-      if (UNO.XUpdatable(textfield) != null) UNO.XUpdatable(textfield).update();
+      if (value != null && textfield != null && doc != null)
+      {
+        UNO.setProperty(master, "Content", value);
+
+        // Refresh auf alle Textfelder im Dokument, damit neuer Inhalt angezeigt wird
+        XEnumerationAccess textFields = UNO.XTextFieldsSupplier(doc).getTextFields();
+        XRefreshable xRefreshable = UNO.XRefreshable(textFields);
+        if (xRefreshable != null)
+        {
+          xRefreshable.refresh();
+        }
+      }
     }
 
     public String getTrafoName()
