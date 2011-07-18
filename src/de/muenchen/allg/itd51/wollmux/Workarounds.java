@@ -83,6 +83,8 @@ public class Workarounds
 
   private static Boolean workaround96281 = null;
 
+  private static Boolean workaround102619 = null;
+
   private static ClassLoader workaround102164CL = null;
 
   private static Boolean applyWorkaround(String issueNumber)
@@ -427,6 +429,30 @@ public class Workarounds
     if (apply)
       Logger.log(L.m("Formulardokument ohne Formularwerte-Abschnitt gefunden! Workaround zur Rekonstruierung der Formularwerte aktiv."));
     return apply;
+  }
+
+  /**
+   * Issue 102619 (calling dispatch .uno:GotoNextPlacemarker crashes OOo) beschreibt
+   * einen Bug in OOo < 3.2.1 bei dem OOo crashed, wenn mittels des Dispatches
+   * .uno:GotoNextPlacemarker in eine Tabelle navigiert wird.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static boolean applyWorkaroundForOOoIssue102619()
+  {
+    if (workaround102619 == null)
+    {
+      String version = getOOoVersion();
+      if (version != null
+        && (version.startsWith("2.") || version.startsWith("3.0") || version.startsWith("3.1")))
+      {
+        workaround102619 = applyWorkaround("102619");
+      }
+      else
+        workaround102619 = Boolean.FALSE;
+    }
+
+    return workaround102619.booleanValue();
   }
 
   // Unbenutzer alternativer Workaround für das setWindowPosSizeFreeze Problem

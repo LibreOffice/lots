@@ -39,11 +39,13 @@ import java.util.regex.Pattern;
 
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
+import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextRangeCompare;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -328,8 +330,8 @@ public class TextModule
   }
 
   /**
-   * Erzeugt ein Bookmark vom Typ "WM(CMD'insertFrag' FRAG_ID '<args[0]>' ARGS('<args[1]>'
-   * '...' '<args[n]>')" im Dokument doc an der Stelle range.
+   * Erzeugt ein Bookmark vom Typ "WM(CMD'insertFrag' FRAG_ID '<args[0]>'
+   * ARGS('<args[1]>' '...' '<args[n]>')" im Dokument doc an der Stelle range.
    * 
    * @param doc
    *          Aktuelles Textdokument
@@ -398,6 +400,104 @@ public class TextModule
    *          Aktueller ViewCursor im Dokument
    */
   public static void jumpPlaceholders(XTextDocument doc, XTextCursor viewCursor)
+  {
+    if (Workarounds.applyWorkaroundForOOoIssue102619())
+    {
+      jumpPlaceholdersOld(doc, viewCursor);
+      return;
+    }
+
+    XTextCursor oldPos = viewCursor.getText().createTextCursorByRange(viewCursor);
+
+    // Nächsten Platzhalter anspringen. Dabei berücksichtigen, dass
+    // .uno:GotoNextPlacemarker nicht automatisch zu einem evtl. direkt am
+    // View-Cursor angrenzenden Platzhalter springt, sondern dann gleich zum
+    // nächsten.
+    XTextField nearPlacemarker = null;
+    if (viewCursor.isCollapsed())
+      nearPlacemarker = getPlacemarkerStartingWithRange(doc, viewCursor);
+    if (nearPlacemarker != null)
+      viewCursor.gotoRange(nearPlacemarker.getAnchor(), false);
+    else
+      UNO.dispatchAndWait(doc, ".uno:GotoNextPlacemarker");
+
+    // Keinen weiteren Platzhalter gefunden? Dies erkenne ich daran, dass entwder der
+    // View-Cursor (falls er bereits auf dem letzten Platzhalter des Dokuments stand)
+    // kollabiert wurde oder der View-Cursor auf der selben Stelle wie früher stehen
+    // geblieben ist.
+    if (viewCursor.isCollapsed()
+      || new TextRangeRelation(oldPos, viewCursor).followsOrderscheme8888())
+    {
+      // Proiere nochmal ab dem Anfang des Dokuments
+      viewCursor.gotoRange(doc.getText().getStart(), false);
+      nearPlacemarker = null;
+      if (viewCursor.isCollapsed())
+        nearPlacemarker = getPlacemarkerStartingWithRange(doc, viewCursor);
+      if (nearPlacemarker != null)
+        viewCursor.gotoRange(nearPlacemarker.getAnchor(), false);
+      else
+        UNO.dispatchAndWait(doc, ".uno:GotoNextPlacemarker");
+
+      // Falls immer noch kein Platzhalter gefunden wurde wird zur Marke
+      // 'setJumpMark' gesprungen falls vorhanden sonst kommt eine Fehlermeldung
+      if (new TextRangeRelation(doc.getText().getStart(), viewCursor).followsOrderscheme8888())
+      {
+        // ViewCursor wieder auf Ausgangsposition setzen.
+        viewCursor.gotoRange(oldPos, false);
+
+        // und handle jumpToMark aufrufen.
+        WollMuxEventHandler.handleJumpToMark(doc, true);
+      }
+    }
+  }
+
+  /**
+   * Liefert aus dem Dokument doc das erste Text-Field Objekt vom Typ Placemarker,
+   * das gemeinsam mit range an der selben Position startet, oder null falls ein
+   * solches Objekt nicht gefunden wird.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private static XTextField getPlacemarkerStartingWithRange(XTextDocument doc,
+      XTextCursor range)
+  {
+    if (UNO.XTextFieldsSupplier(doc) == null) return null;
+    XEnumeration xenum =
+      UNO.XTextFieldsSupplier(doc).getTextFields().createEnumeration();
+    while (xenum.hasMoreElements())
+    {
+      XTextField tf = null;
+      try
+      {
+        tf = UNO.XTextField(xenum.nextElement());
+      }
+      catch (Exception e)
+      {}
+      if (tf != null
+        && UNO.supportsService(tf, "com.sun.star.text.TextField.JumpEdit"))
+      {
+        XTextRangeCompare c = UNO.XTextRangeCompare(range.getText());
+        try
+        {
+          if (c.compareRegionStarts(range, tf.getAnchor()) == 0) return tf;
+        }
+        catch (IllegalArgumentException e)
+        {}
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Alte und fehlerhafte Implementierung, da der jumpPlaceholder-Methode, da sie
+   * Platzhalter in Tabellen nicht anspringen kann. Diese Methode wird nur noch als
+   * Workaround für Issue http://openoffice.org/bugzilla/show_bug.cgi?id=102619 in
+   * allen OOo-Versionen < 3.2.1 benötigt.
+   * 
+   * @param viewCursor
+   *          Aktueller ViewCursor im Dokument
+   */
+  public static void jumpPlaceholdersOld(XTextDocument doc, XTextCursor viewCursor)
   {
     boolean found = false;
 
