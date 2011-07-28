@@ -63,7 +63,10 @@
  * 25.06.2007 | BNK | [R7224]Im Minimize-Modus bei Absenderauswahl nicht minimieren
  * 19.07.2007 | BNK | [22882]--load sollte jetzt auch unter Windows funzen
  * 17.12.2010 | ERT | [#5704] Menü der Senderbox wird versteckt, wenn die WollMuxBar unsichtbar wird
- * 19.01.2010 | ERT | Menü der Suchbox wird versteckt, wenn die WollMuxBar unsichtbar wird
+ * 19.01.2011 | ERT | Menü der Suchbox wird versteckt, wenn die WollMuxBar unsichtbar wird
+ * 28.07.2011 | ERT | [R98726] Verliert die WollMuxBar den Fokus, wird der Fokus von der Suchliste auf das 
+ *                  | nächste Element verschoben. Dadurch bleibt das Suchmenü geschlossen, wenn die 
+ *                  | WollMuxBar den Fokus zurückerhält.
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1695,7 +1698,12 @@ public class WollMuxBar
       textField.addFocusListener(new FocusListener()
       {
         public void focusLost(FocusEvent arg0)
-        {}
+        {
+          if (arg0.getOppositeComponent() == null)
+          {
+            arg0.getComponent().transferFocus();
+          }
+        }
 
         public void focusGained(FocusEvent arg0)
         {
@@ -2177,8 +2185,8 @@ public class WollMuxBar
 
   private void error(String errorMsg)
   {
-    JOptionPane.showMessageDialog(null,
-      L.m("%1\nVerständigen Sie Ihre Systemadministration.", errorMsg),
+    JOptionPane.showMessageDialog(null, L.m(
+      "%1\nVerständigen Sie Ihre Systemadministration.", errorMsg),
       L.m("Fehlerhafte Konfiguration"), JOptionPane.ERROR_MESSAGE);
   }
 
