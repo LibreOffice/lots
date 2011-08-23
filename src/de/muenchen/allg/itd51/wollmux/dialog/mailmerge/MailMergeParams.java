@@ -147,23 +147,63 @@ class MailMergeParams
      * Gesamtdokument erzeugen, das alle Serienbriefe in allen Ausfertigungen
      * enthält.
      */
-    SINGLE_FILE(L.m("in neues Dokument schreiben")),
+    OOO_MAILMERGE(L.m("mit dem OOo-Seriendruck erzeugen")) {
+      public String[] requiredPrintFunctions()
+      {
+        return new String[] {
+          "MailMergeSimulateSetFormValue", "OOoMailMergeToSingleFile" };
+      }
+    },
 
     /**
      * Alle Ausfertigungen in ein großes pdf-Dokument schreiben
      */
-    SINGLE_PDF_FILE(L.m("PDF-Gesamtdokument erzeugen")),
+    SINGLE_PDF_FILE(L.m("PDF-Gesamtdokument erzeugen")) {
+      public String[] requiredPrintFunctions()
+      {
+        return new String[] {
+          "MailMergeNewSetFormValue", "PDFGesamtdokument", "PDFGesamtdokumentOutput" };
+      }
+    },
+
+    /**
+     * Gesamtdokument erzeugen, das alle Serienbriefe in allen Ausfertigungen
+     * enthält.
+     */
+    SINGLE_FILE(L.m("in neues Dokument schreiben")) {
+      public String[] requiredPrintFunctions()
+      {
+        return new String[] {
+          "MailMergeNewSetFormValue", "Gesamtdokument" };
+      }
+    },
 
     /**
      * Eine Datei pro Serienbrief, wobei jede Datei alle Versionen (bei SLV-Druck)
      * enthält.
      */
-    MULTI_FILE(L.m("in einzelne Dateien schreiben")),
+    MULTI_FILE(L.m("in einzelne Dateien schreiben")) {
+      /**
+       * Auch im MULTI_FILE Fall wird die Gesamtdokument-Funktion verwendet,
+       * allerdings werden in diesem Fall mehrere Gesamtdokumente erzeugt, eines pro
+       * Datensatz (aber z.B. mit allen Versionen beim SLV-Druck im selben Dokument).
+       */
+      public String[] requiredPrintFunctions()
+      {
+        return new String[] {
+          "MailMergeNewSetFormValue", "Gesamtdokument" };
+      }
+    },
 
     /**
      * Direkte Ausgabe auf dem Drucker.
      */
-    PRINTER(L.m("auf dem Drucker ausgeben")),
+    PRINTER(L.m("auf dem Drucker ausgeben")) {
+      public String[] requiredPrintFunctions()
+      {
+        return new String[] { "MailMergeNewSetFormValue" };
+      }
+    },
 
     /**
      * Versenden per E-Mail.
@@ -184,6 +224,16 @@ class MailMergeParams
     public String toString()
     {
       return menuLabel;
+    }
+
+    /**
+     * Liefert in einem String[] die Namen der für die Ausführung des Seriendrucks
+     * notwendigen Druckfunktionen (so wie sie in der funktionen.conf definiert sein
+     * müssen).
+     */
+    public String[] requiredPrintFunctions()
+    {
+      return new String[] {};
     }
   }
 
@@ -237,10 +287,15 @@ class MailMergeParams
       hbox.add(label);
       hbox.add(Box.createHorizontalStrut(5));
 
+      // Angezeige festlegen: nur verfügbare Druckfunktionen anzeigen
       Vector<MailMergeType> types = new Vector<MailMergeType>();
       for (MailMergeType type : MailMergeType.values())
-        if (!type.equals(MailMergeType.SINGLE_PDF_FILE)
-          || mm.hasPrintfunction("PDFGesamtdokument")) types.add(type);
+      {
+        boolean functionsAvailable = true;
+        for (String f : type.requiredPrintFunctions())
+          if (!mm.hasPrintfunction(f)) functionsAvailable = false;
+        if (functionsAvailable) types.add(type);
+      }
       final JComboBox typeBox = new JComboBox(types);
       hbox.add(typeBox);
 
@@ -384,6 +439,8 @@ class MailMergeParams
       hbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(targetDirectory));
       hbox.add(new JButton(new AbstractAction(L.m("Suchen..."))
       {
+        private static final long serialVersionUID = -7919862309134895087L;
+
         public void actionPerformed(ActionEvent e)
         {
           final JFileChooser fc = new JFileChooser(targetDirectory.getText());
@@ -534,6 +591,8 @@ class MailMergeParams
     List<Action> actions = new Vector<Action>();
     actions.add(new AbstractAction(L.m("Datensatznummer"))
     {
+      private static final long serialVersionUID = 2675809156807460816L;
+
       public void actionPerformed(ActionEvent e)
       {
         tags.insertTag(TAG_DATENSATZNUMMER);
@@ -541,6 +600,8 @@ class MailMergeParams
     });
     actions.add(new AbstractAction(L.m("Serienbriefnummer"))
     {
+      private static final long serialVersionUID = 3779132684393223573L;
+
       public void actionPerformed(ActionEvent e)
       {
         tags.insertTag(TAG_SERIENBRIEFNUMMER);

@@ -435,7 +435,7 @@ public final class FormFieldFactory
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
-  interface FormField extends Comparable<FormField>
+  public interface FormField extends Comparable<FormField>
   {
     /**
      * FIXME Unschöne Fixup-Funktion, die in FormScanner.executeCommand() aufgerufen

@@ -264,9 +264,18 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
   private boolean isTempMailMergeDocument(XModel compo)
   {
     String url = compo.getURL();
-    Logger.debug2(url);
-    int idx = url.lastIndexOf('/') - 4;
-    return (url.startsWith(".tmp/sv", idx) && url.endsWith(".tmp"));
+    int idx = url.lastIndexOf('/');
+
+    boolean mmdoc =
+      (/* wird über datei->Drucken in Serienbrief erzeugt: */(url.startsWith(
+        ".tmp/sv", idx - 4) && url.endsWith(".tmp"))
+        || /* wird über den Service css.text.MailMerge erzeugt: */(url.startsWith(
+          "/SwMM", idx) && url.endsWith(".odt")) || /* wird vom WollMux erzeugt: */url.startsWith(
+        "/WollMuxMailMerge", idx - 20));
+
+    // debug-Meldung bewusst ohne L.m gewählt (WollMux halt dich raus!)
+    if (mmdoc) Logger.debug2("temporary document: " + url);
+    return mmdoc;
   }
 
   /**

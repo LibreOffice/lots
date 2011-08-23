@@ -358,6 +358,17 @@ public class TextDocumentModel
   private boolean alreadyTouchedAsFormDocument;
 
   /**
+   * Das TextDocumentModel kann in einem Simulationsmodus betrieben werden, in dem
+   * Änderungen an Formularelementen (WollMux- und NON-WollMux-Felder) nur simuliert
+   * und nicht tatsächlich durchgeführt werden. Benötigt wird dieser Modus für den
+   * Seriendruck über den OOo-Seriendruck, bei dem die Änderungen nicht auf dem
+   * gerade offenen TextDocument durchgeführt werden, sondern auf einer durch den
+   * OOo-Seriendruckmechanismus verwalteten Kopie des Dokuments. Der Simulationsmodus
+   * ist dann aktiviert, wenn {@link #simulationResult} != null ist.
+   */
+  private SimulationResults simulationResult = null;
+
+  /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie direkt
    * aufgerufen werden, da neue TextDocumentModels über das WollMuxSingleton (siehe
    * WollMuxSingleton.getTextDocumentModel()) erzeugt und verwaltet werden.
@@ -1494,11 +1505,19 @@ public class TextDocumentModel
    * Schlüssel. Änderungen an der zurückgelieferten Map zeigen keine Wirkung im
    * TextDocumentModel (da nur eine Kopie der internen Map zurückgegeben wird).
    * 
+   * Befindet sich das TextDocumentModel in einem über {@link #startSimulation()}
+   * gesetzten Simulationslauf, so werden die im Simulationslauf gesetzten Werte
+   * zurück geliefert, die nicht zwangsweise mit den reell gesetzten Werten
+   * übereinstimmen müssen.
+   * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   synchronized public Map<String, String> getFormFieldValues()
   {
-    return new HashMap<String, String>(formFieldValues);
+    if (simulationResult == null)
+      return new HashMap<String, String>(formFieldValues);
+    else
+      return new HashMap<String, String>(simulationResult.getFormFieldValues());
   }
 
   /**
@@ -1946,16 +1965,26 @@ public class TextDocumentModel
    * neue Wert angezeigt wird, ist ein Aufruf von {@link #updateFormFields(String)}
    * erforderlich.
    * 
+   * Befindet sich das TextDocumentModel in einem über {@link #startSimulation()}
+   * gestarteten Simulationslauf, so werden die persistenten Daten nicht verändert
+   * und der neue Wert nur in einem internen Objekt des Simulationslaufs gespeichert
+   * anstatt im Dokument.
+   * 
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
   synchronized public void setFormFieldValue(String fieldId, String value)
   {
-    updateLastTouchedByVersionInfo();
-    if (value == null)
-      formFieldValues.remove(fieldId);
+    if (simulationResult == null)
+    {
+      updateLastTouchedByVersionInfo();
+      if (value == null)
+        formFieldValues.remove(fieldId);
+      else
+        formFieldValues.put(fieldId, value);
+      persistentData.setData(DATA_ID_FORMULARWERTE, getFormFieldValuesString());
+    }
     else
-      formFieldValues.put(fieldId, value);
-    persistentData.setData(DATA_ID_FORMULARWERTE, getFormFieldValuesString());
+      simulationResult.setFormFieldValue(fieldId, value);
   }
 
   /**
@@ -2110,7 +2139,13 @@ public class TextDocumentModel
    * dem persistenten Formularwerte-Abschnitt in die zugehörigen Formularfelder im
    * Dokument; Ist der Vorschaumodus nicht aktiv, so werden jeweils nur die
    * Spaltennamen in spitzen Klammern angezeigt; Für die Auflösung der TRAFOs wird
-   * dabei die Funktionsbibliothek funcLib verwendet.
+   * dabei die Funktionsbibliothek funcLib verwendet. Außerdem wird der
+   * Modified-Status des Dokuments gesetzt.
+   * 
+   * Befindet sich das TextDocumentModel in einem über {@link #startSimulation()}
+   * gestarteten Simulationslauf, so wird der Update der von fieldId abhängigen
+   * Formularelemente nur simuliert und es der Modified-Status des Dokuments wird
+   * nicht gesetzt.
    * 
    * @param fieldId
    *          Die ID des Formularfeldes bzw. der Formularfelder, die im Dokument
@@ -2121,6 +2156,8 @@ public class TextDocumentModel
     if (formFieldPreviewMode)
     {
       String value = formFieldValues.get(fieldId);
+      if (simulationResult != null)
+        value = simulationResult.getFormFieldValues().get(fieldId);
       if (value == null) value = "";
       setFormFields(fieldId, value, true);
     }
@@ -2128,7 +2165,7 @@ public class TextDocumentModel
     {
       setFormFields(fieldId, "<" + fieldId + ">", false);
     }
-    setDocumentModified(true);
+    if (simulationResult == null) setDocumentModified(true);
   }
 
   /**
@@ -2163,12 +2200,12 @@ public class TextDocumentModel
   }
 
   /**
-   * Setzt den Inhalt aller Formularfelder aus der Liste formFields auf value.
-   * formFields kann null sein, dann passiert nichts.
+   * Setzt den Inhalt aller Formularfelder aus der Liste formFields auf value und
+   * wendet dabei ggf; (abhängig von applyTrafo und useKnownFormValues) die für die
+   * Formularfelder korrekte Transformation an; Wenn simulateResult != null ist, so
+   * werden die Werte nicht tatsächlich gesetzt, sondern das Setzen in die HashMap
+   * simulateResult simuliert. formFields kann null sein, dann passiert nichts.
    * 
-   * @param funcLib
-   *          Funktionsbibliothek zum Berechnen von TRAFOs. funcLib darf null sein,
-   *          dann werden die Formularwerte in jedem Fall untransformiert gesetzt.
    * @param applyTrafo
    *          gibt an ob eine evtl. vorhandenen Trafofunktion verwendet werden soll.
    * @param useKnownFormValues
@@ -2184,21 +2221,27 @@ public class TextDocumentModel
   {
     if (formFields == null) return;
 
-    updateLastTouchedByVersionInfo();
+    if (simulationResult == null) updateLastTouchedByVersionInfo();
 
     for (FormField field : formFields)
       try
       {
+        String result;
         String trafoName = field.getTrafoName();
         if (trafoName != null && applyTrafo)
         {
           if (useKnownFormValues)
-            field.setValue(getTransformedValue(trafoName));
+            result = getTransformedValue(trafoName);
           else
-            field.setValue(getTransformedValue(trafoName, value));
+            result = getTransformedValue(trafoName, value);
         }
         else
-          field.setValue(value);
+          result = value;
+
+        if (simulationResult == null)
+          field.setValue(result);
+        else
+          simulationResult.setFormFieldContent(field, result);
       }
       catch (RuntimeException e)
       {
@@ -2326,6 +2369,10 @@ public class TextDocumentModel
    * wird ein Fehlerstring zurückgeliefert und eine weitere Fehlermeldung in die
    * Log-Datei geschrieben.
    * 
+   * Befindet sich das TextDocumentModel in einem über {@link #startSimulation()}
+   * gesetzten Simulationslauf, so wird die Trafo mit den im Simulationslauf
+   * gesetzten Formularwerten berechnet und zurück geliefert.
+   * 
    * @param trafoName
    *          Der Name der Trafofunktion, der nicht null sein darf.
    * @return Der transformierte Wert falls die Trafo definiert ist oder ein
@@ -2333,7 +2380,10 @@ public class TextDocumentModel
    */
   public String getTransformedValue(String trafoName)
   {
-    return getTransformedValue(trafoName, formFieldValues);
+    if (simulationResult == null)
+      return getTransformedValue(trafoName, formFieldValues);
+    else
+      return getTransformedValue(trafoName, simulationResult.getFormFieldValues());
   }
 
   /**
@@ -3324,6 +3374,45 @@ public class TextDocumentModel
   }
 
   /**
+   * Liefert den Wert von ID des als Kommandostring cmdStr übergebenen
+   * Dokumentkommandos (derzeit nur insertFormValue); Bildet cmdStr kein gültiges
+   * Dokumentkommando mit ID-Attribut so wird null zurück geliefert.
+   * 
+   * @param cmdStr
+   *          Ein Kommandostring eines Dokumentkommandos in der Form "WM(CMD
+   *          '<command>' ...)"
+   * @return
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static String getFormIDForDocumentCommand(String cmdStr)
+  {
+    ConfigThingy wm = new ConfigThingy("");
+    try
+    {
+      wm = new ConfigThingy("", cmdStr).get("WM");
+    }
+    catch (java.lang.Exception e)
+    {}
+
+    String cmd = "";
+    try
+    {
+      cmd = wm.get("CMD").toString();
+    }
+    catch (NodeNotFoundException e)
+    {}
+
+    if (cmd.equalsIgnoreCase("insertFormValue")) try
+    {
+      return wm.get("ID").toString();
+    }
+    catch (NodeNotFoundException e)
+    {}
+    return null;
+  }
+
+  /**
    * Ersetzt die aktuelle Selektion (falls vorhanden) durch ein WollMux-Formularfeld
    * mit ID id, dem Hinweistext hint und der durch trafoConf definierten TRAFO. Das
    * Formularfeld ist direkt einsetzbar, d.h. sobald diese Methode zurückkehrt, kann
@@ -3521,10 +3610,10 @@ public class TextDocumentModel
           catch (IllegalArgumentException e)
           {}
 
-          Matcher m = WOLLMUX_BOOKMARK_PATTERN.matcher(name);
-          if (m.matches())
+          String docCmd = getDocumentCommandByBookmarkName(name);
+          if (docCmd != null)
           {
-            String t = getFunctionNameForDocumentCommand(m.group(1));
+            String t = getFunctionNameForDocumentCommand(docCmd);
             if (t != null)
             {
               Integer s = collectedTrafos.get(t);
@@ -3538,6 +3627,21 @@ public class TextDocumentModel
       }
     }
     return collectedTrafos;
+  }
+
+  /**
+   * Prüft ob es sich bei dem mit bookmarkName bezeichneten Bookmark um ein
+   * Dokumentkommando des WollMux handelt und liefert in diesem Fall das
+   * Dokumentkommando (also den Bookmark-Namen bereinigt um die abschließende Ziffer)
+   * zurück, oder null, wenn es sich um kein Dokumentkommando des WollMux handelt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static String getDocumentCommandByBookmarkName(String bookmarkName)
+  {
+    Matcher m = WOLLMUX_BOOKMARK_PATTERN.matcher(bookmarkName);
+    if (m.matches()) return m.group(1);
+    return null;
   }
 
   /**
@@ -4073,5 +4177,44 @@ public class TextDocumentModel
         return (isField() ? "FIELD" : "FIXED_TEXT") + " \"" + value + "\"";
       }
     }
+  }
+
+  /**
+   * Startet den Simulationsmodus, in dem Änderungen an Formularelementen (WollMux-
+   * und NON-WollMux-Felder) nur simuliert und nicht tatsächlich durchgeführt werden.
+   * Benötigt wird dieser Modus für den Seriendruck über den OOo-Seriendruck, bei dem
+   * die Änderungen nicht auf dem gerade offenen TextDocument durchgeführt werden,
+   * sondern auf einer durch den OOo-Seriendruckmechanismus verwalteten Kopie des
+   * Dokuments.
+   */
+  synchronized public void startSimulation()
+  {
+    simulationResult = new SimulationResults();
+    simulationResult.setFormFieldValues(formFieldValues);
+
+    // Aktuell gesetzte FormField-Inhalte auslesen und simulationResults bekannt
+    // machen.
+    HashSet<FormField> ffs = new HashSet<FormField>();
+    for (List<FormField> l : idToFormFields.values())
+      for (FormField ff : l)
+        ffs.add(ff);
+    for (List<FormField> l : idToTextFieldFormFields.values())
+      for (FormField ff : l)
+        ffs.add(ff);
+    ffs.addAll(staticTextFieldFormFields);
+    for (FormField ff : ffs)
+      simulationResult.setFormFieldContent(ff, ff.getValue());
+  }
+
+  /**
+   * Beendet den mit {@link #startSimulation()} gestarteten Simulationsmodus und
+   * liefert das Simulationsergebnis in SimulationResults zurück oder null, wenn der
+   * Simulationsmodus vorher nicht gestartet wurde.
+   */
+  synchronized public SimulationResults stopSimulation()
+  {
+    SimulationResults r = simulationResult;
+    simulationResult = null;
+    return r;
   }
 }

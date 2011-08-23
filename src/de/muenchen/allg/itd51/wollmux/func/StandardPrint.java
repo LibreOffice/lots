@@ -214,6 +214,34 @@ public class StandardPrint
   }
 
   /**
+   * Verhält sich wie {@link #mailMergeNewSetFormValue(XPrintModel)} mit der
+   * Ausnahme, dass das Setzen der Formularwerte nicht tatsächlich im Dokument
+   * erfolgt sondern simuliert.
+   * 
+   * @throws Exception
+   *           falls was schief geht.
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static void mailMergeSimulateSetFormValue(final XPrintModel pmod)
+      throws Exception
+  {
+    pmod.setPropertyValue(MailMergeNew.PROP_SIMULATE, true);
+    MailMergeNew.mailMergeNewSetFormValue(pmod);
+  }
+
+  /**
+   * Druckfunktion zum Aufruf des Seriendrucks über den OOo-MailMergeService.
+   * 
+   * @throws Exception
+   *           falls was schief geht.
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static void oooMailMergeToSingleFile(final XPrintModel pmod)
+  {
+    OOoBasedMailMerge.oooMailMergeToSingleFile(pmod);
+  }
+
+  /**
    * Erzeugt eine interne Druckfunktion, die auf die in dieser Klasse definierte
    * Methode mit dem Namen functionName verweist und den Order-Wert order besitzt.
    * 

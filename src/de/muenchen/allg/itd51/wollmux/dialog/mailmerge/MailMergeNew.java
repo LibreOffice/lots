@@ -66,6 +66,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.SimulationResults;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
@@ -97,6 +98,30 @@ import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
  */
 public class MailMergeNew
 {
+  /**
+   * ID zu der MailMergeNew Information an nachfolgende Druckfunktionen weiter gibt,
+   * ob es sich bei dem aktuellen Aufruf von pmod.printWithProps() um den letzten
+   * Aufruf handelt. TODO: evtl auslagern in XPrintModel als eigene Funktion.
+   */
+  public static final String PROP_LAST_PRINT =
+    "MailMergeNewSetFormValue_LastPrintCall";
+
+  /**
+   * Teilt MailMergeNewSetFormValue mit, dass Änderungen nur simuliert werden sollen
+   * (mit dem Ergebnis der Simulation wird dann später eine OOo-Datenquelle angelegt
+   * als Input für den OOo-Seriendruck, der nicht auf dem eigentlichen Dokument,
+   * sondern auf einer Kopie arbeitet).
+   */
+  public static final String PROP_SIMULATE = "MailMergeNewSetFormValue_Simulate";
+
+  /**
+   * Falls {@link #PROP_SIMULATE}==true ist und die Druckfunktion
+   * MailMergeNewSetFormValue aufgerufen wurde, so enthält diese Property nach dem
+   * Aufruf das Ergebnis der Simulation als ein Objekt von {@link SimulationResults}.
+   */
+  public static final String PROP_SIMULATION_RESULTS =
+    "MailMergeNewSetFormValue_SimulationResult";
+
   /**
    * ID der Property in der die Serienbriefdaten gespeichert werden.
    */
@@ -888,6 +913,7 @@ public class MailMergeNew
         break;
     }
 
+    // PrintModel erzeugen und Parameter setzen:
     final XPrintModel pmod = mod.createPrintModel(true);
     try
     {
@@ -905,20 +931,12 @@ public class MailMergeNew
       Logger.error(x);
       return;
     }
+
+    // Benötigte Druckfunktionen zu pmod hinzufügen:
     try
     {
-      pmod.usePrintFunction("MailMergeNewSetFormValue");
-
-      /*
-       * Auch im MULTI_FILE Fall wird die Gesamtdokument-Funktion verwendet,
-       * allerdings werden in diesem Fall mehrere Gesamtdokumente erzeugt, eines pro
-       * Datensatz (aber z.B. mit allen Versionen beim SLV-Druck im selben Dokument).
-       */
-      if (mailMergeType == MailMergeType.SINGLE_FILE
-        || mailMergeType == MailMergeType.MULTI_FILE)
-        pmod.usePrintFunction("Gesamtdokument");
-      else if (mailMergeType == MailMergeType.SINGLE_PDF_FILE)
-        pmod.usePrintFunction("PDFGesamtdokument");
+      for (String printFunctionName : mailMergeType.requiredPrintFunctions())
+        pmod.usePrintFunction(printFunctionName);
     }
     catch (NoSuchMethodException e)
     {
@@ -944,17 +962,14 @@ public class MailMergeNew
         XTextDocument outputDoc = null;
         try
         {
-          if (mailMergeType == MailMergeType.SINGLE_FILE)
+          if (mailMergeType == MailMergeType.SINGLE_FILE) try
           {
-            try
-            {
-              outputDoc = StandardPrint.createNewTargetDocument(pmod, true);
-              outputDoc.lockControllers();
-            }
-            catch (java.lang.Exception e)
-            {
-              Logger.error(e);
-            }
+            outputDoc = StandardPrint.createNewTargetDocument(pmod, true);
+            outputDoc.lockControllers();
+          }
+          catch (java.lang.Exception e)
+          {
+            Logger.error(e);
           }
 
           mod.setFormFieldsPreviewMode(true);
@@ -963,9 +978,8 @@ public class MailMergeNew
         }
         finally
         {
-          // lockControllers des Gesamtdokuments aufheben und das Gesamtdokument
-          // anzeigen.
-          if (outputDoc != null && mailMergeType != MailMergeType.SINGLE_PDF_FILE)
+          // lockControllers aufheben und das Gesamtdokument anzeigen:
+          if (mailMergeType == MailMergeType.SINGLE_FILE && outputDoc != null)
           {
             outputDoc.unlockControllers();
             outputDoc.getCurrentController().getFrame().getContainerWindow().setVisible(
@@ -973,25 +987,49 @@ public class MailMergeNew
           }
         }
         long duration = (System.currentTimeMillis() - startTime) / 1000;
-        Logger.debug(L.m("printIntoFile finished after %1 seconds", duration));
+        Logger.debug(L.m("MailMerge finished after %1 seconds", duration));
       }
     }.start();
   }
 
   /**
    * PrintFunction, die das jeweils nächste Element der Seriendruckdaten nimmt und
-   * die Seriendruckfelder im Dokument entsprechend setzt. Herangezogen werden die
-   * Properties {@link #PROP_QUERYRESULTS} (ein Objekt vom Typ {@link QueryResults})
-   * und "MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält, sowie
-   * {@link #PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der
-   * ausgewählten Datensätze ist (0 ist der erste Datensatz). Dies funktioniert
-   * natürlich nur dann, wenn pmod kein Proxy ist.
+   * die Seriendruckfelder im Dokument entsprechend setzt. Herangezogen werden
+   * folgende Properties:
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   * <ul>
+   * <li>{@link #PROP_QUERYRESULTS} (ein Objekt vom Typ {@link QueryResults})</li>
+   * 
+   * <li>"MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält</li>
+   * 
+   * <li>{@link #PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der
+   * ausgewählten Datensätze ist (0 ist der erste Datensatz).</li>
+   * 
+   * <li>{@link #PROP_SIMULATE} steuert über ein Boolean-Objekt (falls true), ob das
+   * Setzen der Werte nur simuliert werden soll.</li>
+   * </ul>
+   * 
+   * Als Rückgabewerte für nachfolgend aufgerufene Druckfunktionen setzt diese
+   * Druckfunktion die folgenden Properties:
+   * 
+   * <ul>
+   * <li>{@link #PROP_SIMULATION_RESULTS} enthält ein Objekt vom Typ
+   * {@link SimulationResults} wenn {@link #PROP_SIMULATE} == true gesetzt ist.</li>
+   * 
+   * <li>{@link #PROP_LAST_PRINT} ist Boolean.TRUE, wenn die Werte des letzten
+   * selektierten Datensatzes gesetzt wurden.</li>
+   * </ul>
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
+   * 
+   *         TODO: ausführlicher testen
    */
   @SuppressWarnings("unchecked")
   public static void mailMergeNewSetFormValue(XPrintModel pmod) throws Exception
   {
+    TextDocumentModel mod =
+      WollMuxSingleton.getInstance().getTextDocumentModel(pmod.getTextDocument());
+
     QueryResults data = (QueryResults) pmod.getPropertyValue(PROP_QUERYRESULTS);
     Collection schema = (Collection) pmod.getPropertyValue("MailMergeNew_Schema");
     List<Integer> selection =
@@ -1007,6 +1045,23 @@ public class MailMergeNew
     }
     catch (Exception x)
     {}
+
+    Boolean simulate = false;
+    try
+    {
+      simulate = (Boolean) pmod.getPropertyValue(PROP_SIMULATE);
+    }
+    catch (Exception x)
+    {}
+
+    try
+    {
+      pmod.setPropertyValue(PROP_LAST_PRINT, Boolean.FALSE);
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
+    }
 
     Iterator iter = data.iterator();
     Iterator<Integer> selIter = selection.iterator();
@@ -1030,6 +1085,9 @@ public class MailMergeNew
       else
         selectedIdx = -1;
 
+      SimulationResults simulationResult = null;
+      if (simulate) mod.startSimulation();
+
       Iterator schemaIter = schema.iterator();
       while (schemaIter.hasNext())
       {
@@ -1039,6 +1097,16 @@ public class MailMergeNew
       pmod.setFormValue(MailMergeParams.TAG_DATENSATZNUMMER, "" + datensatzNummer);
       pmod.setFormValue(MailMergeParams.TAG_SERIENBRIEFNUMMER, ""
         + serienbriefNummer);
+
+      if (simulate) simulationResult = mod.stopSimulation();
+      if (simulationResult != null) try
+      {
+        pmod.setPropertyValue(PROP_SIMULATION_RESULTS, simulationResult);
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+      }
 
       /*
        * Wenn wir im Fall des Einzeldokumentdrucks sind, dann wird hier vor dem
@@ -1057,6 +1125,15 @@ public class MailMergeNew
         {
           Logger.error(e);
         }
+      }
+
+      if (selectedIdx < 0) try
+      {
+        pmod.setPropertyValue(PROP_LAST_PRINT, Boolean.TRUE);
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
       }
 
       pmod.printWithProps();
