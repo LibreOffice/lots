@@ -153,6 +153,7 @@ import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
+import de.muenchen.allg.itd51.wollmux.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
@@ -239,6 +240,13 @@ public class WollMuxBar
   private int windowMode;
 
   /**
+   * Enthält das Verhalten desTrayIcons (wie z.B.
+   * {@link WollMuxBarConfig#ICONIFY_TRAY_ICON}), das nur einmal aus {@link #config}
+   * ausgelesen und dann hier gecachet wird. Siehe auch {@link #windowMode}.
+   */
+  private int trayIconMode;
+
+  /**
    * Falls true, so agiert die WollMuxBar als OOo-Quickstarter.
    */
   private boolean quickstarterEnabled = false;
@@ -257,6 +265,12 @@ public class WollMuxBar
    * Das Panel für den Inhalt des Fensters der WollMuxBar (myFrame).
    */
   private JPanel contentPanel;
+
+  /**
+   * Das (optionale) TrayIcon für die WollMuxBar. Kann <code>null</code> sein, wenn
+   * kein TrayIcon aktiviert wurde!
+   */
+  private WollMuxBarTrayIcon trayIcon;
 
   /**
    * Mappt einen Menü-Namen auf ein entsprechendes JPopupMenu.
@@ -400,9 +414,10 @@ public class WollMuxBar
   private JMenuBar menuBar;
 
   /**
-   * true zeigt an, dass die Leiste minimiert ist.
+   * <code>true</code> zeigt an, dass die Leiste im
+   * {@link WollMuxBarConfig#UP_AND_AWAY_WINDOW_MODE} minimiert ist.
    */
-  private boolean isMinimized = false;
+  private boolean windowIsAway = false;
 
   /**
    * Die wollmux.conf.
@@ -507,6 +522,7 @@ public class WollMuxBar
     myFrame_x = config.getX();
     myFrame_y = config.getY();
     windowMode = config.getWindowMode();
+    trayIconMode = config.getTrayIconMode();
 
     // set the icon for the WollMuxBar frame
     Common.setWollMuxIcon(myFrame);
@@ -546,6 +562,7 @@ public class WollMuxBar
       Logger.error(x);
     }
 
+    JPopupMenu trayIconMenu = null;
     menuBar = new JMenuBar();
     menuBar.addMouseListener(myIsInsideMonitor);
     try
@@ -556,6 +573,15 @@ public class WollMuxBar
         ConfigThingy menueConf = conf.query("Menues");
         initMenuOrder(menueConf, menubar.getLastChild(), "");
         addUIElements(menueConf, menubar.getLastChild(), menuBar, 1, 0, "menu");
+
+        // Gegebenfalls Kontext-Menü für TrayIcon befüllen
+        if (trayIconMode == WollMuxBarConfig.POPUP_TRAY_ICON
+          || trayIconMode == WollMuxBarConfig.ICONIFY_AND_POPUP_TRAY_ICON)
+        {
+          trayIconMenu = new JPopupMenu();
+          addUIElements(menueConf, menubar.getLastChild(), trayIconMenu, 1, 0,
+            "menu");
+        }
       }
     }
     catch (NodeNotFoundException x)
@@ -569,6 +595,31 @@ public class WollMuxBar
     if (windowMode != WollMuxBarConfig.NORMAL_WINDOW_MODE)
       myFrame.setAlwaysOnTop(true);
 
+    if (trayIconMode == WollMuxBarConfig.ICONIFY_TRAY_ICON)
+    {
+      trayIcon = new WollMuxBarTrayIcon(null, myFrame, true);
+    }
+    else if (trayIconMode == WollMuxBarConfig.POPUP_TRAY_ICON)
+    {
+      trayIcon = new WollMuxBarTrayIcon(trayIconMenu, myFrame, false);
+    }
+    else if (trayIconMode == WollMuxBarConfig.ICONIFY_AND_POPUP_TRAY_ICON)
+    {
+      trayIcon = new WollMuxBarTrayIcon(trayIconMenu, myFrame, true);
+    }
+
+    if (trayIcon != null)
+    {
+      try
+      {
+        trayIcon.addToTray();
+      }
+      catch (UnavailableException e)
+      {
+        Logger.log(L.m("Konnte Tray-Icon nicht zur System-Tray hinzufügen."));
+      }
+    }
+
     setSizeAndLocation();
     myFrame.setResizable(true);
     myFrame.setVisible(true);
@@ -581,7 +632,7 @@ public class WollMuxBar
    */
   private void setSizeAndLocation()
   {
-    if (isMinimized) return;
+    if (windowIsAway) return;
     // Toolkit tk = Toolkit.getDefaultToolkit();
     GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
     // Dimension screenSize = tk.getScreenSize();
@@ -1295,6 +1346,17 @@ public class WollMuxBar
     instance = null;
     eventHandler.handleTerminate();
     myFrame.dispose();
+    if (trayIcon != null)
+    {
+      try
+      {
+        trayIcon.removeFromTray();
+      }
+      catch (UnavailableException e)
+      {
+        // do nothing
+      }
+    }
     eventHandler.waitForThreadTermination();
 
     terminate(0);
@@ -1344,6 +1406,17 @@ public class WollMuxBar
   {
     eventHandler.handleTerminate();
     myFrame.dispose();
+    if (trayIcon != null)
+    {
+      try
+      {
+        trayIcon.removeFromTray();
+      }
+      catch (UnavailableException e)
+      {
+        // do nothing
+      }
+    }
     eventHandler.waitForThreadTermination();
     readWollMuxBarConfAndStartWollMuxBar(config.getWindowMode(),
       isQuickstarterEnabled(), false, defaultConf);
@@ -2050,8 +2123,8 @@ public class WollMuxBar
       return;
     }
 
-    if (isMinimized) return;
-    isMinimized = true;
+    if (windowIsAway) return;
+    windowIsAway = true;
 
     if (windowMode == WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE)
     {
@@ -2078,8 +2151,8 @@ public class WollMuxBar
       return;
     }
 
-    if (!isMinimized) return;
-    isMinimized = false;
+    if (!windowIsAway) return;
+    windowIsAway = false;
 
     if (windowMode == WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE)
     {

@@ -84,6 +84,30 @@ public class WollMuxBarConfig
   static final int UP_AND_AWAY_WINDOW_MODE = 4;
 
   /**
+   * Kein TrayIcon für die WollMuxBar.
+   */
+  static final int NO_TRAY_ICON = 0;
+
+  /**
+   * TrayIcon, auf das die WollMuxBar ikonifiziert wird und das sie per Klick wieder
+   * de-ikonifiziert.
+   */
+  static final int ICONIFY_TRAY_ICON = 1;
+
+  /**
+   * TrayIcon, das Popup-Menü für den Schnellzugriff auf die WollMuxBar-Einträge zur
+   * Verfügung stellt.
+   */
+  static final int POPUP_TRAY_ICON = 2;
+
+  /**
+   * TrayIcon, auf das die WollMuxBar ikonifiziert wird und das sie per Klick wieder
+   * de-ikonifiziert, und das außerdem ein Popup-Menü für den Schnellzugriff auf die
+   * WollMuxBar-Einträge zur Verfügung stellt.
+   */
+  static final int ICONIFY_AND_POPUP_TRAY_ICON = 3;
+
+  /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
    */
   private final static int TF_BORDER = 4;
@@ -165,6 +189,17 @@ public class WollMuxBarConfig
   private int windowMode_default;
 
   /**
+   * Der Modus für das WollMuxTrayIcon (zum Beispiel
+   * {@link WollMuxBarConfig#ICONIFY_TRAY_ICON}).
+   */
+  private int trayIconMode;
+
+  /**
+   * Der zentrale Vorgabewert für den {@link #trayIconMode};
+   */
+  private int trayIconMode_default;
+
+  /**
    * Die aktiven CONF_IDs.
    */
   private Set<String> conf_ids;
@@ -213,6 +248,7 @@ public class WollMuxBarConfig
      */
     myFrame_title_default = WollMuxBarConfig.DEFAULT_TITLE;
     windowMode_default = WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE;
+    trayIconMode_default = WollMuxBarConfig.NO_TRAY_ICON;
     myFrame_x_default = Integer.MIN_VALUE;
     myFrame_y_default = Integer.MIN_VALUE;
     myFrame_width_default = 0;
@@ -228,6 +264,8 @@ public class WollMuxBarConfig
           myFrame_title_default = conf.toString();
         else if (conf.getName().equals("MODE"))
           windowMode_default = getWindowMode(conf.toString());
+        else if (conf.getName().equals("TRAYICON"))
+          trayIconMode_default = getTrayIconMode(conf.toString());
         else if (conf.getName().equals("X"))
           myFrame_x_default = getXY(conf.toString());
         else if (conf.getName().equals("Y"))
@@ -248,6 +286,7 @@ public class WollMuxBarConfig
      */
     myFrame_title = WollMuxBarConfig.DEFAULT_TITLE;
     windowMode = WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE;
+    trayIconMode = WollMuxBarConfig.NO_TRAY_ICON;
     myFrame_x = Integer.MIN_VALUE;
     myFrame_y = Integer.MIN_VALUE;
     myFrame_width = 0;
@@ -263,6 +302,8 @@ public class WollMuxBarConfig
           myFrame_title = conf.toString();
         else if (conf.getName().equals("MODE"))
           windowMode = getWindowMode(conf.toString());
+        else if (conf.getName().equals("TRAYICON"))
+          trayIconMode = getTrayIconMode(conf.toString());
         else if (conf.getName().equals("X"))
           myFrame_x = getXY(conf.toString());
         else if (conf.getName().equals("Y"))
@@ -279,6 +320,7 @@ public class WollMuxBarConfig
       // Werte aus defaultConf verwendet.
       myFrame_title = myFrame_title_default;
       windowMode = windowMode_default;
+      trayIconMode = trayIconMode_default;
       myFrame_x = myFrame_x_default;
       myFrame_y = myFrame_y_default;
       myFrame_width = myFrame_width_default;
@@ -337,6 +379,15 @@ public class WollMuxBarConfig
   public int getWindowMode()
   {
     return windowMode;
+  }
+
+  /**
+   * Liefert das gewünschte Verhalten für das Tray-Icon der WollMuxBar, z.B.
+   * {@link #ICONIFY_TRAY_ICON}.
+   */
+  public int getTrayIconMode()
+  {
+    return trayIconMode;
   }
 
   /**
@@ -490,6 +541,18 @@ public class WollMuxBarConfig
     ++y;
     gbcLabel.gridx = x++;
     gbcLabel.gridy = y;
+    mainPanel.add(new JLabel(L.m("Tray-Icon")), gbcLabel);
+    final JComboBox inputTrayIcon = new JComboBox(new String[] {
+      "None", "Iconify", "Popup", "IconifyAndPopup" });
+    inputTrayIcon.setEditable(false);
+    gbcCombo.gridx = x++;
+    gbcCombo.gridy = y;
+    mainPanel.add(inputTrayIcon, gbcCombo);
+
+    x = 0;
+    ++y;
+    gbcLabel.gridx = x++;
+    gbcLabel.gridy = y;
     mainPanel.add(new JLabel("X"), gbcLabel);
     final JComboBox inputX = new JComboBox(new String[] {
       "auto", "center", "min", "max" });
@@ -556,6 +619,7 @@ public class WollMuxBarConfig
 
     inputTitle.setText(myFrame_title);
     setCombo(inputMode, windowModeToText(windowMode));
+    setCombo(inputTrayIcon, trayIconModeToText(trayIconMode));
     setCombo(inputX, xyToText(myFrame_x));
     setCombo(inputY, xyToText(myFrame_y));
     setCombo(inputWidth, widthHeightToText(myFrame_width));
@@ -583,6 +647,7 @@ public class WollMuxBarConfig
       {
         inputTitle.setText(myFrame_title_default);
         setCombo(inputMode, windowModeToText(windowMode_default));
+        setCombo(inputTrayIcon, trayIconModeToText(trayIconMode_default));
         setCombo(inputX, xyToText(myFrame_x_default));
         setCombo(inputY, xyToText(myFrame_y_default));
         setCombo(inputWidth, widthHeightToText(myFrame_width_default));
@@ -601,6 +666,7 @@ public class WollMuxBarConfig
       {
         myFrame_title = inputTitle.getText();
         windowMode = getWindowMode(inputMode.getSelectedItem().toString());
+        trayIconMode = getTrayIconMode(inputTrayIcon.getSelectedItem().toString());
         myFrame_x = getXY(inputX.getSelectedItem().toString());
         myFrame_y = getXY(inputY.getSelectedItem().toString());
         myFrame_width = getWidthHeight(inputWidth.getSelectedItem().toString());
@@ -771,7 +837,8 @@ public class WollMuxBarConfig
 
     if (myFrame_title.equals(myFrame_title_default)
       && windowMode == windowMode_default && myFrame_x == myFrame_x_default
-      && myFrame_y == myFrame_y_default && myFrame_width == myFrame_width_default
+      && trayIconMode == trayIconMode_default && myFrame_y == myFrame_y_default
+      && myFrame_width == myFrame_width_default
       && myFrame_height == myFrame_height_default)
     {
       // Falls gegenüber den Werten aus defaultConf nichts geändert wurde, dann
@@ -784,6 +851,7 @@ public class WollMuxBarConfig
       ConfigThingy wmbConf = conf.add("Fenster").add("WollMuxBar");
       wmbConf.add("TITLE").add(myFrame_title);
       wmbConf.add("MODE").add(windowModeToText(windowMode));
+      wmbConf.add("TRAYICON").add(trayIconModeToText(trayIconMode));
       wmbConf.add("X").add(xyToText(myFrame_x));
       wmbConf.add("Y").add(xyToText(myFrame_y));
       wmbConf.add("WIDTH").add(widthHeightToText(myFrame_width));
@@ -852,6 +920,22 @@ public class WollMuxBarConfig
         return "UpAndAway";
     }
     return "UpAndAway";
+  }
+
+  private String trayIconModeToText(int trayIconMode)
+  {
+    switch (trayIconMode)
+    {
+      case NO_TRAY_ICON:
+        return "None";
+      case ICONIFY_TRAY_ICON:
+        return "Iconify";
+      case POPUP_TRAY_ICON:
+        return "Popup";
+      case ICONIFY_AND_POPUP_TRAY_ICON:
+        return "IconifyAndPopup";
+    }
+    return "None";
   }
 
   private String xyToText(int xy)
@@ -968,6 +1052,32 @@ public class WollMuxBarConfig
       Logger.error(L.m("Ununterstützer MODE für WollMuxBar-Fenster: '%1'",
         windowMode));
     return windowModeInt;
+  }
+
+  /**
+   * Liefert die zum String trayIconMode ("None", "Iconify", "Popup", oder
+   * "IconifyAndPopup" in beliebiger Groß-/Kleinschreibung) gehörige Konstante (z.B.
+   * {@link #ICONIFY_TRAY_ICON}).
+   * 
+   * Enthält der String keinen identifizierbaren Wert, wird ein Fehler geloggt und
+   * {@link #NO_TRAY_ICON} geliefert.
+   */
+  private int getTrayIconMode(String trayIconMode)
+  {
+    int trayIconModeInt = NO_TRAY_ICON;
+    if (trayIconMode.equalsIgnoreCase("None"))
+      trayIconModeInt = WollMuxBarConfig.NO_TRAY_ICON;
+    else if (trayIconMode.equalsIgnoreCase("Iconify"))
+      trayIconModeInt = WollMuxBarConfig.ICONIFY_TRAY_ICON;
+    else if (trayIconMode.equalsIgnoreCase("Popup"))
+      trayIconModeInt = WollMuxBarConfig.POPUP_TRAY_ICON;
+    else if (trayIconMode.equalsIgnoreCase("IconifyAndPopup"))
+      trayIconModeInt = WollMuxBarConfig.ICONIFY_AND_POPUP_TRAY_ICON;
+    else
+      Logger.error(L.m(
+        "Ununterstützer Wert von TRAYICON für WollMuxBar-Fenster: '%1'",
+        trayIconMode));
+    return trayIconModeInt;
   }
 
 }
