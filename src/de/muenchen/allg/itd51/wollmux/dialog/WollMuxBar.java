@@ -728,6 +728,7 @@ public class WollMuxBar
     {
       upAndAwayMinimizedPanel = new JPanel();
       upAndAwayMinimizedPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+      upAndAwayMinimizedPanel.setPreferredSize(new Dimension(minimizedWidth, 5));
     }
   }
 
@@ -2117,7 +2118,9 @@ public class WollMuxBar
 
     if (windowMode == WollMuxBarConfig.ALWAYS_ON_TOP_WINDOW_MODE
       || windowMode == WollMuxBarConfig.NORMAL_WINDOW_MODE) return;
-    if (windowMode == WollMuxBarConfig.MINIMIZE_TO_TASKBAR_MODE)
+    if (windowMode == WollMuxBarConfig.MINIMIZE_TO_TASKBAR_MODE
+      || trayIconMode == WollMuxBarConfig.ICONIFY_TRAY_ICON
+      || trayIconMode == WollMuxBarConfig.ICONIFY_AND_POPUP_TRAY_ICON)
     {
       myFrame.setExtendedState(Frame.ICONIFIED);
       return;
@@ -2132,7 +2135,10 @@ public class WollMuxBar
       Container contentPane = myFrame.getContentPane();
       contentPane.remove(contentPanel);
       contentPane.add(upAndAwayMinimizedPanel);
-      myFrame.setSize(minimizedWidth, 5);
+      myFrame.pack();
+      myFrame.setLocation(
+        GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint().x
+          - (myFrame.getWidth() / 2), 0);
       myFrame.addMouseListener(upAndAwayWindowTransformer);
     }
   }
