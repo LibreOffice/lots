@@ -23,6 +23,7 @@
  * -------------------------------------------------------------------
  * 29.05.2011 | BED | Erstellung
  * 02.09.2011 | BED | Überarbeitung; Erste eingecheckte Version
+ * 03.09.2011 | BED | Focus-Probleme behoben
  * -------------------------------------------------------------------
  *
  * @author Daniel Benkmann (D-III-ITD-D101)
@@ -41,17 +42,15 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.net.MalformedURLException;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JWindow;
-import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
@@ -88,7 +87,7 @@ public class WollMuxBarTrayIcon
    * Der Default-Tooltip des TrayIcons, der verwendet wird, wenn kein expliziter
    * Tooltip für das WollMuxBarTrayIcon angegeben wurde.
    */
-  private static final String DEFAULT_TOOLTIP = "WollMuxBar";
+  private static final String DEFAULT_TOOLTIP = "WollMux";
 
   /**
    * Hilfsmethode, die versucht die Größe von TrayIcons auf dem aktuellen System
@@ -285,24 +284,16 @@ public class WollMuxBarTrayIcon
    */
   public void deiconifyFrameFromTray()
   {
-    SwingUtilities.invokeLater(new Runnable()
+    // Frame deikonifizieren (falls ikonifiziert - ansonsten lassen wir den
+    // Status in Ruhe)
+    if (iconifiableFrame.getExtendedState() == Frame.ICONIFIED)
     {
-      public void run()
-      {
-        // Frame deikonifizieren (falls ikonifiziert - ansonsten lassen wir den
-        // Status in Ruhe)
-        if (iconifiableFrame.getExtendedState() == Frame.ICONIFIED)
-        {
-          iconifiableFrame.setVisible(true);
-          iconifiableFrame.setExtendedState(Frame.NORMAL);
-        }
-        // Frame in den Vordergrund bringen (unabhängig davon ob er vorher
-        // ikonifiziert war oder nicht)
-        iconifiableFrame.toFront();
-        // TODO: Unter Linux kein Focus!
-      }
-    });
-
+      iconifiableFrame.setExtendedState(Frame.NORMAL);
+    }
+    // Frame sichtbar machen und in den Vordergrund bringen (unabhängig davon ob er
+    // vorher ikonifiziert war oder nicht)
+    iconifiableFrame.setVisible(true);
+    iconifiableFrame.toFront();
   }
 
   /**
@@ -322,9 +313,18 @@ public class WollMuxBarTrayIcon
      */
     private JWindow invoker;
 
-    private void maybeShowPopup(MouseEvent e)
+    /**
+     * Zeigt das Kontext-Popup-Menü des TrayIcons an. Wenn kein Popup-Menü vorhanden
+     * ist, tut diese Methode nichts.
+     * 
+     * @param e
+     *          das MouseEvent, welches das Anzeigen des Popup-Menüs ausgelöst hat.
+     * 
+     * @author Daniel Benkmann (D-III-ITD-D101)
+     */
+    private void showPopup(MouseEvent e)
     {
-      if (e.isPopupTrigger() && popupMenu != null)
+      if (popupMenu != null)
       {
         if (invoker == null)
         {
@@ -397,12 +397,29 @@ public class WollMuxBarTrayIcon
 
     public void mousePressed(MouseEvent e)
     {
-      maybeShowPopup(e);
+    // Eigentlich wäre unter den meisten Linux-Plattformen das mousePressed-Event
+    // der richtige Trigger, um ein Popup-Menü zu starten und man sollte um das
+    // ganze plattformunabhängig zu machen mittels e.isPopupTrigger() sowohl bei
+    // mousePressed als auch mouseReleased (dem üblichen Popup-Trigger auf
+    // Windows-Plattformen) prüfen, ob das Event der Popup-Trigger der Plattform
+    // ist und nur dann das Popup auslösen. Dies tun wir hier nicht, da es unter
+    // Linux (zumindest Debian + Ubuntu) einen nervigen Bug gibt, der dafür sorgt,
+    // dass wenn wir das Popup-Menü korrekterweise beim mousePressed-Event
+    // auslösen, es manchmal(!) beim mouseReleased-Event dann gleich wieder
+    // verschwindet, weil wahrscheinlich irgendwo der Focus verloren geht. Daher
+    // war die einfachste Lösung, die auf allen Plattformen funktioniert, das Popup
+    // konsistent beim mouseReleased-Event mit Button 2 oder 3 zu triggern - selbst
+    // wenn dies nicht überall das plattformgerechte Verhalten ist.
     }
 
     public void mouseReleased(MouseEvent e)
     {
-      maybeShowPopup(e);
+      // Normalerweise wäre ein "if (e.isPopupTrigger())" angebracht, aber siehe
+      // Kommentar unter mousePressed.
+      if (e.getButton() == MouseEvent.BUTTON2 || e.getButton() == MouseEvent.BUTTON3)
+      {
+        showPopup(e);
+      }
     }
 
     public void mouseEntered(MouseEvent e)
@@ -436,14 +453,14 @@ public class WollMuxBarTrayIcon
     submenu.add(new JMenuItem("Untermenüeintrag 2"));
     menu.add(submenu);
 
-    menu.addPropertyChangeListener(new PropertyChangeListener()
-    {
-
-      public void propertyChange(PropertyChangeEvent evt)
-      {
-        System.out.println(evt.getPropertyName());
-      }
-    });
+    // menu.addPropertyChangeListener(new PropertyChangeListener()
+    // {
+    //
+    // public void propertyChange(PropertyChangeEvent evt)
+    // {
+    // System.out.println(evt.getPropertyName());
+    // }
+    // });
 
     // Bild für Icon
     Image img = new ImageIcon("src/data/wollmux_icon24x24.png").getImage();
@@ -452,12 +469,16 @@ public class WollMuxBarTrayIcon
     JFrame frame = new JFrame("Dies ist ein Testframe");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+    frame.getContentPane().add(new JButton("Button"));
+
     // Icon erstellen
     WollMuxBarTrayIcon icon =
       new WollMuxBarTrayIcon(img, "TrayIcon Test", menu, frame, true);
 
     icon.addToTray();
 
+    frame.setPreferredSize(new Dimension(400, 300));
+    frame.setSize(400, 300);
     frame.pack();
     frame.setVisible(true);
   }
