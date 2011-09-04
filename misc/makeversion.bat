@@ -32,8 +32,10 @@ REM First number = year - 2000; Second number = month
 for /f "delims=- tokens=1-2" %%a in (
 'hg log -l1 --template "{date|shortdate}"'
 ) do (
+REM Set year in v1
 set /a v1=%%a - 2000
-set /a v2=%%b
+REM Set month in v2 (removing leading zeroes)
+set /a v2=100%%b %% 100
 )
 
 REM Get local revision number of last commit
