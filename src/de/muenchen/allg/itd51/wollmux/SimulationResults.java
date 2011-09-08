@@ -137,4 +137,15 @@ public class SimulationResults
     else
       mapFormFieldIDToValue.remove(fieldId);
   }
+
+  /**
+   * Beschreibt eine Klasse mit einer Funktion zur Verarbeitung des
+   * Simulationsergebnisses.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static interface SimulationResultsProcessor
+  {
+    void processSimulationResults(SimulationResults simRes);
+  }
 }

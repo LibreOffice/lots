@@ -150,8 +150,7 @@ class MailMergeParams
     OOO_MAILMERGE(L.m("mit dem OOo-Seriendruck erzeugen")) {
       public String[] requiredPrintFunctions()
       {
-        return new String[] {
-          "MailMergeSimulateSetFormValue", "OOoMailMergeToSingleFile" };
+        return new String[] { "OOoMailMergeToSingleFile" };
       }
     },
 

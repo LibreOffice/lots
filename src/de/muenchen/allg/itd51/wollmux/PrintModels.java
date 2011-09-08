@@ -72,6 +72,14 @@ import de.muenchen.allg.itd51.wollmux.func.PrintFunction;
 public class PrintModels
 {
   /**
+   * Spezial-Property für {@link XPrintModel#setPropertyValue(String, Object)} zum
+   * Setzen eines Beschreibungsstrings des aktuell in Bearbeitung befindlichen
+   * Druckvorgangs. Für die Verwendung des Stage-Feature innerhalb des WollMux siehe
+   * {@link #setStage(XPrintModel, String)}.
+   */
+  private static final String STAGE = "STAGE";
+
+  /**
    * Erzeugt ein PrintModel-Objekt, das einen Druckvorgang zum Dokument
    * TextDocumentModel model repräsentiert. Pro Druckvorgang wird dabei ein neuer
    * PrintModelMaster erzeugt, der ein oder mehrere PrintModelSlaves anspricht und so
@@ -194,6 +202,11 @@ public class PrintModels
     private PrintProgressBar printProgressBar = null;
 
     /**
+     * Enthält die Beschreibung des aktuell ausgeführten Druckvorgangs.
+     */
+    private String currentStage = L.m("Drucke");
+
+    /**
      * Erzeugt ein neues MasterPrintModel-Objekt für das Dokument model, das einen
      * Druckvorgang repräsentiert, der mit einer leeren Aufrufkette (Liste von
      * Druckfunktionen) und einer leeren HashMap für den Informationsaustausch
@@ -241,7 +254,8 @@ public class PrintModels
     /*
      * (non-Javadoc)
      * 
-     * @see de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel#useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.func.PrintFunction)
+     * @seede.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel#
+     * useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.func.PrintFunction)
      */
     public boolean useInternalPrintFunction(PrintFunction printFunction)
     {
@@ -467,6 +481,19 @@ public class PrintModels
     }
 
     /**
+     * Setzt den die Beschreibung des aktuellen Druckvorgangs auf stage und
+     * aktualisiert die Anzeige in der PrintProgressBar (falls eine solche Leiste
+     * angezeigt wird).
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public void setStage(String stage)
+    {
+      currentStage = stage;
+      if (printProgressBar != null) printProgressBar.setTitle(currentStage);
+    }
+
+    /**
      * synchronisiertes Auslesen von props
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
@@ -605,7 +632,7 @@ public class PrintModels
      * (non-Javadoc)
      * 
      * @see com.sun.star.beans.XPropertySet#setPropertyValue(java.lang.String,
-     *      java.lang.Object)
+     * java.lang.Object)
      */
     public void setPropertyValue(String arg0, Object arg1)
         throws UnknownPropertyException, PropertyVetoException,
@@ -632,8 +659,9 @@ public class PrintModels
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.star.beans.XPropertySet#addPropertyChangeListener(java.lang.String,
-     *      com.sun.star.beans.XPropertyChangeListener)
+     * @see
+     * com.sun.star.beans.XPropertySet#addPropertyChangeListener(java.lang.String,
+     * com.sun.star.beans.XPropertyChangeListener)
      */
     public void addPropertyChangeListener(String arg0, XPropertyChangeListener arg1)
         throws UnknownPropertyException, WrappedTargetException
@@ -644,8 +672,9 @@ public class PrintModels
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.star.beans.XPropertySet#removePropertyChangeListener(java.lang.String,
-     *      com.sun.star.beans.XPropertyChangeListener)
+     * @see
+     * com.sun.star.beans.XPropertySet#removePropertyChangeListener(java.lang.String,
+     * com.sun.star.beans.XPropertyChangeListener)
      */
     public void removePropertyChangeListener(String arg0,
         XPropertyChangeListener arg1) throws UnknownPropertyException,
@@ -657,8 +686,9 @@ public class PrintModels
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.star.beans.XPropertySet#addVetoableChangeListener(java.lang.String,
-     *      com.sun.star.beans.XVetoableChangeListener)
+     * @see
+     * com.sun.star.beans.XPropertySet#addVetoableChangeListener(java.lang.String,
+     * com.sun.star.beans.XVetoableChangeListener)
      */
     public void addVetoableChangeListener(String arg0, XVetoableChangeListener arg1)
         throws UnknownPropertyException, WrappedTargetException
@@ -669,8 +699,9 @@ public class PrintModels
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.star.beans.XPropertySet#removeVetoableChangeListener(java.lang.String,
-     *      com.sun.star.beans.XVetoableChangeListener)
+     * @see
+     * com.sun.star.beans.XPropertySet#removeVetoableChangeListener(java.lang.String,
+     * com.sun.star.beans.XVetoableChangeListener)
      */
     public void removeVetoableChangeListener(String arg0,
         XVetoableChangeListener arg1) throws UnknownPropertyException,
@@ -826,7 +857,7 @@ public class PrintModels
     {
       if (printProgressBar == null && maxValue > 0)
       {
-        printProgressBar = new PrintProgressBar(new ActionListener()
+        printProgressBar = new PrintProgressBar(currentStage, new ActionListener()
         {
           public void actionPerformed(ActionEvent e)
           {
@@ -879,6 +910,12 @@ public class PrintModels
     private int idx;
 
     private MasterPrintModel master;
+
+    /**
+     * Enthält die Beschreibung des Druckvorgangs, der in diesem SlavePrintModel
+     * bearbeitet wird.
+     */
+    private String stage;
 
     /**
      * Erzeugt ein neues SlavePrintModel, das in der Aufrufkette, die durch das
@@ -948,13 +985,14 @@ public class PrintModels
       {
         master.finalPrint();
       }
+      if (stage != null) master.setStage(stage);
     }
 
     /*
      * (non-Javadoc)
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setFormValue(java.lang.String,
-     *      java.lang.String)
+     * java.lang.String)
      */
     public void setFormValue(String arg0, String arg1)
     {
@@ -994,8 +1032,9 @@ public class PrintModels
     /*
      * (non-Javadoc)
      * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintBlocksProps(java.lang.String,
-     *      boolean, boolean)
+     * @see
+     * de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintBlocksProps(java.lang.String
+     * , boolean, boolean)
      */
     public void setPrintBlocksProps(String arg0, boolean arg1, boolean arg2)
     {
@@ -1016,13 +1055,22 @@ public class PrintModels
      * (non-Javadoc)
      * 
      * @see com.sun.star.beans.XPropertySet#setPropertyValue(java.lang.String,
-     *      java.lang.Object)
+     * java.lang.Object)
      */
-    public void setPropertyValue(String arg0, Object arg1)
+    public void setPropertyValue(String key, Object val)
         throws UnknownPropertyException, PropertyVetoException,
         IllegalArgumentException, WrappedTargetException
     {
-      master.setPropertyValue(arg0, arg1);
+      if (STAGE.equalsIgnoreCase(key))
+      {
+        if (val != null)
+        {
+          stage = val.toString();
+          master.setStage(stage);
+        }
+      }
+      else
+        master.setPropertyValue(key, val);
     }
 
     /*
@@ -1039,8 +1087,9 @@ public class PrintModels
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.star.beans.XPropertySet#addPropertyChangeListener(java.lang.String,
-     *      com.sun.star.beans.XPropertyChangeListener)
+     * @see
+     * com.sun.star.beans.XPropertySet#addPropertyChangeListener(java.lang.String,
+     * com.sun.star.beans.XPropertyChangeListener)
      */
     public void addPropertyChangeListener(String arg0, XPropertyChangeListener arg1)
         throws UnknownPropertyException, WrappedTargetException
@@ -1051,8 +1100,9 @@ public class PrintModels
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.star.beans.XPropertySet#removePropertyChangeListener(java.lang.String,
-     *      com.sun.star.beans.XPropertyChangeListener)
+     * @see
+     * com.sun.star.beans.XPropertySet#removePropertyChangeListener(java.lang.String,
+     * com.sun.star.beans.XPropertyChangeListener)
      */
     public void removePropertyChangeListener(String arg0,
         XPropertyChangeListener arg1) throws UnknownPropertyException,
@@ -1064,8 +1114,9 @@ public class PrintModels
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.star.beans.XPropertySet#addVetoableChangeListener(java.lang.String,
-     *      com.sun.star.beans.XVetoableChangeListener)
+     * @see
+     * com.sun.star.beans.XPropertySet#addVetoableChangeListener(java.lang.String,
+     * com.sun.star.beans.XVetoableChangeListener)
      */
     public void addVetoableChangeListener(String arg0, XVetoableChangeListener arg1)
         throws UnknownPropertyException, WrappedTargetException
@@ -1076,8 +1127,9 @@ public class PrintModels
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.star.beans.XPropertySet#removeVetoableChangeListener(java.lang.String,
-     *      com.sun.star.beans.XVetoableChangeListener)
+     * @see
+     * com.sun.star.beans.XPropertySet#removeVetoableChangeListener(java.lang.String,
+     * com.sun.star.beans.XVetoableChangeListener)
      */
     public void removeVetoableChangeListener(String arg0,
         XVetoableChangeListener arg1) throws UnknownPropertyException,
@@ -1136,8 +1188,9 @@ public class PrintModels
     /*
      * (non-Javadoc)
      * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setGroupVisible(java.lang.String,
-     *      boolean)
+     * @see
+     * de.muenchen.allg.itd51.wollmux.XPrintModel#setGroupVisible(java.lang.String,
+     * boolean)
      */
     public void setGroupVisible(String arg0, boolean arg1)
     {
@@ -1167,7 +1220,8 @@ public class PrintModels
     /*
      * (non-Javadoc)
      * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintProgressMaxValue(short)
+     * @see
+     * de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintProgressMaxValue(short)
      */
     public void setPrintProgressMaxValue(short maxValue)
     {
@@ -1183,6 +1237,24 @@ public class PrintModels
     {
       master.setPrintProgressValue(this, value);
     }
+  }
 
+  /**
+   * Setzt die Beschreibung des aktuellen Druckbearbeitungsvorgangs für das
+   * XPrintModel pmod auf stage
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static void setStage(XPrintModel pmod, String stage)
+  {
+    if (pmod == null) return;
+    try
+    {
+      pmod.setPropertyValue(STAGE, stage);
+    }
+    catch (Exception e)
+    {
+      Logger.error(L.m("Kann Stage nicht auf '%1' setzen", stage), e);
+    }
   }
 }

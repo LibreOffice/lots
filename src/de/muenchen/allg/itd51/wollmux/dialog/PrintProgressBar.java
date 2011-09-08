@@ -45,6 +45,7 @@ import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 
 import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.Logger;
 
 /**
  * Diese Klasse repräsentiert eine Fortschrittsanzeige für den WollMux-Komfortdruck,
@@ -118,23 +119,36 @@ public class PrintProgressBar
    * Erzeugt ein neues PrintProgressBar-Objekt und zeigt das entsprechende Fenster
    * mit der Verlaufsinformation sofort sichtbar an.
    * 
+   * @param title
+   *          Enthält den initial in der Titel-Leiste anzuzeigenden Titel
    * @param abortListener
    *          Der abortListener wird informiert, wenn der "X"-Button oder der
    *          "Abbrechen"-Knopf des Fensters betätigt wurde.
    */
-  public PrintProgressBar(ActionListener abortListener)
+  /**
+   * @param abortListener
+   */
+  public PrintProgressBar(final String title, ActionListener abortListener)
   {
-    order = new LinkedList<Object>();
-    maxValues = new HashMap<Object, Integer>();
-    currentValues = new HashMap<Object, Integer>();
+    this.order = new LinkedList<Object>();
+    this.maxValues = new HashMap<Object, Integer>();
+    this.currentValues = new HashMap<Object, Integer>();
     this.abortListener = abortListener;
-    SwingUtilities.invokeLater(new Runnable()
+    try
     {
-      public void run()
+      SwingUtilities.invokeAndWait(new Runnable()
       {
-        createGui();
-      }
-    });
+        public void run()
+        {
+          createGui();
+        }
+      });
+    }
+    catch (Exception e)
+    {
+      Logger.log(e);
+    }
+    setTitle(title);
   }
 
   /**
@@ -146,7 +160,7 @@ public class PrintProgressBar
   {
     Common.setLookAndFeelOnce();
 
-    myFrame = new JFrame(L.m("Drucke"));
+    myFrame = new JFrame();
     oehrchen = new MyWindowListener();
     myFrame.addWindowListener(oehrchen);
 
@@ -328,8 +342,8 @@ public class PrintProgressBar
 
   /**
    * Baut die Ansicht der PrintProgressBar neu auf. Eine der Hauptaufgaben von
-   * refresh ist es dabei, den status-String (z.B. "1 von 4 Versionen" oder bei mehr
-   * als einer registrierten Druckfunktion "3 von 10 (=2x5) Versionen") zusammen zu
+   * refresh ist es dabei, den status-String (z.B. "1 von 4 Schritten" oder bei mehr
+   * als einer registrierten Druckfunktion "3 von 10 (=2x5) Schritten") zusammen zu
    * setzen und die Gesamtzahl zu erwartender Versionen und den aktuellen
    * Fortschrittswert zu berechnen. Die Gesamtzahl ergibt sich aus der Multiplikation
    * der einzelnen Maximal-Werte der registrierten Druckfunktionen. Bei der
@@ -386,9 +400,25 @@ public class PrintProgressBar
       {
         pb.setMaximum(allMax);
         pb.setValue(allCurrent);
-        statusLabel.setText(L.m(" %1 von %2%3 Versionen", allCurrent, allMax,
+        statusLabel.setText(L.m(" %1 von %2%3 Schritten", allCurrent, allMax,
           fromMaxString));
         myFrame.pack();
+      }
+    });
+  }
+
+  /**
+   * Setzt den Titel des Frames der PrintProgressBar auf title.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public void setTitle(final String title)
+  {
+    SwingUtilities.invokeLater(new Runnable()
+    {
+      public void run()
+      {
+        myFrame.setTitle(title);
       }
     });
   }
@@ -403,7 +433,7 @@ public class PrintProgressBar
    */
   public static void main(String[] args) throws InterruptedException
   {
-    PrintProgressBar bar = new PrintProgressBar(new ActionListener()
+    PrintProgressBar bar = new PrintProgressBar("Drucke", new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {

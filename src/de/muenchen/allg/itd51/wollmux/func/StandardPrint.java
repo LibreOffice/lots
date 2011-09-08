@@ -210,23 +210,7 @@ public class StandardPrint
   public static void mailMergeNewSetFormValue(final XPrintModel pmod)
       throws Exception
   {
-    MailMergeNew.mailMergeNewSetFormValue(pmod);
-  }
-
-  /**
-   * Verhält sich wie {@link #mailMergeNewSetFormValue(XPrintModel)} mit der
-   * Ausnahme, dass das Setzen der Formularwerte nicht tatsächlich im Dokument
-   * erfolgt sondern simuliert.
-   * 
-   * @throws Exception
-   *           falls was schief geht.
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  public static void mailMergeSimulateSetFormValue(final XPrintModel pmod)
-      throws Exception
-  {
-    pmod.setPropertyValue(MailMergeNew.PROP_SIMULATE, true);
-    MailMergeNew.mailMergeNewSetFormValue(pmod);
+    MailMergeNew.mailMergeNewSetFormValue(pmod, null);
   }
 
   /**
@@ -237,6 +221,7 @@ public class StandardPrint
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static void oooMailMergeToSingleFile(final XPrintModel pmod)
+      throws Exception
   {
     OOoBasedMailMerge.oooMailMergeToSingleFile(pmod);
   }

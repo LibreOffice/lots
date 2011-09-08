@@ -66,11 +66,11 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.SimulationResults;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
@@ -98,30 +98,6 @@ import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
  */
 public class MailMergeNew
 {
-  /**
-   * ID zu der MailMergeNew Information an nachfolgende Druckfunktionen weiter gibt,
-   * ob es sich bei dem aktuellen Aufruf von pmod.printWithProps() um den letzten
-   * Aufruf handelt. TODO: evtl auslagern in XPrintModel als eigene Funktion.
-   */
-  public static final String PROP_LAST_PRINT =
-    "MailMergeNewSetFormValue_LastPrintCall";
-
-  /**
-   * Teilt MailMergeNewSetFormValue mit, dass Änderungen nur simuliert werden sollen
-   * (mit dem Ergebnis der Simulation wird dann später eine OOo-Datenquelle angelegt
-   * als Input für den OOo-Seriendruck, der nicht auf dem eigentlichen Dokument,
-   * sondern auf einer Kopie arbeitet).
-   */
-  public static final String PROP_SIMULATE = "MailMergeNewSetFormValue_Simulate";
-
-  /**
-   * Falls {@link #PROP_SIMULATE}==true ist und die Druckfunktion
-   * MailMergeNewSetFormValue aufgerufen wurde, so enthält diese Property nach dem
-   * Aufruf das Ergebnis der Simulation als ein Objekt von {@link SimulationResults}.
-   */
-  public static final String PROP_SIMULATION_RESULTS =
-    "MailMergeNewSetFormValue_SimulationResult";
-
   /**
    * ID der Property in der die Serienbriefdaten gespeichert werden.
    */
@@ -993,9 +969,9 @@ public class MailMergeNew
   }
 
   /**
-   * PrintFunction, die das jeweils nächste Element der Seriendruckdaten nimmt und
-   * die Seriendruckfelder im Dokument entsprechend setzt. Herangezogen werden
-   * folgende Properties:
+   * Implementierung einer Druckfunktion, die das jeweils nächste Element der
+   * Seriendruckdaten nimmt und die Seriendruckfelder im Dokument entsprechend setzt.
+   * Herangezogen werden folgende Properties:
    * 
    * <ul>
    * <li>{@link #PROP_QUERYRESULTS} (ein Objekt vom Typ {@link QueryResults})</li>
@@ -1003,29 +979,16 @@ public class MailMergeNew
    * <li>"MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält</li>
    * 
    * <li>{@link #PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der
-   * ausgewählten Datensätze ist (0 ist der erste Datensatz).</li>
-   * 
-   * <li>{@link #PROP_SIMULATE} steuert über ein Boolean-Objekt (falls true), ob das
-   * Setzen der Werte nur simuliert werden soll.</li>
-   * </ul>
-   * 
-   * Als Rückgabewerte für nachfolgend aufgerufene Druckfunktionen setzt diese
-   * Druckfunktion die folgenden Properties:
-   * 
+   * ausgewählten Datensätze ist (0 ist der erste Datensatz).</li> *
    * <ul>
-   * <li>{@link #PROP_SIMULATION_RESULTS} enthält ein Objekt vom Typ
-   * {@link SimulationResults} wenn {@link #PROP_SIMULATE} == true gesetzt ist.</li>
-   * 
-   * <li>{@link #PROP_LAST_PRINT} ist Boolean.TRUE, wenn die Werte des letzten
-   * selektierten Datensatzes gesetzt wurden.</li>
-   * </ul>
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
    * 
    *         TODO: ausführlicher testen
    */
   @SuppressWarnings("unchecked")
-  public static void mailMergeNewSetFormValue(XPrintModel pmod) throws Exception
+  public static void mailMergeNewSetFormValue(XPrintModel pmod,
+      SimulationResultsProcessor simProc) throws Exception
   {
     TextDocumentModel mod =
       WollMuxSingleton.getInstance().getTextDocumentModel(pmod.getTextDocument());
@@ -1045,23 +1008,6 @@ public class MailMergeNew
     }
     catch (Exception x)
     {}
-
-    Boolean simulate = false;
-    try
-    {
-      simulate = (Boolean) pmod.getPropertyValue(PROP_SIMULATE);
-    }
-    catch (Exception x)
-    {}
-
-    try
-    {
-      pmod.setPropertyValue(PROP_LAST_PRINT, Boolean.FALSE);
-    }
-    catch (Exception e)
-    {
-      Logger.error(e);
-    }
 
     Iterator iter = data.iterator();
     Iterator<Integer> selIter = selection.iterator();
@@ -1085,8 +1031,7 @@ public class MailMergeNew
       else
         selectedIdx = -1;
 
-      SimulationResults simulationResult = null;
-      if (simulate) mod.startSimulation();
+      if (simProc != null) mod.startSimulation();
 
       Iterator schemaIter = schema.iterator();
       while (schemaIter.hasNext())
@@ -1097,16 +1042,6 @@ public class MailMergeNew
       pmod.setFormValue(MailMergeParams.TAG_DATENSATZNUMMER, "" + datensatzNummer);
       pmod.setFormValue(MailMergeParams.TAG_SERIENBRIEFNUMMER, ""
         + serienbriefNummer);
-
-      if (simulate) simulationResult = mod.stopSimulation();
-      if (simulationResult != null) try
-      {
-        pmod.setPropertyValue(PROP_SIMULATION_RESULTS, simulationResult);
-      }
-      catch (Exception e)
-      {
-        Logger.error(e);
-      }
 
       /*
        * Wenn wir im Fall des Einzeldokumentdrucks sind, dann wird hier vor dem
@@ -1127,16 +1062,13 @@ public class MailMergeNew
         }
       }
 
-      if (selectedIdx < 0) try
-      {
-        pmod.setPropertyValue(PROP_LAST_PRINT, Boolean.TRUE);
-      }
-      catch (Exception e)
-      {
-        Logger.error(e);
-      }
-
-      pmod.printWithProps();
+      // Weiterreichen des Drucks an die nächste Druckfunktion. Dies findet nicht
+      // statt, wenn simProc != null ist, da die Verarbeitung in diesem Fall über
+      // simProc durchgeführt wird.
+      if (simProc == null)
+        pmod.printWithProps();
+      else
+        simProc.processSimulationResults(mod.stopSimulation());
 
       /*
        * Im Falle des Einzeldokumentdrucks wird das Zieldokument jetzt gespeichert
