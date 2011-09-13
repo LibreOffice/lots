@@ -111,7 +111,7 @@ public class WollMuxBarTrayIcon
     Image img =
       Toolkit.getDefaultToolkit().createImage(
         WollMuxBarTrayIcon.class.getClassLoader().getResource(
-          "data/wollmux_icon32x32.png")); // 32x32 als Default
+          "data/wollmux_icon32x32_gelb.png")); // 32x32 als Default
 
     if (SystemTray.isSupported())
     {
@@ -121,14 +121,14 @@ public class WollMuxBarTrayIcon
         img =
           Toolkit.getDefaultToolkit().createImage(
             WollMuxBarTrayIcon.class.getClassLoader().getResource(
-              "data/wollmux_icon16x16.png"));
+              "data/wollmux_icon16x16_gelb.png"));
       }
       else if (iconWidth <= 24)
       {
         img =
           Toolkit.getDefaultToolkit().createImage(
             WollMuxBarTrayIcon.class.getClassLoader().getResource(
-              "data/wollmux_icon24x24.png"));
+              "data/wollmux_icon24x24_gelb.png"));
       }
     }
 
@@ -463,7 +463,7 @@ public class WollMuxBarTrayIcon
     // });
 
     // Bild für Icon
-    Image img = new ImageIcon("src/data/wollmux_icon24x24.png").getImage();
+    Image img = new ImageIcon("src/data/wollmux_icon24x24_gelb.png").getImage();
 
     // Test-Frame
     JFrame frame = new JFrame("Dies ist ein Testframe");
