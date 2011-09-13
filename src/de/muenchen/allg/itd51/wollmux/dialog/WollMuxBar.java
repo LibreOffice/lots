@@ -414,6 +414,12 @@ public class WollMuxBar
   private JMenuBar menuBar;
 
   /**
+   * Das Kontext-PopupMenu für das Tray-Icon der WollMuxBar. Wird nur bei bestimmten
+   * Tray-Icon-Modi befüllt und kann daher <code>null</code> sein!
+   */
+  private JPopupMenu trayIconMenu;
+
+  /**
    * <code>true</code> zeigt an, dass die Leiste im
    * {@link WollMuxBarConfig#UP_AND_AWAY_WINDOW_MODE} minimiert ist.
    */
@@ -562,7 +568,7 @@ public class WollMuxBar
       Logger.error(x);
     }
 
-    JPopupMenu trayIconMenu = null;
+    trayIconMenu = null;
     menuBar = new JMenuBar();
     menuBar.addMouseListener(myIsInsideMonitor);
     try
@@ -898,9 +904,13 @@ public class WollMuxBar
           gbcMenuButton.gridy = y;
           sfield.addMouseListener(myIsInsideMonitor);
           if (context.equals("menu"))
-            compo.add(sfield);
+          {
+            if (compo != trayIconMenu) compo.add(sfield);
+          }
           else
+          {
             compo.add(sfield, gbcMenuButton);
+          }
         }
         else if (type.equals("menu"))
         {
