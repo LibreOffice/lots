@@ -51,6 +51,7 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.Workarounds;
 
 /**
  * Verwaltet die Konfiguration der WollMuxbar und bietet einen Dialog zum Ändern
@@ -541,13 +542,17 @@ public class WollMuxBarConfig
     ++y;
     gbcLabel.gridx = x++;
     gbcLabel.gridy = y;
-    mainPanel.add(new JLabel(L.m("Tray-Icon")), gbcLabel);
     final JComboBox inputTrayIcon = new JComboBox(new String[] {
       "None", "Iconify", "Popup", "IconifyAndPopup" });
     inputTrayIcon.setEditable(false);
     gbcCombo.gridx = x++;
     gbcCombo.gridy = y;
-    mainPanel.add(inputTrayIcon, gbcCombo);
+    // Tray-Icon-Auswahl nur in Optionen-Menü anzeigen, wenn Java 6+
+    if (!Workarounds.workaroundForJava5("Tray-Icon", false))
+    {
+      mainPanel.add(new JLabel(L.m("Tray-Icon")), gbcLabel);
+      mainPanel.add(inputTrayIcon, gbcCombo);
+    }
 
     x = 0;
     ++y;
