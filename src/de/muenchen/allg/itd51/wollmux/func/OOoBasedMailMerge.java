@@ -60,7 +60,10 @@ import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XMailMergeBroadcaster;
 import com.sun.star.text.XMailMergeListener;
 import com.sun.star.text.XTextContent;
+import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextSection;
+import com.sun.star.text.XTextSectionsSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XNamingService;
@@ -72,6 +75,7 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.PrintModels;
+import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.SimulationResults;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
@@ -200,7 +204,7 @@ public class OOoBasedMailMerge
 
     public void incrementProgress()
     {
-      pmod.setPrintProgressValue((short) currentCount++);
+      pmod.setPrintProgressValue((short) ++currentCount);
     }
   }
 
@@ -588,7 +592,7 @@ public class OOoBasedMailMerge
     if (origDoc == null) return null;
     File inputFile = new File(tmpDir, "input.odt");
     String url = UNO.getParsedUNOUrl(inputFile.toURI().toString()).Complete;
-    XStorable xStorable = UNO.XStorable(UNO.desktop.getCurrentComponent());
+    XStorable xStorable = UNO.XStorable(origDoc);
     if (xStorable != null)
     {
       try
@@ -620,9 +624,8 @@ public class OOoBasedMailMerge
     addDatabaseFieldsForInsertFormValueBookmarks(tmpDoc, dbName);
     adjustDatabaseAndInputUserFields(tmpDoc, dbName);
     removeAllBookmarks(tmpDoc);
-    renameSLVStyles(tmpDoc);
-    removeHiddenText(tmpDoc);
-    removeSections(tmpDoc);
+    removeHiddenSections(tmpDoc);
+    SachleitendeVerfuegung.deMuxSLVStyles(UNO.XTextDocument(tmpDoc));
 
     // neues input-Dokument speichern und schließen
     if (UNO.XStorable(tmpDoc) != null)
@@ -664,12 +667,11 @@ public class OOoBasedMailMerge
   }
 
   /**
-   * Hebt alle gesetzten TextSections (Bereiche) in Dokument tmpDoc auf, wobei bei
-   * unsichtbaren Bereichen auch der Inhalt entfernt wird. Das Entfernen der aus
-   * meiner Sicht überflüssigen Bereiche dient zur Verbesserung der Performance, das
-   * löschen der Bereichsinhalte ist notwendig, damit das erzeugte Gesamtdokument
-   * korrekt dargestellt wird (hier habe ich wilde Textverschiebungen beobachtet, die
-   * so vermieden werden sollen).
+   * Hebt alle unsichtbaren TextSections (Bereiche) in Dokument tmpDoc auf, wobei bei
+   * auch der Inhalt entfernt wird. Das Entfernen der unsichtbaren Bereiche dient zur
+   * Verbesserung der Performance, das Löschen der Bereichsinhalte ist notwendig,
+   * damit das erzeugte Gesamtdokument korrekt dargestellt wird (hier habe ich wilde
+   * Textverschiebungen beobachtet, die so vermieden werden sollen).
    * 
    * Bereiche sind auch ein möglicher Auslöser von allen möglichen falsch gesetzten
    * Seitenumbrüchen (siehe z.B. Issue:
@@ -677,33 +679,42 @@ public class OOoBasedMailMerge
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
-  private static void removeSections(XComponent tmpDoc)
+  private static void removeHiddenSections(XComponent tmpDoc)
   {
-  // TODO implementieren
-  }
+    XTextSectionsSupplier tss = UNO.XTextSectionsSupplier(tmpDoc);
+    if (tss == null) return;
 
-  /**
-   * Löscht aus tmpDoc alle unsichtbaren Textportions heraus und dient der
-   * Optimierung und Verhinderung von Darstellungsproblemen (siehe
-   * {@link #removeSections(XComponent)}.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  private static void removeHiddenText(XComponent tmpDoc)
-  {
-  // TODO implementieren
-  }
-
-  /**
-   * Benennt alle Formatvorlagen um, die in Sachleitenden Verfügungen eine besondere
-   * Rolle spielen, damit sie beim Öffnen des Gesamtdokuments nicht noch einmal vom
-   * WollMux interpretiert werden.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  private static void renameSLVStyles(XComponent tmpDoc)
-  {
-  // TODO: implementieren
+    for (String name : tss.getTextSections().getElementNames())
+    {
+      try
+      {
+        XTextSection section =
+          UNO.XTextSection(tss.getTextSections().getByName(name));
+        if (Boolean.FALSE.equals(UNO.getProperty(section, "IsVisible")))
+        {
+          // Inhalt der Section löschen
+          XTextCursor cursor =
+            section.getAnchor().getText().createTextCursorByRange(
+              section.getAnchor());
+          if (UNO.XEnumerationAccess(cursor) != null)
+          {
+            XEnumeration xenum = UNO.XEnumerationAccess(cursor).createEnumeration();
+            while (xenum.hasMoreElements())
+            {
+              XTextContent content = UNO.XTextContent(xenum.nextElement());
+              if (content != null)
+                content.getAnchor().getText().removeTextContent(content);
+            }
+          }
+          // Section selbst aufheben
+          section.getAnchor().getText().removeTextContent(section);
+        }
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+      }
+    }
   }
 
   /**
@@ -988,7 +999,8 @@ public class OOoBasedMailMerge
 
     // Register MailMergeEventListener
     XMailMergeBroadcaster xmmb =
-      UnoRuntime.queryInterface(XMailMergeBroadcaster.class, mailMerge);
+      (XMailMergeBroadcaster) UnoRuntime.queryInterface(XMailMergeBroadcaster.class,
+        mailMerge);
     xmmb.addMailMergeEventListener(new XMailMergeListener()
     {
       int count = 0;

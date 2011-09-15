@@ -969,9 +969,29 @@ public class MailMergeNew
   }
 
   /**
+   * PrintFunction, die das jeweils nächste Element der Seriendruckdaten nimmt und
+   * die Seriendruckfelder im Dokument entsprechend setzt. Herangezogen werden die
+   * Properties {@link #PROP_QUERYRESULTS} (ein Objekt vom Typ {@link QueryResults})
+   * und "MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält, sowie
+   * {@link #PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der
+   * ausgewählten Datensätze ist (0 ist der erste Datensatz). Dies funktioniert
+   * natürlich nur dann, wenn pmod kein Proxy ist.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   */
+  public static void mailMergeNewSetFormValue(XPrintModel pmod) throws Exception
+  {
+    mailMergeNewSetFormValue(pmod, null);
+  }
+
+  /**
    * Implementierung einer Druckfunktion, die das jeweils nächste Element der
-   * Seriendruckdaten nimmt und die Seriendruckfelder im Dokument entsprechend setzt.
-   * Herangezogen werden folgende Properties:
+   * Seriendruckdaten nimmt und die Seriendruckfelder im Dokument entsprechend setzt;
+   * wird der SimulationsResultsProcessor simProc übergeben, so werden die
+   * Dokumentänderungen nur simuliert und nicht tatsächlich im Dokument ausgeführt.
+   * Im Fall, dass simProc != null ist, wird auch die nächste Druckfunktion in der
+   * Aufrufkette nicht aufgerufen, sondern statt dessen der in simProc enthaltene
+   * handler. Die Druckfunktion zieht folgende Properties heran:
    * 
    * <ul>
    * <li>{@link #PROP_QUERYRESULTS} (ein Objekt vom Typ {@link QueryResults})</li>
@@ -982,9 +1002,17 @@ public class MailMergeNew
    * ausgewählten Datensätze ist (0 ist der erste Datensatz).</li> *
    * <ul>
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
+   * @param pmod
+   *          PrintModel welches das Hauptdokument des Seriendrucks beschreibt.
+   * @param simProc
+   *          Ist simProc != null, so werden die Wertänderungen nur simuliert und
+   *          nach jedem Datensatz einmal der in simProc enthaltene handler
+   *          aufgerufen.
+   * @throws Exception
+   *           Falls irgend etwas schief geht
    * 
-   *         TODO: ausführlicher testen
+   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
+   *         TESTED
    */
   @SuppressWarnings("unchecked")
   public static void mailMergeNewSetFormValue(XPrintModel pmod,

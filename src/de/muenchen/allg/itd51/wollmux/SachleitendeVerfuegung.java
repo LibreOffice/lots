@@ -36,6 +36,7 @@ import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,6 +45,7 @@ import com.sun.star.awt.FontWeight;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNameContainer;
+import com.sun.star.container.XNamed;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.style.XStyle;
 import com.sun.star.text.XParagraphCursor;
@@ -1754,5 +1756,72 @@ public class SachleitendeVerfuegung
         "I.", "II.", "III.", "IV.", "V.", "VI.", "VII.", "VIII.", "IX.", "X.",
         "XI.", "XII.", "XIII.", "XIV.", "XV." };
     }
+  }
+
+  /**
+   * Sorgt ohne Verlust von sichtbaren Formatierungseigenschaften dafür, dass alle
+   * Formatvorlagen des Dokuments doc, die in Sachleitenden Verfügungen eine
+   * besondere Rolle spielen, zukünftig nicht mehr vom WollMux interpretiert werden.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static void deMuxSLVStyles(XTextDocument doc)
+  {
+    if (doc == null) return;
+
+    HashMap<String, String> mapOldNameToNewName = new HashMap<String, String>();
+    XParagraphCursor cursor =
+      UNO.XParagraphCursor(doc.getText().createTextCursorByRange(
+        doc.getText().getStart()));
+    if (cursor != null)
+      do
+      {
+        cursor.gotoEndOfParagraph(true);
+
+        if (isVerfuegungspunkt(cursor) || isZuleitungszeile(cursor)
+          || isVerfuegungspunktMitZuleitung(cursor))
+        {
+          String oldName = "";
+          try
+          {
+            oldName =
+              AnyConverter.toString(UNO.getProperty(cursor, "ParaStyleName"));
+          }
+          catch (IllegalArgumentException e)
+          {}
+
+          // Einmalig Style NO<number>_<oldName> erzeugen, der von <oldName> erbt.
+          String newName = mapOldNameToNewName.get(oldName);
+          XStyle newStyle = null;
+          if (newName == null) do
+          {
+            newName = "NO" + new Random().nextInt(1000) + "_" + oldName;
+            mapOldNameToNewName.put(oldName, newName);
+            newStyle = createParagraphStyle(doc, newName, oldName);
+          } while (newStyle == null);
+
+          if (oldName != null)
+          {
+            // Das Setzen von ParaStyleName setzt mindestens CharHidden des cursors
+            // auf Default zurück. Daher muss der bisherige Stand von CharHidden nach
+            // dem Setzen wieder hergestellt werden:
+            Object hidden = UNO.getProperty(cursor, "CharHidden");
+            UNO.setProperty(cursor, "ParaStyleName", newName);
+            UNO.setProperty(cursor, "CharHidden", hidden);
+          }
+        }
+      } while (cursor.gotoNextParagraph(false));
+
+    // Extra-Frame für Verfügungspunkt1 umbenennen
+    try
+    {
+      XNamed frame =
+        UNO.XNamed(UNO.XTextFramesSupplier(doc).getTextFrames().getByName(
+          FrameNameVerfuegungspunkt1));
+      if (frame != null) frame.setName("NON_" + FrameNameVerfuegungspunkt1);
+    }
+    catch (java.lang.Exception e)
+    {}
+
   }
 }
