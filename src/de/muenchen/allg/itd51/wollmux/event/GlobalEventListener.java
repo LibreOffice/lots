@@ -216,6 +216,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
   private void onSaveOrSaveAs(Object source)
   {
     XTextDocument xTextDoc = UNO.XTextDocument(source);
+    if (xTextDoc == null) return;
     DocumentManager.Info info = docManager.getInfo(xTextDoc);
     if (info != null) info.getTextDocumentModel().flushPersistentData();
   }
