@@ -87,7 +87,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
   public TestDatasourceJoiner() throws Exception
   { // TESTED
     File curDir = new File(System.getProperty("user.dir"));
-    URL context = curDir.toURL();
+    URL context = curDir.toURI().toURL();
     File losCache = new File(curDir, "testdata/cache.conf");
     String confFile = "testdata/testdjjoin.conf";
     URL confURL = new URL(context, confFile);

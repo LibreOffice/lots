@@ -497,8 +497,9 @@ public class LDAPDatasource implements Datasource
   /*
    * (non-Javadoc)
    * 
-   * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection,
-   *      long)
+   * @see
+   * de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection
+   * , long)
    */
   public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
       throws TimeoutException
@@ -698,7 +699,6 @@ public class LDAPDatasource implements Datasource
    * (non-Javadoc)
    * 
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
-   * 
    */
   public QueryResults find(List<QueryPart> query, long timeout)
       throws TimeoutException
@@ -894,7 +894,6 @@ public class LDAPDatasource implements Datasource
      * bilde die Schnittmenge aller angegebenen negativen relativen Pfade
      * 
      * Vergleiche jeweils zwei Listen, die je ein Suchattribut repräsentieren.
-     * 
      */
     List<RelativePath> mergedNegativeList = null;
     if (negativeSubtreePathLists.size() > 0) // TOD0 if nach oben ziehen, um
@@ -1840,7 +1839,7 @@ public class LDAPDatasource implements Datasource
       NodeNotFoundException, TimeoutException, ConfigurationErrorException
   {
     File curDir = new File(System.getProperty("user.dir"));
-    URL context = curDir.toURL();
+    URL context = curDir.toURI().toURL();
     URL confURL = new URL(context, "testdata/ldap.conf");
     ConfigThingy ldapConf = new ConfigThingy("", confURL);
     Map<String, Datasource> nameToDatasource = new HashMap<String, Datasource>();

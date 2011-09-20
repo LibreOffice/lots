@@ -136,6 +136,7 @@ public class JPotentiallyOverlongPopupMenuButton extends JButton
       final Integer I = Integer.valueOf(i);
       actions.add(new AbstractAction("" + i)
       {
+        private static final long serialVersionUID = 8275823697153645607L;
 
         public void actionPerformed(ActionEvent e)
         {

@@ -416,7 +416,7 @@ public class Shortcuts
     ConfigThingy conf = null;
     String confFile = "../../.wollmux/wollmux.conf";
 
-    conf = new ConfigThingy("", new URL(new File(".").toURL(), confFile));
+    conf = new ConfigThingy("", new URL(new File(".").toURI().toURL(), confFile));
 
     // ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
 

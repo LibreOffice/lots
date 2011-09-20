@@ -285,6 +285,8 @@ public class MenuManager
     JMenuItem menuItem;
     menuItem = new JMenuItem(new AbstractAction(L.m("Speichern"))
     {
+      private static final long serialVersionUID = 8967339845549340259L;
+
       public void actionPerformed(ActionEvent e)
       {
         save();
@@ -293,6 +295,8 @@ public class MenuManager
     menu.add(menuItem);
     menuItem = new JMenuItem(new AbstractAction(L.m("Exportieren..."))
     {
+      private static final long serialVersionUID = 5844265995812275892L;
+
       public void actionPerformed(ActionEvent e)
       {
         saveAll();
@@ -301,6 +305,8 @@ public class MenuManager
     menu.add(menuItem);
     menuItem = new JMenuItem(new AbstractAction(L.m("Schließen"))
     {
+      private static final long serialVersionUID = 5677051521445316758L;
+
       public void actionPerformed(ActionEvent e)
       {
         closeAfterQuestion();
@@ -351,6 +357,8 @@ public class MenuManager
       final String id = cid.id;
       add.add(new AbstractAction(id)
       {
+        private static final long serialVersionUID = -1045976152158250940L;
+
         public void actionPerformed(ActionEvent e)
         {
           myTreeModel.addConfigID(id);
@@ -365,6 +373,8 @@ public class MenuManager
       final String id = cid.id;
       addRecursive.add(new AbstractAction(id)
       {
+        private static final long serialVersionUID = 4405056732432446023L;
+
         public void actionPerformed(ActionEvent e)
         {
           myTreeModel.addConfigIDRecursive(id);
@@ -379,6 +389,8 @@ public class MenuManager
       final String id = cid.id;
       remove.add(new AbstractAction(id)
       {
+        private static final long serialVersionUID = 5912673283378141797L;
+
         public void actionPerformed(ActionEvent e)
         {
           myTreeModel.removeConfigID(id);
@@ -393,6 +405,8 @@ public class MenuManager
       final String id = cid.id;
       removeRecursive.add(new AbstractAction(id)
       {
+        private static final long serialVersionUID = -6487420333590904845L;
+
         public void actionPerformed(ActionEvent e)
         {
           myTreeModel.removeConfigIDRecursive(id);
@@ -404,6 +418,8 @@ public class MenuManager
     confidsMenu.addSeparator();
     confidsMenu.add(new JMenuItem(new AbstractAction(L.m("Liste bearbeiten"))
     {
+      private static final long serialVersionUID = -6157409084988422313L;
+
       public void actionPerformed(ActionEvent e)
       {
         editConfIDsList();
@@ -464,6 +480,8 @@ public class MenuManager
       {
         hbox.add(new JButton(new AbstractAction(L.m("Standard"))
         {
+          private static final long serialVersionUID = 3258477476164927624L;
+
           public void actionPerformed(ActionEvent e)
           {
             cid.label_user = null;
@@ -475,6 +493,8 @@ public class MenuManager
       {
         hbox.add(new JButton(new AbstractAction(L.m("Löschen"))
         {
+          private static final long serialVersionUID = -651706612313442973L;
+
           public void actionPerformed(ActionEvent e)
           {
             tempConfigIDs.remove(cid);
@@ -490,6 +510,8 @@ public class MenuManager
     hbox.add(Box.createHorizontalGlue());
     hbox.add(new JButton(new AbstractAction(L.m("Neu"))
     {
+      private static final long serialVersionUID = -6185739510399692189L;
+
       public void actionPerformed(ActionEvent e)
       {
         String confId =
@@ -531,6 +553,8 @@ public class MenuManager
     myDialog.add(buttonBox);
     buttonBox.add(new JButton(new AbstractAction(L.m("Abbrechen"))
     {
+      private static final long serialVersionUID = -3659326734901758337L;
+
       public void actionPerformed(ActionEvent e)
       {
         myDialog.dispose();
@@ -539,6 +563,8 @@ public class MenuManager
     buttonBox.add(Box.createHorizontalGlue());
     buttonBox.add(new JButton(new AbstractAction(L.m("OK"))
     {
+      private static final long serialVersionUID = -5822262452343677762L;
+
       public void actionPerformed(ActionEvent e)
       {
         myDialog.dispose();
@@ -567,6 +593,8 @@ public class MenuManager
   {
     JMenuItem menuItem = new JMenuItem(new AbstractAction(L.m("Bearbeiten..."))
     {
+      private static final long serialVersionUID = -918938091489734657L;
+
       public void actionPerformed(ActionEvent e)
       {
         myTreeModel.editProperties();
@@ -575,6 +603,8 @@ public class MenuManager
     menu.add(menuItem);
     menuItem = new JMenuItem(new AbstractAction(L.m("Standard wiederherstellen"))
     {
+      private static final long serialVersionUID = 517548317085280952L;
+
       public void actionPerformed(ActionEvent e)
       {
         myTreeModel.restoreStandard();
@@ -584,6 +614,8 @@ public class MenuManager
     addSeparator(menu);
     menuItem = new JMenuItem(new AbstractAction(L.m("Neues (Unter)Menü"))
     {
+      private static final long serialVersionUID = 2041242346379829129L;
+
       public void actionPerformed(ActionEvent e)
       {
         myTreeModel.newSubMenu();
@@ -592,6 +624,8 @@ public class MenuManager
     menu.add(menuItem);
     menuItem = new JMenuItem(new AbstractAction(NEW_FILES_TEXT)
     {
+      private static final long serialVersionUID = -7565982220424612249L;
+
       public void actionPerformed(ActionEvent e)
       {
         myTreeModel.newFile();
@@ -600,6 +634,8 @@ public class MenuManager
     menu.add(menuItem);
     menuItem = new JMenuItem(new AbstractAction(L.m("Neuer Separator"))
     {
+      private static final long serialVersionUID = 4088545641795209383L;
+
       public void actionPerformed(ActionEvent e)
       {
         myTreeModel.newSeparator();
@@ -608,6 +644,8 @@ public class MenuManager
     menu.add(menuItem);
     menuItem = new JMenuItem(new AbstractAction(L.m("Neues ..."))
     {
+      private static final long serialVersionUID = 6174870030755959853L;
+
       public void actionPerformed(ActionEvent e)
       {
         myTreeModel.newSomething();
@@ -617,6 +655,8 @@ public class MenuManager
     addSeparator(menu);
     menuItem = new JMenuItem(new AbstractAction(L.m("Löschen"))
     {
+      private static final long serialVersionUID = 448136839617492761L;
+
       public void actionPerformed(ActionEvent e)
       {
         myTreeModel.deleteSelection();
@@ -1393,6 +1433,8 @@ public class MenuManager
 
   private class MyTransferHandler extends TransferHandler
   {
+    private static final long serialVersionUID = -814838847502548075L;
+
     public int getSourceActions(JComponent c)
     {
       if (c == myTree)

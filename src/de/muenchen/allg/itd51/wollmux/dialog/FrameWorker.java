@@ -232,6 +232,8 @@ public class FrameWorker implements Runnable
    */
   private class WaitGlassPane extends JComponent
   {
+    private static final long serialVersionUID = 3078126237943242148L;
+
     /**
      * Default-Konstruktor.
      */

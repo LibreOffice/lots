@@ -133,7 +133,7 @@ public class LocalizationUpdater
     try
     {
       localizationConf =
-        new ConfigThingy("localization", localizationConfFile.toURL());
+        new ConfigThingy("localization", localizationConfFile.toURI().toURL());
     }
     catch (Exception e)
     {

@@ -330,6 +330,8 @@ public class WollMuxBarTrayIcon
         {
           invoker = new JWindow(new JFrame()
           {
+            private static final long serialVersionUID = 8801277919852565508L;
+
             // Ganz fieser Trick! JWindow muss focussierbar sein, damit unser
             // PopupMenu beim Verlust des Focus wieder korrekt gecancelt wird.
             // Allerdings ist JWindow nur dann focussierbar, wenn sein Parent

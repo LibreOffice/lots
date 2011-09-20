@@ -941,7 +941,6 @@ public final class FormFieldFactory
       return true;
     }
 
-    @Override
     public FormFieldType getType()
     {
       return FormFieldType.DropdownFormField;

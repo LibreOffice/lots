@@ -74,7 +74,7 @@ public class TextComponentTags
    */
   final public static int CAT_VALUE_SYNTAX = 0;
 
-  /**
+/**
    * Präfix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
    * Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber zur
    * Unterscheidung des Präfix von den Benutzereingaben) und dem "<"-Zeichen.
@@ -156,9 +156,9 @@ public class TextComponentTags
   }
 
   /**
-   * Liefert eine Liste von {@link ContentElement}-Objekten, die den aktuellen
-   * Inhalt der JTextComponent repräsentiert und dabei enthaltenen Text und evtl.
-   * enthaltene Tags als eigene Objekte kapselt.
+   * Liefert eine Liste von {@link ContentElement}-Objekten, die den aktuellen Inhalt
+   * der JTextComponent repräsentiert und dabei enthaltenen Text und evtl. enthaltene
+   * Tags als eigene Objekte kapselt.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -274,6 +274,8 @@ public class TextComponentTags
       final String name = iter.next();
       Action action = new AbstractAction(name)
       {
+        private static final long serialVersionUID = -9123184290299840565L;
+
         public void actionPerformed(ActionEvent e)
         {
           text.insertTag(name);

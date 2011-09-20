@@ -497,6 +497,8 @@ public class FormGUI
 
   private class WindowPosSizeSetter extends Timer implements ActionListener
   {
+    private static final long serialVersionUID = 3722895126444827532L;
+
     private int x;
 
     private int y;

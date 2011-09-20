@@ -218,6 +218,7 @@ class AdjustFields
               final String name = iter.next();
               Action button = new AbstractAction(name)
               {
+                private static final long serialVersionUID = 3688585907102784521L;
 
                 public void actionPerformed(ActionEvent e)
                 {

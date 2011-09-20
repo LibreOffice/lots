@@ -636,6 +636,8 @@ public class WollMuxBarConfig
     gbcButton.gridy = y;
     buttonPanel.add(new JButton(new AbstractAction(L.m("Abbrechen"))
     {
+      private static final long serialVersionUID = -7034390091333940094L;
+
       public void actionPerformed(ActionEvent e)
       {
         myDialog.dispose();
@@ -648,6 +650,8 @@ public class WollMuxBarConfig
     gbcButton.gridy = y;
     buttonPanel.add(new JButton(new AbstractAction(L.m("Standard wiederherstellen"))
     {
+      private static final long serialVersionUID = -5001745869100349262L;
+
       public void actionPerformed(ActionEvent e)
       {
         inputTitle.setText(myFrame_title_default);
@@ -667,6 +671,8 @@ public class WollMuxBarConfig
     gbcButton.gridy = y;
     buttonPanel.add(new JButton(new AbstractAction(L.m("OK"))
     {
+      private static final long serialVersionUID = -4400165442859398615L;
+
       public void actionPerformed(ActionEvent e)
       {
         myFrame_title = inputTitle.getText();

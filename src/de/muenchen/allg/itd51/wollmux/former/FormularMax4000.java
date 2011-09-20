@@ -221,20 +221,20 @@ public class FormularMax4000
    * Zusatzinformationen werden herangezogen um Labels, IDs und andere Informationen
    * zu bestimmen.
    * 
-   * >>>>Eingabefeld<<<<: Als "Hinweis" kann "Label<<ID>>" angegeben werden und
-   * wird beim Import entsprechend berücksichtigt. Wird nur "<<ID>>" angegeben, so
+   * >>>>Eingabefeld<<<<: Als "Hinweis" kann "Label<<ID>>" angegeben werden und wird
+   * beim Import entsprechend berücksichtigt. Wird nur "<<ID>>" angegeben, so
    * markiert das Eingabefeld eine reine Einfügestelle (insertValue oder
    * insertContent) und beim Import wird dafür kein Formularsteuerelement erzeugt.
    * Wird ID ein "glob:" vorangestellt, so wird gleich ein insertValue-Bookmark
    * erstellt.
    * 
-   * >>>>>Eingabeliste/Dropdown<<<<<: Als "Name" kann "Label<<ID>>" angegeben
-   * werden und wird beim Import berücksichtigt. Als Spezialeintrag in der Liste kann "<<Freitext>>"
-   * eingetragen werden und signalisiert dem FM4000, dass die ComboBox im Formular
-   * auch die Freitexteingabe erlauben soll. Wie bei Eingabefeldern auch ist die
-   * Angabe "<<ID>>" ohne Label möglich und signalisiert, dass es sich um eine
-   * reine Einfügestelle handelt, die kein Formularelement erzeugen soll. Wird als
-   * "Name" die Spezialsyntax "<<gender:ID>>" verwendet, so wird eine reine
+   * >>>>>Eingabeliste/Dropdown<<<<<: Als "Name" kann "Label<<ID>>" angegeben werden
+   * und wird beim Import berücksichtigt. Als Spezialeintrag in der Liste kann
+   * "<<Freitext>>" eingetragen werden und signalisiert dem FM4000, dass die ComboBox
+   * im Formular auch die Freitexteingabe erlauben soll. Wie bei Eingabefeldern auch
+   * ist die Angabe "<<ID>>" ohne Label möglich und signalisiert, dass es sich um
+   * eine reine Einfügestelle handelt, die kein Formularelement erzeugen soll. Wird
+   * als "Name" die Spezialsyntax "<<gender:ID>>" verwendet, so wird eine reine
    * Einfügestelle erzeugt, die mit einer Gender-TRAFO versehen wird, die abhängig
    * vom Formularfeld ID einen der Werte des Dropdowns auswählt, und zwar bei "Herr"
    * oder "Herrn" den ersten Eintrag, bei "Frau" den zweiten Eintrag und bei allem
@@ -245,8 +245,8 @@ public class FormularMax4000
    * zu diesem Eintrag sind. Dies ermöglicht es, das selbe Wort mehrfach in die Liste
    * aufzunehmen.
    * 
-   * >>>>>Checkbox<<<<<: Bei Checkboxen kann als "Hilfetext" "Label<<ID>>"
-   * angegeben werden und wird beim Import entsprechend berücksichtigt.
+   * >>>>>Checkbox<<<<<: Bei Checkboxen kann als "Hilfetext" "Label<<ID>>" angegeben
+   * werden und wird beim Import entsprechend berücksichtigt.
    * 
    * Technischer Hinweis: Auf dieses Pattern getestet wird grundsätzlich der String,
    * der von {@link DocumentTree.FormControl#getDescriptor()} geliefert wird.
@@ -938,7 +938,7 @@ public class FormularMax4000
    * @return false, falls der Konfigurationsabschnitt nicht existiert.
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private boolean createStandardelementeMenuNew(JMenu submenu)
   {
@@ -1944,6 +1944,8 @@ public class FormularMax4000
 
     private static class NoWrapFactory implements ViewFactory, Serializable
     {
+      private static final long serialVersionUID = -932935111327537530L;
+
       public View create(Element e)
       {
         return new PlainView(e);
@@ -2357,7 +2359,7 @@ public class FormularMax4000
    * @throws WrappedTargetException
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private void handleParagraphEnumeration(Set<String> names,
       XEnumerationAccess enuAccess, XTextRangeCompare compare, XTextRange range,
@@ -2427,7 +2429,7 @@ public class FormularMax4000
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private void handleTextTable(Set<String> names, XTextTable table,
       XTextRangeCompare compare, XTextRange range) throws NoSuchElementException,
@@ -2455,7 +2457,7 @@ public class FormularMax4000
    * @throws WrappedTargetException
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TESTED
+   *         TESTED
    */
   private void handleParagraph(Set<String> names, XEnumerationAccess para,
       XTextRangeCompare compare, XTextRange range, boolean doCompare)

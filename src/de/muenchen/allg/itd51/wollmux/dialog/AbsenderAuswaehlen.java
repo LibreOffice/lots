@@ -924,14 +924,14 @@ public class AbsenderAuswaehlen
     String verConfFile = "testdata/PAL.conf";
     String abConfFile = "testdata/AbsenderdatenBearbeiten.conf";
     ConfigThingy conf =
-      new ConfigThingy("", new URL(new File(System.getProperty("user.dir")).toURL(),
-        confFile));
+      new ConfigThingy("", new URL(
+        new File(System.getProperty("user.dir")).toURI().toURL(), confFile));
     ConfigThingy verConf =
-      new ConfigThingy("", new URL(new File(System.getProperty("user.dir")).toURL(),
-        verConfFile));
+      new ConfigThingy("", new URL(
+        new File(System.getProperty("user.dir")).toURI().toURL(), verConfFile));
     ConfigThingy abConf =
-      new ConfigThingy("", new URL(new File(System.getProperty("user.dir")).toURL(),
-        abConfFile));
+      new ConfigThingy("", new URL(
+        new File(System.getProperty("user.dir")).toURI().toURL(), abConfFile));
     TestDatasourceJoiner dj = new TestDatasourceJoiner();
     RunTest test =
       new RunTest(conf.get("AbsenderAuswaehlen"),

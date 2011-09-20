@@ -200,6 +200,8 @@ public class UIElementConfigThingyEditor
     myDialog.add(buttonBox);
     buttonBox.add(new JButton(new AbstractAction(L.m("Abbrechen"))
     {
+      private static final long serialVersionUID = 2595972767797238686L;
+
       public void actionPerformed(ActionEvent e)
       {
         myDialog.dispose();
@@ -210,6 +212,8 @@ public class UIElementConfigThingyEditor
 
     buttonBox.add(new JButton(new AbstractAction(L.m("OK"))
     {
+      private static final long serialVersionUID = 6641563851370571888L;
+
       public void actionPerformed(ActionEvent e)
       {
         myDialog.dispose();
@@ -349,6 +353,8 @@ public class UIElementConfigThingyEditor
   private static abstract class JAttributeEditor extends JPanel implements
       AttributeEditor
   {
+    private static final long serialVersionUID = -4979751095800681712L;
+
     protected Box mainEditorVBox;
 
     private String attributeName;
@@ -383,6 +389,8 @@ public class UIElementConfigThingyEditor
 
   private class JTextAttributeEditor extends JAttributeEditor
   {
+    private static final long serialVersionUID = -3689716244286247562L;
+
     protected JTextComponent myTextComponent;
 
     protected Box hboxAroundMyTextComponent;
@@ -467,6 +475,7 @@ public class UIElementConfigThingyEditor
 
   private class JShortTextAttributeEditor extends JTextAttributeEditor
   {
+    private static final long serialVersionUID = -6387855504728566060L;
 
     /**
      * Editor for a String whose {@link JTextField} is dimensioned for len
@@ -488,6 +497,8 @@ public class UIElementConfigThingyEditor
 
   private class JTypeAttributeEditor extends JAttributeEditor
   {
+    private static final long serialVersionUID = 8511287349879988272L;
+
     private JComboBox combo;
 
     public JTypeAttributeEditor()
@@ -514,6 +525,8 @@ public class UIElementConfigThingyEditor
 
   private class JFavoAttributeEditor extends JAttributeEditor
   {
+    private static final long serialVersionUID = 6025044029161150947L;
+
     private JCheckBox check;
 
     public JFavoAttributeEditor()
@@ -547,6 +560,8 @@ public class UIElementConfigThingyEditor
 
   private class JActionAttributeEditor extends JAttributeEditor
   {
+    private static final long serialVersionUID = -6633764674615890730L;
+
     private JComboBox combo;
 
     public JActionAttributeEditor()
