@@ -877,6 +877,8 @@ public class WollMuxEventHandler
       hbox.add(Box.createHorizontalGlue());
       hbox.add(new JButton(new AbstractAction(L.m("OK"))
       {
+        private static final long serialVersionUID = 4527702807001201116L;
+
         public void actionPerformed(ActionEvent e)
         {
           dialog.dispose();
