@@ -484,7 +484,9 @@ public class PersistentData
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static class RDFMetadataNotSupportedException extends Exception
-  {}
+  {
+    private static final long serialVersionUID = 2416952716636541797L;
+  }
 
   /**
    * Implementiert die neue Zugriffsmethode auf persistente Daten im neuen
