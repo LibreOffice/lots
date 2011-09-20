@@ -60,7 +60,6 @@ import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XMailMergeBroadcaster;
 import com.sun.star.text.XMailMergeListener;
 import com.sun.star.text.XTextContent;
-import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextSection;
 import com.sun.star.text.XTextSectionsSupplier;
@@ -72,6 +71,9 @@ import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand;
+import de.muenchen.allg.itd51.wollmux.DocumentCommands;
+import de.muenchen.allg.itd51.wollmux.FormFieldFactory;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.PrintModels;
@@ -79,21 +81,31 @@ import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.SimulationResults;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
+import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormFieldType;
 import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 
 public class OOoBasedMailMerge
 {
-  private static final String COLUMN_PREFIX_SINGLE_PARAMETER_FUNCTION = "WM:SP:";
+  private static final String SEP = ":";
 
-  private static final String COLUMN_PREFIX_MULTI_PARAMETER_FUNCTION = "WM:MP:";
+  private static final String COLUMN_PREFIX_SINGLE_PARAMETER_FUNCTION = "WM:SP";
+
+  private static final String COLUMN_PREFIX_CHECKBOX_FUNCTION = "WM:CB";
+
+  private static final String COLUMN_PREFIX_MULTI_PARAMETER_FUNCTION = "WM:MP";
 
   private static final String TEMP_WOLLMUX_MAILMERGE_PREFIX = "WollMuxMailMerge";
 
   private static final String DATASOURCE_ODB_FILENAME = "datasource.odb";
 
   private static final String TABLE_NAME = "data";
+
+  private static final char OPENSYMBOL_CHECKED = 0xE4C4;
+
+  private static final char OPENSYMBOL_UNCHECKED = 0xE470;
 
   /**
    * Druckfunktion für den Seriendruck in ein Gesamtdokument mit Hilfe des
@@ -258,16 +270,21 @@ public class OOoBasedMailMerge
 
       HashMap<String, String> data =
         new HashMap<String, String>(simRes.getFormFieldValues());
-      for (FormField f : simRes.getFormFields())
+      for (FormField field : simRes.getFormFields())
       {
-        String content = simRes.getFormFieldContent(f);
-        String trafo = f.getTrafoName();
-        if (trafo == null) continue;
-        String name =
-          (f.singleParameterTrafo() ? COLUMN_PREFIX_SINGLE_PARAMETER_FUNCTION
-                                   : COLUMN_PREFIX_MULTI_PARAMETER_FUNCTION)
-            + f.getTrafoName();
-        data.put(name, content);
+        String columnName = getSpecialColumnNameForFormField(field);
+        if (columnName == null) continue;
+        String content = simRes.getFormFieldContent(field);
+
+        // Checkboxen müssen über bestimmte Zeichen der Schriftart OpenSymbol
+        // angenähert werden.
+        if (field.getType() == FormFieldType.CheckBoxFormField)
+          if (content.equalsIgnoreCase("TRUE"))
+            content = "" + OPENSYMBOL_CHECKED;
+          else
+            content = "" + OPENSYMBOL_UNCHECKED;
+
+        data.put(columnName, content);
       }
       try
       {
@@ -609,7 +626,13 @@ public class OOoBasedMailMerge
       return null;
     }
 
-    // Neues input-Dokument öffnen
+    // Neues input-Dokument öffnen. Achtung: Normalerweise würde der
+    // loadComponentFromURL den WollMux veranlassen, das Dokument zu interpretieren
+    // (und damit zu verarbeiten). Da das bei diesem temporären Dokument nicht
+    // erwünscht ist, erkennt der WollMux in
+    // d.m.a.i.wollmux.event.GlobalEventListener.isTempMailMergeDocument(XModel
+    // compo) über den Pfad der Datei dass es sich um ein temporäres Dokument handelt
+    // und dieses nicht bearbeitet werden soll.
     XComponent tmpDoc = null;
     try
     {
@@ -621,7 +644,7 @@ public class OOoBasedMailMerge
     }
 
     // neues input-Dokument bearbeiten/anpassen
-    addDatabaseFieldsForInsertFormValueBookmarks(tmpDoc, dbName);
+    addDatabaseFieldsForInsertFormValueBookmarks(UNO.XTextDocument(tmpDoc), dbName);
     adjustDatabaseAndInputUserFields(tmpDoc, dbName);
     removeAllBookmarks(tmpDoc);
     removeHiddenSections(tmpDoc);
@@ -692,21 +715,8 @@ public class OOoBasedMailMerge
           UNO.XTextSection(tss.getTextSections().getByName(name));
         if (Boolean.FALSE.equals(UNO.getProperty(section, "IsVisible")))
         {
-          // Inhalt der Section löschen
-          XTextCursor cursor =
-            section.getAnchor().getText().createTextCursorByRange(
-              section.getAnchor());
-          if (UNO.XEnumerationAccess(cursor) != null)
-          {
-            XEnumeration xenum = UNO.XEnumerationAccess(cursor).createEnumeration();
-            while (xenum.hasMoreElements())
-            {
-              XTextContent content = UNO.XTextContent(xenum.nextElement());
-              if (content != null)
-                content.getAnchor().getText().removeTextContent(content);
-            }
-          }
-          // Section selbst aufheben
+          // Inhalt der Section löschen und Section aufheben:
+          section.getAnchor().setString("");
           section.getAnchor().getText().removeTextContent(section);
         }
       }
@@ -742,10 +752,15 @@ public class OOoBasedMailMerge
         {
           bookmark = UNO.XTextContent(xna.getByName(name));
         }
-        catch (Exception e1)
+        catch (NoSuchElementException e)
         {
-          Logger.error(e1);
+          continue;
         }
+        catch (Exception e)
+        {
+          Logger.error(e);
+        }
+
         if (bookmark != null) try
         {
           bookmark.getAnchor().getText().removeTextContent(bookmark);
@@ -759,51 +774,43 @@ public class OOoBasedMailMerge
   }
 
   /**
-   * Fügt dem Dokument tmpDoc für alle enthaltenen insertFormValue-Bookmarks
-   * zugehörige OOo-Seriendruckfelder mit Verweis auf die Datenbank dbName hinzu.
+   * Fügt dem Dokument doc für alle enthaltenen insertFormValue-Bookmarks zugehörige
+   * OOo-Seriendruckfelder mit Verweis auf die Datenbank dbName hinzu.
    * 
-   * @author Christoph Lutz (D-III-ITD-D101)
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private static void addDatabaseFieldsForInsertFormValueBookmarks(
-      XComponent tmpDoc, String dbName)
+      XTextDocument doc, String dbName)
   {
-    // insertFormValue-Bookmark anpassen
-    if (UNO.XBookmarksSupplier(tmpDoc) != null)
+    DocumentCommands cmds = new DocumentCommands(UNO.XBookmarksSupplier(doc));
+    cmds.update();
+    HashMap<String, FormField> bookmarkNameToFormField =
+      new HashMap<String, FormField>();
+    for (DocumentCommand cmd : cmds)
     {
-      XNameAccess xna = UNO.XBookmarksSupplier(tmpDoc).getBookmarks();
-      for (String name : xna.getElementNames())
+      if (cmd instanceof InsertFormValue)
       {
-        String docCmd = TextDocumentModel.getDocumentCommandByBookmarkName(name);
-        if (docCmd == null) continue;
+        InsertFormValue ifvCmd = (InsertFormValue) cmd;
+        FormField field =
+          FormFieldFactory.createFormField(doc, ifvCmd, bookmarkNameToFormField);
+        if (field == null) continue;
+        field.setCommand(ifvCmd);
 
-        String functionName =
-          TextDocumentModel.getFunctionNameForDocumentCommand(docCmd);
-        String id = TextDocumentModel.getFormIDForDocumentCommand(docCmd);
+        String columnName = getSpecialColumnNameForFormField(field);
+        if (columnName == null) columnName = ifvCmd.getID();
         try
         {
-          XDependentTextField dbField = null;
-          if (functionName != null)
-            dbField =
-              createDatabaseField(UNO.XMultiServiceFactory(tmpDoc), dbName,
-                TABLE_NAME, COLUMN_PREFIX_SINGLE_PARAMETER_FUNCTION + functionName);
-          else if (id != null)
-            dbField =
-              createDatabaseField(UNO.XMultiServiceFactory(tmpDoc), dbName,
-                TABLE_NAME, id);
+          XDependentTextField dbField =
+            createDatabaseField(UNO.XMultiServiceFactory(doc), dbName, TABLE_NAME,
+              columnName);
           if (dbField == null) continue;
 
-          XTextContent bookmark = null;
-          try
-          {
-            bookmark = UNO.XTextContent(xna.getByName(name));
-          }
-          catch (Exception e1)
-          {
-            Logger.error(e1);
-          }
-          if (bookmark != null)
-            bookmark.getAnchor().getText().insertTextContent(bookmark.getAnchor(),
-              dbField, true);
+          ifvCmd.insertTextContentIntoBookmark(dbField, true);
+
+          // Checkboxen müssen über bestimmte Zeichen der Schriftart OpenSymbol
+          // angenähert werden.
+          if (field.getType() == FormFieldType.CheckBoxFormField)
+            UNO.setProperty(ifvCmd.getTextCursor(), "CharFontName", "OpenSymbol");
         }
         catch (Exception e)
         {
@@ -814,11 +821,43 @@ public class OOoBasedMailMerge
   }
 
   /**
+   * Liefert zum Formularfeld field unter Berücksichtigung des Feld-Typs und evtl.
+   * gesetzter Trafos eine eindeutige Bezeichnung für die Datenbankspalte in die der
+   * Wert des Formularfeldes geschrieben ist bzw. aus der der Wert des Formularfeldes
+   * wieder ausgelesen werden kann oder null, wenn das Formularfeld über einen
+   * primitiven Spaltennamen (der nur aus einer in den setValues gesetzten IDs
+   * besteht) gefüllt werden kann.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
+   */
+  private static String getSpecialColumnNameForFormField(FormField field)
+  {
+    String trafo = field.getTrafoName();
+    String id = field.getId();
+
+    if (field.getType() == FormFieldType.CheckBoxFormField && id != null
+      && trafo != null)
+      return COLUMN_PREFIX_CHECKBOX_FUNCTION + SEP + id + SEP + trafo;
+
+    else if (field.getType() == FormFieldType.CheckBoxFormField && id != null
+      && trafo == null)
+      return COLUMN_PREFIX_CHECKBOX_FUNCTION + SEP + id;
+
+    else if (field.singleParameterTrafo() && id != null && trafo != null)
+      return COLUMN_PREFIX_SINGLE_PARAMETER_FUNCTION + SEP + id + SEP + trafo;
+
+    else if (!field.singleParameterTrafo() && trafo != null)
+      return COLUMN_PREFIX_MULTI_PARAMETER_FUNCTION + SEP + trafo;
+
+    return null;
+  }
+
+  /**
    * Passt bereits enthaltene OOo-Seriendruckfelder und Nächster-Datensatz-Felder in
    * tmpDoc so an, dass sie über die Datenbank dbName befüllt werden und ersetzt
    * InputUser-Felder durch entsprechende OOo-Seriendruckfelder.
    * 
-   * @author Christoph Lutz (D-III-ITD-D101)
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private static void adjustDatabaseAndInputUserFields(XComponent tmpDoc,
       String dbName)
@@ -865,15 +904,14 @@ public class OOoBasedMailMerge
           catch (IllegalArgumentException e)
           {}
 
-          String functionName =
-            TextDocumentModel.getFunctionNameForUserFieldName(content);
-          if (functionName != null)
+          String trafo = TextDocumentModel.getFunctionNameForUserFieldName(content);
+          if (trafo != null)
           {
             try
             {
               XDependentTextField dbField =
                 createDatabaseField(UNO.XMultiServiceFactory(tmpDoc), dbName,
-                  TABLE_NAME, COLUMN_PREFIX_MULTI_PARAMETER_FUNCTION + functionName);
+                  TABLE_NAME, COLUMN_PREFIX_MULTI_PARAMETER_FUNCTION + SEP + trafo);
               tf.getAnchor().getText().insertTextContent(tf.getAnchor(), dbField,
                 true);
             }

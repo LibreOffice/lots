@@ -1165,6 +1165,12 @@ abstract public class DocumentCommand
       }
     }
 
+    /**
+     * Liefert die im insertFormValues-Kommando gesetzte id, die garantiert != null
+     * ist.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
     public String getID()
     {
       return id;

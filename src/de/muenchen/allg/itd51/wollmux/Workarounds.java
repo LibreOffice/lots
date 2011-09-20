@@ -87,6 +87,8 @@ public class Workarounds
 
   private static ClassLoader workaround102164CL = null;
 
+  private static Boolean workaround68261 = null;
+
   private static Boolean applyWorkaround(String issueNumber)
   {
     Logger.debug("Workaround für Issue "
@@ -453,6 +455,36 @@ public class Workarounds
     }
 
     return workaround102619.booleanValue();
+  }
+
+  /**
+   * Issue 68261 (XEnumeration.nextElement() throws despite hasMoreElements()==true)
+   * beschreibt einen Bug in OOo < 3.0 (das genaue Target der 2er-Serie kann ich
+   * leider nicht mehr ermitteln) bei dem OOo Exceptions schmeißt beim Iterieren über
+   * Inhalte in Tabellen.
+   * 
+   * Achtung: Sollte der Workaround einmal entfernt werden, dann bitte darauf achten,
+   * dass sich der Workaround nicht nur auf den im Code markierten Block bezieht,
+   * sondern sich durch die ganze Logik in der Klasse {@link FormFieldFactory}
+   * durchzieht. Die Logik dieser Klasse kann an einigen Stellen sicherlich deutlich
+   * vereinfacht werden ohne diesen Workaround. Evtl. bietet sich sogar ein
+   * Neu-Schreiben an.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static boolean applyWorkaroundForOOoIssue68261()
+  {
+    if (workaround68261 == null)
+    {
+      String version = getOOoVersion();
+      if (version != null && (version.startsWith("2.")))
+      {
+        workaround68261 = applyWorkaround("68261");
+      }
+      else
+        workaround68261 = Boolean.FALSE;
+    }
+    return workaround68261.booleanValue();
   }
 
   // Unbenutzer alternativer Workaround für das setWindowPosSizeFreeze Problem

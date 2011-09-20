@@ -103,10 +103,11 @@ public final class FormFieldFactory
      * ausgeweitet, damit die ganze Zelle gescannt wird (Workaround für Bug
      * http://qa.openoffice.org/issues/show_bug.cgi?id=68261)
      */
-    XTextRange range = cmd.getAnchor();
-    if (range != null)
+    XTextRange range = null;
+    if (Workarounds.applyWorkaroundForOOoIssue68261())
     {
-      range = range.getText();
+      range = cmd.getAnchor();
+      if (range != null) range = range.getText();
       XCell cell = UNO.XCell(range);
       if (cell == null) // range nicht in Tabellenzelle?
       {
@@ -459,6 +460,14 @@ public final class FormFieldFactory
     public XTextRange getAnchor();
 
     /**
+     * Liefert für alle aus insertFormValue-Bookmarks entstandenen FormField-Objekte
+     * die im insertFormValue-Kommando angegebene ID, und andernfalls null.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public abstract String getId();
+
+    /**
      * Die Methode liefert den Namen der Trafo, die auf dieses Formularfeld gesetzt
      * ist oder null, wenn keine Trafo gesetzt ist.
      */
@@ -506,6 +515,27 @@ public final class FormFieldFactory
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
     public abstract void dispose();
+
+    /**
+     * Liefert den Typ des FormField-Objekts zurück
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public FormFieldType getType();
+  }
+
+  /**
+   * Beschreibt mögliche Typen von FormField-Objekten
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public enum FormFieldType {
+    InputFormField,
+    DynamicInputFormField,
+    DropdownFormField,
+    CheckBoxFormField,
+    DatabaseFormField,
+    InputUserFormField
   }
 
   private static abstract class BasicFormField implements FormField
@@ -517,7 +547,13 @@ public final class FormFieldFactory
     public void setCommand(InsertFormValue cmd)
     {
       this.cmd = cmd;
-    };
+    }
+
+    public String getId()
+    {
+      if (cmd != null) return cmd.getID();
+      return null;
+    }
 
     /**
      * Erzeugt ein Formularfeld im Dokument doc an der Stelle des
@@ -695,6 +731,11 @@ public final class FormFieldFactory
     {
       return true;
     }
+
+    public FormFieldType getType()
+    {
+      return FormFieldType.InputFormField;
+    }
   }
 
   /**
@@ -798,6 +839,11 @@ public final class FormFieldFactory
         Logger.error(e);
       }
     }
+
+    public FormFieldType getType()
+    {
+      return FormFieldType.DynamicInputFormField;
+    }
   }
 
   /**
@@ -894,6 +940,12 @@ public final class FormFieldFactory
     {
       return true;
     }
+
+    @Override
+    public FormFieldType getType()
+    {
+      return FormFieldType.DropdownFormField;
+    }
   }
 
   /**
@@ -956,6 +1008,11 @@ public final class FormFieldFactory
     public boolean singleParameterTrafo()
     {
       return true;
+    }
+
+    public FormFieldType getType()
+    {
+      return FormFieldType.CheckBoxFormField;
     }
   }
 
@@ -1058,6 +1115,16 @@ public final class FormFieldFactory
       // Der Rückgabewert spielt keine Rolle da diese Felder immer untransformiert
       // sind.
       return false;
+    }
+
+    public FormFieldType getType()
+    {
+      return FormFieldType.DatabaseFormField;
+    }
+
+    public String getId()
+    {
+      return null;
     }
   }
 
@@ -1171,6 +1238,16 @@ public final class FormFieldFactory
     public boolean singleParameterTrafo()
     {
       return false;
+    }
+
+    public FormFieldType getType()
+    {
+      return FormFieldType.InputUserFormField;
+    }
+
+    public String getId()
+    {
+      return null;
     }
   }
 }

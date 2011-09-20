@@ -3374,45 +3374,6 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert den Wert von ID des als Kommandostring cmdStr übergebenen
-   * Dokumentkommandos (derzeit nur insertFormValue); Bildet cmdStr kein gültiges
-   * Dokumentkommando mit ID-Attribut so wird null zurück geliefert.
-   * 
-   * @param cmdStr
-   *          Ein Kommandostring eines Dokumentkommandos in der Form "WM(CMD
-   *          '<command>' ...)"
-   * @return
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public static String getFormIDForDocumentCommand(String cmdStr)
-  {
-    ConfigThingy wm = new ConfigThingy("");
-    try
-    {
-      wm = new ConfigThingy("", cmdStr).get("WM");
-    }
-    catch (java.lang.Exception e)
-    {}
-
-    String cmd = "";
-    try
-    {
-      cmd = wm.get("CMD").toString();
-    }
-    catch (NodeNotFoundException e)
-    {}
-
-    if (cmd.equalsIgnoreCase("insertFormValue")) try
-    {
-      return wm.get("ID").toString();
-    }
-    catch (NodeNotFoundException e)
-    {}
-    return null;
-  }
-
-  /**
    * Ersetzt die aktuelle Selektion (falls vorhanden) durch ein WollMux-Formularfeld
    * mit ID id, dem Hinweistext hint und der durch trafoConf definierten TRAFO. Das
    * Formularfeld ist direkt einsetzbar, d.h. sobald diese Methode zurückkehrt, kann
