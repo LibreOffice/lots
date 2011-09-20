@@ -76,6 +76,8 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.PersistentData;
+import de.muenchen.allg.itd51.wollmux.PersistentDataContainer;
 import de.muenchen.allg.itd51.wollmux.PrintModels;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.SimulationResults;
@@ -84,6 +86,7 @@ import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormFieldType;
+import de.muenchen.allg.itd51.wollmux.PersistentDataContainer.DataID;
 import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 
@@ -600,7 +603,7 @@ public class OOoBasedMailMerge
    * damit der Seriendruck über die temporäre Datenbank dbName korrekt und möglichst
    * performant funktioniert, und liefert dieses zurück.
    * 
-   * @author Christoph Lutz (D-III-ITD-D101)
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private static File createAndAdjustInputFile(File tmpDir, XTextDocument origDoc,
       String dbName)
@@ -649,6 +652,7 @@ public class OOoBasedMailMerge
     removeAllBookmarks(tmpDoc);
     removeHiddenSections(tmpDoc);
     SachleitendeVerfuegung.deMuxSLVStyles(UNO.XTextDocument(tmpDoc));
+    removeWollMuxMetadata(UNO.XTextDocument(tmpDoc));
 
     // neues input-Dokument speichern und schließen
     if (UNO.XStorable(tmpDoc) != null)
@@ -687,6 +691,22 @@ public class OOoBasedMailMerge
     } while (closed == false);
 
     return inputFile;
+  }
+
+  /**
+   * Entfernt alle Metadaten des WollMux aus dem Dokument doc die nicht reine
+   * Infodaten des WollMux sind (wie z.B. WollMuxVersion, OOoVersion) um
+   * sicherzustellen, dass der WollMux das Gesamtdokument nicht interpretiert.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
+   */
+  private static void removeWollMuxMetadata(XTextDocument doc)
+  {
+    if (doc == null) return;
+    PersistentDataContainer c = PersistentData.createPersistentDataContainer(doc);
+    for (DataID dataId : DataID.values())
+      if (!dataId.isInfodata()) c.removeData(dataId);
+    c.flush();
   }
 
   /**

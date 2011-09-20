@@ -44,7 +44,7 @@ public interface PersistentDataContainer
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
-  public String getData(String dataId);
+  public String getData(DataID dataId);
 
   /**
    * Speichert dataValue mit der id dataId im zugehörigen ODF-Dokument. Falls bereits
@@ -53,7 +53,7 @@ public interface PersistentDataContainer
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
-  public void setData(String dataId, String dataValue);
+  public void setData(DataID dataId, String dataValue);
 
   /**
    * Entfernt die mit dataId bezeichneten Daten, falls vorhanden. Die Aktion wird
@@ -61,7 +61,7 @@ public interface PersistentDataContainer
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
-  public void removeData(String dataId);
+  public void removeData(DataID dataId);
 
   /**
    * Garantiert, dass bereits getätigte Aufrufe von setData(...) bzw. removeData(...)
@@ -73,4 +73,86 @@ public interface PersistentDataContainer
    */
   public void flush();
 
+  /**
+   * Liste aller möglichen DataIDs des WollMux
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public enum DataID {
+    /**
+     * Die dataId unter der die WollMux-Formularbeschreibung gespeichert wird.
+     */
+    FORMULARBESCHREIBUNG("WollMuxFormularbeschreibung"),
+
+    /**
+     * Die dataId unter der die WollMux-Formularwerte gespeichert werden.
+     */
+    FORMULARWERTE("WollMuxFormularwerte"),
+
+    /**
+     * Die dataId unter der die Metadaten der Seriendruckfunktion gespeichert werden.
+     */
+    SERIENDRUCK("WollMuxSeriendruck"),
+
+    /**
+     * Die dataId unter der der Name der Druckfunktion gespeichert wird.
+     */
+    PRINTFUNCTION("PrintFunction"),
+
+    /**
+     * Die dataId unter der der Typ des Dokuments gespeichert wird.
+     */
+    SETTYPE("SetType"),
+
+    /**
+     * Die dataId unter der die Version des letzten WollMux der das Dokument
+     * angefasst hat (vor diesem gerade laufenden) gespeichert wird.
+     */
+    TOUCH_WOLLMUXVERSION("WollMuxVersion", true),
+
+    /**
+     * Die dataId unter der die Version des letzten OpenOffice,orgs das das Dokument
+     * angefasst hat (vor diesem gerade laufenden) gespeichert wird.
+     */
+    TOUCH_OOOVERSION("OOoVersion", true);
+
+    private String name;
+
+    private boolean infodata;
+
+    DataID(String name)
+    {
+      this.name = name;
+      this.infodata = false;
+    }
+
+    DataID(String name, boolean infodata)
+    {
+      this.name = name;
+      this.infodata = infodata;
+    }
+
+    /**
+     * Liefert den Bezeichner der DataID zurück, unter dem die Daten tatsächlich im
+     * Storage gespeichert werden.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public String getDescriptor()
+    {
+      return name;
+    }
+
+    /**
+     * Gibt Auskunft darüber, ob es sich bei den unter dieser DataID abgelegten Daten
+     * um reine, nicht durch den WollMux interpretierten Infodaten handelt oder
+     * nicht.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public boolean isInfodata()
+    {
+      return infodata;
+    }
+  }
 }

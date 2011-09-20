@@ -89,6 +89,7 @@ import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.OptionalHighlightColorProvider;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
+import de.muenchen.allg.itd51.wollmux.PersistentDataContainer.DataID;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
@@ -121,49 +122,6 @@ public class TextDocumentModel
    * TextDocument-Services der zugehörigen UNO-Komponente.
    */
   public final XTextDocument doc;
-
-  /**
-   * Die dataId unter der die WollMux-Formularbeschreibung in {@link #persistentData}
-   * gespeichert wird.
-   */
-  private static final String DATA_ID_FORMULARBESCHREIBUNG =
-    "WollMuxFormularbeschreibung";
-
-  /**
-   * Die dataId unter der die WollMux-Formularwerte in {@link #persistentData}
-   * gespeichert werden.
-   */
-  private static final String DATA_ID_FORMULARWERTE = "WollMuxFormularwerte";
-
-  /**
-   * Die dataId unter der die Metadaten der Seriendruckfunktion in
-   * {@link #persistentData} gespeichert werden.
-   */
-  private static final String DATA_ID_SERIENDRUCK = "WollMuxSeriendruck";
-
-  /**
-   * Die dataId unter der der Name der Druckfunktion in {@link #persistentData}
-   * gespeichert wird.
-   */
-  private static final String DATA_ID_PRINTFUNCTION = "PrintFunction";
-
-  /**
-   * Die dataId unter der der Name der Druckfunktion in {@link #persistentData}
-   * gespeichert wird.
-   */
-  private static final String DATA_ID_SETTYPE = "SetType";
-
-  /**
-   * Die dataId unter der die Version des letzten WollMux der das Dokument angefasst
-   * hat (vor diesem gerade laufenden) gespeichert wird.
-   */
-  private static final String DATA_ID_TOUCH_WOLLMUXVERSION = "WollMuxVersion";
-
-  /**
-   * Die dataId unter der die Version des letzten OpenOffice,orgs das das Dokument
-   * angefasst hat (vor diesem gerade laufenden) gespeichert wird.
-   */
-  private static final String DATA_ID_TOUCH_OOOVERSION = "OOoVersion";
 
   /**
    * Pattern zum Erkennen der Bookmarks, die {@link #deForm()} entfernen soll.
@@ -401,15 +359,15 @@ public class TextDocumentModel
 
     // Auslesen der Persistenten Daten:
     this.persistentData = PersistentData.createPersistentDataContainer(doc);
-    String setTypeData = persistentData.getData(DATA_ID_SETTYPE);
+    String setTypeData = persistentData.getData(DataID.SETTYPE);
     alreadyTouchedAsFormDocument = "formDocument".equals(setTypeData);
-    parsePrintFunctions(persistentData.getData(DATA_ID_PRINTFUNCTION));
-    parseFormValues(persistentData.getData(DATA_ID_FORMULARWERTE));
+    parsePrintFunctions(persistentData.getData(DataID.PRINTFUNCTION));
+    parseFormValues(persistentData.getData(DataID.FORMULARWERTE));
     lastTouchedByWollMuxVersion =
-      persistentData.getData(DATA_ID_TOUCH_WOLLMUXVERSION);
+      persistentData.getData(DataID.TOUCH_WOLLMUXVERSION);
     if (lastTouchedByWollMuxVersion == null)
       lastTouchedByWollMuxVersion = VERSION_UNKNOWN;
-    lastTouchedByOOoVersion = persistentData.getData(DATA_ID_TOUCH_OOOVERSION);
+    lastTouchedByOOoVersion = persistentData.getData(DataID.TOUCH_OOOVERSION);
     if (lastTouchedByOOoVersion == null) lastTouchedByOOoVersion = VERSION_UNKNOWN;
 
     // Type auswerten
@@ -473,9 +431,9 @@ public class TextDocumentModel
       // Logger.error(new Exception()); //um einen Stacktrace zu kriegen
       haveUpdatedLastTouchedByVersionInfo = true;
       boolean modified = getDocumentModified();
-      persistentData.setData(DATA_ID_TOUCH_WOLLMUXVERSION,
+      persistentData.setData(DataID.TOUCH_WOLLMUXVERSION,
         WollMuxSingleton.getInstance().getVersion());
-      persistentData.setData(DATA_ID_TOUCH_OOOVERSION, Workarounds.getOOoVersion());
+      persistentData.setData(DataID.TOUCH_OOOVERSION, Workarounds.getOOoVersion());
       setDocumentModified(modified);
     }
   }
@@ -744,7 +702,7 @@ public class TextDocumentModel
     // Workaround für #5031 (Sammelticket für Datenverlust aufgrund eines leeren oder
     // nicht existierenden WollMuxFormularwerte-Abschnitts).
     if (Workarounds.applyWorkaroundForTracTicket5031(
-      persistentData.getData(DATA_ID_FORMULARWERTE), alreadyTouchedAsFormDocument))
+      persistentData.getData(DataID.FORMULARWERTE), alreadyTouchedAsFormDocument))
       return getIdToPresetValueEmptyFormularwerte();
 
     // mapIdToPresetValue vorbelegen: Gibt es zu id mindestens ein untransformiertes
@@ -1259,7 +1217,7 @@ public class TextDocumentModel
   {
     updateLastTouchedByVersionInfo();
     setType("formDocument");
-    persistentData.setData(DATA_ID_SETTYPE, "formDocument");
+    persistentData.setData(DataID.SETTYPE, "formDocument");
   }
 
   /**
@@ -1350,7 +1308,7 @@ public class TextDocumentModel
     updateLastTouchedByVersionInfo();
     if (printFunctions.isEmpty())
     {
-      persistentData.removeData(DATA_ID_PRINTFUNCTION);
+      persistentData.removeData(DataID.PRINTFUNCTION);
     }
     else
     // if (printFunctions.size() > 0)
@@ -1385,9 +1343,9 @@ public class TextDocumentModel
       }
 
       if (needConfigThingy)
-        persistentData.setData(DATA_ID_PRINTFUNCTION, wm.stringRepresentation());
+        persistentData.setData(DataID.PRINTFUNCTION, wm.stringRepresentation());
       else
-        persistentData.setData(DATA_ID_PRINTFUNCTION,
+        persistentData.setData(DataID.PRINTFUNCTION,
           printFunctions.iterator().next());
     }
   }
@@ -1615,8 +1573,8 @@ public class TextDocumentModel
       }
     }
 
-    persistentData.removeData(DATA_ID_FORMULARBESCHREIBUNG);
-    persistentData.removeData(DATA_ID_FORMULARWERTE);
+    persistentData.removeData(DataID.FORMULARBESCHREIBUNG);
+    persistentData.removeData(DataID.FORMULARWERTE);
   }
 
   /**
@@ -1704,7 +1662,7 @@ public class TextDocumentModel
       Logger.debug(L.m("Einlesen der Formularbeschreibung von %1", this));
       formularConf = new ConfigThingy("WM");
       addToFormDescription(formularConf,
-        persistentData.getData(DATA_ID_FORMULARBESCHREIBUNG));
+        persistentData.getData(DataID.FORMULARBESCHREIBUNG));
       formularConf = applyFormularanpassung(formularConf);
 
       ConfigThingy title = formularConf.query("TITLE");
@@ -1830,7 +1788,7 @@ public class TextDocumentModel
   {
     if (mailmergeConf == null)
     {
-      String data = persistentData.getData(DATA_ID_SERIENDRUCK);
+      String data = persistentData.getData(DataID.SERIENDRUCK);
       mailmergeConf = new ConfigThingy("Seriendruck");
       if (data != null)
         try
@@ -1871,9 +1829,9 @@ public class TextDocumentModel
     ConfigThingy wm = new ConfigThingy("WM");
     wm.addChild(mailmergeConf);
     if (mailmergeConf.count() > 0)
-      persistentData.setData(DATA_ID_SERIENDRUCK, wm.stringRepresentation());
+      persistentData.setData(DataID.SERIENDRUCK, wm.stringRepresentation());
     else
-      persistentData.removeData(DATA_ID_SERIENDRUCK);
+      persistentData.removeData(DataID.SERIENDRUCK);
   }
 
   /**
@@ -1927,10 +1885,10 @@ public class TextDocumentModel
       if ((conf.query("Fenster").count() > 0 && conf.get("Fenster").count() > 0)
         || (conf.query("Sichtbarkeit").count() > 0 && conf.get("Sichtbarkeit").count() > 0)
         || (conf.query("Funktionen").count() > 0 && conf.get("Funktionen").count() > 0))
-        persistentData.setData(DATA_ID_FORMULARBESCHREIBUNG,
+        persistentData.setData(DataID.FORMULARBESCHREIBUNG,
           conf.stringRepresentation());
       else
-        persistentData.removeData(DATA_ID_FORMULARBESCHREIBUNG);
+        persistentData.removeData(DataID.FORMULARBESCHREIBUNG);
     }
     catch (NodeNotFoundException e)
     {
@@ -1981,7 +1939,7 @@ public class TextDocumentModel
         formFieldValues.remove(fieldId);
       else
         formFieldValues.put(fieldId, value);
-      persistentData.setData(DATA_ID_FORMULARWERTE, getFormFieldValuesString());
+      persistentData.setData(DataID.FORMULARWERTE, getFormFieldValuesString());
     }
     else
       simulationResult.setFormFieldValue(fieldId, value);

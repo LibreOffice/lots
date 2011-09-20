@@ -252,7 +252,7 @@ public class PersistentData
      * 
      * TESTED
      */
-    public String getData(String dataId)
+    public String getData(DataID dataId)
     {
       String data = legacy.getData(dataId);
       if (data != null)
@@ -275,7 +275,7 @@ public class PersistentData
      * 
      * @author Christoph Lutz (D-III-ITD-D101) TESTED
      */
-    private void copyOnRead(PersistentDataContainer c, String dataId, String data)
+    private void copyOnRead(PersistentDataContainer c, DataID dataId, String data)
     {
       XModifiable mod = UNO.XModifiable(doc);
       boolean modState = false;
@@ -300,7 +300,7 @@ public class PersistentData
      * 
      * TESTED
      */
-    public void setData(String dataId, String dataValue)
+    public void setData(DataID dataId, String dataValue)
     {
       legacy.setData(dataId, dataValue);
       rdfData.setData(dataId, dataValue); // CopyOnWrite
@@ -326,7 +326,7 @@ public class PersistentData
      * de.muenchen.allg.itd51.wollmux.PersistentDataContainer#removeData(java.lang.
      * String)
      */
-    public void removeData(String dataId)
+    public void removeData(DataID dataId)
     {
       rdfData.removeData(dataId);
       legacy.removeData(dataId);
@@ -358,7 +358,7 @@ public class PersistentData
 
     private XTextDocument doc;
 
-    private HashSet<String> removedFromLegacy;
+    private HashSet<DataID> removedFromLegacy;
 
     /**
      * Erzeugt einen neuen persistenten Datenspeicher im Dokument doc.
@@ -371,7 +371,7 @@ public class PersistentData
       this.rdfData = new RDFBasedPersistentDataContainer(doc);
       this.legacy = new AnnotationBasedPersistentDataContainer(doc);
       this.doc = doc;
-      this.removedFromLegacy = new HashSet<String>();
+      this.removedFromLegacy = new HashSet<DataID>();
     }
 
     /*
@@ -383,7 +383,7 @@ public class PersistentData
      * 
      * TESTED
      */
-    public String getData(String dataId)
+    public String getData(DataID dataId)
     {
       String data = legacy.getData(dataId);
       if (data != null)
@@ -404,7 +404,7 @@ public class PersistentData
      * 
      * @author Christoph Lutz (D-III-ITD-D101) TESTED
      */
-    private void ensureRemovedFromLegacy(String dataId)
+    private void ensureRemovedFromLegacy(DataID dataId)
     {
       if (!removedFromLegacy.contains(dataId))
       {
@@ -419,7 +419,7 @@ public class PersistentData
      * 
      * @author Christoph Lutz (D-III-ITD-D101) TESTED
      */
-    private void copyOnRead(PersistentDataContainer c, String dataId, String data)
+    private void copyOnRead(PersistentDataContainer c, DataID dataId, String data)
     {
       XModifiable mod = UNO.XModifiable(doc);
       boolean modState = false;
@@ -444,7 +444,7 @@ public class PersistentData
      * 
      * TESTED
      */
-    public void setData(String dataId, String dataValue)
+    public void setData(DataID dataId, String dataValue)
     {
       rdfData.setData(dataId, dataValue);
       ensureRemovedFromLegacy(dataId);
@@ -470,7 +470,7 @@ public class PersistentData
      * de.muenchen.allg.itd51.wollmux.PersistentDataContainer#removeData(java.lang.
      * String)
      */
-    public void removeData(String dataId)
+    public void removeData(DataID dataId)
     {
       rdfData.removeData(dataId);
       ensureRemovedFromLegacy(dataId);
@@ -542,8 +542,8 @@ public class PersistentData
      * Dient zum Cachen von bereits erzeugten URI-Objekten für verschiedene dataIDs,
      * damit diese Objekte nicht mehrfach erzeugt werden müssen.
      */
-    private static final HashMap<String, XURI> mapDataIdToURI =
-      new HashMap<String, XURI>();
+    private static final HashMap<DataID, XURI> mapDataIdToURI =
+      new HashMap<DataID, XURI>();
 
     /**
      * Erzeugt einen neuen persistenten Datenspeicher im Dokument doc.
@@ -623,12 +623,13 @@ public class PersistentData
      * 
      * @author Christoph Lutz (D-III-ITD-D101)
      */
-    private XURI getDataIdURI(String dataId) throws IllegalArgumentException
+    private XURI getDataIdURI(DataID dataId) throws IllegalArgumentException
     {
       XURI uri = mapDataIdToURI.get(dataId);
       if (uri == null)
       {
-        uri = URI.create(UNO.defaultContext, WM_METADATA_XMLNS + dataId);
+        uri =
+          URI.create(UNO.defaultContext, WM_METADATA_XMLNS + dataId.getDescriptor());
         mapDataIdToURI.put(dataId, uri);
       }
       return uri;
@@ -643,7 +644,7 @@ public class PersistentData
      * 
      * TESTED
      */
-    public String getData(String dataId)
+    public String getData(DataID dataId)
     {
       XNamedGraph g = getWollMuxDatenGraph();
       if (g == null) return null;
@@ -676,7 +677,7 @@ public class PersistentData
      * 
      * TESTED
      */
-    public void setData(String dataId, String dataValue)
+    public void setData(DataID dataId, String dataValue)
     {
       XNamedGraph g = getOrCreateWollMuxDatenGraph();
       if (g == null) return;
@@ -708,7 +709,7 @@ public class PersistentData
      * 
      * TESTED
      */
-    public void removeData(String dataId)
+    public void removeData(DataID dataId)
     {
       XNamedGraph g = getWollMuxDatenGraph();
       if (g == null) return;
@@ -780,7 +781,7 @@ public class PersistentData
      * wird für den Workaround für OOo-Issue 100374 benötigt. Kann mit Entfernen des
      * Workarounds auch wieder entfernt werden.
      */
-    private HashSet<String> modifiedDataIDs;
+    private HashSet<DataID> modifiedDataIDs;
 
     /**
      * Erzeugt einen neuen persistenten Datenspeicher im Dokument doc.
@@ -788,16 +789,17 @@ public class PersistentData
     public AnnotationBasedPersistentDataContainer(XTextDocument doc)
     {
       this.doc = doc;
-      this.modifiedDataIDs = new HashSet<String>();
+      this.modifiedDataIDs = new HashSet<DataID>();
     }
 
     /**
      * Die Methode liefert die unter ID dataId gespeicherten Daten zurück oder null,
      * wenn keine vorhanden sind.
      */
-    public String getData(String dataId)
+    public String getData(DataID dataId)
     {
-      Vector<Object> textfields = getWollMuxTextFields(dataId, false, 0);
+      Vector<Object> textfields =
+        getWollMuxTextFields(dataId.getDescriptor(), false, 0);
       if (textfields.size() == 0) return null;
       Iterator<Object> iter = textfields.iterator();
       StringBuilder buffy = new StringBuilder();
@@ -945,12 +947,12 @@ public class PersistentData
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
-    public void setData(String dataId, String dataValue)
+    public void setData(DataID dataId, String dataValue)
     {
       Object recordChanges = UNO.getProperty(doc, RECORD_CHANGES);
       UNO.setProperty(doc, RECORD_CHANGES, false);
       Vector<Object> textfields =
-        getWollMuxTextFields(dataId, true, dataValue.length());
+        getWollMuxTextFields(dataId.getDescriptor(), true, dataValue.length());
       if (textfields.size() == 0)
       {
         Logger.error(L.m("Konnte WollMux-Textfeld(er) \"%1\" nicht anlegen", dataId));
@@ -983,11 +985,12 @@ public class PersistentData
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public void removeData(String dataId)
+    public void removeData(DataID dataId)
     {
       Object recordChanges = UNO.getProperty(doc, RECORD_CHANGES);
       UNO.setProperty(doc, RECORD_CHANGES, false);
-      Vector<Object> textfields = getWollMuxTextFields(dataId, false, 0);
+      Vector<Object> textfields =
+        getWollMuxTextFields(dataId.getDescriptor(), false, 0);
       if (textfields.size() > 0)
       {
         Iterator<Object> iter = textfields.iterator();
@@ -1020,7 +1023,7 @@ public class PersistentData
      *          die ID der Daten die neu geschrieben werden sollen.
      * @author Daniel Benkmann (D-III-ITD-D101)
      */
-    private void rewriteData(String dataId)
+    private void rewriteData(DataID dataId)
     {
       String oldValue = getData(dataId);
       if (oldValue != null)
@@ -1041,7 +1044,7 @@ public class PersistentData
     {
       if (Workarounds.applyWorkaroundForOOoIssue100374())
       {
-        for (String dataId : new HashSet<String>(modifiedDataIDs))
+        for (DataID dataId : new HashSet<DataID>(modifiedDataIDs))
           rewriteData(dataId);
         modifiedDataIDs.clear();
       }
