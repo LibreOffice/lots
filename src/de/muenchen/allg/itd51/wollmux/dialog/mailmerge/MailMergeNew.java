@@ -724,6 +724,16 @@ public class MailMergeNew
     });
     menu.add(button);
 
+    button = new JMenuItem(L.m("Nächster Datensatz"));
+    button.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        mod.insertNextDatasetFieldAtCursorPosition();
+      }
+    });
+    menu.add(button);
+
     button = new JMenuItem(L.m("Feld bearbeiten..."));
     button.setEnabled(editFieldDialog != null);
     button.addActionListener(new ActionListener()

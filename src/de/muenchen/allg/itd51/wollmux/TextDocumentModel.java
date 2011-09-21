@@ -1590,6 +1590,16 @@ public class TextDocumentModel
   }
 
   /**
+   * Fügt an Stelle der aktuellen Selektion ein "Nächster Datensatz"-Feld für den
+   * OOo-basierten Seriendruck ein.
+   */
+  synchronized public void insertNextDatasetFieldAtCursorPosition()
+  {
+    updateLastTouchedByVersionInfo();
+    insertNextDatasetField(getViewCursor());
+  }
+
+  /**
    * Stellt sicher, dass persistente Daten dieses Dokuments auch tatsächlich
    * persistiert werden.
    * 
@@ -1641,6 +1651,34 @@ public class TextDocumentModel
 
       // Ansicht des Formularfeldes aktualisieren:
       updateFormFields(fieldId);
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(e);
+    }
+  }
+
+  /**
+   * Fügt an Stelle range ein "Nächster Datensatz"-Feld für den OOo-basierten
+   * Seriendruck ein.
+   */
+  private void insertNextDatasetField(XTextRange range)
+  {
+    updateLastTouchedByVersionInfo();
+
+    try
+    {
+      // Feld einfügen
+      XMultiServiceFactory factory = UNO.XMultiServiceFactory(doc);
+      XDependentTextField field =
+        UNO.XDependentTextField(factory.createInstance("com.sun.star.text.TextField.DatabaseNextSet"));
+      UNO.setProperty(field, "DataBaseName", "DataBaseName");
+      UNO.setProperty(field, "DataTableName", "DataTableName");
+      UNO.setProperty(field, "DataCommandType", com.sun.star.sdb.CommandType.TABLE);
+      UNO.setProperty(field, "Condition", "true");
+
+      XTextCursor cursor = range.getText().createTextCursorByRange(range);
+      cursor.getText().insertTextContent(cursor, field, true);
     }
     catch (java.lang.Exception e)
     {

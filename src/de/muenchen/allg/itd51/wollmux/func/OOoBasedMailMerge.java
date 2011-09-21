@@ -82,6 +82,7 @@ import de.muenchen.allg.itd51.wollmux.PrintModels;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.SimulationResults;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
@@ -136,6 +137,14 @@ public class OOoBasedMailMerge
         L.m("OOo-Based-MailMerge: kann Simulationsdatenquelle nicht erzeugen!"), e);
       return;
     }
+    if (ds.getSize() == 0)
+    {
+      WollMuxSingleton.showInfoModal(
+        L.m("WollMux-Seriendruck"),
+        L.m("Der Seriendruck wurde abgebrochen, da Ihr Druckauftrag keine Datensätze enthält."));
+      pmod.cancel();
+      return;
+    }
 
     XDocumentDataSource dataSource = ds.createXDocumentDatasource();
 
@@ -183,15 +192,22 @@ public class OOoBasedMailMerge
 
     // Output-File als Template öffnen und aufräumen
     File outputFile = new File(tmpDir, "output0.odt");
-    try
+    if (outputFile.exists())
+      try
+      {
+        String unoURL = UNO.getParsedUNOUrl(outputFile.toURI().toString()).Complete;
+        Logger.debug(L.m("Öffne erzeugtes Gesamtdokument %1", unoURL));
+        UNO.loadComponentFromURL(unoURL, true, false);
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+      }
+    else
     {
-      String unoURL = UNO.getParsedUNOUrl(outputFile.toURI().toString()).Complete;
-      Logger.debug(L.m("Öffne erzeugtes Gesamtdokument %1", unoURL));
-      UNO.loadComponentFromURL(unoURL, true, false);
-    }
-    catch (Exception e)
-    {
-      Logger.error(e);
+      WollMuxSingleton.showInfoModal(L.m("WollMux-Seriendruck"),
+        L.m("Leider konnte kein Gesamtdokument erstellt werden."));
+      pmod.cancel();
     }
 
     outputFile.delete();
@@ -621,6 +637,9 @@ public class OOoBasedMailMerge
       }
       catch (IOException e)
       {
+        Logger.error(
+          L.m("Kann temporäres Eingabedokument für den OOo-Seriendruck nicht erzeugen"),
+          e);
         return null;
       }
     }
