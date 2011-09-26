@@ -3677,8 +3677,7 @@ public class TextDocumentModel
 
   /**
    * Diese Methode liefert ein Array von FieldInfo-Objekten, das Informationen über
-   * FeldIDs enthält, die in der aktuellen Selektion (falls der ViewCursor eine
-   * Selektion aufspannt) oder im gesamten Dokument in insertFormValue-Kommandos,
+   * FeldIDs enthält, die im gesamten Dokument in insertFormValue-Kommandos,
    * Serienbrieffelder, Benutzerfelder und evtl. gesetzten Trafos referenziert werden
    * und nicht im Schema schema aufgeführt sind. Ist eine Selektion vorhanden, so ist
    * die Liste in der Reihenfolge aufgebaut, in der die IDs im Dokument angesprochen
@@ -3694,33 +3693,26 @@ public class TextDocumentModel
       Set<String> schema)
   {
     ArrayList<ReferencedFieldID> list = new ArrayList<ReferencedFieldID>();
-    if (hasSelection())
+
+    // Alle ReferencedFieldIDs des Dokuments alphabetisch sortiert
+    // zurückliefern.
+    List<String> sortedIDs = new ArrayList<String>(getAllFieldIDs());
+    Collections.sort(sortedIDs);
+    for (Iterator<String> iter = sortedIDs.iterator(); iter.hasNext();)
     {
-      // Nur Felder der aktuellen Selektion zurückliefern.
-      // TODO: diesen Fall implementieren
-    }
-    // else TODO einkommentieren wenn obiger branch implementiert
-    {
-      // Alle ReferencedFieldIDs des Dokuments alphabetisch sortiert
-      // zurückliefern.
-      List<String> sortedIDs = new ArrayList<String>(getAllFieldIDs());
-      Collections.sort(sortedIDs);
-      for (Iterator<String> iter = sortedIDs.iterator(); iter.hasNext();)
+      String id = iter.next();
+      if (schema.contains(id)) continue;
+      List<FormField> fields = new ArrayList<FormField>();
+      if (idToFormFields.containsKey(id)) fields.addAll(idToFormFields.get(id));
+      if (idToTextFieldFormFields.containsKey(id))
+        fields.addAll(idToTextFieldFormFields.get(id));
+      boolean hasTrafo = false;
+      for (Iterator<FormField> fieldIter = fields.iterator(); fieldIter.hasNext();)
       {
-        String id = iter.next();
-        if (schema.contains(id)) continue;
-        List<FormField> fields = new ArrayList<FormField>();
-        if (idToFormFields.containsKey(id)) fields.addAll(idToFormFields.get(id));
-        if (idToTextFieldFormFields.containsKey(id))
-          fields.addAll(idToTextFieldFormFields.get(id));
-        boolean hasTrafo = false;
-        for (Iterator<FormField> fieldIter = fields.iterator(); fieldIter.hasNext();)
-        {
-          FormField field = fieldIter.next();
-          if (field.getTrafoName() != null) hasTrafo = true;
-        }
-        list.add(new ReferencedFieldID(id, hasTrafo));
+        FormField field = fieldIter.next();
+        if (field.getTrafoName() != null) hasTrafo = true;
       }
+      list.add(new ReferencedFieldID(id, hasTrafo));
     }
 
     // Array FieldInfo erstellen

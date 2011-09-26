@@ -453,21 +453,10 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        // Anpassen des Menüpunktes "Felder anpassen"
-        if (mod.hasSelection())
-        {
-          adjustFieldsMenuItem.setText(L.m("Ausgewählte Felder anpassen"));
-        }
-        else
-        {
-          adjustFieldsMenuItem.setText(L.m("Alle Felder anpassen"));
-        }
-
         // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
         // entsprechenden Datenquellenfeldern zugeordnet werden können.
         // Tabellenspalten ergänzen wird außerdem ausgegraut, wenn die Datenquelle
-        // dies
-        // nicht unterstützt
+        // dies nicht unterstützt
         boolean hasUnmappedFields =
           mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
             ds.getColumnNames())).length > 0;
