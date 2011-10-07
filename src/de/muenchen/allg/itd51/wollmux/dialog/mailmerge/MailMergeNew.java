@@ -41,6 +41,7 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -116,6 +117,12 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * gespeichert wird.
    */
   private static final String PROP_FILEPATTERN = "MailMergeNew_FilePattern";
+
+  /**
+   * ID der Property in der das Dateinamenmuster für den Einzeldokumentdruck
+   * gespeichert wird.
+   */
+  private static final String PROP_DATASET_EXPORT = "MailMergeNew_DatasetExport";
 
   /**
    * ID der Property, die einen List der Indizes der zu druckenden Datensätze
@@ -1044,16 +1051,6 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       (List) pmod.getPropertyValue(PROP_MAILMERGENEW_SELECTION);
     if (selection.isEmpty()) return;
 
-    TextComponentTags filePattern = null;
-    String targetDir = null;
-    try
-    {
-      filePattern = (TextComponentTags) pmod.getPropertyValue(PROP_FILEPATTERN);
-      targetDir = (String) pmod.getPropertyValue(PROP_TARGETDIR);
-    }
-    catch (Exception x)
-    {}
-
     Iterator iter = data.iterator();
     Iterator<Integer> selIter = selection.iterator();
     int selectedIdx = selIter.next();
@@ -1078,34 +1075,28 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
       if (simProc != null) mod.startSimulation();
 
+      HashMap<String, String> dataSetExport = new HashMap<String, String>();
+      try
+      {
+        pmod.setPropertyValue(PROP_DATASET_EXPORT, dataSetExport);
+      }
+      catch (Exception x)
+      {}
+
       Iterator schemaIter = schema.iterator();
       while (schemaIter.hasNext())
       {
         String spalte = (String) schemaIter.next();
-        pmod.setFormValue(spalte, ds.get(spalte));
+        String value = ds.get(spalte);
+        pmod.setFormValue(spalte, value);
+        dataSetExport.put(spalte, value);
       }
       pmod.setFormValue(MailMergeParams.TAG_DATENSATZNUMMER, "" + datensatzNummer);
+      dataSetExport.put(MailMergeParams.TAG_DATENSATZNUMMER, "" + datensatzNummer);
       pmod.setFormValue(MailMergeParams.TAG_SERIENBRIEFNUMMER, ""
         + serienbriefNummer);
-
-      /*
-       * Wenn wir im Fall des Einzeldokumentdrucks sind, dann wird hier vor dem
-       * Ausdruck für den aktuellen Datensatz ein neues Dokument angelegt.
-       * lockControllers() soll der Performance-Steigerung dienen.
-       */
-      XTextDocument outputDoc = null;
-      if (filePattern != null)
-      {
-        try
-        {
-          outputDoc = StandardPrint.createNewTargetDocument(pmod, true);
-          outputDoc.lockControllers();
-        }
-        catch (java.lang.Exception e)
-        {
-          Logger.error(e);
-        }
-      }
+      dataSetExport.put(MailMergeParams.TAG_SERIENBRIEFNUMMER, ""
+        + serienbriefNummer);
 
       // Weiterreichen des Drucks an die nächste Druckfunktion. Dies findet nicht
       // statt, wenn simProc != null ist, da die Verarbeitung in diesem Fall über
@@ -1114,18 +1105,6 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
         pmod.printWithProps();
       else
         simProc.processSimulationResults(mod.stopSimulation());
-
-      /*
-       * Im Falle des Einzeldokumentdrucks wird das Zieldokument jetzt gespeichert
-       * (ohne es vorher sichtbar zu machen) und dann geschlossen.
-       */
-      if (filePattern != null)
-      {
-        File outFile =
-          makeOutputPath(targetDir, filePattern, ds, datensatzNummer,
-            serienbriefNummer, data.size());
-        saveAndCloseOutputFileForMailmerge(outFile, outputDoc);
-      }
 
       pmod.setPrintProgressValue((short) serienbriefNummer);
       ++serienbriefNummer;
