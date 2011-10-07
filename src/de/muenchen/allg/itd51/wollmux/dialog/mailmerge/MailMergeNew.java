@@ -44,6 +44,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -85,6 +86,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags.ContentElement;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.DatasetSelectionType;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.IndexSelection;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeType;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.SubmitArgument;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
@@ -96,7 +98,7 @@ import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class MailMergeNew
+public class MailMergeNew implements MailMergeParams.MailMergeController
 {
   /**
    * ID der Property in der die Serienbriefdaten gespeichert werden.
@@ -846,6 +848,22 @@ public class MailMergeNew
     {
       return null;
     }
+  }
+
+  /**
+   * TODO: comment MailMergeNew.doMailMerge
+   * 
+   * @param usePrintFunctions
+   * @param ignoreDocPrintFuncs
+   * @param args
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public void doMailMerge(List<String> usePrintFunctions,
+      boolean ignoreDocPrintFuncs, Map<SubmitArgument, Object> args)
+  {
+  // TODO Auto-generated method stub
+
   }
 
   /**

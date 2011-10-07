@@ -220,10 +220,21 @@ public class StandardPrint
    *           falls was schief geht.
    * @author Christoph Lutz (D-III-ITD-D101)
    */
-  public static void oooMailMergeToSingleFile(final XPrintModel pmod)
-      throws Exception
+  public static void oooMailMergeToOdtFile(final XPrintModel pmod) throws Exception
   {
-    OOoBasedMailMerge.oooMailMergeToSingleFile(pmod);
+    OOoBasedMailMerge.oooMailMerge(pmod);
+  }
+
+  /**
+   * Druckfunktion zum Aufruf des Seriendrucks über den OOo-MailMergeService.
+   * 
+   * @throws Exception
+   *           falls was schief geht.
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static void oooMailMergeToPrinter(final XPrintModel pmod) throws Exception
+  {
+    OOoBasedMailMerge.oooMailMerge(pmod);
   }
 
   /**

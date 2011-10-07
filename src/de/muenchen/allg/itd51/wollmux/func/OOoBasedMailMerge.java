@@ -117,7 +117,7 @@ public class OOoBasedMailMerge
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
-  public static void oooMailMergeToSingleFile(final XPrintModel pmod)
+  public static void oooMailMerge(final XPrintModel pmod)
   {
     PrintModels.setStage(pmod, L.m("Seriendruck vorbereiten"));
 

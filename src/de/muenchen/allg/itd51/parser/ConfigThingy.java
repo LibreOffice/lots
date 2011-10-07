@@ -666,6 +666,25 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
+   * Diese Vereinfachungs-Methode zur Vermeidung unübersichtlicher Exception-Blöcke
+   * liefert das Ergebnis von get(name).toString() zurück oder defStr, falls es das
+   * gesuchte Element nicht gibt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public String getString(String name, String defStr)
+  {
+    try
+    {
+      return get(name, INTEGER_MAX).toString();
+    }
+    catch (NodeNotFoundException e)
+    {
+      return defStr;
+    }
+  }
+
+  /**
    * Wie {@link #get(String)}, es werden aber maximal Ergebnisse von Suchtiefe
    * maxlevel (0 ist this) zurückgeliefert.
    * 
@@ -1533,16 +1552,6 @@ public class ConfigThingy implements Iterable<ConfigThingy>
     public int type()
     {
       return Token.END;
-    }
-
-    /**
-     * Liefert immer 0.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     */
-    public static int atStartOf(String str)
-    {
-      return 0;
     }
   }
 
