@@ -90,37 +90,33 @@ import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
 class MailMergeParams
 {
   /**
-   * Tag für {@link TextComponentTags}, das als Platzhalter für die Serienbriefnummer
-   * steht.
-   */
-  static final String TAG_SERIENBRIEFNUMMER = "#SB";
-
-  /**
-   * Tag für {@link TextComponentTags}, das als Platzhalter für die Datensatznummer
-   * steht.
-   */
-  static final String TAG_DATENSATZNUMMER = "#DS";
-
-  /**
-   * URL der Konfiguration der Fallback-Konfiguration für den Abschnitt
-   * Dialoge/Seriendruckdialog, falls dieser Abschnitt nicht in der
-   * WollMux-Konfiguration definiert wurde.
+   * Übernimmt die Aufgabe des Controllers bezüglich dieser Klasse (MailMergeParams),
+   * die die View darstellt.
    * 
-   * Dieser Fallback wurde eingebaut, um mit alten WollMux-Standard-Configs
-   * kompatibel zu bleiben, sollte nach ausreichend Zeit aber wieder entfernt werden!
+   * @author Christoph Lutz (D-III-ITD-D101)
    */
-  private final URL DEFAULT_MAILMERGEDIALOG_URL =
-    this.getClass().getClassLoader().getResource("data/seriendruckdialog.conf");
+  public interface MailMergeController
+  {
+    public boolean hasPrintfunction(String name);
 
-  // TODO: diese enum löschen.
-  enum MailMergeType {
-    MULTI_FILE,
-    SINGLE_FILE;
+    public void doMailMerge(List<String> usePrintFunctions,
+        boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
+        Map<SubmitArgument, Object> args);
+  }
 
-    String[] requiredPrintFunctions()
-    {
-      return new String[] {};
-    }
+  /**
+   * TODO: comment MailMergeParams
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static enum SubmitArgument {
+    targetDirectory,
+    filenameTemplate,
+    emailFrom,
+    emailToFieldName,
+    emailText,
+    emailSubject,
+    indexSelection,
   }
 
   /**
@@ -128,7 +124,7 @@ class MailMergeParams
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
    */
-  enum DatasetSelectionType {
+  public static enum DatasetSelectionType {
     /**
      * Alle Datensätze.
      */
@@ -173,6 +169,232 @@ class MailMergeParams
     public List<Integer> selectedIndexes = new Vector<Integer>();
 
   };
+
+  /**
+   * TODO: comment MailMergeParams
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private static enum UIElementType {
+    radio,
+    label,
+    description,
+    fromtoradio,
+    targetdirpicker,
+    filenametemplatechooser,
+    emailfrom,
+    emailtofieldname,
+    emailtext,
+    emailsubject,
+    glue,
+    button,
+    unknown;
+
+    static UIElementType getByname(String s)
+    {
+      for (UIElementType t : UIElementType.values())
+      {
+        if (t.toString().equalsIgnoreCase(s)) return t;
+      }
+      return unknown;
+    }
+  }
+
+  /**
+   * TODO: comment MailMergeParams
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private static enum UIElementAction {
+    setActionType() {
+      public ActionListener createActionListener(final String value,
+          final MailMergeParams mmp)
+      {
+        return new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            mmp.currentActionType = value;
+            mmp.updateView();
+          }
+        };
+      }
+    },
+
+    setOutput() {
+      public ActionListener createActionListener(final String value,
+          final MailMergeParams mmp)
+      {
+        return new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            mmp.currentOutput = value;
+            mmp.updateView();
+          }
+        };
+      }
+    },
+
+    selectAll() {
+      public ActionListener createActionListener(final String value,
+          final MailMergeParams mmp)
+      {
+        return new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            mmp.datasetSelectionType = DatasetSelectionType.ALL;
+          }
+        };
+      }
+    },
+
+    selectRange() {
+      public ActionListener createActionListener(final String value,
+          final MailMergeParams mmp)
+      {
+        return new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            mmp.datasetSelectionType = DatasetSelectionType.RANGE;
+          }
+        };
+      }
+    },
+
+    abort() {
+      public ActionListener createActionListener(final String value,
+          final MailMergeParams mmp)
+      {
+        return new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            mmp.dialog.dispose();
+          }
+        };
+      }
+    },
+
+    submit() {
+      public ActionListener createActionListener(final String value,
+          final MailMergeParams mmp)
+      {
+        return new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            try
+            {
+              Map<SubmitArgument, Object> args =
+                new HashMap<SubmitArgument, Object>();
+              for (Section s : mmp.sections)
+                s.addSubmitArgs(args);
+              mmp.dialog.dispose();
+              boolean ignoreDocPrintFuncs = false;
+              if (mmp.ignoreDocPrintFuncs != null && mmp.ignoreDocPrintFuncs == true)
+                ignoreDocPrintFuncs = true;
+              mmp.mmc.doMailMerge(mmp.usePrintFunctions, ignoreDocPrintFuncs,
+                mmp.datasetSelectionType, args);
+            }
+            catch (UIElement.InvalidArgumentException ex)
+            {
+              JOptionPane.showMessageDialog(mmp.dialog, ex.getMessage(),
+                L.m("Fehlerhafte Eingabe"), JOptionPane.ERROR_MESSAGE);
+            }
+          }
+        };
+      }
+    },
+
+    unknown() {
+      public ActionListener createActionListener(final String value,
+          final MailMergeParams mmp)
+      {
+        return null;
+      }
+    };
+
+    static UIElementAction getByname(String s)
+    {
+      for (UIElementAction a : UIElementAction.values())
+      {
+        if (a.toString().equalsIgnoreCase(s)) return a;
+      }
+      return unknown;
+    }
+
+    abstract public ActionListener createActionListener(String value,
+        MailMergeParams mmp);
+  }
+
+  /**
+   * TODO: comment MailMergeParams
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private static enum RuleStatement {
+    ON_ACTION_TYPE,
+    ON_OUTPUT,
+    SHOW_GROUPS,
+    USE_PRINTFUNCTIONS,
+    SET_DESCRIPTION,
+    IGNORE_DOC_PRINTFUNCTIONS,
+    unknown;
+
+    static RuleStatement getByname(String s)
+    {
+      for (RuleStatement k : RuleStatement.values())
+      {
+        if (k.toString().equals(s)) return k;
+      }
+      return unknown;
+    }
+  }
+
+  /**
+   * TODO: comment MailMergeParams
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private static enum Orientation {
+    vertical,
+    horizontal;
+
+    static Orientation getByname(String s)
+    {
+      for (Orientation o : Orientation.values())
+      {
+        if (o.toString().equalsIgnoreCase(s)) return o;
+      }
+      return vertical;
+    }
+  }
+
+  /**
+   * URL der Konfiguration der Fallback-Konfiguration für den Abschnitt
+   * Dialoge/Seriendruckdialog, falls dieser Abschnitt nicht in der
+   * WollMux-Konfiguration definiert wurde.
+   * 
+   * Dieser Fallback wurde eingebaut, um mit alten WollMux-Standard-Configs
+   * kompatibel zu bleiben, sollte nach ausreichend Zeit aber wieder entfernt werden!
+   */
+  private final URL DEFAULT_MAILMERGEDIALOG_URL =
+    this.getClass().getClassLoader().getResource("data/seriendruckdialog.conf");
+
+  /**
+   * Tag für {@link TextComponentTags}, das als Platzhalter für die Serienbriefnummer
+   * steht.
+   */
+  static final String TAG_SERIENBRIEFNUMMER = "#SB";
+
+  /**
+   * Tag für {@link TextComponentTags}, das als Platzhalter für die Datensatznummer
+   * steht.
+   */
+  static final String TAG_DATENSATZNUMMER = "#DS";
 
   /**
    * TODO dok
@@ -237,7 +459,7 @@ class MailMergeParams
   /**
    * TODO dok
    */
-  public String defaultEmailFrom = "";
+  private String defaultEmailFrom = "";
 
   /**
    * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
@@ -259,8 +481,8 @@ class MailMergeParams
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  void showDoMailmergeDialog(final JFrame parent, final MailMergeController mmc,
-      List<String> fieldNames)
+  public void showDoMailmergeDialog(final JFrame parent,
+      final MailMergeController mmc, List<String> fieldNames)
   {
     ConfigThingy sdConf = null;
     try
@@ -327,8 +549,9 @@ class MailMergeParams
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
    */
-  void showDoMailmergeDialog(final JFrame parent, final MailMergeController mmc,
-      List<String> fieldNames, ConfigThingy dialogConf, String defaultEmailFrom)
+  private void showDoMailmergeDialog(final JFrame parent,
+      final MailMergeController mmc, List<String> fieldNames,
+      ConfigThingy dialogConf, String defaultEmailFrom)
   {
     this.mmc = mmc;
     this.fieldNames = fieldNames;
@@ -395,145 +618,6 @@ class MailMergeParams
       int x = screenSize.width / 2 - frameWidth / 2;
       int y = screenSize.height / 2 - frameHeight / 2;
       dialog.setLocation(x, y);
-    }
-  }
-
-  /**
-   * Beschreibt eine Section im Seriendruckdialog (z.B. "Aktionen" oder "Output") und
-   * enthält UIElemente. Sind alle UIElement dieser Section unsichtbar, so ist auch
-   * die Sektion selbst unsichtbar. Besitzt die Section einen TITLE ungleich null
-   * oder Leerstring, so wird die Section mit einer TitledBorder verziert, ansonsten
-   * nicht. Radio-Buttons erhalten innerhalb einer Section die selbe ButtonGroup,
-   * weshalb für jede neue Gruppe eine neue Section erstellt werden muss.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  private static class Section
-  {
-    List<UIElement> elements = new ArrayList<UIElement>();
-
-    Box contentBox;
-
-    boolean visible;
-
-    /**
-     * TODO: comment Section.createSection
-     * 
-     * @param section
-     * @param compo
-     * @param gm
-     * @return
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
-     */
-    private Section(ConfigThingy section, JComponent parent, MailMergeParams mmp)
-    {
-      String title = "";
-      try
-      {
-        title = section.get("TITLE").toString();
-      }
-      catch (NodeNotFoundException e1)
-      {}
-
-      Orientation orient = Orientation.vertical;
-      try
-      {
-        orient = Orientation.getByname(section.get("ORIENTATION").toString());
-      }
-      catch (NodeNotFoundException e1)
-      {}
-
-      Box hbox = Box.createHorizontalBox();
-      parent.add(hbox);
-      if (orient == Orientation.vertical)
-        contentBox = Box.createVerticalBox();
-      else
-        contentBox = Box.createHorizontalBox();
-
-      if (title.length() > 0)
-      {
-        Border border =
-          BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(Color.GRAY), title);
-        contentBox.setBorder(border);
-      }
-      hbox.add(contentBox);
-
-      ConfigThingy elementsConf = section.queryByChild("TYPE");
-      ButtonGroup buttonGroup = null;
-      for (ConfigThingy element : elementsConf)
-      {
-        String label = element.getString("LABEL", null);
-        String labelFrom = element.getString("LABEL_FROM", null);
-        String labelTo = element.getString("LABEL_TO", null);
-        UIElementType type =
-          UIElementType.getByname(element.getString("TYPE", null));
-        UIElementAction action =
-          UIElementAction.getByname(element.getString("ACTION", null));
-        String value = element.getString("VALUE", null);
-        String group = element.getString("GROUP", null);
-        UIElement uiel =
-          createUIElement(type, label, labelFrom, labelTo, action, value, group,
-            orient, mmp, this);
-        if (uiel != null)
-        {
-          elements.add(uiel);
-          contentBox.add(uiel.getCompo());
-          if (uiel instanceof HasRadioElement)
-          {
-            if (buttonGroup == null) buttonGroup = new ButtonGroup();
-            ((HasRadioElement) uiel).setButtonGroup(buttonGroup);
-          }
-        }
-      }
-      if (orient == Orientation.vertical)
-        contentBox.add(Box.createVerticalStrut(5));
-    }
-
-    /**
-     * TODO: comment Section.updateVisibility Prüft, ob die Voreinstellungen unter
-     * Berücksichtigung der aktuellen Verhältnisse bezüglich der Sichtbarkeit und
-     * Aktiviertheit von UIElementen (derzeit nur die, die {@link HasRadioElement}
-     * implementieren) zugänglich sind und setzt ggf. die Default-Einstellungen um.
-     * 
-     * @return
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
-     */
-    private void updateView()
-    {
-      visible = false;
-      HasRadioElement firstEnabledRadio = null;
-      boolean hasEnabledPreset = false;
-      for (UIElement el : elements)
-      {
-        el.updateView();
-        if (el.isVisible()) visible = true;
-
-        // ggf. Voreinstellungen von Radio-Buttons anpassen
-        if (!(el instanceof HasRadioElement)) continue;
-        HasRadioElement hre = (HasRadioElement) el;
-        if (el.isVisible() && el.isEnabled())
-        {
-          if (firstEnabledRadio == null) firstEnabledRadio = hre;
-          if (hre.isSelected()) hasEnabledPreset = true;
-        }
-      }
-
-      if (!hasEnabledPreset && firstEnabledRadio != null)
-        firstEnabledRadio.setSelected(true);
-
-      contentBox.setVisible(visible);
-    }
-
-    public void addSubmitArgs(Map<SubmitArgument, Object> args)
-        throws UIElement.InvalidArgumentException
-    {
-      for (UIElement el : elements)
-      {
-        if (el.isVisible() && el.isEnabled()) el.addSubmitArgs(args);
-      }
     }
   }
 
@@ -622,6 +706,92 @@ class MailMergeParams
   }
 
   /**
+   * TODO: comment MailMergeParams.isActionAvailableInCurrentContext Prüft ob die
+   * UIElementAction action mit dem Action-Wert value im aktuellen Kontext ausgeführt
+   * werden könnte. Eine Action ist u.A. dann nicht ausführbar, wenn in einem
+   * zugehörigen Regeln-Abschnitt eine USE_PRINTFUNCTIONS-Anweisung steht, deren
+   * Druckfunktionen nicht verfügbar sind.
+   * 
+   * @param action
+   * @param actionValue
+   * @param reasons
+   * @return
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private boolean isActionAvailableInCurrentContext(UIElementAction action,
+      String actionValue, List<String> reasons)
+  {
+    switch (action)
+    {
+      case selectAll:
+        return true;
+
+      case unknown:
+        return true;
+
+      case setActionType:
+        ConfigThingy myrules =
+          rules.queryByChild(RuleStatement.ON_ACTION_TYPE.toString());
+        for (ConfigThingy rule : myrules)
+        {
+          String value =
+            rule.getString(RuleStatement.ON_ACTION_TYPE.toString(), null);
+          if (!value.equals(actionValue)) continue;
+          if (requiredPrintfunctionsAvailable(rule, reasons)) return true;
+        }
+        return false;
+
+      case setOutput:
+        myrules = rules.queryByChild(RuleStatement.ON_OUTPUT.toString());
+        for (ConfigThingy rule : myrules)
+        {
+          String value = rule.getString(RuleStatement.ON_OUTPUT.toString(), null);
+          if (!value.equals(actionValue)) continue;
+          String actionType =
+            rule.getString(RuleStatement.ON_ACTION_TYPE.toString(), null);
+          if (actionType == null || !actionType.equals(currentActionType)) continue;
+          if (requiredPrintfunctionsAvailable(rule, reasons)) return true;
+        }
+        return false;
+    }
+    return false;
+  }
+
+  /**
+   * TODO: comment MailMergeParams.requiredPrintfunctionsAvailable
+   * 
+   * @param rule
+   * @param reasons
+   * @return
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private boolean requiredPrintfunctionsAvailable(ConfigThingy rule,
+      List<String> reasons)
+  {
+    boolean allAvailable = true;
+    try
+    {
+      ConfigThingy usePrintFuncs =
+        rule.get(RuleStatement.USE_PRINTFUNCTIONS.toString());
+      for (ConfigThingy funcName : usePrintFuncs)
+      {
+        if (!mmc.hasPrintfunction(funcName.toString()))
+        {
+          allAvailable = false;
+          reasons.add(L.m("Druckfunktion %1 ist nicht verfügbar", funcName));
+        }
+      }
+    }
+    catch (NodeNotFoundException e)
+    {
+      return false;
+    }
+    return allAvailable;
+  }
+
+  /**
    * TODO: comment MailMergeParams.createUIElement
    * 
    * @param type
@@ -642,47 +812,89 @@ class MailMergeParams
     switch (type)
     {
       case label:
+      {
         return new UIElement(new JLabel(label), group, mmp);
+      }
 
       case radio:
+      {
         return new RadioButtonUIElement(label, action, value, group, mmp);
+      }
 
       case description:
+      {
         JTextArea tf = new JTextArea(3, 50);
         tf.setEditable(false);
         tf.setFocusable(false);
-        // tf.setLineWrap(true);
         DimAdjust.fixedSize(tf);
         tf.setBackground(Color.YELLOW);
         mmp.descriptionFields.add(tf);
         return new UIElement(tf, group, mmp);
+      }
 
       case fromtoradio:
+      {
         return new FromToRadioUIElement(labelFrom, labelTo, action, value, group,
           mmp);
+      }
 
       case glue:
+      {
         if (orient == Orientation.vertical)
           return new UIElement(Box.createVerticalGlue(), group, mmp);
         else
           return new UIElement(Box.createHorizontalGlue(), group, mmp);
+      }
 
       case button:
+      {
         JButton button = new JButton(label);
         button.addActionListener(action.createActionListener(value, mmp));
         return new UIElement(button, group, mmp);
+      }
 
       case targetdirpicker:
+      {
         return new TargetDirPickerUIElement(label, action, value, group, mmp);
+      }
 
       case filenametemplatechooser:
-        return new FilenameTemplateChooserUIElement(label, action, value, group, mmp);
+      {
+        JTextField textField = new JTextField(".odt");
+        TextWithDatafieldTagsUIElement el =
+          new TextWithDatafieldTagsUIElement(textField,
+            SubmitArgument.filenameTemplate,
+            L.m("Sie müssen ein Dateinamenmuster angeben!"), group, mmp);
+        el.textTags.getJTextComponent().setCaretPosition(0);
+        el.textTags.insertTag(TAG_DATENSATZNUMMER);
+        return el;
+      }
+
+      case emailtext:
+      {
+        JTextArea tf =
+          new JTextArea(
+            L.m("Sehr geehrte Damen und Herren,\n\nanbei erhalten Sie ...\n\nmit freundlichen Grüßen\n..."));
+        TextWithDatafieldTagsUIElement el =
+          new TextWithDatafieldTagsUIElement(tf, SubmitArgument.emailText, null,
+            group, mmp);
+        return el;
+      }
+
+      case emailsubject:
+      {
+        return new EMailSubject(label, action, value, group, mmp);
+      }
 
       case emailtofieldname:
+      {
         return new EMailToFieldNameUIElement(label, action, value, group, mmp);
+      }
 
       case emailfrom:
+      {
         return new EMailFromUIElement(label, action, value, group, mmp);
+      }
     }
     return null;
   }
@@ -1124,6 +1336,34 @@ class MailMergeParams
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
+  private static class EMailSubject extends UIElement
+  {
+    private final JTextField textField;
+
+    public EMailSubject(String label, UIElementAction action, final String value,
+        String group, final MailMergeParams mmp)
+    {
+      super(Box.createHorizontalBox(), group, mmp);
+      Box hbox = (Box) getCompo();
+      hbox.add(new JLabel(label));
+      hbox.add(Box.createHorizontalStrut(5));
+      this.textField = new JTextField("");
+      hbox.add(Box.createHorizontalStrut(5));
+      hbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(textField));
+    }
+
+    public void addSubmitArgs(Map<SubmitArgument, Object> args)
+        throws UIElement.InvalidArgumentException
+    {
+      args.put(SubmitArgument.emailSubject, textField.getText());
+    }
+  }
+
+  /**
+   * TODO: comment MailMergeParams
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
   private static class EMailToFieldNameUIElement extends UIElement
   {
     private final JComboBox toFieldName;
@@ -1136,10 +1376,10 @@ class MailMergeParams
       hbox.add(new JLabel(label));
       hbox.add(Box.createHorizontalStrut(5));
       String[] fnames = new String[mmp.fieldNames.size() + 1];
-      fnames[0] = L.m("<Bitte auswählen>");
+      fnames[0] = L.m("-- Bitte auswählen --");
       int i = 1;
       for (String fname : mmp.fieldNames)
-        fnames[i++] = fname;
+        fnames[i++] = "<" + fname + ">";
       this.toFieldName = new JComboBox(fnames);
       hbox.add(Box.createHorizontalStrut(5));
       hbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(toFieldName));
@@ -1162,20 +1402,22 @@ class MailMergeParams
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
-  private static class FilenameTemplateChooserUIElement extends UIElement
+  private static class TextWithDatafieldTagsUIElement extends UIElement
   {
     private TextComponentTags textTags;
 
-    public FilenameTemplateChooserUIElement(String label, UIElementAction action,
-        final String value, String group, final MailMergeParams mmp)
+    private String errorMessageIfEmpty;
+
+    private SubmitArgument argKey;
+
+    public TextWithDatafieldTagsUIElement(JTextComponent textCompo,
+        SubmitArgument argKey, String errorMessageIfEmpty, String group,
+        final MailMergeParams mmp)
     {
       super(Box.createVerticalBox(), group, mmp);
       Box vbox = (Box) getCompo();
 
-      final JTextField targetPattern = new JTextField(".odt");
-      textTags = new TextComponentTags(targetPattern);
-      targetPattern.setCaretPosition(0);
-      textTags.insertTag(TAG_DATENSATZNUMMER);
+      this.textTags = new TextComponentTags(textCompo);
 
       Box hbox = Box.createHorizontalBox();
       hbox.add(Box.createHorizontalGlue());
@@ -1192,18 +1434,20 @@ class MailMergeParams
 
       hbox = Box.createHorizontalBox();
       hbox.add(Box.createHorizontalStrut(5));
-      hbox.add(targetPattern);
+      hbox.add(textCompo);
       hbox.add(Box.createHorizontalStrut(5));
       vbox.add(hbox);
+
+      this.errorMessageIfEmpty = errorMessageIfEmpty;
+      this.argKey = argKey;
     }
 
     public void addSubmitArgs(Map<SubmitArgument, Object> args)
         throws UIElement.InvalidArgumentException
     {
-      if (textTags.getContent().isEmpty())
-        throw new UIElement.InvalidArgumentException(
-          L.m("Sie müssen ein Dateinamenmuster angeben!"));
-      args.put(SubmitArgument.filenameTemplate, textTags.getContent());
+      if (errorMessageIfEmpty != null && textTags.getContent().isEmpty())
+        throw new UIElement.InvalidArgumentException(errorMessageIfEmpty);
+      args.put(argKey, textTags.getContent());
     }
 
     /**
@@ -1237,318 +1481,142 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams
+   * Beschreibt eine Section im Seriendruckdialog (z.B. "Aktionen" oder "Output") und
+   * enthält UIElemente. Sind alle UIElement dieser Section unsichtbar, so ist auch
+   * die Sektion selbst unsichtbar. Besitzt die Section einen TITLE ungleich null
+   * oder Leerstring, so wird die Section mit einer TitledBorder verziert, ansonsten
+   * nicht. Radio-Buttons erhalten innerhalb einer Section die selbe ButtonGroup,
+   * weshalb für jede neue Gruppe eine neue Section erstellt werden muss.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
-  private enum UIElementType {
-    radio,
-    label,
-    description,
-    fromtoradio,
-    targetdirpicker,
-    filenametemplatechooser,
-    emailfrom,
-    emailtofieldname,
-    glue,
-    button,
-    unknown;
-
-    static UIElementType getByname(String s)
-    {
-      for (UIElementType t : UIElementType.values())
-      {
-        if (t.toString().equalsIgnoreCase(s)) return t;
-      }
-      return unknown;
-    }
-  }
-
-  /**
-   * TODO: comment MailMergeParams
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  private enum UIElementAction {
-    setActionType() {
-      public ActionListener createActionListener(final String value,
-          final MailMergeParams mmp)
-      {
-        return new ActionListener()
-        {
-          public void actionPerformed(ActionEvent e)
-          {
-            mmp.currentActionType = value;
-            mmp.updateView();
-          }
-        };
-      }
-    },
-
-    setOutput() {
-      public ActionListener createActionListener(final String value,
-          final MailMergeParams mmp)
-      {
-        return new ActionListener()
-        {
-          public void actionPerformed(ActionEvent e)
-          {
-            mmp.currentOutput = value;
-            mmp.updateView();
-          }
-        };
-      }
-    },
-
-    selectAll() {
-      public ActionListener createActionListener(final String value,
-          final MailMergeParams mmp)
-      {
-        return new ActionListener()
-        {
-          public void actionPerformed(ActionEvent e)
-          {
-            mmp.datasetSelectionType = DatasetSelectionType.ALL;
-          }
-        };
-      }
-    },
-
-    selectRange() {
-      public ActionListener createActionListener(final String value,
-          final MailMergeParams mmp)
-      {
-        return new ActionListener()
-        {
-          public void actionPerformed(ActionEvent e)
-          {
-            mmp.datasetSelectionType = DatasetSelectionType.RANGE;
-          }
-        };
-      }
-    },
-
-    abort() {
-      public ActionListener createActionListener(final String value,
-          final MailMergeParams mmp)
-      {
-        return new ActionListener()
-        {
-          public void actionPerformed(ActionEvent e)
-          {
-            mmp.dialog.dispose();
-          }
-        };
-      }
-    },
-
-    submit() {
-      public ActionListener createActionListener(final String value,
-          final MailMergeParams mmp)
-      {
-        return new ActionListener()
-        {
-          public void actionPerformed(ActionEvent e)
-          {
-            try
-            {
-              Map<SubmitArgument, Object> args =
-                new HashMap<SubmitArgument, Object>();
-              for (Section s : mmp.sections)
-                s.addSubmitArgs(args);
-              mmp.dialog.dispose();
-              boolean ignoreDocPrintFuncs = false;
-              if (mmp.ignoreDocPrintFuncs != null && mmp.ignoreDocPrintFuncs == true)
-                ignoreDocPrintFuncs = true;
-              mmp.mmc.doMailMerge(mmp.usePrintFunctions, ignoreDocPrintFuncs,
-                mmp.datasetSelectionType, args);
-            }
-            catch (UIElement.InvalidArgumentException ex)
-            {
-              JOptionPane.showMessageDialog(mmp.dialog, ex.getMessage(),
-                L.m("Fehlerhafte Eingabe"), JOptionPane.ERROR_MESSAGE);
-            }
-          }
-        };
-      }
-    },
-
-    unknown() {
-      public ActionListener createActionListener(final String value,
-          final MailMergeParams mmp)
-      {
-        return null;
-      }
-    };
-
-    static UIElementAction getByname(String s)
-    {
-      for (UIElementAction a : UIElementAction.values())
-      {
-        if (a.toString().equalsIgnoreCase(s)) return a;
-      }
-      return unknown;
-    }
-
-    abstract public ActionListener createActionListener(String value,
-        MailMergeParams mmp);
-  }
-
-  /**
-   * TODO: comment MailMergeParams
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  private static enum RuleStatement {
-    ON_ACTION_TYPE,
-    ON_OUTPUT,
-    SHOW_GROUPS,
-    USE_PRINTFUNCTIONS,
-    SET_DESCRIPTION,
-    IGNORE_DOC_PRINTFUNCTIONS,
-    unknown;
-
-    static RuleStatement getByname(String s)
-    {
-      for (RuleStatement k : RuleStatement.values())
-      {
-        if (k.toString().equals(s)) return k;
-      }
-      return unknown;
-    }
-  }
-
-  /**
-   * TODO: comment MailMergeParams
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  private static enum Orientation {
-    vertical,
-    horizontal;
-
-    static Orientation getByname(String s)
-    {
-      for (Orientation o : Orientation.values())
-      {
-        if (o.toString().equalsIgnoreCase(s)) return o;
-      }
-      return vertical;
-    }
-  }
-
-  /**
-   * TODO: comment MailMergeParams
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  public static enum SubmitArgument {
-    targetDirectory,
-    filenameTemplate,
-    emailFrom,
-    emailToFieldName,
-    indexSelection,
-  }
-
-  /**
-   * TODO: comment MailMergeParams.isActionAvailableInCurrentContext Prüft ob die
-   * UIElementAction action mit dem Action-Wert value im aktuellen Kontext ausgeführt
-   * werden könnte. Eine Action ist u.A. dann nicht ausführbar, wenn in einem
-   * zugehörigen Regeln-Abschnitt eine USE_PRINTFUNCTIONS-Anweisung steht, deren
-   * Druckfunktionen nicht verfügbar sind.
-   * 
-   * @param action
-   * @param actionValue
-   * @param reasons
-   * @return
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  private boolean isActionAvailableInCurrentContext(UIElementAction action,
-      String actionValue, List<String> reasons)
+  private static class Section
   {
-    switch (action)
+    List<UIElement> elements = new ArrayList<UIElement>();
+
+    Box contentBox;
+
+    boolean visible;
+
+    /**
+     * TODO: comment Section.createSection
+     * 
+     * @param section
+     * @param compo
+     * @param gm
+     * @return
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    private Section(ConfigThingy section, JComponent parent, MailMergeParams mmp)
     {
-      case selectAll:
-        return true;
-
-      case unknown:
-        return true;
-
-      case setActionType:
-        ConfigThingy myrules =
-          rules.queryByChild(RuleStatement.ON_ACTION_TYPE.toString());
-        for (ConfigThingy rule : myrules)
-        {
-          String value =
-            rule.getString(RuleStatement.ON_ACTION_TYPE.toString(), null);
-          if (!value.equals(actionValue)) continue;
-          if (requiredPrintfunctionsAvailable(rule, reasons)) return true;
-        }
-        return false;
-
-      case setOutput:
-        myrules = rules.queryByChild(RuleStatement.ON_OUTPUT.toString());
-        for (ConfigThingy rule : myrules)
-        {
-          String value = rule.getString(RuleStatement.ON_OUTPUT.toString(), null);
-          if (!value.equals(actionValue)) continue;
-          String actionType =
-            rule.getString(RuleStatement.ON_ACTION_TYPE.toString(), null);
-          if (actionType == null || !actionType.equals(currentActionType)) continue;
-          if (requiredPrintfunctionsAvailable(rule, reasons)) return true;
-        }
-        return false;
-    }
-    return false;
-  }
-
-  /**
-   * TODO: comment MailMergeParams.requiredPrintfunctionsAvailable
-   * 
-   * @param rule
-   * @param reasons
-   * @return
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  private boolean requiredPrintfunctionsAvailable(ConfigThingy rule,
-      List<String> reasons)
-  {
-    boolean allAvailable = true;
-    try
-    {
-      ConfigThingy usePrintFuncs =
-        rule.get(RuleStatement.USE_PRINTFUNCTIONS.toString());
-      for (ConfigThingy funcName : usePrintFuncs)
+      String title = "";
+      try
       {
-        if (!mmc.hasPrintfunction(funcName.toString()))
+        title = section.get("TITLE").toString();
+      }
+      catch (NodeNotFoundException e1)
+      {}
+
+      Orientation orient = Orientation.vertical;
+      try
+      {
+        orient = Orientation.getByname(section.get("ORIENTATION").toString());
+      }
+      catch (NodeNotFoundException e1)
+      {}
+
+      Box hbox = Box.createHorizontalBox();
+      parent.add(hbox);
+      if (orient == Orientation.vertical)
+        contentBox = Box.createVerticalBox();
+      else
+        contentBox = Box.createHorizontalBox();
+
+      if (title.length() > 0)
+      {
+        Border border =
+          BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(Color.GRAY), title);
+        contentBox.setBorder(border);
+      }
+      hbox.add(contentBox);
+
+      ConfigThingy elementsConf = section.queryByChild("TYPE");
+      ButtonGroup buttonGroup = null;
+      for (ConfigThingy element : elementsConf)
+      {
+        String label = element.getString("LABEL", null);
+        String labelFrom = element.getString("LABEL_FROM", null);
+        String labelTo = element.getString("LABEL_TO", null);
+        UIElementType type =
+          UIElementType.getByname(element.getString("TYPE", null));
+        UIElementAction action =
+          UIElementAction.getByname(element.getString("ACTION", null));
+        String value = element.getString("VALUE", null);
+        String group = element.getString("GROUP", null);
+        UIElement uiel =
+          createUIElement(type, label, labelFrom, labelTo, action, value, group,
+            orient, mmp, this);
+        if (uiel != null)
         {
-          allAvailable = false;
-          reasons.add(L.m("Druckfunktion %1 ist nicht verfügbar", funcName));
+          elements.add(uiel);
+          contentBox.add(uiel.getCompo());
+          if (uiel instanceof HasRadioElement)
+          {
+            if (buttonGroup == null) buttonGroup = new ButtonGroup();
+            ((HasRadioElement) uiel).setButtonGroup(buttonGroup);
+          }
         }
       }
+      if (orient == Orientation.vertical)
+        contentBox.add(Box.createVerticalStrut(5));
     }
-    catch (NodeNotFoundException e)
+
+    /**
+     * TODO: comment Section.updateVisibility Prüft, ob die Voreinstellungen unter
+     * Berücksichtigung der aktuellen Verhältnisse bezüglich der Sichtbarkeit und
+     * Aktiviertheit von UIElementen (derzeit nur die, die {@link HasRadioElement}
+     * implementieren) zugänglich sind und setzt ggf. die Default-Einstellungen um.
+     * 
+     * @return
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    private void updateView()
     {
-      return false;
+      visible = false;
+      HasRadioElement firstEnabledRadio = null;
+      boolean hasEnabledPreset = false;
+      for (UIElement el : elements)
+      {
+        el.updateView();
+        if (el.isVisible()) visible = true;
+
+        // ggf. Voreinstellungen von Radio-Buttons anpassen
+        if (!(el instanceof HasRadioElement)) continue;
+        HasRadioElement hre = (HasRadioElement) el;
+        if (el.isVisible() && el.isEnabled())
+        {
+          if (firstEnabledRadio == null) firstEnabledRadio = hre;
+          if (hre.isSelected()) hasEnabledPreset = true;
+        }
+      }
+
+      if (!hasEnabledPreset && firstEnabledRadio != null)
+        firstEnabledRadio.setSelected(true);
+
+      contentBox.setVisible(visible);
     }
-    return allAvailable;
-  }
 
-  /**
-   * Übernimmt die Aufgabe des Controllers bezüglich dieser Klasse (MailMergeParams),
-   * die die View darstellt.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  public interface MailMergeController
-  {
-    public boolean hasPrintfunction(String name);
-
-    public void doMailMerge(List<String> usePrintFunctions,
-        boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
-        Map<SubmitArgument, Object> args);
+    public void addSubmitArgs(Map<SubmitArgument, Object> args)
+        throws UIElement.InvalidArgumentException
+    {
+      for (UIElement el : elements)
+      {
+        if (el.isVisible() && el.isEnabled()) el.addSubmitArgs(args);
+      }
+    }
   }
 
   /**
@@ -1567,8 +1635,10 @@ class MailMergeParams
     try
     {
       sdConf =
-        new ConfigThingy("dialogConf", new URL(
-          "file:///home/christoph.lutz/wollmux-standard-config/conf/dialoge.conf"));
+        new ConfigThingy(
+          "dialogConf",
+          new URL(
+            "file:///home/christoph.lutz/workspace/WollMux/src/data/seriendruckdialog.conf"));
       sdConf = sdConf.get("Dialoge").get("Seriendruckdialog");
     }
     catch (Exception e)
@@ -1595,6 +1665,7 @@ class MailMergeParams
           boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
           Map<SubmitArgument, Object> pmodArgs)
       {
+        Logger.init(System.out, Logger.ALL);
         System.out.print("PrintFunctions: ");
         for (String func : usePrintFunctions)
           System.out.print("'" + func + "' ");
