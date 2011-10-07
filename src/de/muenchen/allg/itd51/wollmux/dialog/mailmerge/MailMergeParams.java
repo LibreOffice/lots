@@ -76,9 +76,6 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
@@ -215,17 +212,6 @@ class MailMergeParams
   private String currentOutput = "";
 
   /**
-   * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
-   */
-  private DatasetSelectionType datasetSelectionType = DatasetSelectionType.ALL;
-
-  /**
-   * Falls {@link DatasetSelectionType} != {@link DatasetSelectionType#ALL}, so
-   * bestimmt dies die Indizes der ausgewählten Datensätze.
-   */
-  private IndexSelection indexSelection = new IndexSelection();
-
-  /**
    * TODO dok
    */
   private ArrayList<JTextComponent> descriptionFields =
@@ -248,7 +234,15 @@ class MailMergeParams
    */
   private Boolean ignoreDocPrintFuncs;
 
+  /**
+   * TODO dok
+   */
   public String defaultEmailFrom = "";
+
+  /**
+   * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
+   */
+  private DatasetSelectionType datasetSelectionType = DatasetSelectionType.ALL;
 
   /**
    * Zeigt den Dialog an, der die Serienbriefverarbeitung (Direktdruck oder in neues
@@ -919,6 +913,11 @@ class MailMergeParams
     }
   }
 
+  /**
+   * TODO: comment MailMergeParams
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
   private static class FromToRadioUIElement extends UIElement implements
       HasRadioElement
   {
@@ -929,6 +928,12 @@ class MailMergeParams
     private JRadioButton fromRadioButton;
 
     private MailMergeParams mmp;
+
+    /**
+     * Falls {@link DatasetSelectionType} != {@link DatasetSelectionType#ALL}, so
+     * bestimmt dies die Indizes der ausgewählten Datensätze.
+     */
+    private IndexSelection indexSelection = new IndexSelection();
 
     public FromToRadioUIElement(String labelFrom, String labelTo,
         UIElementAction action, final String value, String group,
@@ -991,19 +996,19 @@ class MailMergeParams
         mmp.datasetSelectionType = DatasetSelectionType.RANGE;
         try
         {
-          mmp.indexSelection.rangeStart = Integer.parseInt(start.getText());
+          indexSelection.rangeStart = Integer.parseInt(start.getText());
         }
         catch (Exception x)
         {
-          mmp.indexSelection.rangeStart = 0;
+          indexSelection.rangeStart = 0;
         }
         try
         {
-          mmp.indexSelection.rangeEnd = Integer.parseInt(end.getText());
+          indexSelection.rangeEnd = Integer.parseInt(end.getText());
         }
         catch (Exception x)
         {
-          mmp.indexSelection.rangeEnd = 0;
+          indexSelection.rangeEnd = 0;
         }
       }
 
@@ -1022,8 +1027,19 @@ class MailMergeParams
         update();
       }
     };
+
+    public void addSubmitArgs(java.util.Map<SubmitArgument, Object> args)
+        throws UIElement.InvalidArgumentException
+    {
+      args.put(SubmitArgument.indexSelection, indexSelection);
+    }
   }
 
+  /**
+   * TODO: comment MailMergeParams
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
   private static class TargetDirPickerUIElement extends UIElement
   {
     private final JTextField targetDirectory;
@@ -1079,13 +1095,10 @@ class MailMergeParams
   {
     private final JTextField fromField;
 
-    private MailMergeParams mmp;
-
     public EMailFromUIElement(String label, UIElementAction action,
         final String value, String group, final MailMergeParams mmp)
     {
       super(Box.createHorizontalBox(), group, mmp);
-      this.mmp = mmp;
       Box hbox = (Box) getCompo();
       hbox.add(new JLabel(label));
       hbox.add(Box.createHorizontalStrut(5));
@@ -1172,7 +1185,7 @@ class MailMergeParams
       hbox.add(insertFieldButton);
       hbox.add(Box.createHorizontalStrut(5));
       hbox.add(new JPotentiallyOverlongPopupMenuButton(L.m("Spezialfeld"),
-        mmp.makeSpecialFieldActions(textTags)));
+        makeSpecialFieldActions(textTags)));
       hbox.add(Box.createHorizontalStrut(6));
       vbox.add(hbox);
       vbox.add(Box.createVerticalStrut(3));
@@ -1191,6 +1204,35 @@ class MailMergeParams
         throw new UIElement.InvalidArgumentException(
           L.m("Sie müssen ein Dateinamenmuster angeben!"));
       args.put(SubmitArgument.filenameTemplate, textTags.getContent());
+    }
+
+    /**
+     * Erzeugt eine Liste von Actions zum Einfügen von Spezialfeld-Tags in tags.
+     * 
+     * @author Matthias Benkmann (D-III-ITD-D101)
+     */
+    private List<Action> makeSpecialFieldActions(final TextComponentTags tags)
+    {
+      List<Action> actions = new Vector<Action>();
+      actions.add(new AbstractAction(L.m("Datensatznummer"))
+      {
+        private static final long serialVersionUID = 2675809156807460816L;
+
+        public void actionPerformed(ActionEvent e)
+        {
+          tags.insertTag(TAG_DATENSATZNUMMER);
+        }
+      });
+      actions.add(new AbstractAction(L.m("Serienbriefnummer"))
+      {
+        private static final long serialVersionUID = 3779132684393223573L;
+
+        public void actionPerformed(ActionEvent e)
+        {
+          tags.insertTag(TAG_SERIENBRIEFNUMMER);
+        }
+      });
+      return actions;
     }
   }
 
@@ -1318,7 +1360,8 @@ class MailMergeParams
               boolean ignoreDocPrintFuncs = false;
               if (mmp.ignoreDocPrintFuncs != null && mmp.ignoreDocPrintFuncs == true)
                 ignoreDocPrintFuncs = true;
-              mmp.mmc.doMailMerge(mmp.usePrintFunctions, ignoreDocPrintFuncs, args);
+              mmp.mmc.doMailMerge(mmp.usePrintFunctions, ignoreDocPrintFuncs,
+                mmp.datasetSelectionType, args);
             }
             catch (UIElement.InvalidArgumentException ex)
             {
@@ -1403,7 +1446,8 @@ class MailMergeParams
     targetDirectory,
     filenameTemplate,
     emailFrom,
-    emailToFieldName
+    emailToFieldName,
+    indexSelection,
   }
 
   /**
@@ -1503,36 +1547,8 @@ class MailMergeParams
     public boolean hasPrintfunction(String name);
 
     public void doMailMerge(List<String> usePrintFunctions,
-        boolean ignoreDocPrintFuncs, Map<SubmitArgument, Object> args);
-  }
-
-  /**
-   * Erzeugt eine Liste von Actions zum Einfügen von Spezialfeld-Tags in tags.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   */
-  private List<Action> makeSpecialFieldActions(final TextComponentTags tags)
-  {
-    List<Action> actions = new Vector<Action>();
-    actions.add(new AbstractAction(L.m("Datensatznummer"))
-    {
-      private static final long serialVersionUID = 2675809156807460816L;
-
-      public void actionPerformed(ActionEvent e)
-      {
-        tags.insertTag(TAG_DATENSATZNUMMER);
-      }
-    });
-    actions.add(new AbstractAction(L.m("Serienbriefnummer"))
-    {
-      private static final long serialVersionUID = 3779132684393223573L;
-
-      public void actionPerformed(ActionEvent e)
-      {
-        tags.insertTag(TAG_SERIENBRIEFNUMMER);
-      }
-    });
-    return actions;
+        boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
+        Map<SubmitArgument, Object> args);
   }
 
   /**
@@ -1576,13 +1592,15 @@ class MailMergeParams
       }
 
       public void doMailMerge(List<String> usePrintFunctions,
-          boolean ignoreDocPrintFuncs, Map<SubmitArgument, Object> pmodArgs)
+          boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
+          Map<SubmitArgument, Object> pmodArgs)
       {
         System.out.print("PrintFunctions: ");
         for (String func : usePrintFunctions)
           System.out.print("'" + func + "' ");
         System.out.println("");
         System.out.println("IgnoreDocPrintFuncs: " + ignoreDocPrintFuncs);
+        System.out.println("datasetSelectionType: " + datasetSelectionType);
         System.out.println("pmodArgs: ");
         for (Entry<SubmitArgument, Object> en : pmodArgs.entrySet())
           System.out.println("  " + en.getKey() + ": " + en.getValue());
