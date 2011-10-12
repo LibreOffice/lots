@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sun.star.beans.UnknownPropertyException;
+import com.sun.star.io.IOException;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
@@ -235,6 +236,29 @@ public class StandardPrint
   public static void oooMailMergeToPrinter(final XPrintModel pmod) throws Exception
   {
     OOoBasedMailMerge.oooMailMerge(pmod);
+  }
+
+  /**
+   * Druckfunktion zum Abspeichern der durch den Seriendruck erzeugten Daten in
+   * einzelnen Dateien.
+   * 
+   * @author Ignaz Forster (D-III-ITD-D102)
+   * @throws Exception
+   */
+  public static void mailMergeNewSingleODF(final XPrintModel pmod) throws Exception
+  {
+    MailMergeNew.saveToODF(pmod);
+  }
+
+  /**
+   * Druckfunktion zum Versenden der durch den Seriendruck erzeugten Dokumente per
+   * E-Mail
+   * 
+   * @author Ignaz Forster (D-III-ITD-D102)
+   */
+  public static void mailMergeNewEMail(final XPrintModel pmod)
+  {
+    MailMergeNew.sendAsEmail(pmod);
   }
 
   /**

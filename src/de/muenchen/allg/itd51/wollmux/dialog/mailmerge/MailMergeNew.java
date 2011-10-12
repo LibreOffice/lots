@@ -39,6 +39,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.mail.MessagingException;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
@@ -60,8 +63,11 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.frame.XStorable;
+import com.sun.star.io.IOException;
 import com.sun.star.lang.NoSuchMethodException;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
@@ -91,6 +97,8 @@ import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
+import de.muenchen.allg.itd51.wollmux.email.EMailSender;
+import de.muenchen.allg.itd51.wollmux.email.IncompleteMailserverConfigException;
 
 /**
  * Die neuen erweiterten Serienbrief-Funktionalitäten.
@@ -140,6 +148,10 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * speichert.
    */
   private static final String PROP_MAILMERGENEW_SELECTION = "MailMergeNew_Selection";
+
+  private static final String TEMP_MAIL_DIR_PREFIX = "wollmuxmail";
+
+  private static final String ERROR_MESSAGE_TITLE = "Fehler beim E-Mail-Versand";
 
   /**
    * Das {@link TextDocumentModel} zu dem Dokument an dem diese Toolbar hängt.
@@ -1107,14 +1119,151 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   }
 
   /**
+   * Speichert das übergebene Dokument in eine ODF-Datei. Die WollMux-Daten bleiben
+   * dabei erhalten.
+   * 
+   * @author Ignaz Forster (D-III-ITD-D102)
+   */
+  public static String saveToODF(XPrintModel pmod) throws IOException
+  {
+    String outputDir;
+    String filename;
+
+    XTextDocument textDocument = pmod.getTextDocument();
+
+    HashMap<String, String> formValueSettings =
+      (HashMap<String, String>) getPrintModelProperty(pmod, PROP_DATASET_EXPORT);
+    Integer fileCounter =
+      new Integer(formValueSettings.get(MailMergeParams.TAG_DATENSATZNUMMER));
+    if (fileCounter == null)
+    {
+      fileCounter = 0;
+    }
+
+    outputDir = (String) getPrintModelProperty(pmod, PROP_TARGETDIR);
+    if (outputDir == null)
+    {
+      outputDir = System.getProperty("user.home") + "/Seriendruck";
+    }
+    try
+    {
+      // TODO: FOS - nicht getestet, siehe createOutputPathFromPattern für weitere
+      // TODOs
+      TextComponentTags filePattern =
+        (TextComponentTags) pmod.getPropertyValue(PROP_FILEPATTERN);
+      filename = createOutputPathFromPattern(filePattern, pmod);
+    }
+    catch (Exception x)
+    {
+      try
+      {
+        filename = new File(new URI(textDocument.getURL())).getName();
+      }
+      catch (URISyntaxException e)
+      {
+        filename = System.getProperty("java.io.tmpdir") + "/output.odt";
+      }
+    }
+
+    saveOutputFile(new File(outputDir + "/" + filename), textDocument);
+
+    return outputDir + "/" + filename;
+  }
+
+  /**
+   * Speichert das übergebene Dokument in eine ODF-Datei. Die WollMux-Daten bleiben
+   * dabei erhalten.
+   * 
+   * @author Ignaz Forster (D-III-ITD-D102)
+   */
+  public static void sendAsEmail(XPrintModel pmod)
+  {
+    File tmpOutDir;
+    File attachment;
+    try
+    {
+      tmpOutDir = File.createTempFile(TEMP_MAIL_DIR_PREFIX, null);
+      tmpOutDir.delete();
+      tmpOutDir.mkdir();
+    }
+    catch (java.io.IOException e)
+    {
+      Logger.error(e);
+      WollMuxSingleton.showInfoModal(L.m(ERROR_MESSAGE_TITLE),
+        L.m("Das temporäre Verzeichnis " + TEMP_MAIL_DIR_PREFIX
+          + "konnte nicht angelegt werden."));
+      pmod.cancel();
+      return;
+    }
+
+    try
+    {
+      pmod.setPropertyValue(PROP_TARGETDIR, tmpOutDir.toURI().toString());
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
+      pmod.cancel();
+      return;
+    }
+
+    try
+    {
+      attachment = new File(saveToODF(pmod));
+
+      EMailSender mail = new EMailSender();
+      mail.createNewMultipartMail("tobias.fischbach@muenchen.de",
+        "ignaz.forster@muenchen.de", "Hallo", "Test");
+      mail.addAttachment(attachment);
+      mail.sendMessage();
+    }
+    catch (IncompleteMailserverConfigException e)
+    {
+      Logger.error(e);
+      WollMuxSingleton.showInfoModal(
+        L.m(ERROR_MESSAGE_TITLE),
+        L.m("Es konnten keine Angaben zum Mailserver gefunden werden - eventuell ist die WollMux-Konfiguration nicht vollständig."));
+      pmod.cancel();
+      return;
+    }
+    catch (MessagingException e)
+    {
+      Logger.error(e);
+      WollMuxSingleton.showInfoModal(L.m(ERROR_MESSAGE_TITLE),
+        L.m("Der Versand der E-Mail ist fehlgeschlagen."));
+      pmod.cancel();
+      return;
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
+      pmod.cancel();
+      return;
+    }
+  }
+
+  private static Object getPrintModelProperty(XPrintModel pmod, String propertyName)
+  {
+    Object result = null;
+    try
+    {
+      result = (Object) pmod.getPropertyValue(propertyName);
+    }
+    catch (UnknownPropertyException e)
+    {}
+    catch (WrappedTargetException e)
+    {}
+    return result;
+  }
+
+  /**
    * Speichert doc unter dem in outFile angegebenen Dateipfad und schließt dann doc.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
    *         TESTED
    */
-  private static void saveAndCloseOutputFileForMailmerge(File outFile,
-      XTextDocument doc)
+  private static void saveOutputFile(File outFile, XTextDocument doc)
   {
     try
     {
@@ -1162,17 +1311,10 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     {
       Logger.error(x);
     }
-
-    try
-    {
-      UNO.XCloseable(doc).close(true);
-    }
-    catch (Exception x)
-    {}
   }
 
   /**
-   * Nimmt filePatter, ersetzt darin befindliche Tags durch entsprechende
+   * Nimmt filePattern, ersetzt darin befindliche Tags durch entsprechende
    * Spaltenwerte aus ds und setzt daraus einen Dateipfad mit Elternverzeichnis
    * targetDir zusammen. Die Spezialtags {@link MailMergeParams#TAG_DATENSATZNUMMER}
    * und {@link MailMergeParams#TAG_SERIENBRIEFNUMMER} werden durch die Strings
@@ -1184,14 +1326,27 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    *          serienbriefNummer mit 0ern zu padden.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   *         TESTED
    */
-  private static File makeOutputPath(String targetDir,
-      TextComponentTags filePattern, Dataset ds, int datensatzNummer,
-      int serienbriefNummer, int totalDatasets)
+  private static String createOutputPathFromPattern(TextComponentTags filePattern,
+      XPrintModel pmod)
   {
-    String totalDatasetsStr = "" + totalDatasets;
+    // TODO: FOS - das sieht noch nicht gut aus - an die Daten sollte man auch anders
+    // kommen...
+    QueryResults data = null;
+    try
+    {
+      data = (QueryResults) pmod.getPropertyValue(PROP_QUERYRESULTS);
+    }
+    catch (Exception e)
+    {}
+    HashMap<String, String> formValueSettings =
+      (HashMap<String, String>) getPrintModelProperty(pmod, PROP_DATASET_EXPORT);
+    String datensatzNummer =
+      formValueSettings.get(MailMergeParams.TAG_DATENSATZNUMMER);
+    String serienbriefNummer =
+      formValueSettings.get(MailMergeParams.TAG_SERIENBRIEFNUMMER);
+
+    String totalDatasetsStr = "" + data.size();
     String datensatzNummerStr = "" + datensatzNummer;
     while (datensatzNummerStr.length() < totalDatasetsStr.length())
       datensatzNummerStr = "0" + datensatzNummerStr;
@@ -1209,21 +1364,20 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
           value = datensatzNummerStr;
         else if (tag.equals(MailMergeParams.TAG_SERIENBRIEFNUMMER))
           value = serienbriefNummerStr;
-        else
-          try
-          {
-            value = ds.get(tag);
-          }
-          catch (ColumnNotFoundException x)
-          {
-            Logger.error(x);
-          }
+        // else
+        // try
+        // {
+        // value = ds.get(tag);
+        // }
+        // catch (ColumnNotFoundException x)
+        // {
+        // Logger.error(x);
+        // }
       }
       buffy.append(value);
     }
 
-    return new File(targetDir, buffy.toString().replaceAll(
-      "[^\\p{javaLetterOrDigit} ,.()=+_-]", "_"));
+    return buffy.toString().replaceAll("[^\\p{javaLetterOrDigit} ,.()=+_-]", "_");
   }
 
   private class MyWindowListener implements WindowListener
