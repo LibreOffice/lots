@@ -40,6 +40,7 @@ import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -217,6 +218,40 @@ public class TextComponentTags
     }
 
     return conf;
+  }
+
+  /**
+   * Liefert den Inhalt der TextComponentTag als String mit aufgelösten Tags, wobei
+   * an Stelle jedes Tags der entsprechende Inhalt eingesetzt wird, der in
+   * mapTagToValue unter dem Schlüssel des Tagnamens gefunden wird oder der String
+   * "<tagname>", wenn das Tag nicht aufgelöst werden kann.
+   * 
+   * @param mapTagToValue
+   *          Map mit Schlüssel-/Wertpaaren, die die entsprechenden Werte für die
+   *          Tags enthält.
+   * @return Inhalt der TextComponentTag als String mit aufgelösten Tags (soweit
+   *         möglich).
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public String getContent(Map<String, String> mapTagToValue)
+  {
+    StringBuffer buf = new StringBuffer();
+    for (ContentElement el : getContent())
+    {
+      if (el.isTag())
+      {
+        String key = el.toString();
+        String value = mapTagToValue.get(key);
+        if (value != null)
+          buf.append(mapTagToValue.get(key));
+        else
+          buf.append("<" + key + ">");
+      }
+      else
+        buf.append(el.toString());
+    }
+    return buf.toString();
   }
 
   /**

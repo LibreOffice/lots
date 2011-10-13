@@ -99,9 +99,14 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="OFFAPI_RDB" value="${TYPES_RDB}" /> <!-- Fallback for 2.x installations that don't have OFFAPI_RDB -->
 	
 	<property name="SDK_IDL" value="${OOO_SDK}/idl" />
+
+	<property name="JAVAMAIL_JAR" value ="thirdparty/javamail-1.4.4/mail.jar"/>
+	
+	<property name="CLASSPATH" value="${OOO_CLASSPATH}:${JAVAMAIL_JARS}"/>
 	
 	<property name="BIN" value="bin" />
 	<property name="SRC" value="src" />
+	<property name="THIRDPARTY" value="thirdparty"/>
 	
 	<property name="WOLLMUXBAR_JAR_NAME" value="WollMuxBar.jar" />
 	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/${WOLLMUXBAR_JAR_NAME}" />
@@ -285,7 +290,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		
 		<javac srcdir="${SRC}"
 			destdir="${BIN}"
-			classpath="${OOO_CLASSPATH}:${MY_IDL}:${TOOLING}"
+			classpath="${CLASSPATH}:${MY_IDL}:${TOOLING}"
 			includeAntRuntime="false"
 			encoding="${SRC_ENCODING}"
 			debug="${DEBUG}"
@@ -325,6 +330,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 			<fileset file="${BUILD_INFO_FILE}" />
 			<manifest>
 				<attribute name="RegistrationClassName" value="${WollMux_REG_NAME}" />
+				<attribute name="Class-Path" value="${JAVAMAIL_JAR}" />
 			</manifest>
 		</jar>
 	</target>
@@ -342,6 +348,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		<delete file="${PKG_FILE}" />
 		<zip destfile="${PKG_FILE}">
 			<fileset file="${WollMux_COMPJAR}" />
+			<fileset dir="." includes="${THIRDPARTY}/**/*.jar" />
 			<fileset dir="${RDB_DIR}">
 				<include name="*.xcu" />
 				<include name="*.rdb" />
@@ -452,7 +459,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		<javac srcdir="${MISC}"
 			destdir="${BIN}"
 			includes="${TERMINATEOOO_MAIN_CLASS}.java"
-			classpath="${OOO_CLASSPATH}"
+			classpath="${CLASSPATH}"
 			includeAntRuntime="false"
 			encoding="${SRC_ENCODING}"
 			debug="${DEBUG}"

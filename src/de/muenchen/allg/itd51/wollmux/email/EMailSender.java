@@ -1,5 +1,9 @@
-/*
- *  Copyright (c) 2010 Landeshauptstadt München
+/* 
+ * Dateiname: EMailSender.java
+ * Projekt  : WollMux
+ * Funktion : Teil des E-Mail-Wrappers für javamail
+ * 
+ * Copyright (c) 2011 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -48,6 +52,13 @@ public class EMailSender
   {
     MailServerSettings mailserver = getWollMuxMailServerSettings();
 
+//    // Workaround für javax.activation.UnsupportedDataTypeException. Weitere Infos:
+//    // http://www.jguru.com/faq/view.jsp?EID=237257
+//    MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
+//    // Weitere Handler-Definitionen siehe META-INF/mailcap in mail.jar
+//    mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed");
+//    CommandMap.setDefaultCommandMap(mc);
+
     props = new Properties();
     props.put("mail.smtp.host", mailserver.getMailserver());
     Session session = Session.getDefaultInstance(props);
@@ -92,7 +103,7 @@ public class EMailSender
     ConfigThingy wollmuxconf = WollMuxFiles.getWollmuxConf();
     try
     {
-      wollmuxconf = wollmuxconf.get("EMailEinstellungen");
+      wollmuxconf = wollmuxconf.query("EMailEinstellungen").getLastChild();
       mailserver.setMailserver(wollmuxconf.get("SERVER").toString());
       mailserver.setMailserverport(new Integer(wollmuxconf.get("PORT").toString()));
     }

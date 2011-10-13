@@ -6,5 +6,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenOffice"/>
 	<classpathentry kind="lib" path="idl"/>
 	<classpathentry kind="lib" path="/classes/bin"/>
+	<classpathentry kind="lib" path="thirdparty/javamail-1.4.4/mail.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

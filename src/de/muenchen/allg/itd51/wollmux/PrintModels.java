@@ -656,6 +656,24 @@ public class PrintModels
         throw new UnknownPropertyException(arg0);
     }
 
+    /**
+     * Diese Komfortmethode verhält sich wie
+     * c.s.s.b.XPropertySet.getPropertyValue([in] string propertyName), mit dem
+     * Unterschied, dass sie keine Exceptions schmeißt und im Fehlerfall defaultValue
+     * zurück liefert.
+     */
+    public Object getProp(String propertyName, Object defaultValue)
+    {
+      try
+      {
+        return getPropertyValue(propertyName);
+      }
+      catch (Exception e)
+      {
+        return defaultValue;
+      }
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -1082,6 +1100,17 @@ public class PrintModels
         WrappedTargetException
     {
       return master.getPropertyValue(arg0);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getProp(java.lang.String,
+     * java.lang.Object)
+     */
+    public Object getProp(String arg0, Object arg1)
+    {
+      return master.getProp(arg0, arg1);
     }
 
     /*

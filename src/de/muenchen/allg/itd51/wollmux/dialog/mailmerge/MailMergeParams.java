@@ -62,6 +62,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
@@ -97,15 +98,36 @@ class MailMergeParams
    */
   public interface MailMergeController
   {
+    /**
+     * Gibt Auskunft darüber, ob die Druckfunktion name existiert.
+     */
     public boolean hasPrintfunction(String name);
 
+    /**
+     * Liefert die Spaltennamen der aktuellen Datenquelle
+     */
+    public List<String> getColumnNames();
+
+    /**
+     * Liefert einen Vorschlag für einen Dateinamen zum Speichern der Einzeldokumente
+     * (im Fall von Einzeldokumentdruck und E-Mail versandt), so wie er aus
+     * Benutzersicht wahrscheinlich erwünscht ist OHNE Suffix.
+     */
+    public String getDefaultFilename();
+
+    /**
+     * Startet den MailMerge
+     */
     public void doMailMerge(List<String> usePrintFunctions,
         boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
         Map<SubmitArgument, Object> args);
   }
 
   /**
-   * TODO: comment MailMergeParams
+   * Zählt alle Schlüsselwörter auf, die Übergabeargumente für
+   * {@link MailMergeController#doMailMerge(List, boolean, DatasetSelectionType, Map)}
+   * sein können. Jedes UI-Element steuert in {@link UIElement#addSubmitArgs(Map)},
+   * ob und welche Argumente es setzt.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -171,7 +193,13 @@ class MailMergeParams
   };
 
   /**
-   * TODO: comment MailMergeParams
+   * Beschreibt Elementtypen, wie sie im TYPE-Attribut von Einträgen des
+   * Seriendruckdialog-Abschnitts der WollMux-Konfiguration verwendet werden können.
+   * Der Seriendruckabschnitt definiert im Vergleich zur FormGUI einige
+   * Spezial-Typen, die nur im Kontext dieses Dialogs einen Sinn ergeben.
+   * 
+   * Die Methode {@link #getByname(String)} ermöglicht eine Zuordnung von Strings der
+   * Konfigurationsdatei auf den entsprechenden enum-Typen.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -201,7 +229,11 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams
+   * Beschreibt die möglichen Actions, die auf Formularelemente des
+   * Seriendruckabschnitts angewendet werden können und deren Event-Handler.
+   * 
+   * Die Methode {@link #getByname(String)} ermöglicht eine Zuordnung von Strings der
+   * Konfigurationsdatei auf den entsprechenden enum-Typen.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -331,7 +363,13 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams
+   * Folgende Statements können innerhalb des Regeln-Abschnitts der
+   * Seriendruckdialog-Beschreibung angewendet werden. Über sie werden z.B. die
+   * Sichtbarkeiten der {@link Section}s und {@link UIElement}e gesteuert und die pro
+   * Option zu verwendenden Druckfunktionen spezifiziert.
+   * 
+   * Die Methode {@link #getByname(String)} ermöglicht eine Zuordnung von Strings der
+   * Konfigurationsdatei auf den entsprechenden enum-Typen.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -355,7 +393,8 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams
+   * Beschreibt die Ausrichtung, nach der Formularelemente innerhalb einer
+   * {@link Section} ausgerichtet werden können.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -397,7 +436,8 @@ class MailMergeParams
   static final String TAG_DATENSATZNUMMER = "#DS";
 
   /**
-   * TODO dok
+   * Enthält den {@link MailMergeController}, der Infos zum aktuellen
+   * Seriendruckkontext liefern kann und den eigentlichen Seriendruck ausführen kann.
    */
   private MailMergeController mmc;
 
@@ -409,40 +449,50 @@ class MailMergeParams
   private JDialog dialog = null;
 
   /**
-   * TODO: dok
+   * Enthält den Regeln-Abschnitt aus der Seriendruckdialog-Beschreibung.
    */
   private ConfigThingy rules;
 
   /**
-   * TODO: dok
+   * Enthält alle zum aktuellen Zeitpunkt sichtbaren Gruppen, die über das
+   * {@link RuleStatement#SHOW_GROUPS} sichtbar geschaltet wurden.
    */
   private HashSet<String> visibleGroups = new HashSet<String>();
 
   /**
-   * TODO: dok
+   * Enthält eine Liste aller erzeugter {@link Section}-Objekte in der Reihenfolge
+   * der Seriendruckdialog-Beschreibung.
    */
   private ArrayList<Section> sections = new ArrayList<Section>();
 
   /**
-   * TODO: dok
+   * Enthält den String der im Attribut VALUE zur zuletzt ausgeführten
+   * {@link UIElementAction#setActionType}-Action angegeben war. Beispiel:
+   * 
+   * Wird in der GUI das Formularelement '(LABEL "Gesamtdokument erstellen" TYPE
+   * "radio" ACTION "setActionType" VALUE "gesamtdok")' ausgewählt, dann enthält
+   * diese Variable den Wert "gesamtdok".
    */
   private String currentActionType = "";
 
   /**
-   * TODO: dok
+   * Enthält den String der im Attribut VALUE zur zuletzt ausgeführten
+   * {@link UIElementAction#setOutput}-Action angegeben war. Beispiel:
+   * 
+   * Wird in der GUI das Formularelement '(LABEL "ODT-Datei" TYPE "radio" GROUP "odt"
+   * ACTION "setOutput" VALUE "odt")' ausgewählt, dann enthält diese Variable den
+   * Wert "odt".
    */
   private String currentOutput = "";
 
   /**
-   * TODO dok
+   * Sammelt die JTextComponent-Objekte alle in der Seriendruckdialog-Beschreibung
+   * enthaltenen Formularfelder vom Typ {@link UIElementType#description} auf (das
+   * ist normalerweise immer nur eins, aber es ist niemand daran gehindert, das
+   * Element öfters in den Dialog einzubinden - wenn auch ohne größeren Sinn)
    */
   private ArrayList<JTextComponent> descriptionFields =
     new ArrayList<JTextComponent>();
-
-  /**
-   * TODO dok
-   */
-  private List<String> fieldNames;
 
   /**
    * Enthält die Namen der über das zuletzt ausgeführte
@@ -457,7 +507,8 @@ class MailMergeParams
   private Boolean ignoreDocPrintFuncs;
 
   /**
-   * TODO dok
+   * Enthält den String, der als Vorbelegung im Formularfeld für das
+   * Absender-Email-Feld gesetzt wird.
    */
   private String defaultEmailFrom = "";
 
@@ -482,7 +533,7 @@ class MailMergeParams
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void showDoMailmergeDialog(final JFrame parent,
-      final MailMergeController mmc, List<String> fieldNames)
+      final MailMergeController mmc)
   {
     ConfigThingy sdConf = null;
     try
@@ -530,7 +581,7 @@ class MailMergeParams
         e);
     }
 
-    showDoMailmergeDialog(parent, mmc, fieldNames, sdConf, defaultFrom);
+    showDoMailmergeDialog(parent, mmc, sdConf, defaultFrom);
   }
 
   /**
@@ -550,11 +601,9 @@ class MailMergeParams
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
    */
   private void showDoMailmergeDialog(final JFrame parent,
-      final MailMergeController mmc, List<String> fieldNames,
-      ConfigThingy dialogConf, String defaultEmailFrom)
+      final MailMergeController mmc, ConfigThingy dialogConf, String defaultEmailFrom)
   {
     this.mmc = mmc;
-    this.fieldNames = fieldNames;
     this.defaultEmailFrom = defaultEmailFrom;
 
     if (dialog == null || dialog.getParent() != parent)
@@ -622,7 +671,9 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams.updateVisibilities
+   * Führt die im Regeln-Abschnitt angegebenen Regeln aus, passt alle Sichtbarkeiten
+   * und Vorbelegungen für Radio-Buttons korrekt an und zeichnet den Dialog bei
+   * Bedarf neu.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -635,7 +686,7 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams.processRules
+   * Führt die im Regeln-Abschnitt definierten Regeln aus.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -706,16 +757,13 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams.isActionAvailableInCurrentContext Prüft ob die
-   * UIElementAction action mit dem Action-Wert value im aktuellen Kontext ausgeführt
-   * werden könnte. Eine Action ist u.A. dann nicht ausführbar, wenn in einem
-   * zugehörigen Regeln-Abschnitt eine USE_PRINTFUNCTIONS-Anweisung steht, deren
-   * Druckfunktionen nicht verfügbar sind.
-   * 
-   * @param action
-   * @param actionValue
-   * @param reasons
-   * @return
+   * Prüft ob die UIElementAction action mit dem Action-Wert value im aktuellen
+   * Kontext ausgeführt werden könnte und liefert true zurück, wenn nichts gegen eine
+   * Ausführung der Aktion spricht oder false, wenn es Gründe gibt, die eine
+   * Ausführung behindern könnten (diese Gründe werden dann als String in die
+   * übergebene reasons-Liste aufgenommen). Die Actions setActionType und setOutput
+   * sind z.B. dann nicht ausführbar, wenn in einem zugehörigen Regeln-Abschnitt eine
+   * USE_PRINTFUNCTIONS-Anweisung steht, deren Druckfunktionen nicht verfügbar sind.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -759,11 +807,10 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams.requiredPrintfunctionsAvailable
-   * 
-   * @param rule
-   * @param reasons
-   * @return
+   * Prüft, ob die in einer Regel rule unter dem Schlüssel
+   * {@link RuleStatement#USE_PRINTFUNCTIONS} beschriebenen Druckfunktionen
+   * ausführbar sind und liefert hängt im Fehlerfall eine textuelle Beschreibung an
+   * die übergebene Liste reasons an.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -792,16 +839,9 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams.createUIElement
-   * 
-   * @param type
-   * @param label
-   * @param labelFrom
-   * @param labelTo
-   * @param action
-   * @param value
-   * @param group
-   * @return
+   * Fabrik-Methode für die Erzeugung aller {@link UIElement}-Objekte. Die erwarteten
+   * String-Argumente können (je nach Formularelement) auch null sein, die anderen
+   * Typen müssen mit Objekten != null belegt sein.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -860,12 +900,13 @@ class MailMergeParams
 
       case filenametemplatechooser:
       {
-        JTextField textField = new JTextField(".odt");
+        String name = mmp.mmc.getDefaultFilename() + "_.odt";
+        JTextField textField = new JTextField(name);
         TextWithDatafieldTagsUIElement el =
-          new TextWithDatafieldTagsUIElement(textField,
+          new TextWithDatafieldTagsUIElement(textField, textField,
             SubmitArgument.filenameTemplate,
             L.m("Sie müssen ein Dateinamenmuster angeben!"), group, mmp);
-        el.textTags.getJTextComponent().setCaretPosition(0);
+        el.textTags.getJTextComponent().setCaretPosition(name.length() - 4);
         el.textTags.insertTag(TAG_DATENSATZNUMMER);
         return el;
       }
@@ -874,9 +915,10 @@ class MailMergeParams
       {
         JTextArea tf =
           new JTextArea(
-            L.m("Sehr geehrte Damen und Herren,\n\nanbei erhalten Sie ...\n\nmit freundlichen Grüßen\n..."));
+            L.m("Sehr geehrte Damen und Herren,\n\nanbei erhalten Sie ...\n\nMit freundlichen Grüßen\n..."));
+        JScrollPane sc = new JScrollPane(tf);
         TextWithDatafieldTagsUIElement el =
-          new TextWithDatafieldTagsUIElement(tf, SubmitArgument.emailText, null,
+          new TextWithDatafieldTagsUIElement(tf, sc, SubmitArgument.emailText, null,
             group, mmp);
         return el;
       }
@@ -900,7 +942,12 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams
+   * Repräsentiert ein mit {@link UIElementType} beschriebenes Formularelement und
+   * kann sichtbar/unsichtbar und aktiviert/nicht aktiviert sein. Außerdem kann es in
+   * der Methode {@link UIElement#addSubmitArgs(Map)} vor einem Submit prüfen, ob die
+   * Formularinhalte plausibel sind und entsprechend gültige Werte in die
+   * Argumentliste aufnehmen oder eine {@link InvalidArgumentException}-Exception
+   * werfen.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -917,11 +964,9 @@ class MailMergeParams
     private MailMergeParams mmp;
 
     /**
-     * TODO
-     * 
-     * @param compo
-     * @param group
-     * @param mmp
+     * Erzeugt ein UIElement, das über die Hauptkomponente compo dargestellt werden,
+     * über die Sichtbarkeitsgruppe group ein-/ausgeblendet werden kann und im
+     * Kontext vom {@link MailMergeParams} mmp gültig ist.
      */
     private UIElement(Component compo, String group, MailMergeParams mmp)
     {
@@ -931,9 +976,8 @@ class MailMergeParams
     }
 
     /**
-     * TODO: comment UIElement.updateVisibility
-     * 
-     * @return
+     * Passt die Sichtbarkeit abhängig von den aktuell gesetzten Sichtbarkeitsgruppen
+     * aus mmp.visibleGroups an.
      * 
      * @author Christoph Lutz (D-III-ITD-D101)
      */
@@ -959,9 +1003,7 @@ class MailMergeParams
     }
 
     /**
-     * TODO: comment UIElement.isVisible
-     * 
-     * @return
+     * Gibt Auskunft, ob das UIElement aktuell sichtbar ist.
      * 
      * @author Christoph Lutz (D-III-ITD-D101)
      */
@@ -971,9 +1013,7 @@ class MailMergeParams
     }
 
     /**
-     * TODO: comment UIElement.setEnabled
-     * 
-     * @param enabled
+     * Setzt den Aktiviert-Status des UIElements auf enabled.
      * 
      * @author Christoph Lutz (D-III-ITD-D101)
      */
@@ -984,9 +1024,7 @@ class MailMergeParams
     }
 
     /**
-     * TODO: comment UIElement.isEnabled
-     * 
-     * @return
+     * Gibt Auskunft, ob das UIElement aktuell aktiviert ist.
      * 
      * @author Christoph Lutz (D-III-ITD-D101)
      */
@@ -1028,7 +1066,10 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams
+   * Manche UIElemente implementieren dieses Interface um damit anzuzeigen, dass sie
+   * eine ButtonGroup zugeordnet werden können und einen Radio-Button enthalten,
+   * dessen Vorbelegung bei Ein-/Ausblendungen durch den Seriendruckdialog verwaltet
+   * werden sollen.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -1042,7 +1083,7 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams
+   * Beschreibt das {@link UIElement} vom Typ {@link UIElementType#radio}.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -1126,7 +1167,7 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams
+   * Beschreibt das {@link UIElement} vom Typ {@link UIElementType#fromtoradio}.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -1248,7 +1289,8 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams
+   * Beschreibt das {@link UIElement} vom Typ
+   * {@link UIElementType#filenametemplatechooser}.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -1262,8 +1304,9 @@ class MailMergeParams
       super(Box.createHorizontalBox(), group, mmp);
       Box hbox = (Box) getCompo();
       this.targetDirectory = new JTextField();
+      DimAdjust.maxHeightIsPrefMaxWidthUnlimited(targetDirectory);
       hbox.add(Box.createHorizontalStrut(5));
-      hbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(targetDirectory));
+      hbox.add(targetDirectory);
       hbox.add(new JButton(new AbstractAction(label)
       {
         private static final long serialVersionUID = -7919862309134895087L;
@@ -1280,6 +1323,7 @@ class MailMergeParams
         }
       }));
       hbox.add(Box.createHorizontalStrut(6));
+      DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox);
     }
 
     public void addSubmitArgs(Map<SubmitArgument, Object> args)
@@ -1299,7 +1343,7 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams
+   * Beschreibt das {@link UIElement} vom Typ {@link UIElementType#emailfrom}.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -1310,13 +1354,19 @@ class MailMergeParams
     public EMailFromUIElement(String label, UIElementAction action,
         final String value, String group, final MailMergeParams mmp)
     {
-      super(Box.createHorizontalBox(), group, mmp);
-      Box hbox = (Box) getCompo();
+      super(Box.createVerticalBox(), group, mmp);
+      Box vbox = (Box) getCompo();
+
+      Box hbox = Box.createHorizontalBox();
       hbox.add(new JLabel(label));
       hbox.add(Box.createHorizontalStrut(5));
       this.fromField = new JTextField(mmp.defaultEmailFrom);
       hbox.add(Box.createHorizontalStrut(5));
-      hbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(fromField));
+      hbox.add(fromField);
+      DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox);
+
+      vbox.add(hbox);
+      vbox.add(Box.createVerticalStrut(5));
     }
 
     public void addSubmitArgs(Map<SubmitArgument, Object> args)
@@ -1332,7 +1382,7 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams
+   * Beschreibt das {@link UIElement} vom Typ {@link UIElementType#emailsubject}.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -1343,13 +1393,19 @@ class MailMergeParams
     public EMailSubject(String label, UIElementAction action, final String value,
         String group, final MailMergeParams mmp)
     {
-      super(Box.createHorizontalBox(), group, mmp);
-      Box hbox = (Box) getCompo();
+      super(Box.createVerticalBox(), group, mmp);
+      Box vbox = (Box) getCompo();
+
+      Box hbox = Box.createHorizontalBox();
       hbox.add(new JLabel(label));
       hbox.add(Box.createHorizontalStrut(5));
       this.textField = new JTextField("");
       hbox.add(Box.createHorizontalStrut(5));
-      hbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(textField));
+      hbox.add(textField);
+      DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox);
+
+      vbox.add(hbox);
+      vbox.add(Box.createVerticalStrut(5));
     }
 
     public void addSubmitArgs(Map<SubmitArgument, Object> args)
@@ -1360,7 +1416,7 @@ class MailMergeParams
   }
 
   /**
-   * TODO: comment MailMergeParams
+   * Beschreibt das {@link UIElement} vom Typ {@link UIElementType#emailtofieldname}.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -1371,34 +1427,49 @@ class MailMergeParams
     public EMailToFieldNameUIElement(String label, UIElementAction action,
         final String value, String group, final MailMergeParams mmp)
     {
-      super(Box.createHorizontalBox(), group, mmp);
-      Box hbox = (Box) getCompo();
+      super(Box.createVerticalBox(), group, mmp);
+      Box vbox = (Box) getCompo();
+
+      Box hbox = Box.createHorizontalBox();
       hbox.add(new JLabel(label));
       hbox.add(Box.createHorizontalStrut(5));
-      String[] fnames = new String[mmp.fieldNames.size() + 1];
+      String[] fnames = new String[mmp.mmc.getColumnNames().size() + 1];
       fnames[0] = L.m("-- Bitte auswählen --");
       int i = 1;
-      for (String fname : mmp.fieldNames)
+      int mailIdx = 0;
+      for (String fname : mmp.mmc.getColumnNames())
+      {
+        if (fname.toLowerCase().contains("mail") && mailIdx == 0) mailIdx = i;
         fnames[i++] = "<" + fname + ">";
+      }
       this.toFieldName = new JComboBox(fnames);
+      toFieldName.setSelectedIndex(mailIdx);
       hbox.add(Box.createHorizontalStrut(5));
-      hbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(toFieldName));
+      hbox.add(toFieldName);
+      DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox);
+
+      vbox.add(hbox);
+      vbox.add(Box.createVerticalStrut(5));
     }
 
     public void addSubmitArgs(Map<SubmitArgument, Object> args)
         throws UIElement.InvalidArgumentException
     {
-      String to = toFieldName.getSelectedItem().toString();
       if (toFieldName.getSelectedIndex() == 0)
         throw new UIElement.InvalidArgumentException(
           L.m("Sie müssen ein Feld angeben, das die Empfängeradresse enthält!"));
 
+      String to = toFieldName.getSelectedItem().toString();
+      to = to.substring(1, to.length() - 1);
       args.put(SubmitArgument.emailToFieldName, to);
     }
   }
 
   /**
-   * TODO: comment MailMergeParams
+   * Beschreibt ein UIElement, das {@link JTextComponent}s über
+   * {@link TextComponentTags} editieren kann und derzeit für die Elemente vom Typ
+   * {@link UIElementType#emailtext} und
+   * {@link UIElementType#filenametemplatechooser} verwendet wird.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -1411,8 +1482,8 @@ class MailMergeParams
     private SubmitArgument argKey;
 
     public TextWithDatafieldTagsUIElement(JTextComponent textCompo,
-        SubmitArgument argKey, String errorMessageIfEmpty, String group,
-        final MailMergeParams mmp)
+        JComponent toAdd, SubmitArgument argKey, String errorMessageIfEmpty,
+        String group, final MailMergeParams mmp)
     {
       super(Box.createVerticalBox(), group, mmp);
       Box vbox = (Box) getCompo();
@@ -1423,7 +1494,8 @@ class MailMergeParams
       hbox.add(Box.createHorizontalGlue());
       JPotentiallyOverlongPopupMenuButton insertFieldButton =
         new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
-          TextComponentTags.makeInsertFieldActions(mmp.fieldNames, textTags));
+          TextComponentTags.makeInsertFieldActions(mmp.mmc.getColumnNames(),
+            textTags));
       hbox.add(insertFieldButton);
       hbox.add(Box.createHorizontalStrut(5));
       hbox.add(new JPotentiallyOverlongPopupMenuButton(L.m("Spezialfeld"),
@@ -1434,9 +1506,10 @@ class MailMergeParams
 
       hbox = Box.createHorizontalBox();
       hbox.add(Box.createHorizontalStrut(5));
-      hbox.add(textCompo);
+      hbox.add(toAdd);
       hbox.add(Box.createHorizontalStrut(5));
       vbox.add(hbox);
+      DimAdjust.maxHeightIsPrefMaxWidthUnlimited(vbox);
 
       this.errorMessageIfEmpty = errorMessageIfEmpty;
       this.argKey = argKey;
@@ -1447,7 +1520,7 @@ class MailMergeParams
     {
       if (errorMessageIfEmpty != null && textTags.getContent().isEmpty())
         throw new UIElement.InvalidArgumentException(errorMessageIfEmpty);
-      args.put(argKey, textTags.getContent());
+      args.put(argKey, textTags);
     }
 
     /**
@@ -1499,12 +1572,9 @@ class MailMergeParams
     boolean visible;
 
     /**
-     * TODO: comment Section.createSection
-     * 
-     * @param section
-     * @param compo
-     * @param gm
-     * @return
+     * Erzeugt die Section, die über das ConfigThingy section beschrieben ist, in der
+     * JComponent parent angezeigt werden soll und im Kontext des
+     * MailMergeParams-Objekts mmp gültig ist.
      * 
      * @author Christoph Lutz (D-III-ITD-D101)
      */
@@ -1540,6 +1610,11 @@ class MailMergeParams
             BorderFactory.createLineBorder(Color.GRAY), title);
         contentBox.setBorder(border);
       }
+      else
+      {
+        if (orient == Orientation.vertical)
+          contentBox.add(Box.createVerticalStrut(5));
+      }
       hbox.add(contentBox);
 
       ConfigThingy elementsConf = section.queryByChild("TYPE");
@@ -1574,12 +1649,9 @@ class MailMergeParams
     }
 
     /**
-     * TODO: comment Section.updateVisibility Prüft, ob die Voreinstellungen unter
-     * Berücksichtigung der aktuellen Verhältnisse bezüglich der Sichtbarkeit und
-     * Aktiviertheit von UIElementen (derzeit nur die, die {@link HasRadioElement}
-     * implementieren) zugänglich sind und setzt ggf. die Default-Einstellungen um.
-     * 
-     * @return
+     * Aktualisiert alle in der Section enthaltenen UIElemente (bezüglich ihrer
+     * Sichtbarkeit und Aktiviertheit) und passt ggf. die Voreinstellungen von allen
+     * UIElementen an, die {@link HasRadioElement} implementieren.
      * 
      * @author Christoph Lutz (D-III-ITD-D101)
      */
@@ -1647,15 +1719,15 @@ class MailMergeParams
     }
 
     final ConfigThingy seriendruckConf = sdConf;
-    MailMergeController pfInfo = new MailMergeController()
+    MailMergeController mmc = new MailMergeController()
     {
       public boolean hasPrintfunction(String name)
       {
         String[] funcs =
           new String[] {
-            "OOoMailMergeToPrinter", /* "OOoMailMergeToOdtFile", */
-            "MailMergeNewSetFormValue", /* "PDFGesamtdokument", */"toBeImplemented",
-            "PDFGesamtdokumentOutput" };
+            "OOoMailMergeToPrinter", "OOoMailMergeToOdtFile", "MailMergeNewToEMail",
+            "MailMergeNewSetFormValue", /* "PDFGesamtdokument", */
+            "MailMergeNewToSingleODT", "PDFGesamtdokumentOutput" };
         for (String func : funcs)
           if (func.equals(name)) return true;
         return false;
@@ -1676,12 +1748,27 @@ class MailMergeParams
         for (Entry<SubmitArgument, Object> en : pmodArgs.entrySet())
           System.out.println("  " + en.getKey() + ": " + en.getValue());
       }
+
+      public List<String> getColumnNames()
+      {
+        return fieldNames;
+      }
+
+      public String getDefaultFilename()
+      {
+        return "MeinDokument";
+      }
     };
 
-    mmp.showDoMailmergeDialog(new JFrame("irgendwas"), pfInfo, fieldNames,
-      seriendruckConf, "christoph.lutz@muenchen.de");
+    mmp.showDoMailmergeDialog(new JFrame("irgendwas"), mmc, seriendruckConf,
+      "christoph.lutz@muenchen.de");
 
+    try
+    {
+      Thread.sleep(5000);
+    }
+    catch (InterruptedException e)
+    {}
     System.exit(0);
   }
-
 }

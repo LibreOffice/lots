@@ -57,6 +57,14 @@ interface XPrintModel
      */
 	interface com::sun::star::beans::XPropertySet;
 	
+	/**
+	 * Diese Komfortmethode verhält sich wie 
+	 * c.s.s.b.XPropertySet.getPropertyValue([in] string PropertyName), mit
+	 * dem Unterschied, dass sie keine Exceptions schmeißt und im Fehlerfall
+	 * defaultValue zurück liefert.
+	 */
+	any getProp( [in] string PropertyName, [in] any defaultValue);
+	
     /**
      * Lädt die in der wollmux.conf definierte Druckfunktion mit dem Namen
      * functionName in das XPrintModel und ordnet sie gemäß dem ORDER-Attribut an der

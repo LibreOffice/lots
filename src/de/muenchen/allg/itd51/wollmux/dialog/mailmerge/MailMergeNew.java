@@ -39,8 +39,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,23 +61,21 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.frame.XStorable;
 import com.sun.star.io.IOException;
 import com.sun.star.lang.NoSuchMethodException;
-import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.PrintModels;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
@@ -89,7 +85,6 @@ import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
 import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
-import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags.ContentElement;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.DatasetSelectionType;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.IndexSelection;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.SubmitArgument;
@@ -133,9 +128,22 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /**
    * ID der Property in der der Name des Feldes gespeichert wird, in dem die
-   * E-Mail-Adressen der Empfänger enthalten ist.
+   * E-Mail-Adressen der Empfänger enthalten sind.
    */
   private static final String PROP_EMAIL_FROM = "MailMergeNew_EMailFrom";
+
+  /**
+   * ID der Property in der die Betreffzeile vom Typ String der zu verschickenden
+   * E-Mail enthalten ist.
+   */
+  private static final String PROP_EMAIL_SUBJECT = "MailMergeNew_EMailSubject";
+
+  /**
+   * ID der Property in der die Betreffzeile vom Typ String der zu verschickenden
+   * E-Mail enthalten ist.
+   */
+  private static final String PROP_EMAIL_MESSAGE_TEXTTAGS =
+    "MailMergeNew_EMailMessageTextTags";
 
   /**
    * ID der Property in der das Dateinamenmuster für den Einzeldokumentdruck
@@ -151,7 +159,8 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   private static final String TEMP_MAIL_DIR_PREFIX = "wollmuxmail";
 
-  private static final String ERROR_MESSAGE_TITLE = "Fehler beim E-Mail-Versand";
+  private static final String MAIL_ERROR_MESSAGE_TITLE =
+    L.m("Fehler beim E-Mail-Versand");
 
   /**
    * Das {@link TextDocumentModel} zu dem Dokument an dem diese Toolbar hängt.
@@ -439,8 +448,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       public void actionPerformed(ActionEvent e)
       {
         if (ds.hasDatasource())
-          mailMergeParams.showDoMailmergeDialog(myFrame, MailMergeNew.this,
-            ds.getColumnNames());
+          mailMergeParams.showDoMailmergeDialog(myFrame, MailMergeNew.this);
       }
     });
     hbox.add(button);
@@ -957,6 +965,12 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
       o = args.get(SubmitArgument.emailFrom);
       if (o != null) pmod.setPropertyValue(PROP_EMAIL_FROM, o);
+
+      o = args.get(SubmitArgument.emailSubject);
+      if (o != null) pmod.setPropertyValue(PROP_EMAIL_SUBJECT, o);
+
+      o = args.get(SubmitArgument.emailText);
+      if (o != null) pmod.setPropertyValue(PROP_EMAIL_MESSAGE_TEXTTAGS, o);
     }
     catch (Exception x)
     {
@@ -1123,51 +1137,29 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * dabei erhalten.
    * 
    * @author Ignaz Forster (D-III-ITD-D102)
+   * @throws java.io.IOException
    */
-  public static String saveToODF(XPrintModel pmod) throws IOException
+  public static File saveToODT(XPrintModel pmod) throws IOException,
+      java.io.IOException
   {
-    String outputDir;
-    String filename;
-
     XTextDocument textDocument = pmod.getTextDocument();
 
-    HashMap<String, String> formValueSettings =
-      (HashMap<String, String>) getPrintModelProperty(pmod, PROP_DATASET_EXPORT);
-    Integer fileCounter =
-      new Integer(formValueSettings.get(MailMergeParams.TAG_DATENSATZNUMMER));
-    if (fileCounter == null)
-    {
-      fileCounter = 0;
-    }
+    File outputDir =
+      new File(pmod.getProp(PROP_TARGETDIR,
+        System.getProperty("user.home") + "/Seriendruck").toString());
 
-    outputDir = (String) getPrintModelProperty(pmod, PROP_TARGETDIR);
-    if (outputDir == null)
-    {
-      outputDir = System.getProperty("user.home") + "/Seriendruck";
-    }
-    try
-    {
-      // TODO: FOS - nicht getestet, siehe createOutputPathFromPattern für weitere
-      // TODOs
-      TextComponentTags filePattern =
-        (TextComponentTags) pmod.getPropertyValue(PROP_FILEPATTERN);
+    String filename;
+    TextComponentTags filePattern =
+      (TextComponentTags) pmod.getProp(PROP_FILEPATTERN, null);
+    if (filePattern != null)
       filename = createOutputPathFromPattern(filePattern, pmod);
-    }
-    catch (Exception x)
-    {
-      try
-      {
-        filename = new File(new URI(textDocument.getURL())).getName();
-      }
-      catch (URISyntaxException e)
-      {
-        filename = System.getProperty("java.io.tmpdir") + "/output.odt";
-      }
-    }
+    else
+      filename = L.m("Dokument.odt");
+    File file = new File(outputDir, filename);
 
-    saveOutputFile(new File(outputDir + "/" + filename), textDocument);
+    saveOutputFile(file, textDocument);
 
-    return outputDir + "/" + filename;
+    return file;
   }
 
   /**
@@ -1178,42 +1170,76 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    */
   public static void sendAsEmail(XPrintModel pmod)
   {
-    File tmpOutDir;
-    File attachment;
-    try
+    String targetDir = (String) pmod.getProp(PROP_TARGETDIR, null);
+    File tmpOutDir = null;
+    if (targetDir != null)
+      tmpOutDir = new File(targetDir);
+    else
+      try
+      {
+        tmpOutDir = File.createTempFile(TEMP_MAIL_DIR_PREFIX, null);
+        tmpOutDir.delete();
+        tmpOutDir.mkdir();
+        try
+        {
+          pmod.setPropertyValue(PROP_TARGETDIR, tmpOutDir.toString());
+        }
+        catch (Exception e)
+        {
+          Logger.error(L.m("darf nicht vorkommen"), e);
+        }
+      }
+      catch (java.io.IOException e)
+      {
+        Logger.error(e);
+      }
+    if (tmpOutDir == null)
     {
-      tmpOutDir = File.createTempFile(TEMP_MAIL_DIR_PREFIX, null);
-      tmpOutDir.delete();
-      tmpOutDir.mkdir();
-    }
-    catch (java.io.IOException e)
-    {
-      Logger.error(e);
-      WollMuxSingleton.showInfoModal(L.m(ERROR_MESSAGE_TITLE),
-        L.m("Das temporäre Verzeichnis " + TEMP_MAIL_DIR_PREFIX
-          + "konnte nicht angelegt werden."));
+      WollMuxSingleton.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m(
+        "Das temporäre Verzeichnis %1 konnte nicht angelegt werden.",
+        TEMP_MAIL_DIR_PREFIX));
       pmod.cancel();
       return;
     }
 
-    try
+    String from = pmod.getProp(PROP_EMAIL_FROM, "").toString();
+    if (!isMailAddress(from))
     {
-      pmod.setPropertyValue(PROP_TARGETDIR, tmpOutDir.toURI().toString());
-    }
-    catch (Exception e)
-    {
-      Logger.error(e);
+      WollMuxSingleton.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m(
+        "Die Absenderadresse '%1' ist ungültig.", from));
       pmod.cancel();
       return;
     }
 
+    String fieldName = pmod.getProp(PROP_EMAIL_TO_FIELD_NAME, "").toString();
+    @SuppressWarnings("unchecked")
+    HashMap<String, String> ds =
+      new HashMap<String, String>((HashMap<String, String>) pmod.getProp(
+        PROP_DATASET_EXPORT, new HashMap<String, String>()));
+    String to = ds.get(fieldName);
+    PrintModels.setStage(pmod, L.m("Sende an %1", to));
+    if (!isMailAddress(to))
+    {
+      WollMuxSingleton.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m(
+        "Die Empfängeradresse '%1' ist ungültig.", to));
+      // hier kein pmod.cancel() - es soll weiterlaufen!
+      return;
+    }
+
+    String subject =
+      pmod.getProp(PROP_EMAIL_SUBJECT, L.m("<kein Betreff>")).toString();
+
+    String message = "";
+    TextComponentTags messageTags =
+      (TextComponentTags) pmod.getProp(PROP_EMAIL_MESSAGE_TEXTTAGS, null);
+    if (messageTags != null) message = messageTags.getContent(ds);
+
+    File attachment = null;
     try
     {
-      attachment = new File(saveToODF(pmod));
-
+      attachment = saveToODT(pmod);
       EMailSender mail = new EMailSender();
-      mail.createNewMultipartMail("tobias.fischbach@muenchen.de",
-        "ignaz.forster@muenchen.de", "Hallo", "Test");
+      mail.createNewMultipartMail(from, to, subject, message);
       mail.addAttachment(attachment);
       mail.sendMessage();
     }
@@ -1221,7 +1247,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     {
       Logger.error(e);
       WollMuxSingleton.showInfoModal(
-        L.m(ERROR_MESSAGE_TITLE),
+        MAIL_ERROR_MESSAGE_TITLE,
         L.m("Es konnten keine Angaben zum Mailserver gefunden werden - eventuell ist die WollMux-Konfiguration nicht vollständig."));
       pmod.cancel();
       return;
@@ -1229,7 +1255,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     catch (MessagingException e)
     {
       Logger.error(e);
-      WollMuxSingleton.showInfoModal(L.m(ERROR_MESSAGE_TITLE),
+      WollMuxSingleton.showInfoModal(MAIL_ERROR_MESSAGE_TITLE,
         L.m("Der Versand der E-Mail ist fehlgeschlagen."));
       pmod.cancel();
       return;
@@ -1240,20 +1266,20 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       pmod.cancel();
       return;
     }
+    finally
+    {
+      if (attachment != null) attachment.delete();
+    }
   }
 
-  private static Object getPrintModelProperty(XPrintModel pmod, String propertyName)
+  /**
+   * grobe Plausiprüfung, ob E-Mailadresse gültig ist.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private static boolean isMailAddress(String mail)
   {
-    Object result = null;
-    try
-    {
-      result = (Object) pmod.getPropertyValue(propertyName);
-    }
-    catch (UnknownPropertyException e)
-    {}
-    catch (WrappedTargetException e)
-    {}
-    return result;
+    return mail != null && mail.length() > 0 && mail.matches("[^ ]+@[^ ]+");
   }
 
   /**
@@ -1325,59 +1351,107 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    *          Druckauftrag nicht gewählten). Wird verwendet um datensatzNummer und
    *          serienbriefNummer mit 0ern zu padden.
    * 
+   * @throws MissingMapEntryException
+   *           wenn ein Tag verwendet wird, zu dem es keine Spalte im aktuellen
+   *           Datensatz existiert.
+   * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   private static String createOutputPathFromPattern(TextComponentTags filePattern,
       XPrintModel pmod)
   {
-    // TODO: FOS - das sieht noch nicht gut aus - an die Daten sollte man auch anders
-    // kommen...
-    QueryResults data = null;
+    int digits = 4;
     try
     {
-      data = (QueryResults) pmod.getPropertyValue(PROP_QUERYRESULTS);
+      QueryResults r = (QueryResults) pmod.getPropertyValue(PROP_QUERYRESULTS);
+      digits = ("" + r.size()).length();
     }
     catch (Exception e)
     {}
-    HashMap<String, String> formValueSettings =
-      (HashMap<String, String>) getPrintModelProperty(pmod, PROP_DATASET_EXPORT);
-    String datensatzNummer =
-      formValueSettings.get(MailMergeParams.TAG_DATENSATZNUMMER);
-    String serienbriefNummer =
-      formValueSettings.get(MailMergeParams.TAG_SERIENBRIEFNUMMER);
 
-    String totalDatasetsStr = "" + data.size();
-    String datensatzNummerStr = "" + datensatzNummer;
-    while (datensatzNummerStr.length() < totalDatasetsStr.length())
-      datensatzNummerStr = "0" + datensatzNummerStr;
-    String serienbriefNummerStr = "" + serienbriefNummer;
-    while (serienbriefNummerStr.length() < totalDatasetsStr.length())
-      serienbriefNummerStr = "0" + serienbriefNummerStr;
-    StringBuilder buffy = new StringBuilder();
-    for (ContentElement ele : filePattern.getContent())
+    @SuppressWarnings("unchecked")
+    HashMap<String, String> dataset =
+      new HashMap((HashMap<String, String>) pmod.getProp(PROP_DATASET_EXPORT,
+        new HashMap<String, String>()));
+
+    // Zähler für #DS und #SB mit gleicher Länge erzeugen (ggf. mit 0en auffüllen)
+    fillWithLeading0(dataset, MailMergeParams.TAG_DATENSATZNUMMER, digits);
+    fillWithLeading0(dataset, MailMergeParams.TAG_SERIENBRIEFNUMMER, digits);
+
+    String fileName = filePattern.getContent(dataset);
+    return simplifyFilename(fileName);
+  }
+
+  /**
+   * Holt sich Element key aus dataset, sorgt dafür, dass der Wert digit-stellig wird
+   * und speichert diesen Wert wieder in dataset ab.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private static void fillWithLeading0(HashMap<String, String> dataset, String key,
+      int digits)
+  {
+    String value = dataset.get(key);
+    if (value == null) value = "";
+    while (value.length() < digits)
+      value = "0" + value;
+    dataset.put(key, value);
+  }
+
+  /**
+   * Ersetzt alle möglicherweise bösen Zeichen im Dateinamen name durch eine
+   * Unterstrich.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private static String simplifyFilename(String name)
+  {
+    return name.replaceAll("[^\\p{javaLetterOrDigit},.()=+_-]", "_");
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
+   * #hasPrintfunction(java.lang.String)
+   */
+  public boolean hasPrintfunction(String name)
+  {
+    final XPrintModel pmod = mod.createPrintModel(true);
+    try
     {
-      String value = ele.toString();
-      if (ele.isTag())
-      {
-        String tag = ele.toString();
-        if (tag.equals(MailMergeParams.TAG_DATENSATZNUMMER))
-          value = datensatzNummerStr;
-        else if (tag.equals(MailMergeParams.TAG_SERIENBRIEFNUMMER))
-          value = serienbriefNummerStr;
-        // else
-        // try
-        // {
-        // value = ds.get(tag);
-        // }
-        // catch (ColumnNotFoundException x)
-        // {
-        // Logger.error(x);
-        // }
-      }
-      buffy.append(value);
+      pmod.usePrintFunction(name);
+      return true;
     }
+    catch (NoSuchMethodException ex)
+    {
+      return false;
+    }
+  }
 
-    return buffy.toString().replaceAll("[^\\p{javaLetterOrDigit} ,.()=+_-]", "_");
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
+   * #getColumnNames()
+   */
+  public List<String> getColumnNames()
+  {
+    return ds.getColumnNames();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
+   * #getDefaultFilename()
+   */
+  public String getDefaultFilename()
+  {
+    return simplifyFilename(mod.getTitle());
   }
 
   private class MyWindowListener implements WindowListener
@@ -1448,27 +1522,5 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     while (mm.myFrame != null)
       Thread.sleep(1000);
     System.exit(0);
-  }
-
-  /**
-   * Prüft, ob eine Komfordruckfunktion vorhanden ist.
-   * 
-   * @param name
-   *          Name der Druckfunktion
-   * @return
-   * @author Andor Ertsey (D-III-ITD-D101)
-   */
-  public boolean hasPrintfunction(String name)
-  {
-    final XPrintModel pmod = mod.createPrintModel(true);
-    try
-    {
-      pmod.usePrintFunction(name);
-      return true;
-    }
-    catch (NoSuchMethodException ex)
-    {
-      return false;
-    }
   }
 }

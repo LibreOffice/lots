@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sun.star.beans.UnknownPropertyException;
-import com.sun.star.io.IOException;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
@@ -245,9 +244,10 @@ public class StandardPrint
    * @author Ignaz Forster (D-III-ITD-D102)
    * @throws Exception
    */
-  public static void mailMergeNewSingleODF(final XPrintModel pmod) throws Exception
+  public static void mailMergeNewToSingleODT(final XPrintModel pmod)
+      throws Exception
   {
-    MailMergeNew.saveToODF(pmod);
+    MailMergeNew.saveToODT(pmod);
   }
 
   /**
@@ -256,7 +256,7 @@ public class StandardPrint
    * 
    * @author Ignaz Forster (D-III-ITD-D102)
    */
-  public static void mailMergeNewEMail(final XPrintModel pmod)
+  public static void mailMergeNewToEMail(final XPrintModel pmod)
   {
     MailMergeNew.sendAsEmail(pmod);
   }
