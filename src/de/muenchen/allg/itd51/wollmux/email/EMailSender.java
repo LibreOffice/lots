@@ -41,6 +41,7 @@ import javax.mail.internet.MimeMultipart;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.Workarounds;
 
 public class EMailSender
 {
@@ -51,14 +52,6 @@ public class EMailSender
   public EMailSender() throws IncompleteMailserverConfigException
   {
     MailServerSettings mailserver = getWollMuxMailServerSettings();
-
-//    // Workaround für javax.activation.UnsupportedDataTypeException. Weitere Infos:
-//    // http://www.jguru.com/faq/view.jsp?EID=237257
-//    MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
-//    // Weitere Handler-Definitionen siehe META-INF/mailcap in mail.jar
-//    mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed");
-//    CommandMap.setDefaultCommandMap(mc);
-
     props = new Properties();
     props.put("mail.smtp.host", mailserver.getMailserver());
     Session session = Session.getDefaultInstance(props);
@@ -93,6 +86,7 @@ public class EMailSender
 
   public void sendMessage() throws MessagingException
   {
+    Workarounds.applyWorkaroundForOOoIssue102164();
     Transport.send(email);
   }
 

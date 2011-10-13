@@ -102,7 +102,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 
 	<property name="JAVAMAIL_JAR" value ="thirdparty/javamail-1.4.4/mail.jar"/>
 	
-	<property name="CLASSPATH" value="${OOO_CLASSPATH}:${JAVAMAIL_JARS}"/>
+	<property name="CLASSPATH" value="${OOO_CLASSPATH}:${JAVAMAIL_JAR}"/>
 	
 	<property name="BIN" value="bin" />
 	<property name="SRC" value="src" />
