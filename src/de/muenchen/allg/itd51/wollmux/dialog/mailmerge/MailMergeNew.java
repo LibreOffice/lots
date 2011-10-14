@@ -1463,6 +1463,18 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     return simplifyFilename(title);
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
+   * #getTextDocument()
+   */
+  public XTextDocument getTextDocument()
+  {
+    return mod.doc;
+  }
+
   private class MyWindowListener implements WindowListener
   {
     public void windowOpened(WindowEvent e)

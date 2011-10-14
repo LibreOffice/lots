@@ -117,7 +117,7 @@ public class OOoBasedMailMerge
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
-  public static void oooMailMerge(final XPrintModel pmod)
+  public static void oooMailMerge(final XPrintModel pmod, OutputType type)
   {
     PrintModels.setStage(pmod, L.m("Seriendruck vorbereiten"));
 
@@ -161,7 +161,7 @@ public class OOoBasedMailMerge
     {
       PrintModels.setStage(pmod, L.m("Gesamtdokument erzeugen"));
       ProgressUpdater updater = new ProgressUpdater(pmod, ds.getSize());
-      t = runMailMerge(dbName, tmpDir, inputFile, updater);
+      t = runMailMerge(dbName, tmpDir, inputFile, updater, type);
     }
     catch (Exception e)
     {
@@ -190,27 +190,31 @@ public class OOoBasedMailMerge
     inputFile.delete();
     if (pmod.isCanceled()) return;
 
-    // Output-File als Template öffnen und aufräumen
-    File outputFile = new File(tmpDir, "output0.odt");
-    if (outputFile.exists())
-      try
-      {
-        String unoURL = UNO.getParsedUNOUrl(outputFile.toURI().toString()).Complete;
-        Logger.debug(L.m("Öffne erzeugtes Gesamtdokument %1", unoURL));
-        UNO.loadComponentFromURL(unoURL, true, false);
-      }
-      catch (Exception e)
-      {
-        Logger.error(e);
-      }
-    else
+    if (type == OutputType.toFile)
     {
-      WollMuxSingleton.showInfoModal(L.m("WollMux-Seriendruck"),
-        L.m("Leider konnte kein Gesamtdokument erstellt werden."));
-      pmod.cancel();
+      // Output-File als Template öffnen und aufräumen
+      File outputFile = new File(tmpDir, "output0.odt");
+      if (outputFile.exists())
+        try
+        {
+          String unoURL =
+            UNO.getParsedUNOUrl(outputFile.toURI().toString()).Complete;
+          Logger.debug(L.m("Öffne erzeugtes Gesamtdokument %1", unoURL));
+          UNO.loadComponentFromURL(unoURL, true, false);
+        }
+        catch (Exception e)
+        {
+          Logger.error(e);
+        }
+      else
+      {
+        WollMuxSingleton.showInfoModal(L.m("WollMux-Seriendruck"),
+          L.m("Leider konnte kein Gesamtdokument erstellt werden."));
+        pmod.cancel();
+      }
+      outputFile.delete();
     }
 
-    outputFile.delete();
     tmpDir.delete();
   }
 
@@ -1049,6 +1053,16 @@ public class OOoBasedMailMerge
   }
 
   /**
+   * Steuert den Ausgabetyp beim OOo-Seriendruck.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static enum OutputType {
+    toFile,
+    toPrinter;
+  }
+
+  /**
    * Startet die Ausführung des Seriendrucks in ein Gesamtdokument mit dem
    * c.s.s.text.MailMergeService in einem eigenen Thread und liefert diesen zurück.
    * 
@@ -1067,7 +1081,8 @@ public class OOoBasedMailMerge
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static Thread runMailMerge(String dbName, final File outputDir,
-      File inputFile, final ProgressUpdater progress) throws Exception
+      File inputFile, final ProgressUpdater progress, OutputType type)
+      throws Exception
   {
     final XJob mailMerge =
       (XJob) UnoRuntime.queryInterface(XJob.class,
@@ -1099,12 +1114,20 @@ public class OOoBasedMailMerge
     mmProps.add(new NamedValue("Command", TABLE_NAME));
     mmProps.add(new NamedValue("DocumentURL",
       UNO.getParsedUNOUrl(inputFile.toURI().toString()).Complete));
-    mmProps.add(new NamedValue("SaveAsSingleFile", Boolean.TRUE));
-    mmProps.add(new NamedValue("OutputType", MailMergeType.FILE));
-    mmProps.add(new NamedValue("FileNameFromColumn", Boolean.FALSE));
-    mmProps.add(new NamedValue("FileNamePrefix", "output"));
     mmProps.add(new NamedValue("OutputURL",
       UNO.getParsedUNOUrl(outputDir.toURI().toString()).Complete));
+    if (type == OutputType.toFile)
+    {
+      mmProps.add(new NamedValue("SaveAsSingleFile", Boolean.TRUE));
+      mmProps.add(new NamedValue("OutputType", MailMergeType.FILE));
+      mmProps.add(new NamedValue("FileNameFromColumn", Boolean.FALSE));
+      mmProps.add(new NamedValue("FileNamePrefix", "output"));
+    }
+    else if (type == OutputType.toPrinter)
+    {
+      mmProps.add(new NamedValue("OutputType", MailMergeType.PRINTER));
+      mmProps.add(new NamedValue("SinglePrintJobs", Boolean.FALSE));
+    }
     Thread t = new Thread(new Runnable()
     {
       public void run()
@@ -1171,7 +1194,7 @@ public class OOoBasedMailMerge
 
       System.out.println("Temporäre Datenquelle: " + dbName);
 
-      runMailMerge(dbName, tmpDir, inputFile, null);
+      runMailMerge(dbName, tmpDir, inputFile, null, OutputType.toFile);
 
       removeTempDatasource(dbName, tmpDir);
 

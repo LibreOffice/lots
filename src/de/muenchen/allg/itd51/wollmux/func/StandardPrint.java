@@ -222,7 +222,7 @@ public class StandardPrint
    */
   public static void oooMailMergeToOdtFile(final XPrintModel pmod) throws Exception
   {
-    OOoBasedMailMerge.oooMailMerge(pmod);
+    OOoBasedMailMerge.oooMailMerge(pmod, OOoBasedMailMerge.OutputType.toFile);
   }
 
   /**
@@ -234,7 +234,7 @@ public class StandardPrint
    */
   public static void oooMailMergeToPrinter(final XPrintModel pmod) throws Exception
   {
-    OOoBasedMailMerge.oooMailMerge(pmod);
+    OOoBasedMailMerge.oooMailMerge(pmod, OOoBasedMailMerge.OutputType.toPrinter);
   }
 
   /**

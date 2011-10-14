@@ -129,13 +129,6 @@ public class PrintParametersDialog
     {}
   };
 
-  /**
-   * TODO: dok
-   * 
-   * @param doc
-   * @param showCopyCount
-   * @param listener
-   */
   public PrintParametersDialog(XTextDocument doc, boolean showCopyCount,
       ActionListener listener)
   {
@@ -175,11 +168,13 @@ public class PrintParametersDialog
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static enum PageRangeType {
-    // TODO: Formatierung nochmal anpassen....
     ALL(L.m("Alles")),
+
     USER_DEFINED(L.m("Seiten"), "1,3,5,10-100<etwasPlatz>",
         L.m("Mögliche Eingaben sind z.B. '1', '2-5' oder '1,3,5'")),
+
     CURRENT_PAGE(L.m("Aktuelle Seite")),
+
     CURRENT_AND_FOLLOWING(L.m("Aktuelle Seite bis Dokumentende"));
 
     public final String label;
@@ -257,7 +252,7 @@ public class PrintParametersDialog
       BorderFactory.createRaisedBevelBorder(), L.m("Drucker")));
     hbox.add(new JLabel(L.m("Name")));
     hbox.add(Box.createHorizontalStrut(10));
-    printerNameField = new JTextField(" " + getCurrentPrinterName() + " ");
+    printerNameField = new JTextField(" " + getCurrentPrinterName(doc) + " ");
     printerNameField.setEditable(false);
     hbox.add(printerNameField);
     hbox.add(Box.createHorizontalStrut(10));
@@ -468,7 +463,8 @@ public class PrintParametersDialog
                   {
                     public void run()
                     {
-                      printerNameField.setText(" " + getCurrentPrinterName() + " ");
+                      printerNameField.setText(" " + getCurrentPrinterName(doc)
+                        + " ");
                       dialog.pack();
                       dialog.setAlwaysOnTop(true);
                     }
@@ -492,7 +488,7 @@ public class PrintParametersDialog
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public String getCurrentPrinterName()
+  public static String getCurrentPrinterName(XTextDocument doc)
   {
     XPrintable printable = UNO.XPrintable(doc);
     PropertyValue[] printer = null;

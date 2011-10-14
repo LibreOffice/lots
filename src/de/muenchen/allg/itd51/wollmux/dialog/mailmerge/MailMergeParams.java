@@ -65,22 +65,35 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
+import com.sun.star.beans.PropertyValue;
+import com.sun.star.frame.DispatchResultEvent;
+import com.sun.star.frame.XDispatchResultListener;
+import com.sun.star.frame.XNotifyingDispatch;
+import com.sun.star.lang.EventObject;
+import com.sun.star.text.XTextDocument;
+
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
+import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
+import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
 /**
  * Dialoge zur Bestimmung der Parameter für den wirklichen Merge (z.B. ob in
@@ -114,6 +127,13 @@ class MailMergeParams
      * Benutzersicht wahrscheinlich erwünscht ist OHNE Suffix.
      */
     public String getDefaultFilename();
+
+    /**
+     * Liefert das Textdokument für das der Seriendruck gestartet werden soll.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public XTextDocument getTextDocument();
 
     /**
      * Startet den MailMerge
@@ -214,6 +234,7 @@ class MailMergeParams
     emailtofieldname,
     emailtext,
     emailsubject,
+    printersettings,
     glue,
     button,
     unknown;
@@ -435,6 +456,11 @@ class MailMergeParams
    * steht.
    */
   static final String TAG_DATENSATZNUMMER = "#DS";
+
+  /**
+   * Enthält die Hintergrundfarbe des Beschreibungsfeldes im Druckdialog
+   */
+  static final Color DESC_COLOR = new Color(0xffffc8);
 
   /**
    * Enthält den {@link MailMergeController}, der Infos zum aktuellen
@@ -869,7 +895,8 @@ class MailMergeParams
         tf.setEditable(false);
         tf.setFocusable(false);
         DimAdjust.fixedSize(tf);
-        tf.setBackground(Color.YELLOW);
+        tf.setBackground(DESC_COLOR);
+        tf.setBorder(new LineBorder(DESC_COLOR, 4));
         mmp.descriptionFields.add(tf);
         return new UIElement(tf, group, mmp);
       }
@@ -938,6 +965,11 @@ class MailMergeParams
       case emailfrom:
       {
         return new EMailFromUIElement(label, action, value, group, mmp);
+      }
+
+      case printersettings:
+      {
+        return new PrinterSettingsUIElement(label, group, mmp);
       }
     }
     return null;
@@ -1574,6 +1606,95 @@ class MailMergeParams
     }
   }
 
+  private static class PrinterSettingsUIElement extends UIElement
+  {
+    MailMergeParams mmp;
+
+    JTextField printerNameField;
+
+    public PrinterSettingsUIElement(String label, String group,
+        final MailMergeParams mmp)
+    {
+      super(Box.createHorizontalBox(), group, mmp);
+      this.mmp = mmp;
+
+      Box hbox = (Box) getCompo();
+      printerNameField = new JTextField();
+      printerNameField.setEditable(false);
+      printerNameField.setFocusable(false);
+      // DimAdjust.maxHeightIsPrefMaxWidthUnlimited(printerNameField);
+      hbox.add(new JLabel(label));
+      hbox.add(Box.createHorizontalStrut(5));
+      hbox.add(printerNameField);
+      hbox.add(Box.createHorizontalStrut(5));
+      hbox.add(new JButton(new AbstractAction(L.m("Drucker wechseln/einrichten..."))
+      {
+        private static final long serialVersionUID = 1L;
+
+        public void actionPerformed(ActionEvent e)
+        {
+          showPrinterSettings();
+        }
+      }));
+      hbox.add(Box.createHorizontalStrut(6));
+      DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox);
+
+      updateCurrentPrinter();
+    }
+
+    private void updateCurrentPrinter()
+    {
+      printerNameField.setText(PrintParametersDialog.getCurrentPrinterName(mmp.mmc.getTextDocument()));
+    }
+
+    private void showPrinterSettings()
+    {
+      mmp.dialog.setVisible(false);
+      Thread t = new Thread()
+      {
+        public void run()
+        {
+          try
+          {
+            com.sun.star.util.URL url =
+              UNO.getParsedUNOUrl(Dispatch.DISP_unoPrinterSetup);
+            XNotifyingDispatch disp =
+              UNO.XNotifyingDispatch(WollMuxSingleton.getDispatchForModel(
+                UNO.XModel(mmp.mmc.getTextDocument()), url));
+
+            if (disp != null)
+            {
+              disp.dispatchWithNotification(url, new PropertyValue[] {},
+                new XDispatchResultListener()
+                {
+                  public void disposing(EventObject arg0)
+                  {}
+
+                  public void dispatchFinished(DispatchResultEvent arg0)
+                  {
+                    SwingUtilities.invokeLater(new Runnable()
+                    {
+                      public void run()
+                      {
+                        updateCurrentPrinter();
+                        mmp.dialog.setVisible(true);
+                      }
+                    });
+                  }
+                });
+            }
+          }
+          catch (java.lang.Exception e)
+          {
+            Logger.error(e);
+          }
+        }
+      };
+      t.setDaemon(false);
+      t.start();
+    }
+  }
+
   /**
    * Beschreibt eine Section im Seriendruckdialog (z.B. "Aktionen" oder "Output") und
    * enthält UIElemente. Sind alle UIElement dieser Section unsichtbar, so ist auch
@@ -1778,6 +1899,22 @@ class MailMergeParams
       public String getDefaultFilename()
       {
         return "MeinDokument";
+      }
+
+      private boolean initialized = false;
+
+      public XTextDocument getTextDocument()
+      {
+        if (!initialized) try
+        {
+          initialized = true;
+          UNO.init();
+        }
+        catch (Exception e)
+        {
+          e.printStackTrace();
+        }
+        return UNO.XTextDocument(UNO.desktop.getCurrentComponent());
       }
     };
 
