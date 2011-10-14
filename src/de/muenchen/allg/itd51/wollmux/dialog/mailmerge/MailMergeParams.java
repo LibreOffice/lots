@@ -333,8 +333,9 @@ class MailMergeParams
             }
             catch (UIElement.InvalidArgumentException ex)
             {
-              JOptionPane.showMessageDialog(mmp.dialog, ex.getMessage(),
-                L.m("Fehlerhafte Eingabe"), JOptionPane.ERROR_MESSAGE);
+              if (ex.getMessage() != null)
+                JOptionPane.showMessageDialog(mmp.dialog, ex.getMessage(),
+                  L.m("Fehlerhafte Eingabe"), JOptionPane.ERROR_MESSAGE);
             }
           }
         };
@@ -1058,6 +1059,11 @@ class MailMergeParams
     {
       private static final long serialVersionUID = -2091420849047004341L;
 
+      private InvalidArgumentException()
+      {
+        super(null, null);
+      }
+
       private InvalidArgumentException(String msg)
       {
         super(msg);
@@ -1390,6 +1396,8 @@ class MailMergeParams
   {
     private final JTextField textField;
 
+    private final MailMergeParams mmp;
+
     public EMailSubject(String label, UIElementAction action, final String value,
         String group, final MailMergeParams mmp)
     {
@@ -1406,12 +1414,24 @@ class MailMergeParams
 
       vbox.add(hbox);
       vbox.add(Box.createVerticalStrut(5));
+      this.mmp = mmp;
     }
 
     public void addSubmitArgs(Map<SubmitArgument, Object> args)
         throws UIElement.InvalidArgumentException
     {
-      args.put(SubmitArgument.emailSubject, textField.getText());
+      String subject = textField.getText();
+      if (subject.trim().length() == 0)
+      {
+        int res =
+          JOptionPane.showConfirmDialog(mmp.dialog,
+            L.m("Ihre Betreffszeile ist leer. Möchten Sie wirklich fortsetzen?"),
+            L.m("Betreff fehlt!"), JOptionPane.YES_NO_OPTION);
+        if (res == JOptionPane.NO_OPTION)
+          throw new UIElement.InvalidArgumentException();
+      }
+
+      args.put(SubmitArgument.emailSubject, subject);
     }
   }
 

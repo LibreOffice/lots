@@ -56,6 +56,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
@@ -1220,9 +1221,13 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     PrintModels.setStage(pmod, L.m("Sende an %1", to));
     if (!isMailAddress(to))
     {
-      WollMuxSingleton.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m(
-        "Die Empfängeradresse '%1' ist ungültig.", to));
-      // hier kein pmod.cancel() - es soll weiterlaufen!
+      int res =
+        JOptionPane.showConfirmDialog(
+          null,
+          L.m(
+            "Die Empfängeradresse '%1' ist ungültig!\n\nDiesen Datensatz überspringen und fortsetzen?",
+            to), MAIL_ERROR_MESSAGE_TITLE, JOptionPane.OK_CANCEL_OPTION);
+      if (res == JOptionPane.CANCEL_OPTION) pmod.cancel();
       return;
     }
 
@@ -1451,7 +1456,11 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    */
   public String getDefaultFilename()
   {
-    return simplifyFilename(mod.getTitle());
+    String title = mod.getTitle();
+    // Suffix entfernen:
+    if (title.toLowerCase().matches(".+\\.(odt|doc|ott|dot)$"))
+      title = title.substring(0, title.length() - 4);
+    return simplifyFilename(title);
   }
 
   private class MyWindowListener implements WindowListener
