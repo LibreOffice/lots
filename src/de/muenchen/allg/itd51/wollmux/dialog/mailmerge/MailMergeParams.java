@@ -668,6 +668,7 @@ class MailMergeParams
       int x = screenSize.width / 2 - frameWidth / 2;
       int y = screenSize.height / 2 - frameHeight / 2;
       dialog.setLocation(x, y);
+      dialog.pack(); // manchmal funzt der repaint nicht... warum?
     }
   }
 
