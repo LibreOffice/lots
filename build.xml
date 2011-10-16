@@ -285,6 +285,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 			encoding="${SRC_ENCODING}"
 			debug="${DEBUG}"
 			optimize="${OPTIMIZE}"
+			source="1.5"
 			target="1.5"
 		/>
 		
@@ -295,6 +296,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 			encoding="${SRC_ENCODING}"
 			debug="${DEBUG}"
 			optimize="${OPTIMIZE}"
+			source="1.5"
 			target="1.5"
 		/>
 	</target>
@@ -464,6 +466,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 			encoding="${SRC_ENCODING}"
 			debug="${DEBUG}"
 			optimize="${OPTIMIZE}"
+			source="1.5"
 			target="1.5"
 		/>
 
