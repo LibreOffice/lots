@@ -2671,7 +2671,9 @@ public class WollMuxBar
         if (fifo != null)
         {
           Logger.debug(L.m("%1: Lösche fifo-File '%2'.", randInt, fifo));
-          fifo.delete();
+          if (!fifo.delete()) {
+            Logger.debug(L.m("fifo.delete fehlgeschlagen!"));
+          }
         }
         fifoListenerThread = null;
       }
