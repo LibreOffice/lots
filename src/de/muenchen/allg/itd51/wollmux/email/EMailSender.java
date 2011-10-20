@@ -24,6 +24,8 @@ package de.muenchen.allg.itd51.wollmux.email;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -37,9 +39,14 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
 
@@ -49,12 +56,14 @@ public class EMailSender
 
   private Message email;
 
-  public EMailSender() throws IncompleteMailserverConfigException
+  private Session session;
+
+  static private MailServerSettings mailserver = null;
+
+  public EMailSender()
   {
-    MailServerSettings mailserver = getWollMuxMailServerSettings();
     props = new Properties();
-    props.put("mail.smtp.host", mailserver.getMailserver());
-    Session session = Session.getDefaultInstance(props);
+    session = Session.getDefaultInstance(props);
     email = new MimeMessage(session);
   }
 
@@ -84,10 +93,32 @@ public class EMailSender
     ((Multipart) email.getContent()).addBodyPart(messageBodyPart);
   }
 
-  public void sendMessage() throws MessagingException
+  public void sendMessage() throws IncompleteMailserverConfigException,
+      MessagingException
   {
-    Workarounds.applyWorkaroundForOOoIssue102164();
-    Transport.send(email);
+
+    if (mailserver == null)
+    {
+      mailserver = getWollMuxMailServerSettings();
+    }
+    try
+    {
+      Workarounds.applyWorkaroundForOOoIssue102164();
+      Transport tr = session.getTransport("smtp");
+      Workarounds.applyWorkaroundForOOoIssue102164();
+      tr.connect(mailserver.getMailserver(), mailserver.getMailserverport(),
+        mailserver.getUsername(), mailserver.getPassword());
+      Workarounds.applyWorkaroundForOOoIssue102164();
+      email.saveChanges();
+
+      Workarounds.applyWorkaroundForOOoIssue102164();
+      tr.sendMessage(email, email.getAllRecipients());
+    }
+    catch (MessagingException e)
+    {
+      mailserver = null;
+      throw new MessagingException(e.getMessage(), e);
+    }
   }
 
   private MailServerSettings getWollMuxMailServerSettings()
@@ -99,9 +130,61 @@ public class EMailSender
     {
       wollmuxconf = wollmuxconf.query("EMailEinstellungen").getLastChild();
       mailserver.setMailserver(wollmuxconf.get("SERVER").toString());
-      mailserver.setMailserverport(new Integer(wollmuxconf.get("PORT").toString()));
+    }
+    catch (Exception e)
+    {
+      throw new IncompleteMailserverConfigException();
+    }
+
+    try
+    {
+      if (wollmuxconf.query("PORT").count() != 1
+        || wollmuxconf.get("PORT").toString().equals(""))
+        mailserver.setMailserverport("-1");
+      else
+        mailserver.setMailserverport(wollmuxconf.get("PORT").toString());
+
+      if (wollmuxconf.query("AUTH_USER_PATTERN").count() == 1
+        && !wollmuxconf.get("AUTH_USER_PATTERN").toString().equals(""))
+      {
+        String username = email.getFrom()[0].toString();
+        Pattern pattern =
+          Pattern.compile(wollmuxconf.get("AUTH_USER_PATTERN").toString());
+        try
+        {
+          Matcher result = pattern.matcher(username);
+          result.find();
+          username = result.group(1);
+        }
+        catch (IllegalStateException e)
+        {
+          username = pattern.pattern();
+        }
+
+        JLabel jUserName = new JLabel(L.m("Benutzername"));
+        JTextField userNameField = new JTextField(username);
+        JLabel jPassword = new JLabel(L.m("Passwort"));
+        JTextField passwordField = new JPasswordField();
+        String jAuthPrompt =
+          new String(
+            L.m("Bitte geben Sie Benutzername und Passwort für den E-Mail-Server ein."));
+        Object[] dialogElements = {
+          jAuthPrompt, jUserName, userNameField, jPassword, passwordField };
+        int dialog =
+          JOptionPane.showConfirmDialog(null, dialogElements,
+            L.m("Authentifizierung am E-Mail-Server"), JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.PLAIN_MESSAGE);
+
+        if (dialog == JOptionPane.OK_OPTION)
+        {
+          mailserver.setUsername(userNameField.getText());
+          mailserver.setPassword(passwordField.getText());
+        }
+      }
     }
     catch (NodeNotFoundException e)
+    {}
+    catch (Exception e)
     {
       throw new IncompleteMailserverConfigException();
     }

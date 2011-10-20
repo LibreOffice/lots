@@ -91,12 +91,10 @@ public class TextComponentTags
 
   /**
    * Beschreibt einen regulären Ausdruck, mit dem nach Tags im Text gesucht werden
-   * kann. Ein Match liefert in Gruppe 1 den Text vor dem Tag, in Gruppe 2 das Tag
-   * mit Präfix und Suffix und in Gruppe 3 den Tag-Namen zurück.
+   * kann. Ein Match liefert in Gruppe 1 den Text des Tags.
    */
   private final static Pattern TAG_PATTERN =
-    Pattern.compile("([^(" + TAG_PREFIX + ")]*)(" + TAG_PREFIX + "([^(" + TAG_SUFFIX
-      + ")]*)" + TAG_SUFFIX + ")");
+    Pattern.compile("(" + TAG_PREFIX + "(.*?)" + TAG_SUFFIX + ")");
 
   /**
    * Farbe, mit dem der Hintergund eines Textfeldes im Dialog "Felder anpassen"
@@ -169,13 +167,14 @@ public class TextComponentTags
     String t = compo.getText();
     Matcher m = TAG_PATTERN.matcher(t);
     int lastEndPos = 0;
+    int startPos = 0;
     while (m.find())
     {
-      lastEndPos = m.end();
-      String text = m.group(1);
-      String tag = m.group(3);
-      if (text.length() > 0) list.add(new ContentElement(text, false));
+      startPos = m.start();
+      String tag = m.group(2);
+      list.add(new ContentElement(t.substring(lastEndPos, startPos), false));
       if (tag.length() > 0) list.add(new ContentElement(tag, true));
+      lastEndPos = m.end();
     }
     String text = t.substring(lastEndPos);
     if (text.length() > 0) list.add(new ContentElement(text, false));
@@ -730,7 +729,7 @@ public class TextComponentTags
     Matcher m = TAG_PATTERN.matcher(compo.getText());
     while (m.find())
     {
-      results.add(new TagPos(m.start(2), m.end(2), m.group(3)));
+      results.add(new TagPos(m.start(1), m.end(1), m.group(2)));
     }
     return results.iterator();
   }

@@ -21,11 +21,17 @@
 
 package de.muenchen.allg.itd51.wollmux.email;
 
+import java.util.regex.Pattern;
+
 public class MailServerSettings
 {
   private String mailserver;
 
   private Integer mailserverport;
+
+  private String username;
+
+  private String password;
 
   public String getMailserver()
   {
@@ -42,8 +48,28 @@ public class MailServerSettings
     return mailserverport;
   }
 
-  public void setMailserverport(Integer mailserverport)
+  public void setMailserverport(String mailserverport)
   {
-    this.mailserverport = mailserverport;
+    this.mailserverport = new Integer(mailserverport);
+  }
+
+  public String getUsername()
+  {
+    return username;
+  }
+
+  public void setUsername(String username)
+  {
+    this.username = username;
+  }
+
+  public String getPassword()
+  {
+    return password;
+  }
+
+  public void setPassword(String password)
+  {
+    this.password = password;
   }
 }
