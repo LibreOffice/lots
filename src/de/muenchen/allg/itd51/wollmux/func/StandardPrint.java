@@ -23,6 +23,7 @@ package de.muenchen.allg.itd51.wollmux.func;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.lang.NoSuchMethodException;
@@ -37,13 +38,11 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 
 public class StandardPrint
 {
-
   /**
    * Unter diesem Key werden in den Properties eines XPrintModels die Einstellungen
    * zu den Sachleitenden Verfügungen als Objekte vom Typ List<VerfuegungspunktInfo>
@@ -69,20 +68,13 @@ public class StandardPrint
     // Druckfunktion SachleitendeVerfuegungOutput für SLV-Ausgabe hinzuladen:
     try
     {
-      pmod.usePrintFunction("SachleitendeVerfuegungOutput");
+      pmod.usePrintFunction(InternalPrintFunction.SachleitendeVerfuegungOutput.name());
     }
     catch (NoSuchMethodException e)
     {
-      String method = "sachleitendeVerfuegungOutput";
-      int order = 150;
-      PrintFunction func = getInternalPrintFunction(method, order);
-      if (pmod instanceof InternalPrintModel)
-      {
-        Logger.debug(L.m(
-          "Verwende interne Druckfunktion '%1' mit ORDER-Wert '%2' als Fallback.",
-          method, order));
-        ((InternalPrintModel) pmod).useInternalPrintFunction(func);
-      }
+      Logger.error(e);
+      pmod.cancel();
+      return;
     }
 
     List<VerfuegungspunktInfo> settings =
@@ -262,40 +254,6 @@ public class StandardPrint
   }
 
   /**
-   * Erzeugt eine interne Druckfunktion, die auf die in dieser Klasse definierte
-   * Methode mit dem Namen functionName verweist und den Order-Wert order besitzt.
-   * 
-   * @param functionName
-   *          Enthält den Namen einer in dieser Klasse definierten
-   *          Standard-Druckfunktion
-   * @param order
-   *          enthält den Order-Wert, der für die bestimmung der Reihenfolge der
-   *          Ausführung benötigt wird.
-   * @return die neue Druckfunktion oder null, wenn die Funktion nicht definiert ist.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public static PrintFunction getInternalPrintFunction(final String functionName,
-      int order)
-  {
-    ConfigThingy conf = new ConfigThingy("EXTERN");
-    ConfigThingy url = new ConfigThingy("URL");
-    url.addChild(new ConfigThingy("java:" + StandardPrint.class.getName() + "."
-      + functionName));
-    conf.addChild(url);
-    try
-    {
-      return new PrintFunction(conf, functionName, order);
-    }
-    catch (ConfigurationErrorException e)
-    {
-      Logger.error(L.m("Interne Druckfunktion '%1' nicht definiert!", functionName),
-        e);
-      return null;
-    }
-  }
-
-  /**
    * Hängt das zu pmod gehörige TextDocument an das im Property
    * PrintIntoFile_OutputDocument gespeicherte XTextDocument an. Falls noch kein
    * solches Property existiert, wird ein leeres Dokument angelegt.
@@ -364,5 +322,84 @@ public class StandardPrint
     pmod.setPropertyValue("PrintIntoFile_OutputDocument", outputDoc);
 
     return outputDoc;
+  }
+
+  /**
+   * Enthält alle internen Druckfunktionen dieser Klasse, die als
+   * Default-Druckfunktionen verwendet werden, wenn sie nicht sowieso in der
+   * Konfiguration definiert sind.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private enum InternalPrintFunction {
+    SachleitendeVerfuegung("sachleitendeVerfuegung", 50),
+  
+    MailMergeNewSetFormValue("mailMergeNewSetFormValue", 75),
+  
+    SachleitendeVerfuegungOutput("sachleitendeVerfuegungOutput", 150),
+  
+    MailMergeNewToSingleODT("mailMergeNewToSingleODT", 200),
+  
+    MailMergeNewToEMail("mailMergeNewToEMail", 200),
+  
+    OOoMailMergeToPrinter("oooMailMergeToPrinter", 200),
+  
+    OOoMailMergeToOdtFile("oooMailMergeToOdtFile", 200);
+  
+    private String intMethodName;
+  
+    private int order;
+  
+    InternalPrintFunction(String intMethodName, int order)
+    {
+      this.intMethodName = intMethodName;
+      this.order = order;
+    }
+  
+    /**
+     * Erzeugt die interne Druckfunktion
+     * 
+     * @return die neue Druckfunktion oder null, wenn die Funktion nicht definiert
+     *         ist.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    public PrintFunction createPrintFunction()
+    {
+      ConfigThingy conf = new ConfigThingy("EXTERN");
+      ConfigThingy url = new ConfigThingy("URL");
+      url.addChild(new ConfigThingy("java:" + StandardPrint.class.getName() + "."
+        + intMethodName));
+      conf.addChild(url);
+      try
+      {
+        return new PrintFunction(conf, intMethodName, order);
+      }
+      catch (ConfigurationErrorException e)
+      {
+        Logger.error(L.m("Interne Druckfunktion '%1' nicht definiert!",
+          intMethodName), e);
+        return null;
+      }
+    }
+  }
+
+  /**
+   * Diese Methode fügt der PrintFunctionLibrary funcLib alle in dieser Klasse
+   * definierten Druckfunktionen hinzu, wenn sie nicht bereits in funcLib enthalten
+   * sind.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static void addInternalDefaultPrintFunctions(PrintFunctionLibrary funcLib)
+  {
+    Set<String> names = funcLib.getFunctionNames();
+    for (InternalPrintFunction f : InternalPrintFunction.values())
+      if (!names.contains(f.name()))
+      {
+        funcLib.add(f.name(), f.createPrintFunction());
+        Logger.debug(L.m("Registriere interne Druckfunktion %1 als Fallback",
+          f.name()));
+      }
   }
 }

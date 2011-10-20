@@ -603,9 +603,7 @@ class MailMergeParams
     }
     catch (Exception e)
     {
-      Logger.error(
-        L.m("Kann Voreinstellung der Absender E-Mailadresse für den Seriendruckdialog nicht bestimmen"),
-        e);
+      Logger.debug(L.m("Kann Voreinstellung der Absender E-Mailadresse für den Seriendruckdialog nicht bestimmen"));
     }
 
     showDoMailmergeDialog(parent, mmc, sdConf, defaultFrom);

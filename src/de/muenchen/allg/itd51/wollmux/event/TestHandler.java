@@ -45,7 +45,6 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
 
@@ -101,8 +100,10 @@ public class TestHandler
       {
         Logger.error(e);
       }
-      ((InternalPrintModel) pmod).useInternalPrintFunction(StandardPrint.getInternalPrintFunction(
-        "sachleitendeVerfuegungOutput", 10));
+      // FIXME: auskommentiert --> Code broken
+      // ((InternalPrintModel)
+      // pmod).useInternalPrintFunction(StandardPrint.getInternalPrintFunction(
+      // "sachleitendeVerfuegungOutput", 10));
       // Drucken im Hintergrund, damit der WollMux weiterläuft.
       new Thread()
       {
@@ -152,8 +153,8 @@ public class TestHandler
 
   /**
    * Liest die Argumente aus der Datei WOLLMUX_QATEST_ARGS_FILE in eine HashMap ein
-   * und liefert diese zurück. Die Argumente werden in der Datei in Zeilen der Form "<key>,<value>"
-   * abgelegt erwartet (key darf dabei kein "," enthalten).
+   * und liefert diese zurück. Die Argumente werden in der Datei in Zeilen der Form
+   * "<key>,<value>" abgelegt erwartet (key darf dabei kein "," enthalten).
    * 
    * @return
    * 

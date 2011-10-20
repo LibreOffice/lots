@@ -104,6 +104,7 @@ import de.muenchen.allg.itd51.wollmux.event.GlobalEventListener;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
 
 /**
  * Diese Klasse ist ein Singleton, welches den WollMux initialisiert und alle
@@ -295,6 +296,7 @@ public class WollMuxSingleton implements XPALProvider
      */
     globalPrintFunctions =
       WollMuxFiles.parsePrintFunctions(WollMuxFiles.getWollmuxConf());
+    StandardPrint.addInternalDefaultPrintFunctions(globalPrintFunctions);
 
     /*
      * Dokumentaktionen parsen. Diese haben weder Kontext noch Dialoge.
