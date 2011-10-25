@@ -39,7 +39,7 @@ use warnings;
 
 my $page = { "text" => "" };
 
-open(my $in, "html2text -nobs http://limux.tvc.muenchen.de/wiki/index.php/Roadmap_des_WollMux|") or error("Couldn't read from Wiki: $!");
+open(my $in, "wget --no-proxy -qO- http://limux.tvc.muenchen.de/wiki/index.php/Roadmap_des_WollMux | html2text -nobs |") or error("Couldn't read from Wiki: $!");
 parse($page, $in, 1000000);
 
 print " " x 1,"=" x 20, " Neu in dieser Version ", "=" x 20;
