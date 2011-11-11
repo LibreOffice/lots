@@ -734,7 +734,6 @@ public class WollMuxBar
     {
       upAndAwayMinimizedPanel = new JPanel();
       upAndAwayMinimizedPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-      upAndAwayMinimizedPanel.setPreferredSize(new Dimension(minimizedWidth, 5));
     }
   }
 
@@ -2144,6 +2143,7 @@ public class WollMuxBar
       myFrame.setJMenuBar(null);
       Container contentPane = myFrame.getContentPane();
       contentPane.remove(contentPanel);
+      upAndAwayMinimizedPanel.setPreferredSize(new Dimension(contentPanel.getWidth(), 6));
       contentPane.add(upAndAwayMinimizedPanel);
       myFrame.pack();
       myFrame.setLocation(
