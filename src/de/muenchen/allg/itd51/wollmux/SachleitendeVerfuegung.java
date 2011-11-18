@@ -974,7 +974,9 @@ public class SachleitendeVerfuegung
       // Zuleitungszeilen hinzufügen (auch wenn der Paragraph Verfügungspunkt
       // und Zuleitungszeile zugleich ist)
       if ((isZuleitungszeile(cursor) || isVerfuegungspunktMitZuleitung(cursor))
-        && currentVerfpunkt != null)
+        && currentVerfpunkt != null
+        // ausgeblendete Zeilen ignorieren
+        && Boolean.FALSE.equals(UNO.getProperty(cursor, "CharHidden")))
       {
         String zuleit = cursor.getString();
         // nicht leere Zuleitungszeilen zum Verfügungspunkt hinzufügen.
