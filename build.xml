@@ -194,6 +194,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		<loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true">
 			<filterchain>
 				<striplinebreaks/>
+				<trim/>
 			</filterchain>
 		</loadfile>
 		<echo message="WollMux-Version is ${VERSION}" />
