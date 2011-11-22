@@ -114,8 +114,10 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.FormModelImpl;
+import de.muenchen.allg.itd51.wollmux.FormModelImpl.InvalidFormDescriptorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
@@ -129,12 +131,10 @@ import de.muenchen.allg.itd51.wollmux.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo;
-import de.muenchen.allg.itd51.wollmux.FormModelImpl.InvalidFormDescriptorException;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -777,11 +777,11 @@ public class WollMuxEventHandler
       myPanel.add(hbox);
 
       copyrightPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-      JLabel label = new JLabel("WollMux " + mux.getVersion());
+      JLabel label = new JLabel(L.m("WollMux") + " " + mux.getVersion());
       Font largeFont = label.getFont().deriveFont(15.0f);
       label.setFont(largeFont);
       copyrightPanel.add(label);
-      label = new JLabel("Copyright (c) 2005-2011 Landeshauptstadt München");
+      label = new JLabel(L.m("Copyright (c) 2005-2011 Landeshauptstadt München"));
       label.setFont(largeFont);
       copyrightPanel.add(label);
       label = new JLabel(L.m("Lizenz: %1", "European Union Public License"));
@@ -860,7 +860,7 @@ public class WollMuxEventHandler
       infoPanel.setOpaque(false);
       infoPanel.setBorder(BorderFactory.createTitledBorder(L.m("Info")));
 
-      infoPanel.add(new JLabel("WollMux" + " " + mux.getBuildInfo()));
+      infoPanel.add(new JLabel(L.m("WollMux") + " " + mux.getBuildInfo()));
 
       if (wollMuxBarVersion != null && !wollMuxBarVersion.equals(""))
         infoPanel.add(new JLabel(L.m("WollMux-Leiste") + " " + wollMuxBarVersion));
@@ -3523,7 +3523,7 @@ public class WollMuxEventHandler
           if (vc != null) vc.collapseToEnd();
         }
         WollMuxSingleton.showInfoModal(L.m("Block wurde markiert"), L.m(
-          "Der ausgewählte Block %1.", markChange));
+"Der ausgewählte Block %1.", markChange));
       }
 
       // PrintBlöcke neu einlesen:
