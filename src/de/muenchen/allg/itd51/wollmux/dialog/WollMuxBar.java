@@ -393,11 +393,6 @@ public class WollMuxBar
   private List<Senderbox> senderboxes = new Vector<Senderbox>();
 
   /**
-   * Die breite der minimierten WollMux-Leiste im UP_AND_AWAY_WINDOW_MODE.
-   */
-  private int minimizedWidth = 300;
-
-  /**
    * Wird im UP_AND_AWAY_WINDOW_MODE auf das Fenster registriert.
    */
   private UpAndAwayWindowTransformer upAndAwayWindowTransformer =
@@ -714,10 +709,6 @@ public class WollMuxBar
     myFrame.setSize(frameSize);
     myFrame.setLocation(frameLocation);
     myFrame.validate(); // ohne diese wurde in Tests manchmal nicht neu gezeichnet
-
-    minimizedWidth = frameSize.width;
-    if (minimizedWidth > 128) minimizedWidth -= 64;
-
   }
 
   /**
