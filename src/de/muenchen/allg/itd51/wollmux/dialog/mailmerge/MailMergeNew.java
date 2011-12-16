@@ -69,6 +69,7 @@ import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.PrintModels;
@@ -1248,7 +1249,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       mail.addAttachment(attachment);
       mail.sendMessage();
     }
-    catch (IncompleteMailserverConfigException e)
+    catch (ConfigurationErrorException e)
     {
       Logger.error(e);
       WollMuxSingleton.showInfoModal(

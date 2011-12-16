@@ -46,6 +46,7 @@ import javax.swing.JTextField;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
@@ -93,7 +94,7 @@ public class EMailSender
     ((Multipart) email.getContent()).addBodyPart(messageBodyPart);
   }
 
-  public void sendMessage() throws IncompleteMailserverConfigException,
+  public void sendMessage() throws ConfigurationErrorException,
       MessagingException
   {
 
@@ -122,7 +123,7 @@ public class EMailSender
   }
 
   private MailServerSettings getWollMuxMailServerSettings()
-      throws IncompleteMailserverConfigException
+      throws ConfigurationErrorException
   {
     MailServerSettings mailserver = new MailServerSettings();
     ConfigThingy wollmuxconf = WollMuxFiles.getWollmuxConf();
@@ -133,7 +134,7 @@ public class EMailSender
     }
     catch (Exception e)
     {
-      throw new IncompleteMailserverConfigException();
+      throw new ConfigurationErrorException();
     }
 
     try
@@ -186,7 +187,7 @@ public class EMailSender
     {}
     catch (Exception e)
     {
-      throw new IncompleteMailserverConfigException();
+      throw new ConfigurationErrorException();
     }
     return mailserver;
   }
