@@ -89,6 +89,7 @@ import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormFieldType;
 import de.muenchen.allg.itd51.wollmux.PersistentDataContainer.DataID;
 import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
+import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 
 public class OOoBasedMailMerge
@@ -546,6 +547,8 @@ public class OOoBasedMailMerge
      */
     public void flushAndClose() throws Exception
     {
+      validateColumnHeaders();
+      
       PrintWriter p = new PrintWriter(csvFile);
       p.print(line(getHeaders()));
       for (HashMap<String, String> ds : datasets)
@@ -560,6 +563,27 @@ public class OOoBasedMailMerge
         p.print(line(entries));
       }
       p.close();
+    }
+
+    private void validateColumnHeaders() throws ColumnNotFoundException
+    {
+      String invalidHeaders = "";
+      for (String key : getHeaders())
+      {
+        if (key.contains("\n"))
+        {
+          invalidHeaders += "• " + key + "\n";
+        }
+      }
+      if (! invalidHeaders.isEmpty())
+      {
+        WollMuxSingleton.showInfoModal(
+          L.m("WollMux-Seriendruck"),
+          L.m("Zeilenumbrüche in Spaltenüberschriften sind für den Seriendruck nicht erlaubt.\n")
+          + L.m("\nBitte entfernen Sie die Zeilenumbrüche aus den folgenden Überschriften:\n\n")
+          + invalidHeaders);
+        throw new ColumnNotFoundException(L.m("Spaltenüberschriften enthalten newlines"));
+      }
     }
 
     /**
