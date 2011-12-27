@@ -73,11 +73,11 @@ import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.PrintModels;
+import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
@@ -95,7 +95,6 @@ import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
 import de.muenchen.allg.itd51.wollmux.email.EMailSender;
-import de.muenchen.allg.itd51.wollmux.email.IncompleteMailserverConfigException;
 
 /**
  * Die neuen erweiterten Serienbrief-Funktionalitäten.
