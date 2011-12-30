@@ -108,7 +108,8 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="SRC" value="src" />
 	<property name="THIRDPARTY" value="thirdparty"/>
 	
-	<property name="WOLLMUXBAR_JAR_NAME" value="WollMuxBar.jar" />
+	<property name="WOLLMUXBAR_NAME" value="WollMuxBar" />
+	<property name="WOLLMUXBAR_JAR_NAME" value="${WOLLMUXBAR_NAME}.jar" />
 	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/${WOLLMUXBAR_JAR_NAME}" />
 	<property name="WOLLMUXBAR_EXE_NAME" value="wollmuxbar.exe" />
 	<property name="WOLLMUXBAR_EXE" value="${PACKAGE_DIR}/${WOLLMUXBAR_EXE_NAME}" />
@@ -451,7 +452,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<!-- Das Target erzeugt die wollmuxbar.exe -->
 	<target name="wollmuxbar.exe">
 		<exec executable="makensis" failonerror="true" failifexecutionfails="true">
-			<arg line="-V3 ${MISC}/wollmuxbarlauncher.nsi"/>
+			<arg line="-V3 -DOUT_FILE=${WOLLMUXBAR_EXE_NAME} -DJAR_FILE=${WOLLMUXBAR_JAR_NAME} ${MISC}/wollmuxbarlauncher.nsi"/>
 		</exec>
 		<move file="${MISC}/${WOLLMUXBAR_EXE_NAME}" todir="${PACKAGE_DIR}" />
 	</target>
@@ -489,10 +490,10 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<!-- Das Target erzeugt den Windows WollMux-Installer -->
 	<target name="wininstaller" depends="makeversion, TerminateOOo.jar, WollMuxBar.jar, WollMux.oxt">
 		<exec executable="makensis" failonerror="true" failifexecutionfails="true">
-			<arg line="-V3 -DFILESDIR=../${PACKAGE_DIR} -DVERSION=${VERSION} ${MISC}/wollmuxinstaller.nsi"/>
+			<arg line="-V3 -DFILESDIR=../${PACKAGE_DIR} -DVERSION=${VERSION} -DWOLLMUX=${COMPONENT} -DWOLLMUXBAR=${WOLLMUXBAR_NAME} -DWOLLMUXBAR_EXE_NAME=${WOLLMUXBAR_EXE_NAME} -DWOLLMUXBAR_JAR_NAME=${WOLLMUXBAR_JAR_NAME} ${MISC}/wollmuxinstaller.nsi"/>
 		</exec>
 		
-		<move file="${MISC}/wollmux-${VERSION}-installer.exe" todir="${PACKAGE_DIR}" />
+		<move file="${MISC}/${COMPONENT}-${VERSION}-installer.exe" todir="${PACKAGE_DIR}" />
 		<delete file="${TERMINATEOOO_JAR}" />
 	</target>
 
