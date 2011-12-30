@@ -36,10 +36,26 @@
 	!define FILESDIR "files" ;; default
 !endif
 
+!ifndef WOLLMUX ;; name to use for WollMux application
+	!define WOLLMUX "WollMux" ;; default
+!endif
 
-Name "WollMux ${VERSION}"
-OutFile "wollmux-${VERSION}-installer.exe"
-Caption "WollMux Installer"
+!ifndef WOLLMUXBAR ;; name to use for the WollMuxBar
+	!define WOLLMUXBAR "WollMuxBar" ;; default
+!endif
+
+!ifndef WOLLMUXBAR_EXE_NAME ;; name of the wollmuxbar.exe
+	!define WOLLMUXBAR_EXE_NAME "wollmuxbar.exe" ;; default
+!endif
+
+!ifndef WOLLMUXBAR_JAR_NAME ;; name of the WollMuxBar.jar file
+	!define WOLLMUXBAR_JAR_NAME "WollMuxBar.jar" ;; default
+!endif
+
+
+Name "${WOLLMUX} ${VERSION}"
+OutFile "${WOLLMUX}-${VERSION}-installer.exe"
+Caption "${WOLLMUX} Installer"
 BrandingText "(c) Landeshauptstadt München" ;; string to replace "Nullsoft Install System vX.XX" at the bottom of install window
 
 RequestExecutionLevel admin ;; needed to set ExecutionLevel for Vista/Windows 7 - works only with NSIS ver. 2.21+
@@ -49,7 +65,7 @@ ShowInstDetails hide
 ShowUninstDetails hide
 
 # Set Default Installation Directory
-InstallDir "$PROGRAMFILES\WollMux" ;; default ($INSTDIR will be overwritten in .onInit function if "--INSTDIR=" command line parameter is set)
+InstallDir "$PROGRAMFILES\${WOLLMUX}" ;; default ($INSTDIR will be overwritten in .onInit function if "--INSTDIR=" command line parameter is set)
 
 # Installer & Uninstaller Pages
 Page components ;; Soll der User überhaupt was auswählen dürfen?
@@ -74,8 +90,8 @@ Var cmdParameters
 
 
 ################################ Installer Sections ################################
-SectionGroup /e "WollMux"
-Section "WollMuxBar & OOo Extension"
+SectionGroup /e "${WOLLMUX}"
+Section "${WOLLMUXBAR} & OOo Extension"
 	SectionIn 1 RO ;; section is "read-only", i.e. it can't be unselected
 	
 	# create temporary directory
@@ -84,9 +100,9 @@ Section "WollMuxBar & OOo Extension"
 	SetOutPath $R9 ;; creates directory with TempFileName and sets the output path ($OUTDIR) to it
 	
 	# extract the files
-	File ${FILESDIR}\WollMux.oxt
-	File ${FILESDIR}\WollMuxBar.jar
-	File ${FILESDIR}\wollmuxbar.exe
+	File ${FILESDIR}\${WOLLMUX}.oxt
+	File ${FILESDIR}\${WOLLMUXBAR_JAR_NAME}
+	File ${FILESDIR}\${WOLLMUXBAR_EXE_NAME}
 	
 	# since the installation of the OOo extension is the most critical part of the installation we try that first
 	Call GetOOoPath
@@ -111,7 +127,7 @@ Section "WollMuxBar & OOo Extension"
 	;; Now we try to install the new WollMux.oxt
 	DetailPrint $(UnoPkgAddMessage)
 	ClearErrors
-	ExecWait '"$R0\unopkg" add "$R9\WollMux.oxt" $sharedSwitch'
+	ExecWait '"$R0\unopkg" add "$R9\${WOLLMUX}.oxt" $sharedSwitch'
 	IfErrors 0 +6
 	  MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION $(UnoPkgErrorMessage) /SD IDCANCEL IDRETRY unopkg IDCANCEL 0
 	  SetOutPath $INSTDIR ;; current working directory can't be deleted so we change it
@@ -139,15 +155,15 @@ Section "WollMuxBar & OOo Extension"
 	RMDir /r $R9
 	
 	# write registry entries for "Add/Remove Programs"
-	WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\WollMux" "DisplayName" "WollMux"
-	WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\WollMux" "UninstallString" "$\"$INSTDIR\wollmux_uninstall.exe$\""
-	WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\WollMux" "QuietUninstallString" "$\"$INSTDIR\wollmux_uninstall.exe$\" /S"
-	WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\WollMux" "InstallLocation" "$\"$INSTDIR$\""
-	WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\WollMux" "Publisher" "http://www.wollmux.org"
-	WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\WollMux" "URLInfoAbout" "http://www.wollmux.org"
-	WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\WollMux" "DisplayVersion" "${VERSION}"
-	WriteRegDWORD SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\WollMux" "NoModify" 0x00000001
-	WriteRegDWORD SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\WollMux" "NoRepair" 0x00000001
+	WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\${WOLLMUX}" "DisplayName" "${WOLLMUX}"
+	WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\${WOLLMUX}" "UninstallString" "$\"$INSTDIR\wollmux_uninstall.exe$\""
+	WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\${WOLLMUX}" "QuietUninstallString" "$\"$INSTDIR\wollmux_uninstall.exe$\" /S"
+	WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\${WOLLMUX}" "InstallLocation" "$\"$INSTDIR$\""
+	WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\${WOLLMUX}" "Publisher" "http://www.wollmux.org"
+	WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\${WOLLMUX}" "URLInfoAbout" "http://www.wollmux.org"
+	WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\${WOLLMUX}" "DisplayVersion" "${VERSION}"
+	WriteRegDWORD SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\${WOLLMUX}" "NoModify" 0x00000001
+	WriteRegDWORD SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\${WOLLMUX}" "NoRepair" 0x00000001
 	
 	# write "JavaHome" registry key
 	ReadRegStr $R0 SHELL_CONTEXT "Software\WollMux" "JavaHome"
@@ -157,16 +173,16 @@ SectionEnd
 
 Section $(StartMenuShortcut) startmenu_section_id
 	ClearErrors
-	CreateDirectory "$SMPROGRAMS\WollMux"
-	CreateShortCut "$SMPROGRAMS\WollMux\WollMuxBar.lnk" "$INSTDIR\wollmuxbar.exe"
-	CreateShortCut "$SMPROGRAMS\WollMux\$(UninstallWollMux).lnk" "$INSTDIR\wollmux_uninstall.exe"
+	CreateDirectory "$SMPROGRAMS\${WOLLMUX}"
+	CreateShortCut "$SMPROGRAMS\${WOLLMUX}\${WOLLMUXBAR}.lnk" "$INSTDIR\${WOLLMUXBAR_EXE_NAME}"
+	CreateShortCut "$SMPROGRAMS\${WOLLMUX}\$(UninstallWollMux).lnk" "$INSTDIR\wollmux_uninstall.exe"
 	IfErrors 0 +2
 	  MessageBox MB_OK|MB_ICONEXCLAMATION $(StartMenuShortcutErrorMessage) /SD IDOK
 SectionEnd
 
 Section $(DesktopShortcut) desktop_section_id
 	ClearErrors
-	CreateShortCut "$DESKTOP\WollMuxBar.lnk" "$INSTDIR\wollmuxbar.exe"
+	CreateShortCut "$DESKTOP\${WOLLMUXBAR}.lnk" "$INSTDIR\${WOLLMUXBAR_EXE_NAME}"
 	IfErrors 0 +2
 	  MessageBox MB_OK|MB_ICONEXCLAMATION $(DesktopShortcutErrorMessage) /SD IDOK
 SectionEnd
@@ -175,21 +191,21 @@ SectionGroupEnd
 
 
 ################################ Uninstaller Sections ################################
-SectionGroup "un.WollMux"
-Section "un.WollMuxBar & OOo Extension"
+SectionGroup "un.${WOLLMUX}"
+Section "un.${WOLLMUXBAR} & OOo Extension"
 	Delete $INSTDIR\wollmux_uninstall.exe
-	Delete $INSTDIR\WollMux.oxt
-	Delete $INSTDIR\WollMuxBar.jar
-	Delete $INSTDIR\wollmuxbar.exe
+	Delete $INSTDIR\${WOLLMUX}.oxt
+	Delete $INSTDIR\${WOLLMUXBAR_JAR_NAME}
+	Delete $INSTDIR\${WOLLMUXBAR_EXE_NAME}
 	RMDir $INSTDIR ;; deletes the directory only if it is empty
 	Delete $PROFILE\.wollmux\wollmux.log
 	;;Delete $PROFILE\.wollmux\cache.conf
 	RMDir $PROFILE\.wollmux ;; deletes the directory only if it is empty
 		
 	# Delete registry keys created for "Add/Remove Programs" (only if they really point to this uninstaller!)
-	ReadRegStr $R0 SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\WollMux" "UninstallString"
+	ReadRegStr $R0 SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\${WOLLMUX}" "UninstallString"
 	StrCmp $R0 "$\"$INSTDIR\wollmux_uninstall.exe$\"" 0 +2
-	DeleteRegKey SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\WollMux"
+	DeleteRegKey SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\${WOLLMUX}"
 	
 	# try to uninstall WollMux.oxt extension with unopkg
 	Call un.GetOOoPath
@@ -206,13 +222,13 @@ Section "un.WollMuxBar & OOo Extension"
 SectionEnd
 
 Section "un.$(StartMenuShortcut)"
-	Delete "$SMPROGRAMS\WollMux\WollMuxBar.lnk"
-	Delete "$SMPROGRAMS\WollMux\$(UninstallWollMux).lnk"
-	RMDir "$SMPROGRAMS\WollMux"
+	Delete "$SMPROGRAMS\${WOLLMUX}\${WOLLMUXBAR}.lnk"
+	Delete "$SMPROGRAMS\${WOLLMUX}\$(UninstallWollMux).lnk"
+	RMDir "$SMPROGRAMS\${WOLLMUX}"
 SectionEnd
 
 Section "un.$(DesktopShortcut)"
-	Delete "$DESKTOP\WollMuxBar.lnk"
+	Delete "$DESKTOP\${WOLLMUXBAR}.lnk"
 SectionEnd
 SectionGroupEnd
 

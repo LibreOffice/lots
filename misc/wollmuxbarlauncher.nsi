@@ -21,11 +21,20 @@
 # You should have received a copy of the European Union Public Licence
 # along with this program. If not, see 
 # http://www.osor.eu/eupl
- 
+
+!ifndef OUT_FILE ;; name of the outfile
+	!define OUT_FILE "wollmuxbar.exe" ;; default
+!endif
+
+!ifndef JAR_FILE ;; name of the jar file to launch
+	!define JAR_FILE "WollMuxBar.jar" ;; default
+!endif
+
+
 Name "WollMuxBar Launcher"
 Caption "WollMuxBar Launcher"
 Icon "wollmux.ico"
-OutFile "wollmuxbar.exe"
+OutFile "${OUT_FILE}"
 
 !if ${NSIS_VERSION} != "v2.19-3"
 	RequestExecutionLevel user ;; needed to set ExecutionLevel for Vista/Windows 7 - available since NSIS ver. 2.21
@@ -39,7 +48,6 @@ ShowInstDetails nevershow
 !include FileFunc.nsh
 !insertmacro GetParameters
 
-!define JAR_FILE "WollMuxBar.jar"
 
 Section ""
   Call GetJRE
