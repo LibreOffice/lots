@@ -30,7 +30,8 @@
 package de.muenchen.allg.itd51.wollmux.func;
 
 import java.io.File;
-import java.io.PrintWriter;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -72,23 +73,23 @@ import com.sun.star.util.URL;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory;
+import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
+import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormFieldType;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.PersistentData;
 import de.muenchen.allg.itd51.wollmux.PersistentDataContainer;
+import de.muenchen.allg.itd51.wollmux.PersistentDataContainer.DataID;
 import de.muenchen.allg.itd51.wollmux.PrintModels;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.SimulationResults;
+import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
-import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
-import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormFieldType;
-import de.muenchen.allg.itd51.wollmux.PersistentDataContainer.DataID;
-import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 
@@ -548,8 +549,9 @@ public class OOoBasedMailMerge
     public void flushAndClose() throws Exception
     {
       validateColumnHeaders();
-      
-      PrintWriter p = new PrintWriter(csvFile);
+
+      FileOutputStream fos = new FileOutputStream(csvFile);
+      PrintStream p = new PrintStream(fos, true, "UTF-8");
       p.print(line(getHeaders()));
       for (HashMap<String, String> ds : datasets)
       {
@@ -575,14 +577,15 @@ public class OOoBasedMailMerge
           invalidHeaders += "• " + key + "\n";
         }
       }
-      if (! invalidHeaders.isEmpty())
+      if (!invalidHeaders.isEmpty())
       {
         WollMuxSingleton.showInfoModal(
           L.m("WollMux-Seriendruck"),
           L.m("Zeilenumbrüche in Spaltenüberschriften sind für den Seriendruck nicht erlaubt.\n")
-          + L.m("\nBitte entfernen Sie die Zeilenumbrüche aus den folgenden Überschriften:\n\n")
-          + invalidHeaders);
-        throw new ColumnNotFoundException(L.m("Spaltenüberschriften enthalten newlines"));
+            + L.m("\nBitte entfernen Sie die Zeilenumbrüche aus den folgenden Überschriften:\n\n")
+            + invalidHeaders);
+        throw new ColumnNotFoundException(
+          L.m("Spaltenüberschriften enthalten newlines"));
       }
     }
 
