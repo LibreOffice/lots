@@ -130,6 +130,22 @@ public class DocumentDispatch extends Dispatch
     WollMuxEventHandler.handlePrint(getModel(), origDisp, origUrl, props);
   }
 
+  public void dispatch__uno_save(String arg, PropertyValue[] props)
+  {
+    if (!getModel().hasURL())
+      WollMuxEventHandler.handleSaveAs(getModel(), origDisp, origUrl, props);
+    else
+      origDisp.dispatch(origUrl, props);
+  }
+
+  public void dispatch__uno_saveas(String arg, PropertyValue[] props)
+  {
+    if (!getModel().hasURL())
+      WollMuxEventHandler.handleSaveAs(getModel(), origDisp, origUrl, props);
+    else
+      origDisp.dispatch(origUrl, props);
+  }
+
   public void dispatch__uno_printdefault(String arg, PropertyValue[] props)
   {
     WollMuxEventHandler.handlePrint(getModel(), origDisp, origUrl, props);

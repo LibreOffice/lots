@@ -1359,6 +1359,40 @@ public class TextDocumentModel
   }
 
   /**
+   * Setzt die FilenameGeneratorFunction, die verwendet wird für die Generierung des
+   * Namensvorschlags beim Speichern neuer Dokumente persistent auf die durch
+   * ConfigThingy c repräsentierte Funktion oder löscht diese Funktion, wenn c ==
+   * null ist.
+   */
+  synchronized public void setFilenameGeneratorFunc(ConfigThingy c)
+  {
+    updateLastTouchedByVersionInfo();
+    if (c == null)
+      persistentData.removeData(DataID.FILENAMEGENERATORFUNC);
+    else
+      persistentData.setData(DataID.FILENAMEGENERATORFUNC, c.stringRepresentation());
+  }
+
+  /**
+   * Liefert die aktuell im Dokument gesetzte FilenameGeneratorFunction in Form eines
+   * ConfigThingy-Objekts, oder null, wenn keine gültige FilenameGeneratorFunction
+   * gesetzt ist.
+   */
+  synchronized public ConfigThingy getFilenameGeneratorFunc()
+  {
+    String func = persistentData.getData(DataID.FILENAMEGENERATORFUNC);
+    if (func == null) return null;
+    try
+    {
+      return new ConfigThingy("func", func).getFirstChild();
+    }
+    catch (Exception e)
+    {
+      return null;
+    }
+  }
+
+  /**
    * Liefert ein HashSet mit den Namen (Strings) aller als unsichtbar markierten
    * Sichtbarkeitsgruppen.
    */
@@ -1705,8 +1739,8 @@ public class TextDocumentModel
 
       ConfigThingy title = formularConf.query("TITLE");
       if (title.count() > 0)
-        Logger.debug(L.m("Formular %1 eingelesen.", title.stringRepresentation(true,
-          '\'')));
+        Logger.debug(L.m("Formular %1 eingelesen.",
+          title.stringRepresentation(true, '\'')));
     }
 
     return formularConf;
@@ -2108,8 +2142,8 @@ public class TextDocumentModel
 
     try
     {
-      funcLib.add(name, FunctionFactory.parseChildren(funcConf, funcLib, dialogLib,
-        context));
+      funcLib.add(name,
+        FunctionFactory.parseChildren(funcConf, funcLib, dialogLib, context));
 
       // Funktion zur Formularbeschreibung hinzufügen:
       ConfigThingy betterNameFunc = new ConfigThingy(name);

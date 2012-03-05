@@ -100,6 +100,11 @@ public interface PersistentDataContainer
     PRINTFUNCTION("PrintFunction"),
 
     /**
+     * Die dataId unter der der Name der Druckfunktion gespeichert wird.
+     */
+    FILENAMEGENERATORFUNC("FilenameGeneratorFunction"),
+
+    /**
      * Die dataId unter der der Typ des Dokuments gespeichert wird.
      */
     SETTYPE("SetType"),
