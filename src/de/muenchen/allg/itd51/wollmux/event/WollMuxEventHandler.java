@@ -47,10 +47,12 @@ package de.muenchen.allg.itd51.wollmux.event;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -83,8 +85,11 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.filechooser.FileFilter;
 
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
@@ -99,6 +104,7 @@ import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
+import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.util.XStringSubstitution;
 import com.sun.star.view.DocumentZoomType;
@@ -146,6 +152,10 @@ import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.func.Function;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.Values;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
@@ -4205,6 +4215,196 @@ public class WollMuxEventHandler
         // Forward auf Standardfunktion
         if (origDisp != null) origDisp.dispatch(origUrl, origArgs);
       }
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(" + model + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Der Handler für einen abgespeckten Speichern-Unter-Dialog des WollMux, der in
+   * Abängigkeit von einer gesetzten FilenameGeneratorFunction über den WollMux
+   * aufgrufen und mit dem generierten Filenamen vorbelegt wird.
+   * 
+   * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü
+   * "Datei->SaveAs" oder über die Symbolleiste die dispatch-url .uno:Save bzw.
+   * .uno:SaveAs abgesetzt wurde.
+   */
+  public static void handleSaveAs(TextDocumentModel model, XDispatch origDisp,
+      com.sun.star.util.URL origUrl, PropertyValue[] origArgs)
+  {
+    handle(new OnSaveAs(model, origDisp, origUrl, origArgs));
+  }
+
+  private static class OnSaveAs extends BasicEvent
+  {
+    private TextDocumentModel model;
+
+    private XDispatch origDisp;
+
+    private com.sun.star.util.URL origUrl;
+
+    private PropertyValue[] origArgs;
+
+    public OnSaveAs(TextDocumentModel model, XDispatch origDisp,
+        com.sun.star.util.URL origUrl, PropertyValue[] origArgs)
+    {
+      this.model = model;
+      this.origDisp = origDisp;
+      this.origUrl = origUrl;
+      this.origArgs = origArgs;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      // FilenameGeneratorFunction auslesen und parsen
+      FunctionLibrary lib = model.getFunctionLibrary();
+      ConfigThingy funcConf = model.getFilenameGeneratorFunc();
+      Function func = null;
+      if (funcConf != null) try
+      {
+        func = FunctionFactory.parse(funcConf, lib, null, null);
+      }
+      catch (ConfigurationErrorException e)
+      {
+        Logger.error(L.m("Kann FilenameGeneratorFunction nicht parsen!"), e);
+      }
+
+      // Original-Dispatch ausführen, wenn keine FilenameGeneratorFunction gesetzt
+      if (func == null)
+      {
+        if (origDisp != null) origDisp.dispatch(origUrl, origArgs);
+        return;
+      }
+
+      boolean done = false;
+      File file = ensureFileHasODTSuffix(getDefaultFile(func));
+      JFileChooser fc = createODTFileChooser(file);
+      while (!done)
+      {
+        done = true;
+        if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION)
+        {
+          boolean save = true;
+          File f = ensureFileHasODTSuffix(fc.getSelectedFile());
+
+          // Sicherheitsabfage vor Überschreiben
+          if (f.exists())
+          {
+            save = false;
+            int res =
+              JOptionPane.showConfirmDialog(
+                null,
+                L.m("Datei %1 existiert bereits. Soll sie überschrieben werden?",
+                  f.getName()), L.m("Überschreiben?"),
+                JOptionPane.YES_NO_CANCEL_OPTION);
+            if (res == JOptionPane.NO_OPTION) done = false;
+            if (res == JOptionPane.OK_OPTION) save = true;
+          }
+
+          if (save) saveAs(f);
+        }
+      }
+    }
+
+    private File getDefaultFile(Function func)
+    {
+      Map<String, String> fields = model.getFormFieldValues();
+      Values.SimpleMap values = new Values.SimpleMap();
+      for (String par : func.parameters())
+      {
+        String value = fields.get(par);
+        if (value == null) value = "";
+        values.put(par, value);
+      }
+      String filename = func.getString(values);
+      File f = new File(filename);
+      if (f.isAbsolute()) return f;
+
+      try
+      {
+        Object ps = UNO.createUNOService("com.sun.star.util.PathSettings");
+        URL dir = new URL(AnyConverter.toString(UNO.getProperty(ps, "Work")));
+        return new File(dir.getPath(), filename);
+      }
+      catch (com.sun.star.lang.IllegalArgumentException e)
+      {
+        Logger.error(e);
+      }
+      catch (MalformedURLException e)
+      {
+        Logger.error(e);
+      }
+      return new File(filename);
+    }
+
+    private JFileChooser createODTFileChooser(File file)
+    {
+      JFileChooser fc = new JFileChooser()
+      {
+        private static final long serialVersionUID = 1560806929064954454L;
+
+        // Laut Didi kommt der JFileChooser unter Windows nicht im Vordergrund.
+        // Deshalb das Überschreiben der createDialog-Methode und Setzen von
+        // alwaysOnTop(true)
+        protected JDialog createDialog(Component parent) throws HeadlessException
+        {
+          JDialog dialog = super.createDialog(parent);
+          dialog.setAlwaysOnTop(true);
+          return dialog;
+        }
+      };
+      fc.setMultiSelectionEnabled(false);
+      fc.setFileFilter(new FileFilter()
+      {
+        public String getDescription()
+        {
+          return L.m("ODF Textdokument");
+        }
+
+        public boolean accept(File f)
+        {
+          return f.getName().toLowerCase().endsWith(".odt") || f.isDirectory();
+        }
+      });
+      fc.setSelectedFile(file);
+      return fc;
+    }
+
+    private void saveAs(File f)
+    {
+      model.flushPersistentData();
+      try
+      {
+        String url = UNO.getParsedUNOUrl(f.toURI().toURL().toString()).Complete;
+        if (UNO.XStorable(model.doc) != null)
+          UNO.XStorable(model.doc).storeAsURL(url, new PropertyValue[] {});
+      }
+      catch (MalformedURLException e)
+      {
+        Logger.error(L.m("das darf nicht passieren"), e);
+      }
+      catch (com.sun.star.io.IOException e)
+      {
+        Logger.error(e);
+        JOptionPane.showMessageDialog(null, L.m(
+          "Das Speichern der Datei %1 ist fehlgeschlagen!\n\n%2", f.toString(),
+          e.getLocalizedMessage()), L.m("Fehler beim Speichern"),
+          JOptionPane.ERROR_MESSAGE);
+      }
+    }
+
+    private static File ensureFileHasODTSuffix(File f)
+    {
+      if (f != null && !f.getName().toLowerCase().endsWith(".odt"))
+      {
+        return new File(f.getParent(), f.getName() + ".odt");
+      }
+      return f;
     }
 
     public String toString()

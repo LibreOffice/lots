@@ -1359,6 +1359,40 @@ public class TextDocumentModel
   }
 
   /**
+   * Setzt die FilenameGeneratorFunction, die verwendet wird für die Generierung des
+   * Namensvorschlags beim Speichern neuer Dokumente persistent auf die durch
+   * ConfigThingy c repräsentierte Funktion oder löscht diese Funktion, wenn c ==
+   * null ist.
+   */
+  synchronized public void setFilenameGeneratorFunc(ConfigThingy c)
+  {
+    updateLastTouchedByVersionInfo();
+    if (c == null)
+      persistentData.removeData(DataID.FILENAMEGENERATORFUNC);
+    else
+      persistentData.setData(DataID.FILENAMEGENERATORFUNC, c.stringRepresentation());
+  }
+
+  /**
+   * Liefert die aktuell im Dokument gesetzte FilenameGeneratorFunction in Form eines
+   * ConfigThingy-Objekts, oder null, wenn keine gültige FilenameGeneratorFunction
+   * gesetzt ist.
+   */
+  synchronized public ConfigThingy getFilenameGeneratorFunc()
+  {
+    String func = persistentData.getData(DataID.FILENAMEGENERATORFUNC);
+    if (func == null) return null;
+    try
+    {
+      return new ConfigThingy("func", func).getFirstChild();
+    }
+    catch (Exception e)
+    {
+      return null;
+    }
+  }
+
+  /**
    * Liefert ein HashSet mit den Namen (Strings) aller als unsichtbar markierten
    * Sichtbarkeitsgruppen.
    */
