@@ -30,7 +30,8 @@
 package de.muenchen.allg.itd51.wollmux.func;
 
 import java.io.File;
-import java.io.PrintWriter;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -546,7 +547,9 @@ public class OOoBasedMailMerge
      */
     public void flushAndClose() throws Exception
     {
-      PrintWriter p = new PrintWriter(csvFile);
+
+      FileOutputStream fos = new FileOutputStream(csvFile);
+      PrintStream p = new PrintStream(fos, true, "UTF-8");
       p.print(line(getHeaders()));
       for (HashMap<String, String> ds : datasets)
       {
