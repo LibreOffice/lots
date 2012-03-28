@@ -1,4 +1,4 @@
- ==================== Neu in dieser Version ====================
+ ==================== Neu in Version 11.10a ====================
 
     * Bugfixes:
           o Verliert die WollMuxBar den Fokus, wird der Fokus von der Suchliste
@@ -14,6 +14,8 @@
             Verfügungen werden jetzt unsichtbare Zuleitungszeilen nicht mehr
             mitgezählt (für den Zähler der angibt, wie viele Ausdrucke von
             einem Verfügungspunkt gemacht werden sollen).
+          o Falsches Encoding in temporärer .csv-Datei unter Windows bei
+            WollMux-Seriendruck behoben
     * Neue Features:
           o Überarbeiteter WollMux-Seriendruck:
                 # Der Seriendruckdialog des WollMux (aufzurufen über "Drucken"
@@ -85,17 +87,8 @@
             erlaubt. Das Tray-Icon ist standardmäßig deaktiviert, kann aber
             über den neuen Parameter TRAYICON im Fenster-Abschnitt der
             wollmux.conf aktiviert und konfiguriert werden.
-          o Wird weiter verschoben: In der WollMuxBar steht eine neue ACTION
-            "menuManager" zur Verfügung. Diese ruft den Menü-Manager auf, ein
-            interaktives Tool zur Bearbeitung der WollMuxBar-Menüstruktur.
-            (Dieses Feature ist nur verfügbar, wenn der WollMux mit Java 6
-            ausgeführt wird!)
-          o Wird weiter verschoben: Die WollMuxBar hat einen neuen
-            Kommandozeilenschalter --mm. Dieser ruft direkt den Menü-Manager
-            auf. Dies ist nützlich zum Bootstrappen wenn es noch kein Menü gibt
-            oder auch wenn der Menü-Manager nicht im WollMuxBar-Menü vorhanden
-            ist. (Dieses Feature ist nur verfügbar, wenn der WollMux mit Java 6
-            ausgeführt wird!)
+          o Möglichkeit zur Vorbelegung eines Dateinamens (siehe
+            FilenameGeneratorFunction)
 
     * Integration eines Patches von Jan Gerrit Möltgen zur Erweiterung des
       Konfigurationsabschnitts SachleitendeVerfuegungen um die zusätzlichen
