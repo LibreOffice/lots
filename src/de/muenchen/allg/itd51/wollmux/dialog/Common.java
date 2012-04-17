@@ -27,6 +27,7 @@
  * 27.07.2006 | BNK | "auto" Wert explizit parsen.
  * 29.07.2009 | BED | +configureTextFieldBehaviour()
  * 26.02.2010 | BED | +setWollMuxIcon(JFrame)
+ * 17.04.2012 | AEK | +setLookAndFeel() um das konfigurierbare LAF erweitert
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -58,6 +59,7 @@ import javax.swing.plaf.FontUIResource;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 
 /**
  * Enthält von den Dialogen gemeinsam genutzten Code.
@@ -129,6 +131,9 @@ public class Common
    * Bugs. Es ist also auch ein Problem, dass wir nicht genug Ressourcen haben, um 2
    * Plattformen diesbzgl. zu testen und zu debuggen.
    * 
+   * Als Kompromiss ist es möglich das zu verwendende LAF über die 
+   * Konfiguration vorzugeben.
+   * 
    * alt: Setzt das System Look and Feel, falls es nicht MetalLookAndFeel ist.
    * Ansonsten setzt es GTKLookAndFeel falls möglich.
    * 
@@ -136,12 +141,28 @@ public class Common
    */
   private static void setLookAndFeel()
   {
-    String lafName = UIManager.getSystemLookAndFeelClassName();
+    // String lafName = UIManager.getSystemLookAndFeelClassName();
     // if (lafName.equals("javax.swing.plaf.metal.MetalLookAndFeel"))
     // lafName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
-    lafName = "javax.swing.plaf.metal.MetalLookAndFeel";
+    
+    // Das Standard-LAF für den WollMux
+    String lafName = "javax.swing.plaf.metal.MetalLookAndFeel";
     try
     {
+      
+      try 
+      {
+        
+        // Ist der Konfig-Parameter "LAF_CLASS_NAME" gesetzt, wird das angegebene 
+        // LAF verwendet.
+        ConfigThingy config = WollMuxFiles.getWollmuxConf();
+        ConfigThingy lafConf = config.get( "LAF_CLASS_NAME" );
+        lafName = lafConf.toString();
+        
+      } // try 
+      catch ( Exception e )
+      {} // catch
+      
       UIManager.setLookAndFeel(lafName);
     }
     catch (Exception x)
