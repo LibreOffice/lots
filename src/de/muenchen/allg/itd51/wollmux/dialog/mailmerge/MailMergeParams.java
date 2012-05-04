@@ -927,13 +927,16 @@ class MailMergeParams
 
       case filenametemplatechooser:
       {
-        String name = mmp.mmc.getDefaultFilename() + "_.odt";
+        // liefert einen filenamen *ohne* endung
+        String name = mmp.mmc.getDefaultFilename();
         JTextField textField = new JTextField(name);
         TextWithDatafieldTagsUIElement el =
           new TextWithDatafieldTagsUIElement(textField, textField,
             SubmitArgument.filenameTemplate,
             L.m("Sie müssen ein Dateinamenmuster angeben!"), group, mmp);
-        el.textTags.getJTextComponent().setCaretPosition(name.length() - 4);
+        // JUB: muss abhängig von der endung gesetzt werden:
+        // ohne endung ---> ganz ans ende
+        el.textTags.getJTextComponent().setCaretPosition(name.length());
         el.textTags.insertTag(TAG_DATENSATZNUMMER);
         return el;
       }
@@ -1865,9 +1868,9 @@ class MailMergeParams
       {
         String[] funcs =
           new String[] {
-            "OOoMailMergeToPrinter", "OOoMailMergeToOdtFile", "MailMergeNewToEMail",
-            "MailMergeNewSetFormValue", /* "PDFGesamtdokument", */
-            "MailMergeNewToSingleODT", "PDFGesamtdokumentOutput" };
+          "OOoMailMergeToPrinter", "OOoMailMergeToOdtFile", "MailMergeNewToODTEMail",
+          "MailMergeNewToPDFEMail", "MailMergeNewSetFormValue", /* "PDFGesamtdokument", */
+          "MailMergeNewToSingleODT", "PDFGesamtdokumentOutput" };
         for (String func : funcs)
           if (func.equals(name)) return true;
         return false;

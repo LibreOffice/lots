@@ -239,20 +239,34 @@ public class StandardPrint
   public static void mailMergeNewToSingleODT(final XPrintModel pmod)
       throws Exception
   {
-    MailMergeNew.saveToODT(pmod);
+    boolean isODT = true;
+    MailMergeNew.saveToFile(pmod, isODT);
   }
 
   /**
-   * Druckfunktion zum Versenden der durch den Seriendruck erzeugten Dokumente per
+   * Druckfunktion zum Versenden der durch den Seriendruck erzeugten odt Dokumente per
    * E-Mail
    * 
    * @author Ignaz Forster (D-III-ITD-D102)
    */
-  public static void mailMergeNewToEMail(final XPrintModel pmod)
+  public static void mailMergeNewToODTEMail(final XPrintModel pmod)
   {
-    MailMergeNew.sendAsEmail(pmod);
+    boolean isODT = true;
+    MailMergeNew.sendAsEmail(pmod, isODT);
   }
-
+  
+  /**
+   * Druckfunktion zum Versenden der durch den Seriendruck erzeugten pdf Dokumente per
+   * E-Mail
+   * 
+   * @author judith baur (D-III-ITD-D102)
+   */
+  public static void mailMergeNewToPDFEMail(final XPrintModel pmod)
+  {
+    boolean isODT = false;
+    MailMergeNew.sendAsEmail(pmod, isODT);
+  }
+  
   /**
    * Hängt das zu pmod gehörige TextDocument an das im Property
    * PrintIntoFile_OutputDocument gespeicherte XTextDocument an. Falls noch kein
@@ -340,7 +354,9 @@ public class StandardPrint
   
     MailMergeNewToSingleODT("mailMergeNewToSingleODT", 200),
   
-    MailMergeNewToEMail("mailMergeNewToEMail", 200),
+    MailMergeNewToODTEMail("mailMergeNewToODTEMail", 200),
+    
+    MailMergeNewToPDFEMail("mailMergeNewToPDFEMail", 200),
   
     OOoMailMergeToPrinter("oooMailMergeToPrinter", 200),
   
