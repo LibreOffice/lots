@@ -120,10 +120,9 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo;
+import de.muenchen.allg.itd51.wollmux.EndlessLoopException;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.FormModelImpl;
-import de.muenchen.allg.itd51.wollmux.FormModelImpl.InvalidFormDescriptorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
@@ -137,10 +136,12 @@ import de.muenchen.allg.itd51.wollmux.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo;
+import de.muenchen.allg.itd51.wollmux.FormModelImpl.InvalidFormDescriptorException;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -1602,12 +1603,25 @@ public class WollMuxEventHandler
           URL url;
           try
           {
-            url = WollMuxFiles.makeURL(urlStr);
-            urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
-            url = WollMuxFiles.makeURL(urlStr);
-            WollMuxSingleton.checkURL(url);
+            urlStr = WollMuxFiles.resolveAndCheckUrl(urlStr, 50);            
           }
+          catch (EndlessLoopException e)
+          {
+            Logger.log(e);
+            errors +=
+              L.m("Die URL '%1' läßt sich nicht auflösen", urlStr) + "\n"
+                + e.getLocalizedMessage() + "\n\n";
+            continue;
+          }            
           catch (MalformedURLException e)
+          {
+            Logger.log(e);
+            errors +=
+              L.m("Die URL '%1' ist ungültig:", urlStr) + "\n"
+                + e.getLocalizedMessage() + "\n\n";
+            continue;
+          }
+          catch (URISyntaxException e)
           {
             Logger.log(e);
             errors +=

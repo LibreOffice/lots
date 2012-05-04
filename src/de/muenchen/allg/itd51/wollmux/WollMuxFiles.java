@@ -52,6 +52,7 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,6 +60,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -67,6 +69,7 @@ import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.UnknownHostException;
@@ -490,6 +493,75 @@ public class WollMuxFiles
   public static URL makeURL(String urlStr) throws MalformedURLException
   {
     return new URL(WollMuxFiles.getDEFAULT_CONTEXT(), ConfigThingy.urlEncode(urlStr));
+  }
+  
+  public static boolean isFakeSymLink(String urlStr) {
+    if(urlStr.toLowerCase().endsWith(".fakesymlink"))
+      return true;
+    
+    return false;
+  }
+  
+  /**
+   * testet, ob sich der Filename als fakeSymLink auflösen läßt und falls ja,
+   * gibt den Inhalt der fakeSymLink Datei zurück.
+   * 
+   * @param urlStr Name des files, das uu einen symLink faked
+   * @return String name und pfad des files, wie es im fakeSymLink stand
+   * @author judith baur
+   * @throws URISyntaxException 
+   * @throws MalformedURLException 
+   * @throws IOException
+   */  
+  public static String resolveFakeSymLink(String urlStr) 
+    throws URISyntaxException, MalformedURLException, IOException
+  {  
+    URL url = new URL(checkParsedUNOUrl(urlStr));
+    BufferedReader fakeSymLinkReader = 
+      new BufferedReader(new InputStreamReader(url.openStream(), ConfigThingy.CHARSET));
+    
+    String line = fakeSymLinkReader.readLine(); 
+    return line;
+  }
+  
+  /**
+   * 
+   * @param urlStr
+   * @param iDepth die Suchtiefe, um in keine endlose scheife zu laufen 
+   * @return urlStr
+   * @author judith baur
+   */
+  public static String resolveAndCheckUrl(String urlStr, int iDepth) 
+    throws URISyntaxException, MalformedURLException, IOException, 
+      EndlessLoopException {
+    
+    try { 
+      // falls jemand die Endung '.fakeSymLink' mit angegeben hat
+      if(isFakeSymLink(urlStr)) {
+        urlStr = resolveFakeSymLink(urlStr);
+      }
+      
+      urlStr = checkParsedUNOUrl(urlStr);
+    } catch (IOException e) {
+      if(iDepth > 0) {
+        urlStr = resolveFakeSymLink(urlStr + ".fakeSymLink");
+        urlStr = resolveAndCheckUrl(urlStr, --iDepth);
+      } else {
+        throw new EndlessLoopException("");
+      }
+    }
+    return urlStr;
+  }
+  
+  public static String checkParsedUNOUrl(String urlStr) 
+    throws MalformedURLException, IOException, URISyntaxException {
+    
+    URL url; 
+    url = WollMuxFiles.makeURL(urlStr);
+    urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete; 
+    url =  WollMuxFiles.makeURL(urlStr); 
+    WollMuxSingleton.checkURL(url); 
+    return urlStr; 
   }
 
   /**
