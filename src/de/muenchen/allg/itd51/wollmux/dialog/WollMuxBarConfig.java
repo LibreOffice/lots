@@ -22,6 +22,8 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
@@ -553,6 +555,25 @@ public class WollMuxBarConfig
       mainPanel.add(new JLabel(L.m("Tray-Icon")), gbcLabel);
       mainPanel.add(inputTrayIcon, gbcCombo);
     }
+    
+    inputMode.addItemListener(new ItemListener()
+    {      
+      public void itemStateChanged(ItemEvent e)
+      {
+        // tray icon auswahl nur anbieten, falls nicht upAndAway
+        if(e.getStateChange() == ItemEvent.SELECTED) {
+          if(e.getItem().toString().equalsIgnoreCase("UpAndAway")) {
+            inputTrayIcon.setSelectedIndex(0);
+            inputTrayIcon.setEnabled(false);
+          }
+        }
+        if(e.getStateChange() == ItemEvent.DESELECTED) {
+          if(e.getItem().toString().equalsIgnoreCase("UpAndAway")) {
+            inputTrayIcon.setEnabled(true);
+          }
+        }   
+      }
+    });
 
     x = 0;
     ++y;
@@ -624,10 +645,17 @@ public class WollMuxBarConfig
 
     inputTitle.setText(myFrame_title);
     setCombo(inputMode, windowModeToText(windowMode));
-    setCombo(inputTrayIcon, trayIconModeToText(trayIconMode));
+    
+    // bei UpAndAway: tray icon none!
+    if(windowMode == WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE) {
+      inputTrayIcon.setEnabled(false);
+    } else {
+      setCombo(inputTrayIcon, trayIconModeToText(trayIconMode));
+    }
+        
     setCombo(inputX, xyToText(myFrame_x));
     setCombo(inputY, xyToText(myFrame_y));
-    setCombo(inputWidth, widthHeightToText(myFrame_width));
+    setCombo(inputWidth, widthHeightToText(myFrame_width));    
     setCombo(inputHeight, widthHeightToText(myFrame_height));
 
     x = 0;
@@ -677,7 +705,13 @@ public class WollMuxBarConfig
       {
         myFrame_title = inputTitle.getText();
         windowMode = getWindowMode(inputMode.getSelectedItem().toString());
-        trayIconMode = getTrayIconMode(inputTrayIcon.getSelectedItem().toString());
+        
+        // upAndAway modus niemals mit iconify verwenden!
+        if(windowMode == WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE)
+          trayIconMode = WollMuxBarConfig.NO_TRAY_ICON;
+        else
+          trayIconMode = getTrayIconMode(inputTrayIcon.getSelectedItem().toString());
+               
         myFrame_x = getXY(inputX.getSelectedItem().toString());
         myFrame_y = getXY(inputY.getSelectedItem().toString());
         myFrame_width = getWidthHeight(inputWidth.getSelectedItem().toString());
