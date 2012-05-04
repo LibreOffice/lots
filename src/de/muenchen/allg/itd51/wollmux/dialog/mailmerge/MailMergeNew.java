@@ -1140,7 +1140,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * @author Ignaz Forster (D-III-ITD-D102)
    * @throws java.io.IOException
    */
-  public static File saveToODT(XPrintModel pmod) throws IOException,
+  public static File saveToFile(XPrintModel pmod, boolean isODT) throws IOException,
       java.io.IOException
   {
     XTextDocument textDocument = pmod.getTextDocument();
@@ -1156,6 +1156,14 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       filename = createOutputPathFromPattern(filePattern, pmod);
     else
       filename = L.m("Dokument.odt");
+    
+    // jub .odt/.pdf ergänzen, falls nicht angegeben.
+    if(!filename.endsWith(".odt") && !filename.endsWith(".pdf"))
+      if(isODT)
+        filename = filename + ".odt";
+      else
+        filename = filename + ".pdf";
+    
     File file = new File(outputDir, filename);
 
     saveOutputFile(file, textDocument);
@@ -1169,7 +1177,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * 
    * @author Ignaz Forster (D-III-ITD-D102)
    */
-  public static void sendAsEmail(XPrintModel pmod)
+  public static void sendAsEmail(XPrintModel pmod, boolean isODT)
   {
     String targetDir = (String) pmod.getProp(PROP_TARGETDIR, null);
     File tmpOutDir = null;
@@ -1242,7 +1250,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     File attachment = null;
     try
     {
-      attachment = saveToODT(pmod);
+      attachment = saveToFile(pmod, isODT);
       EMailSender mail = new EMailSender();
       mail.createNewMultipartMail(from, to, subject, message);
       mail.addAttachment(attachment);
