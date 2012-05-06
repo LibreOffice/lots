@@ -58,7 +58,7 @@ Section ""
   ;; get command line parameters
   ${GetParameters} $R1
   
-  StrCpy $0 '"$R0" -jar "${JAR_FILE}" $R1'
+  StrCpy $0 '"$R0" -Xrs -jar "${JAR_FILE}" $R1'
  
   SetOutPath $EXEDIR
   Exec $0
