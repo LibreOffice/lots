@@ -28,6 +28,8 @@
  * 08.07.2009 | BED | addToCurrentFormDescription(...) löscht jetzt nicht nur Notiz
  *                  | sondern kompletten Bookmark-Inhalt und Bookmark wird kollabiert
  * 17.05.2010 | BED | +rewritePersistantData() (für Workaround für Issue #100374)
+ * 07.05.2012 | ERT | TextDocumentModel.setWindowPosSize: Größe und Position des Fensters
+ *                  | werden jetzt nacheinander gesetzt. Funktioniert besser unter Gnome
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -1739,8 +1741,8 @@ public class TextDocumentModel
 
       ConfigThingy title = formularConf.query("TITLE");
       if (title.count() > 0)
-        Logger.debug(L.m("Formular %1 eingelesen.",
-          title.stringRepresentation(true, '\'')));
+        Logger.debug(L.m("Formular %1 eingelesen.", title.stringRepresentation(true,
+          '\'')));
     }
 
     return formularConf;
@@ -2142,8 +2144,8 @@ public class TextDocumentModel
 
     try
     {
-      funcLib.add(name,
-        FunctionFactory.parseChildren(funcConf, funcLib, dialogLib, context));
+      funcLib.add(name, FunctionFactory.parseChildren(funcConf, funcLib, dialogLib,
+        context));
 
       // Funktion zur Formularbeschreibung hinzufügen:
       ConfigThingy betterNameFunc = new ConfigThingy(name);
@@ -2610,8 +2612,14 @@ public class TextDocumentModel
   {
     try
     {
+      // Der Aufruf von SIZE vor POS ist vor allem bei maximierten Dokumenten von
+      // Bedeutung. Ein maximiertes Dokument kann nicht verschoben werden.
+      // Nach der Änderung der Größe ist es aber nicht mehr maximiert.
       getFrame().getContainerWindow().setPosSize(docX, docY, docWidth, docHeight,
-        PosSize.POSSIZE);
+        PosSize.SIZE);
+      getFrame().getContainerWindow().setPosSize(docX, docY, docWidth, docHeight,
+        PosSize.POS);
+
     }
     catch (java.lang.Exception e)
     {}
