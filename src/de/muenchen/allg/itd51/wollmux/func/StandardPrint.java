@@ -15,6 +15,16 @@
  * http://ec.europa.eu/idabc/en/document/7330
  *
  *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ *            |     | Erstellung
+ * 08.05.2012 | jub | mailMergeNewToEMail() getrennt in mailMergeNewToODTEMail() und
+ *                    mailMergeNewToPDFEMail(): sowohl in der enummeration der 
+ *                    druckfunktionen, als auch als mehthoden;
+ *                    aufruf von saveToFile() zur unterscheidung mit pdf/odt flage.
+ * -------------------------------------------------------------------
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @author Christoph Lutz (D-III-ITD-5.1)
  * 

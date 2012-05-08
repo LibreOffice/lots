@@ -45,6 +45,10 @@
  * 07.10.2010 | ERT | dumpInfo() erweitert um No. of Processors, Physical Memory und Swap Size
  * 19.10.2010 | ERT | dumpInfo() erweitert um IP-Adresse und OOo-Version
  * 22.02.2011 | ERT | dumpInfo() erweitert um LHM-Version
+ * 08.05.2012 | jub | fakeSymLink behandlung eingebaut: der verweis auf fragmente, wie er in der 
+ *                    config datei steht, kann auf einen sog. fake SymLink gehen, eine text-
+ *                    datei, in der auf ein anderes fragment inkl. relativem pfad verwiesen wird.
+ * 
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -491,8 +495,25 @@ public class WollMuxFiles
    *           falls urlStr keine legale URL darstellt.
    */
   public static URL makeURL(String urlStr) throws MalformedURLException
-  {
+  {    
     return new URL(WollMuxFiles.getDEFAULT_CONTEXT(), ConfigThingy.urlEncode(urlStr));
+  }
+  
+  /**
+   * Liefert einen String urlStr mit kontext fakeSymLink
+   * 
+   * @author judith baur
+   * @param urlStr, fakeSymLink
+   * @return urlStr
+   */
+  public static String makeFakeSymLinkURLStr(String fakeSymLink, String urlStr)
+  {
+    String link;
+    if(!fakeSymLink.isEmpty())
+      fakeSymLink = fakeSymLink.substring(0, fakeSymLink.lastIndexOf("/") + 1);
+    
+    link = fakeSymLink + urlStr;
+    return link;
   }
   
   public static boolean isFakeSymLink(String urlStr) {
@@ -516,12 +537,22 @@ public class WollMuxFiles
   public static String resolveFakeSymLink(String urlStr) 
     throws URISyntaxException, MalformedURLException, IOException
   {  
-    URL url = new URL(checkParsedUNOUrl(urlStr));
+    urlStr = makeParsedUNOUrl("", urlStr);
+    WollMuxSingleton.checkURL(WollMuxFiles.makeURL(urlStr)); 
+    
+    URL url = new URL(urlStr);
     BufferedReader fakeSymLinkReader = 
       new BufferedReader(new InputStreamReader(url.openStream(), ConfigThingy.CHARSET));
     
     String line = fakeSymLinkReader.readLine(); 
     return line;
+  }
+  
+  public static String resolveAndCheckUrl(String urlStr, int iDepth)
+    throws URISyntaxException, MalformedURLException, IOException, 
+      EndlessLoopException {
+   
+      return resolveAndCheckUrl("", urlStr, iDepth);
   }
   
   /**
@@ -531,7 +562,7 @@ public class WollMuxFiles
    * @return urlStr
    * @author judith baur
    */
-  public static String resolveAndCheckUrl(String urlStr, int iDepth) 
+  public static String resolveAndCheckUrl(String context, String urlStr, int iDepth) 
     throws URISyntaxException, MalformedURLException, IOException, 
       EndlessLoopException {
     
@@ -539,13 +570,17 @@ public class WollMuxFiles
       // falls jemand die Endung '.fakeSymLink' mit angegeben hat
       if(isFakeSymLink(urlStr)) {
         urlStr = resolveFakeSymLink(urlStr);
-      }
-      
-      urlStr = checkParsedUNOUrl(urlStr);
+       } 
+            
+      urlStr = makeParsedUNOUrl(context, urlStr);
+      WollMuxSingleton.checkURL(WollMuxFiles.makeURL(urlStr)); 
+           
     } catch (IOException e) {
       if(iDepth > 0) {
-        urlStr = resolveFakeSymLink(urlStr + ".fakeSymLink");
-        urlStr = resolveAndCheckUrl(urlStr, --iDepth);
+        String line;
+        line = resolveFakeSymLink(urlStr + ".fakeSymLink");
+        
+        urlStr = resolveAndCheckUrl(urlStr, line, --iDepth);
       } else {
         throw new EndlessLoopException("");
       }
@@ -553,17 +588,16 @@ public class WollMuxFiles
     return urlStr;
   }
   
-  public static String checkParsedUNOUrl(String urlStr) 
+  public static String makeParsedUNOUrl(String context, String urlStr) 
     throws MalformedURLException, IOException, URISyntaxException {
     
     URL url; 
+    urlStr = WollMuxFiles.makeFakeSymLinkURLStr(context, urlStr);
     url = WollMuxFiles.makeURL(urlStr);
-    urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete; 
-    url =  WollMuxFiles.makeURL(urlStr); 
-    WollMuxSingleton.checkURL(url); 
+    urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
     return urlStr; 
   }
-
+  
   /**
    * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null, falls
    * ein Fehler während der Initialisierung aufgetreten ist).

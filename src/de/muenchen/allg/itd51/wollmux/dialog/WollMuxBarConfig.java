@@ -12,6 +12,17 @@
  * You should have received a copy of the European Union Public Licence
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
+ * 
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ *            |     | Erstellung
+ *            
+ * 08.05.2012 | jub | upAndAway modus kann nicht mehr zusammen mit einem der iconify
+ *                    modi benutzt werden: ergab nie sinn, hat nur fehler produziert.  
+ * 
+ * -------------------------------------------------------------------
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 

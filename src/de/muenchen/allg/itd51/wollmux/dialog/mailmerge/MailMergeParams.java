@@ -24,6 +24,9 @@
  * 11.10.2007 | BNK | Erstellung
  * 25.05.2010 | ERT | GUI für PDF-Gesamtdruck
  * 20.12.2010 | ERT | Defaultwerte für Druckdialog von ... bis
+ * 08.05.2012 | jub | vorgeschlagener name für den anhang eines serienbrief/emailversands
+ *                    kommt ohne endung, da für den nutzer auswahl zwischen pdf/odt 
+ *                    möglich ist
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -934,8 +937,6 @@ class MailMergeParams
           new TextWithDatafieldTagsUIElement(textField, textField,
             SubmitArgument.filenameTemplate,
             L.m("Sie müssen ein Dateinamenmuster angeben!"), group, mmp);
-        // JUB: muss abhängig von der endung gesetzt werden:
-        // ohne endung ---> ganz ans ende
         el.textTags.getJTextComponent().setCaretPosition(name.length());
         el.textTags.insertTag(TAG_DATENSATZNUMMER);
         return el;

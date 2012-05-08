@@ -38,6 +38,9 @@
  * 03.03.2010 | ERT | Verhindern von Überlagern von insertFrag-Bookmarks
  * 23.03.2010 | ERT | [R59480] Meldung beim Ausführen von "Textbausteinverweis einfügen"
  * 02.06.2010 | BED | +handleSaveTempAndOpenExt
+ * 08.05.2012 | jub | fakeSymLink behandlung eingebaut: auflösung und test der FRAG_IDs berücksichtigt
+ *                    auch die möglichkeit, dass im conifg file auf einen fake SymLink verwiesen wird.
+ *
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)

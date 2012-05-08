@@ -25,6 +25,10 @@
  * 25.05.2010 | ERT | Aufruf von PDFGesamtdruck-Druckfunktion
  * 20.12.2010 | ERT | Bei ungültigem indexSelection.rangeEnd wird der 
  *                    Wert auf den letzten Datensatz gesetzt
+ * 08.05.2012 | jub | um beim serienbrief/emailversand die auswahl zwischen odt und pdf
+ *                    anhängen anbieten zu können, sendAsEmail() und saveToFile() mit 
+ *                    einer flage versehen, die zwischen den beiden formaten 
+ *                    unterscheidet.
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
