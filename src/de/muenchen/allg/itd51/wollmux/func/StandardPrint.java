@@ -252,6 +252,20 @@ public class StandardPrint
     boolean isODT = true;
     MailMergeNew.saveToFile(pmod, isODT);
   }
+  
+  /**
+   * Druckfunktion zum Abspeichern der durch den Seriendruck erzeugten Daten in
+   * einzelnen Dateien.
+   * 
+   * @author Ignaz Forster (D-III-ITD-D102)
+   * @throws Exception
+   */
+  public static void mailMergeNewToSinglePDF(final XPrintModel pmod)
+      throws Exception
+  {
+    boolean isODT = false;
+    MailMergeNew.saveToFile(pmod, isODT);
+  }
 
   /**
    * Druckfunktion zum Versenden der durch den Seriendruck erzeugten odt Dokumente per
@@ -363,6 +377,8 @@ public class StandardPrint
     SachleitendeVerfuegungOutput("sachleitendeVerfuegungOutput", 150),
   
     MailMergeNewToSingleODT("mailMergeNewToSingleODT", 200),
+    
+    MailMergeNewToSinglePDF("mailMergeNewToSinglePDF", 200),
   
     MailMergeNewToODTEMail("mailMergeNewToODTEMail", 200),
     
