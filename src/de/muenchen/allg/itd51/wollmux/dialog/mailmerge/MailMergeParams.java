@@ -1871,7 +1871,7 @@ class MailMergeParams
           new String[] {
           "OOoMailMergeToPrinter", "OOoMailMergeToOdtFile", "MailMergeNewToODTEMail",
           "MailMergeNewToPDFEMail", "MailMergeNewSetFormValue", /* "PDFGesamtdokument", */
-          "MailMergeNewToSingleODT", "PDFGesamtdokumentOutput" };
+          "MailMergeNewToSingleODT", "MailMergeNewToSinglePDF", "PDFGesamtdokumentOutput" };
         for (String func : funcs)
           if (func.equals(name)) return true;
         return false;
