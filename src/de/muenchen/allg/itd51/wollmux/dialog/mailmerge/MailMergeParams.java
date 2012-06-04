@@ -672,8 +672,19 @@ class MailMergeParams
         sections.add(new Section(sectionConf, vbox, this));
     }
     updateView();
+    setDialogLocation();
     dialog.setResizable(false);
     dialog.setVisible(true);
+  }
+  
+  private void setDialogLocation() {
+    
+    int frameWidth = dialog.getWidth();
+    int frameHeight = dialog.getHeight();
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    int x = screenSize.width / 2 - frameWidth / 2;
+    int y = screenSize.height / 2 - frameHeight / 2;
+    dialog.setLocation(x, y);
   }
 
   /**
@@ -686,16 +697,9 @@ class MailMergeParams
   {
     Dimension pref = dialog.getPreferredSize();
     Dimension actual = dialog.getSize();
-    if (actual.height < pref.height || actual.width < pref.width)
+    if (actual.height != pref.height || actual.width < pref.width)
     {
       dialog.pack();
-      int frameWidth = dialog.getWidth();
-      int frameHeight = dialog.getHeight();
-      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      int x = screenSize.width / 2 - frameWidth / 2;
-      int y = screenSize.height / 2 - frameHeight / 2;
-      dialog.setLocation(x, y);
-      dialog.pack(); // manchmal funzt der repaint nicht... warum?
     }
   }
 
