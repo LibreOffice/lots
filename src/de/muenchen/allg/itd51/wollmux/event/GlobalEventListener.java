@@ -50,13 +50,18 @@
 
 package de.muenchen.allg.itd51.wollmux.event;
 
+import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.DocumentManager.Info;
 
@@ -182,9 +187,10 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       return;
     }
     Info docInfo = docManager.getInfo(compo);
-    // docInfo ist != null, wenn das Dokument mit Create erzeugt wurde.
+    // docInfo ist hier nur dann ungleich null, wenn das Dokument mit Create erzeugt
+    // wurde.
     XTextDocument xTextDoc = UNO.XTextDocument(compo);
-    if (xTextDoc != null && docInfo != null && isDocumentHidden(compo))
+    if (xTextDoc != null && docInfo != null && isDocumentLoadedHidden(compo))
     {
       docManager.remove(compo);
       return;
@@ -195,7 +201,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     {
       if (docInfo == null) docManager.addTextDocument(xTextDoc);
       WollMuxEventHandler.handleProcessTextDocument(xTextDoc,
-        !isDocumentHidden(compo));
+        !isDocumentLoadedHidden(compo));
     }
     else
     {
@@ -269,7 +275,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
 
     boolean mmdoc =
       (/* wird über datei->Drucken in Serienbrief erzeugt: */(url.startsWith(
-        ".tmp/sv", idx - 4) && url.endsWith(".tmp"))
+        ".tmp/", idx - 4) && url.endsWith(".tmp"))
         || /* wird über den Service css.text.MailMerge erzeugt: */(url.startsWith(
           "/SwMM", idx) && url.endsWith(".odt")) || /* wird vom WollMux erzeugt: */url.startsWith(
         "/WollMuxMailMerge", idx - 20));
@@ -280,29 +286,31 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
   }
 
   /**
-   * Liefert false zurück, wenn das Dokument sichtbar ist und true, wenn das Dokument
-   * unsichtbar ist oder keine View besitzt.
+   * Liefert nur dann true zurück, wenn das Dokument mit der
+   * MediaDescriptor-Eigenschaft Hidden=true geöffnet wurde.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
-  private boolean isDocumentHidden(XModel compo)
+  private boolean isDocumentLoadedHidden(XModel compo)
   {
+    UnoProps props = new UnoProps(compo.getArgs());
     try
     {
-      return Boolean.TRUE.equals(UNO.getProperty(
-        compo.getCurrentController().getFrame(), "IsHidden"));
+      return AnyConverter.toBoolean(props.getPropertyValue("Hidden"));
     }
-    catch (Exception x)
+    catch (UnknownPropertyException e)
     {
-      // Falls der Zugriff auf den aktuellen Controller/Frame scheitert
-      // (NullPointerException), dann ist das Dokument nicht sichtbar. Ein
-      // null-Frame ist genauso unsichtbar wie ein Frame mit IsHidden==true.
-      return true;
+      return false;
+    }
+    catch (IllegalArgumentException e)
+    {
+      Logger.error(L.m("das darf nicht vorkommen!"), e);
+      return false;
     }
   }
 
   public void disposing(EventObject arg0)
   {
-  // nothing to do
+    // nothing to do
   }
 }
