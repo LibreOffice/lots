@@ -54,7 +54,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
@@ -214,6 +216,22 @@ public class WollMuxBarConfig
   private int trayIconMode_default;
 
   /**
+   * Der Maximalwert für den {@link #myFrame_fontzoom}
+   * (größer 10 wird von der zoom-Methode verweigert).
+   */
+  private final float myFrame_fontzoom_Max = 10;
+  /**
+   * Der Zoomfaktor für Fonts in der WollMux-Bar.
+   * Eingeschränkt auf 0 .. {@link #myFrame_fontzoom_Max}.
+   */
+  private float myFrame_fontzoom;
+
+  /**
+   * Der zentrale Vorgabewert für den {@link #myFrame_fontzoom};
+   */
+  private float  myFrame_fontzoom_default;
+
+  /**
    * Die aktiven CONF_IDs.
    */
   private Set<String> conf_ids;
@@ -267,6 +285,7 @@ public class WollMuxBarConfig
     myFrame_y_default = Integer.MIN_VALUE;
     myFrame_width_default = 0;
     myFrame_height_default = 0;
+    myFrame_fontzoom_default = 1;
     // defaultConf auswerten
     ConfigThingy wmbConf = defaultConf.query("Fenster", 1).query("WollMuxBar", 2);
     try
@@ -295,6 +314,22 @@ public class WollMuxBarConfig
       // Oben gesetzte Defaults werden verwendet
     }
 
+    // Noch nach der Font Größe suchen, die steht in einem anderen Abschnitt
+    ConfigThingy dialogConf = defaultConf.query("Dialoge", 1);
+    try
+    {
+      dialogConf = dialogConf.getLastChild();
+      for (ConfigThingy conf : dialogConf)
+      {
+        if (conf.getName().equals("FONT_ZOOM"))
+          myFrame_fontzoom_default = getFontZoom(conf.toString());
+      }
+    }
+    catch (NodeNotFoundException x)
+    {
+      // Oben gesetzte Defaults werden verwendet
+    }
+
     /*
      * userConf: Defaults setzen für den Fall eines unvollständigen Fensterabschnitts
      */
@@ -305,6 +340,7 @@ public class WollMuxBarConfig
     myFrame_y = Integer.MIN_VALUE;
     myFrame_width = 0;
     myFrame_height = 0;
+    myFrame_fontzoom = 0;
     // userConf auswerten
     wmbConf = userConf.query("Fenster", 1).query("WollMuxBar", 2);
     try
@@ -339,6 +375,22 @@ public class WollMuxBarConfig
       myFrame_y = myFrame_y_default;
       myFrame_width = myFrame_width_default;
       myFrame_height = myFrame_height_default;
+    }
+
+    // Noch nach der Font Größe suchen
+    dialogConf = userConf.query("Dialoge", 1);
+    try
+    {
+      dialogConf = dialogConf.getLastChild();
+      for (ConfigThingy conf : dialogConf)
+      {
+        if (conf.getName().equals("FONT_ZOOM"))
+          myFrame_fontzoom = getFontZoom(conf.toString());
+      }
+    }
+    catch (NodeNotFoundException x)
+    {
+      myFrame_fontzoom = myFrame_fontzoom_default;
     }
 
     /*
@@ -636,6 +688,16 @@ public class WollMuxBarConfig
 
     x = 0;
     ++y;
+    gbcLabel.gridx = x++;
+    gbcLabel.gridy = y;
+    mainPanel.add(new JLabel(L.m("Font-Zoom")), gbcLabel);
+    final JSpinner fontZoom = new JSpinner(new SpinnerNumberModel(1.0,0.0,myFrame_fontzoom_Max,0.1));
+    gbcCombo.gridx = x++;
+    gbcCombo.gridy = y;
+    mainPanel.add(fontZoom, gbcCombo);
+
+    x = 0;
+    ++y;
     gbcSeparator.gridx = x++;
     gbcSeparator.gridy = y;
     mainPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbcSeparator);
@@ -668,6 +730,7 @@ public class WollMuxBarConfig
     setCombo(inputY, xyToText(myFrame_y));
     setCombo(inputWidth, widthHeightToText(myFrame_width));    
     setCombo(inputHeight, widthHeightToText(myFrame_height));
+    setSpinner(fontZoom, myFrame_fontzoom);
 
     x = 0;
     y = 0;
@@ -700,6 +763,7 @@ public class WollMuxBarConfig
         setCombo(inputY, xyToText(myFrame_y_default));
         setCombo(inputWidth, widthHeightToText(myFrame_width_default));
         setCombo(inputHeight, widthHeightToText(myFrame_height_default));
+        setSpinner(fontZoom, myFrame_fontzoom_default);
         setCheckboxesForConfIDsToDefaultValues(checkboxes);
       }
     }), gbcButton);
@@ -727,6 +791,7 @@ public class WollMuxBarConfig
         myFrame_y = getXY(inputY.getSelectedItem().toString());
         myFrame_width = getWidthHeight(inputWidth.getSelectedItem().toString());
         myFrame_height = getWidthHeight(inputHeight.getSelectedItem().toString());
+        myFrame_fontzoom = getFontZoom(fontZoom.getValue());
         conf_ids = getConfIDsFromCheckboxes(checkboxes);
 
         doSave();
@@ -862,6 +927,15 @@ public class WollMuxBarConfig
     combo.setSelectedItem(str);
   }
 
+  /**
+   * Wählt das Item von combo aus, das equals zu str ist. Falls keines vorhanden ist,
+   * wird str direkt gesetzt (ergibt nur bei einer editable ComboBox Sinn).
+   */
+  private void setSpinner(JSpinner spinner, float value)
+  {
+    spinner.setValue(new Float(value));
+  }
+
   private void doSave()
   {
     ConfigThingy conf = userConf;
@@ -889,13 +963,24 @@ public class WollMuxBarConfig
         }
         if (subConf.count() == 0) iter.remove();
       }
+      else if (subConf.getName().equals("Dialoge"))
+      {
+        Iterator<ConfigThingy> subIter = subConf.iterator();
+        while (subIter.hasNext())
+        {
+          String name = subIter.next().getName();
+          if (name.equals("FONT_ZOOM")) subIter.remove();
+        }
+        if (subConf.count() == 0) iter.remove();
+      }
     }
 
     if (myFrame_title.equals(myFrame_title_default)
       && windowMode == windowMode_default && myFrame_x == myFrame_x_default
       && trayIconMode == trayIconMode_default && myFrame_y == myFrame_y_default
       && myFrame_width == myFrame_width_default
-      && myFrame_height == myFrame_height_default)
+      && myFrame_height == myFrame_height_default
+      && myFrame_fontzoom == myFrame_fontzoom_default)
     {
       // Falls gegenüber den Werten aus defaultConf nichts geändert wurde, dann
       // schreiben wir keinen Fenster-Abschnitt in die wollmuxbar.conf. Der
@@ -912,6 +997,8 @@ public class WollMuxBarConfig
       wmbConf.add("Y").add(xyToText(myFrame_y));
       wmbConf.add("WIDTH").add(widthHeightToText(myFrame_width));
       wmbConf.add("HEIGHT").add(widthHeightToText(myFrame_height));
+      ConfigThingy dialogConf = conf.add("Dialoge");
+      dialogConf.add("FONT_ZOOM").add(zoomToText(myFrame_fontzoom));
     }
 
     ConfigThingy active_ids =
@@ -1025,6 +1112,37 @@ public class WollMuxBarConfig
   }
 
   /**
+   * Wandelt den ZoomWert in einen String um
+   * @param zoom der umzuwandelnde Zoom-Wert
+   * @return zoom als String
+   */
+  private String zoomToText(float zoom){
+    String text = Float.toString(zoom);
+    return text;
+  }
+
+  /**
+   * Liefert den passenden int zu Font-Zoom (0 <= x <= myFrame_fontzoom_Max). Ist der Wert
+   * nicht parsbar, wird ein Fehler geloggert und 1 geliefert.
+   */
+  private float getFontZoom(String fontzoom)
+  {
+    float value = 1;
+    try
+    {
+      value = Float.parseFloat(fontzoom);
+      if (value < 0) value = 0;
+      if (value > myFrame_fontzoom_Max) value = myFrame_fontzoom_Max;
+    }
+    catch (NumberFormatException x)
+    {
+      Logger.error(L.m(
+        "Fehlerhafte Font-Zoom Angabe: '%1' ist keine Zahl ", fontzoom));
+    }
+    return value;
+  }
+
+  /**
    * Liefert den passenden Integer-Wert zu xy (Zahl, "auto", "min", "max", "center").
    * Falls kein parsbarer Wert, so wird ein Fehler geloggert und der int für "auto"
    * zurückgeliefert.
@@ -1082,6 +1200,31 @@ public class WollMuxBarConfig
           "Fehlerhafte WIDTH/HEIGHT Angabe: '%1' ist weder Zahl noch 'max' oder 'auto'",
           widthOrHeight));
       }
+    return value;
+  }
+
+  /**
+   * Liefert den passenden Wert zu fontZoom.
+   * nicht parsbar, wird ein Fehler geloggert und 1.0 geliefert.
+   */
+  private float getFontZoom(Object zoom)
+  {
+    float value = 1;
+    if (zoom instanceof Double){
+      value = ((Double)zoom).floatValue();
+    }
+    else
+    {
+      try
+      {
+        value = Float.parseFloat(zoom.toString());
+      }
+      catch (NumberFormatException x)
+      {
+        Logger.error(L.m(
+          "Fehlerhafte Fontzoom Angabe: '%1' ist keine Zahl", zoom));
+      }
+    }
     return value;
   }
 

@@ -747,21 +747,68 @@ public class WollMuxFiles
       try
       {
         double zoomFactor = Double.parseDouble(zoom.getLastChild().toString());
-        if (zoomFactor < 0.5 || zoomFactor > 10)
-        {
-          Logger.error(L.m("Unsinniger FONT_ZOOM Wert angegeben: %1", ""
-            + zoomFactor));
-        }
-        else
-        {
-          if (zoomFactor < 0.99 || zoomFactor > 1.01) Common.zoomFonts(zoomFactor);
-        }
+        zoomFonts(zoomFactor);
       }
       catch (Exception x)
       {
         Logger.error(x);
       }
     }
+  }
+
+  /**
+   * Wertet die FONT_ZOOM-Direktive des Dialoge-Abschnitts aus und zoomt die Fonts
+   * falls erforderlich.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static void setLookAndFeel(ConfigThingy conf)
+  {
+    Common.setLookAndFeelOnce();
+    if (conf != null)
+    {
+      ConfigThingy zoom = conf.query("Dialoge").query("FONT_ZOOM", 2);
+      if (zoom.count() > 0)
+      {
+        try
+        {
+          double zoomFactor = Double.parseDouble(zoom.getLastChild().toString());
+          zoomFonts(zoomFactor);
+        }
+        catch (Exception x)
+        {
+          Logger.error(x);
+        }
+      }
+      else
+      {
+        Logger.debug(L.m("Config Thing ist null!"));
+      }
+    }
+  }
+
+  /**
+   * Zoomt die Fonts auf zoomFactor, falls erforderlich.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static void zoomFonts(double zoomFactor)
+  {
+
+    if (zoomFactor < 0.5 || zoomFactor > 10)
+    {
+      Logger.error(L.m("Unsinniger FONT_ZOOM Wert angegeben: %1", ""
+        + zoomFactor));
+    }
+    else
+    {
+      // Frühere Prüfung (nur werte kleiner 0.99 oder größer 1.01) entfernt,
+      // seitdem die Fontgröße im Gui eingestellt werden kann.
+      // Mit dieser Prüfung wäre z. b. ein Zurückstellen 
+      // von Zoomfaktor 2 auf 1 abgelehnt worden. 
+      Common.zoomFonts(zoomFactor);
+    }
+
   }
 
   /**

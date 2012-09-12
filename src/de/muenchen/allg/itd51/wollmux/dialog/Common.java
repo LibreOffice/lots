@@ -48,13 +48,17 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
-import javax.swing.plaf.FontUIResource;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.L;
@@ -109,6 +113,11 @@ public class Common
    * Gibt an ob {@link #setLookAndFeel()} bereits aufgerufen wurde.
    */
   private static boolean lafSet = false;
+  
+  /**
+   * Speichert die ursprünglichen Fontgrößen.
+   */
+  private static HashMap<Object, Float> defaultFontsizes;
 
   /**
    * Führt {@link #setLookAndFeel()} aus, aber nur, wenn es bisher noch nicht
@@ -141,6 +150,7 @@ public class Common
    */
   private static void setLookAndFeel()
   {
+    Logger.debug("setLookAndFeel");
     // String lafName = UIManager.getSystemLookAndFeelClassName();
     // if (lafName.equals("javax.swing.plaf.metal.MetalLookAndFeel"))
     // lafName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
@@ -174,6 +184,20 @@ public class Common
     // configure behaviour of JTextFields:
     configureTextFieldBehaviour();
 
+    defaultFontsizes = new HashMap<Object, Float>();
+    UIDefaults def = UIManager.getLookAndFeelDefaults();
+    Enumeration<Object> keys = def.keys();
+    float fontSize;
+    Object key;
+    Font font;
+    while (keys.hasMoreElements()){
+      key = keys.nextElement();
+      font = def.getFont(key);
+      if (font != null){
+        fontSize = font.getSize();
+        defaultFontsizes.put(key, new Float(fontSize));
+      }
+    }
     lafSet = true;
   }
 
@@ -256,24 +280,66 @@ public class Common
   {
     Logger.debug("zoomFonts(" + zoomFactor + ")");
     UIDefaults def = UIManager.getLookAndFeelDefaults();
-    Enumeration<Object> enu = def.keys();
+    Set<Map.Entry<Object, Float>> mappings;
+    mappings = defaultFontsizes.entrySet();
+    Iterator<Entry<Object, Float>> mappingEntries = mappings.iterator();
+    Entry<Object,Float> mappingEntry;
+    Object key;
+    Float size;
+    Font oldFnt, newFont;
     int changedFonts = 0;
+    while (mappingEntries.hasNext())
+    {
+      try
+      {
+        mappingEntry = mappingEntries.next();
+        key = mappingEntry.getKey();
+        size = mappingEntry.getValue();
+        oldFnt = def.getFont(key);
+        if (oldFnt != null) {
+          newFont = oldFnt.deriveFont((float)(size * zoomFactor));
+          def.put(key, newFont);
+          ++changedFonts;
+        }
+      }
+      catch (Exception ex)
+      {
+        Logger.debug(ex);
+      }
+    }
+    
+    /*Enumeration<Object> enu = def.keys();
+    
     while (enu.hasMoreElements())
     {
       Object key = enu.nextElement();
+      //Font elem = def.getFont(key);
+      //if (elem == null ) continue;
       if (key.toString().endsWith(".font"))
       {
+        Logger.debug(key.toString());
         try
         {
-          FontUIResource res = (FontUIResource) def.get(key);
-          Font fnt = res.deriveFont((float) (res.getSize() * zoomFactor));
-          def.put(key, fnt);
-          ++changedFonts;
+          Object obj = def.get(key);
+          if (obj instanceof FontUIResource){
+            FontUIResource res = (FontUIResource) def.get(key);
+            Font fnt = res.deriveFont((float) (defaultFontsize * zoomFactor));
+            def.put(key, fnt);
+          }
+          if (obj instanceof Font){
+            Font res = (Font) def.get(key);
+            //Font fnt = res.deriveFont((float) (res.getSize() * zoomFactor));
+            Font fnt = res.deriveFont((float) (defaultFontsize * zoomFactor));
+            def.put(key, fnt);
+          }
+          
         }
         catch (Exception x)
-        {}
+        {
+          Logger.debug(x);
+        }
       }
-    }
+    }*/
     Logger.debug(changedFonts + L.m(" Fontgrößen verändert!"));
   }
 

@@ -2721,9 +2721,12 @@ public class WollMuxBar
           L.m("Fehlerhafte Konfiguration"), JOptionPane.ERROR_MESSAGE);
       }
       else
+      {
+        WollMuxFiles.setLookAndFeel(wollmuxbarConf);
         instance =
           new WollMuxBar(windowMode, combinedConf, wollmuxConf, wollmuxbarConf,
             quickstarter);
+      }
 
       if (menumanager)
       {
