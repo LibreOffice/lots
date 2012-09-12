@@ -10,6 +10,12 @@
       WollMuxBar-Menü vorhanden ist. (Dieses Feature ist nur verfügbar, wenn
       der WollMux mit Java 6 ausgeführt wird!)
     * Unter Extras-Optionen kann die Fontgröße bis zu Faktor 10 eingestellt werden.
+    * Bei Seriendrucken, deren Datenquelle mehrzeilige Spaltenüberschriften enthält, 
+      konnte das Dokument bisher auch nach Korrektur der Datenquelle nicht mehr 
+      gedruckt werden, da die Information auch im Dokument selbst gespeichert 
+      wurde.
+      Ein solches Dokument kann jetzt "repariert" werden, so dass die Information
+      nicht mehr im Dokument gespeichert ist. 
 
 
  ==================== Neu in Version 10.8 RC ====================

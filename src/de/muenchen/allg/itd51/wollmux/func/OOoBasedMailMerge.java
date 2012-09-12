@@ -73,23 +73,23 @@ import com.sun.star.util.URL;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory;
-import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
-import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormFieldType;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.PersistentData;
 import de.muenchen.allg.itd51.wollmux.PersistentDataContainer;
-import de.muenchen.allg.itd51.wollmux.PersistentDataContainer.DataID;
 import de.muenchen.allg.itd51.wollmux.PrintModels;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.SimulationResults;
-import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
+import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
+import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormFieldType;
+import de.muenchen.allg.itd51.wollmux.PersistentDataContainer.DataID;
+import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 
@@ -135,6 +135,13 @@ public class OOoBasedMailMerge
     }
     catch (Exception e)
     {
+      if (ds.getDataSourceWriter().isAdjustMainDoc()){
+        PersistentDataContainer lCont = PersistentData.
+          createPersistentDataContainer(pmod.getTextDocument());
+        lCont.removeData(PersistentDataContainer.DataID.FORMULARWERTE);
+        Logger.debug(
+          L.m("Formularwerte wurden aus %1 gelöscht.", pmod.getTextDocument().getURL()));
+      }
       Logger.error(
         L.m("OOo-Based-MailMerge: kann Simulationsdatenquelle nicht erzeugen!"), e);
       return;
@@ -474,6 +481,13 @@ public class OOoBasedMailMerge
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     public int getSize();
+
+    /**
+     * Entscheidet ob aus den PersistentData der Originaldatei die WollMux-Abschitte
+     * gelöscht werden müssen. 
+     * @return true falls die Abschnitte gelöscht werden müssen, false sonst
+     */
+    public boolean isAdjustMainDoc();
   }
 
   /**
@@ -503,6 +517,12 @@ public class OOoBasedMailMerge
      * Enthält nach einem Aufruf von {@link #getHeaders()} die sortierten Headers.
      */
     ArrayList<String> headers = null;
+
+    /**
+     * Wenn {@link #validateColumntHeaders()} Leerzeichen in den Headern findet, 
+     * müssen die PersistentData des Originaldokuments angepasst werden. 
+     */
+    private boolean adjustPersistentData = false;
 
     /**
      * Erzeugt einen CSVDataSourceWriter, der die zu erzeugende csv-Datei in
@@ -567,8 +587,16 @@ public class OOoBasedMailMerge
       p.close();
     }
 
+    /**
+     * Überprüft ob die Headerzeilen der Datenquelle gültig sind, 
+     * dh. keine Zeilenumbrüche enthalten. Wenn Zeilenumbrüche gefunden
+     * werden, wird eine entsprechende Meldung angezeigt.
+     * @throws ColumnNotFoundException Falls die Datenquelle in der
+     * Headerzeile mindestens 1 Spalte mit Zeilenumbruch enthält.
+     */
     private void validateColumnHeaders() throws ColumnNotFoundException
     {
+      Logger.debug(L.m("validateColumnHeaders()"));
       String invalidHeaders = "";
       for (String key : getHeaders())
       {
@@ -579,11 +607,17 @@ public class OOoBasedMailMerge
       }
       if (!invalidHeaders.isEmpty())
       {
-        WollMuxSingleton.showInfoModal(
+        boolean anpassen = WollMuxSingleton.showQuestionModal(
           L.m("WollMux-Seriendruck"),
           L.m("Zeilenumbrüche in Spaltenüberschriften sind für den Seriendruck nicht erlaubt.\n")
-            + L.m("\nBitte entfernen Sie die Zeilenumbrüche aus den folgenden Überschriften:\n\n")
-            + invalidHeaders);
+            + L.m("\nBitte entfernen Sie die Zeilenumbrüche aus den folgenden Überschriften der Datenquelle:\n\n")
+            + invalidHeaders 
+            + L.m("\nSoll das Hauptdokument entsprechend angepasst werden?"));
+          
+          
+        if (anpassen){
+          adjustPersistentData = true;
+        }
         throw new ColumnNotFoundException(
           L.m("Spaltenüberschriften enthalten newlines"));
       }
@@ -642,8 +676,18 @@ public class OOoBasedMailMerge
     {
       return csvFile;
     }
+
+    /**
+     * Liefert den Wert von {@link #adjustPersistentData}} zurück.
+     * 
+     * @author Ulrich Kitzinger (GBI I21)
+     */
+    public boolean isAdjustMainDoc(){
+      return adjustPersistentData;
+    }
   }
 
+  
   /**
    * Erzeugt das aus origDoc abgeleitete, für den OOo-Seriendruck heranzuziehende
    * Input-Dokument im Verzeichnis tmpDir und nimmt alle notwendigen Anpassungen vor,
