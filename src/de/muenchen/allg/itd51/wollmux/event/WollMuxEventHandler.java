@@ -40,6 +40,7 @@
  * 02.06.2010 | BED | +handleSaveTempAndOpenExt
  * 08.05.2012 | jub | fakeSymLink behandlung eingebaut: auflösung und test der FRAG_IDs berücksichtigt
  *                    auch die möglichkeit, dass im conifg file auf einen fake SymLink verwiesen wird.
+ * 11.12.2012 | jub | fakeSymLinks werden doch nicht gebraucht; wieder aus dem code entfernt                   
  *
  * -------------------------------------------------------------------
  *
@@ -123,7 +124,6 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.EndlessLoopException;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.FormModelImpl;
 import de.muenchen.allg.itd51.wollmux.L;
@@ -1606,15 +1606,10 @@ public class WollMuxEventHandler
           URL url;
           try
           {
-            urlStr = WollMuxFiles.resolveAndCheckUrl(urlStr, 50);            
-          }
-          catch (EndlessLoopException e)
-          {
-            Logger.log(e);
-            errors +=
-              L.m("Die URL '%1' läßt sich nicht auflösen", urlStr) + "\n"
-                + e.getLocalizedMessage() + "\n\n";
-            continue;
+            url = WollMuxFiles.makeURL(urlStr);
+            urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
+            url = WollMuxFiles.makeURL(urlStr);
+            WollMuxSingleton.checkURL(url);
           }            
           catch (MalformedURLException e)
           {
@@ -1623,15 +1618,7 @@ public class WollMuxEventHandler
               L.m("Die URL '%1' ist ungültig:", urlStr) + "\n"
                 + e.getLocalizedMessage() + "\n\n";
             continue;
-          }
-          catch (URISyntaxException e)
-          {
-            Logger.log(e);
-            errors +=
-              L.m("Die URL '%1' ist ungültig:", urlStr) + "\n"
-                + e.getLocalizedMessage() + "\n\n";
-            continue;
-          }
+          }          
           catch (IOException e)
           {
             Logger.log(e);

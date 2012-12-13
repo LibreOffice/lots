@@ -48,6 +48,7 @@
  * 08.05.2012 | jub | fakeSymLink behandlung eingebaut: der verweis auf fragmente, wie er in der 
  *                    config datei steht, kann auf einen sog. fake SymLink gehen, eine text-
  *                    datei, in der auf ein anderes fragment inkl. relativem pfad verwiesen wird.
+ * 11.12.2012 | jub | fakeSymLinks werden doch nicht gebraucht; wieder aus dem code entfernt                   
  * 
  * -------------------------------------------------------------------
  *
@@ -56,7 +57,6 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -64,7 +64,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -73,7 +72,6 @@ import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.UnknownHostException;
@@ -497,106 +495,7 @@ public class WollMuxFiles
   public static URL makeURL(String urlStr) throws MalformedURLException
   {    
     return new URL(WollMuxFiles.getDEFAULT_CONTEXT(), ConfigThingy.urlEncode(urlStr));
-  }
-  
-  /**
-   * Liefert einen String urlStr mit kontext fakeSymLink
-   * 
-   * @author judith baur
-   * @param urlStr, fakeSymLink
-   * @return urlStr
-   */
-  public static String makeFakeSymLinkURLStr(String fakeSymLink, String urlStr)
-  {
-    String link;
-    if(!fakeSymLink.isEmpty())
-      fakeSymLink = fakeSymLink.substring(0, fakeSymLink.lastIndexOf("/") + 1);
-    
-    link = fakeSymLink + urlStr;
-    return link;
-  }
-  
-  public static boolean isFakeSymLink(String urlStr) {
-    if(urlStr.toLowerCase().endsWith(".fakesymlink"))
-      return true;
-    
-    return false;
-  }
-  
-  /**
-   * testet, ob sich der Filename als fakeSymLink auflösen läßt und falls ja,
-   * gibt den Inhalt der fakeSymLink Datei zurück.
-   * 
-   * @param urlStr Name des files, das uu einen symLink faked
-   * @return String name und pfad des files, wie es im fakeSymLink stand
-   * @author judith baur
-   * @throws URISyntaxException 
-   * @throws MalformedURLException 
-   * @throws IOException
-   */  
-  public static String resolveFakeSymLink(String urlStr) 
-    throws URISyntaxException, MalformedURLException, IOException
-  {  
-    urlStr = makeParsedUNOUrl("", urlStr);
-    WollMuxSingleton.checkURL(WollMuxFiles.makeURL(urlStr)); 
-    
-    URL url = new URL(urlStr);
-    BufferedReader fakeSymLinkReader = 
-      new BufferedReader(new InputStreamReader(url.openStream(), ConfigThingy.CHARSET));
-    
-    String line = fakeSymLinkReader.readLine(); 
-    return line;
-  }
-  
-  public static String resolveAndCheckUrl(String urlStr, int iDepth)
-    throws URISyntaxException, MalformedURLException, IOException, 
-      EndlessLoopException {
-   
-      return resolveAndCheckUrl("", urlStr, iDepth);
-  }
-  
-  /**
-   * 
-   * @param urlStr
-   * @param iDepth die Suchtiefe, um in keine endlose scheife zu laufen 
-   * @return urlStr
-   * @author judith baur
-   */
-  public static String resolveAndCheckUrl(String context, String urlStr, int iDepth) 
-    throws URISyntaxException, MalformedURLException, IOException, 
-      EndlessLoopException {
-    
-    try { 
-      // falls jemand die Endung '.fakeSymLink' mit angegeben hat
-      if(isFakeSymLink(urlStr)) {
-        urlStr = resolveFakeSymLink(urlStr);
-       } 
-            
-      urlStr = makeParsedUNOUrl(context, urlStr);
-      WollMuxSingleton.checkURL(WollMuxFiles.makeURL(urlStr)); 
-           
-    } catch (IOException e) {
-      if(iDepth > 0) {
-        String line;
-        line = resolveFakeSymLink(urlStr + ".fakeSymLink");
-        
-        urlStr = resolveAndCheckUrl(urlStr, line, --iDepth);
-      } else {
-        throw new EndlessLoopException("");
-      }
-    }
-    return urlStr;
-  }
-  
-  public static String makeParsedUNOUrl(String context, String urlStr) 
-    throws MalformedURLException, IOException, URISyntaxException {
-    
-    URL url; 
-    urlStr = WollMuxFiles.makeFakeSymLinkURLStr(context, urlStr);
-    url = WollMuxFiles.makeURL(urlStr);
-    urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
-    return urlStr; 
-  }
+  }  
   
   /**
    * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null, falls
