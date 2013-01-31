@@ -282,6 +282,19 @@ public class WollMuxFiles
     // Pfad zur wollmux.conf
     String wollmuxConfPath = null;
 
+    // wollmux.conf wird über die Umgebungsvariable "WOLLMUX_CONF_PATH" gesetzt.
+    if (wollmuxConfFile == null || !wollmuxConfFile.exists())
+    { 
+      if (System.getenv("WOLLMUX_CONF_PATH") != null)
+      {
+        wollmuxConfPath = System.getenv("WOLLMUX_CONF_PATH");
+        wollmuxConfFile = new File(wollmuxConfPath);
+        searchPaths.append(wollmuxConfFile.getPath() + "\n");
+        debug2Messages.append("wollmux.conf was set by environment variable: ");
+        debug2Messages.append(wollmuxConfPath);
+      } 
+    }
+
     // Überprüfen, ob das Betriebssystem Windows ist
     boolean windowsOS =
       System.getProperty("os.name").toLowerCase().contains("windows");
