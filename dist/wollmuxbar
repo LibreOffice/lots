@@ -12,4 +12,16 @@ if [ ! -p $FIFO ]; then
   set -- --firstrun "$@"
 fi
 
+# If no office installation is found in the path and the install location is
+# not specified by the user try to autodetect installation paths in /opt
+if ! `which soffice > /dev/null` && [ "x$UNO_PATH" = "x" ]; then
+	for officepath in /opt/libreoffice*/ /opt/openoffice.org*/; do
+		if [ -e "$officepath/program/soffice" ]; then
+			export UNO_PATH="$officepath/program"
+			break
+		fi
+	done
+fi
+
+
 exec java -jar "${JAR_FILE}" --quickstarter --fifo $FIFO "$@"
