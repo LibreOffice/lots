@@ -2,7 +2,7 @@
 Exec[$e]=wollmux
 GenericName=templates and forms
 GenericName[de]=Vorlagen und Formulare
-Comment=toolbar for the WollMux extension of OpenOffice.org Writer
+Comment=toolbar for the WollMux extension of LibreOffice Writer
 Icon=wollmux
 MimeType=
 Name=WollMux

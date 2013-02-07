@@ -1,6 +1,6 @@
 =head1 NAME
 
-WollMux Bar - external controller for the WollMux form letter extension for OpenOffice.org Writer
+WollMux Bar - external controller for the WollMux form letter extension for LibreOffice / Apache OpenOffice / OpenOffice.org Writer
 
 =head1 SYNOPSIS
 
@@ -8,7 +8,7 @@ B<wollmuxbar>
 
 =head1 DESCRIPTION
 
-WollMux is an extension to Openoffice.org Writer with the following features:
+WollMux is an extension to LibreOffice / Apache OpenOffice / Openoffice.org Writer with the following features:
 
 =over 6
 

@@ -4,14 +4,13 @@
 #export DH_VERBOSE=1
 #DEB_ANT_INVOKE += -v
 
-OOO_EXTENSION_PKG := openoffice.org-wollmux
+OOO_EXTENSION_PKG := libreoffice-wollmux
 OOO_OXT_FILE := dist/WollMux.oxt
 OOO_OXT_IDENTIFIER := oxt/description.xml
 OOO_OXT_BUILD_COMMAND :=
 
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/ant.mk
-include /usr/share/openoffice.org-devscripts/ooo-extension.mk
 
 # JAVA_HOME := /usr/lib/jvm/default-java
 JAVA_HOME := /usr/lib/j2sdk1.6-sun
@@ -28,15 +27,13 @@ debian/stamp-build:
 	inkscape -h 128 -D -e debian/wollmuxbar.png debian/frog.svg
 	touch $@
 
-install/wollmux:: oxt-maintscripts
-
 install/wollmuxbar::
 	install -m 644 -D dist/WollMuxBar.jar \
 	  debian/wollmuxbar/usr/share/java/WollMuxBar-$(DEB_UPSTREAM_VERSION).jar
 	dh_link -pwollmuxbar /usr/share/java/WollMuxBar-$(DEB_UPSTREAM_VERSION).jar \
 	  /usr/share/java/WollMuxBar.jar
 
-clean:: oxt-clean
+clean::
 	$(RM) debian/stamp-* debian/wollmuxbar.1 debian/wollmuxbar.png 
 	$(RM) debian/*.{pre,post}{inst,rm}
 
