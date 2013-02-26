@@ -268,6 +268,20 @@ public class StandardPrint
   }
 
   /**
+   * <b>DEPRECATED</b>: Druckfunktion zum Versenden der durch den Seriendruck erzeugten odt Dokumente per
+   * E-Mail. Funktion existiert noch für die Kompatibilität zu alten Konfigurationen. Zukünftig werden 
+   * <b>"mailMergeNewToODTEMail"</b> bzw. <b>"mailMergeNewToPDFEMail"</b> diese Funktion ersetzen.
+   * 
+   * @author Stefan Ströbl (ITM-B17)
+   */
+  public static void mailMergeNewToEMail(final XPrintModel pmod)
+  {
+    //TODO Funktion entfernen, wenn die Standard-Config 13.X schon länger (~2 Jahre) im Einsatz ist
+    boolean isODT = true;
+    MailMergeNew.sendAsEmail(pmod, isODT);
+  }
+  
+  /**
    * Druckfunktion zum Versenden der durch den Seriendruck erzeugten odt Dokumente per
    * E-Mail
    * 
