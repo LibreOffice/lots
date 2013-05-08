@@ -50,6 +50,7 @@ import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -137,6 +138,7 @@ public class SachleitendeVerfuegungenDruckdialog
   {
     public void actionPerformed(ActionEvent e)
     {
+      printOrderAsc = getSelectedPrintOrderAsc();
       getCurrentSettingsForAllElements();
       abort(CMD_SUBMIT);
     }
@@ -218,6 +220,11 @@ public class SachleitendeVerfuegungenDruckdialog
   private JTextField allElementCountTextField;
 
   /**
+   * Die Checkbox zur Reihenfolge des Ausdrucks
+   */
+  private JCheckBox printOrder;
+
+  /**
    * Der dem
    * {@link #AbsenderAuswaehlen(ConfigThingy, ConfigThingy, DatasourceJoiner, ActionListener)
    * Konstruktor} übergebene dialogEndListener.
@@ -234,6 +241,11 @@ public class SachleitendeVerfuegungenDruckdialog
    * aktuelle Liste Einstellungen für die zu druckenden Verfügungspunkte.
    */
   private List<VerfuegungspunktInfo> currentSettings;
+
+  /**
+   * Enthält die Information ob die Methode printAll in auf- oder absteigender Reihenfolge drucken soll.
+   */
+  private boolean printOrderAsc;
 
   /**
    * Erzeugt einen neuen Dialog.
@@ -262,6 +274,7 @@ public class SachleitendeVerfuegungenDruckdialog
     this.verfuegungspunkte = verfuegungspunkte;
     this.dialogEndListener = dialogEndListener;
     this.currentSettings = new ArrayList<VerfuegungspunktInfo>();
+    this.printOrder = new JCheckBox();
 
     ConfigThingy fensterDesc1 = conf.query("Fenster");
     if (fensterDesc1.count() == 0)
@@ -325,6 +338,17 @@ public class SachleitendeVerfuegungenDruckdialog
       return "VerfuegungspunktInfo(verfPunkt=" + verfPunktNr + ", copyCount="
         + copyCount + ", isDraft=" + isDraft + ", isOriginal=" + isOriginal + ")";
     }
+  }
+
+  /**
+   * Liefert die aktuellen in diesem Dialog getroffenen Einstellung zur Reihenfolge des Ausdrucks.
+   * @return true falls in aufsteigender Reihenfloge gedruckt werden soll, false sonst.
+   *
+   * @author ulrich.kitzinger
+   */
+  public boolean getPrintOrderAsc()
+  {
+    return printOrderAsc;
   }
 
   /**
@@ -437,6 +461,8 @@ public class SachleitendeVerfuegungenDruckdialog
 
     addUIElements(fensterDesc, "AllElements", 0,
       size + 2 /* Headers und Separator */, verfPunktPanel, 1, 0);
+    addUIElements(fensterDesc, "Reihenfolge", 0,
+      size + 4 /* Headers und Separator */, verfPunktPanel, 1, 0);
     addUIElements(fensterDesc, "Buttons", 0, 0, buttons, 1, 0);
 
     myFrame.pack();
@@ -504,6 +530,10 @@ public class SachleitendeVerfuegungenDruckdialog
         GridBagConstraints.BOTH, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
           TF_BORDER), 0, 0);
     GridBagConstraints gbcSpinner =
+      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,
+        GridBagConstraints.BOTH, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
+          TF_BORDER), 0, 0);
+    GridBagConstraints gbcCheckBox =
       new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,
         GridBagConstraints.BOTH, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
           TF_BORDER), 0, 0);
@@ -623,6 +653,27 @@ public class SachleitendeVerfuegungenDruckdialog
             gbcComboBox.gridy = y;
             if (comboBox != null) compo.add(comboBox, gbcComboBox);
           }
+
+          else if (type.equals("checkbox"))
+          {
+            JCheckBox checkBox;
+            if (id.equals("printOrder"))
+            {
+              checkBox = printOrder;
+            }
+            else
+            {
+              checkBox = new JCheckBox();
+            }
+
+            gbcCheckBox.gridx = x;
+            gbcCheckBox.gridy = y;
+
+            String boxText = uiElementDesc.get("LABEL").toString();
+            checkBox.setText(boxText);
+            compo.add(checkBox, gbcCheckBox);
+          }
+
 
           else if (type.equals("textfield"))
           {
@@ -767,6 +818,16 @@ public class SachleitendeVerfuegungenDruckdialog
     myFrame.dispose();
     if (dialogEndListener != null)
       dialogEndListener.actionPerformed(new ActionEvent(this, 0, cmdStr));
+  }
+
+  /**
+   * Ermittelt ob in aufsteigender oder absteigender Reihenfolge gedruckt werden soll.
+   * @return true falls in aufsteigender Reihenfolge gedruckt werden soll, false sonst
+   *
+   * @author ulrich.kitzinger
+   */
+  private boolean getSelectedPrintOrderAsc(){
+    return !printOrder.isSelected();
   }
 
   /**

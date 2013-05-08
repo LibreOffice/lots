@@ -33,9 +33,11 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Random;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -1153,7 +1155,21 @@ public class SachleitendeVerfuegung
         (SachleitendeVerfuegungenDruckdialog) result.getSource();
       if (SachleitendeVerfuegungenDruckdialog.CMD_SUBMIT.equals(cmd) && slvd != null)
       {
-        return slvd.getCurrentSettings();
+        if (slvd.getPrintOrderAsc())
+        {
+          return slvd.getCurrentSettings();
+        }
+        else
+        {
+          // sonst in umgekehrter Reihenfolge
+          List<VerfuegungspunktInfo> lList = new ArrayList<VerfuegungspunktInfo>();
+          ListIterator<VerfuegungspunktInfo> lIt = slvd.getCurrentSettings().listIterator(slvd.getCurrentSettings().size());
+          while (lIt.hasPrevious())
+          {
+            lList.add(lIt.previous());
+          }
+          return lList;
+        }
       }
       return null;
     }
