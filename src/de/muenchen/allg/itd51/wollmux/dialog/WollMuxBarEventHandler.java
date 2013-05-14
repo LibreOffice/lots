@@ -52,6 +52,8 @@ import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
+import com.sun.star.bridge.XUnoUrlResolver;
+import com.sun.star.bridge.UnoUrlResolver;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -524,10 +526,24 @@ public class WollMuxBarEventHandler
       }
       catch (Exception x)
       {
-        Logger.error(L.m("Konnte keine Verbindung zu OpenOffice herstellen"));
-        wollmuxbar.connectionFailedWarning();
+        // whoops, that failed - can we get an urp connection to a
+        // running OOo/LibO at the usual port (8100)?
+        try
+        {
+          ctx = Bootstrap.createInitialComponentContext(null);
+          // create a connector, so that it can contact the office
+          XUnoUrlResolver urlResolver = UnoUrlResolver.create(ctx);
+          Object initialObject = urlResolver.resolve("uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager");
+          factory = (XMultiServiceFactory) UnoRuntime.queryInterface(
+            XMultiServiceFactory.class, initialObject);
+        }
+        catch (Exception y)
+        {
+          Logger.error(L.m("Konnte keine Verbindung zu OpenOffice/LibreOffice herstellen"));
+          wollmuxbar.connectionFailedWarning();
 
-        return null;
+          return null;
+        }
       }
 
       /*
