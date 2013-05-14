@@ -239,7 +239,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<target name="compileidl">
 		<echo message="Types dir: ${OOO_TYPES_DIR}"/>
 		<echo level="info">idlc: Creating .urd files</echo>
-		<apply executable="idlc" dest="${MY_IDL}">
+		<apply executable="${OOO_SDK}/bin/idlc" dest="${MY_IDL}">
 			<arg value="-C" />
 			<arg value="-I${SDK_IDL}" />
 			<fileset dir="${MY_IDL}" includes="**/*.idl" />
@@ -248,7 +248,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 
 		<delete file="${RDBFILE}" />
 		<echo level="info" message="regmerge: Creating ${RDBFILE}" />
-		<apply executable="regmerge" parallel="true">
+		<apply executable="${OOO_URE_BIN}/regmerge" parallel="true">
 			<arg line="'${RDBFILE}' /UCR" />
 			<fileset dir="${MY_IDL}" includes="**/*.urd" />
 		</apply>
@@ -258,7 +258,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		    Replace "javamaker" with "echo"
 		-->
 
-		<apply verbose="true" executable="javamaker" relative="true" addsourcefile="false" dest="${BIN}">
+		<apply verbose="true" executable="${OOO_SDK}/bin/javamaker" relative="true" addsourcefile="false" dest="${BIN}">
 			<arg line="-BUCR" />
 			<targetfile />
 
