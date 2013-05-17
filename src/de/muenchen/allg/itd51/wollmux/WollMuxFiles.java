@@ -48,7 +48,12 @@
  * 08.05.2012 | jub | fakeSymLink behandlung eingebaut: der verweis auf fragmente, wie er in der 
  *                    config datei steht, kann auf einen sog. fake SymLink gehen, eine text-
  *                    datei, in der auf ein anderes fragment inkl. relativem pfad verwiesen wird.
- * 11.12.2012 | jub | fakeSymLinks werden doch nicht gebraucht; wieder aus dem code entfernt                   
+ * 11.12.2012 | jub | fakeSymLinks werden doch nicht gebraucht; wieder aus dem code entfernt
+ * 17.05.2013 | ukt | Fontgröße wird jetzt immer gesetzt, unabhängig davon, ob der Wert in der  
+ *                    wollmuxbar.conf gesetzt ist oder nicht.
+ *                    Andernfalls wird die Änderung der Fontgröße von einem Nicht-Defaultwert auf
+ *                    den Default-Wert nicht angezeigt, wenn alle anderen Optionswerte ebenfalls 
+ *                    den Default-Wert haben.                    
  * 
  * -------------------------------------------------------------------
  *
@@ -653,19 +658,20 @@ public class WollMuxFiles
   public static void setLookAndFeel()
   {
     Common.setLookAndFeelOnce();
+    double zoomFactor = 1.0;
     ConfigThingy zoom = getWollmuxConf().query("Dialoge").query("FONT_ZOOM", 2);
     if (zoom.count() > 0)
     {
       try
       {
-        double zoomFactor = Double.parseDouble(zoom.getLastChild().toString());
-        zoomFonts(zoomFactor);
+        zoomFactor = Double.parseDouble(zoom.getLastChild().toString());
       }
       catch (Exception x)
       {
         Logger.error(x);
       }
     }
+    zoomFonts(zoomFactor);
   }
 
   /**
@@ -679,13 +685,13 @@ public class WollMuxFiles
     Common.setLookAndFeelOnce();
     if (conf != null)
     {
+      double zoomFactor = 1.0;
       ConfigThingy zoom = conf.query("Dialoge").query("FONT_ZOOM", 2);
       if (zoom.count() > 0)
       {
         try
         {
-          double zoomFactor = Double.parseDouble(zoom.getLastChild().toString());
-          zoomFonts(zoomFactor);
+          zoomFactor = Double.parseDouble(zoom.getLastChild().toString());
         }
         catch (Exception x)
         {
@@ -696,6 +702,7 @@ public class WollMuxFiles
       {
         Logger.debug(L.m("Config Thing ist null!"));
       }
+      zoomFonts(zoomFactor);
     }
   }
 
