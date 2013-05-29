@@ -731,14 +731,16 @@ public class DocumentCommandInterpreter
     public int execute(DocumentCommands commands) throws WMCommandsFailedException
     {
       int errors = 0;
+      int i = 0;
 
       // so lange wiederholen, bis sich der Baum durch das Expandieren nicht
       // mehr ändert.
       do
       {
+        i++;
         errors += executeOverrideFrags(commands);
         errors += executeAll(commands);
-      } while (commands.update());
+      } while (commands.update() && i < 50);
 
       return errors;
     }
