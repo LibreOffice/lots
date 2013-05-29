@@ -36,6 +36,8 @@
  * 08.07.2009 | BED | Anpassung an die Änderungen in DocumentCommand (R48539)
  * 16.12.2009 | ERT | Cast XTextField-Interface entfernt
  * 08.03.2010 | ERT | [R33088]Bessere Fehlermeldungen im Zusammenhang mit overrideFrag
+ * 29.05.2013 | JuB | execute() auf 50 begrenzt, damit potentielle endlos-Loops beim Einfügen 
+ *                    von Fragmenten abgefangen werden.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
