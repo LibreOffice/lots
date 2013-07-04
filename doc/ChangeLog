@@ -1,4 +1,4 @@
- ==================== Neu in dieser Version ====================
+ ==================== Neu in Version 13.5 ====================
 
     * In der WollMuxBar steht eine neue ACTION "menuManager" zur Verfügung.
       Diese ruft den Menü-Manager auf, ein interaktives Tool zur Bearbeitung
@@ -16,6 +16,8 @@
       wurde.
       Ein solches Dokument kann jetzt "repariert" werden, so dass die Information
       nicht mehr im Dokument gespeichert ist. 
+    * Der Ausdruck von sachleitenden Verfügungen kann jetzt auch in umgekehrter 
+      Reihenfolge erfolgen
 
 
  ==================== Neu in Version 10.8 RC ====================
@@ -36,7 +38,7 @@
             bei Verwendung von overrideFrag-Kommandos ohne NEW_FRAG_ID zu
             Abstürzen kommen. Dieses Problem ist nun behoben.
           o Der Windows-Uninstaller des WollMux kann nun auch ausgeführt
-            werden, wenn kein OpenOffice.org auf dem System installiert ist. In
+            werden, wenn kein OpenOffice.org auf dem System installiert ist. Inde.muenchen.allg.d101.wollmux
             diesem Fall kann natürlich nicht die OpenOffice.Org-Extension
             (WollMux.oxt) deinstalliert werden, aber der Uninstaller räumt
             jetzt alle übrigen Dateien und Registry-Einträge des WollMux
