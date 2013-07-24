@@ -22,6 +22,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 15.06.2011 | LUT | Erstellung
+ * 12.07.2013 | JGM | Anpassungen an die neue UNO API zum setzten des Druckers
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD-D101)
@@ -41,6 +42,7 @@ import java.util.Random;
 
 import com.sun.star.beans.NamedValue;
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
@@ -69,6 +71,7 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XNamingService;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.URL;
+import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -170,7 +173,22 @@ public class OOoBasedMailMerge
     {
       PrintModels.setStage(pmod, L.m("Gesamtdokument erzeugen"));
       ProgressUpdater updater = new ProgressUpdater(pmod, ds.getSize());
-      t = runMailMerge(dbName, tmpDir, inputFile, updater, type);
+      //jgm,07.2013: Lese ausgewaehlten Drucker
+      XPrintable xprintSD = (XPrintable) UnoRuntime.queryInterface(XPrintable.class, pmod.getTextDocument());
+      String pNameSD;
+      PropertyValue[] printer = null;
+      if (xprintSD != null) printer = xprintSD.getPrinter();
+      UnoProps printerInfo = new UnoProps(printer);
+      try
+      {
+        pNameSD = (String) printerInfo.getPropertyValue("Name");
+      }
+      catch (UnknownPropertyException e)
+      {
+        pNameSD = "unbekannt";
+      }    
+      //jgm ende
+      t = runMailMerge(dbName, tmpDir, inputFile, updater, type,pNameSD);
     }
     catch (Exception e)
     {
@@ -1146,13 +1164,15 @@ public class OOoBasedMailMerge
    * @param progress
    *          Ein ProgressUpdater, der über den Bearbeitungsfortschritt informiert
    *          wird.
+   * @param printerName
+   *          Drucker fuer den Seriendruck
    * @throws Exception
    *           falls der MailMergeService nicht erzeugt werden kann.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static Thread runMailMerge(String dbName, final File outputDir,
-      File inputFile, final ProgressUpdater progress, OutputType type)
+      File inputFile, final ProgressUpdater progress, OutputType type, String printerName)
       throws Exception
   {
     final XJob mailMerge =
@@ -1198,6 +1218,17 @@ public class OOoBasedMailMerge
     {
       mmProps.add(new NamedValue("OutputType", MailMergeType.PRINTER));
       mmProps.add(new NamedValue("SinglePrintJobs", Boolean.FALSE));
+      //jgm,07.2013: setze ausgewaehlten Drucker
+      if (printerName != null && printerName.length() > 0)
+      {
+        PropertyValue[] printOpts = new PropertyValue[1];
+        printOpts[0] = new PropertyValue();
+        printOpts[0].Name = "PrinterName";
+        printOpts[0].Value = printerName;
+        Logger.debug(L.m("Seriendruck - Setze Drucker: %1", printerName));
+        mmProps.add(new NamedValue("PrintOptions", printOpts));
+      }
+      //jgm ende
     }
     Thread t = new Thread(new Runnable()
     {
@@ -1248,6 +1279,7 @@ public class OOoBasedMailMerge
    */
   public static void main(String[] args)
   {
+    String pNameSD="HP1010"; //Drucker Name
     try
     {
       UNO.init();
@@ -1265,7 +1297,7 @@ public class OOoBasedMailMerge
 
       System.out.println("Temporäre Datenquelle: " + dbName);
 
-      runMailMerge(dbName, tmpDir, inputFile, null, OutputType.toFile);
+      runMailMerge(dbName, tmpDir, inputFile, null, OutputType.toFile, pNameSD);
 
       removeTempDatasource(dbName, tmpDir);
 
