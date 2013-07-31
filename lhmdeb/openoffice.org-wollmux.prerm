@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+	remove)
+                /opt/openoffice.org3/program/unopkg remove --shared de.muenchen.allg.d101.wollmux
+	;;
+esac
+
+exit 0

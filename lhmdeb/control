@@ -17,13 +17,36 @@ Homepage: http://www.wollmux.org
 Package: libreoffice-wollmux
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, openjdk-6-jre | java2-runtime,
- libreoffice3.6-writer|openoffice.org-writer,
- libreoffice-debian-menus|openoffice.org-debian-menus
-X-Debian-Depends: libobasis3.6-javafilter|openoffice.org-java-common (>= 3.0.0)
-X-Upstream-Depends: libreoffice-debian-menus|openoffice.org-debian-menus
+ libreoffice3.6-writer, libreoffice-debian-menus
+X-Debian-Depends: libobasis3.6-javafilter
+X-Upstream-Depends: libreoffice-debian-menus
 Suggests: wollmuxbar
-Description: WollMux extension for LibreOffice / Apache OpenOffice / Openoffice.org Writer
- The package adds an extension to LibreOffice / Apache OpenOffice / Openoffice.org with the following features:
+Description: WollMux extension for LibreOffice
+ The package adds an extension to LibreOffice with the following features:
+  - On the fly template generation from fragments (e.g. letterhead, footer,
+    form)
+  - Pre-filling templates with personal and organizational data from a variety
+    of databases (LDAP, local user data, and other sources)
+  - Advanced form support with auto-computed fields and input validity checking
+  - Improved user interface for interactive form data
+  - Hiding and showing parts of the document based on form input
+  - Advanced autotext support with identifier pattern matching and a shortcut
+    syntax for filling in placeholders
+  - Chainable printing plugins to provide custom dialogs and transformations
+    when printing
+  - Automatic printing of document variants according to document content
+  - Enhanced serial letter functionality that ties in with the form
+    functionality (e.g. auto-computed fields) and the custom print plugins.
+
+Package: openoffice.org-wollmux
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, openjdk-6-jre | java2-runtime,
+ openoffice.org-writer, openoffice.org-debian-menus
+X-Debian-Depends: openoffice.org-java-common (>= 3.0.0)
+X-Upstream-Depends: openoffice.org-debian-menus
+Suggests: wollmuxbar
+Description: WollMux extension for OpenOffice.org Writer
+ The package adds an extension to Openoffice.org with the following features:
   - On the fly template generation from fragments (e.g. letterhead, footer,
     form)
   - Pre-filling templates with personal and organizational data from a variety
@@ -41,7 +64,7 @@ Description: WollMux extension for LibreOffice / Apache OpenOffice / Openoffice.
 
 Package: wollmuxbar
 Architecture: all
-Depends: libreoffice-wollmux (= ${binary:Version})
+Depends: libreoffice-wollmux (= ${binary:Version}) | openoffice.org-wollmux (= ${binary:Version})
 Conflicts: wollmux (<< ${binary:Version})
 Replaces: wollmux (<< ${binary:Version})
 Description: Standalone toolbar for WollMux
