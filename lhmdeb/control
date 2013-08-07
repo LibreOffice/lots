@@ -64,7 +64,7 @@ Description: WollMux extension for OpenOffice.org Writer
 
 Package: wollmuxbar
 Architecture: all
-Depends: libreoffice-wollmux (= ${binary:Version}) | openoffice.org-wollmux (= ${binary:Version})
+Depends: openoffice.org-wollmux (= ${binary:Version}) | libreoffice-wollmux (= ${binary:Version})
 Conflicts: wollmux (<< ${binary:Version})
 Replaces: wollmux (<< ${binary:Version})
 Description: Standalone toolbar for WollMux
