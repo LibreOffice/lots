@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+	remove)
+		if /opt/openoffice.org3/program/unopkg list --shared de.muenchen.allg.d101.wollmux >/dev/null 2>&1; then
+			/opt/openoffice.org3/program/unopkg remove --shared de.muenchen.allg.d101.wollmux
+		else
+			rm -rf /opt/openoffice.org3/share/uno_packages
+		fi
+	;;
+esac
+
+exit 0
