@@ -52,6 +52,8 @@ import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
+import com.sun.star.util.XCloseable;
+import com.sun.star.util.XModifiable;
 import com.sun.star.bridge.XUnoUrlResolver;
 import com.sun.star.bridge.UnoUrlResolver;
 
@@ -617,6 +619,9 @@ public class WollMuxBarEventHandler
         factory.createInstance("com.sun.star.frame.Desktop"));
     terminateListener = new XTerminateListener()
     {
+      // Was any of the open documents changed?
+      private boolean docChanged = false;
+      
       public void notifyTermination(EventObject arg0)
       {
         Logger.debug("notifyTermination");
@@ -625,6 +630,7 @@ public class WollMuxBarEventHandler
       public void queryTermination(EventObject arg0) throws TerminationVetoException
       {
         Logger.debug("queryTermination");
+        docChanged = false;
         /*
          * Because of issue
          * 
@@ -639,11 +645,18 @@ public class WollMuxBarEventHandler
           while (xenu.hasMoreElements())
           {
             Object compo = xenu.nextElement();
+            XModifiable lMod = UNO.XModifiable(compo);
+            if ((lMod != null) && lMod.isModified())
+            {
+              // Geaendert ==> Nicht schließen
+              docChanged = true;
+              continue;
+            }
             try
             { /*
              * First see if the component itself offers a close function
              */
-              UNO.XCloseable(compo).close(true);
+              UNO.XCloseable(compo).close(false);
             }
             catch (Exception x)
             {
@@ -667,7 +680,12 @@ public class WollMuxBarEventHandler
         {
           x.printStackTrace();
         }
-        throw new TerminationVetoException();
+        if (!docChanged)
+        {
+          // Wenn eine der Komponenten geändert wurde, dann kein Veto
+          // sonst bleibt das Fenster einfach offen, ohne eine Info an den Anwender.
+          throw new TerminationVetoException();
+        }
       }
 
       public void disposing(EventObject arg0)

@@ -2,10 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="src" path="/UNOHelper"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenOffice"/>
 	<classpathentry kind="lib" path="idl"/>
-	<classpathentry kind="lib" path="/classes/bin"/>
 	<classpathentry kind="lib" path="thirdparty/javamail-1.4.4/mail.jar"/>
+	<classpathentry kind="lib" path="/home/ulrich.kitzinger/workspace/classes/bin"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/UNOHelper"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
