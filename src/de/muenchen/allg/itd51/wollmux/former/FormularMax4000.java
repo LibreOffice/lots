@@ -41,6 +41,7 @@
  * 01.08.2007 | BNK | FunctionTester eingebaut      
  * 10.12.2007 | BNK | [R11302]intelligentere Behandlung von Leerzeichen am Ende von gender-Dropdown-Listen
  * 13.01.2010 | BED | [R67584]FormularMax öffnet sich bei großen Formularen und niedriger JVM Heap Size nicht mehr, sondern bringt entsprechende Meldung
+ * 13.05.2013 | UKT | Anpassungen an LO 4.0
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -111,7 +112,7 @@ import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XIndexAccess;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNamed;
-import com.sun.star.document.XDocumentInfo;
+import com.sun.star.document.XDocumentProperties;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.WrappedTargetException;
@@ -1530,7 +1531,7 @@ public class FormularMax4000
   {
     try
     {
-      XDocumentInfo info = UNO.XDocumentInfoSupplier(doc).getDocumentInfo();
+      XDocumentProperties info = UNO.XDocumentPropertiesSupplier(doc).getDocumentProperties();
       try
       {
         String tit = ((String) UNO.getProperty(info, "Title")).trim();
