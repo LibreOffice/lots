@@ -23,6 +23,7 @@
  * -------------------------------------------------------------------
  * 04.03.2008 | BNK | Herausfaktorisiert aus MailMergeNew
  * 23.10.2013 | JGM | FilePicker durch Swing FileChooser ersetzt (Loest Probleme mit LO 4)
+ * 20.11.2013 | UKT | Swing FileChooser wieder durch LO FilePicker ersetzt
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -35,7 +36,6 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +52,6 @@ import java.util.Vector;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
@@ -1252,26 +1251,30 @@ public class MailMergeDatasource
    */
   private void selectFileAsDatasource(JFrame parent, final Runnable callback)
   {
-    final JFileChooser fc = new JFileChooser();
-    fc.showOpenDialog(parent);
-    File file = fc.getSelectedFile();
-    try
+    XFilePicker picker = UNO.XFilePicker(UNO.createUNOService("com.sun.star.ui.dialogs.FilePicker"));
+    short res = picker.execute();
+    if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)
     {
-      Logger.debug(L.m("Öffne %1 als Datenquelle für Seriendruck", ("file://" + file.getAbsolutePath())));
+      String[] files = picker.getFiles();
+      if (files.length == 0) return;
       try
       {
-        getCalcDoc("file://" + file.getAbsolutePath());
-        SwingUtilities.invokeLater(callback);
+        Logger.debug(L.m("Öffne %1 als Datenquelle für Seriendruck", files[0]));
+        try
+        {
+          getCalcDoc(files[0]);
+          SwingUtilities.invokeLater(callback);
+        }
+        catch (UnavailableException x)
+        {
+          return;
+        }
+        selectTable(parent);
       }
-      catch (UnavailableException x)
+      catch (Exception e)
       {
-        return;
+        Logger.error(e);
       }
-      selectTable(parent);
-    }
-    catch (Exception e)
-    {
-      Logger.error(e);
     }
   }
 
