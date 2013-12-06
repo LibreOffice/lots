@@ -40,6 +40,9 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
             you'll need to call this target after an "ant clean", because Eclipse
             can't compile these files on its own.
 
+documentation: Download WollMux documentation from WollMux Wiki and prepare it for 
+               offline usage.
+
 makechangelog: Attempt to create ChangeLog file from LiMux Wiki. Only works inside
              the LHM's network.
 
@@ -71,6 +74,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="MAKE_DIR" value="." />
 	<property name="RDB_DIR" value="oxt" />
 	<property name="PACKAGE_DIR" value="dist" />
+	<property name="DOC_DIR" value="${PACKAGE_DIR}/doc"/>
 	<property name="PKG_NAME" value="${COMPONENT}.oxt" />
 	<property name="PKG_FILE" value="${PACKAGE_DIR}/${PKG_NAME}" />
 	<property name="MD5SUMS_FILE_NAME" value="${PACKAGE_DIR}/md5sums.txt" />
@@ -81,6 +85,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="UPDATE_XML" value="${PACKAGE_DIR}/${COMPONENT}.update.xml" />
 	<property name="VERSION_FILE" value="${MISC}/version"/>
 	<property name="CHANGELOG_FILE" value="doc/ChangeLog"/>
+	<property name="WOLLMUX_WIKI_URL" value="http://www.wollmux.net/wiki" />
 
 	<property name="SRC_ENCODING" value="UTF-8" />
 	
@@ -145,7 +150,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 
 	<target name="all" depends="debug,WollMuxBar.jar,WollMux.oxt,md5sum" />
 	
-	<target name="snapshot" depends="clean, makechangelog, debug, all, .tar.gz, deb, wininstaller, WollMuxInterfaces.jar" />
+	<target name="snapshot" depends="clean, makechangelog, debug, all, .tar.gz, deb, wininstaller, WollMuxInterfaces.jar, documentation" />
 
 	<!-- The debug target doesn't do anything by itself, but for any targets executed later
 	     the DEBUG property will be set. --> 
@@ -234,7 +239,74 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		  <arg line="-l misc/makechangelog "/>
 		</exec>		
 	</target>
-	
+
+	<target name="documentation">
+		<!-- Download all pages belonging to the WollMux manual category --> 
+		<get dest="${DOC_DIR}">
+			<resourcelist>
+				<url url="${WOLLMUX_WIKI_URL}/index.php?title=Spezial:Exportieren&amp;action=submit&amp;catname=Handbuch_des_WollMux&amp;addcat=Hinzuf%C3%BCgen&amp;wpDownload=1" />
+				<filterchain>
+					<replaceregex pattern='.*&lt;.*textarea name="pages"[^>]*>\n([^&lt;]*).*' replace="\1" flags="gis" byline="false" />
+					<tokenfilter>
+						<linetokenizer />
+						<replaceregex pattern='^' replace='${WOLLMUX_WIKI_URL}/' />
+					</tokenfilter>
+				</filterchain>
+			</resourcelist>
+		</get>
+
+		<!-- Modify downloaded files for offline usage -->
+		<!-- Change links to reference local files -->
+		<replaceregexp match='"/wiki/(Datei:)?' replace='"' flags="g">
+			<fileset dir="${DOC_DIR}" />
+		</replaceregexp>
+		<!-- Remove navigation bar -->
+		<replaceregexp match='\s*&lt;!-- jumpto -->.*&lt;!-- /jumpto -->' replace="" flags="gis">
+			<fileset dir="${DOC_DIR}" />
+		</replaceregexp>
+		<!-- Remove footer (except for license information) -->
+		<replaceregexp match='\s*&lt;!-- catlinks -->.*(&lt;li id="footer-info-copyright">.*?&lt;/li).*&lt;!-- /footer -->' replace='\1&lt;/div>' flags="gis">
+			<fileset dir="${DOC_DIR}" />
+		</replaceregexp>
+		<!-- Remove magnifying links -->
+		<replaceregexp match='&lt;div class="magnify">.*?&lt;/div>' replace='' flags="g">
+			<fileset dir="${DOC_DIR}" />
+		</replaceregexp>
+		<!-- Direct references to original images -->
+		<replaceregexp match='&lt;a[^>]*class="image"[^>]*>\s*&lt;img [^>]*src="(images/(thumb/)?([^/]+/[^/]+/[^/"]+)[^>]*)[^>]*"[^>]*>&lt;/a>' replace='&lt;img src="images/\3" />' flags="g">
+			<fileset dir="${DOC_DIR}" />
+		</replaceregexp>
+
+		<!-- Download images -->
+		<get dest="${DOC_DIR}">
+			<resourcelist>
+				<fileset dir="${DOC_DIR}" />
+				<filterchain>
+					<tokenfilter>
+						<linetokenizer />
+						<containsstring contains="&lt;img" />
+						<replaceregex pattern='.*&lt;img [^>]*src="([^"]*)".*' replace="${WOLLMUX_WIKI_URL}/\1" />
+					</tokenfilter>
+				</filterchain>
+			</resourcelist>
+		</get>
+		<!-- Use local directory for images -->
+		<replaceregexp match='&lt;img src="[^"]*/([^"]*)"' replace='&lt;img src="\1"' flags="g">
+			<fileset dir="${DOC_DIR}" />
+		</replaceregexp>
+
+		<!-- Restore umlauts in filenames -->
+		<move todir="${DOC_DIR}">
+			<fileset dir="${DOC_DIR}" />
+			<mapper>
+				<filtermapper>
+					<replacestring from="%C3%BC" to="ü" />
+					<replacestring from="%C3%A4" to="ä" />
+				</filtermapper>
+			</mapper>
+		</move>
+	</target>
+
 	<!-- Das Target compileidl erzeugt das rdb-file und die java-Interfaces -->
 	<target name="compileidl">
 		<echo message="Types dir: ${OOO_TYPES_DIR}"/>
