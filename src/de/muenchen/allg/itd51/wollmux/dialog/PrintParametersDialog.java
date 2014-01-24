@@ -23,6 +23,7 @@
  * -------------------------------------------------------------------
  * 03.05.2008 | LUT | Erstellung
  * 08.08.2006 | BNK | Viel Arbeit reingesteckt.
+ * 23.01.2014 | loi | Set Methode hinzugefügt.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD-D101)
@@ -501,6 +502,27 @@ public class PrintParametersDialog
     catch (UnknownPropertyException e)
     {
       return L.m("unbekannt");
+    }
+  }
+  
+  /**
+   * Setzt den Namen des aktuell zu diesem Dokument eingestellten Druckers.
+   * 
+   * @author Judith Baur, Simona Loi
+   */
+  public static void setCurrentPrinterName(XTextDocument doc, String druckerName)
+  {
+    XPrintable printable = UNO.XPrintable(doc);
+    PropertyValue[] printer = null;    
+    UnoProps printerInfo = new UnoProps(printer);
+    try
+    {
+      printerInfo.setPropertyValue("Name", druckerName);
+      if (printable != null) printable.setPrinter(printerInfo.getProps());
+    }
+    catch (Exception e)
+    {
+      System.out.println("property setzen: " + e.getMessage());
     }
   }
 

@@ -27,6 +27,9 @@
  * 08.05.2012 | jub | vorgeschlagener name für den anhang eines serienbrief/emailversands
  *                    kommt ohne endung, da für den nutzer auswahl zwischen pdf/odt 
  *                    möglich ist
+ * 23.01.2014 | loi | Für den Seriendruck einen Wollmux Druckerauswahl Dialog eingefugt,
+ *                    da der LO Dialog Druckeroptionen zur Auswahl bietet, die im Druck 
+ *                    nicht umgesetz werden.                  
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -48,8 +51,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.Map.Entry;
+import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -145,6 +148,8 @@ class MailMergeParams
         boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
         Map<SubmitArgument, Object> args);
   }
+  
+
 
   /**
    * Zählt alle Schlüsselwörter auf, die Übergabeargumente für
@@ -470,6 +475,12 @@ class MailMergeParams
    * Seriendruckkontext liefern kann und den eigentlichen Seriendruck ausführen kann.
    */
   private MailMergeController mmc;
+  
+  //
+  
+  public MailMergeController getMMC() {
+    return mmc;
+  }
 
   /**
    * Der Dialog, der durch {@link #showDoMailmergeDialog(JFrame, MailMergeNew, List)}
@@ -477,6 +488,17 @@ class MailMergeParams
    * Dialog verwendet, damit die Vorbelegungen erhalten bleiben.
    */
   private JDialog dialog = null;
+  
+  
+  /**
+   * Das Model für den Druckerauswahldialog beim Seriendruck
+   */
+  private DruckerModel druckerModel;
+  
+  /**
+   * Der Controller für den Druckerauswahldialog beim Seriendruck
+   */
+  private DruckerController druckerController;
 
   /**
    * Enthält den Regeln-Abschnitt aus der Seriendruckdialog-Beschreibung.
@@ -634,8 +656,17 @@ class MailMergeParams
     this.mmc = mmc;
     this.defaultEmailFrom = defaultEmailFrom;
 
-    if (dialog == null || dialog.getParent() != parent)
-    {
+    // erzeugt ein model für den Druckerauswahldialog falls noch keine existiert
+    if (druckerModel == null) {
+      druckerModel = new DruckerModel();
+    }
+       
+    if(dialog != null && dialog.getParent() == parent) {
+      // erzeugt einen controller für den Druckerauswahldialog falls noch keiner existiert
+      if (druckerController == null) {  
+        druckerController = new DruckerController(druckerModel, (JFrame)dialog.getOwner(), this);
+      }      
+    } else {
       String title = L.m("Seriendruck");
       try
       {
@@ -645,7 +676,10 @@ class MailMergeParams
       {}
       dialog = new JDialog(parent, title, true);
       dialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-
+      // erzeugt einen controller für den Druckerauswahldialog falls noch keiner existiert
+      if (druckerController == null) {  
+        druckerController = new DruckerController(druckerModel, (JFrame)dialog.getOwner(), this);
+      }      
       try
       {
         rules = dialogConf.get("Regeln");
@@ -655,7 +689,6 @@ class MailMergeParams
         Logger.error(L.m("Dialogbeschreibung für den Seriendruckdialog enthält keinen Abschnitt 'Regeln'"));
         return;
       }
-
       ConfigThingy fensterConf = new ConfigThingy("");
       try
       {
@@ -668,14 +701,15 @@ class MailMergeParams
       vbox.setBorder(new EmptyBorder(8, 5, 10, 5));
       dialog.add(vbox);
 
-      for (ConfigThingy sectionConf : fensterConf)
-        sections.add(new Section(sectionConf, vbox, this));
+      for (ConfigThingy sectionConf : fensterConf) 
+        sections.add(new Section(sectionConf, vbox, this)); 
     }
+    
     updateView();
     setDialogLocation();
     dialog.setResizable(false);
     dialog.setVisible(true);
-  }
+  } 
   
   private void setDialogLocation() {
     
@@ -710,7 +744,7 @@ class MailMergeParams
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
-  private void updateView()
+  public void updateView()
   {
     processRules();
     for (Section s : sections)
@@ -1617,13 +1651,13 @@ class MailMergeParams
     MailMergeParams mmp;
 
     JTextField printerNameField;
-
+       
     public PrinterSettingsUIElement(String label, String group,
         final MailMergeParams mmp)
     {
       super(Box.createHorizontalBox(), group, mmp);
       this.mmp = mmp;
-
+      
       Box hbox = (Box) getCompo();
       printerNameField = new JTextField();
       printerNameField.setEditable(false);
@@ -1633,71 +1667,23 @@ class MailMergeParams
       hbox.add(Box.createHorizontalStrut(5));
       hbox.add(printerNameField);
       hbox.add(Box.createHorizontalStrut(5));
-      hbox.add(new JButton(new AbstractAction(L.m("Drucker wechseln/einrichten..."))
+      
+      hbox.add(new JButton(new AbstractAction(L.m("Drucker wechseln"))
       {
         private static final long serialVersionUID = 1L;
 
         public void actionPerformed(ActionEvent e)
         {
-          showPrinterSettings();
-        }
+          mmp.druckerController.erzeugeView();
+          printerNameField.setText(mmp.druckerController.getDrucker());
+          PrintParametersDialog.setCurrentPrinterName(mmp.mmc.getTextDocument(), mmp.druckerController.getDrucker());
+         }
       }));
+  
       hbox.add(Box.createHorizontalStrut(6));
       DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox);
 
-      updateCurrentPrinter();
-    }
-
-    private void updateCurrentPrinter()
-    {
-      printerNameField.setText(PrintParametersDialog.getCurrentPrinterName(mmp.mmc.getTextDocument()));
-    }
-
-    private void showPrinterSettings()
-    {
-      mmp.dialog.setVisible(false);
-      Thread t = new Thread()
-      {
-        public void run()
-        {
-          try
-          {
-            com.sun.star.util.URL url =
-              UNO.getParsedUNOUrl(Dispatch.DISP_unoPrinterSetup);
-            XNotifyingDispatch disp =
-              UNO.XNotifyingDispatch(WollMuxSingleton.getDispatchForModel(
-                UNO.XModel(mmp.mmc.getTextDocument()), url));
-
-            if (disp != null)
-            {
-              disp.dispatchWithNotification(url, new PropertyValue[] {},
-                new XDispatchResultListener()
-                {
-                  public void disposing(EventObject arg0)
-                  {}
-
-                  public void dispatchFinished(DispatchResultEvent arg0)
-                  {
-                    SwingUtilities.invokeLater(new Runnable()
-                    {
-                      public void run()
-                      {
-                        updateCurrentPrinter();
-                        mmp.dialog.setVisible(true);
-                      }
-                    });
-                  }
-                });
-            }
-          }
-          catch (java.lang.Exception e)
-          {
-            Logger.error(e);
-          }
-        }
-      };
-      t.setDaemon(false);
-      t.start();
+      printerNameField.setText(mmp.druckerController.getDrucker());
     }
   }
 
