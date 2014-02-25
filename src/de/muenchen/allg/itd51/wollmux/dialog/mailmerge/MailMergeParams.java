@@ -674,7 +674,10 @@ class MailMergeParams
       }
       catch (NodeNotFoundException e1)
       {}
-      dialog = new JDialog(parent, title, true);
+      //set JDialog to Modeless type so that it remains visible when changing focus between opened 
+      //calc and writer document. Drawback: when this Dialog is open, the "Seriendruck" bar is 
+      //active too.
+      dialog = new JDialog(parent, title, false);
       dialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
       // erzeugt einen controller für den Druckerauswahldialog falls noch keiner existiert
       if (druckerController == null) {  

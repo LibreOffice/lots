@@ -377,8 +377,11 @@ public class MailMergeDatasource
   public void showDatasourceSelectionDialog(final JFrame parent,
       final Runnable callback)
   {
+    //set JDialog to Modeless type so that it remains visible when changing focus between opened 
+    //calc and writer document. Drawback: when this Dialog is open, the "Seriendruck" bar is 
+    //active too.
     final JDialog datasourceSelector =
-      new JDialog(parent, L.m("Serienbriefdaten auswählen"), true);
+      new JDialog(parent, L.m("Serienbriefdaten auswählen"), false);
 
     Box vbox = Box.createVerticalBox();
     datasourceSelector.add(vbox);

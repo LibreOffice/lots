@@ -141,6 +141,7 @@ class AdjustFields
     showFieldMappingDialog(parent, fieldIDs, L.m("Tabellenspalten ergänzen"),
       L.m("Spalte"), L.m("Vorbelegung"), L.m("Spalten ergänzen"),
       ds.getColumnNames(), submitActionListener, true);
+
   }
 
   /**
@@ -193,7 +194,10 @@ class AdjustFields
       final List<String> fieldNames, final ActionListener submitActionListener,
       boolean ignoreIsTransformed)
   {
-    final JDialog dialog = new JDialog(parent, title, true);
+    //set JDialog to Modeless type so that it remains visible when changing focus between opened 
+    //calc and writer document. Drawback: when this Dialog is open, the "Seriendruck" bar is 
+    //active too.
+    final JDialog dialog = new JDialog(parent, title, false);
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
     final TextComponentTags[] currentField = new TextComponentTags[] { null };
