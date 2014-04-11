@@ -72,6 +72,7 @@ import com.sun.star.uno.XNamingService;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.URL;
 import com.sun.star.view.XPrintable;
+import com.sun.star.util.XCancellable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -168,7 +169,7 @@ public class OOoBasedMailMerge
     Logger.debug(L.m("Temporäre Datenquelle: %1", dbName));
     if (pmod.isCanceled()) return;
 
-    Thread t = null;
+    MailMergeThread t = null;
     try
     {
       PrintModels.setStage(pmod, L.m("Gesamtdokument erzeugen"));
@@ -201,7 +202,11 @@ public class OOoBasedMailMerge
       try
       {
         t.join(1000);
-        if (pmod.isCanceled()) break;
+           if (pmod.isCanceled())
+           {
+             t.cancel();
+             break;
+            }
       }
       catch (InterruptedException e)
       {}
@@ -244,6 +249,56 @@ public class OOoBasedMailMerge
 
     tmpDir.delete();
   }
+  
+  
+    /**
+     * A optional XCancellable mail merge thread.
+     * 
+     * @author Jan-Marek Glogowski (ITM-I23)
+     */
+    private static class MailMergeThread extends Thread
+    {
+      private XCancellable mailMergeCancellable = null;
+      private final XJob mailMerge;
+      private final File outputDir;
+      private final ArrayList<NamedValue> mmProps;
+  
+      MailMergeThread(XJob mailMerge, File outputDir, ArrayList<NamedValue> mmProps)
+      {
+        this.mailMerge = mailMerge;
+        this.outputDir = outputDir;
+        this.mmProps = mmProps;
+      }
+  
+      public void run()
+      {
+        try
+        {
+          Logger.debug(L.m("Starting OOo-MailMerge in Verzeichnis %1", outputDir));
+          // The XCancellable mail merge interface was included in LO >= 4.3.
+          mailMergeCancellable =
+            (XCancellable) UnoRuntime.queryInterface(XCancellable.class, mailMerge);
+          if (mailMergeCancellable != null)
+            Logger.debug(L.m("XCancellable interface im mailMerge-Objekt gefunden!"));
+          else
+            Logger.debug(L.m("KEIN XCancellable interface im mailMerge-Objekt gefunden!"));
+          mailMerge.execute(mmProps.toArray(new NamedValue[mmProps.size()]));
+          Logger.debug(L.m("Finished Mail Merge"));
+        }
+        catch (Exception e)
+        {
+          Logger.debug(L.m("OOo-MailMergeService fehlgeschlagen: %1", e.getMessage()));
+        }
+        mailMergeCancellable = null;
+      }
+  
+      public synchronized void cancel()
+      {
+        if (mailMergeCancellable != null)
+          mailMergeCancellable.cancel();
+      }
+    }
+  
 
   /**
    * Übernimmt das Aktualisieren der Fortschrittsanzeige im XPrintModel pmod.
@@ -1171,7 +1226,7 @@ public class OOoBasedMailMerge
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
-  private static Thread runMailMerge(String dbName, final File outputDir,
+  private static MailMergeThread runMailMerge(String dbName, final File outputDir,
       File inputFile, final ProgressUpdater progress, OutputType type, String printerName)
       throws Exception
   {
@@ -1230,22 +1285,7 @@ public class OOoBasedMailMerge
       }
       //jgm ende
     }
-    Thread t = new Thread(new Runnable()
-    {
-      public void run()
-      {
-        try
-        {
-          Logger.debug(L.m("Starting OOo-MailMerge in Verzeichnis %1", outputDir));
-          mailMerge.execute(mmProps.toArray(new NamedValue[mmProps.size()]));
-          Logger.debug(L.m("Finished Mail Merge"));
-        }
-        catch (Exception e)
-        {
-          Logger.debug(L.m("OOo-MailMergeService fehlgeschlagen: %1", e.getMessage()));
-        }
-      }
-    });
+    MailMergeThread t = new MailMergeThread(mailMerge, outputDir, mmProps);
     t.start();
     return t;
   }
