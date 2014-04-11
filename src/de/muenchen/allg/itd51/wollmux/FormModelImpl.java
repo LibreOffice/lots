@@ -25,6 +25,8 @@
  *                    + MultiDocumentFormModel
  * 28.04.2008 | BNK | [R19466]+save(), +saveAs()
  * 02.06.2010 | BED | +saveTempAndOpenExt
+ * 01.04.2014 | JGM | Anpassungen an startFormGUI für SingleDocumentFormModel
+ * 04.04.2014 | JGM | Überarbeitetung, Anpassungen an startFormGUI für SingleDocumentFormModel
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -58,7 +60,16 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
  */
 public class FormModelImpl
 {
-
+  /**
+  * vFormGUIs beinhaltet die Referenzen der z.Z. ausgeführten FormGUIs
+  */
+  public static Vector<FormGUI> vFormGUIs=new Vector<FormGUI>();
+  
+  /**
+  * vFrames beinhaltet die Referenzen der z.Z. ausgeführten Frames mit FormGUI
+  */
+  public static Vector<XFrame> vFrames=new Vector<XFrame>();
+  
   public static final String MULTI_FORM_TITLE =
     L.m("Mehrere Formulare gleichzeitig ausfüllen");
 
@@ -851,10 +862,28 @@ public class FormModelImpl
      */
     public void startFormGUI()
     {
+      boolean containsFrames=false;
+      containsFrames=vFrames.contains(doc.getFrame());
+
+      //Schaue ob bereits eine Instanz genau dieses Formulars geöffnet ist, falls ja wird das nun ungültige FormGUI beendet 
+      if (containsFrames){  
+        //Hole Index des ungültigen FormGUI
+        int frameIndex=vFrames.indexOf(doc.getFrame());
+        
+        vFormGUIs.get(frameIndex).dispose();
+        vFormGUIs.remove(frameIndex);
+        vFrames.remove(frameIndex);
+        Logger.debug(L.m("FormGUI an der Stelle %1 beendet.", frameIndex));
+      }
+      
       HashMap<String, String> idToPresetValue = doc.getIDToPresetValue();
       formGUI =
         new FormGUI(formFensterConf, formConf, this, idToPresetValue,
           functionContext, funcLib, dialogLib, visible);
+      
+      // füge FormGUI Refenrenz und die dazugehörigen Frames zu den Klassenvariable hinzu
+      vFormGUIs.add(formGUI);
+      vFrames.add(doc.getFrame());  
     }
 
     public String getWindowTitle()
