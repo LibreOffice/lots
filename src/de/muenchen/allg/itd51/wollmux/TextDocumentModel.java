@@ -30,6 +30,8 @@
  * 17.05.2010 | BED | +rewritePersistantData() (für Workaround für Issue #100374)
  * 07.05.2012 | ERT | TextDocumentModel.setWindowPosSize: Größe und Position des Fensters
  *                  | werden jetzt nacheinander gesetzt. Funktioniert besser unter Gnome
+ * 11.04.2014 | Loi | Die vorhergehende Änderungen reicht nicht mehr unter KDE4, 
+ *                  | deswegen wird das Fenster noch demaximiert.            
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -2612,6 +2614,12 @@ public class TextDocumentModel
   {
     try
     {
+      // Seit KDE4 muss ein maximiertes Fenster vor dem Verschieben "demaximiert" werden 
+      // sonst wird die Positionierung ignoriert.
+      if (UNO.XTopWindow2(getFrame().getContainerWindow()).getIsMaximized()) 
+        {
+          UNO.XTopWindow2(getFrame().getContainerWindow()).setIsMaximized(false);
+        }
       // Der Aufruf von SIZE vor POS ist vor allem bei maximierten Dokumenten von
       // Bedeutung. Ein maximiertes Dokument kann nicht verschoben werden.
       // Nach der Änderung der Größe ist es aber nicht mehr maximiert.
