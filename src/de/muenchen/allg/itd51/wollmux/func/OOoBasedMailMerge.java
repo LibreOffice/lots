@@ -173,8 +173,9 @@ public class OOoBasedMailMerge
     try
     {
       PrintModels.setStage(pmod, L.m("Gesamtdokument erzeugen"));
-      ProgressUpdater updater = new ProgressUpdater(pmod, ds.getSize());
-      //jgm,07.2013: Lese ausgewaehlten Drucker
+      ProgressUpdater updater = new ProgressUpdater(pmod, (int)Math.ceil((double)ds.getSize()/countNextSets(pmod.getTextDocument())));
+
+      // Lese ausgewählten Drucker
       XPrintable xprintSD = (XPrintable) UnoRuntime.queryInterface(XPrintable.class, pmod.getTextDocument());
       String pNameSD;
       PropertyValue[] printer = null;
@@ -187,16 +188,15 @@ public class OOoBasedMailMerge
       catch (UnknownPropertyException e)
       {
         pNameSD = "unbekannt";
-      }    
-      //jgm ende
-      t = runMailMerge(dbName, tmpDir, inputFile, updater, type,pNameSD);
+      }
+      t = runMailMerge(dbName, tmpDir, inputFile, updater, type, pNameSD);
     }
     catch (Exception e)
     {
       Logger.error(L.m("Fehler beim Starten des OOo-Seriendrucks"), e);
     }
 
-    // Warte auf Ende des MailMerge-Threads unter berücksichtigung von
+    // Warte auf Ende des MailMerge-Threads unter Berücksichtigung von
     // pmod.isCanceled()
     while (t != null && t.isAlive())
       try
@@ -1110,6 +1110,40 @@ public class OOoBasedMailMerge
         }
       }
     }
+  }
+
+  /**
+   * Zählt die Anzahl an "Nächster Datensatz"-Feldern zur Berechnung der Gesamtzahl
+   * der zu verarbeitenden Dokumente.
+   * 
+   * @author Ignaz Forster (ITM-I23)
+   */
+  private static int countNextSets(XComponent doc)
+  {
+    int numberOfNextSets = 1;
+    if (UNO.XTextFieldsSupplier(doc) != null)
+    {
+      XEnumeration xenum =
+        UNO.XTextFieldsSupplier(doc).getTextFields().createEnumeration();
+      while (xenum.hasMoreElements())
+      {
+        XDependentTextField tf = null;
+        try
+        {
+          tf = UNO.XDependentTextField(xenum.nextElement());
+        }
+        catch (Exception e)
+        {
+          continue;
+        }
+
+        if (UNO.supportsService(tf, "com.sun.star.text.TextField.DatabaseNextSet"))
+        {
+          numberOfNextSets++;
+        }
+      }
+    }
+    return numberOfNextSets;
   }
 
   /**
