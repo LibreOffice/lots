@@ -311,10 +311,13 @@ public class OOoBasedMailMerge
 
     private int currentCount;
 
+    public final int maxDatasets;
+
     public ProgressUpdater(XPrintModel pmod, int maxDatasets)
     {
       this.pmod = pmod;
       this.currentCount = 0;
+      this.maxDatasets = maxDatasets;
       pmod.setPrintProgressMaxValue((short) maxDatasets);
       pmod.setPrintProgressValue((short) 0);
     }
@@ -1267,7 +1270,7 @@ public class OOoBasedMailMerge
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static MailMergeThread runMailMerge(String dbName, final File outputDir,
-      File inputFile, final ProgressUpdater progress, OutputType type, String printerName)
+      File inputFile, final ProgressUpdater progress, final OutputType type, String printerName)
       throws Exception
   {
     final XJob mailMerge =
@@ -1291,6 +1294,9 @@ public class OOoBasedMailMerge
         count++;
         Logger.debug2(L.m("OOo-MailMerger: verarbeite Datensatz %1 (%2 ms)", count,
           (System.currentTimeMillis() - start)));
+        if (count >= progress.maxDatasets && type == OutputType.toPrinter) {
+          progress.setMessage(L.m("Sende Druckauftrag - bitte warten..."));
+        }
       }
     });
 
