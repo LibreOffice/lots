@@ -341,6 +341,32 @@ public class PrintProgressBar
   }
 
   /**
+   * Erlaubt das Setzen einer Nachricht, die in der Fortschrittsleiste angezeigt
+   * wird. Der Fortschrittsbalken wird dabei nicht zurückgesetzt, es wird
+   * lediglich der Textteil überschrieben.
+   * 
+   * @param key
+   *          repräsentiert eine Druckfunktion, die über den neuen Fortschritt
+   *          informiert. (derzeit ungenutzt)
+   * @param value
+   *          enthält den Text, der angezeigt werden soll.
+   * 
+   * @author Ignaz Forster (ITM-I23)
+   */
+  public void setMessage(Object key, final String value)
+  {
+    if (myFrame == null) return;
+    SwingUtilities.invokeLater(new Runnable()
+    {
+      public void run()
+      {
+        statusLabel.setText(value);
+        myFrame.pack();
+      }
+    });
+  }
+
+  /**
    * Baut die Ansicht der PrintProgressBar neu auf. Eine der Hauptaufgaben von
    * refresh ist es dabei, den status-String (z.B. "1 von 4 Schritten" oder bei mehr
    * als einer registrierten Druckfunktion "3 von 10 (=2x5) Schritten") zusammen zu

@@ -232,6 +232,16 @@ interface XPrintModel
      *          gedruckten Versionen. Es muss gelten: 0 <= value <= maxValue
      */
 	void setPrintProgressValue([in] short value);
+
+	/**
+     * Diese Methode erlaubt das Setzen einer Nachricht, die in der
+     * Fortschrittsleiste angezeigt wird. Der Fortschrittsbalken wird dabei
+     * nicht zurückgesetzt, es wird lediglich der Textinhalt überschrieben.
+     * 
+     * @param value
+     *          Der anzuzeigende String.
+     */
+	void setPrintMessage([in] string value);
 };
 
 }; }; }; }; };

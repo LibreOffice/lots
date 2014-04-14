@@ -906,6 +906,22 @@ public class PrintModels
     {
       if (printProgressBar != null) printProgressBar.setValue(key, value);
     }
+
+    /**
+     * Erlaubt die Anzeige eines eigenen Textes neben der Fortschrittsleiste.
+     * Der Text wird einmalig angezeigt, d.h. wenn danach ein weiterer Aufruf
+     * von setPrintProgressValue erfolgt, wird der Text wieder gelöscht und
+     * durch den Fortschrittsstatus ersetzt.
+     * 
+     * @param value
+     *          enthält den anzuzeigenden Text
+     * 
+     * @author Ignaz Forster (ITM-I23)
+     */
+    public void setPrintMessage(String value)
+    {
+      if (printProgressBar != null) printProgressBar.setMessage(this, value);
+    }
   }
 
   /**
@@ -1265,6 +1281,16 @@ public class PrintModels
     public void setPrintProgressValue(short value)
     {
       master.setPrintProgressValue(this, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintMessage(string)
+     */
+    public void setPrintMessage(String value)
+    {
+      master.setPrintMessage(value);
     }
   }
 

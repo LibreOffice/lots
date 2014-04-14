@@ -323,6 +323,12 @@ public class OOoBasedMailMerge
     {
       pmod.setPrintProgressValue((short) ++currentCount);
     }
+
+    public void setMessage(String text)
+    {
+      this.currentCount = 0;
+      pmod.setPrintMessage(text);
+    }
   }
 
   /**
