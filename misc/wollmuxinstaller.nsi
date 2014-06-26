@@ -379,8 +379,10 @@ Function ${UN}GetOOoPath
 	# It looks in:
 	#  1 - the registry value "" (default) of the key "HKCU\Software\OpenOffice.org\UNO\InstallPath"
 	#  2 - the registry value "" (default) of the key "HKLM\Software\OpenOffice.org\UNO\InstallPath"
-	#  3 - the registry value "" (default) of the key "HKCU\Software\LibreOffice\UNO\InstallPath"
-	#  4 - the registry value "" (default) of the key "HKLM\Software\LibreOffice\UNO\InstallPath"
+	#  3 - the registry value "" (default) of the key "HKCU\Software\OpenOffice\UNO\InstallPath"
+	#  4 - the registry value "" (default) of the key "HKLM\Software\OpenOffice\UNO\InstallPath"
+	#  5 - the registry value "" (default) of the key "HKCU\Software\LibreOffice\UNO\InstallPath"
+	#  6 - the registry value "" (default) of the key "HKLM\Software\LibreOffice\UNO\InstallPath"
 	#
 	# If the path could not be found the string "NOTFOUND" is returned.
 	# If the command line parameter "--LIBRE" is set we skip the search in 1) and 2).
@@ -407,20 +409,34 @@ Function ${UN}GetOOoPath
 	StrCmp $R0 "" +2  ;; check if entry is empty
 	IfFileExists $R0\*.* OOoFound  ;; 2) found path in the HKLM OOo registry key
 	StrCpy $R0 "NOTFOUND"
-	
+
+	ClearErrors
+	ReadRegStr $R0 HKCU "Software\OpenOffice\UNO\InstallPath" ""
+	IfErrors +3
+	StrCmp $R0 "" +2  ;; check if entry is empty
+	IfFileExists $R0\*.* OOoFound  ;; 3) found path in the HKCU AOO registry key
+	StrCpy $R0 "NOTFOUND"
+
+	ClearErrors
+	ReadRegStr $R0 HKLM "Software\OpenOffice\UNO\InstallPath" ""
+	IfErrors +3
+	StrCmp $R0 "" +2  ;; check if entry is empty
+	IfFileExists $R0\*.* OOoFound  ;; 4) found path in the HKLM AOO registry key
+	StrCpy $R0 "NOTFOUND"
+
   skipOOoReg:
 	ClearErrors
 	ReadRegStr $R0 HKCU "Software\LibreOffice\UNO\InstallPath" ""
 	IfErrors +3
 	StrCmp $R0 "" +2  ;; check if entry is empty
-	IfFileExists $R0\*.* OOoFound  ;; 3) found path in the HKCU LibreOffice registry key
+	IfFileExists $R0\*.* OOoFound  ;; 5) found path in the HKCU LibreOffice registry key
 	StrCpy $R0 "NOTFOUND"
 
 	ClearErrors
 	ReadRegStr $R0 HKLM "Software\LibreOffice\UNO\InstallPath" ""
 	IfErrors +3
 	StrCmp $R0 "" +2  ;; check if entry is empty
-	IfFileExists $R0\*.* OOoFound  ;; 4) found path in the HKLM LibreOffice registry key
+	IfFileExists $R0\*.* OOoFound  ;; 6) found path in the HKLM LibreOffice registry key
 	StrCpy $R0 "NOTFOUND"
  
   OOoFound:
