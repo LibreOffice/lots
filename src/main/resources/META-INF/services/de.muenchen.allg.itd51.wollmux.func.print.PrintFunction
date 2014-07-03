@@ -3,7 +3,9 @@ de.muenchen.allg.itd51.wollmux.slv.print.ContentBasedDirectivePrintOutput
 de.muenchen.allg.itd51.wollmux.mailmerge.print.SetFormValue
 de.muenchen.allg.itd51.wollmux.mailmerge.print.ToOdtEmail
 de.muenchen.allg.itd51.wollmux.mailmerge.print.ToOdtFile
+de.muenchen.allg.itd51.wollmux.mailmerge.print.ToPdfFile
 de.muenchen.allg.itd51.wollmux.mailmerge.print.ToPdfEmail
 de.muenchen.allg.itd51.wollmux.mailmerge.print.ToPrinter
+de.muenchen.allg.itd51.wollmux.mailmerge.print.ToShowOdtFile
 de.muenchen.allg.itd51.wollmux.mailmerge.print.ToSingleODT
 de.muenchen.allg.itd51.wollmux.mailmerge.print.ToSinglePDF
