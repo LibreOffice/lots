@@ -50,6 +50,8 @@ public class PrintFunction implements Comparable<PrintFunction>
   private static final Logger LOGGER = LoggerFactory
       .getLogger(PrintFunction.class);
 
+  public static final String PROP_PRINT_RESULT = "WollMux_Print_Result";
+
   private ExternalFunction func = null;
 
   private String functionName;

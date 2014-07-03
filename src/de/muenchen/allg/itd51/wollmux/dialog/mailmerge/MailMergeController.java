@@ -216,9 +216,15 @@ public class MailMergeController
     boolean ignoreDocPrintFuncs = true;
     switch (action)
     {
-    case SINGLE_DOCUMENT:
+    case SINGLE_DOCUMENT_ODT:
       ignoreDocPrintFuncs = false;
       usePrintFunctions.add("OOoMailMergeToOdtFile");
+      usePrintFunctions.add("OOoMailMergeToShowOdtFile");
+      break;
+    case SINGLE_DOCUMENT_PDF:
+      ignoreDocPrintFuncs = false;
+      usePrintFunctions.add("OOoMailMergeToOdtFile");
+      usePrintFunctions.add("OOoMailMergeToPdfFile");
       break;
     case DIRECT:
       ignoreDocPrintFuncs = false;
@@ -436,7 +442,8 @@ public class MailMergeController
   }
   
   enum ACTION {
-    SINGLE_DOCUMENT,
+    SINGLE_DOCUMENT_ODT,
+    SINGLE_DOCUMENT_PDF,
     DIRECT,
     MAIL,
     MULTIPLE_DOCUMENTS,
