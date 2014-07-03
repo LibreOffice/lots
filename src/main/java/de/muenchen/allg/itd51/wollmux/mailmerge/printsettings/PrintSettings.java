@@ -12,7 +12,7 @@ public class PrintSettings
   /**
    * Defines how the document is printed.
    */
-  private ACTION action = ACTION.SINGLE_DOCUMENT;
+  private ACTION action = ACTION.SINGLE_DOCUMENT_ODT;
 
   /**
    * If {@link #selection} is {@link DatasetSelectionType#RANGE}, this is the first record to be
@@ -257,9 +257,13 @@ public class PrintSettings
   public enum ACTION
   {
     /**
-     * Create one single file with all records.
+     * Create one single ODT file with all records.
      */
-    SINGLE_DOCUMENT,
+    SINGLE_DOCUMENT_ODT,
+    /**
+     * Create one single PDF file with all records.
+     */
+    SINGLE_DOCUMENT_PDF,
     /**
      * Print the files on a printer.
      */

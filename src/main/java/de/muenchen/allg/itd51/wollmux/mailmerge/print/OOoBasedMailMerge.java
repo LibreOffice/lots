@@ -74,8 +74,8 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
-import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.print.PrintModels;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
 import de.muenchen.allg.util.UnoConfiguration;
@@ -116,7 +116,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
   /**
    * Create a mail merge based on LibreOffice.
-   * 
+   *
    * @param pmod
    *          The print model.
    * @param type
@@ -203,7 +203,8 @@ public class OOoBasedMailMerge implements AutoCloseable
           handleFileResult(new File(tmpDir, "output0.odt"));
         } else if (type == MailMergeType.SHELL)
         {
-          handleShellResult(UNO.XTextDocument(result));
+          pmod.setPropertyValue(PrintFunction.PRINT_RESULT, result);
+          pmod.printWithProps();
         }
       }
     } catch (Exception e)
@@ -216,6 +217,7 @@ public class OOoBasedMailMerge implements AutoCloseable
   private void handleFileResult(File outputFile)
   {
     if (outputFile.exists())
+    {
       try
       {
         String unoURL = UNO.getParsedUNOUrl(outputFile.toURI().toString()).Complete;
@@ -225,7 +227,7 @@ public class OOoBasedMailMerge implements AutoCloseable
       {
         LOGGER.error("", e);
       }
-    else
+    } else
     {
       InfoDialog.showInfoModal(L.m("WollMux-Seriendruck"),
           L.m("Leider konnte kein Gesamtdokument erstellt werden."));
@@ -237,25 +239,6 @@ public class OOoBasedMailMerge implements AutoCloseable
     } catch (java.io.IOException ex)
     {
       LOGGER.error("Couldn't delete file", ex);
-    }
-  }
-
-  private void handleShellResult(XTextDocument result)
-  {
-    if (result != null && result.getCurrentController() != null
-        && result.getCurrentController().getFrame() != null
-        && result.getCurrentController().getFrame().getContainerWindow() != null)
-    {
-      DocumentManager.getDocumentManager().addTextDocument(result);
-      DispatchProviderAndInterceptor
-          .registerDocumentDispatchInterceptor(result.getCurrentController().getFrame());
-      result.getCurrentController().getFrame().getContainerWindow().setVisible(true);
-      UNO.XTopWindow(result.getCurrentController().getFrame().getContainerWindow()).toFront();
-    } else
-    {
-      InfoDialog.showInfoModal(L.m("WollMux-Seriendruck"),
-          L.m("Das erzeugte Gesamtdokument kann leider nicht angezeigt werden."));
-      pmod.cancel();
     }
   }
 

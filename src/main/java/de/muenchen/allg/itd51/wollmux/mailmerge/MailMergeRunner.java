@@ -201,9 +201,15 @@ public class MailMergeRunner implements Runnable
       boolean ignoreDocPrintFuncs = true;
       switch (settings.getAction())
       {
-      case SINGLE_DOCUMENT:
+      case SINGLE_DOCUMENT_ODT:
         ignoreDocPrintFuncs = false;
         pmod.usePrintFunction("OOoMailMergeToOdtFile");
+        pmod.usePrintFunction("OOoMailMergeToShowOdtFile");
+        break;
+      case SINGLE_DOCUMENT_PDF:
+        ignoreDocPrintFuncs = false;
+        pmod.usePrintFunction("OOoMailMergeToOdtFile");
+        pmod.usePrintFunction("OOoMailMergeToPdfFile");
         break;
       case DIRECT:
         ignoreDocPrintFuncs = false;
