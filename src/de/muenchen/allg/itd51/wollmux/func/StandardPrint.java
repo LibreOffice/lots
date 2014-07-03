@@ -31,6 +31,10 @@
  */
 package de.muenchen.allg.itd51.wollmux.func;
 
+import java.awt.Desktop;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -39,11 +43,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.UnknownPropertyException;
+import com.sun.star.frame.XStorable;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.ui.dialogs.FilePicker;
+import com.sun.star.ui.dialogs.TemplateDescription;
+import com.sun.star.ui.dialogs.XFilePicker3;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
@@ -53,6 +62,8 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.event.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.print.OOoBasedMailMerge;
 import de.muenchen.allg.itd51.wollmux.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
@@ -220,6 +231,48 @@ public class StandardPrint
     }
 
     OOoBasedMailMerge.oooMailMerge(pmod, OOoBasedMailMerge.OutputType.toShell);
+  }
+
+  public static void oooMailMergeToShowOdtFile(final XPrintModel pmod)
+  {
+    XTextDocument result = UNO.XTextDocument(pmod.getProp(PrintFunction.PROP_PRINT_RESULT, pmod.getTextDocument()));
+    if (result != null && result.getCurrentController() != null && result.getCurrentController().getFrame() != null
+        && result.getCurrentController().getFrame().getContainerWindow() != null)
+    {
+      DocumentManager.getDocumentManager().addTextDocument(result);
+      DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(result.getCurrentController().getFrame());
+      result.getCurrentController().getFrame().getContainerWindow().setVisible(true);
+      UNO.XTopWindow(result.getCurrentController().getFrame().getContainerWindow()).toFront();
+    } else
+    {
+      InfoDialog.showInfoModal(L.m("WollMux-Seriendruck"),
+          L.m("Das erzeugte Gesamtdokument kann leider nicht angezeigt werden."));
+      pmod.cancel();
+    }
+  }
+
+  public static void oooMailMergeToPdfFile(final XPrintModel pmod) throws Exception
+  {
+    XFilePicker3 picker = FilePicker.createWithMode(UNO.defaultContext, TemplateDescription.FILESAVE_AUTOEXTENSION);
+    String filterName = "PDF Dokument";
+    picker.appendFilter(filterName, "*.pdf");
+    picker.appendFilter("Alle Dateien", "*");
+    picker.setCurrentFilter(filterName);
+    short res = picker.execute();
+    if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)
+    {
+      String[] files = picker.getFiles();
+      Path outputPath = Paths.get(new URI(files[0]));
+      UnoProps props = new UnoProps("FilterName", "writer_pdf_Export");
+      XStorable result = UNO
+          .XStorable(pmod.getProp(PrintFunction.PROP_PRINT_RESULT, pmod.getTextDocument()));
+      result.storeToURL(files[0], props.getProps());
+      LOGGER.debug("Öffne erzeugtes Gesamtdokument {}", outputPath);
+      Desktop.getDesktop().open(outputPath.toFile());
+    } else
+    {
+      InfoDialog.showInfoModal("WollMux Seriendruck", "PDF Dokument konnte nicht angezeigt werden.");
+    }
   }
 
   /**
@@ -397,7 +450,12 @@ public class StandardPrint
 
     OOoMailMergeToPrinter("oooMailMergeToPrinter", 200),
 
-    OOoMailMergeToOdtFile("oooMailMergeToOdtFile", 200);
+    OOoMailMergeToOdtFile("oooMailMergeToOdtFile", 200),
+
+    OOoMailMergeToShowOdtFile("oooMailMergeToShowOdtFile",
+        350),
+
+    OOoMailMergeToPdfFile("oooMailMergeToPdfFile", 210);
 
     private String intMethodName;
 

@@ -26,6 +26,7 @@ public class StartWizardPage extends AbstractXWizardPage
   private static final Logger LOGGER = LoggerFactory.getLogger(StartWizardPage.class);
 
   private final XRadioButton singleDocument;
+  private final XRadioButton singleDocumentPDF;
   private final XRadioButton direct;
   private final XRadioButton mails;
   private final XRadioButton multipleDocuments;
@@ -62,6 +63,8 @@ public class StartWizardPage extends AbstractXWizardPage
     this.controller = controller;
     XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
     singleDocument = UNO.XRadio(container.getControl("gesamtDoc"));
+    singleDocument.addItemListener(new ActionItemListener(PATH.STANDRAD));
+    singleDocumentPDF = UNO.XRadio(container.getControl("gesamtDocPDF"));
     singleDocument.addItemListener(new ActionItemListener(PATH.STANDRAD));
     direct = UNO.XRadio(container.getControl("drucken"));
     direct.addItemListener(new ActionItemListener(PATH.DIRECT_PRINT));
@@ -106,7 +109,7 @@ public class StartWizardPage extends AbstractXWizardPage
   {
     LOGGER.debug("canAdvance");
     ACTION action = getSelectedAction();
-    return (action != ACTION.NOTHING || action != ACTION.SINGLE_DOCUMENT)
+    return (action != ACTION.NOTHING || action != ACTION.SINGLE_DOCUMENT_ODT)
         && getSelectedRange() != DatasetSelectionType.NOTHING;
   }
 
@@ -140,7 +143,11 @@ public class StartWizardPage extends AbstractXWizardPage
   {
     if (singleDocument.getState())
     {
-      return ACTION.SINGLE_DOCUMENT;
+      return ACTION.SINGLE_DOCUMENT_ODT;
+    }
+    if (singleDocumentPDF.getState())
+    {
+      return ACTION.SINGLE_DOCUMENT_PDF;
     }
     if (direct.getState())
     {
