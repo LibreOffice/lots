@@ -23,6 +23,7 @@
  * -------------------------------------------------------------------
  * 15.06.2011 | LUT | Erstellung
  * 12.07.2013 | JGM | Anpassungen an die neue UNO API zum setzten des Druckers
+ * 21.07.2014 | LUT | Erweiterung um BarcodeInfo-Feld by CIB software GmbH
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD-D101)
@@ -47,6 +48,7 @@ import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
+import com.sun.star.container.XNameContainer;
 import com.sun.star.frame.XModel;
 import com.sun.star.frame.XStorable;
 import com.sun.star.io.IOException;
@@ -56,6 +58,7 @@ import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.lang.XSingleServiceFactory;
 import com.sun.star.sdb.CommandType;
 import com.sun.star.sdb.XDocumentDataSource;
+import com.sun.star.style.XStyle;
 import com.sun.star.task.XJob;
 import com.sun.star.text.MailMergeEvent;
 import com.sun.star.text.MailMergeType;
@@ -63,7 +66,9 @@ import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XMailMergeBroadcaster;
 import com.sun.star.text.XMailMergeListener;
 import com.sun.star.text.XTextContent;
+import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextSection;
 import com.sun.star.text.XTextSectionsSupplier;
 import com.sun.star.uno.AnyConverter;
@@ -99,6 +104,12 @@ import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 
 public class OOoBasedMailMerge
 {
+  /**
+   * Ein BarcodeInfo-InputUser-Feld wird mit diesem Textstyle ausgezeichnet, damit
+   * dessen Merge-Ergebnis in der Nachbearbeitung verarbeitet werden kann.
+   */
+  private static final String WOLLMUX_BARCODEINFO_TEXTSTYLE = "WollMuxBarcodeInfo";
+
   private static final String SEP = ":";
 
   private static final String COLUMN_PREFIX_SINGLE_PARAMETER_FUNCTION = "WM:SP";
@@ -1092,6 +1103,15 @@ public class OOoBasedMailMerge
         // InputUser-Felder ersetzen durch entsprechende Database-Felder
         else if (UNO.supportsService(tf, "com.sun.star.text.TextField.InputUser"))
         {
+          boolean isBarcodeInfoField = false;
+          try
+          {
+            String hint = AnyConverter.toString(UNO.getProperty(tf, "Hint"));
+            isBarcodeInfoField = MailMergeNew.BARCODE_INFO.equals(hint);
+          }
+          catch (IllegalArgumentException e)
+          {}
+
           String content = "";
           try
           {
@@ -1108,8 +1128,27 @@ public class OOoBasedMailMerge
               XDependentTextField dbField =
                 createDatabaseField(UNO.XMultiServiceFactory(tmpDoc), dbName,
                   TABLE_NAME, COLUMN_PREFIX_MULTI_PARAMETER_FUNCTION + SEP + trafo);
-              tf.getAnchor().getText().insertTextContent(tf.getAnchor(), dbField,
-                true);
+
+              // Workaround: Mit LibreOffice 4.2 wurde eine neue
+              // InplaceEditing-Funktion für Inputfields eingebaut. Aufgrund eines
+              // Bugs kann das Feld aber nur mit folgender Kombination entfernt
+              // werden. Es wird mit einem reinen Replace (insertTextContent) über
+              // die TextRange tf.getAnchor() oder über
+              // tf.getAnchor().getText().removeTextContent(tf) nicht mehr korrekt
+              // entfernt. Dieser Workaround müsste theoretisch auch mit älteren
+              // LO-Versionen funktionieren.
+              XTextCursor cursor =
+                tf.getAnchor().getText().createTextCursorByRange(
+                  tf.getAnchor().getStart());
+              cursor.goRight((short) 1, true);
+              cursor.setString("");
+
+              if (isBarcodeInfoField)
+              {
+                surroundWithBarcodeInfoTextStyle(tmpDoc, cursor);
+              }
+              
+              cursor.getText().insertTextContent(cursor, dbField, true);
             }
             catch (Exception e)
             {
@@ -1119,6 +1158,33 @@ public class OOoBasedMailMerge
         }
       }
     }
+  }
+
+  /**
+   * Erzeugt in doc (hier ein unsichtbares temporäres Dokument) einen neuen Textstyle
+   * WOLLMUX_BARCODEINFO_TEXTSTYLE wenn er noch nicht existiert und weist ihn der
+   * TextRange r zu.
+   * 
+   * @author Christoph Lutz (CIB software GmbH)
+   */
+  private static void surroundWithBarcodeInfoTextStyle(XComponent doc, XTextRange r)
+  {
+    // create the style if it not already exists
+    try
+    {
+      XNameContainer pss =
+        UNO.XNameContainer(UNO.XNameAccess(
+          UNO.XStyleFamiliesSupplier(doc).getStyleFamilies()).getByName(
+          "CharacterStyles"));
+      XStyle style =
+        UNO.XStyle(UNO.XMultiServiceFactory(doc).createInstance(
+          "com.sun.star.style.CharacterStyle"));
+      pss.insertByName(WOLLMUX_BARCODEINFO_TEXTSTYLE, style);
+    }
+    catch (java.lang.Exception e)
+    {}
+    // apply the style
+    UNO.setProperty(r, "CharStyleName", WOLLMUX_BARCODEINFO_TEXTSTYLE);
   }
 
   /**

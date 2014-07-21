@@ -43,7 +43,7 @@ import de.muenchen.allg.itd51.wollmux.UnavailableException;
 public class TrafoDialogFactory
 {
   private static final Class<?>[] dialogClasses = {
-    GenderDialog.class, IfThenElseDialog.class };
+    BarcodeInfo.class, GenderDialog.class, IfThenElseDialog.class };
 
   private static final Class<?>[] DIALOG_CONSTRUCTOR_SIGNATURE =
     { TrafoDialogParameters.class };

@@ -94,6 +94,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.DatasetSelectionType;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.IndexSelection;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.SubmitArgument;
+import de.muenchen.allg.itd51.wollmux.dialog.trafo.BarcodeInfo;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
@@ -107,6 +108,13 @@ import de.muenchen.allg.itd51.wollmux.email.EMailSender;
  */
 public class MailMergeNew implements MailMergeParams.MailMergeController
 {
+  /**
+   * Dieser String wird als Tooltip für BarcodeInfo InputUser-Felder und für eine
+   * spätere automatische Erkennung von BarcodeInfo-Feldern durch den WollMux
+   * genutzt.
+   */
+  public static final String BARCODE_INFO = "BarcodeInfo";
+
   /**
    * ID der Property in der die Serienbriefdaten gespeichert werden.
    */
@@ -738,6 +746,19 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     });
     menu.add(button);
 
+    final String barcodeInfoButtonName = L.m("Barcode-Informationen");
+    button = new JMenuItem(barcodeInfoButtonName);
+    button.setEnabled(dsHasFields);
+    button.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        ConfigThingy barcodeinfoConf = BarcodeInfo.generateBarcodeInfoTrafoConf("QR", null);
+        insertFieldFromTrafoDialog(ds.getColumnNames(), BARCODE_INFO, barcodeinfoConf);
+      }
+    });
+    menu.add(button);
+
     button = new JMenuItem(L.m("Datensatznummer"));
     button.addActionListener(new ActionListener()
     {
@@ -840,7 +861,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
     catch (UnavailableException e)
     {
-      Logger.error(L.m("Das darf nicht passieren!"));
+      Logger.error(L.m("Das darf nicht passieren!"), e);
     }
   }
 
