@@ -31,15 +31,18 @@
  */
 package de.muenchen.allg.itd51.wollmux.func;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.io.OutputStream;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map.Entry;
+import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -57,6 +60,12 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
@@ -73,112 +82,113 @@ import de.muenchen.allg.itd51.parser.SyntaxErrorException;
  */
 public class MailMergeBarcodePostprocessing
 {
+  static byte[] buf = new byte[1024];
 
-  public static class ZipCopyWriter
+  public static void execute(File inputFile, File outputFile) throws ZipException,
+      IOException, ParserConfigurationException, SAXException, XMLStreamException,
+      FactoryConfigurationError
   {
-    ZipFile zipFile;
+    ZipFile inputZip = new ZipFile(inputFile);
+    ZipOutputStream outputZip =
+      new ZipOutputStream(new FileOutputStream(outputFile));
+    Enumeration<? extends ZipEntry> en = inputZip.entries();
+    PictureReplacer replacer = new PictureReplacer();
+    Manifest manifest = new Manifest();
+    Vector<ConfigThingy> barcodeInfos = new Vector<ConfigThingy>();
 
-    byte[] buf = new byte[1024];
-
-    HashMap<String, String> filename2overridedata = new HashMap<String, String>();
-
-    public ZipCopyWriter(ZipFile zipFile)
+    while (en.hasMoreElements())
     {
-      this.zipFile = zipFile;
-    }
+      ZipEntry entry = en.nextElement();
+      String name = entry.getName();
 
-    public void setData(String filename, String data)
-    {
-      filename2overridedata.put(filename, data);
-    }
-
-    public void write(File outFilename) throws IOException
-    {
-      ZipOutputStream out = new ZipOutputStream(new FileOutputStream(outFilename));
-      Enumeration<? extends ZipEntry> en = zipFile.entries();
-
-      while (en.hasMoreElements())
+      if (name.equals("content.xml") || name.equals("styles.xml") /* header&footer */)
       {
-        ZipEntry entry = en.nextElement();
+        InputStream is = inputZip.getInputStream(entry);
         entry.setCompressedSize(-1);
-        out.putNextEntry(entry);
+        outputZip.putNextEntry(entry);
+        replacer.execute(is, outputZip, barcodeInfos);
+        outputZip.closeEntry();
+        continue;
+      }
 
-        String override = filename2overridedata.get(entry.getName());
-        if (override != null)
-          out.write(override.getBytes("UTF-8"));
-        else
+      else if (name.equals("META-INF/manifest.xml"))
+      {
+        InputStream is = inputZip.getInputStream(entry);
+        manifest.parse(is);
+        continue;
+      }
+
+      else if (name.equals("mimetype"))
+      {
+        entry.setMethod(ZipEntry.STORED);
+      }
+
+      // copy entry to output
+      outputZip.putNextEntry(entry);
+      InputStream in = inputZip.getInputStream(entry);
+      int len;
+      while ((len = in.read(buf)) > 0)
+      {
+        outputZip.write(buf, 0, len);
+      }
+      in.close();
+
+      outputZip.closeEntry();
+    }
+
+    // create barcode pictures and add to document package
+    for (ConfigThingy barcodeInfo : barcodeInfos)
+    {
+      try
+      {
+        String barcodeContent = barcodeInfo.get("CONTENT").getLastChild().getName();
+        String path = barcodeInfo.get("PATH").getLastChild().getName();
+        String type = barcodeInfo.get("TYPE").getLastChild().getName();
+
+        ZipEntry entry = new ZipEntry(path);
+        entry.setCompressedSize(-1);
+        outputZip.putNextEntry(entry);
+
+        if (type.equals("QR"))
         {
-          InputStream in = zipFile.getInputStream(entry);
-          int len;
-          while ((len = in.read(buf)) > 0)
-          {
-            out.write(buf, 0, len);
-          }
-          in.close();
+          QRCodeWriter writer = new QRCodeWriter();
+          BitMatrix bitMatrix =
+            writer.encode(barcodeContent, BarcodeFormat.QR_CODE, 300, 300);
+          MatrixToImageWriter.writeToStream(bitMatrix, "png", outputZip);
         }
 
-        out.closeEntry();
+        outputZip.closeEntry();
+        manifest.addEntry(path, null, "image/png");
       }
-      out.close();
+      catch (WriterException e)
+      {
+        e.printStackTrace();
+      }
+      catch (IOException e)
+      {
+        e.printStackTrace();
+      }
+      catch (NodeNotFoundException e)
+      {
+        e.printStackTrace();
+      }
     }
 
-    public void close() throws IOException
-    {
-      zipFile.close();
-    }
-  }
+    // write new manifest file (which will contain newly added pictures)
+    ZipEntry entry = new ZipEntry("META-INF/manifest.xml");
+    entry.setCompressedSize(-1);
+    entry.setMethod(ZipEntry.DEFLATED);
+    outputZip.putNextEntry(entry);
+    manifest.write(outputZip);
+    outputZip.closeEntry();
 
-  public static class OdtDocument
-  {
-    ZipFile zipFile;
-
-    ZipCopyWriter copyWriter;
-
-    public OdtDocument load(File file) throws ZipException, IOException
-    {
-      zipFile = new ZipFile(file);
-      copyWriter = new ZipCopyWriter(zipFile);
-      return this;
-    }
-
-    public void storeTo(File file) throws IOException
-    {
-      copyWriter.write(file);
-    }
-
-    public void close() throws IOException
-    {
-      copyWriter.close();
-    }
-
-    public List<String> getDocumentContentFiles()
-    {
-      ArrayList<String> list = new ArrayList<String>();
-      list.add("content.xml");
-      list.add("styles.xml"); // styles.xml contains header and footer content
-                              // elements
-      return list;
-    }
-
-    public InputStream getInputStream(String filename) throws IOException
-    {
-      ZipEntry e = zipFile.getEntry(filename);
-      return zipFile.getInputStream(e);
-    }
-
-    public void setContent(String filename, String data)
-    {
-      copyWriter.setData(filename, data);
-    }
+    outputZip.close();
+    inputZip.close();
   }
 
   public static class PictureReplacer extends DefaultHandler
   {
-    private SAXParser saxParser;
-
     private XMLStreamWriter saxWriter;
-
-    private ByteArrayOutputStream result = new ByteArrayOutputStream();
 
     private int wollMuxBarcodeInfoIgnoreLevel = 0;
 
@@ -186,33 +196,19 @@ public class MailMergeBarcodePostprocessing
 
     ConfigThingy lastBarcodeInfo = null;
 
-    public PictureReplacer() throws ParserConfigurationException, SAXException,
-        XMLStreamException, FactoryConfigurationError
+    Vector<ConfigThingy> barcodeInfos;
+
+    public void execute(InputStream is, OutputStream out,
+        Vector<ConfigThingy> barcodeInfos) throws ParserConfigurationException,
+        SAXException, XMLStreamException, FactoryConfigurationError, IOException
     {
       SAXParserFactory factory = SAXParserFactory.newInstance();
-      saxParser = factory.newSAXParser();
-      saxWriter =
-        XMLOutputFactory.newInstance().createXMLStreamWriter(result, "UTF-8");
-    }
-
-    public void execute(InputStream is)
-    {
-      result.reset();
-      try
-      {
-        saxWriter.writeStartDocument("UTF-8", "1.0");
-        saxWriter.writeCharacters("\n");
-        saxParser.parse(is, this);
-      }
-      catch (Throwable err)
-      {
-        err.printStackTrace();
-      }
-    }
-
-    public String getReplacementResult()
-    {
-      return result.toString();
+      SAXParser saxParser = factory.newSAXParser();
+      saxWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(out, "UTF-8");
+      saxWriter.writeStartDocument("UTF-8", "1.0");
+      saxWriter.writeCharacters("\n");
+      saxParser.parse(is, this);
+      this.barcodeInfos = barcodeInfos;
     }
 
     @Override
@@ -252,7 +248,17 @@ public class MailMergeBarcodePostprocessing
               saxWriter.writeAttribute(attQName, value);
             }
           }
-          saxWriter.writeAttribute("xlink:href", lastBarcodeInfo.get("CONTENT").getFirstChild().getName());
+
+          String barcodeContent =
+            lastBarcodeInfo.get("CONTENT").getFirstChild().getName();
+          String md5sum = getMD5Sum(barcodeContent);
+          String picturePath = "Pictures/" + md5sum + ".png";
+          ConfigThingy path = new ConfigThingy("PATH");
+          path.addChild(new ConfigThingy(picturePath));
+          lastBarcodeInfo.addChild(path);
+          barcodeInfos.add(lastBarcodeInfo);
+
+          saxWriter.writeAttribute("xlink:href", picturePath);
         }
         catch (XMLStreamException e)
         {
@@ -292,6 +298,29 @@ public class MailMergeBarcodePostprocessing
       }
     }
 
+    private String getMD5Sum(String content)
+    {
+      String hashtext = "";
+      try
+      {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        md.update(content.getBytes());
+        byte[] digest = md.digest();
+        BigInteger bigInt = new BigInteger(1, digest);
+        hashtext = bigInt.toString(16);
+      }
+      catch (NoSuchAlgorithmException e1)
+      {}
+
+      // padding with zeros until 32 characters.
+      while (hashtext.length() < 32)
+      {
+        hashtext = "0" + hashtext;
+      }
+
+      return hashtext;
+    }
+
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException
     {
@@ -324,7 +353,6 @@ public class MailMergeBarcodePostprocessing
           try
           {
             lastBarcodeInfo = new ConfigThingy("BCI", barcodeInfoStrBuf.toString());
-            System.out.println(lastBarcodeInfo.stringRepresentation());
           }
           catch (IOException e)
           {
@@ -355,22 +383,136 @@ public class MailMergeBarcodePostprocessing
 
   }
 
-  public static void postprocess(File inputFile, File outputFile)
-      throws ZipException, IOException, ParserConfigurationException, SAXException,
-      XMLStreamException, FactoryConfigurationError
+  public static class ManifestEntry
   {
-    OdtDocument input = new OdtDocument();
-    input.load(inputFile);
-    PictureReplacer replacer = new PictureReplacer();
-    for (String contentElement : input.getDocumentContentFiles())
-    {
-      InputStream is = input.getInputStream(contentElement);
-      replacer.execute(is);
-      input.setContent(contentElement, replacer.getReplacementResult());
+    private String fullPath = null;
 
-      System.out.println(replacer.getReplacementResult());
+    private String version = null;
+
+    private String mediaType = null;
+
+    public void setFullPath(String fullPath)
+    {
+      this.fullPath = fullPath;
     }
-    input.storeTo(outputFile);
+
+    public void setVersion(String version)
+    {
+      this.version = version;
+    }
+
+    public void setMediaType(String mediaType)
+    {
+      this.mediaType = mediaType;
+    }
+
+    public void write(XMLStreamWriter writer) throws XMLStreamException
+    {
+      writer.writeStartElement("manifest:file-entry");
+      if (fullPath != null)
+      {
+        writer.writeAttribute("manifest:full-path", fullPath);
+      }
+      if (version != null)
+      {
+        writer.writeAttribute("manifest:version", version);
+      }
+      if (mediaType != null)
+      {
+        writer.writeAttribute("manifest:media-type", mediaType);
+      }
+      writer.writeEndElement();
+    }
+  }
+
+  public static class Manifest extends DefaultHandler
+  {
+    private HashMap<String, String> manifestAtts = new HashMap<String, String>();
+
+    private Vector<ManifestEntry> entries = new Vector<ManifestEntry>();
+
+    public void parse(InputStream is) throws ParserConfigurationException,
+        SAXException, IOException
+    {
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      SAXParser saxParser = factory.newSAXParser();
+      saxParser.parse(is, this);
+    }
+
+    @Override
+    public void startElement(String uri, String localName, String qName,
+        Attributes attributes) throws SAXException
+    {
+      // store only attributes for manifest-nodes
+      if (qName.equals("manifest:manifest"))
+      {
+        for (int i = 0; i < attributes.getLength(); ++i)
+        {
+          String attQName = attributes.getQName(i);
+          String value = attributes.getValue(i);
+          manifestAtts.put(attQName, value);
+        }
+      }
+
+      else if (qName.equals("manifest:file-entry"))
+      {
+        ManifestEntry e = new ManifestEntry();
+        for (int i = 0; i < attributes.getLength(); ++i)
+        {
+          String attQName = attributes.getQName(i);
+          if (attQName.equals("manifest:full-path"))
+          {
+            e.setFullPath(attributes.getValue(i));
+          }
+          if (attQName.equals("manifest:version"))
+          {
+            e.setVersion(attributes.getValue(i));
+          }
+          if (attQName.equals("manifest:media-type"))
+          {
+            e.setMediaType(attributes.getValue(i));
+          }
+        }
+        entries.add(e);
+      }
+    }
+
+    public void addEntry(String fullPath, String version, String mediaType)
+    {
+      ManifestEntry e = new ManifestEntry();
+      if (fullPath != null) e.setFullPath(fullPath);
+      if (version != null) e.setVersion(version);
+      if (mediaType != null) e.setMediaType(mediaType);
+      entries.add(e);
+    }
+
+    public void write(OutputStream os) throws XMLStreamException,
+        FactoryConfigurationError
+    {
+      XMLStreamWriter saxWriter =
+        XMLOutputFactory.newInstance().createXMLStreamWriter(os, "UTF-8");
+      saxWriter.writeStartDocument("UTF-8", "1.0");
+      saxWriter.writeCharacters("\n");
+      write(saxWriter);
+    }
+
+    private void write(XMLStreamWriter writer) throws XMLStreamException
+    {
+      writer.writeStartElement("manifest:manifest");
+      for (Entry<String, String> att : manifestAtts.entrySet())
+      {
+        writer.writeAttribute(att.getKey(), att.getValue());
+      }
+      for (ManifestEntry entry : entries)
+      {
+        entry.write(writer);
+      }
+      for (ManifestEntry entry : entries)
+      {
+        entry.write(writer);
+      }
+      writer.writeEndElement();
+    }
   }
 
   /**
@@ -382,7 +524,7 @@ public class MailMergeBarcodePostprocessing
   {
     File inputFile = new File("C:/temp/LHM/mm_output.odt");
     File outputFile = new File("C:/temp/LHM/mm_output_processed.odt");
-    postprocess(inputFile, outputFile);
+    execute(inputFile, outputFile);
   }
 
 }
