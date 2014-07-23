@@ -24,4 +24,5 @@ dist/TerminateOOo.jar
 dist/wollmux-*-installer.exe
 dist/wollmux-*.tar.gz
 oxt/WollMux.uno.jar
+testdata/mailmerge_barcode/mm_output_processed.odt
 *~
