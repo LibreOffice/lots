@@ -68,7 +68,7 @@ import com.google.zxing.qrcode.QRCodeWriter;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.parser.SyntaxErrorException;
+import de.muenchen.allg.itd51.wollmux.L;
 
 /**
  * Diese Klasse führt eine Nachbearbeitung auf Ergebnissen des OOoBasedMailMerge
@@ -76,7 +76,8 @@ import de.muenchen.allg.itd51.parser.SyntaxErrorException;
  * ersetzt werden.
  * 
  * Die Nachbearbeitung findet auf Basis des OpenDocumentFormats statt, d.h. als
- * Manipulation der content.xml-Datei auf XML-Ebene.
+ * Manipulation der content.xml-Datei auf XML-Ebene. Die Barcode-Bilder werden
+ * dynamisch mit Hilfe der java-Bibliothek zxing erzeugt.
  * 
  * @author Christoph (CIB software GmbH)
  */
@@ -84,62 +85,75 @@ public class MailMergeBarcodePostprocessing
 {
   static byte[] buf = new byte[1024];
 
+  /**
+   * Liest das ODT-Dokument inputFile, führt die Nachbearbeitung durch und schreibt
+   * das Ergebnis in das File outputFile.
+   * 
+   * @throws ZipException
+   * @throws IOException
+   * @throws ParserConfigurationException
+   * @throws SAXException
+   * @throws XMLStreamException
+   * @throws FactoryConfigurationError
+   * @throws WriterException
+   * @throws NodeNotFoundException
+   */
   public static void execute(File inputFile, File outputFile) throws ZipException,
       IOException, ParserConfigurationException, SAXException, XMLStreamException,
-      FactoryConfigurationError
+      FactoryConfigurationError, WriterException, NodeNotFoundException
   {
     ZipFile inputZip = new ZipFile(inputFile);
     ZipOutputStream outputZip =
       new ZipOutputStream(new FileOutputStream(outputFile));
-    Enumeration<? extends ZipEntry> en = inputZip.entries();
-    PictureReplacer replacer = new PictureReplacer();
-    Manifest manifest = new Manifest();
-    Vector<ConfigThingy> barcodeInfos = new Vector<ConfigThingy>();
-
-    while (en.hasMoreElements())
+    try
     {
-      ZipEntry entry = en.nextElement();
-      String name = entry.getName();
+      Enumeration<? extends ZipEntry> en = inputZip.entries();
+      PictureReplacer replacer = new PictureReplacer();
+      Manifest manifest = new Manifest();
+      Vector<ConfigThingy> barcodeInfos = new Vector<ConfigThingy>();
 
-      if (name.equals("content.xml") || name.equals("styles.xml") /* header&footer */)
+      while (en.hasMoreElements())
       {
-        InputStream is = inputZip.getInputStream(entry);
-        entry.setCompressedSize(-1);
+        ZipEntry entry = en.nextElement();
+        String name = entry.getName();
+
+        if (name.equals("content.xml") || name.equals("styles.xml") /* header&footer */)
+        {
+          InputStream is = inputZip.getInputStream(entry);
+          entry.setCompressedSize(-1);
+          outputZip.putNextEntry(entry);
+          replacer.execute(is, outputZip, barcodeInfos);
+          outputZip.closeEntry();
+          continue;
+        }
+
+        else if (name.equals("META-INF/manifest.xml"))
+        {
+          InputStream is = inputZip.getInputStream(entry);
+          manifest.parse(is);
+          continue;
+        }
+
+        else if (name.equals("mimetype"))
+        {
+          entry.setMethod(ZipEntry.STORED);
+        }
+
+        // copy entry to output
         outputZip.putNextEntry(entry);
-        replacer.execute(is, outputZip, barcodeInfos);
+        InputStream in = inputZip.getInputStream(entry);
+        int len;
+        while ((len = in.read(buf)) > 0)
+        {
+          outputZip.write(buf, 0, len);
+        }
+        in.close();
+
         outputZip.closeEntry();
-        continue;
       }
 
-      else if (name.equals("META-INF/manifest.xml"))
-      {
-        InputStream is = inputZip.getInputStream(entry);
-        manifest.parse(is);
-        continue;
-      }
-
-      else if (name.equals("mimetype"))
-      {
-        entry.setMethod(ZipEntry.STORED);
-      }
-
-      // copy entry to output
-      outputZip.putNextEntry(entry);
-      InputStream in = inputZip.getInputStream(entry);
-      int len;
-      while ((len = in.read(buf)) > 0)
-      {
-        outputZip.write(buf, 0, len);
-      }
-      in.close();
-
-      outputZip.closeEntry();
-    }
-
-    // create barcode pictures and add to document package
-    for (ConfigThingy barcodeInfo : barcodeInfos)
-    {
-      try
+      // create barcode pictures and add to document package
+      for (ConfigThingy barcodeInfo : barcodeInfos)
       {
         String barcodeContent = barcodeInfo.get("CONTENT").getLastChild().getName();
         String path = barcodeInfo.get("PATH").getLastChild().getName();
@@ -156,36 +170,41 @@ public class MailMergeBarcodePostprocessing
             writer.encode(barcodeContent, BarcodeFormat.QR_CODE, 300, 300);
           MatrixToImageWriter.writeToStream(bitMatrix, "png", outputZip);
         }
+        else
+        {
+          throw new IllegalArgumentException(L.m(
+            "Nicht unterstützter Barcode-Typ '%1'", type));
+        }
 
         outputZip.closeEntry();
         manifest.addEntry(path, null, "image/png");
       }
-      catch (WriterException e)
-      {
-        e.printStackTrace();
-      }
-      catch (IOException e)
-      {
-        e.printStackTrace();
-      }
-      catch (NodeNotFoundException e)
-      {
-        e.printStackTrace();
-      }
+
+      // write new manifest file (which will contain newly added pictures)
+      ZipEntry entry = new ZipEntry("META-INF/manifest.xml");
+      entry.setCompressedSize(-1);
+      entry.setMethod(ZipEntry.DEFLATED);
+      outputZip.putNextEntry(entry);
+      manifest.write(outputZip);
+      outputZip.closeEntry();
     }
-
-    // write new manifest file (which will contain newly added pictures)
-    ZipEntry entry = new ZipEntry("META-INF/manifest.xml");
-    entry.setCompressedSize(-1);
-    entry.setMethod(ZipEntry.DEFLATED);
-    outputZip.putNextEntry(entry);
-    manifest.write(outputZip);
-    outputZip.closeEntry();
-
-    outputZip.close();
-    inputZip.close();
+    finally
+    {
+      outputZip.close();
+      inputZip.close();
+    }
   }
 
+  /**
+   * Der PictureReplacer ist ein SAX-XML Filter, der ein Eingangsdokument (XML)
+   * liest, enthaltene '<text:span
+   * text:style-name="WollMuxBarcodeInfo">BARCODEINFO(TYPE "QR" CONTENT "..."
+   * )</text:span>' Zeilen sammelt (und ignoriert), das erste darauf folgende Bild
+   * durch den Verweis auf ein neues, dynamisches Barcode-Bild ersetzt und das
+   * Ergebnis (XML) in einen OutputStream schreibt.
+   * 
+   * @author Christoph (CIB software GmbH)
+   */
   public static class PictureReplacer extends DefaultHandler
   {
     private XMLStreamWriter saxWriter;
@@ -202,20 +221,19 @@ public class MailMergeBarcodePostprocessing
         Vector<ConfigThingy> barcodeInfos) throws ParserConfigurationException,
         SAXException, XMLStreamException, FactoryConfigurationError, IOException
     {
+      this.barcodeInfos = barcodeInfos;
       SAXParserFactory factory = SAXParserFactory.newInstance();
       SAXParser saxParser = factory.newSAXParser();
       saxWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(out, "UTF-8");
       saxWriter.writeStartDocument("UTF-8", "1.0");
       saxWriter.writeCharacters("\n");
       saxParser.parse(is, this);
-      this.barcodeInfos = barcodeInfos;
     }
 
     @Override
     public void startElement(String uri, String localName, String qName,
         Attributes attributes) throws SAXException
     {
-
       // ignore everything under text:span with text:style-name "WollMuxBarcodeInfo"
       // and collect the BarcodeInfo.
       if (qName.equals("text:span"))
@@ -249,26 +267,42 @@ public class MailMergeBarcodePostprocessing
             }
           }
 
-          String barcodeContent =
-            lastBarcodeInfo.get("CONTENT").getFirstChild().getName();
-          String md5sum = getMD5Sum(barcodeContent);
+          String barcodeContent = "";
+          try
+          {
+            barcodeContent =
+              lastBarcodeInfo.get("CONTENT").getFirstChild().getName();
+          }
+          catch (NodeNotFoundException x)
+          {}
+
+          String barcodeType = "NO_TYPE";
+          try
+          {
+            barcodeType = lastBarcodeInfo.get("TYPE").getFirstChild().getName();
+          }
+          catch (NodeNotFoundException x)
+          {}
+
+          // Erzeuge neuen eindeutigen Elementnamen für das Barcode-Bild
+          String md5sum = getMD5Sum(barcodeType + ":" + barcodeContent);
           String picturePath = "Pictures/" + md5sum + ".png";
           ConfigThingy path = new ConfigThingy("PATH");
           path.addChild(new ConfigThingy(picturePath));
           lastBarcodeInfo.addChild(path);
-          barcodeInfos.add(lastBarcodeInfo);
 
           saxWriter.writeAttribute("xlink:href", picturePath);
+          barcodeInfos.add(lastBarcodeInfo);
         }
         catch (XMLStreamException e)
         {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+          handleXMLStreamException(e);
         }
-        catch (NodeNotFoundException e)
+        catch (NoSuchAlgorithmException e)
         {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+          throw new SAXException(
+            L.m("Kann keinen eindeutigen Elementnamen für das neue Bild erzeugen"),
+            e);
         }
         lastBarcodeInfo = null;
         return;
@@ -289,7 +323,7 @@ public class MailMergeBarcodePostprocessing
         }
         catch (XMLStreamException e)
         {
-          e.printStackTrace();
+          handleXMLStreamException(e);
         }
       }
       else
@@ -298,19 +332,19 @@ public class MailMergeBarcodePostprocessing
       }
     }
 
-    private String getMD5Sum(String content)
+    /**
+     * Diese Helper-Methode liefert die MD5Sum zum String content zurück.
+     * 
+     * @throws NoSuchAlgorithmException
+     *           wenn MD5-Algorithmus nicht verfügbar
+     */
+    private String getMD5Sum(String content) throws NoSuchAlgorithmException
     {
-      String hashtext = "";
-      try
-      {
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(content.getBytes());
-        byte[] digest = md.digest();
-        BigInteger bigInt = new BigInteger(1, digest);
-        hashtext = bigInt.toString(16);
-      }
-      catch (NoSuchAlgorithmException e1)
-      {}
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      md.update(content.getBytes());
+      byte[] digest = md.digest();
+      BigInteger bigInt = new BigInteger(1, digest);
+      String hashtext = bigInt.toString(16);
 
       // padding with zeros until 32 characters.
       while (hashtext.length() < 32)
@@ -332,7 +366,7 @@ public class MailMergeBarcodePostprocessing
         }
         catch (XMLStreamException e)
         {
-          e.printStackTrace();
+          handleXMLStreamException(e);
         }
       }
       else
@@ -354,15 +388,9 @@ public class MailMergeBarcodePostprocessing
           {
             lastBarcodeInfo = new ConfigThingy("BCI", barcodeInfoStrBuf.toString());
           }
-          catch (IOException e)
+          catch (Exception e)
           {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-          catch (SyntaxErrorException e)
-          {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new SAXException(L.m("Kann WollMuxBarcodeInfo nicht parsen"), e);
           }
           barcodeInfoStrBuf = null;
         }
@@ -376,13 +404,23 @@ public class MailMergeBarcodePostprocessing
         }
         catch (XMLStreamException e)
         {
-          e.printStackTrace();
+          handleXMLStreamException(e);
         }
       }
     }
 
+    private void handleXMLStreamException(XMLStreamException e) throws SAXException
+    {
+      throw new SAXException(L.m("Fehler beim Schreiben des Ergebnisdokuments"), e);
+    }
+
   }
 
+  /**
+   * Repräsentiert und schreibt einen Eintrag einer ODF-Manifest Datei.
+   * 
+   * @author Christoph (CIB software GmbH)
+   */
   public static class ManifestEntry
   {
     private String fullPath = null;
@@ -425,6 +463,12 @@ public class MailMergeBarcodePostprocessing
     }
   }
 
+  /**
+   * Parst, repräsentiert und schreibt eine ODF-Manifest Datei und ermöglicht es,
+   * neue Elemente hinzuzufügen.
+   * 
+   * @author Christoph (CIB software GmbH)
+   */
   public static class Manifest extends DefaultHandler
   {
     private HashMap<String, String> manifestAtts = new HashMap<String, String>();
@@ -522,8 +566,8 @@ public class MailMergeBarcodePostprocessing
    */
   public static void main(String[] args) throws Exception
   {
-    File inputFile = new File("C:/temp/LHM/mm_output.odt");
-    File outputFile = new File("C:/temp/LHM/mm_output_processed.odt");
+    File inputFile = new File("testdata/mailmerge_barcode/mm_output.odt");
+    File outputFile = new File("testdata/mailmerge_barcode/mm_output_processed.odt");
     execute(inputFile, outputFile);
   }
 

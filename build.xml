@@ -107,8 +107,10 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="SDK_IDL" value="${OOO_SDK}/idl" />
 
 	<property name="JAVAMAIL_JAR" value ="thirdparty/javamail-1.4.4/mail.jar"/>
-	
-	<property name="CLASSPATH" value="${OOO_CLASSPATH}:${JAVAMAIL_JAR}"/>
+	<property name="ZXING_CORE_JAR" value ="thirdparty/zxing-3.1.0/core-3.1.0.jar"/>
+	<property name="ZXING_JAVASE_JAR" value ="thirdparty/zxing-3.1.0/javase-3.1.0.jar"/>
+			
+	<property name="CLASSPATH" value="${OOO_CLASSPATH}:${JAVAMAIL_JAR}:${ZXING_CORE_JAR}:${ZXING_JAVASE_JAR}"/>
 	
 	<property name="BIN" value="bin" />
 	<property name="SRC" value="src" />
@@ -430,7 +432,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 			<fileset file="${BUILD_INFO_FILE}" />
 			<manifest>
 				<attribute name="RegistrationClassName" value="${WollMux_REG_NAME}" />
-				<attribute name="Class-Path" value="${JAVAMAIL_JAR}" />
+				<attribute name="Class-Path" value="${JAVAMAIL_JAR} ${ZXING_CORE_JAR} ${ZXING_JAVASE_JAR}" />
 			</manifest>
 		</jar>
 	</target>

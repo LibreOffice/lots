@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/UNOHelper"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenOffice"/>
 	<classpathentry kind="lib" path="idl"/>
 	<classpathentry kind="lib" path="thirdparty/javamail-1.4.4/mail.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/UNOHelper"/>
+	<classpathentry kind="lib" path="thirdparty/zxing-3.1.0/core-3.1.0.jar"/>
+	<classpathentry kind="lib" path="thirdparty/zxing-3.1.0/javase-3.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

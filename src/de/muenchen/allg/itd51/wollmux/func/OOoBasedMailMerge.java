@@ -235,27 +235,28 @@ public class OOoBasedMailMerge
 
     if (type == OutputType.toFile)
     {
-      // Output-File als Template öffnen und aufräumen
+      // Output-File nachbearbeiten (Postprocessing), als Template öffnen und
+      // aufräumen
       File outputFile = new File(tmpDir, "output0.odt");
-      if (outputFile.exists())
-        try
-        {
-          String unoURL =
-            UNO.getParsedUNOUrl(outputFile.toURI().toString()).Complete;
-          Logger.debug(L.m("Öffne erzeugtes Gesamtdokument %1", unoURL));
-          UNO.loadComponentFromURL(unoURL, true, false);
-        }
-        catch (Exception e)
-        {
-          Logger.error(e);
-        }
-      else
+      File outputFilePostprocessing = new File(tmpDir, "output_postprocessing.odt");
+      try
       {
-        WollMuxSingleton.showInfoModal(L.m("WollMux-Seriendruck"),
-          L.m("Leider konnte kein Gesamtdokument erstellt werden."));
+        MailMergeBarcodePostprocessing.execute(outputFile, outputFilePostprocessing);
+        String unoURL =
+          UNO.getParsedUNOUrl(outputFilePostprocessing.toURI().toString()).Complete;
+        Logger.debug(L.m("Öffne erzeugtes Gesamtdokument %1", unoURL));
+        UNO.loadComponentFromURL(unoURL, true, false);
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+        WollMuxSingleton.showInfoModal(L.m("Fehler beim WollMux-Seriendruck"),
+          e.getMessage());
         pmod.cancel();
       }
+
       outputFile.delete();
+      outputFilePostprocessing.delete();
     }
 
     tmpDir.delete();

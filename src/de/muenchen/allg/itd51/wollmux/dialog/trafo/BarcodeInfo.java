@@ -57,12 +57,14 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
 
 /**
@@ -80,7 +82,7 @@ public class BarcodeInfo extends TrafoDialog
 
   private JPanel barcodeInfoPanel;
 
-  private JComboBox cbBarcodeType;
+  private JComboBox<String> cbBarcodeType;
 
   private TextComponentTags tfBarcodeContent;
 
@@ -179,15 +181,6 @@ public class BarcodeInfo extends TrafoDialog
 
       if (barcodeType == null || barcodeContent == null) stop();
 
-      // if (innerConf.count() == 0 || innerConf.getName().equals("CAT"))
-      // {
-      // res.type = 0;
-      // if (innerConf.getName().equals("CAT"))
-      // res.text.setContent(TextComponentTags.CAT_VALUE_SYNTAX, innerConf);
-      // else
-      // textArea.setText(innerConf.toString());
-      // return;
-
       HashSet<String> uniqueFieldNames = new HashSet<String>(params.fieldNames);
       List<String> sortedNames = new ArrayList<String>(uniqueFieldNames);
       Collections.sort(sortedNames);
@@ -237,12 +230,35 @@ public class BarcodeInfo extends TrafoDialog
     label = new JLabel(L.m("Barcode Typ"));
     label.setFont(label.getFont().deriveFont(Font.PLAIN));
     hbox.add(label);
-    cbBarcodeType = new JComboBox(BARCODE_TYPES);
+    cbBarcodeType = new JComboBox<String>(BARCODE_TYPES);
     cbBarcodeType.setSelectedItem(barcodeType);
     cbBarcodeType.setEditable(false);
     hbox.add(Box.createHorizontalGlue());
     hbox.add(cbBarcodeType);
     vbox.add(hbox);
+    addText(vbox, " ");
+
+    hbox = Box.createHorizontalBox();
+    JTextField textField = new JTextField();
+    tfBarcodeContent = new TextComponentTags(textField);
+    tfBarcodeContent.setContent(TextComponentTags.CAT_VALUE_SYNTAX, barcodeContent);
+    hbox.add(Box.createHorizontalGlue());
+    JPotentiallyOverlongPopupMenuButton butt =
+      new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
+        TextComponentTags.makeInsertFieldActions(fieldNames,
+          tfBarcodeContent));
+    butt.setFocusable(false);
+    hbox.add(butt);
+    vbox.add(hbox);
+    
+    hbox = Box.createHorizontalBox();
+    label = new JLabel(L.m("Barcode-Inhalt"));
+    label.setFont(label.getFont().deriveFont(Font.PLAIN));
+    hbox.add(label);
+    hbox.add(Box.createHorizontalStrut(10));
+    hbox.add(textField);
+    vbox.add(hbox);
+    addText(vbox, " ");
 
     // einheitliche Breite für alle Labels vergeben:
     for (Iterator<JLabel> iter = labels.iterator(); iter.hasNext();)
@@ -263,7 +279,7 @@ public class BarcodeInfo extends TrafoDialog
    * Text text hinzu, wobei der Text an Zeilenumbrüchen umgebrochen und linksbündig
    * dargestellt wird.
    * 
-   * @author Christoph Lutz (D-III-ITD 5.1), Christoph Lutz (CIB software GmbH)
+   * @author Christoph Lutz (D-III-ITD 5.1)
    */
   private void addText(JComponent compo, String text)
   {
@@ -428,7 +444,7 @@ public class BarcodeInfo extends TrafoDialog
    * Beendet den Dialog und ruft insbesondere den close-ActionListener der
    * darüberliegenden Anwendung auf.
    * 
-   * @author Christoph Lutz (D-III-ITD 5.1), Christoph Lutz (CIB software GmbH)
+   * @author Christoph Lutz (D-III-ITD 5.1)
    */
   private void abort()
   {
@@ -506,19 +522,16 @@ public class BarcodeInfo extends TrafoDialog
     cat.add("\" ");
 
     cat.add("CONTENT \"");
-    innerCat=new ConfigThingy("CAT");
-    cat.addChild(innerCat);
     if (barcodeContent != null)
     {
-      // TODO Verarbeitung von TextComponentTags noch nicht unterstützt!
+      innerCat = barcodeContent.getContent(TextComponentTags.CAT_VALUE_SYNTAX);
     }
     else
     {
-      // innerCat.add(""); TODO: should be this <-- but for testing we use below one
-      ConfigThingy value = new ConfigThingy("VALUE");
-      value.add("Inventarnummer");
-      innerCat.addChild(value);
+      innerCat=new ConfigThingy("CAT");
+      innerCat.add("");
     }
+    cat.addChild(innerCat);
     cat.add("\" ");
     
     cat.add(")");
