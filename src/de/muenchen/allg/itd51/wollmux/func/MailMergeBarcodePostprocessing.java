@@ -41,6 +41,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
@@ -153,10 +154,14 @@ public class MailMergeBarcodePostprocessing
       }
 
       // create barcode pictures and add to document package
+      HashSet<String> pathsCreated = new HashSet<String>();
       for (ConfigThingy barcodeInfo : barcodeInfos)
       {
-        String barcodeContent = barcodeInfo.get("CONTENT").getLastChild().getName();
         String path = barcodeInfo.get("PATH").getLastChild().getName();
+        if (pathsCreated.contains(path)) continue;
+        pathsCreated.add(path);
+        
+        String barcodeContent = barcodeInfo.get("CONTENT").getLastChild().getName();
         String type = barcodeInfo.get("TYPE").getLastChild().getName();
 
         ZipEntry entry = new ZipEntry(path);
