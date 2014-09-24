@@ -25,6 +25,8 @@
  * 31.07.2009 | BED | +"copyOnly"
  * 04.05.2011 | LUT | Ziffernanzeige und String "Abdruck" konfigurierbar
  *                    Patch von Jan Gerrit Möltgen (JanGerrit@burg-borgholz.de)
+ * 09.09.2014 | JGM | Update der Dokumentenstruktur vorm Drucken eingefuegt.
+ *                    Behebt Bug#12079 "SLV Druckbloecke in Bereichen"
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -1112,6 +1114,8 @@ public class SachleitendeVerfuegung
    */
   public static List<VerfuegungspunktInfo> callPrintDialog(XTextDocument doc)
   {
+    //JGM: Update der Dokumentenstruktur (Kommandos und TextSections)
+    WollMuxSingleton.getInstance().getTextDocumentModel(doc).getDocumentCommands().update();
     Vector<Verfuegungspunkt> vps = scanVerfuegungspunkte(doc);
     Iterator<Verfuegungspunkt> iter = vps.iterator();
     while (iter.hasNext())
