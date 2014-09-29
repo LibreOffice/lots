@@ -93,6 +93,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="WollMux_COMPJAR" value="${RDB_DIR}/${COMPONENT}.uno.jar" />
 	
 	<property name="RDBFILE" value="${RDB_DIR}/${COMPONENT}.rdb" />
+	<property name="JAVAMAKER_ARGS" value="" />
 
 	<property name="MY_IDL" value="idl" />
 	<property name="MY_CLASSES" value="bin" />
@@ -311,7 +312,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<target name="compileidl">
 		<echo message="Types dir: ${OOO_TYPES_DIR}"/>
 		<echo level="info">idlc: Creating .urd files</echo>
-		<apply executable="${OOO_SDK}/bin/idlc" dest="${MY_IDL}">
+		<apply executable="${OOO_SDK}/bin/idlc" failonerror="true" dest="${MY_IDL}" >
 			<arg value="-C" />
 			<arg value="-I${SDK_IDL}" />
 			<fileset dir="${MY_IDL}" includes="**/*.idl" />
@@ -320,21 +321,17 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 
 		<delete file="${RDBFILE}" />
 		<echo level="info" message="regmerge: Creating ${RDBFILE}" />
-		<apply executable="${OOO_URE_BIN}/regmerge" parallel="true">
+		<apply executable="${OOO_URE_BIN}/regmerge" parallel="true" failonerror="true">
 			<arg line="'${RDBFILE}' /UCR" />
 			<fileset dir="${MY_IDL}" includes="**/*.urd" />
 		</apply>
 
 		<echo level="info">javamaker: Creating .class files</echo>
+		<echo level="info">Hint: See property 'JAVAMAKER_ARGS' in '${os.family}.properties' if you get an error.</echo>
 		<!-- Trick for debugging: 
 		    Replace "javamaker" with "echo"
 		-->
-
-		<condition property="JAVAMAKER_ARGS" value="-BUCR" else="">
-			<isset property="LEGACY_JAVAMAKER" />
-		</condition>
-	
-		<apply verbose="true" executable="${OOO_SDK}/bin/javamaker" relative="true" addsourcefile="false" dest="${BIN}">
+		<apply verbose="true" executable="${OOO_SDK}/bin/javamaker" relative="true" addsourcefile="false" failonerror="true" dest="${BIN}">
 			<arg line="${JAVAMAKER_ARGS}" />
 			<targetfile />
 

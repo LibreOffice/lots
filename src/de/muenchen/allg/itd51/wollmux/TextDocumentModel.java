@@ -42,6 +42,7 @@ package de.muenchen.allg.itd51.wollmux;
 import java.awt.Window;
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -2615,14 +2616,17 @@ public class TextDocumentModel
     try
     {
       // Seit KDE4 muss ein maximiertes Fenster vor dem Verschieben "demaximiert" werden 
-      // sonst wird die Positionierung ignoriert.
-      if (UNO.XTopWindow2(getFrame().getContainerWindow()).getIsMaximized()) 
+      // sonst wird die Positionierung ignoriert. Leider ist die dafür benötigte Klasse
+      // erst seit OpenOffice.org 3.4 verfügbar - zur Abwärtskompatibilität erfolgt der
+      // Aufruf daher über Reflection.
+      Class c = Class.forName("com.sun.star.awt.XTopWindow2");
+      Object o = UnoRuntime.queryInterface(c, getFrame().getContainerWindow());
+      Method getIsMaximized = c.getMethod("getIsMaximized", (Class[])null);
+      Method setIsMaximized = c.getMethod("setIsMaximized", (boolean.class));
+      if ((Boolean)getIsMaximized.invoke(o, (Object[])null))
         {
-          UNO.XTopWindow2(getFrame().getContainerWindow()).setIsMaximized(false);
+          setIsMaximized.invoke(o, false);
         }
-      // Der Aufruf von SIZE vor POS ist vor allem bei maximierten Dokumenten von
-      // Bedeutung. Ein maximiertes Dokument kann nicht verschoben werden.
-      // Nach der Änderung der Größe ist es aber nicht mehr maximiert.
       getFrame().getContainerWindow().setPosSize(docX, docY, docWidth, docHeight,
         PosSize.SIZE);
       getFrame().getContainerWindow().setPosSize(docX, docY, docWidth, docHeight,
