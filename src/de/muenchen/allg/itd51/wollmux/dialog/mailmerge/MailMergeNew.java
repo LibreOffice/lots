@@ -2,7 +2,7 @@
  * Dateiname: MailMergeNew.java
  * Projekt  : WollMux
  * Funktion : Die neuen erweiterten Serienbrief-Funktionalitäten
- * 
+ *
  * Copyright (c) 2010 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,16 +23,16 @@
  * -------------------------------------------------------------------
  * 11.10.2007 | BNK | Erstellung
  * 25.05.2010 | ERT | Aufruf von PDFGesamtdruck-Druckfunktion
- * 20.12.2010 | ERT | Bei ungültigem indexSelection.rangeEnd wird der 
+ * 20.12.2010 | ERT | Bei ungültigem indexSelection.rangeEnd wird der
  *                    Wert auf den letzten Datensatz gesetzt
  * 08.05.2012 | jub | um beim serienbrief/emailversand die auswahl zwischen odt und pdf
- *                    anhängen anbieten zu können, sendAsEmail() und saveToFile() mit 
- *                    einer flage versehen, die zwischen den beiden formaten 
+ *                    anhängen anbieten zu können, sendAsEmail() und saveToFile() mit
+ *                    einer flage versehen, die zwischen den beiden formaten
  *                    unterscheidet.
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
@@ -43,6 +43,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,10 +67,36 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.XPropertySet;
+import com.sun.star.bridge.UnoUrlResolver;
+import com.sun.star.bridge.XUnoUrlResolver;
+import com.sun.star.chart2.data.XDataSource;
+import com.sun.star.comp.helper.Bootstrap;
+import com.sun.star.frame.FeatureStateEvent;
+import com.sun.star.frame.FrameSearchFlag;
+import com.sun.star.frame.XComponentLoader;
+import com.sun.star.frame.XDispatch;
+import com.sun.star.frame.XDispatchProvider;
+import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XStatusListener;
 import com.sun.star.frame.XStorable;
 import com.sun.star.io.IOException;
+import com.sun.star.lang.EventObject;
 import com.sun.star.lang.NoSuchMethodException;
+import com.sun.star.lang.XMultiComponentFactory;
+import com.sun.star.lang.XMultiServiceFactory;
+import com.sun.star.lib.uno.helper.Factory;
+import com.sun.star.sdb.XDatabaseContext;
+import com.sun.star.sdbc.XConnection;
+import com.sun.star.sdbc.XResultSet;
+import com.sun.star.sdbc.XStatement;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.uno.UnoRuntime;
+import com.sun.star.uno.XComponentContext;
+import com.sun.star.uno.XCurrentContext;
+import com.sun.star.util.URL;
+import com.sun.star.util.URLTransformer;
+import com.sun.star.util.XURLTransformer;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -102,7 +129,7 @@ import de.muenchen.allg.itd51.wollmux.email.EMailSender;
 
 /**
  * Die neuen erweiterten Serienbrief-Funktionalitäten.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class MailMergeNew implements MailMergeParams.MailMergeController
@@ -239,7 +266,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /**
    * Die zentrale Klasse, die die Serienbrieffunktionalität bereitstellt.
-   * 
+   *
    * @param mod
    *          das {@link TextDocumentModel} an dem die Toolbar hängt.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -540,9 +567,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Geht alle Komponenten durch, die unter bestimmten Bedingungen ausgegraut werden
    * müssen und setzt ihren Status korrekt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    */
   private void updateEnabledDisabledState()
   {
@@ -576,13 +603,22 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * setzt {@link #previewDatasetNumberMax} und setzt dann falls {@link #previewMode}
    * == true alle Feldwerte auf die Werte des entsprechenden Datensatzes. Ruft
    * außerdem {@link #updateEnabledDisabledState()} auf.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD D.10)
-   * 
+   *
    *         TESTED
    */
   private void updatePreviewFields()
   {
+
+
+    // TODO remove - test call to new method - nothing else executed
+    insertDataToFields();
+    if (true) {
+      return;
+    }
+
+
     if (!ds.hasDatasource()) return;
 
     int count = ds.getNumberOfDatasets();
@@ -624,7 +660,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /**
    * Schliesst den MailMergeNew und alle zugehörigen Fenster.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
   public void dispose()
@@ -652,7 +688,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Erzeugt eine Liste mit {@link javax.swing.Action}s für alle Namen aus
    * {@link #ds},getColumnNames(), die ein entsprechendes Seriendruckfeld einfügen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private List<Action> getInsertFieldActionList()
@@ -684,7 +720,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Erzeugt ein JPopupMenu, das Einträge für das Einfügen von Spezialfeldern enthält
    * und zeigt es an neben invoker an der relativen Position x,y.
-   * 
+   *
    * @param invoker
    *          zu welcher Komponente gehört das Popup
    * @param x
@@ -790,7 +826,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * Buttons buttonName, aus dem das Label des Dialogs, und später der Mouse-Over
    * hint erzeugt wird und die Liste der aktuellen Felder, die evtl. im Dialog zur
    * Verfügung stehen sollen.
-   * 
+   *
    * @param fieldNames
    *          Eine Liste der Feldnamen, die der Dialog anzeigt, falls er Buttons zum
    *          Einfügen von Serienbrieffeldern bereitstellt.
@@ -802,7 +838,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    *          spezifiziert. Der von den Dialogen benötigte äußere Knoten
    *          "Func(...trafoConf...) wird dabei von dieser Methode erzeugt, so dass
    *          trafoConf nur die eigentliche Funktion darstellen muss.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   protected void insertFieldFromTrafoDialog(List<String> fieldNames,
@@ -849,7 +885,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * liefert ein mit Hilfe der TrafoDialogFactory erzeugtes zugehöriges
    * TrafoDialog-Objekt zurück, oder null, wenn keine transformierte Funktion
    * selektiert ist oder für die Trafo kein Dialog existiert.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private TrafoDialog getTrafoDialogForCurrentSelection()
@@ -896,7 +932,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Startet den Seriendruck (und wird vom Seriendruckdialog aus
    * {@link MailMergeParams} über das Submit-Event aufgerufen.
-   * 
+   *
    * @param usePrintFunctions
    *          Liste der (in der Konfigurationsdatei definierten) Namen der
    *          Druckfunktionen, die für den Seriendruck verwendet werden sollen.
@@ -1026,7 +1062,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * {@link #PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der
    * ausgewählten Datensätze ist (0 ist der erste Datensatz). Dies funktioniert
    * natürlich nur dann, wenn pmod kein Proxy ist.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public static void mailMergeNewSetFormValue(XPrintModel pmod) throws Exception
@@ -1042,16 +1078,16 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * Im Fall, dass simProc != null ist, wird auch die nächste Druckfunktion in der
    * Aufrufkette nicht aufgerufen, sondern statt dessen der in simProc enthaltene
    * handler. Die Druckfunktion zieht folgende Properties heran:
-   * 
+   *
    * <ul>
    * <li>{@link #PROP_QUERYRESULTS} (ein Objekt vom Typ {@link QueryResults})</li>
-   * 
+   *
    * <li>"MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält</li>
-   * 
+   *
    * <li>{@link #PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der
    * ausgewählten Datensätze ist (0 ist der erste Datensatz).</li> *
    * <ul>
-   * 
+   *
    * @param pmod
    *          PrintModel welches das Hauptdokument des Seriendrucks beschreibt.
    * @param simProc
@@ -1060,7 +1096,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    *          aufgerufen.
    * @throws Exception
    *           Falls irgend etwas schief geht
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
    *         TESTED
    */
@@ -1140,7 +1176,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Speichert das übergebene Dokument in eine ODF-Datei. Die WollMux-Daten bleiben
    * dabei erhalten.
-   * 
+   *
    * @author Ignaz Forster (D-III-ITD-D102)
    * @throws java.io.IOException
    */
@@ -1160,14 +1196,14 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       filename = createOutputPathFromPattern(filePattern, pmod);
     else
       filename = L.m("Dokument.odt");
-    
+
     // jub .odt/.pdf ergänzen, falls nicht angegeben.
     if(!filename.endsWith(".odt") && !filename.endsWith(".pdf"))
       if(isODT)
         filename = filename + ".odt";
       else
         filename = filename + ".pdf";
-    
+
     File file = new File(outputDir, filename);
 
     saveOutputFile(file, textDocument);
@@ -1178,7 +1214,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Speichert das übergebene Dokument in eine ODF-Datei. Die WollMux-Daten bleiben
    * dabei erhalten.
-   * 
+   *
    * @author Ignaz Forster (D-III-ITD-D102)
    */
   public static void sendAsEmail(XPrintModel pmod, boolean isODT)
@@ -1291,7 +1327,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /**
    * grobe Plausiprüfung, ob E-Mailadresse gültig ist.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static boolean isMailAddress(String mail)
@@ -1301,9 +1337,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /**
    * Speichert doc unter dem in outFile angegebenen Dateipfad und schließt dann doc.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    *         TESTED
    */
   private static void saveOutputFile(File outFile, XTextDocument doc)
@@ -1317,7 +1353,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
       /*
        * For more options see:
-       * 
+       *
        * http://wiki.services.openoffice.org/wiki/API/Tutorials/PDF_export
        */
       if (unparsedUrl.endsWith(".pdf"))
@@ -1362,16 +1398,16 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * targetDir zusammen. Die Spezialtags {@link MailMergeParams#TAG_DATENSATZNUMMER}
    * und {@link MailMergeParams#TAG_SERIENBRIEFNUMMER} werden durch die Strings
    * datensatzNummer und serienbriefNummer ersetzt.
-   * 
+   *
    * @param totalDatasets
    *          die Gesamtzahl aller Datensätze (auch der für den aktuellen
    *          Druckauftrag nicht gewählten). Wird verwendet um datensatzNummer und
    *          serienbriefNummer mit 0ern zu padden.
-   * 
+   *
    * @throws MissingMapEntryException
    *           wenn ein Tag verwendet wird, zu dem es keine Spalte im aktuellen
    *           Datensatz existiert.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   private static String createOutputPathFromPattern(TextComponentTags filePattern,
@@ -1402,7 +1438,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Holt sich Element key aus dataset, sorgt dafür, dass der Wert digit-stellig wird
    * und speichert diesen Wert wieder in dataset ab.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static void fillWithLeading0(HashMap<String, String> dataset, String key,
@@ -1418,7 +1454,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Ersetzt alle möglicherweise bösen Zeichen im Dateinamen name durch eine
    * Unterstrich.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static String simplifyFilename(String name)
@@ -1428,7 +1464,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
    * #hasPrintfunction(java.lang.String)
@@ -1449,7 +1485,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
    * #getColumnNames()
@@ -1461,7 +1497,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
    * #getDefaultFilename()
@@ -1477,7 +1513,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
    * #getTextDocument()
@@ -1535,6 +1571,173 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     if (abortListener != null)
       abortListener.actionPerformed(new ActionEvent(this, 0, ""));
   }
+
+
+  // TEST: use "data to fields" functionality for document preview
+  // s. http://mail-archives.apache.org/mod_mbox/openoffice-api/201311.mbox/%3C20131105233035.GA25328@localhost%3E
+  // (particularly attachment with code)
+  private void insertDataToFields() {
+
+
+    // variables - TODO make it dynamic
+    final String test_databaseName = "DataBase";
+    final String test_tableName = "Table";
+
+
+
+
+    try {
+      final XFrame oFrame = mod.doc.getCurrentController().getFrame();
+      final XDispatchProvider xDispatchProvider = UnoRuntime.queryInterface(XDispatchProvider.class, oFrame);
+
+/*
+      // s. https://wiki.openoffice.org/wiki/Documentation/DevGuide/ProUNO/Java/Getting_a_Service_Manager
+      XComponentContext xcomponentcontext = Bootstrap.createInitialComponentContext(null);
+
+      // create a connector, so that it can contact the office
+      XUnoUrlResolver urlResolver = UnoUrlResolver.create(xcomponentcontext);
+
+      // TODO correct if not possible like this - requires respective
+      // parameters on startup of soffice - s. link above
+
+      final String TEST_URL = "uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager";
+
+      Object initialObject = urlResolver.resolve(
+//          "uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager");
+        TEST_URL);
+
+      XMultiComponentFactory xOfficeFactory = (XMultiComponentFactory) UnoRuntime.queryInterface(
+          XMultiComponentFactory.class, initialObject);
+
+      // retrieve the component context as property (it is not yet exported from the office)
+      // Query for the XPropertySet interface.
+      XPropertySet xProperySet = (XPropertySet) UnoRuntime.queryInterface(
+          XPropertySet.class, xOfficeFactory);
+
+      // Get the default context from the office server.
+      Object oDefaultContext = xProperySet.getPropertyValue("DefaultContext");
+
+      // Query for the interface XComponentContext.
+      XComponentContext xOfficeComponentContext = (XComponentContext) UnoRuntime.queryInterface(
+          XComponentContext.class, oDefaultContext);
+*/
+
+      // get the remote office component context
+      // TODO note: for this ("Bootstrap.bootstrap()" call) to work, java_uno must be on
+      // the java.library.path, otherwise an exception is thrown;
+      // setting can be done by setting the respective JVM parameter in LibreOffice
+      // example for LibreOffice 4.3 on LiMux/Ubuntu:
+      // "-Djava.library.path=/opt/libreoffice4.3/ure/lib/"
+      // alternative might be to use a different kind of connection, but for this,
+      // additional start parameters might have to be passed to LibreOffice/OpenOffice
+      // see also how retrieving reference to ServiceManager is done/tried in
+      // de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarEventHandler.getRemoteWollMux(boolean)
+      XComponentContext xOfficeComponentContext = Bootstrap.bootstrap();
+      if (xOfficeComponentContext == null) {
+        // TODO handle
+        System.err.println("ERROR: Could not bootstrap default Office.");
+      }
+      XMultiComponentFactory xOfficeFactory = xOfficeComponentContext.getServiceManager();
+
+
+      final Object transformerObject = xOfficeFactory.createInstanceWithContext("com.sun.star.util.URLTransformer", xOfficeComponentContext);
+
+
+      final XURLTransformer urlTransformer = UnoRuntime.queryInterface(XURLTransformer.class, transformerObject);
+
+
+      // database connection
+      final Object dbContext = xOfficeFactory.createInstanceWithContext("com.sun.star.sdb.DatabaseContext", xOfficeComponentContext);
+      XDatabaseContext databaseContext = UnoRuntime.queryInterface(XDatabaseContext.class, dbContext);
+
+      final Object oDataSource = databaseContext.getByName(test_databaseName);
+      final com.sun.star.sdbc.XDataSource dataSource = UnoRuntime.queryInterface(com.sun.star.sdbc.XDataSource.class, oDataSource);
+
+
+      final XConnection dbConnection = dataSource.getConnection("", "");
+      // TODO call "dbConnection.close();" in the right place!!! - connection must be closed
+
+
+      final XStatement xStatement = dbConnection.createStatement();
+
+      final String query = "SELECT * from " + "\"" + test_tableName + "\"";
+
+      final XResultSet xResultSet = xStatement.executeQuery(query);
+
+
+      // TODO remove
+      int i = 0;
+      while (xResultSet.next()) {
+        i++;
+      }
+      System.out.println("entries: " + i);
+
+
+
+      URL url = new URL();
+      url.Complete = ".uno:DataSourceBrowser/InsertContent";
+
+
+      final URL[] urlArray = new URL[] { url };
+      urlTransformer.parseStrict(urlArray);
+
+
+
+      final XDispatch xDispatch = xDispatchProvider.queryDispatch(url, "_self", FrameSearchFlag.SELF);
+
+
+      final List<PropertyValue> props = new ArrayList<PropertyValue>();
+
+      // TODO change hard-coded values
+      final PropertyValue v0 = new PropertyValue();
+      v0.Name = "DataSourceName";
+      v0.Value = test_databaseName;
+      props.add(v0);
+
+      final PropertyValue v1 = new PropertyValue();
+      v1.Name = "ActiveConnection";
+      v1.Value = dbConnection;
+      props.add(v1);
+
+      final PropertyValue v2 = new PropertyValue();
+      v2.Name = "Command";
+      v2.Value = test_tableName; // TODO is that OK?
+      props.add(v2);
+
+
+      final PropertyValue v3 = new PropertyValue();
+      v3.Name = "CommandType";
+      v3.Value = com.sun.star.sdb.CommandType.TABLE; // TODO change if required
+      props.add(v3);
+
+
+      final PropertyValue v4 = new PropertyValue();
+      v4.Name = "Cursor";
+      v4.Value = xResultSet;
+      props.add(v4);
+
+
+      // TODO
+      final PropertyValue v5 = new PropertyValue();
+      v5.Name = "Selection";
+      v5.Value = new int[] {1,2,3};
+      props.add(v5);
+
+
+      PropertyValue[] propValues = {};
+      propValues = props.toArray(new PropertyValue[0]);
+
+
+      xDispatch.dispatch(url, propValues);
+
+    } catch (final Exception e) {
+      // TODO
+      // split the try-catch block and handle respective exceptions properly
+      e.printStackTrace();
+    }
+
+  }
+
 
   public static void main(String[] args) throws Exception
   {
