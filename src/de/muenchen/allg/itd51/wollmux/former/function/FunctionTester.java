@@ -273,7 +273,7 @@ public class FunctionTester
     String currentValue = getComboBoxValue(combo, "");
     combo.removeAllItems();
     boolean found = false;
-    Iterator<IDManager.ID> iter = idManager.getAllIDs(namespace).iterator();
+    Iterator<IDManager.ID> iter = idManager.getAllIDsSorted(namespace).iterator();
     while (iter.hasNext())
     {
       IDManager.ID id = iter.next();

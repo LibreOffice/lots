@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
@@ -136,6 +137,24 @@ public class IDManager
 
     Map<String, ID> mapString2ID = mapNamespace2mapString2ID.get(namespace);
     return mapString2ID.values();
+  }
+  
+  /**
+   * Liefert eine sortierte {@link Collection} mit allen {@link IDManager.ID} Objekten, die im
+   * Namensraum namespace registriert sind. ACHTUNG! Die zurückgegebene Collection
+   * darf nicht geändert oder gespeichert werden, da sie direkt eine interne
+   * Datenstruktur ist!
+   * 
+   * @author Patric Busanny (ITM-I23)
+   */
+  public Collection<ID> getAllIDsSorted(Object namespace)
+  {
+    if (!mapNamespace2mapString2ID.containsKey(namespace))
+      return new ArrayList<ID>();
+
+    Map<String, ID> MapString2ID = new TreeMap<String, ID>(mapNamespace2mapString2ID.get(namespace));
+    
+    return MapString2ID.values();
   }
 
   /**
