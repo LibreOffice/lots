@@ -366,6 +366,11 @@ public class FunctionTester
       L.m("DIALOG(\"Dialogname\", \"Feldname\")")));
     functionInsertPanel.add(makeCodeInsertionButton("LENGTH",
       "LENGTH(String1, String2 ,,,)"));
+    functionInsertPanel.add(makeCodeInsertionButton("THOUSAND",
+        "CAT(\n REPLACE(\n  REPLACE(Zahl \",\\d*\" \"\") \"(?<=\\d)(?=(\\d\\d\\d)+$)\" \".\"\n )"
+        + "\n IF(\n  MATCH(Zahl \"-?(\\d+)(,\\d*)$\")"
+        + "\n  THEN (REPLACE(Zahl \"-?(\\d+)(,\\d*)$\" \"$2\"))"
+        + "\n  ELSE \"\"\n )\n)"));
 
     return functionInsertPanel;
   }
