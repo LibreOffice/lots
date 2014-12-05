@@ -15,10 +15,9 @@ fi
 #  rev=$(git log -1 --date=short|sed -n 's/^commit \(.*\)/\1/p'|head -n 1)
 #  if [ -z "$date" ]; then
 #    echo 1>&2 "Getting GIT version info failed => Trying HG"
-    date=$(hg log -l 1 --style=compact|head -n 1|sed -n 's/.*\([0-9]\{4\}-[0-9][0-9]-[0-9][0-9]\).*/\1/p')
-    rev=$( hg log -l 1 --style=compact|head -n 1|sed 's/^.*\([0-9a-zA-Z]\{12,12\}\).*$/\1/')
-    localrev=$(hg log -l 1 --style=compact|head -n 1|cut -d "[" -f 1)
-    test -z "$date" && echo 1>&2 "Getting HG version info failed => Falling back to shipped version info"
+    date=$( git log --date=short -n 1 | grep "Date:" | awk '{print $2}' )
+    rev=$( git log --oneline -n1 | awk '{print $1}' )
+    test -z "$date" && echo 1>&2 "Getting GIT version info failed => Falling back to shipped version info"
 #  fi
 #fi
 
@@ -29,7 +28,7 @@ v1=$((${date%%-*} - 2000))
 v2=$(echo $date| sed 's/[^-]*-0\?\([^-]*\)-.*/\1/')
 #v3=$(( $(echo ${date##*-}| sed 's/^0\?\(.*\)/\1/') / 10 ))
 
-version="$v1.${v2}rev$localrev"
+version="$v1.${v2}rev$rev"
 
 #if [ -e "$1" ]; then
 #  dotversion=$(sed -n "s/^$version//p" "$1")
