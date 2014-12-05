@@ -528,14 +528,15 @@ public class WollMuxFiles
       djInitialized = true;
       ConfigThingy senderSource =
         WollMuxFiles.getWollmuxConf().query("SENDER_SOURCE", 1);
-      String senderSourceStr = "";
+      String senderSourceStr = null;
       try
       {
         senderSourceStr = senderSource.getLastChild().toString();
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(L.m("Keine Hauptdatenquelle SENDER_SOURCE definiert! Setze SENDER_SOURCE=\"\"."));
+        // hier geben wir im Vergleich zu früher keine Fehlermeldung mehr aus, sondern erst später, wnn
+        // tatsächlich auf die Datenquelle "null" zurück gegriffen wird.
       }
 
       ConfigThingy dataSourceTimeout =
