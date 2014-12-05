@@ -342,6 +342,7 @@ public class WollMuxEventHandler
       }
       catch (WollMuxFehlerException e)
       {
+        // hier wäre ein showNoConfigInfo möglich - ist aber nicht eindeutig auf no config zurückzuführen
         errorMessage(e);
       }
       // Notnagel für alle Runtime-Exceptions.

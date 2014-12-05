@@ -238,7 +238,7 @@ public class TextDocumentModel
   private DocumentCommands documentCommands;
 
   /**
-   * Enthält ein Setmit den Namen aller derzeit unsichtbar gestellter
+   * Enthält ein Set mit den Namen aller derzeit unsichtbar gestellter
    * Sichtbarkeitsgruppen.
    */
   private HashSet<String> invisibleGroups;

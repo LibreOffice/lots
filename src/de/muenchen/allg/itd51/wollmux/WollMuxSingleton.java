@@ -116,7 +116,7 @@ public class WollMuxSingleton implements XPALProvider
 {
   public static final String OVERRIDE_FRAG_DB_SPALTE = "OVERRIDE_FRAG_DB_SPALTE";
 
-  /**
+   /**
    * Default-Wert für {@link #senderDisplayTemplate}, wenn kein Wert in der
    * Konfiguration explizit angegeben ist.
    * 
@@ -198,6 +198,11 @@ public class WollMuxSingleton implements XPALProvider
    * Verwaltet Informationen zu allen offenen OOo-Dokumenten.
    */
   private DocumentManager docManager;
+  
+  /**
+   * Verwaltet Informationen zum NoConfig mode.
+   */
+  private NoConfig noConfig;
 
   /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
@@ -227,8 +232,16 @@ public class WollMuxSingleton implements XPALProvider
 
     registeredDocumentEventListener = new Vector<XEventListener>();
 
-    WollMuxFiles.setupWollMuxDir();
-
+    if (!WollMuxFiles.setupWollMuxDir())
+    {
+      noConfig = new NoConfig(true);
+      showNoConfigInfo();
+    } 
+    else
+    {
+      noConfig = new NoConfig(false);
+    }
+    
     Logger.debug(L.m("StartupWollMux"));
     Logger.debug("Build-Info: " + getBuildInfo());
     Logger.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
@@ -257,9 +270,13 @@ public class WollMuxSingleton implements XPALProvider
     }
     catch (NodeNotFoundException e)
     {
-      Logger.log(L.m(
-        "Keine Einstellung für SENDER_DISPLAYTEMPLATE gefunden! Verwende Fallback: %1",
-        DEFAULT_SENDER_DISPLAYTEMPLATE));
+      if ( ! noConfig.isNoConfig()) // nur wenn wir eine wollmux.conf haben
+      {
+        Logger.log(L.m(
+          "Keine Einstellung für SENDER_DISPLAYTEMPLATE gefunden! Verwende Fallback: %1",
+          DEFAULT_SENDER_DISPLAYTEMPLATE));
+        
+      }
       // SENDER_DISPLAYTEMPLATE sollte eigentlich verpflichtend sein und wir
       // sollten an dieser Stelle einen echten Error loggen bzw. eine
       // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
@@ -478,7 +495,14 @@ public class WollMuxSingleton implements XPALProvider
     }
     catch (NodeNotFoundException e)
     {
-      return L.m("unbekannt");
+      if (noConfig != null && noConfig.isNoConfig())
+      {
+        return L.m("keine geladen");
+      } 
+      else
+      {
+        return L.m("unbekannt");
+      }
     }
   }
 
@@ -495,6 +519,7 @@ public class WollMuxSingleton implements XPALProvider
    * 
    * @return Returns the datasourceJoiner.
    */
+ 
   public DatasourceJoiner getDatasourceJoiner()
   {
     return WollMuxFiles.getDatasourceJoiner();
@@ -1413,5 +1438,26 @@ public class WollMuxSingleton implements XPALProvider
         com.sun.star.frame.FrameSearchFlag.SELF);
     }
     return null;
+  }
+  
+  /**
+   * Git zurück, ob sich der WollMux im NoConfig-Modus befindet,
+   * d.h. es wurde keine Config-Datei gefunden.
+   * 
+   * @return
+   */
+  public boolean isNoConfig()
+  {
+    return (null != noConfig) ? noConfig.isNoConfig() : false;
+  }
+  
+  /**
+   * Schreibt Meldung in die Log-Datei, wenn der NoConfig-Modus aktiv ist.
+   * 
+   * @return
+   */
+  public boolean showNoConfigInfo()
+  {
+    return noConfig.showNoConfigInfo();
   }
 }
