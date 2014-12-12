@@ -675,43 +675,11 @@ public class WollMuxFiles
   }
 
   /**
-   * Wertet die FONT_ZOOM-Direktive des Dialoge-Abschnitts aus und zoomt die Fonts
-   * falls erforderlich.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public static void setLookAndFeel(ConfigThingy conf)
-  {
-    Common.setLookAndFeelOnce();
-    if (conf != null)
-    {
-      double zoomFactor = 1.0;
-      ConfigThingy zoom = conf.query("Dialoge").query("FONT_ZOOM", 2);
-      if (zoom.count() > 0)
-      {
-        try
-        {
-          zoomFactor = Double.parseDouble(zoom.getLastChild().toString());
-        }
-        catch (Exception x)
-        {
-          Logger.error(x);
-        }
-      }
-      else
-      {
-        Logger.debug(L.m("Config Thing ist null!"));
-      }
-      zoomFonts(zoomFactor);
-    }
-  }
-
-  /**
    * Zoomt die Fonts auf zoomFactor, falls erforderlich.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private static void zoomFonts(double zoomFactor)
+  public static void zoomFonts(double zoomFactor)
   {
 
     if (zoomFactor < 0.5 || zoomFactor > 10)

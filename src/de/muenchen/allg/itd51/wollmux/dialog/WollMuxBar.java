@@ -165,6 +165,10 @@ import de.muenchen.allg.itd51.wollmux.event.Dispatch;
  */
 public class WollMuxBar
 {
+  private static final String ALLOW_USER_CONFIG = "ALLOW_USER_CONFIG";
+  
+  private static final String ALLOW_MENUMANAGER = "ALLOW_MENUMANAGER";
+
   /**
    * Name der Datei in der die WollMuxBar ihre Konfiguration schreibt.
    */
@@ -431,6 +435,19 @@ public class WollMuxBar
   private ConfigThingy userConf;
 
   /**
+   * Ist allowUserConfig==false, darf die userConf nicht ausgewertet werden (und
+   * damit die Defaulteinstellungen überschreiben). Außerdem dürfen die Buttons mit
+   * den ACTIONs "menuManager" und "options" nicht in der WollMuxBar erscheinen.
+   */
+  private boolean allowUserConfig;
+
+  /**
+   * Ist allowMenuManager==false, darf der Button mit der ACTION "menuManager" nicht
+   * in der WollMuxBar erscheinen.
+   */
+  private boolean allowMenuManager;
+
+  /**
    * Erzeugt eine neue WollMuxBar.
    * 
    * @param winMode
@@ -442,21 +459,31 @@ public class WollMuxBar
    *          die wollmux.conf
    * @param userConf
    *          die wollmuxbar.conf
+   * @param allowUserConfig
+   *          falls allowUserConfig==false, darf die wollmuxbar.conf nicht
+   *          ausgewertet werden und die buttons mit der Aktion "options" und
+   *          "menuManager" dürfen nicht in der WollMuxBar erscheinen.
+   * @param allowMenuManager
+   *          falls allowMenuManager==false, darf der Button mit der Aktion
+   *          "menuManager" nicht in der WollMuxBar erscheinen.
    * @param quickstarter
    *          falls true wird die WollMuxBar als OOo-Quickstarter agieren.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public WollMuxBar(int winMode, final ConfigThingy conf, ConfigThingy defaultConf,
-      ConfigThingy userConf, boolean quickstarter)
+      ConfigThingy userConf, boolean allowUserConfig, boolean allowMenuManager, boolean quickstarter)
   {
     this.defaultConf = defaultConf;
     this.userConf = userConf;
-    config = new WollMuxBarConfig(winMode, defaultConf, userConf);
+    this.allowUserConfig = allowUserConfig;
+    this.allowMenuManager = allowMenuManager;
+    config = new WollMuxBarConfig(winMode, defaultConf, userConf, allowUserConfig);
     quickstarterEnabled = quickstarter;
 
     eventHandler = new WollMuxBarEventHandler(this);
     eventHandler.start();
 
+    WollMuxFiles.zoomFonts(config.getFontZoom());
     /*
      * Die GUI wird im Event-Dispatching Thread erzeugt wg. Thread-Safety. Auch
      * eventHandler.connectWithWollMux() wird im EDT ausgeführt, um sicherzustellen,
@@ -958,6 +985,19 @@ public class WollMuxBar
         }
         else
         {
+          // deactivate menuManager and options buttons if allowUserConfig is not activated
+          boolean active = true;
+          try
+          {
+            String action = uiElementDesc.get("ACTION").toString();
+            if(action.equals("menuManager") && !(allowUserConfig && allowMenuManager))
+              active = false;
+            if(action.equals("options") && !(allowUserConfig))
+              active = false;
+          }
+          catch (Exception e)
+          {}
+          
           UIElement uiElement =
             uiElementFactory.createUIElement(contextMap, uiElementDesc);
           GridBagConstraints gbc =
@@ -966,10 +1006,28 @@ public class WollMuxBar
           gbc.gridy = y;
           Component uiComponent = uiElement.getComponent();
           uiComponent.addMouseListener(myIsInsideMonitor);
-          if (context.equals("menu"))
-            compo.add(uiComponent);
+          
+          if(active)
+          {
+            if (context.equals("menu"))
+              compo.add(uiComponent);
+            else
+              compo.add(uiComponent, gbc);
+          }
           else
-            compo.add(uiComponent, gbc);
+          {
+            String label = "";
+            try
+            {
+              String str = uiElementDesc.get("LABEL").toString();
+              label = L.m(str);
+            }
+            catch (Exception e)
+            {}
+            Logger.debug(L.m(
+              "Warnung: Button '%1' wurde konfigurativ deaktiviert und ist daher nicht in der WollMuxBar enthalten.",
+              label));
+          }
         }
       }
       catch (ConfigurationErrorException e)
@@ -1420,7 +1478,7 @@ public class WollMuxBar
     }
     eventHandler.waitForThreadTermination();
     readWollMuxBarConfAndStartWollMuxBar(config.getWindowMode(),
-      isQuickstarterEnabled(), false, defaultConf);
+      isQuickstarterEnabled(), false, allowUserConfig, allowMenuManager, defaultConf);
   }
 
   /**
@@ -2435,8 +2493,35 @@ public class WollMuxBar
 
     ConfigThingy wollmuxConf = WollMuxFiles.getWollmuxConf();
 
+    // Darf der Menümanager (experimentelles Feature) angezeigt werden?
+    // Solange wir den Menümanager als experimentelles Feature betrachten, wird
+    // allowMenuManager mit false vorbelegt. Das kann sich später ggf. ändern.
+    boolean allowMenuManager = false;
+    try
+    {
+        allowMenuManager =
+          wollmuxConf.query(ALLOW_MENUMANAGER, 1).getLastChild().toString().equalsIgnoreCase("true");
+    }
+    catch (NodeNotFoundException e)
+    {}
+    // --mm schaltet allowMenuManager implizit an
+    if(menumanager) allowMenuManager = true;
+    
+    
+    // Darf die userConfig (wollmuxbar.conf) ausgewertet werden?
+    boolean allowUserConfig = true;
+    try
+    {
+        allowUserConfig =
+          wollmuxConf.query(ALLOW_USER_CONFIG, 1).getLastChild().toString().equalsIgnoreCase("true");
+    }
+    catch (NodeNotFoundException e)
+    {}
+    // --mm schaltet allowUserConfig implizit an
+    if(menumanager) allowUserConfig = true;
+    
     readWollMuxBarConfAndStartWollMuxBar(windowMode, quickstarter, menumanager,
-      wollmuxConf);
+      allowUserConfig, allowMenuManager, wollmuxConf);
   }
 
   /**
@@ -2623,6 +2708,7 @@ public class WollMuxBar
             ObjectOutputStream o =
               new ObjectOutputStream(new FileOutputStream(fifo));
             o.writeObject(args);
+            o.close();
             synchronized (fertig)
             {
               fertig[0] = true;
@@ -2681,26 +2767,43 @@ public class WollMuxBar
    *          falls true wird der quickstarter aktiviert.
    * @param menumanager
    *          falls true wird automatisch der {@link MenuManager} gestartet.
+   * @param allowUserConfig
+   *          falls allowUserConfig==false, darf die wollmuxbar.conf nicht
+   *          ausgewertet werden und die buttons mit der Aktion "options" und
+   *          "menuManager" dürfen nicht in der WollMuxBar erscheinen.
+   * @param allowMenuManager
+   *          falls allowMenuManager==false, darf der Button mit der Aktion
+   *          "menuManager" nicht in der WollMuxBar erscheinen.
    * @param wollmuxConf
    *          die wollmux.conf
    */
   private static void readWollMuxBarConfAndStartWollMuxBar(int windowMode,
-      boolean quickstarter, boolean menumanager, ConfigThingy wollmuxConf)
-  {
+      boolean quickstarter, boolean menumanager, boolean allowUserConfig, boolean allowMenuManager, ConfigThingy wollmuxConf)
+  { 
     ConfigThingy wollmuxbarConf = null;
     File wollmuxbarConfFile =
       new File(WollMuxFiles.getWollMuxDir(), WOLLMUXBAR_CONF);
+
     if (wollmuxbarConfFile.exists())
     {
-      try
+      if (allowUserConfig)
       {
-        wollmuxbarConf =
-          new ConfigThingy("wollmuxbarConf", wollmuxbarConfFile.toURI().toURL());
+        try
+        {
+          wollmuxbarConf =
+            new ConfigThingy("wollmuxbarConf", wollmuxbarConfFile.toURI().toURL());
+        }
+        catch (Exception x)
+        {
+          Logger.error(
+            L.m("Fehler beim Lesen von '%1'", wollmuxbarConfFile.toString()), x);
+        }
       }
-      catch (Exception x)
+      else
       {
-        Logger.error(
-          L.m("Fehler beim Lesen von '%1'", wollmuxbarConfFile.toString()), x);
+        Logger.debug(L.m(
+          "Die Verwendung der Konfigurationsdatei '%1' ist deaktiviert. Sie wird nicht ausgewertet!",
+          wollmuxbarConfFile.toString()));
       }
     }
 
@@ -2722,10 +2825,9 @@ public class WollMuxBar
       }
       else
       {
-        WollMuxFiles.setLookAndFeel(wollmuxbarConf);
         instance =
           new WollMuxBar(windowMode, combinedConf, wollmuxConf, wollmuxbarConf,
-            quickstarter);
+            allowUserConfig, allowMenuManager, quickstarter);
       }
 
       if (menumanager)

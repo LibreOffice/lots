@@ -13,16 +13,6 @@
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  * 
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- *            |     | Erstellung
- *            
- * 08.05.2012 | jub | upAndAway modus kann nicht mehr zusammen mit einem der iconify
- *                    modi benutzt werden: ergab nie sinn, hat nur fehler produziert.  
- * 
- * -------------------------------------------------------------------
- *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
@@ -132,7 +122,13 @@ public class WollMuxBarConfig
    * Rand um Buttons (in Pixeln).
    */
   private final static int BUTTON_BORDER = 2;
-
+  
+  /**
+   * Ist dieses flag false, darf die userConf nicht eingelesen werden (und damit auch
+   * nicht die Standardvorgaben überschreiben)
+   */
+  private boolean allowUserConfig;
+  
   /**
    * Der Fenstertitel der WollMuxBar.
    */
@@ -269,142 +265,28 @@ public class WollMuxBarConfig
    *          die wollmuxbar.conf
    */
   public WollMuxBarConfig(int winMode, ConfigThingy defaultConf,
-      ConfigThingy userConf)
+      ConfigThingy userConf, boolean allowUserConfig)
   {
     this.userConf = userConf;
     this.defaultConf = defaultConf;
+    this.allowUserConfig = allowUserConfig;
 
-    /*
-     * defaultConf: Defaults setzen für den Fall eines unvollständigen
-     * Fensterabschnitts
-     */
-    myFrame_title_default = WollMuxBarConfig.DEFAULT_TITLE;
-    windowMode_default = WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE;
-    trayIconMode_default = WollMuxBarConfig.NO_TRAY_ICON;
-    myFrame_x_default = Integer.MIN_VALUE;
-    myFrame_y_default = Integer.MIN_VALUE;
-    myFrame_width_default = 0;
-    myFrame_height_default = 0;
-    myFrame_fontzoom_default = 1;
-    // defaultConf auswerten
-    ConfigThingy wmbConf = defaultConf.query("Fenster", 1).query("WollMuxBar", 2);
-    try
-    {
-      wmbConf = wmbConf.getLastChild();
-      for (ConfigThingy conf : wmbConf)
-      {
-        if (conf.getName().equals("TITLE"))
-          myFrame_title_default = conf.toString();
-        else if (conf.getName().equals("MODE"))
-          windowMode_default = getWindowMode(conf.toString());
-        else if (conf.getName().equals("TRAYICON"))
-          trayIconMode_default = getTrayIconMode(conf.toString());
-        else if (conf.getName().equals("X"))
-          myFrame_x_default = getXY(conf.toString());
-        else if (conf.getName().equals("Y"))
-          myFrame_y_default = getXY(conf.toString());
-        else if (conf.getName().equals("WIDTH"))
-          myFrame_width_default = getWidthHeight(conf.toString());
-        else if (conf.getName().equals("HEIGHT"))
-          myFrame_height_default = getWidthHeight(conf.toString());
-      }
-    }
-    catch (NodeNotFoundException x)
-    {
-      // Oben gesetzte Defaults werden verwendet
-    }
-
-    // Noch nach der Font Größe suchen, die steht in einem anderen Abschnitt
-    ConfigThingy dialogConf = defaultConf.query("Dialoge", 1);
-    try
-    {
-      dialogConf = dialogConf.getLastChild();
-      for (ConfigThingy conf : dialogConf)
-      {
-        if (conf.getName().equals("FONT_ZOOM"))
-          myFrame_fontzoom_default = getFontZoom(conf.toString());
-      }
-    }
-    catch (NodeNotFoundException x)
-    {
-      // Oben gesetzte Defaults werden verwendet
-    }
-
-    /*
-     * userConf: Defaults setzen für den Fall eines unvollständigen Fensterabschnitts
-     */
-    myFrame_title = WollMuxBarConfig.DEFAULT_TITLE;
-    windowMode = WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE;
-    trayIconMode = WollMuxBarConfig.NO_TRAY_ICON;
-    myFrame_x = Integer.MIN_VALUE;
-    myFrame_y = Integer.MIN_VALUE;
-    myFrame_width = 0;
-    myFrame_height = 0;
-    myFrame_fontzoom = 0;
-    // userConf auswerten
-    wmbConf = userConf.query("Fenster", 1).query("WollMuxBar", 2);
-    try
-    {
-      wmbConf = wmbConf.getLastChild();
-      for (ConfigThingy conf : wmbConf)
-      {
-        if (conf.getName().equals("TITLE"))
-          myFrame_title = conf.toString();
-        else if (conf.getName().equals("MODE"))
-          windowMode = getWindowMode(conf.toString());
-        else if (conf.getName().equals("TRAYICON"))
-          trayIconMode = getTrayIconMode(conf.toString());
-        else if (conf.getName().equals("X"))
-          myFrame_x = getXY(conf.toString());
-        else if (conf.getName().equals("Y"))
-          myFrame_y = getXY(conf.toString());
-        else if (conf.getName().equals("WIDTH"))
-          myFrame_width = getWidthHeight(conf.toString());
-        else if (conf.getName().equals("HEIGHT"))
-          myFrame_height = getWidthHeight(conf.toString());
-      }
-    }
-    catch (NodeNotFoundException x)
-    {
-      // Falls gar kein Fenster-Abschnitt in userConf vorhanden ist, dann werden die
-      // Werte aus defaultConf verwendet.
-      myFrame_title = myFrame_title_default;
-      windowMode = windowMode_default;
-      trayIconMode = trayIconMode_default;
-      myFrame_x = myFrame_x_default;
-      myFrame_y = myFrame_y_default;
-      myFrame_width = myFrame_width_default;
-      myFrame_height = myFrame_height_default;
-    }
-
-    // Noch nach der Font Größe suchen
-    dialogConf = userConf.query("Dialoge", 1);
-    try
-    {
-      dialogConf = dialogConf.getLastChild();
-      for (ConfigThingy conf : dialogConf)
-      {
-        if (conf.getName().equals("FONT_ZOOM"))
-          myFrame_fontzoom = getFontZoom(conf.toString());
-      }
-    }
-    catch (NodeNotFoundException x)
-    {
-      myFrame_fontzoom = myFrame_fontzoom_default;
-    }
+    readConfig(defaultConf, true);
+    if (allowUserConfig) readConfig(userConf, false);
 
     /*
      * Falls ein winMode übergeben wurde overridet er userConf und defaultConf
      */
     if (winMode > 0) windowMode = winMode;
-
-    conf_ids = new HashSet<String>();
-    ConfigThingy active_ids =
-      userConf.query("WollMuxBarKonfigurationen", 1).query("Aktiv", 2);
+  
+    this.conf_ids = new HashSet<String>();
+    ConfigThingy active_ids = new ConfigThingy("aciveIDs");
+    if (userConf != null)
+      active_ids = userConf.query("WollMuxBarKonfigurationen", 1).query("Aktiv", 2);
     if (active_ids.count() == 0)
       active_ids =
         defaultConf.query("WollMuxBarKonfigurationen", 1).query("Aktiv", 2);
-
+  
     if (active_ids.count() > 0)
     {
       try
@@ -417,6 +299,115 @@ public class WollMuxBarConfig
       {
         conf_ids.add(idConf.getName());
       }
+    }
+  }
+
+  /**
+   * Liest die Einstellungen aus der Konfiguration configuration aus und
+   * initialisiert die internen Konfigurationsparameter.
+   * 
+   * @param configuration
+   *          Wurzel einer Konfiguration. Darf auch null sein, dann macht die Methode
+   *          nichts.
+   * @param setAsDefault
+   *          falls true, werden zusätzlich auch die internen Defaulteinstellungen
+   *          mit den gelesenen Werten initialisiert.
+   * 
+   * @author Matthias S. Benkmann, Christoph Lutz (CIB software GmbH)
+   */
+  private void readConfig(ConfigThingy configuration, boolean setAsDefault)
+  {
+    if(configuration == null)
+      return;
+
+    // Vorbelegung mit Defaults für den Fall eines unvollständigen Konfigurationsabschnitts
+    String lFrame_title = myFrame_title_default;
+    int lWindowMode = windowMode_default;
+    int lTrayIconMode = trayIconMode_default;
+    int lFrame_x = myFrame_x_default;
+    int lFrame_y = myFrame_y_default;
+    int lFrame_width = myFrame_width_default;
+    int lFrame_height = myFrame_height_default;
+    float lFrame_fontzoom = myFrame_fontzoom_default;
+
+    // wenn wir die defaults erst definieren, dann stelle sicher, dass sie "frisch" sind
+    if (setAsDefault) 
+    {
+      lFrame_title = WollMuxBarConfig.DEFAULT_TITLE;
+      lWindowMode = WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE;
+      lTrayIconMode = WollMuxBarConfig.NO_TRAY_ICON;
+      lFrame_x = Integer.MIN_VALUE;
+      lFrame_y = Integer.MIN_VALUE;
+      lFrame_width = 0;
+      lFrame_height = 0;
+      lFrame_fontzoom = 1;
+    }
+
+    // nutzen wir die bereits wenn wir die Defaults nicht setzen, gehen wir davon aus, dass die Defaults vorher schon 
+
+    // configuration auswerten
+    ConfigThingy wmbConf = configuration.query("Fenster", 1).query("WollMuxBar", 2);
+    try
+    {
+      wmbConf = wmbConf.getLastChild();
+      for (ConfigThingy conf : wmbConf)
+      {
+        if (conf.getName().equals("TITLE"))
+          lFrame_title = conf.toString();
+        else if (conf.getName().equals("MODE"))
+          lWindowMode = getWindowMode(conf.toString());
+        else if (conf.getName().equals("TRAYICON"))
+          lTrayIconMode = getTrayIconMode(conf.toString());
+        else if (conf.getName().equals("X"))
+          lFrame_x = getXY(conf.toString());
+        else if (conf.getName().equals("Y"))
+          lFrame_y = getXY(conf.toString());
+        else if (conf.getName().equals("WIDTH"))
+          lFrame_width = getWidthHeight(conf.toString());
+        else if (conf.getName().equals("HEIGHT"))
+          lFrame_height = getWidthHeight(conf.toString());
+      }
+    }
+    catch (NodeNotFoundException x)
+    {
+      // Abschnitt nicht da -> oben gesetzte Defaults werden verwendet
+    }
+    
+    // Noch nach der Font Größe suchen, die steht in einem anderen Abschnitt
+    ConfigThingy dialogConf = configuration.query("Dialoge", 1);
+    try
+    {
+      dialogConf = dialogConf.getLastChild();
+      for (ConfigThingy conf : dialogConf)
+      {
+        if (conf.getName().equals("FONT_ZOOM"))
+          lFrame_fontzoom = getFontZoom(conf.toString());
+      }
+    }
+    catch (NodeNotFoundException x)
+    {
+      // Abschnitt nicht da -> oben gesetzte Defaults werden verwendet
+    }
+
+    myFrame_title = lFrame_title;
+    windowMode = lWindowMode;
+    trayIconMode = lTrayIconMode;
+    myFrame_x = lFrame_x;
+    myFrame_y = lFrame_y;
+    myFrame_width = lFrame_width;
+    myFrame_height = lFrame_height;
+    myFrame_fontzoom = lFrame_fontzoom;
+
+    if (setAsDefault)
+    {
+      myFrame_title_default = lFrame_title;
+      windowMode_default = lWindowMode;
+      trayIconMode_default = lTrayIconMode;
+      myFrame_x_default = lFrame_x;
+      myFrame_y_default = lFrame_y;
+      myFrame_width_default = lFrame_width;
+      myFrame_height_default = lFrame_height;
+      myFrame_fontzoom_default = lFrame_fontzoom;
     }
   }
 
@@ -504,6 +495,14 @@ public class WollMuxBarConfig
   public int getY()
   {
     return myFrame_y;
+  }
+
+  /**
+   * Liefert den konfigurierten FONT_ZOOM-Wert. 
+   */
+  public float getFontZoom()
+  {
+    return myFrame_fontzoom;
   }
 
   /**
