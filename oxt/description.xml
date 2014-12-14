@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <description xmlns="http://openoffice.org/extensions/description/2006"
 	     xmlns:xlink="http://www.w3.org/1999/xlink">
-	<version value="13.11rev2054" />
+	<version value="14.12rev04-67c2f23" />
 	<identifier value="de.muenchen.allg.d101.wollmux"/>
 	<dependencies>
 		<OpenOffice.org-minimal-version value="2.1" name="OpenOffice.org 2.1"/>

@@ -7,33 +7,19 @@ if [ $# != 4 ]; then
   exit 1
 fi
 
-#date=$(LC_ALL=C svn info|grep "^Last Changed Date"|sed -n 's/.*\([0-9]\{4\}-[0-9][0-9]-[0-9][0-9]\).*/\1/p')
-#rev=$(LC_ALL=C svn info|grep "^Revision"|sed -n 's/.* \([0-9]\+\).*/\1/p')
-#if [ -z "$date" ]; then
-#  echo 1>&2 "Getting SVN version info failed => Trying GIT"
-#  date=$(git log -1 --date=short|grep ^Date:|head -n 1|sed -n 's/.*\([0-9]\{4\}-[0-9][0-9]-[0-9][0-9]\).*/\1/p')
-#  rev=$(git log -1 --date=short|sed -n 's/^commit \(.*\)/\1/p'|head -n 1)
-#  if [ -z "$date" ]; then
-#    echo 1>&2 "Getting GIT version info failed => Trying HG"
-    date=$( git log --date=short -n 1 | grep "Date:" | awk '{print $2}' )
-    rev=$( git log --oneline -n1 | awk '{print $1}' )
-    test -z "$date" && echo 1>&2 "Getting GIT version info failed => Falling back to shipped version info"
-#  fi
-#fi
+yyyymm=$(date --date="@$(git log -1 --pretty=format:"%ct")" +"%Y.%m")
+yymm=$(echo ${yyyymm} | cut -c 3-)
+hash=$(git log -1 --pretty=format:"%h")
+localrev=$( printf "%02d" $(git log --pretty=format:"%ci" | grep $yyyymm | wc -l) )
 
-test -z "$date" && exit 1
-test -z "$rev" && exit 1
+version="${yymm}rev${localrev}-${hash}"
 
-v1=$((${date%%-*} - 2000))
-v2=$(echo $date| sed 's/[^-]*-0\?\([^-]*\)-.*/\1/')
-#v3=$(( $(echo ${date##*-}| sed 's/^0\?\(.*\)/\1/') / 10 ))
+test -z "$yymm" && echo 1>&2 "Getting GIT version info failed => Falling back to shipped version info"
 
-version="$v1.${v2}rev$rev"
+test -z "$yymm" && exit 1
+test -z "$localrev" && exit 1
+test -z "$hash" && exit 1
 
-#if [ -e "$1" ]; then
-#  dotversion=$(sed -n "s/^$version//p" "$1")
-#  version=${version}${dotversion}
-#fi
 
 # check if <versionfile> contains "rev", if not we use the version number from <versionfile>
 if [ -e "$1" ]; then
@@ -44,7 +30,7 @@ if [ -e "$1" ]; then
 fi
 
 echo "$version" >"$1" 
-echo "Version: $version, Revision: $rev" >"$2"
+echo "Version: $version, Revision: $hash" >"$2"
 
 cat >"$3" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
