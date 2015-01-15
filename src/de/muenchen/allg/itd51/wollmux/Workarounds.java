@@ -89,6 +89,8 @@ public class Workarounds
 
   private static Boolean workaround68261 = null;
 
+  private static Boolean workaroundSunJavaBug4737732 = null;
+
   private static Boolean applyWorkaround(String issueNumber)
   {
     Logger.debug("Workaround für Issue "
@@ -223,6 +225,37 @@ public class Workarounds
     return workaround96281.booleanValue();
   }
 
+  /**
+   * Folgender Workaround bezieht sich auf das SUN-JRE Issue
+   * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4737732 und ist in der Klasse
+   * d.m.a.i.wollmux.dialog.FormGUI implementiert. Der Workaround ist notwendig, wenn
+   * WollMux mit einem SunJRE < 1.7 gestartet wird. Den Java-Bug konnten wir bislang
+   * vor allem unter Linux mit KDE feststellen. Der Java-Bug ist in Oracle JRE 1.7
+   * behoben und auch mit dem aktuellen openJDK 1.7 tritt er nicht mehr auf. Der
+   * Workaround war von 2006 bis 2014 immer standardmäßig aktiv, führt aber mit
+   * Basisclient 5.0 verstärkt zum Issue trac#11494. Deshalb wird der Workaround 
+   * jetzt nur noch mit SunJRE <= 1.6 angewendet. Er kann vermutlich komplett
+   * entfernt werden (wenn WollMux unter Linux nicht mehr mit SunJRE 1.6 genutzt wird)
+   */
+  public static boolean applyWorkaroundForSunJavaBug4737732()
+  {
+    if(workaroundSunJavaBug4737732 == null)
+    {
+      String javaVendor = System.getProperty("java.vendor");
+      String javaVersion = System.getProperty("java.version");
+      if(javaVendor.equals("Sun Microsystems Inc.") && (javaVersion.startsWith("1.6.") || javaVersion.startsWith("1.5.")))
+      {
+        Logger.debug("Workaround für Sun-JRE Issue 4737732 aktiv.");
+        workaroundSunJavaBug4737732  = Boolean.TRUE;
+      }
+      else
+      {
+        workaroundSunJavaBug4737732 = Boolean.FALSE;
+      }
+    }
+    return workaroundSunJavaBug4737732;
+  }
+  
   /**
    * Diese Methode liefert die Versionsnummer von OpenOffice.org aus dem
    * Konfigurationsknoten /org.openoffice.Setup/Product/oooSetupVersionAboutBox
@@ -487,46 +520,4 @@ public class Workarounds
     return workaround68261.booleanValue();
   }
 
-  // Unbenutzer alternativer Workaround für das setWindowPosSizeFreeze Problem
-  // /**
-  // * setWindowPosSize() aus einem Java-Thread (nicht Beanshell) heraus friert unter
-  // * Windows OOo ein.
-  // *
-  // *
-  // * @author Matthias Benkmann (D-III-ITD-D101)
-  // */
-  // public static boolean workaroundForSetWindowPosSizeFreeze(JFrame frame)
-  // {
-  // if (workaroundSetWindowPosSize == null)
-  // {
-  // String version = getOOoVersion();
-  // if (version != null
-  // && (version.startsWith("3.0") || version.startsWith("3.1"))
-  // && System.getProperty("os.name").contains("Windows"))
-  // {
-  // workaroundSetWindowPosSize = applyWorkaround("setWindowPosSize");
-  // }
-  // else
-  // workaroundSetWindowPosSize = Boolean.FALSE;
-  // }
-  //
-  // if (workaroundSetWindowPosSize.booleanValue())
-  // {
-  // try
-  // {
-  // if (frame.isActive()) return true;
-  // PointerInfo info = MouseInfo.getPointerInfo();
-  // Rectangle r = frame.getBounds();
-  // if (!r.contains(info.getLocation()))
-  // new Robot().mouseMove(r.x + r.width / 2, r.y + r.height / 2);
-  // }
-  // catch (Exception x)
-  // {
-  // Logger.error(x);
-  // }
-  // return true;
-  // }
-  //
-  // return false;
-  // }
 }

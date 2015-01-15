@@ -73,6 +73,7 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
@@ -303,7 +304,11 @@ public class FormGUI
 
     GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
     maxWindowBounds = genv.getMaximumWindowBounds();
-    maxWindowBounds.height -= 32; // Sicherheitsabzug für KDE Taskleiste
+    
+    if(Workarounds.applyWorkaroundForSunJavaBug4737732())
+    {
+      maxWindowBounds.height -= 32; // Sicherheitsabzug für KDE Taskleiste
+    }
 
     myFrame.pack();
     myFrame.setResizable(true);
@@ -316,52 +321,64 @@ public class FormGUI
      */
     windowInsets = myFrame.getInsets();
 
-    myFrame.addWindowStateListener(new WindowStateListener()
+    if (Workarounds.applyWorkaroundForSunJavaBug4737732())
     {
-      private int counter = 0;
-
-      public void windowStateChanged(WindowEvent e)
+      myFrame.addWindowStateListener(new WindowStateListener()
       {
-        if (counter == 0
-          && (e.getNewState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH)
-        {
-          createGUI2(true);
-          ++counter;
-        }
-        else if (counter == 1)
-        {
-          createGUI3();
-          ++counter;
-        }
-        else if (counter == 2)
-        {
-          myFrame.removeWindowStateListener(this);
-          ++counter;
-        }
-      }
-    });
+        private int counter = 0;
 
-    myFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
+        public void windowStateChanged(WindowEvent e)
+        {
+          if (counter == 0 && (e.getNewState() & Frame.MAXIMIZED_BOTH) > 0)
+          // Bei der Erkennung, ob der Frame maximiert wurde, sind wir seit
+          // trac#11494 weniger restriktiv als bisher. Der BC 5.0 meldet jetzt
+          // aus irgend einem Grund nur noch Frame.MAXIMIZED_HORIZ (2) zurück 
+          // und wir aktzeptieren das auch - bisher wurde nur Frame.MAXIMIZED_BOTH (6)
+          // akzeptiert. Ich sehe in diesem Vorgehen nur ein sehr geringes
+          // Risiko, dass einmal falsche Werte entstehen können.
+          {
+            createGUI2(true);
+            ++counter;
+          }
+          else if (counter == 1)
+          {
+            setFormGUISizeAndLocation();
+            arrangeWindows();
+            ++counter;
+          }
+          else if (counter == 2)
+          {
+            myFrame.removeWindowStateListener(this);
+            ++counter;
+          }
+        }
+      });
+
+      myFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
+    }
+    else
+    {
+      // Dieser Teil muss ausgeführt werden, wenn der Workaround nicht aktiv ist!
+      setFormGUISizeAndLocation();
+      arrangeWindows();
+    }
   }
 
   private void createGUI2(boolean changeMaxWinBounds)
   {
-    if (changeMaxWinBounds)
+    if (Workarounds.applyWorkaroundForSunJavaBug4737732())
     {
-      Rectangle newBounds = myFrame.getBounds();
-      // sanity check: Falls die neuen Grenzen weniger als 75% der Fläche haben als
-      // die alten (die bis auf die Taskleiste korrekt seien sollten), dann
-      // werden sie nicht genommen.
-      if (newBounds.width * newBounds.height >= 0.75 * maxWindowBounds.width
-        * maxWindowBounds.height) maxWindowBounds = newBounds;
+      if (changeMaxWinBounds)
+      {
+        Rectangle newBounds = myFrame.getBounds();
+        // sanity check: Falls die neuen Grenzen weniger als 75% der Fläche haben als
+        // die alten (die bis auf die Taskleiste korrekt seien sollten), dann
+        // werden sie nicht genommen.
+        if (newBounds.width * newBounds.height >= 0.75 * maxWindowBounds.width
+          * maxWindowBounds.height) maxWindowBounds = newBounds;
+      }
+      myFrame.setExtendedState(Frame.NORMAL);
     }
-    myFrame.setExtendedState(Frame.NORMAL);
-  }
-
-  private void createGUI3()
-  {
-    setFormGUISizeAndLocation();
-    arrangeWindows();
   }
 
   /**
