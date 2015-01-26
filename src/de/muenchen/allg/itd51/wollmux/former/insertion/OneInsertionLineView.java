@@ -59,6 +59,10 @@ import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
 public class OneInsertionLineView extends LineView
 {
+  /**
+   * InsertValue erhält eine graue Hintergrundfarbe.
+   */
+  private Color insertValueBackground=Color.LIGHT_GRAY;
 
   /**
    * Das Model zu dieser View.
@@ -141,7 +145,14 @@ public class OneInsertionLineView extends LineView
       final JTextComponent tc =
         ((JTextComponent) idBox.getEditor().getEditorComponent());
       final Document comboDoc = tc.getDocument();
-      final Color defaultBackground = tc.getBackground();
+      final Color defaultBackground;
+
+      if(model.getSourceType()==0)
+        defaultBackground = insertValueBackground;
+      else
+        defaultBackground = tc.getBackground();
+
+      tc.setBackground(defaultBackground);
 
       tc.addMouseListener(myMouseListener);
 

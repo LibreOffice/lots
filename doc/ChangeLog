@@ -30,6 +30,12 @@
                 # Der Button "Standard wiederherstellen" setzt alle
                   Benutzereinstellungen zurück und die (zentralen)
                   Einstellungen greifen wieder.
+          o Optische Unterscheidung zwischen insertValues und insertFormValues
+            im FM4000
+                # insertValues (Textmarken) werden im Reiter "Einfügungen"
+                  leicht gräulich dargestellt
+                # insertFormValues (Feldern) bleiben weiss, da diese Elemente
+                  primär für die Formular-GUI verwendet werden.
 
 
 

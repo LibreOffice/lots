@@ -365,6 +365,10 @@ public class InsertionModel4InsertXValue extends InsertionModel
     return bookmark.getName();
   }
 
+  public int getSourceType(){
+    return sourceType;
+  }
+
   public void selectWithViewCursor()
   {
     bookmark.select();
