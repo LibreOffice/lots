@@ -1,29 +1,313 @@
+ ==================== Neu in dieser Version ====================
+
+    * Bugfixes:
+          o FM4000: Funktionstester sortiert Comboboxen alphabetisch
+          o Skalierung der FormularGUI bleibt auch mit mehreren Elementen
+            stabil
+    * Neue Features:
+          o FM4000: Der Funktionstester bietet nun eine Funktion an, mit dem
+            man den Tausenderpunkt formatiert.
+          o FM4000: Optische Unterscheidung zwischen insertValues und
+            insertFormValues
+          o Optionen-Menü und MenüManager konfigurativ steuerbar
+                # ALLOW_USER_CONFIG standardmäßig aktiviert (damit das
+                  Optionen-Menü standardmäßig nutzbar ist)
+                # Der Button Menümanager ist über eine weitere
+                  Konfigurationsoption ALLOW_MENUMANAGER aktivierbar.
+                # ALLOW_MENUMANAGER is dabei standardmäßig deaktiviert (Feature
+                  aktuell als experimentell eingestuft)
+                # Ist aufgrund ALLOW_USER_CONFIG oder ALLOW_MENUMANAGER ein
+                  Button deaktiviert, wird er gar nicht erst in die WollMuxBar
+                  eingefügt
+                # die neuen Optionen sind unter
+                  http://www.wollmux.net/wiki/Konfigurationsdatei_wollmux.conf
+                  dokumentiert.
+          o Zoomfaktor in der WollMuxBar über Optionen-Menü einstellbar
+                # Benutzern wird es ermöglicht einen eigenen Wert für den Font-
+                  Zoom zu definieren (wollmuxbar.conf).
+                # Eine lokale wollmuxbar.conf-Datei hat immer Vorrang zu den
+                  (zentralen) Einstellungen aus der wollmux.conf.
+                # Der Button "Standard wiederherstellen" setzt alle
+                  Benutzereinstellungen zurück und die (zentralen)
+                  Einstellungen greifen wieder.
 
 
 
- ==================== Neu in Version 13.5 ====================
+ ==================== Neu in Version 14.9 ====================
 
-    * In der WollMuxBar steht eine neue ACTION "menuManager" zur Verfügung.
-      Diese ruft den Menü-Manager auf, ein interaktives Tool zur Bearbeitung
-      der WollMuxBar-Menüstruktur. (Dieses Feature ist nur verfügbar, wenn
-      der WollMux mit Java 6 ausgeführt wird!)
-    * Die WollMuxBar hat einen neuen Kommandozeilenschalter --mm. Dieser ruft
-      direkt den Menü-Manager auf. Dies ist nützlich zum Bootstrappen wenn es
-      noch kein Menü gibt oder auch wenn der Menü-Manager nicht im
-      WollMuxBar-Menü vorhanden ist. (Dieses Feature ist nur verfügbar, wenn
-      der WollMux mit Java 6 ausgeführt wird!)
-    * Unter Extras-Optionen kann die Fontgröße bis zu Faktor 10 eingestellt werden.
-    * Bei Seriendrucken, deren Datenquelle mehrzeilige Spaltenüberschriften enthält, 
-      konnte das Dokument bisher auch nach Korrektur der Datenquelle nicht mehr 
-      gedruckt werden, da die Information auch im Dokument selbst gespeichert 
-      wurde.
-      Ein solches Dokument kann jetzt "repariert" werden, so dass die Information
-      nicht mehr im Dokument gespeichert ist. 
-    * Der Ausdruck von sachleitenden Verfügungen kann jetzt auch in umgekehrter 
-      Reihenfolge erfolgen
+    * Bugfixes:
+          o Seriendruck: Kinddialog verschwindet nicht mehr (trac ticket
+            #10880)
+          o Seriendruck: Abbrechen Button gefixt (trac ticket #11747)
+          o Ersetzt den LO Druckerauswahldialog für den Seriendruck durch einen
+            WollMux Dialog, ohne Properties Auswahlmöglichkeit
+          o Behebe fehlerhafte Berechnung und Anzeige der zu verarbeitenden
+            Seiten bei Verwendung der "Nächster Datensatz"-Funktion
+    * Neue Features:
+          o Unterstützung von LibreOffice 4
+          o "documentation" als ant-Task hinzugefügt
+                # Sobald neue Snapshots erstellt werden, wird die Dokumentation
+                  lokal (offline) zur Verfügung gestellt.
+          o Ermögliche das Anzeigen einer eigenen Nachricht im
+            Seriendruckfortschrittsdialog
+          o Zeige eine Nachricht an, wenn ein Serienbrief an den Drucker
+            geschickt wird
+          o Im Installerskript getOOoPath für AOO erweitert
+          o Erweiterung des LibreOffice basierten Seriendrucks, zur erstellen
+            von PDF Gesamtdokumenten.
+                # Um die Funktion zum erzeugen des PDF-Gesamtdokuments zu
+                  nutzen, sind zusätzlich Anpassungen in der WollMux Config von
+                  Nöten, siehe dialoge.conf und funktionen.conf
+          o Einführung einer build-Property JAVAMAKER_ARGS für einfacheren
+            Build über verschiedene Office-SDKs hinweg.
+                # JAVAMAKER_ARGS standardmäßig auskommentiert
 
 
- ==================== Neu in Version 10.8 RC ====================
+ ==================== Neu in Version 13.10 ====================
+
+    * Bugfixes:
+          o Mit LibreOffice 3.6.4 der LHM funktioniert beim Seriendruck die
+            Druckerauswahl.
+    * Neue Features:
+          o Beim Seriendruck kann beim Erstellen von Einzeldateien das Format
+            (odt oder pdf) durch Radiobutton ausgewählt werden.
+          o Der Ausdruck von sachleitenden Verfügungen kann jetzt auch in
+            umgekehrter Reihenfolge erfolgen
+          o Font-Zoom kann auch im GUI eingestellt werden.
+          o In der WollMuxBar steht eine neue ACTION "menuManager" zur
+            Verfügung.
+                # Diese ruft den Menü-Manager auf, ein interaktives Tool zur
+                  Bearbeitung der WollMuxBar-Menüstruktur.
+                # (Dieses Feature ist nur verfügbar, wenn der WollMux mit Java
+                  6 ausgeführt wird!)
+          o Die WollMuxBar hat einen neuen Kommandozeilenschalter --mm.
+                # Dieser ruft direkt den Menü-Manager auf.
+                # Dies ist nützlich zum Bootstrappen wenn es noch kein Menü
+                  gibt oder auch wenn der Menü-Manager nicht im WollMuxBar-Menü
+                  vorhanden ist.
+                # (Dieses Feature ist nur verfügbar, wenn der WollMux mit Java
+                  6 ausgeführt wird!)
+          o Unter Extras-Optionen kann die Fontgröße bis zu Faktor 10
+            eingestellt werden.
+          o Bei Seriendrucken, deren Datenquelle mehrzeilige
+            Spaltenüberschriften enthält, konnte das Dokument bisher auch nach
+            Korrektur der Datenquelle nicht mehr gedruckt werden, da die
+            Information auch im Dokument selbst gespeichert wurde.
+                # Ein solches Dokument kann jetzt "repariert" werden, so dass
+                  die Information nicht mehr im Dokument gespeichert ist.
+
+
+ ==================== Neu in Version 11.10b ====================
+
+    * Bugfixes:
+          o Voraussichtlich wird es im BC 4.1 nötig werden OOo mit der Gnome-
+            Oberfläche zu starten. Dies hatte zur Folge, dass beim Öffnen eines
+            WollMux-Formulars das Office-Dokument nicht mehr korrekt neben das
+            Formular verschoben und verkleinert wurde. Dies wurde jetzt
+            behoben. Als positiver Seiteneffekt der Änderung geschieht die
+            Größenänderung des Dokuments jetzt deutlich ruhiger und flüssiger.
+
+
+ ==================== Neu in Version 11.10a ====================
+
+    * Bugfixes:
+          o Falsches Encoding in temporärer .csv-Datei unter Windows bei
+            WollMux-Seriendruck behoben
+    * Neue Features:
+          o Um das Look&amp;Feel des WollMux zu beeinflussen kann jetzt der
+            Konfig-Parameter LAF_CLASS_NAME verwendet werden.
+          o Möglichkeit zur Vorbelegung eines Dateinamens (siehe
+            FilenameGeneratorFunction)
+
+
+ ==================== Neu in Version 11.10 ====================
+
+    * Bugfixes:
+          o Verliert die WollMuxBar den Fokus, wird der Fokus von der Suchliste
+            auf das nächste Steuerelement verschoben. Dadurch bleibt das
+            Suchmenü geschlossen, wenn die WollMuxBar den Fokus zurückerhält.
+            Voraussetzung ist, dass mindestens ein weiteres fokusierbares
+            Steuerlement (z.B. ein Button) auf der WollMuxbar enthalten ist.
+          o Im Fenstermodus "UpAndAway" der WollMuxBar hatte die minimierte
+            WollMuxBar am oberen Bildschirmrand nicht die gewünschte Breite.
+            Dieser Fehler ist nun behoben und die minimierte WollMuBar sollte
+            dadurch im Allgemeinen wesentlich kleiner erscheinen.
+          o In der Vorbelegung des Komfortdruckdialogs für Sachleitende
+            Verfügungen werden jetzt unsichtbare Zuleitungszeilen nicht mehr
+            mitgezählt (für den Zähler der angibt, wie viele Ausdrucke von
+            einem Verfügungspunkt gemacht werden sollen).
+    * Neue Features:
+          o Überarbeiteter WollMux-Seriendruck:
+                # Der Seriendruckdialog des WollMux (aufzurufen über "Drucken"
+                  aus der WollMux-Seriendruckleiste) wurde komplett
+                  überarbeitet und zeigt neben neuen Optionen nun auch
+                  Informationen zur Funktionsweise und Vor- und Nachteile der
+                  einzelnen Druckoptionen an.
+                # Die Druckfunktionen zum Drucken in ein ODT-Gesamtdokument und
+                  zum Direktdruck auf einen Drucker wurden durch neue
+                  Druckfunktionen ersetzt, die im Hintergrund den in
+                  OpenOffice.org eingebauten Seriendruckmechanismus verwenden
+                  und dadurch deutlich schneller und robuster als bisher
+                  arbeiten. Beim Druck auf den Drucker wird jetzt nur noch ein
+                  einziger Druckjob erzeugt und nicht so wie früher für jeden
+                  Datensatz ein eigener. Dies wirkt sich vor allem auf
+                  gemeinsam genutzten Druckern positiv aus.
+                # Vorausgefüllte Dokumente per E-Mail verschicken: Über die
+                  neue Option "E-Mails verschicken" können Serienbriefe auch
+                  per E-Mail an verschiedene Empfänger verschickt werden. Diese
+                  sind dann automatisch mit den entsprechenden Daten aus den
+                  Seriendruck-Datensätzen vorbelegt und können von Empfängern
+                  mit WollMux ohne Einschränkungen weiter bearbeitet bzw.
+                  vervollständigt werden.
+                # Spezialfeld "Nächster Datensatz": Über das neue Spezialfeld
+                  "nächster Datensatz" können innerhalb einer Druckseite
+                  mehrere Datensätze gleichzeitig angezeigt werden. Dies ist
+                  z.B. für die Erstellung von Etiketten notwendig, die jetzt
+                  direkt in ein neues ODT-Gesamtdokument oder direkt auf den
+                  Drucker ausgedruckt werden können. Achtung: Das neue
+                  Spezialfeld wirkt sich nicht aus bei den Druckoptionen zum
+                  Drucken in ein PDF-Gesamtdokument, in Einzeldateien oder beim
+                  Verschicken von E-Mails.
+                # Über die Property "STAGE" kann nun in Druckfunktionen auch
+                  der Anzeigetitel des Fortschrittsdialogs programmatisch
+                  geändert werden (siehe Schnittstellen_des_WollMux_für
+                  Experten)
+          o Im Wrapper-Shellskript des WollMux für Linux ist nun
+            voreingestellt, dass die WollMuxBar nur einmal gestartet werden
+            kann wenn die WollMuxBar mehrfach aufgerufen wird. Damit dies
+            funktioniert wurde die WollMuxBar um zwei neue Schalter --fifo_und
+            --firstrun erweitert.
+          o Über die neue Konfigurationseinstellung PERSISTENT_DATA_MODE kann
+            gesteuert werden, wie und wo der WollMux seine dokumentbezogenen
+            Metadaten (wie z.B. die Formularbeschreibung) im Dokument ablegt.
+            Der bisherige Mechanismus (annotation), Metadaten in versteckten
+            Notizen im Dokument abzulegen, hat sich als fehleranfällig und
+            störend erwiesen und kann so langfristig durch einen neuen
+            Mechanismus (rdfReadLegacy) abgelöst werden, bei dem die Metadaten
+            unabhängig von der Dokumentdarstellung in eine eigene XML-Datei
+            namens "wollmux.rdf" im ODF-Paket abgelegt werden. Standardmäßig
+            wird der WollMux in einer Übergangsphase nun im sog. transition-
+            Modus betrieben, der sowohl in die Notizen als auch in die RDF-
+            Datei schreibt. Für den neuen RDF-Mechanismus wird OpenOffice.org
+            3.2.1 vorausgesetzt. Bei älteren OpenOffice.org-Versionen schreibt
+            der WollMux wie früher ausschließlich in die Notizen.
+          o Ab OpenOffice.org 3.2.x können über die Funktion "Platzhalter
+            anspringen" des Textbausteinsystems des WollMux auch Platzhalter in
+            Tabellen angesprungen werden. Dies war bisher nicht möglich.
+          o Für die WollMuxBar kann nun optional auch ein Icon auf der System
+            Tray (auch bekannt als "Notification Area" - gemeint ist der
+            Bereich üblicherweise ganz rechts auf der Taskbar neben der
+            Uhrzeitanzeige) angezeigt werden. Dieses Icon kann dazu verwendet
+            werden, um die WollMuxBar beim Minimieren komplett darauf zu
+            ikonifizieren (d.h. die WollMuxBar verschwindet komplett und auch
+            kein Taskbar-Eintrag ist mehr für sie vorhanden; sie kann dann per
+            Klick auf das Icon wieder hergestellt werden) und/oder um per
+            Rechtklick auf das Icon ein Kontextmenü aufzurufen, das einen
+            Schnellzugriff auf alle Elemente der Menüleiste der WollMuxBar
+            erlaubt. Das Tray-Icon ist standardmäßig deaktiviert, kann aber
+            über den neuen Parameter TRAYICON im Fenster-Abschnitt der
+            wollmux.conf aktiviert und konfiguriert werden.
+
+    * Integration eines Patches von Jan Gerrit Möltgen zur Erweiterung des
+      Konfigurationsabschnitts SachleitendeVerfuegungen um die zusätzlichen
+      Einstellungen NUMBERS und ABDRUCK_NAME. Über diese Einstellungen lassen
+      sich Sachleitende Verfügungen nun auch mit arabischen statt bisher mit
+      römischen Ziffern darstellen und der Text "Abdruck" kann frei
+      konfiguriert werden.
+
+
+ ==================== Neu in Version 11.2d ====================
+
+    * Bugfixes:
+          o Temporäre Dokumente des OpenOffice.org-Seriendruck werden nun auch
+            beim Verbinden über Extras->Seriendruck-Assistent durch den WollMux
+            ignoriert. Damit entfallen benutzersichtbare "Runtime-Exceptions",
+            die mit OOo 3.2.1 in manchen Fällen auftraten. Generell konnte der
+            OOo-Seriendruck in Verbindung mit dem WollMux beschleunigt werden.
+          o Beim Durchblättern der Steuerelemente in der Formular-GUI mittels
+            Tabulatortaste wird der Inhalt der Formular-GUI jetzt linksbündig
+            gescrollt. Die Formular-GUI wird jetzt auch korrekt gescrollt, wenn
+            eine Textarea den Fokus erhält (dies hat zudem den gewünschten
+            Nebeneffekt, dass nun keine Tabs mehr in eine Textarea beim Druck
+            auf die Tabulatortaste eingefügt werden).
+          o Die Anzeige der nicht synchronisierbaren Datensätze aus der
+            persönlichen Absenderliste bei der WollMux-Initialisierung erfolgt
+            nun ebenfalls nach der in SENDER_DISPLAYTEMPLATE definierten
+            Formatierung.
+          o Die Formular-GUI konnte in einem speziellen Fall unabhängig vom
+            zugehörigen Dokument geschlossen werden (durch Klick auf den
+            Abbrechen-Button in der Formular-GUI eines modifizierten Dokuments
+            und anschließendem Klick auf "Abbrechen" in der Sicherheitsabfrage
+            "Speichern/Verwerfen/Abbrechen?"). Dieser Bug ist nun behoben.
+          o Bei der Verwendung der Druckoption "in einzelne Dateien schreiben"
+            des WollMux-Seriendrucks verschwand unter Windows nach der Auswahl
+            eines Zielverzeichnises über "Suchen..." der Druckdialog. Dieser
+            Bug ist nun behoben.
+          o Bei Verwendung von OpenOffice.org 3.2.1 (und späteren Versionen)
+            wurden alle Checkboxen im Dokument nicht mehr angezeigt, wenn über
+            die WollMux-Formular-GUI Eingabefelder im Dokument befüllt wurden.
+            Dieser Bug ist nun behoben.
+    * Allgemeine Verbesserungen:
+          o Die Dump-Info-Datei, die vom WollMux zur Diagnose von Fehlern
+            generiert werden kann, enthält nun auch Informationen über IP-
+            Adresse, eingesetzte OpenOffice.org-Version, Prozessoranzahl,
+            Arbeitsspeicher und Swap Size. Außerdem wird nun auch eine LHM-
+            interne Buildnummer und eine Liste der vom Office-Team entwickelten
+            und in OpenOffice.org integrierten Patches ausgegeben.
+          o Im Formularfenster zu einem gerade in Bearbeitung befindlichen
+            Dokumentfensters wird nun immer auch der Name des Dokuments in der
+            Kopfzeile angezeigt. Dies hilft bei der Zuordnung mehrerer
+            Formularfensters zum richtigen zugehörigen Dokumentfenster.
+            Beispiel: Beim Öffnen des WollMux-Formulars "Abtretungserklärung"
+            bekam das Formularfenster (links) früher den Titel
+            "Abtretungserklärung" und das Dokumentfenster (rechts) den Titel
+            "Unbenannt1". Wurden nun mehrere Abtretungserklärungen gleichzeitig
+            bearbeitet, konnte man anhand des Fenstertitels nicht erkennen,
+            welches Formularfenster zu welchem Dokumentfenster gehört.
+            Zukünftig erhält das linke Fenster den Titel "Unbenannt1 -
+            Abtretungserklärung", womit ersichtlich wird, dass dieses
+            Formularfenster zum Dokumentfenster mit dem Titel "Unbenannt1"
+            gehört.
+    * Neue Features:
+          o Für WollMux-Funktionen steht eine neue Grundfunktion SPLIT
+            (<Argument>,_<RegEx>,_<Index>) zur Verfügung, mit der
+            beispielsweise leichter als bisher Leerzeilen aus Adressen entfernt
+            werden können.
+          o Der Windows-Installer des WollMux kennt nun zwei neue
+            Kommandozeilenparameter: --NOKILL und --LIBRE. Eine Beschreibung
+            dieser Parameter finden Sie auf der Wiki-Seite "WollMux
+            installieren".
+
+    * Integration eines Patches der Ärztekammer Schleswig-Holstein (Michael
+      Stramm) zur Erweiterung der Datenquellen vom Typ ooo um die Unterstützung
+      von Pervasive-SQL
+
+
+ ==================== Neu in Version 10.8a ====================
+
+    * Bugfixes:
+          o Es wurde ein Fehler beseitigt, der dafür sorgte, dass es bei der
+            Bearbeitung eines WollMux-Formulars mit aktivierter
+            Änderungsverfolgung zum Verlust des WollMuxFormularwerte-Abschnitts
+            kommen konnte.
+          o Außerdem ist der WollMux nun in der Lage, einen fehlenden
+            WollMuxFormularwerte-Abschnitt teilweise zu rekonstruieren. Nicht
+            wiederherstellbare Formulardaten werden in der FormGUI rot
+            hinterlegt und können so manuell korrigiert werden.
+          o Beim WollMux-Seriendruck wurde ein Fehlverhalten der Von-Bis-Felder
+            der Datensatzauswahl korrigiert, wenn kein Inhalt eingetragen wird.
+          o Die Trefferliste der Senderbox und das Menü der Suchbox werden
+            jetzt geschlossen, wenn die WollMux-Leiste minimiert wird.
+          o Es wurde ein Fehler im FormularMax4000 behoben, der das Bearbeiten
+            eines Formulars unmöglich gemacht hat, wenn Sichtbarkeiten direkt
+            an den Rückgabewert von Funktionen gebunden wurden.
+          o Seit WollMux 6.4.0 war es nicht mehr möglich bei der Suche im
+            Empfängerauswahldialog und Persönlicher Absenderliste bei
+            geeigneter Suchstrategie per Eingabe eines Leerstrings sämtliche
+            Datensätze als Suchergebnis anzuzeigen. Dies ist nun wieder möglich
+
+
+ ==================== Neu in Version 10.8 ====================
 
     * Hinweis: Grundsätzlich sollten Sie bei einem Update auf eine neue
       WollMux-Version immer sowohl die WollMux-Extension (.oxt) als auch die
@@ -33,37 +317,37 @@
     * Bugfixes:
           o Ein Problem wurde behoben, das bei der Weiterverwendung eines
             OpenOffice.org-Fensters auftrat, in dem zuvor ein Textdokument
-            geöffnet war, das über Datei->Schließen bzw. den kleinen "X"-
-            Knopf geschlossen wurde. Wurde in diesem leeren Fenster ein neues
+            geöffnet war, das über Datei->Schließen bzw. den kleinen "X"-Knopf
+            geschlossen wurde. Wurde in diesem leeren Fenster ein neues
             Dokument (z.B. ein Calc-Dokument) aufgemacht, so konnte dieses
             Dokument nicht mit Datei->Drucken ausgedruckt werden.
-          o In sehr seltenen Fällen konnte es in früheren WollMux-Versionen
-            bei Verwendung von overrideFrag-Kommandos ohne NEW_FRAG_ID zu
-            Abstürzen kommen. Dieses Problem ist nun behoben.
+          o In sehr seltenen Fällen konnte es in früheren WollMux-Versionen bei
+            Verwendung von overrideFrag-Kommandos ohne NEW_FRAG_ID zu Abstürzen
+            kommen. Dieses Problem ist nun behoben.
           o Der Windows-Uninstaller des WollMux kann nun auch ausgeführt
-            werden, wenn kein OpenOffice.org auf dem System installiert ist. Inde.muenchen.allg.d101.wollmux
+            werden, wenn kein OpenOffice.org auf dem System installiert ist. In
             diesem Fall kann natürlich nicht die OpenOffice.Org-Extension
             (WollMux.oxt) deinstalliert werden, aber der Uninstaller räumt
             jetzt alle übrigen Dateien und Registry-Einträge des WollMux
             korrekt auf.
           o Der WollMux öffnet jetzt nur noch eine Formular-GUI, wenn die
             Vorlage im "Fenster"-Abschnitt ihrer Formularbeschreibung wirklich
-            Inhalt enthält. Früher konnte es in seltenen Fällen (z.B. wenn
-            in der Vorlage Spezialfelder des WollMux-Seriendrucks enthalten
-            waren) vorkommen, dass eine leere Formular-GUI geöffnet wurde.
+            Inhalt enthält. Früher konnte es in seltenen Fällen (z.B. wenn in
+            der Vorlage Spezialfelder des WollMux-Seriendrucks enthalten waren)
+            vorkommen, dass eine leere Formular-GUI geöffnet wurde.
           o Ein Fehler wurde behoben, durch den Menü-Elemente mit TYPE
             "senderbox" in der WollMuxBar nur ganz links platziert werden
             konnten.
           o Bei WollMux-Formularen mit einer sehr langen Formularbeschreibung
-            konnte es in älteren WollMux-Versionen aufgrund eines
-            Speicherlecks in OpenOffice.org bei längerer Arbeit mit diesen
-            Formularen zu sehr hohem Speicherverbrauch kommen, der letztlich
-            sogar zu Abstürzen führen konnte. Betroffen von diesem Problem
-            war ausschließlich OOo 3.0.1, in späteren OOo-Versionen ist das
-            Speicherleck behoben. Das OOo 3.0.1, das mit dem LiMux-Basisclient
-            2.4 und 3.0 ausgeliefert wird, war ebenfalls nicht von dem Problem
-            betroffen. Für alle anderen OOo-Versionen wurde in den WollMux ein
-            Workaround eingebaut.
+            konnte es in älteren WollMux-Versionen aufgrund eines Speicherlecks
+            in OpenOffice.org bei längerer Arbeit mit diesen Formularen zu sehr
+            hohem Speicherverbrauch kommen, der letztlich sogar zu Abstürzen
+            führen konnte. Betroffen von diesem Problem war ausschließlich OOo
+            3.0.1, in späteren OOo-Versionen ist das Speicherleck behoben. Das
+            OOo 3.0.1, das mit dem LiMux-Basisclient 2.4 und 3.0 ausgeliefert
+            wird, war ebenfalls nicht von dem Problem betroffen. Für alle
+            anderen OOo-Versionen wurde in den WollMux ein Workaround
+            eingebaut.
           o Behebung eines Fehlers im WollMux-Seriendruck: Spezialfelder des
             WollMux-Seriendrucks (z.B. "Gender" oder "Wenn...Dann...Sonst...")
             erhielten beim Drucken mit der Option "in neues Dokument schreiben"
@@ -76,11 +360,11 @@
             aktuelle Steuerelement nicht mehr sichtbar ist.
           o Im FormularMax 4000 kann jetzt ein Bereich von mehreren Elementen
             mit gedrückter Umstelltaste (SHIFT) ausgewählt werden.
-          o Während im Dialog zum Verwalten der Persönlichen Absenderliste
-            eine Suche durchgeführt wird, ist nun in der grafischen
-            Benutzeroberfläche klar ersichtlich, dass die Suche läuft. Wenn
-            die Suche aufgrund eines Timeouts abgebrochen wird, erscheint jetzt
-            ein entsprechender Hinweis.
+          o Während im Dialog zum Verwalten der Persönlichen Absenderliste eine
+            Suche durchgeführt wird, ist nun in der grafischen
+            Benutzeroberfläche klar ersichtlich, dass die Suche läuft. Wenn die
+            Suche aufgrund eines Timeouts abgebrochen wird, erscheint jetzt ein
+            entsprechender Hinweis.
     * WollMux-Seriendruck:
           o Der Seriendruck kann jetzt auch in ein PDF-Gesamtdokument drucken.
             Dies ist deutlich schneller als der bisherige Druck in ein
@@ -90,12 +374,11 @@
             kann manuell in alte Konfigurationen nachinstalliert werden).
     * WollMuxBar:
           o Die WollMuxBar unterstützt ein neues Menü-Element mit TYPE
-            "searchbox". Mit diesem Menü-Element kann die neue Suchfunktion
-            der WollMuxBar aktiviert werden.
+            "searchbox". Mit diesem Menü-Element kann die neue Suchfunktion der
+            WollMuxBar aktiviert werden.
           o In der WollMuxBar steht eine neue ACTION "options" zur Verfügung.
-            Diese ruft den Optionen-Dialog auf. Dort lassen sich alle
-            möglichen Einstellungen des WollMuxBar-Fenster-Abschnitts
-            konfigurieren.
+            Diese ruft den Optionen-Dialog auf. Dort lassen sich alle möglichen
+            Einstellungen des WollMuxBar-Fenster-Abschnitts konfigurieren.
           o Die WollMuxBar erlaubt jetzt die Einrichtung verschiedener Menü-
             Gruppen, die über den Optionen-Dialog an- oder abgewählt werden
             können und die zugehörigen Buttons/Vorlagen/Menüs ein- oder
@@ -131,20 +414,20 @@
             "closeAndOpenExt" und "saveTempAndOpenExt" verwendet werden. Diese
             schreiben das Formular in eine temporäre Datei eines beliebigen
             Formats (z.B. odt oder pdf), schließen es ohne Benutzerrückfrage
-            (nur im Falle von "closeAndOpenExt") und öffnen dann die
-            temporäre Datei mit der externen Anwendung.
+            (nur im Falle von "closeAndOpenExt") und öffnen dann die temporäre
+            Datei mit der externen Anwendung.
           o Die Zeitangaben in den Logausgaben der wollmux.log sind nun
             sekundengenau.
 
     * Das Interface XPALProvider hat sich dementsprechend verändert, dass die
-      String-Repräsentationen von Absendern, die von den Methoden
-      getPALEntries() und getCurrentSender() zurückgeliefert werden, nicht
-      mehr zwangsläufig dem Schema "<Nachname>, <Vorname> (<Rolle>)"
-      entsprechen müssen. Stattdessen wird die genaue Form der String-
-      Repräsentation nicht mehr von diesem Interface vorgeschrieben, sondern
-      ist im Falle der WollMux-Implementierung des Interfaces abhängig vom
-      Wert von SENDER_DISPLAYTEMPLATE in der WollMux-Konfiguration. Unabhängig
-      von SENDER_DISPLAYTEMPLATE enthalten die über diese Methoden
+      String-Repräsentationen von Absendern, die von den Methoden getPALEntries
+      () und getCurrentSender() zurückgeliefert werden, nicht mehr zwangsläufig
+      dem Schema "<Nachname>, <Vorname> (<Rolle>)" entsprechen müssen.
+      Stattdessen wird die genaue Form der String-Repräsentation nicht mehr von
+      diesem Interface vorgeschrieben, sondern ist im Falle der WollMux-
+      Implementierung des Interfaces abhängig vom Wert von
+      SENDER_DISPLAYTEMPLATE in der WollMux-Konfiguration. Unabhängig von
+      SENDER_DISPLAYTEMPLATE enthalten die über diese Methoden
       zurückgelieferten String-Repräsentationen aber auf jeden Fall immer am
       Ende den String "§§%=%§§" gefolgt vom Schlüssel des entsprechenden
       Eintrags.
@@ -152,25 +435,24 @@
       einer externen Anwendung das zusätzliche Attribut PIPE angegeben werden.
       Hat es den Wert "true", so liest der WollMux bzw. die WollMuxBar nach
       Start der externen Anwendung deren Stdout und Stderr permanent aus. Ist
-      PIPE "false" oder fehlt, so schließt der WollMux diese Kanäle nach
-      Start der Anwendung. Es gibt manche Anwendungen (z.B. der Adobe Reader),
-      die mit PIPE "false" nicht funktionieren. Da das Auslesen von Stdout/
-      Stderr einen laufenden Thread erfordert, ist normalerweise ein Shell-
-      Wrapper mit Umleitung nach /dev/null die bessere Wahl. Ein Nebeneffekt
-      von PIPE "true", der für das Debugging nützlich ist, besteht darin,
-      dass der WollMux alle Ausgaben des externen Programms in die wollmux.log
-      kopiert.
+      PIPE "false" oder fehlt, so schließt der WollMux diese Kanäle nach Start
+      der Anwendung. Es gibt manche Anwendungen (z.B. der Adobe Reader), die
+      mit PIPE "false" nicht funktionieren. Da das Auslesen von Stdout/Stderr
+      einen laufenden Thread erfordert, ist normalerweise ein Shell-Wrapper mit
+      Umleitung nach /dev/null die bessere Wahl. Ein Nebeneffekt von PIPE
+      "true", der für das Debugging nützlich ist, besteht darin, dass der
+      WollMux alle Ausgaben des externen Programms in die wollmux.log kopiert.
     * Im Konfigurations-Abschnitt ExterneAnwendungen kann beim Attribut PROGRAM
       das virtuelle Programm "/loadComponentFromURL/" angegeben werden. Es ist
-      ungefähr das selbe als ob man soffice bzw. soffice.exe angibt,
-      allerdings wird nicht wirklich ein externes Programm gestartet sondern
-      die interne Funktion von OOo zum Laden des Dokuments verwendet.
+      ungefähr das selbe als ob man soffice bzw. soffice.exe angibt, allerdings
+      wird nicht wirklich ein externes Programm gestartet sondern die interne
+      Funktion von OOo zum Laden des Dokuments verwendet.
       Es ist möglich, Parameter mitzugeben, z.B.
-      PROGRAM("/loadComponentFromURL/AsTemplate=true/MacroExecutionMode=3/
-      Hidden=false/")
+      PROGRAM(&quot;/loadComponentFromURL/AsTemplate=true/MacroExecutionMode=3/
+      Hidden=false/&quot;)
       Die Parameter sind optional und ihre Reihenfolge ist beliebig.
-      Für MacroExecutionMode stehen folgende Konstanten zur Verfügung
-      (näheres siehe in der IDL-Doku_zu_loadComponentFromURL):
+      Für MacroExecutionMode stehen folgende Konstanten zur Verfügung (näheres
+      siehe in der IDL-Doku_zu_loadComponentFromURL):
       # NEVER_EXECUTE = 0;
       # FROM_LIST = 1;
       # ALWAYS_EXECUTE = 2;
@@ -199,21 +481,21 @@
 
     * Behebung eines Fehlers im WollMux-Seriendruck: Spezialfelder des WollMux-
       Seriendrucks (z.B. "Gender" oder "Wenn...Dann...Sonst...") erhielten beim
-      Drucken mit der Option "in neues Dokument schreiben" (Gesamtdokument)
-      für alle Datensätze den selben Wert.
+      Drucken mit der Option "in neues Dokument schreiben" (Gesamtdokument) für
+      alle Datensätze den selben Wert.
 
 
  ==================== Neu in Version 6.3.0a ====================
 
     * Betrifft nur Windows: Schwebt der Mauszeiger über einer Symbolleiste von
-      OpenOffice.org Writer während die Fenstergröße geändert wird, so
-      friert OpenOffice.org manchmal vollständig ein. Da bei jedem WollMux-
-      Formular die Fenstergröße geändert wird, um die WollMux-FormularGUI
-      und das Writer-Fenster nebeneinander anzuordnen, ist das Auftreten des
-      Problems sehr wahrscheinlich. Da die WollMux-FormularGUI weiterhin
-      bearbeitet werden kann, bemerkt der Benutzer das Problem oft erst
-      später, was dazu führt, dass Benutzer über Abstürze in ganz
-      verschiedenen Situationen klagen.
+      OpenOffice.org Writer während die Fenstergröße geändert wird, so friert
+      OpenOffice.org manchmal vollständig ein. Da bei jedem WollMux-Formular
+      die Fenstergröße geändert wird, um die WollMux-FormularGUI und das
+      Writer-Fenster nebeneinander anzuordnen, ist das Auftreten des Problems
+      sehr wahrscheinlich. Da die WollMux-FormularGUI weiterhin bearbeitet
+      werden kann, bemerkt der Benutzer das Problem oft erst später, was dazu
+      führt, dass Benutzer über Abstürze in ganz verschiedenen Situationen
+      klagen.
       Der WollMux enthält folgenden Worakround für dieses Problem: Um die
       Wahrscheinlichkeit eines Einfrierens zu minimieren, wird der Mauszeiger
       beim Öffnen eines Dokuments über die WollMux-Bar an den oberen
@@ -226,15 +508,15 @@
 
     * FormularMax_4000:
           o Das Menü Einfügen/Standardelemente einfügen ist jetzt über die
-            wollmux.conf konfigurierbar. Dadurch kann jedes Referat dort
-            häufig verwendete Tabs oder Gruppen von Buttons konfigurieren und
-            sie so Vorlagenerstellern zugänglich machen. Ab der WollMux-
+            wollmux.conf konfigurierbar. Dadurch kann jedes Referat dort häufig
+            verwendete Tabs oder Gruppen von Buttons konfigurieren und sie so
+            Vorlagenerstellern zugänglich machen. Ab der WollMux-
             Standardkonfiguration 6.1.2 ist eine entsprechende
             Konfigurationsdatei enthalten. Diese enthält zusätzlich zu den
             bisherigen Einträgen auch einen Eintrag Abbrechen, <-Zurück,
-            Speichern, Drucken, der die entsprechenden Buttons einfügt. Ist
-            ein entsprechender Konfigurationsabschnitt nicht vorhanden (z.B.
-            bei einer alten Konfiguration), wird als Fallback das alte Menü
+            Speichern, Drucken, der die entsprechenden Buttons einfügt. Ist ein
+            entsprechender Konfigurationsabschnitt nicht vorhanden (z.B. bei
+            einer alten Konfiguration), wird als Fallback das alte Menü
             angeboten.
           o Illegale Namen für Sichtbarkeitsgruppen werden nicht mehr
             akzeptiert. Dies verhindert, dass man sich durch falsche Benennung
@@ -243,8 +525,8 @@
             Formulare ohne Heraufsetzen der Java Heap Size bearbeitet werden.
           o Der Button "Tab" wurde umbenannt in "Neuer Tab"; der Button "Neu"
             wurde umbenannt in "Neues Label".
-          o Aus Konsistenzgründen ist der Defaultname für neue Tabs jetzt
-            "Tab" und nicht mehr "Reiter".
+          o Aus Konsistenzgründen ist der Defaultname für neue Tabs jetzt "Tab"
+            und nicht mehr "Reiter".
     * Wenn die WollMuxBar mit Java 6 gestartet wird, so hat sie nun ihr eigenes
       WollMux-Icon in der Taskleiste und beim Umschalten mittels Alt+Tabulator.
       Dasselbe gilt für alle anderen Fenster, die vom WollMux erzeugt werden,
@@ -259,24 +541,24 @@
       generierte Dump-Datei nun auch Informationen über die
       Speichereinstellungen der Java Virtual Machine enthält. Diese
       Informationen erleichtern in bestimmten Fällen die Fehlerdiagnose.
-    * Über den Konfigurationsabschnitt_Dokumentaktionen lässt sich abhängig
-      von Eigenschaften des Dokuments steuern, wie der WollMux damit umgeht.
+    * Über den Konfigurationsabschnitt_Dokumentaktionen lässt sich abhängig von
+      Eigenschaften des Dokuments steuern, wie der WollMux damit umgeht.
     * OOo 3.x hat einen Bug, der dafür sorgt, dass wenn in eine Textarea eines
       WollMux-Formulars mehr als 16400 Zeichen eingegeben werden nach dem
       Speichern und Wiederladen des Dokuments die Inhalte des Formulars
-      verloren gehen. Diese Version des WollMux hat einen Workaround für
-      diesen Bug. Dieser greift allerdings nur bei Dokumenten, die mit dieser
-      neuen Version des WollMux ausgefüllt wurden. Altdokumente die mit dem
-      nicht betroffenen OOo 2.x erstellt wurden und von dem Problem betroffen
-      sind, lassen sich trotzdem nicht ohne Datenverlust in OOo 3.x öffnen.
+      verloren gehen. Diese Version des WollMux hat einen Workaround für diesen
+      Bug. Dieser greift allerdings nur bei Dokumenten, die mit dieser neuen
+      Version des WollMux ausgefüllt wurden. Altdokumente die mit dem nicht
+      betroffenen OOo 2.x erstellt wurden und von dem Problem betroffen sind,
+      lassen sich trotzdem nicht ohne Datenverlust in OOo 3.x öffnen.
     * Diverse Probleme im Zusammenhang mit OOo 3.2 behoben.
     * Beim WollMux-Seriendruck wird jetzt "Seite N von M" korrekt erzeugt.
-    * OOo ab Version 3.1 hat einen Bug der dafür sorgt, dass in manchen
-      Fällen der Anzeigemaßstab auch auf den Ausdruck übertragen wird. Dies
-      führt insbesondere bei WollMux-Formularen (wo der Anzeigemaßstab auf 4:
+    * OOo ab Version 3.1 hat einen Bug der dafür sorgt, dass in manchen Fällen
+      der Anzeigemaßstab auch auf den Ausdruck übertragen wird. Dies führt
+      insbesondere bei WollMux-Formularen (wo der Anzeigemaßstab auf 4:
       3 Monitoren typischerweise sehr klein ist) zu geschrumpften Ausdrucken.
-      Diese WollMux-Version setzt als Workaround vor jedem Ausdruck den
-      Maßstab auf "100%".
+      Diese WollMux-Version setzt als Workaround vor jedem Ausdruck den Maßstab
+      auf "100%".
     * Der Menüpunkt "Liste Bearbeiten" bei der Auswahl des Absenders in der
       WollMuxBar wurde aus Konsistenzgründen umbenannt in "Absenderliste
       verwalten...".
@@ -287,9 +569,9 @@
       Abfragen als wären es Tabellen.
 
     * Der WollMux funktioniert jetzt auch wenn die KDE/GNOME Desktop-
-      Integration von OOo aktiv ist. Früher musste man OOo mit der
-      Environment-Variable OOO_FORCE_DESKTOP=none starten. Dies ist nun nicht
-      mehr der Fall.
+      Integration von OOo aktiv ist. Früher musste man OOo mit der Environment-
+      Variable OOO_FORCE_DESKTOP=none starten. Dies ist nun nicht mehr der
+      Fall.
     * WollMux-Notizen werden jetzt unsichtbar geschaltet, damit der Benutzer
       nicht mit dem Code der WollMux-Formularbeschreibung konfrontiert wird.
     * Die Lizenz wurde geändert von EUPL 1.0 auf EUPL x.y (beliebige Version).
@@ -357,8 +639,8 @@
       Gegensatz zum früheren Verhalten des WollMux ist die Suche nach der
       wollmux.conf nicht mehr davon abhängig, ob ein Wert für DEFAULT_CONTEXT
       gesetzt wurde, und die Suche bricht ab, sobald eine wollmux.conf gefunden
-      wurde (unter bestimmten Umständen wurde in früheren WollMux-Versionen
-      die Fallback-Konfigurationsdatei in die wollmux.conf im $HOME-Verzeichnis
+      wurde (unter bestimmten Umständen wurde in früheren WollMux-Versionen die
+      Fallback-Konfigurationsdatei in die wollmux.conf im $HOME-Verzeichnis
       eingefügt).
     * Die Datei wollmuxbar.bat, die unter Windows zum Starten der WollMuxBar
       verwendet werden konnte, wurde abgelöst durch die Datei wollmuxbar.exe.
@@ -367,17 +649,17 @@
       Installation um die WollMuxBar zu starten. Ein manuelles Angeben des
       Java-Pfades wie in der wollmuxbar.bat ist daher nicht mehr nötig. Sollte
       dennoch Bedarf bestehen, kann die zu verwendende Java-Installation über
-      den Wert "JavaHome" im Registrierungschlüssel HKCU\Software\WollMux
-      (für einen Benutzer) bzw. HKLM\Software\WollMux (für alle Benutzer)
-      oder über die Umgebungsvariable JAVA_HOME festgelegt werden.
-    * Bugfix: Alle Textbereiche, die beim Drucken von Sachleitenden
-      Verfügungen zwischenzeitig ausgeblendet sind, werden nach dem Drucken
-      wieder auf den ursprünglichen Sichtbarkeitszustand gesetzt. Damit
-      können nun Textbereiche_mit_GROUPS-Attribut auch problemfrei innerhalb
-      von Sachleitenden Verfügungen verwendet werden. Bisher führte das
-      Drucken von Sachleitenden Verfügungen dazu, dass die entsprechenden
-      Textbereiche sichtbar gestellt wurden, obwohl der Textbereich gemäß der
-      zugehörige Sichtbarkeitsgruppe nicht sichtbar sein durfte.
+      den Wert "JavaHome" im Registrierungschlüssel HKCU\Software\WollMux (für
+      einen Benutzer) bzw. HKLM\Software\WollMux (für alle Benutzer) oder über
+      die Umgebungsvariable JAVA_HOME festgelegt werden.
+    * Bugfix: Alle Textbereiche, die beim Drucken von Sachleitenden Verfügungen
+      zwischenzeitig ausgeblendet sind, werden nach dem Drucken wieder auf den
+      ursprünglichen Sichtbarkeitszustand gesetzt. Damit können nun
+      Textbereiche_mit_GROUPS-Attribut auch problemfrei innerhalb von
+      Sachleitenden Verfügungen verwendet werden. Bisher führte das Drucken von
+      Sachleitenden Verfügungen dazu, dass die entsprechenden Textbereiche
+      sichtbar gestellt wurden, obwohl der Textbereich gemäß der zugehörige
+      Sichtbarkeitsgruppe nicht sichtbar sein durfte.
     * Die Verwendung von setGroups-Kommandos innerhalb von Sachleitenden
       Verfügungen oder innerhalb von Kommandos_zur_SLV-Drucksteuerung ist
       unzulässig. Die Dokumentation wurde entsprechend angepasst.
@@ -403,25 +685,24 @@
       zugelassenen Zustand reparieren. Insbesondere ist es ein ungültiger
       Zustand, wenn die Textmarke Nutztext umschließt, da dieser Inhalt nicht
       sicher ist und in früheren WollMux-Versionen bei Aktionen wie z.B.
-      "Empfängerfeld einfügen" oder "Seriendruck (WollMux)" verloren ging.
-      Zur Vermeidung dieser Unsicherheit wird nun die Textmarke vor den
-      Nutztext gesetzt. Sowohl Textmarke als auch Nutztext bleiben erhalten.
+      "Empfängerfeld einfügen" oder "Seriendruck (WollMux)" verloren ging. Zur
+      Vermeidung dieser Unsicherheit wird nun die Textmarke vor den Nutztext
+      gesetzt. Sowohl Textmarke als auch Nutztext bleiben erhalten.
     * Neben der obigen Änderung in Bezug auf Textmarken mit InsertFormValue-
       Kommandos wurde das Behandeln von Textmarken zudem grundsätzlich
-      verändert und ist nun wesentlich robuster. Auch in anderen Szenarien
-      kann es nun nicht mehr vorkommen, dass Textmarken unerwünscht Nutztext
+      verändert und ist nun wesentlich robuster. Auch in anderen Szenarien kann
+      es nun nicht mehr vorkommen, dass Textmarken unerwünscht Nutztext
       umschließen und dieser so verloren gehen kann.
-    * Der WollMux sorgt nun dafür, dass sich die Absatz- und Zeichenformate
-      von Textinhalten durch das Aus- und Wiedereinblenden nicht verändern. In
+    * Der WollMux sorgt nun dafür, dass sich die Absatz- und Zeichenformate von
+      Textinhalten durch das Aus- und Wiedereinblenden nicht verändern. In
       früheren Versionen wurde insbesondere nach dem Wiedereinblenden die
       Eigenschaft "Sichtbarkeit" explizit auf "sichtbar" gesetzt. Das
-      beeinträchtigte im Zusammenhang mit der in OOo-Issue #96878
-      beschriebenen Austauschproblematik in manchen Fällen den
-      Dokumentenaustausch von neu erstellen Dokumenten zwischen OpenOffice.org
-      2 und OpenOffice.org 3. Durch das verbesserte Verhalten des WollMux wird
-      nun dafür gesorgt, dass neu erstellte Dokumente diesbezüglich korrekt
-      zwischen OpenOffice.org 2 und OpenOffice.org 3 ausgetauscht werden
-      können.
+      beeinträchtigte im Zusammenhang mit der in OOo-Issue #96878 beschriebenen
+      Austauschproblematik in manchen Fällen den Dokumentenaustausch von neu
+      erstellen Dokumenten zwischen OpenOffice.org 2 und OpenOffice.org 3.
+      Durch das verbesserte Verhalten des WollMux wird nun dafür gesorgt, dass
+      neu erstellte Dokumente diesbezüglich korrekt zwischen OpenOffice.org 2
+      und OpenOffice.org 3 ausgetauscht werden können.
     * Nach dem Ausführen des Dokumentkommandos WM(CMD_'form') wird nun nicht
       nur mehr die Notiz innerhalb der Textmarke dieses Kommandos gelöscht,
       sondern jeglicher Inhalt, der sich eventuell innerhalb der Textmarke des
@@ -431,31 +712,31 @@
  ==================== Neu in Version 5.6.1a ====================
 
     * Zur Umgehung eines neu bekannt gewordenen OpenOffice.org-Fehlers wurde
-      das in WollMux 5.4.2 eingeführte Verhalten wieder rückgängig gemacht,
-      bei dem Textmarken mit Dokumentkommando "insertFormValue" gleich nach
-      Öffnen des Dokuments bzw. der Vorlage durch ein Leerzeichen ersetzt
-      werden, wenn sie nicht entweder ein Formularfeld enthalten oder einen von
-      <>, [] oder {} eingefassten Text. Eine entsprechende, mit WollMux 5.4.2
-      ebenso eingeführte Warnmeldung in der Logdatei wollmux.log, wurde in
-      angepasster Form beibehalten.
+      das in WollMux 5.4.2 eingeführte Verhalten wieder rückgängig gemacht, bei
+      dem Textmarken mit Dokumentkommando "insertFormValue" gleich nach Öffnen
+      des Dokuments bzw. der Vorlage durch ein Leerzeichen ersetzt werden, wenn
+      sie nicht entweder ein Formularfeld enthalten oder einen von <>, [] oder
+      {} eingefassten Text. Eine entsprechende, mit WollMux 5.4.2 ebenso
+      eingeführte Warnmeldung in der Logdatei wollmux.log, wurde in angepasster
+      Form beibehalten.
 
 
  ==================== Neu in Version 5.4.2 ====================
 
-    * In WollMux 5.4.0 gab es einen Fehler der dazu führte, dass nach
-      Speichern und Wiederöffnen von Formularen manche Werte in der Formular-
-      GUI verloren gingen. Der Fehler ist in dieser Version behoben.
+    * In WollMux 5.4.0 gab es einen Fehler der dazu führte, dass nach Speichern
+      und Wiederöffnen von Formularen manche Werte in der Formular-GUI verloren
+      gingen. Der Fehler ist in dieser Version behoben.
     * In WollMux-Versionen zwischen 5.3.1 und 5.4.1.0 funktionierte nach
       Schließen von OOo die WollMux-Leiste nicht mehr.
     * Textmarken mit Dokumentkommando "insertFormValue" werden jetzt, wenn sie
       nicht entweder ein Formularfeld enthalten oder einen von <>, [] oder {}
-      eingefassten Text gleich nach Öffnen des Dokuments bzw. der Vorlage
-      durch den leeren String ersetzt. Ein Formularfeld wird weiterhin nur bei
-      Bedarf eingefügt. Dadurch wird das Verhalten optisch wieder dem von
-      WollMux-Versionen vor 3.11.1 angenähert. Dies beseitigt das Problem,
-      dass bei manchen Formularen Teile des Texts, die in WollMux-Versionen vor
-      3.11.1 nicht angezeigt wurden, in Versionen ab 3.11.1 in manchen
-      Situationen zu sehen waren und in anderen Situationen gelöscht wurden.
+      eingefassten Text gleich nach Öffnen des Dokuments bzw. der Vorlage durch
+      den leeren String ersetzt. Ein Formularfeld wird weiterhin nur bei Bedarf
+      eingefügt. Dadurch wird das Verhalten optisch wieder dem von WollMux-
+      Versionen vor 3.11.1 angenähert. Dies beseitigt das Problem, dass bei
+      manchen Formularen Teile des Texts, die in WollMux-Versionen vor 3.11.1
+      nicht angezeigt wurden, in Versionen ab 3.11.1 in manchen Situationen zu
+      sehen waren und in anderen Situationen gelöscht wurden.
       Achtung! Dies kann in fehlerhaften Formularen dazu führen, dass wichtige
       Teile des Texts verschwinden. Aus diesem Grund gibt der WollMux eine
       Warnmeldung in der wollmux.log aus (mit Priorität LOG), wannimmer er
@@ -474,8 +755,8 @@
       inhaltlicher Fehler in erzeugten Dokumenten werden die entsprechenden
       Bookmarks nun durch einzelne Leerzeichen an Stelle der ursprünglichen
       Leerstrings ersetzt. Die Auswirkung dieser Änderung ist z.B. im
-      Empfängerfeld des externen Briefkopfs sichtbar, in dem nun jede Zeile
-      mit einem Leerzeichen startet.
+      Empfängerfeld des externen Briefkopfs sichtbar, in dem nun jede Zeile mit
+      einem Leerzeichen startet.
     * Wiederherstellung des alten Verhaltens bezüglich der Vorbelegung von
       Formularfeldern: Beim ersten Öffnen einer WollMux-Vorlage sind alle
       Formularfelder der Form-GUI leer bzw. enthalten den Wert von AUTOFILL.
@@ -493,12 +774,12 @@
       3.0.1 und bisherigen WollMux-Versionen nicht mehr möglich war.
       Endanwenderinnen und Endanwender konnten einen Anzeigefehler
       ("!!!PRÜFEN!!!") bekommen, wenn WollMux-Formulare mehr als zwei mal
-      weiter bearbeitet wurden. Dieser WollMux enthält nun einen Workaround
-      für das Problem. Bitte verwenden Sie OpenOffice.org 3.0.1
-      ausschließlich mit einer WollMux-Version 5.4.0 oder höher.
+      weiter bearbeitet wurden. Dieser WollMux enthält nun einen Workaround für
+      das Problem. Bitte verwenden Sie OpenOffice.org 3.0.1 ausschließlich mit
+      einer WollMux-Version 5.4.0 oder höher.
     * Enthielt ein mit Datei->Drucken zu druckendes Dokument Serienbrieffelder,
-      so wurde früher der Dialog "Das Dokument enthält Serienbrief-Felder.
-      Was wollen Sie tun?" gebracht. Dieser Dialog wurde entfernt, da er seit
+      so wurde früher der Dialog "Das Dokument enthält Serienbrief-Felder. Was
+      wollen Sie tun?" gebracht. Dieser Dialog wurde entfernt, da er seit
       Einführung der neuen Seriendruckfunktion "Extras->Seriendruck (WollMux)"
       überflüssig ist und für Fehler und Verwirrungen sorgte.
     * WollMux-5.2.0 hat für den Aufbau von Vorlagen teilweise doppelt so lang
@@ -512,9 +793,9 @@
             mehr gelöscht.
           o Über den neuen Reiter_Bereiche lassen sich im Dokument ein- und
             auszublendende Bereiche anlegen und mit Sichtbarkeitsgruppen
-            verknüpfen. Insbesondere erwähnenswert ist eine Funktion die
-            einen Bereich automatisch an manuellen Seitenumbrüchen einfügt,
-            so dass in ein Formular eingebettete Teildokumente bequem ein- und
+            verknüpfen. Insbesondere erwähnenswert ist eine Funktion die einen
+            Bereich automatisch an manuellen Seitenumbrüchen einfügt, so dass
+            in ein Formular eingebettete Teildokumente bequem ein- und
             ausgeblendet werden können.
 
     * Die Lokalisierung, die bisher fester Teil des WollMux-Binärpakets war,
@@ -534,21 +815,21 @@
     * Die neue Direktive OVERRIDE_FRAG_DB_SPALTE erlaubt es, Benutzer- und
       Rollen-spezifische overrideFrag-Listen einzurichten. Ein Anwendungsfall
       ist z.B. das Einrichten einer Rolle "Englisch", die in alle Vorlagen
-      englischsprachige Briefköpfe einbindet anstatt der deutschsprachigen.
-      Ein weiteres Beispiel wäre eine Rolle "total e-quality", die als Logo
-      immer das total e-quality Logo einbindet, auch wenn das Standardlogo ein
+      englischsprachige Briefköpfe einbindet anstatt der deutschsprachigen. Ein
+      weiteres Beispiel wäre eine Rolle "total e-quality", die als Logo immer
+      das total e-quality Logo einbindet, auch wenn das Standardlogo ein
       anderes ist.
     * Mit Hilfe eines Formularanpassung-Abschnitts kann jetzt der
-      Empfängerauswahl-Reiter für alle Formulare zentral über die
-      wollmux.conf vorgegeben werden. Dadurch entfällt das Anpassen aller
-      Vorlagen, wenn z.B. ein neuer Zustellvermerk hinzukommt.
+      Empfängerauswahl-Reiter für alle Formulare zentral über die wollmux.conf
+      vorgegeben werden. Dadurch entfällt das Anpassen aller Vorlagen, wenn
+      z.B. ein neuer Zustellvermerk hinzukommt.
     * Mit Hilfe eines Formularanpassung-Abschnitts kann jetzt das Vorhandensein
       der "Drucken.." und "PDF.." Buttons für alle Formulare zentral über die
       wollmux.conf gesteuert werden.
     * Wichtiger Bugfix: Wenn Formulare transformierte Felder enthalten, so
-      wurden diese in früheren Versionen nach dem Speichern und erneuten
-      Öffnen des Formulars in der FormularGUI immer mit "!!!PRÜFEN!!!"
-      markiert. Der Bugfix behebt dieses Problem.
+      wurden diese in früheren Versionen nach dem Speichern und erneuten Öffnen
+      des Formulars in der FormularGUI immer mit "!!!PRÜFEN!!!" markiert. Der
+      Bugfix behebt dieses Problem.
     * Das Scrollrad scrollt jetzt in diversen Dialogen des WollMux schneller,
       z.B. im FormularMax 4000.
 
@@ -641,9 +922,8 @@
             abgeschnitten. Dies betrifft insbesondere den Seriendruck, wo
             dieses Problem aufgetreten ist, wenn die Serienbriefdaten so viele
             Spalten enthielten, dass nicht alle im Menü zum Einfügen der
-            Seriendruckfelder angeklickt werden konnten. Die Menüs der
-            WollMux-Leiste bleiben weiterhin auf eine Bildschirmlänge
-            beschränkt.
+            Seriendruckfelder angeklickt werden konnten. Die Menüs der WollMux-
+            Leiste bleiben weiterhin auf eine Bildschirmlänge beschränkt.
           o Als Quelle für den WollMux-Seriendruck sind jetzt beliebige in
             OpenOffice.org registrierte Datenquellen verwendbar. Damit können
             z.B. auch Oracle-Datenbanken benutzt werden.
@@ -669,8 +949,8 @@
       Einfügungen, die in Form eines kollabierten Bookmarks in Zellen einer
       Tabelle vorkamen.
     * Synchronisation mit anderen Anwendungen: Im WollMux wurden die
-      notwendigen Änderungen vorgenommen, damit andere externe_Anwendungen_
-      (wie_z.B._JavaComm)_mit_dem_WollMux_synchronisiert werden können.
+      notwendigen Änderungen vorgenommen, damit andere externe_Anwendungen_(wie
+      z.B._JavaComm)_mit_dem_WollMux_synchronisiert werden können.
     * Die Scrollleiste am rechten Rand wird jetzt in der FormularGUI immer
       dargestellt. Dies beseitigt das Problem, dass die FormularGUI oft zu
       klein erzeugt wurde, so dass das letzte Element nur durch Scrollen
@@ -684,12 +964,11 @@
       Serienbrieffelder zerstört. Stattdessen verweigert der FM4000 mit einer
       Fehlermeldung den Start, wenn er ein Dokument antrifft, das er nicht ohne
       Datenverlust bearbeiten kann.
-    * Komfortdruck Sachleitende Verfügungen: Der Dialog "Einstellungen für
-      den Druck" erscheint jetzt nach dem Betättigen der Buttons
-      "Drucken","Alle Ausfertigungen Drucken" bzw. Alle Drucken. Der bisherige
-      Button "Druckereinstellungen" sollte für die wollmux-standard-conf
-      3.11.1 oder älter in der dialoge.conf auskommentiert bzw. gelöscht
-      werden.
+    * Komfortdruck Sachleitende Verfügungen: Der Dialog "Einstellungen für den
+      Druck" erscheint jetzt nach dem Betättigen der Buttons "Drucken","Alle
+      Ausfertigungen Drucken" bzw. Alle Drucken. Der bisherige Button
+      "Druckereinstellungen" sollte für die wollmux-standard-conf 3.11.1 oder
+      älter in der dialoge.conf auskommentiert bzw. gelöscht werden.
     * Achtung: Diese Version ist mit Versionen der WollMuxBar älter als 3.11.2
       nicht kompatibel. Bitte vermeiden Sie es, verschiedene Versionen von
       WollMuxBar.jar und WollMux.uno.pkg zu mischen.
@@ -710,13 +989,13 @@
             Verkettungsreihenfolge der Komfortdruckfunktionen festgelegt werden
             kann.
           o Pro Dokument können jetzt mehr als eine Druckfunktion gespeichert
-            und verarbeitet werden. Die Druckfunktionen können über den FM
-            4000 gesetzt werden.
+            und verarbeitet werden. Die Druckfunktionen können über den FM 4000
+            gesetzt werden.
     * Komfortdruck Sachleitende Verfügungen
           o Mit dem neuen Dokumentkommando WM(CMD_'originalOnly') können jetzt
             Blöcke markiert werden, die ausschließlich im Original gedruckt
-            werden. Die Symbolleiste "Sachleitende Verfügungen" besitzt
-            passend dazu eine neue Schaltfläche "nur im Original".
+            werden. Die Symbolleiste "Sachleitende Verfügungen" besitzt passend
+            dazu eine neue Schaltfläche "nur im Original".
           o Bisher durften unterhalb von Verfügungspunkten keine Tabellen mit
             Rahmen und keine manuellen Seitenumbrüche im Dokument eingefügt
             sein, denn diese Elemente wurden beim SLV-Druck nicht vollständig
@@ -745,10 +1024,10 @@
             durch einen zum Kontext passenden ersetzen.
     * Bugfixes:
           o Fehler beim Seriendruck WollMux behoben: Nachdem ein
-            Serienbriefdokument abgespeichert und neu geöffnet wurde,
-            befüllte der Seriendruck (WollMux) nicht mehr das Empfängerfeld.
-            Dieser Fehler tritt jetzt nicht mehr auf, da die Dokumentkommendos
-            WM(CMD'insertFormValue'...) jetzt bei jedem Dokumenttyp (Vorlage,
+            Serienbriefdokument abgespeichert und neu geöffnet wurde, befüllte
+            der Seriendruck (WollMux) nicht mehr das Empfängerfeld. Dieser
+            Fehler tritt jetzt nicht mehr auf, da die Dokumentkommendos WM
+            (CMD'insertFormValue'...) jetzt bei jedem Dokumenttyp (Vorlage,
             Dokument und Formulardokument) aktiv sind.
           o Fehler behoben: Direkt nach dem Öffnen des externen Briefkopfs kam
             über Einfügen->Tabelle kein Dialog zur Auswahl der gewünschten
@@ -776,9 +1055,9 @@
       Berechnungen (z.B. "Resturlaub = Gesamturlaub - Beantragterurlaub")
       erweitern. Auch das Formatieren von Zahlenwerten auf eine bestimmte
       Anzahl von Kommastellen wird jetzt unterstützt (nützlich für
-      Geldbeträge). Die neu hinzugekommenen Funktionen sind DIVIDE, SUM,
-      MINUS, PRODUCT, DIFF, ABS, SIGN, NUMCMP, LE, GE, GT, LT , STRCMP, ISERROR
-      und ISERRORSTRING.
+      Geldbeträge). Die neu hinzugekommenen Funktionen sind DIVIDE, SUM, MINUS,
+      PRODUCT, DIFF, ABS, SIGN, NUMCMP, LE, GE, GT, LT , STRCMP, ISERROR und
+      ISERRORSTRING.
     * FormularMax 4000
           o Über Ansicht/Funktionstester lässt sich eine GUI aufrufen zur
             Eingabe und zum Test von WollMux-Funktionen. So können AUTOFILLs,
@@ -789,19 +1068,19 @@
             bei Checkboxen über die Angabe "Label<<ID>>" beim Feld Hilfetext
             das Label und die ID festzulegen funktioniert jetzt.
           o Viele Formulare verwenden Reihen von Checkboxen in denen genau eine
-            anzukreuzen ist (z.B. [ ] Ja [ ] Nein [ ] keine Angabe). Werden
+            anzukreuzen ist (z.B. [ ] Ja [ ] Nein [ ] keine Angabe). Werden
             solche Checkboxen mit dem FM4000 erfasst, entstehen dadurch
-            WollMux-Formulare die mit Checkboxen überladen und nicht
-            vernünftig bedienbar sind. Statt mehrerer Checkboxen sollte in
-            solchen Fällen eine ComboBox verwendet werden, die je nach im
-            Pull-Down-Menü ausgewählten Wert die passende Checkbox im
-            Dokument aktiviert. Dies von Hand umzusetzen war jedoch bislang
-            sehr mühsam. Deswegen wurde jetzt eine Funktion Checkboxen_zu
-            ComboBox eingeführt, die dies automatisch erledigt. Alle Referate,
-            die Formulare mit derartigen Checkbox-Reihen verwenden, sollten
-            diese Funktion nutzen, um ihre Formulare benutzerfreundlicher zu
-            gestalten. Bei manchen Formularen wird dadurch eine sinnvolle
-            WollMuxifizierung überhaupt erst möglich.
+            WollMux-Formulare die mit Checkboxen überladen und nicht vernünftig
+            bedienbar sind. Statt mehrerer Checkboxen sollte in solchen Fällen
+            eine ComboBox verwendet werden, die je nach im Pull-Down-Menü
+            ausgewählten Wert die passende Checkbox im Dokument aktiviert. Dies
+            von Hand umzusetzen war jedoch bislang sehr mühsam. Deswegen wurde
+            jetzt eine Funktion Checkboxen_zu_ComboBox eingeführt, die dies
+            automatisch erledigt. Alle Referate, die Formulare mit derartigen
+            Checkbox-Reihen verwenden, sollten diese Funktion nutzen, um ihre
+            Formulare benutzerfreundlicher zu gestalten. Bei manchen Formularen
+            wird dadurch eine sinnvolle WollMuxifizierung überhaupt erst
+            möglich.
             Hinweis:Die mit Hilfe dieser Funktion bearbeiteten Formulare sind
             weiterhin mit alten WollMux-Versionen kompatibel. Ein Update der
             Endbenutzerarbeitsplätze ist also nicht erforderlich.
@@ -824,22 +1103,22 @@
     * Sachleitende-Verfügungen Komfortdruckdialog: Verfügungspunkte werden
       immer mit 1 (Anzahl Ausfertigungen) vorbelegt, auch wenn in Ihnen keine
       Zuleitungszeilen vorhanden sind.
-    * Sachleitende-Verfügungen Komfortdruckdialog: Zur Erhöhung der
-      Transparenz beim Drucken erzeugt der Komfortdruck der Sachleitenden
-      Verfügungen jetzt keine automatischen Seitenumbrüche mehr.
+    * Sachleitende-Verfügungen Komfortdruckdialog: Zur Erhöhung der Transparenz
+      beim Drucken erzeugt der Komfortdruck der Sachleitenden Verfügungen jetzt
+      keine automatischen Seitenumbrüche mehr.
     * Der Download von Dokumenten für externe Anwendungen (z.B. PDFs) aus der
       WollMuxBar sollte jetzt auch funktionieren, wenn der Quellpfad Umlaute
       und/oder Leerzeichen enthält.
-    * Die Behandlung von Pfaden mit Leerzeichen bei %include wurde geändert,
-      da die alte Umsetzung mit manchen Servern nicht funktioniert hat. Wenn
-      Sie die Standardkonfiguration verwenden und nicht selbst %includes mit
+    * Die Behandlung von Pfaden mit Leerzeichen bei %include wurde geändert, da
+      die alte Umsetzung mit manchen Servern nicht funktioniert hat. Wenn Sie
+      die Standardkonfiguration verwenden und nicht selbst %includes mit
       Leerzeichen in der URL eingefügt haben, waren Sie von dem Problem nicht
       betroffen.
     * Sachleitende Verfügungen: Durch einen Fehler in OOo wurde beim Drucken
       des Originals oft ein ungewünschter Abstand zwischen die Zeilen "Mit
-      freundlichen Grüßen" und "im Auftrag" eingefügt. Für diesen Fehler
-      konnte ein Workaround gefunden und implementiert werden, so dass der
-      Fehler jetzt nicht mehr auftritt.
+      freundlichen Grüßen" und "im Auftrag" eingefügt. Für diesen Fehler konnte
+      ein Workaround gefunden und implementiert werden, so dass der Fehler
+      jetzt nicht mehr auftritt.
     * Das Aufrufen von .ott Dateien über die WollMuxBar, um die Popups beim
       Aufruf von Vorlagen durch Doppelklick zu unterdrücken funktioniert jetzt
       auch unter Windows zuverlässig.
@@ -856,10 +1135,10 @@
       Oberfläche schlanker zu gestalten.
     * Problem mit dem Dialog "Absenderdaten Bearbeiten" bei Auflösung 800x600
       (Eingabefelder für Fußzeile zu Strich zusammengeschrumpft) behoben.
-    * Beim Referenzieren von Textfragmenten (z.B. beim Öffnen oder Einfügen
-      von Textfragmenten) erfolgt jetzt eine Prüfung ob die übergebene
-      FRAG_ID ein gültiger Bezeichner gemäß der Spezifikation ist und
-      liefert eine entsprechende Fehlermeldung, wenn dies nicht der Fall ist.
+    * Beim Referenzieren von Textfragmenten (z.B. beim Öffnen oder Einfügen von
+      Textfragmenten) erfolgt jetzt eine Prüfung ob die übergebene FRAG_ID ein
+      gültiger Bezeichner gemäß der Spezifikation ist und liefert eine
+      entsprechende Fehlermeldung, wenn dies nicht der Fall ist.
     * Der WollMux bringt jetzt wenn innerhalb von 10s die Konfiguration nicht
       eingelesen werden konnte eine Warnungsmeldung, die auf ein langsames
       Netzwerk/langsamen Server hinweist. Dies soll verhindern, dass die
@@ -867,9 +1146,9 @@
       lange dauert. Die Meldung ist rein informativ und hat keine Auswirkungen
       auf die weitere Funktionalität des WollMux oder von OpenOffice.org.
     * Es gibt ein neues Dokumentkommando overrideFrag, über das die in
-      insertFrag und insertContent verwendeten Fragmentbezeichner
-      überschrieben werden können. So können einfach Variationen von
-      Vorlagen erzeugt werden, ohne die Vorlagen duplizieren zu müssen.
+      insertFrag und insertContent verwendeten Fragmentbezeichner überschrieben
+      werden können. So können einfach Variationen von Vorlagen erzeugt werden,
+      ohne die Vorlagen duplizieren zu müssen.
   Achtung
       Damit das neue Feature zur Einschränkung des Seitenbereichs beim
       Sachleitenden-Verfügungen Komfortdruck genutzt werden kann, ist eine
@@ -885,52 +1164,50 @@
           o Symbolleiste Textbausteine (WollMux): Buttons "Textbaustein
             einfügen", "Platzhalter anspringen" und "Empfänger auswählen"
           o Symbolleiste Werkzeuge für Vorlagenersteller (WollMux): Buttons
-            "FormularMax 4000", "Textbausteinverweis einfügen", "Dump Info"
-            und "Info über Vorlagen und Formulare"
+            "FormularMax 4000", "Textbausteinverweis einfügen", "Dump Info" und
+            "Info über Vorlagen und Formulare"
           o Menüpunkt Hilfe->Info über Vorlagen und Formulare (WollMux):
             liefert die Versionsinformation des WollMux. Achtung: Damit der
             Menüpunkt in OOo erscheint, ist mindestens OOo 2.0.4 notwendig.
           o Menüpunkt Extras->Seriendruck (WollMux): ruft die neue
-            Seriendruckfunktion (siehe unten) auf. Achtung: Damit der
-            Menüpunkt in OOo erscheint, ist mindestens OOo 2.0.4 notwendig.
+            Seriendruckfunktion (siehe unten) auf. Achtung: Damit der Menüpunkt
+            in OOo erscheint, ist mindestens OOo 2.0.4 notwendig.
     * Interaktive Seriendruck-Funktion superMailMerge
-          o Lässt den Benutzer die Daten für den Seriendruck zusätzlich zu
-            den normalen OOo-Datenquellen auch aus Tabellenblättern offener
-            Calc-Dokumente wählen (ohne die Notwendigkeit einer Datenquellen-
+          o Lässt den Benutzer die Daten für den Seriendruck zusätzlich zu den
+            normalen OOo-Datenquellen auch aus Tabellenblättern offener Calc-
+            Dokumente wählen (ohne die Notwendigkeit einer Datenquellen-
             Registrierung in OOo). Dabei werden nur die sichtbaren Zellen
-            verwendet, so dass die Datensätze in Calc gefiltert werden
-            können.
+            verwendet, so dass die Datensätze in Calc gefiltert werden können.
           o Über den Menüpunkt Extras->Seriendruck (WollMux) kann die neue
-            Seriendruckfunktion aufgerufen werden. Achtung: Damit der
-            Menüpunkt in OOo erscheint, ist mindestens OOo 2.0.4 notwendig.
+            Seriendruckfunktion aufgerufen werden. Achtung: Damit der Menüpunkt
+            in OOo erscheint, ist mindestens OOo 2.0.4 notwendig.
           o Für Makro-Programmierer steht die neue Seriendruckfunktion auch
             über die Dispatch-URL_'wollmux:Seriendruck' zur Verfügung.
     * Verbesserungen des Formularsystems
           o Verbessertes Verhalten nach dem Betätigen der Schaltfläche
-            "Abbrechen" in der FormularGUI: Nach dem Betätigen der
-            Schaltfläche "Abbrechen" kam früher ein Dialog mit der Frage
-            "Speichern", "Verwerfen" und "Abbrechen". Wurde dort auf
-            "Abbrechen" geklickt, so wurde das Dokument trotzdem geschlossen.
-            Dies ist jetzt nicht mehr der Fall.
+            "Abbrechen" in der FormularGUI: Nach dem Betätigen der Schaltfläche
+            "Abbrechen" kam früher ein Dialog mit der Frage "Speichern",
+            "Verwerfen" und "Abbrechen". Wurde dort auf "Abbrechen" geklickt,
+            so wurde das Dokument trotzdem geschlossen. Dies ist jetzt nicht
+            mehr der Fall.
           o Multi-Form: Multi-Form ist ein Mechanismus der es ermöglicht,
             mehrere Formulardokumente über ein gemeinsames Formularfenster zu
             befüllen, wobei in mehreren Formularen benutzte Daten nur einmal
             eingegeben werden müssen.
           o Bei WollMux-Formularen wird jetzt an den Dokumentanfang gesprungen
             nachdem alles vollständig initialisiert wurde.
-          o Im FormularMax 4000 können jetzt bei Funktionen (z.B. AUTOFILL)
-            als Parameter auch Referenzen auf Steuerelemente ausgewählt
-            werden.
+          o Im FormularMax 4000 können jetzt bei Funktionen (z.B. AUTOFILL) als
+            Parameter auch Referenzen auf Steuerelemente ausgewählt werden.
           o Verbesserungen bei der Unterstützung referatseigener_Plugins.
     * Verbesserungen des Komfortdrucks für Sachleitende Verfügungen
           o Beim Drucken von Sachleitenden Verfügungen wurden bisher
             gelegentlich unnötige Seitenumbrüche vor die Verfügungspunkte
             gesetzt. Dieser Fehler ist nun behoben.
           o Über den Abschnitt_SachleitendeVerfügungen können jetzt
-            Hintergrundfarben für die Druckblöcke der Sachleitenden
-            Verfügungen "immer drucken", "immer außer Original" und "nur im
-            Entwurf" vergeben werden, mit denen die Blöcke optisch
-            hervorgehoben werden können.
+            Hintergrundfarben für die Druckblöcke der Sachleitenden Verfügungen
+            "immer drucken", "immer außer Original" und "nur im Entwurf"
+            vergeben werden, mit denen die Blöcke optisch hervorgehoben werden
+            können.
     * Sonstiges
           o Enthält ein Dokument Serienbrieffelder, so erscheint beim Drucken
             ein Dialog, über den ausgewählt werden kann, ob die
@@ -960,9 +1237,9 @@
             einer Minute lag. Dies sollte nun nicht mehr vorkommen.
   ACHTUNG
       Die Performance-Verbesserungen waren nur möglich durch tiefgreifende
-      Änderungen an zentralen Teilen des WollMux. Es ist nicht
-      auszuschließen, dass sich im Zuge dieser Änderungen Fehler
-      eingeschlichen haben, die sich in unseren Tests nicht gezeigt haben.
+      Änderungen an zentralen Teilen des WollMux. Es ist nicht auszuschließen,
+      dass sich im Zuge dieser Änderungen Fehler eingeschlichen haben, die sich
+      in unseren Tests nicht gezeigt haben.
       Bitte testen Sie daher dieses Release gründlich mit Ihren jeweiligen
       Referatskonfigurationen.
 
@@ -979,13 +1256,12 @@
       Da die Verwendung von setGroups auch bisher schon der vorgesehene und von
       uns kommunizierte Weg zum Markieren von Ein/Ausblendungen war, ist nicht
       davon auzugehen, dass das entfernte Feature in freier Wildbahn verwendet
-      wird. Dennoch sollten Sie dies überprüfen. Es genügt, alle Vorlagen,
-      die Ein/Ausblendungen verwenden einmal zu öffnen und danach in die
+      wird. Dennoch sollten Sie dies überprüfen. Es genügt, alle Vorlagen, die
+      Ein/Ausblendungen verwenden einmal zu öffnen und danach in die
       wollmux.log zu schauen. Verwendet eine Vorlage ein nicht mehr
       unterstütztes GROUPS-Attribut, so gibt es einen ERROR-Eintrag.
-      Anmerkung: Die Unterstützung des GROUPS-Attributs für Bereiche
-      (Einfügen/Bereich... bzw. Format/Bereiche...) ist von der Änderung
-      nicht betroffen.
+      Anmerkung: Die Unterstützung des GROUPS-Attributs für Bereiche (Einfügen/
+      Bereich... bzw. Format/Bereiche...) ist von der Änderung nicht betroffen.
   Achtung
       Bitte bei Einführung der neuen WollMux Version unbedingt auch die
       WollMuxBar aktualisieren, da die alte Version der WollMuxBar nicht mehr
@@ -1011,11 +1287,11 @@
       in denen .class Dateien gesucht werden für externe Funktionen (TRAFOs
       etc.) Dies erlaubt den Referaten auf einfache Weise, ihre eigenen
       WollMux-Plugins zu verteilen und auszurollen.
-    * Bleibt der Textinhalt eines insertFrag-Befehls nach dem Einfügen leer
-      und ist der insertFrag-Befehl das einzige Element in einem Absatz, so
-      wird dieser Absatz gelöscht. Dies ist z.B. sinnvoll, um die erste Zeile
-      einer Mischvorlage ("<internerBriefkopf>" bzw. "<externerBriefkopf>")
-      nach dem Einfügen zu löschen.
+    * Bleibt der Textinhalt eines insertFrag-Befehls nach dem Einfügen leer und
+      ist der insertFrag-Befehl das einzige Element in einem Absatz, so wird
+      dieser Absatz gelöscht. Dies ist z.B. sinnvoll, um die erste Zeile einer
+      Mischvorlage ("<internerBriefkopf>" bzw. "<externerBriefkopf>") nach dem
+      Einfügen zu löschen.
     * FormularMax_4000: Das Einfügen des Empfängerauswahl-Tabs fügt nun auch
       ein Eingabefeld für "Unser Zeichen" sowie weitere Alternativen für
       Zustellvermerke ein.
@@ -1038,8 +1314,8 @@
       lassen. Dies erleichtert die zentrale Verteilung und Administration von
       OOo-Datenquellen.
     * Mit dem Namenszusatz_'GROUPS_...' können jetzt auch über "Einfügen-
-      >Bereich..." erstellte Textbereiche mit Sichtbarkeitsgruppen für die
-      Ein-/Ausblendung versehen werden. Damit können jetzt auch Tabellen und
+      >Bereich..." erstellte Textbereiche mit Sichtbarkeitsgruppen für die Ein-
+      /Ausblendung versehen werden. Damit können jetzt auch Tabellen und
       manuelle Seitenumbrücke vollständig ausgeblendet werden, die unter der
       Verwendung von Bookmarks nicht sauber ausgeblendet werden konnten.
     * Der WollMux erfasst jetzt auch normale Serienbrieffelder und kann diese
@@ -1072,11 +1348,10 @@
     * FormularMax_4000: Sichtbarkeit-Abschnitt wird nicht mehr gelöscht, d.h.
       Ein/Ausblendungen können realisiert werden.
     * FormularMax_4000: "Speichern unter..." funktioniert (wieder) korrekt
-    * Fehler bei Sachleitenden Verfügungen unter Windows NT behoben:
-      OpenOffice hängt, wenn auf die Schaltfläche "Block: immer drucken"
-      gedrückt wird.
-    * Komfortdruckfunktionen: Das XPrintModel unterstützt nun die neue
-      Funktion setFormValue(id, value), mit der Formularwerte vor dem Drucken
+    * Fehler bei Sachleitenden Verfügungen unter Windows NT behoben: OpenOffice
+      hängt, wenn auf die Schaltfläche "Block: immer drucken" gedrückt wird.
+    * Komfortdruckfunktionen: Das XPrintModel unterstützt nun die neue Funktion
+      setFormValue(id, value), mit der Formularwerte vor dem Drucken
       programmatisch verändert werden können.
     * Die Symbolleiste "Sachleitende Verfügungen" wird jetzt standardmäßig
       deaktiviert, kann aber über "Ansicht->Symbolleisten->Sachleitende
@@ -1111,18 +1386,18 @@
       Konfig-Datei hinterlegt werden, die gelesen wird, wenn im
       Benutzerverzeichnis keine vorhanden ist bzw. keinen DEFAULT_CONTEXT
       definiert. Details siehe Handbuch.
-    * Die WollMux-Leiste unterstützt jetzt die ACTION "about", die einen
-      Dialog aufruft, der wichtige (Versions)Informationen zum aktuell
-      installierten WollMux enthält.
+    * Die WollMux-Leiste unterstützt jetzt die ACTION "about", die einen Dialog
+      aufruft, der wichtige (Versions)Informationen zum aktuell installierten
+      WollMux enthält.
     * Der "Icon" Modus wird von der WollMux-Leiste nicht mehr unterstützt, da
-      zur Fehlerbehebung größere Umstrukturierungen erforderlich waren und
-      der Aufwand für das Beibehalten des Icon-Modus aufgrund der negativen
+      zur Fehlerbehebung größere Umstrukturierungen erforderlich waren und der
+      Aufwand für das Beibehalten des Icon-Modus aufgrund der negativen
       Nutzerresonanz nicht gerechtfertigt erschien.
-    * In dbConf-Funktionsdialogen (z.B. Empfängerauswahl) ist es jetzt
-      möglich, gleich eine Ergebnisliste anzeigen zu lassen, ohne dass der
-      Benutzer suchen muss. Bei Datenquellen des Typs "conf" ist auch das
-      Anzeigen des kompletten Inhalts möglich. Dies ist zum Beispiel nützlich
-      um dem Benutzer in der Empfängerauswahl eine Liste aller Krankenkassen
+    * In dbConf-Funktionsdialogen (z.B. Empfängerauswahl) ist es jetzt möglich,
+      gleich eine Ergebnisliste anzeigen zu lassen, ohne dass der Benutzer
+      suchen muss. Bei Datenquellen des Typs "conf" ist auch das Anzeigen des
+      kompletten Inhalts möglich. Dies ist zum Beispiel nützlich um dem
+      Benutzer in der Empfängerauswahl eine Liste aller Krankenkassen
       anzubieten.
     * Checkboxen (bzw. ihre Label) werden durch eine Umrandung markiert, wenn
       sie den Fokus haben
@@ -1173,9 +1448,9 @@
     * Neue Grundfunktion REPLACE, die Ersetzungen von Zeichenketten in Strings
       erlaubt.
     * Funktion zum Formatieren von Telefonnummern nach DIN 5008.
-    * insertValue-Daten können jetzt mit Formatierungsfunktionen belegt
-      werden. Die Standardkonfiguration wird dies in Zukunft nutzen, um
-      Telefonnummern nach DIN 5008 zu formatieren.
+    * insertValue-Daten können jetzt mit Formatierungsfunktionen belegt werden.
+      Die Standardkonfiguration wird dies in Zukunft nutzen, um Telefonnummern
+      nach DIN 5008 zu formatieren.
     * Das neue Dokumentkommando insertFunctionValue kann verwendet werden, um
       die Rückgabewerte referatspezifischer Funktionen in den Briefkopf
       einfügen zu können.
@@ -1204,9 +1479,9 @@
  ==================== Neu in Version 1.2.0 ====================
 
     * Das Formularsystem steht (erstmals) zur Verfügung
-    * Über die Dokumentkommandos_"setType" können Sie steuern, ob ein
-      Dokument bzw. eine Vorlage wie eine Vorlage, wie eine Vorlage für eine
-      Vorlage oder als Formulardokument behandelt werden soll.
+    * Über die Dokumentkommandos_"setType" können Sie steuern, ob ein Dokument
+      bzw. eine Vorlage wie eine Vorlage, wie eine Vorlage für eine Vorlage
+      oder als Formulardokument behandelt werden soll.
 
 
  ==================== Neu in Version 0.96.0 ====================
@@ -1215,11 +1490,11 @@
       und die Person nochmal aus dem Suchfeld einfügen. Dadurch erhält man 2
       aus dem LDAP abgeglichene Einträge mit verschiedener Rolle, die man
       verschieden anpassen kann (z.B. unterschiedliche Fußzeile).
-    * Umlaute in %include und Fragment-URLs sind jetzt möglich. Zu beachten
+    * Umlaute in %include und Fragment-URLs sind jetzt möglich. Zu beachten
       ist, dass
           o falls ein Webserver verwendet wird, die Dateinamen auf diesem UTF-
             8-kodiert vorliegen.
-          o vorkodierte URLs (d.h. welche, bei denen Umlaute bereits durch %...
+          o vorkodierte URLs (d.h. welche, bei denen Umlaute bereits durch %...
             ersetzt wurden) in wollmux.conf nur funktionieren, wenn die
             Vorkodierung mit UTF-8 erfolgt ist. Siehe hierzu P811.
     * Das Startverhalten der WollMux-Leiste wurde verbessert. Die Leiste wird
@@ -1230,8 +1505,8 @@
       netzlaufwerke/fileserver/wollmux") so wird dieser Pfad relativ zum
       .wollmux-Verzeichnis ausgewertet. Dies erlaubt es, die WollMux-
       Konfiguration auf einem Netzlaufwerk zu halten, auch wenn das
-      Netzlaufwerk (wie auf dem Basis-Client üblich) einen
-      benutzerspezifischen Pfad hat.
+      Netzlaufwerk (wie auf dem Basis-Client üblich) einen benutzerspezifischen
+      Pfad hat.
     * Diverse Eigenschaften der WollMuxBar sind jetzt konfigurierbar
           o der Anzeigemodus der WollMuxBar (z.B. Verwandeln in ein Icon bei
             Fokus-Verlust)
@@ -1248,13 +1523,13 @@
       Dokumenterstellung aktualisiert werden.
     * Viele der bislang benutzersichtbaren Textmarken der Form "WM(...)" werden
       nun entfernt.
-    * Die aus mehreren Fragmenten zusammengesetzten Dokumente (z.B.
-      Briefköpfe) enthalten nun keine versteckten Leerzeichen mehr.
+    * Die aus mehreren Fragmenten zusammengesetzten Dokumente (z.B. Briefköpfe)
+      enthalten nun keine versteckten Leerzeichen mehr.
 
 
  ==================== Neu in Version 0.95.0 ====================
 
     * Unterstützung von Umlauten in URLs
-    * In der Menübeschreibung wird eine neue ACTION "openDocument"
-      unterstützt, die ein Fragment direkt zum Bearbeiten öffnet anstatt es
-      als Vorlage für ein neues Dokument "UnbenanntX" zu verwenden.
+    * In der Menübeschreibung wird eine neue ACTION "openDocument" unterstützt,
+      die ein Fragment direkt zum Bearbeiten öffnet anstatt es als Vorlage für
+      ein neues Dokument "UnbenanntX" zu verwenden.
