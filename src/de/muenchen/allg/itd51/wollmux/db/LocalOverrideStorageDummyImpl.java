@@ -28,7 +28,7 @@ public class LocalOverrideStorageDummyImpl implements LocalOverrideStorage
       @Override
       public String get(String columnName) throws ColumnNotFoundException
       {
-        return "<" + columnName + ">";
+        return columnName;
       }
 
       @Override
@@ -127,6 +127,9 @@ public class LocalOverrideStorageDummyImpl implements LocalOverrideStorage
   @Override
   public Set<String> getSchema()
   {
+    if ( schema.isEmpty()){
+      schema.add(de.muenchen.allg.itd51.wollmux.NoConfig.NOCONFIG);
+    }
     return schema;
   }
 
@@ -159,5 +162,4 @@ public class LocalOverrideStorageDummyImpl implements LocalOverrideStorage
   {
     return false;
   }
-
 }

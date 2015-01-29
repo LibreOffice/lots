@@ -41,8 +41,9 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
  * Eine Dummy-Datenquelle, die im Schema keine Datensätze enthält und als QueryResult
- * bei getDatasetsByKey den String "<key>" zurück liefert; Zudem liefert diese
- * Datenquelle beim Im keine Datensätze enthält.
+ * bei getDatasetsByKey den String "<key>" zurück liefert.
+ * 
+ * verwendet im  noConfig Modus.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */

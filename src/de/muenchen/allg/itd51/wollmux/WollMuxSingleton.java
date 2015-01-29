@@ -116,7 +116,7 @@ public class WollMuxSingleton implements XPALProvider
 {
   public static final String OVERRIDE_FRAG_DB_SPALTE = "OVERRIDE_FRAG_DB_SPALTE";
 
-  /**
+   /**
    * Default-Wert für {@link #senderDisplayTemplate}, wenn kein Wert in der
    * Konfiguration explizit angegeben ist.
    * 
@@ -198,6 +198,11 @@ public class WollMuxSingleton implements XPALProvider
    * Verwaltet Informationen zu allen offenen OOo-Dokumenten.
    */
   private DocumentManager docManager;
+  
+  /**
+   * Verwaltet Informationen zum NoConfig mode.
+   */
+  private NoConfig noConfig;
 
   /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
@@ -227,8 +232,12 @@ public class WollMuxSingleton implements XPALProvider
 
     registeredDocumentEventListener = new Vector<XEventListener>();
 
-    WollMuxFiles.setupWollMuxDir();
-
+  
+    
+    boolean noConf = false;
+    noConf =  WollMuxFiles.setupWollMuxDir();
+    noConfig = new NoConfig(noConf);
+    
     Logger.debug(L.m("StartupWollMux"));
     Logger.debug("Build-Info: " + getBuildInfo());
     Logger.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
@@ -246,7 +255,7 @@ public class WollMuxSingleton implements XPALProvider
 
     // Versuchen, den DJ zu initialisieren und Flag setzen, falls nicht
     // erfolgreich.
-    if (getDatasourceJoiner() == null) successfulStartup = false;
+    if (getDatasourceJoiner(noConfig.isNoConfig()) == null) successfulStartup = false;
 
     // Setzen von senderDisplayTemplate
     this.senderDisplayTemplate = DEFAULT_SENDER_DISPLAYTEMPLATE;
@@ -257,9 +266,13 @@ public class WollMuxSingleton implements XPALProvider
     }
     catch (NodeNotFoundException e)
     {
-      Logger.log(L.m(
-        "Keine Einstellung für SENDER_DISPLAYTEMPLATE gefunden! Verwende Fallback: %1",
-        DEFAULT_SENDER_DISPLAYTEMPLATE));
+      if ( ! noConfig.isNoConfig()) // nur wenn wir eine wollmux.conf haben
+      {
+        Logger.log(L.m(
+          "Keine Einstellung für SENDER_DISPLAYTEMPLATE gefunden! Verwende Fallback: %1",
+          DEFAULT_SENDER_DISPLAYTEMPLATE));
+        
+      }
       // SENDER_DISPLAYTEMPLATE sollte eigentlich verpflichtend sein und wir
       // sollten an dieser Stelle einen echten Error loggen bzw. eine
       // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
@@ -495,9 +508,13 @@ public class WollMuxSingleton implements XPALProvider
    * 
    * @return Returns the datasourceJoiner.
    */
+  public DatasourceJoiner getDatasourceJoiner(boolean noConfig)
+  {
+    return WollMuxFiles.getDatasourceJoiner(noConfig); //kein no conf Modus
+  }
   public DatasourceJoiner getDatasourceJoiner()
   {
-    return WollMuxFiles.getDatasourceJoiner();
+    return WollMuxFiles.getDatasourceJoiner(WollMuxSingleton.getInstance().isNoConfig());
   }
 
   /**
@@ -1414,4 +1431,21 @@ public class WollMuxSingleton implements XPALProvider
     }
     return null;
   }
+  
+  // NO Config //
+  public boolean isNoConfig()
+  {
+    if ( null != noConfig)
+      return noConfig.isNoConfig();
+    else
+      return false;
+  }
+  
+  public boolean showNoConfigInfo()
+  {
+    return noConfig.showNoConfigInfo();
+  }
+ 
+  
+  
 }

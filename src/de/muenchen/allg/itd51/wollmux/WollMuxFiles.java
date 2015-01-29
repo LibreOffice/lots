@@ -148,11 +148,10 @@ public class WollMuxFiles
    */
   private final static String WOLLMUX_CONF_PATH_VALUE_NAME = "ConfigPath";
 
-  private static final String WOLLMUX_CONF_NOT_FOUND_MESSAGE =
-    L.m("Es konnte keine WollMux-Konfiguration (wollmux.conf) gefunden werden!\n"
-      + "Die meisten WollMux-Funktionen werden daher nicht korrekt funktionieren.\n"
-      + "Es wurde erfolglos versucht die Datei wollmux.conf an folgenden Orten zu finden:\n");
+  private static final String WOLLMUX_NOCONF =
+      L.m("Es wurde keine WollMux-Konfiguration (wollmux.conf) gefunden - deshalb läuft WollMux im NoConfig-Modus.");
 
+  
   private static final long DATASOURCE_TIMEOUT = 10000;
 
   /**
@@ -257,14 +256,15 @@ public class WollMuxFiles
    * <li>unter dem Dateipfad, der in der Konstanten {@link #ETC_WOLLMUX_WOLLMUX_CONF}
    * festgelegt ist (nur Linux!)</li>
    * </ol>
-   * 
+   * @return true für den den Fall no Config, false bei gefundener wollmux.conf 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
-  public static void setupWollMuxDir()
+  public static boolean setupWollMuxDir()
   {
     long time = System.currentTimeMillis(); // Zeitnahme fürs Debuggen
-
+    boolean noConf = false;                 // kein no conf mode
+    
     String userHome = System.getProperty("user.home");
     wollmuxDir = new File(userHome, ".wollmux");
 
@@ -396,8 +396,9 @@ public class WollMuxFiles
       }
     }
     else
-    { // wollmux.conf existiert nicht
-      Logger.error(WOLLMUX_CONF_NOT_FOUND_MESSAGE + searchPaths);
+    { // wollmux.conf existiert nicht - damit wechseln wir in den no config mode.
+      noConf = true;
+      Logger.log(WOLLMUX_NOCONF);
     }
 
     fido.dontBark();
@@ -440,6 +441,8 @@ public class WollMuxFiles
 
     Logger.debug(L.m(".wollmux init time: %1ms", ""
       + (System.currentTimeMillis() - time)));
+    
+    return noConf;
   }
 
   /**
@@ -523,6 +526,10 @@ public class WollMuxFiles
    */
   public static DatasourceJoiner getDatasourceJoiner()
   {
+    return getDatasourceJoiner(WollMuxSingleton.getInstance().isNoConfig());
+  }
+  public static DatasourceJoiner getDatasourceJoiner(boolean noConfig)
+  {
     if (!djInitialized)
     {
       djInitialized = true;
@@ -567,6 +574,9 @@ public class WollMuxFiles
 
       try
       {
+        if (noConfig)
+          senderSourceStr = de.muenchen.allg.itd51.wollmux.NoConfig.NOCONFIG;
+        
         datasourceJoiner =
           new DatasourceJoiner(getWollmuxConf(), senderSourceStr, getLosCacheFile(),
             getDEFAULT_CONTEXT(), datasourceTimeoutLong);

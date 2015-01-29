@@ -1443,6 +1443,9 @@ public class DocumentCommandInterpreter
    */
   private void insertErrorField(DocumentCommand cmd, java.lang.Exception e)
   {
+   
+    WollMuxSingleton.getInstance().showNoConfigInfo();
+    
     String msg = L.m("Fehler in Dokumentkommando '%1'", cmd.getBookmarkName());
 
     // Meldung auch auf dem Logger ausgeben

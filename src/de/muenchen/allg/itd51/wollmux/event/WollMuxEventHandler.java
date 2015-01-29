@@ -342,6 +342,7 @@ public class WollMuxEventHandler
       }
       catch (WollMuxFehlerException e)
       {
+        WollMuxSingleton.getInstance().showNoConfigInfo();
         errorMessage(e);
       }
       // Notnagel für alle Runtime-Exceptions.

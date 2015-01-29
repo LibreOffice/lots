@@ -73,6 +73,8 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
+import de.muenchen.allg.itd51.wollmux.db.DummyDatasourceWithMessagebox;
 
 /**
  * Stellt eine virtuelle Datenbank zur Verfügung, die ihre Daten aus verschiedenen
@@ -88,7 +90,7 @@ public class DatasourceJoiner
    * einfriert.
    */
   private long queryTimeout;
-
+  
   /**
    * Muster für erlaubte Suchstrings für den Aufruf von find().
    */
@@ -163,6 +165,7 @@ public class DatasourceJoiner
       File losCache, URL context, long datasourceTimeout)
       throws ConfigurationErrorException
   {
+
     init(joinConf, mainSourceName, losCache, context, datasourceTimeout);
   }
 
@@ -257,21 +260,36 @@ public class DatasourceJoiner
       nameToDatasource.put(name, ds);
     }
 
-    myLOS = new LocalOverrideStorageStandardImpl(losCache, context);
-
+    // kann sein, dass noch kein singleton erstellt ist - kein Zugriff auf no config
+    if (mainSourceName.equals(de.muenchen.allg.itd51.wollmux.NoConfig.NOCONFIG))
+    {
+      myLOS = new LocalOverrideStorageDummyImpl();// no config, kein cache ! 
+    }
+    else
+    {
+      myLOS = new LocalOverrideStorageStandardImpl(losCache, context);//mit config
+    }
+    
+    
     Set<String> schema = myLOS.getSchema();
 
     if (!nameToDatasource.containsKey(mainSourceName))
     {
-      if (schema == null)
+      if (schema == null){
         throw new ConfigurationErrorException(L.m(
           "Datenquelle \"%1\" nicht definiert und Cache nicht vorhanden",
           mainSourceName));
-
-      Logger.error(L.m(
-        "Datenquelle \"%1\" nicht definiert => verwende alte Daten aus Cache",
-        mainSourceName));
-      mainDatasource = new EmptyDatasource(schema, mainSourceName);
+      }
+      
+      if ( ! mainSourceName.equals(de.muenchen.allg.itd51.wollmux.NoConfig.NOCONFIG)){
+        Logger.error(L.m("Datenquelle \"%1\" nicht definiert => verwende alte Daten aus Cache",
+                                        mainSourceName));
+        mainDatasource = new EmptyDatasource(schema, mainSourceName);
+      }
+      else
+      {
+        mainDatasource = new de.muenchen.allg.itd51.wollmux.db.DummyDatasourceWithMessagebox(schema, mainSourceName);
+      }
       nameToDatasource.put(mainSourceName, mainDatasource);
     }
     else
