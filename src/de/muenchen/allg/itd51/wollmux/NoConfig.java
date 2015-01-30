@@ -4,6 +4,7 @@
 package de.muenchen.allg.itd51.wollmux;
 
 /**
+ * No config Modus
  * @author 
  *
  */
@@ -14,10 +15,10 @@ public class NoConfig
     private static boolean noConfigMode = false;                // modus
     private static boolean noConfigInfoShown = false;           // Anwender schon auf no config modus hingewiesen ?
   
-  //ctor
+    
     public NoConfig()
     {
-   //   noConfigMode = false;
+      noConfigMode = false;
       noConfigInfoShown = false;
     }
   
@@ -27,16 +28,14 @@ public class NoConfig
       noConfigInfoShown = false;
     }
   
-  // meth.
+    /**
+     * Läuft wollmux im no config Modus ?
+     * @return true wenn no config Modus, false falls nicht
+     */
     public boolean isNoConfig()
     {
       return noConfigMode;
     }
-  
- //   private void setNoConfig(boolean flag)
- //   {
- //     noConfigMode = flag;
- //   }
   
     private boolean isNoConfigInfoShown()
     {
@@ -51,14 +50,14 @@ public class NoConfig
     }
     
     /**
-     * Zeige einen no config hinweis an.
+     * Zeige - einmalig - einen no config hinweis an.
      * @return true wenn der dialog angezeigt wurde, false falls nicht
      */
     public boolean showNoConfigInfo()
     {
 
       if ( isNoConfig() 
-        && ! isNoConfigInfoShown())
+      && ! isNoConfigInfoShown())
       {
         String msg = "WollMux läuft ohne wollmux.conf !\n"  
                    + "Aus diesem Grund ist leider nicht der komplette Funktionsumfang verfügbar.\n";
