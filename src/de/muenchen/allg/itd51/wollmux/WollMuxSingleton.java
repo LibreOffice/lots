@@ -255,7 +255,7 @@ public class WollMuxSingleton implements XPALProvider
 
     // Versuchen, den DJ zu initialisieren und Flag setzen, falls nicht
     // erfolgreich.
-    if (getDatasourceJoiner(noConfig.isNoConfig()) == null) successfulStartup = false;
+    if (getDatasourceJoiner() == null) successfulStartup = false;
 
     // Setzen von senderDisplayTemplate
     this.senderDisplayTemplate = DEFAULT_SENDER_DISPLAYTEMPLATE;
@@ -508,13 +508,10 @@ public class WollMuxSingleton implements XPALProvider
    * 
    * @return Returns the datasourceJoiner.
    */
-  public DatasourceJoiner getDatasourceJoiner(boolean noConfig)
-  {
-    return WollMuxFiles.getDatasourceJoiner(noConfig); //kein no conf Modus
-  }
+ 
   public DatasourceJoiner getDatasourceJoiner()
   {
-    return WollMuxFiles.getDatasourceJoiner(WollMuxSingleton.getInstance().isNoConfig());
+    return WollMuxFiles.getDatasourceJoiner();
   }
 
   /**

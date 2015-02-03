@@ -56,12 +56,13 @@ public class NoConfig
     public boolean showNoConfigInfo()
     {
 
-      if ( isNoConfig() 
-      && ! isNoConfigInfoShown())
+      if (isNoConfig() && !isNoConfigInfoShown())
       {
-        String msg = "WollMux läuft ohne wollmux.conf !\n"  
-                   + "Aus diesem Grund ist leider nicht der komplette Funktionsumfang verfügbar.\n";
-        WollMuxSingleton.showInfoModal(L.m("WollMux-Hinweis - fehlende wollmux.conf"), msg);  
+        String msg =
+          "WollMux läuft ohne wollmux.conf !\n"
+            + "Aus diesem Grund ist leider nicht der komplette Funktionsumfang verfügbar.\n";
+        WollMuxSingleton.showInfoModal(L.m("WollMux-Hinweis - fehlende wollmux.conf"),
+          msg);
         setNoConfigInfoShown();
         return true;
       }
