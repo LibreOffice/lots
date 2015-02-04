@@ -375,6 +375,29 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 			target="1.5"
 		/>
 	</target>
+
+	<target name="WollMux.oxt-ButtonsOnly">
+		<delete file="${PKG_FILE}" />
+		<zip destfile="${PKG_FILE}">
+			<fileset dir="${RDB_DIR}">
+				<include name="Addons.xcu" />
+				<include name="WriterWindowState.xcu" />
+			</fileset>
+			<fileset dir="${RDB_DIR}/BUTTONS_ONLY" includes="META-INF/manifest.xml" />
+		</zip>
+		
+		<echo level="info">unopkg remove ${PKG_NAME}:</echo>
+		<exec executable="unopkg" failifexecutionfails="false">
+			<arg line="remove ${PKG_NAME}" />
+		</exec>
+		<echo level="info">unopkg add ${PKG_NAME}:</echo>
+		<exec executable="unopkg" failifexecutionfails="false">
+			<arg line="add ${PKG_FILE}" />
+		</exec>
+		
+		<tstamp><format property="mytime" pattern="HH:mm:ss"/></tstamp>
+		<echo level="info" message="Install finished at ">${mytime}</echo>
+	</target>
 	
 	<target name="WollMuxBar.jar" depends="makeversion, compile">
 		<delete file="${WOLLMUXBAR_JAR}" />
