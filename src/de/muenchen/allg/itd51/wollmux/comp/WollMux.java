@@ -192,8 +192,25 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    */
   public synchronized static boolean __writeRegistryServiceInfo(XRegistryKey xRegKey)
   {
-    return Factory.writeRegistryServiceInfo(WollMux.class.getName(),
-      WollMux.SERVICENAMES, xRegKey);
+    try
+    {
+      return Factory.writeRegistryServiceInfo(WollMux.class.getName(),
+        WollMux.SERVICENAMES, xRegKey);
+    }
+    catch (Throwable t)
+    {
+      // Es ist besser hier alles zu fangen was fliegt und es auf stderr auszugeben.
+      // So kann man z.B. mit "unopkg add <paketname>" immer gleich sehen, warum sich
+      // die Extension nicht installieren lässt. Fängt man hier nicht, erzeugt
+      // "unopkg add" eine unverständliche Fehlerausgabe und man sucht lange nach der
+      // Ursache. Wir hatten bei java-Extensions vor allem schon Probleme mit
+      // verschiedenen OOo/LO-Versionen, die wir erst finden konnten, als wir die
+      // Exception ausgegeben haben. Die Logger-Klasse möchte ich hier für die
+      // Ausgabe nicht verwenden weil dies ein Problem während der Installation und
+      // nicht während der Laufzeit ist.
+      t.printStackTrace();
+      return false;
+    }
   }
 
   /**
