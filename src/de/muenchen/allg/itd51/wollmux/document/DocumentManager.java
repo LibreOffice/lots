@@ -529,7 +529,7 @@ public class DocumentManager
     }
     catch (NodeNotFoundException e)
     {
-      pdMode = PersistentDataContainer.PERSISTENT_DATA_MODE_TRANSITION;
+      pdMode = PersistentDataContainer.PERSISTENT_DATA_MODE_RDFREADLEGACY;
       Logger.debug(L.m("Attribut %1 nicht gefunden. Verwende Voreinstellung '%2'.",
         PersistentDataContainer.PERSISTENT_DATA_MODE, pdMode));
     }
