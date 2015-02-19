@@ -168,7 +168,7 @@ public class PersistentData
     }
     catch (NodeNotFoundException e)
     {
-      pdMode = PERSISTENT_DATA_MODE_TRANSITION;
+      pdMode = PERSISTENT_DATA_MODE_rdfReadLegacy;
       Logger.debug(L.m("Attribut %1 nicht gefunden. Verwende Voreinstellung '%2'.",
         PERSISTENT_DATA_MODE, pdMode));
     }
