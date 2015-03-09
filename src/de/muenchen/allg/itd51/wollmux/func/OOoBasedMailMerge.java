@@ -214,12 +214,14 @@ public class OOoBasedMailMerge
     {
       t.interrupt();
       Logger.debug(L.m("Der OOo-Seriendruck wurde abgebrochen"));
-      return;
+      // aber aufräumen tun wir noch...
     }
 
     removeTempDatasource(dbName, tmpDir);
     ds.remove();
     inputFile.delete();
+    
+    // ... jetzt können wir nach Benutzerabbruch aufhören 
     if (pmod.isCanceled()) return;
 
     if (type == OutputType.toFile)
