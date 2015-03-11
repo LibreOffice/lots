@@ -46,7 +46,7 @@ public class QueryResultsList implements QueryResults
   /**
    * Die Liste der Datasets.
    */
-  private List<Dataset> data;
+  private List<? extends Dataset> data;
   
   /**
    * Erzeugt eine neue QueryResultsList, die die Elemente enthält 
@@ -57,24 +57,32 @@ public class QueryResultsList implements QueryResults
    */
   public QueryResultsList(Iterator<? extends Dataset> iter, int count)
   {
-    data = new Vector<Dataset>(count);
-    while(iter.hasNext()) data.add(iter.next());
+    List<Dataset> d = new Vector<Dataset>(count);
+    while(iter.hasNext()) d.add(iter.next());
+    data = d;
   }
 
   /**
    * Erzeugt eine neue QueryResultsList aus einer bestehenden Liste.
    * Achtung! Die Liste wird nicht kopiert, sondern als Referenz übernommen.
    */
-  @SuppressWarnings("unchecked")
   public QueryResultsList(List<? extends Dataset> datasets)
   {
-    List foo = datasets;
-    data = foo;
+    data = datasets;
   }
   
   public int size() { return data.size();}
   
-  public Iterator<Dataset> iterator(){ return data.iterator(); }
+  @SuppressWarnings("unchecked") 
+  // Die Typsicherheit kann hier nicht gefährdet sein, da laut
+  // http://docs.oracle.com/javase/tutorial/java/generics/wildcardGuidelines.htm vor
+  // allem gesichert sein muss, dass kein falscher Typ zur List<? extends Dataset>
+  // hinzugefügt wird. So etwas ist mit einem Iterator, der nur die Methoden
+  // hasNext(), next() und remove() kennt, nicht möglich.
+  public Iterator<Dataset> iterator()
+  {
+    return (Iterator<Dataset>) data.iterator(); 
+  }
   
   public boolean isEmpty() { return data.isEmpty(); }
 }

@@ -666,11 +666,6 @@ public class DatensatzBearbeiten
 
     public abstract String getTextFromControl();
 
-    public String getColumnName()
-    {
-      return columnName;
-    }
-
     public abstract void setTextInControl(String text);
 
     public boolean hasBeenModified()
@@ -803,7 +798,7 @@ public class DatensatzBearbeiten
   private class ComboBoxDataControl extends DataControl implements ActionListener,
       ItemListener
   {
-    public ComboBoxDataControl(String colName, JComboBox compo, Color localColor)
+    public ComboBoxDataControl(String colName, JComboBox<String> compo, Color localColor)
         throws ColumnNotFoundException
     {
       initCompo(colName, compo, localColor);
@@ -814,25 +809,28 @@ public class DatensatzBearbeiten
       compo.addItemListener(this);
     }
 
+    @SuppressWarnings("unchecked") // constructor ensures correct type    
     public void setBackground(Color c)
     {
       super.setBackground(c);
-      ((JComboBox) myComponent).getEditor().getEditorComponent().setBackground(c);
+      ((JComboBox<String>) myComponent).getEditor().getEditorComponent().setBackground(c);
     }
 
+    @SuppressWarnings("unchecked") // constructor ensures correct type    
     public void addItem(String text)
     {
       if (text == null) text = "";
-      for (int i = ((JComboBox) myComponent).getItemCount() - 1; i >= 0; --i)
+      for (int i = ((JComboBox<String>) myComponent).getItemCount() - 1; i >= 0; --i)
       {
-        if (((JComboBox) myComponent).getItemAt(i).equals(text)) return;
+        if (((JComboBox<String>) myComponent).getItemAt(i).equals(text)) return;
       }
-      ((JComboBox) myComponent).addItem(text);
+      ((JComboBox<String>) myComponent).addItem(text);
     }
 
+    @SuppressWarnings("unchecked") // constructor ensures correct type
     public String getTextFromControl()
     {
-      JComboBox combo = (JComboBox) myComponent;
+      JComboBox<String> combo = (JComboBox<String>) myComponent;
       if (combo.isEditable())
       {
         Document comboDoc =
@@ -854,9 +852,10 @@ public class DatensatzBearbeiten
       }
     }
 
+    @SuppressWarnings("unchecked") // constructor ensures correct type    
     public void setTextInControl(String text)
     {
-      JComboBox myBox = (JComboBox) myComponent;
+      JComboBox<String> myBox = (JComboBox<String>) myComponent;
       boolean edit = myBox.isEditable();
       myBox.setEditable(true);
       myBox.setSelectedItem(text);
@@ -1248,7 +1247,7 @@ public class DatensatzBearbeiten
               {}
 
               JPanel uiElement = new JPanel(new GridLayout(1, 1));
-              JComboBox combo = new JComboBox();
+              JComboBox<String> combo = new JComboBox<String>();
               combo.setEnabled(!readonly);
               boolean editable = false;
               try
@@ -1458,7 +1457,7 @@ public class DatensatzBearbeiten
     String confFile = "testdata/AbsenderdatenBearbeiten.conf";
     DJDataset datensatz = new TestDJDataset();
     ConfigThingy conf =
-      new ConfigThingy("", new URL(new File(System.getProperty("user.dir")).toURL(),
+      new ConfigThingy("", new URL(new File(System.getProperty("user.dir")).toURI().toURL(),
         confFile));
     DatensatzBearbeiten ab =
       new DatensatzBearbeiten(conf.get("AbsenderdatenBearbeiten"), datensatz);

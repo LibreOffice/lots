@@ -80,7 +80,7 @@ public class GenderDialog extends TrafoDialog
 
   private JPanel genderPanel;
 
-  private JComboBox cbAnrede;
+  private JComboBox<String> cbAnrede;
 
   private JTextField tfHerr;
 
@@ -186,7 +186,7 @@ public class GenderDialog extends TrafoDialog
     label = new JLabel(L.m("Geschlechtsbestimmendes Feld"));
     label.setFont(label.getFont().deriveFont(Font.PLAIN));
     hbox.add(label);
-    cbAnrede = new JComboBox(new Vector<String>(fieldNames));
+    cbAnrede = new JComboBox<String>(new Vector<String>(fieldNames));
     cbAnrede.setSelectedItem(anredeId);
     cbAnrede.setEditable(false);
     hbox.add(Box.createHorizontalGlue());

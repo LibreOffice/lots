@@ -45,6 +45,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -421,9 +422,9 @@ public interface UIElement extends Value
 
   public static class Combobox extends UIElementBase
   {
-    private JComboBox combo;
+    private JComboBox<?> combo;
 
-    public Combobox(String id, JComboBox combo, Object layoutConstraints,
+    public Combobox(String id, JComboBox<?> combo, Object layoutConstraints,
         Integer labelType, String label, Object labelLayoutConstraints)
     {
       this.combo = combo;
@@ -491,9 +492,9 @@ public interface UIElement extends Value
   {
     private JScrollPane scrollPane;
 
-    private JList list;
+    private JList<Object> list;
 
-    public Listbox(String id, JScrollPane scrollPane, JList list,
+    public Listbox(String id, JScrollPane scrollPane, JList<Object> list,
         Object layoutConstraints, Integer labelType, String label,
         Object labelLayoutConstraints)
     {
@@ -513,12 +514,11 @@ public interface UIElement extends Value
 
     public String getString()
     {
-      Object[] vals = list.getSelectedValues();
       StringBuffer buffy = new StringBuffer();
-      for (int i = 0; i < vals.length; ++i)
+      for (Object o : list.getSelectedValuesList())
       {
-        if (i > 0) buffy.append('\n');
-        buffy.append(vals[i].toString());
+        if (buffy.length() > 0) buffy.append('\n');
+        buffy.append(o.toString());
       }
       return buffy.toString();
     }
@@ -536,7 +536,7 @@ public interface UIElement extends Value
         vals.add(split[i]);
 
       Vector<Integer> indices = new Vector<Integer>(split.length);
-      DefaultListModel model = (DefaultListModel) list.getModel();
+      DefaultListModel<?> model = (DefaultListModel<?>) list.getModel();
       Enumeration<?> enu = model.elements();
       int index = 0;
       while (enu.hasMoreElements())
@@ -563,12 +563,11 @@ public interface UIElement extends Value
      */
     public void setList(Collection<?> newEntries)
     {
-      DefaultListModel listModel = (DefaultListModel) list.getModel();
+      DefaultListModel<Object> listModel = (DefaultListModel<Object>) list.getModel();
       listModel.clear();
-      Iterator<?> iter = newEntries.iterator();
-      while (iter.hasNext())
+      for (Object o : newEntries)
       {
-        listModel.addElement(iter.next());
+        listModel.addElement(o);
       }
     }
 
@@ -577,9 +576,9 @@ public interface UIElement extends Value
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
-    public Object[] getSelected()
+    public List<Object> getSelected()
     {
-      return list.getSelectedValues();
+      return list.getSelectedValuesList();
     }
 
     /**

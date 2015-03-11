@@ -180,7 +180,7 @@ public class AbsenderAuswaehlen
   /**
    * Die Listbox mit der persönlichen Absenderliste.
    */
-  private JList palJList;
+  private JList<Object> palJList;
 
   /**
    * Gibt an, wie die Suchresultate in der {@link #palJList} angezeigt werden sollen.
@@ -300,7 +300,7 @@ public class AbsenderAuswaehlen
   {
     Common.setLookAndFeelOnce();
 
-    palJList = new JList(new DefaultListModel());
+    palJList = new JList<Object>(new DefaultListModel<Object>());
 
     String title = L.m("TITLE fehlt für Fenster AbsenderAuswaehlen/Auswaehlen");
     try
@@ -462,7 +462,7 @@ public class AbsenderAuswaehlen
             catch (Exception e)
             {}
 
-            JList list;
+            JList<Object> list;
             if (id.equals("pal"))
             {
               list = palJList;
@@ -489,7 +489,7 @@ public class AbsenderAuswaehlen
             }
             else
             {
-              list = new JList(new DefaultListModel());
+              list = new JList<Object>(new DefaultListModel<Object>());
             }
 
             list.setVisibleRowCount(lines);
@@ -572,11 +572,11 @@ public class AbsenderAuswaehlen
    */
   private static class MyActionMouseListener extends MouseAdapter
   {
-    private JList list;
+    private JList<Object> list;
 
     private ActionListener action;
 
-    public MyActionMouseListener(JList list, ActionListener action)
+    public MyActionMouseListener(JList<Object> list, ActionListener action)
     {
       this.list = list;
       this.action = action;
@@ -643,7 +643,7 @@ public class AbsenderAuswaehlen
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void setListElements(JList list, QueryResults data, String displayTemplate)
+  private void setListElements(JList<Object> list, QueryResults data, String displayTemplate)
   {
     Object[] elements = new Object[data.size()];
     Iterator<Dataset> iter = data.iterator();
@@ -659,15 +659,15 @@ public class AbsenderAuswaehlen
       }
     });
 
-    DefaultListModel listModel = (DefaultListModel) list.getModel();
+    DefaultListModel<Object> listModel = (DefaultListModel<Object>) list.getModel();
     listModel.clear();
     for (i = 0; i < elements.length; ++i)
       listModel.addElement(elements[i]);
   }
 
-  private void selectSelectedDataset(JList list)
+  private void selectSelectedDataset(JList<?> list)
   {
-    DefaultListModel listModel = (DefaultListModel) list.getModel();
+    DefaultListModel<?> listModel = (DefaultListModel<?>) list.getModel();
     for (int i = 0; i < listModel.size(); ++i)
       if (((DJDatasetListElement) listModel.get(i)).getDataset().isSelectedDataset())
         list.setSelectedValue(listModel.get(i), true);
@@ -682,7 +682,8 @@ public class AbsenderAuswaehlen
   {
     public void valueChanged(ListSelectionEvent e)
     {
-      JList list = (JList) e.getSource();
+      @SuppressWarnings("unchecked")
+      JList<Object> list = (JList<Object>) e.getSource();
       if (list != palJList) return;
 
       DJDatasetListElement ele = (DJDatasetListElement) list.getSelectedValue();

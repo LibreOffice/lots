@@ -168,17 +168,17 @@ public class IfThenElseDialog extends TrafoDialog
     /**
      * Auswahl des zu vergleichenden Feldes.
      */
-    private JComboBox fieldSelector;
+    private JComboBox<String> fieldSelector;
 
     /**
      * Auswahl zwischen "" und "nicht".
      */
-    private JComboBox notSelector;
+    private JComboBox<String> notSelector;
 
     /**
      * Auswahl des anzuwendenden Tests.
      */
-    private JComboBox testSelector;
+    private JComboBox<TestType> testSelector;
 
     /**
      * Eingabefeld für den Vergleichswert.
@@ -437,7 +437,7 @@ public class IfThenElseDialog extends TrafoDialog
      */
     private void parseCondition(ConfigThingy conf, List<String> fieldNames)
     {
-      notSelector = new JComboBox(new String[] {
+      notSelector = new JComboBox<String>(new String[] {
         "", L.m("nicht") });
       if (conf.getName().equals("NOT"))
       {
@@ -452,7 +452,7 @@ public class IfThenElseDialog extends TrafoDialog
         notSelector.setSelectedIndex(1);
       }
 
-      testSelector = new JComboBox(testTypes);
+      testSelector = new JComboBox<TestType>(testTypes);
       determineTest: while (true)
       {
         for (int i = 0; i < testTypes.length; ++i)
@@ -476,7 +476,7 @@ public class IfThenElseDialog extends TrafoDialog
           {
             String compareConf = conf.getLastChild().toString();
             compareTo = new JTextField(compareConf, 20);
-            fieldSelector = new JComboBox(new Vector<String>(fieldNames));
+            fieldSelector = new JComboBox<String>(new Vector<String>(fieldNames));
             fieldSelector.setEditable(false);
             String fieldName = value.toString();
             Iterator<String> iter = fieldNames.iterator();

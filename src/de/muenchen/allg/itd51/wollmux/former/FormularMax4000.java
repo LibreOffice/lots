@@ -2063,13 +2063,13 @@ public class FormularMax4000
 
   private void setPrintFunction()
   {
-    final JList printFunctionCurrentList =
-      new JList(new Vector<String>(doc.getPrintFunctions()));
+    final JList<String> printFunctionCurrentList =
+      new JList<String>(new Vector<String>(doc.getPrintFunctions()));
     JPanel printFunctionEditorContentPanel = new JPanel(new BorderLayout());
     printFunctionEditorContentPanel.add(printFunctionCurrentList,
       BorderLayout.CENTER);
 
-    final JComboBox printFunctionComboBox = new JComboBox(printFunctionNames);
+    final JComboBox<String> printFunctionComboBox = new JComboBox<String>(printFunctionNames);
     printFunctionComboBox.setEditable(true);
 
     printFunctionEditorContentPanel.add(printFunctionComboBox, BorderLayout.NORTH);
@@ -2079,9 +2079,8 @@ public class FormularMax4000
     {
       public void actionPerformed(ActionEvent e)
       {
-        Object[] todel = printFunctionCurrentList.getSelectedValues();
-        for (int i = 0; i < todel.length; i++)
-          doc.removePrintFunction("" + todel[i]);
+        for (Object o : printFunctionCurrentList.getSelectedValuesList())
+          doc.removePrintFunction("" + o);
         printFunctionCurrentList.setListData(new Vector<String>(
           doc.getPrintFunctions()));
       }
@@ -2184,7 +2183,7 @@ public class FormularMax4000
     hbox.add(new JLabel(L.m("Nachträgliche Anpassung")));
     hbox.add(Box.createHorizontalGlue());
     vbox.add(hbox);
-    final JComboBox adjustFuncCombo = new JComboBox(adjustFuncs.toArray());
+    final JComboBox<String> adjustFuncCombo = new JComboBox<String>(new Vector<String>(adjustFuncs));
     if (sel > 0)
       adjustFuncCombo.setSelectedIndex(sel);
     else if (functionName != null)
@@ -2314,7 +2313,7 @@ public class FormularMax4000
   }
 
   private static ConfigThingy createFilenameGeneratorFunctionConf(
-      TextComponentTags tt, JComboBox adjustFuncCombo)
+      TextComponentTags tt, JComboBox<String> adjustFuncCombo)
   {
     if (tt.getJTextComponent().getText().trim().length() == 0) return null;
     ConfigThingy catFunc = tt.getContent(TextComponentTags.CAT_VALUE_SYNTAX);

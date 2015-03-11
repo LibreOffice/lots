@@ -71,7 +71,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -80,11 +79,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
-import com.sun.star.beans.PropertyValue;
-import com.sun.star.frame.DispatchResultEvent;
-import com.sun.star.frame.XDispatchResultListener;
-import com.sun.star.frame.XNotifyingDispatch;
-import com.sun.star.lang.EventObject;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
@@ -93,13 +87,11 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
-import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
 /**
  * Dialoge zur Bestimmung der Parameter für den wirklichen Merge (z.B. ob in
@@ -1518,7 +1510,7 @@ class MailMergeParams
    */
   private static class EMailToFieldNameUIElement extends UIElement
   {
-    private final JComboBox toFieldName;
+    private final JComboBox<String> toFieldName;
 
     public EMailToFieldNameUIElement(String label, UIElementAction action,
         final String value, String group, final MailMergeParams mmp)
@@ -1538,7 +1530,7 @@ class MailMergeParams
         if (fname.toLowerCase().contains("mail") && mailIdx == 0) mailIdx = i;
         fnames[i++] = "<" + fname + ">";
       }
-      this.toFieldName = new JComboBox(fnames);
+      this.toFieldName = new JComboBox<String>(fnames);
       toFieldName.setSelectedIndex(mailIdx);
       hbox.add(Box.createHorizontalStrut(5));
       hbox.add(toFieldName);
@@ -1651,15 +1643,12 @@ class MailMergeParams
 
   private static class PrinterSettingsUIElement extends UIElement
   {
-    MailMergeParams mmp;
-
     JTextField printerNameField;
        
     public PrinterSettingsUIElement(String label, String group,
         final MailMergeParams mmp)
     {
       super(Box.createHorizontalBox(), group, mmp);
-      this.mmp = mmp;
       
       Box hbox = (Box) getCompo();
       printerNameField = new JTextField();

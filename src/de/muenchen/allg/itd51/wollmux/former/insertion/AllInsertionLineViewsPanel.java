@@ -218,30 +218,6 @@ public class AllInsertionLineViewsPanel implements View
   }
 
   /**
-   * Löscht alle ausgewählten Elemente.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-   */
-  private void deleteSelectedElements()
-  {
-    /**
-     * Die folgende Schleife muss auf diese Weise geschrieben werden und nicht mit
-     * einem Iterator, weil es ansonsten eine ConcurrentModificationException gibt,
-     * da über {@link ViewChangeListener#viewShouldBeRemoved(View)} die Selektion
-     * während des remove() gleich verändert wird, was den Iterator invalidieren
-     * würde.
-     */
-    while (!selection.isEmpty())
-    {
-      int i = selection.lastElement();
-      OneInsertionLineView view = views.get(i);
-      InsertionModel model = view.getModel();
-      model.removeFromDocument();
-      insertionModelList.remove(model);
-    }
-  }
-
-  /**
    * Löscht die WollMux-Bookmarks um alle ausgewählten Elemente. Da es damit keine
    * Einfügestellen mehr sind, werden die entsprechenden LineViews ebenfalls
    * entfernt.

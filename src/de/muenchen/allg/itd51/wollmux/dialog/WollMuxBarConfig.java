@@ -124,12 +124,6 @@ public class WollMuxBarConfig
   private final static int BUTTON_BORDER = 2;
   
   /**
-   * Ist dieses flag false, darf die userConf nicht eingelesen werden (und damit auch
-   * nicht die Standardvorgaben überschreiben)
-   */
-  private boolean allowUserConfig;
-  
-  /**
    * Der Fenstertitel der WollMuxBar.
    */
   private String myFrame_title;
@@ -269,7 +263,6 @@ public class WollMuxBarConfig
   {
     this.userConf = userConf;
     this.defaultConf = defaultConf;
-    this.allowUserConfig = allowUserConfig;
 
     readConfig(defaultConf, true);
     if (allowUserConfig) readConfig(userConf, false);
@@ -595,7 +588,7 @@ public class WollMuxBarConfig
     gbcLabel.gridx = x++;
     gbcLabel.gridy = y;
     mainPanel.add(new JLabel(L.m("Fensterverhalten")), gbcLabel);
-    final JComboBox inputMode = new JComboBox(new String[] {
+    final JComboBox<String> inputMode = new JComboBox<String>(new String[] {
       "UpAndAway", "Minimize", "Window", "AlwaysOnTop" });
     inputMode.setEditable(false);
     gbcCombo.gridx = x++;
@@ -606,7 +599,7 @@ public class WollMuxBarConfig
     ++y;
     gbcLabel.gridx = x++;
     gbcLabel.gridy = y;
-    final JComboBox inputTrayIcon = new JComboBox(new String[] {
+    final JComboBox<String> inputTrayIcon = new JComboBox<String>(new String[] {
       "None", "Iconify", "Popup", "IconifyAndPopup" });
     inputTrayIcon.setEditable(false);
     gbcCombo.gridx = x++;
@@ -642,7 +635,7 @@ public class WollMuxBarConfig
     gbcLabel.gridx = x++;
     gbcLabel.gridy = y;
     mainPanel.add(new JLabel("X"), gbcLabel);
-    final JComboBox inputX = new JComboBox(new String[] {
+    final JComboBox<String> inputX = new JComboBox<String>(new String[] {
       "auto", "center", "min", "max" });
     inputX.setEditable(true);
     gbcCombo.gridx = x++;
@@ -654,7 +647,7 @@ public class WollMuxBarConfig
     gbcLabel.gridx = x++;
     gbcLabel.gridy = y;
     mainPanel.add(new JLabel("Y"), gbcLabel);
-    final JComboBox inputY = new JComboBox(new String[] {
+    final JComboBox<String> inputY = new JComboBox<String>(new String[] {
       "auto", "center", "min", "max" });
     inputY.setEditable(true);
     gbcCombo.gridx = x++;
@@ -666,7 +659,7 @@ public class WollMuxBarConfig
     gbcLabel.gridx = x++;
     gbcLabel.gridy = y;
     mainPanel.add(new JLabel(L.m("Breite")), gbcLabel);
-    final JComboBox inputWidth = new JComboBox(new String[] {
+    final JComboBox<String> inputWidth = new JComboBox<String>(new String[] {
       "auto", "max" });
     inputWidth.setEditable(true);
     gbcCombo.gridx = x++;
@@ -678,7 +671,7 @@ public class WollMuxBarConfig
     gbcLabel.gridx = x++;
     gbcLabel.gridy = y;
     mainPanel.add(new JLabel(L.m("Höhe")), gbcLabel);
-    final JComboBox inputHeight = new JComboBox(new String[] {
+    final JComboBox<String> inputHeight = new JComboBox<String>(new String[] {
       "auto", "max" });
     inputHeight.setEditable(true);
     gbcCombo.gridx = x++;
@@ -914,7 +907,7 @@ public class WollMuxBarConfig
    * Wählt das Item von combo aus, das equals zu str ist. Falls keines vorhanden ist,
    * wird str direkt gesetzt (ergibt nur bei einer editable ComboBox Sinn).
    */
-  private void setCombo(JComboBox combo, String str)
+  private void setCombo(JComboBox<String> combo, String str)
   {
     for (int i = 0; i < combo.getItemCount(); ++i)
       if (str.equals(combo.getItemAt(i)))

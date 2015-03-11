@@ -90,7 +90,7 @@ public class OneInsertionLineView extends LineView
   /**
    * Die ComboBox, die DB_SPALTE bzw, ID anzeigt und ändern lässt.
    */
-  private JComboBox idBox;
+  private JComboBox<String> idBox;
 
   /**
    * Erzeugt eine neue View für model.
@@ -127,7 +127,7 @@ public class OneInsertionLineView extends LineView
    */
   private JComponent makeIDView()
   {
-    idBox = new JComboBox();
+    idBox = new JComboBox<String>();
 
     if (!(this.model instanceof InsertionModel4InsertXValue))
     {

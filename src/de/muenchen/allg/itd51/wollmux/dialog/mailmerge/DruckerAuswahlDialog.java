@@ -36,6 +36,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -51,7 +52,7 @@ public class DruckerAuswahlDialog implements ActionListener {
   DruckerController controller;
   JFrame parent;
   JDialog printerDialog;
-  JComboBox viewComboBox;
+  JComboBox<String> viewComboBox;
   JLabel viewLabel;
   JButton okButton;
   JButton abbrechButton;
@@ -74,7 +75,7 @@ public class DruckerAuswahlDialog implements ActionListener {
     abbrechButton = new JButton("Abbrechen");
     abbrechButton.addActionListener(this);
 
-    viewComboBox = new JComboBox(controller.getAlleDrucker().toArray());
+    viewComboBox = new JComboBox<String>(new Vector<String>(controller.getAlleDrucker()));
     viewComboBox.setSelectedItem(controller.getDrucker());
     
     parent.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);

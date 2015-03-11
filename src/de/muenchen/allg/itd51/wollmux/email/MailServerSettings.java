@@ -21,7 +21,6 @@
 
 package de.muenchen.allg.itd51.wollmux.email;
 
-import java.util.regex.Pattern;
 
 public class MailServerSettings
 {

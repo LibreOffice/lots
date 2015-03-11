@@ -309,12 +309,12 @@ public class PersoenlicheAbsenderlisteVerwalten
   /**
    * Die Listbox mit den Suchresultaten.
    */
-  private JList resultsJList;
+  private JList<DJDatasetListElement> resultsJList;
 
   /**
    * Die Listbox mit der persönlichen Absenderliste.
    */
-  private JList palJList;
+  private JList<DJDatasetListElement> palJList;
 
   /**
    * Gibt an, wie die Suchresultate in der {@link #resultsJList} angezeigt werden
@@ -491,10 +491,10 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     Common.setLookAndFeelOnce();
 
-    resultsJList = new JList(new DefaultListModel());
-    ListCellRenderer myRenderer = new MyListCellRenderer();
+    resultsJList = new JList<DJDatasetListElement>(new DefaultListModel<DJDatasetListElement>());
+    ListCellRenderer<Object> myRenderer = new MyListCellRenderer();
     resultsJList.setCellRenderer(myRenderer);
-    palJList = new JList(new DefaultListModel());
+    palJList = new JList<DJDatasetListElement>(new DefaultListModel<DJDatasetListElement>());
 
     // KeyListener hinzufügen, damit Einträge in der PAL-Liste durch Drücken der
     // ENTF-Taste gelöscht werden können
@@ -733,7 +733,7 @@ public class PersoenlicheAbsenderlisteVerwalten
             catch (Exception e)
             {}
 
-            JList list;
+            JList<DJDatasetListElement> list;
             if (id.equals("suchergebnis"))
             {
               list = resultsJList;
@@ -784,13 +784,14 @@ public class PersoenlicheAbsenderlisteVerwalten
             }
             else
             {
-              list = new JList(new DefaultListModel());
+              list = new JList<DJDatasetListElement>(new DefaultListModel<DJDatasetListElement>());
             }
 
             list.setVisibleRowCount(lines);
             list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             list.setLayoutOrientation(JList.VERTICAL);
-            list.setPrototypeCellValue("Al-chman hemnal ulhillim el-WollMux(W-OLL-MUX-5.1)");
+            list.setFixedCellWidth((int) new JLabel(
+              "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX").getPreferredSize().getWidth());
 
             list.addListSelectionListener(myListSelectionListener);
 
@@ -886,11 +887,11 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   private static class MyActionMouseListener extends MouseAdapter
   {
-    private JList list;
+    private JList<DJDatasetListElement> list;
 
     private ActionListener action;
 
-    public MyActionMouseListener(JList list, ActionListener action)
+    public MyActionMouseListener(JList<DJDatasetListElement> list, ActionListener action)
     {
       this.list = list;
       this.action = action;
@@ -935,7 +936,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    *          ausgewählt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void setListElements(JList list, QueryResults data,
+  private void setListElements(JList<DJDatasetListElement> list, QueryResults data,
       String displayTemplate, boolean append, Dataset datasetToSelect)
   {
     int selectedIndex = -1;
@@ -976,7 +977,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       Arrays.sort(elements);
     }
 
-    DefaultListModel listModel = (DefaultListModel) list.getModel();
+    DefaultListModel<DJDatasetListElement> listModel = (DefaultListModel<DJDatasetListElement>) list.getModel();
     if (!append) listModel.clear();
     int oldSize = listModel.size();
     for (int i = 0; i < elements.length; ++i)
@@ -1006,7 +1007,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    *          ersetzen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void setListElements(JList list, QueryResults data,
+  private void setListElements(JList<DJDatasetListElement> list, QueryResults data,
       String displayTemplate, boolean append)
   {
     setListElements(list, data, displayTemplate, append, null);
@@ -1040,8 +1041,9 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     private static final long serialVersionUID = -540148680826568290L;
 
-    public Component getListCellRendererComponent(JList list, Object value,
-        int index, boolean isSelected, boolean cellHasFocus)
+    public Component getListCellRendererComponent(
+        @SuppressWarnings("rawtypes") JList list, Object value, int index,
+        boolean isSelected, boolean cellHasFocus)
     {
       try
       {
@@ -1070,13 +1072,14 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     public void valueChanged(ListSelectionEvent e)
     {
-      JList list = (JList) e.getSource();
+      @SuppressWarnings("unchecked")
+      JList<DJDatasetListElement> list = (JList<DJDatasetListElement>) e.getSource();
       if (list != palJList && list != resultsJList) return;
 
       /*
        * Dafür sorgen, dass nie in beiden Listen ein Element selektiert ist.
        */
-      JList otherlist = (list == palJList) ? resultsJList : palJList;
+      JList<DJDatasetListElement> otherlist = (list == palJList) ? resultsJList : palJList;
       if (list.getSelectedIndex() >= 0) otherlist.clearSelection();
 
       /*
@@ -1126,16 +1129,15 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   private void addToPAL()
   {
-    Object[] sel = resultsJList.getSelectedValues();
-    addEntries: for (int i = 0; i < sel.length; ++i)
+    List<DJDatasetListElement> sel = resultsJList.getSelectedValuesList();
+    addEntries: for (DJDatasetListElement e : sel)
     {
-      DJDatasetListElement e = (DJDatasetListElement) sel[i];
       DJDataset ds = e.getDataset();
       String eStr = e.toString();
-      ListModel model = palJList.getModel();
+      ListModel<DJDatasetListElement> model = palJList.getModel();
       for (int j = model.getSize() - 1; j >= 0; --j)
       {
-        DJDatasetListElement e2 = (DJDatasetListElement) model.getElementAt(j);
+        DJDatasetListElement e2 = model.getElementAt(j);
         if (e2.toString().equals(eStr)) continue addEntries;
       }
       ds.copy();
@@ -1165,10 +1167,9 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   private void removeFromPAL()
   {
-    Object[] sel = palJList.getSelectedValues();
-    for (int i = 0; i < sel.length; ++i)
+    List<DJDatasetListElement> sel = palJList.getSelectedValuesList();
+    for (DJDatasetListElement e : sel)
     {
-      DJDatasetListElement e = (DJDatasetListElement) sel[i];
       e.getDataset().remove();
     }
 
@@ -1237,17 +1238,15 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   private void copyEntry()
   {
-    Object[] sel = resultsJList.getSelectedValues();
-    for (int i = 0; i < sel.length; ++i)
+    List<DJDatasetListElement> sel = resultsJList.getSelectedValuesList();
+    for (DJDatasetListElement e : sel)
     {
-      DJDatasetListElement e = (DJDatasetListElement) sel[i];
       copyDJDataset(e.getDataset());
     }
 
-    sel = palJList.getSelectedValues();
-    for (int i = 0; i < sel.length; ++i)
+    sel = palJList.getSelectedValuesList();
+    for (DJDatasetListElement e : sel)
     {
-      DJDatasetListElement e = (DJDatasetListElement) sel[i];
       copyDJDataset(e.getDataset());
     }
 

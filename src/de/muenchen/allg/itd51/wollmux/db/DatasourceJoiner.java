@@ -1206,6 +1206,7 @@ public class DatasourceJoiner
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
+    @SuppressWarnings("unused")
     public boolean isEmpty()
     {
       return data.isEmpty();
