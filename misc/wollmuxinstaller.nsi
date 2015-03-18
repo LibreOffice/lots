@@ -4,7 +4,7 @@
 # the WollMux Installer for Windows.
 # 
 # Copyright (c) 2011 Landeshauptstadt München
-# Author: Daniel Benkmann
+# Author: Daniel Benkmann, Patric Busanny
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the European Union Public Licence (EUPL), 
@@ -19,12 +19,38 @@
 # along with this program. If not, see 
 # http://www.osor.eu/eupl
 
+# Includes
+!include nsDialogs.nsh
 !include FileFunc.nsh
 !insertmacro GetParameters
 !insertmacro GetOptions
 !include Sections.nsh
-!include wollmuxinstaller_lang.nsh ;; Include our own language specific settings and strings
+!include MUI2.nsh
 
+# Interface Settings
+!define MUI_ABORTWARNING
+!define MUI_ICON "wollmux.ico"
+!define MUI_UNICON "wollmux.ico"
+!define MUI_LANGDLL_WINDOWTITLE "WollMux Installation"
+!define MUI_LANGDLL_INFO "In welcher Sprache soll die Installation angezeigt werden?"
+!define MUI_WELCOMEFINISHPAGE_BITMAP wollmux_welcome.bmp
+!define MUI_UNWELCOMEFINISHPAGE_BITMAP wollmux_welcome.bmp
+!define MUI_COMPONENTSPAGE_NODESC
+
+# Unicode Installer
+#
+# Starting with MakeNSIS v3.0 you can choose to create Unicode installers by setting the Unicode attribute
+# Properly display all languages (Installer will not work on Windows 95, 98 or ME!)
+# Unicode true
+
+# Reserve Files
+#
+# If you are using solid compression, files that are required before
+# the actual installation should be stored first in the data block,
+# because this will make your installer start faster.
+!insertmacro MUI_RESERVEFILE_LANGDLL
+
+# Default values for parameters
 !ifndef VERSION ;; WollMux version
 	!warning "VERSION was not defined, so used 'x.x.x' as default! Call makensis with the -D switch to set the version number."
 	!define VERSION "x.x.x" ;; default
@@ -52,28 +78,44 @@
 	!define WOLLMUXBAR_JAR_NAME "WollMuxBar.jar" ;; default
 !endif
 
-
-Name "${WOLLMUX} ${VERSION}"
+# Name and file
+Name "${WOLLMUX}"
 OutFile "${WOLLMUX}-${VERSION}-installer.exe"
-Caption "${WOLLMUX} Installer"
-BrandingText "(c) Landeshauptstadt München" ;; string to replace "Nullsoft Install System vX.XX" at the bottom of install window
+Caption "${WOLLMUX}"
+BrandingText "http://www.wollmux.org" ;; string to replace "Nullsoft Install System vX.XX" at the bottom of install window
 
+# Request application privileges
 RequestExecutionLevel admin ;; needed to set ExecutionLevel for Vista/Windows 7 - works only with NSIS ver. 2.21+
 AllowRootDirInstall true ;; not necessary but why restrict the user?
 AllowSkipFiles off
 ShowInstDetails hide
 ShowUninstDetails hide
 
-# Set Default Installation Directory
+# Default installation folder
 InstallDir "$PROGRAMFILES\${WOLLMUX}" ;; default ($INSTDIR will be overwritten in .onInit function if "--INSTDIR=" command line parameter is set)
 
-# Installer & Uninstaller Pages
-Page components ;; Soll der User überhaupt was auswählen dürfen?
-Page directory
-Page instfiles
-UninstPage uninstConfirm
-UninstPage instFiles
+# Installer Pages
+!insertmacro MUI_PAGE_WELCOME
+Page Custom skipadmincheck
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
 
+# Uninstaller Pages
+!insertmacro MUI_UNPAGE_WELCOME
+UninstPage Custom un.skipKillOOo
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_UNPAGE_FINISH
+
+# Installer Language
+#
+# Show all languages, despite user's codepage
+#!define MUI_LANGDLL_ALLLANGUAGES
+!insertmacro MUI_LANGUAGE "German" ;first language is the default language
+!insertmacro MUI_LANGUAGE "English"
+!include wollmuxinstaller_lang.nsh ;; Include our own language specific settings and strings
 
 # VARIABLE DECLARATIONS:
 # 
@@ -167,7 +209,7 @@ Section "${WOLLMUXBAR} & OOo Extension"
 	
 	# write "JavaHome" registry key
 	ReadRegStr $R0 SHELL_CONTEXT "Software\WollMux" "JavaHome"
-    StrCmp $R0 "" 0 +2  ;; check if JavaHome entry is empty (or doesn't exist); if it isn't empty we don't overwrite it
+	StrCmp $R0 "" 0 +2  ;; check if JavaHome entry is empty (or doesn't exist); if it isn't empty we don't overwrite it
 	WriteRegStr SHELL_CONTEXT "Software\WollMux" "JavaHome" ""
 SectionEnd
 
@@ -251,15 +293,6 @@ Function .onInit
 	IfErrors +2
 	SetSilent silent
 	
-	# Check if command line parameter "--LOCAL" was used - if so try local installation instead of shared install
-	# THIS SWITCH IS NOT SUPPORTED BY THE UNINSTALLER!
-	ClearErrors
-	${GetOptions} $cmdParameters "--LOCAL" $R1 ;; read optional "--LOCAL" parameter
-	IfErrors +4
-	  SetShellVarContext current
-	  StrCpy $sharedSwitch ""
-	  Goto skipadmincheck
-	
 	# check if user is admin or power user - if not abort
 	UserInfo::GetAccountType
 	Pop $R0
@@ -270,55 +303,17 @@ Function .onInit
 
 	# set context to "all users" for installation
 	SetShellVarContext all ;; default is "current"
-	
-  skipadmincheck:
-	
-	# Check if command line parameter "--NOKILL" was used - if so we skip execution of TerminateOOo.jar
-	ClearErrors
-	${GetOptions} $cmdParameters "--NOKILL" $R1 ;; read optional "--NOKILL" parameter
-	IfErrors 0 skipKillOOo
-	
-	# Inform User that we will try to close OpenOffice.org
-	MessageBox MB_OKCANCEL|MB_ICONINFORMATION $(TryToKillOOoMessage) /SD IDOK IDOK +2
-	Abort
-	# Try to kill OOo using TerminateOOo.jar. If unsuccessful abort installation with message.
-	File /oname=$TEMP\TerminateOOo.jar ${FILESDIR}\TerminateOOo.jar ;; extract TerminateOOo.jar to temporary directory
-	Call GetJRE
-	Pop $R0
-	StrCmp $R0 "NOTFOUND" 0 +4 ;; check if Java was found
-	  MessageBox MB_OK|MB_ICONEXCLAMATION $(NoJavaFoundMessage) /SD IDOK
-	  Delete $TEMP\TerminateOOo.jar
-	  Abort
-	ClearErrors
-	ExecWait '"$R0" -jar "$TEMP\TerminateOOo.jar"' ;; does not work if WollMuxBar is running with "--quickstarter" option
-	IfErrors 0 +4
-	  MessageBox MB_OK|MB_ICONEXCLAMATION $(OOoRunningMessage) /SD IDOK ;; we would also get this error if no Java was found, but we check for that above
-	  Delete $TEMP\TerminateOOo.jar
-	  Abort
-	
-	Delete $TEMP\TerminateOOo.jar
-	
-  skipKillOOo:
-	
-	# Set $INSTDIR if command line parameter "--INSTDIR=" was used (this is done in .onInit so the directory page contains the right value when it is displayed)
-	ClearErrors
-	${GetOptions} $cmdParameters "--INSTDIR=" $R1 ;; read optional "--INSTDIR=" parameter
-	IfErrors +2 0
-	StrCpy $INSTDIR $R1 ;; set installation directory
 
-	# Unselect "Start Menu Shortcut" section if command line parameter "--NOSTARTMENU" was used
-	ClearErrors
-	${GetOptions} $cmdParameters "--NOSTARTMENU" $R1 ;; read optional "--NOSTARTMENU" parameter
-	IfErrors nostartmenudone
-	!insertmacro UnselectSection ${startmenu_section_id}
-  nostartmenudone:
+	# MultiLanguage dialog
+	# !insertmacro MUI_LANGDLL_DISPLAY
 	
-	# Unselect "Desktop Shortcut" section if command line parameter "--NODESKTOP" was used
+	# Check if command line parameter "--LOCAL" was used - if so try local installation instead of shared install
+	# THIS SWITCH IS NOT SUPPORTED BY THE UNINSTALLER!
 	ClearErrors
-	${GetOptions} $cmdParameters "--NODESKTOP" $R1 ;; read optional "--NODESKTOP" parameter
-	IfErrors nodesktopdone
-	!insertmacro UnselectSection ${desktop_section_id}
-  nodesktopdone:
+	${GetOptions} $cmdParameters "--LOCAL" $R1 ;; read optional "--LOCAL" parameter
+	IfErrors +4
+	  SetShellVarContext current
+	  StrCpy $sharedSwitch ""
 	
 	Pop $R1
 	Pop $R0
@@ -342,36 +337,86 @@ Function un.onInit
 	# Set context to "all users" for uninstallation
 	SetShellVarContext all ;; default is "current"
 	
-	# Check if command line parameter "--NOKILL" was used - if so we skip execution of TerminateOOo.jar
-	ClearErrors
-	${GetOptions} $cmdParameters "--NOKILL" $R1 ;; read optional "--NOKILL" parameter
-	IfErrors 0 skipKillOOo
-	
-	# Inform User that we will try to close OpenOffice.org
-	MessageBox MB_OKCANCEL|MB_ICONINFORMATION $(TryToKillOOoMessage) /SD IDOK IDOK +2
-	Abort
-	# Try to kill OOo using TerminateOOo.jar. If that doesn't work we give the user the option to try to uninstall anyway.
-	File /oname=$TEMP\TerminateOOo.jar ${FILESDIR}\TerminateOOo.jar ;; extract TerminateOOo.jar to temporary directory
-	Call un.GetJRE
-	Pop $R0
-	StrCmp $R0 "NOTFOUND" 0 +4 ;; check if Java was found
-	  MessageBox MB_YESNO|MB_ICONEXCLAMATION $(OOoKillFailedMessage) /SD IDYES IDYES skipKillOOo
-	  Delete $TEMP\TerminateOOo.jar
-	  Abort
-	ClearErrors
-	ExecWait '"$R0" -jar "$TEMP\TerminateOOo.jar"' ;; does not work if WollMuxBar is running with "--quickstarter" option
-	IfErrors 0 +4
-	  MessageBox MB_YESNO|MB_ICONEXCLAMATION $(OOoKillFailedMessage) /SD IDYES IDYES skipKillOOo ;; we would also get this error if no Java was found, but we check for that above
-	  Delete $TEMP\TerminateOOo.jar
-	  Abort
-
-  skipKillOOo:	  
-	Delete $TEMP\TerminateOOo.jar
+	# MultiLanguage dialog
+	# !insertmacro MUI_LANGDLL_DISPLAY
 	
 	Pop $R1
 	Pop $R0
 FunctionEnd
 
+Function un.skipKillOOo
+        # Check if command line parameter "--NOKILL" was used - if so we skip execution of TerminateOOo.jar
+        ClearErrors
+        ${GetOptions} $cmdParameters "--NOKILL" $R1 ;; read optional "--NOKILL" parameter
+        IfErrors 0 skipKillOOo
+
+        # Try to kill OOo using TerminateOOo.jar. If that doesn't work we give the user the option to try to uninstall anyway.
+        File /oname=$TEMP\TerminateOOo.jar ${FILESDIR}\TerminateOOo.jar ;; extract TerminateOOo.jar to temporary directory
+        Call un.GetJRE
+        Pop $R0
+        StrCmp $R0 "NOTFOUND" 0 +4 ;; check if Java was found
+          MessageBox MB_YESNO|MB_ICONEXCLAMATION $(OOoKillFailedMessage) /SD IDYES IDYES skipKillOOo
+          Delete $TEMP\TerminateOOo.jar
+          Abort
+        ClearErrors
+        ExecWait '"$R0" -jar "$TEMP\TerminateOOo.jar"' ;; does not work if WollMuxBar is running with "--quickstarter" option
+        IfErrors 0 +4
+          MessageBox MB_YESNO|MB_ICONEXCLAMATION $(OOoKillFailedMessage) /SD IDYES IDYES skipKillOOo ;; we would also get this error if no Java was found, but we check for that above
+          Delete $TEMP\TerminateOOo.jar
+          Abort
+
+  skipKillOOo:
+        Delete $TEMP\TerminateOOo.jar
+FunctionEnd
+
+Function skipadmincheck
+        # Check if command line parameter "--NOKILL" was used - if so we skip execution of TerminateOOo.jar
+        ClearErrors
+        ${GetOptions} $cmdParameters "--NOKILL" $R1 ;; read optional "--NOKILL" parameter
+        IfErrors 0 skipKillOOo
+
+        # Try to kill OOo using TerminateOOo.jar. If unsuccessful abort installation with message.
+        File /oname=$TEMP\TerminateOOo.jar ${FILESDIR}\TerminateOOo.jar ;; extract TerminateOOo.jar to temporary directory
+        Call GetJRE
+        Pop $R0
+        StrCmp $R0 "NOTFOUND" 0 +4 ;; check if Java was found
+          MessageBox MB_OK|MB_ICONEXCLAMATION $(NoJavaFoundMessage) /SD IDOK
+          Delete $TEMP\TerminateOOo.jar
+          Abort
+        ClearErrors
+        ExecWait '"$R0" -jar "$TEMP\TerminateOOo.jar"' ;; does not work if WollMuxBar is running with "--quickstarter" option
+        IfErrors 0 +4
+          MessageBox MB_OK|MB_ICONEXCLAMATION $(OOoRunningMessage) /SD IDOK ;; we would also get this error if no Java was found, but we check for that above
+          Delete $TEMP\TerminateOOo.jar
+          Abort
+
+        Delete $TEMP\TerminateOOo.jar
+
+  skipKillOOo:
+
+        # Set $INSTDIR if command line parameter "--INSTDIR=" was used (this is done in .onInit so the directory page contains the right value when it is displayed)
+        ClearErrors
+        ${GetOptions} $cmdParameters "--INSTDIR=" $R1 ;; read optional "--INSTDIR=" parameter
+        IfErrors +2 0
+        StrCpy $INSTDIR $R1 ;; set installation directory
+
+        # Unselect "Start Menu Shortcut" section if command line parameter "--NOSTARTMENU" was used
+        ClearErrors
+        ${GetOptions} $cmdParameters "--NOSTARTMENU" $R1 ;; read optional "--NOSTARTMENU" parameter
+        IfErrors nostartmenudone
+        !insertmacro UnselectSection ${startmenu_section_id}
+  nostartmenudone:
+
+        # Unselect "Desktop Shortcut" section if command line parameter "--NODESKTOP" was used
+        ClearErrors
+        ${GetOptions} $cmdParameters "--NODESKTOP" $R1 ;; read optional "--NODESKTOP" parameter
+        IfErrors nodesktopdone
+        !insertmacro UnselectSection ${desktop_section_id}
+  nodesktopdone:
+
+        Pop $R1
+        Pop $R0
+FunctionEnd
 
 !macro GetOOOPath UN
 Function ${UN}GetOOoPath
@@ -489,3 +534,4 @@ FunctionEnd
 
 !insertmacro GetJRE ""
 !insertmacro GetJRE "un."
+
