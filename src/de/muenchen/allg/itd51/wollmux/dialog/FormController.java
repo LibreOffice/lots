@@ -823,9 +823,13 @@ public class FormController implements UIElementEventHandler
         {
           ConfigThingy uiConf = iter.next();
           UIElement uiElement;
+          
           try
           {
             uiElement = uiElementFactory.createUIElement(buttonContext, uiConf);
+            UIElementState state = new UIElementState();
+            state.setIsButton(true);
+            uiElement.setAdditionalData(state);
           }
           catch (ConfigurationErrorException e)
           {
@@ -854,6 +858,9 @@ public class FormController implements UIElementEventHandler
             }
 
           }
+          
+          parseGROUPS(uiConf, uiElement);
+          
           GridBagConstraints gbc =
             (GridBagConstraints) uiElement.getLayoutConstraints();
           gbc.gridx = compoX;
@@ -1547,7 +1554,15 @@ public class FormController implements UIElementEventHandler
        */
       if (oldElementVisible != newElementVisible)
       {
-        ele.setVisible(newElementVisible);
+        if(state.getIsButton()){
+          if (newElementVisible)
+            ele.setEnabled(true);
+          else
+            ele.setEnabled(false);
+          }
+          else
+            ele.setVisible(newElementVisible);
+        
         if (!ele.isStatic())
         {
           if (newElementVisible)
@@ -1699,6 +1714,11 @@ public class FormController implements UIElementEventHandler
   private static class UIElementState
   {
     /**
+     * true, wenn es sich bei dem Element um einen Button handelt
+     */
+    private boolean isButton = false;
+    
+    /**
      * Die Plausi, die dieses Element überprüft (falls vorhanden).
      */
     public Function plausi = null;
@@ -1739,6 +1759,16 @@ public class FormController implements UIElementEventHandler
     public boolean visible()
     {
       return (invisibleGroups == null || invisibleGroups.isEmpty());
+    }
+    
+    public void setIsButton(boolean isButton)
+    {
+      this.isButton = isButton;
+    }
+    
+    public boolean getIsButton()
+    {
+      return isButton;
     }
   }
 

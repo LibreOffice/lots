@@ -185,6 +185,8 @@ public interface UIElement extends Value
    * Setzt eine neue Hintergrundfarbe für das UIElement.
    */
   public void setBackground(Color bg);
+  
+  public void setEnabled(boolean enabled);
 
   /**
    * Setzt die Sichtbarkeit der Komponente und ihres Zusatzlabels (falls vorhanden).
@@ -239,6 +241,11 @@ public interface UIElement extends Value
     public void setBackground(Color bg)
     {
       this.getComponent().setBackground(bg);
+    }
+    
+    public void setEnabled(boolean enabled)
+    {
+      this.getComponent().setEnabled(enabled);
     }
 
     public Integer getLabelType()
