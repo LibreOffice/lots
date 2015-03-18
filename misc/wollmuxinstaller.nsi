@@ -112,10 +112,14 @@ UninstPage Custom un.skipKillOOo
 # Installer Language
 #
 # Show all languages, despite user's codepage
-#!define MUI_LANGDLL_ALLLANGUAGES
-!insertmacro MUI_LANGUAGE "German" ;first language is the default language
+# !define MUI_LANGDLL_ALLLANGUAGES
+#
+# First language is the default language
 !insertmacro MUI_LANGUAGE "English"
-!include wollmuxinstaller_lang.nsh ;; Include our own language specific settings and strings
+!insertmacro MUI_LANGUAGE "German" 
+#
+# Include our own language specific settings and strings
+!include wollmuxinstaller_lang.nsh
 
 # VARIABLE DECLARATIONS:
 # 
