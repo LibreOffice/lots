@@ -20,7 +20,7 @@ else
   OFFICE_EXECUTABLE=`which soffice`
   if [ -z "$OFFICE_EXECUTABLE" ]
   then
-    for OFFICE_LOC in /opt/libreoffice*/ /opt/openoffice.org*/
+    for OFFICE_LOC in /opt/libreoffice*/ /opt/openoffice*/
     do
       if [ -f "$OFFICE_LOC/program/soffice" ]
       then
