@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Dialog zur Suche nach Daten in einer Datenquelle, die über DIALOG-Funktion verfügbar gemacht werden.
  * 
- * Copyright (c) 2010 Landeshauptstadt München
+ * Copyright (c) 2010-2015 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),

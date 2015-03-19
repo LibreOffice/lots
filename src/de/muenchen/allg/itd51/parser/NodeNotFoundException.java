@@ -3,7 +3,7 @@
 * Projekt  : WollMux
 * Funktion : Signalisiert, dass ein gesuchter Knoten nicht gefunden wurde. 
 * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008-2015 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),

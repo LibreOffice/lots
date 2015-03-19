@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Stellt Methoden zum Suchen in Datenquellen zur Verfügung
  * 
- * Copyright (c) 2010 Landeshauptstadt München
+ * Copyright (c) 2010-2015 Landeshauptstadt München
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 

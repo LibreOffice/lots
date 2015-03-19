@@ -3,7 +3,7 @@
 * Projekt  : WollMux
 * Funktion : Zeigt an, dass die gewünschte(n) Funktion(en)/Daten nicht verfügbar sind.
 * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2008-2015 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
