@@ -116,6 +116,10 @@ public class Shortcuts
         {
           Logger.error(e);
         }
+        catch (NoSuchElementException e)
+        {
+          Logger.error(e);
+        }
       }
       else
       {
