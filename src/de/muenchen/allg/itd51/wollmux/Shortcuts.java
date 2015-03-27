@@ -42,7 +42,6 @@ import com.sun.star.awt.KeyEvent;
 import com.sun.star.awt.KeyFunction;
 import com.sun.star.awt.KeyModifier;
 import com.sun.star.container.NoSuchElementException;
-import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.ui.XAcceleratorConfiguration;
 
 import de.muenchen.allg.afid.UNO;
@@ -112,11 +111,7 @@ public class Shortcuts
         {
           shortcutManager.setKeyEvent(keyEvent, url);
         }
-        catch (IllegalArgumentException e)
-        {
-          Logger.error(e);
-        }
-        catch (NoSuchElementException e)
+        catch (Exception e)
         {
           Logger.error(e);
         }
