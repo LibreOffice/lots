@@ -808,6 +808,15 @@ class MailMergeParams
             hadIgnoreDocPrintFunctions = true;
             ignoreDocPrintFuncs = Boolean.parseBoolean(key.toString());
             break;
+
+          case ON_ACTION_TYPE:
+            break;
+          case ON_OUTPUT:
+            break;
+          case unknown:
+            break;
+          default:
+            break;
         }
       }
 
@@ -864,6 +873,15 @@ class MailMergeParams
           if (requiredPrintfunctionsAvailable(rule, reasons)) return true;
         }
         return false;
+        
+      case abort:
+        break;
+      case selectRange:
+        break;
+      case submit:
+        break;
+      default:
+        break;
     }
     return false;
   }
@@ -1006,6 +1024,11 @@ class MailMergeParams
       {
         return new PrinterSettingsUIElement(label, group, mmp);
       }
+      
+      case unknown:
+        break;
+      default:
+        break;
     }
     return null;
   }
