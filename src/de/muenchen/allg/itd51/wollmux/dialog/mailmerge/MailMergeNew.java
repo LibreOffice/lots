@@ -1136,6 +1136,25 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   }
 
   /**
+   * Liefert die Größe der von MailMergeNew im XPrintModel gesetzten Selection.  
+   */
+  @SuppressWarnings("unchecked")
+  public static int mailMergeNewGetSelectionSize(XPrintModel pmod)
+  {
+    List<Integer> selection;
+    try
+    {
+      selection = (List<Integer>) pmod.getPropertyValue(PROP_MAILMERGENEW_SELECTION);
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
+      return 0;
+    }
+    return selection.size();
+  }
+  
+  /**
    * Speichert das übergebene Dokument in eine ODF-Datei. Die WollMux-Daten bleiben
    * dabei erhalten.
    * 

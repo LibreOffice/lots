@@ -40,7 +40,12 @@ import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 
 import com.sun.star.container.XNameAccess;
+import com.sun.star.drawing.XDrawPageSupplier;
 import com.sun.star.lang.XMultiServiceFactory;
+import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextSectionsSupplier;
+import com.sun.star.text.XTextTablesSupplier;
+import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -72,6 +77,8 @@ public class Workarounds
   private static Pattern workaround101249 = null;
 
   private static String workaround101283 = null;
+
+  private static Boolean workaround89783 = null;
 
   private static Boolean workaround103137 = null;
 
@@ -337,6 +344,67 @@ public class Workarounds
     return workaround101283;
   }
 
+  /**
+   * Wegen https://bugs.documentfoundation.org/show_bug.cgi?id=89783 muss der
+   * OOoMailMerge in mehrere Pakete aufgeteilt werden, wenn das
+   * Seriendruck-Hauptdokument doc viele der im Issue genannten Elemente (z.B.
+   * Rahmen, PageStyles, ...) enthält. Betroffen davon sind alle aktuell bekannten
+   * Versionen von OOo, AOO und LO.
+   * 
+   * @param doc
+   *         Das Seriendruck-Hauptdokument
+   * 
+   * @return Der Rückgabewert dieser Methode beschreibt, wie viele Datensätze zu doc
+   *         ohne Einfrierer von der aktuell genutzen Office-Version verarbeitet
+   *         werden können. Der Rückgabewert kann auch null sein, dann soll der der
+   *         Workaround nicht angewendet werden.
+   * 
+   * @author Christoph Lutz (CIB software GmbH)
+   */
+  public static Integer workaroundForTDFIssue89783(XTextDocument doc)
+  {
+    if (workaround89783 == null)
+    {
+      Logger.debug(L.m("Workaround für TDF Issue 89783 aktiv."));
+      workaround89783 = true;
+    }
+
+    if(workaround89783)
+    {
+      int maxCritElements = 1;
+      // zähle Sections:
+      XTextSectionsSupplier tss = UNO.XTextSectionsSupplier(doc);
+      if (tss != null)
+      {
+        String[] names = tss.getTextSections().getElementNames();
+        if (names.length > maxCritElements) maxCritElements = names.length;
+      }
+
+      // zähle DrawPage-Objekte (TextFrames + Pictures + DrawObjects):
+      XDrawPageSupplier dps = UNO.XDrawPageSupplier(doc);
+      if (dps != null)
+      {
+        int drawPageElements = dps.getDrawPage().getCount();
+        if (drawPageElements > maxCritElements) maxCritElements = drawPageElements;
+      }
+
+      // count TextTables
+      XTextTablesSupplier tts =
+        UnoRuntime.queryInterface(XTextTablesSupplier.class, doc);
+      if (tts != null)
+      {
+        String[] names = tts.getTextTables().getElementNames();
+        if (names.length > maxCritElements) maxCritElements = names.length;
+      }
+
+      // Maximalwert des mit 16-Bit adressierbaren Bereichs / maxCritElements - 1
+      // (zu Sicherheit)
+      return ((1 << 16) / maxCritElements) - 1;
+    }
+    
+    return null;
+  }
+  
   /**
    * Wenn bestimmte Aktionen getätigt werden (z.B. setWindowPosSize()) während der
    * Mauszeiger über einer OOo-Toolbar schwebt, dann friert OOo 3.0 und 3.1 unter
