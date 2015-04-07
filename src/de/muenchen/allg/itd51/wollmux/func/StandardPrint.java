@@ -242,7 +242,7 @@ public class StandardPrint
       return;
     }
     
-    OOoBasedMailMerge.oooMailMerge(pmod, OOoBasedMailMerge.OutputType.toFile);
+    OOoBasedMailMerge.oooMailMerge(pmod, OOoBasedMailMerge.OutputType.toShell);
   }
 
   /**

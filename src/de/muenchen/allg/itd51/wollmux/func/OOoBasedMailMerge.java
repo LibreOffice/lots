@@ -33,6 +33,7 @@ package de.muenchen.allg.itd51.wollmux.func;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -71,29 +72,29 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XNamingService;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.URL;
-import com.sun.star.view.XPrintable;
 import com.sun.star.util.XCancellable;
+import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory;
+import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
+import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormFieldType;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.PersistentData;
 import de.muenchen.allg.itd51.wollmux.PersistentDataContainer;
+import de.muenchen.allg.itd51.wollmux.PersistentDataContainer.DataID;
 import de.muenchen.allg.itd51.wollmux.PrintModels;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.SimulationResults;
+import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
-import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
-import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormFieldType;
-import de.muenchen.allg.itd51.wollmux.PersistentDataContainer.DataID;
-import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 
@@ -116,7 +117,7 @@ public class OOoBasedMailMerge
   private static final char OPENSYMBOL_CHECKED = 0xE4C4;
 
   private static final char OPENSYMBOL_UNCHECKED = 0xE470;
-
+  
   /**
    * Druckfunktion für den Seriendruck in ein Gesamtdokument mit Hilfe des
    * OpenOffice.org-Seriendrucks.
@@ -127,6 +128,14 @@ public class OOoBasedMailMerge
   {
     PrintModels.setStage(pmod, L.m("Seriendruck vorbereiten"));
 
+    // prüfe ob OutputType.toShell von der Office-Version
+    // unterstützt wird. Falls nicht, falle zurück auf OutputType.toFile.
+    if(type == OutputType.toShell && type.getUNOMailMergeType() == null)
+    {
+      Logger.debug(L.m("Die aktuelle Office-Version unterstützt MailMergeType.SHELL nicht. Verwende MailMergeType.FILE stattdessen"));
+      type = OutputType.toFile;
+    }
+    
     File tmpDir = createMailMergeTempdir();
 
     // Datenquelle mit über mailMergeNewSetFormValue simulierten Daten erstellen
@@ -202,11 +211,11 @@ public class OOoBasedMailMerge
       try
       {
         t.join(1000);
-           if (pmod.isCanceled())
-           {
-             t.cancel();
-             break;
-            }
+        if (pmod.isCanceled())
+        {
+          t.cancel();
+          break;
+        }
       }
       catch (InterruptedException e)
       {}
@@ -248,59 +257,85 @@ public class OOoBasedMailMerge
       }
       outputFile.delete();
     }
-
-    tmpDir.delete();
-  }
-  
-  
-    /**
-     * A optional XCancellable mail merge thread.
-     * 
-     * @author Jan-Marek Glogowski (ITM-I23)
-     */
-    private static class MailMergeThread extends Thread
-    {
-      private XCancellable mailMergeCancellable = null;
-      private final XJob mailMerge;
-      private final File outputDir;
-      private final ArrayList<NamedValue> mmProps;
-  
-      MailMergeThread(XJob mailMerge, File outputDir, ArrayList<NamedValue> mmProps)
+    
+    else if(type == OutputType.toShell)
+    {      
+      XTextDocument result = UNO.XTextDocument(t.getResult());
+      if (result != null && result.getCurrentController() != null
+        && result.getCurrentController().getFrame() != null
+        && result.getCurrentController().getFrame().getContainerWindow() != null)
       {
-        this.mailMerge = mailMerge;
-        this.outputDir = outputDir;
-        this.mmProps = mmProps;
+        result.getCurrentController().getFrame().getContainerWindow().setVisible(true);
       }
-  
-      public void run()
+      else
       {
-        try
-        {
-          Logger.debug(L.m("Starting OOo-MailMerge in Verzeichnis %1", outputDir));
-          // The XCancellable mail merge interface was included in LO >= 4.3.
-          mailMergeCancellable =
-            (XCancellable) UnoRuntime.queryInterface(XCancellable.class, mailMerge);
-          if (mailMergeCancellable != null)
-            Logger.debug(L.m("XCancellable interface im mailMerge-Objekt gefunden!"));
-          else
-            Logger.debug(L.m("KEIN XCancellable interface im mailMerge-Objekt gefunden!"));
-          mailMerge.execute(mmProps.toArray(new NamedValue[mmProps.size()]));
-          Logger.debug(L.m("Finished Mail Merge"));
-        }
-        catch (Exception e)
-        {
-          Logger.debug(L.m("OOo-MailMergeService fehlgeschlagen: %1", e.getMessage()));
-        }
-        mailMergeCancellable = null;
-      }
-  
-      public synchronized void cancel()
-      {
-        if (mailMergeCancellable != null)
-          mailMergeCancellable.cancel();
+        WollMuxSingleton.showInfoModal(L.m("WollMux-Seriendruck"),
+          L.m("Das erzeugte Gesamtdokument kann leider nicht angezeigt werden."));
+        pmod.cancel();
       }
     }
+
+    tmpDir.delete();
+  }  
   
+  /**
+   * A optional XCancellable mail merge thread.
+   * 
+   * @author Jan-Marek Glogowski (ITM-I23)
+   */
+  private static class MailMergeThread extends Thread
+  {
+    private XCancellable mailMergeCancellable = null;
+
+    private Object result = null;
+
+    private final XJob mailMerge;
+
+    private final File outputDir;
+
+    private final ArrayList<NamedValue> mmProps;
+
+    MailMergeThread(XJob mailMerge, File outputDir, ArrayList<NamedValue> mmProps)
+    {
+      this.mailMerge = mailMerge;
+      this.outputDir = outputDir;
+      this.mmProps = mmProps;
+    }
+
+    public void run()
+    {
+      try
+      {
+        Logger.debug(L.m("Starting OOo-MailMerge in Verzeichnis %1", outputDir));
+        // The XCancellable mail merge interface was included in LO >= 4.3.
+        mailMergeCancellable =
+          (XCancellable) UnoRuntime.queryInterface(XCancellable.class, mailMerge);
+        if (mailMergeCancellable != null)
+          Logger.debug(L.m("XCancellable interface im mailMerge-Objekt gefunden!"));
+        else
+          Logger.debug(L.m("KEIN XCancellable interface im mailMerge-Objekt gefunden!"));
+
+        result = mailMerge.execute(mmProps.toArray(new NamedValue[mmProps.size()]));
+
+        Logger.debug(L.m("Finished Mail Merge"));
+      }
+      catch (Exception e)
+      {
+        Logger.debug(L.m("OOo-MailMergeService fehlgeschlagen: %1", e.getMessage()));
+      }
+      mailMergeCancellable = null;
+    }
+
+    public synchronized void cancel()
+    {
+      if (mailMergeCancellable != null) mailMergeCancellable.cancel();
+    }
+    
+    public Object getResult()
+    {
+      return result;
+    }
+  }
 
   /**
    * Übernimmt das Aktualisieren der Fortschrittsanzeige im XPrintModel pmod.
@@ -1248,7 +1283,48 @@ public class OOoBasedMailMerge
    */
   public static enum OutputType {
     toFile,
-    toPrinter;
+    toPrinter,
+    toShell;
+    
+    /**
+     * Diese Methode verwendet die Reflection API um den passenden
+     * com.sun.star.text.MailMergeType für den OutputType zurück zu liefern oder
+     * null, wenn die verwendete unoil.jar den MailMergeType nicht kennt (kann
+     * insbes. bei toShell der Fall sein). Hintergrund: MailMergeType.SHELL ist erst
+     * ab LibreOffice 4.4 verfügbar. Wir müssen also diesen Weg gehen, damit WollMux
+     * kompatibel zu OOo 3.2.1 und AOO bleibt (Build-Zeit und Laufzeit).
+     */
+    public Short getUNOMailMergeType()
+    {
+      Field found = null;
+      for (Field f : MailMergeType.class.getDeclaredFields())
+      {
+        switch (this)
+        {
+          case toFile:
+            if (f.getName().equals("FILE")) found = f;
+            break;
+          case toPrinter:
+            if (f.getName().equals("PRINTER")) found = f;
+            break;
+          case toShell:
+            if (f.getName().equals("SHELL")) found = f;
+            break;
+        }
+      }
+      if (found != null)
+      {
+        try
+        {
+          return found.getShort(null);
+        }
+        catch (Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+      return null;                  
+    }
   }
 
   /**
@@ -1310,16 +1386,20 @@ public class OOoBasedMailMerge
       UNO.getParsedUNOUrl(inputFile.toURI().toString()).Complete));
     mmProps.add(new NamedValue("OutputURL",
       UNO.getParsedUNOUrl(outputDir.toURI().toString()).Complete));
+    mmProps.add(new NamedValue("OutputType", type.getUNOMailMergeType()));
     if (type == OutputType.toFile)
     {
       mmProps.add(new NamedValue("SaveAsSingleFile", Boolean.TRUE));
-      mmProps.add(new NamedValue("OutputType", MailMergeType.FILE));
       mmProps.add(new NamedValue("FileNameFromColumn", Boolean.FALSE));
       mmProps.add(new NamedValue("FileNamePrefix", "output"));
     }
+    else if (type == OutputType.toShell)
+    {
+      mmProps.add(new NamedValue("SaveAsSingleFile", Boolean.TRUE));
+      mmProps.add(new NamedValue("FileNameFromColumn", Boolean.FALSE));
+    }
     else if (type == OutputType.toPrinter)
     {
-      mmProps.add(new NamedValue("OutputType", MailMergeType.PRINTER));
       mmProps.add(new NamedValue("SinglePrintJobs", Boolean.FALSE));
       //jgm,07.2013: setze ausgewaehlten Drucker
       if (printerName != null && printerName.length() > 0)
