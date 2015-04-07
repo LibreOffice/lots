@@ -1725,12 +1725,12 @@ public class SachleitendeVerfuegung
    */
   private static String getCopyName()
   {
-    String name = "Abdruck";
+    String name = L.m("Abdruck");
     ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
     ConfigThingy nan = conf.query("SachleitendeVerfuegungen").query("ABDRUCK_NAME");
     try
     {
-      name = nan.getLastChild().toString();
+      name = L.m(nan.getLastChild().toString());
       Logger.debug(L.m("Verwende ABDRUCK_NAME '%1'", name));
     }
     catch (NodeNotFoundException x)
