@@ -1160,11 +1160,14 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       filename = L.m("Dokument.odt");
     
     // jub .odt/.pdf ergänzen, falls nicht angegeben.
-    if(!filename.endsWith(".odt") && !filename.endsWith(".pdf"))
-      if(isODT)
+    if (!filename.toLowerCase().endsWith(".odt")
+      && !filename.toLowerCase().endsWith(".pdf"))
+    {
+      if (isODT)
         filename = filename + ".odt";
       else
         filename = filename + ".pdf";
+    }
     
     File file = new File(outputDir, filename);
 
