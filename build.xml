@@ -218,9 +218,9 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	</target>
 	
 	<target name="makeversion_windows" if="isWindows">
-		<exec executable="cmd" failifexecutionfails="false">
-			<arg value="/c"/>
-			<arg file="${MISC}/makeversion.bat"/>
+		<exec executable="powershell" failifexecutionfails="false">
+			<arg value="-File"/>
+			<arg file="${MISC}/makeversion.ps1"/>
 			<arg file="${VERSION_FILE}"/>
 			<arg file="${BUILD_INFO_FILE}"/>
 			<arg file="${DESCRIPTION_XML}"/>
