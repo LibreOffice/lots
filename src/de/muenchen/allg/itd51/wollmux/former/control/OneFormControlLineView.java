@@ -653,7 +653,12 @@ public class OneFormControlLineView extends LineView
   private class MyMouseListener implements MouseListener
   {
     public void mouseClicked(MouseEvent e)
-    {}
+    {
+      if(e.getSource().equals(labelTextfield) && labelTextfield.getText().equals("Label"))
+        labelTextfield.setText("");
+      if(e.getSource().equals(idTextfield) && idTextfield.getText().matches("ID[0-9]*"))
+        idTextfield.setText("");
+    }
 
     public void mousePressed(MouseEvent e)
     {
@@ -678,7 +683,12 @@ public class OneFormControlLineView extends LineView
     {}
 
     public void mouseEntered(MouseEvent e)
-    {}
+    {
+      if(e.getSource().equals(labelTextfield))
+        labelTextfield.setToolTipText("Label");
+      if(e.getSource().equals(idTextfield))
+         idTextfield.setToolTipText("ID");
+    }
 
     public void mouseExited(MouseEvent e)
     {}

@@ -361,10 +361,10 @@ public class FormControlModel
       FormularMax4000 formularMax4000)
   {
     FormControlModel model =
-      new FormControlModel(label, LABEL_TYPE, "", formularMax4000);
+      new FormControlModel(label, LABEL_TYPE, "ID", formularMax4000);
     return model;
   }
-
+  
   /**
    * Liefert ein FormControlModel, das eine Combobox darstellt mit gegebenem LABEL
    * label und ID id.

@@ -672,7 +672,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   {
     String id = formControlModelList.makeUniqueId("Label");
     FormControlModel model =
-      FormControlModel.createLabel(L.m("Text"), id, formularMax4000);
+      FormControlModel.createLabel(L.m("Label"), id, formularMax4000);
     int index = getInsertionIndex();
     formControlModelList.add(model, index);
   }
