@@ -33,7 +33,6 @@
 package de.muenchen.allg.itd51.wollmux.former.control;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -59,6 +58,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
@@ -328,7 +328,7 @@ public class OneFormControlLineView extends LineView
   private JComboBox<Object> makeTypeView()
   {
     typeView = new JComboBox<Object>();
-    typeView.setToolTipText("Feldtyp");
+    typeView.setToolTipText(L.m("Feldtyp"));
     typeView.setEditable(false);
     typeView.addItem(FormControlModel.COMBOBOX_TYPE);
     typeView.addItem(FormControlModel.TEXTFIELD_TYPE);
@@ -370,7 +370,7 @@ public class OneFormControlLineView extends LineView
       BoxLayout.X_AXIS));
 
     final JComboBox<Object> combo = new JComboBox<Object>();
-    combo.setToolTipText("Eingabeliste");
+    combo.setToolTipText(L.m("Eingabeliste"));
     combo.setEditable(true);
     combo.setPrototypeDisplayValue("Sicherungsgeberin");
     List<String> items = model.getItems();
@@ -402,7 +402,7 @@ public class OneFormControlLineView extends LineView
     comboBoxAdditionalView.addMouseListener(myMouseListener);
 
     final JCheckBox editBox = new JCheckBox();
-    editBox.setToolTipText("Erweiterbar");
+    editBox.setToolTipText(L.m("Erweiterbar"));
     editBox.setSelected(model.getEditable());
     comboBoxAdditionalView.add(editBox);
     editBox.addActionListener(new ActionListener()
@@ -416,7 +416,7 @@ public class OneFormControlLineView extends LineView
     });
     editBox.addMouseListener(myMouseListener);
     final JButton newButton = new JButton("N");
-    newButton.setToolTipText("Neuer Wert");
+    newButton.setToolTipText(L.m("Neuer Wert"));
     Insets ins = newButton.getInsets();
     newButton.setMargin(new Insets(ins.top, 0, ins.bottom, 0));
     comboBoxAdditionalView.add(newButton);
@@ -436,7 +436,7 @@ public class OneFormControlLineView extends LineView
     });
     newButton.addMouseListener(myMouseListener);
     JButton delButton = new JButton("X");
-    delButton.setToolTipText("Wert löschen");
+    delButton.setToolTipText(L.m("Wert löschen"));
     ins = delButton.getInsets();
     delButton.setMargin(new Insets(ins.top, 0, ins.bottom, 0));
     comboBoxAdditionalView.add(delButton);
@@ -474,7 +474,7 @@ public class OneFormControlLineView extends LineView
     textAreaAdditionalView.setLayout(new BoxLayout(textAreaAdditionalView,
       BoxLayout.X_AXIS));
     final JTextField linesTextfield = new JTextField("" + model.getLines(), 3);
-    linesTextfield.setToolTipText("Anzahl der Zeilen");
+    linesTextfield.setToolTipText(L.m("Anzahl der Zeilen"));
     Document tfdoc = linesTextfield.getDocument();
     tfdoc.addDocumentListener(new DocumentListener()
     {
@@ -517,7 +517,7 @@ public class OneFormControlLineView extends LineView
     textAreaAdditionalView.add(linesTextfield);
 
     final JCheckBox wrapBox = new JCheckBox();
-    wrapBox.setToolTipText("Automatischer Zeilenumbruch");
+    wrapBox.setToolTipText(L.m("Automatischer Zeilenumbruch"));
     wrapBox.setSelected(model.getWrap());
     textAreaAdditionalView.add(wrapBox);
     wrapBox.addActionListener(new ActionListener()
