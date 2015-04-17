@@ -60,6 +60,12 @@ public class TextSection implements VisibilityElement
    * Ein Set das die Gruppennamen dieses Sichtbarkeitselements enthält.
    */
   private Set<String> groups;
+  
+  /**
+   * Enthält den Namen der TextSection (zum Erzeugungszeitpunkt). Ändert sich dieser,
+   * wird die TextSection invalide.
+   */
+  private String initialName;
 
   /**
    * Erzeugt ein neues TextSection-Objekt.
@@ -74,6 +80,9 @@ public class TextSection implements VisibilityElement
   {
     this.section = section;
     this.groups = groups;
+    this.initialName = null;
+    XNamed xNamed = UNO.XNamed(section);
+    if (xNamed != null) initialName = xNamed.getName();
   }
 
   /*
@@ -142,16 +151,22 @@ public class TextSection implements VisibilityElement
   }
 
   /**
-   * Liefert den Namen der TextSection, der auch dann noch aktuell bleibt, wenn der
-   * Name manuell im Dokument geändert wurde, oder "<disposedTextSection>", wenn die
-   * TextSection nicht mehr existiert.
+   * Liefert den Namen der TextSection oder null, wenn die TextSection zwischenzeitig
+   * invalide wurde.
+   * 
+   * TextSection ist dann invalide, wenn sie nicht XNamed implementiert, sich ihr
+   * Name seit dem Erzeugungszeitpunkt ändert oder sie nicht mehr im Dokument
+   * existiert.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public String getName()
   {
     XNamed xNamed = UNO.XNamed(section);
-    return (xNamed != null) ? xNamed.getName() : "<disposedTextSection>";
+    if (xNamed == null) return null;
+    String newName = xNamed.getName();
+    if (initialName != null && initialName.equals(newName)) return initialName;
+    return null;
   }
 
   /**
@@ -162,7 +177,7 @@ public class TextSection implements VisibilityElement
    */
   public int hashCode()
   {
-    return getName().hashCode();
+    return (initialName != null) ? initialName.hashCode() : 0;
   }
 
   /**
@@ -183,12 +198,20 @@ public class TextSection implements VisibilityElement
   }
 
   /**
-   * Liefert true, wenn die TextSection (bzw. Ihr Anchor) nicht mehr existiert.
+   * Liefert true, wenn die TextSection (bzw. Ihr Anchor) nicht mehr valide ist.
+   * 
+   * Dies ist der Fall, wenn seit der Erzeugung ihr Name (im Dokument) geändert wurde
+   * oder sie nicht mehr existiert.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public boolean isRetired()
+  public boolean isInvalid()
   {
-    return getAnchor() == null;
+    return getAnchor() == null || getName() == null;
+  }
+  
+  public String toString()
+  {
+    return this.getClass().getName() + "('" + initialName + "')";
   }
 }

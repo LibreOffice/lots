@@ -326,12 +326,12 @@ public class DocumentCommands implements Iterable<DocumentCommand>
     // HashSets mit den Namen der bekannten, gültigen TextSections
     // und den ungültigen TextSections erstellen:
     HashSet<String> knownTextSections = new HashSet<String>();
-    HashSet<TextSection> retiredTextSections = new HashSet<TextSection>();
+    HashSet<TextSection> invalidTextSections = new HashSet<TextSection>();
     for (Iterator<TextSection> iter = allTextSectionsWithGROUPS.iterator(); iter.hasNext();)
     {
       TextSection s = iter.next();
-      if (s.isRetired())
-        retiredTextSections.add(s);
+      if (s.isInvalid())
+        invalidTextSections.add(s);
       else
         knownTextSections.add(s.getName());
     }
@@ -353,14 +353,14 @@ public class DocumentCommands implements Iterable<DocumentCommand>
     }
 
     // lokale Kommandosets aktualisieren:
-    removeRetiredTextSections(retiredTextSections);
+    removeInvalidTextSections(invalidTextSections);
     addNewTextSections(newTextSections);
 
     Logger.debug2(L.m(
       "updateTextSections fertig nach %1 ms. Entfernte/Neue TextSections: ",
       Integer.valueOf((int) (System.currentTimeMillis() - startTime)))
-      + retiredTextSections.size() + " / " + newTextSections.size());
-    return retiredTextSections.size() > 0 || newTextSections.size() > 0;
+      + invalidTextSections.size() + " / " + newTextSections.size());
+    return invalidTextSections.size() > 0 || newTextSections.size() > 0;
   }
 
   /**
@@ -570,16 +570,16 @@ public class DocumentCommands implements Iterable<DocumentCommand>
    * Abgleich der internen Datenstrukturen: löscht alle in newDocumentCommands
    * enthaltenen Dokumentkommandos aus den entsprechenden Sets/Listen.
    * 
-   * @param retired
+   * @param invalid
    *          Set mit allen Dokumentkommandos, die seit dem letzten update ungültig
    *          (gelöscht) wurden.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private void removeRetiredTextSections(HashSet<TextSection> retired)
+  private void removeInvalidTextSections(HashSet<TextSection> invalid)
   {
-    allTextSectionsWithGROUPS.removeAll(retired);
-    visibilityElements.removeAll(retired);
+    allTextSectionsWithGROUPS.removeAll(invalid);
+    visibilityElements.removeAll(invalid);
   }
 
   /**
