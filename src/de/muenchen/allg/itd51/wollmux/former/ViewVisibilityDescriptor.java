@@ -48,7 +48,7 @@ public class ViewVisibilityDescriptor
    * {@link de.muenchen.allg.itd51.wollmux.former.control.OneFormControlLineView}.
    */
   public boolean formControlLineViewLabel = true;
-
+  
   /**
    * Anzeigen des TYPEs in der
    * {@link de.muenchen.allg.itd51.wollmux.former.control.OneFormControlLineView}.
@@ -61,6 +61,19 @@ public class ViewVisibilityDescriptor
    * die von der Art des Controls abhängen.
    */
   public boolean formControlLineViewAdditional = true;
+  
+  /**
+   * Anzeigen des TOOLTIPs in der
+   * {@link de.muenchen.allg.itd51.wollmux.former.control.OneFormControlLineView}.
+   */
+  public boolean formControlLineViewTooltip = false;
+
+  /**
+   * Anzeigen des READONLYs in der
+   * {@link de.muenchen.allg.itd51.wollmux.former.control.OneFormControlLineView}.
+   */
+  public boolean formControlLineViewReadonly = false;
+
 
   public ViewVisibilityDescriptor()
   {};
@@ -73,8 +86,10 @@ public class ViewVisibilityDescriptor
   public ViewVisibilityDescriptor(ViewVisibilityDescriptor orig)
   {
     this.formControlLineViewId = orig.formControlLineViewId;
-    this.formControlLineViewLabel = orig.formControlLineViewLabel;
+    this.formControlLineViewLabel = orig.formControlLineViewLabel;    
     this.formControlLineViewType = orig.formControlLineViewType;
     this.formControlLineViewAdditional = orig.formControlLineViewAdditional;
+    this.formControlLineViewTooltip = orig.formControlLineViewTooltip;
+    this.formControlLineViewReadonly = orig.formControlLineViewReadonly;
   };
 }

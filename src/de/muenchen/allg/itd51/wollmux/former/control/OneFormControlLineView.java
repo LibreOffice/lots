@@ -77,12 +77,17 @@ public class OneFormControlLineView extends LineView
    * Standardbreite des Textfelds, das das Label anzeigt.
    */
   private static final int LABEL_COLUMNS = 20;
-
+  
   /**
    * Standardbreite des Textfelds, das die ID anzeigt.
    */
   private static final int ID_COLUMNS = 10;
-
+  
+  /**
+   * Standardbreite des Textfelds, das das Tooltip anzeigt.
+   */
+  private static final int TIP_COLUMNS = 10;
+  
   /**
    * Typischerweise ein Container, der die View enthält und daher über Änderungen auf
    * dem Laufenden gehalten werden muss.
@@ -105,7 +110,7 @@ public class OneFormControlLineView extends LineView
    * Das JTextField, das das LABEL anzeigt und ändern lässt.
    */
   private JTextField labelTextfield;
-
+  
   /**
    * Das JTextField, das die ID anzeigt und ändern lässt.
    */
@@ -126,6 +131,16 @@ public class OneFormControlLineView extends LineView
    */
   private JPanel comboBoxAdditionalView;
 
+  /**
+   * Das JTextField, das das TOLLTIP anzeigt und ändern lässt.
+   */
+  private JTextField tipTextfield;
+  
+  /**
+   * Das JCheckBox, das das READONLY anzeigt und ändern lässt.
+   */
+  private JCheckBox readOnlyfield;
+  
   /**
    * Wird auf alle Teilkomponenten dieser View registriert.
    */
@@ -169,9 +184,11 @@ public class OneFormControlLineView extends LineView
     myPanel.addMouseListener(myMouseListener);
     myPanel.add(makeIdView());
     myPanel.add(makeLabelView());
+    myPanel.add(makeTooltipView());
     myPanel.add(makeTypeView());
     myPanel.add(makeComboBoxAdditionalView());
     myPanel.add(makeTextAreaAdditionalView());
+    myPanel.add(makeReadOnlyView());
     normalFont = labelTextfield.getFont();
     boldFont = normalFont.deriveFont(Font.BOLD);
     unmarkedBackgroundColor = myPanel.getBackground();
@@ -203,13 +220,18 @@ public class OneFormControlLineView extends LineView
     idTextfield.setVisible(model.isTab() || viewVisibilityDescriptor == null
       || viewVisibilityDescriptor.formControlLineViewId);
     labelTextfield.setVisible(model.isTab() || viewVisibilityDescriptor == null
-      || viewVisibilityDescriptor.formControlLineViewLabel);
+      || viewVisibilityDescriptor.formControlLineViewLabel);      
+    tipTextfield.setVisible(!model.isTab()
+      && viewVisibilityDescriptor != null && viewVisibilityDescriptor.formControlLineViewTooltip);        
     typeView.setVisible(!model.isTab()
       && (viewVisibilityDescriptor == null || viewVisibilityDescriptor.formControlLineViewType));
     comboBoxAdditionalView.setVisible(model.isCombo()
       && (viewVisibilityDescriptor == null || viewVisibilityDescriptor.formControlLineViewAdditional));
     textAreaAdditionalView.setVisible(model.isTextArea()
       && (viewVisibilityDescriptor == null || viewVisibilityDescriptor.formControlLineViewAdditional));
+    readOnlyfield.setVisible(!model.isTab()
+      && viewVisibilityDescriptor != null && viewVisibilityDescriptor.formControlLineViewReadonly);
+    
     /*
      * Wenn alle abgeschaltet sind, aktiviere zumindest das ID-Feld
      */
@@ -217,7 +239,9 @@ public class OneFormControlLineView extends LineView
       && !viewVisibilityDescriptor.formControlLineViewAdditional
       && !viewVisibilityDescriptor.formControlLineViewId
       && !viewVisibilityDescriptor.formControlLineViewLabel
-      && !viewVisibilityDescriptor.formControlLineViewType)
+      && !viewVisibilityDescriptor.formControlLineViewTooltip
+      && !viewVisibilityDescriptor.formControlLineViewType
+      && !viewVisibilityDescriptor.formControlLineViewReadonly)
     {
       idTextfield.setVisible(true);
     }
@@ -266,6 +290,76 @@ public class OneFormControlLineView extends LineView
     labelTextfield.addMouseListener(myMouseListener);
     setTypeSpecificTraits(labelTextfield, model.getType());
     return labelTextfield;
+  }
+  
+  /**
+   * Liefert eine Komponente, die das TIP des FormControlModels anzeigt und
+   * Änderungen an das Model weitergibt.
+   * 
+   * @author Simona Loi, I23
+   */
+  private JComponent makeTooltipView()
+  {
+    tipTextfield = new JTextField(model.getTooltip(), TIP_COLUMNS);
+    tipTextfield.setToolTipText("Tooltip Text");
+    Document tfdoc = tipTextfield.getDocument();
+    tfdoc.addDocumentListener(new DocumentListener()
+    {
+      public void update()
+      {
+        ignoreAttributeChanged = true;
+        model.setTooltip(tipTextfield.getText());
+        ignoreAttributeChanged = false;
+        if (getModel().getType() == FormControlModel.TAB_TYPE)
+          bigDaddy.tabTitleChanged(OneFormControlLineView.this);
+      }
+
+      public void insertUpdate(DocumentEvent e)
+      {
+        update();
+      }
+
+      public void removeUpdate(DocumentEvent e)
+      {
+        update();
+      }
+
+      public void changedUpdate(DocumentEvent e)
+      {
+        update();
+      }
+    });
+
+    tipTextfield.setCaretPosition(0);
+    tipTextfield.addMouseListener(myMouseListener);
+    setTypeSpecificTraits(tipTextfield, model.getType());
+    return tipTextfield;
+  }
+  
+  /**
+   * Liefert eine Komponente, die das READONLY des FormControlModels anzeigt und
+   * Änderungen an das Model weitergibt.
+   * 
+   * @author Simona Loi, I23
+   */
+  private JComponent makeReadOnlyView()
+  {
+    readOnlyfield = new JCheckBox();
+    readOnlyfield.setToolTipText("Read Only");
+    readOnlyfield.setSelected(model.getEditable());
+    comboBoxAdditionalView.add(readOnlyfield);
+    readOnlyfield.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        ignoreAttributeChanged = true;
+        model.setReadonly(readOnlyfield.isSelected());
+        ignoreAttributeChanged = false;
+      }
+    });
+    readOnlyfield.addMouseListener(myMouseListener);
+
+    return readOnlyfield;
   }
 
   /**

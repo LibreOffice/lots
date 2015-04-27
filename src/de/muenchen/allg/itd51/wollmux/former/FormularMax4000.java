@@ -768,6 +768,19 @@ public class FormularMax4000
     });
     menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewLabel);
     menu.add(menuItem);
+    
+    menuItem = new JCheckBoxMenuItem("TOOLTIP");
+    menuItem.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        viewVisibilityDescriptor.formControlLineViewTooltip =
+          ((AbstractButton) e.getSource()).isSelected();
+        broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
+      }
+    });
+    menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewTooltip);
+    menu.add(menuItem);    
 
     menuItem = new JCheckBoxMenuItem("TYPE");
     menuItem.addActionListener(new ActionListener()
@@ -794,6 +807,19 @@ public class FormularMax4000
     });
     menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewAdditional);
     menu.add(menuItem);
+    
+    menuItem = new JCheckBoxMenuItem("READONLY");
+    menuItem.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        viewVisibilityDescriptor.formControlLineViewReadonly =
+          ((AbstractButton) e.getSource()).isSelected();
+        broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
+      }
+    });
+    menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewReadonly);
+    menu.add(menuItem);
 
     menuItem = new JCheckBoxMenuItem("TRAFO, PLAUSI, AUTOFILL, GROUPS");
     menuItem.addActionListener(new ActionListener()
@@ -815,8 +841,8 @@ public class FormularMax4000
         setFrameSize();
       }
     });
-    menu.add(menuItem);
-
+    menu.add(menuItem);    
+    
     menu.addSeparator();
     menuItem = new JMenuItem(L.m("Funktionstester"));
     menuItem.addActionListener(new ActionListener()
