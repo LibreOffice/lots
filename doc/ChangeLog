@@ -1,4 +1,4 @@
- ==================== Neu in dieser Version ====================
+ ==================== Neu in Version 15.04 ====================
 
     * Bugfixes:
           o FM4000: Funktionstester sortiert Comboboxen alphabetisch
@@ -36,7 +36,47 @@
                   leicht gräulich dargestellt
                 # insertFormValues (Feldern) bleiben weiss, da diese Elemente
                   primär für die Formular-GUI verwendet werden.
-
+          o Es wird nun vor dem OOoBasedMailMerge (Druck nach ODT) geprüft, ob
+            mehr Datensätze gedruckt werden sollen, als es Office verarbeiten
+            kann.
+                # In diesem Fall erfolgt eine Fehlermeldung.
+          o Mittels Sichtbarkeiten können Elemente in der FormularGUI aus-/
+            eingeblendet werden.
+                # Dies gilt nun auch für Elemente vom Typ Button
+                # Somit können Standardelemente, wie z.B. Weiter, Drucken, etc.
+                  deaktiviert werden, solange die entsprechende Sichtbarkeit
+                  nicht gültig ist.
+          o Neuer Windows-Installer mit besserer Benutzerfuehrung
+                # Der WollMux-Installer unter Windows enthält nun eine
+                  Willkommensseite, in der auch z.B. die
+                  Installationsvoraussetzungen beschrieben sind.
+                # Alle bisherigen Prüfungen auf JAVA und LO/OOo werden nach der
+                  Willkommensseite durchgeführt.
+                # Der Installer ist in Deutsch und in Englisch (je nach
+                  Systemsprache) verfügbar
+          o WollMux-ODT-Seriendruck direkt als Fenster anzeigen
+            (MailMergeType.SHELL)
+                # Damit das neue Feature funktioniert, muss mindestens LO 4.4.3
+                  installiert sein. Bei älteren Versionen wird automatisch auf
+                  den alten Modus (=Dokument wird nach der Generierung neu
+                  geladen) gewechselt.
+                # Mit den Versionen LO 4.4.0 bis LO 4.4.2 ist KEIN Seriendruck
+                  in ein ODT-Gesamtdokument möglich. Hier wird das
+                  Gesamtdokument zwar generiert, kann aber aufgrund eines
+                  LibreOffice-Bugs nicht angezeigt werden.
+                # Innerhalb der LHM wird das Feature mit LO 4.1.6v2 zur
+                  Verfügung stehen.
+          o Tooltips in FM4000
+                # Sobald der Cursor über einer Spalte steht, werden nun
+                  Tooltips angezeigt.
+                # Beim Klicken auf "Neues Label", werden die Spalten mit "ID"
+                  und "Label" vorbefüllt.
+                # Beim Klicken in Feld "ID" oder "Label" wird der Text gelöscht
+                  und erwartet eine Eingabe.
+                # Bei mehrfach eingefügten Label wird der Name "ID" hochgezählt
+                  (ID2,ID3,ID4,...)
+                # Ein Label sollte selbst nicht den Namen "Label" bekommen
+                # Eine ID sollte selbst nicht den Namen "ID" bekommen
 
 
  ==================== Neu in Version 14.9 ====================
