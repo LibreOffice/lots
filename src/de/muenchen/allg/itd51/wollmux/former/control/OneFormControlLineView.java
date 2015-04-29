@@ -119,7 +119,7 @@ public class OneFormControlLineView extends LineView
   /**
    * Die Komponente, die das Bearbeiten des TYPE-Attributs erlaubt.
    */
-  private JComboBox<Object> typeView;
+  private JComboBox typeView;
 
   /**
    * Zusätzliche Elemente für FormControls mit TYPE "combobox".
@@ -325,9 +325,9 @@ public class OneFormControlLineView extends LineView
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private JComboBox<Object> makeTypeView()
+  private JComboBox makeTypeView()
   {
-    typeView = new JComboBox<Object>();
+    typeView = new JComboBox();
     typeView.setToolTipText(L.m("Feldtyp"));
     typeView.setEditable(false);
     typeView.addItem(FormControlModel.COMBOBOX_TYPE);
@@ -369,7 +369,7 @@ public class OneFormControlLineView extends LineView
     comboBoxAdditionalView.setLayout(new BoxLayout(comboBoxAdditionalView,
       BoxLayout.X_AXIS));
 
-    final JComboBox<Object> combo = new JComboBox<Object>();
+    final JComboBox combo = new JComboBox();
     combo.setToolTipText(L.m("Eingabeliste"));
     combo.setEditable(true);
     combo.setPrototypeDisplayValue("Sicherungsgeberin");

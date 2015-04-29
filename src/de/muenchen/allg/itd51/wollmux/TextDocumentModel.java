@@ -2621,7 +2621,7 @@ public class TextDocumentModel
       // Aufruf daher über Reflection.
       try
       {
-        Class<?> c = Class.forName("com.sun.star.awt.XTopWindow2");
+        Class c = Class.forName("com.sun.star.awt.XTopWindow2");
         Object o = UnoRuntime.queryInterface(c, getFrame().getContainerWindow());
         Method getIsMaximized = c.getMethod("getIsMaximized", (Class[])null);
         Method setIsMaximized = c.getMethod("setIsMaximized", (boolean.class));

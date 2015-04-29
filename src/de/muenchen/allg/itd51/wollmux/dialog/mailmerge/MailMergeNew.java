@@ -1072,12 +1072,12 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       WollMuxSingleton.getInstance().getTextDocumentModel(pmod.getTextDocument());
 
     QueryResults data = (QueryResults) pmod.getPropertyValue(PROP_QUERYRESULTS);
-    Collection<String> schema = (Collection<String>) pmod.getPropertyValue("MailMergeNew_Schema");
+    Collection schema = (Collection) pmod.getPropertyValue("MailMergeNew_Schema");
     List<Integer> selection =
-      (List<Integer>) pmod.getPropertyValue(PROP_MAILMERGENEW_SELECTION);
+      (List) pmod.getPropertyValue(PROP_MAILMERGENEW_SELECTION);
     if (selection.isEmpty()) return;
 
-    Iterator<Dataset> iter = data.iterator();
+    Iterator iter = data.iterator();
     Iterator<Integer> selIter = selection.iterator();
     int selectedIdx = selIter.next();
 
@@ -1089,7 +1089,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     {
       if (pmod.isCanceled()) return;
 
-      Dataset ds = iter.next();
+      Dataset ds = (Dataset) iter.next();
       if (++index < selectedIdx) continue;
 
       int datensatzNummer = index + 1; // same as datensatzNummer = selectedIdx+1;
@@ -1109,8 +1109,10 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       catch (Exception x)
       {}
 
-      for(String spalte : schema)
+      Iterator schemaIter = schema.iterator();
+      while (schemaIter.hasNext())
       {
+        String spalte = (String) schemaIter.next();
         String value = ds.get(spalte);
         pmod.setFormValue(spalte, value);
         dataSetExport.put(spalte, value);
@@ -1408,7 +1410,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
     @SuppressWarnings("unchecked")
     HashMap<String, String> dataset =
-      new HashMap<String, String>((HashMap<String, String>) pmod.getProp(PROP_DATASET_EXPORT,
+      new HashMap((HashMap<String, String>) pmod.getProp(PROP_DATASET_EXPORT,
         new HashMap<String, String>()));
 
     // Zähler für #DS und #SB mit gleicher Länge erzeugen (ggf. mit 0en auffüllen)

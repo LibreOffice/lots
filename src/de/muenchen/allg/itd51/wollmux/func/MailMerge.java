@@ -533,7 +533,7 @@ public class MailMerge
     myPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     myFrame.setContentPane(myPanel);
 
-    final JList<MailMerge.ListElement> myList = new JList<MailMerge.ListElement>(list);
+    final JList myList = new JList(list);
     myList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     for (int i = 0; i < list.size(); ++i)
     {
@@ -857,7 +857,7 @@ public class MailMerge
      * Die ComboBox in der der Benutzer die OOo-Datenquelle bzw, das Calc-Dokument
      * für den MailMerge auswählen kann.
      */
-    private JComboBox<String> datasourceSelector;
+    private JComboBox datasourceSelector;
 
     /**
      * Das XPrintModel für diesen MailMerge.
@@ -867,7 +867,7 @@ public class MailMerge
     /**
      * Die ComboBox in der der Benutzer die Tabelle für den MailMerge auswählen kann.
      */
-    private JComboBox<String> tableSelector;
+    private JComboBox tableSelector;
 
     /**
      * Der Name der aktuell ausgewählten Datenquelle (bzw, der Titel des ausgewählten
@@ -1005,12 +1005,8 @@ public class MailMerge
      * Erstellt die GUI für die Auswahl der Datenquelle/Tabelle für den
      * SuperMailMerge. Darf nur im EDT aufgerufen werden.
      * 
-     * Diese Methode wird indirekt per Reflection aufgerufen (daher keine
-     * "unused"-Warnung)
-     * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
-    @SuppressWarnings("unused")
     public void createGUI()
     {
       final JFrame myFrame = new JFrame(L.m("Seriendruck"));
@@ -1055,7 +1051,7 @@ public class MailMerge
       Box hbox = Box.createHorizontalBox();
       vbox.add(hbox);
       hbox.add(new JLabel(L.m("Datenquelle")));
-      datasourceSelector = new JComboBox<String>();
+      datasourceSelector = new JComboBox();
       hbox.add(Box.createHorizontalStrut(5));
       hbox.add(datasourceSelector);
       int selected = 0;
@@ -1109,7 +1105,7 @@ public class MailMerge
       vbox.add(hbox);
       hbox.add(new JLabel(L.m("Tabelle")));
       hbox.add(Box.createHorizontalStrut(5));
-      tableSelector = new JComboBox<String>();
+      tableSelector = new JComboBox();
       hbox.add(tableSelector);
 
       /*
@@ -1184,9 +1180,6 @@ public class MailMerge
      * Wird im Nicht-EDT aufgerufen und bestimmt die Tabellen der neu ausgewählten
      * Datenquelle und lässt dann im EDT die {@link #tableSelector}-ComboBox updaten.
      * 
-     * Diese Methode wird indirekt über Reflection aufgerufen (daher keine
-     * "unused"-Warnung)
-     * 
      * @param datasourceAndTableName
      *          das erste Element ist der Name der neu ausgewählten Datenquelle bzw.
      *          des Calc-Dokuments. Das zweite Element ist der Name der vorher
@@ -1195,7 +1188,6 @@ public class MailMerge
      *          aktuelle Auswahl der ComboBox eingestellt werden soll.
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
-    @SuppressWarnings("unused")
     public void updateTableSelector(String[] datasourceAndTableName)
     {
       String datasourceName = datasourceAndTableName[0];
@@ -1279,7 +1271,6 @@ public class MailMerge
       }
     }
 
-    @SuppressWarnings("unused") // wird per reflection aufgerufen
     public void print(Boolean offerselection)
     {
       if (calcDocumentTitles.contains(selectedDatasource))
@@ -1304,11 +1295,12 @@ public class MailMerge
      *          Methode keine Parameter erwartet.
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
+    @SuppressWarnings("unchecked")
     private void addTodo(String method, Object param)
     {
       try
       {
-        Class<?>[] paramTypes = null;
+        Class[] paramTypes = null;
         Object[] params = null;
         if (param != null)
         {

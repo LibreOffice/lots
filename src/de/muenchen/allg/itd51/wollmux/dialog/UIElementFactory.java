@@ -425,7 +425,7 @@ public class UIElementFactory
     }
     else if (type.equals("combobox"))
     {
-      JComboBox<Object> combo = new JComboBox<Object>();
+      JComboBox combo = new JComboBox();
       combo.setEnabled(!readonly);
       combo.setFocusable(!readonly);
       combo.setEditable(editable);
@@ -495,7 +495,7 @@ public class UIElementFactory
       catch (Exception e)
       {}
 
-      JList<Object> list = new JList<Object>(new DefaultListModel<Object>());
+      JList list = new JList(new DefaultListModel());
 
       list.setVisibleRowCount(lines);
       list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -792,11 +792,11 @@ public class UIElementFactory
    */
   private static class MyActionMouseListener extends MouseAdapter
   {
-    private JList<Object> list;
+    private JList list;
 
     private ActionListener action;
 
-    public MyActionMouseListener(JList<Object> list, ActionListener action)
+    public MyActionMouseListener(JList list, ActionListener action)
     {
       this.list = list;
       this.action = action;

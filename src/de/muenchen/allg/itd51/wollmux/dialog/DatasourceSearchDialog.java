@@ -57,7 +57,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -866,17 +865,17 @@ public class DatasourceSearchDialog implements Dialog
             Dataset ds = null;
             if (resultsList != null)
             {
-              List<Object> selected = resultsList.getSelected();
-              if (selected.size() > 0)
-                ds = ((ListElement) selected.get(0)).getDataset();
+              Object[] selected = resultsList.getSelected();
+              if (selected.length > 0)
+                ds = ((ListElement) selected[0]).getDataset();
             }
             select(dialogWindowSchema, ds);
           }
         }
         else if (eventType.equals("listSelectionChanged"))
         {
-          List<Object> selected = ((UIElement.Listbox) source).getSelected();
-          if (selected.size() > 0) updatePreview((ListElement) selected.get(0));
+          Object[] selected = ((UIElement.Listbox) source).getSelected();
+          if (selected.length > 0) updatePreview((ListElement) selected[0]);
         }
 
       }

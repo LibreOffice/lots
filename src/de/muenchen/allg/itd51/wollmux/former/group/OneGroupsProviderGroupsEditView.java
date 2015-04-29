@@ -32,7 +32,6 @@ package de.muenchen.allg.itd51.wollmux.former.group;
 
 import java.awt.GridLayout;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import javax.swing.DefaultListModel;
@@ -66,12 +65,12 @@ public class OneGroupsProviderGroupsEditView implements View
    * Die Liste mit allen Gruppen aus {@link #groupModelList}, wobei die Gruppen aus
    * {@link #groupsProvider} selektiert sind.
    */
-  private JList<IDManager.ID> myList;
+  private JList myList;
 
   /**
    * Das {@link ListModel} zu {@link #myList}.
    */
-  private DefaultListModel<IDManager.ID> listModel;
+  private DefaultListModel listModel;
 
   /**
    * Wessen Gruppen werden angezeigt und bearbeitet.
@@ -106,8 +105,8 @@ public class OneGroupsProviderGroupsEditView implements View
     groupModelList.addListener(myListener);
 
     myPanel = new JPanel(new GridLayout(1, 1));
-    listModel = new DefaultListModel<IDManager.ID>();
-    myList = new JList<IDManager.ID>(listModel);
+    listModel = new DefaultListModel();
+    myList = new JList(listModel);
     myList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
     JScrollPane scrollPane = new JScrollPane(myList);
@@ -223,16 +222,16 @@ public class OneGroupsProviderGroupsEditView implements View
       if (e.getValueIsAdjusting()) return;
       recursion = true;
 
-      List<IDManager.ID> selected = myList.getSelectedValuesList();
+      Object[] selected = myList.getSelectedValues();
       Iterator<IDManager.ID> iter = groupsProvider.iterator();
       while (iter.hasNext())
       {
         IDManager.ID id = iter.next();
         found: do
         {
-          for (IDManager.ID id2 : selected)
+          for (Object o : selected)
           {
-            if (id2.equals(id)) break found;
+            if (o.equals(id)) break found;
           }
 
           iter.remove();

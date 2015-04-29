@@ -499,12 +499,12 @@ public class UIElementConfigThingyEditor
   {
     private static final long serialVersionUID = 8511287349879988272L;
 
-    private JComboBox<String> combo;
+    private JComboBox combo;
 
     public JTypeAttributeEditor()
     {
       super("TYPE", false);
-      combo = new JComboBox<String>(new String[] {
+      combo = new JComboBox(new String[] {
         "button", "separator", "glue", "senderbox", "searchbox" }); // "menu" NICHT!
       prepareComboBox(combo, "TYPE");
 
@@ -562,7 +562,7 @@ public class UIElementConfigThingyEditor
   {
     private static final long serialVersionUID = -6633764674615890730L;
 
-    private JComboBox<String> combo;
+    private JComboBox combo;
 
     public JActionAttributeEditor()
     {
@@ -570,7 +570,7 @@ public class UIElementConfigThingyEditor
       Vector<String> actions = new Vector<String>(WollMuxBar.SUPPORTED_ACTIONS);
       actions.remove("open"); // FIXME: "open"-Actions werden nicht unterstützt!
       Collections.sort(actions);
-      combo = new JComboBox<String>(actions);
+      combo = new JComboBox(actions);
 
       prepareComboBox(combo, "ACTION");
 
@@ -589,7 +589,7 @@ public class UIElementConfigThingyEditor
     }
   }
 
-  private void prepareComboBox(JComboBox<String> combo, String attributeName)
+  private void prepareComboBox(JComboBox combo, String attributeName)
   {
     combo.setEditable(false);
     try

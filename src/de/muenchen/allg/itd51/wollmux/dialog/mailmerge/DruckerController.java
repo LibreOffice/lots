@@ -32,7 +32,6 @@
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
@@ -78,7 +77,7 @@ public class DruckerController {
     return model.getDrucker();
   } 
     
-  public List<String> getAlleDrucker() {
+  public ArrayList<String> getAlleDrucker() {
     return model.getAlleDrucker();
   }  
 }

@@ -126,7 +126,7 @@ public class FunctionSelectionAccessView implements View
   /**
    * Die JComboBox, in der der Benutzer die Funktion auswählen kann.
    */
-  private JComboBox<String> functionSelectorBox;
+  private JComboBox functionSelectorBox;
 
   /**
    * Der {@link IDManager}, dessen aktive IDs für Feldreferenzen auswählbar sind.
@@ -312,7 +312,7 @@ public class FunctionSelectionAccessView implements View
         gbcLabelLeft.gridy = y;
         myPanel.add(label, gbcLabelLeft);
 
-        JComboBox<String> box =
+        JComboBox box =
           buildParameterBox(names[i], funcSel.getParameterValue(names[i]));
         gbcTextfield.gridx = 1;
         gbcTextfield.gridy = y++;
@@ -338,9 +338,9 @@ public class FunctionSelectionAccessView implements View
    *          der Wert, den die ComboBox zu Beginn eingestellt haben soll.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private JComboBox<String> buildParameterBox(final String paramName, ParamValue startValue)
+  private JComboBox buildParameterBox(final String paramName, ParamValue startValue)
   {
-    final JComboBox<String> combo = new JComboBox<String>();
+    final JComboBox combo = new JComboBox();
     combo.setEditable(true);
 
     combo.addItem(UNSPECIFIED_ITEM);
@@ -441,7 +441,7 @@ public class FunctionSelectionAccessView implements View
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private void updateParameterBox(JComboBox<String> combo)
+  private void updateParameterBox(JComboBox combo)
   {
     Document comboDoc =
       ((JTextComponent) combo.getEditor().getEditorComponent()).getDocument();
@@ -488,9 +488,9 @@ public class FunctionSelectionAccessView implements View
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private JComboBox<String> buildFunctionSelector()
+  private JComboBox buildFunctionSelector()
   {
-    functionSelectorBox = new JComboBox<String>();
+    functionSelectorBox = new JComboBox();
     int selectedIndex = 0;
     int none_index = functionSelectorBox.getItemCount();
     functionSelectorBox.addItem(NONE_ITEM);

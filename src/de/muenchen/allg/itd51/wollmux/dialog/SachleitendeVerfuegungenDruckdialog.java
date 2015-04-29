@@ -175,10 +175,9 @@ public class SachleitendeVerfuegungenDruckdialog
     public void itemStateChanged(ItemEvent arg0)
     {
       Object source = arg0.getSource();
-      if (source != null && source instanceof JComboBox<?>)
+      if (source != null && source instanceof JComboBox)
       {
-        @SuppressWarnings("unchecked")
-        JComboBox<String> cbox = (JComboBox<String>) source;
+        JComboBox cbox = (JComboBox) source;
         if (cbox.getSelectedIndex() != 0) cbox.setSelectedIndex(0);
       }
     }
@@ -205,10 +204,10 @@ public class SachleitendeVerfuegungenDruckdialog
   private JSpinner[] elementCountSpinner;
 
   /**
-   * Liste mit allen comboBoxen, die verfügungspunkte+zuleitungszeilen
+   * Die Array mit allen comboBoxen, die verfügungspunkte+zuleitungszeilen
    * beinhalten.
    */
-  private List<JComboBox<String>> elementComboBoxes;
+  private JComboBox[] elementComboBoxes;
 
   /**
    * Die Array mit allen buttons auf printElement-Actions
@@ -377,7 +376,7 @@ public class SachleitendeVerfuegungenDruckdialog
     int size = verfuegungspunkte.size();
 
     // element
-    elementComboBoxes = new ArrayList<JComboBox<String>>();
+    elementComboBoxes = new JComboBox[size];
     elementCountSpinner = new JSpinner[size];
     printElementButtons = new JButton[size];
 
@@ -397,7 +396,7 @@ public class SachleitendeVerfuegungenDruckdialog
         String zuleitung = iter.next();
         content.add(cutContent(zuleitung));
       }
-      elementComboBoxes.add(new JComboBox<String>(content));
+      elementComboBoxes[i] = new JComboBox(content);
 
       // elementCountComboBoxes vorbelegen:
       SpinnerNumberModel model =
@@ -632,10 +631,10 @@ public class SachleitendeVerfuegungenDruckdialog
 
           else if (type.equals("combobox"))
           {
-            JComboBox<String> comboBox;
-            if (id.equals("element") && verfPunktNr < elementComboBoxes.size())
+            JComboBox comboBox;
+            if (id.equals("element") && verfPunktNr < elementComboBoxes.length)
             {
-              comboBox = elementComboBoxes.get(verfPunktNr);
+              comboBox = elementComboBoxes[verfPunktNr];
               comboBox.addItemListener(cboxItemListener);
             }
 
@@ -646,7 +645,7 @@ public class SachleitendeVerfuegungenDruckdialog
             }
 
             else
-              comboBox = new JComboBox<String>();
+              comboBox = new JComboBox();
 
             // comboBox.addListSelectionListener(myListSelectionListener);
 

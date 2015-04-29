@@ -211,7 +211,7 @@ public class FunctionTester
   private ValueBox makeValueBox()
   {
     Box hbox = Box.createHorizontalBox();
-    final JComboBox<String> combo = new JComboBox<String>();
+    final JComboBox combo = new JComboBox();
     combo.setEditable(true);
 
     updateParameterBox(combo);
@@ -268,7 +268,7 @@ public class FunctionTester
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private void updateParameterBox(JComboBox<String> combo)
+  private void updateParameterBox(JComboBox combo)
   {
     String currentValue = getComboBoxValue(combo, "");
     combo.removeAllItems();
@@ -467,7 +467,7 @@ public class FunctionTester
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private String getComboBoxValue(JComboBox<String> combo, String errorValue)
+  private String getComboBoxValue(JComboBox combo, String errorValue)
   {
     Document comboDoc =
       ((JTextComponent) combo.getEditor().getEditorComponent()).getDocument();
@@ -490,13 +490,13 @@ public class FunctionTester
    */
   private static class ValueBox
   {
-    private JComboBox<String> combo;
+    private JComboBox combo;
 
     private JTextField text;
 
     private JComponent compo;
 
-    public ValueBox(JComboBox<String> combo, JTextField text, JComponent compo)
+    public ValueBox(JComboBox combo, JTextField text, JComponent compo)
     {
       this.combo = combo;
       this.text = text;
