@@ -35,6 +35,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
+import java.awt.AWTEvent;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.KeyEventPostProcessor;
@@ -52,8 +53,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JTextField;
@@ -114,6 +115,8 @@ public class Common
    */
   private static boolean lafSet = false;
   
+  private static boolean isPopupVisible = false;
+
   /**
    * Speichert die ursprünglichen Fontgrößen.
    */
@@ -130,6 +133,15 @@ public class Common
     if (!lafSet) setLookAndFeel();
   }
 
+  /**
+   * Setzt, ob gerade ein Popup angezeigt wird.
+   * 
+   * @param isPopupVisible
+   */
+  public static void setIsPopupVisible(boolean isPopupVisible) {
+    Common.isPopupVisible = isPopupVisible;
+  }
+  
   /**
    * Setzt das Metal Look and Feel und ruft {@link #configureTextFieldBehaviour()}
    * auf. Das plattformspezifische LAF wird nicht verwendet, damit die Benutzer unter
@@ -226,6 +238,11 @@ public class Common
    */
   private static void configureTextFieldBehaviour()
   {
+    // Hier wird konfiguriert das rechts Mouse click in ein TextField. Das Mouse listener
+    // ist als AWTEventListener implementiert um eine globaler event listener zu haben,
+    // er reagiert an eine event in alle Komponente.
+    Toolkit.getDefaultToolkit().addAWTEventListener(new ContextMenuMouseListener(), AWTEvent.MOUSE_EVENT_MASK);
+
     KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
 
     // Wir fügen dem aktuellen KeyboardFocusManager einen
@@ -249,11 +266,13 @@ public class Common
     // Wir melden am aktuellen KeyboardFocusManager einen PropertyChangeListener an,
     // der bemerkt, ob ein JTextField den Focus verloren hat und dessen Selektion
     // löscht.
+    // Das darf nicht passieren wenn in ein JTextField das recht Mouse Taste geklickt ist
+    // und ein PopUp Menu angezeigt wird.
     kfm.addPropertyChangeListener("focusOwner", new PropertyChangeListener()
     {
       public void propertyChange(PropertyChangeEvent evt)
       {
-        if (evt.getOldValue() instanceof JTextField)
+        if (evt.getOldValue() instanceof JTextField && !isPopupVisible)
         {
           JTextField textField = (JTextField) evt.getOldValue();
 
