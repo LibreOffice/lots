@@ -121,6 +121,11 @@ public class Logger
   private static int mode = LOG;
 
   /**
+   * Wenn ignoreInit==true, wird der nächte init-Aufruf ignoriert.
+   */
+  private static boolean ignoreInit = false;
+  
+  /**
    * Über die Methode init wird der Logger mit einem PrintStream und einem
    * Logging-Modus initialisiert. Ohne diese Methode schreibt der Logger auf
    * System.err im Modus LOG.
@@ -131,6 +136,8 @@ public class Logger
    */
   public static void init(PrintStream outputPrintStream, int loggingMode)
   {
+    if (ignoreInit) return;
+    
     outputStream = outputPrintStream;
     file = null; // evtl. vorher erfolgte Zuweisung aufheben, damit outputStream
     // auch wirklich verwendet wird
@@ -153,6 +160,8 @@ public class Logger
    */
   public static void init(File outputFile, int loggingMode)
   {
+    if (ignoreInit) return;
+
     file = outputFile;
     mode = loggingMode;
     Logger.debug2("========================== Logger::init(): LoggingMode = " + mode
@@ -170,6 +179,8 @@ public class Logger
    */
   public static void init(int loggingMode)
   {
+    if (ignoreInit) return;
+
     mode = loggingMode;
     Logger.debug2("========================== Logger::init(): LoggingMode = " + mode
       + " ========================");
@@ -187,11 +198,22 @@ public class Logger
    */
   public static void init(String loggingMode)
   {
+    if (ignoreInit) return;
+
     if (loggingMode.compareToIgnoreCase("NONE") == 0) init(NONE);
     if (loggingMode.compareToIgnoreCase("ERROR") == 0) init(ERROR);
     if (loggingMode.compareToIgnoreCase("LOG") == 0) init(LOG);
     if (loggingMode.compareToIgnoreCase("DEBUG") == 0) init(DEBUG);
     if (loggingMode.compareToIgnoreCase("ALL") == 0) init(ALL);
+  }
+
+  /**
+   * Nach einem Aufruf dieser Methode mit ignoreInit==true werden alle folgenden
+   * init-Aufrufe ignoriert.
+   */
+  public static void setIgnoreInit(boolean ignoreInit)
+  {
+    Logger.ignoreInit = ignoreInit;
   }
 
   /**
