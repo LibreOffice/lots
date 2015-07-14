@@ -146,6 +146,11 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    * Der FormularMax4000, zu dem diese View gehört.
    */
   private FormularMax4000 formularMax4000;
+  
+  /**
+   * Sichtbarkeitseinstellungen von FormularMax;
+   */
+  private ViewVisibilityDescriptor visibilityDescriptor;
 
   /**
    * Erzeugt eine AllFormControlLineViewsPanel, die den Inhalt von
@@ -160,7 +165,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     this.formControlModelList = formControlModelList;
     this.formularMax4000 = formularMax4000;
     formControlModelList.addListener(this);
-    formularMax4000.addBroadcastListener(new MyBroadcastListener());
+    formularMax4000.addBroadcastListener(new MyBroadcastListener(this));
 
     myPanel = new JPanel(new GridBagLayout());
     tabPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -280,6 +285,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     }
     OneFormControlLineView ofclView =
       new OneFormControlLineView(model, this, formularMax4000);
+    ofclView.setViewVisibilityDescriptor(visibilityDescriptor);
 
     boolean isTab = (model.getType() == FormControlModel.TAB_TYPE);
     JComponent tab = firstTab;
@@ -694,6 +700,13 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
   private class MyBroadcastListener extends BroadcastListener
   {
+    private AllFormControlLineViewsPanel panel;
+    
+    private MyBroadcastListener(AllFormControlLineViewsPanel panel)
+    {
+      this.panel = panel;
+    }
+    
     public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
     { // TESTED
       if (b.getClearSelection()) clearSelection();
@@ -756,6 +769,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
        * OneFormControlLineViews, da diese keine Änderungen daran vornehmen.
        */
       ViewVisibilityDescriptor newDesc = new ViewVisibilityDescriptor(desc);
+      panel.visibilityDescriptor = newDesc;
 
       Iterator<Object> iter = viewDescriptors.iterator();
       while (iter.hasNext())
