@@ -121,9 +121,9 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
         onSaveOrSaveAs(docEvent.Source);
       else if (ON_SAVE_AS.equals(event)) onSaveOrSaveAs(docEvent.Source);
     }
-    catch (Exception e)
+    catch (Throwable t)
     {
-      Logger.error(e);
+      Logger.error(t);
     }
   }
 
@@ -224,7 +224,8 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     XTextDocument xTextDoc = UNO.XTextDocument(source);
     if (xTextDoc == null) return;
     DocumentManager.Info info = docManager.getInfo(xTextDoc);
-    if (info != null) info.getTextDocumentModel().flushPersistentData();
+    if (info != null && info.hasTextDocumentModel())
+        info.getTextDocumentModel().flushPersistentData();
   }
 
   /**

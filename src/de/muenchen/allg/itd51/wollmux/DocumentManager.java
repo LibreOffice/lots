@@ -194,7 +194,7 @@ public class DocumentManager
 
   public static class TextDocumentInfo extends Info
   {
-    private TextDocumentModel model;
+    private TextDocumentModel model = null;
 
     private XTextDocument doc;
 
@@ -214,7 +214,7 @@ public class DocumentManager
       return model;
     }
 
-    public synchronized boolean hasTextDocumentModel()
+    public boolean hasTextDocumentModel()
     {
       return model != null;
     }
