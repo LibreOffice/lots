@@ -1,3 +1,14 @@
+ ==================== Neu in Version 15.04a ====================
+
+    * Bugfixes:
+          o DIWO: Nach dem weiteren Reduzieren des Testfalles (das Makro des
+            DIWO Herstellers) und des WollMux auf die wesentlichen Funktionen,
+            die zum Deadlock beitragen hat sich herausgestellt, dass der
+            Deadlock durch den WollMux verursacht wird. Zwei Threads wollten
+            dort auf den selben synchronized-Block zugreifen und hingen durch
+            LibreOffice indirekt wieder voneinander ab.
+
+
  ==================== Neu in Version 15.04 ====================
 
     * Bugfixes:
