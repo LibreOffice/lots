@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<macker>
+	<ruleset name="WollMux">
+		<pattern name="wollmux-classes">
+			<include class="de.muenchen.allg.itd51.wollmux.**" />
+		</pattern>
+		<pattern name="uno-classes">
+			<include class="com.sun.star.**" />
+		</pattern>
+		<pattern name="private-classes">
+			<include pattern="wollmux-classes" />
+			<exclude filter="class-access" min="protected" />
+		</pattern>
+		<pattern name="public-classes">
+			<include pattern="wollmux-classes" />
+			<exclude  filter="class-access" max="private" />
+		</pattern>
+
+		<access-rule severity="debug">
+			<message>Direct access to UNO.</message>
+			<deny>
+				<to>
+					<include pattern="uno-classes" />
+					<include class="de.muenchen.allg.afid.UNO" />
+				</to>
+			</deny>
+		</access-rule>
+
+		<access-rule severity="debug">
+			<message>WollMux singleton.</message>
+			<deny>
+				<to class="de.muenchen.allg.itd51.wollmux.WollMuxSingleton" />
+			</deny>
+		</access-rule>
+
+		<access-rule severity="error">
+			<message>Conf parser accesses classes in WollMux.</message>
+			<deny>
+				<from class="de.muenchen.allg.itd51.parser.**" />
+				<to pattern="wollmux-classes" />
+			</deny>
+		</access-rule>
+	</ruleset>
+</macker>

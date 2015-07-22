@@ -25,3 +25,4 @@ dist/wollmux-*-installer.exe
 dist/wollmux-*.tar.gz
 oxt/WollMux.uno.jar
 *~
+/target
