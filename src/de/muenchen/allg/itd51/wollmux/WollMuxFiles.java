@@ -80,6 +80,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -170,6 +171,8 @@ public class WollMuxFiles
 
   private static final WollMuxClassLoader classLoader = new WollMuxClassLoader();
 
+  private static final String[] BLACKLIST = { "java.", "com.sun." };
+  
   /**
    * Die in der wollmux.conf mit DEFAULT_CONTEXT festgelegte URL.
    */
@@ -804,7 +807,18 @@ public class WollMuxFiles
       urllist.append(urls[i].toExternalForm());
       urllist.append("  ");
     }
-
+    
+    for (String s : BLACKLIST)
+    {
+      classLoader.addBlacklisted(s);
+    }
+    
+    ConfigThingy confWhitelist = getWollmuxConf().query("CPWHITELIST", 1);
+    for (ConfigThingy w : confWhitelist)
+    {
+      classLoader.addWhitelisted(w.toString());
+    }
+    
     Logger.debug("CLASSPATH=" + urllist);
   }
 
@@ -1481,20 +1495,42 @@ public class WollMuxFiles
 
   private static class WollMuxClassLoader extends URLClassLoader
   {
+    private ArrayList<String> blacklist;
+    private ArrayList<String> whitelist;
+    
     public WollMuxClassLoader()
     {
       super(new URL[] {});
+      blacklist = new ArrayList<String>();
+      whitelist = new ArrayList<String>();
     }
 
+    @Override
     public void addURL(URL url)
     {
       super.addURL(url);
     }
+    
+    public void addBlacklisted(String name)
+    {
+      blacklist.add(name);
+    }
 
+    public void addWhitelisted(String name)
+    {
+      whitelist.add(name);
+    }
+
+    @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException
     {
       try
       {
+        if (isBlacklisted(name) && !isWhitelisted(name))
+        {
+          throw new ClassNotFoundException();
+        }
+        
         Class<?> c = findLoadedClass(name);
         if (c != null) return c;
         return super.findClass(name);
@@ -1504,6 +1540,33 @@ public class WollMuxFiles
         return WollMuxClassLoader.class.getClassLoader().loadClass(name);
       }
     }
+    
+    private boolean isBlacklisted(String name)
+    {
+      for (String bl : blacklist)
+      {
+        if (name.startsWith(bl))
+        {
+          return true;
+        }
+      }
+      
+      return false;
+    }
+    
+    private boolean isWhitelisted(String name)
+    {
+      for (String wl : whitelist)
+      {
+        if (name.startsWith(wl))
+        {
+          return true;
+        }
+      }
+      
+      return false;
+    }
+
   }
 
   public static boolean installQATestHandler()
