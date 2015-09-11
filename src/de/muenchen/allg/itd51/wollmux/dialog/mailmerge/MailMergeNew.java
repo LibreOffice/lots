@@ -99,6 +99,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
 import de.muenchen.allg.itd51.wollmux.email.EMailSender;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
  * Die neuen erweiterten Serienbrief-Funktionalitäten.
@@ -610,16 +611,12 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     Iterator<String> dataIter = data.iterator();
     for (String column : schema)
     {
-      mod.setFormFieldValue(column, dataIter.next());
-      mod.updateFormFields(column);
+      WollMuxEventHandler.handleSetFormValue(mod.doc, column, dataIter.next(), null);
     }
-
-    mod.setFormFieldValue(MailMergeParams.TAG_DATENSATZNUMMER,
-      previewDatasetNumberStr);
-    mod.updateFormFields(MailMergeParams.TAG_DATENSATZNUMMER);
-    mod.setFormFieldValue(MailMergeParams.TAG_SERIENBRIEFNUMMER,
-      previewDatasetNumberStr);
-    mod.updateFormFields(MailMergeParams.TAG_SERIENBRIEFNUMMER);
+    WollMuxEventHandler.handleSetFormValue(mod.doc,
+      MailMergeParams.TAG_DATENSATZNUMMER, previewDatasetNumberStr, null);
+    WollMuxEventHandler.handleSetFormValue(mod.doc,
+      MailMergeParams.TAG_SERIENBRIEFNUMMER, previewDatasetNumberStr, null);
   }
 
   /**
