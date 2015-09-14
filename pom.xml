@@ -5,6 +5,12 @@
 	<artifactId>wollmux</artifactId>
 	<version>15.4.0-SNAPSHOT</version>
 	<name>WollMux</name>
+
+	<properties>
+		<libreoffice.version>4.1</libreoffice.version>
+	</properties>
+
+
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
@@ -149,6 +155,31 @@
 			<groupId>javax.mail</groupId>
 			<artifactId>javax.mail-api</artifactId>
 			<version>1.5.4</version>
+		</dependency>
+		<dependency>
+			<groupId>de.muenchen</groupId>
+			<artifactId>classes</artifactId>
+			<version>1.0.0</version>
+		</dependency>		
+		<dependency>
+			<groupId>org.libreoffice</groupId>
+			<artifactId>ridl</artifactId>
+			<version>${libreoffice.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.libreoffice</groupId>
+			<artifactId>juh</artifactId>
+			<version>${libreoffice.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.libreoffice</groupId>
+			<artifactId>jurt</artifactId>
+			<version>${libreoffice.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.libreoffice</groupId>
+			<artifactId>unoil</artifactId>
+			<version>${libreoffice.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>de.muenchen</groupId>
