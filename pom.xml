@@ -10,6 +10,9 @@
 		<libreoffice.version>4.1</libreoffice.version>
 	</properties>
 
+	<scm>
+		<developerConnection>scm:git:https://github.com/WollMux/WollMux.git</developerConnection>
+	</scm>
 
 	<build>
 		<sourceDirectory>src</sourceDirectory>
@@ -72,6 +75,11 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.2</version>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -160,7 +168,7 @@
 			<groupId>de.muenchen</groupId>
 			<artifactId>classes</artifactId>
 			<version>1.0.0</version>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.libreoffice</groupId>
 			<artifactId>ridl</artifactId>
