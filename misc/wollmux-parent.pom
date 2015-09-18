@@ -8,6 +8,11 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<packaging>pom</packaging>
 
 	<distributionManagement>
+		<repository>
+			<id>release</id>
+			<name>kvm-javabuild-release</name>
+			<url>http://kvm-javabuild.tvc.muenchen.de/artifactory/libs-release-local</url>
+		</repository>
 		<snapshotRepository>
 			<id>snapshots</id>
 			<name>kvm-javabuild-snapshots</name>
