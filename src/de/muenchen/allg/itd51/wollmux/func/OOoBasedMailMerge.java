@@ -863,7 +863,7 @@ public class OOoBasedMailMerge
     addDatabaseFieldsForInsertFormValueBookmarks(UNO.XTextDocument(tmpDoc), dbName);
     adjustDatabaseAndInputUserFields(tmpDoc, dbName);
     removeAllBookmarks(tmpDoc);
-    removeHiddenSections(tmpDoc);
+    //removeHiddenSections(tmpDoc);
     SachleitendeVerfuegung.deMuxSLVStyles(UNO.XTextDocument(tmpDoc));
     removeWollMuxMetadata(UNO.XTextDocument(tmpDoc));
 
