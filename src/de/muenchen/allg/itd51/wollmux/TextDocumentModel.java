@@ -244,10 +244,10 @@ public class TextDocumentModel
   private DocumentCommands documentCommands;
 
   /**
-   * Enthält ein Set mit den Namen aller derzeit unsichtbar gestellter
-   * Sichtbarkeitsgruppen.
+   * Enthält eine Map mit den Namen aller (bisher gesetzter) Sichtbarkeitsgruppen auf
+   * deren aktuellen Sichtbarkeitsstatus (sichtbar = true, unsichtbar = false)
    */
-  private HashSet<String> invisibleGroups;
+  private HashMap<String, Boolean> mapGroupIdToVisibilityState;
 
   /**
    * Der Vorschaumodus ist standardmäßig immer gesetzt - ist dieser Modus nicht
@@ -362,7 +362,7 @@ public class TextDocumentModel
     this.printFunctions = new HashSet<String>();
     this.formularConf = null;
     this.formFieldValues = new HashMap<String, String>();
-    this.invisibleGroups = new HashSet<String>();
+    this.mapGroupIdToVisibilityState = new HashMap<String, Boolean>();
     this.overrideFragMap = new HashMap<String, String>();
     parseInitialOverrideFragMap(getInitialOverrideFragMap());
     this.functionContext = new HashMap<Object, Object>();
@@ -1412,15 +1412,6 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert ein HashSet mit den Namen (Strings) aller als unsichtbar markierten
-   * Sichtbarkeitsgruppen.
-   */
-  synchronized public HashSet<String> getInvisibleGroups()
-  {
-    return invisibleGroups;
-  }
-
-  /**
    * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die Anzeige der
    * Hintergrundfarbe (showHighlightColor) für alle Druckblöcke eines bestimmten
    * Blocktyps blockName (z.B. allVersions).
@@ -1482,6 +1473,86 @@ public class TextDocumentModel
       }
 
     }
+  }
+
+  synchronized public void setVisibleState(String groupId, boolean visible)
+  {
+    try
+    {
+      Map<String, Boolean> groupState = mapGroupIdToVisibilityState;
+      if (simulationResult != null)
+        groupState = simulationResult.getGroupsVisibilityState();
+
+      groupState.put(groupId, visible);
+
+      VisibilityElement firstChangedElement = null;
+
+      // Sichtbarkeitselemente durchlaufen und alle ggf. updaten:
+      Iterator<VisibilityElement> iter = documentCommands.setGroupsIterator();
+      while (iter.hasNext())
+      {
+        VisibilityElement visibleElement = iter.next();
+        Set<String> groups = visibleElement.getGroups();
+        if (!groups.contains(groupId)) continue;
+
+        // Visibility-Status neu bestimmen:
+        boolean setVisible = true;
+        for (String gid : groups)
+        {
+          if (groupState.get(gid).equals(Boolean.FALSE)) setVisible = false;
+        }
+
+        // Element merken, dessen Sichtbarkeitsstatus sich zuerst ändert und
+        // den focus (ViewCursor) auf den Start des Bereichs setzen. Da das
+        // Setzen eines ViewCursors in einen unsichtbaren Bereich nicht
+        // funktioniert, wird die Methode focusRangeStart zwei mal aufgerufen,
+        // je nach dem, ob der Bereich vor oder nach dem Setzen des neuen
+        // Sichtbarkeitsstatus sichtbar ist.
+        if (setVisible != visibleElement.isVisible() && firstChangedElement == null)
+        {
+          firstChangedElement = visibleElement;
+          if (firstChangedElement.isVisible()) focusRangeStart(visibleElement);
+        }
+
+        // neuen Sichtbarkeitsstatus setzen:
+        try
+        {
+          visibleElement.setVisible(setVisible);
+        }
+        catch (RuntimeException e)
+        {
+          // Absicherung gegen das manuelle Löschen von Dokumentinhalten
+        }
+      }
+
+      // Den Cursor (nochmal) auf den Anfang des Ankers des Elements setzen,
+      // dessen Sichtbarkeitsstatus sich zuerst geändert hat (siehe Begründung
+      // oben).
+      if (firstChangedElement != null && firstChangedElement.isVisible())
+        focusRangeStart(firstChangedElement);
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(e);
+    }
+  }
+
+  /**
+   * Diese Methode setzt den ViewCursor auf den Anfang des Ankers des
+   * Sichtbarkeitselements.
+   * 
+   * @param visibleElement
+   *          Das Sichtbarkeitselement, auf dessen Anfang des Ankers der ViewCursor
+   *          gesetzt werden soll.
+   */
+  private void focusRangeStart(VisibilityElement visibleElement)
+  {
+    try
+    {
+      getViewCursor().gotoRange(visibleElement.getAnchor().getStart(), false);
+    }
+    catch (java.lang.Exception e)
+    {}
   }
 
   /**
@@ -4282,6 +4353,7 @@ public class TextDocumentModel
   {
     simulationResult = new SimulationResults();
     simulationResult.setFormFieldValues(formFieldValues);
+    simulationResult.setGroupsVisibilityState(mapGroupIdToVisibilityState);
 
     // Aktuell gesetzte FormField-Inhalte auslesen und simulationResults bekannt
     // machen.

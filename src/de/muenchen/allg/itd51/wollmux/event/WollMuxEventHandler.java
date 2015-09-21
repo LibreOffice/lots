@@ -72,7 +72,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -135,7 +134,6 @@ import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.TextModule;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
-import de.muenchen.allg.itd51.wollmux.VisibilityElement;
 import de.muenchen.allg.itd51.wollmux.VisibleTextFragmentList;
 import de.muenchen.allg.itd51.wollmux.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
@@ -1919,88 +1917,8 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      try
-      {
-        // invisibleGroups anpassen:
-        HashSet<String> invisibleGroups = model.getInvisibleGroups();
-        if (visible)
-          invisibleGroups.remove(groupId);
-        else
-          invisibleGroups.add(groupId);
-
-        VisibilityElement firstChangedElement = null;
-
-        // Sichtbarkeitselemente durchlaufen und alle ggf. updaten:
-        Iterator<VisibilityElement> iter = model.visibleElementsIterator();
-        while (iter.hasNext())
-        {
-          VisibilityElement visibleElement = iter.next();
-          Set<String> groups = visibleElement.getGroups();
-          if (!groups.contains(groupId)) continue;
-
-          // Visibility-Status neu bestimmen:
-          boolean setVisible = true;
-          Iterator<String> i = groups.iterator();
-          while (i.hasNext())
-          {
-            String groupId = i.next();
-            if (invisibleGroups.contains(groupId)) setVisible = false;
-          }
-
-          // Element merken, dessen Sichtbarkeitsstatus sich zuerst ändert und
-          // den focus (ViewCursor) auf den Start des Bereichs setzen. Da das
-          // Setzen eines ViewCursors in einen unsichtbaren Bereich nicht
-          // funktioniert, wird die Methode focusRangeStart zwei mal aufgerufen,
-          // je nach dem, ob der Bereich vor oder nach dem Setzen des neuen
-          // Sichtbarkeitsstatus sichtbar ist.
-          if (setVisible != visibleElement.isVisible()
-            && firstChangedElement == null)
-          {
-            firstChangedElement = visibleElement;
-            if (firstChangedElement.isVisible()) focusRangeStart(visibleElement);
-          }
-
-          // neuen Sichtbarkeitsstatus setzen:
-          try
-          {
-            visibleElement.setVisible(setVisible);
-          }
-          catch (RuntimeException e)
-          {
-            // Absicherung gegen das manuelle Löschen von Dokumentinhalten
-          }
-        }
-
-        // Den Cursor (nochmal) auf den Anfang des Ankers des Elements setzen,
-        // dessen Sichtbarkeitsstatus sich zuerst geändert hat (siehe Begründung
-        // oben).
-        if (firstChangedElement != null && firstChangedElement.isVisible())
-          focusRangeStart(firstChangedElement);
-      }
-      catch (java.lang.Exception e)
-      {
-        Logger.error(e);
-      }
-
+      model.setVisibleState(groupId, visible);
       if (listener != null) listener.actionPerformed(null);
-    }
-
-    /**
-     * Diese Methode setzt den ViewCursor auf den Anfang des Ankers des
-     * Sichtbarkeitselements.
-     * 
-     * @param visibleElement
-     *          Das Sichtbarkeitselement, auf dessen Anfang des Ankers der ViewCursor
-     *          gesetzt werden soll.
-     */
-    private void focusRangeStart(VisibilityElement visibleElement)
-    {
-      try
-      {
-        model.getViewCursor().gotoRange(visibleElement.getAnchor().getStart(), false);
-      }
-      catch (java.lang.Exception e)
-      {}
     }
 
     @Override
