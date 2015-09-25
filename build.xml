@@ -444,7 +444,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		</jar>
 	</target>
 
-    <target name="WollMux.oxt" depends="WollMux.uno.jar, makeversion">
+    <target name="WollMux.oxt" depends="makeversion">
 		<delete file="${PKG_FILE}" />
 		<zip destfile="${PKG_FILE}">
 			<fileset file="${WollMux_COMPJAR}" />
