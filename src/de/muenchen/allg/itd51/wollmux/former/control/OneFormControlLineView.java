@@ -757,14 +757,14 @@ public class OneFormControlLineView extends LineView
   private class MyMouseListener implements MouseListener
   {
     /*
-     * Beim Klicken in Feld "ID" oder "Label" wird der automatischen vorbefühllte Text gelöscht.
+     * Beim Klicken in Feld "ID" oder "Label" wird der automatisch vorbefüllte Text gelöscht.
      */    
     public void mouseClicked(MouseEvent e)
     {
       if(e.getSource().equals(labelTextfield) && labelTextfield.getText().equals("Label"))
-        labelTextfield.setText("");
+        labelTextfield.selectAll();
       if(e.getSource().equals(idTextfield) && idTextfield.getText().matches("ID[0-9]*"))
-        idTextfield.setText("");
+        idTextfield.selectAll();
     }
 
     public void mousePressed(MouseEvent e)
