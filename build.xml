@@ -90,7 +90,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="SRC_ENCODING" value="UTF-8" />
 	
 	<property name="WollMux_REG_NAME" value="de.muenchen.allg.itd51.wollmux.comp.WollMux" />
-	<property name="WollMux_COMPJAR" value="${RDB_DIR}/${COMPONENT}.uno.jar" />
+	<property name="WollMux_COMPJAR" value="${COMPONENT}.uno.jar" />
 	
 	<property name="RDBFILE" value="${RDB_DIR}/${COMPONENT}.rdb" />
 	<property name="JAVAMAKER_ARGS" value="" />
@@ -447,7 +447,10 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
     <target name="WollMux.oxt" depends="makeversion">
 		<delete file="${PKG_FILE}" />
 		<zip destfile="${PKG_FILE}">
-			<fileset file="${WollMux_COMPJAR}" />
+			<mappedresources>
+				<zipfileset dir="dist" includes="${WOLLMUXBAR_JAR_NAME}" />
+				<globmapper from="*" to="${WollMux_COMPJAR}" />
+			</mappedresources>
 			<fileset dir="." includes="${THIRDPARTY}/**/*.jar" />
 			<fileset dir="${RDB_DIR}">
 				<include name="*.xcu" />

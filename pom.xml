@@ -55,8 +55,8 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.5.5</version>
 				<configuration>
-					<finalName>WollMux.uno</finalName>
-					<outputDirectory>oxt</outputDirectory>
+					<finalName>WollMuxBar</finalName>
+					<outputDirectory>dist</outputDirectory>
 					<appendAssemblyId>false</appendAssemblyId>
 					<archive>
 						<addMavenDescriptor>false</addMavenDescriptor>
@@ -66,7 +66,16 @@
 						</manifest>
 						<manifestEntries>
 							<RegistrationClassName>de.muenchen.allg.itd51.wollmux.comp.WollMux</RegistrationClassName>
+							<Main-Class>com.sun.star.lib.loader.Loader</Main-Class>
 						</manifestEntries>
+						<manifestSections>
+							<manifestSection>
+								<name>com/sun/star/lib/loader/Loader.class</name>
+								<manifestEntries>
+									<Application-Class>de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar</Application-Class>
+								</manifestEntries>
+							</manifestSection>
+						</manifestSections>
 					</archive>
 					<descriptors>
 						<descriptor>misc/assembly.xml</descriptor>
