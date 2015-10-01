@@ -95,6 +95,10 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import com.sun.jna.Native;
+import com.sun.jna.platform.win32.Shell32;
+import com.sun.jna.platform.win32.ShlObj;
+import com.sun.jna.platform.win32.WinDef;
 import com.sun.management.OperatingSystemMXBean;
 import com.sun.star.beans.Property;
 import com.sun.star.beans.PropertyValue;
@@ -150,9 +154,8 @@ public class WollMuxFiles
   private final static String WOLLMUX_CONF_PATH_VALUE_NAME = "ConfigPath";
 
   private static final String WOLLMUX_NOCONF =
-      L.m("Es wurde keine WollMux-Konfiguration (wollmux.conf) gefunden - deshalb läuft WollMux im NoConfig-Modus.");
+    L.m("Es wurde keine WollMux-Konfiguration (wollmux.conf) gefunden - deshalb läuft WollMux im NoConfig-Modus.");
 
-  
   private static final long DATASOURCE_TIMEOUT = 10000;
 
   /**
@@ -170,8 +173,9 @@ public class WollMuxFiles
 
   private static final WollMuxClassLoader classLoader = new WollMuxClassLoader();
 
-  private static final String[] BLACKLIST = { "java.", "com.sun." };
-  
+  private static final String[] BLACKLIST = {
+    "java.", "com.sun." };
+
   /**
    * Die in der wollmux.conf mit DEFAULT_CONTEXT festgelegte URL.
    */
@@ -259,15 +263,16 @@ public class WollMuxFiles
    * <li>unter dem Dateipfad, der in der Konstanten {@link #ETC_WOLLMUX_WOLLMUX_CONF}
    * festgelegt ist (nur Linux!)</li>
    * </ol>
-   * @return false für den den Fall no Config, true bei gefundener wollmux.conf 
+   * 
+   * @return false für den den Fall no Config, true bei gefundener wollmux.conf
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
   public static boolean setupWollMuxDir()
   {
     long time = System.currentTimeMillis(); // Zeitnahme fürs Debuggen
-    boolean noConf = false;                 // kein no conf mode
-    
+    boolean noConf = false; // kein no conf mode
+
     String userHome = System.getProperty("user.home");
     wollmuxDir = new File(userHome, ".wollmux");
 
@@ -281,101 +286,19 @@ public class WollMuxFiles
     wollmuxLogFile = new File(wollmuxDir, "wollmux.log");
 
     StringBuilder debug2Messages = new StringBuilder();
-    // Zum Aufsammeln der Pfade, an denen die wollmux.conf gesucht wurde:
-    StringBuilder searchPaths = new StringBuilder();
-
-    // Logger initialisieren:
-    Logger.init(wollmuxLogFile, Logger.LOG);
-
-    // Pfad zur wollmux.conf
-    String wollmuxConfPath = null;
-
-    // wollmux.conf wird über die Umgebungsvariable "WOLLMUX_CONF_PATH" gesetzt.
-    if (wollmuxConfFile == null || !wollmuxConfFile.exists())
-    { 
-      if (System.getenv("WOLLMUX_CONF_PATH") != null)
-      {
-        wollmuxConfPath = System.getenv("WOLLMUX_CONF_PATH");
-        wollmuxConfFile = new File(wollmuxConfPath);
-        searchPaths.append(wollmuxConfFile.getPath() + "\n");
-        debug2Messages.append("wollmux.conf was set by environment variable: ");
-        debug2Messages.append(wollmuxConfPath);
-      } 
-    }
-
-    // Überprüfen, ob das Betriebssystem Windows ist
-    boolean windowsOS =
-      System.getProperty("os.name").toLowerCase().contains("windows");
-
-    // Falls Windows:
-    // Versuch den Pfad der wollmux.conf aus HKCU-Registry zu lesen
-    if (windowsOS)
+    try
     {
-      try
-      {
-        wollmuxConfPath =
-          WollMuxRegistryAccess.getStringValueFromRegistry("HKEY_CURRENT_USER",
-            WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
-        wollmuxConfFile = new File(wollmuxConfPath);
-        searchPaths.append(wollmuxConfFile.getPath() + "\n");
-      }
-      catch (WollMuxRegistryAccessException e)
-      {
-        // Entweder Linux oder Registry Key nicht gefunden
-        debug2Messages.append(e.getLocalizedMessage());
-        debug2Messages.append('\n');
-      }
+      findWollMuxConf(debug2Messages);
     }
-
-    // Als nächstes wird im .wollmux-Verzeichnis nach der wollmux.conf gesucht
-    if (wollmuxConfFile == null || !wollmuxConfFile.exists())
+    catch (FileNotFoundException ex)
     {
-      wollmuxConfFile = new File(wollmuxDir, "wollmux.conf");
-      searchPaths.append(wollmuxConfFile.getPath() + "\n");
-
-      // Falls wollmux.conf im .wollmux-Verzeichnis nicht existiert
-      if (!wollmuxConfFile.exists())
-      {
-        debug2Messages.append(wollmuxConfFile + " does not exist\n");
-
-        // Falls Windows => Versuch den Pfad aus HKLM-Registry zu lesen
-        if (windowsOS)
-        {
-          try
-          {
-            wollmuxConfPath =
-              WollMuxRegistryAccess.getStringValueFromRegistry("HKEY_LOCAL_MACHINE",
-                WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
-
-            wollmuxConfFile = new File(wollmuxConfPath);
-            searchPaths.append(wollmuxConfFile.getPath() + "\n");
-          }
-          catch (WollMuxRegistryAccessException e)
-          {
-            // Entweder Linux oder Registry Key nicht gefunden
-            debug2Messages.append(e.getLocalizedMessage());
-            debug2Messages.append('\n');
-          }
-        }
-
-        // Als letzte Möglichkeit wird in einem Fallback-Verzeichnis gesucht
-        if (!wollmuxConfFile.exists())
-        {
-          wollmuxConfPath = ETC_WOLLMUX_WOLLMUX_CONF;
-
-          // Falls Windows, dann anderes Fallback-Verzeichnis
-          if (windowsOS)
-          {
-            wollmuxConfPath = C_PROGRAMME_WOLLMUX_WOLLMUX_CONF;
-          }
-
-          wollmuxConfFile = new File(wollmuxConfPath);
-          searchPaths.append(wollmuxConfFile.getPath() + "\n");
-          debug2Messages.append("Final wollmux.conf fallback: ");
-          debug2Messages.append(wollmuxConfPath);
-        }
-      }
+      debug2Messages.append(ex.getLocalizedMessage());
+      debug2Messages.append('\n');
     }
+
+    debug2Messages.append("wollmux.conf gefunden in "
+      + wollmuxConfFile.getAbsolutePath());
+    debug2Messages.append('\n');
 
     // Bevor wir versuchen zu parsen wird auf jeden Fall ein leeres ConfigThingy
     // angelegt, damit wollmuxConf auch dann wohldefiniert ist, wenn die Datei
@@ -444,8 +367,93 @@ public class WollMuxFiles
 
     Logger.debug(L.m(".wollmux init time: %1ms", ""
       + (System.currentTimeMillis() - time)));
-    
+
     return !noConf;
+  }
+
+  private static void findWollMuxConf(StringBuilder debug2Messages)
+      throws FileNotFoundException
+  {
+    // Überprüfen, ob das Betriebssystem Windows ist
+    boolean windowsOS =
+      System.getProperty("os.name").toLowerCase().contains("windows");
+
+    // Zum Aufsammeln der Pfade, an denen die wollmux.conf gesucht wurde:
+    ArrayList<String> searchPaths = new ArrayList<String>();
+
+    // Logger initialisieren:
+    Logger.init(wollmuxLogFile, Logger.LOG);
+
+    // Pfad zur wollmux.conf
+    String wollmuxConfPath = null;
+
+    // wollmux.conf wird über die Umgebungsvariable "WOLLMUX_CONF_PATH" gesetzt.
+    if (wollmuxConfFile == null || !wollmuxConfFile.exists())
+    {
+      if (System.getenv("WOLLMUX_CONF_PATH") != null)
+      {
+        wollmuxConfPath = System.getenv("WOLLMUX_CONF_PATH");
+        searchPaths.add(wollmuxConfPath);
+      }
+
+      searchPaths.add(new File(wollmuxDir, "wollmux.conf").getAbsolutePath());
+      searchPaths.add(System.getProperty("user.dir") + "/.wollmux/wollmux.conf");
+      searchPaths.add(ETC_WOLLMUX_WOLLMUX_CONF);
+
+      // Falls Windows:
+      // Versuch den Pfad der wollmux.conf aus HKCU-Registry zu lesen
+      if (windowsOS)
+      {
+        try
+        {
+          wollmuxConfPath =
+            WollMuxRegistryAccess.getStringValueFromRegistry("HKEY_CURRENT_USER",
+              WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
+          searchPaths.add(wollmuxConfPath);
+
+          wollmuxConfPath =
+            WollMuxRegistryAccess.getStringValueFromRegistry("HKEY_LOCAL_MACHINE",
+              WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
+
+          searchPaths.add(wollmuxConfPath);
+        }
+        catch (WollMuxRegistryAccessException ex)
+        {}
+
+        Shell32 shell = Shell32.INSTANCE;
+
+        char[] arrWollmuxConfPath = new char[WinDef.MAX_PATH];
+        shell.SHGetFolderPath(null, ShlObj.CSIDL_APPDATA, null,
+          ShlObj.SHGFP_TYPE_CURRENT, arrWollmuxConfPath);
+        searchPaths.add(Native.toString(arrWollmuxConfPath)
+          + "/.wollmux/wollmux.conf");
+
+        arrWollmuxConfPath = new char[WinDef.MAX_PATH];
+        shell.SHGetFolderPath(null, ShlObj.CSIDL_PROGRAM_FILESX86, null,
+          ShlObj.SHGFP_TYPE_CURRENT, arrWollmuxConfPath);
+        searchPaths.add(Native.toString(arrWollmuxConfPath)
+          + "/.wollmux/wollmux.conf");
+
+        arrWollmuxConfPath = new char[WinDef.MAX_PATH];
+        shell.SHGetFolderPath(null, ShlObj.CSIDL_PROGRAM_FILES, null,
+          ShlObj.SHGFP_TYPE_CURRENT, arrWollmuxConfPath);
+        searchPaths.add(Native.toString(arrWollmuxConfPath)
+          + "/.wollmux/wollmux.conf");
+      }
+
+      for (String path : searchPaths)
+      {
+        File confPath = new File(path);
+        if (confPath.exists())
+        {
+          wollmuxConfFile = confPath;
+          return;
+        }
+      }
+
+      throw new FileNotFoundException(
+        "wollmux.conf konnte nicht gefunden werden. Suchpfade.");
+    }
   }
 
   /**
@@ -517,17 +525,17 @@ public class WollMuxFiles
    *           falls urlStr keine legale URL darstellt.
    */
   public static URL makeURL(String urlStr) throws MalformedURLException
-  {    
+  {
     return new URL(WollMuxFiles.getDEFAULT_CONTEXT(), ConfigThingy.urlEncode(urlStr));
-  }  
-  
+  }
+
   /**
    * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null, falls
    * ein Fehler während der Initialisierung aufgetreten ist).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
- 
+
   public static DatasourceJoiner getDatasourceJoiner()
   {
     if (!djInitialized)
@@ -542,7 +550,8 @@ public class WollMuxFiles
       }
       catch (NodeNotFoundException e)
       {
-        // hier geben wir im Vergleich zu früher keine Fehlermeldung mehr aus, sondern erst später, wnn
+        // hier geben wir im Vergleich zu früher keine Fehlermeldung mehr aus,
+        // sondern erst später, wnn
         // tatsächlich auf die Datenquelle "null" zurück gegriffen wird.
       }
 
@@ -576,7 +585,7 @@ public class WollMuxFiles
       {
         if (null == senderSourceStr)
           senderSourceStr = de.muenchen.allg.itd51.wollmux.NoConfig.NOCONFIG;
-        
+
         datasourceJoiner =
           new DatasourceJoiner(getWollmuxConf(), senderSourceStr, getLosCacheFile(),
             getDEFAULT_CONTEXT(), datasourceTimeoutLong);
@@ -695,15 +704,14 @@ public class WollMuxFiles
 
     if (zoomFactor < 0.5 || zoomFactor > 10)
     {
-      Logger.error(L.m("Unsinniger FONT_ZOOM Wert angegeben: %1", ""
-        + zoomFactor));
+      Logger.error(L.m("Unsinniger FONT_ZOOM Wert angegeben: %1", "" + zoomFactor));
     }
     else
     {
       // Frühere Prüfung (nur werte kleiner 0.99 oder größer 1.01) entfernt,
       // seitdem die Fontgröße im Gui eingestellt werden kann.
-      // Mit dieser Prüfung wäre z. b. ein Zurückstellen 
-      // von Zoomfaktor 2 auf 1 abgelehnt worden. 
+      // Mit dieser Prüfung wäre z. b. ein Zurückstellen
+      // von Zoomfaktor 2 auf 1 abgelehnt worden.
       Common.zoomFonts(zoomFactor);
     }
 
@@ -815,18 +823,18 @@ public class WollMuxFiles
       urllist.append(urls[i].toExternalForm());
       urllist.append("  ");
     }
-    
+
     for (String s : BLACKLIST)
     {
       classLoader.addBlacklisted(s);
     }
-    
+
     ConfigThingy confWhitelist = getWollmuxConf().query("CPWHITELIST", 1);
     for (ConfigThingy w : confWhitelist)
     {
       classLoader.addWhitelisted(w.toString());
     }
-    
+
     Logger.debug("CLASSPATH=" + urllist);
   }
 
@@ -879,8 +887,8 @@ public class WollMuxFiles
         dialogsInBlock.add(name);
         try
         {
-          funcDialogs.add(name, DatasourceSearchDialog.create(dialogConf,
-            getDatasourceJoiner()));
+          funcDialogs.add(name,
+            DatasourceSearchDialog.create(dialogConf, getDatasourceJoiner()));
         }
         catch (ConfigurationErrorException e)
         {
@@ -990,8 +998,8 @@ public class WollMuxFiles
           }
           catch (NodeNotFoundException e)
           {
-            Logger.error(L.m("Druckfunktion '%1' enthält keinen Schlüssel EXTERN",
-              name), e);
+            Logger.error(
+              L.m("Druckfunktion '%1' enthält keinen Schlüssel EXTERN", name), e);
             continue;
           }
 
@@ -1504,8 +1512,9 @@ public class WollMuxFiles
   private static class WollMuxClassLoader extends URLClassLoader
   {
     private ArrayList<String> blacklist;
+
     private ArrayList<String> whitelist;
-    
+
     public WollMuxClassLoader()
     {
       super(new URL[] {});
@@ -1519,7 +1528,7 @@ public class WollMuxFiles
     {
       super.addURL(url);
     }
-    
+
     public void addBlacklisted(String name)
     {
       blacklist.add(name);
@@ -1539,7 +1548,7 @@ public class WollMuxFiles
         {
           throw new ClassNotFoundException();
         }
-        
+
         Class<?> c = findLoadedClass(name);
         if (c != null) return c;
         return super.findClass(name);
@@ -1549,7 +1558,7 @@ public class WollMuxFiles
         return WollMuxClassLoader.class.getClassLoader().loadClass(name);
       }
     }
-    
+
     private boolean isBlacklisted(String name)
     {
       for (String bl : blacklist)
@@ -1559,10 +1568,10 @@ public class WollMuxFiles
           return true;
         }
       }
-      
+
       return false;
     }
-    
+
     private boolean isWhitelisted(String name)
     {
       for (String wl : whitelist)
@@ -1572,7 +1581,7 @@ public class WollMuxFiles
           return true;
         }
       }
-      
+
       return false;
     }
 

@@ -7,5 +7,7 @@
 	<classpathentry kind="lib" path="idl"/>
 	<classpathentry kind="lib" path="thirdparty/javamail-1.4.4/mail.jar"/>
 	<classpathentry kind="lib" path="../classes"/>
+	<classpathentry kind="lib" path="thirdparty/jna-4.2.0.jar"/>
+	<classpathentry kind="lib" path="thirdparty/platform-3.5.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
