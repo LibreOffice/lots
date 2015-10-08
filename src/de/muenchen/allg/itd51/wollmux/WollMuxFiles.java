@@ -1511,6 +1511,7 @@ public class WollMuxFiles
       super(new URL[] {});
       blacklist = new ArrayList<String>();
       whitelist = new ArrayList<String>();
+      whitelist.add("com.sun.star.lib.loader"); // Ausnahme für Klassen in der Standardconfig
     }
 
     @Override
