@@ -63,9 +63,8 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<condition property="isWindows" value="true">  
 		<os family="windows"/>  
 	</condition> 
-	<property file="${os.family}.properties"/>  
-
-
+	<property file="${os.family}.properties"/> 
+	
 <!-- If you follow the INSTALL instructions exactly, you won't have to change this path --> 	
 	<property name="UNOHELPER_DIR" value="../UNOHelper" />
 
@@ -562,14 +561,23 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		<javac srcdir="${MISC}"
 			destdir="${BIN}"
 			includes="${TERMINATEOOO_MAIN_CLASS}.java"
-			classpath="${CLASSPATH}"
 			includeAntRuntime="false"
 			encoding="${SRC_ENCODING}"
 			debug="${DEBUG}"
 			optimize="${OPTIMIZE}"
 			source="1.5"
 			target="1.5"
-		/>
+		>
+			<classpath>
+				<path>
+					<pathelement path="${de.muenchen:wollmux-support-classes:jar}"/>
+					<pathelement path="${org.libreoffice:unoil:jar}"/>
+					<pathelement path="${org.libreoffice:ridl:jar}"/>
+					<pathelement path="${org.libreoffice:juh:jar}"/>
+					<pathelement path="${org.libreoffice:jurt:jar}"/>
+				</path>
+			</classpath>
+		</javac>
 
 		<delete file="${TERMINATEOOO_JAR}" />
 		<jar destfile="${TERMINATEOOO_JAR}" duplicate="preserve">
