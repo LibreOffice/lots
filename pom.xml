@@ -26,6 +26,51 @@
 		</resources>
 		<plugins>
 			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.6.1</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>dist</directory>
+							<excludes>
+								<exclude>**/README</exclude>
+								<exclude>**/WollMux.update.xml</exclude>
+								<exclude>**/wollmuxbar</exclude>
+								<exclude>**/wollmuxbar.exe</exclude>
+								<exclude>**/wollmuxbar.l4j.ini</exclude>
+							</excludes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.10</version>
+				<executions>
+					<execution>
+						<id>include-rdb</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>de.muenchen</groupId>
+									<artifactId>wollmux-interfaces</artifactId>
+									<version>${project.version}</version>
+									<type>rdb</type>
+									<outputDirectory>${basedir}/oxt</outputDirectory>
+									<destFileName>WollMux.rdb</destFileName>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
 				<configuration>
@@ -251,6 +296,26 @@
 										</versionRange>
 										<goals>
 											<goal>build-idl</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-dependency-plugin
+										</artifactId>
+										<versionRange>
+											[2.10,)
+										</versionRange>
+										<goals>
+											<goal>unpack</goal>
+											<goal>copy</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>
