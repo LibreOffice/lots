@@ -55,24 +55,6 @@
 					</execution>
 				</executions>
 			</plugin>
-<!-- 			<plugin> -->
-<!-- 				<groupId>com.coderplus.maven.plugins</groupId> -->
-<!-- 				<artifactId>copy-rename-maven-plugin</artifactId> -->
-<!-- 				<version>1.0.1</version> -->
-<!-- 				<executions> -->
-<!-- 					<execution> -->
-<!-- 						<id>rename-file</id> -->
-<!-- 						<phase>generate-sources</phase> -->
-<!-- 						<goals> -->
-<!-- 							<goal>rename</goal> -->
-<!-- 						</goals> -->
-<!-- 						<configuration> -->
-<!-- 							<sourceFile>${project.build.directory}/types.rdb</sourceFile> -->
-<!-- 							<destinationFile>${basedir}/../oxt/WollMux.rdb</destinationFile> -->
-<!-- 						</configuration> -->
-<!-- 					</execution> -->
-<!-- 				</executions> -->
-<!-- 			</plugin> -->
 		</plugins>
 	</build>
 </project>

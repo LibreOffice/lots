@@ -65,6 +65,15 @@
 									<outputDirectory>${basedir}/oxt</outputDirectory>
 									<destFileName>WollMux.rdb</destFileName>
 								</artifactItem>
+								<artifactItem>
+									<groupId>de.muenchen</groupId>
+									<artifactId>terminate-ooo</artifactId>
+									<version>1.0.0-SNAPSHOT</version>
+									<classifier>fat</classifier>
+									<type>jar</type>
+									<outputDirectory>${basedir}/dist</outputDirectory>
+									<destFileName>TerminateOOo.jar</destFileName>
+								</artifactItem>
 							</artifactItems>
 						</configuration>
 					</execution>
@@ -205,18 +214,6 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
-					<!-- <execution> -->
-					<!-- <id>deb</id> -->
-					<!-- <phase>package</phase> -->
-					<!-- <configuration> -->
-					<!-- <target> -->
-					<!-- <ant antfile="build.xml" target="deb" /> -->
-					<!-- </target> -->
-					<!-- </configuration> -->
-					<!-- <goals> -->
-					<!-- <goal>run</goal> -->
-					<!-- </goals> -->
-					<!-- </execution> -->
 				</executions>
 				<dependencies>
 					<dependency>

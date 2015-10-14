@@ -595,7 +595,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	</target>
 	
 	<!-- Das Target erzeugt den Windows WollMux-Installer -->
-	<target name="wininstaller" depends="makeversion, TerminateOOo.jar">
+	<target name="wininstaller" depends="makeversion">
 		<exec executable="makensis" failonerror="true" failifexecutionfails="true">
 			<arg line="-V3 -DFILESDIR=../${PACKAGE_DIR} -DVERSION=${VERSION} -DWOLLMUX=${COMPONENT} -DWOLLMUXBAR=${WOLLMUXBAR_NAME} -DWOLLMUXBAR_EXE_NAME=${WOLLMUXBAR_EXE_NAME} -DWOLLMUXBAR_JAR_NAME=${WOLLMUXBAR_JAR_NAME} ${MISC}/wollmuxinstaller.nsi"/>
 		</exec>
