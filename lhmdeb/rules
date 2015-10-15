@@ -2,26 +2,15 @@
 
 # Add verbosity
 #export DH_VERBOSE=1
-#DEB_ANT_INVOKE += -v
-
-OOO_EXTENSION_PKG := libreoffice-wollmux
-OOO_OXT_FILE := dist/WollMux.oxt
-OOO_OXT_IDENTIFIER := oxt/description.xml
-OOO_OXT_BUILD_COMMAND :=
 
 include /usr/share/cdbs/1/rules/debhelper.mk
-include /usr/share/cdbs/1/class/ant.mk
 
-# JAVA_HOME := /usr/lib/jvm/default-java
-JAVA_HOME := /usr/lib/jvm/j2sdk1.6-oracle
+JAVA_HOME := /usr/lib/jvm/default-java
 ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
-
-# Debian SDK path
-#export PATH := $(PATH):/usr/lib/openoffice/basis3.0/sdk/bin
 
 build/wollmuxbar:: debian/stamp-build
 debian/stamp-build:
-	pod2man -c 'WollMux for Debian GNU/Linux' \
+	pod2man -c 'WollMux for Landeshauptstadt München' \
 	  -r WollMux-$(DEB_UPSTREAM_VERSION) \
 	  debian/wollmuxbar.pod > debian/wollmuxbar.1
 	inkscape -h 128 -D -e debian/wollmuxbar.png debian/frog.svg

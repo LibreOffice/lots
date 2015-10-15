@@ -1,6 +1,6 @@
-wollmux (13.11rev2054-0lhm1) plophos; urgency=low
+wollmux (15.10-0lhm1) tramp; urgency=low
 
     * Version bump.
 
- -- Felix WollMux <wollmux-general@lists.forge.osor.eu>  Mon, 23 May 2011 19:35:16 +0200
+ -- Patric Busanny <patric.busanny@muenchen.de>  Mon, 19 Oct 2015 12:00:00 +0200
 

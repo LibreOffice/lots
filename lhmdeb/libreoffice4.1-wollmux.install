@@ -1,4 +1,3 @@
-oxt/WollMux.uno.jar /opt/libreoffice4.1/share/extensions/wollmux/
 oxt/*.xcu /opt/libreoffice4.1/share/extensions/wollmux/
 oxt/*.rdb /opt/libreoffice4.1/share/extensions/wollmux/
 oxt/META-INF/manifest.xml /opt/libreoffice4.1/share/extensions/wollmux/META-INF/
