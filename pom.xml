@@ -60,7 +60,7 @@
 								<artifactItem>
 									<groupId>de.muenchen</groupId>
 									<artifactId>wollmux-interfaces</artifactId>
-									<version>${project.version}</version>
+									<version>15.4.0</version>
 									<type>rdb</type>
 									<outputDirectory>${basedir}/oxt</outputDirectory>
 									<destFileName>WollMux.rdb</destFileName>
@@ -68,7 +68,7 @@
 								<artifactItem>
 									<groupId>de.muenchen</groupId>
 									<artifactId>terminate-ooo</artifactId>
-									<version>1.0.0-SNAPSHOT</version>
+									<version>1.0.0</version>
 									<classifier>fat</classifier>
 									<type>jar</type>
 									<outputDirectory>${basedir}/dist</outputDirectory>
@@ -372,7 +372,7 @@
 		<dependency>
 			<groupId>de.muenchen</groupId>
 			<artifactId>wollmux-interfaces</artifactId>
-			<version>15.4.0-SNAPSHOT</version>
+			<version>15.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>net.java.dev.jna</groupId>
