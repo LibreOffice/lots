@@ -8,6 +8,7 @@
 
 	<properties>
 		<libreoffice.version>4.1</libreoffice.version>
+		<izpack.staging>dist</izpack.staging>
 	</properties>
 
 	<scm>
@@ -22,6 +23,10 @@
 				<excludes>
 					<exclude>**/*.java</exclude>
 				</excludes>
+			</resource>
+			<resource>
+				<directory>izpack</directory>
+				<filtering>true</filtering>
 			</resource>
 		</resources>
 		<plugins>
@@ -80,12 +85,21 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.7</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
 				<configuration>
 					<compilerVersion>1.7</compilerVersion>
 					<source>1.6</source>
 					<target>1.6</target>
+					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -203,18 +217,6 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
-					<execution>
-						<id>wininstaller</id>
-						<phase>package</phase>
-						<configuration>
-							<target>
-								<ant antfile="build.xml" target="wininstaller" />
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
 				</executions>
 				<dependencies>
 					<dependency>
@@ -225,6 +227,31 @@
 						<systemPath>${java.home}/../lib/tools.jar</systemPath>
 					</dependency>
 				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.izpack</groupId>
+				<artifactId>izpack-maven-plugin</artifactId>
+				<version>5.0.5</version>
+				<extensions>true</extensions>
+				<configuration>
+					<baseDir>${izpack.staging}</baseDir>
+					<installFile>${project.build.directory}/classes/install.xml</installFile>
+					<outputDirectory>${project.build.directory}</outputDirectory>
+					<finalName>${project.build.finalName}-installer</finalName>
+					<enableOverrideArtifact>true</enableOverrideArtifact>
+					<mkdirs>true</mkdirs>
+					<autoIncludeUrl>false</autoIncludeUrl>
+					<autoIncludeDevelopers>false</autoIncludeDevelopers>
+				</configuration>
+				<executions>
+					<execution>
+						<id>izpack</id>
+						<phase>package</phase>
+						<goals>
+							<goal>izpack</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -243,6 +270,25 @@
 					<configuration>
 						<lifecycleMappingMetadata>
 							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.codehaus.mojo</groupId>
+										<artifactId>build-helper-maven-plugin</artifactId>
+										<versionRange>[1.9,)</versionRange>
+										<goals>
+											<goal>parse-version</goal>
+											<goal>regex-property</goal>
+											<goal>add-source</goal>
+											<goal>add-resource</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute>
+											<runOnIncremental>true</runOnIncremental>
+											<runOnConfiguration>true</runOnConfiguration>
+										</execute>
+									</action>
+								</pluginExecution>
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>
@@ -384,6 +430,11 @@
 			<groupId>net.java.dev.jna</groupId>
 			<artifactId>platform</artifactId>
 			<version>3.5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.izpack</groupId>
+			<artifactId>izpack-native</artifactId>
+			<version>5.0.5</version>
 		</dependency>
 	</dependencies>
 </project>
