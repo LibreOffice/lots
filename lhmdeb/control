@@ -37,8 +37,8 @@ Package: libreoffice5.0-wollmux
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, default-jre, libreoffice5.0-writer, libreoffice5.0-debian-menus
 Suggests: wollmuxbar
-Description: WollMux extension for OpenOffice.org Writer
- The package adds an extension to Openoffice.org with the following features:
+Description: WollMux extension for LibreOffice
+ The package adds an extension to LibreOffice with the following features:
   - On the fly template generation from fragments (e.g. letterhead, footer,
     form)
   - Pre-filling templates with personal and organizational data from a variety
