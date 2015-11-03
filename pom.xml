@@ -134,6 +134,7 @@
 						<manifestEntries>
 							<RegistrationClassName>de.muenchen.allg.itd51.wollmux.comp.WollMux</RegistrationClassName>
 							<Main-Class>com.sun.star.lib.loader.Loader</Main-Class>
+							<UNO-Type-Path>&lt;&gt;</UNO-Type-Path>
 						</manifestEntries>
 						<manifestSections>
 							<manifestSection>
