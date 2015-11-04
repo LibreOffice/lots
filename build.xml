@@ -413,6 +413,10 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	</target>
 
     <target name="WollMux.oxt" depends="makeversion">
+    	<!-- Workaround für Fehler beim Packen durch Maven Assembly Plugin. -->
+    	<unjar src="${WOLLMUXBAR_JAR}" dest="${java.io.tmpdir}/${WOLLMUXBAR_JAR_NAME}" />
+    	<jar destfile="${WOLLMUXBAR_JAR}" basedir="${java.io.tmpdir}/${WOLLMUXBAR_JAR_NAME}" manifest="${java.io.tmpdir}/${WOLLMUXBAR_JAR_NAME}/META-INF/MANIFEST.MF" />
+    	
 		<delete file="${PKG_FILE}" />
 		<zip destfile="${PKG_FILE}">
 			<mappedresources>
