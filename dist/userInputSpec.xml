@@ -3,7 +3,7 @@
 		<field type="check" variable="sharedSwitch">
 			<description txt="WollMux-Erweiterung wird für alle Benutzer installiert." id="description.check.1" />
 			<spec txt="Shared installieren" id="check.label.1" true="--shared" false=""
-				set="--shared" />
+				set="" />
 		</field>
 	</panel>
 </userInput>
