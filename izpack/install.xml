@@ -67,9 +67,9 @@
 		<condition type="exists" id="oooPathExists">
 			<variable>oooPath</variable>
 		</condition>
-		<condition type="variable" id="isLocal">
+		<condition type="variable" id="notIsLocal">
 			<name>localSwitch</name>
-			<value>true</value>
+			<value>false</value>
 		</condition>
 		<condition type="variable" id="is64bit">
 			<name>os_arch</name>
@@ -107,8 +107,8 @@
 		<variable name="oooPath" value="${hklmLO}" condition="hklmLOExists" />
 
 		<variable name="localSwitch" value="${SYSTEM[local]}" />
-		<variable name="sharedSwitch" value="--shared" />
-		<variable name="sharedSwitch" value="" condition="isLocal" />
+		<variable name="sharedSwitch" value="" />
+		<variable name="sharedSwitch" value="--shared" condition="notIsLocal" />
 
 		<variable name="os_arch" value="${SYSTEM[os.arch]}" />
 		<variable name="officeRunning"
