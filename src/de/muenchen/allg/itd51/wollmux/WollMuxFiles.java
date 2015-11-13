@@ -289,16 +289,15 @@ public class WollMuxFiles
     try
     {
       findWollMuxConf(debug2Messages);
+      debug2Messages.append("wollmux.conf gefunden in "
+          + wollmuxConfFile.getAbsolutePath());
+        debug2Messages.append('\n');
     }
     catch (FileNotFoundException ex)
     {
       debug2Messages.append(ex.getLocalizedMessage());
       debug2Messages.append('\n');
     }
-
-    debug2Messages.append("wollmux.conf gefunden in "
-      + wollmuxConfFile.getAbsolutePath());
-    debug2Messages.append('\n');
 
     // Bevor wir versuchen zu parsen wird auf jeden Fall ein leeres ConfigThingy
     // angelegt, damit wollmuxConf auch dann wohldefiniert ist, wenn die Datei
@@ -308,7 +307,7 @@ public class WollMuxFiles
     SlowServerWatchdog fido = new SlowServerWatchdog(SLOW_SERVER_TIMEOUT);
 
     // Jetzt versuchen, die wollmux.conf zu parsen, falls sie existiert
-    if (wollmuxConfFile.exists())
+    if (wollmuxConfFile != null && wollmuxConfFile.exists())
     {
       fido.start();
       try
@@ -659,7 +658,10 @@ public class WollMuxFiles
          * eigentlich nicht passieren können), so gilt immer noch das erste.
          */
         defaultContextURL = new URL("file:///");
-        defaultContextURL = getWollMuxConfFile().toURI().toURL();
+        if (getWollMuxConfFile() != null)
+        {
+          defaultContextURL = getWollMuxConfFile().toURI().toURL();
+        }
         defaultContextURL = new URL(defaultContextURL, urlVerzStr);
       }
       catch (MalformedURLException e)
@@ -1108,7 +1110,10 @@ public class WollMuxFiles
         + WollMuxSingleton.getInstance().getConfVersionInfo() + "\n");
       out.write("wollmuxDir: " + getWollMuxDir() + "\n");
       out.write("wollmuxLogFile: " + getWollMuxLogFile() + "\n");
-      out.write("wollmuxConfFile: " + getWollMuxConfFile() + "\n");
+      if (getWollMuxConfFile() != null)
+      {
+        out.write("wollmuxConfFile: " + getWollMuxConfFile() + "\n");
+      }
       out.write("losCacheFile: " + getLosCacheFile() + "\n");
 
       out.write("===================== START JVM-Settings ==================\n");
@@ -1175,7 +1180,10 @@ public class WollMuxFiles
 
       out.write("===================== START wollmuxConfFile ==================\n");
       out.flush(); // weil wir gleich direkt auf den Stream zugreifen
-      copyFile(getWollMuxConfFile(), outStream);
+      if (getWollMuxConfFile() != null)
+      {
+        copyFile(getWollMuxConfFile(), outStream);
+      }
       outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
       out.write("\n");
       out.write("===================== END wollmuxConfFile ==================\n");

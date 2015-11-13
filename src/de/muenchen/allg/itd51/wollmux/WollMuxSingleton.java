@@ -244,7 +244,10 @@ public class WollMuxSingleton implements XPALProvider
     
     Logger.debug(L.m("StartupWollMux"));
     Logger.debug("Build-Info: " + getBuildInfo());
-    Logger.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
+    if (WollMuxFiles.getWollMuxConfFile() != null)
+    {
+      Logger.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
+    }
     Logger.debug("DEFAULT_CONTEXT \"" + WollMuxFiles.getDEFAULT_CONTEXT().toString()
       + "\"");
     Logger.debug("CONF_VERSION: " + getConfVersionInfo());
