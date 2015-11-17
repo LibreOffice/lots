@@ -39,10 +39,11 @@
 							<directory>dist</directory>
 							<excludes>
 								<exclude>**/README</exclude>
-								<exclude>**/WollMux.update.xml</exclude>
+								<exclude>**/*.xml*</exclude>
 								<exclude>**/wollmuxbar</exclude>
-								<exclude>**/wollmuxbar.exe</exclude>
 								<exclude>**/wollmuxbar.l4j.ini</exclude>
+								<exclude>**/*.bat</exclude>
+								<exclude>**/*.sh</exclude>
 							</excludes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
@@ -91,6 +92,27 @@
 				<configuration>
 					<encoding>UTF-8</encoding>
 				</configuration>
+				<executions>
+					<execution>
+						<id>copy-version</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/misc</outputDirectory>
+							<resources>
+								<resource>
+									<directory>resources</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>version</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -136,43 +158,89 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.5.5</version>
 				<configuration>
-					<finalName>WollMuxBar</finalName>
 					<outputDirectory>dist</outputDirectory>
-					<appendAssemblyId>false</appendAssemblyId>
-					<archive>
-						<addMavenDescriptor>false</addMavenDescriptor>
-						<manifest>
-							<addClasspath>false</addClasspath>
-							<classpathPrefix>lib/</classpathPrefix>
-						</manifest>
-						<manifestEntries>
-							<RegistrationClassName>de.muenchen.allg.itd51.wollmux.comp.WollMux</RegistrationClassName>
-							<Main-Class>com.sun.star.lib.loader.Loader</Main-Class>
-							<UNO-Type-Path>&lt;&gt;</UNO-Type-Path>
-						</manifestEntries>
-						<manifestSections>
-							<manifestSection>
-								<name>com/sun/star/lib/loader/Loader.class</name>
-								<manifestEntries>
-									<Application-Class>de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar</Application-Class>
-								</manifestEntries>
-							</manifestSection>
-						</manifestSections>
-					</archive>
-					<descriptors>
-						<descriptor>misc/assembly.xml</descriptor>
-					</descriptors>
-					<recompressZippedFiles>false</recompressZippedFiles>
+					<recompressZippedFiles>true</recompressZippedFiles>
 				</configuration>
 				<executions>
 					<execution>
-						<id>assemble-all</id>
+						<id>assemble-wollmuxbar</id>
 						<phase>prepare-package</phase>
 						<goals>
 							<goal>single</goal>
 						</goals>
+						<configuration>
+							<finalName>WollMuxBar</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<archive>
+								<addMavenDescriptor>false</addMavenDescriptor>
+								<manifest>
+									<addClasspath>false</addClasspath>
+									<classpathPrefix>lib/</classpathPrefix>
+								</manifest>
+								<manifestEntries>
+									<RegistrationClassName>de.muenchen.allg.itd51.wollmux.comp.WollMux</RegistrationClassName>
+									<Main-Class>com.sun.star.lib.loader.Loader</Main-Class>
+									<UNO-Type-Path>&lt;&gt;</UNO-Type-Path>
+								</manifestEntries>
+								<manifestSections>
+									<manifestSection>
+										<name>com/sun/star/lib/loader/Loader.class</name>
+										<manifestEntries>
+											<Application-Class>de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar</Application-Class>
+										</manifestEntries>
+									</manifestSection>
+								</manifestSections>
+							</archive>
+							<archiverConfig>
+								<compress>false</compress>
+							</archiverConfig>
+							<descriptors>
+								<descriptor>misc/assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+					<execution>
+						<id>assemble-oxt</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<finalName>WollMux</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<descriptors>
+								<descriptor>misc/assembly-oxt.xml</descriptor>
+							</descriptors>
+						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<id>oxt</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<target>
+								<move file="dist/WollMux.zip" tofile="dist/WollMux.oxt" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>sun.jdk</groupId>
+						<artifactId>tools</artifactId>
+						<version>1.7.0</version>
+						<scope>system</scope>
+						<systemPath>${java.home}/../lib/tools.jar</systemPath>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>com.akathist.maven.plugins.launch4j</groupId>
@@ -201,33 +269,33 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.8</version>
-				<executions>
-					<execution>
-						<id>oxt</id>
-						<phase>package</phase>
-						<configuration>
-							<target>
-								<ant antfile="build.xml" target="WollMux.oxt" />
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>sun.jdk</groupId>
-						<artifactId>tools</artifactId>
-						<version>1.7.0</version>
-						<scope>system</scope>
-						<systemPath>${java.home}/../lib/tools.jar</systemPath>
-					</dependency>
-				</dependencies>
-			</plugin>
+			<!-- <plugin> -->
+			<!-- <artifactId>maven-antrun-plugin</artifactId> -->
+			<!-- <version>1.8</version> -->
+			<!-- <executions> -->
+			<!-- <execution> -->
+			<!-- <id>oxt</id> -->
+			<!-- <phase>package</phase> -->
+			<!-- <configuration> -->
+			<!-- <target> -->
+			<!-- <ant antfile="build.xml" target="WollMux.oxt" /> -->
+			<!-- </target> -->
+			<!-- </configuration> -->
+			<!-- <goals> -->
+			<!-- <goal>run</goal> -->
+			<!-- </goals> -->
+			<!-- </execution> -->
+			<!-- </executions> -->
+			<!-- <dependencies> -->
+			<!-- <dependency> -->
+			<!-- <groupId>sun.jdk</groupId> -->
+			<!-- <artifactId>tools</artifactId> -->
+			<!-- <version>1.7.0</version> -->
+			<!-- <scope>system</scope> -->
+			<!-- <systemPath>${java.home}/../lib/tools.jar</systemPath> -->
+			<!-- </dependency> -->
+			<!-- </dependencies> -->
+			<!-- </plugin> -->
 			<plugin>
 				<groupId>org.codehaus.izpack</groupId>
 				<artifactId>izpack-maven-plugin</artifactId>

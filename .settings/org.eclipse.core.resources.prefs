@@ -4,4 +4,6 @@ encoding//oxt/ProtocolHandler.xcu=UTF-8
 encoding//oxt/WriterWindowState.xcu=UTF-8
 encoding//src/data=UTF-8
 encoding/default=UTF-8
+encoding/izpack=UTF-8
+encoding/src=UTF-8
 encoding/testdata=UTF-8
