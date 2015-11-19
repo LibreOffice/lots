@@ -269,33 +269,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- <plugin> -->
-			<!-- <artifactId>maven-antrun-plugin</artifactId> -->
-			<!-- <version>1.8</version> -->
-			<!-- <executions> -->
-			<!-- <execution> -->
-			<!-- <id>oxt</id> -->
-			<!-- <phase>package</phase> -->
-			<!-- <configuration> -->
-			<!-- <target> -->
-			<!-- <ant antfile="build.xml" target="WollMux.oxt" /> -->
-			<!-- </target> -->
-			<!-- </configuration> -->
-			<!-- <goals> -->
-			<!-- <goal>run</goal> -->
-			<!-- </goals> -->
-			<!-- </execution> -->
-			<!-- </executions> -->
-			<!-- <dependencies> -->
-			<!-- <dependency> -->
-			<!-- <groupId>sun.jdk</groupId> -->
-			<!-- <artifactId>tools</artifactId> -->
-			<!-- <version>1.7.0</version> -->
-			<!-- <scope>system</scope> -->
-			<!-- <systemPath>${java.home}/../lib/tools.jar</systemPath> -->
-			<!-- </dependency> -->
-			<!-- </dependencies> -->
-			<!-- </plugin> -->
 			<plugin>
 				<groupId>org.codehaus.izpack</groupId>
 				<artifactId>izpack-maven-plugin</artifactId>

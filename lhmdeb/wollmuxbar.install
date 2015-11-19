@@ -1,3 +1,3 @@
-dist/wollmuxbar           /usr/bin/
+debian/wollmuxbar         /usr/bin/
 debian/wollmuxbar.desktop /usr/share/applications/
 debian/wollmuxbar.png     /usr/share/icons/
