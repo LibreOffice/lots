@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oor:component-data xmlns:oor="http://openoffice.org/2001/registry"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" oor:name="Addons"
+	oor:package="org.openoffice.Office">
+	<node oor:name="AddonUI">
+		<node oor:name="OfficeToolBar">
+
+			<node oor:name="de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung"
+				oor:op="replace">
+
+				<prop oor:name="Title" oor:type="xs:string">
+					<value xml:lang="de">Sachleitende Verfügungen (WollMux)</value>
+				</prop>
+
+				<node oor:name="ToolBarItems">
+					<node oor:name="m1" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>wollmux:ZifferEinfuegen</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Ziffer einfügen</value>
+							<value xml:lang="de">Ziffer einfügen</value>
+							<value xml:lang="nl">Cijfer toevoegen</value>
+							<value xml:lang="en">Add Numeral</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+
+					<node oor:name="m2" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>wollmux:Abdruck</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Abdruck</value>
+							<value xml:lang="de">Abdruck</value>
+							<value xml:lang="nl">Afrdruk</value>
+							<value xml:lang="en">Copy</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+
+					<node oor:name="m3" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>wollmux:Zuleitungszeile</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Zuleitungszeile</value>
+							<value xml:lang="de">Zuleitungszeile</value>
+							<value xml:lang="nl">Toezendingsregel</value>
+							<value xml:lang="en">Supply Line</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+
+					<node oor:name="m4" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>private:separator</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Block</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+
+					<node oor:name="m5" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>wollmux:MarkBlock#allVersions</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Immer drucken</value>
+							<value xml:lang="de">Immer drucken</value>
+							<value xml:lang="nl">Altijd printen</value>
+							<value xml:lang="en">Print always</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+
+					<node oor:name="m6" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>wollmux:MarkBlock#notInOriginal</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Nicht im Original</value>
+							<value xml:lang="de">Nicht im Original</value>
+							<value xml:lang="nl">Niet in het originaal</value>
+							<value xml:lang="en">Not in original</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+
+					<node oor:name="m7" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>wollmux:MarkBlock#originalOnly</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Nur Original</value>
+							<value xml:lang="de">Nur Original</value>
+							<value xml:lang="nl">Alleen in het originaal</value>
+							<value xml:lang="en">Original only</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+
+					<node oor:name="m8" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>wollmux:MarkBlock#draftOnly</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Nur Entwurf</value>
+							<value xml:lang="de">Nur Entwurf</value>
+							<value xml:lang="nl">Alleen in het ontwerp</value>
+							<value xml:lang="en">Draft only</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+
+					<node oor:name="m9" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>wollmux:MarkBlock#copyOnly</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Nur Abdrucke</value>
+							<value xml:lang="de">Nur Abdrucke</value>
+							<value xml:lang="nl">Alleen in het Afrdruk</value>
+							<value xml:lang="en">Copies only</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+				</node>
+
+			</node>
+
+			<node oor:name="de.muenchen.allg.itd51.wollmux.Textbausteinsystem"
+				oor:op="replace">
+
+				<prop oor:name="Title" oor:type="xs:string">
+					<value xml:lang="de">Textbausteine (WollMux)</value>
+				</prop>
+
+				<node oor:name="ToolBarItems">
+					<node oor:name="m1" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>wollmux:TextbausteinEinfuegen</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Textbaustein einfügen</value>
+							<value xml:lang="de">Textbaustein einfügen</value>
+							<value xml:lang="nl">Textbouwsteen toevoegen</value>
+							<value xml:lang="en">Insert Textfragment</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+
+					<node oor:name="m2" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>wollmux:PlatzhalterAnspringen</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Platzhalter anspringen</value>
+							<value xml:lang="de">Platzhalter anspringen</value>
+							<value xml:lang="nl">Plaatshouder aanspringen</value>
+							<value xml:lang="en">Jump To Next Placeholder</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+
+					<node oor:name="m3" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>wollmux:FunctionDialog#Empfaengerauswahl</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Empfänger auswählen</value>
+							<value xml:lang="de">Empfänger auswählen</value>
+							<value xml:lang="nl">Ontvanger kiezen</value>
+							<value xml:lang="en">Select Sender</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+				</node>
+
+			</node>
+
+			<node oor:name="de.muenchen.allg.itd51.wollmux.WerkzeugeFuerVorlagenersteller"
+				oor:op="replace">
+
+				<prop oor:name="Title" oor:type="xs:string">
+					<value xml:lang="de">Werkzeuge für Vorlagenersteller (WollMux)</value>
+				</prop>
+
+				<node oor:name="ToolBarItems">
+					<node oor:name="m1" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>wollmux:FormularMax4000</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>FormularMax 4000</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+
+					<node oor:name="m2" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>private:separator</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Block</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+
+					<node oor:name="m3" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>wollmux:TextbausteinVerweisEinfuegen</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Textbausteinverweis einfügen</value>
+							<value xml:lang="de">Textbausteinverweis einfügen</value>
+							<value xml:lang="nl">Tekstbouwsteenverwijzing invoegen</value>
+							<value xml:lang="en">Insert reference to textmodule</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+
+					<node oor:name="m4" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>private:separator</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Block</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+
+					<node oor:name="m5" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>wollmux:DumpInfo</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value>Fehlerinfos erstellen</value>
+							<value xml:lang="de">Fehlerinfos erstellen</value>
+							<value xml:lang="nl">Info over fouten opstellen</value>
+							<value xml:lang="en">Dump troubleshoot information</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value>com.sun.star.text.TextDocument</value>
+						</prop>
+					</node>
+				</node>
+			</node>
+
+		</node>
+	</node>
+</oor:component-data>

@@ -11,12 +11,12 @@
 	</info>
 
 	<resources>
-		<res id="CustomLangPack.xml_eng" src="customLangPack.xml_eng" />
-		<res id="CustomLangPack.xml_deu" src="customLangPack.xml_deu" />
+		<res id="CustomLangPack.xml_eng" src="../izpack/customLangPack.xml_eng" />
+		<res id="CustomLangPack.xml_deu" src="../izpack/customLangPack.xml_deu" />
 
-		<res id="userInputSpec.xml" src="userInputSpec.xml" parse="yes"
+		<res id="userInputSpec.xml" src="../izpack/userInputSpec.xml" parse="yes"
 			type="xml" />
-		<res id="shortcutSpec.xml" src="shortcutSpec.xml" parse="yes"
+		<res id="shortcutSpec.xml" src="../izpack/shortcutSpec.xml" parse="yes"
 			type="xml" />
 		<res id="Installer.image" src="../misc/wollmux_welcome.png" />
 	</resources>
@@ -154,22 +154,41 @@
 	</panels>
 
 	<packs>
-		<pack name="WollMux" required="yes">
-			<description>Installiert WollMux auf der Festplatte.</description>
+		<pack name="WollMux (LibreOffice)" required="no" preselected="yes" excludeGroup="extension">
+			<description>Installiert WollMux für LibreOffice auf der Festplatte.</description>
 			<fileset dir="." targetdir="${INSTALL_PATH}" override="true">
+				<exclude name="WollMux-AOO.oxt"/>
 				<exclude name="*.sh" />
 				<exclude name="*.bat" />
 			</fileset>
 			<fileset dir="../misc" targetdir="${INSTALL_PATH}" override="true">
 				<include name="wollmux.ico" />
 			</fileset>
+			<executable targetfile="${INSTALL_PATH}/wollmuxbar" keep="true" stage="never">
+				<os family="mac" />
+				<os family="unix" />
+			</executable>
+		</pack>
+		<pack name="WollMux (OpenOffice)" required="no" excludeGroup="extension">
+			<description>Installiert WollMux für Apache OpenOffice auf der Festplatte.</description>
+			<fileset dir="." targetdir="${INSTALL_PATH}" override="true">
+				<exclude name="WollMux.oxt"/>
+				<exclude name="*.sh" />
+				<exclude name="*.bat" />
+			</fileset>
+			<singlefile src="WollMux-AOO.oxt" target="${INSTALL_PATH}/WollMux.oxt" />
+			<fileset dir="../misc" targetdir="${INSTALL_PATH}" override="true">
+				<include name="wollmux.ico" />
+			</fileset>
+			<executable targetfile="${INSTALL_PATH}/wollmuxbar" keep="true" stage="never">
+				<os family="mac" />
+				<os family="unix" />
+			</executable>
 		</pack>
 		<!-- Windows -->
 		<pack name="Extension installieren (Windows)" required="no"
 			preselected="yes" condition="oooPathExists">
-			<description>Installiert die WollMux-Extension in
-				OpenOffice/LibreOffice. (Windows)
-			</description>
+			<description>Installiert die WollMux-Extension in OpenOffice/LibreOffice.</description>
 			<os family="windows" />
 			<fileset dir="." targetdir="${INSTALL_PATH}" override="true">
 				<include name="*.bat" />
@@ -190,9 +209,7 @@
 		</pack>
 		<!-- Un*x/Mac -->
 		<pack name="Extension installieren" required="no" preselected="yes">
-			<description>Installiert die WollMux-Extension in
-				OpenOffice/LibreOffice.
-			</description>
+			<description>Installiert die WollMux-Extension in OpenOffice/LibreOffice.</description>
 			<os family="mac" />
 			<os family="unix" />
 			<fileset dir="." targetdir="${INSTALL_PATH}" override="true">

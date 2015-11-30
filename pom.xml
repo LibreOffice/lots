@@ -213,6 +213,20 @@
 							</descriptors>
 						</configuration>
 					</execution>
+					<execution>
+						<id>assemble-oxt-aoo</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<finalName>WollMux-AOO</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<descriptors>
+								<descriptor>misc/assembly-oxt_AOO.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
@@ -225,6 +239,7 @@
 						<configuration>
 							<target>
 								<move file="dist/WollMux.zip" tofile="dist/WollMux.oxt" />
+								<move file="dist/WollMux-AOO.zip" tofile="dist/WollMux-AOO.oxt" />
 							</target>
 						</configuration>
 						<goals>
@@ -272,7 +287,7 @@
 			<plugin>
 				<groupId>org.codehaus.izpack</groupId>
 				<artifactId>izpack-maven-plugin</artifactId>
-				<version>5.0.5</version>
+				<version>5.0.6</version>
 				<extensions>true</extensions>
 				<configuration>
 					<baseDir>${izpack.staging}</baseDir>
