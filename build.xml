@@ -6,17 +6,6 @@ See doc/INSTALL for instructions how to build WollMux.
 
 Targets:
 
-clean: Remove all generated files except for version information (which is only
-       regenerated when building from a git/svn working copy.
-
-debug: List this target before other build targets to get .class files with
-       debug information.
-
-all: Create the OOo component and WollMuxBar.jar, but *not* the Debian package.
-     The files are created in the dist/ directory.
-
-.tar.gz: Creates wollmux-<version>.tar.gz with the WollMux and UNOHelper sources
-
 deb: Create the Debian package in the dist/ directory. 
      ATTENTION! If you build from vanilla sources, this Debian package will NOT work
      on a standard Debian or Ubuntu system. If you want a Debian package that works
@@ -24,21 +13,11 @@ deb: Create the Debian package in the dist/ directory.
      it will be used. Otherwise the lhmdeb directory is used, which only works for
      the Landeshauptstadt München's Basisclient.
 
-wininstaller : Creates the Windows installer executable in the dist/ directory.
-
 install: Install the WollMux OOo component in the user area for the user running ant.
          DO NOT USE THIS AS ROOT. IT DOESN'T DO SYSTEM-WIDE INSTALLATION.
 
 updateLocalizationConf: Collects new strings from the WollMux sources and adds them
                         to src/data/localization.conf
-
-makeversion: Attempt to regenerate version information and set VERSION property for
-             the rest of the build. This target is implicitly called by the other
-             targets. Do not call this directly.
-
-compileidl: Compiles the files from the idl/ directory. If you're using Eclipse, then
-            you'll need to call this target after an "ant clean", because Eclipse
-            can't compile these files on its own.
 
 documentation: Download WollMux documentation from WollMux Wiki and prepare it for 
                offline usage.
@@ -50,64 +29,28 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
              Only executed if no debian/rules file present, i.e. this target is not
              executed for a true Debian build.
 
-snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 
 *****************************************************************-->
 
-	<condition property="os.family" value="unix">  
-		<os family="unix"/>  
-	</condition>  
-	<condition property="os.family" value="windows">  
-		<os family="windows"/>  
-	</condition> 
-	<condition property="isWindows" value="true">  
-		<os family="windows"/>  
-	</condition> 
-	<property file="${os.family}.properties"/> 
-	
 <!-- If you follow the INSTALL instructions exactly, you won't have to change this path --> 	
 	<property name="UNOHELPER_DIR" value="../UNOHelper" />
 
 <!-- Don't change anything below this line. -->
 	<property name="COMPONENT" value="WollMux" />
-	<property name="MAKE_DIR" value="." />
 	<property name="RDB_DIR" value="oxt" />
 	<property name="PACKAGE_DIR" value="dist" />
 	<property name="DOC_DIR" value="${PACKAGE_DIR}/doc"/>
 	<property name="PKG_NAME" value="${COMPONENT}.oxt" />
 	<property name="PKG_FILE" value="${PACKAGE_DIR}/${PKG_NAME}" />
-	<property name="MD5SUMS_FILE_NAME" value="${PACKAGE_DIR}/md5sums.txt" />
 	<property name="MISC" value="misc" />
-	<property name="BUILD_INFO_FILE_NAME" value="buildinfo" />
-	<property name="BUILD_INFO_FILE" value="${MISC}/${BUILD_INFO_FILE_NAME}" />
 	<property name="DESCRIPTION_XML" value="${RDB_DIR}/description.xml" />
 	<property name="UPDATE_XML" value="${PACKAGE_DIR}/${COMPONENT}.update.xml" />
 	<property name="VERSION_FILE" value="${MISC}/version"/>
 	<property name="CHANGELOG_FILE" value="doc/ChangeLog"/>
 	<property name="WOLLMUX_WIKI_URL" value="http://www.wollmux.net/wiki" />
 
-	<property name="SRC_ENCODING" value="UTF-8" />
-	
-	<property name="WollMux_REG_NAME" value="de.muenchen.allg.itd51.wollmux.comp.WollMux" />
-	<property name="WollMux_COMPJAR" value="${COMPONENT}.uno.jar" />
-	
-	<property name="RDBFILE" value="${RDB_DIR}/${COMPONENT}.rdb" />
-	<property name="JAVAMAKER_ARGS" value="" />
-
-	<property name="MY_IDL" value="idl" />
 	<property name="MY_CLASSES" value="bin" />
 
-	
-	<property name="OOO_CLASSPATH" value="${OOOCLS1}/juh.jar:${OOOCLS1}/jurt.jar:${OOOCLS1}/ridl.jar:${OOOCLS2}/unoil.jar" />
-	<property name="TYPES_RDB" value="${OOO_TYPES_DIR}/types.rdb" />
-	<available file="${OOO_OFFAPI_DIR}/offapi.rdb" property="OFFAPI_RDB" value="${OOO_OFFAPI_DIR}/offapi.rdb" />
-	<property name="OFFAPI_RDB" value="${TYPES_RDB}" /> <!-- Fallback for 2.x installations that don't have OFFAPI_RDB -->
-	
-	<property name="SDK_IDL" value="${OOO_SDK}/idl" />
-
-	<property name="JAVAMAIL_JAR" value ="thirdparty/javamail-1.4.4/mail.jar"/>
-	
-	<property name="CLASSPATH" value="${OOO_CLASSPATH}:${JAVAMAIL_JAR}"/>
 	
 	<property name="BIN" value="bin" />
 	<property name="SRC" value="src" />
@@ -118,22 +61,6 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/${WOLLMUXBAR_JAR_NAME}" />
 	<property name="WOLLMUXBAR_EXE_NAME" value="wollmuxbar.exe" />
 	<property name="WOLLMUXBAR_EXE" value="${PACKAGE_DIR}/${WOLLMUXBAR_EXE_NAME}" />
-	
-	<property name="WOLLMUXINTERFACES_JAR_NAME" value="WollMuxInterfaces.jar" />
-	<property name="WOLLMUXINTERFACES_JAR" value="${PACKAGE_DIR}/${WOLLMUXINTERFACES_JAR_NAME}" />
-	
-	<property name="TERMINATEOOO_JAR_NAME" value="TerminateOOo.jar" />
-	<property name="TERMINATEOOO_JAR" value="${PACKAGE_DIR}/${TERMINATEOOO_JAR_NAME}" />
-	
-	<property name="UNOHELPER_SRC" value="${UNOHELPER_DIR}/src" />
-	
-	<!-- Nicht ${UNOHELPER_DIR}/bin. Dies liegt in einem anderen
-	   Projektordner. Da pfuschen wir nicht drin rum. -->
-	<property name="UNOHELPER_BIN" value="${BIN}" />
-	
-	<property name="TOOLING_MAIN_CLASS" value="com.sun.star.lib.loader.Loader" />
-	<property name="WOLLMUXBAR_MAIN_CLASS" value="de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar" />
-    <property name="TERMINATEOOO_MAIN_CLASS" value="TerminateOOo" />
 	
     <!-- The directory that contains the subdirectories com/ and win/ of the SDK -->
 	<!-- First check if we got our own copy of classes/ on the same level as WollMux and UNOHelper -->
@@ -147,57 +74,10 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="TOOLING" value="${OOO_SDK}/classes" />
 	<echo message="===== Using bootstrap files from ${TOOLING} =====" />
 
-
-	<target name="all" depends="debug,WollMuxBar.jar,WollMux.oxt,md5sum" />
-	
-	<target name="snapshot" depends="clean, makechangelog, debug, all, .tar.gz, deb, wininstaller, WollMuxInterfaces.jar, documentation" />
-
-	<!-- The debug target doesn't do anything by itself, but for any targets executed later
-	     the DEBUG property will be set. --> 
-	<target name="debug">
-	        <echo message="===== Compiling with debug info (RECOMMENDED!) =====" />
-		<property name="DEBUG" value="on" />
-		<!-- If optimization interferes with debugging, it can be disabled. -->
-		<!-- <property name="OPTIMIZE" value="off" /> -->
-	</target>
-	
-	<target name="clean" >
-		<delete dir="${PACKAGE_DIR}/deb" />
-	</target>
-	
-	<target name="makeversion" depends="makeversion_unix, makeversion_windows">
-		<loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true">
-			<filterchain>
-				<striplinebreaks/>
-				<trim/>
-			</filterchain>
-		</loadfile>
-		<echo message="WollMux-Version is ${VERSION}" />
-	</target>
-	
-	<target name="makeversion_unix" unless="isWindows">
-		<exec executable="bash" failifexecutionfails="false">
-			<arg file="${MISC}/makeversion"/>
-			<arg file="${VERSION_FILE}"/>
-			<arg file="${BUILD_INFO_FILE}"/>
-			<arg file="${DESCRIPTION_XML}"/>
-			<arg file="${UPDATE_XML}"/>
-		</exec>
-	</target>
-	
-	<target name="makeversion_windows" if="isWindows">
-		<exec executable="powershell" failifexecutionfails="false">
-			<arg value="-File"/>
-			<arg file="${MISC}/makeversion.ps1"/>
-			<arg file="${VERSION_FILE}"/>
-			<arg file="${BUILD_INFO_FILE}"/>
-			<arg file="${DESCRIPTION_XML}"/>
-			<arg file="${UPDATE_XML}"/>
-		</exec>
-	</target>
 	
 	<available file="debian/rules" property="debian.native" />
-	<target name="bumpversion" unless="debian.native" depends="makeversion">
+	
+	<target name="bumpversion" unless="debian.native">
 		<exec executable="bash" failifexecutionfails="false">
 		  <arg line="misc/bumpversion ${VERSION_FILE} lhmdeb/changelog"/>
 		</exec>		
@@ -276,74 +156,6 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		</move>
 	</target>
 
-	<!-- Das Target compileidl erzeugt das rdb-file und die java-Interfaces -->
-	<target name="compileidl">
-		<echo message="Types dir: ${OOO_TYPES_DIR}"/>
-		<echo level="info">idlc: Creating .urd files</echo>
-		<apply executable="${OOO_SDK}/bin/idlc" failonerror="true" dest="${MY_IDL}" >
-			<arg value="-C" />
-			<arg value="-I${SDK_IDL}" />
-			<fileset dir="${MY_IDL}" includes="**/*.idl" />
-			<mapper type="glob" from="*.idl" to="*.urd"/>
-		</apply>
-
-		<delete file="${RDBFILE}" />
-		<echo level="info" message="regmerge: Creating ${RDBFILE}" />
-		<apply executable="${OOO_URE_BIN}/regmerge" parallel="true" failonerror="true">
-			<arg line="'${RDBFILE}' /UCR" />
-			<fileset dir="${MY_IDL}" includes="**/*.urd" />
-		</apply>
-
-		<echo level="info">javamaker: Creating .class files</echo>
-		<echo level="info">Hint: See property 'JAVAMAKER_ARGS' in '${os.family}.properties' if you get an error.</echo>
-		<!-- Trick for debugging: 
-		    Replace "javamaker" with "echo"
-		-->
-		<apply verbose="true" executable="${OOO_SDK}/bin/javamaker" relative="true" addsourcefile="false" failonerror="true" dest="${BIN}">
-			<arg line="${JAVAMAKER_ARGS}" />
-			<targetfile />
-
-			<!-- ATTENTION! The ./ before the ${MY_IDL} is important or javamaker fails with
-			the error message ERROR: Cannot create temporary file for idl/de/muenchen/allg/itd51/wollmux/....class
-			-->
-			<arg value="-nD" />
-			<arg value="${TYPES_RDB}" />
-			<arg value="${OFFAPI_RDB}" />
-			<arg value="${RDBFILE}" />
-			<arg value="-O" />
-			<arg value="./${MY_IDL}" />
-			<fileset dir="${MY_IDL}" includes="**/*.urd" />
-			<mapper type="package" from="*.urd" to="-T*" />
-		</apply>
-	</target>
-	
-	<target name="compile" depends="compileidl">
-		<property name="DEBUG" value="off" />
-		<property name="OPTIMIZE" value="on" />
-
-		<javac srcdir="${UNOHELPER_SRC}"
-			destdir="${UNOHELPER_BIN}"
-			classpath="${OOO_CLASSPATH}"
-			includeAntRuntime="false"
-			encoding="${SRC_ENCODING}"
-			debug="${DEBUG}"
-			optimize="${OPTIMIZE}"
-			source="1.5"
-			target="1.5"
-		/>
-		
-		<javac srcdir="${SRC}"
-			destdir="${BIN}"
-			classpath="${CLASSPATH}:${MY_IDL}:${TOOLING}"
-			includeAntRuntime="false"
-			encoding="${SRC_ENCODING}"
-			debug="${DEBUG}"
-			optimize="${OPTIMIZE}"
-			source="1.5"
-			target="1.5"
-		/>
-	</target>
-
 	<target name="WollMux.oxt-ButtonsOnly">
 		<delete file="${PKG_FILE}" />
 		<zip destfile="${PKG_FILE}">
@@ -367,83 +179,8 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		<echo level="info" message="Install finished at ">${mytime}</echo>
 	</target>
 	
-	<target name="WollMuxBar.jar" depends="makeversion, compile">
-		<delete file="${WOLLMUXBAR_JAR}" />
-		<jar destfile="${WOLLMUXBAR_JAR}" duplicate="preserve">
-<!--			<fileset dir="${BIN}" includes="**/WollMuxBar*,**/dialog/UIElement*,**/ConfigThingy*,**/NodeNotFoundException*,**/SyntaxErrorException*,**/ConfigurationErrorException*,**/DispatchHandler*,**/L.class,**/Logger*,**/WollMuxFiles*,**/WollMuxBarEventHandler*,**/dialog/Common*,**/XPAL*,**/XWollMux*" />
-			<fileset dir="${UNOHELPER_BIN}" includes="**/afid/*" /> -->
-			<fileset dir="${BIN}" includes="**/*.class"/>
-			<fileset dir="${MY_IDL}" includes="**/*.class"/>
-			<fileset dir="${UNOHELPER_BIN}" includes="**/*.class" />
-			<fileset dir="${TOOLING}" includes="**/*" />
-			<fileset dir="${SRC}" includes="data/**/*" />
-			<fileset file="${BUILD_INFO_FILE}" />
-			<manifest>
-				<attribute name="Main-Class" value="${TOOLING_MAIN_CLASS}" />
-				<section name="com/sun/star/lib/loader/Loader.class">
-					<attribute name="Application-Class" value="${WOLLMUXBAR_MAIN_CLASS}" />
-				</section>
-			</manifest>
-		</jar>
-	</target>
-	
-	<target name="WollMux.uno.jar" depends="compile, compileidl, makeversion">
-		<delete file="${WollMux_COMPJAR}" />
-		<jar destfile="${WollMux_COMPJAR}" duplicate="preserve">
-			<fileset dir="${BIN}" includes="**/*.class"/>
-			<fileset dir="${MY_IDL}" includes="**/*.class"/>
-			<fileset dir="${UNOHELPER_BIN}" includes="**/*.class" />
-			<fileset dir="${TOOLING}" includes="**/*" />
-			<fileset dir="${SRC}" includes="data/**/*" />
-			<fileset file="${BUILD_INFO_FILE}" />
-			<manifest>
-				<attribute name="RegistrationClassName" value="${WollMux_REG_NAME}" />
-				<attribute name="Class-Path" value="${JAVAMAIL_JAR}" />
-			</manifest>
-		</jar>
-	</target>
-
-	<!-- Erzeugt ein jar-Paket mit den exportierten Interfaces des WollMux -->
-	<target name="WollMuxInterfaces.jar" depends="compile, compileidl, makeversion">
-		<delete file="${WOLLMUXINTERFACES_JAR}" />
-		<jar destfile="${WOLLMUXINTERFACES_JAR}" duplicate="preserve">
-			<fileset dir="${MY_IDL}" includes="**/*.class"/>
-			<fileset file="${BUILD_INFO_FILE}" />
-		</jar>
-	</target>
-
-    <target name="WollMux.oxt" depends="makeversion">
-    	<!-- Workaround für Fehler beim Packen durch Maven Assembly Plugin. -->
-    	<unjar src="${WOLLMUXBAR_JAR}" dest="${java.io.tmpdir}/${WOLLMUXBAR_JAR_NAME}" />
-    	<jar destfile="${WOLLMUXBAR_JAR}" basedir="${java.io.tmpdir}/${WOLLMUXBAR_JAR_NAME}" manifest="${java.io.tmpdir}/${WOLLMUXBAR_JAR_NAME}/META-INF/MANIFEST.MF" />
-    	
-		<delete file="${PKG_FILE}" />
-		<zip destfile="${PKG_FILE}">
-			<mappedresources>
-				<zipfileset dir="dist" includes="${WOLLMUXBAR_JAR_NAME}" />
-				<globmapper from="*" to="${WollMux_COMPJAR}" />
-			</mappedresources>
-			<fileset dir="." includes="${THIRDPARTY}/**/*.jar" />
-			<fileset dir="${RDB_DIR}">
-				<include name="*.xcu" />
-				<include name="*.rdb" />
-				<include name="META-INF/manifest.xml" />
-				<include name="help/component*.txt" />
-			</fileset>
-			<fileset file="${BUILD_INFO_FILE}" />
-			<fileset file="${DESCRIPTION_XML}" />
-			<fileset dir="." includes="basic/**/*" />
-		</zip>
-	</target>
-
-	<target name="md5sum" depends="WollMux.oxt, WollMuxBar.jar">
-		<apply executable="md5sum" dir="${PACKAGE_DIR}" relative="true" failifexecutionfails="false" output="${MD5SUMS_FILE_NAME}" append="false" parallel="true">
-			<fileset dir="${PACKAGE_DIR}" includes="${PKG_NAME},${WOLLMUXBAR_JAR_NAME}"/>
-		</apply>
-	</target>	
-	
 	<!-- Das Target install installiert/reinstalliert das erzeugte uno-package -->
-	<target name="install" depends="WollMux.oxt">
+	<target name="install">
 		<echo level="info">unopkg remove ${PKG_NAME}:</echo>
 		<exec executable="unopkg" failifexecutionfails="false">
 			<arg line="remove ${PKG_NAME}" />
@@ -457,30 +194,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		<echo level="info" message="Install finished at ">${mytime}</echo>
 	</target>
 
-	<target name=".tar.gz" depends="makeversion, bumpversion">
-		<property name="TAR_BUILD_DIR" value="${PACKAGE_DIR}/wollmux-${VERSION}" />
-		<mkdir dir="${TAR_BUILD_DIR}" />
-		<copy todir="${TAR_BUILD_DIR}/WollMux" >
-			<fileset dir="." includes="**/*" excludes="${TAR_BUILD_DIR}" /> 
-			<fileset dir="." includes="**/.*" excludes="${TAR_BUILD_DIR}" />
-		</copy>
-		<copy todir="${TAR_BUILD_DIR}/UNOHelper" >
-			<fileset dir="${UNOHELPER_DIR}" includes="**/*" excludes="bin/**" /> 
-			<fileset dir="${UNOHELPER_DIR}" includes="**/.*"/>
-		</copy>
-		
-		<exec dir="${TAR_BUILD_DIR}" executable="ant" failifexecutionfails="true" failonerror="true">
-			<arg line="-f WollMux/build.xml clean" />
-		</exec>
-
-		<exec dir="${PACKAGE_DIR}" executable="tar" failifexecutionfails="true" failonerror="true">
-			<arg line="-czf wollmux-${VERSION}.tar.gz --exclude=.hg --exclude=.git --exclude=.svn --exclude=.gitignore --exclude=.hgignore --exclude=debian wollmux-${VERSION}" />
-		</exec>
-		
-		<delete dir="${TAR_BUILD_DIR}" />
-	</target>
-	
-	<target name="deb" depends="makeversion, bumpversion">
+	<target name="deb">
 		<property name="DEB_BUILD_DIR" value="${PACKAGE_DIR}/deb/wollmux-${VERSION}" />
 		<condition property="DEBIAN_DIR" value="debian" else="lhmdeb">
 			<available file="debian/rules" />
@@ -514,63 +228,6 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<!-- Das Target aktualisiert das LocalizationConf-File -->
 	<target name="updateLocalizationConf">
 		<java classname="de.muenchen.allg.itd51.wollmux.LocalizationUpdater" fork="true" classpath="${MY_CLASSES}" dir="${basedir}"/>
-	</target>
-
-	<!-- Das Target erzeugt die wollmuxbar.exe -->
-	<target name="wollmuxbar.exe">
-		<exec executable="makensis" failonerror="true" failifexecutionfails="true">
-			<arg line="-V3 -DOUT_FILE=${WOLLMUXBAR_EXE_NAME} -DJAR_FILE=${WOLLMUXBAR_JAR_NAME} ${MISC}/wollmuxbarlauncher.nsi"/>
-		</exec>
-		<move file="${MISC}/${WOLLMUXBAR_EXE_NAME}" todir="${PACKAGE_DIR}" />
-	</target>
-	
-	<target name="TerminateOOo.jar">
-		<property name="DEBUG" value="off" />
-		<property name="OPTIMIZE" value="on" />
-		<javac srcdir="${MISC}"
-			destdir="${BIN}"
-			includes="${TERMINATEOOO_MAIN_CLASS}.java"
-			includeAntRuntime="false"
-			encoding="${SRC_ENCODING}"
-			debug="${DEBUG}"
-			optimize="${OPTIMIZE}"
-			source="1.5"
-			target="1.5"
-		>
-			<classpath>
-				<path>
-					<pathelement path="${de.muenchen:wollmux-support-classes:jar}"/>
-					<pathelement path="${org.libreoffice:unoil:jar}"/>
-					<pathelement path="${org.libreoffice:ridl:jar}"/>
-					<pathelement path="${org.libreoffice:juh:jar}"/>
-					<pathelement path="${org.libreoffice:jurt:jar}"/>
-				</path>
-			</classpath>
-		</javac>
-
-		<delete file="${TERMINATEOOO_JAR}" />
-		<jar destfile="${TERMINATEOOO_JAR}" duplicate="preserve">
-			<fileset dir="${BIN}" includes="${TERMINATEOOO_MAIN_CLASS}.class" />
-			<zipfileset includes="**/*" src="${de.muenchen:wollmux-support-classes:jar}" />
-			<manifest>
-				<attribute name="Main-Class" value="${TOOLING_MAIN_CLASS}" />
-				<section name="com/sun/star/lib/loader/Loader.class">
-					<attribute name="Application-Class" value="${TERMINATEOOO_MAIN_CLASS}" />
-				</section>
-			</manifest>
-		</jar>
-
-		<delete file="${BIN}/${TERMINATEOOO_MAIN_CLASS}.class" />
-	</target>
-	
-	<!-- Das Target erzeugt den Windows WollMux-Installer -->
-	<target name="wininstaller" depends="makeversion">
-		<exec executable="makensis" failonerror="true" failifexecutionfails="true">
-			<arg line="-V3 -DFILESDIR=../${PACKAGE_DIR} -DVERSION=${VERSION} -DWOLLMUX=${COMPONENT} -DWOLLMUXBAR=${WOLLMUXBAR_NAME} -DWOLLMUXBAR_EXE_NAME=${WOLLMUXBAR_EXE_NAME} -DWOLLMUXBAR_JAR_NAME=${WOLLMUXBAR_JAR_NAME} ${MISC}/wollmuxinstaller.nsi"/>
-		</exec>
-		
-		<move file="${MISC}/${COMPONENT}-${VERSION}-installer.exe" todir="${PACKAGE_DIR}" />
-		<delete file="${TERMINATEOOO_JAR}" />
 	</target>
 
 </project>
