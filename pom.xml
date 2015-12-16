@@ -437,6 +437,11 @@
 			<version>1.5.4</version>
 		</dependency>
 		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.5.4</version>
+		</dependency>
+		<dependency>
 			<groupId>de.muenchen</groupId>
 			<artifactId>wollmux-support-classes</artifactId>
 			<version>1.0.0</version>
