@@ -46,6 +46,7 @@ import java.util.regex.Pattern;
 
 import com.sun.star.awt.XControlModel;
 import com.sun.star.beans.XPropertySet;
+import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XNamed;
@@ -54,6 +55,7 @@ import com.sun.star.frame.XController;
 import com.sun.star.lang.XServiceInfo;
 import com.sun.star.table.XCell;
 import com.sun.star.text.XDependentTextField;
+import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
@@ -62,6 +64,7 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XRefreshable;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.TextRangeRelation.TreeRelation;
 
@@ -735,6 +738,21 @@ public final class FormFieldFactory
     public FormFieldType getType()
     {
       return FormFieldType.InputFormField;
+    }
+    
+    @Override
+    public void dispose()
+    {
+      super.dispose();
+      try
+      {
+        XTextContent xTextContent = UNO.XTextContent(inputField);
+        xTextContent.getAnchor().getText().removeTextContent(xTextContent);
+      }
+      catch (NoSuchElementException e)
+      {
+        Logger.log(e);
+      }
     }
   }
 
