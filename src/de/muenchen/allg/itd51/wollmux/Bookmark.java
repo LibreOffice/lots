@@ -34,7 +34,6 @@
  *                  | getTextRange() umbenannt in getTextCursor()
  *                  | decollapseBookmark() gefixt so dass dekollabierte Bookmarks nicht nochmal dekollabiert werden
  * 13.07.2009 | BED | decollapseBookmark() ruft jetzt kein setString() mehr auf
- * 31.07.2013 | JGM | decollapseBookmark() Erweitert damit es unter LO funktioniert
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -572,8 +571,6 @@ public class Bookmark
     {
       UnoService bookmark = document.create("com.sun.star.text.Bookmark");
       bookmark.xNamed().setName(name);
-      //JGM,31.07.13: "." eingefügt und Cursor um eine Position nach rechts //erweitert 
-      cursor.getText().insertString(cursor, ".", true);
       cursor.getText().insertTextContent(cursor, bookmark.xTextContent(), true);
     }
     catch (com.sun.star.uno.Exception e)
