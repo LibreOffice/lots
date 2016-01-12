@@ -137,12 +137,12 @@ public class OneFormControlExtView implements LazyView
   private void initPanel()
   {
     autofillView = new OneFormControlAutofillEditView(model, funcLib, null);
-    myTabbedPane.addTab("AUTOFILL", autofillView.JComponent());
+    myTabbedPane.addTab("AUTOFILL", autofillView.getComponent());
     plausiView = new OneFormControlPlausiEditView(model, funcLib, null);
-    myTabbedPane.addTab("PLAUSI", plausiView.JComponent());
+    myTabbedPane.addTab("PLAUSI", plausiView.getComponent());
     groupsView =
       new OneGroupsProviderGroupsEditView(model.getGroupsProvider(), groupModelList);
-    myTabbedPane.addTab("GROUPS", groupsView.JComponent());
+    myTabbedPane.addTab("GROUPS", groupsView.getComponent());
     myTabbedPane.setSelectedIndex(selectedTab);
   }
 
@@ -165,7 +165,7 @@ public class OneFormControlExtView implements LazyView
     }
   }
 
-  public JComponent JComponent()
+  public JComponent getComponent()
   {
     return myTabbedPane;
   }

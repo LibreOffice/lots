@@ -140,7 +140,7 @@ public abstract class OnDemandCardView implements View
     View view = createViewFor(model, myViewChangeListener);
     String cardId = getCardIdFor(model);
     mapModel2ViewDescriptor.put(model, new ViewCardIdPair(view, cardId));
-    myPanel.add(view.JComponent(), cardId);
+    myPanel.add(view.getComponent(), cardId);
     myPanel.validate();
   }
 
@@ -162,7 +162,7 @@ public abstract class OnDemandCardView implements View
       if (pair.view == view)
       {
         iter.remove();
-        myPanel.remove(view.JComponent());
+        myPanel.remove(view.getComponent());
         myPanel.validate();
         if (currentModel != null && getCardIdFor(currentModel).equals(pair.cardId))
           showEmpty();
@@ -227,7 +227,7 @@ public abstract class OnDemandCardView implements View
     return inactivePanel;
   }
 
-  public JComponent JComponent()
+  public JComponent getComponent()
   {
     return myPanel;
   }

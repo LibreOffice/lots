@@ -64,7 +64,7 @@ public abstract class LineView implements View
    */
   protected FormularMax4000 formularMax4000;
 
-  public JComponent JComponent()
+  public JComponent getComponent()
   {
     return myPanel;
   }

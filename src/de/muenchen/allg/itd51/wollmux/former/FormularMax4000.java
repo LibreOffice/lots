@@ -75,7 +75,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.AbstractButton;
 import javax.swing.Box;
@@ -146,19 +145,15 @@ import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
-import de.muenchen.allg.itd51.wollmux.former.DocumentTree.Container;
-import de.muenchen.allg.itd51.wollmux.former.DocumentTree.DropdownFormControl;
-import de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl;
-import de.muenchen.allg.itd51.wollmux.former.DocumentTree.InsertionBookmark;
-import de.muenchen.allg.itd51.wollmux.former.DocumentTree.TextRange;
-import de.muenchen.allg.itd51.wollmux.former.DocumentTree.Visitor;
 import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
+import de.muenchen.allg.itd51.wollmux.former.document.DocumentTree;
+import de.muenchen.allg.itd51.wollmux.former.document.ScanVisitor;
+import de.muenchen.allg.itd51.wollmux.former.document.Visitor;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionTester;
-import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModel;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
@@ -184,31 +179,10 @@ public class FormularMax4000
   public static final String STANDARD_TAB_NAME = L.m("Tab");
 
   /**
-   * Die Namen der Parameter, die die Gender-Trafo erwartet. ACHTUNG! Diese müssen
-   * exakt mit den Parametern der Gender()-Funktion aus der WollMux-Konfig
-   * übereinstimmen. Insbesondere dürfen sie nicht übersetzt werden, ohne dass die
-   * Gender()-Funktion angepasst wird. Und falls die Gender()-Funktion geändert wird,
-   * dann funktionieren existierende Formulare nicht mehr.
-   */
-  private static final String[] GENDER_TRAFO_PARAMS = new String[] {
-    "Falls_Anrede_HerrN", "Falls_Anrede_Frau", "Falls_sonstige_Anrede", "Anrede" };
-
-  /**
-   * Regex für Test ob String mit Buchstabe oder Underscore beginnt. ACHTUNG! Das .*
-   * am Ende ist notwendig, da String.matches() immer den ganzen String testet.
-   */
-  private static final String STARTS_WITH_LETTER_RE = "^[a-zA-Z_].*";
-
-  /**
    * Der Standard-Formulartitel, solange kein anderer gesetzt wird.
    */
   private static final String GENERATED_FORM_TITLE =
     L.m("Generiert durch FormularMax 4000");
-
-  /**
-   * Maximale Anzahl Zeichen für ein automatisch generiertes Label.
-   */
-  private static final int GENERATED_LABEL_MAXLENGTH = 30;
 
   /**
    * URL des Quelltexts für den Standard-Empfängerauswahl-Tab.
@@ -228,58 +202,6 @@ public class FormularMax4000
    */
   private final URL STANDARD_BUTTONS_LAST_URL =
     this.getClass().getClassLoader().getResource("data/standardbuttons_letztes.conf");
-
-  /**
-   * Beim Import neuer Formularfelder oder Checkboxen schaut der FormularMax4000 nach
-   * speziellen Hinweisen/Namen/Einträgen, die diesem Muster entsprechen. Diese
-   * Zusatzinformationen werden herangezogen um Labels, IDs und andere Informationen
-   * zu bestimmen.
-   * 
-   * >>>>Eingabefeld<<<<: Als "Hinweis" kann "Label<<ID>>" angegeben werden und wird
-   * beim Import entsprechend berücksichtigt. Wird nur "<<ID>>" angegeben, so
-   * markiert das Eingabefeld eine reine Einfügestelle (insertValue oder
-   * insertContent) und beim Import wird dafür kein Formularsteuerelement erzeugt.
-   * Wird ID ein "glob:" vorangestellt, so wird gleich ein insertValue-Bookmark
-   * erstellt.
-   * 
-   * >>>>>Eingabeliste/Dropdown<<<<<: Als "Name" kann "Label<<ID>>" angegeben werden
-   * und wird beim Import berücksichtigt. Als Spezialeintrag in der Liste kann
-   * "<<Freitext>>" eingetragen werden und signalisiert dem FM4000, dass die ComboBox
-   * im Formular auch die Freitexteingabe erlauben soll. Wie bei Eingabefeldern auch
-   * ist die Angabe "<<ID>>" ohne Label möglich und signalisiert, dass es sich um
-   * eine reine Einfügestelle handelt, die kein Formularelement erzeugen soll. Wird
-   * als "Name" die Spezialsyntax "<<gender:ID>>" verwendet, so wird eine reine
-   * Einfügestelle erzeugt, die mit einer Gender-TRAFO versehen wird, die abhängig
-   * vom Formularfeld ID einen der Werte des Dropdowns auswählt, und zwar bei "Herr"
-   * oder "Herrn" den ersten Eintrag, bei "Frau" den zweiten Eintrag und bei allem
-   * sonstigen den dritten Eintrag. Hat das Dropdown nur 2 Einträge, so wird im
-   * sonstigen Fall das Feld ID untransformiert übernommen. Falls vorhanden werden
-   * bis zu N-1 Leerzeichen am Ende eines Eintrages der Dropdown-Liste entfernt,
-   * wobei N die Anzahl der Einträge ist, die bis auf folgende Leerzeichen identisch
-   * zu diesem Eintrag sind. Dies ermöglicht es, das selbe Wort mehrfach in die Liste
-   * aufzunehmen.
-   * 
-   * >>>>>Checkbox<<<<<: Bei Checkboxen kann als "Hilfetext" "Label<<ID>>" angegeben
-   * werden und wird beim Import entsprechend berücksichtigt.
-   * 
-   * Technischer Hinweis: Auf dieses Pattern getestet wird grundsätzlich der String,
-   * der von {@link DocumentTree.FormControl#getDescriptor()} geliefert wird.
-   * 
-   */
-  private static final Pattern MAGIC_DESCRIPTOR_PATTERN =
-    Pattern.compile("\\A(.*)<<(.*)>>\\z");
-
-  /**
-   * Präfix zur Markierung von IDs der magischen Deskriptor-Syntax um anzuzeigen,
-   * dass ein insertValue anstatt eines insertFormValue erzeugt werden soll.
-   */
-  private static final String GLOBAL_PREFIX = "glob:";
-
-  /**
-   * Präfix zur Markierung von IDs der magischen Deskriptor-Syntax um anzuzeigen,
-   * dass ein insertFormValue mit Gender-TRAFO erzeugt werden soll.
-   */
-  private static final String GENDER_PREFIX = "gender:";
 
   /**
    * Der {@link IDManager}-Namensraum für die IDs von {@link FormControlModel}s.
@@ -437,13 +359,13 @@ public class FormularMax4000
    * Beenden des FM4000 endet.
    */
   private List<BroadcastListener> broadcastListeners =
-    new Vector<BroadcastListener>();
+    new ArrayList<BroadcastListener>();
 
   /**
    * Wird auf myFrame registriert, damit zum Schließen des Fensters abort()
    * aufgerufen wird.
    */
-  private MyWindowListener oehrchen;
+  private MyWindowListener windowCloseListener;
 
   /**
    * Die Haupt-Menüleiste des FM4000.
@@ -463,7 +385,7 @@ public class FormularMax4000
   /**
    * Die Namen aller Druckfunktionen, die zur Auswahl stehen.
    */
-  private Vector<String> printFunctionNames;
+  private ArrayList<String> printFunctionNames;
 
   /**
    * Wird bei jeder Änderung von Formularaspekten gestartet, um nach einer
@@ -516,10 +438,9 @@ public class FormularMax4000
    */
   public void broadcast(Broadcast b)
   {
-    Iterator<BroadcastListener> iter = broadcastListeners.iterator();
-    while (iter.hasNext())
+    for (BroadcastListener bl : broadcastListeners)
     {
-      b.sendTo(iter.next());
+      b.sendTo(bl);
     }
   }
 
@@ -530,7 +451,10 @@ public class FormularMax4000
    */
   public void addBroadcastListener(BroadcastListener listener)
   {
-    if (!broadcastListeners.contains(listener)) broadcastListeners.add(listener);
+    if (!broadcastListeners.contains(listener)) 
+    {
+      broadcastListeners.add(listener);
+    }
   }
 
   /**
@@ -584,13 +508,14 @@ public class FormularMax4000
     this.doc = model;
     this.abortListener = abortListener;
     this.functionLibrary = funcLib;
-    this.printFunctionNames = new Vector<String>(printFuncLib.getFunctionNames());
+    this.printFunctionNames = new ArrayList<String>(printFuncLib.getFunctionNames());
 
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           try
@@ -601,7 +526,6 @@ public class FormularMax4000
           {
             Logger.error(x);
           }
-          ;
         }
       });
     }
@@ -610,7 +534,27 @@ public class FormularMax4000
       Logger.error(x);
     }
   }
+  
+  public TextDocumentModel getDocumentModel()
+  {
+    return doc;
+  }
+  
+  public FunctionSelectionProvider getFunctionSelectionProvider()
+  {
+    return functionSelectionProvider;
+  }
+  
+  public InsertionModelList getInsertionModelList()
+  {
+    return insertionModelList;
+  }
 
+  public FormControlModelList getFormControlModelList()
+  {
+    return formControlModelList;
+  }
+  
   private void createGUI()
   {
     Common.setLookAndFeelOnce();
@@ -649,10 +593,10 @@ public class FormularMax4000
     myFrame = new JFrame("FormularMax 4000");
     // leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    oehrchen = new MyWindowListener();
+    windowCloseListener = new MyWindowListener();
     // der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert
     // wird
-    myFrame.addWindowListener(oehrchen);
+    myFrame.addWindowListener(windowCloseListener);
 
     // WollMux-Icon für das Frame
     Common.setWollMuxIcon(myFrame);
@@ -665,13 +609,13 @@ public class FormularMax4000
         sectionModelList, functionLibrary, this);
 
     // damit sich Slider von JSplitPane vernünftig bewegen lässt.
-    rightPanel.JComponent().setMinimumSize(new Dimension(100, 0));
+    rightPanel.getComponent().setMinimumSize(new Dimension(100, 0));
     nonExistingRightPanel = new JPanel();
     nonExistingRightPanel.setMinimumSize(new Dimension(0, 0));
     nonExistingRightPanel.setPreferredSize(nonExistingRightPanel.getMinimumSize());
     nonExistingRightPanel.setMaximumSize(nonExistingRightPanel.getMinimumSize());
     mainContentPanel =
-      new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel.JComponent(),
+      new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel.getComponent(),
         nonExistingRightPanel);
     mainContentPanel.setResizeWeight(1.0);
     defaultDividerSize = mainContentPanel.getDividerSize();
@@ -679,6 +623,38 @@ public class FormularMax4000
 
     myFrame.getContentPane().add(mainContentPanel);
 
+    createMainMenu();
+
+    myFrame.setJMenuBar(mainMenuBar);
+
+    writeChangesTimer = new Timer(500, new ActionListener()
+    {
+      @Override
+      public void actionPerformed(ActionEvent e)
+      {
+        updateDocument(doc);
+      }
+    });
+    writeChangesTimer.setCoalesce(true);
+    writeChangesTimer.setRepeats(false);
+
+    initEditor();
+
+    selectionSupplier = UNO.XSelectionSupplier(doc.doc.getCurrentController());
+    myXSelectionChangedListener = new MyXSelectionChangedListener();
+    selectionSupplier.addSelectionChangeListener(myXSelectionChangedListener);
+
+    initModelsAndViews(doc.getFormDescription());
+
+    writeChangesTimer.stop();
+
+    setFrameSize();
+    myFrame.setResizable(true);
+    myFrame.setVisible(true);
+  }
+
+  private void createMainMenu()
+  {
     mainMenuBar = new JMenuBar();
     // ========================= Datei ============================
     JMenu menu = new JMenu(L.m("Datei"));
@@ -686,6 +662,7 @@ public class FormularMax4000
     JMenuItem menuItem = new JMenuItem(L.m("Speichern"));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         save(doc);
@@ -696,6 +673,7 @@ public class FormularMax4000
     menuItem = new JMenuItem(L.m("Speichern unter..."));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         saveAs(doc);
@@ -706,6 +684,7 @@ public class FormularMax4000
     menuItem = new JMenuItem(L.m("Beenden"));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         abort();
@@ -731,10 +710,14 @@ public class FormularMax4000
     menuItem = new JMenuItem(L.m("Checkboxen zu ComboBox"));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         ComboboxMergeDescriptor desc = leftPanel.mergeCheckboxesIntoCombobox();
-        if (desc != null) insertionModelList.mergeCheckboxesIntoCombobox(desc);
+        if (desc != null)
+        {
+          insertionModelList.mergeCheckboxesIntoCombobox(desc);
+        }
       }
     });
     menu.add(menuItem);
@@ -746,6 +729,7 @@ public class FormularMax4000
     menuItem = new JCheckBoxMenuItem("ID");
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         viewVisibilityDescriptor.formControlLineViewId =
@@ -759,6 +743,7 @@ public class FormularMax4000
     menuItem = new JCheckBoxMenuItem("LABEL");
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         viewVisibilityDescriptor.formControlLineViewLabel =
@@ -772,6 +757,7 @@ public class FormularMax4000
     menuItem = new JCheckBoxMenuItem("TOOLTIP");
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         viewVisibilityDescriptor.formControlLineViewTooltip =
@@ -785,6 +771,7 @@ public class FormularMax4000
     menuItem = new JCheckBoxMenuItem("TYPE");
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         viewVisibilityDescriptor.formControlLineViewType =
@@ -798,6 +785,7 @@ public class FormularMax4000
     menuItem = new JCheckBoxMenuItem(L.m("Elementspezifische Felder"));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         viewVisibilityDescriptor.formControlLineViewAdditional =
@@ -811,6 +799,7 @@ public class FormularMax4000
     menuItem = new JCheckBoxMenuItem("READONLY");
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         viewVisibilityDescriptor.formControlLineViewReadonly =
@@ -824,12 +813,13 @@ public class FormularMax4000
     menuItem = new JCheckBoxMenuItem("TRAFO, PLAUSI, AUTOFILL, GROUPS");
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         if (((AbstractButton) e.getSource()).isSelected())
         {
           mainContentPanel.setDividerSize(defaultDividerSize);
-          mainContentPanel.setRightComponent(rightPanel.JComponent());
+          mainContentPanel.setRightComponent(rightPanel.getComponent());
           mainContentPanel.setResizeWeight(0.6);
         }
         else
@@ -847,12 +837,14 @@ public class FormularMax4000
     menuItem = new JMenuItem(L.m("Funktionstester"));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         if (functionTester == null)
         {
           functionTester = new FunctionTester(functionLibrary, new ActionListener()
           {
+            @Override
             public void actionPerformed(ActionEvent e)
             {
               functionTester = null;
@@ -874,6 +866,7 @@ public class FormularMax4000
     menuItem = new JMenuItem(L.m("Formularfelder aus Vorlage einlesen"));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         scan(doc.doc);
@@ -885,6 +878,7 @@ public class FormularMax4000
     menuItem = new JMenuItem(L.m("Formulartitel setzen"));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         setFormTitle();
@@ -896,6 +890,7 @@ public class FormularMax4000
     menuItem = new JMenuItem(L.m("Druckfunktionen setzen"));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         setPrintFunction();
@@ -907,6 +902,7 @@ public class FormularMax4000
     menuItem = new JMenuItem(L.m("Dateiname vorgeben"));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         setFilenameGeneratorFunction();
@@ -918,6 +914,7 @@ public class FormularMax4000
     menuItem = new JMenuItem(L.m("WollMux-Formularmerkmale aus Vorlage entfernen"));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         deForm(doc);
@@ -935,6 +932,7 @@ public class FormularMax4000
       menuItem = new JMenuItem(L.m("Ladezeit des Dokuments optimieren"));
       menuItem.addActionListener(new ActionListener()
       {
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           removeNonWMBookmarks(doc);
@@ -946,6 +944,7 @@ public class FormularMax4000
     menuItem = new JMenuItem(L.m("Formularbeschreibung editieren"));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         editFormDescriptor();
@@ -954,32 +953,6 @@ public class FormularMax4000
     menu.add(menuItem);
 
     mainMenuBar.add(menu);
-
-    myFrame.setJMenuBar(mainMenuBar);
-
-    writeChangesTimer = new Timer(500, new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        updateDocument(doc);
-      }
-    });
-    writeChangesTimer.setCoalesce(true);
-    writeChangesTimer.setRepeats(false);
-
-    initEditor();
-
-    selectionSupplier = UNO.XSelectionSupplier(doc.doc.getCurrentController());
-    myXSelectionChangedListener = new MyXSelectionChangedListener();
-    selectionSupplier.addSelectionChangeListener(myXSelectionChangedListener);
-
-    initModelsAndViews(doc.getFormDescription());
-
-    writeChangesTimer.stop();
-
-    setFrameSize();
-    myFrame.setResizable(true);
-    myFrame.setVisible(true);
   }
 
   /**
@@ -1017,6 +990,7 @@ public class FormularMax4000
                 tabConf.getFirstChild().getFirstChild();
               menuItem.addActionListener(new ActionListener()
               {
+                @Override
                 public void actionPerformed(ActionEvent e)
                 {
                   insertStandardTab(tabConfEntry, null);
@@ -1041,6 +1015,7 @@ public class FormularMax4000
               JMenuItem menuItem = new JMenuItem(L.m(label));
               menuItem.addActionListener(new ActionListener()
               {
+                @Override
                 public void actionPerformed(ActionEvent e)
                 {
                   insertStandardButtons(buttonsConfEntry, null);
@@ -1076,6 +1051,7 @@ public class FormularMax4000
     menuItem = new JMenuItem(L.m("Empfängerauswahl-Tab"));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         insertStandardTab(null, EMPFAENGER_TAB_URL);
@@ -1087,6 +1063,7 @@ public class FormularMax4000
     menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, Weiter->"));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         insertStandardButtons(null, STANDARD_BUTTONS_MIDDLE_URL);
@@ -1098,6 +1075,7 @@ public class FormularMax4000
     menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, PDF, Drucken"));
     menuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         insertStandardButtons(null, STANDARD_BUTTONS_LAST_URL);
@@ -1298,7 +1276,6 @@ public class FormularMax4000
       {
         Logger.error(x);
       }
-      ;
     }
   }
 
@@ -1355,12 +1332,22 @@ public class FormularMax4000
   private void parseGlobalFormInfo(ConfigThingy conf)
   {
     ConfigThingy tempConf = conf.query("Formular").query("TITLE");
-    if (tempConf.count() > 0) formTitle = tempConf.toString();
+    
+    if (tempConf.count() > 0) 
+    {
+      formTitle = tempConf.toString();
+    }
     tempConf = conf.query("Formular").query("PLAUSI_MARKER_COLOR");
-    if (tempConf.count() > 0) plausiMarkerColor = tempConf.toString();
+    
+    if (tempConf.count() > 0)
+    {
+      plausiMarkerColor = tempConf.toString();
+    }
+    
     funktionsDialogeAbschnitteConf =
       conf.query("Formular").query("Funktionsdialoge", 2);
     tempConf = conf.query("Formular").query("Funktionen");
+    
     if (tempConf.count() >= 1)
     {
       try
@@ -1411,7 +1398,9 @@ public class FormularMax4000
     try
     {
       if (tabConf == null)
+      {
         tabConf = new ConfigThingy("Empfaengerauswahl", tabConfUrl);
+      }
       parseTab(tabConf, 0);
       documentNeedsUpdating();
     }
@@ -1433,7 +1422,10 @@ public class FormularMax4000
   {
     try
     {
-      if (conf == null) conf = new ConfigThingy("Buttons", confUrl);
+      if (conf == null) 
+      {
+        conf = new ConfigThingy("Buttons", confUrl);
+      }
 
       // damit ich parseGrandchildren() verwenden kann muss ich noch einen
       // Großelternknoten hinzufügen.
@@ -1460,8 +1452,9 @@ public class FormularMax4000
    *          in die Formularbeschreibung eingefügt, ansonsten ans Ende angehängt.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private void parseTab(ConfigThingy conf, int idx)
+  private void parseTab(ConfigThingy conf, int index)
   {
+    int idx = index;
     String id = conf.getName();
     String label = id;
     String action = FormControlModel.NO_ACTION;
@@ -1475,12 +1468,21 @@ public class FormularMax4000
       String name = attr.getName();
       String str = attr.toString();
       if (name.equals("TITLE"))
+      {
         label = str;
+      } 
       else if (name.equals("CLOSEACTION"))
+      {
         action = str;
+      }
       else if (name.equals("TIP"))
+      {
         tooltip = str;
-      else if (name.equals("HOTKEY")) hotkey = str.length() > 0 ? str.charAt(0) : 0;
+      }
+      else if (name.equals("HOTKEY"))
+      {
+        hotkey = (str.length() > 0) ? str.charAt(0) : 0;
+      }
     }
 
     FormControlModel tab = FormControlModel.createTab(label, id, this);
@@ -1517,9 +1519,13 @@ public class FormularMax4000
    * @return die Anzahl der erzeugten Steuerelemente.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private int parseGrandchildren(ConfigThingy grandma, int idx, boolean killLastGlue)
+  private int parseGrandchildren(ConfigThingy grandma, int index, boolean killLastGlue)
   {
-    if (idx < 0) idx = formControlModelList.size();
+    int idx = index;
+    if (idx < 0) 
+    {
+      idx = formControlModelList.size();
+    }
 
     boolean lastIsGlue = false;
     FormControlModel model = null;
@@ -1560,13 +1566,16 @@ public class FormularMax4000
       XDocumentProperties info = UNO.XDocumentPropertiesSupplier(doc).getDocumentProperties();
       try
       {
-        String tit = ((String) UNO.getProperty(info, "Title")).trim();
-        if (formTitle == GENERATED_FORM_TITLE && tit.length() > 0) formTitle = tit;
+        String title = ((String) UNO.getProperty(info, "Title")).trim();
+        if (formTitle == GENERATED_FORM_TITLE && title.length() > 0)
+        {
+          formTitle = title;
+        }
       }
       catch (Exception x)
       {}
       DocumentTree tree = new DocumentTree(doc);
-      Visitor visitor = new ScanVisitor();
+      Visitor visitor = new ScanVisitor(this);
       visitor.visit(tree);
     }
     catch (Exception x)
@@ -1575,410 +1584,6 @@ public class FormularMax4000
     }
 
     documentNeedsUpdating();
-  }
-
-  private class ScanVisitor extends DocumentTree.Visitor
-  {
-    private Map<String, InsertionBookmark> insertions =
-      new HashMap<String, InsertionBookmark>();
-
-    private StringBuilder text = new StringBuilder();
-
-    private StringBuilder fixupText = new StringBuilder();
-
-    private FormControlModel fixupCheckbox = null;
-
-    private void fixup()
-    {
-      if (fixupCheckbox != null && fixupCheckbox.getLabel().length() == 0)
-      {
-        fixupCheckbox.setLabel(makeLabelFromStartOf(fixupText,
-          2 * GENERATED_LABEL_MAXLENGTH));
-        fixupCheckbox = null;
-      }
-      fixupText.setLength(0);
-    }
-
-    public boolean container(Container container, int count)
-    {
-      fixup();
-
-      if (container.getType() != DocumentTree.PARAGRAPH_TYPE) text.setLength(0);
-
-      return true;
-    }
-
-    public boolean textRange(TextRange textRange)
-    {
-      String str = textRange.getString();
-      text.append(str);
-      fixupText.append(str);
-      return true;
-    }
-
-    public boolean insertionBookmark(InsertionBookmark bookmark)
-    {
-      if (bookmark.isStart())
-        insertions.put(bookmark.getName(), bookmark);
-      else
-        insertions.remove(bookmark.getName());
-
-      return true;
-    }
-
-    public boolean formControl(FormControl control)
-    {
-      fixup();
-
-      if (insertions.isEmpty())
-      {
-        FormControlModel model = registerFormControl(control, text);
-        if (model != null && model.getType() == FormControlModel.CHECKBOX_TYPE)
-          fixupCheckbox = model;
-      }
-
-      return true;
-    }
-  }
-
-  /**
-   * Fügt der {@link #formControlModelList} ein neues {@link FormControlModel} hinzu
-   * für das {@link de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl}
-   * control, wobei text der Text sein sollte, der im Dokument vor control steht.
-   * Dieser Text wird zur Generierung des Labels herangezogen. Es wird ebenfalls der
-   * {@link #insertionModelList} ein entsprechendes {@link InsertionModel}
-   * hinzugefügt. Zusätzlich wird immer ein entsprechendes Bookmark um das Control
-   * herumgelegt, das die Einfügestelle markiert.
-   * 
-   * @return null, falls es sich bei dem Control nur um eine reine Einfügestelle
-   *         handelt. In diesem Fall wird nur der {@link #insertionModelList} ein
-   *         Element hinzugefügt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private FormControlModel registerFormControl(FormControl control,
-      StringBuilder text)
-  {
-    boolean insertionOnlyNoLabel = false;
-    String label = "";
-    String id;
-    String descriptor = control.getDescriptor();
-    Matcher m = MAGIC_DESCRIPTOR_PATTERN.matcher(descriptor);
-    if (m.matches())
-    {
-      label = m.group(1).trim();
-      if (label.length() == 0) insertionOnlyNoLabel = true;
-      id = m.group(2).trim();
-    }
-    else
-    {
-      if (control.getType() == DocumentTree.CHECKBOX_CONTROL)
-        label = ""; // immer fixUp-Text von hinter der Checkbox benutzen, weil
-      // meist bessere Ergebnisse als Text von vorne
-      else
-        label = makeLabelFromEndOf(text, GENERATED_LABEL_MAXLENGTH);
-      id = descriptor;
-    }
-
-    id = makeControlId(label, id, insertionOnlyNoLabel);
-
-    FormControlModel model = null;
-
-    if (!insertionOnlyNoLabel)
-    {
-      switch (control.getType())
-      {
-        case DocumentTree.CHECKBOX_CONTROL:
-          model = registerCheckbox(control, label, id);
-          break;
-        case DocumentTree.DROPDOWN_CONTROL:
-          model = registerDropdown((DropdownFormControl) control, label, id);
-          break;
-        case DocumentTree.INPUT_CONTROL:
-          model = registerInput(control, label, id);
-          break;
-        default:
-          Logger.error(L.m("Unbekannter Typ Formular-Steuerelement"));
-          return null;
-      }
-    }
-
-    boolean doGenderTrafo = false;
-
-    String bookmarkName = insertFormValue(id);
-    if (insertionOnlyNoLabel)
-    {
-      if (id.startsWith(GLOBAL_PREFIX))
-      {
-        id = id.substring(GLOBAL_PREFIX.length());
-        bookmarkName = insertValue(id);
-      }
-      else if (id.startsWith(GENDER_PREFIX))
-      {
-        id = id.substring(GENDER_PREFIX.length());
-        bookmarkName = insertFormValue(id);
-        if (control.getType() == DocumentTree.DROPDOWN_CONTROL)
-          doGenderTrafo = true;
-      }
-    }
-
-    bookmarkName = control.surroundWithBookmark(bookmarkName);
-
-    try
-    {
-      InsertionModel imodel =
-        new InsertionModel4InsertXValue(bookmarkName,
-          UNO.XBookmarksSupplier(doc.doc), functionSelectionProvider, this);
-      if (doGenderTrafo) addGenderTrafo(imodel, (DropdownFormControl) control);
-      insertionModelList.add(imodel);
-    }
-    catch (Exception x)
-    {
-      Logger.error(
-        L.m("Es wurde ein fehlerhaftes Bookmark generiert: \"%1\"", bookmarkName), x);
-    }
-
-    return model;
-  }
-
-  /**
-   * Verpasst model eine Gender-TRAFO, die ihre Herr/Frau/Anders-Texte aus den Items
-   * von control bezieht.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void addGenderTrafo(InsertionModel model, DropdownFormControl control)
-  {
-    String[] items = control.getItems();
-    FunctionSelection genderTrafo =
-      functionSelectionProvider.getFunctionSelection("Gender");
-
-    for (int i = 0; i < 3 && i < items.length; ++i)
-    {
-      String item = items[i];
-
-      /*
-       * Bestimme die maximal am Ende des Eintrags zu entfernende Anzahl Leerzeichen.
-       * Dies ist die Anzahl an Einträgen, die bis auf folgende Leerzeichen identisch
-       * sind MINUS 1.
-       */
-      String item1 = item;
-      while (item1.endsWith(" "))
-        item1 = item1.substring(0, item1.length() - 1);
-      int n = 0;
-      for (int j = 0; j < items.length; ++j)
-      {
-        String item2 = items[j];
-        while (item2.endsWith(" "))
-          item2 = item2.substring(0, item2.length() - 1);
-        if (item1.equals(item2)) ++n;
-      }
-
-      // bis zu N-1 Leerzeichen am Ende löschen, um mehrere gleiche Einträge zu
-      // erlauben.
-      for (; n > 1 && item.endsWith(" "); --n)
-        item = item.substring(0, item.length() - 1);
-      genderTrafo.setParameterValue(GENDER_TRAFO_PARAMS[i], ParamValue.literal(item));
-    }
-
-    model.setTrafo(genderTrafo);
-  }
-
-  /**
-   * Bastelt aus dem Ende des Textes text ein Label das maximal maxlen Zeichen lang
-   * ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private String makeLabelFromEndOf(StringBuilder text, int maxlen)
-  {
-    String label;
-    String str = text.toString().trim();
-    int len = str.length();
-    if (len > maxlen) len = maxlen;
-    label = str.substring(str.length() - len);
-    if (label.length() < 2) label = "";
-    return label;
-  }
-
-  /**
-   * Bastelt aus dem Start des Textes text ein Label, das maximal maxlen Zeichen lang
-   * ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private String makeLabelFromStartOf(StringBuilder text, int maxlen)
-  {
-    String label;
-    String str = text.toString().trim();
-    int len = str.length();
-    if (len > maxlen) len = maxlen;
-    label = str.substring(0, len);
-    if (label.length() < 2) label = "";
-    return label;
-  }
-
-  /**
-   * Fügt {@link #formControlModelList} ein neues {@link FormControlModel} für eine
-   * Checkbox hinzu und liefert es zurück.
-   * 
-   * @param control
-   *          das entsprechende
-   *          {@link de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl}
-   * @param label
-   *          das Label
-   * @param id
-   *          die ID
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private FormControlModel registerCheckbox(FormControl control, String label,
-      String id)
-  {
-    FormControlModel model = null;
-    model = FormControlModel.createCheckbox(label, id, this);
-    if (control.getString().equalsIgnoreCase("true"))
-    {
-      ConfigThingy autofill = new ConfigThingy("AUTOFILL");
-      autofill.add("true");
-      model.setAutofill(functionSelectionProvider.getFunctionSelection(autofill));
-    }
-    formControlModelList.add(model);
-    return model;
-  }
-
-  /**
-   * Fügt {@link #formControlModelList} ein neues {@link FormControlModel} für eine
-   * Auswahlliste hinzu und liefert es zurück.
-   * 
-   * @param control
-   *          das entsprechende
-   *          {@link de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl}
-   * @param label
-   *          das Label
-   * @param id
-   *          die ID
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private FormControlModel registerDropdown(DropdownFormControl control,
-      String label, String id)
-  {
-    FormControlModel model = null;
-    String[] items = control.getItems();
-    boolean editable = false;
-    for (int i = 0; i < items.length; ++i)
-    {
-      if (items[i].equalsIgnoreCase("<<Freitext>>"))
-      {
-        String[] newItems = new String[items.length - 1];
-        System.arraycopy(items, 0, newItems, 0, i);
-        System.arraycopy(items, i + 1, newItems, i, items.length - i - 1);
-        items = newItems;
-        editable = true;
-        break;
-      }
-    }
-    model = FormControlModel.createComboBox(label, id, items, this);
-    model.setEditable(editable);
-    String preset = unicodeTrim(control.getString());
-    if (preset.length() > 0)
-    {
-      ConfigThingy autofill = new ConfigThingy("AUTOFILL");
-      autofill.add(preset);
-      model.setAutofill(functionSelectionProvider.getFunctionSelection(autofill));
-    }
-    formControlModelList.add(model);
-    return model;
-  }
-
-  /**
-   * Fügt {@link #formControlModelList} ein neues {@link FormControlModel} für ein
-   * Eingabefeld hinzu und liefert es zurück.
-   * 
-   * @param control
-   *          das entsprechende
-   *          {@link de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl}
-   * @param label
-   *          das Label
-   * @param id
-   *          die ID
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private FormControlModel registerInput(FormControl control, String label, String id)
-  {
-    FormControlModel model = null;
-    model = FormControlModel.createTextfield(label, id, this);
-    String preset = unicodeTrim(control.getString());
-    if (preset.length() > 0)
-    {
-      ConfigThingy autofill = new ConfigThingy("AUTOFILL");
-      autofill.add(preset);
-      model.setAutofill(functionSelectionProvider.getFunctionSelection(autofill));
-    }
-    formControlModelList.add(model);
-    return model;
-  }
-
-  /**
-   * Liefert str zurück minus führende und folgende Whitespace (wobei
-   * Unicode-Leerzeichen) korrekt berücksichtigt werden.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-   */
-  private String unicodeTrim(String str)
-  {
-    if (str.length() == 0) return str;
-
-    if (Character.isWhitespace(str.charAt(0))
-      || Character.isWhitespace(str.charAt(str.length() - 1)))
-    {
-      int i = 0;
-      while (i < str.length() && Character.isWhitespace(str.charAt(i)))
-        ++i;
-      int j = str.length() - 1;
-      while (j >= 0 && Character.isWhitespace(str.charAt(j)))
-        --j;
-      if (i > j) return "";
-      return str.substring(i, j + 1);
-    }
-    else
-      return str;
-  }
-
-  /**
-   * Macht aus str einen passenden Bezeichner für ein Steuerelement. Falls
-   * insertionOnlyNoLabel == true, so muss der Bezeichner nicht eindeutig sein (dies
-   * ist der Marker für eine reine Einfügestelle, für die kein Steuerelement erzeugt
-   * werden muss).
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private String makeControlId(String label, String str, boolean insertionOnlyNoLabel)
-  {
-    if (insertionOnlyNoLabel)
-    {
-      String prefix = "";
-      if (str.startsWith(GLOBAL_PREFIX))
-      {
-        prefix = GLOBAL_PREFIX;
-        str = str.substring(GLOBAL_PREFIX.length());
-      }
-      else if (str.startsWith(GENDER_PREFIX))
-      {
-        prefix = GENDER_PREFIX;
-        str = str.substring(GENDER_PREFIX.length());
-      }
-      str = str.replaceAll("[^a-zA-Z_0-9]", "");
-      if (str.length() == 0) str = "Einfuegung";
-      if (!str.matches(STARTS_WITH_LETTER_RE)) str = "_" + str;
-      return prefix + str;
-    }
-    else
-    {
-      str = str.replaceAll("[^a-zA-Z_0-9]", "");
-      if (str.length() == 0) str = "Steuerelement";
-      if (!str.matches(STARTS_WITH_LETTER_RE)) str = "_" + str;
-      return formControlModelList.makeUniqueId(str);
-    }
   }
 
   private static class NoWrapEditorKit extends DefaultEditorKit
@@ -1997,6 +1602,7 @@ public class FormularMax4000
     {
       private static final long serialVersionUID = -932935111327537530L;
 
+      @Override
       public View create(Element e)
       {
         return new PlainView(e);
@@ -2095,7 +1701,7 @@ public class FormularMax4000
     printFunctionEditorContentPanel.add(printFunctionCurrentList,
       BorderLayout.CENTER);
 
-    final JComboBox<String> printFunctionComboBox = new JComboBox<String>(printFunctionNames);
+    final JComboBox<String> printFunctionComboBox = new JComboBox<String>(printFunctionNames.toArray(new String[]{}));
     printFunctionComboBox.setEditable(true);
 
     printFunctionEditorContentPanel.add(printFunctionComboBox, BorderLayout.NORTH);
@@ -2103,6 +1709,7 @@ public class FormularMax4000
 
     ActionListener removeFunc = new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         for (Object o : printFunctionCurrentList.getSelectedValuesList())
@@ -2114,6 +1721,7 @@ public class FormularMax4000
 
     ActionListener addFunc = new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         String newFunctionName = printFunctionComboBox.getSelectedItem().toString();
@@ -2132,6 +1740,7 @@ public class FormularMax4000
     JButton ok = new JButton(L.m("OK"));
     ok.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         dialog.dispose();
@@ -2217,6 +1826,7 @@ public class FormularMax4000
       adjustFuncCombo.addItem(functionName);
       adjustFuncCombo.addItemListener(new ItemListener()
       {
+        @Override
         public void itemStateChanged(ItemEvent e)
         {
           if (adjustFuncCombo.getSelectedIndex() == adjustFuncs.size())
@@ -2242,6 +1852,7 @@ public class FormularMax4000
     JButton cancel = new JButton(L.m("Abbrechen"));
     cancel.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         dialog.dispose();
@@ -2250,6 +1861,7 @@ public class FormularMax4000
 
     ActionListener submitActionListener = new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         try
@@ -2284,7 +1896,9 @@ public class FormularMax4000
 
     int frameWidth = dialog.getWidth();
     int frameHeight = dialog.getHeight();
-    if (frameHeight < 200) frameHeight = 200;
+    if (frameHeight < 200) {
+      frameHeight = 200;
+    }
 
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     int x = screenSize.width / 2 - frameWidth / 2;
@@ -2361,26 +1975,6 @@ public class FormularMax4000
   }
 
   /**
-   * Liefert "WM(CMD'insertValue' DB_SPALTE '&lt;id>').
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private String insertValue(String id)
-  {
-    return "WM(CMD 'insertValue' DB_SPALTE '" + id + "')";
-  }
-
-  /**
-   * Liefert "WM(CMD'insertFormValue' ID '&lt;id>').
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private String insertFormValue(String id)
-  {
-    return "WM(CMD 'insertFormValue' ID '" + id + "')";
-  }
-
-  /**
    * Entfernt alle Bookmarks, die keine WollMux-Bookmarks sind aus dem Dokument doc.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -2439,7 +2033,7 @@ public class FormularMax4000
      * sorgen dafür, dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager)
      * indirekt über den JFrame den FM4000 kennt.
      */
-    myFrame.removeWindowListener(oehrchen);
+    myFrame.removeWindowListener(windowCloseListener);
     myFrame.getContentPane().remove(0);
     myFrame.setJMenuBar(null);
 

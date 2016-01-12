@@ -217,7 +217,7 @@ public class AllGroupLineViewsPanel implements View
      * view vor dem letzten Element von mainPanel einfügen, weil das letzte Element
      * immer ein Glue sein soll.
      */
-    mainPanel.add(view.JComponent(), mainPanel.getComponentCount() - 1);
+    mainPanel.add(view.getComponent(), mainPanel.getComponentCount() - 1);
 
     mainPanel.validate();
     scrollPane.validate();
@@ -233,7 +233,7 @@ public class AllGroupLineViewsPanel implements View
     int index = views.indexOf(view);
     if (index < 0) return;
     views.remove(index);
-    mainPanel.remove(view.JComponent());
+    mainPanel.remove(view.getComponent());
     mainPanel.validate();
     selection.remove(index);
     selection.fixup(index, -1, views.size() - 1);
@@ -298,7 +298,7 @@ public class AllGroupLineViewsPanel implements View
     }
   }
 
-  public JComponent JComponent()
+  public JComponent getComponent()
   {
     return myPanel;
   }

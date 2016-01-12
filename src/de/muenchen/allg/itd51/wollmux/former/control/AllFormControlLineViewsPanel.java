@@ -270,7 +270,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     buttonPanel.add(newButton, gbcButton);
   }
 
-  public JComponent JComponent()
+  public JComponent getComponent()
   {
     return myPanel;
   }
@@ -306,7 +306,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     viewDescriptors.add(index, desc);
 
     gbcLineView.gridy = gridY;
-    tab.add(ofclView.JComponent(), gbcLineView);
+    tab.add(ofclView.getComponent(), gbcLineView);
     tab.validate();
 
     fixTabStructure();
@@ -353,9 +353,9 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
       {
         JComponent oldTab =
           (JComponent) tabPane.getComponent(desc.containingTabIndex);
-        oldTab.remove(desc.view.JComponent());
+        oldTab.remove(desc.view.getComponent());
         gbcLineView.gridy = gridY;
-        tab.add(desc.view.JComponent(), gbcLineView);
+        tab.add(desc.view.getComponent(), gbcLineView);
         desc.containingTabIndex = tabIndex;
         desc.gridY = gridY;
         toValidate.add(tab);
@@ -403,7 +403,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
     ViewDescriptor desc = (ViewDescriptor) viewDescriptors.remove(index);
     JComponent tab = (JComponent) tabPane.getComponentAt(desc.containingTabIndex);
-    tab.remove(view.JComponent());
+    tab.remove(view.getComponent());
     tab.validate();
 
     fixTabStructure();

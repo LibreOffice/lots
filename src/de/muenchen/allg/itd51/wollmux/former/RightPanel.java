@@ -109,24 +109,24 @@ public class RightPanel implements View
     AllFormControlExtViewsPanel allFormControlExtViewsPanel =
       new AllFormControlExtViewsPanel(formControlModelList, funcLib, groupModelList,
         formularMax4000);
-    myPanel.add(allFormControlExtViewsPanel.JComponent(),
+    myPanel.add(allFormControlExtViewsPanel.getComponent(),
       ALL_FORMCONTROL_EXT_VIEWS_PANEL);
     AllInsertionTrafoViewsPanel allInsertionTrafoViewsPanel =
       new AllInsertionTrafoViewsPanel(insertionModelList, funcLib, formularMax4000);
-    myPanel.add(allInsertionTrafoViewsPanel.JComponent(),
+    myPanel.add(allInsertionTrafoViewsPanel.getComponent(),
       ALL_INSERTION_TRAFO_VIEWS_PANEL);
     AllGroupFuncViewsPanel allGroupFuncViewsPanel =
       new AllGroupFuncViewsPanel(groupModelList, new FunctionLibrary(),
         formularMax4000);
-    myPanel.add(allGroupFuncViewsPanel.JComponent(), ALL_GROUP_FUNC_VIEWS_PANEL);
+    myPanel.add(allGroupFuncViewsPanel.getComponent(), ALL_GROUP_FUNC_VIEWS_PANEL);
     AllSectionExtViewsPanel allSectionExtViewsPanel =
       new AllSectionExtViewsPanel(sectionModelList, groupModelList, formularMax4000);
-    myPanel.add(allSectionExtViewsPanel.JComponent(), ALL_SECTION_EXT_VIEWS_PANEL);
+    myPanel.add(allSectionExtViewsPanel.getComponent(), ALL_SECTION_EXT_VIEWS_PANEL);
 
     formularMax4000.addBroadcastListener(new MyBroadcastListener());
   }
 
-  public JComponent JComponent()
+  public JComponent getComponent()
   {
     return myPanel;
   }
