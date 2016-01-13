@@ -430,8 +430,7 @@ public class WollMuxSingleton implements XPALProvider
    */
   public String getVersion()
   {
-    if (version == null) getBuildInfo();
-    return version;
+    return getBuildInfo();
   }
 
   /**
@@ -448,7 +447,7 @@ public class WollMuxSingleton implements XPALProvider
    */
   public String getBuildInfo()
   {
-    version = "unknown";
+    version = "unbekannt";
     BufferedReader in = null;
     try
     {
@@ -459,8 +458,6 @@ public class WollMuxSingleton implements XPALProvider
         String str = in.readLine();
         if (str != null)
         {
-          if (str.startsWith("Version: "))
-            version = str.substring(9, str.indexOf(','));
           return str;
         }
       }
