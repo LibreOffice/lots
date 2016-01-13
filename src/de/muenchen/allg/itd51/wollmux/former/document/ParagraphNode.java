@@ -19,6 +19,6 @@ public class ParagraphNode extends ContainerNode
 
   public int getType()
   {
-    return DocumentTree.PARAGRAPH_TYPE;
+    return PARAGRAPH_TYPE;
   }
 }

@@ -51,7 +51,7 @@ public class DropdownNode extends TextFieldNode implements
   @Override
   public int getType()
   {
-    return DocumentTree.DROPDOWN_CONTROL;
+    return DROPDOWN_CONTROL;
   }
 
   @Override

@@ -84,31 +84,8 @@ public class DocumentTree
   private static final Pattern GROUP_BOOKMARK =
     DocumentCommands.getPatternForCommand("setGroups");
 
-  /**
-   * Rückgabewert für {@link FormControl#getType()} im Falle einer Checkbox.
-   */
-  public static final int CHECKBOX_CONTROL = 0;
-
-  /**
-   * Rückgabewert für {@link FormControl#getType()} im Falle einer Eingabeliste.
-   */
-  public static final int DROPDOWN_CONTROL = 1;
-
-  /**
-   * Rückgabewert für {@link FormControl#getType()} im Falle eines Eingabefeldes.
-   */
-  public static final int INPUT_CONTROL = 2;
-
-  /**
-   * Rückgabewert für {@link Container#getType()} falls die Art des Containers nicht
-   * näher bestimmt ist.
-   */
-  public static final int CONTAINER_TYPE = 0;
-
-  /**
-   * Rückgabewert für {@link Container#getType()} falls der Container ein Absatz ist.
-   */
-  public static final int PARAGRAPH_TYPE = 1;
+  public static final int TEXFIELD_TYPE_INPUT = 0;
+  public static final int TEXFIELD_TYPE_DROPDOWN = 1;
 
   /**
    * Die Wurzel des Dokumentbaums.
@@ -274,149 +251,15 @@ public class DocumentTree
         (String) UNO.getProperty(textPortion, "TextPortionType");
       if (textPortionType.equals("Bookmark"))
       {
-        boolean isStart = false;
-        boolean isCollapsed = false;
-        XNamed bookmark = null;
-        try
-        {
-          isStart =
-            ((Boolean) UNO.getProperty(textPortion, "IsStart")).booleanValue();
-          isCollapsed =
-            ((Boolean) UNO.getProperty(textPortion, "IsCollapsed")).booleanValue();
-          if (isCollapsed) 
-          {
-            isStart = true;
-          }
-          bookmark = UNO.XNamed(UNO.getProperty(textPortion, "Bookmark"));
-        }
-        catch (Exception x)
-        {
-          continue;
-        }
-        if (bookmark == null) 
-        {
-          continue;
-        }
-
-        String name = bookmark.getName();
-        Matcher m = InsertionModel4InsertXValue.INSERTION_BOOKMARK.matcher(name);
-        if (m.matches())
-        {
-          ConfigThingy conf;
-          try
-          {
-            conf = new ConfigThingy("", null, new StringReader(m.group(1)));
-          }
-          catch (Exception x)
-          {
-            Logger.error(L.m("Fehlerhaftes WM()-Bookmark: \"%1\"", name), x);
-            continue;
-          }
-          textPortions.add(new InsertionBookmarkNode(new Bookmark(bookmark, doc),
-            isStart, conf));
-          if (isCollapsed)
-          {
-            textPortions.add(new InsertionBookmarkNode(new Bookmark(bookmark, doc),
-              false, conf));
-          }
-          continue;
-        }
-
-        m = GROUP_BOOKMARK.matcher(name);
-        if (m.matches())
-        {
-          ConfigThingy conf;
-          try
-          {
-            conf = new ConfigThingy("", null, new StringReader(m.group(1)));
-          }
-          catch (Exception x)
-          {
-            Logger.error(L.m("Fehlerhaftes WM()-Bookmark: \"%1\"", name), x);
-            continue;
-          }
-          textPortions.add(new GroupBookmarkNode(new Bookmark(bookmark, doc),
-            isStart, conf));
-          if (isCollapsed)
-          {
-            textPortions.add(new GroupBookmarkNode(new Bookmark(bookmark, doc),
-              false, conf));
-          }
-        }
-
+        handleBookmark(textPortion, textPortions, doc);
       }
       else if (textPortionType.equals("TextField"))
       {
-        XDependentTextField textField = null;
-        int textfieldType = 0; // 0:input, 1:dropdown
-        try
-        {
-          textField =
-            UNO.XDependentTextField(UNO.getProperty(textPortion, "TextField"));
-          XServiceInfo info = UNO.XServiceInfo(textField);
-          if (info.supportsService("com.sun.star.text.TextField.DropDown"))
-            textfieldType = 1;
-          else if (info.supportsService("com.sun.star.text.TextField.Input"))
-            textfieldType = 0;
-          else
-            continue; // sonstiges TextField
-        }
-        catch (Exception x)
-        {
-          continue;
-        }
-
-        switch (textfieldType)
-        {
-          case 0:
-            textPortions.add(new InputNode(textField, doc));
-            break;
-          case 1:
-            textPortions.add(new DropdownNode(textField, doc));
-            break;
-        }
-
+        handleTextfield(textPortion, textPortions, doc);
       }
       else if (textPortionType.equals("Frame"))
       {
-        XControlShape shape = null;
-        XControlModel model = null;
-        try
-        {
-          XEnumeration contentEnum =
-            UNO.XContentEnumerationAccess(textPortion).createContentEnumeration(
-              "com.sun.star.text.TextPortion");
-          while (contentEnum.hasMoreElements())
-          {
-            XControlShape tempShape;
-            try
-            {
-              tempShape = UNO.XControlShape(contentEnum.nextElement());
-            }
-            catch (Exception x)
-            { // Wegen OOo Bugs kann nextElement() werfen auch wenn hasMoreElements()
-              continue;
-            }
-            if (tempShape != null)
-            {
-              XControlModel tempModel = tempShape.getControl();
-              XServiceInfo info = UNO.XServiceInfo(tempModel);
-              if (info.supportsService("com.sun.star.form.component.CheckBox"))
-              {
-                shape = tempShape;
-                model = tempModel;
-              }
-            }
-          }
-        }
-        catch (Exception x)
-        {
-          continue;
-        }
-
-        if (shape != null && model != null)
-          textPortions.add(new CheckboxNode(shape, model, doc));
-
+        handleFrame(textPortion, textPortions, doc);
       }
       else if (textPortionType.equals("Text"))
       {
@@ -433,7 +276,153 @@ public class DocumentTree
 
     nodes.add(new ParagraphNode(textPortions));
   }
+  
+  private void handleBookmark(Object textPortion, List<Node> textPortions, XTextDocument doc)
+  {
+    boolean isStart = false;
+    boolean isCollapsed = false;
+    XNamed bookmark = null;
+    try
+    {
+      isStart =
+        ((Boolean) UNO.getProperty(textPortion, "IsStart")).booleanValue();
+      isCollapsed =
+        ((Boolean) UNO.getProperty(textPortion, "IsCollapsed")).booleanValue();
+      if (isCollapsed) 
+      {
+        isStart = true;
+      }
+      bookmark = UNO.XNamed(UNO.getProperty(textPortion, "Bookmark"));
+    }
+    catch (Exception x)
+    {
+      return;
+    }
+    if (bookmark == null) 
+    {
+      return;
+    }
 
+    String name = bookmark.getName();
+    Matcher m = InsertionModel4InsertXValue.INSERTION_BOOKMARK.matcher(name);
+    if (m.matches())
+    {
+      try
+      {
+        ConfigThingy conf = new ConfigThingy("", null, new StringReader(m.group(1)));
+        textPortions.add(new InsertionBookmarkNode(new Bookmark(bookmark, doc),
+          isStart, conf));
+        if (isCollapsed)
+        {
+          textPortions.add(new InsertionBookmarkNode(new Bookmark(bookmark, doc),
+            false, conf));
+        }
+      }
+      catch (Exception x)
+      {
+        Logger.error(L.m("Fehlerhaftes WM()-Bookmark: \"%1\"", name), x);
+        return;
+      }
+      return;
+    }
+
+    m = GROUP_BOOKMARK.matcher(name);
+    if (m.matches())
+    {
+      try
+      {
+        ConfigThingy conf = new ConfigThingy("", null, new StringReader(m.group(1)));
+        textPortions.add(new GroupBookmarkNode(new Bookmark(bookmark, doc),
+          isStart, conf));
+        if (isCollapsed)
+        {
+          textPortions.add(new GroupBookmarkNode(new Bookmark(bookmark, doc),
+            false, conf));
+        }
+      }
+      catch (Exception x)
+      {
+        Logger.error(L.m("Fehlerhaftes WM()-Bookmark: \"%1\"", name), x);
+        return;
+      }
+    }
+  }
+
+  private void handleTextfield(Object textPortion, List<Node> textPortions, XTextDocument doc)
+  {
+    XDependentTextField textField = null;
+    int textfieldType = TEXFIELD_TYPE_INPUT;
+    try
+    {
+      textField =
+        UNO.XDependentTextField(UNO.getProperty(textPortion, "TextField"));
+      XServiceInfo info = UNO.XServiceInfo(textField);
+      if (info.supportsService("com.sun.star.text.TextField.DropDown"))
+        textfieldType = TEXFIELD_TYPE_DROPDOWN;
+      else if (info.supportsService("com.sun.star.text.TextField.Input"))
+        textfieldType = TEXFIELD_TYPE_INPUT;
+      else
+        return; // sonstiges TextField
+    }
+    catch (Exception x)
+    {
+      return;
+    }
+
+    switch (textfieldType)
+    {
+      case TEXFIELD_TYPE_INPUT:
+        textPortions.add(new InputNode(textField, doc));
+        break;
+      case TEXFIELD_TYPE_DROPDOWN:
+        textPortions.add(new DropdownNode(textField, doc));
+        break;
+    }
+  }
+
+  private void handleFrame(Object textPortion, List<Node> textPortions, XTextDocument doc)
+  {
+    XControlShape shape = null;
+    XControlModel model = null;
+    try
+    {
+      XEnumeration contentEnum =
+        UNO.XContentEnumerationAccess(textPortion).createContentEnumeration(
+          "com.sun.star.text.TextPortion");
+      while (contentEnum.hasMoreElements())
+      {
+        XControlShape tempShape;
+        try
+        {
+          tempShape = UNO.XControlShape(contentEnum.nextElement());
+        }
+        catch (com.sun.star.uno.Exception x)
+        { // Wegen OOo Bugs kann nextElement() werfen auch wenn hasMoreElements()
+          continue;
+        }
+        if (tempShape != null)
+        {
+          XControlModel tempModel = tempShape.getControl();
+          XServiceInfo info = UNO.XServiceInfo(tempModel);
+          if (info.supportsService("com.sun.star.form.component.CheckBox"))
+          {
+            shape = tempShape;
+            model = tempModel;
+          }
+        }
+      }
+    }
+    catch (Exception x)
+    {
+      return;
+    }
+
+    if (shape != null && model != null)
+    {
+      textPortions.add(new CheckboxNode(shape, model, doc));
+    }
+  }
+  
   /**
    * Liefert eine textuelle Baumdarstellung des Baums mit Wurzel root. Jeder Zeile
    * wird childPrefix vorangestellt.

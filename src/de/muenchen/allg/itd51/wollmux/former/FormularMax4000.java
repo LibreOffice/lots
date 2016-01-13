@@ -1574,9 +1574,8 @@ public class FormularMax4000
       }
       catch (Exception x)
       {}
-      DocumentTree tree = new DocumentTree(doc);
       Visitor visitor = new ScanVisitor(this);
-      visitor.visit(tree);
+      visitor.visit(doc);
     }
     catch (Exception x)
     {

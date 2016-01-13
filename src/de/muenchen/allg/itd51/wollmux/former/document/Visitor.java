@@ -1,5 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.former.document;
 
+import com.sun.star.text.XTextDocument;
+
 import de.muenchen.allg.itd51.wollmux.former.document.nodes.Container;
 
 
@@ -16,8 +18,9 @@ import de.muenchen.allg.itd51.wollmux.former.document.nodes.Container;
  */
 public abstract class Visitor
 {
-  public void visit(DocumentTree tree)
+  public void visit(XTextDocument doc)
   {
+    DocumentTree tree = new DocumentTree(doc);
     tree.getRoot().visit(this);
   }
 

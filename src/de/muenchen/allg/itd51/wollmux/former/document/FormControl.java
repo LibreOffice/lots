@@ -8,7 +8,23 @@ package de.muenchen.allg.itd51.wollmux.former.document;
 public interface FormControl
 {
   /**
-   * Liefert die Art des Steuerelements, z,B, {@link DocumentTree#CHECKBOX_CONTROL}.
+   * Rückgabewert für {@link FormControl#getType()} im Falle einer Checkbox.
+   */
+  public static final int CHECKBOX_CONTROL = 0;
+
+  /**
+   * Rückgabewert für {@link FormControl#getType()} im Falle einer Eingabeliste.
+   */
+  public static final int DROPDOWN_CONTROL = 1;
+
+  /**
+   * Rückgabewert für {@link FormControl#getType()} im Falle eines Eingabefeldes.
+   */
+  public static final int INPUT_CONTROL = 2;
+
+
+  /**
+   * Liefert die Art des Steuerelements, z,B, {@link CHECKBOX_CONTROL}.
    * 
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)

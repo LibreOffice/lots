@@ -10,7 +10,18 @@ import de.muenchen.allg.itd51.wollmux.former.document.DocumentTree;
 public interface Container
 {
   /**
-   * Liefert die Art des Knotens, z,B, {@link DocumentTree#PARAGRAPH_TYPE}.
+   * Rückgabewert für {@link Container#getType()} falls die Art des Containers nicht
+   * näher bestimmt ist.
+   */
+  public static final int CONTAINER_TYPE = 0;
+
+  /**
+   * Rückgabewert für {@link Container#getType()} falls der Container ein Absatz ist.
+   */
+  public static final int PARAGRAPH_TYPE = 1;
+  
+  /**
+   * Liefert die Art des Knotens, z,B, {@link PARAGRAPH_TYPE}.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

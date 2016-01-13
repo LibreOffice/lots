@@ -33,7 +33,7 @@ public class ContainerNode extends Node implements Container
 
   public int getType()
   {
-    return DocumentTree.CONTAINER_TYPE;
+    return CONTAINER_TYPE;
   }
 
   public boolean visit(Visitor visit)

@@ -50,7 +50,7 @@ public class CheckboxNode extends Node implements FormControl
   @Override
   public int getType()
   {
-    return DocumentTree.CHECKBOX_CONTROL;
+    return CHECKBOX_CONTROL;
   }
 
   @Override

@@ -43,7 +43,7 @@ public class InputNode extends TextFieldNode implements FormControl
   @Override
   public int getType()
   {
-    return DocumentTree.INPUT_CONTROL;
+    return INPUT_CONTROL;
   }
 
   @Override
@@ -56,12 +56,17 @@ public class InputNode extends TextFieldNode implements FormControl
     }
     catch (Exception x)
     {}
-    if (buf.toString().trim().length() < 2) try
+    
+    if (buf.toString().trim().length() < 2)
     {
-      buf.append((String) UNO.getProperty(textfield, "Content"));
+      try
+
+      {
+        buf.append((String) UNO.getProperty(textfield, "Content"));
+      }
+      catch (Exception x)
+      {}
     }
-    catch (Exception x)
-    {}
     return buf.toString();
   }
 
