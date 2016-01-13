@@ -32,6 +32,7 @@
 	<files>
 		<file>
 			<source>misc/buildinfo</source>
+			<filtered>true</filtered>
 		</file>
 	</files>
 	<fileSets>

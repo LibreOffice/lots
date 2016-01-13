@@ -164,6 +164,7 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 				<include name="WriterWindowState.xcu" />
 			</fileset>
 			<fileset dir="${RDB_DIR}/BUTTONS_ONLY" includes="META-INF/manifest.xml" />
+			<fileset dir="misc" includes="buildinfo" />
 		</zip>
 		
 		<echo level="info">unopkg remove ${PKG_NAME}:</echo>
