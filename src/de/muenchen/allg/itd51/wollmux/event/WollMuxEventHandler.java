@@ -796,7 +796,7 @@ public class WollMuxEventHandler
       Font largeFont = label.getFont().deriveFont(15.0f);
       label.setFont(largeFont);
       copyrightPanel.add(label);
-      label = new JLabel(L.m("Copyright (c) 2005-2011 Landeshauptstadt München"));
+      label = new JLabel(L.m("Copyright (c) 2005-2016 Landeshauptstadt München"));
       label.setFont(largeFont);
       copyrightPanel.add(label);
       label = new JLabel(L.m("Lizenz: %1", "European Union Public License"));
