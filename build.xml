@@ -6,6 +6,9 @@ See doc/INSTALL for instructions how to build WollMux.
 
 Targets:
 
+clean: Remove all generated files except for version information (which is only
+       regenerated when building from a git working copy.
+
 deb: Create the Debian package in the dist/ directory. 
      ATTENTION! If you build from vanilla sources, this Debian package will NOT work
      on a standard Debian or Ubuntu system. If you want a Debian package that works
@@ -193,6 +196,10 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 		
 		<tstamp><format property="mytime" pattern="HH:mm:ss"/></tstamp>
 		<echo level="info" message="Install finished at ">${mytime}</echo>
+	</target>
+
+	<target name="clean" >
+		<delete dir="${PACKAGE_DIR}/deb" />
 	</target>
 
 	<target name="deb">
