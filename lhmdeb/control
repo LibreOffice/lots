@@ -3,9 +3,7 @@ Section: lhm/misc
 Priority: optional
 Maintainer: WollMux mailing list <wollmux-general@lists.forge.osor.eu>
 Uploaders: Felix WollMux <wollmux-general@lists.forge.osor.eu>
-Build-Depends: ant, cdbs, debhelper (>= 5),
- inkscape, openjdk-7-jdk|oracle-java7-jdk, libobasis5.0-sdk|libobasis4.1-sdk, 
- libreoffice5.0|libreoffice4.1, libreoffice5.0-debian-menus|libreoffice4.1-debian-menus
+Build-Depends: ant, cdbs, debhelper (>= 5), inkscape, openjdk-7-jdk|oracle-java7-jdk 
 Standards-Version: 3.8.0
 Homepage: http://www.wollmux.org
 
