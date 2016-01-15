@@ -50,42 +50,30 @@
 package de.muenchen.allg.itd51.wollmux.former;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 import java.util.regex.Matcher;
 
 import javax.swing.AbstractButton;
-import javax.swing.Box;
-import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -93,12 +81,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
-import javax.swing.border.EmptyBorder;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Element;
 import javax.swing.text.PlainView;
@@ -142,13 +128,8 @@ import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
-import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
-import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
-import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
-import de.muenchen.allg.itd51.wollmux.former.document.DocumentTree;
 import de.muenchen.allg.itd51.wollmux.former.document.ScanVisitor;
 import de.muenchen.allg.itd51.wollmux.former.document.Visitor;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
@@ -162,7 +143,6 @@ import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXVal
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModel;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModelList;
-import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 
@@ -183,25 +163,6 @@ public class FormularMax4000
    */
   private static final String GENERATED_FORM_TITLE =
     L.m("Generiert durch FormularMax 4000");
-
-  /**
-   * URL des Quelltexts für den Standard-Empfängerauswahl-Tab.
-   */
-  private final URL EMPFAENGER_TAB_URL =
-    this.getClass().getClassLoader().getResource(
-      "data/empfaengerauswahl_controls.conf");
-
-  /**
-   * URL des Quelltexts für die Standardbuttons für einen mittleren Tab.
-   */
-  private final URL STANDARD_BUTTONS_MIDDLE_URL =
-    this.getClass().getClassLoader().getResource("data/standardbuttons_mitte.conf");
-
-  /**
-   * URL des Quelltexts für die Standardbuttons für den letzten Tab.
-   */
-  private final URL STANDARD_BUTTONS_LAST_URL =
-    this.getClass().getClassLoader().getResource("data/standardbuttons_letztes.conf");
 
   /**
    * Der {@link IDManager}-Namensraum für die IDs von {@link FormControlModel}s.
@@ -278,12 +239,6 @@ public class FormularMax4000
    * FM4000 verwendet wird, wenn diese ausgeblendet sein soll.
    */
   private JPanel nonExistingRightPanel;
-
-  /**
-   * Beschreibt die aktuellen Sichtbarkeitseinstellungen des Benutzers.
-   */
-  private ViewVisibilityDescriptor viewVisibilityDescriptor =
-    new ViewVisibilityDescriptor();
 
   /**
    * GUI zum interaktiven Zusammenbauen und Testen von Funktionen.
@@ -385,7 +340,7 @@ public class FormularMax4000
   /**
    * Die Namen aller Druckfunktionen, die zur Auswahl stehen.
    */
-  private ArrayList<String> printFunctionNames;
+  private PrintFunctionLibrary printFunctionLibrary;
 
   /**
    * Wird bei jeder Änderung von Formularaspekten gestartet, um nach einer
@@ -508,7 +463,7 @@ public class FormularMax4000
     this.doc = model;
     this.abortListener = abortListener;
     this.functionLibrary = funcLib;
-    this.printFunctionNames = new ArrayList<String>(printFuncLib.getFunctionNames());
+    this.printFunctionLibrary = printFuncLib;
 
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try
@@ -559,28 +514,8 @@ public class FormularMax4000
   {
     Common.setLookAndFeelOnce();
 
-    // Zuerst überprüfen wir, ob das Formular eine kritische Anzahl an FormControls
-    // sowie eine niedrige Einstellung für die Java Heap Size hat, die zu
-    // OutOfMemoryErrors führen könnte. Wenn ja, wird eine entsprechende Meldung
-    // ausgegeben, dass der Benutzer seine Java-Einstellungen ändern soll und
-    // der FormularMax wird nicht gestartet.
-    int formControlCount = doc.getFormDescription().query("TYPE", 6, 6).count();
-    long maxMemory = Runtime.getRuntime().maxMemory();
-    if (formControlCount > CRITICAL_NUMBER_OF_FORMCONTROLS
-      && maxMemory < LOWEST_ALLOWED_HEAP_SIZE)
+    if (!testMemoryRequirements())
     {
-      Logger.log(L.m(
-        "Starten von FormularMax beim Bearbeiten von Dokument '%1' abgebrochen, da maximale Java Heap Size = %2 bytes und Anzahl FormControls = %3",
-        doc.getTitle(), maxMemory, formControlCount));
-      JOptionPane.showMessageDialog(
-        myFrame,
-        L.m("Der FormularMax 4000 kann nicht ausgeführt werden, da der Java-Laufzeitumgebung zu wenig Hauptspeicher zur Verfügung steht.\n"
-          + "Bitte ändern Sie in OpenOffice.org Ihre Java-Einstellungen. Sie finden diese unter \"Extras->Optionen->OpenOffice.org->Java\".\n"
-          + "Dort wählen Sie in der Liste Ihre aktuelle Java-Laufzeitumgebung aus, klicken auf den Button \"Parameter\",\n"
-          + "tragen den neuen Parameter \"-Xmx256m\" ein (Groß-/Kleinschreibung beachten!) und klicken auf \"Zuweisen\".\n"
-          + "Danach ist ein Neustart von OpenOffice.org nötig."),
-        L.m("Java Heap Size zu gering"), JOptionPane.ERROR_MESSAGE);
-      doc.setCurrentFormularMax4000(null);
       return;
     }
 
@@ -653,80 +588,156 @@ public class FormularMax4000
     myFrame.setVisible(true);
   }
 
+  private boolean testMemoryRequirements()
+  {
+    // Zuerst überprüfen wir, ob das Formular eine kritische Anzahl an FormControls
+    // sowie eine niedrige Einstellung für die Java Heap Size hat, die zu
+    // OutOfMemoryErrors führen könnte. Wenn ja, wird eine entsprechende Meldung
+    // ausgegeben, dass der Benutzer seine Java-Einstellungen ändern soll und
+    // der FormularMax wird nicht gestartet.
+    int formControlCount = doc.getFormDescription().query("TYPE", 6, 6).count();
+    long maxMemory = Runtime.getRuntime().maxMemory();
+    if (formControlCount > CRITICAL_NUMBER_OF_FORMCONTROLS
+      && maxMemory < LOWEST_ALLOWED_HEAP_SIZE)
+    {
+      Logger.log(L.m(
+        "Starten von FormularMax beim Bearbeiten von Dokument '%1' abgebrochen, da maximale Java Heap Size = %2 bytes und Anzahl FormControls = %3",
+        doc.getTitle(), maxMemory, formControlCount));
+      JOptionPane.showMessageDialog(
+        myFrame,
+        L.m("Der FormularMax 4000 kann nicht ausgeführt werden, da der Java-Laufzeitumgebung zu wenig Hauptspeicher zur Verfügung steht.\n"
+          + "Bitte ändern Sie in OpenOffice.org Ihre Java-Einstellungen. Sie finden diese unter \"Extras->Optionen->OpenOffice.org->Java\".\n"
+          + "Dort wählen Sie in der Liste Ihre aktuelle Java-Laufzeitumgebung aus, klicken auf den Button \"Parameter\",\n"
+          + "tragen den neuen Parameter \"-Xmx256m\" ein (Groß-/Kleinschreibung beachten!) und klicken auf \"Zuweisen\".\n"
+          + "Danach ist ein Neustart von OpenOffice.org nötig."),
+        L.m("Java Heap Size zu gering"), JOptionPane.ERROR_MESSAGE);
+      doc.setCurrentFormularMax4000(null);
+      return false;
+    }
+    
+    return true;
+  }
+
   private void createMainMenu()
   {
     mainMenuBar = new JMenuBar();
-    // ========================= Datei ============================
-    JMenu menu = new JMenu(L.m("Datei"));
 
-    JMenuItem menuItem = new JMenuItem(L.m("Speichern"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        save(doc);
-      }
-    });
-    menu.add(menuItem);
-
-    menuItem = new JMenuItem(L.m("Speichern unter..."));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        saveAs(doc);
-      }
-    });
-    menu.add(menuItem);
-
-    menuItem = new JMenuItem(L.m("Beenden"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        abort();
-      }
-    });
-    menu.add(menuItem);
-
+    JMenu menu = createMenuDatei();
     mainMenuBar.add(menu);
-    // ========================= Bearbeiten ============================
-    menu = new JMenu(L.m("Bearbeiten"));
+    
+    menu = createMenuBearbeiten();
+    mainMenuBar.add(menu);
 
-    // ========================= Bearbeiten/Einfügen ============================
-    JMenu submenu = new JMenu(L.m("Standardelemente einfügen"));
+    menu = createMenuAnsicht();
+    mainMenuBar.add(menu);
 
-    if (!createStandardelementeMenuNew(submenu))
-      createStandardelementeMenuOld(submenu);
+    menu = createMenuFormular();
+    mainMenuBar.add(menu);
+  }
 
-    menu.add(submenu);
-    // =================== Bearbeiten (Fortsetzung) ============================
+  private JMenu createMenuFormular()
+  {
+    JMenu menu = new JMenu(L.m("Formular"));
 
-    menu.addSeparator();
-
-    menuItem = new JMenuItem(L.m("Checkboxen zu ComboBox"));
+    JMenuItem menuItem = new JMenuItem(L.m("Formularfelder aus Vorlage einlesen"));
     menuItem.addActionListener(new ActionListener()
     {
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        ComboboxMergeDescriptor desc = leftPanel.mergeCheckboxesIntoCombobox();
-        if (desc != null)
+        scan(doc.doc);
+        setFrameSize();
+      }
+    });
+    menu.add(menuItem);
+
+    menuItem = new JMenuItem(L.m("Formulartitel setzen"));
+    menuItem.addActionListener(new ActionListener()
+    {
+      @Override
+      public void actionPerformed(ActionEvent e)
+      {
+        setFormTitle();
+        setFrameSize();
+      }
+    });
+    menu.add(menuItem);
+
+    menuItem = new JMenuItem(L.m("Druckfunktionen setzen"));
+    menuItem.addActionListener(new ActionListener()
+    {
+      @Override
+      public void actionPerformed(ActionEvent e)
+      {
+        setPrintFunction();
+        setFrameSize();
+      }
+    });
+    menu.add(menuItem);
+
+    menuItem = new JMenuItem(L.m("Dateiname vorgeben"));
+    menuItem.addActionListener(new ActionListener()
+    {
+      @Override
+      public void actionPerformed(ActionEvent e)
+      {
+        setFilenameGeneratorFunction();
+        setFrameSize();
+      }
+    });
+    menu.add(menuItem);
+
+    menuItem = new JMenuItem(L.m("WollMux-Formularmerkmale aus Vorlage entfernen"));
+    menuItem.addActionListener(new ActionListener()
+    {
+      @Override
+      public void actionPerformed(ActionEvent e)
+      {
+        deForm(doc);
+      }
+    });
+    menu.add(menuItem);
+
+    /*
+     * Das Entfernen von Bookmarks kann Referenzfelder (Felder die Kopien anderer
+     * Teile des Dokuments enthalten) zerstören, da diese dann ins Leere greifen.
+     * Solange dies nicht erkannt wird, muss die Funktion deaktiviert sein.
+     */
+    if (Integer.valueOf(3).equals(Integer.valueOf(0)))
+    {
+      menuItem = new JMenuItem(L.m("Ladezeit des Dokuments optimieren"));
+      menuItem.addActionListener(new ActionListener()
+      {
+        @Override
+        public void actionPerformed(ActionEvent e)
         {
-          insertionModelList.mergeCheckboxesIntoCombobox(desc);
+          removeNonWMBookmarks(doc);
         }
+      });
+      menu.add(menuItem);
+    }
+
+    menuItem = new JMenuItem(L.m("Formularbeschreibung editieren"));
+    menuItem.addActionListener(new ActionListener()
+    {
+      @Override
+      public void actionPerformed(ActionEvent e)
+      {
+        editFormDescriptor();
       }
     });
     menu.add(menuItem);
+    return menu;
+  }
 
-    mainMenuBar.add(menu);
-    // ========================= Ansicht ============================
-    menu = new JMenu(L.m("Ansicht"));
+  private JMenu createMenuAnsicht()
+  {
+    JMenu menu = new JMenu(L.m("Ansicht"));
 
-    menuItem = new JCheckBoxMenuItem("ID");
+    final ViewVisibilityDescriptor viewVisibilityDescriptor =
+        new ViewVisibilityDescriptor();
+    
+    JMenuItem menuItem = new JCheckBoxMenuItem("ID");
     menuItem.addActionListener(new ActionListener()
     {
       @Override
@@ -858,101 +869,78 @@ public class FormularMax4000
       }
     });
     menu.add(menuItem);
+    return menu;
+  }
 
-    mainMenuBar.add(menu);
-    // ========================= Formular ============================
-    menu = new JMenu(L.m("Formular"));
+  private JMenu createMenuBearbeiten()
+  {
+    JMenu menu = new JMenu(L.m("Bearbeiten"));
 
-    menuItem = new JMenuItem(L.m("Formularfelder aus Vorlage einlesen"));
+    JMenu submenu = new JMenu(L.m("Standardelemente einfügen"));
+
+    if (!createStandardelementeMenuNew(submenu))
+      createStandardelementeMenuOld(submenu);
+
+    menu.add(submenu);
+
+    menu.addSeparator();
+
+    JMenuItem menuItem = new JMenuItem(L.m("Checkboxen zu ComboBox"));
     menuItem.addActionListener(new ActionListener()
     {
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        scan(doc.doc);
-        setFrameSize();
-      }
-    });
-    menu.add(menuItem);
-
-    menuItem = new JMenuItem(L.m("Formulartitel setzen"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        setFormTitle();
-        setFrameSize();
-      }
-    });
-    menu.add(menuItem);
-
-    menuItem = new JMenuItem(L.m("Druckfunktionen setzen"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        setPrintFunction();
-        setFrameSize();
-      }
-    });
-    menu.add(menuItem);
-
-    menuItem = new JMenuItem(L.m("Dateiname vorgeben"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        setFilenameGeneratorFunction();
-        setFrameSize();
-      }
-    });
-    menu.add(menuItem);
-
-    menuItem = new JMenuItem(L.m("WollMux-Formularmerkmale aus Vorlage entfernen"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        deForm(doc);
-      }
-    });
-    menu.add(menuItem);
-
-    /*
-     * Das Entfernen von Bookmarks kann Referenzfelder (Felder die Kopien anderer
-     * Teile des Dokuments enthalten) zerstören, da diese dann ins Leere greifen.
-     * Solange dies nicht erkannt wird, muss die Funktion deaktiviert sein.
-     */
-    if (Integer.valueOf(3).equals(Integer.valueOf(0)))
-    {
-      menuItem = new JMenuItem(L.m("Ladezeit des Dokuments optimieren"));
-      menuItem.addActionListener(new ActionListener()
-      {
-        @Override
-        public void actionPerformed(ActionEvent e)
+        ComboboxMergeDescriptor desc = leftPanel.mergeCheckboxesIntoCombobox();
+        if (desc != null)
         {
-          removeNonWMBookmarks(doc);
+          insertionModelList.mergeCheckboxesIntoCombobox(desc);
         }
-      });
-      menu.add(menuItem);
-    }
+      }
+    });
+    
+    menu.add(menuItem);
+    return menu;
+  }
 
-    menuItem = new JMenuItem(L.m("Formularbeschreibung editieren"));
+  private JMenu createMenuDatei()
+  {
+    JMenu menu = new JMenu(L.m("Datei"));
+
+    JMenuItem menuItem = new JMenuItem(L.m("Speichern"));
     menuItem.addActionListener(new ActionListener()
     {
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        editFormDescriptor();
+        save(doc);
       }
     });
     menu.add(menuItem);
 
-    mainMenuBar.add(menu);
+    menuItem = new JMenuItem(L.m("Speichern unter..."));
+    menuItem.addActionListener(new ActionListener()
+    {
+      @Override
+      public void actionPerformed(ActionEvent e)
+      {
+        saveAs(doc);
+      }
+    });
+    menu.add(menuItem);
+
+    menuItem = new JMenuItem(L.m("Beenden"));
+    menuItem.addActionListener(new ActionListener()
+    {
+      @Override
+      public void actionPerformed(ActionEvent e)
+      {
+        abort();
+      }
+    });
+    
+    menu.add(menuItem);
+    return menu;
   }
 
   /**
@@ -1049,6 +1037,11 @@ public class FormularMax4000
   {
     JMenuItem menuItem;
     menuItem = new JMenuItem(L.m("Empfängerauswahl-Tab"));
+    
+    final URL EMPFAENGER_TAB_URL =
+      this.getClass().getClassLoader().getResource(
+        "data/empfaengerauswahl_controls.conf");
+    
     menuItem.addActionListener(new ActionListener()
     {
       @Override
@@ -1061,6 +1054,10 @@ public class FormularMax4000
     submenu.add(menuItem);
 
     menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, Weiter->"));
+    
+    final URL STANDARD_BUTTONS_MIDDLE_URL =
+        this.getClass().getClassLoader().getResource("data/standardbuttons_mitte.conf");
+
     menuItem.addActionListener(new ActionListener()
     {
       @Override
@@ -1073,6 +1070,11 @@ public class FormularMax4000
     submenu.add(menuItem);
 
     menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, PDF, Drucken"));
+    
+    final URL STANDARD_BUTTONS_LAST_URL =
+      this.getClass().getClassLoader().getResource(
+        "data/standardbuttons_letztes.conf");
+    
     menuItem.addActionListener(new ActionListener()
     {
       @Override
@@ -1385,7 +1387,7 @@ public class FormularMax4000
   }
 
   /**
-   * Fügt am Anfang der Liste einem Tab ein, dessen Konfiguration aus tabConf kommt
+   * Fügt am Anfang der Liste einen Tab ein, dessen Konfiguration aus tabConf kommt
    * (Wurzelknoten wird ignoriert, darunter sollten TITLE, Eingabefelder etc, liegen)
    * falls tabConf != null, ansonsten aus einem ConfigThingy was an der URL
    * tabConfUrl gespeichert ist (hier sind TITLE, Eingabefelder, etc, auf oberster
@@ -1694,283 +1696,14 @@ public class FormularMax4000
 
   private void setPrintFunction()
   {
-    final JList<String> printFunctionCurrentList =
-      new JList<String>(new Vector<String>(doc.getPrintFunctions()));
-    JPanel printFunctionEditorContentPanel = new JPanel(new BorderLayout());
-    printFunctionEditorContentPanel.add(printFunctionCurrentList,
-      BorderLayout.CENTER);
-
-    final JComboBox<String> printFunctionComboBox = new JComboBox<String>(printFunctionNames.toArray(new String[]{}));
-    printFunctionComboBox.setEditable(true);
-
-    printFunctionEditorContentPanel.add(printFunctionComboBox, BorderLayout.NORTH);
-    final JDialog dialog = new JDialog(myFrame, true);
-
-    ActionListener removeFunc = new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        for (Object o : printFunctionCurrentList.getSelectedValuesList())
-          doc.removePrintFunction("" + o);
-        printFunctionCurrentList.setListData(new Vector<String>(
-          doc.getPrintFunctions()));
-      }
-    };
-
-    ActionListener addFunc = new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        String newFunctionName = printFunctionComboBox.getSelectedItem().toString();
-        doc.addPrintFunction(newFunctionName);
-        printFunctionCurrentList.setListData(new Vector<String>(
-          doc.getPrintFunctions()));
-      }
-    };
-
-    JButton wegDamit = new JButton(L.m("Entfernen"));
-    wegDamit.addActionListener(removeFunc);
-
-    JButton machDazu = new JButton(L.m("Hinzufügen"));
-    machDazu.addActionListener(addFunc);
-
-    JButton ok = new JButton(L.m("OK"));
-    ok.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        dialog.dispose();
-      }
-    });
-
-    Box buttons = Box.createHorizontalBox();
-    buttons.add(wegDamit);
-    buttons.add(Box.createHorizontalGlue());
-    buttons.add(machDazu);
-    buttons.add(Box.createHorizontalGlue());
-    buttons.add(ok);
-    printFunctionEditorContentPanel.add(buttons, BorderLayout.SOUTH);
-
-    dialog.setTitle(L.m("Druckfunktion setzen"));
-    dialog.add(printFunctionEditorContentPanel);
-    dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
-    dialog.pack();
-    int frameWidth = dialog.getWidth();
-    int frameHeight = dialog.getHeight();
-    if (frameHeight < 200) frameHeight = 200;
-
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width / 2 - frameWidth / 2;
-    int y = screenSize.height / 2 - frameHeight / 2;
-    dialog.setBounds(x, y, frameWidth, frameHeight);
-    dialog.setVisible(true);
+    PrintFunctionDialog pfd = new PrintFunctionDialog(myFrame, true, doc, printFunctionLibrary);
+    pfd.setVisible(true);
   }
 
   private void setFilenameGeneratorFunction()
   {
-    AdjustorFunction func = parseAdjustorFunction(doc.getFilenameGeneratorFunc());
-    String functionName = null;
-    if (func != null) functionName = func.functionName;
-
-    Box vbox = Box.createVerticalBox();
-    vbox.setBorder(new EmptyBorder(8, 5, 10, 5));
-
-    JTextField tf = new JTextField();
-    DimAdjust.maxHeightIsPrefMaxWidthUnlimited(tf);
-    final TextComponentTags tt = new TextComponentTags(tf);
-    if (func != null) tt.setContent(TextComponentTags.CAT_VALUE_SYNTAX, func.CAT);
-    Collection<ID> idsCol = idManager.getAllIDs(NAMESPACE_FORMCONTROLMODEL);
-    List<String> ids = new ArrayList<String>();
-    for (ID id : idsCol)
-      ids.add(id.getID());
-    JPotentiallyOverlongPopupMenuButton insertFieldButton =
-      new JPotentiallyOverlongPopupMenuButton(L.m("ID"),
-        TextComponentTags.makeInsertFieldActions(ids, tt));
-    insertFieldButton.setFocusable(false);
-    Box hbox = Box.createHorizontalBox();
-    hbox.add(new JLabel(L.m("Dateiname"), JLabel.LEFT));
-    hbox.add(Box.createHorizontalGlue());
-    hbox.add(insertFieldButton);
-    vbox.add(hbox);
-    vbox.add(tf);
-
-    final List<String> adjustFuncs = new ArrayList<String>();
-    adjustFuncs.add(L.m("-- keine --"));
-    int sel = 0;
-    for (String fName : doc.getFunctionLibrary().getFunctionNames())
-    {
-      Function f = doc.getFunctionLibrary().get(fName);
-      if (f != null && f.parameters().length == 1
-        && f.parameters()[0].equals("Filename"))
-      {
-        if (functionName != null && functionName.equals(fName))
-          sel = adjustFuncs.size();
-        adjustFuncs.add(fName);
-      }
-    }
-    vbox.add(Box.createVerticalStrut(5));
-    hbox = Box.createHorizontalBox();
-    hbox.add(new JLabel(L.m("Nachträgliche Anpassung")));
-    hbox.add(Box.createHorizontalGlue());
-    vbox.add(hbox);
-    final JComboBox<String> adjustFuncCombo = new JComboBox<String>(new Vector<String>(adjustFuncs));
-    if (sel > 0)
-      adjustFuncCombo.setSelectedIndex(sel);
-    else if (functionName != null)
-    {
-      adjustFuncCombo.addItem(functionName);
-      adjustFuncCombo.addItemListener(new ItemListener()
-      {
-        @Override
-        public void itemStateChanged(ItemEvent e)
-        {
-          if (adjustFuncCombo.getSelectedIndex() == adjustFuncs.size())
-          {
-            adjustFuncCombo.setBackground(Color.red);
-            adjustFuncCombo.setToolTipText(L.m("Achtung: Funktion nicht definiert!"));
-          }
-          else
-          {
-            adjustFuncCombo.setBackground(null);
-            adjustFuncCombo.setToolTipText(null);
-          }
-
-        }
-      });
-      adjustFuncCombo.setSelectedIndex(adjustFuncs.size());
-    }
-    DimAdjust.maxHeightIsPrefMaxWidthUnlimited(adjustFuncCombo);
-    vbox.add(adjustFuncCombo);
-
-    final JDialog dialog = new JDialog(myFrame, true);
-
-    JButton cancel = new JButton(L.m("Abbrechen"));
-    cancel.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        dialog.dispose();
-      }
-    });
-
-    ActionListener submitActionListener = new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        try
-        {
-          ConfigThingy functionConf =
-            createFilenameGeneratorFunctionConf(tt, adjustFuncCombo);
-          doc.setFilenameGeneratorFunc(functionConf);
-        }
-        catch (Exception e1)
-        {
-          Logger.error(e1);
-        }
-        dialog.dispose();
-      }
-    };
-
-    JButton ok = new JButton(L.m("OK"));
-    ok.addActionListener(submitActionListener);
-    tf.addActionListener(submitActionListener);
-
-    Box buttons = Box.createHorizontalBox();
-    buttons.add(cancel);
-    buttons.add(Box.createHorizontalGlue());
-    buttons.add(ok);
-    vbox.add(Box.createVerticalGlue());
-    vbox.add(buttons, BorderLayout.SOUTH);
-
-    dialog.setTitle(L.m("Dateiname vorgeben"));
-    dialog.add(vbox);
-    dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-    dialog.pack();
-
-    int frameWidth = dialog.getWidth();
-    int frameHeight = dialog.getHeight();
-    if (frameHeight < 200) {
-      frameHeight = 200;
-    }
-
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width / 2 - frameWidth / 2;
-    int y = screenSize.height / 2 - frameHeight / 2;
-    dialog.setBounds(x, y, frameWidth, frameHeight);
-    dialog.setVisible(true);
-  }
-
-  private static class AdjustorFunction
-  {
-    final ConfigThingy CAT;
-
-    final String functionName;
-
-    AdjustorFunction(ConfigThingy cat, String functionName)
-    {
-      this.CAT = cat;
-      this.functionName = functionName;
-    }
-  }
-
-  private static AdjustorFunction parseAdjustorFunction(ConfigThingy func)
-  {
-    if (func == null) return null;
-    if (func.getName().equals("CAT") && isCatFuncOk(func))
-      return new AdjustorFunction(func, null);
-    if (!func.getName().equals("BIND") || func.count() != 2) return null;
-    Iterator<ConfigThingy> bindIter = func.iterator();
-    ConfigThingy n = bindIter.next();
-    if (n == null || !n.getName().equals("FUNCTION") || n.count() != 1) return null;
-    String bindFunctionName = n.iterator().next().getName();
-    n = bindIter.next();
-    if (n == null || !n.getName().equals("SET") || n.count() != 2) return null;
-    Iterator<ConfigThingy> setIter = n.iterator();
-    n = setIter.next();
-    if (n == null || !n.getName().equals("Filename") || n.count() != 0) return null;
-    n = setIter.next();
-    if (n == null || !n.getName().equals("CAT") || !isCatFuncOk(n)) return null;
-    return new AdjustorFunction(n, bindFunctionName);
-  }
-
-  private static boolean isCatFuncOk(ConfigThingy catFunc)
-  {
-    for (ConfigThingy c : catFunc)
-    {
-      boolean invalid = true;
-      if (c.count() == 0) invalid = false;
-      if (c.getName().equals("VALUE") && c.count() == 1) invalid = false;
-      if (invalid) return false;
-    }
-    return true;
-  }
-
-  private static ConfigThingy createFilenameGeneratorFunctionConf(
-      TextComponentTags tt, JComboBox<String> adjustFuncCombo)
-  {
-    if (tt.getJTextComponent().getText().trim().length() == 0) return null;
-    ConfigThingy catFunc = tt.getContent(TextComponentTags.CAT_VALUE_SYNTAX);
-    ConfigThingy bindFunc = null;
-    if (adjustFuncCombo.getSelectedIndex() != 0)
-    {
-      bindFunc = new ConfigThingy("BIND");
-      ConfigThingy function = new ConfigThingy("FUNCTION");
-      function.add(adjustFuncCombo.getSelectedItem().toString());
-      bindFunc.addChild(function);
-      ConfigThingy set = new ConfigThingy("SET");
-      set.add("Filename");
-      set.addChild(catFunc);
-      bindFunc.addChild(set);
-      return bindFunc;
-    }
-    else
-      return catFunc;
+    FilenameGeneratorFunctionDialog fgfd = new FilenameGeneratorFunctionDialog(myFrame, true, doc, idManager);
+    fgfd.setVisible(true);
   }
 
   /**
