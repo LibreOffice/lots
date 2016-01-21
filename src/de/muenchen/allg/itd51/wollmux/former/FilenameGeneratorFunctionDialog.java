@@ -86,7 +86,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
       tt.setContent(TextComponentTags.CAT_VALUE_SYNTAX, func.cat);
     }
     
-    Collection<ID> idsCol = idManager.getAllIDs(FormularMax4000.NAMESPACE_FORMCONTROLMODEL);
+    Collection<ID> idsCol = idManager.getAllIDs(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL);
     List<String> ids = new ArrayList<String>();
     for (ID id : idsCol)
       ids.add(id.getID());

@@ -37,9 +37,9 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -53,7 +53,7 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
@@ -73,7 +73,7 @@ public class AllInsertionLineViewsPanel implements View
   /**
    * Der {@link FormularMax4000} zu dem diese View gehört.
    */
-  private FormularMax4000 formularMax4000;
+  private FormularMax4kController formularMax4000;
 
   /**
    * Wird auf alle {@link OneInsertionLineView}s registriert.
@@ -100,7 +100,7 @@ public class AllInsertionLineViewsPanel implements View
   /**
    * Die Liste der {@link OneInsertionLineView}s in dieser View.
    */
-  private List<OneInsertionLineView> views = new Vector<OneInsertionLineView>();
+  private List<OneInsertionLineView> views = new ArrayList<OneInsertionLineView>();
 
   /**
    * Liste von Indizes der selektierten Objekte in der {@link #views} Liste.
@@ -120,7 +120,7 @@ public class AllInsertionLineViewsPanel implements View
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public AllInsertionLineViewsPanel(InsertionModelList insertionModelList,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
     this.insertionModelList = insertionModelList;
@@ -152,6 +152,7 @@ public class AllInsertionLineViewsPanel implements View
     JButton button = new JButton(L.m("Entfernen (DeMux)"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         demuxSelectedElements();
@@ -161,6 +162,10 @@ public class AllInsertionLineViewsPanel implements View
 
     ++gbcButton.gridx;
 
+    for (InsertionModel m : insertionModelList)
+    {
+      addItem(m);
+    }
   }
 
   /**
@@ -252,6 +257,7 @@ public class AllInsertionLineViewsPanel implements View
     }
   }
 
+  @Override
   public JComponent getComponent()
   {
     return myPanel;
@@ -260,11 +266,13 @@ public class AllInsertionLineViewsPanel implements View
   private class MyItemListener implements InsertionModelList.ItemListener
   {
 
+    @Override
     public void itemAdded(InsertionModel model, int index)
     {
       addItem(model);
     }
 
+    @Override
     public void itemRemoved(InsertionModel model, int index)
     {}
 
@@ -273,6 +281,7 @@ public class AllInsertionLineViewsPanel implements View
   private class MyViewChangeListener implements ViewChangeListener
   {
 
+    @Override
     public void viewShouldBeRemoved(View view)
     {
       removeItem((OneInsertionLineView) view);
@@ -282,9 +291,11 @@ public class AllInsertionLineViewsPanel implements View
 
   private class MyBroadcastListener extends BroadcastListener
   {
+    @Override
     public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
     {}
 
+    @Override
     public void broadcastInsertionModelSelection(BroadcastObjectSelection b)
     {
       if (b.getClearSelection()) clearSelection();

@@ -30,6 +30,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -48,7 +49,7 @@ import de.muenchen.allg.itd51.wollmux.UnknownIDException;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.ComboboxMergeDescriptor;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
@@ -58,7 +59,7 @@ import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class InsertionModelList
+public class InsertionModelList implements Iterable<InsertionModel>
 {
   private final static String COMBO_PARAM_ID = "ComboBoxWert";
 
@@ -71,12 +72,12 @@ public class InsertionModelList
    * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts
    * informiert werden wollen.
    */
-  private List<ItemListener> listeners = new Vector<ItemListener>(1);
+  private List<ItemListener> listeners = new ArrayList<ItemListener>(1);
 
   /**
    * Der FormularMax4000 zu dem diese InsertionModelList gehört.
    */
-  private FormularMax4000 formularMax4000;
+  private FormularMax4kController formularMax4000;
 
   /**
    * Erzeugt eine neue InsertionModelList.
@@ -85,7 +86,7 @@ public class InsertionModelList
    *          der FormularMax4000 zu dem diese Liste gehört.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public InsertionModelList(FormularMax4000 formularMax4000)
+  public InsertionModelList(FormularMax4kController formularMax4000)
   {
     formularMax4000.addBroadcastListener(new MyBroadcastListener());
     this.formularMax4000 = formularMax4000;
@@ -129,6 +130,7 @@ public class InsertionModelList
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
+  @Override
   public Iterator<InsertionModel> iterator()
   {
     return models.iterator();
@@ -417,16 +419,19 @@ public class InsertionModelList
   {
     boolean insertionViewsSelected = false;
 
+    @Override
     public void broadcastAllInsertionsViewSelected()
     {
       insertionViewsSelected = true;
     }
 
+    @Override
     public void broadcastAllFormControlsViewSelected()
     {
       insertionViewsSelected = false;
     }
 
+    @Override
     public void broadcastBookmarkSelection(Set<String> bookmarkNames)
     { // TESTED
       if (!insertionViewsSelected) return;
@@ -440,6 +445,7 @@ public class InsertionModelList
           formularMax4000.broadcast(new BroadcastObjectSelection(model, 1,
             clearSelection)
           {
+            @Override
             public void sendTo(BroadcastListener listener)
             {
               listener.broadcastInsertionModelSelection(this);

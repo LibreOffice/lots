@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 
@@ -60,7 +60,7 @@ public class GroupsProvider implements Iterable<IDManager.ID>
   /**
    * Der heilige Meister, den wir anbeten.
    */
-  private FormularMax4000 formularMax4000;
+  private FormularMax4kController formularMax4000;
 
   /**
    * Erzeugt einen neuen GroupsProvider, der
@@ -69,7 +69,7 @@ public class GroupsProvider implements Iterable<IDManager.ID>
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
-  public GroupsProvider(FormularMax4000 formularMax4000)
+  public GroupsProvider(FormularMax4kController formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
   }
@@ -210,6 +210,7 @@ public class GroupsProvider implements Iterable<IDManager.ID>
     public void groupRemoved(IDManager.ID groupID);
   }
 
+  @Override
   public Iterator<ID> iterator()
   {
     return new MyIterator();
@@ -226,17 +227,20 @@ public class GroupsProvider implements Iterable<IDManager.ID>
       iter = groups.iterator();
     }
 
+    @Override
     public boolean hasNext()
     {
       return iter.hasNext();
     }
 
+    @Override
     public ID next()
     {
       lastReturnedID = iter.next();
       return lastReturnedID;
     }
 
+    @Override
     public void remove()
     {
       iter.remove();

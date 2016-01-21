@@ -88,11 +88,11 @@ public class LeftPanel implements View
   /**
    * Der FormularMax4000 zu dem dieses Panel gehört.
    */
-  private FormularMax4000 formularMax4000;
+  private FormularMax4kController formularMax4000;
 
   public LeftPanel(InsertionModelList insertionModelList,
       FormControlModelList formControlModelList, GroupModelList groupModelList,
-      SectionModelList sectionModelList, FormularMax4000 formularMax4000,
+      SectionModelList sectionModelList, FormularMax4kController formularMax4000,
       XTextDocument doc)
   {
     this.formularMax4000 = formularMax4000;

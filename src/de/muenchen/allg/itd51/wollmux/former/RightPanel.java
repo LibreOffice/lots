@@ -102,7 +102,7 @@ public class RightPanel implements View
   public RightPanel(InsertionModelList insertionModelList,
       FormControlModelList formControlModelList, GroupModelList groupModelList,
       SectionModelList sectionModelList, FunctionLibrary funcLib,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     cards = new CardLayout();
     myPanel = new JPanel(cards);

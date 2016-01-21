@@ -124,8 +124,10 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.FormModelImpl;
+import de.muenchen.allg.itd51.wollmux.FormModelImpl.InvalidFormDescriptorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
@@ -139,12 +141,10 @@ import de.muenchen.allg.itd51.wollmux.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo;
-import de.muenchen.allg.itd51.wollmux.FormModelImpl.InvalidFormDescriptorException;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -155,7 +155,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -240,6 +240,7 @@ public class WollMuxEventHandler
       // starte den eventProcessorThread
       eventProcessorThread = new Thread(new Runnable()
       {
+        @Override
         public void run()
         {
           Logger.debug(L.m("Starte EventProcessor-Thread"));
@@ -333,6 +334,7 @@ public class WollMuxEventHandler
      * Events gestartet werden soll oder ob das GUI blockiert werden soll bis das
      * nächste actionPerformed-Event beim EventProcessor eintrifft.
      */
+    @Override
     public void process()
     {
       Logger.debug("Process WollMuxEvent " + this.toString());
@@ -407,6 +409,7 @@ public class WollMuxEventHandler
       System.gc();
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName();
@@ -512,6 +515,7 @@ public class WollMuxEventHandler
     {
       public ActionEvent actionEvent = null;
 
+      @Override
       public void actionPerformed(ActionEvent arg0)
       {
         actionEvent = arg0;
@@ -549,6 +553,7 @@ public class WollMuxEventHandler
    */
   private static class OnShowDialogAbsenderAuswaehlen extends BasicEvent
   {
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
@@ -608,6 +613,7 @@ public class WollMuxEventHandler
   private static class OnShowDialogPersoenlicheAbsenderlisteVerwalten extends
       BasicEvent
   {
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
@@ -670,6 +676,7 @@ public class WollMuxEventHandler
       this.dialogName = dialogName;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
@@ -728,6 +735,7 @@ public class WollMuxEventHandler
       stabilize();
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ", '" + dialogName
@@ -766,6 +774,7 @@ public class WollMuxEventHandler
       this.wollMuxBarVersion = wollMuxBarVersion;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
@@ -894,6 +903,7 @@ public class WollMuxEventHandler
       {
         private static final long serialVersionUID = 4527702807001201116L;
 
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           dialog.dispose();
@@ -917,6 +927,7 @@ public class WollMuxEventHandler
       dialog.setVisible(true);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "()";
@@ -946,10 +957,11 @@ public class WollMuxEventHandler
       this.model = model;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       // Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
-      FormularMax4000 max = model.getCurrentFormularMax4000();
+      FormularMax4kController max = model.getCurrentFormularMax4000();
       if (max != null)
       {
         max.toFront();
@@ -958,9 +970,10 @@ public class WollMuxEventHandler
       {
         ActionListener l = new ActionListener()
         {
+          @Override
           public void actionPerformed(ActionEvent actionEvent)
           {
-            if (actionEvent.getSource() instanceof FormularMax4000)
+            if (actionEvent.getSource() instanceof FormularMax4kController)
               WollMuxEventHandler.handleFormularMax4000Returned(model);
           }
         };
@@ -970,13 +983,14 @@ public class WollMuxEventHandler
         // Bibliotheken, die das model bereitstellt. Die dokumentlokalen
         // Bibliotheken kann der FM4000 selbst auflösen.
         max =
-          new FormularMax4000(model, l,
+          new FormularMax4kController(model, l,
             WollMuxSingleton.getInstance().getGlobalFunctions(),
             WollMuxSingleton.getInstance().getGlobalPrintFunctions());
         model.setCurrentFormularMax4000(max);
       }
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ")";
@@ -1005,11 +1019,13 @@ public class WollMuxEventHandler
       this.model = model;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       model.setCurrentFormularMax4000(null);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + model.hashCode() + ")";
@@ -1038,11 +1054,13 @@ public class WollMuxEventHandler
       this.model = model;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       model.setCurrentMailMergeNew(null);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + model.hashCode() + ")";
@@ -1095,11 +1113,13 @@ public class WollMuxEventHandler
       this.docInfo = doc;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       if (docInfo.hasTextDocumentModel()) docInfo.getTextDocumentModel().dispose();
     }
 
+    @Override
     public String toString()
     {
       String code = "unknown";
@@ -1146,6 +1166,7 @@ public class WollMuxEventHandler
       this.visible = visible;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       if (xTextDoc == null) return;
@@ -1260,6 +1281,7 @@ public class WollMuxEventHandler
       stabilize();
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + xTextDoc.hashCode() + ")";
@@ -1299,6 +1321,7 @@ public class WollMuxEventHandler
       this.buttonAnpassung = buttonAnpassung;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       FormModel fm;
@@ -1325,6 +1348,7 @@ public class WollMuxEventHandler
       fm.startFormGUI();
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + docs + ")";
@@ -1358,6 +1382,7 @@ public class WollMuxEventHandler
       this.model = model;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       if (model == null) return;
@@ -1385,6 +1410,7 @@ public class WollMuxEventHandler
       stabilize();
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ")";
@@ -1431,6 +1457,7 @@ public class WollMuxEventHandler
       this.asTemplate = asTemplate;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       // Baue ein ConfigThingy (als String), das die neue open-Methode versteht
@@ -1448,6 +1475,7 @@ public class WollMuxEventHandler
         + fragIdStr.toString() + "))");
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "("
@@ -1483,6 +1511,7 @@ public class WollMuxEventHandler
       this.openConfStr = openConfStr;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       boolean asTemplate = true;
@@ -1673,6 +1702,7 @@ public class WollMuxEventHandler
       return model;
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "('" + openConfStr + "')";
@@ -1700,6 +1730,7 @@ public class WollMuxEventHandler
    */
   private static class OnPALChangedNotify extends BasicEvent
   {
+    @Override
     protected void doit()
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
@@ -1770,6 +1801,7 @@ public class WollMuxEventHandler
       this.idx = idx;
     }
 
+    @Override
     protected void doit()
     {
       String[] pal = WollMuxSingleton.getInstance().getPALEntries();
@@ -1793,6 +1825,7 @@ public class WollMuxEventHandler
       WollMuxEventHandler.handlePALChangedNotify();
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + senderName + ", " + idx + ")";
@@ -1844,12 +1877,14 @@ public class WollMuxEventHandler
       this.model = model;
     }
 
+    @Override
     protected void doit()
     {
       model.setFormFieldValue(fieldId, newValue);
       model.updateFormFields(fieldId);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + fieldId + "', '" + newValue
@@ -1907,6 +1942,7 @@ public class WollMuxEventHandler
       this.listener = listener;
     }
 
+    @Override
     protected void doit()
     {
       try
@@ -1993,6 +2029,7 @@ public class WollMuxEventHandler
       {}
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "('" + groupId + "', " + visible
@@ -2036,11 +2073,13 @@ public class WollMuxEventHandler
       this.fieldId = fieldId;
     }
 
+    @Override
     protected void doit()
     {
       model.focusFormField(fieldId);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + model.doc + ", '" + fieldId
@@ -2103,11 +2142,13 @@ public class WollMuxEventHandler
       this.docHeight = docHeight;
     }
 
+    @Override
     protected void doit()
     {
       model.setWindowPosSize(docX, docY, docWidth, docHeight);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + docX + ", " + docY + ", "
@@ -2153,11 +2194,13 @@ public class WollMuxEventHandler
       this.visible = visible;
     }
 
+    @Override
     protected void doit()
     {
       model.setWindowVisible(visible);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + visible + ")";
@@ -2193,11 +2236,13 @@ public class WollMuxEventHandler
       this.model = model;
     }
 
+    @Override
     protected void doit()
     {
       model.close();
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + model.hashCode() + ")";
@@ -2241,6 +2286,7 @@ public class WollMuxEventHandler
       this.ext = ext;
     }
 
+    @Override
     protected void doit()
     {
       try
@@ -2250,6 +2296,7 @@ public class WollMuxEventHandler
         openExt.storeIfNecessary();
         openExt.launch(new OpenExt.ExceptionHandler()
         {
+          @Override
           public void handle(Exception x)
           {
             Logger.error(x);
@@ -2266,6 +2313,7 @@ public class WollMuxEventHandler
       model.close();
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + model.hashCode() + ", " + ext
@@ -2309,6 +2357,7 @@ public class WollMuxEventHandler
       this.ext = ext;
     }
 
+    @Override
     protected void doit()
     {
       try
@@ -2318,6 +2367,7 @@ public class WollMuxEventHandler
         openExt.storeIfNecessary();
         openExt.launch(new OpenExt.ExceptionHandler()
         {
+          @Override
           public void handle(Exception x)
           {
             Logger.error(x);
@@ -2331,6 +2381,7 @@ public class WollMuxEventHandler
       }
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + model.hashCode() + ", " + ext
@@ -2361,6 +2412,7 @@ public class WollMuxEventHandler
    */
   private static class OnInitialize extends BasicEvent
   {
+    @Override
     protected void doit()
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
@@ -2678,6 +2730,7 @@ public class WollMuxEventHandler
         super(dsj);
       }
 
+      @Override
       protected String getValueForKey(String key)
       {
         try
@@ -2717,6 +2770,7 @@ public class WollMuxEventHandler
         super(dsj);
       }
 
+      @Override
       protected String getValueForKey(String key)
       {
         try
@@ -2768,6 +2822,7 @@ public class WollMuxEventHandler
       this.wollmuxConfHashCode = wollmuxConfHashCode;
     }
 
+    @Override
     protected void doit()
     {
       WollMuxSingleton.getInstance().addPALChangeEventListener(listener);
@@ -2787,6 +2842,7 @@ public class WollMuxEventHandler
 
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
@@ -2825,11 +2881,13 @@ public class WollMuxEventHandler
       this.listener = listener;
     }
 
+    @Override
     protected void doit()
     {
       WollMuxSingleton.getInstance().removePALChangeEventListener(listener);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
@@ -2862,6 +2920,7 @@ public class WollMuxEventHandler
       this.frame = frame;
     }
 
+    @Override
     protected void doit()
     {
       try
@@ -2882,6 +2941,7 @@ public class WollMuxEventHandler
       {}
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + frame.hashCode() + ")";
@@ -2911,6 +2971,7 @@ public class WollMuxEventHandler
       this.listener = listener;
     }
 
+    @Override
     protected void doit()
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
@@ -2926,6 +2987,7 @@ public class WollMuxEventHandler
       }
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
@@ -2955,11 +3017,13 @@ public class WollMuxEventHandler
       this.listener = listener;
     }
 
+    @Override
     protected void doit()
     {
       WollMuxSingleton.getInstance().removeDocumentEventListener(listener);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
@@ -3009,6 +3073,7 @@ public class WollMuxEventHandler
       this.source = source;
     }
 
+    @Override
     protected void doit()
     {
       final com.sun.star.document.EventObject eventObject =
@@ -3026,6 +3091,7 @@ public class WollMuxEventHandler
           final XEventListener listener = i.next();
           if (this.listener == null || this.listener == listener) new Thread()
           {
+            @Override
             public void run()
             {
               try
@@ -3050,6 +3116,7 @@ public class WollMuxEventHandler
 
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "('" + eventName + "', "
@@ -3083,6 +3150,7 @@ public class WollMuxEventHandler
       this.model = model;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       // Prüfen, ob alle gesetzten Druckfunktionen im aktuellen Kontext noch
@@ -3096,6 +3164,7 @@ public class WollMuxEventHandler
       // Drucken im Hintergrund, damit der WollMuxEventHandler weiterläuft.
       new Thread()
       {
+        @Override
         public void run()
         {
           pmod.printWithProps();
@@ -3130,6 +3199,7 @@ public class WollMuxEventHandler
       // ...Platz für weitere Prüfungen.....
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ")";
@@ -3187,6 +3257,7 @@ public class WollMuxEventHandler
       this.listener = listener;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       TextDocumentModel model =
@@ -3204,6 +3275,7 @@ public class WollMuxEventHandler
       if (listener != null) listener.actionPerformed(null);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", '"
@@ -3253,6 +3325,7 @@ public class WollMuxEventHandler
       this.remove = remove;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       TextDocumentModel model =
@@ -3263,6 +3336,7 @@ public class WollMuxEventHandler
         model.addPrintFunction(functionName);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", '"
@@ -3295,6 +3369,7 @@ public class WollMuxEventHandler
       this.model = model;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       XTextCursor viewCursor = model.getViewCursor();
@@ -3308,6 +3383,7 @@ public class WollMuxEventHandler
       stabilize();
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ")";
@@ -3338,6 +3414,7 @@ public class WollMuxEventHandler
       this.model = model;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       XTextCursor viewCursor = model.getViewCursor();
@@ -3350,6 +3427,7 @@ public class WollMuxEventHandler
       stabilize();
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ")";
@@ -3381,6 +3459,7 @@ public class WollMuxEventHandler
       this.model = model;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       XTextCursor viewCursor = model.getViewCursor();
@@ -3394,6 +3473,7 @@ public class WollMuxEventHandler
       stabilize();
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ")";
@@ -3436,6 +3516,7 @@ public class WollMuxEventHandler
       this.blockname = blockname;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       if (UNO.XBookmarksSupplier(model.doc) == null || blockname == null) return;
@@ -3582,6 +3663,7 @@ public class WollMuxEventHandler
       }
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + model.hashCode() + ", '"
@@ -3608,6 +3690,7 @@ public class WollMuxEventHandler
   private static class OnDumpInfo extends BasicEvent
   {
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       final String title = L.m("Fehlerinfos erstellen");
@@ -3626,6 +3709,7 @@ public class WollMuxEventHandler
           L.m("Die Fehlerinformationen des WollMux konnten nicht geschrieben werden\n\nDetails siehe Datei wollmux.log!"));
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "()";
@@ -3648,6 +3732,7 @@ public class WollMuxEventHandler
 
   private static class OnKill extends BasicEvent
   {
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       if (UNO.desktop != null)
@@ -3660,6 +3745,7 @@ public class WollMuxEventHandler
       }
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "()";
@@ -3720,6 +3806,7 @@ public class WollMuxEventHandler
       this.listener = listener;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       TextDocumentModel model =
@@ -3732,6 +3819,7 @@ public class WollMuxEventHandler
         // (damit sind auch automatisch alle Abhängigkeiten richtig aufgelöst)
         formModel.setValue(id, value, new ActionListener()
         {
+          @Override
           public void actionPerformed(ActionEvent arg0)
           {
             handleSetFormValueFinished(listener);
@@ -3747,6 +3835,7 @@ public class WollMuxEventHandler
       }
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", id='" + id
@@ -3788,6 +3877,7 @@ public class WollMuxEventHandler
       this.listener = listener;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       model.collectNonWollMuxFormFields();
@@ -3796,6 +3886,7 @@ public class WollMuxEventHandler
       if (listener != null) listener.actionPerformed(null);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ")";
@@ -3831,11 +3922,13 @@ public class WollMuxEventHandler
       this.listener = unlockActionListener;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       if (listener != null) listener.actionPerformed(null);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "()";
@@ -3888,6 +3981,7 @@ public class WollMuxEventHandler
       this.listener = unlockActionListener;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       TextDocumentModel model =
@@ -3923,6 +4017,7 @@ public class WollMuxEventHandler
       if (listener != null) listener.actionPerformed(null);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + doc.hashCode()
@@ -3961,6 +4056,7 @@ public class WollMuxEventHandler
 
     }
 
+    @Override
     protected void doit()
     {
       XTextCursor viewCursor = model.getViewCursor();
@@ -3978,6 +4074,7 @@ public class WollMuxEventHandler
       }
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ", " + reprocess + ")";
@@ -4007,6 +4104,7 @@ public class WollMuxEventHandler
       this.model = model;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       XTextCursor viewCursor = model.getViewCursor();
@@ -4023,6 +4121,7 @@ public class WollMuxEventHandler
       stabilize();
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ")";
@@ -4055,6 +4154,7 @@ public class WollMuxEventHandler
       this.msg = msg;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
 
@@ -4097,6 +4197,7 @@ public class WollMuxEventHandler
       stabilize();
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", " + msg
@@ -4129,6 +4230,7 @@ public class WollMuxEventHandler
       this.model = model;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       // Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
@@ -4141,6 +4243,7 @@ public class WollMuxEventHandler
       {
         mmn = new MailMergeNew(model, new ActionListener()
         {
+          @Override
           public void actionPerformed(ActionEvent actionEvent)
           {
             if (actionEvent.getSource() instanceof MailMergeNew)
@@ -4151,6 +4254,7 @@ public class WollMuxEventHandler
       }
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ")";
@@ -4193,6 +4297,7 @@ public class WollMuxEventHandler
       this.origArgs = origArgs;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       boolean hasPrintFunction = model.getPrintFunctions().size() > 0;
@@ -4222,6 +4327,7 @@ public class WollMuxEventHandler
       }
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ")";
@@ -4264,6 +4370,7 @@ public class WollMuxEventHandler
       this.origArgs = origArgs;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       // FilenameGeneratorFunction auslesen und parsen
@@ -4356,6 +4463,7 @@ public class WollMuxEventHandler
         // Laut Didi kommt der JFileChooser unter Windows nicht im Vordergrund.
         // Deshalb das Überschreiben der createDialog-Methode und Setzen von
         // alwaysOnTop(true)
+        @Override
         protected JDialog createDialog(Component parent) throws HeadlessException
         {
           JDialog dialog = super.createDialog(parent);
@@ -4366,11 +4474,13 @@ public class WollMuxEventHandler
       fc.setMultiSelectionEnabled(false);
       fc.setFileFilter(new FileFilter()
       {
+        @Override
         public String getDescription()
         {
           return L.m("ODF Textdokument");
         }
 
+        @Override
         public boolean accept(File f)
         {
           return f.getName().toLowerCase().endsWith(".odt") || f.isDirectory();
@@ -4412,6 +4522,7 @@ public class WollMuxEventHandler
       return f;
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ")";
@@ -4444,6 +4555,7 @@ public class WollMuxEventHandler
       this.model = model;
     }
 
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       // Springt zum Dokumentenanfang
@@ -4464,6 +4576,7 @@ public class WollMuxEventHandler
       model.setDocumentModified(false);
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ")";
@@ -4487,6 +4600,7 @@ public class WollMuxEventHandler
 
   private static class OnCheckInstallation extends BasicEvent
   {
+    @Override
     protected void doit() throws WollMuxFehlerException
     {
       // Standardwerte für den Warndialog:
@@ -4588,6 +4702,7 @@ public class WollMuxEventHandler
         this.isShared = isShared;
       }
 
+      @Override
       public String toString()
       {
         return path + " -- " + date + " shared:" + isShared;
@@ -4711,6 +4826,7 @@ public class WollMuxEventHandler
       }
     }
 
+    @Override
     public String toString()
     {
       return this.getClass().getSimpleName() + "()";

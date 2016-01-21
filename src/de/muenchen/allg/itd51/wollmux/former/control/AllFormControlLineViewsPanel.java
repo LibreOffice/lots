@@ -63,11 +63,11 @@ import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.ComboboxMergeDescriptor;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
+import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.ViewVisibilityDescriptor;
-import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList.ItemListener;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 
@@ -145,7 +145,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   /**
    * Der FormularMax4000, zu dem diese View gehört.
    */
-  private FormularMax4000 formularMax4000;
+  private FormularMax4kController formularMax4000;
   
   /**
    * Sichtbarkeitseinstellungen von FormularMax;
@@ -160,7 +160,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public AllFormControlLineViewsPanel(FormControlModelList formControlModelList,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     this.formControlModelList = formControlModelList;
     this.formularMax4000 = formularMax4000;
@@ -211,6 +211,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     JButton hochButton = new JButton(L.m("Hoch"));
     hochButton.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         if (noSelectedElementsOnVisibleTab()) return;
@@ -224,6 +225,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     JButton runterButton = new JButton(L.m("Runter"));
     runterButton.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         if (noSelectedElementsOnVisibleTab()) return;
@@ -237,6 +239,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     JButton killButton = new JButton(L.m("Löschen"));
     killButton.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         if (noSelectedElementsOnVisibleTab()) return;
@@ -249,6 +252,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     JButton tabButton = new JButton(L.m("Neuer Tab"));
     tabButton.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         if (noSelectedElementsOnVisibleTab()) return;
@@ -262,20 +266,29 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     JButton newButton = new JButton(L.m("Neues Label"));
     newButton.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         insertNewElement();
       }
     });
     buttonPanel.add(newButton, gbcButton);
+    
+    int index = 0;
+    for (FormControlModel m : formControlModelList)
+    {
+      itemAdded(m, index++);
+    }
   }
 
+  @Override
   public JComponent getComponent()
   {
     return myPanel;
   }
 
   // TESTED
+  @Override
   public void itemAdded(FormControlModel model, int index)
   {
     if (index < 0 || index > viewDescriptors.size())
@@ -395,6 +408,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     return -1;
   }
 
+  @Override
   public void viewShouldBeRemoved(View _view)
   { // TESTED
     OneFormControlLineView view = (OneFormControlLineView) _view;
@@ -416,6 +430,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     selection.fixup(index, -1, viewDescriptors.size() - 1);
   }
 
+  @Override
   public void tabTitleChanged(OneFormControlLineView view)
   {
     int index = getDescriptorIndexOf(view);
@@ -660,7 +675,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    */
   private void insertNewTab()
   {
-    String id = formControlModelList.makeUniqueId(FormularMax4000.STANDARD_TAB_NAME);
+    String id = formControlModelList.makeUniqueId(FormularMax4kController.STANDARD_TAB_NAME);
     String label = id;
     FormControlModel model = FormControlModel.createTab(label, id, formularMax4000);
     int index = getInsertionIndex();
@@ -683,6 +698,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     formControlModelList.add(model, index);
   }
 
+  @Override
   public void itemSwapped(int index1, int index2)
   {
     ViewDescriptor desc1 = (ViewDescriptor) viewDescriptors.get(index1);
@@ -707,6 +723,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
       this.panel = panel;
     }
     
+    @Override
     public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
     { // TESTED
       if (b.getClearSelection()) clearSelection();
@@ -761,6 +778,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
     }
 
+    @Override
     public void broadcastViewVisibilitySettings(ViewVisibilityDescriptor desc)
     {
       /*

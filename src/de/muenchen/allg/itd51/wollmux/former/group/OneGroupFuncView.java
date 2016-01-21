@@ -30,7 +30,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.group;
 
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccessView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -59,7 +59,7 @@ public class OneGroupFuncView extends FunctionSelectionAccessView
   {
     super(model.getConditionAccess(), funcLib,
       model.getFormularMax4000().getIDManager(),
-      FormularMax4000.NAMESPACE_FORMCONTROLMODEL);
+      FormularMax4kController.NAMESPACE_FORMCONTROLMODEL);
     this.model = model;
     this.bigDaddy = bigDaddy;
     model.addListener(new MyModelChangeListener());
@@ -67,11 +67,13 @@ public class OneGroupFuncView extends FunctionSelectionAccessView
 
   private class MyModelChangeListener implements GroupModel.ModelChangeListener
   {
+    @Override
     public void modelRemoved(GroupModel model)
     {
       if (bigDaddy != null) bigDaddy.viewShouldBeRemoved(OneGroupFuncView.this);
     }
 
+    @Override
     public void attributeChanged(GroupModel model, int attributeId, Object newValue)
     {}
   }

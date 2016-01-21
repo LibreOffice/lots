@@ -64,7 +64,7 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
@@ -84,7 +84,7 @@ public class AllSectionLineViewsPanel implements View
   /**
    * Der {@link FormularMax4000} zu dem diese View gehört.
    */
-  private FormularMax4000 formularMax4000;
+  private FormularMax4kController formularMax4000;
 
   /**
    * Wird auf alle {@link OneSectionLineView}s registriert.
@@ -136,7 +136,7 @@ public class AllSectionLineViewsPanel implements View
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public AllSectionLineViewsPanel(SectionModelList sectionModelList,
-      FormularMax4000 formularMax4000, XTextDocument doc)
+      FormularMax4kController formularMax4000, XTextDocument doc)
   {
     this.formularMax4000 = formularMax4000;
     this.sectionModelList = sectionModelList;
@@ -169,6 +169,7 @@ public class AllSectionLineViewsPanel implements View
     JButton button = new JButton(L.m("Aufheben"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         deleteSelectedElements();
@@ -180,6 +181,7 @@ public class AllSectionLineViewsPanel implements View
     button = new JButton(L.m("Neu"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         createNewSectionFromSelection();
@@ -191,6 +193,7 @@ public class AllSectionLineViewsPanel implements View
     button = new JButton(L.m("Neu (ganze Seiten)"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         createNewSectionFromAllPagesTouchedBySelection();
@@ -199,6 +202,11 @@ public class AllSectionLineViewsPanel implements View
     buttonPanel.add(button, gbcButton);
 
     ++gbcButton.gridx;
+    
+    for (SectionModel m : sectionModelList)
+    {
+      addItem(m);
+    }
   }
 
   /**
@@ -422,6 +430,7 @@ public class AllSectionLineViewsPanel implements View
     }
   }
 
+  @Override
   public JComponent getComponent()
   {
     return myPanel;
@@ -430,11 +439,13 @@ public class AllSectionLineViewsPanel implements View
   private class MyItemListener implements SectionModelList.ItemListener
   {
 
+    @Override
     public void itemAdded(SectionModel model, int index)
     {
       addItem(model);
     }
 
+    @Override
     public void itemRemoved(SectionModel model, int index)
     {}
 
@@ -443,6 +454,7 @@ public class AllSectionLineViewsPanel implements View
   private class MyViewChangeListener implements ViewChangeListener
   {
 
+    @Override
     public void viewShouldBeRemoved(View view)
     {
       removeItem((OneSectionLineView) view);
@@ -452,6 +464,7 @@ public class AllSectionLineViewsPanel implements View
 
   private class MyBroadcastListener extends BroadcastListener
   {
+    @Override
     public void broadcastSectionModelSelection(BroadcastObjectSelection b)
     {
       if (b.getClearSelection()) clearSelection();

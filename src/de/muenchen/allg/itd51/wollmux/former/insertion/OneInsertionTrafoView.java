@@ -30,7 +30,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccessView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -58,7 +58,7 @@ public class OneInsertionTrafoView extends FunctionSelectionAccessView
   {
     super(model.getTrafoAccess(), funcLib,
       model.getFormularMax4000().getIDManager(),
-      FormularMax4000.NAMESPACE_FORMCONTROLMODEL);
+      FormularMax4kController.NAMESPACE_FORMCONTROLMODEL);
     this.model = model;
     this.bigDaddy = bigDaddy;
     model.addListener(new MyModelChangeListener());
@@ -66,12 +66,14 @@ public class OneInsertionTrafoView extends FunctionSelectionAccessView
 
   private class MyModelChangeListener implements InsertionModel.ModelChangeListener
   {
+    @Override
     public void modelRemoved(InsertionModel model)
     {
       if (bigDaddy != null)
         bigDaddy.viewShouldBeRemoved(OneInsertionTrafoView.this);
     }
 
+    @Override
     public void attributeChanged(InsertionModel model, int attributeId,
         Object newValue)
     {}

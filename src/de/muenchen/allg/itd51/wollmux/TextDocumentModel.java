@@ -50,9 +50,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -99,7 +99,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InputUser;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
@@ -184,7 +184,7 @@ public class TextDocumentModel
    * Enthält die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
    * FormularMax4000.
    */
-  private FormularMax4000 currentMax4000;
+  private FormularMax4kController currentMax4000;
 
   /**
    * Enthält die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
@@ -1036,6 +1036,7 @@ public class TextDocumentModel
       this.fragId = fragId;
     }
 
+    @Override
     public String getMessage()
     {
       return L.m(
@@ -1064,7 +1065,7 @@ public class TextDocumentModel
    * 
    * @param max
    */
-  synchronized public void setCurrentFormularMax4000(FormularMax4000 max)
+  synchronized public void setCurrentFormularMax4000(FormularMax4kController max)
   {
     currentMax4000 = max;
   }
@@ -1075,7 +1076,7 @@ public class TextDocumentModel
    * 
    * @return
    */
-  synchronized public FormularMax4000 getCurrentFormularMax4000()
+  synchronized public FormularMax4kController getCurrentFormularMax4000()
   {
     return currentMax4000;
   }
@@ -2897,7 +2898,7 @@ public class TextDocumentModel
    */
   synchronized public void dispose()
   {
-    if (currentMax4000 != null) currentMax4000.dispose();
+    if (currentMax4000 != null) currentMax4000.abort();
     currentMax4000 = null;
 
     if (currentMM != null) currentMM.dispose();
@@ -2933,6 +2934,7 @@ public class TextDocumentModel
    * 
    * @see java.lang.Object#toString()
    */
+  @Override
   synchronized public String toString()
   {
     return "doc('" + getTitle() + "')";
@@ -3253,6 +3255,7 @@ public class TextDocumentModel
 
     public static final int MYVALUES_NAMESPACE_USER = 1;
 
+    @Override
     public String getString(String id)
     {
       switch (namespace(id))
@@ -3264,6 +3267,7 @@ public class TextDocumentModel
       }
     }
 
+    @Override
     public boolean getBoolean(String id)
     {
       switch (namespace(id))
@@ -3275,6 +3279,7 @@ public class TextDocumentModel
       }
     }
 
+    @Override
     public boolean hasValue(String id)
     {
       switch (namespace(id))
@@ -4131,11 +4136,13 @@ public class TextDocumentModel
       list.add(new SubstElement(SubstElement.FIXED_TEXT, text));
     }
 
+    @Override
     public Iterator<SubstElement> iterator()
     {
       return list.iterator();
     }
 
+    @Override
     public String toString()
     {
       StringBuilder buffy = new StringBuilder();
@@ -4183,6 +4190,7 @@ public class TextDocumentModel
         return type == FIXED_TEXT;
       }
 
+      @Override
       public String toString()
       {
         return (isField() ? "FIELD" : "FIXED_TEXT") + " \"" + value + "\"";

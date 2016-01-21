@@ -47,7 +47,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
@@ -177,7 +177,7 @@ public class FormControlModel
    * Der FormularMax4000 zu dem dieses Model gehört. Dieser wird über Änderungen des
    * Models informiert, um das Zurückschreiben der Daten in das Dokument anzustoßen.
    */
-  private FormularMax4000 formularMax4000;
+  private FormularMax4kController formularMax4000;
 
   /**
    * Parst conf als Steuerelement und erzeugt ein entsprechendes FormControlModel.
@@ -194,7 +194,7 @@ public class FormControlModel
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormControlModel(ConfigThingy conf, FunctionSelectionProvider funcSelProv,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
     this.groups = new GroupsProvider(formularMax4000);
@@ -299,7 +299,7 @@ public class FormControlModel
     Iterator<ConfigThingy> iter = conf.iterator();
     while (iter.hasNext())
     {
-      set.add(formularMax4000.getIDManager().getID(FormularMax4000.NAMESPACE_GROUPS,
+      set.add(formularMax4000.getIDManager().getID(FormularMax4kController.NAMESPACE_GROUPS,
         iter.next().toString()));
     }
     groups.initGroups(set);
@@ -316,7 +316,7 @@ public class FormControlModel
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private FormControlModel(String label, String type, String id,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     this.label = label;
     this.type = type;
@@ -332,7 +332,7 @@ public class FormControlModel
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static FormControlModel createCheckbox(String label, String id,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     return new FormControlModel(label, CHECKBOX_TYPE, id, formularMax4000);
   }
@@ -344,7 +344,7 @@ public class FormControlModel
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static FormControlModel createTextfield(String label, String id,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     FormControlModel model =
       new FormControlModel(label, TEXTFIELD_TYPE, id, formularMax4000);
@@ -358,7 +358,7 @@ public class FormControlModel
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static FormControlModel createLabel(String label, String id,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     FormControlModel model =
       new FormControlModel(label, LABEL_TYPE, "ID", formularMax4000);
@@ -372,7 +372,7 @@ public class FormControlModel
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static FormControlModel createComboBox(String label, String id,
-      String[] items, FormularMax4000 formularMax4000)
+      String[] items, FormularMax4kController formularMax4000)
   {
     FormControlModel model =
       new FormControlModel(label, COMBOBOX_TYPE, id, formularMax4000);
@@ -387,7 +387,7 @@ public class FormControlModel
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static FormControlModel createTab(String label, String id,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     FormControlModel model =
       new FormControlModel(label, TAB_TYPE, id, formularMax4000);
@@ -400,7 +400,7 @@ public class FormControlModel
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormularMax4000 getFormularMax4000()
+  public FormularMax4kController getFormularMax4000()
   {
     return formularMax4000;
   }
@@ -714,7 +714,7 @@ public class FormControlModel
       {
         this.id =
           formularMax4000.getIDManager().getActiveID(
-            FormularMax4000.NAMESPACE_FORMCONTROLMODEL, id);
+            FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, id);
       }
       else
       {
@@ -756,7 +756,7 @@ public class FormControlModel
     while (true)
     {
       IDManager.ID id =
-        idMan.getID(FormularMax4000.NAMESPACE_FORMCONTROLMODEL, idStr2);
+        idMan.getID(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, idStr2);
       if (!id.isActive())
       {
         this.id = id;
@@ -791,7 +791,7 @@ public class FormControlModel
       try
       {
         IDManager.ID id =
-          idMan.getActiveID(FormularMax4000.NAMESPACE_FORMCONTROLMODEL, idStr2);
+          idMan.getActiveID(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, idStr2);
         this.id = id;
         return;
       }
@@ -1129,65 +1129,77 @@ public class FormControlModel
       this.sel = sel;
     }
 
+    @Override
     public boolean isReference()
     {
       return sel.isReference();
     }
 
+    @Override
     public boolean isExpert()
     {
       return sel.isExpert();
     }
 
+    @Override
     public boolean isNone()
     {
       return sel.isNone();
     }
 
+    @Override
     public String getFunctionName()
     {
       return sel.getFunctionName();
     }
 
+    @Override
     public ConfigThingy getExpertFunction()
     {
       return sel.getExpertFunction();
     }
 
+    @Override
     public void setParameterValues(Map<String, ParamValue> mapNameToParamValue)
     {
       sel.setParameterValues(mapNameToParamValue);
       formularMax4000.documentNeedsUpdating();
     }
 
+    @Override
     public void setFunction(String functionName, String[] paramNames)
     {
       sel.setFunction(functionName, paramNames);
       formularMax4000.documentNeedsUpdating();
     }
 
+    @Override
     public void setExpertFunction(ConfigThingy funConf)
     {
       sel.setExpertFunction(funConf);
       formularMax4000.documentNeedsUpdating();
     }
 
+    @Override
     public void setParameterValue(String paramName, ParamValue paramValue)
     {
       sel.setParameterValue(paramName, paramValue);
       formularMax4000.documentNeedsUpdating();
     }
 
+    @Override
     public String[] getParameterNames()
     {
       return sel.getParameterNames();
     }
 
+    @Override
     public boolean hasSpecifiedParameters()
     {
       return sel.hasSpecifiedParameters();
     }
 
+    @Override
     public ParamValue getParameterValue(String paramName)
     {
       return sel.getParameterValue(paramName);

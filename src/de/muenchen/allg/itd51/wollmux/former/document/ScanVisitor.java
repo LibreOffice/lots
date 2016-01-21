@@ -9,7 +9,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.document.nodes.Container;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
@@ -19,7 +19,7 @@ import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXVal
 
 public class ScanVisitor extends Visitor
 {
-  private final FormularMax4000 formularMax4000;
+  private final FormularMax4kController formularMax4000;
   
   /**
    * Maximale Anzahl Zeichen für ein automatisch generiertes Label.
@@ -97,7 +97,7 @@ public class ScanVisitor extends Visitor
   /**
    * @param formularMax4000
    */
-  public ScanVisitor(FormularMax4000 formularMax4000)
+  public ScanVisitor(FormularMax4kController formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
   }

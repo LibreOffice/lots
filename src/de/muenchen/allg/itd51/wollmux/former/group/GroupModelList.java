@@ -31,13 +31,13 @@
 
 package de.muenchen.allg.itd51.wollmux.former.group;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
 /**
  * Verwaltet eine Liste von GroupModels
@@ -55,12 +55,12 @@ public class GroupModelList implements Iterable<GroupModel>
    * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts
    * informiert werden wollen.
    */
-  private List<ItemListener> listeners = new Vector<ItemListener>(1);
+  private List<ItemListener> listeners = new ArrayList<ItemListener>(1);
 
   /**
    * Der FormularMax4000 zu dem diese GroupModelList gehört.
    */
-  private FormularMax4000 formularMax4000;
+  private FormularMax4kController formularMax4000;
 
   /**
    * Erzeugt eine neue GroupModelList.
@@ -69,7 +69,7 @@ public class GroupModelList implements Iterable<GroupModel>
    *          der FormularMax4000 zu dem diese Liste gehört.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public GroupModelList(FormularMax4000 formularMax4000)
+  public GroupModelList(FormularMax4kController formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
     // this.formularMax4000.addBroadcastListener(new MyBroadcastListener());
@@ -148,6 +148,7 @@ public class GroupModelList implements Iterable<GroupModel>
   /**
    * Liefert einen Iterator über alle Models dieser Liste.
    */
+  @Override
   public Iterator<GroupModel> iterator()
   {
     return models.iterator();

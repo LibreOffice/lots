@@ -40,7 +40,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 import de.muenchen.allg.itd51.wollmux.former.IDManager.IDChangeListener;
@@ -85,7 +85,7 @@ public class GroupModel
   /**
    * Der FormularMax4000 zu dem dieses Model gehört.
    */
-  private FormularMax4000 formularMax4000;
+  private FormularMax4kController formularMax4000;
 
   /**
    * Listener der Änderungen an {@link #id} überwacht.
@@ -103,7 +103,7 @@ public class GroupModel
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public GroupModel(IDManager.ID id, FunctionSelection condition,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     this.id = id;
     // Achtung! Wir müssen eine Referenz halten (siehe addIdChangeListener())
@@ -118,7 +118,7 @@ public class GroupModel
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormularMax4000 getFormularMax4000()
+  public FormularMax4kController getFormularMax4000()
   {
     return formularMax4000;
   }
@@ -281,6 +281,7 @@ public class GroupModel
 
   private class MyIDChangeListener implements IDChangeListener
   {
+    @Override
     public void idHasChanged(ID id)
     {
       notifyListeners(ID_ATTR, id);
@@ -300,65 +301,77 @@ public class GroupModel
    */
   private class MyConditionAccess implements FunctionSelectionAccess
   {
+    @Override
     public boolean isReference()
     {
       return condition.isReference();
     }
 
+    @Override
     public boolean isExpert()
     {
       return condition.isExpert();
     }
 
+    @Override
     public boolean isNone()
     {
       return condition.isNone();
     }
 
+    @Override
     public String getFunctionName()
     {
       return condition.getFunctionName();
     }
 
+    @Override
     public ConfigThingy getExpertFunction()
     {
       return condition.getExpertFunction();
     }
 
+    @Override
     public void setParameterValues(Map<String, ParamValue> mapNameToParamValue)
     {
       condition.setParameterValues(mapNameToParamValue);
       formularMax4000.documentNeedsUpdating();
     }
 
+    @Override
     public void setFunction(String functionName, String[] paramNames)
     {
       condition.setFunction(functionName, paramNames);
       formularMax4000.documentNeedsUpdating();
     }
 
+    @Override
     public void setExpertFunction(ConfigThingy funConf)
     {
       condition.setExpertFunction(funConf);
       formularMax4000.documentNeedsUpdating();
     }
 
+    @Override
     public void setParameterValue(String paramName, ParamValue paramValue)
     {
       condition.setParameterValue(paramName, paramValue);
       formularMax4000.documentNeedsUpdating();
     }
 
+    @Override
     public String[] getParameterNames()
     {
       return condition.getParameterNames();
     }
 
+    @Override
     public boolean hasSpecifiedParameters()
     {
       return condition.hasSpecifiedParameters();
     }
 
+    @Override
     public ParamValue getParameterValue(String paramName)
     {
       return condition.getParameterValue(paramName);

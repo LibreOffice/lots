@@ -35,7 +35,7 @@ import java.util.Iterator;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.view.OnDemandCardView;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
@@ -67,7 +67,7 @@ public class AllInsertionTrafoViewsPanel extends OnDemandCardView
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public AllInsertionTrafoViewsPanel(InsertionModelList insertionModelList,
-      FunctionLibrary funcLib, FormularMax4000 formularMax4000)
+      FunctionLibrary funcLib, FormularMax4kController formularMax4000)
   {
     super(L.m("Trafo-View"));
     this.funcLib = funcLib;
@@ -82,6 +82,7 @@ public class AllInsertionTrafoViewsPanel extends OnDemandCardView
     }
   }
 
+  @Override
   public View createViewFor(Object model, ViewChangeListener viewChangeListener)
   {
     InsertionModel m = (InsertionModel) model;
@@ -90,11 +91,13 @@ public class AllInsertionTrafoViewsPanel extends OnDemandCardView
 
   private class MyItemListener implements InsertionModelList.ItemListener
   {
+    @Override
     public void itemAdded(InsertionModel model, int index)
     {
       if (model.hasTrafo()) addItem(model);
     }
 
+    @Override
     public void itemRemoved(InsertionModel model, int index)
     {
     // Hier muss nicht removeItem(model) aufgerufen werden. Dies behandelt die
@@ -104,11 +107,13 @@ public class AllInsertionTrafoViewsPanel extends OnDemandCardView
 
   private class MyBroadcastListener extends BroadcastListener
   {
+    @Override
     public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
     {
       showEmpty();
     }
 
+    @Override
     public void broadcastInsertionModelSelection(BroadcastObjectSelection b)
     {
       if (b.getState() == 1)

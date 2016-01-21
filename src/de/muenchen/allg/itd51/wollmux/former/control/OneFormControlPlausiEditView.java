@@ -30,7 +30,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.control;
 
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccessView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -74,7 +74,7 @@ public class OneFormControlPlausiEditView extends FunctionSelectionAccessView
   {
     super(model.getPlausiAccess(), funcLib,
       model.getFormularMax4000().getIDManager(),
-      FormularMax4000.NAMESPACE_FORMCONTROLMODEL);
+      FormularMax4kController.NAMESPACE_FORMCONTROLMODEL);
     this.model = model;
     this.bigDaddy = bigDaddy;
     listener = new MyModelChangeListener();
@@ -95,12 +95,14 @@ public class OneFormControlPlausiEditView extends FunctionSelectionAccessView
   private class MyModelChangeListener implements
       FormControlModel.ModelChangeListener
   {
+    @Override
     public void modelRemoved(FormControlModel model)
     {
       if (bigDaddy != null)
         bigDaddy.viewShouldBeRemoved(OneFormControlPlausiEditView.this);
     }
 
+    @Override
     public void attributeChanged(FormControlModel model, int attributeId,
         Object newValue)
     {}
