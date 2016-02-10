@@ -36,7 +36,7 @@ package de.muenchen.allg.itd51.wollmux;
  * wird geworfen, wenn eine Fehlkonfiguration festgestellt wird (d.h. Benutzer hat Config verbockt)
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class ConfigurationErrorException extends Exception
+public class ConfigurationErrorException extends RuntimeException
 {
   /**
    * keine Ahnung, was das soll, aber es macht Eclipse glücklich.

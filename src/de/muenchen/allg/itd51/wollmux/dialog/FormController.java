@@ -90,8 +90,8 @@ import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.dialog.UIElement.Textarea;
-import de.muenchen.allg.itd51.wollmux.dialog.UIElementFactory.Context;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.Textarea;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
@@ -175,18 +175,18 @@ public class FormController implements UIElementEventHandler
   private DialogLibrary dialogLib;
 
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
+   * Ein Kontext für {@link UIElementFactory#createUIElement(UIElementContext, ConfigThingy)},
    * der verwendet wird für das Erzeugen der vertikal angeordneten UI Elemente, die
    * die Formularfelder darstellen.
    */
-  private UIElementFactory.Context panelContext;
+  private UIElementContext panelContext;
 
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
+   * Ein Kontext für {@link UIElementFactory#createUIElement(UIElementContext, ConfigThingy)},
    * der verwendet wird für das Erzeugen der horizontal angeordneten Buttons unter
    * den Formularfeldern.
    */
-  private UIElementFactory.Context buttonContext;
+  private UIElementContext buttonContext;
 
   /**
    * Der Kontext, in dem Funktionen geparst werden.
@@ -1138,7 +1138,7 @@ public class FormController implements UIElementEventHandler
     mapTypeToLabelType.put("v-separator", UIElement.LABEL_NONE);
     mapTypeToLabelLayoutConstraints.put("v-separator", null);
 
-    panelContext = new UIElementFactory.Context();
+    panelContext = new UIElementContext();
     panelContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
     panelContext.mapTypeToLabelType = mapTypeToLabelType;
     panelContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
@@ -1147,7 +1147,7 @@ public class FormController implements UIElementEventHandler
     panelContext.mapTypeToType.put("separator", "h-separator");
     panelContext.mapTypeToType.put("glue", "v-glue");
 
-    buttonContext = new UIElementFactory.Context();
+    buttonContext = new UIElementContext();
     buttonContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
     buttonContext.mapTypeToLabelType = mapTypeToLabelType;
     buttonContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;

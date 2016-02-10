@@ -40,6 +40,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.bridge.UnoUrlResolver;
+import com.sun.star.bridge.XUnoUrlResolver;
 import com.sun.star.comp.helper.Bootstrap;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.frame.TerminationVetoException;
@@ -53,8 +55,6 @@ import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 import com.sun.star.util.XModifiable;
-import com.sun.star.bridge.XUnoUrlResolver;
-import com.sun.star.bridge.UnoUrlResolver;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -140,7 +140,7 @@ public class WollMuxBarEventHandler
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
-  void start()
+  public void start()
   {
     myThread.start();
   }
@@ -288,11 +288,12 @@ public class WollMuxBarEventHandler
       url = dispatchCmd + arg;
     }
 
+    @Override
     public void process()
     {
       XDispatchProvider dispProv = null;
       dispProv =
-        (XDispatchProvider) UnoRuntime.queryInterface(XDispatchProvider.class,
+        UnoRuntime.queryInterface(XDispatchProvider.class,
           getRemoteWollMux(true));
       if (dispProv != null)
       {
@@ -318,6 +319,7 @@ public class WollMuxBarEventHandler
       selectedEntry = current;
     }
 
+    @Override
     public void process()
     {
       // GUI-Funktionen im Event-Dispatching Thread ausführen wg. Thread-Safety.
@@ -328,6 +330,7 @@ public class WollMuxBarEventHandler
         final String selected = selectedEntry;
         javax.swing.SwingUtilities.invokeLater(new Runnable()
         {
+          @Override
           public void run()
           {
             wmbar.updateSenderboxes(entries, selected);
@@ -353,6 +356,7 @@ public class WollMuxBarEventHandler
       this.index = index;
     }
 
+    @Override
     public void process()
     {
       XWollMux mux = getRemoteWollMux(true);
@@ -362,6 +366,7 @@ public class WollMuxBarEventHandler
 
   private class TerminateEvent implements Event
   {
+    @Override
     public void process()
     {
       XWollMux mux = getRemoteWollMux(false);
@@ -373,6 +378,7 @@ public class WollMuxBarEventHandler
 
   private class WollMuxConnectionEvent implements Event
   {
+    @Override
     public void process()
     {
       getRemoteWollMux(true);
@@ -388,6 +394,7 @@ public class WollMuxBarEventHandler
       this.run = run;
     }
 
+    @Override
     public void process()
     {
       getRemoteWollMux(true);
@@ -397,11 +404,12 @@ public class WollMuxBarEventHandler
 
   private class MyPALChangeEventListener implements XPALChangeEventListener
   {
+    @Override
     public void updateContent(EventObject eventObject)
     {
       XPALProvider palProv =
-        (XPALProvider) UnoRuntime.queryInterface(XPALProvider.class,
-          eventObject.Source);
+        UnoRuntime.queryInterface(XPALProvider.class,
+        eventObject.Source);
       if (palProv != null)
       {
         try
@@ -424,6 +432,7 @@ public class WollMuxBarEventHandler
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
+    @Override
     public void disposing(EventObject arg0)
     {}
   }
@@ -435,6 +444,7 @@ public class WollMuxBarEventHandler
    */
   private class EventProcessor extends Thread
   {
+    @Override
     public void run()
     {
       while (true)
@@ -502,7 +512,7 @@ public class WollMuxBarEventHandler
       try
       {
         XWollMux mux =
-          (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
+          UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
         if (mux == null) throw new DisposedException();
         return mux;
       }
@@ -522,7 +532,7 @@ public class WollMuxBarEventHandler
       {
         ctx = Bootstrap.bootstrap();
         factory =
-          (XMultiServiceFactory) UnoRuntime.queryInterface(
+          UnoRuntime.queryInterface(
             XMultiServiceFactory.class, ctx.getServiceManager());
       }
       catch (Exception x)
@@ -535,7 +545,7 @@ public class WollMuxBarEventHandler
           // create a connector, so that it can contact the office
           XUnoUrlResolver urlResolver = UnoUrlResolver.create(ctx);
           Object initialObject = urlResolver.resolve("uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager");
-          factory = (XMultiServiceFactory) UnoRuntime.queryInterface(
+          factory = UnoRuntime.queryInterface(
             XMultiServiceFactory.class, initialObject);
         }
         catch (Exception y)
@@ -588,7 +598,7 @@ public class WollMuxBarEventHandler
       }
 
       XWollMux mux =
-        (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
+        UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
       try
       {
         int wmConfHashCode =
@@ -614,18 +624,20 @@ public class WollMuxBarEventHandler
     terminateListener = null;
     if (!wollmuxbar.isQuickstarterEnabled()) return;
     desktop =
-      (XDesktop) UnoRuntime.queryInterface(XDesktop.class,
+      UnoRuntime.queryInterface(XDesktop.class,
         factory.createInstance("com.sun.star.frame.Desktop"));
     terminateListener = new XTerminateListener()
     {
       // Was any of the open documents changed?
       private boolean docChanged = false;
       
+      @Override
       public void notifyTermination(EventObject arg0)
       {
         Logger.debug("notifyTermination");
       }
 
+      @Override
       public void queryTermination(EventObject arg0) throws TerminationVetoException
       {
         Logger.debug("queryTermination");
@@ -687,6 +699,7 @@ public class WollMuxBarEventHandler
         }
       }
 
+      @Override
       public void disposing(EventObject arg0)
       {
         Logger.debug("disposing");

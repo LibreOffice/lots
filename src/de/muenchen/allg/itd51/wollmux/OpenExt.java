@@ -25,6 +25,8 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XStorable;
@@ -102,6 +104,37 @@ public class OpenExt
   /** true gdw {@link #storeIfNecessary()} bereits aufgerufen wurde. */
   private boolean haveStored = false;
 
+  public static OpenExt getInstance(String ext, String url) throws MalformedURLException
+  {
+    final String USER_HOME = "${user.home}";
+    int uhidx = url.indexOf(USER_HOME);
+    if (uhidx >= 0)
+    {
+      String userHomeUrl =
+        new File(System.getProperty("user.home")).toURI().toURL().toString();
+
+      while ((uhidx = url.indexOf(USER_HOME)) >= 0)
+        url =
+          url.substring(0, uhidx) + userHomeUrl
+            + url.substring(uhidx + USER_HOME.length());
+
+      /**
+       * Beim Einbau einer URL in eine bestehende URL kann es zu Doppelungen des
+       * Protokollbezeichners file: kommen. In diesem Fall entfernen wir das erste
+       * davon.
+       */
+      final Pattern DUPLICATE_FILE_PROTOCOL_PATTERN =
+        Pattern.compile("file:/*(file:.*)");
+      Matcher m = DUPLICATE_FILE_PROTOCOL_PATTERN.matcher(url);
+      if (m.matches()) url = m.group(1);
+    }
+
+    URL srcUrl = WollMuxFiles.makeURL(url);
+    final OpenExt openExt = new OpenExt(ext, WollMuxFiles.getWollmuxConf());
+    openExt.setSource(srcUrl);
+    return openExt;
+  }
+  
   /**
    * Erzeugt ein neues OpenExt Objekt für die Erweitertung ext, wobei Informationen
    * über die externe Applikation aus wollmuxConf,query("ExterneAnwendungen")
@@ -387,6 +420,7 @@ public class OpenExt
 
     Thread t = new Thread()
     {
+      @Override
       public void run()
       {
         try

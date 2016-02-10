@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.comp.loader.FactoryHelper;
 import com.sun.star.container.XIndexAccess;
 import com.sun.star.container.XIndexContainer;
 import com.sun.star.document.XEventListener;
@@ -48,8 +49,10 @@ import com.sun.star.frame.DispatchDescriptor;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
 import com.sun.star.lang.XComponent;
+import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.lang.XServiceInfo;
 import com.sun.star.lang.XSingleComponentFactory;
+import com.sun.star.lang.XSingleServiceFactory;
 import com.sun.star.lib.uno.helper.Factory;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.registry.XRegistryKey;
@@ -74,6 +77,7 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 import de.muenchen.allg.itd51.wollmux.event.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
 
 /**
  * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service hat
@@ -191,6 +195,11 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     com.sun.star.lang.XSingleComponentFactory xFactory = null;
     if (sImplName.equals(WollMux.class.getName()))
       xFactory = Factory.createComponentFactory(WollMux.class, SERVICENAMES);
+    if (sImplName.equals(WollMuxSidebarFactory.class.getName()))
+      xFactory =
+        Factory.createComponentFactory(WollMuxSidebarFactory.class,
+          new String[] { WollMuxSidebarFactory.__serviceName });
+
     return xFactory;
   }
 
@@ -206,6 +215,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   {
     try
     {
+      FactoryHelper.writeRegistryServiceInfo(WollMuxSidebarFactory.class.getName(),
+        WollMuxSidebarFactory.__serviceName, xRegKey);
+
       return Factory.writeRegistryServiceInfo(WollMux.class.getName(),
         WollMux.SERVICENAMES, xRegKey);
     }
@@ -223,6 +235,24 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
       t.printStackTrace();
       return false;
     }
+  }
+  
+  public synchronized static XSingleServiceFactory __getServiceFactory(
+      final String sImplementationName,
+      final XMultiServiceFactory xFactory,
+      final XRegistryKey xKey)
+  {
+      XSingleServiceFactory xResult = null;
+      if (sImplementationName.equals(WollMuxSidebarFactory.class.getName()))
+      {
+        xResult = FactoryHelper.getServiceFactory(
+                WollMuxSidebarFactory.class,
+                WollMuxSidebarFactory.__serviceName,
+                xFactory,
+                xKey);
+      }
+      
+      return xResult;
   }
 
   /**

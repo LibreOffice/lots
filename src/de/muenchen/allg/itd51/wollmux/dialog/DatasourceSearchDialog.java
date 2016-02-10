@@ -85,7 +85,8 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.Search;
 import de.muenchen.allg.itd51.wollmux.db.SearchStrategy;
-import de.muenchen.allg.itd51.wollmux.dialog.UIElementFactory.Context;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.Listbox;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
@@ -158,24 +159,24 @@ public class DatasourceSearchDialog implements Dialog
   private DatasourceJoiner dj;
 
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
+   * Ein Kontext für {@link UIElementFactory#createUIElement(UIElementContext, ConfigThingy)},
    * der verwendet wird für das Erzeugen von vertikal angeordneten UI Elementen (mit
    * Ausnahme der Vorschau).
    */
-  private UIElementFactory.Context vertiContext;
+  private UIElementContext vertiContext;
 
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
+   * Ein Kontext für {@link UIElementFactory#createUIElement(UIElementContext, ConfigThingy)},
    * der verwendet wird für das Erzeugen der vertikal angeordneten UI Elemente der
    * Vorschau.
    */
-  private UIElementFactory.Context previewContext;
+  private UIElementContext previewContext;
 
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
+   * Ein Kontext für {@link UIElementFactory#createUIElement(UIElementContext, ConfigThingy)},
    * der verwendet wird für das Erzeugen von horizontal angeordneten Elementen.
    */
-  private UIElementFactory.Context horiContext;
+  private UIElementContext horiContext;
 
   /**
    * Solange dieses Flag false ist, werden Events von UI Elementen ignoriert.
@@ -447,7 +448,7 @@ public class DatasourceSearchDialog implements Dialog
     /**
      * Die Listbox mit den Suchresultaten.
      */
-    private UIElement.Listbox resultsList = null;
+    private Listbox resultsList = null;
 
     /**
      * Das Textfeld in dem der Benutzer seine Suchanfrage eintippt.
@@ -550,14 +551,14 @@ public class DatasourceSearchDialog implements Dialog
      * 
      * @param context
      *          ist der Kontext, der
-     *          {@link UIElementFactory#createUIElement(Context, ConfigThingy)}
+     *          {@link UIElementFactory#createUIElement(UIElementContext, ConfigThingy)}
      *          übergeben werden soll für die Erzeugung der UIElemente.
      * @param in
      *          dieser Map werden all erzeugten UIElemente registriert, die ein
      *          DB_SPALTE Attribut haben. null ist nicht erlaubt. TESTED
      */
     private void addUIElements(ConfigThingy conf, String key, JComponent compo,
-        int stepx, int stepy, UIElementFactory.Context context,
+        int stepx, int stepy, UIElementContext context,
         Map<String, UIElement> mapDB_SPALTEtoUIElement)
     {
       int y = 0;
@@ -610,7 +611,7 @@ public class DatasourceSearchDialog implements Dialog
           {
             try
             {
-              resultsList = (UIElement.Listbox) uiElement;
+              resultsList = (Listbox) uiElement;
               try
               {
                 displayTemplate = uiConf.get("DISPLAY").toString();
@@ -702,7 +703,7 @@ public class DatasourceSearchDialog implements Dialog
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
-    private void setListElements(UIElement.Listbox list, QueryResults data)
+    private void setListElements(Listbox list, QueryResults data)
     {
       if (list == null) return;
       ListElement[] elements;
@@ -875,7 +876,7 @@ public class DatasourceSearchDialog implements Dialog
         }
         else if (eventType.equals("listSelectionChanged"))
         {
-          List<Object> selected = ((UIElement.Listbox) source).getSelected();
+          List<Object> selected = ((Listbox) source).getSelected();
           if (selected.size() > 0) updatePreview((ListElement) selected.get(0));
         }
 
@@ -1012,7 +1013,7 @@ public class DatasourceSearchDialog implements Dialog
       supportedActions.add("search");
       supportedActions.add("select");
 
-      vertiContext = new UIElementFactory.Context();
+      vertiContext = new UIElementContext();
       vertiContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
       vertiContext.mapTypeToLabelType = mapTypeToLabelType;
       vertiContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
@@ -1023,7 +1024,7 @@ public class DatasourceSearchDialog implements Dialog
       vertiContext.supportedActions = supportedActions;
       vertiContext.uiElementEventHandler = this;
 
-      horiContext = new UIElementFactory.Context();
+      horiContext = new UIElementContext();
       horiContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
       horiContext.mapTypeToLabelType = mapTypeToLabelType;
       horiContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
@@ -1046,7 +1047,7 @@ public class DatasourceSearchDialog implements Dialog
       previewLayoutConstraints.put("v-glue", gbcPreviewGlue);
       previewLayoutConstraints.put("label", gbcPreviewLabel);
       previewLayoutConstraints.put("h-separator", gbcPreviewHsep);
-      previewContext = new UIElementFactory.Context();
+      previewContext = new UIElementContext();
       previewContext.mapTypeToLabelLayoutConstraints = previewLabelLayoutConstraints;
       previewContext.mapTypeToLabelType = previewLabelType;
       previewContext.mapTypeToLayoutConstraints = previewLayoutConstraints;
