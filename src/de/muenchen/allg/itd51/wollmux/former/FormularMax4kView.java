@@ -36,6 +36,7 @@ public class FormularMax4kView extends JFrame
    */
   private ActionListener actionListener_abort = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       controller.abort();
@@ -72,6 +73,8 @@ public class FormularMax4kView extends JFrame
 
     Common.setLookAndFeelOnce();
     createGUI();
+    
+    setLocationRelativeTo(null);
   }
 
   private void createGUI()
@@ -512,26 +515,33 @@ public class FormularMax4kView extends JFrame
 
   private class MyWindowListener implements WindowListener
   {
+    @Override
     public void windowOpened(WindowEvent e)
     {}
 
+    @Override
     public void windowClosing(WindowEvent e)
     {
       closeAction.actionPerformed(null);
     }
 
+    @Override
     public void windowClosed(WindowEvent e)
     {}
 
+    @Override
     public void windowIconified(WindowEvent e)
     {}
 
+    @Override
     public void windowDeiconified(WindowEvent e)
     {}
 
+    @Override
     public void windowActivated(WindowEvent e)
     {}
 
+    @Override
     public void windowDeactivated(WindowEvent e)
     {}
 

@@ -2,6 +2,8 @@ package de.muenchen.allg.itd51.wollmux.former;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -443,12 +445,18 @@ public class FormularMax4kController
    */
   public void editFormDescriptor()
   {
-    // editor.setCaretPosition(0);
-    // editor.setText(updateDocument(doc).stringRepresentation());
-    // myFrame.getContentPane().remove(mainContentPanel);
-    // myFrame.getContentPane().add(editorContentPanel);
-    // myFrame.setJMenuBar(editorMenuBar);
-    // setFrameSize();
+    view.setVisible(false);
+    ConfigEditor editor = new ConfigEditor("Config Editor", this);
+    
+    editor.setVisible(true);
+    editor.setText(updateDocument(doc).stringRepresentation());
+    editor.addWindowListener(new WindowAdapter()
+    {
+      @Override
+      public void windowClosed(WindowEvent e) {
+        view.setVisible(true);
+      }
+    });
   }
 
   public void showFunctionTester()
@@ -732,7 +740,7 @@ public class FormularMax4kController
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private void initModelsAndViews(ConfigThingy formDescription)
+  public void initModelsAndViews(ConfigThingy formDescription)
   {
     idManager = new IDManager();
     formControlModelList.clear();
