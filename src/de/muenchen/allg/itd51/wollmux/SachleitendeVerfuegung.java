@@ -1115,7 +1115,7 @@ public class SachleitendeVerfuegung
   public static List<VerfuegungspunktInfo> callPrintDialog(XTextDocument doc)
   {
     //JGM: Update der Dokumentenstruktur (Kommandos und TextSections)
-    WollMuxSingleton.getInstance().getTextDocumentModel(doc).getDocumentCommands().update();
+    DocumentManager.getTextDocumentModel(doc).getDocumentCommands().update();
     Vector<Verfuegungspunkt> vps = scanVerfuegungspunkte(doc);
     Iterator<Verfuegungspunkt> iter = vps.iterator();
     while (iter.hasNext())
@@ -1132,7 +1132,7 @@ public class SachleitendeVerfuegung
     }
 
     // Beschreibung des Druckdialogs auslesen.
-    ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
+    ConfigThingy conf = WollMuxFiles.getWollmuxConf();
     ConfigThingy svdds =
       conf.query("Dialoge").query("SachleitendeVerfuegungenDruckdialog");
     ConfigThingy printDialogConf = null;
@@ -1726,7 +1726,7 @@ public class SachleitendeVerfuegung
   private static String getCopyName()
   {
     String name = L.m("Abdruck");
-    ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
+    ConfigThingy conf = WollMuxFiles.getWollmuxConf();
     ConfigThingy nan = conf.query("SachleitendeVerfuegungen").query("ABDRUCK_NAME");
     try
     {
@@ -1750,7 +1750,7 @@ public class SachleitendeVerfuegung
   private static String[] getNumbers()
   {
     String numbers = "roman";
-    ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
+    ConfigThingy conf = WollMuxFiles.getWollmuxConf();
     ConfigThingy nan = conf.query("SachleitendeVerfuegungen").query("NUMBERS");
     try
     {

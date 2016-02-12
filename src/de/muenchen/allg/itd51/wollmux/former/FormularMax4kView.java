@@ -26,7 +26,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 
 public class FormularMax4kView extends JFrame
@@ -607,7 +607,7 @@ public class FormularMax4kView extends JFrame
   private boolean createStandardelementeMenuNew(JMenu submenu)
   {
     boolean found = false;
-    for (ConfigThingy fm4000conf : WollMuxSingleton.getInstance().getWollmuxConf().query(
+    for (ConfigThingy fm4000conf : WollMuxFiles.getWollmuxConf().query(
       "FormularMax4000", 1))
     {
       for (ConfigThingy eleConf : fm4000conf.query("Standardelemente", 1))

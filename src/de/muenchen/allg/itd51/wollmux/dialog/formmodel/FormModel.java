@@ -29,9 +29,11 @@
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * 
  */
-package de.muenchen.allg.itd51.wollmux;
+package de.muenchen.allg.itd51.wollmux.dialog.formmodel;
 
 import java.awt.event.ActionListener;
+
+import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 
 /**
  * Erlaubt Zugriff auf die Formularbestandteile eines Dokuments abstrahiert von den

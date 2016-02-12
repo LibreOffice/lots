@@ -160,7 +160,7 @@ public class PersistentData
   public static PersistentDataContainer createPersistentDataContainer(
       XTextDocument doc)
   {
-    ConfigThingy wmConf = WollMuxSingleton.getInstance().getWollmuxConf();
+    ConfigThingy wmConf = WollMuxFiles.getWollmuxConf();
     String pdMode;
     try
     {
@@ -252,6 +252,7 @@ public class PersistentData
      * 
      * TESTED
      */
+    @Override
     public String getData(DataID dataId)
     {
       String data = legacy.getData(dataId);
@@ -300,6 +301,7 @@ public class PersistentData
      * 
      * TESTED
      */
+    @Override
     public void setData(DataID dataId, String dataValue)
     {
       legacy.setData(dataId, dataValue);
@@ -313,6 +315,7 @@ public class PersistentData
      * 
      * TESTED
      */
+    @Override
     public void flush()
     {
       rdfData.flush();
@@ -326,6 +329,7 @@ public class PersistentData
      * de.muenchen.allg.itd51.wollmux.PersistentDataContainer#removeData(java.lang.
      * String)
      */
+    @Override
     public void removeData(DataID dataId)
     {
       rdfData.removeData(dataId);
@@ -383,6 +387,7 @@ public class PersistentData
      * 
      * TESTED
      */
+    @Override
     public String getData(DataID dataId)
     {
       String data = legacy.getData(dataId);
@@ -444,6 +449,7 @@ public class PersistentData
      * 
      * TESTED
      */
+    @Override
     public void setData(DataID dataId, String dataValue)
     {
       rdfData.setData(dataId, dataValue);
@@ -457,6 +463,7 @@ public class PersistentData
      * 
      * TESTED
      */
+    @Override
     public void flush()
     {
       rdfData.flush();
@@ -470,6 +477,7 @@ public class PersistentData
      * de.muenchen.allg.itd51.wollmux.PersistentDataContainer#removeData(java.lang.
      * String)
      */
+    @Override
     public void removeData(DataID dataId)
     {
       rdfData.removeData(dataId);
@@ -644,6 +652,7 @@ public class PersistentData
      * 
      * TESTED
      */
+    @Override
     public String getData(DataID dataId)
     {
       XNamedGraph g = getWollMuxDatenGraph();
@@ -677,6 +686,7 @@ public class PersistentData
      * 
      * TESTED
      */
+    @Override
     public void setData(DataID dataId, String dataValue)
     {
       XNamedGraph g = getOrCreateWollMuxDatenGraph();
@@ -709,6 +719,7 @@ public class PersistentData
      * 
      * TESTED
      */
+    @Override
     public void removeData(DataID dataId)
     {
       XNamedGraph g = getWollMuxDatenGraph();
@@ -733,6 +744,7 @@ public class PersistentData
      * 
      * TESTED
      */
+    @Override
     public void flush()
     {
       try
@@ -796,6 +808,7 @@ public class PersistentData
      * Die Methode liefert die unter ID dataId gespeicherten Daten zurück oder null,
      * wenn keine vorhanden sind.
      */
+    @Override
     public String getData(DataID dataId)
     {
       Vector<Object> textfields =
@@ -947,6 +960,7 @@ public class PersistentData
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
+    @Override
     public void setData(DataID dataId, String dataValue)
     {
       Object recordChanges = UNO.getProperty(doc, RECORD_CHANGES);
@@ -985,6 +999,7 @@ public class PersistentData
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
+    @Override
     public void removeData(DataID dataId)
     {
       Object recordChanges = UNO.getProperty(doc, RECORD_CHANGES);
@@ -1040,6 +1055,7 @@ public class PersistentData
      * 
      * TESTED
      */
+    @Override
     public void flush()
     {
       if (Workarounds.applyWorkaroundForOOoIssue100374())

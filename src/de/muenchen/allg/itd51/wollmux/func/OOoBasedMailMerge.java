@@ -85,6 +85,7 @@ import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormFieldType;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.PersistentData;
 import de.muenchen.allg.itd51.wollmux.PersistentDataContainer;
 import de.muenchen.allg.itd51.wollmux.PersistentDataContainer.DataID;
@@ -93,7 +94,6 @@ import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.SimulationResults;
 import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
@@ -161,7 +161,7 @@ public class OOoBasedMailMerge
     }
     if (ds.getSize() == 0)
     {
-      WollMuxSingleton.showInfoModal(
+      ModalDialogs.showInfoModal(
         L.m("WollMux-Seriendruck"),
         L.m("Der Seriendruck wurde abgebrochen, da Ihr Druckauftrag keine Datensätze enthält."));
       pmod.cancel();
@@ -251,7 +251,7 @@ public class OOoBasedMailMerge
         }
       else
       {
-        WollMuxSingleton.showInfoModal(L.m("WollMux-Seriendruck"),
+        ModalDialogs.showInfoModal(L.m("WollMux-Seriendruck"),
           L.m("Leider konnte kein Gesamtdokument erstellt werden."));
         pmod.cancel();
       }
@@ -269,7 +269,7 @@ public class OOoBasedMailMerge
       }
       else
       {
-        WollMuxSingleton.showInfoModal(L.m("WollMux-Seriendruck"),
+        ModalDialogs.showInfoModal(L.m("WollMux-Seriendruck"),
           L.m("Das erzeugte Gesamtdokument kann leider nicht angezeigt werden."));
         pmod.cancel();
       }
@@ -726,7 +726,7 @@ public class OOoBasedMailMerge
       }
       if (!invalidHeaders.isEmpty())
       {
-        boolean anpassen = WollMuxSingleton.showQuestionModal(
+        boolean anpassen = ModalDialogs.showQuestionModal(
           L.m("WollMux-Seriendruck"),
           L.m("Zeilenumbrüche in Spaltenüberschriften sind für den Seriendruck nicht erlaubt.\n")
             + L.m("\nBitte entfernen Sie die Zeilenumbrüche aus den folgenden Überschriften der Datenquelle:\n\n")

@@ -31,10 +31,15 @@ package de.muenchen.allg.itd51.wollmux;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Vector;
 
+import com.sun.star.document.XEventListener;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.uno.UnoRuntime;
+import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
 
@@ -45,8 +50,23 @@ import de.muenchen.allg.afid.UNO;
  */
 public class DocumentManager
 {
+  /**
+   * Verwaltet Informationen zu allen offenen OOo-Dokumenten.
+   */
+  private static DocumentManager docManager;
+  
   private HashMap<HashableComponent, Info> info =
     new HashMap<HashableComponent, Info>();
+  
+  /**
+   * Enthält alle registrierten XEventListener, die bei Statusänderungen der
+   * Dokumentbearbeitung informiert werden.
+   */
+  private Vector<XEventListener> registeredDocumentEventListener;
+  
+  private DocumentManager() {
+    registeredDocumentEventListener = new Vector<XEventListener>();
+  }
 
   /**
    * Fügt compo den gemanageten Objekten hinzu, wobei die für Textdokumente
@@ -136,6 +156,103 @@ public class DocumentManager
     if (nfo != null) nfo.setProcessingFinished();
   }
 
+  /**
+   * Liefert einen Iterator auf alle registrierten XEventListener-Objekte, die über
+   * Änderungen am Status der Dokumentverarbeitung informiert werden sollen.
+   * 
+   * @return Iterator auf alle registrierten XEventListener-Objekte.
+   */
+  public Iterator<XEventListener> documentEventListenerIterator()
+  {
+    return registeredDocumentEventListener.iterator();
+  }
+
+  /**
+   * Diese Methode registriert einen XEventListener, der Nachrichten empfängt wenn
+   * sich der Status der Dokumentbearbeitung ändert (z.B. wenn ein Dokument
+   * vollständig bearbeitet/expandiert wurde). Die Methode ignoriert alle
+   * XEventListenener-Instanzen, die bereits registriert wurden.
+   * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
+   * 
+   * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen werden,
+   * sondern jeder Aufruf muss über den EventHandler laufen. Deswegen exportiert
+   * WollMuxSingleton auch nicht das XEventBroadcaster-Interface.
+   */
+  public void addDocumentEventListener(XEventListener listener)
+  {
+    Logger.debug2("DocumentManager::addDocumentEventListener()");
+
+    if (listener == null) return;
+
+    Iterator<XEventListener> i = registeredDocumentEventListener.iterator();
+    while (i.hasNext())
+    {
+      XInterface l = UNO.XInterface(i.next());
+      if (UnoRuntime.areSame(l, listener)) return;
+    }
+    registeredDocumentEventListener.add(listener);
+  }
+
+  /**
+   * Diese Methode deregistriert einen XEventListener wenn er bereits registriert
+   * war.
+   * 
+   * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen werden,
+   * sondern jeder Aufruf muss über den EventHandler laufen. Deswegen exportiert
+   * WollMuxSingleton auch nicht das XEventBroadcaster-Interface.
+   */
+  public void removeDocumentEventListener(XEventListener listener)
+  {
+    Logger.debug2("DocumentManager::removeDocumentEventListener()");
+    Iterator<XEventListener> i = registeredDocumentEventListener.iterator();
+    while (i.hasNext())
+    {
+      XInterface l = UNO.XInterface(i.next());
+      if (UnoRuntime.areSame(l, listener)) i.remove();
+    }
+  }
+  
+  /**
+   * Liefert das aktuelle TextDocumentModel zum übergebenen XTextDocument doc;
+   * existiert zu doc noch kein TextDocumentModel, so wird hier eines erzeugt und das
+   * neu erzeugte zurück geliefert.
+   * 
+   * @param doc
+   *          Das XTextDocument, zu dem das zugehörige TextDocumentModel
+   *          zurückgeliefert werden soll.
+   * @return Das zu doc zugehörige TextDocumentModel.
+   */
+  public static TextDocumentModel getTextDocumentModel(XTextDocument doc)
+  {
+    Info info = getDocumentManager().getInfo(doc);
+    if (info == null)
+    {
+      Logger.error(
+        L.m("Irgendwer will hier ein TextDocumentModel für ein Objekt was der DocumentManager nicht kennt. Das sollte nicht passieren!"),
+        new Exception());
+  
+      // Wir versuchen trotzdem sinnvoll weiterzumachen.
+      getDocumentManager().addTextDocument(doc);
+      info = getDocumentManager().getInfo(doc);
+    }
+  
+    return info.getTextDocumentModel();
+  }
+
+  /**
+   * Liefert eine Referenz auf den von diesem WollMux verwendeten
+   * {@link DocumentManager}.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public static DocumentManager getDocumentManager()
+  {
+    if (docManager == null)
+      docManager = new DocumentManager();
+    
+    return docManager;
+  }
+
   public static class Info
   {
     /**
@@ -208,17 +325,20 @@ public class DocumentManager
      * möglicherweise aus verschiedenen Threads zugegriffen (WollMux Event Queue und
      * Event Handler im Singleton), daher ist synchronized notwendig.
      */
+    @Override
     public synchronized TextDocumentModel getTextDocumentModel()
     {
       if (model == null) model = new TextDocumentModel(doc);
       return model;
     }
 
+    @Override
     public boolean hasTextDocumentModel()
     {
       return model != null;
     }
 
+    @Override
     public String toString()
     {
       return "TextDocumentInfo - model=" + model;

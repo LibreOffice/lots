@@ -125,12 +125,12 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo;
-import de.muenchen.allg.itd51.wollmux.FormModel;
-import de.muenchen.allg.itd51.wollmux.FormModelImpl;
-import de.muenchen.allg.itd51.wollmux.FormModelImpl.InvalidFormDescriptorException;
+import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
+import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.TextModule;
@@ -154,6 +154,10 @@ import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
+import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
+import de.muenchen.allg.itd51.wollmux.dialog.formmodel.InvalidFormDescriptorException;
+import de.muenchen.allg.itd51.wollmux.dialog.formmodel.MultiDocumentFormModel;
+import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.func.Function;
@@ -379,7 +383,7 @@ public class WollMuxEventHandler
       {
         msg += "\n\n" + c;
       }
-      WollMuxSingleton.showInfoModal(L.m("WollMux-Fehler"), msg);
+      ModalDialogs.showInfoModal(L.m("WollMux-Fehler"), msg);
     }
 
     /**
@@ -556,34 +560,22 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
+      ConfigThingy conf = WollMuxFiles.getWollmuxConf();
 
-      ConfigThingy conf = mux.getWollmuxConf();
-
-      // Konfiguration auslesen:
-      ConfigThingy whoAmIconf;
-      ConfigThingy PALconf;
-      ConfigThingy ADBconf;
       try
       {
-        whoAmIconf = requireLastSection(conf, "AbsenderAuswaehlen");
-        PALconf = requireLastSection(conf, "PersoenlicheAbsenderliste");
-        ADBconf = requireLastSection(conf, "AbsenderdatenBearbeiten");
-      }
-      catch (ConfigurationErrorException e)
-      {
-        throw new CantStartDialogException(e);
-      }
+        // Konfiguration auslesen:
+        ConfigThingy whoAmIconf = requireLastSection(conf, "AbsenderAuswaehlen");
+        ConfigThingy PALconf = requireLastSection(conf, "PersoenlicheAbsenderliste");
+        ConfigThingy ADBconf = requireLastSection(conf, "AbsenderdatenBearbeiten");
 
-      // Dialog modal starten:
-      try
-      {
+        // Dialog modal starten:
         setLock();
         new AbsenderAuswaehlen(whoAmIconf, PALconf, ADBconf,
-          mux.getDatasourceJoiner(), unlockActionListener);
+          WollMuxFiles.getDatasourceJoiner(), unlockActionListener);
         waitForUnlock();
       }
-      catch (java.lang.Exception e)
+      catch (Exception e)
       {
         throw new CantStartDialogException(e);
       }
@@ -616,31 +608,21 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-      ConfigThingy conf = mux.getWollmuxConf();
+      ConfigThingy conf = WollMuxFiles.getWollmuxConf();
 
-      // Konfiguration auslesen:
-      ConfigThingy PALconf;
-      ConfigThingy ADBconf;
       try
       {
-        PALconf = requireLastSection(conf, "PersoenlicheAbsenderliste");
-        ADBconf = requireLastSection(conf, "AbsenderdatenBearbeiten");
-      }
-      catch (ConfigurationErrorException e)
-      {
-        throw new CantStartDialogException(e);
-      }
+        // Konfiguration auslesen:
+        ConfigThingy PALconf = requireLastSection(conf, "PersoenlicheAbsenderliste");
+        ConfigThingy ADBconf = requireLastSection(conf, "AbsenderdatenBearbeiten");
 
-      // Dialog modal starten:
-      try
-      {
+        // Dialog modal starten:
         setLock();
         new PersoenlicheAbsenderlisteVerwalten(PALconf, ADBconf,
-          mux.getDatasourceJoiner(), unlockActionListener);
+          WollMuxFiles.getDatasourceJoiner(), unlockActionListener);
         waitForUnlock();
-      }
-      catch (java.lang.Exception e)
+}
+      catch (Exception e)
       {
         throw new CantStartDialogException(e);
       }
@@ -679,10 +661,8 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-
       // Dialog aus Funktionsdialog-Bibliothek holen:
-      Dialog dialog = mux.getFunctionDialogs().get(dialogName);
+      Dialog dialog = GlobalFunctions.getInstance().getFunctionDialogs().get(dialogName);
       if (dialog == null)
         throw new WollMuxFehlerException(L.m(
           "Funktionsdialog '%1' ist nicht definiert.", dialogName));
@@ -777,8 +757,6 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-
       Common.setLookAndFeelOnce();
 
       // non-modal dialog. Set 3rd param to true to make modal
@@ -801,7 +779,7 @@ public class WollMuxEventHandler
       myPanel.add(hbox);
 
       copyrightPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-      JLabel label = new JLabel(L.m("WollMux") + " " + mux.getVersion());
+      JLabel label = new JLabel(L.m("WollMux") + " " + WollMuxSingleton.getVersion());
       Font largeFont = label.getFont().deriveFont(15.0f);
       label.setFont(largeFont);
       copyrightPanel.add(label);
@@ -884,13 +862,13 @@ public class WollMuxEventHandler
       infoPanel.setOpaque(false);
       infoPanel.setBorder(BorderFactory.createTitledBorder(L.m("Info")));
 
-      infoPanel.add(new JLabel(L.m("WollMux") + " " + mux.getBuildInfo()));
+      infoPanel.add(new JLabel(L.m("WollMux") + " " + WollMuxSingleton.getBuildInfo()));
 
       if (wollMuxBarVersion != null && !wollMuxBarVersion.equals(""))
         infoPanel.add(new JLabel(L.m("WollMux-Leiste") + " " + wollMuxBarVersion));
 
       infoPanel.add(new JLabel(L.m("WollMux-Konfiguration:") + " "
-        + mux.getConfVersionInfo()));
+        + WollMuxSingleton.getInstance().getConfVersionInfo()));
 
       infoPanel.add(new JLabel("DEFAULT_CONTEXT: "
         + WollMuxFiles.getDEFAULT_CONTEXT().toExternalForm()));
@@ -984,9 +962,10 @@ public class WollMuxEventHandler
         // Bibliotheken kann der FM4000 selbst auflösen.
         max =
           new FormularMax4kController(model, l,
-            WollMuxSingleton.getInstance().getGlobalFunctions(),
-            WollMuxSingleton.getInstance().getGlobalPrintFunctions());
+            GlobalFunctions.getInstance().getGlobalFunctions(),
+            GlobalFunctions.getInstance().getGlobalPrintFunctions());
         model.setCurrentFormularMax4000(max);
+        max.run();
       }
     }
 
@@ -1171,15 +1150,14 @@ public class WollMuxEventHandler
     {
       if (xTextDoc == null) return;
 
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-      TextDocumentModel model = mux.getTextDocumentModel(xTextDoc);
+      TextDocumentModel model = DocumentManager.getTextDocumentModel(xTextDoc);
 
       // Konfigurationsabschnitt Textdokument verarbeiten falls Dok sichtbar:
       if (visible)
         try
         {
           ConfigThingy tds =
-            mux.getWollmuxConf().query("Fenster").query("Textdokument").getLastChild();
+            WollMuxFiles.getWollmuxConf().query("Fenster").query("Textdokument").getLastChild();
           model.setWindowViewSettings(tds);
         }
         catch (NodeNotFoundException e)
@@ -1202,7 +1180,7 @@ public class WollMuxEventHandler
       }
 
       // Mögliche Aktionen für das neu geöffnete Dokument:
-      DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model, mux);
+      DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model, WollMuxFiles.isDebugMode());
 
       try
       {
@@ -1211,7 +1189,7 @@ public class WollMuxEventHandler
         dci.scanGlobalDocumentCommands();
 
         int actions =
-          model.evaluateDocumentActions(mux.getDocumentActionFunctions().iterator());
+          model.evaluateDocumentActions(GlobalFunctions.getInstance().getDocumentActionFunctions().iterator());
 
         // Bei Vorlagen: Ausführung der Dokumentkommandos
         if ((actions < 0 && model.isTemplate()) || (actions == Integer.MAX_VALUE))
@@ -1234,7 +1212,7 @@ public class WollMuxEventHandler
           if (visible)
             try
             {
-              model.setDocumentZoom(mux.getWollmuxConf().query("Fenster").query(
+              model.setDocumentZoom(WollMuxFiles.getWollmuxConf().query("Fenster").query(
                 "Formular").getLastChild().query("ZOOM"));
             }
             catch (java.lang.Exception e)
@@ -1246,7 +1224,7 @@ public class WollMuxEventHandler
             FormModel fm;
             try
             {
-              fm = FormModelImpl.createSingleDocumentFormModel(model, visible);
+              fm = SingleDocumentFormModel.createSingleDocumentFormModel(model, visible);
             }
             catch (InvalidFormDescriptorException e)
             {
@@ -1327,7 +1305,7 @@ public class WollMuxEventHandler
       FormModel fm;
       try
       {
-        fm = FormModelImpl.createMultiDocumentFormModel(docs, buttonAnpassung);
+        fm = MultiDocumentFormModel.createMultiDocumentFormModel(docs, buttonAnpassung);
       }
       catch (InvalidFormDescriptorException e)
       {
@@ -1391,7 +1369,7 @@ public class WollMuxEventHandler
       // DocumentCommandInterpreter bearbeiten:
       model.getDocumentCommands().update();
       DocumentCommandInterpreter dci =
-        new DocumentCommandInterpreter(model, WollMuxSingleton.getInstance());
+        new DocumentCommandInterpreter(model, WollMuxFiles.isDebugMode());
       try
       {
         dci.executeTemplateCommands();
@@ -1586,8 +1564,6 @@ public class WollMuxEventHandler
     private TextDocumentModel openTextDocument(List<String> fragIDs,
         boolean asTemplate, boolean asPartOfMultiform) throws WollMuxFehlerException
     {
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-
       // das erste Argument ist das unmittelbar zu landende Textfragment und
       // wird nach urlStr aufgelöst. Alle weiteren Argumente (falls vorhanden)
       // werden nach argsUrlStr aufgelöst.
@@ -1687,7 +1663,7 @@ public class WollMuxEventHandler
 
         if (UNO.XTextDocument(doc) != null)
         {
-          model = mux.getTextDocumentModel(UNO.XTextDocument(doc));
+          model = DocumentManager.getTextDocumentModel(UNO.XTextDocument(doc));
           model.setFragUrls(fragUrls);
           if (asPartOfMultiform)
             model.setPartOfMultiformDocument(asPartOfMultiform);
@@ -1733,15 +1709,13 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-
       // registrierte PALChangeListener updaten
-      Iterator<XPALChangeEventListener> i = mux.palChangeListenerIterator();
+      Iterator<XPALChangeEventListener> i = PersoenlicheAbsenderliste.getInstance().iterator();
       while (i.hasNext())
       {
         Logger.debug2("OnPALChangedNotify: Update XPALChangeEventListener");
         EventObject eventObject = new EventObject();
-        eventObject.Source = WollMuxSingleton.getInstance();
+        eventObject.Source = PersoenlicheAbsenderliste.getInstance();
         try
         {
           i.next().updateContent(eventObject);
@@ -1755,7 +1729,7 @@ public class WollMuxEventHandler
       // Cache und LOS auf Platte speichern.
       try
       {
-        mux.getDatasourceJoiner().saveCacheAndLOS(WollMuxFiles.getLosCacheFile());
+        WollMuxFiles.getDatasourceJoiner().saveCacheAndLOS(WollMuxFiles.getLosCacheFile());
       }
       catch (IOException e)
       {
@@ -1804,7 +1778,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      String[] pal = WollMuxSingleton.getInstance().getPALEntries();
+      String[] pal = PersoenlicheAbsenderliste.getInstance().getPALEntries();
 
       // nur den neuen Absender setzen, wenn index und sender übereinstimmen,
       // d.h.
@@ -1812,7 +1786,7 @@ public class WollMuxEventHandler
       if (idx >= 0 && idx < pal.length && pal[idx].toString().equals(senderName))
       {
         DJDatasetListElement[] palDatasets =
-          WollMuxSingleton.getInstance().getSortedPALEntries();
+            PersoenlicheAbsenderliste.getInstance().getSortedPALEntries();
         palDatasets[idx].getDataset().select();
       }
       else
@@ -2415,9 +2389,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-
-      DatasourceJoiner dsj = mux.getDatasourceJoiner();
+      DatasourceJoiner dsj = WollMuxFiles.getDatasourceJoiner();
 
       if (dsj.getLOS().size() == 0)
       {
@@ -2437,7 +2409,7 @@ public class WollMuxEventHandler
       {
         // Liste der nicht zuordnenbaren Datensätze erstellen und ausgeben:
         String names = "";
-        List<String> lost = mux.getsLostDatasetDisplayStrings();
+        List<String> lost = WollMuxFiles.getLostDatasetDisplayStrings();
         if (lost.size() > 0)
         {
           for (String l : lost)
@@ -2448,7 +2420,7 @@ public class WollMuxEventHandler
               + "Wenn dieses Problem nicht temporärer "
               + "Natur ist, sollten Sie diese Datensätze aus "
               + "ihrer Absenderliste löschen und neu hinzufügen!", names);
-          WollMuxSingleton.showInfoModal(L.m("WollMux-Info"), message);
+          ModalDialogs.showInfoModal(L.m("WollMux-Info"), message);
         }
       }
     }
@@ -2825,7 +2797,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      WollMuxSingleton.getInstance().addPALChangeEventListener(listener);
+      PersoenlicheAbsenderliste.getInstance().addPALChangeEventListener(listener);
 
       WollMuxEventHandler.handlePALChangedNotify();
 
@@ -2884,7 +2856,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      WollMuxSingleton.getInstance().removePALChangeEventListener(listener);
+      PersoenlicheAbsenderliste.getInstance().removePALChangeEventListener(listener);
     }
 
     @Override
@@ -2974,11 +2946,10 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-      mux.addDocumentEventListener(listener);
+      DocumentManager.getDocumentManager().addDocumentEventListener(listener);
 
       List<XComponent> processedDocuments = new Vector<XComponent>();
-      mux.getDocumentManager().getProcessedDocuments(processedDocuments);
+      DocumentManager.getDocumentManager().getProcessedDocuments(processedDocuments);
 
       for (XComponent compo : processedDocuments)
       {
@@ -3020,7 +2991,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      WollMuxSingleton.getInstance().removeDocumentEventListener(listener);
+      DocumentManager.getDocumentManager().removeDocumentEventListener(listener);
     }
 
     @Override
@@ -3082,7 +3053,7 @@ public class WollMuxEventHandler
       eventObject.EventName = eventName;
 
       Iterator<XEventListener> i =
-        WollMuxSingleton.getInstance().documentEventListenerIterator();
+          DocumentManager.getDocumentManager().documentEventListenerIterator();
       while (i.hasNext())
       {
         Logger.debug2("notifying XEventListener (event '" + eventName + "')");
@@ -3111,7 +3082,7 @@ public class WollMuxEventHandler
 
       XComponent compo = UNO.XComponent(source);
       if (compo != null && eventName.equals(ON_WOLLMUX_PROCESSING_FINISHED))
-        WollMuxSingleton.getInstance().getDocumentManager().setProcessingFinished(
+        DocumentManager.getDocumentManager().setProcessingFinished(
           compo);
 
     }
@@ -3261,7 +3232,7 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       TextDocumentModel model =
-        WollMuxSingleton.getInstance().getTextDocumentModel(doc);
+        DocumentManager.getTextDocumentModel(doc);
       try
       {
         model.setPrintBlocksProps(blockName, visible, showHighlightColor);
@@ -3329,7 +3300,7 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       TextDocumentModel model =
-        WollMuxSingleton.getInstance().getTextDocumentModel(doc);
+        DocumentManager.getTextDocumentModel(doc);
       if (remove)
         model.removePrintFunction(functionName);
       else
@@ -3522,7 +3493,7 @@ public class WollMuxEventHandler
       if (UNO.XBookmarksSupplier(model.doc) == null || blockname == null) return;
 
       ConfigThingy slvConf =
-        WollMuxSingleton.getInstance().getWollmuxConf().query(
+          WollMuxFiles.getWollmuxConf().query(
           "SachleitendeVerfuegungen");
       Integer highlightColor = null;
 
@@ -3532,7 +3503,7 @@ public class WollMuxEventHandler
 
       if (range.isCollapsed())
       {
-        WollMuxSingleton.showInfoModal(L.m("Fehler"),
+        ModalDialogs.showInfoModal(L.m("Fehler"),
           L.m("Bitte wählen Sie einen Bereich aus, der markiert werden soll."));
         return;
       }
@@ -3600,7 +3571,7 @@ public class WollMuxEventHandler
           catch (NoSuchElementException e)
           {}
         }
-        WollMuxSingleton.showInfoModal(
+        ModalDialogs.showInfoModal(
           L.m("Markierung des Blockes aufgehoben"),
           L.m(
             "Der ausgewählte Block enthielt bereits eine Markierung 'Block %1'. Die bestehende Markierung wurde aufgehoben.",
@@ -3618,14 +3589,14 @@ public class WollMuxEventHandler
           XTextCursor vc = model.getViewCursor();
           if (vc != null) vc.collapseToEnd();
         }
-        WollMuxSingleton.showInfoModal(L.m("Block wurde markiert"),
+        ModalDialogs.showInfoModal(L.m("Block wurde markiert"),
           L.m("Der ausgewählte Block %1.", markChange));
       }
 
       // PrintBlöcke neu einlesen:
       model.getDocumentCommands().update();
       DocumentCommandInterpreter dci =
-        new DocumentCommandInterpreter(model, WollMuxSingleton.getInstance());
+        new DocumentCommandInterpreter(model, WollMuxFiles.isDebugMode());
       dci.scanGlobalDocumentCommands();
       dci.scanInsertFormValueCommands();
 
@@ -3698,13 +3669,13 @@ public class WollMuxEventHandler
       String name = WollMuxFiles.dumpInfo();
 
       if (name != null)
-        WollMuxSingleton.showInfoModal(
+        ModalDialogs.showInfoModal(
           title,
           L.m(
             "Die Fehlerinformationen des WollMux wurden erfolgreich in die Datei '%1' geschrieben.",
             name));
       else
-        WollMuxSingleton.showInfoModal(
+        ModalDialogs.showInfoModal(
           title,
           L.m("Die Fehlerinformationen des WollMux konnten nicht geschrieben werden\n\nDetails siehe Datei wollmux.log!"));
     }
@@ -3810,7 +3781,7 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       TextDocumentModel model =
-        WollMuxSingleton.getInstance().getTextDocumentModel(doc);
+        DocumentManager.getTextDocumentModel(doc);
 
       FormModel formModel = model.getFormModel();
       if (formModel != null)
@@ -3985,7 +3956,7 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       TextDocumentModel model =
-        WollMuxSingleton.getInstance().getTextDocumentModel(doc);
+        DocumentManager.getTextDocumentModel(doc);
 
       for (DocumentCommand cmd : model.getDocumentCommands())
         // stellt sicher, dass listener am Schluss informiert wird
@@ -4065,12 +4036,12 @@ public class WollMuxEventHandler
         TextModule.createInsertFragFromIdentifier(model.doc, viewCursor, reprocess);
         if (reprocess) handleReprocessTextDocument(model);
         if (!reprocess)
-          WollMuxSingleton.showInfoModal(L.m("WollMux"),
+          ModalDialogs.showInfoModal(L.m("WollMux"),
             L.m("Der Textbausteinverweis wurde eingefügt."));
       }
       catch (WollMuxFehlerException e)
       {
-        WollMuxSingleton.showInfoModal(L.m("WollMux-Fehler"), e.getMessage());
+        ModalDialogs.showInfoModal(L.m("WollMux-Fehler"), e.getMessage());
       }
     }
 
@@ -4159,7 +4130,7 @@ public class WollMuxEventHandler
     {
 
       TextDocumentModel model =
-        WollMuxSingleton.getInstance().getTextDocumentModel(doc);
+        DocumentManager.getTextDocumentModel(doc);
 
       XTextCursor viewCursor = model.getViewCursor();
       if (viewCursor == null) return;
@@ -4189,7 +4160,7 @@ public class WollMuxEventHandler
       {
         if (msg)
         {
-          WollMuxSingleton.showInfoModal(L.m("WollMux"),
+          ModalDialogs.showInfoModal(L.m("WollMux"),
             L.m("Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!"));
         }
       }
@@ -4614,7 +4585,7 @@ public class WollMuxEventHandler
       try
       {
         ConfigThingy warndialog =
-          WollMuxSingleton.getInstance().getWollmuxConf().query("Dialoge").query(
+          WollMuxFiles.getWollmuxConf().query("Dialoge").query(
             "MehrfachinstallationWarndialog").getLastChild();
         try
         {
@@ -4683,7 +4654,7 @@ public class WollMuxEventHandler
             + "\n" + otherInstsList;
         Logger.error(logMsg);
 
-        if (showdialog) WollMuxSingleton.showInfoModal(title, msg, 0);
+        if (showdialog) ModalDialogs.showInfoModal(title, msg, 0);
       }
     }
 

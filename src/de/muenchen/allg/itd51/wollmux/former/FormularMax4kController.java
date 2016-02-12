@@ -261,7 +261,15 @@ public class FormularMax4kController
     selectionSupplier = getSelectionSupplier();
     myXSelectionChangedListener = new MyXSelectionChangedListener();
     selectionSupplier.addSelectionChangeListener(myXSelectionChangedListener);
-    
+}
+
+  public void setAbortListener(ActionListener abortListener)
+  {
+    this.abortListener = abortListener;
+  }
+
+  public void run()
+  {
     try
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
@@ -289,7 +297,7 @@ public class FormularMax4kController
     {
       Logger.error(x);
     }
-}
+  }
 
   /**
    * Liefert den {@link IDManager}, der für Objekte im Formular verwendet wird.
@@ -1053,7 +1061,7 @@ public class FormularMax4kController
     try
     {
       XDocumentProperties info =
-        UNO.XDocumentPropertiesSupplier(doc).getDocumentProperties();
+        UNO.XDocumentPropertiesSupplier(doc.doc).getDocumentProperties();
       try
       {
         String title = ((String) UNO.getProperty(info, "Title")).trim();

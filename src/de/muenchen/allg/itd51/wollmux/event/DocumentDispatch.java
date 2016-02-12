@@ -37,9 +37,9 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 
 /**
  * Implementiert XDispatch und kann alle Dispatch-URLs behandeln, die ein
@@ -120,7 +120,7 @@ public class DocumentDispatch extends Dispatch
     XTextDocument doc = UNO.XTextDocument(frame.getController().getModel());
     if (doc != null)
     {
-      return WollMuxSingleton.getInstance().getTextDocumentModel(doc);
+      return DocumentManager.getTextDocumentModel(doc);
     }
     return null;
   }

@@ -36,12 +36,14 @@
 
 package de.muenchen.allg.itd51.wollmux.comp;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.container.XIndexAccess;
+import com.sun.star.container.XIndexContainer;
 import com.sun.star.document.XEventListener;
+import com.sun.star.form.FormButtonType;
 import com.sun.star.frame.DispatchDescriptor;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
@@ -52,13 +54,15 @@ import com.sun.star.lib.uno.helper.Factory;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.registry.XRegistryKey;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.ui.XModuleUIConfigurationManagerSupplier;
+import com.sun.star.ui.XUIConfigurationManager;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.SyncActionListener;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
@@ -67,6 +71,7 @@ import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 import de.muenchen.allg.itd51.wollmux.event.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
@@ -102,6 +107,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   public WollMux(XComponentContext ctx)
   {
     WollMuxSingleton.initialize(ctx);
+    
+    createMenuItems();
   }
 
   /*
@@ -109,6 +116,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * 
    * @see com.sun.star.lang.XServiceInfo#getSupportedServiceNames()
    */
+  @Override
   public String[] getSupportedServiceNames()
   {
     return SERVICENAMES;
@@ -119,6 +127,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * 
    * @see com.sun.star.lang.XServiceInfo#supportsService(java.lang.String)
    */
+  @Override
   public boolean supportsService(String sService)
   {
     int len = SERVICENAMES.length;
@@ -134,6 +143,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * 
    * @see com.sun.star.lang.XServiceInfo#getImplementationName()
    */
+  @Override
   public String getImplementationName()
   {
     return (WollMux.class.getName());
@@ -145,6 +155,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * @see com.sun.star.frame.XDispatchProvider#queryDispatch(com.sun.star.util.URL,
    * java.lang.String, int)
    */
+  @Override
   public XDispatch queryDispatch( /* IN */com.sun.star.util.URL aURL,
   /* IN */String sTargetFrameName,
   /* IN */int iSearchFlags)
@@ -159,6 +170,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * @seecom.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.
    * DispatchDescriptor[])
    */
+  @Override
   public XDispatch[] queryDispatches( /* IN */DispatchDescriptor[] seqDescripts)
   {
     return DispatchProviderAndInterceptor.globalWollMuxDispatches.queryDispatches(seqDescripts);
@@ -223,6 +235,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * 
    * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventBroadcaster#addPALChangeEventListener(de.muenchen.allg.itd51.wollmux.XPALChangeEventListener)
    */
+  @Override
   public void addPALChangeEventListener(XPALChangeEventListener l)
   {
     WollMuxEventHandler.handleAddPALChangeEventListener(l, null);
@@ -253,6 +266,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventBroadcaster#addPALChangeEventListenerWithConsistencyCheck(de.muenchen.allg.itd51.wollmux.XPALChangeEventListener,
    *      int)
    */
+  @Override
   public void addPALChangeEventListenerWithConsistencyCheck(
       XPALChangeEventListener l, int wollmuxConfHashCode)
   {
@@ -285,6 +299,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * @author Christoph Lutz (D-III-ITD-5.1)
    * @see com.sun.star.document.XEventBroadcaster#addEventListener(com.sun.star.document.XEventListener)
    */
+  @Override
   public void addEventListener(XEventListener l)
   {
     WollMuxEventHandler.handleAddDocumentEventListener(l);
@@ -296,6 +311,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * 
    * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventBroadcaster#removePALChangeEventListener(de.muenchen.allg.itd51.wollmux.XPALChangeEventListener)
    */
+  @Override
   public void removePALChangeEventListener(XPALChangeEventListener l)
   {
     WollMuxEventHandler.handleRemovePALChangeEventListener(l);
@@ -311,6 +327,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * @author Christoph Lutz (D-III-ITD-5.1)
    * @see com.sun.star.document.XEventBroadcaster#removeEventListener(com.sun.star.document.XEventListener)
    */
+  @Override
   public void removeEventListener(XEventListener l)
   {
     WollMuxEventHandler.handleRemoveDocumentEventListener(l);
@@ -325,6 +342,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * für sender das selben Format wie es von {@link XPALProvider.getCurrentSender()}
    * bzw. {@link XPALProvider.getPALEntries()} geliefert wird.
    */
+  @Override
   public void setCurrentSender(String sender, short idx)
   {
     Logger.debug2("WollMux.setCurrentSender(\"" + sender + "\", " + idx + ")");
@@ -349,11 +367,12 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
+  @Override
   public PropertyValue[] getInsertValues()
   {
     // Diese Methode nimmt keine Synchronisierung über den WollMuxEventHandler vor,
     // da das reine Auslesen der Datenstrukturen unkritisch ist.
-    DatasourceJoiner dj = WollMuxSingleton.getInstance().getDatasourceJoiner();
+    DatasourceJoiner dj = WollMuxFiles.getDatasourceJoiner();
     UnoProps p = new UnoProps();
     try
     {
@@ -390,6 +409,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * @return Der Wert der Datenbankspalte dbSpalte des aktuell ausgewählten Absenders
    *         oder "", wenn der Wert nicht bestimmt werden kann.
    */
+  @Override
   public String getValue(String dbSpalte)
   {
     /*
@@ -406,7 +426,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     try
     {
       String value =
-        WollMuxSingleton.getInstance().getDatasourceJoiner().getSelectedDatasetTransformed().get(
+          WollMuxFiles.getDatasourceJoiner().getSelectedDatasetTransformed().get(
           dbSpalte);
       if (value == null) value = "";
       return value;
@@ -433,6 +453,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
+  @Deprecated
+  @Override
   public void addPrintFunction(XTextDocument doc, String functionName)
   {
     XWollMuxDocument wdoc = getWollMuxDocument(doc);
@@ -452,6 +474,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
+  @Deprecated
+  @Override
   public void removePrintFunction(XTextDocument doc, String functionName)
   {
     XWollMuxDocument wdoc = getWollMuxDocument(doc);
@@ -484,173 +508,111 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * 
    * @author Matthias Benkmann (D-III-ITD-D101), Christoph Lutz (D-III-ITD-D101)
    */
+  @Override
   public XWollMuxDocument getWollMuxDocument(XComponent doc)
   {
     XTextDocument tdoc = UNO.XTextDocument(doc);
     if (tdoc != null) return new WollMuxDocument(tdoc);
     return null;
   }
+  
+  private void createMenuItems()
+  {
+    // "Extras->Seriendruck (WollMux)" erzeugen:
+    List<String> removeButtonsFor = new ArrayList<String>();
+    removeButtonsFor.add(Dispatch.DISP_wmSeriendruck);
+    WollMux.createMenuButton(Dispatch.DISP_wmSeriendruck, L.m("Seriendruck (WollMux)"),
+      ".uno:ToolsMenu", ".uno:MailMergeWizard", removeButtonsFor);
+
+    // "Help->Info über WollMux" erzeugen:
+    removeButtonsFor.clear();
+    removeButtonsFor.add(Dispatch.DISP_wmAbout);
+    WollMux.createMenuButton(Dispatch.DISP_wmAbout,
+      L.m("Info über Vorlagen und Formulare (WollMux)"), ".uno:HelpMenu",
+      ".uno:About", removeButtonsFor);
+  }
 
   /**
-   * Implementiert XWollMuxDocument für alle dokumentspezifischen Aktionen
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
+   * Erzeugt einen persistenten Menüeintrag mit der KommandoUrl cmdUrl und dem Label
+   * label in dem durch mit insertIntoMenuUrl beschriebenen Toplevelmenü des Writers
+   * und ordnet ihn direkt oberhalb des bereits bestehenden Menüpunktes mit der URL
+   * insertBeforeElementUrl an. Alle Buttons, deren Url in der Liste removeCmdUrls
+   * aufgeführt sind werden dabei vorher gelöscht (v.a. sollte cmdUrl aufgeführt
+   * sein, damit nicht der selbe Button doppelt erscheint).
    */
-  private static class WollMuxDocument implements XWollMuxDocument
+  private static void createMenuButton(String cmdUrl, String label,
+      String insertIntoMenuUrl, String insertBeforeElementUrl,
+      List<String> removeCmdUrls)
   {
-    private XTextDocument doc;
-
-    private HashMap<String, String> mapDbSpalteToValue;
-
-    public WollMuxDocument(XTextDocument doc)
+    final String settingsUrl = "private:resource/menubar/menubar";
+  
+    try
     {
-      this.doc = doc;
-      this.mapDbSpalteToValue = new HashMap<String, String>();
+      // Menüleiste aus des Moduls com.sun.star.text.TextDocument holen:
+      XModuleUIConfigurationManagerSupplier suppl =
+        UNO.XModuleUIConfigurationManagerSupplier(UNO.createUNOService("com.sun.star.ui.ModuleUIConfigurationManagerSupplier"));
+      XUIConfigurationManager cfgMgr =
+        UNO.XUIConfigurationManager(suppl.getUIConfigurationManager("com.sun.star.text.TextDocument"));
+      XIndexAccess menubar = UNO.XIndexAccess(cfgMgr.getSettings(settingsUrl, true));
+  
+      int idx = findElementWithCmdURL(menubar, insertIntoMenuUrl);
+      if (idx >= 0)
+      {
+        UnoProps desc = new UnoProps((PropertyValue[]) menubar.getByIndex(idx));
+        // Elemente des .uno:ToolsMenu besorgen:
+        XIndexContainer toolsMenu =
+          UNO.XIndexContainer(desc.getPropertyValue("ItemDescriptorContainer"));
+  
+        // Seriendruck-Button löschen, wenn er bereits vorhanden ist.
+        for (String rCmdUrl : removeCmdUrls)
+        {
+          idx = findElementWithCmdURL(toolsMenu, rCmdUrl);
+          if (idx >= 0) toolsMenu.removeByIndex(idx);
+        }
+  
+        // SeriendruckAssistent suchen
+        idx = findElementWithCmdURL(toolsMenu, insertBeforeElementUrl);
+        if (idx >= 0)
+        {
+          UnoProps newDesc = new UnoProps();
+          newDesc.setPropertyValue("CommandURL", cmdUrl);
+          newDesc.setPropertyValue("Type", FormButtonType.PUSH);
+          newDesc.setPropertyValue("Label", label);
+          toolsMenu.insertByIndex(idx, newDesc.getProps());
+          cfgMgr.replaceSettings(settingsUrl, menubar);
+          UNO.XUIConfigurationPersistence(cfgMgr).store();
+        }
+      }
     }
-
-    /**
-     * Nimmt die Druckfunktion functionName in die Liste der Druckfunktionen des
-     * Dokuments auf. Die Druckfunktion wird dabei automatisch aktiv, wenn das
-     * Dokument das nächste mal mit Datei->Drucken gedruckt werden soll. Ist die
-     * Druckfunktion bereits in der Liste der Druckfunktionen des Dokuments
-     * enthalten, so geschieht nichts.
-     * 
-     * Hinweis: Die Ausführung erfolgt asynchron, d.h. addPrintFunction() kehrt unter
-     * Umständen bereits zurück BEVOR die Methode ihre Wirkung entfaltet hat.
-     * 
-     * @param functionName
-     *          der Name einer Druckfunktion, die im Abschnitt "Druckfunktionen" der
-     *          WollMux-Konfiguration definiert sein muss.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
-     */
-    public void addPrintFunction(String functionName)
-    {
-      WollMuxEventHandler.handleManagePrintFunction(doc, functionName, false);
-    }
-
-    /**
-     * Löscht die Druckfunktion functionName aus der Liste der Druckfunktionen des
-     * Dokuments. Die Druckfunktion wird damit ab dem nächsten Aufruf von
-     * Datei->Drucken nicht mehr aufgerufen. Ist die Druckfunktion nicht in der Liste
-     * der Druckfunktionen des Dokuments enthalten, so geschieht nichts.
-     * 
-     * Hinweis: Die Ausführung erfolgt asynchron, d.h. removePrintFunction() kehrt
-     * unter Umständen bereits zurück BEVOR die Methode ihre Wirkung entfaltet hat.
-     * 
-     * @param functionName
-     *          der Name einer Druckfunktion, die im Dokument gesetzt ist.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
-     */
-    public void removePrintFunction(String functionName)
-    {
-      WollMuxEventHandler.handleManagePrintFunction(doc, functionName, true);
-    }
-
-    /**
-     * Setzt den Wert mit ID id in der FormularGUI auf Wert mit allen Folgen, die das
-     * nach sich zieht (PLAUSIs, AUTOFILLs, Ein-/Ausblendungen,...). Es ist nicht
-     * garantiert, dass der Befehl ausgeführt wird, bevor updateFormGUI() aufgerufen
-     * wurde. Eine Implementierung mit einer Queue ist möglich.
-     * 
-     * Anmerkung: Eine Liste aller verfügbaren IDs kann über die Methode
-     * XWollMuxDocument.getFormValues() gewonnen werden.
-     * 
-     * @param id
-     *          ID zu der der neue Formularwert gesetzt werden soll.
-     * @param value
-     *          Der neu zu setzende Formularwert.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
-     */
-    public void setFormValue(String id, String value)
-    {
-      SyncActionListener s = new SyncActionListener();
-      WollMuxEventHandler.handleSetFormValue(doc, id, value, s);
-      s.synchronize();
-    }
-
-    /**
-     * Setzt den Wert, der bei insertValue-Dokumentkommandos mit DB_SPALTE "dbSpalte"
-     * eingefügt werden soll auf Wert. Es ist nicht garantiert, dass der neue Wert im
-     * Dokument sichtbar wird, bevor updateInsertFields() aufgerufen wurde. Eine
-     * Implementierung mit einer Queue ist möglich.
-     * 
-     * Anmerkung: Eine Liste aller verfügbaren DB_SPALTEn kann mit der Methode
-     * XWollMux.getInsertValues() gewonnen werden.
-     * 
-     * @param dbSpalte
-     *          enthält den Namen der Absenderdatenspalte, deren Wert geändert werden
-     *          soll.
-     * @param value
-     *          enthält den neuen Wert für dbSpalte.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
-     */
-    public void setInsertValue(String dbSpalte, String value)
-    {
-      mapDbSpalteToValue.put(dbSpalte, value);
-    }
-
-    /**
-     * Sorgt für die Ausführung aller noch nicht ausgeführten setFormValue()
-     * Kommandos. Die Methode kehrt garantiert erst zurück, wenn alle
-     * setFormValue()-Kommandos ihre Wirkung im WollMux und im entsprechenden
-     * Dokument entfaltet haben.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
-     */
-    public void updateFormGUI()
-    {
-    // Wird implementiert, wenn setFormValue(...) so umgestellt werden soll, dass die
-    // Änderungen vorerst nur in einer queue gesammelt werden und mit dieser Methode
-    // aktiv werden sollen.
-    }
-
-    /**
-     * Sorgt für die Ausführung aller noch nicht ausgeführten setInsertValue()
-     * Kommandos. Die Methode kehrt garantiert erst zurück, wenn alle
-     * setInsertValue()-Kommandos ihre Wirkung im WollMux und im entsprechenden
-     * Dokument entfaltet haben.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
-     */
-    public void updateInsertFields()
-    {
-      HashMap<String, String> m = new HashMap<String, String>(mapDbSpalteToValue);
-      mapDbSpalteToValue.clear();
-      SyncActionListener s = new SyncActionListener();
-      WollMuxEventHandler.handleSetInsertValues(doc, m, s);
-      s.synchronize();
-    }
-
-    /**
-     * Liefert die zum aktuellen Zeitpunkt gesetzten Formularwerte dieses
-     * WollMux-Dokuments in einem Array von PropertyValue-Objekten zurück. Dabei
-     * repräsentieren die Attribute {@link PropertyValue.Name} die verfügbaren IDs
-     * und die Attribute {@link PropertyValue.Value} die zu ID zugehörigen
-     * Formularwerte.
-     * 
-     * Jeder Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit allen
-     * Einträgen die zu dem Zeitpunkt gültig sind. Eine Änderung der Werte des
-     * Rückgabeobjekts hat daher keine Auswirkung auf den WollMux.
-     * 
-     * @return Array von PropertyValue-Objekten mit den aktuell gesetzten
-     *         Formularwerten dieses WollMux-Dokuments. Gibt es keine Formularwerte
-     *         im Dokument, so ist das Array leer (aber != null).
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
-     */
-    public PropertyValue[] getFormValues()
-    {
-      UnoProps p = new UnoProps();
-      TextDocumentModel model =
-        WollMuxSingleton.getInstance().getTextDocumentModel(doc);
-      Map<String, String> id2value = model.getFormFieldValues();
-      for (Entry<String, String> e : id2value.entrySet())
-        if (e.getValue() != null) p.setPropertyValue(e.getKey(), e.getValue());
-      return p.getProps();
-    }
+    catch (Exception e)
+    {}
   }
+  
+  /**
+   * Liefert den Index des ersten Menüelements aus dem Menü menu zurück, dessen
+   * CommandURL mit cmdUrl identisch ist oder -1, falls kein solches Element gefunden
+   * wurde.
+   * 
+   * @return Liefert den Index des ersten Menüelements mit CommandURL cmdUrl oder -1.
+   */
+  private static int findElementWithCmdURL(XIndexAccess menu, String cmdUrl)
+  {
+    try
+    {
+      for (int i = 0; i < menu.getCount(); ++i)
+      {
+        PropertyValue[] desc = (PropertyValue[]) menu.getByIndex(i);
+        for (int j = 0; j < desc.length; j++)
+        {
+          if ("CommandURL".equals(desc[j].Name) && cmdUrl.equals(desc[j].Value))
+            return i;
+        }
+      }
+    }
+    catch (Exception e)
+    {}
+    return -1;
+  }
+
+
 }

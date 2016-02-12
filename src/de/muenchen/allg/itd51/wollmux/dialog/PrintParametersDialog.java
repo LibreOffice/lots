@@ -60,7 +60,10 @@ import javax.swing.event.DocumentListener;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.frame.DispatchResultEvent;
+import com.sun.star.frame.XDispatch;
+import com.sun.star.frame.XDispatchProvider;
 import com.sun.star.frame.XDispatchResultListener;
+import com.sun.star.frame.XModel;
 import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.lang.EventObject;
 import com.sun.star.text.XTextDocument;
@@ -70,7 +73,6 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
 public class PrintParametersDialog
@@ -106,26 +108,33 @@ public class PrintParametersDialog
   private WindowListener myWindowListener = new WindowListener()
   {
 
+    @Override
     public void windowDeactivated(WindowEvent e)
     {}
 
+    @Override
     public void windowActivated(WindowEvent e)
     {}
 
+    @Override
     public void windowDeiconified(WindowEvent e)
     {}
 
+    @Override
     public void windowIconified(WindowEvent e)
     {}
 
+    @Override
     public void windowClosed(WindowEvent e)
     {}
 
+    @Override
     public void windowClosing(WindowEvent e)
     {
       abort(CMD_CANCEL);
     }
 
+    @Override
     public void windowOpened(WindowEvent e)
     {}
   };
@@ -156,6 +165,7 @@ public class PrintParametersDialog
       this.pageRangeValue = pageRangeValue;
     }
 
+    @Override
     public String toString()
     {
       return "PageRange(" + pageRangeType + ", '" + pageRangeValue + "')";
@@ -262,6 +272,7 @@ public class PrintParametersDialog
       new JButton(L.m("Drucker wechseln/einrichten..."));
     printerSettingsButton.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         showPrintSettingsDialog();
@@ -299,16 +310,19 @@ public class PrintParametersDialog
         additionalTextfield.setText("");
         additionalTextfield.getDocument().addDocumentListener(new DocumentListener()
         {
+          @Override
           public void changedUpdate(DocumentEvent e)
           {
             currentPageRangeValue = additionalTextfield.getText();
           }
 
+          @Override
           public void removeUpdate(DocumentEvent e)
           {
             currentPageRangeValue = additionalTextfield.getText();
           }
 
+          @Override
           public void insertUpdate(DocumentEvent e)
           {
             currentPageRangeValue = additionalTextfield.getText();
@@ -322,6 +336,7 @@ public class PrintParametersDialog
       if (firstButton == null) firstButton = button;
       button.addChangeListener(new ChangeListener()
       {
+        @Override
         public void stateChanged(ChangeEvent e)
         {
           if (button.isSelected())
@@ -370,6 +385,7 @@ public class PrintParametersDialog
     button = new JButton(L.m("Abbrechen"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         abort(CMD_CANCEL);
@@ -380,6 +396,7 @@ public class PrintParametersDialog
     button = new JButton(L.m("Drucken"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         printButtonPressed();
@@ -439,6 +456,7 @@ public class PrintParametersDialog
     dialog.setAlwaysOnTop(false);
     Thread t = new Thread()
     {
+      @Override
       public void run()
       {
         // Dialog anzeigen:
@@ -447,21 +465,23 @@ public class PrintParametersDialog
           com.sun.star.util.URL url =
             UNO.getParsedUNOUrl(Dispatch.DISP_unoPrinterSetup);
           XNotifyingDispatch disp =
-            UNO.XNotifyingDispatch(WollMuxSingleton.getDispatchForModel(
-              UNO.XModel(doc), url));
+            UNO.XNotifyingDispatch(getDispatchForModel(UNO.XModel(doc), url));
 
           if (disp != null)
           {
             disp.dispatchWithNotification(url, new PropertyValue[] {},
               new XDispatchResultListener()
               {
+                @Override
                 public void disposing(EventObject arg0)
                 {}
 
+                @Override
                 public void dispatchFinished(DispatchResultEvent arg0)
                 {
                   SwingUtilities.invokeLater(new Runnable()
                   {
+                    @Override
                     public void run()
                     {
                       printerNameField.setText(" " + getCurrentPrinterName(doc)
@@ -482,6 +502,38 @@ public class PrintParametersDialog
     };
     t.setDaemon(false);
     t.start();
+  }
+
+  /**
+   * Holt sich den Frame von doc, führt auf diesem ein queryDispatch() mit der zu
+   * urlStr gehörenden URL aus und liefert den Ergebnis XDispatch zurück oder null,
+   * falls der XDispatch nicht verfügbar ist.
+   * 
+   * @param doc
+   *          Das Dokument, dessen Frame für den Dispatch verwendet werden soll.
+   * @param urlStr
+   *          die URL in Form eines Strings (wird intern zu URL umgewandelt).
+   * @return den gefundenen XDispatch oder null, wenn der XDispatch nicht verfügbar
+   *         ist.
+   */
+  private XDispatch getDispatchForModel(XModel doc, com.sun.star.util.URL url)
+  {
+    if (doc == null) return null;
+  
+    XDispatchProvider dispProv = null;
+    try
+    {
+      dispProv = UNO.XDispatchProvider(doc.getCurrentController().getFrame());
+    }
+    catch (Exception e)
+    {}
+  
+    if (dispProv != null)
+    {
+      return dispProv.queryDispatch(url, "_self",
+        com.sun.star.frame.FrameSearchFlag.SELF);
+    }
+    return null;
   }
 
   /**
@@ -532,6 +584,7 @@ public class PrintParametersDialog
     new PrintParametersDialog(UNO.XTextDocument(UNO.desktop.getCurrentComponent()),
       true, new ActionListener()
       {
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           try

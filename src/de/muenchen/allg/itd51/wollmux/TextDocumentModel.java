@@ -95,8 +95,12 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.OptionalHighlightColorProv
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.PersistentDataContainer.DataID;
+import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
+import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
@@ -116,6 +120,8 @@ import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
  */
 public class TextDocumentModel
 {
+  public static final String OVERRIDE_FRAG_DB_SPALTE = "OVERRIDE_FRAG_DB_SPALTE";
+  
   /**
    * Verwendet für {@link #lastTouchedByOOoVersion} und
    * {@link #lastTouchedByWollMuxVersion}.
@@ -330,6 +336,13 @@ public class TextDocumentModel
    * ist dann aktiviert, wenn {@link #simulationResult} != null ist.
    */
   private SimulationResults simulationResult = null;
+  
+  /**
+   * Der Wert von {@link #OVERRIDE_FRAG_DB_SPALTE}, d,h, der Name der Spalte, die die
+   * persönliche OverrideFrag-Liste enthält. "" falls nicht definiert.
+   */
+  private String overrideFragDbSpalte;
+
 
   /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie direkt
@@ -351,7 +364,7 @@ public class TextDocumentModel
     this.formFieldValues = new HashMap<String, String>();
     this.invisibleGroups = new HashSet<String>();
     this.overrideFragMap = new HashMap<String, String>();
-    parseInitialOverrideFragMap(WollMuxSingleton.getInstance().getInitialOverrideFragMap());
+    parseInitialOverrideFragMap(getInitialOverrideFragMap());
     this.functionContext = new HashMap<Object, Object>();
     this.formModel = null;
     this.formFieldPreviewMode = true;
@@ -437,7 +450,7 @@ public class TextDocumentModel
       haveUpdatedLastTouchedByVersionInfo = true;
       boolean modified = getDocumentModified();
       persistentData.setData(DataID.TOUCH_WOLLMUXVERSION,
-        WollMuxSingleton.getInstance().getVersion());
+        WollMuxSingleton.getVersion());
       persistentData.setData(DataID.TOUCH_OOOVERSION, Workarounds.getOOoVersion());
       setDocumentModified(modified);
     }
@@ -474,7 +487,7 @@ public class TextDocumentModel
       {
         Logger.error(L.m(
           "FRAG_ID Angabe fehlt in einem Eintrag der %1: %2\nVielleicht haben Sie die Klammern um (FRAG_ID 'A' NEW_FRAG_ID 'B') vergessen?",
-          WollMuxSingleton.OVERRIDE_FRAG_DB_SPALTE, conf.stringRepresentation()));
+          OVERRIDE_FRAG_DB_SPALTE, conf.stringRepresentation()));
         continue;
       }
 
@@ -495,7 +508,7 @@ public class TextDocumentModel
       catch (OverrideFragChainException x)
       {
         Logger.error(L.m("Fehlerhafte Angabe in %1: %2",
-          WollMuxSingleton.OVERRIDE_FRAG_DB_SPALTE, conf.stringRepresentation()), x);
+          OVERRIDE_FRAG_DB_SPALTE, conf.stringRepresentation()), x);
       }
     }
   }
@@ -767,7 +780,7 @@ public class TextDocumentModel
    */
   private HashMap<String, String> getIdToPresetValueEmptyFormularwerte()
   {
-    WollMuxSingleton.showInfoModal(L.m("WollMux-Warnung"),
+    ModalDialogs.showInfoModal(L.m("WollMux-Warnung"),
       L.m("WollMux-Formulardaten nicht gefunden.\n\nDer WollMux versucht, die "
         + "fehlenden Formulardaten wieder herzustellen. Nicht rekonstruierbare "
         + "Felder werden im Formular rot hinterlegt. Bitte prüfen und "
@@ -1769,7 +1782,7 @@ public class TextDocumentModel
   private ConfigThingy applyFormularanpassung(ConfigThingy formularConf)
   {
     ConfigThingy anpassungen =
-      WollMuxSingleton.getInstance().getWollmuxConf().query("Formularanpassung", 1);
+        WollMuxFiles.getWollmuxConf().query("Formularanpassung", 1);
     if (anpassungen.count() == 0) return formularConf;
 
     try
@@ -2082,7 +2095,7 @@ public class TextDocumentModel
       {}
       functionLib =
         WollMuxFiles.parseFunctions(formConf, getDialogLibrary(), functionContext,
-          WollMuxSingleton.getInstance().getGlobalFunctions());
+          GlobalFunctions.getInstance().getGlobalFunctions());
     }
     return functionLib;
   }
@@ -2106,7 +2119,7 @@ public class TextDocumentModel
       {}
       dialogLib =
         WollMuxFiles.parseFunctionDialogs(formConf,
-          WollMuxSingleton.getInstance().getFunctionDialogs(), functionContext);
+          GlobalFunctions.getInstance().getFunctionDialogs(), functionContext);
     }
     return dialogLib;
   }
@@ -2587,7 +2600,7 @@ public class TextDocumentModel
   {
     try
     {
-      if (WollMuxSingleton.getInstance().isDebugMode() == false
+      if (WollMuxFiles.isDebugMode() == false
         && UNO.XModel(doc) != null)
       {
         if (lock)
@@ -2808,7 +2821,7 @@ public class TextDocumentModel
     XTextRange range = formCmd.getTextCursor();
 
     XTextContent annotationField =
-      UNO.XTextContent(WollMuxSingleton.findAnnotationFieldRecursive(range));
+      UNO.XTextContent(findAnnotationFieldRecursive(range));
     if (annotationField == null)
       throw new ConfigurationErrorException(
         L.m("Die zugehörige Notiz mit der Formularbeschreibung fehlt."));
@@ -4114,6 +4127,65 @@ public class TextDocumentModel
   }
 
   /**
+   * Liefert die persönliche OverrideFrag-Liste des aktuell gewählten Absenders.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   *         TESTED
+   */
+  private ConfigThingy getInitialOverrideFragMap()
+  {
+    ConfigThingy overrideFragConf = new ConfigThingy("overrideFrag");
+    if (overrideFragDbSpalte == null)
+    {
+      ConfigThingy overrideFragDbSpalteConf =
+        WollMuxFiles.getWollmuxConf().query(OVERRIDE_FRAG_DB_SPALTE, 1);
+      try
+      {
+        overrideFragDbSpalte = overrideFragDbSpalteConf.getLastChild().toString();
+      }
+      catch (NodeNotFoundException x)
+      {
+        // keine OVERRIDE_FRAG_DB_SPALTE Direktive gefunden
+        overrideFragDbSpalte = "";
+      }
+    }
+
+    if (overrideFragDbSpalte.length() > 0)
+    {
+      try
+      {
+        Dataset ds = WollMuxFiles.getDatasourceJoiner().getSelectedDatasetTransformed();
+        String value = ds.get(overrideFragDbSpalte);
+        if (value == null) value = "";
+        overrideFragConf = new ConfigThingy("overrideFrag", value);
+      }
+      catch (DatasetNotFoundException e)
+      {
+        Logger.log(L.m("Kein Absender ausgewählt => %1 bleibt wirkungslos",
+          OVERRIDE_FRAG_DB_SPALTE));
+      }
+      catch (ColumnNotFoundException e)
+      {
+        Logger.error(L.m("%2 spezifiziert Spalte '%1', die nicht vorhanden ist",
+          overrideFragDbSpalte, OVERRIDE_FRAG_DB_SPALTE), e);
+      }
+      catch (IOException x)
+      {
+        Logger.error(L.m("Fehler beim Parsen der %2 '%1'", overrideFragDbSpalte,
+          OVERRIDE_FRAG_DB_SPALTE), x);
+      }
+      catch (SyntaxErrorException x)
+      {
+        Logger.error(L.m("Fehler beim Parsen der %2 '%1'", overrideFragDbSpalte,
+          OVERRIDE_FRAG_DB_SPALTE), x);
+      }
+    }
+
+    return overrideFragConf;
+  }
+  
+  /**
    * Diese Klasse beschreibt die Ersetzung eines bestehendes Formularfeldes durch
    * neue Felder oder konstante Textinhalte. Sie liefert einen Iterator, über den die
    * einzelnen Elemente (Felder bzw. fester Text) vom Typ SubstElement iteriert
@@ -4235,5 +4307,48 @@ public class TextDocumentModel
     SimulationResults r = simulationResult;
     simulationResult = null;
     return r;
+  }
+
+  /**
+   * Diese Methode durchsucht das Element element bzw. dessen XEnumerationAccess
+   * Interface rekursiv nach TextField.Annotation-Objekten und liefert das erste
+   * gefundene TextField.Annotation-Objekt zurück, oder null, falls kein
+   * entsprechendes Element gefunden wurde.
+   * 
+   * @param element
+   *          Das erste gefundene AnnotationField oder null, wenn keines gefunden
+   *          wurde.
+   */
+  private XTextField findAnnotationFieldRecursive(Object element)
+  {
+    // zuerst die Kinder durchsuchen (falls vorhanden):
+    if (UNO.XEnumerationAccess(element) != null)
+    {
+      XEnumeration xEnum = UNO.XEnumerationAccess(element).createEnumeration();
+  
+      while (xEnum.hasMoreElements())
+      {
+        try
+        {
+          Object child = xEnum.nextElement();
+          XTextField found = findAnnotationFieldRecursive(child);
+          // das erste gefundene Element zurückliefern.
+          if (found != null) return found;
+        }
+        catch (Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+    }
+  
+    Object textField = UNO.getProperty(element, "TextField");
+    if (textField != null
+      && UNO.supportsService(textField, "com.sun.star.text.TextField.Annotation"))
+    {
+      return UNO.XTextField(textField);
+    }
+  
+    return null;
   }
 }

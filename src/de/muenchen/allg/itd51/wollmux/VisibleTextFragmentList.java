@@ -158,7 +158,7 @@ public class VisibleTextFragmentList
   {
     WollMuxSingleton.checkIdentifier(frag_id);
 
-    ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
+    ConfigThingy conf = WollMuxFiles.getWollmuxConf();
 
     LinkedList<ConfigThingy> tfListe = new LinkedList<ConfigThingy>();
     ConfigThingy tfConf = conf.query("Textfragmente");
