@@ -10,9 +10,6 @@ Homepage: http://www.wollmux.org
 Package: libreoffice4.1-wollmux
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, default-jre, libreoffice4.1-writer, libreoffice4.1-debian-menus
-Provides: libreoffice-wollmux
-Conflicts: libreoffice-wollmux
-Replaces: libreoffice-wollmux
 Suggests: wollmuxbar
 Description: WollMux extension for LibreOffice
  The package adds an extension to LibreOffice with the following features:
@@ -68,3 +65,8 @@ Depends: wollmuxbar (= ${binary:Version})
 Description: Transitional package for WollMux Bar
  Ease transition from wollmux to wollmuxbar package
 
+Package: libreoffice-wollmux
+Depends: libreoffice4.1-wollmux | libreoffice5.0-wollmux, ${misc:Depends}
+Architecture: all
+Description: transitional dummy package
+ This is a transitional dummy package. It can safely be removed.
