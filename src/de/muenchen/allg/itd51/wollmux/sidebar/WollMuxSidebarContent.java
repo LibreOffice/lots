@@ -344,10 +344,24 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       }
       else if (element.getClass().equals(UISenderbox.class))
       {
-        UISenderbox uiSenderbox = (UISenderbox) element;
+        final UISenderbox uiSenderbox = (UISenderbox) element;
         XControl button =
           GuiFactory.createSenderbox(UNO.xMCF, context, toolkit, windowPeer,
             uiSenderbox.getLabel(), null, new Rectangle(0, 0, 100, 32));
+        
+        XButton xbutton = UnoRuntime.queryInterface(XButton.class, button);
+        xbutton.addActionListener(new XActionListener() {
+          @Override
+          public void disposing(EventObject arg0)
+          {}
+
+          @Override
+          public void actionPerformed(ActionEvent arg0)
+          {
+            uiSenderbox.getAction().performAction();
+          }
+        });
+        
         layout.add(button);
       }
       else if (element instanceof UISearchbox)
