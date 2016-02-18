@@ -9,6 +9,7 @@ import javax.swing.JOptionPane;
 
 import com.sun.star.accessibility.XAccessible;
 import com.sun.star.awt.ActionEvent;
+import com.sun.star.awt.MenuEvent;
 import com.sun.star.awt.MouseEvent;
 import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.WindowEvent;
@@ -16,7 +17,9 @@ import com.sun.star.awt.XActionListener;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlContainer;
+import com.sun.star.awt.XMenu;
 import com.sun.star.awt.XMouseListener;
+import com.sun.star.awt.XPopupMenu;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowListener;
@@ -24,11 +27,15 @@ import com.sun.star.awt.XWindowPeer;
 import com.sun.star.awt.tree.XMutableTreeDataModel;
 import com.sun.star.awt.tree.XMutableTreeNode;
 import com.sun.star.awt.tree.XTreeControl;
+import com.sun.star.beans.MethodConcept;
+import com.sun.star.beans.XIntrospection;
+import com.sun.star.beans.XIntrospectionAccess;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.lang.DisposedException;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.lib.uno.helper.ComponentBase;
+import com.sun.star.reflection.XIdlMethod;
 import com.sun.star.ui.LayoutSize;
 import com.sun.star.ui.XSidebarPanel;
 import com.sun.star.ui.XToolPanel;
@@ -40,11 +47,14 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
+import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
+import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.dialog.UIElementContext;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarConfig;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIButton;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIControl;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIElementAction;
@@ -98,7 +108,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     this.parentWindow.addWindowListener(this);
     layout = new SimpleLayoutManager(this.parentWindow);
 
-    ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
+    ConfigThingy conf = WollMuxFiles.getWollmuxConf();
 
     boolean allowUserConfig = true;
     try
@@ -345,6 +355,78 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       else if (element.getClass().equals(UISenderbox.class))
       {
         final UISenderbox uiSenderbox = (UISenderbox) element;
+        if (!PersoenlicheAbsenderliste.getInstance().getCurrentSender().isEmpty())
+        {
+          uiSenderbox.setLabel(PersoenlicheAbsenderliste.getInstance().getCurrentSender().split("§§%=%§§")[0]);
+        }
+        
+        String[] palEntries = PersoenlicheAbsenderliste.getInstance().getPALEntries();
+        
+        final XPopupMenu menu = UnoRuntime.queryInterface(XPopupMenu.class, UNO.xMCF.createInstanceWithContext("com.sun.star.awt.PopupMenu", context));
+        XMenu xMenu = UnoRuntime.queryInterface(XMenu.class, menu);
+
+        XIntrospection intro = UnoRuntime.queryInterface(XIntrospection.class, UNO.xMSF.createInstance("com.sun.star.beans.Introspection"));
+        XIntrospectionAccess access = intro.inspect(xMenu);
+        XIdlMethod m_setcommand = access.getMethod("setCommand", MethodConcept.ALL);
+        final XIdlMethod m_execute = access.getMethod("execute", MethodConcept.ALL);
+        final XIdlMethod m_getcommand = access.getMethod("getCommand", MethodConcept.ALL);
+        
+        xMenu.addMenuListener(new AbstractMenuListener()
+        {
+          @Override
+          public void select(MenuEvent event)
+          {
+            XMenu menu = UnoRuntime.queryInterface(XMenu.class, event.Source);
+            try
+            {
+              String name = (String)m_getcommand.invoke(menu, new Object[][]{ new Object[]{ new Short(event.MenuId) } });
+              WollMuxEventHandler.handleSetSender(name, event.MenuId - 1);
+            }
+            catch (Exception e)
+            {
+              Logger.error(e);
+            }
+          }
+        });
+        
+        short n = 0;
+        for (String entry : palEntries)
+        {
+          menu.insertItem((short)(n+1), entry.split("§§%=%§§")[0], (short) 0, (short) (n+1));
+          m_setcommand.invoke(xMenu, new Object[][] { new Object[] { new Short((short)(n+1)), entry } });
+          n++;
+        }
+
+        PersoenlicheAbsenderliste.getInstance().addPALChangeEventListener(new XPALChangeEventListener()
+        {
+          @Override
+          public void disposing(EventObject arg0)
+          {}
+          
+          @Override
+          public void updateContent(EventObject eventObject)
+          {
+            XPALProvider palProv =
+                UnoRuntime.queryInterface(XPALProvider.class,
+                eventObject.Source);
+              if (palProv != null)
+              {
+                try
+                {
+                  String[] entries = palProv.getPALEntries();
+                  String current = palProv.getCurrentSender();
+                  String[] entriesCopy = new String[entries.length];
+                  System.arraycopy(entries, 0, entriesCopy, 0, entries.length);
+                  //handleSenderboxUpdate(entriesCopy, current);
+                }
+                catch (Exception x)
+                {
+                  Logger.error(x);
+                }
+              }
+          }
+        });
+        
         XControl button =
           GuiFactory.createSenderbox(UNO.xMCF, context, toolkit, windowPeer,
             uiSenderbox.getLabel(), null, new Rectangle(0, 0, 100, 32));
@@ -356,9 +438,19 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           {}
 
           @Override
-          public void actionPerformed(ActionEvent arg0)
+          public void actionPerformed(ActionEvent event)
           {
-            uiSenderbox.getAction().performAction();
+            try
+            {
+              final XWindow wndButton = UnoRuntime.queryInterface(XWindow.class, event.Source);
+              Rectangle posSize = wndButton.getPosSize();
+              //short n = menu.execute(windowPeer, new Rectangle(posSize.X, posSize.Height, 0, 0), (short)0);
+              m_execute.invoke(menu, new Object[][] { new Object[] { windowPeer, new Rectangle(posSize.X, posSize.Y + posSize.Height, 0, 0), new Short((short)0) } });
+            }
+            catch (Exception e)
+            {
+              e.printStackTrace();
+            }
           }
         });
         
