@@ -202,7 +202,13 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 		<delete dir="${PACKAGE_DIR}/deb" />
 	</target>
 
-	<target name="deb">
+	<target name="deb" depends="bumpversion">
+                <loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true">
+                        <filterchain>
+                                <striplinebreaks/>
+                                <trim/>
+                        </filterchain>
+                </loadfile>
 		<property name="DEB_BUILD_DIR" value="${PACKAGE_DIR}/deb/wollmux-${VERSION}" />
 		<condition property="DEBIAN_DIR" value="debian" else="lhmdeb">
 			<available file="debian/rules" />
