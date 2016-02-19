@@ -333,7 +333,10 @@ public class WollMuxBarEventHandler
           @Override
           public void run()
           {
-            wmbar.updateSenderboxes(entries, selected);
+            if (wmbar != null)
+            {
+              wmbar.updateSenderboxes(entries, selected);
+            }
           }
         });
       }

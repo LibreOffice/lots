@@ -139,7 +139,7 @@ public class UIFactory
     }
   }
 
-  private UIControl<?> createUIMenuElement(UIElementContext context,
+  public UIControl<?> createUIMenuElement(UIElementContext context,
       ConfigThingy conf, String parent)
   {
     Map<String, String> props = parseElementConf(conf);

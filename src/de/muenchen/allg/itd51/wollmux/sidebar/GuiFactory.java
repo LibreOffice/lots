@@ -3,6 +3,7 @@ package de.muenchen.allg.itd51.wollmux.sidebar;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import com.sun.star.awt.InvalidateStyle;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.WindowAttribute;
@@ -10,6 +11,7 @@ import com.sun.star.awt.WindowClass;
 import com.sun.star.awt.WindowDescriptor;
 import com.sun.star.awt.XActionListener;
 import com.sun.star.awt.XButton;
+import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlModel;
 import com.sun.star.awt.XTextComponent;
@@ -127,6 +129,7 @@ public class GuiFactory
     XControl buttonCtrl =
       createControl(xMCF, context, toolkit, windowPeer,
         "com.sun.star.awt.UnoControlEdit", null, null, size);
+    
     XTextComponent txt = UnoRuntime.queryInterface(XTextComponent.class, buttonCtrl);
     txt.setText(text);
     return buttonCtrl;
@@ -171,9 +174,45 @@ public class GuiFactory
 
     XPropertySet props =
         UnoRuntime.queryInterface(XPropertySet.class, treeCtrl.getModel());
-      props.setPropertyValue("DataModel", dataModel);
+    props.setPropertyValue("DataModel", dataModel);
     
     return treeCtrl;
+  }
+  
+  public static XControl createCombobox(XMultiComponentFactory xMCF,
+      XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer, String text, Rectangle size)
+  {
+    XControl ctrl =
+        createControl(xMCF, context, toolkit, windowPeer,
+          "com.sun.star.awt.UnoControlComboBox", null, null, size);
+    XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, ctrl);
+    tf.setText(text);
+    XComboBox cmb = UnoRuntime.queryInterface(XComboBox.class, ctrl);
+    cmb.setDropDownLineCount((short) 10);
+    
+    try
+    {
+      XControlModel model = ctrl.getModel();
+//        UnoRuntime.queryInterface(XControlModel.class,
+//          xMCF.createInstanceWithContext("com.sun.star.awt.UnoControlComboBoxModel", context));
+      
+      XPropertySet props =
+          UnoRuntime.queryInterface(XPropertySet.class, model);
+
+      props.setPropertyValue("Dropdown", Boolean.TRUE);
+      //props.setPropertyValue("ReadOnly", Boolean.TRUE);
+      props.setPropertyValue("Autocomplete", Boolean.FALSE);
+      props.setPropertyValue("HideInactiveSelection", Boolean.TRUE);
+      
+      ctrl.setModel(model);
+      ctrl.getPeer().invalidate(InvalidateStyle.UPDATE);
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
+    }
+    
+    return ctrl;
   }
 
   /**
@@ -211,9 +250,9 @@ public class GuiFactory
       }
       else if (type.equals("com.sun.star.awt.UnoControlEdit"))
       {
-        props.put("MultiLine", true);
-        props.put("ReadOnly", true);
-        props.put("VScroll", true);
+        props.put("MultiLine", false);
+        props.put("ReadOnly", false);
+        props.put("VScroll", false);
       }
       if (propNames != null)
       {

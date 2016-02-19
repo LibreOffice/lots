@@ -1,5 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.sidebar;
 
+import java.awt.SystemColor;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,17 +10,30 @@ import javax.swing.JOptionPane;
 
 import com.sun.star.accessibility.XAccessible;
 import com.sun.star.awt.ActionEvent;
+import com.sun.star.awt.FocusEvent;
+import com.sun.star.awt.InvalidateStyle;
+import com.sun.star.awt.ItemEvent;
 import com.sun.star.awt.MenuEvent;
 import com.sun.star.awt.MouseEvent;
+import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
+import com.sun.star.awt.Selection;
+import com.sun.star.awt.TextEvent;
 import com.sun.star.awt.WindowEvent;
 import com.sun.star.awt.XActionListener;
 import com.sun.star.awt.XButton;
+import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlContainer;
+import com.sun.star.awt.XControlModel;
+import com.sun.star.awt.XFocusListener;
+import com.sun.star.awt.XItemList;
+import com.sun.star.awt.XItemListener;
 import com.sun.star.awt.XMenu;
 import com.sun.star.awt.XMouseListener;
 import com.sun.star.awt.XPopupMenu;
+import com.sun.star.awt.XTextComponent;
+import com.sun.star.awt.XTextListener;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowListener;
@@ -28,13 +42,19 @@ import com.sun.star.awt.tree.XMutableTreeDataModel;
 import com.sun.star.awt.tree.XMutableTreeNode;
 import com.sun.star.awt.tree.XTreeControl;
 import com.sun.star.beans.MethodConcept;
+import com.sun.star.beans.PropertyVetoException;
+import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XIntrospection;
 import com.sun.star.beans.XIntrospectionAccess;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.lang.DisposedException;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.IndexOutOfBoundsException;
+import com.sun.star.lang.NoSuchMethodException;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.lib.uno.helper.ComponentBase;
+import com.sun.star.reflection.InvocationTargetException;
 import com.sun.star.reflection.XIdlMethod;
 import com.sun.star.ui.LayoutSize;
 import com.sun.star.ui.XSidebarPanel;
@@ -51,6 +71,7 @@ import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPALProvider;
+import de.muenchen.allg.itd51.wollmux.dialog.SearchBox;
 import de.muenchen.allg.itd51.wollmux.dialog.UIElementContext;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarConfig;
@@ -64,6 +85,7 @@ import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIMenu;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIMenuItem;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UISearchbox;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UISenderbox;
+import de.muenchen.uno.UnoReflect;
 
 /**
  * Erzeugt das Fenster, dass in der WollMux-Sidebar angezeigt wird. Das Fenster
@@ -92,10 +114,13 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
   private Map<String, XMutableTreeNode> menus;
   private Map<String, UIElementAction> actions;
+  private Map<String, UIElementAction> searchActions;
 
   private XTreeControl tree;
 
   private XMouseListener xMouseListener;
+
+  private UIFactory uiFactory;
 
   public WollMuxSidebarContent(XComponentContext context, XWindow parentWindow)
   {
@@ -104,6 +129,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
     menus = new HashMap<String, XMutableTreeNode>();
     actions = new HashMap<String, UIElementAction>();
+    searchActions = new HashMap<String, UIElementAction>();
 
     this.parentWindow.addWindowListener(this);
     layout = new SimpleLayoutManager(this.parentWindow);
@@ -167,26 +193,26 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           
           layout.add(line);
 
-          UIFactory factory = new UIFactory(config);
-          factory.addElementCreateListener(this);
+          uiFactory = new UIFactory(config);
+          uiFactory.addElementCreateListener(this);
 
           ConfigThingy menubar = conf.query("Menueleiste");
           ConfigThingy menuConf = conf.query("Menues");
 
           if (menubar.count() > 0)
           {
-            factory.createUIElements(new UIElementContext(), null,
+            uiFactory.createUIElements(new UIElementContext(), null,
               menubar.getLastChild(), false);
 
             for (ConfigThingy menuDef : menuConf.getLastChild())
             {
-              factory.createUIElements(new UIElementContext(), menuDef,
+              uiFactory.createUIElements(new UIElementContext(), menuDef,
                 menuDef.getLastChild(), true);
             }
           }
 
           ConfigThingy bkl = conf.query("Symbolleisten").query("Briefkopfleiste");
-          factory.createUIElements(new UIElementContext(), menuConf,
+          uiFactory.createUIElements(new UIElementContext(), menuConf,
             bkl.getLastChild(), false);
 
           tree.expandNode(root);
@@ -354,116 +380,11 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       }
       else if (element.getClass().equals(UISenderbox.class))
       {
-        final UISenderbox uiSenderbox = (UISenderbox) element;
-        if (!PersoenlicheAbsenderliste.getInstance().getCurrentSender().isEmpty())
-        {
-          uiSenderbox.setLabel(PersoenlicheAbsenderliste.getInstance().getCurrentSender().split("§§%=%§§")[0]);
-        }
-        
-        String[] palEntries = PersoenlicheAbsenderliste.getInstance().getPALEntries();
-        
-        final XPopupMenu menu = UnoRuntime.queryInterface(XPopupMenu.class, UNO.xMCF.createInstanceWithContext("com.sun.star.awt.PopupMenu", context));
-        XMenu xMenu = UnoRuntime.queryInterface(XMenu.class, menu);
-
-        XIntrospection intro = UnoRuntime.queryInterface(XIntrospection.class, UNO.xMSF.createInstance("com.sun.star.beans.Introspection"));
-        XIntrospectionAccess access = intro.inspect(xMenu);
-        XIdlMethod m_setcommand = access.getMethod("setCommand", MethodConcept.ALL);
-        final XIdlMethod m_execute = access.getMethod("execute", MethodConcept.ALL);
-        final XIdlMethod m_getcommand = access.getMethod("getCommand", MethodConcept.ALL);
-        
-        xMenu.addMenuListener(new AbstractMenuListener()
-        {
-          @Override
-          public void select(MenuEvent event)
-          {
-            XMenu menu = UnoRuntime.queryInterface(XMenu.class, event.Source);
-            try
-            {
-              String name = (String)m_getcommand.invoke(menu, new Object[][]{ new Object[]{ new Short(event.MenuId) } });
-              WollMuxEventHandler.handleSetSender(name, event.MenuId - 1);
-            }
-            catch (Exception e)
-            {
-              Logger.error(e);
-            }
-          }
-        });
-        
-        short n = 0;
-        for (String entry : palEntries)
-        {
-          menu.insertItem((short)(n+1), entry.split("§§%=%§§")[0], (short) 0, (short) (n+1));
-          m_setcommand.invoke(xMenu, new Object[][] { new Object[] { new Short((short)(n+1)), entry } });
-          n++;
-        }
-
-        PersoenlicheAbsenderliste.getInstance().addPALChangeEventListener(new XPALChangeEventListener()
-        {
-          @Override
-          public void disposing(EventObject arg0)
-          {}
-          
-          @Override
-          public void updateContent(EventObject eventObject)
-          {
-            XPALProvider palProv =
-                UnoRuntime.queryInterface(XPALProvider.class,
-                eventObject.Source);
-              if (palProv != null)
-              {
-                try
-                {
-                  String[] entries = palProv.getPALEntries();
-                  String current = palProv.getCurrentSender();
-                  String[] entriesCopy = new String[entries.length];
-                  System.arraycopy(entries, 0, entriesCopy, 0, entries.length);
-                  //handleSenderboxUpdate(entriesCopy, current);
-                }
-                catch (Exception x)
-                {
-                  Logger.error(x);
-                }
-              }
-          }
-        });
-        
-        XControl button =
-          GuiFactory.createSenderbox(UNO.xMCF, context, toolkit, windowPeer,
-            uiSenderbox.getLabel(), null, new Rectangle(0, 0, 100, 32));
-        
-        XButton xbutton = UnoRuntime.queryInterface(XButton.class, button);
-        xbutton.addActionListener(new XActionListener() {
-          @Override
-          public void disposing(EventObject arg0)
-          {}
-
-          @Override
-          public void actionPerformed(ActionEvent event)
-          {
-            try
-            {
-              final XWindow wndButton = UnoRuntime.queryInterface(XWindow.class, event.Source);
-              Rectangle posSize = wndButton.getPosSize();
-              //short n = menu.execute(windowPeer, new Rectangle(posSize.X, posSize.Height, 0, 0), (short)0);
-              m_execute.invoke(menu, new Object[][] { new Object[] { windowPeer, new Rectangle(posSize.X, posSize.Y + posSize.Height, 0, 0), new Short((short)0) } });
-            }
-            catch (Exception e)
-            {
-              e.printStackTrace();
-            }
-          }
-        });
-        
-        layout.add(button);
+        createSenderbox((UISenderbox) element);
       }
       else if (element instanceof UISearchbox)
       {
-        UISearchbox uiSearchbox = (UISearchbox) element;
-        String label = L.m("Suchen...");
-        XControl button =
-          GuiFactory.createTextfield(UNO.xMCF, context, toolkit, windowPeer, label,
-            new Rectangle(0, 0, 100, 32));
-        layout.add(button);
+        createSearchbox((UISearchbox) element);
       }
       else if (element.getClass().equals(UIMenu.class))
       {
@@ -491,6 +412,302 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     {
       Logger.error(e);
     }
+  }
+
+  private void createSearchbox(UISearchbox element)
+      throws com.sun.star.uno.Exception, UnknownPropertyException,
+      PropertyVetoException, WrappedTargetException
+  {
+    String label = L.m("Suchen...");
+    
+    XControl searchBox =
+      GuiFactory.createCombobox(UNO.xMCF, context, toolkit, windowPeer, label,
+        new Rectangle(0, 0, 100, 32));
+    
+    final XWindow wnd = UnoRuntime.queryInterface(XWindow.class, searchBox);
+    XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, searchBox);
+    
+    XControlModel model = searchBox.getModel();
+    XPropertySet props =
+        UnoRuntime.queryInterface(XPropertySet.class, model);
+    props.setPropertyValue("TextColor", new Integer(SystemColor.textInactiveText.getRGB() & ~0xFF000000));
+    
+    searchBox.setModel(model);
+    
+    tf.addTextListener(new XTextListener()
+    {
+      @Override
+      public void disposing(EventObject event)
+      {}
+      
+      @Override
+      public void textChanged(TextEvent event)
+      {
+        XControl ctrl = UnoRuntime.queryInterface(XControl.class, event.Source);
+        XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, event.Source);
+        XComboBox cmb = UnoRuntime.queryInterface(XComboBox.class, event.Source);
+        String text = tf.getText();
+        
+        XControlModel model = ctrl.getModel();
+        XItemList items = UnoRuntime.queryInterface(XItemList.class, model);
+        
+        if (text.length() > 0)
+        {
+          String[] words = text.split("\\s+");
+          try
+          {
+            cmb.removeItems((short) 0, cmb.getItemCount());
+            searchActions.clear();
+            
+            ConfigThingy menues = WollMuxFiles.getWollmuxConf().get("Menues");
+            ConfigThingy labels = menues.queryAll("LABEL", 4, true);
+            
+            int n = 0;
+            for (ConfigThingy label : labels)
+            {
+              ConfigThingy type = label.query("TYPE");
+              if (type.count() != 0 && (type.getLastChild().toString().equals("button") || type.getLastChild().toString().equals("menu")))
+              {
+                ConfigThingy action = label.query("ACTION");
+                if (action.count() != 0)
+                {
+                  if (SearchBox.buttonMatches(label, words))
+                  {
+                    UIMenuItem item = (UIMenuItem) uiFactory.createUIMenuElement(null, label, "");
+                    items.insertItemText(n, item.getLabel());
+                    UUID uuid = UUID.randomUUID();
+                    searchActions.put(uuid.toString(), item.getAction());
+                    items.setItemData(n, uuid.toString());
+                    n++;
+                  }
+                }
+              }
+            }
+          }
+          catch (Exception e)
+          {
+            e.printStackTrace();
+          }
+        }
+      }
+    });
+    
+    wnd.addFocusListener(new XFocusListener()
+    {
+      @Override
+      public void disposing(EventObject event)
+      {}
+      
+      @Override
+      public void focusLost(FocusEvent event)
+      {
+        try
+        {
+          XControl searchBox =
+            UnoRuntime.queryInterface(XControl.class, event.Source);
+          XTextComponent tf =
+            UnoRuntime.queryInterface(XTextComponent.class, searchBox);
+          
+          wnd.setPosSize(0, 0, 0, 32, PosSize.HEIGHT);
+
+          if (tf.getText().isEmpty())
+          {
+            tf.setText(L.m("Suchen..."));
+            XControlModel model = searchBox.getModel();
+            XPropertySet props =
+              UnoRuntime.queryInterface(XPropertySet.class, model);
+            props.setPropertyValue("TextColor", new Integer(
+              SystemColor.textInactiveText.getRGB() & ~0xFF000000));
+          }
+          
+          windowPeer.invalidate((short)(InvalidateStyle.UPDATE | InvalidateStyle.TRANSPARENT));
+          layout.layout();
+        }
+        catch (Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+      
+      @Override
+      public void focusGained(FocusEvent event)
+      {
+        try
+        {
+          XControl searchBox =
+            UnoRuntime.queryInterface(XControl.class, event.Source);
+          XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, searchBox);
+          XControlModel model = searchBox.getModel();
+          XPropertySet props =
+            UnoRuntime.queryInterface(XPropertySet.class, model);
+          
+          wnd.setPosSize(0, 0, 0, 320, PosSize.HEIGHT);
+          
+          int color = (Integer) props.getPropertyValue("TextColor");
+          if (color == (SystemColor.textInactiveText.getRGB() & ~0xFF000000))
+          {
+            props.setPropertyValue("TextColor", new Integer(SystemColor.textText.getRGB() & ~0xFF000000));
+            tf.setText("");
+          }
+          else
+          {
+            tf.setSelection(new Selection(0, tf.getText().length()));
+          }
+          
+          windowPeer.invalidate((short)(InvalidateStyle.UPDATE | InvalidateStyle.TRANSPARENT));
+          layout.layout();
+        }
+        catch (Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+    });
+    
+    XComboBox cmb = UnoRuntime.queryInterface(XComboBox.class, searchBox);
+    cmb.addItemListener(new XItemListener()
+    {
+      @Override
+      public void disposing(EventObject event)
+      {
+      }
+      
+      @Override
+      public void itemStateChanged(ItemEvent event)
+      {
+        try
+        {
+          XControl ctrl = UnoRuntime.queryInterface(XControl.class, event.Source);
+          XItemList items =
+            UnoRuntime.queryInterface(XItemList.class, ctrl.getModel());
+          String uuid = (String) items.getItemData(event.Selected);
+          UIElementAction action = searchActions.get(uuid);
+          if (action != null)
+          {
+            action.performAction();
+          }
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+          Logger.error(e);
+        }
+      }
+    });
+    
+    layout.add(searchBox);
+  }
+
+  private void createSenderbox(UISenderbox uiSenderbox)
+      throws com.sun.star.uno.Exception, NoSuchMethodException,
+      InvocationTargetException
+  {
+    if (!PersoenlicheAbsenderliste.getInstance().getCurrentSender().isEmpty())
+    {
+      uiSenderbox.setLabel(PersoenlicheAbsenderliste.getInstance().getCurrentSender().split("§§%=%§§")[0]);
+    }
+    
+    XControl button =
+        GuiFactory.createSenderbox(UNO.xMCF, context, toolkit, windowPeer,
+          uiSenderbox.getLabel(), null, new Rectangle(0, 0, 100, 32));
+    final XButton xbutton = UnoRuntime.queryInterface(XButton.class, button);
+      
+    String[] palEntries = PersoenlicheAbsenderliste.getInstance().getPALEntries();
+    
+    final XPopupMenu menu = UnoRuntime.queryInterface(XPopupMenu.class, UNO.xMCF.createInstanceWithContext("com.sun.star.awt.PopupMenu", context));
+    XMenu xMenu = UnoRuntime.queryInterface(XMenu.class, menu);
+
+    XIntrospection intro = UnoRuntime.queryInterface(XIntrospection.class, UNO.xMSF.createInstance("com.sun.star.beans.Introspection"));
+    XIntrospectionAccess access = intro.inspect(xMenu);
+    final XIdlMethod m_execute = access.getMethod("execute", MethodConcept.ALL);
+    
+    xMenu.addMenuListener(new AbstractMenuListener()
+    {
+      @Override
+      public void select(MenuEvent event)
+      {
+        XMenu menu = UnoRuntime.queryInterface(XMenu.class, event.Source);
+        try
+        {
+          String name = (String) UnoReflect.with(menu).method("getCommand").withArgs(new Short(event.MenuId)).invoke();
+          short pos = (Short) UnoReflect.with(menu).method("getItemPos").withArgs(new Short(event.MenuId)).invoke();
+          WollMuxEventHandler.handleSetSender(name, pos);
+        }
+        catch (Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+    });
+    
+    short n = 0;
+    for (String entry : palEntries)
+    {
+      menu.insertItem((short)(n+1), entry.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0], (short) 0, (short) (n+1));
+      UnoReflect.with(menu).method("setCommand").withArgs(new Short((short)(n+1)), entry).invoke();
+      n++;
+    }
+
+    PersoenlicheAbsenderliste.getInstance().addPALChangeEventListener(new XPALChangeEventListener()
+    {
+      @Override
+      public void disposing(EventObject arg0)
+      {}
+      
+      @Override
+      public void updateContent(EventObject eventObject)
+      {
+        XPALProvider palProv =
+            UnoRuntime.queryInterface(XPALProvider.class,
+            eventObject.Source);
+          if (palProv != null)
+          {
+            try
+            {
+              String[] entries = palProv.getPALEntries();
+              String current = palProv.getCurrentSender();
+
+              xbutton.setLabel(current.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0]);
+              UnoReflect.with(menu).method("clear").invoke();
+              
+              short n = 0;
+              for (String entry : entries)
+              {
+                menu.insertItem((short)(n+1), entry.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0], (short) 0, (short) (n+1));
+                UnoReflect.with(menu).method("setCommand").withArgs(new Short((short)(n+1)), entry).invoke();    
+                n++;
+              }
+            }
+            catch (Exception x)
+            {
+              Logger.error(x);
+            }
+          }
+      }
+    });
+    
+    xbutton.addActionListener(new XActionListener() {
+      @Override
+      public void disposing(EventObject arg0)
+      {}
+
+      @Override
+      public void actionPerformed(ActionEvent event)
+      {
+        try
+        {
+          final XWindow wndButton = UnoRuntime.queryInterface(XWindow.class, event.Source);
+          Rectangle posSize = wndButton.getPosSize();
+          //short n = menu.execute(windowPeer, new Rectangle(posSize.X, posSize.Height, 0, 0), (short)0);
+          m_execute.invoke(menu, new Object[][] { new Object[] { windowPeer, new Rectangle(posSize.X, posSize.Y + posSize.Height, 0, 0), new Short((short)0) } });
+        }
+        catch (Exception e)
+        {
+          e.printStackTrace();
+        }
+      }
+    });
+    
+    layout.add(button);
   }
 
   private final class TreeMouseListener implements XMouseListener

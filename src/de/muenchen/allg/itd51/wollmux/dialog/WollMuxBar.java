@@ -87,9 +87,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
@@ -119,25 +116,16 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 
 import com.sun.star.document.MacroExecMode;
 
@@ -298,13 +286,13 @@ public class WollMuxBar
    * Enthält nach dem Aufruf von initMenuOrder(...) eine Liste aller IDs von Menüs
    * und deren per Tiefensuche ermittelten Untermenüs
    */
-  private List<String> menuOrder = new ArrayList<String>();
+  List<String> menuOrder = new ArrayList<String>();
 
   /**
    * Enthält nach dem Aufruf von initMenuOrder(...) eine Zuordnung von MenüIDs zu den
    * mit vollständigen Pfaden (der Menünavigation) aufgeführten Namen der Menüs
    */
-  private Map<String, String> mapMenuIDToLabel = new HashMap<String, String>();
+  Map<String, String> mapMenuIDToLabel = new HashMap<String, String>();
 
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
@@ -782,7 +770,7 @@ public class WollMuxBar
    *          siehe stepx
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void addUIElements(ConfigThingy menuConf, ConfigThingy elementParent,
+  void addUIElements(ConfigThingy menuConf, ConfigThingy elementParent,
       JComponent compo, int stepx, int stepy, String context)
   {
     addUIElementsChecked(new HashSet<String>(), menuConf, elementParent, compo,
@@ -913,7 +901,7 @@ public class WollMuxBar
           catch (Exception e)
           {}
 
-          SearchBox searchBox = new SearchBox(label, menuConf);
+          SearchBox searchBox = new SearchBox(this, label, menuConf);
           JTextField sfield = searchBox.getTextField();
           sfield.setMinimumSize(sfield.getPreferredSize());
           sfield.setMaximumSize(sfield.getPreferredSize());
@@ -1510,95 +1498,6 @@ public class WollMuxBar
     setSizeAndLocation();
   }
 
-  private static abstract class Senderbox
-  {
-    protected JComponent menu;
-
-    public void removeAllItems()
-    {
-      menu.removeAll();
-    }
-
-    public void addItem(String item, ActionListener listen, String actionCommand,
-        MouseListener mouseListen)
-    {
-      JMenuItem menuItem = new JMenuItem(item);
-      menuItem.addActionListener(listen);
-      menuItem.setActionCommand(actionCommand);
-      menuItem.addMouseListener(mouseListen);
-      menu.add(menuItem);
-    }
-
-    public void addSeparator()
-    {
-      menu.add(new JSeparator());
-    }
-
-    public abstract void setSelectedItem(String item);
-
-    public static Senderbox create(JMenu menu)
-    {
-      return new JMenuSenderbox(menu);
-    }
-
-    public static Senderbox create(JPopupMenu menu, AbstractButton button)
-    {
-      return new JPopupMenuSenderbox(menu, button);
-    }
-
-    private static class JMenuSenderbox extends Senderbox
-    {
-
-      public JMenuSenderbox(JMenu menu)
-      {
-        this.menu = menu;
-      }
-
-      @Override
-      public void setSelectedItem(String item)
-      {
-        ((JMenu) menu).setText(item);
-      }
-    }
-
-    private static class JPopupMenuSenderbox extends Senderbox
-    {
-      private AbstractButton button;
-
-      public JPopupMenuSenderbox(JPopupMenu menu, AbstractButton button)
-      {
-        this.menu = menu;
-        this.button = button;
-        this.button.putClientProperty("menu", menu);
-
-        button.addAncestorListener(new AncestorListener()
-        {
-
-          @Override
-          public void ancestorRemoved(AncestorEvent event)
-          {
-            if (event.getComponent().isVisible())
-              ((JPopupMenu) event.getComponent().getClientProperty("menu")).setVisible(false);
-          }
-
-          @Override
-          public void ancestorMoved(AncestorEvent event)
-          {}
-
-          @Override
-          public void ancestorAdded(AncestorEvent event)
-          {}
-        });
-      }
-
-      @Override
-      public void setSelectedItem(String item)
-      {
-        button.setText(item);
-      }
-    }
-  }
-
   /**
    * Diese Methode initialisiert die Datenstrukturen menuOrder und mapMenuIDToLabel
    * zur Verwendung für die Searchbox. Dabei werden ausgehend von currentMenu alle
@@ -1637,264 +1536,6 @@ public class WollMuxBar
       {
         Logger.log(e);
       }
-    }
-  }
-
-  /**
-   * Implementiert eine SearchBox, die in einem JTextField nach Menüeinträgen der
-   * WollMuxBar suchen kann und so den Schnellzugriff auf bestimmte Menüeinträge
-   * ermöglicht.
-   * 
-   * @author Christoph Lutz (privat)
-   */
-  private class SearchBox
-  {
-    private static final int MAX_SHOWN = 20;
-
-    private static final int TEXTFIELD_COLUMNS = 12;
-
-    private final JTextField textField;
-
-    private final JPopupMenu menu;
-
-    private final ConfigThingy menuConf;
-
-    private boolean ignoreNextFocusRequest;
-
-    public SearchBox(final String label, ConfigThingy menuConf)
-    {
-      this.textField = new JTextField(L.m(label), TEXTFIELD_COLUMNS);
-      this.menu = new JPopupMenu();
-      this.menuConf = menuConf;
-      this.ignoreNextFocusRequest = false;
-
-      this.textField.putClientProperty("menu", menu);
-
-      this.textField.addAncestorListener(new AncestorListener()
-      {
-
-        @Override
-        public void ancestorRemoved(AncestorEvent event)
-        {
-          if (event.getComponent().isVisible())
-            ((JPopupMenu) event.getComponent().getClientProperty("menu")).setVisible(false);
-        }
-
-        @Override
-        public void ancestorMoved(AncestorEvent event)
-        {}
-
-        @Override
-        public void ancestorAdded(AncestorEvent event)
-        {}
-      });
-
-      textField.addActionListener(new ActionListener()
-      {
-        @Override
-        public void actionPerformed(ActionEvent arg0)
-        {
-          for (Component compo : menu.getComponents())
-          {
-            if (compo instanceof JMenuItem)
-            {
-              JMenuItem item = (JMenuItem) compo;
-              if (item.isArmed())
-              {
-                item.doClick();
-                menu.setVisible(false);
-                return;
-              }
-            }
-          }
-        }
-      });
-
-      // Der MouseListener wird benötigt, um den 'Suchen...'-String zu löschen, wenn
-      // das Suchfeld direkt nach dem Start angeklickt wird. Dann hat das Suchfeld
-      // bereits den Fokus und der FocusListener wird nicht ausgelöst.
-      textField.addMouseListener(new MouseAdapter()
-      {
-        @Override
-        public void mousePressed(MouseEvent e)
-        {
-          if (textField.hasFocus() && textField.getText().equals(label))
-          {
-            textField.setText("");
-          }
-        }
-      });
-
-      textField.addFocusListener(new FocusListener()
-      {
-        @Override
-        public void focusLost(FocusEvent arg0)
-        {
-          if (arg0.getOppositeComponent() == null)
-          {
-            arg0.getComponent().transferFocus();
-          }
-        }
-
-        @Override
-        public void focusGained(FocusEvent arg0)
-        {
-          if (ignoreNextFocusRequest)
-          {
-            ignoreNextFocusRequest = false;
-            return;
-          }
-
-          // "Suchen..." löschen wenn der erste nutzerinitiiert Focus kommt
-          if (arg0.getOppositeComponent() != null
-            && textField.getText().equals(label)) textField.setText("");
-
-          // Menü sichtbar machen, wenn nicht bereits sichtbar
-          if (menu.getComponentCount() > 0 && !menu.isVisible())
-          {
-            menu.setVisible(true);
-            textField.requestFocusInWindow();
-          }
-
-          // den ganzen Text markieren
-          textField.setSelectionStart(0);
-          textField.setSelectionEnd(textField.getText().length());
-        }
-      });
-
-      textField.getDocument().addDocumentListener(new DocumentListener()
-      {
-        @Override
-        public void changedUpdate(DocumentEvent e)
-        {
-          update(e);
-        }
-
-        @Override
-        public void removeUpdate(DocumentEvent e)
-        {
-          update(e);
-        }
-
-        @Override
-        public void insertUpdate(DocumentEvent e)
-        {
-          update(e);
-        }
-
-        private void update(DocumentEvent e)
-        {
-          Document doc = e.getDocument();
-          String text = "";
-          try
-          {
-            text = doc.getText(0, doc.getLength()).trim();
-          }
-          catch (BadLocationException e1)
-          {}
-
-          String[] words = null;
-          if (text.length() > 0) words = text.split("\\s+");
-          updateResultPopupMenu(words);
-        }
-      });
-    }
-
-    public JTextField getTextField()
-    {
-      return textField;
-    }
-
-    private void updateResultPopupMenu(String[] words)
-    {
-      menu.setVisible(false);
-      menu.removeAll();
-
-      int count = 0;
-      for (String menuId : menuOrder)
-      {
-        boolean added = false;
-        ConfigThingy elementeKnoten = new ConfigThingy("");
-        try
-        {
-          elementeKnoten = menuConf.query(menuId).getLastChild().query("Elemente");
-        }
-        catch (NodeNotFoundException e)
-        {}
-
-        ConfigThingy matches = new ConfigThingy("Matches");
-        for (ConfigThingy elemente : elementeKnoten)
-          for (ConfigThingy button : elemente)
-            if (buttonMatches(button, words) && count++ <= MAX_SHOWN)
-            {
-              if (!added)
-              {
-                JMenuItem label = new JMenuItem(mapMenuIDToLabel.get(menuId));
-                label.setBorder(BorderFactory.createBevelBorder(1));
-                label.setBackground(Color.WHITE);
-                label.setEnabled(false);
-                menu.add(label);
-                added = true;
-              }
-              matches.addChild(button);
-            }
-        addUIElements(menuConf, matches, menu, 0, 1, "menu");
-      }
-
-      if (count > 0)
-      {
-        // nur anzeigen, wenn mindestens zwei Treffer nicht angezeigt wurden
-        if (count > (MAX_SHOWN + 1))
-        {
-          menu.addSeparator();
-          menu.add(new JLabel(L.m("und %1 nicht angezeigte Treffer", count
-            - MAX_SHOWN)));
-        }
-        menu.show(textField, 0, textField.getHeight());
-        ignoreNextFocusRequest = true;
-        textField.requestFocusInWindow();
-      }
-    }
-
-    /**
-     * Liefert true gdw. das durch button beschriebene Element ein button ist
-     * (TYPE-Attribut muss "button" sein) und alle in words enthaltenen strings ohne
-     * Beachtung der Groß-/Kleinschreibung im Wert des LABEL-Attributs (das natürlich
-     * vorhanden sein muss) vorkommen.
-     * 
-     * @param button
-     *          Den ConfigThingy-Knoten, der ein UI-Element beschreibt, wie z.B.
-     *          "(TYPE 'button' LABEL 'Hallo' ...)"
-     * @param words
-     *          Diese Wörter müssen ALLE im LABEL vorkommen (ohne Beachtung der
-     *          Groß-/Kleinschreibung).
-     */
-    private boolean buttonMatches(ConfigThingy button, String[] words)
-    {
-      if (words == null || words.length == 0) return false;
-      try
-      {
-        String type = button.get("TYPE").toString();
-        if (!type.equals("button")) return false;
-      }
-      catch (NodeNotFoundException e1)
-      {
-        return false;
-      }
-
-      String label;
-      try
-      {
-        label = button.get("LABEL").toString();
-      }
-      catch (NodeNotFoundException e1)
-      {
-        return false;
-      }
-
-      for (String word : words)
-        if (!label.toLowerCase().contains(word.toLowerCase())) return false;
-      return true;
     }
   }
 

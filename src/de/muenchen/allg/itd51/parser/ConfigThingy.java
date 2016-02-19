@@ -141,7 +141,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   private static final int DEFAULT_MINLEVEL = 1;
 
   /** Die Kindknoten. */
-  private Vector<ConfigThingy> children;
+  private List<ConfigThingy> children;
 
   /** Der Name des Knotens. Bei Blättern ist dies der (String-)Wert des Knotens. */
   private String name;
@@ -229,10 +229,9 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   /**
    * Erzeugt ein anonymes ConfigThingy mit Kindern aus children.
    */
-  private ConfigThingy(String name, Vector<ConfigThingy> children)
+  private ConfigThingy(String name, List<ConfigThingy> children)
   {
     this.name = name;
-    children.trimToSize();
     this.children = children;
   }
 
@@ -250,7 +249,6 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       childCopy.addChildCopiesFrom(childToCopy);
       this.addChild(childCopy);
     }
-    this.children.trimToSize();
   }
 
   /**
@@ -360,7 +358,6 @@ public class ConfigThingy implements Iterable<ConfigThingy>
         throw new SyntaxErrorException(token1.url() + ": " + (stack.size() - 1)
           + " schließende Klammern fehlen");
       }
-      trimConfigThingy();
     }
     finally
     {
@@ -372,20 +369,6 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       {}
       ;
     }
-  }
-
-  /**
-   * Ruft trimToSize() auf dem {@link #children}-Vector dieses ConfigThingys auf und
-   * rekursiv auf den children-Vectoren der Kinder dieses ConfigThingys. Dient zur
-   * Speicheroptimierung.
-   * 
-   * @author Daniel Benkmann (D-III-ITD-D101)
-   */
-  private void trimConfigThingy()
-  {
-    this.children.trimToSize();
-    for (ConfigThingy child : children)
-      child.trimConfigThingy();
   }
 
   /**
@@ -470,6 +453,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
+  @Override
   public Iterator<ConfigThingy> iterator()
   {
     return children.iterator();
@@ -843,6 +827,29 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   {
     return query(name, true, maxlevel, minlevel);
   }
+  
+  /**
+   * Sucht rekursiv nach allen Knoten mit einem bestimmten Namen.
+   * 
+   * @param name
+   * @param maxlevel Maximale Tiefe in der gesucht werden soll.
+   * @param getParents Wenn ture, liefert den Elternknoten zurück. 
+   * @return
+   */
+  public ConfigThingy queryAll(String name, int maxlevel, boolean getParents)
+  {
+    ArrayList<ConfigThingy> found = new ArrayList<ConfigThingy>();
+    
+    boolean hasMore = false;
+    
+    int searchlevel = 1;
+    do
+    {
+      hasMore = rollcall(this, name, found, -1, searchlevel++, getParents);
+    } while (hasMore && searchlevel < maxlevel + 1);
+    
+    return new ConfigThingy("<query results>", found);
+  }
 
   /**
    * Falls getParents == false verhält sich diese Funktion wie
@@ -885,6 +892,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    * Falls der Knoten this ein Blatt ist wird der Name des Knotens geliefert,
    * ansonsten die Konkatenation aller Blätter des unter this liegenden Teilbaums.
    */
+  @Override
   public String toString()
   {
     if (children.isEmpty()) return name;
@@ -1209,21 +1217,25 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       myPosition = position;
     }
 
+    @Override
     public URL url()
     {
       return myURL;
     }
 
+    @Override
     public int line()
     {
       return myLine;
     }
 
+    @Override
     public int position()
     {
       return myPosition;
     }
 
+    @Override
     public String contentString()
     {
       return content;
@@ -1332,6 +1344,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       }
     }
 
+    @Override
     public int type()
     {
       return Token.STRING;
@@ -1388,6 +1401,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       content = m.group(1);
     }
 
+    @Override
     public int type()
     {
       return Token.KEY;
@@ -1420,6 +1434,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       content = "(";
     }
 
+    @Override
     public int type()
     {
       return Token.OPENPAREN;
@@ -1449,6 +1464,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       content = ")";
     }
 
+    @Override
     public int type()
     {
       return Token.CLOSEPAREN;
@@ -1480,6 +1496,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       content = inc;
     }
 
+    @Override
     public int type()
     {
       return Token.INCLUDE;
@@ -1519,6 +1536,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       content = tokenData.substring(1);
     }
 
+    @Override
     public int type()
     {
       return Token.LINECOMMENT;
@@ -1549,6 +1567,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       content = "";
     }
 
+    @Override
     public int type()
     {
       return Token.END;
