@@ -6,9 +6,9 @@ if [ $# != 2 ]; then
 fi
 
 version="$(cat "$1")"
-echo "wollmux (${version}-0lhm1) tramp; urgency=low
+echo "wollmux (${version}) wanderer; urgency=low
 
     * Version bump.
 
- -- Felix WollMux <wollmux-general@lists.forge.osor.eu>  Mon, 23 May 2011 19:35:16 +0200
+ -- Felix WollMux <wollmux-general@lists.forge.osor.eu>  Mon, 04 April 2016 14:44:44 +0200
 " >"$2"

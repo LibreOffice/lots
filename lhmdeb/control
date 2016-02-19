@@ -9,7 +9,7 @@ Homepage: http://www.wollmux.org
 
 Package: libreoffice4.1-wollmux
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, default-jre, libreoffice4.1-writer, libreoffice4.1-debian-menus
+Depends: ${misc:Depends}, default-jre, libreoffice4.1-writer, libreoffice4.1-debian-menus
 Suggests: wollmuxbar
 Description: WollMux extension for LibreOffice
  The package adds an extension to LibreOffice with the following features:
@@ -30,7 +30,7 @@ Description: WollMux extension for LibreOffice
 
 Package: libreoffice5.0-wollmux
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, default-jre, libreoffice5.0-writer, libreoffice5.0-debian-menus
+Depends: ${misc:Depends}, default-jre, libreoffice5.0-writer, libreoffice5.0-debian-menus
 Suggests: wollmuxbar
 Description: WollMux extension for LibreOffice
  The package adds an extension to LibreOffice with the following features:
