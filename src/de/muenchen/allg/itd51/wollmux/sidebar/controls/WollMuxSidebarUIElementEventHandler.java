@@ -1,6 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.sidebar.controls;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import javax.swing.JFrame;
@@ -15,7 +16,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.UIElementEventHandler;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarEventHandler;
 import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
-import de.muenchen.allg.itd51.wollmux.event.Dispatch;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
  * EventHandler für die WollMux-Sidebar. Der EventHandler behandelt alle WollMux-Aktionen,
@@ -41,19 +42,23 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     String action = args[0].toString();
     if (action.equals("absenderAuswaehlen"))
     {
-      eventHandler.handleWollMuxUrl(Dispatch.DISP_wmAbsenderAuswaehlen, "");
+      WollMuxEventHandler.handleShowDialogAbsenderAuswaehlen();
     }
     else if (action.equals("openDocument"))
     {
       String fragId = getFragId((ConfigThingy) args[1], action);
       if (fragId != null)
-        eventHandler.handleWollMuxUrl(Dispatch.DISP_wmOpenDocument, fragId);
+      {
+        WollMuxEventHandler.handleOpenDocument(Arrays.asList(new String[]{fragId}), false);
+      }
     }
     else if (action.equals("openTemplate"))
     {
       String fragId = getFragId((ConfigThingy) args[1], action);
       if (fragId != null)
-        eventHandler.handleWollMuxUrl(Dispatch.DISP_wmOpenTemplate, fragId);
+      {
+        WollMuxEventHandler.handleOpenDocument(Arrays.asList(new String[]{fragId}), true);
+      }
     }
     else if (action.equals("open"))
     {
@@ -68,7 +73,7 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     }
     else if (action.equals("dumpInfo"))
     {
-      eventHandler.handleWollMuxUrl(Dispatch.DISP_wmDumpInfo, null);
+      WollMuxEventHandler.handleDumpInfo();
     }
     else if (action.equals("abort"))
     {
@@ -76,12 +81,12 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     }
     else if (action.equals("kill"))
     {
-      eventHandler.handleWollMuxUrl(Dispatch.DISP_wmKill, null);
+      WollMuxEventHandler.handleKill();
       // abort();
     }
     else if (action.equals("about"))
     {
-      eventHandler.handleWollMuxUrl(Dispatch.DISP_wmAbout, WollMuxBar.getBuildInfo());
+      WollMuxEventHandler.handleAbout(WollMuxBar.getBuildInfo());
     }
     else if (action.equals("menuManager"))
     {

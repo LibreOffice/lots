@@ -73,7 +73,7 @@ public class UIFactory
     listeners = new ArrayList<UIElementCreateListener>();
 
     WollMuxBarEventHandler wmEventHandler = new WollMuxBarEventHandler(null);
-    wmEventHandler.start();
+    //wmEventHandler.start();
     eventHandler = new WollMuxSidebarUIElementEventHandler(wmEventHandler);
   }
 
@@ -96,6 +96,20 @@ public class UIFactory
   {
     for (ConfigThingy uiElementDesc : elementParent)
     {
+      // Mit dem Config-Parameter "SIDEBAR" können Elemente in der Sidebar unterdrückt werden.
+      ConfigThingy sidebar = uiElementDesc.query("SIDEBAR");
+      boolean isSidebar = true;
+      
+      if (sidebar.count() > 0)
+      {
+        isSidebar = new Boolean(sidebar.getString("SIDEBAR", "true"));
+      }
+      
+      if (!isSidebar)
+      {
+        continue;
+      }
+      
       /*
        * Falls kein CONF_ID vorhanden ist, wird das Element angezeigt, ansonsten nur
        * dann wenn mindestens eine CONF_ID aktiv ist.
@@ -113,17 +127,6 @@ public class UIFactory
             }
         if (!active) continue;
       }
-
-      // String type;
-      // try
-      // {
-      // type = uiElementDesc.get(TYPE).toString();
-      // }
-      // catch (NodeNotFoundException e)
-      // {
-      // Logger.error(L.m("Ein User Interface Element ohne TYPE wurde entdeckt"));
-      // continue;
-      // }
 
       if (isMenu)
       {

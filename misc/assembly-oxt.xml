@@ -21,7 +21,7 @@
 			<filtered>true</filtered>
 		</file>
 		<file>
-			<source>oxt/tools-large.png</source>
+			<source>oxt/wollmux.png</source>
 			<outputDirectory>icons</outputDirectory>
 		</file>
 	</files>

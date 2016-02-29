@@ -24,7 +24,6 @@ import com.sun.star.awt.XActionListener;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
-import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XControlModel;
 import com.sun.star.awt.XFocusListener;
 import com.sun.star.awt.XItemList;
@@ -156,13 +155,10 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
     if (parentWindowPeer != null)
     {
-      Rectangle windowSize = parentWindow.getPosSize();
       toolkit = parentWindowPeer.getToolkit();
       windowPeer = GuiFactory.createWindow(toolkit, parentWindowPeer);
       windowPeer.setBackground(0xffffffff);
       window = UnoRuntime.queryInterface(XWindow.class, windowPeer);
-      XControlContainer cc =
-        UnoRuntime.queryInterface(XControlContainer.class, window);
 
       if (window != null)
       {
