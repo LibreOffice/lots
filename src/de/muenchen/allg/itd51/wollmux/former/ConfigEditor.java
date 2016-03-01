@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.StringReader;
 
 import javax.swing.AbstractAction;
@@ -33,8 +35,8 @@ import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
+import org.fife.ui.rsyntaxtextarea.TextEditorPane;
 import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rtextarea.RTextArea;
@@ -52,7 +54,7 @@ public class ConfigEditor extends JFrame implements SearchListener
 
   private CollapsibleSectionPanel sectionPanel;
 
-  private RSyntaxTextArea editor;
+  private TextEditorPane editor;
 
   private FindDialog findDialog;
 
@@ -69,7 +71,28 @@ public class ConfigEditor extends JFrame implements SearchListener
 
     this.controller = controller;
 
-    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+    addWindowListener(new WindowAdapter()
+    {
+
+      @Override
+      public void windowClosing(WindowEvent e)
+      {
+        if (editor.isDirty())
+        {
+          if (JOptionPane.showConfirmDialog(ConfigEditor.this,
+            L.m("Wollen Sie den Editor schließen ohne zu speichern?"),
+            L.m("Editor schließen"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+          {
+            ConfigEditor.this.dispose();
+          }
+        } 
+        else
+        {
+          ConfigEditor.this.dispose();
+        }
+      }
+    });
 
     createGui();
     setPreferredSize(new Dimension(1024, 768));
@@ -81,6 +104,8 @@ public class ConfigEditor extends JFrame implements SearchListener
   {
     editor.setText(text);
     editor.discardAllEdits();
+    editor.setCaretPosition(0);
+    editor.setDirty(false);
   }
 
   private void createGui()
@@ -89,8 +114,7 @@ public class ConfigEditor extends JFrame implements SearchListener
 
     sectionPanel = new CollapsibleSectionPanel();
 
-    editor = new RSyntaxTextArea();
-    editor.setCaretPosition(0);
+    editor = new TextEditorPane();
     editor.setBracketMatchingEnabled(true);
 
     Font font = new Font("Monospaced", Font.PLAIN, editor.getFont().getSize() + 2);
@@ -121,6 +145,7 @@ public class ConfigEditor extends JFrame implements SearchListener
     setJMenuBar(createMenu());
 
     initDialogs();
+    editor.setCaretPosition(0);
   }
 
   private void initDialogs()
