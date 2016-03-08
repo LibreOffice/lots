@@ -2,65 +2,46 @@
 
 if [ $# != 4 ]; then
   echo 1>&2 "USAGE: makeversion <versionfile> <buildinfofile> <descriptionxmlfile> <updatexmlfile>"
-  echo 1>&2 "If <versionfile> exists and contains a version number that does not contain 'rev'"
-  echo 1>&2 "the version number from <versionfile> is used."
   exit 1
 fi
 
-yyyymm=$(date --date="@$(git log -1 --pretty=format:"%ct")" +"%Y.%m")
-yymm=$(echo ${yyyymm} | cut -c 3-)
-hash=$(git log -1 --pretty=format:"%h")
-localrev=$( printf "%02d" $(git log --pretty=format:"%ci" | grep $yyyymm | wc -l) )
-
-version="${yymm}rev${localrev}-${hash}"
-
-test -z "$yymm" && echo 1>&2 "Getting GIT version info failed => Falling back to shipped version info"
-
-test -z "$yymm" && exit 1
-test -z "$localrev" && exit 1
-test -z "$hash" && exit 1
-
-
 # check if <versionfile> contains "rev", if not we use the version number from <versionfile>
 if [ -e "$1" ]; then
-  head -n 1 "$1"|grep -q "rev"
-  if [ $? -ne 0 ]; then
-    version=$(head -n 1 "$1")
-  fi
+  version=$(head -n 1 "$1")
+  echo "$version" >"$1" 
+  echo "Version: $version" >"$2"
 fi
 
-echo "$version" >"$1" 
-echo "Version: $version, Revision: $hash" >"$2"
 
 cat >"$3" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <description xmlns="http://openoffice.org/extensions/description/2006"
-	     xmlns:xlink="http://www.w3.org/1999/xlink">
-	<version value="$version" />
-	<identifier value="de.muenchen.allg.d101.wollmux"/>
-	<dependencies>
-		<OpenOffice.org-minimal-version value="2.1" name="OpenOffice.org 2.1"/>
-	</dependencies>
+             xmlns:xlink="http://www.w3.org/1999/xlink">
+        <version value="$version" />
+        <identifier value="de.muenchen.allg.d101.wollmux"/>
+        <dependencies>
+                <OpenOffice.org-minimal-version value="2.1" name="OpenOffice.org 2.1"/>
+        </dependencies>
 
-	<publisher>
-		<name xlink:href="http://www.wollmux.org" lang="de">WollMux.org</name>
-	</publisher>
+        <publisher>
+                <name xlink:href="http://www.wollmux.org" lang="de">WollMux.org</name>
+        </publisher>
 
-	<display-name>
-		<name lang="de-DE">WollMux</name>
-	</display-name>
+        <display-name>
+                <name lang="de-DE">WollMux</name>
+        </display-name>
 
-	<update-information>
-	  <src xlink:href="http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/packages/WollMux-snapshot/WollMux.update.xml"/>
-	</update-information>
-<!--	<registration>
-		<simple-license accept-by="admin" default-license-id="en-NZ" suppress-on-update="true" >
-			<license-text xlink:href="registration/license_de-DE.txt" lang="de-DE" />
-			<license-text xlink:href="registration/license_en-GB.txt" lang="en-GB" />
-			<license-text xlink:href="registration/license_en-NZ.txt" lang="en-NZ" license-id="en-NZ" />
-			<license-text xlink:href="registration/license_en-US.txt" lang="en-US" />
-		</simple-license>
-	</registration>
+        <update-information>
+          <src xlink:href="http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/packages/WollMux-snapshot/WollMux.update.xml"/>
+        </update-information>
+<!--    <registration>
+                <simple-license accept-by="admin" default-license-id="en-NZ" suppress-on-update="true" >
+                        <license-text xlink:href="registration/license_de-DE.txt" lang="de-DE" />
+                        <license-text xlink:href="registration/license_en-GB.txt" lang="en-GB" />
+                        <license-text xlink:href="registration/license_en-NZ.txt" lang="en-NZ" license-id="en-NZ" />
+                        <license-text xlink:href="registration/license_en-US.txt" lang="en-US" />
+                </simple-license>
+        </registration>
 -->
 </description>
 EOF

@@ -18,34 +18,17 @@ Param(
    [string]$updateXmlFile
 )
 
-# Committer-Datum des letzten Commits
-$committerDate = git log -1 --pretty=format:"%ci"
-$hash = git log -1 --pretty=format:"%h"
-
-$yyyymm = $committerDate.Split("-")
-$yyyymm = $yyyymm[0] + "." + $yyyymm[1]
-$yymm   = $yyyymm.Remove(0,2)
-
-# Anzahl der letzten Commits des gleichen Monats
-# Dient dazu, um eine aufsteigende Versionierung zu erreichen.
-$commits = git log --pretty=format:"%ci"
-$localrev = ([regex]::Matches($commits, "$yyyymm")).count
-
-$version="${yymm}rev${localrev}-${hash}"
-
-# Prüfe ob ${versionFile} den String "rev" enthält.
-# Wenn nicht, dann verwende die Versionsnummer aus ${versionFile}.
 if(Test-Path $versionFile) {
     $content = Get-Content $versionFile
 
     foreach ($versionFileContent in $content)
     {
-        if($versionFileContent -notmatch "rev") { $version = $versionFileContent }
+        $version = $versionFileContent
     }
 }
 
 $version | Out-File -FilePath $versionFile -encoding ASCII
-echo "Version: ${version}, Revision: ${hash}" | Out-File -FilePath $buildinfoFile -encoding ASCII
+echo "Version: ${version}" | Out-File -FilePath $buildinfoFile -encoding ASCII
 
 $descriptionXml = '<?xml version="1.0" encoding="UTF-8"?>
 <description xmlns="http://openoffice.org/extensions/description/2006"

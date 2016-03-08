@@ -22,6 +22,10 @@ install: Install the WollMux OOo component in the user area for the user running
 updateLocalizationConf: Collects new strings from the WollMux sources and adds them
                         to src/data/localization.conf
 
+makeversion: Attempt to regenerate version information and set VERSION property for
+             the rest of the build. This target is implicitly called by the other
+             targets. Do not call this directly.
+
 documentation: Download WollMux documentation from WollMux Wiki and prepare it for 
                offline usage.
 
@@ -42,12 +46,15 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 	<property name="COMPONENT" value="WollMux" />
 	<property name="RDB_DIR" value="oxt" />
 	<property name="PACKAGE_DIR" value="dist" />
+        <property name="LHM_DIR" value="lhmdeb/lhm" />
 	<property name="DOC_DIR" value="${PACKAGE_DIR}/doc"/>
 	<property name="PKG_NAME" value="${COMPONENT}.oxt" />
 	<property name="PKG_FILE" value="${PACKAGE_DIR}/${PKG_NAME}" />
 	<property name="MISC" value="misc" />
-	<property name="DESCRIPTION_XML" value="${RDB_DIR}/description.xml" />
-	<property name="UPDATE_XML" value="${PACKAGE_DIR}/${COMPONENT}.update.xml" />
+	<property name="BUILD_INFO_FILE_NAME" value="buildinfo" />
+	<property name="BUILD_INFO_FILE" value="${LHM_DIR}/${BUILD_INFO_FILE_NAME}" />
+	<property name="DESCRIPTION_XML" value="${LHM_DIR}/description.xml" />
+	<property name="UPDATE_XML" value="${LHM_DIR}/${COMPONENT}.update.xml" />
 	<property name="VERSION_FILE" value="${MISC}/version"/>
 	<property name="CHANGELOG_FILE" value="doc/ChangeLog"/>
 	<property name="WOLLMUX_WIKI_URL" value="http://www.wollmux.net/wiki" />
@@ -79,8 +86,39 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 
 	
 	<available file="debian/rules" property="debian.native" />
+
+	<target name="makeversion" depends="makeversion_unix, makeversion_windows">
+		<loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true">
+			<filterchain>
+				<striplinebreaks/>
+				<trim/>
+			</filterchain>
+		</loadfile>
+		<echo message="WollMux-Version is ${VERSION}" />
+	</target>
 	
-	<target name="bumpversion" unless="debian.native">
+	<target name="makeversion_unix" unless="isWindows">
+		<exec executable="bash" failifexecutionfails="false">
+			<arg file="${MISC}/makeversion"/>
+			<arg file="${VERSION_FILE}"/>
+			<arg file="${BUILD_INFO_FILE}"/>
+			<arg file="${DESCRIPTION_XML}"/>
+			<arg file="${UPDATE_XML}"/>
+		</exec>
+	</target>
+	
+	<target name="makeversion_windows" if="isWindows">
+		<exec executable="powershell" failifexecutionfails="false">
+			<arg value="-File"/>
+			<arg file="${MISC}/makeversion.ps1"/>
+			<arg file="${VERSION_FILE}"/>
+			<arg file="${BUILD_INFO_FILE}"/>
+			<arg file="${DESCRIPTION_XML}"/>
+			<arg file="${UPDATE_XML}"/>
+		</exec>
+	</target>
+	
+	<target name="bumpversion" unless="debian.native" depends="makeversion">
 		<exec executable="bash" failifexecutionfails="false">
 		  <arg line="misc/bumpversion ${VERSION_FILE} lhmdeb/changelog"/>
 		</exec>		
@@ -206,7 +244,7 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 		<delete dir="${PACKAGE_DIR}/deb" />
 	</target>
 
-	<target name="deb" depends="bumpversion">
+	<target name="deb" depends="clean, bumpversion">
                 <loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true">
                         <filterchain>
                                 <striplinebreaks/>
