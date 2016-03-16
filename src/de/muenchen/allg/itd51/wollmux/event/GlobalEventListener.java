@@ -50,6 +50,7 @@
 
 package de.muenchen.allg.itd51.wollmux.event;
 
+import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
@@ -61,9 +62,9 @@ import com.sun.star.uno.AnyConverter;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.DocumentManager.Info;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.DocumentManager.Info;
 
 /**
  * Der GlobalEventListener sorgt dafür, dass der WollMux alle wichtigen globalen
@@ -98,6 +99,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
    * NICHT SYNCHRONIZED, weil es Deadlocks gibt zwischen getUrl() und der Zustellung
    * bestimmter Events (z.B. OnSave).
    */
+  @Override
   public void notifyEvent(com.sun.star.document.EventObject docEvent)
   {
     // Der try-catch-Block verhindert, daß die Funktion und damit der
@@ -273,13 +275,23 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
   {
     String url = compo.getURL();
     int idx = url.lastIndexOf('/');
+    PropertyValue[] args = compo.getArgs();
+    String fileName = "";
+    boolean hidden = false;
+    for (PropertyValue p : args)
+    {
+      if (p.Name.equals("FileName"))
+        fileName = (String) p.Value;
+      if (p.Name.equals("Hidden"))
+        hidden = (Boolean)p.Value;
+    }
 
     boolean mmdoc =
       (/* wird über datei->Drucken in Serienbrief erzeugt: */(url.startsWith(
         ".tmp/", idx - 4) && url.endsWith(".tmp"))
         || /* wird über den Service css.text.MailMerge erzeugt: */(url.startsWith(
           "/SwMM", idx) && url.endsWith(".odt")) || /* wird vom WollMux erzeugt: */url.startsWith(
-        "/WollMuxMailMerge", idx - 20));
+        "/WollMuxMailMerge", idx - 20) || (fileName.equals("private:object") && hidden));
 
     // debug-Meldung bewusst ohne L.m gewählt (WollMux halt dich raus!)
     if (mmdoc) Logger.debug2("temporary document: " + url);
@@ -310,6 +322,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     }
   }
 
+  @Override
   public void disposing(EventObject arg0)
   {
     // nothing to do

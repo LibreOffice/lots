@@ -112,7 +112,11 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   {
     WollMuxSingleton.initialize(ctx);
     
-    createMenuItems();
+    if (!WollMuxSingleton.getInstance().isMenusCreated())
+    {
+      createMenuItems();
+      WollMuxSingleton.getInstance().setMenusCreated(true);
+    }
   }
 
   /*
@@ -643,6 +647,5 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     {}
     return -1;
   }
-
-
+  
 }

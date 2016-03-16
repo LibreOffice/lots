@@ -89,6 +89,8 @@ public class WollMuxSingleton
    * Verwaltet Informationen zum NoConfig mode.
    */
   private NoConfig noConfig;
+  
+  private boolean menusCreated = false;
 
   /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
@@ -209,6 +211,16 @@ public class WollMuxSingleton
   public static WollMuxSingleton getInstance()
   {
     return singletonInstance;
+  }
+
+  public boolean isMenusCreated()
+  {
+    return menusCreated;
+  }
+
+  public void setMenusCreated(boolean menusCreated)
+  {
+    this.menusCreated = menusCreated;
   }
 
   /**
