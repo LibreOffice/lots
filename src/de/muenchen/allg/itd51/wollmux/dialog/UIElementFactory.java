@@ -390,7 +390,7 @@ public class UIElementFactory
       // JScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
       // JScrollPane.VERTICAL_SCROLLBAR_NEVER);
       scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-      scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+      scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
       panel.add(scrollPane);
       uiElement =
         new Textarea(id, textarea, panel, layoutConstraints, labelType,
