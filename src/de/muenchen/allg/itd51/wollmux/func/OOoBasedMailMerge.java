@@ -875,6 +875,16 @@ public class OOoBasedMailMerge
     {
       return null;
     }
+    
+    // Workaround für #16487
+    try
+    {
+      Thread.sleep(1000);
+    }
+    catch (InterruptedException e2)
+    {
+      Logger.error(e2);
+    }
 
     // Neues input-Dokument öffnen. Achtung: Normalerweise würde der
     // loadComponentFromURL den WollMux veranlassen, das Dokument zu interpretieren
