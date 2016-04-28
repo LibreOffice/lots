@@ -38,6 +38,7 @@ package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -65,27 +66,28 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
+import com.sun.star.awt.XTopWindow;
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XStorable;
 import com.sun.star.io.IOException;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.CoupledWindowController;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.PrintModels;
-import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.UnavailableException;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults.SimulationResultsProcessor;
+import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.QueryResultsWithSchema;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
@@ -241,6 +243,12 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   private MailMergeParams mailMergeParams = new MailMergeParams();
 
   /**
+   * Enthält den Controller, der an das Dokumentfenster dieses Dokuments angekoppelte
+   * Fenster überwacht und steuert.
+   */
+  private CoupledWindowController coupledWindowController = null;
+
+  /**
    * Die zentrale Klasse, die die Serienbrieffunktionalität bereitstellt.
    * 
    * @param mod
@@ -258,6 +266,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           try
@@ -304,10 +313,12 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     button = new JButton(L.m("Datenquelle"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         ds.showDatasourceSelectionDialog(myFrame, new Runnable()
         {
+          @Override
           public void run()
           {
             updateEnabledDisabledState();
@@ -321,6 +332,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
         new Iterable<Action>()
         {
+          @Override
           public Iterator<Action> iterator()
           {
             return getInsertFieldActionList().iterator();
@@ -333,6 +345,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     final JButton specialFieldButton = button;
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         showInsertSpecialFieldPopup(specialFieldButton, 0,
@@ -349,6 +362,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     final JButton previewButton = button;
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         if (!ds.hasDatasource()) return;
@@ -376,6 +390,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     button = new JButton("|<");
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         previewDatasetNumber = 1;
@@ -389,6 +404,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     button = new JButton("<");
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         --previewDatasetNumber;
@@ -404,6 +420,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     previewDatasetNumberTextfield.addKeyListener(NonNumericKeyConsumer.instance);
     previewDatasetNumberTextfield.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         String tfValue = previewDatasetNumberTextfield.getText();
@@ -427,6 +444,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     button = new JButton(">");
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         ++previewDatasetNumber;
@@ -440,6 +458,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     button = new JButton(">|");
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         previewDatasetNumber = Integer.MAX_VALUE;
@@ -453,6 +472,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     button = new JButton(L.m("Drucken"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         if (ds.hasDatasource())
@@ -466,6 +486,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     JMenuItem item = new JMenuItem(L.m("Tabelle bearbeiten"));
     item.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         ds.toFront();
@@ -477,6 +498,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       new JMenuItem(L.m("Tabellenspalten ergänzen"));
     addColumnsMenuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         AdjustFields.showAddMissingColumnsDialog(myFrame, mod, ds);
@@ -488,6 +510,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       new JMenuItem(L.m("Alle Felder anpassen"));
     adjustFieldsMenuItem.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         AdjustFields.showAdjustFieldsDialog(myFrame, mod, ds);
@@ -499,6 +522,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     final JButton tabelleButton = button;
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
@@ -527,12 +551,13 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     int y = frameHeight * 3;// screenSize.height/2 - frameHeight/2;
     myFrame.setLocation(x, y);
     myFrame.setResizable(false);
-    mod.addCoupledWindow(myFrame);
+    addCoupledWindow(myFrame);
     myFrame.setVisible(true);
 
     if (!ds.hasDatasource())
       ds.showDatasourceSelectionDialog(myFrame, new Runnable()
       {
+        @Override
         public void run()
         {
           updateEnabledDisabledState();
@@ -632,6 +657,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           try
@@ -669,6 +695,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       {
         private static final long serialVersionUID = 0; // Eclipse-Warnung totmachen
 
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           mod.insertMailMergeFieldAtCursorPosition(name);
@@ -706,6 +733,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     button.setEnabled(dsHasFields);
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         // ConfigThingy für leere Gender-Funktion zusammenbauen.
@@ -722,6 +750,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     button.setEnabled(dsHasFields);
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         // ConfigThingy für leere WennDannSonst-Funktion zusammenbauen. Aufbau:
@@ -740,6 +769,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     button = new JMenuItem(L.m("Datensatznummer"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         mod.insertMailMergeFieldAtCursorPosition(MailMergeParams.TAG_DATENSATZNUMMER);
@@ -750,6 +780,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     button = new JMenuItem(L.m("Serienbriefnummer"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         mod.insertMailMergeFieldAtCursorPosition(MailMergeParams.TAG_SERIENBRIEFNUMMER);
@@ -760,6 +791,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     button = new JMenuItem(L.m("Nächster Datensatz"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         mod.insertNextDatasetFieldAtCursorPosition();
@@ -771,6 +803,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     button.setEnabled(editFieldDialog != null);
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         editFieldDialog.show(L.m("Spezialfeld bearbeiten"), myFrame);
@@ -814,6 +847,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     params.fieldNames = fieldNames;
     params.closeAction = new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         TrafoDialog dialog = (TrafoDialog) e.getSource();
@@ -864,6 +898,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     params.fieldNames = ds.getColumnNames();
     params.closeAction = new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         TrafoDialog dialog = (TrafoDialog) e.getSource();
@@ -912,6 +947,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    *          Seriendruckdialog gesetzt oder nicht gesetzt sind.
    * @author Christoph Lutz (D-III-ITD-D101)
    */
+  @Override
   public void doMailMerge(List<String> usePrintFunctions,
       boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
       Map<SubmitArgument, Object> args)
@@ -951,7 +987,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
 
     // PrintModel erzeugen und Parameter setzen:
-    final XPrintModel pmod = mod.createPrintModel(!ignoreDocPrintFuncs);
+    final XPrintModel pmod = PrintModels.createPrintModel(mod, !ignoreDocPrintFuncs);
     try
     {
       pmod.setPropertyValue("MailMergeNew_Schema", data.getSchema());
@@ -1003,6 +1039,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     // Drucken im Hintergrund, damit der EDT nicht blockiert.
     new Thread()
     {
+      @Override
       public void run()
       {
         long startTime = System.currentTimeMillis();
@@ -1452,9 +1489,10 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
    * #hasPrintfunction(java.lang.String)
    */
+  @Override
   public boolean hasPrintfunction(String name)
   {
-    final XPrintModel pmod = mod.createPrintModel(true);
+    final XPrintModel pmod = PrintModels.createPrintModel(mod, true);
     try
     {
       pmod.usePrintFunction(name);
@@ -1473,6 +1511,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
    * #getColumnNames()
    */
+  @Override
   public List<String> getColumnNames()
   {
     return ds.getColumnNames();
@@ -1485,6 +1524,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
    * #getDefaultFilename()
    */
+  @Override
   public String getDefaultFilename()
   {
     String title = mod.getTitle();
@@ -1501,6 +1541,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
    * #getTextDocument()
    */
+  @Override
   public XTextDocument getTextDocument()
   {
     return mod.doc;
@@ -1508,33 +1549,40 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   private class MyWindowListener implements WindowListener
   {
+    @Override
     public void windowOpened(WindowEvent e)
     {}
 
+    @Override
     public void windowClosing(WindowEvent e)
     {
       abort();
     }
 
+    @Override
     public void windowClosed(WindowEvent e)
     {}
 
+    @Override
     public void windowIconified(WindowEvent e)
     {}
 
+    @Override
     public void windowDeiconified(WindowEvent e)
     {}
 
+    @Override
     public void windowActivated(WindowEvent e)
     {}
 
+    @Override
     public void windowDeactivated(WindowEvent e)
     {}
   }
 
   private void abort()
   {
-    mod.removeCoupledWindow(myFrame);
+    removeCoupledWindow(myFrame);
     /*
      * Wegen folgendem Java Bug (WONTFIX)
      * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304 sind die folgenden
@@ -1555,24 +1603,54 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       abortListener.actionPerformed(new ActionEvent(this, 0, ""));
   }
 
-  public static void main(String[] args) throws Exception
+  /**
+   * Koppelt das AWT-Window window an das Fenster dieses Textdokuments an. Die
+   * Methode muss aufgerufen werden, solange das Fenster window unsichtbar und nicht
+   * aktiv ist (also z.B. vor dem Aufruf von window.setVisible(true)).
+   * 
+   * @param window
+   *          das Fenster, das an das Hauptfenster angekoppelt werden soll.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private synchronized void addCoupledWindow(Window window)
   {
-    UNO.init();
-    Logger.init(Logger.ALL);
-    WollMuxSingleton.initialize(UNO.defaultContext);
-    XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
-    if (doc == null)
+    if (window == null) return;
+    if (coupledWindowController == null)
     {
-      System.err.println(L.m("Vordergrunddokument ist kein XTextDocument!"));
-      System.exit(1);
+      coupledWindowController = new CoupledWindowController();
+      XFrame f = mod.getFrame();
+      XTopWindow w = null;
+      if (f != null) w = UNO.XTopWindow(f.getContainerWindow());
+      if (w != null) coupledWindowController.setTopWindow(w);
     }
+  
+    coupledWindowController.addCoupledWindow(window);
+  }
 
-    MailMergeNew mm = new MailMergeNew(new TextDocumentModel(doc), null);
-
-    while (mm.myFrame == null)
-      Thread.sleep(1000);
-    while (mm.myFrame != null)
-      Thread.sleep(1000);
-    System.exit(0);
+  /**
+   * Löst die Bindung eines angekoppelten Fensters window an das Dokumentfenster.
+   * 
+   * @param window
+   *          das Fenster, dessen Bindung zum Hauptfenster gelöst werden soll. Ist
+   *          das Fenster nicht angekoppelt, dann passiert nichts.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private synchronized void removeCoupledWindow(Window window)
+  {
+    if (window == null || coupledWindowController == null) return;
+  
+    coupledWindowController.removeCoupledWindow(window);
+  
+    if (!coupledWindowController.hasCoupledWindows())
+    {
+      // deregistriert den windowListener.
+      XFrame f = mod.getFrame();
+      XTopWindow w = null;
+      if (f != null) w = UNO.XTopWindow(f.getContainerWindow());
+      if (w != null) coupledWindowController.unsetTopWindow(w);
+      coupledWindowController = null;
+    }
   }
 }

@@ -65,14 +65,18 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
-import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.WollMuxClassLoader;
+import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
+import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.functions.ExternalFunction;
+import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.core.functions.Values;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Erzeugt Functions aus ConfigThingys.
@@ -1063,7 +1067,7 @@ public class FunctionFactory
     public ExternalFunctionFunction(ConfigThingy conf)
         throws ConfigurationErrorException
     {
-      func = new ExternalFunction(conf, WollMuxFiles.getClassLoader());
+      func = new ExternalFunction(conf, WollMuxClassLoader.getClassLoader());
     }
 
     public String[] parameters()
@@ -2456,6 +2460,76 @@ public class FunctionFactory
       values);
 
     System.exit(0);
+  }
+
+  /**
+   * Parst die "Funktionen" Abschnitte aus conf und liefert eine entsprechende
+   * FunctionLibrary.
+   * 
+   * @param context
+   *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden sollen
+   *          (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
+   *          gespeichert, es ist nicht nur ein Schlüssel.
+   * 
+   * @param baselib
+   *          falls nicht-null wird diese als Fallback verlinkt, um Funktionen zu
+   *          liefern, die anderweitig nicht gefunden werden.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static FunctionLibrary parseFunctions(ConfigThingy conf,
+      DialogLibrary dialogLib, Map<Object, Object> context, FunctionLibrary baselib)
+  {
+    return parseFunctions(new FunctionLibrary(baselib), conf, "Funktionen",
+      dialogLib, context);
+  }
+
+  /**
+   * Parst die Inhalte von conf,query(section) als Funktionsdefinitionen und fügt sie
+   * funcs hinzu.
+   * 
+   * @param context
+   *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden sollen
+   *          (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
+   *          gespeichert, es ist nicht nur ein Schlüssel.
+   * 
+   * @param baselib
+   *          falls nicht-null wird diese als Fallback verlinkt, um Funktionen zu
+   *          liefern, die anderweitig nicht gefunden werden.
+   * 
+   * @return funcs
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static FunctionLibrary parseFunctions(FunctionLibrary funcs,
+      ConfigThingy conf, String section, DialogLibrary dialogLib,
+      Map<Object, Object> context)
+  {
+    conf = conf.query(section);
+    Iterator<ConfigThingy> parentIter = conf.iterator();
+    while (parentIter.hasNext())
+    {
+      Iterator<ConfigThingy> iter = parentIter.next().iterator();
+      while (iter.hasNext())
+      {
+        ConfigThingy funcConf = iter.next();
+        String name = funcConf.getName();
+        try
+        {
+          Function func =
+            parseChildren(funcConf, funcs, dialogLib, context);
+          funcs.add(name, func);
+        }
+        catch (ConfigurationErrorException e)
+        {
+          Logger.error(L.m(
+            "Fehler beim Parsen der Funktion \"%1\" im Abschnitt \"%2\"", name,
+            section), e);
+        }
+      }
+    }
+  
+    return funcs;
   }
 
 }

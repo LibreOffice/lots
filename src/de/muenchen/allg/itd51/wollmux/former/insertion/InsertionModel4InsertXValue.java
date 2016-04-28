@@ -42,19 +42,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import java.util.regex.Pattern;
 
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XTextRange;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.SyntaxErrorException;
-import de.muenchen.allg.itd51.wollmux.Bookmark;
-import de.muenchen.allg.itd51.wollmux.DocumentCommands;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.UnknownIDException;
+import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
@@ -82,12 +80,6 @@ public class InsertionModel4InsertXValue extends InsertionModel
    * Siehe {@link #autosep}.
    */
   private static final int AUTOSEP_RIGHT = 3;
-
-  /**
-   * Pattern zum Erkennen von insertValue und insertFormValue-Bookmarks.
-   */
-  public static final Pattern INSERTION_BOOKMARK =
-    DocumentCommands.getPatternForCommand("((insertValue)|(insertFormValue))");
 
   /**
    * Attribut-ID-Konstante für

@@ -34,6 +34,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -53,12 +54,15 @@ import com.sun.star.uno.Type;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRange;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRangeType;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintProgressBar;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
-import de.muenchen.allg.itd51.wollmux.func.PrintFunction;
+import de.muenchen.allg.itd51.wollmux.print.PrintFunction;
 
 /**
  * Diese Klasse enthält eine Fabrik für die Erzeugung eines XPrintModels, die
@@ -95,6 +99,43 @@ public class PrintModels
   {
     return new MasterPrintModel(model);
   }
+  
+  /**
+   * Liefert ein neues zu diesem TextDocumentModel zugehörige XPrintModel für einen
+   * Druckvorgang; ist useDocumentPrintFunctions==true, so werden bereits alle im
+   * Dokument gesetzten Druckfunktionen per
+   * XPrintModel.usePrintFunctionWithArgument(...) hinzugeladen.
+   * 
+   * @param model
+   *          Das Dokument das gedruckt werden soll
+   * @param useDocPrintFunctions
+   *          steuert ob das PrintModel mit den im Dokument gesetzten Druckfunktionen
+   *          vorbelegt sein soll.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static XPrintModel createPrintModel(TextDocumentModel model, boolean useDocPrintFunctions)
+  {
+    XPrintModel pmod = PrintModels.createPrintModel(model);
+    if (useDocPrintFunctions)
+    {
+      for (Iterator<String> iter = model.getPrintFunctions().iterator(); iter.hasNext();)
+      {
+        String name = iter.next();
+        try
+        {
+          pmod.usePrintFunction(name);
+        }
+        catch (NoSuchMethodException e)
+        {
+          Logger.error(e);
+        }
+      }
+    }
+    return pmod;
+  }
+
+
 
   /**
    * Jedes hier definierte konkrete PrintModel definiert dieses Interface und kann
@@ -1251,7 +1292,7 @@ public class PrintModels
      * nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als der
      * ORDER-Wert der aktuellen Druckfunktion ist.
      * 
-     * @see de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel#useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.func.PrintFunction)
+     * @see de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel#useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.print.PrintFunction)
      */
     @Override
     public boolean useInternalPrintFunction(PrintFunction function)

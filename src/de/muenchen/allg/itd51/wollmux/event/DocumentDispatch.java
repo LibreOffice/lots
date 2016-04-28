@@ -38,8 +38,8 @@ import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 
 /**
  * Implementiert XDispatch und kann alle Dispatch-URLs behandeln, die ein
@@ -93,6 +93,7 @@ public class DocumentDispatch extends Dispatch
    * 
    * @see #removeStatusListener(XStatusListener, URL)
    */
+  @Override
   public void addStatusListener(XStatusListener listener, URL url)
   {
     if (origDisp != null)
@@ -107,6 +108,7 @@ public class DocumentDispatch extends Dispatch
    * 
    * @see #addStatusListener(XStatusListener, URL)
    */
+  @Override
   public void removeStatusListener(XStatusListener listener, URL url)
   {
     if (origDisp != null)

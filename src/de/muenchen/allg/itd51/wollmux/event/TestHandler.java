@@ -39,12 +39,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.PrintModels;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
 
@@ -88,7 +89,7 @@ public class TestHandler
       int verfPunkt = Short.parseShort(idsAndValues.get("VerfPunkt"));
       boolean isDraft = (verfPunkt == count) ? true : false;
       boolean isOriginal = (verfPunkt == 1) ? true : false;
-      final XPrintModel pmod = model.createPrintModel(false);
+      final XPrintModel pmod = PrintModels.createPrintModel(model, false);
       try
       {
         List<VerfuegungspunktInfo> settings = new ArrayList<VerfuegungspunktInfo>();
@@ -107,6 +108,7 @@ public class TestHandler
       // Drucken im Hintergrund, damit der WollMux weiterläuft.
       new Thread()
       {
+        @Override
         public void run()
         {
           pmod.printWithProps();

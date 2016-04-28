@@ -16,9 +16,9 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
 
 public class PrintFunctionDialog extends JDialog
 {

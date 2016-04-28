@@ -8,18 +8,18 @@ import java.util.Vector;
 import com.sun.star.frame.XFrame;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
-import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeDatasource;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Repräsentiert ein FormModel für ein einfaches Formular mit genau einem
@@ -213,13 +213,13 @@ public class SingleDocumentFormModel implements FormModel
    * (non-Javadoc)
    * 
    * @see
-   * de.muenchen.allg.itd51.wollmux.FormModel#disposed(de.muenchen.allg.itd51.wollmux
+   * de.muenchen.allg.itd51.wollmux.FormModel#closing(de.muenchen.allg.itd51.wollmux
    * .TextDocumentModel)
    */
   @Override
-  public void disposing(TextDocumentModel source)
+  public void closing(Object sender)
   {
-    if (doc.equals(source))
+    if (doc.doc.equals(sender))
     {
       if (formGUI != null)
       {

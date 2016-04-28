@@ -7,17 +7,18 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.dialog.FormController;
+import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 /**
  * Repräsentiert ein FormModel dem mehrere Formulardokumente zugeordnet sind, die
@@ -298,16 +299,16 @@ public class MultiDocumentFormModel implements FormModel
    * TESTED
    */
   @Override
-  public void disposing(TextDocumentModel source)
+  public void closing(Object sender)
   {
     for (int i = 0; i < docs.size(); i++)
     {
       TextDocumentModel doc = docs.get(i);
       FormModel fm = formModels.get(i);
 
-      if (doc.equals(source))
+      if (doc.equals(sender))
       {
-        fm.disposing(source);
+        fm.closing(sender);
         docs.remove(i);
         formModels.remove(i);
       }
@@ -397,21 +398,21 @@ public class MultiDocumentFormModel implements FormModel
   
     // ...und mergen
     ConfigThingy formConf =
-      FormController.mergeFormDescriptors(formularSections, buttonAnpassung,
+      TextDocumentModel.mergeFormDescriptors(formularSections, buttonAnpassung,
         MultiDocumentFormModel.MULTI_FORM_TITLE);
   
     // FunctionContext erzeugen und im Formular definierte
     // Funktionen/DialogFunktionen parsen:
     Map<Object, Object> functionContext = new HashMap<Object, Object>();
     DialogLibrary dialogLib =
-      WollMuxFiles.parseFunctionDialogs(formConf, GlobalFunctions.getInstance().getFunctionDialogs(),
+      DialogFactory.parseFunctionDialogs(formConf, GlobalFunctions.getInstance().getFunctionDialogs(),
         functionContext);
     // FIXME: hier müsste eine gemergte Variante der Funktionsbibliotheken der
     // einzel-TextDocumentModels erzeugt werden, damit auch dokumentlokale
     // Trafos funktionieren - aber wer verwendet schon Multiform? Warten wir mit
     // der Änderung sie jemand benötigt.
     FunctionLibrary funcLib =
-      WollMuxFiles.parseFunctions(formConf, dialogLib, functionContext,
+      FunctionFactory.parseFunctions(formConf, dialogLib, functionContext,
         GlobalFunctions.getInstance().getGlobalFunctions());
   
     // Abschnitt Fenster/Formular aus wollmuxConf holen:

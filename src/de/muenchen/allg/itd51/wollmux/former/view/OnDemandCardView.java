@@ -44,7 +44,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
  * Basisklasse für Views mit CardLayout für eine Menge von Objekten, wobei die

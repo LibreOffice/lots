@@ -41,8 +41,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
-import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
  * verwaltet Objekte, die ID-Strings repräsentieren. Die ID-Objekte können an

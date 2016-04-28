@@ -34,7 +34,7 @@ package de.muenchen.allg.itd51.wollmux.db;
 import java.util.Map;
 import java.util.Set;
 
-import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
  * Basisklasse für DJDataset-Implementierungen.

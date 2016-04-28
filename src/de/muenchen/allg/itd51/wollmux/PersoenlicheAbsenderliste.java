@@ -8,11 +8,14 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 
 public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALChangeEventListener>
@@ -196,7 +199,7 @@ public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALCha
   public DJDatasetListElement[] getSortedPALEntries()
   {
     // Liste der entries aufbauen.
-    QueryResults data = WollMuxFiles.getDatasourceJoiner().getLOS();
+    QueryResults data = DatasourceJoiner.getDatasourceJoiner().getLOS();
   
     DJDatasetListElement[] elements = new DJDatasetListElement[data.size()];
     Iterator<Dataset> iter = data.iterator();
@@ -231,7 +234,7 @@ public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALCha
   {
     try
     {
-      DJDataset selected = WollMuxFiles.getDatasourceJoiner().getSelectedDataset();
+      DJDataset selected = DatasourceJoiner.getDatasourceJoiner().getSelectedDataset();
       return new DJDatasetListElement(selected, senderDisplayTemplate).toString()
         + SENDER_KEY_SEPARATOR + selected.getKey();
     }

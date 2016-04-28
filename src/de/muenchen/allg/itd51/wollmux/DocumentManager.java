@@ -42,6 +42,13 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
 /**
  * Verwaltet Informationen zu allen offenen OOo-Dokumenten.
@@ -55,8 +62,12 @@ public class DocumentManager
    */
   private static DocumentManager docManager;
   
-  private HashMap<HashableComponent, Info> info =
+  private Map<HashableComponent, Info> info =
     new HashMap<HashableComponent, Info>();
+  
+  private Map<XTextDocument, FormModel> formModels = new HashMap<XTextDocument, FormModel>();
+  private Map<XTextDocument, FormularMax4kController> fm4k = new HashMap<XTextDocument, FormularMax4kController>();
+  private Map<XTextDocument, MailMergeNew> mailMerge = new HashMap<XTextDocument, MailMergeNew>();
   
   /**
    * Enthält alle registrierten XEventListener, die bei Statusänderungen der
@@ -213,6 +224,75 @@ public class DocumentManager
   }
   
   /**
+   * Liefert die zu diesem Dokument zugehörige FormularGUI, falls dem
+   * TextDocumentModel die Existent einer FormGUI über setFormGUI(...) mitgeteilt
+   * wurde - andernfalls wird null zurück geliefert.
+   * 
+   * @return Die FormularGUI des Formulardokuments oder null
+   */
+  synchronized public FormModel getFormModel(XTextDocument doc)
+  {
+    return formModels.get(doc);
+  }
+
+  /**
+   * Gibt dem TextDocumentModel die Existent der FormularGUI formGUI bekannt und wird
+   * vom DocumentCommandInterpreter in der Methode processFormCommands() gestartet
+   * hat, falls das Dokument ein Formulardokument ist.
+   * 
+   * @param formGUI
+   *          Die zu diesem Dokument zugehörige formGUI
+   */
+  synchronized public void setFormModel(XTextDocument doc, FormModel formModel)
+  {
+    this.formModels.put(doc, formModel);
+  }
+
+  /**
+   * Setzt die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
+   * FormularMax4000.
+   * 
+   * @param max
+   */
+  synchronized public void setCurrentFormularMax4000(XTextDocument doc, FormularMax4kController max)
+  {
+    fm4k.put(doc, max);
+  }
+
+  /**
+   * Liefert die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
+   * FormularMax4000 zurück, oder null, falls kein FormularMax gestartet wurde.
+   * 
+   * @return
+   */
+  synchronized public FormularMax4kController getCurrentFormularMax4000(XTextDocument doc)
+  {
+    return fm4k.get(doc);
+  }
+
+  /**
+   * Setzt die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
+   * MailMergeNew.
+   * 
+   * @param max
+   */
+  synchronized public void setCurrentMailMergeNew(XTextDocument doc, MailMergeNew max)
+  {
+    mailMerge.put(doc, max);
+  }
+
+  /**
+   * Liefert die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
+   * MailMergeNew zurück, oder null, falls kein FormularMax gestartet wurde.
+   * 
+   * @return
+   */
+  synchronized public MailMergeNew getCurrentMailMergeNew(XTextDocument doc)
+  {
+    return mailMerge.get(doc);
+  }
+
+  /**
    * Liefert das aktuelle TextDocumentModel zum übergebenen XTextDocument doc;
    * existiert zu doc noch kein TextDocumentModel, so wird hier eines erzeugt und das
    * neu erzeugte zurück geliefert.
@@ -328,7 +408,15 @@ public class DocumentManager
     @Override
     public synchronized TextDocumentModel getTextDocumentModel()
     {
-      if (model == null) model = new TextDocumentModel(doc);
+      if (model == null)
+      {
+        model = new TextDocumentModel(doc);
+
+        /**
+         * Dispatch Handler in eigenem Event registrieren, da es Deadlocks gegeben hat.
+         */
+        WollMuxEventHandler.handleRegisterDispatchInterceptor(model.getFrame());
+      }
       return model;
     }
 
@@ -343,5 +431,21 @@ public class DocumentManager
     {
       return "TextDocumentInfo - model=" + model;
     }
+  }
+  
+  /**
+   * Ruft die Dispose-Methoden von allen aktiven, dem TextDocumentModel zugeordneten
+   * Dialogen auf und gibt den Speicher des TextDocumentModels frei.
+   */
+  public synchronized void dispose(XTextDocument doc)
+  {
+    if (fm4k.containsKey(doc)) fm4k.get(doc).abort();
+    fm4k.remove(doc);
+
+    if (mailMerge.containsKey(doc)) mailMerge.get(doc).dispose();
+    mailMerge.remove(doc);
+
+    if (formModels.containsKey(doc)) formModels.get(doc).closing(this);
+    formModels.remove(doc);
   }
 }

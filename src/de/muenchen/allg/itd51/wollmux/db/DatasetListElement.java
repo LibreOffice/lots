@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.Icon;
 
-import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 public class DatasetListElement implements Comparable<DatasetListElement>
 {

@@ -49,6 +49,9 @@ import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Diese Klasse referenziert alle temporären Workarounds, die im WollMux aufgenommen
@@ -524,6 +527,7 @@ public class Workarounds
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
+  @Deprecated
   public static boolean applyWorkaroundForTracTicket5031(String werteStr,
       boolean alreadyTouchedAsFormDocument)
   {

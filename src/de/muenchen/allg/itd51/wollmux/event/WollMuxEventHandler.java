@@ -115,53 +115,54 @@ import com.sun.star.view.DocumentZoomType;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.Bookmark;
-import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand;
-import de.muenchen.allg.itd51.wollmux.DocumentCommandInterpreter;
-import de.muenchen.allg.itd51.wollmux.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
+import de.muenchen.allg.itd51.wollmux.PrintModels;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.TextModule;
-import de.muenchen.allg.itd51.wollmux.TimeoutException;
-import de.muenchen.allg.itd51.wollmux.VisibleTextFragmentList;
-import de.muenchen.allg.itd51.wollmux.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
+import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.document.VisibleTextFragmentList;
+import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
+import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.core.functions.Values;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.core.parser.InvalidIdentifierException;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.db.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
-import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.InvalidFormDescriptorException;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.MultiDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
-import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.func.Values;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
@@ -570,7 +571,7 @@ public class WollMuxEventHandler
         // Dialog modal starten:
         setLock();
         new AbsenderAuswaehlen(whoAmIconf, PALconf, ADBconf,
-          WollMuxFiles.getDatasourceJoiner(), unlockActionListener);
+          DatasourceJoiner.getDatasourceJoiner(), unlockActionListener);
         waitForUnlock();
       }
       catch (Exception e)
@@ -617,7 +618,7 @@ public class WollMuxEventHandler
         // Dialog modal starten:
         setLock();
         new PersoenlicheAbsenderlisteVerwalten(PALconf, ADBconf,
-          WollMuxFiles.getDatasourceJoiner(), unlockActionListener);
+          DatasourceJoiner.getDatasourceJoiner(), unlockActionListener);
         waitForUnlock();
 }
       catch (Exception e)
@@ -937,7 +938,7 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       // Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
-      FormularMax4kController max = model.getCurrentFormularMax4000();
+      FormularMax4kController max = DocumentManager.getDocumentManager().getCurrentFormularMax4000(model.doc);
       if (max != null)
       {
         max.toFront();
@@ -962,7 +963,7 @@ public class WollMuxEventHandler
           new FormularMax4kController(model, l,
             GlobalFunctions.getInstance().getGlobalFunctions(),
             GlobalFunctions.getInstance().getGlobalPrintFunctions());
-        model.setCurrentFormularMax4000(max);
+        DocumentManager.getDocumentManager().setCurrentFormularMax4000(model.doc, max);
         max.run();
       }
     }
@@ -999,7 +1000,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      model.setCurrentFormularMax4000(null);
+      DocumentManager.getDocumentManager().setCurrentFormularMax4000(model.doc, null);
     }
 
     @Override
@@ -1034,7 +1035,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      model.setCurrentMailMergeNew(null);
+      DocumentManager.getDocumentManager().setCurrentMailMergeNew(model.doc, null);
     }
 
     @Override
@@ -1093,7 +1094,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      if (docInfo.hasTextDocumentModel()) docInfo.getTextDocumentModel().dispose();
+      if (docInfo.hasTextDocumentModel()) DocumentManager.getDocumentManager().dispose(docInfo.getTextDocumentModel().doc);
     }
 
     @Override
@@ -1230,7 +1231,7 @@ public class WollMuxEventHandler
                 L.m("Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\nBitte kontaktieren Sie Ihre Systemadministration."));
             }
 
-            model.setFormModel(fm);
+            DocumentManager.getDocumentManager().setFormModel(model.doc, fm);
             fm.startFormGUI();
           }
         }
@@ -1317,7 +1318,7 @@ public class WollMuxEventHandler
       for (Iterator<TextDocumentModel> iter = docs.iterator(); iter.hasNext();)
       {
         TextDocumentModel doc = iter.next();
-        doc.setFormModel(fm);
+        DocumentManager.getDocumentManager().setFormModel(doc.doc, fm);
       }
 
       // FormGUI starten:
@@ -1582,7 +1583,7 @@ public class WollMuxEventHandler
             "Das Textfragment mit der FRAG_ID '%1' ist nicht definiert!", frag_id));
         try
         {
-          urls = VisibleTextFragmentList.getURLsByID(frag_id);
+          urls = VisibleTextFragmentList.getURLsByID(WollMuxFiles.getWollmuxConf(), frag_id);
         }
         catch (InvalidIdentifierException e)
         {
@@ -1727,7 +1728,7 @@ public class WollMuxEventHandler
       // Cache und LOS auf Platte speichern.
       try
       {
-        WollMuxFiles.getDatasourceJoiner().saveCacheAndLOS(WollMuxFiles.getLosCacheFile());
+        DatasourceJoiner.getDatasourceJoiner().saveCacheAndLOS(WollMuxFiles.getLosCacheFile());
       }
       catch (IOException e)
       {
@@ -2307,7 +2308,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      DatasourceJoiner dsj = WollMuxFiles.getDatasourceJoiner();
+      DatasourceJoiner dsj = DatasourceJoiner.getDatasourceJoiner();
 
       if (dsj.getLOS().size() == 0)
       {
@@ -2327,7 +2328,7 @@ public class WollMuxEventHandler
       {
         // Liste der nicht zuordnenbaren Datensätze erstellen und ausgeben:
         String names = "";
-        List<String> lost = WollMuxFiles.getLostDatasetDisplayStrings();
+        List<String> lost = DatasourceJoiner.getLostDatasetDisplayStrings();
         if (lost.size() > 0)
         {
           for (String l : lost)
@@ -3048,7 +3049,7 @@ public class WollMuxEventHandler
       stabilize();
 
       // Die im Dokument gesetzten Druckfunktionen ausführen:
-      final XPrintModel pmod = model.createPrintModel(true);
+      final XPrintModel pmod = PrintModels.createPrintModel(model, true);
 
       // Drucken im Hintergrund, damit der WollMuxEventHandler weiterläuft.
       new Thread()
@@ -3701,7 +3702,7 @@ public class WollMuxEventHandler
       TextDocumentModel model =
         DocumentManager.getTextDocumentModel(doc);
 
-      FormModel formModel = model.getFormModel();
+      FormModel formModel = DocumentManager.getDocumentManager().getFormModel(doc);
       if (formModel != null)
       {
         // Werte über den FormController (den das FormModel kennt) setzen lassen
@@ -4123,7 +4124,7 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       // Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
-      MailMergeNew mmn = model.getCurrentMailMergeNew();
+      MailMergeNew mmn = DocumentManager.getDocumentManager().getCurrentMailMergeNew(model.doc);
       if (mmn != null)
       {
         return;
@@ -4139,7 +4140,7 @@ public class WollMuxEventHandler
               WollMuxEventHandler.handleMailMergeNewReturned(model);
           }
         });
-        model.setCurrentMailMergeNew(mmn);
+        DocumentManager.getDocumentManager().setCurrentMailMergeNew(model.doc, mmn);
       }
     }
 

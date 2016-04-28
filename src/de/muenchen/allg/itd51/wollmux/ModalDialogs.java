@@ -3,6 +3,7 @@ package de.muenchen.allg.itd51.wollmux;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 
 public class ModalDialogs

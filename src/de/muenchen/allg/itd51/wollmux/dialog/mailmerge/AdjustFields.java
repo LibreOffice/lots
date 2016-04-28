@@ -59,11 +59,10 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
 
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel.ReferencedFieldID;
-import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.ReferencedFieldID;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;

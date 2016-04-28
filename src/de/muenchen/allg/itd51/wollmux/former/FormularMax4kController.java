@@ -42,15 +42,17 @@ import com.sun.star.view.XSelectionChangeListener;
 import com.sun.star.view.XSelectionSupplier;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.core.document.DocumentTreeVisitor;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
 import de.muenchen.allg.itd51.wollmux.former.document.ScanVisitor;
-import de.muenchen.allg.itd51.wollmux.former.document.Visitor;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionTester;
@@ -62,8 +64,7 @@ import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXVal
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModel;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModelList;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
 
 public class FormularMax4kController
 {
@@ -790,7 +791,7 @@ public class FormularMax4kController
       try
       {
         String bookmark = bookmarks[i];
-        if (InsertionModel4InsertXValue.INSERTION_BOOKMARK.matcher(bookmark).matches())
+        if (DocumentCommands.INSERTION_BOOKMARK.matcher(bookmark).matches())
           insertionModelList.add(new InsertionModel4InsertXValue(bookmark, bmSupp,
             functionSelectionProvider, this));
       }
@@ -814,7 +815,7 @@ public class FormularMax4kController
         if (info.supportsService("com.sun.star.text.TextField.InputUser"))
         {
           Matcher m =
-            InsertionModel4InputUser.INPUT_USER_FUNCTION.matcher(UNO.getProperty(tf,
+            TextDocumentModel.INPUT_USER_FUNCTION.matcher(UNO.getProperty(tf,
               "Content").toString());
 
           if (m.matches())
@@ -1072,7 +1073,7 @@ public class FormularMax4kController
       }
       catch (Exception x)
       {}
-      Visitor visitor = new ScanVisitor(this);
+      DocumentTreeVisitor visitor = new ScanVisitor(this);
       visitor.visit(doc.doc);
     }
     catch (Exception x)
@@ -1268,7 +1269,7 @@ public class FormularMax4kController
           + "tragen den neuen Parameter \"-Xmx256m\" ein (Groß-/Kleinschreibung beachten!) und klicken auf \"Zuweisen\".\n"
           + "Danach ist ein Neustart von OpenOffice.org nötig."),
         L.m("Java Heap Size zu gering"), JOptionPane.ERROR_MESSAGE);
-      doc.setCurrentFormularMax4000(null);
+      DocumentManager.getDocumentManager().setCurrentFormularMax4000(doc.doc, null);
       return false;
     }
     
@@ -1299,7 +1300,6 @@ public class FormularMax4kController
               }
               catch (Exception x)
               {}
-              ;
             }
           });
         }

@@ -78,18 +78,11 @@ import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.swing.JDialog;
@@ -116,20 +109,11 @@ import com.sun.star.util.XStringSubstitution;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.ColumnTransformer;
-import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.DatasetListElement;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
-import de.muenchen.allg.itd51.wollmux.dialog.DatasourceSearchDialog;
-import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.func.Function;
-import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.func.PrintFunction;
-import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 
 /**
  * 
@@ -159,8 +143,6 @@ public class WollMuxFiles
   private static final String WOLLMUX_NOCONF =
     L.m("Es wurde keine WollMux-Konfiguration (wollmux.conf) gefunden - deshalb läuft WollMux im NoConfig-Modus.");
 
-  private static final long DATASOURCE_TIMEOUT = 10000;
-
   /**
    * Wenn nach dieser Anzahl Millisekunden die Konfiguration noch nicht vollständig
    * eingelesen ist, wird ein Popup mit der Meldung {@link #SLOW_SERVER_MESSAGE}
@@ -174,26 +156,10 @@ public class WollMuxFiles
   private static final String SLOW_SERVER_MESSAGE =
     L.m("Ihr Vorlagen-Server und/oder Ihre Netzwerkverbindung sind sehr langsam.\nDies kann die Arbeit mit OpenOffice.org stark beeinträchtigen.");
 
-  private static final WollMuxClassLoader classLoader = new WollMuxClassLoader();
-
-  private static final String[] BLACKLIST = {
-    "java.", "com.sun." };
-
   /**
    * Die in der wollmux.conf mit DEFAULT_CONTEXT festgelegte URL.
    */
   private static URL defaultContextURL;
-
-  /**
-   * Enthält den zentralen DataSourceJoiner.
-   */
-  private static DatasourceJoiner datasourceJoiner;
-
-  /**
-   * Falls true, wurde bereits versucht, den DJ zu initialisieren (über den Erfolg
-   * des Versuchs sagt die Variable nichts.)
-   */
-  private static boolean djInitialized = false;
 
   /**
    * Enthält den geparsten Konfigruationsbaum der wollmux.conf
@@ -237,12 +203,6 @@ public class WollMuxFiles
    * wollmux.conf: QA_TEST_HANDLER "true/false".
    */
   private static boolean installQATestHandler = false;
-
-  /**
-   * Druckfunktionen, bei denen kein ORDER-Attribut angegeben ist, werden automatisch
-   * mit diesem ORDER-Wert versehen.
-   */
-  private static final String DEFAULT_PRINTFUNCTION_ORDER_VALUE = "100";
 
   /**
    * Erzeugt das .wollmux-Verzeichnis im Home-Verzeichnis des Benutzers (falls es
@@ -350,8 +310,6 @@ public class WollMuxFiles
       WollMuxFiles.getWollmuxConf().query("QA_TEST_HANDLER", 1).query("true").count() > 0;
 
     determineDefaultContext();
-
-    initClassLoader();
 
     initDebugMode();
 
@@ -532,94 +490,6 @@ public class WollMuxFiles
   }
 
   /**
-   * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null, falls
-   * ein Fehler während der Initialisierung aufgetreten ist).
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-
-  public static DatasourceJoiner getDatasourceJoiner()
-  {
-    if (!djInitialized)
-    {
-      djInitialized = true;
-      ConfigThingy senderSource =
-        WollMuxFiles.getWollmuxConf().query("SENDER_SOURCE", 1);
-      String senderSourceStr = null;
-      try
-      {
-        senderSourceStr = senderSource.getLastChild().toString();
-      }
-      catch (NodeNotFoundException e)
-      {
-        // hier geben wir im Vergleich zu früher keine Fehlermeldung mehr aus,
-        // sondern erst später, wnn
-        // tatsächlich auf die Datenquelle "null" zurück gegriffen wird.
-      }
-
-      ConfigThingy dataSourceTimeout =
-        WollMuxFiles.getWollmuxConf().query("DATASOURCE_TIMEOUT", 1);
-      String datasourceTimeoutStr = "";
-      long datasourceTimeoutLong = 0;
-      try
-      {
-        datasourceTimeoutStr = dataSourceTimeout.getLastChild().toString();
-        try
-        {
-          datasourceTimeoutLong = new Long(datasourceTimeoutStr).longValue();
-        }
-        catch (NumberFormatException e)
-        {
-          Logger.error(L.m("DATASOURCE_TIMEOUT muss eine ganze Zahl sein"));
-          datasourceTimeoutLong = DATASOURCE_TIMEOUT;
-        }
-        if (datasourceTimeoutLong <= 0)
-        {
-          Logger.error(L.m("DATASOURCE_TIMEOUT muss größer als 0 sein!"));
-        }
-      }
-      catch (NodeNotFoundException e)
-      {
-        datasourceTimeoutLong = DATASOURCE_TIMEOUT;
-      }
-
-      try
-      {
-        if (null == senderSourceStr)
-          senderSourceStr = de.muenchen.allg.itd51.wollmux.NoConfig.NOCONFIG;
-
-        datasourceJoiner =
-          new DatasourceJoiner(getWollmuxConf(), senderSourceStr, getLosCacheFile(),
-            getDEFAULT_CONTEXT(), datasourceTimeoutLong);
-        /*
-         * Zum Zeitpunkt wo der DJ initialisiert wird sind die Funktions- und
-         * Dialogbibliothek des WollMuxSingleton noch nicht initialisiert, deswegen
-         * können sie hier nicht verwendet werden. Man könnte die Reihenfolge
-         * natürlich ändern, aber diese Reihenfolgeabhängigkeit gefällt mir nicht.
-         * Besser wäre auch bei den Funktionen WollMuxSingleton.getFunctionDialogs()
-         * und WollMuxSingleton.getGlobalFunctions() eine on-demand initialisierung
-         * nach dem Prinzip if (... == null) initialisieren. Aber das heben wir uns
-         * für einen Zeitpunkt auf, wo es benötigt wird und nehmen jetzt erst mal
-         * leere Dummy-Bibliotheken.
-         */
-        FunctionLibrary funcLib = new FunctionLibrary();
-        DialogLibrary dialogLib = new DialogLibrary();
-        Map<Object, Object> context = new HashMap<Object, Object>();
-        ColumnTransformer columnTransformer =
-          new ColumnTransformer(WollMuxFiles.getWollmuxConf(),
-            "AbsenderdatenSpaltenumsetzung", funcLib, dialogLib, context);
-        datasourceJoiner.setTransformer(columnTransformer);
-      }
-      catch (ConfigurationErrorException e)
-      {
-        Logger.error(e);
-      }
-    }
-
-    return datasourceJoiner;
-  }
-
-  /**
    * Wertet den DEFAULT_CONTEXT aus wollmux.conf aus und erstellt eine entsprechende
    * URL, mit der {@link #defaultContextURL} initialisiert wird. Wenn in der
    * wollmux.conf kein DEFAULT_CONTEXT angegeben ist, so wird das Verzeichnis, in dem
@@ -783,268 +653,6 @@ public class WollMuxFiles
     }
     else
       debugMode = false;
-  }
-
-  /**
-   * Parst die CLASSPATH Direktiven und hängt für jede eine weitere URL an den
-   * Suchpfad von {@link #classLoader} an.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-   */
-  private static void initClassLoader()
-  {
-    ConfigThingy conf = getWollmuxConf().query("CLASSPATH", 1);
-    Iterator<ConfigThingy> parentiter = conf.iterator();
-    while (parentiter.hasNext())
-    {
-      ConfigThingy CLASSPATHconf = parentiter.next();
-      Iterator<ConfigThingy> iter = CLASSPATHconf.iterator();
-      while (iter.hasNext())
-      {
-        String urlStr = iter.next().toString();
-        if (!urlStr.endsWith("/")
-          && (urlStr.indexOf('.') < 0 || urlStr.lastIndexOf('/') > urlStr.lastIndexOf('.')))
-          urlStr = urlStr + "/"; // Falls keine
-        // Dateierweiterung
-        // angegeben, /
-        // ans Ende setzen, weil nur so Verzeichnisse
-        // erkannt werden.
-        try
-        {
-          URL url = WollMuxFiles.makeURL(urlStr);
-          classLoader.addURL(url);
-        }
-        catch (MalformedURLException e)
-        {
-          Logger.error(L.m("Fehlerhafte CLASSPATH-Angabe: \"%1\"", urlStr), e);
-        }
-      }
-    }
-
-    StringBuilder urllist = new StringBuilder();
-    URL[] urls = classLoader.getURLs();
-    for (int i = 0; i < urls.length; ++i)
-    {
-      urllist.append(urls[i].toExternalForm());
-      urllist.append("  ");
-    }
-
-    for (String s : BLACKLIST)
-    {
-      classLoader.addBlacklisted(s);
-    }
-
-    ConfigThingy confWhitelist = getWollmuxConf().query("CPWHITELIST", 1);
-    for (ConfigThingy w : confWhitelist)
-    {
-      classLoader.addWhitelisted(w.toString());
-    }
-
-    Logger.debug("CLASSPATH=" + urllist);
-  }
-
-  /**
-   * Liefert einen ClassLoader, der die in wollmux,conf gesetzten
-   * CLASSPATH-Direktiven berücksichtigt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public static ClassLoader getClassLoader()
-  {
-    return classLoader;
-  }
-
-  /**
-   * Parst die "Funktionsdialoge" Abschnitte aus conf und liefert als Ergebnis eine
-   * DialogLibrary zurück.
-   * 
-   * @param baselib
-   *          falls nicht-null wird diese als Fallback verlinkt, um Dialoge zu
-   *          liefern, die anderweitig nicht gefunden werden.
-   * @param context
-   *          der Kontext in dem in Dialogen enthaltene Funktionsdefinitionen
-   *          ausgewertet werden sollen (insbesondere DIALOG-Funktionen). ACHTUNG!
-   *          Hier werden Werte gespeichert, es ist nicht nur ein Schlüssel.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public static DialogLibrary parseFunctionDialogs(ConfigThingy conf,
-      DialogLibrary baselib, Map<Object, Object> context)
-  {
-    DialogLibrary funcDialogs = new DialogLibrary(baselib);
-
-    Set<String> dialogsInBlock = new HashSet<String>();
-
-    conf = conf.query("Funktionsdialoge");
-    Iterator<ConfigThingy> parentIter = conf.iterator();
-    while (parentIter.hasNext())
-    {
-      dialogsInBlock.clear();
-      Iterator<ConfigThingy> iter = parentIter.next().iterator();
-      while (iter.hasNext())
-      {
-        ConfigThingy dialogConf = iter.next();
-        String name = dialogConf.getName();
-        if (dialogsInBlock.contains(name))
-          Logger.error(L.m(
-            "Funktionsdialog \"%1\" im selben Funktionsdialoge-Abschnitt mehrmals definiert",
-            name));
-        dialogsInBlock.add(name);
-        try
-        {
-          funcDialogs.add(name,
-            DatasourceSearchDialog.create(dialogConf, getDatasourceJoiner()));
-        }
-        catch (ConfigurationErrorException e)
-        {
-          Logger.error(L.m("Fehler in Funktionsdialog %1", name), e);
-        }
-      }
-    }
-
-    return funcDialogs;
-  }
-
-  /**
-   * Parst die "Funktionen" Abschnitte aus conf und liefert eine entsprechende
-   * FunctionLibrary.
-   * 
-   * @param context
-   *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden sollen
-   *          (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
-   *          gespeichert, es ist nicht nur ein Schlüssel.
-   * 
-   * @param baselib
-   *          falls nicht-null wird diese als Fallback verlinkt, um Funktionen zu
-   *          liefern, die anderweitig nicht gefunden werden.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public static FunctionLibrary parseFunctions(ConfigThingy conf,
-      DialogLibrary dialogLib, Map<Object, Object> context, FunctionLibrary baselib)
-  {
-    return parseFunctions(new FunctionLibrary(baselib), conf, "Funktionen",
-      dialogLib, context);
-  }
-
-  /**
-   * Parst die Inhalte von conf,query(section) als Funktionsdefinitionen und fügt sie
-   * funcs hinzu.
-   * 
-   * @param context
-   *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden sollen
-   *          (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
-   *          gespeichert, es ist nicht nur ein Schlüssel.
-   * 
-   * @param baselib
-   *          falls nicht-null wird diese als Fallback verlinkt, um Funktionen zu
-   *          liefern, die anderweitig nicht gefunden werden.
-   * 
-   * @return funcs
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public static FunctionLibrary parseFunctions(FunctionLibrary funcs,
-      ConfigThingy conf, String section, DialogLibrary dialogLib,
-      Map<Object, Object> context)
-  {
-    conf = conf.query(section);
-    Iterator<ConfigThingy> parentIter = conf.iterator();
-    while (parentIter.hasNext())
-    {
-      Iterator<ConfigThingy> iter = parentIter.next().iterator();
-      while (iter.hasNext())
-      {
-        ConfigThingy funcConf = iter.next();
-        String name = funcConf.getName();
-        try
-        {
-          Function func =
-            FunctionFactory.parseChildren(funcConf, funcs, dialogLib, context);
-          funcs.add(name, func);
-        }
-        catch (ConfigurationErrorException e)
-        {
-          Logger.error(L.m(
-            "Fehler beim Parsen der Funktion \"%1\" im Abschnitt \"%2\"", name,
-            section), e);
-        }
-      }
-    }
-
-    return funcs;
-  }
-
-  /**
-   * Parst die "Druckfunktionen" Abschnitte aus conf und liefert eine entsprechende
-   * PrintFunctionLibrary.
-   * 
-   * @author Christoph Lutz (D-III-ITD 5.1)
-   */
-  public static PrintFunctionLibrary parsePrintFunctions(ConfigThingy conf)
-  {
-    PrintFunctionLibrary funcs = new PrintFunctionLibrary();
-
-    conf = conf.query("Druckfunktionen");
-    Iterator<ConfigThingy> parentIter = conf.iterator();
-    while (parentIter.hasNext())
-    {
-      Iterator<ConfigThingy> iter = parentIter.next().iterator();
-      while (iter.hasNext())
-      {
-        ConfigThingy funcConf = iter.next();
-        String name = funcConf.getName();
-        try
-        {
-          ConfigThingy extConf;
-          try
-          {
-            extConf = funcConf.get("EXTERN");
-          }
-          catch (NodeNotFoundException e)
-          {
-            Logger.error(
-              L.m("Druckfunktion '%1' enthält keinen Schlüssel EXTERN", name), e);
-            continue;
-          }
-
-          String orderStr = DEFAULT_PRINTFUNCTION_ORDER_VALUE;
-          int order;
-          try
-          {
-            orderStr = funcConf.get("ORDER").toString();
-          }
-          catch (NodeNotFoundException e)
-          {
-            Logger.debug(L.m(
-              "Druckfunktion '%1' enthält keinen Schlüssel ORDER. Verwende Standard-Wert %2",
-              name, "" + DEFAULT_PRINTFUNCTION_ORDER_VALUE));
-          }
-          try
-          {
-            order = new Integer(orderStr).intValue();
-          }
-          catch (NumberFormatException e)
-          {
-            Logger.error(
-              L.m(
-                "Der Wert '%1' des Schlüssels ORDER in der Druckfunktion '%2' ist ungültig.",
-                orderStr, name), e);
-            continue;
-          }
-
-          PrintFunction func = new PrintFunction(extConf, name, order);
-
-          funcs.add(name, func);
-        }
-        catch (ConfigurationErrorException e)
-        {
-          Logger.error(L.m("Fehler beim Parsen der Druckfunktion \"%1\"", name), e);
-        }
-      }
-    }
-
-    return funcs;
   }
 
   /**
@@ -1522,84 +1130,6 @@ public class WollMuxFiles
 
   }
 
-  private static class WollMuxClassLoader extends URLClassLoader
-  {
-    private ArrayList<String> blacklist;
-
-    private ArrayList<String> whitelist;
-
-    public WollMuxClassLoader()
-    {
-      super(new URL[] {});
-      blacklist = new ArrayList<String>();
-      whitelist = new ArrayList<String>();
-      whitelist.add("com.sun.star.lib.loader"); // Ausnahme für Klassen in der Standardconfig
-    }
-
-    @Override
-    public void addURL(URL url)
-    {
-      super.addURL(url);
-    }
-
-    public void addBlacklisted(String name)
-    {
-      blacklist.add(name);
-    }
-
-    public void addWhitelisted(String name)
-    {
-      whitelist.add(name);
-    }
-
-    @Override
-    public Class<?> loadClass(String name) throws ClassNotFoundException
-    {
-      try
-      {
-        if (isBlacklisted(name) && !isWhitelisted(name))
-        {
-          throw new ClassNotFoundException();
-        }
-
-        Class<?> c = findLoadedClass(name);
-        if (c != null) return c;
-        return super.findClass(name);
-      }
-      catch (ClassNotFoundException x)
-      {
-        return WollMuxClassLoader.class.getClassLoader().loadClass(name);
-      }
-    }
-
-    private boolean isBlacklisted(String name)
-    {
-      for (String bl : blacklist)
-      {
-        if (name.startsWith(bl))
-        {
-          return true;
-        }
-      }
-
-      return false;
-    }
-
-    private boolean isWhitelisted(String name)
-    {
-      for (String wl : whitelist)
-      {
-        if (name.startsWith(wl))
-        {
-          return true;
-        }
-      }
-
-      return false;
-    }
-
-  }
-
   public static boolean installQATestHandler()
   {
     return installQATestHandler;
@@ -1613,26 +1143,6 @@ public class WollMuxFiles
   public static void showCredits(boolean showCredits)
   {
     WollMuxFiles.showCredits = showCredits;
-  }
-
-  /**
-   * Diese Methode liefert eine Liste mit den über {@link #senderDisplayTemplate}
-   * definierten String-Repräsentation aller verlorenen gegangenen Datensätze des
-   * DatasourceJoiner (gemäß {@link DatasourceJoiner.Status.lostDatasets}) zurück.
-   * Die genaue Form der String-Repräsentation ist abhängig von
-   * {@link #senderDisplayTemplate}, das in der WollMux-Konfiguration über den Wert
-   * von SENDER_DISPLAYTEMPLATE gesetzt werden kann. Gibt es keine verloren
-   * gegangenen Datensätze, so bleibt die Liste leer.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  public static List<String> getLostDatasetDisplayStrings()
-  {
-    DatasourceJoiner dj = getDatasourceJoiner();
-    ArrayList<String> list = new ArrayList<String>();
-    for (Dataset ds : dj.getStatus().lostDatasets)
-      list.add(new DatasetListElement(ds, PersoenlicheAbsenderliste.getInstance().getSenderDisplayTemplate()).toString());
-    return list;
   }
 
 }

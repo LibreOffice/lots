@@ -40,9 +40,9 @@ import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XStatusListener;
 import com.sun.star.util.URL;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Implementiert XDispatch und kann alle Dispatch-URLs behandeln, die kein

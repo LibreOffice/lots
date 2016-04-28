@@ -3,6 +3,8 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+
 /**
  * Speichert Informationen darüber, ob der WollMux sich im NoConfig-Modus
  * befindet.

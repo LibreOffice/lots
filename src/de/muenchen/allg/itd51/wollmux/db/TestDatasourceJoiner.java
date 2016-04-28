@@ -46,7 +46,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 
 /**
  * Variante des DatasourceJoiners, die zum testen besser geeignet ist.

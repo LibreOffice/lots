@@ -33,8 +33,8 @@ package de.muenchen.allg.itd51.wollmux.former.function;
 
 import java.util.Map;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
  * Interface zum Zugriff auf eine FunctionSelection.
