@@ -31,9 +31,12 @@ package de.muenchen.allg.itd51.wollmux.event;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XDispatch;
+import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.frame.XStatusListener;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
@@ -93,6 +96,7 @@ public class DocumentDispatch extends Dispatch
    * 
    * @see #removeStatusListener(XStatusListener, URL)
    */
+  @Override
   public void addStatusListener(XStatusListener listener, URL url)
   {
     if (origDisp != null)
@@ -107,6 +111,7 @@ public class DocumentDispatch extends Dispatch
    * 
    * @see #addStatusListener(XStatusListener, URL)
    */
+  @Override
   public void removeStatusListener(XStatusListener listener, URL url)
   {
     if (origDisp != null)
@@ -138,12 +143,32 @@ public class DocumentDispatch extends Dispatch
       origDisp.dispatch(origUrl, props);
   }
 
+  public void dispatch__uno_save(String arg, PropertyValue[] props, XDispatchResultListener listener)
+  {
+    if (!getModel().hasURL())
+      WollMuxEventHandler.handleSaveAs(getModel(), origDisp, origUrl, props);
+    else {
+      XNotifyingDispatch nd = UnoRuntime.queryInterface(XNotifyingDispatch.class, origDisp);
+      nd.dispatchWithNotification(origUrl, props, listener);
+    }
+  }
+
   public void dispatch__uno_saveas(String arg, PropertyValue[] props)
   {
     if (!getModel().hasURL())
       WollMuxEventHandler.handleSaveAs(getModel(), origDisp, origUrl, props);
     else
       origDisp.dispatch(origUrl, props);
+  }
+
+  public void dispatch__uno_saveas(String arg, PropertyValue[] props, XDispatchResultListener listener)
+  {
+    if (!getModel().hasURL())
+      WollMuxEventHandler.handleSaveAs(getModel(), origDisp, origUrl, props);
+    else {
+      XNotifyingDispatch nd = UnoRuntime.queryInterface(XNotifyingDispatch.class, origDisp);
+      nd.dispatchWithNotification(origUrl, props, listener);
+    }
   }
 
   public void dispatch__uno_printdefault(String arg, PropertyValue[] props)

@@ -36,7 +36,8 @@ import java.util.Vector;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.FeatureStateEvent;
-import com.sun.star.frame.XDispatch;
+import com.sun.star.frame.XDispatchResultListener;
+import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.frame.XStatusListener;
 import com.sun.star.util.URL;
 
@@ -67,7 +68,7 @@ import de.muenchen.allg.itd51.wollmux.Logger;
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
-public class Dispatch implements XDispatch
+public class Dispatch implements XNotifyingDispatch
 {
   public static final String DISP_unoPrint = ".uno:Print";
 
@@ -209,11 +210,30 @@ public class Dispatch implements XDispatch
    * @see com.sun.star.frame.XDispatch#dispatch(com.sun.star.util.URL,
    *      com.sun.star.beans.PropertyValue[])
    */
+  @Override
   public void dispatch(URL url, PropertyValue[] props)
   {
     Logger.debug2(this.getClass().getSimpleName() + ".dispatch('" + url.Complete
       + "')");
 
+    callDispatchMethod(url, props, null);
+  }
+
+  @Override
+  public void dispatchWithNotification(URL url, PropertyValue[] props,
+      XDispatchResultListener listener)
+  {
+    callDispatchMethod(url, props, listener);
+//    if (listener != null)
+//    {
+//      DispatchResultEvent dre = new DispatchResultEvent();
+//      dre.State = DispatchResultState.SUCCESS;
+//      listener.dispatchFinished(dre);
+//    }
+  }
+
+  private void callDispatchMethod(URL url, PropertyValue[] props, XDispatchResultListener listener)
+  {
     // z.B. "wollmux:OpenTemplate#internerBriefkopf"
     // =====> {"wollmux:OpenTemplate", "internerBriefkopf"}
     String arg = "";
@@ -236,22 +256,32 @@ public class Dispatch implements XDispatch
     try
     {
       Class<? extends Dispatch> myClass = this.getClass();
-      Method method =
-        myClass.getDeclaredMethod(methodName, String.class, PropertyValue[].class);
-      method.invoke(this, arg, props);
+      if (listener == null)
+      {
+        Method method =
+          myClass.getDeclaredMethod(methodName, String.class, PropertyValue[].class);
+        method.invoke(this, arg, props);
+      } 
+      else
+      {
+        Method method =
+            myClass.getDeclaredMethod(methodName, String.class, PropertyValue[].class, XDispatchResultListener.class);
+          method.invoke(this, arg, props, listener);
+      }
     }
     catch (Throwable x)
     {
       Logger.error(x);
     }
   }
-
+  
   /*
    * (non-Javadoc)
    * 
    * @see com.sun.star.frame.XDispatch#addStatusListener(com.sun.star.frame.XStatusListener,
    *      com.sun.star.util.URL)
    */
+  @Override
   public void addStatusListener(XStatusListener listener, URL url)
   {
     // boolean alreadyRegistered = false;
@@ -271,6 +301,7 @@ public class Dispatch implements XDispatch
    * @see com.sun.star.frame.XDispatch#removeStatusListener(com.sun.star.frame.XStatusListener,
    *      com.sun.star.util.URL)
    */
+  @Override
   public void removeStatusListener(XStatusListener listener, URL x)
   {
   // Iterator<XStatusListener> iter = statusListener.iterator();
