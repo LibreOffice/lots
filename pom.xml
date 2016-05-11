@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.muenchen</groupId>
 	<artifactId>wollmux</artifactId>
-	<version>16.08</version>
+	<version>16.08a</version>
 	<name>WollMux</name>
 
 	<properties>
@@ -12,7 +12,7 @@
 
 	<scm>
 		<developerConnection>scm:git:https://github.com/WollMux/WollMux.git</developerConnection>
-		<tag>wollmux-16.08</tag>
+		<tag>wollmux-16.08a</tag>
 	</scm>
 
 	<build>
