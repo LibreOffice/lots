@@ -1,4 +1,16 @@
 
+ ==================== Neu in Version 16.08a ====================
+
+    * Bugfixes:
+          o Der WollMux unterstützt jetzt das Interface XNotifyingDispatch,
+            über das eine Rückmeldung an LibreOffice gegeben werden kann, wenn
+            der Speichervorgang beendet wurde. Außerdem werden die
+            Speicherroutinen des WollMux jetzt synchron aufgerufen. In
+            Zusammenspiel mit Änderungen in LibreOffice, so dass der korrekte
+            Dispatch aufgerufen wird, wird LibreOffice nach dem Speichern
+            korrekt geschlossen.
+
+
  ==================== Neu in Version 16.08 ====================
 
     * Bugfixes:
@@ -56,6 +68,16 @@
           o Refactoring: Private Klassen aus FormularMax4000 extrahiert.
           o FormularMax aufgeteilt in View- und Controller-Klasse.
           o FormularMax-Texteditor als eigenständiges Fenster hinzugefügt.
+                # Ab WollMux 16.08 steht ein neuer Editor (Config Editor) zur
+                  Verfügung, der die Anforderungen aus dem SOLL
+                  (Ticketbeschreibung) erfüllt.
+                # Diesen Editor findet man im FormularMax über "Formular" -
+                  > "Formularbeschreibung editieren" (wie bisher) mit folgenden
+                  Features:
+                      # Syntax Vervollständigung
+                      # Syntax Highligting
+                      # Suchfunktion (Tastenkürzel STRG + SHIFT + "F")
+                      # Zeilennummern
           o Refactoring von WollMuxSingleton.
           o Refactoring von DocumentTree.
 
@@ -262,8 +284,7 @@
             Seiten bei Verwendung der "Nächster Datensatz"-Funktion
     * Neue Features:
           o Unterstützung von LibreOffice 4
-          o "documentation" alUse of uninitialized value in print at misc/makechangelog line 47, <$in> line 2268.
-s ant-Task hinzugefügt
+          o "documentation" als ant-Task hinzugefügt
                 # Sobald neue Snapshots erstellt werden, wird die Dokumentation
                   lokal (offline) zur Verfügung gestellt.
           o Ermögliche das Anzeigen einer eigenen Nachricht im
