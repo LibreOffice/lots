@@ -30,6 +30,8 @@
 package de.muenchen.allg.itd51.wollmux.event;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.frame.DispatchResultEvent;
+import com.sun.star.frame.DispatchResultState;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XFrame;
@@ -146,8 +148,15 @@ public class DocumentDispatch extends Dispatch
   public void dispatch__uno_save(String arg, PropertyValue[] props, XDispatchResultListener listener)
   {
     if (!getModel().hasURL())
-      WollMuxEventHandler.handleSaveAs(getModel(), origDisp, origUrl, props);
-    else {
+    {
+      WollMuxEventHandler.handleSaveAsSync(getModel(), origDisp, origUrl, props);
+      DispatchResultEvent dre = new DispatchResultEvent();
+      dre.Source = this;
+      dre.State = DispatchResultState.SUCCESS;
+      listener.dispatchFinished(dre);
+    }
+    else 
+    {
       XNotifyingDispatch nd = UnoRuntime.queryInterface(XNotifyingDispatch.class, origDisp);
       nd.dispatchWithNotification(origUrl, props, listener);
     }
@@ -164,8 +173,15 @@ public class DocumentDispatch extends Dispatch
   public void dispatch__uno_saveas(String arg, PropertyValue[] props, XDispatchResultListener listener)
   {
     if (!getModel().hasURL())
-      WollMuxEventHandler.handleSaveAs(getModel(), origDisp, origUrl, props);
-    else {
+    {
+      WollMuxEventHandler.handleSaveAsSync(getModel(), origDisp, origUrl, props);
+      DispatchResultEvent dre = new DispatchResultEvent();
+      dre.Source = this;
+      dre.State = DispatchResultState.SUCCESS;
+      listener.dispatchFinished(dre);
+    }
+    else 
+    {
       XNotifyingDispatch nd = UnoRuntime.queryInterface(XNotifyingDispatch.class, origDisp);
       nd.dispatchWithNotification(origUrl, props, listener);
     }
