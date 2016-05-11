@@ -83,6 +83,7 @@ import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.itd51.wollmux.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.PrintModels;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
@@ -158,7 +159,7 @@ public class OOoBasedMailMerge
       if (ds.getDataSourceWriter().isAdjustMainDoc())
       {
         PersistentDataContainer lCont =
-          TextDocumentModel.createPersistentDataContainer(pmod.getTextDocument());
+          DocumentManager.createPersistentDataContainer(pmod.getTextDocument());
         lCont.removeData(PersistentDataContainer.DataID.FORMULARWERTE);
         Logger.debug(L.m("Formularwerte wurden aus %1 gelöscht.",
           pmod.getTextDocument().getURL()));
@@ -1004,7 +1005,7 @@ public class OOoBasedMailMerge
   private static void removeWollMuxMetadata(XTextDocument doc)
   {
     if (doc == null) return;
-    PersistentDataContainer c = TextDocumentModel.createPersistentDataContainer(doc);
+    PersistentDataContainer c = DocumentManager.createPersistentDataContainer(doc);
     for (DataID dataId : DataID.values())
       if (!dataId.isInfodata()) c.removeData(dataId);
     c.flush();

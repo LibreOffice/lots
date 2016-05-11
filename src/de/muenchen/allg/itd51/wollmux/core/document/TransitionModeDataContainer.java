@@ -4,7 +4,6 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.util.XModifiable;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer.DataID;
 
 /**
  * Implementiert den DatenContainer für den transition-Modus, bei dem Metadaten
@@ -19,7 +18,7 @@ import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer.Data
  * 
  * @author Christoph Lutz (D-III-ITD-D101)
  */
-class TransitionModeDataContainer implements
+public class TransitionModeDataContainer implements
     PersistentDataContainer
 {
   private PersistentDataContainer rdfData;

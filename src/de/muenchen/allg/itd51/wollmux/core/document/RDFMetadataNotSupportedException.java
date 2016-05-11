@@ -6,7 +6,7 @@ package de.muenchen.allg.itd51.wollmux.core.document;
  * 
  * @author Christoph Lutz (D-III-ITD-D101)
  */
-class RDFMetadataNotSupportedException extends Exception
+public class RDFMetadataNotSupportedException extends Exception
 {
   private static final long serialVersionUID = 2416952716636541797L;
 }

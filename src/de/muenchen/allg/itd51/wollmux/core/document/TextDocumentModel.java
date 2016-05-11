@@ -86,7 +86,6 @@ import com.sun.star.view.DocumentZoomType;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
@@ -114,7 +113,6 @@ import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
-import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 /**
@@ -339,6 +337,9 @@ public class TextDocumentModel
   public static final Pattern INPUT_USER_FUNCTION =
     Pattern.compile("\\A\\s*(WM\\s*\\(.*FUNCTION\\s*'[^']*'.*\\))\\s*\\d*\\z");
 
+  private FunctionLibrary globalFunctions;
+  
+  private DialogLibrary globalDialogs;
 
   /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie 
@@ -348,7 +349,7 @@ public class TextDocumentModel
    * 
    * @param doc
    */
-  public TextDocumentModel(XTextDocument doc)
+  public TextDocumentModel(XTextDocument doc, PersistentDataContainer persistentDataContainer, FunctionLibrary globalFunctions, DialogLibrary globalDialogs)
   {
     this.doc = doc;
     this.idToFormFields = new HashMap<String, List<FormField>>();
@@ -371,7 +372,7 @@ public class TextDocumentModel
     setDocumentModified(modified);
 
     // Auslesen der Persistenten Daten:
-    this.persistentData = TextDocumentModel.createPersistentDataContainer(doc);
+    this.persistentData = persistentDataContainer;
     String setTypeData = persistentData.getData(DataID.SETTYPE);
     alreadyTouchedAsFormDocument = "formDocument".equals(setTypeData);
     parsePrintFunctions(persistentData.getData(DataID.PRINTFUNCTION));
@@ -386,6 +387,10 @@ public class TextDocumentModel
     // Type auswerten
     this.isTemplate = !hasURL();
     this.isFormDocument = false;
+    
+    this.globalFunctions = globalFunctions;
+    this.globalDialogs = globalDialogs;
+    
     setType(setTypeData);
   }
 
@@ -2035,7 +2040,7 @@ public class TextDocumentModel
       {}
       functionLib =
         FunctionFactory.parseFunctions(formConf, getDialogLibrary(), functionContext,
-          GlobalFunctions.getInstance().getGlobalFunctions());
+          globalFunctions);
     }
     return functionLib;
   }
@@ -2059,7 +2064,7 @@ public class TextDocumentModel
       {}
       dialogLib =
         DialogFactory.parseFunctionDialogs(formConf,
-          GlobalFunctions.getInstance().getFunctionDialogs(), functionContext);
+          globalDialogs, functionContext);
     }
     return dialogLib;
   }
@@ -3833,23 +3838,6 @@ public class TextDocumentModel
         }
       }
     }
-
-    // Datenstrukturen aktualisieren
-    getDocumentCommands().update();
-    DocumentCommandInterpreter dci = new DocumentCommandInterpreter(this);
-    dci.scanGlobalDocumentCommands();
-    // collectNonWollMuxFormFields() wird im folgenden scan auch noch erledigt
-    dci.scanInsertFormValueCommands();
-
-    // Alte Formularwerte aus den persistenten Daten entfernen
-    setFormFieldValue(fieldId, null);
-
-    // Ansicht der betroffenen Felder aktualisieren
-    for (Iterator<FieldSubstitution.SubstElement> iter = subst.iterator(); iter.hasNext();)
-    {
-      FieldSubstitution.SubstElement ele = iter.next();
-      if (ele.isField()) updateFormFields(ele.getValue());
-    }
   }
 
   /**
@@ -4520,115 +4508,6 @@ public class TextDocumentModel
     {
       this.action = action;
       this.uiElementDesc = uiElementDesc;
-    }
-  }
-
-  /**
-   * Liefert abhängig von der Konfigurationseinstellung PERSISTENT_DATA_MODE
-   * (annotation|transition|rdfReadLegacy|rdf) den dazugehörigen
-   * PersistentDataContainer für das Dokument doc.
-   * 
-   * Die folgende Aufstellung zeigt das Verhalten der verschiedenen Einstellungen
-   * bezüglich der möglichen Kombinationen von Metadaten in den Ausgangsdokumenten
-   * und der Aktualisierung der Metadaten in den Ergebnisdokumenten. Ein "*"
-   * symbolisiert dabei, welcher Metadatencontainer jeweils aktuell ist bzw. bei
-   * Dokumentänderungen aktualisiert wird.
-   * 
-   * Ausgangsdokument -> bearbeitet durch -> Ergebnisdokument
-   * 
-   * [N*] -> annotation-Mode (WollMux-Alt) -> [N*]
-   * 
-   * [N*] -> transition-Mode -> [N*R*]
-   * 
-   * [N*] -> rdfReadLegacy-Mode -> [R*]
-   * 
-   * [N*] -> rdf-Mode: NICHT UNTERSTÜTZT
-   * 
-   * [N*R*] -> annotation-Mode (WollMux-Alt) -> [N*R]
-   * 
-   * [N*R*] -> transition-Mode -> [N*R*]
-   * 
-   * [N*R*] -> rdfReadLegacy-Mode -> [R*]
-   * 
-   * [N*R*] -> rdf-Mode -> [NR*]
-   * 
-   * [N*R] -> annotation-Mode (WollMux-Alt) -> [N*R]
-   * 
-   * [N*R] -> transition-Mode -> [N*R*]
-   * 
-   * [N*R] -> rdfReadLegacy-Mode -> [R*]
-   * 
-   * [N*R] -> rdf-Mode: NICHT UNTERSTÜTZT
-   * 
-   * [NR*] -> annotation-Mode (WollMux-Alt) : NICHT UNTERSTÜTZT
-   * 
-   * [NR*] -> transition-Mode: NICHT UNTERSTÜTZT
-   * 
-   * [NR*] -> rdfReadLegacy-Mode: NICHT UNTERSTÜTZT
-   * 
-   * [NR*] -> rdf -> [NR*]
-   * 
-   * [R*] -> annotation-Mode (WollMux-Alt): NICHT UNTERSTÜTZT
-   * 
-   * [R*] -> transition-Mode -> [N*R*]
-   * 
-   * [R*] -> rdfReadLegacy-Mode -> [R*]
-   * 
-   * [R*] -> rdf-Mode -> [R*]
-   * 
-   * Agenda: [N]=Dokument mit Notizen; [R]=Dokument mit RDF-Metadaten; [NR]=Dokument
-   * mit Notizen und RDF-Metadaten; *=N/R enthält aktuellen Stand;
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101) TESTED
-   */
-  public static PersistentDataContainer createPersistentDataContainer(
-      XTextDocument doc)
-  {
-    ConfigThingy wmConf = WollMuxFiles.getWollmuxConf();
-    String pdMode;
-    try
-    {
-      pdMode = wmConf.query(PersistentDataContainer.PERSISTENT_DATA_MODE).getLastChild().toString();
-    }
-    catch (NodeNotFoundException e)
-    {
-      pdMode = PersistentDataContainer.PERSISTENT_DATA_MODE_TRANSITION;
-      Logger.debug(L.m("Attribut %1 nicht gefunden. Verwende Voreinstellung '%2'.",
-        PersistentDataContainer.PERSISTENT_DATA_MODE, pdMode));
-    }
-  
-    try
-    {
-      if (PersistentDataContainer.PERSISTENT_DATA_MODE_TRANSITION.equalsIgnoreCase(pdMode))
-      {
-        return new TransitionModeDataContainer(doc);
-      }
-      else if (PersistentDataContainer.PERSISTENT_DATA_MODE_RDFREADLEGACY.equalsIgnoreCase(pdMode))
-      {
-        return new RDFReadLegacyModeDataContainer(doc);
-      }
-      else if (PersistentDataContainer.PERSISTENT_DATA_MODE_RDF.equalsIgnoreCase(pdMode))
-      {
-        return new RDFBasedPersistentDataContainer(doc);
-      }
-      else if (PersistentDataContainer.PERSISTENT_DATA_MODE_ANNOTATION.equalsIgnoreCase(pdMode))
-      {
-        return new AnnotationBasedPersistentDataContainer(doc);
-      }
-      else
-      {
-        Logger.error(L.m(
-          "Ungültiger Wert '%1' für Attribut %2. Verwende Voreinstellung '%3' statt dessen.",
-          pdMode, PersistentDataContainer.PERSISTENT_DATA_MODE, PersistentDataContainer.PERSISTENT_DATA_MODE_TRANSITION));
-        return new TransitionModeDataContainer(doc);
-      }
-    }
-    catch (RDFMetadataNotSupportedException e)
-    {
-      Logger.log(L.m(
-        "Die Einstellung '%1' für Attribut %2 ist mit dieser OpenOffice.org-Version nicht kompatibel. Verwende Einstellung '%3' statt dessen.",
-        pdMode, PersistentDataContainer.PERSISTENT_DATA_MODE, PersistentDataContainer.PERSISTENT_DATA_MODE_ANNOTATION));
-      return new AnnotationBasedPersistentDataContainer(doc);
     }
   }
 }

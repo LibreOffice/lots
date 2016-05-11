@@ -42,7 +42,15 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.core.document.AnnotationBasedPersistentDataContainer;
+import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer;
+import de.muenchen.allg.itd51.wollmux.core.document.RDFBasedPersistentDataContainer;
+import de.muenchen.allg.itd51.wollmux.core.document.RDFMetadataNotSupportedException;
+import de.muenchen.allg.itd51.wollmux.core.document.RDFReadLegacyModeDataContainer;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.document.TransitionModeDataContainer;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
@@ -410,7 +418,7 @@ public class DocumentManager
     {
       if (model == null)
       {
-        model = new TextDocumentModel(doc);
+        model = new TextDocumentModel(doc, createPersistentDataContainer(doc), GlobalFunctions.getInstance().getGlobalFunctions(), GlobalFunctions.getInstance().getFunctionDialogs());
 
         /**
          * Dispatch Handler in eigenem Event registrieren, da es Deadlocks gegeben hat.
@@ -447,5 +455,114 @@ public class DocumentManager
 
     if (formModels.containsKey(doc)) formModels.get(doc).closing(this);
     formModels.remove(doc);
+  }
+
+  /**
+   * Liefert abhängig von der Konfigurationseinstellung PERSISTENT_DATA_MODE
+   * (annotation|transition|rdfReadLegacy|rdf) den dazugehörigen
+   * PersistentDataContainer für das Dokument doc.
+   * 
+   * Die folgende Aufstellung zeigt das Verhalten der verschiedenen Einstellungen
+   * bezüglich der möglichen Kombinationen von Metadaten in den Ausgangsdokumenten
+   * und der Aktualisierung der Metadaten in den Ergebnisdokumenten. Ein "*"
+   * symbolisiert dabei, welcher Metadatencontainer jeweils aktuell ist bzw. bei
+   * Dokumentänderungen aktualisiert wird.
+   * 
+   * Ausgangsdokument -> bearbeitet durch -> Ergebnisdokument
+   * 
+   * [N*] -> annotation-Mode (WollMux-Alt) -> [N*]
+   * 
+   * [N*] -> transition-Mode -> [N*R*]
+   * 
+   * [N*] -> rdfReadLegacy-Mode -> [R*]
+   * 
+   * [N*] -> rdf-Mode: NICHT UNTERSTÜTZT
+   * 
+   * [N*R*] -> annotation-Mode (WollMux-Alt) -> [N*R]
+   * 
+   * [N*R*] -> transition-Mode -> [N*R*]
+   * 
+   * [N*R*] -> rdfReadLegacy-Mode -> [R*]
+   * 
+   * [N*R*] -> rdf-Mode -> [NR*]
+   * 
+   * [N*R] -> annotation-Mode (WollMux-Alt) -> [N*R]
+   * 
+   * [N*R] -> transition-Mode -> [N*R*]
+   * 
+   * [N*R] -> rdfReadLegacy-Mode -> [R*]
+   * 
+   * [N*R] -> rdf-Mode: NICHT UNTERSTÜTZT
+   * 
+   * [NR*] -> annotation-Mode (WollMux-Alt) : NICHT UNTERSTÜTZT
+   * 
+   * [NR*] -> transition-Mode: NICHT UNTERSTÜTZT
+   * 
+   * [NR*] -> rdfReadLegacy-Mode: NICHT UNTERSTÜTZT
+   * 
+   * [NR*] -> rdf -> [NR*]
+   * 
+   * [R*] -> annotation-Mode (WollMux-Alt): NICHT UNTERSTÜTZT
+   * 
+   * [R*] -> transition-Mode -> [N*R*]
+   * 
+   * [R*] -> rdfReadLegacy-Mode -> [R*]
+   * 
+   * [R*] -> rdf-Mode -> [R*]
+   * 
+   * Agenda: [N]=Dokument mit Notizen; [R]=Dokument mit RDF-Metadaten; [NR]=Dokument
+   * mit Notizen und RDF-Metadaten; *=N/R enthält aktuellen Stand;
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
+   */
+  public static PersistentDataContainer createPersistentDataContainer(
+      XTextDocument doc)
+  {
+    ConfigThingy wmConf = WollMuxFiles.getWollmuxConf();
+    String pdMode;
+    try
+    {
+      pdMode = wmConf.query(PersistentDataContainer.PERSISTENT_DATA_MODE).getLastChild().toString();
+    }
+    catch (NodeNotFoundException e)
+    {
+      pdMode = PersistentDataContainer.PERSISTENT_DATA_MODE_TRANSITION;
+      Logger.debug(L.m("Attribut %1 nicht gefunden. Verwende Voreinstellung '%2'.",
+        PersistentDataContainer.PERSISTENT_DATA_MODE, pdMode));
+    }
+  
+    try
+    {
+      if (PersistentDataContainer.PERSISTENT_DATA_MODE_TRANSITION.equalsIgnoreCase(pdMode))
+      {
+        return new TransitionModeDataContainer(doc);
+      }
+      else if (PersistentDataContainer.PERSISTENT_DATA_MODE_RDFREADLEGACY.equalsIgnoreCase(pdMode))
+      {
+        return new RDFReadLegacyModeDataContainer(doc);
+      }
+      else if (PersistentDataContainer.PERSISTENT_DATA_MODE_RDF.equalsIgnoreCase(pdMode))
+      {
+        return new RDFBasedPersistentDataContainer(doc);
+      }
+      else if (PersistentDataContainer.PERSISTENT_DATA_MODE_ANNOTATION.equalsIgnoreCase(pdMode))
+      {
+        return new AnnotationBasedPersistentDataContainer(doc);
+      }
+      else
+      {
+        Logger.error(L.m(
+          "Ungültiger Wert '%1' für Attribut %2. Verwende Voreinstellung '%3' statt dessen.",
+          pdMode, PersistentDataContainer.PERSISTENT_DATA_MODE, PersistentDataContainer.PERSISTENT_DATA_MODE_TRANSITION));
+        return new TransitionModeDataContainer(doc);
+      }
+    }
+    catch (RDFMetadataNotSupportedException e)
+    {
+      Logger.log(L.m(
+        "Die Einstellung '%1' für Attribut %2 ist mit dieser OpenOffice.org-Version nicht kompatibel. Verwende Einstellung '%3' statt dessen.",
+        pdMode, PersistentDataContainer.PERSISTENT_DATA_MODE, PersistentDataContainer.PERSISTENT_DATA_MODE_ANNOTATION));
+      return new AnnotationBasedPersistentDataContainer(doc);
+    }
   }
 }

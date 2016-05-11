@@ -33,6 +33,7 @@ package de.muenchen.allg.itd51.wollmux.core.functions;
 
 import java.util.Collection;
 
+import de.muenchen.allg.itd51.wollmux.core.functions.Values.None;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
@@ -42,6 +43,14 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 public interface Function
 {
   public static final String ERROR = L.m("!¤£!FEHLERHAFTE DATEN!¤£!");
+  /**
+   * Eine leere Liste von Parameter-Namen.
+   */
+  static final String[] noParams = new String[] {};
+  /**
+   * Eine leere Values-Sammlung.
+   */
+  public static final Values noValues = new Values.None();
   
   /**
    * Liefert die Namen der Parameter, die die Funktion erwartet.
