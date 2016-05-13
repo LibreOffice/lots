@@ -109,7 +109,7 @@ public final class FormFieldFactory
      * http://qa.openoffice.org/issues/show_bug.cgi?id=68261)
      */
     XTextRange range = null;
-    if (Workarounds.applyWorkaroundForOOoIssue68261())
+    if (de.muenchen.allg.itd51.wollmux.core.Workarounds.applyWorkaroundForOOoIssue68261())
     {
       range = cmd.getAnchor();
       if (range != null) range = range.getText();
@@ -803,7 +803,7 @@ public final class FormFieldFactory
             String textSurroundedByBookmark = cursor.getString();
 
             String trimmedText = textSurroundedByBookmark.trim();
-            Pattern p = Workarounds.workaroundForIssue101249();
+            Pattern p = de.muenchen.allg.itd51.wollmux.core.Workarounds.workaroundForIssue101249();
             // Für die Überprüfung des Patterns verwenden wir den getrimmten Text, da
             // wir auch die Fälle erwischen wollen, wo vielleicht aus Versehen ein
             // Leerzeichen am Anfang reingerutscht ist. Besser wäre es aber eventuell

@@ -65,6 +65,7 @@ import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
  * Diese Klasse repräsentiert den Kommando-Interpreter zur Auswertung von
@@ -75,7 +76,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 public class DocumentCommandInterpreter
 {
 
-  TextDocumentModel model;
+  private TextDocumentController documentController;
 
   /**
    * Enthält die Instanz auf das zentrale WollMuxSingleton.
@@ -94,9 +95,9 @@ public class DocumentCommandInterpreter
    *          Eine Liste mit fragment-urls, die für das Kommando insertContent
    *          benötigt wird.
    */
-  public DocumentCommandInterpreter(TextDocumentModel model, boolean debugMode)
+  public DocumentCommandInterpreter(TextDocumentController documentController, boolean debugMode)
   {
-    this.model = model;
+    this.documentController = documentController;
     this.debugMode = debugMode;
   }
 
@@ -110,10 +111,20 @@ public class DocumentCommandInterpreter
    *          Eine Liste mit fragment-urls, die für das Kommando insertContent
    *          benötigt wird.
    */
-  public DocumentCommandInterpreter(TextDocumentModel model)
+  public DocumentCommandInterpreter(TextDocumentController documentController)
   {
-    this.model = model;
+    this.documentController = documentController;
     this.debugMode = false;
+  }
+  
+  public TextDocumentController getDocumentController()
+  {
+    return documentController;
+  }
+
+  public TextDocumentModel getModel()
+  {
+    return getDocumentController().getModel();
   }
 
   /**
@@ -124,12 +135,12 @@ public class DocumentCommandInterpreter
   public void scanGlobalDocumentCommands()
   {
     Logger.debug("scanGlobalDocumentCommands");
-    boolean modified = model.getDocumentModified();
+    boolean modified = getDocumentController().getModel().isDocumentModified();
 
     GlobalDocumentCommandsScanner s = new GlobalDocumentCommandsScanner(this);
-    s.execute(model.getDocumentCommands());
+    s.execute(getDocumentController().getModel().getDocumentCommands());
 
-    model.setDocumentModified(modified);
+    getDocumentController().getModel().setDocumentModified(modified);
   }
 
   /**
@@ -151,15 +162,15 @@ public class DocumentCommandInterpreter
   public void scanInsertFormValueCommands()
   {
     Logger.debug("scanInsertFormValueCommands");
-    boolean modified = model.getDocumentModified();
+    boolean modified = getDocumentController().getModel().isDocumentModified();
 
     InsertFormValueCommandsScanner s = new InsertFormValueCommandsScanner(this);
-    s.execute(model.getDocumentCommands());
+    s.execute(getDocumentController().getModel().getDocumentCommands());
 
-    model.setIDToFormFields(s.idToFormFields);
-    model.collectNonWollMuxFormFields();
+    getDocumentController().getModel().setIDToFormFields(s.idToFormFields);
+    getDocumentController().collectNonWollMuxFormFields();
 
-    model.setDocumentModified(modified);
+    getDocumentController().getModel().setDocumentModified(modified);
   }
 
   /**
@@ -171,7 +182,7 @@ public class DocumentCommandInterpreter
   public void executeTemplateCommands() throws WMCommandsFailedException
   {
     Logger.debug("executeTemplateCommands");
-    boolean modified = model.getDocumentModified();
+    boolean modified = getDocumentController().getModel().isDocumentModified();
 
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
     int errors = 0;
@@ -180,15 +191,15 @@ public class DocumentCommandInterpreter
     // können, damit der DocumentCommandTree vollständig aufgebaut werden
     // kann.
     errors +=
-      new DocumentExpander(this, model.getFragUrls()).execute(model.getDocumentCommands());
+      new DocumentExpander(this, getDocumentController().getModel().getFragUrls()).execute(getDocumentController().getModel().getDocumentCommands());
 
     // Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
     // Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls
     // Seitenvorlage Wollmuxseite vorhanden ist.
-    pageStyleWollmuxseiteToStandard(model.doc);
+    pageStyleWollmuxseiteToStandard(getDocumentController().getModel().doc);
 
     // Ziffern-Anpassen der Sachleitenden Verfügungen aufrufen:
-    SachleitendeVerfuegung.ziffernAnpassen(model);
+    SachleitendeVerfuegung.ziffernAnpassen(getDocumentController());
 
     // Jetzt können die TextFelder innerhalb der updateFields Kommandos
     // geupdatet werden. Durch die Auslagerung in einen extra Schritt wird die
@@ -198,11 +209,11 @@ public class DocumentCommandInterpreter
     // übereinander liegen kann. Ausserdem liegt updateFields thematisch näher
     // am expandieren der Textfragmente, da updateFields im Prinzip nur dessen
     // Schwäche beseitigt.
-    errors += new TextFieldUpdater(this).execute(model.getDocumentCommands());
+    errors += new TextFieldUpdater(this).execute(getDocumentController().getModel().getDocumentCommands());
 
     // Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
     // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
-    errors += new MainProcessor(this).execute(model.getDocumentCommands());
+    errors += new MainProcessor(this).execute(getDocumentController().getModel().getDocumentCommands());
 
     // Da keine neuen Elemente mehr eingefügt werden müssen, können
     // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
@@ -214,19 +225,19 @@ public class DocumentCommandInterpreter
     // sauber erkennen und entfernen.
     // errors += new EmptyParagraphCleaner().execute(tree);
     SurroundingGarbageCollector collect = new SurroundingGarbageCollector(this);
-    errors += collect.execute(model.getDocumentCommands());
+    errors += collect.execute(getDocumentController().getModel().getDocumentCommands());
     collect.removeGarbage();
 
     // da hier bookmarks entfernt werden, muss der Baum upgedatet werden
-    model.getDocumentCommands().update();
+    getDocumentController().updateDocumentCommands();
 
     // Jetzt wird das Dokument als Formulardokument markiert, wenn mindestens ein
     // Formularfenster definiert ist.
-    if (model.hasFormGUIWindow()) model.markAsFormDocument();
+    if (getDocumentController().getModel().hasFormGUIWindow()) getDocumentController().markAsFormDocument();
 
     // Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
-    model.setDocumentModified(modified);
+    getDocumentController().getModel().setDocumentModified(modified);
 
     // ggf. eine WMCommandsFailedException werfen:
     if (errors != 0)

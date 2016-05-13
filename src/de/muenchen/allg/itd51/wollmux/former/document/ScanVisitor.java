@@ -265,7 +265,7 @@ public class ScanVisitor extends DocumentTreeVisitor
     {
       InsertionModel imodel =
         new InsertionModel4InsertXValue(bookmarkName,
-          UNO.XBookmarksSupplier(formularMax4000.getDocumentModel().doc), formularMax4000.getFunctionSelectionProvider(), formularMax4000);
+          UNO.XBookmarksSupplier(formularMax4000.getDocumentController().getModel().doc), formularMax4000.getFunctionSelectionProvider(), formularMax4000);
       if (doGenderTrafo)
       {
         addGenderTrafo(imodel, (DropdownFormControl) control);

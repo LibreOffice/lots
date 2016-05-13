@@ -54,13 +54,13 @@ import com.sun.star.uno.Type;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRange;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRangeType;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintProgressBar;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.print.PrintFunction;
 
@@ -89,15 +89,15 @@ public class PrintModels
    * PrintModelMaster erzeugt, der ein oder mehrere PrintModelSlaves anspricht und so
    * eine Verkettung mehrerer Druckfunktionen ermöglicht.
    * 
-   * @param model
+   * @param documentController
    *          Das Dokument das gedruckt werden soll
    * @return das neue PrintModel für diesen Druckvorgang
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public static XPrintModel createPrintModel(TextDocumentModel model)
+  public static XPrintModel createPrintModel(TextDocumentController documentController)
   {
-    return new MasterPrintModel(model);
+    return new MasterPrintModel(documentController);
   }
   
   /**
@@ -106,7 +106,7 @@ public class PrintModels
    * Dokument gesetzten Druckfunktionen per
    * XPrintModel.usePrintFunctionWithArgument(...) hinzugeladen.
    * 
-   * @param model
+   * @param documentController
    *          Das Dokument das gedruckt werden soll
    * @param useDocPrintFunctions
    *          steuert ob das PrintModel mit den im Dokument gesetzten Druckfunktionen
@@ -114,12 +114,12 @@ public class PrintModels
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public static XPrintModel createPrintModel(TextDocumentModel model, boolean useDocPrintFunctions)
+  public static XPrintModel createPrintModel(TextDocumentController documentController, boolean useDocPrintFunctions)
   {
-    XPrintModel pmod = PrintModels.createPrintModel(model);
+    XPrintModel pmod = PrintModels.createPrintModel(documentController);
     if (useDocPrintFunctions)
     {
-      for (Iterator<String> iter = model.getPrintFunctions().iterator(); iter.hasNext();)
+      for (Iterator<String> iter = documentController.getModel().getPrintFunctions().iterator(); iter.hasNext();)
       {
         String name = iter.next();
         try
@@ -226,11 +226,6 @@ public class PrintModels
     private HashMap<String, Object> props;
 
     /**
-     * Das TextDocumentModel zu diesem PrintModel
-     */
-    private TextDocumentModel model;
-
-    /**
      * Enthält das Flag das Auskunft darüber gibt, ob der Druckauftrag abgebrochen
      * wurde oder nicht.
      */
@@ -247,6 +242,8 @@ public class PrintModels
      */
     private String currentStage = L.m("Drucke");
 
+    private TextDocumentController documentController;
+
     /**
      * Erzeugt ein neues MasterPrintModel-Objekt für das Dokument model, das einen
      * Druckvorgang repräsentiert, der mit einer leeren Aufrufkette (Liste von
@@ -255,11 +252,11 @@ public class PrintModels
      * Druckfunktionen über usePrintFunction/useInternalPrintFunction... hinzugeladen
      * werden und Properties über get/setPropertyValue gesetzt bzw. gelesen werden.
      * 
-     * @param model
+     * @param documentController
      */
-    private MasterPrintModel(TextDocumentModel model)
+    private MasterPrintModel(TextDocumentController documentController)
     {
-      this.model = model;
+      this.documentController = documentController;
       this.props = new HashMap<String, Object>();
       this.functions = new TreeSet<PrintFunction>();
     }
@@ -341,7 +338,7 @@ public class PrintModels
     @Override
     public XTextDocument getTextDocument()
     {
-      return model.doc;
+      return documentController.getModel().doc;
     }
 
     /**
@@ -429,7 +426,7 @@ public class PrintModels
       if (noParamsDialog == false)
       {
         SyncActionListener s = new SyncActionListener();
-        new PrintParametersDialog(model.doc, showCopiesSpinner, s);
+        new PrintParametersDialog(documentController.getModel().doc, showCopiesSpinner, s);
         ActionEvent result = s.synchronize();
 
         // Rückgabewerte des Dialogs speichern für diesen und alle folgenden Aufrufe
@@ -478,8 +475,8 @@ public class PrintModels
 
       // pr mit aktueller Seite vorbelegen (oder 1 als fallback)
       String prStr = "1";
-      if (UNO.XPageCursor(model.getViewCursor()) != null)
-        prStr = "" + UNO.XPageCursor(model.getViewCursor()).getPage();
+      if (UNO.XPageCursor(documentController.getModel().getViewCursor()) != null)
+        prStr = "" + UNO.XPageCursor(documentController.getModel().getViewCursor()).getPage();
 
       // Property "Pages" bestimmen:
       switch (pr.pageRangeType)
@@ -497,13 +494,13 @@ public class PrintModels
           break;
 
         case CURRENT_AND_FOLLOWING:
-          myProps.setPropertyValue("Pages", prStr + "-" + model.getPageCount());
+          myProps.setPropertyValue("Pages", prStr + "-" + documentController.getModel().getPageCount());
           break;
       }
 
-      if (UNO.XPrintable(model.doc) != null) try
+      if (UNO.XPrintable(documentController.getModel().doc) != null) try
       {
-        UNO.XPrintable(model.doc).print(myProps.getProps());
+        UNO.XPrintable(documentController.getModel().doc).print(myProps.getProps());
         return true;
       }
       catch (IllegalArgumentException e)
@@ -574,7 +571,7 @@ public class PrintModels
     public void setFormValue(String id, String value)
     {
       SyncActionListener s = new SyncActionListener();
-      WollMuxEventHandler.handleSetFormValue(model.doc, id, value, s);
+      WollMuxEventHandler.handleSetFormValue(documentController.getModel().doc, id, value, s);
       s.synchronize();
     }
 
@@ -601,7 +598,7 @@ public class PrintModels
     {
       // Keine WollMuxEvent notwendig, da keine WollMux-Datenstrukturen
       // angefasst werden.
-      return model.getDocumentModified();
+      return documentController.getModel().isDocumentModified();
     }
 
     /**
@@ -614,7 +611,7 @@ public class PrintModels
     {
       // Keine WollMuxEvent notwendig, da keine WollMux-Datenstrukturen
       // angefasst werden.
-      model.setDocumentModified(modified);
+      documentController.getModel().setDocumentModified(modified);
     }
 
     /**
@@ -627,7 +624,7 @@ public class PrintModels
     public void collectNonWollMuxFormFields()
     {
       SyncActionListener s = new SyncActionListener();
-      WollMuxEventHandler.handleCollectNonWollMuxFormFieldsViaPrintModel(model, s);
+      WollMuxEventHandler.handleCollectNonWollMuxFormFieldsViaPrintModel(documentController, s);
       s.synchronize();
     }
 
@@ -813,7 +810,7 @@ public class PrintModels
         boolean showHighlightColor)
     {
       SyncActionListener s = new SyncActionListener();
-      WollMuxEventHandler.handleSetPrintBlocksPropsViaPrintModel(model.doc,
+      WollMuxEventHandler.handleSetPrintBlocksPropsViaPrintModel(documentController.getModel().doc,
         blockName, visible, showHighlightColor, s);
       s.synchronize();
     }
@@ -839,7 +836,7 @@ public class PrintModels
     public void setGroupVisible(String groupID, boolean visible)
     {
       SyncActionListener s = new SyncActionListener();
-      WollMuxEventHandler.handleSetVisibleState(model, groupID, visible, s);
+      WollMuxEventHandler.handleSetVisibleState(documentController, groupID, visible, s);
       s.synchronize();
     }
 

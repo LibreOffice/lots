@@ -28,12 +28,12 @@ import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.OverrideFragChainException;
 import de.muenchen.allg.itd51.wollmux.core.document.VisibleTextFragmentList;
 import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFrag;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.OverrideFrag;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
@@ -143,13 +143,13 @@ class DocumentExpander extends AbstractExecutor
   {
     try
     {
-      this.documentCommandInterpreter.model.setOverrideFrag(cmd.getFragID(), cmd.getNewFragID());
+      this.documentCommandInterpreter.getModel().setOverrideFrag(cmd.getFragID(), cmd.getNewFragID());
       cmd.markDone(!this.documentCommandInterpreter.debugMode);
       return 0;
     }
     catch (OverrideFragChainException e)
     {
-      AbstractExecutor.insertErrorField(cmd, documentCommandInterpreter.model.doc, e);
+      AbstractExecutor.insertErrorField(cmd, documentCommandInterpreter.getModel().doc, e);
       cmd.setErrorState(true);
       return 1;
     }
@@ -170,7 +170,7 @@ class DocumentExpander extends AbstractExecutor
 
     try
     {
-      fragId = this.documentCommandInterpreter.model.getOverrideFrag(cmd.getFragID());
+      fragId = this.documentCommandInterpreter.getModel().getOverrideFrag(cmd.getFragID());
 
       // Bei leeren FragIds wird der Text unter dem Dokumentkommando
       // gelöscht und das Dokumentkommando auf DONE gesetzt.
@@ -223,7 +223,7 @@ class DocumentExpander extends AbstractExecutor
         throw new Exception(errors);
       }
 
-      fillPlaceholders(this.documentCommandInterpreter.model.doc, this.documentCommandInterpreter.model.getViewCursor(), cmd.getTextCursor(),
+      fillPlaceholders(this.documentCommandInterpreter.getModel().doc, this.documentCommandInterpreter.getModel().getViewCursor(), cmd.getTextCursor(),
         cmd.getArgs());
     }
     catch (java.lang.Exception e)
@@ -243,7 +243,7 @@ class DocumentExpander extends AbstractExecutor
       }
       else
       {
-        AbstractExecutor.insertErrorField(cmd, documentCommandInterpreter.model.doc, e);
+        AbstractExecutor.insertErrorField(cmd, documentCommandInterpreter.getModel().doc, e);
       }
       cmd.setErrorState(true);
       return 1;
@@ -276,7 +276,7 @@ class DocumentExpander extends AbstractExecutor
       }
       catch (java.lang.Exception e)
       {
-        AbstractExecutor.insertErrorField(cmd, documentCommandInterpreter.model.doc, e);
+        AbstractExecutor.insertErrorField(cmd, documentCommandInterpreter.getModel().doc, e);
         cmd.setErrorState(true);
         return 1;
       }
@@ -361,10 +361,10 @@ class DocumentExpander extends AbstractExecutor
     // Liste aller TextFrames vor dem Einfügen zusammenstellen (benötigt für
     // das Updaten der enthaltenen TextFields später).
     HashSet<String> textFrames = new HashSet<String>();
-    if (UNO.XTextFramesSupplier(this.documentCommandInterpreter.model.doc) != null)
+    if (UNO.XTextFramesSupplier(this.documentCommandInterpreter.getModel().doc) != null)
     {
       String[] names =
-        UNO.XTextFramesSupplier(this.documentCommandInterpreter.model.doc).getTextFrames().getElementNames();
+        UNO.XTextFramesSupplier(this.documentCommandInterpreter.getModel().doc).getTextFrames().getElementNames();
       for (int i = 0; i < names.length; i++)
       {
         textFrames.add(names[i]);
@@ -439,7 +439,7 @@ class DocumentExpander extends AbstractExecutor
         Boolean.valueOf(styles.contains("pagestyles")));
       props.setPropertyValue("LoadNumberingStyles",
         Boolean.valueOf(styles.contains("numberingstyles")));
-      XStyleFamiliesSupplier sfs = UNO.XStyleFamiliesSupplier(this.documentCommandInterpreter.model.doc);
+      XStyleFamiliesSupplier sfs = UNO.XStyleFamiliesSupplier(this.documentCommandInterpreter.getModel().doc);
       XStyleLoader loader = UNO.XStyleLoader(sfs.getStyleFamilies());
       loader.loadStylesFromURL(urlStr, props.getProps());
     }

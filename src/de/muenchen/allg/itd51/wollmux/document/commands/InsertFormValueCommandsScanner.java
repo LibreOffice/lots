@@ -8,9 +8,9 @@ import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory.FormField;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFormValue;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 
 /**
  * Scanner, der die InsertFormValue-Kommandos des Dokuments abarbeitet und ein
@@ -61,7 +61,7 @@ class InsertFormValueCommandsScanner extends AbstractExecutor
       idToFormFields.put(id, fields);
     }
     FormField field =
-      FormFieldFactory.createFormField(this.documentCommandInterpreter.model.doc, cmd, bookmarkNameToFormField);
+      FormFieldFactory.createFormField(this.documentCommandInterpreter.getModel().doc, cmd, bookmarkNameToFormField);
 
     if (field != null)
     {

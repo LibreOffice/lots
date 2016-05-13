@@ -115,7 +115,7 @@ public class SimulationResults
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
-  public void setFormFieldValues(HashMap<String, String> mapIDToValue)
+  public void setFormFieldValues(Map<String, String> mapIDToValue)
   {
     this.mapFormFieldIDToValue.clear();
     this.mapFormFieldIDToValue.putAll(mapIDToValue);

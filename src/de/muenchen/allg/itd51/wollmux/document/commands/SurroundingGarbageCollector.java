@@ -8,11 +8,11 @@ import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFrag;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
@@ -61,7 +61,7 @@ class SurroundingGarbageCollector extends AbstractExecutor
     @Override
     public void tueDeinePflicht()
     {
-      Bookmark.removeTextFromInside(SurroundingGarbageCollector.this.documentCommandInterpreter.model.doc, range);
+      Bookmark.removeTextFromInside(SurroundingGarbageCollector.this.documentCommandInterpreter.getModel().doc, range);
     }
   }
 
@@ -105,7 +105,7 @@ class SurroundingGarbageCollector extends AbstractExecutor
   {
     try
     {
-      this.documentCommandInterpreter.model.setLockControllers(true);
+      this.documentCommandInterpreter.getDocumentController().setLockControllers(true);
       Iterator<Muellmann> iter = muellmaenner.iterator();
       while (iter.hasNext())
       {
@@ -115,7 +115,7 @@ class SurroundingGarbageCollector extends AbstractExecutor
     }
     finally
     {
-      this.documentCommandInterpreter.model.setLockControllers(false);
+      this.documentCommandInterpreter.getDocumentController().setLockControllers(false);
     }
   }
 

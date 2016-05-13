@@ -80,8 +80,8 @@ import de.muenchen.allg.itd51.wollmux.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.PrintModels;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults.SimulationResultsProcessor;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
@@ -102,6 +102,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.email.EMailSender;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
@@ -171,11 +172,6 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   private static final String MAIL_ERROR_MESSAGE_TITLE =
     L.m("Fehler beim E-Mail-Versand");
-
-  /**
-   * Das {@link TextDocumentModel} zu dem Dokument an dem diese Toolbar hängt.
-   */
-  private TextDocumentModel mod;
 
   /**
    * Stellt die Felder und Datensätze für die Serienbriefverarbeitung bereit.
@@ -248,17 +244,19 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    */
   private CoupledWindowController coupledWindowController = null;
 
+  private TextDocumentController documentController;
+
   /**
    * Die zentrale Klasse, die die Serienbrieffunktionalität bereitstellt.
    * 
-   * @param mod
+   * @param documentController
    *          das {@link TextDocumentModel} an dem die Toolbar hängt.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  public MailMergeNew(TextDocumentModel mod, ActionListener abortListener)
+  public MailMergeNew(TextDocumentController documentController, ActionListener abortListener)
   {
-    this.mod = mod;
-    this.ds = new MailMergeDatasource(mod);
+    this.documentController = documentController;
+    this.ds = new MailMergeDatasource(documentController);
     this.abortListener = abortListener;
 
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
@@ -357,7 +355,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     final String VORSCHAU = L.m("   Vorschau   ");
     button = new JButton(VORSCHAU);
     previewMode = false;
-    mod.setFormFieldsPreviewMode(previewMode);
+    documentController.setFormFieldsPreviewMode(previewMode);
 
     final JButton previewButton = button;
     button.addActionListener(new ActionListener()
@@ -368,18 +366,18 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
         if (!ds.hasDatasource()) return;
         if (previewMode)
         {
-          mod.collectNonWollMuxFormFields();
+          documentController.collectNonWollMuxFormFields();
           previewButton.setText(VORSCHAU);
           previewMode = false;
-          mod.setFormFieldsPreviewMode(false);
+          documentController.setFormFieldsPreviewMode(false);
           updateEnabledDisabledState();
         }
         else
         {
-          mod.collectNonWollMuxFormFields();
+          documentController.collectNonWollMuxFormFields();
           previewButton.setText(L.m("<Feldname>"));
           previewMode = true;
-          mod.setFormFieldsPreviewMode(true);
+          documentController.setFormFieldsPreviewMode(true);
           updatePreviewFields();
         }
       }
@@ -501,7 +499,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        AdjustFields.showAddMissingColumnsDialog(myFrame, mod, ds);
+        AdjustFields.showAddMissingColumnsDialog(myFrame, documentController, ds);
       }
     });
     tabelleMenu.add(addColumnsMenuItem);
@@ -513,7 +511,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        AdjustFields.showAdjustFieldsDialog(myFrame, mod, ds);
+        AdjustFields.showAdjustFieldsDialog(myFrame, documentController, ds);
       }
     });
     tabelleMenu.add(adjustFieldsMenuItem);
@@ -530,7 +528,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
         // Tabellenspalten ergänzen wird außerdem ausgegraut, wenn die Datenquelle
         // dies nicht unterstützt
         boolean hasUnmappedFields =
-          mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
+            documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
             ds.getColumnNames())).length > 0;
         adjustFieldsMenuItem.setEnabled(hasUnmappedFields);
         addColumnsMenuItem.setEnabled(hasUnmappedFields && ds.supportsAddColumns());
@@ -638,11 +636,11 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     Iterator<String> dataIter = data.iterator();
     for (String column : schema)
     {
-      WollMuxEventHandler.handleSetFormValue(mod.doc, column, dataIter.next(), null);
+      WollMuxEventHandler.handleSetFormValue(documentController.getModel().doc, column, dataIter.next(), null);
     }
-    WollMuxEventHandler.handleSetFormValue(mod.doc,
+    WollMuxEventHandler.handleSetFormValue(documentController.getModel().doc,
       MailMergeParams.TAG_DATENSATZNUMMER, previewDatasetNumberStr, null);
-    WollMuxEventHandler.handleSetFormValue(mod.doc,
+    WollMuxEventHandler.handleSetFormValue(documentController.getModel().doc,
       MailMergeParams.TAG_SERIENBRIEFNUMMER, previewDatasetNumberStr, null);
   }
 
@@ -698,7 +696,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
         @Override
         public void actionPerformed(ActionEvent e)
         {
-          mod.insertMailMergeFieldAtCursorPosition(name);
+          documentController.insertMailMergeFieldAtCursorPosition(name);
         }
       };
       actions.add(button);
@@ -772,7 +770,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        mod.insertMailMergeFieldAtCursorPosition(MailMergeParams.TAG_DATENSATZNUMMER);
+        documentController.insertMailMergeFieldAtCursorPosition(MailMergeParams.TAG_DATENSATZNUMMER);
       }
     });
     menu.add(button);
@@ -783,7 +781,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        mod.insertMailMergeFieldAtCursorPosition(MailMergeParams.TAG_SERIENBRIEFNUMMER);
+        documentController.insertMailMergeFieldAtCursorPosition(MailMergeParams.TAG_SERIENBRIEFNUMMER);
       }
     });
     menu.add(button);
@@ -794,7 +792,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        mod.insertNextDatasetFieldAtCursorPosition();
+        documentController.insertNextDatasetFieldAtCursorPosition();
       }
     });
     menu.add(button);
@@ -856,7 +854,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
         {
           try
           {
-            mod.replaceSelectionWithTrafoField(status.conf, buttonName);
+            documentController.replaceSelectionWithTrafoField(status.conf, buttonName);
           }
           catch (Exception x)
           {
@@ -887,7 +885,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    */
   private TrafoDialog getTrafoDialogForCurrentSelection()
   {
-    ConfigThingy trafoConf = mod.getFormFieldTrafoFromSelection();
+    ConfigThingy trafoConf = documentController.getModel().getFormFieldTrafoFromSelection();
     if (trafoConf == null) return null;
 
     final String trafoName = trafoConf.getName();
@@ -907,7 +905,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
         {
           try
           {
-            mod.setTrafo(trafoName, status.conf);
+            documentController.setTrafo(trafoName, status.conf);
           }
           catch (Exception x)
           {
@@ -952,7 +950,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
       Map<SubmitArgument, Object> args)
   {
-    mod.collectNonWollMuxFormFields();
+    documentController.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
 
     List<Integer> selected = new Vector<Integer>();
@@ -987,7 +985,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
 
     // PrintModel erzeugen und Parameter setzen:
-    final XPrintModel pmod = PrintModels.createPrintModel(mod, !ignoreDocPrintFuncs);
+    final XPrintModel pmod = PrintModels.createPrintModel(documentController, !ignoreDocPrintFuncs);
     try
     {
       pmod.setPropertyValue("MailMergeNew_Schema", data.getSchema());
@@ -1044,9 +1042,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       {
         long startTime = System.currentTimeMillis();
 
-        mod.setFormFieldsPreviewMode(true);
+        documentController.setFormFieldsPreviewMode(true);
         pmod.printWithProps();
-        mod.setFormFieldsPreviewMode(previewMode);
+        documentController.setFormFieldsPreviewMode(previewMode);
 
         long duration = (System.currentTimeMillis() - startTime) / 1000;
         Logger.debug(L.m("MailMerge finished after %1 seconds", duration));
@@ -1104,8 +1102,8 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   public static void mailMergeNewSetFormValue(XPrintModel pmod,
       SimulationResultsProcessor simProc) throws Exception
   {
-    TextDocumentModel mod =
-      DocumentManager.getTextDocumentModel(pmod.getTextDocument());
+    TextDocumentController documentController =
+      DocumentManager.getTextDocumentController(pmod.getTextDocument());
 
     QueryResults data = (QueryResults) pmod.getPropertyValue(PROP_QUERYRESULTS);
     Collection<String> schema = (Collection<String>) pmod.getPropertyValue("MailMergeNew_Schema");
@@ -1135,7 +1133,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       else
         selectedIdx = -1;
 
-      if (simProc != null) mod.startSimulation();
+      if (simProc != null) documentController.startSimulation();
 
       HashMap<String, String> dataSetExport = new HashMap<String, String>();
       try
@@ -1164,7 +1162,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       if (simProc == null)
         pmod.printWithProps();
       else
-        simProc.processSimulationResults(mod.stopSimulation());
+        simProc.processSimulationResults(documentController.stopSimulation());
 
       pmod.setPrintProgressValue((short) serienbriefNummer);
       ++serienbriefNummer;
@@ -1492,7 +1490,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   @Override
   public boolean hasPrintfunction(String name)
   {
-    final XPrintModel pmod = PrintModels.createPrintModel(mod, true);
+    final XPrintModel pmod = PrintModels.createPrintModel(documentController, true);
     try
     {
       pmod.usePrintFunction(name);
@@ -1527,7 +1525,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   @Override
   public String getDefaultFilename()
   {
-    String title = mod.getTitle();
+    String title = documentController.getTitle();
     // Suffix entfernen:
     if (title.toLowerCase().matches(".+\\.(odt|doc|ott|dot)$"))
       title = title.substring(0, title.length() - 4);
@@ -1544,7 +1542,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   @Override
   public XTextDocument getTextDocument()
   {
-    return mod.doc;
+    return documentController.getModel().doc;
   }
 
   private class MyWindowListener implements WindowListener
@@ -1619,7 +1617,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     if (coupledWindowController == null)
     {
       coupledWindowController = new CoupledWindowController();
-      XFrame f = mod.getFrame();
+      XFrame f = documentController.getFrame();
       XTopWindow w = null;
       if (f != null) w = UNO.XTopWindow(f.getContainerWindow());
       if (w != null) coupledWindowController.setTopWindow(w);
@@ -1646,7 +1644,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     if (!coupledWindowController.hasCoupledWindows())
     {
       // deregistriert den windowListener.
-      XFrame f = mod.getFrame();
+      XFrame f = documentController.getFrame();
       XTopWindow w = null;
       if (f != null) w = UNO.XTopWindow(f.getContainerWindow());
       if (w != null) coupledWindowController.unsetTopWindow(w);

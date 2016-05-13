@@ -227,7 +227,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     if (xTextDoc == null) return;
     DocumentManager.Info info = docManager.getInfo(xTextDoc);
     if (info != null && info.hasTextDocumentModel())
-        info.getTextDocumentModel().flushPersistentData();
+        info.getTextDocumentController().flushPersistentData();
   }
 
   /**

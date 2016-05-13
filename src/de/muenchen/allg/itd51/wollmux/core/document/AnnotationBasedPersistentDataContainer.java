@@ -326,7 +326,7 @@ public class AnnotationBasedPersistentDataContainer implements
   @Override
   public void flush()
   {
-    if (Workarounds.applyWorkaroundForOOoIssue100374())
+    if (de.muenchen.allg.itd51.wollmux.core.Workarounds.applyWorkaroundForOOoIssue100374())
     {
       for (DataID dataId : new HashSet<DataID>(modifiedDataIDs))
         rewriteData(dataId);

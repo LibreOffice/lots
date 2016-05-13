@@ -67,6 +67,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 
 /**
@@ -86,11 +87,11 @@ class AdjustFields
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  static void showAdjustFieldsDialog(JFrame parent, final TextDocumentModel mod,
+  static void showAdjustFieldsDialog(JFrame parent, final TextDocumentController documentController,
       MailMergeDatasource ds)
   {
     ReferencedFieldID[] fieldIDs =
-      mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
+      documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
         ds.getColumnNames()));
     ActionListener submitActionListener = new ActionListener()
     {
@@ -104,23 +105,23 @@ class AdjustFields
         {
           String fieldId = ent.getKey();
           FieldSubstitution subst = ent.getValue();
-          mod.applyFieldSubstitution(fieldId, subst);
+          documentController.applyFieldSubstitution(fieldId, subst);
           
           // Datenstrukturen aktualisieren
-          mod.getDocumentCommands().update();
-          DocumentCommandInterpreter dci = new DocumentCommandInterpreter(mod);
+          documentController.updateDocumentCommands();
+          DocumentCommandInterpreter dci = new DocumentCommandInterpreter(documentController);
           dci.scanGlobalDocumentCommands();
           // collectNonWollMuxFormFields() wird im folgenden scan auch noch erledigt
           dci.scanInsertFormValueCommands();
 
           // Alte Formularwerte aus den persistenten Daten entfernen
-          mod.setFormFieldValue(fieldId, null);
+          documentController.setFormFieldValue(fieldId, null);
 
           // Ansicht der betroffenen Felder aktualisieren
           for (Iterator<FieldSubstitution.SubstElement> iter = subst.iterator(); iter.hasNext();)
           {
             FieldSubstitution.SubstElement ele = iter.next();
-            if (ele.isField()) mod.updateFormFields(ele.getValue());
+            if (ele.isField()) documentController.updateFormFields(ele.getValue());
           }
 
         }
@@ -141,11 +142,11 @@ class AdjustFields
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  static void showAddMissingColumnsDialog(JFrame parent, TextDocumentModel mod,
+  static void showAddMissingColumnsDialog(JFrame parent, TextDocumentController documentController,
       final MailMergeDatasource ds)
   {
     ReferencedFieldID[] fieldIDs =
-      mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
+        documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
         ds.getColumnNames()));
     ActionListener submitActionListener = new ActionListener()
     {

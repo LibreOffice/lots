@@ -1,8 +1,8 @@
 package de.muenchen.allg.itd51.wollmux.document.commands;
 
+import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
@@ -38,7 +38,7 @@ class MainProcessor extends AbstractExecutor
   {
     try
     {
-      this.documentCommandInterpreter.model.setLockControllers(true);
+      this.documentCommandInterpreter.getDocumentController().setLockControllers(true);
 
       int errors = executeAll(commands);
 
@@ -46,7 +46,7 @@ class MainProcessor extends AbstractExecutor
     }
     finally
     {
-      this.documentCommandInterpreter.model.setLockControllers(false);
+      this.documentCommandInterpreter.getDocumentController().setLockControllers(false);
     }
   }
 
@@ -61,11 +61,11 @@ class MainProcessor extends AbstractExecutor
     cmd.setErrorState(false);
     try
     {
-      this.documentCommandInterpreter.model.addToCurrentFormDescription(cmd);
+      this.documentCommandInterpreter.getDocumentController().addToCurrentFormDescription(cmd);
     }
     catch (ConfigurationErrorException e)
     {
-      AbstractExecutor.insertErrorField(cmd, documentCommandInterpreter.model.doc, e);
+      AbstractExecutor.insertErrorField(cmd, documentCommandInterpreter.getModel().doc, e);
       cmd.setErrorState(true);
       return 1;
     }
@@ -80,7 +80,7 @@ class MainProcessor extends AbstractExecutor
   @Override
   public int executeCommand(DocumentCommand.InvalidCommand cmd)
   {
-    AbstractExecutor.insertErrorField(cmd, documentCommandInterpreter.model.doc, cmd.getException());
+    AbstractExecutor.insertErrorField(cmd, documentCommandInterpreter.getModel().doc, cmd.getException());
     cmd.setErrorState(true);
     return 1;
   }
@@ -103,7 +103,7 @@ class MainProcessor extends AbstractExecutor
       if (value == null) value = "";
 
       // ggf. TRAFO durchführen
-      value = this.documentCommandInterpreter.model.getTransformedValue(cmd.getTrafoName(), value);
+      value = this.documentCommandInterpreter.getDocumentController().getTransformedValue(cmd.getTrafoName(), value);
     }
     catch (DatasetNotFoundException e)
     {
@@ -111,7 +111,7 @@ class MainProcessor extends AbstractExecutor
     }
     catch (ColumnNotFoundException e)
     {
-      AbstractExecutor.insertErrorField(cmd, documentCommandInterpreter.model.doc, e);
+      AbstractExecutor.insertErrorField(cmd, documentCommandInterpreter.getModel().doc, e);
       cmd.setErrorState(true);
       return 1;
     }

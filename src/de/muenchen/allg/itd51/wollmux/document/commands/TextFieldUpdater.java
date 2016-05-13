@@ -4,9 +4,9 @@ import com.sun.star.container.XEnumeration;
 import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UnoService;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.UpdateFields;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.UpdateFields;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
@@ -34,7 +34,7 @@ class TextFieldUpdater extends AbstractExecutor
   {
     try
     {
-      this.documentCommandInterpreter.model.setLockControllers(true);
+      this.documentCommandInterpreter.getDocumentController().setLockControllers(true);
 
       int errors = executeAll(commands);
 
@@ -42,7 +42,7 @@ class TextFieldUpdater extends AbstractExecutor
     }
     finally
     {
-      this.documentCommandInterpreter.model.setLockControllers(false);
+      this.documentCommandInterpreter.getDocumentController().setLockControllers(false);
     }
 
   }

@@ -35,23 +35,19 @@ import java.awt.PointerInfo;
 import java.awt.Robot;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 
-import com.sun.star.container.XNameAccess;
 import com.sun.star.drawing.XDrawPageSupplier;
-import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextSectionsSupplier;
 import com.sun.star.text.XTextTablesSupplier;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 
 /**
  * Diese Klasse referenziert alle temporären Workarounds, die im WollMux aufgenommen
@@ -62,23 +58,6 @@ import de.muenchen.allg.itd51.wollmux.core.util.Logger;
  */
 public class Workarounds
 {
-  /**
-   * Enthält die Version des eingesetzten OpenOffice.org, die mit
-   * {@link #getOOoVersion()} abgefragt werden kann.
-   */
-  private static String oooVersion = null;
-
-  /*
-   * Das ".*" nach dem \\A dürfte da eigentlich nicht sein, aber wenn es nicht da
-   * ist, wird bei der Abtretungserklärung gemeckert wegen des Issues 101249.
-   */
-  private static final Pattern INSERTFORMVALUE_BOOKMARK_TEXT_THAT_CAN_BE_SAFELY_DELETED_WORKAROUND =
-    Pattern.compile("\\A.*[<\\[{].*[\\]>}]\\z");
-
-  private static Boolean workaround100374 = null;
-
-  private static Pattern workaround101249 = null;
-
   private static String workaround101283 = null;
 
   private static Boolean workaround89783 = null;
@@ -97,41 +76,14 @@ public class Workarounds
 
   private static ClassLoader workaround102164CL = null;
 
-  private static Boolean workaround68261 = null;
-
   private static Boolean workaroundSunJavaBug4737732 = null;
 
-  private static Boolean applyWorkaround(String issueNumber)
+  public static Boolean applyWorkaround(String issueNumber)
   {
     Logger.debug("Workaround für Issue "
       + issueNumber
       + " aktiv. Bestimmte Features sind evtl. nicht verfügbar. Die Performance kann ebenfalls leiden.");
     return Boolean.TRUE;
-  }
-
-  /**
-   * Issue #100374 betrifft OOo 3.0.x. Der Workaround kann entfernt werden, wenn
-   * voraussichtlich OOo 3.1 flächendeckend eingesetzt wird.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   */
-  public static boolean applyWorkaroundForOOoIssue100374()
-  {
-    if (workaround100374 == null)
-    {
-      String version = getOOoVersion();
-      // -100374 ist der Marker für unsere selbst gepatchten Versionen ohne den
-      // Fehler
-      if (version != null && version.startsWith("3.0")
-        && !version.contains("-100374"))
-      {
-        workaround100374 = applyWorkaround("100374");
-      }
-      else
-        workaround100374 = Boolean.FALSE;
-    }
-
-    return workaround100374.booleanValue();
   }
 
   /**
@@ -161,7 +113,7 @@ public class Workarounds
   {
     if (workaround102164 == null)
     {
-      String version = getOOoVersion();
+      String version = Utils.getOOoVersion();
       if (version != null && !version.startsWith("3.1") && !version.startsWith("2")
         && !version.startsWith("3.0"))
       {
@@ -199,7 +151,7 @@ public class Workarounds
   {
     if (workaround103137 == null)
     {
-      String version = getOOoVersion();
+      String version = Utils.getOOoVersion();
       if (version != null
         && (version.startsWith("3.0") || version.startsWith("3.1")))
       {
@@ -222,7 +174,7 @@ public class Workarounds
   {
     if (workaround96281 == null)
     {
-      String version = getOOoVersion();
+      String version = Utils.getOOoVersion();
       if (version != null
         && (version.startsWith("3.1") || version.startsWith("3.2") || version.startsWith("3.3")))
       {
@@ -266,67 +218,6 @@ public class Workarounds
     return workaroundSunJavaBug4737732;
   }
   
-  /**
-   * Diese Methode liefert die Versionsnummer von OpenOffice.org aus dem
-   * Konfigurationsknoten /org.openoffice.Setup/Product/oooSetupVersionAboutBox
-   * konkateniert mit /org.openoffice.Setup/Product/oooSetupExtension zurück oder
-   * null, falls bei der Bestimmung der Versionsnummer Fehler auftraten.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  public static String getOOoVersion()
-  {
-    if (oooVersion == null)
-    {
-      XMultiServiceFactory cfgProvider =
-        UNO.XMultiServiceFactory(UNO.createUNOService("com.sun.star.configuration.ConfigurationProvider"));
-      if (cfgProvider != null)
-      {
-        XNameAccess cfgAccess = null;
-        try
-        {
-          cfgAccess =
-            UNO.XNameAccess(cfgProvider.createInstanceWithArguments(
-              "com.sun.star.configuration.ConfigurationAccess", new UnoProps(
-                "nodepath", "/org.openoffice.Setup/Product").getProps()));
-        }
-        catch (Exception e)
-        {}
-        if (cfgAccess != null)
-        {
-          try
-          {
-            oooVersion =
-              "" + cfgAccess.getByName("ooSetupVersionAboutBox")
-                + cfgAccess.getByName("ooSetupExtension");
-          }
-          catch (Exception e)
-          {}
-        }
-      }
-    }
-    return oooVersion;
-  }
-
-  /**
-   * Wegen http://qa.openoffice.org/issues/show_bug.cgi?id=101249 muss ein laxeres
-   * Pattern verwendet werden, zum Test, ob ein Text in einem insertFormValue
-   * Bookmark problematisch ist.
-   * 
-   * @return das Pattern das zum Testen verwendet werden soll
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   */
-  public static Pattern workaroundForIssue101249()
-  {
-    if (workaround101249 == null)
-    {
-      Logger.debug(L.m("Workaround für Issue 101249 aktiv."));
-      workaround101249 =
-        INSERTFORMVALUE_BOOKMARK_TEXT_THAT_CAN_BE_SAFELY_DELETED_WORKAROUND;
-    }
-    return workaround101249;
-  }
-
   /**
    * Wegen http://qa.openoffice.org/issues/show_bug.cgi?id=101283 muss der Inhalt des
    * Bookmarks durch ein Leerzeichen an Stelle des gewünschten Leerstrings ersetzt
@@ -419,7 +310,7 @@ public class Workarounds
   {
     if (workaroundToolbarHoverFreeze == null)
     {
-      String version = getOOoVersion();
+      String version = Utils.getOOoVersion();
       if (version == null) return false;
       if ((version.startsWith("3.0") || version.startsWith("3.1"))
         && System.getProperty("os.name").contains("Windows"))
@@ -549,7 +440,7 @@ public class Workarounds
   {
     if (workaround102619 == null)
     {
-      String version = getOOoVersion();
+      String version = Utils.getOOoVersion();
       if (version != null
         && (version.startsWith("2.") || version.startsWith("3.0") || version.startsWith("3.1")))
       {
@@ -560,36 +451,6 @@ public class Workarounds
     }
 
     return workaround102619.booleanValue();
-  }
-
-  /**
-   * Issue 68261 (XEnumeration.nextElement() throws despite hasMoreElements()==true)
-   * beschreibt einen Bug in OOo < 3.0 (das genaue Target der 2er-Serie kann ich
-   * leider nicht mehr ermitteln) bei dem OOo Exceptions schmeißt beim Iterieren über
-   * Inhalte in Tabellen.
-   * 
-   * Achtung: Sollte der Workaround einmal entfernt werden, dann bitte darauf achten,
-   * dass sich der Workaround nicht nur auf den im Code markierten Block bezieht,
-   * sondern sich durch die ganze Logik in der Klasse {@link FormFieldFactory}
-   * durchzieht. Die Logik dieser Klasse kann an einigen Stellen sicherlich deutlich
-   * vereinfacht werden ohne diesen Workaround. Evtl. bietet sich sogar ein
-   * Neu-Schreiben an.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  public static boolean applyWorkaroundForOOoIssue68261()
-  {
-    if (workaround68261 == null)
-    {
-      String version = getOOoVersion();
-      if (version != null && (version.startsWith("2.")))
-      {
-        workaround68261 = applyWorkaround("68261");
-      }
-      else
-        workaround68261 = Boolean.FALSE;
-    }
-    return workaround68261.booleanValue();
   }
 
 }

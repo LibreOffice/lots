@@ -34,6 +34,7 @@ import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -48,7 +49,6 @@ import com.sun.star.text.XTextSectionsSupplier;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
-import de.muenchen.allg.itd51.wollmux.core.document.TextRangeRelation;
 import de.muenchen.allg.itd51.wollmux.core.document.TextSection;
 import de.muenchen.allg.itd51.wollmux.core.document.TreeRelation;
 import de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement;
@@ -597,25 +597,26 @@ public class DocumentCommands implements Iterable<DocumentCommand>
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
+  @Override
   public Iterator<DocumentCommand> iterator()
   {
     return allCommands.iterator();
   }
 
   /**
-   * Liefert einen Iterator über die Menge aller setGroups-Dokumentkommandos in
+   * Liefert List aller setGroups-Dokumentkommandos in
    * undefinierter Reihenfolge, wobei sichergestellt ist, dass die
    * Gruppenzugehörigkeit verschachtelter SetGroups-Kommandos gemäß der
    * Vererbungsstruktur von Sichbarkeitsgruppen auf untergeordnete
    * SetGroups-Kommandos vererbt wurde.
    * 
-   * @return ein Iterator über alle setGroups-Dokumentkommandos.
+   * @return eine Liste aller setGroups-Dokumentkommandos.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public Iterator<VisibilityElement> setGroupsIterator()
+  public List<VisibilityElement> getSetGroups()
   {
-    return visibilityElements.iterator();
+    return visibilityElements;
   }
 
   /**

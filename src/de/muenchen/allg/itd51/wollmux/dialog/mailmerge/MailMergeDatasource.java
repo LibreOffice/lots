@@ -84,7 +84,6 @@ import com.sun.star.util.XCloseListener;
 import com.sun.star.util.XModifiable;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
@@ -99,6 +98,7 @@ import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.QueryResultsWithSchema;
 import de.muenchen.allg.itd51.wollmux.db.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
  * Stellt eine OOo-Datenquelle oder ein offenes Calc-Dokument über ein gemeinsames
@@ -204,19 +204,19 @@ public class MailMergeDatasource
    * Wird verwendet zum Speichern/Wiedereinlesen der zuletzt ausgewählten
    * Datenquelle.
    */
-  private TextDocumentModel mod;
+  private TextDocumentController documentController;
 
   /**
    * Erzeugt eine neue Datenquelle.
    * 
-   * @param mod
+   * @param documentController
    *          wird verwendet zum Speichern/Wiedereinlesen der zuletzt ausgewählten
    *          Datenquelle.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public MailMergeDatasource(TextDocumentModel mod)
+  public MailMergeDatasource(TextDocumentController documentController)
   {
-    this.mod = mod;
+    this.documentController = documentController;
     openDatasourceFromLastStoredSettings();
   }
 
@@ -401,6 +401,7 @@ public class MailMergeDatasource
     {
       button.addActionListener(new ActionListener()
       {
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           datasourceSelector.dispose();
@@ -413,6 +414,7 @@ public class MailMergeDatasource
     button = new JButton(L.m("Datei..."));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         datasourceSelector.dispose();
@@ -424,6 +426,7 @@ public class MailMergeDatasource
     button = new JButton(L.m("Neue Calc-Tabelle..."));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         datasourceSelector.dispose();
@@ -435,6 +438,7 @@ public class MailMergeDatasource
     button = new JButton(L.m("Datenbank..."));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         datasourceSelector.dispose();
@@ -474,6 +478,7 @@ public class MailMergeDatasource
     button = new JButton(L.m("Abbrechen"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         datasourceSelector.dispose();
@@ -575,7 +580,7 @@ public class MailMergeDatasource
    */
   private void openDatasourceFromLastStoredSettings()
   {
-    ConfigThingy mmconf = mod.getMailmergeConfig();
+    ConfigThingy mmconf = documentController.getModel().getMailmergeConfig();
     ConfigThingy datenquelle = new ConfigThingy("");
     try
     {
@@ -677,7 +682,7 @@ public class MailMergeDatasource
 
     ConfigThingy seriendruck = new ConfigThingy("Seriendruck");
     if (dq.count() > 0) seriendruck.addChild(dq);
-    mod.setMailmergeConfig(seriendruck);
+    documentController.setMailmergeConfig(seriendruck);
   }
 
   /**
@@ -1095,6 +1100,7 @@ public class MailMergeDatasource
       button = new JButton(name);
       button.addActionListener(new ActionListener()
       {
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           dbSelector.dispose();
@@ -1185,6 +1191,7 @@ public class MailMergeDatasource
       button = new JButton(name);
       button.addActionListener(new ActionListener()
       {
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           calcWinSelector.dispose();
@@ -1327,6 +1334,7 @@ public class MailMergeDatasource
       button = new JButton(name);
       button.addActionListener(new ActionListener()
       {
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           tableSelector.dispose();
@@ -1969,15 +1977,18 @@ public class MailMergeDatasource
   private class MyCalcListener implements XCloseListener, XEventListener
   {
 
+    @Override
     public void queryClosing(EventObject arg0, boolean arg1)
         throws CloseVetoException
     {}
 
+    @Override
     public void notifyClosing(EventObject arg0)
     {
       Logger.debug(L.m("Calc-Datenquelle wurde unerwartet geschlossen"));
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           calcDoc = null;
@@ -1985,11 +1996,13 @@ public class MailMergeDatasource
       });
     }
 
+    @Override
     public void disposing(EventObject arg0)
     {
       Logger.debug(L.m("Calc-Datenquelle wurde disposed()"));
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           calcDoc = null;
@@ -1997,6 +2010,7 @@ public class MailMergeDatasource
       });
     }
 
+    @Override
     public void notifyEvent(com.sun.star.document.EventObject event)
     {
       if (event.EventName.equals("OnSaveAsDone")
@@ -2004,6 +2018,7 @@ public class MailMergeDatasource
       {
         javax.swing.SwingUtilities.invokeLater(new Runnable()
         {
+          @Override
           public void run()
           {
             calcUrl = UNO.XModel(calcDoc).getURL();
@@ -2158,16 +2173,19 @@ public class MailMergeDatasource
 
     private List<Dataset> datasets = new ArrayList<Dataset>();
 
+    @Override
     public int size()
     {
       return datasets.size();
     }
 
+    @Override
     public Iterator<Dataset> iterator()
     {
       return datasets.iterator();
     }
 
+    @Override
     public boolean isEmpty()
     {
       return datasets.isEmpty();
@@ -2192,6 +2210,7 @@ public class MailMergeDatasource
         this.data = data;
       }
 
+      @Override
       public String get(String columnName) throws ColumnNotFoundException
       {
         Number idx = mapColumnNameToIndex.get(columnName);
@@ -2201,6 +2220,7 @@ public class MailMergeDatasource
         return data[idx.intValue()];
       }
 
+      @Override
       public String getKey()
       {
         return "key";

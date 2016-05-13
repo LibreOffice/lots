@@ -16,22 +16,22 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
 
 public class PrintFunctionDialog extends JDialog
 {
   private static final long serialVersionUID = 1L;
   
-  private TextDocumentModel doc;
+  private TextDocumentController documentController;
   PrintFunctionLibrary printFunctionLibrary;
 
-  public PrintFunctionDialog(Frame owner, boolean modal, TextDocumentModel doc, PrintFunctionLibrary printFuncLib)
+  public PrintFunctionDialog(Frame owner, boolean modal, TextDocumentController documentController, PrintFunctionLibrary printFuncLib)
   {
     super(owner, modal);
     
-    this.doc = doc;
+    this.documentController = documentController;
     this.printFunctionLibrary = printFuncLib;
     
     setTitle(L.m("Druckfunktion setzen"));
@@ -57,7 +57,7 @@ public class PrintFunctionDialog extends JDialog
   private void createGui()
   {
     final JList<String> printFunctionCurrentList =
-        new JList<String>(new Vector<String>(doc.getPrintFunctions()));
+        new JList<String>(new Vector<String>(documentController.getModel().getPrintFunctions()));
       JPanel printFunctionEditorContentPanel = new JPanel(new BorderLayout());
       printFunctionEditorContentPanel.add(printFunctionCurrentList,
         BorderLayout.CENTER);
@@ -73,9 +73,9 @@ public class PrintFunctionDialog extends JDialog
         public void actionPerformed(ActionEvent e)
         {
           for (Object o : printFunctionCurrentList.getSelectedValuesList())
-            doc.removePrintFunction("" + o);
+            documentController.removePrintFunction("" + o);
           printFunctionCurrentList.setListData(new Vector<String>(
-            doc.getPrintFunctions()));
+            documentController.getModel().getPrintFunctions()));
         }
       };
 
@@ -85,9 +85,9 @@ public class PrintFunctionDialog extends JDialog
         public void actionPerformed(ActionEvent e)
         {
           String newFunctionName = printFunctionComboBox.getSelectedItem().toString();
-          doc.addPrintFunction(newFunctionName);
+          documentController.addPrintFunction(newFunctionName);
           printFunctionCurrentList.setListData(new Vector<String>(
-            doc.getPrintFunctions()));
+            documentController.getModel().getPrintFunctions()));
         }
       };
 

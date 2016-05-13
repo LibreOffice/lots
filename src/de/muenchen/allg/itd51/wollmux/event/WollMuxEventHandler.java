@@ -160,6 +160,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.formmodel.InvalidFormDescriptorExce
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.MultiDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
@@ -640,20 +641,20 @@ public class WollMuxEventHandler
    * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
    * WollMuxEventHandler ausgelöst.
    */
-  public static void handleFunctionDialog(TextDocumentModel model, String dialogName)
+  public static void handleFunctionDialog(TextDocumentController documentController, String dialogName)
   {
-    handle(new OnFunctionDialog(model, dialogName));
+    handle(new OnFunctionDialog(documentController, dialogName));
   }
 
   private static class OnFunctionDialog extends BasicEvent
   {
-    private TextDocumentModel model;
+    private TextDocumentController documentController;
 
     private String dialogName;
 
-    private OnFunctionDialog(TextDocumentModel model, String dialogName)
+    private OnFunctionDialog(TextDocumentController documentController, String dialogName)
     {
-      this.model = model;
+      this.documentController = documentController;
       this.dialogName = dialogName;
     }
 
@@ -673,8 +674,8 @@ public class WollMuxEventHandler
         dialogInst = dialog.instanceFor(new HashMap<Object, Object>());
 
         setLock();
-        dialogInst.show(unlockActionListener, model.getFunctionLibrary(),
-          model.getDialogLibrary());
+        dialogInst.show(unlockActionListener, documentController.getFunctionLibrary(),
+          documentController.getDialogLibrary());
         waitForUnlock();
       }
       catch (ConfigurationErrorException e)
@@ -690,7 +691,7 @@ public class WollMuxEventHandler
       // transparent mit verfolgt werden können.
       try
       {
-        model.getFrame().getContainerWindow().setFocus();
+        documentController.getFrame().getContainerWindow().setFocus();
       }
       catch (java.lang.Exception e)
       {
@@ -706,9 +707,7 @@ public class WollMuxEventHandler
         String id = iter.next();
         String value = dialogInst.getData(id).toString();
 
-        // Formularwerte ins Model uns ins Dokument übernehmen.
-        model.setFormFieldValue(id, value);
-        model.updateFormFields(id);
+        documentController.addFormFieldValue(id, value);
       }
 
       stabilize();
@@ -717,7 +716,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ", '" + dialogName
+      return this.getClass().getSimpleName() + "(" + documentController + ", '" + dialogName
         + "')";
     }
   }
@@ -920,25 +919,26 @@ public class WollMuxEventHandler
    * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
    * WollMuxEventHandler ausgelöst.
    */
-  public static void handleFormularMax4000Show(TextDocumentModel model)
+  public static void handleFormularMax4000Show(TextDocumentController documentController)
   {
-    handle(new OnFormularMax4000Show(model));
+    handle(new OnFormularMax4000Show(documentController));
   }
 
   private static class OnFormularMax4000Show extends BasicEvent
   {
-    private final TextDocumentModel model;
 
-    private OnFormularMax4000Show(TextDocumentModel model)
+    private TextDocumentController documentController;
+
+    private OnFormularMax4000Show(TextDocumentController documentController)
     {
-      this.model = model;
+      this.documentController = documentController;
     }
 
     @Override
     protected void doit() throws WollMuxFehlerException
     {
       // Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
-      FormularMax4kController max = DocumentManager.getDocumentManager().getCurrentFormularMax4000(model.doc);
+      FormularMax4kController max = DocumentManager.getDocumentManager().getCurrentFormularMax4000(documentController.getModel().doc);
       if (max != null)
       {
         max.toFront();
@@ -951,7 +951,7 @@ public class WollMuxEventHandler
           public void actionPerformed(ActionEvent actionEvent)
           {
             if (actionEvent.getSource() instanceof FormularMax4kController)
-              WollMuxEventHandler.handleFormularMax4000Returned(model);
+              WollMuxEventHandler.handleFormularMax4000Returned(documentController);
           }
         };
 
@@ -960,10 +960,10 @@ public class WollMuxEventHandler
         // Bibliotheken, die das model bereitstellt. Die dokumentlokalen
         // Bibliotheken kann der FM4000 selbst auflösen.
         max =
-          new FormularMax4kController(model, l,
+          new FormularMax4kController(documentController, l,
             GlobalFunctions.getInstance().getGlobalFunctions(),
             GlobalFunctions.getInstance().getGlobalPrintFunctions());
-        DocumentManager.getDocumentManager().setCurrentFormularMax4000(model.doc, max);
+        DocumentManager.getDocumentManager().setCurrentFormularMax4000(documentController.getModel().doc, max);
         max.run();
       }
     }
@@ -971,7 +971,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ")";
+      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
     }
   }
 
@@ -983,30 +983,31 @@ public class WollMuxEventHandler
    * 
    * Dieses Event wird vom EventProcessor geworfen, wenn der FormularMax zurückkehrt.
    */
-  public static void handleFormularMax4000Returned(TextDocumentModel model)
+  public static void handleFormularMax4000Returned(TextDocumentController documentController)
   {
-    handle(new OnFormularMax4000Returned(model));
+    handle(new OnFormularMax4000Returned(documentController));
   }
 
   private static class OnFormularMax4000Returned extends BasicEvent
   {
-    private TextDocumentModel model;
 
-    private OnFormularMax4000Returned(TextDocumentModel model)
+    private TextDocumentController documentController;
+
+    private OnFormularMax4000Returned(TextDocumentController documentController)
     {
-      this.model = model;
+      this.documentController = documentController;
     }
 
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      DocumentManager.getDocumentManager().setCurrentFormularMax4000(model.doc, null);
+      DocumentManager.getDocumentManager().setCurrentFormularMax4000(documentController.getModel().doc, null);
     }
 
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + model.hashCode() + ")";
+      return this.getClass().getSimpleName() + "(#" + documentController.getModel().hashCode() + ")";
     }
   }
 
@@ -1018,30 +1019,30 @@ public class WollMuxEventHandler
    * 
    * Dieses Event wird vom EventProcessor geworfen, wenn der FormularMax zurückkehrt.
    */
-  public static void handleMailMergeNewReturned(TextDocumentModel model)
+  public static void handleMailMergeNewReturned(TextDocumentController documentController)
   {
-    handle(new OnHandleMailMergeNewReturned(model));
+    handle(new OnHandleMailMergeNewReturned(documentController));
   }
 
   private static class OnHandleMailMergeNewReturned extends BasicEvent
   {
-    private TextDocumentModel model;
+    private TextDocumentController documentController;
 
-    private OnHandleMailMergeNewReturned(TextDocumentModel model)
+    private OnHandleMailMergeNewReturned(TextDocumentController documentController)
     {
-      this.model = model;
+      this.documentController = documentController;
     }
 
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      DocumentManager.getDocumentManager().setCurrentMailMergeNew(model.doc, null);
+      DocumentManager.getDocumentManager().setCurrentMailMergeNew(documentController.getModel().doc, null);
     }
 
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + model.hashCode() + ")";
+      return this.getClass().getSimpleName() + "(#" + documentController.getModel().hashCode() + ")";
     }
   }
 
@@ -1066,7 +1067,7 @@ public class WollMuxEventHandler
    *          und gleich wieder geschlossen wurde zu folgendem Deadlock:
    * 
    *          {@link OnProcessTextDocument} =>
-   *          {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#getTextDocumentModel()}
+   *          {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#getTextDocumentController()}
    *          => {@link TextDocumentModel#TextDocumentModel(XTextDocument)} =>
    *          {@link DispatchProviderAndInterceptor#registerDocumentDispatchInterceptor(XFrame)}
    *          => OOo Proxy =>
@@ -1094,7 +1095,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      if (docInfo.hasTextDocumentModel()) DocumentManager.getDocumentManager().dispose(docInfo.getTextDocumentModel().doc);
+      if (docInfo.hasTextDocumentModel()) DocumentManager.getDocumentManager().dispose(docInfo.getTextDocumentController().getModel().doc);
     }
 
     @Override
@@ -1102,7 +1103,7 @@ public class WollMuxEventHandler
     {
       String code = "unknown";
       if (docInfo.hasTextDocumentModel())
-        code = "" + docInfo.getTextDocumentModel().hashCode();
+        code = "" + docInfo.getTextDocumentController().hashCode();
       return this.getClass().getSimpleName() + "(#" + code + ")";
     }
   }
@@ -1149,7 +1150,7 @@ public class WollMuxEventHandler
     {
       if (xTextDoc == null) return;
 
-      TextDocumentModel model = DocumentManager.getTextDocumentModel(xTextDoc);
+      TextDocumentController documentController = DocumentManager.getTextDocumentController(xTextDoc);
 
       // Konfigurationsabschnitt Textdokument verarbeiten falls Dok sichtbar:
       if (visible)
@@ -1157,7 +1158,7 @@ public class WollMuxEventHandler
         {
           ConfigThingy tds =
             WollMuxFiles.getWollmuxConf().query("Fenster").query("Textdokument").getLastChild();
-          model.setWindowViewSettings(tds);
+          documentController.setWindowViewSettings(tds);
         }
         catch (NodeNotFoundException e)
         {}
@@ -1173,13 +1174,13 @@ public class WollMuxEventHandler
         // die Sichtbarkeiten explizit setzt. Damit bleiben nur die Sachleitenden
         // Verfügungen übrig, die vom WollMux bisher noch nicht automatisch
         // korrigiert wurden. Dieser Workaround macht das nun:
-        if (model.getPrintFunctions().contains(
+        if (documentController.getModel().getPrintFunctions().contains(
           SachleitendeVerfuegung.PRINT_FUNCTION_NAME))
-          SachleitendeVerfuegung.workaround103137(model);
+          SachleitendeVerfuegung.workaround103137(documentController);
       }
 
       // Mögliche Aktionen für das neu geöffnete Dokument:
-      DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model, WollMuxFiles.isDebugMode());
+      DocumentCommandInterpreter dci = new DocumentCommandInterpreter(documentController, WollMuxFiles.isDebugMode());
 
       try
       {
@@ -1188,10 +1189,10 @@ public class WollMuxEventHandler
         dci.scanGlobalDocumentCommands();
 
         int actions =
-          model.evaluateDocumentActions(GlobalFunctions.getInstance().getDocumentActionFunctions().iterator());
+          documentController.evaluateDocumentActions(GlobalFunctions.getInstance().getDocumentActionFunctions().iterator());
 
         // Bei Vorlagen: Ausführung der Dokumentkommandos
-        if ((actions < 0 && model.isTemplate()) || (actions == Integer.MAX_VALUE))
+        if ((actions < 0 && documentController.getModel().isTemplate()) || (actions == Integer.MAX_VALUE))
         {
           dci.executeTemplateCommands();
 
@@ -1205,25 +1206,25 @@ public class WollMuxEventHandler
         // Anmerkung: actions == allactions wird NICHT so interpretiert, dass auch
         // bei Dokumenten ohne Formularfunktionen der folgende Abschnitt ausgeführt
         // wird. Dies würde unsinnige Ergebnisse verursachen.
-        if (actions != 0 && model.isFormDocument())
+        if (actions != 0 && documentController.getModel().isFormDocument())
         {
           // Konfigurationsabschnitt Fenster/Formular verarbeiten falls Dok sichtbar
           if (visible)
             try
             {
-              model.setDocumentZoom(WollMuxFiles.getWollmuxConf().query("Fenster").query(
+              documentController.setDocumentZoom(WollMuxFiles.getWollmuxConf().query("Fenster").query(
                 "Formular").getLastChild().query("ZOOM"));
             }
             catch (java.lang.Exception e)
             {}
 
           // FormGUI starten, falls es kein Teil eines Multiform-Dokuments ist.
-          if (!model.isPartOfMultiformDocument())
+          if (!documentController.getModel().isPartOfMultiformDocument())
           {
             FormModel fm;
             try
             {
-              fm = SingleDocumentFormModel.createSingleDocumentFormModel(model, visible);
+              fm = SingleDocumentFormModel.createSingleDocumentFormModel(documentController, visible);
             }
             catch (InvalidFormDescriptorException e)
             {
@@ -1231,7 +1232,7 @@ public class WollMuxEventHandler
                 L.m("Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\nBitte kontaktieren Sie Ihre Systemadministration."));
             }
 
-            DocumentManager.getDocumentManager().setFormModel(model.doc, fm);
+            DocumentManager.getDocumentManager().setFormModel(documentController.getModel().doc, fm);
             fm.startFormGUI();
           }
         }
@@ -1245,12 +1246,12 @@ public class WollMuxEventHandler
       // Registrierte XEventListener (etwas später) informieren, dass die
       // Dokumentbearbeitung fertig ist.
       handleNotifyDocumentEventListener(null, ON_WOLLMUX_PROCESSING_FINISHED,
-        model.doc);
+        documentController.getModel().doc);
 
       // ContextChanged auslösen, damit die Dispatches aktualisiert werden.
       try
       {
-        model.getFrame().contextChanged();
+        documentController.getFrame().contextChanged();
       }
       catch (java.lang.Exception e)
       {}
@@ -1273,28 +1274,28 @@ public class WollMuxEventHandler
    * zuständig ist, die eine FormGUI für den MultiDocument-Modus zu erzeugen und zu
    * starten.
    * 
-   * @param docs
+   * @param documentControllers
    *          Ein Vector of TextDocumentModels, die in einem Multiformular
    *          zusammengefasst werden sollen.
    */
   public static void handleProcessMultiform(
-      Vector /* of TextDocumentModel */<TextDocumentModel> docs,
+      List<TextDocumentController> documentControllers,
       ConfigThingy buttonAnpassung)
   {
-    handle(new OnProcessMultiform(docs, buttonAnpassung));
+    handle(new OnProcessMultiform(documentControllers, buttonAnpassung));
   }
 
   private static class OnProcessMultiform extends BasicEvent
   {
-    Vector<TextDocumentModel> docs;
+    private ConfigThingy buttonAnpassung;
 
-    ConfigThingy buttonAnpassung;
+    private List<TextDocumentController> documentControllers;
 
     public OnProcessMultiform(
-        Vector /* of TextDocumentModel */<TextDocumentModel> docs,
+        List<TextDocumentController> documentControllers,
         ConfigThingy buttonAnpassung)
     {
-      this.docs = docs;
+      this.documentControllers = documentControllers;
       this.buttonAnpassung = buttonAnpassung;
     }
 
@@ -1304,7 +1305,7 @@ public class WollMuxEventHandler
       FormModel fm;
       try
       {
-        fm = MultiDocumentFormModel.createMultiDocumentFormModel(docs, buttonAnpassung);
+        fm = MultiDocumentFormModel.createMultiDocumentFormModel(documentControllers, buttonAnpassung);
       }
       catch (InvalidFormDescriptorException e)
       {
@@ -1315,10 +1316,9 @@ public class WollMuxEventHandler
       }
 
       // FormModel in allen Dokumenten registrieren:
-      for (Iterator<TextDocumentModel> iter = docs.iterator(); iter.hasNext();)
+      for (TextDocumentController documentController : documentControllers)
       {
-        TextDocumentModel doc = iter.next();
-        DocumentManager.getDocumentManager().setFormModel(doc.doc, fm);
+        DocumentManager.getDocumentManager().setFormModel(documentController.getModel().doc, fm);
       }
 
       // FormGUI starten:
@@ -1328,7 +1328,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + docs + ")";
+      return this.getClass().getSimpleName() + "(" + documentControllers + ")";
     }
   }
 
@@ -1342,21 +1342,22 @@ public class WollMuxEventHandler
    * neue Dokumentkommandos eingefügt wurden, die nun bearbeitet werden sollen - z.B.
    * wenn ein Textbaustein eingefügt wurde.
    * 
-   * @param model
+   * @param documentController
    *          Das TextDocumentModel, das durch den WollMux verarbeitet werden soll.
    */
-  public static void handleReprocessTextDocument(TextDocumentModel model)
+  public static void handleReprocessTextDocument(TextDocumentController documentController)
   {
-    handle(new OnReprocessTextDocument(model));
+    handle(new OnReprocessTextDocument(documentController));
   }
 
   private static class OnReprocessTextDocument extends BasicEvent
   {
     TextDocumentModel model;
+    private TextDocumentController documentController;
 
-    public OnReprocessTextDocument(TextDocumentModel model)
+    public OnReprocessTextDocument(TextDocumentController documentController)
     {
-      this.model = model;
+      this.documentController = documentController;
     }
 
     @Override
@@ -1368,7 +1369,7 @@ public class WollMuxEventHandler
       // DocumentCommandInterpreter bearbeiten:
       model.getDocumentCommands().update();
       DocumentCommandInterpreter dci =
-        new DocumentCommandInterpreter(model, WollMuxFiles.isDebugMode());
+        new DocumentCommandInterpreter(documentController, WollMuxFiles.isDebugMode());
       try
       {
         dci.executeTemplateCommands();
@@ -1529,7 +1530,7 @@ public class WollMuxEventHandler
       {}
 
       Iterator<ConfigThingy> iter = fragConf.iterator();
-      Vector<TextDocumentModel> docs = new Vector<TextDocumentModel>();
+      List<TextDocumentController> docs = new ArrayList<TextDocumentController>();
       while (iter.hasNext())
       {
         ConfigThingy fragListConf = iter.next();
@@ -1541,8 +1542,8 @@ public class WollMuxEventHandler
         }
         if (!fragIds.isEmpty())
         {
-          TextDocumentModel model = openTextDocument(fragIds, asTemplate, merged);
-          if (model != null) docs.add(model);
+          TextDocumentController documentController = openTextDocument(fragIds, asTemplate, merged);
+          if (documentController.getModel() != null) docs.add(documentController);
         }
       }
 
@@ -1560,7 +1561,7 @@ public class WollMuxEventHandler
      * @return
      * @throws WollMuxFehlerException
      */
-    private TextDocumentModel openTextDocument(List<String> fragIDs,
+    private TextDocumentController openTextDocument(List<String> fragIDs,
         boolean asTemplate, boolean asPartOfMultiform) throws WollMuxFehlerException
     {
       // das erste Argument ist das unmittelbar zu landende Textfragment und
@@ -1655,17 +1656,17 @@ public class WollMuxEventHandler
       }
 
       // open document as Template (or as document):
-      TextDocumentModel model = null;
+      TextDocumentController documentController = null;
       try
       {
         XComponent doc = UNO.loadComponentFromURL(loadUrlStr, asTemplate, true);
 
         if (UNO.XTextDocument(doc) != null)
         {
-          model = DocumentManager.getTextDocumentModel(UNO.XTextDocument(doc));
-          model.setFragUrls(fragUrls);
+          documentController = DocumentManager.getTextDocumentController(UNO.XTextDocument(doc));
+          documentController.getModel().setFragUrls(fragUrls);
           if (asPartOfMultiform)
-            model.setPartOfMultiformDocument(asPartOfMultiform);
+            documentController.getModel().setPartOfMultiformDocument(asPartOfMultiform);
         }
       }
       catch (java.lang.Exception x)
@@ -1674,7 +1675,7 @@ public class WollMuxEventHandler
         throw new WollMuxFehlerException(L.m(
           "Die Vorlage mit der URL '%1' kann nicht geöffnet werden.", loadUrlStr), x);
       }
-      return model;
+      return documentController;
     }
 
     @Override
@@ -1828,10 +1829,10 @@ public class WollMuxEventHandler
    *          Die Funktionsbibliothek, die zur Gewinnung der Trafo-Funktion verwendet
    *          werden soll.
    */
-  public static void handleFormValueChanged(TextDocumentModel model, String fieldId,
+  public static void handleFormValueChanged(TextDocumentController documentController, String fieldId,
       String newValue)
   {
-    handle(new OnFormValueChanged(model, fieldId, newValue));
+    handle(new OnFormValueChanged(documentController, fieldId, newValue));
   }
 
   private static class OnFormValueChanged extends BasicEvent
@@ -1840,21 +1841,20 @@ public class WollMuxEventHandler
 
     private String newValue;
 
-    private TextDocumentModel model;
+    private TextDocumentController documentController;
 
-    public OnFormValueChanged(TextDocumentModel model, String fieldId,
+    public OnFormValueChanged(TextDocumentController documentController, String fieldId,
         String newValue)
     {
       this.fieldId = fieldId;
       this.newValue = newValue;
-      this.model = model;
+      this.documentController = documentController;
     }
 
     @Override
     protected void doit()
     {
-      model.setFormFieldValue(fieldId, newValue);
-      model.updateFormFields(fieldId);
+      documentController.addFormFieldValue(fieldId, newValue);
     }
 
     @Override
@@ -1878,7 +1878,7 @@ public class WollMuxEventHandler
    * ausgeblendet werden sollen. Auch das PrintModel verwendet dieses Event, wenn
    * XPrintModel.setGroupVisible() aufgerufen wurde.
    * 
-   * @param model
+   * @param documentController
    *          Das TextDocumentModel, welches die Sichtbarkeitselemente enthält.
    * @param groupId
    *          Die GROUP (ID) der ein/auszublendenden Gruppe.
@@ -1890,26 +1890,26 @@ public class WollMuxEventHandler
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public static void handleSetVisibleState(TextDocumentModel model, String groupId,
+  public static void handleSetVisibleState(TextDocumentController documentController, String groupId,
       boolean visible, ActionListener listener)
   {
-    handle(new OnSetVisibleState(model, groupId, visible, listener));
+    handle(new OnSetVisibleState(documentController, groupId, visible, listener));
   }
 
   private static class OnSetVisibleState extends BasicEvent
   {
-    private TextDocumentModel model;
-
     private String groupId;
 
     private boolean visible;
 
     private ActionListener listener;
 
-    public OnSetVisibleState(TextDocumentModel model, String groupId,
+    private TextDocumentController documentController;
+
+    public OnSetVisibleState(TextDocumentController documentController, String groupId,
         boolean visible, ActionListener listener)
     {
-      this.model = model;
+      this.documentController = documentController;
       this.groupId = groupId;
       this.visible = visible;
       this.listener = listener;
@@ -1918,7 +1918,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      model.setVisibleState(groupId, visible);
+      documentController.setVisibleState(groupId, visible);
       if (listener != null) listener.actionPerformed(null);
     }
 
@@ -1949,33 +1949,32 @@ public class WollMuxEventHandler
    *          dem Vektor genommen, das keine Trafo enthält. Ansonsten wird das erste
    *          Formularfeld im Vektor verwendet.
    */
-  public static void handleFocusFormField(TextDocumentModel model, String fieldId)
+  public static void handleFocusFormField(TextDocumentController documentController, String fieldId)
   {
-    handle(new OnFocusFormField(model, fieldId));
+    handle(new OnFocusFormField(documentController, fieldId));
   }
 
   private static class OnFocusFormField extends BasicEvent
   {
-    private TextDocumentModel model;
-
     private String fieldId;
+    private TextDocumentController documentController;
 
-    public OnFocusFormField(TextDocumentModel model, String fieldId)
+    public OnFocusFormField(TextDocumentController documentController, String fieldId)
     {
-      this.model = model;
+      this.documentController = documentController;
       this.fieldId = fieldId;
     }
 
     @Override
     protected void doit()
     {
-      model.focusFormField(fieldId);
+      documentController.getModel().focusFormField(fieldId);
     }
 
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + model.doc + ", '" + fieldId
+      return this.getClass().getSimpleName() + "(#" + documentController.getModel().doc + ", '" + fieldId
         + "')";
     }
   }
@@ -2006,10 +2005,10 @@ public class WollMuxEventHandler
    *          Titelzeile des Rahmens nicht beachtet und muss vorher entsprechend
    *          eingerechnet werden.
    */
-  public static void handleSetWindowPosSize(TextDocumentModel model, int docX,
+  public static void handleSetWindowPosSize(TextDocumentController documentController, int docX,
       int docY, int docWidth, int docHeight)
   {
-    handle(new OnSetWindowPosSize(model, docX, docY, docWidth, docHeight));
+    handle(new OnSetWindowPosSize(documentController, docX, docY, docWidth, docHeight));
   }
 
   /**
@@ -2021,14 +2020,14 @@ public class WollMuxEventHandler
    */
   private static class OnSetWindowPosSize extends BasicEvent
   {
-    private TextDocumentModel model;
-
     private int docX, docY, docWidth, docHeight;
 
-    public OnSetWindowPosSize(TextDocumentModel model, int docX, int docY,
+    private TextDocumentController documentController;
+
+    public OnSetWindowPosSize(TextDocumentController documentController, int docX, int docY,
         int docWidth, int docHeight)
     {
-      this.model = model;
+      this.documentController = documentController;
       this.docX = docX;
       this.docY = docY;
       this.docWidth = docWidth;
@@ -2038,7 +2037,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      model.setWindowPosSize(docX, docY, docWidth, docHeight);
+      documentController.setWindowPosSize(docX, docY, docWidth, docHeight);
     }
 
     @Override
@@ -2056,16 +2055,16 @@ public class WollMuxEventHandler
    * unsichtbar schaltet. Dabei wird direkt die entsprechende Funktion der UNO-API
    * verwendet.
    * 
-   * @param model
+   * @param documentController
    *          Das XModel interface des dokuments, welches sichtbar oder unsichtbar
    *          geschaltet werden soll.
    * @param visible
    *          true, wenn das Dokument sichtbar geschaltet werden soll und false, wenn
    *          das Dokument unsichtbar geschaltet werden soll.
    */
-  public static void handleSetWindowVisible(TextDocumentModel model, boolean visible)
+  public static void handleSetWindowVisible(TextDocumentController documentController, boolean visible)
   {
-    handle(new OnSetWindowVisible(model, visible));
+    handle(new OnSetWindowVisible(documentController, visible));
   }
 
   /**
@@ -2077,20 +2076,20 @@ public class WollMuxEventHandler
    */
   private static class OnSetWindowVisible extends BasicEvent
   {
-    private TextDocumentModel model;
-
     boolean visible;
 
-    public OnSetWindowVisible(TextDocumentModel model, boolean visible)
+    private TextDocumentController documentController;
+
+    public OnSetWindowVisible(TextDocumentController documentController, boolean visible)
     {
-      this.model = model;
+      this.documentController = documentController;
       this.visible = visible;
     }
 
     @Override
     protected void doit()
     {
-      model.setWindowVisible(visible);
+      documentController.setWindowVisible(visible);
     }
 
     @Override
@@ -2105,12 +2104,12 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein Event, das das übergebene Dokument schließt.
    * 
-   * @param model
+   * @param documentController
    *          Das zu schließende TextDocumentModel.
    */
-  public static void handleCloseTextDocument(TextDocumentModel model)
+  public static void handleCloseTextDocument(TextDocumentController documentController)
   {
-    handle(new OnCloseTextDocument(model));
+    handle(new OnCloseTextDocument(documentController));
   }
 
   /**
@@ -2122,23 +2121,23 @@ public class WollMuxEventHandler
    */
   private static class OnCloseTextDocument extends BasicEvent
   {
-    private TextDocumentModel model;
+    private TextDocumentController documentController;
 
-    public OnCloseTextDocument(TextDocumentModel model)
+    public OnCloseTextDocument(TextDocumentController documentController)
     {
-      this.model = model;
+      this.documentController = documentController;
     }
 
     @Override
     protected void doit()
     {
-      model.close();
+      documentController.getModel().close();
     }
 
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + model.hashCode() + ")";
+      return this.getClass().getSimpleName() + "(#" + documentController.getModel().hashCode() + ")";
     }
   }
 
@@ -2150,15 +2149,15 @@ public class WollMuxEventHandler
    * schließt, wobei der ExterneAnwendungen-Abschnitt zu ext die näheren Details wie
    * den FILTER regelt.
    * 
-   * @param model
+   * @param documentController
    *          Das an die externe Anwendung weiterzureichende TextDocumentModel.
    * @param ext
    *          identifiziert den entsprechenden Eintrag im Abschnitt
    *          ExterneAnwendungen.
    */
-  public static void handleCloseAndOpenExt(TextDocumentModel model, String ext)
+  public static void handleCloseAndOpenExt(TextDocumentController documentController, String ext)
   {
-    handle(new OnCloseAndOpenExt(model, ext));
+    handle(new OnCloseAndOpenExt(documentController, ext));
   }
 
   /**
@@ -2169,13 +2168,12 @@ public class WollMuxEventHandler
    */
   private static class OnCloseAndOpenExt extends BasicEvent
   {
-    private TextDocumentModel model;
-
     private String ext;
+    private TextDocumentController documentController;
 
-    public OnCloseAndOpenExt(TextDocumentModel model, String ext)
+    public OnCloseAndOpenExt(TextDocumentController documentController, String ext)
     {
-      this.model = model;
+      this.documentController = documentController;
       this.ext = ext;
     }
 
@@ -2185,7 +2183,7 @@ public class WollMuxEventHandler
       try
       {
         OpenExt openExt = new OpenExt(ext, WollMuxFiles.getWollmuxConf());
-        openExt.setSource(UNO.XStorable(model.doc));
+        openExt.setSource(UNO.XStorable(documentController.getModel().doc));
         openExt.storeIfNecessary();
         openExt.launch(new OpenExt.ExceptionHandler()
         {
@@ -2202,14 +2200,14 @@ public class WollMuxEventHandler
         return;
       }
 
-      model.setDocumentModified(false);
-      model.close();
+      documentController.getModel().setDocumentModified(false);
+      documentController.getModel().close();
     }
 
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + model.hashCode() + ", " + ext
+      return this.getClass().getSimpleName() + "(#" + documentController.getModel().hashCode() + ", " + ext
         + ")";
     }
   }
@@ -2221,15 +2219,15 @@ public class WollMuxEventHandler
    * und eine externe Anwendung mit dieser aufruft, wobei der
    * ExterneAnwendungen-Abschnitt zu ext die näheren Details wie den FILTER regelt.
    * 
-   * @param model
+   * @param documentController
    *          Das an die externe Anwendung weiterzureichende TextDocumentModel.
    * @param ext
    *          identifiziert den entsprechenden Eintrag im Abschnitt
    *          ExterneAnwendungen.
    */
-  public static void handleSaveTempAndOpenExt(TextDocumentModel model, String ext)
+  public static void handleSaveTempAndOpenExt(TextDocumentController documentController, String ext)
   {
-    handle(new OnSaveTempAndOpenExt(model, ext));
+    handle(new OnSaveTempAndOpenExt(documentController, ext));
   }
 
   /**
@@ -2240,13 +2238,13 @@ public class WollMuxEventHandler
    */
   private static class OnSaveTempAndOpenExt extends BasicEvent
   {
-    private TextDocumentModel model;
-
     private String ext;
 
-    public OnSaveTempAndOpenExt(TextDocumentModel model, String ext)
+    private TextDocumentController documentController;
+
+    public OnSaveTempAndOpenExt(TextDocumentController documentController, String ext)
     {
-      this.model = model;
+      this.documentController = documentController;
       this.ext = ext;
     }
 
@@ -2256,7 +2254,7 @@ public class WollMuxEventHandler
       try
       {
         OpenExt openExt = new OpenExt(ext, WollMuxFiles.getWollmuxConf());
-        openExt.setSource(UNO.XStorable(model.doc));
+        openExt.setSource(UNO.XStorable(documentController.getModel().doc));
         openExt.storeIfNecessary();
         openExt.launch(new OpenExt.ExceptionHandler()
         {
@@ -2277,7 +2275,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + model.hashCode() + ", " + ext
+      return this.getClass().getSimpleName() + "(#" + documentController.getModel().hashCode() + ", " + ext
         + ")";
     }
   }
@@ -3026,18 +3024,18 @@ public class WollMuxEventHandler
    * Das Event wird ausgelöst, wenn der registrierte WollMuxDispatchInterceptor eines
    * Dokuments eine entsprechende Nachricht bekommt.
    */
-  public static void handleExecutePrintFunctions(TextDocumentModel model)
+  public static void handleExecutePrintFunctions(TextDocumentController documentController)
   {
-    handle(new OnExecutePrintFunction(model));
+    handle(new OnExecutePrintFunction(documentController));
   }
 
   private static class OnExecutePrintFunction extends BasicEvent
   {
-    private TextDocumentModel model;
+    private TextDocumentController documentController;
 
-    public OnExecutePrintFunction(TextDocumentModel model)
+    public OnExecutePrintFunction(TextDocumentController documentController)
     {
-      this.model = model;
+      this.documentController = documentController;
     }
 
     @Override
@@ -3045,11 +3043,11 @@ public class WollMuxEventHandler
     {
       // Prüfen, ob alle gesetzten Druckfunktionen im aktuellen Kontext noch
       // Sinn machen:
-      checkPrintPreconditions(model);
+      checkPrintPreconditions(documentController);
       stabilize();
 
       // Die im Dokument gesetzten Druckfunktionen ausführen:
-      final XPrintModel pmod = PrintModels.createPrintModel(model, true);
+      final XPrintModel pmod = PrintModels.createPrintModel(documentController, true);
 
       // Drucken im Hintergrund, damit der WollMuxEventHandler weiterläuft.
       new Thread()
@@ -3073,9 +3071,9 @@ public class WollMuxEventHandler
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
-    protected static void checkPrintPreconditions(TextDocumentModel model)
+    protected static void checkPrintPreconditions(TextDocumentController documentController)
     {
-      Set<String> printFunctions = model.getPrintFunctions();
+      Set<String> printFunctions = documentController.getModel().getPrintFunctions();
 
       // Ziffernanpassung der Sachleitenden Verfügungen durlaufen lassen, um zu
       // erkennen, ob Verfügungspunkte manuell aus dem Dokument gelöscht
@@ -3083,7 +3081,7 @@ public class WollMuxEventHandler
       // Ziffern zu drücken.
       if (printFunctions.contains(SachleitendeVerfuegung.PRINT_FUNCTION_NAME))
       {
-        SachleitendeVerfuegung.ziffernAnpassen(model);
+        SachleitendeVerfuegung.ziffernAnpassen(documentController);
       }
 
       // ...Platz für weitere Prüfungen.....
@@ -3092,7 +3090,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ")";
+      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
     }
   }
 
@@ -3150,11 +3148,11 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      TextDocumentModel model =
-        DocumentManager.getTextDocumentModel(doc);
+      TextDocumentController documentController =
+        DocumentManager.getTextDocumentController(doc);
       try
       {
-        model.setPrintBlocksProps(blockName, visible, showHighlightColor);
+        documentController.setPrintBlocksProps(blockName, visible, showHighlightColor);
       }
       catch (java.lang.Exception e)
       {
@@ -3218,12 +3216,12 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      TextDocumentModel model =
-        DocumentManager.getTextDocumentModel(doc);
+      TextDocumentController documentController =
+        DocumentManager.getTextDocumentController(doc);
       if (remove)
-        model.removePrintFunction(functionName);
+        documentController.removePrintFunction(functionName);
       else
-        model.addPrintFunction(functionName);
+        documentController.addPrintFunction(functionName);
     }
 
     @Override
@@ -3245,28 +3243,28 @@ public class WollMuxEventHandler
    * auf den Knopf der OOo-Symbolleiste ein "wollmux:ZifferEinfuegen" dispatch
    * erfolgte.
    */
-  public static void handleButtonZifferEinfuegenPressed(TextDocumentModel model)
+  public static void handleButtonZifferEinfuegenPressed(TextDocumentController documentController)
   {
-    handle(new OnZifferEinfuegen(model));
+    handle(new OnZifferEinfuegen(documentController));
   }
 
   private static class OnZifferEinfuegen extends BasicEvent
   {
-    private TextDocumentModel model;
+    private TextDocumentController documentController;
 
-    public OnZifferEinfuegen(TextDocumentModel model)
+    public OnZifferEinfuegen(TextDocumentController documentController)
     {
-      this.model = model;
+      this.documentController = documentController;
     }
 
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      XTextCursor viewCursor = model.getViewCursor();
+      XTextCursor viewCursor = documentController.getModel().getViewCursor();
       if (viewCursor != null)
       {
         XTextRange vc =
-          SachleitendeVerfuegung.insertVerfuegungspunkt(model, viewCursor);
+          SachleitendeVerfuegung.insertVerfuegungspunkt(documentController, viewCursor);
         if (vc != null) viewCursor.gotoRange(vc, false);
       }
 
@@ -3276,7 +3274,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ")";
+      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
     }
   }
 
@@ -3290,27 +3288,27 @@ public class WollMuxEventHandler
    * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines Drucks
    * auf den Knopf der OOo-Symbolleiste ein "wollmux:Abdruck" dispatch erfolgte.
    */
-  public static void handleButtonAbdruckPressed(TextDocumentModel model)
+  public static void handleButtonAbdruckPressed(TextDocumentController documentController)
   {
-    handle(new OnAbdruck(model));
+    handle(new OnAbdruck(documentController));
   }
 
   private static class OnAbdruck extends BasicEvent
   {
-    private TextDocumentModel model;
+    private TextDocumentController documentController;
 
-    public OnAbdruck(TextDocumentModel model)
+    public OnAbdruck(TextDocumentController documentController)
     {
-      this.model = model;
+      this.documentController = documentController;
     }
 
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      XTextCursor viewCursor = model.getViewCursor();
+      XTextCursor viewCursor = documentController.getModel().getViewCursor();
       if (viewCursor != null)
       {
-        XTextRange vc = SachleitendeVerfuegung.insertAbdruck(model, viewCursor);
+        XTextRange vc = SachleitendeVerfuegung.insertAbdruck(documentController, viewCursor);
         if (vc != null) viewCursor.gotoRange(vc, false);
       }
 
@@ -3320,7 +3318,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ")";
+      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
     }
   }
 
@@ -3335,28 +3333,28 @@ public class WollMuxEventHandler
    * auf den Knopf der OOo-Symbolleiste ein "wollmux:Zuleitungszeile" dispatch
    * erfolgte.
    */
-  public static void handleButtonZuleitungszeilePressed(TextDocumentModel model)
+  public static void handleButtonZuleitungszeilePressed(TextDocumentController documentController)
   {
-    handle(new OnButtonZuleitungszeilePressed(model));
+    handle(new OnButtonZuleitungszeilePressed(documentController));
   }
 
   private static class OnButtonZuleitungszeilePressed extends BasicEvent
   {
-    private TextDocumentModel model;
+    private TextDocumentController documentController;
 
-    public OnButtonZuleitungszeilePressed(TextDocumentModel model)
+    public OnButtonZuleitungszeilePressed(TextDocumentController documentController)
     {
-      this.model = model;
+      this.documentController = documentController;
     }
 
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      XTextCursor viewCursor = model.getViewCursor();
+      XTextCursor viewCursor = documentController.getModel().getViewCursor();
       if (viewCursor != null)
       {
         XTextRange vc =
-          SachleitendeVerfuegung.insertZuleitungszeile(model, viewCursor);
+          SachleitendeVerfuegung.insertZuleitungszeile(documentController, viewCursor);
         if (vc != null) viewCursor.gotoRange(vc, false);
       }
 
@@ -3366,7 +3364,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ")";
+      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
     }
   }
 
@@ -3382,41 +3380,40 @@ public class WollMuxEventHandler
    * auf den Knopf der OOo-Symbolleiste ein "wollmux:markBlock#<blockname>" dispatch
    * erfolgte.
    * 
-   * @param model
+   * @param documentController
    *          Das Textdokument, in dem der Block eingefügt werden soll.
    * @param blockname
    *          Derzeit werden folgende Blocknamen akzeptiert "draftOnly",
    *          "notInOriginal", "originalOnly", "copyOnly" und "allVersions". Alle
    *          anderen Blocknamen werden ignoriert und keine Aktion ausgeführt.
    */
-  public static void handleMarkBlock(TextDocumentModel model, String blockname)
+  public static void handleMarkBlock(TextDocumentController documentController, String blockname)
   {
-    handle(new OnMarkBlock(model, blockname));
+    handle(new OnMarkBlock(documentController, blockname));
   }
 
   private static class OnMarkBlock extends BasicEvent
   {
-    private TextDocumentModel model;
-
     private String blockname;
+    private TextDocumentController documentController;
 
-    public OnMarkBlock(TextDocumentModel model, String blockname)
+    public OnMarkBlock(TextDocumentController documentController, String blockname)
     {
-      this.model = model;
+      this.documentController = documentController;
       this.blockname = blockname;
     }
 
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      if (UNO.XBookmarksSupplier(model.doc) == null || blockname == null) return;
+      if (UNO.XBookmarksSupplier(documentController.getModel().doc) == null || blockname == null) return;
 
       ConfigThingy slvConf =
           WollMuxFiles.getWollmuxConf().query(
           "SachleitendeVerfuegungen");
       Integer highlightColor = null;
 
-      XTextCursor range = model.getViewCursor();
+      XTextCursor range = documentController.getModel().getViewCursor();
 
       if (range == null) return;
 
@@ -3482,7 +3479,7 @@ public class WollMuxEventHandler
           try
           {
             Bookmark b =
-              new Bookmark(bookmarkName, UNO.XBookmarksSupplier(model.doc));
+              new Bookmark(bookmarkName, UNO.XBookmarksSupplier(documentController.getModel().doc));
             if (bookmarkName.contains("HIGHLIGHT_COLOR"))
               UNO.setPropertyToDefault(b.getTextCursor(), "CharBackColor");
             b.remove();
@@ -3499,13 +3496,13 @@ public class WollMuxEventHandler
       else
       {
         // neuen Block anlegen
-        model.addNewDocumentCommand(range, bookmarkName);
+        documentController.getModel().addNewDocumentCommand(range, bookmarkName);
         if (highlightColor != null)
         {
           UNO.setProperty(range, "CharBackColor", highlightColor);
           // ViewCursor kollabieren, da die Markierung die Farben verfälscht
           // darstellt.
-          XTextCursor vc = model.getViewCursor();
+          XTextCursor vc = documentController.getModel().getViewCursor();
           if (vc != null) vc.collapseToEnd();
         }
         ModalDialogs.showInfoModal(L.m("Block wurde markiert"),
@@ -3513,9 +3510,9 @@ public class WollMuxEventHandler
       }
 
       // PrintBlöcke neu einlesen:
-      model.getDocumentCommands().update();
+      documentController.getModel().getDocumentCommands().update();
       DocumentCommandInterpreter dci =
-        new DocumentCommandInterpreter(model, WollMuxFiles.isDebugMode());
+        new DocumentCommandInterpreter(documentController, WollMuxFiles.isDebugMode());
       dci.scanGlobalDocumentCommands();
       dci.scanInsertFormValueCommands();
 
@@ -3556,7 +3553,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + model.hashCode() + ", '"
+      return this.getClass().getSimpleName() + "(#" + documentController.getModel().hashCode() + ", '"
         + blockname + "')";
     }
   }
@@ -3699,8 +3696,8 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      TextDocumentModel model =
-        DocumentManager.getTextDocumentModel(doc);
+      TextDocumentController documentController =
+        DocumentManager.getTextDocumentController(doc);
 
       FormModel formModel = DocumentManager.getDocumentManager().getFormModel(doc);
       if (formModel != null)
@@ -3719,8 +3716,7 @@ public class WollMuxEventHandler
       else
       {
         // Werte selber setzen:
-        model.setFormFieldValue(id, value);
-        model.updateFormFields(id);
+        documentController.addFormFieldValue(id, value);
         if (listener != null) listener.actionPerformed(null);
       }
     }
@@ -3743,34 +3739,33 @@ public class WollMuxEventHandler
    * Das Event wird aus der Implementierung von XPrintModel (siehe TextDocumentModel)
    * geworfen, wenn dort die Methode collectNonWollMuxFormFields aufgerufen wird.
    * 
-   * @param model
+   * @param documentController
    * @param unlockActionListener
    *          Der unlockActionListener wird immer informiert, wenn alle notwendigen
    *          Anpassungen durchgeführt wurden.
    */
   public static void handleCollectNonWollMuxFormFieldsViaPrintModel(
-      TextDocumentModel model, ActionListener listener)
+      TextDocumentController documentController, ActionListener listener)
   {
-    handle(new OnCollectNonWollMuxFormFieldsViaPrintModel(model, listener));
+    handle(new OnCollectNonWollMuxFormFieldsViaPrintModel(documentController, listener));
   }
 
   private static class OnCollectNonWollMuxFormFieldsViaPrintModel extends BasicEvent
   {
-    private TextDocumentModel model;
-
     private ActionListener listener;
+    private TextDocumentController documentController;
 
-    public OnCollectNonWollMuxFormFieldsViaPrintModel(TextDocumentModel model,
+    public OnCollectNonWollMuxFormFieldsViaPrintModel(TextDocumentController documentController,
         ActionListener listener)
     {
-      this.model = model;
+      this.documentController = documentController;
       this.listener = listener;
     }
 
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      model.collectNonWollMuxFormFields();
+      documentController.collectNonWollMuxFormFields();
 
       stabilize();
       if (listener != null) listener.actionPerformed(null);
@@ -3779,7 +3774,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ")";
+      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
     }
   }
 
@@ -3874,10 +3869,10 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      TextDocumentModel model =
-        DocumentManager.getTextDocumentModel(doc);
+      TextDocumentController documentController =
+        DocumentManager.getTextDocumentController(doc);
 
-      for (DocumentCommand cmd : model.getDocumentCommands())
+      for (DocumentCommand cmd :documentController.getModel().getDocumentCommands())
         // stellt sicher, dass listener am Schluss informiert wird
         try
         {
@@ -3887,7 +3882,7 @@ public class WollMuxEventHandler
             String value = mapDbSpalteToValue.get(insVal.getDBSpalte());
             if (value != null)
             {
-              value = model.getTransformedValue(insVal.getTrafoName(), value);
+              value = documentController.getTransformedValue(insVal.getTrafoName(), value);
               if ("".equals(value))
               {
                 cmd.setTextRangeString("");
@@ -3927,21 +3922,20 @@ public class WollMuxEventHandler
    * Tastenkuerzels oder Druck auf den Knopf der OOo-Symbolleiste ein
    * "wollmux:TextbausteinEinfuegen" dispatch erfolgte.
    */
-  public static void handleTextbausteinEinfuegen(TextDocumentModel model,
+  public static void handleTextbausteinEinfuegen(TextDocumentController documentController,
       boolean reprocess)
   {
-    handle(new OnTextbausteinEinfuegen(model, reprocess));
+    handle(new OnTextbausteinEinfuegen(documentController, reprocess));
   }
 
   private static class OnTextbausteinEinfuegen extends BasicEvent
   {
-    private TextDocumentModel model;
-
     private boolean reprocess;
+    private TextDocumentController documentController;
 
-    public OnTextbausteinEinfuegen(TextDocumentModel model, boolean reprocess)
+    public OnTextbausteinEinfuegen(TextDocumentController documentController, boolean reprocess)
     {
-      this.model = model;
+      this.documentController = documentController;
       this.reprocess = reprocess;
 
     }
@@ -3949,11 +3943,11 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      XTextCursor viewCursor = model.getViewCursor();
+      XTextCursor viewCursor = documentController.getModel().getViewCursor();
       try
       {
-        TextModule.createInsertFragFromIdentifier(model.doc, viewCursor, reprocess);
-        if (reprocess) handleReprocessTextDocument(model);
+        TextModule.createInsertFragFromIdentifier(documentController.getModel().doc, viewCursor, reprocess);
+        if (reprocess) handleReprocessTextDocument(documentController);
         if (!reprocess)
           ModalDialogs.showInfoModal(L.m("WollMux"),
             L.m("Der Textbausteinverweis wurde eingefügt."));
@@ -3967,7 +3961,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ", " + reprocess + ")";
+      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ", " + reprocess + ")";
     }
   }
 
@@ -3980,28 +3974,28 @@ public class WollMuxEventHandler
    * auf den Knopf der OOo-Symbolleiste ein "wollmux:PlatzhalterAnspringen" dispatch
    * erfolgte.
    */
-  public static void handleJumpToPlaceholder(TextDocumentModel model)
+  public static void handleJumpToPlaceholder(TextDocumentController documentController)
   {
-    handle(new OnJumpToPlaceholder(model));
+    handle(new OnJumpToPlaceholder(documentController));
   }
 
   private static class OnJumpToPlaceholder extends BasicEvent
   {
-    private TextDocumentModel model;
+    private TextDocumentController documentController;
 
-    public OnJumpToPlaceholder(TextDocumentModel model)
+    public OnJumpToPlaceholder(TextDocumentController documentController)
     {
-      this.model = model;
+      this.documentController = documentController;
     }
 
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      XTextCursor viewCursor = model.getViewCursor();
+      XTextCursor viewCursor = documentController.getModel().getViewCursor();
 
       try
       {
-        TextModule.jumpPlaceholders(model.doc, viewCursor);
+        TextModule.jumpPlaceholders(documentController.getModel().doc, viewCursor);
       }
       catch (java.lang.Exception e)
       {
@@ -4014,7 +4008,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ")";
+      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
     }
   }
 
@@ -4048,13 +4042,13 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
 
-      TextDocumentModel model =
-        DocumentManager.getTextDocumentModel(doc);
+      TextDocumentController documentController =
+        DocumentManager.getTextDocumentController(doc);
 
-      XTextCursor viewCursor = model.getViewCursor();
+      XTextCursor viewCursor = documentController.getModel().getViewCursor();
       if (viewCursor == null) return;
 
-      DocumentCommand cmd = model.getFirstJumpMark();
+      DocumentCommand cmd = documentController.getModel().getFirstJumpMark();
 
       if (cmd != null)
       {
@@ -4068,11 +4062,11 @@ public class WollMuxEventHandler
           Logger.error(e);
         }
 
-        boolean modified = model.getDocumentModified();
+        boolean modified = documentController.getModel().isDocumentModified();
         cmd.markDone(true);
-        model.setDocumentModified(modified);
+        documentController.getModel().setDocumentModified(modified);
 
-        model.getDocumentCommands().update();
+        documentController.getModel().getDocumentCommands().update();
 
       }
       else
@@ -4105,49 +4099,49 @@ public class WollMuxEventHandler
    * "Extras->Seriendruck (WollMux)" die dispatch-url wollmux:SeriendruckNeu
    * abgesetzt wurde.
    */
-  public static void handleSeriendruck(TextDocumentModel model,
+  public static void handleSeriendruck(TextDocumentController documentController,
       boolean useDocPrintFunctions)
   {
-    handle(new OnSeriendruck(model, useDocPrintFunctions));
+    handle(new OnSeriendruck(documentController, useDocPrintFunctions));
   }
 
   private static class OnSeriendruck extends BasicEvent
   {
-    private TextDocumentModel model;
+    private TextDocumentController documentController;
 
-    public OnSeriendruck(TextDocumentModel model, boolean useDocumentPrintFunctions)
+    public OnSeriendruck(TextDocumentController documentController, boolean useDocumentPrintFunctions)
     {
-      this.model = model;
+      this.documentController = documentController;
     }
 
     @Override
     protected void doit() throws WollMuxFehlerException
     {
       // Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
-      MailMergeNew mmn = DocumentManager.getDocumentManager().getCurrentMailMergeNew(model.doc);
+      MailMergeNew mmn = DocumentManager.getDocumentManager().getCurrentMailMergeNew(documentController.getModel().doc);
       if (mmn != null)
       {
         return;
       }
       else
       {
-        mmn = new MailMergeNew(model, new ActionListener()
+        mmn = new MailMergeNew(documentController, new ActionListener()
         {
           @Override
           public void actionPerformed(ActionEvent actionEvent)
           {
             if (actionEvent.getSource() instanceof MailMergeNew)
-              WollMuxEventHandler.handleMailMergeNewReturned(model);
+              WollMuxEventHandler.handleMailMergeNewReturned(documentController);
           }
         });
-        DocumentManager.getDocumentManager().setCurrentMailMergeNew(model.doc, mmn);
+        DocumentManager.getDocumentManager().setCurrentMailMergeNew(documentController.getModel().doc, mmn);
       }
     }
 
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ")";
+      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
     }
   }
 
@@ -4162,26 +4156,26 @@ public class WollMuxEventHandler
    * "Datei->Drucken" oder über die Symbolleiste die dispatch-url .uno:Print bzw.
    * .uno:PrintDefault abgesetzt wurde.
    */
-  public static void handlePrint(TextDocumentModel model, XDispatch origDisp,
+  public static void handlePrint(TextDocumentController documentController, XDispatch origDisp,
       com.sun.star.util.URL origUrl, PropertyValue[] origArgs)
   {
-    handle(new OnPrint(model, origDisp, origUrl, origArgs));
+    handle(new OnPrint(documentController, origDisp, origUrl, origArgs));
   }
 
   private static class OnPrint extends BasicEvent
   {
-    private TextDocumentModel model;
-
     private XDispatch origDisp;
 
     private com.sun.star.util.URL origUrl;
 
     private PropertyValue[] origArgs;
 
-    public OnPrint(TextDocumentModel model, XDispatch origDisp,
+    private TextDocumentController documentController;
+
+    public OnPrint(TextDocumentController documentController, XDispatch origDisp,
         com.sun.star.util.URL origUrl, PropertyValue[] origArgs)
     {
-      this.model = model;
+      this.documentController = documentController;
       this.origDisp = origDisp;
       this.origUrl = origUrl;
       this.origArgs = origArgs;
@@ -4190,14 +4184,14 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      boolean hasPrintFunction = model.getPrintFunctions().size() > 0;
+      boolean hasPrintFunction = documentController.getModel().getPrintFunctions().size() > 0;
 
       if (Workarounds.applyWorkaroundForOOoIssue96281())
       {
         try
         {
           Object viewSettings =
-            UNO.XViewSettingsSupplier(model.doc.getCurrentController()).getViewSettings();
+            UNO.XViewSettingsSupplier(documentController.getModel().doc.getCurrentController()).getViewSettings();
           UNO.setProperty(viewSettings, "ZoomType", DocumentZoomType.BY_VALUE);
           UNO.setProperty(viewSettings, "ZoomValue", Short.valueOf((short) 100));
         }
@@ -4208,7 +4202,7 @@ public class WollMuxEventHandler
       if (hasPrintFunction)
       {
         // Druckfunktion aufrufen
-        handleExecutePrintFunctions(model);
+        handleExecutePrintFunctions(documentController);
       }
       else
       {
@@ -4220,7 +4214,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ")";
+      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
     }
   }
 
@@ -4235,26 +4229,26 @@ public class WollMuxEventHandler
    * "Datei->SaveAs" oder über die Symbolleiste die dispatch-url .uno:Save bzw.
    * .uno:SaveAs abgesetzt wurde.
    */
-  public static void handleSaveAs(TextDocumentModel model, XDispatch origDisp,
+  public static void handleSaveAs(TextDocumentController documentController, XDispatch origDisp,
       com.sun.star.util.URL origUrl, PropertyValue[] origArgs)
   {
-    handle(new OnSaveAs(model, origDisp, origUrl, origArgs));
+    handle(new OnSaveAs(documentController, origDisp, origUrl, origArgs));
   }
 
   private static class OnSaveAs extends BasicEvent
   {
-    private TextDocumentModel model;
-
     private XDispatch origDisp;
 
     private com.sun.star.util.URL origUrl;
 
     private PropertyValue[] origArgs;
 
-    public OnSaveAs(TextDocumentModel model, XDispatch origDisp,
+    private TextDocumentController documentController;
+
+    public OnSaveAs(TextDocumentController documentController, XDispatch origDisp,
         com.sun.star.util.URL origUrl, PropertyValue[] origArgs)
     {
-      this.model = model;
+      this.documentController = documentController;
       this.origDisp = origDisp;
       this.origUrl = origUrl;
       this.origArgs = origArgs;
@@ -4264,8 +4258,8 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       // FilenameGeneratorFunction auslesen und parsen
-      FunctionLibrary lib = model.getFunctionLibrary();
-      ConfigThingy funcConf = model.getFilenameGeneratorFunc();
+      FunctionLibrary lib = documentController.getFunctionLibrary();
+      ConfigThingy funcConf = documentController.getFilenameGeneratorFunc();
       Function func = null;
       if (funcConf != null) try
       {
@@ -4315,7 +4309,7 @@ public class WollMuxEventHandler
 
     private File getDefaultFile(Function func)
     {
-      Map<String, String> fields = model.getFormFieldValues();
+      Map<String, String> fields = documentController.getModel().getFormFieldValuesMap();
       Values.SimpleMap values = new Values.SimpleMap();
       for (String par : func.parameters())
       {
@@ -4382,12 +4376,12 @@ public class WollMuxEventHandler
 
     private void saveAs(File f)
     {
-      model.flushPersistentData();
+      documentController.flushPersistentData();
       try
       {
         String url = UNO.getParsedUNOUrl(f.toURI().toURL().toString()).Complete;
-        if (UNO.XStorable(model.doc) != null)
-          UNO.XStorable(model.doc).storeAsURL(url, new PropertyValue[] {});
+        if (UNO.XStorable(documentController.getModel().doc) != null)
+          UNO.XStorable(documentController.getModel().doc).storeAsURL(url, new PropertyValue[] {});
       }
       catch (MalformedURLException e)
       {
@@ -4415,7 +4409,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ")";
+      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
     }
   }
 
@@ -4431,18 +4425,18 @@ public class WollMuxEventHandler
    * Das Event wird vom FormModel erzeugt, wenn es vom FormController eine
    * entsprechende Nachricht erhält.
    */
-  public static void handleFormControllerInitCompleted(TextDocumentModel model)
+  public static void handleFormControllerInitCompleted(TextDocumentController documentController)
   {
-    handle(new OnFormControllerInitCompleted(model));
+    handle(new OnFormControllerInitCompleted(documentController));
   }
 
   private static class OnFormControllerInitCompleted extends BasicEvent
   {
-    private TextDocumentModel model;
+    private TextDocumentController documentController;
 
-    public OnFormControllerInitCompleted(TextDocumentModel model)
+    public OnFormControllerInitCompleted(TextDocumentController documentController)
     {
-      this.model = model;
+      this.documentController = documentController;
     }
 
     @Override
@@ -4451,7 +4445,7 @@ public class WollMuxEventHandler
       // Springt zum Dokumentenanfang
       try
       {
-        model.getViewCursor().gotoRange(model.doc.getText().getStart(), false);
+        documentController.getModel().getViewCursor().gotoRange(documentController.getModel().doc.getText().getStart(), false);
       }
       catch (java.lang.Exception e)
       {
@@ -4463,13 +4457,13 @@ public class WollMuxEventHandler
       // eine entsprechende Benutzerinteraktion stattgefunden hat. Der
       // Modified-Status des Dokuments wird daher zurückgesetzt, damit nur
       // wirkliche Interaktionen durch den Benutzer modified=true setzen.
-      model.setDocumentModified(false);
+      documentController.getModel().setDocumentModified(false);
     }
 
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ")";
+      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
     }
   }
 

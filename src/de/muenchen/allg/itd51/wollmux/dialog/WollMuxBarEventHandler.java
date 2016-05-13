@@ -58,7 +58,6 @@ import com.sun.star.util.XModifiable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
@@ -66,6 +65,7 @@ import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 
 /**
  * Dient der thread-safen Kommunikation der WollMuxBar mit dem WollMux im OOo.
@@ -572,7 +572,7 @@ public class WollMuxBarEventHandler
          * werden. Nach diesem Aufruf hier funktionieren die entsprechenden Aufrufe
          * der Workarounds Funktionen.
          */
-        Workarounds.getOOoVersion();
+        Utils.getOOoVersion();
       }
       catch (Exception e)
       {

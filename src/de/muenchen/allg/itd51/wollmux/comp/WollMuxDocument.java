@@ -47,6 +47,7 @@ class WollMuxDocument implements XWollMuxDocument
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
+  @Override
   public void addPrintFunction(String functionName)
   {
     WollMuxEventHandler.handleManagePrintFunction(doc, functionName, false);
@@ -66,6 +67,7 @@ class WollMuxDocument implements XWollMuxDocument
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
+  @Override
   public void removePrintFunction(String functionName)
   {
     WollMuxEventHandler.handleManagePrintFunction(doc, functionName, true);
@@ -87,6 +89,7 @@ class WollMuxDocument implements XWollMuxDocument
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
+  @Override
   public void setFormValue(String id, String value)
   {
     SyncActionListener s = new SyncActionListener();
@@ -111,6 +114,7 @@ class WollMuxDocument implements XWollMuxDocument
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
+  @Override
   public void setInsertValue(String dbSpalte, String value)
   {
     mapDbSpalteToValue.put(dbSpalte, value);
@@ -124,6 +128,7 @@ class WollMuxDocument implements XWollMuxDocument
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
+  @Override
   public void updateFormGUI()
   {
   // Wird implementiert, wenn setFormValue(...) so umgestellt werden soll, dass die
@@ -139,6 +144,7 @@ class WollMuxDocument implements XWollMuxDocument
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
+  @Override
   public void updateInsertFields()
   {
     HashMap<String, String> m = new HashMap<String, String>(mapDbSpalteToValue);
@@ -165,12 +171,13 @@ class WollMuxDocument implements XWollMuxDocument
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
+  @Override
   public PropertyValue[] getFormValues()
   {
     UnoProps p = new UnoProps();
     TextDocumentModel model =
-      DocumentManager.getTextDocumentModel(doc);
-    Map<String, String> id2value = model.getFormFieldValues();
+      DocumentManager.getTextDocumentController(doc).getModel();
+    Map<String, String> id2value = model.getFormFieldValuesMap();
     for (Entry<String, String> e : id2value.entrySet())
       if (e.getValue() != null) p.setPropertyValue(e.getKey(), e.getValue());
     return p.getProps();

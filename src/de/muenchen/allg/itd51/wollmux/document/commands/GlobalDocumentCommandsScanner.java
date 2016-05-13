@@ -1,9 +1,9 @@
 package de.muenchen.allg.itd51.wollmux.document.commands;
 
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.SetType;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 
 /**
  * Hierbei handelt es sich um einen minimalen Scanner, der zu aller erst abläuft
@@ -41,7 +41,7 @@ class GlobalDocumentCommandsScanner extends AbstractExecutor
   @Override
   public int executeCommand(SetPrintFunction cmd)
   {
-    this.documentCommandInterpreter.model.addPrintFunction(cmd.getFunctionName());
+    this.documentCommandInterpreter.getDocumentController().addPrintFunction(cmd.getFunctionName());
     cmd.markDone(true);
     return 0;
   }
@@ -49,11 +49,11 @@ class GlobalDocumentCommandsScanner extends AbstractExecutor
   @Override
   public int executeCommand(SetType cmd)
   {
-    this.documentCommandInterpreter.model.setType(cmd.getType());
+    this.documentCommandInterpreter.getModel().setType(cmd.getType());
 
     // Wenn eine Mischvorlage zum Bearbeiten geöffnet wurde soll der typ
     // "templateTemplate" NICHT gelöscht werden, ansonsten schon.
-    if (!(this.documentCommandInterpreter.model.hasURL() && cmd.getType().equalsIgnoreCase("templateTemplate")))
+    if (!(this.documentCommandInterpreter.getModel().hasURL() && cmd.getType().equalsIgnoreCase("templateTemplate")))
       cmd.markDone(true);
     return 0;
   }

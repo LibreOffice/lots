@@ -55,6 +55,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
@@ -310,7 +311,7 @@ public class DocumentManager
    *          zurückgeliefert werden soll.
    * @return Das zu doc zugehörige TextDocumentModel.
    */
-  public static TextDocumentModel getTextDocumentModel(XTextDocument doc)
+  public static TextDocumentController getTextDocumentController(XTextDocument doc)
   {
     Info info = getDocumentManager().getInfo(doc);
     if (info == null)
@@ -324,7 +325,7 @@ public class DocumentManager
       info = getDocumentManager().getInfo(doc);
     }
   
-    return info.getTextDocumentModel();
+    return info.getTextDocumentController();
   }
 
   /**
@@ -369,7 +370,7 @@ public class DocumentManager
      * 
      * @author Matthias Benkmann (D-III-ITD-D101)
      */
-    public TextDocumentModel getTextDocumentModel()
+    public TextDocumentController getTextDocumentController()
     {
       throw new UnsupportedOperationException();
     }
@@ -399,7 +400,7 @@ public class DocumentManager
 
   public static class TextDocumentInfo extends Info
   {
-    private TextDocumentModel model = null;
+    private TextDocumentController documentController = null;
 
     private XTextDocument doc;
 
@@ -409,35 +410,35 @@ public class DocumentManager
     }
 
     /**
-     * Auf die Methoden getTextDocumentModel() und hasTextDocumentModel() wird
+     * Auf die Methoden getTextDocumentController() und hasTextDocumentModel() wird
      * möglicherweise aus verschiedenen Threads zugegriffen (WollMux Event Queue und
      * Event Handler im Singleton), daher ist synchronized notwendig.
      */
     @Override
-    public synchronized TextDocumentModel getTextDocumentModel()
+    public synchronized TextDocumentController getTextDocumentController()
     {
-      if (model == null)
+      if (documentController == null)
       {
-        model = new TextDocumentModel(doc, createPersistentDataContainer(doc), GlobalFunctions.getInstance().getGlobalFunctions(), GlobalFunctions.getInstance().getFunctionDialogs());
+        documentController = new TextDocumentController(new TextDocumentModel(doc, createPersistentDataContainer(doc)), GlobalFunctions.getInstance().getGlobalFunctions(), GlobalFunctions.getInstance().getFunctionDialogs());
 
         /**
          * Dispatch Handler in eigenem Event registrieren, da es Deadlocks gegeben hat.
          */
-        WollMuxEventHandler.handleRegisterDispatchInterceptor(model.getFrame());
+        WollMuxEventHandler.handleRegisterDispatchInterceptor(documentController.getFrame());
       }
-      return model;
+      return documentController;
     }
 
     @Override
     public boolean hasTextDocumentModel()
     {
-      return model != null;
+      return documentController.getModel() != null;
     }
 
     @Override
     public String toString()
     {
-      return "TextDocumentInfo - model=" + model;
+      return "TextDocumentInfo - model=" + documentController;
     }
   }
   
@@ -453,7 +454,7 @@ public class DocumentManager
     if (mailMerge.containsKey(doc)) mailMerge.get(doc).dispose();
     mailMerge.remove(doc);
 
-    if (formModels.containsKey(doc)) formModels.get(doc).closing(this);
+    if (formModels.containsKey(doc)) formModels.get(doc).closing(doc);
     formModels.remove(doc);
   }
 
