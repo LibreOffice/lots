@@ -61,10 +61,10 @@ import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.itd51.wollmux.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.DocumentManager.Info;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager.Info;
 
 /**
  * Der GlobalEventListener sorgt dafür, dass der WollMux alle wichtigen globalen
@@ -202,7 +202,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     if (xTextDoc != null)
     {
       if (docInfo == null) docManager.addTextDocument(xTextDoc);
-      WollMuxEventHandler.handleProcessTextDocument(xTextDoc,
+      WollMuxEventHandler.handleProcessTextDocument(DocumentManager.getTextDocumentController(xTextDoc),
         !isDocumentLoadedHidden(compo));
     }
     else

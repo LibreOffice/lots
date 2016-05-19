@@ -28,7 +28,7 @@
  * @version 1.0
  * 
  */
-package de.muenchen.allg.itd51.wollmux;
+package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
 import java.awt.Window;
 import java.awt.event.WindowEvent;

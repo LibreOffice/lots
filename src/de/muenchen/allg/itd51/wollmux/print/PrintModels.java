@@ -28,7 +28,7 @@
  * @author Christoph Lutz (D-III-ITD 5.1)
  * 
  */
-package de.muenchen.allg.itd51.wollmux;
+package de.muenchen.allg.itd51.wollmux.print;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -54,6 +54,9 @@ import com.sun.star.uno.Type;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
+import de.muenchen.allg.itd51.wollmux.SyncActionListener;
+import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog;
@@ -62,7 +65,6 @@ import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRangeType
 import de.muenchen.allg.itd51.wollmux.dialog.PrintProgressBar;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
-import de.muenchen.allg.itd51.wollmux.print.PrintFunction;
 
 /**
  * Diese Klasse enthält eine Fabrik für die Erzeugung eines XPrintModels, die
@@ -1289,7 +1291,7 @@ public class PrintModels
      * nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als der
      * ORDER-Wert der aktuellen Druckfunktion ist.
      * 
-     * @see de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel#useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.print.PrintFunction)
+     * @see de.muenchen.allg.itd51.wollmux.print.PrintModels.InternalPrintModel#useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.print.PrintFunction)
      */
     @Override
     public boolean useInternalPrintFunction(PrintFunction function)

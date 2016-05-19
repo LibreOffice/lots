@@ -27,7 +27,7 @@
  * @author Matthias Benkmann (D-III-ITD-D101)
  * 
  */
-package de.muenchen.allg.itd51.wollmux;
+package de.muenchen.allg.itd51.wollmux.document;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,6 +42,9 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
+import de.muenchen.allg.itd51.wollmux.HashableComponent;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.document.AnnotationBasedPersistentDataContainer;
 import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer;
 import de.muenchen.allg.itd51.wollmux.core.document.RDFBasedPersistentDataContainer;
@@ -55,7 +58,6 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
-import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
@@ -424,7 +426,7 @@ public class DocumentManager
         /**
          * Dispatch Handler in eigenem Event registrieren, da es Deadlocks gegeben hat.
          */
-        WollMuxEventHandler.handleRegisterDispatchInterceptor(documentController.getFrame());
+        WollMuxEventHandler.handleRegisterDispatchInterceptor(documentController);
       }
       return documentController;
     }

@@ -63,6 +63,9 @@ import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
+import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
+import de.muenchen.allg.itd51.wollmux.dialog.formmodel.InvalidFormDescriptorException;
+import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 public class TextDocumentController
@@ -136,27 +139,14 @@ public class TextDocumentController
   @Override
   synchronized public String toString()
   {
-    return "doc('" + getTitle() + "')";
-  }
-
-  /**
-   * Liefert den Frame zu diesem TextDocument oder null, wenn der Frame nicht
-   * bestimmt werden kann.
-   * 
-   * @return
-   */
-  public synchronized XFrame getFrame()
-  {
-    try
-    {
-      return model.doc.getCurrentController().getFrame();
-    }
-    catch (java.lang.Exception e)
-    {
-      return null;
-    }
+    return "doc('" + getFrameController().getTitle() + "')";
   }
   
+  public FrameController getFrameController()
+  {
+    return new FrameController(model.doc);
+  }
+
   /**
    * Diese Methode fügt die Druckfunktion functionName der Menge der dem Dokument
    * zugeordneten Druckfunktionen hinzu. FunctionName muss dabei ein gültiger
@@ -176,7 +166,7 @@ public class TextDocumentController
     // auch auf die neue Druckfunktion reagiert.
     try
     {
-      getFrame().contextChanged();
+      getFrameController().getFrame().contextChanged();
     }
     catch (java.lang.Exception e)
     {}
@@ -202,234 +192,10 @@ public class TextDocumentController
     // auch auf gelöschte Druckfunktion reagiert.
     try
     {
-      getFrame().contextChanged();
+      getFrameController().getFrame().contextChanged();
     }
     catch (java.lang.Exception e)
     {}
-  }
-  
-  /**
-   * Setzt das Fensters des TextDokuments auf Sichtbar (visible==true) oder
-   * unsichtbar (visible == false).
-   * 
-   * @param visible
-   */
-  synchronized public void setWindowVisible(boolean visible)
-  {
-    XFrame frame = getFrame();
-    if (frame != null)
-    {
-      frame.getContainerWindow().setVisible(visible);
-    }
-  }
-  
-  /**
-   * Setzt die Position des Fensters auf die übergebenen Koordinaten, wobei die
-   * Nachteile der UNO-Methode setWindowPosSize greifen, bei der die Fensterposition
-   * nicht mit dem äusseren Fensterrahmen beginnt, sondern mit der grauen Ecke links
-   * über dem File-Menü.
-   * 
-   * @param docX
-   * @param docY
-   * @param docWidth
-   * @param docHeight
-   */
-  public synchronized void setWindowPosSize(final int docX, final int docY,
-      final int docWidth, final int docHeight)
-  {
-    try
-    {
-      // Seit KDE4 muss ein maximiertes Fenster vor dem Verschieben "demaximiert" werden 
-      // sonst wird die Positionierung ignoriert. Leider ist die dafür benötigte Klasse
-      // erst seit OpenOffice.org 3.4 verfügbar - zur Abwärtskompatibilität erfolgt der
-      // Aufruf daher über Reflection.
-      try
-      {
-        Class<?> c = Class.forName("com.sun.star.awt.XTopWindow2");
-        Object o = UnoRuntime.queryInterface(c, getFrame().getContainerWindow());
-        Method getIsMaximized = c.getMethod("getIsMaximized", (Class[])null);
-        Method setIsMaximized = c.getMethod("setIsMaximized", (boolean.class));
-        if ((Boolean)getIsMaximized.invoke(o, (Object[])null))
-        {
-          setIsMaximized.invoke(o, false);
-        }
-      }
-      catch (java.lang.Exception e)
-      {}
-
-      getFrame().getContainerWindow().setPosSize(docX, docY, docWidth, docHeight,
-        PosSize.SIZE);
-      getFrame().getContainerWindow().setPosSize(docX, docY, docWidth, docHeight,
-        PosSize.POS);
-
-    }
-    catch (java.lang.Exception e)
-    { 
-      Logger.debug(e);
-    }
-  }
-  
-  /**
-   * Diese Methode liest die (optionalen) Attribute X, Y, WIDTH, HEIGHT und ZOOM aus
-   * dem übergebenen Konfigurations-Abschnitt settings und setzt die
-   * Fenstereinstellungen des Dokuments entsprechend um. Bei den Pärchen X/Y bzw.
-   * SIZE/WIDTH müssen jeweils beide Komponenten im Konfigurationsabschnitt angegeben
-   * sein.
-   * 
-   * @param settings
-   *          der Konfigurationsabschnitt, der X, Y, WIDHT, HEIGHT und ZOOM als
-   *          direkte Kinder enthält.
-   */
-  public synchronized void setWindowViewSettings(ConfigThingy settings)
-  {
-    // Fenster holen (zum setzen der Fensterposition und des Zooms)
-    XWindow window = null;
-    try
-    {
-      window = getFrame().getContainerWindow();
-    }
-    catch (java.lang.Exception e)
-    {}
-
-    // Insets bestimmen (Rahmenmaße des Windows)
-    int insetLeft = 0, insetTop = 0, insetRight = 0, insetButtom = 0;
-    if (UNO.XDevice(window) != null)
-    {
-      DeviceInfo di = UNO.XDevice(window).getInfo();
-      insetButtom = di.BottomInset;
-      insetTop = di.TopInset;
-      insetRight = di.RightInset;
-      insetLeft = di.LeftInset;
-    }
-
-    // Position setzen:
-    try
-    {
-      int xPos = Integer.parseInt(settings.get("X").toString());
-      int yPos = Integer.parseInt(settings.get("Y").toString());
-      if (window != null)
-      {
-        window.setPosSize(xPos + insetLeft, yPos + insetTop, 0, 0, PosSize.POS);
-      }
-    }
-    catch (java.lang.Exception e)
-    {}
-    // Dimensions setzen:
-    try
-    {
-      int width = Integer.parseInt(settings.get("WIDTH").toString());
-      int height = Integer.parseInt(settings.get("HEIGHT").toString());
-      if (window != null)
-        window.setPosSize(0, 0, width - insetLeft - insetRight, height - insetTop
-          - insetButtom, PosSize.SIZE);
-    }
-    catch (java.lang.Exception e)
-    {}
-
-    // Zoom setzen:
-    setDocumentZoom(settings);
-  }
-  
-  /**
-   * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht des
-   * Dokuments auf den neuen Wert den das ConfigThingy conf im Knoten ZOOM angibt,
-   * der entwender eine ganzzahliger Prozentwert (ohne "%"-Zeichen") oder einer der
-   * Werte "Optimal", "PageWidth", "PageWidthExact" oder "EntirePage" ist.
-   * 
-   * @param zoom
-   * @throws ConfigurationErrorException
-   */
-  public synchronized void setDocumentZoom(ConfigThingy conf)
-  {
-    try
-    {
-      setDocumentZoom(conf.get("ZOOM").toString());
-    }
-    catch (NodeNotFoundException e)
-    {
-      // ZOOM ist optional
-    }
-    catch (ConfigurationErrorException e)
-    {
-      Logger.error(e);
-    }
-  }
-  
-  /**
-   * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht des
-   * Dokuments auf den neuen Wert zoom, der entwender eine ganzzahliger Prozentwert
-   * (ohne "%"-Zeichen") oder einer der Werte "Optimal", "PageWidth",
-   * "PageWidthExact" oder "EntirePage" ist.
-   * 
-   * @param zoom
-   * @throws ConfigurationErrorException
-   */
-  private void setDocumentZoom(String zoom) throws ConfigurationErrorException
-  {
-    Short zoomType = null;
-    Short zoomValue = null;
-
-    if (zoom != null)
-    {
-      // ZOOM-Argument auswerten:
-      if (zoom.equalsIgnoreCase("Optimal"))
-        zoomType = Short.valueOf(DocumentZoomType.OPTIMAL);
-
-      if (zoom.equalsIgnoreCase("PageWidth"))
-        zoomType = Short.valueOf(DocumentZoomType.PAGE_WIDTH);
-
-      if (zoom.equalsIgnoreCase("PageWidthExact"))
-        zoomType = Short.valueOf(DocumentZoomType.PAGE_WIDTH_EXACT);
-
-      if (zoom.equalsIgnoreCase("EntirePage"))
-        zoomType = Short.valueOf(DocumentZoomType.ENTIRE_PAGE);
-
-      if (zoomType == null)
-      {
-        try
-        {
-          zoomValue = Short.valueOf(zoom);
-        }
-        catch (NumberFormatException e)
-        {}
-      }
-    }
-
-    // ZoomType bzw ZoomValue setzen:
-    Object viewSettings = null;
-    try
-    {
-      viewSettings =
-        UNO.XViewSettingsSupplier(model.doc.getCurrentController()).getViewSettings();
-    }
-    catch (java.lang.Exception e)
-    {}
-    if (zoomType != null)
-      UNO.setProperty(viewSettings, "ZoomType", zoomType);
-    else if (zoomValue != null)
-      UNO.setProperty(viewSettings, "ZoomValue", zoomValue);
-    else
-      throw new ConfigurationErrorException(L.m("Ungültiger ZOOM-Wert '%1'", zoom));
-  }
-  
-  /**
-   * Liefert den Titel des Dokuments, wie er im Fenster des Dokuments angezeigt wird,
-   * ohne den Zusatz " - OpenOffice.org Writer" oder "NoTitle", wenn der Titel nicht
-   * bestimmt werden kann. TextDocumentModel('<title>')
-   */
-  public synchronized String getTitle()
-  {
-    String title = "NoTitle";
-    try
-    {
-      title = UNO.getProperty(getFrame(), "Title").toString();
-      // "Untitled1 - OpenOffice.org Writer" -> cut " - OpenOffice.org Writer"
-      int i = title.lastIndexOf(" - ");
-      if (i >= 0) title = title.substring(0, i);
-    }
-    catch (java.lang.Exception e)
-    {}
-    return title;
   }
   
   /**
@@ -2551,5 +2317,48 @@ public class TextDocumentController
 
     return overrideFragConf;
   }
- 
+
+  /**
+   * Erzeugt ein FormModel für ein einfaches Formular mit genau einem zugehörigen
+   * Formulardokument.
+   * 
+   * @param doc
+   *          Das Dokument zu dem ein FormModel erzeugt werden soll.
+   * @param visible
+   *          false zeigt an, dass das Dokument unsichtbar ist (und es die FormGUI
+   *          auch sein sollte).
+   * @return ein FormModel dem genau ein Formulardokument zugeordnet ist.
+   * @throws InvalidFormDescriptorException
+   */
+  public FormModel createSingleDocumentFormModel(boolean visible) throws InvalidFormDescriptorException
+  {
+  
+    // Abschnitt "Formular" holen:
+    ConfigThingy formConf;
+    try
+    {
+      formConf = getFormDescription().get("Formular");
+    }
+    catch (NodeNotFoundException e)
+    {
+      throw new InvalidFormDescriptorException(
+        L.m("Kein Abschnitt 'Formular' in der Formularbeschreibung vorhanden"));
+    }
+  
+    // Abschnitt Fenster/Formular aus wollmuxConf holen:
+    ConfigThingy formFensterConf;
+    try
+    {
+      formFensterConf =
+        WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild();
+    }
+    catch (NodeNotFoundException x)
+    {
+      formFensterConf = new ConfigThingy("");
+    }
+  
+    return new SingleDocumentFormModel(this, formFensterConf, formConf,
+      getFunctionContext(), getFunctionLibrary(), getDialogLibrary(),
+      visible);
+  }
 }

@@ -392,7 +392,7 @@ public class MultiDocumentFormModel implements FormModel
       catch (NodeNotFoundException e)
       {
         Logger.error(L.m("Dokument '%1' enthält keine gültige Formularbeschreibung",
-          documentController.getTitle()), e);
+          documentController.getFrameController().getTitle()), e);
       }
     }
   

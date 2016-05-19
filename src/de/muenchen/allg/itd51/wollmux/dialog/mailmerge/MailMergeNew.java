@@ -75,10 +75,7 @@ import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.CoupledWindowController;
-import de.muenchen.allg.itd51.wollmux.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.ModalDialogs;
-import de.muenchen.allg.itd51.wollmux.PrintModels;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
@@ -102,9 +99,11 @@ import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.email.EMailSender;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.print.PrintModels;
 
 /**
  * Die neuen erweiterten Serienbrief-Funktionalitäten.
@@ -1525,7 +1524,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   @Override
   public String getDefaultFilename()
   {
-    String title = documentController.getTitle();
+    String title = documentController.getFrameController().getTitle();
     // Suffix entfernen:
     if (title.toLowerCase().matches(".+\\.(odt|doc|ott|dot)$"))
       title = title.substring(0, title.length() - 4);
@@ -1617,7 +1616,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     if (coupledWindowController == null)
     {
       coupledWindowController = new CoupledWindowController();
-      XFrame f = documentController.getFrame();
+      XFrame f = documentController.getFrameController().getFrame();
       XTopWindow w = null;
       if (f != null) w = UNO.XTopWindow(f.getContainerWindow());
       if (w != null) coupledWindowController.setTopWindow(w);
@@ -1644,7 +1643,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     if (!coupledWindowController.hasCoupledWindows())
     {
       // deregistriert den windowListener.
-      XFrame f = documentController.getFrame();
+      XFrame f = documentController.getFrameController().getFrame();
       XTopWindow w = null;
       if (f != null) w = UNO.XTopWindow(f.getContainerWindow());
       if (w != null) coupledWindowController.unsetTopWindow(w);

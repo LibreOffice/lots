@@ -9,11 +9,9 @@ import java.util.Map;
 import com.sun.star.frame.XFrame;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
@@ -377,12 +375,12 @@ public class SingleDocumentFormModel implements FormModel
   public void startFormGUI()
   {
     boolean containsFrames=false;
-    containsFrames=SingleDocumentFormModel.vFrames.contains(documentController.getFrame());
+    containsFrames=SingleDocumentFormModel.vFrames.contains(documentController.getFrameController().getFrame());
 
     //Schaue ob bereits eine Instanz genau dieses Formulars geöffnet ist, falls ja wird das nun ungültige FormGUI beendet 
     if (containsFrames){  
       //Hole Index des ungültigen FormGUI
-      int frameIndex=SingleDocumentFormModel.vFrames.indexOf(documentController.getFrame());
+      int frameIndex=SingleDocumentFormModel.vFrames.indexOf(documentController.getFrameController().getFrame());
       
       SingleDocumentFormModel.vFormGUIs.get(frameIndex).dispose();
       SingleDocumentFormModel.vFormGUIs.remove(frameIndex);
@@ -397,7 +395,7 @@ public class SingleDocumentFormModel implements FormModel
     
     // füge FormGUI Refenrenz und die dazugehörigen Frames zu den Klassenvariable hinzu
     SingleDocumentFormModel.vFormGUIs.add(formGUI);
-    SingleDocumentFormModel.vFrames.add(documentController.getFrame());  
+    SingleDocumentFormModel.vFrames.add(documentController.getFrameController().getFrame());  
   }
 
   @Override
@@ -414,50 +412,5 @@ public class SingleDocumentFormModel implements FormModel
     {
       return null;
     }
-  }
-
-  /**
-   * Erzeugt ein FormModel für ein einfaches Formular mit genau einem zugehörigen
-   * Formulardokument.
-   * 
-   * @param doc
-   *          Das Dokument zu dem ein FormModel erzeugt werden soll.
-   * @param visible
-   *          false zeigt an, dass das Dokument unsichtbar ist (und es die FormGUI
-   *          auch sein sollte).
-   * @return ein FormModel dem genau ein Formulardokument zugeordnet ist.
-   * @throws InvalidFormDescriptorException
-   */
-  public static FormModel createSingleDocumentFormModel(TextDocumentController documentController,
-      boolean visible) throws InvalidFormDescriptorException
-  {
-  
-    // Abschnitt "Formular" holen:
-    ConfigThingy formConf;
-    try
-    {
-      formConf = documentController.getFormDescription().get("Formular");
-    }
-    catch (NodeNotFoundException e)
-    {
-      throw new InvalidFormDescriptorException(
-        L.m("Kein Abschnitt 'Formular' in der Formularbeschreibung vorhanden"));
-    }
-  
-    // Abschnitt Fenster/Formular aus wollmuxConf holen:
-    ConfigThingy formFensterConf;
-    try
-    {
-      formFensterConf =
-        WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild();
-    }
-    catch (NodeNotFoundException x)
-    {
-      formFensterConf = new ConfigThingy("");
-    }
-  
-    return new SingleDocumentFormModel(documentController, formFensterConf, formConf,
-      documentController.getFunctionContext(), documentController.getFunctionLibrary(), documentController.getDialogLibrary(),
-      visible);
   }
 }

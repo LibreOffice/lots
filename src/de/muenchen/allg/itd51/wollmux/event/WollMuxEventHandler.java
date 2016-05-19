@@ -115,13 +115,10 @@ import com.sun.star.view.DocumentZoomType;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
-import de.muenchen.allg.itd51.wollmux.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
-import de.muenchen.allg.itd51.wollmux.PrintModels;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.TextModule;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
@@ -158,12 +155,15 @@ import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.InvalidFormDescriptorException;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.MultiDocumentFormModel;
-import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.document.FrameController;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
+import de.muenchen.allg.itd51.wollmux.print.PrintModels;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
@@ -691,7 +691,7 @@ public class WollMuxEventHandler
       // transparent mit verfolgt werden können.
       try
       {
-        documentController.getFrame().getContainerWindow().setFocus();
+        documentController.getFrameController().getFrame().getContainerWindow().setFocus();
       }
       catch (java.lang.Exception e)
       {
@@ -1067,13 +1067,13 @@ public class WollMuxEventHandler
    *          und gleich wieder geschlossen wurde zu folgendem Deadlock:
    * 
    *          {@link OnProcessTextDocument} =>
-   *          {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#getTextDocumentController()}
+   *          {@link de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo#getTextDocumentController()}
    *          => {@link TextDocumentModel#TextDocumentModel(XTextDocument)} =>
    *          {@link DispatchProviderAndInterceptor#registerDocumentDispatchInterceptor(XFrame)}
    *          => OOo Proxy =>
    *          {@link GlobalEventListener#notifyEvent(com.sun.star.document.EventObject)}
    *          ("OnUnload") =>
-   *          {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#hasTextDocumentModel()}
+   *          {@link de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo#hasTextDocumentModel()}
    * 
    *          Da {@link TextDocumentInfo} synchronized ist kam es zum Deadlock.
    * 
@@ -1114,16 +1114,16 @@ public class WollMuxEventHandler
    * Erzeugt ein neues WollMuxEvent, das die eigentliche Dokumentbearbeitung eines
    * TextDokuments startet.
    * 
-   * @param xTextDoc
+   * @param documentController
    *          Das XTextDocument, das durch den WollMux verarbeitet werden soll.
    * @param visible
    *          false zeigt an, dass das Dokument (bzw. das zugehörige Fenster)
    *          unsichtbar ist.
    */
-  public static void handleProcessTextDocument(XTextDocument xTextDoc,
+  public static void handleProcessTextDocument(TextDocumentController documentController,
       boolean visible)
   {
-    handle(new OnProcessTextDocument(xTextDoc, visible));
+    handle(new OnProcessTextDocument(documentController, visible));
   }
 
   /**
@@ -1135,22 +1135,20 @@ public class WollMuxEventHandler
    */
   private static class OnProcessTextDocument extends BasicEvent
   {
-    XTextDocument xTextDoc;
+    TextDocumentController documentController;
 
     boolean visible;
 
-    public OnProcessTextDocument(XTextDocument xTextDoc, boolean visible)
+    public OnProcessTextDocument(TextDocumentController documentController, boolean visible)
     {
-      this.xTextDoc = xTextDoc;
+      this.documentController = documentController;
       this.visible = visible;
     }
 
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      if (xTextDoc == null) return;
-
-      TextDocumentController documentController = DocumentManager.getTextDocumentController(xTextDoc);
+      if (documentController == null) return;
 
       // Konfigurationsabschnitt Textdokument verarbeiten falls Dok sichtbar:
       if (visible)
@@ -1158,7 +1156,7 @@ public class WollMuxEventHandler
         {
           ConfigThingy tds =
             WollMuxFiles.getWollmuxConf().query("Fenster").query("Textdokument").getLastChild();
-          documentController.setWindowViewSettings(tds);
+          documentController.getFrameController().setWindowViewSettings(tds);
         }
         catch (NodeNotFoundException e)
         {}
@@ -1212,7 +1210,7 @@ public class WollMuxEventHandler
           if (visible)
             try
             {
-              documentController.setDocumentZoom(WollMuxFiles.getWollmuxConf().query("Fenster").query(
+              documentController.getFrameController().setDocumentZoom(WollMuxFiles.getWollmuxConf().query("Fenster").query(
                 "Formular").getLastChild().query("ZOOM"));
             }
             catch (java.lang.Exception e)
@@ -1224,7 +1222,7 @@ public class WollMuxEventHandler
             FormModel fm;
             try
             {
-              fm = SingleDocumentFormModel.createSingleDocumentFormModel(documentController, visible);
+              fm = documentController.createSingleDocumentFormModel(visible);
             }
             catch (InvalidFormDescriptorException e)
             {
@@ -1251,7 +1249,7 @@ public class WollMuxEventHandler
       // ContextChanged auslösen, damit die Dispatches aktualisiert werden.
       try
       {
-        documentController.getFrame().contextChanged();
+        documentController.getFrameController().getFrame().contextChanged();
       }
       catch (java.lang.Exception e)
       {}
@@ -1262,7 +1260,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + xTextDoc.hashCode() + ")";
+      return this.getClass().getSimpleName() + "(#" + documentController.hashCode() + ")";
     }
   }
 
@@ -2037,7 +2035,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      documentController.setWindowPosSize(docX, docY, docWidth, docHeight);
+      documentController.getFrameController().setWindowPosSize(docX, docY, docWidth, docHeight);
     }
 
     @Override
@@ -2089,7 +2087,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      documentController.setWindowVisible(visible);
+      documentController.getFrameController().setWindowVisible(visible);
     }
 
     @Override
@@ -2792,29 +2790,32 @@ public class WollMuxEventHandler
    *          der {@link XFrame} auf den der {@link DispatchProviderAndInterceptor}
    *          registriert werden soll.
    */
-  public static void handleRegisterDispatchInterceptor(XFrame frame)
+  public static void handleRegisterDispatchInterceptor(TextDocumentController documentController)
   {
-    if (frame == null)
-      Logger.debug(L.m("Ignoriere handleRegisterDispatchInterceptor(null)"));
-    else
-      handle(new OnRegisterDispatchInterceptor(frame));
+      handle(new OnRegisterDispatchInterceptor(documentController));
   }
 
   private static class OnRegisterDispatchInterceptor extends BasicEvent
   {
-    private XFrame frame;
+    private TextDocumentController documentController;
 
-    public OnRegisterDispatchInterceptor(XFrame frame)
+    public OnRegisterDispatchInterceptor(TextDocumentController documentController)
     {
-      this.frame = frame;
+      this.documentController = documentController;
     }
 
     @Override
     protected void doit()
     {
+      FrameController fc = documentController.getFrameController(); 
+      if (fc.getFrame() == null)
+      {
+        Logger.debug(L.m("Ignoriere handleRegisterDispatchInterceptor(null)"));
+        return;
+      }
       try
       {
-        DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(frame);
+        DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(fc.getFrame());
       }
       catch (java.lang.Exception e)
       {
@@ -2824,7 +2825,7 @@ public class WollMuxEventHandler
       // Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
       try
       {
-        frame.contextChanged();
+        fc.getFrame().contextChanged();
       }
       catch (java.lang.Exception e)
       {}
@@ -2833,7 +2834,7 @@ public class WollMuxEventHandler
     @Override
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + frame.hashCode() + ")";
+      return this.getClass().getSimpleName() + "(#" + documentController.getFrameController().getFrame().hashCode() + ")";
     }
   }
 

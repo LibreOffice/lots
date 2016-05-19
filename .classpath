@@ -6,10 +6,8 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" kind="src" path="/UNOHelper"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenOffice"/>
 	<classpathentry kind="lib" path="idl"/>
-	<classpathentry kind="lib" path="../classes"/>
 	<classpathentry excluding="**" kind="src" output="target/classes" path="izpack">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
