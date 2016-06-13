@@ -139,50 +139,38 @@ public class DocumentDispatch extends Dispatch
 
   public void dispatch__uno_save(String arg, PropertyValue[] props)
   {
-    if (!getModel().hasURL())
-      WollMuxEventHandler.handleSaveAs(getModel(), origDisp, origUrl, props);
-    else
-      origDisp.dispatch(origUrl, props);
+    dispatch__uno_saveas(arg, props);
   }
 
-  public void dispatch__uno_save(String arg, PropertyValue[] props, XDispatchResultListener listener)
+  public void dispatch__uno_save(String arg, PropertyValue[] props,
+      XDispatchResultListener listener)
   {
-    if (!getModel().hasURL())
-    {
-      WollMuxEventHandler.handleSaveAsSync(getModel(), origDisp, origUrl, props);
-      DispatchResultEvent dre = new DispatchResultEvent();
-      dre.Source = this;
-      dre.State = DispatchResultState.SUCCESS;
-      listener.dispatchFinished(dre);
-    }
-    else 
-    {
-      XNotifyingDispatch nd = UnoRuntime.queryInterface(XNotifyingDispatch.class, origDisp);
-      nd.dispatchWithNotification(origUrl, props, listener);
-    }
+    dispatch__uno_saveas(arg, props, listener);
   }
 
   public void dispatch__uno_saveas(String arg, PropertyValue[] props)
   {
     if (!getModel().hasURL())
-      WollMuxEventHandler.handleSaveAs(getModel(), origDisp, origUrl, props);
+    {
+      WollMuxEventHandler.handleSaveAs(getModel(), new DocumentDispatchHelper(
+        null, origDisp, origUrl, props, this));
+    }
     else
       origDisp.dispatch(origUrl, props);
   }
 
-  public void dispatch__uno_saveas(String arg, PropertyValue[] props, XDispatchResultListener listener)
+  public void dispatch__uno_saveas(String arg, PropertyValue[] props,
+      XDispatchResultListener listener)
   {
     if (!getModel().hasURL())
     {
-      WollMuxEventHandler.handleSaveAsSync(getModel(), origDisp, origUrl, props);
-      DispatchResultEvent dre = new DispatchResultEvent();
-      dre.Source = this;
-      dre.State = DispatchResultState.SUCCESS;
-      listener.dispatchFinished(dre);
+      WollMuxEventHandler.handleSaveAs(getModel(), new DocumentDispatchHelper(
+        listener, origDisp, origUrl, props, this));
     }
-    else 
+    else
     {
-      XNotifyingDispatch nd = UnoRuntime.queryInterface(XNotifyingDispatch.class, origDisp);
+      final XNotifyingDispatch nd =
+        UnoRuntime.queryInterface(XNotifyingDispatch.class, origDisp);
       nd.dispatchWithNotification(origUrl, props, listener);
     }
   }
@@ -248,6 +236,110 @@ public class DocumentDispatch extends Dispatch
   public void dispatch_wollmux_test(String arg, PropertyValue[] props)
   {
     if (WollMuxFiles.installQATestHandler()) TestHandler.doTest(getModel(), arg);
+  }
+
+  /**
+   * Helperklasse für XNotifyingDispatch. Der ResultStatus kann beim Listener gesetzt
+   * werden und der original Dispatch weitergereicht werden.
+   *
+   * @author daniel.sikeler
+   *
+   */
+  public class DocumentDispatchHelper
+  {
+
+    /**
+     * Der Listener des XNotifiyingDispatch.
+     */
+    private final XDispatchResultListener listener;
+
+    /**
+     * Der original Dispatch.
+     */
+    private final XDispatch origDisp;
+
+    /**
+     * Die URL des original Dispatch.
+     */
+    private final com.sun.star.util.URL origUrl;
+
+    /**
+     * Die Parameter des original Dispatch.
+     */
+    private final PropertyValue[] origArgs;
+
+    /**
+     * Ein Result, dass an den Listener übergeben wird.
+     */
+    private final DispatchResultEvent dre = new DispatchResultEvent();
+
+    /**
+     * Erzeugt einen neuen Helper für XNotifyingDispatches.
+     *
+     * @param listener
+     *          Der Listener für den Dispatch.
+     * @param origDisp
+     *          Der original Dispatch.
+     * @param origUrl
+     *          Die URL des original Dispatch.
+     * @param origArgs
+     *          Die Parameter des original Dispatch.
+     * @param dispatch
+     *          Der Dispatch.
+     */
+    private DocumentDispatchHelper(XDispatchResultListener listener,
+        XDispatch origDisp, com.sun.star.util.URL origUrl, PropertyValue[] origArgs,
+        XDispatch dispatch)
+    {
+      this.listener = listener;
+      this.origDisp = origDisp;
+      this.origUrl = origUrl;
+      this.origArgs = origArgs;
+      dre.Source = dispatch;
+    }
+
+    /**
+     * Sendet einen Result an den Listener und zeigt damit an, dass der Dispatch
+     * beendet ist.
+     *
+     * @param success
+     *          War der Dispatch erfolgreich?
+     */
+    public void dispatchFinished(final boolean success)
+    {
+      if (listener != null)
+      {
+        if (success)
+        {
+          dre.State = DispatchResultState.SUCCESS;
+        }
+        else
+        {
+          dre.State = DispatchResultState.FAILURE;
+        }
+        this.listener.dispatchFinished(dre);
+      }
+    }
+
+    /**
+     * Führt den Dispatch mit der original URL und en original Parametern aus.
+     */
+    public void dispatch()
+    {
+      if (origDisp != null)
+      {
+        if (listener == null)
+        {
+          origDisp.dispatch(origUrl, origArgs);
+        }
+        else
+        {
+          final XNotifyingDispatch nd =
+            UnoRuntime.queryInterface(XNotifyingDispatch.class, origDisp);
+          nd.dispatchWithNotification(origUrl, origArgs, listener);
+        }
+      }
+    }
   }
 
 }
