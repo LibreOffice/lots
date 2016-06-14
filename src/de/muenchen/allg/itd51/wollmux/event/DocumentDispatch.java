@@ -136,6 +136,15 @@ public class DocumentDispatch extends Dispatch
   {
     WollMuxEventHandler.handlePrint(getModel(), origDisp, origUrl, props);
   }
+  
+  public void dispatch__uno_print(String arg, PropertyValue[] props, XDispatchResultListener listener)
+  {
+    WollMuxEventHandler.handlePrint(getModel(), origDisp, origUrl, props);
+    DispatchResultEvent dre = new DispatchResultEvent();
+    dre.Source = this;
+    dre.State = DispatchResultState.SUCCESS;
+    listener.dispatchFinished(dre);
+  }
 
   public void dispatch__uno_save(String arg, PropertyValue[] props)
   {
