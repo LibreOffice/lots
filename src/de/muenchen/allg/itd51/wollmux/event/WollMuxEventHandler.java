@@ -157,7 +157,6 @@ import de.muenchen.allg.itd51.wollmux.dialog.formmodel.InvalidFormDescriptorExce
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.MultiDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
-import de.muenchen.allg.itd51.wollmux.event.DocumentDispatch.DocumentDispatchHelper;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
@@ -4235,87 +4234,86 @@ public class WollMuxEventHandler
    * "Datei->SaveAs" oder über die Symbolleiste die dispatch-url .uno:Save bzw.
    * .uno:SaveAs abgesetzt wurde.
    */
-  public static void handleSaveAs(final TextDocumentModel model,
-      final DocumentDispatchHelper callback)
+  public static void handleSaveAs(TextDocumentModel model, XDispatch origDisp,
+      com.sun.star.util.URL origUrl, PropertyValue[] origArgs)
   {
-    new OnSaveAs(model, callback).process();
+    handle(new OnSaveAs(model, origDisp, origUrl, origArgs));
   }
 
+  public static void handleSaveAsSync(TextDocumentModel model, XDispatch origDisp,
+      com.sun.star.util.URL origUrl, PropertyValue[] origArgs)
+  {
+    new OnSaveAs(model, origDisp, origUrl, origArgs).process();
+  }
+  
   private static class OnSaveAs extends BasicEvent
   {
-    private final TextDocumentModel model;
+    private TextDocumentModel model;
 
-    private final DocumentDispatchHelper helper;
+    private XDispatch origDisp;
 
-    public OnSaveAs(final TextDocumentModel model,
-        final DocumentDispatchHelper helper)
+    private com.sun.star.util.URL origUrl;
+
+    private PropertyValue[] origArgs;
+
+    public OnSaveAs(TextDocumentModel model, XDispatch origDisp,
+        com.sun.star.util.URL origUrl, PropertyValue[] origArgs)
     {
       this.model = model;
-      this.helper = helper;
+      this.origDisp = origDisp;
+      this.origUrl = origUrl;
+      this.origArgs = origArgs;
     }
 
     @Override
     protected void doit() throws WollMuxFehlerException
     {
       // FilenameGeneratorFunction auslesen und parsen
-      final FunctionLibrary lib = model.getFunctionLibrary();
-      final ConfigThingy funcConf = model.getFilenameGeneratorFunc();
+      FunctionLibrary lib = model.getFunctionLibrary();
+      ConfigThingy funcConf = model.getFilenameGeneratorFunc();
       Function func = null;
-      if (funcConf != null)
+      if (funcConf != null) try
       {
-        try
-        {
-          func = FunctionFactory.parse(funcConf, lib, null, null);
-        }
-        catch (final ConfigurationErrorException e)
-        {
-          Logger.error(L.m("Kann FilenameGeneratorFunction nicht parsen!"), e);
-        }
+        func = FunctionFactory.parse(funcConf, lib, null, null);
+      }
+      catch (ConfigurationErrorException e)
+      {
+        Logger.error(L.m("Kann FilenameGeneratorFunction nicht parsen!"), e);
       }
 
-      // Original-Dispatch ausführen, wenn keine FilenameGeneratorFunction
-      // gesetzt
+      // Original-Dispatch ausführen, wenn keine FilenameGeneratorFunction gesetzt
       if (func == null)
       {
-        helper.dispatch();
+        if (origDisp != null) origDisp.dispatch(origUrl, origArgs);
         return;
       }
 
       boolean done = false;
-      final File file = ensureFileHasODTSuffix(getDefaultFile(func));
-      final JFileChooser fc = createODTFileChooser(file);
+      File file = ensureFileHasODTSuffix(getDefaultFile(func));
+      JFileChooser fc = createODTFileChooser(file);
       while (!done)
       {
         done = true;
         if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION)
         {
           boolean save = true;
-          final File f = ensureFileHasODTSuffix(fc.getSelectedFile());
+          File f = ensureFileHasODTSuffix(fc.getSelectedFile());
 
           // Sicherheitsabfage vor Überschreiben
           if (f.exists())
           {
             save = false;
-            final int res =
+            int res =
               JOptionPane.showConfirmDialog(
                 null,
                 L.m("Datei %1 existiert bereits. Soll sie überschrieben werden?",
                   f.getName()), L.m("Überschreiben?"),
                 JOptionPane.YES_NO_CANCEL_OPTION);
-            if (res == JOptionPane.NO_OPTION)
-            {
-              done = false;
-            }
-            if (res == JOptionPane.OK_OPTION)
-            {
-              save = true;
-            }
+            if (res == JOptionPane.NO_OPTION) done = false;
+            if (res == JOptionPane.OK_OPTION) save = true;
           }
 
-          if (save)
-          {
-            helper.dispatchFinished(saveAs(f));
-          }
+          if (save) saveAs(f);
         }
       }
     }
@@ -4387,7 +4385,7 @@ public class WollMuxEventHandler
       return fc;
     }
 
-    private boolean saveAs(File f)
+    private void saveAs(File f)
     {
       model.flushPersistentData();
       try
@@ -4395,7 +4393,6 @@ public class WollMuxEventHandler
         String url = UNO.getParsedUNOUrl(f.toURI().toURL().toString()).Complete;
         if (UNO.XStorable(model.doc) != null)
           UNO.XStorable(model.doc).storeAsURL(url, new PropertyValue[] {});
-        return true;
       }
       catch (MalformedURLException e)
       {
@@ -4409,7 +4406,6 @@ public class WollMuxEventHandler
           e.getLocalizedMessage()), L.m("Fehler beim Speichern"),
           JOptionPane.ERROR_MESSAGE);
       }
-      return false;
     }
 
     private static File ensureFileHasODTSuffix(File f)

@@ -256,25 +256,17 @@ public class Dispatch implements XNotifyingDispatch
     try
     {
       Class<? extends Dispatch> myClass = this.getClass();
-      // Alle Dispatches außer save und saveas sollen als normaler Dispatch behandelt
-      // werden. Um ein Bug zu fixen, dass LO geschlossen wird obwohl der
-      // Speichervorgang abgebrochen wurde, verwenden wir nun das Interface
-      // XNotifyingDispatch. Gerade im Zusammenhang mit Makros sind dadurch Probleme
-      // aufgetreten. Deshalb werden die anderen Dispatches wie bisher behandelt.
-      // TODO: Einheitliches Verhalten herstellen.
-      if (listener == null || !("dispatch__uno_saveas".equals(methodName)
-        || "dispatch__uno_save".equals(methodName)))
+      if (listener == null)
       {
         Method method =
           myClass.getDeclaredMethod(methodName, String.class, PropertyValue[].class);
         method.invoke(this, arg, props);
-      }
+      } 
       else
       {
         Method method =
-          myClass.getDeclaredMethod(methodName, String.class, PropertyValue[].class,
-            XDispatchResultListener.class);
-        method.invoke(this, arg, props, listener);
+            myClass.getDeclaredMethod(methodName, String.class, PropertyValue[].class, XDispatchResultListener.class);
+          method.invoke(this, arg, props, listener);
       }
     }
     catch (Throwable x)
