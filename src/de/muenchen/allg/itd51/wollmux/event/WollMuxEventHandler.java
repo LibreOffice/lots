@@ -4240,12 +4240,6 @@ public class WollMuxEventHandler
     handle(new OnSaveAs(model, origDisp, origUrl, origArgs));
   }
 
-  public static void handleSaveAsSync(TextDocumentModel model, XDispatch origDisp,
-      com.sun.star.util.URL origUrl, PropertyValue[] origArgs)
-  {
-    new OnSaveAs(model, origDisp, origUrl, origArgs).process();
-  }
-  
   private static class OnSaveAs extends BasicEvent
   {
     private TextDocumentModel model;
