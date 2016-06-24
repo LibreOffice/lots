@@ -9,9 +9,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/UNOHelper"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenOffice"/>
 	<classpathentry kind="lib" path="idl"/>
-	<classpathentry kind="lib" path="thirdparty/javamail-1.4.4/mail.jar"/>
-	<classpathentry kind="lib" path="../classes"/>
-	<classpathentry kind="lib" path="thirdparty/platform-3.5.2.jar"/>
 	<classpathentry excluding="**" kind="src" output="target/classes" path="izpack">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
