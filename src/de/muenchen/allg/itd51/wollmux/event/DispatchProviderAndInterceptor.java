@@ -174,6 +174,8 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
 
     if (hasMethod(Dispatch.class, methodName))
       return new Dispatch();
+    else if (hasMethod(NotifyingDispatch.class, methodName))
+      return new NotifyingDispatch();
     else
     {
       if (frame != null)
@@ -181,6 +183,9 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
         if (hasMethod(DocumentDispatch.class, methodName))
           return new DocumentDispatch(getOrigDispatch(url, frameName, fsFlag), url,
             frame);
+        else if (hasMethod(DocumentNotifyingDispatch.class, methodName))
+          return new DocumentNotifyingDispatch(getOrigDispatch(url, frameName,
+            fsFlag), url, frame);
       }
     }
 
