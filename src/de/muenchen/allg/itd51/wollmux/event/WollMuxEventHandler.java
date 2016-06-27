@@ -4230,29 +4230,29 @@ public class WollMuxEventHandler
    * "Datei->SaveAs" oder über die Symbolleiste die dispatch-url .uno:Save bzw.
    * .uno:SaveAs abgesetzt wurde.
    */
-  public static void handleSaveAs(TextDocumentController documentController, XDispatch origDisp,
-      com.sun.star.util.URL origUrl, PropertyValue[] origArgs)
+  public static void handleSaveAs(TextDocumentController documentController, DispatchHelper helper, boolean sync)
   {
-    handle(new OnSaveAs(documentController, origDisp, origUrl, origArgs));
+    BasicEvent event = new OnSaveAs(documentController, helper);
+    if (sync)
+    {
+      event.process();
+    }
+    else
+    {
+      handle(event);
+    }
   }
 
   private static class OnSaveAs extends BasicEvent
   {
-    private XDispatch origDisp;
-
-    private com.sun.star.util.URL origUrl;
-
-    private PropertyValue[] origArgs;
-
     private TextDocumentController documentController;
 
-    public OnSaveAs(TextDocumentController documentController, XDispatch origDisp,
-        com.sun.star.util.URL origUrl, PropertyValue[] origArgs)
+    private DispatchHelper helper;
+
+    public OnSaveAs(TextDocumentController documentController, DispatchHelper helper)
     {
       this.documentController = documentController;
-      this.origDisp = origDisp;
-      this.origUrl = origUrl;
-      this.origArgs = origArgs;
+      this.helper = helper;
     }
 
     @Override
@@ -4274,7 +4274,7 @@ public class WollMuxEventHandler
       // Original-Dispatch ausführen, wenn keine FilenameGeneratorFunction gesetzt
       if (func == null)
       {
-        if (origDisp != null) origDisp.dispatch(origUrl, origArgs);
+        helper.dispatchOriginal();
         return;
       }
 
@@ -4299,11 +4299,20 @@ public class WollMuxEventHandler
                 L.m("Datei %1 existiert bereits. Soll sie überschrieben werden?",
                   f.getName()), L.m("Überschreiben?"),
                 JOptionPane.YES_NO_CANCEL_OPTION);
-            if (res == JOptionPane.NO_OPTION) done = false;
-            if (res == JOptionPane.OK_OPTION) save = true;
+            if (res == JOptionPane.NO_OPTION)
+            {
+              done = false;
+            }
+            if (res == JOptionPane.OK_OPTION)
+            {
+              save = true;
+            }
           }
 
-          if (save) saveAs(f);
+          if (save)
+          {
+            helper.dispatchFinished(saveAs(f));
+          }
         }
       }
     }
@@ -4375,14 +4384,17 @@ public class WollMuxEventHandler
       return fc;
     }
 
-    private void saveAs(File f)
+    private boolean saveAs(File f)
     {
       documentController.flushPersistentData();
       try
       {
         String url = UNO.getParsedUNOUrl(f.toURI().toURL().toString()).Complete;
         if (UNO.XStorable(documentController.getModel().doc) != null)
+        {
           UNO.XStorable(documentController.getModel().doc).storeAsURL(url, new PropertyValue[] {});
+        }
+        return true;
       }
       catch (MalformedURLException e)
       {
@@ -4396,6 +4408,7 @@ public class WollMuxEventHandler
           e.getLocalizedMessage()), L.m("Fehler beim Speichern"),
           JOptionPane.ERROR_MESSAGE);
       }
+      return false;
     }
 
     private static File ensureFileHasODTSuffix(File f)
