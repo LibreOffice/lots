@@ -1,3 +1,43 @@
+ ==================== Neu in Version 16.08b ====================
+
+    * Bugfixes:
+          o Umstellung von Metadaten-Notizen auf den neuen RDF-Mechanismus.
+                # Im neuen Modus rdfReadLegacy werden Annotationen gelöscht und
+                  durch RDF-Metadaten ersetzt. WollMux >11.9 ist als
+                  Voraussetzung notwendig, da ab dieser Version die RDF
+                  Metadaten durch den WollMux ausgewertet werden (wenn sie
+                  vorhanden sind).
+          o Es wird nun sowohl das UNO-Interface XDispatch und
+            XNotifyingDispatch implementiert. Wenn kein Ergebnis von dem
+            Dispatch erwartet wird, dann kann die Klasse Dispatch oder
+            DocumentDispatch verwendet werden. Deren Funktionalität hat sich
+            nicht verändert. Wenn dem Dispatch zwingend ein Ergebnis
+            übermittelt werden muss, dann muss entweder NotifyingDispatch oder
+            DocumentNotifyingDispatch verwendet werden. Diese brauchen dann
+            sowohl eine Dispatch-Methode mit Listener und ohne Listener als
+            Parameter.
+                # Für die save und saveAs Dispatches wird nun das neue
+                  Interface XNotifyingDispatch verwendet. Wird ein Listener als
+                  Parameter übergeben, so wird diesem nach der Bearbeitung das
+                  Ergebnis (Failure oder Success) mitgeteilt. Außerdem wird das
+                  Flag "SynchronMode" ausgewertet. Ist dieses Flag true, so
+                  muss der Dispatch synchron abgearbeitet werden. Dazu wird das
+                  Event nicht wie sonst üblich in die EventQueue des WollMux
+                  gehängt, sondern direkt bearbeitet. Ist das Flag false, so
+                  findet eine Bearbeitung wie bisher statt, indem das Event zur
+                  Queue hinzugefügt wird.
+          o Durch eine saubere Trennung zwischen den beiden Interfaces
+            XDispatch und XNotifyingDispatch versucht LibreOffice nicht mehr
+            die Druckfunktionen mit einem Listener als Parameter aufzurufen. Da
+            diese Funktionen nicht implementiert sind, kam es zu dem
+            fehlerhaften Verhalten.
+          o WOLLMUX_CONF_PATH wird nur noch verwendet, wenn sie auf eine Datei
+            zeigt.
+                # Bisher gab es keine Prüfung, ob der Pfad in WOLLMUX_CONF_PATH
+                  auf eine Datei oder ein Verzeichnis zeigt. Im letzteren Fall
+                  wurde die Liste der Dateien in dem Verzeichnis eingelesen.
+                  Das wurde jetzt korrigiert.
+
 
  ==================== Neu in Version 16.08a ====================
 
