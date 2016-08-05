@@ -1,12 +1,12 @@
 [Desktop Entry]
-Exec[$e]=wollmux
+Exec=wollmux
 GenericName=templates and forms
 GenericName[de]=Vorlagen und Formulare
 Comment=toolbar for the WollMux extension of LibreOffice Writer
 Icon=wollmux
 MimeType=
 Name=WollMux
-Path[$e]=
+Path=
 StartupNotify=false
 Terminal=false
 Type=Application
