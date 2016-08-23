@@ -2287,7 +2287,15 @@ public class TextDocumentModel
     }
     if (simulationResult == null) setDocumentModified(true);
   }
-
+  
+  public synchronized void clearFormFieldValues()
+  {
+    for (String key : formFieldValues.keySet())
+    {
+      formFieldValues.put(key, "");
+    }
+  }
+  
   /**
    * Im Vorschaumodus überträgt diese Methode alle Formularwerte aus dem
    * Formularwerte-Abschnitt der persistenten Daten in die zugehörigen Formularfelder
