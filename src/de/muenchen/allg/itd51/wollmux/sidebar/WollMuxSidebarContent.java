@@ -387,7 +387,14 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         UIMenu menu = (UIMenu) element;
   
         XMutableTreeNode node = dataModel.createNode(menu.getLabel(), false);
-        ((XMutableTreeNode) dataModel.getRoot()).appendChild(node);
+        if (menu.getParent() == null)
+        {
+          ((XMutableTreeNode) dataModel.getRoot()).appendChild(node);
+        }
+        else
+        {
+          menus.get(menu.getParent()).appendChild(node);          
+        }
         menus.put(menu.getId(), node);
       }
       else if (element.getClass().equals(UIMenuItem.class))
