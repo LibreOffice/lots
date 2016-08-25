@@ -170,6 +170,9 @@ public class UIFactory
       {
         action.setControl(uiElement);
       }
+    } else if (type.equals("menu"))
+    {
+      uiElement = new UIMenu(props.get(MENU), props.get(LABEL), parent, null);
     }
 
     return uiElement;
