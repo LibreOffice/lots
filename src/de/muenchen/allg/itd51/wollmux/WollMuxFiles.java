@@ -270,7 +270,7 @@ public class WollMuxFiles
     SlowServerWatchdog fido = new SlowServerWatchdog(SLOW_SERVER_TIMEOUT);
 
     // Jetzt versuchen, die wollmux.conf zu parsen, falls sie existiert
-    if (wollmuxConfFile != null && wollmuxConfFile.exists())
+    if (wollmuxConfFile != null && wollmuxConfFile.exists() && wollmuxConfFile.isFile())
     {
       fido.start();
       try
