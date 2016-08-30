@@ -1041,9 +1041,10 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       {
         long startTime = System.currentTimeMillis();
 
+        documentController.clearFormFields();
         documentController.setFormFieldsPreviewMode(true);
         pmod.printWithProps();
-        documentController.setFormFieldsPreviewMode(previewMode);
+        documentController.setFormFieldsPreviewMode(false);
 
         long duration = (System.currentTimeMillis() - startTime) / 1000;
         Logger.debug(L.m("MailMerge finished after %1 seconds", duration));

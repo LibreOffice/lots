@@ -1,7 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.document;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,13 +10,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import com.sun.star.awt.DeviceInfo;
-import com.sun.star.awt.PosSize;
-import com.sun.star.awt.XWindow;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
-import com.sun.star.frame.XFrame;
 import com.sun.star.lang.XComponent;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.text.XBookmarksSupplier;
@@ -26,8 +21,6 @@ import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.RuntimeException;
-import com.sun.star.uno.UnoRuntime;
-import com.sun.star.view.DocumentZoomType;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
@@ -36,14 +29,13 @@ import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory;
-import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer.DataID;
+import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.OverrideFragChainException;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution.SubstElement;
+import de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.OptionalHighlightColorProvider;
 import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
@@ -1312,6 +1304,8 @@ public class TextDocumentController
     else
       model.getPersistentData().removeData(DataID.SERIENDRUCK);
   }
+  
+  
 
   /**
    * Im Vorschaumodus überträgt diese Methode den Formularwert zum Feldes fieldId aus
@@ -1515,6 +1509,11 @@ public class TextDocumentController
     this.formFieldPreviewMode = previewMode;
     updateAllFormFields();
     cleanupGarbageOfUnreferencedAutofunctions();
+  }
+  
+  public synchronized void clearFormFields()
+  {
+    model.clearFormFieldValues();
   }
   
   /**
