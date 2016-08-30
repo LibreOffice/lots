@@ -138,6 +138,7 @@ public class PrintProgressBar
     {
       SwingUtilities.invokeAndWait(new Runnable()
       {
+        @Override
         public void run()
         {
           createGui();
@@ -179,6 +180,7 @@ public class PrintProgressBar
     cancelButton = new JButton(L.m("Abbrechen"));
     cancelButton.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         cancel();
@@ -201,26 +203,33 @@ public class PrintProgressBar
    */
   private class MyWindowListener implements WindowListener
   {
+    @Override
     public void windowOpened(WindowEvent e)
     {}
 
+    @Override
     public void windowClosing(WindowEvent e)
     {
       cancel();
     }
 
+    @Override
     public void windowClosed(WindowEvent e)
     {}
 
+    @Override
     public void windowIconified(WindowEvent e)
     {}
 
+    @Override
     public void windowDeiconified(WindowEvent e)
     {}
 
+    @Override
     public void windowActivated(WindowEvent e)
     {}
 
+    @Override
     public void windowDeactivated(WindowEvent e)
     {}
 
@@ -245,6 +254,7 @@ public class PrintProgressBar
 
     if (abortListener != null) new Thread()
     {
+      @Override
       public void run()
       {
         abortListener.actionPerformed(new ActionEvent(this, 0, ""));
@@ -262,6 +272,7 @@ public class PrintProgressBar
   {
     SwingUtilities.invokeLater(new Runnable()
     {
+      @Override
       public void run()
       {
         abortListener = null;
@@ -358,6 +369,7 @@ public class PrintProgressBar
     if (myFrame == null) return;
     SwingUtilities.invokeLater(new Runnable()
     {
+      @Override
       public void run()
       {
         statusLabel.setText(value);
@@ -422,13 +434,17 @@ public class PrintProgressBar
     if (myFrame == null) return;
     SwingUtilities.invokeLater(new Runnable()
     {
+      @Override
       public void run()
       {
-        pb.setMaximum(allMax);
-        pb.setValue(allCurrent);
-        statusLabel.setText(L.m(" %1 von %2%3 Schritten", allCurrent, allMax,
-          fromMaxString));
-        myFrame.pack();
+        if (myFrame != null)
+        {
+          pb.setMaximum(allMax);
+          pb.setValue(allCurrent);
+          statusLabel.setText(L.m(" %1 von %2%3 Schritten", allCurrent, allMax,
+            fromMaxString));
+          myFrame.pack();
+        }
       }
     });
   }
@@ -442,6 +458,7 @@ public class PrintProgressBar
   {
     SwingUtilities.invokeLater(new Runnable()
     {
+      @Override
       public void run()
       {
         myFrame.setTitle(title);
@@ -461,6 +478,7 @@ public class PrintProgressBar
   {
     PrintProgressBar bar = new PrintProgressBar("Drucke", new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         System.out.println(L.m("Druckvorgang abgebrochen!"));
