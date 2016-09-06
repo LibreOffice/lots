@@ -181,71 +181,84 @@ public class DocumentCommandInterpreter
    */
   public void executeTemplateCommands() throws WMCommandsFailedException
   {
-    Logger.debug("executeTemplateCommands");
-    boolean modified = getDocumentController().getModel().isDocumentModified();
-
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
     int errors = 0;
+    boolean modified = getDocumentController().getModel().isDocumentModified();
 
-    // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
-    // können, damit der DocumentCommandTree vollständig aufgebaut werden
-    // kann.
-    errors +=
-      new DocumentExpander(this, getDocumentController().getModel().getFragUrls()).execute(getDocumentController().getModel().getDocumentCommands());
-
-    // Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
-    // Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls
-    // Seitenvorlage Wollmuxseite vorhanden ist.
-    pageStyleWollmuxseiteToStandard(getDocumentController().getModel().doc);
-
-    // Ziffern-Anpassen der Sachleitenden Verfügungen aufrufen:
-    SachleitendeVerfuegung.ziffernAnpassen(getDocumentController());
-
-    // Jetzt können die TextFelder innerhalb der updateFields Kommandos
-    // geupdatet werden. Durch die Auslagerung in einen extra Schritt wird die
-    // Reihenfolge der Abarbeitung klar definiert (zuerst die updateFields
-    // Kommandos, dann die anderen Kommandos). Dies ist wichtig, da
-    // insbesondere das updateFields Kommando exakt mit einem anderen Kommando
-    // übereinander liegen kann. Ausserdem liegt updateFields thematisch näher
-    // am expandieren der Textfragmente, da updateFields im Prinzip nur dessen
-    // Schwäche beseitigt.
-    errors += new TextFieldUpdater(this).execute(getDocumentController().getModel().getDocumentCommands());
-
-    // Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
-    // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
-    errors += new MainProcessor(this).execute(getDocumentController().getModel().getDocumentCommands());
-
-    // Da keine neuen Elemente mehr eingefügt werden müssen, können
-    // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
-    // InsertContent-Kommandos gelöscht werden.
-    // errors += cleanInsertMarks(tree);
-
-    // Erst nachdem die INSERT_MARKS entfernt wurden, lassen sich leere
-    // Absätze zum Beginn und Ende der insertFrag bzw. insertContent-Kommandos
-    // sauber erkennen und entfernen.
-    // errors += new EmptyParagraphCleaner().execute(tree);
-    SurroundingGarbageCollector collect = new SurroundingGarbageCollector(this);
-    errors += collect.execute(getDocumentController().getModel().getDocumentCommands());
-    collect.removeGarbage();
-
-    // da hier bookmarks entfernt werden, muss der Baum upgedatet werden
-    getDocumentController().updateDocumentCommands();
-
-    // Jetzt wird das Dokument als Formulardokument markiert, wenn mindestens ein
-    // Formularfenster definiert ist.
-    if (getDocumentController().getModel().hasFormGUIWindow()) getDocumentController().markAsFormDocument();
-
-    // Document-Modified auf false setzen, da nur wirkliche
-    // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
-    getDocumentController().getModel().setDocumentModified(modified);
-
-    // ggf. eine WMCommandsFailedException werfen:
-    if (errors != 0)
+    try
     {
-      throw new WMCommandsFailedException(
-        L.m(
-          "Die verwendete Vorlage enthält %1 Fehler.\n\nBitte kontaktieren Sie Ihre Systemadministration.",
-          ((errors == 1) ? "einen" : "" + errors)));
+      Logger.debug("executeTemplateCommands");
+      // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
+      // können, damit der DocumentCommandTree vollständig aufgebaut werden
+      // kann.
+      errors +=
+        new DocumentExpander(this, getDocumentController().getModel().getFragUrls()).execute(getDocumentController().getModel().getDocumentCommands());
+
+      // Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
+      // Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls
+      // Seitenvorlage Wollmuxseite vorhanden ist.
+      pageStyleWollmuxseiteToStandard(getDocumentController().getModel().doc);
+
+      // Ziffern-Anpassen der Sachleitenden Verfügungen aufrufen:
+      SachleitendeVerfuegung.ziffernAnpassen(getDocumentController());
+
+      // Jetzt können die TextFelder innerhalb der updateFields Kommandos
+      // geupdatet werden. Durch die Auslagerung in einen extra Schritt wird die
+      // Reihenfolge der Abarbeitung klar definiert (zuerst die updateFields
+      // Kommandos, dann die anderen Kommandos). Dies ist wichtig, da
+      // insbesondere das updateFields Kommando exakt mit einem anderen Kommando
+      // übereinander liegen kann. Ausserdem liegt updateFields thematisch näher
+      // am expandieren der Textfragmente, da updateFields im Prinzip nur dessen
+      // Schwäche beseitigt.
+      errors +=
+        new TextFieldUpdater(this).execute(getDocumentController().getModel().getDocumentCommands());
+
+      // Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
+      // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
+      errors +=
+        new MainProcessor(this).execute(getDocumentController().getModel().getDocumentCommands());
+
+      // Da keine neuen Elemente mehr eingefügt werden müssen, können
+      // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
+      // InsertContent-Kommandos gelöscht werden.
+      // errors += cleanInsertMarks(tree);
+
+      // Erst nachdem die INSERT_MARKS entfernt wurden, lassen sich leere
+      // Absätze zum Beginn und Ende der insertFrag bzw. insertContent-Kommandos
+      // sauber erkennen und entfernen.
+      // errors += new EmptyParagraphCleaner().execute(tree);
+      SurroundingGarbageCollector collect = new SurroundingGarbageCollector(this);
+      errors +=
+        collect.execute(getDocumentController().getModel().getDocumentCommands());
+      collect.removeGarbage();
+
+      // da hier bookmarks entfernt werden, muss der Baum upgedatet werden
+      getDocumentController().updateDocumentCommands();
+
+      // Jetzt wird das Dokument als Formulardokument markiert, wenn mindestens ein
+      // Formularfenster definiert ist.
+      if (getDocumentController().getModel().hasFormGUIWindow())
+        getDocumentController().markAsFormDocument();
+
+      // Document-Modified auf false setzen, da nur wirkliche
+      // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
+      getDocumentController().getModel().setDocumentModified(modified);
+    }
+    finally
+    {
+      // Document-Modified auf false setzen, da nur wirkliche
+      // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
+      getDocumentController().getModel().setDocumentModified(modified);
+      getDocumentController().getModel().setDocumentModifiable(true);
+
+      // ggf. eine WMCommandsFailedException werfen:
+      if (errors != 0)
+      {
+        throw new WMCommandsFailedException(
+          L.m(
+            "Die verwendete Vorlage enthält %1 Fehler.\n\nBitte kontaktieren Sie Ihre Systemadministration.",
+            ((errors == 1) ? "einen" : "" + errors)));
+      }
     }
   }
 
