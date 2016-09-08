@@ -136,11 +136,18 @@ public class DocumentCommandInterpreter
   {
     Logger.debug("scanGlobalDocumentCommands");
     boolean modified = getDocumentController().getModel().isDocumentModified();
-
-    GlobalDocumentCommandsScanner s = new GlobalDocumentCommandsScanner(this);
-    s.execute(getDocumentController().getModel().getDocumentCommands());
-
-    getDocumentController().getModel().setDocumentModified(modified);
+    
+    try
+    {
+      getDocumentController().getModel().setDocumentModifiable(false);
+      GlobalDocumentCommandsScanner s = new GlobalDocumentCommandsScanner(this);
+      s.execute(getDocumentController().getModel().getDocumentCommands());
+    }
+    finally
+    {
+      getDocumentController().getModel().setDocumentModified(modified);
+      getDocumentController().getModel().setDocumentModifiable(true);
+    }
   }
 
   /**
@@ -163,14 +170,21 @@ public class DocumentCommandInterpreter
   {
     Logger.debug("scanInsertFormValueCommands");
     boolean modified = getDocumentController().getModel().isDocumentModified();
+    
+    try
+    {
+      getDocumentController().getModel().setDocumentModifiable(false);
+      InsertFormValueCommandsScanner s = new InsertFormValueCommandsScanner(this);
+      s.execute(getDocumentController().getModel().getDocumentCommands());
 
-    InsertFormValueCommandsScanner s = new InsertFormValueCommandsScanner(this);
-    s.execute(getDocumentController().getModel().getDocumentCommands());
-
-    getDocumentController().getModel().setIDToFormFields(s.idToFormFields);
-    getDocumentController().collectNonWollMuxFormFields();
-
-    getDocumentController().getModel().setDocumentModified(modified);
+      getDocumentController().getModel().setIDToFormFields(s.idToFormFields);
+      getDocumentController().collectNonWollMuxFormFields();
+    }
+    finally
+    {
+      getDocumentController().getModel().setDocumentModified(modified);
+      getDocumentController().getModel().setDocumentModifiable(true);
+    }
   }
 
   /**
@@ -188,6 +202,7 @@ public class DocumentCommandInterpreter
     try
     {
       Logger.debug("executeTemplateCommands");
+      getDocumentController().getModel().setDocumentModifiable(false);
       // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
       // können, damit der DocumentCommandTree vollständig aufgebaut werden
       // kann.
@@ -239,10 +254,6 @@ public class DocumentCommandInterpreter
       // Formularfenster definiert ist.
       if (getDocumentController().getModel().hasFormGUIWindow())
         getDocumentController().markAsFormDocument();
-
-      // Document-Modified auf false setzen, da nur wirkliche
-      // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
-      getDocumentController().getModel().setDocumentModified(modified);
     }
     finally
     {
