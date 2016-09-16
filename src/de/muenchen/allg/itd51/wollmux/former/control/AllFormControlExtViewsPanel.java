@@ -35,7 +35,7 @@ import java.util.Iterator;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.view.OnDemandCardView;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
@@ -75,7 +75,7 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
    */
   public AllFormControlExtViewsPanel(FormControlModelList formControlModelList,
       FunctionLibrary funcLib, GroupModelList groupModelList,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     super(L.m("Extra-View"));
     this.funcLib = funcLib;
@@ -92,6 +92,7 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
     }
   }
 
+  @Override
   public View createViewFor(Object model, ViewChangeListener viewChangeListener)
   {
     FormControlModel m = (FormControlModel) model;
@@ -101,18 +102,21 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
   private class MyItemListener implements FormControlModelList.ItemListener
   {
 
+    @Override
     public void itemAdded(FormControlModel model, int index)
     {
       if (model.hasPlausi() || model.hasAutofill() || model.hasGroups())
         addItem(model);
     }
 
+    @Override
     public void itemSwapped(int index1, int index2)
     {}
   }
 
   private class MyBroadcastListener extends BroadcastListener
   {
+    @Override
     public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
     {
       if (b.getState() == BroadcastObjectSelection.STATE_NORMAL_CLICK)
@@ -125,11 +129,13 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
       }
     }
 
+    @Override
     public void broadcastInsertionModelSelection(BroadcastObjectSelection b)
     {
       showEmpty();
     }
 
+    @Override
     public void broadcastGroupModelSelection(BroadcastObjectSelection b)
     {
       showEmpty();

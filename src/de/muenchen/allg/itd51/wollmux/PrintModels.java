@@ -54,9 +54,9 @@ import com.sun.star.uno.Type;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog;
-import de.muenchen.allg.itd51.wollmux.dialog.PrintProgressBar;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRange;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRangeType;
+import de.muenchen.allg.itd51.wollmux.dialog.PrintProgressBar;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.func.PrintFunction;
 
@@ -240,10 +240,11 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#usePrintFunction(java.lang.String)
      */
+    @Override
     public void usePrintFunction(String functionName) throws NoSuchMethodException
     {
       PrintFunction newFunc =
-        WollMuxSingleton.getInstance().getGlobalPrintFunctions().get(functionName);
+          GlobalFunctions.getInstance().getGlobalPrintFunctions().get(functionName);
       if (newFunc != null)
         useInternalPrintFunction(newFunc);
       else
@@ -257,6 +258,7 @@ public class PrintModels
      * @seede.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel#
      * useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.func.PrintFunction)
      */
+    @Override
     public boolean useInternalPrintFunction(PrintFunction printFunction)
     {
       if (printFunction != null)
@@ -295,6 +297,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getTextDocument()
      */
+    @Override
     public XTextDocument getTextDocument()
     {
       return model.doc;
@@ -305,6 +308,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#print(short)
      */
+    @Override
     public void print(short numberOfCopies)
     {
       for (int i = 0; i < numberOfCopies; ++i)
@@ -330,6 +334,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#printWithProps()
      */
+    @Override
     public void printWithProps()
     {
       if (isCanceled()) return;
@@ -524,6 +529,7 @@ public class PrintModels
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setFormValue(java.lang.String,
      *      java.lang.String)
      */
+    @Override
     public void setFormValue(String id, String value)
     {
       SyncActionListener s = new SyncActionListener();
@@ -549,6 +555,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getDocumentModified()
      */
+    @Override
     public boolean getDocumentModified()
     {
       // Keine WollMuxEvent notwendig, da keine WollMux-Datenstrukturen
@@ -561,6 +568,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setDocumentModified(boolean)
      */
+    @Override
     public void setDocumentModified(boolean modified)
     {
       // Keine WollMuxEvent notwendig, da keine WollMux-Datenstrukturen
@@ -574,6 +582,7 @@ public class PrintModels
      * (derzeit c,s,s,t,textfield,Database-Felder). So werden z.B. Seriendruckfelder
      * erkannt, die erst nach dem Öffnen des Dokuments manuell hinzugefügt wurden.
      */
+    @Override
     public void collectNonWollMuxFormFields()
     {
       SyncActionListener s = new SyncActionListener();
@@ -586,6 +595,7 @@ public class PrintModels
      * 
      * @see com.sun.star.beans.XPropertySet#getPropertySetInfo()
      */
+    @Override
     public XPropertySetInfo getPropertySetInfo()
     {
       final HashSet<String> propsKeySet;
@@ -596,11 +606,13 @@ public class PrintModels
 
       return new XPropertySetInfo()
       {
+        @Override
         public boolean hasPropertyByName(String arg0)
         {
           return propsKeySet.contains(arg0);
         }
 
+        @Override
         public Property getPropertyByName(String arg0)
             throws UnknownPropertyException
         {
@@ -610,6 +622,7 @@ public class PrintModels
             throw new UnknownPropertyException(arg0);
         }
 
+        @Override
         public Property[] getProperties()
         {
           Property[] ps = new Property[propsKeySet.size()];
@@ -634,6 +647,7 @@ public class PrintModels
      * @see com.sun.star.beans.XPropertySet#setPropertyValue(java.lang.String,
      * java.lang.Object)
      */
+    @Override
     public void setPropertyValue(String arg0, Object arg1)
         throws UnknownPropertyException, PropertyVetoException,
         IllegalArgumentException, WrappedTargetException
@@ -646,6 +660,7 @@ public class PrintModels
      * 
      * @see com.sun.star.beans.XPropertySet#getPropertyValue(java.lang.String)
      */
+    @Override
     public Object getPropertyValue(String arg0) throws UnknownPropertyException,
         WrappedTargetException
     {
@@ -662,6 +677,7 @@ public class PrintModels
      * Unterschied, dass sie keine Exceptions schmeißt und im Fehlerfall defaultValue
      * zurück liefert.
      */
+    @Override
     public Object getProp(String propertyName, Object defaultValue)
     {
       try
@@ -681,6 +697,7 @@ public class PrintModels
      * com.sun.star.beans.XPropertySet#addPropertyChangeListener(java.lang.String,
      * com.sun.star.beans.XPropertyChangeListener)
      */
+    @Override
     public void addPropertyChangeListener(String arg0, XPropertyChangeListener arg1)
         throws UnknownPropertyException, WrappedTargetException
     {
@@ -694,6 +711,7 @@ public class PrintModels
      * com.sun.star.beans.XPropertySet#removePropertyChangeListener(java.lang.String,
      * com.sun.star.beans.XPropertyChangeListener)
      */
+    @Override
     public void removePropertyChangeListener(String arg0,
         XPropertyChangeListener arg1) throws UnknownPropertyException,
         WrappedTargetException
@@ -708,6 +726,7 @@ public class PrintModels
      * com.sun.star.beans.XPropertySet#addVetoableChangeListener(java.lang.String,
      * com.sun.star.beans.XVetoableChangeListener)
      */
+    @Override
     public void addVetoableChangeListener(String arg0, XVetoableChangeListener arg1)
         throws UnknownPropertyException, WrappedTargetException
     {
@@ -721,6 +740,7 @@ public class PrintModels
      * com.sun.star.beans.XPropertySet#removeVetoableChangeListener(java.lang.String,
      * com.sun.star.beans.XVetoableChangeListener)
      */
+    @Override
     public void removeVetoableChangeListener(String arg0,
         XVetoableChangeListener arg1) throws UnknownPropertyException,
         WrappedTargetException
@@ -747,6 +767,7 @@ public class PrintModels
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
+    @Override
     public void setPrintBlocksProps(String blockName, boolean visible,
         boolean showHighlightColor)
     {
@@ -773,6 +794,7 @@ public class PrintModels
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setGroupVisible(java.lang.String,
      *      boolean)
      */
+    @Override
     public void setGroupVisible(String groupID, boolean visible)
     {
       SyncActionListener s = new SyncActionListener();
@@ -790,6 +812,7 @@ public class PrintModels
      * @author Christoph Lutz (D-III-ITD-5.1)
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#isCanceled()
      */
+    @Override
     public boolean isCanceled()
     {
       synchronized (isCanceled)
@@ -807,6 +830,7 @@ public class PrintModels
      * @author Christoph Lutz (D-III-ITD-5.1)
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#cancel()
      */
+    @Override
     public void cancel()
     {
       synchronized (isCanceled)
@@ -833,6 +857,7 @@ public class PrintModels
      * @author Christoph Lutz (D-III-ITD-5.1)
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintProgressMaxValue(short)
      */
+    @Override
     public void setPrintProgressMaxValue(short maxValue)
     {
     // nicht auf das MasterPrintModel anwendbar, aber auf SlavePrintModels.
@@ -851,6 +876,7 @@ public class PrintModels
      * @author Christoph Lutz (D-III-ITD-5.1)
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintProgressValue(short)
      */
+    @Override
     public void setPrintProgressValue(short value)
     {
     // nicht auf das MasterPrintModel anwendbar, aber auf SlavePrintModels.
@@ -877,6 +903,7 @@ public class PrintModels
       {
         printProgressBar = new PrintProgressBar(currentStage, new ActionListener()
         {
+          @Override
           public void actionPerformed(ActionEvent e)
           {
             cancel();
@@ -918,6 +945,7 @@ public class PrintModels
      * 
      * @author Ignaz Forster (ITM-I23)
      */
+    @Override
     public void setPrintMessage(String value)
     {
       if (printProgressBar != null) printProgressBar.setMessage(this, value);
@@ -973,6 +1001,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getTextDocument()
      */
+    @Override
     public XTextDocument getTextDocument()
     {
       return master.getTextDocument();
@@ -983,6 +1012,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#print(short)
      */
+    @Override
     public void print(short numberOfCopies)
     {
       for (int i = 0; i < numberOfCopies && !isCanceled(); ++i)
@@ -996,6 +1026,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#printWithProps()
      */
+    @Override
     public void printWithProps()
     {
       if (isCanceled()) return;
@@ -1028,6 +1059,7 @@ public class PrintModels
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setFormValue(java.lang.String,
      * java.lang.String)
      */
+    @Override
     public void setFormValue(String arg0, String arg1)
     {
       master.setFormValue(arg0, arg1);
@@ -1038,6 +1070,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getDocumentModified()
      */
+    @Override
     public boolean getDocumentModified()
     {
       return master.getDocumentModified();
@@ -1048,6 +1081,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setDocumentModified(boolean)
      */
+    @Override
     public void setDocumentModified(boolean arg0)
     {
       master.setDocumentModified(arg0);
@@ -1058,6 +1092,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#collectNonWollMuxFormFields()
      */
+    @Override
     public void collectNonWollMuxFormFields()
     {
       master.collectNonWollMuxFormFields();
@@ -1070,6 +1105,7 @@ public class PrintModels
      * de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintBlocksProps(java.lang.String
      * , boolean, boolean)
      */
+    @Override
     public void setPrintBlocksProps(String arg0, boolean arg1, boolean arg2)
     {
       master.setPrintBlocksProps(arg0, arg1, arg2);
@@ -1080,6 +1116,7 @@ public class PrintModels
      * 
      * @see com.sun.star.beans.XPropertySet#getPropertySetInfo()
      */
+    @Override
     public XPropertySetInfo getPropertySetInfo()
     {
       return master.getPropertySetInfo();
@@ -1091,6 +1128,7 @@ public class PrintModels
      * @see com.sun.star.beans.XPropertySet#setPropertyValue(java.lang.String,
      * java.lang.Object)
      */
+    @Override
     public void setPropertyValue(String key, Object val)
         throws UnknownPropertyException, PropertyVetoException,
         IllegalArgumentException, WrappedTargetException
@@ -1112,6 +1150,7 @@ public class PrintModels
      * 
      * @see com.sun.star.beans.XPropertySet#getPropertyValue(java.lang.String)
      */
+    @Override
     public Object getPropertyValue(String arg0) throws UnknownPropertyException,
         WrappedTargetException
     {
@@ -1124,6 +1163,7 @@ public class PrintModels
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getProp(java.lang.String,
      * java.lang.Object)
      */
+    @Override
     public Object getProp(String arg0, Object arg1)
     {
       return master.getProp(arg0, arg1);
@@ -1136,6 +1176,7 @@ public class PrintModels
      * com.sun.star.beans.XPropertySet#addPropertyChangeListener(java.lang.String,
      * com.sun.star.beans.XPropertyChangeListener)
      */
+    @Override
     public void addPropertyChangeListener(String arg0, XPropertyChangeListener arg1)
         throws UnknownPropertyException, WrappedTargetException
     {
@@ -1149,6 +1190,7 @@ public class PrintModels
      * com.sun.star.beans.XPropertySet#removePropertyChangeListener(java.lang.String,
      * com.sun.star.beans.XPropertyChangeListener)
      */
+    @Override
     public void removePropertyChangeListener(String arg0,
         XPropertyChangeListener arg1) throws UnknownPropertyException,
         WrappedTargetException
@@ -1163,6 +1205,7 @@ public class PrintModels
      * com.sun.star.beans.XPropertySet#addVetoableChangeListener(java.lang.String,
      * com.sun.star.beans.XVetoableChangeListener)
      */
+    @Override
     public void addVetoableChangeListener(String arg0, XVetoableChangeListener arg1)
         throws UnknownPropertyException, WrappedTargetException
     {
@@ -1176,6 +1219,7 @@ public class PrintModels
      * com.sun.star.beans.XPropertySet#removeVetoableChangeListener(java.lang.String,
      * com.sun.star.beans.XVetoableChangeListener)
      */
+    @Override
     public void removeVetoableChangeListener(String arg0,
         XVetoableChangeListener arg1) throws UnknownPropertyException,
         WrappedTargetException
@@ -1190,10 +1234,11 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#usePrintFunction(java.lang.String)
      */
+    @Override
     public void usePrintFunction(String functionName) throws NoSuchMethodException
     {
       PrintFunction newFunc =
-        WollMuxSingleton.getInstance().getGlobalPrintFunctions().get(functionName);
+          GlobalFunctions.getInstance().getGlobalPrintFunctions().get(functionName);
       if (newFunc != null)
         useInternalPrintFunction(newFunc);
       else
@@ -1208,6 +1253,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel#useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.func.PrintFunction)
      */
+    @Override
     public boolean useInternalPrintFunction(PrintFunction function)
     {
       if (function != null)
@@ -1237,6 +1283,7 @@ public class PrintModels
      * de.muenchen.allg.itd51.wollmux.XPrintModel#setGroupVisible(java.lang.String,
      * boolean)
      */
+    @Override
     public void setGroupVisible(String arg0, boolean arg1)
     {
       master.setGroupVisible(arg0, arg1);
@@ -1247,6 +1294,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#isCanceled()
      */
+    @Override
     public boolean isCanceled()
     {
       return master.isCanceled();
@@ -1257,6 +1305,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#cancel()
      */
+    @Override
     public void cancel()
     {
       master.cancel();
@@ -1268,6 +1317,7 @@ public class PrintModels
      * @see
      * de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintProgressMaxValue(short)
      */
+    @Override
     public void setPrintProgressMaxValue(short maxValue)
     {
       master.setPrintProgressMaxValue(this, maxValue);
@@ -1278,6 +1328,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintProgressValue(short)
      */
+    @Override
     public void setPrintProgressValue(short value)
     {
       master.setPrintProgressValue(this, value);
@@ -1288,6 +1339,7 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintMessage(string)
      */
+    @Override
     public void setPrintMessage(String value)
     {
       master.setPrintMessage(value);

@@ -21,6 +21,10 @@
 			<filtered>true</filtered>
 		</file>
 		<file>
+			<source>oxt/wollmux.png</source>
+			<outputDirectory>icons</outputDirectory>
+		</file>
+		<file>
 			<source>oxt/META-INF/manifest_AOO.xml</source>
 			<destName>META-INF/manifest.xml</destName>
 		</file>

@@ -61,7 +61,7 @@ import javax.swing.text.JTextComponent;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.ViewVisibilityDescriptor;
 import de.muenchen.allg.itd51.wollmux.former.view.LineView;
@@ -172,7 +172,7 @@ public class OneFormControlLineView extends LineView
    */
   public OneFormControlLineView(FormControlModel model,
       OneFormControlLineView.ViewChangeListener bigDaddy,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     this.model = model;
     this.bigDaddy = bigDaddy;
@@ -270,16 +270,19 @@ public class OneFormControlLineView extends LineView
           bigDaddy.tabTitleChanged(OneFormControlLineView.this);
       }
 
+      @Override
       public void insertUpdate(DocumentEvent e)
       {
         update();
       }
 
+      @Override
       public void removeUpdate(DocumentEvent e)
       {
         update();
       }
 
+      @Override
       public void changedUpdate(DocumentEvent e)
       {
         update();
@@ -314,16 +317,19 @@ public class OneFormControlLineView extends LineView
           bigDaddy.tabTitleChanged(OneFormControlLineView.this);
       }
 
+      @Override
       public void insertUpdate(DocumentEvent e)
       {
         update();
       }
 
+      @Override
       public void removeUpdate(DocumentEvent e)
       {
         update();
       }
 
+      @Override
       public void changedUpdate(DocumentEvent e)
       {
         update();
@@ -350,6 +356,7 @@ public class OneFormControlLineView extends LineView
     comboBoxAdditionalView.add(readOnlyfield);
     readOnlyfield.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         ignoreAttributeChanged = true;
@@ -392,16 +399,19 @@ public class OneFormControlLineView extends LineView
         ignoreAttributeChanged = false;
       }
 
+      @Override
       public void insertUpdate(DocumentEvent e)
       {
         update();
       }
 
+      @Override
       public void removeUpdate(DocumentEvent e)
       {
         update();
       }
 
+      @Override
       public void changedUpdate(DocumentEvent e)
       {
         update();
@@ -437,6 +447,7 @@ public class OneFormControlLineView extends LineView
 
     typeView.addItemListener(new ItemListener()
     {
+      @Override
       public void itemStateChanged(ItemEvent e)
       {
         if (e.getStateChange() == ItemEvent.SELECTED)
@@ -484,6 +495,7 @@ public class OneFormControlLineView extends LineView
     tc.setCaretPosition(0);
     combo.addItemListener(new ItemListener()
     {
+      @Override
       public void itemStateChanged(ItemEvent e)
       {
         tc.setCaretPosition(0);
@@ -501,6 +513,7 @@ public class OneFormControlLineView extends LineView
     comboBoxAdditionalView.add(editBox);
     editBox.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         ignoreAttributeChanged = true;
@@ -516,6 +529,7 @@ public class OneFormControlLineView extends LineView
     comboBoxAdditionalView.add(newButton);
     newButton.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         String sel = combo.getSelectedItem().toString();
@@ -536,6 +550,7 @@ public class OneFormControlLineView extends LineView
     comboBoxAdditionalView.add(delButton);
     delButton.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         int idx = combo.getSelectedIndex();
@@ -590,16 +605,19 @@ public class OneFormControlLineView extends LineView
         }
       }
 
+      @Override
       public void insertUpdate(DocumentEvent e)
       {
         update();
       }
 
+      @Override
       public void removeUpdate(DocumentEvent e)
       {
         update();
       }
 
+      @Override
       public void changedUpdate(DocumentEvent e)
       {
         update();
@@ -616,6 +634,7 @@ public class OneFormControlLineView extends LineView
     textAreaAdditionalView.add(wrapBox);
     wrapBox.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         ignoreAttributeChanged = true;
@@ -725,6 +744,7 @@ public class OneFormControlLineView extends LineView
   private class MyModelChangeListener implements
       FormControlModel.ModelChangeListener
   {
+    @Override
     public void attributeChanged(FormControlModel model, int attributeId,
         Object newValue)
     {
@@ -740,6 +760,7 @@ public class OneFormControlLineView extends LineView
       }
     }
 
+    @Override
     public void modelRemoved(FormControlModel model)
     {
       bigDaddy.viewShouldBeRemoved(OneFormControlLineView.this);
@@ -759,6 +780,7 @@ public class OneFormControlLineView extends LineView
     /*
      * Beim Klicken in Feld "ID" oder "Label" wird der automatisch vorbefüllte Text gelöscht.
      */    
+    @Override
     public void mouseClicked(MouseEvent e)
     {
       if(e.getSource().equals(labelTextfield) && labelTextfield.getText().equals("Label"))
@@ -767,6 +789,7 @@ public class OneFormControlLineView extends LineView
         idTextfield.selectAll();
     }
 
+    @Override
     public void mousePressed(MouseEvent e)
     {
       int state = BroadcastObjectSelection.STATE_NORMAL_CLICK;
@@ -779,6 +802,7 @@ public class OneFormControlLineView extends LineView
         state == BroadcastObjectSelection.STATE_NORMAL_CLICK)
       {
 
+        @Override
         public void sendTo(BroadcastListener listener)
         {
           listener.broadcastFormControlModelSelection(this);
@@ -786,12 +810,15 @@ public class OneFormControlLineView extends LineView
       });
     }
 
+    @Override
     public void mouseReleased(MouseEvent e)
     {}
 
+    @Override
     public void mouseEntered(MouseEvent e)
     {}
 
+    @Override
     public void mouseExited(MouseEvent e)
     {}
   }

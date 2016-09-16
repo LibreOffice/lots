@@ -50,9 +50,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -85,6 +85,7 @@ import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
+import com.sun.star.util.XModifiable2;
 import com.sun.star.view.DocumentZoomType;
 
 import de.muenchen.allg.afid.UNO;
@@ -95,11 +96,15 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.OptionalHighlightColorProv
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.PersistentDataContainer.DataID;
+import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
+import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InputUser;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
@@ -116,6 +121,8 @@ import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
  */
 public class TextDocumentModel
 {
+  public static final String OVERRIDE_FRAG_DB_SPALTE = "OVERRIDE_FRAG_DB_SPALTE";
+  
   /**
    * Verwendet für {@link #lastTouchedByOOoVersion} und
    * {@link #lastTouchedByWollMuxVersion}.
@@ -184,7 +191,7 @@ public class TextDocumentModel
    * Enthält die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
    * FormularMax4000.
    */
-  private FormularMax4000 currentMax4000;
+  private FormularMax4kController currentMax4000;
 
   /**
    * Enthält die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
@@ -238,10 +245,10 @@ public class TextDocumentModel
   private DocumentCommands documentCommands;
 
   /**
-   * Enthält ein Set mit den Namen aller derzeit unsichtbar gestellter
-   * Sichtbarkeitsgruppen.
+   * Enthält eine Map mit den Namen aller (bisher gesetzter) Sichtbarkeitsgruppen auf
+   * deren aktuellen Sichtbarkeitsstatus (sichtbar = true, unsichtbar = false)
    */
-  private HashSet<String> invisibleGroups;
+  private HashMap<String, Boolean> mapGroupIdToVisibilityState;
 
   /**
    * Der Vorschaumodus ist standardmäßig immer gesetzt - ist dieser Modus nicht
@@ -330,6 +337,13 @@ public class TextDocumentModel
    * ist dann aktiviert, wenn {@link #simulationResult} != null ist.
    */
   private SimulationResults simulationResult = null;
+  
+  /**
+   * Der Wert von {@link #OVERRIDE_FRAG_DB_SPALTE}, d,h, der Name der Spalte, die die
+   * persönliche OverrideFrag-Liste enthält. "" falls nicht definiert.
+   */
+  private String overrideFragDbSpalte;
+
 
   /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie direkt
@@ -349,9 +363,9 @@ public class TextDocumentModel
     this.printFunctions = new HashSet<String>();
     this.formularConf = null;
     this.formFieldValues = new HashMap<String, String>();
-    this.invisibleGroups = new HashSet<String>();
+    this.mapGroupIdToVisibilityState = new HashMap<String, Boolean>();
     this.overrideFragMap = new HashMap<String, String>();
-    parseInitialOverrideFragMap(WollMuxSingleton.getInstance().getInitialOverrideFragMap());
+    parseInitialOverrideFragMap(getInitialOverrideFragMap());
     this.functionContext = new HashMap<Object, Object>();
     this.formModel = null;
     this.formFieldPreviewMode = true;
@@ -437,7 +451,7 @@ public class TextDocumentModel
       haveUpdatedLastTouchedByVersionInfo = true;
       boolean modified = getDocumentModified();
       persistentData.setData(DataID.TOUCH_WOLLMUXVERSION,
-        WollMuxSingleton.getInstance().getVersion());
+        WollMuxSingleton.getVersion());
       persistentData.setData(DataID.TOUCH_OOOVERSION, Workarounds.getOOoVersion());
       setDocumentModified(modified);
     }
@@ -474,7 +488,7 @@ public class TextDocumentModel
       {
         Logger.error(L.m(
           "FRAG_ID Angabe fehlt in einem Eintrag der %1: %2\nVielleicht haben Sie die Klammern um (FRAG_ID 'A' NEW_FRAG_ID 'B') vergessen?",
-          WollMuxSingleton.OVERRIDE_FRAG_DB_SPALTE, conf.stringRepresentation()));
+          OVERRIDE_FRAG_DB_SPALTE, conf.stringRepresentation()));
         continue;
       }
 
@@ -495,7 +509,7 @@ public class TextDocumentModel
       catch (OverrideFragChainException x)
       {
         Logger.error(L.m("Fehlerhafte Angabe in %1: %2",
-          WollMuxSingleton.OVERRIDE_FRAG_DB_SPALTE, conf.stringRepresentation()), x);
+          OVERRIDE_FRAG_DB_SPALTE, conf.stringRepresentation()), x);
       }
     }
   }
@@ -767,7 +781,7 @@ public class TextDocumentModel
    */
   private HashMap<String, String> getIdToPresetValueEmptyFormularwerte()
   {
-    WollMuxSingleton.showInfoModal(L.m("WollMux-Warnung"),
+    ModalDialogs.showInfoModal(L.m("WollMux-Warnung"),
       L.m("WollMux-Formulardaten nicht gefunden.\n\nDer WollMux versucht, die "
         + "fehlenden Formulardaten wieder herzustellen. Nicht rekonstruierbare "
         + "Felder werden im Formular rot hinterlegt. Bitte prüfen und "
@@ -1036,6 +1050,7 @@ public class TextDocumentModel
       this.fragId = fragId;
     }
 
+    @Override
     public String getMessage()
     {
       return L.m(
@@ -1064,7 +1079,7 @@ public class TextDocumentModel
    * 
    * @param max
    */
-  synchronized public void setCurrentFormularMax4000(FormularMax4000 max)
+  synchronized public void setCurrentFormularMax4000(FormularMax4kController max)
   {
     currentMax4000 = max;
   }
@@ -1075,7 +1090,7 @@ public class TextDocumentModel
    * 
    * @return
    */
-  synchronized public FormularMax4000 getCurrentFormularMax4000()
+  synchronized public FormularMax4kController getCurrentFormularMax4000()
   {
     return currentMax4000;
   }
@@ -1398,15 +1413,6 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert ein HashSet mit den Namen (Strings) aller als unsichtbar markierten
-   * Sichtbarkeitsgruppen.
-   */
-  synchronized public HashSet<String> getInvisibleGroups()
-  {
-    return invisibleGroups;
-  }
-
-  /**
    * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die Anzeige der
    * Hintergrundfarbe (showHighlightColor) für alle Druckblöcke eines bestimmten
    * Blocktyps blockName (z.B. allVersions).
@@ -1468,6 +1474,86 @@ public class TextDocumentModel
       }
 
     }
+  }
+
+  synchronized public void setVisibleState(String groupId, boolean visible)
+  {
+    try
+    {
+      Map<String, Boolean> groupState = mapGroupIdToVisibilityState;
+      if (simulationResult != null)
+        groupState = simulationResult.getGroupsVisibilityState();
+
+      groupState.put(groupId, visible);
+
+      VisibilityElement firstChangedElement = null;
+
+      // Sichtbarkeitselemente durchlaufen und alle ggf. updaten:
+      Iterator<VisibilityElement> iter = documentCommands.setGroupsIterator();
+      while (iter.hasNext())
+      {
+        VisibilityElement visibleElement = iter.next();
+        Set<String> groups = visibleElement.getGroups();
+        if (!groups.contains(groupId)) continue;
+
+        // Visibility-Status neu bestimmen:
+        boolean setVisible = true;
+        for (String gid : groups)
+        {
+          if (groupState.get(gid).equals(Boolean.FALSE)) setVisible = false;
+        }
+
+        // Element merken, dessen Sichtbarkeitsstatus sich zuerst ändert und
+        // den focus (ViewCursor) auf den Start des Bereichs setzen. Da das
+        // Setzen eines ViewCursors in einen unsichtbaren Bereich nicht
+        // funktioniert, wird die Methode focusRangeStart zwei mal aufgerufen,
+        // je nach dem, ob der Bereich vor oder nach dem Setzen des neuen
+        // Sichtbarkeitsstatus sichtbar ist.
+        if (setVisible != visibleElement.isVisible() && firstChangedElement == null)
+        {
+          firstChangedElement = visibleElement;
+          if (firstChangedElement.isVisible()) focusRangeStart(visibleElement);
+        }
+
+        // neuen Sichtbarkeitsstatus setzen:
+        try
+        {
+          visibleElement.setVisible(setVisible);
+        }
+        catch (RuntimeException e)
+        {
+          // Absicherung gegen das manuelle Löschen von Dokumentinhalten
+        }
+      }
+
+      // Den Cursor (nochmal) auf den Anfang des Ankers des Elements setzen,
+      // dessen Sichtbarkeitsstatus sich zuerst geändert hat (siehe Begründung
+      // oben).
+      if (firstChangedElement != null && firstChangedElement.isVisible())
+        focusRangeStart(firstChangedElement);
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(e);
+    }
+  }
+
+  /**
+   * Diese Methode setzt den ViewCursor auf den Anfang des Ankers des
+   * Sichtbarkeitselements.
+   * 
+   * @param visibleElement
+   *          Das Sichtbarkeitselement, auf dessen Anfang des Ankers der ViewCursor
+   *          gesetzt werden soll.
+   */
+  private void focusRangeStart(VisibilityElement visibleElement)
+  {
+    try
+    {
+      getViewCursor().gotoRange(visibleElement.getAnchor().getStart(), false);
+    }
+    catch (java.lang.Exception e)
+    {}
   }
 
   /**
@@ -1768,7 +1854,7 @@ public class TextDocumentModel
   private ConfigThingy applyFormularanpassung(ConfigThingy formularConf)
   {
     ConfigThingy anpassungen =
-      WollMuxSingleton.getInstance().getWollmuxConf().query("Formularanpassung", 1);
+        WollMuxFiles.getWollmuxConf().query("Formularanpassung", 1);
     if (anpassungen.count() == 0) return formularConf;
 
     try
@@ -2081,7 +2167,7 @@ public class TextDocumentModel
       {}
       functionLib =
         WollMuxFiles.parseFunctions(formConf, getDialogLibrary(), functionContext,
-          WollMuxSingleton.getInstance().getGlobalFunctions());
+          GlobalFunctions.getInstance().getGlobalFunctions());
     }
     return functionLib;
   }
@@ -2105,7 +2191,7 @@ public class TextDocumentModel
       {}
       dialogLib =
         WollMuxFiles.parseFunctionDialogs(formConf,
-          WollMuxSingleton.getInstance().getFunctionDialogs(), functionContext);
+          GlobalFunctions.getInstance().getFunctionDialogs(), functionContext);
     }
     return dialogLib;
   }
@@ -2202,7 +2288,15 @@ public class TextDocumentModel
     }
     if (simulationResult == null) setDocumentModified(true);
   }
-
+  
+  public synchronized void clearFormFieldValues()
+  {
+    for (String key : formFieldValues.keySet())
+    {
+      formFieldValues.put(key, "");
+    }
+  }
+  
   /**
    * Im Vorschaumodus überträgt diese Methode alle Formularwerte aus dem
    * Formularwerte-Abschnitt der persistenten Daten in die zugehörigen Formularfelder
@@ -2574,6 +2668,30 @@ public class TextDocumentModel
     catch (java.lang.Exception x)
     {}
   }
+  
+  /**
+   * Wenn true übergeben wird, wird der Status des Dokuments nie auf
+   * modified gesetzt.
+   * 
+   * @param state
+   */
+  public synchronized void setDocumentModifiable(boolean state)
+  {
+    try
+    {
+      XModifiable2 mod2 = UnoRuntime.queryInterface(XModifiable2.class, doc);
+      if (state)
+      {
+        mod2.enableSetModified();
+      }
+      else
+      {
+        mod2.disableSetModified();
+      }
+    }
+    catch (java.lang.Exception x)
+    {}    
+  }
 
   /**
    * Diese Methode blockt/unblocked die Contoller, die für das Rendering der
@@ -2586,7 +2704,7 @@ public class TextDocumentModel
   {
     try
     {
-      if (WollMuxSingleton.getInstance().isDebugMode() == false
+      if (WollMuxFiles.isDebugMode() == false
         && UNO.XModel(doc) != null)
       {
         if (lock)
@@ -2807,7 +2925,7 @@ public class TextDocumentModel
     XTextRange range = formCmd.getTextCursor();
 
     XTextContent annotationField =
-      UNO.XTextContent(WollMuxSingleton.findAnnotationFieldRecursive(range));
+      UNO.XTextContent(findAnnotationFieldRecursive(range));
     if (annotationField == null)
       throw new ConfigurationErrorException(
         L.m("Die zugehörige Notiz mit der Formularbeschreibung fehlt."));
@@ -2897,7 +3015,7 @@ public class TextDocumentModel
    */
   synchronized public void dispose()
   {
-    if (currentMax4000 != null) currentMax4000.dispose();
+    if (currentMax4000 != null) currentMax4000.abort();
     currentMax4000 = null;
 
     if (currentMM != null) currentMM.dispose();
@@ -2933,6 +3051,7 @@ public class TextDocumentModel
    * 
    * @see java.lang.Object#toString()
    */
+  @Override
   synchronized public String toString()
   {
     return "doc('" + getTitle() + "')";
@@ -3253,6 +3372,7 @@ public class TextDocumentModel
 
     public static final int MYVALUES_NAMESPACE_USER = 1;
 
+    @Override
     public String getString(String id)
     {
       switch (namespace(id))
@@ -3264,6 +3384,7 @@ public class TextDocumentModel
       }
     }
 
+    @Override
     public boolean getBoolean(String id)
     {
       switch (namespace(id))
@@ -3275,6 +3396,7 @@ public class TextDocumentModel
       }
     }
 
+    @Override
     public boolean hasValue(String id)
     {
       switch (namespace(id))
@@ -4109,6 +4231,65 @@ public class TextDocumentModel
   }
 
   /**
+   * Liefert die persönliche OverrideFrag-Liste des aktuell gewählten Absenders.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   *         TESTED
+   */
+  private ConfigThingy getInitialOverrideFragMap()
+  {
+    ConfigThingy overrideFragConf = new ConfigThingy("overrideFrag");
+    if (overrideFragDbSpalte == null)
+    {
+      ConfigThingy overrideFragDbSpalteConf =
+        WollMuxFiles.getWollmuxConf().query(OVERRIDE_FRAG_DB_SPALTE, 1);
+      try
+      {
+        overrideFragDbSpalte = overrideFragDbSpalteConf.getLastChild().toString();
+      }
+      catch (NodeNotFoundException x)
+      {
+        // keine OVERRIDE_FRAG_DB_SPALTE Direktive gefunden
+        overrideFragDbSpalte = "";
+      }
+    }
+
+    if (overrideFragDbSpalte.length() > 0)
+    {
+      try
+      {
+        Dataset ds = WollMuxFiles.getDatasourceJoiner().getSelectedDatasetTransformed();
+        String value = ds.get(overrideFragDbSpalte);
+        if (value == null) value = "";
+        overrideFragConf = new ConfigThingy("overrideFrag", value);
+      }
+      catch (DatasetNotFoundException e)
+      {
+        Logger.log(L.m("Kein Absender ausgewählt => %1 bleibt wirkungslos",
+          OVERRIDE_FRAG_DB_SPALTE));
+      }
+      catch (ColumnNotFoundException e)
+      {
+        Logger.error(L.m("%2 spezifiziert Spalte '%1', die nicht vorhanden ist",
+          overrideFragDbSpalte, OVERRIDE_FRAG_DB_SPALTE), e);
+      }
+      catch (IOException x)
+      {
+        Logger.error(L.m("Fehler beim Parsen der %2 '%1'", overrideFragDbSpalte,
+          OVERRIDE_FRAG_DB_SPALTE), x);
+      }
+      catch (SyntaxErrorException x)
+      {
+        Logger.error(L.m("Fehler beim Parsen der %2 '%1'", overrideFragDbSpalte,
+          OVERRIDE_FRAG_DB_SPALTE), x);
+      }
+    }
+
+    return overrideFragConf;
+  }
+  
+  /**
    * Diese Klasse beschreibt die Ersetzung eines bestehendes Formularfeldes durch
    * neue Felder oder konstante Textinhalte. Sie liefert einen Iterator, über den die
    * einzelnen Elemente (Felder bzw. fester Text) vom Typ SubstElement iteriert
@@ -4131,11 +4312,13 @@ public class TextDocumentModel
       list.add(new SubstElement(SubstElement.FIXED_TEXT, text));
     }
 
+    @Override
     public Iterator<SubstElement> iterator()
     {
       return list.iterator();
     }
 
+    @Override
     public String toString()
     {
       StringBuilder buffy = new StringBuilder();
@@ -4183,6 +4366,7 @@ public class TextDocumentModel
         return type == FIXED_TEXT;
       }
 
+      @Override
       public String toString()
       {
         return (isField() ? "FIELD" : "FIXED_TEXT") + " \"" + value + "\"";
@@ -4202,6 +4386,7 @@ public class TextDocumentModel
   {
     simulationResult = new SimulationResults();
     simulationResult.setFormFieldValues(formFieldValues);
+    simulationResult.setGroupsVisibilityState(mapGroupIdToVisibilityState);
 
     // Aktuell gesetzte FormField-Inhalte auslesen und simulationResults bekannt
     // machen.
@@ -4227,5 +4412,48 @@ public class TextDocumentModel
     SimulationResults r = simulationResult;
     simulationResult = null;
     return r;
+  }
+
+  /**
+   * Diese Methode durchsucht das Element element bzw. dessen XEnumerationAccess
+   * Interface rekursiv nach TextField.Annotation-Objekten und liefert das erste
+   * gefundene TextField.Annotation-Objekt zurück, oder null, falls kein
+   * entsprechendes Element gefunden wurde.
+   * 
+   * @param element
+   *          Das erste gefundene AnnotationField oder null, wenn keines gefunden
+   *          wurde.
+   */
+  private XTextField findAnnotationFieldRecursive(Object element)
+  {
+    // zuerst die Kinder durchsuchen (falls vorhanden):
+    if (UNO.XEnumerationAccess(element) != null)
+    {
+      XEnumeration xEnum = UNO.XEnumerationAccess(element).createEnumeration();
+  
+      while (xEnum.hasMoreElements())
+      {
+        try
+        {
+          Object child = xEnum.nextElement();
+          XTextField found = findAnnotationFieldRecursive(child);
+          // das erste gefundene Element zurückliefern.
+          if (found != null) return found;
+        }
+        catch (Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+    }
+  
+    Object textField = UNO.getProperty(element, "TextField");
+    if (textField != null
+      && UNO.supportsService(textField, "com.sun.star.text.TextField.Annotation"))
+    {
+      return UNO.XTextField(textField);
+    }
+  
+    return null;
   }
 }

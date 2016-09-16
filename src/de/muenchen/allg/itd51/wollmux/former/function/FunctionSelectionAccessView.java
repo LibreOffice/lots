@@ -641,7 +641,7 @@ public class FunctionSelectionAccessView implements View
     }
   }
 
-  public JComponent JComponent()
+  public JComponent getComponent()
   {
     return myPanel;
   }

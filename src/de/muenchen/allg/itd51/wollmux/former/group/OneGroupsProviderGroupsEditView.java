@@ -150,7 +150,7 @@ public class OneGroupsProviderGroupsEditView implements View
     myList.removeListSelectionListener(myListener);
   }
 
-  public JComponent JComponent()
+  public JComponent getComponent()
   {
     return myPanel;
   }

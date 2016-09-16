@@ -114,7 +114,7 @@ public class DocumentCommandInterpreter
   /**
    * Enthält die Instanz auf das zentrale WollMuxSingleton.
    */
-  private WollMuxSingleton mux;
+  private boolean debugMode;
 
   /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
@@ -128,10 +128,10 @@ public class DocumentCommandInterpreter
    *          Eine Liste mit fragment-urls, die für das Kommando insertContent
    *          benötigt wird.
    */
-  public DocumentCommandInterpreter(TextDocumentModel model, WollMuxSingleton mux)
+  public DocumentCommandInterpreter(TextDocumentModel model, boolean debugMode)
   {
     this.model = model;
-    this.mux = mux;
+    this.debugMode = debugMode;
   }
 
   /**
@@ -147,7 +147,7 @@ public class DocumentCommandInterpreter
   public DocumentCommandInterpreter(TextDocumentModel model)
   {
     this.model = model;
-    this.mux = WollMuxSingleton.getInstance();
+    this.debugMode = false;
   }
 
   /**
@@ -160,10 +160,17 @@ public class DocumentCommandInterpreter
     Logger.debug("scanGlobalDocumentCommands");
     boolean modified = model.getDocumentModified();
 
-    GlobalDocumentCommandsScanner s = new GlobalDocumentCommandsScanner();
-    s.execute(model.getDocumentCommands());
-
-    model.setDocumentModified(modified);
+    try
+    {
+      model.setDocumentModifiable(false);
+      GlobalDocumentCommandsScanner s = new GlobalDocumentCommandsScanner();
+      s.execute(model.getDocumentCommands());
+    }
+    finally
+    {
+      model.setDocumentModified(modified);
+      model.setDocumentModifiable(true);
+    }
   }
 
   /**
@@ -186,14 +193,20 @@ public class DocumentCommandInterpreter
   {
     Logger.debug("scanInsertFormValueCommands");
     boolean modified = model.getDocumentModified();
+    try
+    {
+      model.setDocumentModifiable(false);
+      InsertFormValueCommandsScanner s = new InsertFormValueCommandsScanner();
+      s.execute(model.getDocumentCommands());
 
-    InsertFormValueCommandsScanner s = new InsertFormValueCommandsScanner();
-    s.execute(model.getDocumentCommands());
-
-    model.setIDToFormFields(s.idToFormFields);
-    model.collectNonWollMuxFormFields();
-
-    model.setDocumentModified(modified);
+      model.setIDToFormFields(s.idToFormFields);
+      model.collectNonWollMuxFormFields();
+    }
+    finally
+    {
+      model.setDocumentModified(modified);
+      model.setDocumentModifiable(true);
+    }
   }
 
   /**
@@ -204,71 +217,79 @@ public class DocumentCommandInterpreter
    */
   public void executeTemplateCommands() throws WMCommandsFailedException
   {
-    Logger.debug("executeTemplateCommands");
-    boolean modified = model.getDocumentModified();
-
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
     int errors = 0;
+    boolean modified = model.getDocumentModified();
 
-    // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
-    // können, damit der DocumentCommandTree vollständig aufgebaut werden
-    // kann.
-    errors +=
-      new DocumentExpander(model.getFragUrls()).execute(model.getDocumentCommands());
-
-    // Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
-    // Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls
-    // Seitenvorlage Wollmuxseite vorhanden ist.
-    pageStyleWollmuxseiteToStandard(model.doc);
-
-    // Ziffern-Anpassen der Sachleitenden Verfügungen aufrufen:
-    SachleitendeVerfuegung.ziffernAnpassen(model);
-
-    // Jetzt können die TextFelder innerhalb der updateFields Kommandos
-    // geupdatet werden. Durch die Auslagerung in einen extra Schritt wird die
-    // Reihenfolge der Abarbeitung klar definiert (zuerst die updateFields
-    // Kommandos, dann die anderen Kommandos). Dies ist wichtig, da
-    // insbesondere das updateFields Kommando exakt mit einem anderen Kommando
-    // übereinander liegen kann. Ausserdem liegt updateFields thematisch näher
-    // am expandieren der Textfragmente, da updateFields im Prinzip nur dessen
-    // Schwäche beseitigt.
-    errors += new TextFieldUpdater().execute(model.getDocumentCommands());
-
-    // Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
-    // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
-    errors += new MainProcessor().execute(model.getDocumentCommands());
-
-    // Da keine neuen Elemente mehr eingefügt werden müssen, können
-    // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
-    // InsertContent-Kommandos gelöscht werden.
-    // errors += cleanInsertMarks(tree);
-
-    // Erst nachdem die INSERT_MARKS entfernt wurden, lassen sich leere
-    // Absätze zum Beginn und Ende der insertFrag bzw. insertContent-Kommandos
-    // sauber erkennen und entfernen.
-    // errors += new EmptyParagraphCleaner().execute(tree);
-    SurroundingGarbageCollector collect = new SurroundingGarbageCollector();
-    errors += collect.execute(model.getDocumentCommands());
-    collect.removeGarbage();
-
-    // da hier bookmarks entfernt werden, muss der Baum upgedatet werden
-    model.getDocumentCommands().update();
-
-    // Jetzt wird das Dokument als Formulardokument markiert, wenn mindestens ein
-    // Formularfenster definiert ist.
-    if (model.hasFormGUIWindow()) model.markAsFormDocument();
-
-    // Document-Modified auf false setzen, da nur wirkliche
-    // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
-    model.setDocumentModified(modified);
-
-    // ggf. eine WMCommandsFailedException werfen:
-    if (errors != 0)
+    try
     {
-      throw new WMCommandsFailedException(
-        L.m(
-          "Die verwendete Vorlage enthält %1 Fehler.\n\nBitte kontaktieren Sie Ihre Systemadministration.",
-          ((errors == 1) ? "einen" : "" + errors)));
+      Logger.debug("executeTemplateCommands");
+      model.setDocumentModifiable(false);
+
+      // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
+      // können, damit der DocumentCommandTree vollständig aufgebaut werden
+      // kann.
+      errors +=
+        new DocumentExpander(model.getFragUrls()).execute(model.getDocumentCommands());
+
+      // Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
+      // Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls
+      // Seitenvorlage Wollmuxseite vorhanden ist.
+      pageStyleWollmuxseiteToStandard(model.doc);
+
+      // Ziffern-Anpassen der Sachleitenden Verfügungen aufrufen:
+      SachleitendeVerfuegung.ziffernAnpassen(model);
+
+      // Jetzt können die TextFelder innerhalb der updateFields Kommandos
+      // geupdatet werden. Durch die Auslagerung in einen extra Schritt wird die
+      // Reihenfolge der Abarbeitung klar definiert (zuerst die updateFields
+      // Kommandos, dann die anderen Kommandos). Dies ist wichtig, da
+      // insbesondere das updateFields Kommando exakt mit einem anderen Kommando
+      // übereinander liegen kann. Ausserdem liegt updateFields thematisch näher
+      // am expandieren der Textfragmente, da updateFields im Prinzip nur dessen
+      // Schwäche beseitigt.
+      errors += new TextFieldUpdater().execute(model.getDocumentCommands());
+
+      // Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
+      // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
+      errors += new MainProcessor().execute(model.getDocumentCommands());
+
+      // Da keine neuen Elemente mehr eingefügt werden müssen, können
+      // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
+      // InsertContent-Kommandos gelöscht werden.
+      // errors += cleanInsertMarks(tree);
+
+      // Erst nachdem die INSERT_MARKS entfernt wurden, lassen sich leere
+      // Absätze zum Beginn und Ende der insertFrag bzw. insertContent-Kommandos
+      // sauber erkennen und entfernen.
+      // errors += new EmptyParagraphCleaner().execute(tree);
+      SurroundingGarbageCollector collect = new SurroundingGarbageCollector();
+      errors += collect.execute(model.getDocumentCommands());
+      collect.removeGarbage();
+
+      // da hier bookmarks entfernt werden, muss der Baum upgedatet werden
+      model.getDocumentCommands().update();
+
+      // Jetzt wird das Dokument als Formulardokument markiert, wenn mindestens ein
+      // Formularfenster definiert ist.
+      if (model.hasFormGUIWindow()) model.markAsFormDocument();
+
+    }
+    finally
+    {
+      // Document-Modified auf false setzen, da nur wirkliche
+      // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
+      model.setDocumentModified(modified);
+      model.setDocumentModifiable(true);
+
+      // ggf. eine WMCommandsFailedException werfen:
+      if (errors != 0)
+      {
+        throw new WMCommandsFailedException(
+          L.m(
+            "Die verwendete Vorlage enthält %1 Fehler.\n\nBitte kontaktieren Sie Ihre Systemadministration.",
+            ((errors == 1) ? "einen" : "" + errors)));
+      }
     }
   }
 
@@ -392,6 +413,7 @@ public class DocumentCommandInterpreter
      * SetPrintFunction gesetzten Werte in die persistenten Daten des Dokuments
      * übertragen werden und das Dokumentkommando danach gelöscht wird.
      */
+    @Override
     public int executeCommand(SetPrintFunction cmd)
     {
       model.addPrintFunction(cmd.getFunctionName());
@@ -399,6 +421,7 @@ public class DocumentCommandInterpreter
       return 0;
     }
 
+    @Override
     public int executeCommand(SetType cmd)
     {
       model.setType(cmd.getType());
@@ -431,6 +454,7 @@ public class DocumentCommandInterpreter
       return executeAll(commands);
     }
 
+    @Override
     public int executeCommand(InsertFormValue cmd)
     {
       // idToFormFields aufbauen
@@ -501,6 +525,7 @@ public class DocumentCommandInterpreter
         super(range);
       }
 
+      @Override
       public void tueDeinePflicht()
       {
         Bookmark.removeTextFromInside(model.doc, range);
@@ -514,6 +539,7 @@ public class DocumentCommandInterpreter
         super(range);
       }
 
+      @Override
       public void tueDeinePflicht()
       {
         TextDocument.deleteParagraph(range);
@@ -560,6 +586,7 @@ public class DocumentCommandInterpreter
       }
     }
 
+    @Override
     public int executeCommand(InsertFrag cmd)
     {
       if (cmd.hasInsertMarks())
@@ -574,11 +601,12 @@ public class DocumentCommandInterpreter
       cmd.unsetHasInsertMarks();
 
       // Kommando löschen wenn der WollMux nicht im debugModus betrieben wird.
-      cmd.markDone(!mux.isDebugMode());
+      cmd.markDone(!debugMode);
 
       return 0;
     }
 
+    @Override
     public int executeCommand(InsertContent cmd)
     {
       if (cmd.hasInsertMarks())
@@ -588,7 +616,7 @@ public class DocumentCommandInterpreter
       cmd.unsetHasInsertMarks();
 
       // Kommando löschen wenn der WollMux nicht im debugModus betrieben wird.
-      cmd.markDone(!mux.isDebugMode());
+      cmd.markDone(!debugMode);
 
       return 0;
     }
@@ -779,12 +807,13 @@ public class DocumentCommandInterpreter
      * Bearbeitung der anderen Kommandos (insertFrag/insertContent), da das mapping
      * beim insertFrag/insertContent benötigt wird.
      */
+    @Override
     public int executeCommand(OverrideFrag cmd)
     {
       try
       {
         model.setOverrideFrag(cmd.getFragID(), cmd.getNewFragID());
-        cmd.markDone(!mux.isDebugMode());
+        cmd.markDone(!debugMode);
         return 0;
       }
       catch (OverrideFragChainException e)
@@ -800,6 +829,7 @@ public class DocumentCommandInterpreter
      * bookmarkName ein. Im Fehlerfall wird eine entsprechende Fehlermeldung
      * eingefügt.
      */
+    @Override
     public int executeCommand(InsertFrag cmd)
     {
       cmd.setErrorState(false);
@@ -878,7 +908,7 @@ public class DocumentCommandInterpreter
 
           Logger.error(msg);
 
-          WollMuxSingleton.showInfoModal(L.m("WollMux-Fehler"), msg);
+          ModalDialogs.showInfoModal(L.m("WollMux-Fehler"), msg);
         }
         else
         {
@@ -899,6 +929,7 @@ public class DocumentCommandInterpreter
      * übergebenen frag_urls liste ein. Im Fehlerfall wird eine entsprechende
      * Fehlermeldung eingefügt.
      */
+    @Override
     public int executeCommand(InsertContent cmd)
     {
       cmd.setErrorState(false);
@@ -1230,7 +1261,7 @@ public class DocumentCommandInterpreter
 
         Logger.error(error);
 
-        ConfigThingy conf = mux.getWollmuxConf();
+        ConfigThingy conf = WollMuxFiles.getWollmuxConf();
         ConfigThingy WarnungenConf = conf.query("Textbausteine").query("Warnungen");
 
         String message = "";
@@ -1243,7 +1274,7 @@ public class DocumentCommandInterpreter
 
         if (message.equals("true") || message.equals("on") || message.equals("1"))
         {
-          WollMuxSingleton.showInfoModal("WollMux", error);
+          ModalDialogs.showInfoModal("WollMux", error);
         }
       }
     }
@@ -1281,6 +1312,7 @@ public class DocumentCommandInterpreter
      * wird dieses in die persistenten Daten des Dokuments kopiert und die zugehörige
      * Notiz gelöscht, wenn nicht bereits eine Formularbeschreibung dort existiert.
      */
+    @Override
     public int executeCommand(DocumentCommand.Form cmd)
     {
       cmd.setErrorState(false);
@@ -1294,7 +1326,7 @@ public class DocumentCommandInterpreter
         cmd.setErrorState(true);
         return 1;
       }
-      cmd.markDone(!mux.isDebugMode());
+      cmd.markDone(!debugMode);
       return 0;
     }
 
@@ -1302,6 +1334,7 @@ public class DocumentCommandInterpreter
      * Diese Methode bearbeitet ein InvalidCommand und fügt ein Fehlerfeld an der
      * Stelle des Dokumentkommandos ein.
      */
+    @Override
     public int executeCommand(DocumentCommand.InvalidCommand cmd)
     {
       insertErrorField(cmd, cmd.getException());
@@ -1313,6 +1346,7 @@ public class DocumentCommandInterpreter
      * Diese Methode fügt einen Spaltenwert aus dem aktuellen Datensatz der
      * Absenderdaten ein. Im Fehlerfall wird die Fehlermeldung eingefügt.
      */
+    @Override
     public int executeCommand(DocumentCommand.InsertValue cmd)
     {
       cmd.setErrorState(false);
@@ -1321,7 +1355,7 @@ public class DocumentCommandInterpreter
       String value = null;
       try
       {
-        Dataset ds = mux.getDatasourceJoiner().getSelectedDatasetTransformed();
+        Dataset ds = WollMuxFiles.getDatasourceJoiner().getSelectedDatasetTransformed();
         value = ds.get(spaltenname);
         if (value == null) value = "";
 
@@ -1382,6 +1416,7 @@ public class DocumentCommandInterpreter
     /**
      * Diese Methode updated alle TextFields, die das Kommando cmd umschließt.
      */
+    @Override
     public int executeCommand(UpdateFields cmd)
     {
       XTextRange range = cmd.getTextCursor();
@@ -1390,7 +1425,7 @@ public class DocumentCommandInterpreter
         UnoService cursor = new UnoService(range);
         updateTextFieldsRecursive(cursor);
       }
-      cmd.markDone(!mux.isDebugMode());
+      cmd.markDone(!debugMode);
       return 0;
     }
 

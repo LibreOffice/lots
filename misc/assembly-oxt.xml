@@ -20,6 +20,10 @@
 			<source>oxt/description.xml</source>
 			<filtered>true</filtered>
 		</file>
+		<file>
+			<source>oxt/wollmux.png</source>
+			<outputDirectory>icons</outputDirectory>
+		</file>
 	</files>
 	<fileSets>
 		<fileSet>

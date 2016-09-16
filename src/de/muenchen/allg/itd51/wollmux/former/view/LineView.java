@@ -35,7 +35,7 @@ import java.awt.Color;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
 public abstract class LineView implements View
 {
@@ -62,9 +62,10 @@ public abstract class LineView implements View
   /**
    * Der FormularMax4000, zu dem diese View gehört.
    */
-  protected FormularMax4000 formularMax4000;
+  protected FormularMax4kController formularMax4000;
 
-  public JComponent JComponent()
+  @Override
+  public JComponent getComponent()
   {
     return myPanel;
   }

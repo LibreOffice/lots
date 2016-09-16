@@ -94,7 +94,7 @@ public class TextModule
   public static void createInsertFragFromIdentifier(XTextDocument doc,
       XTextRange range, boolean isManual) throws WollMuxFehlerException
   {
-    ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
+    ConfigThingy conf = WollMuxFiles.getWollmuxConf();
 
     // holt sich Textbausteine aus .conf und sammelt sie in umgekehrter
     // Reihenfolge in der LinkedList tbListe. Damit später definierte

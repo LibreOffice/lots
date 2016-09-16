@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.muenchen</groupId>
 	<artifactId>wollmux</artifactId>
-	<version>16.04</version>
+	<version>16.09</version>
 	<name>WollMux</name>
 
 	<properties>
@@ -12,7 +12,8 @@
 
 	<scm>
 		<developerConnection>scm:git:https://github.com/WollMux/WollMux.git</developerConnection>
-        </scm>
+		<tag>HEAD</tag>
+	</scm>
 
 	<build>
 		<sourceDirectory>src</sourceDirectory>
@@ -495,6 +496,36 @@
 			<groupId>org.codehaus.izpack</groupId>
 			<artifactId>izpack-native</artifactId>
 			<version>5.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fifesoft</groupId>
+			<artifactId>rsyntaxtextarea</artifactId>
+			<version>2.5.8</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fifesoft</groupId>
+			<artifactId>autocomplete</artifactId>
+			<version>2.5.8</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fifesoft</groupId>
+			<artifactId>rstaui</artifactId>
+			<version>2.5.7</version>
 		</dependency>
 	</dependencies>
 </project>

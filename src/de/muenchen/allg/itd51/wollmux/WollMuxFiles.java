@@ -86,6 +86,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -118,6 +119,8 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnTransformer;
+import de.muenchen.allg.itd51.wollmux.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.db.DatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DatasourceSearchDialog;
@@ -307,7 +310,7 @@ public class WollMuxFiles
     SlowServerWatchdog fido = new SlowServerWatchdog(SLOW_SERVER_TIMEOUT);
 
     // Jetzt versuchen, die wollmux.conf zu parsen, falls sie existiert
-    if (wollmuxConfFile != null && wollmuxConfFile.exists())
+    if (wollmuxConfFile != null && wollmuxConfFile.exists() && wollmuxConfFile.isFile())
     {
       fido.start();
       try
@@ -1064,7 +1067,7 @@ public class WollMuxFiles
       BufferedWriter out =
         new BufferedWriter(new OutputStreamWriter(outStream, ConfigThingy.CHARSET));
       out.write("Dump time: " + date + "\n");
-      out.write(WollMuxSingleton.getInstance().getBuildInfo() + "\n");
+      out.write(WollMuxSingleton.getBuildInfo() + "\n");
       StringBuilder buffy = new StringBuilder();
 
       // IP-Adresse für localhost
@@ -1264,8 +1267,8 @@ public class WollMuxFiles
         xMultiComponentFactory.createInstanceWithContext(
           "com.sun.star.configuration.ConfigurationProvider", UNO.defaultContext);
       XMultiServiceFactory xConfigurationServiceFactory =
-        (XMultiServiceFactory) UnoRuntime.queryInterface(XMultiServiceFactory.class,
-          oProvider);
+        UnoRuntime.queryInterface(XMultiServiceFactory.class,
+        oProvider);
 
       PropertyValue[] lArgs = new PropertyValue[1];
       lArgs[0] = new PropertyValue();
@@ -1277,7 +1280,7 @@ public class WollMuxFiles
           "com.sun.star.configuration.ConfigurationAccess", lArgs);
 
       XNameAccess xNameAccess =
-        (XNameAccess) UnoRuntime.queryInterface(XNameAccess.class, configAccess);
+        UnoRuntime.queryInterface(XNameAccess.class, configAccess);
 
       return xNameAccess.getByName(name).toString();
     }
@@ -1463,6 +1466,7 @@ public class WollMuxFiles
       setDaemon(true);
     }
 
+    @Override
     public void run()
     {
       startTime = System.currentTimeMillis();
@@ -1487,6 +1491,7 @@ public class WollMuxFiles
 
       SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           Logger.error(SLOW_SERVER_MESSAGE);
@@ -1608,6 +1613,26 @@ public class WollMuxFiles
   public static void showCredits(boolean showCredits)
   {
     WollMuxFiles.showCredits = showCredits;
+  }
+
+  /**
+   * Diese Methode liefert eine Liste mit den über {@link #senderDisplayTemplate}
+   * definierten String-Repräsentation aller verlorenen gegangenen Datensätze des
+   * DatasourceJoiner (gemäß {@link DatasourceJoiner.Status.lostDatasets}) zurück.
+   * Die genaue Form der String-Repräsentation ist abhängig von
+   * {@link #senderDisplayTemplate}, das in der WollMux-Konfiguration über den Wert
+   * von SENDER_DISPLAYTEMPLATE gesetzt werden kann. Gibt es keine verloren
+   * gegangenen Datensätze, so bleibt die Liste leer.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static List<String> getLostDatasetDisplayStrings()
+  {
+    DatasourceJoiner dj = getDatasourceJoiner();
+    ArrayList<String> list = new ArrayList<String>();
+    for (Dataset ds : dj.getStatus().lostDatasets)
+      list.add(new DatasetListElement(ds, PersoenlicheAbsenderliste.getInstance().getSenderDisplayTemplate()).toString());
+    return list;
   }
 
 }

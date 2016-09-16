@@ -30,16 +30,21 @@
 package de.muenchen.allg.itd51.wollmux.event;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.frame.DispatchResultEvent;
+import com.sun.star.frame.DispatchResultState;
 import com.sun.star.frame.XDispatch;
+import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.frame.XStatusListener;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 
 /**
  * Implementiert XDispatch und kann alle Dispatch-URLs behandeln, die ein
@@ -93,6 +98,7 @@ public class DocumentDispatch extends Dispatch
    * 
    * @see #removeStatusListener(XStatusListener, URL)
    */
+  @Override
   public void addStatusListener(XStatusListener listener, URL url)
   {
     if (origDisp != null)
@@ -107,6 +113,7 @@ public class DocumentDispatch extends Dispatch
    * 
    * @see #addStatusListener(XStatusListener, URL)
    */
+  @Override
   public void removeStatusListener(XStatusListener listener, URL url)
   {
     if (origDisp != null)
@@ -120,7 +127,7 @@ public class DocumentDispatch extends Dispatch
     XTextDocument doc = UNO.XTextDocument(frame.getController().getModel());
     if (doc != null)
     {
-      return WollMuxSingleton.getInstance().getTextDocumentModel(doc);
+      return DocumentManager.getTextDocumentModel(doc);
     }
     return null;
   }
@@ -128,6 +135,15 @@ public class DocumentDispatch extends Dispatch
   public void dispatch__uno_print(String arg, PropertyValue[] props)
   {
     WollMuxEventHandler.handlePrint(getModel(), origDisp, origUrl, props);
+  }
+  
+  public void dispatch__uno_print(String arg, PropertyValue[] props, XDispatchResultListener listener)
+  {
+    WollMuxEventHandler.handlePrint(getModel(), origDisp, origUrl, props);
+    DispatchResultEvent dre = new DispatchResultEvent();
+    dre.Source = this;
+    dre.State = DispatchResultState.SUCCESS;
+    listener.dispatchFinished(dre);
   }
 
   public void dispatch__uno_save(String arg, PropertyValue[] props)
@@ -138,12 +154,46 @@ public class DocumentDispatch extends Dispatch
       origDisp.dispatch(origUrl, props);
   }
 
+  public void dispatch__uno_save(String arg, PropertyValue[] props, XDispatchResultListener listener)
+  {
+    if (!getModel().hasURL())
+    {
+      WollMuxEventHandler.handleSaveAsSync(getModel(), origDisp, origUrl, props);
+      DispatchResultEvent dre = new DispatchResultEvent();
+      dre.Source = this;
+      dre.State = DispatchResultState.SUCCESS;
+      listener.dispatchFinished(dre);
+    }
+    else 
+    {
+      XNotifyingDispatch nd = UnoRuntime.queryInterface(XNotifyingDispatch.class, origDisp);
+      nd.dispatchWithNotification(origUrl, props, listener);
+    }
+  }
+
   public void dispatch__uno_saveas(String arg, PropertyValue[] props)
   {
     if (!getModel().hasURL())
       WollMuxEventHandler.handleSaveAs(getModel(), origDisp, origUrl, props);
     else
       origDisp.dispatch(origUrl, props);
+  }
+
+  public void dispatch__uno_saveas(String arg, PropertyValue[] props, XDispatchResultListener listener)
+  {
+    if (!getModel().hasURL())
+    {
+      WollMuxEventHandler.handleSaveAsSync(getModel(), origDisp, origUrl, props);
+      DispatchResultEvent dre = new DispatchResultEvent();
+      dre.Source = this;
+      dre.State = DispatchResultState.SUCCESS;
+      listener.dispatchFinished(dre);
+    }
+    else 
+    {
+      XNotifyingDispatch nd = UnoRuntime.queryInterface(XNotifyingDispatch.class, origDisp);
+      nd.dispatchWithNotification(origUrl, props, listener);
+    }
   }
 
   public void dispatch__uno_printdefault(String arg, PropertyValue[] props)

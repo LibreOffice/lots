@@ -46,7 +46,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupsProvider;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
@@ -70,7 +70,7 @@ public class SectionModel
   /**
    * Der FormularMax4000 zu dem dieses Model gehört.
    */
-  private FormularMax4000 formularMax4000;
+  private FormularMax4kController formularMax4000;
 
   /**
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert
@@ -120,7 +120,7 @@ public class SectionModel
    * TESTED
    */
   public SectionModel(String sectionName, XTextSectionsSupplier doc,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
     parseName(sectionName);
@@ -156,7 +156,7 @@ public class SectionModel
         while (iter.hasNext())
         {
           set.add(formularMax4000.getIDManager().getID(
-            FormularMax4000.NAMESPACE_GROUPS, iter.next().toString()));
+            FormularMax4kController.NAMESPACE_GROUPS, iter.next().toString()));
         }
         // Prefix erst hier ins globale Feld übertragen, wenn keine Exception
         // geflogen ist.
@@ -175,7 +175,7 @@ public class SectionModel
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormularMax4000 getFormularMax4000()
+  public FormularMax4kController getFormularMax4000()
   {
     return formularMax4000;
   }

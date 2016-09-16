@@ -65,7 +65,7 @@ public class NoConfig
 
     if (isNoConfig() && !isNoConfigInfoShown())
     {
-      WollMuxSingleton.showInfoModal(
+      ModalDialogs.showInfoModal(
         L.m("WollMux-Hinweis - fehlende wollmux.conf"),
         L.m("WollMux läuft ohne wollmux.conf !\n"
           + "Aus diesem Grund ist leider nicht der komplette Funktionsumfang verfügbar.\n"));

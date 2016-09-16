@@ -44,5 +44,5 @@ public interface View
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public JComponent JComponent();
+  public JComponent getComponent();
 }

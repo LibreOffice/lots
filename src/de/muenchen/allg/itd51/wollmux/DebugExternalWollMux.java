@@ -1,11 +1,15 @@
 package de.muenchen.allg.itd51.wollmux;
 
+import com.sun.star.container.XSet;
 import com.sun.star.frame.TerminationVetoException;
 import com.sun.star.frame.XTerminateListener;
 import com.sun.star.lang.EventObject;
+import com.sun.star.ui.XUIElementFactoryRegistration;
+import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.comp.WollMux;
+import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
 
 /**
  * Über diese Klasse kann der WollMux zum Debuggen in der lokalen JVM gestartet
@@ -30,20 +34,18 @@ public class DebugExternalWollMux
     Logger.setIgnoreInit(true);
 
     UNO.init();
-    
+
     UNO.desktop.addTerminateListener(new XTerminateListener()
     {
-      
+
       @Override
       public void disposing(EventObject arg0)
-      {
-      }
-      
+      {}
+
       @Override
       public void queryTermination(EventObject arg0) throws TerminationVetoException
-      {
-      }
-      
+      {}
+
       @Override
       public void notifyTermination(EventObject arg0)
       {
@@ -52,6 +54,19 @@ public class DebugExternalWollMux
       }
     });
 
-    new WollMux(UNO.defaultContext);
+    XUIElementFactoryRegistration factoryRegistration =
+      UnoRuntime.queryInterface(
+        XUIElementFactoryRegistration.class,
+        UNO.defaultContext.getServiceManager().createInstanceWithContext(
+          "com.sun.star.ui.UIElementFactoryManager", UNO.defaultContext));
+
+    factoryRegistration.registerFactory("toolpanel", "WollMuxSidebarFactory", null,
+      "de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory");
+    XSet set =
+      UnoRuntime.queryInterface(XSet.class, UNO.defaultContext.getServiceManager());
+    set.insert(WollMux.__getComponentFactory(WollMux.class.getName()));
+    set.insert(WollMux.__getComponentFactory(WollMuxSidebarFactory.class.getName()));
+
+    WollMux wm = new WollMux(UNO.defaultContext);
   }
 }

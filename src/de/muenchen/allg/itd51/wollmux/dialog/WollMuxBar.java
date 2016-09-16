@@ -85,12 +85,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
@@ -114,35 +110,22 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 
 import com.sun.star.document.MacroExecMode;
 
@@ -156,6 +139,7 @@ import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
 /**
@@ -165,7 +149,7 @@ import de.muenchen.allg.itd51.wollmux.event.Dispatch;
  */
 public class WollMuxBar
 {
-  private static final String ALLOW_USER_CONFIG = "ALLOW_USER_CONFIG";
+  public static final String ALLOW_USER_CONFIG = "ALLOW_USER_CONFIG";
   
   private static final String ALLOW_MENUMANAGER = "ALLOW_MENUMANAGER";
 
@@ -290,25 +274,25 @@ public class WollMuxBar
   /**
    * Kontext für GUI-Elemente in JPanels (für Übergabe an die uiElementFactory).
    */
-  private UIElementFactory.Context panelContext;
+  private UIElementContext panelContext;
 
   /**
    * Kontext für GUI-Elemente in JMenus und JPopupMenus (für Übergabe an die
    * uiElementFactory).
    */
-  private UIElementFactory.Context menuContext;
+  private UIElementContext menuContext;
 
   /**
    * Enthält nach dem Aufruf von initMenuOrder(...) eine Liste aller IDs von Menüs
    * und deren per Tiefensuche ermittelten Untermenüs
    */
-  private List<String> menuOrder = new ArrayList<String>();
+  List<String> menuOrder = new ArrayList<String>();
 
   /**
    * Enthält nach dem Aufruf von initMenuOrder(...) eine Zuordnung von MenüIDs zu den
    * mit vollständigen Pfaden (der Menünavigation) aufgeführten Namen der Menüs
    */
-  private Map<String, String> mapMenuIDToLabel = new HashMap<String, String>();
+  Map<String, String> mapMenuIDToLabel = new HashMap<String, String>();
 
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
@@ -327,7 +311,7 @@ public class WollMuxBar
   private static final String CONNECTION_FAILED_MESSAGE =
     L.m("Es konnte keine Verbindung zu OpenOffice bzw. zur WollMux-Komponente in OpenOffice hergestellt werden.\n");
 
-  private static final String WOLLMUX_CONFIG_ERROR_MESSAGE =
+  public static final String WOLLMUX_CONFIG_ERROR_MESSAGE =
     L.m("Aus Ihrer WollMux-Konfiguration konnte kein Abschnitt \"Symbolleisten\" gelesen werden.\n"
       + "Die WollMux-Leiste kann daher nicht gestartet werden. Bitte überprüfen Sie, ob in Ihrer wollmux.conf\n"
       + "der %include für die Konfiguration der WollMuxBar (z.B. wollmuxbar_standard.conf) vorhanden ist und\n"
@@ -339,6 +323,7 @@ public class WollMuxBar
    */
   private ActionListener actionListener_abort = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       abort();
@@ -350,6 +335,7 @@ public class WollMuxBar
    */
   private ActionListener actionListener_openMenu = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       openMenu(e);
@@ -367,6 +353,7 @@ public class WollMuxBar
    */
   private ActionListener actionListener_editSenderList = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       eventHandler.handleWollMuxUrl(Dispatch.DISP_wmPALVerwalten, null);
@@ -379,6 +366,7 @@ public class WollMuxBar
    */
   private ActionListener senderboxActionListener = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       senderBoxItemChanged(e);
@@ -494,6 +482,7 @@ public class WollMuxBar
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           try
@@ -781,7 +770,7 @@ public class WollMuxBar
    *          siehe stepx
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void addUIElements(ConfigThingy menuConf, ConfigThingy elementParent,
+  void addUIElements(ConfigThingy menuConf, ConfigThingy elementParent,
       JComponent compo, int stepx, int stepy, String context)
   {
     addUIElementsChecked(new HashSet<String>(), menuConf, elementParent, compo,
@@ -815,7 +804,7 @@ public class WollMuxBar
     int y = -stepy;
     int x = -stepx;
 
-    UIElementFactory.Context contextMap =
+    UIElementContext contextMap =
       context.equals("menu") ? menuContext : panelContext;
 
     Iterator<ConfigThingy> piter = elementParent.iterator();
@@ -912,7 +901,7 @@ public class WollMuxBar
           catch (Exception e)
           {}
 
-          SearchBox searchBox = new SearchBox(label, menuConf);
+          SearchBox searchBox = new SearchBox(this, label, menuConf);
           JTextField sfield = searchBox.getTextField();
           sfield.setMinimumSize(sfield.getPreferredSize());
           sfield.setMaximumSize(sfield.getPreferredSize());
@@ -1173,7 +1162,7 @@ public class WollMuxBar
 
     UIElementEventHandler myUIElementEventHandler = new MyUIElementEventHandler();
 
-    panelContext = new UIElementFactory.Context();
+    panelContext = new UIElementContext();
     panelContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
     panelContext.mapTypeToLabelType = mapTypeToLabelType;
     panelContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
@@ -1182,7 +1171,7 @@ public class WollMuxBar
     panelContext.mapTypeToType.put("separator", "v-separator");
     panelContext.mapTypeToType.put("glue", "h-glue");
 
-    menuContext = new UIElementFactory.Context();
+    menuContext = new UIElementContext();
     menuContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
     menuContext.mapTypeToLabelType = mapTypeToLabelType;
     menuContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
@@ -1206,6 +1195,7 @@ public class WollMuxBar
    */
   private class MyUIElementEventHandler implements UIElementEventHandler
   {
+    @Override
     public void processUiElementEvent(UIElement source, String eventType,
         Object[] args)
     {
@@ -1275,123 +1265,7 @@ public class WollMuxBar
    */
   private void multiOpenDialog(final ConfigThingy conf)
   {
-    final JFrame multiOpenFrame = new JFrame(L.m("Was möchten Sie öffnen ?"));
-    multiOpenFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-    Box vbox = Box.createVerticalBox();
-    multiOpenFrame.getContentPane().add(vbox);
-    vbox.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    Box hbox;
-    /*
-     * hbox = Box.createHorizontalBox(); hbox.add(new JLabel(L.m("Was möchten Sie
-     * öffnen ?"))); hbox.add(Box.createHorizontalGlue()); vbox.add(hbox);
-     * vbox.add(Box.createVerticalStrut(5));
-     */
-    final ConfigThingy openConf = new ConfigThingy(conf); // Kopie machen, die
-    // manipuliert werden darf.
-    Iterator<ConfigThingy> iter;
-    try
-    {
-      iter = conf.get("Labels").iterator();
-    }
-    catch (NodeNotFoundException e2)
-    {
-      Logger.error(L.m("ACTION \"open\" erfordert Abschnitt \"Labels\" in den OPEN-Angaben"));
-      return;
-    }
-    final List<JCheckBox> checkBoxes = new Vector<JCheckBox>();
-    while (iter.hasNext())
-    {
-      hbox = Box.createHorizontalBox();
-      String label = iter.next().toString();
-      JCheckBox checkbox = new JCheckBox(label, true);
-      checkBoxes.add(checkbox);
-      hbox.add(checkbox);
-      hbox.add(Box.createHorizontalGlue());
-      vbox.add(hbox);
-      vbox.add(Box.createVerticalStrut(5));
-    }
-
-    hbox = Box.createHorizontalBox();
-    JButton button = new JButton(L.m("Abbrechen"));
-    button.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        multiOpenFrame.dispose();
-      }
-    });
-    hbox.add(button);
-    hbox.add(Box.createHorizontalStrut(5));
-    hbox.add(Box.createHorizontalGlue());
-
-    button = new JButton(L.m("Alle"));
-    button.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        Iterator<JCheckBox> iter = checkBoxes.iterator();
-        while (iter.hasNext())
-          iter.next().setSelected(true);
-      }
-    });
-    hbox.add(button);
-    hbox.add(Box.createHorizontalStrut(5));
-
-    button = new JButton(L.m("Keine"));
-    button.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        Iterator<JCheckBox> iter = checkBoxes.iterator();
-        while (iter.hasNext())
-          iter.next().setSelected(false);
-      }
-    });
-    hbox.add(button);
-    hbox.add(Box.createHorizontalStrut(5));
-    hbox.add(Box.createHorizontalGlue());
-
-    button = new JButton(L.m("Öffnen"));
-    button.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        multiOpenFrame.dispose();
-        Iterator<JCheckBox> iter = checkBoxes.iterator();
-        ConfigThingy fragConf;
-        try
-        {
-          fragConf = openConf.get("Fragmente", 1);
-        }
-        catch (NodeNotFoundException e1)
-        {
-          Logger.error(L.m("Abschnitt \"Fragmente\" fehlt in OPEN-Angabe"));
-          return;
-        }
-        Iterator<ConfigThingy> fragIter = fragConf.iterator();
-        while (iter.hasNext() && fragIter.hasNext())
-        {
-          fragIter.next();
-          JCheckBox checkbox = iter.next();
-          if (!checkbox.isSelected()) fragIter.remove();
-        }
-
-        eventHandler.handleWollMuxUrl(Dispatch.DISP_wmOpen,
-          openConf.stringRepresentation(true, '"', false));
-      }
-    });
-    hbox.add(button);
-
-    vbox.add(hbox);
-
-    multiOpenFrame.setAlwaysOnTop(true);
-    multiOpenFrame.pack();
-    int frameWidth = multiOpenFrame.getWidth();
-    int frameHeight = multiOpenFrame.getHeight();
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width / 2 - frameWidth / 2;
-    int y = screenSize.height / 2 - frameHeight / 2;
-    multiOpenFrame.setLocation(x, y);
+    final JFrame multiOpenFrame = new MultiOpenDialog(L.m("Was möchten Sie öffnen ?"), conf, eventHandler);
     multiOpenFrame.setVisible(true);
   }
 
@@ -1430,6 +1304,7 @@ public class WollMuxBar
   {
     new MenuManager(defaultConf, userConf, new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         reinit();
@@ -1446,6 +1321,7 @@ public class WollMuxBar
   {
     config.showOptionsDialog(myFrame, new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         // derzeit ist der OK-Vergleich unnötig, da bei negativer Beendigung des
@@ -1493,7 +1369,7 @@ public class WollMuxBar
    * 
    * @return Der Build-Status der aktuellen WollMuxBar.
    */
-  public String getBuildInfo()
+  public static String getBuildInfo()
   {
     BufferedReader in = null;
     try
@@ -1622,90 +1498,6 @@ public class WollMuxBar
     setSizeAndLocation();
   }
 
-  private static abstract class Senderbox
-  {
-    protected JComponent menu;
-
-    public void removeAllItems()
-    {
-      menu.removeAll();
-    }
-
-    public void addItem(String item, ActionListener listen, String actionCommand,
-        MouseListener mouseListen)
-    {
-      JMenuItem menuItem = new JMenuItem(item);
-      menuItem.addActionListener(listen);
-      menuItem.setActionCommand(actionCommand);
-      menuItem.addMouseListener(mouseListen);
-      menu.add(menuItem);
-    }
-
-    public void addSeparator()
-    {
-      menu.add(new JSeparator());
-    }
-
-    public abstract void setSelectedItem(String item);
-
-    public static Senderbox create(JMenu menu)
-    {
-      return new JMenuSenderbox(menu);
-    }
-
-    public static Senderbox create(JPopupMenu menu, AbstractButton button)
-    {
-      return new JPopupMenuSenderbox(menu, button);
-    }
-
-    private static class JMenuSenderbox extends Senderbox
-    {
-
-      public JMenuSenderbox(JMenu menu)
-      {
-        this.menu = menu;
-      }
-
-      public void setSelectedItem(String item)
-      {
-        ((JMenu) menu).setText(item);
-      }
-    }
-
-    private static class JPopupMenuSenderbox extends Senderbox
-    {
-      private AbstractButton button;
-
-      public JPopupMenuSenderbox(JPopupMenu menu, AbstractButton button)
-      {
-        this.menu = menu;
-        this.button = button;
-        this.button.putClientProperty("menu", menu);
-
-        button.addAncestorListener(new AncestorListener()
-        {
-
-          public void ancestorRemoved(AncestorEvent event)
-          {
-            if (event.getComponent().isVisible())
-              ((JPopupMenu) event.getComponent().getClientProperty("menu")).setVisible(false);
-          }
-
-          public void ancestorMoved(AncestorEvent event)
-          {}
-
-          public void ancestorAdded(AncestorEvent event)
-          {}
-        });
-      }
-
-      public void setSelectedItem(String item)
-      {
-        button.setText(item);
-      }
-    }
-  }
-
   /**
    * Diese Methode initialisiert die Datenstrukturen menuOrder und mapMenuIDToLabel
    * zur Verwendung für die Searchbox. Dabei werden ausgehend von currentMenu alle
@@ -1748,254 +1540,6 @@ public class WollMuxBar
   }
 
   /**
-   * Implementiert eine SearchBox, die in einem JTextField nach Menüeinträgen der
-   * WollMuxBar suchen kann und so den Schnellzugriff auf bestimmte Menüeinträge
-   * ermöglicht.
-   * 
-   * @author Christoph Lutz (privat)
-   */
-  private class SearchBox
-  {
-    private static final int MAX_SHOWN = 20;
-
-    private static final int TEXTFIELD_COLUMNS = 12;
-
-    private final JTextField textField;
-
-    private final JPopupMenu menu;
-
-    private final ConfigThingy menuConf;
-
-    private boolean ignoreNextFocusRequest;
-
-    public SearchBox(final String label, ConfigThingy menuConf)
-    {
-      this.textField = new JTextField(L.m(label), TEXTFIELD_COLUMNS);
-      this.menu = new JPopupMenu();
-      this.menuConf = menuConf;
-      this.ignoreNextFocusRequest = false;
-
-      this.textField.putClientProperty("menu", menu);
-
-      this.textField.addAncestorListener(new AncestorListener()
-      {
-
-        public void ancestorRemoved(AncestorEvent event)
-        {
-          if (event.getComponent().isVisible())
-            ((JPopupMenu) event.getComponent().getClientProperty("menu")).setVisible(false);
-        }
-
-        public void ancestorMoved(AncestorEvent event)
-        {}
-
-        public void ancestorAdded(AncestorEvent event)
-        {}
-      });
-
-      textField.addActionListener(new ActionListener()
-      {
-        public void actionPerformed(ActionEvent arg0)
-        {
-          for (Component compo : menu.getComponents())
-          {
-            if (compo instanceof JMenuItem)
-            {
-              JMenuItem item = (JMenuItem) compo;
-              if (item.isArmed())
-              {
-                item.doClick();
-                menu.setVisible(false);
-                return;
-              }
-            }
-          }
-        }
-      });
-
-      // Der MouseListener wird benötigt, um den 'Suchen...'-String zu löschen, wenn
-      // das Suchfeld direkt nach dem Start angeklickt wird. Dann hat das Suchfeld
-      // bereits den Fokus und der FocusListener wird nicht ausgelöst.
-      textField.addMouseListener(new MouseAdapter()
-      {
-        public void mousePressed(MouseEvent e)
-        {
-          if (textField.hasFocus() && textField.getText().equals(label))
-          {
-            textField.setText("");
-          }
-        }
-      });
-
-      textField.addFocusListener(new FocusListener()
-      {
-        public void focusLost(FocusEvent arg0)
-        {
-          if (arg0.getOppositeComponent() == null)
-          {
-            arg0.getComponent().transferFocus();
-          }
-        }
-
-        public void focusGained(FocusEvent arg0)
-        {
-          if (ignoreNextFocusRequest)
-          {
-            ignoreNextFocusRequest = false;
-            return;
-          }
-
-          // "Suchen..." löschen wenn der erste nutzerinitiiert Focus kommt
-          if (arg0.getOppositeComponent() != null
-            && textField.getText().equals(label)) textField.setText("");
-
-          // Menü sichtbar machen, wenn nicht bereits sichtbar
-          if (menu.getComponentCount() > 0 && !menu.isVisible())
-          {
-            menu.setVisible(true);
-            textField.requestFocusInWindow();
-          }
-
-          // den ganzen Text markieren
-          textField.setSelectionStart(0);
-          textField.setSelectionEnd(textField.getText().length());
-        }
-      });
-
-      textField.getDocument().addDocumentListener(new DocumentListener()
-      {
-        public void changedUpdate(DocumentEvent e)
-        {
-          update(e);
-        }
-
-        public void removeUpdate(DocumentEvent e)
-        {
-          update(e);
-        }
-
-        public void insertUpdate(DocumentEvent e)
-        {
-          update(e);
-        }
-
-        private void update(DocumentEvent e)
-        {
-          Document doc = e.getDocument();
-          String text = "";
-          try
-          {
-            text = doc.getText(0, doc.getLength()).trim();
-          }
-          catch (BadLocationException e1)
-          {}
-
-          String[] words = null;
-          if (text.length() > 0) words = text.split("\\s+");
-          updateResultPopupMenu(words);
-        }
-      });
-    }
-
-    public JTextField getTextField()
-    {
-      return textField;
-    }
-
-    private void updateResultPopupMenu(String[] words)
-    {
-      menu.setVisible(false);
-      menu.removeAll();
-
-      int count = 0;
-      for (String menuId : menuOrder)
-      {
-        boolean added = false;
-        ConfigThingy elementeKnoten = new ConfigThingy("");
-        try
-        {
-          elementeKnoten = menuConf.query(menuId).getLastChild().query("Elemente");
-        }
-        catch (NodeNotFoundException e)
-        {}
-
-        ConfigThingy matches = new ConfigThingy("Matches");
-        for (ConfigThingy elemente : elementeKnoten)
-          for (ConfigThingy button : elemente)
-            if (buttonMatches(button, words) && count++ <= MAX_SHOWN)
-            {
-              if (!added)
-              {
-                JMenuItem label = new JMenuItem(mapMenuIDToLabel.get(menuId));
-                label.setBorder(BorderFactory.createBevelBorder(1));
-                label.setBackground(Color.WHITE);
-                label.setEnabled(false);
-                menu.add(label);
-                added = true;
-              }
-              matches.addChild(button);
-            }
-        addUIElements(menuConf, matches, menu, 0, 1, "menu");
-      }
-
-      if (count > 0)
-      {
-        // nur anzeigen, wenn mindestens zwei Treffer nicht angezeigt wurden
-        if (count > (MAX_SHOWN + 1))
-        {
-          menu.addSeparator();
-          menu.add(new JLabel(L.m("und %1 nicht angezeigte Treffer", count
-            - MAX_SHOWN)));
-        }
-        menu.show(textField, 0, textField.getHeight());
-        ignoreNextFocusRequest = true;
-        textField.requestFocusInWindow();
-      }
-    }
-
-    /**
-     * Liefert true gdw. das durch button beschriebene Element ein button ist
-     * (TYPE-Attribut muss "button" sein) und alle in words enthaltenen strings ohne
-     * Beachtung der Groß-/Kleinschreibung im Wert des LABEL-Attributs (das natürlich
-     * vorhanden sein muss) vorkommen.
-     * 
-     * @param button
-     *          Den ConfigThingy-Knoten, der ein UI-Element beschreibt, wie z.B.
-     *          "(TYPE 'button' LABEL 'Hallo' ...)"
-     * @param words
-     *          Diese Wörter müssen ALLE im LABEL vorkommen (ohne Beachtung der
-     *          Groß-/Kleinschreibung).
-     */
-    private boolean buttonMatches(ConfigThingy button, String[] words)
-    {
-      if (words == null || words.length == 0) return false;
-      try
-      {
-        String type = button.get("TYPE").toString();
-        if (!type.equals("button")) return false;
-      }
-      catch (NodeNotFoundException e1)
-      {
-        return false;
-      }
-
-      String label;
-      try
-      {
-        label = button.get("LABEL").toString();
-      }
-      catch (NodeNotFoundException e1)
-      {
-        return false;
-      }
-
-      for (String word : words)
-        if (!label.toLowerCase().contains(word.toLowerCase())) return false;
-      return true;
-    }
-  }
-
-  /**
    * Erzeugt ein Popup-Fenster, das den Benutzer darüber informiert, dass keine
    * Verbindung zu OpenOffice hergestellt werden konnte.
    * 
@@ -2007,6 +1551,7 @@ public class WollMuxBar
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           JOptionPane.showMessageDialog(null, CONNECTION_FAILED_MESSAGE,
@@ -2029,26 +1574,33 @@ public class WollMuxBar
     public MyWindowListener()
     {}
 
+    @Override
     public void windowActivated(WindowEvent e)
     {}
 
+    @Override
     public void windowClosed(WindowEvent e)
     {}
 
+    @Override
     public void windowClosing(WindowEvent e)
     {
       closeAction.actionPerformed(null);
     }
 
+    @Override
     public void windowDeactivated(WindowEvent e)
     {}
 
+    @Override
     public void windowDeiconified(WindowEvent e)
     {}
 
+    @Override
     public void windowIconified(WindowEvent e)
     {}
 
+    @Override
     public void windowOpened(WindowEvent e)
     {}
   }
@@ -2061,9 +1613,11 @@ public class WollMuxBar
    */
   private class WindowTransformer implements WindowFocusListener
   {
+    @Override
     public void windowGainedFocus(WindowEvent e)
     {}
 
+    @Override
     public void windowLostFocus(WindowEvent e)
     {
       minimize();
@@ -2087,25 +1641,31 @@ public class WollMuxBar
       timer.setRepeats(false);
     }
 
+    @Override
     public void mouseClicked(MouseEvent e)
     {}
 
+    @Override
     public void mousePressed(MouseEvent e)
     {}
 
+    @Override
     public void mouseReleased(MouseEvent e)
     {}
 
+    @Override
     public void mouseEntered(MouseEvent e)
     {
       timer.restart();
     }
 
+    @Override
     public void mouseExited(MouseEvent e)
     {
       timer.stop();
     }
 
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       maximize();
@@ -2128,21 +1688,26 @@ public class WollMuxBar
       timer.setRepeats(false);
     }
 
+    @Override
     public void mouseClicked(MouseEvent e)
     {}
 
+    @Override
     public void mousePressed(MouseEvent e)
     {}
 
+    @Override
     public void mouseReleased(MouseEvent e)
     {}
 
+    @Override
     public void mouseEntered(MouseEvent e)
     {
       if (windowMode != WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE) return;
       timer.stop();
     }
 
+    @Override
     public void mouseExited(MouseEvent e)
     {
       delayedMinimize();
@@ -2154,6 +1719,7 @@ public class WollMuxBar
       timer.restart();
     }
 
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       minimize();
@@ -2249,32 +1815,8 @@ public class WollMuxBar
   {
     try
     {
-      final String USER_HOME = "${user.home}";
-      int uhidx = url.indexOf(USER_HOME);
-      if (uhidx >= 0)
-      {
-        String userHomeUrl =
-          new File(System.getProperty("user.home")).toURI().toURL().toString();
+      final OpenExt openExt = OpenExt.getInstance(ext, url);
 
-        while ((uhidx = url.indexOf(USER_HOME)) >= 0)
-          url =
-            url.substring(0, uhidx) + userHomeUrl
-              + url.substring(uhidx + USER_HOME.length());
-
-        /**
-         * Beim Einbau einer URL in eine bestehende URL kann es zu Doppelungen des
-         * Protokollbezeichners file: kommen. In diesem Fall entfernen wir das erste
-         * davon.
-         */
-        final Pattern DUPLICATE_FILE_PROTOCOL_PATTERN =
-          Pattern.compile("file:/*(file:.*)");
-        Matcher m = DUPLICATE_FILE_PROTOCOL_PATTERN.matcher(url);
-        if (m.matches()) url = m.group(1);
-      }
-
-      URL srcUrl = WollMuxFiles.makeURL(url);
-      final OpenExt openExt = new OpenExt(ext, defaultConf);
-      openExt.setSource(srcUrl);
       try
       {
         openExt.storeIfNecessary();
@@ -2288,10 +1830,12 @@ public class WollMuxBar
 
       Runnable launch = new Runnable()
       {
+        @Override
         public void run()
         {
           openExt.launch(new OpenExt.ExceptionHandler()
           {
+            @Override
             public void handle(Exception x)
             {
               Logger.error(x);
@@ -2450,6 +1994,7 @@ public class WollMuxBar
       {
         SwingUtilities.invokeAndWait(new Runnable()
         {
+          @Override
           public void run()
           {
             instance.abort();
@@ -2634,6 +2179,7 @@ public class WollMuxBar
       Logger.debug(L.m("%1: Starte Fifo-Listener mit Fifo-Pipe '%2'.", randInt, fifo));
       fifoListenerThread = new Thread()
       {
+        @Override
         public void run()
         {
           while (true)
@@ -2650,6 +2196,7 @@ public class WollMuxBar
                 final List<String> args = (List<String>) ois.readObject();
                 new Thread()
                 {
+                  @Override
                   public void run()
                   {
                     startWollMuxBar(args);
@@ -2699,6 +2246,7 @@ public class WollMuxBar
       final boolean[] fertig = new boolean[] { false };
       Thread t = new Thread()
       {
+        @Override
         public void run()
         {
           try

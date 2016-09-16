@@ -46,7 +46,6 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.AWTKeyStroke;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
@@ -63,11 +62,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 import javax.swing.AbstractButton;
-import javax.swing.Box;
 import javax.swing.DefaultListModel;
 import javax.swing.InputMap;
 import javax.swing.JButton;
@@ -96,6 +93,16 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.Box;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.Button;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.Checkbox;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.Combobox;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.Label;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.Listbox;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.Separator;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.Textarea;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.Textfield;
+import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
 
 /**
  * Erzeugt zu ConfigThingys passende UI Elemente.
@@ -233,7 +240,7 @@ public class UIElementFactory
    *           wird.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public UIElement createUIElement(Context context, ConfigThingy conf)
+  public UIElement createUIElement(UIElementContext context, ConfigThingy conf)
       throws ConfigurationErrorException
   {
     String label = "";
@@ -275,39 +282,11 @@ public class UIElementFactory
     /*
      * Den richtigen type aus dem context bestimmen.
      */
-    if (context.mapTypeToType != null && context.mapTypeToType.containsKey(type))
-      type = context.mapTypeToType.get(type);
+    type = context.getMappedType(type);
 
-    /*
-     * ACHTUNG! Hier wird immer erst mit containsKey() getestet, anstatt nur get() zu
-     * machen und auf null zu testen, weil null-Werte in den Maps erlaubt sind und
-     * zurückgeliefert werden sollen.
-     */
-
-    Object layoutConstraints;
-    if (context.mapTypeToLayoutConstraints.containsKey(type))
-      layoutConstraints = context.mapTypeToLayoutConstraints.get(type);
-    else
-      layoutConstraints = context.mapTypeToLayoutConstraints.get(DEFAULT);
-
-    Object labelLayoutConstraints;
-    if (context.mapTypeToLabelLayoutConstraints.containsKey(type))
-      labelLayoutConstraints = context.mapTypeToLabelLayoutConstraints.get(type);
-    else
-      labelLayoutConstraints = context.mapTypeToLabelLayoutConstraints.get(DEFAULT);
-    /**
-     * Falls nötig, erzeuge unabhängigen Klon der Layout Constraints.
-     */
-    if (layoutConstraints instanceof GridBagConstraints)
-      layoutConstraints = ((GridBagConstraints) layoutConstraints).clone();
-    if (labelLayoutConstraints instanceof GridBagConstraints)
-      labelLayoutConstraints = ((GridBagConstraints) labelLayoutConstraints).clone();
-
-    Integer labelType;
-    if (context.mapTypeToLabelType.containsKey(type))
-      labelType = context.mapTypeToLabelType.get(type);
-    else
-      labelType = context.mapTypeToLabelType.get(DEFAULT);
+    Object layoutConstraints = context.getLayoutConstraints(type);
+    Object labelLayoutConstraints = context.getLabelLayoutConstraints(type);
+    Integer labelType = context.getLabelType(type);
 
     UIElement uiElement;
 
@@ -324,7 +303,7 @@ public class UIElementFactory
 
       button.setMnemonic(hotkey);
       if (!tip.equals("")) button.setToolTipText(tip);
-      uiElement = new UIElement.Button(id, button, layoutConstraints);
+      uiElement = new Button(id, button, layoutConstraints);
 
       ActionListener actionL =
         getAction(uiElement, action, conf, context.uiElementEventHandler,
@@ -336,7 +315,7 @@ public class UIElementFactory
     }
     else if (type.equals("label"))
     {
-      uiElement = new UIElement.Label(id, label, layoutConstraints);
+      uiElement = new Label(id, label, layoutConstraints);
       return uiElement;
     }
     else if (type.equals("textfield"))
@@ -346,7 +325,7 @@ public class UIElementFactory
       tf.setFocusable(!readonly);
       if (!tip.equals("")) tf.setToolTipText(tip);
       uiElement =
-        new UIElement.Textfield(id, tf, layoutConstraints, labelType, label,
+        new Textfield(id, tf, layoutConstraints, labelType, label,
           labelLayoutConstraints);
       tf.getDocument().addDocumentListener(
         new UIElementDocumentListener(context.uiElementEventHandler, uiElement,
@@ -411,10 +390,10 @@ public class UIElementFactory
       // JScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
       // JScrollPane.VERTICAL_SCROLLBAR_NEVER);
       scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-      scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+      scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
       panel.add(scrollPane);
       uiElement =
-        new UIElement.Textarea(id, textarea, panel, layoutConstraints, labelType,
+        new Textarea(id, textarea, panel, layoutConstraints, labelType,
           label, labelLayoutConstraints);
       textarea.getDocument().addDocumentListener(
         new UIElementDocumentListener(context.uiElementEventHandler, uiElement,
@@ -444,7 +423,7 @@ public class UIElementFactory
       }
 
       uiElement =
-        new UIElement.Combobox(id, combo, layoutConstraints, labelType, label,
+        new Combobox(id, combo, layoutConstraints, labelType, label,
           labelLayoutConstraints);
 
       if (editable)
@@ -477,7 +456,7 @@ public class UIElementFactory
       boxBruceleitner.setEnabled(!readonly);
       boxBruceleitner.setFocusable(!readonly);
       if (!tip.equals("")) boxBruceleitner.setToolTipText(tip);
-      uiElement = new UIElement.Checkbox(id, boxBruceleitner, layoutConstraints);
+      uiElement = new Checkbox(id, boxBruceleitner, layoutConstraints);
       boxBruceleitner.addActionListener(new UIElementActionListener(
         context.uiElementEventHandler, uiElement, true, "valueChanged",
         new Object[] {}));
@@ -507,7 +486,7 @@ public class UIElementFactory
       scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
       uiElement =
-        new UIElement.Listbox(id, scrollPane, list, layoutConstraints, labelType,
+        new Listbox(id, scrollPane, list, layoutConstraints, labelType,
           label, labelLayoutConstraints);
 
       list.addListSelectionListener(new UIElementListSelectionListener(
@@ -524,12 +503,12 @@ public class UIElementFactory
     else if (type.equals("h-separator"))
     {
       JSeparator wurzelSepp = new JSeparator(SwingConstants.HORIZONTAL);
-      return new UIElement.Separator(id, wurzelSepp, layoutConstraints);
+      return new Separator(id, wurzelSepp, layoutConstraints);
     }
     else if (type.equals("v-separator"))
     {
       JSeparator wurzelSepp = new JSeparator(SwingConstants.VERTICAL);
-      return new UIElement.Separator(id, wurzelSepp, layoutConstraints);
+      return new Separator(id, wurzelSepp, layoutConstraints);
     }
     else if (type.equals("h-glue"))
     {
@@ -542,23 +521,20 @@ public class UIElementFactory
       }
       catch (Exception x)
       {}
-      ;
       try
       {
         maxsize = Integer.parseInt(conf.get("MAXSIZE").toString());
       }
       catch (Exception x)
       {}
-      ;
       try
       {
         prefsize = Integer.parseInt(conf.get("PREFSIZE").toString());
       }
       catch (Exception x)
       {}
-      ;
 
-      return new UIElement.Box(id, new Box.Filler(new Dimension(minsize, 0),
+      return new Box(id, new javax.swing.Box.Filler(new Dimension(minsize, 0),
         new Dimension(prefsize, 0), new Dimension(maxsize, Integer.MAX_VALUE)),
         layoutConstraints);
     }
@@ -573,23 +549,20 @@ public class UIElementFactory
       }
       catch (Exception x)
       {}
-      ;
       try
       {
         maxsize = Integer.parseInt(conf.get("MAXSIZE").toString());
       }
       catch (Exception x)
       {}
-      ;
       try
       {
         prefsize = Integer.parseInt(conf.get("PREFSIZE").toString());
       }
       catch (Exception x)
       {}
-      ;
 
-      return new UIElement.Box(id, new Box.Filler(new Dimension(0, minsize),
+      return new Box(id, new javax.swing.Box.Filler(new Dimension(0, minsize),
         new Dimension(0, prefsize), new Dimension(Integer.MAX_VALUE, maxsize)),
         layoutConstraints);
     }
@@ -597,7 +570,7 @@ public class UIElementFactory
       throw new ConfigurationErrorException(L.m(
         "Ununterstützter TYPE für GUI Element: \"%1\"", type));
   }
-
+  
   private void copySpaceBindingToEnter(AbstractButton button)
   {
     InputMap imap = button.getInputMap(JComponent.WHEN_FOCUSED);
@@ -633,11 +606,13 @@ public class UIElementFactory
       this.uiElement = uiElement;
     }
 
+    @Override
     public void focusGained(FocusEvent e)
     {
       handler.processUiElementEvent(uiElement, "focus", gained);
     }
 
+    @Override
     public void focusLost(FocusEvent e)
     {
       handler.processUiElementEvent(uiElement, "focus", lost);
@@ -672,6 +647,7 @@ public class UIElementFactory
       this.args = args;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       if (takeFocus && !uiElement.hasFocus()) uiElement.takeFocus();
@@ -704,16 +680,19 @@ public class UIElementFactory
       this.args = args;
     }
 
+    @Override
     public void insertUpdate(DocumentEvent e)
     {
       handler.processUiElementEvent(uiElement, eventType, args);
     }
 
+    @Override
     public void removeUpdate(DocumentEvent e)
     {
       handler.processUiElementEvent(uiElement, eventType, args);
     }
 
+    @Override
     public void changedUpdate(DocumentEvent e)
     {
       handler.processUiElementEvent(uiElement, eventType, args);
@@ -745,6 +724,7 @@ public class UIElementFactory
       this.args = args;
     }
 
+    @Override
     public void itemStateChanged(ItemEvent e)
     {
       if (e.getStateChange() == ItemEvent.SELECTED)
@@ -778,6 +758,7 @@ public class UIElementFactory
       this.args = args;
     }
 
+    @Override
     public void valueChanged(ListSelectionEvent e)
     {
       handler.processUiElementEvent(uiElement, eventType, args);
@@ -802,6 +783,7 @@ public class UIElementFactory
       this.action = action;
     }
 
+    @Override
     public void mouseClicked(MouseEvent e)
     {
       if (e.getClickCount() == 2)
@@ -975,65 +957,6 @@ public class UIElementFactory
     }
 
     return null;
-  }
-
-  public static class Context
-  {
-    /**
-     * Bildet einen TYPE auf die dazugehörigen layout constraints (d,i, der optionale
-     * zweite Parameter von
-     * {@link java.awt.Container#add(java.awt.Component, java.lang.Object)
-     * java.awt.Container.add()}) ab. Darf null-Werte enthalten. Ist für einen TYPE
-     * kein Mapping angegeben (auch kein null-Wert), so wird erst geschaut, ob ein
-     * Mapping für "default" vorhanden ist. Falls ja, so wird dieses der
-     * entsprechenden Eigenschaft des erzeugten UIElements zugewiesen, ansonsten
-     * null.
-     */
-    public Map<String, ?> mapTypeToLayoutConstraints;
-
-    /**
-     * Bildet einen TYPE auf einen Integer ab, der angibt, ob das UI Element ein
-     * zusätzliches Label links oder rechts bekommen soll. Mögliche Werte sind
-     * {@link UIElement#LABEL_LEFT}, {@link UIElement#LABEL_RIGHT} und
-     * {@link UIElement#LABEL_NONE}. Darf null-Werte enthalten. Ist für einen TYPE
-     * kein Mapping angegeben (auch kein null-Wert), so wird erst geschaut, ob ein
-     * Mapping für "default" vorhanden ist. Falls ja, so wird dieses der
-     * entsprechenden Eigenschaft des erzeugten UIElements zugewiesen, ansonsten
-     * null.
-     */
-    public Map<String, Integer> mapTypeToLabelType;
-
-    /**
-     * Für UI Elemente, die ein zusätzliches Label links oder rechts bekommen sollen
-     * (siehe {@link #mapTypeToLabelType}) liefert diese Map die layout constraints
-     * für das Label. Achtung! UI Elemente mit TYPE "label" beziehen ihre layout
-     * constraints nicht aus dieser Map, sondern wie alle anderen UI Elemente auch
-     * aus {@link #mapTypeToLayoutConstraints}. Darf null-Werte enthalten. Ist für
-     * einen TYPE kein Mapping angegeben (auch kein null-Wert), so wird erst
-     * geschaut, ob ein Mapping für "default" vorhanden ist. Falls ja, so wird dieses
-     * der entsprechenden Eigenschaft des erzeugten UIElements zugewiesen, ansonsten
-     * null.
-     */
-    public Map<String, ?> mapTypeToLabelLayoutConstraints;
-
-    /**
-     * Die Menge (von Strings) der ACTIONs, die akzeptiert werden sollen. Alle
-     * anderen produzieren eine Fehlermeldung.
-     */
-    public Set<String> supportedActions;
-
-    /**
-     * Der {@link UIElementEventHandler}, an den die erzeugten UI Elemente ihre
-     * Ereignisse melden.
-     */
-    public UIElementEventHandler uiElementEventHandler;
-
-    /**
-     * Enthält diese Map für einen TYPE ein Mapping auf einen anderen TYPE, so wird
-     * der andere TYPE verwendet. Dies ist nützlich, um abhängig vom Kontext den TYPE
-     * "separator" entweder auf "h-separator" oder "v-separator" abzubilden.
-     */
-    public Map<String, String> mapTypeToType;
   }
 
 }

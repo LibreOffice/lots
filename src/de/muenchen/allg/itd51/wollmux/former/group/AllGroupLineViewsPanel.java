@@ -55,7 +55,7 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
@@ -77,7 +77,7 @@ public class AllGroupLineViewsPanel implements View
   /**
    * Der {@link FormularMax4000} zu dem diese View gehört.
    */
-  private FormularMax4000 formularMax4000;
+  private FormularMax4kController formularMax4000;
 
   /**
    * Wird auf alle {@link OneGroupLineView}s registriert.
@@ -123,7 +123,7 @@ public class AllGroupLineViewsPanel implements View
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public AllGroupLineViewsPanel(GroupModelList groupModelList,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
     this.groupModelList = groupModelList;
@@ -155,6 +155,7 @@ public class AllGroupLineViewsPanel implements View
     JButton button = new JButton(L.m("Löschen"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         deleteSelectedElements();
@@ -166,6 +167,7 @@ public class AllGroupLineViewsPanel implements View
     button = new JButton(L.m("Neu"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         createNewGroup();
@@ -174,6 +176,11 @@ public class AllGroupLineViewsPanel implements View
     buttonPanel.add(button, gbcButton);
 
     ++gbcButton.gridx;
+    
+    for (GroupModel m : groupModelList)
+    {
+      addItem(m);
+    }
   }
 
   private void createNewGroup()
@@ -186,7 +193,7 @@ public class AllGroupLineViewsPanel implements View
       {
         id =
           formularMax4000.getIDManager().getActiveID(
-            FormularMax4000.NAMESPACE_GROUPS, "Sichtbarkeit" + num);
+            FormularMax4kController.NAMESPACE_GROUPS, "Sichtbarkeit" + num);
         break;
       }
       catch (DuplicateIDException x)
@@ -217,7 +224,7 @@ public class AllGroupLineViewsPanel implements View
      * view vor dem letzten Element von mainPanel einfügen, weil das letzte Element
      * immer ein Glue sein soll.
      */
-    mainPanel.add(view.JComponent(), mainPanel.getComponentCount() - 1);
+    mainPanel.add(view.getComponent(), mainPanel.getComponentCount() - 1);
 
     mainPanel.validate();
     scrollPane.validate();
@@ -233,7 +240,7 @@ public class AllGroupLineViewsPanel implements View
     int index = views.indexOf(view);
     if (index < 0) return;
     views.remove(index);
-    mainPanel.remove(view.JComponent());
+    mainPanel.remove(view.getComponent());
     mainPanel.validate();
     selection.remove(index);
     selection.fixup(index, -1, views.size() - 1);
@@ -298,7 +305,8 @@ public class AllGroupLineViewsPanel implements View
     }
   }
 
-  public JComponent JComponent()
+  @Override
+  public JComponent getComponent()
   {
     return myPanel;
   }
@@ -306,11 +314,13 @@ public class AllGroupLineViewsPanel implements View
   private class MyItemListener implements GroupModelList.ItemListener
   {
 
+    @Override
     public void itemAdded(GroupModel model, int index)
     {
       addItem(model);
     }
 
+    @Override
     public void itemRemoved(GroupModel model, int index)
     {}
 
@@ -319,6 +329,7 @@ public class AllGroupLineViewsPanel implements View
   private class MyViewChangeListener implements ViewChangeListener
   {
 
+    @Override
     public void viewShouldBeRemoved(View view)
     {
       removeItem((OneGroupLineView) view);
@@ -328,6 +339,7 @@ public class AllGroupLineViewsPanel implements View
 
   private class MyBroadcastListener extends BroadcastListener
   {
+    @Override
     public void broadcastGroupModelSelection(BroadcastObjectSelection b)
     {
       if (b.getClearSelection()) clearSelection();

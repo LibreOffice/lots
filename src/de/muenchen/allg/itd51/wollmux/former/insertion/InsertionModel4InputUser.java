@@ -47,7 +47,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 
 public class InsertionModel4InputUser extends InsertionModel
@@ -93,7 +93,7 @@ public class InsertionModel4InputUser extends InsertionModel
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public InsertionModel4InputUser(Object textField, XTextDocument doc,
-      FunctionSelectionProvider funcSelections, FormularMax4000 formularMax4000)
+      FunctionSelectionProvider funcSelections, FormularMax4kController formularMax4000)
       throws SyntaxErrorException
   { // TESTED
     this.formularMax4000 = formularMax4000;
@@ -131,11 +131,13 @@ public class InsertionModel4InputUser extends InsertionModel
     }
   }
 
+  @Override
   public String getName()
   {
     return name;
   }
 
+  @Override
   public void removeFromDocument()
   {
     try
@@ -209,6 +211,7 @@ public class InsertionModel4InputUser extends InsertionModel
     }
   }
 
+  @Override
   public void selectWithViewCursor()
   { // TESTED
     try
@@ -222,6 +225,7 @@ public class InsertionModel4InputUser extends InsertionModel
     {}
   }
 
+  @Override
   public boolean updateDocument(
       Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
   { // TESTED

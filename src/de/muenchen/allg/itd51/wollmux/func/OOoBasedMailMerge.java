@@ -39,7 +39,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.sun.star.beans.NamedValue;
 import com.sun.star.beans.PropertyValue;
@@ -65,6 +70,7 @@ import com.sun.star.text.XMailMergeBroadcaster;
 import com.sun.star.text.XMailMergeListener;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextSection;
 import com.sun.star.text.XTextSectionsSupplier;
 import com.sun.star.uno.AnyConverter;
@@ -85,6 +91,7 @@ import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormFieldType;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.PersistentData;
 import de.muenchen.allg.itd51.wollmux.PersistentDataContainer;
 import de.muenchen.allg.itd51.wollmux.PersistentDataContainer.DataID;
@@ -93,7 +100,6 @@ import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.SimulationResults;
 import de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
@@ -108,6 +114,8 @@ public class OOoBasedMailMerge
 
   private static final String COLUMN_PREFIX_MULTI_PARAMETER_FUNCTION = "WM:MP";
 
+  private static final String COLUMN_PREFIX_TEXTSECTION = "WM:SE_";
+
   private static final String TEMP_WOLLMUX_MAILMERGE_PREFIX = "WollMuxMailMerge";
 
   private static final String DATASOURCE_ODB_FILENAME = "datasource.odb";
@@ -117,7 +125,7 @@ public class OOoBasedMailMerge
   private static final char OPENSYMBOL_CHECKED = 0xE4C4;
 
   private static final char OPENSYMBOL_UNCHECKED = 0xE470;
-  
+
   /**
    * Druckfunktion für den Seriendruck in ein Gesamtdokument mit Hilfe des
    * OpenOffice.org-Seriendrucks.
@@ -130,12 +138,12 @@ public class OOoBasedMailMerge
 
     // prüfe ob OutputType.toShell von der Office-Version
     // unterstützt wird. Falls nicht, falle zurück auf OutputType.toFile.
-    if(type == OutputType.toShell && type.getUNOMailMergeType() == null)
+    if (type == OutputType.toShell && type.getUNOMailMergeType() == null)
     {
       Logger.debug(L.m("Die aktuelle Office-Version unterstützt MailMergeType.SHELL nicht. Verwende MailMergeType.FILE stattdessen"));
       type = OutputType.toFile;
     }
-    
+
     File tmpDir = createMailMergeTempdir();
 
     // Datenquelle mit über mailMergeNewSetFormValue simulierten Daten erstellen
@@ -148,12 +156,13 @@ public class OOoBasedMailMerge
     }
     catch (Exception e)
     {
-      if (ds.getDataSourceWriter().isAdjustMainDoc()){
-        PersistentDataContainer lCont = PersistentData.
-          createPersistentDataContainer(pmod.getTextDocument());
+      if (ds.getDataSourceWriter().isAdjustMainDoc())
+      {
+        PersistentDataContainer lCont =
+          PersistentData.createPersistentDataContainer(pmod.getTextDocument());
         lCont.removeData(PersistentDataContainer.DataID.FORMULARWERTE);
-        Logger.debug(
-          L.m("Formularwerte wurden aus %1 gelöscht.", pmod.getTextDocument().getURL()));
+        Logger.debug(L.m("Formularwerte wurden aus %1 gelöscht.",
+          pmod.getTextDocument().getURL()));
       }
       Logger.error(
         L.m("OOo-Based-MailMerge: kann Simulationsdatenquelle nicht erzeugen!"), e);
@@ -161,7 +170,7 @@ public class OOoBasedMailMerge
     }
     if (ds.getSize() == 0)
     {
-      WollMuxSingleton.showInfoModal(
+      ModalDialogs.showInfoModal(
         L.m("WollMux-Seriendruck"),
         L.m("Der Seriendruck wurde abgebrochen, da Ihr Druckauftrag keine Datensätze enthält."));
       pmod.cancel();
@@ -182,10 +191,13 @@ public class OOoBasedMailMerge
     try
     {
       PrintModels.setStage(pmod, L.m("Gesamtdokument erzeugen"));
-      ProgressUpdater updater = new ProgressUpdater(pmod, (int)Math.ceil((double)ds.getSize()/countNextSets(pmod.getTextDocument())));
+      ProgressUpdater updater =
+        new ProgressUpdater(pmod, (int) Math.ceil((double) ds.getSize()
+          / countNextSets(pmod.getTextDocument())));
 
       // Lese ausgewählten Drucker
-      XPrintable xprintSD = (XPrintable) UnoRuntime.queryInterface(XPrintable.class, pmod.getTextDocument());
+      XPrintable xprintSD =
+        UnoRuntime.queryInterface(XPrintable.class, pmod.getTextDocument());
       String pNameSD;
       PropertyValue[] printer = null;
       if (xprintSD != null) printer = xprintSD.getPrinter();
@@ -229,8 +241,8 @@ public class OOoBasedMailMerge
     removeTempDatasource(dbName, tmpDir);
     ds.remove();
     inputFile.delete();
-    
-    // ... jetzt können wir nach Benutzerabbruch aufhören 
+
+    // ... jetzt können wir nach Benutzerabbruch aufhören
     if (pmod.isCanceled()) return;
 
     if (type == OutputType.toFile)
@@ -251,33 +263,34 @@ public class OOoBasedMailMerge
         }
       else
       {
-        WollMuxSingleton.showInfoModal(L.m("WollMux-Seriendruck"),
+        ModalDialogs.showInfoModal(L.m("WollMux-Seriendruck"),
           L.m("Leider konnte kein Gesamtdokument erstellt werden."));
         pmod.cancel();
       }
       outputFile.delete();
     }
-    
-    else if(type == OutputType.toShell)
-    {      
+
+    else if (type == OutputType.toShell)
+    {
       XTextDocument result = UNO.XTextDocument(t.getResult());
       if (result != null && result.getCurrentController() != null
         && result.getCurrentController().getFrame() != null
         && result.getCurrentController().getFrame().getContainerWindow() != null)
       {
-        result.getCurrentController().getFrame().getContainerWindow().setVisible(true);
+        result.getCurrentController().getFrame().getContainerWindow().setVisible(
+          true);
       }
       else
       {
-        WollMuxSingleton.showInfoModal(L.m("WollMux-Seriendruck"),
+        ModalDialogs.showInfoModal(L.m("WollMux-Seriendruck"),
           L.m("Das erzeugte Gesamtdokument kann leider nicht angezeigt werden."));
         pmod.cancel();
       }
     }
 
     tmpDir.delete();
-  }  
-  
+  }
+
   /**
    * A optional XCancellable mail merge thread.
    * 
@@ -302,6 +315,7 @@ public class OOoBasedMailMerge
       this.mmProps = mmProps;
     }
 
+    @Override
     public void run()
     {
       try
@@ -309,7 +323,7 @@ public class OOoBasedMailMerge
         Logger.debug(L.m("Starting OOo-MailMerge in Verzeichnis %1", outputDir));
         // The XCancellable mail merge interface was included in LO >= 4.3.
         mailMergeCancellable =
-          (XCancellable) UnoRuntime.queryInterface(XCancellable.class, mailMerge);
+          UnoRuntime.queryInterface(XCancellable.class, mailMerge);
         if (mailMergeCancellable != null)
           Logger.debug(L.m("XCancellable interface im mailMerge-Objekt gefunden!"));
         else
@@ -330,7 +344,7 @@ public class OOoBasedMailMerge
     {
       if (mailMergeCancellable != null) mailMergeCancellable.cancel();
     }
-    
+
     public Object getResult()
     {
       return result;
@@ -415,6 +429,7 @@ public class OOoBasedMailMerge
      * de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor
      * #processSimulationResults(de.muenchen.allg.itd51.wollmux.SimulationResults)
      */
+    @Override
     public void processSimulationResults(SimulationResults simRes)
     {
       if (simRes == null) return;
@@ -437,6 +452,13 @@ public class OOoBasedMailMerge
 
         data.put(columnName, content);
       }
+
+      for (Map.Entry<String, Boolean> entry : simRes.getGroupsVisibilityState().entrySet())
+      {
+        Logger.log(entry.getKey() + " --> " + entry.getValue());
+        data.put(COLUMN_PREFIX_TEXTSECTION + entry.getKey(), entry.getValue().toString());
+      }
+
       try
       {
         getDataSourceWriter().addDataset(data);
@@ -477,6 +499,7 @@ public class OOoBasedMailMerge
      * @seede.muenchen.allg.itd51.wollmux.func.OOoBasedMailMerge.OOoDataSource#
      * getDataSourceWriter()
      */
+    @Override
     public DataSourceWriter getDataSourceWriter()
     {
       return dsw;
@@ -488,6 +511,7 @@ public class OOoBasedMailMerge
      * @seede.muenchen.allg.itd51.wollmux.func.OOoBasedMailMerge.OOoDataSource#
      * createXDocumentDatasource()
      */
+    @Override
     public XDocumentDataSource createXDocumentDatasource()
     {
       XSingleServiceFactory dbContext =
@@ -542,6 +566,7 @@ public class OOoBasedMailMerge
      * @see
      * de.muenchen.allg.itd51.wollmux.func.OOoBasedMailMerge.OOoDataSource#getSize()
      */
+    @Override
     public int getSize()
     {
       return dsw.getSize();
@@ -553,6 +578,7 @@ public class OOoBasedMailMerge
      * @see
      * de.muenchen.allg.itd51.wollmux.func.OOoBasedMailMerge.OOoDataSource#remove()
      */
+    @Override
     public void remove()
     {
       dsw.getCSVFile().delete();
@@ -603,7 +629,8 @@ public class OOoBasedMailMerge
 
     /**
      * Entscheidet ob aus den PersistentData der Originaldatei die WollMux-Abschitte
-     * gelöscht werden müssen. 
+     * gelöscht werden müssen.
+     * 
      * @return true falls die Abschnitte gelöscht werden müssen, false sonst
      */
     public boolean isAdjustMainDoc();
@@ -638,8 +665,8 @@ public class OOoBasedMailMerge
     ArrayList<String> headers = null;
 
     /**
-     * Wenn {@link #validateColumntHeaders()} Leerzeichen in den Headern findet, 
-     * müssen die PersistentData des Originaldokuments angepasst werden. 
+     * Wenn {@link #validateColumntHeaders()} Leerzeichen in den Headern findet,
+     * müssen die PersistentData des Originaldokuments angepasst werden.
      */
     private boolean adjustPersistentData = false;
 
@@ -661,6 +688,7 @@ public class OOoBasedMailMerge
      * de.muenchen.allg.itd51.wollmux.func.OOoBasedMailMerge.DataSourceWriter#getSize
      * ()
      */
+    @Override
     public int getSize()
     {
       return datasets.size();
@@ -673,6 +701,7 @@ public class OOoBasedMailMerge
      * de.muenchen.allg.itd51.wollmux.func.OOoBasedMailMerge.DataSourceWriter#addDataset
      * (java.util.HashMap)
      */
+    @Override
     public void addDataset(HashMap<String, String> ds) throws Exception
     {
       datasets.add(ds);
@@ -685,6 +714,7 @@ public class OOoBasedMailMerge
      * @seede.muenchen.allg.itd51.wollmux.func.OOoBasedMailMerge.DataSourceWriter#
      * flushAndClose()
      */
+    @Override
     public void flushAndClose() throws Exception
     {
       validateColumnHeaders();
@@ -707,11 +737,13 @@ public class OOoBasedMailMerge
     }
 
     /**
-     * Überprüft ob die Headerzeilen der Datenquelle gültig sind, 
-     * dh. keine Zeilenumbrüche enthalten. Wenn Zeilenumbrüche gefunden
-     * werden, wird eine entsprechende Meldung angezeigt.
-     * @throws ColumnNotFoundException Falls die Datenquelle in der
-     * Headerzeile mindestens 1 Spalte mit Zeilenumbruch enthält.
+     * Überprüft ob die Headerzeilen der Datenquelle gültig sind, dh. keine
+     * Zeilenumbrüche enthalten. Wenn Zeilenumbrüche gefunden werden, wird eine
+     * entsprechende Meldung angezeigt.
+     * 
+     * @throws ColumnNotFoundException
+     *           Falls die Datenquelle in der Headerzeile mindestens 1 Spalte mit
+     *           Zeilenumbruch enthält.
      */
     private void validateColumnHeaders() throws ColumnNotFoundException
     {
@@ -726,15 +758,16 @@ public class OOoBasedMailMerge
       }
       if (!invalidHeaders.isEmpty())
       {
-        boolean anpassen = WollMuxSingleton.showQuestionModal(
-          L.m("WollMux-Seriendruck"),
-          L.m("Zeilenumbrüche in Spaltenüberschriften sind für den Seriendruck nicht erlaubt.\n")
-            + L.m("\nBitte entfernen Sie die Zeilenumbrüche aus den folgenden Überschriften der Datenquelle:\n\n")
-            + invalidHeaders 
-            + L.m("\nSoll das Hauptdokument entsprechend angepasst werden?"));
-          
-          
-        if (anpassen){
+        boolean anpassen =
+          ModalDialogs.showQuestionModal(
+            L.m("WollMux-Seriendruck"),
+            L.m("Zeilenumbrüche in Spaltenüberschriften sind für den Seriendruck nicht erlaubt.\n")
+              + L.m("\nBitte entfernen Sie die Zeilenumbrüche aus den folgenden Überschriften der Datenquelle:\n\n")
+              + invalidHeaders
+              + L.m("\nSoll das Hauptdokument entsprechend angepasst werden?"));
+
+        if (anpassen)
+        {
           adjustPersistentData = true;
         }
         throw new ColumnNotFoundException(
@@ -797,16 +830,17 @@ public class OOoBasedMailMerge
     }
 
     /**
-     * Liefert den Wert von {@link #adjustPersistentData}} zurück.
+     * Liefert den Wert von {@link #adjustPersistentData} zurück.
      * 
      * @author Ulrich Kitzinger (GBI I21)
      */
-    public boolean isAdjustMainDoc(){
+    @Override
+    public boolean isAdjustMainDoc()
+    {
       return adjustPersistentData;
     }
   }
 
-  
   /**
    * Erzeugt das aus origDoc abgeleitete, für den OOo-Seriendruck heranzuziehende
    * Input-Dokument im Verzeichnis tmpDir und nimmt alle notwendigen Anpassungen vor,
@@ -841,6 +875,16 @@ public class OOoBasedMailMerge
     {
       return null;
     }
+    
+    // Workaround für #16487
+    try
+    {
+      Thread.sleep(1000);
+    }
+    catch (InterruptedException e2)
+    {
+      Logger.error(e2);
+    }
 
     // Neues input-Dokument öffnen. Achtung: Normalerweise würde der
     // loadComponentFromURL den WollMux veranlassen, das Dokument zu interpretieren
@@ -861,9 +905,10 @@ public class OOoBasedMailMerge
 
     // neues input-Dokument bearbeiten/anpassen
     addDatabaseFieldsForInsertFormValueBookmarks(UNO.XTextDocument(tmpDoc), dbName);
+    updateTextSections(UNO.XTextDocument(tmpDoc));
     adjustDatabaseAndInputUserFields(tmpDoc, dbName);
     removeAllBookmarks(tmpDoc);
-    removeHiddenSections(tmpDoc);
+    // removeHiddenSections(tmpDoc);
     SachleitendeVerfuegung.deMuxSLVStyles(UNO.XTextDocument(tmpDoc));
     removeWollMuxMetadata(UNO.XTextDocument(tmpDoc));
 
@@ -904,6 +949,50 @@ public class OOoBasedMailMerge
     } while (closed == false);
 
     return inputFile;
+  }
+
+  private static void updateTextSections(XTextDocument doc)
+  {
+    XTextSectionsSupplier tssupp = UNO.XTextSectionsSupplier(doc);
+    XNameAccess textSections = tssupp.getTextSections();
+    String[] sectionNames = textSections.getElementNames();
+
+    Pattern groupPattern = Pattern.compile(".* GROUPS(?:\\s\"(.*)\"|\\((.*)\\)\n?)");
+
+    for (String sectionName : sectionNames)
+    {
+      Matcher matcher = groupPattern.matcher(sectionName);
+      if (matcher.matches())
+      {
+        String res = (matcher.group(1) != null) ? matcher.group(1) : matcher.group(2);
+        String groups = res.replaceAll("\"", "");
+        String[] groupNames = groups.split("\\s*,\\s*");
+
+        try
+        {
+          XTextSection section =
+            UnoRuntime.queryInterface(XTextSection.class,
+              textSections.getByName(sectionName));
+          XPropertySet ps = UNO.XPropertySet(section);
+          
+          XTextRange range = section.getAnchor();
+          UNO.setPropertyToDefault(range, "CharHidden");
+          
+          List<String> conditions = new ArrayList<String>();
+          for (String groupName : groupNames)
+          {
+            conditions.add(String.format("([%s] != \"true\")", COLUMN_PREFIX_TEXTSECTION + groupName));
+          }
+          
+          String condition = StringUtils.join(conditions, " or ");
+          ps.setPropertyValue("Condition", condition);
+        }
+        catch (Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+    }
   }
 
   /**
@@ -1285,7 +1374,7 @@ public class OOoBasedMailMerge
     toFile,
     toPrinter,
     toShell;
-    
+
     /**
      * Diese Methode verwendet die Reflection API um den passenden
      * com.sun.star.text.MailMergeType für den OutputType zurück zu liefern oder
@@ -1323,7 +1412,7 @@ public class OOoBasedMailMerge
           Logger.error(e);
         }
       }
-      return null;                  
+      return null;
     }
   }
 
@@ -1348,31 +1437,31 @@ public class OOoBasedMailMerge
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static MailMergeThread runMailMerge(String dbName, final File outputDir,
-      File inputFile, final ProgressUpdater progress, final OutputType type, String printerName)
-      throws Exception
+      File inputFile, final ProgressUpdater progress, final OutputType type,
+      String printerName) throws Exception
   {
     final XJob mailMerge =
-      (XJob) UnoRuntime.queryInterface(XJob.class,
-        UNO.xMCF.createInstanceWithContext("com.sun.star.text.MailMerge",
-          UNO.defaultContext));
+      UnoRuntime.queryInterface(XJob.class, UNO.xMCF.createInstanceWithContext(
+        "com.sun.star.text.MailMerge", UNO.defaultContext));
 
     // Register MailMergeEventListener
     XMailMergeBroadcaster xmmb =
-      (XMailMergeBroadcaster) UnoRuntime.queryInterface(XMailMergeBroadcaster.class,
-        mailMerge);
+      UnoRuntime.queryInterface(XMailMergeBroadcaster.class, mailMerge);
     xmmb.addMailMergeEventListener(new XMailMergeListener()
     {
       int count = 0;
 
       final long start = System.currentTimeMillis();
 
+      @Override
       public void notifyMailMergeEvent(MailMergeEvent arg0)
       {
         if (progress != null) progress.incrementProgress();
         count++;
         Logger.debug2(L.m("OOo-MailMerger: verarbeite Datensatz %1 (%2 ms)", count,
           (System.currentTimeMillis() - start)));
-        if (count >= progress.maxDatasets && type == OutputType.toPrinter) {
+        if (count >= progress.maxDatasets && type == OutputType.toPrinter)
+        {
           progress.setMessage(L.m("Sende Druckauftrag - bitte warten..."));
         }
       }
@@ -1401,7 +1490,7 @@ public class OOoBasedMailMerge
     else if (type == OutputType.toPrinter)
     {
       mmProps.add(new NamedValue("SinglePrintJobs", Boolean.FALSE));
-      //jgm,07.2013: setze ausgewaehlten Drucker
+      // jgm,07.2013: setze ausgewaehlten Drucker
       if (printerName != null && printerName.length() > 0)
       {
         PropertyValue[] printOpts = new PropertyValue[1];
@@ -1411,7 +1500,7 @@ public class OOoBasedMailMerge
         Logger.debug(L.m("Seriendruck - Setze Drucker: %1", printerName));
         mmProps.add(new NamedValue("PrintOptions", printOpts));
       }
-      //jgm ende
+      // jgm ende
     }
     MailMergeThread t = new MailMergeThread(mailMerge, outputDir, mmProps);
     t.start();
@@ -1447,7 +1536,7 @@ public class OOoBasedMailMerge
    */
   public static void main(String[] args)
   {
-    String pNameSD="HP1010"; //Drucker Name
+    String pNameSD = "HP1010"; // Drucker Name
     try
     {
       UNO.init();

@@ -200,12 +200,12 @@
 			</executable>
 			<parsable targetfile="${INSTALL_PATH}/remove.bat" />
 			<executable targetfile="${INSTALL_PATH}/remove.bat" type="bin"
-				stage="postinstall" failure="warn" keep="true" />
+				stage="postinstall" failure="warn" />
 			<os family="windows" />
 			<parsable targetfile="${INSTALL_PATH}/add.bat" />
 			<os family="windows" />
 			<executable targetfile="${INSTALL_PATH}/add.bat" type="bin"
-				stage="postinstall" failure="warn" keep="true" />
+				stage="postinstall" failure="warn" />
 		</pack>
 		<!-- Un*x/Mac -->
 		<pack name="Extension installieren" required="no" preselected="yes">

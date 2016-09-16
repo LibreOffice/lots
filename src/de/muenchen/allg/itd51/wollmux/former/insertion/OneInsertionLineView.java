@@ -52,7 +52,7 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.UnknownIDException;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.view.LineView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
@@ -98,7 +98,7 @@ public class OneInsertionLineView extends LineView
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public OneInsertionLineView(InsertionModel model, ViewChangeListener bigDaddy,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     this.model = model;
     this.bigDaddy = bigDaddy;
@@ -177,16 +177,19 @@ public class OneInsertionLineView extends LineView
           ignoreAttributeChanged = false;
         }
 
+        @Override
         public void insertUpdate(DocumentEvent e)
         {
           update();
         }
 
+        @Override
         public void removeUpdate(DocumentEvent e)
         {
           update();
         }
 
+        @Override
         public void changedUpdate(DocumentEvent e)
         {
           update();
@@ -216,11 +219,13 @@ public class OneInsertionLineView extends LineView
 
   private class MyModelChangeListener implements InsertionModel.ModelChangeListener
   {
+    @Override
     public void modelRemoved(InsertionModel model)
     {
       bigDaddy.viewShouldBeRemoved(OneInsertionLineView.this);
     }
 
+    @Override
     public void attributeChanged(InsertionModel model, int attributeId,
         Object newValue)
     {
@@ -244,9 +249,11 @@ public class OneInsertionLineView extends LineView
    */
   private class MyMouseListener implements MouseListener
   {
+    @Override
     public void mouseClicked(MouseEvent e)
     {}
 
+    @Override
     public void mousePressed(MouseEvent e)
     {
       int state = BroadcastObjectSelection.STATE_NORMAL_CLICK;
@@ -258,6 +265,7 @@ public class OneInsertionLineView extends LineView
       formularMax4000.broadcast(new BroadcastObjectSelection(getModel(), state,
         state == BroadcastObjectSelection.STATE_NORMAL_CLICK)
       {
+        @Override
         public void sendTo(BroadcastListener listener)
         {
           listener.broadcastInsertionModelSelection(this);
@@ -268,12 +276,15 @@ public class OneInsertionLineView extends LineView
         getModel().selectWithViewCursor();
     }
 
+    @Override
     public void mouseReleased(MouseEvent e)
     {}
 
+    @Override
     public void mouseEntered(MouseEvent e)
     {}
 
+    @Override
     public void mouseExited(MouseEvent e)
     {}
   }

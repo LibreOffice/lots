@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
@@ -54,7 +54,7 @@ public abstract class InsertionModel
   /**
    * Der FormularMax4000 zu dem dieses Model gehört.
    */
-  protected FormularMax4000 formularMax4000;
+  protected FormularMax4kController formularMax4000;
 
   /**
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert
@@ -109,7 +109,7 @@ public abstract class InsertionModel
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormularMax4000 getFormularMax4000()
+  public FormularMax4kController getFormularMax4000()
   {
     return formularMax4000;
   }
@@ -206,65 +206,77 @@ public abstract class InsertionModel
    */
   private class MyTrafoAccess implements FunctionSelectionAccess
   {
+    @Override
     public boolean isReference()
     {
       return trafo.isReference();
     }
 
+    @Override
     public boolean isExpert()
     {
       return trafo.isExpert();
     }
 
+    @Override
     public boolean isNone()
     {
       return trafo.isNone();
     }
 
+    @Override
     public String getFunctionName()
     {
       return trafo.getFunctionName();
     }
 
+    @Override
     public ConfigThingy getExpertFunction()
     {
       return trafo.getExpertFunction();
     }
 
+    @Override
     public void setParameterValues(Map<String, ParamValue> mapNameToParamValue)
     {
       trafo.setParameterValues(mapNameToParamValue);
       formularMax4000.documentNeedsUpdating();
     }
 
+    @Override
     public void setFunction(String functionName, String[] paramNames)
     {
       trafo.setFunction(functionName, paramNames);
       formularMax4000.documentNeedsUpdating();
     }
 
+    @Override
     public void setExpertFunction(ConfigThingy funConf)
     {
       trafo.setExpertFunction(funConf);
       formularMax4000.documentNeedsUpdating();
     }
 
+    @Override
     public void setParameterValue(String paramName, ParamValue paramValue)
     {
       trafo.setParameterValue(paramName, paramValue);
       formularMax4000.documentNeedsUpdating();
     }
 
+    @Override
     public String[] getParameterNames()
     {
       return trafo.getParameterNames();
     }
 
+    @Override
     public boolean hasSpecifiedParameters()
     {
       return trafo.hasSpecifiedParameters();
     }
 
+    @Override
     public ParamValue getParameterValue(String paramName)
     {
       return trafo.getParameterValue(paramName);

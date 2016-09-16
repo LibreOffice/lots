@@ -30,12 +30,13 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.section;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
 /**
  * Verwaltet eine Liste von SectionModels.
@@ -53,7 +54,7 @@ public class SectionModelList implements Iterable<SectionModel>
    * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts
    * informiert werden wollen.
    */
-  private List<ItemListener> listeners = new Vector<ItemListener>(1);
+  private List<ItemListener> listeners = new ArrayList<ItemListener>(1);
 
   /**
    * Der FormularMax4000 zu dem diese SectionModelList gehört.
@@ -66,7 +67,7 @@ public class SectionModelList implements Iterable<SectionModel>
    *          der FormularMax4000 zu dem diese Liste gehört.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public SectionModelList(FormularMax4000 formularMax4000)
+  public SectionModelList(FormularMax4kController formularMax4000)
   {
   // this.formularMax4000 = formularMax4000;
   // this.formularMax4000.addBroadcastListener(new MyBroadcastListener());
@@ -154,6 +155,7 @@ public class SectionModelList implements Iterable<SectionModel>
   /**
    * Liefert einen Iterator über alle Models dieser Liste.
    */
+  @Override
   public Iterator<SectionModel> iterator()
   {
     return models.iterator();

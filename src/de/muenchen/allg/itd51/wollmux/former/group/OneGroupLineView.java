@@ -52,7 +52,7 @@ import javax.swing.text.JTextComponent;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.view.LineView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
@@ -94,7 +94,7 @@ public class OneGroupLineView extends LineView
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public OneGroupLineView(GroupModel model, ViewChangeListener bigDaddy,
-      FormularMax4000 formularMax4000)
+      FormularMax4kController formularMax4000)
   {
     this.model = model;
     this.bigDaddy = bigDaddy;
@@ -151,16 +151,19 @@ public class OneGroupLineView extends LineView
         ignoreAttributeChanged = false;
       }
 
+      @Override
       public void insertUpdate(DocumentEvent e)
       {
         update();
       }
 
+      @Override
       public void removeUpdate(DocumentEvent e)
       {
         update();
       }
 
+      @Override
       public void changedUpdate(DocumentEvent e)
       {
         update();
@@ -189,11 +192,13 @@ public class OneGroupLineView extends LineView
 
   private class MyModelChangeListener implements GroupModel.ModelChangeListener
   {
+    @Override
     public void modelRemoved(GroupModel model)
     {
       bigDaddy.viewShouldBeRemoved(OneGroupLineView.this);
     }
 
+    @Override
     public void attributeChanged(GroupModel model, int attributeId, Object newValue)
     {
       if (ignoreAttributeChanged) return;
@@ -216,9 +221,11 @@ public class OneGroupLineView extends LineView
    */
   private class MyMouseListener implements MouseListener
   {
+    @Override
     public void mouseClicked(MouseEvent e)
     {}
 
+    @Override
     public void mousePressed(MouseEvent e)
     {
       int state = BroadcastObjectSelection.STATE_NORMAL_CLICK;
@@ -230,6 +237,7 @@ public class OneGroupLineView extends LineView
       formularMax4000.broadcast(new BroadcastObjectSelection(getModel(), state,
         state == BroadcastObjectSelection.STATE_NORMAL_CLICK)
       {
+        @Override
         public void sendTo(BroadcastListener listener)
         {
           listener.broadcastGroupModelSelection(this);
@@ -237,12 +245,15 @@ public class OneGroupLineView extends LineView
       });
     }
 
+    @Override
     public void mouseReleased(MouseEvent e)
     {}
 
+    @Override
     public void mouseEntered(MouseEvent e)
     {}
 
+    @Override
     public void mouseExited(MouseEvent e)
     {}
   }

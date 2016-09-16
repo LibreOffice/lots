@@ -30,6 +30,8 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
+import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
+
 /**
  * Interface für Klassen, die auf Events reagieren, die von UIElements verursacht
  * werden.

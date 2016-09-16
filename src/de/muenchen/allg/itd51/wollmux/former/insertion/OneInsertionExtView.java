@@ -85,12 +85,12 @@ public class OneInsertionExtView implements View
     // direkt auf dem Model als Listener registriert.
     OneInsertionTrafoView trafoView =
       new OneInsertionTrafoView(model, funcLib, null);
-    myTabbedPane.addTab("TRAFO", trafoView.JComponent());
+    myTabbedPane.addTab("TRAFO", trafoView.getComponent());
 
     model.addListener(new MyModelChangeListener());
   }
 
-  public JComponent JComponent()
+  public JComponent getComponent()
   {
     return myTabbedPane;
   }

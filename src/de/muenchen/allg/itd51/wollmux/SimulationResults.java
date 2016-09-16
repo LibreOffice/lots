@@ -30,6 +30,7 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
@@ -56,7 +57,13 @@ public class SimulationResults
    * Enthält die Zuordnung von FormIDs auf Formularwerte.
    */
   HashMap<String, String> mapFormFieldIDToValue;
-
+  
+  /**
+   * Enthält eine Map mit den Namen aller (bisher gesetzter) Sichtbarkeitsgruppen auf
+   * deren aktuellen Sichtbarkeitsstatus (sichtbar = true, unsichtbar = false)
+   */
+  private HashMap<String, Boolean> mapGroupIdToVisibilityState;
+  
   /**
    * Erzeugt ein SimulationResults-Objekt zur Aufnahme von Simulationsergebnissen mit
    * (noch) leerem Inhalt.
@@ -65,6 +72,7 @@ public class SimulationResults
   {
     this.mapFormFieldToContentValue = new HashMap<FormField, String>();
     this.mapFormFieldIDToValue = new HashMap<String, String>();
+    this.mapGroupIdToVisibilityState = new HashMap<String, Boolean>();
   }
 
   /**
@@ -114,6 +122,17 @@ public class SimulationResults
   }
 
   /**
+   * Löscht alle bisher bekannten Zuständer der Sichtbarkeitsgruppen und belegt die
+   * Gruppensichtbarkeiten des Simulationslaufs mit states neu.
+   * 
+   * @author Christoph Lutz (CIB software GmbH)
+   */
+  public void setGroupsVisibilityState(Map<String, Boolean> states)
+  {
+    mapGroupIdToVisibilityState.putAll(states);
+  }
+
+  /**
    * Liefert eine Map mit der Zuordnung aller im Simulationslauf gesetzter formIDs
    * auf die zugehörigen Werte.
    * 
@@ -136,6 +155,17 @@ public class SimulationResults
       mapFormFieldIDToValue.put(fieldId, value);
     else
       mapFormFieldIDToValue.remove(fieldId);
+  }
+  
+  /**
+   * Liefert eine Map mit den Namen aller (bisher gesetzter) Sichtbarkeitsgruppen auf
+   * deren aktuellen Sichtbarkeitsstatus (sichtbar = true, unsichtbar = false)
+   * 
+   * @author Christoph Lutz (CIB software GmbH)
+   */
+  public Map<String, Boolean> getGroupsVisibilityState()
+  {
+    return mapGroupIdToVisibilityState;
   }
 
   /**

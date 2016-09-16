@@ -82,12 +82,12 @@ public class OneSectionExtView implements View
 
     OneGroupsProviderGroupsEditView groupsView =
       new OneGroupsProviderGroupsEditView(model.getGroupsProvider(), groupModelList);
-    myTabbedPane.addTab("GROUPS", groupsView.JComponent());
+    myTabbedPane.addTab("GROUPS", groupsView.getComponent());
 
     model.addListener(new MyModelChangeListener());
   }
 
-  public JComponent JComponent()
+  public JComponent getComponent()
   {
     return myTabbedPane;
   }

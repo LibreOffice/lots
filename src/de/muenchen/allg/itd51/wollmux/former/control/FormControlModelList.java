@@ -36,13 +36,13 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.control;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 
 /**
@@ -50,7 +50,7 @@ import de.muenchen.allg.itd51.wollmux.former.IDManager;
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class FormControlModelList
+public class FormControlModelList implements Iterable<FormControlModel>
 {
   /**
    * Die FormControlModelList erzwingt einen Tab nach spätestens sovielen
@@ -61,20 +61,20 @@ public class FormControlModelList
   /**
    * Die Liste der {@link FormControlModel}s.
    */
-  private Vector<FormControlModel> models = new Vector<FormControlModel>();
+  private List<FormControlModel> models = new ArrayList<FormControlModel>();
 
   /**
    * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts
    * informiert werden wollen.
    */
-  private List<ItemListener> listeners = new Vector<ItemListener>(1);
+  private List<ItemListener> listeners = new ArrayList<ItemListener>(1);
 
   /**
    * Der FormularMax4000 zu dem diese Liste gehört.
    */
-  private FormularMax4000 formularMax4000;
+  private FormularMax4kController formularMax4000;
 
-  public FormControlModelList(FormularMax4000 formularMax4000)
+  public FormControlModelList(FormularMax4kController formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
   }
@@ -124,6 +124,7 @@ public class FormControlModelList
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
+  @Override
   public Iterator<FormControlModel> iterator()
   {
     return models.iterator();
@@ -221,7 +222,7 @@ public class FormControlModelList
       if (i - tabIdx >= MAX_MODELS_PER_TAB)
       {
         int idx = (i + tabIdx) / 2;
-        String id = makeUniqueId(FormularMax4000.STANDARD_TAB_NAME);
+        String id = makeUniqueId(FormularMax4kController.STANDARD_TAB_NAME);
         this.add(FormControlModel.createTab(id, id, formularMax4000), idx);
         tabIdx = idx;
       }
@@ -251,8 +252,8 @@ public class FormControlModelList
       FormControlModel model1 = models.get(idx - 1);
       FormControlModel model2 = models.get(idx);
       haveMovedTab = haveMovedTab || model1.isTab() || model2.isTab();
-      models.setElementAt(model2, idx - 1);
-      models.setElementAt(model1, idx);
+      models.set(idx-1, model2);
+      models.set(idx, model1);
       notifyListeners(idx - 1, idx);
     }
     if (haveMovedTab) enforceMaxModelsPerTab();
@@ -285,8 +286,8 @@ public class FormControlModelList
       FormControlModel model1 = models.get(idx + 1);
       FormControlModel model2 = models.get(idx);
       haveMovedTab = haveMovedTab || model1.isTab() || model2.isTab();
-      models.setElementAt(model2, idx + 1);
-      models.setElementAt(model1, idx);
+      models.set(idx+1, model2);
+      models.set(idx, model1);
       notifyListeners(idx, idx + 1);
     }
     if (haveMovedTab) enforceMaxModelsPerTab();
@@ -305,7 +306,7 @@ public class FormControlModelList
     ConfigThingy tabConf = export;
 
     int phase = 0; // 0: tab start, 1: Eingabefelder, 2: Buttons
-    String id = makeUniqueId(FormularMax4000.STANDARD_TAB_NAME);
+    String id = makeUniqueId(FormularMax4kController.STANDARD_TAB_NAME);
     FormControlModel currentTab =
       FormControlModel.createTab(id, id, formularMax4000);
     Iterator<FormControlModel> iter = models.iterator();
@@ -343,7 +344,7 @@ public class FormControlModelList
         && model.getType() != FormControlModel.GLUE_TYPE
         && model.getType() != FormControlModel.SEPARATOR_TYPE)
       {
-        id = makeUniqueId(FormularMax4000.STANDARD_TAB_NAME);
+        id = makeUniqueId(FormularMax4kController.STANDARD_TAB_NAME);
         currentTab = FormControlModel.createTab(id, id, formularMax4000);
         tabConf = outputTab(currentTab, export);
         conf = tabConf.add("Eingabefelder");
@@ -405,7 +406,10 @@ public class FormControlModelList
    */
   public void addListener(ItemListener listener)
   {
-    if (!listeners.contains(listener)) listeners.add(listener);
+    if (!listeners.contains(listener))
+    {
+      listeners.add(listener);
+    }
   }
 
   /**

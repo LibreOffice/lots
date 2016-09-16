@@ -35,7 +35,7 @@ import java.util.Iterator;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.view.OnDemandCardView;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
@@ -65,7 +65,7 @@ public class AllSectionExtViewsPanel extends OnDemandCardView
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public AllSectionExtViewsPanel(SectionModelList sectionModelList,
-      GroupModelList groupModelList, FormularMax4000 formularMax4000)
+      GroupModelList groupModelList, FormularMax4kController formularMax4000)
   {
     super(L.m("GROUPS-View"));
     this.groupModelList = groupModelList;
@@ -80,6 +80,7 @@ public class AllSectionExtViewsPanel extends OnDemandCardView
     }
   }
 
+  @Override
   public View createViewFor(Object model, ViewChangeListener viewChangeListener)
   {
     SectionModel m = (SectionModel) model;
@@ -88,11 +89,13 @@ public class AllSectionExtViewsPanel extends OnDemandCardView
 
   private class MyItemListener implements SectionModelList.ItemListener
   {
+    @Override
     public void itemAdded(SectionModel model, int index)
     {
       if (model.hasGroups()) addItem(model);
     }
 
+    @Override
     public void itemRemoved(SectionModel model, int index)
     {
     // Hier muss nicht removeItem(model) aufgerufen werden. Dies behandelt die
@@ -102,11 +105,13 @@ public class AllSectionExtViewsPanel extends OnDemandCardView
 
   private class MyBroadcastListener extends BroadcastListener
   {
+    @Override
     public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
     {
       showEmpty();
     }
 
+    @Override
     public void broadcastSectionModelSelection(BroadcastObjectSelection b)
     {
       if (b.getState() == 1)

@@ -88,11 +88,11 @@ public class LeftPanel implements View
   /**
    * Der FormularMax4000 zu dem dieses Panel gehört.
    */
-  private FormularMax4000 formularMax4000;
+  private FormularMax4kController formularMax4000;
 
   public LeftPanel(InsertionModelList insertionModelList,
       FormControlModelList formControlModelList, GroupModelList groupModelList,
-      SectionModelList sectionModelList, FormularMax4000 formularMax4000,
+      SectionModelList sectionModelList, FormularMax4kController formularMax4000,
       XTextDocument doc)
   {
     this.formularMax4000 = formularMax4000;
@@ -108,14 +108,15 @@ public class LeftPanel implements View
     myTabbedPane =
       new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
     myTabbedPane.add(L.m("Formular-GUI"),
-      allFormControlModelLineViewsPanel.JComponent());
+      allFormControlModelLineViewsPanel.getComponent());
     myTabbedPane.add(L.m("Einfügungen"),
-      allInsertionModelLineViewsPanel.JComponent());
-    myTabbedPane.add(L.m("Sichtbarkeiten"), allGroupModelLineViewsPanel.JComponent());
-    myTabbedPane.add(L.m("Bereiche"), allSectionModelLineViewsPanel.JComponent());
+      allInsertionModelLineViewsPanel.getComponent());
+    myTabbedPane.add(L.m("Sichtbarkeiten"), allGroupModelLineViewsPanel.getComponent());
+    myTabbedPane.add(L.m("Bereiche"), allSectionModelLineViewsPanel.getComponent());
 
     myTabbedPane.addChangeListener(new ChangeListener()
     {
+      @Override
       public void stateChanged(ChangeEvent e)
       {
         tabSwitched();
@@ -125,7 +126,7 @@ public class LeftPanel implements View
 
   private void tabSwitched()
   {
-    if (myTabbedPane.getSelectedComponent() == allFormControlModelLineViewsPanel.JComponent())
+    if (myTabbedPane.getSelectedComponent() == allFormControlModelLineViewsPanel.getComponent())
     {
       formularMax4000.broadcast(new Broadcast()
       {
@@ -135,7 +136,7 @@ public class LeftPanel implements View
         }
       });
     }
-    else if (myTabbedPane.getSelectedComponent() == allInsertionModelLineViewsPanel.JComponent())
+    else if (myTabbedPane.getSelectedComponent() == allInsertionModelLineViewsPanel.getComponent())
     {
       formularMax4000.broadcast(new Broadcast()
       {
@@ -145,7 +146,7 @@ public class LeftPanel implements View
         }
       });
     }
-    else if (myTabbedPane.getSelectedComponent() == allGroupModelLineViewsPanel.JComponent())
+    else if (myTabbedPane.getSelectedComponent() == allGroupModelLineViewsPanel.getComponent())
     {
       formularMax4000.broadcast(new Broadcast()
       {
@@ -155,7 +156,7 @@ public class LeftPanel implements View
         }
       });
     }
-    else if (myTabbedPane.getSelectedComponent() == allSectionModelLineViewsPanel.JComponent())
+    else if (myTabbedPane.getSelectedComponent() == allSectionModelLineViewsPanel.getComponent())
     {
       formularMax4000.broadcast(new Broadcast()
       {
@@ -180,7 +181,8 @@ public class LeftPanel implements View
     return allFormControlModelLineViewsPanel.getButtonInsertionIndex();
   }
 
-  public JComponent JComponent()
+  @Override
+  public JComponent getComponent()
   {
     return myTabbedPane;
   }

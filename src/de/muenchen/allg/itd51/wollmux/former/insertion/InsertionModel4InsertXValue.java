@@ -55,7 +55,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.UnknownIDException;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
@@ -151,7 +151,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public InsertionModel4InsertXValue(String bookmarkName, XBookmarksSupplier doc,
-      FunctionSelectionProvider funcSelections, FormularMax4000 formularMax4000)
+      FunctionSelectionProvider funcSelections, FormularMax4kController formularMax4000)
       throws SyntaxErrorException, NoSuchElementException
   {
     this.formularMax4000 = formularMax4000;
@@ -182,7 +182,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
       ConfigThingy dbSpalteConf = conf.query("DB_SPALTE");
       if (dbSpalteConf.count() == 0) throw new SyntaxErrorException();
       dataId =
-        formularMax4000.getIDManager().getID(FormularMax4000.NAMESPACE_DB_SPALTE,
+        formularMax4000.getIDManager().getID(FormularMax4kController.NAMESPACE_DB_SPALTE,
           dbSpalteConf.toString());
       dataId.addIDChangeListener(myIDChangeListener);
       sourceType = DATABASE_TYPE;
@@ -193,7 +193,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
       if (idConf.count() == 0) throw new SyntaxErrorException();
       dataId =
         formularMax4000.getIDManager().getID(
-          FormularMax4000.NAMESPACE_FORMCONTROLMODEL, idConf.toString());
+          FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, idConf.toString());
       dataId.addIDChangeListener(myIDChangeListener);
       sourceType = FORM_TYPE;
     }
@@ -247,6 +247,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
 
   }
 
+  @Override
   public boolean updateDocument(
       Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
   {
@@ -341,7 +342,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
     {
       IDManager.ID newDataId =
         formularMax4000.getIDManager().getExistingID(
-          FormularMax4000.NAMESPACE_FORMCONTROLMODEL, newId);
+          FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, newId);
       if (newDataId == null) throw new UnknownIDException(newId);
       dataId.removeIDChangeListener(myIDChangeListener);
       dataId = newDataId;
@@ -352,7 +353,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
     {
       dataId.removeIDChangeListener(myIDChangeListener);
       dataId =
-        formularMax4000.getIDManager().getID(FormularMax4000.NAMESPACE_DB_SPALTE,
+        formularMax4000.getIDManager().getID(FormularMax4kController.NAMESPACE_DB_SPALTE,
           newId);
       dataId.addIDChangeListener(myIDChangeListener);
     }
@@ -360,6 +361,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
     // formularMax4000.documentNeedsUpdating(); ist bereits in notifyListeners
   }
 
+  @Override
   public String getName()
   {
     return bookmark.getName();
@@ -369,11 +371,13 @@ public class InsertionModel4InsertXValue extends InsertionModel
     return sourceType;
   }
 
+  @Override
   public void selectWithViewCursor()
   {
     bookmark.select();
   }
 
+  @Override
   public void removeFromDocument()
   {
     XTextRange range = bookmark.getAnchor();
@@ -404,6 +408,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
 
   private class MyIDChangeListener implements IDManager.IDChangeListener
   {
+    @Override
     public void idHasChanged(ID id)
     {
       if (id != dataId)
