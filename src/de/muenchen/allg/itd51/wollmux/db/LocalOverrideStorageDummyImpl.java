@@ -6,8 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.TimeoutException;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner.Status;
 
 public class LocalOverrideStorageDummyImpl implements LocalOverrideStorage

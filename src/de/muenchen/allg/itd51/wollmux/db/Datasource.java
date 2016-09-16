@@ -38,8 +38,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import de.muenchen.allg.itd51.wollmux.TimeoutException;
-
 /**
  * Interface für Datenquellen, die der DJ verwalten kann. ACHTUNG! Die Konstruktoren
  * dieser Klasse dürfen keine potentiell lange blockierenden Aktionen (zum Beispiel

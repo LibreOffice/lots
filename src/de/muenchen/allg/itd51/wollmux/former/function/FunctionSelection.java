@@ -34,7 +34,7 @@ package de.muenchen.allg.itd51.wollmux.former.function;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 
 public class FunctionSelection implements FunctionSelectionAccess
 {

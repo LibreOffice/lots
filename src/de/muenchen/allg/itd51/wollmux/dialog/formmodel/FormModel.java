@@ -33,8 +33,6 @@ package de.muenchen.allg.itd51.wollmux.dialog.formmodel;
 
 import java.awt.event.ActionListener;
 
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
-
 /**
  * Erlaubt Zugriff auf die Formularbestandteile eines Dokuments abstrahiert von den
  * dahinterstehenden OOo-Objekten. ACHTUNG! Der FormController ruft die Methoden
@@ -160,7 +158,7 @@ public interface FormModel
    * 
    * @author christoph.lutz
    */
-  public void disposing(TextDocumentModel source);
+  public void closing(Object sender);
 
   /**
    * Teilt der FormGUI die zu diesem FormModel gehört mit, dass der Wert des

@@ -51,8 +51,8 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Liefert zu Dispatch-URLs, die der WollMux behandeln kann XDispatch-Objekte.
@@ -174,6 +174,8 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
 
     if (hasMethod(Dispatch.class, methodName))
       return new Dispatch();
+    else if (hasMethod(NotifyingDispatch.class, methodName))
+      return new NotifyingDispatch();
     else
     {
       if (frame != null)
@@ -181,6 +183,9 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
         if (hasMethod(DocumentDispatch.class, methodName))
           return new DocumentDispatch(getOrigDispatch(url, frameName, fsFlag), url,
             frame);
+        else if (hasMethod(DocumentNotifyingDispatch.class, methodName))
+          return new DocumentNotifyingDispatch(getOrigDispatch(url, frameName,
+            fsFlag), url, frame);
       }
     }
 

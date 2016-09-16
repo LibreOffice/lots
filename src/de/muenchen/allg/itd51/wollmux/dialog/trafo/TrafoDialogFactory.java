@@ -32,8 +32,8 @@ package de.muenchen.allg.itd51.wollmux.dialog.trafo;
 
 import java.lang.reflect.Constructor;
 
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.UnavailableException;
+import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
  * Erzeugt zu einem Satz von Parametern einen passenden TrafoDialog.

@@ -59,6 +59,7 @@ package de.muenchen.allg.itd51.wollmux.db;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -67,12 +68,15 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.TimeoutException;
+import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Stellt eine virtuelle Datenbank zur Verfügung, die ihre Daten aus verschiedenen
@@ -131,6 +135,19 @@ public class DatasourceJoiner
 
   private Status status;
 
+  private static final long DATASOURCE_TIMEOUT = 10000;
+
+  /**
+   * Enthält den zentralen DataSourceJoiner.
+   */
+  private static DatasourceJoiner datasourceJoiner;
+
+  /**
+   * Falls true, wurde bereits versucht, den DJ zu initialisieren (über den Erfolg
+   * des Versuchs sagt die Variable nichts.)
+   */
+  private static boolean djInitialized = false;
+
   public Status getStatus()
   {
     return status;
@@ -159,7 +176,7 @@ public class DatasourceJoiner
    *           unmöglich macht, wie z.B. wenn die Datenquelle mainSourceName in der
    *           joinConf fehlt und gleichzeitig kein Cache verfügbar ist.
    */
-  public DatasourceJoiner(ConfigThingy joinConf, String mainSourceName,
+  protected DatasourceJoiner(ConfigThingy joinConf, String mainSourceName,
       File losCache, URL context, long datasourceTimeout)
       throws ConfigurationErrorException
   {
@@ -643,6 +660,114 @@ public class DatasourceJoiner
   };
 
   /**
+   * Diese Methode liefert eine Liste mit den über {@link #senderDisplayTemplate}
+   * definierten String-Repräsentation aller verlorenen gegangenen Datensätze des
+   * DatasourceJoiner (gemäß {@link Status.lostDatasets}) zurück.
+   * Die genaue Form der String-Repräsentation ist abhängig von
+   * {@link #senderDisplayTemplate}, das in der WollMux-Konfiguration über den Wert
+   * von SENDER_DISPLAYTEMPLATE gesetzt werden kann. Gibt es keine verloren
+   * gegangenen Datensätze, so bleibt die Liste leer.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static List<String> getLostDatasetDisplayStrings()
+  {
+    DatasourceJoiner dj = getDatasourceJoiner();
+    ArrayList<String> list = new ArrayList<String>();
+    for (Dataset ds : dj.getStatus().lostDatasets)
+      list.add(new DatasetListElement(ds, PersoenlicheAbsenderliste.getInstance().getSenderDisplayTemplate()).toString());
+    return list;
+  }
+
+  /**
+   * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null, falls
+   * ein Fehler während der Initialisierung aufgetreten ist).
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  
+  public static DatasourceJoiner getDatasourceJoiner()
+  {
+    if (!DatasourceJoiner.djInitialized)
+    {
+      DatasourceJoiner.djInitialized = true;
+      ConfigThingy senderSource =
+        WollMuxFiles.getWollmuxConf().query("SENDER_SOURCE", 1);
+      String senderSourceStr = null;
+      try
+      {
+        senderSourceStr = senderSource.getLastChild().toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        // hier geben wir im Vergleich zu früher keine Fehlermeldung mehr aus,
+        // sondern erst später, wnn
+        // tatsächlich auf die Datenquelle "null" zurück gegriffen wird.
+      }
+  
+      ConfigThingy dataSourceTimeout =
+        WollMuxFiles.getWollmuxConf().query("DATASOURCE_TIMEOUT", 1);
+      String datasourceTimeoutStr = "";
+      long datasourceTimeoutLong = 0;
+      try
+      {
+        datasourceTimeoutStr = dataSourceTimeout.getLastChild().toString();
+        try
+        {
+          datasourceTimeoutLong = new Long(datasourceTimeoutStr).longValue();
+        }
+        catch (NumberFormatException e)
+        {
+          Logger.error(L.m("DATASOURCE_TIMEOUT muss eine ganze Zahl sein"));
+          datasourceTimeoutLong = DatasourceJoiner.DATASOURCE_TIMEOUT;
+        }
+        if (datasourceTimeoutLong <= 0)
+        {
+          Logger.error(L.m("DATASOURCE_TIMEOUT muss größer als 0 sein!"));
+        }
+      }
+      catch (NodeNotFoundException e)
+      {
+        datasourceTimeoutLong = DatasourceJoiner.DATASOURCE_TIMEOUT;
+      }
+  
+      try
+      {
+        if (null == senderSourceStr)
+          senderSourceStr = de.muenchen.allg.itd51.wollmux.NoConfig.NOCONFIG;
+  
+        DatasourceJoiner.datasourceJoiner =
+          new DatasourceJoiner(WollMuxFiles.getWollmuxConf(), senderSourceStr, WollMuxFiles.getLosCacheFile(),
+            WollMuxFiles.getDEFAULT_CONTEXT(), datasourceTimeoutLong);
+        /*
+         * Zum Zeitpunkt wo der DJ initialisiert wird sind die Funktions- und
+         * Dialogbibliothek des WollMuxSingleton noch nicht initialisiert, deswegen
+         * können sie hier nicht verwendet werden. Man könnte die Reihenfolge
+         * natürlich ändern, aber diese Reihenfolgeabhängigkeit gefällt mir nicht.
+         * Besser wäre auch bei den Funktionen WollMuxSingleton.getFunctionDialogs()
+         * und WollMuxSingleton.getGlobalFunctions() eine on-demand initialisierung
+         * nach dem Prinzip if (... == null) initialisieren. Aber das heben wir uns
+         * für einen Zeitpunkt auf, wo es benötigt wird und nehmen jetzt erst mal
+         * leere Dummy-Bibliotheken.
+         */
+        FunctionLibrary funcLib = new FunctionLibrary();
+        DialogLibrary dialogLib = new DialogLibrary();
+        Map<Object, Object> context = new HashMap<Object, Object>();
+        ColumnTransformer columnTransformer =
+          new ColumnTransformer(WollMuxFiles.getWollmuxConf(),
+            "AbsenderdatenSpaltenumsetzung", funcLib, dialogLib, context);
+        DatasourceJoiner.datasourceJoiner.setTransformer(columnTransformer);
+      }
+      catch (ConfigurationErrorException e)
+      {
+        Logger.error(e);
+      }
+    }
+  
+    return DatasourceJoiner.datasourceJoiner;
+  }
+
+  /**
    * Ein Wrapper um einfache Datasets, wie sie von Datasources als Ergebnisse von
    * Anfragen zurückgeliefert werden. Der Wrapper ist notwendig, um die auch für
    * Fremddatensätze sinnvollen DJDataset Funktionen anbieten zu können, allen voran
@@ -659,6 +784,7 @@ public class DatasourceJoiner
       myDS = ds;
     }
 
+    @Override
     public void set(String columnName, String newValue)
         throws ColumnNotFoundException, UnsupportedOperationException,
         IllegalArgumentException
@@ -667,55 +793,65 @@ public class DatasourceJoiner
         L.m("Datensatz kommt nicht aus dem LOS"));
     }
 
+    @Override
     public boolean hasLocalOverride(String columnName)
         throws ColumnNotFoundException
     {
       return false;
     }
 
+    @Override
     public boolean hasBackingStore()
     {
       return true;
     }
 
+    @Override
     public boolean isFromLOS()
     {
       return false;
     }
 
+    @Override
     public boolean isSelectedDataset()
     {
       return false;
     }
 
+    @Override
     public void select() throws UnsupportedOperationException
     {
       throw new UnsupportedOperationException(
         L.m("Datensatz kommt nicht aus dem LOS"));
     }
 
+    @Override
     public void discardLocalOverride(String columnName)
         throws ColumnNotFoundException, NoBackingStoreException
     {
     // nichts zu tun
     }
 
+    @Override
     public DJDataset copy()
     {
       return myLOS.copyNonLOSDataset(myDS);
     }
 
+    @Override
     public void remove() throws UnsupportedOperationException
     {
       throw new UnsupportedOperationException(
         L.m("Datensatz kommt nicht aus dem LOS"));
     }
 
+    @Override
     public String get(String columnName) throws ColumnNotFoundException
     {
       return myDS.get(columnName);
     }
 
+    @Override
     public String getKey()
     {
       return myDS.getKey();

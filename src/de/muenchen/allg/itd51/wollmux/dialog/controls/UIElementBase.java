@@ -6,7 +6,7 @@ import java.awt.Component;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 
-import de.muenchen.allg.itd51.wollmux.func.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 
 /**
  * Abstrakte Basis-Klasse für UIElemente.

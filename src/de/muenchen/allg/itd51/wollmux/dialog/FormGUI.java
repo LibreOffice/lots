@@ -66,15 +66,17 @@ import com.sun.star.awt.XWindow2;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
+import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 /**
  * Managed die Fenster (Writer und FormController) der FormularGUI.
@@ -142,6 +144,7 @@ public class FormGUI
    */
   private ActionListener actionListener_abort = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       abort();
@@ -176,7 +179,7 @@ public class FormGUI
    *          bildet IDs von Formularfeldern auf Vorgabewerte ab. Falls hier ein Wert
    *          für ein Formularfeld vorhanden ist, so wird dieser allen anderen
    *          automatischen Befüllungen vorgezogen. Wird das Objekt
-   *          {@link FormController#FISHY} als Wert für ein Feld übergeben, so wird
+   *          {@link TextDocumentModel#FISHY} als Wert für ein Feld übergeben, so wird
    *          dieses Feld speziell markiert als ungültig bis der Benutzer es manuell
    *          ändert.
    * @param functionContext
@@ -217,6 +220,7 @@ public class FormGUI
     {
       Runnable runner = new Runnable()
       {
+        @Override
         public void run()
         {
           try
@@ -327,6 +331,7 @@ public class FormGUI
       {
         private int counter = 0;
 
+        @Override
         public void windowStateChanged(WindowEvent e)
         {
           if (counter == 0 && (e.getNewState() & Frame.MAXIMIZED_BOTH) > 0)
@@ -541,6 +546,7 @@ public class FormGUI
       restart();
     }
 
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       myDoc.setWindowPosSize(x, y, width, height);
@@ -560,6 +566,7 @@ public class FormGUI
     public MyWindowListener()
     {}
 
+    @Override
     public void windowActivated(WindowEvent e)
     {
       updateTitle();
@@ -581,44 +588,54 @@ public class FormGUI
       {}
     }
 
+    @Override
     public void windowClosed(WindowEvent e)
     {}
 
+    @Override
     public void windowClosing(WindowEvent e)
     {
       closeAction.actionPerformed(null);
     }
 
+    @Override
     public void windowDeactivated(WindowEvent e)
     {}
 
+    @Override
     public void windowDeiconified(WindowEvent e)
     {
       // myDoc.setWindowVisible(true);
       arrangeWindows();
     }
 
+    @Override
     public void windowIconified(WindowEvent e)
     {
     // myDoc.setWindowVisible(false);
     }
 
+    @Override
     public void windowOpened(WindowEvent e)
     {}
 
+    @Override
     public void componentResized(ComponentEvent e)
     {
       arrangeWindows();
     }
 
+    @Override
     public void componentMoved(ComponentEvent e)
     {
       arrangeWindows();
     }
 
+    @Override
     public void componentShown(ComponentEvent e)
     {}
 
+    @Override
     public void componentHidden(ComponentEvent e)
     {}
   }
@@ -657,6 +674,7 @@ public class FormGUI
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           try
@@ -686,16 +704,19 @@ public class FormGUI
         UNO.XWindow2(myDoc.getCurrentController().getFrame().getContainerWindow());
     }
 
+    @Override
     public void setWindowPosSize(int x, int y, int width, int height)
     {
       myWindow.setPosSize(x, y, width, height, PosSize.POSSIZE);
     }
 
+    @Override
     public void setWindowVisible(boolean vis)
     {
       myWindow.setVisible(vis);
     }
 
+    @Override
     public void close()
     {
       try
@@ -708,85 +729,101 @@ public class FormGUI
       }
     }
 
+    @Override
     public void setVisibleState(String groupId, boolean visible)
     {
       Logger.log("Gruppe \"" + groupId + "\" ist jetzt "
         + (visible ? "sichtbar" : "unsichtbar"));
     }
 
+    @Override
     public void valueChanged(String fieldId, String newValue)
     {
       Logger.log("Feld \"" + fieldId + "\" hat jetzt den Wert \"" + newValue + "\"");
     }
 
+    @Override
     public void focusGained(String fieldId)
     {
       Logger.log("Feld \"" + fieldId + "\" hat den Fokus bekommen");
     }
 
+    @Override
     public void focusLost(String fieldId)
     {
       Logger.log("Feld \"" + fieldId + "\" hat den Fokus verloren");
     }
 
-    public void disposing(TextDocumentModel source)
-    {
-      Logger.log("Dispose()");
-    }
-
+    @Override
     public void print()
     {
       Logger.log("print()");
     }
 
+    @Override
     public void pdf()
     {
       Logger.log("pdf()");
     }
 
+    @Override
     public void setValue(String fieldId, String value, ActionListener listener)
     {
       Logger.log("setValue()");
     }
 
+    @Override
     public void startFormGUI()
     {
       Logger.log("startFormGUI()");
     }
 
+    @Override
     public void formControllerInitCompleted()
     {
       Logger.log("formControllerInitCompleted()");
     }
 
+    @Override
     public void save()
     {
       Logger.log("save()");
     }
 
+    @Override
     public void saveAs()
     {
       Logger.log("saveAs()");
     }
 
+    @Override
     public void closeAndOpenExt(String ext)
     {
       Logger.log("closeAndOpenExt(" + ext + ")");
     }
 
+    @Override
     public void saveTempAndOpenExt(String ext)
     {
       Logger.log("saveTempAndOpenExt(" + ext + ")");
     }
 
+    @Override
     public String getWindowTitle()
     {
       return "Fenstertitte";
+    }
+
+    @Override
+    public void closing(Object sender)
+    {
+      Logger.log("Closing(sender)");
     }
   }
 
   private class MyAbortRequestListener implements ActionListener
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       abort();
@@ -810,10 +847,10 @@ public class FormGUI
         true));
     FormModel model = new DummyFormModel(doc);
     Map<String, String> mapIdToPresetValue = new HashMap<String, String>();
-    mapIdToPresetValue.put("NEFishy", FormController.FISHY);
+    mapIdToPresetValue.put("NEFishy", TextDocumentModel.FISHY);
     mapIdToPresetValue.put("NEPresetInList", "Dings");
     mapIdToPresetValue.put("NEPresetNotInList", "Schwupps");
-    mapIdToPresetValue.put("EFishy", FormController.FISHY);
+    mapIdToPresetValue.put("EFishy", TextDocumentModel.FISHY);
     mapIdToPresetValue.put("EPresetInList", "Dings");
     mapIdToPresetValue.put("EPresetNotInList", "Schwupps");
     mapIdToPresetValue.put("AbtLohn", "TRUE");
@@ -822,9 +859,9 @@ public class FormGUI
 
     Map<Object, Object> functionContext = new HashMap<Object, Object>();
     DialogLibrary dialogLib =
-      WollMuxFiles.parseFunctionDialogs(conf.get("Formular"), null, functionContext);
+      DialogFactory.parseFunctionDialogs(conf.get("Formular"), null, functionContext);
     FunctionLibrary funcLib =
-      WollMuxFiles.parseFunctions(conf.get("Formular"), dialogLib, functionContext,
+      FunctionFactory.parseFunctions(conf.get("Formular"), dialogLib, functionContext,
         null);
 
     ConfigThingy formFensterConf = new ConfigThingy("");

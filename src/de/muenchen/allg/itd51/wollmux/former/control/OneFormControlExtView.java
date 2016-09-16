@@ -35,11 +35,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.group.OneGroupsProviderGroupsEditView;
 import de.muenchen.allg.itd51.wollmux.former.view.LazyView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Anzeige erweiterter Eigenschaften eines FormControlModels.

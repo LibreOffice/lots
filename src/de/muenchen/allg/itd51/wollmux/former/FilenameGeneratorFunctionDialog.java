@@ -24,32 +24,32 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
-import de.muenchen.allg.itd51.wollmux.func.Function;
 
 public class FilenameGeneratorFunctionDialog extends JDialog
 {
   private static final long serialVersionUID = 1L;
   
-  private TextDocumentModel doc;
+  private TextDocumentController documentController;
   private AdjustorFunction func;
   private String functionName;
   private IDManager idManager;
 
-  public FilenameGeneratorFunctionDialog(Frame owner, boolean modal, TextDocumentModel doc, IDManager idManager)
+  public FilenameGeneratorFunctionDialog(Frame owner, boolean modal, TextDocumentController documentController, IDManager idManager)
   {
     super(owner, modal);
 
-    this.doc = doc;
+    this.documentController = documentController;
     this.idManager = idManager;
-    func = parseAdjustorFunction(doc.getFilenameGeneratorFunc());
+    func = parseAdjustorFunction(documentController.getFilenameGeneratorFunc());
     if (func != null)
     {
       functionName = func.functionName;
@@ -104,9 +104,9 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     final List<String> adjustFuncs = new ArrayList<String>();
     adjustFuncs.add(L.m("-- keine --"));
     int sel = 0;
-    for (String fName : doc.getFunctionLibrary().getFunctionNames())
+    for (String fName : documentController.getFunctionLibrary().getFunctionNames())
     {
-      Function f = doc.getFunctionLibrary().get(fName);
+      Function f = documentController.getFunctionLibrary().get(fName);
       if (f != null && f.parameters().length == 1
         && f.parameters()[0].equals("Filename"))
       {
@@ -170,7 +170,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
         {
           ConfigThingy functionConf =
             createFilenameGeneratorFunctionConf(tt, adjustFuncCombo);
-          doc.setFilenameGeneratorFunc(functionConf);
+          documentController.setFilenameGeneratorFunc(functionConf);
         }
         catch (Exception e1)
         {

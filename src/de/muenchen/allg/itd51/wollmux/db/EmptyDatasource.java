@@ -37,8 +37,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import de.muenchen.allg.itd51.wollmux.TimeoutException;
-
 /**
  * Eine Datenquelle, die keine Datensätze enthält.
  * 

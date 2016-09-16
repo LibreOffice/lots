@@ -42,15 +42,18 @@ import com.sun.star.view.XSelectionChangeListener;
 import com.sun.star.view.XSelectionSupplier;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.document.DocumentTreeVisitor;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
 import de.muenchen.allg.itd51.wollmux.former.document.ScanVisitor;
-import de.muenchen.allg.itd51.wollmux.former.document.Visitor;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionTester;
@@ -62,8 +65,7 @@ import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXVal
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModel;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModelList;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
 
 public class FormularMax4kController
 {
@@ -72,7 +74,7 @@ public class FormularMax4kController
   /**
    * Das TextDocumentModel, zu dem das Dokument doc gehört.
    */
-  private TextDocumentModel doc;
+  private TextDocumentController documentController;
 
   /**
    * Verwaltet die IDs von Objekten.
@@ -226,11 +228,11 @@ public class FormularMax4kController
    */
   private static final long LOWEST_ALLOWED_HEAP_SIZE = 70000000;
 
-  public FormularMax4kController(TextDocumentModel model,
+  public FormularMax4kController(TextDocumentController documentController,
       ActionListener abortListener, FunctionLibrary funcLib,
       PrintFunctionLibrary printFuncLib)
   {
-    this.doc = model;
+    this.documentController = documentController;
     this.abortListener = abortListener;
     this.functionLibrary = funcLib;
     this.printFunctionLibrary = printFuncLib;
@@ -245,13 +247,13 @@ public class FormularMax4kController
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        updateDocument(doc);
+        updateDocument(FormularMax4kController.this.documentController);
       }
     });
     writeChangesTimer.setCoalesce(true);
     writeChangesTimer.setRepeats(false);
 
-    initModelsAndViews(doc.getFormDescription());
+    initModelsAndViews(documentController.getFormDescription());
     
     if (!testMemoryRequirements())
     {
@@ -310,9 +312,9 @@ public class FormularMax4kController
     return idManager;
   }
 
-  public TextDocumentModel getDocumentModel()
+  public TextDocumentController getDocumentController()
   {
-    return doc;
+    return documentController;
   }
 
   public FunctionSelectionProvider getFunctionSelectionProvider()
@@ -395,7 +397,7 @@ public class FormularMax4kController
   public LeftPanel createLeftPanel()
   {
     return new LeftPanel(insertionModelList, formControlModelList, groupModelList,
-      sectionModelList, this, doc.doc);
+      sectionModelList, this, documentController.getModel().doc);
   }
 
   public RightPanel createRightPanel()
@@ -406,20 +408,20 @@ public class FormularMax4kController
 
   public XSelectionSupplier getSelectionSupplier()
   {
-    return UNO.XSelectionSupplier(doc.doc.getCurrentController());
+    return UNO.XSelectionSupplier(documentController.getModel().doc.getCurrentController());
   }
 
   public void setPrintFunction()
   {
     PrintFunctionDialog pfd =
-      new PrintFunctionDialog(view, true, doc, printFunctionLibrary);
+      new PrintFunctionDialog(view, true, documentController, printFunctionLibrary);
     pfd.setVisible(true);
   }
 
   public void setFilenameGeneratorFunction()
   {
     FilenameGeneratorFunctionDialog fgfd =
-      new FilenameGeneratorFunctionDialog(view, true, doc, idManager);
+      new FilenameGeneratorFunctionDialog(view, true, documentController, idManager);
     fgfd.setVisible(true);
   }
 
@@ -430,7 +432,7 @@ public class FormularMax4kController
    */
   public void deForm()
   {
-    doc.deForm();
+    documentController.deForm();
     initModelsAndViews(new ConfigThingy(""));
   }
 
@@ -441,7 +443,7 @@ public class FormularMax4kController
    */
   public void removeNonWMBookmarks()
   {
-    doc.removeNonWMBookmarks();
+    documentController.removeNonWMBookmarks();
   }
 
   /**
@@ -457,7 +459,7 @@ public class FormularMax4kController
     ConfigEditor editor = new ConfigEditor("Config Editor", this);
     
     editor.setVisible(true);
-    editor.setText(updateDocument(doc).stringRepresentation());
+    editor.setText(updateDocument(documentController).stringRepresentation());
     editor.addWindowListener(new WindowAdapter()
     {
       @Override
@@ -618,7 +620,7 @@ public class FormularMax4kController
   public void save()
   {
     flushChanges();
-    UNO.dispatch(doc.doc, ".uno:Save");
+    UNO.dispatch(documentController.getModel().doc, ".uno:Save");
   }
   
   /**
@@ -629,7 +631,7 @@ public class FormularMax4kController
   public void saveAs()
   {
     flushChanges();
-    UNO.dispatch(doc.doc, ".uno:SaveAs");
+    UNO.dispatch(documentController.getModel().doc, ".uno:SaveAs");
   }
   
   /**
@@ -671,7 +673,7 @@ public class FormularMax4kController
       writeChangesTimer.stop();
       try
       {
-        updateDocument(doc);
+        updateDocument(documentController);
       }
       catch (Exception x)
       {
@@ -688,7 +690,7 @@ public class FormularMax4kController
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private ConfigThingy updateDocument(TextDocumentModel doc)
+  private ConfigThingy updateDocument(TextDocumentController documentController)
   {
     Logger.debug(L.m("Übertrage Formularbeschreibung ins Dokument"));
     Map<String, ConfigThingy> mapFunctionNameToConfigThingy =
@@ -696,7 +698,7 @@ public class FormularMax4kController
     insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
     sectionModelList.updateDocument();
     ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
-    doc.setFormDescription(new ConfigThingy(conf));
+    documentController.setFormDescription(new ConfigThingy(conf));
     return conf;
   }
 
@@ -783,14 +785,14 @@ public class FormularMax4kController
     /*
      * Collect insertions via WollMux bookmarks
      */
-    XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(doc.doc);
+    XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(documentController.getModel().doc);
     String[] bookmarks = bmSupp.getBookmarks().getElementNames();
     for (int i = 0; i < bookmarks.length; ++i)
     {
       try
       {
         String bookmark = bookmarks[i];
-        if (InsertionModel4InsertXValue.INSERTION_BOOKMARK.matcher(bookmark).matches())
+        if (DocumentCommands.INSERTION_BOOKMARK.matcher(bookmark).matches())
           insertionModelList.add(new InsertionModel4InsertXValue(bookmark, bmSupp,
             functionSelectionProvider, this));
       }
@@ -803,7 +805,7 @@ public class FormularMax4kController
     /*
      * Collect insertions via InputUser textfields
      */
-    XTextFieldsSupplier tfSupp = UNO.XTextFieldsSupplier(doc.doc);
+    XTextFieldsSupplier tfSupp = UNO.XTextFieldsSupplier(documentController.getModel().doc);
     XEnumeration enu = tfSupp.getTextFields().createEnumeration();
     while (enu.hasMoreElements())
     {
@@ -814,11 +816,11 @@ public class FormularMax4kController
         if (info.supportsService("com.sun.star.text.TextField.InputUser"))
         {
           Matcher m =
-            InsertionModel4InputUser.INPUT_USER_FUNCTION.matcher(UNO.getProperty(tf,
+            TextDocumentModel.INPUT_USER_FUNCTION.matcher(UNO.getProperty(tf,
               "Content").toString());
 
           if (m.matches())
-            insertionModelList.add(new InsertionModel4InputUser(tf, doc.doc,
+            insertionModelList.add(new InsertionModel4InputUser(tf, documentController.getModel().doc,
               functionSelectionProvider, this));
         }
       }
@@ -864,7 +866,7 @@ public class FormularMax4kController
     }
 
     sectionModelList.clear();
-    XTextSectionsSupplier tsSupp = UNO.XTextSectionsSupplier(doc.doc);
+    XTextSectionsSupplier tsSupp = UNO.XTextSectionsSupplier(documentController.getModel().doc);
     XNameAccess textSections = tsSupp.getTextSections();
     String[] sectionNames = textSections.getElementNames();
     for (String sectionName : sectionNames)
@@ -1061,7 +1063,7 @@ public class FormularMax4kController
     try
     {
       XDocumentProperties info =
-        UNO.XDocumentPropertiesSupplier(doc.doc).getDocumentProperties();
+        UNO.XDocumentPropertiesSupplier(documentController.getModel().doc).getDocumentProperties();
       try
       {
         String title = ((String) UNO.getProperty(info, "Title")).trim();
@@ -1072,8 +1074,8 @@ public class FormularMax4kController
       }
       catch (Exception x)
       {}
-      Visitor visitor = new ScanVisitor(this);
-      visitor.visit(doc.doc);
+      DocumentTreeVisitor visitor = new ScanVisitor(this);
+      visitor.visit(documentController.getModel().doc);
     }
     catch (Exception x)
     {
@@ -1252,14 +1254,14 @@ public class FormularMax4kController
     // OutOfMemoryErrors führen könnte. Wenn ja, wird eine entsprechende Meldung
     // ausgegeben, dass der Benutzer seine Java-Einstellungen ändern soll und
     // der FormularMax wird nicht gestartet.
-    int formControlCount = doc.getFormDescription().query("TYPE", 6, 6).count();
+    int formControlCount = documentController.getFormDescription().query("TYPE", 6, 6).count();
     long maxMemory = Runtime.getRuntime().maxMemory();
     if (formControlCount > CRITICAL_NUMBER_OF_FORMCONTROLS
       && maxMemory < LOWEST_ALLOWED_HEAP_SIZE)
     {
       Logger.log(L.m(
         "Starten von FormularMax beim Bearbeiten von Dokument '%1' abgebrochen, da maximale Java Heap Size = %2 bytes und Anzahl FormControls = %3",
-        doc.getTitle(), maxMemory, formControlCount));
+        documentController.getFrameController().getTitle(), maxMemory, formControlCount));
       JOptionPane.showMessageDialog(
         view,
         L.m("Der FormularMax 4000 kann nicht ausgeführt werden, da der Java-Laufzeitumgebung zu wenig Hauptspeicher zur Verfügung steht.\n"
@@ -1268,7 +1270,7 @@ public class FormularMax4kController
           + "tragen den neuen Parameter \"-Xmx256m\" ein (Groß-/Kleinschreibung beachten!) und klicken auf \"Zuweisen\".\n"
           + "Danach ist ein Neustart von OpenOffice.org nötig."),
         L.m("Java Heap Size zu gering"), JOptionPane.ERROR_MESSAGE);
-      doc.setCurrentFormularMax4000(null);
+      DocumentManager.getDocumentManager().setCurrentFormularMax4000(documentController.getModel().doc, null);
       return false;
     }
     
@@ -1299,7 +1301,6 @@ public class FormularMax4kController
               }
               catch (Exception x)
               {}
-              ;
             }
           });
         }

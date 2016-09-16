@@ -64,8 +64,12 @@ import com.sun.star.util.XChangesBatch;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.event.GlobalEventListener;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
@@ -124,6 +128,8 @@ public class WollMuxSingleton
       noConfig = new NoConfig(false);
     }
     
+    WollMuxClassLoader.initClassLoader();
+    
     Logger.debug(L.m("StartupWollMux"));
     Logger.debug("Build-Info: " + getBuildInfo());
     if (WollMuxFiles.getWollMuxConfFile() != null)
@@ -144,7 +150,7 @@ public class WollMuxSingleton
 
     // Versuchen, den DJ zu initialisieren und Flag setzen, falls nicht
     // erfolgreich.
-    if (WollMuxFiles.getDatasourceJoiner() == null) successfulStartup = false;
+    if (DatasourceJoiner.getDatasourceJoiner() == null) successfulStartup = false;
 
     // Initialisiere EventProcessor
     WollMuxEventHandler.setAcceptEvents(successfulStartup);
@@ -530,42 +536,6 @@ public class WollMuxSingleton
     catch (WrappedTargetException e)
     {
       Logger.error(e);
-    }
-  }
-
-  /**
-   * Diese Methode tut nichts ausser zu prüfen, ob es sich bei dem übergebenen String
-   * id um einen gültigen Bezeichner gemäß der Syntax für WollMux-Config-Dateien
-   * handelt und im negativen Fall eine InvalidIdentifierException zu werfen.
-   * 
-   * @param id
-   *          zu prüfende ID
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   * @throws InvalidIdentifierException
-   */
-  public static void checkIdentifier(String id) throws InvalidIdentifierException
-  {
-    if (!id.matches("^[a-zA-Z_][a-zA-Z_0-9]*$"))
-      throw new InvalidIdentifierException(id);
-  }
-
-  public static class InvalidIdentifierException extends Exception
-  {
-    private static final long serialVersionUID = 495666967644874471L;
-
-    private String invalidId;
-
-    public InvalidIdentifierException(String invalidId)
-    {
-      this.invalidId = invalidId;
-    }
-
-    @Override
-    public String getMessage()
-    {
-      return L.m(
-        "Der Bezeichner '%1' ist ungültig, und darf nur die Zeichen a-z, A-Z, _ und 0-9 enthalten, wobei das erste Zeichen keine Ziffer sein darf.",
-        invalidId);
     }
   }
 

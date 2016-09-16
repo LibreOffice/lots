@@ -42,7 +42,7 @@ package de.muenchen.allg.itd51.wollmux.dialog.controls;
 import java.awt.Color;
 import java.awt.Component;
 
-import de.muenchen.allg.itd51.wollmux.func.Value;
+import de.muenchen.allg.itd51.wollmux.core.functions.Value;
 
 /**
  * Interface das von den konkreten UI Elementen (Combobox etc.) abstrahiert.

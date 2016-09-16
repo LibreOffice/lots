@@ -59,15 +59,16 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
 
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel.ReferencedFieldID;
-import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.ReferencedFieldID;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 
 /**
  * "Felder anpassen" Dialog der neuen erweiterten Serienbrief-Funktionalitäten.
@@ -86,14 +87,15 @@ class AdjustFields
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  static void showAdjustFieldsDialog(JFrame parent, final TextDocumentModel mod,
+  static void showAdjustFieldsDialog(JFrame parent, final TextDocumentController documentController,
       MailMergeDatasource ds)
   {
     ReferencedFieldID[] fieldIDs =
-      mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
+      documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
         ds.getColumnNames()));
     ActionListener submitActionListener = new ActionListener()
     {
+      @Override
       @SuppressWarnings("unchecked")
       public void actionPerformed(ActionEvent e)
       {
@@ -103,7 +105,25 @@ class AdjustFields
         {
           String fieldId = ent.getKey();
           FieldSubstitution subst = ent.getValue();
-          mod.applyFieldSubstitution(fieldId, subst);
+          documentController.applyFieldSubstitution(fieldId, subst);
+          
+          // Datenstrukturen aktualisieren
+          documentController.updateDocumentCommands();
+          DocumentCommandInterpreter dci = new DocumentCommandInterpreter(documentController);
+          dci.scanGlobalDocumentCommands();
+          // collectNonWollMuxFormFields() wird im folgenden scan auch noch erledigt
+          dci.scanInsertFormValueCommands();
+
+          // Alte Formularwerte aus den persistenten Daten entfernen
+          documentController.setFormFieldValue(fieldId, null);
+
+          // Ansicht der betroffenen Felder aktualisieren
+          for (Iterator<FieldSubstitution.SubstElement> iter = subst.iterator(); iter.hasNext();)
+          {
+            FieldSubstitution.SubstElement ele = iter.next();
+            if (ele.isField()) documentController.updateFormFields(ele.getValue());
+          }
+
         }
       }
     };
@@ -122,14 +142,15 @@ class AdjustFields
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  static void showAddMissingColumnsDialog(JFrame parent, TextDocumentModel mod,
+  static void showAddMissingColumnsDialog(JFrame parent, TextDocumentController documentController,
       final MailMergeDatasource ds)
   {
     ReferencedFieldID[] fieldIDs =
-      mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
+        documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
         ds.getColumnNames()));
     ActionListener submitActionListener = new ActionListener()
     {
+      @Override
       @SuppressWarnings("unchecked")
       public void actionPerformed(ActionEvent e)
       {
@@ -209,6 +230,7 @@ class AdjustFields
       new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
         new Iterable<Action>()
         {
+          @Override
           public Iterator<Action> iterator()
           {
             List<Action> actions = new Vector<Action>();
@@ -224,6 +246,7 @@ class AdjustFields
               {
                 private static final long serialVersionUID = 3688585907102784521L;
 
+                @Override
                 public void actionPerformed(ActionEvent e)
                 {
                   if (currentField[0] != null) currentField[0].insertTag(name);
@@ -277,6 +300,7 @@ class AdjustFields
 
       final TextComponentTags field = new TextComponentTags(new JTextField())
       {
+        @Override
         public boolean isContentValid()
         {
           if (!isTransformed) return true;
@@ -291,9 +315,11 @@ class AdjustFields
       fbox.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
       field.getJTextComponent().addFocusListener(new FocusListener()
       {
+        @Override
         public void focusLost(FocusEvent e)
         {}
 
+        @Override
         public void focusGained(FocusEvent e)
         {
           currentField[0] = field;
@@ -319,6 +345,7 @@ class AdjustFields
     JButton button = new JButton(L.m("Abbrechen"));
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         dialog.dispose();
@@ -331,6 +358,7 @@ class AdjustFields
     button = new JButton(labelSubmitButton);
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         final HashMap<String, FieldSubstitution> result =
@@ -356,6 +384,7 @@ class AdjustFields
 
         if (submitActionListener != null) new Thread()
         {
+          @Override
           public void run()
           {
             submitActionListener.actionPerformed(new ActionEvent(result, 0,

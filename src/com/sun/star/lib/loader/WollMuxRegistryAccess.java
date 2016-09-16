@@ -33,7 +33,7 @@
 // Leider ist WinRegKey package protected, also müssen wir uns in diese Package einklinken.
 package com.sun.star.lib.loader;
 
-import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 public class WollMuxRegistryAccess
 {
