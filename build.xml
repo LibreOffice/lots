@@ -205,11 +205,9 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 				<include name="Sidebar.xcu" />
 				<include name="WriterWindowState.xcu" />
 			</fileset>
-			<zipfileset dir="${RDB_DIR}" prefix="icons">
-				<include name="tools-large.png" />
-			</zipfileset>
 			<fileset dir="${RDB_DIR}/BUTTONS_ONLY" includes="META-INF/manifest.xml" />
 			<fileset dir="misc" includes="buildinfo" />
+			<zipfileset dir="oxt" includes="wollmux.png" fullpath="icons/wollmux.png" />
 		</zip>
 		
 		<echo level="info">unopkg remove ${PKG_NAME}:</echo>
