@@ -90,6 +90,8 @@ public class Dispatch extends BaseDispatch
 
   public static final String DISP_wmTest = "wollmux:Test";
 
+  public static final String DISP_wmPrintPage = "wollmux:PrintPage";
+
   /**
    * Enthält alle aktuell registrierten StatusListener Grund für Auskommentierung:
    * Braucht doch keiner, oder?
@@ -145,5 +147,4 @@ public class Dispatch extends BaseDispatch
   {
     WollMuxEventHandler.handleDumpInfo();
   }
-
 }

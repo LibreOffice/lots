@@ -208,6 +208,9 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 			<fileset dir="${RDB_DIR}/BUTTONS_ONLY" includes="META-INF/manifest.xml" />
 			<fileset dir="misc" includes="buildinfo" />
 			<zipfileset dir="oxt" includes="wollmux.png" fullpath="icons/wollmux.png" />
+			<fileset dir="${RDB_DIR}">
+				<include name="icons/*.*" />
+			</fileset>
 		</zip>
 		
 		<echo level="info">unopkg remove ${PKG_NAME}:</echo>

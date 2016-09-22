@@ -34,6 +34,7 @@
 				<include>*.rdb</include>
 				<include>META-INF/manifest.xml</include>
 				<include>help/component*.txt</include>
+				<include>icons/*</include>
 			</includes>
 			<excludes>
 				<exclude>META-INF/manifest_AOO.xml</exclude>

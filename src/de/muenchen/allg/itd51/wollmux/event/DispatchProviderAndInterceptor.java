@@ -170,7 +170,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
    */
   public XDispatch queryDispatch(URL url, String frameName, int fsFlag)
   {
-    String methodName = Dispatch.getMethodName(url);
+    String methodName = Dispatch.getDispatchMethodName(url);
 
     if (hasMethod(Dispatch.class, methodName))
       return new Dispatch();

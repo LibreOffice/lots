@@ -28,7 +28,7 @@ public class NotifyingDispatch extends BaseDispatch implements XNotifyingDispatc
 
     String arg = getMethodArgument(url);
 
-    String methodName = getMethodName(url);
+    String methodName = getDispatchMethodName(url);
 
     try
     {

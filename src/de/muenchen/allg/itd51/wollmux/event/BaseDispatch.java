@@ -47,12 +47,25 @@ public abstract class BaseDispatch implements XDispatch
    * @author Matthias Benkmann (D-III-ITD-D101)
    *
    */
-  public static String getMethodName(URL url)
+  public static String getDispatchMethodName(URL url)
   {
     String part = url.Complete.split("#")[0];
     return "dispatch_" + part.replaceAll("\\W", "_").toLowerCase();
   }
 
+  /**
+   * Gibt den Namen der Methode zurück, über die der Anzeigestatus
+   * eines Menüs oder Toolbarbuttons abgefragt werden kann.
+   * 
+   * @param url
+   * @return
+   */
+  public static String getStatusMethodName(URL url)
+  {
+    String part = url.Complete.split("#")[0];
+    return "status_" + part.replaceAll("\\W", "_").toLowerCase();
+  }
+  
   /**
    * Wertet die Properties aus, ob der SynchronMode gesetzt ist.
    *
@@ -104,9 +117,11 @@ public abstract class BaseDispatch implements XDispatch
    */
   protected void notifyStatusListener(XStatusListener listener, URL url)
   {
+    boolean isEnabled = queryStatus(url);
+    
     FeatureStateEvent fse = new FeatureStateEvent();
     fse.FeatureURL = url;
-    fse.IsEnabled = true;
+    fse.IsEnabled = isEnabled;
     listener.statusChanged(fse);
   }
 
@@ -124,7 +139,7 @@ public abstract class BaseDispatch implements XDispatch
 
     String arg = getMethodArgument(url);
 
-    String methodName = getMethodName(url);
+    String methodName = getDispatchMethodName(url);
 
     try
     {
@@ -137,6 +152,32 @@ public abstract class BaseDispatch implements XDispatch
     {
       Logger.error(x);
     }
+  }
+  
+  /**
+   * Sucht im Dispatcher nach einer Methode "status_<url>", über die entschieden wird,
+   * ob ein Menüpunkt oder Toolbarbutton aktiv ist.
+   * 
+   * @param url
+   * @return
+   */
+  public boolean queryStatus(URL url)
+  {
+    try
+    {
+      String methodName = getStatusMethodName(url);
+      Class<? extends BaseDispatch> myClass = this.getClass();
+      Method method =
+        myClass.getDeclaredMethod(methodName);
+      Boolean ret = (Boolean) method.invoke(this);
+      return ret.booleanValue();
+    }
+    catch (Throwable x)
+    {
+      Logger.debug(x);
+    }
+    
+    return true;
   }
 
   /*

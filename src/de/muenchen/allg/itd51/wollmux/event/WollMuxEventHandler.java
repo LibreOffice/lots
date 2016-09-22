@@ -104,13 +104,17 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XFrames;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
+import com.sun.star.text.XPageCursor;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.RuntimeException;
+import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XStringSubstitution;
 import com.sun.star.view.DocumentZoomType;
+import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -3603,6 +3607,47 @@ public class WollMuxEventHandler
       return this.getClass().getSimpleName() + "()";
     }
   }
+  
+  /**
+   * Druckt die aktuelle Seite eines Dokuments auf dem Standarddrucker aus.
+   */
+  public static void handlePrintPage(TextDocumentController documentController)
+  {
+    handle(new OnPrintPage(documentController));
+  }
+
+  private static class OnPrintPage extends BasicEvent
+  {
+
+    private TextDocumentController documentController;
+
+		public OnPrintPage(TextDocumentController documentController) {
+			this.documentController = documentController;
+		}
+
+		@Override
+    protected void doit() throws WollMuxFehlerException
+    {
+		  XTextViewCursorSupplier viewCursorSupplier = UNO.XTextViewCursorSupplier(documentController.getModel().doc.getCurrentController());
+		  XPageCursor pageCursor = UNO.XPageCursor(viewCursorSupplier.getViewCursor());
+		  short page = pageCursor.getPage();
+		  XPrintable printable = UNO.XPrintable(documentController.getModel().doc);
+		  
+		  UnoProps props = new UnoProps();
+		  props.setPropertyValue("CopyCount", (short)1);
+      props.setPropertyValue("Pages", String.valueOf(page));
+      props.setPropertyValue("Collate", false);
+		  
+      printable.print(props.getProps());
+    }
+
+    @Override
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "()";
+    }
+  }
+
 
   // *******************************************************************************************
 

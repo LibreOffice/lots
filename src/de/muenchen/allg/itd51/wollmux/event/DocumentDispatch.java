@@ -29,14 +29,21 @@
  */
 package de.muenchen.allg.itd51.wollmux.event;
 
+import javax.naming.OperationNotSupportedException;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XLayoutManager;
+import com.sun.star.frame.XModel2;
 import com.sun.star.frame.XStatusListener;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.uno.RuntimeException;
+import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
@@ -196,4 +203,15 @@ public class DocumentDispatch extends Dispatch
     if (WollMuxFiles.installQATestHandler()) TestHandler.doTest(getDocumentController(), arg);
   }
 
+  public void dispatch_wollmux_printpage(String arg, PropertyValue[] props)
+  {
+    WollMuxEventHandler.handlePrintPage(getDocumentController());
+  }
+  
+  public boolean status_wollmux_printpage()
+  {
+    // Deaktiviert den 'Seite drucken'-Button im Seitenvorschaumodus
+    XLayoutManager layout = UNO.XLayoutManager(UNO.getProperty(getDocumentController().getModel().doc.getCurrentController().getFrame(), "LayoutManager")); 
+    return !layout.isElementVisible("private:resource/toolbar/previewobjectbar");
+  }
 }
