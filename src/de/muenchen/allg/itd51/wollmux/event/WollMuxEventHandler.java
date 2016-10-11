@@ -1356,6 +1356,7 @@ public class WollMuxEventHandler
     public OnReprocessTextDocument(TextDocumentController documentController)
     {
       this.documentController = documentController;
+      this.model = documentController.getModel();
     }
 
     @Override
