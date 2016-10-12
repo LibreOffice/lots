@@ -30,4 +30,5 @@ oxt/WollMux.uno.jar
 *.urd
 misc/version
 .project
+.classpath
 /.settings
