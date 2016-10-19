@@ -50,4 +50,4 @@ then
   "$OFFICE_EXECUTABLE" "${OPT}nologo" "${OPT}nodefault" "${OPT}minimized" &
 fi
 
-exec java -jar "${JAR_FILE}" --quickstarter --fifo $FIFO "$@"
+exec java -jar "${JAR_FILE}" --fifo $FIFO "$@"

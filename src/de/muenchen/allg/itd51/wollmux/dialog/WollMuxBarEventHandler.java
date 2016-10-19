@@ -596,8 +596,6 @@ public class WollMuxBarEventHandler
           WollMuxFiles.getWollmuxConf().stringRepresentation().hashCode();
         mux.addPALChangeEventListenerWithConsistencyCheck(myPALChangeEventListener,
           wmConfHashCode);
-
-        installQuickstarter(factory);
       }
       catch (Exception x)
       {
@@ -607,94 +605,6 @@ public class WollMuxBarEventHandler
     }
 
     return null;
-  }
-
-  private void installQuickstarter(XMultiServiceFactory factory) throws Exception
-  {
-    desktop = null;
-    terminateListener = null;
-    if (!wollmuxbar.isQuickstarterEnabled()) return;
-    desktop =
-      (XDesktop) UnoRuntime.queryInterface(XDesktop.class,
-        factory.createInstance("com.sun.star.frame.Desktop"));
-    terminateListener = new XTerminateListener()
-    {
-      // Was any of the open documents changed?
-      private boolean docChanged = false;
-      
-      public void notifyTermination(EventObject arg0)
-      {
-        Logger.debug("notifyTermination");
-      }
-
-      public void queryTermination(EventObject arg0) throws TerminationVetoException
-      {
-        Logger.debug("queryTermination");
-        docChanged = false;
-        /*
-         * Because of issue
-         * 
-         * http://www.openoffice.org/issues/show_bug.cgi?id=65942
-         * 
-         * OOo does not allow the user to close the last window if termination is
-         * vetoed. So we close all windows for him.
-         */
-        try
-        {
-          XEnumeration xenu = desktop.getComponents().createEnumeration();
-          while (xenu.hasMoreElements())
-          {
-            Object compo = xenu.nextElement();
-            XModifiable lMod = UNO.XModifiable(compo);
-            if ((lMod != null) && lMod.isModified())
-            {
-              // Geaendert ==> Nicht schließen
-              docChanged = true;
-              continue;
-            }
-            try
-            { /*
-             * First see if the component itself offers a close function
-             */
-              UNO.XCloseable(compo).close(false);
-            }
-            catch (Exception x)
-            {
-              Logger.debug("Konnte Komponente nicht schließen. Versuche es über den Frame nochmal");
-              try
-              {
-                /*
-                 * Okay, so the component can't be closed. Maybe it has a frame that
-                 * we can close.
-                 */
-                UNO.XCloseable(UNO.XController(compo).getFrame()).close(true);
-              }
-              catch (Exception y)
-              {
-                Logger.error("Konnte Komponente weder direkt noch über den Frame schließen");
-              }
-            }
-          }
-        }
-        catch (Throwable x)
-        {
-          x.printStackTrace();
-        }
-        if (!docChanged)
-        {
-          // Wenn eine der Komponenten geändert wurde, dann kein Veto
-          // sonst bleibt das Fenster einfach offen, ohne eine Info an den Anwender.
-          throw new TerminationVetoException();
-        }
-      }
-
-      public void disposing(EventObject arg0)
-      {
-        Logger.debug("disposing");
-      }
-    };
-
-    desktop.addTerminateListener(terminateListener);
   }
 
 }
