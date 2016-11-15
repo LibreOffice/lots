@@ -533,7 +533,17 @@ public class WollMuxBarEventHandler
       XComponentContext ctx = null;
       try
       {
-        ctx = Bootstrap.bootstrap();
+        try
+        {
+          String[] args = {"--nologo", "--nodefault", "--minimized"};
+          Bootstrap.class.getMethod("bootstrap", args.getClass());
+          ctx = Bootstrap.bootstrap(args);
+        }
+        // Verwende default Bootstrap-Methode. Diese startet Office mit anderen Parametern.
+        catch (Exception e)
+        {
+          ctx = Bootstrap.bootstrap();
+        }
         factory =
           UnoRuntime.queryInterface(
             XMultiServiceFactory.class, ctx.getServiceManager());
