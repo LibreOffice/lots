@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Ein Container für Ergebnisse einer Datenbankafrage zusammen mit dem zugehörigen Schema.
  * 
- * Copyright (c) 2008-2015 Landeshauptstadt München
+ * Copyright (c) 2008-2016 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),

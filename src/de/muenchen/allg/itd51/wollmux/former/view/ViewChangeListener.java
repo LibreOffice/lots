@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Interface für Klassen, die an Änderungen einer View interessiert sind. 
  * 
- * Copyright (c) 2008-2015 Landeshauptstadt München
+ * Copyright (c) 2008-2016 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
