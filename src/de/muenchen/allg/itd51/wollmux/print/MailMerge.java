@@ -35,7 +35,6 @@ package de.muenchen.allg.itd51.wollmux.print;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ItemEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.lang.reflect.Method;
@@ -83,14 +82,14 @@ import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.core.db.Datasource;
+import de.muenchen.allg.itd51.wollmux.core.db.OOoDatasource;
+import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.core.db.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.Datasource;
-import de.muenchen.allg.itd51.wollmux.db.OOoDatasource;
-import de.muenchen.allg.itd51.wollmux.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.db.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 
 public class MailMerge
@@ -218,7 +217,7 @@ public class MailMerge
   private static void mailMerge(XPrintModel pmod, boolean offerSelection,
       Set<String> schema, QueryResults data)
   {
-    Vector<ListElement> list = new Vector<ListElement>();
+    Vector<ListElement> list = new Vector<>();
     int index = 1;
     for (Dataset dataset : data)
     {

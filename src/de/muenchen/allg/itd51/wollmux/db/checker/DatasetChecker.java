@@ -24,8 +24,8 @@ package de.muenchen.allg.itd51.wollmux.db.checker;
 import java.util.Iterator;
 import java.util.List;
 
-import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.QueryPart;
+import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.core.db.QueryPart;
 
 /**
  * Ein DatasetChecker überprüft, ob für ein Dataset eine bestimmte Bedingung erfüllt

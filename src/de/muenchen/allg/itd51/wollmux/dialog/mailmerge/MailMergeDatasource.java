@@ -84,18 +84,18 @@ import com.sun.star.util.XCloseListener;
 import com.sun.star.util.XModifiable;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.core.db.Datasource;
+import de.muenchen.allg.itd51.wollmux.core.db.OOoDatasource;
+import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.core.db.QueryResultsWithSchema;
+import de.muenchen.allg.itd51.wollmux.core.db.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.Datasource;
-import de.muenchen.allg.itd51.wollmux.db.OOoDatasource;
-import de.muenchen.allg.itd51.wollmux.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.db.QueryResultsWithSchema;
-import de.muenchen.allg.itd51.wollmux.db.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
@@ -243,13 +243,13 @@ public class MailMergeDatasource
         case SOURCE_DB:
           return getDbColumnNames(getOOoDatasource());
         default:
-          return new ArrayList<String>();
+          return new ArrayList<>();
       }
     }
     catch (Exception x)
     {
       LOGGER.error("", x);
-      return new ArrayList<String>();
+      return new ArrayList<>();
     }
   }
 
@@ -277,13 +277,13 @@ public class MailMergeDatasource
         case SOURCE_DB:
           return getDbValuesForDataset(getOOoDatasource(), rowIndex);
         default:
-          return new ArrayList<String>();
+          return new ArrayList<>();
       }
     }
     catch (Exception x)
     {
       LOGGER.error("", x);
-      return new ArrayList<String>();
+      return new ArrayList<>();
     }
   }
 
@@ -830,7 +830,7 @@ public class MailMergeDatasource
    */
   private List<String> getColumnNames(XSpreadsheetDocument calcDoc, String tableName)
   {
-    List<String> columnNames = new ArrayList<String>();
+    List<String> columnNames = new ArrayList<>();
     if (calcDoc == null) {
       return columnNames;
     }

@@ -74,15 +74,15 @@ import javax.swing.event.ListSelectionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.core.db.DJDatasetListElement;
+import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
-import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 
 /**
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
@@ -280,7 +280,7 @@ public class AbsenderAuswaehlen
   {
     Common.setLookAndFeelOnce();
 
-    palJList = new JList<>(new DefaultListModel<Object>());
+    palJList = new JList<>(new DefaultListModel<>());
 
     String title = L.m(fensterDesc.getString("TITLE",
         "TITLE fehlt für Fenster AbsenderAuswaehlen/Auswaehlen"));
@@ -443,7 +443,7 @@ public class AbsenderAuswaehlen
           }
           else
           {
-            list = new JList<>(new DefaultListModel<Object>());
+            list = new JList<>(new DefaultListModel<>());
           }
 
           list.setVisibleRowCount(lines);

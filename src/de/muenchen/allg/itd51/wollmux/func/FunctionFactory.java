@@ -45,6 +45,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.func;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
@@ -144,7 +145,7 @@ public class FunctionFactory
       FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context)
       throws ConfigurationErrorException
   {
-    Vector<Function> andFunction = new Vector<Function>();
+    Vector<Function> andFunction = new Vector<>();
     Iterator<ConfigThingy> iter1 = conf.iterator();
     while (iter1.hasNext())
     {
@@ -191,7 +192,7 @@ public class FunctionFactory
       DialogLibrary dialogLib, Map<Object, Object> context)
       throws ConfigurationErrorException
   {
-    Vector<Function> andFunction = new Vector<Function>();
+    Vector<Function> andFunction = new Vector<>();
     Iterator<ConfigThingy> iter = conf.iterator();
     while (iter.hasNext())
     {
@@ -832,4 +833,31 @@ public class FunctionFactory
     return funcs;
   }
 
+  public static Map<String, Function> parseTrafos(ConfigThingy trafoConf, String nodeName, FunctionLibrary funcLib, DialogLibrary dialogLib,
+      Map<Object, Object> context)
+  {
+    Map<String, Function> trafos = new HashMap<>();
+    Iterator<ConfigThingy> suIter = trafoConf.query(nodeName, 1).iterator();
+    while (suIter.hasNext())
+    {
+      ConfigThingy spaltenumsetzung = suIter.next();
+
+      for (ConfigThingy transConf : spaltenumsetzung)
+      {
+        String name = transConf.getName();
+        try
+        {
+          Function func = FunctionFactory.parseChildren(transConf, funcLib, dialogLib, context);
+          if (func == null)
+            throw new ConfigurationErrorException(
+                L.m("Leere Funktionsdefinition ist nicht erlaubt. Verwenden Sie stattdessen den leeren String \"\""));
+          trafos.put(name, func);
+        } catch (ConfigurationErrorException e)
+        {
+          LOGGER.error(L.m("Fehler beim Parsen der Spaltenumsetzungsfunktion für Ergebnisspalte \"%1\"", name), e);
+        }
+      }
+    }
+    return trafos;
+  }
 }

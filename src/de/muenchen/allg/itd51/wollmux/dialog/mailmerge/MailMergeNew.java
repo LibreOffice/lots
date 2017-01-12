@@ -79,15 +79,15 @@ import com.sun.star.text.XTextDocument;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.core.db.QueryResultsWithSchema;
 import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.db.QueryResultsWithSchema;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
@@ -207,22 +207,22 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   private JTextField previewDatasetNumberTextfield;
 
   private Collection<JComponent> elementsDisabledWhenNoDatasourceSelected =
-    new ArrayList<JComponent>();
+    new ArrayList<>();
 
   private Collection<JComponent> elementsDisabledWhenNotInPreviewMode =
-    new ArrayList<JComponent>();
+    new ArrayList<>();
 
   private Collection<JComponent> elementsDisabledWhenFirstDatasetSelected =
-    new ArrayList<JComponent>();
+    new ArrayList<>();
 
   private Collection<JComponent> elementsDisabledWhenLastDatasetSelected =
-    new ArrayList<JComponent>();
+    new ArrayList<>();
 
   /**
    * Enthält alle elementsDisabledWhen... Collections.
    */
   private ArrayList<Collection<JComponent>> listsOfElementsDisabledUnderCertainCircumstances =
-    new ArrayList<Collection<JComponent>>();
+    new ArrayList<>();
 
   /**
    * Das Toolbar-Fenster.
@@ -535,7 +535,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
         // Tabellenspalten ergänzen wird außerdem ausgegraut, wenn die Datenquelle
         // dies nicht unterstützt
         boolean hasUnmappedFields =
-            documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
+            documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(
             ds.getColumnNames())).length > 0;
         adjustFieldsMenuItem.setEnabled(hasUnmappedFields);
         addColumnsMenuItem.setEnabled(hasUnmappedFields && ds.supportsAddColumns());
@@ -697,7 +697,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    */
   private List<Action> getInsertFieldActionList()
   {
-    List<Action> actions = new ArrayList<Action>();
+    List<Action> actions = new ArrayList<>();
     List<String> columnNames = ds.getColumnNames();
 
     Collections.sort(columnNames);
@@ -972,7 +972,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     documentController.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
 
-    List<Integer> selected = new ArrayList<Integer>();
+    List<Integer> selected = new ArrayList<>();
     switch (datasetSelectionType)
     {
       case ALL:
@@ -1178,7 +1178,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
         documentController.startSimulation();
       }
 
-      HashMap<String, String> dataSetExport = new HashMap<String, String>();
+      HashMap<String, String> dataSetExport = new HashMap<>();
       try
       {
         pmod.setPropertyValue(PROP_DATASET_EXPORT, dataSetExport);
@@ -1325,7 +1325,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     String fieldName = pmod.getProp(PROP_EMAIL_TO_FIELD_NAME, "").toString();
     @SuppressWarnings("unchecked")
     HashMap<String, String> ds =
-      new HashMap<String, String>((HashMap<String, String>) pmod.getProp(
+      new HashMap<>((HashMap<String, String>) pmod.getProp(
         PROP_DATASET_EXPORT, new HashMap<String, String>()));
     String to = ds.get(fieldName);
     PrintModels.setStage(pmod, L.m("Sende an %1", to));
@@ -1494,7 +1494,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
     @SuppressWarnings("unchecked")
     HashMap<String, String> dataset =
-      new HashMap<String, String>((HashMap<String, String>) pmod.getProp(PROP_DATASET_EXPORT,
+      new HashMap<>((HashMap<String, String>) pmod.getProp(PROP_DATASET_EXPORT,
         new HashMap<String, String>()));
 
     // Zähler für #DS und #SB mit gleicher Länge erzeugen (ggf. mit 0en auffüllen)
