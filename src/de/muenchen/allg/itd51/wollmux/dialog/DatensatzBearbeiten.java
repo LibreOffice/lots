@@ -98,12 +98,12 @@ import javax.swing.text.JTextComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.core.db.NoBackingStoreException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.db.NoBackingStoreException;
 
 /**
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
@@ -298,7 +298,7 @@ public class DatensatzBearbeiten
     this.dialogEndListener = dialogEndListener;
     this.edit = edit;
 
-    fenster = new HashMap<String, DialogWindow>();
+    fenster = new HashMap<>();
 
     modColor = Color.PINK;
     try
@@ -631,7 +631,7 @@ public class DatensatzBearbeiten
      */
     boolean isCurrentlyNormalColor;
 
-    List<ColorChangeListener> listeners = new ArrayList<ColorChangeListener>();
+    List<ColorChangeListener> listeners = new ArrayList<>();
 
     public void initCompo(String colName, JComponent compo, Color localColor)
     {
@@ -928,13 +928,13 @@ public class DatensatzBearbeiten
      * des Dialogs fehlerhaft sind kann es sein, dass nicht zu jedem Control ein
      * DataControl existiert.
      */
-    private List<DataControl> dataControls = new ArrayList<DataControl>();
+    private List<DataControl> dataControls = new ArrayList<>();
 
     /**
      * Liste aller JButtons, die ausgegraut werden müssen, wenn keines der
      * DataControls einen hasBeenModified() Zustand hat.
      */
-    private List<JButton> buttonsToGreyOutIfNoChanges = new ArrayList<JButton>();
+    private List<JButton> buttonsToGreyOutIfNoChanges = new ArrayList<>();
 
     private ActionListener dialogWindowCloseAction = actionListenerAbort;
 
@@ -1233,7 +1233,7 @@ public class DatensatzBearbeiten
             label.setText(L.m(uiElementDesc.getString("LABEL", "")));
 
             JPanel uiElement = new JPanel(new GridLayout(1, 1));
-            JComboBox<String> combo = new JComboBox<String>();
+            JComboBox<String> combo = new JComboBox<>();
             combo.setEnabled(!readonly);
             boolean editable = false;
             if ("true".equals(uiElementDesc.getString("EDIT", "")))

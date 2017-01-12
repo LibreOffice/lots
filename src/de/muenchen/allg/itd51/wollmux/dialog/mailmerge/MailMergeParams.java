@@ -86,7 +86,7 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
@@ -212,7 +212,7 @@ class MailMergeParams
      * bestimmt dies die Indizes der ausgewählten Datensätze, wobei 1 den ersten
      * Datensatz bezeichnet.
      */
-    public List<Integer> selectedIndexes = new ArrayList<Integer>();
+    public List<Integer> selectedIndexes = new ArrayList<>();
 
   }
 
@@ -360,7 +360,7 @@ class MailMergeParams
             try
             {
               Map<SubmitArgument, Object> args =
-                new HashMap<SubmitArgument, Object>();
+                new HashMap<>();
               for (Section s : mmp.sections)
                 s.addSubmitArgs(args);
               mmp.dialog.dispose();
@@ -520,13 +520,13 @@ class MailMergeParams
    * Enthält alle zum aktuellen Zeitpunkt sichtbaren Gruppen, die über das
    * {@link RuleStatement#SHOW_GROUPS} sichtbar geschaltet wurden.
    */
-  private HashSet<String> visibleGroups = new HashSet<String>();
+  private HashSet<String> visibleGroups = new HashSet<>();
 
   /**
    * Enthält eine Liste aller erzeugter {@link Section}-Objekte in der Reihenfolge
    * der Seriendruckdialog-Beschreibung.
    */
-  private ArrayList<Section> sections = new ArrayList<Section>();
+  private ArrayList<Section> sections = new ArrayList<>();
 
   /**
    * Enthält den String der im Attribut VALUE zur zuletzt ausgeführten
@@ -555,13 +555,13 @@ class MailMergeParams
    * Element öfters in den Dialog einzubinden - wenn auch ohne größeren Sinn)
    */
   private ArrayList<JTextComponent> descriptionFields =
-    new ArrayList<JTextComponent>();
+    new ArrayList<>();
 
   /**
    * Enthält die Namen der über das zuletzt ausgeführte
    * {@link RuleStatement#USE_PRINTFUNCTIONS} -Statement gesetzten PrintFunctions.
    */
-  private List<String> usePrintFunctions = new ArrayList<String>();
+  private List<String> usePrintFunctions = new ArrayList<>();
 
   /**
    * Enthält den Wert des zuletzt ausgeführten
@@ -638,7 +638,7 @@ class MailMergeParams
       String defaultEmailFromColumnName =
         emailConf.getString("DEFAULT_SENDER_DB_SPALTE", "");
       defaultFrom =
-        DatasourceJoiner.getDatasourceJoiner().getSelectedDataset().get(
+          DatasourceJoinerFactory.getDatasourceJoiner().getSelectedDataset().get(
           defaultEmailFromColumnName);
     }
     catch (Exception e)
@@ -1270,7 +1270,7 @@ class MailMergeParams
       if (action == UIElementAction.setActionType
         || action == UIElementAction.setOutput)
       {
-        ArrayList<String> reasons = new ArrayList<String>();
+        ArrayList<String> reasons = new ArrayList<>();
         boolean available =
           mmp.isActionAvailableInCurrentContext(action, actionValue, reasons);
         setEnabled(available);
@@ -1610,7 +1610,7 @@ class MailMergeParams
         }
         fnames[i++] = "<" + fname + ">";
       }
-      this.toFieldName = new JComboBox<String>(fnames);
+      this.toFieldName = new JComboBox<>(fnames);
       toFieldName.setSelectedIndex(mailIdx);
       hbox.add(Box.createHorizontalStrut(5));
       hbox.add(toFieldName);
@@ -1700,7 +1700,7 @@ class MailMergeParams
      */
     private List<Action> makeSpecialFieldActions(final TextComponentTags tags)
     {
-      List<Action> actions = new ArrayList<Action>();
+      List<Action> actions = new ArrayList<>();
       actions.add(new AbstractAction(L.m("Datensatznummer"))
       {
         private static final long serialVersionUID = 2675809156807460816L;
@@ -1776,7 +1776,7 @@ class MailMergeParams
    */
   private static class Section
   {
-    List<UIElement> elements = new ArrayList<UIElement>();
+    List<UIElement> elements = new ArrayList<>();
 
     Box contentBox;
 

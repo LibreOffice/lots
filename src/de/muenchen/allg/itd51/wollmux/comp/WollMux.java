@@ -70,11 +70,12 @@ import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
 import de.muenchen.allg.itd51.wollmux.XWollMuxDocument;
+import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 import de.muenchen.allg.itd51.wollmux.event.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -409,7 +410,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   {
     // Diese Methode nimmt keine Synchronisierung über den WollMuxEventHandler vor,
     // da das reine Auslesen der Datenstrukturen unkritisch ist.
-    DatasourceJoiner dj = DatasourceJoiner.getDatasourceJoiner();
+    DatasourceJoiner dj = DatasourceJoinerFactory.getDatasourceJoiner();
     UnoProps p = new UnoProps();
     try
     {
@@ -463,7 +464,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     try
     {
       String value =
-          DatasourceJoiner.getDatasourceJoiner().getSelectedDatasetTransformed().get(
+          DatasourceJoinerFactory.getDatasourceJoiner().getSelectedDatasetTransformed().get(
           dbSpalte);
       if (value == null) value = "";
       return value;
@@ -556,7 +557,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   private void createMenuItems()
   {
     // "Extras->Seriendruck (WollMux)" erzeugen:
-    List<String> removeButtonsFor = new ArrayList<String>();
+    List<String> removeButtonsFor = new ArrayList<>();
     removeButtonsFor.add(Dispatch.DISP_wmSeriendruck);
     WollMux.createMenuButton(Dispatch.DISP_wmSeriendruck, L.m("Seriendruck (WollMux)"),
       ".uno:ToolsMenu", ".uno:MailMergeWizard", removeButtonsFor);

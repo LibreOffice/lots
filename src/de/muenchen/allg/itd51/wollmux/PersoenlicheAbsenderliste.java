@@ -11,14 +11,14 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.core.db.DJDatasetListElement;
+import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
-import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 
 public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALChangeEventListener>
 {
@@ -69,7 +69,7 @@ public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALCha
   
   private PersoenlicheAbsenderliste()
   {
-    registeredPALChangeListener = new Vector<XPALChangeEventListener>();
+    registeredPALChangeListener = new Vector<>();
     
     // Setzen von senderDisplayTemplate
     this.senderDisplayTemplate = DEFAULT_SENDER_DISPLAYTEMPLATE;
@@ -207,7 +207,7 @@ public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALCha
   public DJDatasetListElement[] getSortedPALEntries()
   {
     // Liste der entries aufbauen.
-    QueryResults data = DatasourceJoiner.getDatasourceJoiner().getLOS();
+    QueryResults data = DatasourceJoinerFactory.getDatasourceJoiner().getLOS();
   
     DJDatasetListElement[] elements = new DJDatasetListElement[data.size()];
     Iterator<Dataset> iter = data.iterator();
@@ -242,7 +242,7 @@ public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALCha
   {
     try
     {
-      DJDataset selected = DatasourceJoiner.getDatasourceJoiner().getSelectedDataset();
+      DJDataset selected = DatasourceJoinerFactory.getDatasourceJoiner().getSelectedDataset();
       return new DJDatasetListElement(selected, senderDisplayTemplate).toString()
         + SENDER_KEY_SEPARATOR + selected.getKey();
     }

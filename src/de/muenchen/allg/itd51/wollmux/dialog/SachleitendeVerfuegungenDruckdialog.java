@@ -69,10 +69,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.Verfuegungspunkt;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 
 /**
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
@@ -283,7 +283,7 @@ public class SachleitendeVerfuegungenDruckdialog
   {
     this.verfuegungspunkte = verfuegungspunkte;
     this.dialogEndListener = dialogEndListener;
-    this.currentSettings = new ArrayList<VerfuegungspunktInfo>();
+    this.currentSettings = new ArrayList<>();
     this.printOrder = new JCheckBox();
 
     ConfigThingy fensterDesc1 = conf.query("Fenster");
@@ -388,7 +388,7 @@ public class SachleitendeVerfuegungenDruckdialog
     int size = verfuegungspunkte.size();
 
     // element
-    elementComboBoxes = new ArrayList<JComboBox<String>>();
+    elementComboBoxes = new ArrayList<>();
     elementCountSpinner = new JSpinner[size];
     printElementButtons = new JButton[size];
 
@@ -398,7 +398,7 @@ public class SachleitendeVerfuegungenDruckdialog
       List<String> zuleitungszeilen = verfPunkt.getZuleitungszeilen();
 
       // elementComboBoxes vorbelegen:
-      Vector<String> content = new Vector<String>();
+      Vector<String> content = new Vector<>();
       content.add(cutContent(verfPunkt.getHeading()));
       if (!zuleitungszeilen.isEmpty())
         content.add(cutContent(L.m("------- Zuleitung an --------")));
@@ -408,7 +408,7 @@ public class SachleitendeVerfuegungenDruckdialog
         String zuleitung = iter.next();
         content.add(cutContent(zuleitung));
       }
-      elementComboBoxes.add(new JComboBox<String>(content));
+      elementComboBoxes.add(new JComboBox<>(content));
 
       // elementCountComboBoxes vorbelegen:
       SpinnerNumberModel model =
@@ -623,10 +623,11 @@ public class SachleitendeVerfuegungenDruckdialog
           else if (id.equals("pageRange"))
           {
             comboBox = null;
+
           }
           else
           {
-            comboBox = new JComboBox<String>();
+            comboBox = new JComboBox<>();
           }
 
           // comboBox.addListSelectionListener(myListSelectionListener);

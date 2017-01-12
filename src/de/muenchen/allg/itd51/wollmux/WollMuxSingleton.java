@@ -70,7 +70,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.event.GlobalEventListener;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -155,7 +155,7 @@ public class WollMuxSingleton
 
     // Versuchen, den DJ zu initialisieren und Flag setzen, falls nicht
     // erfolgreich.
-    if (DatasourceJoiner.getDatasourceJoiner() == null) successfulStartup = false;
+    if (DatasourceJoinerFactory.getDatasourceJoiner() == null) successfulStartup = false;
 
     // Initialisiere EventProcessor
     WollMuxEventHandler.setAcceptEvents(successfulStartup);

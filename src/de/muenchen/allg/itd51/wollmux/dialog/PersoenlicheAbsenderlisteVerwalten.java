@@ -104,20 +104,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.core.db.DJDatasetListElement;
+import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.core.db.Search;
+import de.muenchen.allg.itd51.wollmux.core.db.SearchStrategy;
+import de.muenchen.allg.itd51.wollmux.core.db.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
-import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.db.Search;
-import de.muenchen.allg.itd51.wollmux.db.SearchStrategy;
-import de.muenchen.allg.itd51.wollmux.db.TimeoutException;
 
 /**
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
@@ -317,7 +317,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    * Speichert Referenzen auf die JButtons, die zu deaktivieren sind, wenn kein
    * Eintrag in einer Liste selektiert ist.
    */
-  private List<JButton> buttonsToGreyOutIfNothingSelected = new ArrayList<JButton>();
+  private List<JButton> buttonsToGreyOutIfNothingSelected = new ArrayList<>();
 
   /**
    * Die Listbox mit den Suchresultaten.
@@ -511,10 +511,10 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     Common.setLookAndFeelOnce();
 
-    resultsJList = new JList<DJDatasetListElement>(new DefaultListModel<DJDatasetListElement>());
+    resultsJList = new JList<>(new DefaultListModel<DJDatasetListElement>());
     ListCellRenderer<Object> myRenderer = new MyListCellRenderer();
     resultsJList.setCellRenderer(myRenderer);
-    palJList = new JList<DJDatasetListElement>(new DefaultListModel<DJDatasetListElement>());
+    palJList = new JList<>(new DefaultListModel<DJDatasetListElement>());
 
     // KeyListener hinzufügen, damit Einträge in der PAL-Liste durch Drücken der
     // ENTF-Taste gelöscht werden können
@@ -783,7 +783,7 @@ public class PersoenlicheAbsenderlisteVerwalten
           }
           else
           {
-            list = new JList<DJDatasetListElement>(
+            list = new JList<>(
                 new DefaultListModel<DJDatasetListElement>());
           }
 

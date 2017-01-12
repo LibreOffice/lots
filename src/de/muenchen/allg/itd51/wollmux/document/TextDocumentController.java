@@ -27,6 +27,9 @@ import com.sun.star.uno.RuntimeException;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory;
@@ -49,10 +52,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.InvalidFormDescriptorException;
@@ -2365,7 +2365,7 @@ public class TextDocumentController
     {
       try
       {
-        Dataset ds = DatasourceJoiner.getDatasourceJoiner().getSelectedDatasetTransformed();
+        Dataset ds = DatasourceJoinerFactory.getDatasourceJoiner().getSelectedDatasetTransformed();
         String value = ds.get(overrideFragDbSpalte);
         if (value == null) {
           value = "";

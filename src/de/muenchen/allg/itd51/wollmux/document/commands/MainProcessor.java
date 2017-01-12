@@ -1,14 +1,14 @@
 package de.muenchen.allg.itd51.wollmux.document.commands;
 
+import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 
 /**
  * Der Hauptverarbeitungsschritt, in dem vor allem die Textinhalte gefüllt werden.
@@ -98,7 +98,7 @@ class MainProcessor extends AbstractExecutor
     String value = null;
     try
     {
-      Dataset ds = DatasourceJoiner.getDatasourceJoiner().getSelectedDatasetTransformed();
+      Dataset ds = DatasourceJoinerFactory.getDatasourceJoiner().getSelectedDatasetTransformed();
       value = ds.get(spaltenname);
       if (value == null) value = "";
 

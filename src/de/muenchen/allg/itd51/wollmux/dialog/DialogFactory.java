@@ -12,7 +12,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 
 public class DialogFactory
 {
@@ -39,7 +39,7 @@ public class DialogFactory
   {
     DialogLibrary funcDialogs = new DialogLibrary(baselib);
 
-    Set<String> dialogsInBlock = new HashSet<String>();
+    Set<String> dialogsInBlock = new HashSet<>();
 
     conf = conf.query("Funktionsdialoge");
     Iterator<ConfigThingy> parentIter = conf.iterator();
@@ -59,7 +59,7 @@ public class DialogFactory
         try
         {
           funcDialogs.add(name,
-            DatasourceSearchDialog.create(dialogConf, DatasourceJoiner.getDatasourceJoiner()));
+            DatasourceSearchDialog.create(dialogConf, DatasourceJoinerFactory.getDatasourceJoiner()));
         }
         catch (ConfigurationErrorException e)
         {

@@ -74,22 +74,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.db.ColumnTransformer;
+import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.core.db.Search;
+import de.muenchen.allg.itd51.wollmux.core.db.SearchStrategy;
+import de.muenchen.allg.itd51.wollmux.core.db.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.ColumnTransformer;
-import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.db.Search;
-import de.muenchen.allg.itd51.wollmux.db.SearchStrategy;
-import de.muenchen.allg.itd51.wollmux.db.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.dialog.controls.Listbox;
 import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 /**
  * Dialog zur Suche nach Daten in einer Datenquelle, die über DIALOG-Funktion
@@ -227,15 +228,14 @@ public class DatasourceSearchDialog implements Dialog
   }
 
   /**
-   * Erzeugt einen neuen Dialog, dessen Instanzen Datenquellensuchdialoge gemäß der
-   * Beschreibung in conf darstellen. Die Suchergebnisse liefert dj.
+   * Erzeugt einen neuen Dialog, dessen Instanzen Datenquellensuchdialoge gemäß
+   * der Beschreibung in conf darstellen. Die Suchergebnisse liefert dj.
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * @throws ConfigurationErrorException
    *           falls ein Fehler in der Dialogbeschreibung vorliegt.
    */
-  public static Dialog create(ConfigThingy conf, DatasourceJoiner dj)
-      throws ConfigurationErrorException
+  public static Dialog create(ConfigThingy conf, DatasourceJoiner dj) throws ConfigurationErrorException
   {
     return new Instantiator(conf, dj);
   }
@@ -509,8 +509,8 @@ public class DatasourceSearchDialog implements Dialog
       try
       {
         columnTransformer =
-          new ColumnTransformer(conf, "Spaltenumsetzung", funcLib, dialogLib,
-            context);
+          new ColumnTransformer(FunctionFactory.parseTrafos(conf, "Spaltenumsetzung", funcLib, dialogLib,
+            context));
       }
       catch (ConfigurationErrorException x)
       {
