@@ -198,28 +198,27 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 	</target>
 
 	<target name="WollMux.oxt-ButtonsOnly">
-		<delete file="${PKG_FILE}" />
-		<zip destfile="${PKG_FILE}">
+		<delete file="dist/WollMux_ButtonsOnly.oxt" />
+		<zip destfile="dist/WollMux_ButtonsOnly.oxt">
 			<fileset dir="${RDB_DIR}">
 				<include name="Addons.xcu" />
 				<include name="Sidebar.xcu" />
 				<include name="WriterWindowState.xcu" />
 			</fileset>
+			<zipfileset dir="${RDB_DIR}" prefix="icons">
+				<include name="tools-large.png" />
+			</zipfileset>
 			<fileset dir="${RDB_DIR}/BUTTONS_ONLY" includes="META-INF/manifest.xml" />
 			<fileset dir="misc" includes="buildinfo" />
-			<zipfileset dir="oxt" includes="wollmux.png" fullpath="icons/wollmux.png" />
-			<fileset dir="${RDB_DIR}">
-				<include name="icons/*.*" />
-			</fileset>
 		</zip>
 		
 		<echo level="info">unopkg remove ${PKG_NAME}:</echo>
 		<exec executable="unopkg" failifexecutionfails="false">
-			<arg line="remove ${PKG_NAME}" />
+			<arg line="remove WollMux_ButtonsOnly.oxt" />
 		</exec>
 		<echo level="info">unopkg add ${PKG_NAME}:</echo>
 		<exec executable="unopkg" failifexecutionfails="false">
-			<arg line="add ${PKG_FILE}" />
+			<arg line="add dist/WollMux_ButtonsOnly.oxt" />
 		</exec>
 		
 		<tstamp><format property="mytime" pattern="HH:mm:ss"/></tstamp>
