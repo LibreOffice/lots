@@ -11,7 +11,7 @@ import com.sun.star.ui.XUIElementFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Dies ist die Implementation der Sidebar-Factory, die in Factories.xcu

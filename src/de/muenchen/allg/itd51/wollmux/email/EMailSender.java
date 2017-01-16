@@ -44,12 +44,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 public class EMailSender
 {

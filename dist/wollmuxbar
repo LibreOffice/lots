@@ -12,4 +12,4 @@ if [ ! -p $FIFO ]; then
   set -- --firstrun "$@"
 fi
 
-exec java -jar "${JAR_FILE}" --quickstarter --fifo $FIFO "$@"
+exec java -jar "${JAR_FILE}" --fifo $FIFO "$@"

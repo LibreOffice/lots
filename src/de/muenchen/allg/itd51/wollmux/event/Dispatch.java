@@ -29,46 +29,18 @@
  */
 package de.muenchen.allg.itd51.wollmux.event;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
-import java.net.URLDecoder;
 import java.util.Vector;
 
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.frame.FeatureStateEvent;
-import com.sun.star.frame.XDispatchResultListener;
-import com.sun.star.frame.XNotifyingDispatch;
-import com.sun.star.frame.XStatusListener;
-import com.sun.star.util.URL;
-
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
 
 /**
  * Implementiert XDispatch und kann alle Dispatch-URLs behandeln, die kein
- * DocumentModel erfordern. Die dispatch()-Methode funktioniert über Reflection. Jede
- * Methode dieser Klasse der Form dispatch_name(String arg, PropertyValue[] props)
- * implementiert den Dispatch der URL name, wobei alle Buchstaben in lowercase
- * konvertiert und nichtalphanumerische Zeichen durch Unterstrich ersetzt sind.
- * Beispiel: dispatch__uno_print() implementiert den dispatch der URL ".uno:Print".
- * Man beachte die beiden Unterstriche im Namen. Der erste kommt von "dispatch_" der
- * zweite ist die Ersetzung des ".". Um diese Klasse eine neue URL unterstützen zu
- * lassen genügt es, eine entsprechende dispatch_Name() Methode hinzuzufügen.
- * 
- * Für jede dispatch_name(arg, props) Methode gilt:
- * 
- * arg enthält das Argument der URL enthält (z.B. "internerBriefkopf", wenn
- * url="wollmux:openTemplate#internerBriefkopf" war) Es kann davon ausgegangen
- * werden, dass arg nicht null ist und falls es nicht vorhanden ist den Leerstring
- * enthält.
- * 
- * props ist das PropertyValue[], das auch schon der ursprünglichen dispatch Methode
- * mitgeliefert wurde.
+ * DocumentModel erfordern. Nähere Infos zur Funktionsweise siehe
+ * {@link BaseDispatch}.
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
-public class Dispatch implements XNotifyingDispatch
+public class Dispatch extends BaseDispatch
 {
   public static final String DISP_unoPrint = ".uno:Print";
 
@@ -118,18 +90,7 @@ public class Dispatch implements XNotifyingDispatch
 
   public static final String DISP_wmTest = "wollmux:Test";
 
-  /**
-   * Liefert zu url den Namen der Methode, die den Dispatch behandeln würde.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   */
-  public static String getMethodName(URL url)
-  {
-    String part = url.Complete.split("#")[0];
-    String methodName = "dispatch_" + part.replaceAll("\\W", "_").toLowerCase();
-    return methodName;
-  }
+  public static final String DISP_wmPrintPage = "wollmux:PrintPage";
 
   /**
    * Enthält alle aktuell registrierten StatusListener Grund für Auskommentierung:
@@ -185,127 +146,5 @@ public class Dispatch implements XNotifyingDispatch
   public void dispatch_wollmux_dumpinfo(String arg, PropertyValue[] props)
   {
     WollMuxEventHandler.handleDumpInfo();
-  }
-
-  /**
-   * Benachrichtigt den übergebenen XStatusListener listener mittels
-   * listener.statusChanged() über den aktuellen Zustand des DispatchHandlers und
-   * setzt z.B. den Zustände IsEnabled (Standardmäßig wird IsEnabled=true
-   * übermittelt).
-   * 
-   * @param listener
-   * @param url
-   */
-  protected void notifyStatusListener(XStatusListener listener, URL url)
-  {
-    FeatureStateEvent fse = new FeatureStateEvent();
-    fse.FeatureURL = url;
-    fse.IsEnabled = true;
-    listener.statusChanged(fse);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.frame.XDispatch#dispatch(com.sun.star.util.URL,
-   *      com.sun.star.beans.PropertyValue[])
-   */
-  @Override
-  public void dispatch(URL url, PropertyValue[] props)
-  {
-    Logger.debug2(this.getClass().getSimpleName() + ".dispatch('" + url.Complete
-      + "')");
-
-    callDispatchMethod(url, props, null);
-  }
-
-  @Override
-  public void dispatchWithNotification(URL url, PropertyValue[] props,
-      XDispatchResultListener listener)
-  {
-    callDispatchMethod(url, props, listener);
-//    if (listener != null)
-//    {
-//      DispatchResultEvent dre = new DispatchResultEvent();
-//      dre.State = DispatchResultState.SUCCESS;
-//      listener.dispatchFinished(dre);
-//    }
-  }
-
-  private void callDispatchMethod(URL url, PropertyValue[] props, XDispatchResultListener listener)
-  {
-    // z.B. "wollmux:OpenTemplate#internerBriefkopf"
-    // =====> {"wollmux:OpenTemplate", "internerBriefkopf"}
-    String arg = "";
-    String[] parts = url.Complete.split("#", 2);
-    if (parts.length == 2) arg = parts[1];
-
-    // arg durch den URL-Decoder jagen:
-    try
-    {
-      arg = URLDecoder.decode(arg, ConfigThingy.CHARSET);
-    }
-    catch (UnsupportedEncodingException e)
-    {
-      Logger.error(L.m("Fehler in Dispatch-URL '%1':", url.Complete), e);
-      // Aber wir machen trotzdem weiter. Wer wagt, gewinnt! :-)
-    }
-
-    String methodName = getMethodName(url);
-
-    try
-    {
-      Class<? extends Dispatch> myClass = this.getClass();
-      if (listener == null)
-      {
-        Method method =
-          myClass.getDeclaredMethod(methodName, String.class, PropertyValue[].class);
-        method.invoke(this, arg, props);
-      } 
-      else
-      {
-        Method method =
-            myClass.getDeclaredMethod(methodName, String.class, PropertyValue[].class, XDispatchResultListener.class);
-          method.invoke(this, arg, props, listener);
-      }
-    }
-    catch (Throwable x)
-    {
-      Logger.error(x);
-    }
-  }
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.frame.XDispatch#addStatusListener(com.sun.star.frame.XStatusListener,
-   *      com.sun.star.util.URL)
-   */
-  @Override
-  public void addStatusListener(XStatusListener listener, URL url)
-  {
-    // boolean alreadyRegistered = false;
-    // Iterator<XStatusListener> iter = statusListener.iterator();
-    // while (iter.hasNext())
-    // if (UnoRuntime.areSame(UNO.XInterface(iter.next()), listener))
-    // alreadyRegistered = true;
-    //
-    // if (!alreadyRegistered) statusListener.add(listener);
-
-    notifyStatusListener(listener, url);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.frame.XDispatch#removeStatusListener(com.sun.star.frame.XStatusListener,
-   *      com.sun.star.util.URL)
-   */
-  @Override
-  public void removeStatusListener(XStatusListener listener, URL x)
-  {
-  // Iterator<XStatusListener> iter = statusListener.iterator();
-  // while (iter.hasNext())
-  // if (UnoRuntime.areSame(UNO.XInterface(iter.next()), listener)) iter.remove();
   }
 }

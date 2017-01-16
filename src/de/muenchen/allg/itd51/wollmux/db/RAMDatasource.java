@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.db.checker.DatasetChecker;
 
 /**

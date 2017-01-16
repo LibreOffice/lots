@@ -130,15 +130,16 @@ import javax.swing.border.BevelBorder;
 import com.sun.star.document.MacroExecMode;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
-import de.muenchen.allg.itd51.wollmux.UnavailableException;
+import de.muenchen.allg.itd51.wollmux.WollMuxClassLoader;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
+import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
@@ -233,11 +234,6 @@ public class WollMuxBar
    * ausgelesen und dann hier gecachet wird. Siehe auch {@link #windowMode}.
    */
   private int trayIconMode;
-
-  /**
-   * Falls true, so agiert die WollMuxBar als OOo-Quickstarter.
-   */
-  private boolean quickstarterEnabled = false;
 
   /**
    * Dient der thread-safen Kommunikation mit dem entfernten WollMux.
@@ -454,19 +450,16 @@ public class WollMuxBar
    * @param allowMenuManager
    *          falls allowMenuManager==false, darf der Button mit der Aktion
    *          "menuManager" nicht in der WollMuxBar erscheinen.
-   * @param quickstarter
-   *          falls true wird die WollMuxBar als OOo-Quickstarter agieren.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public WollMuxBar(int winMode, final ConfigThingy conf, ConfigThingy defaultConf,
-      ConfigThingy userConf, boolean allowUserConfig, boolean allowMenuManager, boolean quickstarter)
+      ConfigThingy userConf, boolean allowUserConfig, boolean allowMenuManager)
   {
     this.defaultConf = defaultConf;
     this.userConf = userConf;
     this.allowUserConfig = allowUserConfig;
     this.allowMenuManager = allowMenuManager;
     config = new WollMuxBarConfig(winMode, defaultConf, userConf, allowUserConfig);
-    quickstarterEnabled = quickstarter;
 
     eventHandler = new WollMuxBarEventHandler(this);
     eventHandler.start();
@@ -1354,7 +1347,7 @@ public class WollMuxBar
     }
     eventHandler.waitForThreadTermination();
     readWollMuxBarConfAndStartWollMuxBar(config.getWindowMode(),
-      isQuickstarterEnabled(), false, allowUserConfig, allowMenuManager, defaultConf);
+      false, allowUserConfig, allowMenuManager, defaultConf);
   }
 
   /**
@@ -1797,16 +1790,6 @@ public class WollMuxBar
   }
 
   /**
-   * Liefert true, gdw die WollMuxBar als Quickstarter agiert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   */
-  boolean isQuickstarterEnabled()
-  {
-    return quickstarterEnabled;
-  }
-
-  /**
    * Führt die gleichnamige ACTION aus.
    * 
    * TESTED
@@ -2009,7 +1992,6 @@ public class WollMuxBar
 
     // neue Instanz starten:
     int windowMode = -1;
-    boolean quickstarter = false;
     boolean menumanager = false;
     Iterator<String> i = args.iterator();
     while (i.hasNext())
@@ -2022,8 +2004,10 @@ public class WollMuxBar
         windowMode = WollMuxBarConfig.ALWAYS_ON_TOP_WINDOW_MODE;
       else if (arg.equals("--normalwindow"))
         windowMode = WollMuxBarConfig.NORMAL_WINDOW_MODE;
+      // TODO: die Quickstarteroption hat keine Auswirkung mehr
+      // und kann zu gegebener Zeit entfernt werden.
       else if (arg.equals("--quickstarter"))
-        quickstarter = true;
+        continue;
       else if (arg.equals("--mm"))
         menumanager = true;
       else
@@ -2035,6 +2019,8 @@ public class WollMuxBar
     }
 
     WollMuxFiles.setupWollMuxDir();
+    
+    WollMuxClassLoader.initClassLoader();
 
     ConfigThingy wollmuxConf = WollMuxFiles.getWollmuxConf();
 
@@ -2065,7 +2051,7 @@ public class WollMuxBar
     // --mm schaltet allowUserConfig implizit an
     if(menumanager) allowUserConfig = true;
     
-    readWollMuxBarConfAndStartWollMuxBar(windowMode, quickstarter, menumanager,
+    readWollMuxBarConfAndStartWollMuxBar(windowMode, menumanager,
       allowUserConfig, allowMenuManager, wollmuxConf);
   }
 
@@ -2311,8 +2297,6 @@ public class WollMuxBar
    * @param windowMode
    *          falls >0, overridet dieser windowMode den aus der Konfiguration
    *          gelesenen Wert.
-   * @param quickstarter
-   *          falls true wird der quickstarter aktiviert.
    * @param menumanager
    *          falls true wird automatisch der {@link MenuManager} gestartet.
    * @param allowUserConfig
@@ -2326,7 +2310,7 @@ public class WollMuxBar
    *          die wollmux.conf
    */
   private static void readWollMuxBarConfAndStartWollMuxBar(int windowMode,
-      boolean quickstarter, boolean menumanager, boolean allowUserConfig, boolean allowMenuManager, ConfigThingy wollmuxConf)
+      boolean menumanager, boolean allowUserConfig, boolean allowMenuManager, ConfigThingy wollmuxConf)
   { 
     ConfigThingy wollmuxbarConf = null;
     File wollmuxbarConfFile =
@@ -2375,7 +2359,7 @@ public class WollMuxBar
       {
         instance =
           new WollMuxBar(windowMode, combinedConf, wollmuxConf, wollmuxbarConf,
-            allowUserConfig, allowMenuManager, quickstarter);
+            allowUserConfig, allowMenuManager);
       }
 
       if (menumanager)

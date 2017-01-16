@@ -43,11 +43,10 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Vector;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.TimeoutException;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
  * Datasource, die Daten einer Datenquelle A von Dateien einer anderen Datenquelle B

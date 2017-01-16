@@ -46,8 +46,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
  * Diese Klasse liest alle zu lokalisierenden Strings des WollMux aus dem Source-Code

@@ -34,8 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.TimeoutException;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 
 /**
  * Diese Klasse stellt Methoden zur Verfügung um in Datenquellen Suchen

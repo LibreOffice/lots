@@ -1,9 +1,11 @@
 package de.muenchen.allg.itd51.wollmux;
 
-import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
+import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
 
 public class GlobalFunctions
 {
@@ -44,7 +46,7 @@ public class GlobalFunctions
      * darstellen, die global einheitliche Werte haben.
      */
     funcDialogs =
-      WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null, null);
+      DialogFactory.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null, null);
 
     /*
      * Globale Funktionen parsen. ACHTUNG! Verwendet die Funktionsdialoge. Diese
@@ -52,21 +54,21 @@ public class GlobalFunctions
      * Funktionen keinen Kontext haben.
      */
     globalFunctions =
-      WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(),
+      FunctionFactory.parseFunctions(WollMuxFiles.getWollmuxConf(),
         getFunctionDialogs(), null, null);
 
     /*
      * Globale Druckfunktionen parsen.
      */
     globalPrintFunctions =
-      WollMuxFiles.parsePrintFunctions(WollMuxFiles.getWollmuxConf());
+      PrintFunctionLibrary.parsePrintFunctions(WollMuxFiles.getWollmuxConf());
     StandardPrint.addInternalDefaultPrintFunctions(globalPrintFunctions);
 
     /*
      * Dokumentaktionen parsen. Diese haben weder Kontext noch Dialoge.
      */
     documentActionFunctions = new FunctionLibrary(null, true);
-    WollMuxFiles.parseFunctions(documentActionFunctions,
+    FunctionFactory.parseFunctions(documentActionFunctions,
       WollMuxFiles.getWollmuxConf(), "Dokumentaktionen", null, null);
 
     

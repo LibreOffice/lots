@@ -2,11 +2,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.muenchen</groupId>
 	<artifactId>wollmux</artifactId>
-	<version>16.09</version>
+	<version>16.11-SNAPSHOT</version>
 	<name>WollMux</name>
 
 	<properties>
-		<libreoffice.version>4.1</libreoffice.version>
+		<libreoffice.version>4.1.1</libreoffice.version>
 		<izpack.staging>dist</izpack.staging>
 	</properties>
 
@@ -445,6 +445,11 @@
 			<groupId>de.muenchen</groupId>
 			<artifactId>wollmux-support-classes</artifactId>
 			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>de.muenchen</groupId>
+			<artifactId>wollmux-core</artifactId>
+			<version>16.10</version>
 		</dependency>
 		<dependency>
 			<groupId>org.libreoffice</groupId>

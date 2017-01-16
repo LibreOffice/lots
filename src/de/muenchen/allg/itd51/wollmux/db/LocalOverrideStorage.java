@@ -3,8 +3,7 @@ package de.muenchen.allg.itd51.wollmux.db;
 import java.util.Iterator;
 import java.util.Set;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.TimeoutException;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner.Status;
 
 interface LocalOverrideStorage

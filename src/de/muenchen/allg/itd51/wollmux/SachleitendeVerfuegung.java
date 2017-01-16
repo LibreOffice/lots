@@ -64,10 +64,15 @@ import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 public class SachleitendeVerfuegung
@@ -159,13 +164,13 @@ public class SachleitendeVerfuegung
    * @return die Position zurück, auf die der ViewCursor gesetzt werden soll oder
    *         null, falls der ViewCursor unverändert bleibt.
    */
-  public static XTextRange insertVerfuegungspunkt(TextDocumentModel model,
+  public static XTextRange insertVerfuegungspunkt(TextDocumentController documentController,
       XTextRange range)
   {
     if (range == null) return null;
 
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
-    createUsedStyles(model.doc);
+    createUsedStyles(documentController.getModel().doc);
 
     XParagraphCursor cursor =
       UNO.XParagraphCursor(range.getText().createTextCursorByRange(range));
@@ -187,7 +192,7 @@ public class SachleitendeVerfuegung
     }
 
     // Ziffernanpassung durchführen:
-    ziffernAnpassen(model);
+    ziffernAnpassen(documentController);
 
     return null;
   }
@@ -207,12 +212,12 @@ public class SachleitendeVerfuegung
    * @return die Position zurück, auf die der ViewCursor gesetzt werden soll oder
    *         null, falls der ViewCursor unverändert bleibt.
    */
-  public static XTextRange insertAbdruck(TextDocumentModel model, XTextRange range)
+  public static XTextRange insertAbdruck(TextDocumentController documentController, XTextRange range)
   {
     if (range == null) return null;
 
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
-    createUsedStyles(model.doc);
+    createUsedStyles(documentController.getModel().doc);
 
     XParagraphCursor cursor =
       UNO.XParagraphCursor(range.getText().createTextCursorByRange(range));
@@ -230,7 +235,7 @@ public class SachleitendeVerfuegung
       cursor.collapseToStart();
       if (isVerfuegungspunkt(cursor)) cursor.gotoEndOfParagraph(false);
 
-      int count = countVerfPunkteBefore(model.doc, cursor) + 1;
+      int count = countVerfPunkteBefore(documentController.getModel().doc, cursor) + 1;
       cursor.setString("\r" + abdruckString(count) + "\r");
       // Falls Cursor auf dem Zeilenanfang stand, wird die Formatierung auf
       // Standardformatierung gesetzt
@@ -242,7 +247,7 @@ public class SachleitendeVerfuegung
     }
 
     // Ziffern anpassen:
-    ziffernAnpassen(model);
+    ziffernAnpassen(documentController);
 
     return cursor;
   }
@@ -260,13 +265,13 @@ public class SachleitendeVerfuegung
    * @return die Position zurück, auf die der ViewCursor gesetzt werden soll oder
    *         null, falls der ViewCursor unverändert bleibt.
    */
-  public static XTextRange insertZuleitungszeile(TextDocumentModel model,
+  public static XTextRange insertZuleitungszeile(TextDocumentController documentController,
       XTextRange range)
   {
     if (range == null) return null;
 
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
-    createUsedStyles(model.doc);
+    createUsedStyles(documentController.getModel().doc);
 
     XParagraphCursor cursor =
       UNO.XParagraphCursor(range.getText().createTextCursorByRange(range));
@@ -727,9 +732,9 @@ public class SachleitendeVerfuegung
    * @param doc
    *          Das Dokument, in dem alle Verfügungspunkte angepasst werden sollen.
    */
-  public static void ziffernAnpassen(TextDocumentModel model)
+  public static void ziffernAnpassen(TextDocumentController documentController)
   {
-    XTextRange punkt1 = getVerfuegungspunkt1(model.doc);
+    XTextRange punkt1 = getVerfuegungspunkt1(documentController.getModel().doc);
 
     // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
     // Verfuegungspunkt1 vorhanden ist.
@@ -743,8 +748,8 @@ public class SachleitendeVerfuegung
     // genug isolieren um ein entsprechende Ticket bei OOo dazu aufmachen zu
     // können, da der Absturz nur sporadisch auftrat.
     XParagraphCursor cursor =
-      UNO.XParagraphCursor(model.doc.getText().createTextCursorByRange(
-        model.doc.getText().getStart()));
+      UNO.XParagraphCursor(documentController.getModel().doc.getText().createTextCursorByRange(
+        documentController.getModel().doc.getText().getStart()));
     if (cursor != null) do
     {
       // ganzen Paragraphen markieren
@@ -805,9 +810,9 @@ public class SachleitendeVerfuegung
     // Druckfunktion zurück.
     int effectiveCount = (punkt1 != null) ? count - 1 : count;
     if (effectiveCount > 0)
-      model.addPrintFunction(PRINT_FUNCTION_NAME);
+      documentController.addPrintFunction(PRINT_FUNCTION_NAME);
     else
-      model.removePrintFunction(PRINT_FUNCTION_NAME);
+      documentController.removePrintFunction(PRINT_FUNCTION_NAME);
   }
 
   /**
@@ -1115,7 +1120,7 @@ public class SachleitendeVerfuegung
   public static List<VerfuegungspunktInfo> callPrintDialog(XTextDocument doc)
   {
     //JGM: Update der Dokumentenstruktur (Kommandos und TextSections)
-    DocumentManager.getTextDocumentModel(doc).getDocumentCommands().update();
+    DocumentManager.getTextDocumentController(doc).updateDocumentCommands();
     Vector<Verfuegungspunkt> vps = scanVerfuegungspunkte(doc);
     Iterator<Verfuegungspunkt> iter = vps.iterator();
     while (iter.hasNext())
@@ -1354,10 +1359,10 @@ public class SachleitendeVerfuegung
    * Beendigung des Drucks eines Originals - es setzt alle Verfügungspunkte,
    * Druckblöcke und Sichtbarkeitsgruppen aus model auf sichtbar.
    */
-  public static void workaround103137(TextDocumentModel model)
+  public static void workaround103137(TextDocumentController documentController)
   {
-    if (model == null || model.doc == null) return;
-    XTextDocument doc = model.doc;
+    if (documentController == null || documentController.getModel().doc == null) return;
+    XTextDocument doc = documentController.getModel().doc;
     XParagraphCursor cursor =
       UNO.XParagraphCursor(doc.getText().createTextCursorByRange(
         doc.getText().getStart()));
@@ -1393,23 +1398,23 @@ public class SachleitendeVerfuegung
     }
 
     // Sichtbarkeitsgruppen einblenden:
-    WollMuxEventHandler.handleSetVisibleState(model, GROUP_ID_SLV_DRAFT_ONLY, true,
+    WollMuxEventHandler.handleSetVisibleState(documentController, GROUP_ID_SLV_DRAFT_ONLY, true,
       null);
-    WollMuxEventHandler.handleSetVisibleState(model, GROUP_ID_SLV_NOT_IN_ORIGINAL,
+    WollMuxEventHandler.handleSetVisibleState(documentController, GROUP_ID_SLV_NOT_IN_ORIGINAL,
       true, null);
-    WollMuxEventHandler.handleSetVisibleState(model, GROUP_ID_SLV_ORIGINAL_ONLY,
+    WollMuxEventHandler.handleSetVisibleState(documentController, GROUP_ID_SLV_ORIGINAL_ONLY,
       true, null);
-    WollMuxEventHandler.handleSetVisibleState(model, GROUP_ID_SLV_ALL_VERSIONS,
+    WollMuxEventHandler.handleSetVisibleState(documentController, GROUP_ID_SLV_ALL_VERSIONS,
       true, null);
-    WollMuxEventHandler.handleSetVisibleState(model, GROUP_ID_SLV_COPY_ONLY, true,
+    WollMuxEventHandler.handleSetVisibleState(documentController, GROUP_ID_SLV_COPY_ONLY, true,
       null);
 
     // Druckblöcke wieder einblenden:
-    model.setPrintBlocksProps(BLOCKNAME_SLV_DRAFT_ONLY, true, true);
-    model.setPrintBlocksProps(BLOCKNAME_SLV_NOT_IN_ORIGINAL, true, true);
-    model.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, true, true);
-    model.setPrintBlocksProps(BLOCKNAME_SLV_ALL_VERSIONS, true, true);
-    model.setPrintBlocksProps(BLOCKNAME_SLV_COPY_ONLY, true, true);
+    documentController.setPrintBlocksProps(BLOCKNAME_SLV_DRAFT_ONLY, true, true);
+    documentController.setPrintBlocksProps(BLOCKNAME_SLV_NOT_IN_ORIGINAL, true, true);
+    documentController.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, true, true);
+    documentController.setPrintBlocksProps(BLOCKNAME_SLV_ALL_VERSIONS, true, true);
+    documentController.setPrintBlocksProps(BLOCKNAME_SLV_COPY_ONLY, true, true);
 
     // Verfügungspunkte wieder einblenden:
     if (setInvisibleRange != null) UNO.hideTextRange(setInvisibleRange, false);

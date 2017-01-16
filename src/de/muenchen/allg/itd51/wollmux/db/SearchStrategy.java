@@ -37,7 +37,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 
 /**
  * Eine Suchstrategie liefert für eine gegebene Wortzahl eine Liste von Templates für

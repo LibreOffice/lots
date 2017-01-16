@@ -1,25 +1,24 @@
 package de.muenchen.allg.itd51.wollmux.dialog.formmodel;
 
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import com.sun.star.frame.XFrame;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
-import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeDatasource;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Repräsentiert ein FormModel für ein einfaches Formular mit genau einem
@@ -30,7 +29,7 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
  */
 public class SingleDocumentFormModel implements FormModel
 {
-  private final TextDocumentModel doc;
+  private final TextDocumentController documentController;
 
   private final ConfigThingy formFensterConf;
 
@@ -51,18 +50,18 @@ public class SingleDocumentFormModel implements FormModel
   /**
   * vFormGUIs beinhaltet die Referenzen der z.Z. ausgeführten FormGUIs
   */
-  public static Vector<FormGUI> vFormGUIs=new Vector<FormGUI>();
+  public static List<FormGUI> vFormGUIs=new ArrayList<FormGUI>();
 
   /**
   * vFrames beinhaltet die Referenzen der z.Z. ausgeführten Frames mit FormGUI
   */
-  public static Vector<XFrame> vFrames=new Vector<XFrame>();
+  public static List<XFrame> vFrames=new ArrayList<XFrame>();
 
   /**
    * Konstruktor für ein SingleDocumentFormModel mit dem zugehörigen
    * TextDocumentModel doc.
    * 
-   * @param doc
+   * @param documentController
    *          Das zugeordnete TextDocumentModel.
    * @param formFensterConf
    *          Der Formular-Unterabschnitt des Fenster-Abschnitts von wollmux.conf
@@ -83,12 +82,12 @@ public class SingleDocumentFormModel implements FormModel
    * @param visible
    *          false zeigt an, dass die FormGUI unsichtbar sein soll.
    */
-  public SingleDocumentFormModel(final TextDocumentModel doc,
+  public SingleDocumentFormModel(final TextDocumentController documentController,
       final ConfigThingy formFensterConf, final ConfigThingy formConf,
       final Map<Object, Object> functionContext, final FunctionLibrary funcLib,
       final DialogLibrary dialogLib, boolean visible)
   {
-    this.doc = doc;
+    this.documentController = documentController;
     this.formFensterConf = formFensterConf;
     this.formConf = formConf;
     this.functionContext = functionContext;
@@ -116,19 +115,19 @@ public class SingleDocumentFormModel implements FormModel
   @Override
   public void close()
   {
-    WollMuxEventHandler.handleCloseTextDocument(doc);
+    WollMuxEventHandler.handleCloseTextDocument(documentController);
   }
 
   @Override
   public void closeAndOpenExt(String ext)
   {
-    WollMuxEventHandler.handleCloseAndOpenExt(doc, ext);
+    WollMuxEventHandler.handleCloseAndOpenExt(documentController, ext);
   }
 
   @Override
   public void saveTempAndOpenExt(String ext)
   {
-    WollMuxEventHandler.handleSaveTempAndOpenExt(doc, ext);
+    WollMuxEventHandler.handleSaveTempAndOpenExt(documentController, ext);
   }
 
   /*
@@ -146,7 +145,7 @@ public class SingleDocumentFormModel implements FormModel
      * dann müsste noch einiges anderes geändert werden, z.B. müsste die FormGUI
      * sichtbar werden.
      */
-    if (visible) WollMuxEventHandler.handleSetWindowVisible(doc, vis);
+    if (visible) WollMuxEventHandler.handleSetWindowVisible(documentController, vis);
   }
 
   /*
@@ -159,7 +158,7 @@ public class SingleDocumentFormModel implements FormModel
   public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
   {
     if (visible)
-      WollMuxEventHandler.handleSetWindowPosSize(doc, docX, docY, docWidth,
+      WollMuxEventHandler.handleSetWindowPosSize(documentController, docX, docY, docWidth,
         docHeight);
   }
 
@@ -173,7 +172,7 @@ public class SingleDocumentFormModel implements FormModel
   @Override
   public void setVisibleState(String groupId, boolean visible)
   {
-    WollMuxEventHandler.handleSetVisibleState(doc, groupId, visible, null);
+    WollMuxEventHandler.handleSetVisibleState(documentController, groupId, visible, null);
   }
 
   /*
@@ -186,7 +185,7 @@ public class SingleDocumentFormModel implements FormModel
   public void valueChanged(String fieldId, String newValue)
   {
     if (fieldId.length() > 0)
-      WollMuxEventHandler.handleFormValueChanged(doc, fieldId, newValue);
+      WollMuxEventHandler.handleFormValueChanged(documentController, fieldId, newValue);
   }
 
   /*
@@ -197,7 +196,7 @@ public class SingleDocumentFormModel implements FormModel
   @Override
   public void focusGained(String fieldId)
   {
-    if (visible) WollMuxEventHandler.handleFocusFormField(doc, fieldId);
+    if (visible) WollMuxEventHandler.handleFocusFormField(documentController, fieldId);
   }
 
   /*
@@ -213,13 +212,13 @@ public class SingleDocumentFormModel implements FormModel
    * (non-Javadoc)
    * 
    * @see
-   * de.muenchen.allg.itd51.wollmux.FormModel#disposed(de.muenchen.allg.itd51.wollmux
+   * de.muenchen.allg.itd51.wollmux.FormModel#closing(de.muenchen.allg.itd51.wollmux
    * .TextDocumentModel)
    */
   @Override
-  public void disposing(TextDocumentModel source)
+  public void closing(Object sender)
   {
-    if (doc.equals(source))
+    if (documentController.getModel().doc.equals(sender))
     {
       if (formGUI != null)
       {
@@ -317,7 +316,7 @@ public class SingleDocumentFormModel implements FormModel
   @Override
   public void formControllerInitCompleted()
   {
-    WollMuxEventHandler.handleFormControllerInitCompleted(doc);
+    WollMuxEventHandler.handleFormControllerInitCompleted(documentController);
   }
 
   /*
@@ -328,7 +327,7 @@ public class SingleDocumentFormModel implements FormModel
   @Override
   public void print()
   {
-    UNO.dispatch(doc.doc, Dispatch.DISP_unoPrint);
+    UNO.dispatch(documentController.getModel().doc, Dispatch.DISP_unoPrint);
   }
 
   /*
@@ -339,19 +338,19 @@ public class SingleDocumentFormModel implements FormModel
   @Override
   public void pdf()
   {
-    UNO.dispatch(doc.doc, ".uno:ExportToPDF");
+    UNO.dispatch(documentController.getModel().doc, ".uno:ExportToPDF");
   }
 
   @Override
   public void save()
   {
-    UNO.dispatch(doc.doc, ".uno:Save");
+    UNO.dispatch(documentController.getModel().doc, ".uno:Save");
   }
 
   @Override
   public void saveAs()
   {
-    UNO.dispatch(doc.doc, ".uno:SaveAs");
+    UNO.dispatch(documentController.getModel().doc, ".uno:SaveAs");
   }
 
   /*
@@ -376,12 +375,12 @@ public class SingleDocumentFormModel implements FormModel
   public void startFormGUI()
   {
     boolean containsFrames=false;
-    containsFrames=SingleDocumentFormModel.vFrames.contains(doc.getFrame());
+    containsFrames=SingleDocumentFormModel.vFrames.contains(documentController.getFrameController().getFrame());
 
     //Schaue ob bereits eine Instanz genau dieses Formulars geöffnet ist, falls ja wird das nun ungültige FormGUI beendet 
     if (containsFrames){  
       //Hole Index des ungültigen FormGUI
-      int frameIndex=SingleDocumentFormModel.vFrames.indexOf(doc.getFrame());
+      int frameIndex=SingleDocumentFormModel.vFrames.indexOf(documentController.getFrameController().getFrame());
       
       SingleDocumentFormModel.vFormGUIs.get(frameIndex).dispose();
       SingleDocumentFormModel.vFormGUIs.remove(frameIndex);
@@ -389,14 +388,14 @@ public class SingleDocumentFormModel implements FormModel
       Logger.debug(L.m("FormGUI an der Stelle %1 beendet.", frameIndex));
     }
     
-    HashMap<String, String> idToPresetValue = doc.getIDToPresetValue();
+    HashMap<String, String> idToPresetValue = documentController.getIDToPresetValue();
     formGUI =
       new FormGUI(formFensterConf, formConf, this, idToPresetValue,
         functionContext, funcLib, dialogLib, visible);
     
     // füge FormGUI Refenrenz und die dazugehörigen Frames zu den Klassenvariable hinzu
     SingleDocumentFormModel.vFormGUIs.add(formGUI);
-    SingleDocumentFormModel.vFrames.add(doc.getFrame());  
+    SingleDocumentFormModel.vFrames.add(documentController.getFrameController().getFrame());  
   }
 
   @Override
@@ -404,7 +403,7 @@ public class SingleDocumentFormModel implements FormModel
   {
     try
     {
-      XFrame frame = UNO.XModel(doc.doc).getCurrentController().getFrame();
+      XFrame frame = UNO.XModel(documentController.getModel().doc).getCurrentController().getFrame();
       String frameTitle = (String) UNO.getProperty(frame, "Title");
       frameTitle = MailMergeDatasource.stripOpenOfficeFromWindowName(frameTitle);
       return frameTitle;
@@ -413,50 +412,5 @@ public class SingleDocumentFormModel implements FormModel
     {
       return null;
     }
-  }
-
-  /**
-   * Erzeugt ein FormModel für ein einfaches Formular mit genau einem zugehörigen
-   * Formulardokument.
-   * 
-   * @param doc
-   *          Das Dokument zu dem ein FormModel erzeugt werden soll.
-   * @param visible
-   *          false zeigt an, dass das Dokument unsichtbar ist (und es die FormGUI
-   *          auch sein sollte).
-   * @return ein FormModel dem genau ein Formulardokument zugeordnet ist.
-   * @throws InvalidFormDescriptorException
-   */
-  public static FormModel createSingleDocumentFormModel(TextDocumentModel doc,
-      boolean visible) throws InvalidFormDescriptorException
-  {
-  
-    // Abschnitt "Formular" holen:
-    ConfigThingy formConf;
-    try
-    {
-      formConf = doc.getFormDescription().get("Formular");
-    }
-    catch (NodeNotFoundException e)
-    {
-      throw new InvalidFormDescriptorException(
-        L.m("Kein Abschnitt 'Formular' in der Formularbeschreibung vorhanden"));
-    }
-  
-    // Abschnitt Fenster/Formular aus wollmuxConf holen:
-    ConfigThingy formFensterConf;
-    try
-    {
-      formFensterConf =
-        WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild();
-    }
-    catch (NodeNotFoundException x)
-    {
-      formFensterConf = new ConfigThingy("");
-    }
-  
-    return new SingleDocumentFormModel(doc, formFensterConf, formConf,
-      doc.getFunctionContext(), doc.getFunctionLibrary(), doc.getDialogLibrary(),
-      visible);
   }
 }

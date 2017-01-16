@@ -1,6 +1,0 @@
-eclipse.preferences.version=1
-extraProperties=sonar.jdbc.password\=sonar\r\nsonar.jdbc.username\=sonar\r\nsonar.jdbc.url\=jdbc\:mysql\://192.168.0.2\:3306/sonar?useUnicode\r\nsonar.host.url\=http\://192.168.0.2\:9000
-lastAnalysisDate=1457944607070
-projectKey=de.muenchen\:wollmux\:maven
-serverUrl=http\://kvm-javabuild.tvc.muenchen.de\:9000/sonar
-version=2

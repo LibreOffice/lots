@@ -9,7 +9,7 @@ Homepage: http://www.wollmux.org
 
 Package: libreoffice4.1-wollmux
 Architecture: all
-Depends: ${misc:Depends}, default-jre, libreoffice4.1-writer, libreoffice4.1-debian-menus
+Depends: ${misc:Depends}, default-jre, libreoffice-meta
 Replaces: libreoffice-wollmux (<< ${binary:Version})
 Breaks: libreoffice-wollmux (<< ${binary:Version})
 Suggests: wollmuxbar
@@ -30,9 +30,9 @@ Description: WollMux extension for LibreOffice
   - Enhanced serial letter functionality that ties in with the form
     functionality (e.g. auto-computed fields) and the custom print plugins.
 
-Package: libreoffice5.0-wollmux
+Package: libreoffice5.2-wollmux
 Architecture: all
-Depends: ${misc:Depends}, default-jre, libreoffice5.0-writer, libreoffice5.0-debian-menus
+Depends: ${misc:Depends}, default-jre, libreoffice-meta
 Conflicts: libreoffice-wollmux (<< ${binary:Version})
 Replaces: libreoffice-wollmux (<< ${binary:Version})
 Suggests: wollmuxbar
@@ -55,7 +55,7 @@ Description: WollMux extension for LibreOffice
 
 Package: wollmuxbar
 Architecture: all
-Depends: libreoffice4.1-wollmux (= ${binary:Version}) | libreoffice5.0-wollmux (= ${binary:Version})
+Depends: libreoffice4.1-wollmux (= ${binary:Version}) | libreoffice5.2-wollmux (= ${binary:Version})
 Conflicts: wollmux (<< ${binary:Version})
 Replaces: wollmux (<< ${binary:Version})
 Description: Standalone toolbar for WollMux
@@ -70,7 +70,7 @@ Description: Transitional package for WollMux Bar
  Ease transition from wollmux to wollmuxbar package
 
 Package: libreoffice-wollmux
-Depends: libreoffice4.1-wollmux (= ${binary:Version}) | libreoffice5.0-wollmux (= ${binary:Version})
+Depends: libreoffice4.1-wollmux (= ${binary:Version}) | libreoffice5.2-wollmux (= ${binary:Version})
 Architecture: all
 Description: transitional dummy package
  This is a transitional dummy package. It can safely be removed.

@@ -38,7 +38,7 @@ import javax.swing.event.ChangeListener;
 
 import com.sun.star.text.XTextDocument;
 
-import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.former.control.AllFormControlLineViewsPanel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;

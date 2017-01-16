@@ -44,8 +44,8 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Diese Klasse repräsentiert eine Fortschrittsanzeige für den WollMux-Komfortdruck,

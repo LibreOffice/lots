@@ -36,11 +36,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
-import de.muenchen.allg.itd51.wollmux.func.Function;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Liefert {@link FunctionSelection}s.

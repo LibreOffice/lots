@@ -7,10 +7,10 @@ import java.util.Iterator;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.MultiOpenDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.UIElementEventHandler;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar;

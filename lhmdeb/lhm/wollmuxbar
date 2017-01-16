@@ -12,42 +12,4 @@ if [ ! -p $FIFO ]; then
   set -- --firstrun "$@"
 fi
 
-# Scan office installation(s) according to UNO_PATH, PATH and default locations
-if [ "$UNO_PATH" ]
-then
-  OFFICE_EXECUTABLE="$UNO_PATH/soffice"
-else
-  OFFICE_EXECUTABLE=`which soffice`
-  if [ -z "$OFFICE_EXECUTABLE" ]
-  then
-    for OFFICE_LOC in /opt/libreoffice*/ /opt/openoffice*/
-    do
-      if [ -f "$OFFICE_LOC/program/soffice" ]
-      then
-        export UNO_PATH="$OFFICE_LOC/program"
-        OFFICE_EXECUTABLE="$UNO_PATH/soffice"
-        break
-      fi
-    done
-  fi
-fi
-
-# Pre-invocation of office if possible, to establish one office process with
-# defined user-space parameters instead of the rather erratic parameters
-# used by the UNO helper layer issuing the later invocation.
-if [ "$OFFICE_EXECUTABLE" ]
-then
-  # determine single- vs. double-dash option format
-  if "$OFFICE_EXECUTABLE" -help 2>&1 | grep -qP '^-minimized'
-    # this succeeds iff -help is understood and one exemplary
-    # single-dash option is printed by -help
-    # assumption: "-help is not understood" implies "only double-dash options are understood"
-  then
-    OPT='-'
-  else
-    OPT='--'
-  fi
-  "$OFFICE_EXECUTABLE" "${OPT}nologo" "${OPT}nodefault" "${OPT}minimized" &
-fi
-
-exec java -jar "${JAR_FILE}" --quickstarter --fifo $FIFO "$@"
+exec java -jar "${JAR_FILE}" --fifo $FIFO "$@"

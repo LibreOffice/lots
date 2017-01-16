@@ -26,7 +26,7 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Die Factory enthält Hilfsfunktionen zum einfacheren Erzeugen von 

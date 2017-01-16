@@ -48,8 +48,14 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextRangeCompare;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
+import de.muenchen.allg.itd51.wollmux.core.document.TextRangeRelation;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.ooo.TextDocument;
 

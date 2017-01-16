@@ -57,15 +57,15 @@ import com.sun.star.uno.XComponentContext;
 import com.sun.star.util.XModifiable;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
 import de.muenchen.allg.itd51.wollmux.comp.WollMux;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 
 /**
  * Dient der thread-safen Kommunikation der WollMuxBar mit dem WollMux im OOo.
@@ -533,7 +533,17 @@ public class WollMuxBarEventHandler
       XComponentContext ctx = null;
       try
       {
-        ctx = Bootstrap.bootstrap();
+        try
+        {
+          String[] args = {"--nologo", "--nodefault", "--minimized"};
+          Bootstrap.class.getMethod("bootstrap", args.getClass());
+          ctx = Bootstrap.bootstrap(args);
+        }
+        // Verwende default Bootstrap-Methode. Diese startet Office mit anderen Parametern.
+        catch (Exception e)
+        {
+          ctx = Bootstrap.bootstrap();
+        }
         factory =
           UnoRuntime.queryInterface(
             XMultiServiceFactory.class, ctx.getServiceManager());
@@ -572,7 +582,7 @@ public class WollMuxBarEventHandler
          * werden. Nach diesem Aufruf hier funktionieren die entsprechenden Aufrufe
          * der Workarounds Funktionen.
          */
-        Workarounds.getOOoVersion();
+        Utils.getOOoVersion();
       }
       catch (Exception e)
       {
@@ -608,8 +618,6 @@ public class WollMuxBarEventHandler
           WollMuxFiles.getWollmuxConf().stringRepresentation().hashCode();
         mux.addPALChangeEventListenerWithConsistencyCheck(myPALChangeEventListener,
           wmConfHashCode);
-
-        installQuickstarter(factory);
       }
       catch (Exception x)
       {
@@ -619,97 +627,6 @@ public class WollMuxBarEventHandler
     }
 
     return null;
-  }
-
-  private void installQuickstarter(XMultiServiceFactory factory) throws Exception
-  {
-    desktop = null;
-    terminateListener = null;
-    if (!wollmuxbar.isQuickstarterEnabled()) return;
-    desktop =
-      UnoRuntime.queryInterface(XDesktop.class,
-        factory.createInstance("com.sun.star.frame.Desktop"));
-    terminateListener = new XTerminateListener()
-    {
-      // Was any of the open documents changed?
-      private boolean docChanged = false;
-      
-      @Override
-      public void notifyTermination(EventObject arg0)
-      {
-        Logger.debug("notifyTermination");
-      }
-
-      @Override
-      public void queryTermination(EventObject arg0) throws TerminationVetoException
-      {
-        Logger.debug("queryTermination");
-        docChanged = false;
-        /*
-         * Because of issue
-         * 
-         * http://www.openoffice.org/issues/show_bug.cgi?id=65942
-         * 
-         * OOo does not allow the user to close the last window if termination is
-         * vetoed. So we close all windows for him.
-         */
-        try
-        {
-          XEnumeration xenu = desktop.getComponents().createEnumeration();
-          while (xenu.hasMoreElements())
-          {
-            Object compo = xenu.nextElement();
-            XModifiable lMod = UNO.XModifiable(compo);
-            if ((lMod != null) && lMod.isModified())
-            {
-              // Geaendert ==> Nicht schließen
-              docChanged = true;
-              continue;
-            }
-            try
-            { /*
-             * First see if the component itself offers a close function
-             */
-              UNO.XCloseable(compo).close(false);
-            }
-            catch (Exception x)
-            {
-              Logger.debug("Konnte Komponente nicht schließen. Versuche es über den Frame nochmal");
-              try
-              {
-                /*
-                 * Okay, so the component can't be closed. Maybe it has a frame that
-                 * we can close.
-                 */
-                UNO.XCloseable(UNO.XController(compo).getFrame()).close(true);
-              }
-              catch (Exception y)
-              {
-                Logger.error("Konnte Komponente weder direkt noch über den Frame schließen");
-              }
-            }
-          }
-        }
-        catch (Throwable x)
-        {
-          x.printStackTrace();
-        }
-        if (!docChanged)
-        {
-          // Wenn eine der Komponenten geändert wurde, dann kein Veto
-          // sonst bleibt das Fenster einfach offen, ohne eine Info an den Anwender.
-          throw new TerminationVetoException();
-        }
-      }
-
-      @Override
-      public void disposing(EventObject arg0)
-      {
-        Logger.debug("disposing");
-      }
-    };
-
-    desktop.addTerminateListener(terminateListener);
   }
 
 }

@@ -29,26 +29,29 @@
  */
 package de.muenchen.allg.itd51.wollmux.event;
 
+import javax.naming.OperationNotSupportedException;
+
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.frame.DispatchResultEvent;
-import com.sun.star.frame.DispatchResultState;
 import com.sun.star.frame.XDispatch;
-import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XFrame;
-import com.sun.star.frame.XNotifyingDispatch;
+import com.sun.star.frame.XLayoutManager;
+import com.sun.star.frame.XModel2;
 import com.sun.star.frame.XStatusListener;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
  * Implementiert XDispatch und kann alle Dispatch-URLs behandeln, die ein
- * DocumentModel erfordern. Nähere Infos zur Funktionsweise siehe {@link Dispatch}.
+ * DocumentModel erfordern. Nähere Infos zur Funktionsweise siehe
+ * {@link BaseDispatch}.
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
@@ -122,141 +125,93 @@ public class DocumentDispatch extends Dispatch
       super.removeStatusListener(listener, url);
   }
 
-  private TextDocumentModel getModel()
+  private TextDocumentController getDocumentController()
   {
     XTextDocument doc = UNO.XTextDocument(frame.getController().getModel());
     if (doc != null)
     {
-      return DocumentManager.getTextDocumentModel(doc);
+      return DocumentManager.getTextDocumentController(doc);
     }
     return null;
   }
 
   public void dispatch__uno_print(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handlePrint(getModel(), origDisp, origUrl, props);
-  }
-  
-  public void dispatch__uno_print(String arg, PropertyValue[] props, XDispatchResultListener listener)
-  {
-    WollMuxEventHandler.handlePrint(getModel(), origDisp, origUrl, props);
-    DispatchResultEvent dre = new DispatchResultEvent();
-    dre.Source = this;
-    dre.State = DispatchResultState.SUCCESS;
-    listener.dispatchFinished(dre);
-  }
-
-  public void dispatch__uno_save(String arg, PropertyValue[] props)
-  {
-    if (!getModel().hasURL())
-      WollMuxEventHandler.handleSaveAs(getModel(), origDisp, origUrl, props);
-    else
-      origDisp.dispatch(origUrl, props);
-  }
-
-  public void dispatch__uno_save(String arg, PropertyValue[] props, XDispatchResultListener listener)
-  {
-    if (!getModel().hasURL())
-    {
-      WollMuxEventHandler.handleSaveAsSync(getModel(), origDisp, origUrl, props);
-      DispatchResultEvent dre = new DispatchResultEvent();
-      dre.Source = this;
-      dre.State = DispatchResultState.SUCCESS;
-      listener.dispatchFinished(dre);
-    }
-    else 
-    {
-      XNotifyingDispatch nd = UnoRuntime.queryInterface(XNotifyingDispatch.class, origDisp);
-      nd.dispatchWithNotification(origUrl, props, listener);
-    }
-  }
-
-  public void dispatch__uno_saveas(String arg, PropertyValue[] props)
-  {
-    if (!getModel().hasURL())
-      WollMuxEventHandler.handleSaveAs(getModel(), origDisp, origUrl, props);
-    else
-      origDisp.dispatch(origUrl, props);
-  }
-
-  public void dispatch__uno_saveas(String arg, PropertyValue[] props, XDispatchResultListener listener)
-  {
-    if (!getModel().hasURL())
-    {
-      WollMuxEventHandler.handleSaveAsSync(getModel(), origDisp, origUrl, props);
-      DispatchResultEvent dre = new DispatchResultEvent();
-      dre.Source = this;
-      dre.State = DispatchResultState.SUCCESS;
-      listener.dispatchFinished(dre);
-    }
-    else 
-    {
-      XNotifyingDispatch nd = UnoRuntime.queryInterface(XNotifyingDispatch.class, origDisp);
-      nd.dispatchWithNotification(origUrl, props, listener);
-    }
+    WollMuxEventHandler.handlePrint(getDocumentController(), origDisp, origUrl, props);
   }
 
   public void dispatch__uno_printdefault(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handlePrint(getModel(), origDisp, origUrl, props);
+    WollMuxEventHandler.handlePrint(getDocumentController(), origDisp, origUrl, props);
   }
 
   public void dispatch_wollmux_functiondialog(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleFunctionDialog(getModel(), arg);
+    WollMuxEventHandler.handleFunctionDialog(getDocumentController(), arg);
   }
 
   public void dispatch_wollmux_formularmax4000(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleFormularMax4000Show(getModel());
+    WollMuxEventHandler.handleFormularMax4000Show(getDocumentController());
   }
 
   public void dispatch_wollmux_ziffereinfuegen(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleButtonZifferEinfuegenPressed(getModel());
+    WollMuxEventHandler.handleButtonZifferEinfuegenPressed(getDocumentController());
   }
 
   public void dispatch_wollmux_abdruck(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleButtonAbdruckPressed(getModel());
+    WollMuxEventHandler.handleButtonAbdruckPressed(getDocumentController());
   }
 
   public void dispatch_wollmux_zuleitungszeile(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleButtonZuleitungszeilePressed(getModel());
+    WollMuxEventHandler.handleButtonZuleitungszeilePressed(getDocumentController());
   }
 
   public void dispatch_wollmux_markblock(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleMarkBlock(getModel(), arg);
+    WollMuxEventHandler.handleMarkBlock(getDocumentController(), arg);
   }
 
   public void dispatch_wollmux_textbausteineinfuegen(String arg,
       PropertyValue[] props)
   {
-    WollMuxEventHandler.handleTextbausteinEinfuegen(getModel(), true);
+    WollMuxEventHandler.handleTextbausteinEinfuegen(getDocumentController(), true);
   }
 
   public void dispatch_wollmux_platzhalteranspringen(String arg,
       PropertyValue[] props)
   {
-    WollMuxEventHandler.handleJumpToPlaceholder(getModel());
+    WollMuxEventHandler.handleJumpToPlaceholder(getDocumentController());
   }
 
   public void dispatch_wollmux_textbausteinverweiseinfuegen(String arg,
       PropertyValue[] props)
   {
-    WollMuxEventHandler.handleTextbausteinEinfuegen(getModel(), false);
+    WollMuxEventHandler.handleTextbausteinEinfuegen(getDocumentController(), false);
   }
 
   public void dispatch_wollmux_seriendruck(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleSeriendruck(getModel(), false);
+    WollMuxEventHandler.handleSeriendruck(getDocumentController(), false);
   }
 
   public void dispatch_wollmux_test(String arg, PropertyValue[] props)
   {
-    if (WollMuxFiles.installQATestHandler()) TestHandler.doTest(getModel(), arg);
+    if (WollMuxFiles.installQATestHandler()) TestHandler.doTest(getDocumentController(), arg);
   }
 
+  public void dispatch_wollmux_printpage(String arg, PropertyValue[] props)
+  {
+    WollMuxEventHandler.handlePrintPage(getDocumentController());
+  }
+  
+  public boolean status_wollmux_printpage()
+  {
+    // Deaktiviert den 'Seite drucken'-Button im Seitenvorschaumodus
+    XLayoutManager layout = UNO.XLayoutManager(UNO.getProperty(getDocumentController().getModel().doc.getCurrentController().getFrame(), "LayoutManager")); 
+    return !layout.isElementVisible("private:resource/toolbar/previewobjectbar");
+  }
 }

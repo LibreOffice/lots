@@ -37,8 +37,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import de.muenchen.allg.itd51.wollmux.TimeoutException;
-
 /**
  * Eine Dummy-Datenquelle, die im Schema keine Datensätze enthält und als QueryResult
  * bei getDatasetsByKey den String "<key>" zurück liefert.

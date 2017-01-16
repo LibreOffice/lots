@@ -63,13 +63,12 @@ import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
 import de.muenchen.allg.itd51.wollmux.XWollMuxDocument;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
@@ -406,7 +405,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   {
     // Diese Methode nimmt keine Synchronisierung über den WollMuxEventHandler vor,
     // da das reine Auslesen der Datenstrukturen unkritisch ist.
-    DatasourceJoiner dj = WollMuxFiles.getDatasourceJoiner();
+    DatasourceJoiner dj = DatasourceJoiner.getDatasourceJoiner();
     UnoProps p = new UnoProps();
     try
     {
@@ -460,7 +459,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     try
     {
       String value =
-          WollMuxFiles.getDatasourceJoiner().getSelectedDatasetTransformed().get(
+          DatasourceJoiner.getDatasourceJoiner().getSelectedDatasetTransformed().get(
           dbSpalte);
       if (value == null) value = "";
       return value;

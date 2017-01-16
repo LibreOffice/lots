@@ -33,7 +33,6 @@ package de.muenchen.allg.itd51.wollmux.former.insertion;
 import java.io.IOException;
 import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
@@ -43,25 +42,19 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.SyntaxErrorException;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 
 public class InsertionModel4InputUser extends InsertionModel
 {
   /**
-   * Pattern zum Erkennen von InputUser-Feldern, die eine WollMux-Funktion
-   * referenzieren (z.B. die Spezialfelder des WollMux-Seriendrucks).
-   */
-  public static final Pattern INPUT_USER_FUNCTION =
-    Pattern.compile("\\A\\s*(WM\\s*\\(.*FUNCTION\\s*'[^']*'.*\\))\\s*\\d*\\z");
-
-  /**
    * Name of the variable whose value is edited by the InputUser field. This is a
-   * string matching {@link #INPUT_USER_FUNCTION} and contains the name of the
+   * string matching {@link TextDocumentModel#INPUT_USER_FUNCTION} and contains the name of the
    * function used to compute the field by the WollMux.
    */
   private String name;
@@ -107,7 +100,7 @@ public class InsertionModel4InputUser extends InsertionModel
     {
       throw new SyntaxErrorException(x);
     }
-    Matcher m = INPUT_USER_FUNCTION.matcher(name);
+    Matcher m = TextDocumentModel.INPUT_USER_FUNCTION.matcher(name);
 
     if (!m.matches()) throw new SyntaxErrorException();
     String confStr = m.group(1);

@@ -68,7 +68,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -85,18 +84,21 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
+import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.core.functions.Values;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.controls.Textarea;
 import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
-import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.func.Values;
 
 /**
  * Stellt UI bereit, um ein Formulardokument zu bearbeiten.
@@ -105,14 +107,6 @@ import de.muenchen.allg.itd51.wollmux.func.Values;
  */
 public class FormController implements UIElementEventHandler
 {
-  /**
-   * Wird and FormGUI und FormController in mapIdToPresetValue übergeben, wenn der
-   * Wert des entsprechenden Feldes nicht korrekt widerhergestellt werden kann.
-   * ACHTUNG! Diese Konstante muss als Objekt übergeben werden, da sie == verglichen
-   * wird.
-   */
-  public final static String FISHY = L.m("!!!PRÜFEN!!!");
-
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
    */
@@ -266,7 +260,7 @@ public class FormController implements UIElementEventHandler
    * @param mapIdToPresetValue
    *          bildet IDs von Formularfeldern auf Vorgabewerte ab. Falls hier ein Wert
    *          für ein Formularfeld vorhanden ist, so wird dieser allen anderen
-   *          automatischen Befüllungen vorgezogen. Wird das Objekt {@link #FISHY}
+   *          automatischen Befüllungen vorgezogen. Wird das Objekt {@link TextDocumentModel#FISHY}
    *          als Wert für ein Feld übergeben, so wird dieses Feld speziell markiert
    *          als ungültig bis der Benutzer es manuell ändert.
    * @param functionContext
@@ -350,7 +344,7 @@ public class FormController implements UIElementEventHandler
    * @param mapIdToPresetValue
    *          bildet IDs von Formularfeldern auf Vorgabewerte ab. Falls hier ein Wert
    *          für ein Formularfeld vorhanden ist, so wird dieser allen anderen
-   *          automatischen Befüllungen vorgezogen. Wird das Objekt {@link #FISHY}
+   *          automatischen Befüllungen vorgezogen. Wird das Objekt {@link TextDocumentModel#FISHY}
    *          als Wert für ein Feld übergeben, so wird dieses Feld speziell markiert
    *          als ungültig bis der Benutzer es manuell ändert.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -605,7 +599,7 @@ public class FormController implements UIElementEventHandler
      * @param mapIdToPresetValue
      *          bildet IDs von Formularfeldern auf Vorgabewerte ab. Falls hier ein
      *          Wert für ein Formularfeld vorhanden ist, so wird dieser allen anderen
-     *          automatischen Befüllungen vorgezogen. Wird das Objekt {@link #FISHY}
+     *          automatischen Befüllungen vorgezogen. Wird das Objekt {@link TextDocumentModel#FISHY}
      *          als Wert für ein Feld übergeben, so wird dieses Feld speziell
      *          markiert als ungültig bis der Benutzer es manuell ändert.
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -691,7 +685,7 @@ public class FormController implements UIElementEventHandler
           Object preset = mapIdToPresetValue.get(uiElement.getId());
           if (preset != null)
           {
-            if (preset == FISHY)
+            if (preset == TextDocumentModel.FISHY)
             {
               ((UIElementState) uiElement.getAdditionalData()).fishy = true;
             }
@@ -1806,361 +1800,6 @@ public class FormController implements UIElementEventHandler
     }
   }
 
-  /**
-   * Nimmt eine Liste von ConfigThingys, von denen jedes ein "Formular"-Knoten mit
-   * enthaltener Formularbeschreibung ist, und liefert ein neues ConfigThingy zurück,
-   * das eine gemergte Formularbeschreibung enthält. Beim Merge wird von Reitern mit
-   * gleicher ID nur der letzte übernommen. Für die Reihenfolge wird die Reihenfolge
-   * des ersten Auftretens herangezogen. Der TITLE wird zu newTitle. Die Funktionen-
-   * und Funktionsdialoge-Abschnitte werden verschmolzen, wobei mehrfach auftretende
-   * Funktionen eine Fehlermeldung im Log produzieren (und die letzte Definition
-   * gewinnt). Selbiges gilt auch für die Sichtbarkeit-Abschnitte
-   * 
-   * @param buttonAnpassung
-   *          ein ButtonAnpassung-Abschnitt wie bei wollmux:Open dokumentiert, oder
-   *          null, wenn keine Anpassung erforderlich. Der oberste Knoten muss nicht
-   *          Buttonanpassung sein. In der Tat ist es auch erlaubt, dass ein
-   *          &lt;query results> Knoten mit mehreren Buttonanpassung-Abschnitten
-   *          übergeben wird. Es ist nur wichtig, dass alle ...Tab-Abschnitte auf der
-   *          selben Höhe im Baum sind.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-   */
-  public static ConfigThingy mergeFormDescriptors(List<ConfigThingy> desc,
-      ConfigThingy buttonAnpassung, String newTitle)
-  {
-    if (buttonAnpassung == null)
-      buttonAnpassung = new ConfigThingy("Buttonanpassung");
-    String plausiColor = null;
-    Map<String, ConfigThingy> mapFensterIdToConfigThingy =
-      new HashMap<String, ConfigThingy>();
-    Map<String, ConfigThingy> mapSichtbarkeitIdToConfigThingy =
-      new HashMap<String, ConfigThingy>();
-    Map<String, ConfigThingy> mapFunktionenIdToConfigThingy =
-      new HashMap<String, ConfigThingy>();
-    Map<String, ConfigThingy> mapFunktionsdialogeIdToConfigThingy =
-      new HashMap<String, ConfigThingy>();
-    List<String> tabNames = new Vector<String>();
-    for (ConfigThingy conf : desc)
-    {
-      try
-      {
-        plausiColor = conf.get("PLAUSI_MARKER_COLOR", 1).toString();
-      }
-      catch (Exception x)
-      {}
-
-      mergeSection(conf, "Fenster", mapFensterIdToConfigThingy, tabNames, true);
-      mergeSection(conf, "Sichtbarkeit", mapSichtbarkeitIdToConfigThingy, null,
-        false);
-      mergeSection(conf, "Funktionen", mapFunktionenIdToConfigThingy, null, false);
-      mergeSection(conf, "Funktionsdialoge", mapFunktionsdialogeIdToConfigThingy,
-        null, false);
-    }
-
-    ConfigThingy conf = new ConfigThingy("Formular");
-    conf.add("TITLE").add(newTitle);
-    if (plausiColor != null) conf.add("PLAUSI_MARKER_COLOR").add(plausiColor);
-
-    ConfigThingy subConf = conf.add("Fenster");
-    int tabNum = -1;
-    if (tabNames.size() > 1) tabNum = 0;
-    Iterator<String> iter = tabNames.iterator();
-    while (iter.hasNext())
-    {
-      ConfigThingy tabConf = mapFensterIdToConfigThingy.get(iter.next());
-      buttonAnpassung(tabNum, tabConf, buttonAnpassung);
-      if (++tabNum == tabNames.size() - 1) tabNum = Integer.MAX_VALUE;
-      subConf.addChild(tabConf);
-    }
-
-    if (!mapSichtbarkeitIdToConfigThingy.isEmpty())
-    {
-      subConf = conf.add("Sichtbarkeit");
-      for (ConfigThingy conf2 : mapSichtbarkeitIdToConfigThingy.values())
-        subConf.addChild(conf2);
-    }
-
-    if (!mapFunktionenIdToConfigThingy.isEmpty())
-    {
-      subConf = conf.add("Funktionen");
-      for (ConfigThingy conf2 : mapFunktionenIdToConfigThingy.values())
-        subConf.addChild(conf2);
-    }
-
-    if (!mapFunktionsdialogeIdToConfigThingy.isEmpty())
-    {
-      subConf = conf.add("Funktionsdialoge");
-      for (ConfigThingy conf2 : mapFunktionsdialogeIdToConfigThingy.values())
-        subConf.addChild(conf2);
-    }
-
-    return conf;
-  }
-
-  /**
-   * Geht die Enkelkinder von conf,query(sectionName) durch und trägt für jedes ein
-   * Mapping von seinem Namen auf eine Kopie seiner selbst in die Map sectionMap ein.
-   * Dabei wird ein vorher vorhandenes Mapping ersetzt. Falls
-   * duplicatesAllowed==false, so wird eine Fehlermeldung geloggt, wenn eine
-   * Ersetzung eines Mappings für einen Bezeichner durch ein neues Mapping
-   * stattfindet.
-   * 
-   * @param tabNames
-   *          falls nicht null, so werden alle Namen von Enkeln, die noch nicht in
-   *          idList enthalten sind dieser in der Reihenfolge ihres Auftretens
-   *          hinzugefügt.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-   */
-  private static void mergeSection(ConfigThingy conf, String sectionName,
-      Map<String, ConfigThingy> mapFensterIdToConfigThingy, List<String> tabNames,
-      boolean duplicatesAllowed)
-  {
-    Iterator<ConfigThingy> parentIter = conf.query(sectionName).iterator();
-    while (parentIter.hasNext())
-    {
-      Iterator<ConfigThingy> iter = parentIter.next().iterator();
-      while (iter.hasNext())
-      {
-        ConfigThingy node = iter.next();
-        String name = node.getName();
-        if (tabNames != null && !tabNames.contains(name)) tabNames.add(name);
-        if (!duplicatesAllowed && mapFensterIdToConfigThingy.containsKey(name))
-          Logger.error(L.m(
-            "Fehler beim Zusammenfassen mehrerer Formulare zum gemeinsamen Ausfüllen: Mehrere \"%1\" Abschnitte enthalten \"%2\"",
-            sectionName, name));
-
-        mapFensterIdToConfigThingy.put(name, new ConfigThingy(node));
-      }
-    }
-  }
-
-  /**
-   * Passt die in tabConf gespeicherte Beschreibung eines Reiters einer FormularGUI
-   * an entsprechend dem Buttonanpassung-Abschnitt in buttonAnpassung. Der oberste
-   * Knoten muss nicht Buttonanpassung sein. In der Tat ist es auch erlaubt, dass ein
-   * &lt;query results> Knoten mit mehreren Buttonanpassung-Abschnitten übergeben
-   * wird. Es ist nur wichtig, dass alle ...Tab-Abschnitte auf der selben Höhe im
-   * Baum sind.
-   * 
-   * @param tabNum
-   *          0: tabConf beschreibt den ersten Tab, Integer.MAX_VALUE: tabConf
-   *          beschreibt den letzten Tab, -1: tabConf beschreibt den einzigen Tab.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-   */
-  private static void buttonAnpassung(int tabNum, ConfigThingy tabConf,
-      ConfigThingy buttonAnpassung)
-  {
-    ConfigThingy anpassung;
-    switch (tabNum)
-    {
-      case -1:
-        anpassung = buttonAnpassung.query("EinzigerTab");
-        break;
-      case 0:
-        anpassung = buttonAnpassung.query("ErsterTab");
-        break;
-      case Integer.MAX_VALUE:
-        anpassung = buttonAnpassung.query("LetzterTab");
-        break;
-      default:
-        anpassung = buttonAnpassung.query("MittlererTab");
-        break;
-    }
-
-    /*
-     * Kopie machen, da wir evtl. Veränderungen vornehmen (z.B. "ALWAYS" entfernen)
-     */
-    anpassung = new ConfigThingy(anpassung);
-
-    /*
-     * NEVER und ALWAYS Angaben aufsammeln
-     */
-    Set<String> neverActions = new HashSet<String>();
-    List<ActionUIElementPair> alwaysActions = new Vector<ActionUIElementPair>(); // of
-    // ActionUIElementPair
-    Iterator<ConfigThingy> anpOuterIter = anpassung.iterator(); // durchläuft die
-    // *Tab Abschnitte
-    while (anpOuterIter.hasNext())
-    {
-      // durchläuft die NEVER und ALWAYS Angaben
-      Iterator<ConfigThingy> anpInnerIter = anpOuterIter.next().iterator();
-      while (anpInnerIter.hasNext())
-      {
-        ConfigThingy neverOrAlwaysConf = anpInnerIter.next();
-        if (neverOrAlwaysConf.getName().equals("NEVER"))
-        {
-          Iterator<ConfigThingy> neverActionIter = neverOrAlwaysConf.iterator();
-          while (neverActionIter.hasNext())
-            neverActions.add(neverActionIter.next().toString());
-        }
-        else if (neverOrAlwaysConf.getName().equals("ALWAYS"))
-        {
-          try
-          {
-            String action = neverOrAlwaysConf.get("ACTION").toString();
-            neverOrAlwaysConf.setName("");
-            alwaysActions.add(new ActionUIElementPair(action, neverOrAlwaysConf));
-          }
-          catch (Exception x)
-          {
-            Logger.error(
-              L.m("Fehlerhafter ALWAYS-Angabe in Buttonanpassung-Abschnitt"), x);
-          }
-        }
-      }
-    }
-
-    /*
-     * Existierende Buttons-Abschnitte durchgehen, ihre Elemente aufsammeln (außer
-     * denen, die durch NEVER verboten sind)
-     */
-    List<ActionUIElementPair> existingUIElements = new Vector<ActionUIElementPair>(); // of
-    // ActionUIElementPair
-    ConfigThingy buttonsConf = tabConf.query("Buttons");
-    Iterator<ConfigThingy> buttonsOuterIter = buttonsConf.iterator(); // durchläuft
-    // die
-    // Buttons-Abschnitte
-    while (buttonsOuterIter.hasNext())
-    {
-      Iterator<ConfigThingy> buttonsInnerIter = buttonsOuterIter.next().iterator(); // durchläuft
-      // die
-      // Eingabeelemente
-      // im
-      // Buttons-Abschnitt
-      while (buttonsInnerIter.hasNext())
-      {
-        ConfigThingy buttonConf = buttonsInnerIter.next();
-        String action = null;
-        try
-        {
-          action = buttonConf.get("ACTION").toString();
-        }
-        catch (Exception x)
-        {}
-        if (action == null || !neverActions.contains(action))
-          existingUIElements.add(new ActionUIElementPair(action, buttonConf));
-      }
-    }
-
-    /*
-     * den Buttons-Abschnitt löschen (weil nachher ein neuer generiert wird)
-     */
-    Iterator<ConfigThingy> iter = tabConf.iterator();
-    while (iter.hasNext())
-    {
-      ConfigThingy possiblyButtonsConf = iter.next();
-      if (possiblyButtonsConf.getName().equals("Buttons")) iter.remove();
-    }
-
-    /*
-     * alwaysActions Liste in existingUIElements hineinmergen.
-     */
-    integrateAlwaysButtons: for (int i = 0; i < alwaysActions.size(); ++i)
-    {
-      ActionUIElementPair act = alwaysActions.get(i);
-      /*
-       * zuerst schauen, ob schon ein Button entsprechender ACTION vorhanden ist und
-       * falls ja, dann mit dem nächsten Element aus alwaysActions weitermachen.
-       */
-      for (ActionUIElementPair act2 : existingUIElements)
-      {
-        if (act2.action != null && act2.action.equals(act.action))
-          continue integrateAlwaysButtons;
-      }
-
-      /*
-       * Okay, das Element gibt's noch nicht. Wir versuchen zuerst, eine
-       * Einfügestelle zu finden hinter einem Button mit selber ACTION wie der
-       * Vorgänger in alwaysActions (falls es einen gibt).
-       */
-      if (i > 0)
-      {
-        String predecessorAction = alwaysActions.get(i - 1).action;
-        if (predecessorAction != null)
-        {
-          for (int k = 0; k < existingUIElements.size(); ++k)
-          {
-            ActionUIElementPair act2 = existingUIElements.get(k);
-            if (act2.action != null && act2.action.equals(predecessorAction))
-            {
-              existingUIElements.add(k + 1, act);
-              continue integrateAlwaysButtons;
-            }
-          }
-        }
-      }
-
-      /*
-       * Wenn wir keine passende Einfügestelle finden konnten, versuchen wir eine
-       * Stelle zu finden vor einem Button mit selber ACTION wie der Nachfolger in
-       * alwaysActions (falls es einen gibt).
-       */
-      if (i + 1 < alwaysActions.size())
-      {
-        String successorAction = alwaysActions.get(i + 1).action;
-        if (successorAction != null)
-        {
-          for (int k = 0; k < existingUIElements.size(); ++k)
-          {
-            ActionUIElementPair act2 = existingUIElements.get(k);
-            if (act2.action != null && act2.action.equals(successorAction))
-            {
-              existingUIElements.add(k, act);
-              continue integrateAlwaysButtons;
-            }
-          }
-        }
-      }
-
-      /*
-       * Keine Einfügestelle gefunden? Dann hängen wir den Button einfach ans Ende.
-       */
-      existingUIElements.add(act);
-    }
-
-    /*
-     * "glue" Elemente am Ende der Buttonliste löschen, da diese dort normalerweise
-     * nicht erwünscht sind.
-     */
-    ListIterator<ActionUIElementPair> liter =
-      existingUIElements.listIterator(existingUIElements.size());
-    while (liter.hasPrevious())
-    {
-      ActionUIElementPair act = liter.previous();
-      String type = null;
-      try
-      {
-        type = act.uiElementDesc.get("TYPE").toString();
-      }
-      catch (Exception x)
-      {}
-      if (type != null && type.equals("glue"))
-        liter.remove();
-      else
-        break;
-    }
-
-    ConfigThingy newButtons = new ConfigThingy("Buttons");
-    for (ActionUIElementPair act : existingUIElements)
-    {
-      newButtons.addChild(act.uiElementDesc);
-    }
-    tabConf.addChild(newButtons);
-  }
-
-  private static class ActionUIElementPair
-  {
-    public String action;
-
-    public ConfigThingy uiElementDesc;
-
-    public ActionUIElementPair(String action, ConfigThingy uiElementDesc)
-    {
-      this.action = action;
-      this.uiElementDesc = uiElementDesc;
-    }
-  }
-
   public static void main(String[] args) throws Exception
   {
     File curDir = new File(System.getProperty("user.dir"));
@@ -2175,7 +1814,7 @@ public class FormController implements UIElementEventHandler
     formDesc.add(merge1Conf);
     formDesc.add(merge2Conf);
     ConfigThingy merged =
-      mergeFormDescriptors(formDesc, buttonanpassung, "Multi-Form");
+      TextDocumentModel.mergeFormDescriptors(formDesc, buttonanpassung, "Multi-Form");
     System.out.println(merged.stringRepresentation());
   }
 

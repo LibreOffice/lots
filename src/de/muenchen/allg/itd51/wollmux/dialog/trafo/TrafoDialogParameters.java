@@ -34,7 +34,7 @@ import java.awt.event.ActionListener;
 import java.util.Iterator;
 import java.util.List;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 
 /**
  * Speichert diverse Parameter für den Aufruf von TrafoDialogen.

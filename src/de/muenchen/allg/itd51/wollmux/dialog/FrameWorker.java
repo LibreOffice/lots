@@ -47,7 +47,7 @@ import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputListener;
 
-import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
  * Diese Klasse stellt Methoden zur Verfügung, um zeitaufwändige Tätigkeiten in einem

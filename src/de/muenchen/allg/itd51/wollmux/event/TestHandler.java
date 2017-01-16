@@ -39,14 +39,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
+import de.muenchen.allg.itd51.wollmux.print.PrintModels;
 
 /**
  * Enthält die DispatchHandler für alle dispatch-Urls, die mit "wollmux:Test"
@@ -70,12 +71,12 @@ public class TestHandler
    * Bearbeitet den Test, der im Argument arg spezifiziert ist und im
    * TextDocumentModel model ausgeführt werden soll.
    * 
-   * @param model
+   * @param documentController
    * @param arg
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public static void doTest(TextDocumentModel model, String arg)
+  public static void doTest(TextDocumentController documentController, String arg)
   {
     String[] args = arg.split("#");
     String cmd = args[0];
@@ -84,11 +85,11 @@ public class TestHandler
     if (cmd.equalsIgnoreCase("VerfuegungspunktDrucken"))
     {
       Map<String, String> idsAndValues = getWollmuxTestArgs();
-      int count = SachleitendeVerfuegung.countVerfuegungspunkte(model.doc);
+      int count = SachleitendeVerfuegung.countVerfuegungspunkte(documentController.getModel().doc);
       int verfPunkt = Short.parseShort(idsAndValues.get("VerfPunkt"));
       boolean isDraft = (verfPunkt == count) ? true : false;
       boolean isOriginal = (verfPunkt == 1) ? true : false;
-      final XPrintModel pmod = model.createPrintModel(false);
+      final XPrintModel pmod = PrintModels.createPrintModel(documentController, false);
       try
       {
         List<VerfuegungspunktInfo> settings = new ArrayList<VerfuegungspunktInfo>();
@@ -107,6 +108,7 @@ public class TestHandler
       // Drucken im Hintergrund, damit der WollMux weiterläuft.
       new Thread()
       {
+        @Override
         public void run()
         {
           pmod.printWithProps();
@@ -122,7 +124,7 @@ public class TestHandler
       {
         String id = ent.getKey();
         String value = ent.getValue();
-        WollMuxEventHandler.handleSetFormValue(model.doc, id, value, null);
+        WollMuxEventHandler.handleSetFormValue(documentController.getModel().doc, id, value, null);
       }
     }
 
@@ -134,14 +136,14 @@ public class TestHandler
       ConfigThingy c = new ConfigThingy("Funktion");
       c.addChild(new ConfigThingy("Hallo"));
       // model.replaceSelectionWithFormField(t, c);
-      ConfigThingy trafo = model.getFormFieldTrafoFromSelection();
+      ConfigThingy trafo = documentController.getModel().getFormFieldTrafoFromSelection();
       Logger.error("EinTest Trafo = '"
         + ((trafo != null) ? trafo.stringRepresentation() : "null") + "'");
       if (trafo != null)
       {
         try
         {
-          model.setTrafo(trafo.getName(), c);
+          documentController.setTrafo(trafo.getName(), c);
         }
         catch (Exception e)
         {
