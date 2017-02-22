@@ -511,6 +511,7 @@ public class WollMuxBarConfig
   {
     SwingUtilities.invokeLater(new Runnable()
     {
+      @Override
       public void run()
       {
         createGUI(parent, finishedAction);
@@ -610,9 +611,10 @@ public class WollMuxBarConfig
       mainPanel.add(new JLabel(L.m("Tray-Icon")), gbcLabel);
       mainPanel.add(inputTrayIcon, gbcCombo);
     }
-    
+
     inputMode.addItemListener(new ItemListener()
-    {      
+    {
+      @Override
       public void itemStateChanged(ItemEvent e)
       {
         // tray icon auswahl nur anbieten, falls nicht upAndAway
@@ -626,7 +628,7 @@ public class WollMuxBarConfig
           if(e.getItem().toString().equalsIgnoreCase("UpAndAway")) {
             inputTrayIcon.setEnabled(true);
           }
-        }   
+        }
       }
     });
 
@@ -648,7 +650,7 @@ public class WollMuxBarConfig
     gbcLabel.gridy = y;
     mainPanel.add(new JLabel("Y"), gbcLabel);
     final JComboBox<String> inputY = new JComboBox<String>(new String[] {
-      "auto", "center", "oben", "unten" });
+      "auto", "center", "unten", "oben" });
     inputY.setEditable(true);
     gbcCombo.gridx = x++;
     gbcCombo.gridy = y;
@@ -719,7 +721,7 @@ public class WollMuxBarConfig
     }
 
     setCombo(inputX, xyToText(myFrame_x, "rechts", "links"));
-    setCombo(inputY, xyToText(myFrame_y, "oben", "unten"));
+    setCombo(inputY, xyToText(myFrame_y, "unten", "oben"));
     setCombo(inputWidth, widthHeightToText(myFrame_width));
     setCombo(inputHeight, widthHeightToText(myFrame_height));
     setSpinner(fontZoom, myFrame_fontzoom);
@@ -756,7 +758,7 @@ public class WollMuxBarConfig
         setCombo(inputMode, windowModeToText(windowMode_default));
         setCombo(inputTrayIcon, trayIconModeToText(trayIconMode_default));
         setCombo(inputX, xyToText(myFrame_x_default, "rechts", "links"));
-        setCombo(inputY, xyToText(myFrame_y_default, "oben", "unten"));
+        setCombo(inputY, xyToText(myFrame_y_default, "unten", "oben"));
         setCombo(inputWidth, widthHeightToText(myFrame_width_default));
         setCombo(inputHeight, widthHeightToText(myFrame_height_default));
         setSpinner(fontZoom, myFrame_fontzoom_default);
@@ -787,7 +789,7 @@ public class WollMuxBarConfig
           trayIconMode = getTrayIconMode(inputTrayIcon.getSelectedItem().toString());
 
         myFrame_x = getXY(inputX.getSelectedItem().toString(), "rechts", "links");
-        myFrame_y = getXY(inputY.getSelectedItem().toString(), "oben", "unten");
+        myFrame_y = getXY(inputY.getSelectedItem().toString(), "unten", "oben");
         myFrame_width = getWidthHeight(inputWidth.getSelectedItem().toString());
         myFrame_height = getWidthHeight(inputHeight.getSelectedItem().toString());
         myFrame_fontzoom = getFontZoom(fontZoom.getValue());
