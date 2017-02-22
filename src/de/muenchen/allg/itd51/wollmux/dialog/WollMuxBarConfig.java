@@ -12,7 +12,7 @@
  * You should have received a copy of the European Union Public Licence
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
@@ -122,13 +122,13 @@ public class WollMuxBarConfig
    * Rand um Buttons (in Pixeln).
    */
   private final static int BUTTON_BORDER = 2;
-  
+
   /**
    * Ist dieses flag false, darf die userConf nicht eingelesen werden (und damit auch
    * nicht die Standardvorgaben überschreiben)
    */
   private boolean allowUserConfig;
-  
+
   /**
    * Der Fenstertitel der WollMuxBar.
    */
@@ -213,12 +213,12 @@ public class WollMuxBarConfig
 
   /**
    * Der Maximalwert für den {@link #myFrame_fontzoom}
-   * (größer 10 wird von der zoom-Methode verweigert).
+   * (größer 3 wird von der zoom-Methode verweigert).
    */
-  private final float myFrame_fontzoom_Max = 10;
+  private final float myFrame_fontzoom_Max = 3;
   /**
    * Der Zoomfaktor für Fonts in der WollMux-Bar.
-   * Eingeschränkt auf 0 .. {@link #myFrame_fontzoom_Max}.
+   * Eingeschränkt auf 0,5 .. {@link #myFrame_fontzoom_Max}.
    */
   private float myFrame_fontzoom;
 
@@ -255,7 +255,7 @@ public class WollMuxBarConfig
 
   /**
    * Erzeugt eine neue Konfiguration.
-   * 
+   *
    * @param winMode
    *          falls > 0 overridet dieser windowMode die entsprechenden Angaben sowohl
    *          aus userConf als auch aus defaultConf
@@ -278,7 +278,7 @@ public class WollMuxBarConfig
      * Falls ein winMode übergeben wurde overridet er userConf und defaultConf
      */
     if (winMode > 0) windowMode = winMode;
-  
+
     this.conf_ids = new HashSet<String>();
     ConfigThingy active_ids = new ConfigThingy("aciveIDs");
     if (userConf != null)
@@ -286,7 +286,7 @@ public class WollMuxBarConfig
     if (active_ids.count() == 0)
       active_ids =
         defaultConf.query("WollMuxBarKonfigurationen", 1).query("Aktiv", 2);
-  
+
     if (active_ids.count() > 0)
     {
       try
@@ -305,14 +305,14 @@ public class WollMuxBarConfig
   /**
    * Liest die Einstellungen aus der Konfiguration configuration aus und
    * initialisiert die internen Konfigurationsparameter.
-   * 
+   *
    * @param configuration
    *          Wurzel einer Konfiguration. Darf auch null sein, dann macht die Methode
    *          nichts.
    * @param setAsDefault
    *          falls true, werden zusätzlich auch die internen Defaulteinstellungen
    *          mit den gelesenen Werten initialisiert.
-   * 
+   *
    * @author Matthias S. Benkmann, Christoph Lutz (CIB software GmbH)
    */
   private void readConfig(ConfigThingy configuration, boolean setAsDefault)
@@ -331,7 +331,7 @@ public class WollMuxBarConfig
     float lFrame_fontzoom = myFrame_fontzoom_default;
 
     // wenn wir die defaults erst definieren, dann stelle sicher, dass sie "frisch" sind
-    if (setAsDefault) 
+    if (setAsDefault)
     {
       lFrame_title = WollMuxBarConfig.DEFAULT_TITLE;
       lWindowMode = WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE;
@@ -343,7 +343,7 @@ public class WollMuxBarConfig
       lFrame_fontzoom = 1;
     }
 
-    // nutzen wir die bereits wenn wir die Defaults nicht setzen, gehen wir davon aus, dass die Defaults vorher schon 
+    // nutzen wir die bereits wenn wir die Defaults nicht setzen, gehen wir davon aus, dass die Defaults vorher schon
 
     // configuration auswerten
     ConfigThingy wmbConf = configuration.query("Fenster", 1).query("WollMuxBar", 2);
@@ -359,9 +359,9 @@ public class WollMuxBarConfig
         else if (conf.getName().equals("TRAYICON"))
           lTrayIconMode = getTrayIconMode(conf.toString());
         else if (conf.getName().equals("X"))
-          lFrame_x = getXY(conf.toString());
+          lFrame_x = getXY(conf.toString(), "max", "min");
         else if (conf.getName().equals("Y"))
-          lFrame_y = getXY(conf.toString());
+          lFrame_y = getXY(conf.toString(), "max", "min");
         else if (conf.getName().equals("WIDTH"))
           lFrame_width = getWidthHeight(conf.toString());
         else if (conf.getName().equals("HEIGHT"))
@@ -372,7 +372,7 @@ public class WollMuxBarConfig
     {
       // Abschnitt nicht da -> oben gesetzte Defaults werden verwendet
     }
-    
+
     // Noch nach der Font Größe suchen, die steht in einem anderen Abschnitt
     ConfigThingy dialogConf = configuration.query("Dialoge", 1);
     try
@@ -422,7 +422,7 @@ public class WollMuxBarConfig
 
   /**
    * Liefert den Titel, den das WollMuxBar-Fenster haben soll.
-   * 
+   *
    */
   public String getWindowTitle()
   {
@@ -473,7 +473,7 @@ public class WollMuxBarConfig
    * Fenster zentriert. Falls -2, so wird die größte sinnvolle Koordinate verwendet.
    * Falls -3, so wird die kleinste sinnvolle Koordinate verwendet. Falls
    * Integer.MIN_VALUE, so ist keine Koordinate fest vorgegeben.
-   * 
+   *
    * ACHTUNG! Ist hier ein fester Wert gesetzt, so sollte dieser nur einmal so
    * gesetzt werden. Danach sollte der Benutzer das Fenster frei verschieben können.
    */
@@ -488,7 +488,7 @@ public class WollMuxBarConfig
    * Fenster zentriert. Falls -2, so wird die größte sinnvolle Koordinate verwendet.
    * Falls -3, so wird die kleinste sinnvolle Koordinate verwendet. Falls
    * Integer.MIN_VALUE, so ist keine Koordinate fest vorgegeben.
-   * 
+   *
    * ACHTUNG! Ist hier ein fester Wert gesetzt, so sollte dieser nur einmal so
    * gesetzt werden. Danach sollte der Benutzer das Fenster frei verschieben können.
    */
@@ -498,7 +498,7 @@ public class WollMuxBarConfig
   }
 
   /**
-   * Liefert den konfigurierten FONT_ZOOM-Wert. 
+   * Liefert den konfigurierten FONT_ZOOM-Wert.
    */
   public float getFontZoom()
   {
@@ -510,7 +510,7 @@ public class WollMuxBarConfig
    * finishedAction aufgerufen mit ActionCommand "OK". Bei negativer Beendigung
    * erfolgt kein Aufruf des ActionListeners. Diese Methode kann in und außerhalb des
    * EDT aufgerufen werden.
-   * 
+   *
    * TESTED
    */
   public void showOptionsDialog(final JFrame parent,
@@ -518,6 +518,7 @@ public class WollMuxBarConfig
   {
     SwingUtilities.invokeLater(new Runnable()
     {
+      @Override
       public void run()
       {
         createGUI(parent, finishedAction);
@@ -617,9 +618,10 @@ public class WollMuxBarConfig
       mainPanel.add(new JLabel(L.m("Tray-Icon")), gbcLabel);
       mainPanel.add(inputTrayIcon, gbcCombo);
     }
-    
+
     inputMode.addItemListener(new ItemListener()
-    {      
+    {
+      @Override
       public void itemStateChanged(ItemEvent e)
       {
         // tray icon auswahl nur anbieten, falls nicht upAndAway
@@ -633,7 +635,7 @@ public class WollMuxBarConfig
           if(e.getItem().toString().equalsIgnoreCase("UpAndAway")) {
             inputTrayIcon.setEnabled(true);
           }
-        }   
+        }
       }
     });
 
@@ -643,7 +645,7 @@ public class WollMuxBarConfig
     gbcLabel.gridy = y;
     mainPanel.add(new JLabel("X"), gbcLabel);
     final JComboBox inputX = new JComboBox(new String[] {
-      "auto", "center", "min", "max" });
+      "auto", "center", "links", "rechts" });
     inputX.setEditable(true);
     gbcCombo.gridx = x++;
     gbcCombo.gridy = y;
@@ -655,7 +657,7 @@ public class WollMuxBarConfig
     gbcLabel.gridy = y;
     mainPanel.add(new JLabel("Y"), gbcLabel);
     final JComboBox inputY = new JComboBox(new String[] {
-      "auto", "center", "min", "max" });
+      "auto", "center", "unten", "oben" });
     inputY.setEditable(true);
     gbcCombo.gridx = x++;
     gbcCombo.gridy = y;
@@ -689,8 +691,8 @@ public class WollMuxBarConfig
     ++y;
     gbcLabel.gridx = x++;
     gbcLabel.gridy = y;
-    mainPanel.add(new JLabel(L.m("Font-Zoom")), gbcLabel);
-    final JSpinner fontZoom = new JSpinner(new SpinnerNumberModel(1.0,0.0,myFrame_fontzoom_Max,0.1));
+    mainPanel.add(new JLabel(L.m("Font-Zoom (zw. 0,5 und 3,0)")), gbcLabel);
+    final JSpinner fontZoom = new JSpinner(new SpinnerNumberModel(1.0,0.5,myFrame_fontzoom_Max,0.1));
     gbcCombo.gridx = x++;
     gbcCombo.gridy = y;
     mainPanel.add(fontZoom, gbcCombo);
@@ -717,17 +719,17 @@ public class WollMuxBarConfig
 
     inputTitle.setText(myFrame_title);
     setCombo(inputMode, windowModeToText(windowMode));
-    
+
     // bei UpAndAway: tray icon none!
     if(windowMode == WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE) {
       inputTrayIcon.setEnabled(false);
     } else {
       setCombo(inputTrayIcon, trayIconModeToText(trayIconMode));
     }
-        
-    setCombo(inputX, xyToText(myFrame_x));
-    setCombo(inputY, xyToText(myFrame_y));
-    setCombo(inputWidth, widthHeightToText(myFrame_width));    
+
+    setCombo(inputX, xyToText(myFrame_x, "rechts", "links"));
+    setCombo(inputY, xyToText(myFrame_y, "unten", "oben"));
+    setCombo(inputWidth, widthHeightToText(myFrame_width));
     setCombo(inputHeight, widthHeightToText(myFrame_height));
     setSpinner(fontZoom, myFrame_fontzoom);
 
@@ -735,59 +737,66 @@ public class WollMuxBarConfig
     y = 0;
     gbcButton.gridx = x++;
     gbcButton.gridy = y;
-    buttonPanel.add(new JButton(new AbstractAction(L.m("Abbrechen"))
+    JButton cancelButton = new JButton(new AbstractAction(L.m("Abbrechen"))
     {
       private static final long serialVersionUID = -7034390091333940094L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         myDialog.dispose();
       }
-    }), gbcButton);
+    });
+    cancelButton.setMnemonic('A');
+    buttonPanel.add(cancelButton, gbcButton);
     gbcGlue.gridx = x++;
     gbcGlue.gridy = y;
     buttonPanel.add(Box.createHorizontalGlue(), gbcGlue);
     gbcButton.gridx = x++;
     gbcButton.gridy = y;
-    buttonPanel.add(new JButton(new AbstractAction(L.m("Standard wiederherstellen"))
+    JButton resetButton = new JButton(new AbstractAction(L.m("Standard wiederherstellen"))
     {
       private static final long serialVersionUID = -5001745869100349262L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         inputTitle.setText(myFrame_title_default);
         setCombo(inputMode, windowModeToText(windowMode_default));
         setCombo(inputTrayIcon, trayIconModeToText(trayIconMode_default));
-        setCombo(inputX, xyToText(myFrame_x_default));
-        setCombo(inputY, xyToText(myFrame_y_default));
+        setCombo(inputX, xyToText(myFrame_x_default, "rechts", "links"));
+        setCombo(inputY, xyToText(myFrame_y_default, "unten", "oben"));
         setCombo(inputWidth, widthHeightToText(myFrame_width_default));
         setCombo(inputHeight, widthHeightToText(myFrame_height_default));
         setSpinner(fontZoom, myFrame_fontzoom_default);
         setCheckboxesForConfIDsToDefaultValues(checkboxes);
       }
-    }), gbcButton);
+    });
+    resetButton.setMnemonic('S');
+    buttonPanel.add(resetButton, gbcButton);
     gbcGlue.gridx = x++;
     gbcGlue.gridy = y;
     buttonPanel.add(Box.createHorizontalGlue(), gbcGlue);
     gbcButton.gridx = x++;
     gbcButton.gridy = y;
-    buttonPanel.add(new JButton(new AbstractAction(L.m("OK"))
+    JButton okButton = new JButton(new AbstractAction(L.m("OK"))
     {
       private static final long serialVersionUID = -4400165442859398615L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         myFrame_title = inputTitle.getText();
         windowMode = getWindowMode(inputMode.getSelectedItem().toString());
-        
+
         // upAndAway modus niemals mit iconify verwenden!
         if(windowMode == WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE)
           trayIconMode = WollMuxBarConfig.NO_TRAY_ICON;
         else
           trayIconMode = getTrayIconMode(inputTrayIcon.getSelectedItem().toString());
-               
-        myFrame_x = getXY(inputX.getSelectedItem().toString());
-        myFrame_y = getXY(inputY.getSelectedItem().toString());
+
+        myFrame_x = getXY(inputX.getSelectedItem().toString(), "rechts", "links");
+        myFrame_y = getXY(inputY.getSelectedItem().toString(), "unten", "oben");
         myFrame_width = getWidthHeight(inputWidth.getSelectedItem().toString());
         myFrame_height = getWidthHeight(inputHeight.getSelectedItem().toString());
         myFrame_fontzoom = getFontZoom(fontZoom.getValue());
@@ -798,7 +807,9 @@ public class WollMuxBarConfig
 
         myDialog.dispose();
       }
-    }), gbcButton);
+    });
+    okButton.setMnemonic('O');
+    buttonPanel.add(okButton, gbcButton);
 
     myDialog.pack();
     Rectangle parentBounds = parent.getBounds();
@@ -817,7 +828,7 @@ public class WollMuxBarConfig
    * Liefert die zu den selektierten Checkboxen aus checkboxes, die durch
    * {@link #addCheckboxesForConfIDs(JPanel, GridBagConstraints, List)} erzeugt
    * worden sein müssen, zugehörigen CONF_IDs.
-   * 
+   *
    * TESTED
    */
   protected Set<String> getConfIDsFromCheckboxes(List<JCheckBox> checkboxes)
@@ -847,7 +858,7 @@ public class WollMuxBarConfig
    * {@link #addCheckboxesForConfIDs(JPanel, GridBagConstraints, List)} gesetzt
    * worden wären, wenn für das Bestimmen von {@link #conf_ids} nur
    * {@link #defaultConf} herangezogen worden wäre.
-   * 
+   *
    * TESTED
    */
   protected void setCheckboxesForConfIDsToDefaultValues(List<JCheckBox> checkboxes)
@@ -887,7 +898,7 @@ public class WollMuxBarConfig
    * raufgezählt). Die so erstellten Checkboxen werden außerdem zur Liste checkboxes
    * hinzugefügt. Der initiale Aktivierungswert der Checkboxen richtet sich nach
    * {@link #conf_ids}.
-   * 
+   *
    * TESTED
    */
   private void addCheckboxesForConfIDs(JPanel mainPanel,
@@ -992,8 +1003,8 @@ public class WollMuxBarConfig
       wmbConf.add("TITLE").add(myFrame_title);
       wmbConf.add("MODE").add(windowModeToText(windowMode));
       wmbConf.add("TRAYICON").add(trayIconModeToText(trayIconMode));
-      wmbConf.add("X").add(xyToText(myFrame_x));
-      wmbConf.add("Y").add(xyToText(myFrame_y));
+      wmbConf.add("X").add(xyToText(myFrame_x, "max", "min"));
+      wmbConf.add("Y").add(xyToText(myFrame_y, "max", "min"));
       wmbConf.add("WIDTH").add(widthHeightToText(myFrame_width));
       wmbConf.add("HEIGHT").add(widthHeightToText(myFrame_height));
       ConfigThingy dialogConf = conf.add("Dialoge");
@@ -1080,16 +1091,16 @@ public class WollMuxBarConfig
     return "None";
   }
 
-  private String xyToText(int xy)
+  private String xyToText(int xy, String max, String min)
   {
     switch (xy)
     {
       case -1:
         return "center";
       case -2:
-        return "max";
+        return max;
       case -3:
-        return "min";
+        return min;
       case Integer.MIN_VALUE:
         return "auto";
       default:
@@ -1121,7 +1132,7 @@ public class WollMuxBarConfig
   }
 
   /**
-   * Liefert den passenden int zu Font-Zoom (0 <= x <= myFrame_fontzoom_Max). Ist der Wert
+   * Liefert den passenden int zu Font-Zoom (0,5 <= x <= myFrame_fontzoom_Max). Ist der Wert
    * nicht parsbar, wird ein Fehler geloggert und 1 geliefert.
    */
   private float getFontZoom(String fontzoom)
@@ -1130,7 +1141,7 @@ public class WollMuxBarConfig
     try
     {
       value = Float.parseFloat(fontzoom);
-      if (value < 0) value = 0;
+      if (value < 0.5) value = 0.5f;
       if (value > myFrame_fontzoom_Max) value = myFrame_fontzoom_Max;
     }
     catch (NumberFormatException x)
@@ -1145,16 +1156,16 @@ public class WollMuxBarConfig
    * Liefert den passenden Integer-Wert zu xy (Zahl, "auto", "min", "max", "center").
    * Falls kein parsbarer Wert, so wird ein Fehler geloggert und der int für "auto"
    * zurückgeliefert.
-   * 
+   *
    */
-  private int getXY(String xy)
+  private int getXY(String xy, String max, String min)
   {
     int value = Integer.MIN_VALUE;
     if (xy.equalsIgnoreCase("center"))
       value = -1;
-    else if (xy.equalsIgnoreCase("max"))
+    else if (xy.equalsIgnoreCase(max))
       value = -2;
-    else if (xy.equalsIgnoreCase("min"))
+    else if (xy.equalsIgnoreCase(min))
       value = -3;
     else if (xy.equalsIgnoreCase("auto"))
       value = Integer.MIN_VALUE;
@@ -1231,7 +1242,7 @@ public class WollMuxBarConfig
    * Liefert die zum String windowMode ("AlwaysOnTop", "Window", "Minimize", oder
    * "UpAndAway" in beliebiger Groß-/Kleinschreibung) gehörige Konstante (z.B.
    * {@link #UP_AND_AWAY_WINDOW_MODE}).
-   * 
+   *
    * Enthält der String keinen identifizierbaren Wert, wird ein Fehler geloggert und
    * {@link #UP_AND_AWAY_WINDOW_MODE} geliefert.
    */
@@ -1256,7 +1267,7 @@ public class WollMuxBarConfig
    * Liefert die zum String trayIconMode ("None", "Iconify", "Popup", oder
    * "IconifyAndPopup" in beliebiger Groß-/Kleinschreibung) gehörige Konstante (z.B.
    * {@link #ICONIFY_TRAY_ICON}).
-   * 
+   *
    * Enthält der String keinen identifizierbaren Wert, wird ein Fehler geloggt und
    * {@link #NO_TRAY_ICON} geliefert.
    */

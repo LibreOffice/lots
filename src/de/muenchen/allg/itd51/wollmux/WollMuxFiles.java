@@ -2,7 +2,7 @@
  * Dateiname: WollMuxFiles.java
  * Projekt  : WollMux
  * Funktion : Managed die Dateien auf die der WollMux zugreift (z.B. wollmux.conf)
- * 
+ *
  * Copyright (c) 2009-2016 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
  * 26.05.2006 | BNK | +DJ Initialisierung
  * 20.06.2006 | BNK | keine wollmux.conf mehr anlegen wenn nicht vorhanden
  *                  | /etc/wollmux/wollmux.conf auswerten
- * 26.06.2006 | BNK | Dialoge/FONT_ZOOM auswerten. LookAndFeel setzen. 
+ * 26.06.2006 | BNK | Dialoge/FONT_ZOOM auswerten. LookAndFeel setzen.
  * 07.09.2006 | BNK | isDebugMode effizienter gemacht.
  * 21.09.2006 | BNK | Unter Windows nach c:\programme\wollmux\wollmux.conf schauen
  * 19.10.2006 | BNK | +dumpInfo()
@@ -36,7 +36,7 @@
  * 09.07.2007 | BNK | [R7137]IP-Adresse in Dumpinfo
  * 17.07.2007 | BNK | [R7605]Dateien binär kopieren in dumpInfo(), außerdem immer als UTF-8 schreiben
  * 18.07.2007 | BNK | Alle Java-Properties in dumpInfo() ausgeben
- * 27.07.2007 | BNK | [P1448]WollMuxClassLoader.class.getClassLoader() als parent verwenden 
+ * 27.07.2007 | BNK | [P1448]WollMuxClassLoader.class.getClassLoader() als parent verwenden
  * 01.09.2008 | BNK | [R28149]Klassen im CLASSPATH aus wollmux.conf haben vorrang vor WollMux-internen.
  * 18.08.2009 | BED | -defaultWollmuxConf
  *                  | andere Strategie für Suche nach wollmux.conf in setupWollMuxDir()
@@ -45,20 +45,20 @@
  * 07.10.2010 | ERT | dumpInfo() erweitert um No. of Processors, Physical Memory und Swap Size
  * 19.10.2010 | ERT | dumpInfo() erweitert um IP-Adresse und OOo-Version
  * 22.02.2011 | ERT | dumpInfo() erweitert um LHM-Version
- * 08.05.2012 | jub | fakeSymLink behandlung eingebaut: der verweis auf fragmente, wie er in der 
+ * 08.05.2012 | jub | fakeSymLink behandlung eingebaut: der verweis auf fragmente, wie er in der
  *                    config datei steht, kann auf einen sog. fake SymLink gehen, eine text-
  *                    datei, in der auf ein anderes fragment inkl. relativem pfad verwiesen wird.
  * 11.12.2012 | jub | fakeSymLinks werden doch nicht gebraucht; wieder aus dem code entfernt
- * 17.05.2013 | ukt | Fontgröße wird jetzt immer gesetzt, unabhängig davon, ob der Wert in der  
+ * 17.05.2013 | ukt | Fontgröße wird jetzt immer gesetzt, unabhängig davon, ob der Wert in der
  *                    wollmuxbar.conf gesetzt ist oder nicht.
  *                    Andernfalls wird die Änderung der Fontgröße von einem Nicht-Defaultwert auf
- *                    den Default-Wert nicht angezeigt, wenn alle anderen Optionswerte ebenfalls 
- *                    den Default-Wert haben.                    
- * 
+ *                    den Default-Wert nicht angezeigt, wenn alle anderen Optionswerte ebenfalls
+ *                    den Default-Wert haben.
+ *
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux;
 
@@ -124,9 +124,9 @@ import de.muenchen.allg.itd51.wollmux.func.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 
 /**
- * 
+ *
  * Managed die Dateien auf die der WollMux zugreift (z,B, wollmux,conf)
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class WollMuxFiles
@@ -242,7 +242,7 @@ public class WollMuxFiles
    * <p>
    * Die wollmux.conf wird an folgenden Stellen in der angegebenen Reihenfolge
    * gesucht:
-   * 
+   *
    * <ol>
    * <li>unter dem Dateipfad (inkl. Dateiname!), der im Registrierungswert
    * "ConfigPath" des Schlüssels HKCU\Software\WollMux\ festgelegt ist (nur Windows!)
@@ -257,7 +257,7 @@ public class WollMuxFiles
    * <li>unter dem Dateipfad, der in der Konstanten {@link #ETC_WOLLMUX_WOLLMUX_CONF}
    * festgelegt ist (nur Linux!)</li>
    * </ol>
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
@@ -289,7 +289,7 @@ public class WollMuxFiles
 
     // wollmux.conf wird über die Umgebungsvariable "WOLLMUX_CONF_PATH" gesetzt.
     if (wollmuxConfFile == null || !wollmuxConfFile.exists())
-    { 
+    {
       if (System.getenv("WOLLMUX_CONF_PATH") != null)
       {
         wollmuxConfPath = System.getenv("WOLLMUX_CONF_PATH");
@@ -297,7 +297,7 @@ public class WollMuxFiles
         searchPaths.append(wollmuxConfFile.getPath() + "\n");
         debug2Messages.append("wollmux.conf was set by environment variable: ");
         debug2Messages.append(wollmuxConfPath);
-      } 
+      }
     }
 
     // Überprüfen, ob das Betriebssystem Windows ist
@@ -444,7 +444,7 @@ public class WollMuxFiles
 
   /**
    * Liefert das Verzeichnis ,wollmux zurück.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static File getWollMuxDir()
@@ -465,7 +465,7 @@ public class WollMuxFiles
   /**
    * Liefert das File-Objekt der Logdatei zurück. Darf erst nach setupWollMuxDir()
    * aufgerufen werden.
-   * 
+   *
    */
   public static File getWollMuxLogFile()
   {
@@ -475,7 +475,7 @@ public class WollMuxFiles
   /**
    * Liefert das File-Objekt des LocalOverrideStorage Caches zurück. Darf erst nach
    * setupWollMuxDir() aufgerufen werden.
-   * 
+   *
    * @return das File-Objekt des LocalOverrideStorage Caches.
    */
   public static File getLosCacheFile()
@@ -505,20 +505,20 @@ public class WollMuxFiles
   /**
    * Liefert eine URL zum String urlStr, wobei relative Pfade relativ zum
    * DEFAULT_CONTEXT aufgelöst werden.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * @throws MalformedURLException
    *           falls urlStr keine legale URL darstellt.
    */
   public static URL makeURL(String urlStr) throws MalformedURLException
-  {    
+  {
     return new URL(WollMuxFiles.getDEFAULT_CONTEXT(), ConfigThingy.urlEncode(urlStr));
-  }  
-  
+  }
+
   /**
    * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null, falls
    * ein Fehler während der Initialisierung aufgetreten ist).
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static DatasourceJoiner getDatasourceJoiner()
@@ -602,10 +602,10 @@ public class WollMuxFiles
    * URL, mit der {@link #defaultContextURL} initialisiert wird. Wenn in der
    * wollmux.conf kein DEFAULT_CONTEXT angegeben ist, so wird das Verzeichnis, in dem
    * die wollmux.conf gefunden wurde, als Default Context verwendet.
-   * 
+   *
    * Sollte {{@link #defaultContextURL} nicht <code>null</code> sein, tut diese
    * Methode nichts.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static void determineDefaultContext()
@@ -652,7 +652,7 @@ public class WollMuxFiles
   /**
    * Wertet die FONT_ZOOM-Direktive des Dialoge-Abschnitts aus und zoomt die Fonts
    * falls erforderlich.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void setLookAndFeel()
@@ -676,13 +676,13 @@ public class WollMuxFiles
 
   /**
    * Zoomt die Fonts auf zoomFactor, falls erforderlich.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void zoomFonts(double zoomFactor)
   {
 
-    if (zoomFactor < 0.5 || zoomFactor > 10)
+    if (zoomFactor < 0.5 || zoomFactor > 3)
     {
       Logger.error(L.m("Unsinniger FONT_ZOOM Wert angegeben: %1", ""
         + zoomFactor));
@@ -691,8 +691,8 @@ public class WollMuxFiles
     {
       // Frühere Prüfung (nur werte kleiner 0.99 oder größer 1.01) entfernt,
       // seitdem die Fontgröße im Gui eingestellt werden kann.
-      // Mit dieser Prüfung wäre z. b. ein Zurückstellen 
-      // von Zoomfaktor 2 auf 1 abgelehnt worden. 
+      // Mit dieser Prüfung wäre z. b. ein Zurückstellen
+      // von Zoomfaktor 2 auf 1 abgelehnt worden.
       Common.zoomFonts(zoomFactor);
     }
 
@@ -702,7 +702,7 @@ public class WollMuxFiles
    * Wertet die wollmux,conf-Direktive LOGGING_MODE aus und setzt den Logging-Modus
    * entsprechend. Ist kein LOGGING_MODE gegeben, so greift der Standard (siehe
    * Logger.java)
-   * 
+   *
    * @param ct
    */
   private static void setLoggingMode(ConfigThingy ct)
@@ -727,7 +727,7 @@ public class WollMuxFiles
    * wird automatisch aktiviert, wenn der LOGGING_MODE auf "debug" oder "all" gesetzt
    * wurde. Im debug-mode werden z.B. die Bookmarks abgearbeiteter Dokumentkommandos
    * nach der Ausführung nicht entfernt, damit sich Fehler leichter finden lassen.
-   * 
+   *
    * @return
    */
   public static boolean isDebugMode()
@@ -764,7 +764,7 @@ public class WollMuxFiles
   /**
    * Parst die CLASSPATH Direktiven und hängt für jede eine weitere URL an den
    * Suchpfad von {@link #classLoader} an.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static void initClassLoader()
@@ -811,7 +811,7 @@ public class WollMuxFiles
   /**
    * Liefert einen ClassLoader, der die in wollmux,conf gesetzten
    * CLASSPATH-Direktiven berücksichtigt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static ClassLoader getClassLoader()
@@ -822,7 +822,7 @@ public class WollMuxFiles
   /**
    * Parst die "Funktionsdialoge" Abschnitte aus conf und liefert als Ergebnis eine
    * DialogLibrary zurück.
-   * 
+   *
    * @param baselib
    *          falls nicht-null wird diese als Fallback verlinkt, um Dialoge zu
    *          liefern, die anderweitig nicht gefunden werden.
@@ -830,7 +830,7 @@ public class WollMuxFiles
    *          der Kontext in dem in Dialogen enthaltene Funktionsdefinitionen
    *          ausgewertet werden sollen (insbesondere DIALOG-Funktionen). ACHTUNG!
    *          Hier werden Werte gespeichert, es ist nicht nur ein Schlüssel.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static DialogLibrary parseFunctionDialogs(ConfigThingy conf,
@@ -873,16 +873,16 @@ public class WollMuxFiles
   /**
    * Parst die "Funktionen" Abschnitte aus conf und liefert eine entsprechende
    * FunctionLibrary.
-   * 
+   *
    * @param context
    *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden sollen
    *          (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
    *          gespeichert, es ist nicht nur ein Schlüssel.
-   * 
+   *
    * @param baselib
    *          falls nicht-null wird diese als Fallback verlinkt, um Funktionen zu
    *          liefern, die anderweitig nicht gefunden werden.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static FunctionLibrary parseFunctions(ConfigThingy conf,
@@ -895,18 +895,18 @@ public class WollMuxFiles
   /**
    * Parst die Inhalte von conf,query(section) als Funktionsdefinitionen und fügt sie
    * funcs hinzu.
-   * 
+   *
    * @param context
    *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden sollen
    *          (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
    *          gespeichert, es ist nicht nur ein Schlüssel.
-   * 
+   *
    * @param baselib
    *          falls nicht-null wird diese als Fallback verlinkt, um Funktionen zu
    *          liefern, die anderweitig nicht gefunden werden.
-   * 
+   *
    * @return funcs
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static FunctionLibrary parseFunctions(FunctionLibrary funcs,
@@ -943,7 +943,7 @@ public class WollMuxFiles
   /**
    * Parst die "Druckfunktionen" Abschnitte aus conf und liefert eine entsprechende
    * PrintFunctionLibrary.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
   public static PrintFunctionLibrary parsePrintFunctions(ConfigThingy conf)
@@ -1016,7 +1016,7 @@ public class WollMuxFiles
    * Erstellt eine Dump-Datei im WollMux-Verzeichnis, die wichtige Informationen zur
    * Fehlersuche enthält und liefert den Namen dieser Datei als String zurück, oder
    * null falls bei der Erstellung Fehler auftraten.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz
    */
   public static String dumpInfo()
@@ -1252,7 +1252,7 @@ public class WollMuxFiles
 
   /**
    * Kopiert den Inhalt von file nach out (binär).
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static void copyFile(File file, OutputStream out)
@@ -1286,7 +1286,7 @@ public class WollMuxFiles
   /**
    * Gibt den Inhalt der OOo-Konfiguration einschließlich aller Unterknoten am Knoten
    * nodePath zurück.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static String dumpOOoConfiguration(String nodePath)
@@ -1315,12 +1315,12 @@ public class WollMuxFiles
    * Gibt den Inhalt eines Knotens element der OOo-Konfiguration mit dem Knotennamen
    * und allen enthaltenen Properties zurück, wobei die Inhalte pro Zeile um den
    * String spaces eingerückt werden.
-   * 
+   *
    * @param element
    * @param spaces
    * @return
    * @throws Exception
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static String dumpNode(Object element, String spaces)
@@ -1425,6 +1425,7 @@ public class WollMuxFiles
       setDaemon(true);
     }
 
+    @Override
     public void run()
     {
       startTime = System.currentTimeMillis();
@@ -1449,6 +1450,7 @@ public class WollMuxFiles
 
       SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           Logger.error(SLOW_SERVER_MESSAGE);
@@ -1486,11 +1488,13 @@ public class WollMuxFiles
       super(new URL[] {});
     }
 
+    @Override
     public void addURL(URL url)
     {
       super.addURL(url);
     }
 
+    @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException
     {
       try
