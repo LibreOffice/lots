@@ -4,7 +4,7 @@
  * Funktion : Der Controller für den Druckerauswahl Dialog beim Seriendruck.
  *            Siehe auch DruckerModel und DruckerAuswahlDialog.
  * 
- * Copyright (c) 2014-2016 Landeshauptstadt München
+ * Copyright (c) 2014-2017 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),

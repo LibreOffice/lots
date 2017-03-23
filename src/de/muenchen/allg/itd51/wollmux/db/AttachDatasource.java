@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Eine Datenquelle, die eine andere Datenquelle um Spalten ergänzt.
  * 
- * Copyright (c) 2008-2016 Landeshauptstadt München
+ * Copyright (c) 2008-2017 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
