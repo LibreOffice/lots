@@ -1,3 +1,15 @@
+    * Bugfixes:
+          o Die zulässigen Werte für Font_Zoom in der WollMuxBar wurden
+            begrenzt auf den Bereich zwischen 0,5 und 3. Die Auswahloptionen
+            für die X-Position wurde nach 'links' und 'rechts' umbenannt.
+            Analog dazu die Option für die Y-Position nach 'unten' und 'oben'.
+            Die Buttons lassen sich nun über die Tastenkombination Alt+'Taste'
+            ansteuern.
+    * Neue Features
+          o WollMux läasst sich auf einem 64-Bit-Client mit einer 32-Bit-
+            Version von LibreOffice installieren.
+
+
  ==================== Neu in Version 15.04b ====================
 
     * Bugfixes:
