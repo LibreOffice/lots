@@ -16,8 +16,7 @@ Homepage: http://www.wollmux.org
 
 Package: libreoffice-wollmux
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, java6-runtime,
- libreoffice3.6-writer|libreoffice4.1-writer:any, libreoffice-debian-menus|libreoffice4.1-debian-menus
+Depends: ${shlibs:Depends}, ${misc:Depends}, java6-runtime, libreoffice4.1-meta
 X-Debian-Depends: libobasis3.6-javafilter|libobasis4.1-javafilter:any
 X-Upstream-Depends: libreoffice-debian-menus
 Suggests: wollmuxbar
