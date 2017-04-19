@@ -449,7 +449,7 @@
 		<dependency>
 			<groupId>de.muenchen</groupId>
 			<artifactId>wollmux-core</artifactId>
-			<version>16.10</version>
+			<version>16.11-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.libreoffice</groupId>
