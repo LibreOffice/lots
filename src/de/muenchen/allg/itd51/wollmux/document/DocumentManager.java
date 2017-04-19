@@ -45,6 +45,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.core.document.AnnotationBasedPersistentDataContainer;
 import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer;
 import de.muenchen.allg.itd51.wollmux.core.document.RDFBasedPersistentDataContainer;
@@ -56,6 +57,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -421,7 +423,11 @@ public class DocumentManager
     {
       if (documentController == null)
       {
-        documentController = new TextDocumentController(new TextDocumentModel(doc, createPersistentDataContainer(doc)), GlobalFunctions.getInstance().getGlobalFunctions(), GlobalFunctions.getInstance().getFunctionDialogs());
+        documentController = new TextDocumentController(
+            new TextDocumentModel(doc, createPersistentDataContainer(doc),
+                WollMuxSingleton.getVersion(), Utils.getOOoVersion()),
+            GlobalFunctions.getInstance().getGlobalFunctions(),
+            GlobalFunctions.getInstance().getFunctionDialogs());
 
         /**
          * Dispatch Handler in eigenem Event registrieren, da es Deadlocks gegeben hat.
