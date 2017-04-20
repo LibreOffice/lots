@@ -270,8 +270,7 @@ public class TextDocumentController
   public synchronized ConfigThingy getFormDescription()
   {
     ConfigThingy formDescription = model.getFormDescription();
-    applyFormularanpassung(formDescription);
-    return formDescription;
+    return applyFormularanpassung(formDescription);
   }
 
   /**
