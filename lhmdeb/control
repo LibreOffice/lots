@@ -20,6 +20,7 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, java6-runtime, libreoffice4.1-meta
 X-Debian-Depends: libobasis3.6-javafilter|libobasis4.1-javafilter:any
 X-Upstream-Depends: libreoffice-debian-menus
 Suggests: wollmuxbar
+Multi-arch: foreign
 Description: WollMux extension for LibreOffice
  The package adds an extension to LibreOffice with the following features:
   - On the fly template generation from fragments (e.g. letterhead, footer,
@@ -44,6 +45,7 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, java6-runtime,
 X-Debian-Depends: openoffice.org-java-common (>= 3.0.0)
 X-Upstream-Depends: openoffice.org-debian-menus
 Suggests: wollmuxbar
+Multi-arch: foreign
 Description: WollMux extension for OpenOffice.org Writer
  The package adds an extension to Openoffice.org with the following features:
   - On the fly template generation from fragments (e.g. letterhead, footer,
@@ -66,6 +68,7 @@ Architecture: all
 Depends: openoffice.org-wollmux (= ${binary:Version}) | libreoffice-wollmux (= ${binary:Version})
 Conflicts: wollmux (<< ${binary:Version})
 Replaces: wollmux (<< ${binary:Version})
+Multi-arch: foreign
 Description: Standalone toolbar for WollMux
  The package adds a toolbar to your desktop that provides easy access to the
  libreoffice-wollmux extension without a permanently running instance of
@@ -74,6 +77,7 @@ Description: Standalone toolbar for WollMux
 Package: wollmux
 Architecture: all
 Depends: wollmuxbar (= ${binary:Version})
+Multi-arch: foreign
 Description: Transitional package for WollMux Bar
  Ease transition from wollmux to wollmuxbar package
 
