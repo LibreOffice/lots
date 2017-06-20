@@ -252,7 +252,8 @@ public class ConfigEditor extends JFrame implements SearchListener
     provider.addCompletion(new BasicCompletion(provider, "ID"));
     provider.addCompletion(new BasicCompletion(provider, "HOTKEY"));
     provider.addCompletion(new BasicCompletion(provider, "EDIT"));
-
+    provider.addCompletion(new BasicCompletion(provider, "FRAG_ID"));
+    
     return provider;
   }
 

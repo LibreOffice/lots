@@ -84,6 +84,8 @@ public class FormControlModel
   public static final String CHECKBOX_TYPE = "checkbox";
 
   public static final String BUTTON_TYPE = "button";
+  
+  public static final String FRAG_ID_TYPE = "frag_id";
 
   /**
    * Wird gesetzt, wenn versucht wird, einen TYPE einzustellen, der nicht bekannt
@@ -130,6 +132,9 @@ public class FormControlModel
 
   /** EXT. */
   private String ext = "";
+  
+  /** FRAG_ID */
+  private String frag_id = "";
 
   /** TIP. */
   private String tooltip = "";
@@ -260,6 +265,8 @@ public class FormControlModel
         plausiConf = attr;
       else if (name.equals("AUTOFILL"))
         autofill = funcSelProv.getFunctionSelection(attr);
+      else if (name.equals("FRAG_ID"))
+    	  frag_id = str;
     }
 
     if (plausiConf != null)
@@ -447,6 +454,15 @@ public class FormControlModel
   {
     return type == COMBOBOX_TYPE;
   }
+  
+  /**
+   * Liefert true gdw dieses FormControlModel einen Button darstellt.
+   * 
+   * @author Björn Ranft
+   */
+  public boolean isButton() {
+	  return type == BUTTON_TYPE;
+  }
 
   /**
    * Liefert true gdw dieses FormControlModel eine TextArea darstellt.
@@ -487,6 +503,14 @@ public class FormControlModel
   public String getAction()
   {
     return action;
+  }
+  
+  /**
+   * Liefert die FRAG_ID dieses FormControlModels.
+   * @author Björn Ranft
+   */
+  public String getFragID() {
+	  return this.frag_id;
   }
 
   /**
@@ -878,6 +902,14 @@ public class FormControlModel
     this.lines = lines;
     formularMax4000.documentNeedsUpdating();
   }
+  
+  /**
+   * Setzt das FRAGID-Attribut.
+   * @author Björn Ranft
+   */
+  public void setFragID(String frag_id) {
+	  this.frag_id = frag_id;
+  }
 
   /**
    * Setzt das MINSIZE-Attribut.
@@ -931,6 +963,8 @@ public class FormControlModel
       this.type = CHECKBOX_TYPE;
     else if (type.equals(BUTTON_TYPE))
       this.type = BUTTON_TYPE;
+    else if (type.equals(FRAG_ID_TYPE))
+    	this.type = FRAG_ID_TYPE;
     else
       this.type = UNKNOWN_TYPE;
     notifyListeners(TYPE_ATTR, this.type);
@@ -979,6 +1013,7 @@ public class FormControlModel
     if (getDialog().length() > 0) conf.add("DIALOG").add("" + getDialog());
     if (getExt().length() > 0) conf.add("EXT").add("" + getExt());
     if (getHotkey() > 0) conf.add("HOTKEY").add("" + getHotkey());
+    if (getFragID().length() > 0) conf.add("FRAG_ID").add("" + getFragID());
 
     List<String> items = getItems();
     if (items.size() > 0)

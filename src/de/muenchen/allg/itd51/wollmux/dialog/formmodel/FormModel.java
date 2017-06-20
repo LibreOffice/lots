@@ -32,6 +32,7 @@
 package de.muenchen.allg.itd51.wollmux.dialog.formmodel;
 
 import java.awt.event.ActionListener;
+import java.util.List;
 
 /**
  * Erlaubt Zugriff auf die Formularbestandteile eines Dokuments abstrahiert von den
@@ -231,6 +232,12 @@ public interface FormModel
    * externe Anwendung mit dieser Datei.
    */
   public void saveTempAndOpenExt(String ext);
+  
+  /**
+   * Öffnet durch ACTION-Event ein neues Dokument oder Template.
+   * Durch Angabe der FragID wird die entsprechende Vorlage zugeordnet.
+   */
+  public void openTemplateOrDocument(List<String> fragIds);
 
   /**
    * Über diese Methode kann der FormController das FormModel informieren, dass er
