@@ -1315,12 +1315,15 @@ public class FormController implements UIElementEventHandler
         else if (action.equals("nextTab"))
         {       	
         	int currentTabIndex = myTabbedPane.getSelectedIndex();
-        	if(currentTabIndex > - 1) myTabbedPane.setSelectedIndex(currentTabIndex + 1);
+        	if (currentTabIndex == -1 && myTabbedPane.getTabCount() > 1) {
+        		myTabbedPane.setSelectedIndex(1);
+        	} else
+        		myTabbedPane.setSelectedIndex(currentTabIndex + 1);	
         }
         else if (action.equals("prevTab"))
         {
         	int currentTabIndex = myTabbedPane.getSelectedIndex(); 
-        	if(currentTabIndex > -1) myTabbedPane.setSelectedIndex(currentTabIndex - 1);
+        	if (currentTabIndex > 0) myTabbedPane.setSelectedIndex(currentTabIndex - 1);
         }
         else if (action.equals("funcDialog"))
         {
