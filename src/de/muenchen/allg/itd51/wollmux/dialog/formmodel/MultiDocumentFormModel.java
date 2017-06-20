@@ -359,6 +359,11 @@ public class MultiDocumentFormModel implements FormModel
   {
     return null;
   }
+  
+  @Override
+  public void openTemplateOrDocument(List<String> fragIds){
+	  //TODO Auto-generated method stub
+  }
 
   /**
    * Erzeugt ein FormModel dem mehrere Formulardokumente zugeordnet sind, die alle in

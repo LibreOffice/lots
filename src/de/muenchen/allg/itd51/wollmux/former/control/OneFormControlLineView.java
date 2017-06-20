@@ -33,6 +33,7 @@
 package de.muenchen.allg.itd51.wollmux.former.control;
 
 import java.awt.Color;
+import java.awt.Dimensions;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -40,6 +41,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Iterator;
@@ -130,6 +133,11 @@ public class OneFormControlLineView extends LineView
    * Zusätzliche Elemente für FormControls mit TYPE "combobox".
    */
   private JPanel comboBoxAdditionalView;
+  
+  /**
+   * Zusätzliche Elemente für FormControls mit TYPE "button" (außer Standardbuttons)
+   */
+  private JPanel buttonAdditionalView;
 
   /**
    * Das JTextField, das das TOLLTIP anzeigt und ändern lässt.
@@ -188,6 +196,20 @@ public class OneFormControlLineView extends LineView
     myPanel.add(makeTypeView());
     myPanel.add(makeComboBoxAdditionalView());
     myPanel.add(makeTextAreaAdditionalView());
+    
+    //additionalview nur bauen wenn kein standard button, makeButtonAdditionalView baut controls für FRAG_ID und ACTION
+    if(!model.getAction().equals("abort") 
+    		&& !model.getAction().equals("prevTab") 
+    		&& !model.getAction().equals("nextTab")
+    		&& !model.getAction().equals("funcDialog")
+    		&& !model.getAction().equals("form2PDF")
+    		&& !model.getAction().equals("save")
+    		&& !model.getAction().equals("saveAs")
+    		&& !model.getAction().equals("printForm")
+    		&& !model.getAction().equals("closeAndOpenExt")
+    		&& !model.getAction().equals("saveTempAndOpenExt"))
+    	myPanel.add(makeButtonAdditionalView());
+    
     myPanel.add(makeReadOnlyView());
     normalFont = labelTextfield.getFont();
     boldFont = normalFont.deriveFont(Font.BOLD);
@@ -231,6 +253,10 @@ public class OneFormControlLineView extends LineView
       && (viewVisibilityDescriptor == null || viewVisibilityDescriptor.formControlLineViewAdditional));
     readOnlyfield.setVisible(!model.isTab()
       && viewVisibilityDescriptor != null && viewVisibilityDescriptor.formControlLineViewReadonly);
+    
+    if(buttonAdditionalView != null)
+    	buttonAdditionalView.setVisible(model.isButton()
+			&& (viewVisibilityDescriptor == null || viewVisibilityDescriptor.formControlLineViewAdditional));
     
     /*
      * Wenn alle abgeschaltet sind, aktiviere zumindest das ID-Feld
@@ -569,6 +595,71 @@ public class OneFormControlLineView extends LineView
     delButton.addMouseListener(myMouseListener);
 
     return comboBoxAdditionalView;
+  }
+  
+  /**
+   * Liefert ein JPanel mit zusätzlichen Bedienelementen
+   * Action-Liste und FRAG_ID für TYPE "button".
+   * 
+   * @author Björn Ranft
+   */
+  private JPanel makeButtonAdditionalView() {
+	  buttonAdditionalView = new JPanel();
+	  buttonAdditionalView.setLayout(new BoxLayout(buttonAdditionalView, BoxLayout.X_AXIS));
+	  
+	  final JComboBox<String> actionComboBox = new JComboBox<String>();
+	  actionComboBox.addItem("openTemplate");
+	  actionComboBox.addItem("openExt");
+	  
+	  if(model != null && model.getAction() != null && model.getAction().equals("openTemplate"))
+		  actionComboBox.setSelectedIndex(0);
+	  
+	  if(model != null && model.getAction() != null && model.getAction().equals("openExt"))
+		  actionComboBox.setSelectedIndex(1);
+	  
+	  final JTextField fragIDTextField = new JTextField();
+	  fragIDTextField.setMinimumSize(new Dimension(20 ,20));
+	  
+	  if(model != null && model.getFragID() != null && model.getFragID().isEmpty()) fragIDTextField.setText("FRAG_ID"); else fragIDTextField.setText(model.getFragID());
+	  
+	 
+	  fragIDTextField.addKeyListener(new KeyListener() {
+		
+		@Override
+		public void keyTyped(KeyEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		@Override
+		public void keyReleased(KeyEvent e) {
+			model.setFragID(fragIDTextField.getText());
+		}
+		
+		@Override
+		public void keyPressed(KeyEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+	});
+	  
+	  actionComboBox.addItemListener(new ItemListener() {
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+			String selectedAction = actionComboBox.getSelectedItem().toString();
+			
+			if(model!= null)
+				model.setAction(selectedAction);
+		}
+	  });
+	  
+	  buttonAdditionalView.add(fragIDTextField);
+	  buttonAdditionalView.add(actionComboBox);
+	  
+	  //set default Action
+	  if(model.getAction() == null || model.getAction().isEmpty()) model.setAction("openTemplate");
+	  
+	  return buttonAdditionalView;
   }
 
   /**

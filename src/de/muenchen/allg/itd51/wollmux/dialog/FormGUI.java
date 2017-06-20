@@ -55,6 +55,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -818,6 +819,13 @@ public class FormGUI
     public void closing(Object sender)
     {
       Logger.log("Closing(sender)");
+    }
+    
+    @Override
+    public void openTemplateOrDocument(List<String> fragIds) {
+    	for(String fragId : fragIds){
+    		Logger.log("openTemplateOrDocument(" + fragId + ")");
+    	}
     }
   }
 

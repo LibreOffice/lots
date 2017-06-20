@@ -1161,6 +1161,7 @@ public class FormController implements UIElementEventHandler
     supportedActions.add("printForm");
     supportedActions.add("closeAndOpenExt");
     supportedActions.add("saveTempAndOpenExt");
+    supportedActions.add("openTemplate");
     panelContext.supportedActions = supportedActions;
     buttonContext.supportedActions = supportedActions;
 
@@ -1312,30 +1313,14 @@ public class FormController implements UIElementEventHandler
           abortRequestListener.actionPerformed(new ActionEvent(this, 0, "abort"));
         }
         else if (action.equals("nextTab"))
-        {
-          int startIdx = myTabbedPane.getSelectedIndex();
-          int idx = startIdx;
-          do
-          {
-            ++idx;
-            if (idx >= myTabbedPane.getTabCount()) idx = 0;
-            if (myTabbedPane.isEnabledAt(idx)) break;
-          } while (idx != startIdx);
-
-          myTabbedPane.setSelectedIndex(idx);
+        {       	
+        	int currentTabIndex = myTabbedPane.getSelectedIndex();
+        	if(currentTabIndex > - 1) myTabbedPane.setSelectedIndex(currentTabIndex + 1);
         }
         else if (action.equals("prevTab"))
         {
-          int startIdx = myTabbedPane.getSelectedIndex();
-          int idx = startIdx;
-          do
-          {
-            if (idx == 0) idx = myTabbedPane.getTabCount();
-            --idx;
-            if (myTabbedPane.isEnabledAt(idx)) break;
-          } while (idx != startIdx);
-
-          myTabbedPane.setSelectedIndex(idx);
+        	int currentTabIndex = myTabbedPane.getSelectedIndex(); 
+        	if(currentTabIndex > -1) myTabbedPane.setSelectedIndex(currentTabIndex - 1);
         }
         else if (action.equals("funcDialog"))
         {
@@ -1373,6 +1358,12 @@ public class FormController implements UIElementEventHandler
         else if (action.equals("saveAs"))
         {
           formModel.saveAs();
+        }
+        else if(action.equals("openTemplate") || action.equals("openDocument")){
+        	String fragId = (String) args[1];
+        	List<String> fragIds = new ArrayList<String>();
+        	fragIds.add(fragId);
+        	formModel.openTemplateOrDocument(fragIds);
         }
       }
       else if (eventType.equals("focus"))
