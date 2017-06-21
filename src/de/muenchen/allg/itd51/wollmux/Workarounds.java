@@ -2,7 +2,7 @@
  * Dateiname: Workarounds.java
  * Projekt  : WollMux
  * Funktion : Referenziert alle temporären Workarounds an einer zentralen Stelle
- * 
+ *
  * Copyright (c) 2009-2015 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,13 +26,14 @@
  *
  * @author Christoph Lutz (D-III-ITD-D101)
  * @version 1.0
- * 
+ *
  */package de.muenchen.allg.itd51.wollmux;
 
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
 import java.awt.Robot;
+import java.awt.Toolkit;
 import java.net.URL;
 import java.net.URLClassLoader;
 
@@ -53,7 +54,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.Utils;
  * Diese Klasse referenziert alle temporären Workarounds, die im WollMux aufgenommen
  * wurden, an einer zentralen Stelle. Sie definiert Methoden, die die Steuerung
  * übernehmen, ob ein Workaround anzuwenden ist oder nicht.
- * 
+ *
  * @author Christoph Lutz (D-III-ITD-D101)
  */
 public class Workarounds
@@ -78,6 +79,8 @@ public class Workarounds
 
   private static Boolean workaroundSunJavaBug4737732 = null;
 
+  private static Boolean workaroundWMClass = null;
+
   public static Boolean applyWorkaround(String issueNumber)
   {
     Logger.debug("Workaround für Issue "
@@ -90,7 +93,7 @@ public class Workarounds
    * Issue #73229 betrifft den WollMux-Seriendruck in ein Gesamtdokument und ist
    * aktuell für OOo Later priorisiert - wird also nicht in absehbarer Zeit behoben
    * sein.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static boolean applyWorkaroundForOOoIssue73229()
@@ -106,7 +109,7 @@ public class Workarounds
    * Issue #102164 betrifft OOo 3.2. Es ist unklar, wann der Workaround entfernt
    * werden kann, da er aufgrund eines Bugs in der Swing-Implementierung von Java 6
    * zurückgeht.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public static void applyWorkaroundForOOoIssue102164()
@@ -144,7 +147,7 @@ public class Workarounds
    * man vor der Deaktivierung einen Mechanismus über die Dokumentablagen der
    * Referate laufen lassen der dafür sorgt, dass der Altbestand der von OOo 2
    * erzeugten Dokumente von sämtlichen text:display="none"-Stellen befreit wurde.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static boolean applyWorkaroundForOOoIssue103137()
@@ -167,7 +170,7 @@ public class Workarounds
   /**
    * Issue #96281 betrifft OOo 3.1 und 3.2. Ob es in 3.3 gelöst sein wird wissen wir
    * nicht. Seien wir einfach mal pessimistisch.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public static boolean applyWorkaroundForOOoIssue96281()
@@ -195,7 +198,7 @@ public class Workarounds
    * vor allem unter Linux mit KDE feststellen. Der Java-Bug ist in Oracle JRE 1.7
    * behoben und auch mit dem aktuellen openJDK 1.7 tritt er nicht mehr auf. Der
    * Workaround war von 2006 bis 2014 immer standardmäßig aktiv, führt aber mit
-   * Basisclient 5.0 verstärkt zum Issue trac#11494. Deshalb wird der Workaround 
+   * Basisclient 5.0 verstärkt zum Issue trac#11494. Deshalb wird der Workaround
    * jetzt nur noch mit SunJRE <= 1.6 angewendet. Er kann vermutlich komplett
    * entfernt werden (wenn WollMux unter Linux nicht mehr mit SunJRE 1.6 genutzt wird)
    */
@@ -217,15 +220,15 @@ public class Workarounds
     }
     return workaroundSunJavaBug4737732;
   }
-  
+
   /**
    * Wegen http://qa.openoffice.org/issues/show_bug.cgi?id=101283 muss der Inhalt des
    * Bookmarks durch ein Leerzeichen an Stelle des gewünschten Leerstrings ersetzt
    * werden.
-   * 
+   *
    * @return Der String, der an Stelle des gewünschten Leerstrings zur Behebung des
    *         Workarounds verwendet werden muss.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static String workaroundForIssue101283()
@@ -244,15 +247,15 @@ public class Workarounds
    * Seriendruck-Hauptdokument doc viele der im Issue genannten Elemente (z.B.
    * Rahmen, PageStyles, ...) enthält. Betroffen davon sind alle aktuell bekannten
    * Versionen von OOo, AOO und LO.
-   * 
+   *
    * @param doc
    *         Das Seriendruck-Hauptdokument
-   * 
+   *
    * @return Der Rückgabewert dieser Methode beschreibt, wie viele Datensätze zu doc
    *         ohne Einfrierer von der aktuell genutzen Office-Version verarbeitet
    *         werden können. Der Rückgabewert kann auch null sein, dann soll der der
    *         Workaround nicht angewendet werden.
-   * 
+   *
    * @author Christoph Lutz (CIB software GmbH)
    */
   public static Integer workaroundForTDFIssue89783(XTextDocument doc)
@@ -295,15 +298,15 @@ public class Workarounds
       // (zu Sicherheit)
       return ((1 << 16) / maxCritElements) - 1;
     }
-    
+
     return null;
   }
-  
+
   /**
    * Wenn bestimmte Aktionen getätigt werden (z.B. setWindowPosSize()) während der
    * Mauszeiger über einer OOo-Toolbar schwebt, dann friert OOo 3.0 und 3.1 unter
    * Windows ein.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public static boolean workaroundForToolbarHoverFreeze()
@@ -346,13 +349,13 @@ public class Workarounds
    * außerdem ein Meldungsdialog angezeigt, der darauf hinweist dass das gewünschte
    * Feature nicht mit Java 5 ausgeführt werden kann und es wird eine entsprechende
    * Meldung geloggt.
-   * 
+   *
    * Es wird explizit nur auf Java 1.5 geprüft, da Java-Versionen kleiner 1.5 ohnehin
    * nicht vom WollMux unterstützt werden. Der Check auf die Systemproperty
    * "java.version" ist freilich nicht der sicherste, da diese Variable z.B. auch vom
    * Benutzer überschrieben werden kann, aber für unsere Zwecke sollte er in 99,9%
    * der Fälle ausreichend sein.
-   * 
+   *
    * @param featureName
    *          Name des Features, das nicht mit Java 5 ausgeführt werden kann. Dieser
    *          String wird in der Log-Meldung verwendet.
@@ -391,13 +394,13 @@ public class Workarounds
    * Dateninhalt, wiederum eine andere Notiz enthielt eine leere Notiz ohne
    * dc:creator-Attribut, die mutmaßlich früher einmal eine
    * WollMuxFormularwerte-Notiz war.
-   * 
+   *
    * Falls das Dokument vor dieser Verarbeitung durch den WollMux bereits einmal
    * durch den WollMux als Formulardokument markiert worden ist, entsteht ein nicht
    * zulässiger Zustand, wenn der Formularwerte-Abschnitt fehlt. Diese Methode
    * liefert true, wenn der Fall vorliegt und ein entsprechender Workaround
    * angewendet werden soll.
-   * 
+   *
    * Da die Ursache, die zu dem nicht zulässigen Stand geführt hat derzeit noch nicht
    * bekannt ist, und die Symptome auch in drei Fällen unterschiedlich waren (s.o.),
    * kann dieser Workaround derzeit leider nicht zeitlich beschränkt werden. Die
@@ -405,7 +408,7 @@ public class Workarounds
    * und 108709 (also den Änderungen an OOo 3.0 bezüglich des Notizen-Systems)
    * zusammen hängt. Die Hoffnung ist, dass solche kaputten Dokumente nicht mehr
    * auftreten, wenn diese beiden Fehler gefixed sind.
-   * 
+   *
    * @param werteStr
    *          Den Wert den PersistantData zur ID "WollMuxFormularwerte" zurück gibt
    *          (kann null sein, wenn die Notiz bisher nicht existiert, oder != null,
@@ -415,7 +418,7 @@ public class Workarounds
    *          bereits Formulardokument-Merkmale enthielt (z.B. eine Notiz SetType mit
    *          dem Wert "formularDokument")
    * @return true, wenn der Workaround anzuwenden ist.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   @Deprecated
@@ -433,7 +436,7 @@ public class Workarounds
    * Issue 102619 (calling dispatch .uno:GotoNextPlacemarker crashes OOo) beschreibt
    * einen Bug in OOo < 3.2.1 bei dem OOo crashed, wenn mittels des Dispatches
    * .uno:GotoNextPlacemarker in eine Tabelle navigiert wird.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static boolean applyWorkaroundForOOoIssue102619()
@@ -451,6 +454,38 @@ public class Workarounds
     }
 
     return workaround102619.booleanValue();
+  }
+
+  /**
+   * Unter Linux kann kein Schnellstarter erstellt werden, da
+   * @see http://bugs.java.com/bugdatabase/view_bug.do?bug_id=6528430.
+   * Damit es funktioniert, muss das Attribut WM_Class gesetzt werden, da dann
+   * eine korrekte Verknüpfung zwischen dem Schnellstarter und der .desktop
+   * Datei entsteht.
+   *
+   * @return true wenn WM_Class gesetzt wurde.
+   */
+  public static boolean applyWorkaroundForWMClass()
+  {
+    if (workaroundWMClass == null)
+    {
+      Toolkit toolkit = Toolkit.getDefaultToolkit();
+      Class<?> xtoolkit = toolkit.getClass();
+      if ("sun.awt.X11.XToolkit".equals(xtoolkit.getName()))
+      {
+        try
+        {
+          java.lang.reflect.Field awtAppClassNameField = xtoolkit.getDeclaredField("awtAppClassName");
+          awtAppClassNameField.setAccessible(true);
+          awtAppClassNameField.set(null, "WollMux");
+          workaroundWMClass = applyWorkaround("WMClass");
+        } catch (Exception e) {
+          Logger.error(L.m("WMClass konnte nicht gesetzt werden."), e);
+          workaroundWMClass = Boolean.FALSE;
+        }
+      }
+    }
+    return workaroundWMClass.booleanValue();
   }
 
 }

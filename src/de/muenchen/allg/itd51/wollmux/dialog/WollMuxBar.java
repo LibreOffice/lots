@@ -2,7 +2,7 @@
  * Dateiname: WollMuxBar.java
  * Projekt  : WollMux
  * Funktion : Menü-Leiste als zentraler Ausgangspunkt für WollMux-Funktionen
- * 
+ *
  * Copyright (c) 2010-2015 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -47,12 +47,12 @@
  *                  | drückt, damit sich die WollMuxBar dann minimiert.
  * 21.06.2006 | BNK | Gross/Kleinschreibung ignorieren beim Auswertden des MODE
  *                  | Es wird jetzt der letzte Fenster/WollMuxBar-Abschnitt verwendet.
- * 23.06.2006 | BNK | Senderbox von JComboBox auf JPopupMenu umgestellt.    
- * 27.06.2006 | BNK | WIDTH, HEIGHT max korrekt unterstützt 
- * 29.06.2006 | BNK | min, max, center unterstützt    
- * 19.07.2006 | BNK | MODE "Icon" repariert 
- * 02.08.2006 | BNK | bessere Fehlermeldung wenn Konfiguration nicht gefunden.    
- * 19.10.2006 | BNK | +ACTION "kill" +ACTION "dumpInfo"    
+ * 23.06.2006 | BNK | Senderbox von JComboBox auf JPopupMenu umgestellt.
+ * 27.06.2006 | BNK | WIDTH, HEIGHT max korrekt unterstützt
+ * 29.06.2006 | BNK | min, max, center unterstützt
+ * 19.07.2006 | BNK | MODE "Icon" repariert
+ * 02.08.2006 | BNK | bessere Fehlermeldung wenn Konfiguration nicht gefunden.
+ * 19.10.2006 | BNK | +ACTION "kill" +ACTION "dumpInfo"
  * 25.10.2006 | BNK | [P923][R3585]Für den minimierten Zustand wird kein extra Fenster mehr verwendet.
  * 25.10.2006 | BNK | Icon-Mode entfernt.
  * 26.10.2006 | LUT | +ACTION "about"
@@ -64,13 +64,13 @@
  * 19.07.2007 | BNK | [22882]--load sollte jetzt auch unter Windows funzen
  * 17.12.2010 | ERT | [#5704] Menü der Senderbox wird versteckt, wenn die WollMuxBar unsichtbar wird
  * 19.01.2011 | ERT | Menü der Suchbox wird versteckt, wenn die WollMuxBar unsichtbar wird
- * 28.07.2011 | ERT | [R98726] Verliert die WollMuxBar den Fokus, wird der Fokus von der Suchliste auf das 
- *                  | nächste Element verschoben. Dadurch bleibt das Suchmenü geschlossen, wenn die 
+ * 28.07.2011 | ERT | [R98726] Verliert die WollMuxBar den Fokus, wird der Fokus von der Suchliste auf das
+ *                  | nächste Element verschoben. Dadurch bleibt das Suchmenü geschlossen, wenn die
  *                  | WollMuxBar den Fokus zurückerhält.
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
@@ -145,13 +145,13 @@ import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
 /**
  * Menü-Leiste als zentraler Ausgangspunkt für WollMux-Funktionen.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class WollMuxBar
 {
   public static final String ALLOW_USER_CONFIG = "ALLOW_USER_CONFIG";
-  
+
   private static final String ALLOW_MENUMANAGER = "ALLOW_MENUMANAGER";
 
   /**
@@ -213,7 +213,7 @@ public class WollMuxBar
    * einmal gelesen und dann diese Variable hier verwendet, damit im Falle, dass eine
    * feste Koordinate gesetzt ist, der Benutzer trotzdem das Fenster frei verschieben
    * kann nachdem es einmal an die feste Koordinate gesetzt wurde.
-   * 
+   *
    * Außerdem wird dieser Wert immer auf 0 gesetzt wenn der
    * {@link WollMuxBarConfig#UP_AND_AWAY_WINDOW_MODE} gesetzt ist.
    */
@@ -433,7 +433,7 @@ public class WollMuxBar
 
   /**
    * Erzeugt eine neue WollMuxBar.
-   * 
+   *
    * @param winMode
    *          Anzeigemodus, z.B. {@link WollMuxBarConfig#UP_AND_AWAY_WINDOW_MODE}.
    * @param conf
@@ -490,6 +490,8 @@ public class WollMuxBar
              * kann, wenn diese run() Methode beendet ist.
              */
             eventHandler.connectWithWollMux();
+
+            Workarounds.applyWorkaroundForWMClass();
 
             createGUI(conf);
           }
@@ -637,7 +639,7 @@ public class WollMuxBar
 
   /**
    * Passt die Größe und Position der Fenster an.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setSizeAndLocation()
@@ -723,7 +725,7 @@ public class WollMuxBar
   /**
    * Erzeugt den JFrame für die minimierte Darstellung (WollMux-Logo oder schmaler
    * Streifen).
-   * 
+   *
    * @param title
    *          der Titel für das Fenster (nur für Anzeige in Taskleiste)
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -740,7 +742,7 @@ public class WollMuxBar
   /**
    * Fügt der Komponente compo UI Elemente hinzu, eines für jedes Kind von
    * elementParent.
-   * 
+   *
    * @param menuConf
    *          die Kinder dieses ConfigThingys müssen "Menues"-Knoten sein, deren
    *          Kinder Menübeschreibungen sind für die Menüs, die als UI Elemente
@@ -773,7 +775,7 @@ public class WollMuxBar
   /**
    * Wie addUIElements, aber reicht den Parameter alreadySeen an parseMenu weiter, um
    * sich gegenseitig enthaltende Menüs zu erkennen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void addUIElementsChecked(Set<String> alreadySeen, ConfigThingy menuConf,
@@ -979,7 +981,7 @@ public class WollMuxBar
           }
           catch (Exception e)
           {}
-          
+
           UIElement uiElement =
             uiElementFactory.createUIElement(contextMap, uiElementDesc);
           GridBagConstraints gbc =
@@ -988,7 +990,7 @@ public class WollMuxBar
           gbc.gridy = y;
           Component uiComponent = uiElement.getComponent();
           uiComponent.addMouseListener(myIsInsideMonitor);
-          
+
           if(active)
           {
             if (context.equals("menu"))
@@ -1021,7 +1023,7 @@ public class WollMuxBar
 
   /**
    * Parst eine Menübeschreibung und erzeugt ein entsprechendes Menü.
-   * 
+   *
    * @param menu
    *          das JMenu oder JPopupMenu zu dem die UI Elemente hinzugefügt werden
    *          sollen.
@@ -1039,7 +1041,7 @@ public class WollMuxBar
    * @param alreadySeen
    *          falls menuName hier enthalten ist und mapMenuNameToMenu==null dann wird
    *          eine Fehlermeldung ausgegeben und null zurückgeliefert.
-   * 
+   *
    * @return menu, falls das Menü erfolgreich aufgebaut werden konnte, null, wenn das
    *         Menü nicht in menuConf definiert ist oder wenn es in alreadySeen ist und
    *         mapMenuNameToMenu == null.
@@ -1087,7 +1089,7 @@ public class WollMuxBar
 
   /**
    * Initialisiert uiElementFactory.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void initFactories()
@@ -1183,7 +1185,7 @@ public class WollMuxBar
   /**
    * Behandelt die Events der Eingabeelemente, die über die uiElementFactory erzeugt
    * wurden (also fast alle).
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class MyUIElementEventHandler implements UIElementEventHandler
@@ -1253,7 +1255,7 @@ public class WollMuxBar
   /**
    * Erwartet in conf eine Spezifikation gemäß wollmux:Open und bringt einen
    * Auswahldialog, um die zu öffnenden Vorlagen/Dokumente auszuwählen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void multiOpenDialog(final ConfigThingy conf)
@@ -1264,7 +1266,7 @@ public class WollMuxBar
 
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void abort()
@@ -1291,7 +1293,7 @@ public class WollMuxBar
   /**
    * Startet den {@link MenuManager} und führt dann eine Reinitialisierung der
    * WollMuxBar aus.
-   * 
+   *
    */
   private void menuManager()
   {
@@ -1308,7 +1310,7 @@ public class WollMuxBar
   /**
    * Zeigt den Optionsdialog von {@link WollMuxBarConfig} und führt dann eine
    * Reinitialisierung der WollMuxBar aus.
-   * 
+   *
    */
   private void options()
   {
@@ -1327,7 +1329,7 @@ public class WollMuxBar
 
   /**
    * Lässt die WollMuxBar sich komplett neu starten.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   private void reinit()
@@ -1356,10 +1358,10 @@ public class WollMuxBar
    * Kommando "svn info" auf das Projektverzeichnis erstellt. Die Buildinfo-Datei
    * buildinfo enthält die Paketnummer und die svn-Revision und ist in der Datei
    * WollMuxBar.jar enthalten.
-   * 
+   *
    * Kann dieses File nicht gelesen werden, so wird eine entsprechende Ersatzmeldung
    * erzeugt (siehe Sourcecode).
-   * 
+   *
    * @return Der Build-Status der aktuellen WollMuxBar.
    */
   public static String getBuildInfo()
@@ -1393,7 +1395,7 @@ public class WollMuxBar
   /**
    * Wird aufgerufen, wenn ein Button aktiviert wird, dem ein Menü zugeordnet ist und
    * lässt dann das entsprechende Menü aus mapMenuNameToJPopupMenu erscheinen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void openMenu(ActionEvent e)
@@ -1420,7 +1422,7 @@ public class WollMuxBar
    * Diese Methode wird aufgerufen, wenn in der Senderbox ein anderes Element
    * ausgewählt wurde und setzt daraufhin den aktuellen Absender im entfernten
    * WollMux neu.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD 5.1) TESTED
    */
   private void senderBoxItemChanged(ActionEvent e)
@@ -1434,7 +1436,7 @@ public class WollMuxBar
 
   /**
    * Setzt die Einträge aller Senderboxes neu.
-   * 
+   *
    * @param entries
    *          die Einträge, die die Senderboxen enthalten sollen.
    * @param current
@@ -1496,10 +1498,10 @@ public class WollMuxBar
    * zur Verwendung für die Searchbox. Dabei werden ausgehend von currentMenu alle
    * dort beschriebenen Untermenüs zu menuOrder hinzugefügt; Weitere Unter-Untermenüs
    * werden rekursiv durchsucht und ebenfalls angehängt.
-   * 
+   *
    * enthält menuOrder ausgehend vom Startmenü currentMenu (in gegebener Reihenfolge)
    * alle Menüs und Untermenüs
-   * 
+   *
    * @param allMenues
    *          Erwartet die "Menues"-Knoten der WollMux-Konfiguration, in denen die
    *          verfügbaren Menü-IDs aller möglichen Menüs beschrieben sind.
@@ -1535,7 +1537,7 @@ public class WollMuxBar
   /**
    * Erzeugt ein Popup-Fenster, das den Benutzer darüber informiert, dass keine
    * Verbindung zu OpenOffice hergestellt werden konnte.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void connectionFailedWarning()
@@ -1559,7 +1561,7 @@ public class WollMuxBar
   /**
    * Ein WindowListener, der auf die JFrames der Leiste registriert wird, damit als
    * Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class MyWindowListener implements WindowListener
@@ -1601,7 +1603,7 @@ public class WollMuxBar
   /**
    * Wird auf das Leistenfenster als WindowFocusListener registriert, um falls
    * erforderlich das minimieren anzustoßen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class WindowTransformer implements WindowFocusListener
@@ -1621,7 +1623,7 @@ public class WollMuxBar
   /**
    * Wird auf den Strich am oberen Bildschirmrand registriert im UpAndAway Modus, um
    * darauf reagieren zu können, wenn die Maus dort eindringt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class UpAndAwayWindowTransformer implements MouseListener, ActionListener
@@ -1668,7 +1670,7 @@ public class WollMuxBar
   /**
    * Wird auf alle Komponenten der WollMuxBar registriert, um zu überwachen, ob die
    * Maus in einer dieser Komponenten ist.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class IsInsideMonitor implements MouseListener, ActionListener
@@ -1722,7 +1724,7 @@ public class WollMuxBar
   /**
    * Je nach windowMode wird die WollMuxBar auf andere Art und Weise in den
    * Wartezustand versetzt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void minimize()
@@ -1764,7 +1766,7 @@ public class WollMuxBar
   /**
    * Je nach windowMode wird die WollMuxBar aus dem Wartezustand wieder in den
    * aktiven Zustand versetzt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void maximize()
@@ -1791,7 +1793,7 @@ public class WollMuxBar
 
   /**
    * Führt die gleichnamige ACTION aus.
-   * 
+   *
    * TESTED
    */
   private void openExt(String ext, String url)
@@ -1857,7 +1859,7 @@ public class WollMuxBar
 
   /**
    * Öffnet path als Vorlage.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void load(String path)
@@ -1885,7 +1887,7 @@ public class WollMuxBar
    * Startet die WollMuxBar, wobei die Argumente --load, --fifo und --firstrun
    * unabhängig von den restlichen Argumenten der WollMuxBar zuerst ausgewertet
    * werden.
-   * 
+   *
    * @param args
    *          --fifo, --firstrun, --load, --mm. Außerdem --minimize, --topbar,
    *          --normalwindow um das Anzeigeverhalten festzulegen.
@@ -1956,7 +1958,7 @@ public class WollMuxBar
   /**
    * Startet die WollMuxBar und kann aus mehreren Threads aufgerufen werden, da
    * synchronized.
-   * 
+   *
    * @param args
    *          --minimize, --topbar, --normalwindow um das Anzeigeverhalten
    *          festzulegen.
@@ -2019,7 +2021,7 @@ public class WollMuxBar
     }
 
     WollMuxFiles.setupWollMuxDir();
-    
+
     WollMuxClassLoader.initClassLoader();
 
     ConfigThingy wollmuxConf = WollMuxFiles.getWollmuxConf();
@@ -2037,8 +2039,8 @@ public class WollMuxBar
     {}
     // --mm schaltet allowMenuManager implizit an
     if(menumanager) allowMenuManager = true;
-    
-    
+
+
     // Darf die userConfig (wollmuxbar.conf) ausgewertet werden?
     boolean allowUserConfig = true;
     try
@@ -2050,7 +2052,7 @@ public class WollMuxBar
     {}
     // --mm schaltet allowUserConfig implizit an
     if(menumanager) allowUserConfig = true;
-    
+
     readWollMuxBarConfAndStartWollMuxBar(windowMode, menumanager,
       allowUserConfig, allowMenuManager, wollmuxConf);
   }
@@ -2061,7 +2063,7 @@ public class WollMuxBar
    * MUSS an allen Stellen verwendet werden, an denen normalerweise System.exit()
    * verwendet würde (außer der System.exit()-Aufruf wird explizit per Kommentar
    * begründet).
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static void terminate(int status)
@@ -2086,7 +2088,7 @@ public class WollMuxBar
    * Aufrufs an den Server-Prozess weitergeleitet, der sie dann an zentraler Stelle
    * abhängig vom bisherigen Kontext (z.B. WollMuxBar ist bereits geöffnet) behandeln
    * kann.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static class FifoHandler
@@ -2115,14 +2117,14 @@ public class WollMuxBar
      * firstrun angegeben, so weiß der Handler, dass er nicht erst nach einem
      * entfernten "Server" suchen muss, sondern diese Instanz der Server sein soll
      * und sofort gestartet werden kann.
-     * 
+     *
      * @param fifoName
      *          Filename der Fifo-Pipe
      * @param firstrun
      *          Shortcut zum Überspringen des Tests nach einer entfernten WollMuxBar
      * @param args
      *          Die Argumente, mit der die WollMuxBar gestartet werden soll.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     public static void handleFifo(String fifoName, boolean firstrun,
@@ -2157,7 +2159,7 @@ public class WollMuxBar
     /**
      * Startet einen Listener, der in einem eigenen Server-Thread auf der fifo-Pipe
      * fifo lauscht und übergebene Argumente externer WollMuxBar-Aufrufe bearbeitet.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     private static void startFifoListener(final File fifo)
@@ -2212,7 +2214,7 @@ public class WollMuxBar
      * Server-Prozess weiter zu geben und liefert true zurück, wenn das geklappt hat,
      * oder false, wenn kein Server gelauscht hat und daher ein Timeout (von derzeit
      * 2s) aktiv werden musste.
-     * 
+     *
      * @param fifo
      *          Die fifo, über die der entfernte Aufruf versucht werden soll.
      * @param args
@@ -2221,7 +2223,7 @@ public class WollMuxBar
      * @return true, wenn ein Server-Prozess an die Pipe connected ist und den Aufruf
      *         angenommen hat oder false, wenn innerhalb des Timeouts (2s) kein
      *         Serverprozess verbunden ist.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     private static boolean callRemoteApplication(final File fifo,
@@ -2272,7 +2274,7 @@ public class WollMuxBar
      * Sollte vor der Beendigung des Prozesses aufgerufen werden und sorgt dafür,
      * dass das fifo-File des Server-Prozesses (falls er hier läuft) beim Beenden
      * gelöscht wird und auch sonst aufgeräumt wird.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     public static void terminate()
@@ -2293,7 +2295,7 @@ public class WollMuxBar
 
   /**
    * Liest die wollmuxbar.conf ein und startet die WollMuxBar.
-   * 
+   *
    * @param windowMode
    *          falls >0, overridet dieser windowMode den aus der Konfiguration
    *          gelesenen Wert.
@@ -2311,7 +2313,7 @@ public class WollMuxBar
    */
   private static void readWollMuxBarConfAndStartWollMuxBar(int windowMode,
       boolean menumanager, boolean allowUserConfig, boolean allowMenuManager, ConfigThingy wollmuxConf)
-  { 
+  {
     ConfigThingy wollmuxbarConf = null;
     File wollmuxbarConfFile =
       new File(WollMuxFiles.getWollMuxDir(), WOLLMUXBAR_CONF);
