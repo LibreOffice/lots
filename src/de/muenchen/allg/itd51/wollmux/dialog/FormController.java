@@ -84,6 +84,8 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import de.muenchen.allg.itd51.wollmux.OpenExt;
+import de.muenchen.allg.itd51.wollmux.OpenExt.ExceptionHandler;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
@@ -1367,6 +1369,16 @@ public class FormController implements UIElementEventHandler
         	List<String> fragIds = new ArrayList<String>();
         	fragIds.add(fragId);
         	formModel.openTemplateOrDocument(fragIds);
+        }
+        else if (action.equals("openExt")) {
+        	OpenExt openExInstance = OpenExt.getInstance((String) args[1], (String)args[2]);
+        	openExInstance.launch(new ExceptionHandler() {
+				
+				@Override
+				public void handle(Exception x) {
+					Logger.error(x);
+				}
+			});
         }
       }
       else if (eventType.equals("focus"))

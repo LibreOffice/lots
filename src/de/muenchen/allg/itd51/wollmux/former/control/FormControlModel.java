@@ -133,6 +133,9 @@ public class FormControlModel
   /** EXT. */
   private String ext = "";
   
+  /** URL. */
+  private String url = "";
+  
   /** FRAG_ID */
   private String frag_id = "";
 
@@ -267,6 +270,8 @@ public class FormControlModel
         autofill = funcSelProv.getFunctionSelection(attr);
       else if (name.equals("FRAG_ID"))
     	  frag_id = str;
+      else if (name.equals("URL"))
+    	  url = str;
     }
 
     if (plausiConf != null)
@@ -531,6 +536,16 @@ public class FormControlModel
   public String getExt()
   {
     return ext;
+  }
+  
+  /**
+   * Liefert URL dieses FormControlModels für openExt.
+   * 
+   * @author Björn Ranft
+   */
+  public String getUrl()
+  {
+	  return url;
   }
 
   /**
@@ -910,6 +925,14 @@ public class FormControlModel
   public void setFragID(String frag_id) {
 	  this.frag_id = frag_id;
   }
+  
+  /**
+   * Setzt das URL-Attribut.
+   * @author Björn Ranft
+   */
+  public void setUrl(String url) {
+	  this.url = url;
+  }
 
   /**
    * Setzt das MINSIZE-Attribut.
@@ -1014,6 +1037,7 @@ public class FormControlModel
     if (getExt().length() > 0) conf.add("EXT").add("" + getExt());
     if (getHotkey() > 0) conf.add("HOTKEY").add("" + getHotkey());
     if (getFragID().length() > 0) conf.add("FRAG_ID").add("" + getFragID());
+    if (getUrl().length() > 0) conf.add("URL").add("" + getUrl());
 
     List<String> items = getItems();
     if (items.size() > 0)
