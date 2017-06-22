@@ -33,7 +33,7 @@
 package de.muenchen.allg.itd51.wollmux.former.control;
 
 import java.awt.Color;
-import java.awt.Dimensions;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
