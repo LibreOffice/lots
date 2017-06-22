@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -113,14 +114,9 @@ public class OpenExt
     int uhidx = url.indexOf(USER_HOME);
     if (uhidx >= 0)
     {
-      String userHomeUrl =
-        new File(System.getProperty("user.home")).toURI().toURL().toString();
-
-      while ((uhidx = url.indexOf(USER_HOME)) >= 0)
-        url =
-          url.substring(0, uhidx) + userHomeUrl
-            + url.substring(uhidx + USER_HOME.length());
-
+      String userHomeUrl = new File(System.getProperty("user.home")).toURI().toURL().toString();
+      url = Paths.get(userHomeUrl, new File(url).getName()).toString();
+    
       /**
        * Beim Einbau einer URL in eine bestehende URL kann es zu Doppelungen des
        * Protokollbezeichners file: kommen. In diesem Fall entfernen wir das erste
