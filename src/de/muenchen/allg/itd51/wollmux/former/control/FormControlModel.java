@@ -927,8 +927,18 @@ public class FormControlModel
   }
   
   /**
-   * Setzt das URL-Attribut.
-   * @author Björn Ranft
+   *  Setzt EXT-Attribut.
+   *  @author Björn Ranft
+   * @param ext
+   */
+  public void setExt(String ext) {
+	  this.ext = ext;
+  }
+  
+  /**
+   *  Setzt das URL-Attribut.
+   *  @author Björn Ranft
+   * @param url
    */
   public void setUrl(String url) {
 	  this.url = url;

@@ -33,7 +33,6 @@
 package de.muenchen.allg.itd51.wollmux.former.control;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -604,63 +603,168 @@ public class OneFormControlLineView extends LineView
    * @author Björn Ranft
    */
   private JPanel makeButtonAdditionalView() {
-	  buttonAdditionalView = new JPanel();
-	  buttonAdditionalView.setLayout(new BoxLayout(buttonAdditionalView, BoxLayout.X_AXIS));
-	  
-	  final JComboBox<String> actionComboBox = new JComboBox<String>();
-	  actionComboBox.addItem("openTemplate");
-	  actionComboBox.addItem("openExt");
-	  
-	  if(model != null && model.getAction() != null && model.getAction().equals("openTemplate"))
-		  actionComboBox.setSelectedIndex(0);
-	  
-	  if(model != null && model.getAction() != null && model.getAction().equals("openExt"))
-		  actionComboBox.setSelectedIndex(1);
-	  
-	  final JTextField fragIDTextField = new JTextField();
-	  fragIDTextField.setMinimumSize(new Dimension(20 ,20));
-	  
-	  if(model != null && model.getFragID() != null && model.getFragID().isEmpty()) fragIDTextField.setText("FRAG_ID"); else fragIDTextField.setText(model.getFragID());
-	  
-	 
-	  fragIDTextField.addKeyListener(new KeyListener() {
-		
-		@Override
-		public void keyTyped(KeyEvent e) {
-			// TODO Auto-generated method stub
-			
+		buttonAdditionalView = new JPanel();
+		buttonAdditionalView.setLayout(new BoxLayout(buttonAdditionalView, BoxLayout.X_AXIS));
+
+		final JTextField fragIDTextField = new JTextField();
+		final JTextField urlTextField = new JTextField();
+		final JTextField extTextField = new JTextField();
+
+		final JComboBox<String> actionComboBox = new JComboBox<String>();
+		actionComboBox.addItem("openTemplate");
+		actionComboBox.addItem("openExt");
+
+		buttonAdditionalView.add(actionComboBox);
+		buttonAdditionalView.add(fragIDTextField);
+		buttonAdditionalView.add(urlTextField);
+		buttonAdditionalView.add(extTextField);
+
+		fragIDTextField.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				model.setUrl(""); // prevents writing in config thingy export
+				model.setExt("");
+				model.setFragID(fragIDTextField.getText());
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+		urlTextField.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				model.setFragID(""); // prevents writing in config thingy export
+				model.setUrl(urlTextField.getText());
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+		extTextField.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				model.setFragID(""); // prevents writing in config thingy export
+				model.setExt(extTextField.getText());
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+		if (model == null || model.getFragID() == null || model.getFragID().isEmpty()) {
+			actionComboBox.setSelectedIndex(0);
+			urlTextField.setVisible(false);
+			extTextField.setVisible(false);
+			fragIDTextField.setVisible(true);
+			model.setAction("openTemplate");
+			fragIDTextField.setText("FRAG_ID");
 		}
-		
-		@Override
-		public void keyReleased(KeyEvent e) {
-			model.setFragID(fragIDTextField.getText());
+
+		if (model != null && model.getAction() != null && model.getAction().equals("openTemplate")) {
+			actionComboBox.setSelectedIndex(0);
+			urlTextField.setVisible(false);
+			extTextField.setVisible(false);
+			fragIDTextField.setVisible(true);
+
+			if (model != null && model.getFragID() != null && model.getFragID().isEmpty())
+				fragIDTextField.setText("FRAG_ID");
+			else
+				fragIDTextField.setText(model.getFragID());
 		}
-		
-		@Override
-		public void keyPressed(KeyEvent e) {
-			// TODO Auto-generated method stub
-			
+
+		if (model != null && model.getAction() != null && model.getAction().equals("openExt")) {
+			actionComboBox.setSelectedIndex(1);
+
+			fragIDTextField.setVisible(false);
+			urlTextField.setVisible(true);
+			extTextField.setVisible(true);
+
+			if (model != null && model.getUrl() != null && model.getUrl().isEmpty())
+				urlTextField.setText("URL");
+			else
+				urlTextField.setText(model.getUrl());
+
+			if (model != null && model.getExt() != null && model.getExt().isEmpty())
+				extTextField.setText("EXT");
+			else
+				extTextField.setText(model.getExt());
 		}
-	});
-	  
-	  actionComboBox.addItemListener(new ItemListener() {
-		@Override
-		public void itemStateChanged(ItemEvent e) {
-			String selectedAction = actionComboBox.getSelectedItem().toString();
-			
-			if(model!= null)
+
+		actionComboBox.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				String selectedAction = actionComboBox.getSelectedItem().toString();
+
+				if (model == null)
+					return;
+
 				model.setAction(selectedAction);
-		}
-	  });
-	  
-	  buttonAdditionalView.add(fragIDTextField);
-	  buttonAdditionalView.add(actionComboBox);
-	  
-	  //set default Action
-	  if(model.getAction() == null || model.getAction().isEmpty()) model.setAction("openTemplate");
-	  
-	  return buttonAdditionalView;
-  }
+
+				if (selectedAction.equals("openTemplate")) {
+					if (model != null && model.getFragID() != null && model.getFragID().isEmpty())
+						fragIDTextField.setText("FRAG_ID");
+					else
+						fragIDTextField.setText(model.getFragID());
+
+					urlTextField.setVisible(false);
+					extTextField.setVisible(false);
+					fragIDTextField.setVisible(true);
+
+				} else {
+					fragIDTextField.setVisible(false);
+					urlTextField.setVisible(true);
+					extTextField.setVisible(true);
+
+					if (model != null && model.getUrl() != null && model.getUrl().isEmpty())
+						urlTextField.setText("URL");
+					else
+						urlTextField.setText(model.getUrl());
+
+					if (model != null && model.getExt() != null && model.getExt().isEmpty())
+						extTextField.setText("EXT");
+					else
+						extTextField.setText(model.getExt());
+				}
+
+				buttonAdditionalView.revalidate();
+				buttonAdditionalView.repaint();
+			}
+		});
+
+		return buttonAdditionalView;
+	}
 
   /**
    * Liefert eine Komponente, die die ID des FormControlModels anzeigt und Änderungen
