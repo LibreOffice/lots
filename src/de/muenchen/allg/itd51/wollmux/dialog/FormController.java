@@ -1164,6 +1164,7 @@ public class FormController implements UIElementEventHandler
     supportedActions.add("closeAndOpenExt");
     supportedActions.add("saveTempAndOpenExt");
     supportedActions.add("openTemplate");
+    supportedActions.add("openExt");
     panelContext.supportedActions = supportedActions;
     buttonContext.supportedActions = supportedActions;
 
