@@ -238,7 +238,7 @@ public interface FormModel
    * Durch Angabe der FragID wird die entsprechende Vorlage zugeordnet.
    */
   public void openTemplateOrDocument(List<String> fragIds);
-
+  
   /**
    * Über diese Methode kann der FormController das FormModel informieren, dass er
    * vollständig initialisiert wurde und notwendige Aktionen wie z.B. das

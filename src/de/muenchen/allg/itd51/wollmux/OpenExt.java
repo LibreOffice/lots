@@ -116,7 +116,7 @@ public class OpenExt
     {
       String userHomeUrl = new File(System.getProperty("user.home")).toURI().toURL().toString();
       url = Paths.get(userHomeUrl, new File(url).getName()).toString();
-    
+
       /**
        * Beim Einbau einer URL in eine bestehende URL kann es zu Doppelungen des
        * Protokollbezeichners file: kommen. In diesem Fall entfernen wir das erste

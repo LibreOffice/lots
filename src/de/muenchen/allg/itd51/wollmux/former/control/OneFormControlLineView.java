@@ -632,6 +632,8 @@ public class OneFormControlLineView extends LineView
 				model.setUrl(""); // prevents writing in config thingy export
 				model.setExt("");
 				model.setFragID(fragIDTextField.getText());
+				model.setAction("openTemplate");
+				formularMax4000.documentNeedsUpdating();
 			}
 
 			@Override
@@ -653,6 +655,8 @@ public class OneFormControlLineView extends LineView
 			public void keyReleased(KeyEvent e) {
 				model.setFragID(""); // prevents writing in config thingy export
 				model.setUrl(urlTextField.getText());
+				model.setAction("openExt");
+				formularMax4000.documentNeedsUpdating();
 			}
 
 			@Override
@@ -674,6 +678,8 @@ public class OneFormControlLineView extends LineView
 			public void keyReleased(KeyEvent e) {
 				model.setFragID(""); // prevents writing in config thingy export
 				model.setExt(extTextField.getText());
+				model.setAction("openExt");
+				formularMax4000.documentNeedsUpdating();
 			}
 
 			@Override
@@ -683,12 +689,11 @@ public class OneFormControlLineView extends LineView
 			}
 		});
 
-		if (model == null || model.getFragID() == null || model.getFragID().isEmpty()) {
+		if (model.getAction() == null || model.getAction().isEmpty()) {
 			actionComboBox.setSelectedIndex(0);
 			urlTextField.setVisible(false);
 			extTextField.setVisible(false);
 			fragIDTextField.setVisible(true);
-			model.setAction("openTemplate");
 			fragIDTextField.setText("FRAG_ID");
 		}
 
@@ -702,6 +707,8 @@ public class OneFormControlLineView extends LineView
 				fragIDTextField.setText("FRAG_ID");
 			else
 				fragIDTextField.setText(model.getFragID());
+			
+			model.setAction("openTemplate");
 		}
 
 		if (model != null && model.getAction() != null && model.getAction().equals("openExt")) {
@@ -720,6 +727,8 @@ public class OneFormControlLineView extends LineView
 				extTextField.setText("EXT");
 			else
 				extTextField.setText(model.getExt());
+			
+			model.setAction("openExt");
 		}
 
 		actionComboBox.addItemListener(new ItemListener() {
@@ -737,16 +746,13 @@ public class OneFormControlLineView extends LineView
 						fragIDTextField.setText("FRAG_ID");
 					else
 						fragIDTextField.setText(model.getFragID());
-
+					
+					model.setAction("openTemplate");
 					urlTextField.setVisible(false);
 					extTextField.setVisible(false);
 					fragIDTextField.setVisible(true);
 
 				} else {
-					fragIDTextField.setVisible(false);
-					urlTextField.setVisible(true);
-					extTextField.setVisible(true);
-
 					if (model != null && model.getUrl() != null && model.getUrl().isEmpty())
 						urlTextField.setText("URL");
 					else
@@ -756,6 +762,11 @@ public class OneFormControlLineView extends LineView
 						extTextField.setText("EXT");
 					else
 						extTextField.setText(model.getExt());
+					
+					model.setAction("openExt");
+					fragIDTextField.setVisible(false);
+					urlTextField.setVisible(true);
+					extTextField.setVisible(true);
 				}
 
 				buttonAdditionalView.revalidate();
