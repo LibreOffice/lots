@@ -255,9 +255,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        if (noSelectedElementsOnVisibleTab()) return;
         insertNewTab();
-        if (noSelectedElementsOnVisibleTab()) showSelection();
       }
     });
     buttonPanel.add(tabButton, gbcButton);

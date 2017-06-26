@@ -413,9 +413,9 @@ public class SingleDocumentFormModel implements FormModel
       return null;
     }
   }
-  
-  @Override 
-  public void openTemplateOrDocument(List<String> fragIds){
-	  WollMuxEventHandler.handleOpenDocument(fragIds, false);
-  }
+
+	@Override
+	public void openTemplateOrDocument(List<String> fragIds) {
+		WollMuxEventHandler.handleOpenDocument(fragIds, false);
+	}
 }

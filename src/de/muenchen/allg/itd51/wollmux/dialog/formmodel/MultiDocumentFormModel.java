@@ -19,6 +19,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 /**
@@ -359,11 +360,6 @@ public class MultiDocumentFormModel implements FormModel
   {
     return null;
   }
-  
-  @Override
-  public void openTemplateOrDocument(List<String> fragIds){
-	  //TODO Auto-generated method stub
-  }
 
   /**
    * Erzeugt ein FormModel dem mehrere Formulardokumente zugeordnet sind, die alle in
@@ -443,4 +439,9 @@ public class MultiDocumentFormModel implements FormModel
     return new MultiDocumentFormModel(documentControllers, fms, formFensterConf,
       formConf, functionContext, funcLib, dialogLib);
   }
+
+	@Override
+	public void openTemplateOrDocument(List<String> fragIds) {
+		WollMuxEventHandler.handleOpenDocument(fragIds, false);
+	}
 }

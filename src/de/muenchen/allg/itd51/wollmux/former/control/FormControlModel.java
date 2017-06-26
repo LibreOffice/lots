@@ -537,17 +537,16 @@ public class FormControlModel
   {
     return ext;
   }
-  
+
   /**
    * Liefert URL dieses FormControlModels für openExt.
    * 
    * @author Björn Ranft
    */
-  public String getUrl()
-  {
+  public String getUrl() {
 	  return url;
   }
-
+  
   /**
    * Liefert den TIP dieses FormControlModels.
    * 

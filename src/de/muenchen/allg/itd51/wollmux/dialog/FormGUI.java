@@ -823,7 +823,7 @@ public class FormGUI
     
     @Override
     public void openTemplateOrDocument(List<String> fragIds) {
-    	for(String fragId : fragIds){
+    	for(String fragId : fragIds) {
     		Logger.log("openTemplateOrDocument(" + fragId + ")");
     	}
     }
