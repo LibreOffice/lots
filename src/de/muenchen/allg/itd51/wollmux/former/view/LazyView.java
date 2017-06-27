@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Eine View die erst wenn sie das erste mal angezeigt wird initialisiert wird.
  * 
- * Copyright (c) 2010-2015 Landeshauptstadt München
+ * Copyright (c) 2010-2017 Landeshauptstadt München
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 

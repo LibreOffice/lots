@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : GUI zum interaktiven Zusammenbauen und Testen von WollMux-Funktionen.
  * 
- * Copyright (c) 2010-2015 Landeshauptstadt München
+ * Copyright (c) 2010-2017 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
