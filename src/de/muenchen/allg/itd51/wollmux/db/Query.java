@@ -3,7 +3,7 @@
 * Projekt  : WollMux
 * Funktion : Speichert den Namen einer Datenquelle sowie eine Suchanfrage darauf.
 * 
- * Copyright (c) 2008-2015 Landeshauptstadt München
+ * Copyright (c) 2008-2017 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
