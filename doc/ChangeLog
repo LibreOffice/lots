@@ -1,3 +1,171 @@
+ ==================== Neu in Version 17.08 ====================
+
+    * Auf dem Basisclient ist es jetzt möglich einen Schnellstarter für die
+      WollMuxBar anzulegen.
+    * Der FormularMax wurde um die Funktionalität für "ACTION openExt" bzw.
+      "ACTION openTemplate" erweitert. Es ist jetzt möglich in der GUI einen
+      Button zu erzeugen (ähnlich derer, die bereits vorhanden sind), über den
+      ein weiteres Formular oder externes Programm geöffnet werden kann.
+    * Die Formularbeschreibung wurde angepasst, jedoch die ursprüngliche
+      Beschreibung übergeben. Jetzt wird die angepasste Beschreibung an die
+      FormularGUI übergeben und damit greifen die Anpassungen wieder.
+    * Bei der Abarbeitung des Events "TextBausteinEinfügen" wird das
+      TextDokumentModel nun korrekt initialisiert.
+    * Der Benutzer hat die Möglichkeit ein WollMux-Dokument, das noch aufgebaut
+      wird, zu schließen, ohne dass ein Speichern-Dialog erscheint.
+          o In LO kann das Interface XModifiable2 ein Dokument permanent auf
+            'nicht geändert' gesetzt werden. Dies kann, bevor der WollMux die
+            Bearbeitung startet, eingeschaltet und am Ende der Bearbeitung
+            wieder ausgeschaltet werden.
+    * Die Funktion des Makros wurde komplett in den WollMux übernommen und ist
+      im Funktionsumfang im wesentlichen nicht vom Makro zu unterscheiden. Neu
+      ist, dass der Toolbarbutton 'Seite drucken' nur verfügbar ist, wenn die
+      Funktion sinnvoll verwendet werden kann.
+    * Wird vor dem Seriendruck die Vorschau-Funktion verwendet, werden die
+      zuletzt angezeigten Vorschaudaten in das Gesamtdokument übernommen. Als
+      Workaround werden die Vorschaudaten vor dem Drucken gelöscht. Diese Daten
+      werden neu erzeugt, sobald die Vorschau erneut aktiviert wird.
+    * Username und Password für LDAP aus Config laden.
+          o Für eine LDAP-Datenquelle kann über die Schlüssel USER und PASSWORD
+            ein Benutzer für Abfragen an LDAP definiert werden. Für den User
+            muss der volĺständige DN angegeben werden. Wenn USER oder PASSWORD
+            fehlen, wird eine anonyme Anfrage abgesetzt.
+
+
+ ==================== Neu in Version 16.10 ====================
+
+    * Refactoring aller Java-Klassen um den Sourcecode wartbarer zu machen.
+      Hierbei wird ebenso die Möglichkeit zur Erweiterung verbessert.
+          o Auslagern der Hauptklassen des WollMux in ein eigenes Repository
+            namens wollmux-core. Siehe https://github.com/WollMux/wollmux-core.
+    * Kompatibilität mit LibreOffice 5.2 wird seitens des Qualitätsmanagements
+      (LHM) überprüft.
+    * Korrektur der .desktop Datei
+
+
+ ==================== Neu in Version 16.08b ====================
+
+    * Bugfixes:
+          o Umstellung von Metadaten-Notizen auf den neuen RDF-Mechanismus.
+                # Im neuen Modus rdfReadLegacy werden Annotationen gelöscht und
+                  durch RDF-Metadaten ersetzt. WollMux >11.9 ist als
+                  Voraussetzung notwendig, da ab dieser Version die RDF
+                  Metadaten durch den WollMux ausgewertet werden (wenn sie
+                  vorhanden sind).
+          o Es wird nun sowohl das UNO-Interface XDispatch und
+            XNotifyingDispatch implementiert. Wenn kein Ergebnis von dem
+            Dispatch erwartet wird, dann kann die Klasse Dispatch oder
+            DocumentDispatch verwendet werden. Deren Funktionalität hat sich
+            nicht verändert. Wenn dem Dispatch zwingend ein Ergebnis
+            übermittelt werden muss, dann muss entweder NotifyingDispatch oder
+            DocumentNotifyingDispatch verwendet werden. Diese brauchen dann
+            sowohl eine Dispatch-Methode mit Listener und ohne Listener als
+            Parameter.
+                # Für die save und saveAs Dispatches wird nun das neue
+                  Interface XNotifyingDispatch verwendet. Wird ein Listener als
+                  Parameter übergeben, so wird diesem nach der Bearbeitung das
+                  Ergebnis (Failure oder Success) mitgeteilt. Außerdem wird das
+                  Flag "SynchronMode" ausgewertet. Ist dieses Flag true, so
+                  muss der Dispatch synchron abgearbeitet werden. Dazu wird das
+                  Event nicht wie sonst üblich in die EventQueue des WollMux
+                  gehängt, sondern direkt bearbeitet. Ist das Flag false, so
+                  findet eine Bearbeitung wie bisher statt, indem das Event zur
+                  Queue hinzugefügt wird.
+          o Durch eine saubere Trennung zwischen den beiden Interfaces
+            XDispatch und XNotifyingDispatch versucht LibreOffice nicht mehr
+            die Druckfunktionen mit einem Listener als Parameter aufzurufen. Da
+            diese Funktionen nicht implementiert sind, kam es zu dem
+            fehlerhaften Verhalten.
+          o WOLLMUX_CONF_PATH wird nur noch verwendet, wenn sie auf eine Datei
+            zeigt.
+                # Bisher gab es keine Prüfung, ob der Pfad in WOLLMUX_CONF_PATH
+                  auf eine Datei oder ein Verzeichnis zeigt. Im letzteren Fall
+                  wurde die Liste der Dateien in dem Verzeichnis eingelesen.
+                  Das wurde jetzt korrigiert.
+
+
+ ==================== Neu in Version 16.08a ====================
+
+    * Bugfixes:
+          o Der WollMux unterstützt jetzt das Interface XNotifyingDispatch,
+            über das eine Rückmeldung an LibreOffice gegeben werden kann, wenn
+            der Speichervorgang beendet wurde. Außerdem werden die
+            Speicherroutinen des WollMux jetzt synchron aufgerufen. In
+            Zusammenspiel mit Änderungen in LibreOffice, so dass der korrekte
+            Dispatch aufgerufen wird, wird LibreOffice nach dem Speichern
+            korrekt geschlossen.
+
+
+ ==================== Neu in Version 16.08 ====================
+
+    * Bugfixes:
+          o Fix für Anzeige von Versionsnummern in WollMuxBar.
+          o Unsichtbare Bereiche beim MailMerge unversehrt lassen
+          o Zwischenstand Simulation auch für Sichtbarkeitsgruppen aktivieren
+          o Zwischen dem Speichern und Neuladen des Seriendruckdokuments wurde
+            ein Sleep von einer Sekunde eingebaut, um die Wahrscheinlichkeit
+            für einen Freeze zu reduzieren.
+          o lhmdeb: Paketierung der LHM angepasst
+                # Das Target "clean" wird weiterhin für die LHM-spezifischen
+                  Debianpakete benötigt. Zusätzlich wird die WollMuxBar mit
+                  einem eigenem Skript aufgerufen.
+                # Transitional Paket hinzugefügt um ein Systemupdate von
+                  WollMux 15.04 zu ermöglichen. Dies ist notwendig, da WollMux
+                  für LibreOffice 4.X und 5.X für unterschiedliche Zielpfade
+                  ein eigenes Paket erstellt.
+                # Versionsabfrage in build.xml wieder aufgenommen
+                # Natives Paket ohne Revision
+                # ExtensionManager zeigt WollMux-Version
+                # Build-Verzeichnis "deb" wird bereinigt
+                # Sidebar.xcu und Factories.xcu hinzugefügt
+    * Neue Features:
+          o Beschleuningung des Seriendrucks (Gesamtdokument).
+                # Beim Drucken eines Gesamtdokuments wird für jedes gedruckte
+                  Exemplar ein temporäres Dokument erzeugt. Dabei wird für
+                  jedes dieser Dokumente der Service XWollMux instanziiert, da
+                  für jedes Fenster die Toolbars geprüft werden. Wenn der
+                  Service XWollMux gestartet wird, wurden bisher jedes mal die
+                  Menüs im für den Seriendruck und den About-Dialog neu
+                  erzeugt. Dies hat 50% der Zeit des Seriendrucks in Anspruch
+                  genommen. Die Menüs werden jetzt nur noch beim ersten Start
+                  des Service angelegt. Dadurch ergibt sich eine deutliche
+                  Beschleunigung des Seriendrucks.
+          o Sidebar als Ersatz zur WollMuxBar: Eine zusätzliche WollMux-Sidebar
+            ermöglicht den Aufruf von Formularen und Vorlagen innerhalb von
+            LibreOffice 5. Die WollMuxBar bleibt vorerst im Release enthalten
+            und kann weiterhin genutzt werden.
+          o Senderbox für Sidebar.
+          o Sidebar: Popup für Absenderauswahl.
+          o Sidebar: Absender wechseln und Searchbox.
+          o Sidebar: Unterdrücken von Inhalten durch Config-Parameter.
+                # Standardmäßig übernimmt die Sidebar alle Einträge aus der
+                  WollMuxBar. Manche Einträge machen aber keinen Sinn, z.B. der
+                  Schließen-Button. Um diese Einträge zu unterdrücken, kann ein
+                  neuer Parameter SIDEBAR mit LABELs verwendet werden. (LABEL
+                  "X" TYPE "button" ACTION "abort" HOTKEY "S" SIDEBAR "false")
+          o FormularMax: Codeditor mit Syntaxhighlighting.
+          o Sicherheitsabfrage beim Schließen des Codeeditors.
+          o Die Textareas waren bereits in einer ScrollPane, aber die
+            Scrollbalken waren deaktiviert. Ich habe den vertikalen
+            Scrollbalken auf immer sichtbar gesetzt. Aus Gründen des Layouts
+            der Formular-GUI, muss der Scrollbar immer angezeigt werden.
+    * Refactoring:
+          o Refactoring: Private Klassen aus FormularMax4000 extrahiert.
+          o FormularMax aufgeteilt in View- und Controller-Klasse.
+          o FormularMax-Texteditor als eigenständiges Fenster hinzugefügt.
+                # Ab WollMux 16.08 steht ein neuer Editor (Config Editor) zur
+                  Verfügung, der die Anforderungen aus dem SOLL
+                  (Ticketbeschreibung) erfüllt.
+                # Diesen Editor findet man im FormularMax über "Formular" -
+                  > "Formularbeschreibung editieren" (wie bisher) mit folgenden
+                  Features:
+                      # Syntax Vervollständigung
+                      # Syntax Highligting
+                      # Suchfunktion (Tastenkürzel STRG + SHIFT + "F")
+                      # Zeilennummern
+          o Refactoring von WollMuxSingleton.
+          o Refactoring von DocumentTree.
+
 
  ==================== Neu in Version 16.04 ====================
 
@@ -95,6 +263,61 @@
                   und Erweiterungen können dann wesentlich schneller umgesetzt
                   werden. Zusätzlich wird der Installer auch unter Linux und
                   MacOSX zur Verfügung stehen.
+
+
+ ==================== Neu in Version 15.04d ====================
+
+    * Neue Features
+          o WollMux lässt sich auf einem 64-Bit-Client zusammen mit einer 64-
+            Bit-Version von LibreOffice installieren.
+
+
+ ==================== Neu in Version 15.04c ====================
+
+    * Bugfixes:
+          o Die zulässigen Werte für Font_Zoom in der WollMuxBar wurden
+            begrenzt auf den Bereich zwischen 0,5 und 3. Die Auswahloptionen
+            für die X-Position wurde nach 'links' und 'rechts' umbenannt.
+            Analog dazu die Option für die Y-Position nach 'unten' und 'oben'.
+            Die Buttons lassen sich nun über die Tastenkombination Alt+'Taste'
+            ansteuern.
+    * Neue Features
+          o WollMux läasst sich auf einem 64-Bit-Client mit einer 32-Bit-
+            Version von LibreOffice installieren.
+
+
+ ==================== Neu in Version 15.04b ====================
+
+    * Bugfixes:
+          o Es wird nun sowohl das UNO-Interface XDispatch und
+            XNotifyingDispatch implementiert. Wenn kein Ergebnis von dem
+            Dispatch erwartet wird, dann wird die Klasse Dispatch oder
+            DocumentDispatch? verwendet, deren Funktionalität sich nicht
+            verändert hat. Wenn dem Dispatch zwingend ein Ergebnis übermittelt
+            werden muss, dann muss entweder NotifyingDispatch? oder
+            DocumentNotifyingDispatch? verwendet werden. Diese implementieren
+            sowohl eine Dispatch-Methode mit Listener und ohne Listener als
+            Parameter. Für die save und saveAs Dispatches wird nun das neue
+            Interface XNotifyingDispatch verwendet. Wird ein Listener als
+            Parameter übergeben, so wird diesem nach der Bearbeitung das
+            Ergebnis (Failure oder Success) mitgeteilt. Außerdem wird das Flag
+            "SynchronMode?" ausgewertet. Ist dieses Flag true, so muss der
+            Dispatch synchron abgearbeitet werden. Dazu wird das Event nicht
+            wie sonst üblich in die EventQueue? des WollMux gehängt, sondern
+            direkt bearbeitet. Ist das Flag false, so findet eine Bearbeitung
+            wie bisher statt, indem das Event zur Queue hinzugefügt wird.
+          o Der Quickstarter wurde aus der WollMuxBar? entfernt. Der WollMux
+            unterstützt jetzt ein neues Interface XNotifyingDispatch. Dadurch
+            wird der Speichern Dialog beim Abmelden korrekt behandelt. Das
+            Kommandozeilenargument --quickstarter wird nicht mehr ausgewertet.
+            Es wird allerdings weiterhin akzeptiert um die
+            Rückwärtskompatibiliät zu erhalten. Nach einem Backport in LO
+            (#19826) ist es jetzt möglich mit Hilfe der Klasse Bootstrap
+            LibreOffice? mit selbst gewählten Parametern zu starten. Diese
+            sind:
+   --nodefault
+   --nologo
+   --minimized
 
 
  ==================== Neu in Version 15.04a ====================
