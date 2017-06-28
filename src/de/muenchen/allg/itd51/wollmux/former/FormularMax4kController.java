@@ -634,6 +634,11 @@ public class FormularMax4kController
     UNO.dispatch(documentController.getModel().doc, ".uno:SaveAs");
   }
   
+  public void sendAsEmail() {
+	  flushChanges();
+	  UNO.dispatch(documentController.getModel().doc, ".uno:SendMail");
+  }
+  
   /**
    * Implementiert die gleichnamige ACTION.
    * 
