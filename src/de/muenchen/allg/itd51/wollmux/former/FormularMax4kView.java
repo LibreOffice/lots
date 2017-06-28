@@ -737,5 +737,22 @@ public class FormularMax4kView extends JFrame
       }
     });
     submenu.add(menuItem);
+    
+    menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, Als E-Mail versenden, Drucken"));
+    
+    final URL STANDARD_BUTTONS_EMAIL =
+    	      this.getClass().getClassLoader().getResource(
+    	        "data/standardbuttons_email.conf");
+    	    
+    	    menuItem.addActionListener(new ActionListener()
+    	    {
+    	      @Override
+    	      public void actionPerformed(ActionEvent e)
+    	      {
+    	        controller.insertStandardButtons(null, STANDARD_BUTTONS_EMAIL, leftPanel.getButtonInsertionIndex());
+    	        setFrameSize();
+    	      }
+    	    });
+    submenu.add(menuItem);
   }
 }

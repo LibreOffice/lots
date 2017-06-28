@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import com.sun.star.text.XTextDocument;
+
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
@@ -443,5 +446,17 @@ public class MultiDocumentFormModel implements FormModel
 	@Override
 	public void openTemplateOrDocument(List<String> fragIds) {
 		WollMuxEventHandler.handleOpenDocument(fragIds, false);
+	}
+
+	@Override
+	public void sendAsEmail() {
+	  Vector<FormModel> fms = new Vector<FormModel>();
+	  for (TextDocumentController documentController : documentControllers)
+	    {
+	      FormModel fm =
+	        new SingleDocumentFormModel(documentController, formFensterConf, formConf,
+	          functionContext, funcLib, dialogLib, true);
+	      UNO.dispatch(documentController.getModel().doc, ".uno:SendMail");
+	    }
 	}
 }

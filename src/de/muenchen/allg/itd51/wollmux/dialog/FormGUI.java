@@ -828,6 +828,12 @@ public class FormGUI
     		Logger.log("openTemplateOrDocument(" + fragId + ")");
     	}
     }
+
+	@Override
+	public void sendAsEmail() {
+		// TODO Auto-generated method stub
+		
+	}
   }
 
   private class MyAbortRequestListener implements ActionListener

@@ -239,6 +239,8 @@ public interface FormModel
    */
   public void openTemplateOrDocument(List<String> fragIds);
   
+  public void sendAsEmail();
+  
   /**
    * Über diese Methode kann der FormController das FormModel informieren, dass er
    * vollständig initialisiert wurde und notwendige Aktionen wie z.B. das
