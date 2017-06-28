@@ -894,7 +894,42 @@ public class FormController implements UIElementEventHandler
       tabSwitcherCompo.setOpaque(false);
       tabSwitcherCompo.setFocusable(true);
       tabSwitcherCompo.setRequestFocusEnabled(false);
-      
+      tabSwitcherCompo.addFocusListener(new FocusListener()
+      {
+
+	public void focusGained(FocusEvent e)
+	{
+	  if (buttonPanel.getComponentCount() > 1
+	      && e.getOppositeComponent() == buttonPanel.getComponent(1))
+	  {
+	    tabSwitcherCompo.transferFocusBackward();
+	  } else
+	  {
+	    int startIdx = myTabbedPane.getSelectedIndex();
+	    int idx = startIdx;
+	    do
+	    {
+	      ++idx;
+	      if (idx >= myTabbedPane.getTabCount())
+	      {
+		idx = -1;
+		break;
+	      }
+	      if (myTabbedPane.isEnabledAt(idx))
+		break;
+	    } while (idx != startIdx);
+	    if (idx > -1)
+	      processUiElementEvent(null, "action", new String[] { "nextTab" });
+	    else
+	      buttonPanel.getComponent(buttonPanel.getComponentCount() - 1)
+		  .requestFocusInWindow();
+	  }
+	}
+
+	public void focusLost(FocusEvent e)
+	{
+	}
+      });
       buttonPanel.add(tabSwitcherCompo, gbc, 0);
     }
 
@@ -1276,79 +1311,91 @@ public class FormController implements UIElementEventHandler
       }
       else if (eventType.equals("action"))
       {
-        String action = (String) args[0];
-        if (action.equals("abort"))
-        {
-          abortRequestListener.actionPerformed(new ActionEvent(this, 0, "abort"));
-        }
-        else if (action.equals("nextTab"))
-        {
-        	int currentTabIndex = myTabbedPane.getSelectedIndex();
-        	if (currentTabIndex == -1 && myTabbedPane.getTabCount() > 1) {
-        		myTabbedPane.setSelectedIndex(1);
-        	} else
-        		myTabbedPane.setSelectedIndex(currentTabIndex + 1);
-        }
-        else if (action.equals("prevTab"))
-        {
-        	int currentTabIndex = myTabbedPane.getSelectedIndex(); 
-        	if (currentTabIndex > 0) myTabbedPane.setSelectedIndex(currentTabIndex - 1);
-        }
-        else if (action.equals("funcDialog"))
-        {
-          String dialogName = (String) args[1];
-          Dialog dlg = dialogLib.get(dialogName);
-          if (dlg == null)
-            Logger.error(L.m("Funktionsdialog \"%1\" ist nicht definiert",
-              dialogName));
-          else
-          {
-            dlg.instanceFor(functionContext).show(
-              new FunctionDialogEndListener(dialogName), funcLib, dialogLib);
-          }
-        }
-        else if (action.equals("closeAndOpenExt"))
-        {
-          formModel.closeAndOpenExt((String) args[1]);
-        }
-        else if (action.equals("saveTempAndOpenExt"))
-        {
-          formModel.saveTempAndOpenExt((String) args[1]);
-        }
-        else if (action.equals("printForm"))
-        {
-          formModel.print();
-        }
-        else if (action.equals("form2PDF"))
-        {
-          formModel.pdf();
-        }
-        else if (action.equals("save"))
-        {
-          formModel.save();
-        }
-        else if (action.equals("saveAs"))
-        {
-          formModel.saveAs();
-        }
-        else if(action.equals("openTemplate") || action.equals("openDocument")){
-        	String fragId = (String) args[1];
-        	List<String> fragIds = new ArrayList<String>();
-        	fragIds.add(fragId);
-        	formModel.openTemplateOrDocument(fragIds);
-        }
-        else if (action.equals("openExt")) {
-        	OpenExt openExInstance = OpenExt.getInstance((String) args[1], (String)args[2]);
-        	openExInstance.launch(new ExceptionHandler() {
-				
-				@Override
-				public void handle(Exception x) {
-					Logger.error(x);
-				}
-			});
-        }
-      }
-      else if (eventType.equals("focus"))
+	String action = (String) args[0];
+	if (action.equals("abort"))
+	{
+	  abortRequestListener
+	      .actionPerformed(new ActionEvent(this, 0, "abort"));
+	} else if (action.equals("nextTab"))
+	{
+	  int startIdx = myTabbedPane.getSelectedIndex();
+	  int idx = startIdx;
+	  do
+	  {
+	    ++idx;
+	    if (idx >= myTabbedPane.getTabCount())
+	      idx = 0;
+	    if (myTabbedPane.isEnabledAt(idx))
+	      break;
+	  } while (idx != startIdx);
+
+	  myTabbedPane.setSelectedIndex(idx);
+	} else if (action.equals("prevTab"))
+	{
+	  int startIdx = myTabbedPane.getSelectedIndex();
+	  int idx = startIdx;
+	  do
+	  {
+	    if (idx == 0)
+	      idx = myTabbedPane.getTabCount();
+	    --idx;
+	    if (myTabbedPane.isEnabledAt(idx))
+	      break;
+	  } while (idx != startIdx);
+
+	  myTabbedPane.setSelectedIndex(idx);
+	} else if (action.equals("funcDialog"))
+	{
+	  String dialogName = (String) args[1];
+	  Dialog dlg = dialogLib.get(dialogName);
+	  if (dlg == null)
+	    Logger.error(
+		L.m("Funktionsdialog \"%1\" ist nicht definiert", dialogName));
+	  else
+	  {
+	    dlg.instanceFor(functionContext).show(
+		new FunctionDialogEndListener(dialogName), funcLib, dialogLib);
+	  }
+	} else if (action.equals("closeAndOpenExt"))
+	{
+	  formModel.closeAndOpenExt((String) args[1]);
+	} else if (action.equals("saveTempAndOpenExt"))
+	{
+	  formModel.saveTempAndOpenExt((String) args[1]);
+	} else if (action.equals("printForm"))
+	{
+	  formModel.print();
+	} else if (action.equals("form2PDF"))
+	{
+	  formModel.pdf();
+	} else if (action.equals("save"))
+	{
+	  formModel.save();
+	} else if (action.equals("saveAs"))
+	{
+	  formModel.saveAs();
+	} else if (action.equals("openTemplate")
+	    || action.equals("openDocument"))
+	{
+	  String fragId = (String) args[1];
+	  List<String> fragIds = new ArrayList<String>();
+	  fragIds.add(fragId);
+	  formModel.openTemplateOrDocument(fragIds);
+	} else if (action.equals("openExt"))
+	{
+	  OpenExt openExInstance = OpenExt.getInstance((String) args[1],
+	      (String) args[2]);
+	  openExInstance.launch(new ExceptionHandler()
+	  {
+
+	    @Override
+	    public void handle(Exception x)
+	    {
+	      Logger.error(x);
+	    }
+	  });
+	}
+      } else if (eventType.equals("focus"))
       {
         if (args[0].equals("lost"))
           formModel.focusLost(source.getId());
