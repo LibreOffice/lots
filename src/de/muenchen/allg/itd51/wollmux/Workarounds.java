@@ -483,6 +483,8 @@ public class Workarounds
           Logger.error(L.m("WMClass konnte nicht gesetzt werden."), e);
           workaroundWMClass = Boolean.FALSE;
         }
+      } else {
+        workaroundWMClass = Boolean.FALSE;
       }
     }
     return workaroundWMClass.booleanValue();
