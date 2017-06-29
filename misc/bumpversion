@@ -1,14 +1,20 @@
 #!/bin/sh
 
-if [ $# != 2 ]; then
-  echo 1>&2 "USAGE: bumpversion <versionfile> <changelog>"
+if [ $# -lt 1 ] || [ $# -gt 3 ]; then
+  echo 1>&2 "USAGE: bumpversion <changelog> <version>"
+  echo 1>&2 "USAGE: bumpversion <changelog>"
   exit 1
 fi
 
-version="$(cat "$1")"
-echo "wollmux (${version}+lhm1) wanderer; urgency=low
 
-    * Version bump.
+if [ $# -eq 1 ]; then
+  dch --distribution wanderer --force-distribution --urgency low --changelog "$1" --increment --package wollmux "Version bump." --vendor "lhm"
+else
+  version=$2
+  # check if version contains lhm, add if necessary
+  if [ ! -z "${version##*+lhm*}" ]; then
+    version="$version+lhm1"
+  fi
+  dch --distribution wanderer --force-distribution --urgency low --changelog "$1" --newversion ${version} --package wollmux "Version bump." --vendor "lhm"
+fi
 
- -- Felix WollMux <wollmux-general@lists.forge.osor.eu>  Mon, 04 April 2016 14:44:44 +0200
-" >"$2"
