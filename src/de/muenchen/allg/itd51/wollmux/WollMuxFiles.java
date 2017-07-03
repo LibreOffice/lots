@@ -85,6 +85,9 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import javax.management.JMException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -98,7 +101,6 @@ import com.sun.jna.platform.win32.Shell32;
 import com.sun.jna.platform.win32.ShlObj;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinReg;
-import com.sun.management.OperatingSystemMXBean;
 import com.sun.star.beans.Property;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.XNameAccess;
@@ -395,7 +397,7 @@ public class WollMuxFiles
           ShlObj.SHGFP_TYPE_CURRENT, arrWollmuxConfPath);
         searchPaths.add(Native.toString(arrWollmuxConfPath)
           + "/.wollmux/wollmux.conf");
-        
+
         arrWollmuxConfPath = new char[WinDef.MAX_PATH];
         shell.SHGetFolderPath(null, ShlObj.CSIDL_COMMON_APPDATA, null,
           ShlObj.SHGFP_TYPE_CURRENT, arrWollmuxConfPath);
@@ -413,7 +415,7 @@ public class WollMuxFiles
           ShlObj.SHGFP_TYPE_CURRENT, arrWollmuxConfPath);
         searchPaths.add(Native.toString(arrWollmuxConfPath)
           + "/.wollmux/wollmux.conf");
-        
+
       }
 
       for (String path : searchPaths)
@@ -789,20 +791,20 @@ public class WollMuxFiles
       long maxMemory = Runtime.getRuntime().maxMemory();
       long totalMemory = Runtime.getRuntime().totalMemory();
       long freeMemory = Runtime.getRuntime().freeMemory();
-      OperatingSystemMXBean osmb =
-        (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-      out.write("No. of Processors: " + osmb.getAvailableProcessors() + "\n");
+      out.write("No. of Processors: "
+        + ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors()
+        + "\n");
       out.write("Maximum Heap Size: " + (maxMemory / 1024) + " KB\n");
       out.write("Currently Allocated Heap Size: " + (totalMemory / 1024) + " KB\n");
       out.write("Currently Used Memory: " + ((totalMemory - freeMemory) / 1024)
         + " KB\n");
       out.write("Maximum Physical Memory: "
-        + (osmb.getTotalPhysicalMemorySize() / 1024) + " KB\n");
-      out.write("Free Physical Memory: " + (osmb.getFreePhysicalMemorySize() / 1024)
-        + " KB\n");
-      out.write("Maximum Swap Size: " + (osmb.getTotalSwapSpaceSize() / 1024)
-        + " KB\n");
-      out.write("Free Swap Size: " + (osmb.getFreeSwapSpaceSize() / 1024) + " KB\n");
+          + getSystemMemoryAttribut("TotalPhysicalMemorySize") + " KB\n");
+      out.write("Free Physical Memory: " + getSystemMemoryAttribut("FreePhysicalMemorySize")
+          + " KB\n");
+      out.write("Maximum Swap Size: " + getSystemMemoryAttribut("TotalSwapSpaceSize")
+          + " KB\n");
+      out.write("Free Swap Size: " + getSystemMemoryAttribut("FreeSwapSpaceSize") + " KB\n");
 
       out.write("===================== END java-memoryinfo ==================\n");
 
@@ -874,12 +876,27 @@ public class WollMuxFiles
 
       out.close();
     }
-    catch (IOException x)
+    catch (IOException | NumberFormatException | JMException x)
     {
       LOGGER.error(L.m("Fehler beim Erstellen des Dumps"), x);
       return null;
     }
     return dumpFile.getAbsolutePath();
+  }
+
+  /**
+   * Get the size attribute of the system memory parts.
+   * @param key Values could be TotalPhysicalMemorySize or FreeSwapSpaceSize.
+   * @return The size of the memory part.
+   * @throws JMException If no such attribute is present.
+   */
+  private static long getSystemMemoryAttribut(String key)
+      throws JMException
+  {
+    MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+    String value = mBeanServer.getAttribute(
+        new ObjectName("java.lang", "type", "OperatingSystem"), key).toString();
+    return Long.parseLong(value) / 1024;
   }
 
   private static String getConfigValue(String path, String name)
