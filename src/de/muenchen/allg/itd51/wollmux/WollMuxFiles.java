@@ -93,14 +93,15 @@ import com.sun.jna.Native;
 import com.sun.jna.platform.win32.Shell32;
 import com.sun.jna.platform.win32.ShlObj;
 import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.platform.win32.WinReg;
 import com.sun.management.OperatingSystemMXBean;
 import com.sun.star.beans.Property;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.lang.XMultiServiceFactory;
-import com.sun.star.lib.loader.WollMuxRegistryAccess;
-import com.sun.star.lib.loader.WollMuxRegistryAccessException;
+import com.sun.star.lib.loader.RegistryAccess;
+import com.sun.star.lib.loader.RegistryAccessException;
 import com.sun.star.sdbc.XConnection;
 import com.sun.star.sdbc.XDataSource;
 import com.sun.star.uno.AnyConverter;
@@ -367,17 +368,17 @@ public class WollMuxFiles
         try
         {
           wollmuxConfPath =
-            WollMuxRegistryAccess.getStringValueFromRegistry("HKEY_CURRENT_USER",
+            RegistryAccess.getStringValueFromRegistry(WinReg.HKEY_CURRENT_USER,
               WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
           searchPaths.add(wollmuxConfPath);
 
           wollmuxConfPath =
-            WollMuxRegistryAccess.getStringValueFromRegistry("HKEY_LOCAL_MACHINE",
+            RegistryAccess.getStringValueFromRegistry(WinReg.HKEY_LOCAL_MACHINE,
               WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
 
           searchPaths.add(wollmuxConfPath);
         }
-        catch (WollMuxRegistryAccessException ex)
+        catch (RegistryAccessException ex)
         {}
 
         Shell32 shell = Shell32.INSTANCE;
