@@ -6,7 +6,7 @@
 	<name>WollMux</name>
 
 	<properties>
-		<libreoffice.version>4.1.1</libreoffice.version>
+		<libreoffice.version>5.2.7</libreoffice.version>
 		<izpack.staging>dist</izpack.staging>
 	</properties>
 
