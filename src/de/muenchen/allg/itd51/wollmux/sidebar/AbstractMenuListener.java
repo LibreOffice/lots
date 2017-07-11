@@ -9,21 +9,26 @@ public abstract class AbstractMenuListener implements XMenuListener
 
   @Override
   public void disposing(EventObject event)
-  {}
+  {
+  }
 
   @Override
-  public void activate(MenuEvent event)
-  {}
+  public void itemActivated(MenuEvent event)
+  {
+  }
 
   @Override
-  public void deactivate(MenuEvent event)
-  {}
+  public void itemDeactivated(MenuEvent event)
+  {
+  }
 
   @Override
-  public void highlight(MenuEvent event)
-  {}
+  public void itemHighlighted(MenuEvent event)
+  {
+  }
 
   @Override
-  public void select(MenuEvent event)
-  {}
+  public void itemSelected(MenuEvent event)
+  {
+  }
 }
