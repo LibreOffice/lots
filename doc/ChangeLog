@@ -30,6 +30,11 @@
             ein Benutzer für Abfragen an LDAP definiert werden. Für den User
             muss der volĺständige DN angegeben werden. Wenn USER oder PASSWORD
             fehlen, wird eine anonyme Anfrage abgesetzt.
+    * Umstellung auf LibreOffice 5.2
+          o Die Sidebar funktioniert nur zusammen mit LibreOffice 5.2. und
+            nicht mit LibreOffice 4.1
+    * Ersetzen der Windows-Bibliothek unowinreg.dll durch eine Java-Bibliothek
+      (jna)
 
 
  ==================== Neu in Version 16.10 ====================
