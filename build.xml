@@ -119,9 +119,15 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 	</target>
 	
 	<target name="bumpversion" unless="debian.native" depends="makeversion">
-		<exec executable="bash" failifexecutionfails="false">
-		  <arg line="misc/bumpversion ${VERSION_FILE} lhmdeb/changelog"/>
-		</exec>		
+		<exec executable="dpkg-parsechangelog" outputproperty="CUR_VERSION">
+		  <arg line="-llhmdeb/changelog --show-field Version"/>
+		</exec>
+		<echo message="Current Debian Version is ${CUR_VERSION}"/>
+		<echo message="Current WollMux Version is ${VERSION}"/>
+		<input message="New Debian Version (Leave empty to auto-increment):" addproperty="DEB_VERSION"/>
+		<exec executable="bash">
+		  <arg line="misc/bumpversion lhmdeb/changelog ${DEB_VERSION}"/>
+		</exec>
 	</target>
 	
 	<target name="makechangelog">
