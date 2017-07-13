@@ -43,8 +43,6 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.bridge.UnoUrlResolver;
 import com.sun.star.bridge.XUnoUrlResolver;
 import com.sun.star.comp.helper.Bootstrap;
-import com.sun.star.container.XEnumeration;
-import com.sun.star.frame.TerminationVetoException;
 import com.sun.star.frame.XDesktop;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
@@ -54,7 +52,6 @@ import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
-import com.sun.star.util.XModifiable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
@@ -184,9 +181,11 @@ public class WollMuxBarEventHandler
    *          ein optionales Argument (z.B. "{fragid}"). Ist das Argument null oder
    *          der Leerstring, so wird es nicht mit übergeben.
    */
-  public void handleWollMuxUrl(String dispatchCmd, String arg)
+  public Event handleWollMuxUrl(String dispatchCmd, String arg)
   {
-    handle(new WollMuxUrlEvent(dispatchCmd, arg));
+    WollMuxUrlEvent e = new WollMuxUrlEvent(dispatchCmd, arg);
+    handle(e);
+    return e;
   }
 
   /**
@@ -262,7 +261,7 @@ public class WollMuxBarEventHandler
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private interface Event
+  public interface Event
   {
     public void process();
   }
@@ -275,17 +274,18 @@ public class WollMuxBarEventHandler
     {
       try
       {
+        String argEncoded = "";
         if (arg != null && !arg.equals(""))
-          arg = "#" + URLEncoder.encode(arg, ConfigThingy.CHARSET);
-        else
-          arg = "";
+        {
+          argEncoded = "#" + URLEncoder.encode(arg, ConfigThingy.CHARSET);
+        }
+
+        url = dispatchCmd + argEncoded;
       }
       catch (UnsupportedEncodingException e)
       {
         Logger.error(e);
       }
-
-      url = dispatchCmd + arg;
     }
 
     @Override
