@@ -107,7 +107,17 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
   private void showMultiOpenDialog(final ConfigThingy conf)
   {
     final JFrame multiOpenFrame =
-      new MultiOpenDialog(L.m("Was möchten Sie öffnen ?"), conf, eventHandler);
+      new MultiOpenDialog(L.m("Was möchten Sie öffnen ?"), conf, new WollMuxBarEventHandler(null) {
+
+        @Override
+        public Event handleWollMuxUrl(String dispatchCmd, String arg)
+        {
+          Event e = super.handleWollMuxUrl(dispatchCmd, arg);
+          e.process();
+          return e;
+        }
+        
+      });
     multiOpenFrame.setVisible(true);
   }
   

@@ -152,6 +152,7 @@ public class MultiOpenDialog extends JFrame
 
     vbox.add(hbox);
 
+    Common.setWollMuxIcon(this);
     setAlwaysOnTop(true);
     pack();
     int frameWidth = getWidth();

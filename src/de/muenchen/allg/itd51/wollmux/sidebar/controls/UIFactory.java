@@ -9,7 +9,9 @@ import java.util.Set;
 
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.UIElementContext;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarConfig;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarEventHandler;
@@ -158,10 +160,24 @@ public class UIFactory
     if (type.equals("button") || type.equals("menuitem"))
     {
       UIElementAction action = null;
-      if (props.get(ACTION) != null)
+      String actionName = props.get(ACTION); 
+      if (actionName != null)
       {
+        ConfigThingy actionConf = conf;
+        try 
+        {
+          if (actionName.equals("open"))
+          {
+            actionConf = conf.get("OPEN");
+          }
+        }
+        catch (NodeNotFoundException e)
+        {
+          Logger.error(L.m("ACTION \"open\" erfordert die Angabe OPEN \"...\""));
+        }
+
         action = new UIElementAction(eventHandler, false, "action", new Object[] {
-          props.get(ACTION), conf });
+            actionName, actionConf });
       }
 
       uiElement = new UIMenuItem(props.get(ID), props.get(LABEL), parent, action);

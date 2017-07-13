@@ -54,8 +54,8 @@ import java.awt.event.WindowStateListener;
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -597,6 +597,7 @@ public class FormGUI
     public void windowClosing(WindowEvent e)
     {
       closeAction.actionPerformed(null);
+      ((JFrame)e.getSource()).dispose();
     }
 
     @Override
