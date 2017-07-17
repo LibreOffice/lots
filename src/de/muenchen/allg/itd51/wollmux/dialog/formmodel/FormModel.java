@@ -239,6 +239,9 @@ public interface FormModel
    */
   public void openTemplateOrDocument(List<String> fragIds);
   
+  /**
+   * Sendet Dokument als Anhang über Standardbuttons in FormularMax.
+   */
   public void sendAsEmail();
   
   /**
