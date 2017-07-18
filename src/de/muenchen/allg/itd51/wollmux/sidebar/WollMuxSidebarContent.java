@@ -221,7 +221,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       }
     }
   }
-
+  
   @Override
   public XAccessible createAccessible(XAccessible arg0)
   {
@@ -248,7 +248,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
   @Override
   public LayoutSize getHeightForWidth(int width)
   {
-    return new LayoutSize(500, -1, 500);
+    int height = layout.getHeight();
+    return new LayoutSize(height, height, height);
   }
 
   @Override
