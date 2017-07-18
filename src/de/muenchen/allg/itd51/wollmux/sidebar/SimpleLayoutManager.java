@@ -21,6 +21,8 @@ public class SimpleLayoutManager
   private XWindow owner;
 
   private Set<XControl> controls;
+  
+  private int height = 0;
 
   /**
    * Erzeugt einen LayoutManager für eine Fenster. Ein Fenster kann jedes UNO-Objekt
@@ -32,6 +34,11 @@ public class SimpleLayoutManager
   {
     this.owner = owner;
     controls = new LinkedHashSet<XControl>();
+  }
+  
+  public int getHeight()
+  {
+    return height;
   }
 
   /**
@@ -65,5 +72,7 @@ public class SimpleLayoutManager
       Rectangle cr = wnd.getPosSize();
       yOffset += cr.Height;
     }
+    
+    height = yOffset;
   }
 }
