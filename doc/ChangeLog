@@ -33,8 +33,16 @@
     * Umstellung auf LibreOffice 5.2
           o Die Sidebar funktioniert nur zusammen mit LibreOffice 5.2. und
             nicht mit LibreOffice 4.1
+    * MultiForm-Formulare können nun über die Sidebar geöffnet werden.
     * Ersetzen der Windows-Bibliothek unowinreg.dll durch eine Java-Bibliothek
       (jna)
+          o Damit die Bibliothek das installierte LibreOffice finden kann muss
+            Java in der gleichen Architektur wie das LibreOffice verwendet
+            werden.
+    * Über die FormularGui können nun Dokumente als E-Mail versendet werden.
+      Dazu wird ein weiteres Standardelement im FormularMax angeboten.
+    * In der WollMux Sidebar kann nun gescrollt werden.
+    * Die Auflösung des Desktop-Icons unter Windows wurde vergrößert.
 
 
  ==================== Neu in Version 16.10 ====================
