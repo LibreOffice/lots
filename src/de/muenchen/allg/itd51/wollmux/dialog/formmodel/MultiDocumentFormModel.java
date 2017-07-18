@@ -320,7 +320,7 @@ public class MultiDocumentFormModel implements FormModel
     }
 
     // FormGUI beenden (falls bisher eine gesetzt ist)
-    if (documentControllers.size() == 0 && formGUI != null)
+    if (formGUI != null)
     {
       formGUI.dispose();
       formGUI = null;
