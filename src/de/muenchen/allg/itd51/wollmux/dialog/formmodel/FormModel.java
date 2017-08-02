@@ -240,6 +240,11 @@ public interface FormModel
   public void openTemplateOrDocument(List<String> fragIds);
   
   /**
+   * Sendet Dokument als Anhang über Standardbuttons in FormularMax.
+   */
+  public void sendAsEmail();
+  
+  /**
    * Über diese Methode kann der FormController das FormModel informieren, dass er
    * vollständig initialisiert wurde und notwendige Aktionen wie z.B. das
    * zurücksetzen des modified-Status des Dokuments durchgeführt werden sollen.
