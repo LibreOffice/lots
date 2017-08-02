@@ -498,10 +498,9 @@ public class FormGUI
      * Da sich setWindowPosSize() unter Windows und Linux anders verhält, gibt es
      * keine korrekte Methode (die mir bekannt ist), um die richtige Ausrichtung zu
      * berechnen.
-     */
-    int docX =
-      frameBounds.x + frameBounds.width + windowInsets.left + windowInsets.right;
-    int docWidth = maxWindowBounds.x + maxWindowBounds.width - docX;
+    */
+    int docX = frameBounds.width + frameBounds.x + windowInsets.left;
+    int docWidth = maxWindowBounds.width - frameBounds.width - frameBounds.x - windowInsets.right;
     if (docWidth < 0)
     {
       docX = maxWindowBounds.x;
