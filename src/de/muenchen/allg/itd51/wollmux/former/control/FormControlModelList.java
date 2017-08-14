@@ -304,11 +304,12 @@ public class FormControlModelList implements Iterable<FormControlModel>
     ConfigThingy export = new ConfigThingy("Fenster");
     ConfigThingy conf = export;
     ConfigThingy tabConf = export;
-
+   
     int phase = 0; // 0: tab start, 1: Eingabefelder, 2: Buttons
     String id = makeUniqueId(FormularMax4kController.STANDARD_TAB_NAME);
     FormControlModel currentTab =
-      FormControlModel.createTab(id, id, formularMax4000);
+    FormControlModel.createTab(id, id, formularMax4000);
+
     Iterator<FormControlModel> iter = models.iterator();
     while (iter.hasNext())
     {
@@ -325,24 +326,47 @@ public class FormControlModelList implements Iterable<FormControlModel>
       else if (phase == 0 && model.getType() == FormControlModel.BUTTON_TYPE)
       {
         tabConf = outputTab(currentTab, export);
-        conf = tabConf.add("Buttons");
+        
+        //wenn der Button ein trac#20601 Button ist, soll dieser nicht in einen eigenen Knoten Button( ... ) exportiert werden
+        //da er sonst in der Fusszeile der FormularGUI auftauchen würde in der auch die Standardbuttons gezeigt werden.
+        //der button wird dadurch ohne expliziten Button-Knoten in den Knoten "Eingabefelder" exportiert.
+        if(model.getAction().equals("openExt") || model.getAction().equals("openTemplate")) {
+          conf = tabConf.add("Eingabefelder");
+        }
+        else {
+          conf = tabConf.add("Buttons");
+        }
+        
         conf.addChild(model.export());
         phase = 2;
       }
       else if (phase == 1 && model.getType() == FormControlModel.BUTTON_TYPE)
       {
-        conf.addChild(makeGlue());
-        conf = tabConf.add("Buttons");
+        if(!model.getAction().equals("openExt") && !model.getAction().equals("openTemplate"))
+        {
+          conf.addChild(makeGlue());
+          conf = tabConf.add("Buttons");
+        }
+        
         conf.addChild(model.export());
         phase = 2;
       }
       else if (phase == 2 && model.getType() == FormControlModel.BUTTON_TYPE)
       {
-        conf.addChild(model.export());
+	  if(!model.getAction().equals("openExt") 
+	      && !model.getAction().equals("openTemplate")
+	      && tabConf.query("Buttons") != null
+	      && tabConf.query("Buttons").count() < 1) {
+	    
+	    conf = tabConf.add("Buttons");
+	  }
+	
+	conf.addChild(model.export());
       }
       else if (phase == 2 && model.getType() != FormControlModel.BUTTON_TYPE
         && model.getType() != FormControlModel.GLUE_TYPE
-        && model.getType() != FormControlModel.SEPARATOR_TYPE)
+        && model.getType() != FormControlModel.SEPARATOR_TYPE
+        && model.getType().equals("tab"))
       {
         id = makeUniqueId(FormularMax4kController.STANDARD_TAB_NAME);
         currentTab = FormControlModel.createTab(id, id, formularMax4000);
