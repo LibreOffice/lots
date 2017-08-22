@@ -97,12 +97,15 @@ import javax.swing.filechooser.FileFilter;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
+import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XNamed;
 import com.sun.star.document.XEventListener;
 import com.sun.star.form.binding.InvalidBindingStateException;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XFrames;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XPageCursor;
 import com.sun.star.text.XTextCursor;
@@ -167,7 +170,6 @@ import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpret
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.print.PrintModels;
-import de.muenchen.allg.ooo.TextDocument;
 
 /**
  * Ermöglicht die Einstellung neuer WollMuxEvents in die EventQueue.
@@ -3473,36 +3475,32 @@ public class WollMuxEventHandler
         hcAtt = " HIGHLIGHT_COLOR '" + colStr + "'";
       }
       String bookmarkName = bookmarkStart + hcAtt + ")";
-
-      Pattern bookmarkPattern = DocumentCommands.getPatternForCommand(blockname);
-      Set<String> bmNames =
-        TextDocument.getBookmarkNamesMatching(bookmarkPattern, range);
-
-      if (bmNames.size() > 0)
-      {
-        // bereits bestehende Blöcke löschen
-        Iterator<String> iter = bmNames.iterator();
-        while (iter.hasNext())
-        {
-          bookmarkName = iter.next();
-          try
-          {
-            Bookmark b =
-              new Bookmark(bookmarkName, UNO.XBookmarksSupplier(documentController.getModel().doc));
-            if (bookmarkName.contains("HIGHLIGHT_COLOR"))
-              UNO.setPropertyToDefault(b.getTextCursor(), "CharBackColor");
-            b.remove();
-          }
-          catch (NoSuchElementException e)
-          {}
-        }
-        ModalDialogs.showInfoModal(
-          L.m("Markierung des Blockes aufgehoben"),
-          L.m(
-            "Der ausgewählte Block enthielt bereits eine Markierung 'Block %1'. Die bestehende Markierung wurde aufgehoben.",
-            markChange));
+      
+      XNamed bookmarkByRange = getBookmarkByTextRange(range);
+      if(bookmarkByRange != null) {
+	Bookmark bookmarkToDelete;
+	try
+	{
+	  String currentBookmarkByRangeName = bookmarkByRange.getName();
+	  bookmarkToDelete = new Bookmark(currentBookmarkByRangeName, UNO.XBookmarksSupplier(documentController.getModel().doc));
+	  
+	  if (bookmarkName.contains("HIGHLIGHT_COLOR")) {
+	          UNO.setPropertyToDefault(bookmarkToDelete.getTextCursor(), "CharBackColor");
+	  }
+		
+	  bookmarkToDelete.remove();
+	  
+	  if(!(currentBookmarkByRangeName.equals(bookmarkName))){
+	    setNewDocumentCommand(documentController,bookmarkName,range,highlightColor,markChange);
+	  }
+	} catch (NoSuchElementException e)
+	{
+	  // TODO Auto-generated catch block
+	  e.printStackTrace();
+	}
       }
-      else
+
+      if(bookmarkByRange == null)
       {
         // neuen Block anlegen
         documentController.getModel().addNewDocumentCommand(range, bookmarkName);
@@ -3517,15 +3515,75 @@ public class WollMuxEventHandler
         ModalDialogs.showInfoModal(L.m("Block wurde markiert"),
           L.m("Der ausgewählte Block %1.", markChange));
       }
-
+      
       // PrintBlöcke neu einlesen:
       documentController.getModel().getDocumentCommands().update();
       DocumentCommandInterpreter dci =
         new DocumentCommandInterpreter(documentController, WollMuxFiles.isDebugMode());
       dci.scanGlobalDocumentCommands();
       dci.scanInsertFormValueCommands();
-
+      
       stabilize();
+    }
+    
+    private static void setNewDocumentCommand(
+	TextDocumentController documentController,
+	String bookmarkName,
+	XTextCursor range, 
+	int highlightColor,
+	String markChange)
+    {
+   // neuen Block anlegen
+      documentController.getModel().addNewDocumentCommand(range, bookmarkName);
+        UNO.setProperty(range, "CharBackColor", highlightColor);
+        // ViewCursor kollabieren, da die Markierung die Farben verfälscht
+        // darstellt.
+        XTextCursor vc = documentController.getModel().getViewCursor();
+        if (vc != null) vc.collapseToEnd();
+
+      ModalDialogs.showInfoModal(L.m("Block wurde markiert"),
+        L.m("Der ausgewählte Block %1.", markChange));
+    }
+    
+    private static XNamed getBookmarkByTextRange(XTextRange range) {
+      XNamed bookmark = null;
+      XTextCursor currentCursor = range.getText().createTextCursorByRange(range);
+      if (UNO.XEnumerationAccess(currentCursor) != null)
+      {
+        XEnumeration xenum = UNO.XEnumerationAccess(currentCursor).createEnumeration();
+        while (xenum.hasMoreElements())
+        {
+          XEnumeration parEnum = null;
+          try
+          {
+            parEnum =
+              UNO.XEnumerationAccess(xenum.nextElement()).createEnumeration();
+          }
+          catch (java.lang.Exception e)
+          {}
+
+          while (parEnum != null && parEnum.hasMoreElements())
+          {
+            try
+            {
+              Object element = parEnum.nextElement();
+              bookmark = UNO.XNamed(UNO.getProperty(element, "Bookmark"));
+              
+              break;
+            }
+            catch (WrappedTargetException ex) 
+            {
+              break;
+            }
+            catch (NoSuchElementException ex)
+            {
+              break;
+            }
+          }
+        }
+      }
+      
+      return bookmark;
     }
 
     /**
