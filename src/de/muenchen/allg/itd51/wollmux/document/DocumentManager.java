@@ -440,7 +440,7 @@ public class DocumentManager
     @Override
     public boolean hasTextDocumentModel()
     {
-      return documentController.getModel() != null;
+      return getTextDocumentController().getModel() != null;
     }
 
     @Override

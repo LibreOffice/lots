@@ -111,7 +111,6 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.RuntimeException;
-import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XStringSubstitution;
 import com.sun.star.view.DocumentZoomType;
 import com.sun.star.view.XPrintable;
@@ -161,9 +160,9 @@ import de.muenchen.allg.itd51.wollmux.dialog.formmodel.InvalidFormDescriptorExce
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.MultiDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo;
 import de.muenchen.allg.itd51.wollmux.document.FrameController;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
@@ -264,7 +263,11 @@ public class WollMuxEventHandler
                 event = eventQueue.remove(0);
               }
 
-              event.process();
+              try {
+        	event.process();
+              } catch (Exception ex) {
+        	Logger.error(ex);
+              }
             }
           }
           catch (InterruptedException e)
