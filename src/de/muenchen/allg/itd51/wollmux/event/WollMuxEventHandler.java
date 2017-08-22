@@ -3475,9 +3475,8 @@ public class WollMuxEventHandler
         hcAtt = " HIGHLIGHT_COLOR '" + colStr + "'";
       }
       String bookmarkName = bookmarkStart + hcAtt + ")";
-      
       XNamed bookmarkByRange = getBookmarkByTextRange(range);
-      if(bookmarkByRange != null) {
+      if (bookmarkByRange != null) {
 	Bookmark bookmarkToDelete;
 	try
 	{
@@ -3490,7 +3489,7 @@ public class WollMuxEventHandler
 		
 	  bookmarkToDelete.remove();
 	  
-	  if(!(currentBookmarkByRangeName.equals(bookmarkName))){
+	  if (!(currentBookmarkByRangeName.equals(bookmarkName))){
 	    setNewDocumentCommand(documentController,bookmarkName,range,highlightColor,markChange);
 	  }
 	} catch (NoSuchElementException e)
@@ -3500,7 +3499,7 @@ public class WollMuxEventHandler
 	}
       }
 
-      if(bookmarkByRange == null)
+      if (bookmarkByRange == null)
       {
         // neuen Block anlegen
         documentController.getModel().addNewDocumentCommand(range, bookmarkName);
