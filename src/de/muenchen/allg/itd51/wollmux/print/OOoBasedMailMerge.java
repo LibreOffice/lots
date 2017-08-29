@@ -244,7 +244,11 @@ public class OOoBasedMailMerge
     // ... jetzt können wir nach Benutzerabbruch aufhören
     if (pmod.isCanceled()) return;
 
-    if (type == OutputType.toFile)
+    if (type == OutputType.toPrinter)
+    {
+      ModalDialogs.showInfoModal(L.m("WollMux-Seriendruck"), L.m(
+          "Ihr Dokument wird derzeit im Hintergrund gedruckt. Bitte haben Sie etwas Geduld."));
+    } else if (type == OutputType.toFile)
     {
       // Output-File als Template öffnen und aufräumen
       File outputFile = new File(tmpDir, "output0.odt");
