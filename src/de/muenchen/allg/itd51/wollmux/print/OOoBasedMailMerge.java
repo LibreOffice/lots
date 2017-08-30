@@ -99,7 +99,6 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Logger;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 
@@ -155,14 +154,6 @@ public class OOoBasedMailMerge
     }
     catch (Exception e)
     {
-      if (ds.getDataSourceWriter().isAdjustMainDoc())
-      {
-        PersistentDataContainer lCont =
-          DocumentManager.createPersistentDataContainer(pmod.getTextDocument());
-        lCont.removeData(PersistentDataContainer.DataID.FORMULARWERTE);
-        Logger.debug(L.m("Formularwerte wurden aus %1 gelöscht.",
-          pmod.getTextDocument().getURL()));
-      }
       Logger.error(
         L.m("OOo-Based-MailMerge: kann Simulationsdatenquelle nicht erzeugen!"), e);
       return;
@@ -629,14 +620,6 @@ public class OOoBasedMailMerge
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     public int getSize();
-
-    /**
-     * Entscheidet ob aus den PersistentData der Originaldatei die WollMux-Abschitte
-     * gelöscht werden müssen.
-     * 
-     * @return true falls die Abschnitte gelöscht werden müssen, false sonst
-     */
-    public boolean isAdjustMainDoc();
   }
 
   /**
@@ -666,12 +649,6 @@ public class OOoBasedMailMerge
      * Enthält nach einem Aufruf von {@link #getHeaders()} die sortierten Headers.
      */
     ArrayList<String> headers = null;
-
-    /**
-     * Wenn {@link #validateColumntHeaders()} Leerzeichen in den Headern findet,
-     * müssen die PersistentData des Originaldokuments angepasst werden.
-     */
-    private boolean adjustPersistentData = false;
 
     /**
      * Erzeugt einen CSVDataSourceWriter, der die zu erzeugende csv-Datei in
@@ -720,8 +697,6 @@ public class OOoBasedMailMerge
     @Override
     public void flushAndClose() throws Exception
     {
-      validateColumnHeaders();
-
       FileOutputStream fos = new FileOutputStream(csvFile);
       PrintStream p = new PrintStream(fos, true, "UTF-8");
       p.print(line(getHeaders()));
@@ -737,45 +712,6 @@ public class OOoBasedMailMerge
         p.print(line(entries));
       }
       p.close();
-    }
-
-    /**
-     * Überprüft ob die Headerzeilen der Datenquelle gültig sind, dh. keine
-     * Zeilenumbrüche enthalten. Wenn Zeilenumbrüche gefunden werden, wird eine
-     * entsprechende Meldung angezeigt.
-     * 
-     * @throws ColumnNotFoundException
-     *           Falls die Datenquelle in der Headerzeile mindestens 1 Spalte mit
-     *           Zeilenumbruch enthält.
-     */
-    private void validateColumnHeaders() throws ColumnNotFoundException
-    {
-      Logger.debug(L.m("validateColumnHeaders()"));
-      String invalidHeaders = "";
-      for (String key : getHeaders())
-      {
-        if (key.contains("\n"))
-        {
-          invalidHeaders += "• " + key + "\n";
-        }
-      }
-      if (!invalidHeaders.isEmpty())
-      {
-        boolean anpassen =
-          ModalDialogs.showQuestionModal(
-            L.m("WollMux-Seriendruck"),
-            L.m("Zeilenumbrüche in Spaltenüberschriften sind für den Seriendruck nicht erlaubt.\n")
-              + L.m("\nBitte entfernen Sie die Zeilenumbrüche aus den folgenden Überschriften der Datenquelle:\n\n")
-              + invalidHeaders
-              + L.m("\nSoll das Hauptdokument entsprechend angepasst werden?"));
-
-        if (anpassen)
-        {
-          adjustPersistentData = true;
-        }
-        throw new ColumnNotFoundException(
-          L.m("Spaltenüberschriften enthalten newlines"));
-      }
     }
 
     /**
@@ -830,17 +766,6 @@ public class OOoBasedMailMerge
     public File getCSVFile()
     {
       return csvFile;
-    }
-
-    /**
-     * Liefert den Wert von {@link #adjustPersistentData} zurück.
-     * 
-     * @author Ulrich Kitzinger (GBI I21)
-     */
-    @Override
-    public boolean isAdjustMainDoc()
-    {
-      return adjustPersistentData;
     }
   }
 
