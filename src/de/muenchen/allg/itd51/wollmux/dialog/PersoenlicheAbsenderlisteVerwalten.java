@@ -1222,10 +1222,10 @@ public class PersoenlicheAbsenderlisteVerwalten
     else
       ds = e.getDataset();
 
-    editDataset(ds);
+    editDataset(ds, true);
   }
 
-  private void editDataset(DJDataset ds)
+  private void editDataset(DJDataset ds, boolean edit)
   {
     ActionListener del =
       new MyDialogEndListener(this, myConf, abConf, dj, dialogEndListener, null);
@@ -1233,7 +1233,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     abort();
     try
     {
-      new DatensatzBearbeiten(abConf, ds, del);
+      new DatensatzBearbeiten(abConf, ds, del, edit);
     }
     catch (ConfigurationErrorException x)
     {
@@ -1311,7 +1311,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   private void editNewPALEntry()
   {
-    editDataset(newPALEntry());
+    editDataset(newPALEntry(), false);
   }
 
   /**

@@ -180,6 +180,11 @@ public class DatensatzBearbeiten
    * Die mit MODIFY_MARKER_COLOR gesetzte Farbe.
    */
   private Color modColor;
+  /**
+   * Zeigt an ob es sich um einen bearbeiteten Datensatz (true) oder einen neuen
+   * Datensatz (false) handelt.
+   */
+  private boolean edit;
 
   /**
    * ActionListener für Buttons mit der ACTION "abort".
@@ -277,16 +282,19 @@ public class DatensatzBearbeiten
    *          Methode wird aufgerufen (im Event Dispatching Thread), nachdem der
    *          Dialog geschlossen wurde. Das actionCommand des ActionEvents gibt die
    *          Aktion an, die das Speichern des Dialogs veranlasst hat.
+   * @param edit
+   *          False, falls es sich um einen neuen Datensatz handelt, sonst true.
    * @throws ConfigurationErrorException
    *           im Falle eines schwerwiegenden Konfigurationsfehlers, der es dem
    *           Dialog unmöglich macht, zu funktionieren (z.B. dass der "Fenster"
    *           Schlüssel fehlt.
    */
   public DatensatzBearbeiten(ConfigThingy conf, DJDataset datensatz,
-      ActionListener dialogEndListener) throws ConfigurationErrorException
+      ActionListener dialogEndListener, boolean edit)
   {
     this.datensatz = datensatz;
     this.dialogEndListener = dialogEndListener;
+    this.edit = edit;
 
     fenster = new HashMap<String, DialogWindow>();
 
@@ -335,12 +343,12 @@ public class DatensatzBearbeiten
    *
    * @param conf
    * @param datensatz
+   * @param edit
    * @throws ConfigurationErrorException
    */
   public DatensatzBearbeiten(ConfigThingy conf, DJDataset datensatz)
-      throws ConfigurationErrorException
   {
-    this(conf, datensatz, null);
+    this(conf, datensatz, null, true);
   }
 
   private void createGUI(ConfigThingy fensterDesc)
@@ -418,6 +426,10 @@ public class DatensatzBearbeiten
    */
   private void dialogEnd(String actionCommand)
   {
+    if(!edit)
+    {
+      datensatz.remove();
+    }
     myFrame.dispose();
     if (dialogEndListener != null)
       dialogEndListener.actionPerformed(new ActionEvent(this, 0, actionCommand));
@@ -450,6 +462,7 @@ public class DatensatzBearbeiten
    */
   private boolean save()
   {
+    edit = true;
     boolean hasChanges = false;
     Iterator<DialogWindow> iter = fenster.values().iterator();
     while (iter.hasNext())
