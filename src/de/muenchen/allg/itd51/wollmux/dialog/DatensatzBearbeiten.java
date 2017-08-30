@@ -2,7 +2,7 @@
  * Dateiname: DatensatzBearbeiten.java
  * Projekt  : WollMux
  * Funktion : Dynamisches Erzeugen eines Swing-GUIs für das Bearbeiten eines Datensatzes anhand von ConfigThingy
- * 
+ *
  * Copyright (c) 2010-2017 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@
  * 18.10.2005 | BNK | Zusätzliche Exceptions loggen
  * 24.10.2005 | BNK | dialogEndListener wird am Ende aufgerufen
  *                  | show() entfernt zur Vermeidung von Thread-Problemen
- * 24.10.2005 | BNK | restoreStandard() Buttons nicht mehr ausgegraut, wenn 
+ * 24.10.2005 | BNK | restoreStandard() Buttons nicht mehr ausgegraut, wenn
  *                  | Werte nicht geändert wurden, aber bereits aus dem LOS sind.
  * 27.10.2005 | BNK | back + CLOSEACTION
  * 02.11.2005 | BNK | +saveAndBack()
@@ -38,14 +38,14 @@
  * 11.01.2006 | BNK | EDIT "true" bei comboboxen unterstützt
  * 25.01.2006 | BNK | Auch editierbare Comboboxen ändern nun den Hintergrund korrekt.
  * 19.04.2006 | BNK | [R1337]Fehlermeldung, bei unbekanntem TYPE
- * 15.05.2006 | BNK | nicht-editierbare Comboboxen funktionieren jetzt hoffentlich 
+ * 15.05.2006 | BNK | nicht-editierbare Comboboxen funktionieren jetzt hoffentlich
  *                  | richtig mit Vorgabewerten, die nicht in der Liste sind.
- * 29.09.2006 | BNK | Verbessertes Auslesen von ComboBox-Daten            
- * 23.07.2006 | BNK | [R2551][23097]Scrollbar machen     
+ * 29.09.2006 | BNK | Verbessertes Auslesen von ComboBox-Daten
+ * 23.07.2006 | BNK | [R2551][23097]Scrollbar machen
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
@@ -62,15 +62,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -113,7 +113,7 @@ import de.muenchen.allg.itd51.wollmux.db.TestDJDataset;
  * {@link de.muenchen.allg.itd51.wollmux.db.DJDataset}s. <b>ACHTUNG:</b> Die
  * private-Funktionen dürfen NUR aus dem Event-Dispatching Thread heraus aufgerufen
  * werden.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class DatensatzBearbeiten
@@ -121,22 +121,22 @@ public class DatensatzBearbeiten
   /**
    * Standardbreite für Textfelder
    */
-  private final static int TEXTFIELD_DEFAULT_WIDTH = 22;
+  private static final int TEXTFIELD_DEFAULT_WIDTH = 22;
 
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
    */
-  private final static int TF_BORDER = 4;
+  private static final int TF_BORDER = 4;
 
   /**
    * Rand über und unter einem horizontalen Separator (in Pixeln).
    */
-  private final static int SEP_BORDER = 7;
+  private static final int SEP_BORDER = 7;
 
   /**
    * Rand um Buttons (in Pixeln).
    */
-  private final static int BUTTON_BORDER = 2;
+  private static final int BUTTON_BORDER = 2;
 
   /**
    * der Datensatz, der durch den Dialog bearbeitet wird.
@@ -184,8 +184,9 @@ public class DatensatzBearbeiten
   /**
    * ActionListener für Buttons mit der ACTION "abort".
    */
-  private ActionListener actionListener_abort = new ActionListener()
+  private ActionListener actionListenerAbort = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       abort();
@@ -195,8 +196,9 @@ public class DatensatzBearbeiten
   /**
    * ActionListener für Buttons mit der ACTION "back".
    */
-  private ActionListener actionListener_back = new ActionListener()
+  private ActionListener actionListenerBack = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       back();
@@ -206,8 +208,9 @@ public class DatensatzBearbeiten
   /**
    * ActionListener für Buttons mit der ACTION "restoreStandard".
    */
-  private ActionListener actionListener_restoreStandard = new ActionListener()
+  private ActionListener actionListenerRestoreStandard = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       restoreStandard();
@@ -217,8 +220,9 @@ public class DatensatzBearbeiten
   /**
    * ActionListener für Buttons mit der ACTION "save".
    */
-  private ActionListener actionListener_save = new ActionListener()
+  private ActionListener actionListenerSave = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       save();
@@ -228,8 +232,9 @@ public class DatensatzBearbeiten
   /**
    * ActionListener für Buttons mit der ACTION "saveAndExit".
    */
-  private ActionListener actionListener_saveAndExit = new ActionListener()
+  private ActionListener actionListenerSaveAndExit = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       saveAndExit();
@@ -239,8 +244,9 @@ public class DatensatzBearbeiten
   /**
    * ActionListener für Buttons mit der ACTION "saveAndExit".
    */
-  private ActionListener actionListener_saveAndBack = new ActionListener()
+  private ActionListener actionListenerSaveAndBack = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       saveAndBack();
@@ -255,11 +261,11 @@ public class DatensatzBearbeiten
   /**
    * wird getriggert bei windowClosing() Event.
    */
-  private ActionListener closeAction = actionListener_abort;
+  private ActionListener closeAction = actionListenerAbort;
 
   /**
    * Erzeugt einen neuen Dialog und zeigt ihn an.
-   * 
+   *
    * @param conf
    *          das ConfigThingy, das den Dialog beschreibt (der Vater des
    *          "Fenster"-Knotens.
@@ -305,6 +311,7 @@ public class DatensatzBearbeiten
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           try
@@ -313,7 +320,6 @@ public class DatensatzBearbeiten
           }
           catch (Exception x)
           {}
-          ;
         }
       });
     }
@@ -326,7 +332,7 @@ public class DatensatzBearbeiten
   /**
    * Wie {@link #DatensatzBearbeiten(ConfigThingy, DJDataset, ActionListener)} mit
    * null als dialogEndListener.
-   * 
+   *
    * @param conf
    * @param datensatz
    * @throws ConfigurationErrorException
@@ -345,7 +351,14 @@ public class DatensatzBearbeiten
     myFrame = new JFrame(L.m("Absenderdaten bearbeiten"));
     // leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    myFrame.addWindowListener(new MyWindowListener());
+    myFrame.addWindowListener(new WindowAdapter()
+    {
+      @Override
+      public void windowClosing(WindowEvent e)
+      {
+        closeAction.actionPerformed(null);
+      }
+    });
     // WollMux-Icon für den Frame
     Common.setWollMuxIcon(myFrame);
 
@@ -360,9 +373,10 @@ public class DatensatzBearbeiten
       ConfigThingy neuesFenster = iter.next();
       String fensterName = neuesFenster.getName();
       DialogWindow newWindow = new DialogWindow(fensterName, neuesFenster);
-      if (firstWindow == null) firstWindow = fensterName;
+      if (firstWindow == null)
+        firstWindow = fensterName;
       fenster.put(fensterName, newWindow);
-      cardPanel.add(newWindow.JPanel(), fensterName);
+      cardPanel.add(newWindow.getJPanel(), fensterName);
     }
 
     myFrame.pack();
@@ -378,7 +392,7 @@ public class DatensatzBearbeiten
 
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void abort()
@@ -388,7 +402,7 @@ public class DatensatzBearbeiten
 
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void back()
@@ -399,7 +413,7 @@ public class DatensatzBearbeiten
   /**
    * Beendet den Dialog und ruft falls nötig den dialogEndListener auf wobei das
    * gegebene actionCommand übergeben wird.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void dialogEnd(String actionCommand)
@@ -411,25 +425,27 @@ public class DatensatzBearbeiten
 
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void restoreStandard()
   {
-    if (!datensatz.hasBackingStore() || !currentWindow.hasLocalValues()) return;
+    if (!datensatz.hasBackingStore() || !currentWindow.hasLocalValues())
+      return;
     int res =
       JOptionPane.showConfirmDialog(
         myFrame,
         L.m("Wollen Sie Ihre persönlichen Änderungen wirklich verwerfen\nund die Felder dieser Dialogseite wieder mit der zentralen Datenbank synchronisieren?"),
         L.m("Lokale Änderungen wirklich verwerfen?"), JOptionPane.YES_NO_OPTION,
         JOptionPane.QUESTION_MESSAGE);
-    if (res != JOptionPane.YES_OPTION) return;
+    if (res != JOptionPane.YES_OPTION)
+      return;
     currentWindow.restoreStandard();
-  };
+  }
 
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private boolean save()
@@ -439,74 +455,43 @@ public class DatensatzBearbeiten
     while (iter.hasNext())
       hasChanges = iter.next().hasChanges() || hasChanges;
 
-    if (!hasChanges) return true;
+    if (!hasChanges)
+      return true;
     int res =
       JOptionPane.showConfirmDialog(
         myFrame,
         L.m("Wollen Sie Ihre Änderungen wirklich speichern\nund auf die Aktualisierung der entsprechenden Felder\naus der zentralen Datenbank verzichten?"),
         L.m("Änderungen speichern?"), JOptionPane.YES_NO_OPTION,
         JOptionPane.QUESTION_MESSAGE);
-    if (res != JOptionPane.YES_OPTION) return false;
+    if (res != JOptionPane.YES_OPTION)
+      return false;
 
     iter = fenster.values().iterator();
     while (iter.hasNext())
       iter.next().save();
     return true;
-  };
+  }
 
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void saveAndExit()
   {
-    if (save()) dialogEnd("saveAndExit");
+    if (save())
+      dialogEnd("saveAndExit");
   }
 
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void saveAndBack()
   {
-    if (save()) dialogEnd("back");
-  }
-
-  /**
-   * Ein WindowListener, der auf den JFrame registriert wird, damit als Reaktion auf
-   * den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private class MyWindowListener implements WindowListener
-  {
-    public MyWindowListener()
-    {}
-
-    public void windowActivated(WindowEvent e)
-    {}
-
-    public void windowClosed(WindowEvent e)
-    {}
-
-    public void windowClosing(WindowEvent e)
-    {
-      closeAction.actionPerformed(null);
-    }
-
-    public void windowDeactivated(WindowEvent e)
-    {}
-
-    public void windowDeiconified(WindowEvent e)
-    {}
-
-    public void windowIconified(WindowEvent e)
-    {}
-
-    public void windowOpened(WindowEvent e)
-    {}
+    if (save())
+      dialogEnd("back");
   }
 
   /**
@@ -514,7 +499,7 @@ public class DatensatzBearbeiten
    * von Methoden des Dialogs erfolgen. Die Verarbeitung erfolgt asynchron. Wurde dem
    * Konstruktor ein entsprechender ActionListener übergeben, so wird seine
    * actionPerformed() Funktion aufgerufen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void dispose()
@@ -524,6 +509,7 @@ public class DatensatzBearbeiten
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           abort();
@@ -536,24 +522,27 @@ public class DatensatzBearbeiten
 
   /**
    * Zeigt den Dialog an.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void showEDT()
   {
-    if (fenster.size() == 0) return;
-    if (currentWindow == null) showWindow(firstWindow);
+    if (fenster.size() == 0)
+      return;
+    if (currentWindow == null)
+      showWindow(firstWindow);
   }
 
   /**
    * aktiviert das Dialog-Fenster namens name.
-   * 
+   *
    * @param name
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void showWindow(String name)
   {
-    if (!fenster.containsKey(name)) return;
+    if (!fenster.containsKey(name))
+      return;
 
     currentWindow = fenster.get(name);
 
@@ -571,7 +560,7 @@ public class DatensatzBearbeiten
    * (weil sich ihr "geändert" Zustand geändert hat). Dies erlaubt es den
    * DialogWindows, Buttons zu aktualisieren, deren Ausgegrautseinszustand davon
    * abhängt, ob angezeigte Felder geändert wurden oder nicht.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private interface ColorChangeListener
@@ -583,7 +572,7 @@ public class DatensatzBearbeiten
    * Ein DataControl kümmert sich um die Verwaltung von Eingabe-Controls eines
    * DialogWindows. Es stellt insbesondere die Schnittstelle zwischen dem Control und
    * dem Datensatz her.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private abstract class DataControl
@@ -627,7 +616,7 @@ public class DatensatzBearbeiten
      */
     boolean isCurrentlyNormalColor;
 
-    List<ColorChangeListener> listeners = new Vector<ColorChangeListener>();
+    List<ColorChangeListener> listeners = new ArrayList<ColorChangeListener>();
 
     public void initCompo(String colName, JComponent compo, Color localColor)
     {
@@ -642,14 +631,16 @@ public class DatensatzBearbeiten
     {
       myDatasetIsLocal = datensatz.hasLocalOverride(columnName);
       startText = datensatz.get(columnName);
-      if (startText == null) startText = "";
+      if (startText == null)
+        startText = "";
       setTextInControl(startText);
       updateBackground();
     }
 
     public void addColorChangeListener(ColorChangeListener l)
     {
-      if (!listeners.contains(l)) listeners.add(l);
+      if (!listeners.contains(l))
+        listeners.add(l);
     }
 
     public void notifyColorChangeListeners()
@@ -703,7 +694,7 @@ public class DatensatzBearbeiten
     /**
      * Falls hasBeenModified() wird der aktuell im Control stehende Wert in die
      * Datenbank zurückgespeichert.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void save()
@@ -726,7 +717,7 @@ public class DatensatzBearbeiten
     /**
      * Der Wert des Controls wird aus der Datenbank aktualisiert und daran gekoppelt.
      * D.h. lokale Änderungen werden verworfen.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void restoreStandard()
@@ -749,7 +740,7 @@ public class DatensatzBearbeiten
 
   /**
    * Ein {@link DataControl} für JTextComponents.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class TextComponentDataControl extends DataControl implements
@@ -763,26 +754,31 @@ public class DatensatzBearbeiten
       compo.getDocument().addDocumentListener(this);
     }
 
+    @Override
     public String getTextFromControl()
     {
       return ((JTextComponent) myComponent).getText();
     }
 
+    @Override
     public void setTextInControl(String text)
     {
       ((JTextComponent) myComponent).setText(text);
     }
 
+    @Override
     public void changedUpdate(DocumentEvent e)
     {
       updateBackground();
     }
 
+    @Override
     public void insertUpdate(DocumentEvent e)
     {
       updateBackground();
     }
 
+    @Override
     public void removeUpdate(DocumentEvent e)
     {
       updateBackground();
@@ -792,7 +788,7 @@ public class DatensatzBearbeiten
 
   /**
    * Ein {@link DataControl} für JComboBoxes.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class ComboBoxDataControl extends DataControl implements ActionListener,
@@ -809,24 +805,28 @@ public class DatensatzBearbeiten
       compo.addItemListener(this);
     }
 
-    @SuppressWarnings("unchecked") // constructor ensures correct type    
+    @Override
+    @SuppressWarnings("unchecked") // constructor ensures correct type
     public void setBackground(Color c)
     {
       super.setBackground(c);
       ((JComboBox<String>) myComponent).getEditor().getEditorComponent().setBackground(c);
     }
 
-    @SuppressWarnings("unchecked") // constructor ensures correct type    
+    @SuppressWarnings("unchecked") // constructor ensures correct type
     public void addItem(String text)
     {
-      if (text == null) text = "";
+      if (text == null)
+        text = "";
       for (int i = ((JComboBox<String>) myComponent).getItemCount() - 1; i >= 0; --i)
       {
-        if (((JComboBox<String>) myComponent).getItemAt(i).equals(text)) return;
+        if (((JComboBox<String>) myComponent).getItemAt(i).equals(text))
+          return;
       }
       ((JComboBox<String>) myComponent).addItem(text);
     }
 
+    @Override
     @SuppressWarnings("unchecked") // constructor ensures correct type
     public String getTextFromControl()
     {
@@ -852,21 +852,24 @@ public class DatensatzBearbeiten
       }
     }
 
-    @SuppressWarnings("unchecked") // constructor ensures correct type    
+    @Override
+    @SuppressWarnings("unchecked") // constructor ensures correct type
     public void setTextInControl(String text)
     {
       JComboBox<String> myBox = (JComboBox<String>) myComponent;
-      boolean edit = myBox.isEditable();
+      boolean editable = myBox.isEditable();
       myBox.setEditable(true);
       myBox.setSelectedItem(text);
-      myBox.setEditable(edit);
+      myBox.setEditable(editable);
     }
 
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       updateBackground();
     }
 
+    @Override
     public void itemStateChanged(ItemEvent e)
     {
       updateBackground();
@@ -875,7 +878,7 @@ public class DatensatzBearbeiten
 
   /**
    * Verwaltet eine Seite des Dialogs.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class DialogWindow implements ColorChangeListener
@@ -910,36 +913,15 @@ public class DatensatzBearbeiten
      * des Dialogs fehlerhaft sind kann es sein, dass nicht zu jedem Control ein
      * DataControl existiert.
      */
-    private List<DataControl> dataControls = new Vector<DataControl>();
+    private List<DataControl> dataControls = new ArrayList<DataControl>();
 
     /**
      * Liste aller JButtons, die ausgegraut werden müssen, wenn keines der
      * DataControls einen hasBeenModified() Zustand hat.
      */
-    private List<JButton> buttonsToGreyOutIfNoChanges = new Vector<JButton>();
+    private List<JButton> buttonsToGreyOutIfNoChanges = new ArrayList<JButton>();
 
-    private ActionListener dialogWindowCloseAction = actionListener_abort;
-
-    /**
-     * Liefert das JPanel für diese Dialogseite zurück.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     */
-    public JPanel JPanel()
-    {
-      return myPanel;
-    }
-
-    /**
-     * Liefert den Titel zurück, den der Frame haben soll, wenn diese Dialogseite
-     * angezeigt wird.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     */
-    public String getTitle()
-    {
-      return title;
-    }
+    private ActionListener dialogWindowCloseAction = actionListenerAbort;
 
     /**
      * Erzeugt ein neues DialogWindow, dessen Name name ist (vergleiche
@@ -954,9 +936,30 @@ public class DatensatzBearbeiten
     }
 
     /**
+     * Liefert das JPanel für diese Dialogseite zurück.
+     *
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public JPanel getJPanel()
+    {
+      return myPanel;
+    }
+
+    /**
+     * Liefert den Titel zurück, den der Frame haben soll, wenn diese Dialogseite
+     * angezeigt wird.
+     *
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public String getTitle()
+    {
+      return title;
+    }
+
+    /**
      * liefert den Namen zurück, der dem Konstruktor übergeben wurde (vergleiche
      * {@link DatensatzBearbeiten#fenster}.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public String getName()
@@ -980,7 +983,8 @@ public class DatensatzBearbeiten
     {
       Iterator<DataControl> iter = dataControls.iterator();
       while (iter.hasNext())
-        if (iter.next().hasBeenModified()) return true;
+        if (iter.next().hasBeenModified())
+          return true;
       return false;
     }
 
@@ -990,11 +994,13 @@ public class DatensatzBearbeiten
       while (iter.hasNext())
       {
         DataControl ctrl = iter.next();
-        if (ctrl.datasetIsLocal() || ctrl.hasBeenModified()) return true;
+        if (ctrl.datasetIsLocal() || ctrl.hasBeenModified())
+          return true;
       }
       return false;
     }
 
+    @Override
     public void colorChanged()
     {
       boolean enabled = hasLocalValues() && datensatz.hasBackingStore();
@@ -1013,29 +1019,31 @@ public class DatensatzBearbeiten
     /**
      * Ersetzt "%{SPALTENNAME}" in str durch den Wert der entsprechenden Spalte im
      * Datensatz, der durch den Dialog bearbeitet wird.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public String substituteVars(String str)
     {
       Pattern p = Pattern.compile("%\\{([a-zA-Z0-9]+)\\}");
       Matcher m = p.matcher(str);
-      if (m.find()) do
-      {
-        String spalte = m.group(1);
-        String wert = spalte;
-        try
+      if (m.find())
+        do
         {
-          String wert2 = datensatz.get(spalte);
-          if (wert2 != null) wert = wert2.replaceAll("%", "");
-        }
-        catch (ColumnNotFoundException e)
-        {
-          Logger.error(e);
-        }
-        str = str.substring(0, m.start()) + wert + str.substring(m.end());
-        m = p.matcher(str);
-      } while (m.find());
+          String spalte = m.group(1);
+          String wert = spalte;
+          try
+          {
+            String wert2 = datensatz.get(spalte);
+            if (wert2 != null)
+              wert = wert2.replaceAll("%", "");
+          }
+          catch (ColumnNotFoundException e)
+          {
+            Logger.error(e);
+          }
+          str = str.substring(0, m.start()) + wert + str.substring(m.end());
+          m = p.matcher(str);
+        } while (m.find());
       return str;
     }
 
@@ -1123,13 +1131,13 @@ public class DatensatzBearbeiten
             boolean readonly = false;
             try
             {
-              if (uiElementDesc.get("READONLY").toString().equals("true"))
+              if ("true".equals(uiElementDesc.get("READONLY").toString()))
                 readonly = true;
             }
             catch (NodeNotFoundException x)
             {}
             String type = uiElementDesc.get("TYPE").toString();
-            if (type.equals("textfield"))
+            if ("textfield".equals(type))
             {
               JLabel label = new JLabel();
               label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
@@ -1166,7 +1174,7 @@ public class DatensatzBearbeiten
               gbcTextfield.gridy = y;
               myInputPanel.add(uiElement, gbcTextfield);
             }
-            else if (type.equals("textarea"))
+            else if ("textarea".equals(type))
             {
               JLabel label = new JLabel();
               label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
@@ -1214,7 +1222,7 @@ public class DatensatzBearbeiten
               gbcTextarea.gridy = y;
               myInputPanel.add(uiElement, gbcTextarea);
             }
-            else if (type.equals("separator"))
+            else if ("separator".equals(type))
             {
               JPanel uiElement = new JPanel(new GridLayout(1, 1));
               uiElement.add(new JSeparator(SwingConstants.HORIZONTAL));
@@ -1223,7 +1231,7 @@ public class DatensatzBearbeiten
               gbcSeparator.gridy = y;
               myInputPanel.add(uiElement, gbcSeparator);
             }
-            else if (type.equals("label"))
+            else if ("label".equals(type))
             {
               JLabel uiElement = new JLabel();
               uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
@@ -1232,7 +1240,7 @@ public class DatensatzBearbeiten
               myInputPanel.add(uiElement, gbcLabel);
               uiElement.setText(L.m(uiElementDesc.get("LABEL").toString()));
             }
-            else if (type.equals("combobox"))
+            else if ("combobox".equals(type))
             {
               JLabel label = new JLabel();
               label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
@@ -1252,7 +1260,7 @@ public class DatensatzBearbeiten
               boolean editable = false;
               try
               {
-                if (uiElementDesc.get("EDIT").toString().equals("true"))
+                if ("true".equals(uiElementDesc.get("EDIT").toString()))
                   editable = true;
               }
               catch (NodeNotFoundException x)
@@ -1318,7 +1326,7 @@ public class DatensatzBearbeiten
              */
 
             String type = uiElementDesc.get("TYPE").toString();
-            if (type.equals("button"))
+            if ("button".equals(type))
             {
               String action = "";
               try
@@ -1348,7 +1356,8 @@ public class DatensatzBearbeiten
                 firstButton = false;
               }
               int right = BUTTON_BORDER;
-              if (!iter.hasNext()) right = 0;
+              if (!iter.hasNext())
+                right = 0;
               uiElement.setBorder(BorderFactory.createEmptyBorder(0, left, 0, right));
               uiElement.add(button);
               myButtonPanel.add(uiElement);
@@ -1359,15 +1368,16 @@ public class DatensatzBearbeiten
               else
                 button.setEnabled(false);
 
-              if (action.equals("restoreStandard"))
+              if ("restoreStandard".equals(action))
               {
                 buttonsToGreyOutIfNoChanges.add(button);
               }
-              else if (action.equals("switchWindow"))
+              else if ("switchWindow".equals(action))
               {
                 final String window = uiElementDesc.get("WINDOW").toString();
                 button.addActionListener(new ActionListener()
                 {
+                  @Override
                   public void actionPerformed(ActionEvent e)
                   {
                     showWindow(window);
@@ -1378,7 +1388,7 @@ public class DatensatzBearbeiten
               }
 
             }
-            else if (type.equals("glue"))
+            else if ("glue".equals(type))
             {
               try
               {
@@ -1409,40 +1419,40 @@ public class DatensatzBearbeiten
   /**
    * Übersetzt den Namen einer ACTION in eine Referenz auf das passende
    * actionListener_... Objekt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private ActionListener getAction(String action)
   {
-    if (action.equals("abort"))
+    if ("abort".equals(action))
     {
-      return actionListener_abort;
+      return actionListenerAbort;
     }
-    else if (action.equals("back"))
+    else if ("back".equals(action))
     {
-      return actionListener_back;
+      return actionListenerBack;
     }
-    else if (action.equals("restoreStandard"))
+    else if ("restoreStandard".equals(action))
     {
-      return actionListener_restoreStandard;
+      return actionListenerRestoreStandard;
     }
-    else if (action.equals("save"))
+    else if ("save".equals(action))
     {
-      return actionListener_save;
+      return actionListenerSave;
     }
-    else if (action.equals("saveAndExit"))
+    else if ("saveAndExit".equals(action))
     {
-      return actionListener_saveAndExit;
+      return actionListenerSaveAndExit;
     }
-    else if (action.equals("saveAndBack"))
+    else if ("saveAndBack".equals(action))
     {
-      return actionListener_saveAndBack;
+      return actionListenerSaveAndBack;
     }
-    else if (action.equals("switchWindow"))
+    else if ("switchWindow".equals(action))
     {
       return null;
     }
-    else if (action.equals(""))
+    else if (action.isEmpty())
     {
       return null;
     }
