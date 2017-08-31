@@ -25,6 +25,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +40,6 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -245,7 +246,7 @@ public class WollMuxBarConfig
    * Falls nicht-null die gerade oder zuletzt angezeigte Instanz des Optionen
    * Dialogs.
    */
-  private JDialog myDialog;
+  private JFrame myDialog;
 
   /**
    * Erzeugt eine neue Konfiguration.
@@ -533,9 +534,16 @@ public class WollMuxBarConfig
   private void createGUI(final JFrame parent, final ActionListener finishedAction)
   {
     this.parent = parent;
-    myDialog = new JDialog(parent, L.m("Optionen"));
+    myDialog = new JFrame(L.m("Optionen"));
     myDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-    myDialog.setModal(true);
+    myDialog.addWindowListener(new WindowAdapter()
+    {
+      @Override
+      public void windowClosed(WindowEvent e)
+      {
+        parent.setEnabled(true);
+      }
+    });
 
     JPanel myContentPane = new JPanel(new BorderLayout());
     myDialog.setContentPane(myContentPane);
@@ -739,6 +747,7 @@ public class WollMuxBarConfig
       @Override
       public void actionPerformed(ActionEvent e)
       {
+        parent.setEnabled(true);
         myDialog.dispose();
       }
     });
@@ -800,6 +809,7 @@ public class WollMuxBarConfig
         doSave();
         finishedAction.actionPerformed(new ActionEvent(this, 0, "OK"));
 
+        parent.setEnabled(true);
         myDialog.dispose();
       }
     });
@@ -817,7 +827,10 @@ public class WollMuxBarConfig
     myDialog.setLocation(x, y);
 
     myDialog.setResizable(false);
+    myDialog.setAlwaysOnTop(true);
     myDialog.setVisible(true);
+    parent.setEnabled(false);
+    myDialog.requestFocus();
   }
 
   /**
