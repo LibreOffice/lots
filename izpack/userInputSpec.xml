@@ -5,5 +5,9 @@
 			<spec txt="Shared installieren" id="check.label.1" true="--shared" false=""
 				 set="${sharedSwitch}" />
 		</field>
+		<field type="text" variable="wollmuxConfPath">
+			<description txt="Pfad zur wollmux.conf (Optional)" id="description.check.1" />
+			<spec txt="Bitte Pfad eingeben:" id="wollmuxconfpath.label.1" size="30" set="C:\Users\User\wollmux.conf"/>
+		</field>
 	</panel>
 </userInput>

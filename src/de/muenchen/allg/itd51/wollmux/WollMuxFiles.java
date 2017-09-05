@@ -126,9 +126,6 @@ public class WollMuxFiles
 {
   private static final String ETC_WOLLMUX_WOLLMUX_CONF = "/etc/wollmux/wollmux.conf";
 
-  private static final String C_PROGRAMME_WOLLMUX_WOLLMUX_CONF =
-    "C:\\Programme\\wollmux\\wollmux.conf";
-
   /**
    * Der Pfad (ohne Wurzel wie HKCU oder HKLM) zu dem Registrierungsschlüssel, unter
    * dem der WollMux seine Registry-Werte speichert
@@ -388,6 +385,12 @@ public class WollMuxFiles
           ShlObj.SHGFP_TYPE_CURRENT, arrWollmuxConfPath);
         searchPaths.add(Native.toString(arrWollmuxConfPath)
           + "/.wollmux/wollmux.conf");
+        
+        arrWollmuxConfPath = new char[WinDef.MAX_PATH];
+        shell.SHGetFolderPath(null, ShlObj.CSIDL_COMMON_APPDATA, null,
+          ShlObj.SHGFP_TYPE_CURRENT, arrWollmuxConfPath);
+        searchPaths.add(Native.toString(arrWollmuxConfPath)
+          + "/.wollmux/wollmux.conf");
 
         arrWollmuxConfPath = new char[WinDef.MAX_PATH];
         shell.SHGetFolderPath(null, ShlObj.CSIDL_PROGRAM_FILESX86, null,
@@ -400,6 +403,7 @@ public class WollMuxFiles
           ShlObj.SHGFP_TYPE_CURRENT, arrWollmuxConfPath);
         searchPaths.add(Native.toString(arrWollmuxConfPath)
           + "/.wollmux/wollmux.conf");
+        
       }
 
       for (String path : searchPaths)
