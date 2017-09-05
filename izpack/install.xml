@@ -19,14 +19,15 @@
 		<res id="shortcutSpec.xml" src="../izpack/shortcutSpec.xml" parse="yes"
 			type="xml" />
 		<res id="Installer.image" src="../misc/wollmux_welcome.png" />
+		<res id="RegistrySpec.xml" src="../izpack/RegistrySpec.xml" type="xml"></res>
 	</resources>
 
 	<natives>
-		<native type="3rdparty" name="COIOSHelper.dll" stage="uninstall">
+		<native type="3rdparty" name="COIOSHelper.dll" stage="both">
 			<os family="windows" />
 			<os arch="x86" />
 		</native>
-		<native type="3rdparty" name="COIOSHelper_x64.dll" stage="uninstall">
+		<native type="3rdparty" name="COIOSHelper_x64.dll" stage="both">
 			<os family="windows" />
 			<os arch="amd64" />
 		</native>
@@ -83,7 +84,11 @@
 			<condition type="ref" refid="!is64bit" />
 		</condition>
 	</conditions>
-
+	
+	<variables>
+		<variable name="wollmuxConfPath" value=""></variable>
+	</variables>
+	
 	<dynamicvariables>
 		<variable name="hkcuOOo" checkonce="true"
 			regkey="HKCU\Software\OpenOffice.org\UNO\InstallPath" regvalue="" />
@@ -98,7 +103,7 @@
 		<variable name="hklmLO" checkonce="true"
 			regkey="HKEY_LOCAL_MACHINE\Software\LibreOffice\UNO\InstallPath"
 			regvalue="@" />
-
+		
 		<variable name="oooPath" value="${hkcuOOo}" condition="hkcuOOoExists" />
 		<variable name="oooPath" value="${hklmOOo}" condition="hklmOOoExists" />
 		<variable name="oooPath" value="${hkcuOO}" condition="hkcuOOExists" />
@@ -146,7 +151,7 @@
 		<panel classname="PacksPanel" />
 		<panel classname="UserInputPanel" id="panel1" />
 		<panel classname="SummaryPanel" />
-		<panel classname="InstallPanel" />
+		<panel classname="InstallPanel" id="installPanel"/>
 		<panel classname="ShortcutPanel">
 			<os family="windows" />
 		</panel>
