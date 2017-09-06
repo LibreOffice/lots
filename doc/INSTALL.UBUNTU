@@ -2,7 +2,7 @@ The following instructions were tested in XUbuntu Precise 12.04
 
 Enter the following command
 
-  sudo apt-get install mercurial ant libreoffice-dev openjdk-6-jdk
+  sudo apt-get install git ant libreoffice-dev openjdk-6-jdk
 
 add the following at the end of $HOME/.bashrc
 
@@ -14,10 +14,9 @@ Enter the following command so that the new PATH takes effect
 
 Enter the following commands
 
-  hg clone https://code.google.com/p/wollmux/
-  hg clone https://code.google.com/p/unohelper/
-  mv unohelper UNOHelper
-  cd wollmux
+  git clone https://github.com/WollMux/WollMux.git
+  git clone https://github.com/WollMux/UNOHelper.git
+  cd WollMux
 
 Change the file unix.properties to this:
 #####################################################
