@@ -55,8 +55,8 @@ Option 2: Using development sources from git
   projects from their respective git repositories.
 
     cd wollmux-git
-    git clone http://wollmux.projects.forge.osor.eu/repo/WollMux.git
-    git clone http://wollmux.projects.forge.osor.eu/repo/UNOHelper.git
+    git clone https://github.com/WollMux/WollMux.git
+    git clone https://github.com/WollMux/UNOHelper.git
 
 === classes.tar.gz ===
 
