@@ -157,6 +157,8 @@ public class Workarounds
     {
       Logger.debug(L.m("Workaround für TDF Issue 89783 aktiv."));
       workaround89783 = true;
+    } else {
+      workaround89783 = false;
     }
 
     if(workaround89783)
