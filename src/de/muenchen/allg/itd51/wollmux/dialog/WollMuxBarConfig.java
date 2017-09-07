@@ -53,7 +53,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -616,11 +615,8 @@ public class WollMuxBarConfig
     gbcCombo.gridx = x++;
     gbcCombo.gridy = y;
     // Tray-Icon-Auswahl nur in Optionen-Menü anzeigen, wenn Java 6+
-    if (!Workarounds.workaroundForJava5("Tray-Icon", false))
-    {
-      mainPanel.add(new JLabel(L.m("Tray-Icon")), gbcLabel);
-      mainPanel.add(inputTrayIcon, gbcCombo);
-    }
+    mainPanel.add(new JLabel(L.m("Tray-Icon")), gbcLabel);
+    mainPanel.add(inputTrayIcon, gbcCombo);
 
     inputMode.addItemListener(new ItemListener()
     {

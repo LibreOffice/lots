@@ -73,7 +73,6 @@ import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 public class SachleitendeVerfuegung
 {
@@ -1351,73 +1350,6 @@ public class SachleitendeVerfuegung
 
     // ViewCursor wieder herstellen:
     if (vc != null && oldViewCursor != null) vc.gotoRange(oldViewCursor, false);
-  }
-
-  /**
-   * Workaround für OOo-Issue 103137, der das selbe macht, wie
-   * {@link #printVerfuegungspunkt(XPrintModel, int, boolean, boolean, short)} nach
-   * Beendigung des Drucks eines Originals - es setzt alle Verfügungspunkte,
-   * Druckblöcke und Sichtbarkeitsgruppen aus model auf sichtbar.
-   */
-  public static void workaround103137(TextDocumentController documentController)
-  {
-    if (documentController == null || documentController.getModel().doc == null) return;
-    XTextDocument doc = documentController.getModel().doc;
-    XParagraphCursor cursor =
-      UNO.XParagraphCursor(doc.getText().createTextCursorByRange(
-        doc.getText().getStart()));
-    if (cursor == null) return;
-
-    // Punkt1 und den wieder Einzublendenden Bereich festlegen:
-    XTextRange punkt1 = getVerfuegungspunkt1(doc);
-    XTextRange setInvisibleRange = null;
-    do
-    {
-      cursor.gotoEndOfParagraph(true);
-
-      if (isVerfuegungspunkt(cursor))
-      {
-        if (punkt1 == null)
-        {
-          punkt1 = cursor.getText().createTextCursorByRange(cursor);
-        }
-        else
-        {
-          cursor.collapseToStart();
-          cursor.gotoRange(cursor.getText().getEnd(), true);
-          setInvisibleRange = cursor;
-        }
-      }
-    } while (setInvisibleRange == null && cursor.gotoNextParagraph(false));
-
-    // Ausblendung der Ziffer von Punkt 1 aufheben:
-    if (punkt1 != null)
-    {
-      XTextRange punkt1ZifferOnly = getZifferOnly(punkt1, true);
-      if (punkt1ZifferOnly != null) UNO.hideTextRange(punkt1ZifferOnly, false);
-    }
-
-    // Sichtbarkeitsgruppen einblenden:
-    WollMuxEventHandler.handleSetVisibleState(documentController, GROUP_ID_SLV_DRAFT_ONLY, true,
-      null);
-    WollMuxEventHandler.handleSetVisibleState(documentController, GROUP_ID_SLV_NOT_IN_ORIGINAL,
-      true, null);
-    WollMuxEventHandler.handleSetVisibleState(documentController, GROUP_ID_SLV_ORIGINAL_ONLY,
-      true, null);
-    WollMuxEventHandler.handleSetVisibleState(documentController, GROUP_ID_SLV_ALL_VERSIONS,
-      true, null);
-    WollMuxEventHandler.handleSetVisibleState(documentController, GROUP_ID_SLV_COPY_ONLY, true,
-      null);
-
-    // Druckblöcke wieder einblenden:
-    documentController.setPrintBlocksProps(BLOCKNAME_SLV_DRAFT_ONLY, true, true);
-    documentController.setPrintBlocksProps(BLOCKNAME_SLV_NOT_IN_ORIGINAL, true, true);
-    documentController.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, true, true);
-    documentController.setPrintBlocksProps(BLOCKNAME_SLV_ALL_VERSIONS, true, true);
-    documentController.setPrintBlocksProps(BLOCKNAME_SLV_COPY_ONLY, true, true);
-
-    // Verfügungspunkte wieder einblenden:
-    if (setInvisibleRange != null) UNO.hideTextRange(setInvisibleRange, false);
   }
 
   /**

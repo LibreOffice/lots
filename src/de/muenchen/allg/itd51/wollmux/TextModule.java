@@ -407,12 +407,6 @@ public class TextModule
    */
   public static void jumpPlaceholders(XTextDocument doc, XTextCursor viewCursor)
   {
-    if (Workarounds.applyWorkaroundForOOoIssue102619())
-    {
-      jumpPlaceholdersOld(doc, viewCursor);
-      return;
-    }
-
     XTextCursor oldPos = viewCursor.getText().createTextCursorByRange(viewCursor);
 
     // Nächsten Platzhalter anspringen. Dabei berücksichtigen, dass

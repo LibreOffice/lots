@@ -29,15 +29,9 @@
  *
  */package de.muenchen.allg.itd51.wollmux;
 
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.PointerInfo;
-import java.awt.Robot;
 import java.awt.Toolkit;
 import java.net.URL;
 import java.net.URLClassLoader;
-
-import javax.swing.JOptionPane;
 
 import com.sun.star.drawing.XDrawPageSupplier;
 import com.sun.star.text.XTextDocument;
@@ -59,11 +53,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.Utils;
  */
 public class Workarounds
 {
-  private static String workaround101283 = null;
-
   private static Boolean workaround89783 = null;
-
-  private static Boolean workaround103137 = null;
 
   private static Boolean workaroundToolbarHoverFreeze = null;
 
@@ -71,13 +61,7 @@ public class Workarounds
 
   private static Boolean workaround73229 = null;
 
-  private static Boolean workaround96281 = null;
-
-  private static Boolean workaround102619 = null;
-
   private static ClassLoader workaround102164CL = null;
-
-  private static Boolean workaroundSunJavaBug4737732 = null;
 
   private static Boolean workaroundWMClass = null;
 
@@ -90,6 +74,9 @@ public class Workarounds
   }
 
   /**
+   * Beim Einfügen eines Dokuments mit einer Section und einem Seitenumbruch in ein 
+   * anderes wird eine leere Seite am Anfang eingefügt.
+   *  
    * Issue #73229 betrifft den WollMux-Seriendruck in ein Gesamtdokument und ist
    * aktuell für OOo Later priorisiert - wird also nicht in absehbarer Zeit behoben
    * sein.
@@ -106,6 +93,9 @@ public class Workarounds
   }
 
   /**
+   * Beim Erzeugen eines neuen Threads wird der Classloader nicht gesetzt und muss
+   * explizit gesetzt werden.
+   * 
    * Issue #102164 betrifft OOo 3.2. Es ist unklar, wann der Workaround entfernt
    * werden kann, da er aufgrund eines Bugs in der Swing-Implementierung von Java 6
    * zurückgeht.
@@ -141,107 +131,8 @@ public class Workarounds
   }
 
   /**
-   * Issue #103137 betrifft OOo 3.0 und 3.1. Der Workaround kann entfernt werden,
-   * wenn keine Dokumente mehr im Umlauf sind, deren Generator OOo 2 ist und in denen
-   * Textstellen mindestens einmal aus- und wieder eingeblendet wurden. Notfalls muss
-   * man vor der Deaktivierung einen Mechanismus über die Dokumentablagen der
-   * Referate laufen lassen der dafür sorgt, dass der Altbestand der von OOo 2
-   * erzeugten Dokumente von sämtlichen text:display="none"-Stellen befreit wurde.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  public static boolean applyWorkaroundForOOoIssue103137()
-  {
-    if (workaround103137 == null)
-    {
-      String version = Utils.getOOoVersion();
-      if (version != null
-        && (version.startsWith("3.0") || version.startsWith("3.1")))
-      {
-        workaround103137 = applyWorkaround("103137");
-      }
-      else
-        workaround103137 = Boolean.FALSE;
-    }
-
-    return workaround103137.booleanValue();
-  }
-
-  /**
-   * Issue #96281 betrifft OOo 3.1 und 3.2. Ob es in 3.3 gelöst sein wird wissen wir
-   * nicht. Seien wir einfach mal pessimistisch.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   */
-  public static boolean applyWorkaroundForOOoIssue96281()
-  {
-    if (workaround96281 == null)
-    {
-      String version = Utils.getOOoVersion();
-      if (version != null
-        && (version.startsWith("3.1") || version.startsWith("3.2") || version.startsWith("3.3")))
-      {
-        workaround96281 = applyWorkaround("96281");
-      }
-      else
-        workaround96281 = Boolean.FALSE;
-    }
-
-    return workaround96281.booleanValue();
-  }
-
-  /**
-   * Folgender Workaround bezieht sich auf das SUN-JRE Issue
-   * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4737732 und ist in der Klasse
-   * d.m.a.i.wollmux.dialog.FormGUI implementiert. Der Workaround ist notwendig, wenn
-   * WollMux mit einem SunJRE < 1.7 gestartet wird. Den Java-Bug konnten wir bislang
-   * vor allem unter Linux mit KDE feststellen. Der Java-Bug ist in Oracle JRE 1.7
-   * behoben und auch mit dem aktuellen openJDK 1.7 tritt er nicht mehr auf. Der
-   * Workaround war von 2006 bis 2014 immer standardmäßig aktiv, führt aber mit
-   * Basisclient 5.0 verstärkt zum Issue trac#11494. Deshalb wird der Workaround
-   * jetzt nur noch mit SunJRE <= 1.6 angewendet. Er kann vermutlich komplett
-   * entfernt werden (wenn WollMux unter Linux nicht mehr mit SunJRE 1.6 genutzt wird)
-   */
-  public static boolean applyWorkaroundForSunJavaBug4737732()
-  {
-    if(workaroundSunJavaBug4737732 == null)
-    {
-      String javaVendor = System.getProperty("java.vendor");
-      String javaVersion = System.getProperty("java.version");
-      if(javaVendor.equals("Sun Microsystems Inc.") && (javaVersion.startsWith("1.6.") || javaVersion.startsWith("1.5.")))
-      {
-        Logger.debug("Workaround für Sun-JRE Issue 4737732 aktiv.");
-        workaroundSunJavaBug4737732  = Boolean.TRUE;
-      }
-      else
-      {
-        workaroundSunJavaBug4737732 = Boolean.FALSE;
-      }
-    }
-    return workaroundSunJavaBug4737732;
-  }
-
-  /**
-   * Wegen http://qa.openoffice.org/issues/show_bug.cgi?id=101283 muss der Inhalt des
-   * Bookmarks durch ein Leerzeichen an Stelle des gewünschten Leerstrings ersetzt
-   * werden.
-   *
-   * @return Der String, der an Stelle des gewünschten Leerstrings zur Behebung des
-   *         Workarounds verwendet werden muss.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  public static String workaroundForIssue101283()
-  {
-    if (workaround101283 == null)
-    {
-      Logger.debug(L.m("Workaround für Issue 101283 aktiv."));
-      workaround101283 = " ";
-    }
-    return workaround101283;
-  }
-
-  /**
+   * Interne Begrenzung von Arrays im Seriendruck auf 65536.
+   * 
    * Wegen https://bugs.documentfoundation.org/show_bug.cgi?id=89783 muss der
    * OOoMailMerge in mehrere Pakete aufgeteilt werden, wenn das
    * Seriendruck-Hauptdokument doc viele der im Issue genannten Elemente (z.B.
@@ -260,7 +151,9 @@ public class Workarounds
    */
   public static Integer workaroundForTDFIssue89783(XTextDocument doc)
   {
-    if (workaround89783 == null)
+    String version = Utils.getOOoVersion();
+
+    if (workaround89783 == null && (version.startsWith("4") || version.startsWith("5.0")))
     {
       Logger.debug(L.m("Workaround für TDF Issue 89783 aktiv."));
       workaround89783 = true;
@@ -300,160 +193,6 @@ public class Workarounds
     }
 
     return null;
-  }
-
-  /**
-   * Wenn bestimmte Aktionen getätigt werden (z.B. setWindowPosSize()) während der
-   * Mauszeiger über einer OOo-Toolbar schwebt, dann friert OOo 3.0 und 3.1 unter
-   * Windows ein.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   */
-  public static boolean workaroundForToolbarHoverFreeze()
-  {
-    if (workaroundToolbarHoverFreeze == null)
-    {
-      String version = Utils.getOOoVersion();
-      if (version == null) return false;
-      if ((version.startsWith("3.0") || version.startsWith("3.1"))
-        && System.getProperty("os.name").contains("Windows"))
-      {
-        workaroundToolbarHoverFreeze = applyWorkaround("ToolbarHoverFreeze");
-      }
-      else
-        workaroundToolbarHoverFreeze = Boolean.FALSE;
-    }
-
-    if (workaroundToolbarHoverFreeze)
-    {
-      try
-      {
-        Robot robot = new Robot();
-        PointerInfo info = MouseInfo.getPointerInfo();
-        Point p = info.getLocation();
-        robot.mouseMove(p.x, 0);
-        Thread.sleep(100);
-      }
-      catch (Exception x)
-      {
-        Logger.error(x);
-      }
-    }
-
-    return workaroundToolbarHoverFreeze;
-  }
-
-  /**
-   * Prüft, ob das Programm mit Java 5 ausgeführt wird, und liefert <code>true</code>
-   * zurück, wenn dies der Fall ist. Wenn showMessage=true übergeben wird, wird
-   * außerdem ein Meldungsdialog angezeigt, der darauf hinweist dass das gewünschte
-   * Feature nicht mit Java 5 ausgeführt werden kann und es wird eine entsprechende
-   * Meldung geloggt.
-   *
-   * Es wird explizit nur auf Java 1.5 geprüft, da Java-Versionen kleiner 1.5 ohnehin
-   * nicht vom WollMux unterstützt werden. Der Check auf die Systemproperty
-   * "java.version" ist freilich nicht der sicherste, da diese Variable z.B. auch vom
-   * Benutzer überschrieben werden kann, aber für unsere Zwecke sollte er in 99,9%
-   * der Fälle ausreichend sein.
-   *
-   * @param featureName
-   *          Name des Features, das nicht mit Java 5 ausgeführt werden kann. Dieser
-   *          String wird in der Log-Meldung verwendet.
-   * @param showMessage
-   *          Falls <code>true</code> wird eine benutzersichtbare Meldung angezeigt,
-   *          die darauf hinweist, dass ein Feature nicht mit Java 5 ausführbar ist
-   *          und eine Meldung geloggt.
-   * @return <code>true</code>, wenn das Programm mit Java 5 ausgeführt wird,
-   *         <code>false</code> sonst
-   * @author Daniel Benkmann (D-III-ITD-D101)
-   */
-  public static boolean workaroundForJava5(String featureName, boolean showMessage)
-  {
-    if (System.getProperty("java.version").startsWith("1.5"))
-    {
-      if (showMessage)
-      {
-        Logger.debug(L.m(
-          "Versuch das Feature \"%1\" mit Java 5 zu starten wurde verhindert.",
-          featureName));
-        JOptionPane.showMessageDialog(
-          null,
-          L.m("Dieses Feature ist nur verfügbar, wenn Java 6 oder höher eingesetzt wird."),
-          L.m("Inkompatible Java-Version"), JOptionPane.ERROR_MESSAGE);
-      }
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Trac-Ticket 5031 beschreibt mehrere Fälle, in denen WollMux-Formulardokumente
-   * aus bisher unbekanntem Grund ihren Formularwerteabschnitt verloren haben. In
-   * einem Fall enthielt ein Formulardokument gar keine Notiz "WollMuxFormularwerte",
-   * ein anderes Formulardokument enthielt eine solche Notiz aber mit leerem
-   * Dateninhalt, wiederum eine andere Notiz enthielt eine leere Notiz ohne
-   * dc:creator-Attribut, die mutmaßlich früher einmal eine
-   * WollMuxFormularwerte-Notiz war.
-   *
-   * Falls das Dokument vor dieser Verarbeitung durch den WollMux bereits einmal
-   * durch den WollMux als Formulardokument markiert worden ist, entsteht ein nicht
-   * zulässiger Zustand, wenn der Formularwerte-Abschnitt fehlt. Diese Methode
-   * liefert true, wenn der Fall vorliegt und ein entsprechender Workaround
-   * angewendet werden soll.
-   *
-   * Da die Ursache, die zu dem nicht zulässigen Stand geführt hat derzeit noch nicht
-   * bekannt ist, und die Symptome auch in drei Fällen unterschiedlich waren (s.o.),
-   * kann dieser Workaround derzeit leider nicht zeitlich beschränkt werden. Die
-   * Vermutung liegt nahe, dass der Fehler im Zusammenhang mit den OOo-Issues 100374
-   * und 108709 (also den Änderungen an OOo 3.0 bezüglich des Notizen-Systems)
-   * zusammen hängt. Die Hoffnung ist, dass solche kaputten Dokumente nicht mehr
-   * auftreten, wenn diese beiden Fehler gefixed sind.
-   *
-   * @param werteStr
-   *          Den Wert den PersistantData zur ID "WollMuxFormularwerte" zurück gibt
-   *          (kann null sein, wenn die Notiz bisher nicht existiert, oder != null,
-   *          wenn sie bereits existiert).
-   * @param alreadyTouchedAsFormDocument
-   *          Gibt an, ob das Dokument vor dieser Verarbeitung durch den WollMux
-   *          bereits Formulardokument-Merkmale enthielt (z.B. eine Notiz SetType mit
-   *          dem Wert "formularDokument")
-   * @return true, wenn der Workaround anzuwenden ist.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  @Deprecated
-  public static boolean applyWorkaroundForTracTicket5031(String werteStr,
-      boolean alreadyTouchedAsFormDocument)
-  {
-    boolean apply =
-      alreadyTouchedAsFormDocument && (werteStr == null || werteStr.length() == 0);
-    if (apply)
-      Logger.log(L.m("Formulardokument ohne Formularwerte-Abschnitt gefunden! Workaround zur Rekonstruierung der Formularwerte aktiv."));
-    return apply;
-  }
-
-  /**
-   * Issue 102619 (calling dispatch .uno:GotoNextPlacemarker crashes OOo) beschreibt
-   * einen Bug in OOo < 3.2.1 bei dem OOo crashed, wenn mittels des Dispatches
-   * .uno:GotoNextPlacemarker in eine Tabelle navigiert wird.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  public static boolean applyWorkaroundForOOoIssue102619()
-  {
-    if (workaround102619 == null)
-    {
-      String version = Utils.getOOoVersion();
-      if (version != null
-        && (version.startsWith("2.") || version.startsWith("3.0") || version.startsWith("3.1")))
-      {
-        workaround102619 = applyWorkaround("102619");
-      }
-      else
-        workaround102619 = Boolean.FALSE;
-    }
-
-    return workaround102619.booleanValue();
   }
 
   /**

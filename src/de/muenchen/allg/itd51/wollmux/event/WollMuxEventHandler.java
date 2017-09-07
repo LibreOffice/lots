@@ -115,7 +115,6 @@ import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.util.XStringSubstitution;
-import com.sun.star.view.DocumentZoomType;
 import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
@@ -130,7 +129,6 @@ import de.muenchen.allg.itd51.wollmux.TextModule;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
-import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
@@ -139,7 +137,6 @@ import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.VisibleTextFragmentList;
 import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
@@ -1169,22 +1166,6 @@ public class WollMuxEventHandler
         }
         catch (NodeNotFoundException e)
         {}
-
-      // Workaround für OOo-Issue 103137 ggf. anwenden:
-      if (Workarounds.applyWorkaroundForOOoIssue103137())
-      {
-        // Alle mit OOo 2 erstellen Dokumente, die Textstellen enthalten, die von
-        // älteren WollMux-Versionen ein- oder ausgeblendet wurden sind potentiell
-        // betroffen. Ein- und Ausblendungen in WollMux-Formularen werden
-        // glücklicherweise auch ohne Workaround vom WollMux korrigiert, da der
-        // WollMux beim Erzeugen der FormularGUI alle Formularwerte und damit auch
-        // die Sichtbarkeiten explizit setzt. Damit bleiben nur die Sachleitenden
-        // Verfügungen übrig, die vom WollMux bisher noch nicht automatisch
-        // korrigiert wurden. Dieser Workaround macht das nun:
-        if (documentController.getModel().getPrintFunctions().contains(
-          SachleitendeVerfuegung.PRINT_FUNCTION_NAME))
-          SachleitendeVerfuegung.workaround103137(documentController);
-      }
 
       // Mögliche Aktionen für das neu geöffnete Dokument:
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(documentController, WollMuxFiles.isDebugMode());
@@ -3417,21 +3398,20 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      if (UNO.XBookmarksSupplier(documentController.getModel().doc) == null || blockname == null) return;
+      if (UNO.XBookmarksSupplier(documentController.getModel().doc) == null || blockname == null)
+        return;
 
-      ConfigThingy slvConf =
-          WollMuxFiles.getWollmuxConf().query(
-          "SachleitendeVerfuegungen");
+      ConfigThingy slvConf = WollMuxFiles.getWollmuxConf().query("SachleitendeVerfuegungen");
       Integer highlightColor = null;
 
       XTextCursor range = documentController.getModel().getViewCursor();
 
-      if (range == null) return;
+      if (range == null)
+        return;
 
       if (range.isCollapsed())
       {
-        ModalDialogs.showInfoModal(L.m("Fehler"),
-          L.m("Bitte wählen Sie einen Bereich aus, der markiert werden soll."));
+        ModalDialogs.showInfoModal(L.m("Fehler"), L.m("Bitte wählen Sie einen Bereich aus, der markiert werden soll."));
         return;
       }
 
@@ -3440,29 +3420,23 @@ public class WollMuxEventHandler
       {
         markChange = L.m("wird immer gedruckt");
         highlightColor = getHighlightColor(slvConf, "ALL_VERSIONS_HIGHLIGHT_COLOR");
-      }
-      else if (blockname.equalsIgnoreCase("draftOnly"))
+      } else if (blockname.equalsIgnoreCase("draftOnly"))
       {
         markChange = L.m("wird nur im Entwurf gedruckt");
         highlightColor = getHighlightColor(slvConf, "DRAFT_ONLY_HIGHLIGHT_COLOR");
-      }
-      else if (blockname.equalsIgnoreCase("notInOriginal"))
+      } else if (blockname.equalsIgnoreCase("notInOriginal"))
       {
         markChange = L.m("wird im Original nicht gedruckt");
-        highlightColor =
-          getHighlightColor(slvConf, "NOT_IN_ORIGINAL_HIGHLIGHT_COLOR");
-      }
-      else if (blockname.equalsIgnoreCase("originalOnly"))
+        highlightColor = getHighlightColor(slvConf, "NOT_IN_ORIGINAL_HIGHLIGHT_COLOR");
+      } else if (blockname.equalsIgnoreCase("originalOnly"))
       {
         markChange = L.m("wird ausschließlich im Original gedruckt");
         highlightColor = getHighlightColor(slvConf, "ORIGINAL_ONLY_HIGHLIGHT_COLOR");
-      }
-      else if (blockname.equalsIgnoreCase("copyOnly"))
+      } else if (blockname.equalsIgnoreCase("copyOnly"))
       {
         markChange = L.m("wird ausschließlich in Abdrucken gedruckt");
         highlightColor = getHighlightColor(slvConf, "COPY_ONLY_HIGHLIGHT_COLOR");
-      }
-      else
+      } else
         return;
 
       String bookmarkStart = "WM(CMD '" + blockname + "'";
@@ -3475,32 +3449,36 @@ public class WollMuxEventHandler
         hcAtt = " HIGHLIGHT_COLOR '" + colStr + "'";
       }
       String bookmarkName = bookmarkStart + hcAtt + ")";
-      
+
       XNamed bookmarkByRange = getBookmarkByTextRange(range);
-      if(bookmarkByRange != null) {
-	Bookmark bookmarkToDelete;
-	try
-	{
-	  String currentBookmarkByRangeName = bookmarkByRange.getName();
-	  bookmarkToDelete = new Bookmark(currentBookmarkByRangeName, UNO.XBookmarksSupplier(documentController.getModel().doc));
-	  
-	  if (bookmarkName.contains("HIGHLIGHT_COLOR")) {
-	          UNO.setPropertyToDefault(bookmarkToDelete.getTextCursor(), "CharBackColor");
-	  }
-		
-	  bookmarkToDelete.remove();
-	  
-	  if(!(currentBookmarkByRangeName.equals(bookmarkName))){
-	    setNewDocumentCommand(documentController,bookmarkName,range,highlightColor,markChange);
-	  }
-	} catch (NoSuchElementException e)
-	{
-	  // TODO Auto-generated catch block
-	  e.printStackTrace();
-	}
+      if (bookmarkByRange != null)
+      {
+        Bookmark bookmarkToDelete;
+        try
+        {
+          String currentBookmarkByRangeName = bookmarkByRange.getName();
+          bookmarkToDelete = new Bookmark(currentBookmarkByRangeName,
+              UNO.XBookmarksSupplier(documentController.getModel().doc));
+
+          if (bookmarkName.contains("HIGHLIGHT_COLOR"))
+          {
+            UNO.setPropertyToDefault(bookmarkToDelete.getTextCursor(), "CharBackColor");
+          }
+
+          bookmarkToDelete.remove();
+
+          if (!(currentBookmarkByRangeName.equals(bookmarkName)))
+          {
+            setNewDocumentCommand(documentController, bookmarkName, range, highlightColor, markChange);
+          }
+        } catch (NoSuchElementException e)
+        {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
       }
 
-      if(bookmarkByRange == null)
+      if (bookmarkByRange == null)
       {
         // neuen Block anlegen
         documentController.getModel().addNewDocumentCommand(range, bookmarkName);
@@ -3510,19 +3488,18 @@ public class WollMuxEventHandler
           // ViewCursor kollabieren, da die Markierung die Farben verfälscht
           // darstellt.
           XTextCursor vc = documentController.getModel().getViewCursor();
-          if (vc != null) vc.collapseToEnd();
+          if (vc != null)
+            vc.collapseToEnd();
         }
-        ModalDialogs.showInfoModal(L.m("Block wurde markiert"),
-          L.m("Der ausgewählte Block %1.", markChange));
+        ModalDialogs.showInfoModal(L.m("Block wurde markiert"), L.m("Der ausgewählte Block %1.", markChange));
       }
-      
+
       // PrintBlöcke neu einlesen:
       documentController.getModel().getDocumentCommands().update();
-      DocumentCommandInterpreter dci =
-        new DocumentCommandInterpreter(documentController, WollMuxFiles.isDebugMode());
+      DocumentCommandInterpreter dci = new DocumentCommandInterpreter(documentController, WollMuxFiles.isDebugMode());
       dci.scanGlobalDocumentCommands();
       dci.scanInsertFormValueCommands();
-      
+
       stabilize();
     }
     
@@ -4293,19 +4270,6 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       boolean hasPrintFunction = documentController.getModel().getPrintFunctions().size() > 0;
-
-      if (Workarounds.applyWorkaroundForOOoIssue96281())
-      {
-        try
-        {
-          Object viewSettings =
-            UNO.XViewSettingsSupplier(documentController.getModel().doc.getCurrentController()).getViewSettings();
-          UNO.setProperty(viewSettings, "ZoomType", DocumentZoomType.BY_VALUE);
-          UNO.setProperty(viewSettings, "ZoomValue", Short.valueOf((short) 100));
-        }
-        catch (java.lang.Exception e)
-        {}
-      }
 
       if (hasPrintFunction)
       {

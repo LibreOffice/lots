@@ -40,7 +40,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Rectangle;
@@ -48,9 +47,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.awt.event.WindowStateListener;
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
@@ -68,7 +66,6 @@ import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
@@ -309,14 +306,8 @@ public class FormGUI
      * das Setzen der Fenstergröße ohnehin den maximierten Zustand verlässt.
      */
 
-    GraphicsEnvironment genv = GraphicsEnvironment
-	.getLocalGraphicsEnvironment();
+    GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
     maxWindowBounds = genv.getMaximumWindowBounds();
-
-    if (Workarounds.applyWorkaroundForSunJavaBug4737732())
-    {
-      maxWindowBounds.height -= 32; // Sicherheitsabzug für KDE Taskleiste
-    }
 
     myFrame.pack();
     myFrame.setResizable(true);
@@ -329,66 +320,8 @@ public class FormGUI
      */
     windowInsets = myFrame.getInsets();
 
-    if (Workarounds.applyWorkaroundForSunJavaBug4737732())
-    {
-      myFrame.addWindowStateListener(new WindowStateListener()
-      {
-	private int counter = 0;
-
-	@Override
-	public void windowStateChanged(WindowEvent e)
-	{
-	  if (counter == 0 && (e.getNewState() & Frame.MAXIMIZED_BOTH) > 0)
-	  // Bei der Erkennung, ob der Frame maximiert wurde, sind wir seit
-	  // trac#11494 weniger restriktiv als bisher. Der BC 5.0 meldet jetzt
-	  // aus irgend einem Grund nur noch Frame.MAXIMIZED_HORIZ (2) zurück
-	  // und wir aktzeptieren das auch - bisher wurde nur
-	  // Frame.MAXIMIZED_BOTH (6)
-	  // akzeptiert. Ich sehe in diesem Vorgehen nur ein sehr geringes
-	  // Risiko, dass einmal falsche Werte entstehen können.
-	  {
-	    createGUI2(true);
-	    ++counter;
-	  } else if (counter == 1)
-	  {
-	    setFormGUISizeAndLocation();
-	    arrangeWindows();
-	    ++counter;
-	  } else if (counter == 2)
-	  {
-	    myFrame.removeWindowStateListener(this);
-	    ++counter;
-	  }
-	}
-      });
-
-      myFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
-    } else
-    {
-      // Dieser Teil muss ausgeführt werden, wenn der Workaround nicht aktiv
-      // ist!
-      setFormGUISizeAndLocation();
-      arrangeWindows();
-    }
-  }
-
-  private void createGUI2(boolean changeMaxWinBounds)
-  {
-    if (Workarounds.applyWorkaroundForSunJavaBug4737732())
-    {
-      if (changeMaxWinBounds)
-      {
-	Rectangle newBounds = myFrame.getBounds();
-	// sanity check: Falls die neuen Grenzen weniger als 75% der Fläche
-	// haben als
-	// die alten (die bis auf die Taskleiste korrekt seien sollten), dann
-	// werden sie nicht genommen.
-	if (newBounds.width * newBounds.height >= 0.75 * maxWindowBounds.width
-	    * maxWindowBounds.height)
-	  maxWindowBounds = newBounds;
-      }
-      myFrame.setExtendedState(Frame.NORMAL);
-    }
+    setFormGUISizeAndLocation();
+    arrangeWindows();
   }
 
   /**
@@ -405,7 +338,7 @@ public class FormGUI
     {
     case Common.DIMENSION_UNSPECIFIED: // natural width
       if (frameBounds.width > (0.66 * maxWindowBounds.width))
-	frameBounds.width = (int) (0.66 * maxWindowBounds.width);
+        frameBounds.width = (int) (0.66 * maxWindowBounds.width);
       break;
     case Common.DIMENSION_MAX: // max
       frameBounds.width = maxWindowBounds.width;
@@ -476,10 +409,8 @@ public class FormGUI
      * MaximumWindowBounds nicht berücksichtigt beim ersten Layout (jedoch
      * schon, wenn sich die Taskleiste verändert).
      */
-    if (frameBounds.y + frameBounds.height > maxWindowBounds.y
-	+ maxWindowBounds.height)
-      frameBounds.height = maxWindowBounds.y + maxWindowBounds.height
-	  - frameBounds.y;
+    if (frameBounds.y + frameBounds.height > maxWindowBounds.y + maxWindowBounds.height)
+      frameBounds.height = maxWindowBounds.y + maxWindowBounds.height - frameBounds.y;
 
     myFrame.setBounds(frameBounds);
     myFrame.validate(); // ohne diese wurde in Tests manchmal nicht neu
@@ -495,8 +426,7 @@ public class FormGUI
   private void arrangeWindows()
   {
     Rectangle frameBounds = new Rectangle(myFrame.getBounds());
-    Logger.debug("Maximum window bounds " + maxWindowBounds + "| window insets "
-	+ windowInsets + "| frame bounds " + frameBounds);
+    Logger.debug("Maximum window bounds " + maxWindowBounds + "| window insets " + windowInsets + "| frame bounds " + frameBounds);
 
     /*
      * Das Addieren von windowInsets.left und windowInsets.right ist eine
@@ -505,8 +435,7 @@ public class FormGUI
      * richtige Ausrichtung zu berechnen.
      */
     int docX = frameBounds.width + frameBounds.x + windowInsets.left;
-    int docWidth = maxWindowBounds.width - frameBounds.width - frameBounds.x
-	- windowInsets.right;
+    int docWidth = maxWindowBounds.width - frameBounds.width - frameBounds.x - windowInsets.right;
     if (docWidth < 0)
     {
       docX = maxWindowBounds.x;
@@ -517,8 +446,7 @@ public class FormGUI
      * Das Subtrahieren von 2*windowInsets.bottom ist ebenfalls eine Heuristik.
      * (siehe weiter oben)
      */
-    int docHeight = maxWindowBounds.y + maxWindowBounds.height - docY
-	- 2 * windowInsets.bottom;
+    int docHeight = maxWindowBounds.y + maxWindowBounds.height - docY - 2 * windowInsets.bottom;
 
     windowPosSizeSetter.setWindowPosSize(docX, docY, docWidth, docHeight);
   }
@@ -567,12 +495,8 @@ public class FormGUI
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class MyWindowListener implements WindowListener, ComponentListener
+  private class MyWindowListener extends WindowAdapter implements ComponentListener
   {
-    public MyWindowListener()
-    {
-    }
-
     @Override
     public void windowActivated(WindowEvent e)
     {
@@ -583,21 +507,15 @@ public class FormGUI
     {
       try
       {
-	String frameTitle2 = myDoc.getWindowTitle();
-	if (frameTitle2 != frameTitle)
-	{
-	  frameTitle = frameTitle2;
-	  formGUITitle = frameTitle + " - " + formTitle;
-	  myFrame.setTitle(formGUITitle);
-	}
+      	String frameTitle2 = myDoc.getWindowTitle();
+      	if (frameTitle2 != frameTitle)
+      	{
+      	  frameTitle = frameTitle2;
+      	  formGUITitle = frameTitle + " - " + formTitle;
+      	  myFrame.setTitle(formGUITitle);
+      	}
       } catch (Exception x)
-      {
-      }
-    }
-
-    @Override
-    public void windowClosed(WindowEvent e)
-    {
+      {}
     }
 
     @Override
@@ -605,11 +523,6 @@ public class FormGUI
     {
       closeAction.actionPerformed(null);
       ((JFrame) e.getSource()).dispose();
-    }
-
-    @Override
-    public void windowDeactivated(WindowEvent e)
-    {
     }
 
     @Override
@@ -623,11 +536,6 @@ public class FormGUI
     public void windowIconified(WindowEvent e)
     {
       // myDoc.setWindowVisible(false);
-    }
-
-    @Override
-    public void windowOpened(WindowEvent e)
-    {
     }
 
     @Override
@@ -689,21 +597,18 @@ public class FormGUI
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
-	@Override
-	public void run()
-	{
-	  try
-	  {
-	    myFrame.dispose();
-	  } catch (Exception x)
-	  {
-	  }
-	  ;
-	}
+        @Override
+        public void run()
+        {
+          try
+          {
+            myFrame.dispose();
+          } catch (Exception x)
+          {}
+        }
       });
     } catch (Exception x)
-    {
-    }
+    {}
   }
 
   private static class DummyFormModel implements FormModel
@@ -715,8 +620,7 @@ public class FormGUI
     public DummyFormModel(XTextDocument doc)
     {
       myDoc = doc;
-      myWindow = UNO.XWindow2(
-	  myDoc.getCurrentController().getFrame().getContainerWindow());
+      myWindow = UNO.XWindow2(myDoc.getCurrentController().getFrame().getContainerWindow());
     }
 
     @Override
@@ -736,10 +640,10 @@ public class FormGUI
     {
       try
       {
-	UNO.XCloseable(myDoc).close(true);
+        UNO.XCloseable(myDoc).close(true);
       } catch (Exception x)
       {
-	Logger.error(x);
+        Logger.error(x);
       }
     }
 
@@ -840,16 +744,12 @@ public class FormGUI
     {
       for (String fragId : fragIds)
       {
-	Logger.log("openTemplateOrDocument(" + fragId + ")");
+        Logger.log("openTemplateOrDocument(" + fragId + ")");
       }
     }
 
     @Override
-    public void sendAsEmail()
-    {
-      // TODO Auto-generated method stub
-
-    }
+    public void sendAsEmail() {}
   }
 
   private class MyAbortRequestListener implements ActionListener
@@ -870,10 +770,9 @@ public class FormGUI
     WollMuxFiles.setupWollMuxDir();
     Logger.init(System.err, Logger.DEBUG);
     String confFile = "testdata/formulartest.conf";
-    ConfigThingy conf = new ConfigThingy("", new URL(
-	new File(System.getProperty("user.dir")).toURI().toURL(), confFile));
-    XTextDocument doc = UNO.XTextDocument(
-	UNO.loadComponentFromURL("private:factory/swriter", true, true));
+    ConfigThingy conf = new ConfigThingy("",
+        new URL(new File(System.getProperty("user.dir")).toURI().toURL(), confFile));
+    XTextDocument doc = UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true, true));
     FormModel model = new DummyFormModel(doc);
     Map<String, String> mapIdToPresetValue = new HashMap<String, String>();
     mapIdToPresetValue.put("NEFishy", TextDocumentModel.FISHY);
@@ -887,21 +786,18 @@ public class FormGUI
     mapIdToPresetValue.put("AbtKaution", "true");
 
     Map<Object, Object> functionContext = new HashMap<Object, Object>();
-    DialogLibrary dialogLib = DialogFactory
-	.parseFunctionDialogs(conf.get("Formular"), null, functionContext);
-    FunctionLibrary funcLib = FunctionFactory
-	.parseFunctions(conf.get("Formular"), dialogLib, functionContext, null);
+    DialogLibrary dialogLib = DialogFactory.parseFunctionDialogs(conf.get("Formular"), null, functionContext);
+    FunctionLibrary funcLib = FunctionFactory.parseFunctions(conf.get("Formular"), dialogLib, functionContext, null);
 
     ConfigThingy formFensterConf = new ConfigThingy("");
     try
     {
-      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster")
-	  .query("Formular").getLastChild();
+      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild();
     } catch (Exception x)
     {
     }
-    new FormGUI(formFensterConf, conf.get("Formular"), model,
-	mapIdToPresetValue, functionContext, funcLib, dialogLib, true);
+    new FormGUI(formFensterConf, conf.get("Formular"), model, mapIdToPresetValue, functionContext, funcLib, dialogLib,
+        true);
   }
 
 }
