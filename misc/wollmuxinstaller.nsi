@@ -149,6 +149,7 @@ Section "${WOLLMUXBAR} & OOo Extension"
 	File ${FILESDIR}\${WOLLMUX}.oxt
 	File ${FILESDIR}\${WOLLMUXBAR_JAR_NAME}
 	File ${FILESDIR}\${WOLLMUXBAR_EXE_NAME}
+	File ${FILESDIR}\wollmuxbar.l4j.ini
 	
 	# since the installation of the OOo extension is the most critical part of the installation we try that first
 	Call GetOOoPath

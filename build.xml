@@ -64,6 +64,8 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		<os family="windows"/>  
 	</condition> 
 	<property file="${os.family}.properties"/>  
+	<property name="launch4j.dir" location="/opt/launch4j"/>
+	<taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpath="${launch4j.dir}/launch4j.jar :${launch4j.dir}/lib/xstream.jar" />
 
 
 <!-- If you follow the INSTALL instructions exactly, you won't have to change this path --> 	
@@ -546,11 +548,12 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	</target>
 
 	<!-- Das Target erzeugt die wollmuxbar.exe -->
-	<target name="wollmuxbar.exe">
-		<exec executable="makensis" failonerror="true" failifexecutionfails="true">
-			<arg line="-V3 -DOUT_FILE=${WOLLMUXBAR_EXE_NAME} -DJAR_FILE=${WOLLMUXBAR_JAR_NAME} ${MISC}/wollmuxbarlauncher.nsi"/>
-		</exec>
-		<move file="${MISC}/${WOLLMUXBAR_EXE_NAME}" todir="${PACKAGE_DIR}" />
+	<target name="wollmuxbar.exe" depends="WollMuxBar.jar">
+		<launch4j>
+			<config headerType="gui" outfile="${WOLLMUXBAR_EXE}" jar="${WOLLMUXBAR_JAR}" errTitle="WollMux">
+				<jre minVersion="1.6.0" bundledJre64Bit="false" bundledJreAsFallback="false" jdkPreference="preferJre" runtimeBits="64/32"/>
+			</config>
+		</launch4j>
 	</target>
 	
 	<target name="TerminateOOo.jar">
@@ -584,9 +587,9 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	</target>
 	
 	<!-- Das Target erzeugt den Windows WollMux-Installer -->
-	<target name="wininstaller" depends="makeversion, TerminateOOo.jar, WollMuxBar.jar, WollMux.oxt">
+	<target name="wininstaller" depends="makeversion, TerminateOOo.jar, WollMuxBar.jar, WollMux.oxt, wollmuxbar.exe">
 		<exec executable="makensis" failonerror="true" failifexecutionfails="true">
-			<arg line="-V3 -DFILESDIR=../${PACKAGE_DIR} -DVERSION=${VERSION} -DWOLLMUX=${COMPONENT} -DWOLLMUXBAR=${WOLLMUXBAR_NAME} -DWOLLMUXBAR_EXE_NAME=${WOLLMUXBAR_EXE_NAME} -DWOLLMUXBAR_JAR_NAME=${WOLLMUXBAR_JAR_NAME} ${MISC}/wollmuxinstaller.nsi"/>
+			<arg line="-V4 -DFILESDIR=../${PACKAGE_DIR} -DVERSION=${VERSION} -DWOLLMUX=${COMPONENT} -DWOLLMUXBAR=${WOLLMUXBAR_NAME} -DWOLLMUXBAR_EXE_NAME=${WOLLMUXBAR_EXE_NAME} -DWOLLMUXBAR_JAR_NAME=${WOLLMUXBAR_JAR_NAME} ${MISC}/wollmuxinstaller.nsi"/>
 		</exec>
 		
 		<move file="${MISC}/${COMPONENT}-${VERSION}-installer.exe" todir="${PACKAGE_DIR}" />
