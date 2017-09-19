@@ -5,10 +5,7 @@
 
 include /usr/share/cdbs/1/rules/debhelper.mk
 
-JAVA_HOME := /usr/lib/jvm/default-java
-ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
-
-build/wollmuxbar:: debian/stamp-build
+build/libreoffice5.2-wollmux:: debian/stamp-build
 debian/stamp-build:
 	pod2man -c 'WollMux for Landeshauptstadt München' \
 	  -r WollMux-$(DEB_UPSTREAM_VERSION) \
@@ -16,16 +13,8 @@ debian/stamp-build:
 	inkscape -h 128 -D -e debian/wollmuxbar.png debian/frog.svg
 	touch $@
 
-install/wollmuxbar::
-	install -m 644 -D dist/WollMuxBar.jar \
-	  debian/wollmuxbar/usr/share/java/WollMuxBar-$(DEB_UPSTREAM_VERSION).jar
-	dh_link -pwollmuxbar /usr/share/java/WollMuxBar-$(DEB_UPSTREAM_VERSION).jar \
-	  /usr/share/java/WollMuxBar.jar
-
 clean::
 	$(RM) debian/stamp-* debian/wollmuxbar.1 debian/wollmuxbar.png 
 	$(RM) debian/*.{pre,post}{inst,rm}
 
-#get-orig-source:
-#	-uscan --upstream-version 0
 

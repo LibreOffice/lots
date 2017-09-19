@@ -7,35 +7,12 @@ Build-Depends: ant, cdbs, debhelper (>= 5), inkscape, openjdk-7-jdk|oracle-java7
 Standards-Version: 3.8.0
 Homepage: http://www.wollmux.org
 
-Package: libreoffice4.1-wollmux
-Architecture: all
-Depends: ${misc:Depends}, default-jre, libreoffice-meta
-Replaces: libreoffice-wollmux (<< ${binary:Version})
-Breaks: libreoffice-wollmux (<< ${binary:Version})
-Suggests: wollmuxbar
-Multi-arch: foreign
-Description: WollMux extension for LibreOffice
- The package adds an extension to LibreOffice with the following features:
-  - On the fly template generation from fragments (e.g. letterhead, footer,
-    form)
-  - Pre-filling templates with personal and organizational data from a variety
-    of databases (LDAP, local user data, and other sources)
-  - Advanced form support with auto-computed fields and input validity checking
-  - Improved user interface for interactive form data
-  - Hiding and showing parts of the document based on form input
-  - Advanced autotext support with identifier pattern matching and a shortcut
-    syntax for filling in placeholders
-  - Chainable printing plugins to provide custom dialogs and transformations
-    when printing
-  - Automatic printing of document variants according to document content
-  - Enhanced serial letter functionality that ties in with the form
-    functionality (e.g. auto-computed fields) and the custom print plugins.
-
 Package: libreoffice5.2-wollmux
 Architecture: all
 Depends: ${misc:Depends}, default-jre, libreoffice-meta
-Conflicts: libreoffice-wollmux (<< ${binary:Version})
-Replaces: libreoffice-wollmux (<< ${binary:Version})
+Conflicts: libreoffice-wollmux (<< ${binary:Version}), wollmux (<< ${binary:Version}), wollmuxbar (<< ${binary:Version})
+Replaces: libreoffice-wollmux (<< ${binary:Version}), wollmux (<< ${binary:Version}), wollmuxbar (<< ${binary:Version})
+Provides: libreoffice-wollmux, wollmux, wollmuxbar
 Suggests: wollmuxbar
 Multi-arch: foreign
 Description: WollMux extension for LibreOffice
@@ -55,26 +32,3 @@ Description: WollMux extension for LibreOffice
   - Enhanced serial letter functionality that ties in with the form
     functionality (e.g. auto-computed fields) and the custom print plugins.
 
-Package: wollmuxbar
-Architecture: all
-Depends: libreoffice4.1-wollmux (= ${binary:Version}) | libreoffice5.2-wollmux (= ${binary:Version})
-Conflicts: wollmux (<< ${binary:Version})
-Replaces: wollmux (<< ${binary:Version})
-Multi-arch: foreign
-Description: Standalone toolbar for WollMux
- The package adds a toolbar to your desktop that provides easy access to the
- libreoffice-wollmux extension without a permanently running instance of
- LibreOffice / Apache OpenOffice / OpenOffice.org Writer.
-
-Package: wollmux
-Architecture: all
-Depends: wollmuxbar (= ${binary:Version})
-Multi-arch: foreign
-Description: Transitional package for WollMux Bar
- Ease transition from wollmux to wollmuxbar package
-
-Package: libreoffice-wollmux
-Depends: libreoffice4.1-wollmux (= ${binary:Version}) | libreoffice5.2-wollmux (= ${binary:Version})
-Architecture: all
-Description: transitional dummy package
- This is a transitional dummy package. It can safely be removed.
