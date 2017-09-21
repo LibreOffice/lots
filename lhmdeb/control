@@ -13,7 +13,6 @@ Depends: ${misc:Depends}, default-jre, libreoffice-meta
 Conflicts: libreoffice-wollmux (<< ${binary:Version}), wollmux (<< ${binary:Version}), wollmuxbar (<< ${binary:Version})
 Replaces: libreoffice-wollmux (<< ${binary:Version}), wollmux (<< ${binary:Version}), wollmuxbar (<< ${binary:Version})
 Provides: libreoffice-wollmux, wollmux, wollmuxbar
-Suggests: wollmuxbar
 Multi-arch: foreign
 Description: WollMux extension for LibreOffice
  The package adds an extension to LibreOffice with the following features:
