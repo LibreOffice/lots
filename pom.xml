@@ -449,7 +449,7 @@
 		<dependency>
 			<groupId>de.muenchen</groupId>
 			<artifactId>wollmux-core</artifactId>
-			<version>17.08-SNAPSHOT</version>
+			<version>17.10</version>
 		</dependency>
 		<dependency>
 			<groupId>org.libreoffice</groupId>
@@ -474,7 +474,7 @@
 		<dependency>
 			<groupId>de.muenchen</groupId>
 			<artifactId>unohelper</artifactId>
-			<version>1.0.0</version>
+			<version>2.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
