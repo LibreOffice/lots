@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.muenchen</groupId>
 	<artifactId>wollmux</artifactId>
-	<version>17.08-SNAPSHOT</version>
+	<version>17.10-SNAPSHOT</version>
 	<name>WollMux</name>
 
 	<properties>
