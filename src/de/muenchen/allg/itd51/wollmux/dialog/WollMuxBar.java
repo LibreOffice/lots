@@ -509,6 +509,11 @@ public class WollMuxBar
     }
   }
 
+  public IsInsideMonitor getMyIsInsideMonitor()
+  {
+    return myIsInsideMonitor;
+  }
+  
   private void createGUI(ConfigThingy conf)
   {
     initFactories();

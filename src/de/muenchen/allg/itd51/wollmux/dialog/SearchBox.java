@@ -224,6 +224,7 @@ public class SearchBox
               label.setBorder(BorderFactory.createBevelBorder(1));
               label.setBackground(Color.WHITE);
               label.setEnabled(false);
+              label.addMouseListener(wollMuxBar.getMyIsInsideMonitor());
               menu.add(label);
               added = true;
             }
