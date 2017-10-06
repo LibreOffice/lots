@@ -1102,6 +1102,7 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       if (docInfo.hasTextDocumentModel()) DocumentManager.getDocumentManager().dispose(docInfo.getTextDocumentController().getModel().doc);
+      System.gc();
     }
 
     @Override
