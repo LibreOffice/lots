@@ -261,8 +261,11 @@ public class FormularMax4kController
     }
     
     selectionSupplier = getSelectionSupplier();
-    myXSelectionChangedListener = new MyXSelectionChangedListener();
-    selectionSupplier.addSelectionChangeListener(myXSelectionChangedListener);
+    if(selectionSupplier != null)
+    {
+      myXSelectionChangedListener = new MyXSelectionChangedListener();
+      selectionSupplier.addSelectionChangeListener(myXSelectionChangedListener); 
+    }
 }
 
   public void setAbortListener(ActionListener abortListener)

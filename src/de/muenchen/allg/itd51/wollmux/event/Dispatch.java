@@ -147,4 +147,10 @@ public class Dispatch extends BaseDispatch
   {
     WollMuxEventHandler.handleDumpInfo();
   }
+  
+  // zur Vermeidung java.lang.NoSuchMethodException: de.muenchen.allg.itd51.wollmux.event.Dispatch.status_wollmux_dumpinfo()
+  public boolean status_wollmux_dumpinfo()
+  {    
+    return true;
+  }
 }

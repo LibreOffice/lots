@@ -77,13 +77,13 @@ public class DocumentDispatch extends Dispatch
    * Erzeugt einen neuen DocumentDispatch.
    * 
    * @param origDisp
-   *          Ein XDispatch-Objekt, das die ursprüngliche Standard-Aktion der URL url
-   *          auslösen kann.
+   *          Ein XDispatch-Objekt, das die ursprüngliche Standard-Aktion der
+   *          URL url auslösen kann.
    * @param origUrl
    *          Zu origDisp passender URL um das Standardverhalten auszulösen.
    * @param frame
-   *          der Frame des Textdokuments in dessen Kontext der Dispatch ausgeführt
-   *          werden soll.
+   *          der Frame des Textdokuments in dessen Kontext der Dispatch
+   *          ausgeführt werden soll.
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
    */
@@ -96,8 +96,8 @@ public class DocumentDispatch extends Dispatch
   }
 
   /**
-   * Wenn wir ein Original-Dispatch-Objekt haben, überlassen wir diesem das managen
-   * des Status.
+   * Wenn wir ein Original-Dispatch-Objekt haben, überlassen wir diesem das
+   * managen des Status.
    * 
    * @see #removeStatusListener(XStatusListener, URL)
    */
@@ -111,8 +111,8 @@ public class DocumentDispatch extends Dispatch
   }
 
   /**
-   * Wenn wir ein Original-Dispatch-Objekt haben, überlassen wir diesem das managen
-   * des Status.
+   * Wenn wir ein Original-Dispatch-Objekt haben, überlassen wir diesem das
+   * managen des Status.
    * 
    * @see #addStatusListener(XStatusListener, URL)
    */
@@ -135,14 +135,39 @@ public class DocumentDispatch extends Dispatch
     return null;
   }
 
+  // private boolean isDruckVorschauModus()
+  // {
+  // XLayoutManager layout = UNO
+  // .XLayoutManager(UNO.getProperty(getDocumentController().getModel().doc
+  // .getCurrentController().getFrame(), "LayoutManager"));
+  // return
+  // !layout.isElementVisible("private:resource/toolbar/previewobjectbar");
+  // }
+
+  private boolean isElementInPrintPreview()
+  {
+    boolean flag = false;
+    XLayoutManager layout = UNO
+	.XLayoutManager(UNO.getProperty(getDocumentController().getModel().doc
+	    .getCurrentController().getFrame(), "LayoutManager"));
+    if (layout != null)
+    {
+      flag = !layout
+	  .isElementVisible("private:resource/toolbar/previewobjectbar");
+    }
+    return flag;
+  }
+
   public void dispatch__uno_print(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handlePrint(getDocumentController(), origDisp, origUrl, props);
+    WollMuxEventHandler.handlePrint(getDocumentController(), origDisp, origUrl,
+	props);
   }
 
   public void dispatch__uno_printdefault(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handlePrint(getDocumentController(), origDisp, origUrl, props);
+    WollMuxEventHandler.handlePrint(getDocumentController(), origDisp, origUrl,
+	props);
   }
 
   public void dispatch_wollmux_functiondialog(String arg, PropertyValue[] props)
@@ -150,14 +175,17 @@ public class DocumentDispatch extends Dispatch
     WollMuxEventHandler.handleFunctionDialog(getDocumentController(), arg);
   }
 
-  public void dispatch_wollmux_formularmax4000(String arg, PropertyValue[] props)
+  public void dispatch_wollmux_formularmax4000(String arg,
+      PropertyValue[] props)
   {
     WollMuxEventHandler.handleFormularMax4000Show(getDocumentController());
   }
 
-  public void dispatch_wollmux_ziffereinfuegen(String arg, PropertyValue[] props)
+  public void dispatch_wollmux_ziffereinfuegen(String arg,
+      PropertyValue[] props)
   {
-    WollMuxEventHandler.handleButtonZifferEinfuegenPressed(getDocumentController());
+    WollMuxEventHandler
+	.handleButtonZifferEinfuegenPressed(getDocumentController());
   }
 
   public void dispatch_wollmux_abdruck(String arg, PropertyValue[] props)
@@ -165,9 +193,11 @@ public class DocumentDispatch extends Dispatch
     WollMuxEventHandler.handleButtonAbdruckPressed(getDocumentController());
   }
 
-  public void dispatch_wollmux_zuleitungszeile(String arg, PropertyValue[] props)
+  public void dispatch_wollmux_zuleitungszeile(String arg,
+      PropertyValue[] props)
   {
-    WollMuxEventHandler.handleButtonZuleitungszeilePressed(getDocumentController());
+    WollMuxEventHandler
+	.handleButtonZuleitungszeilePressed(getDocumentController());
   }
 
   public void dispatch_wollmux_markblock(String arg, PropertyValue[] props)
@@ -178,7 +208,8 @@ public class DocumentDispatch extends Dispatch
   public void dispatch_wollmux_textbausteineinfuegen(String arg,
       PropertyValue[] props)
   {
-    WollMuxEventHandler.handleTextbausteinEinfuegen(getDocumentController(), true);
+    WollMuxEventHandler.handleTextbausteinEinfuegen(getDocumentController(),
+	true);
   }
 
   public void dispatch_wollmux_platzhalteranspringen(String arg,
@@ -190,7 +221,8 @@ public class DocumentDispatch extends Dispatch
   public void dispatch_wollmux_textbausteinverweiseinfuegen(String arg,
       PropertyValue[] props)
   {
-    WollMuxEventHandler.handleTextbausteinEinfuegen(getDocumentController(), false);
+    WollMuxEventHandler.handleTextbausteinEinfuegen(getDocumentController(),
+	false);
   }
 
   public void dispatch_wollmux_seriendruck(String arg, PropertyValue[] props)
@@ -200,18 +232,74 @@ public class DocumentDispatch extends Dispatch
 
   public void dispatch_wollmux_test(String arg, PropertyValue[] props)
   {
-    if (WollMuxFiles.installQATestHandler()) TestHandler.doTest(getDocumentController(), arg);
+    if (WollMuxFiles.installQATestHandler())
+      TestHandler.doTest(getDocumentController(), arg);
   }
 
   public void dispatch_wollmux_printpage(String arg, PropertyValue[] props)
   {
     WollMuxEventHandler.handlePrintPage(getDocumentController());
   }
-  
+
   public boolean status_wollmux_printpage()
   {
     // Deaktiviert den 'Seite drucken'-Button im Seitenvorschaumodus
-    XLayoutManager layout = UNO.XLayoutManager(UNO.getProperty(getDocumentController().getModel().doc.getCurrentController().getFrame(), "LayoutManager")); 
-    return !layout.isElementVisible("private:resource/toolbar/previewobjectbar");
+    return isElementInPrintPreview();
+  }
+
+  public boolean status_wollmux_textbausteineinfuegen()
+  {
+    // Deaktiviert den 'Textbaustein einfügen'-Button im Seitenvorschaumodus
+    return isElementInPrintPreview();
+  }
+
+  public boolean status_wollmux_platzhalteranspringen()
+  {
+    // Deaktiviert den 'Platzhalter anspringen'-Button im Seitenvorschaumodus
+    return isElementInPrintPreview();
+  }
+
+  public boolean status_wollmux_ziffereinfuegen()
+  {
+    // Deaktiviert den 'Ziffer einfügen'-Button im Seitenvorschaumodus
+    return isElementInPrintPreview();
+  }
+
+  public boolean status_wollmux_textbausteinverweiseinfuegen()
+  {
+    return isElementInPrintPreview();
+  }
+
+  public boolean status_wollmux_abdruck()
+  {
+    // Deaktiviert den 'Abdruck'-Button im Seitenvorschaumodus
+    return isElementInPrintPreview();
+  }
+
+  public boolean status_wollmux_zuleitungszeile()
+  {
+    // Deaktiviert den 'Zuleitungszeile'-Button im Seitenvorschaumodus
+    return isElementInPrintPreview();
+  }
+
+  public boolean status_wollmux_markblock()
+  {
+    // Deaktiviert die Buttons 'Immer drucken', 'Nicht im Original', 'Nur
+    // Original', 'Nur Entwurf', 'Nur Abdrucke' im Seitenvorschaumodus
+    return isElementInPrintPreview();
+  }
+
+  // zur Vermeidung java.lang.NoSuchMethodException:
+  // de.muenchen.allg.itd51.wollmux.event.DocumentDispatch.status_wollmux_formularmax4000()
+  public boolean status_wollmux_formularmax4000()
+  {
+    return true;
+  }
+
+  // zur Vermeidung java.lang.NoSuchMethodException:
+  // de.muenchen.allg.itd51.wollmux.event.DocumentDispatch.status_wollmux_formularmax4000()
+  public boolean status_wollmux_functiondialog()
+  {
+    return true;
   }
 }
