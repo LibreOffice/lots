@@ -135,15 +135,6 @@ public class DocumentDispatch extends Dispatch
     return null;
   }
 
-  // private boolean isDruckVorschauModus()
-  // {
-  // XLayoutManager layout = UNO
-  // .XLayoutManager(UNO.getProperty(getDocumentController().getModel().doc
-  // .getCurrentController().getFrame(), "LayoutManager"));
-  // return
-  // !layout.isElementVisible("private:resource/toolbar/previewobjectbar");
-  // }
-
   private boolean isElementInPrintPreview()
   {
     boolean flag = false;
@@ -267,6 +258,7 @@ public class DocumentDispatch extends Dispatch
 
   public boolean status_wollmux_textbausteinverweiseinfuegen()
   {
+    // Deaktiviert den 'Textbausteinverweis einfügen'-Button im Seitenvorschaumodus
     return isElementInPrintPreview();
   }
 
@@ -289,17 +281,16 @@ public class DocumentDispatch extends Dispatch
     return isElementInPrintPreview();
   }
 
-  // zur Vermeidung java.lang.NoSuchMethodException:
-  // de.muenchen.allg.itd51.wollmux.event.DocumentDispatch.status_wollmux_formularmax4000()
   public boolean status_wollmux_formularmax4000()
   {
-    return true;
+    // Deaktiviert den 'FormularMax 4000'-Button im Seitenvorschaumodus
+    return isElementInPrintPreview();
   }
 
   // zur Vermeidung java.lang.NoSuchMethodException:
-  // de.muenchen.allg.itd51.wollmux.event.DocumentDispatch.status_wollmux_formularmax4000()
   public boolean status_wollmux_functiondialog()
-  {
+  {// Button 'Empfänger auswählen'
+ // zur Vermeidung java.lang.NoSuchMethodException
     return true;
   }
 }
