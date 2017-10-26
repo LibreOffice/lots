@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import com.sun.star.text.XTextDocument;
-
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;

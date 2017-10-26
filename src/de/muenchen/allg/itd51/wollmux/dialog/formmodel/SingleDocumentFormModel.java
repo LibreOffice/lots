@@ -1,21 +1,13 @@
 package de.muenchen.allg.itd51.wollmux.dialog.formmodel;
 
-import java.awt.Desktop;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.sun.star.frame.XFrame;
-import com.sun.star.text.XTextDocument;
-
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;

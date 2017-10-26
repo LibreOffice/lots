@@ -1,17 +1,14 @@
 package de.muenchen.uno;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.sun.mail.iap.Argument;
 import com.sun.star.beans.MethodConcept;
 import com.sun.star.beans.XIntrospection;
 import com.sun.star.beans.XIntrospectionAccess;
 import com.sun.star.lang.NoSuchMethodException;
-import com.sun.star.reflection.InvocationTargetException;
 import com.sun.star.reflection.XIdlMethod;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;

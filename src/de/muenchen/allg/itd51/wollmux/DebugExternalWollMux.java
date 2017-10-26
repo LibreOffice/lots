@@ -20,11 +20,11 @@ import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
  * ALLOW_EXTERNAL_WOLLMUX "true" verwendet. Damit das Debuggen auch ohne WollMuxBar
  * möglich ist, wurde diese Klasse eingefügt. Zusammen mit dem neuen ant build-target
  * WollMux.oxt-ButtonsOnly kann so das Debugging vereinfacht werden.
- * 
+ *
  * Verwendung: Diese Main-Methode einfach per Debugger starten.
- * 
+ *
  * @author Christoph
- * 
+ *
  */
 public class DebugExternalWollMux
 {

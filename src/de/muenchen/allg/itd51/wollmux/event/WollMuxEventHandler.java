@@ -2,7 +2,7 @@
  * Dateiname: WollMuxEventHandler.java
  * Projekt  : WollMux
  * Funktion : Ermöglicht die Einstellung neuer WollMuxEvents in die EventQueue.
- * 
+ *
  * Copyright (c) 2010-2017 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,9 +22,9 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 24.10.2005 | LUT | Erstellung als EventHandler.java
- * 01.12.2005 | BNK | +on_unload() das die Toolbar neu erzeugt (böser Hack zum 
+ * 01.12.2005 | BNK | +on_unload() das die Toolbar neu erzeugt (böser Hack zum
  *                  | Beheben des Seitenansicht-Toolbar-Verschwindibus-Problems)
- *                  | Ausgabe des hashCode()s in den Debug-Meldungen, um Events 
+ *                  | Ausgabe des hashCode()s in den Debug-Meldungen, um Events
  *                  | Objekten zuordnen zu können beim Lesen des Logfiles
  * 27.03.2005 | LUT | neues Kommando openDocument
  * 21.04.2006 | LUT | +ConfigurationErrorException statt NodeNotFoundException bei
@@ -40,12 +40,12 @@
  * 02.06.2010 | BED | +handleSaveTempAndOpenExt
  * 08.05.2012 | jub | fakeSymLink behandlung eingebaut: auflösung und test der FRAG_IDs berücksichtigt
  *                    auch die möglichkeit, dass im conifg file auf einen fake SymLink verwiesen wird.
- * 11.12.2012 | jub | fakeSymLinks werden doch nicht gebraucht; wieder aus dem code entfernt                   
+ * 11.12.2012 | jub | fakeSymLinks werden doch nicht gebraucht; wieder aus dem code entfernt
  *
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.event;
 
@@ -170,7 +170,7 @@ import de.muenchen.allg.itd51.wollmux.print.PrintModels;
 
 /**
  * Ermöglicht die Einstellung neuer WollMuxEvents in die EventQueue.
- * 
+ *
  * @author Christoph Lutz (D-III-ITD 5.1)
  */
 public class WollMuxEventHandler
@@ -185,7 +185,7 @@ public class WollMuxEventHandler
    * Mit dieser Methode ist es möglich die Entgegennahme von Events zu blockieren.
    * Alle eingehenden Events werden ignoriert, wenn accept auf false gesetzt ist und
    * entgegengenommen, wenn accept auf true gesetzt ist.
-   * 
+   *
    * @param accept
    */
   public static void setAcceptEvents(boolean accept)
@@ -198,7 +198,7 @@ public class WollMuxEventHandler
    * Wollmux-Events. Alle Events werden in eine synchronisierte eventQueue
    * hineingepackt und von einem einzigen eventProcessingThread sequentiell
    * abgearbeitet.
-   * 
+   *
    * @author lut
    */
   public static class EventProcessor
@@ -229,7 +229,7 @@ public class WollMuxEventHandler
      * Mit dieser Methode ist es möglich die Entgegennahme von Events zu blockieren.
      * Alle eingehenden Events werden ignoriert, wenn accept auf false gesetzt ist
      * und entgegengenommen, wenn accept auf true gesetzt ist.
-     * 
+     *
      * @param accept
      */
     private void setAcceptEvents(boolean accept)
@@ -281,7 +281,7 @@ public class WollMuxEventHandler
 
     /**
      * Startet den {@link #eventProcessorThread}.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD-D101)
      */
     private void start()
@@ -293,7 +293,7 @@ public class WollMuxEventHandler
      * Diese Methode fügt ein Event an die eventQueue an wenn der WollMux erfolgreich
      * initialisiert wurde und damit events akzeptieren darf. Anschliessend weckt sie
      * den EventProcessor-Thread.
-     * 
+     *
      * @param event
      */
     private void addEvent(WollMuxEventHandler.WollMuxEvent event)
@@ -376,9 +376,9 @@ public class WollMuxEventHandler
       Throwable c = t.getCause();
       /*
        * Bei RuntimeExceptions keine Benutzersichtbare Meldung, weil
-       * 
+       *
        * 1. der Benutzer damit eh nix anfangen kann
-       * 
+       *
        * 2. dies typischerweise passiert, wenn der Benutzer das Dokument geschlossen
        * hat, bevor der WollMux fertig war. In diesem Fall will er nicht mit einer
        * Meldung belästigt werden.
@@ -409,7 +409,7 @@ public class WollMuxEventHandler
      * derartige Aufräumaktionen insbesondere nach der Bearbeitung von Events, die
      * viel mit Dokumenten/Cursorn/Uno-Objekten interagieren, wird die Stabilität des
      * WollMux spürbar gesteigert.
-     * 
+     *
      * In der Vergangenheit gab es z.B. sporadische, nicht immer reproduzierbare
      * Abstürze von OOo, die vermutlich in einem fehlerhaften Speichermanagement in
      * der schwer zu durchschauenden Kette JVM->UNO-Proxies->OOo begründet waren.
@@ -431,7 +431,7 @@ public class WollMuxEventHandler
      * Benutzerinteraktionen wie z.B. Mausklicks auf Menüpunkte oder Tastendrücke
      * verarbeitet. Die Verarbeitung findet nicht statt, wenn enabled==false gesetzt
      * ist, ansonsten schon.
-     * 
+     *
      * @param enabled
      */
     static void enableAllOOoWindows(boolean enabled)
@@ -536,7 +536,7 @@ public class WollMuxEventHandler
 
   /**
    * Stellt das WollMuxEvent event in die EventQueue des EventProcessors.
-   * 
+   *
    * @param event
    */
   private static void handle(WollMuxEvent event)
@@ -558,7 +558,7 @@ public class WollMuxEventHandler
    * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
    * WollMuxEventHandler ausgelöst und sorgt dafür, dass der Dialog AbsenderAuswählen
    * gestartet wird.
-   * 
+   *
    * @author christoph.lutz
    */
   private static class OnShowDialogAbsenderAuswaehlen extends BasicEvent
@@ -605,7 +605,7 @@ public class WollMuxEventHandler
    * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
    * WollMuxEventHandler ausgelöst und sorgt dafür, dass der Dialog
    * PersönlicheAbsendeliste-Verwalten gestartet wird.
-   * 
+   *
    * @author christoph.lutz
    */
   private static class OnShowDialogPersoenlicheAbsenderlisteVerwalten extends
@@ -643,7 +643,7 @@ public class WollMuxEventHandler
    * Erzeugt ein neues WollMuxEvent, das den Funktionsdialog dialogName aufruft und
    * die zurückgelieferten Werte in die entsprechenden FormField-Objekte des
    * Dokuments doc einträgt.
-   * 
+   *
    * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
    * WollMuxEventHandler ausgelöst.
    */
@@ -737,7 +737,7 @@ public class WollMuxEventHandler
    * möglich, über den Parameter wollMuxBarVersion eine Versionsnummer der WollMuxBar
    * zu übergeben, die im Dialog angezeigt wird, falls wollMuxBarVersion nicht der
    * Leerstring ist.
-   * 
+   *
    * Dieses Event wird vom WollMux-Service (...comp.WollMux) ausgelöst, wenn die
    * WollMux-url "wollmux:about" aufgerufen wurde.
    */
@@ -921,7 +921,7 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein neues WollMuxEvent, das den FormularMax4000 aufruft für das Dokument
    * doc.
-   * 
+   *
    * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
    * WollMuxEventHandler ausgelöst.
    */
@@ -986,7 +986,7 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein neues WollMuxEvent, das aufgerufen wird, wenn ein FormularMax4000
    * beendet wird und die entsprechenden internen Referenzen gelöscht werden können.
-   * 
+   *
    * Dieses Event wird vom EventProcessor geworfen, wenn der FormularMax zurückkehrt.
    */
   public static void handleFormularMax4000Returned(TextDocumentController documentController)
@@ -1022,7 +1022,7 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein neues WollMuxEvent, das aufgerufen wird, wenn ein FormularMax4000
    * beendet wird und die entsprechenden internen Referenzen gelöscht werden können.
-   * 
+   *
    * Dieses Event wird vom EventProcessor geworfen, wenn der FormularMax zurückkehrt.
    */
   public static void handleMailMergeNewReturned(TextDocumentController documentController)
@@ -1057,21 +1057,21 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein neues WollMuxEvent, das Auskunft darüber gibt, dass ein TextDokument
    * geschlossen wurde und damit auch das TextDocumentModel disposed werden soll.
-   * 
+   *
    * Dieses Event wird ausgelöst, wenn ein TextDokument geschlossen wird.
-   * 
+   *
    * @param docInfo
    *          ein {@link DocumentManager.Info} Objekt, an dem das TextDocumentModel
    *          dranhängt des Dokuments, das geschlossen wurde. ACHTUNG! docInfo hat
    *          nicht zwingend ein TextDocumentModel. Es muss
    *          {@link DocumentManager.Info#hasTextDocumentModel()} verwendet werden.
-   * 
-   * 
+   *
+   *
    *          ACHTUNG! ACHTUNG! Die Implementierung wurde extra so gewählt, dass hier
    *          ein DocumentManager.Info anstatt direkt eines TextDocumentModel
    *          übergeben wird. Es kam nämlich bei einem Dokument, das schnell geöffnet
    *          und gleich wieder geschlossen wurde zu folgendem Deadlock:
-   * 
+   *
    *          {@link OnProcessTextDocument} =>
    *          {@link de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo#getTextDocumentController()}
    *          => {@link TextDocumentModel#TextDocumentModel(XTextDocument)} =>
@@ -1080,9 +1080,9 @@ public class WollMuxEventHandler
    *          {@link GlobalEventListener#notifyEvent(com.sun.star.document.EventObject)}
    *          ("OnUnload") =>
    *          {@link de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo#hasTextDocumentModel()}
-   * 
+   *
    *          Da {@link TextDocumentInfo} synchronized ist kam es zum Deadlock.
-   * 
+   *
    */
   public static void handleTextDocumentClosed(DocumentManager.Info docInfo)
   {
@@ -1120,7 +1120,7 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein neues WollMuxEvent, das die eigentliche Dokumentbearbeitung eines
    * TextDokuments startet.
-   * 
+   *
    * @param documentController
    *          Das XTextDocument, das durch den WollMux verarbeitet werden soll.
    * @param visible
@@ -1137,7 +1137,7 @@ public class WollMuxEventHandler
    * Dieses Event wird immer dann ausgelöst, wenn der GlobalEventBroadcaster von OOo
    * ein ON_NEW oder ein ON_LOAD-Event wirft. Das Event sorgt dafür, dass die
    * eigentliche Dokumentbearbeitung durch den WollMux angestossen wird.
-   * 
+   *
    * @author christoph.lutz
    */
   private static class OnProcessTextDocument extends BasicEvent
@@ -1262,7 +1262,7 @@ public class WollMuxEventHandler
    * die Einzeldokumente geöffnet und dann dieses Event aufgerufen, das dafür
    * zuständig ist, die eine FormGUI für den MultiDocument-Modus zu erzeugen und zu
    * starten.
-   * 
+   *
    * @param documentControllers
    *          Ein Vector of TextDocumentModels, die in einem Multiformular
    *          zusammengefasst werden sollen.
@@ -1326,11 +1326,11 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein neues WollMuxEvent, das die Bearbeitung aller neu hinzugekommener
    * Dokumentkommandos übernimmt.
-   * 
+   *
    * Dieses Event wird immer dann ausgelöst, wenn nach dem Öffnen eines Dokuments
    * neue Dokumentkommandos eingefügt wurden, die nun bearbeitet werden sollen - z.B.
    * wenn ein Textbaustein eingefügt wurde.
-   * 
+   *
    * @param documentController
    *          Das TextDocumentModel, das durch den WollMux verarbeitet werden soll.
    */
@@ -1390,14 +1390,14 @@ public class WollMuxEventHandler
   /**
    * Obsolete, aber aus Kompatibilitätgründen noch vorhanden. Bitte handleOpen()
    * statt dessen verwenden.
-   * 
+   *
    * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass ein Dokument geöffnet
    * wird.
-   * 
+   *
    * Dieses Event wird gestartet, wenn der WollMux-Service (...comp.WollMux) das
    * Dispatch-Kommando wollmux:openTemplate bzw. wollmux:openDocument empfängt und
    * sort dafür, dass das entsprechende Dokument geöffnet wird.
-   * 
+   *
    * @param fragIDs
    *          Eine List mit fragIDs, wobei das erste Element die FRAG_ID des zu
    *          öffnenden Dokuments beinhalten muss. Weitere Elemente werden in eine
@@ -1458,10 +1458,10 @@ public class WollMuxEventHandler
    * (ConfigThingy-Syntax) und ist ausführlicher beschrieben unter
    * http://limux.tvc.muenchen
    * .de/wiki/index.php/Schnittstellen_des_WollMux_f%C3%BCr_Experten#wollmux:Open
-   * 
+   *
    * Dieses Event wird gestartet, wenn der WollMux-Service (...comp.WollMux) das
    * Dispatch-Kommando wollmux:open empfängt.
-   * 
+   *
    * @param openConfStr
    *          Die Beschreibung der zu öffnenden Fragmente in ConfigThingy-Syntax
    */
@@ -1544,7 +1544,7 @@ public class WollMuxEventHandler
     }
 
     /**
-     * 
+     *
      * @param fragIDs
      * @param asTemplate
      * @param asPartOfMultiform
@@ -1606,7 +1606,7 @@ public class WollMuxEventHandler
             urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
             url = WollMuxFiles.makeURL(urlStr);
             WollMuxSingleton.checkURL(url);
-          }            
+          }
           catch (MalformedURLException e)
           {
             Logger.log(e);
@@ -1614,7 +1614,7 @@ public class WollMuxEventHandler
               L.m("Die URL '%1' ist ungültig:", urlStr) + "\n"
                 + e.getLocalizedMessage() + "\n\n";
             continue;
-          }          
+          }
           catch (IOException e)
           {
             Logger.log(e);
@@ -1691,7 +1691,7 @@ public class WollMuxEventHandler
    * geschlossen wurde und immer dann wenn die PAL z.B. durch einen
    * wollmux:setSender-Befehl geändert hat. Das Event sorgt dafür, dass alle im
    * WollMuxSingleton registrierten XPALChangeListener geupdatet werden.
-   * 
+   *
    * @author christoph.lutz
    */
   private static class OnPALChangedNotify extends BasicEvent
@@ -1732,7 +1732,7 @@ public class WollMuxEventHandler
 
   /**
    * Erzeugt ein neues WollMuxEvent zum setzen des aktuellen Absenders.
-   * 
+   *
    * @param senderName
    *          Name des Senders in der Form "Nachname, Vorname (Rolle)" wie sie auch
    *          der PALProvider bereithält.
@@ -1750,7 +1750,7 @@ public class WollMuxEventHandler
   /**
    * Dieses Event wird ausgelöst, wenn im WollMux-Service die methode setSender
    * aufgerufen wird. Es sort dafür, dass ein neuer Absender gesetzt wird.
-   * 
+   *
    * @author christoph.lutz
    */
   private static class OnSetSender extends BasicEvent
@@ -1802,12 +1802,12 @@ public class WollMuxEventHandler
    * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass alle Formularfelder
    * Dokument auf den neuen Wert gesetzt werden. Bei Formularfeldern mit
    * TRAFO-Funktion wird die Transformation entsprechend durchgeführt.
-   * 
+   *
    * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
    * Formular-GUI der Wert des Formularfeldes fieldID geändert wurde und sorgt dafür,
    * dass die Wertänderung auf alle betroffenen Formularfelder im Dokument doc
    * übertragen werden.
-   * 
+   *
    * @param idToFormValues
    *          Eine HashMap die unter dem Schlüssel fieldID den Vektor aller
    *          FormFields mit der ID fieldID liefert.
@@ -1862,12 +1862,12 @@ public class WollMuxEventHandler
    * Sichtbarkeitselemente (Dokumentkommandos oder Bereiche mit Namensanhang 'GROUPS
    * ...') im übergebenen Dokument, die einer bestimmten Gruppe groupId zugehören
    * ein- oder ausgeblendet werden.
-   * 
+   *
    * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
    * Formular-GUI bestimmte Text-Teile des übergebenen Dokuments ein- oder
    * ausgeblendet werden sollen. Auch das PrintModel verwendet dieses Event, wenn
    * XPrintModel.setGroupVisible() aufgerufen wurde.
-   * 
+   *
    * @param documentController
    *          Das TextDocumentModel, welches die Sichtbarkeitselemente enthält.
    * @param groupId
@@ -1877,7 +1877,7 @@ public class WollMuxEventHandler
    * @param listener
    *          Der listener, der nach Durchführung des Events benachrichtigt wird
    *          (kann auch null sein, dann gibt's keine Nachricht).
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static void handleSetVisibleState(TextDocumentController documentController, String groupId,
@@ -1925,11 +1925,11 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein Event, das den ViewCursor des Dokuments auf das aktuell in der
    * Formular-GUI bearbeitete Formularfeld setzt.
-   * 
+   *
    * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
    * Formular-GUI ein Formularfeld den Fokus bekommen hat und es sorgt dafür, dass
    * der View-Cursor des Dokuments das entsprechende FormField im Dokument anspringt.
-   * 
+   *
    * @param idToFormValues
    *          Eine HashMap die unter dem Schlüssel fieldID den Vektor aller
    *          FormFields mit der ID fieldID liefert.
@@ -1979,7 +1979,7 @@ public class WollMuxEventHandler
    * richtig zu setzen, müssen die Größenangaben des Randes der Fensterdekoration und
    * die Höhe der Titelzeile VOR dem Aufruf der Methode entsprechend eingerechnet
    * werden.
-   * 
+   *
    * @param model
    *          Das XModel-Interface des Dokuments dessen Position/Größe gesetzt werden
    *          soll.
@@ -2005,7 +2005,7 @@ public class WollMuxEventHandler
    * Dieses Event wird vom FormModelImpl ausgelöst, wenn die Formular-GUI die
    * Position und die Ausmasse des Dokuments verändert. Ruft direkt setWindowsPosSize
    * der UNO-API auf.
-   * 
+   *
    * @author christoph.lutz
    */
   private static class OnSetWindowPosSize extends BasicEvent
@@ -2044,7 +2044,7 @@ public class WollMuxEventHandler
    * Erzeugt ein Event, das die Anzeige des übergebenen Dokuments auf sichtbar oder
    * unsichtbar schaltet. Dabei wird direkt die entsprechende Funktion der UNO-API
    * verwendet.
-   * 
+   *
    * @param documentController
    *          Das XModel interface des dokuments, welches sichtbar oder unsichtbar
    *          geschaltet werden soll.
@@ -2061,7 +2061,7 @@ public class WollMuxEventHandler
    * Dieses Event wird vom FormModelImpl ausgelöst, wenn die Formular-GUI das
    * bearbeitete Dokument sichtbar/unsichtbar schalten möchte. Ruft direkt setVisible
    * der UNO-API auf.
-   * 
+   *
    * @author christoph.lutz
    */
   private static class OnSetWindowVisible extends BasicEvent
@@ -2093,7 +2093,7 @@ public class WollMuxEventHandler
 
   /**
    * Erzeugt ein Event, das das übergebene Dokument schließt.
-   * 
+   *
    * @param documentController
    *          Das zu schließende TextDocumentModel.
    */
@@ -2106,7 +2106,7 @@ public class WollMuxEventHandler
    * Dieses Event wird vom FormModelImpl ausgelöst, wenn der Benutzer die
    * Formular-GUI schließt und damit auch das zugehörige TextDokument geschlossen
    * werden soll.
-   * 
+   *
    * @author christoph.lutz
    */
   private static class OnCloseTextDocument extends BasicEvent
@@ -2138,7 +2138,7 @@ public class WollMuxEventHandler
    * speichert, eine externe Anwendung mit dieser aufruft und das Dokument dann
    * schließt, wobei der ExterneAnwendungen-Abschnitt zu ext die näheren Details wie
    * den FILTER regelt.
-   * 
+   *
    * @param documentController
    *          Das an die externe Anwendung weiterzureichende TextDocumentModel.
    * @param ext
@@ -2153,7 +2153,7 @@ public class WollMuxEventHandler
   /**
    * Dieses Event wird vom FormModelImpl ausgelöst, wenn der Benutzer die Aktion
    * "closeAndOpenExt" aktiviert hat.
-   * 
+   *
    * @author matthias.benkmann
    */
   private static class OnCloseAndOpenExt extends BasicEvent
@@ -2208,7 +2208,7 @@ public class WollMuxEventHandler
    * Erzeugt ein Event, das das übergebene Dokument in eine temporäre Datei speichert
    * und eine externe Anwendung mit dieser aufruft, wobei der
    * ExterneAnwendungen-Abschnitt zu ext die näheren Details wie den FILTER regelt.
-   * 
+   *
    * @param documentController
    *          Das an die externe Anwendung weiterzureichende TextDocumentModel.
    * @param ext
@@ -2223,7 +2223,7 @@ public class WollMuxEventHandler
   /**
    * Dieses Event wird vom FormModelImpl ausgelöst, wenn der Benutzer die Aktion
    * "saveTempAndOpenExt" aktiviert hat.
-   * 
+   *
    * @author matthias.benkmann
    */
   private static class OnSaveTempAndOpenExt extends BasicEvent
@@ -2288,7 +2288,7 @@ public class WollMuxEventHandler
    * WollMuxSingleton erzeugt und übernimmt alle benutzersichtbaren (interaktiven)
    * Initialisierungen wie z.B. das Darstellen des AbsenderAuswählen-Dialogs, falls
    * die PAL leer ist.
-   * 
+   *
    * @author christoph.lutz TESTED
    */
   private static class OnInitialize extends BasicEvent
@@ -2341,7 +2341,7 @@ public class WollMuxEventHandler
      * "${sn}") gestartet. Liefert ein Element der Suchstrategie mindestens einen
      * Datensatz zurück, so werden die anderen Elemente der Suchstrategie nicht mehr
      * ausgewertet.
-     * 
+     *
      * @param dsj
      *          Der DatasourceJoiner, in dem nach dem aktuellen Benutzer gesucht
      *          wird.
@@ -2417,7 +2417,7 @@ public class WollMuxEventHandler
        * denen in der Datenquelle gesucht werden soll. Die Beiden Wertpaare werden
        * dabei UND verknüpft. Die Werte wert1 und wert2 können über die Syntax
        * "${name}" Variablen referenzieren, die vor der Suche aufgelöst werden.
-       * 
+       *
        * @param conf
        *          Das ConfigThingy, das die Suchabfrage beschreibt.
        * @return Die Anzahl der gefundenen Datensätze.
@@ -2465,7 +2465,7 @@ public class WollMuxEventHandler
        * Sucht in der Datenquelle nach Datensätzen deren Feld dbSpalte den
        * evaluierten Wert von value enthält und überträgt die gefundenen Werte in die
        * PAL.
-       * 
+       *
        * @param dbSpalte
        *          der Feldname über den nach dem evaluierten Wert von value gesucht
        *          wird.
@@ -2501,7 +2501,7 @@ public class WollMuxEventHandler
        * Sucht in der Datenquelle nach Datensätzen wobei die beiden Suchbedingungen
        * (dbSpalte1==evaluate(value1) und dbSpalte2==evaluate(value2)) mit UND
        * verknüpft sind - die gefundenen Werte werden danach in die PAL kopiert.
-       * 
+       *
        * @param dbSpalte1
        *          der Feldname über den nach dem evaluierten Wert von value gesucht
        *          wird.
@@ -2562,7 +2562,7 @@ public class WollMuxEventHandler
        * getValueForKey() zurückgelieferten Werte nicht selbst Variablen enthalten
        * können (indem die Variablenbegrenzer "${" und "}" durch "<" bzw. ">" ersetzt
        * werden.
-       * 
+       *
        * @param exp
        *          der zu evaluierende Ausdruck
        * @return
@@ -2587,7 +2587,7 @@ public class WollMuxEventHandler
       /**
        * Liefert den Wert zu einer Variable namens key und muss von jeder konkreten
        * Finder-Klasse implementiert werden.
-       * 
+       *
        * @param key
        *          Der Schlüssel, zu dem der Wert zurückgeliefert werden soll.
        * @return der zugehörige Wert zum Schlüssel key.
@@ -2599,7 +2599,7 @@ public class WollMuxEventHandler
      * Ein konkreter DataFinder, der für die Auflösung der Variable in getValueForKey
      * im Benutzerprofil der OOo Registry nachschaut (das selbe wie
      * Extras->Optionen->OpenOffice.org->Benutzerdaten).
-     * 
+     *
      * @author christoph.lutz
      */
     private static class ByOOoUserProfileFinder extends DataFinder
@@ -2639,7 +2639,7 @@ public class WollMuxEventHandler
     /**
      * Ein konkreter DataFinder, der für die Auflösung der Variable in getValueForKey
      * die Methode System.getProperty(key) verwendet.
-     * 
+     *
      * @author christoph.lutz
      */
     private static class ByJavaPropertyFinder extends DataFinder
@@ -2671,7 +2671,7 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein neues WollMuxEvent zum Registrieren des übergebenen
    * XPALChangeEventListeners.
-   * 
+   *
    * @param listener
    */
   public static void handleAddPALChangeEventListener(
@@ -2685,7 +2685,7 @@ public class WollMuxEventHandler
    * WollMux-Service registriert. Es sorgt dafür, dass der PALChangeEventListener in
    * die Liste der registrierten PALChangeEventListener im WollMuxSingleton
    * aufgenommen wird.
-   * 
+   *
    * @author christoph.lutz
    */
   private static class OnAddPALChangeEventListener extends BasicEvent
@@ -2733,7 +2733,7 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein neues WollMuxEvent, das den übergebenen XPALChangeEventListener
    * deregistriert.
-   * 
+   *
    * @param listener
    *          der zu deregistrierende XPALChangeEventListener
    */
@@ -2748,7 +2748,7 @@ public class WollMuxEventHandler
    * externe XPALChangeEventListener beim WollMux deregistriert. Der zu entfernende
    * XPALChangeEventListerner wird anschließend im WollMuxSingleton aus der Liste der
    * registrierten XPALChangeEventListener genommen.
-   * 
+   *
    * @author christoph.lutz
    */
   private static class OnRemovePALChangeEventListener extends BasicEvent
@@ -2777,7 +2777,7 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein neues WollMuxEvent zum Registrieren eines (frischen)
    * {@link DispatchProviderAndInterceptor} auf frame.
-   * 
+   *
    * @param frame
    *          der {@link XFrame} auf den der {@link DispatchProviderAndInterceptor}
    *          registriert werden soll.
@@ -2799,7 +2799,7 @@ public class WollMuxEventHandler
     @Override
     protected void doit()
     {
-      FrameController fc = documentController.getFrameController(); 
+      FrameController fc = documentController.getFrameController();
       if (fc.getFrame() == null)
       {
         Logger.debug(L.m("Ignoriere handleRegisterDispatchInterceptor(null)"));
@@ -2835,7 +2835,7 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein neues WollMuxEvent zum Registrieren des übergebenen XEventListeners
    * und wird vom WollMux-Service aufgerufen.
-   * 
+   *
    * @param listener
    *          der zu registrierende XEventListener.
    */
@@ -2880,7 +2880,7 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein neues WollMuxEvent, das den übergebenen XEventListener zu
    * deregistriert.
-   * 
+   *
    * @param listener
    *          der zu deregistrierende XEventListener
    */
@@ -2918,7 +2918,7 @@ public class WollMuxEventHandler
    * listener==null) oder ein bestimmter registrierter DocumentEventListener (falls
    * listener != null) (XEventListener-Objekte) über Statusänderungen der
    * Dokumentbearbeitung informiert
-   * 
+   *
    * @param listener
    *          der zu benachrichtigende XEventListener. Falls null werden alle
    *          registrierten Listener benachrichtig. listener wird auf jeden Fall nur
@@ -2929,7 +2929,7 @@ public class WollMuxEventHandler
    * @param source
    *          Das von der Statusänderung betroffene Dokument (üblicherweise eine
    *          XComponent)
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static void handleNotifyDocumentEventListener(XEventListener listener,
@@ -3013,7 +3013,7 @@ public class WollMuxEventHandler
    * Die Methode erwartet, dass vor dem Aufruf geprüft wurde, ob model eine
    * Druckfunktion definiert. Ist dennoch keine Druckfunktion definiert, so erscheint
    * eine Fehlermeldung im Log.
-   * 
+   *
    * Das Event wird ausgelöst, wenn der registrierte WollMuxDispatchInterceptor eines
    * Dokuments eine entsprechende Nachricht bekommt.
    */
@@ -3058,10 +3058,10 @@ public class WollMuxEventHandler
      * gesetzt hat, die in der aktuellen Situation nicht mehr sinnvoll ist; Dieser
      * Umstand wird in checkPreconditons geprüft und die betroffene Druckfunktion
      * ggf. aus der Liste der Druckfunktionen entfernt.
-     * 
+     *
      * @param printFunctions
      *          Menge der aktuell gesetzten Druckfunktionen.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
     protected static void checkPrintPreconditions(TextDocumentController documentController)
@@ -3092,10 +3092,10 @@ public class WollMuxEventHandler
   /**
    * Diese Methode erzeugt ein neues WollMuxEvent, mit dem die Eigenschaften der
    * Druckblöcke (z.B. allVersions) gesetzt werden können.
-   * 
+   *
    * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom
    * XPrintModel aufgerufen und mit diesem synchronisiert.
-   * 
+   *
    * @param blockName
    *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
    * @param visible
@@ -3105,7 +3105,7 @@ public class WollMuxEventHandler
    *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur, wenn
    *          zu einem betroffenen Druckblock auch eine Hintergrundfarbe angegeben
    *          ist).
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static void handleSetPrintBlocksPropsViaPrintModel(XTextDocument doc,
@@ -3172,7 +3172,7 @@ public class WollMuxEventHandler
    * remove==false, so wird die Druckfunktion functionName in die Liste der
    * Druckfunktionen für dieses Dokument aufgenommen; ist remove==true, so wird die
    * Druckfunktion aus der Liste entfernt.
-   * 
+   *
    * @param doc
    *          beschreibt das Dokument dessen Druckfunktionen verwaltet werden sollen.
    * @param functionName
@@ -3181,7 +3181,7 @@ public class WollMuxEventHandler
    *          ist remove==false, so wird die Druckfunktion functionName in die Liste
    *          der Druckfunktionen für dieses Dokument aufgenommen; ist remove==true,
    *          so wird die Druckfunktion aus der Liste entfernt.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static void handleManagePrintFunction(XTextDocument doc,
@@ -3231,7 +3231,7 @@ public class WollMuxEventHandler
    * Erzeugt ein neues WollMuxEvent, das signasisiert, dass eine weitere Ziffer der
    * Sachleitenden Verfügungen eingefügt werden, bzw. eine bestehende Ziffer gelöscht
    * werden soll.
-   * 
+   *
    * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines Drucks
    * auf den Knopf der OOo-Symbolleiste ein "wollmux:ZifferEinfuegen" dispatch
    * erfolgte.
@@ -3277,7 +3277,7 @@ public class WollMuxEventHandler
    * Erzeugt ein neues WollMuxEvent, das signasisiert, dass eine Abdruckzeile der
    * Sachleitenden Verfügungen eingefügt werden, bzw. eine bestehende Abdruckzeile
    * gelöscht werden soll.
-   * 
+   *
    * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines Drucks
    * auf den Knopf der OOo-Symbolleiste ein "wollmux:Abdruck" dispatch erfolgte.
    */
@@ -3321,7 +3321,7 @@ public class WollMuxEventHandler
    * Erzeugt ein neues WollMuxEvent, das signasisiert, dass eine Zuleitungszeile der
    * Sachleitenden Verfügungen eingefügt werden, bzw. eine bestehende Zuleitungszeile
    * gelöscht werden soll.
-   * 
+   *
    * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines Drucks
    * auf den Knopf der OOo-Symbolleiste ein "wollmux:Zuleitungszeile" dispatch
    * erfolgte.
@@ -3368,11 +3368,11 @@ public class WollMuxEventHandler
    * doc ein neues Bookmark mit dem Namen "WM(CMD'<blockname>')" legt, wenn nicht
    * bereits ein solches Bookmark im markierten Block definiert ist. Ist bereits ein
    * Bookmark mit diesem Namen vorhanden, so wird dieses gelöscht.
-   * 
+   *
    * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines Drucks
    * auf den Knopf der OOo-Symbolleiste ein "wollmux:markBlock#<blockname>" dispatch
    * erfolgte.
-   * 
+   *
    * @param documentController
    *          Das Textdokument, in dem der Block eingefügt werden soll.
    * @param blockname
@@ -3503,11 +3503,11 @@ public class WollMuxEventHandler
 
       stabilize();
     }
-    
+
     private static void setNewDocumentCommand(
 	TextDocumentController documentController,
 	String bookmarkName,
-	XTextCursor range, 
+	XTextCursor range,
 	int highlightColor,
 	String markChange)
     {
@@ -3522,7 +3522,7 @@ public class WollMuxEventHandler
       ModalDialogs.showInfoModal(L.m("Block wurde markiert"),
         L.m("Der ausgewählte Block %1.", markChange));
     }
-    
+
     private static XNamed getBookmarkByTextRange(XTextRange range) {
       XNamed bookmark = null;
       XTextCursor currentCursor = range.getText().createTextCursorByRange(range);
@@ -3546,10 +3546,10 @@ public class WollMuxEventHandler
             {
               Object element = parEnum.nextElement();
               bookmark = UNO.XNamed(UNO.getProperty(element, "Bookmark"));
-              
+
               break;
             }
-            catch (WrappedTargetException ex) 
+            catch (WrappedTargetException ex)
             {
               break;
             }
@@ -3560,7 +3560,7 @@ public class WollMuxEventHandler
           }
         }
       }
-      
+
       return bookmark;
     }
 
@@ -3569,7 +3569,7 @@ public class WollMuxEventHandler
      * der in slvConf im Attribut attribute hinterlegt ist oder null, wenn das
      * Attribut nicht existiert oder der dort enthaltene String-Wert sich nicht in
      * eine Integerzahl konvertieren lässt.
-     * 
+     *
      * @param slvConf
      * @param attribute
      */
@@ -3610,7 +3610,7 @@ public class WollMuxEventHandler
    * erzeugt wird, die viele für die Fehlersuche relevanten Informationen enthält wie
    * z.B. Versionsinfo, Inhalt der wollmux.conf, cache.conf, StringRepräsentation der
    * Konfiguration im Speicher und eine Kopie der Log-Datei.
-   * 
+   *
    * Das Event wird von der WollMuxBar geworfen, die (speziell für Admins, nicht für
    * Endbenutzer) einen entsprechenden Button besitzt.
    */
@@ -3647,7 +3647,7 @@ public class WollMuxEventHandler
       return this.getClass().getSimpleName() + "()";
     }
   }
-  
+
   /**
    * Druckt die aktuelle Seite eines Dokuments auf dem Standarddrucker aus.
    */
@@ -3672,12 +3672,12 @@ public class WollMuxEventHandler
 		  XPageCursor pageCursor = UNO.XPageCursor(viewCursorSupplier.getViewCursor());
 		  short page = pageCursor.getPage();
 		  XPrintable printable = UNO.XPrintable(documentController.getModel().doc);
-		  
+
 		  UnoProps props = new UnoProps();
 		  props.setPropertyValue("CopyCount", (short)1);
       props.setPropertyValue("Pages", String.valueOf(page));
       props.setPropertyValue("Collate", false);
-		  
+
       printable.print(props.getProps());
     }
 
@@ -3694,7 +3694,7 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein neues WollMuxEvent, das signasisiert, dass das gesamte Office (und
    * damit auch der WollMux) OHNE Sicherheitsabfragen(!) beendet werden soll.
-   * 
+   *
    * Das Event wird von der WollMuxBar geworfen, die (speziell für Admins, nicht für
    * Endbenutzer) einen entsprechenden Button besitzt.
    */
@@ -3736,11 +3736,11 @@ public class WollMuxEventHandler
    * Formularbeschreibung, so wird der Wert direkt gesetzt, ohne Äbhängigkeiten zu
    * beachten. Nach der erfolgreichen Ausführung aller notwendigen Anpassungen wird
    * der unlockActionListener benachrichtigt.
-   * 
+   *
    * Das Event wird aus den Implementierungen von XPrintModel (siehe
    * TextDocumentModel) und XWollMuxDocument (siehe compo.WollMux) geworfen, wenn
    * dort die Methode setFormValue aufgerufen wird.
-   * 
+   *
    * @param doc
    *          Das Dokument, in dem das Formularfeld mit der ID id neu gesetzt werden
    *          soll.
@@ -3821,10 +3821,10 @@ public class WollMuxEventHandler
    * Sammelt alle Formularfelder des Dokuments model auf, die nicht von
    * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden und
    * befüllt werden (derzeit c,s,s,t,textfield,Database-Felder).
-   * 
+   *
    * Das Event wird aus der Implementierung von XPrintModel (siehe TextDocumentModel)
    * geworfen, wenn dort die Methode collectNonWollMuxFormFields aufgerufen wird.
-   * 
+   *
    * @param documentController
    * @param unlockActionListener
    *          Der unlockActionListener wird immer informiert, wenn alle notwendigen
@@ -3872,10 +3872,10 @@ public class WollMuxEventHandler
    * FormGUI - alle abhängigen Formularwerte angepasst wurden. In diesem Fall ist die
    * einzige Aufgabe dieses Events, den unlockActionListener zu informieren, den
    * handleSetFormValueViaPrintModel() nicht selbst informieren konnte.
-   * 
+   *
    * Das Event wird aus der Implementierung vom OnSetFormValueViaPrintModel.doit()
    * erzeugt, wenn Feldänderungen über die FormGUI laufen.
-   * 
+   *
    * @param unlockActionListener
    *          Der zu informierende unlockActionListener.
    */
@@ -3913,10 +3913,10 @@ public class WollMuxEventHandler
    * insertValue-Befehle mit einer DB_SPALTE, die in der übergebenen
    * mapDbSpalteToValue enthalten sind neu für den entsprechenden Wert evaluiert und
    * gesetzt werden, unabhängig davon, ob sie den Status DONE besitzen oder nicht.
-   * 
+   *
    * Das Event wird aus der Implementierung von XWollMuxDocument (siehe
    * compo.WollMux) geworfen, wenn dort die Methode setInsertValue aufgerufen wird.
-   * 
+   *
    * @param doc
    *          Das Dokument, in dem das die insertValue-Kommandos neu gesetzt werden
    *          sollen.
@@ -3927,7 +3927,7 @@ public class WollMuxEventHandler
    *          neuer Inhalt des Bookmarks gesetzt.
    * @param unlockActionListener
    *          Wird informiert, sobald das Event vollständig abgearbeitet wurde.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static void handleSetInsertValues(XTextDocument doc,
@@ -4003,7 +4003,7 @@ public class WollMuxEventHandler
    * Textbaustein-Bezeichner direkt ins Dokument eingefügt wird. Mit reprocess wird
    * übergeben, wann die Dokumentenkommandos ausgewertet werden soll. Mir reprocess =
    * true sofort.
-   * 
+   *
    * Das Event wird von WollMux.dispatch(...) geworfen z.B über Druck eines
    * Tastenkuerzels oder Druck auf den Knopf der OOo-Symbolleiste ein
    * "wollmux:TextbausteinEinfuegen" dispatch erfolgte.
@@ -4180,7 +4180,7 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein neues WollMuxEvent, das signasisiert, dass die neue
    * Seriendruckfunktion des WollMux gestartet werden soll.
-   * 
+   *
    * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü
    * "Extras->Seriendruck (WollMux)" die dispatch-url wollmux:SeriendruckNeu
    * abgesetzt wurde.
@@ -4237,7 +4237,7 @@ public class WollMuxEventHandler
    * Der Handler für das Drucken eines TextDokuments führt in Abhängigkeit von der
    * Existenz von Serienbrieffeldern und Druckfunktion die entsprechenden Aktionen
    * aus.
-   * 
+   *
    * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü
    * "Datei->Drucken" oder über die Symbolleiste die dispatch-url .uno:Print bzw.
    * .uno:PrintDefault abgesetzt wurde.
@@ -4297,7 +4297,7 @@ public class WollMuxEventHandler
    * Der Handler für einen abgespeckten Speichern-Unter-Dialog des WollMux, der in
    * Abängigkeit von einer gesetzten FilenameGeneratorFunction über den WollMux
    * aufgrufen und mit dem generierten Filenamen vorbelegt wird.
-   * 
+   *
    * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü
    * "Datei->SaveAs" oder über die Symbolleiste die dispatch-url .uno:Save bzw.
    * .uno:SaveAs abgesetzt wurde.
@@ -4314,7 +4314,7 @@ public class WollMuxEventHandler
       handle(event);
     }
   }
-  
+
   private static class OnSaveAs extends BasicEvent
   {
     private TextDocumentController documentController;
@@ -4507,7 +4507,7 @@ public class WollMuxEventHandler
    * initialisiert ist und notwendige Aktionen wie z.B. das Zurücksetzen des
    * Modified-Status des Dokuments durchgeführt werden können. Vor dem Zurücksetzen
    * des Modified-Status, wird auf die erste Seite des Dokuments gesprungen.
-   * 
+   *
    * Das Event wird vom FormModel erzeugt, wenn es vom FormController eine
    * entsprechende Nachricht erhält.
    */
@@ -4560,7 +4560,7 @@ public class WollMuxEventHandler
    * installiert ist und keine Doppel- oder Halbinstallationen vorliegen. Ist der
    * WollMux fehlerhaft installiert, erscheint eine Fehlermeldung mit entsprechenden
    * Hinweisen.
-   * 
+   *
    * Das Event wird geworfen, wenn der WollMux startet.
    */
   public static void handleCheckInstallation()
@@ -4682,7 +4682,7 @@ public class WollMuxEventHandler
     /**
      * Liefert eine {@link List} mit den aktuell auf dem System vorhandenen
      * WollMux-Installationen.
-     * 
+     *
      * @author Christoph Lutz, Matthias Benkmann (D-III-ITD-D101)
      */
     private List<WollMuxInstallationDescriptor> getInstallations()
@@ -4746,7 +4746,7 @@ public class WollMuxEventHandler
     /**
      * Sucht im übergebenen Pfad path nach Verzeichnissen die WollMux.oxt enthalten
      * und fügt die Information zu wmInstallations hinzu.
-     * 
+     *
      * @author Bettina Bauer, Christoph Lutz, Matthias Benkmann (D-III-ITD-D101)
      */
     private static void findWollMuxInstallations(

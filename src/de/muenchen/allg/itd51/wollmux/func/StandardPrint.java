@@ -57,7 +57,6 @@ import de.muenchen.allg.itd51.wollmux.print.OOoBasedMailMerge;
 import de.muenchen.allg.itd51.wollmux.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.print.PrintIntoFile;
-import de.muenchen.allg.itd51.wollmux.print.OOoBasedMailMerge.OutputType;
 
 public class StandardPrint
 {
