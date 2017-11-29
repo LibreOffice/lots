@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -46,14 +45,14 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
  * Der DocumentExpander sorgt dafür, dass das Dokument nach Ausführung der
  * enthaltenen Kommandos komplett aufgebaut ist und alle Textfragmente eingefügt
  * wurden.
- *
+ * 
  * @author christoph.lutz
- *
+ * 
  */
 class DocumentExpander extends AbstractExecutor
 {
   /**
-   *
+   * 
    */
   private final DocumentCommandInterpreter documentCommandInterpreter;
 
@@ -69,7 +68,7 @@ class DocumentExpander extends AbstractExecutor
    * Erzeugt einen neuen DocumentExpander, mit der Liste fragUrls, die die URLs
    * beschreibt, von denen die Textfragmente für den insertContent Befehl bezogen
    * werden sollen.
-   *
+   * 
    * @param fragUrls
    * @param documentCommandInterpreter TODO
    */
@@ -85,7 +84,7 @@ class DocumentExpander extends AbstractExecutor
    * werden, bis das Dokument vollständig aufgebaut ist. Die Dokumentkommandos
    * OverrideFrags erhalten dabei eine Sonderrolle, da sie bereits vor den anderen
    * Dokumentkommandos (insertFrag/insertContent) abgefeiert werden.
-   *
+   * 
    * @param tree
    * @return
    * @throws WMCommandsFailedException
@@ -110,7 +109,7 @@ class DocumentExpander extends AbstractExecutor
   /**
    * führt alle OverrideFrag-Kommandos aus commands aus, wenn sie nicht den Status
    * DONE=true oder ERROR=true besitzen.
-   *
+   * 
    * @param commands
    * @return Anzahl der bei der Ausführung aufgetretenen Fehler.
    */
@@ -182,7 +181,7 @@ class DocumentExpander extends AbstractExecutor
         return 0;
       }
 
-      List<String> urls = VisibleTextFragmentList.getURLsByID(WollMuxFiles.getWollmuxConf(), fragId);
+      Vector<String> urls = VisibleTextFragmentList.getURLsByID(WollMuxFiles.getWollmuxConf(), fragId);
       if (urls.size() == 0)
       {
         throw new ConfigurationErrorException(L.m(
@@ -295,7 +294,7 @@ class DocumentExpander extends AbstractExecutor
    * OpenOffice-Probleme angewendet werden. Insbesondere werden InsertMarks um die
    * Stelle herumgelegt vor dem Löschen, wie dies auch bei
    * {@link #insertDocumentFromURL(DocumentCommand, URL)} geschieht.
-   *
+   * 
    * @param cmd
    *          Einfügeposition
    */
@@ -310,7 +309,7 @@ class DocumentExpander extends AbstractExecutor
    * Die Methode fügt das externe Dokument von der URL url an die Stelle von cmd
    * ein. Die Methode enthält desweiteren notwendige Workarounds für die Bugs des
    * insertDocumentFromURL der UNO-API.
-   *
+   * 
    * @param cmd
    *          Einfügeposition
    * @param url
@@ -401,7 +400,7 @@ class DocumentExpander extends AbstractExecutor
    * bestehenden Formatvorlagen des aktuellen Dokuments. Nach der erfolgreichen
    * Einfügung der Formatvorlagen wird der Inhalt des Dokumentkommandos gelöscht,
    * da ja mit dem Einfügen keine Textinhalte eingefügt werden.
-   *
+   * 
    * @param cmd
    *          das Dokumentkommando dessen Inhalt nach dem erfolgreichen Einfügen
    *          gelöscht wird.
@@ -456,7 +455,7 @@ class DocumentExpander extends AbstractExecutor
   /**
    * Diese Methode füllt die Einfuegestellen(Platzhalter) aus dem eingefügten
    * Textbaustein mit den übergebenen Argumente args
-   *
+   * 
    * @param range
    *          der Bereich des eingefügten Textbausteins
    * @param args

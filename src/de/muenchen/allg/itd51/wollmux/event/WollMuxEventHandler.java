@@ -1567,7 +1567,7 @@ public class WollMuxEventHandler
         String frag_id = iter.next();
 
         // Fragment-URL holen und aufbereiten:
-        List<String> urls = new ArrayList<String>();
+        Vector<String> urls = new Vector<String>();
 
         java.lang.Exception error =
           new ConfigurationErrorException(L.m(
