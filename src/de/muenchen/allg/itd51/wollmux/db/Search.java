@@ -30,11 +30,16 @@
  */
 package de.muenchen.allg.itd51.wollmux.db;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.Icon;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 
 /**
  * Diese Klasse stellt Methoden zur Verfügung um in Datenquellen Suchen
@@ -86,28 +91,66 @@ public class Search
     List<Query> queries = parseQuery(searchStrategy, queryString);
 
     QueryResults results = null;
-
-    Iterator<Query> iter = queries.iterator();
-    while (iter.hasNext())
-    {
-      Query query = iter.next();
-      if (query.numberOfQueryParts() == 0)
-      {
-        results =
-          (useDjMainDatasource ? dj.getContentsOfMainDatasource()
-                              : dj.getContentsOf(query.getDatasourceName()));
-      }
-      else
-      {
-        results =
-          (useDjMainDatasource ? dj.find(query.getQueryParts()) : dj.find(query));
-      }
-      if (!results.isEmpty()) break;
+    List<QueryResults> listOfQueryResultsList = new ArrayList<QueryResults>();
+    
+    for(Query query : queries){
+        if (query.numberOfQueryParts() == 0)
+        {
+          results =
+            (useDjMainDatasource ? dj.getContentsOfMainDatasource()
+                                : dj.getContentsOf(query.getDatasourceName()));
+        }
+        else
+        {
+          results =
+            (useDjMainDatasource ? dj.find(query.getQueryParts()) : dj.find(query));
+        }
+        listOfQueryResultsList.add(results);
     }
-    return results;
+    return mergeListOfQueryResultsList(listOfQueryResultsList);
+  }
+  
+  /**
+   * Führt die Ergebnissmengen zusammen. Dabei werden mehrfache Ergebnisse ausgefiltert
+   * @return bereinigte Ergebnisliste
+   * @author Thien Nghiem Tran
+   */
+  private static QueryResults mergeListOfQueryResultsList(List<QueryResults> listOfQueryResultsList) 
+  {	  
+	List<Dataset> listOfDataset = new Vector<Dataset>(0);
+	List<DJDatasetListElement> elements = new ArrayList<DJDatasetListElement>();
+	
+	if(listOfQueryResultsList.size() == 1)
+	{
+		return listOfQueryResultsList.get(0);
+	}
+	else
+	{
+		for(QueryResults queryResults :listOfQueryResultsList)
+		{
+			for(Dataset query : queryResults)
+			{
+				DJDataset ds = (DJDataset) query;
+				Icon icon = null;
+				DJDatasetListElement dJDatasetListElement = new DJDatasetListElement(ds, PersoenlicheAbsenderlisteVerwalten.getDefaultDisplaytemplate(), icon);
+				if(!elements.contains(dJDatasetListElement))
+				{
+					elements.add(dJDatasetListElement);
+				}	
+			}	    			    		
+		}
+		Collections.sort(elements);
+	}
+	
+	for(DJDatasetListElement query : elements)
+	{
+		listOfDataset.add(query.getDataset());
+	}
+	
+	return new QueryResultsList(listOfDataset);
   }
 
-  /**
+/**
    * Liefert zur Anfrage queryString eine Liste von {@link Query}s, die der Reihe
    * nach probiert werden sollten, gemäß der Suchstrategie searchStrategy (siehe
    * {@link SearchStrategy#parse(ConfigThingy)}). Gibt es für die übergebene Anzahl

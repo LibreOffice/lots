@@ -180,6 +180,14 @@ public class PersoenlicheAbsenderlisteVerwalten
    * Standardanzahl an Zeilen in einer Listbox.
    */
   private static final int LISTBOX_DEFAULT_LINES = 10;
+  
+  /**
+   * Getter Methode für Konstante DEFAULT_DISPLAYTEMPLATE
+   */ 
+  public static String getDefaultDisplaytemplate() 
+  {
+	return DEFAULT_DISPLAYTEMPLATE;
+  }
 
   /**
    * ActionListener für Buttons mit der ACTION "abort".
