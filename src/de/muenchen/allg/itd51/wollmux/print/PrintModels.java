@@ -4,7 +4,7 @@
  * Funktion : Diese Klasse enthält eine Fabrik für die Erzeugung eines PrintModels
  *            und die Klassendefinitionen des MasterPrintModels und des SlavePrintModels.
  * 
- * Copyright (c) 2009-2017 Landeshauptstadt München
+ * Copyright (c) 2009-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
