@@ -1,3 +1,18 @@
+ ==================== Neu in Version 18.0.0 ====================
+
+    * Bugfixes
+          o Das Ergebnisfenster der Suche in der WollMuxBar schließt sich nicht
+            mehr wenn Die Maus darüber steht.
+          o Bei bereits gesetzen Markierungen wird nun diese Markierung
+            verändert wenn eine andere Markierung ausgewählt wird.
+          o In der Suche kann nun auch nach Vornamen gesucht werden.
+          o Der zusätzliche Dialog nach einem Seriendruck, dass der Druck im
+            Hintergrund stattfindet, hat keine Besserung gebracht. Deswegen
+            werden die Änderungen aus #21989 wieder rückgängig gemacht. In der
+            Fortschrittsanzeige steht schon ein Hinweis, dass der Druck etwas
+            dauern kann.
+
+
  ==================== Neu in Version 17.10 ====================
 
     * Bugfixes
@@ -32,6 +47,9 @@
           o WollMux kann LDAPs und stellt keine anonymen Anfragen mehr. Dazu
             muss ein User und Passwort in der WollMux-Konfiguration angegeben
             werden.
+    * Abkündigungen
+          o MutliForm Formulare sollten nicht mehr verwendet werden. Die
+            Funktionalität wird vorerst allerdings noch unterstützt.
 
 
  ==================== Neu in Version 17.08 ====================
