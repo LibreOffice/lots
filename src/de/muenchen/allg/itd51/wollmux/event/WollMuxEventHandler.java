@@ -105,12 +105,16 @@ import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XFrames;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XComponent;
+import com.sun.star.sdb.XBookmarksSupplier;
 import com.sun.star.text.XPageCursor;
+import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextRangeCompare;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.RuntimeException;
@@ -137,6 +141,7 @@ import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.VisibleTextFragmentList;
 import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
@@ -167,6 +172,7 @@ import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpret
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.print.PrintModels;
+import de.muenchen.allg.ooo.TextDocument;
 
 /**
  * Ermöglicht die Einstellung neuer WollMuxEvents in die EventQueue.
@@ -3441,46 +3447,28 @@ public class WollMuxEventHandler
         return;
 
       String bookmarkStart = "WM(CMD '" + blockname + "'";
-      String hcAtt = "";
-      if (highlightColor != null)
+      String bookmarkName = bookmarkStart + TextDocument.parseHighlightColor(highlightColor) + ")";
+      List<XNamed> bookmarkByRange = TextDocument.getBookmarkByTextRange(range);
+      Pattern bookmarkPattern = DocumentCommands.getPatternForCommand(blockname);
+      Set<String> bmNames = TextDocument.getBookmarkNamesMatching(bookmarkPattern, range);
+
+      if (bmNames == null || bmNames.size() < 1)
       {
-        String colStr = "00000000";
-        colStr += Integer.toHexString(highlightColor.intValue());
-        colStr = colStr.substring(colStr.length() - 8, colStr.length());
-        hcAtt = " HIGHLIGHT_COLOR '" + colStr + "'";
-      }
-      String bookmarkName = bookmarkStart + hcAtt + ")";
+	for(Pattern pattern : getBookmarkPatterns()) {
+	  Set<String> existingBookmarks = TextDocument.getBookmarkNamesMatching(pattern, range);
 
-      XNamed bookmarkByRange = getBookmarkByTextRange(range);
-      if (bookmarkByRange != null)
-      {
-        Bookmark bookmarkToDelete;
-        try
-        {
-          String currentBookmarkByRangeName = bookmarkByRange.getName();
-          bookmarkToDelete = new Bookmark(currentBookmarkByRangeName,
-              UNO.XBookmarksSupplier(documentController.getModel().doc));
+	  for(String bookmark : existingBookmarks) {
+	    try
+	    {
+	      Bookmark wollBook = new Bookmark(bookmark, UNO.XBookmarksSupplier(documentController.getModel().doc));
+	      wollBook.remove();
+	    } catch (NoSuchElementException e)
+	    {
+	      e.printStackTrace();
+	    }
+	  }
+	}
 
-          if (bookmarkName.contains("HIGHLIGHT_COLOR"))
-          {
-            UNO.setPropertyToDefault(bookmarkToDelete.getTextCursor(), "CharBackColor");
-          }
-
-          bookmarkToDelete.remove();
-
-          if (!(currentBookmarkByRangeName.equals(bookmarkName)))
-          {
-            setNewDocumentCommand(documentController, bookmarkName, range, highlightColor, markChange);
-          }
-        } catch (NoSuchElementException e)
-        {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-      }
-
-      if (bookmarkByRange == null)
-      {
         // neuen Block anlegen
         documentController.getModel().addNewDocumentCommand(range, bookmarkName);
         if (highlightColor != null)
@@ -3494,6 +3482,53 @@ public class WollMuxEventHandler
         }
         ModalDialogs.showInfoModal(L.m("Block wurde markiert"), L.m("Der ausgewählte Block %1.", markChange));
       }
+      else
+      {
+	for(String matchedBookmark : bmNames) {
+	 for(XNamed bookmark : bookmarkByRange) {
+	   if(bookmark == null)
+	     return;
+
+		try
+		{
+		  Bookmark bookmarkToDelete = new Bookmark(matchedBookmark,
+	              UNO.XBookmarksSupplier(documentController.getModel().doc));
+
+		  Bookmark wollBook = new Bookmark(bookmark.getName(), UNO.XBookmarksSupplier(documentController.getModel().doc));
+
+		  XTextRange bookMarkToDeleteAnchor = bookmarkToDelete.getAnchor();
+		  XTextRange wollBookAnchor = wollBook.getAnchor();
+
+		  XTextRangeCompare c = UNO.XTextRangeCompare(bookMarkToDeleteAnchor.getText());
+		        try
+		        {
+		          short result = c.compareRegionStarts(bookMarkToDeleteAnchor, wollBookAnchor); //compareRegionStarts(R1,R2)
+
+		          //R1 ends behind xR2 || r1 ends before r2
+		          if (result == -1 || result == 1) {
+		            UNO.setPropertyToDefault(bookmarkToDelete.getTextCursor(), "CharBackColor");
+		            bookmarkToDelete.remove();
+		            setNewDocumentCommand(documentController, bookmarkName, range, highlightColor, markChange);
+		          }
+
+		          //r1 ends at same position as r2
+		          if(result == 0 ) {
+		            UNO.setPropertyToDefault(bookmarkToDelete.getTextCursor(), "CharBackColor");
+		            bookmarkToDelete.remove();
+		          }
+		        }
+		        catch (IllegalArgumentException e)
+		        {
+		          e.printStackTrace();
+		        }
+		} catch (NoSuchElementException e)
+		{
+		  // TODO Auto-generated catch block
+		  e.printStackTrace();
+		}
+	      }
+      	}
+      }
 
       // PrintBlöcke neu einlesen:
       documentController.getModel().getDocumentCommands().update();
@@ -3502,6 +3537,23 @@ public class WollMuxEventHandler
       dci.scanInsertFormValueCommands();
 
       stabilize();
+    }
+
+    private static List<Pattern> getBookmarkPatterns() {
+        Pattern allVersionPattern = DocumentCommands.getPatternForCommand("allVersions");
+	Pattern draftOnlyPattern = DocumentCommands.getPatternForCommand("draftOnly");
+	Pattern notInOrginalPattern = DocumentCommands.getPatternForCommand("notInOriginal");
+	Pattern originalOnlyPattern = DocumentCommands.getPatternForCommand("originalOnly");
+	Pattern copyOnlyPattern = DocumentCommands.getPatternForCommand("copyOnly");
+
+	List<Pattern> bookmarkPatterns = new ArrayList<Pattern>();
+	bookmarkPatterns.add(allVersionPattern);
+	bookmarkPatterns.add(draftOnlyPattern);
+	bookmarkPatterns.add(notInOrginalPattern);
+	bookmarkPatterns.add(originalOnlyPattern);
+	bookmarkPatterns.add(copyOnlyPattern);
+
+	return bookmarkPatterns;
     }
 
     private static void setNewDocumentCommand(
@@ -3521,47 +3573,6 @@ public class WollMuxEventHandler
 
       ModalDialogs.showInfoModal(L.m("Block wurde markiert"),
         L.m("Der ausgewählte Block %1.", markChange));
-    }
-
-    private static XNamed getBookmarkByTextRange(XTextRange range) {
-      XNamed bookmark = null;
-      XTextCursor currentCursor = range.getText().createTextCursorByRange(range);
-      if (UNO.XEnumerationAccess(currentCursor) != null)
-      {
-        XEnumeration xenum = UNO.XEnumerationAccess(currentCursor).createEnumeration();
-        while (xenum.hasMoreElements())
-        {
-          XEnumeration parEnum = null;
-          try
-          {
-            parEnum =
-              UNO.XEnumerationAccess(xenum.nextElement()).createEnumeration();
-          }
-          catch (java.lang.Exception e)
-          {}
-
-          while (parEnum != null && parEnum.hasMoreElements())
-          {
-            try
-            {
-              Object element = parEnum.nextElement();
-              bookmark = UNO.XNamed(UNO.getProperty(element, "Bookmark"));
-
-              break;
-            }
-            catch (WrappedTargetException ex)
-            {
-              break;
-            }
-            catch (NoSuchElementException ex)
-            {
-              break;
-            }
-          }
-        }
-      }
-
-      return bookmark;
     }
 
     /**

@@ -1,3 +1,39 @@
+ ==================== Neu in Version 17.10 ====================
+
+    * Bugfixes
+          o Wird das Anlegen von neuen Benutzerdaten abgebrochen, so wird kein
+            Eintrag mehr angelegt.
+          o GUI externer Briefkopf wird mit Daten gefüllt beim Laden.
+          o Unerwartete Fehler in LibreOffice werden nun im EventProzessor
+            abgefangen und dadurch wird verhinder, dass keine weiteren Events
+            mehr vom WollMux bearbeitet werden können.
+          o Nach dem Ändern von Sichtbarkeiten, wird auch die farbliche
+            Markierung angepasst.
+          o In der FormularGUI kann nun auch zu Tabs ohne Eingabefelder
+            navigiert werden.
+          o Die Sidebar erhält einen vertikalen Scrollbalken.
+          o Die Fensterpositionierung von LibreOffice und der FormularGUI wurde
+            korrigiert.
+          o Die Buttons zum Öffnen von Vorlagen oder externen Programmen werden
+            nicht mehr in der Fußzeile angezeigt, sondern in der Liste der
+            Eingabefelder.
+          o Beim Ändern von Sichtbarkeiten wird die alte Sichtbarkeit korrekt
+            gelöscht.
+          o Das Options-Menü der WollMuxBar lässt sich nun auch über das Tray-
+            Icon öffnen.
+    * Neue Features
+          o Der Seriendruck unterstützt nun mehrzeilige Spaltenüberschriften
+          o Der Suchmechanismus für die Datei wollmux.conf wurde für Windows um
+            den Pfad %ProgramData% erweitert. Außerdem kann der Anwender nun
+            bei der Installation den Start zur wollmux.conf angeben. Der Pfad
+            wird in der Regestry unter HKEY_LOCAL_MACHINE/Software/WollMux/
+            ConfigPath abgespeichert. Der WollMux liest diesen Regestry-
+            Eintrag.
+          o WollMux kann LDAPs und stellt keine anonymen Anfragen mehr. Dazu
+            muss ein User und Passwort in der WollMux-Konfiguration angegeben
+            werden.
+
+
  ==================== Neu in Version 17.08 ====================
 
     * Auf dem Basisclient ist es jetzt möglich einen Schnellstarter für die
@@ -33,7 +69,6 @@
     * Umstellung auf LibreOffice 5.2
           o Die Sidebar funktioniert nur zusammen mit LibreOffice 5.2. und
             nicht mit LibreOffice 4.1
-    * MultiForm-Formulare können nun über die Sidebar geöffnet werden.
     * Ersetzen der Windows-Bibliothek unowinreg.dll durch eine Java-Bibliothek
       (jna)
           o Damit die Bibliothek das installierte LibreOffice finden kann muss
@@ -211,7 +246,7 @@
             bereits existierenden Zieldatei wird nicht mehr vom Hauptdialog
             verdeckt.
     * Neue Features:
-          o Eine Änderung der Sepzifikation für Addons.xcu in Apache OpenOffice
+          o Eine Änderung der Spezifikation für Addons.xcu in Apache OpenOffice
             hat es nötig gemacht zwei Versionen der WollMux.oxt zu erzeugen -
             eine für LibreOffice und eine für Apache OpenOffice. Die Datei für
             Apache OpenOffice unterscheidet sich durch eine leicht geänderte
@@ -276,6 +311,22 @@
                   und Erweiterungen können dann wesentlich schneller umgesetzt
                   werden. Zusätzlich wird der Installer auch unter Linux und
                   MacOSX zur Verfügung stehen.
+
+
+ ==================== Neu in Version 15.04e ====================
+
+    * Bugfixes:
+          o Dem Anwender wird ein Hinweis-Dialog angezeigt, wenn der WollMux-
+            Seriendruck beendet ist und der Drucker (PDF) im Hintergrund
+            arbeitet um ein Gesamtdokument zu erstellen.
+          o WollMux stürzt nicht mehr mit einer Nvidia-Quaddro GPU ab. Dazu
+            wurde der Windows-Launcher umgestellt. Über eine INI-Datei können
+            der JVM nun Optionen mitgegeben werden, um beispielsweise
+            DirectDraw abzustellen.
+    * Neue Features:
+          o WollMux kann LDAPs und stellt keine anonymen Anfragen mehr. Dazu
+            muss ein User und Passwort in der WollMux-Konfiguration angegeben
+            werden.
 
 
  ==================== Neu in Version 15.04d ====================
