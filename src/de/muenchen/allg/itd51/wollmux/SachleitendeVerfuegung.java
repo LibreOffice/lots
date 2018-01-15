@@ -46,11 +46,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.sun.star.awt.FontWeight;
+import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNameContainer;
 import com.sun.star.container.XNamed;
 import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.style.XStyle;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextCursor;
@@ -382,8 +385,10 @@ public class SachleitendeVerfuegung
   private static boolean removeAllAbdruecke(XParagraphCursor cursor)
   {
     boolean deletedAtLeastOne = false;
+    String fullText = "";
+    fullText = getFullLinesOfSelectedAbdruckLines(cursor);
     if (UNO.XEnumerationAccess(cursor) != null)
-    {
+    {        
       XEnumeration xenum = UNO.XEnumerationAccess(cursor).createEnumeration();
 
       while (xenum.hasMoreElements())
@@ -397,10 +402,12 @@ public class SachleitendeVerfuegung
         {
           Logger.error(e);
         }
-
+        
+        String str = getStringOfXTextRange(par);
+        
         if (par != null)
         {
-          if (isAbdruck(par))
+          if (isAbdruck(par) && fullText.contains(str))
           {
             // Einen evtl. bestehenden Verfuegungspunkt zurücksetzen
             removeSingleVerfuegungspunkt(par);
@@ -411,7 +418,41 @@ public class SachleitendeVerfuegung
     }
     return deletedAtLeastOne;
   }
-
+  
+  /**
+   * Liefert die vollständingen Textzeilen der markierten Abdruckzeilen zurück   
+   * 
+   * @param textRange
+   *          
+   * @return String
+   */  
+  static String getFullLinesOfSelectedAbdruckLines(XParagraphCursor cursor)
+  {
+	  String fullText = "";
+	  if (UNO.XEnumerationAccess(cursor) != null)
+	  {
+	    XEnumeration enumerationAccessFullText =  UNO.XEnumerationAccess(cursor).createEnumeration();
+		while( enumerationAccessFullText.hasMoreElements())
+	     {
+	    	XTextRange test;
+	    	try 
+	    	{
+	    		test = UNO.XTextRange(enumerationAccessFullText.nextElement());
+				fullText += getStringOfXTextRange(test);
+			} 
+	    	catch (NoSuchElementException e) 
+	    	{
+	    		Logger.error(e);
+			} 
+	    	catch (WrappedTargetException e) 
+	    	{
+	    		Logger.error(e);
+			}
+	     }
+	  }
+	return fullText;	  
+  }
+  
   /**
    * Diese Methode löscht alle Zuleitungszeilen, die der Bereich des Cursors cursor
    * berührt, und liefert true zurück, wenn mindestens eine Zuleitungszeile gelöscht
@@ -661,11 +702,29 @@ public class SachleitendeVerfuegung
    */
   private static boolean isAbdruck(XTextRange paragraph)
   {
-    String str = paragraph.getString();
+	String str = getStringOfXTextRange(paragraph);
     return str.contains(copyName + " von " + romanNumbers[0])
       || str.contains(copyName + " von <Vorgänger>.");
   }
 
+  /**
+   * Liefert einen String des übergebenen TextRange zurück   
+   * 
+   * @param textRange
+   *          
+   * @return String
+   */  
+  static String getStringOfXTextRange(XTextRange textRange)
+  {
+	String str = "";
+	XEnumerationAccess enumerationAccess =  UNO.XEnumerationAccess(textRange);
+	if( enumerationAccess.hasElements())
+	{
+	  str = textRange.getString();
+	}
+	return str;	
+  }  
+  
   /**
    * Liefert den letzten Teil suffix, der am Ende eines Abdruck-Strings der Form
    * "Abdruck von I[, II, ...][ und n]<suffix>" gefunden wird oder "", wenn der kein
