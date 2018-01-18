@@ -7,13 +7,8 @@ idl/de/muenchen/allg/itd51/wollmux/*.class
 bin/de
 bin/data
 bin/com
-dist/deb/wollmux-*.tar.gz
-dist/deb/wollmux_*.orig.tar.gz
-dist/deb/openoffice.org-wollmux_*.deb
-dist/deb/wollmux*.deb
-dist/deb/wollmux*.dsc
-dist/deb/wollmux*.diff.gz
-dist/deb/wollmux*.changes
+dist/deb-wanderer
+dist/deb-walhalla
 dist/WollMux.oxt
 dist/WollMux.uno.pkg
 dist/WollMuxBar.jar
@@ -29,6 +24,7 @@ oxt/WollMux.uno.jar
 /idl/target
 *.urd
 misc/version
+lhmdeb/changelog
 .project
 .classpath
 /.settings

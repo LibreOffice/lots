@@ -1,20 +1,12 @@
 #!/bin/sh
 
 if [ $# -lt 1 ] || [ $# -gt 3 ]; then
-  echo 1>&2 "USAGE: bumpversion <changelog> <version>"
-  echo 1>&2 "USAGE: bumpversion <changelog>"
+  echo 1>&2 "USAGE: bumpversion <changelog> <distribution> <version>"
   exit 1
 fi
 
-
-if [ $# -eq 1 ]; then
-  dch --distribution wanderer --force-distribution --urgency low --changelog "$1" --increment --package wollmux "Version bump." --vendor "lhm"
-else
-  version=$2
-  # check if version contains lhm, add if necessary
-  if [ ! -z "${version##*+lhm*}" ]; then
-    version="$version+lhm1"
-  fi
-  dch --distribution wanderer --force-distribution --urgency low --changelog "$1" --newversion ${version} --package wollmux "Version bump." --vendor "lhm"
-fi
+changelog=$1
+distribution=$2
+version=$3
+dch --distribution "$distribution" --force-distribution --urgency low --changelog "$changelog" --newversion ${version} --package wollmux "Version bump."
 

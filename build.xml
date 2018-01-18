@@ -119,15 +119,14 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 	</target>
 	
 	<target name="bumpversion" unless="debian.native" depends="makeversion">
-		<exec executable="dpkg-parsechangelog" outputproperty="CUR_VERSION">
-		  <arg line="-llhmdeb/changelog --show-field Version"/>
-		</exec>
-		<echo message="Current Debian Version is ${CUR_VERSION}"/>
 		<echo message="Current WollMux Version is ${VERSION}"/>
-		<input message="New Debian Version (Leave empty to auto-increment):" addproperty="DEB_VERSION"/>
+		<input message="New Debian Version (Leave empty to auto-increment):" addproperty="DEB_VERSION" defaultvalue="${VERSION}"/>
 		<exec executable="bash">
-		  <arg line="misc/bumpversion lhmdeb/changelog ${DEB_VERSION}"/>
+		  <arg line="misc/bumpversion ${CHANGE_DIST} ${DISTRIBUTION} ${DEB_VERSION}"/>
 		</exec>
+    <exec executable="ln" failifexecutionfails="true" failonerror="true">
+      <arg line="-f ${CHANGE_DIST} lhmdeb/changelog"/>
+    </exec>
 	</target>
 	
 	<target name="makechangelog">
@@ -247,17 +246,40 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 	</target>
 
 	<target name="clean" >
-		<delete dir="${PACKAGE_DIR}/deb" />
+		<delete dir="${PACKAGE_DIR}/deb-${DISTRIBUTION}" />
 	</target>
+	
+	<target name="deb" depends="deb-wan, deb-wal">
+	</target>
+	
+  <target name="deb-wan">
+  	<antcall target="bumpversion">
+  		<param name="CHANGE_DIST" value="lhmdeb/changelog-wan"/>
+  		<param name="DISTRIBUTION" value="wanderer"/>
+  	</antcall>
+  	<antcall target="deb-dist">
+      <param name="DISTRIBUTION" value="wanderer"/>
+  	</antcall>
+  </target>
+	
+  <target name="deb-wal">
+  	<antcall target="bumpversion">
+      <param name="CHANGE_DIST" value="lhmdeb/changelog-wal"/>
+      <param name="DISTRIBUTION" value="walhalla"/>
+    </antcall>
+    <antcall target="deb-dist">
+      <param name="DISTRIBUTION" value="walhalla"/>
+    </antcall>
+  </target>
 
-	<target name="deb" depends="clean, bumpversion">
+	<target name="deb-dist" depends="clean">
                 <loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true">
                         <filterchain>
                                 <striplinebreaks/>
                                 <trim/>
                         </filterchain>
                 </loadfile>
-		<property name="DEB_BUILD_DIR" value="${PACKAGE_DIR}/deb/wollmux-${VERSION}" />
+		<property name="DEB_BUILD_DIR" value="${PACKAGE_DIR}/deb-${DISTRIBUTION}/wollmux-${VERSION}" />
 		<condition property="DEBIAN_DIR" value="debian" else="lhmdeb">
 			<available file="debian/rules" />
 		</condition>
@@ -277,7 +299,7 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 			<arg line="a+x rules" />
 		</exec>
 		
-		<exec dir="${PACKAGE_DIR}/deb" executable="dpkg-source" failifexecutionfails="true" failonerror="true">
+		<exec dir="${PACKAGE_DIR}/deb-${DISTRIBUTION}" executable="dpkg-source" failifexecutionfails="true" failonerror="true">
 			<arg line="-b wollmux-${VERSION}" />
 		</exec>
 		
