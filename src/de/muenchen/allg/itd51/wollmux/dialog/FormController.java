@@ -916,6 +916,43 @@ public class FormController implements UIElementEventHandler
       tabSwitcherCompo.setOpaque(false);
       tabSwitcherCompo.setFocusable(true);
       tabSwitcherCompo.setRequestFocusEnabled(false);
+      tabSwitcherCompo.addFocusListener(new FocusListener()
+      {
+
+	public void focusGained(FocusEvent e)
+	{
+	  if (buttonPanel.getComponentCount() > 1
+	      && e.getOppositeComponent() == buttonPanel.getComponent(1))
+	  {
+	    tabSwitcherCompo.transferFocusBackward();
+	  } else
+	  {
+	    int startIdx = myTabbedPane.getSelectedIndex();
+	    int idx = startIdx;
+	    do
+	    {
+	      ++idx;
+	      if (idx >= myTabbedPane.getTabCount())
+	      {
+		idx = -1;
+		break;
+	      }
+	      if (myTabbedPane.isEnabledAt(idx))
+		break;
+	    } while (idx != startIdx);
+	    if (idx > -1)
+	      processUiElementEvent(null, "action", new String[] { "nextTab" });
+	    else
+	      buttonPanel.getComponent(buttonPanel.getComponentCount() - 1)
+		  .requestFocusInWindow();
+	  }
+	}
+
+	public void focusLost(FocusEvent e)
+	{
+	}
+      });
+
       buttonPanel.add(tabSwitcherCompo, gbc, 0);
     }
 
