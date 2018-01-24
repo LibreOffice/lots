@@ -637,6 +637,7 @@ public class FormController implements UIElementEventHandler
       myPanel.add(scrollPane, gbcMainPanel);
 
       int y = 0;
+      boolean hasFocusable = false;
 
       Iterator<ConfigThingy> parentiter = conf.query("Eingabefelder")
 	  .iterator();
@@ -781,7 +782,9 @@ public class FormController implements UIElementEventHandler
 	  // Objekt shared ist
 	  gbc.gridy = y;
 	  ++y;
-	  mainPanel.add(uiElement.getComponent(), gbc);
+	  Component component = uiElement.getComponent();
+	  hasFocusable |= component.isFocusable();
+	  mainPanel.add(component, gbc);
 	  gbc.gridwidth -= compoWidthIncrement; // wieder abziehen, weil Objekt
 						// ja
 	  // shared ist
@@ -799,6 +802,20 @@ public class FormController implements UIElementEventHandler
       if (y > GRID_MAX)
 	Logger.error(L.m(
 	    "Zu viele Formularelemente auf einem Tab => nicht alle werden angezeigt"));
+
+      if (!hasFocusable)
+      {
+        GridBagConstraints gbc = new GridBagConstraints(0, y, 0, 0, 0.0, 0.0,
+            GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+            new Insets(0, 0, 0, 0), 0, 0);
+        final JPanel tabBlocker = new JPanel();
+        tabBlocker.setSize(0, 0);
+        tabBlocker.setFocusable(true);
+        tabBlocker.setOpaque(false);
+        tabBlocker.setFocusable(true);
+        tabBlocker.setRequestFocusEnabled(true);
+        mainPanel.add(tabBlocker, gbc);
+      }
 
       /******************************************************************************
        * Für die Buttons ein eigenes Panel anlegen und mit UIElementen befüllen.
@@ -916,41 +933,38 @@ public class FormController implements UIElementEventHandler
       tabSwitcherCompo.setOpaque(false);
       tabSwitcherCompo.setFocusable(true);
       tabSwitcherCompo.setRequestFocusEnabled(false);
-      tabSwitcherCompo.addFocusListener(new FocusListener()
+      tabSwitcherCompo.addFocusListener(new FocusAdapter()
       {
 
-	public void focusGained(FocusEvent e)
-	{
-	  if (buttonPanel.getComponentCount() > 1
-	      && e.getOppositeComponent() == buttonPanel.getComponent(1))
-	  {
-	    tabSwitcherCompo.transferFocusBackward();
-	  } else
-	  {
-	    int startIdx = myTabbedPane.getSelectedIndex();
-	    int idx = startIdx;
-	    do
-	    {
-	      ++idx;
-	      if (idx >= myTabbedPane.getTabCount())
-	      {
-		idx = -1;
-		break;
-	      }
-	      if (myTabbedPane.isEnabledAt(idx))
-		break;
-	    } while (idx != startIdx);
-	    if (idx > -1)
-	      processUiElementEvent(null, "action", new String[] { "nextTab" });
-	    else
-	      buttonPanel.getComponent(buttonPanel.getComponentCount() - 1)
-		  .requestFocusInWindow();
-	  }
-	}
-
-	public void focusLost(FocusEvent e)
-	{
-	}
+	@Override
+        public void focusGained(FocusEvent e)
+        {
+          if (buttonPanel.getComponentCount() > 1
+              && e.getOppositeComponent() == buttonPanel.getComponent(1))
+          {
+            tabSwitcherCompo.transferFocusBackward();
+          } else
+          {
+            int startIdx = myTabbedPane.getSelectedIndex();
+            int idx = startIdx;
+            do
+            {
+              ++idx;
+              if (idx >= myTabbedPane.getTabCount())
+              {
+                idx = -1;
+                break;
+              }
+              if (myTabbedPane.isEnabledAt(idx))
+                break;
+            } while (idx != startIdx);
+            if (idx > -1)
+              processUiElementEvent(null, "action", new String[] { "nextTab" });
+            else
+              buttonPanel.getComponent(buttonPanel.getComponentCount() - 1)
+                  .requestFocusInWindow();
+          }
+        }
       });
 
       buttonPanel.add(tabSwitcherCompo, gbc, 0);

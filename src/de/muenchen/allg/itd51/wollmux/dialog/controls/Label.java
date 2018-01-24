@@ -11,25 +11,30 @@ public class Label extends UIElementBase
   public Label(String id, String label, Object layoutConstraints)
   {
     this.component = new JLabel(label);
+    this.component.setFocusable(false);
     this.layoutConstraints = layoutConstraints;
     this.id = id;
   }
 
+  @Override
   public Component getComponent()
   {
     return component;
   }
 
+  @Override
   public String getString()
   {
     return "false";
   }
 
+  @Override
   public boolean getBoolean()
   {
     return false;
   }
 
+  @Override
   public boolean isStatic()
   {
     return true;

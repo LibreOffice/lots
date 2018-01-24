@@ -12,24 +12,29 @@ public class Separator extends UIElementBase
   {
     this.layoutConstraints = layoutConstraints;
     this.seppl = wurzelSepp;
+    this.seppl.setFocusable(false);
     this.id = id;
   }
 
+  @Override
   public Component getComponent()
   {
     return seppl;
   }
 
+  @Override
   public String getString()
   {
     return "false";
   }
 
+  @Override
   public boolean getBoolean()
   {
     return false;
   }
 
+  @Override
   public boolean isStatic()
   {
     return true;
