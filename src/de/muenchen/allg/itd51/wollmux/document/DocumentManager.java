@@ -562,8 +562,8 @@ public class DocumentManager
       {
         Logger.error(L.m(
           "Ungültiger Wert '%1' für Attribut %2. Verwende Voreinstellung '%3' statt dessen.",
-          pdMode, PersistentDataContainer.PERSISTENT_DATA_MODE, PersistentDataContainer.PERSISTENT_DATA_MODE_TRANSITION));
-        return new TransitionModeDataContainer(doc);
+          pdMode, PersistentDataContainer.PERSISTENT_DATA_MODE, PersistentDataContainer.PERSISTENT_DATA_MODE_RDFREADLEGACY));
+        return new RDFReadLegacyModeDataContainer(doc);
       }
     }
     catch (RDFMetadataNotSupportedException e)
