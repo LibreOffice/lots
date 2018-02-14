@@ -133,7 +133,7 @@ public class DocumentDispatch extends Dispatch
   {
     boolean flag = false;
     XLayoutManager layout = UNO
-	.XLayoutManager(UNO.getProperty(getDocumentController().getModel().doc
+	.XLayoutManager(UNO.getProperty(UNO.XTextDocument(frame.getController().getModel())
 	    .getCurrentController().getFrame(), "LayoutManager"));
     if (layout != null)
     {
