@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Eine Sicht, die das Bearbeiten von {@link FunctionSelectionAccess} Objekten erlaubt.
  * 
- * Copyright (c) 2008-2017 Landeshauptstadt München
+ * Copyright (c) 2008-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),

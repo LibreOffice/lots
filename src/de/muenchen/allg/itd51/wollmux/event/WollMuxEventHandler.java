@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Ermöglicht die Einstellung neuer WollMuxEvents in die EventQueue.
  *
- * Copyright (c) 2010-2017 Landeshauptstadt München
+ * Copyright (c) 2010-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -793,7 +793,7 @@ public class WollMuxEventHandler
       Font largeFont = label.getFont().deriveFont(15.0f);
       label.setFont(largeFont);
       copyrightPanel.add(label);
-      label = new JLabel(L.m("Copyright (c) 2005-2017 Landeshauptstadt München"));
+      label = new JLabel(L.m("Copyright (c) 2005-2018 Landeshauptstadt München"));
       label.setFont(largeFont);
       copyrightPanel.add(label);
       label = new JLabel(L.m("Lizenz: %1", "European Union Public License"));
