@@ -456,13 +456,22 @@ public class DocumentManager
    */
   public synchronized void dispose(XTextDocument doc)
   {
-    if (fm4k.containsKey(doc)) fm4k.get(doc).abort();
+    if (fm4k.containsKey(doc) && fm4k.get(doc) != null)
+    {
+      fm4k.get(doc).abort();
+    }
     fm4k.remove(doc);
 
-    if (mailMerge.containsKey(doc)) mailMerge.get(doc).dispose();
+    if (mailMerge.containsKey(doc) && mailMerge.get(doc) != null)
+    {
+      mailMerge.get(doc).dispose();
+    }
     mailMerge.remove(doc);
 
-    if (formModels.containsKey(doc)) formModels.get(doc).closing(doc);
+    if (formModels.containsKey(doc) && formModels.get(doc) != null)
+    {
+      formModels.get(doc).closing(doc);
+    }
     formModels.remove(doc);
   }
 
