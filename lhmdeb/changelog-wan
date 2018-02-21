@@ -1,3 +1,9 @@
+wollmux (18.0.1) wanderer; urgency=low
+
+  * Version bump.
+
+ -- Daniel Sikeler <daniel.sikeler@muenchen.de>  Wed, 21 Feb 2018 13:55:13 +0100
+
 wollmux (18.0.0+lhm1) wanderer; urgency=low
 
   * Version bump.
