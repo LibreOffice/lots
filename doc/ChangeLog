@@ -1,3 +1,19 @@
+ ==================== Neu in Version 18.0.1 ====================
+
+    * Neue Features
+          o Paketierung für walhalla/6.0.0
+    * Bugfixes
+          o WollMux verwendet den Controller von LibreOffice um zu entscheiden,
+            ob die Buttons in der Symbolleiste aktiv sein sollen.
+          o Tabs ohne Eingabefeld in der FormularGUI erhalten eine versteckte
+            Komponente, welche verhindert, dass sofort auf den nächsten Tab
+            gesprungen wird.
+          o Mehrere SLV-Markierungen können nun wieder gleichzeitig entfernt
+            werden.
+          o Die GUI schließt nun wieder wenn zuvor ein FormularMax4000 geöffnet
+            und geschlossen wurde.
+
+
  ==================== Neu in Version 18.0.0 ====================
 
     * Bugfixes
@@ -75,6 +91,7 @@
       im Funktionsumfang im wesentlichen nicht vom Makro zu unterscheiden. Neu
       ist, dass der Toolbarbutton 'Seite drucken' nur verfügbar ist, wenn die
       Funktion sinnvoll verwendet werden kann.
+
     * Wird vor dem Seriendruck die Vorschau-Funktion verwendet, werden die
       zuletzt angezeigten Vorschaudaten in das Gesamtdokument übernommen. Als
       Workaround werden die Vorschaudaten vor dem Drucken gelöscht. Diese Daten
