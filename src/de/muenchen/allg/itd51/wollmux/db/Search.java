@@ -2,11 +2,11 @@
  * Dateiname: Search.java
  * Projekt  : WollMux
  * Funktion : Stellt Methoden zum Suchen in Datenquellen zur Verfügung
- * 
+ *
  * Copyright (c) 2010-2018 Landeshauptstadt München
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL), 
+ * it under the terms of the European Union Public Licence (EUPL),
  * version 1.0 (or any later version).
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,7 +15,7 @@
  * European Union Public Licence for more details.
  *
  * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see 
+ * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
  * Änderungshistorie:
@@ -26,25 +26,21 @@
  * -------------------------------------------------------------------
  *
  * @author Daniel Benkmann (D-III-ITD-D101)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.db;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
-
-import javax.swing.Icon;
 
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 
 /**
  * Diese Klasse stellt Methoden zur Verfügung um in Datenquellen Suchen
  * durchzuführen.
- * 
+ *
  * @author Daniel Benkmann (D-III-ITD-D101)
  */
 public class Search
@@ -55,7 +51,7 @@ public class Search
    * liefert die Ergebnisse in einem {@link QueryResults}-Objekt zurück. Falls einer
    * der übergebenen Parameter <code>null</code> ist oder falls der queryString leer
    * ist, wird <code>null</code> zurückgeliefert.
-   * 
+   *
    * @param queryString
    *          die Suchanfrage
    * @param searchStrategy
@@ -69,7 +65,7 @@ public class Search
    *          von dj gesucht werden soll. Wenn hier <code>true</code> übergeben wird,
    *          enthalten die als Ergebnis der Suche zurückgelieferten QueryResults auf
    *          jeden Fall {@link DJDataset}s.
-   * 
+   *
    * @throws TimeoutException
    *           falls ein Fehler beim Bearbeiten der Suche auftritt oder die Anfrage
    *           nicht rechtzeitig beendet werden konnte. In letzterem Fall ist das
@@ -78,7 +74,7 @@ public class Search
    *           zurückliefern, die in der gegebenen Zeit gewonnen werden konnten.
    * @throws IllegalArgumentException
    *           falls eine Datenquelle, in der gesucht werden soll, nicht existiert
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
@@ -86,68 +82,63 @@ public class Search
       SearchStrategy searchStrategy, DatasourceJoiner dj, boolean useDjMainDatasource)
       throws TimeoutException, IllegalArgumentException
   {
-    if (queryString == null || searchStrategy == null || dj == null) return null;
+    if (queryString == null || searchStrategy == null || dj == null)
+      return null;
 
     List<Query> queries = parseQuery(searchStrategy, queryString);
 
     QueryResults results = null;
     List<QueryResults> listOfQueryResultsList = new ArrayList<QueryResults>();
-    
-    for(Query query : queries){
-        if (query.numberOfQueryParts() == 0)
-        {
-          results =
-            (useDjMainDatasource ? dj.getContentsOfMainDatasource()
-                                : dj.getContentsOf(query.getDatasourceName()));
-        }
-        else
-        {
-          results =
-            (useDjMainDatasource ? dj.find(query.getQueryParts()) : dj.find(query));
-        }
-        listOfQueryResultsList.add(results);
+
+    for (Query query : queries)
+    {
+      if (query.numberOfQueryParts() == 0)
+      {
+        results = (useDjMainDatasource ? dj.getContentsOfMainDatasource()
+            : dj.getContentsOf(query.getDatasourceName()));
+      } else
+      {
+        results = (useDjMainDatasource ? dj.find(query.getQueryParts())
+            : dj.find(query));
+      }
+      listOfQueryResultsList.add(results);
     }
     return mergeListOfQueryResultsList(listOfQueryResultsList);
   }
-  
+
   /**
    * Führt die Ergebnissmengen zusammen. Dabei werden mehrfache Ergebnisse ausgefiltert
    * @return bereinigte Ergebnisliste
    * @author Thien Nghiem Tran
    */
-  private static QueryResults mergeListOfQueryResultsList(List<QueryResults> listOfQueryResultsList) 
-  {	  
-	List<Dataset> listOfDataset = new Vector<Dataset>(0);
-	List<DJDatasetListElement> elements = new ArrayList<DJDatasetListElement>();
-	
-	if(listOfQueryResultsList.size() == 1)
-	{
-		return listOfQueryResultsList.get(0);
-	}
-	else
-	{
-		for(QueryResults queryResults :listOfQueryResultsList)
-		{
-			for(Dataset query : queryResults)
-			{
-				DJDataset ds = (DJDataset) query;
-				Icon icon = null;
-				DJDatasetListElement dJDatasetListElement = new DJDatasetListElement(ds, PersoenlicheAbsenderlisteVerwalten.getDefaultDisplaytemplate(), icon);
-				if(!elements.contains(dJDatasetListElement))
-				{
-					elements.add(dJDatasetListElement);
-				}	
-			}	    			    		
-		}
-		Collections.sort(elements);
-	}
-	
-	for(DJDatasetListElement query : elements)
-	{
-		listOfDataset.add(query.getDataset());
-	}
-	
-	return new QueryResultsList(listOfDataset);
+  private static QueryResults mergeListOfQueryResultsList(List<QueryResults> listOfQueryResultsList)
+  {
+    QueryResultsSet results = new QueryResultsSet(new Comparator<Dataset>()
+    {
+
+      @Override
+      public int compare(Dataset o1, Dataset o2)
+      {
+        if (o1.getClass() == o2.getClass() && o1.getKey().equals(o2.getKey()))
+        {
+          return 0;
+        }
+        return 1;
+      }
+    });
+
+    if (listOfQueryResultsList.size() == 1)
+    {
+      return listOfQueryResultsList.get(0);
+    } else
+    {
+      for (QueryResults queryResults : listOfQueryResultsList)
+      {
+        results.addAll(queryResults);
+      }
+    }
+
+    return results;
   }
 
 /**
@@ -157,14 +148,14 @@ public class Search
    * Wörter keine Suchstrategie, so wird solange das letzte Wort entfernt bis
    * entweder nichts mehr übrig ist oder eine Suchstrategie für die Anzahl Wörter
    * gefunden wurde.
-   * 
+   *
    * @return die leere Liste falls keine Liste bestimmt werden konnte.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static List<Query> parseQuery(SearchStrategy searchStrategy,
       String queryString)
   {
-    List<Query> queryList = new Vector<Query>();
+    List<Query> queryList = new ArrayList<Query>();
 
     /*
      * Kommata durch Space ersetzen (d.h. "Benkmann,Matthias" -> "Benkmann Matthias")
@@ -202,7 +193,10 @@ public class Search
       }
       else
       {
-        if (suffixStar) queryArray[i] = queryArray[i] + "*";
+        if (suffixStar)
+        {
+          queryArray[i] = queryArray[i] + "*";
+        }
       }
     }
 
@@ -215,7 +209,10 @@ public class Search
     /*
      * keine Suchstrategie gefunden
      */
-    if (count < 0) return queryList;
+    if (count < 0)
+    {
+      return queryList;
+    }
 
     List<Query> templateList = searchStrategy.getTemplate(count);
     Iterator<Query> iter = templateList.iterator();
@@ -232,13 +229,13 @@ public class Search
    * Nimmt ein Template für eine Suchanfrage entgegen (das Variablen der Form
    * "${suchanfrageX}" enthalten kann) und instanziiert es mit Wörtern aus words,
    * wobei nur die ersten wordcount Einträge von words beachtet werden.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static Query resolveTemplate(Query template, String[] words, int wordcount)
   {
     String dbName = template.getDatasourceName();
-    List<QueryPart> listOfQueryParts = new Vector<QueryPart>();
+    List<QueryPart> listOfQueryParts = new ArrayList<QueryPart>();
     Iterator<QueryPart> qpIter = template.iterator();
     while (qpIter.hasNext())
     {
