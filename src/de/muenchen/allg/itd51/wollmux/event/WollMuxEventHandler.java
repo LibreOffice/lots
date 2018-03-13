@@ -3503,18 +3503,25 @@ public class WollMuxEventHandler
 		        try
 		        {
 		          short result = c.compareRegionStarts(bookMarkToDeleteAnchor, wollBookAnchor); //compareRegionStarts(R1,R2)
-
+                  UNO.setPropertyToDefault(bookmarkToDelete.getTextCursor(), "CharBackColor");
+		          bookmarkToDelete.remove();
+					
 		          //R1 ends behind xR2 || r1 ends before r2
-		          if (result == -1 || result == 1) {
-		            UNO.setPropertyToDefault(bookmarkToDelete.getTextCursor(), "CharBackColor");
-		            bookmarkToDelete.remove();
+		          if ((result == -1 || result == 1) && !(bookmarkToDelete.getName().equals(bookmarkName))) {
 		            setNewDocumentCommand(documentController, bookmarkName, range, highlightColor, markChange);
+		          } else {
+		        	  ModalDialogs.showInfoModal(L.m("Markierung des Blockes aufgehoben"), L.m(
+								"Der ausgewählte Block enthielt bereits eine Markierung 'Block %1'. Die bestehende Markierung wurde aufgehoben.",
+								markChange));
+		        	  break;
 		          }
 
 		          //r1 ends at same position as r2
 		          if(result == 0 ) {
 		            UNO.setPropertyToDefault(bookmarkToDelete.getTextCursor(), "CharBackColor");
-		            bookmarkToDelete.remove();
+		            ModalDialogs.showInfoModal(L.m("Markierung des Blockes aufgehoben"), L.m(
+							"Der ausgewählte Block enthielt bereits eine Markierung 'Block %1'. Die bestehende Markierung wurde aufgehoben.",
+							markChange));
 		          }
 		        }
 		        catch (IllegalArgumentException e)
