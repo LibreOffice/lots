@@ -1,3 +1,10 @@
+ ==================== Neu in Version 18.0.2 ====================
+    
+    * Bugfixes
+          o Dialog-Hinweis wenn Sichtbarkeit aktiviert/deaktiviert wurde.
+          o Performance der LDAP-Suche verbessert.
+
+
  ==================== Neu in Version 18.0.1 ====================
 
     * Neue Features
