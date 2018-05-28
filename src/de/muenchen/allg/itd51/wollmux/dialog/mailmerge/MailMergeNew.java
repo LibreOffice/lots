@@ -2,7 +2,7 @@
  * Dateiname: MailMergeNew.java
  * Projekt  : WollMux
  * Funktion : Die neuen erweiterten Serienbrief-Funktionalitäten
- * 
+ *
  * Copyright (c) 2010-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,16 +23,16 @@
  * -------------------------------------------------------------------
  * 11.10.2007 | BNK | Erstellung
  * 25.05.2010 | ERT | Aufruf von PDFGesamtdruck-Druckfunktion
- * 20.12.2010 | ERT | Bei ungültigem indexSelection.rangeEnd wird der 
+ * 20.12.2010 | ERT | Bei ungültigem indexSelection.rangeEnd wird der
  *                    Wert auf den letzten Datensatz gesetzt
  * 08.05.2012 | jub | um beim serienbrief/emailversand die auswahl zwischen odt und pdf
- *                    anhängen anbieten zu können, sendAsEmail() und saveToFile() mit 
- *                    einer flage versehen, die zwischen den beiden formaten 
+ *                    anhängen anbieten zu können, sendAsEmail() und saveToFile() mit
+ *                    einer flage versehen, die zwischen den beiden formaten
  *                    unterscheidet.
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
@@ -107,7 +107,7 @@ import de.muenchen.allg.itd51.wollmux.print.PrintModels;
 
 /**
  * Die neuen erweiterten Serienbrief-Funktionalitäten.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class MailMergeNew implements MailMergeParams.MailMergeController
@@ -247,7 +247,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /**
    * Die zentrale Klasse, die die Serienbrieffunktionalität bereitstellt.
-   * 
+   *
    * @param documentController
    *          das {@link TextDocumentModel} an dem die Toolbar hängt.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -565,9 +565,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Geht alle Komponenten durch, die unter bestimmten Bedingungen ausgegraut werden
    * müssen und setzt ihren Status korrekt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    */
   private void updateEnabledDisabledState()
   {
@@ -601,9 +601,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * setzt {@link #previewDatasetNumberMax} und setzt dann falls {@link #previewMode}
    * == true alle Feldwerte auf die Werte des entsprechenden Datensatzes. Ruft
    * außerdem {@link #updateEnabledDisabledState()} auf.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD D.10)
-   * 
+   *
    *         TESTED
    */
   private void updatePreviewFields()
@@ -645,7 +645,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /**
    * Schliesst den MailMergeNew und alle zugehörigen Fenster.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
   public void dispose()
@@ -674,7 +674,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Erzeugt eine Liste mit {@link javax.swing.Action}s für alle Namen aus
    * {@link #ds},getColumnNames(), die ein entsprechendes Seriendruckfeld einfügen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private List<Action> getInsertFieldActionList()
@@ -707,7 +707,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Erzeugt ein JPopupMenu, das Einträge für das Einfügen von Spezialfeldern enthält
    * und zeigt es an neben invoker an der relativen Position x,y.
-   * 
+   *
    * @param invoker
    *          zu welcher Komponente gehört das Popup
    * @param x
@@ -819,7 +819,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * Buttons buttonName, aus dem das Label des Dialogs, und später der Mouse-Over
    * hint erzeugt wird und die Liste der aktuellen Felder, die evtl. im Dialog zur
    * Verfügung stehen sollen.
-   * 
+   *
    * @param fieldNames
    *          Eine Liste der Feldnamen, die der Dialog anzeigt, falls er Buttons zum
    *          Einfügen von Serienbrieffeldern bereitstellt.
@@ -831,7 +831,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    *          spezifiziert. Der von den Dialogen benötigte äußere Knoten
    *          "Func(...trafoConf...) wird dabei von dieser Methode erzeugt, so dass
    *          trafoConf nur die eigentliche Funktion darstellen muss.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   protected void insertFieldFromTrafoDialog(List<String> fieldNames,
@@ -879,7 +879,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * liefert ein mit Hilfe der TrafoDialogFactory erzeugtes zugehöriges
    * TrafoDialog-Objekt zurück, oder null, wenn keine transformierte Funktion
    * selektiert ist oder für die Trafo kein Dialog existiert.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private TrafoDialog getTrafoDialogForCurrentSelection()
@@ -927,7 +927,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Startet den Seriendruck (und wird vom Seriendruckdialog aus
    * {@link MailMergeParams} über das Submit-Event aufgerufen.
-   * 
+   *
    * @param usePrintFunctions
    *          Liste der (in der Konfigurationsdatei definierten) Namen der
    *          Druckfunktionen, die für den Seriendruck verwendet werden sollen.
@@ -1060,7 +1060,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * {@link #PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der
    * ausgewählten Datensätze ist (0 ist der erste Datensatz). Dies funktioniert
    * natürlich nur dann, wenn pmod kein Proxy ist.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public static void mailMergeNewSetFormValue(XPrintModel pmod) throws Exception
@@ -1076,16 +1076,16 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * Im Fall, dass simProc != null ist, wird auch die nächste Druckfunktion in der
    * Aufrufkette nicht aufgerufen, sondern statt dessen der in simProc enthaltene
    * handler. Die Druckfunktion zieht folgende Properties heran:
-   * 
+   *
    * <ul>
    * <li>{@link #PROP_QUERYRESULTS} (ein Objekt vom Typ {@link QueryResults})</li>
-   * 
+   *
    * <li>"MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält</li>
-   * 
+   *
    * <li>{@link #PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der
    * ausgewählten Datensätze ist (0 ist der erste Datensatz).</li> *
    * <ul>
-   * 
+   *
    * @param pmod
    *          PrintModel welches das Hauptdokument des Seriendrucks beschreibt.
    * @param simProc
@@ -1094,7 +1094,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    *          aufgerufen.
    * @throws Exception
    *           Falls irgend etwas schief geht
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
    *         TESTED
    */
@@ -1116,6 +1116,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     int selectedIdx = selIter.next();
 
     pmod.setPrintProgressMaxValue((short) selection.size());
+
+    // save visibility states before dataset evaluation
+    HashMap<String, Boolean> states = documentController.getModel().getMapGroupIdToVisibilityState();
 
     int index = -1;
     int serienbriefNummer = 1;
@@ -1167,10 +1170,15 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       pmod.setPrintProgressValue((short) serienbriefNummer);
       ++serienbriefNummer;
     }
+
+    // reset visibility states from before dataset evaluation
+    for(Map.Entry<String, Boolean> map: states.entrySet()) {
+      pmod.setFormValue(map.getKey(), map.getValue().toString());
+    }
   }
 
   /**
-   * Liefert die Größe der von MailMergeNew im XPrintModel gesetzten Selection.  
+   * Liefert die Größe der von MailMergeNew im XPrintModel gesetzten Selection.
    */
   @SuppressWarnings("unchecked")
   public static int mailMergeNewGetSelectionSize(XPrintModel pmod)
@@ -1187,11 +1195,11 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
     return selection.size();
   }
-  
+
   /**
    * Speichert das übergebene Dokument in eine ODF-Datei. Die WollMux-Daten bleiben
    * dabei erhalten.
-   * 
+   *
    * @author Ignaz Forster (D-III-ITD-D102)
    * @throws java.io.IOException
    */
@@ -1211,7 +1219,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       filename = createOutputPathFromPattern(filePattern, pmod);
     else
       filename = L.m("Dokument.odt");
-    
+
     // jub .odt/.pdf ergänzen, falls nicht angegeben.
     if (!filename.toLowerCase().endsWith(".odt")
       && !filename.toLowerCase().endsWith(".pdf"))
@@ -1221,7 +1229,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       else
         filename = filename + ".pdf";
     }
-    
+
     File file = new File(outputDir, filename);
 
     saveOutputFile(file, textDocument);
@@ -1232,7 +1240,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Speichert das übergebene Dokument in eine ODF-Datei. Die WollMux-Daten bleiben
    * dabei erhalten.
-   * 
+   *
    * @author Ignaz Forster (D-III-ITD-D102)
    */
   public static void sendAsEmail(XPrintModel pmod, boolean isODT)
@@ -1345,7 +1353,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /**
    * grobe Plausiprüfung, ob E-Mailadresse gültig ist.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static boolean isMailAddress(String mail)
@@ -1355,9 +1363,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /**
    * Speichert doc unter dem in outFile angegebenen Dateipfad und schließt dann doc.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    *         TESTED
    */
   private static void saveOutputFile(File outFile, XTextDocument doc)
@@ -1371,7 +1379,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
       /*
        * For more options see:
-       * 
+       *
        * http://wiki.services.openoffice.org/wiki/API/Tutorials/PDF_export
        */
       if (unparsedUrl.endsWith(".pdf"))
@@ -1416,16 +1424,16 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * targetDir zusammen. Die Spezialtags {@link MailMergeParams#TAG_DATENSATZNUMMER}
    * und {@link MailMergeParams#TAG_SERIENBRIEFNUMMER} werden durch die Strings
    * datensatzNummer und serienbriefNummer ersetzt.
-   * 
+   *
    * @param totalDatasets
    *          die Gesamtzahl aller Datensätze (auch der für den aktuellen
    *          Druckauftrag nicht gewählten). Wird verwendet um datensatzNummer und
    *          serienbriefNummer mit 0ern zu padden.
-   * 
+   *
    * @throws MissingMapEntryException
    *           wenn ein Tag verwendet wird, zu dem es keine Spalte im aktuellen
    *           Datensatz existiert.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   private static String createOutputPathFromPattern(TextComponentTags filePattern,
@@ -1456,7 +1464,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Holt sich Element key aus dataset, sorgt dafür, dass der Wert digit-stellig wird
    * und speichert diesen Wert wieder in dataset ab.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static void fillWithLeading0(HashMap<String, String> dataset, String key,
@@ -1472,7 +1480,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   /**
    * Ersetzt alle möglicherweise bösen Zeichen im Dateinamen name durch eine
    * Unterstrich.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static String simplifyFilename(String name)
@@ -1482,7 +1490,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
    * #hasPrintfunction(java.lang.String)
@@ -1504,7 +1512,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
    * #getColumnNames()
@@ -1517,7 +1525,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
    * #getDefaultFilename()
@@ -1534,7 +1542,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
    * #getTextDocument()
@@ -1605,10 +1613,10 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * Koppelt das AWT-Window window an das Fenster dieses Textdokuments an. Die
    * Methode muss aufgerufen werden, solange das Fenster window unsichtbar und nicht
    * aktiv ist (also z.B. vor dem Aufruf von window.setVisible(true)).
-   * 
+   *
    * @param window
    *          das Fenster, das an das Hauptfenster angekoppelt werden soll.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private synchronized void addCoupledWindow(Window window)
@@ -1622,25 +1630,25 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       if (f != null) w = UNO.XTopWindow(f.getContainerWindow());
       if (w != null) coupledWindowController.setTopWindow(w);
     }
-  
+
     coupledWindowController.addCoupledWindow(window);
   }
 
   /**
    * Löst die Bindung eines angekoppelten Fensters window an das Dokumentfenster.
-   * 
+   *
    * @param window
    *          das Fenster, dessen Bindung zum Hauptfenster gelöst werden soll. Ist
    *          das Fenster nicht angekoppelt, dann passiert nichts.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private synchronized void removeCoupledWindow(Window window)
   {
     if (window == null || coupledWindowController == null) return;
-  
+
     coupledWindowController.removeCoupledWindow(window);
-  
+
     if (!coupledWindowController.hasCoupledWindows())
     {
       // deregistriert den windowListener.
