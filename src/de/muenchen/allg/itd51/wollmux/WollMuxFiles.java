@@ -152,7 +152,7 @@ public class WollMuxFiles
    * Siehe {@link #SLOW_SERVER_TIMEOUT}.
    */
   private static final String SLOW_SERVER_MESSAGE =
-    L.m("Ihr Vorlagen-Server und/oder Ihre Netzwerkverbindung sind sehr langsam.\nDies kann die Arbeit mit OpenOffice.org stark beeinträchtigen.");
+    L.m("Ihr Vorlagen-Server und/oder Ihre Netzwerkverbindung sind sehr langsam.\nDies kann die Arbeit mit Office stark beeinträchtigen.");
 
   /**
    * Die in der wollmux.conf mit DEFAULT_CONTEXT festgelegte URL.
