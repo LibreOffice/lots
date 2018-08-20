@@ -41,8 +41,8 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
@@ -70,7 +70,6 @@ import com.sun.star.awt.XTopWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XStorable;
-import com.sun.star.io.IOException;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
 
@@ -274,7 +273,6 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
           {
             Logger.error(x);
           }
-          ;
         }
       });
     }
@@ -362,7 +360,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        if (!ds.hasDatasource()) return;
+        if (!ds.hasDatasource()) {
+          return;
+        }
         if (previewMode)
         {
           documentController.collectNonWollMuxFormFields();
@@ -405,7 +405,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       public void actionPerformed(ActionEvent e)
       {
         --previewDatasetNumber;
-        if (previewDatasetNumber < 1) previewDatasetNumber = 1;
+        if (previewDatasetNumber < 1) {
+          previewDatasetNumber = 1;
+        }
         updatePreviewFields();
       }
     });
@@ -592,8 +594,11 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       for (JComponent compo : elementsDisabledWhenLastDatasetSelected)
         compo.setEnabled(false);
 
-    if (!previewMode) for (JComponent compo : elementsDisabledWhenNotInPreviewMode)
-      compo.setEnabled(false);
+    if (!previewMode) {
+      for (JComponent compo : elementsDisabledWhenNotInPreviewMode) {
+        compo.setEnabled(false);
+      }
+    }
   }
 
   /**
@@ -608,20 +613,28 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    */
   private void updatePreviewFields()
   {
-    if (!ds.hasDatasource()) return;
+    if (!ds.hasDatasource()) {
+      return;
+    }
 
     int count = ds.getNumberOfDatasets();
     previewDatasetNumberMax = count;
 
-    if (previewDatasetNumber > count) previewDatasetNumber = count;
-    if (previewDatasetNumber <= 0) previewDatasetNumber = 1;
+    if (previewDatasetNumber > count) {
+      previewDatasetNumber = count;
+    }
+    if (previewDatasetNumber <= 0) {
+      previewDatasetNumber = 1;
+    }
 
     String previewDatasetNumberStr = "" + previewDatasetNumber;
     previewDatasetNumberTextfield.setText(previewDatasetNumberStr);
 
     updateEnabledDisabledState();
 
-    if (!previewMode) return;
+    if (!previewMode) {
+      return;
+    }
 
     List<String> schema = ds.getColumnNames();
     List<String> data = ds.getValuesForDataset(previewDatasetNumber);
@@ -663,7 +676,6 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
           }
           catch (Exception x)
           {}
-          ;
         }
       });
     }
@@ -718,7 +730,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    */
   private void showInsertSpecialFieldPopup(JComponent invoker, int x, int y)
   {
-    boolean dsHasFields = ds.getColumnNames().size() > 0;
+    boolean dsHasFields = !ds.getColumnNames().isEmpty();
     final TrafoDialog editFieldDialog = getTrafoDialogForCurrentSelection();
 
     JPopupMenu menu = new JPopupMenu();
@@ -885,7 +897,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   private TrafoDialog getTrafoDialogForCurrentSelection()
   {
     ConfigThingy trafoConf = documentController.getModel().getFormFieldTrafoFromSelection();
-    if (trafoConf == null) return null;
+    if (trafoConf == null) {
+      return null;
+    }
 
     final String trafoName = trafoConf.getName();
 
@@ -966,8 +980,12 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
         break;
       case RANGE:
         indexSelection = (IndexSelection) args.get(SubmitArgument.indexSelection);
-        if (indexSelection.rangeStart < 1) indexSelection.rangeStart = 1;
-        if (indexSelection.rangeEnd < 1) indexSelection.rangeEnd = data.size();
+        if (indexSelection.rangeStart < 1) {
+          indexSelection.rangeStart = 1;
+        }
+        if (indexSelection.rangeEnd < 1) {
+          indexSelection.rangeEnd = data.size();
+        }
         if (indexSelection.rangeEnd > data.size())
           indexSelection.rangeEnd = data.size();
         if (indexSelection.rangeStart > data.size())
@@ -992,22 +1010,34 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       pmod.setPropertyValue(PROP_MAILMERGENEW_SELECTION, selected);
 
       Object o = args.get(SubmitArgument.targetDirectory);
-      if (o != null) pmod.setPropertyValue(PROP_TARGETDIR, o);
+      if (o != null) {
+        pmod.setPropertyValue(PROP_TARGETDIR, o);
+      }
 
       o = args.get(SubmitArgument.filenameTemplate);
-      if (o != null) pmod.setPropertyValue(PROP_FILEPATTERN, o);
+      if (o != null) {
+        pmod.setPropertyValue(PROP_FILEPATTERN, o);
+      }
 
       o = args.get(SubmitArgument.emailToFieldName);
-      if (o != null) pmod.setPropertyValue(PROP_EMAIL_TO_FIELD_NAME, o);
+      if (o != null) {
+        pmod.setPropertyValue(PROP_EMAIL_TO_FIELD_NAME, o);
+      }
 
       o = args.get(SubmitArgument.emailFrom);
-      if (o != null) pmod.setPropertyValue(PROP_EMAIL_FROM, o);
+      if (o != null) {
+        pmod.setPropertyValue(PROP_EMAIL_FROM, o);
+      }
 
       o = args.get(SubmitArgument.emailSubject);
-      if (o != null) pmod.setPropertyValue(PROP_EMAIL_SUBJECT, o);
+      if (o != null) {
+        pmod.setPropertyValue(PROP_EMAIL_SUBJECT, o);
+      }
 
       o = args.get(SubmitArgument.emailText);
-      if (o != null) pmod.setPropertyValue(PROP_EMAIL_MESSAGE_TEXTTAGS, o);
+      if (o != null) {
+        pmod.setPropertyValue(PROP_EMAIL_MESSAGE_TEXTTAGS, o);
+      }
     }
     catch (Exception x)
     {
@@ -1109,7 +1139,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     Collection<String> schema = (Collection<String>) pmod.getPropertyValue("MailMergeNew_Schema");
     List<Integer> selection =
       (List<Integer>) pmod.getPropertyValue(PROP_MAILMERGENEW_SELECTION);
-    if (selection.isEmpty()) return;
+    if (selection.isEmpty()) {
+      return;
+    }
 
     Iterator<Dataset> iter = data.iterator();
     Iterator<Integer> selIter = selection.iterator();
@@ -1124,10 +1156,14 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     int serienbriefNummer = 1;
     while (iter.hasNext() && selectedIdx >= 0)
     {
-      if (pmod.isCanceled()) return;
+      if (pmod.isCanceled()) {
+        return;
+      }
 
       Dataset ds = iter.next();
-      if (++index < selectedIdx) continue;
+      if (++index < selectedIdx) {
+        continue;
+      }
 
       int datensatzNummer = index + 1; // same as datensatzNummer = selectedIdx+1;
 
@@ -1136,7 +1172,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       else
         selectedIdx = -1;
 
-      if (simProc != null) documentController.startSimulation();
+      if (simProc != null) {
+        documentController.startSimulation();
+      }
 
       HashMap<String, String> dataSetExport = new HashMap<String, String>();
       try
@@ -1201,10 +1239,8 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * dabei erhalten.
    *
    * @author Ignaz Forster (D-III-ITD-D102)
-   * @throws java.io.IOException
    */
-  public static File saveToFile(XPrintModel pmod, boolean isODT) throws IOException,
-      java.io.IOException
+  public static File saveToFile(XPrintModel pmod, boolean isODT)
   {
     XTextDocument textDocument = pmod.getTextDocument();
 
@@ -1301,7 +1337,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
           L.m(
             "Die Empfängeradresse '%1' ist ungültig!\n\nDiesen Datensatz überspringen und fortsetzen?",
             to), MAIL_ERROR_MESSAGE_TITLE, JOptionPane.OK_CANCEL_OPTION);
-      if (res == JOptionPane.CANCEL_OPTION) pmod.cancel();
+      if (res == JOptionPane.CANCEL_OPTION) {
+        pmod.cancel();
+      }
       return;
     }
 
@@ -1311,7 +1349,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     String message = "";
     TextComponentTags messageTags =
       (TextComponentTags) pmod.getProp(PROP_EMAIL_MESSAGE_TEXTTAGS, null);
-    if (messageTags != null) message = messageTags.getContent(ds);
+    if (messageTags != null) {
+      message = messageTags.getContent(ds);
+    }
 
     File attachment = null;
     try
@@ -1347,7 +1387,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
     finally
     {
-      if (attachment != null) attachment.delete();
+      if (attachment != null) {
+        attachment.delete();
+      }
     }
   }
 
@@ -1400,7 +1442,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       }
       else
       {
-        if (!unparsedUrl.endsWith(".odt")) unparsedUrl = unparsedUrl + ".odt";
+        if (!unparsedUrl.endsWith(".odt")) {
+          unparsedUrl = unparsedUrl + ".odt";
+        }
 
         options = new PropertyValue[0];
       }
@@ -1471,7 +1515,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       int digits)
   {
     String value = dataset.get(key);
-    if (value == null) value = "";
+    if (value == null) {
+      value = "";
+    }
     while (value.length() < digits)
       value = "0" + value;
     dataset.put(key, value);
@@ -1553,37 +1599,13 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     return documentController.getModel().doc;
   }
 
-  private class MyWindowListener implements WindowListener
+  private class MyWindowListener extends WindowAdapter
   {
-    @Override
-    public void windowOpened(WindowEvent e)
-    {}
-
     @Override
     public void windowClosing(WindowEvent e)
     {
       abort();
     }
-
-    @Override
-    public void windowClosed(WindowEvent e)
-    {}
-
-    @Override
-    public void windowIconified(WindowEvent e)
-    {}
-
-    @Override
-    public void windowDeiconified(WindowEvent e)
-    {}
-
-    @Override
-    public void windowActivated(WindowEvent e)
-    {}
-
-    @Override
-    public void windowDeactivated(WindowEvent e)
-    {}
   }
 
   private void abort()
@@ -1621,14 +1643,20 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    */
   private synchronized void addCoupledWindow(Window window)
   {
-    if (window == null) return;
+    if (window == null) {
+      return;
+    }
     if (coupledWindowController == null)
     {
       coupledWindowController = new CoupledWindowController();
       XFrame f = documentController.getFrameController().getFrame();
       XTopWindow w = null;
-      if (f != null) w = UNO.XTopWindow(f.getContainerWindow());
-      if (w != null) coupledWindowController.setTopWindow(w);
+      if (f != null) {
+        w = UNO.XTopWindow(f.getContainerWindow());
+      }
+      if (w != null) {
+        coupledWindowController.setTopWindow(w);
+      }
     }
 
     coupledWindowController.addCoupledWindow(window);
@@ -1645,7 +1673,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    */
   private synchronized void removeCoupledWindow(Window window)
   {
-    if (window == null || coupledWindowController == null) return;
+    if (window == null || coupledWindowController == null) {
+      return;
+    }
 
     coupledWindowController.removeCoupledWindow(window);
 
@@ -1654,8 +1684,12 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       // deregistriert den windowListener.
       XFrame f = documentController.getFrameController().getFrame();
       XTopWindow w = null;
-      if (f != null) w = UNO.XTopWindow(f.getContainerWindow());
-      if (w != null) coupledWindowController.unsetTopWindow(w);
+      if (f != null) {
+        w = UNO.XTopWindow(f.getContainerWindow());
+      }
+      if (w != null) {
+        coupledWindowController.unsetTopWindow(w);
+      }
       coupledWindowController = null;
     }
   }
