@@ -1049,6 +1049,7 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       DocumentManager.getDocumentManager().setCurrentMailMergeNew(documentController.getModel().doc, null);
+      documentController.setFormFieldsPreviewMode(true);
     }
 
     @Override
@@ -3505,7 +3506,7 @@ public class WollMuxEventHandler
 		          short result = c.compareRegionStarts(bookMarkToDeleteAnchor, wollBookAnchor); //compareRegionStarts(R1,R2)
                   UNO.setPropertyToDefault(bookmarkToDelete.getTextCursor(), "CharBackColor");
 		          bookmarkToDelete.remove();
-					
+
 		          //R1 ends behind xR2 || r1 ends before r2
 		          if ((result == -1 || result == 1) && !(bookmarkToDelete.getName().equals(bookmarkName))) {
 		            setNewDocumentCommand(documentController, bookmarkName, range, highlightColor, markChange);
