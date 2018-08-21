@@ -516,7 +516,9 @@ public class WollMuxBarConfig
       @Override
       public void run()
       {
-        createGUI(parent, finishedAction);
+        if (!isDialogVisible()) {
+          createGUI(parent, finishedAction);
+        }
       }
     });
 
