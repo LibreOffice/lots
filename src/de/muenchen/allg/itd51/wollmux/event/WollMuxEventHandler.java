@@ -4353,13 +4353,15 @@ public class WollMuxEventHandler
       FunctionLibrary lib = documentController.getFunctionLibrary();
       ConfigThingy funcConf = documentController.getFilenameGeneratorFunc();
       Function func = null;
-      if (funcConf != null) try
-      {
-        func = FunctionFactory.parse(funcConf, lib, null, null);
-      }
-      catch (ConfigurationErrorException e)
-      {
-        Logger.error(L.m("Kann FilenameGeneratorFunction nicht parsen!"), e);
+      if (funcConf != null) {
+        try
+        {
+          func = FunctionFactory.parse(funcConf, lib, null, null);
+        }
+        catch (ConfigurationErrorException e)
+        {
+          Logger.error(L.m("Kann FilenameGeneratorFunction nicht parsen!"), e);
+        }
       }
 
       // Original-Dispatch ausführen, wenn keine FilenameGeneratorFunction gesetzt
