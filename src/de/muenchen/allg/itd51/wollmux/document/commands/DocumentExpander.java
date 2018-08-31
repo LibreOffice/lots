@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -181,7 +182,7 @@ class DocumentExpander extends AbstractExecutor
         return 0;
       }
 
-      Vector<String> urls = VisibleTextFragmentList.getURLsByID(WollMuxFiles.getWollmuxConf(), fragId);
+      List<String> urls = VisibleTextFragmentList.getURLsByID(WollMuxFiles.getWollmuxConf(), fragId);
       if (urls.size() == 0)
       {
         throw new ConfigurationErrorException(L.m(
