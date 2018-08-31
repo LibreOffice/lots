@@ -1,5 +1,16 @@
+ ==================== Neu in Version 18.0.3 ====================
+
+    * Bugfixes
+          o Textbereiche die über Sichtbarkeiten ein- und ausgeblendet werden
+            können werden korrekt beim Seriendruck behandelt.
+          o Beim Seriendruck werden die Platzhalter im Dokument angezeigt. Hat
+            man den Seriendruck beendet, werden diese Platzhalter wieder durch
+            die Werte aus der FormularGUI ersetzt.
+          o Der Optionen Dialog lässt sich nur einmal öffnen.
+
+
  ==================== Neu in Version 18.0.2 ====================
-    
+
     * Bugfixes
           o Dialog-Hinweis wenn Sichtbarkeit aktiviert/deaktiviert wurde.
           o Performance der LDAP-Suche verbessert.
