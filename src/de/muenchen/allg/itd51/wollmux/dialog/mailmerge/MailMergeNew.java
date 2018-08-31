@@ -1150,7 +1150,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     pmod.setPrintProgressMaxValue((short) selection.size());
 
     // save visibility states before dataset evaluation
-    HashMap<String, Boolean> states = documentController.getModel().getMapGroupIdToVisibilityState();
+    Map<String, Boolean> states = documentController.getModel().getMapGroupIdToVisibilityState();
 
     int index = -1;
     int serienbriefNummer = 1;
