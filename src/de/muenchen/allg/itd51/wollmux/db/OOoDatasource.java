@@ -46,6 +46,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.sdbc.XColumnLocate;
@@ -62,15 +65,18 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Stellt eine OOo-Datenquelle als WollMux-Datenquelle zur Verfügung.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class OOoDatasource implements Datasource
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(OOoDatasource.class);
+
   /**
    * Maximale Zeit in Sekunden, die die Datenquelle für die Verbindungsaufnahme mit
    * der Datenbank brauchen darf.
@@ -322,7 +328,7 @@ public class OOoDatasource implements Datasource
     }
     else
     {
-      Logger.debug(L.m(
+      LOGGER.debug(L.m(
         "Schema der Datenquelle %1 nicht angegeben. Versuche, es von der Datenquelle zu erfragen.",
         datasourceName));
       try
@@ -345,7 +351,7 @@ public class OOoDatasource implements Datasource
         }
         catch (Exception x)
         {
-          Logger.debug(L.m(
+          LOGGER.debug(L.m(
             "Tabelle \"%1\" nicht gefunden. Versuche es als Namen einer Query zu nehmen",
             oooTableName));
           try
@@ -564,7 +570,7 @@ public class OOoDatasource implements Datasource
   private QueryResults sqlQuery(String query, long timeout, boolean throwOnTimeout)
       throws TimeoutException
   {
-    Logger.debug("sqlQuery(\"" + query + "\", " + timeout + ", " + throwOnTimeout
+    LOGGER.debug("sqlQuery(\"" + query + "\", " + timeout + ", " + throwOnTimeout
       + ")");
     long endTime = System.currentTimeMillis() + timeout;
 
@@ -949,23 +955,22 @@ public class OOoDatasource implements Datasource
   private QueryResults simpleFind(String spaltenName1, String suchString1,
       String spaltenName2, String suchString2) throws TimeoutException
   {
-    List<QueryPart> query = new Vector<QueryPart>();
+    List<QueryPart> query = new ArrayList<QueryPart>();
     query.add(new QueryPart(spaltenName1, suchString1));
     query.add(new QueryPart(spaltenName2, suchString2));
-    QueryResults find = find(query, 3000000);
-    return find;
+    return find(query, 3000000);
   }
 
   /**
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * 
+   *
    */
   public static void main(String[] args)
   {
     try
     {
       UNO.init();
-      Logger.init(System.err, Logger.ALL);
+      // Logger.init(System.err, Logger.ALL);
       // Datenquelle(
       // NAME "test"
       // TYPE "ooo"

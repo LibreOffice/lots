@@ -57,6 +57,9 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Iterator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
@@ -67,7 +70,6 @@ import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.event.GlobalEventListener;
@@ -82,7 +84,10 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 public class WollMuxSingleton
 {
 
-   private static WollMuxSingleton singletonInstance = null;
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(WollMuxSingleton.class);
+
+  private static WollMuxSingleton singletonInstance = null;
 
   /**
    * Enthält den default XComponentContext in dem der WollMux (bzw. das OOo) läuft.
@@ -113,7 +118,7 @@ public class WollMuxSingleton
     }
     catch (Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
 
     boolean successfulStartup = true;
@@ -122,23 +127,23 @@ public class WollMuxSingleton
     {
       noConfig = new NoConfig(true);
       showNoConfigInfo();
-    } 
+    }
     else
     {
       noConfig = new NoConfig(false);
     }
-    
+
     WollMuxClassLoader.initClassLoader();
-    
-    Logger.debug(L.m("StartupWollMux"));
-    Logger.debug("Build-Info: " + getBuildInfo());
+
+    LOGGER.debug(L.m("StartupWollMux"));
+    LOGGER.debug("Build-Info: " + getBuildInfo());
     if (WollMuxFiles.getWollMuxConfFile() != null)
     {
-      Logger.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
+      LOGGER.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
     }
-    Logger.debug("DEFAULT_CONTEXT \"" + WollMuxFiles.getDEFAULT_CONTEXT().toString()
+    LOGGER.debug("DEFAULT_CONTEXT \"" + WollMuxFiles.getDEFAULT_CONTEXT().toString()
       + "\"");
-    Logger.debug("CONF_VERSION: " + getConfVersionInfo());
+    LOGGER.debug("CONF_VERSION: " + getConfVersionInfo());
 
     /*
      * Datenquellen/Registriere Abschnitte verarbeiten. ACHTUNG! Dies muss vor
@@ -166,7 +171,7 @@ public class WollMuxSingleton
     }
     catch (Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
 
     /*
@@ -194,7 +199,7 @@ public class WollMuxSingleton
     }
     catch (Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
 
     // Setzen der in den Abschnitten OOoEinstellungen eingestellten
@@ -361,7 +366,7 @@ public class WollMuxSingleton
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(
+        LOGGER.error(
           L.m("NAME-Attribut fehlt in Datenquellen/Registriere-Abschnitt"), e);
         continue;
       }
@@ -373,7 +378,7 @@ public class WollMuxSingleton
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(
+        LOGGER.error(
           L.m(
             "URL-Attribut fehlt in Datenquellen/Registriere-Abschnitt für Datenquelle '%1'",
             name), e);
@@ -400,12 +405,12 @@ public class WollMuxSingleton
       }
       catch (Exception x)
       {
-        Logger.error(L.m(
+        LOGGER.error(L.m(
           "Fehler beim Überprüfen, ob Datenquelle '%1' bereits registriert ist",
           name), x);
       }
 
-      Logger.debug(L.m(
+      LOGGER.debug(L.m(
         "Versuche, Datenquelle '%1' bei OOo zu registrieren für URL '%2'", name,
         urlStr));
 
@@ -417,7 +422,7 @@ public class WollMuxSingleton
       }
       catch (Exception x)
       {
-        Logger.error(L.m(
+        LOGGER.error(L.m(
           "Fehler beim Registrieren von Datenquelle '%1': Illegale URL: '%2'", name,
           urlStr), x);
         continue;
@@ -428,13 +433,13 @@ public class WollMuxSingleton
         Object datasource = UNO.XNameAccess(UNO.dbContext).getByName(parsedUrl);
         UNO.dbContext.registerObject(name, datasource);
         if (!UnoRuntime.areSame(UNO.dbContext.getRegisteredObject(name), datasource))
-          Logger.error(L.m(
+          LOGGER.error(L.m(
             "Testzugriff auf Datenquelle '%1' nach Registrierung fehlgeschlagen",
             name));
       }
       catch (Exception x)
       {
-        Logger.error(
+        LOGGER.error(
           L.m(
             "Fehler beim Registrieren von Datenquelle '%1'. Stellen Sie sicher, dass die URL '%2' gültig ist.",
             name, parsedUrl), x);
@@ -468,7 +473,7 @@ public class WollMuxSingleton
       }
       catch (Exception e)
       {
-        Logger.error(L.m("OOoEinstellungen: Konnte Einstellung '%1'nicht setzen:",
+        LOGGER.error(L.m("OOoEinstellungen: Konnte Einstellung '%1'nicht setzen:",
           element.stringRepresentation()), e);
       }
     }
@@ -528,21 +533,25 @@ public class WollMuxSingleton
   private static void setConfigurationValue(String node, String prop, Object value)
   {
     XChangesBatch updateAccess = UNO.getConfigurationUpdateAccess(node);
-    if (value != null) UNO.setProperty(updateAccess, prop, value);
-    if (updateAccess != null) try
-    {
-      updateAccess.commitChanges();
+    if (value != null) {
+      UNO.setProperty(updateAccess, prop, value);
     }
-    catch (WrappedTargetException e)
+    if (updateAccess != null)
     {
-      Logger.error(e);
+      try
+      {
+        updateAccess.commitChanges();
+      } catch (WrappedTargetException e)
+      {
+        LOGGER.error("", e);
+      }
     }
   }
 
   /**
    * Überprüft, ob von url gelesen werden kann und wirft eine IOException, falls
    * nicht.
-   * 
+   *
    * @throws IOException
    *           falls von url nicht gelesen werden kann.
    * @author Matthias Benkmann (D-III-ITD 5.1)

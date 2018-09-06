@@ -37,6 +37,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.awt.Key;
 import com.sun.star.awt.KeyEvent;
 import com.sun.star.awt.KeyFunction;
@@ -48,15 +51,17 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 public class Shortcuts
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(Shortcuts.class);
+
   /**
    * Liest alle Attribute SHORTCUT und URL aus tastenkombinationenConf aus, löscht
    * alle bisher vorhandenen Tastenkombinationen deren URL mit "wollmux:" beginnt und
    * setzt neue Tastenkombination in OOo-Writer.
-   * 
+   *
    * @param tastenkombinationenConf
    *          .conf Abschnitt Tastenkuerzel mit allen Knoten
    */
@@ -87,7 +92,7 @@ public class Shortcuts
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(L.m("SHORTCUT Angabe fehlt in '%1%'",
+        LOGGER.error(L.m("SHORTCUT Angabe fehlt in '%1%'",
           tastenkombination.stringRepresentation()));
         continue;
       }
@@ -100,7 +105,7 @@ public class Shortcuts
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(L.m("URL Angabe fehlt in '%1'",
+        LOGGER.error(L.m("URL Angabe fehlt in '%1'",
           tastenkombination.stringRepresentation()));
         continue;
       }
@@ -115,12 +120,12 @@ public class Shortcuts
         }
         catch (Exception e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
       else
       {
-        Logger.error(L.m(
+        LOGGER.error(L.m(
           "Ungültige Tastenkombination '%1' im .conf Abschnitt Tastenkuerzel",
           shortcut));
       }
@@ -136,7 +141,7 @@ public class Shortcuts
     }
     catch (Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
   }
 
@@ -172,14 +177,14 @@ public class Shortcuts
       }
       catch (NoSuchElementException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
   }
 
   /**
    * Gibt alle KeyEvents mit Modifier, KeyCode und Command aus
-   * 
+   *
    * @param xac
    *          AcceleratorConfigurator
    */
@@ -193,21 +198,21 @@ public class Shortcuts
     {
       for (int i = 0; i < keys.length; i++)
       {
-        Logger.debug2("Modifiers: " + keys[i].Modifiers + " KeyCode: "
+        LOGGER.trace("Modifiers: " + keys[i].Modifiers + " KeyCode: "
           + keys[i].KeyCode + " --> " + xac.getCommandByKeyEvent(keys[i]));
 
       }
     }
     catch (Exception e)
     {
-      Logger.debug2(e);
+      LOGGER.trace("", e);
     }
 
   }
 
   /**
    * Erzeugt ein Object KeyEvent
-   * 
+   *
    * @param shortcutWithSeparator
    *          Tastenkombination mit "+" als Separator
    * @return gibt ein KeyEvent zurück oder null wenn kein keyCode sondern nur

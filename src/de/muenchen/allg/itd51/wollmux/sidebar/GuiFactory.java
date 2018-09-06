@@ -3,6 +3,9 @@ package de.muenchen.allg.itd51.wollmux.sidebar;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.awt.InvalidateStyle;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
@@ -26,8 +29,6 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
-
 /**
  * Die Factory enthält Hilfsfunktionen zum einfacheren Erzeugen von 
  * UNO-Steuerelementen. 
@@ -35,6 +36,10 @@ import de.muenchen.allg.itd51.wollmux.core.util.Logger;
  */
 public class GuiFactory
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(GuiFactory.class);
+
   /**
    * Erzeugt ein Fenster ohne Dekorationen. Das Fenster kann als Inhalt eines
    * Sidebar-Panels verwendet werden.
@@ -203,21 +208,21 @@ public class GuiFactory
       //props.setPropertyValue("ReadOnly", Boolean.TRUE);
       props.setPropertyValue("Autocomplete", Boolean.FALSE);
       props.setPropertyValue("HideInactiveSelection", Boolean.TRUE);
-      
+
       ctrl.setModel(model);
       ctrl.getPeer().invalidate(InvalidateStyle.UPDATE);
     }
     catch (Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
-    
+
     return ctrl;
   }
 
   /**
    * Eine allgemeine Hilfsfunktion, mit der UNO-Steuerelemente erzeugt werden.
-   *  
+   *
    * @param xMCF
    * @param xContext
    * @param toolkit
@@ -274,7 +279,7 @@ public class GuiFactory
     }
     catch (com.sun.star.uno.Exception ex)
     {
-      Logger.debug(ex);
+      LOGGER.debug("", ex);
       return null;
     }
   }

@@ -49,6 +49,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.container.XIndexAccess;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNamed;
@@ -60,7 +63,6 @@ import com.sun.star.text.XTextSectionsSupplier;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
@@ -76,6 +78,10 @@ import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
  */
 public class AllSectionLineViewsPanel implements View
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(AllSectionLineViewsPanel.class);
+
   /**
    * Rand um Buttons (in Pixeln).
    */
@@ -272,15 +278,15 @@ public class AllSectionLineViewsPanel implements View
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
   /**
    * Liefert true gdw der erste Absatz in range einen BreakType.PAGE_BEFORE hat.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    *         TESTED
    */
   private boolean firstParagraphOfRangeHasHardBreak(XTextRange range)
@@ -295,7 +301,7 @@ public class AllSectionLineViewsPanel implements View
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
     return false;
   }
@@ -320,18 +326,18 @@ public class AllSectionLineViewsPanel implements View
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
   /**
    * Erzeugt einen neuen Textbereich, der range umschließt und erzeugt ein
    * zugehöriges {@link SectionModel} und fügt es zu {@link #sectionModelList} hinzu.
-   * 
+   *
    * @throws Exception
    *           , wenn was schief geht
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    *         TESTED
    */
   private void createNewSectionFromTextRange(XTextRange range) throws Exception

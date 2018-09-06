@@ -2,6 +2,9 @@ package de.muenchen.allg.itd51.wollmux.document;
 
 import java.lang.reflect.Method;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
@@ -15,21 +18,24 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 public class FrameController
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(FrameController.class);
+
   private XTextDocument doc;
 
   public FrameController(XTextDocument doc)
   {
     this.doc = doc;
   }
-  
+
   /**
    * Liefert den Frame zu diesem TextDocument oder null, wenn der Frame nicht
    * bestimmt werden kann.
-   * 
+   *
    * @return
    */
   public synchronized XFrame getFrame()
@@ -100,18 +106,18 @@ public class FrameController
 
     }
     catch (java.lang.Exception e)
-    { 
-      Logger.debug(e);
+    {
+      LOGGER.debug("", e);
     }
   }
-  
+
   /**
    * Diese Methode liest die (optionalen) Attribute X, Y, WIDTH, HEIGHT und ZOOM aus
    * dem übergebenen Konfigurations-Abschnitt settings und setzt die
    * Fenstereinstellungen des Dokuments entsprechend um. Bei den Pärchen X/Y bzw.
    * SIZE/WIDTH müssen jeweils beide Komponenten im Konfigurationsabschnitt angegeben
    * sein.
-   * 
+   *
    * @param settings
    *          der Konfigurationsabschnitt, der X, Y, WIDHT, HEIGHT und ZOOM als
    *          direkte Kinder enthält.
@@ -187,16 +193,16 @@ public class FrameController
     }
     catch (ConfigurationErrorException e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
   }
-  
+
   /**
    * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht des
    * Dokuments auf den neuen Wert zoom, der entwender eine ganzzahliger Prozentwert
    * (ohne "%"-Zeichen") oder einer der Werte "Optimal", "PageWidth",
    * "PageWidthExact" oder "EntirePage" ist.
-   * 
+   *
    * @param zoom
    * @throws ConfigurationErrorException
    */

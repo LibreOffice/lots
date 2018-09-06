@@ -57,8 +57,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
@@ -81,6 +83,10 @@ import de.muenchen.allg.itd51.wollmux.former.view.View;
 public class AllFormControlLineViewsPanel implements View, ItemListener,
     OneFormControlLineView.ViewChangeListener
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(AllFormControlLineViewsPanel.class);
+
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
    */
@@ -291,7 +297,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   {
     if (index < 0 || index > viewDescriptors.size())
     {
-      Logger.error(L.m("Inkonsistenz zwischen Model und View!"));
+      LOGGER.error(L.m("Inkonsistenz zwischen Model und View!"));
       return;
     }
     OneFormControlLineView ofclView =
@@ -539,7 +545,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
       FormControlModel model = view.getModel();
       if (model.getType() != FormControlModel.CHECKBOX_TYPE)
       {
-        Logger.log(L.m("FM4000: Beim Aufruf von Checkbox->Combobox ist ein Element selektiert, das keine Checkbox ist"));
+        LOGGER.info(L.m("FM4000: Beim Aufruf von Checkbox->Combobox ist ein Element selektiert, das keine Checkbox ist"));
         return null;
       }
       else
@@ -547,13 +553,13 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
         IDManager.ID id = model.getId();
         if (id == null)
         {
-          Logger.log(L.m("FM4000: Beim Aufruf von Checkbox->Combobox ist eine Checkbox ohne ID selektiert"));
+          LOGGER.info(L.m("FM4000: Beim Aufruf von Checkbox->Combobox ist eine Checkbox ohne ID selektiert"));
           return null;
         }
         String label = model.getLabel();
         if (mapCheckboxId2ComboboxEntry.containsValue(label))
         {
-          Logger.log(L.m("FM4000: Beim Aufruf von Checkbox->Combobox sind 2 Checkboxen mit gleichem Label selektiert"));
+          LOGGER.info(L.m("FM4000: Beim Aufruf von Checkbox->Combobox sind 2 Checkboxen mit gleichem Label selektiert"));
           return null;
         }
         mapCheckboxId2ComboboxEntry.put(id, label);
@@ -564,7 +570,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
     if (count < 2)
     {
-      Logger.log(L.m("FM4000: Beim Aufruf von Checkbox->Combobox sind weniger als 2 Checkboxen selektiert"));
+      LOGGER.info(L.m("FM4000: Beim Aufruf von Checkbox->Combobox sind weniger als 2 Checkboxen selektiert"));
       return null;
     }
 

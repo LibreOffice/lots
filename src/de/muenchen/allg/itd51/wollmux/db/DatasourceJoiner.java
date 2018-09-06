@@ -68,6 +68,9 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
@@ -76,23 +79,26 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Stellt eine virtuelle Datenbank zur Verfügung, die ihre Daten aus verschiedenen
  * Hintergrunddatenbanken zieht.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class DatasourceJoiner
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(DatasourceJoiner.class);
+
   /**
    * Wird an Datasource.find() übergeben, um die maximale Zeit der Bearbeitung einer
    * Suchanfrage zu begrenzen, damit nicht im Falle eines Netzproblems alles
    * einfriert.
    */
   private long queryTimeout;
-  
+
   /**
    * Muster für erlaubte Suchstrings für den Aufruf von find().
    */
@@ -213,7 +219,7 @@ public class DatasourceJoiner
       ConfigThingy c = sourceDesc.query("NAME");
       if (c.count() == 0)
       {
-        Logger.error(L.m("Datenquelle ohne NAME gefunden"));
+        LOGGER.error(L.m("Datenquelle ohne NAME gefunden"));
         continue;
       }
       String name = c.toString();
@@ -221,7 +227,7 @@ public class DatasourceJoiner
       c = sourceDesc.query("TYPE");
       if (c.count() == 0)
       {
-        Logger.error(L.m("Datenquelle %1 hat keinen TYPE", name));
+        LOGGER.error(L.m("Datenquelle %1 hat keinen TYPE", name));
         continue;
       }
       String type = c.toString();
@@ -248,18 +254,18 @@ public class DatasourceJoiner
         else if (type.equals("funky"))
           ds = new FunkyDatasource(nameToDatasource, sourceDesc, context);
         else
-          Logger.error(L.m("Ununterstützter Datenquellentyp: %1", type));
+          LOGGER.error(L.m("Ununterstützter Datenquellentyp: %1", type));
       }
       catch (Exception x)
       {
-        Logger.error(L.m(
+        LOGGER.error(L.m(
           "Fehler beim Initialisieren von Datenquelle \"%1\" (Typ \"%2\"):", name,
           type), x);
       }
 
       if (ds == null)
       {
-        Logger.error(L.m(
+        LOGGER.error(L.m(
           "Datenquelle '%1' von Typ '%2' konnte nicht initialisiert werden", name,
           type));
         /*
@@ -295,9 +301,9 @@ public class DatasourceJoiner
           "Datenquelle \"%1\" nicht definiert und Cache nicht vorhanden",
           mainSourceName));
       }
-      
+
       if ( ! mainSourceName.equals(de.muenchen.allg.itd51.wollmux.NoConfig.NOCONFIG)){
-        Logger.error(L.m("Datenquelle \"%1\" nicht definiert => verwende alte Daten aus Cache",
+        LOGGER.error(L.m("Datenquelle \"%1\" nicht definiert => verwende alte Daten aus Cache",
                                         mainSourceName));
         mainDatasource = new EmptyDatasource(schema, mainSourceName);
       }
@@ -317,7 +323,7 @@ public class DatasourceJoiner
       }
       catch (TimeoutException x)
       {
-        Logger.error(L.m(
+        LOGGER.error(L.m(
           "Timeout beim Zugriff auf Datenquelle \"%1\" => Benutze Daten aus Cache",
           mainDatasource.getName()), x);
       }
@@ -545,16 +551,16 @@ public class DatasourceJoiner
 
   /**
    * Speichert den aktuellen LOS samt zugehörigem Cache in die Datei cacheFile.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void saveCacheAndLOS(File cacheFile) throws IOException
   {
-    Logger.debug(L.m("Speichere Cache nach %1.", cacheFile));
+    LOGGER.debug(L.m("Speichere Cache nach %1.", cacheFile));
     Set<String> schema = myLOS.getSchema();
     if (schema == null)
     {
-      Logger.error(L.m("Kann Cache nicht speichern, weil nicht initialisiert."));
+      LOGGER.error(L.m("Kann Cache nicht speichern, weil nicht initialisiert."));
       return;
     }
 
@@ -718,24 +724,24 @@ public class DatasourceJoiner
         }
         catch (NumberFormatException e)
         {
-          Logger.error(L.m("DATASOURCE_TIMEOUT muss eine ganze Zahl sein"));
+          LOGGER.error(L.m("DATASOURCE_TIMEOUT muss eine ganze Zahl sein"));
           datasourceTimeoutLong = DatasourceJoiner.DATASOURCE_TIMEOUT;
         }
         if (datasourceTimeoutLong <= 0)
         {
-          Logger.error(L.m("DATASOURCE_TIMEOUT muss größer als 0 sein!"));
+          LOGGER.error(L.m("DATASOURCE_TIMEOUT muss größer als 0 sein!"));
         }
       }
       catch (NodeNotFoundException e)
       {
         datasourceTimeoutLong = DatasourceJoiner.DATASOURCE_TIMEOUT;
       }
-  
+
       try
       {
         if (null == senderSourceStr)
           senderSourceStr = de.muenchen.allg.itd51.wollmux.NoConfig.NOCONFIG;
-  
+
         DatasourceJoiner.datasourceJoiner =
           new DatasourceJoiner(WollMuxFiles.getWollmuxConf(), senderSourceStr, WollMuxFiles.getLosCacheFile(),
             WollMuxFiles.getDEFAULT_CONTEXT(), datasourceTimeoutLong);
@@ -760,10 +766,10 @@ public class DatasourceJoiner
       }
       catch (ConfigurationErrorException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
-  
+
     return DatasourceJoiner.datasourceJoiner;
   }
 

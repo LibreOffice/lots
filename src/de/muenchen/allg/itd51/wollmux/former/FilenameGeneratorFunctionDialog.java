@@ -24,10 +24,12 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
@@ -37,7 +39,11 @@ import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 public class FilenameGeneratorFunctionDialog extends JDialog
 {
   private static final long serialVersionUID = 1L;
-  
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(FilenameGeneratorFunctionDialog.class);
+
+
   private TextDocumentController documentController;
   private AdjustorFunction func;
   private String functionName;
@@ -174,7 +180,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
         }
         catch (Exception e1)
         {
-          Logger.error(e1);
+          LOGGER.error("", e1);
         }
         dispose();
       }

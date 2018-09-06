@@ -39,11 +39,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
@@ -54,11 +56,14 @@ import de.muenchen.allg.itd51.wollmux.print.PrintModels;
  * anfangen und für den automatisierten Test durch wollmux-qatest benötigt werden.
  * Der Handler wird nur installiert, wenn die wollmux.conf die Direktive
  * QA_TEST_HANDLER "true" enthält.
- * 
+ *
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
 public class TestHandler
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(TestHandler.class);
 
   /**
    * Dieses File enthält die Argumente, die einem TestHandler übergeben werden sollen
@@ -99,7 +104,7 @@ public class TestHandler
       }
       catch (Exception e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
       // FIXME: auskommentiert --> Code broken
       // ((InternalPrintModel)
@@ -137,7 +142,7 @@ public class TestHandler
       c.addChild(new ConfigThingy("Hallo"));
       // model.replaceSelectionWithFormField(t, c);
       ConfigThingy trafo = documentController.getModel().getFormFieldTrafoFromSelection();
-      Logger.error("EinTest Trafo = '"
+      LOGGER.error("EinTest Trafo = '"
         + ((trafo != null) ? trafo.stringRepresentation() : "null") + "'");
       if (trafo != null)
       {
@@ -147,7 +152,7 @@ public class TestHandler
         }
         catch (Exception e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
     }
@@ -178,7 +183,7 @@ public class TestHandler
     }
     catch (Exception e)
     {
-      Logger.error(
+      LOGGER.error(
         L.m("Argumentdatei für wollmux-qatest konnte nicht gelesen werden"), e);
     }
     finally

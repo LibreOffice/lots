@@ -38,10 +38,15 @@ import java.util.regex.Pattern;
 
 import javax.swing.Icon;
 
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DatasetListElement implements Comparable<DatasetListElement>
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(DatasetListElement.class);
+
   /**
    * Gibt an, wie die Personen in den Listen angezeigt werden sollen.
    * %{Spalte}-Syntax um entsprechenden Wert des Datensatzes einzufügen, z.B.
@@ -147,41 +152,47 @@ public class DatasetListElement implements Comparable<DatasetListElement>
   /**
    * Ersetzt "%{SPALTENNAME}" in str durch den Wert der entsprechenden Spalte im
    * datensatz.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static String substituteVars(String str, Dataset datensatz)
   {
     Pattern p = Pattern.compile("%\\{([a-zA-Z0-9]+)\\}");
     Matcher m = p.matcher(str);
-    if (m.find()) do
+    if (m.find())
     {
-      String spalte = m.group(1);
-      String wert = spalte;
-      try
+      do
       {
-        String wert2 = datensatz.get(spalte);
-        if (wert2 != null) wert = wert2.replaceAll("%", "");
-      }
-      catch (ColumnNotFoundException e)
-      {
-        Logger.error(e);
-      }
-      str = str.substring(0, m.start()) + wert + str.substring(m.end());
-      m = p.matcher(str);
-    } while (m.find());
+        String spalte = m.group(1);
+        String wert = spalte;
+        try
+        {
+          String wert2 = datensatz.get(spalte);
+          if (wert2 != null)
+          {
+            wert = wert2.replaceAll("%", "");
+          }
+        } catch (ColumnNotFoundException e)
+        {
+          LOGGER.error("", e);
+        }
+        str = str.substring(0, m.start()) + wert + str.substring(m.end());
+        m = p.matcher(str);
+      } while (m.find());
+    }
     return str;
   }
 
   /**
    * Vergleicht die String-Repräsentation ({@link #toString()}) zweier Listenelemente
    * über die compareTo()-Methode der Klasse String.
-   * 
+   *
    * @param o
    *          das DatasetListElement mit dem verglichen werden soll
    * @return Rückgabewert von this.toString().compareTo(o.toString())
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
+  @Override
   public int compareTo(DatasetListElement o)
   {
     return this.toString().compareTo(o.toString());

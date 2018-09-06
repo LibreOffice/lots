@@ -63,23 +63,29 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 
 /**
  * Eine Sicht, die das Bearbeiten von {@link FunctionSelectionAccess} Objekten
  * erlaubt.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class FunctionSelectionAccessView implements View
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(FunctionSelectionAccessView.class);
+
   /**
    * Eintrag für die Funktionsauswahl-ComboBox, wenn keine Funktion gewünscht ist.
    */
@@ -411,7 +417,7 @@ public class FunctionSelectionAccessView implements View
         }
         catch (BadLocationException x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
           return;
         }
       }
@@ -452,7 +458,7 @@ public class FunctionSelectionAccessView implements View
     }
     catch (BadLocationException e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
     combo.removeAllItems();
     combo.addItem(UNSPECIFIED_ITEM);
@@ -630,7 +636,7 @@ public class FunctionSelectionAccessView implements View
           Function func = funcLib.get(functionName);
           if (func == null)
           {
-            Logger.error(L.m("Funktion \"%1\"\" ist verschwunden ?!?", functionName));
+            LOGGER.error(L.m("Funktion \"%1\"\" ist verschwunden ?!?", functionName));
           }
           paramNames = func.parameters();
         }

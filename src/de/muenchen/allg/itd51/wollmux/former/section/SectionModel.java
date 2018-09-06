@@ -37,6 +37,9 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNamed;
 import com.sun.star.lang.XComponent;
@@ -45,7 +48,6 @@ import com.sun.star.text.XTextSectionsSupplier;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupsProvider;
@@ -53,11 +55,15 @@ import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
 
 /**
  * Stellt einen Bereich da (Format/Bereiche...)
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
 public class SectionModel
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(SectionModel.class);
+
   /**
    * Attribut-ID-Konstante für
    * {@link ModelChangeListener#attributeChanged(SectionModel, int, Object)}.
@@ -223,19 +229,19 @@ public class SectionModel
     }
     catch (Exception x)
     {
-      Logger.error(L.m("Fehler beim Versuch, Bereich zu entfernen: \"%1\"",
+      LOGGER.error(L.m("Fehler beim Versuch, Bereich zu entfernen: \"%1\"",
         sectionNameComplete), x);
     }
   }
 
   /**
    * Updatet den Namen des zu diesem Model gehörenden Bereichs.
-   * 
+   *
    * @return false, wenn beim Update etwas schief geht (typischerweise weil der
    *         Benutzer den Bereich hinterrücks gelöscht oder umbenannt hat)
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    * TESTED
    */
   public boolean updateDocument()
@@ -262,7 +268,7 @@ public class SectionModel
     }
     catch (Exception x)
     {
-      Logger.error(L.m("Fehler beim Versuch, Bereich zu updaten: \"%1\"",
+      LOGGER.error(L.m("Fehler beim Versuch, Bereich zu updaten: \"%1\"",
         sectionNameComplete), x);
       return false;
     }
@@ -285,16 +291,16 @@ public class SectionModel
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return false;
     }
   }
 
   /**
    * Setzt die Sichtbarkeit dieses Bereichs auf visible.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    * TESTED
    */
   public void setVisible(boolean visible)
@@ -303,20 +309,20 @@ public class SectionModel
     {
       Object textSection = textSections.getByName(sectionNameComplete);
       if (textSection == null)
-        Logger.error(L.m("Bereich ist plötzlich verschwunden: \"%1\"",
+        LOGGER.error(L.m("Bereich ist plötzlich verschwunden: \"%1\"",
           sectionNameComplete));
       else
         UNO.setProperty(textSection, "IsVisible", Boolean.valueOf(visible));
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
   /**
    * Liefert true gdw, die GROUPS-Angabe nicht leer ist.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public boolean hasGroups()

@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
@@ -39,7 +42,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
@@ -52,6 +54,10 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
  */
 class DocumentExpander extends AbstractExecutor
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(DocumentExpander.class);
+
   /**
    * 
    */
@@ -198,7 +204,7 @@ class DocumentExpander extends AbstractExecutor
         {
           URL url = WollMuxFiles.makeURL(urlStr);
 
-          Logger.debug(L.m("Füge Textfragment '%1' von URL '%2' ein.",
+          LOGGER.debug(L.m("Füge Textfragment '%1' von URL '%2' ein.",
             cmd.getFragID(), url.toExternalForm()));
 
           // styles bzw. fragment einfügen:
@@ -214,7 +220,7 @@ class DocumentExpander extends AbstractExecutor
           // Exception wird nicht beachtet. Wenn die aktuelle URL nicht
           // funktioniert wird die nächste URL ausgewertet
           errors += e.getLocalizedMessage() + "\n\n";
-          Logger.debug(e);
+          LOGGER.debug("", e);
           continue;
         }
       }
@@ -238,7 +244,7 @@ class DocumentExpander extends AbstractExecutor
               "(Override für Fragment '%1')", fragId))))
             + "\n\n" + e.getMessage();
 
-        Logger.error(msg);
+        LOGGER.error(msg);
 
         ModalDialogs.showInfoModal(L.m("WollMux-Fehler"), msg);
       }
@@ -271,7 +277,7 @@ class DocumentExpander extends AbstractExecutor
 
       try
       {
-        Logger.debug(L.m("Füge Textfragment von URL '%1' ein.", urlStr));
+        LOGGER.debug(L.m("Füge Textfragment von URL '%1' ein.", urlStr));
 
         insertDocumentFromURL(cmd, WollMuxFiles.makeURL(urlStr));
       }
@@ -345,7 +351,7 @@ class DocumentExpander extends AbstractExecutor
         new UnoService(range.getText().createTextCursorByRange(range.getEnd()));
     }
     else
-      Logger.error(L.m(
+      LOGGER.error(L.m(
         "insertDocumentFromURL: TextRange des Dokumentkommandos '%1' ist null => Bookmark verschwunden?",
         cmd.toString()));
     try
@@ -356,7 +362,7 @@ class DocumentExpander extends AbstractExecutor
     }
     catch (java.lang.Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
 
     // Liste aller TextFrames vor dem Einfügen zusammenstellen (benötigt für
@@ -390,7 +396,7 @@ class DocumentExpander extends AbstractExecutor
       }
       catch (java.lang.Exception e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
   }
@@ -446,7 +452,7 @@ class DocumentExpander extends AbstractExecutor
     }
     catch (NullPointerException e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
 
     // Textinhalt löschen
@@ -456,14 +462,14 @@ class DocumentExpander extends AbstractExecutor
   /**
    * Diese Methode füllt die Einfuegestellen(Platzhalter) aus dem eingefügten
    * Textbaustein mit den übergebenen Argumente args
-   * 
+   *
    * @param range
    *          der Bereich des eingefügten Textbausteins
    * @param args
    *          Argumente die beim Aufruf zum Einfügen übergeben werden
    */
   private void fillPlaceholders(XTextDocument doc, XTextCursor viewCursor,
-      XTextRange range, Vector<String> args)
+      XTextRange range, List<String> args)
   {
     if (doc == null || viewCursor == null || range == null || args == null)
       return;
@@ -541,9 +547,9 @@ class DocumentExpander extends AbstractExecutor
       // bei einem Parameter ohne Inhalt bleibt die Einfügestelle und die
       // erste ist nach dem Einfügen markiert sonst wird
       // sie ersetzt
-      if (!(args.elementAt(j).equals("")))
+      if (!(args.get(j).equals("")))
       {
-        textFieldAnchor.setString(args.elementAt(j));
+        textFieldAnchor.setString(args.get(j));
         // setzen des ViewCursor auf die erste nicht ausgefüllte Einfügestelle
         // nach dem Einfügen des Textbausteines
       }
@@ -591,7 +597,7 @@ class DocumentExpander extends AbstractExecutor
       String error =
         (L.m("Es sind mehr Parameter angegeben als Platzhalter vorhanden sind"));
 
-      Logger.error(error);
+      LOGGER.error(error);
 
       ConfigThingy conf = WollMuxFiles.getWollmuxConf();
       ConfigThingy WarnungenConf = conf.query("Textbausteine").query("Warnungen");

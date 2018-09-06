@@ -94,6 +94,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
@@ -150,7 +153,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.InvalidIdentifierException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -181,6 +183,10 @@ import de.muenchen.allg.ooo.TextDocument;
  */
 public class WollMuxEventHandler
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(WollMuxEventHandler.class);
+
   /**
    * Name des OnWollMuxProcessingFinished-Events.
    */
@@ -242,9 +248,9 @@ public class WollMuxEventHandler
     {
       acceptEvents = accept;
       if (accept)
-        Logger.debug(L.m("EventProcessor: akzeptiere neue Events."));
+        LOGGER.debug(L.m("EventProcessor: akzeptiere neue Events."));
       else
-        Logger.debug(L.m("EventProcessor: blockiere Entgegennahme von Events!"));
+        LOGGER.debug(L.m("EventProcessor: blockiere Entgegennahme von Events!"));
     }
 
     private EventProcessor()
@@ -255,7 +261,7 @@ public class WollMuxEventHandler
         @Override
         public void run()
         {
-          Logger.debug(L.m("Starte EventProcessor-Thread"));
+          LOGGER.debug(L.m("Starte EventProcessor-Thread"));
           try
           {
             while (true)
@@ -271,16 +277,16 @@ public class WollMuxEventHandler
               try {
         	event.process();
               } catch (Exception ex) {
-        	Logger.error(ex);
+        	LOGGER.error("", ex);
               }
             }
           }
           catch (InterruptedException e)
           {
-            Logger.error(L.m("EventProcessor-Thread wurde unterbrochen:"));
-            Logger.error(e);
+            LOGGER.error(L.m("EventProcessor-Thread wurde unterbrochen:"));
+            LOGGER.error("", e);
           }
-          Logger.debug(L.m("Beende EventProcessor-Thread"));
+          LOGGER.debug(L.m("Beende EventProcessor-Thread"));
         }
       });
     }
@@ -353,7 +359,7 @@ public class WollMuxEventHandler
     @Override
     public void process()
     {
-      Logger.debug("Process WollMuxEvent " + this.toString());
+      LOGGER.debug("Process WollMuxEvent " + this.toString());
       try
       {
         doit();
@@ -366,7 +372,7 @@ public class WollMuxEventHandler
       // Notnagel für alle Runtime-Exceptions.
       catch (Throwable t)
       {
-        Logger.error(t);
+        LOGGER.error("", t);
       }
     }
 
@@ -376,7 +382,7 @@ public class WollMuxEventHandler
      */
     protected void errorMessage(Throwable t)
     {
-      Logger.error(t);
+      LOGGER.error("", t);
       String msg = "";
       if (t.getMessage() != null) msg += t.getMessage();
       Throwable c = t.getCause();
@@ -455,13 +461,13 @@ public class WollMuxEventHandler
           }
           catch (java.lang.Exception e)
           {
-            Logger.error(e);
+            LOGGER.error("", e);
           }
         }
       }
       catch (java.lang.Exception e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
 
@@ -1616,7 +1622,7 @@ public class WollMuxEventHandler
           }
           catch (MalformedURLException e)
           {
-            Logger.log(e);
+            LOGGER.info("", e);
             errors +=
               L.m("Die URL '%1' ist ungültig:", urlStr) + "\n"
                 + e.getLocalizedMessage() + "\n\n";
@@ -1624,7 +1630,7 @@ public class WollMuxEventHandler
           }
           catch (IOException e)
           {
-            Logger.log(e);
+            LOGGER.info("", e);
             errors += e.getLocalizedMessage() + "\n\n";
             continue;
           }
@@ -1710,7 +1716,7 @@ public class WollMuxEventHandler
       Iterator<XPALChangeEventListener> i = PersoenlicheAbsenderliste.getInstance().iterator();
       while (i.hasNext())
       {
-        Logger.debug2("OnPALChangedNotify: Update XPALChangeEventListener");
+        LOGGER.trace("OnPALChangedNotify: Update XPALChangeEventListener");
         EventObject eventObject = new EventObject();
         eventObject.Source = PersoenlicheAbsenderliste.getInstance();
         try
@@ -1730,7 +1736,7 @@ public class WollMuxEventHandler
       }
       catch (IOException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
   }
@@ -1788,7 +1794,7 @@ public class WollMuxEventHandler
       }
       else
       {
-        Logger.error(L.m(
+        LOGGER.error(L.m(
           "Setzen des Senders '%1' schlug fehl, da der index '%2' nicht mit der PAL übereinstimmt (Inkonsistenzen?)",
           senderName, idx));
       }
@@ -2187,13 +2193,13 @@ public class WollMuxEventHandler
           @Override
           public void handle(Exception x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
           }
         });
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
         return;
       }
 
@@ -2258,13 +2264,13 @@ public class WollMuxEventHandler
           @Override
           public void handle(Exception x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
           }
         });
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
         return;
       }
     }
@@ -2387,7 +2393,7 @@ public class WollMuxEventHandler
           }
           else
           {
-            Logger.error(L.m("Ungültiger Schlüssel in Suchstrategie: %1",
+            LOGGER.error(L.m("Ungültiger Schlüssel in Suchstrategie: %1",
               element.stringRepresentation()));
           }
           if (found != 0) return found;
@@ -2453,7 +2459,7 @@ public class WollMuxEventHandler
           }
           else
           {
-            Logger.error(L.m("Nur max zwei Schlüssel/Wert-Paare werden als Argumente für Suchanfragen akzeptiert!"));
+            LOGGER.error(L.m("Nur max zwei Schlüssel/Wert-Paare werden als Argumente für Suchanfragen akzeptiert!"));
           }
         }
 
@@ -2484,7 +2490,7 @@ public class WollMuxEventHandler
        */
       protected int find(String dbSpalte, String value)
       {
-        Logger.debug2(this.getClass().getSimpleName() + ".tryToFind(" + dbSpalte
+        LOGGER.trace(this.getClass().getSimpleName() + ".tryToFind(" + dbSpalte
           + " '" + value + "')");
         try
         {
@@ -2495,11 +2501,11 @@ public class WollMuxEventHandler
         }
         catch (TimeoutException e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
         catch (IllegalArgumentException e)
         {
-          Logger.debug(e);
+          LOGGER.debug("", e);
         }
         return 0;
       }
@@ -2528,7 +2534,7 @@ public class WollMuxEventHandler
       protected int find(String dbSpalte1, String value1, String dbSpalte2,
           String value2)
       {
-        Logger.debug2(this.getClass().getSimpleName() + ".tryToFind(" + dbSpalte1
+        LOGGER.trace(this.getClass().getSimpleName() + ".tryToFind(" + dbSpalte1
           + " '" + value1 + "' " + dbSpalte2 + " '" + value2 + "')");
         try
         {
@@ -2540,11 +2546,11 @@ public class WollMuxEventHandler
         }
         catch (TimeoutException e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
         catch (IllegalArgumentException e)
         {
-          Logger.debug(e);
+          LOGGER.debug("", e);
         }
         return 0;
       }
@@ -2634,7 +2640,7 @@ public class WollMuxEventHandler
         }
         catch (Exception e)
         {
-          Logger.error(
+          LOGGER.error(
             L.m(
               "Konnte den Wert zum Schlüssel '%1' des OOoUserProfils nicht bestimmen:",
               key), e);
@@ -2665,7 +2671,7 @@ public class WollMuxEventHandler
         }
         catch (java.lang.Exception e)
         {
-          Logger.error(
+          LOGGER.error(
             L.m("Konnte den Wert der JavaProperty '%1' nicht bestimmen:", key), e);
         }
         return "";
@@ -2809,7 +2815,7 @@ public class WollMuxEventHandler
       FrameController fc = documentController.getFrameController();
       if (fc.getFrame() == null)
       {
-        Logger.debug(L.m("Ignoriere handleRegisterDispatchInterceptor(null)"));
+        LOGGER.debug(L.m("Ignoriere handleRegisterDispatchInterceptor(null)"));
         return;
       }
       try
@@ -2818,7 +2824,7 @@ public class WollMuxEventHandler
       }
       catch (java.lang.Exception e)
       {
-        Logger.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
+        LOGGER.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
       }
 
       // Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
@@ -2973,7 +2979,7 @@ public class WollMuxEventHandler
           DocumentManager.getDocumentManager().documentEventListenerIterator();
       while (i.hasNext())
       {
-        Logger.debug2("notifying XEventListener (event '" + eventName + "')");
+        LOGGER.trace("notifying XEventListener (event '" + eventName + "')");
         try
         {
           final XEventListener listener = i.next();
@@ -3608,7 +3614,7 @@ public class WollMuxEventHandler
       }
       catch (NumberFormatException e)
       {
-        Logger.error(L.m("Der angegebene Farbwert im Attribut '%1' ist ungültig!",
+        LOGGER.error(L.m("Der angegebene Farbwert im Attribut '%1' ist ungültig!",
           attribute));
         return null;
       }
@@ -4002,7 +4008,7 @@ public class WollMuxEventHandler
         }
         catch (java.lang.Exception e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       if (listener != null) listener.actionPerformed(null);
     }
@@ -4104,7 +4110,7 @@ public class WollMuxEventHandler
       }
       catch (java.lang.Exception e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
 
       stabilize();
@@ -4164,7 +4170,7 @@ public class WollMuxEventHandler
         }
         catch (java.lang.Exception e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
 
         boolean modified = documentController.getModel().isDocumentModified();
@@ -4360,7 +4366,7 @@ public class WollMuxEventHandler
         }
         catch (ConfigurationErrorException e)
         {
-          Logger.error(L.m("Kann FilenameGeneratorFunction nicht parsen!"), e);
+          LOGGER.error(L.m("Kann FilenameGeneratorFunction nicht parsen!"), e);
         }
       }
 
@@ -4432,11 +4438,11 @@ public class WollMuxEventHandler
       }
       catch (com.sun.star.lang.IllegalArgumentException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
       catch (MalformedURLException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
       return new File(filename);
     }
@@ -4491,11 +4497,11 @@ public class WollMuxEventHandler
       }
       catch (MalformedURLException e)
       {
-        Logger.error(L.m("das darf nicht passieren"), e);
+        LOGGER.error(L.m("das darf nicht passieren"), e);
       }
       catch (com.sun.star.io.IOException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
         JOptionPane.showMessageDialog(null, L.m(
           "Das Speichern der Datei %1 ist fehlgeschlagen!\n\n%2", f.toString(),
           e.getLocalizedMessage()), L.m("Fehler beim Speichern"),
@@ -4556,7 +4562,7 @@ public class WollMuxEventHandler
       }
       catch (java.lang.Exception e)
       {
-        Logger.debug(e);
+        LOGGER.debug("", e);
       }
 
       // Beim Öffnen eines Formulars werden viele Änderungen am Dokument
@@ -4672,7 +4678,7 @@ public class WollMuxEventHandler
             + recentInstPath + "\n"
             + L.m("Ausserdem wurden folgende WollMux-Installationen gefunden:")
             + "\n" + otherInstsList;
-        Logger.error(logMsg);
+        LOGGER.error(logMsg);
 
         if (showdialog) ModalDialogs.showInfoModal(title, msg, 0);
       }
@@ -4746,13 +4752,13 @@ public class WollMuxEventHandler
       }
       catch (java.lang.Exception e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
         return wmInstallations;
       }
 
       if (myPath == null || oooPath == null)
       {
-        Logger.error(L.m("Bestimmung der Installationspfade für das WollMux-Paket fehlgeschlagen."));
+        LOGGER.error(L.m("Bestimmung der Installationspfade für das WollMux-Paket fehlgeschlagen."));
         return wmInstallations;
       }
 
@@ -4782,7 +4788,7 @@ public class WollMuxEventHandler
       }
       catch (URISyntaxException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
         return;
       }
 

@@ -83,6 +83,9 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.OpenExt.ExceptionHandler;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
@@ -95,7 +98,6 @@ import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.controls.Textarea;
 import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
@@ -108,6 +110,10 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
  */
 public class FormController implements UIElementEventHandler
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(FormController.class);
+
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in
    * Pixeln.
@@ -321,7 +327,7 @@ public class FormController implements UIElementEventHandler
       createGUI(fensterDesc.getLastChild(), visDesc, mapIdToPresetValue);
     } catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
 
   }
@@ -485,8 +491,8 @@ public class FormController implements UIElementEventHandler
 	    functionContext);
       } catch (ConfigurationErrorException x)
       {
-	Logger.error(x);
-	continue;
+        LOGGER.error("", x);
+        continue;
       }
 
       /*
@@ -502,9 +508,9 @@ public class FormController implements UIElementEventHandler
        */
       Group group = mapGroupIdToGroup.get(groupId);
       if (group.condition != null)
-	Logger.error(
-	    L.m("Mehrere Sichtbarkeitsregeln für Gruppe \"%1\" angegeben.",
-		groupId));
+        LOGGER.error(
+            L.m("Mehrere Sichtbarkeitsregeln für Gruppe \"%1\" angegeben.",
+                groupId));
       group.condition = cond;
 
       /*
@@ -640,168 +646,167 @@ public class FormController implements UIElementEventHandler
       boolean hasFocusable = false;
 
       Iterator<ConfigThingy> parentiter = conf.query("Eingabefelder")
-	  .iterator();
+          .iterator();
       while (parentiter.hasNext())
       {
-	Iterator<ConfigThingy> iter = parentiter.next().iterator();
-	while (iter.hasNext())
-	{
-	  ConfigThingy uiConf = iter.next();
-	  UIElement uiElement;
-	  try
-	  {
-	    uiElement = uiElementFactory.createUIElement(panelContext, uiConf);
-	    UIElementState state = new UIElementState();
-	    state.plausi = FunctionFactory.parseGrandchildren(
-		uiConf.query("PLAUSI"), funcLib, dialogLib, functionContext);
-	    state.autofill = FunctionFactory.parseGrandchildren(
-		uiConf.query("AUTOFILL"), funcLib, dialogLib, functionContext);
-	    storeAutofillFunctionDialogDeps(uiElement, state.autofill);
-	    state.tabIndex = tabIndex;
-	    uiElement.setAdditionalData(state);
-	  } catch (ConfigurationErrorException x)
-	  {
-	    Logger.error(x);
-	    continue;
-	  }
+        Iterator<ConfigThingy> iter = parentiter.next().iterator();
+        while (iter.hasNext())
+        {
+          ConfigThingy uiConf = iter.next();
+          UIElement uiElement;
+          try
+          {
+            uiElement = uiElementFactory.createUIElement(panelContext, uiConf);
+            UIElementState state = new UIElementState();
+            state.plausi = FunctionFactory.parseGrandchildren(
+                uiConf.query("PLAUSI"), funcLib, dialogLib, functionContext);
+            state.autofill = FunctionFactory.parseGrandchildren(
+                uiConf.query("AUTOFILL"), funcLib, dialogLib, functionContext);
+            storeAutofillFunctionDialogDeps(uiElement, state.autofill);
+            state.tabIndex = tabIndex;
+            uiElement.setAdditionalData(state);
+          } catch (ConfigurationErrorException x)
+          {
+            LOGGER.error("", x);
+            continue;
+          }
 
-	  uiElements.add(uiElement);
+          uiElements.add(uiElement);
 
-	  addFocusListener(uiElement);
+          addFocusListener(uiElement);
 
-	  /*
-	   * Überprüfen, dass die ID des neuen Elements nicht schon verwendet
-	   * wurde und Fehler ausgeben, falls doppelte Verwendung. Es wird auf
-	   * jeden Fall weitergemacht und das neue Mapping in mapIdToUIElement
-	   * gespeichert (aber nur falls die ID nicht leer ist).
-	   */
-	  if (mapIdToUIElement.containsKey(uiElement.getId()))
-	  {
-	    String label = L.m("nicht vorhanden");
-	    try
-	    {
-	      label = uiConf.get("LABEL").toString();
-	    } catch (Exception x)
-	    {
-	    }
-	    ;
-	    Logger.error(
-		L.m("ID \"%1\" mehrfach vergeben bei Element mit Label \"%2\"",
-		    uiElement.getId(), label));
-	  }
-	  if (uiElement.getId().length() > 0)
-	    mapIdToUIElement.put(uiElement.getId(), uiElement);
+          /*
+           * Überprüfen, dass die ID des neuen Elements nicht schon verwendet
+           * wurde und Fehler ausgeben, falls doppelte Verwendung. Es wird auf
+           * jeden Fall weitergemacht und das neue Mapping in mapIdToUIElement
+           * gespeichert (aber nur falls die ID nicht leer ist).
+           */
+          if (mapIdToUIElement.containsKey(uiElement.getId()))
+          {
+            String label = L.m("nicht vorhanden");
+            try
+            {
+              label = uiConf.get("LABEL").toString();
+            } catch (Exception x)
+            {
+            }
+            LOGGER.error(
+                L.m("ID \"%1\" mehrfach vergeben bei Element mit Label \"%2\"",
+                    uiElement.getId(), label));
+          }
+          if (uiElement.getId().length() > 0)
+            mapIdToUIElement.put(uiElement.getId(), uiElement);
 
-	  /*
-	   * Preset-Wert auswerten und Element entsprechend initialisieren.
-	   */
-	  Object preset = mapIdToPresetValue.get(uiElement.getId());
-	  if (preset != null)
-	  {
-	    if (preset == TextDocumentModel.FISHY)
-	    {
-	      ((UIElementState) uiElement.getAdditionalData()).fishy = true;
-	    }
+          /*
+           * Preset-Wert auswerten und Element entsprechend initialisieren.
+           */
+          Object preset = mapIdToPresetValue.get(uiElement.getId());
+          if (preset != null)
+          {
+            if (preset == TextDocumentModel.FISHY)
+            {
+              ((UIElementState) uiElement.getAdditionalData()).fishy = true;
+            }
 
-	    uiElement.setString(preset.toString());
-	  }
+            uiElement.setString(preset.toString());
+          }
 
-	  /*
-	   * GROUPS auswerten und entsprechende Mappings speichern.
-	   */
-	  parseGROUPS(uiConf, uiElement);
+          /*
+           * GROUPS auswerten und entsprechende Mappings speichern.
+           */
+          parseGROUPS(uiConf, uiElement);
 
-	  /*
-	   * Plausi-Parameter auswerten und entsprechende Abhängigkeitsmappings
-	   * speichern.
-	   */
-	  storeDeps(uiElement);
+          /*
+           * Plausi-Parameter auswerten und entsprechende Abhängigkeitsmappings
+           * speichern.
+           */
+          storeDeps(uiElement);
 
-	  /**
-	   * Dafür sorgen, dass uiElement immer in seiner eigenen
-	   * Abhängigenliste steht, damit bei jeder Änderung an uiElement auf
-	   * jeden Fall die Plausi neu ausgewertet wird, auch wenn sie nicht von
-	   * diesem Element abhängt. Man denke sich zum Beispiel einen
-	   * Zufallsgenerator als Plausi. Er hängt zwar nicht vom Wert des Felds
-	   * ab, sollte aber bei jeder Änderung des Feldes erneut befragt
-	   * werden.
-	   * 
-	   * Neben der Bedeutung für Plausis ist dies ebenfalls wichtig, damit
-	   * der FISHY-Zustand neu gesetzt wird, wenn sich das Feld ändert.
-	   */
-	  if (!mapIdToListOfUIElementsWithDependingPlausi
-	      .containsKey(uiElement.getId()))
-	    mapIdToListOfUIElementsWithDependingPlausi.put(uiElement.getId(),
-		new Vector<UIElement>(1));
-	  List<UIElement> deps = mapIdToListOfUIElementsWithDependingPlausi
-	      .get(uiElement.getId());
-	  if (!deps.contains(uiElement))
-	    deps.add(uiElement);
+          /**
+           * Dafür sorgen, dass uiElement immer in seiner eigenen
+           * Abhängigenliste steht, damit bei jeder Änderung an uiElement auf
+           * jeden Fall die Plausi neu ausgewertet wird, auch wenn sie nicht von
+           * diesem Element abhängt. Man denke sich zum Beispiel einen
+           * Zufallsgenerator als Plausi. Er hängt zwar nicht vom Wert des Felds
+           * ab, sollte aber bei jeder Änderung des Feldes erneut befragt
+           * werden.
+           *
+           * Neben der Bedeutung für Plausis ist dies ebenfalls wichtig, damit
+           * der FISHY-Zustand neu gesetzt wird, wenn sich das Feld ändert.
+           */
+          if (!mapIdToListOfUIElementsWithDependingPlausi
+              .containsKey(uiElement.getId()))
+            mapIdToListOfUIElementsWithDependingPlausi.put(uiElement.getId(),
+                new ArrayList<UIElement>(1));
+          List<UIElement> deps = mapIdToListOfUIElementsWithDependingPlausi
+              .get(uiElement.getId());
+          if (!deps.contains(uiElement))
+            deps.add(uiElement);
 
-	  /**************************************************************************
-	   * UI Element und evtl. vorhandenes Zusatzlabel zum GUI hinzufügen.
-	   *************************************************************************/
-	  int compoX = 0;
-	  int compoWidthIncrement = 0;
-	  if (!uiElement.getLabelType().equals(UIElement.LABEL_NONE))
-	  {
-	    Component label = uiElement.getLabel();
-	    int labelX = 0;
-	    boolean labelIsEmpty = false;
-	    if (uiElement.getLabelType().equals(UIElement.LABEL_LEFT))
-	    {
-	      compoX = 1;
-	      try
-	      {
-		labelIsEmpty = ((JLabel) label).getText().length() == 0;
-		if (labelIsEmpty)
-		{
-		  compoWidthIncrement = 1;
-		  compoX = 0;
-		}
-	      } catch (Exception x)
-	      {
-	      }
-	    } else
-	      labelX = 1;
+          /**************************************************************************
+           * UI Element und evtl. vorhandenes Zusatzlabel zum GUI hinzufügen.
+           *************************************************************************/
+          int compoX = 0;
+          int compoWidthIncrement = 0;
+          if (!uiElement.getLabelType().equals(UIElement.LABEL_NONE))
+          {
+            Component label = uiElement.getLabel();
+            int labelX = 0;
+            boolean labelIsEmpty = false;
+            if (uiElement.getLabelType().equals(UIElement.LABEL_LEFT))
+            {
+              compoX = 1;
+              try
+              {
+                labelIsEmpty = ((JLabel) label).getText().length() == 0;
+                if (labelIsEmpty)
+                {
+                  compoWidthIncrement = 1;
+                  compoX = 0;
+                }
+              } catch (Exception x)
+              {
+              }
+            } else
+              labelX = 1;
 
-	    if (label != null && !labelIsEmpty)
-	    {
-	      GridBagConstraints gbc = (GridBagConstraints) uiElement
-		  .getLabelLayoutConstraints();
-	      gbc.gridx = labelX;
-	      gbc.gridy = y;
-	      mainPanel.add(label, gbc);
-	    }
-	  }
-	  GridBagConstraints gbc = (GridBagConstraints) uiElement
-	      .getLayoutConstraints();
-	  gbc.gridx = compoX;
-	  gbc.gridwidth += compoWidthIncrement; // wird nachher wieder abgezogen
-						// weil
-	  // Objekt shared ist
-	  gbc.gridy = y;
-	  ++y;
-	  Component component = uiElement.getComponent();
-	  hasFocusable |= component.isFocusable();
-	  mainPanel.add(component, gbc);
-	  gbc.gridwidth -= compoWidthIncrement; // wieder abziehen, weil Objekt
-						// ja
-	  // shared ist
-	  if (!uiElement.isStatic())
-	    increaseTabVisibleCount(tabIndex);
+            if (label != null && !labelIsEmpty)
+            {
+              GridBagConstraints gbc = (GridBagConstraints) uiElement
+                  .getLabelLayoutConstraints();
+              gbc.gridx = labelX;
+              gbc.gridy = y;
+              mainPanel.add(label, gbc);
+            }
+          }
+          GridBagConstraints gbc = (GridBagConstraints) uiElement
+              .getLayoutConstraints();
+          gbc.gridx = compoX;
+          gbc.gridwidth += compoWidthIncrement; // wird nachher wieder abgezogen
+                                                // weil
+          // Objekt shared ist
+          gbc.gridy = y;
+          ++y;
+          Component component = uiElement.getComponent();
+          hasFocusable |= component.isFocusable();
+          mainPanel.add(component, gbc);
+          gbc.gridwidth -= compoWidthIncrement; // wieder abziehen, weil Objekt
+                                                // ja
+          // shared ist
+          if (!uiElement.isStatic())
+            increaseTabVisibleCount(tabIndex);
 
-	  if (y > GRID_MAX)
-	    break;
-	}
+          if (y > GRID_MAX)
+            break;
+        }
 
-	if (y > GRID_MAX)
-	  break;
+        if (y > GRID_MAX)
+          break;
       }
 
       if (y > GRID_MAX)
-	Logger.error(L.m(
-	    "Zu viele Formularelemente auf einem Tab => nicht alle werden angezeigt"));
+        LOGGER.error(L.m(
+            "Zu viele Formularelemente auf einem Tab => nicht alle werden angezeigt"));
 
       if (!hasFocusable)
       {
@@ -850,65 +855,65 @@ public class FormController implements UIElementEventHandler
       Iterator<ConfigThingy> parentiter = conf.query("Buttons").iterator();
       while (parentiter.hasNext())
       {
-	Iterator<ConfigThingy> iter = parentiter.next().iterator();
-	while (iter.hasNext())
-	{
-	  ConfigThingy uiConf = iter.next();
-	  UIElement uiElement;
+        Iterator<ConfigThingy> iter = parentiter.next().iterator();
+        while (iter.hasNext())
+        {
+          ConfigThingy uiConf = iter.next();
+          UIElement uiElement;
 
-	  try
-	  {
-	    uiElement = uiElementFactory.createUIElement(buttonContext, uiConf);
-	    UIElementState state = new UIElementState();
-	    state.setIsButton(true);
-	    uiElement.setAdditionalData(state);
-	  } catch (ConfigurationErrorException e)
-	  {
-	    Logger.error(e);
-	    continue;
-	  }
+          try
+          {
+            uiElement = uiElementFactory.createUIElement(buttonContext, uiConf);
+            UIElementState state = new UIElementState();
+            state.setIsButton(true);
+            uiElement.setAdditionalData(state);
+          } catch (ConfigurationErrorException e)
+          {
+            LOGGER.error("", e);
+            continue;
+          }
 
-	  int compoX = x;
-	  if (!uiElement.getLabelType().equals(UIElement.LABEL_NONE))
-	  {
-	    int labelX = x;
-	    ++x;
-	    if (uiElement.getLabelType().equals(UIElement.LABEL_LEFT))
-	      compoX = x;
-	    else
-	      labelX = x;
+          int compoX = x;
+          if (!uiElement.getLabelType().equals(UIElement.LABEL_NONE))
+          {
+            int labelX = x;
+            ++x;
+            if (uiElement.getLabelType().equals(UIElement.LABEL_LEFT))
+              compoX = x;
+            else
+              labelX = x;
 
-	    Component label = uiElement.getLabel();
-	    if (label != null)
-	    {
-	      GridBagConstraints gbc = (GridBagConstraints) uiElement
-		  .getLabelLayoutConstraints();
-	      gbc.gridx = labelX;
-	      gbc.gridy = 0;
-	      buttonPanel.add(label, gbc);
-	    }
+            Component label = uiElement.getLabel();
+            if (label != null)
+            {
+              GridBagConstraints gbc = (GridBagConstraints) uiElement
+                  .getLabelLayoutConstraints();
+              gbc.gridx = labelX;
+              gbc.gridy = 0;
+              buttonPanel.add(label, gbc);
+            }
 
-	  }
+          }
 
-	  parseGROUPS(uiConf, uiElement);
+          parseGROUPS(uiConf, uiElement);
 
-	  GridBagConstraints gbc = (GridBagConstraints) uiElement
-	      .getLayoutConstraints();
-	  gbc.gridx = compoX;
-	  gbc.gridy = 0;
-	  ++x;
-	  buttonPanel.add(uiElement.getComponent(), gbc);
+          GridBagConstraints gbc = (GridBagConstraints) uiElement
+              .getLayoutConstraints();
+          gbc.gridx = compoX;
+          gbc.gridy = 0;
+          ++x;
+          buttonPanel.add(uiElement.getComponent(), gbc);
 
-	  if (x > GRID_MAX)
-	    break;
-	}
-	if (x > GRID_MAX)
-	  break;
+          if (x > GRID_MAX)
+            break;
+        }
+        if (x > GRID_MAX)
+          break;
       }
 
       if (x > GRID_MAX)
-	Logger.error(L.m(
-	    "Zu viele Buttons auf einem Tab => nicht alle werden angezeigt"));
+        LOGGER.error(L.m(
+            "Zu viele Buttons auf einem Tab => nicht alle werden angezeigt"));
     }
 
     /**
@@ -1259,7 +1264,7 @@ public class FormController implements UIElementEventHandler
 	SwingUtilities.invokeAndWait(runner);
     } catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
     return result[0];
   }
@@ -1317,13 +1322,13 @@ public class FormController implements UIElementEventHandler
       processUIElementEvents = false; // Reentranz bei setString() unterbinden
       if (WollMuxFiles.isDebugMode())
       {
-	StringBuffer buffy = new StringBuffer(
-	    "UIElementEvent: " + eventType + "(");
-	for (int i = 0; i < args.length; ++i)
-	  buffy.append((i == 0 ? "" : ",") + args[i]);
-	if (source != null)
-	  buffy.append(") on UIElement " + source.getId());
-	Logger.debug(buffy.toString());
+        StringBuilder buffy = new StringBuilder(
+            "UIElementEvent: " + eventType + "(");
+        for (int i = 0; i < args.length; ++i)
+          buffy.append((i == 0 ? "" : ",") + args[i]);
+        if (source != null)
+          buffy.append(") on UIElement " + source.getId());
+        LOGGER.debug(buffy.toString());
       }
 
       if (eventType.equals("valueChanged"))
@@ -1349,94 +1354,94 @@ public class FormController implements UIElementEventHandler
 	checkDependingVisibilityGroups(changedElements);
       } else if (eventType.equals("action"))
       {
-	String action = (String) args[0];
-	if (action.equals("abort"))
-	{
-	  abortRequestListener
-	      .actionPerformed(new ActionEvent(this, 0, "abort"));
-	} else if (action.equals("nextTab"))
-	{
-	  int startIdx = myTabbedPane.getSelectedIndex();
-	  int idx = startIdx;
-	  do
-	  {
-	    ++idx;
-	    if (idx >= myTabbedPane.getTabCount())
-	      idx = 0;
-	    if (myTabbedPane.isEnabledAt(idx))
-	      break;
-	  } while (idx != startIdx);
+        String action = (String) args[0];
+        if ("abort".equals(action))
+        {
+          abortRequestListener
+              .actionPerformed(new ActionEvent(this, 0, "abort"));
+        } else if ("nextTab".equals(action))
+        {
+          int startIdx = myTabbedPane.getSelectedIndex();
+          int idx = startIdx;
+          do
+          {
+            ++idx;
+            if (idx >= myTabbedPane.getTabCount())
+              idx = 0;
+            if (myTabbedPane.isEnabledAt(idx))
+              break;
+          } while (idx != startIdx);
 
-	  myTabbedPane.setSelectedIndex(idx);
-	} else if (action.equals("prevTab"))
-	{
-	  int startIdx = myTabbedPane.getSelectedIndex();
-	  int idx = startIdx;
-	  do
-	  {
-	    if (idx == 0)
-	      idx = myTabbedPane.getTabCount();
-	    --idx;
-	    if (myTabbedPane.isEnabledAt(idx))
-	      break;
-	  } while (idx != startIdx);
+          myTabbedPane.setSelectedIndex(idx);
+        } else if ("prevTab".equals(action))
+        {
+          int startIdx = myTabbedPane.getSelectedIndex();
+          int idx = startIdx;
+          do
+          {
+            if (idx == 0)
+              idx = myTabbedPane.getTabCount();
+            --idx;
+            if (myTabbedPane.isEnabledAt(idx))
+              break;
+          } while (idx != startIdx);
 
-	  myTabbedPane.setSelectedIndex(idx);
-	} else if (action.equals("funcDialog"))
-	{
-	  String dialogName = (String) args[1];
-	  Dialog dlg = dialogLib.get(dialogName);
-	  if (dlg == null)
-	    Logger.error(
-		L.m("Funktionsdialog \"%1\" ist nicht definiert", dialogName));
-	  else
-	  {
-	    dlg.instanceFor(functionContext).show(
-		new FunctionDialogEndListener(dialogName), funcLib, dialogLib);
-	  }
-	} else if (action.equals("closeAndOpenExt"))
-	{
-	  formModel.closeAndOpenExt((String) args[1]);
-	} else if (action.equals("saveTempAndOpenExt"))
-	{
-	  formModel.saveTempAndOpenExt((String) args[1]);
-	} else if (action.equals("printForm"))
-	{
-	  formModel.print();
-	} else if (action.equals("form2PDF"))
-	{
-	  formModel.pdf();
-	} else if (action.equals("save"))
-	{
-	  formModel.save();
-	} else if (action.equals("saveAs"))
-	{
-	  formModel.saveAs();
-	} else if (action.equals("openTemplate")
-	    || action.equals("openDocument"))
-	{
-	  String fragId = (String) args[1];
-	  List<String> fragIds = new ArrayList<String>();
-	  fragIds.add(fragId);
-	  formModel.openTemplateOrDocument(fragIds);
-	} else if (action.equals("openExt"))
-	{
-	  OpenExt openExInstance = OpenExt.getInstance((String) args[1],
-	      (String) args[2]);
-	  openExInstance.launch(new ExceptionHandler()
-	  {
+          myTabbedPane.setSelectedIndex(idx);
+        } else if ("funcDialog".equals(action))
+        {
+          String dialogName = (String) args[1];
+          Dialog dlg = dialogLib.get(dialogName);
+          if (dlg == null)
+            LOGGER.error(
+                L.m("Funktionsdialog \"%1\" ist nicht definiert", dialogName));
+          else
+          {
+            dlg.instanceFor(functionContext).show(
+                new FunctionDialogEndListener(dialogName), funcLib, dialogLib);
+          }
+        } else if ("closeAndOpenExt".equals(action))
+        {
+          formModel.closeAndOpenExt((String) args[1]);
+        } else if ("saveTempAndOpenExt".equals(action))
+        {
+          formModel.saveTempAndOpenExt((String) args[1]);
+        } else if ("printForm".equals(action))
+        {
+          formModel.print();
+        } else if ("form2PDF".equals(action))
+        {
+          formModel.pdf();
+        } else if ("form2PDF".equals(action))
+        {
+          formModel.save();
+        } else if ("saveAs".equals(action))
+        {
+          formModel.saveAs();
+        } else if ("openTemplate".equals(action)
+            || "openDocument".equals(action))
+        {
+          String fragId = (String) args[1];
+          List<String> fragIds = new ArrayList<String>();
+          fragIds.add(fragId);
+          formModel.openTemplateOrDocument(fragIds);
+        } else if ("openExt".equals(action))
+        {
+          OpenExt openExInstance = OpenExt.getInstance((String) args[1],
+              (String) args[2]);
+          openExInstance.launch(new ExceptionHandler()
+          {
 
-	    @Override
-	    public void handle(Exception x)
-	    {
-	      Logger.error(x);
-	    }
-	  });
-	} else if (action.equals("form2EMail"))
-	{
-	  formModel.sendAsEmail();
-	}
-      } else if (eventType.equals("focus"))
+            @Override
+            public void handle(Exception x)
+            {
+              LOGGER.error("", x);
+            }
+          });
+        } else if ("form2EMail".equals(action))
+        {
+          formModel.sendAsEmail();
+        }
+      } else if ("focus".equals(eventType))
       {
 	if (args[0].equals("lost"))
 	  formModel.focusLost(source.getId());
@@ -1469,7 +1474,7 @@ public class FormController implements UIElementEventHandler
       }
     } catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     } finally
     {
       processUIElementEvents = true;

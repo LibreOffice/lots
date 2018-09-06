@@ -1,5 +1,9 @@
 package de.muenchen.allg.itd51.wollmux;
 
+import org.apache.log4j.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.container.XSet;
 import com.sun.star.frame.TerminationVetoException;
 import com.sun.star.frame.XTerminateListener;
@@ -10,7 +14,7 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
 
 /**
@@ -28,12 +32,16 @@ import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
  */
 public class DebugExternalWollMux
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(DebugExternalWollMux.class);
+
   public static void main(String[] args) throws Exception
   {
     // Logger zum Debuggen auf stdout initialisieren und die zukünftigen
     // Logger-Einstellungen aus der wollmuxconfig ignorieren.
-    Logger.init(System.out, Logger.DEBUG);
-    Logger.setIgnoreInit(true);
+    LogConfig.init(System.out, Level.DEBUG);
+    LogConfig.setIgnoreInit(true);
 
     UNO.init();
 
@@ -51,7 +59,7 @@ public class DebugExternalWollMux
       @Override
       public void notifyTermination(EventObject arg0)
       {
-        Logger.log(L.m("Desktop wurde geschlossen - beende DebugExternalWollMux"));
+        LOGGER.info(L.m("Desktop wurde geschlossen - beende DebugExternalWollMux"));
         System.exit(0);
       }
     });

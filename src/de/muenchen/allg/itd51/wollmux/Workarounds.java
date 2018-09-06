@@ -33,6 +33,9 @@ import java.awt.Toolkit;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.drawing.XDrawPageSupplier;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextSectionsSupplier;
@@ -41,7 +44,6 @@ import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 
 /**
@@ -53,9 +55,11 @@ import de.muenchen.allg.itd51.wollmux.core.util.Utils;
  */
 public class Workarounds
 {
-  private static Boolean workaround89783 = null;
 
-  private static Boolean workaroundToolbarHoverFreeze = null;
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(Workarounds.class);
+
+  private static Boolean workaround89783 = null;
 
   private static Boolean workaround102164 = null;
 
@@ -67,7 +71,7 @@ public class Workarounds
 
   public static Boolean applyWorkaround(String issueNumber)
   {
-    Logger.debug("Workaround für Issue "
+    LOGGER.debug("Workaround für Issue "
       + issueNumber
       + " aktiv. Bestimmte Features sind evtl. nicht verfügbar. Die Performance kann ebenfalls leiden.");
     return Boolean.TRUE;
@@ -155,7 +159,7 @@ public class Workarounds
 
     if (workaround89783 == null && (version.startsWith("4") || version.startsWith("5.0")))
     {
-      Logger.debug(L.m("Workaround für TDF Issue 89783 aktiv."));
+      LOGGER.debug(L.m("Workaround für TDF Issue 89783 aktiv."));
       workaround89783 = true;
     } else {
       workaround89783 = false;
@@ -221,7 +225,7 @@ public class Workarounds
           awtAppClassNameField.set(null, "WollMux");
           workaroundWMClass = applyWorkaround("WMClass");
         } catch (Exception e) {
-          Logger.error(L.m("WMClass konnte nicht gesetzt werden."), e);
+          LOGGER.error(L.m("WMClass konnte nicht gesetzt werden."), e);
           workaroundWMClass = Boolean.FALSE;
         }
       } else {

@@ -89,6 +89,10 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import org.apache.log4j.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.Shell32;
 import com.sun.jna.platform.win32.ShlObj;
@@ -113,7 +117,7 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 
 /**
@@ -124,6 +128,10 @@ import de.muenchen.allg.itd51.wollmux.dialog.Common;
  */
 public class WollMuxFiles
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(WollMuxFiles.class);
+
   private static final String ETC_WOLLMUX_WOLLMUX_CONF = "/etc/wollmux/wollmux.conf";
 
   /**
@@ -278,13 +286,13 @@ public class WollMuxFiles
       }
       catch (Exception e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
     else
     { // wollmux.conf existiert nicht - damit wechseln wir in den no config mode.
       noConf = true;
-      Logger.log(WOLLMUX_NOCONF);
+      LOGGER.info(WOLLMUX_NOCONF);
     }
 
     fido.dontBark();
@@ -294,12 +302,14 @@ public class WollMuxFiles
     setLoggingMode(WollMuxFiles.getWollmuxConf());
 
     // Gesammelte debug2 Messages rausschreiben
-    Logger.debug2(debug2Messages.toString());
+    LOGGER.trace(debug2Messages.toString());
 
     // Lokalisierung initialisieren
     ConfigThingy l10n = getWollmuxConf().query("L10n", 1);
-    if (l10n.count() > 0) L.init(l10n);
-    Logger.debug(L.flushDebugMessages());
+    if (l10n.count() > 0) {
+      L.init(l10n);
+    }
+    LOGGER.debug(L.flushDebugMessages());
 
     showCredits =
       WollMuxFiles.getWollmuxConf().query("SHOW_CREDITS", 1).query("on").count() > 0;
@@ -323,7 +333,7 @@ public class WollMuxFiles
 
     setLookAndFeel();
 
-    Logger.debug(L.m(".wollmux init time: %1ms", ""
+    LOGGER.debug(L.m(".wollmux init time: %1ms", ""
       + (System.currentTimeMillis() - time)));
 
     return !noConf;
@@ -340,7 +350,7 @@ public class WollMuxFiles
     ArrayList<String> searchPaths = new ArrayList<String>();
 
     // Logger initialisieren:
-    Logger.init(wollmuxLogFile, Logger.LOG);
+    LogConfig.init(wollmuxLogFile, Level.INFO);
 
     // Pfad zur wollmux.conf
     String wollmuxConfPath = null;
@@ -544,7 +554,7 @@ public class WollMuxFiles
       }
       catch (MalformedURLException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
   }
@@ -568,7 +578,7 @@ public class WollMuxFiles
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
     zoomFonts(zoomFactor);
@@ -584,7 +594,7 @@ public class WollMuxFiles
 
     if (zoomFactor < 0.5 || zoomFactor > 3)
     {
-      Logger.error(L.m("Unsinniger FONT_ZOOM Wert angegeben: %1", "" + zoomFactor));
+      LOGGER.error(L.m("Unsinniger FONT_ZOOM Wert angegeben: %1", "" + zoomFactor));
     }
     else
     {
@@ -612,11 +622,11 @@ public class WollMuxFiles
       try
       {
         String mode = log.getLastChild().toString();
-        Logger.init(mode);
+        LogConfig.init(mode);
       }
       catch (NodeNotFoundException x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
   }
@@ -692,7 +702,7 @@ public class WollMuxFiles
       }
       catch (UnknownHostException ex)
       {
-        Logger.error(ex);
+        LOGGER.error("", ex);
         buffy.append("------");
       }
 
@@ -705,13 +715,15 @@ public class WollMuxFiles
           InetAddress.getAllByName(getDEFAULT_CONTEXT().getHost());
         for (int i = 0; i < addresses.length; ++i)
         {
-          if (i > 0) buffy.append(", ");
+          if (i > 0) {
+            buffy.append(", ");
+          }
           buffy.append(addresses[i].getHostAddress());
         }
       }
       catch (UnknownHostException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
         buffy.append("------");
       }
 
@@ -864,7 +876,7 @@ public class WollMuxFiles
     }
     catch (IOException x)
     {
-      Logger.error(L.m("Fehler beim Erstellen des Dumps"), x);
+      LOGGER.error(L.m("Fehler beim Erstellen des Dumps"), x);
       return null;
     }
     return dumpFile.getAbsolutePath();
@@ -899,7 +911,7 @@ public class WollMuxFiles
     }
     catch (Exception ex)
     {
-      Logger.log(ex);
+      LOGGER.info("", ex);
       return "";
     }
   }
@@ -959,7 +971,7 @@ public class WollMuxFiles
     }
     catch (java.lang.Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
       return L.m("Fehler beim Auslesen der OOo-Konfiguration mit dem Nodepath '%1'",
         nodePath);
     }
@@ -1058,6 +1070,10 @@ public class WollMuxFiles
 
   private static class SlowServerWatchdog extends Thread
   {
+
+    private static final Logger LOGGER = LoggerFactory
+        .getLogger(WollMuxFiles.SlowServerWatchdog.class);
+
     private long initTime;
 
     private long startTime;
@@ -1107,7 +1123,7 @@ public class WollMuxFiles
         @Override
         public void run()
         {
-          Logger.error(SLOW_SERVER_MESSAGE);
+          LOGGER.error(SLOW_SERVER_MESSAGE);
           JOptionPane pane =
             new JOptionPane(SLOW_SERVER_MESSAGE, JOptionPane.WARNING_MESSAGE,
               JOptionPane.DEFAULT_OPTION);
@@ -1129,7 +1145,7 @@ public class WollMuxFiles
 
     public void logTimes()
     {
-      Logger.debug("init: " + initTime + " start: " + startTime + " end: " + endTime
+      LOGGER.debug("init: " + initTime + " start: " + startTime + " end: " + endTime
         + " test: " + testTime + " dontBark: " + dontBarkTime);
     }
 

@@ -60,6 +60,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow2;
 import com.sun.star.text.XTextDocument;
@@ -72,17 +75,19 @@ import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 /**
  * Managed die Fenster (Writer und FormController) der FormularGUI.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class FormGUI
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(FormGUI.class);
+
   /**
    * Die (vom Betriebssystem gelieferten) Ränder des Formular-GUI-Fensters. Wird
    * benötigt, um die exakte Platzierung der FormGUI und des Writer-Fensters zu
@@ -221,27 +226,26 @@ public class FormGUI
     {
       Runnable runner = new Runnable()
       {
-	@Override
-	public void run()
-	{
-	  try
-	  {
-	    createGUI(formFensterConf, conf, mapIdToPresetValue,
-		functionContext, funcLib, dialogLib, visible);
-	  } catch (Exception x)
-	  {
-	    Logger.error(x);
-	  }
-	  ;
-	}
+        @Override
+        public void run()
+        {
+          try
+          {
+            createGUI(formFensterConf, conf, mapIdToPresetValue,
+                functionContext, funcLib, dialogLib, visible);
+          } catch (Exception x)
+          {
+            LOGGER.error("", x);
+          }
+        }
       };
       if (SwingUtilities.isEventDispatchThread())
-	runner.run();
+        runner.run();
       else
-	SwingUtilities.invokeAndWait(runner);
+        SwingUtilities.invokeAndWait(runner);
     } catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
 
   }
@@ -271,10 +275,10 @@ public class FormGUI
     try
     {
       formController = new FormController(conf, myDoc, mapIdToPresetValue,
-	  functionContext, funcLib, dialogLib, new MyAbortRequestListener());
+          functionContext, funcLib, dialogLib, new MyAbortRequestListener());
     } catch (ConfigurationErrorException x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return;
     }
 
@@ -326,13 +330,13 @@ public class FormGUI
 
   /**
    * Setzt Größe und Ort der FormGUI.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void setFormGUISizeAndLocation()
   {
     Rectangle frameBounds = new Rectangle(naturalFrameBounds);
-    Logger.debug("setFormGUISizeAndLocation: frameBounds=" + frameBounds);
+    LOGGER.debug("setFormGUISizeAndLocation: frameBounds=" + frameBounds);
 
     switch (formGUIBounds.width)
     {
@@ -426,7 +430,8 @@ public class FormGUI
   private void arrangeWindows()
   {
     Rectangle frameBounds = new Rectangle(myFrame.getBounds());
-    Logger.debug("Maximum window bounds " + maxWindowBounds + "| window insets " + windowInsets + "| frame bounds " + frameBounds);
+    LOGGER.debug("Maximum window bounds " + maxWindowBounds + "| window insets "
+        + windowInsets + "| frame bounds " + frameBounds);
 
     /*
      * Das Addieren von windowInsets.left und windowInsets.right ist eine
@@ -643,88 +648,88 @@ public class FormGUI
         UNO.XCloseable(myDoc).close(true);
       } catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
 
     @Override
     public void setVisibleState(String groupId, boolean visible)
     {
-      Logger.log("Gruppe \"" + groupId + "\" ist jetzt "
-	  + (visible ? "sichtbar" : "unsichtbar"));
+      LOGGER.info("Gruppe \"" + groupId + "\" ist jetzt "
+          + (visible ? "sichtbar" : "unsichtbar"));
     }
 
     @Override
     public void valueChanged(String fieldId, String newValue)
     {
-      Logger.log(
-	  "Feld \"" + fieldId + "\" hat jetzt den Wert \"" + newValue + "\"");
+      LOGGER.info(
+          "Feld \"" + fieldId + "\" hat jetzt den Wert \"" + newValue + "\"");
     }
 
     @Override
     public void focusGained(String fieldId)
     {
-      Logger.log("Feld \"" + fieldId + "\" hat den Fokus bekommen");
+      LOGGER.info("Feld \"" + fieldId + "\" hat den Fokus bekommen");
     }
 
     @Override
     public void focusLost(String fieldId)
     {
-      Logger.log("Feld \"" + fieldId + "\" hat den Fokus verloren");
+      LOGGER.info("Feld \"" + fieldId + "\" hat den Fokus verloren");
     }
 
     @Override
     public void print()
     {
-      Logger.log("print()");
+      LOGGER.info("print()");
     }
 
     @Override
     public void pdf()
     {
-      Logger.log("pdf()");
+      LOGGER.info("pdf()");
     }
 
     @Override
     public void setValue(String fieldId, String value, ActionListener listener)
     {
-      Logger.log("setValue()");
+      LOGGER.info("setValue()");
     }
 
     @Override
     public void startFormGUI()
     {
-      Logger.log("startFormGUI()");
+      LOGGER.info("startFormGUI()");
     }
 
     @Override
     public void formControllerInitCompleted()
     {
-      Logger.log("formControllerInitCompleted()");
+      LOGGER.info("formControllerInitCompleted()");
     }
 
     @Override
     public void save()
     {
-      Logger.log("save()");
+      LOGGER.info("save()");
     }
 
     @Override
     public void saveAs()
     {
-      Logger.log("saveAs()");
+      LOGGER.info("saveAs()");
     }
 
     @Override
     public void closeAndOpenExt(String ext)
     {
-      Logger.log("closeAndOpenExt(" + ext + ")");
+      LOGGER.info("closeAndOpenExt(" + ext + ")");
     }
 
     @Override
     public void saveTempAndOpenExt(String ext)
     {
-      Logger.log("saveTempAndOpenExt(" + ext + ")");
+      LOGGER.info("saveTempAndOpenExt(" + ext + ")");
     }
 
     @Override
@@ -736,7 +741,7 @@ public class FormGUI
     @Override
     public void closing(Object sender)
     {
-      Logger.log("Closing(sender)");
+      LOGGER.info("Closing(sender)");
     }
 
     @Override
@@ -744,7 +749,7 @@ public class FormGUI
     {
       for (String fragId : fragIds)
       {
-        Logger.log("openTemplateOrDocument(" + fragId + ")");
+        LOGGER.info("openTemplateOrDocument(" + fragId + ")");
       }
     }
 
@@ -768,7 +773,7 @@ public class FormGUI
   {
     UNO.init();
     WollMuxFiles.setupWollMuxDir();
-    Logger.init(System.err, Logger.DEBUG);
+    //Logger.init(System.err, Logger.DEBUG);
     String confFile = "testdata/formulartest.conf";
     ConfigThingy conf = new ConfigThingy("",
         new URL(new File(System.getProperty("user.dir")).toURI().toURL(), confFile));

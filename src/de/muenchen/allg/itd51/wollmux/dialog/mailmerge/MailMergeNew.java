@@ -66,6 +66,9 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.awt.XTopWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XFrame;
@@ -82,7 +85,6 @@ import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.QueryResultsWithSchema;
@@ -111,6 +113,10 @@ import de.muenchen.allg.itd51.wollmux.print.PrintModels;
  */
 public class MailMergeNew implements MailMergeParams.MailMergeController
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(MailMergeNew.class);
+
   /**
    * ID der Property in der die Serienbriefdaten gespeichert werden.
    */
@@ -271,14 +277,14 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
           }
           catch (Exception x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
           }
         }
       });
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
@@ -641,7 +647,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
     if (schema.size() != data.size())
     {
-      Logger.error(L.m("Daten haben sich zwischen dem Auslesen von Schema und Werten verändert"));
+      LOGGER.error(L.m("Daten haben sich zwischen dem Auslesen von Schema und Werten verändert"));
       return;
     }
 
@@ -869,7 +875,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
           }
           catch (Exception x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
           }
         }
       }
@@ -882,7 +888,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
     catch (UnavailableException e)
     {
-      Logger.error(L.m("Das darf nicht passieren!"));
+      LOGGER.error(L.m("Das darf nicht passieren!"));
     }
   }
 
@@ -922,7 +928,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
           }
           catch (Exception x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
           }
         }
       }
@@ -1041,7 +1047,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return;
     }
 
@@ -1053,7 +1059,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
     catch (NoSuchMethodException e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
       ModalDialogs.showInfoModal(
         L.m("Fehler beim Drucken"),
         L.m(
@@ -1077,7 +1083,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
         documentController.setFormFieldsPreviewMode(false);
 
         long duration = (System.currentTimeMillis() - startTime) / 1000;
-        Logger.debug(L.m("MailMerge finished after %1 seconds", duration));
+        LOGGER.debug(L.m("MailMerge finished after %1 seconds", duration));
       }
     }.start();
   }
@@ -1228,7 +1234,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
     catch (Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
       return 0;
     }
     return selection.size();
@@ -1297,12 +1303,12 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
         }
         catch (Exception e)
         {
-          Logger.error(L.m("darf nicht vorkommen"), e);
+          LOGGER.error(L.m("darf nicht vorkommen"), e);
         }
       }
       catch (java.io.IOException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     if (tmpOutDir == null)
     {
@@ -1364,7 +1370,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
     catch (ConfigurationErrorException e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
       ModalDialogs.showInfoModal(
         MAIL_ERROR_MESSAGE_TITLE,
         L.m("Es konnten keine Angaben zum Mailserver gefunden werden - eventuell ist die WollMux-Konfiguration nicht vollständig."));
@@ -1373,7 +1379,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
     catch (MessagingException e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
       ModalDialogs.showInfoModal(MAIL_ERROR_MESSAGE_TITLE,
         L.m("Der Versand der E-Mail ist fehlgeschlagen."));
       pmod.cancel();
@@ -1381,7 +1387,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
     catch (Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
       pmod.cancel();
       return;
     }
@@ -1458,7 +1464,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 

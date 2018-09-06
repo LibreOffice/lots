@@ -101,12 +101,14 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
@@ -129,6 +131,10 @@ import de.muenchen.allg.itd51.wollmux.db.TimeoutException;
  */
 public class PersoenlicheAbsenderlisteVerwalten
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(PersoenlicheAbsenderlisteVerwalten.class);
+
   public static final String DEFAULT_ROLLE = "D-WOLL-MUX-5.1";
 
   public static final String DEFAULT_NACHNAME = "Wollmux";
@@ -436,7 +442,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
     else
     {
-      Logger.log(L.m("Kein Suchstrategie-Abschnitt für den PersoenlicheAbsenderliste-Dialog "
+      LOGGER.info(L.m("Kein Suchstrategie-Abschnitt für den PersoenlicheAbsenderliste-Dialog "
         + "angegeben! Verwende Default-Suchstrategie."));
       // Es gibt keinen Suchstrategie-Abschnitt in der Konfiguration, also verwenden
       // wir die Default-Suchstrategie
@@ -457,7 +463,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       }
       catch (Exception e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
 
@@ -485,14 +491,14 @@ public class PersoenlicheAbsenderlisteVerwalten
           }
           catch (Exception x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
           }
         }
       });
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
@@ -767,7 +773,7 @@ public class PersoenlicheAbsenderlisteVerwalten
               }
               catch (NodeNotFoundException e)
               {
-                Logger.log(L.m(
+                LOGGER.info(L.m(
                   "Kein DISPLAY-Attribut für die listbox mit ID \"suchergebnis\" im PersoenlicheAbsenderliste-Dialog angegeben! Verwende Fallback: %1",
                   DEFAULT_DISPLAYTEMPLATE));
                 // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
@@ -791,7 +797,7 @@ public class PersoenlicheAbsenderlisteVerwalten
               }
               catch (NodeNotFoundException e)
               {
-                Logger.log(L.m(
+                LOGGER.info(L.m(
                   "Kein DISPLAY-Attribut für die listbox mit ID \"pal\" im PersoenlicheAbsenderliste-Dialog angegeben! Verwende Fallback: %1",
                   DEFAULT_DISPLAYTEMPLATE));
                 // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
@@ -891,13 +897,13 @@ public class PersoenlicheAbsenderlisteVerwalten
           }
           else
           {
-            Logger.error(L.m("Ununterstützter TYPE für User Interface Element: ",
+            LOGGER.error(L.m("Ununterstützter TYPE für User Interface Element: ",
               type));
           }
         }
         catch (NodeNotFoundException e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
     }
@@ -1059,7 +1065,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
     catch (NullPointerException x)
     {
-      Logger.error(L.m("Listbox mit ID \"suchergebnisse\" oder \"pal\" fehlt"));
+      LOGGER.error(L.m("Listbox mit ID \"suchergebnisse\" oder \"pal\" fehlt"));
     }
 
     Iterator<JButton> iter = buttonsToGreyOutIfNothingSelected.iterator();
@@ -1245,7 +1251,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
     catch (ConfigurationErrorException x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
@@ -1263,7 +1269,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
     catch (Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
   }
 
@@ -1306,7 +1312,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
     listsHaveChanged();
     return ds;
@@ -1358,11 +1364,11 @@ public class PersoenlicheAbsenderlisteVerwalten
               + "Suchbegriff, der auf zu viele Ergebnisse zutrifft.\n"
               + "Bitte versuchen Sie eine andere, präzisere Suchanfrage."),
             L.m("Timeout bei Suchanfrage"), JOptionPane.WARNING_MESSAGE);
-          Logger.error(x);
+          LOGGER.error("", x);
         }
         catch (IllegalArgumentException x)
         { // wird bei illegalen Suchanfragen geworfen
-          Logger.error(x);
+          LOGGER.error("", x);
         }
 
         // Wir benötigen finalResults, da eine nicht-finale Variable nicht in der
@@ -1403,7 +1409,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
     catch (TimeoutException x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
 
     updateButtonStates();
@@ -1458,7 +1464,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       return null;
     }
     else
-      Logger.error(L.m("Ununterstützte ACTION: %1", action));
+      LOGGER.error(L.m("Ununterstützte ACTION: %1", action));
 
     return null;
   }
@@ -1507,7 +1513,7 @@ public class PersoenlicheAbsenderlisteVerwalten
         }
         catch (Exception x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
         }
       else
       {
@@ -1585,7 +1591,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       }
       catch (ConfigurationErrorException x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
   }

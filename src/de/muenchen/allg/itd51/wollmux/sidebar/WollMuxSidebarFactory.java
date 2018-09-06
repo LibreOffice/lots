@@ -1,5 +1,8 @@
 package de.muenchen.allg.itd51.wollmux.sidebar;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
@@ -11,8 +14,6 @@ import com.sun.star.ui.XUIElementFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
-
 /**
  * Dies ist die Implementation der Sidebar-Factory, die in Factories.xcu
  * definiert ist. Die Factory erzeugt ein {@link WollMuxSidebarPanel}.  
@@ -21,6 +22,10 @@ import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 public class WollMuxSidebarFactory extends WeakBase implements XUIElementFactory,
     XServiceInfo
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(WollMuxSidebarFactory.class);
+
   public static final String __serviceName =
     "de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory";
   
@@ -28,7 +33,7 @@ public class WollMuxSidebarFactory extends WeakBase implements XUIElementFactory
 
   public WollMuxSidebarFactory(XComponentContext context)
   {
-    Logger.debug("WollMuxSidebarFactory:WollMuxSidebarFactory");
+    LOGGER.debug("WollMuxSidebarFactory:WollMuxSidebarFactory");
     this.context = context;
   }
 
@@ -36,7 +41,7 @@ public class WollMuxSidebarFactory extends WeakBase implements XUIElementFactory
   public XUIElement createUIElement(String resourceUrl, PropertyValue[] arguments)
       throws NoSuchElementException, IllegalArgumentException
   {
-    Logger.debug("WollMuxSidebarFactory:createUIElement");
+    LOGGER.debug("WollMuxSidebarFactory:createUIElement");
 
     if (!resourceUrl.startsWith("private:resource/toolpanel/WollMuxSidebarFactory/WollMuxSidebarPanel"))
     {

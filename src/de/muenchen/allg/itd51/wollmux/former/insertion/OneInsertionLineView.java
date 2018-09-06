@@ -48,8 +48,10 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.UnknownIDException;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
@@ -59,6 +61,10 @@ import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
 public class OneInsertionLineView extends LineView
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(OneInsertionLineView.class);
+
   /**
    * InsertValue erhält eine graue Hintergrundfarbe.
    */
@@ -168,7 +174,7 @@ public class OneInsertionLineView extends LineView
           }
           catch (BadLocationException x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
           }
           catch (UnknownIDException x)
           {

@@ -31,12 +31,15 @@
  * @author Christoph Lutz (D-III-ITD 5.1)
  * @author Matthias S. Benkmann (D-III-ITD-D101)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.event;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.DispatchDescriptor;
@@ -52,16 +55,19 @@ import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Liefert zu Dispatch-URLs, die der WollMux behandeln kann XDispatch-Objekte.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
 public class DispatchProviderAndInterceptor implements XDispatchProvider,
     XDispatchProviderInterceptor
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(DispatchProviderAndInterceptor.class);
+
   /**
    * Enthält einen XDispatchProvider, der Dispatch-Objekte für alle globalen (d.h.
    * nicht dokumentgebundenen) Funktionalitäten des WollMux bereitstellt.
@@ -242,7 +248,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
     {
       DispatchProviderAndInterceptor dpi = new DispatchProviderAndInterceptor(frame);
 
-      Logger.debug(L.m("Registriere DocumentDispatchInterceptor #%1 für frame #%2",
+      LOGGER.debug(L.m("Registriere DocumentDispatchInterceptor #%1 für frame #%2",
         Integer.valueOf(dpi.hashCode()), Integer.valueOf(frame.hashCode())));
 
       UNO.XDispatchProviderInterception(frame).registerDispatchProviderInterceptor(
@@ -253,7 +259,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
       frame.addFrameActionListener(dpi.frameActionListener);
     }
     else
-      Logger.debug(L.m(
+      LOGGER.debug(L.m(
         "Ignoriere doppelten Aufruf von registerDocumentDispatchInterceptor() für den selben Frame #%1",
         Integer.valueOf(frame.hashCode())));
   }
@@ -289,7 +295,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
             dpi.frameActionListener = null;
           }
 
-          Logger.debug(L.m(
+          LOGGER.debug(L.m(
             "Deregistrierung von DocumentDispatchInterceptor #%1 aus frame #%2",
             Integer.valueOf(dpi.hashCode()), Integer.valueOf(dpi.frame.hashCode())));
           UNO.XDispatchProviderInterception(dpi.frame).releaseDispatchProviderInterceptor(
@@ -329,7 +335,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
     if (dpi == null) return;
     synchronized (documentDispatchProviderAndInterceptors)
     {
-      Logger.debug(L.m("Interne Freigabe des DocumentDispatchInterceptor #%1",
+      LOGGER.debug(L.m("Interne Freigabe des DocumentDispatchInterceptor #%1",
         Integer.valueOf(dpi.hashCode())));
       documentDispatchProviderAndInterceptors.remove(dpi);
     }

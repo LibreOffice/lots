@@ -57,6 +57,9 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.frame.DispatchResultEvent;
@@ -72,11 +75,14 @@ import com.sun.star.view.XPrintable;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
 public class PrintParametersDialog
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(PrintParametersDialog.class);
+
   /**
    * Kommando-String, der dem closeActionListener übermittelt wird, wenn der Dialog
    * über den Drucken-Knopf geschlossen wird.
@@ -496,7 +502,7 @@ public class PrintParametersDialog
         }
         catch (java.lang.Exception e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
     };

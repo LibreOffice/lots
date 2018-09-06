@@ -4,6 +4,9 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.FeatureStateEvent;
 import com.sun.star.frame.XDispatch;
@@ -12,7 +15,6 @@ import com.sun.star.util.URL;
 
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Implementiert XDispatch und stellt einige Hilfsmethoden für konkrete
@@ -40,6 +42,9 @@ import de.muenchen.allg.itd51.wollmux.core.util.Logger;
  */
 public abstract class BaseDispatch implements XDispatch
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(BaseDispatch.class);
 
   /**
    * Liefert zu url den Namen der Methode, die den Dispatch behandeln würde.
@@ -100,7 +105,7 @@ public abstract class BaseDispatch implements XDispatch
     }
     catch (UnsupportedEncodingException e)
     {
-      Logger.error(L.m("Fehler in Dispatch-URL '%1':", url.Complete), e);
+      LOGGER.error(L.m("Fehler in Dispatch-URL '%1':", url.Complete), e);
       // Aber wir machen trotzdem weiter. Wer wagt, gewinnt! :-)
     }
     return arg;
@@ -134,7 +139,7 @@ public abstract class BaseDispatch implements XDispatch
   @Override
   public void dispatch(URL url, PropertyValue[] props)
   {
-    Logger.debug2(this.getClass().getSimpleName() + ".dispatch('" + url.Complete
+    LOGGER.trace(this.getClass().getSimpleName() + ".dispatch('" + url.Complete
       + "')");
 
     String arg = getMethodArgument(url);
@@ -150,7 +155,7 @@ public abstract class BaseDispatch implements XDispatch
     }
     catch (Throwable x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
   
@@ -174,9 +179,9 @@ public abstract class BaseDispatch implements XDispatch
     }
     catch (Throwable x)
     {
-      Logger.debug(x);
+      LOGGER.debug("", x);
     }
-    
+
     return true;
   }
 
