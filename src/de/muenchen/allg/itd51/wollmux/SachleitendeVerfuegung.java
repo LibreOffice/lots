@@ -45,6 +45,9 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.awt.FontWeight;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
@@ -71,7 +74,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
@@ -79,6 +81,10 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 public class SachleitendeVerfuegung
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(SachleitendeVerfuegung.class);
+
   public static final String BLOCKNAME_SLV_ALL_VERSIONS = "AllVersions";
 
   public static final String BLOCKNAME_SLV_ORIGINAL_ONLY = "OriginalOnly";
@@ -351,7 +357,7 @@ public class SachleitendeVerfuegung
         }
         catch (java.lang.Exception e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
 
         if (par != null)
@@ -400,11 +406,11 @@ public class SachleitendeVerfuegung
         }
         catch (java.lang.Exception e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
-        
+
         String str = getStringOfXTextRange(par);
-        
+
         if (par != null)
         {
           if (isAbdruck(par) && fullText.contains(str))
@@ -418,50 +424,49 @@ public class SachleitendeVerfuegung
     }
     return deletedAtLeastOne;
   }
-  
+
   /**
-   * Liefert die vollständingen Textzeilen der markierten Abdruckzeilen zurück   
-   * 
+   * Liefert die vollständingen Textzeilen der markierten Abdruckzeilen zurück
+   *
    * @param textRange
-   *          
+   *
    * @return String
-   */  
+   */
   static String getFullLinesOfSelectedAbdruckLines(XParagraphCursor cursor)
   {
-	  String fullText = "";
-	  if (UNO.XEnumerationAccess(cursor) != null)
-	  {
-	    XEnumeration enumerationAccessFullText =  UNO.XEnumerationAccess(cursor).createEnumeration();
-		while( enumerationAccessFullText.hasMoreElements())
-	     {
-	    	XTextRange test;
-	    	try 
-	    	{
-	    		test = UNO.XTextRange(enumerationAccessFullText.nextElement());
-				fullText += getStringOfXTextRange(test);
-			} 
-	    	catch (NoSuchElementException e) 
-	    	{
-	    		Logger.error(e);
-			} 
-	    	catch (WrappedTargetException e) 
-	    	{
-	    		Logger.error(e);
-			}
-	     }
-	  }
-	return fullText;	  
+    String fullText = "";
+    if (UNO.XEnumerationAccess(cursor) != null)
+    {
+      XEnumeration enumerationAccessFullText = UNO.XEnumerationAccess(cursor)
+          .createEnumeration();
+      while (enumerationAccessFullText.hasMoreElements())
+      {
+        XTextRange test;
+        try
+        {
+          test = UNO.XTextRange(enumerationAccessFullText.nextElement());
+          fullText += getStringOfXTextRange(test);
+        } catch (NoSuchElementException e)
+        {
+          LOGGER.error("", e);
+        } catch (WrappedTargetException e)
+        {
+          LOGGER.error("", e);
+        }
+      }
+    }
+    return fullText;
   }
-  
+
   /**
    * Diese Methode löscht alle Zuleitungszeilen, die der Bereich des Cursors cursor
    * berührt, und liefert true zurück, wenn mindestens eine Zuleitungszeile gelöscht
    * wurde oder false, wenn sich in dem Bereich des Cursors keine Zuleitungszeile
    * befand.
-   * 
+   *
    * @param cursor
    *          Der Cursor, in dessen Bereich nach Zuleitungszeilen gesucht wird.
-   * 
+   *
    * @return true, wenn mindestens eine Zuleitungszeile gelöscht wurde oder false,
    *         wenn kein der cursor keine Zuleitungszeile berührt.
    */
@@ -481,7 +486,7 @@ public class SachleitendeVerfuegung
         }
         catch (java.lang.Exception e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
 
         if (par != null)
@@ -1191,7 +1196,7 @@ public class SachleitendeVerfuegung
         String zuleit = zuleits.next();
         text += "\n  --> '" + zuleit + "'";
       }
-      Logger.debug2(text);
+      LOGGER.trace(text);
     }
 
     // Beschreibung des Druckdialogs auslesen.
@@ -1205,7 +1210,7 @@ public class SachleitendeVerfuegung
     }
     catch (NodeNotFoundException e)
     {
-      Logger.error(
+      LOGGER.error(
         L.m("Fehlende Dialogbeschreibung für den Dialog 'SachleitendeVerfuegungenDruckdialog'."),
         e);
       return null;
@@ -1242,18 +1247,18 @@ public class SachleitendeVerfuegung
     }
     catch (ConfigurationErrorException e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
       return null;
     }
   }
 
   /**
    * Liefert die Anzahl der im XTextDocument doc enthaltenen Verfügungspunkte zurück.
-   * 
+   *
    * @param doc
    *          das TextDocument in dem gezählt werden soll.
    * @return die Anzahl der im XTextDocument doc enthaltenen Verfügungspunkte
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static int countVerfuegungspunkte(XTextDocument doc)
@@ -1446,7 +1451,7 @@ public class SachleitendeVerfuegung
       }
       catch (java.lang.Exception e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
 
       if (section != null)
@@ -1727,7 +1732,7 @@ public class SachleitendeVerfuegung
     try
     {
       name = L.m(nan.getLastChild().toString());
-      Logger.debug(L.m("Verwende ABDRUCK_NAME '%1'", name));
+      LOGGER.debug(L.m("Verwende ABDRUCK_NAME '%1'", name));
     }
     catch (NodeNotFoundException x)
     {}
@@ -1751,7 +1756,7 @@ public class SachleitendeVerfuegung
     try
     {
       numbers = nan.getLastChild().toString();
-      Logger.debug(L.m("Verwende Zahlenformat '%1' aus Attribut NUMBERS.", numbers));
+      LOGGER.debug(L.m("Verwende Zahlenformat '%1' aus Attribut NUMBERS.", numbers));
     }
     catch (NodeNotFoundException x)
     {}
@@ -1767,7 +1772,7 @@ public class SachleitendeVerfuegung
     {
       // roman is default
       if (!"roman".equalsIgnoreCase(numbers))
-        Logger.error(L.m(
+        LOGGER.error(L.m(
           "Ungültiger Wert '%1' für Attribut NUMBERS (zulässig: 'roman' und 'arabic'). Verwende 'roman' statt dessen.",
           numbers));
       return new String[] {

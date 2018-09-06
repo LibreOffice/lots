@@ -79,17 +79,23 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Eine GUI zum Bearbeiten der Menüstruktur der WollMuxBar.
  */
 public class MenuManager
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(MenuManager.class);
+
   /**
    * Regex zur Identifikation von legalen Schlüsseln.
    */
@@ -791,7 +797,7 @@ public class MenuManager
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
       return null;
     }
@@ -1551,7 +1557,7 @@ public class MenuManager
         }
         catch (Exception x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
         }
       }
       return false;
@@ -1984,7 +1990,7 @@ public class MenuManager
           }
           catch (NodeNotFoundException x)
           {
-            Logger.error(L.m("Ein WollMuxBarKonfigurationen/Labels Eintrag besitzt keine CONF_ID"));
+            LOGGER.error(L.m("Ein WollMuxBarKonfigurationen/Labels Eintrag besitzt keine CONF_ID"));
             continue;
           }
 
@@ -1995,7 +2001,7 @@ public class MenuManager
           }
           catch (NodeNotFoundException x)
           {
-            Logger.error(L.m("Ein WollMuxBarKonfigurationen/Labels Eintrag besitzt kein LABEL"));
+            LOGGER.error(L.m("Ein WollMuxBarKonfigurationen/Labels Eintrag besitzt kein LABEL"));
             continue;
           }
 
@@ -2106,7 +2112,7 @@ public class MenuManager
       }
       catch (NodeNotFoundException x)
       {
-        Logger.error(UIELEMENT_WITHOUT_TYPE_ERR);
+        LOGGER.error(UIELEMENT_WITHOUT_TYPE_ERR);
         continue;
       }
 
@@ -2121,13 +2127,13 @@ public class MenuManager
         }
         catch (NodeNotFoundException x)
         {
-          Logger.error(L.m("'menu' Menüeintrag ohne MENU-Attribut gefunden"));
+          LOGGER.error(L.m("'menu' Menüeintrag ohne MENU-Attribut gefunden"));
           continue;
         }
 
         if (alreadySeen.contains(menuId))
         {
-          Logger.error(L.m(
+          LOGGER.error(L.m(
             "Menü '%1' enthält sich direkt oder indirekt selbst als Untermenü",
             menuId));
           continue;
@@ -2149,7 +2155,7 @@ public class MenuManager
         }
         catch (NodeNotFoundException x)
         {
-          Logger.error(L.m("Menü '%1' nicht definiert", menuId));
+          LOGGER.error(L.m("Menü '%1' nicht definiert", menuId));
           continue;
         }
       }
@@ -2279,7 +2285,7 @@ public class MenuManager
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       JOptionPane.showMessageDialog(myFrame, L.m(
         "Beim Speichern ist ein Fehler aufgetreten:\n%1", x.getMessage()),
         L.m("Fehler beim Speichern"), JOptionPane.ERROR_MESSAGE);
@@ -2329,7 +2335,7 @@ public class MenuManager
     }
     catch (NodeNotFoundException x)
     {
-      Logger.error(UIELEMENT_WITHOUT_TYPE_ERR);
+      LOGGER.error(UIELEMENT_WITHOUT_TYPE_ERR);
     }
 
     // Use type as default label (think of "glue" and "separator")
@@ -2448,7 +2454,7 @@ public class MenuManager
       }
       catch (Exception x)
       {
-        Logger.error(
+        LOGGER.error(
           L.m("Fehler beim Lesen von '%1'", wollmuxbarConfFile.toString()), x);
       }
     }

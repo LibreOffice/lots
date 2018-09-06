@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.UIElementContext;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarConfig;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarEventHandler;
@@ -23,12 +25,15 @@ import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarEventHandler;
  * wahlweise z.B. Swing-Objekte oder XControls erzeugt werden. Über
  * {@link UIElementCreateListener} können konkrete Implementationen auf die Erzeugung
  * eines UIControls reagieren.
- * 
+ *
  * @author andor.ertsey
- * 
+ *
  */
 public class UIFactory
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(UIFactory.class);
+
   private static final String EDIT = "EDIT";
 
   private static final String READONLY = "READONLY";
@@ -173,7 +178,7 @@ public class UIFactory
         }
         catch (NodeNotFoundException e)
         {
-          Logger.error(L.m("ACTION \"open\" erfordert die Angabe OPEN \"...\""));
+          LOGGER.error(L.m("ACTION \"open\" erfordert die Angabe OPEN \"...\""));
         }
 
         action = new UIElementAction(eventHandler, false, "action", new Object[] {

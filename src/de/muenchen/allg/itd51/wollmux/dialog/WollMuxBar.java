@@ -127,6 +127,9 @@ import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.document.MacroExecMode;
 
 import de.muenchen.allg.afid.UNO;
@@ -139,7 +142,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
@@ -150,6 +152,10 @@ import de.muenchen.allg.itd51.wollmux.event.Dispatch;
  */
 public class WollMuxBar
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(WollMuxBar.class);
+
   public static final String ALLOW_USER_CONFIG = "ALLOW_USER_CONFIG";
 
   private static final String ALLOW_MENUMANAGER = "ALLOW_MENUMANAGER";
@@ -497,15 +503,14 @@ public class WollMuxBar
           }
           catch (Exception x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
           }
-          ;
         }
       });
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
@@ -576,7 +581,7 @@ public class WollMuxBar
     }
     catch (NodeNotFoundException x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
 
     trayIconMenu = null;
@@ -603,7 +608,7 @@ public class WollMuxBar
     }
     catch (NodeNotFoundException x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
     myFrame.setJMenuBar(menuBar);
 
@@ -633,7 +638,7 @@ public class WollMuxBar
       }
       catch (UnavailableException e)
       {
-        Logger.log(L.m("Konnte Tray-Icon nicht zur System-Tray hinzufügen."));
+        LOGGER.info(L.m("Konnte Tray-Icon nicht zur System-Tray hinzufügen."));
       }
     }
 
@@ -841,7 +846,7 @@ public class WollMuxBar
         }
         catch (NodeNotFoundException e)
         {
-          Logger.error(L.m("Ein User Interface Element ohne TYPE wurde entdeckt"));
+          LOGGER.error(L.m("Ein User Interface Element ohne TYPE wurde entdeckt"));
           continue;
         }
 
@@ -1013,7 +1018,7 @@ public class WollMuxBar
             }
             catch (Exception e)
             {}
-            Logger.debug(L.m(
+            LOGGER.debug(L.m(
               "Warnung: Button '%1' wurde konfigurativ deaktiviert und ist daher nicht in der WollMuxBar enthalten.",
               label));
           }
@@ -1021,7 +1026,7 @@ public class WollMuxBar
       }
       catch (ConfigurationErrorException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
   }
@@ -1061,7 +1066,7 @@ public class WollMuxBar
 
     if (mapMenuNameToMenu == null && alreadySeen.contains(menuName))
     {
-      Logger.error(L.m(
+      LOGGER.error(L.m(
         "Menü \"%1\" ist an einer Endlosschleife sich gegenseitig enthaltender Menüs beteiligt",
         menuName));
       return null;
@@ -1074,7 +1079,7 @@ public class WollMuxBar
     }
     catch (Exception x)
     {
-      Logger.error(L.m(
+      LOGGER.error(L.m(
         "Menü \"%1\" nicht definiert oder enthält keinen Abschnitt \"Elemente()\"",
         menuName));
       return null;
@@ -1413,7 +1418,7 @@ public class WollMuxBar
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return;
     }
 
@@ -1534,7 +1539,7 @@ public class WollMuxBar
       }
       catch (NodeNotFoundException e)
       {
-        Logger.log(e);
+        LOGGER.info("", e);
       }
     }
   }
@@ -1813,7 +1818,7 @@ public class WollMuxBar
       }
       catch (IOException x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
         error(L.m("Fehler beim Download der Datei:\n%1", x.getMessage()));
         return;
       }
@@ -1828,7 +1833,7 @@ public class WollMuxBar
             @Override
             public void handle(Exception x)
             {
-              Logger.error(x);
+              LOGGER.error("", x);
               error(x.getMessage());
             }
           });
@@ -1850,7 +1855,7 @@ public class WollMuxBar
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       error(x.getMessage());
     }
   }
@@ -1971,7 +1976,7 @@ public class WollMuxBar
    */
   synchronized public static void startWollMuxBar(List<String> args)
   {
-    Logger.debug(L.m("Starte WollMuxBar mit args '%1'.", niceArgs(args)));
+    LOGGER.debug(L.m("Starte WollMuxBar mit args '%1'.", niceArgs(args)));
     synchronized (startedCounter)
     {
       startedCounter++;
@@ -1993,7 +1998,7 @@ public class WollMuxBar
       }
       catch (Exception e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
 
@@ -2078,7 +2083,7 @@ public class WollMuxBar
       startedCounter--;
       if (startedCounter <= 0)
       {
-        Logger.debug(L.m("Beende WollMuxBar mit Status %1.", status));
+        LOGGER.debug(L.m("Beende WollMuxBar mit Status %1.", status));
         FifoHandler.terminate();
         System.exit(status);
       }
@@ -2146,13 +2151,13 @@ public class WollMuxBar
       }
       else if (callRemoteApplication(fifo, args))
       {
-        Logger.debug(L.m("%1: Entfernter Aufruf bestätigt.", randInt));
+        LOGGER.debug(L.m("%1: Entfernter Aufruf bestätigt.", randInt));
         // startWollMuxBar(args) wird in der entfernten WollMuxBar ausgeführt.
         System.exit(0); // terminate() hier nicht notwendig (noch keine instanz)
       }
       else
       {
-        Logger.debug(L.m("%1: Entfernter Aufruf missglückt.", randInt));
+        LOGGER.debug(L.m("%1: Entfernter Aufruf missglückt.", randInt));
         startFifoListener(fifo);
         // startWollMuxBar(args) wird indirekt aufgerufen, da das obige
         // callRemoteApplication() bereits in die Pipe geschrieben hat und
@@ -2169,7 +2174,7 @@ public class WollMuxBar
      */
     private static void startFifoListener(final File fifo)
     {
-      Logger.debug(L.m("%1: Starte Fifo-Listener mit Fifo-Pipe '%2'.", randInt, fifo));
+      LOGGER.debug(L.m("%1: Starte Fifo-Listener mit Fifo-Pipe '%2'.", randInt, fifo));
       fifoListenerThread = new Thread()
       {
         @Override
@@ -2198,15 +2203,14 @@ public class WollMuxBar
               }
               catch (ClassNotFoundException e)
               {
-                Logger.error(e);
+                LOGGER.error("", e);
               }
               ois.close();
             }
             catch (IOException e)
             {
-              Logger.debug(L.m("%1: Lesevorgang von FIFO-Pipe '%2' unterbrochen.",
-                randInt, fifo));
-              Logger.debug(e);
+              LOGGER.debug(L.m("%1: Lesevorgang von FIFO-Pipe '%2' unterbrochen.",
+                randInt, fifo), e);
             }
           }
         }
@@ -2234,7 +2238,7 @@ public class WollMuxBar
     private static boolean callRemoteApplication(final File fifo,
         final List<String> args)
     {
-      Logger.debug(L.m("%1: Versuche entfernte WollMuxBar aufzurufen mit '%2'.",
+      LOGGER.debug(L.m("%1: Versuche entfernte WollMuxBar aufzurufen mit '%2'.",
         randInt, niceArgs(args)));
       final boolean[] fertig = new boolean[] { false };
       Thread t = new Thread()
@@ -2258,7 +2262,7 @@ public class WollMuxBar
           }
           catch (Exception e)
           {
-            Logger.error(e);
+            LOGGER.error("", e);
           }
         }
       };
@@ -2288,9 +2292,9 @@ public class WollMuxBar
       {
         if (fifo != null)
         {
-          Logger.debug(L.m("%1: Lösche fifo-File '%2'.", randInt, fifo));
+          LOGGER.debug(L.m("%1: Lösche fifo-File '%2'.", randInt, fifo));
           if (!fifo.delete()) {
-            Logger.debug(L.m("fifo.delete fehlgeschlagen!"));
+            LOGGER.debug(L.m("fifo.delete fehlgeschlagen!"));
           }
         }
         fifoListenerThread = null;
@@ -2334,13 +2338,13 @@ public class WollMuxBar
         }
         catch (Exception x)
         {
-          Logger.error(
+          LOGGER.error(
             L.m("Fehler beim Lesen von '%1'", wollmuxbarConfFile.toString()), x);
         }
       }
       else
       {
-        Logger.debug(L.m(
+        LOGGER.debug(L.m(
           "Die Verwendung der Konfigurationsdatei '%1' ist deaktiviert. Sie wird nicht ausgewertet!",
           wollmuxbarConfFile.toString()));
       }
@@ -2354,11 +2358,11 @@ public class WollMuxBar
 
     try
     {
-      Logger.debug(L.m("WollMuxBar gestartet"));
+      LOGGER.debug(L.m("WollMuxBar gestartet"));
 
       if (combinedConf.query("Symbolleisten").count() == 0)
       {
-        Logger.error(WOLLMUX_CONFIG_ERROR_MESSAGE);
+        LOGGER.error(WOLLMUX_CONFIG_ERROR_MESSAGE);
         JOptionPane.showMessageDialog(null, WOLLMUX_CONFIG_ERROR_MESSAGE,
           L.m("Fehlerhafte Konfiguration"), JOptionPane.ERROR_MESSAGE);
       }
@@ -2380,7 +2384,7 @@ public class WollMuxBar
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 

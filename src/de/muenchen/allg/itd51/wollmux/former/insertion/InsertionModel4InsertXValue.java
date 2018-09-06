@@ -43,6 +43,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XTextRange;
@@ -52,7 +55,6 @@ import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
@@ -61,11 +63,15 @@ import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 
 /**
  * Stellt eine Einfügestelle im Dokument (insertValue oder insertFormValue) dar.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class InsertionModel4InsertXValue extends InsertionModel
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(InsertionModel4InsertXValue.class);
+
   /**
    * Siehe {@link #autosep}.
    */
@@ -405,7 +411,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
     {
       if (id != dataId)
       {
-        Logger.error(L.m("Event für eine ID erhalten, die ich nicht kenne: %1",
+        LOGGER.error(L.m("Event für eine ID erhalten, die ich nicht kenne: %1",
           id.toString()));
         return;
       }

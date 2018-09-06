@@ -68,6 +68,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
@@ -85,7 +88,6 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.Datasource;
@@ -96,6 +98,9 @@ import de.muenchen.allg.itd51.wollmux.dialog.Common;
 
 public class MailMerge
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(MailMerge.class);
+
   /**
    * Anzahl Millisekunden, die maximal gewartet wird, bis alle Datensätze für den
    * Serienbrief aus der Datenbank gelesen wurden.
@@ -125,7 +130,7 @@ public class MailMerge
     }
     catch (Exception x)
     {
-      Logger.error(L.m("Kann DocumentSettings nicht auslesen"), x);
+      LOGGER.error(L.m("Kann DocumentSettings nicht auslesen"), x);
       return;
     }
 
@@ -134,7 +139,7 @@ public class MailMerge
     String table = (String) UNO.getProperty(settings, "CurrentDatabaseCommand");
     Integer type = (Integer) UNO.getProperty(settings, "CurrentDatabaseCommandType");
 
-    Logger.debug("Ausgewählte Datenquelle: \"" + datasource
+    LOGGER.debug("Ausgewählte Datenquelle: \"" + datasource
       + "\"  Tabelle/Kommando: \"" + table + "\"  Typ: \"" + type + "\"");
 
     mailMerge(pmod, datasource, table, type, offerSelection);
@@ -181,7 +186,7 @@ public class MailMerge
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return;
     }
 
@@ -193,7 +198,7 @@ public class MailMerge
     }
     catch (TimeoutException e)
     {
-      Logger.error(
+      LOGGER.error(
         L.m("Konnte Daten für Serienbrief nicht aus der Datenquelle auslesen"), e);
       return;
     }
@@ -253,7 +258,7 @@ public class MailMerge
         }
         catch (Exception e)
         {
-          Logger.error(
+          LOGGER.error(
             L.m("Spalte \"%1\" fehlt unerklärlicherweise => Abbruch des Drucks",
               column), e);
           return;
@@ -316,9 +321,8 @@ public class MailMerge
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
-      ;
     }
 
     public void makeProgress()
@@ -340,9 +344,8 @@ public class MailMerge
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
-      ;
     }
 
     public void close()
@@ -360,7 +363,7 @@ public class MailMerge
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
       ;
     }
@@ -458,14 +461,13 @@ public class MailMerge
           }
           catch (Exception x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
             synchronized (result)
             {
               result[0] = true;
               result.notifyAll();
             }
           }
-          ;
         }
       });
 
@@ -479,7 +481,7 @@ public class MailMerge
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return false;
     }
   }
@@ -829,7 +831,7 @@ public class MailMerge
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
 
     return results;
@@ -948,7 +950,7 @@ public class MailMerge
         }
         catch (Exception x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
         }
       }
 
@@ -966,7 +968,7 @@ public class MailMerge
       }
       catch (Exception x)
       {
-        Logger.error(L.m("Kann DocumentSettings nicht auslesen"), x);
+        LOGGER.error(L.m("Kann DocumentSettings nicht auslesen"), x);
         return;
       }
       String datasource =
@@ -1018,17 +1020,17 @@ public class MailMerge
       }
       catch (Exception e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
 
     /**
      * Erstellt die GUI für die Auswahl der Datenquelle/Tabelle für den
      * SuperMailMerge. Darf nur im EDT aufgerufen werden.
-     * 
+     *
      * Diese Methode wird indirekt per Reflection aufgerufen (daher keine
      * "unused"-Warnung)
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     @SuppressWarnings("unused")
@@ -1256,7 +1258,7 @@ public class MailMerge
           }
           catch (Exception x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
             return;
           }
         }
@@ -1276,7 +1278,7 @@ public class MailMerge
         }
         catch (Exception x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
           return;
         }
       }
@@ -1308,7 +1310,7 @@ public class MailMerge
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
 
@@ -1364,9 +1366,8 @@ public class MailMerge
               }
               catch (Exception x)
               {
-                Logger.error(x);
+                LOGGER.error("", x);
               }
-              ;
             }
           });
           todo.notifyAll();
@@ -1374,13 +1375,13 @@ public class MailMerge
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
 
     /**
      * Leert die {@link #todo}-Liste.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private void clearTodo()
@@ -1438,15 +1439,14 @@ public class MailMerge
             }
             catch (Exception x)
             {
-              Logger.error(x);
+              LOGGER.error("", x);
             }
-            ;
           }
         });
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
 

@@ -41,11 +41,13 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.UnknownIDException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.ComboboxMergeDescriptor;
@@ -56,12 +58,16 @@ import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 
 /**
  * Verwaltet eine Liste von InsertionModels
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class InsertionModelList implements Iterable<InsertionModel>
 {
-  private final static String COMBO_PARAM_ID = "ComboBoxWert";
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(InsertionModelList.class);
+
+  private static final String COMBO_PARAM_ID = "ComboBoxWert";
 
   /**
    * Die Liste der {@link InsertionModel}s.
@@ -166,7 +172,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
     IDManager.ID comboIdd = combo.getId();
     if (comboIdd == null)
     {
-      Logger.error(L.m("Programmfehler: Durch Merge erstellte ComboBox hat keine ID bekommen"));
+      LOGGER.error(L.m("Programmfehler: Durch Merge erstellte ComboBox hat keine ID bekommen"));
       return;
     }
     String comboId = comboIdd.toString();
@@ -186,7 +192,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
           }
           catch (UnknownIDException e)
           {
-            Logger.error(L.m("Programmfehler"), e);
+            LOGGER.error(L.m("Programmfehler"), e);
             return;
           }
 
@@ -263,7 +269,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
         }
         catch (NodeNotFoundException e)
         {
-          Logger.error(L.m("Kann nicht passieren"), e);
+          LOGGER.error(L.m("Kann nicht passieren"), e);
           return;
         }
 

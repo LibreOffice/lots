@@ -1,5 +1,8 @@
 package de.muenchen.allg.itd51.wollmux.document.commands;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.container.XEnumeration;
 import com.sun.star.text.XTextRange;
 
@@ -7,15 +10,18 @@ import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.UpdateFields;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Dieser Executor hat die Aufgabe alle updateFields-Befehle zu verarbeiten.
  */
 class TextFieldUpdater extends AbstractExecutor
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(TextFieldUpdater.class);
+
   /**
-   * 
+   *
    */
   private final DocumentCommandInterpreter documentCommandInterpreter;
 
@@ -86,7 +92,7 @@ class TextFieldUpdater extends AbstractExecutor
         }
         catch (java.lang.Exception e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
     }

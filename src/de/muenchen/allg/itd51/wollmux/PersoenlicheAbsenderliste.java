@@ -4,13 +4,15 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -20,6 +22,10 @@ import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 
 public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALChangeEventListener>
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(PersoenlicheAbsenderliste.class);
+
   private static PersoenlicheAbsenderliste instance;
   
   public static PersoenlicheAbsenderliste getInstance()
@@ -76,10 +82,10 @@ public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALCha
     {
       if ( ! WollMuxSingleton.getInstance().isNoConfig()) // nur wenn wir eine wollmux.conf haben
       {
-        Logger.log(L.m(
+        LOGGER.info(L.m(
           "Keine Einstellung für SENDER_DISPLAYTEMPLATE gefunden! Verwende Fallback: %1",
           DEFAULT_SENDER_DISPLAYTEMPLATE));
-        
+
       }
       // SENDER_DISPLAYTEMPLATE sollte eigentlich verpflichtend sein und wir
       // sollten an dieser Stelle einen echten Error loggen bzw. eine
@@ -112,10 +118,12 @@ public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALCha
    */
   public void addPALChangeEventListener(XPALChangeEventListener listener)
   {
-    Logger.debug2("PersoenlicheAbsenderliste::addPALChangeEventListener()");
-  
-    if (listener == null) return;
-  
+    LOGGER.trace("PersoenlicheAbsenderliste::addPALChangeEventListener()");
+
+    if (listener == null) {
+      return;
+    }
+
     Iterator<XPALChangeEventListener> i = registeredPALChangeListener.iterator();
     while (i.hasNext())
     {
@@ -128,14 +136,14 @@ public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALCha
   /**
    * Diese Methode deregistriert einen XPALChangeEventListener wenn er bereits
    * registriert war.
-   * 
+   *
    * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen werden,
    * sondern jeder Aufruf muss über den EventHandler laufen. Deswegen exportiert
    * PersoenlicheAbsenderliste auch nicht das XPALChangedBroadcaster-Interface.
    */
   public void removePALChangeEventListener(XPALChangeEventListener listener)
   {
-    Logger.debug2("PersoenlicheAbsenderliste::removePALChangeEventListener()");
+    LOGGER.trace("PersoenlicheAbsenderliste::removePALChangeEventListener()");
     Iterator<XPALChangeEventListener> i = registeredPALChangeListener.iterator();
     while (i.hasNext())
     {

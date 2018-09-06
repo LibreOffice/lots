@@ -52,11 +52,13 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Verwaltet die Konfiguration der WollMuxbar und bietet einen Dialog zum Ändern
@@ -64,6 +66,10 @@ import de.muenchen.allg.itd51.wollmux.core.util.Logger;
  */
 public class WollMuxBarConfig
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(WollMuxBarConfig.class);
+
   /**
    * Titel des WollMuxBar-Fensters (falls nicht anders konfiguriert).
    */
@@ -1069,7 +1075,7 @@ public class WollMuxBarConfig
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       JOptionPane.showMessageDialog(parent, L.m(
         "Beim Speichern ist ein Fehler aufgetreten:\n%1", x.getMessage()),
         L.m("Fehler beim Speichern"), JOptionPane.ERROR_MESSAGE);
@@ -1164,7 +1170,7 @@ public class WollMuxBarConfig
     }
     catch (NumberFormatException x)
     {
-      Logger.error(L.m(
+      LOGGER.error(L.m(
         "Fehlerhafte Font-Zoom Angabe: '%1' ist keine Zahl ", fontzoom));
     }
     return value;
@@ -1199,7 +1205,7 @@ public class WollMuxBarConfig
       }
       catch (NumberFormatException x)
       {
-        Logger.error(L.m(
+        LOGGER.error(L.m(
           "Fehlerhafte X/Y Angabe: '%1' ist weder Zahl noch 'max', 'min', 'auto' oder 'center'",
           xy));
       }
@@ -1226,7 +1232,7 @@ public class WollMuxBarConfig
       }
       catch (NumberFormatException x)
       {
-        Logger.error(L.m(
+        LOGGER.error(L.m(
           "Fehlerhafte WIDTH/HEIGHT Angabe: '%1' ist weder Zahl noch 'max' oder 'auto'",
           widthOrHeight));
       }
@@ -1251,7 +1257,7 @@ public class WollMuxBarConfig
       }
       catch (NumberFormatException x)
       {
-        Logger.error(L.m(
+        LOGGER.error(L.m(
           "Fehlerhafte Fontzoom Angabe: '%1' ist keine Zahl", zoom));
       }
     }
@@ -1278,7 +1284,7 @@ public class WollMuxBarConfig
     else if ("UpAndAway".equalsIgnoreCase(windowMode))
       windowModeInt = WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE;
     else
-      Logger.error(L.m("Ununterstützer MODE für WollMuxBar-Fenster: '%1'",
+      LOGGER.error(L.m("Ununterstützer MODE für WollMuxBar-Fenster: '%1'",
         windowMode));
     return windowModeInt;
   }
@@ -1303,7 +1309,7 @@ public class WollMuxBarConfig
     else if ("IconifyAndPopup".equalsIgnoreCase(trayIconMode))
       trayIconModeInt = WollMuxBarConfig.ICONIFY_AND_POPUP_TRAY_ICON;
     else
-      Logger.error(L.m(
+      LOGGER.error(L.m(
         "Ununterstützer Wert von TRAYICON für WollMuxBar-Fenster: '%1'",
         trayIconMode));
     return trayIconModeInt;

@@ -9,10 +9,15 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class Combobox extends UIElementBase
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(Combobox.class);
+
   private JComboBox<?> combo;
 
   public Combobox(String id, JComboBox<?> combo, Object layoutConstraints,
@@ -49,7 +54,7 @@ public class Combobox extends UIElementBase
       }
       catch (BadLocationException x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
         return "";
       }
     }

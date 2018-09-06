@@ -26,24 +26,29 @@
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.print;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxClassLoader;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.functions.ExternalFunction;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Eine durch ein ConfigThingy beschriebene externe Druckfunktion.
- * 
+ *
  * @author christoph.lutz
  */
 public class PrintFunction implements Comparable<PrintFunction>
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(PrintFunction.class);
 
   private ExternalFunction func = null;
 
@@ -103,7 +108,7 @@ public class PrintFunction implements Comparable<PrintFunction>
         }
         catch (java.lang.Exception e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
     });

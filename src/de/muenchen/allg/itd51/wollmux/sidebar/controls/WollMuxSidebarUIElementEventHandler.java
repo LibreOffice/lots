@@ -7,10 +7,12 @@ import java.util.Iterator;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.MultiOpenDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.UIElementEventHandler;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar;
@@ -21,11 +23,15 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 /**
  * EventHandler für die WollMux-Sidebar. Der EventHandler behandelt alle WollMux-Aktionen,
  * die von Steuerelementen in der Sidebar ausgelöst werden, z.B. das Öffnen einer
- * WollMux-Vorlage. 
- * 
+ * WollMux-Vorlage.
+ *
  */
 public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandler
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(WollMuxSidebarUIElementEventHandler.class);
+
   private WollMuxBarEventHandler eventHandler;
 
   public WollMuxSidebarUIElementEventHandler(WollMuxBarEventHandler eventHandler)
@@ -138,7 +144,7 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
       }
       catch (IOException x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
         showError(L.m("Fehler beim Download der Datei:\n%1", x.getMessage()));
         return;
       }
@@ -153,7 +159,7 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
             @Override
             public void handle(Exception x)
             {
-              Logger.error(x);
+              LOGGER.error("", x);
               showError(x.getMessage());
             }
           });
@@ -175,7 +181,7 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       showError(x.getMessage());
     }
   }
@@ -196,12 +202,12 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     }
     else
     {
-      Logger.error(L.m("ACTION \"%1\" erfordert mindestens ein Attribut FRAG_ID",
+      LOGGER.error(L.m("ACTION \"%1\" erfordert mindestens ein Attribut FRAG_ID",
         action));
     }
     return fragId.toString();
   }
-  
+
   private void showError(String errorMsg)
   {
     JOptionPane.showMessageDialog(null, L.m(

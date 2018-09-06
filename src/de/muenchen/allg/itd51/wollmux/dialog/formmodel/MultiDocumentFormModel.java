@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
@@ -16,7 +19,6 @@ import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
@@ -36,6 +38,9 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 public class MultiDocumentFormModel implements FormModel
 {
   private Vector<FormModel> formModels;
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(MultiDocumentFormModel.class);
 
   private final ConfigThingy formFensterConf;
 
@@ -393,8 +398,10 @@ public class MultiDocumentFormModel implements FormModel
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(L.m("Dokument '%1' enthält keine gültige Formularbeschreibung",
-          documentController.getFrameController().getTitle()), e);
+        LOGGER.error(
+            L.m("Dokument '%1' enthält keine gültige Formularbeschreibung",
+                documentController.getFrameController().getTitle()),
+            e);
       }
     }
   

@@ -39,6 +39,9 @@ import java.net.URLEncoder;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.bridge.UnoUrlResolver;
 import com.sun.star.bridge.XUnoUrlResolver;
@@ -61,16 +64,19 @@ import de.muenchen.allg.itd51.wollmux.XWollMux;
 import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 
 /**
  * Dient der thread-safen Kommunikation der WollMuxBar mit dem WollMux im OOo.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class WollMuxBarEventHandler
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(WollMuxBarEventHandler.class);
+
   /**
    * Die Event-Queue.
    */
@@ -157,14 +163,14 @@ public class WollMuxBarEventHandler
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
   /**
    * Startet OOo falls noetig und stellt Kontakt mit dem WollMux her, um über den
    * aktuellen Senderbox-Inhalt informiert zu werden.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void connectWithWollMux()
@@ -241,13 +247,13 @@ public class WollMuxBarEventHandler
 
   /**
    * Schiebt Event e in die Queue.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void handle(Event e)
   {
     if (WollMuxFiles.isDebugMode())
-      Logger.debug2(L.m("Füge %1 zur Event-Queue hinzu",
+      LOGGER.trace(L.m("Füge %1 zur Event-Queue hinzu",
         e.getClass().getSimpleName()));
     synchronized (eventQueue)
     {
@@ -284,7 +290,7 @@ public class WollMuxBarEventHandler
       }
       catch (UnsupportedEncodingException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
 
@@ -342,7 +348,7 @@ public class WollMuxBarEventHandler
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
   }
@@ -425,14 +431,14 @@ public class WollMuxBarEventHandler
         }
         catch (Exception x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
         }
       }
     }
 
     /**
      * Wird zur Zeit (2006-04-19) nicht verwendet.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     @Override
@@ -467,13 +473,13 @@ public class WollMuxBarEventHandler
           processEvent(e);
           if (e instanceof TerminateEvent)
           {
-            Logger.debug(L.m("WollMuxBarEventHandler terminating"));
+            LOGGER.debug(L.m("WollMuxBarEventHandler terminating"));
             return;
           }
         }
         catch (InterruptedException e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
     }
@@ -486,7 +492,7 @@ public class WollMuxBarEventHandler
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
   }
@@ -563,7 +569,7 @@ public class WollMuxBarEventHandler
         }
         catch (Exception y)
         {
-          Logger.error(L.m("Konnte keine Verbindung zu OpenOffice/LibreOffice herstellen"));
+          LOGGER.error(L.m("Konnte keine Verbindung zu OpenOffice/LibreOffice herstellen"));
           wollmuxbar.connectionFailedWarning();
 
           return null;
@@ -586,7 +592,7 @@ public class WollMuxBarEventHandler
       }
       catch (Exception e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
         // Aber wir machen trotzdem weiter
       }
 
@@ -600,7 +606,7 @@ public class WollMuxBarEventHandler
 
       if (remoteWollMux == null)
       {
-        Logger.error(L.m("Konnte keine Verbindung zum WollMux-Modul in OpenOffice herstellen"));
+        LOGGER.error(L.m("Konnte keine Verbindung zum WollMux-Modul in OpenOffice herstellen"));
         if (WollMuxFiles.externalWollMuxEnabled())
           remoteWollMux = new WollMux(ctx);
         else
@@ -621,7 +627,7 @@ public class WollMuxBarEventHandler
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
       return mux;
     }

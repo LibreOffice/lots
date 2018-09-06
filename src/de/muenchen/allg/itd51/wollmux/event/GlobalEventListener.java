@@ -50,6 +50,9 @@
 
 package de.muenchen.allg.itd51.wollmux.event;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.frame.XModel;
@@ -62,7 +65,6 @@ import com.sun.star.uno.AnyConverter;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager.Info;
 
@@ -78,6 +80,10 @@ import de.muenchen.allg.itd51.wollmux.document.DocumentManager.Info;
  */
 public class GlobalEventListener implements com.sun.star.document.XEventListener
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(GlobalEventListener.class);
+
   private static final String ON_SAVE_AS = "OnSaveAs";
 
   private static final String ON_SAVE = "OnSave";
@@ -125,7 +131,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     }
     catch (Throwable t)
     {
-      Logger.error(t);
+      LOGGER.error("", t);
     }
   }
 
@@ -294,7 +300,9 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
         "/WollMuxMailMerge", idx - 20) || (fileName.equals("private:object") && hidden));
 
     // debug-Meldung bewusst ohne L.m gewählt (WollMux halt dich raus!)
-    if (mmdoc) Logger.debug2("temporary document: " + url);
+    if (mmdoc) {
+      LOGGER.trace("temporary document: " + url);
+    }
     return mmdoc;
   }
 
@@ -317,7 +325,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     }
     catch (IllegalArgumentException e)
     {
-      Logger.error(L.m("das darf nicht vorkommen!"), e);
+      LOGGER.error(L.m("das darf nicht vorkommen!"), e);
       return false;
     }
   }

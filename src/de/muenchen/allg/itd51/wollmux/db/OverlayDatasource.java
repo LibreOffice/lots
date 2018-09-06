@@ -41,11 +41,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.checker.DatasetChecker;
 import de.muenchen.allg.itd51.wollmux.db.checker.MatchAllDatasetChecker;
 
@@ -67,11 +69,15 @@ import de.muenchen.allg.itd51.wollmux.db.checker.MatchAllDatasetChecker;
  * In der Ergebnisdatenquelle sind alle Spalten unter ihren ursprünglichen Namen
  * verfügbar (Unterschied zu {@link AttachDatasource}). Konflikte werden über den
  * MODE-Spezifizierer aufgelöst (siehe wollmux.conf Doku).<br>
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
 public class OverlayDatasource implements Datasource
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(OverlayDatasource.class);
+
   private String name;
 
   private String source1Name;
@@ -515,7 +521,7 @@ public class OverlayDatasource implements Datasource
         }
         catch (ColumnNotFoundException x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
         }
       }
 
@@ -569,7 +575,7 @@ public class OverlayDatasource implements Datasource
         }
         catch (ColumnNotFoundException x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
         }
       }
 

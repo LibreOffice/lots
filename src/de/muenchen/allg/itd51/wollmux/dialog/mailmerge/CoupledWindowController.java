@@ -26,7 +26,7 @@
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
@@ -37,6 +37,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.awt.XTopWindow;
 import com.sun.star.awt.XTopWindowListener;
 import com.sun.star.lang.EventObject;
@@ -45,7 +48,6 @@ import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Diese Klasse steuert die logische Ankopplung von eigentlich unabhängigen Fenstern
@@ -54,7 +56,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.Logger;
  * ein angeoppeltes Fenster den Fokus an ein Fenster, das nicht vom
  * CoupledWindowController überwacht wird, so werden alle angekoppelten Fenster
  * unsichtbar gestellt.
- * 
+ *
  * ACHTUNG: Die Windowmanager unter Windows und auf dem Basisclient verhalten sich
  * unterschiedlich und es werden unterschiedliche Ereignisse für gleiche Aktionen
  * generiert: z.B. erhält die Seriendruckleiste (das erste Beispiel eines
@@ -68,11 +70,14 @@ import de.muenchen.allg.itd51.wollmux.core.util.Logger;
  * Arbeit und Probiererei nun endlich in den meisten Fällen funktioniert. Wenn hier
  * etwas geändert werden muss, dann unbedingt unter Windows und auf dem Basisclient
  * ausführlich testen!!!
- * 
+ *
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
 public class CoupledWindowController
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(CoupledWindowController.class);
 
   /**
    * Enthält alle mit addCoupledWindow registrierten angekoppelten Fenster. Dieses
@@ -139,11 +144,11 @@ public class CoupledWindowController
      * wenn bereits der nächste - dann gültige - Warte-Thread angestossen wurde). Ist
      * kein aktives Fenster vorhanden, so werden alle angekoppelten Fenster
      * unsichtbar gemacht.
-     * 
+     *
      * @param nr
      *          eindeutige Nummer des timeout-Events, die mit lastValidTimeoutEvent
      *          übereinstimmen muss, damit das Event ausgeführt wird.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
     public void timeoutEvent(int nr)
@@ -152,19 +157,19 @@ public class CoupledWindowController
       {
         if (nr != lastValidTimeoutEvent)
         {
-          Logger.debug2(L.m("ignoriere ungültiges timeout event"));
+          LOGGER.trace(L.m("ignoriere ungültiges timeout event"));
           return;
         }
 
         if (activeWindow[0] == null)
         {
-          Logger.debug2(L.m("Timeout und kein aktives Fenster - stelle angekoppelte Fenster unsichtbar"));
+          LOGGER.trace(L.m("Timeout und kein aktives Fenster - stelle angekoppelte Fenster unsichtbar"));
           setCoupledWindowsVisible(false);
           acceptMainWindowOnly = true;
         }
         else
         {
-          Logger.debug2(L.m("Timeout aber keine Aktion da Fenster #%1 aktiv.",
+          LOGGER.trace(L.m("Timeout aber keine Aktion da Fenster #%1 aktiv.",
             Integer.valueOf(activeWindow[0].hashCode())));
         }
       }
@@ -173,7 +178,7 @@ public class CoupledWindowController
     /**
      * Registriert die Aktivierung eines Fensters, das durch den Schlüssel key
      * eindeutig beschrieben wird.
-     * 
+     *
      * @param key
      *          der Schlüssel des derzeit aktiven Fensters, mit dem das Fenster
      *          später deaktiviert werden kann.
@@ -182,7 +187,7 @@ public class CoupledWindowController
      *          Hauptfenster das acceptMainWindow-Flag zurücksetzen darf. Über diesen
      *          Parameter kann angegeben werden, ob das Fenster als Hauptfenster
      *          interpretiert gewertet werden soll.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
     public void activationEvent(XTopWindowOrAWTWindow key, boolean isMainWindow)
@@ -191,7 +196,7 @@ public class CoupledWindowController
 
       if (acceptMainWindowOnly && !isMainWindow)
       {
-        Logger.debug2(L.m("Aktivierung ignoriert da Fenster #%1 kein Hauptfenster.",
+        LOGGER.trace(L.m("Aktivierung ignoriert da Fenster #%1 kein Hauptfenster.",
           Integer.valueOf(key.hashCode())));
         return;
       }
@@ -206,7 +211,7 @@ public class CoupledWindowController
           acceptMainWindowOnly = false;
         }
 
-        Logger.debug2(L.m("Aktivierung von Fenster #%1",
+        LOGGER.trace(L.m("Aktivierung von Fenster #%1",
           Integer.valueOf(activeWindow[0].hashCode())));
       }
     }
@@ -217,9 +222,9 @@ public class CoupledWindowController
      * mit dem das Fenster aktiviert wurde, sonst wird auch nichts unternommen. Eine
      * bestimmte Zeit nach dem Deaktivieren des Fensters wird ein Timeout-Event
      * abgesetzt.
-     * 
+     *
      * @param key
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
     public void deactivationEvent(XTopWindowOrAWTWindow key)
@@ -229,14 +234,14 @@ public class CoupledWindowController
       {
         if (key.equals(activeWindow[0]))
         {
-          Logger.debug2(L.m("Deaktivierung von Fenster #%1",
+          LOGGER.trace(L.m("Deaktivierung von Fenster #%1",
             Integer.valueOf(key.hashCode())));
           activeWindow[0] = null;
           startWaitForTimeout();
         }
         else
         {
-          Logger.debug2(L.m("Deaktierung ignoriert, da Fenster #%1 nicht aktiv.",
+          LOGGER.trace(L.m("Deaktierung ignoriert, da Fenster #%1 nicht aktiv.",
             Integer.valueOf(key.hashCode())));
         }
       }
@@ -246,7 +251,7 @@ public class CoupledWindowController
      * Erzeugt nach einer bestimmten Zeit ein Timeout-Event über das die
      * angekoppelten Fenster unsichtbar geschalten werden, wenn bei Ausführung des
      * Timeout-Events kein Fenster aktiv ist.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
     private void startWaitForTimeout()
@@ -254,6 +259,7 @@ public class CoupledWindowController
       final int nr = ++lastValidTimeoutEvent;
       Thread t = new Thread()
       {
+        @Override
         public void run()
         {
           try
@@ -274,23 +280,27 @@ public class CoupledWindowController
      */
     private final XTopWindowListener topWindowListener = new XTopWindowListener()
     {
+      @Override
       public void windowDeactivated(EventObject arg0)
       {
         windowState.deactivationEvent(new XTopWindowOrAWTWindow(
           UNO.XTopWindow(arg0.Source)));
       }
 
+      @Override
       public void windowActivated(EventObject arg0)
       {
         windowState.activationEvent(new XTopWindowOrAWTWindow(
           UNO.XTopWindow(arg0.Source)), true);
       }
 
+      @Override
       public void windowNormalized(EventObject arg0)
       {
       // nicht relevant
       }
 
+      @Override
       public void windowMinimized(EventObject arg0)
       {
         synchronized (activeWindow)
@@ -301,21 +311,25 @@ public class CoupledWindowController
         setCoupledWindowsVisible(false);
       }
 
+      @Override
       public void windowClosed(EventObject arg0)
       {
       // nicht relevant
       }
 
+      @Override
       public void windowClosing(EventObject arg0)
       {
       // nicht relevant
       }
 
+      @Override
       public void windowOpened(EventObject arg0)
       {
       // nicht relevant
       }
 
+      @Override
       public void disposing(EventObject arg0)
       {
       // nicht relevant
@@ -327,22 +341,26 @@ public class CoupledWindowController
      */
     private final WindowListener coupledWindowListener = new WindowListener()
     {
+      @Override
       public void windowActivated(WindowEvent e)
       {
         windowState.activationEvent(
           new XTopWindowOrAWTWindow((Window) e.getSource()), false);
       }
 
+      @Override
       public void windowClosed(WindowEvent e)
       {
       // nicht relevant
       }
 
+      @Override
       public void windowClosing(WindowEvent e)
       {
       // nicht relevant
       }
 
+      @Override
       public void windowDeactivated(WindowEvent e)
       {
         // Wird der Fokus an ein Unterfenster eines registrierten Fensters
@@ -371,16 +389,19 @@ public class CoupledWindowController
           (Window) e.getSource()));
       }
 
+      @Override
       public void windowDeiconified(WindowEvent e)
       {
       // nicht relevant
       }
 
+      @Override
       public void windowIconified(WindowEvent e)
       {
       // nicht relevant
       }
 
+      @Override
       public void windowOpened(WindowEvent e)
       {
       // nicht relevant
@@ -394,10 +415,10 @@ public class CoupledWindowController
      * Bei der Prüfung, ob das Fenster bereits registriert ist, werden alle
      * WeakReference-Objekte aus der Liste collectedChildWindows gelöscht, deren
      * referenzierte Objekte nicht mehr existent sind.
-     * 
+     *
      * @param childWindow
      *          das aufzusammelnde Kindfenster
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
     private void collectChildWindow(Window childWindow)
@@ -416,7 +437,7 @@ public class CoupledWindowController
         }
       }
 
-      Logger.debug(L.m("Registriere Kindfenster #%1",
+      LOGGER.debug(L.m("Registriere Kindfenster #%1",
         Integer.valueOf(childWindow.hashCode())));
       collectedChildWindows.add(new WeakReference<Window>(childWindow));
       childWindow.addWindowListener(coupledWindowListener);
@@ -427,35 +448,35 @@ public class CoupledWindowController
    * Koppelt das AWT-Window window an das Hauptfenster an. Die Methode muss
    * aufgerufen werden, solange das Fenster window unsichtbar und nicht aktiv ist
    * (also z.B. vor dem Aufruf von window.setVisible(true)).
-   * 
+   *
    * @param window
    *          das Fenster, das an das Hauptfenster angekoppelt werden soll.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public void addCoupledWindow(Window window)
   {
     if (window == null) return;
     CoupledWindow toAdd = new CoupledAWTWindow(window);
-    Logger.debug2("addCoupledWindow #" + toAdd.hashCode());
+    LOGGER.trace("addCoupledWindow #" + toAdd.hashCode());
     toAdd.addWindowListener(windowState.coupledWindowListener);
     coupledWindows.add(toAdd);
   }
 
   /**
    * Löst die Bindung eines angekoppelten Fensters window an das Hauptfenster.
-   * 
+   *
    * @param window
    *          das Fenster, dessen Bindung zum Hauptfenster gelöst werden soll. Ist
    *          das Fenster nicht angekoppelt, dann passiert nichts.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public void removeCoupledWindow(Window window)
   {
     if (window == null) return;
     CoupledWindow toRemove = new CoupledAWTWindow(window);
-    Logger.debug2("removeCoupledWindow #" + toRemove.hashCode());
+    LOGGER.trace("removeCoupledWindow #" + toRemove.hashCode());
     for (Iterator<CoupledWindow> iter = coupledWindows.iterator(); iter.hasNext();)
     {
       CoupledWindow w = iter.next();
@@ -470,7 +491,7 @@ public class CoupledWindowController
 
   /**
    * Diese Methode macht alle angekoppelten Fenster sichtbar oder unsichtbar.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private void setCoupledWindowsVisible(boolean visible)
@@ -485,10 +506,10 @@ public class CoupledWindowController
   /**
    * Registriert ein Hauptfenster in diesem CoupledWindowController und sollte immer
    * vor der Benutzung des Controllers aufgerufen werden.
-   * 
+   *
    * @param w
    *          Das XTopWindow welches das entsprechende Hauptfenster ist.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public void setTopWindow(XTopWindow w)
@@ -501,10 +522,10 @@ public class CoupledWindowController
   /**
    * Deregistriert ein Hauptfenster und sollte aufgerufen werden, wenn der Controller
    * nicht mehr benötigt wird und aufgeräumt werden kann.
-   * 
+   *
    * @param w
    *          Das XTopWindow welches früher als Hauptfenster diente.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public void unsetTopWindow(XTopWindow w)
@@ -517,7 +538,7 @@ public class CoupledWindowController
   /**
    * Gibt an, ob in diesem CoupledWindowController angekoppelte Fenster registriert
    * wurden.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public boolean hasCoupledWindows()
@@ -527,7 +548,7 @@ public class CoupledWindowController
 
   /**
    * Beschreibt ein beliebiges ankoppelbares Fenster.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private interface CoupledWindow
@@ -537,9 +558,9 @@ public class CoupledWindowController
      * auch den Fokus erhalten (Das ist eine unschöner Nebeneffekt der AWT-Methode
      * setVisible(...), der hier berücksichtigt ist). Ändert visible nicht den
      * Sichtbarkeitsstatus des Fenster, so hat diese Methode keine Auswirkung.
-     * 
+     *
      * @param visible
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
     public void setVisible(boolean visible);
@@ -549,7 +570,7 @@ public class CoupledWindowController
      * Hauptfenster mitkriegen kann, dass ein angekoppeltes Fenster den Fokus an ein
      * fremdes, nicht angekoppeles, Fenster verloren hat und somit auch alle
      * angekoppelten Fenster unsichtbar gestellt werden sollen.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-5.1)
      * @param listener
      */
@@ -558,7 +579,7 @@ public class CoupledWindowController
     /**
      * Entfernt einen mit addFocusListener(...) registrierten WindowListener vom
      * angkoppelten Fenster.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-5.1)
      * @param listener
      */
@@ -566,7 +587,7 @@ public class CoupledWindowController
 
     /**
      * Liefert true gdw this gecoupled ist mit w.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD-D101)
      */
     public boolean isSameWindow(Window w);
@@ -577,7 +598,7 @@ public class CoupledWindowController
    * java.awt.Window-Objekt zugrundeliegt und implementiert die Methoden hashCode()
    * und equals() damit das Objekt sinnvoll verglichen und in einer HashMap verwaltet
    * werden kann.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private static class CoupledAWTWindow implements CoupledWindow
@@ -589,12 +610,14 @@ public class CoupledWindowController
       this.window = window;
     }
 
+    @Override
     public void setVisible(final boolean visible)
     {
       try
       {
         javax.swing.SwingUtilities.invokeLater(new Runnable()
         {
+          @Override
           public void run()
           {
             try
@@ -610,12 +633,14 @@ public class CoupledWindowController
       {}
     }
 
+    @Override
     public void addWindowListener(final WindowListener l)
     {
       try
       {
         javax.swing.SwingUtilities.invokeLater(new Runnable()
         {
+          @Override
           public void run()
           {
             try
@@ -631,12 +656,14 @@ public class CoupledWindowController
       {}
     }
 
+    @Override
     public void removeWindowListener(final WindowListener l)
     {
       try
       {
         javax.swing.SwingUtilities.invokeLater(new Runnable()
         {
+          @Override
           public void run()
           {
             try
@@ -652,16 +679,19 @@ public class CoupledWindowController
       {}
     }
 
+    @Override
     public int hashCode()
     {
       return window.hashCode();
     }
 
+    @Override
     public boolean isSameWindow(Window w)
     {
       return this.window.equals(w);
     }
 
+    @Override
     public boolean equals(Object o)
     {
       try
@@ -686,7 +716,7 @@ public class CoupledWindowController
     {
       if (win == null)
       {
-        Logger.error(L.m("Großes Problem"));
+        LOGGER.error(L.m("Großes Problem"));
         throw new NullPointerException();
       }
       this.window = win;
@@ -698,17 +728,19 @@ public class CoupledWindowController
       this.window = UNO.XInterface(win);
       if (window == null)
       {
-        Logger.error(L.m("Großes Problem"));
+        LOGGER.error(L.m("Großes Problem"));
         throw new NullPointerException();
       }
       this.hash = UnoRuntime.generateOid(win).hashCode();
     }
 
+    @Override
     public int hashCode()
     {
       return hash;
     }
 
+    @Override
     public boolean equals(Object o)
     {
       if (o == null) return false;

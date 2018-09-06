@@ -39,6 +39,9 @@ package de.muenchen.allg.itd51.wollmux.comp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.comp.loader.FactoryHelper;
 import com.sun.star.container.XIndexAccess;
@@ -68,7 +71,6 @@ import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
 import de.muenchen.allg.itd51.wollmux.XWollMuxDocument;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
@@ -91,6 +93,8 @@ import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
 public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider,
     XWollMux
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(WollMux.class);
 
   /**
    * Dieses Feld entält eine Liste aller Services, die dieser UNO-Service
@@ -378,7 +382,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   @Override
   public void setCurrentSender(String sender, short idx)
   {
-    Logger.debug2("WollMux.setCurrentSender(\"" + sender + "\", " + idx + ")");
+    LOGGER.trace("WollMux.setCurrentSender(\"" + sender + "\", " + idx + ")");
     WollMuxEventHandler.handleSetSender(sender, idx);
   }
 
@@ -466,7 +470,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     }
     catch (java.lang.Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
       return "";
     }
   }

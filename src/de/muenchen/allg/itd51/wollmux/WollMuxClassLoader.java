@@ -6,12 +6,18 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 public class WollMuxClassLoader extends URLClassLoader
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(WollMuxClassLoader.class);
+
   private ArrayList<String> blacklist;
 
   private ArrayList<String> whitelist;
@@ -137,11 +143,11 @@ public class WollMuxClassLoader extends URLClassLoader
         }
         catch (MalformedURLException e)
         {
-          Logger.error(L.m("Fehlerhafte CLASSPATH-Angabe: \"%1\"", urlStr), e);
+          LOGGER.error(L.m("Fehlerhafte CLASSPATH-Angabe: \"%1\"", urlStr), e);
         }
       }
     }
-  
+
     StringBuilder urllist = new StringBuilder();
     URL[] urls = WollMuxClassLoader.getClassLoader().getURLs();
     for (int i = 0; i < urls.length; ++i)
@@ -149,19 +155,19 @@ public class WollMuxClassLoader extends URLClassLoader
       urllist.append(urls[i].toExternalForm());
       urllist.append("  ");
     }
-  
+
     for (String s : WollMuxClassLoader.BLACKLIST)
     {
       WollMuxClassLoader.getClassLoader().addBlacklisted(s);
     }
-  
+
     ConfigThingy confWhitelist = WollMuxFiles.getWollmuxConf().query("CPWHITELIST", 1);
     for (ConfigThingy w : confWhitelist)
     {
       WollMuxClassLoader.getClassLoader().addWhitelisted(w.toString());
     }
-  
-    Logger.debug("CLASSPATH=" + urllist);
+
+    LOGGER.debug("CLASSPATH=" + urllist);
   }
 
 }

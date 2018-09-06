@@ -3,17 +3,22 @@ package de.muenchen.allg.itd51.wollmux;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 
 public class ModalDialogs
 {
 
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(ModalDialogs.class);
+
   /**
    * Diese Methode erzeugt einen modalen Swing-Dialog zur Anzeige von Informationen
    * und kehrt erst nach Beendigung des Dialogs wieder zurück. Der sichtbare Text
    * wird dabei ab einer Länge von 50 Zeichen automatisch umgebrochen.
-   * 
+   *
    * @param sTitle
    *          Titelzeile des Dialogs
    * @param sMessage
@@ -27,7 +32,7 @@ public class ModalDialogs
   /**
    * Diese Methode erzeugt einen modalen Swing-Dialog zur Anzeige von Informationen
    * und kehrt erst nach Beendigung des Dialogs wieder zurück.
-   * 
+   *
    * @param sTitle
    *          Titelzeile des Dialogs
    * @param sMessage
@@ -46,10 +51,10 @@ public class ModalDialogs
   /**
    * Diese Methode erzeugt einen modalen Swing-Dialog zur Anzeige einer Frage
    * und kehrt erst nach Beendigung des Dialogs wieder zurück. Der sichtbare Text
-   * wird dabei ab einer Länge von 50 Zeichen automatisch umgebrochen. 
+   * wird dabei ab einer Länge von 50 Zeichen automatisch umgebrochen.
    * Wenn die Benutzerin oder der Benutzer "OK" geklickt hat, gibt die Methode
    * true zurück, andernfalls false.
-   * 
+   *
    * @param sTitle
    *          Titelzeile des Dialogs
    * @param sMessage
@@ -66,7 +71,7 @@ public class ModalDialogs
    * und kehrt erst nach Beendigung des Dialogs wieder zurück.
    * Wenn die Benutzerin oder der Benutzer "OK" geklickt hat, gibt die Methode
    * true zurück, andernfalls false.
-   * 
+   *
    * @param sTitle
    *          Titelzeile des Dialogs
    * @param sMessage
@@ -83,9 +88,9 @@ public class ModalDialogs
       javax.swing.JOptionPane.YES_NO_OPTION);
   }
 
-  private static boolean showDialog(java.lang.String sTitle, 
+  private static boolean showDialog(java.lang.String sTitle,
       java.lang.String sMessage, int margin, int messageType, int optionType)
-  {    
+  {
     boolean ret = false;
     try
     {
@@ -122,11 +127,11 @@ public class ModalDialogs
       if (retValue.intValue() == 0){
         ret = true;
       }
-      Logger.debug(retValue.toString());
+      LOGGER.debug(retValue.toString());
     }
     catch (Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
     return ret;
   }

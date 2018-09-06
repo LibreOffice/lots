@@ -2,12 +2,13 @@ package de.muenchen.allg.itd51.wollmux.event;
 
 import java.lang.reflect.Method;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.util.URL;
-
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Implementiert XNotifyingDispatch und kann alle Dispatch-URLs behandeln, die kein
@@ -19,11 +20,14 @@ import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 public class NotifyingDispatch extends BaseDispatch implements XNotifyingDispatch
 {
 
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(NotifyingDispatch.class);
+
   @Override
   public void dispatchWithNotification(URL url, PropertyValue[] props,
       XDispatchResultListener listener)
   {
-    Logger.debug2(this.getClass().getSimpleName() + ".dispatchWithNotification('"
+    LOGGER.trace(this.getClass().getSimpleName() + ".dispatchWithNotification('"
       + url.Complete + "')");
 
     String arg = getMethodArgument(url);
@@ -49,7 +53,7 @@ public class NotifyingDispatch extends BaseDispatch implements XNotifyingDispatc
     }
     catch (Throwable x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 

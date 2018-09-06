@@ -88,11 +88,13 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.JTextComponent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.controls.Box;
 import de.muenchen.allg.itd51.wollmux.dialog.controls.Button;
 import de.muenchen.allg.itd51.wollmux.dialog.controls.Checkbox;
@@ -111,6 +113,10 @@ import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
  */
 public class UIElementFactory
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(UIElementFactory.class);
+
   /**
    * Standardbreite für Textfelder und Textareas. Wird verwendet, wenn nicht mit
    * setTextfieldWidth() ein anderer Wert gesetzt wurde.
@@ -419,7 +425,7 @@ public class UIElementFactory
       }
       catch (Exception x)
       {
-        Logger.error(L.m("Fehlerhaftes Element des Typs \"combobox\""), x);
+        LOGGER.error(L.m("Fehlerhaftes Element des Typs \"combobox\""), x);
       }
 
       uiElement =
@@ -831,7 +837,7 @@ public class UIElementFactory
   {
     if (!supportedActions.contains(action))
     {
-      Logger.error(L.m("Ununterstützte ACTION \"%1\"", action));
+      LOGGER.error(L.m("Ununterstützte ACTION \"%1\"", action));
       return null;
     }
 
@@ -846,7 +852,7 @@ public class UIElementFactory
       }
       catch (NodeNotFoundException x)
       {
-        Logger.error(L.m("ACTION \"switchWindow\" erfordert WINDOW-Attribut"));
+        LOGGER.error(L.m("ACTION \"switchWindow\" erfordert WINDOW-Attribut"));
       }
     }
     else if (action.equals("openTemplate") || action.equals("openDocument"))
@@ -868,7 +874,7 @@ public class UIElementFactory
       }
       else
       {
-        Logger.error(L.m("ACTION \"%1\" erfordert mindestens ein Attribut FRAG_ID",
+        LOGGER.error(L.m("ACTION \"%1\" erfordert mindestens ein Attribut FRAG_ID",
           action));
       }
     }
@@ -877,14 +883,14 @@ public class UIElementFactory
       ConfigThingy ext = conf.query("EXT");
       if (ext.count() != 1)
       {
-        Logger.error(L.m("ACTION \"%1\" erfordert genau ein Attribut EXT", action));
+        LOGGER.error(L.m("ACTION \"%1\" erfordert genau ein Attribut EXT", action));
       }
       else
       {
         ConfigThingy url = conf.query("URL");
         if (url.count() != 1)
         {
-          Logger.error(L.m("ACTION \"%1\" erfordert genau ein Attribut URL", action));
+          LOGGER.error(L.m("ACTION \"%1\" erfordert genau ein Attribut URL", action));
         }
         else
         {
@@ -899,7 +905,7 @@ public class UIElementFactory
       ConfigThingy ext = conf.query("EXT");
       if (ext.count() != 1)
       {
-        Logger.error(L.m("ACTION \"%1\" erfordert genau ein Attribut EXT", action));
+        LOGGER.error(L.m("ACTION \"%1\" erfordert genau ein Attribut EXT", action));
       }
       else
       {
@@ -913,7 +919,7 @@ public class UIElementFactory
       ConfigThingy ext = conf.query("EXT");
       if (ext.count() != 1)
       {
-        Logger.error(L.m("ACTION \"%1\" erfordert genau ein Attribut EXT", action));
+        LOGGER.error(L.m("ACTION \"%1\" erfordert genau ein Attribut EXT", action));
       }
       else
       {
@@ -933,7 +939,7 @@ public class UIElementFactory
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(L.m("ACTION \"open\" erfordert die Angabe OPEN \"...\""));
+        LOGGER.error(L.m("ACTION \"open\" erfordert die Angabe OPEN \"...\""));
       }
     }
     else if (action.equals("funcDialog"))
@@ -947,7 +953,7 @@ public class UIElementFactory
       }
       catch (NodeNotFoundException x)
       {
-        Logger.error(L.m("ACTION \"funcDialog\" erfordert DIALOG-Attribut"));
+        LOGGER.error(L.m("ACTION \"funcDialog\" erfordert DIALOG-Attribut"));
       }
     }
     else

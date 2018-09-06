@@ -56,6 +56,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.awt.XTopWindow;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XEnumeration;
@@ -89,7 +92,6 @@ import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.Datasource;
@@ -106,11 +108,15 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  * wieder zu öffnen und Änderungen seines Fenstertitels und/oder seiner
  * Speicherstelle zu überwachen. Stellt auch Dialoge zur Verfügung zur Auswahl der
  * Datenquelle.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class MailMergeDatasource
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(MailMergeDatasource.class);
+
   /**
    * Wert für {@link #sourceType}, der anzeigt, dass keine Datenquelle ausgewählt
    * ist.
@@ -245,7 +251,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return new Vector<String>();
     }
   }
@@ -279,7 +285,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return new Vector<String>();
     }
   }
@@ -307,7 +313,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return 0;
     }
   }
@@ -354,14 +360,14 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return new QueryResultsWithSchema();
     }
   }
 
   /**
    * Liefert true, wenn derzeit eine Datenquelle ausgewählt ist.
-   * 
+   *
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -542,7 +548,7 @@ public class MailMergeDatasource
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
 
@@ -558,13 +564,13 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
   /**
    * Gibt Ressourcen frei und deregistriert Listener.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void dispose()
@@ -610,12 +616,12 @@ public class MailMergeDatasource
         }
         catch (UnavailableException e)
         {
-          Logger.debug(e);
+          LOGGER.debug("", e);
         }
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type),
+        LOGGER.error(L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type),
           e);
       }
     }
@@ -630,13 +636,13 @@ public class MailMergeDatasource
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type),
+        LOGGER.error(L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type),
           e);
       }
     }
     else if (type != null)
     {
-      Logger.error(L.m("Ignoriere Datenquelle mit unbekanntem Typ '%1'", type));
+      LOGGER.error(L.m("Ignoriere Datenquelle mit unbekanntem Typ '%1'", type));
     }
   }
 
@@ -750,7 +756,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return 0;
     }
     finally
@@ -806,7 +812,7 @@ public class MailMergeDatasource
       }
       catch (Exception x)
       {
-        Logger.error(L.m("Kann Anzahl Datensätze nicht bestimmen"), x);
+        LOGGER.error(L.m("Kann Anzahl Datensätze nicht bestimmen"), x);
       }
     }
 
@@ -870,7 +876,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(L.m("Kann Spaltennamen nicht bestimmen"), x);
+      LOGGER.error(L.m("Kann Spaltennamen nicht bestimmen"), x);
     }
     return columnNames;
   }
@@ -940,7 +946,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return new Vector<String>();
     }
   }
@@ -1022,7 +1028,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(L.m("Kann Spaltenwerte nicht bestimmen"), x);
+      LOGGER.error(L.m("Kann Spaltenwerte nicht bestimmen"), x);
     }
     return columnValues;
   }
@@ -1141,7 +1147,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
     return datasourceNames;
   }
@@ -1229,7 +1235,7 @@ public class MailMergeDatasource
   {
     try
     {
-      Logger.debug(L.m("Öffne neues Calc-Dokument als Datenquelle für Seriendruck"));
+      LOGGER.debug(L.m("Öffne neues Calc-Dokument als Datenquelle für Seriendruck"));
       XSpreadsheetDocument spread =
         UNO.XSpreadsheetDocument(UNO.loadComponentFromURL("private:factory/scalc",
           true, true));
@@ -1250,14 +1256,14 @@ public class MailMergeDatasource
     }
     catch (Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
   }
 
   /**
    * Öffnet einen FilePicker und falls der Benutzer dort eine Tabelle auswählt, wird
    * diese geöffnet und als Datenquelle verwendet.
-   * 
+   *
    * @param parent
    *          der JFrame zu dem der die Dialoge gehören sollen.
    * @param callback
@@ -1275,7 +1281,7 @@ public class MailMergeDatasource
       if (files.length == 0) return;
       try
       {
-        Logger.debug(L.m("Öffne %1 als Datenquelle für Seriendruck", files[0]));
+        LOGGER.debug(L.m("Öffne %1 als Datenquelle für Seriendruck", files[0]));
         try
         {
           getCalcDoc(files[0]);
@@ -1289,7 +1295,7 @@ public class MailMergeDatasource
       }
       catch (Exception e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
   }
@@ -1389,7 +1395,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(L.m("Kann CloseListener nicht auf Calc-Dokument registrieren"), x);
+      LOGGER.error(L.m("Kann CloseListener nicht auf Calc-Dokument registrieren"), x);
     }
     try
     {
@@ -1397,14 +1403,14 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(L.m("Kann EventListener nicht auf Calc-Dokument registrieren"), x);
+      LOGGER.error(L.m("Kann EventListener nicht auf Calc-Dokument registrieren"), x);
     }
   }
 
   /**
    * Falls calcDoc != null wird versucht, {@link #myCalcListener} davon zu
    * deregistrieren.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void removeListeners(XSpreadsheetDocument calcDoc)
@@ -1417,7 +1423,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(L.m("Konnte alten XCloseListener nicht deregistrieren"), x);
+      LOGGER.error(L.m("Konnte alten XCloseListener nicht deregistrieren"), x);
     }
     try
     {
@@ -1425,7 +1431,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(L.m("Konnte alten XEventListener nicht deregistrieren"), x);
+      LOGGER.error(L.m("Konnte alten XEventListener nicht deregistrieren"), x);
     }
 
   }
@@ -1520,7 +1526,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
     return win;
   }
@@ -1577,7 +1583,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
 
     /**
@@ -1682,10 +1688,12 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return;
     }
-    if (newDsName.length() == 0) return;
+    if (newDsName.isEmpty()) {
+      return;
+    }
 
     sourceType = SOURCE_DB;
     removeListeners(calcDoc); // falls altes calcDoc vorhanden, dort deregistrieren.
@@ -1778,7 +1786,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(L.m("Fehler beim Zugriff auf Calc-Dokument"), x);
+      LOGGER.error(L.m("Fehler beim Zugriff auf Calc-Dokument"), x);
       return;
     }
 
@@ -1855,7 +1863,7 @@ public class MailMergeDatasource
       }
       catch (Exception x)
       {
-        Logger.error(L.m("Kann Spalte \"%1\" nicht hinzufügen", fieldId), x);
+        LOGGER.error(L.m("Kann Spalte \"%1\" nicht hinzufügen", fieldId), x);
       }
     }
   }
@@ -1884,8 +1892,8 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(x);
-      return new Vector<String>();
+      LOGGER.error("", x);
+      return new ArrayList<String>();
     }
   }
 
@@ -1920,7 +1928,7 @@ public class MailMergeDatasource
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
     return tableNames;
@@ -1959,7 +1967,7 @@ public class MailMergeDatasource
           }
           catch (Exception x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
           }
         }
 
@@ -1969,7 +1977,7 @@ public class MailMergeDatasource
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     return nonEmptyTableNames;
   }
@@ -1985,7 +1993,7 @@ public class MailMergeDatasource
     @Override
     public void notifyClosing(EventObject arg0)
     {
-      Logger.debug(L.m("Calc-Datenquelle wurde unerwartet geschlossen"));
+      LOGGER.debug(L.m("Calc-Datenquelle wurde unerwartet geschlossen"));
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
         @Override
@@ -1999,7 +2007,7 @@ public class MailMergeDatasource
     @Override
     public void disposing(EventObject arg0)
     {
-      Logger.debug(L.m("Calc-Datenquelle wurde disposed()"));
+      LOGGER.debug(L.m("Calc-Datenquelle wurde disposed()"));
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
         @Override
@@ -2022,7 +2030,7 @@ public class MailMergeDatasource
           public void run()
           {
             calcUrl = UNO.XModel(calcDoc).getURL();
-            Logger.debug(L.m("Speicherort der Tabelle hat sich geändert: \"%1\"",
+            LOGGER.debug(L.m("Speicherort der Tabelle hat sich geändert: \"%1\"",
               calcUrl));
             storeDatasourceSettings();
           }
@@ -2117,7 +2125,7 @@ public class MailMergeDatasource
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
 
     return results;

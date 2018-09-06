@@ -16,11 +16,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner.Status;
 
 /**
@@ -30,6 +32,10 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner.Status;
  */
 public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(LocalOverrideStorageStandardImpl.class);
+
   /**
    * Präfix, das vor generierte Schlüssel von LOS-only Datensätzen gesetzt wird, um
    * diese eindeutig von anderen Schlüsseln unterscheiden zu können.
@@ -104,7 +110,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
               String spalte = dsNode.getName();
               if (!newSchema.contains(spalte))
               {
-                Logger.error(L.m(
+                LOGGER.error(L.m(
                   "%1 enthält korrupten Datensatz (Spalte %2 nicht im Schema) => Cache wird ignoriert!",
                   losCache.getPath(), spalte));
                 return;
@@ -123,7 +129,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
             String spalte = dsNode.getName();
             if (!newSchema.contains(spalte))
             {
-              Logger.error(L.m(
+              LOGGER.error(L.m(
                 "%1 enthält korrupten Datensatz (Spalte %2 nicht im Schema) => Cache wird ignoriert!",
                 losCache.getPath(), spalte));
               return;
@@ -146,23 +152,23 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
       }
       catch (FileNotFoundException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
       catch (IOException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
       catch (SyntaxErrorException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
     else
-      Logger.log(L.m("Cache-Datei %1 kann nicht gelesen werden.",
+      LOGGER.info(L.m("Cache-Datei %1 kann nicht gelesen werden.",
         losCache.getPath()));
 
     int sameKeyIndexInt = 0;
@@ -231,7 +237,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
   public DJDataset copyNonLOSDataset(Dataset ds)
   {
     if (ds instanceof LOSDJDataset)
-      Logger.error(L.m("Diese Funktion darf nicht für LOSDJDatasets aufgerufen werden, da sie immer eine Kopie mit Backing Store erzeugt."));
+      LOGGER.error(L.m("Diese Funktion darf nicht für LOSDJDatasets aufgerufen werden, da sie immer eine Kopie mit Backing Store erzeugt."));
 
     Map<String, String> dsoverride = new HashMap<String, String>();
     Map<String, String> dscache = new HashMap<String, String>();
@@ -246,7 +252,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
       }
       catch (ColumnNotFoundException e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
     LOSDJDataset newDs =
@@ -388,7 +394,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
 
@@ -425,7 +431,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
         }
         catch (ColumnNotFoundException x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
         }
         data.add(ds);
       }
@@ -443,7 +449,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
       if (iter2.hasNext()) buffyTheVampireSlayer.append(", ");
     }
     if (buffyTheVampireSlayer.length() > 0)
-      Logger.log(L.m("Die Datensätze mit folgenden Schlüsseln konnten nicht aus der Datenbank aktualisiert werden: ")
+      LOGGER.info(L.m("Die Datensätze mit folgenden Schlüsseln konnten nicht aus der Datenbank aktualisiert werden: ")
         + buffyTheVampireSlayer);
 
     selectDataset(selectKey, sameKeyIndex);
@@ -523,7 +529,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
     if (spaltenDieWeggefallenSind.isEmpty()
       && spaltenDieDazuGekommenSind.isEmpty()) return;
 
-    Logger.log(L.m("Das Datenbank-Schema wurde geändert. Der Cache wird angepasst."));
+    LOGGER.info(L.m("Das Datenbank-Schema wurde geändert. Der Cache wird angepasst."));
 
     Iterator<LOSDJDataset> iter = data.iterator();
     while (iter.hasNext())

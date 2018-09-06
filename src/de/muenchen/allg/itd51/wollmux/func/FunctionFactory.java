@@ -56,6 +56,9 @@ import java.util.Vector;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
@@ -66,7 +69,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.func.functions.AbsFunction;
 import de.muenchen.allg.itd51.wollmux.func.functions.AlwaysTrueFunction;
 import de.muenchen.allg.itd51.wollmux.func.functions.AndFunction;
@@ -96,11 +98,15 @@ import de.muenchen.allg.itd51.wollmux.func.functions.ValueFunction;
 
 /**
  * Erzeugt Functions aus ConfigThingys.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class FunctionFactory
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(FunctionFactory.class);
+
   /**
    * Eine Funktion, die immer true liefert.
    */
@@ -1074,13 +1080,13 @@ public class FunctionFactory
         }
         catch (ConfigurationErrorException e)
         {
-          Logger.error(L.m(
+          LOGGER.error(L.m(
             "Fehler beim Parsen der Funktion \"%1\" im Abschnitt \"%2\"", name,
             section), e);
         }
       }
     }
-  
+
     return funcs;
   }
 

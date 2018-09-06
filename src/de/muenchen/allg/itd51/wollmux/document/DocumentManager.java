@@ -35,6 +35,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.document.XEventListener;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
@@ -56,7 +59,6 @@ import de.muenchen.allg.itd51.wollmux.core.document.TransitionModeDataContainer;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
@@ -70,6 +72,10 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
  */
 public class DocumentManager
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(DocumentManager.class);
+
   /**
    * Verwaltet Informationen zu allen offenen OOo-Dokumenten.
    */
@@ -197,14 +203,14 @@ public class DocumentManager
    * vollständig bearbeitet/expandiert wurde). Die Methode ignoriert alle
    * XEventListenener-Instanzen, die bereits registriert wurden.
    * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
-   * 
+   *
    * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen werden,
    * sondern jeder Aufruf muss über den EventHandler laufen. Deswegen exportiert
    * WollMuxSingleton auch nicht das XEventBroadcaster-Interface.
    */
   public void addDocumentEventListener(XEventListener listener)
   {
-    Logger.debug2("DocumentManager::addDocumentEventListener()");
+    LOGGER.trace("DocumentManager::addDocumentEventListener()");
 
     if (listener == null) return;
 
@@ -220,14 +226,14 @@ public class DocumentManager
   /**
    * Diese Methode deregistriert einen XEventListener wenn er bereits registriert
    * war.
-   * 
+   *
    * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen werden,
    * sondern jeder Aufruf muss über den EventHandler laufen. Deswegen exportiert
    * WollMuxSingleton auch nicht das XEventBroadcaster-Interface.
    */
   public void removeDocumentEventListener(XEventListener listener)
   {
-    Logger.debug2("DocumentManager::removeDocumentEventListener()");
+    LOGGER.trace("DocumentManager::removeDocumentEventListener()");
     Iterator<XEventListener> i = registeredDocumentEventListener.iterator();
     while (i.hasNext())
     {
@@ -320,29 +326,29 @@ public class DocumentManager
     Info info = getDocumentManager().getInfo(doc);
     if (info == null)
     {
-      Logger.error(
+      LOGGER.error(
         L.m("Irgendwer will hier ein TextDocumentModel für ein Objekt was der DocumentManager nicht kennt. Das sollte nicht passieren!"),
         new Exception());
-  
+
       // Wir versuchen trotzdem sinnvoll weiterzumachen.
       getDocumentManager().addTextDocument(doc);
       info = getDocumentManager().getInfo(doc);
     }
-  
+
     return info.getTextDocumentController();
   }
 
   /**
    * Liefert eine Referenz auf den von diesem WollMux verwendeten
    * {@link DocumentManager}.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public static DocumentManager getDocumentManager()
   {
     if (docManager == null)
       docManager = new DocumentManager();
-    
+
     return docManager;
   }
 
@@ -545,10 +551,10 @@ public class DocumentManager
     catch (NodeNotFoundException e)
     {
       pdMode = PersistentDataContainer.PERSISTENT_DATA_MODE_RDFREADLEGACY;
-      Logger.debug(L.m("Attribut %1 nicht gefunden. Verwende Voreinstellung '%2'.",
+      LOGGER.debug(L.m("Attribut %1 nicht gefunden. Verwende Voreinstellung '%2'.",
         PersistentDataContainer.PERSISTENT_DATA_MODE, pdMode));
     }
-  
+
     try
     {
       if (PersistentDataContainer.PERSISTENT_DATA_MODE_TRANSITION.equalsIgnoreCase(pdMode))
@@ -569,7 +575,7 @@ public class DocumentManager
       }
       else
       {
-        Logger.error(L.m(
+        LOGGER.error(L.m(
           "Ungültiger Wert '%1' für Attribut %2. Verwende Voreinstellung '%3' statt dessen.",
           pdMode, PersistentDataContainer.PERSISTENT_DATA_MODE, PersistentDataContainer.PERSISTENT_DATA_MODE_RDFREADLEGACY));
         return new RDFReadLegacyModeDataContainer(doc);
@@ -577,7 +583,7 @@ public class DocumentManager
     }
     catch (RDFMetadataNotSupportedException e)
     {
-      Logger.log(L.m(
+      LOGGER.info(L.m(
         "Die Einstellung '%1' für Attribut %2 ist mit dieser OpenOffice.org-Version nicht kompatibel. Verwende Einstellung '%3' statt dessen.",
         pdMode, PersistentDataContainer.PERSISTENT_DATA_MODE, PersistentDataContainer.PERSISTENT_DATA_MODE_ANNOTATION));
       return new AnnotationBasedPersistentDataContainer(doc);

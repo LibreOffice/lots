@@ -97,11 +97,13 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.NoBackingStoreException;
@@ -118,6 +120,10 @@ import de.muenchen.allg.itd51.wollmux.db.TestDJDataset;
  */
 public class DatensatzBearbeiten
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(DatensatzBearbeiten.class);
+
   /**
    * Standardbreite für Textfelder
    */
@@ -306,7 +312,7 @@ public class DatensatzBearbeiten
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
 
     final ConfigThingy fensterDesc = conf.query("Fenster");
@@ -333,7 +339,7 @@ public class DatensatzBearbeiten
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
@@ -744,7 +750,7 @@ public class DatensatzBearbeiten
       {}
       catch (NoBackingStoreException x)
       {
-        Logger.error(L.m("Es hätte nie passieren dürfen, aber restoreStandard() wurde für einen Datensatz ohne Backing Store aufgerufen!"));
+        LOGGER.error(L.m("Es hätte nie passieren dürfen, aber restoreStandard() wurde für einen Datensatz ohne Backing Store aufgerufen!"));
       }
       updateBackground();
     }
@@ -854,7 +860,7 @@ public class DatensatzBearbeiten
         }
         catch (BadLocationException x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
           return "";
         }
       }
@@ -1052,7 +1058,7 @@ public class DatensatzBearbeiten
           }
           catch (ColumnNotFoundException e)
           {
-            Logger.error(e);
+            LOGGER.error("", e);
           }
           str = str.substring(0, m.start()) + wert + str.substring(m.end());
           m = p.matcher(str);
@@ -1175,7 +1181,7 @@ public class DatensatzBearbeiten
               }
               catch (Exception x)
               {
-                Logger.error(x);
+                LOGGER.error("", x);
               }
 
               // Font fnt = tf.getFont();
@@ -1219,7 +1225,7 @@ public class DatensatzBearbeiten
               }
               catch (Exception x)
               {
-                Logger.error(x);
+                LOGGER.error("", x);
               }
 
               JPanel uiElement = new JPanel(new GridLayout(1, 1));
@@ -1294,7 +1300,7 @@ public class DatensatzBearbeiten
               }
               catch (Exception x)
               {
-                Logger.error(x);
+                LOGGER.error("", x);
               }
 
               uiElement.add(combo);
@@ -1305,13 +1311,13 @@ public class DatensatzBearbeiten
             }
             else
             {
-              Logger.error(L.m(
+              LOGGER.error(L.m(
                 "Ununterstützter TYPE für User Interface Element: %1", type));
             }
           }
           catch (NodeNotFoundException x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
           }
         }
       }
@@ -1416,7 +1422,7 @@ public class DatensatzBearbeiten
           }
           catch (NodeNotFoundException x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
           }
         }
       }
@@ -1470,7 +1476,7 @@ public class DatensatzBearbeiten
       return null;
     }
     else
-      Logger.error(L.m("Ununterstützte ACTION: %1", action));
+      LOGGER.error(L.m("Ununterstützte ACTION: %1", action));
 
     return null;
   }

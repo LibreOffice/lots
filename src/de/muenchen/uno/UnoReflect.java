@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.MethodConcept;
 import com.sun.star.beans.XIntrospection;
@@ -14,10 +16,13 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 public class UnoReflect
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(UnoReflect.class);
+
   private static XIntrospection intro;
 
   static
@@ -29,7 +34,7 @@ public class UnoReflect
     }
     catch (java.lang.Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
   }
 
