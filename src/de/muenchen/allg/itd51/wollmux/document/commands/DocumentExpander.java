@@ -48,9 +48,9 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
  * Der DocumentExpander sorgt dafür, dass das Dokument nach Ausführung der
  * enthaltenen Kommandos komplett aufgebaut ist und alle Textfragmente eingefügt
  * wurden.
- * 
+ *
  * @author christoph.lutz
- * 
+ *
  */
 class DocumentExpander extends AbstractExecutor
 {
@@ -59,7 +59,7 @@ class DocumentExpander extends AbstractExecutor
       .getLogger(DocumentExpander.class);
 
   /**
-   * 
+   *
    */
   private final DocumentCommandInterpreter documentCommandInterpreter;
 
@@ -75,7 +75,7 @@ class DocumentExpander extends AbstractExecutor
    * Erzeugt einen neuen DocumentExpander, mit der Liste fragUrls, die die URLs
    * beschreibt, von denen die Textfragmente für den insertContent Befehl bezogen
    * werden sollen.
-   * 
+   *
    * @param fragUrls
    * @param documentCommandInterpreter TODO
    */
@@ -91,7 +91,7 @@ class DocumentExpander extends AbstractExecutor
    * werden, bis das Dokument vollständig aufgebaut ist. Die Dokumentkommandos
    * OverrideFrags erhalten dabei eine Sonderrolle, da sie bereits vor den anderen
    * Dokumentkommandos (insertFrag/insertContent) abgefeiert werden.
-   * 
+   *
    * @param tree
    * @return
    * @throws WMCommandsFailedException
@@ -116,7 +116,7 @@ class DocumentExpander extends AbstractExecutor
   /**
    * führt alle OverrideFrag-Kommandos aus commands aus, wenn sie nicht den Status
    * DONE=true oder ERROR=true besitzen.
-   * 
+   *
    * @param commands
    * @return Anzahl der bei der Ausführung aufgetretenen Fehler.
    */
@@ -128,9 +128,11 @@ class DocumentExpander extends AbstractExecutor
     for (Iterator<DocumentCommand> iter = commands.iterator(); iter.hasNext();)
     {
       DocumentCommand cmd = iter.next();
-      if (!(cmd instanceof OverrideFrag)) continue;
+      if (!(cmd instanceof OverrideFrag)) {
+        continue;
+      }
 
-      if (cmd.isDone() == false && cmd.hasError() == false)
+      if (!cmd.isDone() && !cmd.hasError())
       {
         // Kommando ausführen und Fehler zählen
         errors += cmd.execute(this);
@@ -189,7 +191,7 @@ class DocumentExpander extends AbstractExecutor
       }
 
       List<String> urls = VisibleTextFragmentList.getURLsByID(WollMuxFiles.getWollmuxConf(), fragId);
-      if (urls.size() == 0)
+      if (urls.isEmpty())
       {
         throw new ConfigurationErrorException(L.m(
           "Das Textfragment mit der FRAG_ID '%1' ist nicht definiert!",
@@ -197,7 +199,7 @@ class DocumentExpander extends AbstractExecutor
       }
       // Iterator über URLs
       Iterator<String> iter = urls.iterator();
-      while (iter.hasNext() && found == false)
+      while (iter.hasNext() && !found)
       {
         String urlStr = iter.next();
         try
@@ -240,8 +242,8 @@ class DocumentExpander extends AbstractExecutor
         String msg =
           L.m(
             "Der Textbaustein mit der Bezeichnung (FRAG_ID) '%1' %2 konnte nicht eingefügt werden:",
-            cmd.getFragID(), ((fragId.equals(cmd.getFragID()) ? "" : L.m(
-              "(Override für Fragment '%1')", fragId))))
+            cmd.getFragID(), (fragId.equals(cmd.getFragID()) ? "" : L.m(
+              "(Override für Fragment '%1')", fragId)))
             + "\n\n" + e.getMessage();
 
         LOGGER.error(msg);
@@ -301,7 +303,7 @@ class DocumentExpander extends AbstractExecutor
    * OpenOffice-Probleme angewendet werden. Insbesondere werden InsertMarks um die
    * Stelle herumgelegt vor dem Löschen, wie dies auch bei
    * {@link #insertDocumentFromURL(DocumentCommand, URL)} geschieht.
-   * 
+   *
    * @param cmd
    *          Einfügeposition
    */
@@ -316,7 +318,7 @@ class DocumentExpander extends AbstractExecutor
    * Die Methode fügt das externe Dokument von der URL url an die Stelle von cmd
    * ein. Die Methode enthält desweiteren notwendige Workarounds für die Bugs des
    * insertDocumentFromURL der UNO-API.
-   * 
+   *
    * @param cmd
    *          Einfügeposition
    * @param url
@@ -407,7 +409,7 @@ class DocumentExpander extends AbstractExecutor
    * bestehenden Formatvorlagen des aktuellen Dokuments. Nach der erfolgreichen
    * Einfügung der Formatvorlagen wird der Inhalt des Dokumentkommandos gelöscht,
    * da ja mit dem Einfügen keine Textinhalte eingefügt werden.
-   * 
+   *
    * @param cmd
    *          das Dokumentkommando dessen Inhalt nach dem erfolgreichen Einfügen
    *          gelöscht wird.
@@ -474,7 +476,7 @@ class DocumentExpander extends AbstractExecutor
     if (doc == null || viewCursor == null || range == null || args == null)
       return;
 
-    // Vector mit allen Platzhalterfelder
+    // Liste mit allen Platzhalterfelder
     Vector<XTextField> placeholders = new Vector<XTextField>();
 
     XEnumeration xEnum = UNO.XEnumerationAccess(range).createEnumeration();
@@ -511,7 +513,7 @@ class DocumentExpander extends AbstractExecutor
           String textPortionType =
             (String) UNO.getProperty(textPortion, "TextPortionType");
           // Wenn es ein Textfeld ist
-          if (textPortionType.equals("TextField"))
+          if ("TextField".equals(textPortionType))
           {
             XTextField textField = null;
             try
@@ -547,13 +549,13 @@ class DocumentExpander extends AbstractExecutor
       // bei einem Parameter ohne Inhalt bleibt die Einfügestelle und die
       // erste ist nach dem Einfügen markiert sonst wird
       // sie ersetzt
-      if (!(args.get(j).equals("")))
+      if (!args.get(j).isEmpty())
       {
         textFieldAnchor.setString(args.get(j));
         // setzen des ViewCursor auf die erste nicht ausgefüllte Einfügestelle
         // nach dem Einfügen des Textbausteines
       }
-      else if (firstEmptyPlaceholder != true)
+      else if (!firstEmptyPlaceholder)
       {
         try
         {
@@ -568,15 +570,12 @@ class DocumentExpander extends AbstractExecutor
     // wenn weniger Parameter als Einfügestellen angegeben wurden wird nach
     // dem Einfügen des Textbaustein und füllen der Argumente, die erste
     // unausgefüllte Einfügestelle markiert.
-    if (placeholders.size() > args.size())
+    if (placeholders.size() > args.size() && !firstEmptyPlaceholder)
     {
-      if (firstEmptyPlaceholder == false)
-      {
-        XTextField textField = UNO.XTextField(placeholders.get(args.size()));
-        XTextRange textFieldAnchor = textField.getAnchor();
-        viewCursor.gotoRange(textFieldAnchor, false);
-        firstEmptyPlaceholder = true;
-      }
+      XTextField textField = UNO.XTextField(placeholders.get(args.size()));
+      XTextRange textFieldAnchor = textField.getAnchor();
+      viewCursor.gotoRange(textFieldAnchor, false);
+      firstEmptyPlaceholder = true;
     }
 
     // Wenn nach dem Einfügen keine Platzhalter vorhanden ist springt der
@@ -610,7 +609,7 @@ class DocumentExpander extends AbstractExecutor
       catch (NodeNotFoundException e)
       {}
 
-      if (message.equals("true") || message.equals("on") || message.equals("1"))
+      if ("true".equals(message) || "on".equals(message) || "1".equals(message))
       {
         ModalDialogs.showInfoModal("WollMux", error);
       }

@@ -42,9 +42,7 @@ class TextFieldUpdater extends AbstractExecutor
     {
       this.documentCommandInterpreter.getDocumentController().setLockControllers(true);
 
-      int errors = executeAll(commands);
-
-      return errors;
+      return executeAll(commands);
     }
     finally
     {
@@ -72,7 +70,7 @@ class TextFieldUpdater extends AbstractExecutor
   /**
    * Diese Methode durchsucht das Element element bzw. dessen XEnumerationAccess
    * Interface rekursiv nach TextFeldern und ruft deren Methode update() auf.
-   * 
+   *
    * @param element
    *          Das Element das geupdated werden soll.
    */

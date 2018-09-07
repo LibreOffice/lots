@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +95,7 @@ public class TextDocumentController
    * ist dann aktiviert, wenn {@link #simulationResult} != null ist.
    */
   private SimulationResults simulationResult = null;
-  
+
   /**
    * Der Vorschaumodus ist standardmäßig immer gesetzt - ist dieser Modus nicht
    * gesetzt, so werden in den Formularfeldern des Dokuments nur die Feldnamen in
@@ -114,30 +113,30 @@ public class TextDocumentController
     this.formFieldPreviewMode = true;
     this.globalFunctions = globalFunctions;
     this.globalDialogs = globalDialogs;
-    
+
     functionContext = new HashMap<Object, Object>();
-    
+
     parseInitialOverrideFragMap(getInitialOverrideFragMap());
   }
-  
+
   public TextDocumentModel getModel()
   {
     return model;
   }
-  
+
   /**
-   * Liefert eine Stringrepräsentation des TextDocumentControllers - Derzeit in 
+   * Liefert eine Stringrepräsentation des TextDocumentControllers - Derzeit in
    * der Form 'doc(<title>)'.
-   * 
-   * 
+   *
+   *
    * @see java.lang.Object#toString()
    */
   @Override
-  synchronized public String toString()
+  public synchronized String toString()
   {
     return "doc('" + getFrameController().getTitle() + "')";
   }
-  
+
   public FrameController getFrameController()
   {
     return new FrameController(model.doc);
@@ -147,7 +146,7 @@ public class TextDocumentController
    * Diese Methode fügt die Druckfunktion functionName der Menge der dem Dokument
    * zugeordneten Druckfunktionen hinzu. FunctionName muss dabei ein gültiger
    * Funktionsbezeichner sein.
-   * 
+   *
    * @param functionName
    *          der Name der Druckfunktion, der ein gültiger Funktionsbezeichner sein
    *          und in einem Abschnitt "Druckfunktionen" in der wollmux.conf definiert
@@ -193,11 +192,11 @@ public class TextDocumentController
     catch (java.lang.Exception e)
     {}
   }
-  
+
   /**
    * Liefert die Funktionsbibliothek mit den globalen Funktionen des WollMux und den
    * lokalen Funktionen dieses Dokuments.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public synchronized FunctionLibrary getFunctionLibrary()
@@ -221,7 +220,7 @@ public class TextDocumentController
   /**
    * Liefert die eine Bibliothek mit den globalen Dialogfunktionen des WollMux und
    * den lokalen Dialogfunktionen dieses Dokuments.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public synchronized DialogLibrary getDialogLibrary()
@@ -241,11 +240,11 @@ public class TextDocumentController
     }
     return dialogLib;
   }
-  
+
   /**
    * Liefert den Kontext mit dem die dokumentlokalen Dokumentfunktionen beim Aufruf
    * von getFunctionLibrary() und getDialogLibrary() erzeugt werden.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public synchronized Map<Object, Object> getFunctionContext()
@@ -257,12 +256,12 @@ public class TextDocumentController
    * Liefert die zum aktuellen Stand gesetzten Formularwerte in einer Map mit ID als
    * Schlüssel. Änderungen an der zurückgelieferten Map zeigen keine Wirkung im
    * TextDocumentModel (da nur eine Kopie der internen Map zurückgegeben wird).
-   * 
+   *
    * Befindet sich das TextDocumentModel in einem über {@link #startSimulation()}
    * gesetzten Simulationslauf, so werden die im Simulationslauf gesetzten Werte
    * zurück geliefert, die nicht zwangsweise mit den reell gesetzten Werten
    * übereinstimmen müssen.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public synchronized Map<String, String> getFormFieldValues()
@@ -284,26 +283,30 @@ public class TextDocumentController
    * auftretends in der wollmux,conf auf formularConf an und liefert das Ergebnis
    * zurück. Achtung! Das zurückgelieferte Objekt kann das selbe Objekt sein wie das
    * übergebene.
-   * 
+   *
    * @param formularConf
    *          ein "WM" Knoten unterhalb dessen sich eine normale Formularbeschreibung
    *          befindet ("Formular" Knoten).
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    *         TESTED
    */
   private ConfigThingy applyFormularanpassung(ConfigThingy formularConf)
   {
     ConfigThingy anpassungen =
         WollMuxFiles.getWollmuxConf().query("Formularanpassung", 1);
-    if (anpassungen.count() == 0) return formularConf;
+    if (anpassungen.count() == 0) {
+      return formularConf;
+    }
 
     try
     {
       ConfigThingy formularConfOld = formularConf;
       formularConf = formularConf.getFirstChild(); // Formular-Knoten
-      if (!formularConf.getName().equals("Formular")) return formularConfOld;
+      if (!formularConf.getName().equals("Formular")) {
+        return formularConfOld;
+      }
     }
     catch (NodeNotFoundException x)
     {
@@ -317,7 +320,9 @@ public class TextDocumentController
       {
         for (ConfigThingy subMatchConf : matchConf)
         {
-          if (!matches(formularConf, subMatchConf)) continue process_anpassung;
+          if (!matches(formularConf, subMatchConf)) {
+            continue process_anpassung;
+          }
         }
       }
 
@@ -338,7 +343,9 @@ public class TextDocumentController
       catch (NodeNotFoundException x)
       {}
       ConfigThingy buttonAnpassung = conf.query("Buttonanpassung");
-      if (buttonAnpassung.count() == 0) buttonAnpassung = null;
+      if (buttonAnpassung.count() == 0) {
+        buttonAnpassung = null;
+      }
       formularConf =
         TextDocumentModel.mergeFormDescriptors(mergeForms, buttonAnpassung, title);
     }
@@ -353,32 +360,36 @@ public class TextDocumentController
    * Herauslöschen von Knoten in den durch matchConf dargestellten Baum überführen
    * lässt. Herauslöschen bedeutet in diesem Fall bei einem inneren Knoten, dass
    * seine Kinder seinen Platz einnehmen.
-   * 
+   *
    * Anmerkung: Die derzeitige Implementierung setzt die obige Spezifikation nicht
    * korrekt um, da {@link ConfigThingy#query(String)} nur die Ergebnisse auf einer
    * Ebene zurückliefert. In der Praxis sollten jedoch keine Fälle auftreten wo dies
    * zum Problem wird.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    *         TESTED
    */
   private static boolean matches(ConfigThingy conf, ConfigThingy matchConf)
   {
     ConfigThingy resConf = conf.query(matchConf.getName());
-    if (resConf.count() == 0) return false;
+    if (resConf.count() == 0) {
+      return false;
+    }
     testMatch: for (ConfigThingy subConf : resConf)
     {
       for (ConfigThingy subMatchConf : matchConf)
       {
-        if (!matches(subConf, subMatchConf)) continue testMatch;
+        if (!matches(subConf, subMatchConf)) {
+          continue testMatch;
+        }
       }
 
       return true;
     }
     return false;
   }
-  
+
   public synchronized void updateDocumentCommands()
   {
     model.getDocumentCommands().update();
@@ -386,7 +397,7 @@ public class TextDocumentController
 
   /**
    * Übernimmt einen Formularwert ins Model uns ins Dokument.
-   * 
+   *
    * @param id Name des Formularfelds
    * @param value Inhalt des Formularfelds
    */
@@ -395,7 +406,7 @@ public class TextDocumentController
     setFormFieldValue(id, value);
     updateFormFields(id);
   }
-  
+
   /**
    * Führt alle Funktionen aus funcs der Reihe nach aus, solange bis eine davon einen
    * nicht-leeren String zurückliefert und interpretiert diesen als Angabe, welche
@@ -406,11 +417,11 @@ public class TextDocumentController
    * <li>"User/<Name>" Werte von Benutzervariablen (vgl.
    * {@link #getUserFieldMaster(String)}</li>
    * </ul>
-   * 
+   *
    * @return 0 => noaction, Integer.MAX_VALUE => allactions, -1 => WollMux-Default
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    *         TESTED
    */
   public int evaluateDocumentActions(Iterator<Function> funcs)
@@ -434,12 +445,12 @@ public class TextDocumentController
     }
     return -1;
   }
-  
+
   /**
    * Fügt an der Stelle r ein neues Textelement vom Typ css.text.TextField.InputUser
    * ein, und verknüpft das Feld so, dass die Trafo trafo verwendet wird, um den
    * angezeigten Feldwert zu berechnen.
-   * 
+   *
    * @param r
    *          die Textrange, an der das Feld eingefügt werden soll
    * @param trafoName
@@ -448,7 +459,7 @@ public class TextDocumentController
    *          Ein Hinweistext, der im Feld angezeigt werden soll, wenn man mit der
    *          Maus drüber fährt - kann auch null sein, dann wird der Hint nicht
    *          gesetzt.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   synchronized public void addNewInputUserField(XTextRange r, String trafoName,
@@ -478,7 +489,9 @@ public class TextDocumentController
         UNO.XTextContent(UNO.XMultiServiceFactory(model.doc).createInstance(
           "com.sun.star.text.TextField.InputUser"));
       UNO.setProperty(f, "Content", userFieldName);
-      if (hint != null) UNO.setProperty(f, "Hint", hint);
+      if (hint != null) {
+        UNO.setProperty(f, "Hint", hint);
+      }
       r.getText().insertTextContent(r, f, true);
     }
     catch (java.lang.Exception e)
@@ -492,7 +505,7 @@ public class TextDocumentController
    * umgeben sind, jedoch trotzdem vom WollMux verstanden und befüllt werden (derzeit
    * c,s,s,t,textfield,Database-Felder und manche
    * c,s,s,t,textfield,InputUser-Felder).
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public synchronized void collectNonWollMuxFormFields()
@@ -509,19 +522,23 @@ public class TextDocumentController
         try
         {
           XDependentTextField tf = UNO.XDependentTextField(xenu.nextElement());
-          if (tf == null) continue;
+          if (tf == null) {
+            continue;
+          }
 
           if (UNO.supportsService(tf, "com.sun.star.text.TextField.InputUser"))
           {
             String varName = UNO.getProperty(tf, "Content").toString();
             String funcName = TextDocumentModel.getFunctionNameForUserFieldName(varName);
-            
-            if (funcName == null) continue;
-            
+
+            if (funcName == null) {
+              continue;
+            }
+
             XPropertySet master = getUserFieldMaster(varName);
             FormField f = FormFieldFactory.createInputUserFormField(model.doc, tf, master);
             Function func = getFunctionLibrary().get(funcName);
-            
+
             if (func == null)
             {
               LOGGER.error(L.m(
@@ -529,16 +546,18 @@ public class TextDocumentController
                 funcName));
               continue;
             }
-            
+
             String[] pars = func.parameters();
-            if (pars.length == 0) model.getStaticTextFieldFormFields().add(f);
+            if (pars.length == 0) {
+              model.getStaticTextFieldFormFields().add(f);
+            }
             for (int i = 0; i < pars.length; i++)
             {
               String id = pars[i];
               if (id != null && id.length() > 0)
               {
                 if (!model.getIdToTextFieldFormFields().containsKey(id))
-                  model.getIdToTextFieldFormFields().put(id, new Vector<FormField>());
+                  model.getIdToTextFieldFormFields().put(id, new ArrayList<FormField>());
 
                 List<FormField> formFields = model.getIdToTextFieldFormFields().get(id);
                 formFields.add(f);
@@ -553,7 +572,7 @@ public class TextDocumentController
             if (id != null && id.length() > 0)
             {
               if (!model.getIdToTextFieldFormFields().containsKey(id))
-                model.getIdToTextFieldFormFields().put(id, new Vector<FormField>());
+                model.getIdToTextFieldFormFields().put(id, new ArrayList<FormField>());
 
               List<FormField> formFields = model.getIdToTextFieldFormFields().get(id);
               formFields.add(FormFieldFactory.createDatabaseFormField(model.doc, tf));
@@ -582,11 +601,11 @@ public class TextDocumentController
    * FormDescriptor verwendet. Die Methode sollte erst aufgerufen werden, nachdem dem
    * Model mit setIDToFormFields die verfügbaren Formularfelder bekanntgegeben
    * wurden.
-   * 
+   *
    * @return eine vollständige Zuordnung von Feld IDs zu den aktuellen Vorbelegungen
    *         im Dokument. TESTED
    */
-  public synchronized HashMap<String, String> getIDToPresetValue()
+  public synchronized Map<String, String> getIDToPresetValue()
   {
     HashMap<String, String> idToPresetValue = new HashMap<String, String>();
     Set<String> ids = new HashSet<String>(model.getFormFieldValuesMap().keySet());
@@ -597,13 +616,19 @@ public class TextDocumentController
     for (String id : ids)
     {
       List<FormField> fields = new ArrayList<FormField>();
-      if (model.getIdToFormFields().get(id) != null) fields.addAll(model.getIdToFormFields().get(id));
+      if (model.getIdToFormFields().get(id) != null) {
+        fields.addAll(model.getIdToFormFields().get(id));
+      }
       if (model.getIdToTextFieldFormFields().get(id) != null)
         fields.addAll(model.getIdToTextFieldFormFields().get(id));
 
       String value = model.getFirstUntransformedValue(fields);
-      if (value == null) value = model.getFormFieldValuesMap().get(id);
-      if (value != null) idToPresetValue.put(id, value);
+      if (value == null) {
+        value = model.getFormFieldValuesMap().get(id);
+      }
+      if (value != null) {
+        idToPresetValue.put(id, value);
+      }
     }
 
     // Alle id's herauslöschen, deren Felder-Werte nicht konsistent sind.
@@ -616,7 +641,9 @@ public class TextDocumentController
           fieldValuesConsistent(model.getIdToFormFields().get(id), idToPresetValue, value)
             && fieldValuesConsistent(model.getIdToTextFieldFormFields().get(id),
               idToPresetValue, value);
-        if (!fieldValuesConsistent) idToPresetValue.remove(id);
+        if (!fieldValuesConsistent) {
+          idToPresetValue.remove(id);
+        }
       }
     }
 
@@ -630,20 +657,19 @@ public class TextDocumentController
     }
     return idToPresetValue;
   }
-  
+
   /**
    * Diese Methode blockt/unblocked die Contoller, die für das Rendering der
    * Darstellung in den Dokumenten zuständig sind, jedoch nur, wenn nicht der
    * debug-modus gesetzt ist.
-   * 
+   *
    * @param state
    */
   public synchronized void setLockControllers(boolean lock)
   {
     try
     {
-      if (WollMuxFiles.isDebugMode() == false
-        && UNO.XModel(model.doc) != null)
+      if (!WollMuxFiles.isDebugMode() && UNO.XModel(model.doc) != null)
       {
         if (lock)
           UNO.XModel(model.doc).lockControllers();
@@ -665,7 +691,7 @@ public class TextDocumentController
    * abgeleitet werden kann, so liefert die Methode false zurück. Die Methode liefert
    * true zurück, wenn die Konsistenzprüfung für alle Formularfelder erfolgreich
    * durchlaufen wurde.
-   * 
+   *
    * @param fields
    *          Enthält die Liste der zu prüfenden Felder.
    * @param mapIdToValues
@@ -677,14 +703,18 @@ public class TextDocumentController
    *          erwartet, verwendet werden soll.
    * @return true, wenn alle Felder konsistent aus den Werten mapIdToValue und value
    *         abgeleitet werden können oder false, falls nicht.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private boolean fieldValuesConsistent(List<FormField> fields,
       HashMap<String, String> mapIdToValues, String value)
   {
-    if (fields == null) fields = new ArrayList<FormField>();
-    if (mapIdToValues == null) mapIdToValues = new HashMap<String, String>();
+    if (fields == null) {
+      fields = new ArrayList<FormField>();
+    }
+    if (mapIdToValues == null) {
+      mapIdToValues = new HashMap<String, String>();
+    }
 
     for (FormField field : fields)
     {
@@ -701,15 +731,23 @@ public class TextDocumentController
         {
           // Abbruch, wenn die Parameter für diese Funktion unvollständig sind.
           Function func = getFunctionLibrary().get(trafoName);
-          if (func != null) for (String par : func.parameters())
-            if (mapIdToValues.get(par) == null) return false;
+          if (func != null)
+          {
+            for (String par : func.parameters())
+              if (mapIdToValues.get(par) == null)
+              {
+                return false;
+              }
+          }
 
           refValue = getTransformedValue(trafoName, mapIdToValues);
         }
       }
 
       // Ist-Wert mit Soll-Wert vergleichen:
-      if (!field.getValue().equals(refValue)) return false;
+      if (!field.getValue().equals(refValue)) {
+        return false;
+      }
     }
     return true;
   }
@@ -722,11 +760,11 @@ public class TextDocumentController
    * nicht in der globalen oder dokumentlokalen Funktionsbibliothek enthalten, so
    * wird ein Fehlerstring zurückgeliefert und eine weitere Fehlermeldung in die
    * Log-Datei geschrieben.
-   * 
+   *
    * Befindet sich das TextDocumentModel in einem über {@link #startSimulation()}
    * gesetzten Simulationslauf, so wird die Trafo mit den im Simulationslauf
    * gesetzten Formularwerten berechnet und zurück geliefert.
-   * 
+   *
    * @param trafoName
    *          Der Name der Trafofunktion, der nicht null sein darf.
    * @return Der transformierte Wert falls die Trafo definiert ist oder ein
@@ -750,7 +788,7 @@ public class TextDocumentController
    * zurückgegeben. Ist die Transformationsionfunktion nicht in der globalen oder
    * dokumentlokalen Funktionsbibliothek enthalten, so wird ein Fehlerstring
    * zurückgeliefert und eine weitere Fehlermeldung in die Log-Datei geschrieben.
-   * 
+   *
    * @param value
    *          Der zu transformierende Wert.
    * @param trafoName
@@ -791,7 +829,7 @@ public class TextDocumentController
    * in der globalen oder dokumentlokalen Funktionsbibliothek enthalten, so wird ein
    * Fehlerstring zurückgeliefert und eine weitere Fehlermeldung in die Log-Datei
    * geschrieben.
-   * 
+   *
    * @param trafoName
    *          Der Name der Trafofunktion, der nicht null sein darf.
    * @param mapIdToValues
@@ -818,12 +856,12 @@ public class TextDocumentController
       return L.m("<FEHLER: TRAFO '%1' nicht definiert>", trafoName);
     }
   }
-  
+
   /**
    * Markiert das Dokument als Formulardokument - damit liefert
    * {@link #isFormDocument()} zukünftig true und der Typ "formDocument" wird
    * persistent im Dokument hinterlegt.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public synchronized void markAsFormDocument()
@@ -837,7 +875,7 @@ public class TextDocumentController
    * Entfernt die WollMux-Kommandos "insertFormValue", "setGroups", "setType
    * formDocument" und "form", sowie die WollMux-Formularbeschreibung und Daten aus
    * dem Dokument doc.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public synchronized void deForm()
@@ -877,7 +915,9 @@ public class TextDocumentController
   public synchronized ConfigThingy getFilenameGeneratorFunc()
   {
     String func = model.getPersistentData().getData(DataID.FILENAMEGENERATORFUNC);
-    if (func == null) return null;
+    if (func == null) {
+      return null;
+    }
     try
     {
       return new ConfigThingy("func", func).getFirstChild();
@@ -902,10 +942,10 @@ public class TextDocumentController
     else
       model.getPersistentData().setData(DataID.FILENAMEGENERATORFUNC, c.stringRepresentation());
   }
-  
+
   /**
    * Entfernt alle Bookmarks, die keine WollMux-Bookmarks sind aus dem Dokument doc.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public synchronized void removeNonWMBookmarks()
@@ -938,7 +978,7 @@ public class TextDocumentController
    * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die Anzeige der
    * Hintergrundfarbe (showHighlightColor) für alle Druckblöcke eines bestimmten
    * Blocktyps blockName (z.B. allVersions).
-   * 
+   *
    * @param blockName
    *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
    * @param visible
@@ -948,7 +988,7 @@ public class TextDocumentController
    *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur, wenn
    *          zu einem betroffenen Druckblock auch eine Hintergrundfarbe angegeben
    *          ist).
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public synchronized void setPrintBlocksProps(String blockName, boolean visible,
@@ -1000,14 +1040,14 @@ public class TextDocumentController
   /**
    * Stellt sicher, dass persistente Daten dieses Dokuments auch tatsächlich
    * persistiert werden.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public synchronized void flushPersistentData()
   {
     model.getPersistentData().flush();
   }
-  
+
   /**
    * Diese Methode ersetzt die Referenzen der ID fieldId im gesamten Dokument durch
    * neue IDs, die in der Ersetzungsregel subst spezifiziert sind. Die
@@ -1016,7 +1056,7 @@ public class TextDocumentController
    * sollen. Damit kann eine Ersetzungsregel auch dafür sorgen, dass aus einem früher
    * atomaren Feld in Zukunft mehrere Felder entstehen. Folgender Abschnitt
    * beschreibt, wie sich die Ersetzung auf verschiedene Elemente auswirkt.
-   * 
+   *
    * 1) Ersetzungsregel "&lt;neueID&gt;" - Einfache Ersetzung mit genau einem neuen
    * Serienbrieffeld (z.B. "&lt;Vorname&gt;"): bei insertFormValue-Kommandos wird
    * WM(CMD'insertFormValue' ID '&lt;alteID&gt;' [TRAFO...]) ersetzt durch WM(CMD
@@ -1024,7 +1064,7 @@ public class TextDocumentController
    * die ID ebenfalls direkt ersetzt durch &lt;neueID&gt;. Bei
    * WollMux-Benutzerfeldern, die ja immer eine Trafo hinterlegt haben, wird jede
    * vorkommende Funktion VALUE 'alteID' ersetzt durch VALUE 'neueID'.
-   * 
+   *
    * 2) Ersetzungsregel "&lt;A&gt; &lt;B&gt;" - Komplexe Ersetzung mit mehreren neuen
    * IDs und Text: Diese Ersetzung ist bei transformierten Feldern grundsätzlich
    * nicht zugelassen. Ein bestehendes insertFormValue-Kommando ohne Trafo wird wie
@@ -1033,29 +1073,31 @@ public class TextDocumentController
    * WM(CMD'insertFormValue' ID 'neueIDn') Bookmarks in den Text eingefügt. Ein
    * Serienbrieffeld wird ersetzt durch entsprechende neue Serienbrieffelder, die
    * durch den entsprechenden Freitext getrennt sind.
-   * 
+   *
    * 3) Leere Ersetzungsregel - in diesem Fall wird keine Ersetzung vorgenommen und
    * die Methode kehrt sofort zurück.
-   * 
+   *
    * In allen Fällen gilt, dass die Änderung nach Ausführung dieser Methode sofort
    * aktiv sind und der Aufruf von setFormFieldValue(...) bzw. updateFormFields(...)
    * mit den neuen IDs direkt in den veränderten Feldern Wirkung zeigt. Ebenso werden
    * aus dem Formularwerte-Abschnitt in den persistenten Daten die alten Werte der
    * ersetzten IDs gelöscht.
-   * 
+   *
    * @param fieldId
    *          Feld, das mit Hilfe der Ersetzungsregel subst ersetzt werden soll.
    * @param subst
    *          die Ersetzungsregel, die beschreibt, welche Inhalte an Stelle des alten
    *          Feldes eingesetzt werden sollen.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
   public synchronized void applyFieldSubstitution(String fieldId,
       FieldSubstitution subst)
   {
     // keine Ersetzung, wenn subst leer ist.
-    if (!subst.iterator().hasNext()) return;
+    if (!subst.iterator().hasNext()) {
+      return;
+    }
 
     // enthält später die neue FieldId, wenn eine 1-zu-1-Zuordnung vorliegt
     String newFieldId = null;
@@ -1077,7 +1119,9 @@ public class TextDocumentController
       }
       count++;
     }
-    if (count != 1) newFieldId = null;
+    if (count != 1) {
+      newFieldId = null;
+    }
 
     // Alle InsertFormValue-Felder anpassen:
     List<FormField> c = model.getIdToFormFields().get(fieldId);
@@ -1187,7 +1231,7 @@ public class TextDocumentController
    * für fieldId gesetzt wurde. Das Serienbrieffeld wird im WollMux registriert und
    * kann damit sofort verwendet werden.
    */
-  synchronized public void insertMailMergeFieldAtCursorPosition(String fieldId)
+  public synchronized void insertMailMergeFieldAtCursorPosition(String fieldId)
   {
     model.updateLastTouchedByVersionInfo();
     insertMailMergeField(fieldId, model.getViewCursor());
@@ -1203,7 +1247,9 @@ public class TextDocumentController
   {
     model.updateLastTouchedByVersionInfo();
 
-    if (fieldId == null || fieldId.length() == 0 || range == null) return;
+    if (fieldId == null || fieldId.length() == 0 || range == null) {
+      return;
+    }
     try
     {
       // Feld einfügen
@@ -1231,7 +1277,7 @@ public class TextDocumentController
 
       // Formularfeld bekanntmachen, damit es vom WollMux verwendet wird.
       if (!model.getIdToTextFieldFormFields().containsKey(fieldId))
-        model.getIdToTextFieldFormFields().put(fieldId, new Vector<FormField>());
+        model.getIdToTextFieldFormFields().put(fieldId, new ArrayList<FormField>());
       List<FormField> formFields = model.getIdToTextFieldFormFields().get(fieldId);
       formFields.add(FormFieldFactory.createDatabaseFormField(model.doc, field));
 
@@ -1311,8 +1357,8 @@ public class TextDocumentController
     else
       model.getPersistentData().removeData(DataID.SERIENDRUCK);
   }
-  
-  
+
+
 
   /**
    * Im Vorschaumodus überträgt diese Methode den Formularwert zum Feldes fieldId aus
@@ -1321,12 +1367,12 @@ public class TextDocumentController
    * Spaltennamen in spitzen Klammern angezeigt; Für die Auflösung der TRAFOs wird
    * dabei die Funktionsbibliothek funcLib verwendet. Außerdem wird der
    * Modified-Status des Dokuments gesetzt.
-   * 
+   *
    * Befindet sich das TextDocumentModel in einem über {@link #startSimulation()}
    * gestarteten Simulationslauf, so wird der Update der von fieldId abhängigen
    * Formularelemente nur simuliert und es der Modified-Status des Dokuments wird
    * nicht gesetzt.
-   * 
+   *
    * @param fieldId
    *          Die ID des Formularfeldes bzw. der Formularfelder, die im Dokument
    *          angepasst werden sollen.
@@ -1338,21 +1384,25 @@ public class TextDocumentController
       String value = model.getFormFieldValuesMap().get(fieldId);
       if (simulationResult != null)
         value = simulationResult.getFormFieldValues().get(fieldId);
-      if (value == null) value = "";
+      if (value == null) {
+        value = "";
+      }
       setFormFields(fieldId, value, true);
     }
     else
     {
       setFormFields(fieldId, "<" + fieldId + ">", false);
     }
-    if (simulationResult == null) model.setDocumentModified(true);
+    if (simulationResult == null) {
+      model.setDocumentModified(true);
+    }
   }
-  
+
   /**
    * Blendet alle Sichtbarkeitselemente eines Dokuments (Dokumentkommandos oder
    * Bereiche mit Namensanhang 'GROUPS ...'), die einer bestimmten Gruppe groupId
    * zugehören, ein oder aus.
-   * 
+   *
    * @param groupId
    * @param visible
    */
@@ -1374,13 +1424,17 @@ public class TextDocumentController
       {
         VisibilityElement visibleElement = iter.next();
         Set<String> groups = visibleElement.getGroups();
-        if (!groups.contains(groupId)) continue;
+        if (!groups.contains(groupId)) {
+          continue;
+        }
 
         // Visibility-Status neu bestimmen:
         boolean setVisible = true;
         for (String gid : groups)
         {
-          if (groupState.get(gid).equals(Boolean.FALSE)) setVisible = false;
+          if (groupState.get(gid).equals(Boolean.FALSE)) {
+            setVisible = false;
+          }
         }
 
         // Element merken, dessen Sichtbarkeitsstatus sich zuerst ändert und
@@ -1392,7 +1446,9 @@ public class TextDocumentController
         if (setVisible != visibleElement.isVisible() && firstChangedElement == null)
         {
           firstChangedElement = visibleElement;
-          if (firstChangedElement.isVisible()) model.focusRangeStart(visibleElement);
+          if (firstChangedElement.isVisible()) {
+            model.focusRangeStart(visibleElement);
+          }
         }
 
         // neuen Sichtbarkeitsstatus setzen:
@@ -1436,7 +1492,7 @@ public class TextDocumentController
 
   /**
    * Setzt den Inhalt aller Formularfelder mit ID fieldId auf value.
-   * 
+   *
    * @param applyTrafo
    *          gibt an, ob eine evtl. vorhandene TRAFO-Funktion angewendet werden soll
    *          (true) oder nicht (false).
@@ -1455,7 +1511,7 @@ public class TextDocumentController
    * Formularfelder korrekte Transformation an; Wenn simulateResult != null ist, so
    * werden die Werte nicht tatsächlich gesetzt, sondern das Setzen in die HashMap
    * simulateResult simuliert. formFields kann null sein, dann passiert nichts.
-   * 
+   *
    * @param applyTrafo
    *          gibt an ob eine evtl. vorhandenen Trafofunktion verwendet werden soll.
    * @param useKnownFormValues
@@ -1463,13 +1519,15 @@ public class TextDocumentController
    *          als Parameter, oder ob alle erwarteten Parameter mit dem Wert value
    *          (false) versorgt werden - wird aus Gründen der Abwärtskompatiblität zu
    *          den bisherigen insertFormValue-Kommandos benötigt.
-   * 
+   *
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
   private void setFormFields(List<FormField> formFields, String value,
       boolean applyTrafo, boolean useKnownFormValues)
   {
-    if (formFields == null) return;
+    if (formFields == null) {
+      return;
+    }
 
     if (simulationResult == null)
       model.updateLastTouchedByVersionInfo();
@@ -1505,11 +1563,11 @@ public class TextDocumentController
    * Vorschaumodus aktiviert, so werden alle Formularfelder mit den zuvor gesetzten
    * Formularwerten angezeigt, ist der Preview-Modus nicht aktiv, so werden nur die
    * Spaltennamen in spitzen Klammern angezeigt.
-   * 
+   *
    * @param previewMode
    *          true schaltet den Modus an, false schaltet auf den Vorschaumodus zurück
    *          in dem die aktuell gesetzten Werte wieder angezeigt werden.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public synchronized void setFormFieldsPreviewMode(boolean previewMode)
@@ -1518,12 +1576,12 @@ public class TextDocumentController
     updateAllFormFields();
     cleanupGarbageOfUnreferencedAutofunctions();
   }
-  
+
   public synchronized void clearFormFields()
   {
     model.clearFormFieldValues();
   }
-  
+
   /**
    * Startet den Simulationsmodus, in dem Änderungen an Formularelementen (WollMux-
    * und NON-WollMux-Felder) nur simuliert und nicht tatsächlich durchgeführt werden.
@@ -1571,7 +1629,7 @@ public class TextDocumentController
    * nicht mehr benötigte TextFieldMaster von ehemaligen InputUser-Textfeldern -
    * Durch die Aufräumaktion ändert sich der DocumentModified-Status des Dokuments
    * nicht.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
   private void cleanupGarbageOfUnreferencedAutofunctions()
@@ -1588,7 +1646,9 @@ public class TextDocumentController
       {
         FormField f = iterator.next();
         String trafoName = f.getTrafoName();
-        if (trafoName != null) usedFunctions.add(trafoName);
+        if (trafoName != null) {
+          usedFunctions.add(trafoName);
+        }
       }
     }
 
@@ -1600,14 +1660,18 @@ public class TextDocumentController
       {
         FormField f = iterator.next();
         String trafoName = f.getTrafoName();
-        if (trafoName != null) usedFunctions.add(trafoName);
+        if (trafoName != null) {
+          usedFunctions.add(trafoName);
+        }
       }
     }
     for (Iterator<FormField> iterator = model.getStaticTextFieldFormFields().iterator(); iterator.hasNext();)
     {
       FormField f = iterator.next();
       String trafoName = f.getTrafoName();
-      if (trafoName != null) usedFunctions.add(trafoName);
+      if (trafoName != null) {
+        usedFunctions.add(trafoName);
+      }
     }
 
     // Nicht mehr benötigte Autofunctions aus der Funktionsbibliothek löschen:
@@ -1645,9 +1709,11 @@ public class TextDocumentController
     for (int i = 0; i < masterNames.length; i++)
     {
       String masterName = masterNames[i];
-      if (masterName == null || !masterName.startsWith(prefix)) continue;
+      if (masterName == null || !masterName.startsWith(prefix)) {
+        continue;
+      }
       String varName = masterName.substring(prefix.length());
-      String trafoName = model.getFunctionNameForUserFieldName(varName);
+      String trafoName = TextDocumentModel.getFunctionNameForUserFieldName(varName);
       if (trafoName != null && !usedFunctions.contains(trafoName))
       {
         try
@@ -1669,7 +1735,7 @@ public class TextDocumentController
    * Ersetzt die Formularbeschreibung dieses Dokuments durch die aus conf. Falls conf
    * == null, so wird die Formularbeschreibung gelöscht. ACHTUNG! conf wird nicht
    * kopiert sondern als Referenz eingebunden.
-   * 
+   *
    * @param conf
    *          ein WM-Knoten, der "Formular"-Kinder hat. Falls conf == null, so wird
    *          die Formularbeschreibungsnotiz gelöscht.
@@ -1691,12 +1757,12 @@ public class TextDocumentController
    * fieldId aus den persistenten Daten, wenn value==null ist. ACHTUNG! Damit der
    * neue Wert angezeigt wird, ist ein Aufruf von {@link #updateFormFields(String)}
    * erforderlich.
-   * 
+   *
    * Befindet sich das TextDocumentModel in einem über {@link #startSimulation()}
    * gestarteten Simulationslauf, so werden die persistenten Daten nicht verändert
    * und der neue Wert nur in einem internen Objekt des Simulationslaufs gespeichert
    * anstatt im Dokument.
-   * 
+   *
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
   public synchronized void setFormFieldValue(String fieldId, String value)
@@ -1713,7 +1779,7 @@ public class TextDocumentController
     else
       simulationResult.setFormFieldValue(fieldId, value);
   }
-  
+
   /**
    * Serialisiert die aktuellen Werte aller Fomularfelder.
    */
@@ -1743,13 +1809,13 @@ public class TextDocumentController
     return werte.stringRepresentation();
   }
 
-  
+
   /**
    * Speichert die aktuelle Formularbeschreibung in den persistenten Daten des
    * Dokuments oder löscht den entsprechenden Abschnitt aus den persistenten Daten,
    * wenn die Formularbeschreibung nur aus einer leeren Struktur ohne eigentlichen
    * Formularinhalt besteht.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private void storeCurrentFormDescription()
@@ -1779,20 +1845,22 @@ public class TextDocumentController
    * neue Formularbeschreibung persistent im Dokument ab und passt die aktuelle
    * Funktionsbibliothek entsprechend an. Ist einer der Werte trafoName, oldFieldId
    * oder newFieldId null, dann macht diese Methode nichts.
-   * 
+   *
    * @param trafoName
    *          Die Funktion, in der die Ersetzung vorgenommen werden soll.
    * @param oldFieldId
    *          Die alte Feld-ID, die durch newFieldId ersetzt werden soll.
    * @param newFieldId
    *          die neue Feld-ID, die oldFieldId ersetzt.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
   private void substituteFieldIdInTrafo(String trafoName, String oldFieldId,
       String newFieldId)
   {
-    if (trafoName == null || oldFieldId == null || newFieldId == null) return;
+    if (trafoName == null || oldFieldId == null || newFieldId == null) {
+      return;
+    }
     try
     {
       ConfigThingy trafoConf =
@@ -1833,7 +1901,7 @@ public class TextDocumentController
    * Formularfeld ist direkt einsetzbar, d.h. sobald diese Methode zurückkehrt, kann
    * über setFormFieldValue(id,...) das Feld befüllt werden. Ist keine Selektion
    * vorhanden, so tut die Funktion nichts.
-   * 
+   *
    * @param trafoConf
    *          darf null sein, dann wird keine TRAFO gesetzt. Ansonsten ein
    *          ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )", wobei
@@ -1847,7 +1915,7 @@ public class TextDocumentController
    * @param hint
    *          Ein Hinweistext der als Tooltip des neuen Formularfeldes angezeigt
    *          werden soll. hint kann null sein, dann wird kein Hinweistext angezeigt.
-   * 
+   *
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TESTED
    */
   public synchronized void replaceSelectionWithTrafoField(ConfigThingy trafoConf,
@@ -1855,34 +1923,40 @@ public class TextDocumentController
   {
     String trafoName = addLocalAutofunction(trafoConf);
 
-    if (trafoName != null) try
+    if (trafoName != null)
     {
-      // Neues UserField an der Cursorposition einfügen
-      addNewInputUserField(model.getViewCursor(), trafoName, hint);
-
-      // Datenstrukturen aktualisieren
-      collectNonWollMuxFormFields();
-
-      // Formularwerte-Abschnitt für alle referenzierten fieldIDs vorbelegen
-      // wenn noch kein Wert gesetzt ist und Anzeige aktualisieren.
-      Function f = getFunctionLibrary().get(trafoName);
-      String[] fieldIds = new String[] {};
-      if (f != null) fieldIds = f.parameters();
-      for (int i = 0; i < fieldIds.length; i++)
+      try
       {
-        String fieldId = fieldIds[i];
-        // Feldwert mit leerem Inhalt vorbelegen, wenn noch kein Wert gesetzt
-        // ist.
-        if (!model.getFormFieldValues().containsKey(fieldId)) setFormFieldValue(fieldId, "");
-        updateFormFields(fieldId);
-      }
+        // Neues UserField an der Cursorposition einfügen
+        addNewInputUserField(model.getViewCursor(), trafoName, hint);
 
-      // Nicht referenzierte Autofunktionen/InputUser-TextFieldMaster löschen
-      cleanupGarbageOfUnreferencedAutofunctions();
-    }
-    catch (java.lang.Exception e)
-    {
-      LOGGER.error("", e);
+        // Datenstrukturen aktualisieren
+        collectNonWollMuxFormFields();
+
+        // Formularwerte-Abschnitt für alle referenzierten fieldIDs vorbelegen
+        // wenn noch kein Wert gesetzt ist und Anzeige aktualisieren.
+        Function f = getFunctionLibrary().get(trafoName);
+        String[] fieldIds = new String[] {};
+        if (f != null)
+        {
+          fieldIds = f.parameters();
+        }
+        for (int i = 0; i < fieldIds.length; i++)
+        {
+          String fieldId = fieldIds[i];
+          // Feldwert mit leerem Inhalt vorbelegen, wenn noch kein Wert gesetzt
+          // ist.
+          if (!model.getFormFieldValues().containsKey(fieldId))
+            setFormFieldValue(fieldId, "");
+          updateFormFields(fieldId);
+        }
+
+        // Nicht referenzierte Autofunktionen/InputUser-TextFieldMaster löschen
+        cleanupGarbageOfUnreferencedAutofunctions();
+      } catch (java.lang.Exception e)
+      {
+        LOGGER.error("", e);
+      }
     }
   }
 
@@ -1890,7 +1964,7 @@ public class TextDocumentController
    * Die Methode fügt die Formular-Abschnitte aus der Formularbeschreibung der Notiz
    * von formCmd zur aktuellen Formularbeschreibung des Dokuments in den persistenten
    * Daten hinzu und löscht die Notiz (sowie den übrigen Inhalt von formCmd).
-   * 
+   *
    * @param formCmd
    *          Das formCmd, das die Notiz mit den hinzuzufügenden Formular-Abschnitten
    *          einer Formularbeschreibung enthält.
@@ -1927,7 +2001,7 @@ public class TextDocumentController
    * Ändert die Definition der TRAFO mit Name trafoName auf trafoConf. Die neue
    * Definition wirkt sich sofort auf folgende
    * {@link #setFormFieldValue(String, String)} Aufrufe aus.
-   * 
+   *
    * @param trafoConf
    *          ein ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )",
    *          wobei Bezeichner ein beliebiger Bezeichner ist und FUNKTIONSDEFINITION
@@ -2002,12 +2076,12 @@ public class TextDocumentController
    * generierten Namen, registriert sie in der Funktionsbibliothek, so dass diese
    * sofort z.B. als TRAFO-Funktion genutzt werden kann und liefert den neuen
    * generierten Funktionsnamen zurück oder null, wenn funcConf fehlerhaft ist.
-   * 
+   *
    * Der automatisch generierte Name ist, nach dem Prinzip
    * PRAEFIX_aktuelleZeitinMillisekunden_zahl aufgebaut. Es wird aber in jedem Fall
    * garantiert, dass der neue Name eindeutig ist und nicht bereits in der
    * Funktionsbibliothek vorkommt.
-   * 
+   *
    * @param funcConf
    *          Ein ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )",
    *          wobei Bezeichner ein beliebiger Bezeichner ist und FUNKTIONSDEFINITION
@@ -2017,7 +2091,7 @@ public class TextDocumentController
    *          Funktionsname, z.B. "AND" sein. Der Bezeichner wird NICHT als Name der
    *          TRAFO verwendet. Stattdessen wird ein neuer eindeutiger TRAFO-Name
    *          generiert.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private String addLocalAutofunction(ConfigThingy funcConf)
@@ -2059,18 +2133,20 @@ public class TextDocumentController
   /**
    * Durchsucht das ConfigThingy conf rekursiv und ersetzt alle VALUE-Knoten, die
    * genau ein Kind besitzen durch VALUE-Knoten mit dem neuen Kind newId.
-   * 
+   *
    * @param conf
    *          Das ConfigThingy, in dem rekursiv ersetzt wird.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private static void substituteValueRecursive(ConfigThingy conf, String oldFieldId,
       String newFieldId)
   {
-    if (conf == null) return;
+    if (conf == null) {
+      return;
+    }
 
-    if (conf.getName().equals("VALUE") && conf.count() == 1
+    if ("VALUE".equals(conf.getName()) && conf.count() == 1
       && conf.toString().equals(oldFieldId))
     {
       try
@@ -2094,11 +2170,11 @@ public class TextDocumentController
   /**
    * Diese Methode liefert den TextFieldMaster, der für Zugriffe auf das Benutzerfeld
    * mit den Namen userFieldName zuständig ist.
-   * 
+   *
    * @param userFieldName
    * @return den TextFieldMaster oder null, wenn das Benutzerfeld userFieldName nicht
    *         existiert.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private XPropertySet getUserFieldMaster(String userFieldName)
@@ -2126,8 +2202,8 @@ public class TextDocumentController
    * <li>"User/" Werte von Benutzervariablen (vgl.
    * {@link #getUserFieldMaster(String)}</li>
    * </ul>
-   * 
-   * 
+   *
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   private class MyValues implements Values
@@ -2174,7 +2250,9 @@ public class TextDocumentController
 
     private int namespace(String id)
     {
-      if (id.startsWith("User/")) return MYVALUES_NAMESPACE_USER;
+      if (id.startsWith("User/")) {
+        return MYVALUES_NAMESPACE_USER;
+      }
       return MYVALUES_NAMESPACE_UNKNOWN;
     }
 
@@ -2193,7 +2271,7 @@ public class TextDocumentController
 
     private boolean getBoolean_User(String id)
     {
-      return getString_User(id).equalsIgnoreCase("true");
+      return "true".equalsIgnoreCase(getString_User(id));
     }
 
     private boolean hasValue_User(String id)
@@ -2209,10 +2287,10 @@ public class TextDocumentController
       }
     }
   }
-  
+
   /**
    * Nimmt ein ConfigThingy von folgender Form
-   * 
+   *
    * <pre>
    * overrideFrag(
    *   (FRAG_ID 'A' NEW_FRAG_ID 'B')
@@ -2220,12 +2298,12 @@ public class TextDocumentController
    *   ...
    * )
    * </pre>
-   * 
+   *
    * parst es und initialisiert damit {@link #overrideFragMap}. NEW_FRAG_ID ist
    * optional und wird als leerer String behandelt wenn es fehlt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    *         TESTED
    */
   private void parseInitialOverrideFragMap(ConfigThingy initialOverrideFragMap)
@@ -2269,15 +2347,15 @@ public class TextDocumentController
 
   /**
    * Liefert die persönliche OverrideFrag-Liste des aktuell gewählten Absenders.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    *         TESTED
    */
   private ConfigThingy getInitialOverrideFragMap()
   {
     ConfigThingy overrideFragConf = new ConfigThingy("overrideFrag");
-    
+
     String overrideFragDbSpalte = null;
     ConfigThingy overrideFragDbSpalteConf =
       WollMuxFiles.getWollmuxConf().query(TextDocumentModel.OVERRIDE_FRAG_DB_SPALTE, 1);
@@ -2297,7 +2375,9 @@ public class TextDocumentController
       {
         Dataset ds = DatasourceJoiner.getDatasourceJoiner().getSelectedDatasetTransformed();
         String value = ds.get(overrideFragDbSpalte);
-        if (value == null) value = "";
+        if (value == null) {
+          value = "";
+        }
         overrideFragConf = new ConfigThingy("overrideFrag", value);
       }
       catch (DatasetNotFoundException e)
@@ -2328,7 +2408,7 @@ public class TextDocumentController
   /**
    * Erzeugt ein FormModel für ein einfaches Formular mit genau einem zugehörigen
    * Formulardokument.
-   * 
+   *
    * @param doc
    *          Das Dokument zu dem ein FormModel erzeugt werden soll.
    * @param visible
@@ -2339,7 +2419,7 @@ public class TextDocumentController
    */
   public FormModel createSingleDocumentFormModel(boolean visible) throws InvalidFormDescriptorException
   {
-  
+
     // Abschnitt "Formular" holen:
     ConfigThingy formConf;
     try
@@ -2351,7 +2431,7 @@ public class TextDocumentController
       throw new InvalidFormDescriptorException(
         L.m("Kein Abschnitt 'Formular' in der Formularbeschreibung vorhanden"));
     }
-  
+
     // Abschnitt Fenster/Formular aus wollmuxConf holen:
     ConfigThingy formFensterConf;
     try
@@ -2363,7 +2443,7 @@ public class TextDocumentController
     {
       formFensterConf = new ConfigThingy("");
     }
-  
+
     return new SingleDocumentFormModel(this, formFensterConf, formConf,
       getFunctionContext(), getFunctionLibrary(), getDialogLibrary(),
       visible);
