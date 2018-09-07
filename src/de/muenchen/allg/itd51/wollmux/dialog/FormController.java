@@ -2,7 +2,7 @@
  * Dateiname: FormController.java
  * Projekt  : WollMux
  * Funktion : Stellt UI bereit, um ein Formulardokument zu bearbeiten.
- * 
+ *
  * Copyright (c) 2010-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -45,7 +45,7 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
@@ -69,7 +69,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -105,7 +104,7 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 /**
  * Stellt UI bereit, um ein Formulardokument zu bearbeiten.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class FormController implements UIElementEventHandler
@@ -118,12 +117,12 @@ public class FormController implements UIElementEventHandler
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in
    * Pixeln.
    */
-  private final static int TF_BORDER = 4;
+  private static final int TF_BORDER = 4;
 
   /**
    * Rand um Buttons (in Pixeln).
    */
-  private final static int BUTTON_BORDER = 2;
+  private static final int BUTTON_BORDER = 2;
 
   /**
    * GridBagLayout hat eine Begrenzung auf maximal 512 Grid-Elemente pro
@@ -132,7 +131,7 @@ public class FormController implements UIElementEventHandler
    * angezeigt werden. Der Wert hier ist etwas weniger als 512, um Puffer zu
    * bieten für das Hinzufügen von Elementen, die immer vorhanden sein sollen.
    */
-  private final static int GRID_MAX = 500;
+  private static final int GRID_MAX = 500;
 
   /**
    * Die Farbe mit der Felder mit fehlerhafter Eingabe (PLAUSI oder FISHY)
@@ -235,7 +234,7 @@ public class FormController implements UIElementEventHandler
   /**
    * Diese Liste enthält alle UIElements.
    */
-  private Vector<UIElement> uiElements = new Vector<UIElement>();
+  private List<UIElement> uiElements = new ArrayList<UIElement>();
 
   /**
    * Die Inhalte der UIElemente aus {@link #mapIdToUIElement} als Values zur
@@ -260,7 +259,7 @@ public class FormController implements UIElementEventHandler
 
   /**
    * ACHTUNG! Darf nur im Event Dispatching Thread aufgerufen werden.
-   * 
+   *
    * @param conf
    *          der Formular-Knoten, der die Formularbeschreibung enthält.
    * @param model
@@ -305,7 +304,7 @@ public class FormController implements UIElementEventHandler
     final ConfigThingy fensterDesc = conf.query("Fenster");
     if (fensterDesc.count() == 0)
       throw new ConfigurationErrorException(
-	  L.m("Schlüssel 'Fenster' fehlt in %1", conf.getName()));
+          L.m("Schlüssel 'Fenster' fehlt in %1", conf.getName()));
 
     initFactories();
 
@@ -313,7 +312,7 @@ public class FormController implements UIElementEventHandler
     try
     {
       plausiMarkerColor = Color
-	  .decode(conf.get("PLAUSI_MARKER_COLOR", 1).getLastChild().toString());
+          .decode(conf.get("PLAUSI_MARKER_COLOR", 1).getLastChild().toString());
     } catch (Exception x)
     {
     }
@@ -322,7 +321,7 @@ public class FormController implements UIElementEventHandler
     {
       ConfigThingy visibilityDesc = conf.query("Sichtbarkeit");
       if (visibilityDesc.count() > 0)
-	visibilityDesc = visibilityDesc.getLastChild();
+        visibilityDesc = visibilityDesc.getLastChild();
       final ConfigThingy visDesc = visibilityDesc;
       createGUI(fensterDesc.getLastChild(), visDesc, mapIdToPresetValue);
     } catch (Exception x)
@@ -334,7 +333,7 @@ public class FormController implements UIElementEventHandler
 
   /**
    * Liefert ein JPanel, das das gesamte GUI des FormControllers enthält.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public JComponent JComponent()
@@ -344,7 +343,7 @@ public class FormController implements UIElementEventHandler
 
   /**
    * Baut die GUI auf (darf nur im EDT aufgerufen werden).
-   * 
+   *
    * @param fensterDesc
    *          der Fenster()-Knoten der Formularbeschreibung.
    * @param visibilityDesc
@@ -375,7 +374,7 @@ public class FormController implements UIElementEventHandler
      */
     // contentPanel = new JPanel();
     myTabbedPane = new JTabbedPane(SwingConstants.TOP,
-	JTabbedPane.SCROLL_TAB_LAYOUT);
+        JTabbedPane.SCROLL_TAB_LAYOUT);
     // contentPanel.add(myTabbedPane);
 
     /********************************************************************************
@@ -395,31 +394,29 @@ public class FormController implements UIElementEventHandler
       Iterator<ConfigThingy> childIter = neuesFenster.iterator();
       while (childIter.hasNext())
       {
-	ConfigThingy childConf = childIter.next();
-	String name = childConf.getName();
-	if (name.equals("TIP"))
-	  tip = childConf.toString();
-	else if (name.equals("TITLE"))
-	  tabTitle = childConf.toString();
-	else if (name.equals("HOTKEY"))
-	{
-	  String str = childConf.toString();
-	  if (str.length() > 0)
-	    hotkey = str.toUpperCase().charAt(0);
-	}
+        ConfigThingy childConf = childIter.next();
+        String name = childConf.getName();
+        if ("TIP".equals(name))
+          tip = childConf.toString();
+        else if ("TITLE".equals(name))
+          tabTitle = childConf.toString();
+        else if ("HOTKEY".equals(name))
+        {
+          String str = childConf.toString();
+          if (str.length() > 0)
+            hotkey = str.toUpperCase().charAt(0);
+        }
       }
 
       DialogWindow newWindow = new DialogWindow(tabIndex, neuesFenster,
-	  mapIdToPresetValue);
+          mapIdToPresetValue);
 
       myTabbedPane.addTab(tabTitle, null, newWindow.JPanel(), tip);
       if (hotkey != 0)
-	myTabbedPane.setMnemonicAt(tabIndex, hotkey);
+        myTabbedPane.setMnemonicAt(tabIndex, hotkey);
 
       ++tabIndex;
     }
-
-    uiElements.trimToSize(); // verschwendeten Platz freigeben.
 
     /********************************************************************************
      * Fokus auf das erste Element setzen (nicht den Tab-Reiter)
@@ -428,10 +425,11 @@ public class FormController implements UIElementEventHandler
     {
       SwingUtilities.invokeLater(new Runnable()
       {
-	public void run()
-	{
-	  uiElements.firstElement().getComponent().requestFocusInWindow();
-	}
+        @Override
+        public void run()
+        {
+          uiElements.get(0).getComponent().requestFocusInWindow();
+        }
       });
     }
 
@@ -470,7 +468,7 @@ public class FormController implements UIElementEventHandler
   /**
    * Parst die Sichtbarkeitsinformationen und setzt die Sichtbarkeit der
    * UIElemente entsprechend und benachrichtigt das FormModel.
-   * 
+   *
    * @param visibilityDesc
    *          der Sichtbarkeit-Knoten der Formularbeschreibung oder ein leeres
    *          ConfigThingy falls der Knoten nicht existiert.
@@ -487,8 +485,8 @@ public class FormController implements UIElementEventHandler
       Function cond;
       try
       {
-	cond = FunctionFactory.parseChildren(visRule, funcLib, dialogLib,
-	    functionContext);
+        cond = FunctionFactory.parseChildren(visRule, funcLib, dialogLib,
+            functionContext);
       } catch (ConfigurationErrorException x)
       {
         LOGGER.error("", x);
@@ -500,7 +498,7 @@ public class FormController implements UIElementEventHandler
        * einfach eine leere Gruppe an.
        */
       if (!mapGroupIdToGroup.containsKey(groupId))
-	mapGroupIdToGroup.put(groupId, new Group(groupId));
+        mapGroupIdToGroup.put(groupId, new Group(groupId));
 
       /*
        * Group mit der entsprechenden Bezeichnung heraussuchen und ihr
@@ -521,11 +519,11 @@ public class FormController implements UIElementEventHandler
       String[] deps = cond.parameters();
       for (int i = 0; i < deps.length; ++i)
       {
-	String elementId = deps[i];
-	if (!mapIdToListOfDependingGroups.containsKey(elementId))
-	  mapIdToListOfDependingGroups.put(elementId, new Vector<Group>(1));
+        String elementId = deps[i];
+        if (!mapIdToListOfDependingGroups.containsKey(elementId))
+          mapIdToListOfDependingGroups.put(elementId, new ArrayList<Group>(1));
 
-	mapIdToListOfDependingGroups.get(elementId).add(group);
+        mapIdToListOfDependingGroups.get(elementId).add(group);
       }
 
       /*
@@ -540,7 +538,7 @@ public class FormController implements UIElementEventHandler
    * Berechnet für jedes UIElement, dessen ID nicht als Schlüssel in
    * mapIdToPresetValue ist den AUTOFILL-Wert, setzt das Feld entsprechend und
    * teilt den Wert des Feldes (egal ob AUTOFILL oder nicht) dem FormModel mit.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void initialStateForUIElementsNotInMapIdToPresetValue(
@@ -552,12 +550,12 @@ public class FormController implements UIElementEventHandler
       UIElement uiElement = iter.next();
       String id = uiElement.getId();
       if (mapIdToPresetValue.containsKey(id))
-	continue;
+        continue;
       UIElementState state = (UIElementState) uiElement.getAdditionalData();
       if (state.autofill != null)
       {
-	String str = state.autofill.getString(myUIElementValues);
-	uiElement.setString(str);
+        String str = state.autofill.getString(myUIElementValues);
+        uiElement.setString(str);
       }
       formModel.valueChanged(id, uiElement.getString());
     }
@@ -567,7 +565,7 @@ public class FormController implements UIElementEventHandler
    * Falls func nicht null ist, wird uiElement für alle Funktionsdialoge, die
    * func referenziert in die entsprechende Liste in
    * {@link #mapDialogNameToListOfUIElementsWithDependingAutofill} eingetragen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void storeAutofillFunctionDialogDeps(UIElement uiElement,
@@ -583,19 +581,19 @@ public class FormController implements UIElementEventHandler
     {
       String dialogName = iter.next();
       if (!mapDialogNameToListOfUIElementsWithDependingAutofill
-	  .containsKey(dialogName))
-	mapDialogNameToListOfUIElementsWithDependingAutofill.put(dialogName,
-	    new Vector<UIElement>(1));
+          .containsKey(dialogName))
+        mapDialogNameToListOfUIElementsWithDependingAutofill.put(dialogName,
+            new ArrayList<UIElement>(1));
 
       List<UIElement> l = mapDialogNameToListOfUIElementsWithDependingAutofill
-	  .get(dialogName);
+          .get(dialogName);
       l.add(uiElement);
     }
   }
 
   /**
    * Ein Tab der Formular-GUI.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class DialogWindow
@@ -607,7 +605,7 @@ public class FormController implements UIElementEventHandler
 
     /**
      * Erzeugt ein neues Tab.
-     * 
+     *
      * @param tabIndex
      *          Die Nummer (von 0 gezählt) des Tabs, das dieses DialogWindow
      *          darstellt.
@@ -624,7 +622,7 @@ public class FormController implements UIElementEventHandler
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public DialogWindow(int tabIndex, ConfigThingy conf,
-	Map<String, String> mapIdToPresetValue)
+        Map<String, String> mapIdToPresetValue)
     {
       myPanel = new JPanel(new GridBagLayout());
       JPanel mainPanel = new JPanel(new GridBagLayout());
@@ -632,13 +630,13 @@ public class FormController implements UIElementEventHandler
       // double weighty, int anchor, int fill, Insets insets, int ipadx, int
       // ipady)
       GridBagConstraints gbcMainPanel = new GridBagConstraints(0, 0, 1, 1, 1.0,
-	  1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-	  new Insets(0, 0, 0, 0), 0, 0);
+          1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
+          new Insets(0, 0, 0, 0), 0, 0);
       JScrollPane scrollPane = new JScrollPane(mainPanel,
-	  ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-	  ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+          ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+          ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
       scrollPane.getVerticalScrollBar()
-	  .setUnitIncrement(Common.getVerticalScrollbarUnitIncrement());
+          .setUnitIncrement(Common.getVerticalScrollbarUnitIncrement());
       scrollPane.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
       myPanel.add(scrollPane, gbcMainPanel);
 
@@ -831,7 +829,7 @@ public class FormController implements UIElementEventHandler
     /**
      * Fügt myPanel an Koordinate y ein Panel hinzu, das mit Buttons gemäß der
      * Beschreibung in conf,query("Buttons") befüllt wird.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private void createButtonPanel(ConfigThingy conf, int y)
@@ -841,9 +839,9 @@ public class FormController implements UIElementEventHandler
       // double
       // weighty, int anchor, int fill, Insets insets, int ipadx, int ipady)
       GridBagConstraints gbcButtonPanel = new GridBagConstraints(0, 0, 1, 1,
-	  1.0, 0.0, GridBagConstraints.LINE_START,
-	  GridBagConstraints.HORIZONTAL,
-	  new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
+          1.0, 0.0, GridBagConstraints.LINE_START,
+          GridBagConstraints.HORIZONTAL,
+          new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
       gbcButtonPanel.gridx = 0;
       gbcButtonPanel.gridy = y;
       // ++y;
@@ -924,14 +922,14 @@ public class FormController implements UIElementEventHandler
      * absetzt, falls es noch ein auf das aktuelle Tab folgendes Tab gibt, das
      * aktiv ist. Falls es kein passendes Tab gibt, bekommt die letzte
      * Komponente von buttonPanel den Fokus.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private void addTabSwitcher(final JPanel buttonPanel)
     {
       GridBagConstraints gbc = new GridBagConstraints(0, 0, 0, 0, 0.0, 0.0,
-	  GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-	  new Insets(0, 0, 0, 0), 0, 0);
+          GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+          new Insets(0, 0, 0, 0), 0, 0);
       final JPanel tabSwitcherCompo = new JPanel();
       tabSwitcherCompo.setSize(1, 1);
       tabSwitcherCompo.setFocusable(true);
@@ -941,7 +939,7 @@ public class FormController implements UIElementEventHandler
       tabSwitcherCompo.addFocusListener(new FocusAdapter()
       {
 
-	@Override
+        @Override
         public void focusGained(FocusEvent e)
         {
           if (buttonPanel.getComponentCount() > 1
@@ -978,7 +976,7 @@ public class FormController implements UIElementEventHandler
     /**
      * Fügt einem Steuerelement einen FocusListener hinzu, der dafür sorgt, daß
      * der Container zu dem Element hinscrollt, sobald es den Fokus erhält.
-     * 
+     *
      * @param uiElement
      *          das Steuerelement, das überwacht werden soll.
      * @author Andor Ertsey (D-III-ITD-D101)
@@ -987,31 +985,32 @@ public class FormController implements UIElementEventHandler
     {
       Component c = uiElement.getComponent();
       if (uiElement instanceof Textarea)
-	c = ((Textarea) uiElement).getTextArea();
+        c = ((Textarea) uiElement).getTextArea();
 
       c.addFocusListener(new FocusAdapter()
       {
-	public void focusGained(FocusEvent e)
-	{
-	  Container c = e.getComponent().getParent();
-	  if (e.getComponent() instanceof JTextArea)
-	    c = c.getParent();
+        @Override
+        public void focusGained(FocusEvent e)
+        {
+          Container c = e.getComponent().getParent();
+          if (e.getComponent() instanceof JTextArea)
+            c = c.getParent();
 
-	  if (c != null && c instanceof JComponent)
-	  {
-	    java.awt.Rectangle b = e.getComponent().getBounds();
-	    b.x = 0;
-	    ((JComponent) c).scrollRectToVisible(b);
-	    c.repaint();
-	  }
-	}
+          if (c != null && c instanceof JComponent)
+          {
+            java.awt.Rectangle b = e.getComponent().getBounds();
+            b.x = 0;
+            ((JComponent) c).scrollRectToVisible(b);
+            c.repaint();
+          }
+        }
       });
     }
 
     /**
      * Falls uiElement eine Plausi und oder ein Autofill hat, werden
      * entsprechende Abhängigkeiten in den Maps erfasst.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     private void storeDeps(UIElement uiElement)
@@ -1026,28 +1025,28 @@ public class FormController implements UIElementEventHandler
        */
       for (int f = 0; f < 2; ++f, func = state.autofill, mapIdToListOfDependingUIElements = mapIdToListOfUIElementsWithDependingAutofill)
       {
-	if (func != null)
-	{
-	  String[] params = func.parameters();
-	  for (int i = 0; i < params.length; ++i)
-	  {
-	    String dependency = params[i];
-	    if (!mapIdToListOfDependingUIElements.containsKey(dependency))
-	      mapIdToListOfDependingUIElements.put(dependency,
-		  new Vector<UIElement>(1));
+        if (func != null)
+        {
+          String[] params = func.parameters();
+          for (int i = 0; i < params.length; ++i)
+          {
+            String dependency = params[i];
+            if (!mapIdToListOfDependingUIElements.containsKey(dependency))
+              mapIdToListOfDependingUIElements.put(dependency,
+                  new ArrayList<UIElement>(1));
 
-	    List<UIElement> deps = mapIdToListOfDependingUIElements
-		.get(dependency);
-	    deps.add(uiElement);
-	  }
-	}
+            List<UIElement> deps = mapIdToListOfDependingUIElements
+                .get(dependency);
+            deps.add(uiElement);
+          }
+        }
       }
     }
 
     /**
      * Verarbeitet die GROUPS-Attribute von uiConf (was zu uiElement gehören
      * muss).
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private void parseGROUPS(ConfigThingy uiConf, UIElement uiElement)
@@ -1056,24 +1055,24 @@ public class FormController implements UIElementEventHandler
       Iterator<ConfigThingy> groupsIter = groupsConf.iterator();
       while (groupsIter.hasNext())
       {
-	ConfigThingy groups = groupsIter.next();
-	Iterator<ConfigThingy> groupIter = groups.iterator();
-	while (groupIter.hasNext())
-	{
-	  String groupId = groupIter.next().toString();
-	  if (!mapGroupIdToGroup.containsKey(groupId))
-	    mapGroupIdToGroup.put(groupId, new Group(groupId));
+        ConfigThingy groups = groupsIter.next();
+        Iterator<ConfigThingy> groupIter = groups.iterator();
+        while (groupIter.hasNext())
+        {
+          String groupId = groupIter.next().toString();
+          if (!mapGroupIdToGroup.containsKey(groupId))
+            mapGroupIdToGroup.put(groupId, new Group(groupId));
 
-	  Group g = mapGroupIdToGroup.get(groupId);
-	  g.uiElements.add(uiElement);
+          Group g = mapGroupIdToGroup.get(groupId);
+          g.uiElements.add(uiElement);
 
-	}
+        }
       }
     }
 
     /**
      * Liefert das Panel zurück, dass den ganzen Inhalt dieses Tabs enthält.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public JPanel JPanel()
@@ -1085,7 +1084,7 @@ public class FormController implements UIElementEventHandler
   /**
    * Initialisiert die UIElementFactory, die zur Erzeugung der UIElements
    * verwendet wird.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void initFactories()
@@ -1098,36 +1097,36 @@ public class FormController implements UIElementEventHandler
     // double
     // weighty, int anchor, int fill, Insets insets, int ipadx, int ipady)
     GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0,
-	0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
-	new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
+        0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
+        new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
     GridBagConstraints gbcCombobox = new GridBagConstraints(0, 0, 1, 1, 1.0,
-	0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
-	new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
+        0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
+        new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
     GridBagConstraints gbcTextarea = new GridBagConstraints(0, 0, 1, 1, 1.0,
-	0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
-	new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
+        0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
+        new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
     GridBagConstraints gbcLabelLeft = new GridBagConstraints(0, 0, 1, 1, 0.0,
-	0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-	new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
+        0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+        new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
     GridBagConstraints gbcCheckbox = new GridBagConstraints(0, 0, 2/* JA */, 1,
-	1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
-	new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
+        1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
+        new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
     GridBagConstraints gbcLabel = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0,
-	GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
-	new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
+        GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
+        new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
     GridBagConstraints gbcButton = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-	GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-	new Insets(BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER),
-	0, 0);
+        GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+        new Insets(BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER),
+        0, 0);
     GridBagConstraints gbcHsep = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0,
-	GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
-	new Insets(3 * TF_BORDER, 0, 2 * TF_BORDER, 0), 0, 0);
+        GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
+        new Insets(3 * TF_BORDER, 0, 2 * TF_BORDER, 0), 0, 0);
     GridBagConstraints gbcVsep = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0,
-	GridBagConstraints.CENTER, GridBagConstraints.VERTICAL,
-	new Insets(0, TF_BORDER, 0, TF_BORDER), 0, 0);
+        GridBagConstraints.CENTER, GridBagConstraints.VERTICAL,
+        new Insets(0, TF_BORDER, 0, TF_BORDER), 0, 0);
     GridBagConstraints gbcGlue = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
-	GridBagConstraints.LINE_START, GridBagConstraints.BOTH,
-	new Insets(0, 0, 0, 0), 0, 0);
+        GridBagConstraints.LINE_START, GridBagConstraints.BOTH,
+        new Insets(0, 0, 0, 0), 0, 0);
 
     mapTypeToLayoutConstraints.put("default", gbcTextfield);
     mapTypeToLabelType.put("default", UIElement.LABEL_LEFT);
@@ -1159,7 +1158,7 @@ public class FormController implements UIElementEventHandler
     mapTypeToLayoutConstraints.put("checkbox", gbcCheckbox);
     mapTypeToLabelType.put("checkbox", UIElement.LABEL_NONE);
     mapTypeToLabelLayoutConstraints.put("checkbox", null); // hat label
-							   // integriert
+                                                           // integriert
 
     mapTypeToLayoutConstraints.put("button", gbcButton);
     mapTypeToLabelType.put("button", UIElement.LABEL_NONE);
@@ -1220,11 +1219,12 @@ public class FormController implements UIElementEventHandler
       funcDialogName = dialogName;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e)
     {
-      if (e.getActionCommand().equals("select"))
-	processUiElementEvent(null, "funcDialogSelect",
-	    new Object[] { funcDialogName });
+      if ("seletc".equals(e.getActionCommand()))
+        processUiElementEvent(null, "funcDialogSelect",
+            new Object[] { funcDialogName });
     }
   }
 
@@ -1234,9 +1234,9 @@ public class FormController implements UIElementEventHandler
    * es wird true geliefert, genau dann wenn kein Feld mit Warnfarbe markiert
    * ist. Kann sowohl aus dem EDT als auch aus einem anderen Thread aufgerufen
    * werden.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    *         TODO Testen
    */
   public boolean isInputOkay()
@@ -1246,22 +1246,23 @@ public class FormController implements UIElementEventHandler
     {
       Runnable runner = new Runnable()
       {
-	public void run()
-	{
-	  for (UIElement ele : uiElements)
-	  {
-	    UIElementState state = ((UIElementState) ele.getAdditionalData());
-	    if ((!state.okay) && state.visible())
-	      return;
-	  }
-	  result[0] = true;
-	}
+        @Override
+        public void run()
+        {
+          for (UIElement ele : uiElements)
+          {
+            UIElementState state = ((UIElementState) ele.getAdditionalData());
+            if ((!state.okay) && state.visible())
+              return;
+          }
+          result[0] = true;
+        }
       };
 
       if (SwingUtilities.isEventDispatchThread())
-	runner.run();
+        runner.run();
       else
-	SwingUtilities.invokeAndWait(runner);
+        SwingUtilities.invokeAndWait(runner);
     } catch (Exception x)
     {
       LOGGER.error("", x);
@@ -1274,7 +1275,7 @@ public class FormController implements UIElementEventHandler
    * behandelt die Änderung so als wäre sie durch den Benutzer erfolgt. ACHTUNG!
    * Die Verarbeitung läuft asynchron im Event-Dispatching Thread, d.h. diese
    * Funktion kehrt evtl. bereits vor Abarbeitung zurück.
-   * 
+   *
    * @param callback
    *          Nach dem Abarbeiten dieser Änderung wird
    *          callback.actionPerformed() aufgerufen falls callback != null.
@@ -1286,20 +1287,21 @@ public class FormController implements UIElementEventHandler
   {
     SwingUtilities.invokeLater(new Runnable()
     {
+      @Override
       public void run()
       {
-	UIElement uiElement = mapIdToUIElement.get(uiElementId);
-	if (uiElement != null)
-	{
-	  processUIElementEvents = false;
-	  uiElement.setString(value);
-	  processUIElementEvents = true;
-	  processUiElementEvent(uiElement, "valueChanged", new Object[] {});
-	} else
-	{
-	  formModel.valueChanged(uiElementId, value);
-	}
-	callback.actionPerformed(new ActionEvent(this, 0, "setValue"));
+        UIElement uiElement = mapIdToUIElement.get(uiElementId);
+        if (uiElement != null)
+        {
+          processUIElementEvents = false;
+          uiElement.setString(value);
+          processUIElementEvents = true;
+          processUiElementEvent(uiElement, "valueChanged", new Object[] {});
+        } else
+        {
+          formModel.valueChanged(uiElementId, value);
+        }
+        callback.actionPerformed(new ActionEvent(this, 0, "setValue"));
       }
     });
   }
@@ -1309,9 +1311,10 @@ public class FormController implements UIElementEventHandler
    * (siehe
    * {@link UIElementEventHandler#processUiElementEvent(UIElement, String, Object[])}
    * ).
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
+  @Override
   public void processUiElementEvent(UIElement source, String eventType,
       Object[] args)
   {
@@ -1331,28 +1334,28 @@ public class FormController implements UIElementEventHandler
         LOGGER.debug(buffy.toString());
       }
 
-      if (eventType.equals("valueChanged"))
+      if ("valueChanged".equals(eventType))
       {
-	// FISHY-Zustand löschen, weil Wert geändert
-	((UIElementState) source.getAdditionalData()).fishy = false;
+        // FISHY-Zustand löschen, weil Wert geändert
+        ((UIElementState) source.getAdditionalData()).fishy = false;
 
-	// FormModel benachrichtigen über Änderung von source
-	// da recomputeAutofills() das FormModel über genau diese Änderung nicht
-	// informiert.
-	formModel.valueChanged(source.getId(), source.getString());
+        // FormModel benachrichtigen über Änderung von source
+        // da recomputeAutofills() das FormModel über genau diese Änderung nicht
+        // informiert.
+        formModel.valueChanged(source.getId(), source.getString());
 
-	Set<UIElement> todo = new HashSet<UIElement>();
-	todo.add(source);
-	/*
-	 * Der folgende Code wird ebenfalls für den eventType funcDialogSelect
-	 * verwendet. Die beiden sollten vermutlich immer synchron gehalten
-	 * werden.
-	 */
-	Set<UIElement> changedElements = computeChangesCausedByChangeOf(todo);
-	recomputeAutofills(changedElements, source);
-	checkDependingPlausis(changedElements);
-	checkDependingVisibilityGroups(changedElements);
-      } else if (eventType.equals("action"))
+        Set<UIElement> todo = new HashSet<UIElement>();
+        todo.add(source);
+        /*
+         * Der folgende Code wird ebenfalls für den eventType funcDialogSelect
+         * verwendet. Die beiden sollten vermutlich immer synchron gehalten
+         * werden.
+         */
+        Set<UIElement> changedElements = computeChangesCausedByChangeOf(todo);
+        recomputeAutofills(changedElements, source);
+        checkDependingPlausis(changedElements);
+        checkDependingVisibilityGroups(changedElements);
+      } else if ("action".equals(eventType))
       {
         String action = (String) args[0];
         if ("abort".equals(action))
@@ -1443,34 +1446,34 @@ public class FormController implements UIElementEventHandler
         }
       } else if ("focus".equals(eventType))
       {
-	if (args[0].equals("lost"))
-	  formModel.focusLost(source.getId());
-	else
-	  formModel.focusGained(source.getId());
-      } else if (eventType.equals("funcDialogSelect"))
+        if ("lost".equals(args[0]))
+          formModel.focusLost(source.getId());
+        else
+          formModel.focusGained(source.getId());
+      } else if ("funcDialogSelect".equals(eventType))
       {
-	String dialogName = (String) args[0];
-	Set<UIElement> todo = new HashSet<UIElement>();
-	List<UIElement> depending = mapDialogNameToListOfUIElementsWithDependingAutofill
-	    .get(dialogName);
-	if (depending != null)
-	{
-	  Iterator<UIElement> iter = depending.iterator();
-	  while (iter.hasNext())
-	  {
-	    UIElement uiElement = iter.next();
-	    todo.add(uiElement);
-	  }
-	}
-	/*
-	 * Der folgende Code wird ebenfalls für den eventType valueChanged
-	 * verwendet. Die beiden sollten vermutlich immer synchron gehalten
-	 * werden.
-	 */
-	Set<UIElement> changedElements = computeChangesCausedByChangeOf(todo);
-	recomputeAutofills(changedElements, source);
-	checkDependingPlausis(changedElements);
-	checkDependingVisibilityGroups(changedElements);
+        String dialogName = (String) args[0];
+        Set<UIElement> todo = new HashSet<UIElement>();
+        List<UIElement> depending = mapDialogNameToListOfUIElementsWithDependingAutofill
+            .get(dialogName);
+        if (depending != null)
+        {
+          Iterator<UIElement> iter = depending.iterator();
+          while (iter.hasNext())
+          {
+            UIElement uiElement = iter.next();
+            todo.add(uiElement);
+          }
+        }
+        /*
+         * Der folgende Code wird ebenfalls für den eventType valueChanged
+         * verwendet. Die beiden sollten vermutlich immer synchron gehalten
+         * werden.
+         */
+        Set<UIElement> changedElements = computeChangesCausedByChangeOf(todo);
+        recomputeAutofills(changedElements, source);
+        checkDependingPlausis(changedElements);
+        checkDependingVisibilityGroups(changedElements);
       }
     } catch (Exception x)
     {
@@ -1485,7 +1488,7 @@ public class FormController implements UIElementEventHandler
    * Liefert die Menge aller UIElemente (inklusive der aus todo), deren Wert
    * sich ändert, wenn sich der Wert eines UIElements aus todo ändert (z,B,
    * wegen AUTOFILLs). ACHTUNG! todo wird durch diese Methode verändert.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public Set<UIElement> computeChangesCausedByChangeOf(Set<UIElement> todo)
@@ -1498,18 +1501,18 @@ public class FormController implements UIElementEventHandler
       iter.remove();
       if (!elements.contains(uiElement))
       {
-	elements.add(uiElement);
-	List<UIElement> deps = mapIdToListOfUIElementsWithDependingAutofill
-	    .get(uiElement.getId());
-	if (deps == null)
-	  continue;
-	Iterator<UIElement> iter2 = deps.iterator();
-	while (iter2.hasNext())
-	{
-	  uiElement = iter2.next();
-	  if (!elements.contains(uiElement))
-	    todo.add(uiElement);
-	}
+        elements.add(uiElement);
+        List<UIElement> deps = mapIdToListOfUIElementsWithDependingAutofill
+            .get(uiElement.getId());
+        if (deps == null)
+          continue;
+        Iterator<UIElement> iter2 = deps.iterator();
+        while (iter2.hasNext())
+        {
+          uiElement = iter2.next();
+          if (!elements.contains(uiElement))
+            todo.add(uiElement);
+        }
       }
     }
     return elements;
@@ -1519,7 +1522,7 @@ public class FormController implements UIElementEventHandler
    * Berechnet die Werte mit den AUTOFILL-Funktionen neu für alle UIElemente aus
    * elements mit Ausnahme von exception (falls nicht null). Das FormModel wird
    * ebenfalls benachrichtigt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void recomputeAutofills(Set<UIElement> elements, UIElement exception)
@@ -1533,15 +1536,15 @@ public class FormController implements UIElementEventHandler
     {
       UIElement uiElement = iter.next();
       if (uiElement == exception)
-	continue;
+        continue;
       if (!elements.contains(uiElement))
-	continue;
+        continue;
       UIElementState state = (UIElementState) uiElement.getAdditionalData();
       if (state.autofill != null)
       {
-	state.fishy = false;
-	uiElement.setString(state.autofill.getString(myUIElementValues));
-	formModel.valueChanged(uiElement.getId(), uiElement.getString());
+        state.fishy = false;
+        uiElement.setString(state.autofill.getString(myUIElementValues));
+        formModel.valueChanged(uiElement.getId(), uiElement.getString());
       }
     }
   }
@@ -1549,7 +1552,7 @@ public class FormController implements UIElementEventHandler
   /**
    * Bestimmt und setzt die Sichtbarkeit neu für alle Groups, die von mindestens
    * einem UIElement mit id aus ids abhängen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void checkDependingVisibilityGroups(Set<UIElement> elements)
@@ -1559,22 +1562,22 @@ public class FormController implements UIElementEventHandler
     {
       UIElement uiElement = eleIter.next();
       List<Group> dependingGroups = mapIdToListOfDependingGroups
-	  .get(uiElement.getId());
+          .get(uiElement.getId());
       if (dependingGroups != null)
       {
-	Iterator<Group> iter = dependingGroups.iterator();
-	while (iter.hasNext())
-	{
-	  Group dependingGroup = iter.next();
-	  Function cond = dependingGroup.condition;
-	  if (cond == null)
-	    continue;
-	  boolean result = cond.getBoolean(myUIElementValues);
-	  if (result == dependingGroup.visible)
-	    continue;
+        Iterator<Group> iter = dependingGroups.iterator();
+        while (iter.hasNext())
+        {
+          Group dependingGroup = iter.next();
+          Function cond = dependingGroup.condition;
+          if (cond == null)
+            continue;
+          boolean result = cond.getBoolean(myUIElementValues);
+          if (result == dependingGroup.visible)
+            continue;
 
-	  setGroupVisibility(dependingGroup, result);
-	}
+          setGroupVisibility(dependingGroup, result);
+        }
       }
     }
   }
@@ -1582,7 +1585,7 @@ public class FormController implements UIElementEventHandler
   /**
    * Setzt die Sichtbarkeit aller Mitglieder von group auf visible und
    * benachrichtigt das FormModel entsprechend.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setGroupVisibility(Group group, boolean visible)
@@ -1597,14 +1600,14 @@ public class FormController implements UIElementEventHandler
 
       if (visible)
       {
-	if (state.invisibleGroups != null)
-	  state.invisibleGroups.remove(group);
+        if (state.invisibleGroups != null)
+          state.invisibleGroups.remove(group);
       } else
       {
-	if (state.invisibleGroups == null)
-	  state.invisibleGroups = new ArrayList<Group>(1);
-	if (!state.invisibleGroups.contains(group))
-	  state.invisibleGroups.add(group);
+        if (state.invisibleGroups == null)
+          state.invisibleGroups = new ArrayList<Group>(1);
+        if (!state.invisibleGroups.contains(group))
+          state.invisibleGroups.add(group);
       }
 
       boolean newElementVisible = state.visible();
@@ -1618,22 +1621,22 @@ public class FormController implements UIElementEventHandler
        */
       if (oldElementVisible != newElementVisible)
       {
-	if (state.getIsButton())
-	{
-	  if (newElementVisible)
-	    ele.setEnabled(true);
-	  else
-	    ele.setEnabled(false);
-	} else
-	  ele.setVisible(newElementVisible);
+        if (state.getIsButton())
+        {
+          if (newElementVisible)
+            ele.setEnabled(true);
+          else
+            ele.setEnabled(false);
+        } else
+          ele.setVisible(newElementVisible);
 
-	if (!ele.isStatic())
-	{
-	  if (newElementVisible)
-	    increaseTabVisibleCount(state.tabIndex);
-	  else
-	    decreaseTabVisibleCount(state.tabIndex);
-	}
+        if (!ele.isStatic())
+        {
+          if (newElementVisible)
+            increaseTabVisibleCount(state.tabIndex);
+          else
+            decreaseTabVisibleCount(state.tabIndex);
+        }
       }
 
     }
@@ -1646,7 +1649,7 @@ public class FormController implements UIElementEventHandler
    * nicht lang genug sein, wird es verlängert. Falls dadurch auf einem Tab eine
    * nicht-leere Menge von nicht-statischen Elementen sichtbar ist, so wird das
    * Tab sichtbar geschaltet.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void increaseTabVisibleCount(int tabIndex)
@@ -1667,7 +1670,7 @@ public class FormController implements UIElementEventHandler
     } else
     {
       if (++tabVisibleCount[tabIndex] == 1)
-	myTabbedPane.setEnabledAt(tabIndex, true);
+        myTabbedPane.setEnabledAt(tabIndex, true);
     }
   }
 
@@ -1675,7 +1678,7 @@ public class FormController implements UIElementEventHandler
    * Erniedrigt den Zähler von tabVisibleCount[tabIndex] um 1. Falls dadurch auf
    * einem Tab keine nicht-statischen Elemente mehr sichtbar ist, so wird das
    * Tab unsichtbar geschaltet.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void decreaseTabVisibleCount(int tabIndex)
@@ -1687,7 +1690,7 @@ public class FormController implements UIElementEventHandler
   /**
    * Berechnet alle Plausi-Zustände neu für Elemente, die von mindestens einem
    * Element mit ID aus ids abhängen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void checkDependingPlausis(Set<UIElement> elements)
@@ -1698,15 +1701,15 @@ public class FormController implements UIElementEventHandler
       UIElement uiElement = eleIter.next();
 
       List<UIElement> dependingUIElements = mapIdToListOfUIElementsWithDependingPlausi
-	  .get(uiElement.getId());
+          .get(uiElement.getId());
       if (dependingUIElements != null)
       {
-	Iterator<UIElement> iter = dependingUIElements.iterator();
-	while (iter.hasNext())
-	{
-	  UIElement dependingUIElement = iter.next();
-	  checkPlausi(dependingUIElement);
-	}
+        Iterator<UIElement> iter = dependingUIElements.iterator();
+        while (iter.hasNext())
+        {
+          UIElement dependingUIElement = iter.next();
+          checkPlausi(dependingUIElement);
+        }
       }
     }
   }
@@ -1714,7 +1717,7 @@ public class FormController implements UIElementEventHandler
   /**
    * Überprüft die Plausi und den fishy-Zustand von uiElement und setzt den
    * Hintergrund entsprechend.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void checkPlausi(UIElement uiElement)
@@ -1739,7 +1742,7 @@ public class FormController implements UIElementEventHandler
 
   /**
    * Eine Sichtbarkeitsgruppe von UIElementen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class Group
@@ -1747,7 +1750,7 @@ public class FormController implements UIElementEventHandler
     /**
      * Die Mitglieder der Gruppe.
      */
-    public List<UIElement> uiElements = new Vector<UIElement>(1);
+    public List<UIElement> uiElements = new ArrayList<UIElement>(1);
 
     /**
      * Die Bedingung für die Sichtbarkeit (true = sichtbar) oder null, wenn
@@ -1773,7 +1776,7 @@ public class FormController implements UIElementEventHandler
 
   /**
    * Speichert diverse Daten über den Zustand eines UIElements.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class UIElementState
@@ -1819,7 +1822,7 @@ public class FormController implements UIElementEventHandler
 
     /**
      * Liefer true gdw invisibleGroups == null oder invisibleGroups leer ist.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD-D101)
      */
     public boolean visible()
@@ -1841,7 +1844,7 @@ public class FormController implements UIElementEventHandler
   /**
    * Stellt den Inhalt einer Map von IDs auf UIElemente als Values zur
    * Verfügung.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class UIElementMapValues implements Values
@@ -1853,24 +1856,27 @@ public class FormController implements UIElementEventHandler
       this.mapIdToUIElement = mapIdToUIElement;
     }
 
+    @Override
     public boolean hasValue(String id)
     {
       return mapIdToUIElement.containsKey(id);
     }
 
+    @Override
     public String getString(String id)
     {
       UIElement uiElement = mapIdToUIElement.get(id);
       if (uiElement == null)
-	return "";
+        return "";
       return uiElement.getString();
     }
 
+    @Override
     public boolean getBoolean(String id)
     {
       UIElement uiElement = mapIdToUIElement.get(id);
       if (uiElement == null)
-	return false;
+        return false;
       return uiElement.getBoolean();
     }
   }
@@ -1885,12 +1891,12 @@ public class FormController implements UIElementEventHandler
     ConfigThingy merge1Conf = new ConfigThingy("", merge1URL).get("Formular");
     ConfigThingy merge2Conf = new ConfigThingy("", merge2URL).get("Formular");
     ConfigThingy buttonanpassung = new ConfigThingy("Buttonanpassung",
-	anpassungURL);
-    List<ConfigThingy> formDesc = new Vector<ConfigThingy>();
+        anpassungURL);
+    List<ConfigThingy> formDesc = new ArrayList<ConfigThingy>();
     formDesc.add(merge1Conf);
     formDesc.add(merge2Conf);
     ConfigThingy merged = TextDocumentModel.mergeFormDescriptors(formDesc,
-	buttonanpassung, "Multi-Form");
+        buttonanpassung, "Multi-Form");
     System.out.println(merged.stringRepresentation());
   }
 

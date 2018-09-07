@@ -44,6 +44,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,7 +52,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.mail.MessagingException;
 import javax.swing.AbstractAction;
@@ -207,22 +207,22 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   private JTextField previewDatasetNumberTextfield;
 
   private Collection<JComponent> elementsDisabledWhenNoDatasourceSelected =
-    new Vector<JComponent>();
+    new ArrayList<JComponent>();
 
   private Collection<JComponent> elementsDisabledWhenNotInPreviewMode =
-    new Vector<JComponent>();
+    new ArrayList<JComponent>();
 
   private Collection<JComponent> elementsDisabledWhenFirstDatasetSelected =
-    new Vector<JComponent>();
+    new ArrayList<JComponent>();
 
   private Collection<JComponent> elementsDisabledWhenLastDatasetSelected =
-    new Vector<JComponent>();
+    new ArrayList<JComponent>();
 
   /**
    * Enthält alle elementsDisabledWhen... Collections.
    */
-  private Vector<Collection<JComponent>> listsOfElementsDisabledUnderCertainCircumstances =
-    new Vector<Collection<JComponent>>();
+  private ArrayList<Collection<JComponent>> listsOfElementsDisabledUnderCertainCircumstances =
+    new ArrayList<Collection<JComponent>>();
 
   /**
    * Das Toolbar-Fenster.
@@ -697,7 +697,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    */
   private List<Action> getInsertFieldActionList()
   {
-    List<Action> actions = new Vector<Action>();
+    List<Action> actions = new ArrayList<Action>();
     List<String> columnNames = ds.getColumnNames();
 
     Collections.sort(columnNames);
@@ -972,7 +972,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     documentController.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
 
-    List<Integer> selected = new Vector<Integer>();
+    List<Integer> selected = new ArrayList<Integer>();
     switch (datasetSelectionType)
     {
       case ALL:

@@ -12,10 +12,10 @@
  * You should have received a copy of the European Union Public Licence
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
- * 
+ *
  * *
  * @author Matthias S. Benkmann
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
@@ -30,10 +30,10 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +44,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 import java.util.regex.Pattern;
 
 import javax.swing.AbstractAction;
@@ -218,7 +217,7 @@ public class MenuManager
   /**
    * Zeigt eine GUI an, über die die Menüstruktur der WollMuxBar bearbeitet werden
    * kann. Alle Änderungen werden in die Datei wollmuxbar.conf geschrieben.
-   * 
+   *
    * @param defaultConf
    *          Die vom Administrator vorgegebene wollmux.conf
    * @param userConf
@@ -236,6 +235,7 @@ public class MenuManager
     this.configIDs = parseConfigIDs(defaultConf, userConf);
     SwingUtilities.invokeLater(new Runnable()
     {
+      @Override
       public void run()
       {
         createGUI();
@@ -285,6 +285,7 @@ public class MenuManager
     {
       private static final long serialVersionUID = 8967339845549340259L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         save();
@@ -295,6 +296,7 @@ public class MenuManager
     {
       private static final long serialVersionUID = 5844265995812275892L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         saveAll();
@@ -305,6 +307,7 @@ public class MenuManager
     {
       private static final long serialVersionUID = 5677051521445316758L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         closeAfterQuestion();
@@ -340,7 +343,7 @@ public class MenuManager
 
   /**
    * Baut {@link #confidsMenu} neu auf.
-   * 
+   *
    * TESTED
    */
   private void rebuildCONF_IDsMenu()
@@ -357,6 +360,7 @@ public class MenuManager
       {
         private static final long serialVersionUID = -1045976152158250940L;
 
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           myTreeModel.addConfigID(id);
@@ -373,6 +377,7 @@ public class MenuManager
       {
         private static final long serialVersionUID = 4405056732432446023L;
 
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           myTreeModel.addConfigIDRecursive(id);
@@ -389,6 +394,7 @@ public class MenuManager
       {
         private static final long serialVersionUID = 5912673283378141797L;
 
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           myTreeModel.removeConfigID(id);
@@ -405,6 +411,7 @@ public class MenuManager
       {
         private static final long serialVersionUID = -6487420333590904845L;
 
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           myTreeModel.removeConfigIDRecursive(id);
@@ -418,6 +425,7 @@ public class MenuManager
     {
       private static final long serialVersionUID = -6157409084988422313L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         editConfIDsList();
@@ -430,7 +438,7 @@ public class MenuManager
     JDialog myDialog = new JDialog(myFrame, L.m("CONF_ID Liste Bearbeiten"));
     myDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     myDialog.setModal(true);
-    List<ConfigID> tempConfigIDs = new Vector<ConfigID>(configIDs);
+    List<ConfigID> tempConfigIDs = new ArrayList<ConfigID>(configIDs);
     editConfIDsList(myDialog, tempConfigIDs);
   }
 
@@ -453,21 +461,26 @@ public class MenuManager
       hbox.add(Box.createHorizontalStrut(4));
       final JTextField tf = new JTextField(40);
       String label = cid.label_user;
-      if (label == null) label = cid.label_default;
+      if (label == null) {
+        label = cid.label_default;
+      }
       tf.setText(label);
       hbox.add(tf);
       tf.getDocument().addDocumentListener(new DocumentListener()
       {
+        @Override
         public void changedUpdate(DocumentEvent e)
         {
           cid.label_user = tf.getText();
         }
 
+        @Override
         public void insertUpdate(DocumentEvent e)
         {
           changedUpdate(e);
         }
 
+        @Override
         public void removeUpdate(DocumentEvent e)
         {
           changedUpdate(e);
@@ -480,6 +493,7 @@ public class MenuManager
         {
           private static final long serialVersionUID = 3258477476164927624L;
 
+          @Override
           public void actionPerformed(ActionEvent e)
           {
             cid.label_user = null;
@@ -493,6 +507,7 @@ public class MenuManager
         {
           private static final long serialVersionUID = -651706612313442973L;
 
+          @Override
           public void actionPerformed(ActionEvent e)
           {
             tempConfigIDs.remove(cid);
@@ -510,6 +525,7 @@ public class MenuManager
     {
       private static final long serialVersionUID = -6185739510399692189L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         String confId =
@@ -517,7 +533,9 @@ public class MenuManager
             L.m("Bitte geben Sie die neue CONF_ID ein"), L.m("CONF_ID eingeben"),
             JOptionPane.QUESTION_MESSAGE);
 
-        if (confId == null) return;
+        if (confId == null) {
+          return;
+        }
 
         for (ConfigID cid : tempConfigIDs)
           if (confId.equals(cid.id))
@@ -553,6 +571,7 @@ public class MenuManager
     {
       private static final long serialVersionUID = -3659326734901758337L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         myDialog.dispose();
@@ -563,6 +582,7 @@ public class MenuManager
     {
       private static final long serialVersionUID = -5822262452343677762L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         myDialog.dispose();
@@ -576,7 +596,9 @@ public class MenuManager
     int frameHeight = myDialog.getHeight();
     int x = parentBounds.x + parentBounds.width / 2 - frameWidth / 2;
     int y = parentBounds.y + parentBounds.height / 2 - frameHeight / 2;
-    if (y < 32) y = 32;
+    if (y < 32) {
+      y = 32;
+    }
     myDialog.setLocation(x, y);
 
     myDialog.setResizable(false);
@@ -585,7 +607,7 @@ public class MenuManager
 
   /**
    * Fügt menu die Menüpunkte für das Bearbeiten-Menü hinzu.
-   * 
+   *
    */
   private void createEditMenu(JComponent menu)
   {
@@ -593,6 +615,7 @@ public class MenuManager
     {
       private static final long serialVersionUID = -918938091489734657L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         myTreeModel.editProperties();
@@ -603,6 +626,7 @@ public class MenuManager
     {
       private static final long serialVersionUID = 517548317085280952L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         myTreeModel.restoreStandard();
@@ -614,6 +638,7 @@ public class MenuManager
     {
       private static final long serialVersionUID = 2041242346379829129L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         myTreeModel.newSubMenu();
@@ -624,6 +649,7 @@ public class MenuManager
     {
       private static final long serialVersionUID = -7565982220424612249L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         myTreeModel.newFile();
@@ -634,6 +660,7 @@ public class MenuManager
     {
       private static final long serialVersionUID = 4088545641795209383L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         myTreeModel.newSeparator();
@@ -644,6 +671,7 @@ public class MenuManager
     {
       private static final long serialVersionUID = 6174870030755959853L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         myTreeModel.newSomething();
@@ -655,6 +683,7 @@ public class MenuManager
     {
       private static final long serialVersionUID = 448136839617492761L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         myTreeModel.deleteSelection();
@@ -665,7 +694,7 @@ public class MenuManager
 
   /**
    * Fügt menu einen für die jeweilige Menüart passenden Separator hinzu.
-   * 
+   *
    */
   private void addSeparator(JComponent menu)
   {
@@ -678,7 +707,7 @@ public class MenuManager
   /**
    * Liefert das empfohlene Startverzeichnis für einen {@link JFileChooser}, der zum
    * Öffnen verwendet wird (insbesondere {@link #openFileChooser}).
-   * 
+   *
    * TESTED
    */
   private File getOpenFileChooserStartDirectory()
@@ -700,7 +729,7 @@ public class MenuManager
    * eingebaut, wenn sie unterhalb dieses Verzeichnisses liegt und dies günstiger
    * erscheint. Falls diese Heuristiken nicht fruchten wird eine absolute URL
    * zurückgeliefert.
-   * 
+   *
    * TESTED
    */
   private String getRelativeURLifPossible(File file)
@@ -713,7 +742,9 @@ public class MenuManager
       String defaultContextPath = canonicalPath(defaultContextFile);
 
       String relativePath = makeRelative(path, defaultContextPath);
-      if (relativePath != null) return relativePath;
+      if (relativePath != null) {
+        return relativePath;
+      }
     }
     catch (Exception x)
     {
@@ -723,7 +754,9 @@ public class MenuManager
     String userHome = System.getProperty("user.home");
     String homePath = canonicalPath(new File(userHome));
     String relativePath = makeRelative(path, homePath);
-    if (relativePath != null) return fixSlashes("${user.home}/" + relativePath);
+    if (relativePath != null) {
+      return fixSlashes("${user.home}/" + relativePath);
+    }
 
     try
     {
@@ -778,16 +811,21 @@ public class MenuManager
   {
     private List<TreeModelListener> listeners = new ArrayList<TreeModelListener>();
 
+    @Override
     public void addTreeModelListener(TreeModelListener l)
     {
-      if (!listeners.contains(l)) listeners.add(l);
+      if (!listeners.contains(l)) {
+        listeners.add(l);
+      }
     }
 
+    @Override
     public void removeTreeModelListener(TreeModelListener l)
     {
       listeners.remove(l);
     }
 
+    @Override
     public Object getChild(Object parent, int index)
     {
       Node parentNode = (Node) parent;
@@ -802,11 +840,13 @@ public class MenuManager
       return null;
     }
 
+    @Override
     public int getChildCount(Object parent)
     {
       return ((Node) parent).children.size();
     }
 
+    @Override
     public int getIndexOfChild(Object parent, Object child)
     {
       if (parent != null && child != null)
@@ -814,18 +854,23 @@ public class MenuManager
       return -1;
     }
 
+    @Override
     public Object getRoot()
     {
       return menuTreeRoot;
     }
 
+    @Override
     public boolean isLeaf(Object n)
     {
       Node node = (Node) n;
-      if (node.isMenuOrBar()) return false;
+      if (node.isMenuOrBar()) {
+        return false;
+      }
       return true;
     }
 
+    @Override
     public void valueForPathChanged(TreePath path, Object newValue)
     {
       throw new UnsupportedOperationException();
@@ -833,29 +878,35 @@ public class MenuManager
 
     /**
      * Fügt allen momentan ausgewählten Knoten des Baums die CONF_ID id hinzu.
-     * 
+     *
      * TESTED
      */
     public void addConfigID(String id)
     {
-      if (warnIfNoSelection()) return;
+      if (warnIfNoSelection()) {
+        return;
+      }
       TreePath[] selectedPaths = myTree.getSelectionPaths();
       for (TreePath selectedPath : selectedPaths)
       {
         Node selectedNode = (Node) selectedPath.getLastPathComponent();
-        if (selectedNode.addConfID(id)) nodeHasBeenModified(selectedPath);
+        if (selectedNode.addConfID(id)) {
+          nodeHasBeenModified(selectedPath);
+        }
       }
     }
 
     /**
      * Fügt allen momentan ausgewählten Knoten des Baums sowie all ihren Nachfahren
      * die CONF_ID id hinzu.
-     * 
+     *
      * TESTED
      */
     public void addConfigIDRecursive(String id)
     {
-      if (warnIfNoSelection()) return;
+      if (warnIfNoSelection()) {
+        return;
+      }
       TreePath[] selectedPaths = myTree.getSelectionPaths();
       for (TreePath selectedPath : selectedPaths)
         addConfigIDRecursive(selectedPath, id);
@@ -863,42 +914,50 @@ public class MenuManager
 
     /**
      * Fügt path und allen seinen Nachfahren die CONF_ID id hinzu.
-     * 
+     *
      * TESTED
      */
     private void addConfigIDRecursive(TreePath path, String id)
     {
       Node selectedNode = (Node) path.getLastPathComponent();
-      if (selectedNode.addConfID(id)) nodeHasBeenModified(path);
+      if (selectedNode.addConfID(id)) {
+        nodeHasBeenModified(path);
+      }
       for (Node node : selectedNode.children)
         addConfigIDRecursive(path.pathByAddingChild(node), id);
     }
 
     /**
      * Entfernt von allen momentan ausgewählten Knoten des Baums die CONF_ID id.
-     * 
+     *
      * TESTED
      */
     public void removeConfigID(String id)
     {
-      if (warnIfNoSelection()) return;
+      if (warnIfNoSelection()) {
+        return;
+      }
       TreePath[] selectedPaths = myTree.getSelectionPaths();
       for (TreePath selectedPath : selectedPaths)
       {
         Node selectedNode = (Node) selectedPath.getLastPathComponent();
-        if (selectedNode.removeConfID(id)) nodeHasBeenModified(selectedPath);
+        if (selectedNode.removeConfID(id)) {
+          nodeHasBeenModified(selectedPath);
+        }
       }
     }
 
     /**
      * Entfernt von allen momentan ausgewählten Knoten des Baums sowie all ihren
      * Nachfahren die CONF_ID id.
-     * 
+     *
      * TESTED
      */
     public void removeConfigIDRecursive(String id)
     {
-      if (warnIfNoSelection()) return;
+      if (warnIfNoSelection()) {
+        return;
+      }
       TreePath[] selectedPaths = myTree.getSelectionPaths();
       for (TreePath selectedPath : selectedPaths)
         removeConfigIDRecursive(selectedPath, id);
@@ -906,13 +965,15 @@ public class MenuManager
 
     /**
      * Entfernt von path und allen seinen Nachfahren die CONF_ID id.
-     * 
+     *
      * TESTED
      */
     private void removeConfigIDRecursive(TreePath path, String id)
     {
       Node selectedNode = (Node) path.getLastPathComponent();
-      if (selectedNode.removeConfID(id)) nodeHasBeenModified(path);
+      if (selectedNode.removeConfID(id)) {
+        nodeHasBeenModified(path);
+      }
       for (Node node : selectedNode.children)
         removeConfigIDRecursive(path.pathByAddingChild(node), id);
     }
@@ -922,7 +983,7 @@ public class MenuManager
      * {@link MenuManager#configIDs} auf den Baum und setzt dann configIDs auf
      * tempConfigIDs. Das CONF_IDs Menü wird ebenfalls neu aufgebaut.
      * {@link MenuManager#modified} wird auf <code>true</code> gesetzt.
-     * 
+     *
      * TESTED
      */
     public void updateConfigIDs(List<ConfigID> tempConfigIDs)
@@ -942,7 +1003,9 @@ public class MenuManager
             break;
           }
         }
-        if (!found) removeConfigIDRecursive(new TreePath(menuTreeRoot), cidold.id);
+        if (!found) {
+          removeConfigIDRecursive(new TreePath(menuTreeRoot), cidold.id);
+        }
       }
 
       configIDs = tempConfigIDs;
@@ -952,7 +1015,7 @@ public class MenuManager
 
     /**
      * Entfernt alle durch paths bezeichneten Knoten aus dem Baum.
-     * 
+     *
      * TESTED
      */
     public void nuke(TreePath[] paths)
@@ -960,7 +1023,9 @@ public class MenuManager
       for (TreePath path : paths)
       {
         // Root und die Leisten können nicht gelöscht werden.
-        if (path.getPathCount() < 3) continue;
+        if (path.getPathCount() < 3) {
+          continue;
+        }
         TreePath parentPath = path.getParentPath();
         Node removedNode = (Node) path.getLastPathComponent();
         Node parentNode = ((Node) parentPath.getLastPathComponent());
@@ -984,7 +1049,7 @@ public class MenuManager
     /**
      * Fügt Kopien von den Nodes die durch paths beschrieben sind an index in den
      * Node identifiziert durch parentPath ein.
-     * 
+     *
      * TESTED
      */
     public void copy(TreePath[] paths, TreePath parentPath, int index)
@@ -994,7 +1059,9 @@ public class MenuManager
       for (TreePath path : paths)
       {
         // Root und die Leisten können nicht kopiert werden.
-        if (path.getPathCount() < 3) continue;
+        if (path.getPathCount() < 3) {
+          continue;
+        }
         Node sourceNode = (Node) path.getLastPathComponent();
         parentNode.recursiveCopy(sourceNode, index);
 
@@ -1017,7 +1084,7 @@ public class MenuManager
     /**
      * Fügt newNode (was ein neuer unabhängiger Node sein muss) als Referenz in den
      * durch parentPath bezeichneten Knoten ein an Position index.
-     * 
+     *
      * TESTED
      */
     public void insert(Node newNode, TreePath parentPath, int index)
@@ -1044,14 +1111,16 @@ public class MenuManager
      * Nimmt das erste aktuell ausgewählte Menü und reinitialisiert es, wobei nur
      * Daten aus {@link MenuManager#defaultConf} verwendet werden, keine aus
      * userConf.
-     * 
+     *
      */
     public void restoreStandard()
     {
       ConfigThingy noUserConf = new ConfigThingy("wollmuxbarConf");
 
       TreePath selection = myTree.getSelectionPath();
-      if (selection == null) return;
+      if (selection == null) {
+        return;
+      }
       if (!confirm(
         L.m("Änderungen aufheben?"),
         L.m("Wollen Sie wirklich alle Änderungen\ndes ausgewählten Menüs und\naller Untermenüs aufheben?")))
@@ -1094,8 +1163,9 @@ public class MenuManager
       else
       { // if (selection.getPathCount() > 2)
         Node node = (Node) selection.getLastPathComponent();
-        if (!node.isMenuOrBar()) return; // Wir können nur ganze Menüs
-        // wiederherstellen
+        if (!node.isMenuOrBar()) {
+          return; // Wir können nur ganze Menüs wiederherstellen
+        }
 
         String menuId = null;
         try
@@ -1131,16 +1201,22 @@ public class MenuManager
     public void deleteSelection()
     {
       TreePath[] paths = myTree.getSelectionPaths();
-      if (paths != null) nuke(paths);
-    };
+      if (paths != null) {
+        nuke(paths);
+      }
+    }
 
     public void newSubMenu()
     {
-      if (!allowedInsertPositionSelected(true)) return;
+      if (!allowedInsertPositionSelected(true)) {
+        return;
+      }
       String menuName =
         JOptionPane.showInputDialog(myFrame, L.m("Name des neuen Menüs"),
           L.m("Neues (Unter)Menü"), JOptionPane.QUESTION_MESSAGE);
-      if (menuName == null || menuName.length() == 0) return;
+      if (menuName == null || menuName.isEmpty()) {
+        return;
+      }
       ConfigThingy conf = new ConfigThingy("");
       conf.add("TYPE").add("menu");
       conf.add("MENU").add(generateMenuId(menuName));
@@ -1154,7 +1230,7 @@ public class MenuManager
      * Erzeugt eine MENU ID die in keinem Menues-Abschnitt in
      * {@link MenuManager#userConf} oder {@link MenuManager#defaultConf} bisher
      * vorkommt und auch nirgends im Baum. Die Generierung orientiert sich an name.
-     * 
+     *
      * TESTED
      */
     private String generateMenuId(String name)
@@ -1164,11 +1240,15 @@ public class MenuManager
       for (int count = 0;; ++count)
       {
         String id = baseid;
-        if (count > 0) id = id + count;
+        if (count > 0) {
+          id = id + count;
+        }
 
         try
         {
-          if (findMenuRecursive(menuTreeRoot, id)) continue;
+          if (findMenuRecursive(menuTreeRoot, id)) {
+            continue;
+          }
 
           getActiveConfigSection(new String[] {
             "Menues", id }, defaultConf, userConf);
@@ -1183,16 +1263,20 @@ public class MenuManager
     /**
      * Liefert true gdw, node selbst oder ein Nachfahre ein Menü ist mit
      * MENU-Attribut id.
-     * 
+     *
      * TESTED
      */
     private boolean findMenuRecursive(Node node, String id)
     {
       // id.equals, NICHT node.menuId().equals, da letzteres null sein kann.
-      if (id.equals(node.menuId())) return true;
+      if (id.equals(node.menuId())) {
+        return true;
+      }
 
       for (Node child : node.children)
-        if (findMenuRecursive(child, id)) return true;
+        if (findMenuRecursive(child, id)) {
+          return true;
+        }
 
       return false;
     }
@@ -1212,17 +1296,23 @@ public class MenuManager
 
     /**
      * Liefer true, wenn eine erlaubte Einfügeposition selektiert ist.
-     * 
+     *
      * @param barsAllowed
      *          falls true gilt eine selektierte Menü- oder Buttonleiste als legal.
      */
     private boolean allowedInsertPositionSelected(boolean barsAllowed)
     {
       TreePath selectedPath = myTree.getSelectionPath();
-      if (selectedPath == null) return false;
+      if (selectedPath == null) {
+        return false;
+      }
       // Kann auf/in/vor Wurzel nichts einfügen
-      if (selectedPath.getPathCount() < 2) return false;
-      if (!barsAllowed && selectedPath.getPathCount() < 3) return false;
+      if (selectedPath.getPathCount() < 2) {
+        return false;
+      }
+      if (!barsAllowed && selectedPath.getPathCount() < 3) {
+        return false;
+      }
       return true;
     }
 
@@ -1230,21 +1320,27 @@ public class MenuManager
      * Fügt vor dem ersten ausgewählten Element (falls vorhanden und falls erlaubt)
      * newNode ein (was ein frischer unabhängiger Node sein muss) und liefert den
      * TreePath des neuen Knoten zurück (oder null falls keiner eingefügt wurde).
-     * 
+     *
      * @param appendIfMenuSelected
      *          falls true, so wird wenn ein Menü selektiert ist, ans Ende von diesem
      *          angehängt. Falls false, so wird auch bei selektiertem Menü davor
      *          eingefügt. In letzterem Fall sind die Menü- und Buttonleiste keine
      *          legalen Einfügepositionen und diese funktioniert tut nichts.
-     * 
+     *
      */
     private TreePath newNode(Node newNode, boolean appendIfMenuSelected)
     {
       TreePath selectedPath = myTree.getSelectionPath();
-      if (selectedPath == null) return null;
+      if (selectedPath == null) {
+        return null;
+      }
       // Kann vor/auf/in Wurzel nichts einfügen
-      if (selectedPath.getPathCount() < 2) return null;
-      if (!appendIfMenuSelected && selectedPath.getPathCount() < 3) return null;
+      if (selectedPath.getPathCount() < 2) {
+        return null;
+      }
+      if (!appendIfMenuSelected && selectedPath.getPathCount() < 3) {
+        return null;
+      }
 
       Node selectedNode = (Node) selectedPath.getLastPathComponent();
       if (appendIfMenuSelected && selectedNode.isMenuOrBar())
@@ -1268,7 +1364,7 @@ public class MenuManager
      * entsprechende openExt-Menüeinträge ein. Wenn derzeit ein Menü selektiert ist,
      * werden die Einträge an dessen Ende angefügt. Ist ein anderer Eintrag
      * selektiert, so werden die Einträge davor eingefügt.
-     * 
+     *
      * TESTED
      */
     public void newFile()
@@ -1299,7 +1395,7 @@ public class MenuManager
      * Falls momentan ein Menü selektiert ist, wird ein openExt-Eintrag für file an
      * sein Ende gesetzt. Falls was anderes selektiert ist, wird der Eintrag davor
      * eingefügt.
-     * 
+     *
      * TESTED
      */
     private void newFile(File file)
@@ -1313,7 +1409,9 @@ public class MenuManager
         ext = label.substring(dotIdx + 1);
         label = label.substring(0, dotIdx);
       }
-      if (ext.length() == 0) ext = "<noext>";
+      if (ext.length() == 0) {
+        ext = "<noext>";
+      }
       conf.add("LABEL").add(label);
       conf.add("TYPE").add("button");
       conf.add("ACTION").add("openExt");
@@ -1333,7 +1431,9 @@ public class MenuManager
       conf.add("LABEL").add("");
       Node newNode = new Node("", new ArrayList<Node>(), false, conf);
       TreePath path = newNode(newNode, true);
-      if (path == null) return;
+      if (path == null) {
+        return;
+      }
       myTree.setSelectionPath(path);
       editProperties();
     }
@@ -1341,23 +1441,28 @@ public class MenuManager
     /**
      * Öffnet einen modalen Dialog über den das zugehörige ConfigThingy des ersten
      * ausgewählten Elements des Baumes bearbeitet werden kann.
-     * 
+     *
      * TESTED
      */
     public void editProperties()
     {
       final TreePath selectedPath = myTree.getSelectionPath();
-      if (selectedPath == null) return;
+      if (selectedPath == null) {
+        return;
+      }
       // Kann Wurzel oder ...leiste nicht bearbeiten
-      if (selectedPath.getPathCount() < 3) return;
+      if (selectedPath.getPathCount() < 3) {
+        return;
+      }
       final Node selectedNode = (Node) selectedPath.getLastPathComponent();
       final ConfigThingy originalConf = selectedNode.conf;
       UIElementConfigThingyEditor.showEditDialog(myFrame, originalConf,
         new ActionListener()
         {
+          @Override
           public void actionPerformed(ActionEvent e)
           {
-            if (e.getActionCommand().equals("OK"))
+            if ("OK".equals(e.getActionCommand()))
             {
               ConfigThingy changedConf = (ConfigThingy) e.getSource();
               propertiesHaveBeenEdited(selectedPath, selectedNode, originalConf,
@@ -1403,7 +1508,7 @@ public class MenuManager
   /**
    * Zeigt einen modalen Dialog an mit Titel title und Frage message und liefert
    * true, wenn der Benutzer Ja anwählt.
-   * 
+   *
    */
   private boolean confirm(String title, String message)
   {
@@ -1413,9 +1518,9 @@ public class MenuManager
 
   /**
    * Bringt eine Warnung, wenn nichts ausgewählt ist.
-   * 
+   *
    * @return true wenn die Warnung gebracht wurde (d.h. wenn nichts ausgewählt ist).
-   * 
+   *
    */
   private boolean warnIfNoSelection()
   {
@@ -1433,6 +1538,7 @@ public class MenuManager
   {
     private static final long serialVersionUID = -814838847502548075L;
 
+    @Override
     public int getSourceActions(JComponent c)
     {
       if (c == myTree)
@@ -1441,18 +1547,24 @@ public class MenuManager
         return NONE;
     }
 
+    @Override
     protected Transferable createTransferable(JComponent c)
     {
-      if (c != myTree) return null;
+      if (c != myTree) {
+        return null;
+      }
       TreePath[] selection = myTree.getSelectionPaths();
 
       // We cannot drag the root or the 2 nodes below it
       for (TreePath path : selection)
-        if (path.getPathCount() < 3) return null;
+        if (path.getPathCount() < 3) {
+          return null;
+        }
 
       return new MyTransferable(selection);
     }
 
+    @Override
     protected void exportDone(JComponent c, Transferable data, int action)
     {
       if (action == MOVE)
@@ -1470,11 +1582,14 @@ public class MenuManager
     {
       for (int i = path.getPathCount() - 1; i > 1; --i)
       {
-        if (((Node) path.getPathComponent(i)).isFavoritesMenu()) return true;
+        if (((Node) path.getPathComponent(i)).isFavoritesMenu()) {
+          return true;
+        }
       }
       return false;
     }
 
+    @Override
     public boolean canImport(TransferHandler.TransferSupport trans)
     {
       try
@@ -1498,19 +1613,25 @@ public class MenuManager
         JTree.DropLocation location = (JTree.DropLocation) trans.getDropLocation();
         TreePath dropPath = location.getPath();
         // kann weder auf noch in wurzel was droppen
-        if (dropPath.getPathCount() < 2) return false;
+        if (dropPath.getPathCount() < 2) {
+          return false;
+        }
 
         // Falls das dropTarget innerhalb von mindestens einer der Selektionen liegt,
         // dürfen wir nicht droppen, weil sonst der Node gelöscht würde
         for (TreePath path : sources)
         {
-          if (path.isDescendant(dropPath)) return false;
+          if (path.isDescendant(dropPath)) {
+            return false;
+          }
         }
 
         // Falls wir von außerhalb eines Favoriten-Menüs in ein solches droppen, dann
         // immer COPY nehmen.
         if (isInFavoritesMenu(dropPath) && !allinfavorites)
-          if (trans.isDrop()) trans.setDropAction(COPY);
+          if (trans.isDrop()) {
+            trans.setDropAction(COPY);
+          }
 
         return true;
       }
@@ -1520,9 +1641,12 @@ public class MenuManager
       }
     }
 
+    @Override
     public boolean importData(TransferHandler.TransferSupport trans)
     {
-      if (!canImport(trans)) return false;
+      if (!canImport(trans)) {
+        return false;
+      }
 
       JTree.DropLocation location = (JTree.DropLocation) trans.getDropLocation();
       int childIndex = location.getChildIndex();
@@ -1568,21 +1692,23 @@ public class MenuManager
   {
     private TreePath[] selection;
 
-    public TreePath[] getDraggedStuff()
-    {
-      return selection;
-    }
-
     public MyTransferable(TreePath[] selection)
     {
       this.selection = selection;
     }
 
+    public TreePath[] getDraggedStuff()
+    {
+      return selection;
+    }
+
+    @Override
     public DataFlavor[] getTransferDataFlavors()
     {
       return TRANSFER_DATAFLAVORS;
     }
 
+    @Override
     public Object getTransferData(DataFlavor flavor)
         throws UnsupportedFlavorException, IOException
     {
@@ -1599,31 +1725,27 @@ public class MenuManager
         return null;
     }
 
+    @Override
     public boolean isDataFlavorSupported(DataFlavor flavor)
     {
       for (DataFlavor flavor2 : TRANSFER_DATAFLAVORS)
-        if (flavor2.equals(flavor)) return true;
+        if (flavor2.equals(flavor)) {
+          return true;
+        }
       return false;
     }
 
   }
 
-  private class MyMouseListener implements MouseListener
+  private class MyMouseListener extends MouseAdapter
   {
-    public void mouseClicked(MouseEvent e)
-    {}
-
-    public void mouseEntered(MouseEvent e)
-    {}
-
-    public void mouseExited(MouseEvent e)
-    {}
-
+    @Override
     public void mousePressed(MouseEvent e)
     {
       maybeShowPopup(e);
     }
 
+    @Override
     public void mouseReleased(MouseEvent e)
     {
       maybeShowPopup(e);
@@ -1647,56 +1769,42 @@ public class MenuManager
     }
   }
 
-  private class MyWindowListener implements WindowListener
+  private class MyWindowListener extends WindowAdapter
   {
-    public void windowActivated(WindowEvent e)
-    {}
-
-    public void windowClosed(WindowEvent e)
-    {}
-
+    @Override
     public void windowClosing(WindowEvent e)
     {
       closeAfterQuestion();
     }
-
-    public void windowDeactivated(WindowEvent e)
-    {}
-
-    public void windowDeiconified(WindowEvent e)
-    {}
-
-    public void windowIconified(WindowEvent e)
-    {}
-
-    public void windowOpened(WindowEvent e)
-    {}
-
   }
 
   /**
    * Wird an {@link MenuManager#myTreeModel} registriert und setzt bei Veränderungen
    * das {@link MenuManager#modified}-Flag auf <code>true</code>.
-   * 
+   *
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
   private class MyTreeModelLister implements TreeModelListener
   {
+    @Override
     public void treeNodesChanged(TreeModelEvent e)
     {
       modified = true;
     }
 
+    @Override
     public void treeNodesInserted(TreeModelEvent e)
     {
       modified = true;
     }
 
+    @Override
     public void treeNodesRemoved(TreeModelEvent e)
     {
       modified = true;
     }
 
+    @Override
     public void treeStructureChanged(TreeModelEvent e)
     {
       modified = true;
@@ -1791,6 +1899,18 @@ public class MenuManager
       this.conf = new ConfigThingy(conf);
     }
 
+    /**
+     * Copy constructor (deep copy).
+     */
+    public Node(Node orig)
+    {
+      this(orig.label, new ArrayList<Node>(), orig.userModified, new ConfigThingy(
+        orig.conf));
+      for (Node child : orig.children)
+        children.add(new Node(child));
+    }
+
+    @Override
     public String toString()
     { // TESTED
       ConfigThingy cids = conf.query("CONF_ID", 1);
@@ -1813,7 +1933,9 @@ public class MenuManager
         buffy.append("] ");
 
         buffy.append(label);
-        if (userModified) buffy.append('*');
+        if (userModified) {
+          buffy.append('*');
+        }
 
         return buffy.toString();
       }
@@ -1829,8 +1951,8 @@ public class MenuManager
     {
       try
       {
-        return conf.getName().length() > 0
-          || conf.get("TYPE").toString().equals("menu");
+        return !conf.getName().isEmpty()
+          || "menu".equals(conf.get("TYPE").toString());
       }
       catch (NodeNotFoundException x)
       {
@@ -1845,7 +1967,7 @@ public class MenuManager
     {
       try
       {
-        return conf.get("FAVO").toString().equals("1");
+        return "1".equals(conf.get("FAVO").toString());
       }
       catch (NodeNotFoundException x)
       {
@@ -1871,7 +1993,7 @@ public class MenuManager
 
     /**
      * Entfernt child aus der Liste der Kinder von this.
-     * 
+     *
      */
     public void removeChild(Node child)
     {
@@ -1882,7 +2004,7 @@ public class MenuManager
      * Fügt eine Kopie von sourceNode unter Index index in die Kinder von this ein.
      * Falls sourceNode Kinder hat, so werden diese rekursiv in den kopierten Knoten
      * kopiert.
-     * 
+     *
      */
     public void recursiveCopy(Node sourceNode, int index)
     {
@@ -1890,35 +2012,30 @@ public class MenuManager
     }
 
     /**
-     * Copy constructor (deep copy).
-     */
-    public Node(Node orig)
-    {
-      this(orig.label, new ArrayList<Node>(), orig.userModified, new ConfigThingy(
-        orig.conf));
-      for (Node child : orig.children)
-        children.add(new Node(child));
-    }
-
-    /**
      * Fügt diesem Knoten die CONF_ID id hinzu falls nicht bereits vorhanden. Bei
      * Knoten, die keine CONF_ID unterstützen wird ohne etwas zu tun false geliefert.
-     * 
+     *
      * @return true wenn id neu hinzugefügt wurde (d.h. nicht bereits vorhanden war)
-     * 
+     *
      *         TESTED
      */
     public boolean addConfID(String id)
     {
       // Falls wir einer der oberen Knoten sind, die kein CONF_ID unterstützen.
-      if (conf.getName().length() > 0) return false;
+      if (conf.getName().length() > 0) {
+        return false;
+      }
 
       ConfigThingy conf_id_conf = conf.query("CONF_ID");
-      if (conf_id_conf.count() == 0) conf_id_conf.addChild(conf.add("CONF_ID"));
+      if (conf_id_conf.count() == 0) {
+        conf_id_conf.addChild(conf.add("CONF_ID"));
+      }
 
       for (ConfigThingy cidGroup : conf_id_conf)
         for (ConfigThingy cid : cidGroup)
-          if (cid.getName().equals(id)) return false;
+          if (cid.getName().equals(id)) {
+            return false;
+          }
 
       try
       {
@@ -1934,9 +2051,9 @@ public class MenuManager
 
     /**
      * Entfernt aus diesem Knoten die CONF_ID id falls vorhanden.
-     * 
+     *
      * @return true wenn eine CONF_ID entfernt wurde
-     * 
+     *
      *         TESTED
      */
     public boolean removeConfID(String id)
@@ -1946,7 +2063,7 @@ public class MenuManager
       while (iter.hasNext())
       {
         ConfigThingy subConf = iter.next();
-        if (subConf.getName().equals("CONF_ID"))
+        if ("CONF_ID".equals(subConf.getName()))
         {
           Iterator<ConfigThingy> subIter = subConf.iterator();
           while (subIter.hasNext())
@@ -1955,7 +2072,9 @@ public class MenuManager
               subIter.remove();
               haveRemoved = true;
             }
-          if (subConf.count() == 0) iter.remove();
+          if (subConf.count() == 0) {
+            iter.remove();
+          }
         }
       }
 
@@ -1966,13 +2085,13 @@ public class MenuManager
   /**
    * Parst die WollMuxBarKonfigurationen-Abschnitte und liefert eine Liste mit den
    * vorhandenen ConfigIDs zurück.
-   * 
+   *
    * TESTED
    */
   static List<ConfigID> parseConfigIDs(ConfigThingy defaultConf,
       ConfigThingy userConf)
   {
-    List<ConfigID> configIDs = new Vector<ConfigID>();
+    List<ConfigID> configIDs = new ArrayList<ConfigID>();
     ConfigThingy[] results =
       new ConfigThingy[] {
         defaultConf.query("WollMuxBarKonfigurationen", 1).query("Labels", 2),
@@ -2036,7 +2155,7 @@ public class MenuManager
   /**
    * Parst die Symbolleisten, Briefkopfleiste, Menueleiste und Menues-Abschnitte und
    * liefert den Wurzel-Knoten des Ergebnisbaumes zurück.
-   * 
+   *
    * TESTED
    */
   private static Node parseMenuTree(ConfigThingy defaultConf, ConfigThingy userConf)
@@ -2092,12 +2211,12 @@ public class MenuManager
    * Node hinzugefügt. Falls der TYPE des UIElements "menu" lautet, so wird dieses
    * Menü aus defaultConf bzw. userConf herausgesucht (die letzte Instanz gewinnt,
    * wobei userConf als nach defaultConf stehend zählt) und rekursiv verarbeitet.
-   * 
+   *
    * @param alreadySeen
    *          Um rekursive Menüstrukturen zu unterbinden wird hier bei jedem
    *          Rekursschritt die ID des rekursiv betretenen Menüs hineingesteckt und
    *          der Aufbau wird abgebrochen wenn ein Menü hier bereits vorhanden ist.
-   * 
+   *
    *          TESTED
    */
   private static void parseMenuTreeRecursive(Node node, ConfigThingy menuConf,
@@ -2118,7 +2237,7 @@ public class MenuManager
 
       String label = getLabel(conf);
 
-      if (type.equals("menu"))
+      if ("menu".equals(type))
       {
         String menuId;
         try
@@ -2201,19 +2320,23 @@ public class MenuManager
     {
       ConfigThingy dingy = iter.next();
       String name = dingy.getName();
-      if (name.equals("Symbolleisten") || name.equals("Menues")
-        || name.equals("Menueleiste"))
+      if ("Symbolleisten".equals(name) || "Menues".equals(name)
+        || "Menueleiste".equals(name))
       {
         iter.remove();
       }
-      else if (name.equals("WollMuxBarKonfigurationen"))
+      else if ("WollMuxBarKonfigurationen".equals(name))
       {
         Iterator<ConfigThingy> subIter = dingy.iterator();
         while (subIter.hasNext())
         {
-          if (subIter.next().getName().equals("Labels")) subIter.remove();
+          if ("Labels".equals(subIter.next().getName())) {
+            subIter.remove();
+          }
         }
-        if (dingy.count() == 0) iter.remove();
+        if (dingy.count() == 0) {
+          iter.remove();
+        }
       }
     }
 
@@ -2324,7 +2447,7 @@ public class MenuManager
 
   /**
    * Liefert ein für das UIElement conf passendes Label für die Anzeige im Baum.
-   * 
+   *
    */
   private static String getLabel(ConfigThingy conf)
   {
@@ -2342,7 +2465,7 @@ public class MenuManager
     String label = "--- " + type + " ---";
     try
     {
-      if (!type.equals("separator") && !type.equals("glue"))
+      if (!"separator".equals(type) && !"glue".equals(type))
         label = conf.get("LABEL").toString();
     }
     catch (Exception x)
@@ -2357,20 +2480,24 @@ public class MenuManager
    * sectionName-Abschnitt betrachtet wird (selbes verhalten wie
    * {@link ConfigThingy#query(String)}). Die userConf gilt als hinter der
    * defaultConf stehend.
-   * 
+   *
    * @throws NodeNotFoundException
    *           falls kein entsprechender Abschnitt gefunden wurde.
-   * 
+   *
    *           TESTED
    */
   private static ActiveConfigSection getActiveConfigSection(String[] sectionPath,
       ConfigThingy defaultConf, ConfigThingy userConf) throws NodeNotFoundException
   {
-    if (sectionPath.length == 0) throw new NodeNotFoundException();
+    if (sectionPath.length == 0) {
+      throw new NodeNotFoundException();
+    }
     ConfigThingy conf = userConf;
     for (int i = 0; i < sectionPath.length; ++i)
       conf = conf.query(sectionPath[i]);
-    if (conf.count() > 0) return new ActiveConfigSection(conf.getLastChild(), true);
+    if (conf.count() > 0) {
+      return new ActiveConfigSection(conf.getLastChild(), true);
+    }
 
     conf = defaultConf;
     for (int i = 0; i < sectionPath.length; ++i)
@@ -2425,11 +2552,13 @@ public class MenuManager
       this.label_user = label_user;
     }
 
+    @Override
     public String toString()
     {
       return id + ": [" + label_default + "] [" + label_user + "]";
     }
 
+    @Override
     public int compareTo(ConfigID o)
     {
       return id.compareTo(o.id);
@@ -2459,10 +2588,13 @@ public class MenuManager
       }
     }
 
-    if (wollmuxbarConf == null) wollmuxbarConf = new ConfigThingy("wollmuxbarConf");
+    if (wollmuxbarConf == null) {
+      wollmuxbarConf = new ConfigThingy("wollmuxbarConf");
+    }
 
     new MenuManager(wollmuxConf, wollmuxbarConf, new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         System.out.println("Finished");

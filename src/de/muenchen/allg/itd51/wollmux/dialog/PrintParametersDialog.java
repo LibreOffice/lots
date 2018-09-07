@@ -2,9 +2,9 @@
  * Dateiname: PrintParametersDialog.java
  * Projekt  : WollMux
  * Funktion : Dialog für Druckeinstellungen
- * 
+ *
  * Copyright (c) 2008-2018 Landeshauptstadt München
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
  * version 1.0 (or any later version).
@@ -15,7 +15,7 @@
  * European Union Public Licence for more details.
  *
  * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see 
+ * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
  * Änderungshistorie:
@@ -28,7 +28,7 @@
  *
  * @author Christoph Lutz (D-III-ITD-D101)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
@@ -37,8 +37,8 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -111,38 +111,13 @@ public class PrintParametersDialog
 
   private String currentPageRangeValue = null;
 
-  private WindowListener myWindowListener = new WindowListener()
+  private WindowAdapter myWindowListener = new WindowAdapter()
   {
-
-    @Override
-    public void windowDeactivated(WindowEvent e)
-    {}
-
-    @Override
-    public void windowActivated(WindowEvent e)
-    {}
-
-    @Override
-    public void windowDeiconified(WindowEvent e)
-    {}
-
-    @Override
-    public void windowIconified(WindowEvent e)
-    {}
-
-    @Override
-    public void windowClosed(WindowEvent e)
-    {}
-
     @Override
     public void windowClosing(WindowEvent e)
     {
       abort(CMD_CANCEL);
     }
-
-    @Override
-    public void windowOpened(WindowEvent e)
-    {}
   };
 
   public PrintParametersDialog(XTextDocument doc, boolean showCopyCount,
@@ -156,7 +131,7 @@ public class PrintParametersDialog
 
   /**
    * Mini-Klasse für den Rückgabewert eines Seitenbereichs.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static class PageRange
@@ -181,7 +156,7 @@ public class PrintParametersDialog
   /**
    * Definiert die in diesem Dialog möglichen Einstellungen zur Auswahl des
    * Seitenbereichs.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static enum PageRangeType {
@@ -225,7 +200,7 @@ public class PrintParametersDialog
   /**
    * Liefert ein PageRange-Objekt zurück, das Informationen über den aktuell
    * ausgewählten Druckbereich enthält.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public PageRange getPageRange()
@@ -237,7 +212,7 @@ public class PrintParametersDialog
    * Liefert die Anzahl in der GUI eingestellter Kopien als Short zurück; Zeigt der
    * Dialog kein Elemente zur Eingabe der Kopien an, oder ist die Eingabe keine
    * gültige Zahl, so wird new Short((short) 1) zurück geliefert.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public Short getCopyCount()
@@ -295,7 +270,9 @@ public class PrintParametersDialog
     vboxCopies.setBorder(BorderFactory.createTitledBorder(
       BorderFactory.createEtchedBorder(), L.m("Kopien")));
     hbox.add(vboxPageRange);
-    if (showCopyCount) hbox.add(vboxCopies);
+    if (showCopyCount) {
+      hbox.add(vboxCopies);
+    }
     vbox.add(hbox);
 
     // JRadio-Buttons für den Druckbereich erzeugen
@@ -339,7 +316,9 @@ public class PrintParametersDialog
         additionalTextfield = null;
 
       final JRadioButton button = new JRadioButton(t.label);
-      if (firstButton == null) firstButton = button;
+      if (firstButton == null) {
+        firstButton = button;
+      }
       button.addChangeListener(new ChangeListener()
       {
         @Override
@@ -374,7 +353,9 @@ public class PrintParametersDialog
       pageRangeButtons.add(button);
       vboxPageRange.add(hbox);
     }
-    if (firstButton != null) firstButton.setSelected(true);
+    if (firstButton != null) {
+      firstButton.setSelected(true);
+    }
 
     hbox = Box.createHorizontalBox();
     hbox.add(new JLabel(L.m("Exemplare  ")));
@@ -454,7 +435,7 @@ public class PrintParametersDialog
 
   /**
    * Ruft den printSettings-Dialog auf.
-   * 
+   *
    * @author christoph.lutz
    */
   private void showPrintSettingsDialog()
@@ -514,7 +495,7 @@ public class PrintParametersDialog
    * Holt sich den Frame von doc, führt auf diesem ein queryDispatch() mit der zu
    * urlStr gehörenden URL aus und liefert den Ergebnis XDispatch zurück oder null,
    * falls der XDispatch nicht verfügbar ist.
-   * 
+   *
    * @param doc
    *          Das Dokument, dessen Frame für den Dispatch verwendet werden soll.
    * @param urlStr
@@ -524,8 +505,10 @@ public class PrintParametersDialog
    */
   private XDispatch getDispatchForModel(XModel doc, com.sun.star.util.URL url)
   {
-    if (doc == null) return null;
-  
+    if (doc == null) {
+      return null;
+    }
+
     XDispatchProvider dispProv = null;
     try
     {
@@ -533,7 +516,7 @@ public class PrintParametersDialog
     }
     catch (Exception e)
     {}
-  
+
     if (dispProv != null)
     {
       return dispProv.queryDispatch(url, "_self",
@@ -544,14 +527,16 @@ public class PrintParametersDialog
 
   /**
    * Liefert den Namen des aktuell zu diesem Dokument eingestellten Druckers.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static String getCurrentPrinterName(XTextDocument doc)
   {
     XPrintable printable = UNO.XPrintable(doc);
     PropertyValue[] printer = null;
-    if (printable != null) printer = printable.getPrinter();
+    if (printable != null) {
+      printer = printable.getPrinter();
+    }
     UnoProps printerInfo = new UnoProps(printer);
     try
     {
@@ -562,21 +547,23 @@ public class PrintParametersDialog
       return L.m("unbekannt");
     }
   }
-  
+
   /**
    * Setzt den Namen des aktuell zu diesem Dokument eingestellten Druckers.
-   * 
+   *
    * @author Judith Baur, Simona Loi
    */
   public static void setCurrentPrinterName(XTextDocument doc, String druckerName)
   {
     XPrintable printable = UNO.XPrintable(doc);
-    PropertyValue[] printer = null;    
+    PropertyValue[] printer = null;
     UnoProps printerInfo = new UnoProps(printer);
     try
     {
       printerInfo.setPropertyValue("Name", druckerName);
-      if (printable != null) printable.setPrinter(printerInfo.getProps());
+      if (printable != null) {
+        printable.setPrinter(printerInfo.getProps());
+      }
     }
     catch (Exception e)
     {

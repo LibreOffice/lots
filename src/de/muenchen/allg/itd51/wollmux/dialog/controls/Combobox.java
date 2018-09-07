@@ -31,17 +31,20 @@ public class Combobox extends UIElementBase
     this.id = id;
   }
 
+  @Override
   public void setBackground(Color bg)
   {
     super.setBackground(bg);
     combo.getEditor().getEditorComponent().setBackground(bg);
   }
 
+  @Override
   public Component getComponent()
   {
     return combo;
   }
 
+  @Override
   public String getString()
   {
     if (combo.isEditable())
@@ -65,11 +68,13 @@ public class Combobox extends UIElementBase
     }
   }
 
+  @Override
   public boolean getBoolean()
   {
-    return !getString().equals("");
+    return !getString().isEmpty();
   }
 
+  @Override
   public void setString(String str)
   {
     boolean edit = combo.isEditable();
@@ -78,6 +83,7 @@ public class Combobox extends UIElementBase
     combo.setEditable(edit);
   }
 
+  @Override
   public boolean isStatic()
   {
     return false;

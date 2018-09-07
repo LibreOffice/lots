@@ -1,8 +1,8 @@
-/* 
+/*
  * Dateiname: SachleitendeVerfuegungenDruckdialog.java
  * Projekt  : WollMux
  * Funktion : Implementiert den Dialog zum Drucken von Sachleitenden Verfügungen
- * 
+ *
  * Copyright (c) 2010-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
@@ -40,8 +40,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -106,29 +106,30 @@ public class SachleitendeVerfuegungenDruckdialog
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
    */
-  private final static int TF_BORDER = 4;
+  private static final int TF_BORDER = 4;
 
   /**
    * Rand über und unter einem horizontalen Separator (in Pixeln).
    */
-  private final static int SEP_BORDER = 7;
+  private static final int SEP_BORDER = 7;
 
   /**
    * Rand um Buttons (in Pixeln).
    */
-  private final static int BUTTON_BORDER = 2;
+  private static final int BUTTON_BORDER = 2;
 
   /**
    * Anzahl der Zeichen, nach der der Text der Verfügungspunkte abgeschnitten wird,
    * damit der Dialog nicht platzt.
    */
-  private final static int CONTENT_CUT = 75;
+  private static final int CONTENT_CUT = 75;
 
   /**
    * ActionListener für Buttons mit der ACTION "printElement".
    */
   private ActionListener actionListener_printElement = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       if (e.getSource() instanceof JButton)
@@ -142,6 +143,7 @@ public class SachleitendeVerfuegungenDruckdialog
    */
   private ActionListener actionListener_printAll = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       printOrderAsc = getSelectedPrintOrderAsc();
@@ -155,6 +157,7 @@ public class SachleitendeVerfuegungenDruckdialog
    */
   private ActionListener actionListener_abort = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       abort(CMD_CANCEL);
@@ -166,6 +169,7 @@ public class SachleitendeVerfuegungenDruckdialog
    */
   private ChangeListener spinnerChangeListener = new ChangeListener()
   {
+    @Override
     public void stateChanged(ChangeEvent arg0)
     {
       allElementCountTextField.setText("" + getAllElementCount());
@@ -178,6 +182,7 @@ public class SachleitendeVerfuegungenDruckdialog
    */
   private ItemListener cboxItemListener = new ItemListener()
   {
+    @Override
     public void itemStateChanged(ItemEvent arg0)
     {
       Object source = arg0.getSource();
@@ -185,7 +190,9 @@ public class SachleitendeVerfuegungenDruckdialog
       {
         @SuppressWarnings("unchecked")
         JComboBox<String> cbox = (JComboBox<String>) source;
-        if (cbox.getSelectedIndex() != 0) cbox.setSelectedIndex(0);
+        if (cbox.getSelectedIndex() != 0) {
+          cbox.setSelectedIndex(0);
+        }
       }
     }
   };
@@ -241,7 +248,7 @@ public class SachleitendeVerfuegungenDruckdialog
   /**
    * Vector of Verfuegungspunkt, der die Beschreibungen der Verfügungspunkte enthält.
    */
-  private Vector<Verfuegungspunkt> verfuegungspunkte;
+  private List<Verfuegungspunkt> verfuegungspunkte;
 
   /**
    * Nach jedem Aufruf von printAll oder printElement enthält diese Methode die
@@ -256,7 +263,7 @@ public class SachleitendeVerfuegungenDruckdialog
 
   /**
    * Erzeugt einen neuen Dialog.
-   * 
+   *
    * @param conf
    *          das ConfigThingy, das den Dialog beschreibt (der Vater des
    *          "Fenster"-Knotens.
@@ -275,7 +282,7 @@ public class SachleitendeVerfuegungenDruckdialog
    *           Schlüssel fehlt.
    */
   public SachleitendeVerfuegungenDruckdialog(ConfigThingy conf,
-      Vector<Verfuegungspunkt> verfuegungspunkte, ActionListener dialogEndListener)
+      List<Verfuegungspunkt> verfuegungspunkte, ActionListener dialogEndListener)
       throws ConfigurationErrorException
   {
     this.verfuegungspunkte = verfuegungspunkte;
@@ -298,6 +305,7 @@ public class SachleitendeVerfuegungenDruckdialog
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           try
@@ -340,6 +348,7 @@ public class SachleitendeVerfuegungenDruckdialog
       this.isOriginal = isOriginal;
     }
 
+    @Override
     public String toString()
     {
       return "VerfuegungspunktInfo(verfPunkt=" + verfPunktNr + ", copyCount="
@@ -361,7 +370,7 @@ public class SachleitendeVerfuegungenDruckdialog
   /**
    * Liefert die aktuellen in diesem Dialog getroffenen Einstellungen als Liste von
    * VerfuegungspunktInfo-Objekten zurück.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public List<VerfuegungspunktInfo> getCurrentSettings()
@@ -371,7 +380,7 @@ public class SachleitendeVerfuegungenDruckdialog
 
   /**
    * Erzeugt das GUI.
-   * 
+   *
    * @param fensterDesc
    *          die Spezifikation dieses Dialogs.
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
@@ -390,12 +399,12 @@ public class SachleitendeVerfuegungenDruckdialog
     for (int i = 0; i < size; ++i)
     {
       Verfuegungspunkt verfPunkt = verfuegungspunkte.get(i);
-      Vector<String> zuleitungszeilen = verfPunkt.getZuleitungszeilen();
+      List<String> zuleitungszeilen = verfPunkt.getZuleitungszeilen();
 
       // elementComboBoxes vorbelegen:
       Vector<String> content = new Vector<String>();
       content.add(cutContent(verfPunkt.getHeading()));
-      if (zuleitungszeilen.size() > 0)
+      if (!zuleitungszeilen.isEmpty())
         content.add(cutContent(L.m("------- Zuleitung an --------")));
       Iterator<String> iter = zuleitungszeilen.iterator();
       while (iter.hasNext())
@@ -488,10 +497,10 @@ public class SachleitendeVerfuegungenDruckdialog
   /**
    * Wenn value mehr als CONTENT_CUT Zeichen besitzt, dann wird eine gekürzte Form
    * von value zurückgeliefert (mit "..." ergänzt) oder ansonsten value selbst.
-   * 
+   *
    * @param value
    *          der zu kürzende String
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private static String cutContent(String value)
@@ -579,7 +588,7 @@ public class SachleitendeVerfuegungenDruckdialog
           // readonly = true; }catch(NodeNotFoundException e){}
           String type = uiElementDesc.get("TYPE").toString();
 
-          if (type.equals("label"))
+          if ("label".equals(type))
           {
             JLabel uiElement = new JLabel();
             gbcLabel.gridx = x;
@@ -599,10 +608,12 @@ public class SachleitendeVerfuegungenDruckdialog
             // haben. AUFGABE: ab März 2009 (ein Jahr nach der Änderung) sollten alle
             // Referate die entsprechend angepasste Standard-Config installiert
             // haben. Dann muss dieses 'if' wieder aus dem Code rausfliegen!!!
-            if (!"Seiten".equals(labelText)) compo.add(uiElement, gbcLabel);
+            if (!"Seiten".equals(labelText)) {
+              compo.add(uiElement, gbcLabel);
+            }
           }
 
-          else if (type.equals("glue"))
+          else if ("glue".equals(type))
           {
             Box uiElement = Box.createHorizontalBox();
             try
@@ -620,10 +631,10 @@ public class SachleitendeVerfuegungenDruckdialog
             compo.add(uiElement, gbcGlue);
           }
 
-          else if (type.equals("spinner"))
+          else if ("spinner".equals(type))
           {
             JSpinner spinner;
-            if (id.equals("elementCount")
+            if ("elementCount".equals(id)
               && verfPunktNr < elementCountSpinner.length)
               spinner = elementCountSpinner[verfPunktNr];
             else
@@ -636,10 +647,10 @@ public class SachleitendeVerfuegungenDruckdialog
             compo.add(spinner, gbcSpinner);
           }
 
-          else if (type.equals("combobox"))
+          else if ("combobox".equals(type))
           {
             JComboBox<String> comboBox;
-            if (id.equals("element") && verfPunktNr < elementComboBoxes.size())
+            if ("element".equals(id) && verfPunktNr < elementComboBoxes.size())
             {
               comboBox = elementComboBoxes.get(verfPunktNr);
               comboBox.addItemListener(cboxItemListener);
@@ -658,13 +669,15 @@ public class SachleitendeVerfuegungenDruckdialog
 
             gbcComboBox.gridx = x;
             gbcComboBox.gridy = y;
-            if (comboBox != null) compo.add(comboBox, gbcComboBox);
+            if (comboBox != null) {
+              compo.add(comboBox, gbcComboBox);
+            }
           }
 
-          else if (type.equals("checkbox"))
+          else if ("checkbox".equals(type))
           {
             JCheckBox checkBox;
-            if (id.equals("printOrder"))
+            if ("printOrder".equals(id))
             {
               checkBox = printOrder;
             }
@@ -682,10 +695,10 @@ public class SachleitendeVerfuegungenDruckdialog
           }
 
 
-          else if (type.equals("textfield"))
+          else if ("textfield".equals(type))
           {
             JTextField textField;
-            if (id.equals("allElementCount"))
+            if ("allElementCount".equals(id))
             {
               textField = new JTextField("" + getAllElementCount());
               textField.setEditable(false);
@@ -700,7 +713,7 @@ public class SachleitendeVerfuegungenDruckdialog
             compo.add(textField, gbcTextField);
           }
 
-          else if (type.equals("button"))
+          else if ("button".equals(type))
           {
             String action = "";
             try
@@ -724,7 +737,7 @@ public class SachleitendeVerfuegungenDruckdialog
             // ansonsten einen neuen erzeugen.
             JButton button = null;
 
-            if (action.equalsIgnoreCase("printElement") && verfPunktNr >= 0
+            if ("printElement".equalsIgnoreCase(action) && verfPunktNr >= 0
               && verfPunktNr < printElementButtons.length)
             {
               button = printElementButtons[verfPunktNr];
@@ -740,7 +753,9 @@ public class SachleitendeVerfuegungenDruckdialog
             compo.add(button, gbcButton);
 
             ActionListener actionL = getAction(action);
-            if (actionL != null) button.addActionListener(actionL);
+            if (actionL != null) {
+              button.addActionListener(actionL);
+            }
 
           }
           else
@@ -773,30 +788,30 @@ public class SachleitendeVerfuegungenDruckdialog
   /**
    * Übersetzt den Namen einer ACTION in eine Referenz auf das passende
    * actionListener_... Objekt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
    */
   private ActionListener getAction(String action)
   {
-    if (action.equals("abort"))
+    if ("abort".equals(action))
     {
       return actionListener_abort;
     }
-    if (action.equals("back"))
+    if ("back".equals(action))
     {
       // diese Aktion wird nicht mehr unterstützt, verhält sich aber aus Gründen der
       // Abwärtskompatibilität wie abort.
       return actionListener_abort;
     }
-    else if (action.equals("printElement"))
+    else if ("printElement".equals(action))
     {
       return actionListener_printElement;
     }
-    else if (action.equals("printAll"))
+    else if ("printAll".equals(action))
     {
       return actionListener_printAll;
     }
-    else if (action.equals("printSettings"))
+    else if ("printSettings".equals(action))
     {
       // FIXME: diese Aktion wird nicht mehr unterstützt, darf aber aus Gründen der
       // Abwärtskompatibilität nicht zu einem Fehler führen. Diese Aktion kann aber
@@ -804,7 +819,7 @@ public class SachleitendeVerfuegungenDruckdialog
       // die entsprechende Standard-config hoffentlich überall im Einsatz ist.
       return null;
     }
-    else if (action.equals(""))
+    else if (action.isEmpty())
     {
       return null;
     }
@@ -817,7 +832,7 @@ public class SachleitendeVerfuegungenDruckdialog
   /**
    * Beendet den Dialog und informiert den dialogEndListener (wenn dieser != null
    * ist).
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void abort(String cmdStr)
@@ -840,7 +855,7 @@ public class SachleitendeVerfuegungenDruckdialog
   /**
    * Löscht currentSettings und schreibt für alle Verfügungspunkte entsprechende
    * VerfuegungspunktInfo-Objekte nach currentSettings.
-   * 
+   *
    * @author christoph.lutz
    */
   private void getCurrentSettingsForAllElements()
@@ -855,7 +870,7 @@ public class SachleitendeVerfuegungenDruckdialog
   /**
    * Bestimmt die Nummer des Verfügungspunktes, dem JButton button zugeordnet ist und
    * schreibt dessen VerfuegungspunktInfo als einziges Element nach currentSettings.
-   * 
+   *
    * @author christoph.lutz
    */
   private void getCurrentSettingsForElement(JButton button)
@@ -874,7 +889,7 @@ public class SachleitendeVerfuegungenDruckdialog
    * Ermittelt die Druckdaten (Verfügungspunkt, Anzahl-Ausfertigungen, ...) zum
    * Verfügungspunkt verfPunkt und liefert sie als VerfuegungspunktInfo-Objekt
    * zurück.
-   * 
+   *
    * @author christoph.lutz
    */
   private VerfuegungspunktInfo getVerfuegungspunktInfo(int verfPunkt)
@@ -900,36 +915,16 @@ public class SachleitendeVerfuegungenDruckdialog
   /**
    * Ein WindowListener, der auf den JFrame registriert wird, damit als Reaktion auf
    * den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class MyWindowListener implements WindowListener
+  private class MyWindowListener extends WindowAdapter
   {
-    public MyWindowListener()
-    {}
-
-    public void windowActivated(WindowEvent e)
-    {}
-
-    public void windowClosed(WindowEvent e)
-    {}
-
+    @Override
     public void windowClosing(WindowEvent e)
     {
       closeAction.actionPerformed(null);
     }
-
-    public void windowDeactivated(WindowEvent e)
-    {}
-
-    public void windowDeiconified(WindowEvent e)
-    {}
-
-    public void windowIconified(WindowEvent e)
-    {}
-
-    public void windowOpened(WindowEvent e)
-    {}
   }
 
   public static void main(String[] args) throws Exception

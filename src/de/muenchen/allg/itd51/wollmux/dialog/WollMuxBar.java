@@ -87,11 +87,11 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
-import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -109,7 +109,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.Vector;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -299,12 +298,12 @@ public class WollMuxBar
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
    */
-  private final static int TF_BORDER = 4;
+  private static final int TF_BORDER = 4;
 
   /**
    * Rand um Buttons (in Pixeln).
    */
-  private final static int BUTTON_BORDER = 2;
+  private static final int BUTTON_BORDER = 2;
 
   /**
    * Die Fehlermeldung die in einem Popup-Fenster gebracht wird, wenn keine
@@ -384,7 +383,7 @@ public class WollMuxBar
   /**
    * Alle {@link Senderbox}es der Leiste.
    */
-  private List<Senderbox> senderboxes = new Vector<Senderbox>();
+  private List<Senderbox> senderboxes = new ArrayList<Senderbox>();
 
   /**
    * Wird im UP_AND_AWAY_WINDOW_MODE auf das Fenster registriert.
@@ -518,7 +517,7 @@ public class WollMuxBar
   {
     return myIsInsideMonitor;
   }
-  
+
   private void createGUI(ConfigThingy conf)
   {
     initFactories();
@@ -654,7 +653,9 @@ public class WollMuxBar
    */
   private void setSizeAndLocation()
   {
-    if (windowIsAway) return;
+    if (windowIsAway) {
+      return;
+    }
     // Toolkit tk = Toolkit.getDefaultToolkit();
     GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
     // Dimension screenSize = tk.getScreenSize();
@@ -810,7 +811,7 @@ public class WollMuxBar
     int x = -stepx;
 
     UIElementContext contextMap =
-      context.equals("menu") ? menuContext : panelContext;
+        "menu".equals(context) ? menuContext : panelContext;
 
     Iterator<ConfigThingy> piter = elementParent.iterator();
     while (piter.hasNext())
@@ -836,7 +837,9 @@ public class WollMuxBar
                 active = true;
                 break;
               }
-          if (!active) continue;
+          if (!active) {
+            continue;
+          }
         }
 
         String type;
@@ -850,7 +853,7 @@ public class WollMuxBar
           continue;
         }
 
-        if (type.equals("senderbox"))
+        if ("senderbox".equals(type))
         {
           char hotkey = 0;
           try
@@ -864,7 +867,7 @@ public class WollMuxBar
           Senderbox senderbox;
           JComponent menu;
           AbstractButton button;
-          if (context.equals("menu"))
+          if ("menu".equals(context))
           {
             menu = new JMenu(label);
             button = (AbstractButton) menu;
@@ -890,12 +893,12 @@ public class WollMuxBar
           gbcSenderbox.gridx = x;
           gbcSenderbox.gridy = y;
           button.addMouseListener(myIsInsideMonitor);
-          if (context.equals("menu"))
+          if ("menu".equals(context))
             compo.add(button);
           else
             compo.add(button, gbcSenderbox);
         }
-        else if (type.equals("searchbox"))
+        else if ("searchbox".equals(type))
         {
           String label = L.m("Suchen...");
           try
@@ -914,16 +917,18 @@ public class WollMuxBar
           gbcMenuButton.gridx = x;
           gbcMenuButton.gridy = y;
           sfield.addMouseListener(myIsInsideMonitor);
-          if (context.equals("menu"))
+          if ("menu".equals(context))
           {
-            if (compo != trayIconMenu) compo.add(sfield);
+            if (compo != trayIconMenu) {
+              compo.add(sfield);
+            }
           }
           else
           {
             compo.add(sfield, gbcMenuButton);
           }
         }
-        else if (type.equals("menu"))
+        else if ("menu".equals(type))
         {
           String label = L.m("LABEL FEHLT ODER FEHLERHAFT!");
           try
@@ -951,12 +956,14 @@ public class WollMuxBar
           {}
 
           AbstractButton button;
-          if (context.equals("menu"))
+          if ("menu".equals(context))
           {
             button =
               (AbstractButton) parseMenu(alreadySeen, null, menuConf, menuName,
                 new JMenu(label));
-            if (button == null) button = new JMenu(label);
+            if (button == null) {
+              button = new JMenu(label);
+            }
           }
           else
           {
@@ -972,7 +979,7 @@ public class WollMuxBar
           gbcMenuButton.gridx = x;
           gbcMenuButton.gridy = y;
           button.addMouseListener(myIsInsideMonitor);
-          if (context.equals("menu"))
+          if ("menu".equals(context))
             compo.add(button);
           else
             compo.add(button, gbcMenuButton);
@@ -984,9 +991,9 @@ public class WollMuxBar
           try
           {
             String action = uiElementDesc.get("ACTION").toString();
-            if(action.equals("menuManager") && !(allowUserConfig && allowMenuManager))
+            if("menuManager".equals(action) && !(allowUserConfig && allowMenuManager))
               active = false;
-            if(action.equals("options") && !(allowUserConfig))
+            if("options".equals(action) && !(allowUserConfig))
               active = false;
           }
           catch (Exception e)
@@ -1003,7 +1010,7 @@ public class WollMuxBar
 
           if(active)
           {
-            if (context.equals("menu"))
+            if ("menu".equals(context))
               compo.add(uiComponent);
             else
               compo.add(uiComponent, gbc);
@@ -1090,7 +1097,9 @@ public class WollMuxBar
      * dem Aufruf von addUIElementsChecked stehen.
      */
     alreadySeen.add(menuName);
-    if (mapMenuNameToMenu != null) mapMenuNameToMenu.put(menuName, menu);
+    if (mapMenuNameToMenu != null) {
+      mapMenuNameToMenu.put(menuName, menu);
+    }
 
     addUIElementsChecked(alreadySeen, menuConf, conf, menu, 0, 1, "menu");
     alreadySeen.remove(menuName);
@@ -1204,58 +1213,60 @@ public class WollMuxBar
     public void processUiElementEvent(UIElement source, String eventType,
         Object[] args)
     {
-      if (!eventType.equals("action")) return;
+      if (!"action".equals(eventType)) {
+        return;
+      }
 
       String action = args[0].toString();
-      if (action.equals("absenderAuswaehlen"))
+      if ("absenderAuswaehlen".equals(action))
       {
         minimize();
         eventHandler.handleWollMuxUrl(Dispatch.DISP_wmAbsenderAuswaehlen, "");
       }
-      else if (action.equals("openDocument"))
+      else if ("openDocument".equals(action))
       {
         minimize();
         eventHandler.handleWollMuxUrl(Dispatch.DISP_wmOpenDocument,
           args[1].toString());
       }
-      else if (action.equals("openTemplate"))
+      else if ("openTemplate".equals(action))
       {
         minimize();
         eventHandler.handleWollMuxUrl(Dispatch.DISP_wmOpenTemplate,
           args[1].toString());
       }
-      else if (action.equals("open"))
+      else if ("open".equals(action))
       {
         minimize();
         multiOpenDialog((ConfigThingy) args[1]);
       }
-      else if (action.equals("openExt"))
+      else if ("openExt".equals(action))
       {
         minimize();
         openExt((String) args[1], (String) args[2]);
       }
-      else if (action.equals("dumpInfo"))
+      else if ("dumpInfo".equals(action))
       {
         eventHandler.handleWollMuxUrl(Dispatch.DISP_wmDumpInfo, null);
       }
-      else if (action.equals("abort"))
+      else if ("abort".equals(action))
       {
         abort();
       }
-      else if (action.equals("kill"))
+      else if ("kill".equals(action))
       {
         eventHandler.handleWollMuxUrl(Dispatch.DISP_wmKill, null);
         abort();
       }
-      else if (action.equals("about"))
+      else if ("about".equals(action))
       {
         eventHandler.handleWollMuxUrl(Dispatch.DISP_wmAbout, getBuildInfo());
       }
-      else if (action.equals("menuManager"))
+      else if ("menuManager".equals(action))
       {
         menuManager();
       }
-      else if (action.equals("options"))
+      else if ("options".equals(action))
       {
         options();
       }
@@ -1332,7 +1343,9 @@ public class WollMuxBar
         // derzeit ist der OK-Vergleich unnötig, da bei negativer Beendigung des
         // Dialogs der ActionListener eh
         // nicht aufgerufen wird. Aber das kann sich ändern.
-        if (e.getActionCommand().equals("OK")) reinit();
+        if ("OK".equals(e.getActionCommand())) {
+          reinit();
+        }
       }
     });
   }
@@ -1384,7 +1397,9 @@ public class WollMuxBar
       {
         in = new BufferedReader(new InputStreamReader(url.openStream()));
         String str = in.readLine();
-        if (str != null) return str;
+        if (str != null) {
+          return str;
+        }
       }
     }
     catch (Exception x)
@@ -1423,7 +1438,9 @@ public class WollMuxBar
     }
 
     JPopupMenu menu = (JPopupMenu) mapMenuNameToJPopupMenu.get(menuName);
-    if (menu == null) return;
+    if (menu == null) {
+      return;
+    }
 
     menu.show(compo, 0, compo.getHeight());
   }
@@ -1574,40 +1591,13 @@ public class WollMuxBar
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class MyWindowListener implements WindowListener
+  private class MyWindowListener extends WindowAdapter
   {
-    public MyWindowListener()
-    {}
-
-    @Override
-    public void windowActivated(WindowEvent e)
-    {}
-
-    @Override
-    public void windowClosed(WindowEvent e)
-    {}
-
     @Override
     public void windowClosing(WindowEvent e)
     {
       closeAction.actionPerformed(null);
     }
-
-    @Override
-    public void windowDeactivated(WindowEvent e)
-    {}
-
-    @Override
-    public void windowDeiconified(WindowEvent e)
-    {}
-
-    @Override
-    public void windowIconified(WindowEvent e)
-    {}
-
-    @Override
-    public void windowOpened(WindowEvent e)
-    {}
   }
 
   /**
@@ -1636,7 +1626,7 @@ public class WollMuxBar
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class UpAndAwayWindowTransformer implements MouseListener, ActionListener
+  private class UpAndAwayWindowTransformer extends MouseAdapter implements ActionListener
   {
     private Timer timer;
 
@@ -1645,18 +1635,6 @@ public class WollMuxBar
       timer = new Timer(500, this);
       timer.setRepeats(false);
     }
-
-    @Override
-    public void mouseClicked(MouseEvent e)
-    {}
-
-    @Override
-    public void mousePressed(MouseEvent e)
-    {}
-
-    @Override
-    public void mouseReleased(MouseEvent e)
-    {}
 
     @Override
     public void mouseEntered(MouseEvent e)
@@ -1683,7 +1661,7 @@ public class WollMuxBar
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class IsInsideMonitor implements MouseListener, ActionListener
+  private class IsInsideMonitor extends MouseAdapter implements ActionListener
   {
     private Timer timer;
 
@@ -1694,21 +1672,11 @@ public class WollMuxBar
     }
 
     @Override
-    public void mouseClicked(MouseEvent e)
-    {}
-
-    @Override
-    public void mousePressed(MouseEvent e)
-    {}
-
-    @Override
-    public void mouseReleased(MouseEvent e)
-    {}
-
-    @Override
     public void mouseEntered(MouseEvent e)
     {
-      if (windowMode != WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE) return;
+      if (windowMode != WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE) {
+        return;
+      }
       timer.stop();
     }
 
@@ -1720,7 +1688,9 @@ public class WollMuxBar
 
     public void delayedMinimize()
     {
-      if (windowMode != WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE) return;
+      if (windowMode != WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE) {
+        return;
+      }
       timer.restart();
     }
 
@@ -1743,7 +1713,9 @@ public class WollMuxBar
      * Minimieren stört die Anzeige des modalen Options-Dialogs (zumindest unter
      * manchen Window-Managern).
      */
-    if (config.isDialogVisible()) return;
+    if (config.isDialogVisible()) {
+      return;
+    }
 
     if (windowMode == WollMuxBarConfig.ALWAYS_ON_TOP_WINDOW_MODE
       || windowMode == WollMuxBarConfig.NORMAL_WINDOW_MODE) return;
@@ -1755,7 +1727,9 @@ public class WollMuxBar
       return;
     }
 
-    if (windowIsAway) return;
+    if (windowIsAway) {
+      return;
+    }
     windowIsAway = true;
 
     if (windowMode == WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE)
@@ -1787,7 +1761,9 @@ public class WollMuxBar
       return;
     }
 
-    if (!windowIsAway) return;
+    if (!windowIsAway) {
+      return;
+    }
     windowIsAway = false;
 
     if (windowMode == WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE)
@@ -1846,7 +1822,9 @@ public class WollMuxBar
        */
       boolean mustConnectToOOo = false;
       for (String program : openExt.getPrograms())
-        if (program.startsWith("/loadComponentFromURL/")) mustConnectToOOo = true;
+        if (program.startsWith("/loadComponentFromURL/")) {
+          mustConnectToOOo = true;
+        }
 
       if (mustConnectToOOo)
         eventHandler.handleDoWithConnection(launch);
@@ -2010,17 +1988,17 @@ public class WollMuxBar
     {
       String arg = i.next();
 
-      if (arg.equals("--minimize"))
+      if ("--minimize".equals(arg))
         windowMode = WollMuxBarConfig.MINIMIZE_TO_TASKBAR_MODE;
-      else if (arg.equals("--topbar"))
+      else if ("--topbar".equals(arg))
         windowMode = WollMuxBarConfig.ALWAYS_ON_TOP_WINDOW_MODE;
-      else if (arg.equals("--normalwindow"))
+      else if ("--normalwindow".equals(arg))
         windowMode = WollMuxBarConfig.NORMAL_WINDOW_MODE;
       // TODO: die Quickstarteroption hat keine Auswirkung mehr
       // und kann zu gegebener Zeit entfernt werden.
-      else if (arg.equals("--quickstarter"))
+      else if ("--quickstarter".equals(arg))
         continue;
-      else if (arg.equals("--mm"))
+      else if ("--mm".equals(arg))
         menumanager = true;
       else
       {
@@ -2048,7 +2026,9 @@ public class WollMuxBar
     catch (NodeNotFoundException e)
     {}
     // --mm schaltet allowMenuManager implizit an
-    if(menumanager) allowMenuManager = true;
+    if(menumanager) {
+      allowMenuManager = true;
+    }
 
 
     // Darf die userConfig (wollmuxbar.conf) ausgewertet werden?
@@ -2056,12 +2036,14 @@ public class WollMuxBar
     try
     {
         allowUserConfig =
-          wollmuxConf.query(ALLOW_USER_CONFIG, 1).getLastChild().toString().equalsIgnoreCase("true");
+          "true".equalsIgnoreCase(wollmuxConf.query(ALLOW_USER_CONFIG, 1).getLastChild().toString());
     }
     catch (NodeNotFoundException e)
     {}
     // --mm schaltet allowUserConfig implizit an
-    if(menumanager) allowUserConfig = true;
+    if(menumanager) {
+      allowUserConfig = true;
+    }
 
     readWollMuxBarConfAndStartWollMuxBar(windowMode, menumanager,
       allowUserConfig, allowMenuManager, wollmuxConf);
@@ -2350,7 +2332,9 @@ public class WollMuxBar
       }
     }
 
-    if (wollmuxbarConf == null) wollmuxbarConf = new ConfigThingy("wollmuxbarConf");
+    if (wollmuxbarConf == null) {
+      wollmuxbarConf = new ConfigThingy("wollmuxbarConf");
+    }
 
     ConfigThingy combinedConf = new ConfigThingy("combinedConf");
     combinedConf.addChild(wollmuxConf);
@@ -2393,7 +2377,7 @@ public class WollMuxBar
    */
   private static String niceArgs(List<String> args)
   {
-    StringBuffer buffy = new StringBuffer();
+    StringBuilder buffy = new StringBuilder();
     for (String s : args)
       if (buffy.length() == 0)
         buffy.append(s);

@@ -2,7 +2,7 @@
  * Dateiname: WollMuxBarEventHandler.java
  * Projekt  : WollMux
  * Funktion : Dient der thread-safen Kommunikation der WollMuxBar mit dem WollMux im OOo.
- * 
+ *
  * Copyright (c) 2008-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
@@ -92,7 +92,7 @@ public class WollMuxBarEventHandler
    * WollMux-Service sollte nicht über dieses Feld, sondern ausschließlich über die
    * Methode getRemoteWollMux bezogen werden, da diese mit einem möglichen Schließen
    * von OOo während die WollMuxBar läuft klarkommt.
-   * 
+   *
    * ACHTUNG! Diese Variable ist absichtlich ein Object, kein XWollMux, um den
    * queryInterface-Aufruf zu erzwingen, damit ein Disposed Zustand erkannt wird.
    */
@@ -122,7 +122,7 @@ public class WollMuxBarEventHandler
 
   /**
    * Startet die Event-Verarbeitung.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public WollMuxBarEventHandler(WollMuxBar wollmuxbar)
@@ -140,7 +140,7 @@ public class WollMuxBarEventHandler
 
   /**
    * Startet den Event Handler Thread.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public void start()
@@ -152,7 +152,7 @@ public class WollMuxBarEventHandler
    * Wartet, bis der Event-bearbeitende Thread sich beendet hat. ACHTUNG! Der Thread
    * beendet sich erst, wenn ein handleTerminate() abgesetzt wurde. Wird kein
    * handleTerminate() abgesetzt, dann wartet diese Methode endlos.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void waitForThreadTermination()
@@ -180,7 +180,7 @@ public class WollMuxBarEventHandler
 
   /**
    * Erzeugt eine wollmuxUrl und übergibt sie dem WollMux zur Bearbeitung.
-   * 
+   *
    * @param dispatchCmd
    *          das Kommando, das der WollMux ausführen soll. (z.B. "openTemplate")
    * @param arg
@@ -196,7 +196,7 @@ public class WollMuxBarEventHandler
 
   /**
    * Lässt die Senderboxes sich updaten.
-   * 
+   *
    * @param entries
    *          die Einträge der PAL
    * @param current
@@ -214,7 +214,7 @@ public class WollMuxBarEventHandler
    * Index übergeben, damit der WollMux auf Konsistenz prüfen kann. Schließlich ist
    * es möglich, dass in der Zwischenzeit konkurrierende Änderungen der Senderbox
    * stattgefunden haben.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void handleSelectPALEntry(String entry, int index)
@@ -227,7 +227,7 @@ public class WollMuxBarEventHandler
    * zum entfernten WollMux lösen, sowie seinen Bearbeitungsthread beenden. Achtung!
    * Es sollte die Methode waitForThreadTermination() verwendet werden, bevor mit
    * System.exit() die JVM beendet wird.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void handleTerminate()
@@ -264,7 +264,7 @@ public class WollMuxBarEventHandler
 
   /**
    * Interface für die Events, die dieser EventHandler abarbeitet.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public interface Event
@@ -281,7 +281,7 @@ public class WollMuxBarEventHandler
       try
       {
         String argEncoded = "";
-        if (arg != null && !arg.equals(""))
+        if (arg != null && !arg.isEmpty())
         {
           argEncoded = "#" + URLEncoder.encode(arg, ConfigThingy.CHARSET);
         }
@@ -308,7 +308,9 @@ public class WollMuxBarEventHandler
         XDispatch disp =
           dispProv.queryDispatch(dispatchUrl, "_self",
             com.sun.star.frame.FrameSearchFlag.SELF);
-        if (disp != null) disp.dispatch(dispatchUrl, new PropertyValue[] {});
+        if (disp != null) {
+          disp.dispatch(dispatchUrl, new PropertyValue[] {});
+        }
       }
     }
   }
@@ -369,7 +371,9 @@ public class WollMuxBarEventHandler
     public void process()
     {
       XWollMux mux = getRemoteWollMux(true);
-      if (mux != null) mux.setCurrentSender(entry, (short) index);
+      if (mux != null) {
+        mux.setCurrentSender(entry, (short) index);
+      }
     }
   }
 
@@ -379,7 +383,9 @@ public class WollMuxBarEventHandler
     public void process()
     {
       XWollMux mux = getRemoteWollMux(false);
-      if (mux != null) mux.removePALChangeEventListener(myPALChangeEventListener);
+      if (mux != null) {
+        mux.removePALChangeEventListener(myPALChangeEventListener);
+      }
       if (desktop != null && terminateListener != null)
         desktop.removeTerminateListener(terminateListener);
     }
@@ -448,7 +454,7 @@ public class WollMuxBarEventHandler
 
   /**
    * Der Thread, der die Events verarbeitet.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class EventProcessor extends Thread
@@ -501,7 +507,7 @@ public class WollMuxBarEventHandler
    * Diese Methode liefert eine Instanz auf den entfernten WollMux zurück, wobei der
    * connect-Parameter steuert, ob falls notwendig eine neue UNO-Verbindung aufgebaut
    * wird.
-   * 
+   *
    * @param connect
    *          Die Methode versucht immer zuerst, eine bestehende Verbindung mit OOo
    *          zu verwenden, um das WollMux-Objekt zu bekommen. Der Parameter connect
@@ -510,7 +516,7 @@ public class WollMuxBarEventHandler
    *          false, so wird in diesen Fällen null zurückgeliefert ohne dass versucht
    *          wird, eine neue Verbindung aufzubauen. Falls connect == true, so wird
    *          versucht, eine neue Verbindung aufzubauen.
-   * 
+   *
    * @return Instanz eines gültigen WollMux. Konnte oder sollte keine Verbindung
    *         hergestellt werden, so wird null zurückgeliefert. TESTED
    */
@@ -522,7 +528,9 @@ public class WollMuxBarEventHandler
       {
         XWollMux mux =
           UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
-        if (mux == null) throw new DisposedException();
+        if (mux == null) {
+          throw new DisposedException();
+        }
         return mux;
       }
       catch (DisposedException e)

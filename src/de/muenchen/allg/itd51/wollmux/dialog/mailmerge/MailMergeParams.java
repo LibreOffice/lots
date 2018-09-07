@@ -2,7 +2,7 @@
  * Dateiname: MailMergeParams.java
  * Projekt  : WollMux
  * Funktion : Dialoge zur Bestimmung der Parameter für den wirklichen Merge (z.B. ob in Gesamtdokument oder auf Drucker geschrieben werden soll.)
- * 
+ *
  * Copyright (c) 2008-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,16 +25,16 @@
  * 25.05.2010 | ERT | GUI für PDF-Gesamtdruck
  * 20.12.2010 | ERT | Defaultwerte für Druckdialog von ... bis
  * 08.05.2012 | jub | vorgeschlagener name für den anhang eines serienbrief/emailversands
- *                    kommt ohne endung, da für den nutzer auswahl zwischen pdf/odt 
+ *                    kommt ohne endung, da für den nutzer auswahl zwischen pdf/odt
  *                    möglich ist
  * 23.01.2014 | loi | Für den Seriendruck einen Wollmux Druckerauswahl Dialog eingefugt,
- *                    da der LO Dialog Druckeroptionen zur Auswahl bietet, die im Druck 
- *                    nicht umgesetz werden.                  
+ *                    da der LO Dialog Druckeroptionen zur Auswahl bietet, die im Druck
+ *                    nicht umgesetz werden.
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
@@ -52,7 +52,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -137,7 +136,7 @@ class MailMergeParams
 
     /**
      * Liefert das Textdokument für das der Seriendruck gestartet werden soll.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     public XTextDocument getTextDocument();
@@ -149,7 +148,7 @@ class MailMergeParams
         boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
         Map<SubmitArgument, Object> args);
   }
-  
+
 
 
   /**
@@ -157,7 +156,7 @@ class MailMergeParams
    * {@link MailMergeController#doMailMerge(List, boolean, DatasetSelectionType, Map)}
    * sein können. Jedes UI-Element steuert in {@link UIElement#addSubmitArgs(Map)},
    * ob und welche Argumente es setzt.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static enum SubmitArgument {
@@ -172,7 +171,7 @@ class MailMergeParams
 
   /**
    * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD D.10)
    */
   public static enum DatasetSelectionType {
@@ -217,19 +216,19 @@ class MailMergeParams
      * bestimmt dies die Indizes der ausgewählten Datensätze, wobei 1 den ersten
      * Datensatz bezeichnet.
      */
-    public List<Integer> selectedIndexes = new Vector<Integer>();
+    public List<Integer> selectedIndexes = new ArrayList<Integer>();
 
-  };
+  }
 
   /**
    * Beschreibt Elementtypen, wie sie im TYPE-Attribut von Einträgen des
    * Seriendruckdialog-Abschnitts der WollMux-Konfiguration verwendet werden können.
    * Der Seriendruckabschnitt definiert im Vergleich zur FormGUI einige
    * Spezial-Typen, die nur im Kontext dieses Dialogs einen Sinn ergeben.
-   * 
+   *
    * Die Methode {@link #getByname(String)} ermöglicht eine Zuordnung von Strings der
    * Konfigurationsdatei auf den entsprechenden enum-Typen.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static enum UIElementType {
@@ -252,7 +251,9 @@ class MailMergeParams
     {
       for (UIElementType t : UIElementType.values())
       {
-        if (t.toString().equalsIgnoreCase(s)) return t;
+        if (t.toString().equalsIgnoreCase(s)) {
+          return t;
+        }
       }
       return unknown;
     }
@@ -261,19 +262,21 @@ class MailMergeParams
   /**
    * Beschreibt die möglichen Actions, die auf Formularelemente des
    * Seriendruckabschnitts angewendet werden können und deren Event-Handler.
-   * 
+   *
    * Die Methode {@link #getByname(String)} ermöglicht eine Zuordnung von Strings der
    * Konfigurationsdatei auf den entsprechenden enum-Typen.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static enum UIElementAction {
     setActionType() {
+      @Override
       public ActionListener createActionListener(final String value,
           final MailMergeParams mmp)
       {
         return new ActionListener()
         {
+          @Override
           public void actionPerformed(ActionEvent e)
           {
             mmp.currentActionType = value;
@@ -284,11 +287,13 @@ class MailMergeParams
     },
 
     setOutput() {
+      @Override
       public ActionListener createActionListener(final String value,
           final MailMergeParams mmp)
       {
         return new ActionListener()
         {
+          @Override
           public void actionPerformed(ActionEvent e)
           {
             mmp.currentOutput = value;
@@ -299,11 +304,13 @@ class MailMergeParams
     },
 
     selectAll() {
+      @Override
       public ActionListener createActionListener(final String value,
           final MailMergeParams mmp)
       {
         return new ActionListener()
         {
+          @Override
           public void actionPerformed(ActionEvent e)
           {
             mmp.datasetSelectionType = DatasetSelectionType.ALL;
@@ -313,11 +320,13 @@ class MailMergeParams
     },
 
     selectRange() {
+      @Override
       public ActionListener createActionListener(final String value,
           final MailMergeParams mmp)
       {
         return new ActionListener()
         {
+          @Override
           public void actionPerformed(ActionEvent e)
           {
             mmp.datasetSelectionType = DatasetSelectionType.RANGE;
@@ -327,11 +336,13 @@ class MailMergeParams
     },
 
     abort() {
+      @Override
       public ActionListener createActionListener(final String value,
           final MailMergeParams mmp)
       {
         return new ActionListener()
         {
+          @Override
           public void actionPerformed(ActionEvent e)
           {
             mmp.dialog.dispose();
@@ -341,11 +352,13 @@ class MailMergeParams
     },
 
     submit() {
+      @Override
       public ActionListener createActionListener(final String value,
           final MailMergeParams mmp)
       {
         return new ActionListener()
         {
+          @Override
           public void actionPerformed(ActionEvent e)
           {
             try
@@ -356,7 +369,7 @@ class MailMergeParams
                 s.addSubmitArgs(args);
               mmp.dialog.dispose();
               boolean ignoreDocPrintFuncs = false;
-              if (mmp.ignoreDocPrintFuncs != null && mmp.ignoreDocPrintFuncs == true)
+              if (mmp.ignoreDocPrintFuncs != null && mmp.ignoreDocPrintFuncs)
                 ignoreDocPrintFuncs = true;
               mmp.mmc.doMailMerge(mmp.usePrintFunctions, ignoreDocPrintFuncs,
                 mmp.datasetSelectionType, args);
@@ -373,6 +386,7 @@ class MailMergeParams
     },
 
     unknown() {
+      @Override
       public ActionListener createActionListener(final String value,
           final MailMergeParams mmp)
       {
@@ -384,12 +398,14 @@ class MailMergeParams
     {
       for (UIElementAction a : UIElementAction.values())
       {
-        if (a.toString().equalsIgnoreCase(s)) return a;
+        if (a.toString().equalsIgnoreCase(s)) {
+          return a;
+        }
       }
       return unknown;
     }
 
-    abstract public ActionListener createActionListener(String value,
+    public abstract ActionListener createActionListener(String value,
         MailMergeParams mmp);
   }
 
@@ -398,10 +414,10 @@ class MailMergeParams
    * Seriendruckdialog-Beschreibung angewendet werden. Über sie werden z.B. die
    * Sichtbarkeiten der {@link Section}s und {@link UIElement}e gesteuert und die pro
    * Option zu verwendenden Druckfunktionen spezifiziert.
-   * 
+   *
    * Die Methode {@link #getByname(String)} ermöglicht eine Zuordnung von Strings der
    * Konfigurationsdatei auf den entsprechenden enum-Typen.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static enum RuleStatement {
@@ -417,7 +433,9 @@ class MailMergeParams
     {
       for (RuleStatement k : RuleStatement.values())
       {
-        if (k.toString().equals(s)) return k;
+        if (k.toString().equals(s)) {
+          return k;
+        }
       }
       return unknown;
     }
@@ -426,7 +444,7 @@ class MailMergeParams
   /**
    * Beschreibt die Ausrichtung, nach der Formularelemente innerhalb einer
    * {@link Section} ausgerichtet werden können.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static enum Orientation {
@@ -437,7 +455,9 @@ class MailMergeParams
     {
       for (Orientation o : Orientation.values())
       {
-        if (o.toString().equalsIgnoreCase(s)) return o;
+        if (o.toString().equalsIgnoreCase(s)) {
+          return o;
+        }
       }
       return vertical;
     }
@@ -447,7 +467,7 @@ class MailMergeParams
    * URL der Konfiguration der Fallback-Konfiguration für den Abschnitt
    * Dialoge/Seriendruckdialog, falls dieser Abschnitt nicht in der
    * WollMux-Konfiguration definiert wurde.
-   * 
+   *
    * Dieser Fallback wurde eingebaut, um mit alten WollMux-Standard-Configs
    * kompatibel zu bleiben, sollte nach ausreichend Zeit aber wieder entfernt werden!
    */
@@ -476,12 +496,6 @@ class MailMergeParams
    * Seriendruckkontext liefern kann und den eigentlichen Seriendruck ausführen kann.
    */
   private MailMergeController mmc;
-  
-  //
-  
-  public MailMergeController getMMC() {
-    return mmc;
-  }
 
   /**
    * Der Dialog, der durch {@link #showDoMailmergeDialog(JFrame, MailMergeNew, List)}
@@ -489,13 +503,13 @@ class MailMergeParams
    * Dialog verwendet, damit die Vorbelegungen erhalten bleiben.
    */
   private JDialog dialog = null;
-  
-  
+
+
   /**
    * Das Model für den Druckerauswahldialog beim Seriendruck
    */
   private DruckerModel druckerModel;
-  
+
   /**
    * Der Controller für den Druckerauswahldialog beim Seriendruck
    */
@@ -521,7 +535,7 @@ class MailMergeParams
   /**
    * Enthält den String der im Attribut VALUE zur zuletzt ausgeführten
    * {@link UIElementAction#setActionType}-Action angegeben war. Beispiel:
-   * 
+   *
    * Wird in der GUI das Formularelement '(LABEL "Gesamtdokument erstellen" TYPE
    * "radio" ACTION "setActionType" VALUE "gesamtdok")' ausgewählt, dann enthält
    * diese Variable den Wert "gesamtdok".
@@ -531,7 +545,7 @@ class MailMergeParams
   /**
    * Enthält den String der im Attribut VALUE zur zuletzt ausgeführten
    * {@link UIElementAction#setOutput}-Action angegeben war. Beispiel:
-   * 
+   *
    * Wird in der GUI das Formularelement '(LABEL "ODT-Datei" TYPE "radio" GROUP "odt"
    * ACTION "setOutput" VALUE "odt")' ausgewählt, dann enthält diese Variable den
    * Wert "odt".
@@ -570,19 +584,23 @@ class MailMergeParams
    */
   private DatasetSelectionType datasetSelectionType = DatasetSelectionType.ALL;
 
+  public MailMergeController getMMC() {
+    return mmc;
+  }
+
   /**
    * Zeigt den Dialog an, der die Serienbriefverarbeitung (Direktdruck oder in neues
    * Dokument) anwirft. Bei jedem Aufruf mit dem gleichen parent Frame wird der selbe
    * Dialog verwendet, damit die Vorbelegungen erhalten bleiben.
-   * 
+   *
    * @param parent
    *          Elternfenster für den anzuzeigenden Dialog.
-   * 
+   *
    * @param mmc
    *          Die Methode
    *          {@link MailMergeNew#doMailMerge(de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeType, de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.DatasetSelectionType)}
    *          wird ausgelöst, wenn der Benutzer den Seriendruck startet.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void showDoMailmergeDialog(final JFrame parent,
@@ -639,16 +657,16 @@ class MailMergeParams
    * Zeigt den Dialog an, der die Serienbriefverarbeitung (Direktdruck oder in neues
    * Dokument) anwirft. Bei jedem Aufruf mit dem gleichen parent Frame wird der selbe
    * Dialog verwendet, damit die Vorbelegungen erhalten bleiben.
-   * 
+   *
    * @param parent
    *          Elternfenster für den anzuzeigenden Dialog.
-   * 
+   *
    * @param mmc
    * @param defaultEmailFrom
    *          Die Methode
    *          {@link MailMergeNew#doMailMerge(de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeType, de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.DatasetSelectionType)}
    *          wird ausgelöst, wenn der Benutzer den Seriendruck startet.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
    */
   private void showDoMailmergeDialog(final JFrame parent,
@@ -661,12 +679,12 @@ class MailMergeParams
     if (druckerModel == null) {
       druckerModel = new DruckerModel();
     }
-       
+
     if(dialog != null && dialog.getParent() == parent) {
       // erzeugt einen controller für den Druckerauswahldialog falls noch keiner existiert
-      if (druckerController == null) {  
+      if (druckerController == null) {
         druckerController = new DruckerController(druckerModel, (JFrame)dialog.getOwner(), this);
-      }      
+      }
     } else {
       String title = L.m("Seriendruck");
       try
@@ -675,15 +693,15 @@ class MailMergeParams
       }
       catch (NodeNotFoundException e1)
       {}
-      //set JDialog to Modeless type so that it remains visible when changing focus between opened 
-      //calc and writer document. Drawback: when this Dialog is open, the "Seriendruck" bar is 
+      //set JDialog to Modeless type so that it remains visible when changing focus between opened
+      //calc and writer document. Drawback: when this Dialog is open, the "Seriendruck" bar is
       //active too.
       dialog = new JDialog(parent, title, false);
       dialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
       // erzeugt einen controller für den Druckerauswahldialog falls noch keiner existiert
-      if (druckerController == null) {  
+      if (druckerController == null) {
         druckerController = new DruckerController(druckerModel, (JFrame)dialog.getOwner(), this);
-      }      
+      }
       try
       {
         rules = dialogConf.get("Regeln");
@@ -705,18 +723,18 @@ class MailMergeParams
       vbox.setBorder(new EmptyBorder(8, 5, 10, 5));
       dialog.add(vbox);
 
-      for (ConfigThingy sectionConf : fensterConf) 
-        sections.add(new Section(sectionConf, vbox, this)); 
+      for (ConfigThingy sectionConf : fensterConf)
+        sections.add(new Section(sectionConf, vbox, this));
     }
-    
+
     updateView();
     setDialogLocation();
     dialog.setResizable(false);
     dialog.setVisible(true);
-  } 
-  
+  }
+
   private void setDialogLocation() {
-    
+
     int frameWidth = dialog.getWidth();
     int frameHeight = dialog.getHeight();
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -728,7 +746,7 @@ class MailMergeParams
   /**
    * Führt dialog.pack() aus wenn die preferredSize des dialogs die aktuelle Größe
    * überschreitet und platziert den Dialog in die Mitte des Bildschirms.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static void repack(JDialog dialog)
@@ -745,7 +763,7 @@ class MailMergeParams
    * Führt die im Regeln-Abschnitt angegebenen Regeln aus, passt alle Sichtbarkeiten
    * und Vorbelegungen für Radio-Buttons korrekt an und zeichnet den Dialog bei
    * Bedarf neu.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public void updateView()
@@ -758,7 +776,7 @@ class MailMergeParams
 
   /**
    * Führt die im Regeln-Abschnitt definierten Regeln aus.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private void processRules()
@@ -771,11 +789,17 @@ class MailMergeParams
       {
         RuleStatement statement = RuleStatement.getByname(key.getName());
         if (statement == RuleStatement.ON_ACTION_TYPE)
-          if (!currentActionType.equals(key.toString())) matches = false;
+          if (!currentActionType.equals(key.toString())) {
+            matches = false;
+          }
         if (statement == RuleStatement.ON_OUTPUT)
-          if (!currentOutput.equals(key.toString())) matches = false;
+          if (!currentOutput.equals(key.toString())) {
+            matches = false;
+          }
       }
-      if (!matches) continue;
+      if (!matches) {
+        continue;
+      }
 
       // Regel trifft zu. Jetzt die Befehle bearbeiten
       boolean hadUsePrintFunctions = false;
@@ -801,7 +825,9 @@ class MailMergeParams
               if (tf instanceof JTextArea)
               {
                 JTextArea ta = (JTextArea) tf;
-                if (ta.getRows() < lines.length) ta.setRows(lines.length);
+                if (ta.getRows() < lines.length) {
+                  ta.setRows(lines.length);
+                }
               }
             }
             break;
@@ -844,7 +870,7 @@ class MailMergeParams
    * übergebene reasons-Liste aufgenommen). Die Actions setActionType und setOutput
    * sind z.B. dann nicht ausführbar, wenn in einem zugehörigen Regeln-Abschnitt eine
    * USE_PRINTFUNCTIONS-Anweisung steht, deren Druckfunktionen nicht verfügbar sind.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private boolean isActionAvailableInCurrentContext(UIElementAction action,
@@ -865,8 +891,12 @@ class MailMergeParams
         {
           String value =
             rule.getString(RuleStatement.ON_ACTION_TYPE.toString(), null);
-          if (!value.equals(actionValue)) continue;
-          if (requiredPrintfunctionsAvailable(rule, reasons)) return true;
+          if (!value.equals(actionValue)) {
+            continue;
+          }
+          if (requiredPrintfunctionsAvailable(rule, reasons)) {
+            return true;
+          }
         }
         return false;
 
@@ -875,14 +905,20 @@ class MailMergeParams
         for (ConfigThingy rule : myrules)
         {
           String value = rule.getString(RuleStatement.ON_OUTPUT.toString(), null);
-          if (!value.equals(actionValue)) continue;
+          if (!value.equals(actionValue)) {
+            continue;
+          }
           String actionType =
             rule.getString(RuleStatement.ON_ACTION_TYPE.toString(), null);
-          if (actionType == null || !actionType.equals(currentActionType)) continue;
-          if (requiredPrintfunctionsAvailable(rule, reasons)) return true;
+          if (actionType == null || !actionType.equals(currentActionType)) {
+            continue;
+          }
+          if (requiredPrintfunctionsAvailable(rule, reasons)) {
+            return true;
+          }
         }
         return false;
-        
+
       case abort:
         break;
       case selectRange:
@@ -900,7 +936,7 @@ class MailMergeParams
    * {@link RuleStatement#USE_PRINTFUNCTIONS} beschriebenen Druckfunktionen
    * ausführbar sind und liefert hängt im Fehlerfall eine textuelle Beschreibung an
    * die übergebene Liste reasons an.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private boolean requiredPrintfunctionsAvailable(ConfigThingy rule,
@@ -931,7 +967,7 @@ class MailMergeParams
    * Fabrik-Methode für die Erzeugung aller {@link UIElement}-Objekte. Die erwarteten
    * String-Argumente können (je nach Formularelement) auch null sein, die anderen
    * Typen müssen mit Objekten != null belegt sein.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static UIElement createUIElement(UIElementType type, String label,
@@ -1008,10 +1044,8 @@ class MailMergeParams
           new JTextArea(
             L.m("Sehr geehrte Damen und Herren,\n\nanbei erhalten Sie ...\n\nMit freundlichen Grüßen\n..."));
         JScrollPane sc = new JScrollPane(tf);
-        TextWithDatafieldTagsUIElement el =
-          new TextWithDatafieldTagsUIElement(tf, sc, SubmitArgument.emailText, null,
+        return new TextWithDatafieldTagsUIElement(tf, sc, SubmitArgument.emailText, null,
             group, mmp);
-        return el;
       }
 
       case emailsubject:
@@ -1033,7 +1067,7 @@ class MailMergeParams
       {
         return new PrinterSettingsUIElement(label, group, mmp);
       }
-      
+
       case unknown:
         break;
       default:
@@ -1049,7 +1083,7 @@ class MailMergeParams
    * Formularinhalte plausibel sind und entsprechend gültige Werte in die
    * Argumentliste aufnehmen oder eine {@link InvalidArgumentException}-Exception
    * werfen.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static class UIElement
@@ -1079,7 +1113,7 @@ class MailMergeParams
     /**
      * Passt die Sichtbarkeit abhängig von den aktuell gesetzten Sichtbarkeitsgruppen
      * aus mmp.visibleGroups an.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     public void updateView()
@@ -1095,7 +1129,7 @@ class MailMergeParams
      * Liefert die JComponent dieses UIElements zurück, wobei es sein kann, dass das
      * UIElement aus mehreren JComponents zusammengesetzt ist (in diesem Fall liefert
      * diese Methode nur die oberste JComponent wie z.B. eine HBox zurück).
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     public Component getCompo()
@@ -1105,7 +1139,7 @@ class MailMergeParams
 
     /**
      * Gibt Auskunft, ob das UIElement aktuell sichtbar ist.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     public boolean isVisible()
@@ -1115,7 +1149,7 @@ class MailMergeParams
 
     /**
      * Setzt den Aktiviert-Status des UIElements auf enabled.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     public void setEnabled(boolean enabled)
@@ -1126,7 +1160,7 @@ class MailMergeParams
 
     /**
      * Gibt Auskunft, ob das UIElement aktuell aktiviert ist.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     public boolean isEnabled()
@@ -1139,10 +1173,10 @@ class MailMergeParams
      * relevanten Benutzereingaben zu der Argumentliste args hinzu, die eine interne
      * Plausibilitätsprüfung bestanden haben. Bei nicht bestandener
      * Plausibilitätsprüfung wird eine {@link InvalidArgumentException} geschmissen.
-     * 
+     *
      * @throws InvalidArgumentException
      *           Bei nicht bestandener Plausibilitätsprüfung
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     public void addSubmitArgs(Map<SubmitArgument, Object> args)
@@ -1152,7 +1186,7 @@ class MailMergeParams
     /**
      * wird von {@link UIElement#addSubmitArgs(Map)} geschmissen, wenn die
      * Benutzereingaben unzureichend oder fehlerhaft sind.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     private static class InvalidArgumentException extends Exception
@@ -1176,7 +1210,7 @@ class MailMergeParams
    * eine ButtonGroup zugeordnet werden können und einen Radio-Button enthalten,
    * dessen Vorbelegung bei Ein-/Ausblendungen durch den Seriendruckdialog verwaltet
    * werden sollen.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private interface HasRadioElement
@@ -1190,7 +1224,7 @@ class MailMergeParams
 
   /**
    * Beschreibt das {@link UIElement} vom Typ {@link UIElementType#radio}.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static class RadioButtonUIElement extends UIElement implements
@@ -1216,24 +1250,29 @@ class MailMergeParams
       hbox.add(radio);
       hbox.add(Box.createHorizontalGlue());
       ActionListener li = action.createActionListener(value, mmp);
-      if (li != null) radio.addActionListener(li);
+      if (li != null) {
+        radio.addActionListener(li);
+      }
 
       this.action = action;
       this.actionValue = value;
       this.mmp = mmp;
     }
 
+    @Override
     public void setButtonGroup(ButtonGroup g)
     {
       g.add(radio);
     }
 
+    @Override
     public void setEnabled(boolean enabled)
     {
       super.setEnabled(enabled);
       radio.setEnabled(enabled);
     }
 
+    @Override
     public void updateView()
     {
       super.updateView();
@@ -1245,7 +1284,7 @@ class MailMergeParams
           mmp.isActionAvailableInCurrentContext(action, actionValue, reasons);
         setEnabled(available);
         // Tooltip zur Anzeige der Probleme zusammen bauen
-        if (reasons.size() == 0)
+        if (reasons.isEmpty())
           radio.setToolTipText(null);
         else
         {
@@ -1258,11 +1297,13 @@ class MailMergeParams
       }
     }
 
+    @Override
     public boolean isSelected()
     {
       return radio.isSelected();
     }
 
+    @Override
     public void setSelected(boolean b)
     {
       radio.setSelected(b);
@@ -1274,7 +1315,7 @@ class MailMergeParams
 
   /**
    * Beschreibt das {@link UIElement} vom Typ {@link UIElementType#fromtoradio}.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static class FromToRadioUIElement extends UIElement implements
@@ -1293,6 +1334,49 @@ class MailMergeParams
      * bestimmt dies die Indizes der ausgewählten Datensätze.
      */
     private IndexSelection indexSelection = new IndexSelection();
+
+    private DocumentListener rangeDocumentListener = new DocumentListener()
+    {
+      public void update()
+      {
+        fromRadioButton.setSelected(true);
+        mmp.datasetSelectionType = DatasetSelectionType.RANGE;
+        try
+        {
+          indexSelection.rangeStart = Integer.parseInt(start.getText());
+        }
+        catch (Exception x)
+        {
+          indexSelection.rangeStart = 0;
+        }
+        try
+        {
+          indexSelection.rangeEnd = Integer.parseInt(end.getText());
+        }
+        catch (Exception x)
+        {
+          indexSelection.rangeEnd = 0;
+        }
+      }
+
+      @Override
+      public void insertUpdate(DocumentEvent e)
+      {
+        update();
+      }
+
+      @Override
+      public void removeUpdate(DocumentEvent e)
+      {
+        update();
+      }
+
+      @Override
+      public void changedUpdate(DocumentEvent e)
+      {
+        update();
+      }
+    };
 
     public FromToRadioUIElement(String labelFrom, String labelTo,
         UIElementAction action, final String value, String group,
@@ -1319,26 +1403,32 @@ class MailMergeParams
       hbox.add(end);
       hbox.add(Box.createHorizontalGlue());
       ActionListener li = action.createActionListener(value, mmp);
-      if (li != null) fromRadioButton.addActionListener(li);
+      if (li != null) {
+        fromRadioButton.addActionListener(li);
+      }
       DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox);
     }
 
+    @Override
     public void setEnabled(boolean enabled)
     {
       super.setEnabled(enabled);
       fromRadioButton.setEnabled(enabled);
     }
 
+    @Override
     public void setButtonGroup(ButtonGroup g)
     {
       g.add(fromRadioButton);
     }
 
+    @Override
     public boolean isSelected()
     {
       return fromRadioButton.isSelected();
     }
 
+    @Override
     public void setSelected(boolean b)
     {
       fromRadioButton.setSelected(b);
@@ -1347,46 +1437,7 @@ class MailMergeParams
         l.actionPerformed(e);
     }
 
-    private DocumentListener rangeDocumentListener = new DocumentListener()
-    {
-      public void update()
-      {
-        fromRadioButton.setSelected(true);
-        mmp.datasetSelectionType = DatasetSelectionType.RANGE;
-        try
-        {
-          indexSelection.rangeStart = Integer.parseInt(start.getText());
-        }
-        catch (Exception x)
-        {
-          indexSelection.rangeStart = 0;
-        }
-        try
-        {
-          indexSelection.rangeEnd = Integer.parseInt(end.getText());
-        }
-        catch (Exception x)
-        {
-          indexSelection.rangeEnd = 0;
-        }
-      }
-
-      public void insertUpdate(DocumentEvent e)
-      {
-        update();
-      }
-
-      public void removeUpdate(DocumentEvent e)
-      {
-        update();
-      }
-
-      public void changedUpdate(DocumentEvent e)
-      {
-        update();
-      }
-    };
-
+    @Override
     public void addSubmitArgs(java.util.Map<SubmitArgument, Object> args)
         throws UIElement.InvalidArgumentException
     {
@@ -1397,7 +1448,7 @@ class MailMergeParams
   /**
    * Beschreibt das {@link UIElement} vom Typ
    * {@link UIElementType#filenametemplatechooser}.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static class TargetDirPickerUIElement extends UIElement
@@ -1417,6 +1468,7 @@ class MailMergeParams
       {
         private static final long serialVersionUID = -7919862309134895087L;
 
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           final JFileChooser fc = new JFileChooser(targetDirectory.getText());
@@ -1432,6 +1484,7 @@ class MailMergeParams
       DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox);
     }
 
+    @Override
     public void addSubmitArgs(Map<SubmitArgument, Object> args)
         throws UIElement.InvalidArgumentException
     {
@@ -1450,7 +1503,7 @@ class MailMergeParams
 
   /**
    * Beschreibt das {@link UIElement} vom Typ {@link UIElementType#emailfrom}.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static class EMailFromUIElement extends UIElement
@@ -1475,6 +1528,7 @@ class MailMergeParams
       vbox.add(Box.createVerticalStrut(5));
     }
 
+    @Override
     public void addSubmitArgs(Map<SubmitArgument, Object> args)
         throws UIElement.InvalidArgumentException
     {
@@ -1489,7 +1543,7 @@ class MailMergeParams
 
   /**
    * Beschreibt das {@link UIElement} vom Typ {@link UIElementType#emailsubject}.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static class EMailSubject extends UIElement
@@ -1517,6 +1571,7 @@ class MailMergeParams
       this.mmp = mmp;
     }
 
+    @Override
     public void addSubmitArgs(Map<SubmitArgument, Object> args)
         throws UIElement.InvalidArgumentException
     {
@@ -1537,7 +1592,7 @@ class MailMergeParams
 
   /**
    * Beschreibt das {@link UIElement} vom Typ {@link UIElementType#emailtofieldname}.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static class EMailToFieldNameUIElement extends UIElement
@@ -1559,7 +1614,9 @@ class MailMergeParams
       int mailIdx = 0;
       for (String fname : mmp.mmc.getColumnNames())
       {
-        if (fname.toLowerCase().contains("mail") && mailIdx == 0) mailIdx = i;
+        if (fname.toLowerCase().contains("mail") && mailIdx == 0) {
+          mailIdx = i;
+        }
         fnames[i++] = "<" + fname + ">";
       }
       this.toFieldName = new JComboBox<String>(fnames);
@@ -1572,6 +1629,7 @@ class MailMergeParams
       vbox.add(Box.createVerticalStrut(5));
     }
 
+    @Override
     public void addSubmitArgs(Map<SubmitArgument, Object> args)
         throws UIElement.InvalidArgumentException
     {
@@ -1590,7 +1648,7 @@ class MailMergeParams
    * {@link TextComponentTags} editieren kann und derzeit für die Elemente vom Typ
    * {@link UIElementType#emailtext} und
    * {@link UIElementType#filenametemplatechooser} verwendet wird.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static class TextWithDatafieldTagsUIElement extends UIElement
@@ -1635,6 +1693,7 @@ class MailMergeParams
       this.argKey = argKey;
     }
 
+    @Override
     public void addSubmitArgs(Map<SubmitArgument, Object> args)
         throws UIElement.InvalidArgumentException
     {
@@ -1645,16 +1704,17 @@ class MailMergeParams
 
     /**
      * Erzeugt eine Liste von Actions zum Einfügen von Spezialfeld-Tags in tags.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD-D101)
      */
     private List<Action> makeSpecialFieldActions(final TextComponentTags tags)
     {
-      List<Action> actions = new Vector<Action>();
+      List<Action> actions = new ArrayList<Action>();
       actions.add(new AbstractAction(L.m("Datensatznummer"))
       {
         private static final long serialVersionUID = 2675809156807460816L;
 
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           tags.insertTag(TAG_DATENSATZNUMMER);
@@ -1664,6 +1724,7 @@ class MailMergeParams
       {
         private static final long serialVersionUID = 3779132684393223573L;
 
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           tags.insertTag(TAG_SERIENBRIEFNUMMER);
@@ -1676,12 +1737,12 @@ class MailMergeParams
   private static class PrinterSettingsUIElement extends UIElement
   {
     JTextField printerNameField;
-       
+
     public PrinterSettingsUIElement(String label, String group,
         final MailMergeParams mmp)
     {
       super(Box.createHorizontalBox(), group, mmp);
-      
+
       Box hbox = (Box) getCompo();
       printerNameField = new JTextField();
       printerNameField.setEditable(false);
@@ -1691,11 +1752,12 @@ class MailMergeParams
       hbox.add(Box.createHorizontalStrut(5));
       hbox.add(printerNameField);
       hbox.add(Box.createHorizontalStrut(5));
-      
+
       hbox.add(new JButton(new AbstractAction(L.m("Drucker wechseln"))
       {
         private static final long serialVersionUID = 1L;
 
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           mmp.druckerController.erzeugeView();
@@ -1703,7 +1765,7 @@ class MailMergeParams
           PrintParametersDialog.setCurrentPrinterName(mmp.mmc.getTextDocument(), mmp.druckerController.getDrucker());
          }
       }));
-  
+
       hbox.add(Box.createHorizontalStrut(6));
       DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox);
 
@@ -1718,7 +1780,7 @@ class MailMergeParams
    * oder Leerstring, so wird die Section mit einer TitledBorder verziert, ansonsten
    * nicht. Radio-Buttons erhalten innerhalb einer Section die selbe ButtonGroup,
    * weshalb für jede neue Gruppe eine neue Section erstellt werden muss.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static class Section
@@ -1733,7 +1795,7 @@ class MailMergeParams
      * Erzeugt die Section, die über das ConfigThingy section beschrieben ist, in der
      * JComponent parent angezeigt werden soll und im Kontext des
      * MailMergeParams-Objekts mmp gültig ist.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     private Section(ConfigThingy section, JComponent parent, MailMergeParams mmp)
@@ -1797,7 +1859,9 @@ class MailMergeParams
           contentBox.add(uiel.getCompo());
           if (uiel instanceof HasRadioElement)
           {
-            if (buttonGroup == null) buttonGroup = new ButtonGroup();
+            if (buttonGroup == null) {
+              buttonGroup = new ButtonGroup();
+            }
             ((HasRadioElement) uiel).setButtonGroup(buttonGroup);
           }
         }
@@ -1810,7 +1874,7 @@ class MailMergeParams
      * Aktualisiert alle in der Section enthaltenen UIElemente (bezüglich ihrer
      * Sichtbarkeit und Aktiviertheit) und passt ggf. die Voreinstellungen von allen
      * UIElementen an, die {@link HasRadioElement} implementieren.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     private void updateView()
@@ -1821,15 +1885,23 @@ class MailMergeParams
       for (UIElement el : elements)
       {
         el.updateView();
-        if (el.isVisible()) visible = true;
+        if (el.isVisible()) {
+          visible = true;
+        }
 
         // ggf. Voreinstellungen von Radio-Buttons anpassen
-        if (!(el instanceof HasRadioElement)) continue;
+        if (!(el instanceof HasRadioElement)) {
+          continue;
+        }
         HasRadioElement hre = (HasRadioElement) el;
         if (el.isVisible() && el.isEnabled())
         {
-          if (firstEnabledRadio == null) firstEnabledRadio = hre;
-          if (hre.isSelected()) hasEnabledPreset = true;
+          if (firstEnabledRadio == null) {
+            firstEnabledRadio = hre;
+          }
+          if (hre.isSelected()) {
+            hasEnabledPreset = true;
+          }
         }
       }
 
@@ -1844,14 +1916,16 @@ class MailMergeParams
     {
       for (UIElement el : elements)
       {
-        if (el.isVisible() && el.isEnabled()) el.addSubmitArgs(args);
+        if (el.isVisible() && el.isEnabled()) {
+          el.addSubmitArgs(args);
+        }
       }
     }
   }
 
   /**
    * Testmethode
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static void main(String[] args)
@@ -1879,6 +1953,7 @@ class MailMergeParams
     final ConfigThingy seriendruckConf = sdConf;
     MailMergeController mmc = new MailMergeController()
     {
+      @Override
       public boolean hasPrintfunction(String name)
       {
         String[] funcs =
@@ -1887,10 +1962,13 @@ class MailMergeParams
           "MailMergeNewToPDFEMail", "MailMergeNewSetFormValue", /* "PDFGesamtdokument", */
           "MailMergeNewToSingleODT", "MailMergeNewToSinglePDF", "PDFGesamtdokumentOutput" };
         for (String func : funcs)
-          if (func.equals(name)) return true;
+          if (func.equals(name)) {
+            return true;
+          }
         return false;
       }
 
+      @Override
       public void doMailMerge(List<String> usePrintFunctions,
           boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
           Map<SubmitArgument, Object> pmodArgs)
@@ -1907,11 +1985,13 @@ class MailMergeParams
           System.out.println("  " + en.getKey() + ": " + en.getValue());
       }
 
+      @Override
       public List<String> getColumnNames()
       {
         return fieldNames;
       }
 
+      @Override
       public String getDefaultFilename()
       {
         return "MeinDokument";
@@ -1919,6 +1999,7 @@ class MailMergeParams
 
       private boolean initialized = false;
 
+      @Override
       public XTextDocument getTextDocument()
       {
         if (!initialized) try

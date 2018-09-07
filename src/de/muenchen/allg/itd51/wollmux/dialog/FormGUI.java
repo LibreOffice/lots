@@ -1,8 +1,8 @@
 /*
  * Dateiname: FormGUI.java
  * Projekt  : WollMux
- * Funktion : managed die Fenster (Writer und FormController) der FormularGUI. 
- * 
+ * Funktion : managed die Fenster (Writer und FormController) der FormularGUI.
+ *
  * Copyright (c) 2010-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,9 +24,9 @@
  * 27.01.2006 | BNK | Erstellung
  * 30.01.2006 | BNK | Office-Bean Einbindung
  * 31.01.2006 | BNK | Bean im Preview-Modus aufrufen
- * 01.02.2006 | BNK | etwas rumgedoktore mit LayoutManager 
+ * 01.02.2006 | BNK | etwas rumgedoktore mit LayoutManager
  * 02.02.2006 | BNK | Fenster zusammengeklebt
- * 05.05.2006 | BNK | Condition -> Function, besser kommentiert 
+ * 05.05.2006 | BNK | Condition -> Function, besser kommentiert
  * 05.07.2006 | BNK | optische Verbesserungen, insbes. bzgl. arrangeWindows()
  * 19.07.2006 | BNK | mehrere übelste Hacks, damit die Formular-GUI nie unsinnige Größe annimmt beim Starten
  * 14.09.2006 | BNK | üble Hacks hoffentlich robuster gemacht
@@ -36,7 +36,7 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
@@ -173,7 +173,7 @@ public class FormGUI
 
   /**
    * Zeigt eine neue Formular-GUI an.
-   * 
+   *
    * @param formFensterConf
    *          Der Formular-Unterabschnitt des Fenster-Abschnitts von
    *          wollmux.conf.
@@ -218,7 +218,7 @@ public class FormGUI
     {
       frameTitle = doc.getWindowTitle();
       if (frameTitle != null)
-	formGUITitle = frameTitle + " - " + formTitle;
+        formGUITitle = frameTitle + " - " + formTitle;
     } catch (Exception x)
     {
     }
@@ -293,26 +293,27 @@ public class FormGUI
      * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4737732 nicht auf
      * einfache Weise die nutzbare Bildschirmflaeche bestimmt werden, deshalb
      * der folgende Hack:
-     * 
+     *
      * o maxWindowBounds initialisieren (so wie es eigentlich reichen sollte
      * aber unter KDE leider nicht tut) minus Sicherheitsabzug fuer KDE. Die
      * Initialisierung ist erforderlich, weil vor den folgenden Events schon
      * Events kommen können, die ein arrangeWindows() erforderlich machen. - Wir
      * registrieren einen WindowStateListener
-     * 
+     *
      * o Wir maximieren das Fenster
-     * 
+     *
      * o Sobald der Event-Handler das erfolgte Maximieren anzeigt, lesen wir die
      * Größe aus und setzen wieder auf normal.
-     * 
+     *
      * o Sobald das Normalsetzen beendet ist deregistriert sich der
      * WindowStateListener und die Fenster werden arrangiert.
-     * 
+     *
      * Bemerkung: Den Teil mit Normalsetzen kann man vermutlich entfernen, da
      * das Setzen der Fenstergröße ohnehin den maximierten Zustand verlässt.
      */
 
-    GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsEnvironment genv = GraphicsEnvironment
+        .getLocalGraphicsEnvironment();
     maxWindowBounds = genv.getMaximumWindowBounds();
 
     myFrame.pack();
@@ -370,11 +371,11 @@ public class FormGUI
     {
     case Common.COORDINATE_CENTER: // center
       frameBounds.x = maxWindowBounds.x
-	  + (maxWindowBounds.width - frameBounds.width) / 2;
+          + (maxWindowBounds.width - frameBounds.width) / 2;
       break;
     case Common.COORDINATE_MAX: // max
       frameBounds.x = maxWindowBounds.x + maxWindowBounds.width
-	  - frameBounds.width;
+          - frameBounds.width;
       break;
     case Common.COORDINATE_MIN: // min
       frameBounds.x = maxWindowBounds.x;
@@ -392,11 +393,11 @@ public class FormGUI
     {
     case Common.COORDINATE_CENTER: // center
       frameBounds.y = maxWindowBounds.y
-	  + (maxWindowBounds.height - frameBounds.height) / 2;
+          + (maxWindowBounds.height - frameBounds.height) / 2;
       break;
     case Common.COORDINATE_MAX: // max
       frameBounds.y = maxWindowBounds.y + maxWindowBounds.height
-	  - frameBounds.height;
+          - frameBounds.height;
       break;
     case Common.COORDINATE_MIN: // min
       frameBounds.y = maxWindowBounds.y;
@@ -415,18 +416,20 @@ public class FormGUI
      * MaximumWindowBounds nicht berücksichtigt beim ersten Layout (jedoch
      * schon, wenn sich die Taskleiste verändert).
      */
-    if (frameBounds.y + frameBounds.height > maxWindowBounds.y + maxWindowBounds.height)
-      frameBounds.height = maxWindowBounds.y + maxWindowBounds.height - frameBounds.y;
+    if (frameBounds.y + frameBounds.height > maxWindowBounds.y
+        + maxWindowBounds.height)
+      frameBounds.height = maxWindowBounds.y + maxWindowBounds.height
+          - frameBounds.y;
 
     myFrame.setBounds(frameBounds);
     myFrame.validate(); // ohne diese wurde in Tests manchmal nicht neu
-			// gezeichnet
+                        // gezeichnet
     myFrame.toFront();
   }
 
   /**
    * Arrangiert das Writer Fenster so, dass es neben dem Formular-Fenster sitzt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void arrangeWindows()
@@ -442,7 +445,8 @@ public class FormGUI
      * richtige Ausrichtung zu berechnen.
      */
     int docX = frameBounds.width + frameBounds.x + windowInsets.left;
-    int docWidth = maxWindowBounds.width - frameBounds.width - frameBounds.x - windowInsets.right;
+    int docWidth = maxWindowBounds.width - frameBounds.width - frameBounds.x
+        - windowInsets.right;
     if (docWidth < 0)
     {
       docX = maxWindowBounds.x;
@@ -453,7 +457,8 @@ public class FormGUI
      * Das Subtrahieren von 2*windowInsets.bottom ist ebenfalls eine Heuristik.
      * (siehe weiter oben)
      */
-    int docHeight = maxWindowBounds.y + maxWindowBounds.height - docY - 2 * windowInsets.bottom;
+    int docHeight = maxWindowBounds.y + maxWindowBounds.height - docY
+        - 2 * windowInsets.bottom;
 
     windowPosSizeSetter.setWindowPosSize(docX, docY, docWidth, docHeight);
   }
@@ -499,10 +504,11 @@ public class FormGUI
    * auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird, sowie ein
    * ComponentListener, der beim Verschieben und Verändern der Größe dafür
    * sorgt, dass das Writer-Fenster entsprechend mitverändert.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class MyWindowListener extends WindowAdapter implements ComponentListener
+  private class MyWindowListener extends WindowAdapter
+      implements ComponentListener
   {
     @Override
     public void windowActivated(WindowEvent e)
@@ -514,15 +520,16 @@ public class FormGUI
     {
       try
       {
-      	String frameTitle2 = myDoc.getWindowTitle();
-      	if (frameTitle2 != frameTitle)
-      	{
-      	  frameTitle = frameTitle2;
-      	  formGUITitle = frameTitle + " - " + formTitle;
-      	  myFrame.setTitle(formGUITitle);
-      	}
+        String frameTitle2 = myDoc.getWindowTitle();
+        if (frameTitle2 != frameTitle)
+        {
+          frameTitle = frameTitle2;
+          formGUITitle = frameTitle + " - " + formTitle;
+          myFrame.setTitle(formGUITitle);
+        }
       } catch (Exception x)
-      {}
+      {
+      }
     }
 
     @Override
@@ -535,14 +542,7 @@ public class FormGUI
     @Override
     public void windowDeiconified(WindowEvent e)
     {
-      // myDoc.setWindowVisible(true);
       arrangeWindows();
-    }
-
-    @Override
-    public void windowIconified(WindowEvent e)
-    {
-      // myDoc.setWindowVisible(false);
     }
 
     @Override
@@ -570,7 +570,7 @@ public class FormGUI
 
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void abort()
@@ -585,7 +585,7 @@ public class FormGUI
 
   /**
    * Liefert den {@link FormController} zu dieser FormGUI.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormController getController()
@@ -595,7 +595,7 @@ public class FormGUI
 
   /**
    * Schliesst die FormGUI und alle zugehörigen Fenster.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void dispose()
@@ -611,11 +611,13 @@ public class FormGUI
           {
             myFrame.dispose();
           } catch (Exception x)
-          {}
+          {
+          }
         }
       });
     } catch (Exception x)
-    {}
+    {
+    }
   }
 
   private static class DummyFormModel implements FormModel
@@ -627,7 +629,8 @@ public class FormGUI
     public DummyFormModel(XTextDocument doc)
     {
       myDoc = doc;
-      myWindow = UNO.XWindow2(myDoc.getCurrentController().getFrame().getContainerWindow());
+      myWindow = UNO.XWindow2(
+          myDoc.getCurrentController().getFrame().getContainerWindow());
     }
 
     @Override
@@ -756,7 +759,9 @@ public class FormGUI
     }
 
     @Override
-    public void sendAsEmail() {}
+    public void sendAsEmail()
+    {
+    }
   }
 
   private class MyAbortRequestListener implements ActionListener
@@ -777,11 +782,12 @@ public class FormGUI
     WollMuxFiles.setupWollMuxDir();
     LogConfig.init(System.err, Level.DEBUG);
     String confFile = "testdata/formulartest.conf";
-    ConfigThingy conf = new ConfigThingy("",
-        new URL(new File(System.getProperty("user.dir")).toURI().toURL(), confFile));
-    XTextDocument doc = UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true, true));
+    ConfigThingy conf = new ConfigThingy("", new URL(
+        new File(System.getProperty("user.dir")).toURI().toURL(), confFile));
+    XTextDocument doc = UNO.XTextDocument(
+        UNO.loadComponentFromURL("private:factory/swriter", true, true));
     FormModel model = new DummyFormModel(doc);
-    Map<String, String> mapIdToPresetValue = new HashMap<String, String>();
+    Map<String, String> mapIdToPresetValue = new HashMap<>();
     mapIdToPresetValue.put("NEFishy", TextDocumentModel.FISHY);
     mapIdToPresetValue.put("NEPresetInList", "Dings");
     mapIdToPresetValue.put("NEPresetNotInList", "Schwupps");
@@ -792,19 +798,22 @@ public class FormGUI
     mapIdToPresetValue.put("AbtAnteile", "false");
     mapIdToPresetValue.put("AbtKaution", "true");
 
-    Map<Object, Object> functionContext = new HashMap<Object, Object>();
-    DialogLibrary dialogLib = DialogFactory.parseFunctionDialogs(conf.get("Formular"), null, functionContext);
-    FunctionLibrary funcLib = FunctionFactory.parseFunctions(conf.get("Formular"), dialogLib, functionContext, null);
+    Map<Object, Object> functionContext = new HashMap<>();
+    DialogLibrary dialogLib = DialogFactory
+        .parseFunctionDialogs(conf.get("Formular"), null, functionContext);
+    FunctionLibrary funcLib = FunctionFactory
+        .parseFunctions(conf.get("Formular"), dialogLib, functionContext, null);
 
     ConfigThingy formFensterConf = new ConfigThingy("");
     try
     {
-      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild();
+      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster")
+          .query("Formular").getLastChild();
     } catch (Exception x)
     {
     }
-    new FormGUI(formFensterConf, conf.get("Formular"), model, mapIdToPresetValue, functionContext, funcLib, dialogLib,
-        true);
+    new FormGUI(formFensterConf, conf.get("Formular"), model,
+        mapIdToPresetValue, functionContext, funcLib, dialogLib, true);
   }
 
 }

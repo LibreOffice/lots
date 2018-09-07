@@ -2,7 +2,7 @@
  * Dateiname: UIElementFactory.java
  * Projekt  : WollMux
  * Funktion : Erzeugt zu ConfigThingys passende UI Elemente.
- * 
+ *
  * Copyright (c) 2010-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -40,7 +40,7 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
@@ -108,7 +108,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
 
 /**
  * Erzeugt zu ConfigThingys passende UI Elemente.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class UIElementFactory
@@ -121,13 +121,7 @@ public class UIElementFactory
    * Standardbreite für Textfelder und Textareas. Wird verwendet, wenn nicht mit
    * setTextfieldWidth() ein anderer Wert gesetzt wurde.
    */
-  private final static int TEXTFIELD_DEFAULT_WIDTH = 22;
-
-  /**
-   * Wird in einer der übergebenen Maps ein TYPE nicht gefunden, so wird stattdessen
-   * nach einem Eintrag für diesen Namen gesucht.
-   */
-  private static final String DEFAULT = "default";
+  private static final int TEXTFIELD_DEFAULT_WIDTH = 22;
 
   /**
    * Die Breite (in Zeichen) für Textfields und Textareas. Kann mit
@@ -140,36 +134,36 @@ public class UIElementFactory
    * {@link UIElement} erzeugt. Die zu übergebenen Maps dürfen alle null-Werte
    * enthalten, die den entsprechenden Eigenschaften der erzeugten UIElemente
    * zugewiesen werden.
-   * 
+   *
    * @param mapTypeToLayoutConstraints
    *          bildet einen TYPE auf die dazugehörigen layout constraints (d,i, der
    *          optionale zweite Parameter von
    *          {@link java.awt.Container#add(java.awt.Component, java.lang.Object)
    *          java.awt.Container.add()}) ab. Wird von
    *          {@link UIElement#getLayoutConstraints()} zurückgeliefert.
-   * 
+   *
    * @param mapTypeToLabelType
    *          bildet einen TYPE auf einen Integer ab, der angibt, ob das UI Element
    *          ein zusätzliches Label links oder rechts bekommen soll. Mögliche Werte
    *          sind {@link UIElement#LABEL_LEFT}, {@link UIElement#LABEL_RIGHT} und
    *          {@link UIElement#LABEL_NONE}. Wird von {@link UIElement#getLabelType()}
    *          zurückgeliefert.
-   * 
+   *
    * @param mapTypeToLabelLayoutConstraints
    *          Für UI Elemente, die ein zusätzliches Label links oder rechts bekommen
    *          sollen (siehe Parameter mapTypeToLabelType) liefert diese Map die
    *          layout constraints für das Label. Achtung! UI Elemente mit TYPE "label"
    *          beziehen ihre layout constraints nicht aus dieser Map, sondern wie alle
    *          anderen UI Elemente auch aus mapTypeToLayoutConstraints.
-   * 
+   *
    * @param supportedActions
    *          Die Menge (von Strings) der ACTIONs, die akzeptiert werden sollen. Alle
    *          anderen produzieren eine Fehlermeldung.
-   * 
+   *
    * @param handler
    *          ist der {@link UIElementEventHandler}, an den die erzeugten UI Elemente
    *          ihre Ereignisse melden.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public UIElementFactory()
@@ -177,7 +171,7 @@ public class UIElementFactory
 
   /**
    * Setzt die Breite für erzeugte Textfields und Textareas auf anzahlZeichen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setTextfieldWidth(int anzahlZeichen)
@@ -191,55 +185,55 @@ public class UIElementFactory
    * <dl>
    * <dt>button</dt>
    * <dd>Ein normaler Button.</dd>
-   * 
+   *
    * <dt>menuitem</dt>
    * <dd>Erzeugt ein JMenuItem, ist aber ansonsten genau wie ein "button".</dd>
-   * 
+   *
    * <dt>textfield</dt>
    * <dd>Ein einzeiliges Textfeld.</dd>
-   * 
+   *
    * <dt>textarea</dt>
    * <dd>Ein mehrzeiliger Texteingabebereich.</dd>
-   * 
+   *
    * <dt>combobox</dt>
    * <dd>Eine Combobox.</dd>
-   * 
+   *
    * <dt>checkbox</dt>
    * <dd>Eine Checkbox mit integriertem Label das immer rechts ist.</dd>
-   * 
+   *
    * <dt>listbox</dt>
    * <dd>Eine Liste von Einträgen.</dd>
-   * 
+   *
    * <dt>v-separator</dt>
    * <dd>Ein separator mit <b>vertikaler</b> Ausdehnung (z.B. ein senkrechter
    * Strich). Diese Art Separator wir benutzt, um horizontal angeordnete Elemente zu
    * trennen.</dd>
-   * 
+   *
    * <dt>h-separator</dt>
    * <dd>Ein separator mit <b>horizontaler</b> Ausdehnung (z.B. ein horizontaler
    * Strich). Diese Art Separator wir benutzt, um vertikal angeordnete Elemente zu
    * trennen (z.B. in einem Pull-Down-Menü).</dd>
-   * 
+   *
    * <dt>h-glue</dt>
    * <dd>Leerraum mit <b>horizontaler</b> Ausdehnung. Wird verwendet, um Abstand
    * zwischen horizontal angeordneten Elementen zu schaffen.</dd>
-   * 
+   *
    * <dt>v-glue</dt>
    * <dd>Leerraum mit <b>vertikaler</b> Ausdehnung. Wird verwendet, um Abstand
    * zwischen vertikal angeordneten Elementen zu schaffen (z.B. in Pull-Down-Menüs).</dd>
-   * 
+   *
    * <dt>default</dt>
    * <dd>Dieser TYPE wird als Fallback verwendet, wenn in einer der an den
    * Konstruktor übergebenen Maps ein TYPE nicht gefunden wird.</dd>
    * </dl>
-   * 
+   *
    * @param context
    *          Liefert Informationen für die Erstellung der UI Elemente. Ist für einen
    *          TYPE in einer Map kein Mapping angegeben (auch kein null-Wert), so wird
    *          erst geschaut, ob ein Mapping für "default" vorhanden ist. Falls ja, so
    *          wird dieses der entsprechenden Eigenschaft des erzeugten UIElements
    *          zugewiesen, ansonsten null.
-   * 
+   *
    * @return niemals null.
    * @throws ConfigurationErrorException
    *           falls irgendein Fehler in der Beschreibung des UI Elements gefunden
@@ -264,21 +258,23 @@ public class UIElementFactory
       String name = node.getName();
       String str = node.toString();
 
-      if (name.equals("LABEL"))
+      if ("LABEL".equals(name))
         label = L.m(str);
-      else if (name.equals("TIP"))
+      else if ("TIP".equals(name))
         tip = L.m(str);
-      else if (name.equals("ID"))
+      else if ("ID".equals(name))
         id = str;
-      else if (name.equals("TYPE"))
+      else if ("TYPE".equals(name))
         type = str;
-      else if (name.equals("HOTKEY"))
+      else if ("HOTKEY".equals(name))
         hotkey = str.length() > 0 ? str.charAt(0) : 0;
-      else if (name.equals("ACTION"))
+      else if ("ACTION".equals(name))
         action = str;
-      else if (name.equals("READONLY"))
-        readonly = str.equals("true");
-      else if (name.equals("EDIT")) editable = str.equals("true");
+      else if ("READONLY".equals(name))
+        readonly = "true".equals(str);
+      else if ("EDIT".equals(name)) {
+        editable = "true".equals(str);
+      }
     }
 
     if (type.length() == 0)
@@ -296,10 +292,10 @@ public class UIElementFactory
 
     UIElement uiElement;
 
-    if (type.equals("button") || type.equals("menuitem"))
+    if ("button".equals(type) || "menuitem".equals(type))
     {
       AbstractButton button;
-      if (type.equals("button"))
+      if ("button".equals(type))
       {
         button = new JButton(label);
         copySpaceBindingToEnter(button);
@@ -308,28 +304,34 @@ public class UIElementFactory
         button = new JMenuItem(label);
 
       button.setMnemonic(hotkey);
-      if (!tip.equals("")) button.setToolTipText(tip);
+      if (!tip.isEmpty()) {
+        button.setToolTipText(tip);
+      }
       uiElement = new Button(id, button, layoutConstraints);
 
       ActionListener actionL =
         getAction(uiElement, action, conf, context.uiElementEventHandler,
           context.supportedActions);
-      if (actionL != null) button.addActionListener(actionL);
+      if (actionL != null) {
+        button.addActionListener(actionL);
+      }
       button.addFocusListener(new UIElementFocusListener(
         context.uiElementEventHandler, uiElement));
       return uiElement;
     }
-    else if (type.equals("label"))
+    else if ("label".equals(type))
     {
       uiElement = new Label(id, label, layoutConstraints);
       return uiElement;
     }
-    else if (type.equals("textfield"))
+    else if ("textfield".equals(type))
     {
       JTextField tf = new JTextField(textfieldWidth);
       tf.setEditable(!readonly);
       tf.setFocusable(!readonly);
-      if (!tip.equals("")) tf.setToolTipText(tip);
+      if (!tip.isEmpty()) {
+        tf.setToolTipText(tip);
+      }
       uiElement =
         new Textfield(id, tf, layoutConstraints, labelType, label,
           labelLayoutConstraints);
@@ -343,11 +345,13 @@ public class UIElementFactory
         ActionListener actionL =
           getAction(uiElement, action, conf, context.uiElementEventHandler,
             context.supportedActions);
-        if (actionL != null) tf.addActionListener(actionL);
+        if (actionL != null) {
+          tf.addActionListener(actionL);
+        }
       }
       return uiElement;
     }
-    else if (type.equals("textarea"))
+    else if ("textarea".equals(type))
     {
       int lines = 3;
       boolean wrap = true;
@@ -359,7 +363,7 @@ public class UIElementFactory
       {}
       try
       {
-        wrap = conf.get("WRAP").toString().equalsIgnoreCase("true");
+        wrap = "true".equalsIgnoreCase(conf.get("WRAP").toString());
       }
       catch (Exception x)
       {}
@@ -372,7 +376,9 @@ public class UIElementFactory
         textarea.setWrapStyleWord(true);
       }
       textarea.setFont(new JTextField().getFont());
-      if (!tip.equals("")) textarea.setToolTipText(tip);
+      if (!tip.isEmpty()) {
+        textarea.setToolTipText(tip);
+      }
 
       /*
        * Tab auch zum Weiterschalten und Shift-Tab zum Zurückschalten erlauben
@@ -408,13 +414,15 @@ public class UIElementFactory
         context.uiElementEventHandler, uiElement));
       return uiElement;
     }
-    else if (type.equals("combobox"))
+    else if ("combobox".equals(type))
     {
       JComboBox<Object> combo = new JComboBox<Object>();
       combo.setEnabled(!readonly);
       combo.setFocusable(!readonly);
       combo.setEditable(editable);
-      if (!tip.equals("")) combo.setToolTipText(tip);
+      if (!tip.isEmpty()) {
+        combo.setToolTipText(tip);
+      }
       try
       {
         Iterator<ConfigThingy> values = conf.get("VALUES").iterator();
@@ -451,7 +459,7 @@ public class UIElementFactory
       }
       return uiElement;
     }
-    else if (type.equals("checkbox"))
+    else if ("checkbox".equals(type))
     {
       /*
        * ACHTUNG! Diese checkbox hat ihr Label fest integriert auf der rechten Seite
@@ -461,7 +469,9 @@ public class UIElementFactory
       copySpaceBindingToEnter(boxBruceleitner);
       boxBruceleitner.setEnabled(!readonly);
       boxBruceleitner.setFocusable(!readonly);
-      if (!tip.equals("")) boxBruceleitner.setToolTipText(tip);
+      if (!tip.isEmpty()) {
+        boxBruceleitner.setToolTipText(tip);
+      }
       uiElement = new Checkbox(id, boxBruceleitner, layoutConstraints);
       boxBruceleitner.addActionListener(new UIElementActionListener(
         context.uiElementEventHandler, uiElement, true, "valueChanged",
@@ -470,7 +480,7 @@ public class UIElementFactory
         context.uiElementEventHandler, uiElement));
       return uiElement;
     }
-    else if (type.equals("listbox"))
+    else if ("listbox".equals(type))
     {
       int lines = 10;
       try
@@ -506,17 +516,17 @@ public class UIElementFactory
         list.addMouseListener(new MyActionMouseListener(list, actionL));
       return uiElement;
     }
-    else if (type.equals("h-separator"))
+    else if ("h-separator".equals(type))
     {
       JSeparator wurzelSepp = new JSeparator(SwingConstants.HORIZONTAL);
       return new Separator(id, wurzelSepp, layoutConstraints);
     }
-    else if (type.equals("v-separator"))
+    else if ("v-separator".equals(type))
     {
       JSeparator wurzelSepp = new JSeparator(SwingConstants.VERTICAL);
       return new Separator(id, wurzelSepp, layoutConstraints);
     }
-    else if (type.equals("h-glue"))
+    else if ("h-glue".equals(type))
     {
       int minsize = 0;
       int prefsize = 0;
@@ -544,7 +554,7 @@ public class UIElementFactory
         new Dimension(prefsize, 0), new Dimension(maxsize, Integer.MAX_VALUE)),
         layoutConstraints);
     }
-    else if (type.equals("v-glue"))
+    else if ("v-glue".equals(type))
     {
       int minsize = 0;
       int prefsize = 0;
@@ -576,7 +586,7 @@ public class UIElementFactory
       throw new ConfigurationErrorException(L.m(
         "Ununterstützter TYPE für GUI Element: \"%1\"", type));
   }
-  
+
   private void copySpaceBindingToEnter(AbstractButton button)
   {
     InputMap imap = button.getInputMap(JComponent.WHEN_FOCUSED);
@@ -593,7 +603,7 @@ public class UIElementFactory
   /**
    * Wird als FocusListener auf UI Elemente registriert, um die auftretenden Events
    * an einen {@link UIElementEventHandler} weiterzureichen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class UIElementFocusListener implements FocusListener
@@ -628,7 +638,7 @@ public class UIElementFactory
   /**
    * Wird als ActionListener auf UI Elemente registriert, um die auftretenden Events
    * an einen {@link UIElementEventHandler} weiterzureichen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class UIElementActionListener implements ActionListener
@@ -656,7 +666,9 @@ public class UIElementFactory
     @Override
     public void actionPerformed(ActionEvent e)
     {
-      if (takeFocus && !uiElement.hasFocus()) uiElement.takeFocus();
+      if (takeFocus && !uiElement.hasFocus()) {
+        uiElement.takeFocus();
+      }
       handler.processUiElementEvent(uiElement, eventType, args);
     }
   }
@@ -664,7 +676,7 @@ public class UIElementFactory
   /**
    * Wird als DocumentListener auf UI Elemente registriert, um die auftretenden
    * Events an einen {@link UIElementEventHandler} weiterzureichen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class UIElementDocumentListener implements DocumentListener
@@ -708,7 +720,7 @@ public class UIElementFactory
   /**
    * Wird als ItemListener auf UI Elemente registriert, um die auftretenden Events an
    * einen {@link UIElementEventHandler} weiterzureichen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class UIElementItemListener implements ItemListener
@@ -741,7 +753,7 @@ public class UIElementFactory
   /**
    * Wird als ListSelectionListener auf UI Elemente registriert, um die auftretenden
    * Events an einen {@link UIElementEventHandler} weiterzureichen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class UIElementListSelectionListener implements
@@ -774,7 +786,7 @@ public class UIElementFactory
   /**
    * Wartet auf Doppelklick in eine JList und führt dann die actionPerformed()
    * Methode eines ActionListeners aus.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class MyActionMouseListener extends MouseAdapter
@@ -796,9 +808,13 @@ public class UIElementFactory
       {
         Point location = e.getPoint();
         int index = list.locationToIndex(location);
-        if (index < 0) return;
+        if (index < 0) {
+          return;
+        }
         Rectangle bounds = list.getCellBounds(index, index);
-        if (!bounds.contains(location)) return;
+        if (!bounds.contains(location)) {
+          return;
+        }
         action.actionPerformed(null);
       }
     }
@@ -807,7 +823,7 @@ public class UIElementFactory
   /**
    * Liefert einen {@link UIElementActionListener} zurück, der ActionEvents von
    * uiElement an handler weitergibt, wobei der eventType "action" ist.
-   * 
+   *
    * @param uiElement
    *          das uiElement zu dem der ActionListener gehört. Achtung! der
    *          ActionListener wird durch diese Methode nicht auf uiElement
@@ -841,7 +857,7 @@ public class UIElementFactory
       return null;
     }
 
-    if (action.equals("switchWindow"))
+    if ("switchWindow".equals(action))
     {
       try
       {
@@ -855,13 +871,13 @@ public class UIElementFactory
         LOGGER.error(L.m("ACTION \"switchWindow\" erfordert WINDOW-Attribut"));
       }
     }
-    else if (action.equals("openTemplate") || action.equals("openDocument"))
+    else if ("openTemplate".equals(action) || "openDocument".equals(action))
     {
       ConfigThingy fids = conf.query("FRAG_ID");
       if (fids.count() > 0)
       {
         Iterator<ConfigThingy> i = fids.iterator();
-        StringBuffer fragId = new StringBuffer();
+        StringBuilder fragId = new StringBuilder();
         fragId.append(i.next().toString());
         while (i.hasNext())
         {
@@ -878,7 +894,7 @@ public class UIElementFactory
           action));
       }
     }
-    else if (action.equals("openExt"))
+    else if ("openExt".equals(action))
     {
       ConfigThingy ext = conf.query("EXT");
       if (ext.count() != 1)
@@ -900,7 +916,7 @@ public class UIElementFactory
         }
       }
     }
-    else if (action.equals("closeAndOpenExt"))
+    else if ("closeAndOpenExt".equals(action))
     {
       ConfigThingy ext = conf.query("EXT");
       if (ext.count() != 1)
@@ -914,7 +930,7 @@ public class UIElementFactory
             action, ext.toString() });
       }
     }
-    else if (action.equals("saveTempAndOpenExt"))
+    else if ("saveTempAndOpenExt".equals(action))
     {
       ConfigThingy ext = conf.query("EXT");
       if (ext.count() != 1)
@@ -928,7 +944,7 @@ public class UIElementFactory
             action, ext.toString() });
       }
     }
-    else if (action.equals("open"))
+    else if ("open".equals(action))
     {
       try
       {
@@ -942,7 +958,7 @@ public class UIElementFactory
         LOGGER.error(L.m("ACTION \"open\" erfordert die Angabe OPEN \"...\""));
       }
     }
-    else if (action.equals("funcDialog"))
+    else if ("funcDialog".equals(action))
     {
       try
       {
