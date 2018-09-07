@@ -2,7 +2,6 @@ package de.muenchen.allg.itd51.wollmux.dialog.formmodel;
 
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.frame.XFrame;
+
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
@@ -396,7 +396,7 @@ public class SingleDocumentFormModel implements FormModel
       LOGGER.debug(L.m("FormGUI an der Stelle %1 beendet.", frameIndex));
     }
 
-    HashMap<String, String> idToPresetValue = documentController
+    Map<String, String> idToPresetValue = documentController
 	.getIDToPresetValue();
     formGUI = new FormGUI(formFensterConf, formConf, this, idToPresetValue,
 	functionContext, funcLib, dialogLib, visible);

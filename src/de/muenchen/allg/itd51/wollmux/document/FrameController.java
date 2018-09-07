@@ -53,7 +53,7 @@ public class FrameController
   /**
    * Setzt das Fensters des TextDokuments auf Sichtbar (visible==true) oder
    * unsichtbar (visible == false).
-   * 
+   *
    * @param visible
    */
   public synchronized void setWindowVisible(boolean visible)
@@ -64,13 +64,13 @@ public class FrameController
       frame.getContainerWindow().setVisible(visible);
     }
   }
-  
+
   /**
    * Setzt die Position des Fensters auf die übergebenen Koordinaten, wobei die
    * Nachteile der UNO-Methode setWindowPosSize greifen, bei der die Fensterposition
    * nicht mit dem äusseren Fensterrahmen beginnt, sondern mit der grauen Ecke links
    * über dem File-Menü.
-   * 
+   *
    * @param docX
    * @param docY
    * @param docWidth
@@ -81,7 +81,7 @@ public class FrameController
   {
     try
     {
-      // Seit KDE4 muss ein maximiertes Fenster vor dem Verschieben "demaximiert" werden 
+      // Seit KDE4 muss ein maximiertes Fenster vor dem Verschieben "demaximiert" werden
       // sonst wird die Positionierung ignoriert. Leider ist die dafür benötigte Klasse
       // erst seit OpenOffice.org 3.4 verfügbar - zur Abwärtskompatibilität erfolgt der
       // Aufruf daher über Reflection.
@@ -171,13 +171,13 @@ public class FrameController
     // Zoom setzen:
     setDocumentZoom(settings);
   }
-  
+
   /**
    * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht des
    * Dokuments auf den neuen Wert den das ConfigThingy conf im Knoten ZOOM angibt,
    * der entwender eine ganzzahliger Prozentwert (ohne "%"-Zeichen") oder einer der
    * Werte "Optimal", "PageWidth", "PageWidthExact" oder "EntirePage" ist.
-   * 
+   *
    * @param zoom
    * @throws ConfigurationErrorException
    */
@@ -214,16 +214,16 @@ public class FrameController
     if (zoom != null)
     {
       // ZOOM-Argument auswerten:
-      if (zoom.equalsIgnoreCase("Optimal"))
+      if ("Optimal".equalsIgnoreCase(zoom))
         zoomType = Short.valueOf(DocumentZoomType.OPTIMAL);
 
-      if (zoom.equalsIgnoreCase("PageWidth"))
+      if ("PageWidth".equalsIgnoreCase(zoom))
         zoomType = Short.valueOf(DocumentZoomType.PAGE_WIDTH);
 
-      if (zoom.equalsIgnoreCase("PageWidthExact"))
+      if ("PageWidthExact".equalsIgnoreCase(zoom))
         zoomType = Short.valueOf(DocumentZoomType.PAGE_WIDTH_EXACT);
 
-      if (zoom.equalsIgnoreCase("EntirePage"))
+      if ("EntirePage".equalsIgnoreCase(zoom))
         zoomType = Short.valueOf(DocumentZoomType.ENTIRE_PAGE);
 
       if (zoomType == null)
@@ -253,7 +253,7 @@ public class FrameController
     else
       throw new ConfigurationErrorException(L.m("Ungültiger ZOOM-Wert '%1'", zoom));
   }
-  
+
   /**
    * Liefert den Titel des Dokuments, wie er im Fenster des Dokuments angezeigt wird,
    * ohne den Zusatz " - OpenOffice.org Writer" oder "NoTitle", wenn der Titel nicht
@@ -267,7 +267,9 @@ public class FrameController
       title = UNO.getProperty(getFrame(), "Title").toString();
       // "Untitled1 - OpenOffice.org Writer" -> cut " - OpenOffice.org Writer"
       int i = title.lastIndexOf(" - ");
-      if (i >= 0) title = title.substring(0, i);
+      if (i >= 0) {
+        title = title.substring(0, i);
+      }
     }
     catch (java.lang.Exception e)
     {}

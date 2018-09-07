@@ -2,7 +2,7 @@
  * Dateiname: DocumentCommandInterpreter.java
  * Projekt  : WollMux
  * Funktion : Interpretiert die in einem Dokument enthaltenen Dokumentkommandos.
- * 
+ *
  * Copyright (c) 2009-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,9 +22,9 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 14.10.2005 | LUT | Erstellung als WMCommandInterpreter
- * 24.10.2005 | LUT | + Sauberes umschliessen von Bookmarks in 
+ * 24.10.2005 | LUT | + Sauberes umschliessen von Bookmarks in
  *                      executeInsertFrag.
- *                    + Abschalten der lock-Controllers  
+ *                    + Abschalten der lock-Controllers
  * 02.05.2006 | LUT | Komplett-Überarbeitung und Umbenennung in
  *                    DocumentCommandInterpreter.
  * 05.05.2006 | BNK | Dummy-Argument zum Aufruf des FormGUI Konstruktors hinzugefügt.
@@ -36,12 +36,12 @@
  * 08.07.2009 | BED | Anpassung an die Änderungen in DocumentCommand (R48539)
  * 16.12.2009 | ERT | Cast XTextField-Interface entfernt
  * 08.03.2010 | ERT | [R33088]Bessere Fehlermeldungen im Zusammenhang mit overrideFrag
- * 29.05.2013 | JuB | execute() auf 50 begrenzt, damit potentielle endlos-Loops beim Einfügen 
+ * 29.05.2013 | JuB | execute() auf 50 begrenzt, damit potentielle endlos-Loops beim Einfügen
  *                    von Fragmenten abgefangen werden.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.document.commands;
 
@@ -91,7 +91,7 @@ public class DocumentCommandInterpreter
   /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
    * Dokumentkommandos im übergebenen Dokument xDoc scannen und interpretieren kann.
-   * 
+   *
    * @param xDoc
    *          Das Dokument, dessen Kommandos ausgeführt werden sollen.
    * @param mux
@@ -109,7 +109,7 @@ public class DocumentCommandInterpreter
   /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
    * Dokumentkommandos im übergebenen Dokument xDoc scannen und interpretieren kann.
-   * 
+   *
    * @param xDoc
    *          Das Dokument, dessen Kommandos ausgeführt werden sollen.
    * @param frag_urls
@@ -121,7 +121,7 @@ public class DocumentCommandInterpreter
     this.documentController = documentController;
     this.debugMode = false;
   }
-  
+
   public TextDocumentController getDocumentController()
   {
     return documentController;
@@ -162,20 +162,20 @@ public class DocumentCommandInterpreter
    * {@link TextDocumentModel#collectNonWollMuxFormFields()} aufgerufen, so dass auch
    * alle Formularfelder aufgesammelt werden, die nicht von WollMux-Kommandos umgeben
    * sind, jedoch trotzdem vom WollMux verstanden und befüllt werden.
-   * 
+   *
    * Diese Methode wurde aus der Methode {@link #scanGlobalDocumentCommands()}
    * ausgelagert, die früher neben den globalen Dokumentkommandos auch die
    * insertFormValue-Kommandos bearbeitet hat. Die Auslagerung geschah hauptsächlich
    * aus Performance-Optimierungsgründen, da so beim OnProcessTextDocument-Event nur
    * einmal die insertFormValue-Kommandos ausgewertet werden müssen.
-   * 
+   *
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
   public void scanInsertFormValueCommands()
   {
     LOGGER.debug("scanInsertFormValueCommands");
     boolean modified = getDocumentController().getModel().isDocumentModified();
-    
+
     try
     {
       getDocumentController().getModel().setDocumentModifiable(false);
@@ -195,7 +195,7 @@ public class DocumentCommandInterpreter
   /**
    * Über diese Methode wird die Ausführung der Kommandos gestartet, die für das
    * Expandieren und Befüllen von Dokumenten notwendig sind.
-   * 
+   *
    * @throws WMCommandsFailedException
    */
   public void executeTemplateCommands() throws WMCommandsFailedException
@@ -282,7 +282,7 @@ public class DocumentCommandInterpreter
    * Überträgt beim übergebenen XTextDocument doc die Eigenschaften der Seitenvorlage
    * Wollmuxseite auf die Seitenvorlage Standard, falls Seitenvorlage Wollmuxseite
    * vorhanden ist.
-   * 
+   *
    * @param doc
    *          Das dessen Seitenvorlage Standard an die Seitenvorlage Wollmuxseite
    *          angepasst werden soll, falls Wollmuxseite vorhanden ist.
