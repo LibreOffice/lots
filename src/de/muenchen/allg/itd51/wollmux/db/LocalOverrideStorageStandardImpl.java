@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,7 +15,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner.Status;
 
 /**
  * Verwaltet den LOS des DJ.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
@@ -187,7 +187,9 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
   @Override
   public void selectDataset(String selectKey, int sameKeyIndex)
   {
-    if (!data.isEmpty()) selectedDataset = data.get(0);
+    if (!data.isEmpty()) {
+      selectedDataset = data.get(0);
+    }
     Iterator<LOSDJDataset> iter = data.iterator();
     while (iter.hasNext())
     {
@@ -195,7 +197,9 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
       if (selectKey.equals(ds.getKey()))
       {
         selectedDataset = ds;
-        if (--sameKeyIndex < 0) return;
+        if (--sameKeyIndex < 0) {
+          return;
+        }
       }
     }
   }
@@ -203,7 +207,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
   /**
    * Generiert einen neuen (eindeutigen) Schlüssel für die Erzeugung eines LOS-only
    * Datensatzes.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String generateKey()
@@ -226,7 +230,9 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
     }
     LOSDJDataset ds = new LOSDJDataset(null, dsoverride, losSchema, generateKey());
     data.add(ds);
-    if (selectedDataset == null) selectedDataset = ds;
+    if (selectedDataset == null) {
+      selectedDataset = ds;
+    }
     return ds;
   }
 
@@ -258,7 +264,9 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
     LOSDJDataset newDs =
       new LOSDJDataset(dscache, dsoverride, losSchema, ds.getKey());
     data.add(newDs);
-    if (selectedDataset == null) selectedDataset = newDs;
+    if (selectedDataset == null) {
+      selectedDataset = newDs;
+    }
     return newDs;
   }
 
@@ -287,8 +295,12 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
     while (iter.hasNext())
     {
       LOSDJDataset ds2 = iter.next();
-      if (ds2 == ds) return idx;
-      if (ds2.getKey().equals(key)) ++idx;
+      if (ds2 == ds) {
+        return idx;
+      }
+      if (ds2.getKey().equals(key)) {
+        ++idx;
+      }
     }
 
     return idx;
@@ -325,7 +337,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
       LOSDJDataset ds = iter.next();
       String key = ds.getKey();
       if (!keyToLOSDJDatasetList.containsKey(key))
-        keyToLOSDJDatasetList.put(key, new Vector<LOSDJDataset>(1));
+        keyToLOSDJDatasetList.put(key, new ArrayList<LOSDJDataset>(1));
       List<LOSDJDataset> djdslist = keyToLOSDJDatasetList.get(key);
       djdslist.add(ds);
     }
@@ -373,7 +385,9 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
         {
           String spaltenName = spalte.next();
           String spaltenWert = sourceDS.get(spaltenName);
-          if (spaltenWert != null) dscache.put(spaltenName, spaltenWert);
+          if (spaltenWert != null) {
+            dscache.put(spaltenName, spaltenWert);
+          }
         }
 
         String key = sourceDS.getKey();
@@ -419,7 +433,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
      * wird der Eintrag in der Absenderliste mit dem neuen Eintrag verknüpft,
      * obwohl dieser nichts mit dem alten zu tun hat.
      */
-    Vector<Dataset> lostDatasets = new Vector<Dataset>();
+    List<Dataset> lostDatasets = new ArrayList<Dataset>();
     for (List<LOSDJDataset> djDatasetList : keyToLOSDJDatasetList.values())
     {
       for (LOSDJDataset ds : djDatasetList)
@@ -437,16 +451,17 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
       }
     }
 
-    lostDatasets.trimToSize();
     status.lostDatasets = lostDatasets;
 
-    StringBuffer buffyTheVampireSlayer = new StringBuffer();
+    StringBuilder buffyTheVampireSlayer = new StringBuilder();
     Iterator<Dataset> iter2 = lostDatasets.iterator();
     while (iter2.hasNext())
     {
       Dataset ds = iter2.next();
       buffyTheVampireSlayer.append(ds.getKey());
-      if (iter2.hasNext()) buffyTheVampireSlayer.append(", ");
+      if (iter2.hasNext()) {
+        buffyTheVampireSlayer.append(", ");
+      }
     }
     if (buffyTheVampireSlayer.length() > 0)
       LOGGER.info(L.m("Die Datensätze mit folgenden Schlüsseln konnten nicht aus der Datenbank aktualisiert werden: ")
@@ -487,7 +502,9 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
           Map.Entry<String, String> ent = entries.next();
           String spalte = ent.getKey();
           String wert = ent.getValue();
-          if (wert != null) cacheConf.add(spalte).add(wert);
+          if (wert != null) {
+            cacheConf.add(spalte).add(wert);
+          }
         }
       }
 
@@ -499,7 +516,9 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
         Map.Entry<String, String> ent = entries.next();
         String spalte = ent.getKey();
         String wert = ent.getValue();
-        if (wert != null) overrideConf.add(spalte).add(wert);
+        if (wert != null) {
+          overrideConf.add(spalte).add(wert);
+        }
       }
     }
   }
@@ -573,7 +592,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
 
   /**
    * Ein Datensatz im LOS bzw Cache.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class LOSDJDataset extends DJDatasetBase
@@ -585,7 +604,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
 
     /**
      * Erzeugt einen neuen LOSDJDataset.
-     * 
+     *
      * @param dscache
      *          die Map, deren Werte den gecachten Werten aus der
      *          Hintergrunddatenbank entsprechen.
@@ -606,21 +625,25 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
     /**
      * Entfernt die Spalte namens columnName aus lokalem Override und Cache dieses
      * Datensatzes.
-     * 
+     *
      * @param columnName
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void drop(String columnName)
     { // TESTED
-      if (isFromLOS()) myLOS.remove(columnName);
-      if (hasBackingStore()) myBS.remove(columnName);
+      if (isFromLOS()){
+        myLOS.remove(columnName);
+      }
+      if (hasBackingStore()) {
+        myBS.remove(columnName);
+      }
     }
 
     /**
      * Ändert die Referenz auf das Schema dieses Datensatzes. Eine Anpassung der im
      * Datensatz gespeicherten Werte geschieht nicht. Dafür muss drop() verwendet
      * werden.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void setSchema(Set<String> losSchema)
@@ -631,20 +654,24 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
     /**
      * Erzeugt eine Kopie dieses Datensatzes im LOS.
      */
+    @Override
     public DJDataset copy()
     {
       LOSDJDataset newDS =
         new LOSDJDataset(this.myBS, isFromLOS() ? new HashMap<String, String>(
           this.myLOS) : new HashMap<String, String>(), this.schema, this.key);
       LocalOverrideStorageStandardImpl.this.data.add(newDS);
-      if (selectedDataset == null) selectedDataset = newDS;
+      if (selectedDataset == null) {
+        selectedDataset = newDS;
+      }
       return newDS;
     }
 
     /**
      * Entfernt diesen Datensatz aus dem LOS.
      */
-    public void remove() throws UnsupportedOperationException
+    @Override
+    public void remove()
     {
       // dieser Test ist nur der vollständigkeit halber hier, für den
       // Falls dass diese Funktion mal in anderen Kontext gecopynpastet
@@ -663,17 +690,22 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
       }
     }
 
+    @Override
     public boolean isSelectedDataset()
     {
       return this == selectedDataset;
     }
 
-    public void select() throws UnsupportedOperationException
+    @Override
+    public void select()
     {
-      if (!isFromLOS()) throw new UnsupportedOperationException();
+      if (!isFromLOS()) {
+        throw new UnsupportedOperationException();
+      }
       selectedDataset = this;
     }
 
+    @Override
     public String getKey()
     { // TESTED
       return this.key;
