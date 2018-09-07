@@ -186,14 +186,6 @@ public class PersoenlicheAbsenderlisteVerwalten
    * Standardanzahl an Zeilen in einer Listbox.
    */
   private static final int LISTBOX_DEFAULT_LINES = 10;
-  
-  /**
-   * Getter Methode für Konstante DEFAULT_DISPLAYTEMPLATE
-   */ 
-  public static String getDefaultDisplaytemplate() 
-  {
-	return DEFAULT_DISPLAYTEMPLATE;
-  }
 
   /**
    * ActionListener für Buttons mit der ACTION "abort".
@@ -500,6 +492,14 @@ public class PersoenlicheAbsenderlisteVerwalten
     {
       LOGGER.error("", x);
     }
+  }
+
+  /**
+   * Getter Methode für Konstante DEFAULT_DISPLAYTEMPLATE
+   */
+  public static String getDefaultDisplaytemplate()
+  {
+        return DEFAULT_DISPLAYTEMPLATE;
   }
 
   /**
@@ -998,11 +998,11 @@ public class PersoenlicheAbsenderlisteVerwalten
 
         if (WollMuxFiles.showCredits())
         {
-          if (mail.equals("matthias.benkmann@muenchen.de"))
+          if ("matthias.benkmann@muenchen.de".equals(mail))
             icon = new ImageIcon(mbURL);
-          else if (mail.equals("christoph.lutz@muenchen.de"))
+          else if ("christoph.lutz@muenchen.de".equals(mail))
             icon = new ImageIcon(clURL);
-          else if (mail.equals("daniel.benkmann@muenchen.de"))
+          else if ("daniel.benkmann@muenchen.de".equals(mail))
             icon = new ImageIcon(dbURL);
         }
 

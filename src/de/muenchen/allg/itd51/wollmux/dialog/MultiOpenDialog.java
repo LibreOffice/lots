@@ -5,9 +5,9 @@ import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -40,7 +40,7 @@ public class MultiOpenDialog extends JFrame
     super(title);
     this.conf = conf;
     this.eventHandler = eventHandler;
-    
+
     init();
   }
 
@@ -68,7 +68,7 @@ public class MultiOpenDialog extends JFrame
       LOGGER.error(L.m("ACTION \"open\" erfordert Abschnitt \"Labels\" in den OPEN-Angaben"));
       return;
     }
-    final List<JCheckBox> checkBoxes = new Vector<JCheckBox>();
+    final List<JCheckBox> checkBoxes = new ArrayList<JCheckBox>();
     while (iter.hasNext())
     {
       hbox = Box.createHorizontalBox();
@@ -147,7 +147,9 @@ public class MultiOpenDialog extends JFrame
         {
           fragIter.next();
           JCheckBox checkbox = iter.next();
-          if (!checkbox.isSelected()) fragIter.remove();
+          if (!checkbox.isSelected()) {
+            fragIter.remove();
+          }
         }
 
         eventHandler.handleWollMuxUrl(Dispatch.DISP_wmOpen,

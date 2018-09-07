@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,21 +25,23 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 /**
- * Repräsentiert ein FormModel dem mehrere Formulardokumente zugeordnet sind, die
- * alle in gleicher Weise über Änderungen (z.B. bei valueChanged()) informiert
- * werden. So ist ein gleichzeitiges Befüllen meherer Dokumente über nur ein
- * Formular möglich. Die Formularbeschreibungen der Einzeldokumente und die in
- * ihnen enthaltenen IDs, Funktionen und Dialogfunktionen müssen dabei vor dem
- * Erzeugen des Objekts zu einer Gesamtbeschreibung zusammengemerged werden.
- * 
+ * Repräsentiert ein FormModel dem mehrere Formulardokumente zugeordnet sind,
+ * die alle in gleicher Weise über Änderungen (z.B. bei valueChanged())
+ * informiert werden. So ist ein gleichzeitiges Befüllen meherer Dokumente über
+ * nur ein Formular möglich. Die Formularbeschreibungen der Einzeldokumente und
+ * die in ihnen enthaltenen IDs, Funktionen und Dialogfunktionen müssen dabei
+ * vor dem Erzeugen des Objekts zu einer Gesamtbeschreibung zusammengemerged
+ * werden.
+ *
  * @author christoph.lutz
  */
 public class MultiDocumentFormModel implements FormModel
 {
-  private Vector<FormModel> formModels;
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(MultiDocumentFormModel.class);
+
+  private List<FormModel> formModels;
 
   private final ConfigThingy formFensterConf;
 
@@ -56,41 +57,43 @@ public class MultiDocumentFormModel implements FormModel
 
   private List<TextDocumentController> documentControllers;
 
-  public static final String MULTI_FORM_TITLE =
-  L.m("Mehrere Formulare gleichzeitig ausfüllen");
+  public static final String MULTI_FORM_TITLE = L
+      .m("Mehrere Formulare gleichzeitig ausfüllen");
 
   /**
    * Konstruktor für ein MultiDocumentFormModel mit den zugehörigen
    * TextDocumentModel Objekten docs und den zugehörigen FormModel Objekten
    * formModels. Das MultiDocumentFormModel leitet alle Anfragen an die
    * mitgelieferten FormModel Objekte weiter.
-   * 
+   *
    * @param docs
    *          Vektor mit den TextDocumentModel Objekten der Einzeldokumente.
    * @param formModels
-   *          Vektor mit den zu den Einzeldokumenten zugehörigen FormModel-Objekten
-   *          (muss die selbe Größe und die selbe Reihenfolge wie docs haben).
+   *          Vektor mit den zu den Einzeldokumenten zugehörigen
+   *          FormModel-Objekten (muss die selbe Größe und die selbe Reihenfolge
+   *          wie docs haben).
    * @param mapDocsToFormModels
    *          enthält die zugeordneten TextDocumentModels.
    * @param formFensterConf
-   *          Der Formular-Unterabschnitt des Fenster-Abschnitts von wollmux.conf
-   *          (wird für createFormGUI() benötigt).
+   *          Der Formular-Unterabschnitt des Fenster-Abschnitts von
+   *          wollmux.conf (wird für createFormGUI() benötigt).
    * @param formConf
-   *          der Formular-Knoten, der die Formularbeschreibung enthält (wird für
-   *          createFormGUI() benötigt).
+   *          der Formular-Knoten, der die Formularbeschreibung enthält (wird
+   *          für createFormGUI() benötigt).
    * @param functionContext
    *          der Kontext für Funktionen, die einen benötigen (wird für
    *          createFormGUI() benötigt).
    * @param funcLib
-   *          die Funktionsbibliothek, die zur Auswertung von Trafos, Plausis etc.
-   *          herangezogen werden soll.
+   *          die Funktionsbibliothek, die zur Auswertung von Trafos, Plausis
+   *          etc. herangezogen werden soll.
    * @param dialogLib
    *          die Dialogbibliothek, die die Dialoge bereitstellt, die für
    *          automatisch zu befüllende Formularfelder benötigt werden (wird für
    *          createFormGUI() benötigt).
    */
-  public MultiDocumentFormModel(List<TextDocumentController> documentControllers,
-      Vector<FormModel> formModels, final ConfigThingy formFensterConf,
+  public MultiDocumentFormModel(
+      List<TextDocumentController> documentControllers,
+      List<FormModel> formModels, final ConfigThingy formFensterConf,
       final ConfigThingy formConf, final Map<Object, Object> functionContext,
       final FunctionLibrary funcLib, final DialogLibrary dialogLib)
   {
@@ -105,9 +108,9 @@ public class MultiDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
-   * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowPosSize(int, int, int,
-   * int)
+   *
+   * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowPosSize(int, int,
+   * int, int)
    */
   @Override
   public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
@@ -121,7 +124,7 @@ public class MultiDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowVisible(boolean)
    */
   @Override
@@ -136,7 +139,7 @@ public class MultiDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#close()
    */
   @Override
@@ -151,7 +154,7 @@ public class MultiDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.FormModel#setVisibleState(java.lang.String,
    * boolean)
@@ -168,8 +171,9 @@ public class MultiDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
-   * @see de.muenchen.allg.itd51.wollmux.FormModel#valueChanged(java.lang.String,
+   *
+   * @see
+   * de.muenchen.allg.itd51.wollmux.FormModel#valueChanged(java.lang.String,
    * java.lang.String)
    */
   @Override
@@ -184,7 +188,7 @@ public class MultiDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#focusGained(java.lang.String)
    */
   @Override
@@ -199,7 +203,7 @@ public class MultiDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#focusLost(java.lang.String)
    */
   @Override
@@ -214,7 +218,7 @@ public class MultiDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#print()
    */
   @Override
@@ -229,7 +233,7 @@ public class MultiDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#pdf()
    */
   @Override
@@ -284,7 +288,7 @@ public class MultiDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#formControllerInitCompleted()
    */
   @Override
@@ -299,11 +303,11 @@ public class MultiDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.FormModel#disposing(de.muenchen.allg.itd51.
    * wollmux.TextDocumentModel)
-   * 
+   *
    * TESTED
    */
   @Override
@@ -332,7 +336,7 @@ public class MultiDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#setValue(java.lang.String,
    * java.lang.String, java.awt.event.ActionListener)
    */
@@ -345,7 +349,7 @@ public class MultiDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#startFormGUI()
    */
   @Override
@@ -356,9 +360,9 @@ public class MultiDocumentFormModel implements FormModel
     // diesem Zeitpunkt sind noch keine Formularwerte durch Benutzer eingegeben
     // worden - weder in der FormGUI noch in den Einfügungen im Dokument - und
     // somit darf auch diese HashMap keinen Inhalt haben.
-    formGUI =
-      new FormGUI(formFensterConf, formConf, this, new HashMap<String, String>(),
-        functionContext, funcLib, dialogLib, true);
+    formGUI = new FormGUI(formFensterConf, formConf, this,
+        new HashMap<String, String>(), functionContext, funcLib, dialogLib,
+        true);
   }
 
   @Override
@@ -368,13 +372,13 @@ public class MultiDocumentFormModel implements FormModel
   }
 
   /**
-   * Erzeugt ein FormModel dem mehrere Formulardokumente zugeordnet sind, die alle in
-   * gleicher Weise über Änderungen (z.B. bei valueChanged()) informiert werden. So
-   * ist ein gleichzeitiges Befüllen meherer Dokumente über nur ein Formular möglich.
-   * Die Formularbeschreibungen der Einzeldokumente und die in ihnen enthaltenen IDs,
-   * Funktionen und Dialogfunktionen werden dabei zu einer Gesamtbeschreibung im
-   * selben Namensraum zusammengemerged.
-   * 
+   * Erzeugt ein FormModel dem mehrere Formulardokumente zugeordnet sind, die
+   * alle in gleicher Weise über Änderungen (z.B. bei valueChanged()) informiert
+   * werden. So ist ein gleichzeitiges Befüllen meherer Dokumente über nur ein
+   * Formular möglich. Die Formularbeschreibungen der Einzeldokumente und die in
+   * ihnen enthaltenen IDs, Funktionen und Dialogfunktionen werden dabei zu
+   * einer Gesamtbeschreibung im selben Namensraum zusammengemerged.
+   *
    * @param docs
    *          Ein Vector mit TextDocumentModel Objekten die dem neuen
    *          MultiDocumentFormModel zugeordnet werden sollen.
@@ -383,20 +387,20 @@ public class MultiDocumentFormModel implements FormModel
    * @throws InvalidFormDescriptorException
    */
   public static FormModel createMultiDocumentFormModel(
-      List<TextDocumentController> documentControllers, ConfigThingy buttonAnpassung)
-      throws InvalidFormDescriptorException
+      List<TextDocumentController> documentControllers,
+      ConfigThingy buttonAnpassung) throws InvalidFormDescriptorException
   {
-  
+
     // Formular-Abschnitte aller TextDocumentModels sammeln...
     ArrayList<ConfigThingy> formularSections = new ArrayList<ConfigThingy>();
     for (TextDocumentController documentController : documentControllers)
     {
       try
       {
-        ConfigThingy formular = documentController.getFormDescription().get("Formular");
+        ConfigThingy formular = documentController.getFormDescription()
+            .get("Formular");
         formularSections.add(formular);
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
         LOGGER.error(
             L.m("Dokument '%1' enthält keine gültige Formularbeschreibung",
@@ -404,64 +408,60 @@ public class MultiDocumentFormModel implements FormModel
             e);
       }
     }
-  
+
     // ...und mergen
-    ConfigThingy formConf =
-      TextDocumentModel.mergeFormDescriptors(formularSections, buttonAnpassung,
+    ConfigThingy formConf = TextDocumentModel.mergeFormDescriptors(
+        formularSections, buttonAnpassung,
         MultiDocumentFormModel.MULTI_FORM_TITLE);
-  
+
     // FunctionContext erzeugen und im Formular definierte
     // Funktionen/DialogFunktionen parsen:
     Map<Object, Object> functionContext = new HashMap<Object, Object>();
-    DialogLibrary dialogLib =
-      DialogFactory.parseFunctionDialogs(formConf, GlobalFunctions.getInstance().getFunctionDialogs(),
-        functionContext);
+    DialogLibrary dialogLib = DialogFactory.parseFunctionDialogs(formConf,
+        GlobalFunctions.getInstance().getFunctionDialogs(), functionContext);
     // FIXME: hier müsste eine gemergte Variante der Funktionsbibliotheken der
     // einzel-TextDocumentModels erzeugt werden, damit auch dokumentlokale
     // Trafos funktionieren - aber wer verwendet schon Multiform? Warten wir mit
     // der Änderung sie jemand benötigt.
-    FunctionLibrary funcLib =
-      FunctionFactory.parseFunctions(formConf, dialogLib, functionContext,
+    FunctionLibrary funcLib = FunctionFactory.parseFunctions(formConf,
+        dialogLib, functionContext,
         GlobalFunctions.getInstance().getGlobalFunctions());
-  
+
     // Abschnitt Fenster/Formular aus wollmuxConf holen:
     ConfigThingy formFensterConf = new ConfigThingy("");
     try
     {
-      formFensterConf =
-        WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild();
+      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster")
+          .query("Formular").getLastChild();
+    } catch (NodeNotFoundException x)
+    {
     }
-    catch (NodeNotFoundException x)
-    {}
-  
+
     // FormModels für die Einzeldokumente erzeugen
-    Vector /* of FormModel */<FormModel> fms = new Vector<FormModel>();
+    List /* of FormModel */<FormModel> fms = new ArrayList<FormModel>();
     for (TextDocumentController documentController : documentControllers)
     {
-      FormModel fm =
-        new SingleDocumentFormModel(documentController, formFensterConf, formConf,
-          functionContext, funcLib, dialogLib, true);
+      FormModel fm = new SingleDocumentFormModel(documentController,
+          formFensterConf, formConf, functionContext, funcLib, dialogLib, true);
       fms.add(fm);
     }
-  
+
     return new MultiDocumentFormModel(documentControllers, fms, formFensterConf,
-      formConf, functionContext, funcLib, dialogLib);
+        formConf, functionContext, funcLib, dialogLib);
   }
 
-	@Override
-	public void openTemplateOrDocument(List<String> fragIds) {
-		WollMuxEventHandler.handleOpenDocument(fragIds, false);
-	}
+  @Override
+  public void openTemplateOrDocument(List<String> fragIds)
+  {
+    WollMuxEventHandler.handleOpenDocument(fragIds, false);
+  }
 
-	@Override
-	public void sendAsEmail() {
-	  Vector<FormModel> fms = new Vector<FormModel>();
-	  for (TextDocumentController documentController : documentControllers)
-	    {
-	      FormModel fm =
-	        new SingleDocumentFormModel(documentController, formFensterConf, formConf,
-	          functionContext, funcLib, dialogLib, true);
-	      UNO.dispatch(documentController.getModel().doc, ".uno:SendMail");
-	    }
-	}
+  @Override
+  public void sendAsEmail()
+  {
+    for (TextDocumentController documentController : documentControllers)
+    {
+      UNO.dispatch(documentController.getModel().doc, ".uno:SendMail");
+    }
+  }
 }

@@ -2,7 +2,7 @@
  * Dateiname: Common.java
  * Projekt  : WollMux
  * Funktion : Enthält von den Dialogen gemeinsam genutzten Code.
- * 
+ *
  * Copyright (c) 2010-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
@@ -45,13 +45,10 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -119,7 +116,7 @@ public class Common
    * Gibt an ob {@link #setLookAndFeel()} bereits aufgerufen wurde.
    */
   private static boolean lafSet = false;
-  
+
   private static boolean isPopupVisible = false;
 
   /**
@@ -130,23 +127,25 @@ public class Common
   /**
    * Führt {@link #setLookAndFeel()} aus, aber nur, wenn es bisher noch nicht
    * ausgeführt wurde.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void setLookAndFeelOnce()
   {
-    if (!lafSet) setLookAndFeel();
+    if (!lafSet) {
+      setLookAndFeel();
+    }
   }
 
   /**
    * Setzt, ob gerade ein Popup angezeigt wird.
-   * 
+   *
    * @param isPopupVisible
    */
   public static void setIsPopupVisible(boolean isPopupVisible) {
     Common.isPopupVisible = isPopupVisible;
   }
-  
+
   /**
    * Setzt das Metal Look and Feel und ruft {@link #configureTextFieldBehaviour()}
    * auf. Das plattformspezifische LAF wird nicht verwendet, damit die Benutzer unter
@@ -156,13 +155,13 @@ public class Common
    * weiteren hatte zumindest als wir angefangen haben das GTK Look and Feel einige
    * Bugs. Es ist also auch ein Problem, dass wir nicht genug Ressourcen haben, um 2
    * Plattformen diesbzgl. zu testen und zu debuggen.
-   * 
-   * Als Kompromiss ist es möglich das zu verwendende LAF über die 
+   *
+   * Als Kompromiss ist es möglich das zu verwendende LAF über die
    * Konfiguration vorzugeben.
-   * 
+   *
    * alt: Setzt das System Look and Feel, falls es nicht MetalLookAndFeel ist.
    * Ansonsten setzt es GTKLookAndFeel falls möglich.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static void setLookAndFeel()
@@ -171,25 +170,25 @@ public class Common
     // String lafName = UIManager.getSystemLookAndFeelClassName();
     // if (lafName.equals("javax.swing.plaf.metal.MetalLookAndFeel"))
     // lafName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
-    
+
     // Das Standard-LAF für den WollMux
     String lafName = "javax.swing.plaf.metal.MetalLookAndFeel";
     try
     {
-      
-      try 
+
+      try
       {
-        
-        // Ist der Konfig-Parameter "LAF_CLASS_NAME" gesetzt, wird das angegebene 
+
+        // Ist der Konfig-Parameter "LAF_CLASS_NAME" gesetzt, wird das angegebene
         // LAF verwendet.
         ConfigThingy config = WollMuxFiles.getWollmuxConf();
         ConfigThingy lafConf = config.get( "LAF_CLASS_NAME" );
         lafName = lafConf.toString();
-        
-      } // try 
+
+      } // try
       catch ( Exception e )
       {} // catch
-      
+
       UIManager.setLookAndFeel(lafName);
     }
     catch (Exception x)
@@ -201,7 +200,7 @@ public class Common
     // configure behaviour of JTextFields:
     configureTextFieldBehaviour();
 
-    defaultFontsizes = new HashMap<Object, Float>();
+    defaultFontsizes = new HashMap<>();
     UIDefaults def = UIManager.getLookAndFeelDefaults();
     Enumeration<Object> keys = def.keys();
     float fontSize;
@@ -225,20 +224,20 @@ public class Common
    * selektiert wird, wenn mit der Tabulator-Taste (nicht aber mit der Maus) in das
    * Feld gewechselt wird, so dass man einfach lostippen kann um den Inhalt zu
    * überschreiben.
-   * 
+   *
    * Dazu installieren wir im aktuellen {@link KeyboardFocusManager} einen
    * {@link KeyEventPostProcessor}, der beim Loslassen ({@link KeyEvent#KEY_RELEASED}
    * ) der Tabulator-Taste überprüft, ob das KeyEvent von einem JTextField ausgelöst
    * wurde und in diesem Fall allen Text in dem Textfeld selektiert.
-   * 
+   *
    * Sollte irgendwann mal RFE 4493590
    * (http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4493590) umgesetzt werden,
    * kann man das ganze vielleicht besser lösen.
-   * 
+   *
    * Außerdem wird ein Swing-Problem korrigiert, durch das es vorkommen kann, dass in
    * einem JTextField selektierter Text auch nachdem des Textfeld den Focus verloren
    * hat noch als selektiert angezeigt wird.
-   * 
+   *
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
   private static void configureTextFieldBehaviour()
@@ -256,6 +255,7 @@ public class Common
     // wurde und in diesem Fall allen Text in dem Textfeld selektiert.
     kfm.addKeyEventPostProcessor(new KeyEventPostProcessor()
     {
+      @Override
       public boolean postProcessKeyEvent(KeyEvent e)
       {
         if (e.getKeyCode() == KeyEvent.VK_TAB && e.getID() == KeyEvent.KEY_RELEASED
@@ -275,6 +275,7 @@ public class Common
     // und ein PopUp Menu angezeigt wird.
     kfm.addPropertyChangeListener("focusOwner", new PropertyChangeListener()
     {
+      @Override
       public void propertyChange(PropertyChangeEvent evt)
       {
         if (evt.getOldValue() instanceof JTextField && !isPopupVisible)
@@ -356,7 +357,7 @@ public class Common
             Font fnt = res.deriveFont((float) (defaultFontsize * zoomFactor));
             def.put(key, fnt);
           }
-          
+
         }
         catch (Exception x)
         {
@@ -376,7 +377,7 @@ public class Common
    * Parst WIDTH, HEIGHT, X und Y aus fensterConf und liefert ein entsprechendes
    * Rectangle. Spezialwerte wie {@link #COORDINATE_CENTER} und
    * {@link #DIMENSION_MAX} werden verwendet.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static Rectangle parseDimensions(ConfigThingy fensterConf)
@@ -386,13 +387,13 @@ public class Common
     try
     {
       String xStr = fensterConf.get("X").toString();
-      if (xStr.equalsIgnoreCase("center"))
+      if ("center".equalsIgnoreCase(xStr))
         r.x = COORDINATE_CENTER;
-      else if (xStr.equalsIgnoreCase("max"))
+      else if ("max".equalsIgnoreCase(xStr))
         r.x = COORDINATE_MAX;
-      else if (xStr.equalsIgnoreCase("min"))
+      else if ("min".equalsIgnoreCase(xStr))
         r.x = COORDINATE_MIN;
-      else if (xStr.equalsIgnoreCase("auto"))
+      else if ("auto".equalsIgnoreCase(xStr))
       {/* nothing */}
       else
       {
@@ -400,7 +401,9 @@ public class Common
         // Ja, das folgende ist eine Einschränkung, aber
         // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
         // obigen Festlegungen
-        if (r.x < 0) r.x = 0;
+        if (r.x < 0) {
+          r.x = 0;
+        }
       }
     }
     catch (Exception x)
@@ -410,13 +413,13 @@ public class Common
     try
     {
       String yStr = fensterConf.get("Y").toString();
-      if (yStr.equalsIgnoreCase("center"))
+      if ("center".equalsIgnoreCase(yStr))
         r.y = COORDINATE_CENTER;
-      else if (yStr.equalsIgnoreCase("max"))
+      else if ("max".equalsIgnoreCase(yStr))
         r.y = COORDINATE_MAX;
-      else if (yStr.equalsIgnoreCase("min"))
+      else if ("min".equalsIgnoreCase(yStr))
         r.y = COORDINATE_MIN;
-      else if (yStr.equalsIgnoreCase("auto"))
+      else if ("auto".equalsIgnoreCase(yStr))
       {/* nothing */}
       else
       {
@@ -424,7 +427,9 @@ public class Common
         // Ja, das folgende ist eine Einschränkung, aber
         // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
         // obigen Festlegungen
-        if (r.y < 0) r.y = 0;
+        if (r.y < 0) {
+          r.y = 0;
+        }
       }
     }
     catch (Exception x)
@@ -434,14 +439,16 @@ public class Common
     try
     {
       String widthStr = fensterConf.get("WIDTH").toString();
-      if (widthStr.equalsIgnoreCase("max"))
+      if ("max".equalsIgnoreCase(widthStr))
         r.width = DIMENSION_MAX;
-      else if (widthStr.equalsIgnoreCase("auto"))
+      else if ("auto".equalsIgnoreCase(widthStr))
       {/* nothing */}
       else
       {
         r.width = Integer.parseInt(widthStr);
-        if (r.width < 0) r.width = DIMENSION_UNSPECIFIED;
+        if (r.width < 0) {
+          r.width = DIMENSION_UNSPECIFIED;
+        }
       }
     }
     catch (Exception x)
@@ -451,14 +458,16 @@ public class Common
     try
     {
       String heightStr = fensterConf.get("HEIGHT").toString();
-      if (heightStr.equalsIgnoreCase("max"))
+      if ("max".equalsIgnoreCase(heightStr))
         r.height = DIMENSION_MAX;
-      else if (heightStr.equalsIgnoreCase("auto"))
+      else if ("auto".equalsIgnoreCase(heightStr))
       {/* nothing */}
       else
       {
         r.height = Integer.parseInt(heightStr);
-        if (r.height < 0) r.height = DIMENSION_UNSPECIFIED;
+        if (r.height < 0) {
+          r.height = DIMENSION_UNSPECIFIED;
+        }
       }
     }
     catch (Exception x)
@@ -481,9 +490,9 @@ public class Common
       URL url = Common.class.getClassLoader().getResource("data/wollmux_icon32x32.png");
       
       if (url == null) {
-    	  LOGGER.error("Could not retrieve Image from resource.");
+        LOGGER.error("Could not retrieve Image from resource.");
     	  
-    	  return;
+        return;
       }
       
       Image image = Toolkit.getDefaultToolkit().createImage(url);

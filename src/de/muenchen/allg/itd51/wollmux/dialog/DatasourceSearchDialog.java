@@ -2,7 +2,7 @@
  * Dateiname: DatasourceSearchDialog.java
  * Projekt  : WollMux
  * Funktion : Dialog zur Suche nach Daten in einer Datenquelle, die über DIALOG-Funktion verfügbar gemacht werden.
- * 
+ *
  * Copyright (c) 2010-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
@@ -47,8 +47,8 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
@@ -98,7 +98,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
 /**
  * Dialog zur Suche nach Daten in einer Datenquelle, die über DIALOG-Funktion
  * verfügbar gemacht werden.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class DatasourceSearchDialog implements Dialog
@@ -108,28 +108,14 @@ public class DatasourceSearchDialog implements Dialog
       .getLogger(DatasourceSearchDialog.class);
 
   /**
-   * Erzeugt einen neuen Dialog, dessen Instanzen Datenquellensuchdialoge gemäß der
-   * Beschreibung in conf darstellen. Die Suchergebnisse liefert dj.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * @throws ConfigurationErrorException
-   *           falls ein Fehler in der Dialogbeschreibung vorliegt.
-   */
-  public static Dialog create(ConfigThingy conf, DatasourceJoiner dj)
-      throws ConfigurationErrorException
-  {
-    return new Instantiator(conf, dj);
-  }
-
-  /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
    */
-  private final static int TF_BORDER = 4;
+  private static final int TF_BORDER = 4;
 
   /**
    * Rand um Buttons (in Pixeln).
    */
-  private final static int BUTTON_BORDER = 2;
+  private static final int BUTTON_BORDER = 2;
 
   /**
    * Das ConfigThingy, das die Beschreibung des Dialogs enthält.
@@ -210,7 +196,7 @@ public class DatasourceSearchDialog implements Dialog
    * Werden durch diesen Funktionsdialog weitere Funktionsdialoge erzeugt, so wird
    * dieser Kontext übergeben.
    */
-  private Map<Object, Object> context = new HashMap<Object, Object>();
+  private Map<Object, Object> context = new HashMap<>();
 
   /**
    * Der show übergebene dialogEndListener.
@@ -225,7 +211,7 @@ public class DatasourceSearchDialog implements Dialog
 
   /**
    * Erzeugt einen neuen DSD.
-   * 
+   *
    * @param ilse
    *          der Instantiator, der für instanceFor()-Aufrufe verwendet werden soll.
    * @param conf
@@ -244,36 +230,60 @@ public class DatasourceSearchDialog implements Dialog
     this.data = new Map[] { new HashMap<String, String>() };
   }
 
+  /**
+   * Erzeugt einen neuen Dialog, dessen Instanzen Datenquellensuchdialoge gemäß der
+   * Beschreibung in conf darstellen. Die Suchergebnisse liefert dj.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @throws ConfigurationErrorException
+   *           falls ein Fehler in der Dialogbeschreibung vorliegt.
+   */
+  public static Dialog create(ConfigThingy conf, DatasourceJoiner dj)
+      throws ConfigurationErrorException
+  {
+    return new Instantiator(conf, dj);
+  }
+
+  @Override
   public Dialog instanceFor(Map<Object, Object> context)
       throws ConfigurationErrorException
   {
     return ilse.instanceFor(context);
   }
 
+  @Override
   public Collection<String> getSchema()
   {
-    return new HashSet<String>(schema);
+    return new HashSet<>(schema);
   }
 
+  @Override
   public Object getData(String id)
   {
     String str;
     synchronized (data)
     {
-      if (!schema.contains(id)) return null;
+      if (!schema.contains(id)) {
+        return null;
+      }
       str = data[0].get(id);
     }
-    if (str == null) return "";
+    if (str == null) {
+      return "";
+    }
     return str;
   }
 
   // TESTED
+  @Override
   public void show(ActionListener dialogEndListener, FunctionLibrary funcLib,
       DialogLibrary dialogLib) throws ConfigurationErrorException
   {
     synchronized (shown)
     {
-      if (shown[0]) return;
+      if (shown[0]) {
+        return;
+      }
       shown[0] = true;
     }
     this.dialogEndListener = dialogEndListener;
@@ -295,7 +305,7 @@ public class DatasourceSearchDialog implements Dialog
     }
     catch (Exception x)
     {}
-    if (!type.equals("dbSelect"))
+    if (!"dbSelect".equals(type))
       throw new ConfigurationErrorException(L.m(
         "Ununterstützter TYPE \"%1\" in Funktionsdialog \"%2\"", type,
         myConf.getName()));
@@ -311,6 +321,7 @@ public class DatasourceSearchDialog implements Dialog
       final String title2 = title;
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           try
@@ -382,21 +393,25 @@ public class DatasourceSearchDialog implements Dialog
       { // TODO CLOSEACTION unterstuetzen
         ConfigThingy childConf = childIter.next();
         String name = childConf.getName();
-        if (name.equals("TIP"))
+        if ("TIP".equals(name))
           tip = childConf.toString();
-        else if (name.equals("TITLE"))
+        else if ("TITLE".equals(name))
           tabTitle = L.m(childConf.toString());
-        else if (name.equals("HOTKEY"))
+        else if ("HOTKEY".equals(name))
         {
           String str = childConf.toString();
-          if (str.length() > 0) hotkey = str.toUpperCase().charAt(0);
+          if (str.length() > 0) {
+            hotkey = str.toUpperCase().charAt(0);
+          }
         }
       }
 
       DialogWindow newWindow = new DialogWindow(tabIndex, neuesFenster);
 
       myTabbedPane.addTab(tabTitle, null, newWindow.JPanel(), tip);
-      if (hotkey != 0) myTabbedPane.setMnemonicAt(tabIndex, hotkey);
+      if (hotkey != 0) {
+        myTabbedPane.setMnemonicAt(tabIndex, hotkey);
+      }
 
       ++tabIndex;
     }
@@ -423,7 +438,7 @@ public class DatasourceSearchDialog implements Dialog
 
   /**
    * Ein Tab der GUI.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class DialogWindow implements UIElementEventHandler
@@ -470,16 +485,6 @@ public class DatasourceSearchDialog implements Dialog
     private boolean autosearch = false;
 
     /**
-     * Liefert das JPanel, das die Elemente dieses Tabs enthält.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     */
-    public JPanel JPanel()
-    {
-      return myPanel;
-    }
-
-    /**
      * Die für die Erzeugung der UI Elemente verwendete Factory.
      */
     private UIElementFactory uiElementFactory;
@@ -492,14 +497,14 @@ public class DatasourceSearchDialog implements Dialog
 
     /**
      * Erzeugt ein neues Tab.
-     * 
+     *
      * @param tabIndex
      *          Die Nummer (von 0 gezählt) des Tabs, das dieses DialogWindow
      *          darstellt.
      * @param conf
      *          der Kind-Knoten des Fenster-Knotens der das Tab beschreibt. conf ist
      *          direkter Elternknoten der Knoten "Intro" et al.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     public DialogWindow(int tabIndex, ConfigThingy conf)
@@ -544,12 +549,24 @@ public class DatasourceSearchDialog implements Dialog
       addUIElements(conf, "Intro", intro, 0, 1, vertiContext, null);
       addUIElements(conf, "Suche", suche, 1, 0, horiContext, null);
       addUIElements(conf, "Suchergebnis", suchergebnis, 0, 1, vertiContext, null);
-      mapDB_SPALTEtoUIElement = new HashMap<String, UIElement>();
+      mapDB_SPALTEtoUIElement = new HashMap<>();
       addUIElements(conf, "Vorschau", vorschau, 0, 1, previewContext,
         mapDB_SPALTEtoUIElement);
       addUIElements(conf, "Fussbereich", fussbereich, 1, 0, horiContext, null);
 
-      if (autosearch) search();
+      if (autosearch) {
+        search();
+      }
+    }
+
+    /**
+     * Liefert das JPanel, das die Elemente dieses Tabs enthält.
+     *
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public JPanel JPanel()
+    {
+      return myPanel;
     }
 
     /**
@@ -557,7 +574,7 @@ public class DatasourceSearchDialog implements Dialog
      * muss ein GridBagLayout haben. stepx und stepy geben an um wieviel mit jedem UI
      * Element die x und die y Koordinate der Zelle erhöht werden soll. Wirklich
      * sinnvoll sind hier nur (0,1) und (1,0).
-     * 
+     *
      * @param context
      *          ist der Kontext, der
      *          {@link UIElementFactory#createUIElement(UIElementContext, ConfigThingy)}
@@ -616,7 +633,7 @@ public class DatasourceSearchDialog implements Dialog
             {}
           }
 
-          if (id.equals("suchergebnis"))
+          if ("suchergebnis".equals(id))
           {
             try
             {
@@ -673,13 +690,15 @@ public class DatasourceSearchDialog implements Dialog
     /**
      * Geht alle Elemente von {@link #mapDB_SPALTEtoUIElement} durch und updated die
      * Felder mit den entsprechenden Werten aus dem Datensatz, der an ele dranhängt.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     private void updatePreview(ListElement ele)
     {
       Dataset ds = null;
-      if (ele != null) ds = ele.getDataset();
+      if (ele != null) {
+        ds = ele.getDataset();
+      }
       Iterator<Map.Entry<String, UIElement>> iter =
         mapDB_SPALTEtoUIElement.entrySet().iterator();
       while (iter.hasNext())
@@ -708,12 +727,14 @@ public class DatasourceSearchDialog implements Dialog
      * data werden nicht direkt als Werte verwendet, sondern in {@link ListElement}
      * Objekte gewrappt. data == null wird interpretiert als leere Liste. list kann
      * null sein (dann tut diese Funktion nichts).
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     private void setListElements(Listbox list, QueryResults data)
     {
-      if (list == null) return;
+      if (list == null) {
+        return;
+      }
       ListElement[] elements;
       if (data == null)
         elements = new ListElement[] {};
@@ -726,6 +747,7 @@ public class DatasourceSearchDialog implements Dialog
           elements[i++] = new ListElement(iter.next());
         Arrays.sort(elements, new Comparator<Object>()
         {
+          @Override
           public int compare(Object o1, Object o2)
           {
             return o1.toString().compareTo(o2.toString());
@@ -739,7 +761,7 @@ public class DatasourceSearchDialog implements Dialog
 
     /**
      * Liefert zu einem Datensatz den in einer Listbox anzuzeigenden String.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private String getDisplayString(Dataset ds)
@@ -749,7 +771,7 @@ public class DatasourceSearchDialog implements Dialog
 
     /**
      * Wrapper um ein Dataset zum Einfügen in eine JList.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private class ListElement
@@ -764,6 +786,7 @@ public class DatasourceSearchDialog implements Dialog
         this.ds = ds;
       }
 
+      @Override
       public String toString()
       {
         return displayString;
@@ -779,17 +802,20 @@ public class DatasourceSearchDialog implements Dialog
      * Führt die Suchanfrage im Feld {@link #query} aus (falls dieses nicht null ist)
      * gemäß {@link #searchStrategy} und ändert {@link #resultsList} (falls nicht
      * null) so dass sie die Suchergebnisse enthält.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     public void search()
     {
-      if (query == null) return;
+      if (query == null) {
+        return;
+      }
 
       // Erzeugen eines Runnable-Objekts, das die Geschäftslogik enthält und nachher
       // an FrameWorker.disableFrameAndWork übergeben werden kann.
       Runnable r = new Runnable()
       {
+        @Override
         public void run()
         {
           QueryResults results = null;
@@ -822,6 +848,7 @@ public class DatasourceSearchDialog implements Dialog
             // Folgendes muss im Event Dispatch Thread ausgeführt werden
             SwingUtilities.invokeLater(new Runnable()
             {
+              @Override
               public void run()
               {
                 setListElements(resultsList,
@@ -840,52 +867,57 @@ public class DatasourceSearchDialog implements Dialog
      * Die zentrale Anlaufstelle für alle von UIElementen ausgelösten Events (siehe
      * {@link UIElementEventHandler#processUiElementEvent(UIElement, String, Object[])}
      * ).
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
+    @Override
     public void processUiElementEvent(UIElement source, String eventType,
         Object[] args)
     {
-      if (!processUIElementEvents) return;
+      if (!processUIElementEvents) {
+        return;
+      }
       try
       {
         processUIElementEvents = false; // Reentranz bei setString() unterbinden
 
         if (WollMuxFiles.isDebugMode())
         {
-          StringBuffer buffy =
-            new StringBuffer("UIElementEvent: " + eventType + "(");
+          StringBuilder buffy =
+            new StringBuilder("UIElementEvent: " + eventType + "(");
           for (int i = 0; i < args.length; ++i)
             buffy.append((i == 0 ? "" : ",") + args[i]);
           buffy.append(") on UIElement " + source.getId());
           LOGGER.debug(buffy.toString());
         }
 
-        if (eventType.equals("action"))
+        if ("action".equals(eventType))
         {
           String action = (String) args[0];
-          if (action.equals("abort"))
+          if ("abort".equals(action))
             abort();
-          else if (action.equals("back"))
+          else if ("back".equals(action))
             back();
-          else if (action.equals("search"))
+          else if ("search".equals(action))
             search();
-          else if (action.equals("select"))
+          else if ("select".equals(action))
           {
             Dataset ds = null;
             if (resultsList != null)
             {
               List<Object> selected = resultsList.getSelected();
-              if (selected.size() > 0)
+              if (!selected.isEmpty())
                 ds = ((ListElement) selected.get(0)).getDataset();
             }
             select(dialogWindowSchema, ds);
           }
         }
-        else if (eventType.equals("listSelectionChanged"))
+        else if ("listSelectionChanged".equals(eventType))
         {
           List<Object> selected = ((Listbox) source).getSelected();
-          if (selected.size() > 0) updatePreview((ListElement) selected.get(0));
+          if (!selected.isEmpty()) {
+            updatePreview((ListElement) selected.get(0));
+          }
         }
 
       }
@@ -902,16 +934,16 @@ public class DatasourceSearchDialog implements Dialog
     /**
      * Initialisiert die UIElementFactory, die zur Erzeugung der UIElements verwendet
      * wird.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     private void initFactories()
     {
       Map<String, GridBagConstraints> mapTypeToLayoutConstraints =
-        new HashMap<String, GridBagConstraints>();
-      Map<String, Integer> mapTypeToLabelType = new HashMap<String, Integer>();
+        new HashMap<>();
+      Map<String, Integer> mapTypeToLabelType = new HashMap<>();
       Map<String, GridBagConstraints> mapTypeToLabelLayoutConstraints =
-        new HashMap<String, GridBagConstraints>();
+        new HashMap<>();
 
       // int gridx, int gridy, int gridwidth, int gridheight, double weightx, double
       // weighty, int anchor, int fill, Insets insets, int ipadx, int ipady)
@@ -1015,7 +1047,7 @@ public class DatasourceSearchDialog implements Dialog
       mapTypeToLabelType.put("v-separator", UIElement.LABEL_NONE);
       mapTypeToLabelLayoutConstraints.put("v-separator", null);
 
-      Set<String> supportedActions = new HashSet<String>();
+      Set<String> supportedActions = new HashSet<>();
       supportedActions.add("abort");
       supportedActions.add("back");
       supportedActions.add("search");
@@ -1026,7 +1058,7 @@ public class DatasourceSearchDialog implements Dialog
       vertiContext.mapTypeToLabelType = mapTypeToLabelType;
       vertiContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
       vertiContext.uiElementEventHandler = this;
-      vertiContext.mapTypeToType = new HashMap<String, String>();
+      vertiContext.mapTypeToType = new HashMap<>();
       vertiContext.mapTypeToType.put("separator", "h-separator");
       vertiContext.mapTypeToType.put("glue", "v-glue");
       vertiContext.supportedActions = supportedActions;
@@ -1037,20 +1069,20 @@ public class DatasourceSearchDialog implements Dialog
       horiContext.mapTypeToLabelType = mapTypeToLabelType;
       horiContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
       horiContext.uiElementEventHandler = this;
-      horiContext.mapTypeToType = new HashMap<String, String>();
+      horiContext.mapTypeToType = new HashMap<>();
       horiContext.mapTypeToType.put("separator", "v-separator");
       horiContext.mapTypeToType.put("glue", "h-glue");
       horiContext.supportedActions = supportedActions;
       horiContext.uiElementEventHandler = this;
 
       Map<String, GridBagConstraints> previewLabelLayoutConstraints =
-        new HashMap<String, GridBagConstraints>(mapTypeToLabelLayoutConstraints);
+        new HashMap<>(mapTypeToLabelLayoutConstraints);
       previewLabelLayoutConstraints.put("textfield", gbcLabelLeft);
       Map<String, Integer> previewLabelType =
-        new HashMap<String, Integer>(mapTypeToLabelType);
+        new HashMap<>(mapTypeToLabelType);
       previewLabelType.put("textfield", UIElement.LABEL_LEFT);
       Map<String, GridBagConstraints> previewLayoutConstraints =
-        new HashMap<String, GridBagConstraints>(mapTypeToLayoutConstraints);
+        new HashMap<>(mapTypeToLayoutConstraints);
       previewLayoutConstraints.put("h-glue", gbcPreviewGlue);
       previewLayoutConstraints.put("v-glue", gbcPreviewGlue);
       previewLayoutConstraints.put("label", gbcPreviewLabel);
@@ -1060,7 +1092,7 @@ public class DatasourceSearchDialog implements Dialog
       previewContext.mapTypeToLabelType = previewLabelType;
       previewContext.mapTypeToLayoutConstraints = previewLayoutConstraints;
       previewContext.uiElementEventHandler = this;
-      previewContext.mapTypeToType = new HashMap<String, String>();
+      previewContext.mapTypeToType = new HashMap<>();
       previewContext.mapTypeToType.put("separator", "h-separator");
       previewContext.mapTypeToType.put("glue", "v-glue");
       previewContext.supportedActions = supportedActions;
@@ -1079,7 +1111,7 @@ public class DatasourceSearchDialog implements Dialog
   /**
    * Ersetzt "${SPALTENNAME}" in str durch den Wert der entsprechenden Spalte im
    * datensatz.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String substituteVars(String str, Dataset datensatz)
@@ -1094,7 +1126,9 @@ public class DatasourceSearchDialog implements Dialog
         try
         {
           String wert2 = datensatz.get(spalte);
-          if (wert2 != null) wert = wert2.replaceAll("\\$", "");
+          if (wert2 != null) {
+            wert = wert2.replaceAll("\\$", "");
+          }
         }
         catch (ColumnNotFoundException e)
         {
@@ -1110,7 +1144,7 @@ public class DatasourceSearchDialog implements Dialog
 
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void abort()
@@ -1120,7 +1154,7 @@ public class DatasourceSearchDialog implements Dialog
 
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void back()
@@ -1130,14 +1164,14 @@ public class DatasourceSearchDialog implements Dialog
 
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void select(Collection<String> schema, Dataset ds)
   {
     if (ds != null)
     {
-      Map<String, String> newData = new HashMap<String, String>();
+      Map<String, String> newData = new HashMap<>();
       Iterator<String> iter = schema.iterator();
       while (iter.hasNext())
       {
@@ -1163,7 +1197,7 @@ public class DatasourceSearchDialog implements Dialog
   /**
    * Beendet den Dialog und ruft falls nötig den dialogEndListener auf wobei das
    * gegebene actionCommand übergeben wird.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void dialogEnd(String actionCommand)
@@ -1183,7 +1217,7 @@ public class DatasourceSearchDialog implements Dialog
    * über diesen Instantiator, d.h. insbesondere dass
    * instanceFor(context).instanceFor(context).instanceFor(context) den selben Dialog
    * liefert wie instanceFor(context).
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class Instantiator implements Dialog
@@ -1200,11 +1234,12 @@ public class DatasourceSearchDialog implements Dialog
       this.conf = conf;
       this.dj = dj;
       schema = parseSchema(conf);
-      if (schema.size() == 0)
+      if (schema.isEmpty())
         throw new ConfigurationErrorException(
           L.m("Fehler in Funktionsdialog: Abschnitt 'Spaltenumsetzung' konnte nicht geparst werden!"));
     }
 
+    @Override
     public Dialog instanceFor(Map<Object, Object> context)
         throws ConfigurationErrorException
     {
@@ -1213,23 +1248,26 @@ public class DatasourceSearchDialog implements Dialog
       return (Dialog) context.get(this);
     }
 
+    @Override
     public Object getData(String id)
     {
       return null;
     }
 
+    @Override
     public void show(ActionListener dialogEndListener, FunctionLibrary funcLib,
         DialogLibrary dialogLib)
     {}
 
+    @Override
     public Collection<String> getSchema()
     {
-      return new HashSet<String>(schema);
+      return new HashSet<>(schema);
     }
 
     private HashSet<String> parseSchema(ConfigThingy conf)
     {
-      HashSet<String> schema = new HashSet<String>();
+      HashSet<String> schema = new HashSet<>();
       Iterator<ConfigThingy> fensterIter = conf.query("Fenster").iterator();
       while (fensterIter.hasNext())
       {
@@ -1260,36 +1298,16 @@ public class DatasourceSearchDialog implements Dialog
   /**
    * Ein WindowListener, der auf den JFrame registriert wird, damit als Reaktion auf
    * den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class MyWindowListener implements WindowListener
+  private class MyWindowListener extends WindowAdapter
   {
-    public MyWindowListener()
-    {}
-
-    public void windowActivated(WindowEvent e)
-    {}
-
-    public void windowClosed(WindowEvent e)
-    {}
-
+    @Override
     public void windowClosing(WindowEvent e)
     {
       abort();
     }
-
-    public void windowDeactivated(WindowEvent e)
-    {}
-
-    public void windowDeiconified(WindowEvent e)
-    {}
-
-    public void windowIconified(WindowEvent e)
-    {}
-
-    public void windowOpened(WindowEvent e)
-    {}
   }
 
   /**
@@ -1306,7 +1324,7 @@ public class DatasourceSearchDialog implements Dialog
     Dialog dialog =
       DatasourceSearchDialog.create(conf.get("Funktionsdialoge").get(
         "Empfaengerauswahl"), DatasourceJoiner.getDatasourceJoiner());
-    Map<Object, Object> myContext = new HashMap<Object, Object>();
+    Map<Object, Object> myContext = new HashMap<>();
     dialog.instanceFor(myContext).show(null, new FunctionLibrary(),
       new DialogLibrary());
   }

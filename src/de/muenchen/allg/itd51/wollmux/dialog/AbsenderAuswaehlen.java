@@ -1,8 +1,8 @@
-/* 
+/*
  * Dateiname: AbsenderAuswaehlen.java
  * Projekt  : WollMux
  * Funktion : Implementiert den Absenderdaten auswählen Dialog des BKS
- * 
+ *
  * Copyright (c) 2010-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
@@ -50,8 +50,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
@@ -123,18 +123,19 @@ public class AbsenderAuswaehlen
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
    */
-  private final static int TF_BORDER = 4;
+  private static final int TF_BORDER = 4;
 
   /**
    * Rand um Buttons (in Pixeln).
    */
-  private final static int BUTTON_BORDER = 2;
+  private static final int BUTTON_BORDER = 2;
 
   /**
    * ActionListener für Buttons mit der ACTION "abort".
    */
   private ActionListener actionListener_abort = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       abort();
@@ -146,6 +147,7 @@ public class AbsenderAuswaehlen
    */
   private ActionListener actionListener_back = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       back();
@@ -157,6 +159,7 @@ public class AbsenderAuswaehlen
    */
   private ActionListener actionListener_editList = new ActionListener()
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       editList();
@@ -229,7 +232,7 @@ public class AbsenderAuswaehlen
 
   /**
    * Erzeugt einen neuen Dialog.
-   * 
+   *
    * @param conf
    *          das ConfigThingy, das den Dialog beschreibt (der Vater des
    *          "Fenster"-Knotens.
@@ -277,6 +280,7 @@ public class AbsenderAuswaehlen
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           try
@@ -314,7 +318,6 @@ public class AbsenderAuswaehlen
     }
     catch (Exception x)
     {}
-    ;
 
     try
     {
@@ -432,7 +435,7 @@ public class AbsenderAuswaehlen
           // readonly = true; }catch(NodeNotFoundException e){}
           String type = uiElementDesc.get("TYPE").toString();
 
-          if (type.equals("label"))
+          if ("label".equals(type))
           {
             JLabel uiElement = new JLabel();
             gbcLabel.gridx = x;
@@ -440,7 +443,7 @@ public class AbsenderAuswaehlen
             compo.add(uiElement, gbcLabel);
             uiElement.setText(L.m(uiElementDesc.get("LABEL").toString()));
           }
-          else if (type.equals("glue"))
+          else if ("glue".equals(type))
           {
             Box uiElement = Box.createHorizontalBox();
             try
@@ -457,7 +460,7 @@ public class AbsenderAuswaehlen
             gbcGlue.gridy = y;
             compo.add(uiElement, gbcGlue);
           }
-          else if (type.equals("listbox"))
+          else if ("listbox".equals(type))
           {
             int lines = 10;
             try
@@ -468,7 +471,7 @@ public class AbsenderAuswaehlen
             {}
 
             JList<Object> list;
-            if (id.equals("pal"))
+            if ("pal".equals(id))
             {
               list = palJList;
               try
@@ -552,7 +555,9 @@ public class AbsenderAuswaehlen
             compo.add(button, gbcButton);
 
             ActionListener actionL = getAction(action);
-            if (actionL != null) button.addActionListener(actionL);
+            if (actionL != null) {
+              button.addActionListener(actionL);
+            }
 
           }
           else
@@ -572,7 +577,7 @@ public class AbsenderAuswaehlen
   /**
    * Wartet auf Doppelklick und führt dann die actionPerformed() Methode eines
    * ActionListeners aus.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class MyActionMouseListener extends MouseAdapter
@@ -587,15 +592,20 @@ public class AbsenderAuswaehlen
       this.action = action;
     }
 
+    @Override
     public void mouseClicked(MouseEvent e)
     {
       if (e.getClickCount() == 2)
       {
         Point location = e.getPoint();
         int index = list.locationToIndex(location);
-        if (index < 0) return;
+        if (index < 0) {
+          return;
+        }
         Rectangle bounds = list.getCellBounds(index, index);
-        if (!bounds.contains(location)) return;
+        if (!bounds.contains(location)) {
+          return;
+        }
         action.actionPerformed(null);
       }
     }
@@ -604,24 +614,24 @@ public class AbsenderAuswaehlen
   /**
    * Übersetzt den Namen einer ACTION in eine Referenz auf das passende
    * actionListener_... Objekt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private ActionListener getAction(String action)
   {
-    if (action.equals("abort"))
+    if ("abort".equals(action))
     {
       return actionListener_abort;
     }
-    else if (action.equals("back"))
+    else if ("back".equals(action))
     {
       return actionListener_back;
     }
-    else if (action.equals("editList"))
+    else if ("editList".equals(action))
     {
       return actionListener_editList;
     }
-    else if (action.equals(""))
+    else if (action.isEmpty())
     {
       return null;
     }
@@ -637,7 +647,7 @@ public class AbsenderAuswaehlen
    * direkt als Werte verwendet, sondern in {@link DJDatasetListElement}-Objekte
    * gewrappt, deren Inhalt entsprechend des übergebenen displayTemplates angezeigt
    * wird.
-   * 
+   *
    * @param list
    *          die Liste deren Wertliste geändert werden soll
    * @param data
@@ -645,7 +655,7 @@ public class AbsenderAuswaehlen
    * @param displayTemplate
    *          gibt an wie die Datensätze in der Liste als Strings repräsentiert
    *          werden sollen, siehe z.B. {@link #DEFAULT_DISPLAYTEMPLATE}.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setListElements(JList<Object> list, QueryResults data, String displayTemplate)
@@ -658,6 +668,7 @@ public class AbsenderAuswaehlen
         new DJDatasetListElement((DJDataset) iter.next(), displayTemplate);
     Arrays.sort(elements, new Comparator<Object>()
     {
+      @Override
       public int compare(Object o1, Object o2)
       {
         return o1.toString().compareTo(o2.toString());
@@ -685,11 +696,14 @@ public class AbsenderAuswaehlen
    */
   private class MyListSelectionListener implements ListSelectionListener
   {
+    @Override
     public void valueChanged(ListSelectionEvent e)
     {
       @SuppressWarnings("unchecked")
       JList<Object> list = (JList<Object>) e.getSource();
-      if (list != palJList) return;
+      if (list != palJList) {
+        return;
+      }
 
       DJDatasetListElement ele = (DJDatasetListElement) list.getSelectedValue();
       if (ele == null)
@@ -701,7 +715,7 @@ public class AbsenderAuswaehlen
 
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void abort()
@@ -711,7 +725,7 @@ public class AbsenderAuswaehlen
 
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void back()
@@ -722,7 +736,7 @@ public class AbsenderAuswaehlen
   /**
    * Beendet den Dialog und liefer actionCommand an den dialogEndHandler zurück
    * (falls er nicht null ist).
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void dialogEnd(String actionCommand)
@@ -734,7 +748,7 @@ public class AbsenderAuswaehlen
 
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void editList()
@@ -792,9 +806,10 @@ public class AbsenderAuswaehlen
       this.mySource = source;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e)
     {
-      if (e.getActionCommand().equals("back"))
+      if ("back".equals(e.getActionCommand()))
         try
         {
           new AbsenderAuswaehlen(conf, verConf, abConf, dj, dialogEndListener);
@@ -820,36 +835,16 @@ public class AbsenderAuswaehlen
   /**
    * Ein WindowListener, der auf den JFrame registriert wird, damit als Reaktion auf
    * den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class MyWindowListener implements WindowListener
+  private class MyWindowListener extends WindowAdapter
   {
-    public MyWindowListener()
-    {}
-
-    public void windowActivated(WindowEvent e)
-    {}
-
-    public void windowClosed(WindowEvent e)
-    {}
-
+    @Override
     public void windowClosing(WindowEvent e)
     {
       closeAction.actionPerformed(null);
     }
-
-    public void windowDeactivated(WindowEvent e)
-    {}
-
-    public void windowDeiconified(WindowEvent e)
-    {}
-
-    public void windowIconified(WindowEvent e)
-    {}
-
-    public void windowOpened(WindowEvent e)
-    {}
   }
 
   /**
@@ -857,7 +852,7 @@ public class AbsenderAuswaehlen
    * von Methoden des Dialogs erfolgen. Die Verarbeitung erfolgt asynchron. Wurde dem
    * Konstruktor ein entsprechender ActionListener übergeben, so wird seine
    * actionPerformed() Funktion aufgerufen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void dispose()
@@ -867,6 +862,7 @@ public class AbsenderAuswaehlen
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           abort();
@@ -879,7 +875,7 @@ public class AbsenderAuswaehlen
 
   /**
    * Sorgt für das dauernde Neustarten des Dialogs.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class RunTest implements ActionListener
@@ -901,13 +897,16 @@ public class AbsenderAuswaehlen
       this.verConf = verConf;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       try
       {
         try
         {
-          if (e.getActionCommand().equals("abort")) System.exit(0);
+          if ("abort".equals(e.getActionCommand())) {
+            System.exit(0);
+          }
         }
         catch (Exception x)
         {}

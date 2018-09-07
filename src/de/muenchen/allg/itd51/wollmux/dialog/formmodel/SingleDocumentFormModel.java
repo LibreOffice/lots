@@ -54,17 +54,17 @@ public class SingleDocumentFormModel implements FormModel
   /**
    * vFormGUIs beinhaltet die Referenzen der z.Z. ausgeführten FormGUIs
    */
-  public static List<FormGUI> vFormGUIs = new ArrayList<FormGUI>();
+  public static List<FormGUI> vFormGUIs = new ArrayList<>();
 
   /**
    * vFrames beinhaltet die Referenzen der z.Z. ausgeführten Frames mit FormGUI
    */
-  public static List<XFrame> vFrames = new ArrayList<XFrame>();
+  public static List<XFrame> vFrames = new ArrayList<>();
 
   /**
    * Konstruktor für ein SingleDocumentFormModel mit dem zugehörigen
    * TextDocumentModel doc.
-   * 
+   *
    * @param documentController
    *          Das zugeordnete TextDocumentModel.
    * @param formFensterConf
@@ -114,7 +114,7 @@ public class SingleDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#close()
    */
   @Override
@@ -137,7 +137,7 @@ public class SingleDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowVisible(boolean)
    */
   @Override
@@ -156,7 +156,7 @@ public class SingleDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowPosSize(int, int,
    * int, int)
    */
@@ -165,12 +165,12 @@ public class SingleDocumentFormModel implements FormModel
   {
     if (visible)
       WollMuxEventHandler.handleSetWindowPosSize(documentController, docX, docY,
-	  docWidth, docHeight);
+          docWidth, docHeight);
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.FormModel#setVisibleState(java.lang.String,
    * boolean)
@@ -179,12 +179,12 @@ public class SingleDocumentFormModel implements FormModel
   public void setVisibleState(String groupId, boolean visible)
   {
     WollMuxEventHandler.handleSetVisibleState(documentController, groupId,
-	visible, null);
+        visible, null);
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.FormModel#valueChanged(java.lang.String,
    * java.lang.String)
@@ -194,12 +194,12 @@ public class SingleDocumentFormModel implements FormModel
   {
     if (fieldId.length() > 0)
       WollMuxEventHandler.handleFormValueChanged(documentController, fieldId,
-	  newValue);
+          newValue);
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#focusGained(java.lang.String)
    */
   @Override
@@ -211,7 +211,7 @@ public class SingleDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#focusLost(java.lang.String)
    */
   @Override
@@ -221,7 +221,7 @@ public class SingleDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.FormModel#closing(de.muenchen.allg.itd51.
    * wollmux .TextDocumentModel)
@@ -233,14 +233,14 @@ public class SingleDocumentFormModel implements FormModel
     {
       if (formGUI != null)
       {
-	formGUI.dispose();
-	formGUI = null;
+        formGUI.dispose();
+        formGUI = null;
       }
 
       // Rücksetzen des defaultWindowAttributes auf den Wert vor dem Schließen
       // des Formulardokuments.
       if (defaultWindowAttributes != null)
-	setDefaultWindowAttributes(defaultWindowAttributes);
+        setDefaultWindowAttributes(defaultWindowAttributes);
     }
   }
 
@@ -250,7 +250,7 @@ public class SingleDocumentFormModel implements FormModel
    * "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument" der
    * OOo-Konfiguration, welches die Standard-FensterAttribute enthält, mit denen
    * neue Fenster für TextDokumente erzeugt werden.
-   * 
+   *
    * @return
    */
   private static String getDefaultWindowAttributes()
@@ -258,7 +258,7 @@ public class SingleDocumentFormModel implements FormModel
     try
     {
       Object cp = UNO
-	  .createUNOService("com.sun.star.configuration.ConfigurationProvider");
+          .createUNOService("com.sun.star.configuration.ConfigurationProvider");
 
       // creation arguments: nodepath
       com.sun.star.beans.PropertyValue aPathArgument = new com.sun.star.beans.PropertyValue();
@@ -268,7 +268,7 @@ public class SingleDocumentFormModel implements FormModel
       aArguments[0] = aPathArgument;
 
       Object ca = UNO.XMultiServiceFactory(cp).createInstanceWithArguments(
-	  "com.sun.star.configuration.ConfigurationAccess", aArguments);
+          "com.sun.star.configuration.ConfigurationAccess", aArguments);
 
       return UNO.getProperty(ca, "ooSetupFactoryWindowAttributes").toString();
     } catch (java.lang.Exception e)
@@ -283,7 +283,7 @@ public class SingleDocumentFormModel implements FormModel
    * "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument" der
    * OOo-Konfiguration auf den neuen Wert value, der (am besten) über einen
    * vorhergehenden Aufruf von getDefaultWindowAttributes() gewonnen wird.
-   * 
+   *
    * @param value
    */
   private static void setDefaultWindowAttributes(String value)
@@ -291,7 +291,7 @@ public class SingleDocumentFormModel implements FormModel
     try
     {
       Object cp = UNO
-	  .createUNOService("com.sun.star.configuration.ConfigurationProvider");
+          .createUNOService("com.sun.star.configuration.ConfigurationProvider");
 
       // creation arguments: nodepath
       com.sun.star.beans.PropertyValue aPathArgument = new com.sun.star.beans.PropertyValue();
@@ -301,7 +301,7 @@ public class SingleDocumentFormModel implements FormModel
       aArguments[0] = aPathArgument;
 
       Object ca = UNO.XMultiServiceFactory(cp).createInstanceWithArguments(
-	  "com.sun.star.configuration.ConfigurationUpdateAccess", aArguments);
+          "com.sun.star.configuration.ConfigurationUpdateAccess", aArguments);
 
       UNO.setProperty(ca, "ooSetupFactoryWindowAttributes", value);
 
@@ -314,7 +314,7 @@ public class SingleDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#controllerInitCompleted()
    */
   @Override
@@ -325,7 +325,7 @@ public class SingleDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#print()
    */
   @Override
@@ -336,7 +336,7 @@ public class SingleDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#pdf()
    */
   @Override
@@ -359,7 +359,7 @@ public class SingleDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#setValue(java.lang.String,
    * java.lang.String, java.awt.event.ActionListener)
    */
@@ -372,7 +372,7 @@ public class SingleDocumentFormModel implements FormModel
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.FormModel#startFormGUI()
    */
   @Override
@@ -380,7 +380,7 @@ public class SingleDocumentFormModel implements FormModel
   {
     boolean containsFrames = false;
     containsFrames = SingleDocumentFormModel.vFrames
-	.contains(documentController.getFrameController().getFrame());
+        .contains(documentController.getFrameController().getFrame());
 
     // Schaue ob bereits eine Instanz genau dieses Formulars geöffnet ist, falls
     // ja wird das nun ungültige FormGUI beendet
@@ -388,7 +388,7 @@ public class SingleDocumentFormModel implements FormModel
     {
       // Hole Index des ungültigen FormGUI
       int frameIndex = SingleDocumentFormModel.vFrames
-	  .indexOf(documentController.getFrameController().getFrame());
+          .indexOf(documentController.getFrameController().getFrame());
 
       SingleDocumentFormModel.vFormGUIs.get(frameIndex).dispose();
       SingleDocumentFormModel.vFormGUIs.remove(frameIndex);
@@ -397,15 +397,15 @@ public class SingleDocumentFormModel implements FormModel
     }
 
     Map<String, String> idToPresetValue = documentController
-	.getIDToPresetValue();
+        .getIDToPresetValue();
     formGUI = new FormGUI(formFensterConf, formConf, this, idToPresetValue,
-	functionContext, funcLib, dialogLib, visible);
+        functionContext, funcLib, dialogLib, visible);
 
     // füge FormGUI Refenrenz und die dazugehörigen Frames zu den
     // Klassenvariable hinzu
     SingleDocumentFormModel.vFormGUIs.add(formGUI);
     SingleDocumentFormModel.vFrames
-	.add(documentController.getFrameController().getFrame());
+        .add(documentController.getFrameController().getFrame());
   }
 
   @Override
@@ -414,10 +414,10 @@ public class SingleDocumentFormModel implements FormModel
     try
     {
       XFrame frame = UNO.XModel(documentController.getModel().doc)
-	  .getCurrentController().getFrame();
+          .getCurrentController().getFrame();
       String frameTitle = (String) UNO.getProperty(frame, "Title");
       frameTitle = MailMergeDatasource
-	  .stripOpenOfficeFromWindowName(frameTitle);
+          .stripOpenOfficeFromWindowName(frameTitle);
       return frameTitle;
     } catch (Exception x)
     {
