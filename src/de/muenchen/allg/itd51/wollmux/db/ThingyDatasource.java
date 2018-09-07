@@ -2,7 +2,7 @@
  * Dateiname: ThingyDatasource.java
  * Projekt  : WollMux
  * Funktion : Datasource, die ihre Daten aus einer ConfigThingy-Datei bezieht.
- * 
+ *
  * Copyright (c) 2008-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -28,20 +28,20 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.db;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -64,7 +64,7 @@ public class ThingyDatasource extends RAMDatasource
 
   /**
    * Erzeugt eine neue ThingyDatasource.
-   * 
+   *
    * @param nameToDatasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser ThingyDatasource
    *          bereits vollständig instanziierten Datenquellen.
@@ -174,7 +174,7 @@ public class ThingyDatasource extends RAMDatasource
           "Fehler in Conf-Datei von Datenquelle %1: Abschnitt 'Daten' fehlt", name));
       }
 
-      List<Dataset> data = new Vector<Dataset>(daten.count());
+      List<Dataset> data = new ArrayList<Dataset>(daten.count());
 
       iter = daten.iterator();
       while (iter.hasNext())
@@ -214,7 +214,7 @@ public class ThingyDatasource extends RAMDatasource
    * Erzeugt ein neues MyDataset aus der Beschreibung dsDesc. Die Methode erkennt
    * automatisch, ob die Beschreibung in der Form ("Spaltenwert1",
    * "Spaltenwert2",...) oder der Form (Spalte1 "Wert1" Spalte2 "Wert2" ...) ist.
-   * 
+   *
    * @param schema
    *          das Datenbankschema
    * @param schemaOrdered
@@ -229,10 +229,12 @@ public class ThingyDatasource extends RAMDatasource
   private Dataset createDataset(ConfigThingy dsDesc, Set<String> schema,
       String[] schemaOrdered, String[] keyCols) throws ConfigurationErrorException
   { // TESTED
-    if (!dsDesc.getName().equals(""))
+    if (!dsDesc.getName().isEmpty())
       throw new ConfigurationErrorException(L.m(
         "Öffnende Klammer erwartet vor \"%1\"", dsDesc.getName()));
-    if (dsDesc.count() == 0) return new MyDataset(schema, keyCols);
+    if (dsDesc.count() == 0) {
+      return new MyDataset(schema, keyCols);
+    }
     try
     {
       if (dsDesc.getFirstChild().count() == 0)
@@ -250,7 +252,7 @@ public class ThingyDatasource extends RAMDatasource
   /**
    * Erzeugt ein neues MyDataset aus der Beschreibung dsDesc. dsDesc muss in der Form
    * (Spalte1 "Spaltenwert1" Spalte2 "Spaltenwert2 ...) sein.
-   * 
+   *
    * @throws ConfigurationErrorException
    *           bei verstössen gegen diverse Regeln
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -276,7 +278,7 @@ public class ThingyDatasource extends RAMDatasource
   /**
    * Erzeugt ein neues MyDataset aus der Beschreibung dsDesc. dsDesc muss in der Form
    * ("Spaltenwert1" "Spaltenwert2 ...) sein.
-   * 
+   *
    * @throws ConfigurationErrorException
    *           bei verstössen gegen diverse Regeln
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -328,23 +330,28 @@ public class ThingyDatasource extends RAMDatasource
     /**
      * Setzt aus den Werten der Schlüsselspalten separiert durch KEY_SEPARATOR den
      * Schlüssel zusammen.
-     * 
+     *
      * @param keyCols
      *          die Namen der Schlüsselspalten
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private void initKey(String[] keyCols)
     { // TESTED
-      StringBuffer buffy = new StringBuffer();
+      StringBuilder buffy = new StringBuilder();
       for (int i = 0; i < keyCols.length; ++i)
       {
         String str = data.get(keyCols[i]);
-        if (str != null) buffy.append(str);
-        if (i + 1 < keyCols.length) buffy.append(KEY_SEPARATOR);
+        if (str != null) {
+          buffy.append(str);
+        }
+        if (i + 1 < keyCols.length) {
+          buffy.append(KEY_SEPARATOR);
+        }
       }
       key = buffy.toString();
     }
 
+    @Override
     public String get(String columnName) throws ColumnNotFoundException
     {
       if (!schema.contains(columnName))
@@ -353,6 +360,7 @@ public class ThingyDatasource extends RAMDatasource
       return data.get(columnName);
     }
 
+    @Override
     public String getKey()
     { // TESTED
       return key;

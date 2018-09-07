@@ -1,9 +1,9 @@
 /*
  * Dateiname: DatasetListElement.java
  * Projekt  : WollMux
- * Funktion : Wrapper um einen Datansatz des DJ für die Darstellung 
+ * Funktion : Wrapper um einen Datansatz des DJ für die Darstellung
  *            in einer Liste.
- * 
+ *
  * Copyright (c) 2008-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.db;
 
@@ -67,7 +67,7 @@ public class DatasetListElement implements Comparable<DatasetListElement>
   /**
    * Erzeugt ein neues DatasetListElement für die Darstellung in einer Liste (ohne
    * Icon).
-   * 
+   *
    * @param ds
    *          Das DatasetElement das über das DatasetListElement dargestellt werden
    *          soll.
@@ -75,7 +75,7 @@ public class DatasetListElement implements Comparable<DatasetListElement>
    *          gibt an, wie die Personen in den Listen angezeigt werden sollen.
    *          %{Spalte}-Syntax um entsprechenden Wert des Datensatzes einzufügen,
    *          z.B. "%{Nachname}, %{Vorname}" für die Anzeige "Meier, Hans" etc.
-   * 
+   *
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
   public DatasetListElement(Dataset ds, String displayTemplate)
@@ -85,7 +85,7 @@ public class DatasetListElement implements Comparable<DatasetListElement>
 
   /**
    * Erzeugt ein neues DatasetListElement für die Darstellung in einer Liste.
-   * 
+   *
    * @param ds
    *          das DatasetElement das über das DatasetListElement dargestellt werden
    *          soll.
@@ -96,7 +96,7 @@ public class DatasetListElement implements Comparable<DatasetListElement>
    * @param icon
    *          das Icon, das in der Liste für das Element verwendet werden soll. Falls
    *          kein Icon vorhanden ist, kann <code>null</code> übergeben werden.
-   * 
+   *
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
   public DatasetListElement(Dataset ds, String displayTemplate, Icon icon)
@@ -109,6 +109,7 @@ public class DatasetListElement implements Comparable<DatasetListElement>
   /**
    * Liefert den in der Listbox anzuzeigenden String.
    */
+  @Override
   public String toString()
   {
     return getDisplayString(ds);
@@ -116,9 +117,9 @@ public class DatasetListElement implements Comparable<DatasetListElement>
 
   /**
    * Liefert den Dataset dieses DatasetListElements.
-   * 
+   *
    * @return den Dataset dieses DatasetListElements.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
   public Dataset getDataset()
@@ -128,10 +129,10 @@ public class DatasetListElement implements Comparable<DatasetListElement>
 
   /**
    * Liefert das Icon dieses DatasetListElements zurück.
-   * 
+   *
    * @return das Icon dieses DatasetListElements. Falls kein Icon vorhanden ist, wird
    *         <code>null</code> zurückgeliefert.
-   * 
+   *
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
   public Icon getIcon()
@@ -141,7 +142,7 @@ public class DatasetListElement implements Comparable<DatasetListElement>
 
   /**
    * Liefert zu einem Datensatz den in einer Listbox anzuzeigenden String.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String getDisplayString(Dataset ds)
@@ -202,9 +203,10 @@ public class DatasetListElement implements Comparable<DatasetListElement>
    * Liefert <code>true</code> zurück, wenn die String-Repräsentation (
    * {@link #toString()}) des übergebenen DatasetListElements gleich (im Hinblick auf
    * {@link String#equals(Object)} ist zu der String-Repräsentation von this.
-   * 
+   *
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
+  @Override
   public boolean equals(Object o)
   {
     if (this == o)
@@ -218,6 +220,7 @@ public class DatasetListElement implements Comparable<DatasetListElement>
     return false;
   }
 
+  @Override
   public int hashCode()
   {
     return this.toString().hashCode();

@@ -1,8 +1,8 @@
-/* 
+/*
  * Dateiname: AttachDatasource.java
  * Projekt  : WollMux
  * Funktion : Eine Datenquelle, die eine andere Datenquelle um Spalten ergänzt.
- * 
+ *
  * Copyright (c) 2008-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -28,11 +28,12 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.db;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -40,7 +41,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,7 +108,7 @@ public class AttachDatasource implements Datasource
 
   /**
    * Erzeugt eine neue AttachDatasource.
-   * 
+   *
    * @param nameToDatasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser AttachDatasource
    *          bereits vollständig instanziierten Datenquellen.
@@ -225,9 +225,10 @@ public class AttachDatasource implements Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getSchema()
    */
+  @Override
   public Set<String> getSchema()
   {
     return schema;
@@ -235,10 +236,11 @@ public class AttachDatasource implements Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection,
    *      long)
    */
+  @Override
   public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
       throws TimeoutException
   {
@@ -254,23 +256,25 @@ public class AttachDatasource implements Datasource
     return attachColumns(results, timeout, new MatchAllDatasetChecker());
   }
 
+  @Override
   public QueryResults getContents(long timeout) throws TimeoutException
   {
-    return new QueryResultsList(new Vector<Dataset>(0));
+    return new QueryResultsList(new ArrayList<Dataset>(0));
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
+  @Override
   public QueryResults find(List<QueryPart> query, long timeout)
       throws TimeoutException
   {
     long time = new Date().getTime();
-    List<QueryPart> query1 = new Vector<QueryPart>(query.size() / 2);
-    List<QueryPart> query2 = new Vector<QueryPart>(query.size() / 2);
-    List<QueryPart> query2WithPrefix = new Vector<QueryPart>(query.size() / 2);
+    List<QueryPart> query1 = new ArrayList<QueryPart>(query.size() / 2);
+    List<QueryPart> query2 = new ArrayList<QueryPart>(query.size() / 2);
+    List<QueryPart> query2WithPrefix = new ArrayList<QueryPart>(query.size() / 2);
     Iterator<QueryPart> iter = query.iterator();
     while (iter.hasNext())
     {
@@ -291,7 +295,7 @@ public class AttachDatasource implements Datasource
      * werten wir falls wir mindestens eine Bedingung an die Hauptdatenquelle haben,
      * die Anfrage auf dieser Datenquelle aus.
      */
-    if (query1.size() > 0)
+    if (!query1.isEmpty())
     {
       QueryResults results = source1.find(query1, timeout);
       time = (new Date().getTime()) - time;
@@ -320,9 +324,10 @@ public class AttachDatasource implements Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getName()
    */
+  @Override
   public String getName()
   {
     return name;
@@ -333,14 +338,14 @@ public class AttachDatasource implements Datasource
   {
     long endTime = new Date().getTime() + timeout;
 
-    List<Dataset> resultsWithAttachments = new Vector<Dataset>(results.size());
+    List<Dataset> resultsWithAttachments = new ArrayList<Dataset>(results.size());
 
     Iterator<Dataset> iter = results.iterator();
     while (iter.hasNext())
     {
       Dataset ds = iter.next();
 
-      List<QueryPart> query = new Vector<QueryPart>(match1.length);
+      List<QueryPart> query = new ArrayList<QueryPart>(match1.length);
       for (int i = 0; i < match1.length; ++i)
       {
         try
@@ -354,7 +359,9 @@ public class AttachDatasource implements Datasource
       }
 
       timeout = endTime - (new Date().getTime());
-      if (timeout <= 0) throw new TimeoutException();
+      if (timeout <= 0) {
+        throw new TimeoutException();
+      }
       QueryResults appendix = source2.find(query, timeout);
 
       Dataset newDataset;
@@ -362,7 +369,9 @@ public class AttachDatasource implements Datasource
       if (appendix.size() == 0)
       {
         newDataset = new ConcatDataset(ds, null);
-        if (filter.matches(newDataset)) resultsWithAttachments.add(newDataset);
+        if (filter.matches(newDataset)) {
+          resultsWithAttachments.add(newDataset);
+        }
       }
       else
       {
@@ -388,13 +397,13 @@ public class AttachDatasource implements Datasource
     long endTime = new Date().getTime() + timeout;
 
     List<ConcatDataset> resultsWithAttachments =
-      new Vector<ConcatDataset>(results.size());
+      new ArrayList<ConcatDataset>(results.size());
 
     Iterator<Dataset> iter = results.iterator();
     while (iter.hasNext())
     {
       Dataset ds = iter.next();
-      List<QueryPart> query = new Vector<QueryPart>(match1.length);
+      List<QueryPart> query = new ArrayList<QueryPart>(match1.length);
       for (int i = 0; i < match1.length; ++i)
       {
         try
@@ -408,7 +417,9 @@ public class AttachDatasource implements Datasource
       }
 
       timeout = endTime - (new Date().getTime());
-      if (timeout <= 0) throw new TimeoutException();
+      if (timeout <= 0) {
+        throw new TimeoutException();
+      }
       QueryResults prependix = source1.find(query, timeout);
 
       if (prependix.size() > 0)
@@ -434,6 +445,7 @@ public class AttachDatasource implements Datasource
       this.ds2 = ds2; // kann null sein!
     }
 
+    @Override
     public String get(String columnName) throws ColumnNotFoundException
     {
       if (!schema.contains(columnName))
@@ -442,13 +454,16 @@ public class AttachDatasource implements Datasource
 
       if (columnName.startsWith(source2Prefix))
       {
-        if (ds2 == null) return null;
+        if (ds2 == null) {
+          return null;
+        }
         return (ds2.get(columnName.substring(source2Prefix.length())));
       }
       else
         return ds1.get(columnName);
     }
 
+    @Override
     public String getKey()
     {
       return ds1.getKey();

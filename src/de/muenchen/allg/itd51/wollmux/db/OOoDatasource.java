@@ -2,7 +2,7 @@
  * Dateiname: OOoDatasource.java
  * Projekt  : WollMux
  * Funktion : Stellt eine OOo-Datenquelle als WollMux-Datenquelle zur Verfügung
- * 
+ *
  * Copyright (c) 2008-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.db;
 
@@ -44,7 +44,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
@@ -111,29 +110,29 @@ public class OOoDatasource implements Datasource
 
   /**
    * Welche Syntax soll verwendet werden.
-   * 
+   *
    * Default ist Oracle-Syntax.
-   * 
+   *
    * o *** ANSI ********* <doublequote symbol> ::= 2 consecutive double quote
    * characters
-   * 
+   *
    * (Lexical Elements, 135 Foundation) Ein delimited Identifier ist ein von "..."
    * umschlossener Identifier. Im Identifier enthaltene Doublequotes werden durch
    * <doublequote symbol> ersetzt. (Lexical Elements, 134 Foundation)
-   * 
+   *
    * <quote symbol> ::= <quote><quote> (2 consecutive quote characters) (Lexical elements, 143 Foundation)
   In einem <character string literal> werden einzelne <quote>s durch <quote symbol> ersetzt.(Lexical elements, 143 Foundation)
-  
+
    o**** Datensätze zu vorgegebener Schlüsselliste finden *********
-   
+
   SELECT * FROM "<id>" WHERE ("<colId>"='<colVal>' AND "<colId>"='<colVal>' AND ...) OR (...) OR ...;
 
   In <id> und <colId> sind Doublequotes durch <doublequote symbol> ersetzt.
-  
+
   In <colVal> sind Quotes durch <quote symbol> ersetzt.
-  
+
   o ***** Datensätze finden, die bestimmte Kriterien erfüllen ********
-  
+
   8.5 <like predicate> (385 Foundation)
   Der String hinter ESCAPE muss genau ein Zeichen lang sein. Ansonsten gibt es eine Exception (387 Foundation, 8.5 General Rules 3b))
   _ und % sowie das ESCAPE-Zeichen selbst müssen im String-Ausdruck hinter LIKE escapet werden (durch Voranstellen des Escape-Zeichens). Andere Zeichen dürfen nicht escapet werden.
@@ -141,7 +140,7 @@ public class OOoDatasource implements Datasource
   SELECT * FROM "<id>" WHERE (lower("<colId>") LIKE lower('<pattern>') ESCAPE '|') AND (...) AND ...;
   In <id> und <colId> sind Doublequotes durch <doublequote symbol> ersetzt.
   In <pattern> sind "_",  "%" und "|" ersetzt durch "|_", "|%" und "||".
-  
+
    ***** Alle Datensätze auslesen ******
 
   SELECT * FROM "<id>";
@@ -196,7 +195,7 @@ public class OOoDatasource implements Datasource
   /**
    * Wie {@link #OOoDatasource(Map, ConfigThingy, URL, boolean)}, wobei noKey==false
    * übergeben wird.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public OOoDatasource(Map<String, Datasource> nameToDatasource,
@@ -207,7 +206,7 @@ public class OOoDatasource implements Datasource
 
   /**
    * Erzeugt eine neue OOoDatasource.
-   * 
+   *
    * @param nameToDatasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser OOoDatasource
    *          bereits vollständig instanziierten Datenquellen (zur Zeit nicht
@@ -285,13 +284,13 @@ public class OOoDatasource implements Datasource
     try
     {
       String sqlSyntaxStr = sourceDesc.get("SQL_SYNTAX").toString();
-      if (sqlSyntaxStr.equalsIgnoreCase("ansi"))
+      if ("ansi".equalsIgnoreCase(sqlSyntaxStr))
         sqlSyntax = SQL_SYNTAX_ANSI;
-      else if (sqlSyntaxStr.equalsIgnoreCase("oracle"))
+      else if ("oracle".equalsIgnoreCase(sqlSyntaxStr))
         sqlSyntax = SQL_SYNTAX_ORACLE;
-      else if (sqlSyntaxStr.equalsIgnoreCase("mysql"))
+      else if ("mysql".equalsIgnoreCase(sqlSyntaxStr))
         sqlSyntax = SQL_SYNTAX_MYSQL;
-      else if (sqlSyntaxStr.equalsIgnoreCase("pervasivesql"))
+      else if ("pervasivesql".equalsIgnoreCase(sqlSyntaxStr))
         sqlSyntax = SQL_SYNTAX_PERVASIVESQL;
       else
         throw new ConfigurationErrorException(L.m(
@@ -309,10 +308,12 @@ public class OOoDatasource implements Datasource
       while (iter.hasNext())
       {
         String columnName = iter.next().toString();
-        if (firstColumnName == null) firstColumnName = columnName;
+        if (firstColumnName == null) {
+          firstColumnName = columnName;
+        }
         schema.add(columnName);
       }
-      if (schema.size() == 0)
+      if (schema.isEmpty())
         throw new ConfigurationErrorException(L.m(
           "Datenquelle \"%1\": Schema-Abschnitt ist leer", datasourceName));
       ConfigThingy schluesselConf = sourceDesc.query("Schluessel");
@@ -322,7 +323,9 @@ public class OOoDatasource implements Datasource
 
       if (noKey)
       {
-        if (firstColumnName != null) keyColumns = new String[] { firstColumnName };
+        if (firstColumnName != null) {
+          keyColumns = new String[] { firstColumnName };
+        }
       }
       else
         parseKey(schluesselConf); // Test ob kein Schluessel vorhanden siehe weiter
@@ -374,14 +377,16 @@ public class OOoDatasource implements Datasource
         for (int i = 0; i < colNames.length; ++i)
           schema.add(colNames[i]);
 
-        if (schema.size() == 0)
+        if (schema.isEmpty())
           throw new ConfigurationErrorException(L.m(
             "Datenquelle \"%1\": Tabelle \"%2\" hat keine Spalten", datasourceName,
             oooTableName));
 
         if (noKey)
         {
-          if (colNames.length > 0) keyColumns = new String[] { colNames[0] };
+          if (colNames.length > 0) {
+            keyColumns = new String[] { colNames[0] };
+          }
         }
         else
         {
@@ -432,7 +437,7 @@ public class OOoDatasource implements Datasource
   /**
    * Parst das erste Kind von conf (das existieren und ein Schluessel-Knoten sein
    * muss) und setzt {@link #keyColumns} entsprechend.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * @throws ConfigurationErrorException
    *           falls eine Schluessel-Spalte nicht im {@link #schema} ist. Es wird
@@ -461,15 +466,19 @@ public class OOoDatasource implements Datasource
     keyColumns = columns.toArray(keyColumns);
   }
 
+  @Override
   public Set<String> getSchema()
   {
     return schema;
   }
 
+  @Override
   public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
       throws TimeoutException
   { // TESTED
-    if (keys.isEmpty()) return new QueryResultsList(new ArrayList<Dataset>(0));
+    if (keys.isEmpty()) {
+      return new QueryResultsList(new ArrayList<Dataset>(0));
+    }
 
     long endTime = System.currentTimeMillis() + timeout;
     StringBuilder buffy =
@@ -479,14 +488,18 @@ public class OOoDatasource implements Datasource
     boolean first = true;
     while (iter.hasNext())
     {
-      if (!first) buffy.append(" OR ");
+      if (!first) {
+        buffy.append(" OR ");
+      }
       first = false;
       String key = iter.next();
       String[] parts = key.split("#", -1);
       buffy.append('(');
       for (int i = 1; i < parts.length; i += 2)
       {
-        if (i > 1) buffy.append(" AND ");
+        if (i > 1) {
+          buffy.append(" AND ");
+        }
         buffy.append(sqlIdentifier(decode(parts[i - 1])));
         buffy.append('=');
         buffy.append(sqlLiteral(decode(parts[i])));
@@ -497,14 +510,19 @@ public class OOoDatasource implements Datasource
     buffy.append(';');
 
     timeout = endTime - System.currentTimeMillis();
-    if (timeout < 1) timeout = 1;
+    if (timeout < 1) {
+      timeout = 1;
+    }
     return sqlQuery(buffy.toString(), timeout, true);
   }
 
+  @Override
   public QueryResults find(List<QueryPart> query, long timeout)
       throws TimeoutException
   { // TESTED
-    if (query.isEmpty()) return new QueryResultsList(new Vector<Dataset>(0));
+    if (query.isEmpty()) {
+      return new QueryResultsList(new ArrayList<Dataset>(0));
+    }
 
     StringBuilder buffy =
       new StringBuilder("SELECT * FROM " + sqlIdentifier(oooTableName) + " WHERE ");
@@ -514,7 +532,9 @@ public class OOoDatasource implements Datasource
     while (iter.hasNext())
     {
       QueryPart part = iter.next();
-      if (!first) buffy.append(" AND ");
+      if (!first) {
+        buffy.append(" AND ");
+      }
       first = false;
       buffy.append('(');
       buffy.append(sqlLower());
@@ -524,8 +544,7 @@ public class OOoDatasource implements Datasource
       buffy.append(" LIKE ");
 
       switch ( sqlSyntax ) {
-        case SQL_SYNTAX_PERVASIVESQL:{
-
+        case SQL_SYNTAX_PERVASIVESQL:
           // Rechts vom LIKE können nur einfache Konstanten und keine Funktionen wie
           // lcase oder lower genutzt werden. Daher wird hier über die Java Methode
           // toLowerCase der zu suchende String in Kleinbuchstaben umgewandelt.
@@ -533,16 +552,13 @@ public class OOoDatasource implements Datasource
           // behandelt werden. Somit ist sichergestellt, dass der durchsuchende und der zu
           // suchende String nur Kleinbuchstaben enthält.
           buffy.append(sqlLiteral(sqlSearchPattern(part.getSearchString())).toLowerCase());
-
-        }; break;
-        default:{
-
+          break;
+        default:
           buffy.append(sqlLower());
           buffy.append('(');
           buffy.append(sqlLiteral(sqlSearchPattern(part.getSearchString())));
           buffy.append(") ESCAPE '|'");
-
-        }; break;
+          break;
       }
 
       buffy.append(')');
@@ -552,6 +568,7 @@ public class OOoDatasource implements Datasource
     return sqlQuery(buffy.toString(), timeout, true);
   }
 
+  @Override
   public QueryResults getContents(long timeout) throws TimeoutException
   {
     String command = "SELECT * FROM " + sqlIdentifier(oooTableName) + ";";
@@ -560,7 +577,7 @@ public class OOoDatasource implements Datasource
 
   /**
    * Setzt die SQL-Anfrage query an die Datenbank ab und liefert die Resultate.
-   * 
+   *
    * @param timeout
    *          maximale Zeit in Millisekunden, die die Anfrage dauern darf.
    * @param throwOnTimeout
@@ -576,7 +593,7 @@ public class OOoDatasource implements Datasource
       + ")");
     long endTime = System.currentTimeMillis() + timeout;
 
-    Vector<OOoDataset> datasets = new Vector<OOoDataset>();
+    List<OOoDataset> datasets = new ArrayList<OOoDataset>();
 
     if (System.currentTimeMillis() > endTime)
     {
@@ -597,7 +614,9 @@ public class OOoDatasource implements Datasource
         XDataSource ds =
           UNO.XDataSource(UNO.dbContext.getRegisteredObject(oooDatasourceName));
         long lgto = timeout / 1000;
-        if (lgto < 1) lgto = 1;
+        if (lgto < 1) {
+          lgto = 1;
+        }
         ds.setLoginTimeout((int) lgto);
         conn = ds.getConnection(userName, password);
       }
@@ -647,9 +666,11 @@ public class OOoDatasource implements Datasource
         {
           Map.Entry<String, Integer> entry = iter.next();
           String column = entry.getKey();
-          int idx = ((Number) entry.getValue()).intValue();
+          int idx = entry.getValue().intValue();
           String value = null;
-          if (idx > 0) value = row.getString(idx);
+          if (idx > 0) {
+            value = row.getString(idx);
+          }
           data.put(column, value);
         }
         datasets.add(new OOoDataset(data));
@@ -670,13 +691,18 @@ public class OOoDatasource implements Datasource
     }
     finally
     {
-      if (results != null) UNO.XComponent(results).dispose();
-      if (conn != null) try
-      {
-        conn.close();
+      if (results != null) {
+        UNO.XComponent(results).dispose();
       }
-      catch (Exception e)
-      {}
+      if (conn != null)
+      {
+        try
+        {
+          conn.close();
+        } catch (Exception e)
+        {
+        }
+      }
     }
 
     return new QueryResultsList(datasets);
@@ -687,7 +713,7 @@ public class OOoDatasource implements Datasource
    * Liefert eine Abbildung der Spaltennamen aus {@link #schema} auf Integer-Indizes,
    * die die Spaltennummern für XRow(results)::getString() sind. Falls eine Spalte
    * nicht existiert, ist ihr index <= 0.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private Map<String, Integer> getColumnMapping(XResultSet results)
@@ -713,7 +739,7 @@ public class OOoDatasource implements Datasource
   /**
    * Liefert abhängig von {@link #sqlSyntax} den "richtigen" Namen der
    * lower()-Funktion.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String sqlLower()
@@ -730,7 +756,7 @@ public class OOoDatasource implements Datasource
   /**
    * Liefert str zurück, als String-Literal vorbereitet für das Einfügen in
    * SQL-Statements.
-   * 
+   *
    * @param str
    *          beginnt und endet immer mit einem Apostroph.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -743,7 +769,7 @@ public class OOoDatasource implements Datasource
   /**
    * Liefert str zurück, als Identifier-Name vorbereitet für das Einfügen in
    * SQL-Statements.
-   * 
+   *
    * @param str
    *          beginnt und endet immer mit einem Doublequote.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -752,8 +778,7 @@ public class OOoDatasource implements Datasource
   {
     switch (sqlSyntax)
     {
-      case SQL_SYNTAX_PERVASIVESQL:{
-
+      case SQL_SYNTAX_PERVASIVESQL:
         // PervasiveSQL unterstützt "DATENBANK.TABELLE" nicht, wird somit in "TABELLE" geändert
         if ( str.contains( "." ) ) {
 
@@ -761,8 +786,7 @@ public class OOoDatasource implements Datasource
           str = str.substring( dot );
 
         }
-
-      }; break;
+        break;
     }
     return "\"" + str.replaceAll("\"", "\"\"") + "\"";
   }
@@ -770,7 +794,7 @@ public class OOoDatasource implements Datasource
   /**
    * Ersetzt das * Wildcard so dass ein SQL-Suchmuster entsteht und escapet Zeichen,
    * die für SQL eine Bedeutung haben mit "|".
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static String sqlSearchPattern(String str)
@@ -779,6 +803,7 @@ public class OOoDatasource implements Datasource
       "\\*", "%");
   }
 
+  @Override
   public String getName()
   {
     return datasourceName;
@@ -798,7 +823,7 @@ public class OOoDatasource implements Datasource
 
     /**
      * Setzt aus den Werten der Schlüsselspalten den Schlüssel zusammen.
-     * 
+     *
      * @param keyCols
      *          die Namen der Schlüsselspalten
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -821,6 +846,7 @@ public class OOoDatasource implements Datasource
       key = buffy.toString();
     }
 
+    @Override
     public String get(String columnName) throws ColumnNotFoundException
     {
       if (!schema.contains(columnName))
@@ -829,6 +855,7 @@ public class OOoDatasource implements Datasource
       return data.get(columnName);
     }
 
+    @Override
     public String getKey()
     {
       return key;
@@ -857,7 +884,7 @@ public class OOoDatasource implements Datasource
   }
 
   private static void printQueryResults(Set<String> schema, QueryResults res,
-      Vector<String> keys) throws ColumnNotFoundException
+      List<String> keys) throws ColumnNotFoundException
   {
     keys.clear();
     Iterator<Dataset> iter;
@@ -884,7 +911,7 @@ public class OOoDatasource implements Datasource
 
   /**
    * Gibt results aus.
-   * 
+   *
    * @param query
    *          ein String der in die Überschrift der Ausgabe geschrieben wird, damit
    *          der Benutzer sieht, was er angezeigt bekommt.
@@ -928,7 +955,7 @@ public class OOoDatasource implements Datasource
   }
 
   /**
-   * 
+   *
    * @param spaltenName
    * @param suchString
    * @return
@@ -938,14 +965,13 @@ public class OOoDatasource implements Datasource
   private QueryResults simpleFind(String spaltenName, String suchString)
       throws TimeoutException
   {
-    List<QueryPart> query = new Vector<QueryPart>();
+    List<QueryPart> query = new ArrayList<QueryPart>();
     query.add(new QueryPart(spaltenName, suchString));
-    QueryResults find = find(query, 3000000);
-    return find;
+    return find(query, 3000000);
   }
 
   /**
-   * 
+   *
    * @param spaltenName1
    * @param suchString1
    * @param spaltenName2
@@ -1008,7 +1034,7 @@ public class OOoDatasource implements Datasource
 
       System.out.println("Datensätze:");
       QueryResults res = ds.getContents(1000000);
-      Vector<String> keys = new Vector<String>();
+      List<String> keys = new ArrayList<String>();
       printQueryResults(schema, res, keys);
 
       keys.remove(0);

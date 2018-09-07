@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : stellt eine virtuelle Datenbank zur Verfügung, die ihre Daten
  *            aus verschiedenen Hintergrunddatenbanken zieht.
- * 
+ *
  * Copyright (c) 2010-2018 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -46,13 +46,13 @@
  *                  | cache.conf gespeichert und wieder restauriert, ohne LDAP
  *                  | Anbindung zu verlieren.
  * 18.04.2006 | BNK | Bugfix zur Behebung von P766: ausgewaehlten Datensatz richtig merken
- * 26.05.2006 | BNK | +find(Query)       
+ * 26.05.2006 | BNK | +find(Query)
  * 30.01.2007 | BNK | Timeout nicht mehr statisch, sondern an Konstruktor übergeben.
  * 19.03.2010 | BED | +getContentsOfMainDatasource()
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.db;
 
@@ -126,7 +126,7 @@ public class DatasourceJoiner
 
   /**
    * Repräsentiert den Status eines DatasourceJoiners.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static class Status
@@ -154,14 +154,9 @@ public class DatasourceJoiner
    */
   private static boolean djInitialized = false;
 
-  public Status getStatus()
-  {
-    return status;
-  }
-
   /**
    * Erzeugt einen neuen DatasourceJoiner.
-   * 
+   *
    * @param joinConf
    *          ein ConfigThingy mit "Datenquellen" Kindern.
    * @param mainSourceName
@@ -195,13 +190,18 @@ public class DatasourceJoiner
    * Konstruktor nicht verwenden können, und stattdessen init() benutzen.
    */
   protected DatasourceJoiner()
-  {};
+  {}
+
+  public Status getStatus()
+  {
+    return status;
+  }
 
   /**
    * Erledigt die Initialisierungsaufgaben des Konstruktors mit den gleichen
    * Parametern. Für die Verwendung durch abgeleitete Klassen, die den
    * parametrisierten Konstruktor nicht verwenden können.
-   * 
+   *
    * @throws ConfigurationErrorException
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -235,23 +235,23 @@ public class DatasourceJoiner
       Datasource ds = null;
       try
       {
-        if (type.equals("conf"))
+        if ("conf".equals(type))
           ds = new ThingyDatasource(nameToDatasource, sourceDesc, context);
-        else if (type.equals("union"))
+        else if ("union".equals(type))
           ds = new UnionDatasource(nameToDatasource, sourceDesc, context);
-        else if (type.equals("attach"))
+        else if ("attach".equals(type))
           ds = new AttachDatasource(nameToDatasource, sourceDesc, context);
-        else if (type.equals("overlay"))
+        else if ("overlay".equals(type))
           ds = new OverlayDatasource(nameToDatasource, sourceDesc, context);
-        else if (type.equals("prefer"))
+        else if ("prefer".equals(type))
           ds = new PreferDatasource(nameToDatasource, sourceDesc, context);
-        else if (type.equals("schema"))
+        else if ("schema".equals(type))
           ds = new SchemaDatasource(nameToDatasource, sourceDesc, context);
-        else if (type.equals("ldap"))
+        else if ("ldap".equals(type))
           ds = new LDAPDatasource(nameToDatasource, sourceDesc, context);
-        else if (type.equals("ooo"))
+        else if ("ooo".equals(type))
           ds = new OOoDatasource(nameToDatasource, sourceDesc, context);
-        else if (type.equals("funky"))
+        else if ("funky".equals(type))
           ds = new FunkyDatasource(nameToDatasource, sourceDesc, context);
         else
           LOGGER.error(L.m("Ununterstützter Datenquellentyp: %1", type));
@@ -284,14 +284,14 @@ public class DatasourceJoiner
     // kann sein, dass noch kein singleton erstellt ist - kein Zugriff auf no config
     if (mainSourceName.equals(de.muenchen.allg.itd51.wollmux.NoConfig.NOCONFIG))
     {
-      myLOS = new LocalOverrideStorageDummyImpl();// no config, kein cache ! 
+      myLOS = new LocalOverrideStorageDummyImpl();// no config, kein cache !
     }
     else
     {
       myLOS = new LocalOverrideStorageStandardImpl(losCache, context);//mit config
     }
-    
-    
+
+
     Set<String> schema = myLOS.getSchema();
 
     if (!nameToDatasource.containsKey(mainSourceName))
@@ -333,7 +333,7 @@ public class DatasourceJoiner
 
   /**
    * Liefert das Schema der Hauptdatenquelle zurück.
-   * 
+   *
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -355,9 +355,9 @@ public class DatasourceJoiner
    * Im folgenden eine Liste möglicher Suchanfragen mit Angabe, ob sie unterstützt
    * wird (X) oder nicht (O).
    * </p>
-   * 
+   *
    * <pre>
-   * Suche nach 
+   * Suche nach
    * X           &quot;vorname.nachname&quot;
    * X           &quot;vorname.nachname@muenchen.de&quot;
    * X           &quot;Nam&quot;
@@ -371,7 +371,7 @@ public class DatasourceJoiner
    * X           &quot;D-III-ITD-5.1&quot;
    * O           &quot;D-HAIII-ITD-5.1&quot;   nicht unterstützt, da HA nicht im lhmOUShortname
    * O           &quot;D-HAIII-ITD5.1&quot;    nicht unterstützt (siehe oben)
-   * 
+   *
    * X           &quot;Nam Vorn&quot;
    * X           &quot;Nam, Vorn&quot;
    * X           &quot;Vorname Name&quot;
@@ -381,7 +381,7 @@ public class DatasourceJoiner
    * X           &quot;V. Nachname&quot;
    * X           &quot;Vorname N.&quot;
    * </pre>
-   * 
+   *
    * @throws TimeoutException
    *           falls die Anfrage nicht innerhalb einer intern vorgegebenen Zeitspanne
    *           beendet werden konnte.
@@ -392,7 +392,7 @@ public class DatasourceJoiner
     if (suchString == null || !SUCHSTRING_PATTERN.matcher(suchString).matches())
       throw new IllegalArgumentException(L.m("Illegaler Suchstring: %1", suchString));
 
-    List<QueryPart> query = new Vector<QueryPart>();
+    List<QueryPart> query = new ArrayList<QueryPart>();
     query.add(new QueryPart(spaltenName, suchString));
     return find(query);
   }
@@ -400,7 +400,7 @@ public class DatasourceJoiner
   /**
    * Wie find(spaltenName, suchString), aber mit einer zweiten Spaltenbedingung, die
    * und-verknüpft wird.
-   * 
+   *
    * @throws TimeoutException
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -414,7 +414,7 @@ public class DatasourceJoiner
       throw new IllegalArgumentException(
         L.m("Illegaler Suchstring: %1", suchString2));
 
-    List<QueryPart> query = new Vector<QueryPart>();
+    List<QueryPart> query = new ArrayList<QueryPart>();
     query.add(new QueryPart(spaltenName1, suchString1));
     query.add(new QueryPart(spaltenName2, suchString2));
     return find(query);
@@ -428,7 +428,7 @@ public class DatasourceJoiner
    * Datenquellen kennt. Ein Wrappen der Datensätze in DJDatasets wäre also nicht
    * sinnvoll, da es damit möglich wäre durch die copy() Methode Datensätze in den
    * LOS zu kopieren, die gar nicht aus der SENDER_SOURCE kommen.
-   * 
+   *
    * @throws TimeoutException
    * @throws IllegalArgumentException
    *           falls eine Suchanfrage fehlerhaft ist, weil z.B. die entsprechende
@@ -462,16 +462,16 @@ public class DatasourceJoiner
   /**
    * Findet Datensätze in der Hauptdatenquelle, die query (Liste von QueryParts)
    * entsprechen.
-   * 
+   *
    * Die Ergebnisse sind {@link DJDataset}s!
-   * 
+   *
    * @throws TimeoutException
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   protected QueryResults find(List<QueryPart> query) throws TimeoutException
   { // TESTED
     QueryResults res = mainDatasource.find(query, queryTimeout());
-    List<DJDatasetWrapper> djDatasetsList = new Vector<DJDatasetWrapper>(res.size());
+    List<DJDatasetWrapper> djDatasetsList = new ArrayList<DJDatasetWrapper>(res.size());
     Iterator<Dataset> iter = res.iterator();
     while (iter.hasNext())
     {
@@ -488,9 +488,9 @@ public class DatasourceJoiner
    * erlaubt, dass hier gar keine Datensätze zurückgeliefert werden. Wenn sinnvoll
    * sollte anstatt des Werfens einer TimeoutException ein Teil der Daten
    * zurückgeliefert werden.
-   * 
+   *
    * ACHTUNG! Die Ergebnisse sind keine DJDatasets!
-   * 
+   *
    * @throws TimeoutException
    *           falls ein Fehler auftritt oder die Anfrage nicht rechtzeitig beendet
    *           werden konnte. In letzterem Fall ist das Werfen dieser Exception
@@ -519,9 +519,9 @@ public class DatasourceJoiner
    * dass hier gar keine Datensätze zurückgeliefert werden. Wenn sinnvoll sollte
    * anstatt des Werfens einer {@link TimeoutException} ein Teil der Daten
    * zurückgeliefert werden.
-   * 
+   *
    * Die Ergebnisse sind DJDatasets!
-   * 
+   *
    * @return
    * @throws TimeoutException
    *           falls ein Fehler auftritt oder die Anfrage nicht rechtzeitig beendet
@@ -534,7 +534,7 @@ public class DatasourceJoiner
   public QueryResults getContentsOfMainDatasource() throws TimeoutException
   {
     QueryResults res = mainDatasource.getContents(queryTimeout());
-    List<DJDatasetWrapper> djDatasetsList = new Vector<DJDatasetWrapper>(res.size());
+    List<DJDatasetWrapper> djDatasetsList = new ArrayList<DJDatasetWrapper>(res.size());
     Iterator<Dataset> iter = res.iterator();
     while (iter.hasNext())
     {
@@ -590,7 +590,7 @@ public class DatasourceJoiner
 
   /**
    * Liefert den momentan im Lokalen Override Speicher ausgewählten Datensatz.
-   * 
+   *
    * @throws DatasetNotFoundException
    *           falls der LOS leer ist (ansonsten ist immer ein Datensatz selektiert).
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -603,7 +603,7 @@ public class DatasourceJoiner
   /**
    * Liefert die Anzahl der Datensätze im LOS, die den selben Schlüssel haben wie der
    * ausgewählte, und die vor diesem in der LOS-Liste gespeichert sind.
-   * 
+   *
    * @throws DatasetNotFoundException
    *           falls der LOS leer ist (ansonsten ist immer ein Datensatz selektiert).
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -619,7 +619,7 @@ public class DatasourceJoiner
    * wird, wird die Transformation deaktiviert und
    * {@link #getSelectedDatasetTransformed()} liefert das selbe Ergebnis wie
    * {@link #getSelectedDataset()}.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public void setTransformer(ColumnTransformer columnTransformer)
@@ -632,7 +632,7 @@ public class DatasourceJoiner
    * {@link #setTransformer(ColumnTransformer)}, so liefert diese Funktion das selbe
    * wie {@link #getSelectedDataset()}, ansonsten wird das durch den
    * ColumnTransformer transformierte Dataset geliefert.
-   * 
+   *
    * @throws DatasetNotFoundException
    *           falls der LOS leer ist (ansonsten ist immer ein Datensatz selektiert).
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -640,7 +640,9 @@ public class DatasourceJoiner
   public Dataset getSelectedDatasetTransformed() throws DatasetNotFoundException
   {
     DJDataset ds = getSelectedDataset();
-    if (columnTransformer == null) return ds;
+    if (columnTransformer == null) {
+      return ds;
+    }
     return columnTransformer.transform(ds);
   }
 
@@ -657,13 +659,13 @@ public class DatasourceJoiner
    * Legt einen neuen Datensatz im LOS an, der nicht mit einer Hintergrunddatenbank
    * verknüpft ist und liefert ihn zurück. Alle Felder des neuen Datensatzes sind mit
    * dem Namen der entsprechenden Spalte initialisiert.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public DJDataset newDataset()
   {
     return myLOS.newDataset();
-  };
+  }
 
   /**
    * Diese Methode liefert eine Liste mit den über {@link #senderDisplayTemplate}
@@ -673,7 +675,7 @@ public class DatasourceJoiner
    * {@link #senderDisplayTemplate}, das in der WollMux-Konfiguration über den Wert
    * von SENDER_DISPLAYTEMPLATE gesetzt werden kann. Gibt es keine verloren
    * gegangenen Datensätze, so bleibt die Liste leer.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static List<String> getLostDatasetDisplayStrings()
@@ -688,10 +690,10 @@ public class DatasourceJoiner
   /**
    * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null, falls
    * ein Fehler während der Initialisierung aufgetreten ist).
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  
+
   public static DatasourceJoiner getDatasourceJoiner()
   {
     if (!DatasourceJoiner.djInitialized)
@@ -710,7 +712,7 @@ public class DatasourceJoiner
         // sondern erst später, wnn
         // tatsächlich auf die Datenquelle "null" zurück gegriffen wird.
       }
-  
+
       ConfigThingy dataSourceTimeout =
         WollMuxFiles.getWollmuxConf().query("DATASOURCE_TIMEOUT", 1);
       String datasourceTimeoutStr = "";
@@ -778,7 +780,7 @@ public class DatasourceJoiner
    * Anfragen zurückgeliefert werden. Der Wrapper ist notwendig, um die auch für
    * Fremddatensätze sinnvollen DJDataset Funktionen anbieten zu können, allen voran
    * copy().
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class DJDatasetWrapper implements DJDataset
@@ -792,8 +794,7 @@ public class DatasourceJoiner
 
     @Override
     public void set(String columnName, String newValue)
-        throws ColumnNotFoundException, UnsupportedOperationException,
-        IllegalArgumentException
+        throws ColumnNotFoundException
     {
       throw new UnsupportedOperationException(
         L.m("Datensatz kommt nicht aus dem LOS"));
@@ -825,7 +826,7 @@ public class DatasourceJoiner
     }
 
     @Override
-    public void select() throws UnsupportedOperationException
+    public void select()
     {
       throw new UnsupportedOperationException(
         L.m("Datensatz kommt nicht aus dem LOS"));
@@ -845,7 +846,7 @@ public class DatasourceJoiner
     }
 
     @Override
-    public void remove() throws UnsupportedOperationException
+    public void remove()
     {
       throw new UnsupportedOperationException(
         L.m("Datensatz kommt nicht aus dem LOS"));

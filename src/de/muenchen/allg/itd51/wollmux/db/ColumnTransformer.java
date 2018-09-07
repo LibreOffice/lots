@@ -2,11 +2,11 @@
  * Dateiname: ColumnTransformer.java
  * Projekt  : WollMux
  * Funktion : Nimmt ein Dataset und stellt mit Hilfe von WollMux-Funktionen aus dessen Spalten berechnete Pseudo-Spalten zur Verfügung.
- * 
+ *
  * Copyright (c) 2008-2018 Landeshauptstadt München
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL), 
+ * it under the terms of the European Union Public Licence (EUPL),
  * version 1.0 (or any later version).
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,7 +15,7 @@
  * European Union Public Licence for more details.
  *
  * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see 
+ * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
  * Änderungshistorie:
@@ -26,7 +26,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD D.10)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.db;
 
@@ -72,7 +72,7 @@ public class ColumnTransformer
 
   /**
    * trafoConf hat folgenden Aufbau
-   * 
+   *
    * <pre>
    *   BeliebigerBezeichner(
    *      Name1( WollMux-Funktion1 )
@@ -80,22 +80,22 @@ public class ColumnTransformer
    *      ...
    *   )
    * </pre>
-   * 
+   *
    * NameX ist jeweils der Name, der zum Zugriff auf den entsprechenden Funktionswert
    * an {@link #get(String, Dataset)} übergeben werden muss. Innerhalb der
    * WollMux-Funktionen verwendete Aufrufe der VALUE-Grundfunktion beziehen sich
    * IMMER auf die untransformierten Spalten des zu übersetzenden {@link Dataset}s,
    * NIEMALS auf Pseudospalten. Wird der selbe NameX mehrfach verwendet, so gilt nur
    * die letzte Definition.
-   * 
+   *
    * @param funcLib
    *          {@link FunctionLibrary}, die zum Parsen von Funktionen verwendet wird.
    * @param dialogLib
    *          {@link DialogLibrary}, die zum Parsen von Funktionen verwendet wird.
-   * 
+   *
    * @throws ConfigurationErrorException
    *           if trafoConf contains an error
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public ColumnTransformer(ConfigThingy trafoConf, FunctionLibrary funcLib,
@@ -108,11 +108,11 @@ public class ColumnTransformer
   /**
    * Initialisiert einen ColumnTransformer mit allen Abschnitten, die
    * trafoConf,query(nodeName, 1) zurückliefert.
-   * 
+   *
    * @see #ColumnTransformer(ConfigThingy, FunctionLibrary, DialogLibrary, Map)
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    */
   public ColumnTransformer(ConfigThingy trafoConf, String nodeName,
       FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context)
@@ -125,7 +125,7 @@ public class ColumnTransformer
    * Erzeugt einen ColumnTransformer ohne Pseudespalten. Dieser reicht
    * {@link #get(String, Dataset)} Abfragen einfach zum entsprechenden Datensatz
    * durch.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public ColumnTransformer()
@@ -135,7 +135,7 @@ public class ColumnTransformer
    * Liefert true gdw eine Pseudospalte namens name definiert ist, d,h, wenn
    * {@link #get(String, Dataset)} für diesen Namen einen berechneten Wert und nicht
    * direkt den Wert des {@link Dataset}s zurückliefert.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public boolean hasPseudoColumn(String name)
@@ -151,20 +151,20 @@ public class ColumnTransformer
    * Pseudospalte neu definiert. Die VALUE-Grundfunktion innerhalb der
    * WollMux-Funktionen bezieht sich auf jeden Fall IMMER auf die entsprechenden
    * untransformierten Spalten des Datensatzes, NIEMALS auf Pseudospalten.
-   * 
+   *
    * ACHTUNG! Beeinflusst auch {@link Dataset}s und {@link QueryResults}, die von
    * früheren Aufrufen zu {@link #transform(Dataset)} bzw.
    * {@link #transform(QueryResults)} geliefert wurden.
-   * 
+   *
    * @param funcLib
    *          {@link FunctionLibrary}, die zum Parsen von Funktionen verwendet wird.
    * @param dialogLib
    *          {@link DialogLibrary}, die zum Parsen von Funktionen verwendet wird.
-   * 
+   *
    * @throws ConfigurationErrorException
    *           if trafoConf contains an error
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    * TESTED
    */
   public void addTrafos(ConfigThingy trafoConf, FunctionLibrary funcLib,
@@ -202,9 +202,9 @@ public class ColumnTransformer
   /**
    * Fügt alle Transformationen aus allen Abschnitten, die
    * trafoConf,query(nodeName,1) zurückliefert zu diesem ColumnTransformer hinzu.
-   * 
+   *
    * @see #addTrafos(ConfigThingy, FunctionLibrary, DialogLibrary, Map)
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public void addTrafos(ConfigThingy trafoConf, String nodeName,
@@ -230,9 +230,9 @@ public class ColumnTransformer
    * Liefert die Menge aller Namen von Pseudospalten, die definiert sind, d,h, alle
    * Namen für die {@link #get(String, Dataset)} einen berechneten Wert und nicht
    * direkt den Wert des {@link Dataset}s zurückliefert.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    * TESTED
    */
   public Set<String> getSchema()
@@ -245,19 +245,21 @@ public class ColumnTransformer
    * aus dem {@link Dataset} ds berechnet wird. Falls keine Umsetzungsregel für
    * columnName existiert, wird direkt der Wert der Spalte columnName von ds
    * zurückgeliefert (null falls nicht belegt).
-   * 
+   *
    * @throws ColumnNotFoundException
    *           falls weder eine Umsetzungsregel für columnName definiert ist noch ds
    *           eine Spalte mit diesem Namen besitzt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    * TESTED
    */
   public String get(String columnName, Dataset ds) throws ColumnNotFoundException
   {
     Function func = columnTranslations.get(columnName);
-    if (func == null) return ds.get(columnName);
+    if (func == null) {
+      return ds.get(columnName);
+    }
     return func.getString(new DatasetValues(ds));
   }
 
@@ -267,7 +269,7 @@ public class ColumnTransformer
    * Aufrufe von
    * {@link #addTrafos(ConfigThingy, FunctionLibrary, DialogLibrary, Map)} wirken
    * sich auf das zurückgelieferte {@link Dataset} aus.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public Dataset transform(Dataset ds)
@@ -281,9 +283,9 @@ public class ColumnTransformer
    * durchgeführt, d.h. spätere Aufrufe von
    * {@link #addTrafos(ConfigThingy, FunctionLibrary, DialogLibrary, Map)} wirken
    * sich auf die {@link Dataset}s der {@link QueryResults} aus.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    * TESTED
    */
   public QueryResults transform(QueryResults qres)
@@ -293,7 +295,7 @@ public class ColumnTransformer
 
   /**
    * Stellt die Spalten eines Datasets als Values zur Verfügung.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class DatasetValues implements Values
@@ -305,6 +307,7 @@ public class ColumnTransformer
       this.ds = ds;
     }
 
+    @Override
     public boolean hasValue(String id)
     {
       try
@@ -318,6 +321,7 @@ public class ColumnTransformer
       return true;
     }
 
+    @Override
     public String getString(String id)
     {
       String str = null;
@@ -331,16 +335,17 @@ public class ColumnTransformer
       return str == null ? "" : str;
     }
 
+    @Override
     public boolean getBoolean(String id)
     {
-      return getString(id).equalsIgnoreCase("true");
+      return "true".equalsIgnoreCase(getString(id));
     }
   }
 
   /**
    * Wendet Spaltenumsetzungen auf QueryResults an und stellt das Ergebnis wieder als
    * QueryResults zur Verfügung.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class TranslatedQueryResults implements QueryResults
@@ -358,16 +363,19 @@ public class ColumnTransformer
       qres = res;
     }
 
+    @Override
     public int size()
     {
       return qres.size();
     }
 
+    @Override
     public Iterator<Dataset> iterator()
     {
       return new Iter();
     }
 
+    @Override
     public boolean isEmpty()
     {
       return qres.isEmpty();
@@ -382,17 +390,20 @@ public class ColumnTransformer
         iter = qres.iterator();
       }
 
+      @Override
       public boolean hasNext()
       {
         return iter.hasNext();
       }
 
+      @Override
       public Dataset next()
       {
         Dataset ds = iter.next();
         return new TransformedDataset(ds);
       }
 
+      @Override
       public void remove()
       {
         iter.remove();
@@ -410,11 +421,13 @@ public class ColumnTransformer
       this.ds = ds;
     }
 
+    @Override
     public String get(String columnName) throws ColumnNotFoundException
     {
       return ColumnTransformer.this.get(columnName, ds);
     }
 
+    @Override
     public String getKey()
     {
       return ds.getKey();
