@@ -1,3 +1,52 @@
+ ==================== Neu in Version 18.0.3 ====================
+
+    * Bugfixes
+          o Textbereiche die über Sichtbarkeiten ein- und ausgeblendet werden
+            können werden korrekt beim Seriendruck behandelt.
+          o Beim Seriendruck werden die Platzhalter im Dokument angezeigt. Hat
+            man den Seriendruck beendet, werden diese Platzhalter wieder durch
+            die Werte aus der FormularGUI ersetzt.
+          o Der Optionen Dialog lässt sich nur einmal öffnen.
+
+
+ ==================== Neu in Version 18.0.2 ====================
+
+    * Bugfixes
+          o Dialog-Hinweis wenn Sichtbarkeit aktiviert/deaktiviert wurde.
+          o Performance der LDAP-Suche verbessert.
+
+
+ ==================== Neu in Version 18.0.1 ====================
+
+    * Neue Features
+          o Paketierung für walhalla/6.0.0
+    * Bugfixes
+          o WollMux verwendet den Controller von LibreOffice um zu entscheiden,
+            ob die Buttons in der Symbolleiste aktiv sein sollen.
+          o Tabs ohne Eingabefeld in der FormularGUI erhalten eine versteckte
+            Komponente, welche verhindert, dass sofort auf den nächsten Tab
+            gesprungen wird.
+          o Mehrere SLV-Markierungen können nun wieder gleichzeitig entfernt
+            werden.
+          o Die GUI schließt nun wieder wenn zuvor ein FormularMax4000 geöffnet
+            und geschlossen wurde.
+
+
+ ==================== Neu in Version 18.0.0 ====================
+
+    * Bugfixes
+          o Das Ergebnisfenster der Suche in der WollMuxBar schließt sich nicht
+            mehr wenn Die Maus darüber steht.
+          o Bei bereits gesetzen Markierungen wird nun diese Markierung
+            verändert wenn eine andere Markierung ausgewählt wird.
+          o In der Suche kann nun auch nach Vornamen gesucht werden.
+          o Der zusätzliche Dialog nach einem Seriendruck, dass der Druck im
+            Hintergrund stattfindet, hat keine Besserung gebracht. Deswegen
+            werden die Änderungen aus #21989 wieder rückgängig gemacht. In der
+            Fortschrittsanzeige steht schon ein Hinweis, dass der Druck etwas
+            dauern kann.
+
+
  ==================== Neu in Version 17.10 ====================
 
     * Bugfixes
@@ -32,6 +81,9 @@
           o WollMux kann LDAPs und stellt keine anonymen Anfragen mehr. Dazu
             muss ein User und Passwort in der WollMux-Konfiguration angegeben
             werden.
+    * Abkündigungen
+          o MutliForm Formulare sollten nicht mehr verwendet werden. Die
+            Funktionalität wird vorerst allerdings noch unterstützt.
 
 
  ==================== Neu in Version 17.08 ====================
@@ -57,6 +109,7 @@
       im Funktionsumfang im wesentlichen nicht vom Makro zu unterscheiden. Neu
       ist, dass der Toolbarbutton 'Seite drucken' nur verfügbar ist, wenn die
       Funktion sinnvoll verwendet werden kann.
+
     * Wird vor dem Seriendruck die Vorschau-Funktion verwendet, werden die
       zuletzt angezeigten Vorschaudaten in das Gesamtdokument übernommen. Als
       Workaround werden die Vorschaudaten vor dem Drucken gelöscht. Diese Daten

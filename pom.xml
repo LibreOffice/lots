@@ -12,7 +12,7 @@
 
 	<scm>
 		<developerConnection>scm:git:https://github.com/WollMux/WollMux.git</developerConnection>
-		<tag>wollmux-17.08</tag>
+		<tag>wollmux-18.0.3</tag>
 	</scm>
 
 	<build>
