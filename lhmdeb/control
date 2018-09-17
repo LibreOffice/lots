@@ -9,7 +9,7 @@ Homepage: http://www.wollmux.org
 
 Package: libreoffice5.2-wollmux
 Architecture: all
-Depends: ${misc:Depends}, default-jre, libreoffice-meta
+Depends: ${misc:Depends}, default-jre, libreoffice-meta, python3
 Conflicts: libreoffice-wollmux (<< ${binary:Version}), wollmux (<< ${binary:Version}), wollmuxbar (<< ${binary:Version})
 Replaces: libreoffice-wollmux (<< ${binary:Version}), wollmux (<< ${binary:Version}), wollmuxbar (<< ${binary:Version})
 Provides: libreoffice-wollmux, wollmux, wollmuxbar
