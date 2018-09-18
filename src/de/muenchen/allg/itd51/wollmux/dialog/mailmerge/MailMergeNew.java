@@ -1071,7 +1071,6 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       {
         long startTime = System.currentTimeMillis();
 
-        documentController.clearFormFields();
         documentController.setFormFieldsPreviewMode(true);
         pmod.printWithProps();
         documentController.setFormFieldsPreviewMode(false);
@@ -1149,9 +1148,6 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
     pmod.setPrintProgressMaxValue((short) selection.size());
 
-    // save visibility states before dataset evaluation
-    Map<String, Boolean> states = documentController.getModel().getMapGroupIdToVisibilityState();
-
     int index = -1;
     int serienbriefNummer = 1;
     while (iter.hasNext() && selectedIdx >= 0)
@@ -1187,6 +1183,9 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       for(String spalte : schema)
       {
         String value = ds.get(spalte);
+        // Wert zuerst entsetzen um sicher eine Änderung hervorzurufen.
+        // Denn ansonsten werden die Sichtbarkeiten nicht richtig aktualisiert.
+        pmod.setFormValue(spalte, "");
         pmod.setFormValue(spalte, value);
         dataSetExport.put(spalte, value);
       }
@@ -1207,11 +1206,6 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
       pmod.setPrintProgressValue((short) serienbriefNummer);
       ++serienbriefNummer;
-    }
-
-    // reset visibility states from before dataset evaluation
-    for(Map.Entry<String, Boolean> map: states.entrySet()) {
-      pmod.setFormValue(map.getKey(), map.getValue().toString());
     }
   }
 
