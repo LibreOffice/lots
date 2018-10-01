@@ -25,8 +25,14 @@ pipeline {
       steps {
         script {
           if (GIT_BRANCH == 'master') {
-            withSonarQubeEnv('SonarQube') {
-              sh "mvn $SONAR_MAVEN_GOAL -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.branch=$GIT_BRANCH"
+            withMaven(
+              maven: 'mvn',
+              mavenLocalRepo: '.repo',
+              mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
+              publisherStrategy: 'EXPLICIT') {
+              withSonarQubeEnv('SonarQube') {
+                sh "mvn $SONAR_MAVEN_GOAL -Dsonar.host.url=$SONAR_HOST_URL"
+              }
             }
             timeout(time: 1, unit: 'HOURS') {
               script {
