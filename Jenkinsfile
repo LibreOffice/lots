@@ -26,7 +26,7 @@ pipeline {
         script {
           if (GIT_BRANCH == 'master') {
             withSonarQubeEnv('SonarQube') {
-              sh "mvn $SONAR_MAVEN_GOAL -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.branch=master"
+              sh "mvn $SONAR_MAVEN_GOAL -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.branch=$GIT_BRANCH"
             }
             timeout(time: 1, unit: 'HOURS') {
               script {
