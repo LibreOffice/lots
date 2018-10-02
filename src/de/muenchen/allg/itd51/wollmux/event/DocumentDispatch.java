@@ -281,6 +281,11 @@ public class DocumentDispatch extends Dispatch
     return isElementInPrintPreview();
   }
 
+  public boolean status_wollmux_seriendruck()
+  {
+    return true;
+  }
+
   // zur Vermeidung java.lang.NoSuchMethodException:
   public boolean status_wollmux_functiondialog()
   {// Button 'Empfänger auswählen'
