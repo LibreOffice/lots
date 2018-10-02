@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +66,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 
 /**
  * Stellt eine OOo-Datenquelle als WollMux-Datenquelle zur Verfügung.
@@ -970,7 +972,7 @@ public class OOoDatasource implements Datasource
     try
     {
       UNO.init();
-      // Logger.init(System.err, Logger.ALL);
+      LogConfig.init(System.err, Level.ALL);
       // Datenquelle(
       // NAME "test"
       // TYPE "ooo"

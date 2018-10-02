@@ -1411,7 +1411,7 @@ public class FormController implements UIElementEventHandler
         } else if ("form2PDF".equals(action))
         {
           formModel.pdf();
-        } else if ("form2PDF".equals(action))
+        } else if ("save".equals(action))
         {
           formModel.save();
         } else if ("saveAs".equals(action))
