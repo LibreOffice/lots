@@ -22,15 +22,21 @@ import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 
 public class FormularMax4kView extends JFrame
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(FormularMax4kView.class);
+
   /**
    * ActionListener für Buttons mit der ACTION "abort".
    */
@@ -668,7 +674,7 @@ public class FormularMax4kView extends JFrame
           }
           catch (Exception x)
           {
-            Logger.error(
+            LOGGER.error(
               L.m("Fehler beim Parsen des Abschnitts FormularMax4000/Standardelemente"),
               x);
           }

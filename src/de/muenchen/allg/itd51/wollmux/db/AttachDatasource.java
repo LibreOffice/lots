@@ -42,11 +42,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.checker.DatasetChecker;
 import de.muenchen.allg.itd51.wollmux.db.checker.MatchAllDatasetChecker;
 
@@ -75,11 +77,15 @@ import de.muenchen.allg.itd51.wollmux.db.checker.MatchAllDatasetChecker;
  * Spalte mit dem entsprechenden Namen erweitert wird. Definitionen, die den Alias
  * verwendet haben verwenden ab da stillschweigend die Spalte aus SOURCE1, was
  * schwierig zu findende Fehler nach sich ziehen kann.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AttachDatasource implements Datasource
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(AttachDatasource.class);
+
   private static final String CONCAT_SEPARATOR = "__";
 
   private String name;
@@ -343,7 +349,7 @@ public class AttachDatasource implements Datasource
         }
         catch (ColumnNotFoundException x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
         }
       }
 
@@ -397,7 +403,7 @@ public class AttachDatasource implements Datasource
         }
         catch (ColumnNotFoundException x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
         }
       }
 

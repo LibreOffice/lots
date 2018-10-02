@@ -17,6 +17,9 @@ import java.util.regex.Matcher;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
@@ -48,7 +51,6 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
@@ -69,6 +71,10 @@ import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
 
 public class FormularMax4kController
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(FormularMax4kController.class);
+
   private FormularMax4kView view;
 
   /**
@@ -293,20 +299,20 @@ public class FormularMax4kController
           }
           catch (Exception x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
           }
         }
       });
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
   /**
    * Liefert den {@link IDManager}, der für Objekte im Formular verwendet wird.
-   * 
+   *
    * @see #NAMESPACE_FORMCONTROLMODEL
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -542,7 +548,7 @@ public class FormularMax4kController
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
@@ -572,7 +578,7 @@ public class FormularMax4kController
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
@@ -600,7 +606,7 @@ public class FormularMax4kController
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
 
@@ -677,7 +683,7 @@ public class FormularMax4kController
   {
     if (writeChangesTimer.isRunning())
     {
-      Logger.debug(L.m("Schreibe wartende Änderungen ins Dokument"));
+      LOGGER.debug(L.m("Schreibe wartende Änderungen ins Dokument"));
       writeChangesTimer.stop();
       try
       {
@@ -685,7 +691,7 @@ public class FormularMax4kController
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
   }
@@ -693,14 +699,14 @@ public class FormularMax4kController
   /**
    * Speichert die aktuelle Formularbeschreibung im Dokument und aktualisiert
    * Bookmarks etc.
-   * 
+   *
    * @return die aktualisierte Formularbeschreibung
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private ConfigThingy updateDocument(TextDocumentController documentController)
   {
-    Logger.debug(L.m("Übertrage Formularbeschreibung ins Dokument"));
+    LOGGER.debug(L.m("Übertrage Formularbeschreibung ins Dokument"));
     Map<String, ConfigThingy> mapFunctionNameToConfigThingy =
       new HashMap<String, ConfigThingy>();
     insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
@@ -806,7 +812,7 @@ public class FormularMax4kController
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
 
@@ -834,7 +840,7 @@ public class FormularMax4kController
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
 
@@ -1087,7 +1093,7 @@ public class FormularMax4kController
     }
     catch (Exception x)
     {
-      Logger.error(L.m("Fehler während des Scan-Vorgangs"), x);
+      LOGGER.error(L.m("Fehler während des Scan-Vorgangs"), x);
     }
 
     documentNeedsUpdating();
@@ -1198,7 +1204,7 @@ public class FormularMax4kController
         }
         catch (Exception x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
         }
       }
       else if ("TextField".equals(type)) // String const first b/c type may be null
@@ -1217,7 +1223,7 @@ public class FormularMax4kController
         }
         catch (Exception x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
         }
       }
     }
@@ -1267,7 +1273,7 @@ public class FormularMax4kController
     if (formControlCount > CRITICAL_NUMBER_OF_FORMCONTROLS
       && maxMemory < LOWEST_ALLOWED_HEAP_SIZE)
     {
-      Logger.log(L.m(
+      LOGGER.info(L.m(
         "Starten von FormularMax beim Bearbeiten von Dokument '%1' abgebrochen, da maximale Java Heap Size = %2 bytes und Anzahl FormControls = %3",
         documentController.getFrameController().getTitle(), maxMemory, formControlCount));
       JOptionPane.showMessageDialog(
@@ -1317,10 +1323,10 @@ public class FormularMax4kController
       }
       catch (IllegalArgumentException e)
       {
-        Logger.error(L.m("Kann Selection nicht in Objekt umwandeln"), e);
+        LOGGER.error(L.m("Kann Selection nicht in Objekt umwandeln"), e);
       }
     }
-  
+
     @Override
     public void disposing(EventObject arg0)
     {}

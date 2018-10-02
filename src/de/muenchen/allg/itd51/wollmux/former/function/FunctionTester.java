@@ -62,24 +62,30 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 /**
  * GUI zum interaktiven Zusammenbauen und Testen von WollMux-Funktionen.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class FunctionTester
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(FunctionTester.class);
+
   /**
    * Das Fenster des FunctionTesters.
    */
@@ -477,7 +483,7 @@ public class FunctionTester
     }
     catch (BadLocationException e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
       return errorValue;
     }
   }

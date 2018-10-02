@@ -29,6 +29,9 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XStorable;
 
@@ -37,14 +40,14 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Klasse, die das Aufrufen von externen Applikationen erleichtert.
- * 
+ *
  */
 public class OpenExt
 {
+  private static final Logger LOGGER = LoggerFactory.getLogger(OpenExt.class);
   /**
    * Präfix für Verzeichnisnamen zum Herunterladen von URLs für ACTION "openExt".
    */
@@ -163,7 +166,7 @@ public class OpenExt
         extConf = appConf.query("EXT");
         if (extConf.count() == 0)
         {
-          Logger.error(L.m("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige EXT-Angabe."));
+          LOGGER.error(L.m("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige EXT-Angabe."));
           continue;
         }
 
@@ -188,7 +191,7 @@ public class OpenExt
         }
         catch (NodeNotFoundException e)
         {
-          Logger.error(L.m("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige PROGRAM-Angabe."));
+          LOGGER.error(L.m("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige PROGRAM-Angabe."));
           continue;
         }
 
@@ -599,7 +602,7 @@ public class OpenExt
         int count;
         while ((0 <= (count = istream.read(buffy))))
         {
-          Logger.log(new String(buffy, 0, count));
+          LOGGER.info(new String(buffy, 0, count));
         }
       }
     }

@@ -65,6 +65,9 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
@@ -73,18 +76,21 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 
 /**
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
  * einen Dialog zum Drucken von Sachleitenden Verfügungen. Die private-Funktionen
  * dürfen NUR aus dem Event-Dispatching Thread heraus aufgerufen werden.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
  */
 public class SachleitendeVerfuegungenDruckdialog
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(SachleitendeVerfuegungenDruckdialog.class);
+
   /**
    * Kommando-String, der dem closeActionListener übermittelt wird, wenn der Dialog
    * über den Drucken-Knopf geschlossen wird.
@@ -305,14 +311,14 @@ public class SachleitendeVerfuegungenDruckdialog
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
   /**
    * Enthält die Einstellungen, die zu einem Verfügungspunkt im Dialog getroffen
    * wurden.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static class VerfuegungspunktInfo
@@ -739,13 +745,13 @@ public class SachleitendeVerfuegungenDruckdialog
           }
           else
           {
-            Logger.error(L.m("Ununterstützter TYPE für User Interface Element: %1",
+            LOGGER.error(L.m("Ununterstützter TYPE für User Interface Element: %1",
               type));
           }
         }
         catch (NodeNotFoundException e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
     }
@@ -803,7 +809,7 @@ public class SachleitendeVerfuegungenDruckdialog
       return null;
     }
     else
-      Logger.error(L.m("Ununterstützte ACTION: %1", action));
+      LOGGER.error(L.m("Ununterstützte ACTION: %1", action));
 
     return null;
   }
@@ -882,7 +888,7 @@ public class SachleitendeVerfuegungenDruckdialog
     }
     catch (Exception e)
     {
-      Logger.error(L.m("Kann Anzahl der Ausfertigungen nicht bestimmen."), e);
+      LOGGER.error(L.m("Kann Anzahl der Ausfertigungen nicht bestimmen."), e);
     }
 
     boolean isDraft = (verfPunkt == verfuegungspunkte.size());

@@ -61,18 +61,23 @@ import javax.swing.JTextField;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Enthält von den Dialogen gemeinsam genutzten Code.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class Common
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(Common.class);
+
   /**
    * Spezialwert wenn eine Breite oder Höhe die maximal sinnvolle sein soll.
    */
@@ -162,7 +167,7 @@ public class Common
    */
   private static void setLookAndFeel()
   {
-    Logger.debug("setLookAndFeel");
+    LOGGER.debug("setLookAndFeel");
     // String lafName = UIManager.getSystemLookAndFeelClassName();
     // if (lafName.equals("javax.swing.plaf.metal.MetalLookAndFeel"))
     // lafName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
@@ -292,12 +297,12 @@ public class Common
    * setLookAndFeel() kann diese Funktion genau einmal verwendet werden und hat in
    * folgenden Aufrufen keine Wirkung mehr, bis wieder setLookAndFeel() aufgerufen
    * wird (was den Zoom wieder zurücksetzt).
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void zoomFonts(double zoomFactor)
   {
-    Logger.debug("zoomFonts(" + zoomFactor + ")");
+    LOGGER.debug("zoomFonts(" + zoomFactor + ")");
     UIDefaults def = UIManager.getLookAndFeelDefaults();
     Set<Map.Entry<Object, Float>> mappings;
     mappings = defaultFontsizes.entrySet();
@@ -323,12 +328,12 @@ public class Common
       }
       catch (Exception ex)
       {
-        Logger.debug(ex);
+        LOGGER.debug("", ex);
       }
     }
-    
+
     /*Enumeration<Object> enu = def.keys();
-    
+
     while (enu.hasMoreElements())
     {
       Object key = enu.nextElement();
@@ -359,7 +364,7 @@ public class Common
         }
       }
     }*/
-    Logger.debug(changedFonts + L.m(" Fontgrößen verändert!"));
+    LOGGER.debug(changedFonts + L.m(" Fontgrößen verändert!"));
   }
 
   public static int getVerticalScrollbarUnitIncrement()

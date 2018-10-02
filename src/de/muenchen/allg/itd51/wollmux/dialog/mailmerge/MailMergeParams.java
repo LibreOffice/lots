@@ -79,6 +79,10 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
+import org.apache.log4j.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
@@ -86,7 +90,7 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
@@ -97,15 +101,19 @@ import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
 /**
  * Dialoge zur Bestimmung der Parameter für den wirklichen Merge (z.B. ob in
  * Gesamtdokument oder auf Drucker geschrieben werden soll.)
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 class MailMergeParams
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(MailMergeParams.class);
+
   /**
    * Übernimmt die Aufgabe des Controllers bezüglich dieser Klasse (MailMergeParams),
    * die die View darstellt.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public interface MailMergeController
@@ -590,7 +598,7 @@ class MailMergeParams
     {}
     if (sdConf == null)
     {
-      Logger.log(L.m("Kein Abschnitt Dialoge/Seriendruckdialog in der WollMux-Konfiguration "
+      LOGGER.info(L.m("Kein Abschnitt Dialoge/Seriendruckdialog in der WollMux-Konfiguration "
         + "angegeben! Verwende Default-Konfiguration für den Seriendruckdialog."));
       try
       {
@@ -600,7 +608,7 @@ class MailMergeParams
       }
       catch (Exception e)
       {
-        Logger.error(
+        LOGGER.error(
           L.m(
             "Kann Default-Konfiguration des Seriendruckdialogs nicht aus internem file %1 bestimmen. Dies darf nicht vorkommenen!",
             DEFAULT_MAILMERGEDIALOG_URL), e);
@@ -621,7 +629,7 @@ class MailMergeParams
     }
     catch (Exception e)
     {
-      Logger.debug(L.m("Kann Voreinstellung der Absender E-Mailadresse für den Seriendruckdialog nicht bestimmen"));
+      LOGGER.debug(L.m("Kann Voreinstellung der Absender E-Mailadresse für den Seriendruckdialog nicht bestimmen"));
     }
 
     showDoMailmergeDialog(parent, mmc, sdConf, defaultFrom);
@@ -682,7 +690,7 @@ class MailMergeParams
       }
       catch (NodeNotFoundException e2)
       {
-        Logger.error(L.m("Dialogbeschreibung für den Seriendruckdialog enthält keinen Abschnitt 'Regeln'"));
+        LOGGER.error(L.m("Dialogbeschreibung für den Seriendruckdialog enthält keinen Abschnitt 'Regeln'"));
         return;
       }
       ConfigThingy fensterConf = new ConfigThingy("");
@@ -1887,7 +1895,7 @@ class MailMergeParams
           boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
           Map<SubmitArgument, Object> pmodArgs)
       {
-        Logger.init(System.out, Logger.ALL);
+        LogConfig.init(System.err, Level.ALL);
         System.out.print("PrintFunctions: ");
         for (String func : usePrintFunctions)
           System.out.print("'" + func + "' ");

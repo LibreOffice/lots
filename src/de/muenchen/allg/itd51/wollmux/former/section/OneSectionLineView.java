@@ -51,7 +51,9 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
@@ -60,11 +62,14 @@ import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
 /**
  * Eine einzeilige Sicht auf einen Bereich im Dokument.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
 public class OneSectionLineView extends LineView
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(OneSectionLineView.class);
 
   /**
    * Das Model zu dieser View.
@@ -149,7 +154,7 @@ public class OneSectionLineView extends LineView
         }
         catch (BadLocationException x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
         }
         ignoreAttributeChanged = false;
       }

@@ -44,8 +44,10 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Diese Klasse repräsentiert eine Fortschrittsanzeige für den WollMux-Komfortdruck,
@@ -56,11 +58,15 @@ import de.muenchen.allg.itd51.wollmux.core.util.Logger;
  * auch z.B. eine Anzeige des Druckstatus in der Form "3 von 10 (=2x5)", aus der
  * hervorgeht, dass zwei Druckfunktionen beteiligt sind, von denen die eine 2
  * Versionen und die andere 5 Versionen erstellen wird.
- * 
+ *
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
 public class PrintProgressBar
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(PrintProgressBar.class);
+
   /**
    * Enthält eine Zuordnung eines Schlüssels, der eine Komfortdruckfunktion
    * repräsentiert, auf den Maximalwert von dieser Komfortdruckfunktion zu
@@ -147,14 +153,14 @@ public class PrintProgressBar
     }
     catch (Exception e)
     {
-      Logger.log(e);
+      LOGGER.info("", e);
     }
     setTitle(title);
   }
 
   /**
    * Erzeugt das Fenster und alle enthaltenen Elemente und schaltet es sichtbar.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private void createGui()

@@ -2,6 +2,9 @@ package de.muenchen.allg.itd51.wollmux.func.functions;
 
 import java.util.Collection;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.WollMuxClassLoader;
 import de.muenchen.allg.itd51.wollmux.core.functions.ExternalFunction;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
@@ -9,10 +12,13 @@ import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 public class ExternalFunctionFunction implements Function
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(ExternalFunctionFunction.class);
+
   private ExternalFunction func;
 
   public ExternalFunctionFunction(ConfigThingy conf)
@@ -44,7 +50,7 @@ public class ExternalFunctionFunction implements Function
     }
     catch (Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
       return Function.ERROR;
     }
   }

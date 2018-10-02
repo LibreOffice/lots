@@ -73,20 +73,26 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 /**
  * Datasource für Zugriff auf ein LDAP-Verzeichnis
- * 
+ *
  * @author Max Meier (D-III-ITD 5.1)
  */
 public class LDAPDatasource implements Datasource
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(LDAPDatasource.class);
+
   private Set<String> schema;
 
   private String datasourceName;
@@ -236,25 +242,25 @@ public class LDAPDatasource implements Datasource
       throw new ConfigurationErrorException(errorMessage()
         + L.m("Keine OBJECT_CLASS definiert."));
     }
-    
+
     String user = "";
     String password = "";
     try
     {
       user = sourceDesc.get("USER").toString();
       password = sourceDesc.get("PASSWORD").toString();
-      
+
     }
     catch (NodeNotFoundException e)
     {
-      Logger.debug(L.m("Username oder Passwort für den LDAP-Server fehlt."));
+      LOGGER.debug(L.m("Username oder Passwort für den LDAP-Server fehlt."));
     }
-    
+
     // set properties
     properties.put(Context.INITIAL_CONTEXT_FACTORY,
       "com.sun.jndi.ldap.LdapCtxFactory");
     properties.put(Context.PROVIDER_URL, url); // + "/" + baseDN);
-    
+
     if (!user.isEmpty() && !password.isEmpty())
     {
       properties.put(Context.SECURITY_PRINCIPAL, user);
@@ -575,7 +581,7 @@ public class LDAPDatasource implements Datasource
           }
           catch (NamingException e)
           {
-            Logger.error(L.m("Error in LDAP-Directory."), e);
+            LOGGER.error(L.m("Error in LDAP-Directory."), e);
           }
         }
       }
@@ -669,10 +675,10 @@ public class LDAPDatasource implements Datasource
     try
     {
       setTimeout(properties, timeout);
-      Logger.debug2("new InitialLdapContext(properties, null)");
+      LOGGER.trace("new InitialLdapContext(properties, null)");
       DirContext ctx = new InitialLdapContext(properties, null);
 
-      Logger.debug2("ctx.getNameParser(\"\")");
+      LOGGER.trace("ctx.getNameParser(\"\")");
       NameParser np = ctx.getNameParser("");
       int rootSize = np.parse(baseDN).size();
       SearchControls sc = new SearchControls();
@@ -680,10 +686,10 @@ public class LDAPDatasource implements Datasource
 
       sc.setTimeLimit((int) timeout);
 
-      Logger.debug2("ctx.search(" + baseDN + "," + filter + ",sc) mit Zeitlimit "
+      LOGGER.trace("ctx.search(" + baseDN + "," + filter + ",sc) mit Zeitlimit "
         + sc.getTimeLimit());
       NamingEnumeration<SearchResult> enumer = ctx.search(baseDN, filter, sc);
-      Logger.debug2("ctx.search() abgeschlossen");
+      LOGGER.trace("ctx.search() abgeschlossen");
 
       paths = new Vector<Name>();
 
@@ -1341,9 +1347,13 @@ public class LDAPDatasource implements Datasource
         tempPath = preparePath(tempPath);
 
         long timeout = endTime - System.currentTimeMillis();
-        if (timeout <= 0) throw new TimeoutException();
-        if (timeout > Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
-        Logger.debug2("getDataset(): verbleibende Zeit: " + timeout);
+        if (timeout <= 0) {
+          throw new TimeoutException();
+        }
+        if (timeout > Integer.MAX_VALUE) {
+          timeout = Integer.MAX_VALUE;
+        }
+        LOGGER.trace("getDataset(): verbleibende Zeit: " + timeout);
         setTimeout(properties, timeout);
         ctx = new InitialLdapContext(properties, null);
 
@@ -1519,13 +1529,13 @@ public class LDAPDatasource implements Datasource
    * @throws TimeoutException
    *           falls die Suche nicht schnell genug abgeschlossen werden konnte.
    * @author Max Meier (D-III-ITD 5.1)
-   * 
+   *
    */
   private NamingEnumeration<SearchResult> searchLDAP(String path, String filter,
       int searchScope, boolean onlyObjectClass, long endTime)
       throws TimeoutException
   {
-    Logger.debug("searchLDAP(" + path + "," + filter + "," + searchScope + ","
+    LOGGER.debug("searchLDAP(" + path + "," + filter + "," + searchScope + ","
       + onlyObjectClass + "," + endTime + ") zum Zeitpunkt "
       + System.currentTimeMillis());
 
@@ -1556,17 +1566,17 @@ public class LDAPDatasource implements Datasource
     try
     {
       setTimeout(properties, timeout);
-      Logger.debug2("new InitialLdapContext(properties, null)");
+      LOGGER.trace("new InitialLdapContext(properties, null)");
       ctx = new InitialLdapContext(properties, null);
 
-      Logger.debug2("ctx.getNameParser(\"\")");
+      LOGGER.trace("ctx.getNameParser(\"\")");
       NameParser nameParser = ctx.getNameParser("");
       Name name = nameParser.parse(path + baseDN);
 
-      Logger.debug2("ctx.search(" + name + "," + filter
+      LOGGER.trace("ctx.search(" + name + "," + filter
         + ",searchControls) mit Zeitlimit " + searchControls.getTimeLimit());
       result = ctx.search(name, filter, searchControls);
-      Logger.debug2("ctx.search() abgeschlossen");
+      LOGGER.trace("ctx.search() abgeschlossen");
 
     }
     catch (TimeLimitExceededException e)
@@ -1587,7 +1597,7 @@ public class LDAPDatasource implements Datasource
       {}
     }
 
-    Logger.debug((result.hasMoreElements() ? "Ergebnisse gefunden"
+    LOGGER.debug((result.hasMoreElements() ? "Ergebnisse gefunden"
                                           : "keine Ergebnisse gefunden")
       + " (verbleibende Zeit: " + (endTime - System.currentTimeMillis()) + ")");
     return result;

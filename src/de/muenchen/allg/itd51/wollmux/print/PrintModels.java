@@ -38,6 +38,9 @@ import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.Property;
 import com.sun.star.beans.PropertyAttribute;
 import com.sun.star.beans.PropertyVetoException;
@@ -58,7 +61,6 @@ import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.SyncActionListener;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRange;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRangeType;
@@ -72,11 +74,15 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
  * Hilfe die Verkettung mehrerer PrintFunctions möglich ist. Ein XPrintModel hält
  * alle Daten und Methoden bereit, die beim Drucken aus einer Druckfunktion heraus
  * benötigt werden.
- * 
+ *
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
 public class PrintModels
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(PrintModels.class);
+
   /**
    * Spezial-Property für {@link XPrintModel#setPropertyValue(String, Object)} zum
    * Setzen eines Beschreibungsstrings des aktuell in Bearbeitung befindlichen
@@ -130,7 +136,7 @@ public class PrintModels
         }
         catch (NoSuchMethodException e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
     }
@@ -390,7 +396,7 @@ public class PrintModels
         }
         catch (InterruptedException e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
       else
@@ -500,21 +506,24 @@ public class PrintModels
           break;
       }
 
-      if (UNO.XPrintable(documentController.getModel().doc) != null) try
+      if (UNO.XPrintable(documentController.getModel().doc) != null)
       {
-        UNO.XPrintable(documentController.getModel().doc).print(myProps.getProps());
-        return true;
-      }
-      catch (IllegalArgumentException e)
-      {
-        Logger.error(e);
+        try
+        {
+          UNO.XPrintable(documentController.getModel().doc)
+              .print(myProps.getProps());
+          return true;
+        } catch (IllegalArgumentException e)
+        {
+          LOGGER.error("", e);
+        }
       }
       return false;
     }
 
     /**
      * synchronisiertes Setzen von props
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
     private void setProperty(String prop, Object o)
@@ -1082,7 +1091,7 @@ public class PrintModels
         }
         catch (InterruptedException e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
         master.setPrintProgressMaxValue(pmod, (short) 0);
       }
@@ -1301,7 +1310,7 @@ public class PrintModels
         PrintFunction currentFunc = master.getPrintFunction(idx);
         if (function.compareTo(currentFunc) <= 0)
         {
-          Logger.error(L.m(
+          LOGGER.error(L.m(
             "Druckfunktion '%1' muss einen höheren ORDER-Wert besitzen als die Druckfunktion '%2'",
             function.getFunctionName(), currentFunc.getFunctionName()));
           return false;
@@ -1311,14 +1320,14 @@ public class PrintModels
       }
       else
       {
-        Logger.error(L.m("Die angeforderte interne Druckfunktion ist ungültig."));
+        LOGGER.error(L.m("Die angeforderte interne Druckfunktion ist ungültig."));
         return false;
       }
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * de.muenchen.allg.itd51.wollmux.XPrintModel#setGroupVisible(java.lang.String,
      * boolean)
@@ -1401,7 +1410,7 @@ public class PrintModels
     }
     catch (Exception e)
     {
-      Logger.error(L.m("Kann Stage nicht auf '%1' setzen", stage), e);
+      LOGGER.error(L.m("Kann Stage nicht auf '%1' setzen", stage), e);
     }
   }
 }

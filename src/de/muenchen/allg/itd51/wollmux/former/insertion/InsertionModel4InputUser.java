@@ -34,6 +34,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.regex.Matcher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.lang.XComponent;
@@ -46,12 +49,15 @@ import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 
 public class InsertionModel4InputUser extends InsertionModel
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(InsertionModel4InputUser.class);
+
   /**
    * Name of the variable whose value is edited by the InputUser field. This is a
    * string matching {@link TextDocumentModel#INPUT_USER_FUNCTION} and contains the name of the
@@ -264,7 +270,7 @@ public class InsertionModel4InputUser extends InsertionModel
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return false;
     }
   }

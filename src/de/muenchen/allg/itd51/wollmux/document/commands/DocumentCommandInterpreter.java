@@ -48,6 +48,9 @@ package de.muenchen.allg.itd51.wollmux.document.commands;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.Property;
 import com.sun.star.beans.PropertyAttribute;
 import com.sun.star.beans.XMultiPropertySet;
@@ -64,17 +67,19 @@ import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
  * Diese Klasse repräsentiert den Kommando-Interpreter zur Auswertung von
  * WollMux-Kommandos in einem gegebenen Textdokument.
- * 
+ *
  * @author Christoph Lutz (D-III-ITD 5.1)
  */
 public class DocumentCommandInterpreter
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(DocumentCommandInterpreter.class);
 
   private TextDocumentController documentController;
 
@@ -134,9 +139,9 @@ public class DocumentCommandInterpreter
    */
   public void scanGlobalDocumentCommands()
   {
-    Logger.debug("scanGlobalDocumentCommands");
+    LOGGER.debug("scanGlobalDocumentCommands");
     boolean modified = getDocumentController().getModel().isDocumentModified();
-    
+
     try
     {
       getDocumentController().getModel().setDocumentModifiable(false);
@@ -168,7 +173,7 @@ public class DocumentCommandInterpreter
    */
   public void scanInsertFormValueCommands()
   {
-    Logger.debug("scanInsertFormValueCommands");
+    LOGGER.debug("scanInsertFormValueCommands");
     boolean modified = getDocumentController().getModel().isDocumentModified();
     
     try
@@ -201,7 +206,7 @@ public class DocumentCommandInterpreter
 
     try
     {
-      Logger.debug("executeTemplateCommands");
+      LOGGER.debug("executeTemplateCommands");
       getDocumentController().getModel().setDocumentModifiable(false);
       // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
       // können, damit der DocumentCommandTree vollständig aufgebaut werden
@@ -296,7 +301,7 @@ public class DocumentCommandInterpreter
     }
     catch (java.lang.Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
 
     XStyle styleWollmuxseite = null;

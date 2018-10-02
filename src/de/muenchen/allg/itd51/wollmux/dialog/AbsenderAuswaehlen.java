@@ -76,11 +76,13 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -93,18 +95,22 @@ import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
  * einen Dialog zum Auswählen eines Eintrages aus der Persönlichen Absenderliste. Die
  * private-Funktionen dürfen NUR aus dem Event-Dispatching Thread heraus aufgerufen
  * werden.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AbsenderAuswaehlen
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(AbsenderAuswaehlen.class);
+
   /**
    * Default-Wert dafür, wie die Personen in der Absenderliste angezeigt werden
    * sollen, wenn es nicht explizit in der Konfiguration über das DISPLAY-Attribut
    * für eine listbox festgelegt ist. %{Spalte}-Syntax um entsprechenden Wert des
    * Datensatzes einzufügen, z.B. "%{Nachname}, %{Vorname}" für die Anzeige
    * "Meier, Hans" etc.
-   * 
+   *
    * An dieser Stelle einen Default-Wert hardzucodieren (der noch dazu LHM-spezifisch
    * ist!) ist sehr unschön und wurde nur gemacht um abwärtskompatibel zu alten
    * WollMux-Konfigurationen zu bleiben. Sobald sichergestellt ist, dass überall auf
@@ -279,19 +285,18 @@ public class AbsenderAuswaehlen
           }
           catch (Exception x)
           {}
-          ;
         }
       });
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
   /**
    * Erzeugt das GUI.
-   * 
+   *
    * @param fensterDesc
    *          die Spezifikation dieses Dialogs.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -472,7 +477,7 @@ public class AbsenderAuswaehlen
               }
               catch (NodeNotFoundException e)
               {
-                Logger.log(L.m(
+                LOGGER.info(L.m(
                   "Kein DISPLAY-Attribut für die listbox mit ID \"pal\" im AbsenderAuswaehlen-Dialog angegeben! Verwende Fallback: %1",
                   DEFAULT_DISPLAYTEMPLATE));
                 // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
@@ -552,13 +557,13 @@ public class AbsenderAuswaehlen
           }
           else
           {
-            Logger.error(L.m("Ununterstützter TYPE für User Interface Element: ",
+            LOGGER.error(L.m("Ununterstützter TYPE für User Interface Element: ",
               type));
           }
         }
         catch (NodeNotFoundException e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
     }
@@ -621,7 +626,7 @@ public class AbsenderAuswaehlen
       return null;
     }
     else
-      Logger.error(L.m("Ununterstützte ACTION: ", action));
+      LOGGER.error(L.m("Ununterstützte ACTION: ", action));
 
     return null;
   }
@@ -745,7 +750,7 @@ public class AbsenderAuswaehlen
     }
     catch (ConfigurationErrorException x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
@@ -796,7 +801,7 @@ public class AbsenderAuswaehlen
         }
         catch (Exception x)
         {
-          Logger.error(x);
+          LOGGER.error("",x);
         }
       else
       {
@@ -910,7 +915,7 @@ public class AbsenderAuswaehlen
       }
       catch (ConfigurationErrorException x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
   }

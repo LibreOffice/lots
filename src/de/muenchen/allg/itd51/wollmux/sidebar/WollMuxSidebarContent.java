@@ -8,6 +8,9 @@ import java.util.UUID;
 
 import javax.swing.JOptionPane;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.accessibility.XAccessible;
 import com.sun.star.awt.ActionEvent;
 import com.sun.star.awt.FocusEvent;
@@ -69,7 +72,6 @@ import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.SearchBox;
 import de.muenchen.allg.itd51.wollmux.dialog.UIElementContext;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar;
@@ -95,6 +97,10 @@ import de.muenchen.uno.UnoReflect;
 public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     XSidebarPanel, XWindowListener, UIElementCreateListener
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(WollMuxSidebarContent.class);
+
   private static WollMuxBarConfig config;
 
   private XComponentContext context;
@@ -216,12 +222,12 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         }
         catch (Exception ex)
         {
-          Logger.error(ex);
+          LOGGER.error("", ex);
         }
       }
     }
   }
-  
+
   @Override
   public XAccessible createAccessible(XAccessible arg0)
   {
@@ -298,13 +304,13 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         }
         catch (Exception x)
         {
-          Logger.error(
+          LOGGER.error(
             L.m("Fehler beim Lesen von '%1'", wollmuxbarConfFile.toString()), x);
         }
       }
       else
       {
-        Logger.debug(L.m(
+        LOGGER.debug(L.m(
           "Die Verwendung der Konfigurationsdatei '%1' ist deaktiviert. Sie wird nicht ausgewertet!",
           wollmuxbarConfFile.toString()));
       }
@@ -318,11 +324,11 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
     try
     {
-      Logger.debug(L.m("WollMuxBar gestartet"));
+      LOGGER.debug(L.m("WollMuxBar gestartet"));
 
       if (combinedConf.query("Symbolleisten").count() == 0)
       {
-        Logger.error(WollMuxBar.WOLLMUX_CONFIG_ERROR_MESSAGE);
+        LOGGER.error(WollMuxBar.WOLLMUX_CONFIG_ERROR_MESSAGE);
         JOptionPane.showMessageDialog(null, WollMuxBar.WOLLMUX_CONFIG_ERROR_MESSAGE,
           L.m("Fehlerhafte Konfiguration"), JOptionPane.ERROR_MESSAGE);
       }
@@ -338,7 +344,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
@@ -347,7 +353,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
   {
     if (element == null)
     {
-      Logger.debug("Unbekanntes Element.");
+      LOGGER.debug("Unbekanntes Element.");
       return;
     }
 
@@ -414,7 +420,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     }
     catch (com.sun.star.uno.Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
   }
 
@@ -529,7 +535,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         }
         catch (Exception e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
 
@@ -563,7 +569,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         }
         catch (Exception e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
     });
@@ -593,7 +599,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         }
         catch (IndexOutOfBoundsException e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
     });
@@ -638,7 +644,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         }
         catch (Exception e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
     });
@@ -684,7 +690,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
             }
             catch (Exception x)
             {
-              Logger.error(x);
+              LOGGER.error("", x);
             }
           }
       }
@@ -746,7 +752,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       }
       catch (Exception ex)
       {
-        Logger.error(ex);
+        LOGGER.error("", ex);
       }
     }
 

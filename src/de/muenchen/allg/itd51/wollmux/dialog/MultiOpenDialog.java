@@ -16,16 +16,22 @@ import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
 public class MultiOpenDialog extends JFrame
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(MultiOpenDialog.class);
+
   private static final long serialVersionUID = 1L;
-  
+
   private ConfigThingy conf;
   private WollMuxBarEventHandler eventHandler;
 
@@ -59,7 +65,7 @@ public class MultiOpenDialog extends JFrame
     }
     catch (NodeNotFoundException e2)
     {
-      Logger.error(L.m("ACTION \"open\" erfordert Abschnitt \"Labels\" in den OPEN-Angaben"));
+      LOGGER.error(L.m("ACTION \"open\" erfordert Abschnitt \"Labels\" in den OPEN-Angaben"));
       return;
     }
     final List<JCheckBox> checkBoxes = new Vector<JCheckBox>();
@@ -133,7 +139,7 @@ public class MultiOpenDialog extends JFrame
         }
         catch (NodeNotFoundException e1)
         {
-          Logger.error(L.m("Abschnitt \"Fragmente\" fehlt in OPEN-Angabe"));
+          LOGGER.error(L.m("Abschnitt \"Fragmente\" fehlt in OPEN-Angabe"));
           return;
         }
         Iterator<ConfigThingy> fragIter = fragConf.iterator();

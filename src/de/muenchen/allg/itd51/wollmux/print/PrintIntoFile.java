@@ -55,6 +55,10 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import org.apache.log4j.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
@@ -83,16 +87,20 @@ import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
  * "Druck"funktion, die das zu druckende Dokument an ein Ergebnisdokument anhängt.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class PrintIntoFile
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(PrintIntoFile.class);
+
   /**
    * Präfix, das vor den Namen des angelegten temporären Verzeichnisses gesetzt wird.
    */
@@ -226,11 +234,11 @@ public class PrintIntoFile
        * expected.
        */
       cursor = text.createTextCursorByRange(text.getEnd());
-      Logger.debug2("================= OID dump BEFORE insert ==================");
+      LOGGER.trace("================= OID dump BEFORE insert ==================");
       dumpOids(outputDoc);
       UNO.XDocumentInsertable(cursor).insertDocumentFromURL(url,
         new PropertyValue[] {});
-      Logger.debug2("================= OID dump AFTER insert ==================");
+      LOGGER.trace("================= OID dump AFTER insert ==================");
       dumpOids(outputDoc);
 
       cursor.collapseToStart();
@@ -271,7 +279,7 @@ public class PrintIntoFile
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
     finally
     {
@@ -347,7 +355,7 @@ public class PrintIntoFile
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
     return false;
@@ -378,7 +386,7 @@ public class PrintIntoFile
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
       return;
     }
     Map<String, String> mapOldPageStyleName2NewPageStyleName =
@@ -409,9 +417,11 @@ public class PrintIntoFile
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
-      if (!cursor.gotoNextParagraph(false)) break;
+      if (!cursor.gotoNextParagraph(false)) {
+        break;
+      }
     }
   }
 
@@ -433,20 +443,22 @@ public class PrintIntoFile
         Object ob = shapes.getByIndex(i);
         XNamed named = UNO.XNamed(ob);
         String name = "<Unknown>";
-        if (named != null) name = named.getName();
-        Logger.debug2(name + " -> " + UnoRuntime.generateOid(ob));
+        if (named != null) {
+          name = named.getName();
+        }
+        LOGGER.trace(name + " -> " + UnoRuntime.generateOid(ob));
       }
     }
     catch (Exception x)
     {
-      Logger.debug2(x);
+      LOGGER.trace("", x);
     }
   }
 
   /**
    * Ersetzt alle TextFields des Typs PageCount in textFields durch den Wert
    * pageCount.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * @throws WrappedTargetException
    * @throws NoSuchElementException
@@ -556,34 +568,34 @@ public class PrintIntoFile
             int oldPageNo =
               ((Number) UNO.getProperty(ob, "AnchorPageNo")).intValue();
             int newPageNo = oldPageNo + pageNumberOffset;
-            Logger.debug2(L.m("Verschiebe \"%1\" von Seite %2 nach Seite %3", name,
+            LOGGER.trace(L.m("Verschiebe \"%1\" von Seite %2 nach Seite %3", name,
               oldPageNo, newPageNo));
             Object afterMovePageNo =
               UNO.setProperty(ob, "AnchorPageNo", Short.valueOf((short) newPageNo));
             if (null == afterMovePageNo
               || ((Number) afterMovePageNo).intValue() != newPageNo)
             {
-              Logger.error(L.m(
+              LOGGER.error(L.m(
                 "Kann AnchorPageNo von Objekt #\"%1\" nicht auf %2 setzen", i,
                 newPageNo));
             }
           }
           else
           {
-            Logger.debug2(L.m(
+            LOGGER.trace(L.m(
               "Verschiebe \"%1\" NICHT, weil zwar neu dazugekommen, aber nicht an der Seite verankert",
               name));
           }
         }
         else
         {
-          Logger.debug2(L.m("Verschiebe \"%1\" NICHT, weil nicht neu dazugekommen",
+          LOGGER.trace(L.m("Verschiebe \"%1\" NICHT, weil nicht neu dazugekommen",
             name));
         }
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
   }
@@ -656,7 +668,7 @@ public class PrintIntoFile
   public static void main(String[] args) throws Exception
   {
     UNO.init();
-    Logger.init(Logger.ALL);
+    LogConfig.init(System.err, Level.ALL);
 
     final boolean[] done = new boolean[] { false };
     SwingUtilities.invokeAndWait(new Runnable()

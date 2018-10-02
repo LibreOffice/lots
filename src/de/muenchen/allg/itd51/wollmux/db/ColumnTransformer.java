@@ -36,6 +36,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
@@ -43,17 +46,20 @@ import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 /**
  * Nimmt ein Dataset und stellt mit Hilfe von WollMux-Funktionen aus dessen Spalten
  * berechnete Pseudo-Spalten zur Verfügung.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
 public class ColumnTransformer
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(ColumnTransformer.class);
+
   /**
    * Die Namen aller Pseudospalten, die für diesen ColumnTransformer definiert sind.
    */
@@ -180,7 +186,7 @@ public class ColumnTransformer
       }
       catch (ConfigurationErrorException e)
       {
-        Logger.error(
+        LOGGER.error(
           L.m(
             "Fehler beim Parsen der Spaltenumsetzungsfunktion für Ergebnisspalte \"%1\"",
             name), e);
@@ -215,7 +221,7 @@ public class ColumnTransformer
       }
       catch (ConfigurationErrorException x)
       {
-        Logger.error(L.m("Fehler beim Parsen des Abschnitts '%1'", nodeName), x);
+        LOGGER.error(L.m("Fehler beim Parsen des Abschnitts '%1'", nodeName), x);
       }
     }
   }

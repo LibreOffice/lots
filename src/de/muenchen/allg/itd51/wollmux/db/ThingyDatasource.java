@@ -44,15 +44,21 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 
 public class ThingyDatasource extends RAMDatasource
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(ThingyDatasource.class);
+
   private static final Pattern SPALTENNAME =
     Pattern.compile("^[a-zA-Z_][a-zA-Z_0-9]*$");
 
@@ -236,7 +242,7 @@ public class ThingyDatasource extends RAMDatasource
     }
     catch (NodeNotFoundException e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
     return null;
   }

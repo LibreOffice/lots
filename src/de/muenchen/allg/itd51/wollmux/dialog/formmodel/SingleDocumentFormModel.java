@@ -6,13 +6,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.frame.XFrame;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeDatasource;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
@@ -28,6 +30,9 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
  */
 public class SingleDocumentFormModel implements FormModel
 {
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(SingleDocumentFormModel.class);
+
   private final TextDocumentController documentController;
 
   private final ConfigThingy formFensterConf;
@@ -303,7 +308,7 @@ public class SingleDocumentFormModel implements FormModel
       UNO.XChangesBatch(ca).commitChanges();
     } catch (java.lang.Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
   }
 
@@ -388,7 +393,7 @@ public class SingleDocumentFormModel implements FormModel
       SingleDocumentFormModel.vFormGUIs.get(frameIndex).dispose();
       SingleDocumentFormModel.vFormGUIs.remove(frameIndex);
       SingleDocumentFormModel.vFrames.remove(frameIndex);
-      Logger.debug(L.m("FormGUI an der Stelle %1 beendet.", frameIndex));
+      LOGGER.debug(L.m("FormGUI an der Stelle %1 beendet.", frameIndex));
     }
 
     HashMap<String, String> idToPresetValue = documentController

@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.document.DocumentTreeVisitor;
 import de.muenchen.allg.itd51.wollmux.core.document.InsertionBookmark;
@@ -14,7 +17,6 @@ import de.muenchen.allg.itd51.wollmux.core.document.nodes.DropdownFormControl;
 import de.muenchen.allg.itd51.wollmux.core.document.nodes.FormControl;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
@@ -24,8 +26,12 @@ import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXVal
 
 public class ScanVisitor extends DocumentTreeVisitor
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(ScanVisitor.class);
+
   private final FormularMax4kController formularMax4000;
-  
+
   /**
    * Maximale Anzahl Zeichen für ein automatisch generiertes Label.
    */
@@ -235,7 +241,7 @@ public class ScanVisitor extends DocumentTreeVisitor
           model = registerInput(control, label, id);
           break;
         default:
-          Logger.error(L.m("Unbekannter Typ Formular-Steuerelement"));
+          LOGGER.error(L.m("Unbekannter Typ Formular-Steuerelement"));
           return null;
       }
     }
@@ -274,7 +280,7 @@ public class ScanVisitor extends DocumentTreeVisitor
     }
     catch (Exception x)
     {
-      Logger.error(
+      LOGGER.error(
         L.m("Es wurde ein fehlerhaftes Bookmark generiert: \"%1\"", bookmarkName), x);
     }
 

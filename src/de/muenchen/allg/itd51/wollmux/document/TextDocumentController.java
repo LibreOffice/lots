@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
@@ -47,7 +50,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
@@ -60,8 +62,12 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 public class TextDocumentController
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(TextDocumentController.class);
+
   private TextDocumentModel model;
-  
+
   /**
    * Enthält den Kontext für die Funktionsbibliotheken und Dialogbibliotheken dieses
    * Dokuments.
@@ -416,9 +422,13 @@ public class TextDocumentController
       String res = f.getString(values);
       if (res.length() > 0)
       {
-        if (res.equals("noaction")) return 0;
-        if (res.equals("allactions")) return Integer.MAX_VALUE;
-        Logger.error(L.m(
+        if ("noaction".equals(res)) {
+          return 0;
+        }
+        if ("allactions".equals(res)) {
+          return Integer.MAX_VALUE;
+        }
+        LOGGER.error(L.m(
           "Unbekannter Rückgabewert \"%1\" von Dokumentaktionen-Funktion", res));
       }
     }
@@ -473,7 +483,7 @@ public class TextDocumentController
     }
     catch (java.lang.Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
   }
 
@@ -514,7 +524,7 @@ public class TextDocumentController
             
             if (func == null)
             {
-              Logger.error(L.m(
+              LOGGER.error(L.m(
                 "Die im Formularfeld verwendete Funktion '%1' ist nicht definiert.",
                 funcName));
               continue;
@@ -552,13 +562,13 @@ public class TextDocumentController
         }
         catch (Exception x)
         {
-          Logger.error(x);
+          LOGGER.error("", x);
         }
       }
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
@@ -767,7 +777,7 @@ public class TextDocumentController
       else
       {
         transformed = L.m("<FEHLER: TRAFO '%1' nicht definiert>", trafoName);
-        Logger.error(L.m("Die TRAFO '%1' ist nicht definiert.", trafoName));
+        LOGGER.error(L.m("Die TRAFO '%1' ist nicht definiert.", trafoName));
       }
     }
     return transformed;
@@ -804,7 +814,7 @@ public class TextDocumentController
     }
     else
     {
-      Logger.error(L.m("Die TRAFO '%1' ist nicht definiert.", trafoName));
+      LOGGER.error(L.m("Die TRAFO '%1' ist nicht definiert.", trafoName));
       return L.m("<FEHLER: TRAFO '%1' nicht definiert>", trafoName);
     }
   }
@@ -851,7 +861,7 @@ public class TextDocumentController
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
 
@@ -919,7 +929,7 @@ public class TextDocumentController
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
     }
   }
@@ -975,7 +985,7 @@ public class TextDocumentController
           }
           catch (NumberFormatException e)
           {
-            Logger.error(L.m(
+            LOGGER.error(L.m(
               "Fehler in Dokumentkommando '%1': Die Farbe HIGHLIGHT_COLOR mit dem Wert '%2' ist ungültig.",
               "" + cmd, highlightColor));
           }
@@ -1083,7 +1093,7 @@ public class TextDocumentController
             // 1-zu-1 Zuordnung: Hier kann substitueFieldID verwendet werden
             f.substituteFieldID(fieldId, newFieldId);
           else
-            Logger.error(L.m("Kann transformiertes Feld nur durch eine 1-zu-1 Zuordnung ersetzen."));
+            LOGGER.error(L.m("Kann transformiertes Feld nur durch eine 1-zu-1 Zuordnung ersetzen."));
         }
         else
         {
@@ -1135,7 +1145,7 @@ public class TextDocumentController
             // werden, dafür kann aber die Trafo angepasst werden.
             substituteFieldIdInTrafo(f.getTrafoName(), fieldId, newFieldId);
           else
-            Logger.error(L.m("Kann transformiertes Feld nur durch eine 1-zu-1 Zuordnung ersetzen."));
+            LOGGER.error(L.m("Kann transformiertes Feld nur durch eine 1-zu-1 Zuordnung ersetzen."));
         }
         else
         {
@@ -1230,7 +1240,7 @@ public class TextDocumentController
     }
     catch (java.lang.Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
   }
 
@@ -1268,10 +1278,10 @@ public class TextDocumentController
     }
     catch (java.lang.Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
   }
-  
+
   /**
    * Diese Methode speichert die als Kinder von conf übergebenen Metadaten für den
    * Seriendruck persistent im Dokument oder löscht die Metadaten aus dem Dokument,
@@ -1404,7 +1414,7 @@ public class TextDocumentController
     }
     catch (java.lang.Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
   }
 
@@ -1647,7 +1657,7 @@ public class TextDocumentController
         }
         catch (java.lang.Exception e)
         {
-          Logger.error(e);
+          LOGGER.error("", e);
         }
       }
     }
@@ -1759,7 +1769,7 @@ public class TextDocumentController
     }
     catch (NodeNotFoundException e)
     {
-      Logger.error(L.m("Dies kann nicht passieren."), e);
+      LOGGER.error(L.m("Dies kann nicht passieren."), e);
     }
   }
 
@@ -1806,12 +1816,12 @@ public class TextDocumentController
       {
         // sollte eigentlich nicht auftreten, da die alte Trafo ja auch schon
         // einmal erfolgreich geparsed werden konnte.
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
     catch (NodeNotFoundException e)
     {
-      Logger.error(L.m(
+      LOGGER.error(L.m(
         "Die trafo '%1' ist nicht in diesem Dokument definiert und kann daher nicht verändert werden.",
         trafoName));
     }
@@ -1872,7 +1882,7 @@ public class TextDocumentController
     }
     catch (java.lang.Exception e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
     }
   }
 
@@ -2041,7 +2051,7 @@ public class TextDocumentController
     }
     catch (ConfigurationErrorException e)
     {
-      Logger.error(e);
+      LOGGER.error("", e);
       return null;
     }
   }
@@ -2103,7 +2113,7 @@ public class TextDocumentController
       }
       catch (java.lang.Exception e)
       {
-        Logger.error(e);
+        LOGGER.error("", e);
       }
     }
     return null;
@@ -2229,7 +2239,7 @@ public class TextDocumentController
       }
       catch (NodeNotFoundException x)
       {
-        Logger.error(L.m(
+        LOGGER.error(L.m(
           "FRAG_ID Angabe fehlt in einem Eintrag der %1: %2\nVielleicht haben Sie die Klammern um (FRAG_ID 'A' NEW_FRAG_ID 'B') vergessen?",
           TextDocumentModel.OVERRIDE_FRAG_DB_SPALTE, conf.stringRepresentation()));
         continue;
@@ -2251,7 +2261,7 @@ public class TextDocumentController
       }
       catch (OverrideFragChainException x)
       {
-        Logger.error(L.m("Fehlerhafte Angabe in %1: %2",
+        LOGGER.error(L.m("Fehlerhafte Angabe in %1: %2",
           TextDocumentModel.OVERRIDE_FRAG_DB_SPALTE, conf.stringRepresentation()), x);
       }
     }
@@ -2292,22 +2302,22 @@ public class TextDocumentController
       }
       catch (DatasetNotFoundException e)
       {
-        Logger.log(L.m("Kein Absender ausgewählt => %1 bleibt wirkungslos",
+        LOGGER.info(L.m("Kein Absender ausgewählt => %1 bleibt wirkungslos",
           TextDocumentModel.OVERRIDE_FRAG_DB_SPALTE));
       }
       catch (ColumnNotFoundException e)
       {
-        Logger.error(L.m("%2 spezifiziert Spalte '%1', die nicht vorhanden ist",
+        LOGGER.error(L.m("%2 spezifiziert Spalte '%1', die nicht vorhanden ist",
           overrideFragDbSpalte, TextDocumentModel.OVERRIDE_FRAG_DB_SPALTE), e);
       }
       catch (IOException x)
       {
-        Logger.error(L.m("Fehler beim Parsen der %2 '%1'", overrideFragDbSpalte,
+        LOGGER.error(L.m("Fehler beim Parsen der %2 '%1'", overrideFragDbSpalte,
           TextDocumentModel.OVERRIDE_FRAG_DB_SPALTE), x);
       }
       catch (SyntaxErrorException x)
       {
-        Logger.error(L.m("Fehler beim Parsen der %2 '%1'", overrideFragDbSpalte,
+        LOGGER.error(L.m("Fehler beim Parsen der %2 '%1'", overrideFragDbSpalte,
           TextDocumentModel.OVERRIDE_FRAG_DB_SPALTE), x);
       }
     }

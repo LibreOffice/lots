@@ -37,6 +37,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.lang.IllegalArgumentException;
@@ -55,17 +58,20 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
  * Klasse enthält statische Methoden die für das Textbausteinsystem benötigt werden
- * 
+ *
  * @author bettina.bauer
  */
 public class TextModule
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(TextModule.class);
+
   /**
    * Pattern, das insertFrag-Bookmarks matcht.
    */
@@ -296,7 +302,7 @@ public class TextModule
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(L.m("FRAG_ID Angabe fehlt in %1",
+        LOGGER.error(L.m("FRAG_ID Angabe fehlt in %1",
           mappingConf.stringRepresentation()));
         continue;
       }
@@ -325,8 +331,8 @@ public class TextModule
           }
           catch (java.lang.Exception e)
           {
-            Logger.error(L.m("Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet wird gibt es nicht in MATCH. ")
-              + e);
+            LOGGER.error(L.m("Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet wird gibt es nicht in MATCH. ")
+              ,e);
           }
           return args;
         }
@@ -393,7 +399,7 @@ public class TextModule
 
     String bookmarkName = DocumentCommand.getCommandString(root);
 
-    Logger.debug2(L.m("Erzeuge Bookmark: '%1'", bookmarkName));
+    LOGGER.trace(L.m("Erzeuge Bookmark: '%1'", bookmarkName));
 
     new Bookmark(bookmarkName, doc, range);
   }

@@ -72,6 +72,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import org.apache.log4j.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
@@ -79,7 +83,7 @@ import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Logger;
+import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnTransformer;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -99,6 +103,10 @@ import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
  */
 public class DatasourceSearchDialog implements Dialog
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(DatasourceSearchDialog.class);
+
   /**
    * Erzeugt einen neuen Dialog, dessen Instanzen Datenquellensuchdialoge gemäß der
    * Beschreibung in conf darstellen. Die Suchergebnisse liefert dj.
@@ -111,7 +119,7 @@ public class DatasourceSearchDialog implements Dialog
       throws ConfigurationErrorException
   {
     return new Instantiator(conf, dj);
-  };
+  }
 
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
@@ -311,21 +319,20 @@ public class DatasourceSearchDialog implements Dialog
           }
           catch (Exception x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
           }
-          ;
         }
       });
     }
     catch (Exception x)
     {
-      Logger.error(x);
+      LOGGER.error("", x);
     }
   }
 
   /**
    * Erzeugt das GUI. Muss im EDT aufgerufen werden.
-   * 
+   *
    * @param title
    *          der Titel des Fensters.
    * @param fensterDesc
@@ -506,7 +513,7 @@ public class DatasourceSearchDialog implements Dialog
       }
       catch (ConfigurationErrorException x)
       {
-        Logger.error(L.m("Fehler beim Parsen des Abschnitts 'Spaltenumsetzung'"), x);
+        LOGGER.error(L.m("Fehler beim Parsen des Abschnitts 'Spaltenumsetzung'"), x);
       }
       dialogWindowSchema = columnTransformer.getSchema();
       initFactories();
@@ -587,7 +594,7 @@ public class DatasourceSearchDialog implements Dialog
           }
           catch (ConfigurationErrorException e)
           {
-            Logger.error(e);
+            LOGGER.error("", e);
             continue;
           }
 
@@ -620,11 +627,10 @@ public class DatasourceSearchDialog implements Dialog
               }
               catch (Exception e)
               {}
-              ;
             }
             catch (ClassCastException e)
             {
-              Logger.error(L.m("UI Element mit ID \"suchergebnis\" muss vom TYPE \"listbox\" sein!"));
+              LOGGER.error(L.m("UI Element mit ID \"suchergebnis\" muss vom TYPE \"listbox\" sein!"));
             }
           }
 
@@ -690,7 +696,7 @@ public class DatasourceSearchDialog implements Dialog
         }
         catch (ColumnNotFoundException e)
         {
-          Logger.error(L.m(
+          LOGGER.error(L.m(
             "Fehler im Abschnitt \"Spaltenumsetzung\" oder \"Vorschau\". Spalte \"%1\" soll in Vorschau angezeigt werden ist aber nicht in der Spaltenumsetzung definiert.",
             dbSpalte));
         }
@@ -800,11 +806,11 @@ public class DatasourceSearchDialog implements Dialog
                 + "Suchbegriff, der auf zu viele Ergebnisse zutrifft.\n"
                 + "Bitte versuchen Sie eine andere, präzisere Suchanfrage."),
               L.m("Timeout bei Suchanfrage"), JOptionPane.WARNING_MESSAGE);
-            Logger.error(x);
+            LOGGER.error("", x);
           }
           catch (IllegalArgumentException x)
           {
-            Logger.error(x);
+            LOGGER.error("", x);
           } // wird bei illegalen Suchanfragen geworfen
 
           if (results != null && resultsList != null)
@@ -852,7 +858,7 @@ public class DatasourceSearchDialog implements Dialog
           for (int i = 0; i < args.length; ++i)
             buffy.append((i == 0 ? "" : ",") + args[i]);
           buffy.append(") on UIElement " + source.getId());
-          Logger.debug(buffy.toString());
+          LOGGER.debug(buffy.toString());
         }
 
         if (eventType.equals("action"))
@@ -885,7 +891,7 @@ public class DatasourceSearchDialog implements Dialog
       }
       catch (Exception x)
       {
-        Logger.error(x);
+        LOGGER.error("", x);
       }
       finally
       {
@@ -1092,7 +1098,7 @@ public class DatasourceSearchDialog implements Dialog
         }
         catch (ColumnNotFoundException e)
         {
-          Logger.error(L.m(
+          LOGGER.error(L.m(
             "Fehler beim Auflösen des Platzhalters \"${%1}\": Spalte für den Datensatz nicht definiert",
             spalte));
         }
@@ -1142,7 +1148,7 @@ public class DatasourceSearchDialog implements Dialog
         }
         catch (Exception x)
         {
-          Logger.error(L.m("Huh? Dies sollte nicht passieren können"), x);
+          LOGGER.error(L.m("Huh? Dies sollte nicht passieren können"), x);
         }
       }
 
@@ -1292,7 +1298,7 @@ public class DatasourceSearchDialog implements Dialog
   public static void main(String[] args) throws Exception
   {
     WollMuxFiles.setupWollMuxDir();
-    Logger.init(System.err, Logger.DEBUG);
+    LogConfig.init(System.err, Level.DEBUG);
     String confFile = "testdata/formulartest.conf";
     ConfigThingy conf =
       new ConfigThingy("", new URL(
