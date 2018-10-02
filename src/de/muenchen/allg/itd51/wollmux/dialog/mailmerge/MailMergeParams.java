@@ -79,6 +79,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
+import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,6 +90,7 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
@@ -1893,7 +1895,7 @@ class MailMergeParams
           boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
           Map<SubmitArgument, Object> pmodArgs)
       {
-        //Logger.init(System.out, Logger.ALL);
+        LogConfig.init(System.err, Level.ALL);
         System.out.print("PrintFunctions: ");
         for (String func : usePrintFunctions)
           System.out.print("'" + func + "' ");

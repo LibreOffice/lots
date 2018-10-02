@@ -55,6 +55,7 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,6 +87,7 @@ import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
@@ -666,7 +668,7 @@ public class PrintIntoFile
   public static void main(String[] args) throws Exception
   {
     UNO.init();
-    //Logger.init(Logger.ALL);
+    LogConfig.init(System.err, Level.ALL);
 
     final boolean[] done = new boolean[] { false };
     SwingUtilities.invokeAndWait(new Runnable()

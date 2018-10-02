@@ -72,6 +72,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +83,7 @@ import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnTransformer;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -101,6 +103,10 @@ import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
  */
 public class DatasourceSearchDialog implements Dialog
 {
+
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(DatasourceSearchDialog.class);
+
   /**
    * Erzeugt einen neuen Dialog, dessen Instanzen Datenquellensuchdialoge gemäß der
    * Beschreibung in conf darstellen. Die Suchergebnisse liefert dj.
@@ -113,10 +119,7 @@ public class DatasourceSearchDialog implements Dialog
       throws ConfigurationErrorException
   {
     return new Instantiator(conf, dj);
-  };
-
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(DatasourceSearchDialog.class);
+  }
 
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
@@ -1295,7 +1298,7 @@ public class DatasourceSearchDialog implements Dialog
   public static void main(String[] args) throws Exception
   {
     WollMuxFiles.setupWollMuxDir();
-    // LOGGER.init(System.err, Logger.DEBUG);
+    LogConfig.init(System.err, Level.DEBUG);
     String confFile = "testdata/formulartest.conf";
     ConfigThingy conf =
       new ConfigThingy("", new URL(
