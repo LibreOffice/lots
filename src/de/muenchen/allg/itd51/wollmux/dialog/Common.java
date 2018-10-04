@@ -470,14 +470,6 @@ public class Common
   /**
    * Sets the icon of the passed in JFrame to the WollMux icon.
    * 
-   * FIXME: At the moment this method works only with Java 6 because we use the
-   * "setIconImages" method; we could have used the "setIconImage" method from Java 5
-   * instead but the result looks absolutely terrible under KDE using Java 5; to
-   * avoid this the following is realized using the reflection API so that it only
-   * works when you use Java 6 but doesn't cause any problems in our build
-   * environment that uses Java 5. When we completely switch to Java 6 this code can
-   * be cleaned up.
-   * 
    * @param myFrame
    *          JFrame which should get the WollMux icon
    * @author Daniel Benkmann
@@ -486,23 +478,20 @@ public class Common
   {
     try
     {
-      List<Image> iconList = new ArrayList<Image>();
-      URL url =
-        Common.class.getClassLoader().getResource("data/wollmux_icon32x32.png");
-      if (url != null) iconList.add(Toolkit.getDefaultToolkit().createImage(url));
-
-      Class<?> cls = myFrame.getClass();
-      Class<?>[] parameterTypes = new Class[1];
-      parameterTypes[0] = Class.forName("java.util.List");
-      Method method = cls.getMethod("setIconImages", parameterTypes);
-      Object[] args = new Object[1];
-      args[0] = iconList;
-      method.invoke(myFrame, args);
+      URL url = Common.class.getClassLoader().getResource("data/wollmux_icon32x32.png");
+      
+      if (url == null) {
+    	  Logger.error("Could not retrieve Image from resource");
+    	  
+    	  return;
+      }
+    	  
+      Image image = Toolkit.getDefaultToolkit().createImage(url);
+      myFrame.setIconImage(image);
     }
-    catch (Throwable e)
+    catch (Exception e)
     {
-      // you probably didn't use Java 6 (or above)
-      // -> no icon for you
+      Logger.error(e);
     }
   }
 }
