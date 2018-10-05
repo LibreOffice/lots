@@ -204,11 +204,11 @@ public class WollMuxSingleton
 
     // Setzen der in den Abschnitten OOoEinstellungen eingestellten
     // Konfigurationsoptionen
-    ConfigThingy oooEinstellungenConf =
-      WollMuxFiles.getWollmuxConf().query("OOoEinstellungen");
-    for (Iterator<ConfigThingy> iter = oooEinstellungenConf.iterator(); iter.hasNext();)
-    {
-      ConfigThingy settings = iter.next();
+    this.setOOoConfiguration(WollMuxFiles.getWollmuxConf().query("OOoEinstellungen"));
+  }
+  
+  private void setOOoConfiguration(ConfigThingy oooEinstellungenConf) {
+    for (ConfigThingy settings : oooEinstellungenConf) {
       setConfigurationValues(settings);
     }
   }
@@ -458,9 +458,8 @@ public class WollMuxSingleton
    */
   private static void setConfigurationValues(ConfigThingy oooEinstellungenConf)
   {
-    for (Iterator<ConfigThingy> iter = oooEinstellungenConf.iterator(); iter.hasNext();)
+    for (ConfigThingy element : oooEinstellungenConf)
     {
-      ConfigThingy element = iter.next();
       try
       {
         String node = element.get("NODE").toString();
@@ -494,27 +493,28 @@ public class WollMuxSingleton
    *           type oder value sind ungültig oder fehlerhaft.
    */
   private static Object getObjectByType(String type, String value)
-      throws IllegalArgumentException
   {
-    if (type.equalsIgnoreCase("boolean"))
+    try
     {
-      return Boolean.valueOf(value);
-    }
-    else if (type.equalsIgnoreCase("integer"))
+      if (type.equalsIgnoreCase("boolean"))
+      {
+	return Boolean.valueOf(value);
+      } else if (type.equalsIgnoreCase("integer"))
+      {
+	return Integer.valueOf(value);
+      } else if (type.equalsIgnoreCase("float"))
+      {
+	return Float.valueOf(value);
+      } else if (type.equalsIgnoreCase("string"))
+      {
+	return value;
+      }
+    } catch (NumberFormatException e)
     {
-      return Integer.valueOf(value);
-    }
-    else if (type.equalsIgnoreCase("float"))
-    {
-      return Float.valueOf(value);
-    }
-    else if (type.equalsIgnoreCase("string"))
-    {
-      return value;
+      LOGGER.error("", e);
     }
 
-    throw new IllegalArgumentException(
-      L.m(
+    throw new IllegalArgumentException(L.m(
         "Der TYPE '%1' ist nicht gültig. Gültig sind 'boolean', 'integer', 'float' und 'string'.",
         type));
   }
@@ -533,18 +533,20 @@ public class WollMuxSingleton
   private static void setConfigurationValue(String node, String prop, Object value)
   {
     XChangesBatch updateAccess = UNO.getConfigurationUpdateAccess(node);
-    if (value != null) {
-      UNO.setProperty(updateAccess, prop, value);
+    
+    if (updateAccess == null) {
+      LOGGER.error("setConfigurationValue(): updateAccess is NULL.");
+      return;
     }
-    if (updateAccess != null)
+
+    UNO.setProperty(updateAccess, prop, value);
+
+    try
     {
-      try
-      {
-        updateAccess.commitChanges();
-      } catch (WrappedTargetException e)
-      {
-        LOGGER.error("", e);
-      }
+      updateAccess.commitChanges();
+    } catch (WrappedTargetException e)
+    {
+      LOGGER.error("", e);
     }
   }
 
