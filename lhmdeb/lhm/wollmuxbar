@@ -12,4 +12,17 @@ if [ ! -p $FIFO ]; then
   set -- --firstrun "$@"
 fi
 
-exec java -jar "${JAR_FILE}" --fifo $FIFO "$@"
+JAVA="java"
+CONFIG="/var/lib/goto-usersession/userconfig/$USER/userconfig.json"
+PY_SCRIPT="import json,sys;
+with open('$CONFIG') as f:
+    conf=json.load(f);
+    print(conf['applications']['configuration']['wollmux']['params']['JRE'])"
+if [ -f $CONFIG ]; then
+  tmp=$(python3 -Esc "$PY_SCRIPT")
+  if [ -n $tmp -a -f $tmp ]; then
+    JAVA=$tmp
+  fi
+fi
+
+exec $JAVA -jar "${JAR_FILE}" --fifo $FIFO "$@"

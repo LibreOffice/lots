@@ -1,3 +1,18 @@
+ ==================== Neu in Version 18.0.4 ====================
+
+    * neue Features
+          o Über den Anwendungsparameter JRE der WollMux-Anwendung in GOsa²
+            kann nun bestimmt werden, mit welcher Java-Version die WollMuxBar
+            gestartet wird. Es ist darauf zu achten, dass sowohl die WollMuxBar
+            als auch LibreOffice mit der gleichen Java-Version laufen.
+    * Bugfixes
+          o Ein Einfrieren von LibreOffice und WollMux wurde behoben.
+          o Der FormularMax4000 ist manchmal im Hintergrund aufgegangen. Dieser
+            Fehler wurde behoben.
+          o Beim Seriendruck haben immer die Daten aus der Datenquelle vorrang
+            vor den Daten in der FormularGUI.
+
+
  ==================== Neu in Version 18.0.3 ====================
 
     * Bugfixes
@@ -109,7 +124,6 @@
       im Funktionsumfang im wesentlichen nicht vom Makro zu unterscheiden. Neu
       ist, dass der Toolbarbutton 'Seite drucken' nur verfügbar ist, wenn die
       Funktion sinnvoll verwendet werden kann.
-
     * Wird vor dem Seriendruck die Vorschau-Funktion verwendet, werden die
       zuletzt angezeigten Vorschaudaten in das Gesamtdokument übernommen. Als
       Workaround werden die Vorschaudaten vor dem Drucken gelöscht. Diese Daten

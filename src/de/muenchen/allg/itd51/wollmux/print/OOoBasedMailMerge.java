@@ -920,6 +920,7 @@ public class OOoBasedMailMerge
           }
           
           String condition = StringUtils.join(conditions, " or ");
+          ps.setPropertyValue("IsVisible", false);
           ps.setPropertyValue("Condition", condition);
         }
         catch (Exception e)
