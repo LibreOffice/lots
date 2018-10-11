@@ -1,4 +1,4 @@
-<project default="deb">
+<project xmlns:if="ant:if" xmlns:unless="ant:unless" default="deb">
 <!--
 *****************************************************************
 
@@ -46,7 +46,7 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 	<property name="COMPONENT" value="WollMux" />
 	<property name="RDB_DIR" value="oxt" />
 	<property name="PACKAGE_DIR" value="dist" />
-        <property name="LHM_DIR" value="lhmdeb/lhm" />
+	<property name="LHM_DIR" value="lhmdeb/lhm" />
 	<property name="DOC_DIR" value="${PACKAGE_DIR}/doc"/>
 	<property name="PKG_NAME" value="${COMPONENT}.oxt" />
 	<property name="PKG_FILE" value="${PACKAGE_DIR}/${PKG_NAME}" />
@@ -71,6 +71,7 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/${WOLLMUXBAR_JAR_NAME}" />
 	<property name="WOLLMUXBAR_EXE_NAME" value="wollmuxbar.exe" />
 	<property name="WOLLMUXBAR_EXE" value="${PACKAGE_DIR}/${WOLLMUXBAR_EXE_NAME}" />
+	<property name="DEBIAN_VERSION" value=""/>
 	
     <!-- The directory that contains the subdirectories com/ and win/ of the SDK -->
 	<!-- First check if we got our own copy of classes/ on the same level as WollMux and UNOHelper -->
@@ -119,8 +120,11 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 	</target>
 	
 	<target name="bumpversion" unless="debian.native" depends="makeversion">
-		<echo message="Current WollMux Version is ${VERSION}"/>
-		<input message="New Debian Version:" addproperty="DEB_VERSION" defaultvalue="${VERSION}"/>
+		<echo if:blank="${DEBIAN_VERSION}" message="Current WollMux Version is ${VERSION}"/>
+		<input if:blank="${DEBIAN_VERSION}" message="New Debian Version:" addproperty="USER_VERSION" defaultvalue="${VERSION}"/>
+		<condition property="DEB_VERSION" value="${USER_VERSION}" else="${DEBIAN_VERSION}">
+			<isset property="USER_VERSION"/>
+		</condition>
 		<exec executable="bash">
 		  <arg line="misc/bumpversion lhmdeb/changelog ${DEB_VERSION}"/>
 		</exec>

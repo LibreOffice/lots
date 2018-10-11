@@ -8,4 +8,6 @@ fi
 version=$2
 echo ${version}
 dch --distribution walhalla --force-distribution --urgency low --changelog "$1" --newversion ${version} --package wollmux "Version bump." --vendor "lhm"
+git add -- lhmdeb/changelog
+git commit -m "Debian Version ${version}"
 

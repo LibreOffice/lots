@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.muenchen</groupId>
 	<artifactId>wollmux</artifactId>
@@ -170,6 +172,58 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>com.akathist.maven.plugins.launch4j</groupId>
+				<artifactId>launch4j-maven-plugin</artifactId>
+				<version>1.7.8</version>
+				<executions>
+					<execution>
+						<id>l4j-clui</id>
+						<phase>package</phase>
+						<goals>
+							<goal>launch4j</goal>
+						</goals>
+						<configuration>
+							<headerType>gui</headerType>
+							<outfile>dist/wollmuxbar.exe</outfile>
+							<jar>dist/WollMuxBar.jar</jar>
+							<errTitle>WollMux</errTitle>
+							<jre>
+								<minVersion>1.6.0</minVersion>
+								<bundledJre64Bit>false</bundledJre64Bit>
+								<bundledJreAsFallback>false</bundledJreAsFallback>
+								<jdkPreference>preferJre</jdkPreference>
+								<runtimeBits>64/32</runtimeBits>
+							</jre>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.izpack</groupId>
+				<artifactId>izpack-maven-plugin</artifactId>
+				<version>5.0.6</version>
+				<extensions>true</extensions>
+				<configuration>
+					<baseDir>${izpack.staging}</baseDir>
+					<installFile>${project.build.directory}/classes/install.xml</installFile>
+					<outputDirectory>${project.build.directory}</outputDirectory>
+					<finalName>${project.build.finalName}-installer</finalName>
+					<enableOverrideArtifact>true</enableOverrideArtifact>
+					<mkdirs>true</mkdirs>
+					<autoIncludeUrl>false</autoIncludeUrl>
+					<autoIncludeDevelopers>false</autoIncludeDevelopers>
+				</configuration>
+				<executions>
+					<execution>
+						<id>izpack</id>
+						<phase>package</phase>
+						<goals>
+							<goal>izpack</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.5.5</version>
@@ -255,7 +309,8 @@
 						<configuration>
 							<target>
 								<move file="dist/WollMux.zip" tofile="dist/WollMux.oxt" />
-								<move file="dist/WollMux-AOO.zip" tofile="dist/WollMux-AOO.oxt" />
+								<move file="dist/WollMux-AOO.zip"
+									tofile="dist/WollMux-AOO.oxt" />
 							</target>
 						</configuration>
 						<goals>
@@ -274,61 +329,13 @@
 				</dependencies>
 			</plugin>
 			<plugin>
-				<groupId>com.akathist.maven.plugins.launch4j</groupId>
-				<artifactId>launch4j-maven-plugin</artifactId>
-				<version>1.7.8</version>
-				<executions>
-					<execution>
-						<id>l4j-clui</id>
-						<phase>package</phase>
-						<goals>
-							<goal>launch4j</goal>
-						</goals>
-						<configuration>
-							<headerType>gui</headerType>
-							<outfile>dist/wollmuxbar.exe</outfile>
-							<jar>dist/WollMuxBar.jar</jar>
-							<errTitle>WollMux</errTitle>
-							<jre>
-								<minVersion>1.6.0</minVersion>
-								<bundledJre64Bit>false</bundledJre64Bit>
-								<bundledJreAsFallback>false</bundledJreAsFallback>
-								<jdkPreference>preferJre</jdkPreference>
-								<runtimeBits>64/32</runtimeBits>
-							</jre>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.izpack</groupId>
-				<artifactId>izpack-maven-plugin</artifactId>
-				<version>5.0.6</version>
-				<extensions>true</extensions>
-				<configuration>
-					<baseDir>${izpack.staging}</baseDir>
-					<installFile>${project.build.directory}/classes/install.xml</installFile>
-					<outputDirectory>${project.build.directory}</outputDirectory>
-					<finalName>${project.build.finalName}-installer</finalName>
-					<enableOverrideArtifact>true</enableOverrideArtifact>
-					<mkdirs>true</mkdirs>
-					<autoIncludeUrl>false</autoIncludeUrl>
-					<autoIncludeDevelopers>false</autoIncludeDevelopers>
-				</configuration>
-				<executions>
-					<execution>
-						<id>izpack</id>
-						<phase>package</phase>
-						<goals>
-							<goal>izpack</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
 				<version>2.5.2</version>
+				<configuration>
+					<tagNameFormat>RELEASE_@{project.version}</tagNameFormat>
+					<releaseProfiles>release</releaseProfiles>
+				</configuration>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -544,4 +551,76 @@
 			<version>2.5.7</version>
 		</dependency>
 	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.8</version>
+						<executions>
+							<execution>
+								<id>deb</id>
+								<phase>package</phase>
+								<configuration>
+									<target>
+										<property name="DEBIAN_VERSION"
+											value="${project.version}" />
+										<ant antfile="${basedir}/build.xml">
+											<target name="deb" />
+										</ant>
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<version>2.5.5</version>
+						<configuration>
+							<recompressZippedFiles>true</recompressZippedFiles>
+							<tarLongFileMode>posix</tarLongFileMode>
+						</configuration>
+						<executions>
+							<execution>
+								<id>assemble-manual-installation</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<finalName>WollMux-${project.version}-manual_installation</finalName>
+									<appendAssemblyId>false</appendAssemblyId>
+									<descriptors>
+										<descriptor>misc/assembly-manual-installation.xml</descriptor>
+									</descriptors>
+								</configuration>
+							</execution>
+							<execution>
+								<id>assemble-release</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}</outputDirectory>
+									<finalName>WollMux-${project.version}</finalName>
+									<appendAssemblyId>false</appendAssemblyId>
+									<descriptors>
+										<descriptor>misc/assembly-release.xml</descriptor>
+									</descriptors>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
