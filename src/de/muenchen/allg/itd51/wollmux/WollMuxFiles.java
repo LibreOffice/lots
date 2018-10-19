@@ -1135,19 +1135,12 @@ public class WollMuxFiles
         if (!bark[0]) return;
       }
 
-      SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          LOGGER.error(SLOW_SERVER_MESSAGE);
-          JOptionPane pane =
-            new JOptionPane(SLOW_SERVER_MESSAGE, JOptionPane.WARNING_MESSAGE,
-              JOptionPane.DEFAULT_OPTION);
-          JDialog dialog = pane.createDialog(null, L.m("Hinweis"));
-          dialog.setModal(false);
-          dialog.setVisible(true);
-        }
+      SwingUtilities.invokeLater(() -> {
+        LOGGER.error(SLOW_SERVER_MESSAGE);
+        JOptionPane pane = new JOptionPane(SLOW_SERVER_MESSAGE, JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION);
+        JDialog dialog = pane.createDialog(null, L.m("Hinweis"));
+        dialog.setModal(false);
+        dialog.setVisible(true);
       });
     }
 
