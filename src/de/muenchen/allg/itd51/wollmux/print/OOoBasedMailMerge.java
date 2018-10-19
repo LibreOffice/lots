@@ -89,16 +89,16 @@ import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory;
-import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer;
-import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory.FormFieldType;
+import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer;
 import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer.DataID;
+import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults;
 import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults.SimulationResultsProcessor;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFormValue;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
@@ -432,7 +432,7 @@ public class OOoBasedMailMerge
       if (simRes == null) return;
 
       HashMap<String, String> data =
-        new HashMap<String, String>(simRes.getFormFieldValues());
+        new HashMap<>(simRes.getFormFieldValues());
       for (FormField field : simRes.getFormFields())
       {
         String columnName = getSpecialColumnNameForFormField(field);
@@ -441,7 +441,7 @@ public class OOoBasedMailMerge
 
         // Checkboxen müssen über bestimmte Zeichen der Schriftart OpenSymbol
         // angenähert werden.
-        if (field.getType() == FormFieldType.CheckBoxFormField)
+        if (field.getType() == FormFieldType.CHECKBOX_FORM_FIELD)
           if (content.equalsIgnoreCase("TRUE"))
             content = "" + OPENSYMBOL_CHECKED;
           else
@@ -664,8 +664,8 @@ public class OOoBasedMailMerge
     public CSVDataSourceWriter(File parentDir)
     {
       csvFile = new File(parentDir, TABLE_NAME + ".csv");
-      datasets = new ArrayList<HashMap<String, String>>();
-      columns = new HashSet<String>();
+      datasets = new ArrayList<>();
+      columns = new HashSet<>();
     }
 
     /*
@@ -709,7 +709,7 @@ public class OOoBasedMailMerge
       p.print(line(getHeaders()));
       for (HashMap<String, String> ds : datasets)
       {
-        ArrayList<String> entries = new ArrayList<String>();
+        ArrayList<String> entries = new ArrayList<>();
         for (String key : getHeaders())
         {
           String val = ds.get(key);
@@ -760,7 +760,7 @@ public class OOoBasedMailMerge
     private ArrayList<String> getHeaders()
     {
       if (headers != null) return headers;
-      headers = new ArrayList<String>(columns);
+      headers = new ArrayList<>(columns);
       Collections.sort(headers);
       return headers;
     }
@@ -913,7 +913,7 @@ public class OOoBasedMailMerge
           XTextRange range = section.getAnchor();
           UNO.setPropertyToDefault(range, "CharHidden");
           
-          List<String> conditions = new ArrayList<String>();
+          List<String> conditions = new ArrayList<>();
           for (String groupName : groupNames)
           {
             conditions.add(String.format("([%s] != \"true\")", COLUMN_PREFIX_TEXTSECTION + groupName));
@@ -1045,7 +1045,7 @@ public class OOoBasedMailMerge
     DocumentCommands cmds = new DocumentCommands(UNO.XBookmarksSupplier(doc));
     cmds.update();
     HashMap<String, FormField> bookmarkNameToFormField =
-      new HashMap<String, FormField>();
+      new HashMap<>();
     for (DocumentCommand cmd : cmds)
     {
       if (cmd instanceof InsertFormValue)
@@ -1069,7 +1069,7 @@ public class OOoBasedMailMerge
 
           // Checkboxen müssen über bestimmte Zeichen der Schriftart OpenSymbol
           // angenähert werden.
-          if (field.getType() == FormFieldType.CheckBoxFormField)
+          if (field.getType() == FormFieldType.CHECKBOX_FORM_FIELD)
             UNO.setProperty(ifvCmd.getTextCursor(), "CharFontName", "OpenSymbol");
         }
         catch (Exception e)
@@ -1095,11 +1095,11 @@ public class OOoBasedMailMerge
     String trafo = field.getTrafoName();
     String id = field.getId();
 
-    if (field.getType() == FormFieldType.CheckBoxFormField && id != null
+    if (field.getType() == FormFieldType.CHECKBOX_FORM_FIELD && id != null
       && trafo != null)
       return COLUMN_PREFIX_CHECKBOX_FUNCTION + SEP + id + SEP + trafo;
 
-    else if (field.getType() == FormFieldType.CheckBoxFormField && id != null
+    else if (field.getType() == FormFieldType.CHECKBOX_FORM_FIELD && id != null
       && trafo == null)
       return COLUMN_PREFIX_CHECKBOX_FUNCTION + SEP + id;
 
@@ -1409,7 +1409,7 @@ public class OOoBasedMailMerge
       }
     });
 
-    final ArrayList<NamedValue> mmProps = new ArrayList<NamedValue>();
+    final ArrayList<NamedValue> mmProps = new ArrayList<>();
     mmProps.add(new NamedValue("DataSourceName", dbName));
     mmProps.add(new NamedValue("CommandType", CommandType.TABLE));
     mmProps.add(new NamedValue("Command", TABLE_NAME));

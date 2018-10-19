@@ -24,7 +24,7 @@ import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXValue;
 
-public class ScanVisitor extends DocumentTreeVisitor
+public class ScanVisitor implements DocumentTreeVisitor
 {
 
   private static final Logger LOGGER = LoggerFactory
@@ -114,7 +114,7 @@ public class ScanVisitor extends DocumentTreeVisitor
   }
 
   private Map<String, InsertionBookmark> insertions =
-    new HashMap<String, InsertionBookmark>();
+    new HashMap<>();
 
   private StringBuilder text = new StringBuilder();
 
@@ -138,7 +138,7 @@ public class ScanVisitor extends DocumentTreeVisitor
   {
     fixup();
 
-    if (container.getType() != Container.PARAGRAPH_TYPE) 
+    if (container.getType() != Container.Type.PARAGRAPH)
     {
       text.setLength(0);
     }
