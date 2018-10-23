@@ -44,7 +44,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -59,14 +58,14 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
 
+import de.muenchen.allg.itd51.wollmux.core.dialog.DimAdjust;
+import de.muenchen.allg.itd51.wollmux.core.dialog.JPotentiallyOverlongPopupMenuButton;
+import de.muenchen.allg.itd51.wollmux.core.dialog.TextComponentTags;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.ReferencedFieldID;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
-import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
-import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
-import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 
@@ -91,7 +90,7 @@ class AdjustFields
       MailMergeDatasource ds)
   {
     ReferencedFieldID[] fieldIDs =
-      documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
+      documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(
         ds.getColumnNames()));
     ActionListener submitActionListener = e ->
     {
@@ -141,7 +140,7 @@ class AdjustFields
       final MailMergeDatasource ds)
   {
     ReferencedFieldID[] fieldIDs =
-        documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
+        documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(
         ds.getColumnNames()));
     ActionListener submitActionListener = e ->
     {
@@ -224,7 +223,6 @@ class AdjustFields
           {
             List<Action> actions = new ArrayList<>();
             List<String> columnNames = new ArrayList<>(fieldNames);
-
             Collections.sort(columnNames);
 
             Iterator<String> iter = columnNames.iterator();
@@ -341,10 +339,9 @@ class AdjustFields
     button.addActionListener(e ->
     {
         final HashMap<String, FieldSubstitution> result = new HashMap<>();
-        for (Iterator<TextComponentTags> iter =
-          mapTextComponentTagsToFieldname.keySet().iterator(); iter.hasNext();)
+
+      for (TextComponentTags f : mapTextComponentTagsToFieldname.keySet())
         {
-          TextComponentTags f = iter.next();
           if (!f.isContentValid()) continue;
           String fieldId = "" + mapTextComponentTagsToFieldname.get(f);
           FieldSubstitution subst = new TextDocumentModel.FieldSubstitution();

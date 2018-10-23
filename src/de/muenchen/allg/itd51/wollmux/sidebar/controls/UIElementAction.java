@@ -1,6 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.sidebar.controls;
 
-import de.muenchen.allg.itd51.wollmux.dialog.UIElementEventHandler;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementEventHandler;
 
 public class UIElementAction
 {

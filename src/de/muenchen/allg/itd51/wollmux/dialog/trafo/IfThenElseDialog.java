@@ -64,12 +64,12 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 
+import de.muenchen.allg.itd51.wollmux.core.dialog.DimAdjust;
+import de.muenchen.allg.itd51.wollmux.core.dialog.JPotentiallyOverlongPopupMenuButton;
+import de.muenchen.allg.itd51.wollmux.core.dialog.TextComponentTags;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
-import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
-import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
 
 /**
  * Erlaubt die Bearbeitung der Funktion eines Wenn-Dann-Sonst-Feldes.
@@ -119,6 +119,7 @@ public class IfThenElseDialog extends TrafoDialog
 
   private class MyRepackActionListener implements ActionListener
   {
+    @Override
     public void actionPerformed(ActionEvent e)
     {
       repack();
@@ -146,6 +147,7 @@ public class IfThenElseDialog extends TrafoDialog
         this.func = func;
       }
 
+      @Override
       public String toString()
       {
         return label;
@@ -327,6 +329,7 @@ public class IfThenElseDialog extends TrafoDialog
         new JRadioButton(L.m("Text"), conditionalResult.type == 0);
       textRadioButton.addActionListener(new ActionListener()
       {
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           if (conditionalResult.type != 0)
@@ -355,6 +358,7 @@ public class IfThenElseDialog extends TrafoDialog
         new JRadioButton(L.m("Wenn...Dann...Sonst..."), conditionalResult.type == 1);
       ifThenElseRadioButton.addActionListener(new ActionListener()
       {
+        @Override
         public void actionPerformed(ActionEvent e)
         {
           if (conditionalResult.type != 1)
@@ -437,7 +441,7 @@ public class IfThenElseDialog extends TrafoDialog
      */
     private void parseCondition(ConfigThingy conf, List<String> fieldNames)
     {
-      notSelector = new JComboBox<String>(new String[] {
+      notSelector = new JComboBox<>(new String[] {
         "", L.m("nicht") });
       if (conf.getName().equals("NOT"))
       {
@@ -452,7 +456,7 @@ public class IfThenElseDialog extends TrafoDialog
         notSelector.setSelectedIndex(1);
       }
 
-      testSelector = new JComboBox<TestType>(testTypes);
+      testSelector = new JComboBox<>(testTypes);
       determineTest: while (true)
       {
         for (int i = 0; i < testTypes.length; ++i)
@@ -476,7 +480,7 @@ public class IfThenElseDialog extends TrafoDialog
           {
             String compareConf = conf.getLastChild().toString();
             compareTo = new JTextField(compareConf, 20);
-            fieldSelector = new JComboBox<String>(new Vector<String>(fieldNames));
+            fieldSelector = new JComboBox<>(new Vector<>(fieldNames));
             fieldSelector.setEditable(false);
             String fieldName = value.toString();
             Iterator<String> iter = fieldNames.iterator();
@@ -632,6 +636,7 @@ public class IfThenElseDialog extends TrafoDialog
     JButton cancel = new JButton(L.m("Abbrechen"));
     cancel.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         abort();
@@ -640,6 +645,7 @@ public class IfThenElseDialog extends TrafoDialog
     JButton insert = new JButton(L.m("OK"));
     insert.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         updateTrafoConf();
@@ -673,6 +679,7 @@ public class IfThenElseDialog extends TrafoDialog
     myDialog.setVisible(true);
   }
 
+  @Override
   public void show(String windowTitle, Dialog owner)
   {
     if (owner == null)
@@ -681,6 +688,7 @@ public class IfThenElseDialog extends TrafoDialog
       show(windowTitle, new JDialog(owner));
   }
 
+  @Override
   public void show(String windowTitle, Frame owner)
   {
     if (owner == null)
@@ -689,6 +697,7 @@ public class IfThenElseDialog extends TrafoDialog
       show(windowTitle, new JDialog(owner));
   }
 
+  @Override
   public TrafoDialogParameters getExitStatus()
   {
     return params;
@@ -717,12 +726,14 @@ public class IfThenElseDialog extends TrafoDialog
       params.closeAction.actionPerformed(new ActionEvent(this, 0, ""));
   }
 
+  @Override
   public void dispose()
   {
     try
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           try

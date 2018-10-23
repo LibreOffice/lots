@@ -27,12 +27,12 @@ import javax.swing.border.EmptyBorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.muenchen.allg.itd51.wollmux.core.dialog.DimAdjust;
+import de.muenchen.allg.itd51.wollmux.core.dialog.JPotentiallyOverlongPopupMenuButton;
+import de.muenchen.allg.itd51.wollmux.core.dialog.TextComponentTags;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
-import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
-import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 
@@ -93,7 +93,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     }
     
     Collection<ID> idsCol = idManager.getAllIDs(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL);
-    List<String> ids = new ArrayList<String>();
+    List<String> ids = new ArrayList<>();
     for (ID id : idsCol)
       ids.add(id.getID());
     JPotentiallyOverlongPopupMenuButton insertFieldButton =
@@ -107,7 +107,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     vbox.add(hbox);
     vbox.add(tf);
 
-    final List<String> adjustFuncs = new ArrayList<String>();
+    final List<String> adjustFuncs = new ArrayList<>();
     adjustFuncs.add(L.m("-- keine --"));
     int sel = 0;
     for (String fName : documentController.getFunctionLibrary().getFunctionNames())
@@ -126,7 +126,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     hbox.add(new JLabel(L.m("Nachträgliche Anpassung")));
     hbox.add(Box.createHorizontalGlue());
     vbox.add(hbox);
-    final JComboBox<String> adjustFuncCombo = new JComboBox<String>(new Vector<String>(adjustFuncs));
+    final JComboBox<String> adjustFuncCombo = new JComboBox<>(new Vector<>(adjustFuncs));
     if (sel > 0)
     {
       adjustFuncCombo.setSelectedIndex(sel);

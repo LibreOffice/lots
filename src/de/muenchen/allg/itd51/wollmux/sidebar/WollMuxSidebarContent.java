@@ -69,11 +69,11 @@ import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPALProvider;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.SearchBox;
-import de.muenchen.allg.itd51.wollmux.dialog.UIElementContext;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarConfig;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -132,9 +132,9 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     this.context = context;
     this.parentWindow = parentWindow;
 
-    menus = new HashMap<String, XMutableTreeNode>();
-    actions = new HashMap<String, UIElementAction>();
-    searchActions = new HashMap<String, UIElementAction>();
+    menus = new HashMap<>();
+    actions = new HashMap<>();
+    searchActions = new HashMap<>();
 
     this.parentWindow.addWindowListener(this);
     layout = new SimpleLayoutManager(this.parentWindow);

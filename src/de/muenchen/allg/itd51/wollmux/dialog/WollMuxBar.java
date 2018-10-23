@@ -136,12 +136,15 @@ import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.WollMuxClassLoader;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementEventHandler;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementFactory;
+import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
 /**
@@ -170,7 +173,7 @@ public class WollMuxBar
    */
   private static final String LEERE_LISTE = L.m("<kein Absender vorhanden>");
 
-  public static final Set<String> SUPPORTED_ACTIONS = new HashSet<String>();
+  public static final Set<String> SUPPORTED_ACTIONS = new HashSet<>();
   static
   {
     SUPPORTED_ACTIONS.add("openTemplate");
@@ -265,7 +268,7 @@ public class WollMuxBar
    * Mappt einen Menü-Namen auf ein entsprechendes JPopupMenu.
    */
   private Map<String, JComponent> mapMenuNameToJPopupMenu =
-    new HashMap<String, JComponent>();
+    new HashMap<>();
 
   /**
    * Die UIElementFactory, die verwendet wird, um das GUI aufzubauen.
@@ -287,13 +290,13 @@ public class WollMuxBar
    * Enthält nach dem Aufruf von initMenuOrder(...) eine Liste aller IDs von Menüs
    * und deren per Tiefensuche ermittelten Untermenüs
    */
-  List<String> menuOrder = new ArrayList<String>();
+  List<String> menuOrder = new ArrayList<>();
 
   /**
    * Enthält nach dem Aufruf von initMenuOrder(...) eine Zuordnung von MenüIDs zu den
    * mit vollständigen Pfaden (der Menünavigation) aufgeführten Namen der Menüs
    */
-  Map<String, String> mapMenuIDToLabel = new HashMap<String, String>();
+  Map<String, String> mapMenuIDToLabel = new HashMap<>();
 
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
@@ -383,7 +386,7 @@ public class WollMuxBar
   /**
    * Alle {@link Senderbox}es der Leiste.
    */
-  private List<Senderbox> senderboxes = new ArrayList<Senderbox>();
+  private List<Senderbox> senderboxes = new ArrayList<>();
 
   /**
    * Wird im UP_AND_AWAY_WINDOW_MODE auf das Fenster registriert.
@@ -1093,10 +1096,10 @@ public class WollMuxBar
   private void initFactories()
   {
     Map<String, GridBagConstraints> mapTypeToLayoutConstraints =
-      new HashMap<String, GridBagConstraints>();
-    Map<String, Integer> mapTypeToLabelType = new HashMap<String, Integer>();
+      new HashMap<>();
+    Map<String, UIElement.LabelPosition> mapTypeToLabelType = new HashMap<>();
     Map<String, Object> mapTypeToLabelLayoutConstraints =
-      new HashMap<String, Object>();
+      new HashMap<>();
 
     // int gridx, int gridy, int gridwidth, int gridheight, double weightx, double
     // weighty, int anchor, int fill, Insets insets, int ipadx, int ipady)
@@ -1124,58 +1127,60 @@ public class WollMuxBar
         GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0);
 
     mapTypeToLayoutConstraints.put("default", gbcButton);
-    mapTypeToLabelType.put("default", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("default", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("default", null);
 
     mapTypeToLayoutConstraints.put("combobox", gbcCombobox);
-    mapTypeToLabelType.put("combobox", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("combobox", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("combobox", null);
 
     mapTypeToLayoutConstraints.put("h-glue", gbcGlue);
-    mapTypeToLabelType.put("h-glue", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("h-glue", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("h-glue", null);
     mapTypeToLayoutConstraints.put("v-glue", gbcGlue);
-    mapTypeToLabelType.put("v-glue", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("v-glue", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("v-glue", null);
 
     mapTypeToLayoutConstraints.put("label", gbcLabel);
-    mapTypeToLabelType.put("label", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("label", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("label", null);
 
     mapTypeToLayoutConstraints.put("button", gbcButton);
-    mapTypeToLabelType.put("button", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("button", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("button", null);
 
     mapTypeToLayoutConstraints.put("h-separator", gbcHsep);
-    mapTypeToLabelType.put("h-separator", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("h-separator", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("h-separator", null);
     mapTypeToLayoutConstraints.put("v-separator", gbcVsep);
-    mapTypeToLabelType.put("v-separator", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("v-separator", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("v-separator", null);
 
     UIElementEventHandler myUIElementEventHandler = new MyUIElementEventHandler();
 
     panelContext = new UIElementContext();
-    panelContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
-    panelContext.mapTypeToLabelType = mapTypeToLabelType;
-    panelContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
-    panelContext.uiElementEventHandler = myUIElementEventHandler;
-    panelContext.mapTypeToType = new HashMap<String, String>();
-    panelContext.mapTypeToType.put("separator", "v-separator");
-    panelContext.mapTypeToType.put("glue", "h-glue");
+    panelContext.setMapTypeToLabelLayoutConstraints(mapTypeToLabelLayoutConstraints);
+    panelContext.setMapTypeToLabelType(mapTypeToLabelType);
+    panelContext.setMapTypeToLabelLayoutConstraints(mapTypeToLayoutConstraints);
+    panelContext.setUiElementEventHandler(myUIElementEventHandler);
+    Map<String, String> panelMapTypeToType = new HashMap<>();
+    panelMapTypeToType.put("separator", "v-separator");
+    panelMapTypeToType.put("glue", "h-glue");
+    panelContext.setMapTypeToType(panelMapTypeToType);
 
     menuContext = new UIElementContext();
-    menuContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
-    menuContext.mapTypeToLabelType = mapTypeToLabelType;
-    menuContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
-    menuContext.uiElementEventHandler = myUIElementEventHandler;
-    menuContext.mapTypeToType = new HashMap<String, String>();
-    menuContext.mapTypeToType.put("separator", "h-separator");
-    menuContext.mapTypeToType.put("glue", "v-glue");
-    menuContext.mapTypeToType.put("button", "menuitem");
+    menuContext.setMapTypeToLabelLayoutConstraints(mapTypeToLabelLayoutConstraints);
+    menuContext.setMapTypeToLabelType(mapTypeToLabelType);
+    menuContext.setMapTypeToLabelLayoutConstraints(mapTypeToLayoutConstraints);
+    menuContext.setUiElementEventHandler(myUIElementEventHandler);
+    Map<String, String> menuMapTypeToType = new HashMap<>();
+    menuMapTypeToType.put("separator", "h-separator");
+    menuMapTypeToType.put("glue", "b-glue");
+    menuMapTypeToType.put("button", "menuitem");
+    menuContext.setMapTypeToType(menuMapTypeToType);
 
-    panelContext.supportedActions = SUPPORTED_ACTIONS;
-    menuContext.supportedActions = SUPPORTED_ACTIONS;
+    panelContext.setSupportedActions(SUPPORTED_ACTIONS);
+    menuContext.setSupportedActions(SUPPORTED_ACTIONS);
 
     uiElementFactory = new UIElementFactory();
   }
@@ -1866,7 +1871,7 @@ public class WollMuxBar
     // initialisiert. Daher hier für Debug-Zwecke per Hand initialisieren.
 
     // Schalter --fifo und --firstrun und --load vorgezogen behandeln:
-    List<String> restArgs = new ArrayList<String>();
+    List<String> restArgs = new ArrayList<>();
     boolean firstrun = false;
     String fifoName = null;
     for (int i = 0; i < args.length; ++i)

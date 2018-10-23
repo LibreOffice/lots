@@ -53,6 +53,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.text.JTextComponent;
 
+import de.muenchen.allg.itd51.wollmux.core.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -78,7 +79,7 @@ public class UIElementConfigThingyEditor
   static
   {
     mapAttributeNameToListOfActionsForWhichItIsNeeded =
-      new HashMap<String, String[]>();
+      new HashMap<>();
     mapAttributeNameToListOfActionsForWhichItIsNeeded.put("FRAG_ID", new String[] {
       "openTemplate", "openDocument" });
     mapAttributeNameToListOfActionsForWhichItIsNeeded.put("EXT",
@@ -115,7 +116,7 @@ public class UIElementConfigThingyEditor
 
   private ActionListener finishedListener;
 
-  private List<AttributeEditor> attributeEditors = new Vector<AttributeEditor>();
+  private List<AttributeEditor> attributeEditors = new Vector<>();
 
   private JDialog myDialog;
 
@@ -128,6 +129,7 @@ public class UIElementConfigThingyEditor
 
     SwingUtilities.invokeLater(new Runnable()
     {
+      @Override
       public void run()
       {
         createGUI();
@@ -200,6 +202,7 @@ public class UIElementConfigThingyEditor
     {
       private static final long serialVersionUID = 2595972767797238686L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         myDialog.dispose();
@@ -212,6 +215,7 @@ public class UIElementConfigThingyEditor
     {
       private static final long serialVersionUID = 6641563851370571888L;
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         myDialog.dispose();
@@ -267,27 +271,34 @@ public class UIElementConfigThingyEditor
 
   private class MyWindowListener implements WindowListener
   {
+    @Override
     public void windowActivated(WindowEvent e)
     {}
 
+    @Override
     public void windowClosed(WindowEvent e)
     {}
 
+    @Override
     public void windowClosing(WindowEvent e)
     {
       myDialog.dispose();
       finishedListener.actionPerformed(new ActionEvent(this, 0, "CANCEL"));
     }
 
+    @Override
     public void windowDeactivated(WindowEvent e)
     {}
 
+    @Override
     public void windowDeiconified(WindowEvent e)
     {}
 
+    @Override
     public void windowIconified(WindowEvent e)
     {}
 
+    @Override
     public void windowOpened(WindowEvent e)
     {}
 
@@ -374,11 +385,13 @@ public class UIElementConfigThingyEditor
       this.add(mainEditorVBox);
     }
 
+    @Override
     public String getAttributeName()
     {
       return attributeName;
     }
 
+    @Override
     public void setEditorVisible(boolean visible)
     {
       this.setVisible(visible);
@@ -465,6 +478,7 @@ public class UIElementConfigThingyEditor
       {}
     }
 
+    @Override
     public String getAttributeValue()
     {
       return myTextComponent.getText();
@@ -502,7 +516,7 @@ public class UIElementConfigThingyEditor
     public JTypeAttributeEditor()
     {
       super("TYPE", false);
-      combo = new JComboBox<String>(new String[] {
+      combo = new JComboBox<>(new String[] {
         "button", "separator", "glue", "senderbox", "searchbox" }); // "menu" NICHT!
       prepareComboBox(combo, "TYPE");
 
@@ -515,6 +529,7 @@ public class UIElementConfigThingyEditor
       // mainEditorVBox.add(Box.createVerticalGlue());
     }
 
+    @Override
     public String getAttributeValue()
     {
       return combo.getSelectedItem().toString();
@@ -544,6 +559,7 @@ public class UIElementConfigThingyEditor
       mainEditorVBox.add(hbox);
     }
 
+    @Override
     public String getAttributeValue()
     {
       return check.isSelected() ? "1" : "0";
@@ -559,10 +575,10 @@ public class UIElementConfigThingyEditor
     public JActionAttributeEditor()
     {
       super("ACTION", false);
-      Vector<String> actions = new Vector<String>(WollMuxBar.SUPPORTED_ACTIONS);
+      Vector<String> actions = new Vector<>(WollMuxBar.SUPPORTED_ACTIONS);
       actions.remove("open"); // FIXME: "open"-Actions werden nicht unterstützt!
       Collections.sort(actions);
-      combo = new JComboBox<String>(actions);
+      combo = new JComboBox<>(actions);
 
       prepareComboBox(combo, "ACTION");
 
@@ -575,6 +591,7 @@ public class UIElementConfigThingyEditor
       // mainEditorVBox.add(Box.createVerticalGlue());
     }
 
+    @Override
     public String getAttributeValue()
     {
       return combo.getSelectedItem().toString();
@@ -594,7 +611,7 @@ public class UIElementConfigThingyEditor
       if (combo.getItemAt(i).equals(type))
       {
         // Falls combo.setSelectedItem() mit == statt equals arbeitet
-        type = (String) combo.getItemAt(i);
+        type = combo.getItemAt(i);
         found = true;
         break;
       }
