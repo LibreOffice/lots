@@ -60,10 +60,10 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
+import de.muenchen.allg.itd51.wollmux.core.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 
 /**
  * Erlaubt die Bearbeitung der Funktion eines Gender-Feldes.
@@ -136,9 +136,9 @@ public class GenderDialog extends TrafoDialog
       if (anredeId == null || textHerr == null || textFrau == null
         || textSonst == null) stop();
 
-      HashSet<String> uniqueFieldNames = new HashSet<String>(params.fieldNames);
+      HashSet<String> uniqueFieldNames = new HashSet<>(params.fieldNames);
       uniqueFieldNames.add(anredeId);
-      List<String> sortedNames = new ArrayList<String>(uniqueFieldNames);
+      List<String> sortedNames = new ArrayList<>(uniqueFieldNames);
       Collections.sort(sortedNames);
 
       buildGUI(anredeId, textHerr, textFrau, textSonst, sortedNames);
@@ -180,13 +180,13 @@ public class GenderDialog extends TrafoDialog
     Box hbox;
     JLabel label;
     int maxLabelWidth = 0;
-    List<JLabel> labels = new ArrayList<JLabel>();
+    List<JLabel> labels = new ArrayList<>();
 
     hbox = Box.createHorizontalBox();
     label = new JLabel(L.m("Geschlechtsbestimmendes Feld"));
     label.setFont(label.getFont().deriveFont(Font.PLAIN));
     hbox.add(label);
-    cbAnrede = new JComboBox<String>(new Vector<String>(fieldNames));
+    cbAnrede = new JComboBox<>(new Vector<>(fieldNames));
     cbAnrede.setSelectedItem(anredeId);
     cbAnrede.setEditable(false);
     hbox.add(Box.createHorizontalGlue());
@@ -266,6 +266,7 @@ public class GenderDialog extends TrafoDialog
    * 
    * @see de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog#getExitStatus()
    */
+  @Override
   public TrafoDialogParameters getExitStatus()
   {
     return params;
@@ -313,6 +314,7 @@ public class GenderDialog extends TrafoDialog
     JButton cancel = new JButton(L.m("Abbrechen"));
     cancel.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         abort();
@@ -321,6 +323,7 @@ public class GenderDialog extends TrafoDialog
     JButton insert = new JButton(L.m("OK"));
     insert.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         updateTrafoConf();
@@ -351,6 +354,7 @@ public class GenderDialog extends TrafoDialog
    * @see de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog#show(java.lang.String,
    *      java.awt.Dialog)
    */
+  @Override
   public void show(String windowTitle, Dialog owner)
   {
     if (owner == null)
@@ -365,6 +369,7 @@ public class GenderDialog extends TrafoDialog
    * @see de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog#show(java.lang.String,
    *      java.awt.Frame)
    */
+  @Override
   public void show(String windowTitle, Frame owner)
   {
     if (owner == null)
@@ -381,26 +386,33 @@ public class GenderDialog extends TrafoDialog
    */
   private class MyWindowListener implements WindowListener
   {
+    @Override
     public void windowOpened(WindowEvent e)
     {}
 
+    @Override
     public void windowClosing(WindowEvent e)
     {
       abort();
     }
 
+    @Override
     public void windowClosed(WindowEvent e)
     {}
 
+    @Override
     public void windowIconified(WindowEvent e)
     {}
 
+    @Override
     public void windowDeiconified(WindowEvent e)
     {}
 
+    @Override
     public void windowActivated(WindowEvent e)
     {}
 
+    @Override
     public void windowDeactivated(WindowEvent e)
     {}
   }
@@ -439,12 +451,14 @@ public class GenderDialog extends TrafoDialog
    * 
    * @see de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog#dispose()
    */
+  @Override
   public void dispose()
   {
     try
     {
       javax.swing.SwingUtilities.invokeLater(new Runnable()
       {
+        @Override
         public void run()
         {
           try

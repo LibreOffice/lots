@@ -10,11 +10,11 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.UIElementContext;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarConfig;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarEventHandler;
 
@@ -58,7 +58,7 @@ public class UIFactory
 
   private WollMuxSidebarUIElementEventHandler eventHandler;
 
-  public static final Set<String> SUPPORTED_ACTIONS = new HashSet<String>();
+  public static final Set<String> SUPPORTED_ACTIONS = new HashSet<>();
   static
   {
     SUPPORTED_ACTIONS.add("openTemplate");
@@ -77,7 +77,7 @@ public class UIFactory
   public UIFactory(WollMuxBarConfig config)
   {
     this.config = config;
-    listeners = new ArrayList<UIElementCreateListener>();
+    listeners = new ArrayList<>();
 
     WollMuxBarEventHandler wmEventHandler = new WollMuxBarEventHandler(null);
     //wmEventHandler.start();
@@ -250,7 +250,7 @@ public class UIFactory
 
   private Map<String, String> parseElementConf(ConfigThingy conf)
   {
-    Map<String, String> props = new HashMap<String, String>();
+    Map<String, String> props = new HashMap<>();
 
     for (ConfigThingy node : conf)
     {

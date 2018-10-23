@@ -74,6 +74,7 @@ import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.itd51.wollmux.core.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 

@@ -83,15 +83,15 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.core.dialog.DimAdjust;
+import de.muenchen.allg.itd51.wollmux.core.dialog.JPotentiallyOverlongPopupMenuButton;
+import de.muenchen.allg.itd51.wollmux.core.dialog.TextComponentTags;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
-import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
-import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog;
-import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
 
 /**
  * Dialoge zur Bestimmung der Parameter für den wirklichen Merge (z.B. ob in

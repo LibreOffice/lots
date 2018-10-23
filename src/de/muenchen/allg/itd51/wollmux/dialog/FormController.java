@@ -88,6 +88,11 @@ import de.muenchen.allg.itd51.wollmux.OpenExt.ExceptionHandler;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementEventHandler;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementFactory;
+import de.muenchen.allg.itd51.wollmux.core.dialog.controls.Textarea;
+import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
@@ -95,8 +100,6 @@ import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.controls.Textarea;
-import de.muenchen.allg.itd51.wollmux.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
@@ -197,42 +200,42 @@ public class FormController implements UIElementEventHandler
   /**
    * Bildet IDs auf die dazugehörigen UIElements ab.
    */
-  private Map<String, UIElement> mapIdToUIElement = new HashMap<String, UIElement>();
+  private Map<String, UIElement> mapIdToUIElement = new HashMap<>();
 
   /**
    * Bildet IDs auf Lists von UIElements ab, deren Plausi vom UIElement ID
    * abhängt.
    */
-  private Map<String, List<UIElement>> mapIdToListOfUIElementsWithDependingPlausi = new HashMap<String, List<UIElement>>();
+  private Map<String, List<UIElement>> mapIdToListOfUIElementsWithDependingPlausi = new HashMap<>();
 
   /**
    * Bildet IDs auf Lists von UIElements ab, deren AUTOFILL vom UIElement ID
    * abhängt.
    */
-  private Map<String, List<UIElement>> mapIdToListOfUIElementsWithDependingAutofill = new HashMap<String, List<UIElement>>();
+  private Map<String, List<UIElement>> mapIdToListOfUIElementsWithDependingAutofill = new HashMap<>();
 
   /**
    * Bildet Namen von Funktionsdialogen auf Lists von UIElements ab, deren
    * AUTOFILL von diesem Funktionsdialog abhängen.
    */
-  private Map<String, List<UIElement>> mapDialogNameToListOfUIElementsWithDependingAutofill = new HashMap<String, List<UIElement>>();
+  private Map<String, List<UIElement>> mapDialogNameToListOfUIElementsWithDependingAutofill = new HashMap<>();
 
   /**
    * Bildet die ID eines UIElements ab auf eine List der Groups, die von
    * Änderungen des UIElements betroffen sind (zum Beispiel weil die
    * Sichtbarkeitsfunktion der Gruppe von dem UIElement abhängt).
    */
-  private Map<String, List<Group>> mapIdToListOfDependingGroups = new HashMap<String, List<Group>>();
+  private Map<String, List<Group>> mapIdToListOfDependingGroups = new HashMap<>();
 
   /**
    * Bildet GROUPS Bezeichner auf die entsprechenden Group-Instanzen ab.
    */
-  private Map<String, Group> mapGroupIdToGroup = new HashMap<String, Group>();
+  private Map<String, Group> mapGroupIdToGroup = new HashMap<>();
 
   /**
    * Diese Liste enthält alle UIElements.
    */
-  private List<UIElement> uiElements = new ArrayList<UIElement>();
+  private List<UIElement> uiElements = new ArrayList<>();
 
   /**
    * Die Inhalte der UIElemente aus {@link #mapIdToUIElement} als Values zur
@@ -572,7 +575,7 @@ public class FormController implements UIElementEventHandler
     if (func == null)
       return;
 
-    Set<String> funcDialogNames = new HashSet<String>();
+    Set<String> funcDialogNames = new HashSet<>();
     func.getFunctionDialogReferences(funcDialogNames);
     Iterator<String> iter = funcDialogNames.iterator();
     while (iter.hasNext())
@@ -738,12 +741,12 @@ public class FormController implements UIElementEventHandler
            *************************************************************************/
           int compoX = 0;
           int compoWidthIncrement = 0;
-          if (!uiElement.getLabelType().equals(UIElement.LABEL_NONE))
+          if (!uiElement.getLabelType().equals(UIElement.LabelPosition.NONE))
           {
             Component label = uiElement.getLabel();
             int labelX = 0;
             boolean labelIsEmpty = false;
-            if (uiElement.getLabelType().equals(UIElement.LABEL_LEFT))
+            if (uiElement.getLabelType().equals(UIElement.LabelPosition.LEFT))
             {
               compoX = 1;
               try
@@ -864,11 +867,11 @@ public class FormController implements UIElementEventHandler
           }
 
           int compoX = x;
-          if (!uiElement.getLabelType().equals(UIElement.LABEL_NONE))
+          if (!uiElement.getLabelType().equals(UIElement.LabelPosition.NONE))
           {
             int labelX = x;
             ++x;
-            if (uiElement.getLabelType().equals(UIElement.LABEL_LEFT))
+            if (uiElement.getLabelType().equals(UIElement.LabelPosition.LEFT))
               compoX = x;
             else
               labelX = x;
@@ -1081,9 +1084,9 @@ public class FormController implements UIElementEventHandler
    */
   private void initFactories()
   {
-    Map<String, GridBagConstraints> mapTypeToLayoutConstraints = new HashMap<String, GridBagConstraints>();
-    Map<String, Integer> mapTypeToLabelType = new HashMap<String, Integer>();
-    Map<String, GridBagConstraints> mapTypeToLabelLayoutConstraints = new HashMap<String, GridBagConstraints>();
+    Map<String, GridBagConstraints> mapTypeToLayoutConstraints = new HashMap<>();
+    Map<String, UIElement.LabelPosition> mapTypeToLabelType = new HashMap<>();
+    Map<String, GridBagConstraints> mapTypeToLabelLayoutConstraints = new HashMap<>();
 
     // int gridx, int gridy, int gridwidth, int gridheight, double weightx,
     // double
@@ -1121,67 +1124,69 @@ public class FormController implements UIElementEventHandler
         new Insets(0, 0, 0, 0), 0, 0);
 
     mapTypeToLayoutConstraints.put("default", gbcTextfield);
-    mapTypeToLabelType.put("default", UIElement.LABEL_LEFT);
+    mapTypeToLabelType.put("default", UIElement.LabelPosition.LEFT);
     mapTypeToLabelLayoutConstraints.put("default", gbcLabelLeft);
 
     mapTypeToLayoutConstraints.put("textfield", gbcTextfield);
-    mapTypeToLabelType.put("textfield", UIElement.LABEL_LEFT);
+    mapTypeToLabelType.put("textfield", UIElement.LabelPosition.LEFT);
     mapTypeToLabelLayoutConstraints.put("textfield", gbcLabelLeft);
 
     mapTypeToLayoutConstraints.put("combobox", gbcCombobox);
-    mapTypeToLabelType.put("combobox", UIElement.LABEL_LEFT);
+    mapTypeToLabelType.put("combobox", UIElement.LabelPosition.LEFT);
     mapTypeToLabelLayoutConstraints.put("combobox", gbcLabelLeft);
 
     mapTypeToLayoutConstraints.put("h-glue", gbcGlue);
-    mapTypeToLabelType.put("h-glue", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("h-glue", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("h-glue", null);
     mapTypeToLayoutConstraints.put("v-glue", gbcGlue);
-    mapTypeToLabelType.put("v-glue", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("v-glue", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("v-glue", null);
 
     mapTypeToLayoutConstraints.put("textarea", gbcTextarea);
-    mapTypeToLabelType.put("textarea", UIElement.LABEL_LEFT);
+    mapTypeToLabelType.put("textarea", UIElement.LabelPosition.LEFT);
     mapTypeToLabelLayoutConstraints.put("textarea", gbcLabelLeft);
 
     mapTypeToLayoutConstraints.put("label", gbcLabel);
-    mapTypeToLabelType.put("label", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("label", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("label", null);
 
     mapTypeToLayoutConstraints.put("checkbox", gbcCheckbox);
-    mapTypeToLabelType.put("checkbox", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("checkbox", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("checkbox", null); // hat label
                                                            // integriert
 
     mapTypeToLayoutConstraints.put("button", gbcButton);
-    mapTypeToLabelType.put("button", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("button", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("button", null);
 
     mapTypeToLayoutConstraints.put("h-separator", gbcHsep);
-    mapTypeToLabelType.put("h-separator", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("h-separator", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("h-separator", null);
     mapTypeToLayoutConstraints.put("v-separator", gbcVsep);
-    mapTypeToLabelType.put("v-separator", UIElement.LABEL_NONE);
+    mapTypeToLabelType.put("v-separator", UIElement.LabelPosition.NONE);
     mapTypeToLabelLayoutConstraints.put("v-separator", null);
 
     panelContext = new UIElementContext();
-    panelContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
-    panelContext.mapTypeToLabelType = mapTypeToLabelType;
-    panelContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
-    panelContext.uiElementEventHandler = this;
-    panelContext.mapTypeToType = new HashMap<String, String>();
-    panelContext.mapTypeToType.put("separator", "h-separator");
-    panelContext.mapTypeToType.put("glue", "v-glue");
+    panelContext.setMapTypeToLabelLayoutConstraints(mapTypeToLabelLayoutConstraints);
+    panelContext.setMapTypeToLabelType(mapTypeToLabelType);
+    panelContext.setMapTypeToLayoutConstraints(mapTypeToLayoutConstraints);
+    panelContext.setUiElementEventHandler(this);
+    Map<String, String> panelMapTypeToType = new HashMap<>();
+    panelMapTypeToType.put("separator", "h-separator");
+    panelMapTypeToType.put("glue", "v-glue");
+    panelContext.setMapTypeToType(panelMapTypeToType);
 
     buttonContext = new UIElementContext();
-    buttonContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
-    buttonContext.mapTypeToLabelType = mapTypeToLabelType;
-    buttonContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
-    buttonContext.uiElementEventHandler = this;
-    buttonContext.mapTypeToType = new HashMap<String, String>();
-    buttonContext.mapTypeToType.put("separator", "v-separator");
-    buttonContext.mapTypeToType.put("glue", "h-glue");
+    buttonContext.setMapTypeToLabelLayoutConstraints(mapTypeToLabelLayoutConstraints);
+    buttonContext.setMapTypeToLabelType(mapTypeToLabelType);
+    buttonContext.setMapTypeToLayoutConstraints(mapTypeToLayoutConstraints);
+    buttonContext.setUiElementEventHandler(this);
+    Map<String, String> buttonMapTypeToType = new HashMap<>();
+    buttonMapTypeToType.put("separator", "v-separator");
+    buttonMapTypeToType.put("glue", "h-glue");
+    buttonContext.setMapTypeToType(buttonMapTypeToType);
 
-    Set<String> supportedActions = new HashSet<String>();
+    Set<String> supportedActions = new HashSet<>();
     supportedActions.add("abort");
     supportedActions.add("nextTab");
     supportedActions.add("prevTab");
@@ -1195,8 +1200,8 @@ public class FormController implements UIElementEventHandler
     supportedActions.add("openTemplate");
     supportedActions.add("openExt");
     supportedActions.add("form2EMail");
-    panelContext.supportedActions = supportedActions;
-    buttonContext.supportedActions = supportedActions;
+    panelContext.setSupportedActions(supportedActions);
+    buttonContext.setSupportedActions(supportedActions);
 
     uiElementFactory = new UIElementFactory();
 
@@ -1336,7 +1341,7 @@ public class FormController implements UIElementEventHandler
         // informiert.
         formModel.valueChanged(source.getId(), source.getString());
 
-        Set<UIElement> todo = new HashSet<UIElement>();
+        Set<UIElement> todo = new HashSet<>();
         todo.add(source);
         /*
          * Der folgende Code wird ebenfalls für den eventType funcDialogSelect
@@ -1416,7 +1421,7 @@ public class FormController implements UIElementEventHandler
             || "openDocument".equals(action))
         {
           String fragId = (String) args[1];
-          List<String> fragIds = new ArrayList<String>();
+          List<String> fragIds = new ArrayList<>();
           fragIds.add(fragId);
           formModel.openTemplateOrDocument(fragIds);
         } else if ("openExt".equals(action))
@@ -1445,7 +1450,7 @@ public class FormController implements UIElementEventHandler
       } else if ("funcDialogSelect".equals(eventType))
       {
         String dialogName = (String) args[0];
-        Set<UIElement> todo = new HashSet<UIElement>();
+        Set<UIElement> todo = new HashSet<>();
         List<UIElement> depending = mapDialogNameToListOfUIElementsWithDependingAutofill
             .get(dialogName);
         if (depending != null)
@@ -1485,7 +1490,7 @@ public class FormController implements UIElementEventHandler
    */
   public Set<UIElement> computeChangesCausedByChangeOf(Set<UIElement> todo)
   {
-    Set<UIElement> elements = new HashSet<UIElement>();
+    Set<UIElement> elements = new HashSet<>();
     while (!todo.isEmpty())
     {
       Iterator<UIElement> iter = todo.iterator();
@@ -1597,7 +1602,7 @@ public class FormController implements UIElementEventHandler
       } else
       {
         if (state.invisibleGroups == null)
-          state.invisibleGroups = new ArrayList<Group>(1);
+          state.invisibleGroups = new ArrayList<>(1);
         if (!state.invisibleGroups.contains(group))
           state.invisibleGroups.add(group);
       }
@@ -1742,7 +1747,7 @@ public class FormController implements UIElementEventHandler
     /**
      * Die Mitglieder der Gruppe.
      */
-    public List<UIElement> uiElements = new ArrayList<UIElement>(1);
+    public List<UIElement> uiElements = new ArrayList<>(1);
 
     /**
      * Die Bedingung für die Sichtbarkeit (true = sichtbar) oder null, wenn
