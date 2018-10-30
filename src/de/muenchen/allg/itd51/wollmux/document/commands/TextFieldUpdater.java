@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.text.XTextRange;
 
-import de.muenchen.allg.afid.UnoService;
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.UpdateFields;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
@@ -60,8 +60,7 @@ class TextFieldUpdater extends AbstractExecutor
     XTextRange range = cmd.getTextCursor();
     if (range != null)
     {
-      UnoService cursor = new UnoService(range);
-      updateTextFieldsRecursive(cursor);
+      updateTextFieldsRecursive(range);
     }
     cmd.markDone(!this.documentCommandInterpreter.debugMode);
     return 0;
@@ -74,18 +73,18 @@ class TextFieldUpdater extends AbstractExecutor
    * @param element
    *          Das Element das geupdated werden soll.
    */
-  private void updateTextFieldsRecursive(UnoService element)
+  private void updateTextFieldsRecursive(Object element)
   {
     // zuerst die Kinder durchsuchen (falls vorhanden):
-    if (element.xEnumerationAccess() != null)
+    if (UNO.XEnumerationAccess(element) != null)
     {
-      XEnumeration xEnum = element.xEnumerationAccess().createEnumeration();
+      XEnumeration xEnum =  UNO.XEnumerationAccess(element).createEnumeration();
 
       while (xEnum.hasMoreElements())
       {
         try
         {
-          UnoService child = new UnoService(xEnum.nextElement());
+          Object child = xEnum.nextElement();
           updateTextFieldsRecursive(child);
         }
         catch (java.lang.Exception e)
@@ -98,10 +97,10 @@ class TextFieldUpdater extends AbstractExecutor
     // jetzt noch update selbst aufrufen (wenn verfügbar):
     try
     {
-      UnoService textField = element.getPropertyValue("TextField");
-      if (textField != null && textField.xUpdatable() != null)
+      Object textField =  UNO.XPropertySet(element).getPropertyValue("TextField");
+      if (textField != null && UNO.XUpdatable(textField) != null)
       {
-        textField.xUpdatable().update();
+        UNO.XUpdatable(textField).update();
       }
     }
     catch (Exception e)

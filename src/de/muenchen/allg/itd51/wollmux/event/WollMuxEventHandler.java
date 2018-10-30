@@ -119,12 +119,12 @@ import com.sun.star.text.XTextRangeCompare;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.RuntimeException;
+import com.sun.star.uno.XComponentContext;
 import com.sun.star.util.XStringSubstitution;
 import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
@@ -2626,16 +2626,19 @@ public class WollMuxEventHandler
       {
         try
         {
-          UnoService confProvider =
-            UnoService.createWithContext(
-              "com.sun.star.configuration.ConfigurationProvider",
-              WollMuxSingleton.getInstance().getXComponentContext());
+					XComponentContext ctx = WollMuxSingleton.getInstance()
+					    .getXComponentContext();
+					Object confProvider = ctx.getServiceManager()
+					    .createInstanceWithContext(
+					        "com.sun.star.configuration.ConfigurationProvider", ctx);
 
-          UnoService confView =
-            confProvider.create(
-              "com.sun.star.configuration.ConfigurationAccess",
-              new UnoProps("nodepath", "/org.openoffice.UserProfile/Data").getProps());
-          return confView.xNameAccess().getByName(key).toString();
+					Object confView =
+					    UNO.XMultiServiceFactory(confProvider)
+					        .createInstanceWithArguments(
+					            "com.sun.star.configuration.ConfigurationAccess",
+					            new UnoProps("nodepath",
+					                "/org.openoffice.UserProfile/Data").getProps());
+					return UNO.XNameAccess(confView).getByName(key).toString();
         }
         catch (Exception e)
         {

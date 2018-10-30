@@ -32,3 +32,4 @@ misc/version
 .project
 .classpath
 /.settings
+.vscode/

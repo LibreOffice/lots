@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.io.IOException;
@@ -25,7 +26,6 @@ import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
@@ -345,12 +345,12 @@ class DocumentExpander extends AbstractExecutor
     // Workaround: Alten Paragraphenstyle merken. Problembeschreibung siehe
     // http://qa.openoffice.org/issues/show_bug.cgi?id=60475
     String paraStyleName = null;
-    UnoService endCursor = new UnoService(null);
+    XPropertySet endCursor = null;
     XTextRange range = cmd.getTextCursor();
     if (range != null)
     {
       endCursor =
-        new UnoService(range.getText().createTextCursorByRange(range.getEnd()));
+         UNO.XPropertySet(range.getText().createTextCursorByRange(range.getEnd()));
     }
     else
       LOGGER.error(L.m(
@@ -358,9 +358,9 @@ class DocumentExpander extends AbstractExecutor
         cmd.toString()));
     try
     {
-      if (endCursor.xPropertySet() != null)
+      if (endCursor != null)
         paraStyleName =
-          endCursor.getPropertyValue("ParaStyleName").getObject().toString();
+          endCursor.getPropertyValue("ParaStyleName").toString();
     }
     catch (java.lang.Exception e)
     {
@@ -390,7 +390,7 @@ class DocumentExpander extends AbstractExecutor
 
     // Workaround: ParagraphStyleName für den letzten eingefügten Paragraphen
     // wieder setzen (siehe oben).
-    if (endCursor.xPropertySet() != null && paraStyleName != null)
+    if (endCursor != null && paraStyleName != null)
     {
       try
       {

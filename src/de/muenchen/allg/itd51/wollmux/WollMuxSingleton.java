@@ -60,13 +60,13 @@ import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.document.XEventBroadcaster;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 import com.sun.star.util.XChangesBatch;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -163,10 +163,10 @@ public class WollMuxSingleton
     // register global EventListener
     try
     {
-      UnoService eventBroadcaster =
-        UnoService.createWithContext("com.sun.star.frame.GlobalEventBroadcaster",
-          ctx);
-      eventBroadcaster.xEventBroadcaster().addEventListener(
+			XEventBroadcaster eventBroadcaster = UNO
+			    .XEventBroadcaster(ctx.getServiceManager().createInstanceWithContext(
+			        "com.sun.star.frame.GlobalEventBroadcaster", ctx));
+			eventBroadcaster.addEventListener(
         new GlobalEventListener(DocumentManager.getDocumentManager()));
     }
     catch (Exception e)

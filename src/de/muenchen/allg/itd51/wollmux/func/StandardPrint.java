@@ -44,7 +44,6 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
@@ -164,18 +163,20 @@ public class StandardPrint
    * UNO-Mechanismen korrekt inspizieren lässt.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
+   * 
+   * @deprecated
    */
   public static void myTestPrintFunction(XPrintModel pmod, Object arg)
   {
     ConfigThingy conf = new ConfigThingy("ARG");
     if (arg != null && arg instanceof ConfigThingy) conf = (ConfigThingy) arg;
 
-    new UnoService(pmod).msgboxFeatures();
+		new de.muenchen.allg.afid.UnoService(pmod).msgboxFeatures();
 
     pmod.setFormValue("EmpfaengerZeile1", conf.stringRepresentation());
     pmod.print((short) 1);
 
-    new UnoService(pmod).msgboxFeatures();
+		new de.muenchen.allg.afid.UnoService(pmod).msgboxFeatures();
   }
 
   /**
