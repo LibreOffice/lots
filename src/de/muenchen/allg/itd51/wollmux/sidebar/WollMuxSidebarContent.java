@@ -181,10 +181,6 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           tree = UnoRuntime.queryInterface(XTreeControl.class, treeCtrl);
           layout.add(treeCtrl);
 
-          XPropertySet props =
-            UnoRuntime.queryInterface(XPropertySet.class, treeCtrl.getModel());
-          props.setPropertyValue("DataModel", dataModel);
-
           XWindow treeWnd = UnoRuntime.queryInterface(XWindow.class, treeCtrl);
           xMouseListener = new TreeMouseListener();
           treeWnd.addMouseListener(xMouseListener);
