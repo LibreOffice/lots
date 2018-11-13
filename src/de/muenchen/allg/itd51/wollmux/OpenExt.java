@@ -202,7 +202,7 @@ public class OpenExt
         programs = commands;
         download = appConf.getString("DOWNLOAD", "").equalsIgnoreCase("true");
         pipe = appConf.getString("PIPE", "").equalsIgnoreCase("true");
-        filter = appConf.getString("FILTER", null).toString();
+        filter = appConf.getString("FILTER", null);
       }
     }
   }

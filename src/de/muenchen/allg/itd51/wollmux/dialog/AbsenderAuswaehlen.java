@@ -810,7 +810,7 @@ public class AbsenderAuswaehlen
     // GUI im Event-Dispatching Thread zerstören wg. Thread-Safety.
     try
     {
-      javax.swing.SwingUtilities.invokeLater(() -> abort());
+      javax.swing.SwingUtilities.invokeLater(this::abort);
     }
     catch (Exception x)
     {/* Hope for the best */}
