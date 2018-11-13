@@ -6,6 +6,7 @@ import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionConstants;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
@@ -33,7 +34,7 @@ public class OrFunction extends MultiFunction
     {
       Function func = iter.next();
       String str = func.getString(parameters);
-      if (str == Function.ERROR) return Function.ERROR;
+      if (str == FunctionConstants.ERROR) return FunctionConstants.ERROR;
       if (str.equalsIgnoreCase("true")) return "true";
     }
     return "false";

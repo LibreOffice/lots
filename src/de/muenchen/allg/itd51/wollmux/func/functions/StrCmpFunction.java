@@ -5,6 +5,7 @@ import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionConstants;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
@@ -29,13 +30,13 @@ public class StrCmpFunction extends MultiFunction
     Iterator<Function> iter = subFunction.iterator();
     Function func = iter.next();
     String compare = func.getString(parameters);
-    if (compare == Function.ERROR) return Function.ERROR;
+    if (compare == FunctionConstants.ERROR) return FunctionConstants.ERROR;
     int prevCompare = 0;
     while (iter.hasNext())
     {
       func = iter.next();
       String str = func.getString(parameters);
-      if (str == Function.ERROR) return Function.ERROR;
+      if (str == FunctionConstants.ERROR) return FunctionConstants.ERROR;
       int res = Integer.signum(compare.compareTo(str));
       if (res * prevCompare < 0) return "0";
       prevCompare += res;

@@ -2,6 +2,8 @@ package de.muenchen.allg.itd51.wollmux.func.functions;
 
 import java.util.Collection;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 
@@ -14,7 +16,7 @@ public class StringLiteralFunction implements Function
   @Override
   public String[] parameters()
   {
-    return noParams;
+    return ArrayUtils.EMPTY_STRING_ARRAY;
   }
 
   @Override

@@ -3,6 +3,7 @@ package de.muenchen.allg.itd51.wollmux.func.functions;
 import java.util.Collection;
 
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionConstants;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 
 public class ValueFunction implements Function
@@ -27,7 +28,7 @@ public class ValueFunction implements Function
   @Override
   public String getString(Values parameters)
   {
-    if (!parameters.hasValue(params[0])) return Function.ERROR;
+    if (!parameters.hasValue(params[0])) return FunctionConstants.ERROR;
     return parameters.getString(params[0]);
   }
 

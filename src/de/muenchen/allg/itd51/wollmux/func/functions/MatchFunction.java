@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.regex.Pattern;
 
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionConstants;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 
 public class MatchFunction implements Function
@@ -22,7 +23,7 @@ public class MatchFunction implements Function
   public String getString(Values parameters)
   {
     String str = input.getString(parameters);
-    if (str == Function.ERROR) return Function.ERROR;
+    if (str == FunctionConstants.ERROR) return FunctionConstants.ERROR;
     if (pattern.matcher(str).matches()) return "true";
     return "false";
   }

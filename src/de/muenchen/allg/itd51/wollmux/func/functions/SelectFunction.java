@@ -6,6 +6,7 @@ import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionConstants;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
@@ -60,12 +61,12 @@ public class SelectFunction extends MultiFunction
   public String getString(Values parameters)
   {
     Iterator<Function> iter = subFunction.iterator();
-    String result = Function.ERROR;
+    String result = FunctionConstants.ERROR;
     while (iter.hasNext())
     {
       Function func = iter.next();
       String str = func.getString(parameters);
-      if (str != Function.ERROR)
+      if (str != FunctionConstants.ERROR)
       {
         result = str;
         if (str.length() > 0) break;

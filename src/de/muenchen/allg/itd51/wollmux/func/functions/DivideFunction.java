@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionConstants;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 
 public class DivideFunction implements Function
@@ -70,11 +71,11 @@ public class DivideFunction implements Function
     ;
 
     String dividend = dividendFunction.getString(parameters);
-    if (dividend == Function.ERROR) return Function.ERROR;
+    if (dividend == FunctionConstants.ERROR) return FunctionConstants.ERROR;
 
     String divisor = "1";
     if (divisorFunction != null) divisor = divisorFunction.getString(parameters);
-    if (divisor == Function.ERROR) return Function.ERROR;
+    if (divisor == FunctionConstants.ERROR) return FunctionConstants.ERROR;
 
     /*
      * Falls der Dezimaltrenner nicht '.' ist, ersetzte alle '.' durch etwas, das
@@ -100,7 +101,7 @@ public class DivideFunction implements Function
     }
     catch (Exception x)
     {
-      return Function.ERROR;
+      return FunctionConstants.ERROR;
     }
 
     /*

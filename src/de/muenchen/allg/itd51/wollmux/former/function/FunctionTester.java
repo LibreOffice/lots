@@ -67,6 +67,7 @@ import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionConstants;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
@@ -428,7 +429,7 @@ public class FunctionTester
           Function func =
             FunctionFactory.parse(codeConf, funcLib, dialogLib, myContext);
           String result = func.getString(myParameters);
-          if (result == Function.ERROR)
+          if (result == FunctionConstants.ERROR)
             throw new Exception(L.m("Illegaler oder fehlender Parameter!"));
           stringResult.setText(result);
           stringResult.setCaretPosition(0);

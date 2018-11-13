@@ -8,6 +8,7 @@ import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionConstants;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
@@ -37,7 +38,7 @@ abstract class NumberFunction extends MultiFunction
    * einer Summen-Funktion würde dies den Summenzähler mit 0 initialisieren.
    * 
    * @return Falls zu diesem Zeitpunkt bereits ein Ergebnis bestimmt werden kann
-   *         (z.B. Function.ERROR, wenn ein benötigter Parameter nicht in
+   *         (z.B. FunctionConstants.ERROR, wenn ein benötigter Parameter nicht in
    *         parameters übergeben wurde), so wird dieses zurückgeliefert, ansonsten
    *         null.
    */
@@ -46,7 +47,7 @@ abstract class NumberFunction extends MultiFunction
   /**
    * Fügt den Wert num der aktuellen Berechnung hinzu. Im Falle einer
    * Summen-Funktion würde er auf den Summen-Zähler addiert. Darf eine Exception
-   * werfen. In diesem Fall wird die Funktion Function.ERROR zurückliefern.
+   * werfen. In diesem Fall wird die Funktion FunctionConstants.ERROR zurückliefern.
    * 
    * @return Falls zu diesem Zeitpunkt bereits ein Ergebnis bestimmt werden kann
    *         (z.B. im Falle einer Vergleichsfunktion, die Kurzschlussauswertung
@@ -72,7 +73,7 @@ abstract class NumberFunction extends MultiFunction
     {
       Function func = iter.next();
       String str = func.getString(parameters);
-      if (str == Function.ERROR) return Function.ERROR;
+      if (str == FunctionConstants.ERROR) return FunctionConstants.ERROR;
       try
       {
         BigDecimal num = makeBigDecimal(str);
@@ -81,7 +82,7 @@ abstract class NumberFunction extends MultiFunction
       }
       catch (Exception x)
       {
-        return Function.ERROR;
+        return FunctionConstants.ERROR;
       }
     }
     return computationResult();

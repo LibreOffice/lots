@@ -5,6 +5,7 @@ import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionConstants;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
@@ -69,11 +70,11 @@ public class IsErrorFunction implements Function
   {
     if (objectCompare)
     {
-      return Function.ERROR == str;
+      return FunctionConstants.ERROR == str;
     }
     else
     {
-      return Function.ERROR.equals(str);
+      return FunctionConstants.ERROR.equals(str);
     }
   }
 

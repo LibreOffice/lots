@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionConstants;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 
 public class IfFunction implements Function
@@ -49,7 +50,7 @@ public class IfFunction implements Function
   public String getString(Values parameters)
   {
     String condition = ifFunction.getString(parameters);
-    if (condition == Function.ERROR) return Function.ERROR;
+    if (condition == FunctionConstants.ERROR) return FunctionConstants.ERROR;
     if (condition.equalsIgnoreCase("true"))
       return thenFunction.getString(parameters);
     else
@@ -60,7 +61,7 @@ public class IfFunction implements Function
   public boolean getBoolean(Values parameters)
   {
     String condition = ifFunction.getString(parameters);
-    if (condition == Function.ERROR) return false;
+    if (condition == FunctionConstants.ERROR) return false;
     if (condition.equalsIgnoreCase("true"))
       return thenFunction.getBoolean(parameters);
     else

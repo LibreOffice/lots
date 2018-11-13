@@ -10,6 +10,7 @@ import java.util.Set;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionConstants;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
@@ -102,7 +103,7 @@ public class BindFunction implements Function
   {
     TranslatedValues trans = new TranslatedValues(parameters);
     String res = func.getString(trans);
-    if (trans.hasError) return Function.ERROR;
+    if (trans.hasError) return FunctionConstants.ERROR;
     return res;
   }
 
@@ -153,7 +154,7 @@ public class BindFunction implements Function
       if (setFunc != null)
       {
         String res = setFunc.getString(values);
-        if (res == Function.ERROR)
+        if (res == FunctionConstants.ERROR)
         {
           hasError = true;
           return "";
@@ -170,7 +171,7 @@ public class BindFunction implements Function
       if (setFunc != null)
       {
         String res = setFunc.getString(values);
-        if (res == Function.ERROR)
+        if (res == FunctionConstants.ERROR)
         {
           hasError = true;
           return false;

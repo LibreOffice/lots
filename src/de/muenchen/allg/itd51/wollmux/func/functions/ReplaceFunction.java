@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionConstants;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 
 public class ReplaceFunction implements Function
@@ -35,7 +36,7 @@ public class ReplaceFunction implements Function
   {
     String str = input.getString(parameters);
     String repStr = replace.getString(parameters);
-    if (str == Function.ERROR || repStr == Function.ERROR) return Function.ERROR;
+    if (str == FunctionConstants.ERROR || repStr == FunctionConstants.ERROR) return FunctionConstants.ERROR;
     return pattern.matcher(str).replaceAll(repStr);
   }
 
