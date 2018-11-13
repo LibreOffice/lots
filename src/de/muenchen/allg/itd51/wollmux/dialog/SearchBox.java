@@ -264,28 +264,25 @@ public class SearchBox
   public static boolean buttonMatches(ConfigThingy button, String[] words)
   {
     if (words == null || words.length == 0) return false;
-    try
-    {
-      String type = button.get("TYPE").toString();
-      if (!type.equals("button")) return false;
-    }
-    catch (NodeNotFoundException e1)
+    String type = button.getString("TYPE", "");
+    if (!type.equals("button"))
     {
       return false;
     }
 
-    String label;
-    try
-    {
-      label = button.get("LABEL").toString();
-    }
-    catch (NodeNotFoundException e1)
+    String label = button.getString("LABEL", "");
+    if (label.isEmpty())
     {
       return false;
     }
 
     for (String word : words)
-      if (!label.toLowerCase().contains(word.toLowerCase())) return false;
+    {
+      if (!label.toLowerCase().contains(word.toLowerCase()))
+      {
+        return false;
+      }
+    }
     return true;
   }
 }

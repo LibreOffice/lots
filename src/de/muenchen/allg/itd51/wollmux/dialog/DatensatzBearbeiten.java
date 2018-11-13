@@ -102,7 +102,6 @@ import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
@@ -1068,20 +1067,9 @@ public class DatensatzBearbeiten
 
     public void createGUI(ConfigThingy conf)
     {
-      title = L.m("TITLE fehlt in Fensterbeschreibung");
-      try
-      {
-        title = substituteVars(L.m("" + conf.get("TITLE")));
-      }
-      catch (NodeNotFoundException x)
-      {}
-
-      try
-      {
-        dialogWindowCloseAction = getAction(conf.get("CLOSEACTION").toString());
-      }
-      catch (Exception x)
-      {}
+      title = substituteVars(
+          L.m(conf.getString("TITLE", "TITLE fehlt in Fensterbeschreibung")));
+      dialogWindowCloseAction = getAction(conf.getString("CLOSEACTION", ""));
 
       myPanel = new JPanel(new BorderLayout());
       myInputPanel = new JPanel();
@@ -1130,194 +1118,164 @@ public class DatensatzBearbeiten
       ConfigThingy felderParent = conf.query("Eingabefelder");
       int y = -1;
 
-      Iterator<ConfigThingy> piter = felderParent.iterator();
-      while (piter.hasNext())
+      for (ConfigThingy it : felderParent)
       {
-        Iterator<ConfigThingy> iter = (piter.next()).iterator();
-        while (iter.hasNext())
+        for (ConfigThingy uiElementDesc : it)
         {
           ++y;
-          ConfigThingy uiElementDesc = iter.next();
-          try
+          boolean readonly = false;
+          if ("true".equals(uiElementDesc.getString("READONLY", "")))
           {
+            readonly = true;
+          }
 
-            /*
-             * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN, DASS DER
-             * ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET() UND EINER EVTL. DARAUS
-             * RESULTIERENDEN NULLPOINTEREXCEPTION NOCH KONSISTENT IST!
-             */
+          String type = uiElementDesc.getString("TYPE", "");
 
-            boolean readonly = false;
+          if ("textfield".equals(type))
+          {
+            JLabel label = new JLabel();
+            label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
+                TF_BORDER, 0));
+            gbcLabelLeft.gridy = y;
+            myInputPanel.add(label, gbcLabelLeft);
+            label.setText(L.m(uiElementDesc.getString("LABEL", "")));
+
+            JPanel uiElement = new JPanel(new GridLayout(1, 1));
+            JTextField tf = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
+            tf.setEditable(!readonly);
+
+            String s = uiElementDesc.getString("DB_SPALTE", null);
+            if (s != null)
+            {
+              try
+              {
+                dataControls
+                    .add(new TextComponentDataControl(s, tf, modColor));
+              }
+              catch (ColumnNotFoundException e)
+              {
+                LOGGER.error("", e);
+              }
+            }
+
+            uiElement.add(tf);
+            uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
+                TF_BORDER, 0));
+            gbcTextfield.gridy = y;
+            myInputPanel.add(uiElement, gbcTextfield);
+          }
+          else if ("textarea".equals(type))
+          {
+            JLabel label = new JLabel();
+            label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
+                TF_BORDER, 0));
+            gbcLabelLeft.gridy = y;
+            myInputPanel.add(label, gbcLabelLeft);
+            label.setText(L.m(uiElementDesc.getString("LABEL", "")));
+
+            int lines = Integer
+                .parseInt(uiElementDesc.getString("LINES", "3"));
+            JTextArea textarea = new JTextArea(lines, TEXTFIELD_DEFAULT_WIDTH);
+            textarea.setEditable(!readonly);
+            textarea.setFont(new JTextField().getFont());
+
+            String s = uiElementDesc.getString("DB_SPALTE", null);
+            if (s != null)
+            {
+              try
+              {
+                dataControls
+                    .add(new TextComponentDataControl(s, textarea, modColor));
+              }
+              catch (ColumnNotFoundException e)
+              {
+                LOGGER.error("", e);
+              }
+            }
+
+            JPanel uiElement = new JPanel(new GridLayout(1, 1));
+            JScrollPane scrollPane = new JScrollPane(textarea);// ,
+            // JScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
+            // JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+            scrollPane.setHorizontalScrollBarPolicy(
+                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            scrollPane.setVerticalScrollBarPolicy(
+                ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+            uiElement.add(scrollPane);
+
+            uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
+                TF_BORDER, 0));
+            gbcTextarea.gridy = y;
+            myInputPanel.add(uiElement, gbcTextarea);
+          }
+          else if ("separator".equals(type))
+          {
+            JPanel uiElement = new JPanel(new GridLayout(1, 1));
+            uiElement.add(new JSeparator(SwingConstants.HORIZONTAL));
+            uiElement.setBorder(BorderFactory.createEmptyBorder(SEP_BORDER, 0,
+                SEP_BORDER, 0));
+            gbcSeparator.gridy = y;
+            myInputPanel.add(uiElement, gbcSeparator);
+          }
+          else if ("label".equals(type))
+          {
+            JLabel uiElement = new JLabel();
+            uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
+                TF_BORDER, 0));
+            gbcLabel.gridy = y;
+            myInputPanel.add(uiElement, gbcLabel);
+            uiElement.setText(L.m(uiElementDesc.getString("LABEL", "")));
+          }
+          else if ("combobox".equals(type))
+          {
+            JLabel label = new JLabel();
+            label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
+                TF_BORDER, 0));
+            gbcLabelLeft.gridy = y;
+            myInputPanel.add(label, gbcLabelLeft);
+            label.setText(L.m(uiElementDesc.getString("LABEL", "")));
+
+            JPanel uiElement = new JPanel(new GridLayout(1, 1));
+            JComboBox<String> combo = new JComboBox<String>();
+            combo.setEnabled(!readonly);
+            boolean editable = false;
+            if ("true".equals(uiElementDesc.getString("EDIT", "")))
+            {
+              editable = true;
+            }
+            combo.setEditable(editable);
             try
             {
-              if ("true".equals(uiElementDesc.get("READONLY").toString()))
-                readonly = true;
-            }
-            catch (NodeNotFoundException x)
-            {}
-            String type = uiElementDesc.get("TYPE").toString();
-            if ("textfield".equals(type))
-            {
-              JLabel label = new JLabel();
-              label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
-                TF_BORDER, 0));
-              gbcLabelLeft.gridy = y;
-              myInputPanel.add(label, gbcLabelLeft);
-              try
+              String s = uiElementDesc.getString("DB_SPALTE", null);
+              if (s != null)
               {
-                label.setText(L.m(uiElementDesc.get("LABEL").toString()));
-              }
-              catch (Exception x)
-              {}
-
-              JPanel uiElement = new JPanel(new GridLayout(1, 1));
-              JTextField tf = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
-              tf.setEditable(!readonly);
-
-              try
-              {
-                dataControls.add(new TextComponentDataControl(uiElementDesc.get(
-                  "DB_SPALTE").toString(), tf, modColor));
-              }
-              catch (Exception x)
-              {
-                LOGGER.error("", x);
-              }
-
-              // Font fnt = tf.getFont();
-              // tf.setFont(fnt.deriveFont((float)14.0));
-              // tf.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-              uiElement.add(tf);
-              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
-                TF_BORDER, 0));
-              gbcTextfield.gridy = y;
-              myInputPanel.add(uiElement, gbcTextfield);
-            }
-            else if ("textarea".equals(type))
-            {
-              JLabel label = new JLabel();
-              label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
-                TF_BORDER, 0));
-              gbcLabelLeft.gridy = y;
-              myInputPanel.add(label, gbcLabelLeft);
-              try
-              {
-                label.setText(L.m(uiElementDesc.get("LABEL").toString()));
-              }
-              catch (Exception x)
-              {}
-
-              int lines = 3;
-              try
-              {
-                lines = Integer.parseInt(uiElementDesc.get("LINES").toString());
-              }
-              catch (Exception x)
-              {}
-              JTextArea textarea = new JTextArea(lines, TEXTFIELD_DEFAULT_WIDTH);
-              textarea.setEditable(!readonly);
-              textarea.setFont(new JTextField().getFont());
-
-              try
-              {
-                dataControls.add(new TextComponentDataControl(uiElementDesc.get(
-                  "DB_SPALTE").toString(), textarea, modColor));
-              }
-              catch (Exception x)
-              {
-                LOGGER.error("", x);
-              }
-
-              JPanel uiElement = new JPanel(new GridLayout(1, 1));
-              JScrollPane scrollPane = new JScrollPane(textarea);// ,
-              // JScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
-              // JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-              scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-              scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-              uiElement.add(scrollPane);
-
-              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
-                TF_BORDER, 0));
-              gbcTextarea.gridy = y;
-              myInputPanel.add(uiElement, gbcTextarea);
-            }
-            else if ("separator".equals(type))
-            {
-              JPanel uiElement = new JPanel(new GridLayout(1, 1));
-              uiElement.add(new JSeparator(SwingConstants.HORIZONTAL));
-              uiElement.setBorder(BorderFactory.createEmptyBorder(SEP_BORDER, 0,
-                SEP_BORDER, 0));
-              gbcSeparator.gridy = y;
-              myInputPanel.add(uiElement, gbcSeparator);
-            }
-            else if ("label".equals(type))
-            {
-              JLabel uiElement = new JLabel();
-              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
-                TF_BORDER, 0));
-              gbcLabel.gridy = y;
-              myInputPanel.add(uiElement, gbcLabel);
-              uiElement.setText(L.m(uiElementDesc.get("LABEL").toString()));
-            }
-            else if ("combobox".equals(type))
-            {
-              JLabel label = new JLabel();
-              label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
-                TF_BORDER, 0));
-              gbcLabelLeft.gridy = y;
-              myInputPanel.add(label, gbcLabelLeft);
-              try
-              {
-                label.setText(L.m(uiElementDesc.get("LABEL").toString()));
-              }
-              catch (Exception x)
-              {}
-
-              JPanel uiElement = new JPanel(new GridLayout(1, 1));
-              JComboBox<String> combo = new JComboBox<String>();
-              combo.setEnabled(!readonly);
-              boolean editable = false;
-              try
-              {
-                if ("true".equals(uiElementDesc.get("EDIT").toString()))
-                  editable = true;
-              }
-              catch (NodeNotFoundException x)
-              {}
-              combo.setEditable(editable);
-              try
-              {
-                ComboBoxDataControl comboCtrl =
-                  new ComboBoxDataControl(uiElementDesc.get("DB_SPALTE").toString(),
+                ComboBoxDataControl comboCtrl = new ComboBoxDataControl(
+                    s,
                     combo, modColor);
-                Iterator<ConfigThingy> values =
-                  uiElementDesc.get("VALUES").iterator();
+                Iterator<ConfigThingy> values = uiElementDesc.get("VALUES")
+                    .iterator();
                 while (values.hasNext())
                 {
                   comboCtrl.addItem(values.next().toString());
                 }
                 dataControls.add(comboCtrl);
               }
-              catch (Exception x)
-              {
-                LOGGER.error("", x);
-              }
-
-              uiElement.add(combo);
-              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
-                TF_BORDER, 0));
-              gbcCombobox.gridy = y;
-              myInputPanel.add(uiElement, gbcCombobox);
             }
-            else
+            catch (Exception x)
             {
-              LOGGER.error(L.m(
-                "Ununterstützter TYPE für User Interface Element: %1", type));
+              LOGGER.error("", x);
             }
+
+            uiElement.add(combo);
+            uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
+                TF_BORDER, 0));
+            gbcCombobox.gridy = y;
+            myInputPanel.add(uiElement, gbcCombobox);
           }
-          catch (NodeNotFoundException x)
+          else
           {
-            LOGGER.error("", x);
+            LOGGER.error(L.m(
+                "Ununterstützter TYPE für User Interface Element: %1", type));
           }
         }
       }
@@ -1327,111 +1285,84 @@ public class DatensatzBearbeiten
       myInputPanel.add(Box.createGlue(), gbcBottomglue);
 
       ConfigThingy buttonParents = conf.query("Buttons");
-      piter = buttonParents.iterator();
       boolean firstButton = true;
-      while (piter.hasNext())
+      for (ConfigThingy it : buttonParents)
       {
-        Iterator<ConfigThingy> iter = (piter.next()).iterator();
+        Iterator<ConfigThingy> iter = it.iterator();
         while (iter.hasNext())
         {
           ConfigThingy uiElementDesc = iter.next();
-          try
+          String type = uiElementDesc.getString("TYPE", "");
+          if ("button".equals(type))
           {
+            String action = uiElementDesc.getString("ACTION", "");
+            String label = L.m(uiElementDesc.getString("LABEL", ""));
+            char hotkey = uiElementDesc.getString("HOTKEY", "0").charAt(0);
 
-            /*
-             * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN, DASS DER
-             * ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET() UND EINER EVTL. DARAUS
-             * RESULTIERENDEN NULLPOINTEREXCEPTION NOCH KONSISTENT IST!
-             */
-
-            String type = uiElementDesc.get("TYPE").toString();
-            if ("button".equals(type))
+            JButton button = new JButton(label);
+            button.setMnemonic(hotkey);
+            JPanel uiElement = new JPanel(new GridLayout(1, 1));
+            int left = BUTTON_BORDER;
+            if (firstButton)
             {
-              String action = "";
-              try
-              {
-                action = uiElementDesc.get("ACTION").toString();
-              }
-              catch (NodeNotFoundException x)
-              {}
-
-              String label = L.m(uiElementDesc.get("LABEL").toString());
-
-              char hotkey = 0;
-              try
-              {
-                hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
-              }
-              catch (Exception x)
-              {}
-
-              JButton button = new JButton(label);
-              button.setMnemonic(hotkey);
-              JPanel uiElement = new JPanel(new GridLayout(1, 1));
-              int left = BUTTON_BORDER;
-              if (firstButton)
-              {
-                left = 0;
-                firstButton = false;
-              }
-              int right = BUTTON_BORDER;
-              if (!iter.hasNext())
-                right = 0;
-              uiElement.setBorder(BorderFactory.createEmptyBorder(0, left, 0, right));
-              uiElement.add(button);
-              myButtonPanel.add(uiElement);
-
-              ActionListener actionL = getAction(action);
-              if (actionL != null)
-                button.addActionListener(actionL);
-              else
-                button.setEnabled(false);
-
-              if ("restoreStandard".equals(action))
-              {
-                buttonsToGreyOutIfNoChanges.add(button);
-              }
-              else if ("switchWindow".equals(action))
-              {
-                final String window = uiElementDesc.get("WINDOW").toString();
-                button.addActionListener(new ActionListener()
-                {
-                  @Override
-                  public void actionPerformed(ActionEvent e)
-                  {
-                    showWindow(window);
-                  }
-                });
-
-                button.setEnabled(true);
-              }
-
+              left = 0;
+              firstButton = false;
             }
-            else if ("glue".equals(type))
+            int right = BUTTON_BORDER;
+            if (!iter.hasNext())
+              right = 0;
+            uiElement
+                .setBorder(BorderFactory.createEmptyBorder(0, left, 0, right));
+            uiElement.add(button);
+            myButtonPanel.add(uiElement);
+
+            ActionListener actionL = getAction(action);
+            if (actionL != null)
+              button.addActionListener(actionL);
+            else
+              button.setEnabled(false);
+
+            if ("restoreStandard".equals(action))
             {
-              try
+              buttonsToGreyOutIfNoChanges.add(button);
+            }
+            else if ("switchWindow".equals(action))
+            {
+              final String window = uiElementDesc.getString("WINDOW", "")
+                  .toString();
+              button.addActionListener(new ActionListener()
               {
-                int minsize =
-                  Integer.parseInt(uiElementDesc.get("MINSIZE").toString());
-                myButtonPanel.add(Box.createHorizontalStrut(minsize));
-              }
-              catch (Exception x)
-              {}
-              myButtonPanel.add(Box.createHorizontalGlue());
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                  showWindow(window);
+                }
+              });
+
+              button.setEnabled(true);
             }
           }
-          catch (NodeNotFoundException x)
+          else if ("glue".equals(type))
           {
-            LOGGER.error("", x);
+            try
+            {
+              int minsize = Integer
+                  .parseInt(uiElementDesc.getString("MINSIZE", ""));
+              myButtonPanel.add(Box.createHorizontalStrut(minsize));
+            }
+            catch (NumberFormatException x)
+            {
+            }
+            myButtonPanel.add(Box.createHorizontalGlue());
           }
         }
       }
 
-      Iterator<DataControl> iter = dataControls.iterator();
-      while (iter.hasNext())
-        iter.next().addColorChangeListener(this);
+      for (DataControl it : dataControls)
+      {
+        it.addColorChangeListener(this);
+      }
       colorChanged();
-
     }
   }
 

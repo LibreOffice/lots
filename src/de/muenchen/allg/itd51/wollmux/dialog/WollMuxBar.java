@@ -855,13 +855,7 @@ public class WollMuxBar
 
         if ("senderbox".equals(type))
         {
-          char hotkey = 0;
-          try
-          {
-            hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
-          }
-          catch (Exception e)
-          {}
+          char hotkey = uiElementDesc.getString("HOTKEY", "0").charAt(0);
 
           String label = L.m("Bitte warten...");
           Senderbox senderbox;
@@ -930,30 +924,13 @@ public class WollMuxBar
         }
         else if ("menu".equals(type))
         {
-          String label = L.m("LABEL FEHLT ODER FEHLERHAFT!");
-          try
-          {
-            String str = uiElementDesc.get("LABEL").toString();
-            label = L.m(str);
-          }
-          catch (Exception e)
-          {}
+          String str = uiElementDesc.getString("LABEL",
+              "LABEL FEHLT ODER FEHLERHAFT!");
+          String label = L.m(str);
 
-          char hotkey = 0;
-          try
-          {
-            hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
-          }
-          catch (Exception e)
-          {}
+          char hotkey = uiElementDesc.getString("HOTKEY", "0").charAt(0);
 
-          String menuName = "";
-          try
-          {
-            menuName = uiElementDesc.get("MENU").toString();
-          }
-          catch (NodeNotFoundException e)
-          {}
+          String menuName = uiElementDesc.getString("MENU", "").toString();
 
           AbstractButton button;
           if ("menu".equals(context))
@@ -980,24 +957,28 @@ public class WollMuxBar
           gbcMenuButton.gridy = y;
           button.addMouseListener(myIsInsideMonitor);
           if ("menu".equals(context))
+          {
             compo.add(button);
+          }
           else
+          {
             compo.add(button, gbcMenuButton);
+          }
         }
         else
         {
           // deactivate menuManager and options buttons if allowUserConfig is not activated
           boolean active = true;
-          try
+          String action = uiElementDesc.getString("ACTION", "");
+          if ("menuManager".equals(action)
+              && !(allowUserConfig && allowMenuManager))
           {
-            String action = uiElementDesc.get("ACTION").toString();
-            if("menuManager".equals(action) && !(allowUserConfig && allowMenuManager))
-              active = false;
-            if("options".equals(action) && !(allowUserConfig))
-              active = false;
+            active = false;
           }
-          catch (Exception e)
-          {}
+          if ("options".equals(action) && !(allowUserConfig))
+          {
+            active = false;
+          }
 
           UIElement uiElement =
             uiElementFactory.createUIElement(contextMap, uiElementDesc);
@@ -1011,20 +992,18 @@ public class WollMuxBar
           if(active)
           {
             if ("menu".equals(context))
+            {
               compo.add(uiComponent);
+            }
             else
+            {
               compo.add(uiComponent, gbc);
+            }
           }
           else
           {
-            String label = "";
-            try
-            {
-              String str = uiElementDesc.get("LABEL").toString();
-              label = L.m(str);
-            }
-            catch (Exception e)
-            {}
+            String str = uiElementDesc.getString("LABEL", "");
+            String label = L.m(str);
             LOGGER.debug(L.m(
               "Warnung: Button '%1' wurde konfigurativ deaktiviert und ist daher nicht in der WollMuxBar enthalten.",
               label));
@@ -1084,7 +1063,7 @@ public class WollMuxBar
     {
       conf = menuConf.query(menuName).getLastChild().get("Elemente");
     }
-    catch (Exception x)
+    catch (NodeNotFoundException x)
     {
       LOGGER.error(L.m(
         "Menü \"%1\" nicht definiert oder enthält keinen Abschnitt \"Elemente()\"",

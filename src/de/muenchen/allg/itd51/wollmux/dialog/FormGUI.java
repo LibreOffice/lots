@@ -49,9 +49,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.net.URL;
-import java.util.HashMap;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +58,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
-import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,16 +66,13 @@ import com.sun.star.awt.XWindow2;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
-import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 /**
  * Managed die Fenster (Writer und FormController) der FormularGUI.
@@ -207,20 +201,12 @@ public class FormGUI
   {
     myDoc = doc;
 
-    try
-    {
-      formTitle = conf.get("TITLE").toString();
-    } catch (Exception x)
-    {
-    }
+    formTitle = conf.getString("TITLE", L.m("Unbenanntes Formular"));
 
-    try
+    frameTitle = doc.getWindowTitle();
+    if (frameTitle != null)
     {
-      frameTitle = doc.getWindowTitle();
-      if (frameTitle != null)
-        formGUITitle = frameTitle + " - " + formTitle;
-    } catch (Exception x)
-    {
+      formGUITitle = frameTitle + " - " + formTitle;
     }
 
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
@@ -245,7 +231,8 @@ public class FormGUI
         runner.run();
       else
         SwingUtilities.invokeAndWait(runner);
-    } catch (Exception x)
+    }
+    catch (InvocationTargetException | InterruptedException x)
     {
       LOGGER.error("", x);
     }
@@ -772,48 +759,4 @@ public class FormGUI
       abort();
     }
   }
-
-  /**
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public static void main(String[] args) throws Exception
-  {
-    UNO.init();
-    WollMuxFiles.setupWollMuxDir();
-    LogConfig.init(System.err, Level.DEBUG);
-    String confFile = "testdata/formulartest.conf";
-    ConfigThingy conf = new ConfigThingy("", new URL(
-        new File(System.getProperty("user.dir")).toURI().toURL(), confFile));
-    XTextDocument doc = UNO.XTextDocument(
-        UNO.loadComponentFromURL("private:factory/swriter", true, true));
-    FormModel model = new DummyFormModel(doc);
-    Map<String, String> mapIdToPresetValue = new HashMap<>();
-    mapIdToPresetValue.put("NEFishy", TextDocumentModel.FISHY);
-    mapIdToPresetValue.put("NEPresetInList", "Dings");
-    mapIdToPresetValue.put("NEPresetNotInList", "Schwupps");
-    mapIdToPresetValue.put("EFishy", TextDocumentModel.FISHY);
-    mapIdToPresetValue.put("EPresetInList", "Dings");
-    mapIdToPresetValue.put("EPresetNotInList", "Schwupps");
-    mapIdToPresetValue.put("AbtLohn", "TRUE");
-    mapIdToPresetValue.put("AbtAnteile", "false");
-    mapIdToPresetValue.put("AbtKaution", "true");
-
-    Map<Object, Object> functionContext = new HashMap<>();
-    DialogLibrary dialogLib = DialogFactory
-        .parseFunctionDialogs(conf.get("Formular"), null, functionContext);
-    FunctionLibrary funcLib = FunctionFactory
-        .parseFunctions(conf.get("Formular"), dialogLib, functionContext, null);
-
-    ConfigThingy formFensterConf = new ConfigThingy("");
-    try
-    {
-      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster")
-          .query("Formular").getLastChild();
-    } catch (Exception x)
-    {
-    }
-    new FormGUI(formFensterConf, conf.get("Formular"), model,
-        mapIdToPresetValue, functionContext, funcLib, dialogLib, true);
-  }
-
 }

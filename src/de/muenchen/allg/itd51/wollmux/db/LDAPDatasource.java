@@ -220,27 +220,30 @@ public class LDAPDatasource implements Datasource
     {
       baseDN = sourceDesc.get("BASE_DN").toString();
       if (!BASEDN_RE.matcher(baseDN).matches())
+      {
         throw new ConfigurationErrorException(L.m(
           "BASE_DN-Wert ist ungültig: \"%1\"", baseDN));
+      }
     }
     catch (NodeNotFoundException e)
     {
       throw new ConfigurationErrorException(errorMessage()
-        + L.m("BASE_DN des LDAP-Servers fehlt."));
+          + L.m("BASE_DN des LDAP-Servers fehlt."), e);
     }
 
     try
     {
       objectClass = sourceDesc.get("OBJECT_CLASS").toString();
       if (!ATTRIBUTE_RE.matcher(objectClass).matches())
+      {
         throw new ConfigurationErrorException(L.m(
           "OBJECT_CLASS enthält unerlaubte Zeichen: \"%1\"", objectClass));
-
+      }
     }
     catch (NodeNotFoundException e)
     {
       throw new ConfigurationErrorException(errorMessage()
-        + L.m("Keine OBJECT_CLASS definiert."));
+          + L.m("Keine OBJECT_CLASS definiert."), e);
     }
 
     String user = "";
@@ -344,23 +347,8 @@ public class LDAPDatasource implements Datasource
           throw new ConfigurationErrorException(L.m(
             "Illegaler Attributsbezeichner: \"%1\"", attributeName));
 
-        try
-        {
-          objectClass = spalteDesc.get("OBJECT_CLASS").toString();
-        }
-        catch (NodeNotFoundException x)
-        {
-          // do nothing... (Angabe von OBJECT_CLASS optional)
-        }
-
-        try
-        {
-          lineSeparator = spalteDesc.get("LINE_SEPARATOR").toString();
-        }
-        catch (NodeNotFoundException x)
-        {
-          // do nothing... (Angabe von LINE_SEPARATOR optional)
-        }
+        objectClass = spalteDesc.getString("OBJECT_CLASS", null);
+        lineSeparator = spalteDesc.getString("LINE_SEPARATOR", null);
 
         ColumnDefinition columnAttr =
           new ColumnDefinition(spalte, relativePath, attributeName);
@@ -375,8 +363,10 @@ public class LDAPDatasource implements Datasource
     ConfigThingy keys = sourceDesc.query("Schluessel");
 
     if (keys.count() == 0)
+    {
       throw new ConfigurationErrorException(errorMessage()
         + L.m("Schluessel-Abschnitt fehlt."));
+    }
 
     ConfigThingy keySpalten;
 
@@ -394,8 +384,10 @@ public class LDAPDatasource implements Datasource
     Iterator<ConfigThingy> keyIterator = keySpalten.iterator();
 
     if (!keyIterator.hasNext())
+    {
       throw new ConfigurationErrorException(errorMessage()
         + L.m("Keine Schluesselspalten angegeben."));
+    }
 
     boolean onlyRelative = true; // true, falls kein Attributpfad der Form 0:*
     boolean onlyAbsolute = true; // true, falls nur Attributspfade der Form 0:*
@@ -427,12 +419,17 @@ public class LDAPDatasource implements Datasource
     }
 
     if (onlyAbsolute)
+    {
       keyStatus = ABSOLUTE_ONLY;
+    }
     else if (onlyRelative)
+    {
       keyStatus = RELATIVE_ONLY;
+    }
     else
+    {
       keyStatus = ABSOLUTE_AND_RELATIVE;
-
+    }
   }
 
   /** Setzt die timeout-Properties. */

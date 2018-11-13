@@ -51,7 +51,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -78,18 +77,15 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
-import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.text.XTextDocument;
 
-import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
@@ -686,13 +682,8 @@ class MailMergeParams
         druckerController = new DruckerController(druckerModel, (JFrame)dialog.getOwner(), this);
       }
     } else {
-      String title = L.m("Seriendruck");
-      try
-      {
-        title = dialogConf.get("TITLE").toString();
-      }
-      catch (NodeNotFoundException e1)
-      {}
+      String title = dialogConf.getString("TITLE", L.m("Seriendruck"));
+
       //set JDialog to Modeless type so that it remains visible when changing focus between opened
       //calc and writer document. Drawback: when this Dialog is open, the "Seriendruck" bar is
       //active too.
@@ -1800,21 +1791,10 @@ class MailMergeParams
      */
     private Section(ConfigThingy section, JComponent parent, MailMergeParams mmp)
     {
-      String title = "";
-      try
-      {
-        title = section.get("TITLE").toString();
-      }
-      catch (NodeNotFoundException e1)
-      {}
+      String title = section.getString("TITLE", "");
 
-      Orientation orient = Orientation.vertical;
-      try
-      {
-        orient = Orientation.getByname(section.get("ORIENTATION").toString());
-      }
-      catch (NodeNotFoundException e1)
-      {}
+      Orientation orient = Orientation
+          .getByname(section.getString("ORIENTATION", ""));
 
       Box hbox = Box.createHorizontalBox();
       parent.add(hbox);
@@ -1906,7 +1886,9 @@ class MailMergeParams
       }
 
       if (!hasEnabledPreset && firstEnabledRadio != null)
+      {
         firstEnabledRadio.setSelected(true);
+      }
 
       contentBox.setVisible(visible);
     }
@@ -1921,109 +1903,5 @@ class MailMergeParams
         }
       }
     }
-  }
-
-  /**
-   * Testmethode
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  public static void main(String[] args)
-  {
-    final List<String> fieldNames = new ArrayList<String>();
-    fieldNames.add("Anrede");
-    fieldNames.add("Name");
-    fieldNames.add("EMail");
-    final MailMergeParams mmp = new MailMergeParams();
-    ConfigThingy sdConf = new ConfigThingy("sdConf");
-    try
-    {
-      sdConf =
-        new ConfigThingy(
-          "dialogConf",
-          new URL(
-            "file:///home/christoph.lutz/workspace/WollMux/src/data/seriendruckdialog.conf"));
-      sdConf = sdConf.get("Dialoge").get("Seriendruckdialog");
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();
-    }
-
-    final ConfigThingy seriendruckConf = sdConf;
-    MailMergeController mmc = new MailMergeController()
-    {
-      @Override
-      public boolean hasPrintfunction(String name)
-      {
-        String[] funcs =
-          new String[] {
-          "OOoMailMergeToPrinter", "OOoMailMergeToOdtFile", "MailMergeNewToODTEMail",
-          "MailMergeNewToPDFEMail", "MailMergeNewSetFormValue", /* "PDFGesamtdokument", */
-          "MailMergeNewToSingleODT", "MailMergeNewToSinglePDF", "PDFGesamtdokumentOutput" };
-        for (String func : funcs)
-          if (func.equals(name)) {
-            return true;
-          }
-        return false;
-      }
-
-      @Override
-      public void doMailMerge(List<String> usePrintFunctions,
-          boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
-          Map<SubmitArgument, Object> pmodArgs)
-      {
-        LogConfig.init(System.err, Level.ALL);
-        System.out.print("PrintFunctions: ");
-        for (String func : usePrintFunctions)
-          System.out.print("'" + func + "' ");
-        System.out.println("");
-        System.out.println("IgnoreDocPrintFuncs: " + ignoreDocPrintFuncs);
-        System.out.println("datasetSelectionType: " + datasetSelectionType);
-        System.out.println("pmodArgs: ");
-        for (Entry<SubmitArgument, Object> en : pmodArgs.entrySet())
-          System.out.println("  " + en.getKey() + ": " + en.getValue());
-      }
-
-      @Override
-      public List<String> getColumnNames()
-      {
-        return fieldNames;
-      }
-
-      @Override
-      public String getDefaultFilename()
-      {
-        return "MeinDokument";
-      }
-
-      private boolean initialized = false;
-
-      @Override
-      public XTextDocument getTextDocument()
-      {
-        if (!initialized) try
-        {
-          initialized = true;
-          UNO.init();
-        }
-        catch (Exception e)
-        {
-          e.printStackTrace();
-        }
-        return UNO.XTextDocument(UNO.desktop.getCurrentComponent());
-      }
-    };
-
-    mmp.showDoMailmergeDialog(new JFrame("irgendwas"), mmc, seriendruckConf,
-      "christoph.lutz@muenchen.de");
-
-    try
-    {
-      Thread.sleep(5000);
-    }
-    catch (InterruptedException e)
-    {}
-    System.exit(0);
   }
 }

@@ -2,7 +2,6 @@ package de.muenchen.allg.itd51.wollmux.db;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -89,24 +88,20 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
          */
         Set<String> newSchema = new HashSet<String>();
         List<LOSDJDataset> data = new LinkedList<LOSDJDataset>();
-        Iterator<ConfigThingy> iter = cacheData.get("Schema").iterator();
-        while (iter.hasNext())
-          newSchema.add(iter.next().toString());
-
-        iter = cacheData.get("Daten").iterator();
-        while (iter.hasNext())
+        for (ConfigThingy it : cacheData.get("Schema"))
         {
-          ConfigThingy dsconf = iter.next();
+          newSchema.add(it.toString());
+        }
 
+        for (ConfigThingy dsconf : cacheData.get("Daten"))
+        {
           Map<String, String> dscache = null;
           ConfigThingy cacheColumns = dsconf.query("Cache");
           if (cacheColumns.count() > 0)
           {
             dscache = new HashMap<String, String>();
-            Iterator<ConfigThingy> iter2 = cacheColumns.getFirstChild().iterator();
-            while (iter2.hasNext())
+            for (ConfigThingy dsNode : cacheColumns.getFirstChild())
             {
-              ConfigThingy dsNode = iter2.next();
               String spalte = dsNode.getName();
               if (!newSchema.contains(spalte))
               {
@@ -122,10 +117,8 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
           // else LOS-only Datensatz, dscache bleibt null
 
           Map<String, String> dsoverride = new HashMap<String, String>();
-          Iterator<ConfigThingy> iter2 = dsconf.get("Override").iterator();
-          while (iter2.hasNext())
+          for (ConfigThingy dsNode : dsconf.get("Override"))
           {
-            ConfigThingy dsNode = iter2.next();
             String spalte = dsNode.getName();
             if (!newSchema.contains(spalte))
             {
@@ -150,26 +143,16 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
         losSchema = newSchema;
         this.data = data;
       }
-      catch (FileNotFoundException e)
-      {
-        LOGGER.error("", e);
-      }
-      catch (IOException e)
-      {
-        LOGGER.error("", e);
-      }
-      catch (SyntaxErrorException e)
-      {
-        LOGGER.error("", e);
-      }
-      catch (NodeNotFoundException e)
+      catch (NodeNotFoundException | IOException | SyntaxErrorException e)
       {
         LOGGER.error("", e);
       }
     }
     else
+    {
       LOGGER.info(L.m("Cache-Datei %1 kann nicht gelesen werden.",
         losCache.getPath()));
+    }
 
     int sameKeyIndexInt = 0;
     try

@@ -392,12 +392,14 @@ public class WollMuxSingleton
           try
           {
             if (!regConf.get("REFRESH").toString().equalsIgnoreCase("true"))
+            {
               continue;
+            }
 
             // hierher (und damit weiter ohne continue) kommen wir nur, wenn
             // ein REFRESH-Abschnitt vorhanden ist und "true" enthält.
           }
-          catch (Exception x) // vor allem NodeNotFoundException
+          catch (NodeNotFoundException x)
           {
             continue;
           }

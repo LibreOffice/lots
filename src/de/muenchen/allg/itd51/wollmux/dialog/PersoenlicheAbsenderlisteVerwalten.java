@@ -69,7 +69,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -118,7 +117,6 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.Search;
 import de.muenchen.allg.itd51.wollmux.db.SearchStrategy;
-import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.TimeoutException;
 
 /**
@@ -536,21 +534,10 @@ public class PersoenlicheAbsenderlisteVerwalten
     palJList.setCellRenderer(myRenderer);
     query = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
 
-    String title =
-      L.m("TITLE fehlt für Fenster PersoenlicheAbsenderListeVerwalten/Verwalten");
-    try
-    {
-      title = L.m(fensterDesc.get("TITLE").toString());
-    }
-    catch (Exception x)
-    {}
+    String title = L.m(fensterDesc.getString("TITLE",
+        "TITLE fehlt für Fenster PersoenlicheAbsenderListeVerwalten/Verwalten"));
 
-    try
-    {
-      closeAction = getAction(fensterDesc.get("CLOSEACTION").toString());
-    }
-    catch (Exception x)
-    {}
+    closeAction = getAction(fensterDesc.getString("CLOSEACTION", "abort"));
 
     // Create and set up the window.
     myFrame = new JFrame(title);
@@ -678,232 +665,194 @@ public class PersoenlicheAbsenderlisteVerwalten
         x += stepx;
 
         ConfigThingy uiElementDesc = iter.next();
-        try
+
+        boolean readonly = false;
+        String id = uiElementDesc.getString("ID", "");
+        if ("true".equals(uiElementDesc.getString("READONLY", "")))
         {
-          /*
-           * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN, DASS DER
-           * ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET() UND EINER EVTL. DARAUS
-           * RESULTIERENDEN NULLPOINTEREXCEPTION NOCH KONSISTENT IST!
-           */
+          readonly = true;
+        }
+        String type = uiElementDesc.getString("TYPE", "");
 
-          boolean readonly = false;
-          String id = "";
+        if ("textfield".equals(type))
+        {
+          JTextField tf;
+          if ("suchanfrage".equals(id))
+            tf = query;
+          else
+            tf = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
+
+          tf.setEditable(!readonly);
+          gbcTextfield.gridx = x;
+          gbcTextfield.gridy = y;
+          compo.add(tf, gbcTextfield);
+
+          String action = uiElementDesc.getString("ACTION", "");
+
+          ActionListener actionL = getAction(action);
+          if (actionL != null)
+          {
+            tf.addActionListener(actionL);
+          }
+        }
+        else if ("label".equals(type))
+        {
+          JLabel uiElement = new JLabel();
+          gbcLabel.gridx = x;
+          gbcLabel.gridy = y;
+          compo.add(uiElement, gbcLabel);
+          uiElement.setText(L.m(uiElementDesc.getString("LABEL", "")));
+        }
+        else if ("glue".equals(type))
+        {
+          Box uiElement = Box.createHorizontalBox();
           try
           {
-            id = uiElementDesc.get("ID").toString();
+            int minsize = Integer
+                .parseInt(uiElementDesc.getString("MINSIZE", ""));
+            uiElement.add(Box.createHorizontalStrut(minsize));
           }
-          catch (NodeNotFoundException e)
-          {}
+          catch (NumberFormatException e)
+          {
+          }
+          uiElement.add(Box.createHorizontalGlue());
+
+          gbcGlue.gridx = x;
+          gbcGlue.gridy = y;
+          compo.add(uiElement, gbcGlue);
+        }
+        else if ("listbox".equals(type))
+        {
+          int lines = LISTBOX_DEFAULT_LINES;
           try
           {
-            if ("true".equals(uiElementDesc.get("READONLY").toString()))
-              readonly = true;
+            lines = Integer.parseInt(uiElementDesc.get("LINES").toString());
           }
-          catch (NodeNotFoundException e)
-          {}
-          String type = uiElementDesc.get("TYPE").toString();
-
-          if ("textfield".equals(type))
+          catch (NodeNotFoundException | NumberFormatException e)
           {
-            JTextField tf;
-            if ("suchanfrage".equals(id))
-              tf = query;
-            else
-              tf = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
+          }
 
-            tf.setEditable(!readonly);
-            gbcTextfield.gridx = x;
-            gbcTextfield.gridy = y;
-            compo.add(tf, gbcTextfield);
-
-            String action = "";
+          JList<DJDatasetListElement> list;
+          if ("suchergebnis".equals(id))
+          {
+            list = resultsJList;
             try
             {
-              action = uiElementDesc.get("ACTION").toString();
+              resultsDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
             }
             catch (NodeNotFoundException e)
-            {}
-
-            ActionListener actionL = getAction(action);
-            if (actionL != null)
-              tf.addActionListener(actionL);
-          }
-          else if ("label".equals(type))
-          {
-            JLabel uiElement = new JLabel();
-            gbcLabel.gridx = x;
-            gbcLabel.gridy = y;
-            compo.add(uiElement, gbcLabel);
-            uiElement.setText(L.m(uiElementDesc.get("LABEL").toString()));
-          }
-          else if ("glue".equals(type))
-          {
-            Box uiElement = Box.createHorizontalBox();
-            try
             {
-              int minsize =
-                Integer.parseInt(uiElementDesc.get("MINSIZE").toString());
-              uiElement.add(Box.createHorizontalStrut(minsize));
-            }
-            catch (Exception e)
-            {}
-            uiElement.add(Box.createHorizontalGlue());
-
-            gbcGlue.gridx = x;
-            gbcGlue.gridy = y;
-            compo.add(uiElement, gbcGlue);
-          }
-          else if ("listbox".equals(type))
-          {
-            int lines = LISTBOX_DEFAULT_LINES;
-            try
-            {
-              lines = Integer.parseInt(uiElementDesc.get("LINES").toString());
-            }
-            catch (Exception e)
-            {}
-
-            JList<DJDatasetListElement> list;
-            if ("suchergebnis".equals(id))
-            {
-              list = resultsJList;
-              try
-              {
-                resultsDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
-              }
-              catch (NodeNotFoundException e)
-              {
-                LOGGER.info(L.m(
+              LOGGER.info(L.m(
                   "Kein DISPLAY-Attribut für die listbox mit ID \"suchergebnis\" im PersoenlicheAbsenderliste-Dialog angegeben! Verwende Fallback: %1",
                   DEFAULT_DISPLAYTEMPLATE));
-                // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
-                // sollten an dieser Stelle einen echten Error loggen bzw. eine
-                // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
-                // dies allerdings nicht, da das DISPLAY-Attribut erst mit
-                // WollMux 6.4.0 eingeführt wurde und wir abwärtskompatibel zu alten
-                // WollMux-Konfigurationen bleiben müssen und Benutzer alter
-                // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
-                // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
-                // sollte nach ausreichend Zeit genauso wie DEFAULT_DISPLAYTEMPLATE
-                // entfernt werden (bzw. wie oben gesagt überarbeitet).
-              }
+              // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
+              // sollten an dieser Stelle einen echten Error loggen bzw. eine
+              // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
+              // dies allerdings nicht, da das DISPLAY-Attribut erst mit
+              // WollMux 6.4.0 eingeführt wurde und wir abwärtskompatibel zu alten
+              // WollMux-Konfigurationen bleiben müssen und Benutzer alter
+              // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
+              // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
+              // sollte nach ausreichend Zeit genauso wie DEFAULT_DISPLAYTEMPLATE
+              // entfernt werden (bzw. wie oben gesagt überarbeitet).
             }
-            else if ("pal".equals(id))
+          }
+          else if ("pal".equals(id))
+          {
+            list = palJList;
+            try
             {
-              list = palJList;
-              try
-              {
-                palDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
-              }
-              catch (NodeNotFoundException e)
-              {
-                LOGGER.info(L.m(
+              palDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
+            }
+            catch (NodeNotFoundException e)
+            {
+              LOGGER.info(L.m(
                   "Kein DISPLAY-Attribut für die listbox mit ID \"pal\" im PersoenlicheAbsenderliste-Dialog angegeben! Verwende Fallback: %1",
                   DEFAULT_DISPLAYTEMPLATE));
-                // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
-                // sollten an dieser Stelle einen echten Error loggen bzw. eine
-                // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
-                // dies allerdings nicht, da das DISPLAY-Attribut erst mit
-                // WollMux 6.4.0 eingeführt wurde und wir abwärtskompatibel zu alten
-                // WollMux-Konfigurationen bleiben müssen und Benutzer alter
-                // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
-                // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
-                // sollte nach ausreichend Zeit genauso wie DEFAULT_DISPLAYTEMPLATE
-                // entfernt werden (bzw. wie oben gesagt überarbeitet).
-              }
-            }
-            else
-            {
-              list = new JList<DJDatasetListElement>(new DefaultListModel<DJDatasetListElement>());
-            }
-
-            list.setVisibleRowCount(lines);
-            list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-            list.setLayoutOrientation(JList.VERTICAL);
-            list.setFixedCellWidth((int) new JLabel(
-              "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX").getPreferredSize().getWidth());
-
-            list.addListSelectionListener(myListSelectionListener);
-
-            String action = "";
-            try
-            {
-              action = uiElementDesc.get("ACTION").toString();
-            }
-            catch (NodeNotFoundException e)
-            {}
-
-            ActionListener actionL = getAction(action);
-            if (actionL != null)
-              list.addMouseListener(new MyActionMouseListener(list, actionL));
-
-            JScrollPane scrollPane = new JScrollPane(list);
-            scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-            gbcListBox.gridx = x;
-            gbcListBox.gridy = y;
-            compo.add(scrollPane, gbcListBox);
-          }
-          else if ("button".equals(type))
-          {
-            String action = "";
-            try
-            {
-              action = uiElementDesc.get("ACTION").toString();
-            }
-            catch (NodeNotFoundException e)
-            {}
-
-            String label = L.m(uiElementDesc.get("LABEL").toString());
-
-            char hotkey = 0;
-            try
-            {
-              hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
-            }
-            catch (Exception e)
-            {}
-
-            JButton button = new JButton(label);
-            button.setMnemonic(hotkey);
-
-            gbcButton.gridx = x;
-            gbcButton.gridy = y;
-            compo.add(button, gbcButton);
-
-            ActionListener actionL = getAction(action);
-            if (actionL != null)
-              button.addActionListener(actionL);
-            else
-              button.setEnabled(false);
-
-            if ("editEntry".equals(action))
-            {
-              buttonsToGreyOutIfNothingSelected.add(button);
-            }
-            if ("removeFromPAL".equals(action))
-            {
-              buttonsToGreyOutIfNothingSelected.add(button);
-            }
-            if ("addToPAL".equals(action))
-            {
-              buttonsToGreyOutIfNothingSelected.add(button);
-            }
-            else if ("copyEntry".equals(action))
-            {
-              buttonsToGreyOutIfNothingSelected.add(button);
+              // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
+              // sollten an dieser Stelle einen echten Error loggen bzw. eine
+              // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
+              // dies allerdings nicht, da das DISPLAY-Attribut erst mit
+              // WollMux 6.4.0 eingeführt wurde und wir abwärtskompatibel zu alten
+              // WollMux-Konfigurationen bleiben müssen und Benutzer alter
+              // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
+              // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
+              // sollte nach ausreichend Zeit genauso wie DEFAULT_DISPLAYTEMPLATE
+              // entfernt werden (bzw. wie oben gesagt überarbeitet).
             }
           }
           else
           {
-            LOGGER.error(L.m("Ununterstützter TYPE für User Interface Element: ",
-              type));
+            list = new JList<DJDatasetListElement>(
+                new DefaultListModel<DJDatasetListElement>());
+          }
+
+          list.setVisibleRowCount(lines);
+          list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+          list.setLayoutOrientation(JList.VERTICAL);
+          list.setFixedCellWidth((int) new JLabel(
+              "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+                  .getPreferredSize().getWidth());
+
+          list.addListSelectionListener(myListSelectionListener);
+
+          String action = uiElementDesc.getString("ACTION", "");
+
+          ActionListener actionL = getAction(action);
+          if (actionL != null)
+            list.addMouseListener(new MyActionMouseListener(list, actionL));
+
+          JScrollPane scrollPane = new JScrollPane(list);
+          scrollPane.setHorizontalScrollBarPolicy(
+              ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+          scrollPane.setVerticalScrollBarPolicy(
+              ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+          gbcListBox.gridx = x;
+          gbcListBox.gridy = y;
+          compo.add(scrollPane, gbcListBox);
+        }
+        else if ("button".equals(type))
+        {
+          String action = uiElementDesc.getString("ACTION", "");
+          String label = L.m(uiElementDesc.getString("LABEL", ""));
+
+          char hotkey = uiElementDesc.getString("HOTKEY", "0").charAt(0);
+
+          JButton button = new JButton(label);
+          button.setMnemonic(hotkey);
+
+          gbcButton.gridx = x;
+          gbcButton.gridy = y;
+          compo.add(button, gbcButton);
+
+          ActionListener actionL = getAction(action);
+          if (actionL != null)
+            button.addActionListener(actionL);
+          else
+            button.setEnabled(false);
+
+          if ("editEntry".equals(action))
+          {
+            buttonsToGreyOutIfNothingSelected.add(button);
+          }
+          if ("removeFromPAL".equals(action))
+          {
+            buttonsToGreyOutIfNothingSelected.add(button);
+          }
+          if ("addToPAL".equals(action))
+          {
+            buttonsToGreyOutIfNothingSelected.add(button);
+          }
+          else if ("copyEntry".equals(action))
+          {
+            buttonsToGreyOutIfNothingSelected.add(button);
           }
         }
-        catch (NodeNotFoundException e)
+        else
         {
-          LOGGER.error("", e);
+          LOGGER.error(L.m("Ununterstützter TYPE für User Interface Element: ",
+              type));
         }
       }
     }
@@ -1554,65 +1503,4 @@ public class PersoenlicheAbsenderlisteVerwalten
     catch (Exception x)
     {/* Hope for the best */}
   }
-
-  /**
-   * Sorgt für das dauernde Neustarten des Dialogs.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private static class RunTest implements ActionListener
-  {
-    private DatasourceJoiner dj;
-
-    private ConfigThingy conf;
-
-    private ConfigThingy abConf;
-
-    public RunTest(ConfigThingy conf, ConfigThingy abConf, DatasourceJoiner dj)
-    {
-      this.dj = dj;
-      this.conf = conf;
-      this.abConf = abConf;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      try
-      {
-        if ("abort".equals(e.getActionCommand()))
-          System.exit(0);
-      }
-      catch (Exception x)
-      {}
-      try
-      {
-        new PersoenlicheAbsenderlisteVerwalten(conf, abConf, dj, this);
-      }
-      catch (ConfigurationErrorException x)
-      {
-        LOGGER.error("", x);
-      }
-    }
-  }
-
-  public static void main(String[] args) throws Exception
-  {
-    String confFile = "testdata/PAL.conf";
-    String abConfFile = "testdata/AbsenderdatenBearbeiten.conf";
-    ConfigThingy conf =
-      new ConfigThingy("", new URL(
-        new File(System.getProperty("user.dir")).toURI().toURL(), confFile));
-    ConfigThingy abConf =
-      new ConfigThingy("", new URL(
-        new File(System.getProperty("user.dir")).toURI().toURL(), abConfFile));
-    TestDatasourceJoiner dj = new TestDatasourceJoiner();
-    RunTest test =
-      new RunTest(conf.get("PersoenlicheAbsenderliste"),
-        abConf.get("AbsenderdatenBearbeiten"), dj);
-    test.actionPerformed(new ActionEvent(test, 0, ""));
-    Thread.sleep(600000);
-    System.exit(0);
-  }
-
 }

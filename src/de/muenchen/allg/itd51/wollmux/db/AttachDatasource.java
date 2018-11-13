@@ -155,16 +155,19 @@ public class AttachDatasource implements Datasource
     source2 = nameToDatasource.get(source2Name);
 
     if (source1 == null)
+    {
       throw new ConfigurationErrorException(
         L.m(
           "Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert",
           name, source1Name));
-
+    }
     if (source2 == null)
+    {
       throw new ConfigurationErrorException(
         L.m(
           "Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert",
           name, source2Name));
+    }
 
     Set<String> schema1 = source1.getSchema();
     Set<String> schema2 = source2.getSchema();
@@ -176,8 +179,10 @@ public class AttachDatasource implements Datasource
     {
       spalte = source2Prefix + spalte;
       if (schema1.contains(spalte))
+      {
         throw new ConfigurationErrorException(L.m(
           "Kollision mit Spalte \"%1\" aus Datenquelle \"%2\"", spalte, source1Name));
+      }
 
       schema.add(spalte);
     }
@@ -185,9 +190,11 @@ public class AttachDatasource implements Datasource
     ConfigThingy matchesDesc = sourceDesc.query("MATCH");
     int numMatches = matchesDesc.count();
     if (numMatches == 0)
+    {
       throw new ConfigurationErrorException(L.m(
         "Mindestens eine MATCH-Angabe muss bei Datenquelle \"%1\" gemacht werden",
         name));
+    }
 
     match1 = new String[numMatches];
     match2 = new String[numMatches];
@@ -197,8 +204,10 @@ public class AttachDatasource implements Datasource
     {
       ConfigThingy matchDesc = iter.next();
       if (matchDesc.count() != 2)
+      {
         throw new ConfigurationErrorException(L.m(
           "Fehlerhafte MATCH Angabe in Datenquelle \"%1\"", name));
+      }
 
       String spalte1 = "";
       String spalte2 = "";
@@ -211,12 +220,16 @@ public class AttachDatasource implements Datasource
       {}
 
       if (!schema1.contains(spalte1))
+      {
         throw new ConfigurationErrorException(L.m(
           "Spalte \"%1\" ist nicht im Schema", spalte1));
+      }
 
       if (!schema2.contains(spalte2))
+      {
         throw new ConfigurationErrorException(L.m(
           "Spalte \"%1\" ist nicht im Schema", spalte2));
+      }
 
       match1[i] = spalte1;
       match2[i] = spalte2;
@@ -249,10 +262,13 @@ public class AttachDatasource implements Datasource
     time = (new Date().getTime()) - time;
     timeout -= time;
     if (timeout <= 0)
+    {
       throw new TimeoutException(
         L.m(
           "Datenquelle %1 konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten",
           source1Name));
+    }
+
     return attachColumns(results, timeout, new MatchAllDatasetChecker());
   }
 

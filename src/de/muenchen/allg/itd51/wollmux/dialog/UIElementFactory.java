@@ -353,20 +353,9 @@ public class UIElementFactory
     }
     else if ("textarea".equals(type))
     {
-      int lines = 3;
-      boolean wrap = true;
-      try
-      {
-        lines = Integer.parseInt(conf.get("LINES").toString());
-      }
-      catch (Exception x)
-      {}
-      try
-      {
-        wrap = "true".equalsIgnoreCase(conf.get("WRAP").toString());
-      }
-      catch (Exception x)
-      {}
+      int lines = Integer.parseInt(conf.getString("LINES", "3"));
+      boolean wrap = "true".equalsIgnoreCase(conf.getString("WRAP", ""));
+
       JTextArea textarea = new JTextArea(lines, textfieldWidth);
       textarea.setEditable(!readonly);
       textarea.setFocusable(!readonly);
@@ -485,9 +474,9 @@ public class UIElementFactory
       int lines = 10;
       try
       {
-        lines = Integer.parseInt(conf.get("LINES").toString());
+        lines = Integer.parseInt(conf.getString("LINES", "10"));
       }
-      catch (Exception e)
+      catch (NumberFormatException e)
       {}
 
       JList<Object> list = new JList<Object>(new DefaultListModel<Object>());
@@ -513,7 +502,9 @@ public class UIElementFactory
         getAction(uiElement, action, conf, context.uiElementEventHandler,
           context.supportedActions);
       if (actionL != null)
+      {
         list.addMouseListener(new MyActionMouseListener(list, actionL));
+      }
       return uiElement;
     }
     else if ("h-separator".equals(type))
@@ -533,21 +524,21 @@ public class UIElementFactory
       int maxsize = Integer.MAX_VALUE;
       try
       {
-        minsize = Integer.parseInt(conf.get("MINSIZE").toString());
+        minsize = Integer.parseInt(conf.getString("MINSIZE", "0"));
       }
-      catch (Exception x)
+      catch (NumberFormatException x)
       {}
       try
       {
         maxsize = Integer.parseInt(conf.get("MAXSIZE").toString());
       }
-      catch (Exception x)
+      catch (NumberFormatException | NodeNotFoundException x)
       {}
       try
       {
         prefsize = Integer.parseInt(conf.get("PREFSIZE").toString());
       }
-      catch (Exception x)
+      catch (NumberFormatException | NodeNotFoundException x)
       {}
 
       return new Box(id, new javax.swing.Box.Filler(new Dimension(minsize, 0),
@@ -563,19 +554,19 @@ public class UIElementFactory
       {
         minsize = Integer.parseInt(conf.get("MINSIZE").toString());
       }
-      catch (Exception x)
+      catch (NumberFormatException | NodeNotFoundException x)
       {}
       try
       {
         maxsize = Integer.parseInt(conf.get("MAXSIZE").toString());
       }
-      catch (Exception x)
+      catch (NumberFormatException | NodeNotFoundException x)
       {}
       try
       {
         prefsize = Integer.parseInt(conf.get("PREFSIZE").toString());
       }
-      catch (Exception x)
+      catch (NumberFormatException | NodeNotFoundException x)
       {}
 
       return new Box(id, new javax.swing.Box.Filler(new Dimension(0, minsize),
@@ -583,8 +574,10 @@ public class UIElementFactory
         layoutConstraints);
     }
     else
+    {
       throw new ConfigurationErrorException(L.m(
         "Ununterstützter TYPE für GUI Element: \"%1\"", type));
+    }
   }
 
   private void copySpaceBindingToEnter(AbstractButton button)
@@ -593,11 +586,15 @@ public class UIElementFactory
 
     Object binding = imap.get(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, true));
     if (binding != null)
+    {
       imap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, true), binding);
+    }
 
     binding = imap.get(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, false));
     if (binding != null)
+    {
       imap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, false), binding);
+    }
   }
 
   /**

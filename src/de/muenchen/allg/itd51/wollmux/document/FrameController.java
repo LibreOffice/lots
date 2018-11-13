@@ -154,7 +154,7 @@ public class FrameController
         window.setPosSize(xPos + insetLeft, yPos + insetTop, 0, 0, PosSize.POS);
       }
     }
-    catch (java.lang.Exception e)
+    catch (NumberFormatException | NodeNotFoundException e)
     {}
     // Dimensions setzen:
     try
@@ -165,7 +165,7 @@ public class FrameController
         window.setPosSize(0, 0, width - insetLeft - insetRight, height - insetTop
           - insetButtom, PosSize.SIZE);
     }
-    catch (java.lang.Exception e)
+    catch (NumberFormatException | NodeNotFoundException e)
     {}
 
     // Zoom setzen:
@@ -185,11 +185,7 @@ public class FrameController
   {
     try
     {
-      setDocumentZoom(conf.get("ZOOM").toString());
-    }
-    catch (NodeNotFoundException e)
-    {
-      // ZOOM ist optional
+      setDocumentZoom(conf.getString("ZOOM", null));
     }
     catch (ConfigurationErrorException e)
     {
