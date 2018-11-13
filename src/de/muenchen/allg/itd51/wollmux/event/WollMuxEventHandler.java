@@ -4752,6 +4752,49 @@ public class WollMuxEventHandler
       }
     }
   }
+  
+  // *******************************************************************************************
+  
+  public static void handleUpdateInputFields(TextDocumentController documentController,
+      DispatchHelper helper, boolean sync)
+  {
+    BasicEvent event = new OnUpdateInputFields(documentController, helper);
+    if (sync)
+    {
+      event.process();
+    } else
+    {
+      handle(event);
+    }
+  }
+  
+  public static class OnUpdateInputFields extends BasicEvent
+  {
+
+    TextDocumentController documentController;
+    DispatchHelper helper;
+
+    public OnUpdateInputFields(TextDocumentController documentController, DispatchHelper helper)
+    {
+      this.documentController = documentController;
+      this.helper = helper;
+    }
+
+    @Override
+    protected void doit() throws WollMuxFehlerException
+    {
+      if (documentController.getModel().isFormDocument())
+      {
+        Logger.log(
+            "LibreOffice Formulareingabe unterdrückt, da es sich um ein WollMux-Formular handelt.");
+        helper.dispatchFinished(true);
+      } else
+      {
+        helper.dispatchOriginal();
+      }
+    }
+
+  }
 
   // *******************************************************************************************
 

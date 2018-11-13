@@ -29,6 +29,7 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 public class DocumentNotifyingDispatch extends NotifyingDispatch implements
     DispatchHelper
 {
+
   /**
    * Ein XDispatch-Objekt, das die ursprüngliche Standard-Aktion der URL url ist.
    *
@@ -208,4 +209,18 @@ public class DocumentNotifyingDispatch extends NotifyingDispatch implements
     }
   }
 
+  public void dispatch__uno_updateinputfields(String arg, PropertyValue[] props)
+  {
+    this.props = props;
+    WollMuxEventHandler.handleUpdateInputFields(getDocumentController(), this,
+        isSynchronMode(props));
+  }
+
+  public void dispatch__uno_updateinputfields(String arg, PropertyValue[] props, XDispatchResultListener listener)
+  {
+    this.props = props;
+    this.listener = listener;
+    WollMuxEventHandler.handleUpdateInputFields(getDocumentController(), this,
+        isSynchronMode(props));
+  }
 }
