@@ -289,11 +289,8 @@ public class MailMerge
       this.maxcount = maxcount;
       try
       {
-        SwingUtilities.invokeAndWait(new Runnable()
+        SwingUtilities.invokeAndWait(() ->
         {
-          @Override
-          public void run()
-          {
             myFrame = new JFrame(L.m("Seriendruck"));
             Common.setWollMuxIcon(myFrame);
             Box vbox = Box.createVerticalBox();
@@ -316,7 +313,6 @@ public class MailMerge
             int y = screenSize.height / 2 - frameHeight / 2;
             myFrame.setLocation(x, y);
             myFrame.setVisible(true);
-          }
         });
       }
       catch (Exception x)
@@ -329,17 +325,13 @@ public class MailMerge
     {
       try
       {
-        SwingUtilities.invokeLater(new Runnable()
+        SwingUtilities.invokeLater(() ->
         {
-          @Override
-          public void run()
-          {
-            ++count;
-            countLabel.setText("" + count);
-            if (maxcount > 0)
-              myFrame.setTitle("" + Math.round(100 * (double) count / maxcount)
-                + "%");
-          }
+          ++count;
+          countLabel.setText("" + count);
+          if (maxcount > 0)
+            myFrame.setTitle("" + Math.round(100 * (double) count / maxcount)
+              + "%");
         });
       }
       catch (Exception x)
@@ -352,20 +344,15 @@ public class MailMerge
     {
       try
       {
-        SwingUtilities.invokeLater(new Runnable()
+        SwingUtilities.invokeLater(() ->
         {
-          @Override
-          public void run()
-          {
-            myFrame.dispose();
-          }
+          myFrame.dispose();
         });
       }
       catch (Exception x)
       {
         LOGGER.error("", x);
       }
-      ;
     }
   }
 
@@ -450,23 +437,19 @@ public class MailMerge
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try
     {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
+      javax.swing.SwingUtilities.invokeLater(() ->
       {
-        @Override
-        public void run()
+        try
         {
-          try
+          createSelectFromListDialog(list, result);
+        }
+        catch (Exception x)
+        {
+          LOGGER.error("", x);
+          synchronized (result)
           {
-            createSelectFromListDialog(list, result);
-          }
-          catch (Exception x)
-          {
-            LOGGER.error("", x);
-            synchronized (result)
-            {
-              result[0] = true;
-              result.notifyAll();
-            }
+            result[0] = true;
+            result.notifyAll();
           }
         }
       });
@@ -570,63 +553,47 @@ public class MailMerge
     myPanel.add(bottomV, BorderLayout.SOUTH);
 
     JButton button = new JButton(L.m("Abbrechen"));
-    button.addActionListener(new ActionListener()
+    button.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        myFrame.dispose();
-      }
+      myFrame.dispose();
     });
     bottom.add(button);
 
     bottom.add(Box.createHorizontalGlue());
 
     button = new JButton(L.m("Alle"));
-    button.addActionListener(new ActionListener()
+    button.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        myList.setSelectionInterval(0, list.size() - 1);
-      }
+      myList.setSelectionInterval(0, list.size() - 1);
     });
     bottom.add(button);
 
     bottom.add(Box.createHorizontalStrut(5));
 
     button = new JButton(L.m("Keinen"));
-    button.addActionListener(new ActionListener()
+    button.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        myList.clearSelection();
-      }
+      myList.clearSelection();
     });
     bottom.add(button);
 
     bottom.add(Box.createHorizontalGlue());
 
     button = new JButton(L.m("Start"));
-    button.addActionListener(new ActionListener()
+    button.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
+      for (int i = 0; i < list.size(); ++i)
+        (list.get(i)).setSelected(false);
+      int[] sel = myList.getSelectedIndices();
+      for (int i = 0; i < sel.length; ++i)
       {
-        for (int i = 0; i < list.size(); ++i)
-          (list.get(i)).setSelected(false);
-        int[] sel = myList.getSelectedIndices();
-        for (int i = 0; i < sel.length; ++i)
-        {
-          (list.get(sel[i])).setSelected(true);
-        }
-        synchronized (result)
-        {
-          result[1] = true;
-        }
-        myFrame.dispose();
+        (list.get(sel[i])).setSelected(true);
       }
+      synchronized (result)
+      {
+        result[1] = true;
+      }
+      myFrame.dispose();
     });
     bottom.add(button);
 
@@ -649,7 +616,7 @@ public class MailMerge
      */
     private Map<String, Integer> mapColumnNameToIndex;
 
-    private List<Dataset> datasets = new ArrayList<Dataset>();
+    private List<Dataset> datasets = new ArrayList<>();
 
     @Override
     public int size()
@@ -987,14 +954,7 @@ public class MailMerge
       /*
        * Erzeugen der GUI auf die todo-Liste setzen.
        */
-      todo.add(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          inEDT("createGUI");
-        }
-      });
+      todo.add(() -> inEDT("createGUI"));
     }
 
     /**
@@ -1115,20 +1075,16 @@ public class MailMerge
       /*
        * Auf Änderungen der Datenquellen-Auswahl-Combobox reagieren.
        */
-      datasourceSelector.addItemListener(new ItemListener()
+      datasourceSelector.addItemListener((ItemEvent e) ->
       {
-        @Override
-        public void itemStateChanged(ItemEvent e)
+        String newDatasource = (String) datasourceSelector.getSelectedItem();
+        String newTable = (String) tableSelector.getSelectedItem();
+        if (newDatasource != null && !newDatasource.equals(selectedDatasource))
         {
-          String newDatasource = (String) datasourceSelector.getSelectedItem();
-          String newTable = (String) tableSelector.getSelectedItem();
-          if (newDatasource != null && !newDatasource.equals(selectedDatasource))
-          {
-            selectedDatasource = newDatasource;
-            selectedTable = newTable;
-            addTodo("updateTableSelector", new String[] {
-              selectedDatasource, selectedTable });
-          }
+          selectedDatasource = newDatasource;
+          selectedTable = newTable;
+          addTodo("updateTableSelector", new String[] {
+            selectedDatasource, selectedTable });
         }
       });
 
@@ -1140,7 +1096,7 @@ public class MailMerge
       vbox.add(hbox);
       hbox.add(new JLabel(L.m("Tabelle")));
       hbox.add(Box.createHorizontalStrut(5));
-      tableSelector = new JComboBox<String>();
+      tableSelector = new JComboBox<>();
       hbox.add(tableSelector);
 
       /*
@@ -1151,50 +1107,38 @@ public class MailMerge
       vbox.add(Box.createVerticalStrut(5));
       vbox.add(hbox);
       JButton button = new JButton(L.m("Abbrechen"));
-      button.addActionListener(new ActionListener()
+      button.addActionListener((ActionEvent e) ->
       {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          stopRunning();
-          myFrame.dispose();
-        }
+        stopRunning();
+        myFrame.dispose();
       });
       hbox.add(button);
 
       button = new JButton(L.m("Start"));
-      button.addActionListener(new ActionListener()
+      button.addActionListener((ActionEvent e) ->
       {
-        @Override
-        public void actionPerformed(ActionEvent e)
+        selectedTable = (String) tableSelector.getSelectedItem();
+        selectedDatasource = (String) datasourceSelector.getSelectedItem();
+        if (selectedTable != null && selectedDatasource != null)
         {
-          selectedTable = (String) tableSelector.getSelectedItem();
-          selectedDatasource = (String) datasourceSelector.getSelectedItem();
-          if (selectedTable != null && selectedDatasource != null)
-          {
-            clearTodo();
-            addTodo("print", Boolean.FALSE);
-            myFrame.dispose();
-          }
+          clearTodo();
+          addTodo("print", Boolean.FALSE);
+          myFrame.dispose();
         }
       });
       hbox.add(Box.createHorizontalStrut(5));
       hbox.add(button);
 
       button = new JButton(L.m("Einzelauswahl"));
-      button.addActionListener(new ActionListener()
+      button.addActionListener((ActionEvent e) ->
       {
-        @Override
-        public void actionPerformed(ActionEvent e)
+        selectedTable = (String) tableSelector.getSelectedItem();
+        selectedDatasource = (String) datasourceSelector.getSelectedItem();
+        if (selectedTable != null && selectedDatasource != null)
         {
-          selectedTable = (String) tableSelector.getSelectedItem();
-          selectedDatasource = (String) datasourceSelector.getSelectedItem();
-          if (selectedTable != null && selectedDatasource != null)
-          {
-            clearTodo();
-            addTodo("print", Boolean.TRUE);
-            myFrame.dispose();
-          }
+          clearTodo();
+          addTodo("print", Boolean.TRUE);
+          myFrame.dispose();
         }
       });
       hbox.add(Box.createHorizontalStrut(5));
@@ -1292,20 +1236,16 @@ public class MailMerge
       final String[] tNames = tableNames;
       try
       {
-        javax.swing.SwingUtilities.invokeLater(new Runnable()
+        javax.swing.SwingUtilities.invokeLater(() ->
         {
-          @Override
-          public void run()
+          tableSelector.removeAllItems();
+          int selected = 0;
+          for (int i = 0; i < tNames.length; ++i)
           {
-            tableSelector.removeAllItems();
-            int selected = 0;
-            for (int i = 0; i < tNames.length; ++i)
-            {
-              if (tNames[i].equals(tableName)) selected = i;
-              tableSelector.addItem(tNames[i]);
-            }
-            tableSelector.setSelectedIndex(selected);
+            if (tNames[i].equals(tableName)) selected = i;
+            tableSelector.addItem(tNames[i]);
           }
+          tableSelector.setSelectedIndex(selected);
         });
       }
       catch (Exception x)
@@ -1319,7 +1259,7 @@ public class MailMerge
     {
       if (calcDocumentTitles.contains(selectedDatasource))
       {
-        Set<String> schema = new HashSet<String>();
+        Set<String> schema = new HashSet<>();
         QueryResults data =
           getVisibleCalcData(selectedDatasource, selectedTable, schema);
         mailMerge(pmod, offerselection.booleanValue(), schema, data);
@@ -1355,19 +1295,15 @@ public class MailMerge
         final SuperMailMerge self = this;
         synchronized (todo)
         {
-          todo.add(new Runnable()
+          todo.add(() ->
           {
-            @Override
-            public void run()
+            try
             {
-              try
-              {
-                m.invoke(self, finalParams);
-              }
-              catch (Exception x)
-              {
-                LOGGER.error("", x);
-              }
+              m.invoke(self, finalParams);
+            }
+            catch (Exception x)
+            {
+              LOGGER.error("", x);
             }
           });
           todo.notifyAll();
@@ -1403,13 +1339,9 @@ public class MailMerge
       synchronized (todo)
       {
         todo.clear();
-        todo.add(new Runnable()
+        todo.add(() ->
         {
-          @Override
-          public void run()
-          {
-            running = false;
-          }
+          running = false;
         });
         todo.notifyAll();
       }
@@ -1428,19 +1360,15 @@ public class MailMerge
       {
         final Method m = this.getClass().getMethod(method, (Class[]) null);
         final SuperMailMerge self = this;
-        javax.swing.SwingUtilities.invokeLater(new Runnable()
+        javax.swing.SwingUtilities.invokeLater(() ->
         {
-          @Override
-          public void run()
+          try
           {
-            try
-            {
-              m.invoke(self, (Object[]) null);
-            }
-            catch (Exception x)
-            {
-              LOGGER.error("", x);
-            }
+            m.invoke(self, (Object[]) null);
+          }
+          catch (Exception x)
+          {
+            LOGGER.error("", x);
           }
         });
       }

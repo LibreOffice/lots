@@ -149,21 +149,13 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
         return;
       }
 
-      Runnable launch = new Runnable()
+      Runnable launch = () ->
       {
-        @Override
-        public void run()
+        openExt.launch((Exception x) ->
         {
-          openExt.launch(new OpenExt.ExceptionHandler()
-          {
-            @Override
-            public void handle(Exception x)
-            {
-              LOGGER.error("", x);
-              showError(x.getMessage());
-            }
-          });
-        }
+          LOGGER.error("", x);
+          showError(x.getMessage());
+        });
       };
 
       /**
@@ -189,7 +181,7 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
   private String getFragId(ConfigThingy conf, String action)
   {
     ConfigThingy fids = conf.query("FRAG_ID");
-    StringBuffer fragId = new StringBuffer();
+    StringBuilder fragId = new StringBuilder();
     if (fids.count() > 0)
     {
       Iterator<ConfigThingy> i = fids.iterator();

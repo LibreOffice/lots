@@ -336,15 +336,11 @@ public class WollMuxBarEventHandler
         final WollMuxBar wmbar = wollmuxbar;
         final String[] entries = palEntries;
         final String selected = selectedEntry;
-        javax.swing.SwingUtilities.invokeLater(new Runnable()
+        javax.swing.SwingUtilities.invokeLater(() ->
         {
-          @Override
-          public void run()
+          if (wmbar != null)
           {
-            if (wmbar != null)
-            {
-              wmbar.updateSenderboxes(entries, selected);
-            }
+            wmbar.updateSenderboxes(entries, selected);
           }
         });
       }

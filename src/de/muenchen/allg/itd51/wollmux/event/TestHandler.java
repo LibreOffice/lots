@@ -190,7 +190,9 @@ public class TestHandler
     {
       try
       {
-        br.close();
+        if (br != null) {
+          br.close();
+        }
       }
       catch (Exception x)
       {}

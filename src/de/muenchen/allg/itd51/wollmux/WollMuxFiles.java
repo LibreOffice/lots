@@ -959,7 +959,9 @@ public class WollMuxFiles
     {
       try
       {
-        in.close();
+        if (in != null) { 
+          in.close();
+        }
       }
       catch (Exception x)
       {}
@@ -1078,7 +1080,9 @@ public class WollMuxFiles
     {
       try
       {
-        out.close();
+        if (out != null) {
+          out.close();
+        }
       }
       catch (Exception x)
       {}
