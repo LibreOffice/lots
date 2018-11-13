@@ -385,7 +385,7 @@ public class Common
     Rectangle r = new Rectangle();
     r.x = COORDINATE_UNSPECIFIED;
 
-    String xStr = fensterConf.getString("X", "");
+    String xStr = fensterConf.getString("X", "0");
     if ("center".equalsIgnoreCase(xStr))
     {
       r.x = COORDINATE_CENTER;
@@ -414,7 +414,7 @@ public class Common
     }
 
     r.y = COORDINATE_UNSPECIFIED;
-    String yStr = fensterConf.getString("Y", "");
+    String yStr = fensterConf.getString("Y", "0");
 
     if ("center".equalsIgnoreCase(yStr))
     {
@@ -444,7 +444,7 @@ public class Common
     }
 
     r.width = DIMENSION_UNSPECIFIED;
-    String widthStr = fensterConf.getString("WIDTH", "");
+    String widthStr = fensterConf.getString("WIDTH", "-2");
 
     if ("max".equalsIgnoreCase(widthStr))
     {
@@ -464,7 +464,7 @@ public class Common
     }
 
     r.height = DIMENSION_UNSPECIFIED;
-    String heightStr = fensterConf.getString("HEIGHT", "");
+    String heightStr = fensterConf.getString("HEIGHT", "-2");
 
     if ("max".equalsIgnoreCase(heightStr))
     {
