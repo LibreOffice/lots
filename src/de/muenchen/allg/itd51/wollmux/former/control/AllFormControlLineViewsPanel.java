@@ -308,7 +308,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     JComponent tab = firstTab;
     int tabIndex = 0;
     int gridY = 0;
-    if (viewDescriptors.size() > 0)
+    if (!viewDescriptors.isEmpty())
     {
       int i = index;
       if (i == viewDescriptors.size()) --i;
@@ -750,18 +750,18 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
             state = 1;
             selindex = index;
           }
+          
 
-          switch (state)
-          {
-            case -1: // abwählen
-              view.unmark();
-              selection.remove(index);
-              break;
-            case 1: // auswählen
-              view.mark();
-              selection.add(index);
-              break;
+          if (state == -1) {
+            view.unmark();
+            selection.remove(index);
           }
+          else {
+            view.mark();
+            selection.add(index);
+          }
+          
+          break;
         }
         else if (b.getState() == BroadcastObjectSelection.STATE_SHIFT_CLICK)
         {
