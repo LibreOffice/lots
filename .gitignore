@@ -33,3 +33,9 @@ misc/version
 .classpath
 /.settings
 .vscode/
+dist/WollMux-AOO.oxt
+dist/WollMux_ButtonsOnly.oxt
+dist/wollmuxbar.exe
+lhmdeb/lhm/WollMux.update.xml
+lhmdeb/lhm/buildinfo
+lhmdeb/lhm/description.xml
