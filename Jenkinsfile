@@ -34,14 +34,6 @@ pipeline {
                 sh "mvn $SONAR_MAVEN_GOAL -Dsonar.host.url=$SONAR_HOST_URL"
               }
             }
-            timeout(time: 1, unit: 'HOURS') {
-              script {
-                def qg = waitForQualityGate()
-                if (qg.status != 'OK') {
-                  error "Pipeline abgebrochen auf Grund von Quality Gate Fehlern: ${qg.status}"
-                }
-              }
-            }
           } else {
             withMaven(
               maven: 'mvn',
