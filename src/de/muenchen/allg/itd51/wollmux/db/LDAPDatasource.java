@@ -42,8 +42,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.db;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -79,7 +77,6 @@ import org.slf4j.LoggerFactory;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
@@ -1876,124 +1873,4 @@ public class LDAPDatasource implements Datasource
     }
     System.out.println();
   }
-
-  /**
-   *
-   * @param spaltenName
-   * @param suchString
-   * @return
-   * @throws TimeoutException
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private QueryResults simpleFind(String spaltenName, String suchString)
-      throws TimeoutException
-  {
-    List<QueryPart> query = new ArrayList<QueryPart>();
-    query.add(new QueryPart(spaltenName, suchString));
-    return find(query, 3000000);
-  }
-
-  /**
-   *
-   * @param spaltenName1
-   * @param suchString1
-   * @param spaltenName2
-   * @param suchString2
-   * @return
-   * @throws TimeoutException
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private QueryResults simpleFind(String spaltenName1, String suchString1,
-      String spaltenName2, String suchString2) throws TimeoutException
-  {
-    List<QueryPart> query = new ArrayList<QueryPart>();
-    query.add(new QueryPart(spaltenName1, suchString1));
-    query.add(new QueryPart(spaltenName2, suchString2));
-    return find(query, 3000000);
-  }
-
-  /**
-   *
-   * @param args
-   * @throws IOException
-   * @throws SyntaxErrorException
-   * @throws NodeNotFoundException
-   * @throws TimeoutException
-   * @throws ConfigurationErrorException
-   * @author Max Meier (D-III-ITD 5.1)
-   */
-  public static void main(String[] args) throws IOException, SyntaxErrorException,
-      NodeNotFoundException, TimeoutException, ConfigurationErrorException
-  {
-    File curDir = new File(System.getProperty("user.dir"));
-    URL context = curDir.toURI().toURL();
-    URL confURL = new URL(context, "testdata/ldap.conf");
-    ConfigThingy ldapConf = new ConfigThingy("", confURL);
-    Map<String, Datasource> nameToDatasource = new HashMap<String, Datasource>();
-    ConfigThingy sourceDesc = ldapConf.query("Datenquelle").getFirstChild();
-    LDAPDatasource source =
-      new LDAPDatasource(nameToDatasource, sourceDesc, context);
-
-    // Test keys
-    System.out.println("Schlüssel für Anfrage OrgaEmail=direktorium@muenchen.de:");
-    QueryResults qr = source.simpleFind("OrgaEmail", "direktorium@muenchen.de");
-    Iterator<Dataset> iter = qr.iterator();
-
-    Collection<String> keys = new ArrayList<String>();
-
-    while (iter.hasNext())
-    {
-      Dataset ds = iter.next();
-      String key = ds.getKey();
-      System.out.println("Key: " + ds.getKey());
-
-      keys.add(key);
-
-    }
-
-    QueryResults qr2 = source.getDatasetsByKey(keys, 3000000);
-
-    printResults("Datensätze zu vorigen Schlüsseln: ", source.schema, qr2);
-
-    printResults("OrgaEmail =  direktorium@muenchen.de , Gertraud = Gertraud",
-      source.getSchema(), source.simpleFind("OrgaEmail", "direktorium@muenchen.de",
-        "Gertraud", "Gertraud"));
-
-    printResults(
-      "OrgaEmail = linux-client.it.dir@muenchen.de, Referat = Direktorium",
-      source.getSchema(), source.simpleFind("OrgaEmail",
-        "linux-client.it.dir@muenchen.de", "Referat", "Direktorium"));
-
-    printResults("Gertraud = Gertraud, Referat = Direktorium", source.getSchema(),
-      source.simpleFind("Gertraud", "Gertraud", "Referat", "Direktorium"));
-
-    printResults("OrgaKurz = D-L, UberOrga = d", source.getSchema(),
-      source.simpleFind("OrgaKurz", "D-L", "UberOrga", "d"));
-
-    printResults("UberOrga = d", source.getSchema(), source.simpleFind("UberOrga",
-      "d"));
-
-    printResults("Orga2 = Stadtarchiv , Referat = Direktorium", source.getSchema(),
-      source.simpleFind("Orga2", "Stadtarchiv", "Referat", "Direktorium"));
-
-    printResults("Referat = Sozialreferat , Nachname = Me\\)er", source.getSchema(),
-      source.simpleFind("Referat", "Sozialreferat", "Nachname", "Me\\)er"));
-
-    printResults("Nachname = *utz", source.getSchema(), source.simpleFind(
-      "Nachname", "*utz"));
-    printResults("Nachname = *oe*", source.getSchema(), source.simpleFind(
-      "Nachname", "*oe*"));
-    printResults("Nachname = Lutz", source.getSchema(), source.simpleFind(
-      "Nachname", "Lutz"));
-    printResults("Nachname = *utz, Vorname = Chris*", source.getSchema(),
-      source.simpleFind("Nachname", "Lutz", "Vorname", "Chris*"));
-
-    printResults("Nachname = Benkmann, Vorname = Matthias", source.getSchema(),
-      source.simpleFind("Nachname", "Benkmann", "Vorname", "Matthias"));
-
-    printResults("OrgaKurz = *itd-5.1", source.getSchema(), source.simpleFind(
-      "OrgaKurz", "*itd-5.1"));
-
-  }
-
 }

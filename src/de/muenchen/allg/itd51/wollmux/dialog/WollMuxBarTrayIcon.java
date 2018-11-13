@@ -38,17 +38,12 @@ import java.awt.Image;
 import java.awt.SystemTray;
 import java.awt.Toolkit;
 import java.awt.TrayIcon;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.MalformedURLException;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JWindow;
 import javax.swing.event.PopupMenuEvent;
@@ -303,7 +298,8 @@ public class WollMuxBarTrayIcon
    * 
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
-  private class MyTrayIconPopupListener implements MouseListener, PopupMenuListener
+  private class MyTrayIconPopupListener extends MouseAdapter
+      implements PopupMenuListener
   {
 
     /**
@@ -423,65 +419,5 @@ public class WollMuxBarTrayIcon
         showPopup(e);
       }
     }
-
-    public void mouseEntered(MouseEvent e)
-    {
-    // Do nothing
-    }
-
-    public void mouseExited(MouseEvent e)
-    {
-    // Do nothing
-    }
-  }
-
-  /**
-   * Main-Methode zum Testen der Klasse.
-   * 
-   * @throws MalformedURLException
-   * @throws UnavailableException
-   */
-  public static void main(String[] args) throws MalformedURLException,
-      UnavailableException
-  {
-    // JPopupMenu konstruieren
-    JPopupMenu menu = new JPopupMenu();
-    menu.add(new JMenuItem("Testeintrag 1"));
-    menu.add(new JMenuItem("Testeintrag 2"));
-    menu.add(new JMenuItem("Testeintrag 3"));
-    menu.add(new JMenuItem("Testeintrag 1"));
-    JMenu submenu = new JMenu("Untermenü 1");
-    submenu.add(new JMenuItem("Untermenüeintrag 1"));
-    submenu.add(new JMenuItem("Untermenüeintrag 2"));
-    menu.add(submenu);
-
-    // menu.addPropertyChangeListener(new PropertyChangeListener()
-    // {
-    //
-    // public void propertyChange(PropertyChangeEvent evt)
-    // {
-    // System.out.println(evt.getPropertyName());
-    // }
-    // });
-
-    // Bild für Icon
-    Image img = new ImageIcon("src/data/wollmux_icon24x24_gelb.png").getImage();
-
-    // Test-Frame
-    JFrame frame = new JFrame("Dies ist ein Testframe");
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-    frame.getContentPane().add(new JButton("Button"));
-
-    // Icon erstellen
-    WollMuxBarTrayIcon icon =
-      new WollMuxBarTrayIcon(img, "TrayIcon Test", menu, frame, true);
-
-    icon.addToTray();
-
-    frame.setPreferredSize(new Dimension(400, 300));
-    frame.setSize(400, 300);
-    frame.pack();
-    frame.setVisible(true);
   }
 }

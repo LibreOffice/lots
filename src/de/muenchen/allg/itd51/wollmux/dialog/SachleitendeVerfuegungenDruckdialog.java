@@ -68,10 +68,7 @@ import javax.swing.event.ChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.Verfuegungspunkt;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -875,18 +872,5 @@ public class SachleitendeVerfuegungenDruckdialog
     {
       closeAction.actionPerformed(null);
     }
-  }
-
-  public static void main(String[] args) throws Exception
-  {
-    UNO.init();
-    WollMuxSingleton.initialize(UNO.defaultContext);
-    List<VerfuegungspunktInfo> info =
-      SachleitendeVerfuegung.callPrintDialog(UNO.XTextDocument(UNO.desktop.getCurrentComponent()));
-    for (VerfuegungspunktInfo v : info)
-    {
-      System.out.println(v);
-    }
-    System.exit(0);
   }
 }

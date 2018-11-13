@@ -64,8 +64,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -106,7 +104,6 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.NoBackingStoreException;
-import de.muenchen.allg.itd51.wollmux.db.TestDJDataset;
 
 /**
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
@@ -1410,18 +1407,5 @@ public class DatensatzBearbeiten
       LOGGER.error(L.m("Ununterstützte ACTION: %1", action));
 
     return null;
-  }
-
-  public static void main(String[] args) throws Exception
-  {
-    String confFile = "testdata/AbsenderdatenBearbeiten.conf";
-    DJDataset datensatz = new TestDJDataset();
-    ConfigThingy conf =
-      new ConfigThingy("", new URL(new File(System.getProperty("user.dir")).toURI().toURL(),
-        confFile));
-    DatensatzBearbeiten ab =
-      new DatensatzBearbeiten(conf.get("AbsenderdatenBearbeiten"), datensatz);
-    Thread.sleep(60000);
-    ab.dispose();
   }
 }

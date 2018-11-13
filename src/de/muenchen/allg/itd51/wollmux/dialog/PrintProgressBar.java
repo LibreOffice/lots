@@ -480,40 +480,4 @@ public class PrintProgressBar
       }
     });
   }
-
-  /**
-   * Testmethode
-   *
-   * @param args
-   * @throws InterruptedException
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public static void main(String[] args) throws InterruptedException
-  {
-    PrintProgressBar bar = new PrintProgressBar("Drucke", new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        System.out.println(L.m("Druckvorgang abgebrochen!"));
-      }
-    });
-    Thread.sleep(2000);
-    bar.setMaxValue("Hallo", 3);
-    Thread.sleep(4000);
-    bar.setValue("Hallo", 1);
-    Thread.sleep(4000);
-    bar.setValue("Hallo", 2);
-    Thread.sleep(4000);
-    bar.setValue("Hallo", 3);
-    Thread.sleep(4000);
-    bar.setMaxValue("bar", 200);
-    bar.setValue("bar", 2);
-    Thread.sleep(4000);
-    bar.setValue("bar", 4);
-    Thread.sleep(10000);
-    bar.dispose();
-  }
-
 }

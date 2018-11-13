@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +64,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 
 /**
  * Stellt eine OOo-Datenquelle als WollMux-Datenquelle zur Verfügung.
@@ -956,118 +954,4 @@ public class OOoDatasource implements Datasource
     }
     System.out.println();
   }
-
-  /**
-   *
-   * @param spaltenName
-   * @param suchString
-   * @return
-   * @throws TimeoutException
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private QueryResults simpleFind(String spaltenName, String suchString)
-      throws TimeoutException
-  {
-    List<QueryPart> query = new ArrayList<QueryPart>();
-    query.add(new QueryPart(spaltenName, suchString));
-    return find(query, 3000000);
-  }
-
-  /**
-   *
-   * @param spaltenName1
-   * @param suchString1
-   * @param spaltenName2
-   * @param suchString2
-   * @return
-   * @throws TimeoutException
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private QueryResults simpleFind(String spaltenName1, String suchString1,
-      String spaltenName2, String suchString2) throws TimeoutException
-  {
-    List<QueryPart> query = new ArrayList<QueryPart>();
-    query.add(new QueryPart(spaltenName1, suchString1));
-    query.add(new QueryPart(spaltenName2, suchString2));
-    return find(query, 3000000);
-  }
-
-  /**
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   *
-   */
-  public static void main(String[] args)
-  {
-    try
-    {
-      UNO.init();
-      LogConfig.init(System.err, Level.ALL);
-      // Datenquelle(
-      // NAME "test"
-      // TYPE "ooo"
-      // SOURCE "datenbank"
-      // TABLE "UserAnsicht"
-      // Schema( "UserVorname" "UserNachname" "Beschreibung" )
-      // Schluessel("UserVorname" "UserNachname")
-      // # Wenn Schema()-Abschnitt angegeben ist, muss auch ein Schluessel-Abschnitt
-      // angegeben werden.
-      // )
-      ConfigThingy conf = new ConfigThingy("Datenquelle");
-      conf.add("NAME").add("test");
-      conf.add("TYPE").add("ooo");
-      conf.add("SOURCE").add("datenbank");
-      conf.add("TABLE").add("UserAnsicht");
-      ConfigThingy keysConf = conf.add("Schluessel");
-      keysConf.add("UserVorname");
-      keysConf.add("UserNachname");
-
-      OOoDatasource ds = new OOoDatasource(null, conf, null);
-      System.out.println("Name: " + ds.getName());
-      System.out.print("Schema: ");
-      Set<String> schema = ds.getSchema();
-      Iterator<String> iter = schema.iterator();
-      while (iter.hasNext())
-      {
-        System.out.print("\"" + iter.next() + "\" ");
-      }
-      System.out.println();
-      System.out.print("Schlüsselspalten: ");
-      for (int i = 0; i < ds.keyColumns.length; ++i)
-        System.out.print("\"" + ds.keyColumns[i] + "\" ");
-
-      System.out.println("Datensätze:");
-      QueryResults res = ds.getContents(1000000);
-      List<String> keys = new ArrayList<String>();
-      printQueryResults(schema, res, keys);
-
-      keys.remove(0);
-      System.out.println("Rufe Datensätze für folgende Schlüssel ab:");
-      iter = keys.iterator();
-      while (iter.hasNext())
-        System.out.println("    " + iter.next());
-
-      res = ds.getDatasetsByKey(keys, 10000000);
-      printQueryResults(schema, res, keys);
-
-      printResults("Beschreibung = *uTTer", schema, ds.simpleFind("Beschreibung",
-        "*uTTer"));
-      printResults("Beschreibung = *uTTer, UserVorname = Sina", schema,
-        ds.simpleFind("Beschreibung", "*uTTer", "UserVorname", "Sina"));
-      printResults("UserVorname = Hans, UserNachname = Mu%rster#rmann", schema,
-        ds.simpleFind("UserVorname", "Hans", "UserNachname", "Mu%rster#rmann"));
-      printResults("Beschreibung = \\Kind", schema, ds.simpleFind("Beschreibung",
-        "\\Kind"));
-      printResults(
-        "UserVorname = Hans, UserNachname = Mu%er#rmann (sic)  muss leer sein",
-        schema, ds.simpleFind("UserVorname", "Hans", "UserNachname", "Mu%er#rmann"));
-      printResults("UserVorname = *a*", schema, ds.simpleFind("UserVorname", "*a*"));
-
-    }
-    catch (Exception x)
-    {
-      x.printStackTrace();
-    }
-    System.exit(0);
-  }
-
 }

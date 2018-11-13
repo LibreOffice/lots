@@ -38,18 +38,11 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Iterator;
-import java.util.Vector;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
 
 /**
  * Stellt einen Button dar mit einem Popup-Menü, das darauf vorbereitet ist, sehr
@@ -122,34 +115,4 @@ public class JPotentiallyOverlongPopupMenuButton extends JButton
 
   private static class MyVerticalFlowLayout extends VerticalFlowLayout
   {}
-
-  public static void main(String[] args)
-  {
-    JFrame myFrame = new JFrame("JPotentiallyOverlongPopupMenuButtonTest");
-    myFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    final Box myPanel = new Box(BoxLayout.X_AXIS);
-    myFrame.setContentPane(myPanel);
-
-    Vector<Action> actions = new Vector<Action>();
-    for (int i = 1; i <= 100; ++i)
-    {
-      final Integer I = Integer.valueOf(i);
-      actions.add(new AbstractAction("" + i)
-      {
-        private static final long serialVersionUID = 8275823697153645607L;
-
-        public void actionPerformed(ActionEvent e)
-        {
-          JOptionPane.showMessageDialog(myPanel, "" + I);
-        }
-      });
-    }
-    JPotentiallyOverlongPopupMenuButton butt =
-      new JPotentiallyOverlongPopupMenuButton(
-        "JPotentiallyOverlongPopupMenuButtonTest", actions);
-
-    myPanel.add(butt);
-    myFrame.pack();
-    myFrame.setVisible(true);
-  }
 }
