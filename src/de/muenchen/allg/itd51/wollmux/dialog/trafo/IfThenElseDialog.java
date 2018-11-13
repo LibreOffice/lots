@@ -37,8 +37,8 @@ import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -739,58 +739,11 @@ public class IfThenElseDialog extends TrafoDialog
     {}
   };
 
-  private class MyWindowListener implements WindowListener
+  private class MyWindowListener extends WindowAdapter
   {
-    public void windowOpened(WindowEvent e)
-    {}
-
     public void windowClosing(WindowEvent e)
     {
       abort();
     }
-
-    public void windowClosed(WindowEvent e)
-    {}
-
-    public void windowIconified(WindowEvent e)
-    {}
-
-    public void windowDeiconified(WindowEvent e)
-    {}
-
-    public void windowActivated(WindowEvent e)
-    {}
-
-    public void windowDeactivated(WindowEvent e)
-    {}
-
   }
-
-  public static void main(String[] args) throws Exception
-  {
-    ConfigThingy funConf =
-      new ConfigThingy(
-        "Func",
-        "IF(STRCMP(VALUE \"foo\", \"bar\") THEN(\"Krass, ey!\") ELSE( IF(MATCH(VALUE \"doof\" \"^foo\") THEN \"blarg\" ELSE \"Dusel\")) )");
-    Vector<String> fieldNames = new Vector<String>();
-    fieldNames.add("Du");
-    fieldNames.add("bist");
-    fieldNames.add("doof");
-    final TrafoDialogParameters params = new TrafoDialogParameters();
-    params.conf = funConf;
-    params.fieldNames = fieldNames;
-    params.closeAction = new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        if (params.isValid)
-          System.out.println(params.conf.stringRepresentation());
-        else
-          System.out.println("ABORTED!");
-      }
-    };
-    IfThenElseDialog dialog = new IfThenElseDialog(params);
-    dialog.show("Wenn-Dann-Sonst-Test", (Dialog) null);
-  }
-
 }

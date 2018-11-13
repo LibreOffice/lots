@@ -2555,42 +2555,4 @@ public class MenuManager
       return id.compareTo(o.id);
     }
   }
-
-  public static void main(String[] args)
-  {
-    WollMuxFiles.setupWollMuxDir();
-
-    ConfigThingy wollmuxConf = WollMuxFiles.getWollmuxConf();
-
-    ConfigThingy wollmuxbarConf = null;
-    File wollmuxbarConfFile =
-      new File(WollMuxFiles.getWollMuxDir(), WollMuxBar.WOLLMUXBAR_CONF);
-    if (wollmuxbarConfFile.exists())
-    {
-      try
-      {
-        wollmuxbarConf =
-          new ConfigThingy("wollmuxbarConf", wollmuxbarConfFile.toURI().toURL());
-      }
-      catch (Exception x)
-      {
-        LOGGER.error(
-          L.m("Fehler beim Lesen von '%1'", wollmuxbarConfFile.toString()), x);
-      }
-    }
-
-    if (wollmuxbarConf == null) {
-      wollmuxbarConf = new ConfigThingy("wollmuxbarConf");
-    }
-
-    new MenuManager(wollmuxConf, wollmuxbarConf, new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        System.out.println("Finished");
-      }
-    });
-  }
-
 }

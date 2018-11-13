@@ -500,22 +500,4 @@ public class GenderDialog extends TrafoDialog
 
     return bind;
   }
-
-  /**
-   * für Tests
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public static void main(String[] args)
-  {
-    TrafoDialogParameters params = new TrafoDialogParameters();
-    params.closeAction = null;
-    params.conf = new ConfigThingy("Func");
-    params.conf.addChild(generateGenderTrafoConf("Anrede", "Hallo Herr",
-      "Hallo Frau", "Liebe Firma"));
-    params.fieldNames = new ArrayList<String>();
-    params.fieldNames.add("MyAnrede");
-
-    new GenderDialog(params).show("Test GenderDialog", (Frame) null);
-  }
 }

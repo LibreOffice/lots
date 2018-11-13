@@ -31,8 +31,6 @@
 
 package de.muenchen.allg.itd51.wollmux;
 
-import java.io.File;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -411,26 +409,5 @@ public class Shortcuts
     final Short keyModifier = myMap.get(shortcut.toUpperCase());
 
     return keyModifier;
-  }
-
-  public static void main(String[] args) throws Exception
-  {
-
-    UNO.init();
-
-    // lesen der conf --> fällt nachher weg
-    ConfigThingy conf = null;
-    String confFile = "../../.wollmux/wollmux.conf";
-
-    conf = new ConfigThingy("", new URL(new File(".").toURI().toURL(), confFile));
-
-    // ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
-
-    // lesen des .conf Abschnitt "Tastenkuerzel"
-    ConfigThingy tastenkombinationenConf = conf.query("Tastenkuerzel");
-
-    createShortcuts(tastenkombinationenConf);
-
-    System.exit(0);
   }
 }

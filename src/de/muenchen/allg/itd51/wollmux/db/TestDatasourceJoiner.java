@@ -40,11 +40,8 @@ package de.muenchen.allg.itd51.wollmux.db;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 
@@ -148,75 +145,4 @@ public class TestDatasourceJoiner extends DatasourceJoiner
     }
     System.out.println();
   }
-
-  /**
-   * Es kann als Argument ein Datei-Pfad übergeben werden, unter dem dann der LOS und
-   * Cache gespeichert wird.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public static void main(String[] args) throws Exception
-  {
-    TestDatasourceJoiner dj = new TestDatasourceJoiner();
-
-    System.out.println("find(Query) mit unbekanntem Datenquellennamen:");
-    try
-    {
-      dj.find(new Query("GibtsNicht", new Vector<QueryPart>()));
-    }
-    catch (Exception x)
-    {
-      System.out.println(x.getClass().getCanonicalName() + ": " + x.getMessage());
-    }
-    System.out.println();
-    System.out.println("find(Query) mit illegalem Suchstring:");
-    try
-    {
-      List<QueryPart> l = new Vector<QueryPart>();
-      l.add(new QueryPart("A****", "f***en"));
-      dj.find(new Query("Personal", l));
-    }
-    catch (Exception x)
-    {
-      System.out.println(x.getClass().getCanonicalName() + ": " + x.getMessage());
-    }
-
-    Set<String> testSchema = new HashSet<String>();
-    testSchema.add("OrgaKurz");
-    testSchema.add("Homepage");
-    List<QueryPart> listOfQueryParts = new Vector<QueryPart>();
-    listOfQueryParts.add(new QueryPart("Homepage", "*limux"));
-    Query query = new Query("OrgaSpezifischeErgaenzungen", listOfQueryParts);
-    printResults("OrgaSpezifischeErgaenzungen: Homepage = *limux", testSchema,
-      dj.find(query));
-
-    printResults("Nachname = Benkmux", dj.getMainDatasourceSchema(), dj.find(
-      "Nachname", "Benkmux"));
-    printResults("Nachname = Benkm*", dj.getMainDatasourceSchema(), dj.find(
-      "Nachname", "Benkm*"));
-    printResults("Nachname = *ux", dj.getMainDatasourceSchema(), dj.find("Nachname",
-      "*ux"));
-    printResults("Nachname = *oe*", dj.getMainDatasourceSchema(), dj.find(
-      "Nachname", "*oe*"));
-    printResults("Nachname = Schlonz", dj.getMainDatasourceSchema(), dj.find(
-      "Nachname", "Schlonz"));
-    printResults("Nachname = Lutz*", dj.getMainDatasourceSchema(), dj.find(
-      "Nachname", "Lutz*"));
-    printResults("Vorname = Christoph", dj.getMainDatasourceSchema(), dj.find(
-      "Vorname", "Christoph"));
-    printResults("Nachname = *uX, Vorname = m*", dj.getMainDatasourceSchema(),
-      dj.find("Nachname", "*uX", "Vorname", "m*"));
-    printResults("Homepage = *limux", dj.getMainDatasourceSchema(), dj.find(
-      "Homepage", "*limux"));
-    printResults("Homepage = *limux, Nachname = B*", dj.getMainDatasourceSchema(),
-      dj.find("Homepage", "*limux", "Nachname", "B*"));
-    printResults("Local Override Storage", dj.getMainDatasourceSchema(), dj.getLOS());
-
-    if (args.length == 1)
-    {
-      File outFile = new File(args[0]);
-      dj.reallySaveCacheAndLOS(outFile);
-    }
-  }
-
 }

@@ -561,7 +561,8 @@ public class PrintParametersDialog
     try
     {
       printerInfo.setPropertyValue("Name", druckerName);
-      if (printable != null) {
+      if (printable != null)
+      {
         printable.setPrinter(printerInfo.getProps());
       }
     }
@@ -569,29 +570,5 @@ public class PrintParametersDialog
     {
       System.out.println("property setzen: " + e.getMessage());
     }
-  }
-
-  public static void main(String[] args) throws Exception
-  {
-    UNO.init();
-    new PrintParametersDialog(UNO.XTextDocument(UNO.desktop.getCurrentComponent()),
-      true, new ActionListener()
-      {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          try
-          {
-            System.out.println(e.getActionCommand());
-            PrintParametersDialog ppd = (PrintParametersDialog) e.getSource();
-            System.out.println(ppd.getPageRange());
-            System.out.println(ppd.getCopyCount());
-            Thread.sleep(1000);
-          }
-          catch (InterruptedException e1)
-          {}
-          System.exit(0);
-        }
-      });
   }
 }
