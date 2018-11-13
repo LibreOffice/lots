@@ -153,25 +153,17 @@ public class AllGroupLineViewsPanel implements View
         GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
           BUTTON_BORDER, BUTTON_BORDER), 0, 0);
     JButton button = new JButton(L.m("Löschen"));
-    button.addActionListener(new ActionListener()
+    button.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
         deleteSelectedElements();
-      }
     });
     buttonPanel.add(button, gbcButton);
 
     ++gbcButton.gridx;
     button = new JButton(L.m("Neu"));
-    button.addActionListener(new ActionListener()
+    button.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
         createNewGroup();
-      }
     });
     buttonPanel.add(button, gbcButton);
 

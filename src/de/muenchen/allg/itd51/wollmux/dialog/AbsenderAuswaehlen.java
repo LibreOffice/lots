@@ -128,37 +128,25 @@ public class AbsenderAuswaehlen
   /**
    * ActionListener für Buttons mit der ACTION "abort".
    */
-  private ActionListener actionListener_abort = new ActionListener()
+  private ActionListener actionListener_abort = (ActionEvent e) ->
   {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
       abort();
-    }
   };
 
   /**
    * ActionListener für Buttons mit der ACTION "back".
    */
-  private ActionListener actionListener_back = new ActionListener()
+  private ActionListener actionListener_back = (ActionEvent e) ->
   {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
       back();
-    }
   };
 
   /**
    * ActionListener für Buttons mit der ACTION "editList".
    */
-  private ActionListener actionListener_editList = new ActionListener()
+  private ActionListener actionListener_editList = (ActionEvent e) ->
   {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
       editList();
-    }
   };
 
   /**
@@ -273,18 +261,16 @@ public class AbsenderAuswaehlen
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try
     {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
+      javax.swing.SwingUtilities.invokeLater(() ->
       {
-        @Override
-        public void run()
-        {
           try
           {
             createGUI(fensterDesc.getLastChild());
           }
           catch (Exception x)
-          {}
-        }
+          {
+            //
+          }
       });
     }
     catch (Exception x)
@@ -616,14 +602,9 @@ public class AbsenderAuswaehlen
     while (iter.hasNext())
       elements[i++] =
         new DJDatasetListElement((DJDataset) iter.next(), displayTemplate);
-    Arrays.sort(elements, new Comparator<Object>()
-    {
-      @Override
-      public int compare(Object o1, Object o2)
-      {
-        return o1.toString().compareTo(o2.toString());
-      }
-    });
+    Arrays.sort(elements, (Object o1, Object o2) ->
+        o1.toString().compareTo(o2.toString())
+    );
 
     DefaultListModel<Object> listModel = (DefaultListModel<Object>) list.getModel();
     listModel.clear();

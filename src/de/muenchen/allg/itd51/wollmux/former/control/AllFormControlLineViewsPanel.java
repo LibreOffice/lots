@@ -215,66 +215,46 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
         GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
           BUTTON_BORDER, BUTTON_BORDER), 0, 0);
     JButton hochButton = new JButton(L.m("Hoch"));
-    hochButton.addActionListener(new ActionListener()
+    hochButton.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        if (noSelectedElementsOnVisibleTab()) return;
-        moveSelectedElementsUp();
-        if (noSelectedElementsOnVisibleTab()) showSelection();
-      }
+      if (noSelectedElementsOnVisibleTab()) return;
+      moveSelectedElementsUp();
+      if (noSelectedElementsOnVisibleTab()) showSelection();
     });
     buttonPanel.add(hochButton, gbcButton);
 
     ++gbcButton.gridx;
     JButton runterButton = new JButton(L.m("Runter"));
-    runterButton.addActionListener(new ActionListener()
+    runterButton.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        if (noSelectedElementsOnVisibleTab()) return;
-        moveSelectedElementsDown();
-        if (noSelectedElementsOnVisibleTab()) showSelection();
-      }
+      if (noSelectedElementsOnVisibleTab()) return;
+      moveSelectedElementsDown();
+      if (noSelectedElementsOnVisibleTab()) showSelection();
     });
     buttonPanel.add(runterButton, gbcButton);
 
     ++gbcButton.gridx;
     JButton killButton = new JButton(L.m("Löschen"));
-    killButton.addActionListener(new ActionListener()
+    killButton.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        if (noSelectedElementsOnVisibleTab()) return;
-        deleteSelectedElements();
-      }
+      if (noSelectedElementsOnVisibleTab()) return;
+      deleteSelectedElements();
     });
     buttonPanel.add(killButton, gbcButton);
 
     ++gbcButton.gridx;
     JButton tabButton = new JButton(L.m("Neuer Tab"));
-    tabButton.addActionListener(new ActionListener()
+    tabButton.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        insertNewTab();
-      }
+      insertNewTab();
     });
     buttonPanel.add(tabButton, gbcButton);
 
     ++gbcButton.gridx;
     JButton newButton = new JButton(L.m("Neues Label"));
-    newButton.addActionListener(new ActionListener()
+    newButton.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        insertNewElement();
-      }
+      insertNewElement();
     });
     buttonPanel.add(newButton, gbcButton);
     

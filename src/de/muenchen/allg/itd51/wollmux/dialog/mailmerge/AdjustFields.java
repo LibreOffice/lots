@@ -93,12 +93,8 @@ class AdjustFields
     ReferencedFieldID[] fieldIDs =
       documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
         ds.getColumnNames()));
-    ActionListener submitActionListener = new ActionListener()
+    ActionListener submitActionListener = (ActionEvent e) ->
     {
-      @Override
-      @SuppressWarnings("unchecked")
-      public void actionPerformed(ActionEvent e)
-      {
         HashMap<String, FieldSubstitution> mapIdToSubstitution =
           (HashMap<String, FieldSubstitution>) e.getSource();
         for (Map.Entry<String, FieldSubstitution> ent : mapIdToSubstitution.entrySet())
@@ -125,7 +121,6 @@ class AdjustFields
           }
 
         }
-      }
     };
     showFieldMappingDialog(parent, fieldIDs, L.m("Felder anpassen"),
       L.m("Altes Feld"), L.m("Neue Belegung"), L.m("Felder anpassen"),
@@ -148,16 +143,11 @@ class AdjustFields
     ReferencedFieldID[] fieldIDs =
         documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
         ds.getColumnNames()));
-    ActionListener submitActionListener = new ActionListener()
+    ActionListener submitActionListener = (ActionEvent e) ->
     {
-      @Override
-      @SuppressWarnings("unchecked")
-      public void actionPerformed(ActionEvent e)
-      {
-        HashMap<String, FieldSubstitution> mapIdToSubstitution =
-          (HashMap<String, FieldSubstitution>) e.getSource();
-        ds.addColumns(mapIdToSubstitution);
-      }
+      HashMap<String, FieldSubstitution> mapIdToSubstitution =
+        (HashMap<String, FieldSubstitution>) e.getSource();
+      ds.addColumns(mapIdToSubstitution);
     };
     showFieldMappingDialog(parent, fieldIDs, L.m("Tabellenspalten ergänzen"),
       L.m("Spalte"), L.m("Vorbelegung"), L.m("Spalten ergänzen"),
@@ -233,8 +223,8 @@ class AdjustFields
           @Override
           public Iterator<Action> iterator()
           {
-            List<Action> actions = new Vector<Action>();
-            List<String> columnNames = new Vector<String>(fieldNames);
+            List<Action> actions = new ArrayList<>();
+            List<String> columnNames = new ArrayList<>(fieldNames);
 
             Collections.sort(columnNames);
 
@@ -343,24 +333,17 @@ class AdjustFields
 
     Box buttonBox = Box.createHorizontalBox();
     JButton button = new JButton(L.m("Abbrechen"));
-    button.addActionListener(new ActionListener()
+    button.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
         dialog.dispose();
-      }
     });
     buttonBox.add(button);
 
     buttonBox.add(Box.createHorizontalGlue());
 
     button = new JButton(labelSubmitButton);
-    button.addActionListener(new ActionListener()
+    button.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
         final HashMap<String, FieldSubstitution> result =
           new HashMap<String, FieldSubstitution>();
         for (Iterator<TextComponentTags> iter =
@@ -391,7 +374,6 @@ class AdjustFields
               "showSubstitutionDialogReturned"));
           }
         }.start();
-      }
     });
     buttonBox.add(button);
 
