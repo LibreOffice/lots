@@ -73,6 +73,7 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogAbsenderAuswaeh
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogPersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextbausteinEinfuegen;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnUpdateInputFields;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnZifferEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
 
@@ -1017,6 +1018,19 @@ public class WollMuxEventHandler
       TextDocumentController documentController)
   {
     handle(new OnExecutePrintFunction(documentController));
+  }
+
+  public void handleUpdateInputFields(TextDocumentController documentController,
+      DispatchHelper helper, boolean sync)
+  {
+    BasicEvent event = new OnUpdateInputFields(documentController, helper);
+    if (sync)
+    {
+      event.process();
+    } else
+    {
+      handle(event);
+    }
   }
 
   // Globale Helper-Methoden
