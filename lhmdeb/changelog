@@ -2,6 +2,12 @@ wollmux (18.0.4) walhalla; urgency=low
 
   * Version bump.
 
+ -- Daniel Sikeler <daniel.sikeler@muenchen.de>  Tue, 30 Oct 2018 08:27:41 +0100
+
+wollmux (18.0.4) walhalla; urgency=low
+
+  * Version bump.
+
  -- Daniel Sikeler <daniel.sikeler@muenchen.de>  Tue, 09 Oct 2018 09:34:57 +0200
 
 wollmux (18.0.3) walhalla; urgency=low
