@@ -50,6 +50,7 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogAbsenderAuswaeh
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogPersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextbausteinEinfuegen;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnUpdateInputFields;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnZifferEinfuegen;
 
 public class WollMuxEventListener
@@ -361,6 +362,12 @@ public class WollMuxEventListener
 
   @Subscribe
   public void onAbout(OnAbout event)
+  {
+    event.process();
+  }
+
+  @Subscribe
+  public void onUpdateInputFields(OnUpdateInputFields event)
   {
     event.process();
   }
