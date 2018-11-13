@@ -741,6 +741,7 @@ public class IfThenElseDialog extends TrafoDialog
 
   private class MyWindowListener extends WindowAdapter
   {
+    @Override
     public void windowClosing(WindowEvent e)
     {
       abort();

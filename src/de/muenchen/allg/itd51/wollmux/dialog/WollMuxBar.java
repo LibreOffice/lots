@@ -930,7 +930,7 @@ public class WollMuxBar
 
           char hotkey = uiElementDesc.getString("HOTKEY", "0").charAt(0);
 
-          String menuName = uiElementDesc.getString("MENU", "").toString();
+          String menuName = uiElementDesc.getString("MENU", "");
 
           AbstractButton button;
           if ("menu".equals(context))

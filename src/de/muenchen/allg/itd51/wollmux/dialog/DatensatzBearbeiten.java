@@ -1325,8 +1325,7 @@ public class DatensatzBearbeiten
             }
             else if ("switchWindow".equals(action))
             {
-              final String window = uiElementDesc.getString("WINDOW", "")
-                  .toString();
+              final String window = uiElementDesc.getString("WINDOW", "");
               button.addActionListener(new ActionListener()
               {
                 @Override
