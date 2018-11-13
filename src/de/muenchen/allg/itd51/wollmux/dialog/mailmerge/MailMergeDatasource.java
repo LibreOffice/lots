@@ -404,51 +404,35 @@ public class MailMergeDatasource
     button = createDatasourceSelectorCalcWindowButton();
     if (button != null)
     {
-      button.addActionListener(new ActionListener()
+      button.addActionListener((ActionEvent e) ->
       {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          datasourceSelector.dispose();
-          selectOpenCalcWindowAsDatasource(parent, callback);
-        }
+        datasourceSelector.dispose();
+        selectOpenCalcWindowAsDatasource(parent, callback);
       });
       vbox.add(DimAdjust.maxWidthUnlimited(button));
     }
 
     button = new JButton(L.m("Datei..."));
-    button.addActionListener(new ActionListener()
+    button.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        datasourceSelector.dispose();
-        selectFileAsDatasource(parent, callback);
-      }
+      datasourceSelector.dispose();
+      selectFileAsDatasource(parent, callback);
     });
     vbox.add(DimAdjust.maxWidthUnlimited(button));
 
     button = new JButton(L.m("Neue Calc-Tabelle..."));
-    button.addActionListener(new ActionListener()
+    button.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        datasourceSelector.dispose();
-        openAndselectNewCalcTableAsDatasource(parent, callback);
-      }
+      datasourceSelector.dispose();
+      openAndselectNewCalcTableAsDatasource(parent, callback);
     });
     vbox.add(DimAdjust.maxWidthUnlimited(button));
 
     button = new JButton(L.m("Datenbank..."));
-    button.addActionListener(new ActionListener()
+    button.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        datasourceSelector.dispose();
-        selectOOoDatasourceAsDatasource(parent, callback);
-      }
+      datasourceSelector.dispose();
+      selectOOoDatasourceAsDatasource(parent, callback);
     });
     vbox.add(DimAdjust.maxWidthUnlimited(button));
 
@@ -485,13 +469,9 @@ public class MailMergeDatasource
     vbox.add(label);
 
     button = new JButton(L.m("Abbrechen"));
-    button.addActionListener(new ActionListener()
+    button.addActionListener((ActionEvent e) ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        datasourceSelector.dispose();
-      }
+      datasourceSelector.dispose();
     });
     vbox.add(DimAdjust.maxWidthUnlimited(button));
 
@@ -814,8 +794,8 @@ public class MailMergeDatasource
       {
         XCellRangesQuery sheet =
           UNO.XCellRangesQuery(calcDoc.getSheets().getByName(tableName));
-        SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
-        SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
+        SortedSet<Integer> columnIndexes = new TreeSet<>();
+        SortedSet<Integer> rowIndexes = new TreeSet<>();
         getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
 
         if (!columnIndexes.isEmpty() && rowIndexes.size() > 1)
@@ -841,7 +821,7 @@ public class MailMergeDatasource
    */
   private List<String> getDbColumnNames(Datasource oooDatasource)
   {
-    List<String> columnNames = new ArrayList<String>();
+    List<String> columnNames = new ArrayList<>();
     columnNames.addAll(oooDatasource.getSchema());
     Collections.sort(columnNames);
     return columnNames;
@@ -863,8 +843,8 @@ public class MailMergeDatasource
     {
       XCellRangesQuery sheet =
         UNO.XCellRangesQuery(calcDoc.getSheets().getByName(tableName));
-      SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
-      SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
+      SortedSet<Integer> columnIndexes = new TreeSet<>();
+      SortedSet<Integer> rowIndexes = new TreeSet<>();
       getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
 
       if (!columnIndexes.isEmpty() && !rowIndexes.isEmpty())
@@ -962,7 +942,7 @@ public class MailMergeDatasource
     catch (Exception x)
     {
       LOGGER.error("", x);
-      return new ArrayList<String>();
+      return new ArrayList<>();
     }
   }
 
@@ -984,7 +964,7 @@ public class MailMergeDatasource
   private List<String> getValuesForDataset(XSpreadsheetDocument calcDoc,
       String tableName, int rowIndex)
   {
-    List<String> columnValues = new ArrayList<String>();
+    List<String> columnValues = new ArrayList<>();
     if (calcDoc == null) {
       return columnValues;
     }
@@ -992,8 +972,8 @@ public class MailMergeDatasource
     {
       XCellRangesQuery sheet =
         UNO.XCellRangesQuery(calcDoc.getSheets().getByName(tableName));
-      SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
-      SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
+      SortedSet<Integer> columnIndexes = new TreeSet<>();
+      SortedSet<Integer> rowIndexes = new TreeSet<>();
       getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
 
       if (!columnIndexes.isEmpty() && !rowIndexes.isEmpty())
@@ -1075,7 +1055,7 @@ public class MailMergeDatasource
   private QueryResultsWithSchema getData(XSpreadsheetDocument calcDoc,
       String tableName)
   {
-    Set<String> schema = new HashSet<String>();
+    Set<String> schema = new HashSet<>();
     QueryResults res = getVisibleCalcData(calcDoc, tableName, schema);
     return new QueryResultsWithSchema(res, schema);
   }
@@ -1123,16 +1103,12 @@ public class MailMergeDatasource
       final String name = names.get(i);
       JButton button;
       button = new JButton(name);
-      button.addActionListener(new ActionListener()
+      button.addActionListener((ActionEvent e) ->
       {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          dbSelector.dispose();
-          getOOoDatasource(name);
-          SwingUtilities.invokeLater(callback);
-          selectTable(parent);
-        }
+        dbSelector.dispose();
+        getOOoDatasource(name);
+        SwingUtilities.invokeLater(callback);
+        selectTable(parent);
       });
       vbox.add(DimAdjust.maxWidthUnlimited(button));
     }
@@ -1157,7 +1133,7 @@ public class MailMergeDatasource
    */
   private List<String> getRegisteredDatabaseNames()
   {
-    List<String> datasourceNames = new ArrayList<String>();
+    List<String> datasourceNames = new ArrayList<>();
     try
     {
       String[] datasourceNamesA = UNO.XNameAccess(UNO.dbContext).getElementNames();
@@ -1216,16 +1192,12 @@ public class MailMergeDatasource
       final XSpreadsheetDocument spread = win.docs.get(i);
       JButton button;
       button = new JButton(name);
-      button.addActionListener(new ActionListener()
+      button.addActionListener((ActionEvent e) ->
       {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          calcWinSelector.dispose();
-          getCalcDoc(spread);
-          SwingUtilities.invokeLater(callback);
-          selectTable(parent);
-        }
+        calcWinSelector.dispose();
+        getCalcDoc(spread);
+        SwingUtilities.invokeLater(callback);
+        selectTable(parent);
       });
       vbox.add(DimAdjust.maxWidthUnlimited(button));
     }
@@ -1365,14 +1337,10 @@ public class MailMergeDatasource
       final String name = iter.next();
       JButton button;
       button = new JButton(name);
-      button.addActionListener(new ActionListener()
+      button.addActionListener((ActionEvent e) ->
       {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          tableSelector.dispose();
-          setTable(name);
-        }
+        tableSelector.dispose();
+        setTable(name);
       });
       vbox.add(DimAdjust.maxWidthUnlimited(button));
     }
@@ -1544,8 +1512,8 @@ public class MailMergeDatasource
   private MailMergeDatasource.OpenCalcWindows getOpenCalcWindows()
   {
     MailMergeDatasource.OpenCalcWindows win = new OpenCalcWindows();
-    win.titles = new ArrayList<String>();
-    win.docs = new ArrayList<XSpreadsheetDocument>();
+    win.titles = new ArrayList<>();
+    win.docs = new ArrayList<>();
     try
     {
       XSpreadsheetDocument spread = null;
@@ -1803,9 +1771,9 @@ public class MailMergeDatasource
      * sichtbarer Zeile) auf Calc-Spaltennamen (z.B. "A") erstellen.
      */
     Map<String, String> mapColumnNameToCalcColumnName =
-      new HashMap<String, String>();
-    SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
-    SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
+      new HashMap<>();
+    SortedSet<Integer> columnIndexes = new TreeSet<>();
+    SortedSet<Integer> rowIndexes = new TreeSet<>();
     try
     {
       getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
@@ -1938,13 +1906,13 @@ public class MailMergeDatasource
         case SOURCE_DB:
           return getDbTableNames();
         default:
-          return new ArrayList<String>();
+          return new ArrayList<>();
       }
     }
     catch (Exception x)
     {
       LOGGER.error("", x);
-      return new ArrayList<String>();
+      return new ArrayList<>();
     }
   }
 
@@ -1959,7 +1927,7 @@ public class MailMergeDatasource
    */
   private List<String> getDbTableNames()
   {
-    List<String> tableNames = new ArrayList<String>();
+    List<String> tableNames = new ArrayList<>();
     if (sourceType == SOURCE_DB && oooDatasourceName != null)
     {
       try
@@ -1996,14 +1964,14 @@ public class MailMergeDatasource
    */
   private List<String> getRelevantTableNames(XSpreadsheetDocument calcDoc)
   {
-    List<String> nonEmptyTableNames = new ArrayList<String>();
+    List<String> nonEmptyTableNames = new ArrayList<>();
     if (calcDoc != null)
       try
       {
         XSpreadsheets sheets = calcDoc.getSheets();
         String[] tableNames = sheets.getElementNames();
-        SortedSet<Integer> columns = new TreeSet<Integer>();
-        SortedSet<Integer> rows = new TreeSet<Integer>();
+        SortedSet<Integer> columns = new TreeSet<>();
+        SortedSet<Integer> rows = new TreeSet<>();
         for (int i = 0; i < tableNames.length; ++i)
         {
           try
@@ -2047,28 +2015,14 @@ public class MailMergeDatasource
     public void notifyClosing(EventObject arg0)
     {
       LOGGER.debug(L.m("Calc-Datenquelle wurde unerwartet geschlossen"));
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          calcDoc = null;
-        }
-      });
+      javax.swing.SwingUtilities.invokeLater(() -> calcDoc = null);
     }
 
     @Override
     public void disposing(EventObject arg0)
     {
       LOGGER.debug(L.m("Calc-Datenquelle wurde disposed()"));
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          calcDoc = null;
-        }
-      });
+      javax.swing.SwingUtilities.invokeLater(() -> calcDoc = null);
     }
 
     @Override
@@ -2077,16 +2031,12 @@ public class MailMergeDatasource
       if ("OnSaveAsDone".equals(event.EventName)
         && UnoRuntime.areSame(UNO.XInterface(event.Source), calcDoc))
       {
-        javax.swing.SwingUtilities.invokeLater(new Runnable()
+        javax.swing.SwingUtilities.invokeLater(() ->
         {
-          @Override
-          public void run()
-          {
-            calcUrl = UNO.XModel(calcDoc).getURL();
-            LOGGER.debug(L.m("Speicherort der Tabelle hat sich geändert: \"%1\"",
-              calcUrl));
-            storeDatasourceSettings();
-          }
+          calcUrl = UNO.XModel(calcDoc).getURL();
+          LOGGER.debug(L.m("Speicherort der Tabelle hat sich geändert: \"%1\"",
+            calcUrl));
+          storeDatasourceSettings();
         });
       }
     }
@@ -2112,8 +2062,8 @@ public class MailMergeDatasource
           UNO.XCellRangesQuery(doc.getSheets().getByName(sheetName));
         if (sheet != null)
         {
-          SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
-          SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
+          SortedSet<Integer> columnIndexes = new TreeSet<>();
+          SortedSet<Integer> rowIndexes = new TreeSet<>();
           getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
 
           if (!columnIndexes.isEmpty() && !rowIndexes.isEmpty())
@@ -2129,7 +2079,7 @@ public class MailMergeDatasource
              */
             int ymin = rowIndexes.first().intValue();
             Map<String, Integer> mapColumnNameToIndex =
-              new HashMap<String, Integer>();
+              new HashMap<>();
             int idx = 0;
             Iterator<Integer> iter = columnIndexes.iterator();
             while (iter.hasNext())
@@ -2232,7 +2182,7 @@ public class MailMergeDatasource
      */
     private Map<String, Integer> mapColumnNameToIndex;
 
-    private List<Dataset> datasets = new ArrayList<Dataset>();
+    private List<Dataset> datasets = new ArrayList<>();
 
     @Override
     public int size()

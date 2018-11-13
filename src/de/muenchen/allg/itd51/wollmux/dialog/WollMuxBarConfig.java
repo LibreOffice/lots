@@ -517,14 +517,10 @@ public class WollMuxBarConfig
   public void showOptionsDialog(final JFrame parent,
       final ActionListener finishedAction)
   {
-    SwingUtilities.invokeLater(new Runnable()
+    SwingUtilities.invokeLater(() ->
     {
-      @Override
-      public void run()
-      {
-        if (!isDialogVisible()) {
-          createGUI(parent, finishedAction);
-        }
+      if (!isDialogVisible()) {
+        createGUI(parent, finishedAction);
       }
     });
 
@@ -626,23 +622,19 @@ public class WollMuxBarConfig
     mainPanel.add(new JLabel(L.m("Tray-Icon")), gbcLabel);
     mainPanel.add(inputTrayIcon, gbcCombo);
 
-    inputMode.addItemListener(new ItemListener()
+    inputMode.addItemListener((ItemEvent e) ->
     {
-      @Override
-      public void itemStateChanged(ItemEvent e)
+      // tray icon auswahl nur anbieten, falls nicht upAndAway
+      if (e.getStateChange() == ItemEvent.SELECTED
+          && "UpAndAway".equalsIgnoreCase(e.getItem().toString()))
       {
-        // tray icon auswahl nur anbieten, falls nicht upAndAway
-        if (e.getStateChange() == ItemEvent.SELECTED
-            && "UpAndAway".equalsIgnoreCase(e.getItem().toString()))
-        {
-          inputTrayIcon.setSelectedIndex(0);
-          inputTrayIcon.setEnabled(false);
-        }
-        if(e.getStateChange() == ItemEvent.DESELECTED
-           && "UpAndAway".equalsIgnoreCase(e.getItem().toString()))
-        {
-          inputTrayIcon.setEnabled(true);
-        }
+        inputTrayIcon.setSelectedIndex(0);
+        inputTrayIcon.setEnabled(false);
+      }
+      if(e.getStateChange() == ItemEvent.DESELECTED
+         && "UpAndAway".equalsIgnoreCase(e.getItem().toString()))
+      {
+        inputTrayIcon.setEnabled(true);
       }
     });
 

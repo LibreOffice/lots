@@ -46,9 +46,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.db.LDAPDatasource;
 
 /**
  * Diese Klasse liest alle zu lokalisierenden Strings des WollMux aus dem Source-Code
@@ -71,6 +75,9 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
  */
 public class LocalizationUpdater
 {
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(LocalizationUpdater.class);
+
   /**
    * Enthält den Pfad zur Konfigurationsdatei localization.conf aus Sicht des
    * Projekt-Hauptverzeichnisses.
@@ -124,7 +131,7 @@ public class LocalizationUpdater
    */
   private static void updateLocalizationConf()
   {
-    System.out.println(L.m("Aktualisiere die Datei localization.conf"));
+    LOGGER.debug(L.m("Aktualisiere die Datei localization.conf"));
 
     // localization.conf einlesen und knownOriginals sammeln.
     HashSet<String> knownOriginals = new HashSet<String>();
@@ -138,7 +145,7 @@ public class LocalizationUpdater
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      LOGGER.error("", e);
     }
     try
     {
@@ -190,7 +197,7 @@ public class LocalizationUpdater
       int progress = (int) ((1.0 * count / sources.size()) * 100);
       if (progress / 10 != lastProgress / 10)
       {
-        System.out.println(L.m("Fortschritt: %1 %", Integer.valueOf(progress)));
+        LOGGER.debug(L.m("Fortschritt: %1 %", Integer.valueOf(progress)));
         lastProgress = progress;
       }
     }
@@ -258,36 +265,39 @@ public class LocalizationUpdater
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      LOGGER.error("", e);
     }
     finally
     {
       try
       {
-        writer.close();
+        if (writer != null) {
+          writer.close();
+        }
       }
       catch (Exception x)
-      {}
+      {
+        //
+      }
     }
 
     // Statistik und Warnung ausgeben:
-    System.out.println("");
-    System.out.println(L.m("Neue original-Strings: %1", Integer.valueOf(countNew)));
-    System.out.println(L.m("Auskommentierte original-Strings: %1",
+    LOGGER.debug(L.m("Neue original-Strings: %1", Integer.valueOf(countNew)));
+    LOGGER.debug(L.m("Auskommentierte original-Strings: %1",
       Integer.valueOf(countRemoved)));
-    System.out.println(L.m("Gesamtzahl aktuelle original-Strings: %1",
+    LOGGER.debug(L.m("Gesamtzahl aktuelle original-Strings: %1",
       Integer.valueOf(currentOriginals.size())));
 
     for (Map.Entry<String, Integer> ent : countTranslations.entrySet())
     {
       String language = ent.getKey();
       int ct = ent.getValue().intValue();
-      System.out.println(L.m("Davon nicht übersetzt in Sprache %1: %2", language,
+      LOGGER.debug(L.m("Davon nicht übersetzt in Sprache %1: %2", language,
         Integer.valueOf(currentOriginals.size() - ct)));
     }
 
     if (removedTranslatedMessagesWarning)
-      System.err.println("\n"
+      LOGGER.debug("\n"
         + L.m("ACHTUNG: Bitte überprüfen Sie den Inhalt Ihrer Datei localization.conf,\nda bereits übersetzte aber nicht mehr benötigte Einträge auskommentiert\nwurden und mit der nächsten Aktualisierung endgültig entfernt werden."));
   }
 
@@ -317,7 +327,7 @@ public class LocalizationUpdater
     }
     catch (IOException e)
     {
-      e.printStackTrace();
+      LOGGER.error("", e);
     }
     return str.toString();
   }

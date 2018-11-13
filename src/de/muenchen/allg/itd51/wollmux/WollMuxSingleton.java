@@ -291,15 +291,21 @@ public class WollMuxSingleton
       }
     }
     catch (Exception x)
-    {}
+    {
+      //
+    }
     finally
     {
       try
       {
-        in.close();
+        if (in != null) {
+          in.close();
+        }
       }
       catch (Exception y)
-      {}
+      {
+        //
+      }
     }
 
     return L.m("Version: unbekannt");

@@ -255,38 +255,34 @@ public class WollMuxEventHandler
     private EventProcessor()
     {
       // starte den eventProcessorThread
-      eventProcessorThread = new Thread(new Runnable()
+      eventProcessorThread = new Thread(() ->
       {
-        @Override
-        public void run()
+        LOGGER.debug(L.m("Starte EventProcessor-Thread"));
+        try
         {
-          LOGGER.debug(L.m("Starte EventProcessor-Thread"));
-          try
+          while (true)
           {
-            while (true)
+            WollMuxEvent event;
+            synchronized (eventQueue)
             {
-              WollMuxEvent event;
-              synchronized (eventQueue)
-              {
-                while (eventQueue.isEmpty())
-                  eventQueue.wait();
-                event = eventQueue.remove(0);
-              }
+              while (eventQueue.isEmpty())
+                eventQueue.wait();
+              event = eventQueue.remove(0);
+            }
 
-              try {
-        	event.process();
-              } catch (Exception ex) {
-        	LOGGER.error("", ex);
-              }
+            try {
+              event.process();
+            } catch (Exception ex) {
+              LOGGER.error("", ex);
             }
           }
-          catch (InterruptedException e)
-          {
-            LOGGER.error(L.m("EventProcessor-Thread wurde unterbrochen:"));
-            LOGGER.error("", e);
-          }
-          LOGGER.debug(L.m("Beende EventProcessor-Thread"));
         }
+        catch (InterruptedException e)
+        {
+          LOGGER.error(L.m("EventProcessor-Thread wurde unterbrochen:"));
+          LOGGER.error("", e);
+        }
+        LOGGER.debug(L.m("Beende EventProcessor-Thread"));
       });
     }
 
@@ -962,14 +958,10 @@ public class WollMuxEventHandler
       }
       else
       {
-        ActionListener l = new ActionListener()
+        ActionListener l = (ActionEvent actionEvent) ->
         {
-          @Override
-          public void actionPerformed(ActionEvent actionEvent)
-          {
-            if (actionEvent.getSource() instanceof FormularMax4kController)
-              WollMuxEventHandler.handleFormularMax4000Returned(documentController);
-          }
+          if (actionEvent.getSource() instanceof FormularMax4kController)
+            WollMuxEventHandler.handleFormularMax4000Returned(documentController);
         };
 
         // Der Konstruktor von FormularMax erwartet hier nur die globalen
@@ -1536,7 +1528,7 @@ public class WollMuxEventHandler
       while (iter.hasNext())
       {
         ConfigThingy fragListConf = iter.next();
-        List<String> fragIds = new Vector<String>();
+        List<String> fragIds = new ArrayList<>();
         Iterator<ConfigThingy> fragIter = fragListConf.iterator();
         while (fragIter.hasNext())
         {
@@ -2187,14 +2179,7 @@ public class WollMuxEventHandler
         OpenExt openExt = new OpenExt(ext, WollMuxFiles.getWollmuxConf());
         openExt.setSource(UNO.XStorable(documentController.getModel().doc));
         openExt.storeIfNecessary();
-        openExt.launch(new OpenExt.ExceptionHandler()
-        {
-          @Override
-          public void handle(Exception x)
-          {
-            LOGGER.error("", x);
-          }
-        });
+        openExt.launch((Exception x) -> LOGGER.error("", x));
       }
       catch (Exception x)
       {
@@ -2258,14 +2243,7 @@ public class WollMuxEventHandler
         OpenExt openExt = new OpenExt(ext, WollMuxFiles.getWollmuxConf());
         openExt.setSource(UNO.XStorable(documentController.getModel().doc));
         openExt.storeIfNecessary();
-        openExt.launch(new OpenExt.ExceptionHandler()
-        {
-          @Override
-          public void handle(Exception x)
-          {
-            LOGGER.error("", x);
-          }
-        });
+        openExt.launch((Exception x) -> LOGGER.error("", x));
       }
       catch (Exception x)
       {
@@ -2873,7 +2851,7 @@ public class WollMuxEventHandler
     {
       DocumentManager.getDocumentManager().addDocumentEventListener(listener);
 
-      List<XComponent> processedDocuments = new Vector<XComponent>();
+      List<XComponent> processedDocuments = new ArrayList<>();
       DocumentManager.getDocumentManager().getProcessedDocuments(processedDocuments);
 
       for (XComponent compo : processedDocuments)
@@ -3817,14 +3795,7 @@ public class WollMuxEventHandler
       {
         // Werte über den FormController (den das FormModel kennt) setzen lassen
         // (damit sind auch automatisch alle Abhängigkeiten richtig aufgelöst)
-        formModel.setValue(id, value, new ActionListener()
-        {
-          @Override
-          public void actionPerformed(ActionEvent arg0)
-          {
-            handleSetFormValueFinished(listener);
-          }
-        });
+        formModel.setValue(id, value, (ActionEvent e) -> handleSetFormValueFinished(listener));
       }
       else
       {
@@ -4238,14 +4209,10 @@ public class WollMuxEventHandler
       }
       else
       {
-        mmn = new MailMergeNew(documentController, new ActionListener()
+        mmn = new MailMergeNew(documentController, (ActionEvent actionEvent) ->
         {
-          @Override
-          public void actionPerformed(ActionEvent actionEvent)
-          {
-            if (actionEvent.getSource() instanceof MailMergeNew)
-              WollMuxEventHandler.handleMailMergeNewReturned(documentController);
-          }
+          if (actionEvent.getSource() instanceof MailMergeNew)
+            WollMuxEventHandler.handleMailMergeNewReturned(documentController);
         });
         DocumentManager.getDocumentManager().setCurrentMailMergeNew(documentController.getModel().doc, mmn);
       }
@@ -4391,7 +4358,7 @@ public class WollMuxEventHandler
           File f = ensureFileHasODTSuffix(fc.getSelectedFile());
 
           // Sicherheitsabfage vor Überschreiben
-          if (f.exists())
+          if (f != null && f.exists())
           {
             save = false;
             int res =

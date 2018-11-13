@@ -17,18 +17,13 @@ import com.sun.star.uno.XComponentContext;
  */
 public class WollMuxSidebarPanel extends ComponentBase implements XUIElement
 {
-  private XComponentContext context;
-  private XWindow parentWindow;
   private String resourceUrl;
   private XToolPanel panel;
   
   public WollMuxSidebarPanel(XComponentContext context, XWindow parentWindow,
       String resourceUrl)
   {
-    this.context = context;
-    this.parentWindow = parentWindow;
     this.resourceUrl = resourceUrl;
-    
     panel = new WollMuxSidebarContent(context, parentWindow);
   }
 

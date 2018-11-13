@@ -1534,10 +1534,14 @@ public class LDAPDatasource implements Datasource
     {
       try
       {
-        ctx.close();
+        if (ctx != null) {
+          ctx.close();
+        }
       }
       catch (Exception e)
-      {}
+      {
+        LOGGER.error("", e);
+      }
     }
   }
 
@@ -1628,7 +1632,9 @@ public class LDAPDatasource implements Datasource
     {
       try
       {
-        ctx.close();
+        if (ctx != null) {
+          ctx.close();
+        }
       }
       catch (Exception e)
       {}
@@ -1846,7 +1852,7 @@ public class LDAPDatasource implements Datasource
   public static void printResults(String query, Set<String> schema,
       QueryResults results)
   {
-    System.out.println("Results for query \"" + query + "\":");
+    LOGGER.debug("Results for query \"" + query + "\":");
     Iterator<Dataset> resIter = results.iterator();
     while (resIter.hasNext())
     {
@@ -1866,11 +1872,11 @@ public class LDAPDatasource implements Datasource
             wert = "\"" + wert + "\"";
         }
         catch (ColumnNotFoundException x)
-        {}
-        System.out.print(spalte + "=" + wert + (spiter.hasNext() ? ", " : ""));
+        {
+          LOGGER.error("", x);
+        }
+        LOGGER.debug(String.format("%1 = %2%3", spalte, wert, spiter.hasNext() ? ", " : ""));
       }
-      System.out.println();
     }
-    System.out.println();
   }
 }

@@ -24,6 +24,7 @@ import com.sun.star.awt.XWindowPeer;
 import com.sun.star.awt.tree.XMutableTreeDataModel;
 import com.sun.star.beans.XMultiPropertySet;
 import com.sun.star.beans.XPropertySet;
+import com.sun.star.lang.NullPointerException;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
@@ -109,6 +110,10 @@ public class GuiFactory
   {
     XControl buttonCtrl =
       createButton(xMCF, context, toolkit, windowPeer, label, listener, size);
+    
+    if(buttonCtrl == null)
+      throw new Exception();
+    
     XControlModel model = buttonCtrl.getModel();
     XPropertySet props = UnoRuntime.queryInterface(XPropertySet.class, model);
     props.setPropertyValue("FocusOnClick", false);
@@ -197,6 +202,9 @@ public class GuiFactory
     
     try
     {
+      if (ctrl == null)
+        throw new NullPointerException();
+      
       XControlModel model = ctrl.getModel();
 //        UnoRuntime.queryInterface(XControlModel.class,
 //          xMCF.createInstanceWithContext("com.sun.star.awt.UnoControlComboBoxModel", context));
