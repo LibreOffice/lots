@@ -59,8 +59,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -681,13 +679,7 @@ public class FormController implements UIElementEventHandler
            */
           if (mapIdToUIElement.containsKey(uiElement.getId()))
           {
-            String label = L.m("nicht vorhanden");
-            try
-            {
-              label = uiConf.get("LABEL").toString();
-            } catch (Exception x)
-            {
-            }
+            String label = uiConf.getString("LABEL", L.m("nicht vorhanden"));
             LOGGER.error(
                 L.m("ID \"%1\" mehrfach vergeben bei Element mit Label \"%2\"",
                     uiElement.getId(), label));
@@ -1880,24 +1872,4 @@ public class FormController implements UIElementEventHandler
       return uiElement.getBoolean();
     }
   }
-
-  public static void main(String[] args) throws Exception
-  {
-    File curDir = new File(System.getProperty("user.dir"));
-    URL context = curDir.toURI().toURL();
-    URL merge1URL = new URL(context, "testdata/merge_form_1.conf");
-    URL merge2URL = new URL(context, "testdata/merge_form_2.conf");
-    URL anpassungURL = new URL(context, "testdata/buttonanpassung.conf");
-    ConfigThingy merge1Conf = new ConfigThingy("", merge1URL).get("Formular");
-    ConfigThingy merge2Conf = new ConfigThingy("", merge2URL).get("Formular");
-    ConfigThingy buttonanpassung = new ConfigThingy("Buttonanpassung",
-        anpassungURL);
-    List<ConfigThingy> formDesc = new ArrayList<ConfigThingy>();
-    formDesc.add(merge1Conf);
-    formDesc.add(merge2Conf);
-    ConfigThingy merged = TextDocumentModel.mergeFormDescriptors(formDesc,
-        buttonanpassung, "Multi-Form");
-    System.out.println(merged.stringRepresentation());
-  }
-
 }

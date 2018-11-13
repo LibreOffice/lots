@@ -1167,15 +1167,7 @@ public class MenuManager
           return; // Wir können nur ganze Menüs wiederherstellen
         }
 
-        String menuId = null;
-        try
-        {
-          menuId = node.conf.get("MENU").toString();
-        }
-        catch (NodeNotFoundException x)
-        {
-          // Unmöglich, da der initiale Parse-Durchgang schon getestet hat.
-        }
+        String menuId = node.conf.getString("MENU", null);
 
         ActiveConfigSection menuSection;
         try
@@ -1194,7 +1186,9 @@ public class MenuManager
         parseMenuTreeRecursive(node, node.conf, defaultConf, noUserConf,
           new HashSet<String>());
         for (TreeModelListener listen : listeners)
+        {
           listen.treeStructureChanged((new TreeModelEvent(this, selection)));
+        }
       }
     };
 
@@ -2463,13 +2457,10 @@ public class MenuManager
 
     // Use type as default label (think of "glue" and "separator")
     String label = "--- " + type + " ---";
-    try
+    if (!"separator".equals(type) && !"glue".equals(type))
     {
-      if (!"separator".equals(type) && !"glue".equals(type))
-        label = conf.get("LABEL").toString();
+      label = conf.getString("LABEL", label);
     }
-    catch (Exception x)
-    {}
     return label;
   }
 

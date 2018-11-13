@@ -49,8 +49,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -72,7 +70,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +80,6 @@ import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnTransformer;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -590,24 +586,19 @@ public class DatasourceSearchDialog implements Dialog
       int y = 0;
       int x = 0;
 
-      Iterator<ConfigThingy> parentiter = conf.query(key).iterator();
-      while (parentiter.hasNext())
+      for (ConfigThingy parent : conf.query(key))
       {
-        Iterator<ConfigThingy> iter = parentiter.next().iterator();
-        while (iter.hasNext())
+        for (ConfigThingy uiConf : parent)
         {
-          ConfigThingy uiConf = iter.next();
           UIElement uiElement;
           try
           {
             uiElement = uiElementFactory.createUIElement(context, uiConf);
-            try
+            String dbSpalte = uiConf.getString("DB_SPALTE", null);
+            if (dbSpalte != null)
             {
-              String dbSpalte = uiConf.get("DB_SPALTE").toString();
               mapDB_SPALTEtoUIElement.put(dbSpalte, uiElement);
             }
-            catch (Exception e)
-            {}
           }
           catch (ConfigurationErrorException e)
           {
@@ -623,14 +614,12 @@ public class DatasourceSearchDialog implements Dialog
           {
             autosearch = false;
             query = uiElement;
-            try
+            String autofill = uiConf.getString("AUTOFILL", null);
+            if (autofill != null)
             {
-              String autofill = uiConf.get("AUTOFILL").toString();
               query.setString(autofill);
               autosearch = true;
             }
-            catch (Exception ex)
-            {}
           }
 
           if ("suchergebnis".equals(id))
@@ -638,12 +627,7 @@ public class DatasourceSearchDialog implements Dialog
             try
             {
               resultsList = (Listbox) uiElement;
-              try
-              {
-                displayTemplate = uiConf.get("DISPLAY").toString();
-              }
-              catch (Exception e)
-              {}
+              displayTemplate = uiConf.getString("DISPLAY", L.m("<Datensatz>"));
             }
             catch (ClassCastException e)
             {
@@ -661,9 +645,13 @@ public class DatasourceSearchDialog implements Dialog
             labelmod = 2;
             int labelX = 0;
             if (uiElement.getLabelType().equals(UIElement.LABEL_LEFT))
+            {
               compoX = 1;
+            }
             else
+            {
               labelX = 1;
+            }
 
             Component label = uiElement.getLabel();
             if (label != null)
@@ -682,7 +670,6 @@ public class DatasourceSearchDialog implements Dialog
           x += stepx * labelmod;
           y += stepy;
           compo.add(uiElement.getComponent(), gbc);
-
         }
       }
     }
@@ -1309,24 +1296,4 @@ public class DatasourceSearchDialog implements Dialog
       abort();
     }
   }
-
-  /**
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public static void main(String[] args) throws Exception
-  {
-    WollMuxFiles.setupWollMuxDir();
-    LogConfig.init(System.err, Level.DEBUG);
-    String confFile = "testdata/formulartest.conf";
-    ConfigThingy conf =
-      new ConfigThingy("", new URL(
-        new File(System.getProperty("user.dir")).toURI().toURL(), confFile));
-    Dialog dialog =
-      DatasourceSearchDialog.create(conf.get("Funktionsdialoge").get(
-        "Empfaengerauswahl"), DatasourceJoiner.getDatasourceJoiner());
-    Map<Object, Object> myContext = new HashMap<>();
-    dialog.instanceFor(myContext).show(null, new FunctionLibrary(),
-      new DialogLibrary());
-  }
-
 }

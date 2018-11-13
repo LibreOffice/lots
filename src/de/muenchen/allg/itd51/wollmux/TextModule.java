@@ -307,10 +307,10 @@ public class TextModule
         continue;
       }
 
-      Iterator<ConfigThingy> matchesIterator = null;
+      ConfigThingy matches = null;
       try
       {
-        matchesIterator = mappingConf.get("MATCH").iterator();
+        matches = mappingConf.get("MATCH");
       }
       catch (NodeNotFoundException e)
       {
@@ -318,9 +318,9 @@ public class TextModule
         continue;
       }
 
-      while (matchesIterator.hasNext())
+      for (ConfigThingy it : matches)
       {
-        String match = matchesIterator.next().toString();
+        String match = it.toString();
 
         // if (identifierWithArgs.matches(match)) {
         if (first.matches(match))

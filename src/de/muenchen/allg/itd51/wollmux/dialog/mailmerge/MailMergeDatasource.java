@@ -598,13 +598,7 @@ public class MailMergeDatasource
     catch (NodeNotFoundException e)
     {}
 
-    String type = null;
-    try
-    {
-      type = datenquelle.get("TYPE").toString();
-    }
-    catch (NodeNotFoundException e)
-    {}
+    String type = datenquelle.getString("TYPE", null);
 
     if ("calc".equalsIgnoreCase(type))
     {

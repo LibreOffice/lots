@@ -52,8 +52,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -70,9 +68,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.UIManager;
 import javax.swing.WindowConstants;
-import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -88,7 +84,6 @@ import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
 
 /**
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
@@ -311,20 +306,9 @@ public class AbsenderAuswaehlen
 
     palJList = new JList<Object>(new DefaultListModel<Object>());
 
-    String title = L.m("TITLE fehlt für Fenster AbsenderAuswaehlen/Auswaehlen");
-    try
-    {
-      title = L.m(fensterDesc.get("TITLE").toString());
-    }
-    catch (Exception x)
-    {}
-
-    try
-    {
-      closeAction = getAction(fensterDesc.get("CLOSEACTION").toString());
-    }
-    catch (Exception x)
-    {}
+    String title = L.m(fensterDesc.getString("TITLE",
+        "TITLE fehlt für Fenster AbsenderAuswaehlen/Auswaehlen"));
+    closeAction = getAction(fensterDesc.getString("CLOSEACTION", ""));
 
     // Create and set up the window.
     myFrame = new JFrame(title);
@@ -415,160 +399,126 @@ public class AbsenderAuswaehlen
         x += stepx;
 
         ConfigThingy uiElementDesc = iter.next();
-        try
-        {
-          /*
-           * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN, DASS DER
-           * ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET() UND EINER EVTL. DARAUS
-           * RESULTIERENDEN NULLPOINTEREXCEPTION NOCH KONSISTENT IST!
-           */
+        String id = uiElementDesc.getString("ID", "");
+        String type = uiElementDesc.getString("TYPE", "");
 
-          // boolean readonly = false;
-          String id = "";
+        if ("label".equals(type))
+        {
+          JLabel uiElement = new JLabel();
+          gbcLabel.gridx = x;
+          gbcLabel.gridy = y;
+          compo.add(uiElement, gbcLabel);
+          uiElement.setText(L.m(uiElementDesc.getString("LABEL", "")));
+        }
+        else if ("glue".equals(type))
+        {
+          Box uiElement = Box.createHorizontalBox();
           try
           {
-            id = uiElementDesc.get("ID").toString();
+            int minsize = Integer
+                .parseInt(uiElementDesc.getString("MINSIZE", "0"));
+            uiElement.add(Box.createHorizontalStrut(minsize));
           }
-          catch (NodeNotFoundException e)
-          {}
-          // try{ if (uiElementDesc.get("READONLY").toString().equals("true"))
-          // readonly = true; }catch(NodeNotFoundException e){}
-          String type = uiElementDesc.get("TYPE").toString();
+          catch (NumberFormatException e)
+          {
+          }
+          uiElement.add(Box.createHorizontalGlue());
 
-          if ("label".equals(type))
+          gbcGlue.gridx = x;
+          gbcGlue.gridy = y;
+          compo.add(uiElement, gbcGlue);
+        }
+        else if ("listbox".equals(type))
+        {
+          int lines = 10;
+          try
           {
-            JLabel uiElement = new JLabel();
-            gbcLabel.gridx = x;
-            gbcLabel.gridy = y;
-            compo.add(uiElement, gbcLabel);
-            uiElement.setText(L.m(uiElementDesc.get("LABEL").toString()));
+            lines = Integer.parseInt(uiElementDesc.getString("LINES", "10"));
           }
-          else if ("glue".equals(type))
+          catch (NumberFormatException e)
           {
-            Box uiElement = Box.createHorizontalBox();
+          }
+
+          JList<Object> list;
+          if ("pal".equals(id))
+          {
+            list = palJList;
             try
             {
-              int minsize =
-                Integer.parseInt(uiElementDesc.get("MINSIZE").toString());
-              uiElement.add(Box.createHorizontalStrut(minsize));
+              palDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
             }
-            catch (Exception e)
-            {}
-            uiElement.add(Box.createHorizontalGlue());
-
-            gbcGlue.gridx = x;
-            gbcGlue.gridy = y;
-            compo.add(uiElement, gbcGlue);
-          }
-          else if ("listbox".equals(type))
-          {
-            int lines = 10;
-            try
+            catch (NodeNotFoundException e)
             {
-              lines = Integer.parseInt(uiElementDesc.get("LINES").toString());
-            }
-            catch (Exception e)
-            {}
-
-            JList<Object> list;
-            if ("pal".equals(id))
-            {
-              list = palJList;
-              try
-              {
-                palDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
-              }
-              catch (NodeNotFoundException e)
-              {
-                LOGGER.info(L.m(
+              LOGGER.info(L.m(
                   "Kein DISPLAY-Attribut für die listbox mit ID \"pal\" im AbsenderAuswaehlen-Dialog angegeben! Verwende Fallback: %1",
                   DEFAULT_DISPLAYTEMPLATE));
-                // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
-                // sollten an dieser Stelle einen echten Error loggen bzw. eine
-                // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
-                // dies allerdings nicht, da das DISPLAY-Attribut erst mit
-                // WollMux 6.4.0 eingeführt wurde und wir abwärtskompatibel zu alten
-                // WollMux-Konfigurationen bleiben müssen und Benutzer alter
-                // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
-                // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
-                // sollte nach ausreichend Zeit genauso wie DEFAULT_DISPLAYTEMPLATE
-                // entfernt werden (bzw. wie oben gesagt überarbeitet).
-              }
+              // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
+              // sollten an dieser Stelle einen echten Error loggen bzw. eine
+              // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
+              // dies allerdings nicht, da das DISPLAY-Attribut erst mit
+              // WollMux 6.4.0 eingeführt wurde und wir abwärtskompatibel zu alten
+              // WollMux-Konfigurationen bleiben müssen und Benutzer alter
+              // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
+              // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
+              // sollte nach ausreichend Zeit genauso wie DEFAULT_DISPLAYTEMPLATE
+              // entfernt werden (bzw. wie oben gesagt überarbeitet).
             }
-            else
-            {
-              list = new JList<Object>(new DefaultListModel<Object>());
-            }
-
-            list.setVisibleRowCount(lines);
-            list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-            list.setLayoutOrientation(JList.VERTICAL);
-            list.setPrototypeCellValue("Al-chman hemnal ulhillim el-WollMux(W-OLL-MUX-5.1)");
-
-            list.addListSelectionListener(myListSelectionListener);
-
-            String action = "";
-            try
-            {
-              action = uiElementDesc.get("ACTION").toString();
-            }
-            catch (NodeNotFoundException e)
-            {}
-
-            ActionListener actionL = getAction(action);
-            if (actionL != null)
-              list.addMouseListener(new MyActionMouseListener(list, actionL));
-
-            JScrollPane scrollPane = new JScrollPane(list);
-            scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-            gbcListBox.gridx = x;
-            gbcListBox.gridy = y;
-            compo.add(scrollPane, gbcListBox);
-          }
-          else if (type.equals("button"))
-          {
-            String action = "";
-            try
-            {
-              action = uiElementDesc.get("ACTION").toString();
-            }
-            catch (NodeNotFoundException e)
-            {}
-
-            String label = L.m(uiElementDesc.get("LABEL").toString());
-
-            char hotkey = 0;
-            try
-            {
-              hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
-            }
-            catch (Exception e)
-            {}
-
-            JButton button = new JButton(label);
-            button.setMnemonic(hotkey);
-
-            gbcButton.gridx = x;
-            gbcButton.gridy = y;
-            compo.add(button, gbcButton);
-
-            ActionListener actionL = getAction(action);
-            if (actionL != null) {
-              button.addActionListener(actionL);
-            }
-
           }
           else
           {
-            LOGGER.error(L.m("Ununterstützter TYPE für User Interface Element: ",
-              type));
+            list = new JList<Object>(new DefaultListModel<Object>());
+          }
+
+          list.setVisibleRowCount(lines);
+          list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+          list.setLayoutOrientation(JList.VERTICAL);
+          list.setPrototypeCellValue(
+              "Al-chman hemnal ulhillim el-WollMux(W-OLL-MUX-5.1)");
+
+          list.addListSelectionListener(myListSelectionListener);
+
+          String action = uiElementDesc.getString("ACTION", "");
+
+          ActionListener actionL = getAction(action);
+          if (actionL != null)
+          {
+            list.addMouseListener(new MyActionMouseListener(list, actionL));
+          }
+
+          JScrollPane scrollPane = new JScrollPane(list);
+          scrollPane.setHorizontalScrollBarPolicy(
+              ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+          scrollPane.setVerticalScrollBarPolicy(
+              ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+          gbcListBox.gridx = x;
+          gbcListBox.gridy = y;
+          compo.add(scrollPane, gbcListBox);
+        }
+        else if (type.equals("button"))
+        {
+          String action = uiElementDesc.getString("ACTION", "");
+          String label = L.m(uiElementDesc.getString("LABEL", ""));
+
+          char hotkey = uiElementDesc.getString("HOTKEY", "0").charAt(0);
+
+          JButton button = new JButton(label);
+          button.setMnemonic(hotkey);
+
+          gbcButton.gridx = x;
+          gbcButton.gridy = y;
+          compo.add(button, gbcButton);
+
+          ActionListener actionL = getAction(action);
+          if (actionL != null)
+          {
+            button.addActionListener(actionL);
           }
         }
-        catch (NodeNotFoundException e)
+        else
         {
-          LOGGER.error("", e);
+          LOGGER.error(L.m("Ununterstützter TYPE für User Interface Element: ",
+              type));
         }
       }
     }
@@ -860,91 +810,9 @@ public class AbsenderAuswaehlen
     // GUI im Event-Dispatching Thread zerstören wg. Thread-Safety.
     try
     {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          abort();
-        }
-      });
+      javax.swing.SwingUtilities.invokeLater(() -> abort());
     }
     catch (Exception x)
     {/* Hope for the best */}
   }
-
-  /**
-   * Sorgt für das dauernde Neustarten des Dialogs.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private static class RunTest implements ActionListener
-  {
-    private DatasourceJoiner dj;
-
-    private ConfigThingy conf;
-
-    private ConfigThingy verConf;
-
-    private ConfigThingy abConf;
-
-    public RunTest(ConfigThingy conf, ConfigThingy verConf, ConfigThingy abConf,
-        DatasourceJoiner dj)
-    {
-      this.dj = dj;
-      this.conf = conf;
-      this.abConf = abConf;
-      this.verConf = verConf;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      try
-      {
-        try
-        {
-          if ("abort".equals(e.getActionCommand())) {
-            System.exit(0);
-          }
-        }
-        catch (Exception x)
-        {}
-        new AbsenderAuswaehlen(conf, verConf, abConf, dj, this);
-      }
-      catch (ConfigurationErrorException x)
-      {
-        LOGGER.error("", x);
-      }
-    }
-  }
-
-  public static void main(String[] args) throws Exception
-  {
-    LookAndFeelInfo[] lf = UIManager.getInstalledLookAndFeels();
-    for (int i = 0; i < lf.length; ++i)
-      System.out.println(lf[i].getClassName());
-    System.out.println("Default L&F: " + UIManager.getSystemLookAndFeelClassName());
-    String confFile = "testdata/WhoAmI.conf";
-    String verConfFile = "testdata/PAL.conf";
-    String abConfFile = "testdata/AbsenderdatenBearbeiten.conf";
-    ConfigThingy conf =
-      new ConfigThingy("", new URL(
-        new File(System.getProperty("user.dir")).toURI().toURL(), confFile));
-    ConfigThingy verConf =
-      new ConfigThingy("", new URL(
-        new File(System.getProperty("user.dir")).toURI().toURL(), verConfFile));
-    ConfigThingy abConf =
-      new ConfigThingy("", new URL(
-        new File(System.getProperty("user.dir")).toURI().toURL(), abConfFile));
-    TestDatasourceJoiner dj = new TestDatasourceJoiner();
-    RunTest test =
-      new RunTest(conf.get("AbsenderAuswaehlen"),
-        verConf.get("PersoenlicheAbsenderliste"),
-        abConf.get("AbsenderdatenBearbeiten"), dj);
-    test.actionPerformed(null);
-    Thread.sleep(600000);
-    System.exit(0);
-  }
-
 }

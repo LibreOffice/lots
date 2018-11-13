@@ -2323,15 +2323,7 @@ public class TextDocumentController
         continue;
       }
 
-      String newFragId = "";
-      try
-      {
-        newFragId = conf.get("NEW_FRAG_ID").toString();
-      }
-      catch (NodeNotFoundException x)
-      {
-        // NEW_FRAG_ID ist optional
-      }
+      String newFragId = conf.getString("NEW_FRAG_ID", "");
 
       try
       {

@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -153,14 +154,10 @@ public class OpenExt
     this.ext = ext;
 
     ConfigThingy conf = wollmuxConf.query("ExterneAnwendungen");
-    Iterator<ConfigThingy> parentIter = conf.iterator();
-    while (parentIter.hasNext())
+    for (ConfigThingy parentConf : conf)
     {
-      ConfigThingy parentConf = parentIter.next();
-      Iterator<ConfigThingy> iter = parentConf.iterator();
-      while (iter.hasNext())
+      for (ConfigThingy appConf : parentConf)
       {
-        ConfigThingy appConf = iter.next();
         ConfigThingy extConf;
         boolean found = false;
         extConf = appConf.query("EXT");
@@ -171,21 +168,28 @@ public class OpenExt
         }
 
         for (ConfigThingy oneExtConf : extConf)
+        {
           for (ConfigThingy singleExt : oneExtConf)
-            if (ext.equals(singleExt.toString())) found = true;
+          {
+            if (ext.equals(singleExt.toString()))
+            {
+              found = true;
+              break;
+            }
+          }
+        }
 
         if (!found) continue;
 
-        Vector<String> commands = new Vector<String>();
+        List<String> commands = new ArrayList<String>();
         try
         {
           ConfigThingy programConf = appConf.get("PROGRAM");
           programConf.getFirstChild(); // Testen, ob mindestens ein Kind vorhanden
           // ist, ansonsten Exception
-          Iterator<ConfigThingy> progiter = programConf.iterator();
-          while (progiter.hasNext())
+          for (ConfigThingy p : programConf)
           {
-            String prog = progiter.next().toString();
+            String prog = p.toString();
             commands.add(prog);
           }
         }
@@ -196,24 +200,9 @@ public class OpenExt
         }
 
         programs = commands;
-        try
-        {
-          download = appConf.get("DOWNLOAD").toString().equalsIgnoreCase("true");
-        }
-        catch (Exception x)
-        {}
-        try
-        {
-          pipe = appConf.get("PIPE").toString().equalsIgnoreCase("true");
-        }
-        catch (Exception x)
-        {}
-        try
-        {
-          filter = appConf.get("FILTER").toString();
-        }
-        catch (Exception x)
-        {}
+        download = appConf.getString("DOWNLOAD", "").equalsIgnoreCase("true");
+        pipe = appConf.getString("PIPE", "").equalsIgnoreCase("true");
+        filter = appConf.getString("FILTER", null).toString();
       }
     }
   }

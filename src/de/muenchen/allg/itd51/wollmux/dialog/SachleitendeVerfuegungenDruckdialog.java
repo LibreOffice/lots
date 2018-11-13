@@ -70,11 +70,10 @@ import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.Verfuegungspunkt;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 
@@ -423,20 +422,10 @@ public class SachleitendeVerfuegungenDruckdialog
       printElementButtons[i] = new JButton();
     }
 
-    String title = L.m("TITLE fehlt für Fenster Drucken");
-    try
-    {
-      title = fensterDesc.get("TITLE").toString();
-    }
-    catch (Exception x)
-    {}
+    String title = fensterDesc.getString("TITLE",
+        L.m("TITLE fehlt für Fenster Drucken"));
 
-    try
-    {
-      closeAction = getAction(fensterDesc.get("CLOSEACTION").toString());
-    }
-    catch (Exception x)
-    {}
+    closeAction = getAction(fensterDesc.getString("CLOSEACTION", "abort"));
 
     // Create and set up the window.
     myFrame = new JFrame(title);
@@ -558,215 +547,176 @@ public class SachleitendeVerfuegungenDruckdialog
     int y = -stepy + yOffset;
     int x = -stepx;
 
-    Iterator<ConfigThingy> piter = felderParent.iterator();
-    while (piter.hasNext())
+    for (ConfigThingy it : felderParent)
     {
-      Iterator<ConfigThingy> iter = piter.next().iterator();
-      while (iter.hasNext())
+        for (ConfigThingy uiElementDesc : it)
       {
         y += stepy;
         x += stepx;
 
-        ConfigThingy uiElementDesc = iter.next();
-        try
+        String id = uiElementDesc.getString("ID", "");
+        String type = uiElementDesc.getString("TYPE", "");
+
+        if ("label".equals(type))
         {
-          /*
-           * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN, DASS DER
-           * ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET() UND EINER EVTL. DARAUS
-           * RESULTIERENDEN NULLPOINTEREXCEPTION NOCH KONSISTENT IST!
-           */
-
-          // boolean readonly = false;
-          String id = "";
-          try
+          JLabel uiElement = new JLabel();
+          gbcLabel.gridx = x;
+          gbcLabel.gridy = y;
+          String labelText = uiElementDesc.getString("LABEL", "");
+          uiElement.setText(labelText);
+          // FIXME: Hier werden alle Labels mit dem Text 'Seiten' rausgefiltert,
+          // damit auch bei einer nicht aktualisierten Standard-Config ein
+          // sinnvoller Dialog angezeigt wird. Früher konnte über diesen Dialog
+          // noch der Seitenbereich eingestellt werden konnte. Passend dazu
+          // existierte in alten Standard-Configs noch die Spaltenüberschrift
+          // "Seiten". Seit der Existent der Druckfunktion 'Gesamtdokument
+          // erstellen' gibt es jedoch keinen Sinn mehr, den Seitenbereich über
+          // diesen Dialog zu steuern. Die Möglichkeit zur Einstellung ist daher
+          // aus dem Dialog entfernt worden, die notwendigen Änderungen der
+          // Standardkonfig machen aber die Referate, worauf wir keine Einfluss
+          // haben. AUFGABE: ab März 2009 (ein Jahr nach der Änderung) sollten alle
+          // Referate die entsprechend angepasste Standard-Config installiert
+          // haben. Dann muss dieses 'if' wieder aus dem Code rausfliegen!!!
+          if (!"Seiten".equals(labelText))
           {
-            id = uiElementDesc.get("ID").toString();
+            compo.add(uiElement, gbcLabel);
           }
-          catch (NodeNotFoundException e)
-          {}
-          // try{ if (uiElementDesc.get("READONLY").toString().equals("true"))
-          // readonly = true; }catch(NodeNotFoundException e){}
-          String type = uiElementDesc.get("TYPE").toString();
+        }
+        else if ("glue".equals(type))
+        {
+          Box uiElement = Box.createHorizontalBox();
+          int minsize = Integer
+              .parseInt(uiElementDesc.getString("MINSIZE", "0"));
+          uiElement.add(Box.createHorizontalStrut(minsize));
+          uiElement.add(Box.createHorizontalGlue());
 
-          if ("label".equals(type))
-          {
-            JLabel uiElement = new JLabel();
-            gbcLabel.gridx = x;
-            gbcLabel.gridy = y;
-            String labelText = uiElementDesc.get("LABEL").toString();
-            uiElement.setText(labelText);
-            // FIXME: Hier werden alle Labels mit dem Text 'Seiten' rausgefiltert,
-            // damit auch bei einer nicht aktualisierten Standard-Config ein
-            // sinnvoller Dialog angezeigt wird. Früher konnte über diesen Dialog
-            // noch der Seitenbereich eingestellt werden konnte. Passend dazu
-            // existierte in alten Standard-Configs noch die Spaltenüberschrift
-            // "Seiten". Seit der Existent der Druckfunktion 'Gesamtdokument
-            // erstellen' gibt es jedoch keinen Sinn mehr, den Seitenbereich über
-            // diesen Dialog zu steuern. Die Möglichkeit zur Einstellung ist daher
-            // aus dem Dialog entfernt worden, die notwendigen Änderungen der
-            // Standardkonfig machen aber die Referate, worauf wir keine Einfluss
-            // haben. AUFGABE: ab März 2009 (ein Jahr nach der Änderung) sollten alle
-            // Referate die entsprechend angepasste Standard-Config installiert
-            // haben. Dann muss dieses 'if' wieder aus dem Code rausfliegen!!!
-            if (!"Seiten".equals(labelText)) {
-              compo.add(uiElement, gbcLabel);
-            }
-          }
-
-          else if ("glue".equals(type))
-          {
-            Box uiElement = Box.createHorizontalBox();
-            try
-            {
-              int minsize =
-                Integer.parseInt(uiElementDesc.get("MINSIZE").toString());
-              uiElement.add(Box.createHorizontalStrut(minsize));
-            }
-            catch (Exception e)
-            {}
-            uiElement.add(Box.createHorizontalGlue());
-
-            gbcGlue.gridx = x;
-            gbcGlue.gridy = y;
-            compo.add(uiElement, gbcGlue);
-          }
-
-          else if ("spinner".equals(type))
-          {
-            JSpinner spinner;
-            if ("elementCount".equals(id)
+          gbcGlue.gridx = x;
+          gbcGlue.gridy = y;
+          compo.add(uiElement, gbcGlue);
+        }
+        else if ("spinner".equals(type))
+        {
+          JSpinner spinner;
+          if ("elementCount".equals(id)
               && verfPunktNr < elementCountSpinner.length)
-              spinner = elementCountSpinner[verfPunktNr];
-            else
-              spinner = new JSpinner(new SpinnerNumberModel(0, 0, 0, 0));
-
-            spinner.addChangeListener(spinnerChangeListener);
-
-            gbcSpinner.gridx = x;
-            gbcSpinner.gridy = y;
-            compo.add(spinner, gbcSpinner);
-          }
-
-          else if ("combobox".equals(type))
           {
-            JComboBox<String> comboBox;
-            if ("element".equals(id) && verfPunktNr < elementComboBoxes.size())
-            {
-              comboBox = elementComboBoxes.get(verfPunktNr);
-              comboBox.addItemListener(cboxItemListener);
-            }
-
-            // Behandlung des nicht mehr unterstützten Elementtyps "pageRange"
-            else if (id.equals("pageRange"))
-            {
-              comboBox = null;
-            }
-
-            else
-              comboBox = new JComboBox<String>();
-
-            // comboBox.addListSelectionListener(myListSelectionListener);
-
-            gbcComboBox.gridx = x;
-            gbcComboBox.gridy = y;
-            if (comboBox != null) {
-              compo.add(comboBox, gbcComboBox);
-            }
-          }
-
-          else if ("checkbox".equals(type))
-          {
-            JCheckBox checkBox;
-            if ("printOrder".equals(id))
-            {
-              checkBox = printOrder;
-            }
-            else
-            {
-              checkBox = new JCheckBox();
-            }
-
-            gbcCheckBox.gridx = x;
-            gbcCheckBox.gridy = y;
-
-            String boxText = uiElementDesc.get("LABEL").toString();
-            checkBox.setText(boxText);
-            compo.add(checkBox, gbcCheckBox);
-          }
-
-
-          else if ("textfield".equals(type))
-          {
-            JTextField textField;
-            if ("allElementCount".equals(id))
-            {
-              textField = new JTextField("" + getAllElementCount());
-              textField.setEditable(false);
-              textField.setHorizontalAlignment(SwingConstants.CENTER);
-              allElementCountTextField = textField;
-            }
-            else
-              textField = new JTextField();
-
-            gbcTextField.gridx = x;
-            gbcTextField.gridy = y;
-            compo.add(textField, gbcTextField);
-          }
-
-          else if ("button".equals(type))
-          {
-            String action = "";
-            try
-            {
-              action = uiElementDesc.get("ACTION").toString();
-            }
-            catch (NodeNotFoundException e)
-            {}
-
-            String label = uiElementDesc.get("LABEL").toString();
-
-            char hotkey = 0;
-            try
-            {
-              hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
-            }
-            catch (Exception e)
-            {}
-
-            // Bei printElement-Actions die vordefinierten Buttons verwenden,
-            // ansonsten einen neuen erzeugen.
-            JButton button = null;
-
-            if ("printElement".equalsIgnoreCase(action) && verfPunktNr >= 0
-              && verfPunktNr < printElementButtons.length)
-            {
-              button = printElementButtons[verfPunktNr];
-              button.setText(label);
-            }
-            else
-              button = new JButton(label);
-
-            button.setMnemonic(hotkey);
-
-            gbcButton.gridx = x;
-            gbcButton.gridy = y;
-            compo.add(button, gbcButton);
-
-            ActionListener actionL = getAction(action);
-            if (actionL != null) {
-              button.addActionListener(actionL);
-            }
-
+            spinner = elementCountSpinner[verfPunktNr];
           }
           else
           {
-            LOGGER.error(L.m("Ununterstützter TYPE für User Interface Element: %1",
-              type));
+            spinner = new JSpinner(new SpinnerNumberModel(0, 0, 0, 0));
+          }
+
+          spinner.addChangeListener(spinnerChangeListener);
+
+          gbcSpinner.gridx = x;
+          gbcSpinner.gridy = y;
+          compo.add(spinner, gbcSpinner);
+        }
+        else if ("combobox".equals(type))
+        {
+          JComboBox<String> comboBox;
+          if ("element".equals(id) && verfPunktNr < elementComboBoxes.size())
+          {
+            comboBox = elementComboBoxes.get(verfPunktNr);
+            comboBox.addItemListener(cboxItemListener);
+          }
+
+          // Behandlung des nicht mehr unterstützten Elementtyps "pageRange"
+          else if (id.equals("pageRange"))
+          {
+            comboBox = null;
+          }
+          else
+          {
+            comboBox = new JComboBox<String>();
+          }
+
+          // comboBox.addListSelectionListener(myListSelectionListener);
+
+          gbcComboBox.gridx = x;
+          gbcComboBox.gridy = y;
+          if (comboBox != null)
+          {
+            compo.add(comboBox, gbcComboBox);
           }
         }
-        catch (NodeNotFoundException e)
+        else if ("checkbox".equals(type))
         {
-          LOGGER.error("", e);
+          JCheckBox checkBox;
+          if ("printOrder".equals(id))
+          {
+            checkBox = printOrder;
+          }
+          else
+          {
+            checkBox = new JCheckBox();
+          }
+
+          gbcCheckBox.gridx = x;
+          gbcCheckBox.gridy = y;
+
+          String boxText = uiElementDesc.getString("LABEL", "");
+          checkBox.setText(boxText);
+          compo.add(checkBox, gbcCheckBox);
+        }
+
+        else if ("textfield".equals(type))
+        {
+          JTextField textField;
+          if ("allElementCount".equals(id))
+          {
+            textField = new JTextField("" + getAllElementCount());
+            textField.setEditable(false);
+            textField.setHorizontalAlignment(SwingConstants.CENTER);
+            allElementCountTextField = textField;
+          }
+          else
+            textField = new JTextField();
+
+          gbcTextField.gridx = x;
+          gbcTextField.gridy = y;
+          compo.add(textField, gbcTextField);
+        }
+        else if ("button".equals(type))
+        {
+          String action = uiElementDesc.getString("ACTION", "");
+          String label = uiElementDesc.getString("LABEL", "");
+          char hotkey = uiElementDesc.getString("HOTKEY", "0").charAt(0);
+
+          // Bei printElement-Actions die vordefinierten Buttons verwenden,
+          // ansonsten einen neuen erzeugen.
+          JButton button = null;
+
+          if ("printElement".equalsIgnoreCase(action) && verfPunktNr >= 0
+              && verfPunktNr < printElementButtons.length)
+          {
+            button = printElementButtons[verfPunktNr];
+            button.setText(label);
+          }
+          else
+          {
+            button = new JButton(label);
+          }
+
+          button.setMnemonic(hotkey);
+
+          gbcButton.gridx = x;
+          gbcButton.gridy = y;
+          compo.add(button, gbcButton);
+
+          ActionListener actionL = getAction(action);
+          if (actionL != null)
+          {
+            button.addActionListener(actionL);
+          }
+
+        }
+        else
+        {
+          LOGGER
+              .error(L.m("Ununterstützter TYPE für User Interface Element: %1",
+                  type));
         }
       }
     }

@@ -25,8 +25,6 @@ import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.Collections;
@@ -533,13 +531,8 @@ public class UIElementConfigThingyEditor
     {
       super("FAVO", false);
       check = new JCheckBox();
-      try
-      {
-        String favo = conf.get("FAVO").toString();
-        check.setSelected(favo.equals("1"));
-      }
-      catch (NodeNotFoundException x)
-      {}
+      String favo = conf.getString("FAVO", "0");
+      check.setSelected(favo.equals("1"));
 
       Box hbox = Box.createHorizontalBox();
       hbox.add(check);
@@ -549,7 +542,6 @@ public class UIElementConfigThingyEditor
           + ")"));
       hbox.add(Box.createHorizontalGlue());
       mainEditorVBox.add(hbox);
-      // mainEditorVBox.add(Box.createVerticalGlue());
     }
 
     public String getAttributeValue()
@@ -592,33 +584,31 @@ public class UIElementConfigThingyEditor
   private void prepareComboBox(JComboBox<String> combo, String attributeName)
   {
     combo.setEditable(false);
-    try
+    String type = conf.getString(attributeName, "");
+    if (type.isEmpty())
     {
-      String type = conf.get(attributeName).toString();
-      boolean found = false;
-      for (int i = 0; i < combo.getItemCount(); ++i)
-        if (combo.getItemAt(i).equals(type))
-        {
-          // Falls combo.setSelectedItem() mit == statt equals arbeitet
-          type = (String) combo.getItemAt(i);
-          found = true;
-          break;
-        }
-
-      if (!found) combo.addItem(type);
-      combo.setSelectedItem(type);
-
-      combo.addItemListener(new ItemListener()
-      {
-        public void itemStateChanged(ItemEvent e)
-        {
-          myDialog.pack();
-          setEditorVisibility();
-        }
-      });
+      return;
     }
-    catch (NodeNotFoundException x)
-    {}
+    boolean found = false;
+    for (int i = 0; i < combo.getItemCount(); ++i)
+      if (combo.getItemAt(i).equals(type))
+      {
+        // Falls combo.setSelectedItem() mit == statt equals arbeitet
+        type = (String) combo.getItemAt(i);
+        found = true;
+        break;
+      }
+
+    if (!found)
+    {
+      combo.addItem(type);
+    }
+    combo.setSelectedItem(type);
+
+    combo.addItemListener(e -> {
+      myDialog.pack();
+      setEditorVisibility();
+    });
   }
 
   private interface AttributeEditor

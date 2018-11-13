@@ -384,94 +384,104 @@ public class Common
   {
     Rectangle r = new Rectangle();
     r.x = COORDINATE_UNSPECIFIED;
-    try
+
+    String xStr = fensterConf.getString("X", "");
+    if ("center".equalsIgnoreCase(xStr))
     {
-      String xStr = fensterConf.get("X").toString();
-      if ("center".equalsIgnoreCase(xStr))
-        r.x = COORDINATE_CENTER;
-      else if ("max".equalsIgnoreCase(xStr))
-        r.x = COORDINATE_MAX;
-      else if ("min".equalsIgnoreCase(xStr))
-        r.x = COORDINATE_MIN;
-      else if ("auto".equalsIgnoreCase(xStr))
-      {/* nothing */}
-      else
+      r.x = COORDINATE_CENTER;
+    }
+    else if ("max".equalsIgnoreCase(xStr))
+    {
+      r.x = COORDINATE_MAX;
+    }
+    else if ("min".equalsIgnoreCase(xStr))
+    {
+      r.x = COORDINATE_MIN;
+    }
+    else if ("auto".equalsIgnoreCase(xStr))
+    {
+      /* nothing */}
+    else
+    {
+      r.x = Integer.parseInt(xStr);
+      // Ja, das folgende ist eine Einschränkung, aber
+      // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
+      // obigen Festlegungen
+      if (r.x < 0)
       {
-        r.x = Integer.parseInt(xStr);
-        // Ja, das folgende ist eine Einschränkung, aber
-        // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
-        // obigen Festlegungen
-        if (r.x < 0) {
-          r.x = 0;
-        }
+        r.x = 0;
       }
     }
-    catch (Exception x)
-    {}
 
     r.y = COORDINATE_UNSPECIFIED;
-    try
+    String yStr = fensterConf.getString("Y", "");
+
+    if ("center".equalsIgnoreCase(yStr))
     {
-      String yStr = fensterConf.get("Y").toString();
-      if ("center".equalsIgnoreCase(yStr))
-        r.y = COORDINATE_CENTER;
-      else if ("max".equalsIgnoreCase(yStr))
-        r.y = COORDINATE_MAX;
-      else if ("min".equalsIgnoreCase(yStr))
-        r.y = COORDINATE_MIN;
-      else if ("auto".equalsIgnoreCase(yStr))
-      {/* nothing */}
-      else
+      r.y = COORDINATE_CENTER;
+    }
+    else if ("max".equalsIgnoreCase(yStr))
+    {
+      r.y = COORDINATE_MAX;
+    }
+    else if ("min".equalsIgnoreCase(yStr))
+    {
+      r.y = COORDINATE_MIN;
+    }
+    else if ("auto".equalsIgnoreCase(yStr))
+    {
+      /* nothing */}
+    else
+    {
+      r.y = Integer.parseInt(yStr);
+      // Ja, das folgende ist eine Einschränkung, aber
+      // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
+      // obigen Festlegungen
+      if (r.y < 0)
       {
-        r.y = Integer.parseInt(yStr);
-        // Ja, das folgende ist eine Einschränkung, aber
-        // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
-        // obigen Festlegungen
-        if (r.y < 0) {
-          r.y = 0;
-        }
+        r.y = 0;
       }
     }
-    catch (Exception x)
-    {}
 
     r.width = DIMENSION_UNSPECIFIED;
-    try
+    String widthStr = fensterConf.getString("WIDTH", "");
+
+    if ("max".equalsIgnoreCase(widthStr))
     {
-      String widthStr = fensterConf.get("WIDTH").toString();
-      if ("max".equalsIgnoreCase(widthStr))
-        r.width = DIMENSION_MAX;
-      else if ("auto".equalsIgnoreCase(widthStr))
-      {/* nothing */}
-      else
+      r.width = DIMENSION_MAX;
+    }
+    else if ("auto".equalsIgnoreCase(widthStr))
+    {
+      /* nothing */
+    }
+    else
+    {
+      r.width = Integer.parseInt(widthStr);
+      if (r.width < 0)
       {
-        r.width = Integer.parseInt(widthStr);
-        if (r.width < 0) {
-          r.width = DIMENSION_UNSPECIFIED;
-        }
+        r.width = DIMENSION_UNSPECIFIED;
       }
     }
-    catch (Exception x)
-    {}
 
     r.height = DIMENSION_UNSPECIFIED;
-    try
+    String heightStr = fensterConf.getString("HEIGHT", "");
+
+    if ("max".equalsIgnoreCase(heightStr))
     {
-      String heightStr = fensterConf.get("HEIGHT").toString();
-      if ("max".equalsIgnoreCase(heightStr))
-        r.height = DIMENSION_MAX;
-      else if ("auto".equalsIgnoreCase(heightStr))
-      {/* nothing */}
-      else
+      r.height = DIMENSION_MAX;
+    }
+    else if ("auto".equalsIgnoreCase(heightStr))
+    {
+      /* nothing */
+    }
+    else
+    {
+      r.height = Integer.parseInt(heightStr);
+      if (r.height < 0)
       {
-        r.height = Integer.parseInt(heightStr);
-        if (r.height < 0) {
-          r.height = DIMENSION_UNSPECIFIED;
-        }
+        r.height = DIMENSION_UNSPECIFIED;
       }
     }
-    catch (Exception x)
-    {}
 
     return r;
   }

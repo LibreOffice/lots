@@ -267,37 +267,31 @@ public class OOoDatasource implements Datasource
           datasourceName));
     }
 
-    try
-    {
-      userName = sourceDesc.get("USER").toString();
-    }
-    catch (NodeNotFoundException x)
-    {}
+    userName = sourceDesc.getString("USER", "");
+    password = sourceDesc.getString("PASSWORD", "");
 
-    try
+    String sqlSyntaxStr = sourceDesc.getString("SQL_SYNTAX", "");
+    if ("ansi".equalsIgnoreCase(sqlSyntaxStr))
     {
-      password = sourceDesc.get("PASSWORD").toString();
+      sqlSyntax = SQL_SYNTAX_ANSI;
     }
-    catch (NodeNotFoundException x)
-    {}
-
-    try
+    else if ("oracle".equalsIgnoreCase(sqlSyntaxStr))
     {
-      String sqlSyntaxStr = sourceDesc.get("SQL_SYNTAX").toString();
-      if ("ansi".equalsIgnoreCase(sqlSyntaxStr))
-        sqlSyntax = SQL_SYNTAX_ANSI;
-      else if ("oracle".equalsIgnoreCase(sqlSyntaxStr))
-        sqlSyntax = SQL_SYNTAX_ORACLE;
-      else if ("mysql".equalsIgnoreCase(sqlSyntaxStr))
-        sqlSyntax = SQL_SYNTAX_MYSQL;
-      else if ("pervasivesql".equalsIgnoreCase(sqlSyntaxStr))
-        sqlSyntax = SQL_SYNTAX_PERVASIVESQL;
-      else
-        throw new ConfigurationErrorException(L.m(
+      sqlSyntax = SQL_SYNTAX_ORACLE;
+    }
+    else if ("mysql".equalsIgnoreCase(sqlSyntaxStr))
+    {
+      sqlSyntax = SQL_SYNTAX_MYSQL;
+    }
+    else if ("pervasivesql".equalsIgnoreCase(sqlSyntaxStr))
+    {
+      sqlSyntax = SQL_SYNTAX_PERVASIVESQL;
+    }
+    else
+    {
+      throw new ConfigurationErrorException(L.m(
           "SQL_SYNTAX \"%1\" nicht unterstützt", sqlSyntaxStr));
     }
-    catch (NodeNotFoundException x)
-    {}
 
     schema = new HashSet<String>();
     ConfigThingy schemaConf = sourceDesc.query("Schema");
@@ -318,8 +312,10 @@ public class OOoDatasource implements Datasource
           "Datenquelle \"%1\": Schema-Abschnitt ist leer", datasourceName));
       ConfigThingy schluesselConf = sourceDesc.query("Schluessel");
       if (schluesselConf.count() == 0)
+      {
         throw new ConfigurationErrorException(L.m(
           "Datenquelle \"%1\": Schluessel-Abschnitt fehlt", datasourceName));
+      }
 
       if (noKey)
       {
@@ -328,8 +324,9 @@ public class OOoDatasource implements Datasource
         }
       }
       else
-        parseKey(schluesselConf); // Test ob kein Schluessel vorhanden siehe weiter
-      // unten
+      {
+        parseKey(schluesselConf); // Test ob kein Schluessel vorhanden siehe weiter unten
+      }
     }
     else
     {
@@ -374,13 +371,17 @@ public class OOoDatasource implements Datasource
           }
         }
         String[] colNames = columns.getElementNames();
-        for (int i = 0; i < colNames.length; ++i)
-          schema.add(colNames[i]);
+        for (String colName : colNames)
+        {
+          schema.add(colName);
+        }
 
         if (schema.isEmpty())
+        {
           throw new ConfigurationErrorException(L.m(
             "Datenquelle \"%1\": Tabelle \"%2\" hat keine Spalten", datasourceName,
             oooTableName));
+        }
 
         if (noKey)
         {
@@ -429,8 +430,10 @@ public class OOoDatasource implements Datasource
       }
 
       if (keyColumns.length == 0)
+      {
         throw new ConfigurationErrorException(L.m(
           "Datenquelle \"%1\": Keine Schluessel-Spalten definiert", datasourceName));
+      }
     }
   }
 

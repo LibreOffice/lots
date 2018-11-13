@@ -132,7 +132,7 @@ public class EMailSender
       wollmuxconf = wollmuxconf.query("EMailEinstellungen").getLastChild();
       mailserver.setMailserver(wollmuxconf.get("SERVER").toString());
     }
-    catch (Exception e)
+    catch (NodeNotFoundException e)
     {
       throw new ConfigurationErrorException();
     }
@@ -140,17 +140,21 @@ public class EMailSender
     try
     {
       if (wollmuxconf.query("PORT").count() != 1
-        || wollmuxconf.get("PORT").toString().equals(""))
+          || wollmuxconf.getString("PORT", "").equals(""))
+      {
         mailserver.setMailserverport("-1");
+      }
       else
-        mailserver.setMailserverport(wollmuxconf.get("PORT").toString());
+      {
+        mailserver.setMailserverport(wollmuxconf.getString("PORT", ""));
+      }
 
       if (wollmuxconf.query("AUTH_USER_PATTERN").count() == 1
-        && !wollmuxconf.get("AUTH_USER_PATTERN").toString().equals(""))
+          && !wollmuxconf.getString("AUTH_USER_PATTERN", "").equals(""))
       {
         String username = email.getFrom()[0].toString();
         Pattern pattern =
-          Pattern.compile(wollmuxconf.get("AUTH_USER_PATTERN").toString());
+            Pattern.compile(wollmuxconf.getString("AUTH_USER_PATTERN", ""));
         try
         {
           Matcher result = pattern.matcher(username);
@@ -183,9 +187,7 @@ public class EMailSender
         }
       }
     }
-    catch (NodeNotFoundException e)
-    {}
-    catch (Exception e)
+    catch (MessagingException e)
     {
       throw new ConfigurationErrorException();
     }
