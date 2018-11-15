@@ -4,7 +4,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +46,11 @@ public class DatasourceJoinerFactory
    */
   private static DatasourceJoiner datasourceJoiner;
 
+  private DatasourceJoinerFactory()
+  {
+    // hide public constructor
+  }
+
   /**
    * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null, falls
    * ein Fehler während der Initialisierung aufgetreten ist).
@@ -73,20 +77,10 @@ public class DatasourceJoinerFactory
   
       ConfigThingy dataSourceTimeout =
         WollMuxFiles.getWollmuxConf().query("DATASOURCE_TIMEOUT", 1);
-      String datasourceTimeoutStr = "";
       long datasourceTimeoutLong = 0;
       try
       {
-        datasourceTimeoutStr = dataSourceTimeout.getLastChild().toString();
-        try
-        {
-          datasourceTimeoutLong = new Long(datasourceTimeoutStr).longValue();
-        }
-        catch (NumberFormatException e)
-        {
-          LOGGER.error(L.m("DATASOURCE_TIMEOUT muss eine ganze Zahl sein"));
-          datasourceTimeoutLong = DatasourceJoiner.DATASOURCE_TIMEOUT;
-        }
+        datasourceTimeoutLong = Long.parseLong(dataSourceTimeout.getLastChild().toString());
         if (datasourceTimeoutLong <= 0)
         {
           LOGGER.error(L.m("DATASOURCE_TIMEOUT muss größer als 0 sein!"));
@@ -94,6 +88,11 @@ public class DatasourceJoinerFactory
       }
       catch (NodeNotFoundException e)
       {
+        datasourceTimeoutLong = DatasourceJoiner.DATASOURCE_TIMEOUT;
+      }
+      catch (NumberFormatException e)
+      {
+        LOGGER.error(L.m("DATASOURCE_TIMEOUT muss eine ganze Zahl sein"));
         datasourceTimeoutLong = DatasourceJoiner.DATASOURCE_TIMEOUT;
       }
   
@@ -141,49 +140,52 @@ public class DatasourceJoinerFactory
     HashMap<String, Datasource> datasources = new HashMap<>();
     
     ConfigThingy datenquellen = joinConf.query("Datenquellen").query("Datenquelle");
-    Iterator<ConfigThingy> iter = datenquellen.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy sourceDesc : datenquellen)
     {
-      ConfigThingy sourceDesc = iter.next();
-      ConfigThingy c = sourceDesc.query("NAME");
-      if (c.count() == 0)
+      String name = sourceDesc.getString("NAME");
+      String type = sourceDesc.getString("TYPE");
+      if (name == null || type == null)
       {
-        LOGGER.error(L.m("Datenquelle ohne NAME gefunden"));
+        LOGGER.error(L.m("Datenquelle ohne NAME oder TYPE gefunden"));
         continue;
       }
-      String name = c.toString();
-
-      c = sourceDesc.query("TYPE");
-      if (c.count() == 0)
-      {
-        LOGGER.error(L.m("Datenquelle %1 hat keinen TYPE", name));
-        continue;
-      }
-      String type = c.toString();
 
       Datasource ds = null;
       try
       {
-        if (type.equals("conf"))
+        switch (type)
+        {
+        case "conf":
           ds = new ThingyDatasource(datasources, sourceDesc, context);
-        else if (type.equals("union"))
+          break;
+        case "union":
           ds = new UnionDatasource(datasources, sourceDesc, context);
-        else if (type.equals("attach"))
+          break;
+        case "attach":
           ds = new AttachDatasource(datasources, sourceDesc, context);
-        else if (type.equals("overlay"))
+          break;
+        case "overlay":
           ds = new OverlayDatasource(datasources, sourceDesc, context);
-        else if (type.equals("prefer"))
+          break;
+        case "prefer":
           ds = new PreferDatasource(datasources, sourceDesc, context);
-        else if (type.equals("schema"))
+          break;
+        case "schema":
           ds = new SchemaDatasource(datasources, sourceDesc, context);
-        else if (type.equals("ldap"))
+          break;
+        case "ldap":
           ds = new LDAPDatasource(datasources, sourceDesc, context);
-        else if (type.equals("ooo"))
+          break;
+        case "ooo":
           ds = new OOoDatasource(datasources, sourceDesc, context);
-        else if (type.equals("funky"))
+          break;
+        case "funky":
           ds = new FunkyDatasource(datasources, sourceDesc, context);
-        else
+          break;
+        default:
           LOGGER.error(L.m("Ununterstützter Datenquellentyp: %1", type));
+          break;
+        }
       }
       catch (Exception x)
       {
@@ -203,8 +205,6 @@ public class DatasourceJoinerFactory
          * weitergearbeitet, was seltsame Effekte zur Folge hätte die schwierig
          * nachzuvollziehen sind.
          */
-        datasources.put(name, null);
-        continue;
       }
 
       datasources.put(name, ds);
@@ -241,7 +241,12 @@ public class DatasourceJoinerFactory
   {
     DatasourceJoiner dj = getDatasourceJoiner();
     ArrayList<String> list = new ArrayList<>();
-    for (Dataset ds : dj.getStatus().lostDatasets)
-      list.add(new DatasetListElement(ds, PersoenlicheAbsenderliste.getInstance().getSenderDisplayTemplate()).toString());
+    if (dj != null)
+    {
+      for (Dataset ds : dj.getStatus().lostDatasets)
+      {
+        list.add(new DatasetListElement(ds, PersoenlicheAbsenderliste.getInstance().getSenderDisplayTemplate()).toString());
+      }
+    }
     return list;
 }}
