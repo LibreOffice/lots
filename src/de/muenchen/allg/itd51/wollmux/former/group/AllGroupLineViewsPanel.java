@@ -35,8 +35,6 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -153,18 +151,12 @@ public class AllGroupLineViewsPanel implements View
         GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
           BUTTON_BORDER, BUTTON_BORDER), 0, 0);
     JButton button = new JButton(L.m("Löschen"));
-    button.addActionListener((ActionEvent e) ->
-    {
-        deleteSelectedElements();
-    });
+    button.addActionListener(e -> deleteSelectedElements());
     buttonPanel.add(button, gbcButton);
 
     ++gbcButton.gridx;
     button = new JButton(L.m("Neu"));
-    button.addActionListener((ActionEvent e) ->
-    {
-        createNewGroup();
-    });
+    button.addActionListener(e -> createNewGroup());
     buttonPanel.add(button, gbcButton);
 
     ++gbcButton.gridx;

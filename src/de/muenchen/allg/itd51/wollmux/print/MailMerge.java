@@ -35,10 +35,7 @@ package de.muenchen.allg.itd51.wollmux.print;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.lang.reflect.Method;
@@ -344,10 +341,7 @@ public class MailMerge
     {
       try
       {
-        SwingUtilities.invokeLater(() ->
-        {
-          myFrame.dispose();
-        });
+        SwingUtilities.invokeLater(() -> myFrame.dispose());
       }
       catch (Exception x)
       {
@@ -529,7 +523,7 @@ public class MailMerge
     myPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     myFrame.setContentPane(myPanel);
 
-    final JList<MailMerge.ListElement> myList = new JList<MailMerge.ListElement>(list);
+    final JList<MailMerge.ListElement> myList = new JList<>(list);
     myList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     for (int i = 0; i < list.size(); ++i)
     {
@@ -553,34 +547,25 @@ public class MailMerge
     myPanel.add(bottomV, BorderLayout.SOUTH);
 
     JButton button = new JButton(L.m("Abbrechen"));
-    button.addActionListener((ActionEvent e) ->
-    {
-      myFrame.dispose();
-    });
+    button.addActionListener(e -> myFrame.dispose());
     bottom.add(button);
 
     bottom.add(Box.createHorizontalGlue());
 
     button = new JButton(L.m("Alle"));
-    button.addActionListener((ActionEvent e) ->
-    {
-      myList.setSelectionInterval(0, list.size() - 1);
-    });
+    button.addActionListener(e -> myList.setSelectionInterval(0, list.size() - 1));
     bottom.add(button);
 
     bottom.add(Box.createHorizontalStrut(5));
 
     button = new JButton(L.m("Keinen"));
-    button.addActionListener((ActionEvent e) ->
-    {
-      myList.clearSelection();
-    });
+    button.addActionListener(e -> myList.clearSelection());
     bottom.add(button);
 
     bottom.add(Box.createHorizontalGlue());
 
     button = new JButton(L.m("Start"));
-    button.addActionListener((ActionEvent e) ->
+    button.addActionListener(e ->
     {
       for (int i = 0; i < list.size(); ++i)
         (list.get(i)).setSelected(false);
@@ -710,8 +695,8 @@ public class MailMerge
           UNO.XCellRangesQuery(doc.getSheets().getByName(sheetName));
         if (sheet != null)
         {
-          SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
-          SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
+          SortedSet<Integer> columnIndexes = new TreeSet<>();
+          SortedSet<Integer> rowIndexes = new TreeSet<>();
           XSheetCellRanges visibleCellRanges = sheet.queryVisibleCells();
           XSheetCellRanges nonEmptyCellRanges =
             sheet.queryContentCells((short) (com.sun.star.sheet.CellFlags.VALUE
@@ -736,7 +721,7 @@ public class MailMerge
             }
           }
 
-          if (columnIndexes.size() > 0 && rowIndexes.size() > 0)
+          if (!columnIndexes.isEmpty() && !rowIndexes.isEmpty())
           {
             XCellRange sheetCellRange = UNO.XCellRange(sheet);
 
@@ -748,8 +733,7 @@ public class MailMerge
              * Datensatz existierenden String[]-Array.
              */
             int ymin = rowIndexes.first().intValue();
-            Map<String, Integer> mapColumnNameToIndex =
-              new HashMap<String, Integer>();
+            Map<String, Integer> mapColumnNameToIndex = new HashMap<>();
             int idx = 0;
             Iterator<Integer> iter = columnIndexes.iterator();
             while (iter.hasNext())
@@ -825,7 +809,7 @@ public class MailMerge
      * Liste von {@link Runnable}-Objekten, die sequentiell abgearbeitet werden im
      * Nicht-Event-Dispatching-Thread.
      */
-    private List<Runnable> todo = new LinkedList<Runnable>();
+    private List<Runnable> todo = new LinkedList<>();
 
     /**
      * Wird dies auf false gesetzt, so beendet sich {@link #run()}.
@@ -835,12 +819,12 @@ public class MailMerge
     /**
      * Die Menge der Namen aller OOo-Datenquellen.
      */
-    private Set<String> datasourceNames = new TreeSet<String>();
+    private Set<String> datasourceNames = new TreeSet<>();
 
     /**
      * Die Menge aller Titel von offenen Calc-Dokument-Fenstern.
      */
-    private Set<String> calcDocumentTitles = new TreeSet<String>();
+    private Set<String> calcDocumentTitles = new TreeSet<>();
 
     /**
      * Die ComboBox in der der Benutzer die OOo-Datenquelle bzw, das Calc-Dokument
@@ -1045,7 +1029,7 @@ public class MailMerge
       Box hbox = Box.createHorizontalBox();
       vbox.add(hbox);
       hbox.add(new JLabel(L.m("Datenquelle")));
-      datasourceSelector = new JComboBox<String>();
+      datasourceSelector = new JComboBox<>();
       hbox.add(Box.createHorizontalStrut(5));
       hbox.add(datasourceSelector);
       int selected = 0;
@@ -1075,7 +1059,7 @@ public class MailMerge
       /*
        * Auf Änderungen der Datenquellen-Auswahl-Combobox reagieren.
        */
-      datasourceSelector.addItemListener((ItemEvent e) ->
+      datasourceSelector.addItemListener(e ->
       {
         String newDatasource = (String) datasourceSelector.getSelectedItem();
         String newTable = (String) tableSelector.getSelectedItem();
@@ -1107,7 +1091,7 @@ public class MailMerge
       vbox.add(Box.createVerticalStrut(5));
       vbox.add(hbox);
       JButton button = new JButton(L.m("Abbrechen"));
-      button.addActionListener((ActionEvent e) ->
+      button.addActionListener(e ->
       {
         stopRunning();
         myFrame.dispose();
@@ -1115,7 +1099,7 @@ public class MailMerge
       hbox.add(button);
 
       button = new JButton(L.m("Start"));
-      button.addActionListener((ActionEvent e) ->
+      button.addActionListener(e ->
       {
         selectedTable = (String) tableSelector.getSelectedItem();
         selectedDatasource = (String) datasourceSelector.getSelectedItem();
@@ -1130,7 +1114,7 @@ public class MailMerge
       hbox.add(button);
 
       button = new JButton(L.m("Einzelauswahl"));
-      button.addActionListener((ActionEvent e) ->
+      button.addActionListener(e ->
       {
         selectedTable = (String) tableSelector.getSelectedItem();
         selectedDatasource = (String) datasourceSelector.getSelectedItem();
@@ -1339,10 +1323,7 @@ public class MailMerge
       synchronized (todo)
       {
         todo.clear();
-        todo.add(() ->
-        {
-          running = false;
-        });
+        todo.add(() -> running = false);
         todo.notifyAll();
       }
     }

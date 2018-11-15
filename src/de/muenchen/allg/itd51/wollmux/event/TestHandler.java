@@ -136,11 +136,8 @@ public class TestHandler
     /** ************************************************************** */
     if (cmd.equalsIgnoreCase("EinTest"))
     {
-      // String t = model.getViewCursor().getString();
-      // t = "id_" + t.replaceAll("[^(a-zA-Z)]", "");
       ConfigThingy c = new ConfigThingy("Funktion");
       c.addChild(new ConfigThingy("Hallo"));
-      // model.replaceSelectionWithFormField(t, c);
       ConfigThingy trafo = documentController.getModel().getFormFieldTrafoFromSelection();
       LOGGER.error("EinTest Trafo = '"
         + ((trafo != null) ? trafo.stringRepresentation() : "null") + "'");
@@ -169,12 +166,10 @@ public class TestHandler
    */
   private static HashMap<String, String> getWollmuxTestArgs()
   {
-    HashMap<String, String> args = new HashMap<String, String>();
-    BufferedReader br = null;
-    try
+    HashMap<String, String> args = new HashMap<>();
+    
+    try (BufferedReader br = new BufferedReader(new FileReader(WOLLMUX_QATEST_ARGS_FILE)))
     {
-      br = new BufferedReader(new FileReader(WOLLMUX_QATEST_ARGS_FILE));
-
       for (String line = null; (line = br.readLine()) != null;)
       {
         String[] keyValue = line.split(",", 2);
@@ -186,17 +181,7 @@ public class TestHandler
       LOGGER.error(
         L.m("Argumentdatei für wollmux-qatest konnte nicht gelesen werden"), e);
     }
-    finally
-    {
-      try
-      {
-        if (br != null) {
-          br.close();
-        }
-      }
-      catch (Exception x)
-      {}
-    }
+    
     return args;
   }
 }

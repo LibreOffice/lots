@@ -940,10 +940,8 @@ public class WollMuxFiles
    */
   private static void copyFile(File file, OutputStream out)
   {
-    InputStream in = null;
-    try
+    try (InputStream in = new FileInputStream(file))
     {
-      in = new FileInputStream(file);
       byte[] buffy = new byte[2048];
       int len;
       while ((len = in.read(buffy)) >= 0)
@@ -954,17 +952,6 @@ public class WollMuxFiles
     catch (IOException ex)
     {
       ex.printStackTrace(new PrintWriter(out));
-    }
-    finally
-    {
-      try
-      {
-        if (in != null) { 
-          in.close();
-        }
-      }
-      catch (Exception x)
-      {}
     }
   }
 
@@ -1069,23 +1056,10 @@ public class WollMuxFiles
   public static void writeConfToFile(File file, ConfigThingy conf)
       throws UnsupportedEncodingException, FileNotFoundException, IOException
   {
-    Writer out = null;
-    try
+    try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(file), ConfigThingy.CHARSET))
     {
-      out = new OutputStreamWriter(new FileOutputStream(file), ConfigThingy.CHARSET);
       out.write("\uFEFF");
       out.write(conf.stringRepresentation(true, '"'));
-    }
-    finally
-    {
-      try
-      {
-        if (out != null) {
-          out.close();
-        }
-      }
-      catch (Exception x)
-      {}
     }
   }
 

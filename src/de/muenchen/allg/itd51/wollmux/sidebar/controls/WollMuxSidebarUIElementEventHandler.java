@@ -150,13 +150,11 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
       }
 
       Runnable launch = () ->
-      {
         openExt.launch((Exception x) ->
         {
           LOGGER.error("", x);
           showError(x.getMessage());
         });
-      };
 
       /**
        * Falls /loadComponentFromURL/ bei den Programmen ist, muss ein Kontakt zu OOo

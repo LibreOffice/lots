@@ -93,7 +93,7 @@ class AdjustFields
     ReferencedFieldID[] fieldIDs =
       documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
         ds.getColumnNames()));
-    ActionListener submitActionListener = (ActionEvent e) ->
+    ActionListener submitActionListener = e ->
     {
         HashMap<String, FieldSubstitution> mapIdToSubstitution =
           (HashMap<String, FieldSubstitution>) e.getSource();
@@ -143,7 +143,7 @@ class AdjustFields
     ReferencedFieldID[] fieldIDs =
         documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
         ds.getColumnNames()));
-    ActionListener submitActionListener = (ActionEvent e) ->
+    ActionListener submitActionListener = e ->
     {
       HashMap<String, FieldSubstitution> mapIdToSubstitution =
         (HashMap<String, FieldSubstitution>) e.getSource();
@@ -212,8 +212,7 @@ class AdjustFields
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
     final TextComponentTags[] currentField = new TextComponentTags[] { null };
-    final HashMap<TextComponentTags, String> mapTextComponentTagsToFieldname =
-      new HashMap<TextComponentTags, String>();
+    final HashMap<TextComponentTags, String> mapTextComponentTagsToFieldname = new HashMap<>();
 
     Box headers = Box.createHorizontalBox();
     final JButton insertFieldButton =
@@ -253,7 +252,7 @@ class AdjustFields
     headers.add(insertFieldButton);
 
     Box itemBox = Box.createVerticalBox();
-    ArrayList<JLabel> labels = new ArrayList<JLabel>();
+    ArrayList<JLabel> labels = new ArrayList<>();
     int maxLabelWidth = 0;
 
     Box hbox = Box.createHorizontalBox();
@@ -270,7 +269,7 @@ class AdjustFields
     DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox);
     itemBox.add(hbox);
 
-    HashSet<String> addedFields = new HashSet<String>();
+    HashSet<String> addedFields = new HashSet<>();
     for (int i = 0; i < fieldIDs.length; i++)
     {
       String fieldId = fieldIDs[i].getFieldId();
@@ -295,7 +294,7 @@ class AdjustFields
         {
           if (!isTransformed) return true;
           List<TextComponentTags.ContentElement> c = getContent();
-          if (c.size() == 0) return true;
+          if (c.isEmpty()) return true;
           return c.size() == 1 && c.get(0).isTag();
         }
       };
@@ -333,19 +332,15 @@ class AdjustFields
 
     Box buttonBox = Box.createHorizontalBox();
     JButton button = new JButton(L.m("Abbrechen"));
-    button.addActionListener((ActionEvent e) ->
-    {
-        dialog.dispose();
-    });
+    button.addActionListener(e -> dialog.dispose());
     buttonBox.add(button);
 
     buttonBox.add(Box.createHorizontalGlue());
 
     button = new JButton(labelSubmitButton);
-    button.addActionListener((ActionEvent e) ->
+    button.addActionListener(e ->
     {
-        final HashMap<String, FieldSubstitution> result =
-          new HashMap<String, FieldSubstitution>();
+        final HashMap<String, FieldSubstitution> result = new HashMap<>();
         for (Iterator<TextComponentTags> iter =
           mapTextComponentTagsToFieldname.keySet().iterator(); iter.hasNext();)
         {

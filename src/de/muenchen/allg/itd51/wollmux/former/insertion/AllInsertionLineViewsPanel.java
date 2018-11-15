@@ -100,7 +100,7 @@ public class AllInsertionLineViewsPanel implements View
   /**
    * Die Liste der {@link OneInsertionLineView}s in dieser View.
    */
-  private List<OneInsertionLineView> views = new ArrayList<OneInsertionLineView>();
+  private List<OneInsertionLineView> views = new ArrayList<>();
 
   /**
    * Liste von Indizes der selektierten Objekte in der {@link #views} Liste.
@@ -150,10 +150,7 @@ public class AllInsertionLineViewsPanel implements View
         GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
           BUTTON_BORDER, BUTTON_BORDER), 0, 0);
     JButton button = new JButton(L.m("Entfernen (DeMux)"));
-    button.addActionListener((ActionEvent e) ->
-    {
-      demuxSelectedElements();
-    });
+    button.addActionListener(e -> demuxSelectedElements());
     buttonPanel.add(button, gbcButton);
 
     ++gbcButton.gridx;
@@ -211,8 +208,8 @@ public class AllInsertionLineViewsPanel implements View
     Iterator<Integer> iter = selection.iterator();
     while (iter.hasNext())
     {
-      Integer I = iter.next();
-      OneInsertionLineView view = views.get(I.intValue());
+      Integer i = iter.next();
+      OneInsertionLineView view = views.get(i.intValue());
       view.unmark();
     }
     selection.clear();
