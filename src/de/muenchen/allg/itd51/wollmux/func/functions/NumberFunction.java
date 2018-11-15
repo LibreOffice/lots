@@ -72,7 +72,7 @@ abstract class NumberFunction extends MultiFunction
     {
       Function func = iter.next();
       String str = func.getString(parameters);
-      if (str == Function.ERROR) return Function.ERROR;
+      if (str == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
       try
       {
         BigDecimal num = makeBigDecimal(str);
@@ -81,7 +81,7 @@ abstract class NumberFunction extends MultiFunction
       }
       catch (Exception x)
       {
-        return Function.ERROR;
+        return FunctionLibrary.ERROR;
       }
     }
     return computationResult();

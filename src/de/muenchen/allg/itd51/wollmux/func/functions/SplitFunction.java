@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.regex.Pattern;
 
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 
 public class SplitFunction implements Function
@@ -28,7 +29,7 @@ public class SplitFunction implements Function
   public String getString(Values parameters)
   {
     String str = input.getString(parameters);
-    if (str == Function.ERROR) return Function.ERROR;
+    if (str == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
     String[] a = str.split(regex);
     if (index < 0 || index >= a.length) return "";
     return a[index];

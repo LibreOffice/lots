@@ -428,7 +428,7 @@ public class FunctionTester
           Function func =
             FunctionFactory.parse(codeConf, funcLib, dialogLib, myContext);
           String result = func.getString(myParameters);
-          if (result == Function.ERROR)
+          if (result == FunctionLibrary.ERROR)
             throw new Exception(L.m("Illegaler oder fehlender Parameter!"));
           stringResult.setText(result);
           stringResult.setCaretPosition(0);

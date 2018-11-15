@@ -22,7 +22,7 @@ public class LengthFunction extends CatFunction
   public String getString(Values parameters)
   {
     String res = super.getString(parameters);
-    if (res == Function.ERROR) return Function.ERROR;
+    if (res == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
     return "" + res.length();
   }
 

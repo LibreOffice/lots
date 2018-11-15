@@ -69,11 +69,11 @@ public class IsErrorFunction implements Function
   {
     if (objectCompare)
     {
-      return Function.ERROR == str;
+      return FunctionLibrary.ERROR == str;
     }
     else
     {
-      return Function.ERROR.equals(str);
+      return FunctionLibrary.ERROR.equals(str);
     }
   }
 

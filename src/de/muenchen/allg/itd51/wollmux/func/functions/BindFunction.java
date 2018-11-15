@@ -102,7 +102,7 @@ public class BindFunction implements Function
   {
     TranslatedValues trans = new TranslatedValues(parameters);
     String res = func.getString(trans);
-    if (trans.hasError) return Function.ERROR;
+    if (trans.hasError) return FunctionLibrary.ERROR;
     return res;
   }
 
@@ -153,7 +153,7 @@ public class BindFunction implements Function
       if (setFunc != null)
       {
         String res = setFunc.getString(values);
-        if (res == Function.ERROR)
+        if (res == FunctionLibrary.ERROR)
         {
           hasError = true;
           return "";
@@ -170,7 +170,7 @@ public class BindFunction implements Function
       if (setFunc != null)
       {
         String res = setFunc.getString(values);
-        if (res == Function.ERROR)
+        if (res == FunctionLibrary.ERROR)
         {
           hasError = true;
           return false;
