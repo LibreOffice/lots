@@ -173,26 +173,17 @@ public class AllSectionLineViewsPanel implements View
         GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
           BUTTON_BORDER, BUTTON_BORDER), 0, 0);
     JButton button = new JButton(L.m("Aufheben"));
-    button.addActionListener((ActionEvent e) ->
-    {
-      deleteSelectedElements();
-    });
+    button.addActionListener(e -> deleteSelectedElements());
     buttonPanel.add(button, gbcButton);
 
     ++gbcButton.gridx;
     button = new JButton(L.m("Neu"));
-    button.addActionListener((ActionEvent e) ->
-    {
-      createNewSectionFromSelection();
-    });
+    button.addActionListener(e -> createNewSectionFromSelection());
     buttonPanel.add(button, gbcButton);
 
     ++gbcButton.gridx;
     button = new JButton(L.m("Neu (ganze Seiten)"));
-    button.addActionListener((ActionEvent e) ->
-    {
-      createNewSectionFromAllPagesTouchedBySelection();
-    });
+    button.addActionListener(e -> createNewSectionFromAllPagesTouchedBySelection());
     buttonPanel.add(button, gbcButton);
 
     ++gbcButton.gridx;

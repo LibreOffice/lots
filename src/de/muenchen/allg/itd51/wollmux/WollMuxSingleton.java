@@ -276,36 +276,23 @@ public class WollMuxSingleton
    */
   public static String getBuildInfo()
   {
-    BufferedReader in = null;
-    try
+    URL url = WollMuxSingleton.class.getClassLoader().getResource("buildinfo");
+    
+    if (url == null) {
+      return L.m("Version: unbekannt");
+    }
+
+    try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream())))
     {
-      URL url = WollMuxSingleton.class.getClassLoader().getResource("buildinfo");
-      if (url != null)
+      String str = in.readLine();
+      if (str != null)
       {
-        in = new BufferedReader(new InputStreamReader(url.openStream()));
-        String str = in.readLine();
-        if (str != null)
-        {
-          return str;
-        }
+        return str;
       }
     }
     catch (Exception x)
     {
-      //
-    }
-    finally
-    {
-      try
-      {
-        if (in != null) {
-          in.close();
-        }
-      }
-      catch (Exception y)
-      {
-        //
-      }
+      LOGGER.trace("", x);
     }
 
     return L.m("Version: unbekannt");

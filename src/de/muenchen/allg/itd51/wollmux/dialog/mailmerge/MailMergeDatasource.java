@@ -34,8 +34,6 @@ package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -404,7 +402,7 @@ public class MailMergeDatasource
     button = createDatasourceSelectorCalcWindowButton();
     if (button != null)
     {
-      button.addActionListener((ActionEvent e) ->
+      button.addActionListener(e ->
       {
         datasourceSelector.dispose();
         selectOpenCalcWindowAsDatasource(parent, callback);
@@ -413,7 +411,7 @@ public class MailMergeDatasource
     }
 
     button = new JButton(L.m("Datei..."));
-    button.addActionListener((ActionEvent e) ->
+    button.addActionListener(e ->
     {
       datasourceSelector.dispose();
       selectFileAsDatasource(parent, callback);
@@ -421,7 +419,7 @@ public class MailMergeDatasource
     vbox.add(DimAdjust.maxWidthUnlimited(button));
 
     button = new JButton(L.m("Neue Calc-Tabelle..."));
-    button.addActionListener((ActionEvent e) ->
+    button.addActionListener(e ->
     {
       datasourceSelector.dispose();
       openAndselectNewCalcTableAsDatasource(parent, callback);
@@ -429,7 +427,7 @@ public class MailMergeDatasource
     vbox.add(DimAdjust.maxWidthUnlimited(button));
 
     button = new JButton(L.m("Datenbank..."));
-    button.addActionListener((ActionEvent e) ->
+    button.addActionListener(e ->
     {
       datasourceSelector.dispose();
       selectOOoDatasourceAsDatasource(parent, callback);
@@ -469,10 +467,7 @@ public class MailMergeDatasource
     vbox.add(label);
 
     button = new JButton(L.m("Abbrechen"));
-    button.addActionListener((ActionEvent e) ->
-    {
-      datasourceSelector.dispose();
-    });
+    button.addActionListener(e -> datasourceSelector.dispose());
     vbox.add(DimAdjust.maxWidthUnlimited(button));
 
     datasourceSelector.pack();
@@ -1103,7 +1098,7 @@ public class MailMergeDatasource
       final String name = names.get(i);
       JButton button;
       button = new JButton(name);
-      button.addActionListener((ActionEvent e) ->
+      button.addActionListener(e ->
       {
         dbSelector.dispose();
         getOOoDatasource(name);
@@ -1192,7 +1187,7 @@ public class MailMergeDatasource
       final XSpreadsheetDocument spread = win.docs.get(i);
       JButton button;
       button = new JButton(name);
-      button.addActionListener((ActionEvent e) ->
+      button.addActionListener(e ->
       {
         calcWinSelector.dispose();
         getCalcDoc(spread);
@@ -1337,7 +1332,7 @@ public class MailMergeDatasource
       final String name = iter.next();
       JButton button;
       button = new JButton(name);
-      button.addActionListener((ActionEvent e) ->
+      button.addActionListener(e ->
       {
         tableSelector.dispose();
         setTable(name);

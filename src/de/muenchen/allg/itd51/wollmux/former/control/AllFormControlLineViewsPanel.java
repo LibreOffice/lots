@@ -90,12 +90,12 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
    */
-  private final static int TF_BORDER = 4;
+  private static final int TF_BORDER = 4;
 
   /**
    * Rand um Buttons (in Pixeln).
    */
-  private final static int BUTTON_BORDER = 2;
+  private static final int BUTTON_BORDER = 2;
 
   /**
    * Wird (mit wechselndem gridy Wert) verwendet als Constraints für das Hinzufügen
@@ -215,7 +215,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
         GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
           BUTTON_BORDER, BUTTON_BORDER), 0, 0);
     JButton hochButton = new JButton(L.m("Hoch"));
-    hochButton.addActionListener((ActionEvent e) ->
+    hochButton.addActionListener(e ->
     {
       if (noSelectedElementsOnVisibleTab()) return;
       moveSelectedElementsUp();
@@ -225,7 +225,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
     ++gbcButton.gridx;
     JButton runterButton = new JButton(L.m("Runter"));
-    runterButton.addActionListener((ActionEvent e) ->
+    runterButton.addActionListener(e ->
     {
       if (noSelectedElementsOnVisibleTab()) return;
       moveSelectedElementsDown();
@@ -235,7 +235,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
     ++gbcButton.gridx;
     JButton killButton = new JButton(L.m("Löschen"));
-    killButton.addActionListener((ActionEvent e) ->
+    killButton.addActionListener(e ->
     {
       if (noSelectedElementsOnVisibleTab()) return;
       deleteSelectedElements();
@@ -244,18 +244,12 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
     ++gbcButton.gridx;
     JButton tabButton = new JButton(L.m("Neuer Tab"));
-    tabButton.addActionListener((ActionEvent e) ->
-    {
-      insertNewTab();
-    });
+    tabButton.addActionListener(e -> insertNewTab());
     buttonPanel.add(tabButton, gbcButton);
 
     ++gbcButton.gridx;
     JButton newButton = new JButton(L.m("Neues Label"));
-    newButton.addActionListener((ActionEvent e) ->
-    {
-      insertNewElement();
-    });
+    newButton.addActionListener(e -> insertNewElement());
     buttonPanel.add(newButton, gbcButton);
     
     int index = 0;
@@ -324,7 +318,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    */
   private void fixTabStructure()
   {
-    Set<Object> toValidate = new HashSet<Object>();
+    Set<Object> toValidate = new HashSet<>();
     int gridY = 0;
     int tabIndex = 0;
     JComponent tab = firstTab;
@@ -514,9 +508,9 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    */
   public ComboboxMergeDescriptor mergeCheckboxesIntoCombobox()
   {
-    Map<ID, String> mapCheckboxId2ComboboxEntry = new HashMap<ID, String>();
+    Map<ID, String> mapCheckboxId2ComboboxEntry = new HashMap<>();
     int count = 0;
-    ArrayList<String> itemList = new ArrayList<String>();
+    ArrayList<String> itemList = new ArrayList<>();
     Iterator<Integer> iter = selection.iterator();
     while (iter.hasNext())
     {

@@ -53,7 +53,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Iterator;
 
 import javax.swing.BorderFactory;
@@ -128,26 +127,17 @@ public class AbsenderAuswaehlen
   /**
    * ActionListener für Buttons mit der ACTION "abort".
    */
-  private ActionListener actionListener_abort = (ActionEvent e) ->
-  {
-      abort();
-  };
+  private ActionListener actionListener_abort = e -> abort();
 
   /**
    * ActionListener für Buttons mit der ACTION "back".
    */
-  private ActionListener actionListener_back = (ActionEvent e) ->
-  {
-      back();
-  };
+  private ActionListener actionListener_back = e -> back();
 
   /**
    * ActionListener für Buttons mit der ACTION "editList".
    */
-  private ActionListener actionListener_editList = (ActionEvent e) ->
-  {
-      editList();
-  };
+  private ActionListener actionListener_editList = e -> editList();
 
   /**
    * wird getriggert bei windowClosing() Event.
@@ -269,7 +259,7 @@ public class AbsenderAuswaehlen
           }
           catch (Exception x)
           {
-            //
+            LOGGER.trace("", x);
           }
       });
     }
@@ -290,7 +280,7 @@ public class AbsenderAuswaehlen
   {
     Common.setLookAndFeelOnce();
 
-    palJList = new JList<Object>(new DefaultListModel<Object>());
+    palJList = new JList<>(new DefaultListModel<Object>());
 
     String title = L.m(fensterDesc.getString("TITLE",
         "TITLE fehlt für Fenster AbsenderAuswaehlen/Auswaehlen"));
@@ -423,6 +413,7 @@ public class AbsenderAuswaehlen
           }
           catch (NumberFormatException e)
           {
+            LOGGER.trace("", e);
           }
 
           JList<Object> list;
@@ -452,7 +443,7 @@ public class AbsenderAuswaehlen
           }
           else
           {
-            list = new JList<Object>(new DefaultListModel<Object>());
+            list = new JList<>(new DefaultListModel<Object>());
           }
 
           list.setVisibleRowCount(lines);
@@ -794,6 +785,8 @@ public class AbsenderAuswaehlen
       javax.swing.SwingUtilities.invokeLater(this::abort);
     }
     catch (Exception x)
-    {/* Hope for the best */}
+    {
+      LOGGER.trace("", x);
+    }
   }
 }
