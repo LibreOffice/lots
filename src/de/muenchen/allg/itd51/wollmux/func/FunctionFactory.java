@@ -58,6 +58,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
@@ -517,7 +518,7 @@ public class FunctionFactory
     reFun = parse(iter.next(), funcLib, dialogLib, context);
     repFun = parse(iter.next(), funcLib, dialogLib, context);
 
-    String regex = reFun.getString(Function.noValues);
+    String regex = reFun.getString(new Values.None());
     Pattern p;
     try
     {
@@ -563,7 +564,7 @@ public class FunctionFactory
         "Index-Argument von %1 muss \"<NichtNegativeGanzeZahl>\" sein",
         conf.getName()));
 
-    String regex = reFun.getString(Function.noValues);
+    String regex = reFun.getString(new Values.None());
     Pattern p;
     try
     {
@@ -602,7 +603,7 @@ public class FunctionFactory
       throw new RuntimeException(x);
     }
 
-    String regex = reFun.getString(Function.noValues);
+    String regex = reFun.getString(new Values.None());
     Pattern p;
     try
     {
@@ -638,7 +639,7 @@ public class FunctionFactory
       throw new RuntimeException(e);
     }
 
-    return new ValueFunction(valueNameFun.getString(Function.noValues));
+    return new ValueFunction(valueNameFun.getString(new Values.None()));
   }
 
   private static Function parseDIVIDE(ConfigThingy conf, FunctionLibrary funcLib,

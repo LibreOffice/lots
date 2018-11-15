@@ -34,7 +34,7 @@ public class AndFunction extends MultiFunction
     {
       Function func = iter.next();
       String str = func.getString(parameters);
-      if (str == Function.ERROR) return Function.ERROR;
+      if (str == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
       if (!str.equalsIgnoreCase("true")) return "false";
     }
     return "true";

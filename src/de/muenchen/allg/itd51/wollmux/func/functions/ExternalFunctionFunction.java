@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import de.muenchen.allg.itd51.wollmux.WollMuxClassLoader;
 import de.muenchen.allg.itd51.wollmux.core.functions.ExternalFunction;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
@@ -51,7 +52,7 @@ public class ExternalFunctionFunction implements Function
     catch (Exception e)
     {
       LOGGER.error("", e);
-      return Function.ERROR;
+      return FunctionLibrary.ERROR;
     }
   }
 

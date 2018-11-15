@@ -60,12 +60,12 @@ public class SelectFunction extends MultiFunction
   public String getString(Values parameters)
   {
     Iterator<Function> iter = subFunction.iterator();
-    String result = Function.ERROR;
+    String result = FunctionLibrary.ERROR;
     while (iter.hasNext())
     {
       Function func = iter.next();
       String str = func.getString(parameters);
-      if (str != Function.ERROR)
+      if (str != FunctionLibrary.ERROR)
       {
         result = str;
         if (str.length() > 0) break;

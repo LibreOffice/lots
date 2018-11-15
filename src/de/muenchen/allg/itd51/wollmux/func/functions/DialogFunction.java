@@ -3,8 +3,11 @@ package de.muenchen.allg.itd51.wollmux.func.functions;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 
@@ -27,7 +30,7 @@ public class DialogFunction implements Function
   @Override
   public String[] parameters()
   {
-    return noParams;
+    return ArrayUtils.EMPTY_STRING_ARRAY;
   }
 
   @Override
@@ -40,7 +43,7 @@ public class DialogFunction implements Function
   public String getString(Values parameters)
   {
     Object data = dialog.getData(dataName);
-    if (data == null) return Function.ERROR;
+    if (data == null) return FunctionLibrary.ERROR;
     return data.toString();
   }
 

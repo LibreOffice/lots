@@ -108,7 +108,7 @@ public class NumberCompareFunction extends NumberFunction
     if (marginFun != null)
     {
       String str = marginFun.getString(parameters);
-      if (str == Function.ERROR) return Function.ERROR;
+      if (str == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
       try
       {
         margin = makeBigDecimal(str);
@@ -116,7 +116,7 @@ public class NumberCompareFunction extends NumberFunction
       }
       catch (Exception x)
       {
-        return Function.ERROR;
+        return FunctionLibrary.ERROR;
       }
     }
     else
