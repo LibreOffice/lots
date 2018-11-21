@@ -158,7 +158,7 @@ public class WollMuxSingleton
     if (DatasourceJoinerFactory.getDatasourceJoiner() == null) successfulStartup = false;
 
     // Initialisiere EventProcessor
-    WollMuxEventHandler.setAcceptEvents(successfulStartup);
+    WollMuxEventHandler.getInstance().setAcceptEvents(successfulStartup);
 
     // register global EventListener
     try
@@ -245,10 +245,10 @@ public class WollMuxSingleton
       singletonInstance = new WollMuxSingleton(ctx);
 
       // Prüfen ob Doppelt- oder Halbinstallation vorliegt.
-      WollMuxEventHandler.handleCheckInstallation();
+      WollMuxEventHandler.getInstance().handleCheckInstallation();
 
       // Event ON_FIRST_INITIALIZE erzeugen:
-      WollMuxEventHandler.handleInitialize();
+      WollMuxEventHandler.getInstance().handleInitialize();
     }
   }
 

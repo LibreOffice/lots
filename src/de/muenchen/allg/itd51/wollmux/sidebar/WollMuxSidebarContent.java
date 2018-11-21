@@ -636,7 +636,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         {
           String name = (String) UnoReflect.with(menu).method("getCommand").withArgs(new Short(event.MenuId)).invoke();
           short pos = (Short) UnoReflect.with(menu).method("getItemPos").withArgs(new Short(event.MenuId)).invoke();
-          WollMuxEventHandler.handleSetSender(name, pos);
+          WollMuxEventHandler.getInstance().handleSetSender(name, pos);
         }
         catch (Exception e)
         {

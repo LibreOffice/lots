@@ -47,14 +47,14 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     String action = args[0].toString();
     if (action.equals("absenderAuswaehlen"))
     {
-      WollMuxEventHandler.handleShowDialogAbsenderAuswaehlen();
+      WollMuxEventHandler.getInstance().handleShowDialogAbsenderAuswaehlen();
     }
     else if (action.equals("openDocument"))
     {
       String fragId = getFragId((ConfigThingy) args[1], action);
       if (fragId != null)
       {
-        WollMuxEventHandler.handleOpenDocument(Arrays.asList(new String[]{fragId}), false);
+        WollMuxEventHandler.getInstance().handleOpenDocument(Arrays.asList(new String[]{fragId}), false);
       }
     }
     else if (action.equals("openTemplate"))
@@ -62,7 +62,7 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
       String fragId = getFragId((ConfigThingy) args[1], action);
       if (fragId != null)
       {
-        WollMuxEventHandler.handleOpenDocument(Arrays.asList(new String[]{fragId}), true);
+        WollMuxEventHandler.getInstance().handleOpenDocument(Arrays.asList(new String[]{fragId}), true);
       }
     }
     else if (action.equals("open"))
@@ -81,7 +81,7 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     }
     else if (action.equals("dumpInfo"))
     {
-      WollMuxEventHandler.handleDumpInfo();
+      WollMuxEventHandler.getInstance().handleDumpInfo();
     }
     else if (action.equals("abort"))
     {
@@ -89,12 +89,12 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     }
     else if (action.equals("kill"))
     {
-      WollMuxEventHandler.handleKill();
+      WollMuxEventHandler.getInstance().handleKill();
       // abort();
     }
     else if (action.equals("about"))
     {
-      WollMuxEventHandler.handleAbout(WollMuxBar.getBuildInfo());
+      WollMuxEventHandler.getInstance().handleAbout(WollMuxBar.getBuildInfo());
     }
     else if (action.equals("menuManager"))
     {

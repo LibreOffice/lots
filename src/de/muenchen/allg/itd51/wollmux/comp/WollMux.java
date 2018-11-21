@@ -276,7 +276,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   @Override
   public void addPALChangeEventListener(XPALChangeEventListener l)
   {
-    WollMuxEventHandler.handleAddPALChangeEventListener(l, null);
+    WollMuxEventHandler.getInstance().handleAddPALChangeEventListener(l, null);
   }
 
   /**
@@ -308,7 +308,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   public void addPALChangeEventListenerWithConsistencyCheck(
       XPALChangeEventListener l, int wollmuxConfHashCode)
   {
-    WollMuxEventHandler.handleAddPALChangeEventListener(l,
+    WollMuxEventHandler.getInstance().handleAddPALChangeEventListener(l,
       Integer.valueOf(wollmuxConfHashCode));
   }
 
@@ -340,7 +340,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   @Override
   public void addEventListener(XEventListener l)
   {
-    WollMuxEventHandler.handleAddDocumentEventListener(l);
+    WollMuxEventHandler.getInstance().handleAddDocumentEventListener(l);
   }
 
   /**
@@ -352,7 +352,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   @Override
   public void removePALChangeEventListener(XPALChangeEventListener l)
   {
-    WollMuxEventHandler.handleRemovePALChangeEventListener(l);
+    WollMuxEventHandler.getInstance().handleRemovePALChangeEventListener(l);
   }
 
   /**
@@ -368,7 +368,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   @Override
   public void removeEventListener(XEventListener l)
   {
-    WollMuxEventHandler.handleRemoveDocumentEventListener(l);
+    WollMuxEventHandler.getInstance().handleRemoveDocumentEventListener(l);
   }
 
   /**
@@ -384,7 +384,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   public void setCurrentSender(String sender, short idx)
   {
     LOGGER.trace("WollMux.setCurrentSender(\"" + sender + "\", " + idx + ")");
-    WollMuxEventHandler.handleSetSender(sender, idx);
+    WollMuxEventHandler.getInstance().handleSetSender(sender, idx);
   }
 
   /**

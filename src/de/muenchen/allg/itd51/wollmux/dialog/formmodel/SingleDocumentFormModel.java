@@ -122,7 +122,7 @@ public class SingleDocumentFormModel
    */
   public void close()
   {
-    WollMuxEventHandler.handleCloseTextDocument(documentController);
+    WollMuxEventHandler.getInstance().handleCloseTextDocument(documentController);
   }
 
   /**
@@ -132,7 +132,7 @@ public class SingleDocumentFormModel
    */
   public void closeAndOpenExt(String ext)
   {
-    WollMuxEventHandler.handleCloseAndOpenExt(documentController, ext);
+    WollMuxEventHandler.getInstance().handleCloseAndOpenExt(documentController, ext);
   }
 
   /**
@@ -142,7 +142,7 @@ public class SingleDocumentFormModel
    */
   public void saveTempAndOpenExt(String ext)
   {
-    WollMuxEventHandler.handleSaveTempAndOpenExt(documentController, ext);
+    WollMuxEventHandler.getInstance().handleSaveTempAndOpenExt(documentController, ext);
   }
 
   /**
@@ -162,7 +162,7 @@ public class SingleDocumentFormModel
      * z.B. müsste die FormGUI sichtbar werden.
      */
     if (visible)
-      WollMuxEventHandler.handleSetWindowVisible(documentController, vis);
+      WollMuxEventHandler.getInstance().handleSetWindowVisible(documentController, vis);
   }
 
   /**
@@ -186,7 +186,7 @@ public class SingleDocumentFormModel
   public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
   {
     if (visible)
-      WollMuxEventHandler.handleSetWindowPosSize(documentController, docX, docY,
+      WollMuxEventHandler.getInstance().handleSetWindowPosSize(documentController, docX, docY,
           docWidth, docHeight);
   }
 
@@ -200,7 +200,7 @@ public class SingleDocumentFormModel
    */
   public void setVisibleState(String groupId, boolean visible)
   {
-    WollMuxEventHandler.handleSetVisibleState(documentController, groupId,
+    WollMuxEventHandler.getInstance().handleSetVisibleState(documentController, groupId,
         visible, null);
   }
 
@@ -214,7 +214,7 @@ public class SingleDocumentFormModel
   public void valueChanged(String fieldId, String newValue)
   {
     if (fieldId.length() > 0)
-      WollMuxEventHandler.handleFormValueChanged(documentController, fieldId,
+      WollMuxEventHandler.getInstance().handleFormValueChanged(documentController, fieldId,
           newValue);
   }
 
@@ -229,7 +229,7 @@ public class SingleDocumentFormModel
   public void focusGained(String fieldId)
   {
     if (visible)
-      WollMuxEventHandler.handleFocusFormField(documentController, fieldId);
+      WollMuxEventHandler.getInstance().handleFocusFormField(documentController, fieldId);
   }
 
   /**
@@ -347,7 +347,7 @@ public class SingleDocumentFormModel
    */
   public void formControllerInitCompleted()
   {
-    WollMuxEventHandler.handleFormControllerInitCompleted(documentController);
+    WollMuxEventHandler.getInstance().handleFormControllerInitCompleted(documentController);
   }
 
   /**
@@ -464,7 +464,7 @@ public class SingleDocumentFormModel
    */
   public void openTemplateOrDocument(List<String> fragIds)
   {
-    WollMuxEventHandler.handleOpenDocument(fragIds, false);
+    WollMuxEventHandler.getInstance().handleOpenDocument(fragIds, false);
   }
 
   /**

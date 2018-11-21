@@ -43,18 +43,15 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
 import org.slf4j.Logger;
@@ -114,7 +111,7 @@ public class FormGUI
    * Dies schadet einerseits der Stabilität von OOo und andererseits ist es ein
    * Performance-Problem.
    */
-  private WindowPosSizeSetter windowPosSizeSetter = new WindowPosSizeSetter();
+//  private WindowPosSizeSetter windowPosSizeSetter = new WindowPosSizeSetter();
 
   /**
    * Der Titel des Formulars (falls nicht anderweitig spezifiziert).
@@ -172,6 +169,7 @@ public class FormGUI
    * @param visible
    *          false zeigt an, dass die FormGUI unsichtbar bleiben soll.
    */
+  public FormGUI() {}
   public FormGUI(final ConfigThingy formFensterConf, final ConfigThingy conf,
       SingleDocumentFormModel doc,
       final Map<String, String> mapIdToPresetValue, final Map<Object, Object> functionContext,
@@ -185,31 +183,22 @@ public class FormGUI
 
     frameTitle = doc.getWindowTitle();
     if (frameTitle != null)
-    {
-      formGUITitle = frameTitle + " - " + formTitle;
-    }
+        formGUITitle = frameTitle + " - " + formTitle;
 
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
-    try
-    {
-      Runnable runner = () -> {
-        try
-        {
-          createGUI(conf, mapIdToPresetValue, functionContext, funcLib, dialogLib, visible);
-        } catch (Exception x)
-        {
-          LOGGER.error("", x);
-        }
-      };
-      if (SwingUtilities.isEventDispatchThread())
-        runner.run();
-      else
-        SwingUtilities.invokeAndWait(runner);
-    } catch (InvocationTargetException | InterruptedException x)
-    {
-      LOGGER.error("", x);
-    }
-
+    Runnable runner = () -> {
+      try
+      {
+        createGUI(conf, mapIdToPresetValue, functionContext, funcLib, dialogLib, visible);
+      } catch (Exception x)
+      {
+        LOGGER.error("", x);
+      }
+    };
+    if (SwingUtilities.isEventDispatchThread())
+      runner.run();
+    else
+      SwingUtilities.invokeLater(runner);
   }
 
   private void createGUI(ConfigThingy conf,
@@ -284,7 +273,7 @@ public class FormGUI
      * Bestimmen der Breite des Fensterrahmens.
      */
     windowInsets = myFrame.getInsets();
-
+    
     setFormGUISizeAndLocation();
     arrangeWindows();
   }
@@ -418,43 +407,7 @@ public class FormGUI
     int docHeight = maxWindowBounds.y + maxWindowBounds.height - docY
         - 2 * windowInsets.bottom;
 
-    windowPosSizeSetter.setWindowPosSize(docX, docY, docWidth, docHeight);
-  }
-
-  private class WindowPosSizeSetter extends Timer implements ActionListener
-  {
-    private static final long serialVersionUID = 3722895126444827532L;
-
-    private int x;
-
-    private int y;
-
-    private int width;
-
-    private int height;
-
-    public WindowPosSizeSetter()
-    {
-      super(100, null);
-      addActionListener(this);
-      setRepeats(false);
-      setCoalesce(true);
-    }
-
-    public void setWindowPosSize(int x, int y, int width, int height)
-    {
-      this.x = x;
-      this.y = y;
-      this.width = width;
-      this.height = height;
-      restart();
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      myDoc.setWindowPosSize(x, y, width, height);
-    }
+   	myDoc.setWindowPosSize(docX, docY, docWidth, docHeight);
   }
 
   /**
