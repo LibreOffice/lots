@@ -106,12 +106,12 @@ public class Dispatch extends BaseDispatch
   // new Vector<XStatusListener>();
   public void dispatch_wollmux_absenderauswaehlen(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleShowDialogAbsenderAuswaehlen();
+    WollMuxEventHandler.getInstance().handleShowDialogAbsenderAuswaehlen();
   }
 
   public void dispatch_wollmux_palverwalten(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleShowDialogPersoenlicheAbsenderliste();
+    WollMuxEventHandler.getInstance().handleShowDialogPersoenlicheAbsenderliste();
   }
 
   public void dispatch_wollmux_opentemplate(String arg, PropertyValue[] props)
@@ -120,7 +120,7 @@ public class Dispatch extends BaseDispatch
     String[] parts = arg.split("&");
     for (int i = 0; i < parts.length; i++)
       fragIds.add(parts[i]);
-    WollMuxEventHandler.handleOpenDocument(fragIds, true);
+    WollMuxEventHandler.getInstance().handleOpenDocument(fragIds, true);
   }
 
   public void dispatch_wollmux_open(String arg, PropertyValue[] props)
@@ -134,24 +134,24 @@ public class Dispatch extends BaseDispatch
     String[] parts = arg.split("&");
     for (int i = 0; i < parts.length; i++)
       fragIds.add(parts[i]);
-    WollMuxEventHandler.handleOpenDocument(fragIds, false);
+    WollMuxEventHandler.getInstance().handleOpenDocument(fragIds, false);
   }
 
   public void dispatch_wollmux_kill(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleKill();
+    WollMuxEventHandler.getInstance().handleKill();
   }
 
   public void dispatch_wollmux_about(String arg, PropertyValue[] props)
   {
     String wollMuxBarVersion = null;
     if (arg.length() > 0) wollMuxBarVersion = arg;
-    WollMuxEventHandler.handleAbout(wollMuxBarVersion);
+    WollMuxEventHandler.getInstance().handleAbout(wollMuxBarVersion);
   }
 
   public void dispatch_wollmux_dumpinfo(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleDumpInfo();
+    WollMuxEventHandler.getInstance().handleDumpInfo();
   }
   
   // zur Vermeidung java.lang.NoSuchMethodException:

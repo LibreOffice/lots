@@ -449,7 +449,7 @@ public class DocumentManager
         /**
          * Dispatch Handler in eigenem Event registrieren, da es Deadlocks gegeben hat.
          */
-        WollMuxEventHandler.handleRegisterDispatchInterceptor(documentController);
+        WollMuxEventHandler.getInstance().handleRegisterDispatchInterceptor(documentController);
       }
       return documentController;
     }

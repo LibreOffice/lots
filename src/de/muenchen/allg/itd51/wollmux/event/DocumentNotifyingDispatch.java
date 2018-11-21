@@ -157,7 +157,7 @@ public class DocumentNotifyingDispatch extends NotifyingDispatch implements
     this.props = props;
     if (!getDocumentController().getModel().hasURL())
     {
-      WollMuxEventHandler.handleSaveAs(getDocumentController(), this, isSynchronMode(props));
+      WollMuxEventHandler.getInstance().handleSaveAs(getDocumentController(), this, isSynchronMode(props));
     }
     else
     {
@@ -172,7 +172,7 @@ public class DocumentNotifyingDispatch extends NotifyingDispatch implements
     this.listener = listener;
     if (!getDocumentController().getModel().hasURL())
     {
-      WollMuxEventHandler.handleSaveAs(getDocumentController(), this, isSynchronMode(props));
+      WollMuxEventHandler.getInstance().handleSaveAs(getDocumentController(), this, isSynchronMode(props));
     }
     else
     {
@@ -185,7 +185,7 @@ public class DocumentNotifyingDispatch extends NotifyingDispatch implements
     this.props = props;
     if (!getDocumentController().getModel().hasURL())
     {
-      WollMuxEventHandler.handleSaveAs(getDocumentController(), this, isSynchronMode(props));
+      WollMuxEventHandler.getInstance().handleSaveAs(getDocumentController(), this, isSynchronMode(props));
     }
     else
     {
@@ -200,7 +200,7 @@ public class DocumentNotifyingDispatch extends NotifyingDispatch implements
     this.listener = listener;
     if (!getDocumentController().getModel().hasURL())
     {
-      WollMuxEventHandler.handleSaveAs(getDocumentController(), this, isSynchronMode(props));
+      WollMuxEventHandler.getInstance().handleSaveAs(getDocumentController(), this, isSynchronMode(props));
     }
     else
     {

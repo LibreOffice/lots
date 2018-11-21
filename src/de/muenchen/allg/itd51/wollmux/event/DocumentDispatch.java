@@ -145,74 +145,74 @@ public class DocumentDispatch extends Dispatch
 
   public void dispatch__uno_print(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handlePrint(getDocumentController(), origDisp, origUrl,
+    WollMuxEventHandler.getInstance().handlePrint(getDocumentController(), origDisp, origUrl,
 	props);
   }
 
   public void dispatch__uno_printdefault(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handlePrint(getDocumentController(), origDisp, origUrl,
+    WollMuxEventHandler.getInstance().handlePrint(getDocumentController(), origDisp, origUrl,
 	props);
   }
 
   public void dispatch_wollmux_functiondialog(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleFunctionDialog(getDocumentController(), arg);
+    WollMuxEventHandler.getInstance().handleFunctionDialog(getDocumentController(), arg);
   }
 
   public void dispatch_wollmux_formularmax4000(String arg,
       PropertyValue[] props)
   {
-    WollMuxEventHandler.handleFormularMax4000Show(getDocumentController());
+    WollMuxEventHandler.getInstance().handleFormularMax4000Show(getDocumentController());
   }
 
   public void dispatch_wollmux_ziffereinfuegen(String arg,
       PropertyValue[] props)
   {
     WollMuxEventHandler
-	.handleButtonZifferEinfuegenPressed(getDocumentController());
+	.getInstance().handleButtonZifferEinfuegenPressed(getDocumentController());
   }
 
   public void dispatch_wollmux_abdruck(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleButtonAbdruckPressed(getDocumentController());
+    WollMuxEventHandler.getInstance().handleButtonAbdruckPressed(getDocumentController());
   }
 
   public void dispatch_wollmux_zuleitungszeile(String arg,
       PropertyValue[] props)
   {
     WollMuxEventHandler
-	.handleButtonZuleitungszeilePressed(getDocumentController());
+	.getInstance().handleButtonZuleitungszeilePressed(getDocumentController());
   }
 
   public void dispatch_wollmux_markblock(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleMarkBlock(getDocumentController(), arg);
+    WollMuxEventHandler.getInstance().handleMarkBlock(getDocumentController(), arg);
   }
 
   public void dispatch_wollmux_textbausteineinfuegen(String arg,
       PropertyValue[] props)
   {
-    WollMuxEventHandler.handleTextbausteinEinfuegen(getDocumentController(),
+    WollMuxEventHandler.getInstance().handleTextbausteinEinfuegen(getDocumentController(),
 	true);
   }
 
   public void dispatch_wollmux_platzhalteranspringen(String arg,
       PropertyValue[] props)
   {
-    WollMuxEventHandler.handleJumpToPlaceholder(getDocumentController());
+    WollMuxEventHandler.getInstance().handleJumpToPlaceholder(getDocumentController());
   }
 
   public void dispatch_wollmux_textbausteinverweiseinfuegen(String arg,
       PropertyValue[] props)
   {
-    WollMuxEventHandler.handleTextbausteinEinfuegen(getDocumentController(),
+    WollMuxEventHandler.getInstance().handleTextbausteinEinfuegen(getDocumentController(),
 	false);
   }
 
   public void dispatch_wollmux_seriendruck(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleSeriendruck(getDocumentController(), false);
+    WollMuxEventHandler.getInstance().handleSeriendruck(getDocumentController(), false);
   }
 
   public void dispatch_wollmux_test(String arg, PropertyValue[] props)
@@ -223,7 +223,7 @@ public class DocumentDispatch extends Dispatch
 
   public void dispatch_wollmux_printpage(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handlePrintPage(getDocumentController());
+    WollMuxEventHandler.getInstance().handlePrintPage(getDocumentController());
   }
 
   public boolean status_wollmux_printpage()

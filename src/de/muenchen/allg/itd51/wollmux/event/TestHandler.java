@@ -129,7 +129,7 @@ public class TestHandler
       {
         String id = ent.getKey();
         String value = ent.getValue();
-        WollMuxEventHandler.handleSetFormValue(documentController.getModel().doc, id, value, null);
+        WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc, id, value, null);
       }
     }
 

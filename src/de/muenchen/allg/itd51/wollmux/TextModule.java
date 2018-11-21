@@ -452,7 +452,7 @@ public class TextModule
         viewCursor.gotoRange(oldPos, false);
 
         // und handle jumpToMark aufrufen.
-        WollMuxEventHandler.handleJumpToMark(doc, true);
+        WollMuxEventHandler.getInstance().handleJumpToMark(doc, true);
       }
     }
   }
@@ -584,7 +584,7 @@ public class TextModule
     // Übergabeparameter true
     if (found == false)
     {
-      WollMuxEventHandler.handleJumpToMark(doc, true);
+      WollMuxEventHandler.getInstance().handleJumpToMark(doc, true);
     }
   }
 }

@@ -50,7 +50,7 @@ class WollMuxDocument implements XWollMuxDocument
   @Override
   public void addPrintFunction(String functionName)
   {
-    WollMuxEventHandler.handleManagePrintFunction(doc, functionName, false);
+    WollMuxEventHandler.getInstance().handleManagePrintFunction(doc, functionName, false);
   }
 
   /**
@@ -70,7 +70,7 @@ class WollMuxDocument implements XWollMuxDocument
   @Override
   public void removePrintFunction(String functionName)
   {
-    WollMuxEventHandler.handleManagePrintFunction(doc, functionName, true);
+    WollMuxEventHandler.getInstance().handleManagePrintFunction(doc, functionName, true);
   }
 
   /**
@@ -93,7 +93,7 @@ class WollMuxDocument implements XWollMuxDocument
   public void setFormValue(String id, String value)
   {
     SyncActionListener s = new SyncActionListener();
-    WollMuxEventHandler.handleSetFormValue(doc, id, value, s);
+    WollMuxEventHandler.getInstance().handleSetFormValue(doc, id, value, s);
     s.synchronize();
   }
 
@@ -150,7 +150,7 @@ class WollMuxDocument implements XWollMuxDocument
     HashMap<String, String> m = new HashMap<String, String>(mapDbSpalteToValue);
     mapDbSpalteToValue.clear();
     SyncActionListener s = new SyncActionListener();
-    WollMuxEventHandler.handleSetInsertValues(doc, m, s);
+    WollMuxEventHandler.getInstance().handleSetInsertValues(doc, m, s);
     s.synchronize();
   }
 

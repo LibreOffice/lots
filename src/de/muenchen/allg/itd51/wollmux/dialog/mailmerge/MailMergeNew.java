@@ -654,11 +654,11 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     Iterator<String> dataIter = data.iterator();
     for (String column : schema)
     {
-      WollMuxEventHandler.handleSetFormValue(documentController.getModel().doc, column, dataIter.next(), null);
+      WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc, column, dataIter.next(), null);
     }
-    WollMuxEventHandler.handleSetFormValue(documentController.getModel().doc,
+    WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
       MailMergeParams.TAG_DATENSATZNUMMER, previewDatasetNumberStr, null);
-    WollMuxEventHandler.handleSetFormValue(documentController.getModel().doc,
+    WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
       MailMergeParams.TAG_SERIENBRIEFNUMMER, previewDatasetNumberStr, null);
   }
 

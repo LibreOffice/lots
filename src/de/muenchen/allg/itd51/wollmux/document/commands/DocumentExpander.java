@@ -581,7 +581,7 @@ class DocumentExpander extends AbstractExecutor
     // Cursor auf die definierte Marke setJumpMark (falls Vorhanden)
     if (placeholders.size() <= args.size())
     {
-      WollMuxEventHandler.handleJumpToMark(doc, false);
+      WollMuxEventHandler.getInstance().handleJumpToMark(doc, false);
     }
 
     // Wenn mehr Platzhalter angegeben als Einfügestellen vorhanden, erscheint
