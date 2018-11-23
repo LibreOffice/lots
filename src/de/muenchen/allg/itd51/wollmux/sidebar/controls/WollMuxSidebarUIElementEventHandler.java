@@ -4,18 +4,17 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementEventHandler;
 import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.MultiOpenDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarEventHandler;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -68,7 +67,10 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     }
     else if (action.equals("open"))
     {
-      showMultiOpenDialog((ConfigThingy) args[1]);
+      ModalDialogs.showInfoModal("Multiformulare werden nicht mehr unterstützt",
+          "Multiformulare werden nicht mehr unterstützt. "
+              + "Bitte kontaktieren Sie Ihren Administrator. "
+              + "Sie müssen jedes Formular einzeln öffnen und ausfüllen.");
     }
     else if (action.equals("openExt"))
     {
@@ -102,29 +104,6 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     {
       // options();
     }
-  }
-  
-  /**
-   * Erwartet in conf eine Spezifikation gemäß wollmux:Open und bringt einen
-   * Auswahldialog, um die zu öffnenden Vorlagen/Dokumente auszuwählen.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-   */
-  private void showMultiOpenDialog(final ConfigThingy conf)
-  {
-    final JFrame multiOpenFrame =
-      new MultiOpenDialog(L.m("Was möchten Sie öffnen ?"), conf, new WollMuxBarEventHandler(null) {
-
-        @Override
-        public Event handleWollMuxUrl(String dispatchCmd, String arg)
-        {
-          Event e = super.handleWollMuxUrl(dispatchCmd, arg);
-          e.process();
-          return e;
-        }
-        
-      });
-    multiOpenFrame.setVisible(true);
   }
   
   /**

@@ -61,7 +61,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
-import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
+import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
@@ -83,11 +83,11 @@ public class DocumentManager
   private static DocumentManager docManager;
 
   private Map<HashableComponent, Info> info =
-    new HashMap<HashableComponent, Info>();
+    new HashMap<>();
 
-  private Map<XTextDocument, FormModel> formModels = new HashMap<XTextDocument, FormModel>();
-  private Map<XTextDocument, FormularMax4kController> fm4k = new HashMap<XTextDocument, FormularMax4kController>();
-  private Map<XTextDocument, MailMergeNew> mailMerge = new HashMap<XTextDocument, MailMergeNew>();
+  private Map<XTextDocument, SingleDocumentFormModel> formModels = new HashMap<>();
+  private Map<XTextDocument, FormularMax4kController> fm4k = new HashMap<>();
+  private Map<XTextDocument, MailMergeNew> mailMerge = new HashMap<>();
 
   /**
    * Enthält alle registrierten XEventListener, die bei Statusänderungen der
@@ -96,7 +96,7 @@ public class DocumentManager
   private List<XEventListener> registeredDocumentEventListener;
 
   private DocumentManager() {
-    registeredDocumentEventListener = new ArrayList<XEventListener>();
+    registeredDocumentEventListener = new ArrayList<>();
   }
 
   /**
@@ -260,7 +260,7 @@ public class DocumentManager
    *
    * @return Die FormularGUI des Formulardokuments oder null
    */
-  public synchronized FormModel getFormModel(XTextDocument doc)
+  public synchronized SingleDocumentFormModel getFormModel(XTextDocument doc)
   {
     return formModels.get(doc);
   }
@@ -273,7 +273,7 @@ public class DocumentManager
    * @param formGUI
    *          Die zu diesem Dokument zugehörige formGUI
    */
-  public synchronized void setFormModel(XTextDocument doc, FormModel formModel)
+  public synchronized void setFormModel(XTextDocument doc, SingleDocumentFormModel formModel)
   {
     this.formModels.put(doc, formModel);
   }

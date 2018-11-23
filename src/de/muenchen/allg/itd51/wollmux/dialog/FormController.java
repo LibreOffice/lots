@@ -100,7 +100,7 @@ import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
+import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 /**
@@ -251,7 +251,7 @@ public class FormController implements UIElementEventHandler
   /**
    * Das Writer-Dokument, das zum Formular gehört (gekapselt als FormModel).
    */
-  private FormModel formModel;
+  private SingleDocumentFormModel formModel;
 
   /**
    * Wird aufgerufen, wenn eine Aktion einen Abbruch des Dialogs erwirken soll.
@@ -290,7 +290,7 @@ public class FormController implements UIElementEventHandler
    *          Aktion an, die verantwortlich ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormController(ConfigThingy conf, FormModel model,
+  public FormController(ConfigThingy conf, SingleDocumentFormModel model,
       final Map<String, String> mapIdToPresetValue,
       Map<Object, Object> functionContext, FunctionLibrary funcLib,
       DialogLibrary dialogLib, ActionListener abortRequestListener)
