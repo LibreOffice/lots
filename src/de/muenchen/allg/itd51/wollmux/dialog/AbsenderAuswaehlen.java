@@ -150,11 +150,6 @@ public class AbsenderAuswaehlen
   private JFrame myFrame;
 
   /**
-   * Das JPanel der obersten Hierarchiestufe.
-   */
-  private JPanel mainPanel;
-
-  /**
    * Der DatasourceJoiner, den dieser Dialog anspricht.
    */
   private DatasourceJoiner dj;
@@ -278,6 +273,11 @@ public class AbsenderAuswaehlen
    */
   private void createGUI(ConfigThingy fensterDesc)
   {
+	/**
+	* Das JPanel der obersten Hierarchiestufe.
+	*/
+	JPanel mainPanel;
+	
     Common.setLookAndFeelOnce();
 
     palJList = new JList<>(new DefaultListModel<>());
