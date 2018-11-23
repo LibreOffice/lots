@@ -2,114 +2,22 @@ package de.muenchen.allg.itd51.wollmux;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.muenchen.allg.itd51.wollmux.core.ConfClassLoader;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 
-public class WollMuxClassLoader extends URLClassLoader
+public class WollMuxClassLoader extends ConfClassLoader
 {
 
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(WollMuxClassLoader.class);
-
-  private ArrayList<String> blacklist;
-
-  private ArrayList<String> whitelist;
-
-  private static WollMuxClassLoader classLoader;
-
-  private static final String[] BLACKLIST = {
-  "java.", "com.sun." };
+  private static final Logger LOGGER = LoggerFactory.getLogger(WollMuxClassLoader.class);
 
   private WollMuxClassLoader()
   {
-    super(new URL[] {});
-    blacklist = new ArrayList<String>();
-    whitelist = new ArrayList<String>();
-    whitelist.add("com.sun.star.lib.loader"); // Ausnahme für Klassen in der Standardconfig
-  }
-
-  @Override
-  public void addURL(URL url)
-  {
-    super.addURL(url);
-  }
-
-  public void addBlacklisted(String name)
-  {
-    blacklist.add(name);
-  }
-
-  public void addWhitelisted(String name)
-  {
-    whitelist.add(name);
-  }
-
-  @Override
-  public Class<?> loadClass(String name) throws ClassNotFoundException
-  {
-    try
-    {
-      if (isBlacklisted(name) && !isWhitelisted(name))
-      {
-        throw new ClassNotFoundException();
-      }
-
-      Class<?> c = findLoadedClass(name);
-      if (c != null) return c;
-      return super.findClass(name);
-    }
-    catch (ClassNotFoundException x)
-    {
-      return WollMuxClassLoader.class.getClassLoader().loadClass(name);
-    }
-  }
-
-  private boolean isBlacklisted(String name)
-  {
-    for (String bl : blacklist)
-    {
-      if (name.startsWith(bl))
-      {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  private boolean isWhitelisted(String name)
-  {
-    for (String wl : whitelist)
-    {
-      if (name.startsWith(wl))
-      {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * Liefert einen ClassLoader, der die in wollmux,conf gesetzten
-   * CLASSPATH-Direktiven berücksichtigt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public static WollMuxClassLoader getClassLoader()
-  {
-    if (classLoader == null)
-    {
-      classLoader = new WollMuxClassLoader();
-    }
-    return classLoader;
+    super();
   }
 
   /**
@@ -121,21 +29,18 @@ public class WollMuxClassLoader extends URLClassLoader
   public static void initClassLoader()
   {
     ConfigThingy conf = WollMuxFiles.getWollmuxConf().query("CLASSPATH", 1);
-    Iterator<ConfigThingy> parentiter = conf.iterator();
-    while (parentiter.hasNext())
+    for (ConfigThingy classpathConf : conf)
     {
-      ConfigThingy CLASSPATHconf = parentiter.next();
-      Iterator<ConfigThingy> iter = CLASSPATHconf.iterator();
-      while (iter.hasNext())
+      for (ConfigThingy urlConf : classpathConf)
       {
-        String urlStr = iter.next().toString();
+        String urlStr = urlConf.toString();
         if (!urlStr.endsWith("/")
           && (urlStr.indexOf('.') < 0 || urlStr.lastIndexOf('/') > urlStr.lastIndexOf('.')))
-          urlStr = urlStr + "/"; // Falls keine
-        // Dateierweiterung
-        // angegeben, /
-        // ans Ende setzen, weil nur so Verzeichnisse
-        // erkannt werden.
+        {
+          // Falls keine Dateierweiterung angegeben, / ans Ende setzen, weil nur so Verzeichnisse
+          // erkannt werden.
+          urlStr = urlStr + "/";
+        }
         try
         {
           URL url = WollMuxFiles.makeURL(urlStr);
@@ -154,11 +59,6 @@ public class WollMuxClassLoader extends URLClassLoader
     {
       urllist.append(urls[i].toExternalForm());
       urllist.append("  ");
-    }
-
-    for (String s : WollMuxClassLoader.BLACKLIST)
-    {
-      WollMuxClassLoader.getClassLoader().addBlacklisted(s);
     }
 
     ConfigThingy confWhitelist = WollMuxFiles.getWollmuxConf().query("CPWHITELIST", 1);

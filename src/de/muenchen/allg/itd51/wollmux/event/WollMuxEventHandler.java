@@ -11,15 +11,21 @@ import com.google.common.eventbus.EventBus;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.document.XEventListener;
 import com.sun.star.frame.XDispatch;
+import com.sun.star.frame.XFrame;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.event.handlers.BasicEvent;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnAbdruck;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnAbout;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnButtonZuleitungszeilePressed;
@@ -69,9 +75,7 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextbausteinEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnZifferEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
-import de.muenchen.allg.itd51.wollmux.event.handlers.BasicEvent;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnAbdruck;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnAbout;
+
 
 public class WollMuxEventHandler
 {
