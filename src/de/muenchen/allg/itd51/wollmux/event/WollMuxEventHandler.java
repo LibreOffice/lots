@@ -94,6 +94,24 @@ public class WollMuxEventHandler
 
 	  private InitEventListener initEventListener;
 	  
+	  private boolean acceptEvents = false;	  
+	  
+    /**
+     * Mit dieser Methode ist es möglich die Entgegennahme von Events zu blockieren.
+     * Alle eingehenden Events werden ignoriert, wenn accept auf false gesetzt ist
+     * und entgegengenommen, wenn accept auf true gesetzt ist.
+     *
+     * @param accept
+     */
+    public void setAcceptEvents(boolean accept)
+    {
+      acceptEvents = accept;
+      if (accept)
+        LOGGER.debug(L.m("EventProcessor: akzeptiere neue Events."));
+      else
+        LOGGER.debug(L.m("EventProcessor: blockiere Entgegennahme von Events!"));
+    }
+	  
 	  private WollMuxEventHandler()
 	  {
 	    eventBus = new EventBus();
@@ -121,7 +139,10 @@ public class WollMuxEventHandler
 	   */
 	  private void handle(WollMuxEvent event)
 	  {
-	    eventBus.post(event);
+		  if(acceptEvents)
+		  {
+			  eventBus.post(event);
+		  }
 	  }	  
 	  
 	  // *******************************************************************************************
@@ -180,18 +201,6 @@ public class WollMuxEventHandler
 	  {
 	    handle(new OnReprocessTextDocument(documentController));
 	  }
-	  
-//	  /**
-//	   * Erzeugt ein neues WollMuxEvent, das den übergebenen XEventListener zu
-//	   * deregistriert.
-//	   *
-//	   * @param listener
-//	   *          der zu deregistrierende XEventListener
-//	   */
-//	  public void handleProcessTextDocumentFinished(DocumentManager documentManager, XComponent compo)
-//	  {
-//	    handle(new OnProcessTextDocumentFinished(documentManager, compo));
-//	  }
 	  
 	  /**
 	   * Erzeugt ein neues WollMuxEvent, das aufgerufen wird, wenn ein FormularMax4000
@@ -427,24 +436,6 @@ public class WollMuxEventHandler
 	  {
 	    handle(new OnCheckInstallation());
 	  }
-
-	  
-    /**
-     * Mit dieser Methode ist es möglich die Entgegennahme von Events zu blockieren.
-     * Alle eingehenden Events werden ignoriert, wenn accept auf false gesetzt ist
-     * und entgegengenommen, wenn accept auf true gesetzt ist.
-     *
-     * @param accept
-     */
-    private boolean acceptEvents = false;
-    public void setAcceptEvents(boolean accept)
-    {
-      acceptEvents = accept;
-      if (accept)
-        LOGGER.debug(L.m("EventProcessor: akzeptiere neue Events."));
-      else
-        LOGGER.debug(L.m("EventProcessor: blockiere Entgegennahme von Events!"));
-    }
 	    
 	  /**
 	   * Erzeugt ein neues WollMuxEvent, das signasisiert, das die nächste Marke
