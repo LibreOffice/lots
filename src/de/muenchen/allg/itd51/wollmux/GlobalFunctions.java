@@ -1,9 +1,9 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
-import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
 import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
 

@@ -44,6 +44,7 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.OptionalHighlightColorProvider;
 import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values.SimpleMap;
@@ -56,7 +57,6 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.InvalidFormDescriptorException;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
-import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 public class TextDocumentController
 {
@@ -1906,7 +1906,7 @@ public class TextDocumentController
    *          ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )", wobei
    *          Bezeichner ein beliebiger Bezeichner ist und FUNKTIONSDEFINITION ein
    *          erlaubter Parameter für
-   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}
+   *          {@link de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}
    *          , d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
    *          Funktionsname, z.B. "AND" sein. Der Bezeichner wird NICHT als Name der
    *          TRAFO verwendet. Stattdessen wird ein neuer eindeutiger TRAFO-Name
@@ -2005,7 +2005,7 @@ public class TextDocumentController
    *          ein ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )",
    *          wobei Bezeichner ein beliebiger Bezeichner ist und FUNKTIONSDEFINITION
    *          ein erlaubter Parameter für
-   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}
+   *          {@link de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}
    *          , d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
    *          Funktionsname, z.B. "AND" sein. Der Bezeichner wird NICHT verwendet.
    *          Der Name der TRAFO wird ausschließlich durch trafoName festgelegt.
@@ -2085,7 +2085,7 @@ public class TextDocumentController
    *          Ein ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )",
    *          wobei Bezeichner ein beliebiger Bezeichner ist und FUNKTIONSDEFINITION
    *          ein erlaubter Parameter für
-   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}
+   *          {@link de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}
    *          , d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
    *          Funktionsname, z.B. "AND" sein. Der Bezeichner wird NICHT als Name der
    *          TRAFO verwendet. Stattdessen wird ein neuer eindeutiger TRAFO-Name

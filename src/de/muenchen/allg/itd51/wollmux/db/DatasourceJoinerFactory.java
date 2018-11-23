@@ -29,12 +29,12 @@ import de.muenchen.allg.itd51.wollmux.core.db.SchemaDatasource;
 import de.muenchen.allg.itd51.wollmux.core.db.ThingyDatasource;
 import de.muenchen.allg.itd51.wollmux.core.db.UnionDatasource;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 
 public class DatasourceJoinerFactory
 {
