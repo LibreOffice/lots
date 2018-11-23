@@ -62,7 +62,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -77,7 +76,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -161,9 +159,8 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
-import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.InvalidFormDescriptorException;
-import de.muenchen.allg.itd51.wollmux.dialog.formmodel.MultiDocumentFormModel;
+import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager.Info;
@@ -221,7 +218,7 @@ public class WollMuxEventHandler
      */
     private boolean acceptEvents = false;
 
-    private List<WollMuxEvent> eventQueue = new LinkedList<WollMuxEvent>();
+    private List<WollMuxEvent> eventQueue = new LinkedList<>();
 
     private static EventProcessor singletonInstance;
 
@@ -685,7 +682,7 @@ public class WollMuxEventHandler
       Dialog dialogInst = null;
       try
       {
-        dialogInst = dialog.instanceFor(new HashMap<Object, Object>());
+        dialogInst = dialog.instanceFor(new HashMap<>());
 
         setLock();
         dialogInst.show(unlockActionListener, documentController.getFunctionLibrary(),
@@ -1204,6 +1201,7 @@ public class WollMuxEventHandler
         {
           // Konfigurationsabschnitt Fenster/Formular verarbeiten falls Dok sichtbar
           if (visible)
+          {
             try
             {
               documentController.getFrameController().setDocumentZoom(WollMuxFiles.getWollmuxConf().query("Fenster").query(
@@ -1211,24 +1209,20 @@ public class WollMuxEventHandler
             }
             catch (java.lang.Exception e)
             {}
-
-          // FormGUI starten, falls es kein Teil eines Multiform-Dokuments ist.
-          if (!documentController.getModel().isPartOfMultiformDocument())
-          {
-            FormModel fm;
-            try
-            {
-              fm = documentController.createSingleDocumentFormModel(visible);
-            }
-            catch (InvalidFormDescriptorException e)
-            {
-              throw new WMCommandsFailedException(
-                L.m("Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\nBitte kontaktieren Sie Ihre Systemadministration."));
-            }
-
-            DocumentManager.getDocumentManager().setFormModel(documentController.getModel().doc, fm);
-            fm.startFormGUI();
           }
+
+          SingleDocumentFormModel fm;
+          try
+          {
+            fm = documentController.createSingleDocumentFormModel(visible);
+          } catch (InvalidFormDescriptorException e)
+          {
+            throw new WMCommandsFailedException(L.m(
+                "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\nBitte kontaktieren Sie Ihre Systemadministration."));
+          }
+
+          DocumentManager.getDocumentManager().setFormModel(documentController.getModel().doc, fm);
+          fm.startFormGUI();
         }
       }
       catch (java.lang.Exception e)
@@ -1257,72 +1251,6 @@ public class WollMuxEventHandler
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + documentController.hashCode() + ")";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
-   * Wird wollmux:Open mit der Option FORMGUIS "merged" gestartet, so werden zuerst
-   * die Einzeldokumente geöffnet und dann dieses Event aufgerufen, das dafür
-   * zuständig ist, die eine FormGUI für den MultiDocument-Modus zu erzeugen und zu
-   * starten.
-   *
-   * @param documentControllers
-   *          Ein Vector of TextDocumentModels, die in einem Multiformular
-   *          zusammengefasst werden sollen.
-   */
-  public static void handleProcessMultiform(
-      List<TextDocumentController> documentControllers,
-      ConfigThingy buttonAnpassung)
-  {
-    handle(new OnProcessMultiform(documentControllers, buttonAnpassung));
-  }
-
-  private static class OnProcessMultiform extends BasicEvent
-  {
-    private ConfigThingy buttonAnpassung;
-
-    private List<TextDocumentController> documentControllers;
-
-    public OnProcessMultiform(
-        List<TextDocumentController> documentControllers,
-        ConfigThingy buttonAnpassung)
-    {
-      this.documentControllers = documentControllers;
-      this.buttonAnpassung = buttonAnpassung;
-    }
-
-    @Override
-    protected void doit() throws WollMuxFehlerException
-    {
-      FormModel fm;
-      try
-      {
-        fm = MultiDocumentFormModel.createMultiDocumentFormModel(documentControllers, buttonAnpassung);
-      }
-      catch (InvalidFormDescriptorException e)
-      {
-        throw new WollMuxFehlerException(
-          L.m("Fehler bei der Dokumentbearbeitung."),
-          new WMCommandsFailedException(
-            L.m("Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\nBitte kontaktieren Sie Ihre Systemadministration.")));
-      }
-
-      // FormModel in allen Dokumenten registrieren:
-      for (TextDocumentController documentController : documentControllers)
-      {
-        DocumentManager.getDocumentManager().setFormModel(documentController.getModel().doc, fm);
-      }
-
-      // FormGUI starten:
-      fm.startFormGUI();
-    }
-
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(" + documentControllers + ")";
     }
   }
 
@@ -1433,19 +1361,10 @@ public class WollMuxEventHandler
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      // Baue ein ConfigThingy (als String), das die neue open-Methode versteht
-      // und leite es weiter an diese.
-      Iterator<String> iter = fragIDs.iterator();
-      StringBuffer fragIdStr = new StringBuffer();
-      while (iter.hasNext())
+      if (!fragIDs.isEmpty())
       {
-        fragIdStr.append("'");
-        fragIdStr.append(iter.next());
-        fragIdStr.append("' ");
+        openTextDocument(fragIDs, asTemplate);
       }
-      handleOpen("AS_TEMPLATE '" + asTemplate
-        + "' FORMGUIS 'independent' Fragmente( FRAG_ID_LIST ("
-        + fragIdStr.toString() + "))");
     }
 
     @Override
@@ -1454,199 +1373,87 @@ public class WollMuxEventHandler
       return this.getClass().getSimpleName() + "("
         + ((asTemplate) ? "asTemplate" : "asDocument") + ", " + fragIDs + ")";
     }
-  }
 
-  // *******************************************************************************************
-
-  /**
-   * Öffnet ein oder mehrere Dokumente anhand der Beschreibung openConfStr
-   * (ConfigThingy-Syntax) und ist ausführlicher beschrieben unter
-   * http://limux.tvc.muenchen
-   * .de/wiki/index.php/Schnittstellen_des_WollMux_f%C3%BCr_Experten#wollmux:Open
-   *
-   * Dieses Event wird gestartet, wenn der WollMux-Service (...comp.WollMux) das
-   * Dispatch-Kommando wollmux:open empfängt.
-   *
-   * @param openConfStr
-   *          Die Beschreibung der zu öffnenden Fragmente in ConfigThingy-Syntax
-   */
-  public static void handleOpen(String openConfStr)
-  {
-    handle(new OnOpen(openConfStr));
-  }
-
-  private static class OnOpen extends BasicEvent
-  {
-    private String openConfStr;
-
-    private OnOpen(String openConfStr)
+    private String getURLForId(String fragId) throws WollMuxFehlerException
     {
-      this.openConfStr = openConfStr;
-    }
+      // Fragment-URL holen und aufbereiten:
+      List<String> urls = new ArrayList<>();
 
-    @Override
-    protected void doit() throws WollMuxFehlerException
-    {
-      boolean asTemplate = true;
-      boolean merged = false;
-      ConfigThingy conf;
-      ConfigThingy fragConf;
-      ConfigThingy buttonAnpassung = null;
+      java.lang.Exception error = new ConfigurationErrorException(
+          L.m("Das Textfragment mit der FRAG_ID '%1' ist nicht definiert!", fragId));
       try
       {
-        conf = new ConfigThingy("OPEN", null, new StringReader(openConfStr));
-        fragConf = conf.get("Fragmente");
+        urls = VisibleTextFragmentList.getURLsByID(WollMuxFiles.getWollmuxConf(), fragId);
+      } catch (InvalidIdentifierException e)
+      {
+        error = e;
       }
-      catch (java.lang.Exception e)
+      if (urls.isEmpty())
       {
         throw new WollMuxFehlerException(
-          L.m("Fehlerhaftes Kommando 'wollmux:Open'"), e);
+            L.m("Die URL zum Textfragment mit der FRAG_ID '%1' kann nicht bestimmt werden:",
+                fragId),
+            error);
       }
-
-      try
+      
+      // Nur die erste funktionierende URL verwenden. Dazu werden alle URL zu
+      // dieser FRAG_ID geprüft und in die Variablen loadUrlStr und fragUrls
+      // übernommen.
+      String errors = "";
+      for (String urlStr : urls)
       {
-        asTemplate = conf.get("AS_TEMPLATE", 1).toString().equalsIgnoreCase("true");
-      }
-      catch (java.lang.Exception x)
-      {}
-
-      try
-      {
-        buttonAnpassung = conf.get("Buttonanpassung", 1);
-      }
-      catch (java.lang.Exception x)
-      {}
-
-      try
-      {
-        merged = conf.get("FORMGUIS", 1).toString().equalsIgnoreCase("merged");
-      }
-      catch (java.lang.Exception x)
-      {}
-
-      Iterator<ConfigThingy> iter = fragConf.iterator();
-      List<TextDocumentController> docs = new ArrayList<TextDocumentController>();
-      while (iter.hasNext())
-      {
-        ConfigThingy fragListConf = iter.next();
-        List<String> fragIds = new ArrayList<>();
-        Iterator<ConfigThingy> fragIter = fragListConf.iterator();
-        while (fragIter.hasNext())
+        // URL erzeugen und prüfen, ob sie aufgelöst werden kann
+        URL url;
+        try
         {
-          fragIds.add(fragIter.next().toString());
-        }
-        if (!fragIds.isEmpty())
+          url = WollMuxFiles.makeURL(urlStr);
+          urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
+          url = WollMuxFiles.makeURL(urlStr);
+          WollMuxSingleton.checkURL(url);
+          return urlStr;
+        } catch (MalformedURLException e)
         {
-          TextDocumentController documentController = openTextDocument(fragIds, asTemplate, merged);
-          if (documentController.getModel() != null) docs.add(documentController);
+          LOGGER.info("", e);
+          errors += L.m("Die URL '%1' ist ungültig:", urlStr) + "\n" + e.getLocalizedMessage()
+              + "\n\n";
+          continue;
+        } catch (IOException e)
+        {
+          LOGGER.info("", e);
+          errors += e.getLocalizedMessage() + "\n\n";
+          continue;
         }
       }
-
-      if (merged)
-      {
-        handleProcessMultiform(docs, buttonAnpassung);
-      }
+      
+      throw new WollMuxFehlerException(
+          L.m("Das Textfragment mit der FRAG_ID '%1' kann nicht aufgelöst werden:", fragId)
+              + "\n\n" + errors);
     }
 
     /**
      *
      * @param fragIDs
      * @param asTemplate
-     * @param asPartOfMultiform
-     * @return
      * @throws WollMuxFehlerException
      */
-    private TextDocumentController openTextDocument(List<String> fragIDs,
-        boolean asTemplate, boolean asPartOfMultiform) throws WollMuxFehlerException
+    private void openTextDocument(List<String> fragIDs, boolean asTemplate)
+        throws WollMuxFehlerException
     {
       // das erste Argument ist das unmittelbar zu landende Textfragment und
       // wird nach urlStr aufgelöst. Alle weiteren Argumente (falls vorhanden)
       // werden nach argsUrlStr aufgelöst.
       String loadUrlStr = "";
-      String[] fragUrls = new String[fragIDs.size() - 1];
-      String urlStr = "";
-
-      Iterator<String> iter = fragIDs.iterator();
-      for (int i = 0; iter.hasNext(); ++i)
+      List<String> fragUrls = new ArrayList<>(fragIDs.size() - 1);
+      boolean first = true;
+      for (String fragId : fragIDs)
       {
-        String frag_id = iter.next();
-
-        // Fragment-URL holen und aufbereiten:
-        List<String> urls = new ArrayList<String>();
-
-        java.lang.Exception error =
-          new ConfigurationErrorException(L.m(
-            "Das Textfragment mit der FRAG_ID '%1' ist nicht definiert!", frag_id));
-        try
+        if (first)
         {
-          urls = VisibleTextFragmentList.getURLsByID(WollMuxFiles.getWollmuxConf(), frag_id);
-        }
-        catch (InvalidIdentifierException e)
+          loadUrlStr = getURLForId(fragId);
+          first = false;
+        } else
         {
-          error = e;
-        }
-        if (urls.size() == 0)
-        {
-          throw new WollMuxFehlerException(
-            L.m(
-              "Die URL zum Textfragment mit der FRAG_ID '%1' kann nicht bestimmt werden:",
-              frag_id), error);
-        }
-
-        // Nur die erste funktionierende URL verwenden. Dazu werden alle URL zu
-        // dieser FRAG_ID geprüft und in die Variablen loadUrlStr und fragUrls
-        // übernommen.
-        String errors = "";
-        boolean found = false;
-        Iterator<String> iterUrls = urls.iterator();
-        while (iterUrls.hasNext() && !found)
-        {
-          urlStr = iterUrls.next();
-
-          // URL erzeugen und prüfen, ob sie aufgelöst werden kann
-          URL url;
-          try
-          {
-            url = WollMuxFiles.makeURL(urlStr);
-            urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
-            url = WollMuxFiles.makeURL(urlStr);
-            WollMuxSingleton.checkURL(url);
-          }
-          catch (MalformedURLException e)
-          {
-            LOGGER.info("", e);
-            errors +=
-              L.m("Die URL '%1' ist ungültig:", urlStr) + "\n"
-                + e.getLocalizedMessage() + "\n\n";
-            continue;
-          }
-          catch (IOException e)
-          {
-            LOGGER.info("", e);
-            errors += e.getLocalizedMessage() + "\n\n";
-            continue;
-          }
-
-          found = true;
-        }
-
-        if (!found)
-        {
-          throw new WollMuxFehlerException(L.m(
-            "Das Textfragment mit der FRAG_ID '%1' kann nicht aufgelöst werden:",
-            frag_id)
-            + "\n\n" + errors);
-        }
-
-        // URL in die in loadUrlStr (zum sofort öffnen) und in argsUrlStr (zum
-        // später öffnen) aufnehmen
-        if (i == 0)
-        {
-          loadUrlStr = urlStr;
-        }
-        else
-        {
-          fragUrls[i - 1] = urlStr;
+          fragUrls.add(getURLForId(fragId));
         }
       }
 
@@ -1659,24 +1466,14 @@ public class WollMuxEventHandler
         if (UNO.XTextDocument(doc) != null)
         {
           documentController = DocumentManager.getTextDocumentController(UNO.XTextDocument(doc));
-          documentController.getModel().setFragUrls(fragUrls);
-          if (asPartOfMultiform)
-            documentController.getModel().setPartOfMultiformDocument(asPartOfMultiform);
+          documentController.getModel().setFragUrls(fragUrls.toArray(new String[fragUrls.size()]));
         }
-      }
-      catch (java.lang.Exception x)
+      } catch (java.lang.Exception x)
       {
         // sollte eigentlich nicht auftreten, da bereits oben geprüft.
-        throw new WollMuxFehlerException(L.m(
-          "Die Vorlage mit der URL '%1' kann nicht geöffnet werden.", loadUrlStr), x);
+        throw new WollMuxFehlerException(
+            L.m("Die Vorlage mit der URL '%1' kann nicht geöffnet werden.", loadUrlStr), x);
       }
-      return documentController;
-    }
-
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "('" + openConfStr + "')";
     }
   }
 
@@ -3534,7 +3331,7 @@ public class WollMuxEventHandler
 	Pattern originalOnlyPattern = DocumentCommands.getPatternForCommand("originalOnly");
 	Pattern copyOnlyPattern = DocumentCommands.getPatternForCommand("copyOnly");
 
-	List<Pattern> bookmarkPatterns = new ArrayList<Pattern>();
+	List<Pattern> bookmarkPatterns = new ArrayList<>();
 	bookmarkPatterns.add(allVersionPattern);
 	bookmarkPatterns.add(draftOnlyPattern);
 	bookmarkPatterns.add(notInOrginalPattern);
@@ -3784,7 +3581,7 @@ public class WollMuxEventHandler
       TextDocumentController documentController =
         DocumentManager.getTextDocumentController(doc);
 
-      FormModel formModel = DocumentManager.getDocumentManager().getFormModel(doc);
+      SingleDocumentFormModel formModel = DocumentManager.getDocumentManager().getFormModel(doc);
       if (formModel != null)
       {
         // Werte über den FormController (den das FormModel kennt) setzen lassen
@@ -4853,7 +4650,7 @@ public class WollMuxEventHandler
     private List<WollMuxInstallationDescriptor> getInstallations()
     {
       List<WollMuxInstallationDescriptor> wmInstallations =
-        new ArrayList<WollMuxInstallationDescriptor>();
+        new ArrayList<>();
 
       // Installationspfade der Pakete bestimmen:
       String myPath = null; // user-Pfad

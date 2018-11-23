@@ -22,13 +22,16 @@ import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
- * Repräsentiert ein FormModel für ein einfaches Formular mit genau einem
- * zugehörigen Formulardokument. Diese Klasse sorgt als Wrapper im Wesentlichen
- * nur dafür, dass alle Methodenaufrufe des FormModels in die ensprechenden
- * WollMuxEvents verpackt werden und somit korrekt synchronisiert ausgeführt
- * werden.
+ * Erlaubt Zugriff auf die Formularbestandteile eines Dokuments abstrahiert von den
+ * dahinterstehenden OOo-Objekten. ACHTUNG! Der FormController ruft die Methoden dieser Klasse aus
+ * dem Event Dispatching Thread auf. Dort dürfen sie aber meist nicht laufen. Deshalb müssen alle
+ * entsprechenden Methoden über den WollMuxEventHandler ein Event Objekt erzeugen und in die
+ * WollMux-Queue zur späteren Ausführung schieben. Es muss dafür gesorgt werden, dass das FormModel
+ * Objekt auch funktioniert, wenn das zugrundeliegende Office-Dokument disposed wurde, da der
+ * FormController evtl. im Moment des disposens darauf zugreifen möchte. Hoffentlich löst obiges
+ * Umsetzen der Aufrufe in Event-Objekte dieses Problem schon weitgehend.
  */
-public class SingleDocumentFormModel implements FormModel
+public class SingleDocumentFormModel
 {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(SingleDocumentFormModel.class);
@@ -112,35 +115,43 @@ public class SingleDocumentFormModel implements FormModel
       this.defaultWindowAttributes = null;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see de.muenchen.allg.itd51.wollmux.FormModel#close()
+  /**
+   * Versucht das Dokument zu schließen. Wurde das Dokument verändert (Modified-Status des
+   * Dokuments==true), so erscheint der Dialog "Speichern"/"Verwerfen"/"Abbrechen" (über den ein
+   * sofortiges Schließen des Dokuments durch den Benutzer verhindert werden kann)
    */
-  @Override
   public void close()
   {
     WollMuxEventHandler.handleCloseTextDocument(documentController);
   }
 
-  @Override
+  /**
+   * Speichert dieses Formular in eine temporäre Datei unter Verwendung des in in ExterneAnwendungen
+   * für ext festgelegten FILTERs, startet dann die zugehörige externe Anwendung mit dieser Datei
+   * und schließt das Formular.
+   */
   public void closeAndOpenExt(String ext)
   {
     WollMuxEventHandler.handleCloseAndOpenExt(documentController, ext);
   }
 
-  @Override
+  /**
+   * Speichert dieses Formular in eine temporäre Datei unter Verwendung des in in ExterneAnwendungen
+   * für ext festgelegten FILTERs und startet dann die zugehörige externe Anwendung mit dieser
+   * Datei.
+   */
   public void saveTempAndOpenExt(String ext)
   {
     WollMuxEventHandler.handleSaveTempAndOpenExt(documentController, ext);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowVisible(boolean)
+  /**
+   * Setzt den Sichtbarkeitsstatus des Fensters des zugehörigen Dokuments auf vis (true=sichtbar,
+   * false=unsichtbar).
+   * 
+   * @param vis
+   *          true=sichtbar, false=unsichtbar
    */
-  @Override
   public void setWindowVisible(boolean vis)
   {
     /*
@@ -154,13 +165,24 @@ public class SingleDocumentFormModel implements FormModel
       WollMuxEventHandler.handleSetWindowVisible(documentController, vis);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowPosSize(int, int,
-   * int, int)
+  /**
+   * Setzt die Position und Größe des Fensters des zugehörigen Dokuments auf die vorgegebenen Werte
+   * setzt. ACHTUNG: Die Maßangaben beziehen sich auf die linke obere Ecke des Fensterinhalts OHNE
+   * die Titelzeile und die Fensterdekoration des Rahmens. Um die linke obere Ecke des gesamten
+   * Fensters richtig zu setzen, müssen die Größenangaben des Randes der Fensterdekoration und die
+   * Höhe der Titelzeile VOR dem Aufruf der Methode entsprechend eingerechnet werden.
+   * 
+   * @param docX
+   *          Die linke obere Ecke des Fensterinhalts X-Koordinate der Position in Pixel, gezählt
+   *          von links oben.
+   * @param docY
+   *          Die Y-Koordinate der Position in Pixel, gezählt von links oben.
+   * @param docWidth
+   *          Die Größe des Dokuments auf der X-Achse in Pixel
+   * @param docHeight
+   *          Die Größe des Dokuments auf der Y-Achse in Pixel. Auch hier wird die Titelzeile des
+   *          Rahmens nicht beachtet und muss vorher entsprechend eingerechnet werden.
    */
-  @Override
   public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
   {
     if (visible)
@@ -168,28 +190,27 @@ public class SingleDocumentFormModel implements FormModel
           docWidth, docHeight);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * de.muenchen.allg.itd51.wollmux.FormModel#setVisibleState(java.lang.String,
-   * boolean)
+  /**
+   * Setzt den Sichtbarkeitsstatus der Sichtbarkeitsgruppe mit der ID groupID auf visible.
+   * 
+   * @param groupId
+   *          Die ID der Gruppe, die Sichtbar/unsichtbar geschalten werden soll.
+   * @param visible
+   *          true==sichtbar, false==unsichtbar
    */
-  @Override
   public void setVisibleState(String groupId, boolean visible)
   {
     WollMuxEventHandler.handleSetVisibleState(documentController, groupId,
         visible, null);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * de.muenchen.allg.itd51.wollmux.FormModel#valueChanged(java.lang.String,
-   * java.lang.String)
+  /**
+   * Setzt den Wert aller Formularfelder im Dokument, die von fieldId abhängen auf den neuen Wert
+   * newValue (bzw. auf das Ergebnis der zu diesem Formularelement hinterlegten Trafo-Funktion).
+   * 
+   * Es ist nicht garantiert, dass sich der Wert tatsächlich geändert hat. Die fieldId kann leer
+   * sein (aber nie null).
    */
-  @Override
   public void valueChanged(String fieldId, String newValue)
   {
     if (fieldId.length() > 0)
@@ -197,36 +218,43 @@ public class SingleDocumentFormModel implements FormModel
           newValue);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see de.muenchen.allg.itd51.wollmux.FormModel#focusGained(java.lang.String)
+  /**
+   * Das Formularfeld im Dokument mit der ID fieldId erhält den Fokus. Gibt es im Dokument mehrere
+   * Formularfelder, die von der ID abhängen, so erhält immer das erste Formularfeld den Fokus -
+   * bevorzugt werden dabei auch die nicht transformierten Formularfelder.
+   * 
+   * @param fieldId
+   *          id des Formularfeldes, das den Fokus bekommen soll.
    */
-  @Override
   public void focusGained(String fieldId)
   {
     if (visible)
       WollMuxEventHandler.handleFocusFormField(documentController, fieldId);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see de.muenchen.allg.itd51.wollmux.FormModel#focusLost(java.lang.String)
+  /**
+   * Not Yet Implemented: Nimmt dem Formularfeld mit der ID fieldId den Fokus wieder weg - ergibt
+   * aber bisher keinen Sinn.
+   * 
+   * @param fieldId
    */
-  @Override
   public void focusLost(String fieldId)
   {
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * de.muenchen.allg.itd51.wollmux.FormModel#closing(de.muenchen.allg.itd51.
-   * wollmux .TextDocumentModel)
+  /**
+   * Informiert das FormModel, dass das zugrundeliegende Dokument source geschlossen wird und das
+   * FormModel entsprechend handeln soll um sicherzustellen, dass das Dokument in Zukunft nicht mehr
+   * angesprochen wird.
+   * 
+   * Abhängig von der Implementierung des FormModels werden unterschiedliche Aktionen erledigt. Dazu
+   * gehören z.B. das Beenden einer bereits gestarteten FormGUI oder das Wiederherstellen der
+   * Fensterattribute des Dokumentfensters auf die Werte, die das Fenster vor dem Starten der
+   * FormGUI hatte.
+   * 
+   * @param source
+   *          Das Dokument das geschlossen wurde.
    */
-  @Override
   public void closing(Object sender)
   {
     if (documentController.getModel().doc.equals(sender))
@@ -312,70 +340,72 @@ public class SingleDocumentFormModel implements FormModel
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see de.muenchen.allg.itd51.wollmux.FormModel#controllerInitCompleted()
+  /**
+   * Über diese Methode kann der FormController das FormModel informieren, dass er vollständig
+   * initialisiert wurde und notwendige Aktionen wie z.B. das zurücksetzen des modified-Status des
+   * Dokuments durchgeführt werden sollen.
    */
-  @Override
   public void formControllerInitCompleted()
   {
     WollMuxEventHandler.handleFormControllerInitCompleted(documentController);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see de.muenchen.allg.itd51.wollmux.FormModel#print()
+  /**
+   * Startet den Ausdruck unter Verwendung eventuell vorhandener Komfortdruckfunktionen.
    */
-  @Override
   public void print()
   {
     UNO.dispatch(documentController.getModel().doc, Dispatch.DISP_unoPrint);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see de.muenchen.allg.itd51.wollmux.FormModel#pdf()
+  /**
+   * Exportiert das Dokument als PDF. Bei Multi-Form wird die Aktion für alle Formulare der Reihe
+   * nach aufgerufen.
    */
-  @Override
   public void pdf()
   {
     UNO.dispatch(documentController.getModel().doc, ".uno:ExportToPDF");
   }
 
-  @Override
+  /**
+   * Speichert das Dokument (Datei/Speichern). Bei Multi-Form wird die Aktion für alle Formulare der
+   * Reihe nach aufgerufen.
+   */
   public void save()
   {
     UNO.dispatch(documentController.getModel().doc, ".uno:Save");
   }
 
-  @Override
+  /**
+   * Speichert das Dokument (Datei/Speichern unter...). Bei Multi-Form wird die Aktion für alle
+   * Formulare der Reihe nach aufgerufen.
+   */
   public void saveAs()
   {
     UNO.dispatch(documentController.getModel().doc, ".uno:SaveAs");
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see de.muenchen.allg.itd51.wollmux.FormModel#setValue(java.lang.String,
-   * java.lang.String, java.awt.event.ActionListener)
+  /**
+   * Teilt der FormGUI die zu diesem FormModel gehört mit, dass der Wert des Formularfeldes mit der
+   * id fieldId auf den neuen Wert value gesetzt werden soll und ruft nach erfolgreicher aktion die
+   * Methode actionPerformed(ActionEvent arg0) des Listeners listener.
+   * 
+   * @param fieldId
+   *          die Id des Feldes das in der FormGUI auf den neuen Wert value gesetzt werden soll.
+   * @param value
+   *          der neue Wert value.
+   * @param listener
+   *          der Listener der informiert wird, nachdem der Wert erfolgreich gesetzt wurde.
    */
-  @Override
   public void setValue(String fieldId, String value, ActionListener listener)
   {
     if (formGUI != null)
       formGUI.getController().setValue(fieldId, value, listener);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see de.muenchen.allg.itd51.wollmux.FormModel#startFormGUI()
+  /**
+   * Erzeugt eine FormGUI zu diesem FormModel und startet diese.
    */
-  @Override
   public void startFormGUI()
   {
     boolean containsFrames = false;
@@ -408,7 +438,10 @@ public class SingleDocumentFormModel implements FormModel
         .add(documentController.getFrameController().getFrame());
   }
 
-  @Override
+  /**
+   * Liefert den Titel des zum FormModel gehörenden Fensters oder null, falls kein Titel bekannt
+   * oder nicht anwendbar (z.B. Multi-Form).
+   */
   public String getWindowTitle()
   {
     try
@@ -425,13 +458,18 @@ public class SingleDocumentFormModel implements FormModel
     }
   }
 
-  @Override
+  /**
+   * Öffnet durch ACTION-Event ein neues Dokument oder Template. Durch Angabe der FragID wird die
+   * entsprechende Vorlage zugeordnet.
+   */
   public void openTemplateOrDocument(List<String> fragIds)
   {
     WollMuxEventHandler.handleOpenDocument(fragIds, false);
   }
 
-  @Override
+  /**
+   * Sendet Dokument als Anhang über Standardbuttons in FormularMax.
+   */
   public void sendAsEmail()
   {
     UNO.dispatch(documentController.getModel().doc, ".uno:SendMail");

@@ -132,6 +132,7 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.document.MacroExecMode;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.WollMuxClassLoader;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
@@ -1219,10 +1220,12 @@ public class WollMuxBar
         eventHandler.handleWollMuxUrl(Dispatch.DISP_wmOpenTemplate,
           args[1].toString());
       }
-      else if ("open".equals(action))
+      else if (action.equals("open"))
       {
-        minimize();
-        multiOpenDialog((ConfigThingy) args[1]);
+        ModalDialogs.showInfoModal("Multiformulare werden nicht mehr unterstützt",
+            "Multiformulare werden nicht mehr unterstützt. "
+                + "Bitte kontaktieren Sie Ihren Administrator. "
+                + "Sie müssen jedes Formular einzeln öffnen und ausfüllen.");
       }
       else if ("openExt".equals(action))
       {
@@ -1255,18 +1258,6 @@ public class WollMuxBar
         options();
       }
     }
-  }
-
-  /**
-   * Erwartet in conf eine Spezifikation gemäß wollmux:Open und bringt einen
-   * Auswahldialog, um die zu öffnenden Vorlagen/Dokumente auszuwählen.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-   */
-  private void multiOpenDialog(final ConfigThingy conf)
-  {
-    final JFrame multiOpenFrame = new MultiOpenDialog(L.m("Was möchten Sie öffnen ?"), conf, eventHandler);
-    multiOpenFrame.setVisible(true);
   }
 
   /**

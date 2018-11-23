@@ -50,7 +50,6 @@ import java.awt.event.ComponentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.JFrame;
@@ -61,18 +60,13 @@ import javax.swing.WindowConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.awt.PosSize;
-import com.sun.star.awt.XWindow2;
-import com.sun.star.text.XTextDocument;
-
-import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
+import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
 
 /**
  * Managed die Fenster (Writer und FormController) der FormularGUI.
@@ -112,7 +106,7 @@ public class FormGUI
   /**
    * Das zum Formular gehörende Writer-Dokument (als FormModel gekapselt).
    */
-  private FormModel myDoc;
+  private SingleDocumentFormModel myDoc;
 
   /**
    * Ein Timer, der dafür sorgt, dass (insbesondere beim manuellen Resizen des
@@ -139,21 +133,9 @@ public class FormGUI
   private Rectangle formGUIBounds;
 
   /**
-   * ActionListener für Buttons mit der ACTION "abort".
+   * wird getriggert bei windowClosing() Event oder für Buttons mit der ACTION "abort".
    */
-  private ActionListener actionListener_abort = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      abort();
-    }
-  };
-
-  /**
-   * wird getriggert bei windowClosing() Event.
-   */
-  private ActionListener closeAction = actionListener_abort;
+  private ActionListener closeAction = e -> abort();
 
   /**
    * Der {@link FormController} dieser FormGUI.
@@ -169,37 +151,35 @@ public class FormGUI
    * Zeigt eine neue Formular-GUI an.
    *
    * @param formFensterConf
-   *          Der Formular-Unterabschnitt des Fenster-Abschnitts von
-   *          wollmux.conf.
+   *          Der Formular-Unterabschnitt des Fenster-Abschnitts von wollmux.conf.
    * @param conf
    *          der Formular-Knoten, der die Formularbeschreibung enthält.
    * @param doc
-   *          das zum Formular gehörende Writer-Dokument (gekapselt als
-   *          FormModel)
+   *          das zum Formular gehörende Writer-Dokument (gekapselt als FormModel)
    * @param mapIdToPresetValue
-   *          bildet IDs von Formularfeldern auf Vorgabewerte ab. Falls hier ein
-   *          Wert für ein Formularfeld vorhanden ist, so wird dieser allen
-   *          anderen automatischen Befüllungen vorgezogen. Wird das Objekt
-   *          {@link TextDocumentModel#FISHY} als Wert für ein Feld übergeben,
-   *          so wird dieses Feld speziell markiert als ungültig bis der
-   *          Benutzer es manuell ändert.
+   *          bildet IDs von Formularfeldern auf Vorgabewerte ab. Falls hier ein Wert für ein
+   *          Formularfeld vorhanden ist, so wird dieser allen anderen automatischen Befüllungen
+   *          vorgezogen. Wird das Objekt {@link TextDocumentModel#FISHY} als Wert für ein Feld
+   *          übergeben, so wird dieses Feld speziell markiert als ungültig bis der Benutzer es
+   *          manuell ändert.
    * @param functionContext
    *          der Kontext für Funktionen, die einen benötigen.
    * @param funcLib
-   *          die Funktionsbibliothek, die zur Auswertung von Plausis etc.
-   *          herangezogen werden soll.
+   *          die Funktionsbibliothek, die zur Auswertung von Plausis etc. herangezogen werden soll.
    * @param dialogLib
-   *          die Dialogbibliothek, die die Dialoge bereitstellt, die für
-   *          automatisch zu befüllende Formularfelder benötigt werden.
+   *          die Dialogbibliothek, die die Dialoge bereitstellt, die für automatisch zu befüllende
+   *          Formularfelder benötigt werden.
    * @param visible
    *          false zeigt an, dass die FormGUI unsichtbar bleiben soll.
    */
   public FormGUI(final ConfigThingy formFensterConf, final ConfigThingy conf,
-      FormModel doc, final Map<String, String> mapIdToPresetValue,
-      final Map<Object, Object> functionContext, final FunctionLibrary funcLib,
-      final DialogLibrary dialogLib, final boolean visible)
+      SingleDocumentFormModel doc,
+      final Map<String, String> mapIdToPresetValue, final Map<Object, Object> functionContext,
+      final FunctionLibrary funcLib, final DialogLibrary dialogLib, final boolean visible)
   {
     myDoc = doc;
+
+    formGUIBounds = Common.parseDimensions(formFensterConf);
 
     formTitle = conf.getString("TITLE", L.m("Unbenanntes Formular"));
 
@@ -212,34 +192,27 @@ public class FormGUI
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try
     {
-      Runnable runner = new Runnable()
-      {
-        @Override
-        public void run()
+      Runnable runner = () -> {
+        try
         {
-          try
-          {
-            createGUI(formFensterConf, conf, mapIdToPresetValue,
-                functionContext, funcLib, dialogLib, visible);
-          } catch (Exception x)
-          {
-            LOGGER.error("", x);
-          }
+          createGUI(conf, mapIdToPresetValue, functionContext, funcLib, dialogLib, visible);
+        } catch (Exception x)
+        {
+          LOGGER.error("", x);
         }
       };
       if (SwingUtilities.isEventDispatchThread())
         runner.run();
       else
         SwingUtilities.invokeAndWait(runner);
-    }
-    catch (InvocationTargetException | InterruptedException x)
+    } catch (InvocationTargetException | InterruptedException x)
     {
       LOGGER.error("", x);
     }
 
   }
 
-  private void createGUI(ConfigThingy formFensterConf, ConfigThingy conf,
+  private void createGUI(ConfigThingy conf,
       Map<String, String> mapIdToPresetValue,
       Map<Object, Object> functionContext, FunctionLibrary funcLib,
       DialogLibrary dialogLib, boolean visible)
@@ -264,7 +237,7 @@ public class FormGUI
     try
     {
       formController = new FormController(conf, myDoc, mapIdToPresetValue,
-          functionContext, funcLib, dialogLib, new MyAbortRequestListener());
+          functionContext, funcLib, dialogLib, closeAction);
     } catch (ConfigurationErrorException x)
     {
       LOGGER.error("", x);
@@ -272,8 +245,6 @@ public class FormGUI
     }
 
     myFrame.getContentPane().add(formController.JComponent());
-
-    formGUIBounds = Common.parseDimensions(formFensterConf);
 
     /*
      * Leider kann wegen
@@ -589,174 +560,16 @@ public class FormGUI
   {
     try
     {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
+      javax.swing.SwingUtilities.invokeLater(() -> {
+        try
         {
-          try
-          {
-            myFrame.dispose();
-          } catch (Exception x)
-          {
-          }
+          myFrame.dispose();
+        } catch (Exception x)
+        {
         }
       });
     } catch (Exception x)
     {
-    }
-  }
-
-  private static class DummyFormModel implements FormModel
-  {
-    XTextDocument myDoc;
-
-    XWindow2 myWindow;
-
-    public DummyFormModel(XTextDocument doc)
-    {
-      myDoc = doc;
-      myWindow = UNO.XWindow2(
-          myDoc.getCurrentController().getFrame().getContainerWindow());
-    }
-
-    @Override
-    public void setWindowPosSize(int x, int y, int width, int height)
-    {
-      myWindow.setPosSize(x, y, width, height, PosSize.POSSIZE);
-    }
-
-    @Override
-    public void setWindowVisible(boolean vis)
-    {
-      myWindow.setVisible(vis);
-    }
-
-    @Override
-    public void close()
-    {
-      try
-      {
-        UNO.XCloseable(myDoc).close(true);
-      } catch (Exception x)
-      {
-        LOGGER.error("", x);
-      }
-    }
-
-    @Override
-    public void setVisibleState(String groupId, boolean visible)
-    {
-      LOGGER.info("Gruppe \"" + groupId + "\" ist jetzt "
-          + (visible ? "sichtbar" : "unsichtbar"));
-    }
-
-    @Override
-    public void valueChanged(String fieldId, String newValue)
-    {
-      LOGGER.info(
-          "Feld \"" + fieldId + "\" hat jetzt den Wert \"" + newValue + "\"");
-    }
-
-    @Override
-    public void focusGained(String fieldId)
-    {
-      LOGGER.info("Feld \"" + fieldId + "\" hat den Fokus bekommen");
-    }
-
-    @Override
-    public void focusLost(String fieldId)
-    {
-      LOGGER.info("Feld \"" + fieldId + "\" hat den Fokus verloren");
-    }
-
-    @Override
-    public void print()
-    {
-      LOGGER.info("print()");
-    }
-
-    @Override
-    public void pdf()
-    {
-      LOGGER.info("pdf()");
-    }
-
-    @Override
-    public void setValue(String fieldId, String value, ActionListener listener)
-    {
-      LOGGER.info("setValue()");
-    }
-
-    @Override
-    public void startFormGUI()
-    {
-      LOGGER.info("startFormGUI()");
-    }
-
-    @Override
-    public void formControllerInitCompleted()
-    {
-      LOGGER.info("formControllerInitCompleted()");
-    }
-
-    @Override
-    public void save()
-    {
-      LOGGER.info("save()");
-    }
-
-    @Override
-    public void saveAs()
-    {
-      LOGGER.info("saveAs()");
-    }
-
-    @Override
-    public void closeAndOpenExt(String ext)
-    {
-      LOGGER.info("closeAndOpenExt(" + ext + ")");
-    }
-
-    @Override
-    public void saveTempAndOpenExt(String ext)
-    {
-      LOGGER.info("saveTempAndOpenExt(" + ext + ")");
-    }
-
-    @Override
-    public String getWindowTitle()
-    {
-      return "Fenstertitte";
-    }
-
-    @Override
-    public void closing(Object sender)
-    {
-      LOGGER.info("Closing(sender)");
-    }
-
-    @Override
-    public void openTemplateOrDocument(List<String> fragIds)
-    {
-      for (String fragId : fragIds)
-      {
-        LOGGER.info("openTemplateOrDocument(" + fragId + ")");
-      }
-    }
-
-    @Override
-    public void sendAsEmail()
-    {
-    }
-  }
-
-  private class MyAbortRequestListener implements ActionListener
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      abort();
     }
   }
 }

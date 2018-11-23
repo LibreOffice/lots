@@ -54,7 +54,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
-import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.InvalidFormDescriptorException;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
@@ -114,7 +113,7 @@ public class TextDocumentController
     this.globalFunctions = globalFunctions;
     this.globalDialogs = globalDialogs;
 
-    functionContext = new HashMap<Object, Object>();
+    functionContext = new HashMap<>();
 
     parseInitialOverrideFragMap(getInitialOverrideFragMap());
   }
@@ -267,9 +266,9 @@ public class TextDocumentController
   public synchronized Map<String, String> getFormFieldValues()
   {
     if (simulationResult == null)
-      return new HashMap<String, String>(model.getFormFieldValuesMap());
+      return new HashMap<>(model.getFormFieldValuesMap());
     else
-      return new HashMap<String, String>(simulationResult.getFormFieldValues());
+      return new HashMap<>(simulationResult.getFormFieldValues());
   }
 
   public synchronized ConfigThingy getFormDescription()
@@ -327,7 +326,7 @@ public class TextDocumentController
       }
 
       ConfigThingy formularAnpassung = conf.query("Formular", 1);
-      List<ConfigThingy> mergeForms = new ArrayList<ConfigThingy>(2);
+      List<ConfigThingy> mergeForms = new ArrayList<>(2);
       mergeForms.add(formularConf);
       String title = "";
       try
@@ -607,15 +606,15 @@ public class TextDocumentController
    */
   public synchronized Map<String, String> getIDToPresetValue()
   {
-    HashMap<String, String> idToPresetValue = new HashMap<String, String>();
-    Set<String> ids = new HashSet<String>(model.getFormFieldValuesMap().keySet());
+    HashMap<String, String> idToPresetValue = new HashMap<>();
+    Set<String> ids = new HashSet<>(model.getFormFieldValuesMap().keySet());
 
     // mapIdToPresetValue vorbelegen: Gibt es zu id mindestens ein untransformiertes
     // Feld, so wird der Wert dieses Feldes genommen. Gibt es kein untransformiertes
     // Feld, so wird der zuletzt im Formularwerte abgespeicherte Wert genommen.
     for (String id : ids)
     {
-      List<FormField> fields = new ArrayList<FormField>();
+      List<FormField> fields = new ArrayList<>();
       if (model.getIdToFormFields().get(id) != null) {
         fields.addAll(model.getIdToFormFields().get(id));
       }
@@ -710,10 +709,10 @@ public class TextDocumentController
       HashMap<String, String> mapIdToValues, String value)
   {
     if (fields == null) {
-      fields = new ArrayList<FormField>();
+      fields = new ArrayList<>();
     }
     if (mapIdToValues == null) {
-      mapIdToValues = new HashMap<String, String>();
+      mapIdToValues = new HashMap<>();
     }
 
     for (FormField field : fields)
@@ -1598,7 +1597,7 @@ public class TextDocumentController
 
     // Aktuell gesetzte FormField-Inhalte auslesen und simulationResults bekannt
     // machen.
-    HashSet<FormField> ffs = new HashSet<FormField>();
+    HashSet<FormField> ffs = new HashSet<>();
     for (List<FormField> l : model.getIdToFormFields().values())
       for (FormField ff : l)
         ffs.add(ff);
@@ -1637,7 +1636,7 @@ public class TextDocumentController
     boolean modified = model.isDocumentModified();
 
     // Liste aller derzeit eingesetzten Trafos aufbauen:
-    HashSet<String> usedFunctions = new HashSet<String>();
+    HashSet<String> usedFunctions = new HashSet<>();
     for (Map.Entry<String, List<FormField>> ent : model.getIdToFormFields().entrySet())
     {
 
@@ -2409,7 +2408,8 @@ public class TextDocumentController
    * @return ein FormModel dem genau ein Formulardokument zugeordnet ist.
    * @throws InvalidFormDescriptorException
    */
-  public FormModel createSingleDocumentFormModel(boolean visible) throws InvalidFormDescriptorException
+  public SingleDocumentFormModel createSingleDocumentFormModel(boolean visible)
+      throws InvalidFormDescriptorException
   {
 
     // Abschnitt "Formular" holen:

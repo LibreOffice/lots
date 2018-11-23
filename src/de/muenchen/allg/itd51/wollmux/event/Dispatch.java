@@ -31,6 +31,9 @@ package de.muenchen.allg.itd51.wollmux.event;
 
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.beans.PropertyValue;
 
 /**
@@ -42,6 +45,9 @@ import com.sun.star.beans.PropertyValue;
  */
 public class Dispatch extends BaseDispatch
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(Dispatch.class);
+
   public static final String DISP_unoPrint = ".uno:Print";
 
   public static final String DISP_unoPrintDefault = ".uno:PrintDefault";
@@ -110,7 +116,7 @@ public class Dispatch extends BaseDispatch
 
   public void dispatch_wollmux_opentemplate(String arg, PropertyValue[] props)
   {
-    Vector<String> fragIds = new Vector<String>();
+    Vector<String> fragIds = new Vector<>();
     String[] parts = arg.split("&");
     for (int i = 0; i < parts.length; i++)
       fragIds.add(parts[i]);
@@ -119,12 +125,12 @@ public class Dispatch extends BaseDispatch
 
   public void dispatch_wollmux_open(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.handleOpen(arg);
+    LOGGER.error("Der Dispatch 'wollmux:open' wird nicht länger unterstützt.");
   }
 
   public void dispatch_wollmux_opendocument(String arg, PropertyValue[] props)
   {
-    Vector<String> fragIds = new Vector<String>();
+    Vector<String> fragIds = new Vector<>();
     String[] parts = arg.split("&");
     for (int i = 0; i < parts.length; i++)
       fragIds.add(parts[i]);
