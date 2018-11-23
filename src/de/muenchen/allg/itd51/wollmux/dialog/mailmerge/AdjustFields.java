@@ -76,6 +76,9 @@ import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpret
  */
 class AdjustFields
 {
+
+  private AdjustFields() {}
+  
   /**
    * Diese Methode zeigt den Dialog an, mit dem die Felder im Dokument an eine
    * Datenquelle angepasst werden können, die nicht die selben Spalten enthält wie
