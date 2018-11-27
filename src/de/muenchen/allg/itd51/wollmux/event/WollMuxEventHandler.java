@@ -11,8 +11,6 @@ import com.google.common.eventbus.EventBus;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.document.XEventListener;
 import com.sun.star.frame.XDispatch;
-import com.sun.star.frame.XModel;
-import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
@@ -29,7 +27,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnCheckInstallation;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseAndOpenExt;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseTextDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCollectNonWollMuxFormFieldsViaPrintModel;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnCreateDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnDumpInfo;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnExecutePrintFunction;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFocusFormField;
@@ -70,7 +67,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogAbsenderAuswaeh
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogPersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextbausteinEinfuegen;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnViewCreated;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnZifferEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
 import de.muenchen.allg.itd51.wollmux.event.handlers.BasicEvent;
@@ -212,18 +208,6 @@ public class WollMuxEventHandler
 	  public void handleFormularMax4000Returned(TextDocumentController documentController)
 	  {
 	    handle(new OnFormularMax4000Returned(documentController));
-	  }
-	  
-	  /**
-	   * Der Handler für das Erzeugen von neuen Dokumenten. Das Dokuement wird dem
-	   * DocumentManager hinzugefügt.
-	   * 
-	   * @param comp
-	   *          Das neue Dokument.
-	   */
-	  public void handleOnCreateDocument(XComponent comp)
-	  {
-	    handle(new OnCreateDocument(comp));
 	  }
 	  
 	  /**
@@ -548,20 +532,7 @@ public class WollMuxEventHandler
 	  public void handleTextDocumentClosed(DocumentManager.Info docInfo)
 	  {
 	    handle(new OnTextDocumentClosed(docInfo));
-	  }
-	  
-	  /**
-	   * Der Handler wird aufgerufen, wenn die View erstellt wurde. Es wird geprüft,
-	   * ob das Dokument überhaupt vom WollMux bearbeitet werden muss und
-	   * gegebenenfalls wird es wieder aus dem DocumentManager gelöscht.
-	   * 
-	   * @param comp
-	   *          Das Dokumenten Modell.
-	   */
-	  public void handleOnViewCreated(XModel comp)
-	  {
-	    handle(new OnViewCreated(comp));
-	  }
+	  }	  
 	  
 	  /**
 	   * Erzeugt ein neues WollMuxEvent, das dafür sorgt, dass im Textdokument doc das
