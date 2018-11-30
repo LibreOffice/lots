@@ -43,7 +43,6 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.WindowAdapter;
@@ -106,14 +105,6 @@ public class FormGUI
   private SingleDocumentFormModel myDoc;
 
   /**
-   * Ein Timer, der dafür sorgt, dass (insbesondere beim manuellen Resizen des
-   * Fensters) nicht unnötig viele Resizes des OOo-Fensters durchgeführt werden.
-   * Dies schadet einerseits der Stabilität von OOo und andererseits ist es ein
-   * Performance-Problem.
-   */
-//  private WindowPosSizeSetter windowPosSizeSetter = new WindowPosSizeSetter();
-
-  /**
    * Der Titel des Formulars (falls nicht anderweitig spezifiziert).
    */
   private String formTitle = L.m("Unbenanntes Formular");
@@ -128,11 +119,6 @@ public class FormGUI
    * {@link Common#parseDimensions(ConfigThingy)} geliefert wird.
    */
   private Rectangle formGUIBounds;
-
-  /**
-   * wird getriggert bei windowClosing() Event oder für Buttons mit der ACTION "abort".
-   */
-  private ActionListener closeAction = e -> abort();
 
   /**
    * Der {@link FormController} dieser FormGUI.
@@ -226,7 +212,7 @@ public class FormGUI
     try
     {
       formController = new FormController(conf, myDoc, mapIdToPresetValue,
-          functionContext, funcLib, dialogLib, closeAction);
+          functionContext, funcLib, dialogLib, e -> abort());
     } catch (ConfigurationErrorException x)
     {
       LOGGER.error("", x);
@@ -446,7 +432,7 @@ public class FormGUI
     @Override
     public void windowClosing(WindowEvent e)
     {
-      closeAction.actionPerformed(null);
+      abort();
       ((JFrame) e.getSource()).dispose();
     }
 
