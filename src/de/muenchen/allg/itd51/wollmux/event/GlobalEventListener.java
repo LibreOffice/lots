@@ -151,11 +151,6 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
    */
   private void onCreate(Object source)
   {
-//    XComponent compo = UNO.XComponent(source);
-//    if (compo != null)
-//    {
-//      WollMuxEventHandler.getInstance().handleOnCreateDocument(compo);
-//    }
     XComponent compo = UNO.XComponent(source);
     if (compo == null) return;
 
@@ -186,11 +181,6 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
    */
   private void onViewCreated(Object source)
   {
-//    XModel compo = UNO.XModel(source);
-//    if (compo != null)
-//    {
-//      WollMuxEventHandler.getInstance().handleOnViewCreated(compo);
-//    }
 	    XModel compo = UNO.XModel(source);
 	    if (compo == null) return;
 

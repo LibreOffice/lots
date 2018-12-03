@@ -1,14 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 
-import com.sun.star.document.XEventListener;
-import com.sun.star.frame.XFrame;
-
-import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.document.DocumentManager.Info;
-import de.muenchen.allg.itd51.wollmux.document.FrameController;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
  * Dieses Event wird vom FormModelImpl ausgelöst, wenn die Formular-GUI die
