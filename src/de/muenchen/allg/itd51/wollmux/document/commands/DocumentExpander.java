@@ -11,12 +11,12 @@ import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.io.IOException;
 import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lib.uno.Proxy;
 import com.sun.star.style.XStyleFamiliesSupplier;
 import com.sun.star.style.XStyleLoader;
 import com.sun.star.text.XTextCursor;
@@ -42,6 +42,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.document.DocumentLoader;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
@@ -384,8 +385,9 @@ class DocumentExpander extends AbstractExecutor
     XTextCursor insCursor = cmd.getTextCursorWithinInsertMarks();
     if (UNO.XDocumentInsertable(insCursor) != null && urlStr != null)
     {
-      UNO.XDocumentInsertable(insCursor).insertDocumentFromURL(urlStr,
-        new PropertyValue[] {});
+      //      UNO.XDocumentInsertable(insCursor).insertDocumentFromURL(urlStr,
+      //        new PropertyValue[] {});
+      DocumentLoader.getInstance().insertDocument((Proxy) insCursor, urlStr);
     }
 
     // Workaround: ParagraphStyleName für den letzten eingefügten Paragraphen
