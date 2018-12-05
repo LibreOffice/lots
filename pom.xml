@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.muenchen</groupId>
 	<artifactId>wollmux</artifactId>
@@ -26,8 +28,8 @@
 				</excludes>
 			</resource>
 			<resource>
-			  <directory>src/main/resources</directory>
-        <filtering>true</filtering>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
 			</resource>
 			<resource>
 				<directory>izpack</directory>
@@ -121,7 +123,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>3.8.0</version>
 				<configuration>
 					<compilerVersion>1.8</compilerVersion>
 					<source>1.8</source>
@@ -260,7 +262,8 @@
 						<configuration>
 							<target>
 								<move file="dist/WollMux.zip" tofile="dist/WollMux.oxt" />
-								<move file="dist/WollMux-AOO.zip" tofile="dist/WollMux-AOO.oxt" />
+								<move file="dist/WollMux-AOO.zip"
+									tofile="dist/WollMux-AOO.oxt" />
 							</target>
 						</configuration>
 						<goals>
@@ -517,12 +520,17 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
-			<version>4.1</version>
+			<version>4.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.4</version>
+			<version>3.8.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fifesoft</groupId>
@@ -538,6 +546,11 @@
 			<groupId>com.fifesoft</groupId>
 			<artifactId>rstaui</artifactId>
 			<version>2.5.7</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>27.0-jre</version>
 		</dependency>
 	</dependencies>
 </project>
