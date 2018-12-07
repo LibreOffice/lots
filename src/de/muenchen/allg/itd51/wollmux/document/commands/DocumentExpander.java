@@ -16,7 +16,6 @@ import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.io.IOException;
 import com.sun.star.lang.IllegalArgumentException;
-import com.sun.star.lib.uno.Proxy;
 import com.sun.star.style.XStyleFamiliesSupplier;
 import com.sun.star.style.XStyleLoader;
 import com.sun.star.text.XTextCursor;
@@ -387,7 +386,7 @@ class DocumentExpander extends AbstractExecutor
     {
       //      UNO.XDocumentInsertable(insCursor).insertDocumentFromURL(urlStr,
       //        new PropertyValue[] {});
-      DocumentLoader.getInstance().insertDocument((Proxy) insCursor, urlStr);
+      DocumentLoader.getInstance().insertDocument(insCursor, urlStr);
     }
 
     // Workaround: ParagraphStyleName für den letzten eingefügten Paragraphen
