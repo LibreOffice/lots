@@ -162,6 +162,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.InvalidFormDescriptorException;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
+import de.muenchen.allg.itd51.wollmux.document.DocumentLoader;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager.Info;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo;
@@ -1461,7 +1462,8 @@ public class WollMuxEventHandler
       TextDocumentController documentController = null;
       try
       {
-        XComponent doc = UNO.loadComponentFromURL(loadUrlStr, asTemplate, true);
+        XComponent doc = DocumentLoader.getInstance().loadDocument(loadUrlStr,
+          asTemplate, true);
 
         if (UNO.XTextDocument(doc) != null)
         {

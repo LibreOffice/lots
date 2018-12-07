@@ -2,13 +2,13 @@ package de.muenchen.allg.itd51.wollmux.document;
 
 import java.nio.ByteBuffer;
 
-import com.sun.star.io.BufferSizeExceededException;
 import com.sun.star.io.IOException;
-import com.sun.star.io.NotConnectedException;
 import com.sun.star.io.XInputStream;
 import com.sun.star.io.XSeekable;
-import com.sun.star.lang.IllegalArgumentException;
 
+/**
+ * Wrapper für ByteBuffer zur Benutzung mit UNO.
+ */
 public class ByteBufferInputStream implements XInputStream, XSeekable
 {
 
@@ -20,22 +20,19 @@ public class ByteBufferInputStream implements XInputStream, XSeekable
   }
 
   @Override
-  public int available()
-      throws NotConnectedException, com.sun.star.io.IOException
+  public int available() throws IOException
   {
     return buffer.remaining();
   }
 
   @Override
-  public void closeInput()
-      throws NotConnectedException, com.sun.star.io.IOException
+  public void closeInput() throws IOException
   {
     buffer = null;
   }
 
   @Override
-  public int readBytes(byte[][] data, int len) throws NotConnectedException,
-      BufferSizeExceededException, com.sun.star.io.IOException
+  public int readBytes(byte[][] data, int len) throws IOException
   {
     int n = Math.min(len, buffer.remaining());
     if (n > 0)
@@ -47,16 +44,13 @@ public class ByteBufferInputStream implements XInputStream, XSeekable
   }
 
   @Override
-  public int readSomeBytes(byte[][] data, int len)
-      throws NotConnectedException, BufferSizeExceededException,
-      com.sun.star.io.IOException
+  public int readSomeBytes(byte[][] data, int len) throws IOException
   {
     return readBytes(data, len);
   }
 
   @Override
-  public void skipBytes(int n) throws NotConnectedException,
-      BufferSizeExceededException, com.sun.star.io.IOException
+  public void skipBytes(int n) throws IOException
   {
     buffer.position(buffer.position() + n);
   }
@@ -74,7 +68,7 @@ public class ByteBufferInputStream implements XInputStream, XSeekable
   }
 
   @Override
-  public void seek(long pos) throws IllegalArgumentException, IOException
+  public void seek(long pos) throws IOException
   {
     buffer.position((int) pos);
   }
