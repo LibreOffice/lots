@@ -87,8 +87,7 @@ public abstract class BasicEvent implements WollMuxEvent
    * Dialog angezeigt werden sollen, können über eine WollMuxFehlerException nach
    * oben weitergereicht werden.
    */
-  protected void doit() throws WollMuxFehlerException
-  {};
+  protected abstract void doit() throws WollMuxFehlerException;
 
   /**
    * Diese Methode kann am Ende einer doit()-Methode aufgerufen werden und versucht
@@ -194,7 +193,7 @@ public abstract class BasicEvent implements WollMuxEvent
     {
       synchronized (lock)
       {
-        while (lock[0] == true)
+        while (lock[0])
           lock.wait();
       }
     }

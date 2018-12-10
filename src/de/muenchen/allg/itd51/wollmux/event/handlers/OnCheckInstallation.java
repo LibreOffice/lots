@@ -64,7 +64,9 @@ public class OnCheckInstallation extends BasicEvent
           title = warndialog.get("TITLE").toString();
         }
         catch (NodeNotFoundException e)
-        {}
+        {
+        	LOGGER.debug("", e);
+        }
       }
       catch (NodeNotFoundException e)
       {
@@ -92,11 +94,11 @@ public class OnCheckInstallation extends BasicEvent
       }
 
       // Variable wrongInstList bestimmen:
-      String otherInstsList = "";
+      StringBuilder otherInstsList = new StringBuilder();
       for (WollMuxInstallationDescriptor desc : wmInsts)
       {
         if (!desc.path.equals(recentInstPath))
-          otherInstsList += "- " + desc.path + "\n";
+        otherInstsList.append("- ").append(desc.path).append("\n");
       }
 
       // Im Fehlerfall Dialog und Fehlermeldung bringen.
@@ -109,7 +111,7 @@ public class OnCheckInstallation extends BasicEvent
         msg =
           msg.replaceAll("\\$\\{RECENT_INST_LAST_MODIFIED\\}",
             f.format(recentInstLastModified));
-        msg = msg.replaceAll("\\$\\{OTHER_INSTS_LIST\\}", otherInstsList);
+        msg = msg.replaceAll("\\$\\{OTHER_INSTS_LIST\\}", otherInstsList.toString());
 
         logMsg +=
           "\n" + L.m("Die juengste WollMux-Installation liegt unter:") + "\n- "
@@ -153,7 +155,7 @@ public class OnCheckInstallation extends BasicEvent
     private List<WollMuxInstallationDescriptor> getInstallations()
     {
       List<WollMuxInstallationDescriptor> wmInstallations =
-        new ArrayList<WollMuxInstallationDescriptor>();
+        new ArrayList<>();
 
       // Installationspfade der Pakete bestimmen:
       String myPath = null; // user-Pfad

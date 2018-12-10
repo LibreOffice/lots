@@ -105,15 +105,11 @@ public class OnAbout extends BasicEvent
       int authorSpacing = 1;
 
       hbox = Box.createHorizontalBox();
-      // hbox.add(new JLabel(new ImageIcon(MB_URL)));
-      // hbox.add(Box.createHorizontalStrut(8));
       hbox.add(new JLabel("Matthias S. Benkmann"));
       hbox.add(Box.createHorizontalGlue());
       authorPanel.add(hbox);
 
       hbox = Box.createHorizontalBox();
-      // hbox.add(new JLabel(new ImageIcon(CL_URL)));
-      // hbox.add(Box.createHorizontalStrut(8));
       hbox.add(new JLabel("Christoph Lutz"));
       hbox.add(Box.createHorizontalGlue());
       authorPanel.add(Box.createVerticalStrut(authorSpacing));
@@ -121,8 +117,6 @@ public class OnAbout extends BasicEvent
 
       authorPanel.add(Box.createVerticalGlue());
 
-      // Box authorPanel2 = Box.createVerticalBox();
-      // authorPanelHBox.add(authorPanel2);
       Box authorPanel2 = authorPanel;
 
       hbox = Box.createHorizontalBox();

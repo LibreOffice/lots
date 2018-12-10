@@ -155,7 +155,6 @@ public class FormGUI
    * @param visible
    *          false zeigt an, dass die FormGUI unsichtbar bleiben soll.
    */
-  public FormGUI() {}
   public FormGUI(final ConfigThingy formFensterConf, final ConfigThingy conf,
       SingleDocumentFormModel doc,
       final Map<String, String> mapIdToPresetValue, final Map<Object, Object> functionContext,
