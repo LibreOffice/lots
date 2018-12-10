@@ -384,8 +384,6 @@ class DocumentExpander extends AbstractExecutor
     XTextCursor insCursor = cmd.getTextCursorWithinInsertMarks();
     if (UNO.XDocumentInsertable(insCursor) != null && urlStr != null)
     {
-      //      UNO.XDocumentInsertable(insCursor).insertDocumentFromURL(urlStr,
-      //        new PropertyValue[] {});
       DocumentLoader.getInstance().insertDocument(insCursor, urlStr);
     }
 
