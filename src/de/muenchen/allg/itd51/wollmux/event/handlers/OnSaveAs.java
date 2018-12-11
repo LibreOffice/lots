@@ -138,11 +138,7 @@ public class OnSaveAs extends BasicEvent
         URL dir = new URL(AnyConverter.toString(UNO.getProperty(ps, "Work")));
         return new File(dir.getPath(), filename);
       }
-      catch (com.sun.star.lang.IllegalArgumentException e)
-      {
-        LOGGER.error("", e);
-      }
-      catch (MalformedURLException e)
+      catch (com.sun.star.lang.IllegalArgumentException | MalformedURLException e )
       {
         LOGGER.error("", e);
       }
@@ -159,7 +155,7 @@ public class OnSaveAs extends BasicEvent
         // Deshalb das Überschreiben der createDialog-Methode und Setzen von
         // alwaysOnTop(true)
         @Override
-        protected JDialog createDialog(Component parent) throws HeadlessException
+        protected JDialog createDialog(Component parent)
         {
           JDialog dialog = super.createDialog(parent);
           dialog.setAlwaysOnTop(true);

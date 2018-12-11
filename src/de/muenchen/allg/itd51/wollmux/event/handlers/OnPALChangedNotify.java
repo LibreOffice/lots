@@ -1,6 +1,5 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 import org.slf4j.Logger;

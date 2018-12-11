@@ -12,7 +12,10 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  */
 public class OnSetWindowPosSize extends BasicEvent 
 {
-    private int docX, docY, docWidth, docHeight;
+    private int docX;
+    private int docY;
+    private int docWidth;
+    private int docHeight;
 
     private TextDocumentController documentController;
 
