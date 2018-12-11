@@ -35,7 +35,7 @@ public abstract class BasicEvent implements WollMuxEvent
   @Override
   public void process()
   {
-    LOGGER.debug("Process WollMuxEvent " + this.toString());
+    LOGGER.debug("Process WollMuxEvent {}", this);
     try
     {
       doit();

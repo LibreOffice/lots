@@ -61,7 +61,7 @@ public class OnNotifyDocumentEventListener extends BasicEvent
           DocumentManager.getDocumentManager().documentEventListenerIterator();
       while (i.hasNext())
       {
-        LOGGER.trace("notifying XEventListener (event '" + eventName + "')");
+        LOGGER.trace("notifying XEventListener (event '{}')", eventName);
         try
         {
           final XEventListener listener = i.next();
@@ -90,7 +90,6 @@ public class OnNotifyDocumentEventListener extends BasicEvent
       {
         DocumentManager.getDocumentManager().setProcessingFinished(
           compo);
-//        WollMuxEventHandler.getInstance().handleProcessTextDocumentFinished(DocumentManager.getDocumentManager(), compo);
       }
     }
 
