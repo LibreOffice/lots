@@ -5,10 +5,10 @@ import java.awt.event.ActionListener;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
-import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 
 public class OnSetFormValue extends BasicEvent
 {
@@ -35,8 +35,7 @@ public class OnSetFormValue extends BasicEvent
     TextDocumentController documentController = DocumentManager
         .getTextDocumentController(doc);
 
-    SingleDocumentFormModel formModel = DocumentManager.getDocumentManager()
-        .getFormModel(doc);
+    FormController formModel = DocumentManager.getDocumentManager().getFormModel(doc);
     if (formModel != null)
     {
       // Werte über den FormController (den das FormModel kennt) setzen lassen

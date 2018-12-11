@@ -76,7 +76,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextbausteinEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnZifferEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
 
-
 public class WollMuxEventHandler
 {
   private static final Logger LOGGER = LoggerFactory
