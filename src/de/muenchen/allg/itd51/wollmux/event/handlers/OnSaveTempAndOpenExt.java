@@ -38,7 +38,7 @@ public class OnSaveTempAndOpenExt extends BasicEvent
         OpenExt openExt = new OpenExt(ext, WollMuxFiles.getWollmuxConf());
         openExt.setSource(UNO.XStorable(documentController.getModel().doc));
         openExt.storeIfNecessary();
-        openExt.launch(x -> { LOGGER.error("", x); });        
+        openExt.launch(x -> LOGGER.error("", x));        
       }
       catch (Exception x)
       {
