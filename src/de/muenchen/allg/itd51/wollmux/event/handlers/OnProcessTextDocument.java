@@ -4,15 +4,15 @@ import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
+import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.formmodel.InvalidFormDescriptorException;
-import de.muenchen.allg.itd51.wollmux.dialog.formmodel.SingleDocumentFormModel;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 
 /**
  * Dieses Event wird immer dann ausgelöst, wenn der GlobalEventBroadcaster von OOo
@@ -94,19 +94,17 @@ public class OnProcessTextDocument extends BasicEvent
           }
 
         // FormGUI starten
-        SingleDocumentFormModel fm;
         try
         {
-          fm = documentController.createSingleDocumentFormModel(visible);
-        } catch (InvalidFormDescriptorException e)
+          FormController formController = documentController.createFormController();
+          DocumentManager.getDocumentManager().setFormModel(documentController.getModel().doc,
+              formController);
+          formController.startFormGUI();
+        } catch (FormModelException e)
         {
           throw new WMCommandsFailedException(
               L.m("Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\nBitte kontaktieren Sie Ihre Systemadministration."));
         }
-
-        DocumentManager.getDocumentManager()
-            .setFormModel(documentController.getModel().doc, fm);
-        fm.startFormGUI();
       }
     } catch (java.lang.Exception e)
     {
