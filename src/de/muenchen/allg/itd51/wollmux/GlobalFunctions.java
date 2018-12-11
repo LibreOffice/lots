@@ -39,11 +39,8 @@ public class GlobalFunctions
   private GlobalFunctions()
   {
     /*
-     * Globale Funktionsdialoge parsen. ACHTUNG! Muss vor parseGlobalFunctions()
-     * erfolgen. Als context wird null übergeben, weil globale Funktionen keinen
-     * Kontext haben. TODO Überlegen, ob ein globaler Kontext doch Sinn machen
-     * könnte. Dadurch könnten globale Funktionen globale Funktionsdialoge
-     * darstellen, die global einheitliche Werte haben.
+     * Globale Funktionsdialoge parsen. ACHTUNG! Muss vor parseGlobalFunctions() erfolgen. Als
+     * context wird null übergeben, weil globale Funktionen keinen Kontext haben.
      */
     funcDialogs =
       DialogFactory.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null, null);
@@ -70,14 +67,10 @@ public class GlobalFunctions
     documentActionFunctions = new FunctionLibrary(null, true);
     FunctionFactory.parseFunctions(documentActionFunctions,
       WollMuxFiles.getWollmuxConf(), "Dokumentaktionen", null, null);
-
-    
   }
   
   /**
    * Liefert die Funktionsbibliothek, die die global definierten Funktionen enthält.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FunctionLibrary getGlobalFunctions()
   {
@@ -86,8 +79,6 @@ public class GlobalFunctions
 
   /**
    * Liefert die Funktionsbibliothek, die die Dokumentaktionen enthält.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FunctionLibrary getDocumentActionFunctions()
   {
@@ -97,8 +88,6 @@ public class GlobalFunctions
   /**
    * Liefert die Funktionsbibliothek, die die global definierten Druckfunktionen
    * enthält.
-   * 
-   * @author Christoph Lutz (D-III-ITD 5.1)
    */
   public PrintFunctionLibrary getGlobalPrintFunctions()
   {
@@ -108,8 +97,6 @@ public class GlobalFunctions
   /**
    * Liefert die Dialogbibliothek, die die Dialoge enthält, die in Funktionen
    * (Grundfunktion "DIALOG") verwendung finden.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public DialogLibrary getFunctionDialogs()
   {
