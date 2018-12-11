@@ -37,7 +37,7 @@ public class OnSetSender extends BasicEvent
       // nur den neuen Absender setzen, wenn index und sender übereinstimmen,
       // d.h.
       // die Absenderliste der entfernten WollMuxBar konsistent war.
-      if (idx >= 0 && idx < pal.length && pal[idx].toString().equals(senderName))
+      if (idx >= 0 && idx < pal.length && pal[idx].equals(senderName))
       {
         DJDatasetListElement[] palDatasets =
             PersoenlicheAbsenderliste.getInstance().getSortedPALEntries();

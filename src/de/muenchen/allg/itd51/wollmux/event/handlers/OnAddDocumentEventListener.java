@@ -22,7 +22,7 @@ public class OnAddDocumentEventListener extends BasicEvent
     {
       DocumentManager.getDocumentManager().addDocumentEventListener(listener);
 
-      List<XComponent> processedDocuments = new ArrayList<XComponent>();
+      List<XComponent> processedDocuments = new ArrayList<>();
       DocumentManager.getDocumentManager().getProcessedDocuments(processedDocuments);
 
       for (XComponent compo : processedDocuments)

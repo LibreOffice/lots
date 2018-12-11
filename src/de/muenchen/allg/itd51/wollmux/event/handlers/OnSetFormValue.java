@@ -1,6 +1,5 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import com.sun.star.text.XTextDocument;
@@ -41,14 +40,10 @@ public class OnSetFormValue extends BasicEvent
       {
         // Werte über den FormController (den das FormModel kennt) setzen lassen
         // (damit sind auch automatisch alle Abhängigkeiten richtig aufgelöst)
-        formModel.setValue(id, value, new ActionListener()
-        {
-          @Override
-          public void actionPerformed(ActionEvent arg0)
-          {
-        	  WollMuxEventHandler.getInstance().handleSetFormValueFinished(listener);
-          }
-        });
+        formModel.setValue(id, value, e ->
+        {        
+          WollMuxEventHandler.getInstance().handleSetFormValueFinished(listener);
+        });       
       }
       else
       {

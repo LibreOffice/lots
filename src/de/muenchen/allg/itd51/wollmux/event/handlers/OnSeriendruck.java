@@ -1,8 +1,5 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
@@ -37,14 +34,10 @@ public class OnSeriendruck extends BasicEvent
       }
       else
       {
-        mmn = new MailMergeNew(documentController, new ActionListener()
-        {
-          @Override
-          public void actionPerformed(ActionEvent actionEvent)
-          {
-            if (actionEvent.getSource() instanceof MailMergeNew)
-              WollMuxEventHandler.getInstance().handleMailMergeNewReturned(documentController);
-          }
+        mmn = new MailMergeNew(documentController, actionEvent ->
+        {           
+          if (actionEvent.getSource() instanceof MailMergeNew)
+            WollMuxEventHandler.getInstance().handleMailMergeNewReturned(documentController);          
         });
         DocumentManager.getDocumentManager().setCurrentMailMergeNew(documentController.getModel().doc, mmn);
       }
