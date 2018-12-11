@@ -7,7 +7,7 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnCheckInstallation;
 public class CheckInstallation 
 {
     @Subscribe
-    public void OnCheckInstallation(OnCheckInstallation event)
+    public void onCheckInstallation(OnCheckInstallation event)
     {
       event.process();
     }

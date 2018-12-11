@@ -109,7 +109,7 @@ public class OnMarkBlock extends BasicEvent
       Pattern bookmarkPattern = DocumentCommands.getPatternForCommand(blockname);
       Set<String> bmNames = TextDocument.getBookmarkNamesMatching(bookmarkPattern, range);
 
-      if (bmNames == null || bmNames.size() < 1)
+      if (bmNames == null || bmNames.isEmpty())
       {
 	for(Pattern pattern : getBookmarkPatterns()) {
 	  Set<String> existingBookmarks = TextDocument.getBookmarkNamesMatching(pattern, range);
@@ -121,7 +121,6 @@ public class OnMarkBlock extends BasicEvent
 	      wollBook.remove();
 	    } catch (NoSuchElementException e)
 	    {
-	      e.printStackTrace();
 	    }
 	  }
 	}
@@ -183,12 +182,9 @@ public class OnMarkBlock extends BasicEvent
 		        }
 		        catch (IllegalArgumentException e)
 		        {
-		          e.printStackTrace();
 		        }
 		} catch (NoSuchElementException e)
 		{
-		  // TODO Auto-generated catch block
-		  e.printStackTrace();
 		}
 	      }
       	}
@@ -210,7 +206,7 @@ public class OnMarkBlock extends BasicEvent
 	Pattern originalOnlyPattern = DocumentCommands.getPatternForCommand("originalOnly");
 	Pattern copyOnlyPattern = DocumentCommands.getPatternForCommand("copyOnly");
 
-	List<Pattern> bookmarkPatterns = new ArrayList<Pattern>();
+	List<Pattern> bookmarkPatterns = new ArrayList<>();
 	bookmarkPatterns.add(allVersionPattern);
 	bookmarkPatterns.add(draftOnlyPattern);
 	bookmarkPatterns.add(notInOrginalPattern);

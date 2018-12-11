@@ -3,11 +3,7 @@ package de.muenchen.allg.itd51.wollmux.event.handlers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.text.XTextRange;
-import com.sun.star.text.XTextViewCursor;
-
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**

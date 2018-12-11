@@ -13,7 +13,6 @@ import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
@@ -65,7 +64,7 @@ public class OnInitialize extends BasicEvent
         // Liste der nicht zuordnenbaren Datensätze erstellen und ausgeben:
         String names = "";
         List<String> lost = DatasourceJoinerFactory.getLostDatasetDisplayStrings();
-        if (lost.size() > 0)
+        if (!lost.isEmpty())
         {
           for (String l : lost)
             names += "- " + l + "\n";
@@ -150,7 +149,7 @@ public class OnInitialize extends BasicEvent
      * können, die vor der Suche in einer anderen Datenquelle aufgelöst werden. Die
      * Auflösung erledigt durch die konkrete Klasse.
      */
-    private static abstract class DataFinder
+    private abstract static class DataFinder
     {
       private DatasourceJoiner dsj;
 

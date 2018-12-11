@@ -1,6 +1,5 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
@@ -38,14 +37,10 @@ public class OnFormularMax4000Show extends BasicEvent
       }
       else
       {
-        ActionListener l = new ActionListener()
+        ActionListener l = actionEvent -> 
         {
-          @Override
-          public void actionPerformed(ActionEvent actionEvent)
-          {
-            if (actionEvent.getSource() instanceof FormularMax4kController)
-              WollMuxEventHandler.getInstance().handleFormularMax4000Returned(documentController);
-          }
+          if (actionEvent.getSource() instanceof FormularMax4kController)
+            WollMuxEventHandler.getInstance().handleFormularMax4000Returned(documentController);
         };
 
         // Der Konstruktor von FormularMax erwartet hier nur die globalen
