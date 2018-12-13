@@ -12,21 +12,21 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
  */
 public class OnKill extends BasicEvent
 {
-	@Override
-	protected void doit() throws WollMuxFehlerException
-	{
-		if (UNO.desktop != null)
-		{
-			UNO.desktop.terminate();
-		} else
-		{
-			System.exit(0);
-		}
-	}
+  @Override
+  protected void doit() throws WollMuxFehlerException
+  {
+    if (UNO.desktop != null)
+    {
+      UNO.desktop.terminate();
+    } else
+    {
+      System.exit(0);
+    }
+  }
 
-	@Override
-	public String toString()
-	{
-		return this.getClass().getSimpleName() + "()";
-	}
+  @Override
+  public String toString()
+  {
+    return this.getClass().getSimpleName() + "()";
+  }
 }

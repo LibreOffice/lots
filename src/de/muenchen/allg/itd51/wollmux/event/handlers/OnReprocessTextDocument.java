@@ -8,46 +8,46 @@ import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpret
 
 public class OnReprocessTextDocument extends BasicEvent
 {
-	TextDocumentModel model;
-	private TextDocumentController documentController;
+  TextDocumentModel model;
+  private TextDocumentController documentController;
 
-	public OnReprocessTextDocument(TextDocumentController documentController)
-	{
-		this.documentController = documentController;
-		this.model = documentController.getModel();
-	}
+  public OnReprocessTextDocument(TextDocumentController documentController)
+  {
+    this.documentController = documentController;
+    this.model = documentController.getModel();
+  }
 
-	@Override
-	protected void doit() throws WollMuxFehlerException
-	{
-		if (model == null)
-			return;
+  @Override
+  protected void doit() throws WollMuxFehlerException
+  {
+    if (model == null)
+      return;
 
-		// Dokument mit neuen Dokumentkommandos über den
-		// DocumentCommandInterpreter bearbeiten:
-		model.getDocumentCommands().update();
-		DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
-		    documentController, WollMuxFiles.isDebugMode());
-		try
-		{
-			dci.executeTemplateCommands();
+    // Dokument mit neuen Dokumentkommandos über den
+    // DocumentCommandInterpreter bearbeiten:
+    model.getDocumentCommands().update();
+    DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
+        documentController, WollMuxFiles.isDebugMode());
+    try
+    {
+      dci.executeTemplateCommands();
 
-			// manche Kommandos sind erst nach der Expansion verfügbar
-			dci.scanGlobalDocumentCommands();
-			dci.scanInsertFormValueCommands();
-		} catch (java.lang.Exception e)
-		{
-			// Hier wird keine Exception erwartet, da Fehler (z.B. beim manuellen
-			// Einfügen von Textbausteinen) bereits dort als Popup angezeigt werden
-			// sollen, wo sie auftreten.
-		}
+      // manche Kommandos sind erst nach der Expansion verfügbar
+      dci.scanGlobalDocumentCommands();
+      dci.scanInsertFormValueCommands();
+    } catch (java.lang.Exception e)
+    {
+      // Hier wird keine Exception erwartet, da Fehler (z.B. beim manuellen
+      // Einfügen von Textbausteinen) bereits dort als Popup angezeigt werden
+      // sollen, wo sie auftreten.
+    }
 
-		stabilize();
-	}
+    stabilize();
+  }
 
-	@Override
-	public String toString()
-	{
-		return this.getClass().getSimpleName() + "(" + model + ")";
-	}
+  @Override
+  public String toString()
+  {
+    return this.getClass().getSimpleName() + "(" + model + ")";
+  }
 }

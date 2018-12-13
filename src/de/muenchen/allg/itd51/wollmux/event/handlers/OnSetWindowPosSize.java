@@ -11,36 +11,36 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  */
 public class OnSetWindowPosSize extends BasicEvent
 {
-	private int docX;
-	private int docY;
-	private int docWidth;
-	private int docHeight;
+  private int docX;
+  private int docY;
+  private int docWidth;
+  private int docHeight;
 
-	private TextDocumentController documentController;
+  private TextDocumentController documentController;
 
-	public OnSetWindowPosSize(TextDocumentController documentController, int docX,
-	    int docY,
-	    int docWidth, int docHeight)
-	{
-		this.documentController = documentController;
-		this.docX = docX;
-		this.docY = docY;
-		this.docWidth = docWidth;
-		this.docHeight = docHeight;
-	}
+  public OnSetWindowPosSize(TextDocumentController documentController, int docX,
+      int docY,
+      int docWidth, int docHeight)
+  {
+    this.documentController = documentController;
+    this.docX = docX;
+    this.docY = docY;
+    this.docWidth = docWidth;
+    this.docHeight = docHeight;
+  }
 
-	@Override
-	protected void doit()
-	{
+  @Override
+  protected void doit()
+  {
 
-		documentController.getFrameController().setWindowPosSize(docX, docY,
-		    docWidth, docHeight);
-	}
+    documentController.getFrameController().setWindowPosSize(docX, docY,
+        docWidth, docHeight);
+  }
 
-	@Override
-	public String toString()
-	{
-		return this.getClass().getSimpleName() + "(" + docX + ", " + docY + ", "
-		    + docWidth + ", " + docHeight + ")";
-	}
+  @Override
+  public String toString()
+  {
+    return this.getClass().getSimpleName() + "(" + docX + ", " + docY + ", "
+        + docWidth + ", " + docHeight + ")";
+  }
 }

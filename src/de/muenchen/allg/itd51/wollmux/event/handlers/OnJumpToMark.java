@@ -23,65 +23,65 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  */
 public class OnJumpToMark extends BasicEvent
 {
-	private static final Logger LOGGER = LoggerFactory
-	    .getLogger(OnJumpToMark.class);
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(OnJumpToMark.class);
 
-	private XTextDocument doc;
+  private XTextDocument doc;
 
-	private boolean msg;
+  private boolean msg;
 
-	public OnJumpToMark(XTextDocument doc, boolean msg)
-	{
-		this.doc = doc;
-		this.msg = msg;
-	}
+  public OnJumpToMark(XTextDocument doc, boolean msg)
+  {
+    this.doc = doc;
+    this.msg = msg;
+  }
 
-	@Override
-	protected void doit() throws WollMuxFehlerException
-	{
+  @Override
+  protected void doit() throws WollMuxFehlerException
+  {
 
-		TextDocumentController documentController = DocumentManager
-		    .getTextDocumentController(doc);
+    TextDocumentController documentController = DocumentManager
+        .getTextDocumentController(doc);
 
-		XTextCursor viewCursor = documentController.getModel().getViewCursor();
-		if (viewCursor == null)
-			return;
+    XTextCursor viewCursor = documentController.getModel().getViewCursor();
+    if (viewCursor == null)
+      return;
 
-		DocumentCommand cmd = documentController.getModel().getFirstJumpMark();
+    DocumentCommand cmd = documentController.getModel().getFirstJumpMark();
 
-		if (cmd != null)
-		{
-			try
-			{
-				XTextRange range = cmd.getTextCursor();
-				if (range != null)
-					viewCursor.gotoRange(range.getStart(), false);
-			} catch (java.lang.Exception e)
-			{
-				LOGGER.error("", e);
-			}
+    if (cmd != null)
+    {
+      try
+      {
+        XTextRange range = cmd.getTextCursor();
+        if (range != null)
+          viewCursor.gotoRange(range.getStart(), false);
+      } catch (java.lang.Exception e)
+      {
+        LOGGER.error("", e);
+      }
 
-			boolean modified = documentController.getModel().isDocumentModified();
-			cmd.markDone(true);
-			documentController.getModel().setDocumentModified(modified);
+      boolean modified = documentController.getModel().isDocumentModified();
+      cmd.markDone(true);
+      documentController.getModel().setDocumentModified(modified);
 
-			documentController.getModel().getDocumentCommands().update();
+      documentController.getModel().getDocumentCommands().update();
 
-		} else
-		{
-			if (msg)
-			{
-				ModalDialogs.showInfoModal(L.m("WollMux"),
-				    L.m("Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!"));
-			}
-		}
-		stabilize();
-	}
+    } else
+    {
+      if (msg)
+      {
+        ModalDialogs.showInfoModal(L.m("WollMux"),
+            L.m("Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!"));
+      }
+    }
+    stabilize();
+  }
 
-	@Override
-	public String toString()
-	{
-		return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", " + msg
-		    + ")";
-	}
+  @Override
+  public String toString()
+  {
+    return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", " + msg
+        + ")";
+  }
 }

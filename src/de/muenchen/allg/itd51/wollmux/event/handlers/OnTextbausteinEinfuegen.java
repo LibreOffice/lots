@@ -21,41 +21,41 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
  */
 public class OnTextbausteinEinfuegen extends BasicEvent
 {
-	private boolean reprocess;
-	private TextDocumentController documentController;
+  private boolean reprocess;
+  private TextDocumentController documentController;
 
-	public OnTextbausteinEinfuegen(TextDocumentController documentController,
-	    boolean reprocess)
-	{
-		this.documentController = documentController;
-		this.reprocess = reprocess;
+  public OnTextbausteinEinfuegen(TextDocumentController documentController,
+      boolean reprocess)
+  {
+    this.documentController = documentController;
+    this.reprocess = reprocess;
 
-	}
+  }
 
-	@Override
-	protected void doit()
-	{
-		XTextCursor viewCursor = documentController.getModel().getViewCursor();
-		try
-		{
-			TextModule.createInsertFragFromIdentifier(
-			    documentController.getModel().doc, viewCursor, reprocess);
-			if (reprocess)
-				WollMuxEventHandler.getInstance()
-				    .handleReprocessTextDocument(documentController);
-			if (!reprocess)
-				ModalDialogs.showInfoModal(L.m("WollMux"),
-				    L.m("Der Textbausteinverweis wurde eingefügt."));
-		} catch (WollMuxFehlerException e)
-		{
-			ModalDialogs.showInfoModal(L.m("WollMux-Fehler"), e.getMessage());
-		}
-	}
+  @Override
+  protected void doit()
+  {
+    XTextCursor viewCursor = documentController.getModel().getViewCursor();
+    try
+    {
+      TextModule.createInsertFragFromIdentifier(
+          documentController.getModel().doc, viewCursor, reprocess);
+      if (reprocess)
+        WollMuxEventHandler.getInstance()
+            .handleReprocessTextDocument(documentController);
+      if (!reprocess)
+        ModalDialogs.showInfoModal(L.m("WollMux"),
+            L.m("Der Textbausteinverweis wurde eingefügt."));
+    } catch (WollMuxFehlerException e)
+    {
+      ModalDialogs.showInfoModal(L.m("WollMux-Fehler"), e.getMessage());
+    }
+  }
 
-	@Override
-	public String toString()
-	{
-		return this.getClass().getSimpleName() + "(" + documentController.getModel()
-		    + ", " + reprocess + ")";
-	}
+  @Override
+  public String toString()
+  {
+    return this.getClass().getSimpleName() + "(" + documentController.getModel()
+        + ", " + reprocess + ")";
+  }
 }

@@ -37,65 +37,65 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  */
 public class OnSetInsertValues extends BasicEvent
 {
-	private static final Logger LOGGER = LoggerFactory
-	    .getLogger(OnSetInsertValues.class);
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(OnSetInsertValues.class);
 
-	private XTextDocument doc;
+  private XTextDocument doc;
 
-	private Map<String, String> mapDbSpalteToValue;
+  private Map<String, String> mapDbSpalteToValue;
 
-	private ActionListener listener;
+  private ActionListener listener;
 
-	public OnSetInsertValues(XTextDocument doc,
-	    Map<String, String> mapDbSpalteToValue,
-	    ActionListener unlockActionListener)
-	{
-		this.doc = doc;
-		this.mapDbSpalteToValue = mapDbSpalteToValue;
-		this.listener = unlockActionListener;
-	}
+  public OnSetInsertValues(XTextDocument doc,
+      Map<String, String> mapDbSpalteToValue,
+      ActionListener unlockActionListener)
+  {
+    this.doc = doc;
+    this.mapDbSpalteToValue = mapDbSpalteToValue;
+    this.listener = unlockActionListener;
+  }
 
-	@Override
-	protected void doit() throws WollMuxFehlerException
-	{
-		TextDocumentController documentController = DocumentManager
-		    .getTextDocumentController(doc);
+  @Override
+  protected void doit() throws WollMuxFehlerException
+  {
+    TextDocumentController documentController = DocumentManager
+        .getTextDocumentController(doc);
 
-		for (DocumentCommand cmd : documentController.getModel()
-		    .getDocumentCommands())
-			// stellt sicher, dass listener am Schluss informiert wird
-			try
-			{
-				if (cmd instanceof DocumentCommand.InsertValue)
-				{
-					DocumentCommand.InsertValue insVal = (DocumentCommand.InsertValue) cmd;
-					String value = mapDbSpalteToValue.get(insVal.getDBSpalte());
-					if (value != null)
-					{
-						value = documentController
-						    .getTransformedValue(insVal.getTrafoName(), value);
-						if ("".equals(value))
-						{
-							cmd.setTextRangeString("");
-						} else
-						{
-							cmd.setTextRangeString(insVal.getLeftSeparator() + value
-							    + insVal.getRightSeparator());
-						}
-					}
-				}
-			} catch (java.lang.Exception e)
-			{
-				LOGGER.error("", e);
-			}
-		if (listener != null)
-			listener.actionPerformed(null);
-	}
+    for (DocumentCommand cmd : documentController.getModel()
+        .getDocumentCommands())
+      // stellt sicher, dass listener am Schluss informiert wird
+      try
+      {
+        if (cmd instanceof DocumentCommand.InsertValue)
+        {
+          DocumentCommand.InsertValue insVal = (DocumentCommand.InsertValue) cmd;
+          String value = mapDbSpalteToValue.get(insVal.getDBSpalte());
+          if (value != null)
+          {
+            value = documentController
+                .getTransformedValue(insVal.getTrafoName(), value);
+            if ("".equals(value))
+            {
+              cmd.setTextRangeString("");
+            } else
+            {
+              cmd.setTextRangeString(insVal.getLeftSeparator() + value
+                  + insVal.getRightSeparator());
+            }
+          }
+        }
+      } catch (java.lang.Exception e)
+      {
+        LOGGER.error("", e);
+      }
+    if (listener != null)
+      listener.actionPerformed(null);
+  }
 
-	@Override
-	public String toString()
-	{
-		return this.getClass().getSimpleName() + "(#" + doc.hashCode()
-		    + ", Nr.Values=" + mapDbSpalteToValue.size() + ")";
-	}
+  @Override
+  public String toString()
+  {
+    return this.getClass().getSimpleName() + "(#" + doc.hashCode()
+        + ", Nr.Values=" + mapDbSpalteToValue.size() + ")";
+  }
 }

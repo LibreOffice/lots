@@ -55,314 +55,314 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnZifferEinfuegen;
 public class WollMuxEventListener
 {
 
-	WollMuxEventListener()
-	{
-	}
+  WollMuxEventListener()
+  {
+  }
 
-	@Subscribe
-	public void onsetwinsize(OnZifferEinfuegen event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onsetwinsize(OnZifferEinfuegen event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onZifferEinfuegen(OnZifferEinfuegen event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onZifferEinfuegen(OnZifferEinfuegen event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onTextbausteinEinfuegen(OnTextbausteinEinfuegen event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onTextbausteinEinfuegen(OnTextbausteinEinfuegen event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onShowDialogPersoenlicheAbsenderlisteVerwalten(
-	    OnShowDialogPersoenlicheAbsenderlisteVerwalten event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onShowDialogPersoenlicheAbsenderlisteVerwalten(
+      OnShowDialogPersoenlicheAbsenderlisteVerwalten event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onShowDialogAbsenderAuswaehlen(
-	    OnShowDialogAbsenderAuswaehlen event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onShowDialogAbsenderAuswaehlen(
+      OnShowDialogAbsenderAuswaehlen event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onSetWindowVisible(OnSetWindowVisible event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onSetWindowVisible(OnSetWindowVisible event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onSetWindowPosSize(OnSetWindowPosSize event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onSetWindowPosSize(OnSetWindowPosSize event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onSetWindowPosSizeSingleForm(OnSetWindowPosSizeSingleForm event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onSetWindowPosSizeSingleForm(OnSetWindowPosSizeSingleForm event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onSetSender(OnSetSender event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onSetSender(OnSetSender event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onSetInsertValues(OnSetInsertValues event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onSetInsertValues(OnSetInsertValues event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onSetFormValueFinished(OnSetFormValueFinished event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onSetFormValueFinished(OnSetFormValueFinished event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onSaveTempAndOpenExt(OnSaveTempAndOpenExt event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onSaveTempAndOpenExt(OnSaveTempAndOpenExt event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onSaveAs(OnSaveAs event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onSaveAs(OnSaveAs event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onReprocessTextDocument(OnReprocessTextDocument event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onReprocessTextDocument(OnReprocessTextDocument event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onRemovePALChangeEventListener(
-	    OnRemovePALChangeEventListener event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onRemovePALChangeEventListener(
+      OnRemovePALChangeEventListener event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onProcessTextDocument(OnProcessTextDocument event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onProcessTextDocument(OnProcessTextDocument event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onPrintPage(OnPrintPage event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onPrintPage(OnPrintPage event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onPALChangedNotify(OnPALChangedNotify event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onPALChangedNotify(OnPALChangedNotify event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onOpenDocument(OnOpenDocument event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onOpenDocument(OnOpenDocument event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onMarkBlock(OnMarkBlock event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onMarkBlock(OnMarkBlock event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onManagePrintFunction(OnManagePrintFunction event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onManagePrintFunction(OnManagePrintFunction event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onKill(OnKill event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onKill(OnKill event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onJumpToPlaceholder(OnJumpToPlaceholder event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onJumpToPlaceholder(OnJumpToPlaceholder event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onJumpToMark(OnJumpToMark event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onJumpToMark(OnJumpToMark event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onFunctionDialog(OnFunctionDialog event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onFunctionDialog(OnFunctionDialog event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onFormValueChanged(OnFormValueChanged event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onFormValueChanged(OnFormValueChanged event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onFormularMax4000Show(OnFormularMax4000Show event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onFormularMax4000Show(OnFormularMax4000Show event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onFormularMax4000Returned(OnFormularMax4000Returned event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onFormularMax4000Returned(OnFormularMax4000Returned event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onFormControllerInitCompleted(OnFormControllerInitCompleted event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onFormControllerInitCompleted(OnFormControllerInitCompleted event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onFocusFormField(OnFocusFormField event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onFocusFormField(OnFocusFormField event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onDumpInfo(OnDumpInfo event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onDumpInfo(OnDumpInfo event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onAbdruck(OnAbdruck event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onAbdruck(OnAbdruck event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onAddPALChangeEventListener(OnAddPALChangeEventListener event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onAddPALChangeEventListener(OnAddPALChangeEventListener event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onButtonZuleitungszeilePressed(
-	    OnButtonZuleitungszeilePressed event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onButtonZuleitungszeilePressed(
+      OnButtonZuleitungszeilePressed event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onCloseAndOpenExt(OnCloseAndOpenExt event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onCloseAndOpenExt(OnCloseAndOpenExt event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onAddDocumentEventListener(OnAddDocumentEventListener event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onAddDocumentEventListener(OnAddDocumentEventListener event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onCloseTextDocument(OnCloseTextDocument event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onCloseTextDocument(OnCloseTextDocument event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onCollectNonWollMuxFormFieldsViaPrintModel(
-	    OnCollectNonWollMuxFormFieldsViaPrintModel event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onCollectNonWollMuxFormFieldsViaPrintModel(
+      OnCollectNonWollMuxFormFieldsViaPrintModel event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onExecutePrintFunction(OnExecutePrintFunction event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onExecutePrintFunction(OnExecutePrintFunction event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onHandleMailMergeNewReturned(OnHandleMailMergeNewReturned event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onHandleMailMergeNewReturned(OnHandleMailMergeNewReturned event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onNotifyDocumentEventListener(OnNotifyDocumentEventListener event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onNotifyDocumentEventListener(OnNotifyDocumentEventListener event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onPrint(OnPrint event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onPrint(OnPrint event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onRegisterDispatchInterceptor(OnRegisterDispatchInterceptor event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onRegisterDispatchInterceptor(OnRegisterDispatchInterceptor event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onRemoveDocumentEventListener(OnRemoveDocumentEventListener event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onRemoveDocumentEventListener(OnRemoveDocumentEventListener event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onSeriendruck(OnSeriendruck event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onSeriendruck(OnSeriendruck event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onSetFormValue(OnSetFormValue event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onSetFormValue(OnSetFormValue event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onSetPrintBlocksPropsViaPrintModel(
-	    OnSetPrintBlocksPropsViaPrintModel event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onSetPrintBlocksPropsViaPrintModel(
+      OnSetPrintBlocksPropsViaPrintModel event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onSetVisibleState(OnSetVisibleState event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onSetVisibleState(OnSetVisibleState event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onTextDocumentClosed(OnTextDocumentClosed event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onTextDocumentClosed(OnTextDocumentClosed event)
+  {
+    event.process();
+  }
 
-	@Subscribe
-	public void onAbout(OnAbout event)
-	{
-		event.process();
-	}
+  @Subscribe
+  public void onAbout(OnAbout event)
+  {
+    event.process();
+  }
 
 }
