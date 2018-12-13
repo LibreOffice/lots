@@ -19,77 +19,81 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
  * WollMuxEventHandler ausgelöst.
  */
-public class OnFunctionDialog extends BasicEvent 
+public class OnFunctionDialog extends BasicEvent
 {
-    private TextDocumentController documentController;
+	private TextDocumentController documentController;
 
-    private String dialogName;
+	private String dialogName;
 
-    public OnFunctionDialog(TextDocumentController documentController, String dialogName)
-    {
-      this.documentController = documentController;
-      this.dialogName = dialogName;
-    }
+	public OnFunctionDialog(TextDocumentController documentController,
+	    String dialogName)
+	{
+		this.documentController = documentController;
+		this.dialogName = dialogName;
+	}
 
-    @Override
-    protected void doit() throws WollMuxFehlerException
-    {
-      // Dialog aus Funktionsdialog-Bibliothek holen:
-      Dialog dialog = GlobalFunctions.getInstance().getFunctionDialogs().get(dialogName);
-      if (dialog == null)
-        throw new WollMuxFehlerException(L.m(
-          "Funktionsdialog '%1' ist nicht definiert.", dialogName));
+	@Override
+	protected void doit() throws WollMuxFehlerException
+	{
+		// Dialog aus Funktionsdialog-Bibliothek holen:
+		Dialog dialog = GlobalFunctions.getInstance().getFunctionDialogs()
+		    .get(dialogName);
+		if (dialog == null)
+			throw new WollMuxFehlerException(L.m(
+			    "Funktionsdialog '%1' ist nicht definiert.", dialogName));
 
-      // Dialoginstanz erzeugen und modal anzeigen:
-      Dialog dialogInst = null;
-      try
-      {
-        dialogInst = dialog.instanceFor(new HashMap<Object, Object>());
+		// Dialoginstanz erzeugen und modal anzeigen:
+		Dialog dialogInst = null;
+		try
+		{
+			dialogInst = dialog.instanceFor(new HashMap<Object, Object>());
 
-        setLock();
-        dialogInst.show(unlockActionListener, documentController.getFunctionLibrary(),
-          documentController.getDialogLibrary());
-        waitForUnlock();
-      }
-      catch (ConfigurationErrorException e)
-      {
-        throw new CantStartDialogException(e);
-      }
+			setLock();
+			dialogInst.show(unlockActionListener,
+			    documentController.getFunctionLibrary(),
+			    documentController.getDialogLibrary());
+			waitForUnlock();
+		} catch (ConfigurationErrorException e)
+		{
+			throw new CantStartDialogException(e);
+		}
 
-      // Abbruch, wenn der Dialog nicht mit OK beendet wurde.
-      String cmd = unlockActionListener.actionEvent.getActionCommand();
-      if (!cmd.equalsIgnoreCase("select")) return;
+		// Abbruch, wenn der Dialog nicht mit OK beendet wurde.
+		String cmd = unlockActionListener.actionEvent.getActionCommand();
+		if (!cmd.equalsIgnoreCase("select"))
+			return;
 
-      // Dem Dokument den Fokus geben, damit die Änderungen des Benutzers
-      // transparent mit verfolgt werden können.
-      try
-      {
-        documentController.getFrameController().getFrame().getContainerWindow().setFocus();
-      }
-      catch (java.lang.Exception e)
-      {
-        // keine Gefährdung des Ablaufs falls das nicht klappt.
-      }
+		// Dem Dokument den Fokus geben, damit die Änderungen des Benutzers
+		// transparent mit verfolgt werden können.
+		try
+		{
+			documentController.getFrameController().getFrame().getContainerWindow()
+			    .setFocus();
+		} catch (java.lang.Exception e)
+		{
+			// keine Gefährdung des Ablaufs falls das nicht klappt.
+		}
 
-      // Alle Werte die der Funktionsdialog sicher zurück liefert werden in
-      // das Dokument übernommen.
-      Collection<String> schema = dialogInst.getSchema();
-      Iterator<String> iter = schema.iterator();
-      while (iter.hasNext())
-      {
-        String id = iter.next();
-        String value = dialogInst.getData(id).toString();
+		// Alle Werte die der Funktionsdialog sicher zurück liefert werden in
+		// das Dokument übernommen.
+		Collection<String> schema = dialogInst.getSchema();
+		Iterator<String> iter = schema.iterator();
+		while (iter.hasNext())
+		{
+			String id = iter.next();
+			String value = dialogInst.getData(id).toString();
 
-        documentController.addFormFieldValue(id, value);
-      }
+			documentController.addFormFieldValue(id, value);
+		}
 
-      stabilize();
-    }
+		stabilize();
+	}
 
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(" + documentController + ", '" + dialogName
-        + "')";
-    }
-  }
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "(" + documentController + ", '"
+		    + dialogName
+		    + "')";
+	}
+}

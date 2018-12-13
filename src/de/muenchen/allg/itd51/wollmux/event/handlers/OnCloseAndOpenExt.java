@@ -17,41 +17,42 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 public class OnCloseAndOpenExt extends BasicEvent
 {
 	private static final Logger LOGGER = LoggerFactory
-		      .getLogger(OnCloseAndOpenExt.class);
-	
-    private String ext;
-    private TextDocumentController documentController;
+	    .getLogger(OnCloseAndOpenExt.class);
 
-    public OnCloseAndOpenExt(TextDocumentController documentController, String ext)
-    {
-      this.documentController = documentController;
-      this.ext = ext;
-    }
+	private String ext;
+	private TextDocumentController documentController;
 
-    @Override
-    protected void doit()
-    {
-      try
-      {
-        OpenExt openExt = new OpenExt(ext, WollMuxFiles.getWollmuxConf());
-        openExt.setSource(UNO.XStorable(documentController.getModel().doc));
-        openExt.storeIfNecessary();
-        openExt.launch(x -> LOGGER.error("", x));
-      }
-      catch (Exception x)
-      {
-        LOGGER.error("", x);
-        return;
-      }
+	public OnCloseAndOpenExt(TextDocumentController documentController,
+	    String ext)
+	{
+		this.documentController = documentController;
+		this.ext = ext;
+	}
 
-      documentController.getModel().setDocumentModified(false);
-      documentController.getModel().close();
-    }
+	@Override
+	protected void doit()
+	{
+		try
+		{
+			OpenExt openExt = new OpenExt(ext, WollMuxFiles.getWollmuxConf());
+			openExt.setSource(UNO.XStorable(documentController.getModel().doc));
+			openExt.storeIfNecessary();
+			openExt.launch(x -> LOGGER.error("", x));
+		} catch (Exception x)
+		{
+			LOGGER.error("", x);
+			return;
+		}
 
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(#" + documentController.getModel().hashCode() + ", " + ext
-        + ")";
-    }
-  }
+		documentController.getModel().setDocumentModified(false);
+		documentController.getModel().close();
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "(#"
+		    + documentController.getModel().hashCode() + ", " + ext
+		    + ")";
+	}
+}

@@ -23,29 +23,30 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 public class OnPALChangedNotify extends BasicEvent
 {
 	private static final Logger LOGGER = LoggerFactory
-		      .getLogger(OnPALChangedNotify.class);
-	
-    @Override
-    protected void doit()
-    {
-      // registrierte PALChangeListener updaten
-      Iterator<XPALChangeEventListener> i = PersoenlicheAbsenderliste.getInstance().iterator();
-      while (i.hasNext())
-      {
-        LOGGER.trace("OnPALChangedNotify: Update XPALChangeEventListener");
-        EventObject eventObject = new EventObject();
-        eventObject.Source = PersoenlicheAbsenderliste.getInstance();
-        try
-        {
-          i.next().updateContent(eventObject);
-        }
-        catch (java.lang.Exception x)
-        {
-          i.remove();
-        }
-      }
+	    .getLogger(OnPALChangedNotify.class);
 
-    // Cache und LOS auf Platte speichern.
-    DatasourceJoinerFactory.getDatasourceJoiner().saveCacheAndLOS(WollMuxFiles.getLosCacheFile());
-    }
-  }
+	@Override
+	protected void doit()
+	{
+		// registrierte PALChangeListener updaten
+		Iterator<XPALChangeEventListener> i = PersoenlicheAbsenderliste
+		    .getInstance().iterator();
+		while (i.hasNext())
+		{
+			LOGGER.trace("OnPALChangedNotify: Update XPALChangeEventListener");
+			EventObject eventObject = new EventObject();
+			eventObject.Source = PersoenlicheAbsenderliste.getInstance();
+			try
+			{
+				i.next().updateContent(eventObject);
+			} catch (java.lang.Exception x)
+			{
+				i.remove();
+			}
+		}
+
+		// Cache und LOS auf Platte speichern.
+		DatasourceJoinerFactory.getDatasourceJoiner()
+		    .saveCacheAndLOS(WollMuxFiles.getLosCacheFile());
+	}
+}

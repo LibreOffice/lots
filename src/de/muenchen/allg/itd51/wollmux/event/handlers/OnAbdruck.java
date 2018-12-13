@@ -15,31 +15,34 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines Drucks
  * auf den Knopf der OOo-Symbolleiste ein "wollmux:Abdruck" dispatch erfolgte.
  */
-public class OnAbdruck extends BasicEvent 
+public class OnAbdruck extends BasicEvent
 {
-    private TextDocumentController documentController;
+	private TextDocumentController documentController;
 
-    public OnAbdruck(TextDocumentController documentController)
-    {
-      this.documentController = documentController;
-    }
+	public OnAbdruck(TextDocumentController documentController)
+	{
+		this.documentController = documentController;
+	}
 
-    @Override
-    protected void doit() throws WollMuxFehlerException
-    {
-      XTextCursor viewCursor = documentController.getModel().getViewCursor();
-      if (viewCursor != null)
-      {
-        XTextRange vc = SachleitendeVerfuegung.insertAbdruck(documentController, viewCursor);
-        if (vc != null) viewCursor.gotoRange(vc, false);
-      }
+	@Override
+	protected void doit() throws WollMuxFehlerException
+	{
+		XTextCursor viewCursor = documentController.getModel().getViewCursor();
+		if (viewCursor != null)
+		{
+			XTextRange vc = SachleitendeVerfuegung.insertAbdruck(documentController,
+			    viewCursor);
+			if (vc != null)
+				viewCursor.gotoRange(vc, false);
+		}
 
-      stabilize();
-    }
+		stabilize();
+	}
 
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
-    }
-  }
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "(" + documentController.getModel()
+		    + ")";
+	}
+}

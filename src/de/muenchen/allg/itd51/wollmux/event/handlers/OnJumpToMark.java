@@ -21,68 +21,67 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  * nach dem Einfügen von Textbausteine keine Einfügestelle vorhanden ist aber eine
  * Marke 'setJumpMark'
  */
-public class OnJumpToMark extends BasicEvent 
+public class OnJumpToMark extends BasicEvent
 {
-    private static final Logger LOGGER = LoggerFactory
-		      .getLogger(OnJumpToMark.class);
-	  
-    private XTextDocument doc;
+	private static final Logger LOGGER = LoggerFactory
+	    .getLogger(OnJumpToMark.class);
 
-    private boolean msg;
-    
-    
-    public OnJumpToMark(XTextDocument doc, boolean msg)
-    {
-    	this.doc = doc;
-    	this.msg = msg;
-    }
-    
-    @Override
-    protected void doit() throws WollMuxFehlerException
-    {
+	private XTextDocument doc;
 
-      TextDocumentController documentController =
-        DocumentManager.getTextDocumentController(doc);
+	private boolean msg;
 
-      XTextCursor viewCursor = documentController.getModel().getViewCursor();
-      if (viewCursor == null) return;
+	public OnJumpToMark(XTextDocument doc, boolean msg)
+	{
+		this.doc = doc;
+		this.msg = msg;
+	}
 
-      DocumentCommand cmd = documentController.getModel().getFirstJumpMark();
+	@Override
+	protected void doit() throws WollMuxFehlerException
+	{
 
-      if (cmd != null)
-      {
-        try
-        {
-          XTextRange range = cmd.getTextCursor();
-          if (range != null) viewCursor.gotoRange(range.getStart(), false);
-        }
-        catch (java.lang.Exception e)
-        {
-          LOGGER.error("", e);
-        }
+		TextDocumentController documentController = DocumentManager
+		    .getTextDocumentController(doc);
 
-        boolean modified = documentController.getModel().isDocumentModified();
-        cmd.markDone(true);
-        documentController.getModel().setDocumentModified(modified);
+		XTextCursor viewCursor = documentController.getModel().getViewCursor();
+		if (viewCursor == null)
+			return;
 
-        documentController.getModel().getDocumentCommands().update();
+		DocumentCommand cmd = documentController.getModel().getFirstJumpMark();
 
-      }
-      else
-      {
-        if (msg)
-        {
-          ModalDialogs.showInfoModal(L.m("WollMux"),
-            L.m("Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!"));
-        }
-      }
-      stabilize();
-    }
+		if (cmd != null)
+		{
+			try
+			{
+				XTextRange range = cmd.getTextCursor();
+				if (range != null)
+					viewCursor.gotoRange(range.getStart(), false);
+			} catch (java.lang.Exception e)
+			{
+				LOGGER.error("", e);
+			}
 
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", " + msg
-        + ")";
-    }
-  }
+			boolean modified = documentController.getModel().isDocumentModified();
+			cmd.markDone(true);
+			documentController.getModel().setDocumentModified(modified);
+
+			documentController.getModel().getDocumentCommands().update();
+
+		} else
+		{
+			if (msg)
+			{
+				ModalDialogs.showInfoModal(L.m("WollMux"),
+				    L.m("Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!"));
+			}
+		}
+		stabilize();
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", " + msg
+		    + ")";
+	}
+}

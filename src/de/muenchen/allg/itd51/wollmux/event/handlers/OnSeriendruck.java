@@ -16,36 +16,39 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
  */
 public class OnSeriendruck extends BasicEvent
 {
-    private TextDocumentController documentController;
+	private TextDocumentController documentController;
 
-    public OnSeriendruck(TextDocumentController documentController, boolean useDocumentPrintFunctions)
-    {
-      this.documentController = documentController;
-    }
+	public OnSeriendruck(TextDocumentController documentController,
+	    boolean useDocumentPrintFunctions)
+	{
+		this.documentController = documentController;
+	}
 
-    @Override
-    protected void doit() throws WollMuxFehlerException
-    {
-      // Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
-      MailMergeNew mmn = DocumentManager.getDocumentManager().getCurrentMailMergeNew(documentController.getModel().doc);
-      if (mmn != null)
-      {
-        return;
-      }
-      else
-      {
-        mmn = new MailMergeNew(documentController, actionEvent ->
-        {           
-          if (actionEvent.getSource() instanceof MailMergeNew)
-            WollMuxEventHandler.getInstance().handleMailMergeNewReturned(documentController);          
-        });
-        DocumentManager.getDocumentManager().setCurrentMailMergeNew(documentController.getModel().doc, mmn);
-      }
-    }
+	@Override
+	protected void doit() throws WollMuxFehlerException
+	{
+		// Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
+		MailMergeNew mmn = DocumentManager.getDocumentManager()
+		    .getCurrentMailMergeNew(documentController.getModel().doc);
+		if (mmn != null)
+		{
+			return;
+		} else
+		{
+			mmn = new MailMergeNew(documentController, actionEvent -> {
+				if (actionEvent.getSource() instanceof MailMergeNew)
+					WollMuxEventHandler.getInstance()
+					    .handleMailMergeNewReturned(documentController);
+			});
+			DocumentManager.getDocumentManager()
+			    .setCurrentMailMergeNew(documentController.getModel().doc, mmn);
+		}
+	}
 
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
-    }
-  }
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "(" + documentController.getModel()
+		    + ")";
+	}
+}

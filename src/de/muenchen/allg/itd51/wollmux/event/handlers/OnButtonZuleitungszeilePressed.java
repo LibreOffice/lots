@@ -16,32 +16,35 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  * auf den Knopf der OOo-Symbolleiste ein "wollmux:Zuleitungszeile" dispatch
  * erfolgte.
  */
-public class OnButtonZuleitungszeilePressed extends BasicEvent 
+public class OnButtonZuleitungszeilePressed extends BasicEvent
 {
-    private TextDocumentController documentController;
+	private TextDocumentController documentController;
 
-    public OnButtonZuleitungszeilePressed(TextDocumentController documentController)
-    {
-      this.documentController = documentController;
-    }
+	public OnButtonZuleitungszeilePressed(
+	    TextDocumentController documentController)
+	{
+		this.documentController = documentController;
+	}
 
-    @Override
-    protected void doit() throws WollMuxFehlerException
-    {
-      XTextCursor viewCursor = documentController.getModel().getViewCursor();
-      if (viewCursor != null)
-      {
-        XTextRange vc =
-          SachleitendeVerfuegung.insertZuleitungszeile(documentController, viewCursor);
-        if (vc != null) viewCursor.gotoRange(vc, false);
-      }
+	@Override
+	protected void doit() throws WollMuxFehlerException
+	{
+		XTextCursor viewCursor = documentController.getModel().getViewCursor();
+		if (viewCursor != null)
+		{
+			XTextRange vc = SachleitendeVerfuegung
+			    .insertZuleitungszeile(documentController, viewCursor);
+			if (vc != null)
+				viewCursor.gotoRange(vc, false);
+		}
 
-      stabilize();
-    }
+		stabilize();
+	}
 
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
-    }
-  }
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "(" + documentController.getModel()
+		    + ")";
+	}
+}

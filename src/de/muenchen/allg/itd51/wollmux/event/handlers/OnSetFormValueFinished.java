@@ -17,24 +17,25 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
  * @param unlockActionListener
  *          Der zu informierende unlockActionListener.
  */
-public class OnSetFormValueFinished extends BasicEvent 
+public class OnSetFormValueFinished extends BasicEvent
 {
-    private ActionListener listener;
+	private ActionListener listener;
 
-    public OnSetFormValueFinished(ActionListener unlockActionListener)
-    {
-      this.listener = unlockActionListener;
-    }
+	public OnSetFormValueFinished(ActionListener unlockActionListener)
+	{
+		this.listener = unlockActionListener;
+	}
 
-    @Override
-    protected void doit() throws WollMuxFehlerException
-    {
-      if (listener != null) listener.actionPerformed(null);
-    }
+	@Override
+	protected void doit() throws WollMuxFehlerException
+	{
+		if (listener != null)
+			listener.actionPerformed(null);
+	}
 
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "()";
-    }
-  }
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "()";
+	}
+}
