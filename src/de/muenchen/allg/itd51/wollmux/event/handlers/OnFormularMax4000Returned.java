@@ -10,25 +10,27 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  *
  * Dieses Event wird vom EventProcessor geworfen, wenn der FormularMax zurückkehrt.
  */
-public class OnFormularMax4000Returned extends BasicEvent 
+public class OnFormularMax4000Returned extends BasicEvent
 {
 
-    private TextDocumentController documentController;
+	private TextDocumentController documentController;
 
-    public OnFormularMax4000Returned(TextDocumentController documentController)
-    {
-      this.documentController = documentController;
-    }
+	public OnFormularMax4000Returned(TextDocumentController documentController)
+	{
+		this.documentController = documentController;
+	}
 
-    @Override
-    protected void doit() throws WollMuxFehlerException
-    {
-      DocumentManager.getDocumentManager().setCurrentFormularMax4000(documentController.getModel().doc, null);
-    }
+	@Override
+	protected void doit() throws WollMuxFehlerException
+	{
+		DocumentManager.getDocumentManager()
+		    .setCurrentFormularMax4000(documentController.getModel().doc, null);
+	}
 
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(#" + documentController.getModel().hashCode() + ")";
-    }
-  }
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "(#"
+		    + documentController.getModel().hashCode() + ")";
+	}
+}

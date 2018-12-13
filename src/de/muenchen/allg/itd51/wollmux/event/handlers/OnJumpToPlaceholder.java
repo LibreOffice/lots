@@ -9,38 +9,39 @@ import de.muenchen.allg.itd51.wollmux.TextModule;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
-public class OnJumpToPlaceholder extends BasicEvent 
+public class OnJumpToPlaceholder extends BasicEvent
 {
-    private static final Logger LOGGER = LoggerFactory
-		      .getLogger(OnJumpToPlaceholder.class);
-    
-    private TextDocumentController documentController;
+	private static final Logger LOGGER = LoggerFactory
+	    .getLogger(OnJumpToPlaceholder.class);
 
-    public OnJumpToPlaceholder(TextDocumentController documentController)
-    {
-      this.documentController = documentController;
-    }
+	private TextDocumentController documentController;
 
-    @Override
-    protected void doit() throws WollMuxFehlerException
-    {
-      XTextCursor viewCursor = documentController.getModel().getViewCursor();
+	public OnJumpToPlaceholder(TextDocumentController documentController)
+	{
+		this.documentController = documentController;
+	}
 
-      try
-      {
-        TextModule.jumpPlaceholders(documentController.getModel().doc, viewCursor);
-      }
-      catch (java.lang.Exception e)
-      {
-        LOGGER.error("", e);
-      }
+	@Override
+	protected void doit() throws WollMuxFehlerException
+	{
+		XTextCursor viewCursor = documentController.getModel().getViewCursor();
 
-      stabilize();
-    }
+		try
+		{
+			TextModule.jumpPlaceholders(documentController.getModel().doc,
+			    viewCursor);
+		} catch (java.lang.Exception e)
+		{
+			LOGGER.error("", e);
+		}
 
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(" + documentController.getModel() + ")";
-    }
-  }
+		stabilize();
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "(" + documentController.getModel()
+		    + ")";
+	}
+}

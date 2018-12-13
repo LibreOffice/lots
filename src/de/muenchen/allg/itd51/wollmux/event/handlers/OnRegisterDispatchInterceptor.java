@@ -18,48 +18,50 @@ import de.muenchen.allg.itd51.wollmux.event.DispatchProviderAndInterceptor;
  *          der {@link XFrame} auf den der {@link DispatchProviderAndInterceptor}
  *          registriert werden soll.
  */
-public class OnRegisterDispatchInterceptor extends BasicEvent 
+public class OnRegisterDispatchInterceptor extends BasicEvent
 {
 	private static final Logger LOGGER = LoggerFactory
-		      .getLogger(OnRegisterDispatchInterceptor.class);
-	
-    private TextDocumentController documentController;
+	    .getLogger(OnRegisterDispatchInterceptor.class);
 
-    public OnRegisterDispatchInterceptor(TextDocumentController documentController)
-    {
-      this.documentController = documentController;
-    }
+	private TextDocumentController documentController;
 
-    @Override
-    protected void doit()
-    {
-      FrameController fc = documentController.getFrameController();
-      if (fc.getFrame() == null)
-      {
-        LOGGER.debug(L.m("Ignoriere handleRegisterDispatchInterceptor(null)"));
-        return;
-      }
-      try
-      {
-        DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(fc.getFrame());
-      }
-      catch (java.lang.Exception e)
-      {
-        LOGGER.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
-      }
+	public OnRegisterDispatchInterceptor(
+	    TextDocumentController documentController)
+	{
+		this.documentController = documentController;
+	}
 
-      // Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
-      try
-      {
-        fc.getFrame().contextChanged();
-      }
-      catch (java.lang.Exception e)
-      {}
-    }
+	@Override
+	protected void doit()
+	{
+		FrameController fc = documentController.getFrameController();
+		if (fc.getFrame() == null)
+		{
+			LOGGER.debug(L.m("Ignoriere handleRegisterDispatchInterceptor(null)"));
+			return;
+		}
+		try
+		{
+			DispatchProviderAndInterceptor
+			    .registerDocumentDispatchInterceptor(fc.getFrame());
+		} catch (java.lang.Exception e)
+		{
+			LOGGER.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
+		}
 
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(#" + documentController.getFrameController().getFrame().hashCode() + ")";
-    }
-  }
+		// Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
+		try
+		{
+			fc.getFrame().contextChanged();
+		} catch (java.lang.Exception e)
+		{
+		}
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "(#"
+		    + documentController.getFrameController().getFrame().hashCode() + ")";
+	}
+}

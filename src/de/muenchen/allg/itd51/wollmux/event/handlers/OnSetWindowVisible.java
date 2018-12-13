@@ -9,27 +9,28 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  *
  * @author christoph.lutz
  */
-public class OnSetWindowVisible extends BasicEvent 
+public class OnSetWindowVisible extends BasicEvent
 {
-    boolean visible;
+	boolean visible;
 
-    private TextDocumentController documentController;
+	private TextDocumentController documentController;
 
-    public OnSetWindowVisible(TextDocumentController documentController, boolean visible)
-    {
-      this.documentController = documentController;
-      this.visible = visible;
-    }
+	public OnSetWindowVisible(TextDocumentController documentController,
+	    boolean visible)
+	{
+		this.documentController = documentController;
+		this.visible = visible;
+	}
 
-    @Override
-    protected void doit()
-    {
-      documentController.getFrameController().setWindowVisible(visible);
-    }
+	@Override
+	protected void doit()
+	{
+		documentController.getFrameController().setWindowVisible(visible);
+	}
 
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(" + visible + ")";
-    }
-  }
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "(" + visible + ")";
+	}
+}

@@ -2,7 +2,6 @@ package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
-
 /**
  * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass alle Formularfelder
  * Dokument auf den neuen Wert gesetzt werden. Bei Formularfeldern mit
@@ -24,32 +23,33 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  *          Die Funktionsbibliothek, die zur Gewinnung der Trafo-Funktion verwendet
  *          werden soll.
  */
-public class OnFormValueChanged extends BasicEvent 
+public class OnFormValueChanged extends BasicEvent
 {
-    private String fieldId;
+	private String fieldId;
 
-    private String newValue;
+	private String newValue;
 
-    private TextDocumentController documentController;
+	private TextDocumentController documentController;
 
-    public OnFormValueChanged(TextDocumentController documentController, String fieldId,
-        String newValue)
-    {
-      this.fieldId = fieldId;
-      this.newValue = newValue;
-      this.documentController = documentController;
-    }
+	public OnFormValueChanged(TextDocumentController documentController,
+	    String fieldId,
+	    String newValue)
+	{
+		this.fieldId = fieldId;
+		this.newValue = newValue;
+		this.documentController = documentController;
+	}
 
-    @Override
-    protected void doit()
-    {
-      documentController.addFormFieldValue(fieldId, newValue);
-    }
+	@Override
+	protected void doit()
+	{
+		documentController.addFormFieldValue(fieldId, newValue);
+	}
 
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(" + fieldId + "', '" + newValue
-        + "')";
-    }
-  }
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "(" + fieldId + "', '" + newValue
+		    + "')";
+	}
+}

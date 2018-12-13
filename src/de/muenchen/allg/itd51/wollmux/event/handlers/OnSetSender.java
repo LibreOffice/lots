@@ -14,48 +14,48 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
  *
  * @author christoph.lutz
  */
-public class OnSetSender extends BasicEvent 
+public class OnSetSender extends BasicEvent
 {
 	private static final Logger LOGGER = LoggerFactory
-		      .getLogger(OnSetSender.class);
-	
-    private String senderName;
+	    .getLogger(OnSetSender.class);
 
-    private int idx;
+	private String senderName;
 
-    public OnSetSender(String senderName, int idx)
-    {
-      this.senderName = senderName;
-      this.idx = idx;
-    }
+	private int idx;
 
-    @Override
-    protected void doit()
-    {
-      String[] pal = PersoenlicheAbsenderliste.getInstance().getPALEntries();
+	public OnSetSender(String senderName, int idx)
+	{
+		this.senderName = senderName;
+		this.idx = idx;
+	}
 
-      // nur den neuen Absender setzen, wenn index und sender übereinstimmen,
-      // d.h.
-      // die Absenderliste der entfernten WollMuxBar konsistent war.
-      if (idx >= 0 && idx < pal.length && pal[idx].equals(senderName))
-      {
-        DJDatasetListElement[] palDatasets =
-            PersoenlicheAbsenderliste.getInstance().getSortedPALEntries();
-        palDatasets[idx].getDataset().select();
-      }
-      else
-      {
-        LOGGER.error(L.m(
-          "Setzen des Senders '%1' schlug fehl, da der index '%2' nicht mit der PAL übereinstimmt (Inkonsistenzen?)",
-          senderName, idx));
-      }
+	@Override
+	protected void doit()
+	{
+		String[] pal = PersoenlicheAbsenderliste.getInstance().getPALEntries();
 
-      WollMuxEventHandler.getInstance().handlePALChangedNotify();
-    }
+		// nur den neuen Absender setzen, wenn index und sender übereinstimmen,
+		// d.h.
+		// die Absenderliste der entfernten WollMuxBar konsistent war.
+		if (idx >= 0 && idx < pal.length && pal[idx].equals(senderName))
+		{
+			DJDatasetListElement[] palDatasets = PersoenlicheAbsenderliste
+			    .getInstance().getSortedPALEntries();
+			palDatasets[idx].getDataset().select();
+		} else
+		{
+			LOGGER.error(L.m(
+			    "Setzen des Senders '%1' schlug fehl, da der index '%2' nicht mit der PAL übereinstimmt (Inkonsistenzen?)",
+			    senderName, idx));
+		}
 
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(" + senderName + ", " + idx + ")";
-    }
-  }
+		WollMuxEventHandler.getInstance().handlePALChangedNotify();
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "(" + senderName + ", " + idx
+		    + ")";
+	}
+}

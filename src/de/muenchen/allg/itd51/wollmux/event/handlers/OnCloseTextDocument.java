@@ -9,24 +9,25 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  *
  * @author christoph.lutz
  */
-public class OnCloseTextDocument extends BasicEvent 
+public class OnCloseTextDocument extends BasicEvent
 {
-    private TextDocumentController documentController;
+	private TextDocumentController documentController;
 
-    public OnCloseTextDocument(TextDocumentController documentController)
-    {
-      this.documentController = documentController;
-    }
+	public OnCloseTextDocument(TextDocumentController documentController)
+	{
+		this.documentController = documentController;
+	}
 
-    @Override
-    protected void doit()
-    {
-      documentController.getModel().close();
-    }
+	@Override
+	protected void doit()
+	{
+		documentController.getModel().close();
+	}
 
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(#" + documentController.getModel().hashCode() + ")";
-    }
-  }
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "(#"
+		    + documentController.getModel().hashCode() + ")";
+	}
+}
