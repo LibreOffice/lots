@@ -13,23 +13,23 @@ import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
  */
 public class OnRemovePALChangeEventListener extends BasicEvent
 {
-	private XPALChangeEventListener listener;
+  private XPALChangeEventListener listener;
 
-	public OnRemovePALChangeEventListener(XPALChangeEventListener listener)
-	{
-		this.listener = listener;
-	}
+  public OnRemovePALChangeEventListener(XPALChangeEventListener listener)
+  {
+    this.listener = listener;
+  }
 
-	@Override
-	protected void doit()
-	{
-		PersoenlicheAbsenderliste.getInstance()
-		    .removePALChangeEventListener(listener);
-	}
+  @Override
+  protected void doit()
+  {
+    PersoenlicheAbsenderliste.getInstance()
+        .removePALChangeEventListener(listener);
+  }
 
-	@Override
-	public String toString()
-	{
-		return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
-	}
+  @Override
+  public String toString()
+  {
+    return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
+  }
 }

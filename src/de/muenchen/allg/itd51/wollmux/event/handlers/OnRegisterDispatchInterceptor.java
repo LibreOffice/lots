@@ -20,48 +20,49 @@ import de.muenchen.allg.itd51.wollmux.event.DispatchProviderAndInterceptor;
  */
 public class OnRegisterDispatchInterceptor extends BasicEvent
 {
-	private static final Logger LOGGER = LoggerFactory
-	    .getLogger(OnRegisterDispatchInterceptor.class);
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(OnRegisterDispatchInterceptor.class);
 
-	private TextDocumentController documentController;
+  private TextDocumentController documentController;
 
-	public OnRegisterDispatchInterceptor(
-	    TextDocumentController documentController)
-	{
-		this.documentController = documentController;
-	}
+  public OnRegisterDispatchInterceptor(
+      TextDocumentController documentController)
+  {
+    this.documentController = documentController;
+  }
 
-	@Override
-	protected void doit()
-	{
-		FrameController fc = documentController.getFrameController();
-		if (fc.getFrame() == null)
-		{
-			LOGGER.debug(L.m("Ignoriere handleRegisterDispatchInterceptor(null)"));
-			return;
-		}
-		try
-		{
-			DispatchProviderAndInterceptor
-			    .registerDocumentDispatchInterceptor(fc.getFrame());
-		} catch (java.lang.Exception e)
-		{
-			LOGGER.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
-		}
+  @Override
+  protected void doit()
+  {
+    FrameController fc = documentController.getFrameController();
+    if (fc.getFrame() == null)
+    {
+      LOGGER.debug(L.m("Ignoriere handleRegisterDispatchInterceptor(null)"));
+      return;
+    }
+    try
+    {
+      DispatchProviderAndInterceptor
+          .registerDocumentDispatchInterceptor(fc.getFrame());
+    } catch (java.lang.Exception e)
+    {
+      LOGGER.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
+    }
 
-		// Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
-		try
-		{
-			fc.getFrame().contextChanged();
-		} catch (java.lang.Exception e)
-		{
-		}
-	}
+    // Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
+    try
+    {
+      fc.getFrame().contextChanged();
+    } catch (java.lang.Exception e)
+    {
+      LOGGER.error("", e);
+    }
+  }
 
-	@Override
-	public String toString()
-	{
-		return this.getClass().getSimpleName() + "(#"
-		    + documentController.getFrameController().getFrame().hashCode() + ")";
-	}
+  @Override
+  public String toString()
+  {
+    return this.getClass().getSimpleName() + "(#"
+        + documentController.getFrameController().getFrame().hashCode() + ")";
+  }
 }

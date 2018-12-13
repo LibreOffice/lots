@@ -18,40 +18,40 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
  */
 public class OnAddPALChangeEventListener extends BasicEvent
 {
-	private XPALChangeEventListener listener;
+  private XPALChangeEventListener listener;
 
-	private Integer wollmuxConfHashCode;
+  private Integer wollmuxConfHashCode;
 
-	public OnAddPALChangeEventListener(XPALChangeEventListener listener,
-	    Integer wollmuxConfHashCode)
-	{
-		this.listener = listener;
-		this.wollmuxConfHashCode = wollmuxConfHashCode;
-	}
+  public OnAddPALChangeEventListener(XPALChangeEventListener listener,
+      Integer wollmuxConfHashCode)
+  {
+    this.listener = listener;
+    this.wollmuxConfHashCode = wollmuxConfHashCode;
+  }
 
-	@Override
-	protected void doit()
-	{
-		PersoenlicheAbsenderliste.getInstance().addPALChangeEventListener(listener);
+  @Override
+  protected void doit()
+  {
+    PersoenlicheAbsenderliste.getInstance().addPALChangeEventListener(listener);
 
-		WollMuxEventHandler.getInstance().handlePALChangedNotify();
+    WollMuxEventHandler.getInstance().handlePALChangedNotify();
 
-		// Konsistenzprüfung: Stimmt WollMux-Konfiguration der entfernten
-		// Komponente mit meiner Konfiguration überein? Ansonsten Fehlermeldung.
-		if (wollmuxConfHashCode != null)
-		{
-			int myWmConfHash = WollMuxFiles.getWollmuxConf().stringRepresentation()
-			    .hashCode();
-			if (myWmConfHash != wollmuxConfHashCode.intValue())
-				errorMessage(new InvalidBindingStateException(
-				    L.m("Die Konfiguration des WollMux muss neu eingelesen werden.\n\nBitte beenden Sie den WollMux und OpenOffice.org und schießen Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab.")));
-		}
+    // Konsistenzprüfung: Stimmt WollMux-Konfiguration der entfernten
+    // Komponente mit meiner Konfiguration überein? Ansonsten Fehlermeldung.
+    if (wollmuxConfHashCode != null)
+    {
+      int myWmConfHash = WollMuxFiles.getWollmuxConf().stringRepresentation()
+          .hashCode();
+      if (myWmConfHash != wollmuxConfHashCode.intValue())
+        errorMessage(new InvalidBindingStateException(
+            L.m("Die Konfiguration des WollMux muss neu eingelesen werden.\n\nBitte beenden Sie den WollMux und OpenOffice.org und schießen Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab.")));
+    }
 
-	}
+  }
 
-	@Override
-	public String toString()
-	{
-		return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
-	}
+  @Override
+  public String toString()
+  {
+    return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
+  }
 }

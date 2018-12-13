@@ -212,7 +212,7 @@ public class DocumentDispatch extends Dispatch
 
   public void dispatch_wollmux_seriendruck(String arg, PropertyValue[] props)
   {
-    WollMuxEventHandler.getInstance().handleSeriendruck(getDocumentController(), false);
+    WollMuxEventHandler.getInstance().handleSeriendruck(getDocumentController());
   }
 
   public void dispatch_wollmux_test(String arg, PropertyValue[] props)

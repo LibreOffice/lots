@@ -41,28 +41,28 @@ import de.muenchen.allg.itd51.wollmux.event.GlobalEventListener;
  */
 public class OnTextDocumentClosed extends BasicEvent
 {
-	private DocumentManager.Info docInfo;
+  private DocumentManager.Info docInfo;
 
-	public OnTextDocumentClosed(DocumentManager.Info doc)
-	{
-		this.docInfo = doc;
-	}
+  public OnTextDocumentClosed(DocumentManager.Info doc)
+  {
+    this.docInfo = doc;
+  }
 
-	@Override
-	protected void doit() throws WollMuxFehlerException
-	{
-		if (docInfo.hasTextDocumentModel())
-			DocumentManager.getDocumentManager()
-			    .dispose(docInfo.getTextDocumentController().getModel().doc);
-		System.gc();
-	}
+  @Override
+  protected void doit() throws WollMuxFehlerException
+  {
+    if (docInfo.hasTextDocumentModel())
+      DocumentManager.getDocumentManager()
+          .dispose(docInfo.getTextDocumentController().getModel().doc);
+    System.gc();
+  }
 
-	@Override
-	public String toString()
-	{
-		String code = "unknown";
-		if (docInfo.hasTextDocumentModel())
-			code = "" + docInfo.getTextDocumentController().hashCode();
-		return this.getClass().getSimpleName() + "(#" + code + ")";
-	}
+  @Override
+  public String toString()
+  {
+    String code = "unknown";
+    if (docInfo.hasTextDocumentModel())
+      code = "" + docInfo.getTextDocumentController().hashCode();
+    return this.getClass().getSimpleName() + "(#" + code + ")";
+  }
 }

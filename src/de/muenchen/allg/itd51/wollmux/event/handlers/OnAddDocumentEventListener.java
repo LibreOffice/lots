@@ -10,33 +10,33 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 public class OnAddDocumentEventListener extends BasicEvent
 {
-	private XEventListener listener;
+  private XEventListener listener;
 
-	public OnAddDocumentEventListener(XEventListener listener)
-	{
-		this.listener = listener;
-	}
+  public OnAddDocumentEventListener(XEventListener listener)
+  {
+    this.listener = listener;
+  }
 
-	@Override
-	protected void doit()
-	{
-		DocumentManager.getDocumentManager().addDocumentEventListener(listener);
+  @Override
+  protected void doit()
+  {
+    DocumentManager.getDocumentManager().addDocumentEventListener(listener);
 
-		List<XComponent> processedDocuments = new ArrayList<>();
-		DocumentManager.getDocumentManager()
-		    .getProcessedDocuments(processedDocuments);
+    List<XComponent> processedDocuments = new ArrayList<>();
+    DocumentManager.getDocumentManager()
+        .getProcessedDocuments(processedDocuments);
 
-		for (XComponent compo : processedDocuments)
-		{
-			WollMuxEventHandler.getInstance().handleNotifyDocumentEventListener(
-			    listener, WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED,
-			    compo);
-		}
-	}
+    for (XComponent compo : processedDocuments)
+    {
+      WollMuxEventHandler.getInstance().handleNotifyDocumentEventListener(
+          listener, WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED,
+          compo);
+    }
+  }
 
-	@Override
-	public String toString()
-	{
-		return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
-	}
+  @Override
+  public String toString()
+  {
+    return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
+  }
 }
