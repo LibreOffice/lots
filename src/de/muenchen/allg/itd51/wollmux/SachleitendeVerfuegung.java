@@ -35,6 +35,7 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.awt.event.ActionEvent;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -1199,48 +1200,43 @@ public class SachleitendeVerfuegung
       LOGGER.trace(text);
     }
 
-    // Beschreibung des Druckdialogs auslesen.
-    ConfigThingy conf = WollMuxFiles.getWollmuxConf();
-    ConfigThingy svdds =
-      conf.query("Dialoge").query("SachleitendeVerfuegungenDruckdialog");
-    ConfigThingy printDialogConf = null;
-    try
-    {
-      printDialogConf = svdds.getLastChild();
-    }
-    catch (NodeNotFoundException e)
-    {
-      LOGGER.error(
-        L.m("Fehlende Dialogbeschreibung für den Dialog 'SachleitendeVerfuegungenDruckdialog'."),
-        e);
-      return null;
-    }
-
     // Dialog ausführen und Rückgabewert zurückliefern.
     try
     {
       SyncActionListener s = new SyncActionListener();
-      new SachleitendeVerfuegungenDruckdialog(printDialogConf, vps, s);
+      
+      new SachleitendeVerfuegungenDruckdialog(vps, s);
+
       ActionEvent result = s.synchronize();
       String cmd = result.getActionCommand();
-      SachleitendeVerfuegungenDruckdialog slvd =
-        (SachleitendeVerfuegungenDruckdialog) result.getSource();
+      SimpleEntry<List<VerfuegungspunktInfo>, Boolean> slvd =
+        (SimpleEntry<List<VerfuegungspunktInfo>, Boolean>) result.getSource();
+      
       if (SachleitendeVerfuegungenDruckdialog.CMD_SUBMIT.equals(cmd) && slvd != null)
       {
-        if (slvd.getPrintOrderAsc())
+        List<VerfuegungspunktInfo> verfuegungsPunktInfos = slvd.getKey();
+        
+        if (verfuegungsPunktInfos == null || verfuegungsPunktInfos.isEmpty())
         {
-          return slvd.getCurrentSettings();
+          LOGGER.debug("Sachleitende Verfuegung: callPrintDialog(): VerfuegungspunktInfos NULL or empty.");
+          return new ArrayList<VerfuegungspunktInfo>();
+        }
+        
+        if (slvd.getValue())
+        {
+          return verfuegungsPunktInfos;
         }
         else
         {
           // sonst in umgekehrter Reihenfolge
-          List<VerfuegungspunktInfo> lList = new ArrayList<VerfuegungspunktInfo>();
-          ListIterator<VerfuegungspunktInfo> lIt = slvd.getCurrentSettings().listIterator(slvd.getCurrentSettings().size());
-          while (lIt.hasPrevious())
-          {
-            lList.add(lIt.previous());
+          List<VerfuegungspunktInfo> descVerfuegungsPunktInfos = new ArrayList<>();
+          ListIterator<VerfuegungspunktInfo> lIt = verfuegungsPunktInfos.listIterator(verfuegungsPunktInfos.size());
+          
+          while (lIt.hasPrevious()) {
+            descVerfuegungsPunktInfos.add(lIt.previous());
           }
-          return lList;
+          
+          return descVerfuegungsPunktInfos;
         }
       }
       return null;

@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.AbstractMap.SimpleEntry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -436,19 +437,16 @@ public class PrintModels
         SyncActionListener s = new SyncActionListener();
         new PrintParametersDialog(documentController.getModel().doc, showCopiesSpinner, s);
         ActionEvent result = s.synchronize();
-
-        // Rückgabewerte des Dialogs speichern für diesen und alle folgenden Aufrufe
-        // von finalPrintWithProps()
-        PrintParametersDialog ppd = (PrintParametersDialog) result.getSource();
-        String actionCommand = result.getActionCommand();
-
-        if (PrintParametersDialog.CMD_CANCEL.equals(actionCommand))
-        {
+        
+        if (PrintParametersDialog.CMD_CANCEL.equals(result.getActionCommand())) {
           cancel();
           return;
         }
-        setProperty(PROP_FINAL_COPY_COUNT, ppd.getCopyCount());
-        setProperty(PROP_FINAL_PAGE_RANGE, ppd.getPageRange());
+        
+        SimpleEntry<Short, PageRange> ppd = (SimpleEntry<Short, PageRange>) result.getSource();
+        
+        setProperty(PROP_FINAL_COPY_COUNT, ppd.getKey());
+        setProperty(PROP_FINAL_PAGE_RANGE, ppd.getValue());
         setProperty(PROP_FINAL_NO_PARAMS_DIALOG, Boolean.TRUE);
       }
 
