@@ -32,36 +32,37 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.awt.ItemEvent;
+import com.sun.star.awt.SpinEvent;
+import com.sun.star.awt.TextEvent;
+import com.sun.star.awt.XActionListener;
+import com.sun.star.awt.XButton;
+import com.sun.star.awt.XControl;
+import com.sun.star.awt.XControlModel;
+import com.sun.star.awt.XFixedText;
+import com.sun.star.awt.XItemListener;
+import com.sun.star.awt.XNumericField;
+import com.sun.star.awt.XRadioButton;
+import com.sun.star.awt.XSpinField;
+import com.sun.star.awt.XSpinListener;
+import com.sun.star.awt.XTextComponent;
+import com.sun.star.awt.XTextListener;
+import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.UnknownPropertyException;
+import com.sun.star.beans.XPropertySet;
 import com.sun.star.frame.DispatchResultEvent;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
@@ -69,12 +70,23 @@ import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XModel;
 import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.uno.UnoRuntime;
 import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.itd51.wollmux.core.dialog.DimAdjust;
+import de.muenchen.allg.itd51.wollmux.core.constants.XButtonProperties;
+import de.muenchen.allg.itd51.wollmux.core.constants.XLabelProperties;
+import de.muenchen.allg.itd51.wollmux.core.constants.XNumericFieldProperties;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.ControlType;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
+import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
@@ -85,14 +97,14 @@ public class PrintParametersDialog
       .getLogger(PrintParametersDialog.class);
 
   /**
-   * Kommando-String, der dem closeActionListener übermittelt wird, wenn der Dialog
-   * über den Drucken-Knopf geschlossen wird.
+   * Kommando-String, der dem closeActionListener übermittelt wird, wenn der
+   * Dialog über den Drucken-Knopf geschlossen wird.
    */
   public static final String CMD_SUBMIT = "submit";
 
   /**
-   * Kommando-String, der dem closeActionListener übermittelt wird, wenn der Dialog
-   * über den Abbrechen oder "X"-Knopf geschlossen wird.
+   * Kommando-String, der dem closeActionListener übermittelt wird, wenn der
+   * Dialog über den Abbrechen oder "X"-Knopf geschlossen wird.
    */
   public static final String CMD_CANCEL = "cancel";
 
@@ -100,26 +112,13 @@ public class PrintParametersDialog
 
   private boolean showCopyCount;
 
-  private JDialog dialog;
-
   private ActionListener closeActionListener;
 
-  private JTextField printerNameField;
-
-  private JSpinner copyCountSpinner;
-
   private PageRangeType currentPageRangeType = null;
+  
+  private short copyCount = 1;
 
   private String currentPageRangeValue = null;
-
-  private WindowAdapter myWindowListener = new WindowAdapter()
-  {
-    @Override
-    public void windowClosing(WindowEvent e)
-    {
-      abort(CMD_CANCEL);
-    }
-  };
 
   public PrintParametersDialog(XTextDocument doc, boolean showCopyCount,
       ActionListener listener)
@@ -127,7 +126,7 @@ public class PrintParametersDialog
     this.doc = doc;
     this.showCopyCount = showCopyCount;
     this.closeActionListener = listener;
-    createGUI(); // FIXME: sollte doch im EDT aufgerufen werden, oder nicht?
+    createGUI();
   }
 
   /**
@@ -160,10 +159,13 @@ public class PrintParametersDialog
    *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public static enum PageRangeType {
+  public static enum PageRangeType
+  {
     ALL(L.m("Alles")),
 
-    USER_DEFINED(L.m("Seiten"), "1,3,5,10-100<etwasPlatz>",
+    USER_DEFINED(
+        L.m("Seiten"),
+        "1,3,5,10-100<etwasPlatz>",
         L.m("Mögliche Eingaben sind z.B. '1', '2-5' oder '1,3,5'")),
 
     CURRENT_PAGE(L.m("Aktuelle Seite")),
@@ -192,8 +194,7 @@ public class PrintParametersDialog
     {
       this.label = label;
       this.hasAdditionalTextField = true;
-      this.additionalTextFieldPrototypeDisplayValue =
-        additionalTextFieldPrototypeDisplayValue;
+      this.additionalTextFieldPrototypeDisplayValue = additionalTextFieldPrototypeDisplayValue;
       this.additionalTextFieldHint = additionalTextFieldHint;
     }
   };
@@ -210,321 +211,464 @@ public class PrintParametersDialog
   }
 
   /**
-   * Liefert die Anzahl in der GUI eingestellter Kopien als Short zurück; Zeigt der
-   * Dialog kein Elemente zur Eingabe der Kopien an, oder ist die Eingabe keine
-   * gültige Zahl, so wird new Short((short) 1) zurück geliefert.
+   * Liefert die Anzahl in der GUI eingestellter Kopien als Short zurück; Zeigt
+   * der Dialog kein Elemente zur Eingabe der Kopien an, oder ist die Eingabe
+   * keine gültige Zahl, so wird new Short((short) 1) zurück geliefert.
    *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public Short getCopyCount()
+  private Short getCopyCount()
   {
-    try
-    {
-      return Short.valueOf(copyCountSpinner.getValue().toString());
-    }
-    catch (NumberFormatException e)
-    {
-      return Short.valueOf((short) 1);
-    }
+    return this.copyCount;
   }
+
+  private UNODialogFactory dialogFactory;
+  private SimpleDialogLayout layout;
 
   private void createGUI()
   {
-    dialog = new JDialog();
-    dialog.setTitle(L.m("Einstellungen für den Druck"));
-    dialog.addWindowListener(myWindowListener);
-    JPanel panel = new JPanel(new BorderLayout());
-    panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    dialog.add(panel);
+    this.dialogFactory = new UNODialogFactory();
 
-    Box vbox = Box.createVerticalBox();
-    Box hbox;
+    XWindow dialogWindow = this.dialogFactory.createDialog(600, 300, 0xF2F2F2);
 
-    hbox = Box.createHorizontalBox();
-    hbox.setBorder(BorderFactory.createTitledBorder(
-      BorderFactory.createRaisedBevelBorder(), L.m("Drucker")));
-    hbox.add(new JLabel(L.m("Name")));
-    hbox.add(Box.createHorizontalStrut(10));
-    printerNameField = new JTextField(" " + getCurrentPrinterName(doc) + " ");
-    printerNameField.setEditable(false);
-    hbox.add(printerNameField);
-    hbox.add(Box.createHorizontalStrut(10));
-    hbox.add(Box.createHorizontalGlue());
-    JButton printerSettingsButton =
-      new JButton(L.m("Drucker wechseln/einrichten..."));
-    printerSettingsButton.addActionListener(new ActionListener()
+    layout = new SimpleDialogLayout(dialogWindow);
+    layout.setMarginTop(20);
+    layout.setMarginLeft(20);
+    layout.setWindowBottomMargin(10);
+
+    // Bereiche
+    List<ControlModel> printRangeControls = new ArrayList<>();
+    List<SimpleEntry<ControlProperties, XControl>> radioControls = null;
+
+    for (int i = 0; i < PageRangeType.values().length; i++)
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        showPrintSettingsDialog();
+      PageRangeType pageRangeType = PageRangeType.values()[i];
+      radioControls = new ArrayList<>();
+      SimpleEntry<ControlProperties, XControl> radioButton = layout
+          .convertToXControl(new ControlProperties(ControlType.RADIO,
+              "radioSectionRadioButton" + i, 0, 30, 60, 0,
+              new SimpleEntry<String[], Object[]>(
+                  new String[] { XButtonProperties.LABEL },
+                  new Object[] { pageRangeType.label })));
+      // zusätzlich zu controlModel.marginLeft etwas einrücken da um diese
+      // Controls später eine GroupBox gezeichnet wird
+      radioButton.getKey().setMarginLeft(40);
+      
+      // ersten RadioButton aktivieren
+      XRadioButton xRadioButton = UnoRuntime.queryInterface(XRadioButton.class, radioButton.getValue());
+      if (i == 0) {
+    	  xRadioButton.setState(true);
+    	  this.currentPageRangeType = pageRangeType;
+    	  this.currentPageRangeValue = "1-9999";
       }
-    });
-    hbox.add(printerSettingsButton);
-    vbox.add(hbox);
+      
+      xRadioButton.addItemListener(radioButtonListener);
 
-    hbox = Box.createHorizontalBox();
-    Box vboxPageRange = Box.createVerticalBox();
-    vboxPageRange.setBorder(BorderFactory.createTitledBorder(
-      BorderFactory.createEtchedBorder(), L.m("Druckbereich")));
-    Box vboxCopies = Box.createVerticalBox();
-    vboxCopies.setBorder(BorderFactory.createTitledBorder(
-      BorderFactory.createEtchedBorder(), L.m("Kopien")));
-    hbox.add(vboxPageRange);
-    if (showCopyCount) {
-      hbox.add(vboxCopies);
+      radioControls.add(radioButton);
+
+      if (pageRangeType.hasAdditionalTextField)
+      {
+        SimpleEntry<ControlProperties, XControl> addtionalTextfield = layout
+            .convertToXControl(new ControlProperties(ControlType.EDIT,
+                "radioSectionTextField" + i, 0, 30, 20, 0,
+                new SimpleEntry<String[], Object[]>(
+                    new String[] { XButtonProperties.LABEL }, new Object[] {
+                    		pageRangeType.additionalTextFieldPrototypeDisplayValue })));
+        UnoRuntime.queryInterface(XTextComponent.class, addtionalTextfield.getValue()).addTextListener(additionalTextFieldListener);
+
+        radioControls.add(addtionalTextfield);
+      }
+
+      ControlModel printRangeModel = new ControlModel(Orientation.HORIZONTAL,
+          Align.NONE, radioControls, Optional.empty());
+      printRangeControls.add(printRangeModel);
     }
-    vbox.add(hbox);
 
-    // JRadio-Buttons für den Druckbereich erzeugen
-    ButtonGroup pageRangeButtons = new ButtonGroup();
-    JRadioButton firstButton = null;
-    for (final PageRangeType t : PageRangeType.values())
+    // Header
+    ControlModel headerModel = this.addHeader();
+    headerModel.setLinebreakHeight(0);
+    layout.addControlsToList(headerModel);
+    // printer info / settings
+    layout.addControlsToList(addPrinterInfoModel());
+    
+    if (showCopyCount) {
+      layout.addControlsToList(addCopyCount());
+    }
+    
+    // GroupBox um 'Bereiche' zeichnen
+    layout.addControlsToList(addGroupBox(printRangeControls));
+
+    for (ControlModel model : printRangeControls)
     {
-      hbox = Box.createHorizontalBox();
+      layout.addControlsToList(model);
+    }
 
-      final JTextField additionalTextfield;
-      if (t.hasAdditionalTextField)
-      {
-        additionalTextfield =
-          new JTextField("" + t.additionalTextFieldPrototypeDisplayValue);
-        DimAdjust.fixedPreferredSize(additionalTextfield);
-        DimAdjust.fixedMaxSize(additionalTextfield, 0, 0);
-        additionalTextfield.setToolTipText(t.additionalTextFieldHint);
-        additionalTextfield.setText("");
-        additionalTextfield.getDocument().addDocumentListener(new DocumentListener()
-        {
-          @Override
-          public void changedUpdate(DocumentEvent e)
-          {
-            currentPageRangeValue = additionalTextfield.getText();
-          }
+    // Buttons "Abbrechen" "Drucken"
+    layout.addControlsToList(addBottomControlButtons());
 
-          @Override
-          public void removeUpdate(DocumentEvent e)
-          {
-            currentPageRangeValue = additionalTextfield.getText();
-          }
+    this.dialogFactory.showDialog();
 
-          @Override
-          public void insertUpdate(DocumentEvent e)
-          {
-            currentPageRangeValue = additionalTextfield.getText();
-          }
-        });
-      }
-      else
-        additionalTextfield = null;
+  }
+  
+  private ControlModel addCopyCount() {
+    List<SimpleEntry<ControlProperties, XControl>> copyCountControls = new ArrayList<>();
+    
+    SimpleEntry<ControlProperties, XControl> labelExemplare = layout
+        .convertToXControl(new ControlProperties(ControlType.LABEL,
+            "labelExemplare", 0, 30, 80, 0,
+            new SimpleEntry<String[], Object[]>(
+                new String[] { XLabelProperties.LABEL },
+                new Object[] { "Exemplare  " })));
+    
+    SimpleEntry<ControlProperties, XControl> printCountField = layout
+        .convertToXControl(new ControlProperties(ControlType.NUMERIC_FIELD,
+            "printCountField", 0, 30, 20, 0,
+            new SimpleEntry<String[], Object[]>(
+                new String[] { XNumericFieldProperties.BORDER,
+                    XNumericFieldProperties.BORDER_COLOR,
+                    XNumericFieldProperties.LABEL,
+                    XNumericFieldProperties.SPIN,
+                    XNumericFieldProperties.VALUE,
+                    XNumericFieldProperties.MIN_VALUE,
+                    XNumericFieldProperties.DECIMAL_ACCURACY },
+                new Object[] { (short) 2, 666666, "Kopien", Boolean.TRUE, 1, 0,
+                    (short) 0 })));
+    
+    UnoRuntime.queryInterface(XSpinField.class, printCountField.getValue()).addSpinListener(printCountSpinFieldListener);
+    
+    copyCountControls.add(labelExemplare);
+    copyCountControls.add(printCountField);
+    
+    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, copyCountControls,
+        Optional.empty());
+  }
 
-      final JRadioButton button = new JRadioButton(t.label);
-      if (firstButton == null) {
-        firstButton = button;
-      }
-      button.addChangeListener(new ChangeListener()
+  private ControlModel addHeader()
+  {
+    List<SimpleEntry<ControlProperties, XControl>> headerLabel = new ArrayList<>();
+    SimpleEntry<ControlProperties, XControl> printerDialogLabel = layout
+        .convertToXControl(new ControlProperties(ControlType.LABEL,
+            "printerDialogLabel", 0, 20, 100, 0,
+            new SimpleEntry<String[], Object[]>(
+                new String[] { XLabelProperties.LABEL },
+                new Object[] { "Drucker" })));
+    printerDialogLabel.getKey().setMarginBetweenControls(0);
+    
+    SimpleEntry<ControlProperties, XControl> hLine = layout
+        .convertToXControl(new ControlProperties(ControlType.FIXEDLINE,
+            "printerDialogLabelHLine", 0, 5, 100, 0,
+            new SimpleEntry<String[], Object[]>(
+                new String[] { },
+                new Object[] { })));
+    hLine.getKey().setMarginBetweenControls(0);
+    
+    headerLabel.add(printerDialogLabel);
+    headerLabel.add(hLine);
+
+    return new ControlModel(Orientation.VERTICAL, Align.NONE, headerLabel,
+        Optional.empty());
+  }
+
+  private ControlModel addPrinterInfoModel()
+  {
+    List<SimpleEntry<ControlProperties, XControl>> printerSettings = new ArrayList<>();
+
+    SimpleEntry<ControlProperties, XControl> printerSettingsLabel = layout
+        .convertToXControl(new ControlProperties(ControlType.LABEL,
+            "printerSettingsLabel", 0, 30, 20, 0,
+            new SimpleEntry<String[], Object[]>(
+                new String[] { XLabelProperties.LABEL },
+                new Object[] { "Name" })));
+
+    SimpleEntry<ControlProperties, XControl> printerSettingsPrintModel = layout
+        .convertToXControl(new ControlProperties(ControlType.LABEL,
+            "printerSettingsPrintModel", 0, 30, 30, 0,
+            new SimpleEntry<String[], Object[]>(
+                new String[] { XLabelProperties.LABEL },
+                new Object[] { getCurrentPrinterName(this.doc) })));
+
+    SimpleEntry<ControlProperties, XControl> printerSettingsSelectPrinterButton = layout
+        .convertToXControl(new ControlProperties(ControlType.BUTTON,
+            "printerSettingsSelectPrinterButton", 0, 30, 50, 0,
+            new SimpleEntry<String[], Object[]>(
+                new String[] { XButtonProperties.LABEL },
+                new Object[] { "Drucker wechseln / einrichten" })));
+    printerSettingsSelectPrinterButton.getKey()
+        .setButtonCommand("selectPrinter");
+    UnoRuntime.queryInterface(XButton.class, printerSettingsSelectPrinterButton.getValue())
+        .addActionListener(selectPrinterActionListener);
+
+    printerSettings.add(printerSettingsLabel);
+    printerSettings.add(printerSettingsPrintModel);
+    printerSettings.add(printerSettingsSelectPrinterButton);
+
+    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, printerSettings,
+        Optional.empty());
+  }
+
+  private ControlModel addGroupBox(List<ControlModel> printRangeControls)
+  {
+    int groupBoxHeight = layout
+        .calcGroupBoxHeightByControlProperties(printRangeControls);
+    List<SimpleEntry<ControlProperties, XControl>> groupBoxRadioModel = new ArrayList<>();
+    SimpleEntry<ControlProperties, XControl> groupBox = layout
+        .convertToXControl(new ControlProperties(ControlType.GROUPBOX,
+            "groupBoxRadio", 0, groupBoxHeight, 100, 0,
+            new SimpleEntry<String[], Object[]>(
+                new String[] { XButtonProperties.LABEL },
+                new Object[] { "Bereiche" })));
+
+    groupBoxRadioModel.add(groupBox);
+
+    ControlModel groupBoxModel = new ControlModel(Orientation.HORIZONTAL,
+        Align.NONE, groupBoxRadioModel, Optional.empty());
+    groupBoxModel.setLinebreakHeight(10);
+
+    return groupBoxModel;
+  }
+
+  private ControlModel addBottomControlButtons()
+  {
+    List<SimpleEntry<ControlProperties, XControl>> bottomButtonsSection = new ArrayList<>();
+    SimpleEntry<ControlProperties, XControl> bottomButtonAbort = layout
+        .convertToXControl(new ControlProperties(ControlType.BUTTON,
+            "printerDialogCancel", 0, 30, 50, 0,
+            new SimpleEntry<String[], Object[]>(
+                new String[] { XButtonProperties.LABEL },
+                new Object[] { "Abbrechen" })));
+    bottomButtonAbort.getKey().setButtonCommand("abort");
+    UnoRuntime.queryInterface(XButton.class, bottomButtonAbort.getValue()).addActionListener(abortListener);
+
+    SimpleEntry<ControlProperties, XControl> bottomButtonPrint = layout
+        .convertToXControl(new ControlProperties(ControlType.BUTTON,
+            "printerDialogPrint", 0, 30, 50, 0,
+            new SimpleEntry<String[], Object[]>(
+                new String[] { XButtonProperties.LABEL },
+                new Object[] { "Drucken" })));
+    bottomButtonPrint.getKey().setButtonCommand("print");
+    UnoRuntime.queryInterface(XButton.class, bottomButtonPrint.getValue()).addActionListener(printListener);
+
+    bottomButtonsSection.add(bottomButtonAbort);
+    bottomButtonsSection.add(bottomButtonPrint);
+
+    return new ControlModel(Orientation.HORIZONTAL, Align.NONE,
+        bottomButtonsSection, Optional.empty());
+  }
+
+  private XActionListener printListener = new XActionListener()
+  {
+
+    @Override
+    public void disposing(EventObject arg0)
+    {
+      // unused
+
+    }
+
+    @Override
+    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
+    {
+      printButtonPressed();
+    }
+  };
+
+  private XActionListener abortListener = new XActionListener()
+  {
+
+    @Override
+    public void disposing(EventObject arg0)
+    {
+      // unused
+
+    }
+
+    @Override
+    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
+    {
+      dialogFactory.closeDialog();
+    }
+  };
+
+  private XActionListener selectPrinterActionListener = new XActionListener()
+  {
+
+    @Override
+    public void disposing(EventObject arg0)
+    {
+      // unused
+    }
+
+    @Override
+    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
+    {
+      showPrintSettingsDialog();
+    }
+    
+    /**
+     * Ruft den printSettings-Dialog auf.
+     *
+     * @author christoph.lutz
+     */
+    private void showPrintSettingsDialog()
+    {
+      Thread t = new Thread()
       {
         @Override
-        public void stateChanged(ChangeEvent e)
+        public void run()
         {
-          if (button.isSelected())
+          // Druckereinstellungen-Dialog anzeigen:
+          try
           {
-            currentPageRangeType = t;
-            if (additionalTextfield != null)
-              currentPageRangeValue = additionalTextfield.getText();
-            else
-              currentPageRangeValue = null;
+            com.sun.star.util.URL url = UNO
+                .getParsedUNOUrl(Dispatch.DISP_unoPrinterSetup);
+            XNotifyingDispatch disp = UNO
+                .XNotifyingDispatch(getDispatchForModel(UNO.XModel(doc), url));
+
+            if (disp != null)
+            {
+              disp.dispatchWithNotification(url, new PropertyValue[] {},
+                  new XDispatchResultListener()
+                  {
+                    @Override
+                    public void disposing(EventObject arg0)
+                    {
+                      // unused
+                    }
+
+                    @Override
+                    public void dispatchFinished(DispatchResultEvent arg0)
+                    {
+                      SwingUtilities.invokeLater(new Runnable()
+                      {
+                        @Override
+                        public void run()
+                        {
+                          XFixedText printerNameLabel = UnoRuntime.queryInterface(
+                              XFixedText.class,
+                              layout.getControl("printerSettingsPrintModel"));
+
+                          if (printerNameLabel == null)
+                            return;
+
+                          printerNameLabel
+                              .setText(" " + getCurrentPrinterName(doc) + " ");
+                        }
+                      });
+                    }
+                  });
+            }
           }
-          if (additionalTextfield != null)
+          catch (java.lang.Exception e)
           {
-            additionalTextfield.setEditable(button.isSelected());
-            additionalTextfield.setFocusable(button.isSelected());
+            LOGGER.error("", e);
           }
         }
-      });
-      // stateChanged()-Event forcieren:
-      button.setSelected(true);
-      button.setSelected(false);
-
-      hbox.add(button);
-      if (additionalTextfield != null)
-      {
-        hbox.add(additionalTextfield);
-      }
-
-      hbox.add(Box.createHorizontalGlue());
-      pageRangeButtons.add(button);
-      vboxPageRange.add(hbox);
+      };
+      t.setDaemon(false);
+      t.start();
     }
-    if (firstButton != null) {
-      firstButton.setSelected(true);
+    
+    /**
+     * Holt sich den Frame von doc, führt auf diesem ein queryDispatch() mit der
+     * zu urlStr gehörenden URL aus und liefert den Ergebnis XDispatch zurück oder
+     * null, falls der XDispatch nicht verfügbar ist.
+     *
+     * @param doc
+     *          Das Dokument, dessen Frame für den Dispatch verwendet werden soll.
+     * @param urlStr
+     *          die URL in Form eines Strings (wird intern zu URL umgewandelt).
+     * @return den gefundenen XDispatch oder null, wenn der XDispatch nicht
+     *         verfügbar ist.
+     */
+    private XDispatch getDispatchForModel(XModel doc, com.sun.star.util.URL url)
+    {
+      if (doc == null)
+      {
+        return null;
+      }
+
+      XDispatchProvider dispProv = null;
+      try
+      {
+        dispProv = UNO.XDispatchProvider(doc.getCurrentController().getFrame());
+      }
+      catch (Exception e)
+      {
+      }
+
+      if (dispProv != null)
+      {
+        return dispProv.queryDispatch(url, "_self",
+            com.sun.star.frame.FrameSearchFlag.SELF);
+      }
+      return null;
     }
-
-    hbox = Box.createHorizontalBox();
-    hbox.add(new JLabel(L.m("Exemplare  ")));
-    copyCountSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 999, 1));
-    DimAdjust.fixedMaxSize(copyCountSpinner, 0, 0);
-    hbox.add(copyCountSpinner);
-    vboxCopies.add(hbox);
-    vboxCopies.add(Box.createVerticalGlue());
-
-    panel.add(vbox, BorderLayout.CENTER);
-
-    JButton button;
-    hbox = Box.createHorizontalBox();
-    button = new JButton(L.m("Abbrechen"));
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        abort(CMD_CANCEL);
-      }
-    });
-    hbox.add(button);
-    hbox.add(Box.createHorizontalGlue());
-    button = new JButton(L.m("Drucken"));
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        printButtonPressed();
-      }
-    });
-    hbox.add(button);
-    panel.add(hbox, BorderLayout.SOUTH);
-
-    dialog.setVisible(false);
-    dialog.setAlwaysOnTop(true);
-    dialog.pack();
-    int frameWidth = dialog.getWidth();
-    int frameHeight = dialog.getHeight();
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width / 2 - frameWidth / 2;
-    int y = screenSize.height / 2 - frameHeight / 2;
-    dialog.setLocation(x, y);
-    dialog.setResizable(false);
-    dialog.setVisible(true);
-  }
+  };
 
   protected void abort(String commandStr)
   {
-    /*
-     * Wegen folgendem Java Bug (WONTFIX)
-     * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304 sind die folgenden
-     * 3 Zeilen nötig, damit der Dialog gc'ed werden kann. Die Befehle sorgen dafür,
-     * dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager) indirekt über
-     * den JFrame den MailMerge kennt.
-     */
-    if (dialog != null)
-    {
-      dialog.removeWindowListener(myWindowListener);
-      dialog.getContentPane().remove(0);
-      dialog.setJMenuBar(null);
-
-      dialog.dispose();
-      dialog = null;
+    SimpleEntry<Short, PageRange> data = new SimpleEntry<>(this.getCopyCount(), this.getPageRange());
+    
+    if (closeActionListener != null) {
+      dialogFactory.closeDialog();
+      closeActionListener.actionPerformed(new ActionEvent(data, 0, commandStr));
     }
-
-    if (closeActionListener != null)
-      closeActionListener.actionPerformed(new ActionEvent(this, 0, commandStr));
   }
 
   protected void printButtonPressed()
   {
     abort(CMD_SUBMIT);
   }
-
-  /**
-   * Ruft den printSettings-Dialog auf.
-   *
-   * @author christoph.lutz
-   */
-  private void showPrintSettingsDialog()
+  
+  
+  private XSpinListener printCountSpinFieldListener = new XSpinListener()
   {
-    dialog.setAlwaysOnTop(false);
-    Thread t = new Thread()
+
+    @Override
+    public void disposing(EventObject arg0)
     {
-      @Override
-      public void run()
-      {
-        // Dialog anzeigen:
-        try
-        {
-          com.sun.star.util.URL url =
-            UNO.getParsedUNOUrl(Dispatch.DISP_unoPrinterSetup);
-          XNotifyingDispatch disp =
-            UNO.XNotifyingDispatch(getDispatchForModel(UNO.XModel(doc), url));
-
-          if (disp != null)
-          {
-            disp.dispatchWithNotification(url, new PropertyValue[] {},
-              new XDispatchResultListener()
-              {
-                @Override
-                public void disposing(EventObject arg0)
-                {}
-
-                @Override
-                public void dispatchFinished(DispatchResultEvent arg0)
-                {
-                  SwingUtilities.invokeLater(new Runnable()
-                  {
-                    @Override
-                    public void run()
-                    {
-                      printerNameField.setText(" " + getCurrentPrinterName(doc)
-                        + " ");
-                      dialog.pack();
-                      dialog.setAlwaysOnTop(true);
-                    }
-                  });
-                }
-              });
-          }
-        }
-        catch (java.lang.Exception e)
-        {
-          LOGGER.error("", e);
-        }
-      }
-    };
-    t.setDaemon(false);
-    t.start();
-  }
-
-  /**
-   * Holt sich den Frame von doc, führt auf diesem ein queryDispatch() mit der zu
-   * urlStr gehörenden URL aus und liefert den Ergebnis XDispatch zurück oder null,
-   * falls der XDispatch nicht verfügbar ist.
-   *
-   * @param doc
-   *          Das Dokument, dessen Frame für den Dispatch verwendet werden soll.
-   * @param urlStr
-   *          die URL in Form eines Strings (wird intern zu URL umgewandelt).
-   * @return den gefundenen XDispatch oder null, wenn der XDispatch nicht verfügbar
-   *         ist.
-   */
-  private XDispatch getDispatchForModel(XModel doc, com.sun.star.util.URL url)
-  {
-    if (doc == null) {
-      return null;
+      // unused
     }
 
-    XDispatchProvider dispProv = null;
-    try
+    @Override
+    public void up(SpinEvent arg0)
     {
-      dispProv = UNO.XDispatchProvider(doc.getCurrentController().getFrame());
+      XNumericField copyCountControl = UnoRuntime.queryInterface(XNumericField.class, arg0.Source);
+      
+      if (copyCountControl == null)
+	return;
+      
+      setCopyCount((short) copyCountControl.getValue());
     }
-    catch (Exception e)
-    {}
 
-    if (dispProv != null)
+    @Override
+    public void last(SpinEvent arg0)
     {
-      return dispProv.queryDispatch(url, "_self",
-        com.sun.star.frame.FrameSearchFlag.SELF);
+      // unused
     }
-    return null;
-  }
+
+    @Override
+    public void first(SpinEvent arg0)
+    {
+      // unused
+
+    }
+
+    @Override
+    public void down(SpinEvent arg0)
+    {
+      XNumericField copyCountControl = UnoRuntime.queryInterface(XNumericField.class, arg0.Source);
+
+      if (copyCountControl == null)
+	return;
+      
+      setCopyCount((short) copyCountControl.getValue());
+    }
+    
+    private void setCopyCount(short count) {
+      copyCount = count;
+    }
+  };
 
   /**
    * Liefert den Namen des aktuell zu diesem Dokument eingestellten Druckers.
@@ -535,7 +679,8 @@ public class PrintParametersDialog
   {
     XPrintable printable = UNO.XPrintable(doc);
     PropertyValue[] printer = null;
-    if (printable != null) {
+    if (printable != null)
+    {
       printer = printable.getPrinter();
     }
     UnoProps printerInfo = new UnoProps(printer);
@@ -554,7 +699,8 @@ public class PrintParametersDialog
    *
    * @author Judith Baur, Simona Loi
    */
-  public static void setCurrentPrinterName(XTextDocument doc, String druckerName)
+  public static void setCurrentPrinterName(XTextDocument doc,
+      String druckerName)
   {
     XPrintable printable = UNO.XPrintable(doc);
     PropertyValue[] printer = null;
@@ -572,4 +718,81 @@ public class PrintParametersDialog
       System.out.println("property setzen: " + e.getMessage());
     }
   }
+  
+  private XTextListener additionalTextFieldListener = new XTextListener()
+  {
+    
+    @Override
+    public void disposing(EventObject arg0)
+    {
+
+    }
+    
+    @Override
+    public void textChanged(TextEvent arg0)
+    {
+      XTextComponent xTextComponent = UnoRuntime.queryInterface(XTextComponent.class, arg0.Source);
+      
+      if (xTextComponent == null)
+        return;
+      
+      currentPageRangeValue = xTextComponent.getText();
+    }
+  };
+
+  private XItemListener radioButtonListener = new XItemListener()
+  {
+
+    @Override
+    public void disposing(EventObject arg0)
+    {
+      // unused
+
+    }
+
+    @Override
+    public void itemStateChanged(ItemEvent arg0)
+    {
+      XControl xControl = UnoRuntime.queryInterface(XControl.class,
+          arg0.Source);
+
+      for (XControl control : layout.getControls())
+      {
+        if (!control.equals(xControl))
+        {
+          XRadioButton radioButton = UnoRuntime
+              .queryInterface(XRadioButton.class, control);
+
+          if (radioButton == null)
+            continue;
+          
+          radioButton.setState(false);
+          
+        } else {
+          XControl radioButton = UnoRuntime
+              .queryInterface(XControl.class, control);
+          XControlModel model = radioButton.getModel();
+          
+          XPropertySet propertySet = UnoRuntime.queryInterface(XPropertySet.class, model);
+          
+          try
+          {
+            String label = (String)propertySet.getPropertyValue("Label");
+            
+            for (PageRangeType type : PageRangeType.values()) {
+              if(type.label.equals(label)) {
+                currentPageRangeType = type;
+                
+                break;
+              }
+            }
+            
+          } catch (UnknownPropertyException | WrappedTargetException e)
+          {
+            LOGGER.error("", e);
+          }
+        }
+      }
+    }
+  };
 }

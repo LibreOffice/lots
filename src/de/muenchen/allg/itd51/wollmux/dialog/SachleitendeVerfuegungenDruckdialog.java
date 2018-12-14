@@ -29,231 +29,97 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSeparator;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingConstants;
-import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.awt.ActionEvent;
+import com.sun.star.awt.ItemEvent;
+import com.sun.star.awt.SpinEvent;
+import com.sun.star.awt.XActionListener;
+import com.sun.star.awt.XButton;
+import com.sun.star.awt.XCheckBox;
+import com.sun.star.awt.XControl;
+import com.sun.star.awt.XFixedText;
+import com.sun.star.awt.XItemListener;
+import com.sun.star.awt.XNumericField;
+import com.sun.star.awt.XSpinField;
+import com.sun.star.awt.XSpinListener;
+import com.sun.star.awt.XWindow;
+import com.sun.star.lang.EventObject;
+import com.sun.star.uno.Exception;
+import com.sun.star.uno.UnoRuntime;
+
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.Verfuegungspunkt;
-import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.core.constants.XButtonProperties;
+import de.muenchen.allg.itd51.wollmux.core.constants.XLabelProperties;
+import de.muenchen.allg.itd51.wollmux.core.constants.XNumericFieldProperties;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.ControlType;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Dock;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
+import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
- * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
- * einen Dialog zum Drucken von Sachleitenden Verfügungen. Die private-Funktionen
- * dürfen NUR aus dem Event-Dispatching Thread heraus aufgerufen werden.
+ * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung einen Dialog zum
+ * Drucken von Sachleitenden Verfügungen. Die private-Funktionen dürfen NUR aus dem
+ * Event-Dispatching Thread heraus aufgerufen werden.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
  */
 public class SachleitendeVerfuegungenDruckdialog
 {
-
   private static final Logger LOGGER = LoggerFactory
       .getLogger(SachleitendeVerfuegungenDruckdialog.class);
 
   /**
-   * Kommando-String, der dem closeActionListener übermittelt wird, wenn der Dialog
-   * über den Drucken-Knopf geschlossen wird.
+   * Kommando-String, der dem closeActionListener übermittelt wird, wenn der Dialog über den
+   * Drucken-Knopf geschlossen wird.
    */
   public static final String CMD_SUBMIT = "submit";
 
   /**
-   * Kommando-String, der dem closeActionListener übermittelt wird, wenn der Dialog
-   * über den Abbrechen oder "X"-Knopf geschlossen wird.
+   * Kommando-String, der dem closeActionListener übermittelt wird, wenn der Dialog über den
+   * Abbrechen oder "X"-Knopf geschlossen wird.
    */
   public static final String CMD_CANCEL = "cancel";
 
   /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
-   */
-  private static final int TF_BORDER = 4;
-
-  /**
-   * Rand über und unter einem horizontalen Separator (in Pixeln).
-   */
-  private static final int SEP_BORDER = 7;
-
-  /**
-   * Rand um Buttons (in Pixeln).
-   */
-  private static final int BUTTON_BORDER = 2;
-
-  /**
-   * Anzahl der Zeichen, nach der der Text der Verfügungspunkte abgeschnitten wird,
-   * damit der Dialog nicht platzt.
+   * Anzahl der Zeichen, nach der der Text der Verfügungspunkte abgeschnitten wird, damit der Dialog
+   * nicht platzt.
    */
   private static final int CONTENT_CUT = 75;
-
-  /**
-   * ActionListener für Buttons mit der ACTION "printElement".
-   */
-  private ActionListener actionListener_printElement = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      if (e.getSource() instanceof JButton)
-        getCurrentSettingsForElement((JButton) e.getSource());
-      abort(CMD_SUBMIT);
-    }
-  };
-
-  /**
-   * ActionListener für Buttons mit der ACTION "printAll".
-   */
-  private ActionListener actionListener_printAll = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      printOrderAsc = getSelectedPrintOrderAsc();
-      getCurrentSettingsForAllElements();
-      abort(CMD_SUBMIT);
-    }
-  };
-
-  /**
-   * ActionListener für Buttons mit der ACTION "abort".
-   */
-  private ActionListener actionListener_abort = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      abort(CMD_CANCEL);
-    }
-  };
-
-  /**
-   * ChangeListener für Änderungen an den Spinnern.
-   */
-  private ChangeListener spinnerChangeListener = new ChangeListener()
-  {
-    @Override
-    public void stateChanged(ChangeEvent arg0)
-    {
-      allElementCountTextField.setText("" + getAllElementCount());
-    }
-  };
-
-  /**
-   * ChangeListener für Änderungen an den ComboBoxen, der eine Änderung des
-   * ausgewählten Elements unmöglich macht.
-   */
-  private ItemListener cboxItemListener = new ItemListener()
-  {
-    @Override
-    public void itemStateChanged(ItemEvent arg0)
-    {
-      Object source = arg0.getSource();
-      if (source != null && source instanceof JComboBox<?>)
-      {
-        @SuppressWarnings("unchecked")
-        JComboBox<String> cbox = (JComboBox<String>) source;
-        if (cbox.getSelectedIndex() != 0) {
-          cbox.setSelectedIndex(0);
-        }
-      }
-    }
-  };
-
-  /**
-   * wird getriggert bei windowClosing() Event.
-   */
-  private ActionListener closeAction = actionListener_abort;
-
-  /**
-   * Der Rahmen des gesamten Dialogs.
-   */
-  private JFrame myFrame;
-
-  /**
-   * Das JPanel der obersten Hierarchiestufe.
-   */
-  private JPanel mainPanel;
-
-  /**
-   * Die Array mit allen comboBoxen, die elementCount beinhalten.
-   */
-  private JSpinner[] elementCountSpinner;
-
-  /**
-   * Liste mit allen comboBoxen, die verfügungspunkte+zuleitungszeilen
-   * beinhalten.
-   */
-  private List<JComboBox<String>> elementComboBoxes;
-
-  /**
-   * Die Array mit allen buttons auf printElement-Actions
-   */
-  private JButton[] printElementButtons;
-
-  /**
-   * Enthält das TextFeld, das die Summe aller Ausfertigungen anzeigt.
-   */
-  private JTextField allElementCountTextField;
-
-  /**
-   * Die Checkbox zur Reihenfolge des Ausdrucks
-   */
-  private JCheckBox printOrder;
-
-  /**
-   * Der dem
-   * {@link #AbsenderAuswaehlen(ConfigThingy, ConfigThingy, DatasourceJoiner, ActionListener)
-   * Konstruktor} übergebene dialogEndListener.
-   */
-  private ActionListener dialogEndListener;
 
   /**
    * Vector of Verfuegungspunkt, der die Beschreibungen der Verfügungspunkte enthält.
    */
   private List<Verfuegungspunkt> verfuegungspunkte;
 
+  private java.awt.event.ActionListener dialogEndListener;
+
   /**
-   * Nach jedem Aufruf von printAll oder printElement enthält diese Methode die
-   * aktuelle Liste Einstellungen für die zu druckenden Verfügungspunkte.
+   * Nach jedem Aufruf von printAll oder printElement enthält diese Methode die aktuelle Liste
+   * Einstellungen für die zu druckenden Verfügungspunkte.
    */
   private List<VerfuegungspunktInfo> currentSettings;
 
+  private SimpleDialogLayout layout = null;
+
   /**
-   * Enthält die Information ob die Methode printAll in auf- oder absteigender Reihenfolge drucken soll.
+   * Enthält die Information ob die Methode printAll in auf- oder absteigender Reihenfolge drucken
+   * soll.
    */
   private boolean printOrderAsc;
 
@@ -261,67 +127,30 @@ public class SachleitendeVerfuegungenDruckdialog
    * Erzeugt einen neuen Dialog.
    *
    * @param conf
-   *          das ConfigThingy, das den Dialog beschreibt (der Vater des
-   *          "Fenster"-Knotens.
+   *          das ConfigThingy, das den Dialog beschreibt (der Vater des "Fenster"-Knotens.
    * @param dialogEndListener
    *          falls nicht null, wird die
-   *          {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}
-   *          Methode aufgerufen (im Event Dispatching Thread), nachdem der Dialog
-   *          geschlossen wurde. Das actionCommand des ActionEvents gibt die Aktion
-   *          an, die das Beenden des Dialogs veranlasst hat.
+   *          {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)} Methode aufgerufen
+   *          (im Event Dispatching Thread), nachdem der Dialog geschlossen wurde. Das actionCommand
+   *          des ActionEvents gibt die Aktion an, die das Beenden des Dialogs veranlasst hat.
    * @param verfuegungspunkte
-   *          Vector of Verfuegungspunkt, der die Beschreibungen der Verfügungspunkte
-   *          enthält.
+   *          Vector of Verfuegungspunkt, der die Beschreibungen der Verfügungspunkte enthält.
+   * @throws NodeNotFoundException
    * @throws ConfigurationErrorException
-   *           im Falle eines schwerwiegenden Konfigurationsfehlers, der es dem
-   *           Dialog unmöglich macht, zu funktionieren (z.B. dass der "Fenster"
-   *           Schlüssel fehlt.
+   *           im Falle eines schwerwiegenden Konfigurationsfehlers, der es dem Dialog unmöglich
+   *           macht, zu funktionieren (z.B. dass der "Fenster" Schlüssel fehlt.
    */
-  public SachleitendeVerfuegungenDruckdialog(ConfigThingy conf,
-      List<Verfuegungspunkt> verfuegungspunkte, ActionListener dialogEndListener)
-      throws ConfigurationErrorException
+  public SachleitendeVerfuegungenDruckdialog(List<Verfuegungspunkt> verfuegungspunkte,
+      ActionListener dialogEndListener)
   {
     this.verfuegungspunkte = verfuegungspunkte;
     this.dialogEndListener = dialogEndListener;
-    this.currentSettings = new ArrayList<>();
-    this.printOrder = new JCheckBox();
 
-    ConfigThingy fensterDesc1 = conf.query("Fenster");
-    if (fensterDesc1.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1",
-        conf.getName()));
-
-    final ConfigThingy fensterDesc = fensterDesc1.query("Drucken");
-    if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Drucken' fehlt in %1",
-        conf.getName()));
-
-    // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
-    try
-    {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          try
-          {
-            createGUI(fensterDesc.getLastChild());
-          }
-          catch (Exception x)
-          {}
-        }
-      });
-    }
-    catch (Exception x)
-    {
-      LOGGER.error("", x);
-    }
+    createGUI();
   }
 
   /**
-   * Enthält die Einstellungen, die zu einem Verfügungspunkt im Dialog getroffen
-   * wurden.
+   * Enthält die Einstellungen, die zu einem Verfügungspunkt im Dialog getroffen wurden.
    *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -347,13 +176,14 @@ public class SachleitendeVerfuegungenDruckdialog
     @Override
     public String toString()
     {
-      return "VerfuegungspunktInfo(verfPunkt=" + verfPunktNr + ", copyCount="
-        + copyCount + ", isDraft=" + isDraft + ", isOriginal=" + isOriginal + ")";
+      return "VerfuegungspunktInfo(verfPunkt=" + verfPunktNr + ", copyCount=" + copyCount
+          + ", isDraft=" + isDraft + ", isOriginal=" + isOriginal + ")";
     }
   }
 
   /**
    * Liefert die aktuellen in diesem Dialog getroffenen Einstellung zur Reihenfolge des Ausdrucks.
+   * 
    * @return true falls in aufsteigender Reihenfloge gedruckt werden soll, false sonst.
    *
    * @author ulrich.kitzinger
@@ -363,16 +193,7 @@ public class SachleitendeVerfuegungenDruckdialog
     return printOrderAsc;
   }
 
-  /**
-   * Liefert die aktuellen in diesem Dialog getroffenen Einstellungen als Liste von
-   * VerfuegungspunktInfo-Objekten zurück.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public List<VerfuegungspunktInfo> getCurrentSettings()
-  {
-    return currentSettings;
-  }
+  private UNODialogFactory unoDialog = null;
 
   /**
    * Erzeugt das GUI.
@@ -380,109 +201,52 @@ public class SachleitendeVerfuegungenDruckdialog
    * @param fensterDesc
    *          die Spezifikation dieses Dialogs.
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
+   * @throws com.sun.star.uno.Exception
    */
-  private void createGUI(ConfigThingy fensterDesc)
+  private void createGUI()
   {
-    Common.setLookAndFeelOnce();
+    unoDialog = new UNODialogFactory();
+    XWindow dialogWindow = unoDialog.createDialog(600, 300, 0xF2F2F2);
+
+    // FYI: showDialog() muss vor Initialisierung von SimpleLayout aufgerufen
+    // werden, da
+    // sonst dialogWindow zu diesem Zeitpunkt noch nicht gezeichnet ist und
+    // demnach dialogWindow.getPosSize() 0 ist,
+    // SimpleLayout braucht jedoch die Werte um Controls richtig anzuordnen.
+    unoDialog.showDialog();
+
+    layout = new SimpleDialogLayout(dialogWindow);
+    layout.setMarginBetweenControls(15);
+    layout.setMarginTop(20);
+    layout.setMarginLeft(20);
+    layout.setWindowBottomMargin(10);
 
     int size = verfuegungspunkte.size();
 
-    // element
-    elementComboBoxes = new ArrayList<>();
-    elementCountSpinner = new JSpinner[size];
-    printElementButtons = new JButton[size];
+    // Header, "Ausdrucke" "Kopien"
+    layout.addControlsToList(addHeader());
 
-    for (int i = 0; i < size; ++i)
+    // Verfuegungspunkte
+    for (ControlModel verfuegungsPunkt : addVerfuegungsPunktControls(size))
     {
-      Verfuegungspunkt verfPunkt = verfuegungspunkte.get(i);
-      List<String> zuleitungszeilen = verfPunkt.getZuleitungszeilen();
-
-      // elementComboBoxes vorbelegen:
-      Vector<String> content = new Vector<>();
-      content.add(cutContent(verfPunkt.getHeading()));
-      if (!zuleitungszeilen.isEmpty())
-        content.add(cutContent(L.m("------- Zuleitung an --------")));
-      Iterator<String> iter = zuleitungszeilen.iterator();
-      while (iter.hasNext())
-      {
-        String zuleitung = iter.next();
-        content.add(cutContent(zuleitung));
-      }
-      elementComboBoxes.add(new JComboBox<>(content));
-
-      // elementCountComboBoxes vorbelegen:
-      SpinnerNumberModel model =
-        new SpinnerNumberModel(verfPunkt.getNumberOfCopies(), 0, 50, 1);
-      elementCountSpinner[i] = new JSpinner(model);
-
-      // printElementButtons vorbelegen:
-      printElementButtons[i] = new JButton();
+      layout.addControlsToList(verfuegungsPunkt);
     }
 
-    String title = fensterDesc.getString("TITLE",
-        L.m("TITLE fehlt für Fenster Drucken"));
+    layout.addControlsToList(addHorizontalLine());
 
-    closeAction = getAction(fensterDesc.getString("CLOSEACTION", "abort"));
+    // Summe aller Ausdrucke
+    layout.addControlsToList(printSumControls(size));
 
-    // Create and set up the window.
-    myFrame = new JFrame(title);
-    // leave handling of close request to WindowListener.windowClosing
-    myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    myFrame.addWindowListener(new MyWindowListener());
-    // WollMux-Icon für das Fenster
-    Common.setWollMuxIcon(myFrame);
+    // Ausdruck in umgekehrter Reihenfolge
+    layout.addControlsToList(addPrintOrderControls());
 
-    mainPanel = new JPanel(new BorderLayout());
-    mainPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    myFrame.getContentPane().add(mainPanel);
-
-    JPanel verfPunktPanel = new JPanel(new GridBagLayout());
-    JPanel buttons = new JPanel(new GridBagLayout());
-
-    mainPanel.add(verfPunktPanel, BorderLayout.CENTER);
-    mainPanel.add(buttons, BorderLayout.PAGE_END);
-
-    addUIElements(fensterDesc, "Headers", 0, 0, verfPunktPanel, 1, 0);
-
-    for (int i = 0; i < size; i++)
-    {
-      addUIElements(fensterDesc, L.m("Verfuegungspunkt"), i, i + 1 /* Headers */,
-        verfPunktPanel, 1, 0);
-    }
-
-    // separator zwischen Verfügungspunkte und Summenzeile hinzufügen
-    GridBagConstraints gbcSeparator =
-      new GridBagConstraints(0, 0, GridBagConstraints.REMAINDER, 1, 1.0, 0.0,
-        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0,
-          0, 0), 0, 0);
-    JPanel uiElement = new JPanel(new GridLayout(1, 1));
-    uiElement.add(new JSeparator(SwingConstants.HORIZONTAL));
-    uiElement.setBorder(BorderFactory.createEmptyBorder(SEP_BORDER, 0, SEP_BORDER, 0));
-    gbcSeparator.gridy = size + 1;
-    verfPunktPanel.add(uiElement, gbcSeparator);
-
-    addUIElements(fensterDesc, "AllElements", 0,
-      size + 2 /* Headers und Separator */, verfPunktPanel, 1, 0);
-    addUIElements(fensterDesc, "Reihenfolge", 0,
-      size + 4 /* Headers und Separator */, verfPunktPanel, 1, 0);
-    addUIElements(fensterDesc, "Buttons", 0, 0, buttons, 1, 0);
-
-    myFrame.pack();
-    int frameWidth = myFrame.getWidth();
-    int frameHeight = myFrame.getHeight();
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width / 2 - frameWidth / 2;
-    int y = screenSize.height / 2 - frameHeight / 2;
-    myFrame.setLocation(x, y);
-    myFrame.setResizable(false);
-    myFrame.setVisible(true);
-    myFrame.setAlwaysOnTop(true);
-    myFrame.requestFocus();
+    // Abbrechen, AlleDrucken-Button
+    layout.addControlsToList(addBottomButtons());
   }
 
   /**
-   * Wenn value mehr als CONTENT_CUT Zeichen besitzt, dann wird eine gekürzte Form
-   * von value zurückgeliefert (mit "..." ergänzt) oder ansonsten value selbst.
+   * Wenn value mehr als CONTENT_CUT Zeichen besitzt, dann wird eine gekürzte Form von value
+   * zurückgeliefert (mit "..." ergänzt) oder ansonsten value selbst.
    *
    * @param value
    *          der zu kürzende String
@@ -497,362 +261,170 @@ public class SachleitendeVerfuegungenDruckdialog
       return value;
   }
 
-  /**
-   * Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu. compo muss
-   * ein GridBagLayout haben. stepx und stepy geben an um wieviel mit jedem UI
-   * Element die x und die y Koordinate der Zelle erhöht werden soll. Wirklich
-   * sinnvoll sind hier nur (0,1) und (1,0).
-   */
-  private void addUIElements(ConfigThingy conf, String key, int verfPunktNr,
-      int yOffset, JComponent compo, int stepx, int stepy)
+  private List<ControlModel> addVerfuegungsPunktControls(int size)
   {
-    // int gridx, int gridy, int gridwidth, int gridheight, double weightx,
-    // double weighty, int anchor, int fill, Insets insets, int ipadx, int
-    // ipady)
-    // GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0,
-    // 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new
-    // Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-    GridBagConstraints gbcLabel =
-      new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
-        GridBagConstraints.NONE, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
-          TF_BORDER), 0, 0);
-    GridBagConstraints gbcGlue =
-      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.LINE_START,
-        GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0);
-    GridBagConstraints gbcButton =
-      new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
-        GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
-          BUTTON_BORDER, BUTTON_BORDER), 0, 0);
-    GridBagConstraints gbcComboBox =
-      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,
-        GridBagConstraints.BOTH, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
-          TF_BORDER), 0, 0);
-    GridBagConstraints gbcTextField =
-      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,
-        GridBagConstraints.BOTH, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
-          TF_BORDER), 0, 0);
-    GridBagConstraints gbcSpinner =
-      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,
-        GridBagConstraints.BOTH, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
-          TF_BORDER), 0, 0);
-    GridBagConstraints gbcCheckBox =
-      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,
-        GridBagConstraints.BOTH, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
-          TF_BORDER), 0, 0);
+    List<ControlModel> verfuegungsPunktModels = new ArrayList<>();
 
-    ConfigThingy felderParent = conf.query(key);
-    int y = -stepy + yOffset;
-    int x = -stepx;
-
-    for (ConfigThingy it : felderParent)
+    for (int i = 0; i < size; ++i)
     {
-        for (ConfigThingy uiElementDesc : it)
-      {
-        y += stepy;
-        x += stepx;
+      Verfuegungspunkt verfPunkt = verfuegungspunkte.get(i);
+      this.currentSettings = new ArrayList<>();
 
-        String id = uiElementDesc.getString("ID", "");
-        String type = uiElementDesc.getString("TYPE", "");
+      List<SimpleEntry<ControlProperties, XControl>> controls = new ArrayList<>();
 
-        if ("label".equals(type))
-        {
-          JLabel uiElement = new JLabel();
-          gbcLabel.gridx = x;
-          gbcLabel.gridy = y;
-          String labelText = uiElementDesc.getString("LABEL", "");
-          uiElement.setText(labelText);
-          // FIXME: Hier werden alle Labels mit dem Text 'Seiten' rausgefiltert,
-          // damit auch bei einer nicht aktualisierten Standard-Config ein
-          // sinnvoller Dialog angezeigt wird. Früher konnte über diesen Dialog
-          // noch der Seitenbereich eingestellt werden konnte. Passend dazu
-          // existierte in alten Standard-Configs noch die Spaltenüberschrift
-          // "Seiten". Seit der Existent der Druckfunktion 'Gesamtdokument
-          // erstellen' gibt es jedoch keinen Sinn mehr, den Seitenbereich über
-          // diesen Dialog zu steuern. Die Möglichkeit zur Einstellung ist daher
-          // aus dem Dialog entfernt worden, die notwendigen Änderungen der
-          // Standardkonfig machen aber die Referate, worauf wir keine Einfluss
-          // haben. AUFGABE: ab März 2009 (ein Jahr nach der Änderung) sollten alle
-          // Referate die entsprechend angepasste Standard-Config installiert
-          // haben. Dann muss dieses 'if' wieder aus dem Code rausfliegen!!!
-          if (!"Seiten".equals(labelText))
-          {
-            compo.add(uiElement, gbcLabel);
-          }
-        }
-        else if ("glue".equals(type))
-        {
-          Box uiElement = Box.createHorizontalBox();
-          int minsize = Integer
-              .parseInt(uiElementDesc.getString("MINSIZE", "0"));
-          uiElement.add(Box.createHorizontalStrut(minsize));
-          uiElement.add(Box.createHorizontalGlue());
+      SimpleEntry<ControlProperties, XControl> verfLabel = layout
+          .convertToXControl(new ControlProperties(ControlType.LABEL, "verfLabel" + i, 0, 30, 60, 0,
+              new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
+                  new Object[] { cutContent(verfPunkt.getHeading()) })));
 
-          gbcGlue.gridx = x;
-          gbcGlue.gridy = y;
-          compo.add(uiElement, gbcGlue);
-        }
-        else if ("spinner".equals(type))
-        {
-          JSpinner spinner;
-          if ("elementCount".equals(id)
-              && verfPunktNr < elementCountSpinner.length)
-          {
-            spinner = elementCountSpinner[verfPunktNr];
-          }
-          else
-          {
-            spinner = new JSpinner(new SpinnerNumberModel(0, 0, 0, 0));
-          }
+      SimpleEntry<ControlProperties, XControl> printCountField = layout
+          .convertToXControl(
+              new ControlProperties(ControlType.NUMERIC_FIELD, "printCountField" + i, 0, 30, 20, 0,
+                  new SimpleEntry<String[], Object[]>(new String[] { XNumericFieldProperties.BORDER,
+                      XNumericFieldProperties.BORDER_COLOR, XNumericFieldProperties.LABEL,
+                      XNumericFieldProperties.SPIN, XNumericFieldProperties.VALUE,
+                      XNumericFieldProperties.MIN_VALUE, XNumericFieldProperties.DECIMAL_ACCURACY },
+                      new Object[] { (short) 2, 666666, "Test", Boolean.TRUE, 1, 0, (short) 0 })));
 
-          spinner.addChangeListener(spinnerChangeListener);
+      UnoRuntime.queryInterface(XSpinField.class, printCountField.getValue())
+          .addSpinListener(printCountSpinFieldListener);
 
-          gbcSpinner.gridx = x;
-          gbcSpinner.gridy = y;
-          compo.add(spinner, gbcSpinner);
-        }
-        else if ("combobox".equals(type))
-        {
-          JComboBox<String> comboBox;
-          if ("element".equals(id) && verfPunktNr < elementComboBoxes.size())
-          {
-            comboBox = elementComboBoxes.get(verfPunktNr);
-            comboBox.addItemListener(cboxItemListener);
-          }
+      SimpleEntry<ControlProperties, XControl> printButtons = layout
+          .convertToXControl(new ControlProperties(ControlType.BUTTON, "printButton" + i, 0, 30, 20,
+              0, new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
+                  new Object[] { "Drucken" })));
+      printButtons.getKey().setButtonCommand("printElement");
+      UnoRuntime.queryInterface(XButton.class, printButtons.getValue())
+          .addActionListener(printElementActionListener);
 
-          // Behandlung des nicht mehr unterstützten Elementtyps "pageRange"
-          else if (id.equals("pageRange"))
-          {
-            comboBox = null;
+      controls.add(verfLabel);
+      controls.add(printCountField);
+      controls.add(printButtons);
 
-          }
-          else
-          {
-            comboBox = new JComboBox<>();
-          }
-
-          // comboBox.addListSelectionListener(myListSelectionListener);
-
-          gbcComboBox.gridx = x;
-          gbcComboBox.gridy = y;
-          if (comboBox != null)
-          {
-            compo.add(comboBox, gbcComboBox);
-          }
-        }
-        else if ("checkbox".equals(type))
-        {
-          JCheckBox checkBox;
-          if ("printOrder".equals(id))
-          {
-            checkBox = printOrder;
-          }
-          else
-          {
-            checkBox = new JCheckBox();
-          }
-
-          gbcCheckBox.gridx = x;
-          gbcCheckBox.gridy = y;
-
-          String boxText = uiElementDesc.getString("LABEL", "");
-          checkBox.setText(boxText);
-          compo.add(checkBox, gbcCheckBox);
-        }
-
-        else if ("textfield".equals(type))
-        {
-          JTextField textField;
-          if ("allElementCount".equals(id))
-          {
-            textField = new JTextField("" + getAllElementCount());
-            textField.setEditable(false);
-            textField.setHorizontalAlignment(SwingConstants.CENTER);
-            allElementCountTextField = textField;
-          }
-          else
-            textField = new JTextField();
-
-          gbcTextField.gridx = x;
-          gbcTextField.gridy = y;
-          compo.add(textField, gbcTextField);
-        }
-        else if ("button".equals(type))
-        {
-          String action = uiElementDesc.getString("ACTION", "");
-          String label = uiElementDesc.getString("LABEL", "");
-          char hotkey = uiElementDesc.getString("HOTKEY", "0").charAt(0);
-
-          // Bei printElement-Actions die vordefinierten Buttons verwenden,
-          // ansonsten einen neuen erzeugen.
-          JButton button = null;
-
-          if ("printElement".equalsIgnoreCase(action) && verfPunktNr >= 0
-              && verfPunktNr < printElementButtons.length)
-          {
-            button = printElementButtons[verfPunktNr];
-            button.setText(label);
-          }
-          else
-          {
-            button = new JButton(label);
-          }
-
-          button.setMnemonic(hotkey);
-
-          gbcButton.gridx = x;
-          gbcButton.gridy = y;
-          compo.add(button, gbcButton);
-
-          ActionListener actionL = getAction(action);
-          if (actionL != null)
-          {
-            button.addActionListener(actionL);
-          }
-
-        }
-        else
-        {
-          LOGGER
-              .error(L.m("Ununterstützter TYPE für User Interface Element: %1",
-                  type));
-        }
-      }
+      ControlModel verfPunktModel = new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls,
+          Optional.empty());
+      verfuegungsPunktModels.add(verfPunktModel);
     }
+
+    return verfuegungsPunktModels;
   }
 
-  /**
-   * Berechnet die Summe aller Ausfertigungen aller elementCountSpinner.
-   */
-  private int getAllElementCount()
+  private ControlModel addHorizontalLine()
   {
-    int count = 0;
-    for (int i = 0; i < elementCountSpinner.length; i++)
-    {
-      count += new Integer(elementCountSpinner[i].getValue().toString()).intValue();
-    }
-    return count;
+    List<SimpleEntry<ControlProperties, XControl>> lineControl = new ArrayList<>();
+
+    lineControl
+        .add(layout.convertToXControl(new ControlProperties(ControlType.FIXEDLINE, "fixedLineSum",
+            0, 30, 100, 0, new SimpleEntry<String[], Object[]>(new String[] {}, new Object[] {}))));
+
+    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, lineControl, Optional.empty());
   }
 
-  /**
-   * Übersetzt den Namen einer ACTION in eine Referenz auf das passende
-   * actionListener_... Objekt.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
-   */
-  private ActionListener getAction(String action)
+  private ControlModel printSumControls(int size)
   {
-    if ("abort".equals(action))
-    {
-      return actionListener_abort;
-    }
-    if ("back".equals(action))
-    {
-      // diese Aktion wird nicht mehr unterstützt, verhält sich aber aus Gründen der
-      // Abwärtskompatibilität wie abort.
-      return actionListener_abort;
-    }
-    else if ("printElement".equals(action))
-    {
-      return actionListener_printElement;
-    }
-    else if ("printAll".equals(action))
-    {
-      return actionListener_printAll;
-    }
-    else if ("printSettings".equals(action))
-    {
-      // FIXME: diese Aktion wird nicht mehr unterstützt, darf aber aus Gründen der
-      // Abwärtskompatibilität nicht zu einem Fehler führen. Diese Aktion kann aber
-      // nach einem Jahr, also ab März 2009 ebenfalls entfernt werden, da bis dahin
-      // die entsprechende Standard-config hoffentlich überall im Einsatz ist.
-      return null;
-    }
-    else if (action.isEmpty())
-    {
-      return null;
-    }
-    else
-      LOGGER.error(L.m("Ununterstützte ACTION: %1", action));
+    List<SimpleEntry<ControlProperties, XControl>> sumControls = new ArrayList<>();
+    SimpleEntry<ControlProperties, XControl> sumLabel = layout
+        .convertToXControl(new ControlProperties(ControlType.LABEL, "sumLabel", 0, 30, 60, 0,
+            new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
+                new Object[] { "Summe aller Ausdrucke" })));
 
-    return null;
+    SimpleEntry<ControlProperties, XControl> sumNumericTextfield = layout
+        .convertToXControl(new ControlProperties(ControlType.LABEL, "sumNumericTextfield", 0, 30,
+            20, 0, new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
+                new Object[] { " " + size })));
+
+    sumControls.add(sumLabel);
+    sumControls.add(sumNumericTextfield);
+
+    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, sumControls, Optional.empty());
   }
 
-  /**
-   * Beendet den Dialog und informiert den dialogEndListener (wenn dieser != null
-   * ist).
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void abort(String cmdStr)
+  private ControlModel addPrintOrderControls()
   {
-    myFrame.dispose();
-    if (dialogEndListener != null)
-      dialogEndListener.actionPerformed(new ActionEvent(this, 0, cmdStr));
+    List<SimpleEntry<ControlProperties, XControl>> printOrderControls = new ArrayList<>();
+
+    SimpleEntry<ControlProperties, XControl> printOrderCheckbox = layout
+        .convertToXControl(new ControlProperties(ControlType.CHECKBOX, "printOrderCheckbox", 0, 30,
+            100, 0, new SimpleEntry<String[], Object[]>(new String[] { "Label" },
+                new Object[] { "Ausdruck in umgekehrter Reihenfolge." })));
+    UnoRuntime.queryInterface(XCheckBox.class, printOrderCheckbox.getValue())
+        .addItemListener(printOrderCheckBoxListener);
+
+    printOrderControls.add(printOrderCheckbox);
+
+    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, printOrderControls,
+        Optional.empty());
   }
 
-  /**
-   * Ermittelt ob in aufsteigender oder absteigender Reihenfolge gedruckt werden soll.
-   * @return true falls in aufsteigender Reihenfolge gedruckt werden soll, false sonst
-   *
-   * @author ulrich.kitzinger
-   */
-  private boolean getSelectedPrintOrderAsc(){
-    return !printOrder.isSelected();
-  }
-
-  /**
-   * Löscht currentSettings und schreibt für alle Verfügungspunkte entsprechende
-   * VerfuegungspunktInfo-Objekte nach currentSettings.
-   *
-   * @author christoph.lutz
-   */
-  private void getCurrentSettingsForAllElements()
+  private ControlModel addHeader()
   {
-    currentSettings.clear();
-    for (int verfPunkt = 1; verfPunkt <= verfuegungspunkte.size(); ++verfPunkt)
-    {
-      currentSettings.add(getVerfuegungspunktInfo(verfPunkt));
-    }
+    List<SimpleEntry<ControlProperties, XControl>> headerControls = new ArrayList<>();
+
+    SimpleEntry<ControlProperties, XControl> headerLabelAusdrucke = layout
+        .convertToXControl(new ControlProperties(ControlType.LABEL, "headerLabelAusdrucke", 0, 30,
+            60, 0, new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
+                new Object[] { "Ausdrucke" })));
+
+    SimpleEntry<ControlProperties, XControl> headerLabelKopien = layout
+        .convertToXControl(new ControlProperties(ControlType.LABEL, "headerLabelKopien", 0, 30, 20,
+            0, new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
+                new Object[] { "Kopien" })));
+
+    headerControls.add(headerLabelAusdrucke);
+    headerControls.add(headerLabelKopien);
+
+    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, headerControls, Optional.empty());
   }
 
-  /**
-   * Bestimmt die Nummer des Verfügungspunktes, dem JButton button zugeordnet ist und
-   * schreibt dessen VerfuegungspunktInfo als einziges Element nach currentSettings.
-   *
-   * @author christoph.lutz
-   */
-  private void getCurrentSettingsForElement(JButton button)
+  private ControlModel addBottomButtons()
   {
-    currentSettings.clear();
-    for (int i = 0; i < printElementButtons.length; i++)
-    {
-      if (printElementButtons[i] == button)
-      {
-        currentSettings.add(getVerfuegungspunktInfo(i + 1));
-      }
-    }
+    List<SimpleEntry<ControlProperties, XControl>> controls = new ArrayList<>();
+    ControlModel controlModel = null;
+
+    SimpleEntry<ControlProperties, XControl> abortButton = layout
+        .convertToXControl(new ControlProperties(ControlType.BUTTON, "abortButton", 0, 40, 50, 0,
+            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
+                new Object[] { "Abbrechen" })));
+    abortButton.getKey().setButtonCommand("abort");
+    UnoRuntime.queryInterface(XButton.class, abortButton.getValue())
+        .addActionListener(abortListener);
+    controls.add(abortButton);
+
+    SimpleEntry<ControlProperties, XControl> printAllButton = layout
+        .convertToXControl(new ControlProperties(ControlType.BUTTON, "printAllButton", 0, 40, 50, 0,
+            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
+                new Object[] { "Alle Drucken" })));
+    printAllButton.getKey().setButtonCommand("printAll");
+    UnoRuntime.queryInterface(XButton.class, printAllButton.getValue())
+        .addActionListener(printAllActionListener);
+    controls.add(printAllButton);
+
+    controlModel = new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls,
+        Optional.of(Dock.BOTTOM));
+
+    return controlModel;
   }
 
   /**
-   * Ermittelt die Druckdaten (Verfügungspunkt, Anzahl-Ausfertigungen, ...) zum
-   * Verfügungspunkt verfPunkt und liefert sie als VerfuegungspunktInfo-Objekt
-   * zurück.
+   * Ermittelt die Druckdaten (Verfügungspunkt, Anzahl-Ausfertigungen, ...) zum Verfügungspunkt
+   * verfPunkt und liefert sie als VerfuegungspunktInfo-Objekt zurück.
    *
    * @author christoph.lutz
    */
   private VerfuegungspunktInfo getVerfuegungspunktInfo(int verfPunkt)
   {
-    // Anzahl der Kopien bestimmen:
-    short numberOfCopies = 0;
-    try
+    // Anzahl der Kopien lesen
+    XNumericField printCountField = UnoRuntime.queryInterface(XNumericField.class,
+        layout.getControl("printCountField" + (verfPunkt - 1)));
+
+    if (printCountField == null)
     {
-      numberOfCopies =
-        new Short(elementCountSpinner[verfPunkt - 1].getValue().toString()).shortValue();
+      LOGGER.error(
+          "SachleitendeVerfuegungenDruckDialog: getVerfuegungspunktInfo: printCountField is NULL.");
+      return new VerfuegungspunktInfo(0, (short) 0, false, false);
     }
-    catch (Exception e)
-    {
-      LOGGER.error(L.m("Kann Anzahl der Ausfertigungen nicht bestimmen."), e);
-    }
+
+    short numberOfCopies = (short) printCountField.getValue();
 
     boolean isDraft = (verfPunkt == verfuegungspunkte.size());
     boolean isOriginal = (verfPunkt == 1);
@@ -860,18 +432,213 @@ public class SachleitendeVerfuegungenDruckdialog
     return new VerfuegungspunktInfo(verfPunkt, numberOfCopies, isDraft, isOriginal);
   }
 
-  /**
-   * Ein WindowListener, der auf den JFrame registriert wird, damit als Reaktion auf
-   * den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private class MyWindowListener extends WindowAdapter
+  public List<VerfuegungspunktInfo> getCurrentSettings()
   {
-    @Override
-    public void windowClosing(WindowEvent e)
+    return this.currentSettings;
+  }
+
+  private void getCurrentSettingsForAllElements()
+  {
+    this.currentSettings.clear();
+
+    for (int verfPunkt = 1; verfPunkt <= verfuegungspunkte.size(); verfPunkt++)
     {
-      closeAction.actionPerformed(null);
+      this.currentSettings.add(getVerfuegungspunktInfo(verfPunkt));
     }
+  }
+
+  private XSpinListener printCountSpinFieldListener = new XSpinListener()
+  {
+
+    @Override
+    public void disposing(EventObject arg0)
+    {
+      // unused
+
+    }
+
+    @Override
+    public void up(SpinEvent arg0)
+    {
+      int printFieldSum = 0;
+
+      for (int i = 0; i < verfuegungspunkte.size(); i++)
+      {
+        XNumericField printCountField = UnoRuntime.queryInterface(XNumericField.class,
+            layout.getControl("printCountField" + i));
+
+        if (printCountField == null)
+          continue;
+
+        printFieldSum += printCountField.getValue();
+      }
+
+      setSumFieldValue(printFieldSum);
+    }
+
+    @Override
+    public void last(SpinEvent arg0)
+    {
+      // unused
+
+    }
+
+    @Override
+    public void first(SpinEvent arg0)
+    {
+      // unused
+
+    }
+
+    @Override
+    public void down(SpinEvent arg0)
+    {
+      int printFieldSum = 0;
+
+      for (int i = 0; i < verfuegungspunkte.size(); i++)
+      {
+        XControl printCount = layout.getControl("printCountField" + i);
+
+        if (printCount == null)
+          continue;
+
+        XNumericField printCountField = UnoRuntime.queryInterface(XNumericField.class, printCount);
+
+        if (printCountField == null)
+          continue;
+
+        printFieldSum += printCountField.getValue();
+      }
+
+      setSumFieldValue(printFieldSum);
+    }
+  };
+
+  private XItemListener printOrderCheckBoxListener = new XItemListener()
+  {
+
+    @Override
+    public void disposing(EventObject arg0)
+    {
+      // unused
+
+    }
+
+    @Override
+    public void itemStateChanged(ItemEvent arg0)
+    {
+      XCheckBox checkBox = UnoRuntime.queryInterface(XCheckBox.class, arg0.Source);
+
+      if (checkBox == null)
+        return;
+
+      printOrderAsc = checkBox.getState() == 1;
+    }
+  };
+
+  private XActionListener abortListener = new XActionListener()
+  {
+
+    @Override
+    public void disposing(EventObject arg0)
+    {
+      // unused
+
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent arg0)
+    {
+      unoDialog.closeDialog();
+    }
+  };
+
+  private XActionListener printElementActionListener = new XActionListener()
+  {
+
+    @Override
+    public void disposing(EventObject arg0)
+    {
+      // unused
+
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent arg0)
+    {
+      XControl xControl = UnoRuntime.queryInterface(XControl.class, arg0.Source);
+
+      getCurrentSettingsForElement(xControl);
+
+      SimpleEntry<List<VerfuegungspunktInfo>, Boolean> config = new SimpleEntry<>(
+          getCurrentSettings(), getPrintOrderAsc());
+
+      if (dialogEndListener != null)
+        dialogEndListener.actionPerformed(new java.awt.event.ActionEvent(config, 0,
+            SachleitendeVerfuegungenDruckdialog.CMD_SUBMIT));
+
+      unoDialog.closeDialog();
+    }
+    
+    private void getCurrentSettingsForElement(XControl control)
+    {
+      currentSettings.clear();
+
+      for (ControlModel model : layout.getControlList())
+      {
+        for (SimpleEntry<ControlProperties, XControl> entry : model.getControls())
+        {
+          if (entry.getValue().equals(control))
+          {
+            int verfPunktIndex = Integer.parseInt(entry.getKey().getControlName()
+                .substring(entry.getKey().getControlName().length() - 1));
+
+            currentSettings.add(getVerfuegungspunktInfo(verfPunktIndex + 1));
+          }
+        }
+      }
+    }
+  };
+
+  private XActionListener printAllActionListener = new XActionListener()
+  {
+
+    @Override
+    public void disposing(EventObject arg0)
+    {
+      // unused
+
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent arg0)
+    {
+      printOrderAsc = getSelectedPrintOrderAsc();
+      getCurrentSettingsForAllElements();
+
+      SimpleEntry<List<VerfuegungspunktInfo>, Boolean> config = new SimpleEntry<>(
+          getCurrentSettings(), getPrintOrderAsc());
+
+      if (dialogEndListener != null)
+        dialogEndListener.actionPerformed(new java.awt.event.ActionEvent(config, 0,
+            SachleitendeVerfuegungenDruckdialog.CMD_SUBMIT));
+
+      unoDialog.closeDialog();
+    }
+  };
+
+  private void setSumFieldValue(int value)
+  {
+    XFixedText sumLabel = UnoRuntime.queryInterface(XFixedText.class,
+        layout.getControl("sumNumericTextfield"));
+    sumLabel.setText(" " + value);
+  }
+
+  private boolean getSelectedPrintOrderAsc()
+  {
+    XCheckBox isOrderAscSelected = UnoRuntime.queryInterface(XCheckBox.class,
+        layout.getControl("printOrderCheckbox"));
+
+    return isOrderAscSelected.getState() == 0;
   }
 }
