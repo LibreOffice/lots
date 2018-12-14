@@ -55,7 +55,7 @@ public class DruckerController {
     this.model = model; 
     this.parent = parent;
     model.setDrucker(
-      PrintParametersDialog.getCurrentPrinterName(
+        PrintParametersDialog.getCurrentPrinterName(
         mmp.getMMC().getTextDocument()));   
     
     PrintService[] printservices = PrintServiceLookup.lookupPrintServices(null,  null); 

@@ -60,7 +60,7 @@ public class WollMuxEventListener
   }
 
   @Subscribe
-  public void onsetwinsize(OnZifferEinfuegen event)
+  public void onsetwinsize(OnSetWindowPosSize event)
   {
     event.process();
   }
