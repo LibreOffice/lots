@@ -52,12 +52,9 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -74,6 +71,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -91,7 +91,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
@@ -116,7 +115,6 @@ import de.muenchen.allg.itd51.wollmux.core.db.SearchStrategy;
 import de.muenchen.allg.itd51.wollmux.core.db.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
@@ -166,132 +164,9 @@ public class PersoenlicheAbsenderlisteVerwalten
     this.getClass().getClassLoader().getResource("data/db.png");
 
   /**
-   * Standardbreite für Textfelder
-   */
-  private static final int TEXTFIELD_DEFAULT_WIDTH = 22;
-
-  /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
-   */
-  private static final int TF_BORDER = 4;
-
-  /**
-   * Rand um Buttons (in Pixeln).
-   */
-  private static final int BUTTON_BORDER = 2;
-
-  /**
-   * Standardanzahl an Zeilen in einer Listbox.
-   */
-  private static final int LISTBOX_DEFAULT_LINES = 10;
-
-  /**
    * ActionListener für Buttons mit der ACTION "abort".
    */
-  private ActionListener actionListenerAbort = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      abort();
-    }
-  };
-
-  /**
-   * ActionListener für Buttons mit der ACTION "back".
-   */
-  private ActionListener actionListenerBack = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      back();
-    }
-  };
-
-  /**
-   * ActionListener für Buttons mit der ACTION "search".
-   */
-  private ActionListener actionListenerSearch = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      search();
-    }
-  };
-
-  /**
-   * ActionListener für Buttons mit der ACTION "addToPAL".
-   */
-  private ActionListener actionListenerAddToPAL = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      addToPAL();
-    }
-  };
-
-  /**
-   * ActionListener für Buttons mit der ACTION "removeFromPAL".
-   */
-  private ActionListener actionListenerRemoveFromPAL = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      removeFromPAL();
-    }
-  };
-
-  /**
-   * ActionListener für Buttons mit der ACTION "editEntry".
-   */
-  private ActionListener actionListenerEditEntry = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      editEntry();
-    }
-  };
-
-  /**
-   * ActionListener für Buttons mit der ACTION "copyEntry".
-   */
-  private ActionListener actionListenerCopyEntry = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      copyEntry();
-    }
-  };
-
-  /**
-   * ActionListener für Buttons mit der ACTION "newPALEntry".
-   */
-  private ActionListener actionListenerNewPALEntry = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      newPALEntry();
-    }
-  };
-
-  /**
-   * ActionListener für Buttons mit der ACTION "editNewPALEntry".
-   */
-  private ActionListener actionListenerEditNewPALEntry = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      editNewPALEntry();
-    }
-  };
+  private ActionListener actionListenerAbort = e -> abort();
 
   /**
    * wird getriggert bei windowClosing() Event.
@@ -306,7 +181,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   /**
    * Das JPanel der obersten Hierarchiestufe.
    */
-  private JPanel mainPanel;
+  private JComponent mainPanel;
 
   /**
    * Der DatasourceJoiner, den dieser Dialog anspricht.
@@ -350,7 +225,9 @@ public class PersoenlicheAbsenderlisteVerwalten
   /**
    * Das Textfeld in dem der Benutzer seine Suchanfrage eintippt.
    */
-  private JTextField query;
+  private List<JTextField> query;
+  private List<String> queryNames = Arrays.asList("Name", "Vorname", "Email",
+      "Orga");
 
   /**
    * Die Suchstrategie für Suchanfragen.
@@ -511,33 +388,9 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     Common.setLookAndFeelOnce();
 
-    resultsJList = new JList<>(new DefaultListModel<DJDatasetListElement>());
-    ListCellRenderer<Object> myRenderer = new MyListCellRenderer();
-    resultsJList.setCellRenderer(myRenderer);
-    palJList = new JList<>(new DefaultListModel<DJDatasetListElement>());
+    String title = L.m("Absenderliste Verwalten (WollMux)");
 
-    // KeyListener hinzufügen, damit Einträge in der PAL-Liste durch Drücken der
-    // ENTF-Taste gelöscht werden können
-    palJList.addKeyListener(new KeyAdapter()
-    {
-      @Override
-      public void keyPressed(KeyEvent e)
-      {
-        super.keyPressed(e);
-        if (e.getKeyCode() == KeyEvent.VK_DELETE)
-        {
-          removeFromPAL();
-        }
-      }
-    });
-
-    palJList.setCellRenderer(myRenderer);
-    query = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
-
-    String title = L.m(fensterDesc.getString("TITLE",
-        "TITLE fehlt für Fenster PersoenlicheAbsenderListeVerwalten/Verwalten"));
-
-    closeAction = getAction(fensterDesc.getString("CLOSEACTION", "abort"));
+    closeAction = actionListenerAbort;
 
     // Create and set up the window.
     myFrame = new JFrame(title);
@@ -555,39 +408,12 @@ public class PersoenlicheAbsenderlisteVerwalten
     // WollMux-Icon für PAL-Frame
     Common.setWollMuxIcon(myFrame);
 
-    mainPanel = new JPanel(new BorderLayout());
+    mainPanel = Box.createVerticalBox();
     mainPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    mainPanel.setPreferredSize(new Dimension(831, 357));
     myFrame.getContentPane().add(mainPanel);
 
-    JPanel introSuche = new JPanel();
-    introSuche.setLayout(new BoxLayout(introSuche, BoxLayout.PAGE_AXIS));
-    JPanel suchergebnisHinUndHerAbsenderliste = new JPanel();
-    suchergebnisHinUndHerAbsenderliste.setLayout(new BoxLayout(
-      suchergebnisHinUndHerAbsenderliste, BoxLayout.LINE_AXIS));
-    JPanel fussbereich = new JPanel(new GridBagLayout());
-    JPanel intro = new JPanel(new GridBagLayout());
-    JPanel suche = new JPanel(new GridBagLayout());
-    JPanel suchergebnis = new JPanel(new GridBagLayout());
-    JPanel hinUndHer = new JPanel(new GridBagLayout());
-    JPanel absenderliste = new JPanel(new GridBagLayout());
-
-    mainPanel.add(introSuche, BorderLayout.PAGE_START);
-    mainPanel.add(suchergebnisHinUndHerAbsenderliste, BorderLayout.CENTER);
-    mainPanel.add(fussbereich, BorderLayout.PAGE_END);
-
-    introSuche.add(intro);
-    introSuche.add(suche);
-
-    suchergebnisHinUndHerAbsenderliste.add(suchergebnis);
-    suchergebnisHinUndHerAbsenderliste.add(hinUndHer);
-    suchergebnisHinUndHerAbsenderliste.add(absenderliste);
-
-    addUIElements(fensterDesc, "Intro", intro, 0, 1);
-    addUIElements(fensterDesc, "Suche", suche, 1, 0);
-    addUIElements(fensterDesc, "Suchergebnis", suchergebnis, 0, 1);
-    addUIElements(fensterDesc, "HinUndHer", hinUndHer, 0, 1);
-    addUIElements(fensterDesc, "Absenderliste", absenderliste, 0, 1);
-    addUIElements(fensterDesc, "Fussbereich", fussbereich, 1, 0);
+    addUIElements();
 
     Dataset dsToSelect = null;
     try
@@ -620,242 +446,202 @@ public class PersoenlicheAbsenderlisteVerwalten
     myFrame.requestFocus();
   }
 
-  /**
-   * Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu. compo muss
-   * ein GridBagLayout haben. stepx und stepy geben an um wieviel mit jedem UI
-   * Element die x und die y Koordinate der Zelle erhöht werden soll. Wirklich
-   * sinnvoll sind hier nur (0,1) und (1,0).
-   */
-  private void addUIElements(ConfigThingy conf, String key, JComponent compo,
-      int stepx, int stepy)
+  private void addUIElements()
   {
-    // int gridx, int gridy, int gridwidth, int gridheight, double weightx, double
-    // weighty, int anchor, int fill, Insets insets, int ipadx, int ipady)
-    GridBagConstraints gbcTextfield =
-      new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,
-        GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
-          TF_BORDER), 0, 0);
-    GridBagConstraints gbcLabel =
-      new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
-        GridBagConstraints.NONE, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
-          TF_BORDER), 0, 0);
-    GridBagConstraints gbcGlue =
-      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.LINE_START,
-        GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0);
-    GridBagConstraints gbcButton =
-      new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
-        GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
-          BUTTON_BORDER, BUTTON_BORDER), 0, 0);
-    GridBagConstraints gbcListBox =
-      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,
-        GridBagConstraints.BOTH, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
-          TF_BORDER), 0, 0);
+    Box panelIntro = new Box(BoxLayout.X_AXIS);
 
-    ConfigThingy felderParent = conf.query(key);
-    int y = -stepy;
-    int x = -stepx;
+    JLabel label = new JLabel(L.m(
+        "Sie können nach Vorname, Nachname, Email und Orga-Einheit suchen"));
+    panelIntro.add(label);
 
-    Iterator<ConfigThingy> piter = felderParent.iterator();
-    while (piter.hasNext())
+    Box glue = Box.createHorizontalBox();
+    glue.add(Box.createHorizontalGlue());
+    panelIntro.add(glue);
+
+    mainPanel.add(panelIntro);
+    mainPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+
+    Box panelSuche = Box.createHorizontalBox();
+    panelSuche.setMaximumSize(new Dimension(900, 28));
+
+    JComponent suchFelder = new JPanel(new GridLayout(2, 2, 5, 5));
+    suchFelder.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    query = new ArrayList<>();
+        
+    KeyAdapter keyAdapter = new KeyAdapter()
     {
-      Iterator<ConfigThingy> iter = (piter.next()).iterator();
-      while (iter.hasNext())
+      @Override
+      public void keyPressed(KeyEvent e)
       {
-        y += stepy;
-        x += stepx;
-
-        ConfigThingy uiElementDesc = iter.next();
-
-        boolean readonly = false;
-        String id = uiElementDesc.getString("ID", "");
-        if ("true".equals(uiElementDesc.getString("READONLY", "")))
+        if (e.getKeyCode() == KeyEvent.VK_ENTER)
         {
-          readonly = true;
+          search();
+          return;
         }
-        String type = uiElementDesc.getString("TYPE", "");
 
-        if ("textfield".equals(type))
+        super.keyPressed(e);
+      }
+    };
+
+    IntStream.range(0, 4).forEach(n -> {
+      Box box = Box.createHorizontalBox();
+      JLabel label1 = new JLabel(queryNames.get(n));
+      box.add(label1);
+      box.add(Box.createHorizontalStrut(5));
+
+      JTextField tf = new JTextField(22);
+      tf.addKeyListener(keyAdapter);
+      box.add(tf);
+
+      label1.setLabelFor(tf);
+
+      query.add(tf);
+      suchFelder.add(box);
+    });
+
+    panelSuche.add(suchFelder);
+
+    panelSuche.add(Box.createRigidArea(new Dimension(5, 0)));
+
+    JButton button = new JButton(L.m("Suchen"));
+    button.setMnemonic('S');
+    button.addActionListener(e -> search());
+    panelSuche.add(button);
+
+    mainPanel.add(panelSuche);
+    mainPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+
+    Box panelSelection = Box.createHorizontalBox();
+    mainPanel.add(panelSelection);
+    mainPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+
+    Box panelSuchergebnis = new Box(BoxLayout.Y_AXIS);
+
+    Box label1Box = Box.createHorizontalBox();
+    JLabel label1 = new JLabel(L.m("Suchergebnis"));
+    label1Box.add(label1);
+    label1Box.add(Box.createHorizontalGlue());
+    panelSuchergebnis.add(label1Box);
+
+    JList<DJDatasetListElement> list = new JList<DJDatasetListElement>();
+    list.setModel(new DefaultListModel<DJDatasetListElement>());
+    list.setVisibleRowCount(10);
+    list.addMouseListener(
+        new MyActionMouseListener(list, e -> addToPAL()));
+    list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    list.setLayoutOrientation(JList.VERTICAL);
+    list.setFixedCellWidth((int) new JLabel(
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX").getPreferredSize()
+            .getWidth());
+    list.addListSelectionListener(myListSelectionListener);
+
+    resultsJList = list;
+    resultsJList.setCellRenderer(new MyListCellRenderer());
+
+    JScrollPane scrollPane = new JScrollPane(list);
+    scrollPane.setHorizontalScrollBarPolicy(
+        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    scrollPane.setVerticalScrollBarPolicy(
+        ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+    panelSuchergebnis.add(scrollPane);
+
+    panelSelection.add(panelSuchergebnis);
+    panelSelection.add(Box.createRigidArea(new Dimension(5, 0)));
+
+    Box panelHinUndHer = new Box(BoxLayout.Y_AXIS);
+
+    JButton button1 = new JButton(L.m("→"));
+    button1.addActionListener(e -> addToPAL());
+    buttonsToGreyOutIfNothingSelected.add(button1);
+
+    panelHinUndHer.add(button1);
+    panelHinUndHer.add(Box.createRigidArea(new Dimension(0, 5)));
+
+    panelSelection.add(panelHinUndHer);
+    panelSelection.add(Box.createRigidArea(new Dimension(5, 0)));
+
+    Box panelAbsenderliste = new Box(BoxLayout.Y_AXIS);
+
+    JLabel label2 = new JLabel(L.m("Persönliche Absenderliste"));
+
+    Box label2Box = Box.createHorizontalBox();
+    label2Box.add(label2);
+    label2Box.add(Box.createHorizontalGlue());
+    panelAbsenderliste.add(label2Box);
+
+
+    JList<DJDatasetListElement> list1 = new JList<DJDatasetListElement>();
+    list1.setModel(new DefaultListModel<DJDatasetListElement>());
+    list1.setVisibleRowCount(10);
+    list1.addMouseListener(
+        new MyActionMouseListener(list, e -> editEntry()));
+    list1.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    list1.setLayoutOrientation(JList.VERTICAL);
+    list1.setFixedCellWidth((int) new JLabel(
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX").getPreferredSize()
+            .getWidth());
+    list1.addListSelectionListener(myListSelectionListener);
+    palJList = list1;
+
+    // KeyListener hinzufügen, damit Einträge in der PAL-Liste durch Drücken der
+    // ENTF-Taste gelöscht werden können
+    palJList.addKeyListener(new KeyAdapter()
+    {
+      @Override
+      public void keyPressed(KeyEvent e)
+      {
+        super.keyPressed(e);
+        if (e.getKeyCode() == KeyEvent.VK_DELETE)
         {
-          JTextField tf;
-          if ("suchanfrage".equals(id))
-            tf = query;
-          else
-            tf = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
-
-          tf.setEditable(!readonly);
-          gbcTextfield.gridx = x;
-          gbcTextfield.gridy = y;
-          compo.add(tf, gbcTextfield);
-
-          String action = uiElementDesc.getString("ACTION", "");
-
-          ActionListener actionL = getAction(action);
-          if (actionL != null)
-          {
-            tf.addActionListener(actionL);
-          }
-        }
-        else if ("label".equals(type))
-        {
-          JLabel uiElement = new JLabel();
-          gbcLabel.gridx = x;
-          gbcLabel.gridy = y;
-          compo.add(uiElement, gbcLabel);
-          uiElement.setText(L.m(uiElementDesc.getString("LABEL", "")));
-        }
-        else if ("glue".equals(type))
-        {
-          Box uiElement = Box.createHorizontalBox();
-          try
-          {
-            int minsize = Integer
-                .parseInt(uiElementDesc.getString("MINSIZE", ""));
-            uiElement.add(Box.createHorizontalStrut(minsize));
-          }
-          catch (NumberFormatException e)
-          {
-          }
-          uiElement.add(Box.createHorizontalGlue());
-
-          gbcGlue.gridx = x;
-          gbcGlue.gridy = y;
-          compo.add(uiElement, gbcGlue);
-        }
-        else if ("listbox".equals(type))
-        {
-          int lines = LISTBOX_DEFAULT_LINES;
-          try
-          {
-            lines = Integer.parseInt(uiElementDesc.get("LINES").toString());
-          }
-          catch (NodeNotFoundException | NumberFormatException e)
-          {
-          }
-
-          JList<DJDatasetListElement> list;
-          if ("suchergebnis".equals(id))
-          {
-            list = resultsJList;
-            try
-            {
-              resultsDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
-            }
-            catch (NodeNotFoundException e)
-            {
-              LOGGER.info(L.m(
-                  "Kein DISPLAY-Attribut für die listbox mit ID \"suchergebnis\" im PersoenlicheAbsenderliste-Dialog angegeben! Verwende Fallback: %1",
-                  DEFAULT_DISPLAYTEMPLATE));
-              // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
-              // sollten an dieser Stelle einen echten Error loggen bzw. eine
-              // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
-              // dies allerdings nicht, da das DISPLAY-Attribut erst mit
-              // WollMux 6.4.0 eingeführt wurde und wir abwärtskompatibel zu alten
-              // WollMux-Konfigurationen bleiben müssen und Benutzer alter
-              // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
-              // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
-              // sollte nach ausreichend Zeit genauso wie DEFAULT_DISPLAYTEMPLATE
-              // entfernt werden (bzw. wie oben gesagt überarbeitet).
-            }
-          }
-          else if ("pal".equals(id))
-          {
-            list = palJList;
-            try
-            {
-              palDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
-            }
-            catch (NodeNotFoundException e)
-            {
-              LOGGER.info(L.m(
-                  "Kein DISPLAY-Attribut für die listbox mit ID \"pal\" im PersoenlicheAbsenderliste-Dialog angegeben! Verwende Fallback: %1",
-                  DEFAULT_DISPLAYTEMPLATE));
-              // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
-              // sollten an dieser Stelle einen echten Error loggen bzw. eine
-              // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
-              // dies allerdings nicht, da das DISPLAY-Attribut erst mit
-              // WollMux 6.4.0 eingeführt wurde und wir abwärtskompatibel zu alten
-              // WollMux-Konfigurationen bleiben müssen und Benutzer alter
-              // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
-              // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
-              // sollte nach ausreichend Zeit genauso wie DEFAULT_DISPLAYTEMPLATE
-              // entfernt werden (bzw. wie oben gesagt überarbeitet).
-            }
-          }
-          else
-          {
-            list = new JList<>(
-                new DefaultListModel<DJDatasetListElement>());
-          }
-
-          list.setVisibleRowCount(lines);
-          list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-          list.setLayoutOrientation(JList.VERTICAL);
-          list.setFixedCellWidth((int) new JLabel(
-              "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-                  .getPreferredSize().getWidth());
-
-          list.addListSelectionListener(myListSelectionListener);
-
-          String action = uiElementDesc.getString("ACTION", "");
-
-          ActionListener actionL = getAction(action);
-          if (actionL != null)
-            list.addMouseListener(new MyActionMouseListener(list, actionL));
-
-          JScrollPane scrollPane = new JScrollPane(list);
-          scrollPane.setHorizontalScrollBarPolicy(
-              ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-          scrollPane.setVerticalScrollBarPolicy(
-              ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-          gbcListBox.gridx = x;
-          gbcListBox.gridy = y;
-          compo.add(scrollPane, gbcListBox);
-        }
-        else if ("button".equals(type))
-        {
-          String action = uiElementDesc.getString("ACTION", "");
-          String label = L.m(uiElementDesc.getString("LABEL", ""));
-
-          char hotkey = uiElementDesc.getString("HOTKEY", "0").charAt(0);
-
-          JButton button = new JButton(label);
-          button.setMnemonic(hotkey);
-
-          gbcButton.gridx = x;
-          gbcButton.gridy = y;
-          compo.add(button, gbcButton);
-
-          ActionListener actionL = getAction(action);
-          if (actionL != null)
-            button.addActionListener(actionL);
-          else
-            button.setEnabled(false);
-
-          if ("editEntry".equals(action))
-          {
-            buttonsToGreyOutIfNothingSelected.add(button);
-          }
-          if ("removeFromPAL".equals(action))
-          {
-            buttonsToGreyOutIfNothingSelected.add(button);
-          }
-          if ("addToPAL".equals(action))
-          {
-            buttonsToGreyOutIfNothingSelected.add(button);
-          }
-          else if ("copyEntry".equals(action))
-          {
-            buttonsToGreyOutIfNothingSelected.add(button);
-          }
-        }
-        else
-        {
-          LOGGER.error(L.m("Ununterstützter TYPE für User Interface Element: ",
-              type));
+          removeFromPAL();
         }
       }
-    }
+    });
+
+    palJList.setCellRenderer(new MyListCellRenderer());
+
+    JScrollPane scrollPane1 = new JScrollPane(list1);
+    scrollPane.setHorizontalScrollBarPolicy(
+        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    scrollPane.setVerticalScrollBarPolicy(
+        ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+    panelAbsenderliste.add(scrollPane1);
+
+    panelSelection.add(panelAbsenderliste);
+
+    Box panelFussbereich = Box.createHorizontalBox();
+
+    JButton button3 = new JButton(L.m("Löschen"));
+    button3.setMnemonic('L');
+    button3.addActionListener(e -> removeFromPAL());
+    buttonsToGreyOutIfNothingSelected.add(button3);
+    panelFussbereich.add(button3);
+
+    JButton button4 = new JButton(L.m("Bearbeiten..."));
+    button4.setMnemonic('B');
+    button4.addActionListener(e -> editEntry());
+    buttonsToGreyOutIfNothingSelected.add(button4);
+    panelFussbereich.add(button4);
+
+    JButton button5 = new JButton(L.m("Kopieren"));
+    button5.setMnemonic('K');
+    button5.addActionListener(e -> copyEntry());
+    buttonsToGreyOutIfNothingSelected.add(button5);
+    panelFussbereich.add(button5);
+
+    JButton button6 = new JButton(L.m("Neu"));
+    button6.setMnemonic('N');
+    button6.addActionListener(e -> editNewPALEntry());
+    panelFussbereich.add(button6);
+
+    JButton button7 = new JButton(L.m("Schließen"));
+    button7.setMnemonic('C');
+    button7.addActionListener(e -> abort());
+    panelFussbereich.add(button7);
+
+    mainPanel.add(panelFussbereich);
   }
 
   /**
@@ -1089,16 +875,6 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Implementiert die gleichnamige ACTION.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void back()
-  {
-    dialogEnd("back");
-  }
-
-  /**
    * Beendet den Dialog und ruft falls nötig den dialogEndListener auf wobei das
    * gegebene actionCommand übergeben wird.
    *
@@ -1287,135 +1063,51 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     // Erzeugen eines Runnable-Objekts, das die Geschäftslogik enthält und nachher an
     // FrameWorker.disableFrameAndWork übergeben werden kann.
-    Runnable r = new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        String queryString = query.getText();
-        if ("credits".equalsIgnoreCase(queryString))
-        {
-          credits();
-          return;
-        }
+    Runnable r = () -> {
+      List<String> queries = query.stream().map(it -> {
+        return it.getText();
+      }).collect(Collectors.toList());
 
-        QueryResults results = null;
-        try
-        {
-          results = Search.search(query.getText(), searchStrategy, dj, true);
-        }
-        catch (TimeoutException x)
-        {
-          JOptionPane.showMessageDialog(
+      Map<String, String> q = IntStream.range(0, queryNames.size()).boxed()
+          .collect(
+              Collectors.toMap(n -> queryNames.get(n), n -> queries.get(n)));
+
+      QueryResults results = null;
+      try
+      {
+        results = Search.search(q, dj);
+      }
+      catch (TimeoutException x1)
+      {
+        JOptionPane.showMessageDialog(
             myFrame,
             L.m("Das Bearbeiten Ihrer Suchanfrage hat zu lange gedauert und wurde deshalb abgebrochen.\n"
-              + "Grund hierfür könnte ein Problem mit der Datenquelle sein oder mit dem verwendeten\n"
-              + "Suchbegriff, der auf zu viele Ergebnisse zutrifft.\n"
-              + "Bitte versuchen Sie eine andere, präzisere Suchanfrage."),
+                + "Grund hierfür könnte ein Problem mit der Datenquelle sein oder mit dem verwendeten\n"
+                + "Suchbegriff, der auf zu viele Ergebnisse zutrifft.\n"
+                + "Bitte versuchen Sie eine andere, präzisere Suchanfrage."),
             L.m("Timeout bei Suchanfrage"), JOptionPane.WARNING_MESSAGE);
-          LOGGER.error("", x);
-        }
-        catch (IllegalArgumentException x)
-        { // wird bei illegalen Suchanfragen geworfen
-          LOGGER.error("", x);
-        }
-
-        // Wir benötigen finalResults, da eine nicht-finale Variable nicht in der
-        // unten definierten anonymen Runnable-Klasse referenziert werden darf.
-        final QueryResults finalResults = results;
-
-        // Folgendes muss im Event Dispatch Thread ausgeführt werden
-        SwingUtilities.invokeLater(new Runnable()
-        {
-          @Override
-          public void run()
-          {
-            // kann mit finalResults == null umgehen
-            setListElements(resultsJList, finalResults, resultsDisplayTemplate,
-              false);
-            updateButtonStates();
-          }
-        });
+        LOGGER.error("", x1);
       }
+      catch (IllegalArgumentException x2)
+      { // wird bei illegalen Suchanfragen geworfen
+        LOGGER.error("", x2);
+      }
+
+      // Wir benötigen finalResults, da eine nicht-finale Variable nicht in der
+      // unten definierten anonymen Runnable-Klasse referenziert werden darf.
+      final QueryResults finalResults = results;
+
+      // Folgendes muss im Event Dispatch Thread ausgeführt werden
+      SwingUtilities.invokeLater(() -> {
+        // kann mit finalResults == null umgehen
+        setListElements(resultsJList, finalResults, resultsDisplayTemplate,
+            false);
+        updateButtonStates();
+      });
     }; // Ende des Erzeugens des Runnable-Objekts r
 
     // Frame disablen und Suche in eigenem Thread starten
     FrameWorker.disableFrameAndWork(myFrame, r, true);
-  }
-
-  private void credits()
-  {
-    WollMuxFiles.showCredits(true);
-    QueryResults results = null;
-    try
-    {
-      results = dj.find("Mail", "matthias.benkmann@muenchen.de");
-      setListElements(resultsJList, results, resultsDisplayTemplate, false);
-      results = dj.find("Mail", "christoph.lutz@muenchen.de");
-      setListElements(resultsJList, results, resultsDisplayTemplate, true);
-      results = dj.find("Mail", "daniel.benkmann@muenchen.de");
-      setListElements(resultsJList, results, resultsDisplayTemplate, true);
-    }
-    catch (TimeoutException x)
-    {
-      LOGGER.error("", x);
-    }
-
-    updateButtonStates();
-  }
-
-  /**
-   * Übersetzt den Namen einer ACTION in eine Referenz auf das passende
-   * actionListener_... Objekt.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private ActionListener getAction(String action)
-  {
-    if ("abort".equals(action))
-    {
-      return actionListenerAbort;
-    }
-    else if ("back".equals(action))
-    {
-      return actionListenerBack;
-    }
-    else if ("search".equals(action))
-    {
-      return actionListenerSearch;
-    }
-    else if ("addToPAL".equals(action))
-    {
-      return actionListenerAddToPAL;
-    }
-    else if ("removeFromPAL".equals(action))
-    {
-      return actionListenerRemoveFromPAL;
-    }
-    else if ("editEntry".equals(action))
-    {
-      return actionListenerEditEntry;
-    }
-    else if ("copyEntry".equals(action))
-    {
-      return actionListenerCopyEntry;
-    }
-    else if ("newPALEntry".equals(action))
-    {
-      return actionListenerNewPALEntry;
-    }
-    else if ("editNewPALEntry".equals(action))
-    {
-      return actionListenerEditNewPALEntry;
-    }
-    else if (action.isEmpty())
-    {
-      return null;
-    }
-    else
-      LOGGER.error(L.m("Ununterstützte ACTION: %1", action));
-
-    return null;
   }
 
   private static class MyDialogEndListener implements ActionListener
@@ -1491,14 +1183,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     // GUI im Event-Dispatching Thread zerstören wg. Thread-Safety.
     try
     {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          abort();
-        }
-      });
+      javax.swing.SwingUtilities.invokeLater(() -> abort());
     }
     catch (Exception x)
     {/* Hope for the best */}
