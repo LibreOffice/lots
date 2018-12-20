@@ -18,6 +18,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +53,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.controls.Textarea;
 import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.core.form.model.Control;
 import de.muenchen.allg.itd51.wollmux.core.form.model.FormModel;
+import de.muenchen.allg.itd51.wollmux.core.form.model.FormType;
 import de.muenchen.allg.itd51.wollmux.core.form.model.FormValueChangedListener;
 import de.muenchen.allg.itd51.wollmux.core.form.model.Tab;
 import de.muenchen.allg.itd51.wollmux.core.form.model.VisibilityChangedListener;
@@ -485,9 +487,9 @@ public class GUI
    */
   private void initFactories()
   {
-    Map<String, GridBagConstraints> mapTypeToLayoutConstraints = new HashMap<>();
-    Map<String, UIElement.LabelPosition> mapTypeToLabelType = new HashMap<>();
-    Map<String, GridBagConstraints> mapTypeToLabelLayoutConstraints = new HashMap<>();
+    Map<FormType, GridBagConstraints> mapTypeToLayoutConstraints = new EnumMap<>(FormType.class);
+    Map<FormType, UIElement.LabelPosition> mapTypeToLabelType = new EnumMap<>(FormType.class);
+    Map<FormType, GridBagConstraints> mapTypeToLabelLayoutConstraints = new EnumMap<>(FormType.class);
 
     // int gridx, int gridy, int gridwidth, int gridheight, double weightx,
     // double
@@ -522,57 +524,57 @@ public class GUI
     GridBagConstraints gbcGlue = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
         GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0);
 
-    mapTypeToLayoutConstraints.put("default", gbcTextfield);
-    mapTypeToLabelType.put("default", UIElement.LabelPosition.LEFT);
-    mapTypeToLabelLayoutConstraints.put("default", gbcLabelLeft);
+    mapTypeToLayoutConstraints.put(FormType.DEFAULT, gbcTextfield);
+    mapTypeToLabelType.put(FormType.DEFAULT, UIElement.LabelPosition.LEFT);
+    mapTypeToLabelLayoutConstraints.put(FormType.DEFAULT, gbcLabelLeft);
 
-    mapTypeToLayoutConstraints.put("textfield", gbcTextfield);
-    mapTypeToLabelType.put("textfield", UIElement.LabelPosition.LEFT);
-    mapTypeToLabelLayoutConstraints.put("textfield", gbcLabelLeft);
+    mapTypeToLayoutConstraints.put(FormType.TEXTFIELD, gbcTextfield);
+    mapTypeToLabelType.put(FormType.TEXTFIELD, UIElement.LabelPosition.LEFT);
+    mapTypeToLabelLayoutConstraints.put(FormType.TEXTFIELD, gbcLabelLeft);
 
-    mapTypeToLayoutConstraints.put("combobox", gbcCombobox);
-    mapTypeToLabelType.put("combobox", UIElement.LabelPosition.LEFT);
-    mapTypeToLabelLayoutConstraints.put("combobox", gbcLabelLeft);
+    mapTypeToLayoutConstraints.put(FormType.COMBOBOX, gbcCombobox);
+    mapTypeToLabelType.put(FormType.COMBOBOX, UIElement.LabelPosition.LEFT);
+    mapTypeToLabelLayoutConstraints.put(FormType.COMBOBOX, gbcLabelLeft);
 
-    mapTypeToLayoutConstraints.put("h-glue", gbcGlue);
-    mapTypeToLabelType.put("h-glue", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("h-glue", null);
-    mapTypeToLayoutConstraints.put("v-glue", gbcGlue);
-    mapTypeToLabelType.put("v-glue", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("v-glue", null);
+    mapTypeToLayoutConstraints.put(FormType.H_GLUE, gbcGlue);
+    mapTypeToLabelType.put(FormType.H_GLUE, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.H_GLUE, null);
+    mapTypeToLayoutConstraints.put(FormType.V_GLUE, gbcGlue);
+    mapTypeToLabelType.put(FormType.V_GLUE, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.V_GLUE, null);
 
-    mapTypeToLayoutConstraints.put("textarea", gbcTextarea);
-    mapTypeToLabelType.put("textarea", UIElement.LabelPosition.LEFT);
-    mapTypeToLabelLayoutConstraints.put("textarea", gbcLabelLeft);
+    mapTypeToLayoutConstraints.put(FormType.TEXTAREA, gbcTextarea);
+    mapTypeToLabelType.put(FormType.TEXTAREA, UIElement.LabelPosition.LEFT);
+    mapTypeToLabelLayoutConstraints.put(FormType.TEXTAREA, gbcLabelLeft);
 
-    mapTypeToLayoutConstraints.put("label", gbcLabel);
-    mapTypeToLabelType.put("label", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("label", null);
+    mapTypeToLayoutConstraints.put(FormType.LABEL, gbcLabel);
+    mapTypeToLabelType.put(FormType.LABEL, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.LABEL, null);
 
-    mapTypeToLayoutConstraints.put("checkbox", gbcCheckbox);
-    mapTypeToLabelType.put("checkbox", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("checkbox", null); // hat label
+    mapTypeToLayoutConstraints.put(FormType.CHECKBOX, gbcCheckbox);
+    mapTypeToLabelType.put(FormType.CHECKBOX, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.CHECKBOX, null); // hat label
                                                            // integriert
 
-    mapTypeToLayoutConstraints.put("button", gbcButton);
-    mapTypeToLabelType.put("button", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("button", null);
+    mapTypeToLayoutConstraints.put(FormType.BUTTON, gbcButton);
+    mapTypeToLabelType.put(FormType.BUTTON, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.BUTTON, null);
 
-    mapTypeToLayoutConstraints.put("h-separator", gbcHsep);
-    mapTypeToLabelType.put("h-separator", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("h-separator", null);
-    mapTypeToLayoutConstraints.put("v-separator", gbcVsep);
-    mapTypeToLabelType.put("v-separator", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("v-separator", null);
+    mapTypeToLayoutConstraints.put(FormType.H_SEPARATOR, gbcHsep);
+    mapTypeToLabelType.put(FormType.H_SEPARATOR, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.H_SEPARATOR, null);
+    mapTypeToLayoutConstraints.put(FormType.V_SEPARATOR, gbcVsep);
+    mapTypeToLabelType.put(FormType.V_SEPARATOR, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.V_SEPARATOR, null);
 
     panelContext = new UIElementContext();
     panelContext.setMapTypeToLabelLayoutConstraints(mapTypeToLabelLayoutConstraints);
     panelContext.setMapTypeToLabelType(mapTypeToLabelType);
     panelContext.setMapTypeToLayoutConstraints(mapTypeToLayoutConstraints);
     panelContext.setUiElementEventHandler(this);
-    Map<String, String> panelMapTypeToType = new HashMap<>();
-    panelMapTypeToType.put("separator", "h-separator");
-    panelMapTypeToType.put("glue", "v-glue");
+    Map<FormType, FormType> panelMapTypeToType = new EnumMap<>(FormType.class);
+    panelMapTypeToType.put(FormType.SEPARATOR, FormType.H_SEPARATOR);
+    panelMapTypeToType.put(FormType.GLUE, FormType.V_GLUE);
     panelContext.setMapTypeToType(panelMapTypeToType);
 
     buttonContext = new UIElementContext();
@@ -580,9 +582,9 @@ public class GUI
     buttonContext.setMapTypeToLabelType(mapTypeToLabelType);
     buttonContext.setMapTypeToLayoutConstraints(mapTypeToLayoutConstraints);
     buttonContext.setUiElementEventHandler(this);
-    Map<String, String> buttonMapTypeToType = new HashMap<>();
-    buttonMapTypeToType.put("separator", "v-separator");
-    buttonMapTypeToType.put("glue", "h-glue");
+    Map<FormType, FormType> buttonMapTypeToType = new EnumMap<>(FormType.class);
+    buttonMapTypeToType.put(FormType.SEPARATOR, FormType.V_SEPARATOR);
+    buttonMapTypeToType.put(FormType.GLUE, FormType.H_GLUE);
     buttonContext.setMapTypeToType(buttonMapTypeToType);
 
     Set<String> supportedActions = new HashSet<>();

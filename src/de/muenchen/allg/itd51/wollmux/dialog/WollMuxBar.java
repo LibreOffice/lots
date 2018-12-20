@@ -102,6 +102,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -126,6 +127,7 @@ import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 
+import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,10 +144,14 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementEventHandler;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementFactory;
 import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
+import de.muenchen.allg.itd51.wollmux.core.form.model.Control;
+import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
+import de.muenchen.allg.itd51.wollmux.core.form.model.FormType;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
 /**
@@ -985,7 +991,7 @@ public class WollMuxBar
           }
 
           UIElement uiElement =
-            uiElementFactory.createUIElement(contextMap, uiElementDesc);
+              uiElementFactory.createUIElement(contextMap, Control.create(uiElementDesc, null));
           GridBagConstraints gbc =
             (GridBagConstraints) uiElement.getLayoutConstraints();
           gbc.gridx = x;
@@ -1017,6 +1023,10 @@ public class WollMuxBar
       catch (ConfigurationErrorException e)
       {
         LOGGER.error("", e);
+      } catch (FormModelException e)
+      {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
       }
     }
   }
@@ -1096,11 +1106,11 @@ public class WollMuxBar
    */
   private void initFactories()
   {
-    Map<String, GridBagConstraints> mapTypeToLayoutConstraints =
-      new HashMap<>();
-    Map<String, UIElement.LabelPosition> mapTypeToLabelType = new HashMap<>();
-    Map<String, Object> mapTypeToLabelLayoutConstraints =
-      new HashMap<>();
+    Map<FormType, GridBagConstraints> mapTypeToLayoutConstraints =
+        new EnumMap<>(FormType.class);
+    Map<FormType, UIElement.LabelPosition> mapTypeToLabelType = new EnumMap<>(FormType.class);
+    Map<FormType, Object> mapTypeToLabelLayoutConstraints =
+        new EnumMap<>(FormType.class);
 
     // int gridx, int gridy, int gridwidth, int gridheight, double weightx, double
     // weighty, int anchor, int fill, Insets insets, int ipadx, int ipady)
@@ -1127,57 +1137,57 @@ public class WollMuxBar
       new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.LINE_START,
         GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0);
 
-    mapTypeToLayoutConstraints.put("default", gbcButton);
-    mapTypeToLabelType.put("default", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("default", null);
+    mapTypeToLayoutConstraints.put(FormType.DEFAULT, gbcButton);
+    mapTypeToLabelType.put(FormType.DEFAULT, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.DEFAULT, null);
 
-    mapTypeToLayoutConstraints.put("combobox", gbcCombobox);
-    mapTypeToLabelType.put("combobox", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("combobox", null);
+    mapTypeToLayoutConstraints.put(FormType.COMBOBOX, gbcCombobox);
+    mapTypeToLabelType.put(FormType.COMBOBOX, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.COMBOBOX, null);
 
-    mapTypeToLayoutConstraints.put("h-glue", gbcGlue);
-    mapTypeToLabelType.put("h-glue", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("h-glue", null);
-    mapTypeToLayoutConstraints.put("v-glue", gbcGlue);
-    mapTypeToLabelType.put("v-glue", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("v-glue", null);
+    mapTypeToLayoutConstraints.put(FormType.H_GLUE, gbcGlue);
+    mapTypeToLabelType.put(FormType.H_GLUE, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.H_GLUE, null);
+    mapTypeToLayoutConstraints.put(FormType.V_GLUE, gbcGlue);
+    mapTypeToLabelType.put(FormType.V_GLUE, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.V_GLUE, null);
 
-    mapTypeToLayoutConstraints.put("label", gbcLabel);
-    mapTypeToLabelType.put("label", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("label", null);
+    mapTypeToLayoutConstraints.put(FormType.LABEL, gbcLabel);
+    mapTypeToLabelType.put(FormType.LABEL, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.LABEL, null);
 
-    mapTypeToLayoutConstraints.put("button", gbcButton);
-    mapTypeToLabelType.put("button", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("button", null);
+    mapTypeToLayoutConstraints.put(FormType.BUTTON, gbcButton);
+    mapTypeToLabelType.put(FormType.BUTTON, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.BUTTON, null);
 
-    mapTypeToLayoutConstraints.put("h-separator", gbcHsep);
-    mapTypeToLabelType.put("h-separator", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("h-separator", null);
-    mapTypeToLayoutConstraints.put("v-separator", gbcVsep);
-    mapTypeToLabelType.put("v-separator", UIElement.LabelPosition.NONE);
-    mapTypeToLabelLayoutConstraints.put("v-separator", null);
+    mapTypeToLayoutConstraints.put(FormType.H_SEPARATOR, gbcHsep);
+    mapTypeToLabelType.put(FormType.H_SEPARATOR, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.H_SEPARATOR, null);
+    mapTypeToLayoutConstraints.put(FormType.V_SEPARATOR, gbcVsep);
+    mapTypeToLabelType.put(FormType.V_SEPARATOR, UIElement.LabelPosition.NONE);
+    mapTypeToLabelLayoutConstraints.put(FormType.V_SEPARATOR, null);
 
     UIElementEventHandler myUIElementEventHandler = new MyUIElementEventHandler();
 
     panelContext = new UIElementContext();
     panelContext.setMapTypeToLabelLayoutConstraints(mapTypeToLabelLayoutConstraints);
     panelContext.setMapTypeToLabelType(mapTypeToLabelType);
-    panelContext.setMapTypeToLabelLayoutConstraints(mapTypeToLayoutConstraints);
+    panelContext.setMapTypeToLayoutConstraints(mapTypeToLayoutConstraints);
     panelContext.setUiElementEventHandler(myUIElementEventHandler);
-    Map<String, String> panelMapTypeToType = new HashMap<>();
-    panelMapTypeToType.put("separator", "v-separator");
-    panelMapTypeToType.put("glue", "h-glue");
+    Map<FormType, FormType> panelMapTypeToType = new EnumMap<>(FormType.class);
+    panelMapTypeToType.put(FormType.SEPARATOR, FormType.V_SEPARATOR);
+    panelMapTypeToType.put(FormType.GLUE, FormType.H_GLUE);
     panelContext.setMapTypeToType(panelMapTypeToType);
 
     menuContext = new UIElementContext();
     menuContext.setMapTypeToLabelLayoutConstraints(mapTypeToLabelLayoutConstraints);
     menuContext.setMapTypeToLabelType(mapTypeToLabelType);
-    menuContext.setMapTypeToLabelLayoutConstraints(mapTypeToLayoutConstraints);
+    menuContext.setMapTypeToLayoutConstraints(mapTypeToLayoutConstraints);
     menuContext.setUiElementEventHandler(myUIElementEventHandler);
-    Map<String, String> menuMapTypeToType = new HashMap<>();
-    menuMapTypeToType.put("separator", "h-separator");
-    menuMapTypeToType.put("glue", "b-glue");
-    menuMapTypeToType.put("button", "menuitem");
+    Map<FormType, FormType> menuMapTypeToType = new EnumMap<>(FormType.class);
+    menuMapTypeToType.put(FormType.SEPARATOR, FormType.H_SEPARATOR);
+    menuMapTypeToType.put(FormType.GLUE, FormType.V_GLUE);
+    menuMapTypeToType.put(FormType.BUTTON, FormType.MENUITEM);
     menuContext.setMapTypeToType(menuMapTypeToType);
 
     panelContext.setSupportedActions(SUPPORTED_ACTIONS);
@@ -1858,8 +1868,8 @@ public class WollMuxBar
    */
   public static void main(String[] args)
   {
-    // Logger.init(Logger.DEBUG); // Logger wird erst in startWollMuxBar korrekt
-    // initialisiert. Daher hier für Debug-Zwecke per Hand initialisieren.
+    LogConfig.init(System.out, Level.DEBUG);
+    LogConfig.setIgnoreInit(true);
 
     // Schalter --fifo und --firstrun und --load vorgezogen behandeln:
     List<String> restArgs = new ArrayList<>();
