@@ -1,5 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import com.sun.star.lang.EventObject;
 import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 
 /**
@@ -46,7 +48,14 @@ public class OnPALChangedNotify extends BasicEvent
     }
 
     // Cache und LOS auf Platte speichern.
-    DatasourceJoinerFactory.getDatasourceJoiner()
+    ConfigThingy cache = DatasourceJoinerFactory.getDatasourceJoiner()
         .saveCacheAndLOS(WollMuxFiles.getLosCacheFile());
+    try
+    {
+      WollMuxFiles.writeConfToFile(WollMuxFiles.getLosCacheFile(), cache);
+    } catch (IOException e)
+    {
+      LOGGER.error("Cache konnte nicht gespeichert werden.", e);
+    }
   }
 }
