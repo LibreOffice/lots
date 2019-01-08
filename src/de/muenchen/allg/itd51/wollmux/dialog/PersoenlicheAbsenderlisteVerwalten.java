@@ -70,10 +70,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Spliterators;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -99,8 +101,11 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableMap;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
@@ -111,10 +116,10 @@ import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.db.Search;
-import de.muenchen.allg.itd51.wollmux.core.db.SearchStrategy;
 import de.muenchen.allg.itd51.wollmux.core.db.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
@@ -223,26 +228,12 @@ public class PersoenlicheAbsenderlisteVerwalten
   private String palDisplayTemplate;
 
   /**
-   * Das Textfeld in dem der Benutzer seine Suchanfrage eintippt.
+   * Die Textfelder in dem der Benutzer seine Suchanfrage eintippt.
    */
   private List<JTextField> query;
-  private List<String> queryNames = Arrays.asList("Name", "Vorname", "Email",
-      "Orga");
-
-  /**
-   * Die Suchstrategie für Suchanfragen.
-   */
-  private SearchStrategy searchStrategy;
-
-  /**
-   * URL der Konfiguration der Fallback-Suchstrategie, falls kein
-   * Suchstrategie-Abschnitt für den PAL-Dialog definiert wurde.
-   *
-   * Dieser Fallback wurde eingebaut, um mit alten WollMux-Konfigurationen kompatibel
-   * zu bleiben, sollte nach ausreichend Zeit aber wieder entfernt werden!
-   */
-  private final URL defaultSuchstrategieURL =
-    this.getClass().getClassLoader().getResource("data/PAL_suchstrategie.conf");
+  private Map<String, String> queryNames = ImmutableMap.of("Nachname",
+      "Nachname", "Vorname", "Vorname", "Email", "Mail",
+      "Orga", "OrgaKurz");
 
   /**
    * Der dem
@@ -301,49 +292,29 @@ public class PersoenlicheAbsenderlisteVerwalten
     this.resultsDisplayTemplate = DEFAULT_DISPLAYTEMPLATE;
     this.palDisplayTemplate = DEFAULT_DISPLAYTEMPLATE;
 
-    // Falls in der Konfiguration ein Suchstrategie-Abschnitt existiert, parsen wir
-    // diesen um eine SearchStrategy zu erhalten
-    if (conf.query("Suchstrategie").count() != 0)
+
+    ConfigThingy suchfelder;
+    try
     {
-      this.searchStrategy = SearchStrategy.parse(conf);
+      suchfelder = conf.query("Suchfelder").getFirstChild();
+
+      queryNames = StreamSupport
+          .stream(Spliterators.spliteratorUnknownSize(suchfelder.iterator(), 0),
+              false)
+          .sorted((a, b) -> {
+            int s1 = NumberUtils.toInt(a.getString("SORT"));
+            int s2 = NumberUtils.toInt(b.getString("SORT"));
+            return s1 - s2;
+          })
+          .collect(Collectors.toMap(it -> it.getString("LABEL"),
+              it -> it.getString("DB_SPALTE"),
+              (oldValue, newValue) -> oldValue, LinkedHashMap::new));
     }
-    else
+    catch (NodeNotFoundException e)
     {
-      LOGGER.info(L.m("Kein Suchstrategie-Abschnitt für den PersoenlicheAbsenderliste-Dialog "
-        + "angegeben! Verwende Default-Suchstrategie."));
-      // Es gibt keinen Suchstrategie-Abschnitt in der Konfiguration, also verwenden
-      // wir die Default-Suchstrategie
-      // Eigentlich sollte der Suchstrategie-Abschnitt aber verpflichtend sein und
-      // wir sollten an dieser Stelle einen echten Error loggen bzw. eine
-      // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
-      // dies allerdings nicht, da das Konfigurieren der Suchstrategie erst mit
-      // WollMux 6.3.2 eingeführt wurde und wir abwärtskompatibel zu alten
-      // WollMux-Konfigurationen bleiben müssen und Benutzer alter
-      // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
-      // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
-      // sollte nach ausreichend Zeit genauso wie DEFAULT_SUCHSTRATEGIE_URL
-      // entfernt werden (bzw. wie oben gesagt überarbeitet).
-      try
-      {
-        this.searchStrategy =
-          SearchStrategy.parse(new ConfigThingy("Default", defaultSuchstrategieURL));
-      }
-      catch (Exception e)
-      {
-        LOGGER.error("", e);
-      }
+      LOGGER.error(L.m("Es wurden keine Suchfelder definiert."));
     }
-
-    ConfigThingy fensterDesc1 = conf.query("Fenster");
-    if (fensterDesc1.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1",
-        conf.getName()));
-
-    final ConfigThingy fensterDesc = fensterDesc1.query("Verwalten");
-    if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Verwalten' fehlt in ",
-        conf.getName()));
-
+    
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try
     {
@@ -354,7 +325,7 @@ public class PersoenlicheAbsenderlisteVerwalten
         {
           try
           {
-            createGUI(fensterDesc.getLastChild());
+            createGUI();
           }
           catch (Exception x)
           {
@@ -384,7 +355,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    *          die Spezifikation dieses Dialogs.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void createGUI(ConfigThingy fensterDesc)
+  private void createGUI()
   {
     Common.setLookAndFeelOnce();
 
@@ -483,9 +454,9 @@ public class PersoenlicheAbsenderlisteVerwalten
       }
     };
 
-    IntStream.range(0, 4).forEach(n -> {
+    queryNames.keySet().forEach(it -> {
       Box box = Box.createHorizontalBox();
-      JLabel label1 = new JLabel(queryNames.get(n));
+      JLabel label1 = new JLabel(it);
       box.add(label1);
       box.add(Box.createHorizontalStrut(5));
 
@@ -1064,13 +1035,8 @@ public class PersoenlicheAbsenderlisteVerwalten
     // Erzeugen eines Runnable-Objekts, das die Geschäftslogik enthält und nachher an
     // FrameWorker.disableFrameAndWork übergeben werden kann.
     Runnable r = () -> {
-      List<String> queries = query.stream().map(it -> {
-        return it.getText();
-      }).collect(Collectors.toList());
-
-      Map<String, String> q = IntStream.range(0, queryNames.size()).boxed()
-          .collect(
-              Collectors.toMap(n -> queryNames.get(n), n -> queries.get(n)));
+      Map<String, String> q = query.stream().collect(Collectors
+          .toMap(it -> queryNames.get(it.getName()), it -> it.getText()));
 
       QueryResults results = null;
       try
