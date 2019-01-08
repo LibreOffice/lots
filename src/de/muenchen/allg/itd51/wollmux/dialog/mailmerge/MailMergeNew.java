@@ -1183,9 +1183,6 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       for(String spalte : schema)
       {
         String value = ds.get(spalte);
-        // Wert zuerst entsetzen um sicher eine Änderung hervorzurufen.
-        // Denn ansonsten werden die Sichtbarkeiten nicht richtig aktualisiert.
-        pmod.setFormValue(spalte, "");
         pmod.setFormValue(spalte, value);
         dataSetExport.put(spalte, value);
       }

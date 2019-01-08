@@ -1565,9 +1565,6 @@ public class FormController implements UIElementEventHandler
 	  if (cond == null)
 	    continue;
 	  boolean result = cond.getBoolean(myUIElementValues);
-	  if (result == dependingGroup.visible)
-	    continue;
-
 	  setGroupVisibility(dependingGroup, result);
 	}
       }
