@@ -156,17 +156,16 @@ public class PersoenlicheAbsenderlisteVerwalten
    * eine neue WollMux-Konfiguration geupdatet wurde, sollte man diesen Fallback
    * wieder entfernen.
    */
-  private static final String DEFAULT_DISPLAYTEMPLATE =
-    "%{Nachname}, %{Vorname} (%{Rolle})";
+  private static final String DEFAULT_DISPLAYTEMPLATE = "%{Nachname}, %{Vorname} (%{Rolle})";
 
-  private final URL mbURL =
-    this.getClass().getClassLoader().getResource("data/mb.png");
+  private final URL mbURL = this.getClass().getClassLoader()
+      .getResource("data/mb.png");
 
-  private final URL clURL =
-    this.getClass().getClassLoader().getResource("data/cl.png");
+  private final URL clURL = this.getClass().getClassLoader()
+      .getResource("data/cl.png");
 
-  private final URL dbURL =
-    this.getClass().getClassLoader().getResource("data/db.png");
+  private final URL dbURL = this.getClass().getClassLoader()
+      .getResource("data/db.png");
 
   /**
    * ActionListener für Buttons mit der ACTION "abort".
@@ -258,8 +257,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    * selektiert sein kann und dass die entsprechenden Buttons ausgegraut werden wenn
    * kein Eintrag selektiert ist.
    */
-  private MyListSelectionListener myListSelectionListener =
-    new MyListSelectionListener();
+  private MyListSelectionListener myListSelectionListener = new MyListSelectionListener();
 
   /**
    * Erzeugt einen neuen Dialog.
@@ -282,7 +280,8 @@ public class PersoenlicheAbsenderlisteVerwalten
    *           Dialog unmöglich macht, zu funktionieren (z.B. dass der "Fenster"
    *           Schlüssel fehlt.
    */
-  public PersoenlicheAbsenderlisteVerwalten(ConfigThingy conf, ConfigThingy abConf,
+  public PersoenlicheAbsenderlisteVerwalten(ConfigThingy conf,
+      ConfigThingy abConf,
       DatasourceJoiner dj, ActionListener dialogEndListener)
   {
     this.dj = dj;
@@ -291,7 +290,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     this.dialogEndListener = dialogEndListener;
     this.resultsDisplayTemplate = DEFAULT_DISPLAYTEMPLATE;
     this.palDisplayTemplate = DEFAULT_DISPLAYTEMPLATE;
-
 
     ConfigThingy suchfelder;
     try
@@ -314,7 +312,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     {
       LOGGER.error(L.m("Es wurden keine Suchfelder definiert."));
     }
-    
+
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try
     {
@@ -345,7 +343,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   public static String getDefaultDisplaytemplate()
   {
-        return DEFAULT_DISPLAYTEMPLATE;
+    return DEFAULT_DISPLAYTEMPLATE;
   }
 
   /**
@@ -392,8 +390,10 @@ public class PersoenlicheAbsenderlisteVerwalten
       dsToSelect = dj.getSelectedDataset();
     }
     catch (DatasetNotFoundException x)
-    {}
-    setListElements(palJList, dj.getLOS(), palDisplayTemplate, false, dsToSelect);
+    {
+    }
+    setListElements(palJList, dj.getLOS(), palDisplayTemplate, false,
+        dsToSelect);
 
     updateButtonStates();
 
@@ -438,7 +438,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     JComponent suchFelder = new JPanel(new GridLayout(2, 2, 5, 5));
     suchFelder.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     query = new ArrayList<>();
-        
+
     KeyAdapter keyAdapter = new KeyAdapter()
     {
       @Override
@@ -461,6 +461,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       box.add(Box.createHorizontalStrut(5));
 
       JTextField tf = new JTextField(22);
+      tf.setName(it);
       tf.addKeyListener(keyAdapter);
       box.add(tf);
 
@@ -540,7 +541,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     label2Box.add(label2);
     label2Box.add(Box.createHorizontalGlue());
     panelAbsenderliste.add(label2Box);
-
 
     JList<DJDatasetListElement> list1 = new JList<DJDatasetListElement>();
     list1.setModel(new DefaultListModel<DJDatasetListElement>());
@@ -627,7 +627,8 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     private ActionListener action;
 
-    public MyActionMouseListener(JList<DJDatasetListElement> list, ActionListener action)
+    public MyActionMouseListener(JList<DJDatasetListElement> list,
+        ActionListener action)
     {
       this.list = list;
       this.action = action;
@@ -675,7 +676,8 @@ public class PersoenlicheAbsenderlisteVerwalten
    *          ausgewählt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void setListElements(JList<DJDatasetListElement> list, QueryResults data,
+  private void setListElements(JList<DJDatasetListElement> list,
+      QueryResults data,
       String displayTemplate, boolean append, Dataset datasetToSelect)
   {
     int selectedIndex = -1;
@@ -697,7 +699,8 @@ public class PersoenlicheAbsenderlisteVerwalten
           mail = ds.get("Mail"); // liefert null, wenn nicht belegt.
         }
         catch (ColumnNotFoundException x)
-        {}
+        {
+        }
 
         if (mail == null)
           mail = "";
@@ -717,7 +720,8 @@ public class PersoenlicheAbsenderlisteVerwalten
       Arrays.sort(elements);
     }
 
-    DefaultListModel<DJDatasetListElement> listModel = (DefaultListModel<DJDatasetListElement>) list.getModel();
+    DefaultListModel<DJDatasetListElement> listModel = (DefaultListModel<DJDatasetListElement>) list
+        .getModel();
     if (!append)
       listModel.clear();
     int oldSize = listModel.size();
@@ -725,7 +729,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     {
       listModel.addElement(elements[i]);
       if (datasetToSelect != null
-        && elements[i].getDataset().getKey().equals(datasetToSelect.getKey()))
+          && elements[i].getDataset().getKey().equals(datasetToSelect.getKey()))
         selectedIndex = i;
     }
 
@@ -749,7 +753,8 @@ public class PersoenlicheAbsenderlisteVerwalten
    *          ersetzen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void setListElements(JList<DJDatasetListElement> list, QueryResults data,
+  private void setListElements(JList<DJDatasetListElement> list,
+      QueryResults data,
       String displayTemplate, boolean append)
   {
     setListElements(list, data, displayTemplate, append, null);
@@ -766,8 +771,8 @@ public class PersoenlicheAbsenderlisteVerwalten
     boolean enabled = false;
     try
     {
-      enabled =
-        (resultsJList.getSelectedIndex() >= 0) || (palJList.getSelectedIndex() >= 0);
+      enabled = (resultsJList.getSelectedIndex() >= 0)
+          || (palJList.getSelectedIndex() >= 0);
     }
     catch (NullPointerException x)
     {
@@ -799,10 +804,11 @@ public class PersoenlicheAbsenderlisteVerwalten
           value = ele.toString();
       }
       catch (ClassCastException x)
-      {}
+      {
+      }
 
       return super.getListCellRendererComponent(list, value, index, isSelected,
-        cellHasFocus);
+          cellHasFocus);
     }
   }
 
@@ -817,14 +823,16 @@ public class PersoenlicheAbsenderlisteVerwalten
     public void valueChanged(ListSelectionEvent e)
     {
       @SuppressWarnings("unchecked")
-      JList<DJDatasetListElement> list = (JList<DJDatasetListElement>) e.getSource();
+      JList<DJDatasetListElement> list = (JList<DJDatasetListElement>) e
+          .getSource();
       if (list != palJList && list != resultsJList)
         return;
 
       /*
        * Dafür sorgen, dass nie in beiden Listen ein Element selektiert ist.
        */
-      JList<DJDatasetListElement> otherlist = (list == palJList) ? resultsJList : palJList;
+      JList<DJDatasetListElement> otherlist = (list == palJList) ? resultsJList
+          : palJList;
       if (list.getSelectedIndex() >= 0)
         otherlist.clearSelection();
 
@@ -855,7 +863,8 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     myFrame.dispose();
     if (dialogEndListener != null)
-      dialogEndListener.actionPerformed(new ActionEvent(this, 0, actionCommand));
+      dialogEndListener
+          .actionPerformed(new ActionEvent(this, 0, actionCommand));
   }
 
   /**
@@ -937,8 +946,8 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private void editDataset(DJDataset ds, boolean edit)
   {
-    ActionListener del =
-      new MyDialogEndListener(this, myConf, abConf, dj, dialogEndListener, null);
+    ActionListener del = new MyDialogEndListener(this, myConf, abConf, dj,
+        dialogEndListener, null);
     dialogEndListener = null;
     abort();
     try
@@ -1116,7 +1125,8 @@ public class PersoenlicheAbsenderlisteVerwalten
       if ("back".equals(e.getActionCommand()))
         try
         {
-          new PersoenlicheAbsenderlisteVerwalten(conf, abConf, dj, dialogEndListener);
+          new PersoenlicheAbsenderlisteVerwalten(conf, abConf, dj,
+              dialogEndListener);
         }
         catch (Exception x)
         {
@@ -1131,7 +1141,8 @@ public class PersoenlicheAbsenderlisteVerwalten
           source = e.getSource();
         }
         if (dialogEndListener != null)
-          dialogEndListener.actionPerformed(new ActionEvent(source, 0, actionCommand));
+          dialogEndListener
+              .actionPerformed(new ActionEvent(source, 0, actionCommand));
       }
     }
   }
@@ -1152,6 +1163,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       javax.swing.SwingUtilities.invokeLater(() -> abort());
     }
     catch (Exception x)
-    {/* Hope for the best */}
+    {
+      /* Hope for the best */}
   }
 }
