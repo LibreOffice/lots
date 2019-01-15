@@ -37,7 +37,7 @@ public class OnPALChangedNotify extends BasicEvent
     {
       LOGGER.trace("OnPALChangedNotify: Update XPALChangeEventListener");
       EventObject eventObject = new EventObject();
-      eventObject.Source = PersoenlicheAbsenderliste.getInstance();
+      
       try
       {
         i.next().updateContent(eventObject);

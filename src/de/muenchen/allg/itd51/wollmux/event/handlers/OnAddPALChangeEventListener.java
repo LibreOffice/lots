@@ -6,7 +6,6 @@ import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
  * Dieses Event wird ausgelöst, wenn sich ein externer PALChangeEventListener beim
@@ -33,8 +32,6 @@ public class OnAddPALChangeEventListener extends BasicEvent
   protected void doit()
   {
     PersoenlicheAbsenderliste.getInstance().addPALChangeEventListener(listener);
-
-    WollMuxEventHandler.getInstance().handlePALChangedNotify();
 
     // Konsistenzprüfung: Stimmt WollMux-Konfiguration der entfernten
     // Komponente mit meiner Konfiguration überein? Ansonsten Fehlermeldung.
