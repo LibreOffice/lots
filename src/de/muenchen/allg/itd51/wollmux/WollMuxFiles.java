@@ -72,8 +72,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -140,13 +138,13 @@ public class WollMuxFiles
    * Der Pfad (ohne Wurzel wie HKCU oder HKLM) zu dem Registrierungsschlüssel, unter
    * dem der WollMux seine Registry-Werte speichert
    */
-  private final static String WOLLMUX_KEY = "Software\\WollMux";
+  private static final String WOLLMUX_KEY = "Software\\WollMux";
 
   /**
    * Der Name des String-Wertes, unter dem der WollMux in der Registry den Ort der
    * wollmux.conf speichert
    */
-  private final static String WOLLMUX_CONF_PATH_VALUE_NAME = "ConfigPath";
+  private static final String WOLLMUX_CONF_PATH_VALUE_NAME = "ConfigPath";
 
   private static final String WOLLMUX_NOCONF =
     L.m("Es wurde keine WollMux-Konfiguration (wollmux.conf) gefunden - deshalb läuft WollMux im NoConfig-Modus.");
@@ -259,7 +257,7 @@ public class WollMuxFiles
     StringBuilder debug2Messages = new StringBuilder();
     try
     {
-      findWollMuxConf(debug2Messages);
+      findWollMuxConf();
       debug2Messages.append("wollmux.conf gefunden in "
           + wollmuxConfFile.getAbsolutePath());
         debug2Messages.append('\n');
@@ -324,8 +322,7 @@ public class WollMuxFiles
     initDebugMode();
 
     try
-    { // TODO Switch dokumentieren, sobald er fehlerfrei implementiert ist
-      // (Ticket #645/R4904)
+    {
       externalWollMuxEnabled =
         getWollmuxConf().get("ALLOW_EXTERNAL_WOLLMUX", 1).toString().equalsIgnoreCase(
           "true");
@@ -341,15 +338,14 @@ public class WollMuxFiles
     return !noConf;
   }
 
-  private static void findWollMuxConf(StringBuilder debug2Messages)
-      throws FileNotFoundException
+  private static void findWollMuxConf() throws FileNotFoundException
   {
     // Überprüfen, ob das Betriebssystem Windows ist
     boolean windowsOS =
       System.getProperty("os.name").toLowerCase().contains("windows");
 
     // Zum Aufsammeln der Pfade, an denen die wollmux.conf gesucht wurde:
-    ArrayList<String> searchPaths = new ArrayList<String>();
+    ArrayList<String> searchPaths = new ArrayList<>();
 
     // Logger initialisieren:
     LogConfig.init(wollmuxLogFile, Level.INFO);
@@ -686,11 +682,10 @@ public class WollMuxFiles
       "" + cal.get(Calendar.YEAR) + "-" + (cal.get(Calendar.MONTH) + 1) + "-"
         + cal.get(Calendar.DAY_OF_MONTH) + "_" + cal.getTimeInMillis();
     File dumpFile = new File(getWollMuxDir(), "dump" + date);
-    try
+    try (OutputStream outStream = new FileOutputStream(dumpFile);
+        BufferedWriter out =
+            new BufferedWriter(new OutputStreamWriter(outStream, ConfigThingy.CHARSET));)
     {
-      OutputStream outStream = new FileOutputStream(dumpFile);
-      BufferedWriter out =
-        new BufferedWriter(new OutputStreamWriter(outStream, ConfigThingy.CHARSET));
       out.write("Dump time: " + date + "\n");
       out.write(WollMuxSingleton.getBuildInfo() + "\n");
       StringBuilder buffy = new StringBuilder();
@@ -731,8 +726,6 @@ public class WollMuxFiles
 
       out.write("OOo-Version: \""
         + getConfigValue("/org.openoffice.Setup/Product", "ooSetupVersion") + "\n");
-      out.write("LHM-Version: \""
-        + getConfigValue("/de.muenchen.LHM.LHMBuild/Version", "lhmVersion") + "\n");
 
       out.write("DEFAULT_CONTEXT: \"" + getDEFAULT_CONTEXT() + "\" (" + buffy
         + ")\n");
@@ -759,13 +752,15 @@ public class WollMuxFiles
         boolean found = false;
         for (int i = 0; i < jConfFiles.length; i++)
         {
-          if (!p.matcher(jConfFiles[i].getName()).matches()) continue;
-          out.flush(); // weil wir gleich direkt auf den Stream zugreifen
-          copyFile(jConfFiles[i], outStream);
-          outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
-          out.write("\n");
-          found = true;
-          break;
+          if (p.matcher(jConfFiles[i].getName()).matches())
+          {
+            out.flush(); // weil wir gleich direkt auf den Stream zugreifen
+            copyFile(jConfFiles[i], outStream);
+            outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
+            out.write("\n");
+            found = true;
+            break;
+          }
         }
         if (!found)
           out.write(L.m("Datei '%1' konnte nicht gefunden werden.\n", jConfPath
@@ -873,8 +868,6 @@ public class WollMuxFiles
         out.write(x.toString() + "\n");
       }
       out.write("===================== END OOo datasources ==================\n");
-
-      out.close();
     }
     catch (IOException | NumberFormatException | JMException x)
     {
@@ -998,7 +991,7 @@ public class WollMuxFiles
   public static String dumpNode(Object element, String spaces)
   {
     // Properties (Elemente mit Werten) durchsuchen:
-    String properties = "";
+    StringBuilder properties = new StringBuilder("");
     if (UNO.XPropertySet(element) != null)
     {
       Property[] props =
@@ -1006,24 +999,26 @@ public class WollMuxFiles
       for (int i = 0; i < props.length; i++)
       {
         Object prop = UNO.getProperty(element, props[i].Name);
-        if (UNO.XInterface(prop) != null) continue;
-        if (AnyConverter.isVoid(prop)) continue;
-        String propStr = "'" + prop + "'";
+        if (UNO.XInterface(prop) != null || AnyConverter.isVoid(prop))
+        {
+          continue;
+        }
+        StringBuilder propStr = new StringBuilder("'" + prop + "'");
         // arrays anzeigen:
         if (prop instanceof Object[])
         {
           Object[] arr = (Object[]) prop;
-          propStr = "[";
+          propStr.append("[");
           for (int j = 0; j < arr.length; j++)
-            propStr += "'" + arr[j] + "'" + ((j == arr.length - 1) ? "" : ", ");
-          propStr += "]";
+            propStr.append("'" + arr[j] + "'" + ((j == arr.length - 1) ? "" : ", "));
+          propStr.append("]");
         }
-        properties += spaces + "|    " + props[i].Name + ": " + propStr + "\n";
+        properties.append(spaces + "|    " + props[i].Name + ": " + propStr + "\n");
       }
     }
 
     // Kinder durchsuchen.
-    String childs = "";
+    StringBuilder childs = new StringBuilder("");
     XNameAccess xna = UNO.XNameAccess(element);
     if (xna != null)
     {
@@ -1032,7 +1027,7 @@ public class WollMuxFiles
       {
         try
         {
-          childs += dumpNode(xna.getByName(elements[i]), spaces + "|    ");
+          childs.append(dumpNode(xna.getByName(elements[i]), spaces + "|    "));
         }
         catch (java.lang.Exception e)
         {}
@@ -1054,7 +1049,7 @@ public class WollMuxFiles
    * die Datei file.
    */
   public static void writeConfToFile(File file, ConfigThingy conf)
-      throws UnsupportedEncodingException, FileNotFoundException, IOException
+      throws IOException
   {
     try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(file), ConfigThingy.CHARSET))
     {
