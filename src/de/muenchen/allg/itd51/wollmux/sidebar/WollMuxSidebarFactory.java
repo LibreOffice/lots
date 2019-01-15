@@ -14,6 +14,8 @@ import com.sun.star.ui.XUIElementFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+
 /**
  * Dies ist die Implementation der Sidebar-Factory, die in Factories.xcu
  * definiert ist. Die Factory erzeugt ein {@link WollMuxSidebarPanel}.  
@@ -34,6 +36,7 @@ public class WollMuxSidebarFactory extends WeakBase implements XUIElementFactory
   public WollMuxSidebarFactory(XComponentContext context)
   {
     LOGGER.debug("WollMuxSidebarFactory:WollMuxSidebarFactory");
+    WollMuxEventHandler.getInstance().handleInitialize();
     this.context = context;
   }
 

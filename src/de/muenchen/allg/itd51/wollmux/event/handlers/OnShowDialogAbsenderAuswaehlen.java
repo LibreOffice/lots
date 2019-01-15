@@ -26,21 +26,14 @@ public class OnShowDialogAbsenderAuswaehlen extends BasicEvent
       // Konfiguration auslesen:
       ConfigThingy whoAmIconf = WollMuxEventHandler.getInstance()
           .requireLastSection(conf, "AbsenderAuswaehlen");
-      ConfigThingy PALconf = WollMuxEventHandler.getInstance()
+      ConfigThingy palConf = WollMuxEventHandler.getInstance()
           .requireLastSection(conf, "PersoenlicheAbsenderliste");
-      ConfigThingy ADBconf = WollMuxEventHandler.getInstance()
-          .requireLastSection(conf, "AbsenderdatenBearbeiten");
 
-      // Dialog modal starten:
-      setLock();
-      new AbsenderAuswaehlen(whoAmIconf, PALconf, ADBconf,
-          DatasourceJoinerFactory.getDatasourceJoiner(), unlockActionListener);
-      waitForUnlock();
+      new AbsenderAuswaehlen(whoAmIconf, palConf,
+          DatasourceJoinerFactory.getDatasourceJoiner());
     } catch (Exception e)
     {
       throw new CantStartDialogException(e);
     }
-
-    WollMuxEventHandler.getInstance().handlePALChangedNotify();
   }
 }

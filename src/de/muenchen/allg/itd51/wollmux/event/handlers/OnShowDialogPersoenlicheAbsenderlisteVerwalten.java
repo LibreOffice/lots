@@ -26,19 +26,13 @@ public class OnShowDialogPersoenlicheAbsenderlisteVerwalten extends BasicEvent
       // Konfiguration auslesen:
       ConfigThingy PALconf = WollMuxEventHandler.getInstance()
           .requireLastSection(conf, "PersoenlicheAbsenderliste");
-      ConfigThingy ADBconf = WollMuxEventHandler.getInstance()
-          .requireLastSection(conf, "AbsenderdatenBearbeiten");
 
       // Dialog modal starten:
-      setLock();
-      new PersoenlicheAbsenderlisteVerwalten(PALconf, ADBconf,
-          DatasourceJoinerFactory.getDatasourceJoiner(), unlockActionListener);
-      waitForUnlock();
+      new PersoenlicheAbsenderlisteVerwalten(PALconf,
+          DatasourceJoinerFactory.getDatasourceJoiner());
     } catch (Exception e)
     {
       throw new CantStartDialogException(e);
     }
-
-    WollMuxEventHandler.getInstance().handlePALChangedNotify();
   }
 }

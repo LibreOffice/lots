@@ -248,9 +248,6 @@ public class WollMuxSingleton
 
       // Prüfen ob Doppelt- oder Halbinstallation vorliegt.
       WollMuxEventHandler.getInstance().handleCheckInstallation();
-
-      // Event ON_FIRST_INITIALIZE erzeugen:
-      WollMuxEventHandler.getInstance().handleInitialize();
     }
   }
 

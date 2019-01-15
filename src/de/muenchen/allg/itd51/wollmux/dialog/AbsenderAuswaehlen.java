@@ -38,116 +38,78 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.Arrays;
-import java.util.Iterator;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.WindowConstants;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.awt.ItemEvent;
+import com.sun.star.awt.XActionListener;
+import com.sun.star.awt.XButton;
+import com.sun.star.awt.XControl;
+import com.sun.star.awt.XItemListener;
+import com.sun.star.awt.XListBox;
+import com.sun.star.awt.XWindow;
+import com.sun.star.awt.XWindowListener;
+import com.sun.star.lang.EventObject;
+import com.sun.star.uno.UnoRuntime;
+
+import de.muenchen.allg.itd51.wollmux.core.constants.XButtonProperties;
+import de.muenchen.allg.itd51.wollmux.core.constants.XLabelProperties;
+import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.ControlType;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
+import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
- * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
- * einen Dialog zum Auswählen eines Eintrages aus der Persönlichen Absenderliste. Die
- * private-Funktionen dürfen NUR aus dem Event-Dispatching Thread heraus aufgerufen
- * werden.
+ * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung einen Dialog zum
+ * Auswählen eines Eintrages aus der Persönlichen Absenderliste. Die private-Funktionen dürfen NUR
+ * aus dem Event-Dispatching Thread heraus aufgerufen werden.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AbsenderAuswaehlen
 {
 
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(AbsenderAuswaehlen.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(AbsenderAuswaehlen.class);
 
   /**
-   * Default-Wert dafür, wie die Personen in der Absenderliste angezeigt werden
-   * sollen, wenn es nicht explizit in der Konfiguration über das DISPLAY-Attribut
-   * für eine listbox festgelegt ist. %{Spalte}-Syntax um entsprechenden Wert des
-   * Datensatzes einzufügen, z.B. "%{Nachname}, %{Vorname}" für die Anzeige
-   * "Meier, Hans" etc.
+   * Default-Wert dafür, wie die Personen in der Absenderliste angezeigt werden sollen, wenn es
+   * nicht explizit in der Konfiguration über das DISPLAY-Attribut für eine listbox festgelegt ist.
+   * %{Spalte}-Syntax um entsprechenden Wert des Datensatzes einzufügen, z.B. "%{Nachname},
+   * %{Vorname}" für die Anzeige "Meier, Hans" etc.
    *
-   * An dieser Stelle einen Default-Wert hardzucodieren (der noch dazu LHM-spezifisch
-   * ist!) ist sehr unschön und wurde nur gemacht um abwärtskompatibel zu alten
-   * WollMux-Konfigurationen zu bleiben. Sobald sichergestellt ist, dass überall auf
-   * eine neue WollMux-Konfiguration geupdatet wurde, sollte man diesen Fallback
-   * wieder entfernen.
+   * An dieser Stelle einen Default-Wert hardzucodieren (der noch dazu LHM-spezifisch ist!) ist sehr
+   * unschön und wurde nur gemacht um abwärtskompatibel zu alten WollMux-Konfigurationen zu bleiben.
+   * Sobald sichergestellt ist, dass überall auf eine neue WollMux-Konfiguration geupdatet wurde,
+   * sollte man diesen Fallback wieder entfernen.
    */
-  private static final String DEFAULT_DISPLAYTEMPLATE =
-    "%{Nachname}, %{Vorname} (%{Rolle})";
+  private static final String DEFAULT_DISPLAYTEMPLATE = "%{Nachname}, %{Vorname} (%{Rolle})";
 
   /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
+   * Gibt an, wie die Suchresultate in der {@link #palJList} angezeigt werden sollen. Der Wert wird
+   * in der Konfiguration bei der "listbox" mit ID "suchanfrage" durch Angeben des DISPLAY-Attributs
+   * konfiguriert. %{Spalte}-Syntax um entsprechenden Wert des Datensatzes einzufügen, z.B.
+   * "%{Nachname}, %{Vorname}" für die Anzeige "Meier, Hans" etc.
    */
-  private static final int TF_BORDER = 4;
-
-  /**
-   * Rand um Buttons (in Pixeln).
-   */
-  private static final int BUTTON_BORDER = 2;
-
-  /**
-   * ActionListener für Buttons mit der ACTION "abort".
-   */
-  private ActionListener actionListener_abort = e -> abort();
-
-  /**
-   * ActionListener für Buttons mit der ACTION "back".
-   */
-  private ActionListener actionListener_back = e -> back();
-
-  /**
-   * ActionListener für Buttons mit der ACTION "editList".
-   */
-  private ActionListener actionListener_editList = e -> editList();
-
-  /**
-   * wird getriggert bei windowClosing() Event.
-   */
-  private ActionListener closeAction = actionListener_abort;
-
-  /**
-   * Der Rahmen des gesamten Dialogs.
-   */
-  private JFrame myFrame;
+  private String palDisplayTemplate;
 
   /**
    * Der DatasourceJoiner, den dieser Dialog anspricht.
@@ -155,638 +117,254 @@ public class AbsenderAuswaehlen
   private DatasourceJoiner dj;
 
   /**
-   * Die Listbox mit der persönlichen Absenderliste.
-   */
-  private JList<Object> palJList;
-
-  /**
-   * Gibt an, wie die Suchresultate in der {@link #palJList} angezeigt werden sollen.
-   * Der Wert wird in der Konfiguration bei der "listbox" mit ID "suchanfrage" durch
-   * Angeben des DISPLAY-Attributs konfiguriert. %{Spalte}-Syntax um entsprechenden
-   * Wert des Datensatzes einzufügen, z.B. "%{Nachname}, %{Vorname}" für die Anzeige
-   * "Meier, Hans" etc.
-   */
-  private String palDisplayTemplate;
-
-  /**
-   * Der dem
-   * {@link #AbsenderAuswaehlen(ConfigThingy, ConfigThingy, DatasourceJoiner, ActionListener)
-   * Konstruktor} übergebene dialogEndListener.
-   */
-  private ActionListener dialogEndListener;
-
-  /**
-   * Das ConfigThingy, das diesen Dialog spezifiziert.
-   */
-  private ConfigThingy myConf;
-
-  /**
    * Das ConfigThingy, das den Dialog zum Bearbeiten der Absenderliste spezifiziert.
    */
   private ConfigThingy verConf;
 
-  /**
-   * Das ConfigThingy, das den Dialog zum Bearbeiten eines Datensatzes der
-   * Absenderliste spezifiziert.
-   */
-  private ConfigThingy abConf;
-
-  /**
-   * Überwacht Änderungen in der Auswahl und wählt den entsprechenden Datensatz im
-   * DJ.
-   */
-  private MyListSelectionListener myListSelectionListener =
-    new MyListSelectionListener();
+  private List<DJDatasetListElement> elements = null;
 
   /**
    * Erzeugt einen neuen Dialog.
    *
    * @param conf
-   *          das ConfigThingy, das den Dialog beschreibt (der Vater des
-   *          "Fenster"-Knotens.
+   *          das ConfigThingy, das den Dialog beschreibt (der Vater des "Fenster"-Knotens.
    * @param abConf
-   *          das ConfigThingy, das den Dialog zum Bearbeiten eines Datensatzes
-   *          beschreibt.
+   *          das ConfigThingy, das den Dialog zum Bearbeiten eines Datensatzes beschreibt.
    * @param verConf
    *          das ConfigThingy, das den Absenderliste Verwalten Dialog beschreibt.
    * @param dj
    *          der DatasourceJoiner, der die PAL verwaltet.
    * @param dialogEndListener
    *          falls nicht null, wird die
-   *          {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}
-   *          Methode aufgerufen (im Event Dispatching Thread), nachdem der Dialog
-   *          geschlossen wurde. Das actionCommand des ActionEvents gibt die Aktion
-   *          an, die das Beenden des Dialogs veranlasst hat.
+   *          {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)} Methode aufgerufen
+   *          (im Event Dispatching Thread), nachdem der Dialog geschlossen wurde. Das actionCommand
+   *          des ActionEvents gibt die Aktion an, die das Beenden des Dialogs veranlasst hat.
    * @throws ConfigurationErrorException
-   *           im Falle eines schwerwiegenden Konfigurationsfehlers, der es dem
-   *           Dialog unmöglich macht, zu funktionieren (z.B. dass der "Fenster"
-   *           Schlüssel fehlt.
+   *           im Falle eines schwerwiegenden Konfigurationsfehlers, der es dem Dialog unmöglich
+   *           macht, zu funktionieren (z.B. dass der "Fenster" Schlüssel fehlt.
    */
-  public AbsenderAuswaehlen(ConfigThingy conf, ConfigThingy verConf,
-      ConfigThingy abConf, DatasourceJoiner dj, ActionListener dialogEndListener)
-      throws ConfigurationErrorException
+  public AbsenderAuswaehlen(ConfigThingy conf, ConfigThingy verConf, DatasourceJoiner dj)
   {
     this.dj = dj;
-    this.myConf = conf;
-    this.abConf = abConf;
     this.verConf = verConf;
-    this.dialogEndListener = dialogEndListener;
     this.palDisplayTemplate = DEFAULT_DISPLAYTEMPLATE;
 
-    ConfigThingy fensterDesc1 = conf.query("Fenster");
-    if (fensterDesc1.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1",
-        conf.getName()));
-
-    final ConfigThingy fensterDesc = fensterDesc1.query("Auswaehlen");
-    if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Auswaehlen' fehlt in ",
-        conf.getName()));
-
-    // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
-    try
-    {
-      javax.swing.SwingUtilities.invokeLater(() ->
-      {
-          try
-          {
-            createGUI(fensterDesc.getLastChild());
-          }
-          catch (Exception x)
-          {
-            LOGGER.trace("", x);
-          }
-      });
-    }
-    catch (Exception x)
-    {
-      LOGGER.error("", x);
-    }
+    createUNOGUI();
   }
 
-  /**
-   * Erzeugt das GUI.
-   *
-   * @param fensterDesc
-   *          die Spezifikation dieses Dialogs.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void createGUI(ConfigThingy fensterDesc)
+  private UNODialogFactory dialogFactory;
+  private SimpleDialogLayout layout;
+
+  private void createUNOGUI()
   {
-	/**
-	* Das JPanel der obersten Hierarchiestufe.
-	*/
-	JPanel mainPanel;
-	
-    Common.setLookAndFeelOnce();
+    dialogFactory = new UNODialogFactory();
+    XWindow dialogWindow = dialogFactory.createDialog(600, 300, 0xF2F2F2);
+    dialogWindow.addWindowListener(windowListener);
 
-    palJList = new JList<>(new DefaultListModel<>());
+    dialogFactory.showDialog();
 
-    String title = L.m(fensterDesc.getString("TITLE",
-        "TITLE fehlt für Fenster AbsenderAuswaehlen/Auswaehlen"));
-    closeAction = getAction(fensterDesc.getString("CLOSEACTION", ""));
+    layout = new SimpleDialogLayout(dialogWindow);
+    layout.setMarginBetweenControls(15);
+    layout.setMarginTop(20);
+    layout.setMarginLeft(20);
+    layout.setWindowBottomMargin(10);
 
-    // Create and set up the window.
-    myFrame = new JFrame(title);
-    // leave handling of close request to WindowListener.windowClosing
-    myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    myFrame.addWindowListener(new MyWindowListener());
-    // WollMux-Icon für AbsenderAuswaehlen-Frame
-    Common.setWollMuxIcon(myFrame);
+    layout.addControlsToList(addMainControls());
+    layout.addControlsToList(addBottomButtons());
 
-    mainPanel = new JPanel(new BorderLayout());
-    mainPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    myFrame.getContentPane().add(mainPanel);
-
-    JPanel absenderliste = new JPanel(new GridBagLayout());
-    JPanel buttons = new JPanel(new GridBagLayout());
-
-    mainPanel.add(absenderliste, BorderLayout.CENTER);
-    mainPanel.add(buttons, BorderLayout.PAGE_END);
-
-    addUIElements(fensterDesc, "Absenderliste", absenderliste, 0, 1);
-    addUIElements(fensterDesc, "Buttons", buttons, 1, 0);
+    layout.draw();
 
     QueryResults palEntries = dj.getLOS();
     if (palEntries.isEmpty())
     {
-      editList();
-    }
-    else
+      new PersoenlicheAbsenderlisteVerwalten(verConf, dj);
+    } else
     {
-      setListElements(palJList, dj.getLOS(), palDisplayTemplate);
-      selectSelectedDataset(palJList);
-
-      myFrame.pack();
-      int frameWidth = myFrame.getWidth();
-      int frameHeight = myFrame.getHeight();
-      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      int x = screenSize.width / 2 - frameWidth / 2;
-      int y = screenSize.height / 2 - frameHeight / 2;
-      myFrame.setLocation(x, y);
-      myFrame.setResizable(false);
-      myFrame.setAlwaysOnTop(true);
-      myFrame.setVisible(true);
-      myFrame.requestFocus();
+      setListElements(dj.getLOS(), palDisplayTemplate);
     }
   }
 
-  /**
-   * Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu. compo muss
-   * ein GridBagLayout haben. stepx und stepy geben an um wieviel mit jedem UI
-   * Element die x und die y Koordinate der Zelle erhöht werden soll. Wirklich
-   * sinnvoll sind hier nur (0,1) und (1,0).
-   */
-  private void addUIElements(ConfigThingy conf, String key, JComponent compo,
-      int stepx, int stepy)
+  private XWindowListener windowListener = new XWindowListener()
   {
-    // int gridx, int gridy, int gridwidth, int gridheight, double weightx, double
-    // weighty, int anchor, int fill, Insets insets, int ipadx, int ipady)
-    // GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
-    // GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new
-    // Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-    GridBagConstraints gbcLabel =
-      new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
-        GridBagConstraints.NONE, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
-          TF_BORDER), 0, 0);
-    GridBagConstraints gbcGlue =
-      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.LINE_START,
-        GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0);
-    GridBagConstraints gbcButton =
-      new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
-        GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
-          BUTTON_BORDER, BUTTON_BORDER), 0, 0);
-    GridBagConstraints gbcListBox =
-      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,
-        GridBagConstraints.BOTH, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
-          TF_BORDER), 0, 0);
 
-    ConfigThingy felderParent = conf.query(key);
-    int y = -stepy;
-    int x = -stepx;
-
-    Iterator<ConfigThingy> piter = felderParent.iterator();
-    while (piter.hasNext())
+    @Override
+    public void disposing(EventObject arg0)
     {
-      Iterator<ConfigThingy> iter = (piter.next()).iterator();
-      while (iter.hasNext())
-      {
-        y += stepy;
-        x += stepx;
-
-        ConfigThingy uiElementDesc = iter.next();
-        String id = uiElementDesc.getString("ID", "");
-        String type = uiElementDesc.getString("TYPE", "");
-
-        if ("label".equals(type))
-        {
-          JLabel uiElement = new JLabel();
-          gbcLabel.gridx = x;
-          gbcLabel.gridy = y;
-          compo.add(uiElement, gbcLabel);
-          uiElement.setText(L.m(uiElementDesc.getString("LABEL", "")));
-        }
-        else if ("glue".equals(type))
-        {
-          Box uiElement = Box.createHorizontalBox();
-          try
-          {
-            int minsize = Integer
-                .parseInt(uiElementDesc.getString("MINSIZE", "0"));
-            uiElement.add(Box.createHorizontalStrut(minsize));
-          }
-          catch (NumberFormatException e)
-          {
-          }
-          uiElement.add(Box.createHorizontalGlue());
-
-          gbcGlue.gridx = x;
-          gbcGlue.gridy = y;
-          compo.add(uiElement, gbcGlue);
-        }
-        else if ("listbox".equals(type))
-        {
-          int lines = 10;
-          try
-          {
-            lines = Integer.parseInt(uiElementDesc.getString("LINES", "10"));
-          }
-          catch (NumberFormatException e)
-          {
-            LOGGER.trace("", e);
-          }
-
-          JList<Object> list;
-          if ("pal".equals(id))
-          {
-            list = palJList;
-            try
-            {
-              palDisplayTemplate = uiElementDesc.get("DISPLAY").toString();
-            }
-            catch (NodeNotFoundException e)
-            {
-              LOGGER.info(L.m(
-                  "Kein DISPLAY-Attribut für die listbox mit ID \"pal\" im AbsenderAuswaehlen-Dialog angegeben! Verwende Fallback: %1",
-                  DEFAULT_DISPLAYTEMPLATE));
-              // Das DISPLAY-ATTRIBUT sollte eigentlich verpflichtend sein und wir
-              // sollten an dieser Stelle einen echten Error loggen bzw. eine
-              // Meldung in der GUI ausgeben und evtl. sogar abbrechen. Wir tun
-              // dies allerdings nicht, da das DISPLAY-Attribut erst mit
-              // WollMux 6.4.0 eingeführt wurde und wir abwärtskompatibel zu alten
-              // WollMux-Konfigurationen bleiben müssen und Benutzer alter
-              // Konfigurationen nicht mit Error-Meldungen irritieren wollen.
-              // Dies ist allerdings nur eine Übergangslösung. Die obige Meldung
-              // sollte nach ausreichend Zeit genauso wie DEFAULT_DISPLAYTEMPLATE
-              // entfernt werden (bzw. wie oben gesagt überarbeitet).
-            }
-          }
-          else
-          {
-            list = new JList<>(new DefaultListModel<>());
-          }
-
-          list.setVisibleRowCount(lines);
-          list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-          list.setLayoutOrientation(JList.VERTICAL);
-          list.setPrototypeCellValue(
-              "Al-chman hemnal ulhillim el-WollMux(W-OLL-MUX-5.1)");
-
-          list.addListSelectionListener(myListSelectionListener);
-
-          String action = uiElementDesc.getString("ACTION", "");
-
-          ActionListener actionL = getAction(action);
-          if (actionL != null)
-          {
-            list.addMouseListener(new MyActionMouseListener(list, actionL));
-          }
-
-          JScrollPane scrollPane = new JScrollPane(list);
-          scrollPane.setHorizontalScrollBarPolicy(
-              ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-          scrollPane.setVerticalScrollBarPolicy(
-              ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-          gbcListBox.gridx = x;
-          gbcListBox.gridy = y;
-          compo.add(scrollPane, gbcListBox);
-        }
-        else if (type.equals("button"))
-        {
-          String action = uiElementDesc.getString("ACTION", "");
-          String label = L.m(uiElementDesc.getString("LABEL", ""));
-
-          char hotkey = uiElementDesc.getString("HOTKEY", "0").charAt(0);
-
-          JButton button = new JButton(label);
-          button.setMnemonic(hotkey);
-
-          gbcButton.gridx = x;
-          gbcButton.gridy = y;
-          compo.add(button, gbcButton);
-
-          ActionListener actionL = getAction(action);
-          if (actionL != null)
-          {
-            button.addActionListener(actionL);
-          }
-        }
-        else
-        {
-          LOGGER.error(L.m("Ununterstützter TYPE für User Interface Element: ",
-              type));
-        }
-      }
-    }
-  }
-
-  /**
-   * Wartet auf Doppelklick und führt dann die actionPerformed() Methode eines
-   * ActionListeners aus.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private static class MyActionMouseListener extends MouseAdapter
-  {
-    private JList<Object> list;
-
-    private ActionListener action;
-
-    public MyActionMouseListener(JList<Object> list, ActionListener action)
-    {
-      this.list = list;
-      this.action = action;
+      WollMuxEventHandler.getInstance().handlePALChangedNotify();
+      dialogFactory.closeDialog();
     }
 
     @Override
-    public void mouseClicked(MouseEvent e)
+    public void windowShown(EventObject arg0)
     {
-      if (e.getClickCount() == 2)
-      {
-        Point location = e.getPoint();
-        int index = list.locationToIndex(location);
-        if (index < 0) {
-          return;
-        }
-        Rectangle bounds = list.getCellBounds(index, index);
-        if (!bounds.contains(location)) {
-          return;
-        }
-        action.actionPerformed(null);
-      }
+      // unused
     }
-  }
 
-  /**
-   * Übersetzt den Namen einer ACTION in eine Referenz auf das passende
-   * actionListener_... Objekt.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private ActionListener getAction(String action)
-  {
-    if ("abort".equals(action))
-    {
-      return actionListener_abort;
-    }
-    else if ("back".equals(action))
-    {
-      return actionListener_back;
-    }
-    else if ("editList".equals(action))
-    {
-      return actionListener_editList;
-    }
-    else if (action.isEmpty())
-    {
-      return null;
-    }
-    else
-      LOGGER.error(L.m("Ununterstützte ACTION: ", action));
-
-    return null;
-  }
-
-  /**
-   * Nimmt eine JList list, die ein DefaultListModel haben muss und ändert ihre
-   * Wertliste so, dass sie data entspricht. Die Datasets aus data werden nicht
-   * direkt als Werte verwendet, sondern in {@link DJDatasetListElement}-Objekte
-   * gewrappt, deren Inhalt entsprechend des übergebenen displayTemplates angezeigt
-   * wird.
-   *
-   * @param list
-   *          die Liste deren Wertliste geändert werden soll
-   * @param data
-   *          enthält die Datensätze, mit denen die Liste gefüllt werden soll
-   * @param displayTemplate
-   *          gibt an wie die Datensätze in der Liste als Strings repräsentiert
-   *          werden sollen, siehe z.B. {@link #DEFAULT_DISPLAYTEMPLATE}.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void setListElements(JList<Object> list, QueryResults data, String displayTemplate)
-  {
-    Object[] elements = new Object[data.size()];
-    Iterator<Dataset> iter = data.iterator();
-    int i = 0;
-    while (iter.hasNext())
-      elements[i++] =
-        new DJDatasetListElement((DJDataset) iter.next(), displayTemplate);
-    Arrays.sort(elements, (Object o1, Object o2) ->
-        o1.toString().compareTo(o2.toString())
-    );
-
-    DefaultListModel<Object> listModel = (DefaultListModel<Object>) list.getModel();
-    listModel.clear();
-    for (i = 0; i < elements.length; ++i)
-      listModel.addElement(elements[i]);
-  }
-
-  private void selectSelectedDataset(JList<?> list)
-  {
-    DefaultListModel<?> listModel = (DefaultListModel<?>) list.getModel();
-    for (int i = 0; i < listModel.size(); ++i)
-      if (((DJDatasetListElement) listModel.get(i)).getDataset().isSelectedDataset())
-        list.setSelectedValue(listModel.get(i), true);
-  }
-
-  /**
-   * Sorgt dafür, dass jeweils nur in einer der beiden Listboxen ein Eintrag
-   * selektiert sein kann und dass die entsprechenden Buttons ausgegraut werden wenn
-   * kein Eintrag selektiert ist.
-   */
-  private class MyListSelectionListener implements ListSelectionListener
-  {
     @Override
-    public void valueChanged(ListSelectionEvent e)
+    public void windowResized(com.sun.star.awt.WindowEvent arg0)
     {
-      @SuppressWarnings("unchecked")
-      JList<Object> list = (JList<Object>) e.getSource();
-      if (list != palJList) {
+      // unused
+    }
+
+    @Override
+    public void windowMoved(com.sun.star.awt.WindowEvent arg0)
+    {
+      // unused
+    }
+
+    @Override
+    public void windowHidden(EventObject arg0)
+    {
+      // unused
+    }
+  };
+
+  private ControlModel addMainControls()
+  {
+    List<SimpleEntry<ControlProperties, XControl>> mainControls = new ArrayList<>();
+
+    mainControls.add(layout.convertToXControl(new ControlProperties(ControlType.LABEL, "absLabel",
+        0, 30, 100, 0, new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
+            new Object[] { "Welchen Absender möchten Sie für Ihre Briefköpfe verwenden?" }))));
+
+    SimpleEntry<ControlProperties, XControl> absListBox = layout
+        .convertToXControl(new ControlProperties(ControlType.LIST_BOX, "absListBox", 0, 130, 100, 0,
+            new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
+                new Object[] { "" })));
+    XListBox absXListBox = UnoRuntime.queryInterface(XListBox.class, absListBox.getValue());
+    absXListBox.addItemListener(absListBoxItemListener);
+
+    mainControls.add(absListBox);
+
+    return new ControlModel(Orientation.VERTICAL, Align.NONE, mainControls, Optional.empty());
+  }
+
+  private ControlModel addBottomButtons()
+  {
+    List<SimpleEntry<ControlProperties, XControl>> bottomBtns = new ArrayList<>();
+
+    SimpleEntry<ControlProperties, XControl> abortBtn = layout
+        .convertToXControl(new ControlProperties(ControlType.BUTTON, "abortBtn", 0, 30, 50, 0,
+            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
+                new Object[] { "Abbrechen" })));
+    XButton abortXBtn = UnoRuntime.queryInterface(XButton.class, abortBtn.getValue());
+    abortXBtn.setActionCommand("abort");
+    abortXBtn.addActionListener(abortActionListener);
+
+    SimpleEntry<ControlProperties, XControl> editBtn = layout
+        .convertToXControl(new ControlProperties(ControlType.BUTTON, "editBtn", 0, 30, 50, 0,
+            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
+                new Object[] { "Bearbeiten" })));
+    XButton editXBtn = UnoRuntime.queryInterface(XButton.class, editBtn.getValue());
+    editXBtn.setActionCommand("printElement");
+    editXBtn.addActionListener(editActionListener);
+
+    bottomBtns.add(abortBtn);
+    bottomBtns.add(editBtn);
+
+    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, bottomBtns, Optional.empty());
+  }
+
+  private XItemListener absListBoxItemListener = new XItemListener()
+  {
+
+    @Override
+    public void disposing(EventObject arg0)
+    {
+      // unused
+    }
+
+    @Override
+    public void itemStateChanged(ItemEvent arg0)
+    {
+      DJDatasetListElement selectedElement = elements.get(arg0.Selected);
+
+      if (selectedElement == null)
         return;
-      }
 
-      DJDatasetListElement ele = (DJDatasetListElement) list.getSelectedValue();
-      if (ele == null)
-        selectSelectedDataset(list);
-      else
-        ele.getDataset().select();
+      selectedElement.getDataset().select();
     }
-  }
+  };
 
-  /**
-   * Implementiert die gleichnamige ACTION.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void abort()
+  private XActionListener abortActionListener = new XActionListener()
   {
-    dialogEnd("abort");
-  }
-
-  /**
-   * Implementiert die gleichnamige ACTION.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void back()
-  {
-    dialogEnd("back");
-  }
-
-  /**
-   * Beendet den Dialog und liefer actionCommand an den dialogEndHandler zurück
-   * (falls er nicht null ist).
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void dialogEnd(String actionCommand)
-  {
-    myFrame.dispose();
-    if (dialogEndListener != null)
-      dialogEndListener.actionPerformed(new ActionEvent(this, 0, actionCommand));
-  }
-
-  /**
-   * Implementiert die gleichnamige ACTION.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void editList()
-  {
-    ActionListener del =
-      new MyDialogEndListener(this, myConf, verConf, abConf, dj, dialogEndListener,
-        null);
-    dialogEndListener = null;
-    abort();
-    try
+    @Override
+    public void disposing(EventObject arg0)
     {
-      new PersoenlicheAbsenderlisteVerwalten(verConf, abConf, dj, del);
-    }
-    catch (ConfigurationErrorException x)
-    {
-      LOGGER.error("", x);
-    }
-  }
-
-  private static class MyDialogEndListener implements ActionListener
-  {
-    private ConfigThingy conf;
-
-    private ConfigThingy abConf;
-
-    private ConfigThingy verConf;
-
-    private DatasourceJoiner dj;
-
-    private ActionListener dialogEndListener;
-
-    private String actionCommand;
-
-    private AbsenderAuswaehlen mySource;
-
-    /**
-     * Falls actionPerformed() mit getActionCommand().equals("back") aufgerufen wird,
-     * wird ein neuer AbsenderAuswaehlen Dialog mit den übergebenen Parametern
-     * erzeugt. Ansonsten wird der dialogEndListener mit actionCommand aufgerufen.
-     * Falls actionCommand null ist wird das action command des ActionEvents
-     * weitergereicht, der actionPerformed() übergeben wird. Falls actionPerformed ==
-     * null wird auch die source weitergereicht, ansonsten wird die übergebene source
-     * verwendet.
-     */
-    public MyDialogEndListener(AbsenderAuswaehlen source, ConfigThingy conf,
-        ConfigThingy verConf, ConfigThingy abConf, DatasourceJoiner dj,
-        ActionListener dialogEndListener, String actionCommand)
-    {
-      this.conf = conf;
-      this.verConf = verConf;
-      this.abConf = abConf;
-      this.dj = dj;
-      this.dialogEndListener = dialogEndListener;
-      this.actionCommand = actionCommand;
-      this.mySource = source;
+      // unused
     }
 
     @Override
-    public void actionPerformed(ActionEvent e)
+    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
     {
-      if ("back".equals(e.getActionCommand()))
-        try
-        {
-          new AbsenderAuswaehlen(conf, verConf, abConf, dj, dialogEndListener);
-        }
-        catch (Exception x)
-        {
-          LOGGER.error("",x);
-        }
-      else
+      WollMuxEventHandler.getInstance().handlePALChangedNotify();
+      dialogFactory.closeDialog();
+    }
+  };
+
+  private XActionListener editActionListener = new XActionListener()
+  {
+    @Override
+    public void disposing(EventObject arg0)
+    {
+      // unused
+    }
+
+    @Override
+    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
+    {
+      new PersoenlicheAbsenderlisteVerwalten(verConf, dj);
+    }
+  };
+
+  private void setListElements(QueryResults data, String displayTemplate)
+  {
+    elements = new ArrayList<>();
+
+    data.forEach(item -> {
+      DJDatasetListElement element = new DJDatasetListElement((DJDataset) item, displayTemplate);
+      elements.add(element);
+    });
+    Collections.sort(elements);
+
+    XControl xControl = layout.getControl("absListBox");
+
+    if (xControl == null)
+      return;
+
+    XListBox xListBox = UnoRuntime.queryInterface(XListBox.class, xControl);
+
+    if (xListBox == null)
+      return;
+
+    if (xListBox.getItemCount() > 0)
+    {
+      xListBox.removeItems((short) 0, xListBox.getItemCount());
+    }
+
+    short itemToHightlightPos = 0;
+    
+    for (int i = 0; i < elements.size(); i++)
+    {
+      try
       {
-        Object source = mySource;
-        if (actionCommand == null)
+        Dataset ds = elements.get(i).getDataset();
+        String dbNachname = ds.get("Nachname") == null ? "" : ds.get("Nachname");
+        String dbVorname = ds.get("Vorname") == null ? "" : ds.get("Vorname");
+        String dbOrgaKurz = ds.get("OrgaKurz") == null ? "" : ds.get("OrgaKurz");
+
+        xListBox.addItem(dbNachname + ", " + dbVorname + " " + dbOrgaKurz, (short) i);
+        
+        if(elements.get(i).getDataset().isSelectedDataset())
         {
-          actionCommand = e.getActionCommand();
-          source = e.getSource();
+          itemToHightlightPos = (short) i;
         }
-        if (dialogEndListener != null)
-          dialogEndListener.actionPerformed(new ActionEvent(source, 0, actionCommand));
+      } catch (ColumnNotFoundException e)
+      {
+        LOGGER.error("", e);
       }
     }
-  }
-
-  /**
-   * Ein WindowListener, der auf den JFrame registriert wird, damit als Reaktion auf
-   * den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private class MyWindowListener extends WindowAdapter
-  {
-    @Override
-    public void windowClosing(WindowEvent e)
-    {
-      closeAction.actionPerformed(null);
-    }
-  }
-
-  /**
-   * Zerstört den Dialog. Nach Aufruf dieser Funktion dürfen keine weiteren Aufrufe
-   * von Methoden des Dialogs erfolgen. Die Verarbeitung erfolgt asynchron. Wurde dem
-   * Konstruktor ein entsprechender ActionListener übergeben, so wird seine
-   * actionPerformed() Funktion aufgerufen.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public void dispose()
-  {
-    // GUI im Event-Dispatching Thread zerstören wg. Thread-Safety.
-    try
-    {
-      javax.swing.SwingUtilities.invokeLater(this::abort);
-    }
-    catch (Exception x)
-    {
-      LOGGER.trace("", x);
-    }
+    
+    xListBox.selectItemPos(itemToHightlightPos, true);
   }
 }
