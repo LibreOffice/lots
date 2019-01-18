@@ -300,7 +300,7 @@ class DocumentExpander extends AbstractExecutor
 
   /**
    * Löscht den Inhalt der TextRange von cmd, wobei Workarounds für
-   * OpenOffice-Probleme angewendet werden. Insbesondere werden InsertMarks um die
+   * Office-Probleme angewendet werden. Insbesondere werden InsertMarks um die
    * Stelle herumgelegt vor dem Löschen, wie dies auch bei
    * {@link #insertDocumentFromURL(DocumentCommand, URL)} geschieht.
    *

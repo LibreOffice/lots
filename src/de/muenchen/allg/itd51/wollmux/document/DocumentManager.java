@@ -594,7 +594,7 @@ public class DocumentManager
     catch (RDFMetadataNotSupportedException e)
     {
       LOGGER.info(L.m(
-        "Die Einstellung '%1' für Attribut %2 ist mit dieser OpenOffice.org-Version nicht kompatibel. Verwende Einstellung '%3' statt dessen.",
+        "Die Einstellung '%1' für Attribut %2 ist mit dieser Office-Version nicht kompatibel. Verwende Einstellung '%3' statt dessen.",
         pdMode, PersistentDataContainer.PERSISTENT_DATA_MODE, PersistentDataContainer.PERSISTENT_DATA_MODE_ANNOTATION));
       return new AnnotationBasedPersistentDataContainer(doc);
     }

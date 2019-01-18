@@ -314,7 +314,7 @@ public class WollMuxBar
    * Verbindung zu OOo hergestellt werden konnte.
    */
   private static final String CONNECTION_FAILED_MESSAGE =
-    L.m("Es konnte keine Verbindung zu OpenOffice bzw. zur WollMux-Komponente in OpenOffice hergestellt werden.\n");
+    L.m("Es konnte keine Verbindung zu Office bzw. zur WollMux-Komponente in Office hergestellt werden.\n");
 
   public static final String WOLLMUX_CONFIG_ERROR_MESSAGE =
     L.m("Aus Ihrer WollMux-Konfiguration konnte kein Abschnitt \"Symbolleisten\" gelesen werden.\n"
@@ -1538,7 +1538,7 @@ public class WollMuxBar
 
   /**
    * Erzeugt ein Popup-Fenster, das den Benutzer darüber informiert, dass keine
-   * Verbindung zu OpenOffice hergestellt werden konnte.
+   * Verbindung zu Office hergestellt werden konnte.
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
