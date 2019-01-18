@@ -338,7 +338,7 @@ public class OnInitialize extends BasicEvent
   /**
    * Ein konkreter DataFinder, der für die Auflösung der Variable in getValueForKey
    * im Benutzerprofil der OOo Registry nachschaut (das selbe wie
-   * Extras->Optionen->OpenOffice.org->Benutzerdaten).
+   * Extras->Optionen->LibreOffice->Benutzerdaten).
    *
    * @author christoph.lutz
    */

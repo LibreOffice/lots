@@ -85,7 +85,7 @@ import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
  * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service hat
  * folgende Funktionen: Als XDispatchProvider und XDispatch behandelt er alle
  * "wollmux:kommando..." URLs und als XWollMux stellt er die Schnittstelle für
- * externe UNO-Komponenten dar. Der Service wird beim Starten von OpenOffice.org
+ * externe UNO-Komponenten dar. Der Service wird beim Starten von Office
  * automatisch (mehrfach) instanziiert, wenn OOo einen dispatchprovider für die in
  * der Datei Addons.xcu enthaltenen wollmux:... dispatches besorgen möchte (dies
  * geschieht auch bei unsichtbar geöffneten Dokumenten). Als Folge wird das
@@ -106,7 +106,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
 
   /**
    * Der Konstruktor initialisiert das WollMuxSingleton und startet damit den
-   * eigentlichen WollMux. Der Konstuktor wird aufgerufen, bevor OpenOffice.org die
+   * eigentlichen WollMux. Der Konstuktor wird aufgerufen, bevor Office die
    * Methode executeAsync() aufrufen kann, die bei einem ON_FIRST_VISIBLE_TASK-Event
    * über den Job-Mechanismus ausgeführt wird.
    * 
@@ -538,7 +538,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * XWollMuxDocument.
    * 
    * @param doc
-   *          Ein OpenOffice.org-Dokument, in dem dokumentspezifische Funktionen des
+   *          Ein Office-Dokument, in dem dokumentspezifische Funktionen des
    *          WollMux aufgerufen werden sollen.
    * @return Liefert null, falls doc durch den WollMux nicht bearbeitet wird und eine
    *         Instanz von XWollMuxDocument, falls es sich bei doc prinzipiell um ein

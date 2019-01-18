@@ -573,7 +573,7 @@ public class WollMuxBarEventHandler
         }
         catch (Exception y)
         {
-          LOGGER.error(L.m("Konnte keine Verbindung zu OpenOffice/LibreOffice herstellen"));
+          LOGGER.error(L.m("Konnte keine Verbindung zu Office herstellen"));
           wollmuxbar.connectionFailedWarning();
 
           return null;
@@ -610,7 +610,7 @@ public class WollMuxBarEventHandler
 
       if (remoteWollMux == null)
       {
-        LOGGER.error(L.m("Konnte keine Verbindung zum WollMux-Modul in OpenOffice herstellen"));
+        LOGGER.error(L.m("Konnte keine Verbindung zum WollMux-Modul in Office herstellen"));
         if (WollMuxFiles.externalWollMuxEnabled())
           remoteWollMux = new WollMux(ctx);
         else

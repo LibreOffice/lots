@@ -131,7 +131,7 @@ public class OOoBasedMailMerge
 
   /**
    * Druckfunktion für den Seriendruck in ein Gesamtdokument mit Hilfe des
-   * OpenOffice.org-Seriendrucks.
+   * Office-Seriendrucks.
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
@@ -383,7 +383,7 @@ public class OOoBasedMailMerge
   }
 
   /**
-   * Repräsentiert eine (noch nicht registrierte) Datenquelle für OpenOffice.org.
+   * Repräsentiert eine (noch nicht registrierte) Datenquelle für Office.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */

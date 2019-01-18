@@ -622,7 +622,7 @@ public class FormularMax4kController
   }
   
   /**
-   * Ruft die Datei/Speichern Funktion von OpenOffice.
+   * Ruft die Datei/Speichern Funktion von Office.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -633,7 +633,7 @@ public class FormularMax4kController
   }
   
   /**
-   * Ruft die Datei/Speichern unter... Funktion von OpenOffice.
+   * Ruft die Datei/Speichern unter... Funktion von Office.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1279,10 +1279,10 @@ public class FormularMax4kController
       JOptionPane.showMessageDialog(
         view,
         L.m("Der FormularMax 4000 kann nicht ausgeführt werden, da der Java-Laufzeitumgebung zu wenig Hauptspeicher zur Verfügung steht.\n"
-          + "Bitte ändern Sie in OpenOffice.org Ihre Java-Einstellungen. Sie finden diese unter \"Extras->Optionen->OpenOffice.org->Java\".\n"
+          + "Bitte ändern Sie in Office Ihre Java-Einstellungen. Sie finden diese unter \"Extras->Optionen->LibreOffice->Erweitert\".\n"
           + "Dort wählen Sie in der Liste Ihre aktuelle Java-Laufzeitumgebung aus, klicken auf den Button \"Parameter\",\n"
           + "tragen den neuen Parameter \"-Xmx256m\" ein (Groß-/Kleinschreibung beachten!) und klicken auf \"Zuweisen\".\n"
-          + "Danach ist ein Neustart von OpenOffice.org nötig."),
+          + "Danach ist ein Neustart von Office nötig."),
         L.m("Java Heap Size zu gering"), JOptionPane.ERROR_MESSAGE);
       DocumentManager.getDocumentManager().setCurrentFormularMax4000(documentController.getModel().doc, null);
       return false;

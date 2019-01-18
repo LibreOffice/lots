@@ -44,7 +44,7 @@ public class OnAddPALChangeEventListener extends BasicEvent
           .hashCode();
       if (myWmConfHash != wollmuxConfHashCode.intValue())
         errorMessage(new InvalidBindingStateException(
-            L.m("Die Konfiguration des WollMux muss neu eingelesen werden.\n\nBitte beenden Sie den WollMux und OpenOffice.org und schießen Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab.")));
+            L.m("Die Konfiguration des WollMux muss neu eingelesen werden.\n\nBitte beenden Sie den WollMux und Office und schießen Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab.")));
     }
 
   }

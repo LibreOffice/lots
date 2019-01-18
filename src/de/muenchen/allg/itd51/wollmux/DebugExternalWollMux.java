@@ -19,7 +19,7 @@ import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
 
 /**
  * Über diese Klasse kann der WollMux zum Debuggen in der lokalen JVM gestartet
- * werden, ohne dass die Extension in OpenOffice/LibreOffice installiert ist. Bisher
+ * werden, ohne dass die Extension in Office installiert ist. Bisher
  * haben wir für diesen Zweck die WollMuxBar mit der Konfigurationsoption
  * ALLOW_EXTERNAL_WOLLMUX "true" verwendet. Damit das Debuggen auch ohne WollMuxBar
  * möglich ist, wurde diese Klasse eingefügt. Zusammen mit dem neuen ant build-target
