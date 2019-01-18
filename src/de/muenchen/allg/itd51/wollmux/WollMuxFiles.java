@@ -359,24 +359,33 @@ public class WollMuxFiles
       searchPaths.add(ETC_WOLLMUX_WOLLMUX_CONF);
 
       // Falls Windows:
-      // Versuch den Pfad der wollmux.conf aus HKCU-Registry zu lesen
       if (windowsOS)
       {
+        // Versuch den Pfad der wollmux.conf aus HKCU-Registry zu lesen
         try
         {
           wollmuxConfPath =
             RegistryAccess.getStringValueFromRegistry(WinReg.HKEY_CURRENT_USER,
               WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
           searchPaths.add(wollmuxConfPath);
+        }
+        catch (RegistryAccessException ex)
+        {
+          Logger.debug("Kein Registry-Eintrag unter HKEY_CURRENT_USER");
+        }
 
+        // Versuch den Pfad der wollmux.conf aus HKLM-Registry zu lesen
+        try
+        {
           wollmuxConfPath =
             RegistryAccess.getStringValueFromRegistry(WinReg.HKEY_LOCAL_MACHINE,
               WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
-
           searchPaths.add(wollmuxConfPath);
         }
         catch (RegistryAccessException ex)
-        {}
+        {
+          Logger.debug("Kein Registry-Eintrag unter HKEY_LOCAL_MACHINE");
+        }
 
         Shell32 shell = Shell32.INSTANCE;
 
