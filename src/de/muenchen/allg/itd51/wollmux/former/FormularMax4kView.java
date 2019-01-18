@@ -112,7 +112,7 @@ public class FormularMax4kView extends JFrame
 
     setFrameSize();
     setResizable(true);
-    setAlwaysOnTop(true);
+
   }
 
   private JMenuBar createMainMenu()
