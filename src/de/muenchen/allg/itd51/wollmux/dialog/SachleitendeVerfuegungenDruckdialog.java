@@ -52,7 +52,6 @@ import com.sun.star.awt.XSpinField;
 import com.sun.star.awt.XSpinListener;
 import com.sun.star.awt.XWindow;
 import com.sun.star.lang.EventObject;
-import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.Verfuegungspunkt;
@@ -67,10 +66,8 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
 import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung einen Dialog zum
@@ -293,9 +290,10 @@ public class SachleitendeVerfuegungenDruckdialog
           .convertToXControl(new ControlProperties(ControlType.BUTTON, "printButton" + i, 0, 30, 20,
               0, new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
                   new Object[] { "Drucken" })));
-      printButtons.getKey().setButtonCommand("printElement");
-      UnoRuntime.queryInterface(XButton.class, printButtons.getValue())
-          .addActionListener(printElementActionListener);
+      
+      XButton printElementButton = UnoRuntime.queryInterface(XButton.class, printButtons.getValue());
+      printElementButton.setActionCommand("printElement");
+      printElementButton.addActionListener(printElementActionListener);
 
       controls.add(verfLabel);
       controls.add(printCountField);
@@ -385,18 +383,21 @@ public class SachleitendeVerfuegungenDruckdialog
         .convertToXControl(new ControlProperties(ControlType.BUTTON, "abortButton", 0, 40, 50, 0,
             new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
                 new Object[] { "Abbrechen" })));
-    abortButton.getKey().setButtonCommand("abort");
-    UnoRuntime.queryInterface(XButton.class, abortButton.getValue())
-        .addActionListener(abortListener);
+
+    XButton abortXButton = UnoRuntime.queryInterface(XButton.class, abortButton.getValue());
+    abortXButton.setActionCommand("abort");
+    abortXButton.addActionListener(abortListener);
+    
     controls.add(abortButton);
 
     SimpleEntry<ControlProperties, XControl> printAllButton = layout
         .convertToXControl(new ControlProperties(ControlType.BUTTON, "printAllButton", 0, 40, 50, 0,
             new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
                 new Object[] { "Alle Drucken" })));
-    printAllButton.getKey().setButtonCommand("printAll");
-    UnoRuntime.queryInterface(XButton.class, printAllButton.getValue())
-        .addActionListener(printAllActionListener);
+    XButton printAllXButton = UnoRuntime.queryInterface(XButton.class, printAllButton.getValue());
+    printAllXButton.setActionCommand("printAll");
+    printAllXButton.addActionListener(printAllActionListener);
+    
     controls.add(printAllButton);
 
     controlModel = new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls,
