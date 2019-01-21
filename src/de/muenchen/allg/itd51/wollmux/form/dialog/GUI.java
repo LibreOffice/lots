@@ -397,8 +397,6 @@ public class GUI
    * einer anderen Komponente als der 2,Komponente des buttonPanels, einen action "nextTab" Event
    * absetzt, falls es noch ein auf das aktuelle Tab folgendes Tab gibt, das aktiv ist. Falls es
    * kein passendes Tab gibt, bekommt die letzte Komponente von buttonPanel den Fokus.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void addTabSwitcher(final JPanel buttonPanel)
   {
@@ -452,7 +450,6 @@ public class GUI
    *
    * @param uiElement
    *          das Steuerelement, das überwacht werden soll.
-   * @author Andor Ertsey (D-III-ITD-D101)
    */
   private void addFocusListener(UIElement uiElement)
   {
@@ -482,8 +479,6 @@ public class GUI
 
   /**
    * Initialisiert die UIElementFactory, die zur Erzeugung der UIElements verwendet wird.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void initFactories()
   {
@@ -610,13 +605,11 @@ public class GUI
 
   /**
    * Setzt Größe und Ort der FormGUI.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void setFormGUISizeAndLocation()
   {
     Rectangle frameBounds = new Rectangle(naturalFrameBounds);
-    LOGGER.debug("setFormGUISizeAndLocation: frameBounds=" + frameBounds);
+    LOGGER.debug("setFormGUISizeAndLocation: frameBounds= {}", frameBounds);
 
     switch (formGUIBounds.width)
     {
@@ -698,8 +691,6 @@ public class GUI
 
   /**
    * Arrangiert das Writer Fenster so, dass es neben dem Formular-Fenster sitzt.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void arrangeWindows()
   {
@@ -766,8 +757,6 @@ public class GUI
 
   /**
    * Schliesst die FormGUI und alle zugehörigen Fenster.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void dispose()
   {
@@ -806,8 +795,6 @@ public class GUI
   /**
    * Die zentrale Anlaufstelle für alle von UIElementen ausgelösten Events (siehe
    * {@link UIElementEventHandler#processUiElementEvent(UIElement, String, Object[])} ).
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   @Override
   public void processUiElementEvent(UIElement source, String eventType, Object[] args)
