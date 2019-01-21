@@ -332,57 +332,31 @@ public class WollMuxBar
   /**
    * ActionListener für Buttons mit der ACTION "abort".
    */
-  private ActionListener actionListener_abort = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      abort();
-    }
-  };
+  private ActionListener actionListenerAbort = event -> abort();
 
   /**
    * ActionListener für Buttons, denen ein Menü zugeordnet ist.
    */
-  private ActionListener actionListener_openMenu = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      openMenu(e);
-    }
-  };
+  private ActionListener actionListenerOpenMenu = this::openMenu;
 
   /**
    * wird getriggert bei windowClosing() Event.
    */
-  private ActionListener closeAction = actionListener_abort;
+  private ActionListener closeAction = actionListenerAbort;
 
   /**
    * Aufgerufen wenn der Spezialeintrag "Absenderliste verwalten..." in der Senderbox
    * gewählt wird.
    */
-  private ActionListener actionListener_editSenderList = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      eventHandler.handleWollMuxUrl(Dispatch.DISP_wmPALVerwalten, null);
-      minimize();
-    }
+  private ActionListener actionListenerEditSenderList = event -> {
+    eventHandler.handleWollMuxUrl(Dispatch.DISP_wmPALVerwalten, null);
+    minimize();
   };
 
   /**
    * ActionListener wenn anderer Absender in Senderbox ausgewählt.
    */
-  private ActionListener senderboxActionListener = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      senderBoxItemChanged(e);
-    }
-  };
+  private ActionListener senderboxActionListener = this::senderBoxItemChanged;
 
   /**
    * Überwacht, ob sich die Maus in irgendwo innerhalb einer Komponente der
@@ -465,7 +439,6 @@ public class WollMuxBar
    * @param allowMenuManager
    *          falls allowMenuManager==false, darf der Button mit der Aktion
    *          "menuManager" nicht in der WollMuxBar erscheinen.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public WollMuxBar(int winMode, final ConfigThingy conf, ConfigThingy defaultConf,
       ConfigThingy userConf, boolean allowUserConfig, boolean allowMenuManager)
@@ -488,32 +461,26 @@ public class WollMuxBar
      */
     try
     {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
+      javax.swing.SwingUtilities.invokeLater(() ->
       {
-        @Override
-        public void run()
+        try
         {
-          try
-          {
-            /*
-             * Dieser Befehl steht VOR dem Aufruf von createGUI(), damit OOo schon
-             * gestartet wird, während wir noch mit GUI aufbauen beschäftigt sind. Es
-             * ist trotztdem sichergestellt, dass updateSenderboxes() nicht vor der
-             * Beendigung von createGUI() aufgerufen werden kann, weil
-             * updateSenderboxes() durch den WollMuxBarEventHandler ebenfalls mit
-             * invokeLater() in den EDT geschickt wird und dort erst zum Zug kommen
-             * kann, wenn diese run() Methode beendet ist.
-             */
-            eventHandler.connectWithWollMux();
+          /*
+           * Dieser Befehl steht VOR dem Aufruf von createGUI(), damit OOo schon gestartet wird,
+           * während wir noch mit GUI aufbauen beschäftigt sind. Es ist trotztdem sichergestellt,
+           * dass updateSenderboxes() nicht vor der Beendigung von createGUI() aufgerufen werden
+           * kann, weil updateSenderboxes() durch den WollMuxBarEventHandler ebenfalls mit
+           * invokeLater() in den EDT geschickt wird und dort erst zum Zug kommen kann, wenn diese
+           * run() Methode beendet ist.
+           */
+          eventHandler.connectWithWollMux();
 
-            Workarounds.applyWorkaroundForWMClass();
+          Workarounds.applyWorkaroundForWMClass();
 
-            createGUI(conf);
-          }
-          catch (Exception x)
-          {
-            LOGGER.error("", x);
-          }
+          createGUI(conf);
+        } catch (Exception x)
+        {
+          LOGGER.error("", x);
         }
       });
     }
@@ -658,8 +625,6 @@ public class WollMuxBar
 
   /**
    * Passt die Größe und Position der Fenster an.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setSizeAndLocation()
   {
@@ -749,7 +714,6 @@ public class WollMuxBar
    *
    * @param title
    *          der Titel für das Fenster (nur für Anzeige in Taskleiste)
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setupMinimizedFrame(String title)
   {
@@ -784,7 +748,6 @@ public class WollMuxBar
    *          Sinnvoll sind hier normalerweise nur (0,1) und (1,0).
    * @param stepy
    *          siehe stepx
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   void addUIElements(ConfigThingy menuConf, ConfigThingy elementParent,
       JComponent compo, int stepx, int stepy, String context)
@@ -883,7 +846,7 @@ public class WollMuxBar
             String menuName = "SenD3rB0x_" + Math.random();
             mapMenuNameToJPopupMenu.put(menuName, menu);
             button = new JButton(label);
-            button.addActionListener(actionListener_openMenu);
+            button.addActionListener(actionListenerOpenMenu);
             button.setActionCommand(menuName);
             button.setBackground(Color.WHITE);
             button.setFocusable(false);
@@ -957,7 +920,7 @@ public class WollMuxBar
             parseMenu(alreadySeen, mapMenuNameToJPopupMenu, menuConf, menuName,
               new JPopupMenu());
             button = new JButton(label);
-            button.addActionListener(actionListener_openMenu);
+            button.addActionListener(actionListenerOpenMenu);
             button.setActionCommand(menuName);
           }
 
@@ -1020,13 +983,9 @@ public class WollMuxBar
           }
         }
       }
-      catch (ConfigurationErrorException e)
+      catch (ConfigurationErrorException | FormModelException e)
       {
         LOGGER.error("", e);
-      } catch (FormModelException e)
-      {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
       }
     }
   }
@@ -1055,7 +1014,6 @@ public class WollMuxBar
    * @return menu, falls das Menü erfolgreich aufgebaut werden konnte, null, wenn das
    *         Menü nicht in menuConf definiert ist oder wenn es in alreadySeen ist und
    *         mapMenuNameToMenu == null.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private JComponent parseMenu(Set<String> alreadySeen,
       Map<String, JComponent> mapMenuNameToMenu, ConfigThingy menuConf,
@@ -1101,8 +1059,6 @@ public class WollMuxBar
 
   /**
    * Initialisiert uiElementFactory.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void initFactories()
   {
@@ -1272,8 +1228,6 @@ public class WollMuxBar
 
   /**
    * Implementiert die gleichnamige ACTION.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void abort()
   {
@@ -1303,14 +1257,7 @@ public class WollMuxBar
    */
   private void menuManager()
   {
-    new MenuManager(defaultConf, userConf, new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        reinit();
-      }
-    });
+    new MenuManager(defaultConf, userConf, event -> reinit());
   }
 
   /**
@@ -1320,17 +1267,13 @@ public class WollMuxBar
    */
   private void options()
   {
-    config.showOptionsDialog(myFrame, new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
+    config.showOptionsDialog(myFrame, event -> {
+      // derzeit ist der OK-Vergleich unnötig, da bei negativer Beendigung des
+      // Dialogs der ActionListener eh
+      // nicht aufgerufen wird. Aber das kann sich ändern.
+      if ("OK".equals(event.getActionCommand()))
       {
-        // derzeit ist der OK-Vergleich unnötig, da bei negativer Beendigung des
-        // Dialogs der ActionListener eh
-        // nicht aufgerufen wird. Aber das kann sich ändern.
-        if ("OK".equals(e.getActionCommand())) {
-          reinit();
-        }
+        reinit();
       }
     });
   }
@@ -1374,29 +1317,20 @@ public class WollMuxBar
    */
   public static String getBuildInfo()
   {
-    BufferedReader in = null;
-    try
+    URL url = WollMuxBar.class.getClassLoader().getResource("buildinfo");
+    if (url != null)
     {
-      URL url = WollMuxBar.class.getClassLoader().getResource("buildinfo");
-      if (url != null)
+      try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream())))
       {
-        in = new BufferedReader(new InputStreamReader(url.openStream()));
         String str = in.readLine();
-        if (str != null) {
+        if (str != null)
+        {
           return str;
         }
-      }
-    }
-    catch (Exception x)
-    {}
-    finally
-    {
-      try
+      } catch (Exception x)
       {
-        in.close();
+        LOGGER.debug("", x);
       }
-      catch (Exception y)
-      {}
     }
 
     return L.m("Version: unbekannt");
@@ -1405,8 +1339,6 @@ public class WollMuxBar
   /**
    * Wird aufgerufen, wenn ein Button aktiviert wird, dem ein Menü zugeordnet ist und
    * lässt dann das entsprechende Menü aus mapMenuNameToJPopupMenu erscheinen.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void openMenu(ActionEvent e)
   {
@@ -1434,8 +1366,6 @@ public class WollMuxBar
    * Diese Methode wird aufgerufen, wenn in der Senderbox ein anderes Element
    * ausgewählt wurde und setzt daraufhin den aktuellen Absender im entfernten
    * WollMux neu.
-   *
-   * @author Christoph Lutz (D-III-ITD 5.1) TESTED
    */
   private void senderBoxItemChanged(ActionEvent e)
   {
@@ -1453,7 +1383,6 @@ public class WollMuxBar
    *          die Einträge, die die Senderboxen enthalten sollen.
    * @param current
    *          der ausgewählte Eintrag
-   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TESTED
    */
   public void updateSenderboxes(String[] entries, String current)
   {
@@ -1487,7 +1416,7 @@ public class WollMuxBar
 
       senderbox.addSeparator();
       senderbox.addItem(L.m("Absenderliste verwalten..."),
-        actionListener_editSenderList, null, myIsInsideMonitor);
+        actionListenerEditSenderList, null, myIsInsideMonitor);
 
       if (current != null && !current.equals(""))
       {
@@ -1524,7 +1453,6 @@ public class WollMuxBar
    *          Beschreibt den Namen des jeweils übergeordneten Menüs (initial sollte
    *          "" übergeben werden), aus dem der Name für mapMenuIDToLabel
    *          zusammengesetzt wird.
-   * @author Christoph Lutz (privat)
    */
   public void initMenuOrder(ConfigThingy allMenues, ConfigThingy currentMenu,
       String path)
@@ -1549,25 +1477,17 @@ public class WollMuxBar
   /**
    * Erzeugt ein Popup-Fenster, das den Benutzer darüber informiert, dass keine
    * Verbindung zu Office hergestellt werden konnte.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void connectionFailedWarning()
   {
     try
     {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          JOptionPane.showMessageDialog(null, CONNECTION_FAILED_MESSAGE,
-            L.m("WollMux-Fehler"), JOptionPane.ERROR_MESSAGE);
-        }
-      });
+      javax.swing.SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null,
+          CONNECTION_FAILED_MESSAGE, L.m("WollMux-Fehler"), JOptionPane.ERROR_MESSAGE));
+    } catch (Exception y)
+    {
+      LOGGER.trace("", y);
     }
-    catch (Exception y)
-    {}
   }
 
   /**
@@ -1595,7 +1515,9 @@ public class WollMuxBar
   {
     @Override
     public void windowGainedFocus(WindowEvent e)
-    {}
+    {
+      // nothing to do
+    }
 
     @Override
     public void windowLostFocus(WindowEvent e)
@@ -1689,8 +1611,6 @@ public class WollMuxBar
   /**
    * Je nach windowMode wird die WollMuxBar auf andere Art und Weise in den
    * Wartezustand versetzt.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void minimize()
   {
@@ -1735,8 +1655,6 @@ public class WollMuxBar
   /**
    * Je nach windowMode wird die WollMuxBar aus dem Wartezustand wieder in den
    * aktiven Zustand versetzt.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void maximize()
   {
@@ -1764,8 +1682,6 @@ public class WollMuxBar
 
   /**
    * Führt die gleichnamige ACTION aus.
-   *
-   * TESTED
    */
   private void openExt(String ext, String url)
   {
@@ -1784,22 +1700,10 @@ public class WollMuxBar
         return;
       }
 
-      Runnable launch = new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          openExt.launch(new OpenExt.ExceptionHandler()
-          {
-            @Override
-            public void handle(Exception x)
-            {
-              LOGGER.error("", x);
-              error(x.getMessage());
-            }
-          });
-        }
-      };
+      Runnable launch = () -> openExt.launch(x -> {
+        LOGGER.error("", x);
+        error(x.getMessage());
+      });
 
       /**
        * Falls /loadComponentFromURL/ bei den Programmen ist, muss ein Kontakt zu OOo
@@ -1832,8 +1736,6 @@ public class WollMuxBar
 
   /**
    * Öffnet path als Vorlage.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void load(String path)
   {
@@ -1864,7 +1766,6 @@ public class WollMuxBar
    * @param args
    *          --fifo, --firstrun, --load, --mm. Außerdem --minimize, --topbar,
    *          --normalwindow um das Anzeigeverhalten festzulegen.
-   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
    */
   public static void main(String[] args)
   {
@@ -1935,9 +1836,8 @@ public class WollMuxBar
    * @param args
    *          --minimize, --topbar, --normalwindow um das Anzeigeverhalten
    *          festzulegen.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  synchronized public static void startWollMuxBar(List<String> args)
+  public static synchronized void startWollMuxBar(List<String> args)
   {
     LOGGER.debug(L.m("Starte WollMuxBar mit args '%1'.", niceArgs(args)));
     synchronized (startedCounter)
@@ -1950,14 +1850,7 @@ public class WollMuxBar
     {
       try
       {
-        SwingUtilities.invokeAndWait(new Runnable()
-        {
-          @Override
-          public void run()
-          {
-            instance.abort();
-          }
-        });
+        SwingUtilities.invokeAndWait(() -> instance.abort());
       }
       catch (Exception e)
       {
@@ -2040,8 +1933,6 @@ public class WollMuxBar
    * MUSS an allen Stellen verwendet werden, an denen normalerweise System.exit()
    * verwendet würde (außer der System.exit()-Aufruf wird explizit per Kommentar
    * begründet).
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static void terminate(int status)
   {
@@ -2101,8 +1992,6 @@ public class WollMuxBar
      *          Shortcut zum Überspringen des Tests nach einer entfernten WollMuxBar
      * @param args
      *          Die Argumente, mit der die WollMuxBar gestartet werden soll.
-     *
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     public static void handleFifo(String fifoName, boolean firstrun,
         final List<String> args)
@@ -2136,8 +2025,6 @@ public class WollMuxBar
     /**
      * Startet einen Listener, der in einem eigenen Server-Thread auf der fifo-Pipe
      * fifo lauscht und übergebene Argumente externer WollMuxBar-Aufrufe bearbeitet.
-     *
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     private static void startFifoListener(final File fifo)
     {
@@ -2149,12 +2036,11 @@ public class WollMuxBar
         {
           while (true)
           {
-            try
+            // Die folgende Zeile blockt so lange, bis sich ein Client-Prozess
+            // connected.
+            try (ObjectInputStream ois =
+                new ObjectInputStream(new FileInputStream(fifo));)
             {
-              // Die folgende Zeile blockt so lange, bis sich ein Client-Prozess
-              // connected.
-              ObjectInputStream ois =
-                new ObjectInputStream(new FileInputStream(fifo));
               try
               {
                 @SuppressWarnings("unchecked")
@@ -2172,7 +2058,6 @@ public class WollMuxBar
               {
                 LOGGER.error("", e);
               }
-              ois.close();
             }
             catch (IOException e)
             {
@@ -2199,8 +2084,6 @@ public class WollMuxBar
      * @return true, wenn ein Server-Prozess an die Pipe connected ist und den Aufruf
      *         angenommen hat oder false, wenn innerhalb des Timeouts (2s) kein
      *         Serverprozess verbunden ist.
-     *
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     private static boolean callRemoteApplication(final File fifo,
         final List<String> args)
@@ -2213,14 +2096,12 @@ public class WollMuxBar
         @Override
         public void run()
         {
-          try
+          // Der folgende Aufruf blockt so lange, bis sich ein Serverprozess
+          // connected.
+          try (ObjectOutputStream o =
+              new ObjectOutputStream(new FileOutputStream(fifo)))
           {
-            // Der folgende Aufruf blockt so lange, bis sich ein Serverprozess
-            // connected.
-            ObjectOutputStream o =
-              new ObjectOutputStream(new FileOutputStream(fifo));
             o.writeObject(args);
-            o.close();
             synchronized (fertig)
             {
               fertig[0] = true;
@@ -2250,8 +2131,6 @@ public class WollMuxBar
      * Sollte vor der Beendigung des Prozesses aufgerufen werden und sorgt dafür,
      * dass das fifo-File des Server-Prozesses (falls er hier läuft) beim Beenden
      * gelöscht wird und auch sonst aufgeräumt wird.
-     *
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     public static void terminate()
     {
