@@ -393,10 +393,10 @@ public class PrintParametersDialog
             new SimpleEntry<String[], Object[]>(
                 new String[] { XButtonProperties.LABEL },
                 new Object[] { "Drucker wechseln / einrichten" })));
-    printerSettingsSelectPrinterButton.getKey()
-        .setButtonCommand("selectPrinter");
-    UnoRuntime.queryInterface(XButton.class, printerSettingsSelectPrinterButton.getValue())
-        .addActionListener(selectPrinterActionListener);
+
+    XButton selectPrinterButton = UnoRuntime.queryInterface(XButton.class, printerSettingsSelectPrinterButton.getValue());
+    selectPrinterButton.setActionCommand("selectPrinter");
+    selectPrinterButton.addActionListener(selectPrinterActionListener);
 
     printerSettings.add(printerSettingsLabel);
     printerSettings.add(printerSettingsPrintModel);
@@ -436,8 +436,10 @@ public class PrintParametersDialog
             new SimpleEntry<String[], Object[]>(
                 new String[] { XButtonProperties.LABEL },
                 new Object[] { "Abbrechen" })));
-    bottomButtonAbort.getKey().setButtonCommand("abort");
-    UnoRuntime.queryInterface(XButton.class, bottomButtonAbort.getValue()).addActionListener(abortListener);
+
+    XButton abortButton = UnoRuntime.queryInterface(XButton.class, bottomButtonAbort.getValue());
+    abortButton.setActionCommand("abort");
+    abortButton.addActionListener(abortListener);
 
     SimpleEntry<ControlProperties, XControl> bottomButtonPrint = layout
         .convertToXControl(new ControlProperties(ControlType.BUTTON,
@@ -445,8 +447,10 @@ public class PrintParametersDialog
             new SimpleEntry<String[], Object[]>(
                 new String[] { XButtonProperties.LABEL },
                 new Object[] { "Drucken" })));
-    bottomButtonPrint.getKey().setButtonCommand("print");
-    UnoRuntime.queryInterface(XButton.class, bottomButtonPrint.getValue()).addActionListener(printListener);
+    
+    XButton printButton = UnoRuntime.queryInterface(XButton.class, bottomButtonPrint.getValue());
+    printButton.setActionCommand("print");
+    printButton.addActionListener(printListener);
 
     bottomButtonsSection.add(bottomButtonAbort);
     bottomButtonsSection.add(bottomButtonPrint);
