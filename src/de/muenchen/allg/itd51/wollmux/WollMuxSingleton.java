@@ -67,9 +67,11 @@ import com.sun.star.uno.XComponentContext;
 import com.sun.star.util.XChangesBatch;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.event.GlobalEventListener;
@@ -527,14 +529,18 @@ public class WollMuxSingleton
    */
   private static void setConfigurationValue(String node, String prop, Object value)
   {
-    XChangesBatch updateAccess = UNO.getConfigurationUpdateAccess(node);
-    
-    if (updateAccess == null) {
-      LOGGER.error("setConfigurationValue(): updateAccess is NULL.");
+    XChangesBatch updateAccess;
+    try
+    {
+      updateAccess = UNO.getConfigurationUpdateAccess(node);
+    }
+    catch (UnoHelperException e1)
+    {
+      LOGGER.error("setConfigurationValue(): updateAccess is NULL.", e1);
       return;
     }
 
-    UNO.setProperty(updateAccess, prop, value);
+    Utils.setProperty(updateAccess, prop, value);
 
     try
     {

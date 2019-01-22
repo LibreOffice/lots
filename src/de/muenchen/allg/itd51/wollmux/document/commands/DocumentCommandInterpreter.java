@@ -67,6 +67,7 @@ import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
@@ -368,8 +369,8 @@ public class DocumentCommandInterpreter
         for (Iterator<String> iter = set.iterator(); iter.hasNext();)
         {
           String element = iter.next();
-          Object value = UNO.getProperty(styleWollmuxseite, element);
-          Object checkset = UNO.setProperty(styleStandard, element, value);
+          Object value = Utils.getProperty(styleWollmuxseite, element);
+          Object checkset = Utils.setProperty(styleStandard, element, value);
           if (UnoRuntime.areSame(value, checkset))
           {
             iter.remove();

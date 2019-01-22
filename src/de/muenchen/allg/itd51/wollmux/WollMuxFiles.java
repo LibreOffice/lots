@@ -72,6 +72,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -118,6 +119,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 
 /**
@@ -998,7 +1000,7 @@ public class WollMuxFiles
         UNO.XPropertySet(element).getPropertySetInfo().getProperties();
       for (int i = 0; i < props.length; i++)
       {
-        Object prop = UNO.getProperty(element, props[i].Name);
+        Object prop = Utils.getProperty(element, props[i].Name);
         if (UNO.XInterface(prop) != null || AnyConverter.isVoid(prop))
         {
           continue;

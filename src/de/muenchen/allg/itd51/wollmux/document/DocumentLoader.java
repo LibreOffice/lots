@@ -23,6 +23,7 @@ import com.sun.star.lang.XComponent;
 import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
@@ -129,8 +130,8 @@ public class DocumentLoader
           new PropertyValue("FilterName", -1, "StarOffice XML (Writer)",
             PropertyState.DIRECT_VALUE)
       );
-    } catch (MalformedURLException | IllegalArgumentException
-      | com.sun.star.io.IOException | ExecutionException e)
+    }
+    catch (UnoHelperException | MalformedURLException | ExecutionException e)
     {
       LOGGER.error("", e);
     }

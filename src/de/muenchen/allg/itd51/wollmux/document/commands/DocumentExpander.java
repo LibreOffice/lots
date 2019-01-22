@@ -41,6 +41,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.document.DocumentLoader;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
@@ -510,7 +511,7 @@ class DocumentExpander extends AbstractExecutor
             continue;
           }
           String textPortionType =
-            (String) UNO.getProperty(textPortion, "TextPortionType");
+              (String) Utils.getProperty(textPortion, "TextPortionType");
           // Wenn es ein Textfeld ist
           if ("TextField".equals(textPortionType))
           {

@@ -18,6 +18,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 
 public class FrameController
 {
@@ -243,9 +244,9 @@ public class FrameController
     catch (java.lang.Exception e)
     {}
     if (zoomType != null)
-      UNO.setProperty(viewSettings, "ZoomType", zoomType);
+      Utils.setProperty(viewSettings, "ZoomType", zoomType);
     else if (zoomValue != null)
-      UNO.setProperty(viewSettings, "ZoomValue", zoomValue);
+      Utils.setProperty(viewSettings, "ZoomValue", zoomValue);
     else
       throw new ConfigurationErrorException(L.m("Ungültiger ZOOM-Wert '%1'", zoom));
   }

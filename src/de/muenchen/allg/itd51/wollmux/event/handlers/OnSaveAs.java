@@ -26,6 +26,7 @@ import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.DispatchHelper;
 
@@ -138,7 +139,7 @@ public class OnSaveAs extends BasicEvent
     try
     {
       Object ps = UNO.createUNOService("com.sun.star.util.PathSettings");
-      URL dir = new URL(AnyConverter.toString(UNO.getProperty(ps, "Work")));
+      URL dir = new URL(AnyConverter.toString(Utils.getProperty(ps, "Work")));
       return new File(dir.getPath(), filename);
     } catch (com.sun.star.lang.IllegalArgumentException
         | MalformedURLException e)

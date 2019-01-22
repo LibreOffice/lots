@@ -74,6 +74,7 @@ import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
@@ -460,7 +461,7 @@ public class PrintIntoFile
       Object textfield = enu.nextElement();
       // Der eigentlich redundante Test auf das Property NumberingType ist eine
       // Optimierung, da supportsService sehr langsam ist.
-      if (UNO.getProperty(textfield, "NumberingType") != null
+      if (Utils.getProperty(textfield, "NumberingType") != null
         && UNO.supportsService(textfield, "com.sun.star.text.textfield.PageCount"))
       {
         XTextRange range = UNO.XTextContent(textfield).getAnchor();
@@ -511,7 +512,8 @@ public class PrintIntoFile
       String content = null;
       try
       {
-        content = AnyConverter.toString(UNO.getProperty(textfield, "Content"));
+        content = AnyConverter
+            .toString(Utils.getProperty(textfield, "Content"));
       }
       catch (IllegalArgumentException e)
       {}

@@ -24,6 +24,7 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.ooo.TextDocument;
@@ -145,7 +146,7 @@ public class OnMarkBlock extends BasicEvent
       documentController.getModel().addNewDocumentCommand(range, bookmarkName);
       if (highlightColor != null)
       {
-        UNO.setProperty(range, CHAR_BACK_COLOR, highlightColor);
+        Utils.setProperty(range, CHAR_BACK_COLOR, highlightColor);
         // ViewCursor kollabieren, da die Markierung die Farben verfälscht
         // darstellt.
         XTextCursor vc = documentController.getModel().getViewCursor();
@@ -262,7 +263,7 @@ public class OnMarkBlock extends BasicEvent
   {
     // neuen Block anlegen
     documentController.getModel().addNewDocumentCommand(range, bookmarkName);
-    UNO.setProperty(range, CHAR_BACK_COLOR, highlightColor);
+    Utils.setProperty(range, CHAR_BACK_COLOR, highlightColor);
     // ViewCursor kollabieren, da die Markierung die Farben verfälscht
     // darstellt.
     XTextCursor vc = documentController.getModel().getViewCursor();

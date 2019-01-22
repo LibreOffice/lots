@@ -46,6 +46,7 @@ import com.sun.star.container.NoSuchElementException;
 import com.sun.star.ui.XAcceleratorConfiguration;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -65,9 +66,16 @@ public class Shortcuts
    */
   public static void createShortcuts(ConfigThingy tastenkombinationenConf)
   {
-    XAcceleratorConfiguration shortcutManager =
-      UNO.getShortcutManager("com.sun.star.text.TextDocument");
-    if (shortcutManager == null) return;
+    XAcceleratorConfiguration shortcutManager = null;
+     try
+    {
+      shortcutManager = UNO.getShortcutManager("com.sun.star.text.TextDocument");
+    }
+    catch (UnoHelperException e1)
+    {
+      LOGGER.error("ShortcutManager nicht verfügbar.", e1);
+      return;
+    }
 
     // löschen aller KeyEvents die mit "wollmux:" beginnen
     removeComandFromAllKeyEvents(shortcutManager);

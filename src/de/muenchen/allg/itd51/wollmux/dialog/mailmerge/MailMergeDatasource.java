@@ -97,6 +97,7 @@ import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
@@ -442,7 +443,7 @@ public class MailMergeDatasource
       if (calcDoc != null)
       {
         String title =
-          (String) UNO.getProperty(
+            (String) Utils.getProperty(
             UNO.XModel(calcDoc).getCurrentController().getFrame(), "Title");
         if (title == null) {
           title = "?????";
