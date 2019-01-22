@@ -51,6 +51,7 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
@@ -1190,7 +1191,7 @@ public class FormularMax4kController
     while (textportionEnu.hasMoreElements())
     {
       Object textportion = textportionEnu.nextElement();
-      String type = (String) UNO.getProperty(textportion, "TextPortionType");
+      String type = (String) Utils.getProperty(textportion, "TextPortionType");
       if ("Bookmark".equals(type)) // String constant first b/c type may be null
       {
         if (isInvalidRange(compare, range, textportion, doCompare)) continue;

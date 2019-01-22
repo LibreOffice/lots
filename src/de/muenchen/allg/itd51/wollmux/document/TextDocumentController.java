@@ -58,6 +58,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeDatasource;
@@ -1028,7 +1029,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
           try
           {
             Integer bgColor = Integer.valueOf(Integer.parseInt(highlightColor, 16));
-            UNO.setProperty(cmd.getTextCursor(), "CharBackColor", bgColor);
+            Utils.setProperty(cmd.getTextCursor(), "CharBackColor", bgColor);
           }
           catch (NumberFormatException e)
           {
@@ -1991,7 +1992,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       throw new ConfigurationErrorException(
         L.m("Die zugehörige Notiz mit der Formularbeschreibung fehlt."));
 
-    Object content = UNO.getProperty(annotationField, "Content");
+    Object content = Utils.getProperty(annotationField, "Content");
     if (content == null)
       throw new ConfigurationErrorException(
         L.m("Die zugehörige Notiz mit der Formularbeschreibung kann nicht gelesen werden."));

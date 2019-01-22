@@ -71,10 +71,12 @@ import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
@@ -558,7 +560,7 @@ public class SachleitendeVerfuegung
    */
   private static void formatDefault(XTextRange paragraph)
   {
-    UNO.setProperty(paragraph, "ParaStyleName", ParaStyleNameDefault);
+    Utils.setProperty(paragraph, "ParaStyleName", ParaStyleNameDefault);
     formatRoemischeZifferOnly(paragraph);
   }
 
@@ -569,7 +571,7 @@ public class SachleitendeVerfuegung
    */
   private static void formatAbdruck(XTextRange paragraph)
   {
-    UNO.setProperty(paragraph, "ParaStyleName", ParaStyleNameAbdruck);
+    Utils.setProperty(paragraph, "ParaStyleName", ParaStyleNameAbdruck);
     formatRoemischeZifferOnly(paragraph);
   }
 
@@ -581,7 +583,7 @@ public class SachleitendeVerfuegung
    */
   private static void formatVerfuegungspunktWithZuleitung(XTextRange paragraph)
   {
-    UNO.setProperty(paragraph, "ParaStyleName",
+    Utils.setProperty(paragraph, "ParaStyleName",
       ParaStyleNameVerfuegungspunktMitZuleitung);
     formatRoemischeZifferOnly(paragraph);
   }
@@ -593,7 +595,8 @@ public class SachleitendeVerfuegung
    */
   private static void formatVerfuegungspunkt(XTextRange paragraph)
   {
-    UNO.setProperty(paragraph, "ParaStyleName", ParaStyleNameVerfuegungspunkt);
+    Utils.setProperty(paragraph, "ParaStyleName",
+        ParaStyleNameVerfuegungspunkt);
     formatRoemischeZifferOnly(paragraph);
   }
 
@@ -604,7 +607,7 @@ public class SachleitendeVerfuegung
    */
   private static void formatZuleitungszeile(XTextRange paragraph)
   {
-    UNO.setProperty(paragraph, "ParaStyleName", ParaStyleNameZuleitungszeile);
+    Utils.setProperty(paragraph, "ParaStyleName", ParaStyleNameZuleitungszeile);
     formatRoemischeZifferOnly(paragraph);
   }
 
@@ -619,12 +622,13 @@ public class SachleitendeVerfuegung
     XTextCursor zifferOnly = getZifferOnly(paragraph, false);
     if (zifferOnly != null)
     {
-      UNO.setProperty(zifferOnly, "CharStyleName", CharStyleNameRoemischeZiffer);
+      Utils.setProperty(zifferOnly, "CharStyleName",
+          CharStyleNameRoemischeZiffer);
 
       // Zeichen danach auf Standardformatierung setzen, damit der Text, der
       // danach geschrieben wird nicht auch obiges Zeichenformat besitzt:
       // ("Standard" gilt laut DevGuide auch in englischen Versionen)
-      UNO.setProperty(zifferOnly.getEnd(), "CharStyleName", "Standard");
+      Utils.setProperty(zifferOnly.getEnd(), "CharStyleName", "Standard");
     }
   }
 
@@ -644,7 +648,7 @@ public class SachleitendeVerfuegung
     try
     {
       paraStyleName =
-        AnyConverter.toString(UNO.getProperty(paragraph, "ParaStyleName"));
+          AnyConverter.toString(Utils.getProperty(paragraph, "ParaStyleName"));
     }
     catch (IllegalArgumentException e)
     {}
@@ -667,7 +671,7 @@ public class SachleitendeVerfuegung
     try
     {
       paraStyleName =
-        AnyConverter.toString(UNO.getProperty(paragraph, "ParaStyleName"));
+          AnyConverter.toString(Utils.getProperty(paragraph, "ParaStyleName"));
     }
     catch (IllegalArgumentException e)
     {}
@@ -690,7 +694,7 @@ public class SachleitendeVerfuegung
     try
     {
       paraStyleName =
-        AnyConverter.toString(UNO.getProperty(paragraph, "ParaStyleName"));
+          AnyConverter.toString(Utils.getProperty(paragraph, "ParaStyleName"));
     }
     catch (IllegalArgumentException e)
     {}
@@ -948,7 +952,8 @@ public class SachleitendeVerfuegung
       if (isVerfuegungspunkt(cursor)) return cursor;
 
       // Absatzformat WollMuxVerfuegungspunkt1 setzen wenn noch nicht gesetzt.
-      UNO.setProperty(cursor, "ParaStyleName", ParaStyleNameVerfuegungspunkt1);
+      Utils.setProperty(cursor, "ParaStyleName",
+          ParaStyleNameVerfuegungspunkt1);
       return cursor;
     }
     else
@@ -1049,7 +1054,7 @@ public class SachleitendeVerfuegung
       if ((isZuleitungszeile(cursor) || isVerfuegungspunktMitZuleitung(cursor))
         && currentVerfpunkt != null
         // ausgeblendete Zeilen ignorieren
-        && Boolean.FALSE.equals(UNO.getProperty(cursor, "CharHidden")))
+            && Boolean.FALSE.equals(Utils.getProperty(cursor, "CharHidden")))
       {
         String zuleit = cursor.getString();
         // nicht leere Zuleitungszeilen zum Verfügungspunkt hinzufügen.
@@ -1343,15 +1348,25 @@ public class SachleitendeVerfuegung
       try
       {
         boolean oldState =
-          AnyConverter.toBoolean(UNO.getProperty(section, "IsVisible"));
+            AnyConverter.toBoolean(Utils.getProperty(section, "IsVisible"));
         sectionOldState.put(section, oldState);
-        UNO.setProperty(section, "IsVisible", Boolean.FALSE);
+        Utils.setProperty(section, "IsVisible", Boolean.FALSE);
       }
       catch (IllegalArgumentException x)
       {}
 
     // ensprechende Verfügungspunkte ausblenden
-    if (setInvisibleRange != null) UNO.hideTextRange(setInvisibleRange, true);
+    if (setInvisibleRange != null)
+    {
+      try
+      {
+        UNO.hideTextRange(setInvisibleRange, true);
+      }
+      catch (UnoHelperException e)
+      {
+        LOGGER.error("Sichtbarkeit konnte nicht geändert werden.", e);
+      }
+    }
 
     // Ein/Ausblenden Druckblöcke (z.B. draftOnly):
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_DRAFT_ONLY, isDraft, false);
@@ -1371,8 +1386,15 @@ public class SachleitendeVerfuegung
     XTextRange punkt1ZifferOnly = null;
     if (isOriginal && punkt1 != null)
     {
-      punkt1ZifferOnly = getZifferOnly(punkt1, true);
-      UNO.hideTextRange(punkt1ZifferOnly, true);
+      try
+      {
+        punkt1ZifferOnly = getZifferOnly(punkt1, true);
+        UNO.hideTextRange(punkt1ZifferOnly, true);
+      }
+      catch (UnoHelperException e)
+      {
+        LOGGER.error("Sichtbarkeit konnte nicht geändert werden.", e);
+      }
     }
 
     // -----------------------------------------------------------------------
@@ -1382,7 +1404,17 @@ public class SachleitendeVerfuegung
       pmod.printWithProps();
 
     // Ausblendung von Ziffer von Punkt 1 wieder aufheben
-    if (punkt1ZifferOnly != null) UNO.hideTextRange(punkt1ZifferOnly, false);
+    if (punkt1ZifferOnly != null)
+    {
+      try
+      {
+        UNO.hideTextRange(punkt1ZifferOnly, false);
+      }
+      catch (UnoHelperException e)
+      {
+        LOGGER.error("Sichtbarkeit konnte nicht geändert werden.", e);
+      }
+    }
 
     // Sichtbarkeitsgruppen wieder einblenden
     pmod.setGroupVisible(GROUP_ID_SLV_DRAFT_ONLY, true);
@@ -1402,11 +1434,22 @@ public class SachleitendeVerfuegung
     for (XTextSection section : hidingSections)
     {
       Boolean oldState = sectionOldState.get(section);
-      if (oldState != null) UNO.setProperty(section, "IsVisible", oldState);
+      if (oldState != null)
+        Utils.setProperty(section, "IsVisible", oldState);
     }
 
     // Verfügungspunkte wieder einblenden:
-    if (setInvisibleRange != null) UNO.hideTextRange(setInvisibleRange, false);
+    if (setInvisibleRange != null)
+    {
+      try
+      {
+        UNO.hideTextRange(setInvisibleRange, false);
+      }
+      catch (UnoHelperException e)
+      {
+        LOGGER.error("Sichtbarkeit konnte nicht geändert werden.", e);
+      }
+    }
 
     // ViewCursor wieder herstellen:
     if (vc != null && oldViewCursor != null) vc.gotoRange(oldViewCursor, false);
@@ -1629,9 +1672,9 @@ public class SachleitendeVerfuegung
     if (style == null)
     {
       style = createParagraphStyle(doc, ParaStyleNameDefault, null);
-      UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-      UNO.setProperty(style, "CharHeight", Integer.valueOf(11));
-      UNO.setProperty(style, "CharFontName", "Arial");
+      Utils.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+      Utils.setProperty(style, "CharHeight", Integer.valueOf(11));
+      Utils.setProperty(style, "CharFontName", "Arial");
     }
 
     style = getParagraphStyle(doc, ParaStyleNameVerfuegungspunkt);
@@ -1640,10 +1683,10 @@ public class SachleitendeVerfuegung
       style =
         createParagraphStyle(doc, ParaStyleNameVerfuegungspunkt,
           ParaStyleNameDefault);
-      UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-      UNO.setProperty(style, "CharWeight", Float.valueOf(FontWeight.BOLD));
-      UNO.setProperty(style, "ParaFirstLineIndent", Integer.valueOf(-700));
-      UNO.setProperty(style, "ParaTopMargin", Integer.valueOf(460));
+      Utils.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+      Utils.setProperty(style, "CharWeight", Float.valueOf(FontWeight.BOLD));
+      Utils.setProperty(style, "ParaFirstLineIndent", Integer.valueOf(-700));
+      Utils.setProperty(style, "ParaTopMargin", Integer.valueOf(460));
     }
 
     style = getParagraphStyle(doc, ParaStyleNameVerfuegungspunkt1);
@@ -1652,9 +1695,9 @@ public class SachleitendeVerfuegung
       style =
         createParagraphStyle(doc, ParaStyleNameVerfuegungspunkt1,
           ParaStyleNameVerfuegungspunkt);
-      UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-      UNO.setProperty(style, "ParaFirstLineIndent", Integer.valueOf(0));
-      UNO.setProperty(style, "ParaTopMargin", Integer.valueOf(0));
+      Utils.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+      Utils.setProperty(style, "ParaFirstLineIndent", Integer.valueOf(0));
+      Utils.setProperty(style, "ParaTopMargin", Integer.valueOf(0));
     }
 
     style = getParagraphStyle(doc, ParaStyleNameAbdruck);
@@ -1663,10 +1706,10 @@ public class SachleitendeVerfuegung
       style =
         createParagraphStyle(doc, ParaStyleNameAbdruck,
           ParaStyleNameVerfuegungspunkt);
-      UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-      UNO.setProperty(style, "CharWeight", Integer.valueOf(100));
-      UNO.setProperty(style, "ParaFirstLineIndent", Integer.valueOf(-700));
-      UNO.setProperty(style, "ParaTopMargin", Integer.valueOf(460));
+      Utils.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+      Utils.setProperty(style, "CharWeight", Integer.valueOf(100));
+      Utils.setProperty(style, "ParaFirstLineIndent", Integer.valueOf(-700));
+      Utils.setProperty(style, "ParaTopMargin", Integer.valueOf(460));
     }
 
     style = getParagraphStyle(doc, ParaStyleNameZuleitungszeile);
@@ -1674,9 +1717,9 @@ public class SachleitendeVerfuegung
     {
       style =
         createParagraphStyle(doc, ParaStyleNameZuleitungszeile, ParaStyleNameDefault);
-      UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-      UNO.setProperty(style, "CharUnderline", Integer.valueOf(1));
-      UNO.setProperty(style, "CharWeight", Float.valueOf(FontWeight.BOLD));
+      Utils.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+      Utils.setProperty(style, "CharUnderline", Integer.valueOf(1));
+      Utils.setProperty(style, "CharWeight", Float.valueOf(FontWeight.BOLD));
     }
 
     style = getParagraphStyle(doc, ParaStyleNameVerfuegungspunktMitZuleitung);
@@ -1685,8 +1728,8 @@ public class SachleitendeVerfuegung
       style =
         createParagraphStyle(doc, ParaStyleNameVerfuegungspunktMitZuleitung,
           ParaStyleNameVerfuegungspunkt);
-      UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-      UNO.setProperty(style, "CharUnderline", Integer.valueOf(1));
+      Utils.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+      Utils.setProperty(style, "CharUnderline", Integer.valueOf(1));
     }
 
     // Zeichenformate:
@@ -1695,10 +1738,10 @@ public class SachleitendeVerfuegung
     if (style == null)
     {
       style = createCharacterStyle(doc, CharStyleNameDefault, null);
-      UNO.setProperty(style, "FollowStyle", CharStyleNameDefault);
-      UNO.setProperty(style, "CharHeight", Integer.valueOf(11));
-      UNO.setProperty(style, "CharFontName", "Arial");
-      UNO.setProperty(style, "CharUnderline", Integer.valueOf(0));
+      Utils.setProperty(style, "FollowStyle", CharStyleNameDefault);
+      Utils.setProperty(style, "CharHeight", Integer.valueOf(11));
+      Utils.setProperty(style, "CharFontName", "Arial");
+      Utils.setProperty(style, "CharUnderline", Integer.valueOf(0));
     }
 
     style = getCharacterStyle(doc, CharStyleNameRoemischeZiffer);
@@ -1706,8 +1749,8 @@ public class SachleitendeVerfuegung
     {
       style =
         createCharacterStyle(doc, CharStyleNameRoemischeZiffer, CharStyleNameDefault);
-      UNO.setProperty(style, "FollowStyle", CharStyleNameDefault);
-      UNO.setProperty(style, "CharWeight", Float.valueOf(FontWeight.BOLD));
+      Utils.setProperty(style, "FollowStyle", CharStyleNameDefault);
+      Utils.setProperty(style, "CharWeight", Float.valueOf(FontWeight.BOLD));
     }
   }
 
@@ -1804,7 +1847,8 @@ public class SachleitendeVerfuegung
           try
           {
             oldName =
-              AnyConverter.toString(UNO.getProperty(cursor, "ParaStyleName"));
+                AnyConverter
+                    .toString(Utils.getProperty(cursor, "ParaStyleName"));
           }
           catch (IllegalArgumentException e)
           {}
@@ -1824,9 +1868,9 @@ public class SachleitendeVerfuegung
             // Das Setzen von ParaStyleName setzt mindestens CharHidden des cursors
             // auf Default zurück. Daher muss der bisherige Stand von CharHidden nach
             // dem Setzen wieder hergestellt werden:
-            Object hidden = UNO.getProperty(cursor, "CharHidden");
-            UNO.setProperty(cursor, "ParaStyleName", newName);
-            UNO.setProperty(cursor, "CharHidden", hidden);
+            Object hidden = Utils.getProperty(cursor, "CharHidden");
+            Utils.setProperty(cursor, "ParaStyleName", newName);
+            Utils.setProperty(cursor, "CharHidden", hidden);
           }
         }
       } while (cursor.gotoNextParagraph(false));

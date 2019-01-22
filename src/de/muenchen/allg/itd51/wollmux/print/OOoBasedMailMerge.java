@@ -100,6 +100,7 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 
@@ -528,7 +529,7 @@ public class OOoBasedMailMerge
       if (dataSource != null)
       {
         String dirURL = UNO.getParsedUNOUrl(parentDir.toURI().toString()).Complete;
-        UNO.setProperty(dataSource, "URL", "sdbc:flat:" + dirURL);
+        Utils.setProperty(dataSource, "URL", "sdbc:flat:" + dirURL);
 
         UnoProps p = new UnoProps();
         p.setPropertyValue("Extension", "csv");
@@ -539,7 +540,7 @@ public class OOoBasedMailMerge
         p.setPropertyValue("StringDelimiter", "\"");
         p.setPropertyValue("DecimalDelimiter", ".");
         p.setPropertyValue("ThousandDelimiter", "");
-        UNO.setProperty(dataSource, "Info", p.getProps());
+        Utils.setProperty(dataSource, "Info", p.getProps());
 
         XStorable xStorable = UNO.XStorable(dataSource.getDatabaseDocument());
         XModel model = UNO.XModel(xStorable);
@@ -1142,15 +1143,15 @@ public class OOoBasedMailMerge
         if (UNO.supportsService(tf, "com.sun.star.text.TextField.Database"))
         {
           XPropertySet master = tf.getTextFieldMaster();
-          UNO.setProperty(master, "DataBaseName", dbName);
-          UNO.setProperty(master, "DataTableName", TABLE_NAME);
+          Utils.setProperty(master, "DataBaseName", dbName);
+          Utils.setProperty(master, "DataTableName", TABLE_NAME);
         }
 
         // "Nächster Datensatz"-Felder anpassen auf temporäre Datenquelle/Tabelle
         if (UNO.supportsService(tf, "com.sun.star.text.TextField.DatabaseNextSet"))
         {
-          UNO.setProperty(tf, "DataBaseName", dbName);
-          UNO.setProperty(tf, "DataTableName", TABLE_NAME);
+          Utils.setProperty(tf, "DataBaseName", dbName);
+          Utils.setProperty(tf, "DataTableName", TABLE_NAME);
         }
 
         // InputUser-Felder ersetzen durch entsprechende Database-Felder
@@ -1159,7 +1160,7 @@ public class OOoBasedMailMerge
           String content = "";
           try
           {
-            content = AnyConverter.toString(UNO.getProperty(tf, "Content"));
+            content = AnyConverter.toString(Utils.getProperty(tf, "Content"));
           }
           catch (IllegalArgumentException e)
           {}

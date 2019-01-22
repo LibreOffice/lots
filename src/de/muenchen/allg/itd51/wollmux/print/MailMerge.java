@@ -90,6 +90,7 @@ import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.db.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 
 public class MailMerge
@@ -131,9 +132,11 @@ public class MailMerge
     }
 
     String datasource =
-      (String) UNO.getProperty(settings, "CurrentDatabaseDataSource");
-    String table = (String) UNO.getProperty(settings, "CurrentDatabaseCommand");
-    Integer type = (Integer) UNO.getProperty(settings, "CurrentDatabaseCommandType");
+        (String) Utils.getProperty(settings, "CurrentDatabaseDataSource");
+    String table = (String) Utils.getProperty(settings,
+        "CurrentDatabaseCommand");
+    Integer type = (Integer) Utils.getProperty(settings,
+        "CurrentDatabaseCommandType");
 
     LOGGER.debug("Ausgewählte Datenquelle: \"" + datasource
       + "\"  Tabelle/Kommando: \"" + table + "\"  Typ: \"" + type + "\"");
@@ -922,10 +925,11 @@ public class MailMerge
         return;
       }
       String datasource =
-        (String) UNO.getProperty(settings, "CurrentDatabaseDataSource");
-      String table = (String) UNO.getProperty(settings, "CurrentDatabaseCommand");
+          (String) Utils.getProperty(settings, "CurrentDatabaseDataSource");
+      String table = (String) Utils.getProperty(settings,
+          "CurrentDatabaseCommand");
       Integer type =
-        (Integer) UNO.getProperty(settings, "CurrentDatabaseCommandType");
+          (Integer) Utils.getProperty(settings, "CurrentDatabaseCommandType");
       if (datasource != null && datasourceNames.contains(datasource)
         && table != null && table.length() > 0 && type != null
         && type.intValue() == CommandType.TABLE)
