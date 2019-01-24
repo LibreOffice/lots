@@ -9,7 +9,7 @@ Homepage: http://www.wollmux.org
 
 Package: libreoffice5.2-wollmux
 Architecture: all
-Depends: ${misc:Depends}, default-jre, libreoffice-meta, python3
+Depends: ${misc:Depends}, default-jre, libreoffice5.2-writer, python3
 Conflicts: libreoffice-wollmux (<< ${binary:Version}), wollmux (<< ${binary:Version}), wollmuxbar (<< ${binary:Version}), libreoffice6.1-wollmux
 Replaces: libreoffice-wollmux (<< ${binary:Version}), wollmux (<< ${binary:Version}), wollmuxbar (<< ${binary:Version}), libreoffice6.1-wollmux
 Provides: libreoffice-wollmux, wollmux, wollmuxbar
@@ -33,7 +33,7 @@ Description: WollMux extension for LibreOffice
 
 Package: libreoffice6.1-wollmux
 Architecture: all
-Depends: ${misc:Depends}, default-jre, libreoffice-meta, python3
+Depends: ${misc:Depends}, default-jre, libreoffice6.1-writer, python3
 Conflicts: libreoffice-wollmux (<< ${binary:Version}), wollmux (<< ${binary:Version}), wollmuxbar (<< ${binary:Version}), libreoffice5.2-wollmux
 Replaces: libreoffice-wollmux (<< ${binary:Version}), wollmux (<< ${binary:Version}), wollmuxbar (<< ${binary:Version}), libreoffice5.2-wollmux
 Provides: libreoffice-wollmux, wollmux, wollmuxbar
