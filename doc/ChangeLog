@@ -1,3 +1,23 @@
+ ==================== Neu in Version 18.0.5 ====================
+
+    * Bugfixes
+          o Der FormularMax4000 ist nicht mehr immer im Vordergrund. Dafür
+            öffnet er sich nun wieder ab und zu im Hintergrund. Das wurde auf
+            wollmux.org -> FormularMax Handbuch dokumentiert.
+          o Wenn die WollMuxBar im Modus "Minimize" mit TrayIcon "Iconify" oder
+            "IconfiyAndPopup" betrieben wurde, dann konnte die WollMuxBar nicht
+            über einen Klick in die Taskbar minimiert werden.
+          o Eine Änderung in der FormularGUI (wie es auch durch den Seriendruck
+            geschieht) wird jetzt immer ins Dokument übertragen. Es kam beim
+            Seriendruck zu Situationen, in denen die Daten in der FormularGUI
+            nicht konsistent mit den Daten im Dokument waren.
+          o Ein Fehler beim Auslesen der Windows-Registry wurde behoben.
+          o Das Plugin lhmDateinamensanpassung wurde in den WollMux integriert.
+            Außerdem werden nun auch relative Pfade korrekt auf 240 Zeichen
+            gekürzt.
+          o Es wurde eine zirkuläre Debianabhängigkeit aufgelöst.
+
+
  ==================== Neu in Version 18.0.4 ====================
 
     * neue Features
