@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Stellt eine Einfügestelle im Dokument (insertValue oder insertFormValue) dar.
  * 
- * Copyright (c) 2008-2018 Landeshauptstadt München
+ * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),

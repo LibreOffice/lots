@@ -4,7 +4,7 @@
  * Funktion : Ein vom DJ gelieferter Datensatz, der zu den Methoden von
  *            Dataset noch DJ-spezifische Methoden anbietet.
  * 
- * Copyright (c) 2008-2018 Landeshauptstadt München
+ * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
