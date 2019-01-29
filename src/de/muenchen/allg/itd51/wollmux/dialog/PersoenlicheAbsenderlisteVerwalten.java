@@ -52,7 +52,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.awt.event.ActionListener;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -108,17 +107,16 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
 import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
- * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung einen Dialog zum
- * Hinzufügen/Entfernen von Einträgen der Persönlichen Absenderliste auf. Die private-Funktionen
- * dagegen NUR aus dem Event-Dispatching Thread heraus aufgerufen werden.
+ * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung einen Dialog
+ * mit konfigurierbaren Suchfeldern zum
+ * Hinzufügen/Entfernen von Einträgen der Persönlichen Absenderliste auf.
  *
- * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @author Matthias Benkmann (D-III-ITD 5.1), Björn Ranft
  */
 public class PersoenlicheAbsenderlisteVerwalten
 {
@@ -134,36 +132,12 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   public static final String DEFAULT_ANREDE = "Herr";
 
-  /**
-   * Gibt an, wie die Personen in den Listen angezeigt werden sollen, wenn es nicht explizit in der
-   * Konfiguration über das DISPLAY-Attribut für eine listbox festgelegt ist. %{Spalte}-Syntax um
-   * entsprechenden Wert des Datensatzes einzufügen, z.B. "%{Nachname}, %{Vorname}" für die Anzeige
-   * "Meier, Hans" etc.
-   *
-   * An dieser Stelle einen Default-Wert hardzucodieren (der noch dazu LHM-spezifisch ist!) ist sehr
-   * unschön und wurde nur gemacht um abwärtskompatibel zu alten WollMux-Konfigurationen zu bleiben.
-   * Sobald sichergestellt ist, dass überall auf eine neue WollMux-Konfiguration geupdatet wurde,
-   * sollte man diesen Fallback wieder entfernen.
-   */
-  private static final String DEFAULT_DISPLAYTEMPLATE = "%{Nachname}, %{Vorname} (%{Rolle})";
-
-  /**
-   * Der DatasourceJoiner, den dieser Dialog anspricht.
-   */
   private DatasourceJoiner dj;
 
   private SimpleDialogLayout layout;
   private UNODialogFactory dialogFactory;
   private List<DJDatasetListElement> resultDJDatasetList = null;
   private List<DJDatasetListElement> cachedPAL = new ArrayList<>();
-
-  /**
-   * Gibt an, wie die Suchresultate in der {@link #resultsJList} angezeigt werden sollen. Der Wert
-   * wird in der Konfiguration dieses Dialogs bei der "listbox" mit ID "suchanfrage" durch Angeben
-   * des DISPLAY-Attributs konfiguriert. %{Spalte}-Syntax um entsprechenden Wert des Datensatzes
-   * einzufügen, z.B. "%{Nachname}, %{Vorname}" für die Anzeige "Meier, Hans" etc.
-   */
-  private String resultsDisplayTemplate;
 
   /**
    * Die Textfelder in dem der Benutzer seine Suchanfrage eintippt.
@@ -177,24 +151,15 @@ public class PersoenlicheAbsenderlisteVerwalten
    * Erzeugt einen neuen Dialog.
    *
    * @param conf
-   *          das ConfigThingy, das den Dialog beschreibt (der Vater des "Fenster"-Knotens.
-   * @param abConf
-   *          das ConfigThingy, das den Absenderdaten Bearbeiten Dialog beschreibt.
+   *          das ConfigThingy, das die möglichen Suchfelder beschreibt.
    * @param dj
    *          der DatasourceJoiner, der die zu bearbeitende Liste verwaltet.
-   * @param dialogEndListener
-   *          falls nicht null, wird die
-   *          {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)} Methode aufgerufen
-   *          (im Event Dispatching Thread), nachdem der Dialog geschlossen wurde. Das actionCommand
-   *          des ActionEvents gibt die Aktion an, die das Speichern des Dialogs veranlasst hat.
-   * @throws ConfigurationErrorException
-   *           im Falle eines schwerwiegenden Konfigurationsfehlers, der es dem Dialog unmöglich
-   *           macht, zu funktionieren (z.B. dass der "Fenster" Schlüssel fehlt.
+   * @throws NodeNotFoundException
+   *           Im Falle von nicht konfigurierten Suchfeldern in ConfigThingy.
    */
   public PersoenlicheAbsenderlisteVerwalten(ConfigThingy conf, DatasourceJoiner dj)
   {
     this.dj = dj;
-    this.resultsDisplayTemplate = DEFAULT_DISPLAYTEMPLATE;
 
     ConfigThingy suchfelder;
     try
@@ -215,14 +180,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
 
     createGUI();
-  }
-
-  /**
-   * Getter Methode für Konstante DEFAULT_DISPLAYTEMPLATE
-   */
-  public static String getDefaultDisplaytemplate()
-  {
-    return DEFAULT_DISPLAYTEMPLATE;
   }
 
   /**
@@ -304,25 +261,15 @@ public class PersoenlicheAbsenderlisteVerwalten
     {
       DJDataset ds = (DJDataset) result;
 
-      try
-      {
-        String dbNachname = ds.get("Nachname") == null ? "" : ds.get("Nachname");
-        String dbVorname = ds.get("Vorname") == null ? "" : ds.get("Vorname");
-        String dbOrgaKurz = ds.get("OrgaKurz") == null ? "" : ds.get("OrgaKurz");
+      palListe.addItem(buildListBoxString(ds), (short) count);
+      cachedPAL.add(new DJDatasetListElement(ds));
 
-        palListe.addItem(dbNachname + ", " + dbVorname + " " + dbOrgaKurz, (short)count);
-        cachedPAL.add(new DJDatasetListElement(ds, DEFAULT_DISPLAYTEMPLATE));
-        
-        if(ds.isSelectedDataset())
-          itemToHighlightPos = (short) count;
-        
-        count++;
-      } catch (ColumnNotFoundException e)
-      {
-        LOGGER.error("", e);
-      }
+      if (ds.isSelectedDataset())
+        itemToHighlightPos = (short) count;
+
+      count++;
     }
-    
+
     palListe.selectItemPos(itemToHighlightPos, true);
   }
 
@@ -577,6 +524,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     public void itemStateChanged(ItemEvent arg0)
     {
       cachedPAL.get(arg0.Selected).getDataset().select();
+      
       WollMuxEventHandler.getInstance().handlePALChangedNotify();
     }
   };
@@ -626,9 +574,11 @@ public class PersoenlicheAbsenderlisteVerwalten
 
       short[] selectedItemsPos = xListBoxResults.getSelectedItemsPos();
 
+      List<DJDatasetListElement> entriesAdded = new ArrayList<>();
       for (short index : selectedItemsPos)
       {
         cachedPAL.add(resultDJDatasetList.get(index));
+        entriesAdded.add(resultDJDatasetList.get(index));
       }
 
       String[] selectedItems = xListBoxResults.getSelectedItems();
@@ -643,7 +593,11 @@ public class PersoenlicheAbsenderlisteVerwalten
       if (xListBoxPal == null)
         return;
 
-      xListBoxPal.addItems(selectedItems, (short) 1);
+      xListBoxPal.addItems(selectedItems, (short) (xListBoxPal.getItemCount() + 1));
+
+      for (DJDatasetListElement entry : entriesAdded) {
+        entry.getDataset().copy();
+      }
     }
   };
 
@@ -679,6 +633,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       for (short pos : selectedItemsPos)
       {
         xListBoxPal.removeItems(pos, (short) 1);
+        cachedPAL.remove(pos);
       }
     }
   };
@@ -732,8 +687,8 @@ public class PersoenlicheAbsenderlisteVerwalten
 
       for (short index : sel)
       {
-        cachedPAL.add(new DJDatasetListElement(
-            copyDJDataset(resultDJDatasetList.get(index).getDataset()), DEFAULT_DISPLAYTEMPLATE));
+        cachedPAL.add(
+            new DJDatasetListElement(copyDJDataset(resultDJDatasetList.get(index).getDataset())));
       }
 
       XControl xControlPAL = layout.getControl("palListe");
@@ -747,25 +702,10 @@ public class PersoenlicheAbsenderlisteVerwalten
       for (short index : sel)
       {
         DJDataset datasetCopy = copyDJDataset(cachedPAL.get(index).getDataset());
-        cachedPAL
-            .add(new DJDatasetListElement(copyDJDataset(datasetCopy), DEFAULT_DISPLAYTEMPLATE));
+        cachedPAL.add(new DJDatasetListElement(copyDJDataset(datasetCopy)));
 
-        try
-        {
-          String dbRolle = datasetCopy.get("Rolle") == null ? "" : datasetCopy.get("Rolle");
-          String dbNachname = datasetCopy.get("Nachname") == null ? ""
-              : datasetCopy.get("Nachname");
-          String dbVorname = datasetCopy.get("Vorname") == null ? "" : datasetCopy.get("Vorname");
-          String dbOrgaKurz = datasetCopy.get("OrgaKurz") == null ? ""
-              : datasetCopy.get("OrgaKurz");
-
-          xListBoxPal.addItem(
-              "(" + dbRolle + ") " + dbNachname + ", " + dbVorname + " " + dbOrgaKurz,
-              (short) (xListBoxPal.getItemCount() + 1));
-        } catch (ColumnNotFoundException e)
-        {
-          LOGGER.error("", e);
-        }
+        xListBoxPal.addItem(buildListBoxString(datasetCopy),
+            (short) (xListBoxPal.getItemCount() + 1));
       }
     }
 
@@ -817,14 +757,21 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
   };
 
-  private void setListElements(QueryResults data, String displayTemplate)
+  private void setListElements(QueryResults data)
   {
+    if (data == null)
+    {
+      LOGGER.debug("PersoenlicheAbsenderlisteVeralten: setListElements: queryresults is NULL.");
+      return;
+    }
+
     resultDJDatasetList = new ArrayList<>();
 
     data.forEach(item -> {
-      DJDatasetListElement element = new DJDatasetListElement((DJDataset) item, displayTemplate);
+      DJDatasetListElement element = new DJDatasetListElement((DJDataset) item);
       resultDJDatasetList.add(element);
     });
+
     Collections.sort(resultDJDatasetList);
 
     XControl xControl = layout.getControl("searchResultList");
@@ -844,19 +791,31 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     for (int i = 0; i < resultDJDatasetList.size(); i++)
     {
-      try
-      {
-        DJDataset ds = resultDJDatasetList.get(i).getDataset();
-        String dbNachname = ds.get("Nachname") == null ? "" : ds.get("Nachname");
-        String dbVorname = ds.get("Vorname") == null ? "" : ds.get("Vorname");
-        String dbOrgaKurz = ds.get("OrgaKurz") == null ? "" : ds.get("OrgaKurz");
-
-        xListBox.addItem(dbNachname + ", " + dbVorname + " " + dbOrgaKurz, (short) i);
-      } catch (ColumnNotFoundException e)
-      {
-        LOGGER.error("", e);
-      }
+      DJDataset ds = resultDJDatasetList.get(i).getDataset();
+      xListBox.addItem(buildListBoxString(ds), (short) i);
     }
+  }
+
+  private String buildListBoxString(DJDataset ds)
+  {
+    String dbNachname = "";
+    String dbVorname = "";
+    String dbOrgaKurz = "";
+    String dbRolle = "";
+
+    try
+    {
+      dbRolle = ds.get("Rolle") == null || ds.get("Rolle").isEmpty() ? "" : "(" + ds.get("Rolle") + ")";
+      dbNachname = ds.get("Nachname") == null ? "" : ds.get("Nachname");
+      dbVorname = ds.get("Vorname") == null ? "" : ds.get("Vorname");
+      dbOrgaKurz = ds.get("OrgaKurz") == null ? "" : ds.get("OrgaKurz");
+
+    } catch (ColumnNotFoundException e)
+    {
+      LOGGER.error("", e);
+    }
+
+    return dbRolle + dbNachname + ", " + dbVorname + " " + dbOrgaKurz;
   }
 
   private void search()
@@ -916,7 +875,7 @@ public class PersoenlicheAbsenderlisteVerwalten
               + "Bitte versuchen Sie eine andere, präzisere Suchanfrage.");
     }
 
-    setListElements(results, resultsDisplayTemplate);
+    setListElements(results);
   }
 
 }

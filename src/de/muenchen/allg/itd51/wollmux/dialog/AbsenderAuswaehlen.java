@@ -38,7 +38,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.awt.event.ActionListener;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,41 +74,17 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
 import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
- * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung einen Dialog zum
- * Auswählen eines Eintrages aus der Persönlichen Absenderliste. Die private-Funktionen dürfen NUR
- * aus dem Event-Dispatching Thread heraus aufgerufen werden.
+ * Diese Klasse stellt einen Dialog zum
+ * Auswählen eines Eintrages aus der Persönlichen Absenderliste bereit.
  *
- * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @author Matthias Benkmann (D-III-ITD 5.1), Björn Ranft
  */
 public class AbsenderAuswaehlen
 {
-
   private static final Logger LOGGER = LoggerFactory.getLogger(AbsenderAuswaehlen.class);
-
-  /**
-   * Default-Wert dafür, wie die Personen in der Absenderliste angezeigt werden sollen, wenn es
-   * nicht explizit in der Konfiguration über das DISPLAY-Attribut für eine listbox festgelegt ist.
-   * %{Spalte}-Syntax um entsprechenden Wert des Datensatzes einzufügen, z.B. "%{Nachname},
-   * %{Vorname}" für die Anzeige "Meier, Hans" etc.
-   *
-   * An dieser Stelle einen Default-Wert hardzucodieren (der noch dazu LHM-spezifisch ist!) ist sehr
-   * unschön und wurde nur gemacht um abwärtskompatibel zu alten WollMux-Konfigurationen zu bleiben.
-   * Sobald sichergestellt ist, dass überall auf eine neue WollMux-Konfiguration geupdatet wurde,
-   * sollte man diesen Fallback wieder entfernen.
-   */
-  private static final String DEFAULT_DISPLAYTEMPLATE = "%{Nachname}, %{Vorname} (%{Rolle})";
-
-  /**
-   * Gibt an, wie die Suchresultate in der {@link #palJList} angezeigt werden sollen. Der Wert wird
-   * in der Konfiguration bei der "listbox" mit ID "suchanfrage" durch Angeben des DISPLAY-Attributs
-   * konfiguriert. %{Spalte}-Syntax um entsprechenden Wert des Datensatzes einzufügen, z.B.
-   * "%{Nachname}, %{Vorname}" für die Anzeige "Meier, Hans" etc.
-   */
-  private String palDisplayTemplate;
 
   /**
    * Der DatasourceJoiner, den dieser Dialog anspricht.
@@ -122,38 +97,26 @@ public class AbsenderAuswaehlen
   private ConfigThingy verConf;
 
   private List<DJDatasetListElement> elements = null;
+  
+  private UNODialogFactory dialogFactory;
+  
+  private SimpleDialogLayout layout;
 
   /**
    * Erzeugt einen neuen Dialog.
    *
-   * @param conf
-   *          das ConfigThingy, das den Dialog beschreibt (der Vater des "Fenster"-Knotens.
-   * @param abConf
-   *          das ConfigThingy, das den Dialog zum Bearbeiten eines Datensatzes beschreibt.
    * @param verConf
    *          das ConfigThingy, das den Absenderliste Verwalten Dialog beschreibt.
    * @param dj
    *          der DatasourceJoiner, der die PAL verwaltet.
-   * @param dialogEndListener
-   *          falls nicht null, wird die
-   *          {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)} Methode aufgerufen
-   *          (im Event Dispatching Thread), nachdem der Dialog geschlossen wurde. Das actionCommand
-   *          des ActionEvents gibt die Aktion an, die das Beenden des Dialogs veranlasst hat.
-   * @throws ConfigurationErrorException
-   *           im Falle eines schwerwiegenden Konfigurationsfehlers, der es dem Dialog unmöglich
-   *           macht, zu funktionieren (z.B. dass der "Fenster" Schlüssel fehlt.
    */
-  public AbsenderAuswaehlen(ConfigThingy conf, ConfigThingy verConf, DatasourceJoiner dj)
+  public AbsenderAuswaehlen(ConfigThingy verConf, DatasourceJoiner dj)
   {
     this.dj = dj;
     this.verConf = verConf;
-    this.palDisplayTemplate = DEFAULT_DISPLAYTEMPLATE;
 
     createUNOGUI();
   }
-
-  private UNODialogFactory dialogFactory;
-  private SimpleDialogLayout layout;
 
   private void createUNOGUI()
   {
@@ -180,7 +143,7 @@ public class AbsenderAuswaehlen
       new PersoenlicheAbsenderlisteVerwalten(verConf, dj);
     } else
     {
-      setListElements(dj.getLOS(), palDisplayTemplate);
+      setListElements(dj.getLOS());
     }
   }
 
@@ -279,8 +242,10 @@ public class AbsenderAuswaehlen
     {
       DJDatasetListElement selectedElement = elements.get(arg0.Selected);
 
-      if (selectedElement == null)
+      if (selectedElement == null) {
+        LOGGER.debug("AbsenderAuswaehlen: itemStateChanged: selectedDataset is NULL.");
         return;
+      }
 
       selectedElement.getDataset().select();
     }
@@ -317,12 +282,12 @@ public class AbsenderAuswaehlen
     }
   };
 
-  private void setListElements(QueryResults data, String displayTemplate)
+  private void setListElements(QueryResults data)
   {
     elements = new ArrayList<>();
 
     data.forEach(item -> {
-      DJDatasetListElement element = new DJDatasetListElement((DJDataset) item, displayTemplate);
+      DJDatasetListElement element = new DJDatasetListElement((DJDataset) item);
       elements.add(element);
     });
     Collections.sort(elements);
