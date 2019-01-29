@@ -24,12 +24,10 @@ public class OnShowDialogAbsenderAuswaehlen extends BasicEvent
     try
     {
       // Konfiguration auslesen:
-      ConfigThingy whoAmIconf = WollMuxEventHandler.getInstance()
-          .requireLastSection(conf, "AbsenderAuswaehlen");
       ConfigThingy palConf = WollMuxEventHandler.getInstance()
           .requireLastSection(conf, "PersoenlicheAbsenderliste");
 
-      new AbsenderAuswaehlen(whoAmIconf, palConf,
+      new AbsenderAuswaehlen(palConf,
           DatasourceJoinerFactory.getDatasourceJoiner());
     } catch (Exception e)
     {

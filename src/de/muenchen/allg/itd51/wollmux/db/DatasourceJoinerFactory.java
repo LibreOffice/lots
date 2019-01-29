@@ -10,7 +10,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.db.AttachDatasource;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnTransformer;
@@ -245,7 +244,7 @@ public class DatasourceJoinerFactory
     {
       for (Dataset ds : dj.getStatus().lostDatasets)
       {
-        list.add(new DatasetListElement(ds, PersoenlicheAbsenderliste.getInstance().getSenderDisplayTemplate()).toString());
+        list.add(new DatasetListElement(ds).toString());
       }
     }
     return list;
