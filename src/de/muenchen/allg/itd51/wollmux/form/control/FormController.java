@@ -1,6 +1,9 @@
 package de.muenchen.allg.itd51.wollmux.form.control;
 
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -315,5 +318,18 @@ public class FormController
   public void formControllerInitCompleted()
   {
     WollMuxEventHandler.getInstance().handleFormControllerInitCompleted(documentController);
+  }
+
+  public void exportFormValues(File f) throws IOException
+  {
+    try (FileOutputStream out = new FileOutputStream(f))
+    {
+      documentController.getModel().exportFormValues(out);
+    }
+  }
+
+  public void importFormValues(File f) throws IOException
+  {
+    documentController.getModel().importFormValues(f);
   }
 }

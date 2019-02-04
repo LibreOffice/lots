@@ -31,10 +31,10 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -152,7 +152,7 @@ public class TextModule
          * dass ein zweiter darüber gelegt wird, da dies diverses Fehlverhalten
          * produzieren kann.
          */
-        HashSet<String> bms =
+        Set<String> bms =
           TextDocument.getBookmarkNamesMatching(INSERTFRAG_PATTERN, cursor);
 
         if (bms.size() == 0)
