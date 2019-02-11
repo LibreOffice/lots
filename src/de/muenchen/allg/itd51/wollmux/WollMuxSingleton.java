@@ -245,9 +245,6 @@ public class WollMuxSingleton
     if (singletonInstance == null)
     {
       singletonInstance = new WollMuxSingleton(ctx);
-
-      // Prüfen ob Doppelt- oder Halbinstallation vorliegt.
-      WollMuxEventHandler.getInstance().handleCheckInstallation();
     }
   }
 

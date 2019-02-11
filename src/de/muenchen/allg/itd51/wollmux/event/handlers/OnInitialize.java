@@ -13,7 +13,6 @@ import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
@@ -25,6 +24,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
@@ -43,6 +43,7 @@ public class OnInitialize extends BasicEvent
   @Override
   protected void doit()
   {
+    WollMuxEventHandler.getInstance().unregisterInitEventListener();
     DatasourceJoiner dsj = DatasourceJoinerFactory.getDatasourceJoiner();
 
     if (dsj.getLOS().size() == 0)
@@ -73,7 +74,7 @@ public class OnInitialize extends BasicEvent
             + "Wenn dieses Problem nicht temporärer "
             + "Natur ist, sollten Sie diese Datensätze aus "
             + "ihrer Absenderliste löschen und neu hinzufügen!", names);
-        ModalDialogs.showInfoModal(L.m("WollMux-Info"), message);
+        InfoDialog.showInfoModal(L.m("WollMux-Info"), message);
       }
     }
   }

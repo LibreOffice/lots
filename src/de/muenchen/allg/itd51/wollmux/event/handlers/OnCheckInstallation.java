@@ -15,12 +15,13 @@ import com.sun.star.container.NoSuchElementException;
 import com.sun.star.util.XStringSubstitution;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
  * Erzeugt ein neues WollMux-Event, in dem geprüft wird, ob der WollMux korrekt
@@ -38,11 +39,12 @@ public class OnCheckInstallation extends BasicEvent
   @Override
   protected void doit() throws WollMuxFehlerException
   {
+    WollMuxEventHandler.getInstance().unregisterCheckInstallationListener();
     // Standardwerte für den Warndialog:
     boolean showdialog = true;
     String title = L.m("Mehrfachinstallation des WollMux");
     String msg = L.m(
-        "Es wurden eine systemweite und eine benutzerlokale Installation des WollMux\n(oder Überreste von einer unvollständigen Deinstallation) gefunden.\nDiese Konstellation kann obskure Fehler verursachen.\n\nEntfernen Sie eine der beiden Installationen.\n\nDie wollmux.log enthält nähere Informationen zu den betroffenen Pfaden.");
+        "Es wurden eine systemweite und eine benutzerlokale Installation des WollMux (oder Überreste von einer unvollständigen Deinstallation) gefunden.\nDiese Konstellation kann obskure Fehler verursachen.\n\nEntfernen Sie eine der beiden Installationen.\n\nDie wollmux.log enthält nähere Informationen zu den betroffenen Pfaden.");
     String logMsg = msg;
 
     // Abschnitt Dialoge/MehrfachinstallationWarndialog auswerten
@@ -119,7 +121,8 @@ public class OnCheckInstallation extends BasicEvent
       LOGGER.error(logMsg);
 
       if (showdialog)
-        ModalDialogs.showInfoModal(title, msg, 0);
+        InfoDialog.showInfoModal(title, msg);
+
     }
   }
 
