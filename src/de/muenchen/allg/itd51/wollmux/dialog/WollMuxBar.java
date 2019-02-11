@@ -134,7 +134,6 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.document.MacroExecMode;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.WollMuxClassLoader;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
@@ -1188,7 +1187,7 @@ public class WollMuxBar
       }
       else if (action.equals("open"))
       {
-        ModalDialogs.showInfoModal("Multiformulare werden nicht mehr unterstützt",
+        InfoDialog.showInfoModal("Multiformulare werden nicht mehr unterstützt",
             "Multiformulare werden nicht mehr unterstützt. "
                 + "Bitte kontaktieren Sie Ihren Administrator. "
                 + "Sie müssen jedes Formular einzeln öffnen und ausfüllen.");

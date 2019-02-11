@@ -4,6 +4,7 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 
 /**
  * Speichert Informationen darüber, ob der WollMux sich im NoConfig-Modus
@@ -67,7 +68,7 @@ public class NoConfig
 
     if (isNoConfig() && !isNoConfigInfoShown())
     {
-      ModalDialogs.showInfoModal(
+      InfoDialog.showInfoModal(
         L.m("WollMux-Hinweis - fehlende wollmux.conf"),
         L.m("WollMux läuft ohne wollmux.conf !\n"
           + "Aus diesem Grund ist leider nicht der komplette Funktionsumfang verfügbar.\n"));

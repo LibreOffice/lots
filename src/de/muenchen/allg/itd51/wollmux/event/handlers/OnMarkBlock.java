@@ -16,7 +16,6 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextRangeCompare;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
@@ -25,6 +24,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.ooo.TextDocument;
@@ -81,7 +81,7 @@ public class OnMarkBlock extends BasicEvent
 
     if (range.isCollapsed())
     {
-      ModalDialogs.showInfoModal(L.m("Fehler"),
+      InfoDialog.showInfoModal(L.m("Fehler"),
           L.m("Bitte wählen Sie einen Bereich aus, der markiert werden soll."));
       return;
     }
@@ -153,7 +153,7 @@ public class OnMarkBlock extends BasicEvent
         if (vc != null)
           vc.collapseToEnd();
       }
-      ModalDialogs.showInfoModal(L.m("Block wurde markiert"),
+      InfoDialog.showInfoModal(L.m("Block wurde markiert"),
           L.m("Der ausgewählte Block %1.", markChange));
     } else
     {
@@ -193,7 +193,7 @@ public class OnMarkBlock extends BasicEvent
                     highlightColor, markChange);
               } else
               {
-                ModalDialogs.showInfoModal(
+                InfoDialog.showInfoModal(
                     L.m("Markierung des Blockes aufgehoben"), L.m(
                         "Der ausgewählte Block enthielt bereits eine Markierung 'Block %1'. Die bestehende Markierung wurde aufgehoben.",
                         markChange));
@@ -205,7 +205,7 @@ public class OnMarkBlock extends BasicEvent
               {
                 UNO.setPropertyToDefault(bookmarkToDelete.getTextCursor(),
                     CHAR_BACK_COLOR);
-                ModalDialogs.showInfoModal(
+                InfoDialog.showInfoModal(
                     L.m("Markierung des Blockes aufgehoben"), L.m(
                         "Der ausgewählte Block enthielt bereits eine Markierung 'Block %1'. Die bestehende Markierung wurde aufgehoben.",
                         markChange));
@@ -270,7 +270,7 @@ public class OnMarkBlock extends BasicEvent
     if (vc != null)
       vc.collapseToEnd();
 
-    ModalDialogs.showInfoModal(L.m("Block wurde markiert"),
+    InfoDialog.showInfoModal(L.m("Block wurde markiert"),
         L.m("Der ausgewählte Block %1.", markChange));
   }
 

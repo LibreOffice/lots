@@ -12,9 +12,9 @@ import com.sun.star.frame.XFrames;
 import com.sun.star.uno.RuntimeException;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 
 /**
  * Dient als Basisklasse für konkrete Event-Implementierungen.
@@ -78,7 +78,7 @@ public abstract class BasicEvent implements WollMuxEvent
     {
       msg += "\n\n" + c;
     }
-    ModalDialogs.showInfoModal(L.m("WollMux-Fehler"), msg);
+    InfoDialog.showInfoModal(L.m("WollMux-Fehler"), msg);
   }
 
   /**

@@ -92,6 +92,8 @@ public class WollMuxEventHandler
 
   private InitEventListener initEventListener;
 
+  private CheckInstallation checkInstallationListener;
+
   private boolean acceptEvents = false;
 
   /**
@@ -115,7 +117,8 @@ public class WollMuxEventHandler
     eventBus = new EventBus();
     initEventListener = new InitEventListener();
     eventBus.register(initEventListener);
-    eventBus.register(new CheckInstallation());
+    checkInstallationListener = new CheckInstallation();
+    eventBus.register(checkInstallationListener);
     eventBus.register(new WollMuxEventListener());
   }
 
@@ -127,6 +130,18 @@ public class WollMuxEventHandler
     }
 
     return instance;
+  }
+
+  public void unregisterInitEventListener()
+  {
+    eventBus.unregister(initEventListener);
+    initEventListener = null;
+  }
+
+  public void unregisterCheckInstallationListener()
+  {
+    eventBus.unregister(checkInstallationListener);
+    checkInstallationListener = null;
   }
 
   /**

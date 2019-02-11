@@ -181,41 +181,48 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
    */
   private void onViewCreated(Object source)
   {
-	    XModel compo = UNO.XModel(source);
-	    if (compo == null) return;
+    XModel compo = UNO.XModel(source);
+    if (compo == null)
+      return;
 
-	    // Keine Aktion bei neu (mit Create) erzeugten und temporären, unsichtbaren
-	    // Textdokumente des OOo-Seriendrucks. Sicherstellen, dass diese Dokumente auch
-	    // nicht im docManager mitgeführt werden.
-	    if (isTempMailMergeDocument(compo))
-	    {
-	      // docManager.remove(source) ist hier nicht erforderlich, weil für Dokumente
-	      // mit URL kein OnCreate-Event kommt.
-	      return;
-	    }
-	    Info docInfo = docManager.getInfo(compo);
-	    // docInfo ist hier nur dann ungleich null, wenn das Dokument mit Create erzeugt
-	    // wurde.
-	    XTextDocument xTextDoc = UNO.XTextDocument(compo);
-	    if (xTextDoc != null && docInfo != null && isDocumentLoadedHidden(compo))
-	    {
-	      docManager.remove(compo);
-	      return;
-	    }
+    // Keine Aktion bei neu (mit Create) erzeugten und temporären, unsichtbaren
+    // Textdokumente des OOo-Seriendrucks. Sicherstellen, dass diese Dokumente auch
+    // nicht im docManager mitgeführt werden.
+    if (isTempMailMergeDocument(compo))
+    {
+      // docManager.remove(source) ist hier nicht erforderlich, weil für Dokumente
+      // mit URL kein OnCreate-Event kommt.
+      return;
+    }
 
-	    // Dokument ggf. in docManager aufnehmen und abhängig vom Typ verarbeiten.
-	    if (xTextDoc != null)
-	    {
-	      if (docInfo == null) docManager.addTextDocument(xTextDoc);
-	      WollMuxEventHandler.getInstance().handleProcessTextDocument(DocumentManager.getTextDocumentController(xTextDoc),
-	        !isDocumentLoadedHidden(compo));
-	    }
-	    else
-	    {
-	      if (docInfo == null) docManager.add(compo);
-	      WollMuxEventHandler.getInstance().handleNotifyDocumentEventListener(null,
-	        WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
-	    }
+    // Prüfen ob Doppelt- oder Halbinstallation vorliegt.
+    WollMuxEventHandler.getInstance().handleCheckInstallation();
+    WollMuxEventHandler.getInstance().handleInitialize();
+
+    Info docInfo = docManager.getInfo(compo);
+    // docInfo ist hier nur dann ungleich null, wenn das Dokument mit Create erzeugt
+    // wurde.
+    XTextDocument xTextDoc = UNO.XTextDocument(compo);
+    if (xTextDoc != null && docInfo != null && isDocumentLoadedHidden(compo))
+    {
+      docManager.remove(compo);
+      return;
+    }
+
+    // Dokument ggf. in docManager aufnehmen und abhängig vom Typ verarbeiten.
+    if (xTextDoc != null)
+    {
+      if (docInfo == null)
+        docManager.addTextDocument(xTextDoc);
+      WollMuxEventHandler.getInstance().handleProcessTextDocument(
+          DocumentManager.getTextDocumentController(xTextDoc), !isDocumentLoadedHidden(compo));
+    } else
+    {
+      if (docInfo == null)
+        docManager.add(compo);
+      WollMuxEventHandler.getInstance().handleNotifyDocumentEventListener(null,
+          WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
+    }
 	  
   }
 

@@ -85,7 +85,6 @@ import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory;
@@ -101,6 +100,7 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.Ins
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 
@@ -166,7 +166,7 @@ public class OOoBasedMailMerge
     }
     if (ds.getSize() == 0)
     {
-      ModalDialogs.showInfoModal(
+      InfoDialog.showInfoModal(
         L.m("WollMux-Seriendruck"),
         L.m("Der Seriendruck wurde abgebrochen, da Ihr Druckauftrag keine Datensätze enthält."));
       pmod.cancel();
@@ -261,7 +261,7 @@ public class OOoBasedMailMerge
         }
       else
       {
-        ModalDialogs.showInfoModal(L.m("WollMux-Seriendruck"),
+        InfoDialog.showInfoModal(L.m("WollMux-Seriendruck"),
           L.m("Leider konnte kein Gesamtdokument erstellt werden."));
         pmod.cancel();
       }
@@ -280,7 +280,7 @@ public class OOoBasedMailMerge
       }
       else
       {
-        ModalDialogs.showInfoModal(L.m("WollMux-Seriendruck"),
+        InfoDialog.showInfoModal(L.m("WollMux-Seriendruck"),
           L.m("Das erzeugte Gesamtdokument kann leider nicht angezeigt werden."));
         pmod.cancel();
       }

@@ -9,12 +9,12 @@ import javax.swing.JOptionPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementEventHandler;
 import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarEventHandler;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -67,7 +67,7 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     }
     else if (action.equals("open"))
     {
-      ModalDialogs.showInfoModal("Multiformulare werden nicht mehr unterstützt",
+      InfoDialog.showInfoModal("Multiformulare werden nicht mehr unterstützt",
           "Multiformulare werden nicht mehr unterstützt. "
               + "Bitte kontaktieren Sie Ihren Administrator. "
               + "Sie müssen jedes Formular einzeln öffnen und ausfüllen.");

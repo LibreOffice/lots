@@ -25,7 +25,6 @@ import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.OverrideFragChainException;
@@ -42,6 +41,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentLoader;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
@@ -249,7 +249,7 @@ class DocumentExpander extends AbstractExecutor
 
         LOGGER.error(msg);
 
-        ModalDialogs.showInfoModal(L.m("WollMux-Fehler"), msg);
+        InfoDialog.showInfoModal(L.m("WollMux-Fehler"), msg);
       }
       else
       {
@@ -611,7 +611,7 @@ class DocumentExpander extends AbstractExecutor
 
       if ("true".equals(message) || "on".equals(message) || "1".equals(message))
       {
-        ModalDialogs.showInfoModal("WollMux", error);
+        InfoDialog.showInfoModal("WollMux", error);
       }
     }
   }

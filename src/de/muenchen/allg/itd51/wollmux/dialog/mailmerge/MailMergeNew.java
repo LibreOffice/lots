@@ -77,7 +77,6 @@ import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
@@ -92,6 +91,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.DatasetSelectionType;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.IndexSelection;
@@ -1060,7 +1060,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     catch (NoSuchMethodException e)
     {
       LOGGER.error("", e);
-      ModalDialogs.showInfoModal(
+      InfoDialog.showInfoModal(
         L.m("Fehler beim Drucken"),
         L.m(
           "Eine notwendige Druckfunktion ist nicht definiert. Bitte wenden Sie sich an Ihre Systemadministration damit Ihre Konfiguration entsprechend erweitert bzw. aktualisiert werden kann.\n\n%1",
@@ -1306,7 +1306,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       }
     if (tmpOutDir == null)
     {
-      ModalDialogs.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m(
+      InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m(
         "Das temporäre Verzeichnis %1 konnte nicht angelegt werden.",
         TEMP_MAIL_DIR_PREFIX));
       pmod.cancel();
@@ -1316,7 +1316,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     String from = pmod.getProp(PROP_EMAIL_FROM, "").toString();
     if (!isMailAddress(from))
     {
-      ModalDialogs.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m(
+      InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m(
         "Die Absenderadresse '%1' ist ungültig.", from));
       pmod.cancel();
       return;
@@ -1365,7 +1365,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     catch (ConfigurationErrorException e)
     {
       LOGGER.error("", e);
-      ModalDialogs.showInfoModal(
+      InfoDialog.showInfoModal(
         MAIL_ERROR_MESSAGE_TITLE,
         L.m("Es konnten keine Angaben zum Mailserver gefunden werden - eventuell ist die WollMux-Konfiguration nicht vollständig."));
       pmod.cancel();
@@ -1374,7 +1374,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     catch (MessagingException e)
     {
       LOGGER.error("", e);
-      ModalDialogs.showInfoModal(MAIL_ERROR_MESSAGE_TITLE,
+      InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE,
         L.m("Der Versand der E-Mail ist fehlgeschlagen."));
       pmod.cancel();
       return;

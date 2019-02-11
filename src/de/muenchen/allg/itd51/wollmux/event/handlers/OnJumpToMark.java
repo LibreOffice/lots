@@ -7,10 +7,10 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 
-import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
@@ -71,7 +71,7 @@ public class OnJumpToMark extends BasicEvent
     {
       if (msg)
       {
-        ModalDialogs.showInfoModal(L.m("WollMux"),
+        InfoDialog.showInfoModal(L.m("WollMux"),
             L.m("Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!"));
       }
     }

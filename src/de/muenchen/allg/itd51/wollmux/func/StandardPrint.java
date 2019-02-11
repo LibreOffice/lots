@@ -44,13 +44,13 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.ModalDialogs;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.print.MailMerge;
@@ -244,7 +244,7 @@ public class StandardPrint
     if (maxProcessableDatasets != null
       && MailMergeNew.mailMergeNewGetSelectionSize(pmod) > maxProcessableDatasets)
     {
-      ModalDialogs.showInfoModal(
+      InfoDialog.showInfoModal(
         L.m("WollMux-Seriendruck Fehler"),
         L.m(
           "Bei diesem Seriendruck-Hauptdokument kann Ihre aktuelle Office-Version maximal %1 Datensätze verarbeiten. "
