@@ -16,8 +16,6 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -30,12 +28,9 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -46,7 +41,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,56 +180,6 @@ public class GUI
 
     JMenuBar mb = new JMenuBar();
     myFrame.setJMenuBar(mb);
-
-    JMenu m1 = new JMenu(L.m("Datei"));
-    m1.setMnemonic(L.m("Datei").charAt(0));
-    mb.add(m1);
-
-    JMenuItem m2 = new JMenuItem(L.m("Import"));
-    m2.addActionListener(e ->
-    {
-      try
-      {
-        JFileChooser fc = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter(
-          L.m("Formularwerte"), "conf");
-        fc.setFileFilter(filter);
-        fc.setSelectedFile(new File(L.m("formularwerte.conf")));
-        fc.setDialogTitle(L.m("Formularwerte importieren"));
-        int n = fc.showOpenDialog(myFrame);
-        if (n == JFileChooser.APPROVE_OPTION)
-        {
-          controller.importFormValues(fc.getSelectedFile());
-        }
-      } catch (IOException e1)
-      {
-        LOGGER.error("", e1);
-      }
-    });
-    m1.add(m2);
-
-    JMenuItem m3 = new JMenuItem(L.m("Export"));
-    m3.addActionListener(e ->
-    {
-      try
-      {
-        JFileChooser fc = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter(
-          L.m("Formularwerte"), "conf");
-        fc.setFileFilter(filter);
-        fc.setSelectedFile(new File(L.m("formularwerte.conf")));
-        fc.setDialogTitle(L.m("Formularwerte exportieren"));
-        int n = fc.showSaveDialog(myFrame);
-        if (n == JFileChooser.APPROVE_OPTION)
-        {
-          controller.exportFormValues(fc.getSelectedFile());
-        }
-      } catch (IOException e1)
-      {
-        LOGGER.error("", e1);
-      }
-    });
-    m1.add(m3);
 
     // WollMux-Icon für das FormGUI-Fenster
     Common.setWollMuxIcon(myFrame);
@@ -755,7 +699,8 @@ public class GUI
   public void arrangeWindows()
   {
     Rectangle frameBounds = new Rectangle(myFrame.getBounds());
-    LOGGER.debug("Maximum window bounds " + maxWindowBounds + "| window insets " + windowInsets
+    LOGGER.debug("Maximum window bounds " + maxWindowBounds + "| window insets "
+        + windowInsets
         + "| frame bounds " + frameBounds);
 
     /*
@@ -764,7 +709,8 @@ public class GUI
      * (die mir bekannt ist), um die richtige Ausrichtung zu berechnen.
      */
     int docX = frameBounds.width + frameBounds.x + windowInsets.left;
-    int docWidth = maxWindowBounds.width - frameBounds.width - frameBounds.x - windowInsets.right;
+    int docWidth = maxWindowBounds.width - frameBounds.width - frameBounds.x
+        - windowInsets.right;
     if (docWidth < 0)
     {
       docX = maxWindowBounds.x;
@@ -774,7 +720,8 @@ public class GUI
     /*
      * Das Subtrahieren von 2*windowInsets.bottom ist ebenfalls eine Heuristik. (siehe weiter oben)
      */
-    int docHeight = maxWindowBounds.y + maxWindowBounds.height - docY - 2 * windowInsets.bottom;
+    int docHeight = maxWindowBounds.y + maxWindowBounds.height - docY
+        - 2 * windowInsets.bottom;
 
     windowPosSizeSetter.setWindowPosSize(docX, docY, docWidth, docHeight);
   }
