@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import javax.swing.JOptionPane;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -179,8 +177,7 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
 
   private void showError(String errorMsg)
   {
-    JOptionPane.showMessageDialog(null, L.m(
-      "%1\nVerständigen Sie Ihre Systemadministration.", errorMsg),
-      L.m("Fehlerhafte Konfiguration"), JOptionPane.ERROR_MESSAGE);
+    InfoDialog.showInfoModal(L.m("Fehlerhafte Konfiguration"), L.m(
+      "%1\nVerständigen Sie Ihre Systemadministration.", errorMsg));
   }
 }
