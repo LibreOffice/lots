@@ -1,3 +1,11 @@
+ ==================== Neu in Version 18.0.6 ====================
+
+    * Bugfixes
+
+          o WollMux behandelt die Eingabefelder selbst und zeigt sie nur an,
+            wenn es sich um kein WollMux-Formular handelt.
+
+
  ==================== Neu in Version 18.0.5 ====================
 
     * Bugfixes
