@@ -58,10 +58,6 @@ public abstract class BasicEvent implements WollMuxEvent
   protected void errorMessage(Throwable t)
   {
     LOGGER.error("", t);
-    String msg = "";
-    if (t.getMessage() != null)
-      msg += t.getMessage();
-    Throwable c = t.getCause();
     /*
      * Bei RuntimeExceptions keine Benutzersichtbare Meldung, weil
      *
@@ -71,14 +67,10 @@ public abstract class BasicEvent implements WollMuxEvent
      * hat, bevor der WollMux fertig war. In diesem Fall will er nicht mit einer
      * Meldung belästigt werden.
      */
-    if (c instanceof RuntimeException)
+    if (t.getCause() instanceof RuntimeException)
       return;
 
-    if (c != null)
-    {
-      msg += "\n\n" + c;
-    }
-    InfoDialog.showInfoModal(L.m("WollMux-Fehler"), msg);
+    InfoDialog.showInfoModal(L.m("WollMux-Fehler"), "Leider ist ein Fehler aufgetreten. Die genaue Fehlerbeschreibung steht im Log. Bitte wenden Sie sich an ihren Administrator.");
   }
 
   /**
