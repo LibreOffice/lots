@@ -27,6 +27,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.DispatchHelper;
 
@@ -101,6 +102,7 @@ public class OnSaveAs extends BasicEvent
                   f.getName()),
               L.m("Überschreiben?"),
               JOptionPane.YES_NO_CANCEL_OPTION);
+          
           if (res == JOptionPane.NO_OPTION)
           {
             done = false;
@@ -203,10 +205,8 @@ public class OnSaveAs extends BasicEvent
     } catch (com.sun.star.io.IOException e)
     {
       LOGGER.error("", e);
-      JOptionPane.showMessageDialog(null, L.m(
-          "Das Speichern der Datei %1 ist fehlgeschlagen!\n\n%2", f.toString(),
-          e.getLocalizedMessage()), L.m("Fehler beim Speichern"),
-          JOptionPane.ERROR_MESSAGE);
+      InfoDialog.showInfoModal(L.m("Fehler beim Speichern"), L.m(
+          "Das Speichern der Datei %1 ist fehlgeschlagen!", f.toString()));
     }
     return false;
   }

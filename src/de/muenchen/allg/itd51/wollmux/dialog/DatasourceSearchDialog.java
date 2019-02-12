@@ -64,7 +64,6 @@ import java.util.regex.Pattern;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
@@ -817,12 +816,11 @@ public class DatasourceSearchDialog implements Dialog
           results = Search.search(query.getString(), searchStrategy, dj, false);
         } catch (TimeoutException x)
         {
-          JOptionPane.showMessageDialog(myFrame, L.m(
+          InfoDialog.showInfoModal(L.m("Timeout bei Suchanfrage"), L.m(
               "Das Bearbeiten Ihrer Suchanfrage hat zu lange gedauert und wurde deshalb abgebrochen.\n"
                   + "Grund hierfür könnte ein Problem mit der Datenquelle sein oder mit dem verwendeten\n"
                   + "Suchbegriff, der auf zu viele Ergebnisse zutrifft.\n"
-                  + "Bitte versuchen Sie eine andere, präzisere Suchanfrage."),
-              L.m("Timeout bei Suchanfrage"), JOptionPane.WARNING_MESSAGE);
+                  + "Bitte versuchen Sie eine andere, präzisere Suchanfrage."));
           LOGGER.error("", x);
         } catch (IllegalArgumentException x)
         {

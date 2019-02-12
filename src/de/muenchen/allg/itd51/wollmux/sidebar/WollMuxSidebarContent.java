@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.swing.JOptionPane;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +71,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.SearchBox;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarConfig;
@@ -325,8 +324,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       if (combinedConf.query("Symbolleisten").count() == 0)
       {
         LOGGER.error(WollMuxBar.WOLLMUX_CONFIG_ERROR_MESSAGE);
-        JOptionPane.showMessageDialog(null, WollMuxBar.WOLLMUX_CONFIG_ERROR_MESSAGE,
-          L.m("Fehlerhafte Konfiguration"), JOptionPane.ERROR_MESSAGE);
+        InfoDialog.showInfoModal(L.m("Fehlerhafte Konfiguration"), WollMuxBar.WOLLMUX_CONFIG_ERROR_MESSAGE);
       }
       else
       {

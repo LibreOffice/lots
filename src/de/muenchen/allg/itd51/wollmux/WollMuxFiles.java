@@ -72,7 +72,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -87,9 +86,6 @@ import java.util.regex.Pattern;
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
@@ -121,6 +117,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 
 /**
  *
@@ -1110,13 +1107,8 @@ public class WollMuxFiles
         if (!bark[0]) return;
       }
 
-      SwingUtilities.invokeLater(() -> {
-        LOGGER.error(SLOW_SERVER_MESSAGE);
-        JOptionPane pane = new JOptionPane(SLOW_SERVER_MESSAGE, JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION);
-        JDialog dialog = pane.createDialog(null, L.m("Hinweis"));
-        dialog.setModal(false);
-        dialog.setVisible(true);
-      });
+      LOGGER.error(SLOW_SERVER_MESSAGE);
+      InfoDialog.showInfoModal("Hinweis", SLOW_SERVER_MESSAGE);
     }
 
     public void dontBark()
