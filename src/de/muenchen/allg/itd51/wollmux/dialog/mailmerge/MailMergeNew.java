@@ -61,7 +61,6 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
@@ -1059,12 +1058,11 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
     catch (NoSuchMethodException e)
     {
-      LOGGER.error("", e);
+      LOGGER.error("Eine notwendige Druckfunktion ist nicht definiert.", e);
       InfoDialog.showInfoModal(
         L.m("Fehler beim Drucken"),
         L.m(
-          "Eine notwendige Druckfunktion ist nicht definiert. Bitte wenden Sie sich an Ihre Systemadministration damit Ihre Konfiguration entsprechend erweitert bzw. aktualisiert werden kann.\n\n%1",
-          e));
+          "Eine notwendige Druckfunktion ist nicht definiert. Bitte wenden Sie sich an Ihre Systemadministration damit Ihre Konfiguration entsprechend erweitert bzw. aktualisiert werden kann."));
       pmod.cancel();
       return;
     }
@@ -1331,13 +1329,11 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     PrintModels.setStage(pmod, L.m("Sende an %1", to));
     if (!isMailAddress(to))
     {
-      int res =
-        JOptionPane.showConfirmDialog(
-          null,
-          L.m(
-            "Die Empfängeradresse '%1' ist ungültig!\n\nDiesen Datensatz überspringen und fortsetzen?",
-            to), MAIL_ERROR_MESSAGE_TITLE, JOptionPane.OK_CANCEL_OPTION);
-      if (res == JOptionPane.CANCEL_OPTION) {
+      boolean res =
+          InfoDialog.showCancelModal("ungültige Empfängeradresse",
+              L.m("Die Empfängeradresse '%1' ist ungültig!\n\nDiesen Datensatz überspringen und fortsetzen?",
+                  to));
+      if (res) {
         pmod.cancel();
       }
       return;
@@ -1364,7 +1360,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
     catch (ConfigurationErrorException e)
     {
-      LOGGER.error("", e);
+      LOGGER.error("Kein Mailserver", e);
       InfoDialog.showInfoModal(
         MAIL_ERROR_MESSAGE_TITLE,
         L.m("Es konnten keine Angaben zum Mailserver gefunden werden - eventuell ist die WollMux-Konfiguration nicht vollständig."));
@@ -1373,7 +1369,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     }
     catch (MessagingException e)
     {
-      LOGGER.error("", e);
+      LOGGER.error("Email versenden fehlgeschlagen", e);
       InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE,
         L.m("Der Versand der E-Mail ist fehlgeschlagen."));
       pmod.cancel();

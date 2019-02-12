@@ -16,9 +16,6 @@ import com.sun.star.util.XStringSubstitution;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
-import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -46,32 +43,6 @@ public class OnCheckInstallation extends BasicEvent
     String msg = L.m(
         "Es wurden eine systemweite und eine benutzerlokale Installation des WollMux (oder Überreste von einer unvollständigen Deinstallation) gefunden.\nDiese Konstellation kann obskure Fehler verursachen.\n\nEntfernen Sie eine der beiden Installationen.\n\nDie wollmux.log enthält nähere Informationen zu den betroffenen Pfaden.");
     String logMsg = msg;
-
-    // Abschnitt Dialoge/MehrfachinstallationWarndialog auswerten
-    try
-    {
-      ConfigThingy warndialog = WollMuxFiles.getWollmuxConf().query("Dialoge")
-          .query(
-              "MehrfachinstallationWarndialog")
-          .getLastChild();
-      try
-      {
-        msg = warndialog.get("MSG").toString();
-      } catch (NodeNotFoundException e)
-      {
-        showdialog = false;
-      }
-      try
-      {
-        title = warndialog.get("TITLE").toString();
-      } catch (NodeNotFoundException e)
-      {
-        LOGGER.debug("", e);
-      }
-    } catch (NodeNotFoundException e)
-    {
-      // Ist der Abschnitt nicht vorhanden, so greifen Standardwerte.
-    }
 
     // Infos der Installationen einlesen.
     List<WollMuxInstallationDescriptor> wmInsts = getInstallations();

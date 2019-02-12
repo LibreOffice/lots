@@ -271,7 +271,7 @@ public class OnMarkBlock extends BasicEvent
       vc.collapseToEnd();
 
     InfoDialog.showInfoModal(L.m("Block wurde markiert"),
-        L.m("Der ausgewählte Block %1.", markChange));
+        L.m("Der ausgewählte Block %1 wurde markiert.", markChange));
   }
 
   /**

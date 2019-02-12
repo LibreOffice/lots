@@ -244,10 +244,9 @@ class DocumentExpander extends AbstractExecutor
           L.m(
             "Der Textbaustein mit der Bezeichnung (FRAG_ID) '%1' %2 konnte nicht eingefügt werden:",
             cmd.getFragID(), (fragId.equals(cmd.getFragID()) ? "" : L.m(
-              "(Override für Fragment '%1')", fragId)))
-            + "\n\n" + e.getMessage();
+              "(Override für Fragment '%1')", fragId)));
 
-        LOGGER.error(msg);
+        LOGGER.error(msg, e);
 
         InfoDialog.showInfoModal(L.m("WollMux-Fehler"), msg);
       }

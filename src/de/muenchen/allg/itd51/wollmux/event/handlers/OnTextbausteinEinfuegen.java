@@ -1,5 +1,8 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.text.XTextCursor;
 
 import de.muenchen.allg.itd51.wollmux.TextModule;
@@ -21,6 +24,9 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
  */
 public class OnTextbausteinEinfuegen extends BasicEvent
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(OnTextbausteinEinfuegen.class);
+
   private boolean reprocess;
   private TextDocumentController documentController;
 
@@ -48,7 +54,8 @@ public class OnTextbausteinEinfuegen extends BasicEvent
             L.m("Der Textbausteinverweis wurde eingefügt."));
     } catch (WollMuxFehlerException e)
     {
-      InfoDialog.showInfoModal(L.m("WollMux-Fehler"), e.getMessage());
+      LOGGER.error("Textbausteinverweis konnte nicht eingefügt werden.", e);
+      InfoDialog.showInfoModal(L.m("WollMux-Fehler"), "Textbausteinverweis konnte nicht eingefügt werden.");
     }
   }
 

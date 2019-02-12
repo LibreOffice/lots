@@ -33,7 +33,7 @@ public class OnDumpInfo extends BasicEvent
     else
       InfoDialog.showInfoModal(
           title,
-          L.m("Die Fehlerinformationen des WollMux konnten nicht geschrieben werden\n\nDetails siehe Datei wollmux.log!"));
+          L.m("Die Fehlerinformationen des WollMux konnten nicht geschrieben werden. Details siehe Datei wollmux.log!"));
   }
 
   @Override
