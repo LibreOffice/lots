@@ -45,6 +45,7 @@ import com.sun.star.awt.XControl;
 import com.sun.star.awt.XFixedText;
 import com.sun.star.awt.XNumericField;
 import com.sun.star.awt.XSpinField;
+import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XWindow;
 import com.sun.star.uno.UnoRuntime;
 
@@ -63,6 +64,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractSpinListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 
@@ -282,6 +284,23 @@ public class SachleitendeVerfuegungenDruckdialog
 
       UnoRuntime.queryInterface(XSpinField.class, printCountField.getValue())
           .addSpinListener(printCountSpinFieldListener);
+      AbstractTextListener textListener = event -> {
+        int printFieldSum = 0;
+
+        for (int j = 0; j < verfuegungspunkte.size(); j++)
+        {
+          XControl printCount = layout.getControl("printCountField" + j);
+          XNumericField nField = UnoRuntime.queryInterface(XNumericField.class, printCount);
+
+          if (nField == null)
+            continue;
+
+          printFieldSum += nField.getValue();
+        }
+
+        setSumFieldValue(printFieldSum);
+      };
+      UnoRuntime.queryInterface(XTextComponent.class, printCountField.getValue()).addTextListener(textListener);
 
       SimpleEntry<ControlProperties, XControl> printButtons = layout
           .convertToXControl(new ControlProperties(ControlType.BUTTON, "printButton" + i, 0, 30, 20,
@@ -485,14 +504,14 @@ public class SachleitendeVerfuegungenDruckdialog
 
       setSumFieldValue(printFieldSum);
     }
-
-    private void setSumFieldValue(int value)
-    {
-      XFixedText sumLabel = UnoRuntime.queryInterface(XFixedText.class,
-          layout.getControl("sumNumericTextfield"));
-      sumLabel.setText(" " + value);
-    }
   };
+  
+  private void setSumFieldValue(int value)
+  {
+    XFixedText sumLabel = UnoRuntime.queryInterface(XFixedText.class,
+        layout.getControl("sumNumericTextfield"));
+    sumLabel.setText(" " + value);
+  }
 
   private AbstractItemListener printOrderCheckBoxListener = event -> {
     XCheckBox checkBox = UnoRuntime.queryInterface(XCheckBox.class, event.Source);
