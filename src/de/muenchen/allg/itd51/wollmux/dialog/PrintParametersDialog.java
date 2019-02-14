@@ -44,21 +44,15 @@ import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.awt.ItemEvent;
 import com.sun.star.awt.SpinEvent;
-import com.sun.star.awt.TextEvent;
-import com.sun.star.awt.XActionListener;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlModel;
 import com.sun.star.awt.XFixedText;
-import com.sun.star.awt.XItemListener;
 import com.sun.star.awt.XNumericField;
 import com.sun.star.awt.XRadioButton;
 import com.sun.star.awt.XSpinField;
-import com.sun.star.awt.XSpinListener;
 import com.sun.star.awt.XTextComponent;
-import com.sun.star.awt.XTextListener;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.UnknownPropertyException;
@@ -87,6 +81,10 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
 import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractSpinListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
@@ -459,155 +457,111 @@ public class PrintParametersDialog
         bottomButtonsSection, Optional.empty());
   }
 
-  private XActionListener printListener = new XActionListener()
-  {
+  private AbstractActionListener printListener = event -> printButtonPressed();
 
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
+  private AbstractActionListener abortListener = event -> dialogFactory.closeDialog();
 
-    }
-
-    @Override
-    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
-    {
-      printButtonPressed();
-    }
-  };
-
-  private XActionListener abortListener = new XActionListener()
-  {
-
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
-
-    }
-
-    @Override
-    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
-    {
-      dialogFactory.closeDialog();
-    }
-  };
-
-  private XActionListener selectPrinterActionListener = new XActionListener()
-  {
-
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
-    {
-      showPrintSettingsDialog();
-    }
+  private AbstractActionListener selectPrinterActionListener = event -> showPrintSettingsDialog();
     
-    /**
-     * Ruft den printSettings-Dialog auf.
-     *
-     * @author christoph.lutz
-     */
-    private void showPrintSettingsDialog()
+  /**
+   * Ruft den printSettings-Dialog auf.
+   *
+   * @author christoph.lutz
+   */
+  private void showPrintSettingsDialog()
+  {
+    Thread t = new Thread()
     {
-      Thread t = new Thread()
+      @Override
+      public void run()
       {
-        @Override
-        public void run()
+        // Druckereinstellungen-Dialog anzeigen:
+        try
         {
-          // Druckereinstellungen-Dialog anzeigen:
-          try
-          {
-            com.sun.star.util.URL url = UNO
-                .getParsedUNOUrl(Dispatch.DISP_unoPrinterSetup);
-            XNotifyingDispatch disp = UNO
-                .XNotifyingDispatch(getDispatchForModel(UNO.XModel(doc), url));
+          com.sun.star.util.URL url = UNO
+              .getParsedUNOUrl(Dispatch.DISP_unoPrinterSetup);
+          XNotifyingDispatch disp = UNO
+              .XNotifyingDispatch(getDispatchForModel(UNO.XModel(doc), url));
 
-            if (disp != null)
-            {
-              disp.dispatchWithNotification(url, new PropertyValue[] {},
-                  new XDispatchResultListener()
+          if (disp != null)
+          {
+            disp.dispatchWithNotification(url, new PropertyValue[] {},
+                new XDispatchResultListener()
+                {
+                  @Override
+                  public void disposing(EventObject arg0)
                   {
-                    @Override
-                    public void disposing(EventObject arg0)
-                    {
-                      // unused
-                    }
+                    // unused
+                  }
 
-                    @Override
-                    public void dispatchFinished(DispatchResultEvent arg0)
+                  @Override
+                  public void dispatchFinished(DispatchResultEvent arg0)
+                  {
+                    SwingUtilities.invokeLater(new Runnable()
                     {
-                      SwingUtilities.invokeLater(new Runnable()
+                      @Override
+                      public void run()
                       {
-                        @Override
-                        public void run()
-                        {
-                          XFixedText printerNameLabel = UnoRuntime.queryInterface(
-                              XFixedText.class,
-                              layout.getControl("printerSettingsPrintModel"));
+                        XFixedText printerNameLabel = UnoRuntime.queryInterface(
+                            XFixedText.class,
+                            layout.getControl("printerSettingsPrintModel"));
 
-                          if (printerNameLabel == null)
-                            return;
+                        if (printerNameLabel == null)
+                          return;
 
-                          printerNameLabel
-                              .setText(" " + getCurrentPrinterName(doc) + " ");
-                        }
-                      });
-                    }
-                  });
-            }
-          }
-          catch (java.lang.Exception e)
-          {
-            LOGGER.error("", e);
+                        printerNameLabel
+                            .setText(" " + getCurrentPrinterName(doc) + " ");
+                      }
+                    });
+                  }
+                });
           }
         }
-      };
-      t.setDaemon(false);
-      t.start();
-    }
-    
-    /**
-     * Holt sich den Frame von doc, führt auf diesem ein queryDispatch() mit der
-     * zu urlStr gehörenden URL aus und liefert den Ergebnis XDispatch zurück oder
-     * null, falls der XDispatch nicht verfügbar ist.
-     *
-     * @param doc
-     *          Das Dokument, dessen Frame für den Dispatch verwendet werden soll.
-     * @param urlStr
-     *          die URL in Form eines Strings (wird intern zu URL umgewandelt).
-     * @return den gefundenen XDispatch oder null, wenn der XDispatch nicht
-     *         verfügbar ist.
-     */
-    private XDispatch getDispatchForModel(XModel doc, com.sun.star.util.URL url)
+        catch (java.lang.Exception e)
+        {
+          LOGGER.error("", e);
+        }
+      }
+    };
+    t.setDaemon(false);
+    t.start();
+  }
+  
+  /**
+   * Holt sich den Frame von doc, führt auf diesem ein queryDispatch() mit der
+   * zu urlStr gehörenden URL aus und liefert den Ergebnis XDispatch zurück oder
+   * null, falls der XDispatch nicht verfügbar ist.
+   *
+   * @param doc
+   *          Das Dokument, dessen Frame für den Dispatch verwendet werden soll.
+   * @param urlStr
+   *          die URL in Form eines Strings (wird intern zu URL umgewandelt).
+   * @return den gefundenen XDispatch oder null, wenn der XDispatch nicht
+   *         verfügbar ist.
+   */
+  private XDispatch getDispatchForModel(XModel doc, com.sun.star.util.URL url)
+  {
+    if (doc == null)
     {
-      if (doc == null)
-      {
-        return null;
-      }
-
-      XDispatchProvider dispProv = null;
-      try
-      {
-        dispProv = UNO.XDispatchProvider(doc.getCurrentController().getFrame());
-      }
-      catch (Exception e)
-      {
-      }
-
-      if (dispProv != null)
-      {
-        return dispProv.queryDispatch(url, "_self",
-            com.sun.star.frame.FrameSearchFlag.SELF);
-      }
       return null;
     }
-  };
+
+    XDispatchProvider dispProv = null;
+    try
+    {
+      dispProv = UNO.XDispatchProvider(doc.getCurrentController().getFrame());
+    }
+    catch (Exception e)
+    {
+    }
+
+    if (dispProv != null)
+    {
+      return dispProv.queryDispatch(url, "_self",
+          com.sun.star.frame.FrameSearchFlag.SELF);
+    }
+    return null;
+  }
 
   protected void abort(String commandStr)
   {
@@ -625,52 +579,28 @@ public class PrintParametersDialog
   }
   
   
-  private XSpinListener printCountSpinFieldListener = new XSpinListener()
+  private AbstractSpinListener printCountSpinFieldListener = new AbstractSpinListener()
   {
 
     @Override
-    public void disposing(EventObject arg0)
+    public void up(SpinEvent event)
     {
-      // unused
+      getAndSetCopyCount(event);
     }
 
     @Override
-    public void up(SpinEvent arg0)
+    public void down(SpinEvent event)
     {
-      XNumericField copyCountControl = UnoRuntime.queryInterface(XNumericField.class, arg0.Source);
-      
-      if (copyCountControl == null)
-	return;
-      
-      setCopyCount((short) copyCountControl.getValue());
-    }
-
-    @Override
-    public void last(SpinEvent arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void first(SpinEvent arg0)
-    {
-      // unused
-
-    }
-
-    @Override
-    public void down(SpinEvent arg0)
-    {
-      XNumericField copyCountControl = UnoRuntime.queryInterface(XNumericField.class, arg0.Source);
-
-      if (copyCountControl == null)
-	return;
-      
-      setCopyCount((short) copyCountControl.getValue());
+      getAndSetCopyCount(event);
     }
     
-    private void setCopyCount(short count) {
-      copyCount = count;
+    private void getAndSetCopyCount(SpinEvent event) {
+      XNumericField copyCountControl = UnoRuntime.queryInterface(XNumericField.class, event.Source);
+      
+      if (copyCountControl == null)
+        return;
+      
+      copyCount = (short) copyCountControl.getValue();
     }
   };
 
@@ -723,78 +653,53 @@ public class PrintParametersDialog
     }
   }
   
-  private XTextListener additionalTextFieldListener = new XTextListener()
-  {
-    
-    @Override
-    public void disposing(EventObject arg0)
-    {
+  private AbstractTextListener additionalTextFieldListener = event -> {
+    XTextComponent xTextComponent = UnoRuntime.queryInterface(XTextComponent.class, event.Source);
 
-    }
-    
-    @Override
-    public void textChanged(TextEvent arg0)
-    {
-      XTextComponent xTextComponent = UnoRuntime.queryInterface(XTextComponent.class, arg0.Source);
-      
-      if (xTextComponent == null)
-        return;
-      
-      currentPageRangeValue = xTextComponent.getText();
-    }
+    if (xTextComponent == null)
+      return;
+
+    currentPageRangeValue = xTextComponent.getText();
   };
 
-  private XItemListener radioButtonListener = new XItemListener()
-  {
+  private AbstractItemListener radioButtonListener = event -> {
+    XControl xControl = UnoRuntime.queryInterface(XControl.class,
+        event.Source);
 
-    @Override
-    public void disposing(EventObject arg0)
+    for (XControl control : layout.getControls())
     {
-      // unused
-
-    }
-
-    @Override
-    public void itemStateChanged(ItemEvent arg0)
-    {
-      XControl xControl = UnoRuntime.queryInterface(XControl.class,
-          arg0.Source);
-
-      for (XControl control : layout.getControls())
+      if (!control.equals(xControl))
       {
-        if (!control.equals(xControl))
-        {
-          XRadioButton radioButton = UnoRuntime
-              .queryInterface(XRadioButton.class, control);
+        XRadioButton radioButton = UnoRuntime
+            .queryInterface(XRadioButton.class, control);
 
-          if (radioButton == null)
-            continue;
+        if (radioButton == null)
+          continue;
+        
+        radioButton.setState(false);
+        
+      } else {
+        XControl radioButton = UnoRuntime
+            .queryInterface(XControl.class, control);
+        XControlModel model = radioButton.getModel();
+        
+        XPropertySet propertySet = UnoRuntime.queryInterface(XPropertySet.class, model);
+        
+        try
+        {
+          String label = (String)propertySet.getPropertyValue("Label");
           
-          radioButton.setState(false);
-          
-        } else {
-          XControl radioButton = UnoRuntime
-              .queryInterface(XControl.class, control);
-          XControlModel model = radioButton.getModel();
-          
-          XPropertySet propertySet = UnoRuntime.queryInterface(XPropertySet.class, model);
-          
-          try
-          {
-            String label = (String)propertySet.getPropertyValue("Label");
-            
-            for (PageRangeType type : PageRangeType.values()) {
-              if(type.label.equals(label)) {
-                currentPageRangeType = type;
-                
-                break;
-              }
+          for (PageRangeType type : PageRangeType.values()) {
+            if(type.label.equals(label)) {
+              currentPageRangeType = type;
+              
+              break;
             }
-            
-          } catch (UnknownPropertyException | WrappedTargetException e)
-          {
-            LOGGER.error("", e);
           }
+          
+        } catch (UnknownPropertyException | WrappedTargetException e)
+        {
+          LOGGER.error("", e);
         }
       }
     }

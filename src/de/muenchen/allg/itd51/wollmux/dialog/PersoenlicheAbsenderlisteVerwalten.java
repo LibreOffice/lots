@@ -69,20 +69,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
-import com.sun.star.awt.ItemEvent;
 import com.sun.star.awt.Key;
-import com.sun.star.awt.XActionListener;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XExtendedToolkit;
 import com.sun.star.awt.XFixedText;
-import com.sun.star.awt.XItemListener;
 import com.sun.star.awt.XKeyHandler;
 import com.sun.star.awt.XListBox;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
-import com.sun.star.awt.XWindowListener;
 import com.sun.star.lang.EventObject;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
@@ -106,6 +102,9 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
 import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -478,283 +477,153 @@ public class PersoenlicheAbsenderlisteVerwalten
         Optional.of(Dock.BOTTOM));
   }
 
-  private XWindowListener xWindowListener = new XWindowListener()
+  private AbstractWindowListener xWindowListener = new AbstractWindowListener()
   {
     @Override
     public void disposing(EventObject arg0)
     {
       WollMuxEventHandler.getInstance().handlePALChangedNotify();
     }
-
-    @Override
-    public void windowShown(EventObject arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void windowResized(com.sun.star.awt.WindowEvent arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void windowMoved(com.sun.star.awt.WindowEvent arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void windowHidden(EventObject arg0)
-    {
-      // unused
-    }
   };
 
-  private XItemListener palListBoxItemListener = new XItemListener()
-  {
-
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void itemStateChanged(ItemEvent arg0)
-    {
-      cachedPAL.get(arg0.Selected).getDataset().select();
-      
-      WollMuxEventHandler.getInstance().handlePALChangedNotify();
-    }
+  private AbstractItemListener palListBoxItemListener = event -> {
+    cachedPAL.get(event.Selected).getDataset().select();
+    
+    WollMuxEventHandler.getInstance().handlePALChangedNotify();
   };
 
-  private XActionListener startSearchBtnActionListener = new XActionListener()
+  private AbstractActionListener startSearchBtnActionListener = event -> search();
+
+  private AbstractActionListener addToPalActionListener = event -> addToPAL();
+
+  private void addToPAL()
   {
+    XControl xControlResults = layout.getControl("searchResultList");
 
-    @Override
-    public void disposing(EventObject arg0)
+    if (xControlResults == null)
+      return;
+
+    XListBox xListBoxResults = UnoRuntime.queryInterface(XListBox.class, xControlResults);
+
+    if (xListBoxResults == null)
+      return;
+
+    short[] selectedItemsPos = xListBoxResults.getSelectedItemsPos();
+
+    List<DJDatasetListElement> entriesAdded = new ArrayList<>();
+    for (short index : selectedItemsPos)
     {
-      // unused
+      cachedPAL.add(resultDJDatasetList.get(index));
+      entriesAdded.add(resultDJDatasetList.get(index));
     }
 
-    @Override
-    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
-    {
-      search();
+    String[] selectedItems = xListBoxResults.getSelectedItems();
+
+    XControl xControlPAL = layout.getControl("palListe");
+
+    if (xControlPAL == null)
+      return;
+
+    XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
+
+    if (xListBoxPal == null)
+      return;
+
+    xListBoxPal.addItems(selectedItems, (short) (xListBoxPal.getItemCount() + 1));
+
+    for (DJDatasetListElement entry : entriesAdded) {
+      entry.getDataset().copy();
     }
+  }
+
+  private AbstractActionListener deleteBtnActionListener = event -> removeFromPAL();
+
+  private void removeFromPAL()
+  {
+    XControl xControlPAL = layout.getControl("palListe");
+
+    if (xControlPAL == null)
+      return;
+
+    XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
+
+    if (xListBoxPal == null)
+      return;
+
+    short[] selectedItemsPos = xListBoxPal.getSelectedItemsPos();
+
+    for (short pos : selectedItemsPos)
+    {
+      xListBoxPal.removeItems(pos, (short) 1);
+      cachedPAL.remove(pos);
+    }
+  }
+
+  private AbstractActionListener editBtnActionListener = event -> editEntry();
+
+  private void editEntry()
+  {
+    // TODO: editEntryDialog(); (DatensatzBearbeiten.java)
+  }
+
+  private AbstractActionListener copyBtnActionListener = event -> copyEntry();
+
+  private void copyEntry()
+  {
+    XControl xControlResults = layout.getControl("searchResultList");
+
+    if (xControlResults == null)
+      return;
+
+    XListBox xListBoxResults = UnoRuntime.queryInterface(XListBox.class, xControlResults);
+
+    short[] sel = xListBoxResults.getSelectedItemsPos();
+
+    for (short index : sel)
+    {
+      cachedPAL.add(
+          new DJDatasetListElement(copyDJDataset(resultDJDatasetList.get(index).getDataset())));
+    }
+
+    XControl xControlPAL = layout.getControl("palListe");
+
+    if (xControlPAL == null)
+      return;
+
+    XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
+
+    sel = xListBoxPal.getSelectedItemsPos();
+    for (short index : sel)
+    {
+      DJDataset datasetCopy = copyDJDataset(cachedPAL.get(index).getDataset());
+      cachedPAL.add(new DJDatasetListElement(copyDJDataset(datasetCopy)));
+
+      xListBoxPal.addItem(buildListBoxString(datasetCopy),
+          (short) (xListBoxPal.getItemCount() + 1));
+    }
+  }
+
+  private DJDataset copyDJDataset(DJDataset orig)
+  {
+    DJDataset newDS = orig.copy();
+    try
+    {
+      newDS.set("Rolle", L.m("Kopie"));
+    } catch (ColumnNotFoundException e)
+    {
+      LOGGER.error("", e);
+    }
+
+    return newDS;
+  }
+
+  private AbstractActionListener newBtnActionListener = event -> {
+    // TODO: create new PAL Entry
   };
 
-  private XActionListener addToPalActionListener = new XActionListener()
-  {
-
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
-    {
-      addToPAL();
-    }
-
-    private void addToPAL()
-    {
-      XControl xControlResults = layout.getControl("searchResultList");
-
-      if (xControlResults == null)
-        return;
-
-      XListBox xListBoxResults = UnoRuntime.queryInterface(XListBox.class, xControlResults);
-
-      if (xListBoxResults == null)
-        return;
-
-      short[] selectedItemsPos = xListBoxResults.getSelectedItemsPos();
-
-      List<DJDatasetListElement> entriesAdded = new ArrayList<>();
-      for (short index : selectedItemsPos)
-      {
-        cachedPAL.add(resultDJDatasetList.get(index));
-        entriesAdded.add(resultDJDatasetList.get(index));
-      }
-
-      String[] selectedItems = xListBoxResults.getSelectedItems();
-
-      XControl xControlPAL = layout.getControl("palListe");
-
-      if (xControlPAL == null)
-        return;
-
-      XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
-
-      if (xListBoxPal == null)
-        return;
-
-      xListBoxPal.addItems(selectedItems, (short) (xListBoxPal.getItemCount() + 1));
-
-      for (DJDatasetListElement entry : entriesAdded) {
-        entry.getDataset().copy();
-      }
-    }
-  };
-
-  private XActionListener deleteBtnActionListener = new XActionListener()
-  {
-
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
-    {
-      removeFromPAL();
-    }
-
-    private void removeFromPAL()
-    {
-      XControl xControlPAL = layout.getControl("palListe");
-
-      if (xControlPAL == null)
-        return;
-
-      XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
-
-      if (xListBoxPal == null)
-        return;
-
-      short[] selectedItemsPos = xListBoxPal.getSelectedItemsPos();
-
-      for (short pos : selectedItemsPos)
-      {
-        xListBoxPal.removeItems(pos, (short) 1);
-        cachedPAL.remove(pos);
-      }
-    }
-  };
-
-  private XActionListener editBtnActionListener = new XActionListener()
-  {
-
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
-    {
-      editEntry();
-    }
-
-    private void editEntry()
-    {
-      // TODO: editEntryDialog(); (DatensatzBearbeiten.java)
-    }
-  };
-
-  private XActionListener copyBtnActionListener = new XActionListener()
-  {
-
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
-    {
-      copyEntry();
-    }
-
-    private void copyEntry()
-    {
-      XControl xControlResults = layout.getControl("searchResultList");
-
-      if (xControlResults == null)
-        return;
-
-      XListBox xListBoxResults = UnoRuntime.queryInterface(XListBox.class, xControlResults);
-
-      short[] sel = xListBoxResults.getSelectedItemsPos();
-
-      for (short index : sel)
-      {
-        cachedPAL.add(
-            new DJDatasetListElement(copyDJDataset(resultDJDatasetList.get(index).getDataset())));
-      }
-
-      XControl xControlPAL = layout.getControl("palListe");
-
-      if (xControlPAL == null)
-        return;
-
-      XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
-
-      sel = xListBoxPal.getSelectedItemsPos();
-      for (short index : sel)
-      {
-        DJDataset datasetCopy = copyDJDataset(cachedPAL.get(index).getDataset());
-        cachedPAL.add(new DJDatasetListElement(copyDJDataset(datasetCopy)));
-
-        xListBoxPal.addItem(buildListBoxString(datasetCopy),
-            (short) (xListBoxPal.getItemCount() + 1));
-      }
-    }
-
-    private DJDataset copyDJDataset(DJDataset orig)
-    {
-      DJDataset newDS = orig.copy();
-      try
-      {
-        newDS.set("Rolle", L.m("Kopie"));
-      } catch (ColumnNotFoundException e)
-      {
-        LOGGER.error("", e);
-      }
-
-      return newDS;
-    }
-  };
-
-  private XActionListener newBtnActionListener = new XActionListener()
-  {
-
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
-    {
-      // TODO: create new PAL Entry
-    }
-  };
-
-  private XActionListener abortBtnActionListener = new XActionListener()
-  {
-
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
-    {
-      WollMuxEventHandler.getInstance().handlePALChangedNotify();
-      dialogFactory.closeDialog();
-    }
+  private AbstractActionListener abortBtnActionListener = event -> {
+    WollMuxEventHandler.getInstance().handlePALChangedNotify();
+    dialogFactory.closeDialog();
   };
 
   private void setListElements(QueryResults data)
