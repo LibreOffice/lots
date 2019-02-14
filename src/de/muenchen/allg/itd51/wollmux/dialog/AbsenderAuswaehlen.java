@@ -47,14 +47,10 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.awt.ItemEvent;
-import com.sun.star.awt.XActionListener;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XControl;
-import com.sun.star.awt.XItemListener;
 import com.sun.star.awt.XListBox;
 import com.sun.star.awt.XWindow;
-import com.sun.star.awt.XWindowListener;
 import com.sun.star.lang.EventObject;
 import com.sun.star.uno.UnoRuntime;
 
@@ -73,6 +69,9 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
 import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
@@ -147,7 +146,7 @@ public class AbsenderAuswaehlen
     }
   }
 
-  private XWindowListener windowListener = new XWindowListener()
+  private AbstractWindowListener windowListener = new AbstractWindowListener()
   {
 
     @Override
@@ -155,30 +154,6 @@ public class AbsenderAuswaehlen
     {
       WollMuxEventHandler.getInstance().handlePALChangedNotify();
       dialogFactory.closeDialog();
-    }
-
-    @Override
-    public void windowShown(EventObject arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void windowResized(com.sun.star.awt.WindowEvent arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void windowMoved(com.sun.star.awt.WindowEvent arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void windowHidden(EventObject arg0)
-    {
-      // unused
     }
   };
 
@@ -228,59 +203,23 @@ public class AbsenderAuswaehlen
     return new ControlModel(Orientation.HORIZONTAL, Align.NONE, bottomBtns, Optional.empty());
   }
 
-  private XItemListener absListBoxItemListener = new XItemListener()
-  {
+  private AbstractItemListener absListBoxItemListener = event -> {
+    DJDatasetListElement selectedElement = elements.get(event.Selected);
 
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
+    if (selectedElement == null) {
+      LOGGER.debug("AbsenderAuswaehlen: itemStateChanged: selectedDataset is NULL.");
+      return;
     }
 
-    @Override
-    public void itemStateChanged(ItemEvent arg0)
-    {
-      DJDatasetListElement selectedElement = elements.get(arg0.Selected);
-
-      if (selectedElement == null) {
-        LOGGER.debug("AbsenderAuswaehlen: itemStateChanged: selectedDataset is NULL.");
-        return;
-      }
-
-      selectedElement.getDataset().select();
-    }
+    selectedElement.getDataset().select();
   };
 
-  private XActionListener abortActionListener = new XActionListener()
-  {
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
-    {
-      WollMuxEventHandler.getInstance().handlePALChangedNotify();
-      dialogFactory.closeDialog();
-    }
+  private AbstractActionListener abortActionListener = event -> {
+    WollMuxEventHandler.getInstance().handlePALChangedNotify();
+    dialogFactory.closeDialog();
   };
 
-  private XActionListener editActionListener = new XActionListener()
-  {
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
-    }
-
-    @Override
-    public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
-    {
-      new PersoenlicheAbsenderlisteVerwalten(verConf, dj);
-    }
-  };
+  private AbstractActionListener editActionListener = event -> new PersoenlicheAbsenderlisteVerwalten(verConf, dj);
 
   private void setListElements(QueryResults data)
   {

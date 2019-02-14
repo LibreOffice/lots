@@ -10,33 +10,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.accessibility.XAccessible;
-import com.sun.star.awt.ActionEvent;
 import com.sun.star.awt.FocusEvent;
 import com.sun.star.awt.InvalidateStyle;
-import com.sun.star.awt.ItemEvent;
 import com.sun.star.awt.MenuEvent;
 import com.sun.star.awt.MouseEvent;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.Selection;
-import com.sun.star.awt.TextEvent;
 import com.sun.star.awt.WindowEvent;
-import com.sun.star.awt.XActionListener;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlModel;
-import com.sun.star.awt.XFocusListener;
 import com.sun.star.awt.XItemList;
-import com.sun.star.awt.XItemListener;
 import com.sun.star.awt.XMenu;
-import com.sun.star.awt.XMouseListener;
 import com.sun.star.awt.XPopupMenu;
 import com.sun.star.awt.XTextComponent;
-import com.sun.star.awt.XTextListener;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
-import com.sun.star.awt.XWindowListener;
 import com.sun.star.awt.XWindowPeer;
 import com.sun.star.awt.tree.XMutableTreeDataModel;
 import com.sun.star.awt.tree.XMutableTreeNode;
@@ -68,6 +59,13 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractMenuListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractFocusListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractMouseListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -94,7 +92,7 @@ import de.muenchen.uno.UnoReflect;
  *
  */
 public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
-    XSidebarPanel, XWindowListener, UIElementCreateListener
+    XSidebarPanel, UIElementCreateListener
 {
 
   private static final Logger LOGGER = LoggerFactory
@@ -122,9 +120,43 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
   private XTreeControl tree;
 
-  private XMouseListener xMouseListener;
+  private AbstractMouseListener xMouseListener = new AbstractMouseListener()
+  {
+    @Override
+    public void mousePressed(MouseEvent event)
+    {
+      try
+      {
+        XMutableTreeNode node = UnoRuntime.queryInterface(XMutableTreeNode.class,
+            tree.getClosestNodeForLocation(event.X, event.Y));
+
+        if (node != null)
+        {
+          tree.clearSelection();
+          tree.addSelection(node);
+          UIElementAction action = actions.get(node.getDataValue());
+          if (action != null)
+          {
+            action.performAction();
+          }
+        }
+      } catch (Exception ex)
+      {
+        LOGGER.error("", ex);
+      }
+    }
+  };
 
   private UIFactory uiFactory;
+  
+  private AbstractWindowListener windowAdapter = new AbstractWindowListener()
+  {
+    @Override
+    public void windowResized(WindowEvent e)
+    {
+      layout.layout();
+    }
+  };
 
   public WollMuxSidebarContent(XComponentContext context, XWindow parentWindow)
   {
@@ -135,7 +167,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     actions = new HashMap<>();
     searchActions = new HashMap<>();
 
-    this.parentWindow.addWindowListener(this);
+    this.parentWindow.addWindowListener(this.windowAdapter);
     layout = new SimpleLayoutManager(this.parentWindow);
 
     ConfigThingy conf = WollMuxFiles.getWollmuxConf();
@@ -181,7 +213,6 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           layout.add(treeCtrl);
 
           XWindow treeWnd = UnoRuntime.queryInterface(XWindow.class, treeCtrl);
-          xMouseListener = new TreeMouseListener();
           treeWnd.addMouseListener(xMouseListener);
 
           XControl line =
@@ -258,28 +289,6 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
   {
     return 100;
   }
-
-  @Override
-  public void disposing(EventObject arg0)
-  {}
-
-  @Override
-  public void windowHidden(EventObject arg0)
-  {}
-
-  @Override
-  public void windowMoved(WindowEvent arg0)
-  {}
-
-  @Override
-  public void windowResized(WindowEvent e)
-  {
-    layout.layout();
-  }
-
-  @Override
-  public void windowShown(EventObject arg0)
-  {}
 
   private static void readWollMuxBarConf(boolean menumanager,
       boolean allowUserConfig, boolean allowMenuManager, ConfigThingy wollmuxConf)
@@ -361,18 +370,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
             uiButton.getLabel(), null, new Rectangle(0, 0, 100, 32));
 
         XButton xbutton = UnoRuntime.queryInterface(XButton.class, button);
-        xbutton.addActionListener(new XActionListener()
-        {
-          @Override
-          public void disposing(EventObject arg0)
-          {}
-
-          @Override
-          public void actionPerformed(ActionEvent arg0)
-          {
-            uiButton.getAction().performAction();
-          }
-        });
+        AbstractActionListener xButtonAction = event -> uiButton.getAction().performAction();
+        xbutton.addActionListener(xButtonAction);
         layout.add(button);
       }
       else if (element.getClass().equals(UISenderbox.class))
@@ -438,70 +437,58 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
     searchBox.setModel(model);
 
-    tf.addTextListener(new XTextListener()
-    {
-      @Override
-      public void disposing(EventObject event)
-      {}
+    AbstractTextListener tfListener = event -> {
+      XControl ctrl = UnoRuntime.queryInterface(XControl.class, event.Source);
+      XTextComponent tfComponent = UnoRuntime.queryInterface(XTextComponent.class, event.Source);
+      XComboBox cmb = UnoRuntime.queryInterface(XComboBox.class, event.Source);
+      String text = tfComponent.getText();
 
-      @Override
-      public void textChanged(TextEvent event)
+      XControlModel tfModel = ctrl.getModel();
+      XItemList items = UnoRuntime.queryInterface(XItemList.class, tfModel);
+
+      if (text.length() > 0)
       {
-        XControl ctrl = UnoRuntime.queryInterface(XControl.class, event.Source);
-        XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, event.Source);
-        XComboBox cmb = UnoRuntime.queryInterface(XComboBox.class, event.Source);
-        String text = tf.getText();
-
-        XControlModel model = ctrl.getModel();
-        XItemList items = UnoRuntime.queryInterface(XItemList.class, model);
-
-        if (text.length() > 0)
+        String[] words = text.split("\\s+");
+        try
         {
-          String[] words = text.split("\\s+");
-          try
+          cmb.removeItems((short) 0, cmb.getItemCount());
+          searchActions.clear();
+
+          ConfigThingy menues = WollMuxFiles.getWollmuxConf().get("Menues");
+          ConfigThingy labels = menues.queryAll("LABEL", 4, true);
+
+          int n = 0;
+          for (ConfigThingy l : labels)
           {
-            cmb.removeItems((short) 0, cmb.getItemCount());
-            searchActions.clear();
-
-            ConfigThingy menues = WollMuxFiles.getWollmuxConf().get("Menues");
-            ConfigThingy labels = menues.queryAll("LABEL", 4, true);
-
-            int n = 0;
-            for (ConfigThingy label : labels)
+            ConfigThingy type = l.query("TYPE");
+            if (type.count() != 0 && (type.getLastChild().toString().equals("button") || type.getLastChild().toString().equals("menu")))
             {
-              ConfigThingy type = label.query("TYPE");
-              if (type.count() != 0 && (type.getLastChild().toString().equals("button") || type.getLastChild().toString().equals("menu")))
+              ConfigThingy action = l.query("ACTION");
+              if (action.count() != 0)
               {
-                ConfigThingy action = label.query("ACTION");
-                if (action.count() != 0)
+                if (SearchBox.buttonMatches(l, words))
                 {
-                  if (SearchBox.buttonMatches(label, words))
-                  {
-                    UIMenuItem item = (UIMenuItem) uiFactory.createUIMenuElement(null, label, "");
-                    items.insertItemText(n, item.getLabel());
-                    UUID uuid = UUID.randomUUID();
-                    searchActions.put(uuid.toString(), item.getAction());
-                    items.setItemData(n, uuid.toString());
-                    n++;
-                  }
+                  UIMenuItem item = (UIMenuItem) uiFactory.createUIMenuElement(null, l, "");
+                  items.insertItemText(n, item.getLabel());
+                  UUID uuid = UUID.randomUUID();
+                  searchActions.put(uuid.toString(), item.getAction());
+                  items.setItemData(n, uuid.toString());
+                  n++;
                 }
               }
             }
           }
-          catch (Exception e)
-          {
-            e.printStackTrace();
-          }
+        }
+        catch (Exception e)
+        {
+          e.printStackTrace();
         }
       }
-    });
+    };
+    tf.addTextListener(tfListener);
 
-    wnd.addFocusListener(new XFocusListener()
+    AbstractFocusListener wndListener = new AbstractFocusListener()
     {
-      @Override
-      public void disposing(EventObject event)
-      {}
-
       @Override
       public void focusLost(FocusEvent event)
       {
@@ -566,37 +553,29 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           LOGGER.error("", e);
         }
       }
-    });
+    };
+    wnd.addFocusListener(wndListener);
 
     XComboBox cmb = UnoRuntime.queryInterface(XComboBox.class, searchBox);
-    cmb.addItemListener(new XItemListener()
-    {
-      @Override
-      public void disposing(EventObject event)
+    AbstractItemListener cmbItemListener = event -> {
+      try
       {
-      }
-
-      @Override
-      public void itemStateChanged(ItemEvent event)
-      {
-        try
+        XControl ctrl = UnoRuntime.queryInterface(XControl.class, event.Source);
+        XItemList items =
+          UnoRuntime.queryInterface(XItemList.class, ctrl.getModel());
+        String uuid = (String) items.getItemData(event.Selected);
+        UIElementAction action = searchActions.get(uuid);
+        if (action != null)
         {
-          XControl ctrl = UnoRuntime.queryInterface(XControl.class, event.Source);
-          XItemList items =
-            UnoRuntime.queryInterface(XItemList.class, ctrl.getModel());
-          String uuid = (String) items.getItemData(event.Selected);
-          UIElementAction action = searchActions.get(uuid);
-          if (action != null)
-          {
-            action.performAction();
-          }
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-          LOGGER.error("", e);
+          action.performAction();
         }
       }
-    });
+      catch (IndexOutOfBoundsException e)
+      {
+        LOGGER.error("", e);
+      }
+    };
+    cmb.addItemListener(cmbItemListener);
 
     layout.add(searchBox);
   }
@@ -690,74 +669,23 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       }
     });
 
-    xbutton.addActionListener(new XActionListener() {
-      @Override
-      public void disposing(EventObject arg0)
-      {}
-
-      @Override
-      public void actionPerformed(ActionEvent event)
+    AbstractActionListener xButtonAction = event -> {
+      try
       {
-        try
-        {
-          final XWindow wndButton = UnoRuntime.queryInterface(XWindow.class, event.Source);
-          Rectangle posSize = wndButton.getPosSize();
-          //short n = menu.execute(windowPeer, new Rectangle(posSize.X, posSize.Height, 0, 0), (short)0);
-          m_execute.invoke(menu, new Object[][] { new Object[] { windowPeer, new Rectangle(posSize.X, posSize.Y + posSize.Height, 0, 0), new Short((short)0) } });
-        }
-        catch (Exception e)
-        {
-          e.printStackTrace();
-        }
+        final XWindow wndButton = UnoRuntime.queryInterface(XWindow.class, event.Source);
+        Rectangle posSize = wndButton.getPosSize();
+        // short n = menu.execute(windowPeer, new Rectangle(posSize.X, posSize.Height, 0, 0),
+        // (short)0);
+        m_execute.invoke(menu, new Object[][] { new Object[] { windowPeer,
+            new Rectangle(posSize.X, posSize.Y + posSize.Height, 0, 0), new Short((short) 0) } });
+      } catch (Exception e)
+      {
+        e.printStackTrace();
       }
-    });
+    };
+    
+    xbutton.addActionListener(xButtonAction);
 
     layout.add(button);
-  }
-
-  private final class TreeMouseListener implements XMouseListener
-  {
-    @Override
-    public void disposing(EventObject arg0)
-    {
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent arg0)
-    {
-    }
-
-    @Override
-    public void mousePressed(MouseEvent event)
-    {
-      try {
-        XMutableTreeNode node = UnoRuntime.queryInterface(XMutableTreeNode.class, tree.getClosestNodeForLocation(event.X, event.Y));
-
-        if (node != null)
-        {
-          tree.clearSelection();
-          tree.addSelection(node);
-          UIElementAction action = actions.get(node.getDataValue());
-          if (action != null)
-          {
-            action.performAction();
-          }
-        }
-      }
-      catch (Exception ex)
-      {
-        LOGGER.error("", ex);
-      }
-    }
-
-    @Override
-    public void mouseExited(MouseEvent arg0)
-    {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent arg0)
-    {
-    }
   }
 }

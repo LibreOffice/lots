@@ -38,20 +38,14 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.awt.ActionEvent;
-import com.sun.star.awt.ItemEvent;
 import com.sun.star.awt.SpinEvent;
-import com.sun.star.awt.XActionListener;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XCheckBox;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XFixedText;
-import com.sun.star.awt.XItemListener;
 import com.sun.star.awt.XNumericField;
 import com.sun.star.awt.XSpinField;
-import com.sun.star.awt.XSpinListener;
 import com.sun.star.awt.XWindow;
-import com.sun.star.lang.EventObject;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.Verfuegungspunkt;
@@ -66,6 +60,9 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
 import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractSpinListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 
@@ -448,18 +445,11 @@ public class SachleitendeVerfuegungenDruckdialog
     }
   }
 
-  private XSpinListener printCountSpinFieldListener = new XSpinListener()
+  private AbstractSpinListener printCountSpinFieldListener = new AbstractSpinListener()
   {
 
     @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
-
-    }
-
-    @Override
-    public void up(SpinEvent arg0)
+    public void up(SpinEvent event)
     {
       int printFieldSum = 0;
 
@@ -478,31 +468,13 @@ public class SachleitendeVerfuegungenDruckdialog
     }
 
     @Override
-    public void last(SpinEvent arg0)
-    {
-      // unused
-
-    }
-
-    @Override
-    public void first(SpinEvent arg0)
-    {
-      // unused
-
-    }
-
-    @Override
-    public void down(SpinEvent arg0)
+    public void down(SpinEvent event)
     {
       int printFieldSum = 0;
 
       for (int i = 0; i < verfuegungspunkte.size(); i++)
       {
         XControl printCount = layout.getControl("printCountField" + i);
-
-        if (printCount == null)
-          continue;
-
         XNumericField printCountField = UnoRuntime.queryInterface(XNumericField.class, printCount);
 
         if (printCountField == null)
@@ -513,127 +485,74 @@ public class SachleitendeVerfuegungenDruckdialog
 
       setSumFieldValue(printFieldSum);
     }
-  };
 
-  private XItemListener printOrderCheckBoxListener = new XItemListener()
-  {
-
-    @Override
-    public void disposing(EventObject arg0)
+    private void setSumFieldValue(int value)
     {
-      // unused
-
-    }
-
-    @Override
-    public void itemStateChanged(ItemEvent arg0)
-    {
-      XCheckBox checkBox = UnoRuntime.queryInterface(XCheckBox.class, arg0.Source);
-
-      if (checkBox == null)
-        return;
-
-      printOrderAsc = checkBox.getState() == 1;
+      XFixedText sumLabel = UnoRuntime.queryInterface(XFixedText.class,
+          layout.getControl("sumNumericTextfield"));
+      sumLabel.setText(" " + value);
     }
   };
 
-  private XActionListener abortListener = new XActionListener()
-  {
+  private AbstractItemListener printOrderCheckBoxListener = event -> {
+    XCheckBox checkBox = UnoRuntime.queryInterface(XCheckBox.class, event.Source);
 
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
+    if (checkBox == null)
+      return;
 
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg0)
-    {
-      unoDialog.closeDialog();
-    }
+    printOrderAsc = checkBox.getState() == 1;
   };
 
-  private XActionListener printElementActionListener = new XActionListener()
+  private AbstractActionListener abortListener = event -> unoDialog.closeDialog();
+
+  private AbstractActionListener printElementActionListener = event ->
   {
+    XControl xControl = UnoRuntime.queryInterface(XControl.class, event.Source);
 
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
+    getCurrentSettingsForElement(xControl);
 
-    }
+    SimpleEntry<List<VerfuegungspunktInfo>, Boolean> config = new SimpleEntry<>(
+        getCurrentSettings(), getPrintOrderAsc());
 
-    @Override
-    public void actionPerformed(ActionEvent arg0)
-    {
-      XControl xControl = UnoRuntime.queryInterface(XControl.class, arg0.Source);
+    if (dialogEndListener != null)
+      dialogEndListener.actionPerformed(new java.awt.event.ActionEvent(config, 0,
+          SachleitendeVerfuegungenDruckdialog.CMD_SUBMIT));
 
-      getCurrentSettingsForElement(xControl);
-
-      SimpleEntry<List<VerfuegungspunktInfo>, Boolean> config = new SimpleEntry<>(
-          getCurrentSettings(), getPrintOrderAsc());
-
-      if (dialogEndListener != null)
-        dialogEndListener.actionPerformed(new java.awt.event.ActionEvent(config, 0,
-            SachleitendeVerfuegungenDruckdialog.CMD_SUBMIT));
-
-      unoDialog.closeDialog();
-    }
+    unoDialog.closeDialog();
+  };
     
-    private void getCurrentSettingsForElement(XControl control)
+  private void getCurrentSettingsForElement(XControl control)
+  {
+    currentSettings.clear();
+
+    for (ControlModel model : layout.getControlList())
     {
-      currentSettings.clear();
-
-      for (ControlModel model : layout.getControlList())
+      for (SimpleEntry<ControlProperties, XControl> entry : model.getControls())
       {
-        for (SimpleEntry<ControlProperties, XControl> entry : model.getControls())
+        if (entry.getValue().equals(control))
         {
-          if (entry.getValue().equals(control))
-          {
-            int verfPunktIndex = Integer.parseInt(entry.getKey().getControlName()
-                .substring(entry.getKey().getControlName().length() - 1));
+          int verfPunktIndex = Integer.parseInt(entry.getKey().getControlName()
+              .substring(entry.getKey().getControlName().length() - 1));
 
-            currentSettings.add(getVerfuegungspunktInfo(verfPunktIndex + 1));
-          }
+          currentSettings.add(getVerfuegungspunktInfo(verfPunktIndex + 1));
         }
       }
     }
-  };
-
-  private XActionListener printAllActionListener = new XActionListener()
-  {
-
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      // unused
-
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg0)
-    {
-      printOrderAsc = getSelectedPrintOrderAsc();
-      getCurrentSettingsForAllElements();
-
-      SimpleEntry<List<VerfuegungspunktInfo>, Boolean> config = new SimpleEntry<>(
-          getCurrentSettings(), getPrintOrderAsc());
-
-      if (dialogEndListener != null)
-        dialogEndListener.actionPerformed(new java.awt.event.ActionEvent(config, 0,
-            SachleitendeVerfuegungenDruckdialog.CMD_SUBMIT));
-
-      unoDialog.closeDialog();
-    }
-  };
-
-  private void setSumFieldValue(int value)
-  {
-    XFixedText sumLabel = UnoRuntime.queryInterface(XFixedText.class,
-        layout.getControl("sumNumericTextfield"));
-    sumLabel.setText(" " + value);
   }
+
+  private AbstractActionListener printAllActionListener = event -> {
+    printOrderAsc = getSelectedPrintOrderAsc();
+    getCurrentSettingsForAllElements();
+
+    SimpleEntry<List<VerfuegungspunktInfo>, Boolean> config = new SimpleEntry<>(
+        getCurrentSettings(), getPrintOrderAsc());
+
+    if (dialogEndListener != null)
+      dialogEndListener.actionPerformed(new java.awt.event.ActionEvent(config, 0,
+          SachleitendeVerfuegungenDruckdialog.CMD_SUBMIT));
+
+    unoDialog.closeDialog();
+  };
 
   private boolean getSelectedPrintOrderAsc()
   {
