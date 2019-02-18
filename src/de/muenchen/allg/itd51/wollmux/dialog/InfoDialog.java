@@ -53,6 +53,12 @@ public class InfoDialog
         MessageBoxButtons.BUTTONS_OK_CANCEL);
     return res == MessageBoxResults.CANCEL;
   }
+  
+  public static short showYesNoModal(String title, String message)
+  {
+    return createDialog(title, message, MessageBoxType.MESSAGEBOX,
+        MessageBoxButtons.BUTTONS_YES_NO);
+  }
 
   /**
    * Erzeugt eine Libreoffice MessageBox und führt sie aus.

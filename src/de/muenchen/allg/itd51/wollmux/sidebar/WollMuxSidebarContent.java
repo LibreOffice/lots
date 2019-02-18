@@ -57,7 +57,6 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
-import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractFocusListener;
@@ -636,32 +635,26 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       @Override
       public void updateContent(EventObject eventObject)
       {
-        XPALProvider palProv =
-            UnoRuntime.queryInterface(XPALProvider.class,
-            eventObject.Source);
-          if (palProv != null)
+
+        String[] entries = PersoenlicheAbsenderliste.getInstance().getPALEntries();
+        String current = PersoenlicheAbsenderliste.getInstance().getCurrentSender();
+
+        xbutton.setLabel(current.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0]);
+        try
+        {
+          UnoReflect.with(menu).method("clear").invoke();
+          
+          short n = 0;
+          for (String entry : entries)
           {
-            try
-            {
-              String[] entries = palProv.getPALEntries();
-              String current = palProv.getCurrentSender();
-
-              xbutton.setLabel(current.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0]);
-              UnoReflect.with(menu).method("clear").invoke();
-
-              short n = 0;
-              for (String entry : entries)
-              {
-                menu.insertItem((short)(n+1), entry.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0], (short) 0, (short) (n+1));
-                UnoReflect.with(menu).method("setCommand").withArgs(new Short((short)(n+1)), entry).invoke();
-                n++;
-              }
-            }
-            catch (Exception x)
-            {
-              LOGGER.error("", x);
-            }
+            menu.insertItem((short)(n+1), entry.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0], (short) 0, (short) (n+1));
+            UnoReflect.with(menu).method("setCommand").withArgs(new Short((short)(n+1)), entry).invoke();
+            n++;
           }
+        } catch (NoSuchMethodException e)
+        {
+          LOGGER.error("", e);
+        }
       }
     });
 
@@ -684,4 +677,5 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
     layout.add(button);
   }
+
 }

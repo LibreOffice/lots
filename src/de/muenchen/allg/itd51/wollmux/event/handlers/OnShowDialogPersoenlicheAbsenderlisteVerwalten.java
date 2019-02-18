@@ -29,7 +29,7 @@ public class OnShowDialogPersoenlicheAbsenderlisteVerwalten extends BasicEvent
 
       // Dialog modal starten:
       new PersoenlicheAbsenderlisteVerwalten(PALconf,
-          DatasourceJoinerFactory.getDatasourceJoiner());
+          DatasourceJoinerFactory.getDatasourceJoiner(), null);
     } catch (Exception e)
     {
       throw new CantStartDialogException(e);
