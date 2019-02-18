@@ -55,7 +55,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +70,7 @@ import com.sun.star.util.XChangesBatch;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.itd51.wollmux.core.db.AsyncLdapSearch;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -78,16 +81,15 @@ import de.muenchen.allg.itd51.wollmux.event.GlobalEventListener;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
- * Diese Klasse ist ein Singleton, welches den WollMux initialisiert und alle
- * zentralen WollMux-Methoden zur Verfügung stellt. Selbst der WollMux-Service
- * de.muenchen.allg.itd51.wollmux.comp.WollMux, der früher zentraler Anlaufpunkt war,
- * bedient sich größtenteils aus den zentralen Methoden des Singletons.
+ * Diese Klasse ist ein Singleton, welches den WollMux initialisiert und alle zentralen
+ * WollMux-Methoden zur Verfügung stellt. Selbst der WollMux-Service
+ * de.muenchen.allg.itd51.wollmux.comp.WollMux, der früher zentraler Anlaufpunkt war, bedient sich
+ * größtenteils aus den zentralen Methoden des Singletons.
  */
 public class WollMuxSingleton
 {
 
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(WollMuxSingleton.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(WollMuxSingleton.class);
 
   private static WollMuxSingleton singletonInstance = null;
 
@@ -100,7 +102,7 @@ public class WollMuxSingleton
    * Verwaltet Informationen zum NoConfig mode.
    */
   private NoConfig noConfig;
-  
+
   private boolean menusCreated = false;
 
   /**
@@ -117,8 +119,7 @@ public class WollMuxSingleton
     try
     {
       UNO.init(ctx.getServiceManager());
-    }
-    catch (Exception e)
+    } catch (Exception e)
     {
       LOGGER.error("", e);
     }
@@ -129,8 +130,7 @@ public class WollMuxSingleton
     {
       noConfig = new NoConfig(true);
       showNoConfigInfo();
-    }
-    else
+    } else
     {
       noConfig = new NoConfig(false);
     }
@@ -143,21 +143,41 @@ public class WollMuxSingleton
     {
       LOGGER.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
     }
-    LOGGER.debug("DEFAULT_CONTEXT \"" + WollMuxFiles.getDEFAULT_CONTEXT().toString()
-      + "\"");
+    LOGGER.debug("DEFAULT_CONTEXT \"{}\"", WollMuxFiles.getDEFAULT_CONTEXT());
     LOGGER.debug("CONF_VERSION: " + getConfVersionInfo());
 
     /*
-     * Datenquellen/Registriere Abschnitte verarbeiten. ACHTUNG! Dies muss vor
-     * getDatasourceJoiner() geschehen, da die entsprechenden Datenquellen womöglich
-     * schon für WollMux-Datenquellen benötigt werden.
+     * Datenquellen/Registriere Abschnitte verarbeiten. ACHTUNG! Dies muss vor getDatasourceJoiner()
+     * geschehen, da die entsprechenden Datenquellen womöglich schon für WollMux-Datenquellen
+     * benötigt werden.
      */
-    registerDatasources(WollMuxFiles.getWollmuxConf(),
-      WollMuxFiles.getDEFAULT_CONTEXT());
+    registerDatasources(WollMuxFiles.getWollmuxConf(), WollMuxFiles.getDEFAULT_CONTEXT());
 
     // Versuchen, den DJ zu initialisieren und Flag setzen, falls nicht
     // erfolgreich.
-    if (DatasourceJoinerFactory.getDatasourceJoiner() == null) successfulStartup = false;
+    if (DatasourceJoinerFactory.getDatasourceJoiner() == null)
+    {
+      successfulStartup = false;
+    } else
+    {
+      // Cachen der aktuellen Datensätze von LDAP anhand PAL-Liste (OIDs). Wird später von
+      // AbsenderAuswaehlen- ,
+      // PAL- und DatensatzBearbeiten-Dialog benötigt um dem User eine Synchronisation aktueller
+      // Datensätze
+      // zu ermöglichen.
+
+      Map<String, String> searchQuery = new HashMap<>();
+      for (String oid : DatasourceJoinerFactory.getDatasourceJoiner().getOIDsFromLOS())
+      {
+        searchQuery.put("OID", oid);
+      }
+
+      AsyncLdapSearch ldapSearchAsync = new AsyncLdapSearch(searchQuery,
+          DatasourceJoinerFactory.getDatasourceJoiner());
+      ldapSearchAsync.runLdapSearchAsync()
+          .thenAcceptAsync(
+              result -> DatasourceJoinerFactory.getDatasourceJoiner().setCachedLdapResults(result));
+    }
 
     // Initialisiere EventProcessor
     WollMuxEventHandler.getInstance().setAcceptEvents(successfulStartup);
@@ -165,41 +185,35 @@ public class WollMuxSingleton
     // register global EventListener
     try
     {
-			XEventBroadcaster eventBroadcaster = UNO
-			    .XEventBroadcaster(ctx.getServiceManager().createInstanceWithContext(
-			        "com.sun.star.frame.GlobalEventBroadcaster", ctx));
-			eventBroadcaster.addEventListener(
-        new GlobalEventListener(DocumentManager.getDocumentManager()));
-    }
-    catch (Exception e)
+      XEventBroadcaster eventBroadcaster = UNO.XEventBroadcaster(ctx.getServiceManager()
+          .createInstanceWithContext("com.sun.star.frame.GlobalEventBroadcaster", ctx));
+      eventBroadcaster
+          .addEventListener(new GlobalEventListener(DocumentManager.getDocumentManager()));
+    } catch (Exception e)
     {
       LOGGER.error("", e);
     }
 
     /*
-     * FIXME: Darf nur im Falle des externen WollMux gemacht werden, da ansonsten
-     * endlosschleifen mit dem ProtocolHandler möglich sind. Evtl. auch lösbar
-     * dadurch, dass URLS, die mit ignorecase("wollmux:") anfangen, niemals an den
-     * Slave delegiert werden. Ist aber nicht so schön als Lösung.
-     * UNO.XDispatchProviderInterception
-     * (UNO.desktop).registerDispatchProviderInterceptor(
-     * DispatchHandler.globalWollMuxDispatches);
+     * FIXME: Darf nur im Falle des externen WollMux gemacht werden, da ansonsten endlosschleifen
+     * mit dem ProtocolHandler möglich sind. Evtl. auch lösbar dadurch, dass URLS, die mit
+     * ignorecase("wollmux:") anfangen, niemals an den Slave delegiert werden. Ist aber nicht so
+     * schön als Lösung. UNO.XDispatchProviderInterception
+     * (UNO.desktop).registerDispatchProviderInterceptor( DispatchHandler.globalWollMuxDispatches);
      */
 
     // setzen von shortcuts
     ConfigThingy tastenkuerzel = new ConfigThingy("");
     try
     {
-      tastenkuerzel =
-        WollMuxFiles.getWollmuxConf().query("Tastenkuerzel").getLastChild();
+      tastenkuerzel = WollMuxFiles.getWollmuxConf().query("Tastenkuerzel").getLastChild();
+    } catch (NodeNotFoundException e)
+    {
     }
-    catch (NodeNotFoundException e)
-    {}
     try
     {
       Shortcuts.createShortcuts(tastenkuerzel);
-    }
-    catch (Exception e)
+    } catch (Exception e)
     {
       LOGGER.error("", e);
     }
@@ -208,16 +222,18 @@ public class WollMuxSingleton
     // Konfigurationsoptionen
     this.setOOoConfiguration(WollMuxFiles.getWollmuxConf().query("OOoEinstellungen"));
   }
-  
-  private void setOOoConfiguration(ConfigThingy oooEinstellungenConf) {
-    for (ConfigThingy settings : oooEinstellungenConf) {
+
+  private void setOOoConfiguration(ConfigThingy oooEinstellungenConf)
+  {
+    for (ConfigThingy settings : oooEinstellungenConf)
+    {
       setConfigurationValues(settings);
     }
   }
 
   /**
-   * Diese Methode liefert die Instanz des WollMux-Singletons. Ist der WollMux noch
-   * nicht initialisiert, so liefert die Methode null!
+   * Diese Methode liefert die Instanz des WollMux-Singletons. Ist der WollMux noch nicht
+   * initialisiert, so liefert die Methode null!
    * 
    * @return Instanz des WollMuxSingletons oder null.
    */
@@ -237,8 +253,8 @@ public class WollMuxSingleton
   }
 
   /**
-   * Diese Methode initialisiert das WollMuxSingleton (nur dann, wenn es noch nicht
-   * initialisiert wurde)
+   * Diese Methode initialisiert das WollMuxSingleton (nur dann, wenn es noch nicht initialisiert
+   * wurde)
    */
   public static synchronized void initialize(XComponentContext ctx)
   {
@@ -260,21 +276,22 @@ public class WollMuxSingleton
 
   /**
    * Diese Methode liefert die erste Zeile aus der buildinfo-Datei der aktuellen
-   * WollMux-Installation zurück. Der Build-Status wird während dem Build-Prozess mit
-   * dem Kommando "svn info" auf das Projektverzeichnis erstellt. Die Buildinfo-Datei
-   * buildinfo enthält die Paketnummer und die svn-Revision und ist im
-   * WollMux.oxt-Paket sowie in der WollMux.uno.jar-Datei abgelegt.
+   * WollMux-Installation zurück. Der Build-Status wird während dem Build-Prozess mit dem Kommando
+   * "svn info" auf das Projektverzeichnis erstellt. Die Buildinfo-Datei buildinfo enthält die
+   * Paketnummer und die svn-Revision und ist im WollMux.oxt-Paket sowie in der
+   * WollMux.uno.jar-Datei abgelegt.
    * 
-   * Kann dieses File nicht gelesen werden, so wird eine entsprechende Ersatzmeldung
-   * erzeugt (siehe Sourcecode).
+   * Kann dieses File nicht gelesen werden, so wird eine entsprechende Ersatzmeldung erzeugt (siehe
+   * Sourcecode).
    * 
    * @return Der Build-Status der aktuellen WollMux-Installation.
    */
   public static String getBuildInfo()
   {
     URL url = WollMuxSingleton.class.getClassLoader().getResource("buildinfo");
-    
-    if (url == null) {
+
+    if (url == null)
+    {
       return L.m("Version: unbekannt");
     }
 
@@ -285,8 +302,7 @@ public class WollMuxSingleton
       {
         return str;
       }
-    }
-    catch (Exception x)
+    } catch (Exception x)
     {
       LOGGER.trace("", x);
     }
@@ -295,13 +311,13 @@ public class WollMuxSingleton
   }
 
   /**
-   * Diese Methode liefert die Versionsinformation der aktuell verwendeten
-   * wollmux-Konfiguration (z.B. "wollmux-standard-config-2.2.1") als String zurück,
-   * wenn in der Konfiguration ein entsprechender CONF_VERSION-Schlüssel definiert
-   * ist, oder "unbekannt", falls der dieser Schlüssel nicht existiert.
+   * Diese Methode liefert die Versionsinformation der aktuell verwendeten wollmux-Konfiguration
+   * (z.B. "wollmux-standard-config-2.2.1") als String zurück, wenn in der Konfiguration ein
+   * entsprechender CONF_VERSION-Schlüssel definiert ist, oder "unbekannt", falls der dieser
+   * Schlüssel nicht existiert.
    * 
-   * @return Der Versionsinformation der aktuellen WollMux-Konfiguration (falls
-   *         definiert) oder "unbekannt", falls nicht.
+   * @return Der Versionsinformation der aktuellen WollMux-Konfiguration (falls definiert) oder
+   *         "unbekannt", falls nicht.
    */
   public String getConfVersionInfo()
   {
@@ -309,14 +325,12 @@ public class WollMuxSingleton
     try
     {
       return versions.getLastChild().toString();
-    }
-    catch (NodeNotFoundException e)
+    } catch (NodeNotFoundException e)
     {
       if (noConfig != null && noConfig.isNoConfig())
       {
         return L.m("keine geladen");
-      } 
-      else
+      } else
       {
         return L.m("unbekannt");
       }
@@ -332,9 +346,8 @@ public class WollMuxSingleton
   }
 
   /**
-   * Verarbeitet alle Datenquellen/Registriere-Unterabschnitte von conf und
-   * registriert die entsprechenden Datenquellen in OOo, falls dort noch nicht
-   * vorhanden.
+   * Verarbeitet alle Datenquellen/Registriere-Unterabschnitte von conf und registriert die
+   * entsprechenden Datenquellen in OOo, falls dort noch nicht vorhanden.
    * 
    * @param context
    *          gibt an relativ zu was relative URLs aufgelöst werden sollen.
@@ -343,8 +356,7 @@ public class WollMuxSingleton
    */
   private static void registerDatasources(ConfigThingy conf, URL context)
   {
-    Iterator<ConfigThingy> iter =
-      conf.query("Datenquellen").query("Registriere").iterator();
+    Iterator<ConfigThingy> iter = conf.query("Datenquellen").query("Registriere").iterator();
     while (iter.hasNext())
     {
       ConfigThingy regConf = iter.next();
@@ -352,11 +364,9 @@ public class WollMuxSingleton
       try
       {
         name = regConf.get("NAME").toString();
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
-        LOGGER.error(
-          L.m("NAME-Attribut fehlt in Datenquellen/Registriere-Abschnitt"), e);
+        LOGGER.error(L.m("NAME-Attribut fehlt in Datenquellen/Registriere-Abschnitt"), e);
         continue;
       }
 
@@ -364,13 +374,12 @@ public class WollMuxSingleton
       try
       {
         urlStr = regConf.get("URL").toString();
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
         LOGGER.error(
-          L.m(
-            "URL-Attribut fehlt in Datenquellen/Registriere-Abschnitt für Datenquelle '%1'",
-            name), e);
+            L.m("URL-Attribut fehlt in Datenquellen/Registriere-Abschnitt für Datenquelle '%1'",
+                name),
+            e);
         continue;
       }
 
@@ -387,35 +396,30 @@ public class WollMuxSingleton
 
             // hierher (und damit weiter ohne continue) kommen wir nur, wenn
             // ein REFRESH-Abschnitt vorhanden ist und "true" enthält.
-          }
-          catch (NodeNotFoundException x)
+          } catch (NodeNotFoundException x)
           {
             continue;
           }
         }
-      }
-      catch (Exception x)
+      } catch (Exception x)
       {
-        LOGGER.error(L.m(
-          "Fehler beim Überprüfen, ob Datenquelle '%1' bereits registriert ist",
-          name), x);
+        LOGGER.error(
+            L.m("Fehler beim Überprüfen, ob Datenquelle '%1' bereits registriert ist", name), x);
       }
 
-      LOGGER.debug(L.m(
-        "Versuche, Datenquelle '%1' bei OOo zu registrieren für URL '%2'", name,
-        urlStr));
+      LOGGER.debug(
+          L.m("Versuche, Datenquelle '%1' bei OOo zu registrieren für URL '%2'", name, urlStr));
 
       String parsedUrl;
       try
       {
         URL url = new URL(context, ConfigThingy.urlEncode(urlStr));
         parsedUrl = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
-      }
-      catch (Exception x)
+      } catch (Exception x)
       {
-        LOGGER.error(L.m(
-          "Fehler beim Registrieren von Datenquelle '%1': Illegale URL: '%2'", name,
-          urlStr), x);
+        LOGGER.error(
+            L.m("Fehler beim Registrieren von Datenquelle '%1': Illegale URL: '%2'", name, urlStr),
+            x);
         continue;
       }
 
@@ -424,14 +428,11 @@ public class WollMuxSingleton
         Object datasource = UNO.XNameAccess(UNO.dbContext).getByName(parsedUrl);
         UNO.dbContext.registerObject(name, datasource);
         if (!UnoRuntime.areSame(UNO.dbContext.getRegisteredObject(name), datasource))
-          LOGGER.error(L.m(
-            "Testzugriff auf Datenquelle '%1' nach Registrierung fehlgeschlagen",
-            name));
-      }
-      catch (Exception x)
+          LOGGER.error(
+              L.m("Testzugriff auf Datenquelle '%1' nach Registrierung fehlgeschlagen", name));
+      } catch (Exception x)
       {
-        LOGGER.error(
-          L.m(
+        LOGGER.error(L.m(
             "Fehler beim Registrieren von Datenquelle '%1'. Stellen Sie sicher, dass die URL '%2' gültig ist.",
             name, parsedUrl), x);
         continue;
@@ -441,8 +442,8 @@ public class WollMuxSingleton
   }
 
   /**
-   * Setzt die im ConfigThingy übergebenen OOoEinstellungen-Abschnitt enthaltenen
-   * Einstellungen in der OOo-Registry.
+   * Setzt die im ConfigThingy übergebenen OOoEinstellungen-Abschnitt enthaltenen Einstellungen in
+   * der OOo-Registry.
    * 
    * @param oooEinstellungenConf
    *          Der Knoten OOoEinstellungen eines solchen Abschnitts.
@@ -460,23 +461,20 @@ public class WollMuxSingleton
         Object v = getObjectByType(type, value);
 
         setConfigurationValue(node, prop, v);
-      }
-      catch (Exception e)
+      } catch (Exception e)
       {
         LOGGER.error(L.m("OOoEinstellungen: Konnte Einstellung '%1'nicht setzen:",
-          element.stringRepresentation()), e);
+            element.stringRepresentation()), e);
       }
     }
   }
 
   /**
-   * Konvertiert den als String übergebenen Wert value in ein Objekt vom Typ type
-   * oder liefert eine IllegalArgumentException, wenn die Werte nicht konvertiert
-   * werden können.
+   * Konvertiert den als String übergebenen Wert value in ein Objekt vom Typ type oder liefert eine
+   * IllegalArgumentException, wenn die Werte nicht konvertiert werden können.
    * 
    * @param type
-   *          Der Typ in den konvertiert werden soll ('boolean', 'integer', 'float',
-   *          'string').
+   *          Der Typ in den konvertiert werden soll ('boolean', 'integer', 'float', 'string').
    * @param value
    *          Der zu konvertierende Wert.
    * @return Das neue Objekt vom entsprechenden Typ.
@@ -489,16 +487,16 @@ public class WollMuxSingleton
     {
       if (type.equalsIgnoreCase("boolean"))
       {
-	return Boolean.valueOf(value);
+        return Boolean.valueOf(value);
       } else if (type.equalsIgnoreCase("integer"))
       {
-	return Integer.valueOf(value);
+        return Integer.valueOf(value);
       } else if (type.equalsIgnoreCase("float"))
       {
-	return Float.valueOf(value);
+        return Float.valueOf(value);
       } else if (type.equalsIgnoreCase("string"))
       {
-	return value;
+        return value;
       }
     } catch (NumberFormatException e)
     {
@@ -511,8 +509,8 @@ public class WollMuxSingleton
   }
 
   /**
-   * Setzt eine Einstellung value in der OOo-Registry, wobei die Position im
-   * Registry-Baum durch node und prop beschrieben wird.
+   * Setzt eine Einstellung value in der OOo-Registry, wobei die Position im Registry-Baum durch
+   * node und prop beschrieben wird.
    * 
    * @param node
    *          z.B. "/org.openoffice.Inet/Settings"
@@ -527,8 +525,7 @@ public class WollMuxSingleton
     try
     {
       updateAccess = UNO.getConfigurationUpdateAccess(node);
-    }
-    catch (UnoHelperException e1)
+    } catch (UnoHelperException e1)
     {
       LOGGER.error("setConfigurationValue(): updateAccess is NULL.", e1);
       return;
@@ -546,8 +543,7 @@ public class WollMuxSingleton
   }
 
   /**
-   * Überprüft, ob von url gelesen werden kann und wirft eine IOException, falls
-   * nicht.
+   * Überprüft, ob von url gelesen werden kann und wirft eine IOException, falls nicht.
    *
    * @throws IOException
    *           falls von url nicht gelesen werden kann.
@@ -559,8 +555,8 @@ public class WollMuxSingleton
   }
 
   /**
-   * Git zurück, ob sich der WollMux im NoConfig-Modus befindet,
-   * d.h. es wurde keine Config-Datei gefunden.
+   * Git zurück, ob sich der WollMux im NoConfig-Modus befindet, d.h. es wurde keine Config-Datei
+   * gefunden.
    * 
    * @return
    */
@@ -568,7 +564,7 @@ public class WollMuxSingleton
   {
     return (null != noConfig) ? noConfig.isNoConfig() : false;
   }
-  
+
   /**
    * Schreibt Meldung in die Log-Datei, wenn der NoConfig-Modus aktiv ist.
    * 

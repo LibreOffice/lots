@@ -39,7 +39,6 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,10 +54,10 @@ import com.sun.star.lang.EventObject;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.core.db.Search;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.ControlType;
@@ -71,6 +70,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
@@ -93,11 +93,13 @@ public class AbsenderAuswaehlen
    */
   private ConfigThingy verConf;
 
-  private List<DJDatasetListElement> elements = null;
+  private List<DJDataset> elements = null;
   
   private UNODialogFactory dialogFactory;
   
   private SimpleDialogLayout layout;
+  
+  private int count = 0;
 
   /**
    * Erzeugt einen neuen Dialog.
@@ -118,7 +120,7 @@ public class AbsenderAuswaehlen
   private void createUNOGUI()
   {
     dialogFactory = new UNODialogFactory();
-    XWindow dialogWindow = dialogFactory.createDialog(600, 300, 0xF2F2F2);
+    XWindow dialogWindow = dialogFactory.createDialog(600, 400, 0xF2F2F2);
     dialogWindow.addWindowListener(windowListener);
 
     dialogFactory.showDialog();
@@ -137,10 +139,11 @@ public class AbsenderAuswaehlen
     QueryResults palEntries = dj.getLOS();
     if (palEntries.isEmpty())
     {
-      new PersoenlicheAbsenderlisteVerwalten(verConf, dj);
+      dialogFactory.setVisible(false);
+      new PersoenlicheAbsenderlisteVerwalten(verConf, dj, palListener);
     } else
     {
-      setListElements(dj.getLOS());
+      setListElements();
     }
   }
 
@@ -164,8 +167,7 @@ public class AbsenderAuswaehlen
     absLabel.setLabel("Welchen Absender möchten Sie für Ihre Briefköpfe verwenden?");
     
     ControlProperties absListBox = new ControlProperties(ControlType.LIST_BOX, "absListBox");
-    absListBox.setControlPercentSize(100, 100);
-    absListBox.setLabel("Welchen Absender möchten Sie für Ihre Briefköpfe verwenden?");
+    absListBox.setControlPercentSize(100, 200);
     XListBox absXListBox = UNO.XListBox(absListBox.getXControl());
     absXListBox.addItemListener(absListBoxItemListener);
 
@@ -198,14 +200,15 @@ public class AbsenderAuswaehlen
   }
 
   private AbstractItemListener absListBoxItemListener = event -> {
-    DJDatasetListElement selectedElement = elements.get(event.Selected);
+    DJDataset selectedElement = elements.get(event.Selected);
 
     if (selectedElement == null) {
       LOGGER.debug("AbsenderAuswaehlen: itemStateChanged: selectedDataset is NULL.");
       return;
     }
 
-    selectedElement.getDataset().select();
+    selectedElement.select();
+    WollMuxEventHandler.getInstance().handlePALChangedNotify();
   };
 
   private AbstractActionListener abortActionListener = event -> {
@@ -213,18 +216,20 @@ public class AbsenderAuswaehlen
     dialogFactory.closeDialog();
   };
 
-  private AbstractActionListener editActionListener = event -> new PersoenlicheAbsenderlisteVerwalten(verConf, dj);
-
-  private void setListElements(QueryResults data)
+  private IPersoenlicheAbsenderlisteVerwalten palListener = () -> 
   {
-    elements = new ArrayList<>();
+      dialogFactory.setVisible(true);
+      setListElements();
+  };
 
-    data.forEach(item -> {
-      DJDatasetListElement element = new DJDatasetListElement((DJDataset) item);
-      elements.add(element);
-    });
-    Collections.sort(elements);
+  private AbstractActionListener editActionListener = event -> {
+    dialogFactory.setVisible(false);
+    new PersoenlicheAbsenderlisteVerwalten(
+      verConf, dj, palListener);
+    };
 
+  private void setListElements()
+  {
     XControl xControl = layout.getControl("absListBox");
 
     if (xControl == null)
@@ -235,34 +240,63 @@ public class AbsenderAuswaehlen
     if (xListBox == null)
       return;
 
-    if (xListBox.getItemCount() > 0)
-    {
-      xListBox.removeItems((short) 0, xListBox.getItemCount());
-    }
+    elements = new ArrayList<>();
+    xListBox.removeItems((short) 0, xListBox.getItemCount());
 
     short itemToHightlightPos = 0;
     
-    for (int i = 0; i < elements.size(); i++)
+    for (Dataset dataset : dj.getLOS())
     {
+      DJDataset ds = (DJDataset) dataset;
+
+      Dataset ldapDataset = null;
+
       try
       {
-        Dataset ds = elements.get(i).getDataset();
-        String dbNachname = ds.get("Nachname") == null ? "" : ds.get("Nachname");
-        String dbVorname = ds.get("Vorname") == null ? "" : ds.get("Vorname");
-        String dbOrgaKurz = ds.get("OrgaKurz") == null ? "" : ds.get("OrgaKurz");
-
-        xListBox.addItem(dbNachname + ", " + dbVorname + " " + dbOrgaKurz, (short) i);
-        
-        if(elements.get(i).getDataset().isSelectedDataset())
-        {
-          itemToHightlightPos = (short) i;
-        }
+        ldapDataset = dj.getCachedLdapResultByOID(dataset.get("OID"));
       } catch (ColumnNotFoundException e)
       {
         LOGGER.error("", e);
       }
+
+      if (dj.getCachedLdapResults() != null
+          && ldapDataset != null
+          && Search.hasLDAPDataChanged(dataset, ldapDataset,
+          DatasourceJoinerFactory.getDatasourceJoiner()))
+        xListBox.addItem("* " + buildListBoxString(ds), (short) count);
+      else
+        xListBox.addItem(buildListBoxString(ds), (short) count);
+
+      elements.add(ds);
+      if (ds.isSelectedDataset())
+        itemToHightlightPos = (short) count;
+
+      count++;
     }
-    
+
     xListBox.selectItemPos(itemToHightlightPos, true);
+  }
+  
+  private String buildListBoxString(DJDataset ds)
+  {
+    String dbNachname = "";
+    String dbVorname = "";
+    String dbOrgaKurz = "";
+    String dbRolle = "";
+
+    try
+    {
+      dbRolle = ds.get("Rolle");
+      dbRolle = dbRolle == null || dbRolle.isEmpty() ? "" : "(" + dbRolle + ")";
+      dbNachname = ds.get("Nachname") == null ? "" : ds.get("Nachname");
+      dbVorname = ds.get("Vorname") == null ? "" : ds.get("Vorname");
+      dbOrgaKurz = ds.get("OrgaKurz") == null ? "" : ds.get("OrgaKurz");
+
+    } catch (ColumnNotFoundException e)
+    {
+      LOGGER.error("", e);
+    }
+
+    return dbRolle + dbNachname + ", " + dbVorname + " " + dbOrgaKurz;
   }
 }
