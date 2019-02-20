@@ -90,6 +90,7 @@ import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.db.Search;
@@ -111,9 +112,9 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
- * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung einen Dialog
- * mit konfigurierbaren Suchfeldern zum
- * Hinzufügen/Entfernen von Einträgen der Persönlichen Absenderliste auf.
+ * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung einen Dialog mit
+ * konfigurierbaren Suchfeldern zum Hinzufügen/Entfernen von Einträgen der Persönlichen
+ * Absenderliste auf.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1), Björn Ranft
  */
@@ -488,7 +489,7 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private AbstractItemListener palListBoxItemListener = event -> {
     cachedPAL.get(event.Selected).getDataset().select();
-    
+
     WollMuxEventHandler.getInstance().handlePALChangedNotify();
   };
 
@@ -531,7 +532,8 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     xListBoxPal.addItems(selectedItems, (short) (xListBoxPal.getItemCount() + 1));
 
-    for (DJDatasetListElement entry : entriesAdded) {
+    for (DJDatasetListElement entry : entriesAdded)
+    {
       entry.getDataset().copy();
     }
   }
@@ -563,7 +565,13 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private void editEntry()
   {
-    // TODO: editEntryDialog(); (DatensatzBearbeiten.java)
+//    try
+//    {
+//      new DatensatzBearbeiten(dj.getSelectedDataset());
+//    } catch (DatasetNotFoundException e)
+//    {
+//      LOGGER.error("", e);
+//    }
   }
 
   private AbstractActionListener copyBtnActionListener = event -> copyEntry();
@@ -576,7 +584,6 @@ public class PersoenlicheAbsenderlisteVerwalten
       return;
 
     XListBox xListBoxResults = UnoRuntime.queryInterface(XListBox.class, xControlResults);
-
     short[] sel = xListBoxResults.getSelectedItemsPos();
 
     for (short index : sel)
@@ -591,13 +598,12 @@ public class PersoenlicheAbsenderlisteVerwalten
       return;
 
     XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
-
     sel = xListBoxPal.getSelectedItemsPos();
+
     for (short index : sel)
     {
       DJDataset datasetCopy = copyDJDataset(cachedPAL.get(index).getDataset());
       cachedPAL.add(new DJDatasetListElement(copyDJDataset(datasetCopy)));
-
       xListBoxPal.addItem(buildListBoxString(datasetCopy),
           (short) (xListBoxPal.getItemCount() + 1));
     }
@@ -618,7 +624,20 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   private AbstractActionListener newBtnActionListener = event -> {
-    // TODO: create new PAL Entry
+    DJDataset newDataset = dj.newDataset();
+
+    XControl xControlPAL = layout.getControl("palListe");
+
+    if (xControlPAL == null)
+      return;
+
+    XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
+
+    if (xListBoxPal == null)
+      return;
+
+    cachedPAL.add(new DJDatasetListElement(newDataset));
+    xListBoxPal.addItem("Neuer Datensatz", (short) (xListBoxPal.getItemCount() + 1));
   };
 
   private AbstractActionListener abortBtnActionListener = event -> {
@@ -674,7 +693,8 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     try
     {
-      dbRolle = ds.get("Rolle") == null || ds.get("Rolle").isEmpty() ? "" : "(" + ds.get("Rolle") + ")";
+      dbRolle = ds.get("Rolle") == null || ds.get("Rolle").isEmpty() ? ""
+          : "(" + ds.get("Rolle") + ")";
       dbNachname = ds.get("Nachname") == null ? "" : ds.get("Nachname");
       dbVorname = ds.get("Vorname") == null ? "" : ds.get("Vorname");
       dbOrgaKurz = ds.get("OrgaKurz") == null ? "" : ds.get("OrgaKurz");
