@@ -113,6 +113,7 @@ import de.muenchen.allg.itd51.wollmux.core.db.NoBackingStoreException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
@@ -147,6 +148,7 @@ public class DatensatzBearbeiten
       short result = wizard.execute();
       
       if (result == ExecutableDialogResults.OK) {
+        WollMuxEventHandler.getInstance().handlePALChangedNotify();
         LOGGER.debug("Datensatz bearbeiten: DatensatzBearbeiten(): ExecutableDialogResult.OK");
       } else {
         LOGGER.debug("Datensatz bearbeiten: DatensatzBearbeiten(): ExecutableDialogResult.CANCEL");

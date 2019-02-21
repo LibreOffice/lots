@@ -579,27 +579,27 @@ public class PersoenlicheAbsenderlisteVerwalten
   private void copyEntry()
   {
     XControl xControlResults = layout.getControl("searchResultList");
-    
+
     if (xControlResults == null)
       return;
-    
+
     XListBox xListBoxResults = UnoRuntime.queryInterface(XListBox.class, xControlResults);
     short[] sel = xListBoxResults.getSelectedItemsPos();
-    
+
     for (short index : sel)
     {
       cachedPAL.add(
           new DJDatasetListElement(copyDJDataset(resultDJDatasetList.get(index).getDataset())));
     }
-    
+
     XControl xControlPAL = layout.getControl("palListe");
-    
+
     if (xControlPAL == null)
       return;
-    
+
     XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
     sel = xListBoxPal.getSelectedItemsPos();
-    
+
     for (short index : sel)
     {
       DJDataset datasetCopy = copyDJDataset(cachedPAL.get(index).getDataset());
@@ -624,7 +624,20 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   private AbstractActionListener newBtnActionListener = event -> {
-    // TODO: create new PAL Entry
+    DJDataset newDataset = dj.newDataset();
+
+    XControl xControlPAL = layout.getControl("palListe");
+
+    if (xControlPAL == null)
+      return;
+
+    XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
+
+    if (xListBoxPal == null)
+      return;
+
+    cachedPAL.add(new DJDatasetListElement(newDataset));
+    xListBoxPal.addItem("Neuer Datensatz", (short) (xListBoxPal.getItemCount() + 1));
   };
 
   private AbstractActionListener abortBtnActionListener = event -> {
