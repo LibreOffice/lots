@@ -69,6 +69,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.sun.star.awt.Key;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XControl;
@@ -541,22 +542,43 @@ public class PersoenlicheAbsenderlisteVerwalten
   private void removeFromPAL()
   {
     XControl xControlPAL = layout.getControl("palListe");
-
     if (xControlPAL == null)
       return;
-
     XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
-
     if (xListBoxPal == null)
       return;
 
     short[] selectedItemsPos = xListBoxPal.getSelectedItemsPos();
 
+    int[] convertedIntArray = new int[selectedItemsPos.length];
+
+    int count = 0;
+    boolean firstIteration = true;
+    List<Dataset> datasetArray = Lists.newArrayList(dj.getLOS());
+
     for (short pos : selectedItemsPos)
     {
       xListBoxPal.removeItems(pos, (short) 1);
       cachedPAL.remove(pos);
+      convertedIntArray[count] = pos;
+
+      if(firstIteration) {
+        xListBoxPal.removeItems(pos, (short) 1);
+        cachedPAL.remove(pos);
+        DJDataset ds = (DJDataset) datasetArray.remove(pos);
+        ds.remove();
+        firstIteration = false;
+      } else {
+        xListBoxPal.removeItems((short)(pos - 1), (short) 1);
+        cachedPAL.remove(pos - 1);
+        DJDataset ds = (DJDataset) datasetArray.remove(pos - 1);
+        ds.remove();
+      }
+
+      count++;
     }
+
+    WollMuxEventHandler.getInstance().handlePALChangedNotify();
   }
 
   private AbstractActionListener editBtnActionListener = event -> editEntry();
