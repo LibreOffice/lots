@@ -640,7 +640,20 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   private AbstractActionListener newBtnActionListener = event -> {
-    // TODO: create new PAL Entry
+    DJDataset newDataset = dj.newDataset();
+
+    XControl xControlPAL = layout.getControl("palListe");
+
+    if (xControlPAL == null)
+      return;
+
+    XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
+
+    if (xListBoxPal == null)
+      return;
+
+    cachedPAL.add(new DJDatasetListElement(newDataset));
+    xListBoxPal.addItem("Neuer Datensatz", (short) (xListBoxPal.getItemCount() + 1));
   };
 
   private AbstractActionListener abortBtnActionListener = event -> {
