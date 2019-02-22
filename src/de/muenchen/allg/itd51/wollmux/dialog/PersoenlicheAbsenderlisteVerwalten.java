@@ -71,6 +71,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.sun.star.awt.Key;
+import com.sun.star.awt.MouseEvent;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XExtendedToolkit;
@@ -106,6 +107,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractMouseListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
@@ -402,6 +404,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     XListBox palListBox = UnoRuntime.queryInterface(XListBox.class, palListe.getValue());
     palListBox.setMultipleMode(true);
     palListBox.addItemListener(palListBoxItemListener);
+    UNO.XWindow(palListBox).addMouseListener(palMouseListener);
 
     searchResultControls.add(searchResult);
     searchResultControls.add(addToPal);
@@ -495,6 +498,16 @@ public class PersoenlicheAbsenderlisteVerwalten
   };
 
   private AbstractActionListener startSearchBtnActionListener = event -> search();
+  
+  private AbstractMouseListener palMouseListener = new AbstractMouseListener()
+  {
+    @Override
+    public void mousePressed(MouseEvent event)
+    {
+      if(event.Buttons == (short) 1 && event.ClickCount == 2)
+        editEntry();
+    }
+  };
 
   private AbstractActionListener addToPalActionListener = event -> addToPAL();
 
