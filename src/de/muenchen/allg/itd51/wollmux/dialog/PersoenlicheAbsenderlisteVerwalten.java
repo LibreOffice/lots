@@ -549,19 +549,13 @@ public class PersoenlicheAbsenderlisteVerwalten
       return;
 
     short[] selectedItemsPos = xListBoxPal.getSelectedItemsPos();
-
-    int[] convertedIntArray = new int[selectedItemsPos.length];
-
-    int count = 0;
+    
     boolean firstIteration = true;
     List<Dataset> datasetArray = Lists.newArrayList(dj.getLOS());
 
+    int count = 0;
     for (short pos : selectedItemsPos)
     {
-      xListBoxPal.removeItems(pos, (short) 1);
-      cachedPAL.remove(pos);
-      convertedIntArray[count] = pos;
-
       if(firstIteration) {
         xListBoxPal.removeItems(pos, (short) 1);
         cachedPAL.remove(pos);
@@ -569,13 +563,12 @@ public class PersoenlicheAbsenderlisteVerwalten
         ds.remove();
         firstIteration = false;
       } else {
-        xListBoxPal.removeItems((short)(pos - 1), (short) 1);
-        cachedPAL.remove(pos - 1);
-        DJDataset ds = (DJDataset) datasetArray.remove(pos - 1);
+        xListBoxPal.removeItems((short)(pos - 1 - count), (short) 1);
+        cachedPAL.remove(pos - 1 - count);
+        DJDataset ds = (DJDataset) datasetArray.remove(pos - 1 - count);
         ds.remove();
+        count++;
       }
-
-      count++;
     }
 
     WollMuxEventHandler.getInstance().handlePALChangedNotify();
