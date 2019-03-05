@@ -44,15 +44,10 @@ import com.sun.star.awt.XCheckBox;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XFixedText;
 import com.sun.star.awt.XNumericField;
-import com.sun.star.awt.XSpinField;
-import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XWindow;
-import com.sun.star.uno.UnoRuntime;
 
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.Verfuegungspunkt;
-import de.muenchen.allg.itd51.wollmux.core.constants.XButtonProperties;
-import de.muenchen.allg.itd51.wollmux.core.constants.XLabelProperties;
-import de.muenchen.allg.itd51.wollmux.core.constants.XNumericFieldProperties;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.ControlType;
@@ -215,6 +210,7 @@ public class SachleitendeVerfuegungenDruckdialog
     layout.setMarginBetweenControls(15);
     layout.setMarginTop(20);
     layout.setMarginLeft(20);
+    layout.setMarginRight(20);
     layout.setWindowBottomMargin(10);
 
     int size = verfuegungspunkte.size();
@@ -266,23 +262,22 @@ public class SachleitendeVerfuegungenDruckdialog
       Verfuegungspunkt verfPunkt = verfuegungspunkte.get(i);
       this.currentSettings = new ArrayList<>();
 
-      List<SimpleEntry<ControlProperties, XControl>> controls = new ArrayList<>();
+      List<ControlProperties> controls = new ArrayList<>();
 
-      SimpleEntry<ControlProperties, XControl> verfLabel = layout
-          .convertToXControl(new ControlProperties(ControlType.LABEL, "verfLabel" + i, 0, 30, 60, 0,
-              new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
-                  new Object[] { cutContent(verfPunkt.getHeading()) })));
-
-      SimpleEntry<ControlProperties, XControl> printCountField = layout
-          .convertToXControl(
-              new ControlProperties(ControlType.NUMERIC_FIELD, "printCountField" + i, 0, 30, 20, 0,
-                  new SimpleEntry<String[], Object[]>(new String[] { XNumericFieldProperties.BORDER,
-                      XNumericFieldProperties.BORDER_COLOR, XNumericFieldProperties.LABEL,
-                      XNumericFieldProperties.SPIN, XNumericFieldProperties.VALUE,
-                      XNumericFieldProperties.MIN_VALUE, XNumericFieldProperties.DECIMAL_ACCURACY },
-                      new Object[] { (short) 2, 666666, "Test", Boolean.TRUE, 1, 0, (short) 0 })));
-
-      UnoRuntime.queryInterface(XSpinField.class, printCountField.getValue())
+      ControlProperties verfLabel = new ControlProperties(ControlType.LABEL, "verfLabel" + i);
+      verfLabel.setControlPercentSize(60, 30);
+      verfLabel.setLabel(cutContent(verfPunkt.getHeading()));
+      
+      ControlProperties printCountField = new ControlProperties(ControlType.NUMERIC_FIELD, "printCountField" + i);
+      printCountField.setControlPercentSize(15, 30);
+      printCountField.setBorder((short) 2);
+      printCountField.setBorderColor(666666);
+      printCountField.setLabel("Test");
+      printCountField.setSpinEnabled(Boolean.TRUE);
+      printCountField.setValue(1);
+      printCountField.setMinValue(0);
+      printCountField.setDecimalAccuracy((short) 0);
+      UNO.toXSpinField(printCountField.getXControl())
           .addSpinListener(printCountSpinFieldListener);
       AbstractTextListener textListener = event -> {
         int printFieldSum = 0;
@@ -290,7 +285,7 @@ public class SachleitendeVerfuegungenDruckdialog
         for (int j = 0; j < verfuegungspunkte.size(); j++)
         {
           XControl printCount = layout.getControl("printCountField" + j);
-          XNumericField nField = UnoRuntime.queryInterface(XNumericField.class, printCount);
+          XNumericField nField = UNO.toXNumericField(printCount);
 
           if (nField == null)
             continue;
@@ -300,15 +295,13 @@ public class SachleitendeVerfuegungenDruckdialog
 
         setSumFieldValue(printFieldSum);
       };
-      UnoRuntime.queryInterface(XTextComponent.class, printCountField.getValue()).addTextListener(textListener);
-
-      SimpleEntry<ControlProperties, XControl> printButtons = layout
-          .convertToXControl(new ControlProperties(ControlType.BUTTON, "printButton" + i, 0, 30, 20,
-              0, new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                  new Object[] { "Drucken" })));
       
-      XButton printElementButton = UnoRuntime.queryInterface(XButton.class, printButtons.getValue());
-      printElementButton.setActionCommand("printElement");
+      UNO.toXTextComponent(printCountField.getXControl()).addTextListener(textListener);
+
+      ControlProperties printButtons = new ControlProperties(ControlType.BUTTON, "printButton" + i);
+      printButtons.setControlPercentSize(25, 30);
+      printButtons.setLabel("Drucken");
+      XButton printElementButton = UNO.toXButton(printButtons.getXControl());
       printElementButton.addActionListener(printElementActionListener);
 
       controls.add(verfLabel);
@@ -325,27 +318,27 @@ public class SachleitendeVerfuegungenDruckdialog
 
   private ControlModel addHorizontalLine()
   {
-    List<SimpleEntry<ControlProperties, XControl>> lineControl = new ArrayList<>();
+    List<ControlProperties> lineControl = new ArrayList<>();
 
-    lineControl
-        .add(layout.convertToXControl(new ControlProperties(ControlType.FIXEDLINE, "fixedLineSum",
-            0, 30, 100, 0, new SimpleEntry<String[], Object[]>(new String[] {}, new Object[] {}))));
+    ControlProperties verfLabel = new ControlProperties(ControlType.FIXEDLINE, "fixedLineSum");
+    verfLabel.setControlPercentSize(100, 30);
+    
+    lineControl.add(verfLabel);
 
     return new ControlModel(Orientation.HORIZONTAL, Align.NONE, lineControl, Optional.empty());
   }
 
   private ControlModel printSumControls(int size)
   {
-    List<SimpleEntry<ControlProperties, XControl>> sumControls = new ArrayList<>();
-    SimpleEntry<ControlProperties, XControl> sumLabel = layout
-        .convertToXControl(new ControlProperties(ControlType.LABEL, "sumLabel", 0, 30, 60, 0,
-            new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
-                new Object[] { "Summe aller Ausdrucke" })));
-
-    SimpleEntry<ControlProperties, XControl> sumNumericTextfield = layout
-        .convertToXControl(new ControlProperties(ControlType.LABEL, "sumNumericTextfield", 0, 30,
-            20, 0, new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
-                new Object[] { " " + size })));
+    List<ControlProperties> sumControls = new ArrayList<>();
+    
+    ControlProperties sumLabel = new ControlProperties(ControlType.LABEL, "sumLabel");
+    sumLabel.setControlPercentSize(60, 30);
+    sumLabel.setLabel("Summe aller Ausdrucke");
+    
+    ControlProperties sumNumericTextfield = new ControlProperties(ControlType.LABEL, "sumNumericTextfield");
+    sumNumericTextfield.setControlPercentSize(20, 30);
+    sumNumericTextfield.setLabel(" " + size);
 
     sumControls.add(sumLabel);
     sumControls.add(sumNumericTextfield);
@@ -355,13 +348,12 @@ public class SachleitendeVerfuegungenDruckdialog
 
   private ControlModel addPrintOrderControls()
   {
-    List<SimpleEntry<ControlProperties, XControl>> printOrderControls = new ArrayList<>();
+    List<ControlProperties> printOrderControls = new ArrayList<>();
 
-    SimpleEntry<ControlProperties, XControl> printOrderCheckbox = layout
-        .convertToXControl(new ControlProperties(ControlType.CHECKBOX, "printOrderCheckbox", 0, 30,
-            100, 0, new SimpleEntry<String[], Object[]>(new String[] { "Label" },
-                new Object[] { "Ausdruck in umgekehrter Reihenfolge." })));
-    UnoRuntime.queryInterface(XCheckBox.class, printOrderCheckbox.getValue())
+    ControlProperties printOrderCheckbox = new ControlProperties(ControlType.CHECKBOX, "printOrderCheckbox");
+    printOrderCheckbox.setControlPercentSize(100, 30);
+    printOrderCheckbox.setLabel("Ausdruck in umgekehrter Reihenfolge.");
+    UNO.toXCheckBox(printOrderCheckbox.getXControl())
         .addItemListener(printOrderCheckBoxListener);
 
     printOrderControls.add(printOrderCheckbox);
@@ -372,18 +364,16 @@ public class SachleitendeVerfuegungenDruckdialog
 
   private ControlModel addHeader()
   {
-    List<SimpleEntry<ControlProperties, XControl>> headerControls = new ArrayList<>();
+    List<ControlProperties> headerControls = new ArrayList<>();
 
-    SimpleEntry<ControlProperties, XControl> headerLabelAusdrucke = layout
-        .convertToXControl(new ControlProperties(ControlType.LABEL, "headerLabelAusdrucke", 0, 30,
-            60, 0, new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
-                new Object[] { "Ausdrucke" })));
-
-    SimpleEntry<ControlProperties, XControl> headerLabelKopien = layout
-        .convertToXControl(new ControlProperties(ControlType.LABEL, "headerLabelKopien", 0, 30, 20,
-            0, new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
-                new Object[] { "Kopien" })));
-
+    ControlProperties headerLabelAusdrucke = new ControlProperties(ControlType.LABEL, "headerLabelAusdrucke");
+    headerLabelAusdrucke.setControlPercentSize(60, 30);
+    headerLabelAusdrucke.setLabel("Ausdrucke");
+    
+    ControlProperties headerLabelKopien = new ControlProperties(ControlType.LABEL, "headerLabelKopien");
+    headerLabelKopien.setControlPercentSize(20, 30);
+    headerLabelKopien.setLabel("Kopien");
+    
     headerControls.add(headerLabelAusdrucke);
     headerControls.add(headerLabelKopien);
 
@@ -392,34 +382,26 @@ public class SachleitendeVerfuegungenDruckdialog
 
   private ControlModel addBottomButtons()
   {
-    List<SimpleEntry<ControlProperties, XControl>> controls = new ArrayList<>();
-    ControlModel controlModel = null;
+    List<ControlProperties> controls = new ArrayList<>();
 
-    SimpleEntry<ControlProperties, XControl> abortButton = layout
-        .convertToXControl(new ControlProperties(ControlType.BUTTON, "abortButton", 0, 40, 50, 0,
-            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                new Object[] { "Abbrechen" })));
-
-    XButton abortXButton = UnoRuntime.queryInterface(XButton.class, abortButton.getValue());
-    abortXButton.setActionCommand("abort");
+    ControlProperties abortButton = new ControlProperties(ControlType.BUTTON, "abortButton");
+    abortButton.setControlPercentSize(50, 40);
+    abortButton.setLabel("Abbrechen");
+    XButton abortXButton = UNO.toXButton(abortButton.getXControl());
     abortXButton.addActionListener(abortListener);
     
     controls.add(abortButton);
 
-    SimpleEntry<ControlProperties, XControl> printAllButton = layout
-        .convertToXControl(new ControlProperties(ControlType.BUTTON, "printAllButton", 0, 40, 50, 0,
-            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                new Object[] { "Alle Drucken" })));
-    XButton printAllXButton = UnoRuntime.queryInterface(XButton.class, printAllButton.getValue());
-    printAllXButton.setActionCommand("printAll");
+    ControlProperties printAllButton = new ControlProperties(ControlType.BUTTON, "printAllButton");
+    printAllButton.setControlPercentSize(50, 40);
+    printAllButton.setLabel("Alle Drucken");
+    XButton printAllXButton = UNO.toXButton(printAllButton.getXControl());
     printAllXButton.addActionListener(printAllActionListener);
     
     controls.add(printAllButton);
 
-    controlModel = new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls,
+    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls,
         Optional.of(Dock.BOTTOM));
-
-    return controlModel;
   }
 
   /**
@@ -431,8 +413,7 @@ public class SachleitendeVerfuegungenDruckdialog
   private VerfuegungspunktInfo getVerfuegungspunktInfo(int verfPunkt)
   {
     // Anzahl der Kopien lesen
-    XNumericField printCountField = UnoRuntime.queryInterface(XNumericField.class,
-        layout.getControl("printCountField" + (verfPunkt - 1)));
+    XNumericField printCountField = UNO.toXNumericField(layout.getControl("printCountField" + (verfPunkt - 1)));
 
     if (printCountField == null)
     {
@@ -474,8 +455,7 @@ public class SachleitendeVerfuegungenDruckdialog
 
       for (int i = 0; i < verfuegungspunkte.size(); i++)
       {
-        XNumericField printCountField = UnoRuntime.queryInterface(XNumericField.class,
-            layout.getControl("printCountField" + i));
+        XNumericField printCountField = UNO.toXNumericField(layout.getControl("printCountField" + i));
 
         if (printCountField == null)
           continue;
@@ -494,7 +474,7 @@ public class SachleitendeVerfuegungenDruckdialog
       for (int i = 0; i < verfuegungspunkte.size(); i++)
       {
         XControl printCount = layout.getControl("printCountField" + i);
-        XNumericField printCountField = UnoRuntime.queryInterface(XNumericField.class, printCount);
+        XNumericField printCountField = UNO.toXNumericField(printCount);
 
         if (printCountField == null)
           continue;
@@ -508,13 +488,12 @@ public class SachleitendeVerfuegungenDruckdialog
   
   private void setSumFieldValue(int value)
   {
-    XFixedText sumLabel = UnoRuntime.queryInterface(XFixedText.class,
-        layout.getControl("sumNumericTextfield"));
+    XFixedText sumLabel = UNO.toXFixedText(layout.getControl("sumNumericTextfield"));
     sumLabel.setText(" " + value);
   }
 
   private AbstractItemListener printOrderCheckBoxListener = event -> {
-    XCheckBox checkBox = UnoRuntime.queryInterface(XCheckBox.class, event.Source);
+    XCheckBox checkBox = UNO.toXCheckBox(event.Source);
 
     if (checkBox == null)
       return;
@@ -526,7 +505,7 @@ public class SachleitendeVerfuegungenDruckdialog
 
   private AbstractActionListener printElementActionListener = event ->
   {
-    XControl xControl = UnoRuntime.queryInterface(XControl.class, event.Source);
+    XControl xControl = UNO.toXControl(event.Source);
 
     getCurrentSettingsForElement(xControl);
 
@@ -546,12 +525,12 @@ public class SachleitendeVerfuegungenDruckdialog
 
     for (ControlModel model : layout.getControlList())
     {
-      for (SimpleEntry<ControlProperties, XControl> entry : model.getControls())
+      for (ControlProperties entry : model.getControls())
       {
-        if (entry.getValue().equals(control))
+        if (entry.getXControl().equals(control))
         {
-          int verfPunktIndex = Integer.parseInt(entry.getKey().getControlName()
-              .substring(entry.getKey().getControlName().length() - 1));
+          int verfPunktIndex = Integer.parseInt(entry.getControlName()
+              .substring(entry.getControlName().length() - 1));
 
           currentSettings.add(getVerfuegungspunktInfo(verfPunktIndex + 1));
         }
@@ -575,8 +554,7 @@ public class SachleitendeVerfuegungenDruckdialog
 
   private boolean getSelectedPrintOrderAsc()
   {
-    XCheckBox isOrderAscSelected = UnoRuntime.queryInterface(XCheckBox.class,
-        layout.getControl("printOrderCheckbox"));
+    XCheckBox isOrderAscSelected = UNO.toXCheckBox(layout.getControl("printOrderCheckbox"));
 
     return isOrderAscSelected.getState() == 0;
   }

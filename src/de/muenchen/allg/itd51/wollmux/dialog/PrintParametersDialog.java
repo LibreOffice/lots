@@ -51,7 +51,6 @@ import com.sun.star.awt.XControlModel;
 import com.sun.star.awt.XFixedText;
 import com.sun.star.awt.XNumericField;
 import com.sun.star.awt.XRadioButton;
-import com.sun.star.awt.XSpinField;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
@@ -66,17 +65,14 @@ import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XTextDocument;
-import com.sun.star.uno.UnoRuntime;
 import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.itd51.wollmux.core.constants.XButtonProperties;
-import de.muenchen.allg.itd51.wollmux.core.constants.XLabelProperties;
-import de.muenchen.allg.itd51.wollmux.core.constants.XNumericFieldProperties;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.ControlType;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Dock;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
 import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
@@ -232,28 +228,28 @@ public class PrintParametersDialog
     layout = new SimpleDialogLayout(dialogWindow);
     layout.setMarginTop(20);
     layout.setMarginLeft(20);
+    layout.setMarginRight(20);
     layout.setWindowBottomMargin(10);
 
     // Bereiche
     List<ControlModel> printRangeControls = new ArrayList<>();
-    List<SimpleEntry<ControlProperties, XControl>> radioControls = null;
+    List<ControlProperties> radioControls = null;
 
     for (int i = 0; i < PageRangeType.values().length; i++)
     {
       PageRangeType pageRangeType = PageRangeType.values()[i];
       radioControls = new ArrayList<>();
-      SimpleEntry<ControlProperties, XControl> radioButton = layout
-          .convertToXControl(new ControlProperties(ControlType.RADIO,
-              "radioSectionRadioButton" + i, 0, 30, 60, 0,
-              new SimpleEntry<String[], Object[]>(
-                  new String[] { XButtonProperties.LABEL },
-                  new Object[] { pageRangeType.label })));
+
+      ControlProperties radioButton = new ControlProperties(ControlType.RADIO, "radioSectionRadioButton" + i);
+      radioButton.setControlPercentSize(60, 30);
+      radioButton.setLabel(pageRangeType.label);
+      
       // zusätzlich zu controlModel.marginLeft etwas einrücken da um diese
       // Controls später eine GroupBox gezeichnet wird
-      radioButton.getKey().setMarginLeft(40);
+      radioButton.setMarginLeft(40);
       
       // ersten RadioButton aktivieren
-      XRadioButton xRadioButton = UnoRuntime.queryInterface(XRadioButton.class, radioButton.getValue());
+      XRadioButton xRadioButton = UNO.toXRadio(radioButton.getXControl());
       if (i == 0) {
     	  xRadioButton.setState(true);
     	  this.currentPageRangeType = pageRangeType;
@@ -266,13 +262,10 @@ public class PrintParametersDialog
 
       if (pageRangeType.hasAdditionalTextField)
       {
-        SimpleEntry<ControlProperties, XControl> addtionalTextfield = layout
-            .convertToXControl(new ControlProperties(ControlType.EDIT,
-                "radioSectionTextField" + i, 0, 30, 20, 0,
-                new SimpleEntry<String[], Object[]>(
-                    new String[] { XButtonProperties.LABEL }, new Object[] {
-                    		pageRangeType.additionalTextFieldPrototypeDisplayValue })));
-        UnoRuntime.queryInterface(XTextComponent.class, addtionalTextfield.getValue()).addTextListener(additionalTextFieldListener);
+        ControlProperties addtionalTextfield = new ControlProperties(ControlType.EDIT, "radioSectionTextField" + i);
+        addtionalTextfield.setControlPercentSize(30, 30);
+        addtionalTextfield.setLabel(pageRangeType.additionalTextFieldPrototypeDisplayValue);
+        UNO.toXTextComponent(addtionalTextfield.getXControl()).addTextListener(additionalTextFieldListener);
 
         radioControls.add(addtionalTextfield);
       }
@@ -309,30 +302,22 @@ public class PrintParametersDialog
   }
   
   private ControlModel addCopyCount() {
-    List<SimpleEntry<ControlProperties, XControl>> copyCountControls = new ArrayList<>();
+    List<ControlProperties> copyCountControls = new ArrayList<>();
     
-    SimpleEntry<ControlProperties, XControl> labelExemplare = layout
-        .convertToXControl(new ControlProperties(ControlType.LABEL,
-            "labelExemplare", 0, 30, 80, 0,
-            new SimpleEntry<String[], Object[]>(
-                new String[] { XLabelProperties.LABEL },
-                new Object[] { "Exemplare  " })));
+    ControlProperties labelExemplare = new ControlProperties(ControlType.LABEL, "labelExemplare");
+    labelExemplare.setControlPercentSize(30, 30);
+    labelExemplare.setLabel("Exemplare");
     
-    SimpleEntry<ControlProperties, XControl> printCountField = layout
-        .convertToXControl(new ControlProperties(ControlType.NUMERIC_FIELD,
-            "printCountField", 0, 30, 20, 0,
-            new SimpleEntry<String[], Object[]>(
-                new String[] { XNumericFieldProperties.BORDER,
-                    XNumericFieldProperties.BORDER_COLOR,
-                    XNumericFieldProperties.LABEL,
-                    XNumericFieldProperties.SPIN,
-                    XNumericFieldProperties.VALUE,
-                    XNumericFieldProperties.MIN_VALUE,
-                    XNumericFieldProperties.DECIMAL_ACCURACY },
-                new Object[] { (short) 2, 666666, "Kopien", Boolean.TRUE, 1, 0,
-                    (short) 0 })));
-    
-    UnoRuntime.queryInterface(XSpinField.class, printCountField.getValue()).addSpinListener(printCountSpinFieldListener);
+    ControlProperties printCountField = new ControlProperties(ControlType.NUMERIC_FIELD, "printCountField");
+    printCountField.setControlPercentSize(20, 30);
+    printCountField.setBorder((short) 2);
+    printCountField.setBorderColor(666666);
+    printCountField.setLabel("Kopien");
+    printCountField.setSpinEnabled(Boolean.TRUE);
+    printCountField.setValue(1);
+    printCountField.setMinValue(0);
+    printCountField.setDecimalAccuracy((short) 0);
+    UNO.toXSpinField(printCountField.getXControl()).addSpinListener(printCountSpinFieldListener);
     
     copyCountControls.add(labelExemplare);
     copyCountControls.add(printCountField);
@@ -343,22 +328,16 @@ public class PrintParametersDialog
 
   private ControlModel addHeader()
   {
-    List<SimpleEntry<ControlProperties, XControl>> headerLabel = new ArrayList<>();
-    SimpleEntry<ControlProperties, XControl> printerDialogLabel = layout
-        .convertToXControl(new ControlProperties(ControlType.LABEL,
-            "printerDialogLabel", 0, 20, 100, 0,
-            new SimpleEntry<String[], Object[]>(
-                new String[] { XLabelProperties.LABEL },
-                new Object[] { "Drucker" })));
-    printerDialogLabel.getKey().setMarginBetweenControls(0);
+    List<ControlProperties> headerLabel = new ArrayList<>();
     
-    SimpleEntry<ControlProperties, XControl> hLine = layout
-        .convertToXControl(new ControlProperties(ControlType.FIXEDLINE,
-            "printerDialogLabelHLine", 0, 5, 100, 0,
-            new SimpleEntry<String[], Object[]>(
-                new String[] { },
-                new Object[] { })));
-    hLine.getKey().setMarginBetweenControls(0);
+    ControlProperties printerDialogLabel = new ControlProperties(ControlType.LABEL, "printerDialogLabel");
+    printerDialogLabel.setControlPercentSize(20, 100);
+    printerDialogLabel.setLabel("Drucker");
+    printerDialogLabel.setMarginBetweenControls(0);
+    
+    ControlProperties hLine = new ControlProperties(ControlType.FIXEDLINE, "printerDialogLabelHLine");
+    hLine.setControlPercentSize(5, 100);
+    hLine.setMarginBetweenControls(0);
     
     headerLabel.add(printerDialogLabel);
     headerLabel.add(hLine);
@@ -369,31 +348,20 @@ public class PrintParametersDialog
 
   private ControlModel addPrinterInfoModel()
   {
-    List<SimpleEntry<ControlProperties, XControl>> printerSettings = new ArrayList<>();
+    List<ControlProperties> printerSettings = new ArrayList<>();
 
-    SimpleEntry<ControlProperties, XControl> printerSettingsLabel = layout
-        .convertToXControl(new ControlProperties(ControlType.LABEL,
-            "printerSettingsLabel", 0, 30, 20, 0,
-            new SimpleEntry<String[], Object[]>(
-                new String[] { XLabelProperties.LABEL },
-                new Object[] { "Name" })));
+    ControlProperties printerSettingsLabel = new ControlProperties(ControlType.LABEL, "printerSettingsLabel");
+    printerSettingsLabel.setControlPercentSize(30, 20);
+    printerSettingsLabel.setLabel("Name");
+    
+    ControlProperties printerSettingsPrintModel = new ControlProperties(ControlType.LABEL, "printerSettingsPrintModel");
+    printerSettingsPrintModel.setControlPercentSize(30, 30);
+    printerSettingsPrintModel.setLabel(getCurrentPrinterName(this.doc));
 
-    SimpleEntry<ControlProperties, XControl> printerSettingsPrintModel = layout
-        .convertToXControl(new ControlProperties(ControlType.LABEL,
-            "printerSettingsPrintModel", 0, 30, 30, 0,
-            new SimpleEntry<String[], Object[]>(
-                new String[] { XLabelProperties.LABEL },
-                new Object[] { getCurrentPrinterName(this.doc) })));
-
-    SimpleEntry<ControlProperties, XControl> printerSettingsSelectPrinterButton = layout
-        .convertToXControl(new ControlProperties(ControlType.BUTTON,
-            "printerSettingsSelectPrinterButton", 0, 30, 50, 0,
-            new SimpleEntry<String[], Object[]>(
-                new String[] { XButtonProperties.LABEL },
-                new Object[] { "Drucker wechseln / einrichten" })));
-
-    XButton selectPrinterButton = UnoRuntime.queryInterface(XButton.class, printerSettingsSelectPrinterButton.getValue());
-    selectPrinterButton.setActionCommand("selectPrinter");
+    ControlProperties printerSettingsSelectPrinterButton = new ControlProperties(ControlType.BUTTON, "printerSettingsSelectPrinterButton");
+    printerSettingsSelectPrinterButton.setControlPercentSize(50, 30);
+    printerSettingsSelectPrinterButton.setLabel("Drucker wechseln / einrichten");
+    XButton selectPrinterButton = UNO.toXButton(printerSettingsSelectPrinterButton.getXControl());
     selectPrinterButton.addActionListener(selectPrinterActionListener);
 
     printerSettings.add(printerSettingsLabel);
@@ -408,14 +376,14 @@ public class PrintParametersDialog
   {
     int groupBoxHeight = layout
         .calcGroupBoxHeightByControlProperties(printRangeControls);
-    List<SimpleEntry<ControlProperties, XControl>> groupBoxRadioModel = new ArrayList<>();
-    SimpleEntry<ControlProperties, XControl> groupBox = layout
-        .convertToXControl(new ControlProperties(ControlType.GROUPBOX,
-            "groupBoxRadio", 0, groupBoxHeight, 100, 0,
-            new SimpleEntry<String[], Object[]>(
-                new String[] { XButtonProperties.LABEL },
-                new Object[] { "Bereiche" })));
-
+    
+    List<ControlProperties> groupBoxRadioModel = new ArrayList<>();
+    
+    ControlProperties groupBox = new ControlProperties(ControlType.GROUPBOX, "groupBoxRadio");
+    groupBox.setControlPercentSize(100, 0);
+    groupBox.setControlSize(0, groupBoxHeight);
+    groupBox.setLabel("Bereiche");
+    
     groupBoxRadioModel.add(groupBox);
 
     ControlModel groupBoxModel = new ControlModel(Orientation.HORIZONTAL,
@@ -427,34 +395,25 @@ public class PrintParametersDialog
 
   private ControlModel addBottomControlButtons()
   {
-    List<SimpleEntry<ControlProperties, XControl>> bottomButtonsSection = new ArrayList<>();
-    SimpleEntry<ControlProperties, XControl> bottomButtonAbort = layout
-        .convertToXControl(new ControlProperties(ControlType.BUTTON,
-            "printerDialogCancel", 0, 30, 50, 0,
-            new SimpleEntry<String[], Object[]>(
-                new String[] { XButtonProperties.LABEL },
-                new Object[] { "Abbrechen" })));
-
-    XButton abortButton = UnoRuntime.queryInterface(XButton.class, bottomButtonAbort.getValue());
-    abortButton.setActionCommand("abort");
+    List<ControlProperties> bottomButtonsSection = new ArrayList<>();
+    
+    ControlProperties bottomButtonAbort = new ControlProperties(ControlType.BUTTON, "printerDialogCancel");
+    bottomButtonAbort.setControlPercentSize(50, 40);
+    bottomButtonAbort.setLabel("Abbrechen");
+    XButton abortButton = UNO.toXButton(bottomButtonAbort.getXControl());
     abortButton.addActionListener(abortListener);
 
-    SimpleEntry<ControlProperties, XControl> bottomButtonPrint = layout
-        .convertToXControl(new ControlProperties(ControlType.BUTTON,
-            "printerDialogPrint", 0, 30, 50, 0,
-            new SimpleEntry<String[], Object[]>(
-                new String[] { XButtonProperties.LABEL },
-                new Object[] { "Drucken" })));
-    
-    XButton printButton = UnoRuntime.queryInterface(XButton.class, bottomButtonPrint.getValue());
-    printButton.setActionCommand("print");
+    ControlProperties bottomButtonPrint = new ControlProperties(ControlType.BUTTON, "printerDialogPrint");
+    bottomButtonPrint.setControlPercentSize(50, 40);
+    bottomButtonPrint.setLabel("Drucken");
+    XButton printButton = UNO.toXButton(bottomButtonPrint.getXControl());
     printButton.addActionListener(printListener);
 
     bottomButtonsSection.add(bottomButtonAbort);
     bottomButtonsSection.add(bottomButtonPrint);
 
     return new ControlModel(Orientation.HORIZONTAL, Align.NONE,
-        bottomButtonsSection, Optional.empty());
+        bottomButtonsSection, Optional.of(Dock.BOTTOM));
   }
 
   private AbstractActionListener printListener = event -> printButtonPressed();
@@ -502,9 +461,7 @@ public class PrintParametersDialog
                       @Override
                       public void run()
                       {
-                        XFixedText printerNameLabel = UnoRuntime.queryInterface(
-                            XFixedText.class,
-                            layout.getControl("printerSettingsPrintModel"));
+                        XFixedText printerNameLabel = UNO.toXFixedText(layout.getControl("printerSettingsPrintModel"));
 
                         if (printerNameLabel == null)
                           return;
@@ -595,7 +552,7 @@ public class PrintParametersDialog
     }
     
     private void getAndSetCopyCount(SpinEvent event) {
-      XNumericField copyCountControl = UnoRuntime.queryInterface(XNumericField.class, event.Source);
+      XNumericField copyCountControl = UNO.toXNumericField(event.Source);
       
       if (copyCountControl == null)
         return;
@@ -654,7 +611,7 @@ public class PrintParametersDialog
   }
   
   private AbstractTextListener additionalTextFieldListener = event -> {
-    XTextComponent xTextComponent = UnoRuntime.queryInterface(XTextComponent.class, event.Source);
+    XTextComponent xTextComponent = UNO.toXTextComponent(event.Source);
 
     if (xTextComponent == null)
       return;
@@ -663,15 +620,13 @@ public class PrintParametersDialog
   };
 
   private AbstractItemListener radioButtonListener = event -> {
-    XControl xControl = UnoRuntime.queryInterface(XControl.class,
-        event.Source);
+    XControl xControl = UNO.toXControl(event.Source);
 
     for (XControl control : layout.getControls())
     {
       if (!control.equals(xControl))
       {
-        XRadioButton radioButton = UnoRuntime
-            .queryInterface(XRadioButton.class, control);
+        XRadioButton radioButton = UNO.toXRadio(control);
 
         if (radioButton == null)
           continue;
@@ -679,11 +634,10 @@ public class PrintParametersDialog
         radioButton.setState(false);
         
       } else {
-        XControl radioButton = UnoRuntime
-            .queryInterface(XControl.class, control);
+        XControl radioButton = UNO.toXControl(control);
         XControlModel model = radioButton.getModel();
         
-        XPropertySet propertySet = UnoRuntime.queryInterface(XPropertySet.class, model);
+        XPropertySet propertySet = UNO.XPropertySet(model);
         
         try
         {
