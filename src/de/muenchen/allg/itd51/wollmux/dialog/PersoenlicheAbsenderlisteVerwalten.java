@@ -52,7 +52,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -71,7 +70,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.sun.star.awt.Key;
-import com.sun.star.awt.XButton;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XExtendedToolkit;
 import com.sun.star.awt.XFixedText;
@@ -85,8 +83,6 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.constants.XButtonProperties;
-import de.muenchen.allg.itd51.wollmux.core.constants.XLabelProperties;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDatasetListElement;
@@ -190,7 +186,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   private void createGUI()
   {
     dialogFactory = new UNODialogFactory();
-    XWindow dialogWindow = dialogFactory.createDialog(600, 300, 0xF2F2F2);
+    XWindow dialogWindow = dialogFactory.createDialog(780, 450, 0xF2F2F2);
     dialogWindow.addWindowListener(xWindowListener);
 
     Object toolkit = null;
@@ -198,7 +194,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     try
     {
       toolkit = UNO.xMCF.createInstanceWithContext("com.sun.star.awt.Toolkit", UNO.defaultContext);
-      xToolkit = UnoRuntime.queryInterface(XToolkit.class, toolkit);
+      xToolkit = UNO.XToolkit(toolkit);
       XExtendedToolkit extToolkit = UnoRuntime.queryInterface(XExtendedToolkit.class, xToolkit);
       extToolkit.addKeyHandler(keyHandler);
     } catch (Exception e)
@@ -223,19 +219,21 @@ public class PersoenlicheAbsenderlisteVerwalten
       // erstellt controls paarweise horizontal
       if (i > 1 && i % 2 == 0)
       {
-        ControlModel searchFields = addSearchControlsTwoColumns(keys.get(i - 2), keys.get(i - 1));
+        boolean isLastRow = i == queryNames.keySet().size();
+        
+        ControlModel searchFields = addSearchControlsTwoColumns(keys.get(i - 2), keys.get(i - 1), isLastRow);
 
         // wenn letzte Zeile, Suchbutton hinzufügen
-        if (i == queryNames.keySet().size())
+        if (isLastRow)
         {
-          searchFields.addControlToControlList(addSearchButton());
+          //searchFields.addControlToControlList(addSearchButton());
         }
 
         layout.addControlsToList(searchFields);
         query2.add(searchFields);
       } else if (i == queryNames.keySet().size())
       {
-        // Zeile mit einem Control falls ungerade Anzahl von Suchfeldern konfiguriert wurde.
+        // Zeile mit einem Control-Paar falls ungerade Anzahl von Suchfeldern konfiguriert wurde.
         ControlModel searchFields = addSearchControlsOneColumn(keys.get(i - 1));
         searchFields.addControlToControlList(addSearchButton());
         layout.addControlsToList(searchFields);
@@ -250,11 +248,8 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     layout.draw();
 
-    XListBox palListe = UnoRuntime.queryInterface(XListBox.class, layout.getControl("palListe"));
-
-    if (palListe == null)
-      return;
-
+    XListBox palListe = UNO.toXListBox(layout.getControl("palListe"));
+    
     int count = 0;
     short itemToHighlightPos = 0;
     for (Dataset result : dj.getLOS())
@@ -293,7 +288,7 @@ public class PersoenlicheAbsenderlisteVerwalten
         if (xButton == null)
           return false;
 
-        XWindow xWnd = UnoRuntime.queryInterface(XWindow.class, xButton);
+        XWindow xWnd = UNO.XWindow(xButton);
 
         if (xWnd == null)
           return false;
@@ -315,64 +310,80 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private ControlModel addIntroControls()
   {
-    List<SimpleEntry<ControlProperties, XControl>> introControls = new ArrayList<>();
+    List<ControlProperties> introControls = new ArrayList<>();
 
-    introControls.add(layout.convertToXControl(new ControlProperties(ControlType.LABEL,
-        "introLabel", 0, 30, 100, 0,
-        new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
-            new Object[] { "Sie können nach Vorname, Nachname, Email und Orga-Einheit suchen" }))));
-
+    ControlProperties label = new ControlProperties(ControlType.LABEL, "introLabel");
+    label.setControlPercentSize(100, 20);
+    label.setLabel("Sie können nach Vorname, Nachname, Email und Orga-Einheit suchen");
+    
+    introControls.add(label);
+    
     return new ControlModel(Orientation.HORIZONTAL, Align.NONE, introControls, Optional.empty());
   }
 
-  private ControlModel addSearchControlsTwoColumns(String firstKey, String secondKey)
+  private ControlModel addSearchControlsTwoColumns(String firstKey, String secondKey, boolean isLastRow)
   {
-    List<SimpleEntry<ControlProperties, XControl>> searchControls = new ArrayList<>();
+    List<ControlProperties> searchControls = new ArrayList<>();
 
-    searchControls.add(layout.convertToXControl(new ControlProperties(ControlType.LABEL, firstKey,
-        0, 30, 20, 0, new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
-            new Object[] { firstKey }))));
-
-    searchControls
-        .add(layout.convertToXControl(new ControlProperties(ControlType.EDIT, firstKey + "Edit", 0,
-            30, 25, 0, new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                new Object[] { firstKey + "Edit" }))));
-
-    searchControls.add(layout.convertToXControl(new ControlProperties(ControlType.LABEL, secondKey,
-        0, 30, 20, 0, new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
-            new Object[] { secondKey }))));
-
-    searchControls
-        .add(layout.convertToXControl(new ControlProperties(ControlType.EDIT, secondKey + "Edit", 0,
-            30, 25, 0, new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                new Object[] { secondKey + "Edit" }))));
+    ControlProperties label = new ControlProperties(ControlType.LABEL, firstKey + "Label");
+    label.setControlPercentSize(10, 30);
+    label.setLabel(firstKey);
+    searchControls.add(label);
+    
+    ControlProperties edit = new ControlProperties(ControlType.EDIT, firstKey + "Edit");
+    edit.setControlPercentSize(30, 30);
+    searchControls.add(edit);
+    
+    ControlProperties labelSecond = new ControlProperties(ControlType.LABEL, secondKey + "Label");
+    labelSecond.setControlPercentSize(10, 30);
+    labelSecond.setLabel(secondKey);
+    searchControls.add(labelSecond);
+    
+    ControlProperties editSecond = new ControlProperties(ControlType.EDIT, secondKey + "Edit");
+    editSecond.setControlPercentSize(30, 30);
+    searchControls.add(editSecond);
+    
+    ControlProperties labelPlaceholder = null;
+    ControlProperties startSearchBtn = null;
+    
+    if (!isLastRow) {
+      labelPlaceholder = new ControlProperties(ControlType.LABEL, firstKey + "LabelP");
+      labelPlaceholder.setControlPercentSize(20, 30);
+      labelPlaceholder.setLabel("");
+      searchControls.add(labelPlaceholder);
+    } else {
+      startSearchBtn = new ControlProperties(ControlType.BUTTON, "startSearch");
+      startSearchBtn.setControlPercentSize(20, 30);
+      startSearchBtn.setLabel("Suchen");
+      searchControls.add(startSearchBtn);
+    }
 
     return new ControlModel(Orientation.HORIZONTAL, Align.NONE, searchControls, Optional.empty());
   }
 
   private ControlModel addSearchControlsOneColumn(String firstKey)
   {
-    List<SimpleEntry<ControlProperties, XControl>> searchControls = new ArrayList<>();
+    List<ControlProperties> searchControls = new ArrayList<>();
 
-    searchControls.add(layout.convertToXControl(new ControlProperties(ControlType.LABEL, firstKey,
-        0, 30, 20, 0, new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
-            new Object[] { firstKey }))));
+    ControlProperties label = new ControlProperties(ControlType.LABEL, firstKey);
+    label.setControlPercentSize(30, 20);
+    label.setLabel(firstKey);
 
-    searchControls
-        .add(layout.convertToXControl(new ControlProperties(ControlType.EDIT, firstKey + "Edit", 0,
-            30, 25, 0, new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                new Object[] { firstKey }))));
-
+    ControlProperties edit = new ControlProperties(ControlType.EDIT, firstKey);
+    edit.setControlPercentSize(70, 20);
+    
+    searchControls.add(label);
+    searchControls.add(edit);
+    
     return new ControlModel(Orientation.HORIZONTAL, Align.NONE, searchControls, Optional.empty());
   }
 
-  private SimpleEntry<ControlProperties, XControl> addSearchButton()
+  private ControlProperties addSearchButton()
   {
-    SimpleEntry<ControlProperties, XControl> startSearchBtn = layout
-        .convertToXControl(new ControlProperties(ControlType.BUTTON, "startSearch", 0, 30, 10, 0,
-            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                new Object[] { "Suchen" })));
-    UnoRuntime.queryInterface(XButton.class, startSearchBtn.getValue())
+    ControlProperties startSearchBtn = new ControlProperties(ControlType.BUTTON, "startSearch");
+    startSearchBtn.setControlPercentSize(30, 30);
+    startSearchBtn.setLabel("Suchen");
+    UNO.toXButton(startSearchBtn.getXControl())
         .addActionListener(startSearchBtnActionListener);
 
     return startSearchBtn;
@@ -380,31 +391,27 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private ControlModel addSearchResultControls()
   {
-    List<SimpleEntry<ControlProperties, XControl>> searchResultControls = new ArrayList<>();
+    List<ControlProperties> searchResultControls = new ArrayList<>();
 
-    SimpleEntry<ControlProperties, XControl> searchResult = layout
-        .convertToXControl(new ControlProperties(ControlType.LIST_BOX, "searchResultList", 0, 150,
-            45, 0, new SimpleEntry<String[], Object[]>(new String[] {}, new Object[] {})));
-    UnoRuntime.queryInterface(XListBox.class, searchResult.getValue()).setMultipleMode(true);
+    ControlProperties searchResultListBox = new ControlProperties(ControlType.LIST_BOX, "searchResultList");
+    searchResultListBox.setControlPercentSize(45, 150);
+    UNO.toXListBox(searchResultListBox.getXControl()).setMultipleMode(true);
 
-    SimpleEntry<ControlProperties, XControl> addToPal = layout
-        .convertToXControl(new ControlProperties(ControlType.BUTTON, "addToPalBtn", 0, 30, 10, 0,
-            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                new Object[] { "->" })));
-    UnoRuntime.queryInterface(XButton.class, addToPal.getValue())
+    ControlProperties addToPalBtn = new ControlProperties(ControlType.BUTTON, "addToPalBtn");
+    addToPalBtn.setControlPercentSize(10, 30);
+    addToPalBtn.setLabel("->");
+    UNO.toXButton(addToPalBtn.getXControl())
         .addActionListener(addToPalActionListener);
 
-    SimpleEntry<ControlProperties, XControl> palListe = layout
-        .convertToXControl(new ControlProperties(ControlType.LIST_BOX, "palListe", 0, 150, 45, 0,
-            new SimpleEntry<String[], Object[]>(new String[] {}, new Object[] {})));
+    ControlProperties palListBox = new ControlProperties(ControlType.LIST_BOX, "palListe");
+    palListBox.setControlPercentSize(45, 150);
+    XListBox palXListBox = UNO.toXListBox(palListBox.getXControl());
+    palXListBox.setMultipleMode(true);
+    palXListBox.addItemListener(palListBoxItemListener);
 
-    XListBox palListBox = UnoRuntime.queryInterface(XListBox.class, palListe.getValue());
-    palListBox.setMultipleMode(true);
-    palListBox.addItemListener(palListBoxItemListener);
-
-    searchResultControls.add(searchResult);
-    searchResultControls.add(addToPal);
-    searchResultControls.add(palListe);
+    searchResultControls.add(searchResultListBox);
+    searchResultControls.add(addToPalBtn);
+    searchResultControls.add(palListBox);
 
     return new ControlModel(Orientation.HORIZONTAL, Align.NONE, searchResultControls,
         Optional.empty());
@@ -412,45 +419,46 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private ControlModel addStatusTextField()
   {
-    List<SimpleEntry<ControlProperties, XControl>> statusControls = new ArrayList<>();
+    List<ControlProperties> statusControls = new ArrayList<>();
 
-    statusControls
-        .add(layout.convertToXControl(new ControlProperties(ControlType.LABEL, "statusText", 0, 30,
-            100, 0, new SimpleEntry<String[], Object[]>(new String[] {}, new Object[] { "" }))));
+    ControlProperties label = new ControlProperties(ControlType.LABEL, "statusText");
+    label.setControlPercentSize(100, 10);
 
+    statusControls.add(label);
+    
     return new ControlModel(Orientation.HORIZONTAL, Align.NONE, statusControls, Optional.empty());
   }
 
   private ControlModel addPalButtonControls()
   {
-    List<SimpleEntry<ControlProperties, XControl>> bottomControls = new ArrayList<>();
+    List<ControlProperties> bottomControls = new ArrayList<>();
 
-    SimpleEntry<ControlProperties, XControl> deleteBtn = layout
-        .convertToXControl(new ControlProperties(ControlType.BUTTON, "delBtn", 0, 30, 25, 0,
-            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                new Object[] { "Löschen" })));
-    UnoRuntime.queryInterface(XButton.class, deleteBtn.getValue())
+    ControlProperties deleteBtn = new ControlProperties(ControlType.BUTTON, "delBtn");
+    deleteBtn.setControlPercentSize(25, 25);
+    deleteBtn.setMarginBetweenControls(5);
+    deleteBtn.setLabel("Löschen");
+    UNO.toXButton(deleteBtn.getXControl())
         .addActionListener(deleteBtnActionListener);
-
-    SimpleEntry<ControlProperties, XControl> editBtn = layout
-        .convertToXControl(new ControlProperties(ControlType.BUTTON, "editBtn", 0, 30, 25, 0,
-            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                new Object[] { "Bearbeiten" })));
-    UnoRuntime.queryInterface(XButton.class, editBtn.getValue())
+    
+    ControlProperties editBtn = new ControlProperties(ControlType.BUTTON, "editBtn");
+    editBtn.setControlPercentSize(25, 25);
+    editBtn.setMarginBetweenControls(5);
+    editBtn.setLabel("Bearbeiten");
+    UNO.toXButton(editBtn.getXControl())
         .addActionListener(editBtnActionListener);
 
-    SimpleEntry<ControlProperties, XControl> copyBtn = layout
-        .convertToXControl(new ControlProperties(ControlType.BUTTON, "copyBtn", 0, 30, 25, 0,
-            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                new Object[] { "Kopieren" })));
-    UnoRuntime.queryInterface(XButton.class, copyBtn.getValue())
+    ControlProperties copyBtn = new ControlProperties(ControlType.BUTTON, "copyBtn");
+    copyBtn.setControlPercentSize(25, 25);
+    copyBtn.setMarginBetweenControls(5);
+    copyBtn.setLabel("Kopieren");
+    UNO.toXButton(copyBtn.getXControl())
         .addActionListener(copyBtnActionListener);
 
-    SimpleEntry<ControlProperties, XControl> newBtn = layout
-        .convertToXControl(new ControlProperties(ControlType.BUTTON, "newBtn", 0, 30, 25, 0,
-            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                new Object[] { "Neu" })));
-    UnoRuntime.queryInterface(XButton.class, newBtn.getValue())
+    ControlProperties newBtn = new ControlProperties(ControlType.BUTTON, "newBtn");
+    newBtn.setControlPercentSize(25, 25);
+    newBtn.setMarginBetweenControls(5);
+    newBtn.setLabel("Neu");
+    UNO.toXButton(newBtn.getXControl())
         .addActionListener(newBtnActionListener);
 
     bottomControls.add(deleteBtn);
@@ -458,18 +466,17 @@ public class PersoenlicheAbsenderlisteVerwalten
     bottomControls.add(copyBtn);
     bottomControls.add(newBtn);
 
-    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, bottomControls, Optional.empty());
+    return new ControlModel(Orientation.HORIZONTAL, Align.RIGHT, bottomControls, Optional.empty());
   }
 
   private ControlModel addBottomControls()
   {
-    List<SimpleEntry<ControlProperties, XControl>> bottomControls = new ArrayList<>();
+    List<ControlProperties> bottomControls = new ArrayList<>();
 
-    SimpleEntry<ControlProperties, XControl> abortBtn = layout
-        .convertToXControl(new ControlProperties(ControlType.BUTTON, "abortBtn", 0, 30, 20, 0,
-            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                new Object[] { "Abbrechen" })));
-    UnoRuntime.queryInterface(XButton.class, abortBtn.getValue())
+    ControlProperties abortBtn = new ControlProperties(ControlType.BUTTON, "abortBtn");
+    abortBtn.setControlPercentSize(30, 40);
+    abortBtn.setLabel("Abbrechen");
+    UNO.toXButton(abortBtn.getXControl())
         .addActionListener(abortBtnActionListener);
 
     bottomControls.add(abortBtn);
@@ -504,7 +511,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (xControlResults == null)
       return;
 
-    XListBox xListBoxResults = UnoRuntime.queryInterface(XListBox.class, xControlResults);
+    XListBox xListBoxResults = UNO.toXListBox(xControlResults);
 
     if (xListBoxResults == null)
       return;
@@ -525,7 +532,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (xControlPAL == null)
       return;
 
-    XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
+    XListBox xListBoxPal = UNO.toXListBox(xControlPAL);
 
     if (xListBoxPal == null)
       return;
@@ -544,7 +551,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     XControl xControlPAL = layout.getControl("palListe");
     if (xControlPAL == null)
       return;
-    XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
+    XListBox xListBoxPal = UNO.toXListBox(xControlPAL);
     if (xListBoxPal == null)
       return;
 
@@ -590,7 +597,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (xControlResults == null)
       return;
 
-    XListBox xListBoxResults = UnoRuntime.queryInterface(XListBox.class, xControlResults);
+    XListBox xListBoxResults = UNO.toXListBox(xControlResults);
 
     short[] sel = xListBoxResults.getSelectedItemsPos();
 
@@ -605,7 +612,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (xControlPAL == null)
       return;
 
-    XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
+    XListBox xListBoxPal = UNO.toXListBox(xControlPAL);
 
     sel = xListBoxPal.getSelectedItemsPos();
     for (short index : sel)
@@ -640,7 +647,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (xControlPAL == null)
       return;
 
-    XListBox xListBoxPal = UnoRuntime.queryInterface(XListBox.class, xControlPAL);
+    XListBox xListBoxPal = UNO.toXListBox(xControlPAL);
 
     if (xListBoxPal == null)
       return;
@@ -676,7 +683,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (xControl == null)
       return;
 
-    XListBox xListBox = UnoRuntime.queryInterface(XListBox.class, xControl);
+    XListBox xListBox = UNO.toXListBox(xControl);
 
     if (xListBox == null)
       return;
@@ -723,7 +730,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (statusTextXControl == null)
       return;
 
-    XFixedText statusText = UnoRuntime.queryInterface(XFixedText.class, statusTextXControl);
+    XFixedText statusText = UNO.toXFixedText(statusTextXControl);
 
     if (statusText == null)
       return;
@@ -735,16 +742,14 @@ public class PersoenlicheAbsenderlisteVerwalten
       for (int i = 0; i < model.getControls().size(); i++)
       {
 
-        XFixedText xLabel = UnoRuntime.queryInterface(XFixedText.class,
-            model.getControls().get(i).getValue());
+        XFixedText xLabel = UNO.toXFixedText(model.getControls().get(i).getXControl());
 
         if (xLabel == null)
           continue;
 
         String labelText = xLabel.getText();
 
-        XTextComponent editField = UnoRuntime.queryInterface(XTextComponent.class,
-            model.getControls().get(i + 1).getValue());
+        XTextComponent editField = UNO.toXTextComponent(model.getControls().get(i + 1).getXControl());
 
         if (editField == null)
           continue;

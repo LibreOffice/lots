@@ -38,7 +38,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -52,10 +51,8 @@ import com.sun.star.awt.XControl;
 import com.sun.star.awt.XListBox;
 import com.sun.star.awt.XWindow;
 import com.sun.star.lang.EventObject;
-import com.sun.star.uno.UnoRuntime;
 
-import de.muenchen.allg.itd51.wollmux.core.constants.XButtonProperties;
-import de.muenchen.allg.itd51.wollmux.core.constants.XLabelProperties;
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDatasetListElement;
@@ -65,6 +62,7 @@ import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.ControlType;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Dock;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
 import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
@@ -159,19 +157,19 @@ public class AbsenderAuswaehlen
 
   private ControlModel addMainControls()
   {
-    List<SimpleEntry<ControlProperties, XControl>> mainControls = new ArrayList<>();
+    List<ControlProperties> mainControls = new ArrayList<>();
 
-    mainControls.add(layout.convertToXControl(new ControlProperties(ControlType.LABEL, "absLabel",
-        0, 30, 100, 0, new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
-            new Object[] { "Welchen Absender möchten Sie für Ihre Briefköpfe verwenden?" }))));
-
-    SimpleEntry<ControlProperties, XControl> absListBox = layout
-        .convertToXControl(new ControlProperties(ControlType.LIST_BOX, "absListBox", 0, 130, 100, 0,
-            new SimpleEntry<String[], Object[]>(new String[] { XLabelProperties.LABEL },
-                new Object[] { "" })));
-    XListBox absXListBox = UnoRuntime.queryInterface(XListBox.class, absListBox.getValue());
+    ControlProperties absLabel = new ControlProperties(ControlType.LABEL, "absLabel");
+    absLabel.setControlPercentSize(100, 20);
+    absLabel.setLabel("Welchen Absender möchten Sie für Ihre Briefköpfe verwenden?");
+    
+    ControlProperties absListBox = new ControlProperties(ControlType.LIST_BOX, "absListBox");
+    absListBox.setControlPercentSize(100, 100);
+    absListBox.setLabel("Welchen Absender möchten Sie für Ihre Briefköpfe verwenden?");
+    XListBox absXListBox = UNO.toXListBox(absListBox.getXControl());
     absXListBox.addItemListener(absListBoxItemListener);
 
+    mainControls.add(absLabel);
     mainControls.add(absListBox);
 
     return new ControlModel(Orientation.VERTICAL, Align.NONE, mainControls, Optional.empty());
@@ -179,28 +177,24 @@ public class AbsenderAuswaehlen
 
   private ControlModel addBottomButtons()
   {
-    List<SimpleEntry<ControlProperties, XControl>> bottomBtns = new ArrayList<>();
+    List<ControlProperties> bottomBtns = new ArrayList<>();
 
-    SimpleEntry<ControlProperties, XControl> abortBtn = layout
-        .convertToXControl(new ControlProperties(ControlType.BUTTON, "abortBtn", 0, 30, 50, 0,
-            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                new Object[] { "Abbrechen" })));
-    XButton abortXBtn = UnoRuntime.queryInterface(XButton.class, abortBtn.getValue());
-    abortXBtn.setActionCommand("abort");
+    ControlProperties abortBtn = new ControlProperties(ControlType.BUTTON, "abortBtn");
+    abortBtn.setControlPercentSize(50, 40);
+    abortBtn.setLabel("Abbrechen");
+    XButton abortXBtn = UNO.toXButton(abortBtn.getXControl());
     abortXBtn.addActionListener(abortActionListener);
 
-    SimpleEntry<ControlProperties, XControl> editBtn = layout
-        .convertToXControl(new ControlProperties(ControlType.BUTTON, "editBtn", 0, 30, 50, 0,
-            new SimpleEntry<String[], Object[]>(new String[] { XButtonProperties.LABEL },
-                new Object[] { "Bearbeiten" })));
-    XButton editXBtn = UnoRuntime.queryInterface(XButton.class, editBtn.getValue());
-    editXBtn.setActionCommand("printElement");
+    ControlProperties editBtn = new ControlProperties(ControlType.BUTTON, "editBtn");
+    editBtn.setControlPercentSize(50, 40);
+    editBtn.setLabel("Bearbeiten");
+    XButton editXBtn = UNO.toXButton(editBtn.getXControl());
     editXBtn.addActionListener(editActionListener);
 
     bottomBtns.add(abortBtn);
     bottomBtns.add(editBtn);
 
-    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, bottomBtns, Optional.empty());
+    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, bottomBtns, Optional.of(Dock.BOTTOM));
   }
 
   private AbstractItemListener absListBoxItemListener = event -> {
@@ -236,7 +230,7 @@ public class AbsenderAuswaehlen
     if (xControl == null)
       return;
 
-    XListBox xListBox = UnoRuntime.queryInterface(XListBox.class, xControl);
+    XListBox xListBox = UNO.toXListBox(xControl);
 
     if (xListBox == null)
       return;
