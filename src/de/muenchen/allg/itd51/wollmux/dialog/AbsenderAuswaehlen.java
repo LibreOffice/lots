@@ -166,7 +166,7 @@ public class AbsenderAuswaehlen
     ControlProperties absListBox = new ControlProperties(ControlType.LIST_BOX, "absListBox");
     absListBox.setControlPercentSize(100, 100);
     absListBox.setLabel("Welchen Absender möchten Sie für Ihre Briefköpfe verwenden?");
-    XListBox absXListBox = UNO.toXListBox(absListBox.getXControl());
+    XListBox absXListBox = UNO.XListBox(absListBox.getXControl());
     absXListBox.addItemListener(absListBoxItemListener);
 
     mainControls.add(absLabel);
@@ -182,13 +182,13 @@ public class AbsenderAuswaehlen
     ControlProperties abortBtn = new ControlProperties(ControlType.BUTTON, "abortBtn");
     abortBtn.setControlPercentSize(50, 40);
     abortBtn.setLabel("Abbrechen");
-    XButton abortXBtn = UNO.toXButton(abortBtn.getXControl());
+    XButton abortXBtn = UNO.XButton(abortBtn.getXControl());
     abortXBtn.addActionListener(abortActionListener);
 
     ControlProperties editBtn = new ControlProperties(ControlType.BUTTON, "editBtn");
     editBtn.setControlPercentSize(50, 40);
     editBtn.setLabel("Bearbeiten");
-    XButton editXBtn = UNO.toXButton(editBtn.getXControl());
+    XButton editXBtn = UNO.XButton(editBtn.getXControl());
     editXBtn.addActionListener(editActionListener);
 
     bottomBtns.add(abortBtn);
@@ -230,7 +230,7 @@ public class AbsenderAuswaehlen
     if (xControl == null)
       return;
 
-    XListBox xListBox = UNO.toXListBox(xControl);
+    XListBox xListBox = UNO.XListBox(xControl);
 
     if (xListBox == null)
       return;

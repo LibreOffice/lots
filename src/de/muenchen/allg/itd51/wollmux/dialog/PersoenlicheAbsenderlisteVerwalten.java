@@ -223,19 +223,12 @@ public class PersoenlicheAbsenderlisteVerwalten
         
         ControlModel searchFields = addSearchControlsTwoColumns(keys.get(i - 2), keys.get(i - 1), isLastRow);
 
-        // wenn letzte Zeile, Suchbutton hinzufügen
-        if (isLastRow)
-        {
-          //searchFields.addControlToControlList(addSearchButton());
-        }
-
         layout.addControlsToList(searchFields);
         query2.add(searchFields);
       } else if (i == queryNames.keySet().size())
       {
         // Zeile mit einem Control-Paar falls ungerade Anzahl von Suchfeldern konfiguriert wurde.
         ControlModel searchFields = addSearchControlsOneColumn(keys.get(i - 1));
-        searchFields.addControlToControlList(addSearchButton());
         layout.addControlsToList(searchFields);
         query2.add(searchFields);
       }
@@ -248,7 +241,7 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     layout.draw();
 
-    XListBox palListe = UNO.toXListBox(layout.getControl("palListe"));
+    XListBox palListe = UNO.XListBox(layout.getControl("palListe"));
     
     int count = 0;
     short itemToHighlightPos = 0;
@@ -298,7 +291,7 @@ public class PersoenlicheAbsenderlisteVerwalten
         search();
       }
 
-      return false;
+      return true;
     }
 
     @Override
@@ -355,6 +348,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       startSearchBtn = new ControlProperties(ControlType.BUTTON, "startSearch");
       startSearchBtn.setControlPercentSize(20, 30);
       startSearchBtn.setLabel("Suchen");
+      UNO.XButton(startSearchBtn.getXControl()).addActionListener(startSearchBtnActionListener);
       searchControls.add(startSearchBtn);
     }
 
@@ -378,34 +372,23 @@ public class PersoenlicheAbsenderlisteVerwalten
     return new ControlModel(Orientation.HORIZONTAL, Align.NONE, searchControls, Optional.empty());
   }
 
-  private ControlProperties addSearchButton()
-  {
-    ControlProperties startSearchBtn = new ControlProperties(ControlType.BUTTON, "startSearch");
-    startSearchBtn.setControlPercentSize(30, 30);
-    startSearchBtn.setLabel("Suchen");
-    UNO.toXButton(startSearchBtn.getXControl())
-        .addActionListener(startSearchBtnActionListener);
-
-    return startSearchBtn;
-  }
-
   private ControlModel addSearchResultControls()
   {
     List<ControlProperties> searchResultControls = new ArrayList<>();
 
     ControlProperties searchResultListBox = new ControlProperties(ControlType.LIST_BOX, "searchResultList");
     searchResultListBox.setControlPercentSize(45, 150);
-    UNO.toXListBox(searchResultListBox.getXControl()).setMultipleMode(true);
+    UNO.XListBox(searchResultListBox.getXControl()).setMultipleMode(true);
 
     ControlProperties addToPalBtn = new ControlProperties(ControlType.BUTTON, "addToPalBtn");
     addToPalBtn.setControlPercentSize(10, 30);
     addToPalBtn.setLabel("->");
-    UNO.toXButton(addToPalBtn.getXControl())
+    UNO.XButton(addToPalBtn.getXControl())
         .addActionListener(addToPalActionListener);
 
     ControlProperties palListBox = new ControlProperties(ControlType.LIST_BOX, "palListe");
     palListBox.setControlPercentSize(45, 150);
-    XListBox palXListBox = UNO.toXListBox(palListBox.getXControl());
+    XListBox palXListBox = UNO.XListBox(palListBox.getXControl());
     palXListBox.setMultipleMode(true);
     palXListBox.addItemListener(palListBoxItemListener);
 
@@ -422,7 +405,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     List<ControlProperties> statusControls = new ArrayList<>();
 
     ControlProperties label = new ControlProperties(ControlType.LABEL, "statusText");
-    label.setControlPercentSize(100, 10);
+    label.setControlPercentSize(100, 20);
 
     statusControls.add(label);
     
@@ -437,28 +420,28 @@ public class PersoenlicheAbsenderlisteVerwalten
     deleteBtn.setControlPercentSize(25, 25);
     deleteBtn.setMarginBetweenControls(5);
     deleteBtn.setLabel("Löschen");
-    UNO.toXButton(deleteBtn.getXControl())
+    UNO.XButton(deleteBtn.getXControl())
         .addActionListener(deleteBtnActionListener);
     
     ControlProperties editBtn = new ControlProperties(ControlType.BUTTON, "editBtn");
     editBtn.setControlPercentSize(25, 25);
     editBtn.setMarginBetweenControls(5);
     editBtn.setLabel("Bearbeiten");
-    UNO.toXButton(editBtn.getXControl())
+    UNO.XButton(editBtn.getXControl())
         .addActionListener(editBtnActionListener);
 
     ControlProperties copyBtn = new ControlProperties(ControlType.BUTTON, "copyBtn");
     copyBtn.setControlPercentSize(25, 25);
     copyBtn.setMarginBetweenControls(5);
     copyBtn.setLabel("Kopieren");
-    UNO.toXButton(copyBtn.getXControl())
+    UNO.XButton(copyBtn.getXControl())
         .addActionListener(copyBtnActionListener);
 
     ControlProperties newBtn = new ControlProperties(ControlType.BUTTON, "newBtn");
     newBtn.setControlPercentSize(25, 25);
     newBtn.setMarginBetweenControls(5);
     newBtn.setLabel("Neu");
-    UNO.toXButton(newBtn.getXControl())
+    UNO.XButton(newBtn.getXControl())
         .addActionListener(newBtnActionListener);
 
     bottomControls.add(deleteBtn);
@@ -466,7 +449,10 @@ public class PersoenlicheAbsenderlisteVerwalten
     bottomControls.add(copyBtn);
     bottomControls.add(newBtn);
 
-    return new ControlModel(Orientation.HORIZONTAL, Align.RIGHT, bottomControls, Optional.empty());
+    ControlModel controlModel = new ControlModel(Orientation.HORIZONTAL, Align.NONE, bottomControls, Optional.empty());
+    controlModel.setBindToControlWidthAndXOffset("palListe");
+    
+    return controlModel;
   }
 
   private ControlModel addBottomControls()
@@ -476,7 +462,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     ControlProperties abortBtn = new ControlProperties(ControlType.BUTTON, "abortBtn");
     abortBtn.setControlPercentSize(30, 40);
     abortBtn.setLabel("Abbrechen");
-    UNO.toXButton(abortBtn.getXControl())
+    UNO.XButton(abortBtn.getXControl())
         .addActionListener(abortBtnActionListener);
 
     bottomControls.add(abortBtn);
@@ -511,7 +497,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (xControlResults == null)
       return;
 
-    XListBox xListBoxResults = UNO.toXListBox(xControlResults);
+    XListBox xListBoxResults = UNO.XListBox(xControlResults);
 
     if (xListBoxResults == null)
       return;
@@ -532,7 +518,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (xControlPAL == null)
       return;
 
-    XListBox xListBoxPal = UNO.toXListBox(xControlPAL);
+    XListBox xListBoxPal = UNO.XListBox(xControlPAL);
 
     if (xListBoxPal == null)
       return;
@@ -551,7 +537,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     XControl xControlPAL = layout.getControl("palListe");
     if (xControlPAL == null)
       return;
-    XListBox xListBoxPal = UNO.toXListBox(xControlPAL);
+    XListBox xListBoxPal = UNO.XListBox(xControlPAL);
     if (xListBoxPal == null)
       return;
 
@@ -597,7 +583,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (xControlResults == null)
       return;
 
-    XListBox xListBoxResults = UNO.toXListBox(xControlResults);
+    XListBox xListBoxResults = UNO.XListBox(xControlResults);
 
     short[] sel = xListBoxResults.getSelectedItemsPos();
 
@@ -612,7 +598,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (xControlPAL == null)
       return;
 
-    XListBox xListBoxPal = UNO.toXListBox(xControlPAL);
+    XListBox xListBoxPal = UNO.XListBox(xControlPAL);
 
     sel = xListBoxPal.getSelectedItemsPos();
     for (short index : sel)
@@ -647,7 +633,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (xControlPAL == null)
       return;
 
-    XListBox xListBoxPal = UNO.toXListBox(xControlPAL);
+    XListBox xListBoxPal = UNO.XListBox(xControlPAL);
 
     if (xListBoxPal == null)
       return;
@@ -683,7 +669,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (xControl == null)
       return;
 
-    XListBox xListBox = UNO.toXListBox(xControl);
+    XListBox xListBox = UNO.XListBox(xControl);
 
     if (xListBox == null)
       return;
@@ -730,7 +716,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (statusTextXControl == null)
       return;
 
-    XFixedText statusText = UNO.toXFixedText(statusTextXControl);
+    XFixedText statusText = UNO.XFixedText(statusTextXControl);
 
     if (statusText == null)
       return;
@@ -742,14 +728,17 @@ public class PersoenlicheAbsenderlisteVerwalten
       for (int i = 0; i < model.getControls().size(); i++)
       {
 
-        XFixedText xLabel = UNO.toXFixedText(model.getControls().get(i).getXControl());
+        XFixedText xLabel = UNO.XFixedText(model.getControls().get(i).getXControl());
 
         if (xLabel == null)
           continue;
 
         String labelText = xLabel.getText();
 
-        XTextComponent editField = UNO.toXTextComponent(model.getControls().get(i + 1).getXControl());
+        if (labelText.isEmpty())
+          continue;
+
+        XTextComponent editField = UNO.XTextComponent(model.getControls().get(i + 1).getXControl());
 
         if (editField == null)
           continue;
@@ -767,6 +756,12 @@ public class PersoenlicheAbsenderlisteVerwalten
     try
     {
       results = Search.search(q, dj);
+
+      if (results == null || results.isEmpty())
+      {
+        statusText.setText("Es wurde nichts gefunden.");
+        return;
+      }
     } catch (TimeoutException | IllegalArgumentException x1)
     {
       LOGGER.error("", x1);
