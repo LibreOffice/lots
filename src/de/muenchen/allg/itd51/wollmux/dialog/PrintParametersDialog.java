@@ -249,7 +249,7 @@ public class PrintParametersDialog
       radioButton.setMarginLeft(40);
       
       // ersten RadioButton aktivieren
-      XRadioButton xRadioButton = UNO.toXRadio(radioButton.getXControl());
+      XRadioButton xRadioButton = UNO.XRadio(radioButton.getXControl());
       if (i == 0) {
     	  xRadioButton.setState(true);
     	  this.currentPageRangeType = pageRangeType;
@@ -265,7 +265,7 @@ public class PrintParametersDialog
         ControlProperties addtionalTextfield = new ControlProperties(ControlType.EDIT, "radioSectionTextField" + i);
         addtionalTextfield.setControlPercentSize(30, 30);
         addtionalTextfield.setLabel(pageRangeType.additionalTextFieldPrototypeDisplayValue);
-        UNO.toXTextComponent(addtionalTextfield.getXControl()).addTextListener(additionalTextFieldListener);
+        UNO.XTextComponent(addtionalTextfield.getXControl()).addTextListener(additionalTextFieldListener);
 
         radioControls.add(addtionalTextfield);
       }
@@ -315,9 +315,8 @@ public class PrintParametersDialog
     printCountField.setLabel("Kopien");
     printCountField.setSpinEnabled(Boolean.TRUE);
     printCountField.setValue(1);
-    printCountField.setMinValue(0);
     printCountField.setDecimalAccuracy((short) 0);
-    UNO.toXSpinField(printCountField.getXControl()).addSpinListener(printCountSpinFieldListener);
+    UNO.XSpinField(printCountField.getXControl()).addSpinListener(printCountSpinFieldListener);
     
     copyCountControls.add(labelExemplare);
     copyCountControls.add(printCountField);
@@ -331,12 +330,12 @@ public class PrintParametersDialog
     List<ControlProperties> headerLabel = new ArrayList<>();
     
     ControlProperties printerDialogLabel = new ControlProperties(ControlType.LABEL, "printerDialogLabel");
-    printerDialogLabel.setControlPercentSize(20, 100);
+    printerDialogLabel.setControlPercentSize(20, 20);
     printerDialogLabel.setLabel("Drucker");
     printerDialogLabel.setMarginBetweenControls(0);
     
     ControlProperties hLine = new ControlProperties(ControlType.FIXEDLINE, "printerDialogLabelHLine");
-    hLine.setControlPercentSize(5, 100);
+    hLine.setControlPercentSize(5, 20);
     hLine.setMarginBetweenControls(0);
     
     headerLabel.add(printerDialogLabel);
@@ -361,7 +360,7 @@ public class PrintParametersDialog
     ControlProperties printerSettingsSelectPrinterButton = new ControlProperties(ControlType.BUTTON, "printerSettingsSelectPrinterButton");
     printerSettingsSelectPrinterButton.setControlPercentSize(50, 30);
     printerSettingsSelectPrinterButton.setLabel("Drucker wechseln / einrichten");
-    XButton selectPrinterButton = UNO.toXButton(printerSettingsSelectPrinterButton.getXControl());
+    XButton selectPrinterButton = UNO.XButton(printerSettingsSelectPrinterButton.getXControl());
     selectPrinterButton.addActionListener(selectPrinterActionListener);
 
     printerSettings.add(printerSettingsLabel);
@@ -400,13 +399,13 @@ public class PrintParametersDialog
     ControlProperties bottomButtonAbort = new ControlProperties(ControlType.BUTTON, "printerDialogCancel");
     bottomButtonAbort.setControlPercentSize(50, 40);
     bottomButtonAbort.setLabel("Abbrechen");
-    XButton abortButton = UNO.toXButton(bottomButtonAbort.getXControl());
+    XButton abortButton = UNO.XButton(bottomButtonAbort.getXControl());
     abortButton.addActionListener(abortListener);
 
     ControlProperties bottomButtonPrint = new ControlProperties(ControlType.BUTTON, "printerDialogPrint");
     bottomButtonPrint.setControlPercentSize(50, 40);
     bottomButtonPrint.setLabel("Drucken");
-    XButton printButton = UNO.toXButton(bottomButtonPrint.getXControl());
+    XButton printButton = UNO.XButton(bottomButtonPrint.getXControl());
     printButton.addActionListener(printListener);
 
     bottomButtonsSection.add(bottomButtonAbort);
@@ -461,7 +460,7 @@ public class PrintParametersDialog
                       @Override
                       public void run()
                       {
-                        XFixedText printerNameLabel = UNO.toXFixedText(layout.getControl("printerSettingsPrintModel"));
+                        XFixedText printerNameLabel = UNO.XFixedText(layout.getControl("printerSettingsPrintModel"));
 
                         if (printerNameLabel == null)
                           return;
@@ -552,7 +551,7 @@ public class PrintParametersDialog
     }
     
     private void getAndSetCopyCount(SpinEvent event) {
-      XNumericField copyCountControl = UNO.toXNumericField(event.Source);
+      XNumericField copyCountControl = UNO.XNumericField(event.Source);
       
       if (copyCountControl == null)
         return;
@@ -611,7 +610,7 @@ public class PrintParametersDialog
   }
   
   private AbstractTextListener additionalTextFieldListener = event -> {
-    XTextComponent xTextComponent = UNO.toXTextComponent(event.Source);
+    XTextComponent xTextComponent = UNO.XTextComponent(event.Source);
 
     if (xTextComponent == null)
       return;
@@ -620,13 +619,13 @@ public class PrintParametersDialog
   };
 
   private AbstractItemListener radioButtonListener = event -> {
-    XControl xControl = UNO.toXControl(event.Source);
+    XControl xControl = UNO.XControl(event.Source);
 
     for (XControl control : layout.getControls())
     {
       if (!control.equals(xControl))
       {
-        XRadioButton radioButton = UNO.toXRadio(control);
+        XRadioButton radioButton = UNO.XRadio(control);
 
         if (radioButton == null)
           continue;
@@ -634,7 +633,7 @@ public class PrintParametersDialog
         radioButton.setState(false);
         
       } else {
-        XControl radioButton = UNO.toXControl(control);
+        XControl radioButton = UNO.XControl(control);
         XControlModel model = radioButton.getModel();
         
         XPropertySet propertySet = UNO.XPropertySet(model);
