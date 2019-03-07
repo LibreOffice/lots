@@ -60,7 +60,6 @@ import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.formmodel.FormModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
 /**
@@ -428,11 +427,6 @@ public class DocumentManager
                 WollMuxSingleton.getVersion(), Utils.getOOoVersion()),
             GlobalFunctions.getInstance().getGlobalFunctions(),
             GlobalFunctions.getInstance().getFunctionDialogs());
-
-        /**
-         * Dispatch Handler in eigenem Event registrieren, da es Deadlocks gegeben hat.
-         */
-        WollMuxEventHandler.handleRegisterDispatchInterceptor(documentController);
       }
       return documentController;
     }
