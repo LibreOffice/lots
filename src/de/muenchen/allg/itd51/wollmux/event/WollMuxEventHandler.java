@@ -116,6 +116,7 @@ import com.sun.star.text.XTextRangeCompare;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.RuntimeException;
+import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XStringSubstitution;
 import com.sun.star.view.XPrintable;
 
@@ -165,7 +166,6 @@ import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager.Info;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo;
-import de.muenchen.allg.itd51.wollmux.document.FrameController;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
@@ -2780,63 +2780,6 @@ public class WollMuxEventHandler
   }
 
   // *******************************************************************************************
-  /**
-   * Erzeugt ein neues WollMuxEvent zum Registrieren eines (frischen)
-   * {@link DispatchProviderAndInterceptor} auf frame.
-   *
-   * @param frame
-   *          der {@link XFrame} auf den der {@link DispatchProviderAndInterceptor}
-   *          registriert werden soll.
-   */
-  public static void handleRegisterDispatchInterceptor(TextDocumentController documentController)
-  {
-      handle(new OnRegisterDispatchInterceptor(documentController));
-  }
-
-  private static class OnRegisterDispatchInterceptor extends BasicEvent
-  {
-    private TextDocumentController documentController;
-
-    public OnRegisterDispatchInterceptor(TextDocumentController documentController)
-    {
-      this.documentController = documentController;
-    }
-
-    @Override
-    protected void doit()
-    {
-      FrameController fc = documentController.getFrameController();
-      if (fc.getFrame() == null)
-      {
-        Logger.debug(L.m("Ignoriere handleRegisterDispatchInterceptor(null)"));
-        return;
-      }
-      try
-      {
-        DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(fc.getFrame());
-      }
-      catch (java.lang.Exception e)
-      {
-        Logger.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
-      }
-
-      // Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
-      try
-      {
-        fc.getFrame().contextChanged();
-      }
-      catch (java.lang.Exception e)
-      {}
-    }
-
-    @Override
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(#" + documentController.getFrameController().getFrame().hashCode() + ")";
-    }
-  }
-
-  // *******************************************************************************************
 
   /**
    * Erzeugt ein neues WollMuxEvent zum Registrieren des übergebenen XEventListeners
@@ -4755,10 +4698,10 @@ public class WollMuxEventHandler
   
   // *******************************************************************************************
   
-  public static void handleUpdateInputFields(TextDocumentController documentController,
+  public static void handleUpdateInputFields(XTextDocument doc,
       DispatchHelper helper, boolean sync)
   {
-    BasicEvent event = new OnUpdateInputFields(documentController, helper);
+    BasicEvent event = new OnUpdateInputFields(doc, helper);
     if (sync)
     {
       event.process();
@@ -4771,29 +4714,46 @@ public class WollMuxEventHandler
   public static class OnUpdateInputFields extends BasicEvent
   {
 
-    TextDocumentController documentController;
+    XTextDocument doc;
     DispatchHelper helper;
 
-    public OnUpdateInputFields(TextDocumentController documentController, DispatchHelper helper)
+    public OnUpdateInputFields(XTextDocument doc, DispatchHelper helper)
     {
-      this.documentController = documentController;
+      this.doc = doc;
       this.helper = helper;
     }
 
     @Override
     protected void doit() throws WollMuxFehlerException
     {
-      if (documentController.getModel().isFormDocument())
+      handle(new OnAddDocumentEventListener(new XEventListener()
       {
-        Logger.log(
-            "LibreOffice Formulareingabe unterdrückt, da es sich um ein WollMux-Formular handelt.");
-        helper.dispatchFinished(true);
-      } else
-      {
-        helper.dispatchOriginal();
-      }
-    }
 
+        @Override
+        public void disposing(EventObject arg0)
+        {
+          // nothing to do
+        }
+
+        @Override
+        public void notifyEvent(com.sun.star.document.EventObject event)
+        {
+          if (UnoRuntime.areSame(doc, event.Source) && ON_WOLLMUX_PROCESSING_FINISHED.equals(event.EventName))
+          {
+            if (DocumentManager.getTextDocumentController(doc).getModel().isFormDocument())
+            {
+              Logger.log(
+                  "LibreOffice Formulareingabe unterdrückt, da es sich um ein WollMux-Formular handelt.");
+              helper.dispatchFinished(true);
+            } else
+            {
+              helper.dispatchOriginal();
+            }
+            handle(new OnRemoveDocumentEventListener(this));
+          }
+        }
+      }));
+    }
   }
 
   // *******************************************************************************************

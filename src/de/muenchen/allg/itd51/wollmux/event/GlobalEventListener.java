@@ -50,12 +50,14 @@
 
 package de.muenchen.allg.itd51.wollmux.event;
 
+import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Logger;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 
@@ -166,6 +168,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     XModel compo = UNO.XModel(source);
     if (compo != null)
     {
+      registerDispatcher(compo.getCurrentController().getFrame());
       WollMuxEventHandler.handleOnViewCreated(compo);
     }
   }
@@ -213,5 +216,36 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
   public void disposing(EventObject arg0)
   {
     // nothing to do
+  }
+
+  /**
+   * Registriert für den Frame einen Dispatch Interceptor.
+   * 
+   * @param frame
+   *          Das Dokument.
+   */
+  private void registerDispatcher(XFrame frame)
+  {
+    if (frame == null)
+    {
+      Logger.debug(L.m("Ignoriere handleRegisterDispatchInterceptor(null)"));
+      return;
+    }
+    try
+    {
+      DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(frame);
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
+    }
+
+    // Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
+    try
+    {
+      frame.contextChanged();
+    }
+    catch (java.lang.Exception e)
+    {}
   }
 }
