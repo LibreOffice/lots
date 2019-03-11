@@ -92,6 +92,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 
 import com.sun.star.awt.XWindow;
@@ -4395,8 +4396,16 @@ public class WollMuxEventHandler
         @Override
         protected JDialog createDialog(Component parent) throws HeadlessException
         {
-          JDialog dialog = super.createDialog(parent);
-          dialog.setAlwaysOnTop(true);
+          final JDialog dialog = super.createDialog(parent);
+          SwingUtilities.invokeLater(new Runnable()
+          {
+            @Override
+            public void run()
+            {
+              dialog.toFront();
+              dialog.setAlwaysOnTop(true);
+            }
+          });
           return dialog;
         }
       };
