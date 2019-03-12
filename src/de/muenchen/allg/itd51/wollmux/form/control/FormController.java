@@ -267,31 +267,6 @@ public class FormController
   }
 
   /**
-   * Setzt die Position und Größe des Fensters des zugehörigen Dokuments auf die vorgegebenen Werte
-   * ACHTUNG: Die Maßangaben beziehen sich auf die linke obere Ecke des Fensterinhalts OHNE die
-   * Titelzeile und die Fensterdekoration des Rahmens. Um die linke obere Ecke des gesamten Fensters
-   * richtig zu setzen, müssen die Größenangaben des Randes der Fensterdekoration und die Höhe der
-   * Titelzeile VOR dem Aufruf der Methode entsprechend eingerechnet werden.
-   * 
-   * @param docX
-   *          Die linke obere Ecke des Fensterinhalts X-Koordinate der Position in Pixel, gezählt
-   *          von links oben.
-   * @param docY
-   *          Die Y-Koordinate der Position in Pixel, gezählt von links oben.
-   * @param docWidth
-   *          Die Größe des Dokuments auf der X-Achse in Pixel
-   * @param docHeight
-   *          Die Größe des Dokuments auf der Y-Achse in Pixel. Auch hier wird die Titelzeile des
-   *          Rahmens nicht beachtet und muss vorher entsprechend eingerechnet werden.
-   */
-  public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
-  {
-    WollMuxEventHandler.getInstance().handleSetWindowPosSize(documentController, docX, docY,
-        docWidth,
-          docHeight);
-  }
-
-  /**
    * Baut die GUI zusammen und zeigt diese an. Sobald, die GUI angezeigt wurde wird die Methode
    * {@link #formControllerInitCompleted()} aufgerufen.
    */

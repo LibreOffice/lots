@@ -67,7 +67,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetInsertValues;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetPrintBlocksPropsViaPrintModel;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetWindowPosSize;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetWindowVisible;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogAbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogPersoenlicheAbsenderlisteVerwalten;
@@ -800,38 +799,6 @@ public class WollMuxEventHandler
       String newValue)
   {
     handle(new OnFormValueChanged(documentController, fieldId, newValue));
-  }
-
-  /**
-   * Erzeugt ein Event, das die Position und Größe des übergebenen Dokument-Fensters
-   * auf die vorgegebenen Werte setzt. ACHTUNG: Die Maßangaben beziehen sich auf die
-   * linke obere Ecke des Fensterinhalts OHNE die Titelzeile und die
-   * Fensterdekoration des Rahmens. Um die linke obere Ecke des gesamten Fensters
-   * richtig zu setzen, müssen die Größenangaben des Randes der Fensterdekoration und
-   * die Höhe der Titelzeile VOR dem Aufruf der Methode entsprechend eingerechnet
-   * werden.
-   *
-   * @param model
-   *          Das XModel-Interface des Dokuments dessen Position/Größe gesetzt werden
-   *          soll.
-   * @param docX
-   *          Die linke obere Ecke des Fensterinhalts X-Koordinate der Position in
-   *          Pixel, gezählt von links oben.
-   * @param docY
-   *          Die Y-Koordinate der Position in Pixel, gezählt von links oben.
-   * @param docWidth
-   *          Die Größe des Dokuments auf der X-Achse in Pixel
-   * @param docHeight
-   *          Die Größe des Dokuments auf der Y-Achse in Pixel. Auch hier wird die
-   *          Titelzeile des Rahmens nicht beachtet und muss vorher entsprechend
-   *          eingerechnet werden.
-   */
-  public void handleSetWindowPosSize(TextDocumentController documentController,
-      int docX,
-      int docY, int docWidth, int docHeight)
-  {
-    handle(new OnSetWindowPosSize(documentController, docX, docY, docWidth,
-        docHeight));
   }
 
   /**
