@@ -1,6 +1,10 @@
 package de.muenchen.allg.itd51.wollmux.form.control;
 
+import java.awt.Rectangle;
+import java.awt.Insets;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -55,6 +59,45 @@ public class FormController
    */
   private String defaultWindowAttributes;
 
+  private PropertyChangeSupport changes = new PropertyChangeSupport( this );
+  
+  public Rectangle frameBounds;
+  public Rectangle maxWindowBounds;
+  public Insets windowInsets;
+  
+  public Rectangle getFrameBounds()
+  {
+    return frameBounds;
+  }
+  public Rectangle getMaxWindowBounds()
+  {
+    return maxWindowBounds;
+  }
+  
+  public Insets getWindowInsets()
+  {
+    return windowInsets;
+  }
+  
+  public void setFrameBounds(Rectangle frameBounds, Rectangle maxWindowBounds, Insets windowInsets)
+  {
+    this.frameBounds = frameBounds;
+    this.maxWindowBounds = maxWindowBounds;
+    this.windowInsets = windowInsets;
+    changes.firePropertyChange("name", null, null);
+  }
+  
+  public void addPropertyChangeListener( PropertyChangeListener l )
+  {
+    changes.addPropertyChangeListener( l );
+  }
+
+  public void removePropertyChangeListener( PropertyChangeListener l )
+  {
+    changes.removePropertyChangeListener( l );
+  }
+  
+  
   /**
    * Erzeugt einen neuen Controller. Hierin wird auch die GUI initialisiert, aber noch nicht
    * aufgebaut und angezeigt.
