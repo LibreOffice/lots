@@ -821,7 +821,7 @@ public class GUI
         if ("lost".equals(args[0]))
           controller.focusLost(source.getId());
         else
-          controller.focusGained(source.getId());
+          controller.setFieldId(source.getId());
       }
     } catch (Exception x)
     {
