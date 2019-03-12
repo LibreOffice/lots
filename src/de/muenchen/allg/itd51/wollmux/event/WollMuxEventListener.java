@@ -43,8 +43,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetInsertValues;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetPrintBlocksPropsViaPrintModel;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetWindowPosSize;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetWindowPosSizeSingleForm;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetWindowVisible;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogAbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogPersoenlicheAbsenderlisteVerwalten;
@@ -58,12 +56,6 @@ public class WollMuxEventListener
 
   WollMuxEventListener()
   {
-  }
-
-  @Subscribe
-  public void onsetwinsize(OnSetWindowPosSize event)
-  {
-    event.process();
   }
 
   @Subscribe
@@ -94,18 +86,6 @@ public class WollMuxEventListener
 
   @Subscribe
   public void onSetWindowVisible(OnSetWindowVisible event)
-  {
-    event.process();
-  }
-
-  @Subscribe
-  public void onSetWindowPosSize(OnSetWindowPosSize event)
-  {
-    event.process();
-  }
-
-  @Subscribe
-  public void onSetWindowPosSizeSingleForm(OnSetWindowPosSizeSingleForm event)
   {
     event.process();
   }
