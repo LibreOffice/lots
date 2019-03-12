@@ -1,5 +1,8 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
@@ -100,6 +103,18 @@ public class OnProcessTextDocument extends BasicEvent
           DocumentManager.getDocumentManager().setFormModel(documentController.getModel().doc,
               formController);
           formController.startFormGUI();
+          formController.formControllerInitCompleted();
+          
+          formController.focusGained(formController.getFieldId());
+          
+          formController.addPropertyChangeListener(new PropertyChangeListener()
+          {
+            @Override
+            public void propertyChange(PropertyChangeEvent e)
+            {
+              formController.focusGained( formController.getFieldId());
+            }
+          });
         } catch (FormModelException e)
         {
           throw new WMCommandsFailedException(

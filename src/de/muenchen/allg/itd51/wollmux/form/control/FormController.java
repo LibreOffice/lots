@@ -60,10 +60,13 @@ public class FormController
   private String defaultWindowAttributes;
 
   private PropertyChangeSupport changes = new PropertyChangeSupport( this );
+  private PropertyChangeSupport fieldIdChanges = new PropertyChangeSupport( this );
   
   public Rectangle frameBounds;
   public Rectangle maxWindowBounds;
   public Insets windowInsets;
+  
+  public String fieldId;
   
   public Rectangle getFrameBounds()
   {
@@ -95,6 +98,17 @@ public class FormController
   public void removePropertyChangeListener( PropertyChangeListener l )
   {
     changes.removePropertyChangeListener( l );
+  }
+  
+  public String getFieldId()
+  {
+    return fieldId;
+  }
+  
+  public void setFieldId(String fieldId)
+  {
+    this.fieldId = fieldId;
+    fieldIdChanges.firePropertyChange("name", null, null);
   }
   
   
@@ -276,7 +290,6 @@ public class FormController
       try
       {
         gui.create(model, true);
-        formControllerInitCompleted();
       } catch (Exception x)
       {
         LOGGER.error("", x);
