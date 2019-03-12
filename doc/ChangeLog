@@ -1,3 +1,16 @@
+ ==================== Neu in Version 18.0.7 ====================
+
+    * Bugfixes
+          o WollMux behandelt die Eingabefelder selbst und zeigt sie nur an,
+            wenn es sich um kein WollMux-Formular handelt. Nachkorrektur für
+            Formulare, die per Doppelklick geöffnet werden.
+          o Der Speichern-Dialog des WollMux wird nun im Vordergrund geöffnet.
+          o Der FormularMax4000 Dialog wird im Vordergrund geöffnet. Die
+            Verwendung des FormularMax4000 ist nur für Vorlagen (keine
+            FormularGUI) gedacht. Das Verhalten bei geöffneter FormularGUI ist
+            nicht genau spezifiert, der Dialog kann auch im Hintergrund
+            erscheinen.
+
  ==================== Neu in Version 18.0.6 ====================
 
     * Bugfixes
