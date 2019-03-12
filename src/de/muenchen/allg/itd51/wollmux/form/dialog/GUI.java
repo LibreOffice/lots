@@ -106,8 +106,6 @@ public class GUI
 
   private Rectangle maxWindowBounds;
 
-  private WindowPosSizeSetter windowPosSizeSetter = new WindowPosSizeSetter();
-
   private UIElementFactory uiElementFactory;
 
   private UIElementContext panelContext;
@@ -703,63 +701,7 @@ public class GUI
         + windowInsets
         + "| frame bounds " + frameBounds);
 
-    /*
-     * Das Addieren von windowInsets.left und windowInsets.right ist eine Heuristik. Da sich
-     * setWindowPosSize() unter Windows und Linux anders verhält, gibt es keine korrekte Methode
-     * (die mir bekannt ist), um die richtige Ausrichtung zu berechnen.
-     */
-    int docX = frameBounds.width + frameBounds.x + windowInsets.left;
-    int docWidth = maxWindowBounds.width - frameBounds.width - frameBounds.x
-        - windowInsets.right;
-    if (docWidth < 0)
-    {
-      docX = maxWindowBounds.x;
-      docWidth = maxWindowBounds.width;
-    }
-    int docY = maxWindowBounds.y + windowInsets.top;
-    /*
-     * Das Subtrahieren von 2*windowInsets.bottom ist ebenfalls eine Heuristik. (siehe weiter oben)
-     */
-    int docHeight = maxWindowBounds.y + maxWindowBounds.height - docY
-        - 2 * windowInsets.bottom;
-
-    windowPosSizeSetter.setWindowPosSize(docX, docY, docWidth, docHeight);
-  }
-
-  private class WindowPosSizeSetter extends Timer implements ActionListener
-  {
-    private static final long serialVersionUID = 3722895126444827532L;
-
-    private int x;
-
-    private int y;
-
-    private int width;
-
-    private int height;
-
-    public WindowPosSizeSetter()
-    {
-      super(100, null);
-      addActionListener(this);
-      setRepeats(false);
-      setCoalesce(true);
-    }
-
-    public void setWindowPosSize(int x, int y, int width, int height)
-    {
-      this.x = x;
-      this.y = y;
-      this.width = width;
-      this.height = height;
-      restart();
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      controller.setWindowPosSize(x, y, width, height);
-    }
+    controller.setFrameBounds(frameBounds, maxWindowBounds, windowInsets);
   }
 
   /**
