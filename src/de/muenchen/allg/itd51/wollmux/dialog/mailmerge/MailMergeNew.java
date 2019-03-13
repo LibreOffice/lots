@@ -101,7 +101,10 @@ import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.email.AuthenticationDialog;
 import de.muenchen.allg.itd51.wollmux.email.EMailSender;
+import de.muenchen.allg.itd51.wollmux.email.IAuthenticationDialogListener;
+import de.muenchen.allg.itd51.wollmux.email.MailServerSettings;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.print.PrintModels;
 
@@ -1355,8 +1358,28 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       attachment = saveToFile(pmod, isODT);
       EMailSender mail = new EMailSender();
       mail.createNewMultipartMail(from, to, subject, message);
+      MailServerSettings smtpSettings = mail.getWollMuxMailServerSettings();
+      
+      IAuthenticationDialogListener authDialogListener = new IAuthenticationDialogListener()
+      {
+        @Override
+        public void setCredentails(String username, String password)
+        {
+          if (username == null || password == null)
+            return;
+          
+          smtpSettings.setUsername(username);
+          smtpSettings.setPassword(password);
+        }
+      };
+      
+      if (smtpSettings.getUsername() == null || smtpSettings.getUsername().isEmpty())
+      {
+        new AuthenticationDialog(authDialogListener);
+      }
+      
       mail.addAttachment(attachment);
-      mail.sendMessage();
+      mail.sendMessage(smtpSettings);
     }
     catch (ConfigurationErrorException e)
     {

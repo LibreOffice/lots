@@ -39,17 +39,12 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 public class EMailSender
 {
@@ -58,8 +53,6 @@ public class EMailSender
   private Message email;
 
   private Session session;
-
-  static private MailServerSettings mailserver = null;
 
   public EMailSender()
   {
@@ -94,21 +87,17 @@ public class EMailSender
     ((Multipart) email.getContent()).addBodyPart(messageBodyPart);
   }
 
-  public void sendMessage() throws ConfigurationErrorException,
+  public void sendMessage(MailServerSettings mailServerSettings) throws ConfigurationErrorException,
       MessagingException
   {
-
-    if (mailserver == null)
-    {
-      mailserver = getWollMuxMailServerSettings();
-    }
     try
     {
+      // TODO: ohne Workarounds testen.
       Workarounds.applyWorkaroundForOOoIssue102164();
       Transport tr = session.getTransport("smtp");
       Workarounds.applyWorkaroundForOOoIssue102164();
-      tr.connect(mailserver.getMailserver(), mailserver.getMailserverport(),
-        mailserver.getUsername(), mailserver.getPassword());
+      tr.connect(mailServerSettings.getMailserver(), mailServerSettings.getMailserverport(),
+          mailServerSettings.getUsername(), mailServerSettings.getPassword());
       Workarounds.applyWorkaroundForOOoIssue102164();
       email.saveChanges();
 
@@ -117,16 +106,16 @@ public class EMailSender
     }
     catch (MessagingException e)
     {
-      mailserver = null;
       throw new MessagingException(e.getMessage(), e);
     }
   }
 
-  private MailServerSettings getWollMuxMailServerSettings()
+  public MailServerSettings getWollMuxMailServerSettings()
       throws ConfigurationErrorException
-  {
+  { 
     MailServerSettings mailserver = new MailServerSettings();
     ConfigThingy wollmuxconf = WollMuxFiles.getWollmuxConf();
+    
     try
     {
       wollmuxconf = wollmuxconf.query("EMailEinstellungen").getLastChild();
@@ -165,32 +154,13 @@ public class EMailSender
         {
           username = pattern.pattern();
         }
-
-        JLabel jUserName = new JLabel(L.m("Benutzername"));
-        JTextField userNameField = new JTextField(username);
-        JLabel jPassword = new JLabel(L.m("Passwort"));
-        JTextField passwordField = new JPasswordField();
-        String jAuthPrompt =
-          new String(
-            L.m("Bitte geben Sie Benutzername und Passwort für den E-Mail-Server ein."));
-        Object[] dialogElements = {
-          jAuthPrompt, jUserName, userNameField, jPassword, passwordField };
-        int dialog =
-          JOptionPane.showConfirmDialog(null, dialogElements,
-            L.m("Authentifizierung am E-Mail-Server"), JOptionPane.OK_CANCEL_OPTION,
-            JOptionPane.PLAIN_MESSAGE);
-
-        if (dialog == JOptionPane.OK_OPTION)
-        {
-          mailserver.setUsername(userNameField.getText());
-          mailserver.setPassword(passwordField.getText());
-        }
       }
     }
     catch (MessagingException e)
     {
       throw new ConfigurationErrorException();
     }
+    
     return mailserver;
   }
 }
