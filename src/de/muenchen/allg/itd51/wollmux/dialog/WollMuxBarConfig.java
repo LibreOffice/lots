@@ -24,21 +24,16 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -573,10 +568,6 @@ public class WollMuxBarConfig
       new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
         GridBagConstraints.NONE, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
           TF_BORDER), 0, 0);
-    GridBagConstraints gbcCheckbox =
-      new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
-        GridBagConstraints.NONE, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
-          TF_BORDER), 0, 0);
     GridBagConstraints gbcGlue =
       new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.LINE_START,
         GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0);
@@ -702,20 +693,6 @@ public class WollMuxBarConfig
     gbcSeparator.gridy = y;
     mainPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbcSeparator);
 
-    x = 0;
-    ++y;
-    gbcLabel.gridx = x++;
-    gbcLabel.gridy = y;
-    mainPanel.add(new JLabel(L.m("Aktive Menügruppen")), gbcLabel);
-
-    x = 0;
-    ++y;
-    gbcCheckbox.gridx = x;
-    gbcCheckbox.gridy = y;
-    final List<JCheckBox> checkboxes = new ArrayList<JCheckBox>();
-    addCheckboxesForConfIDs(mainPanel, gbcCheckbox, checkboxes);
-    y = gbcCheckbox.gridy;
-
     inputTitle.setText(myFrameTitle);
     setCombo(inputMode, windowModeToText(windowMode));
 
@@ -769,7 +746,6 @@ public class WollMuxBarConfig
         setCombo(inputWidth, widthHeightToText(myFrameWidthDefault));
         setCombo(inputHeight, widthHeightToText(myFrameHeightDefault));
         setSpinner(fontZoom, myFrameFontzoomDefault);
-        setCheckboxesForConfIDsToDefaultValues(checkboxes);
       }
     });
     resetButton.setMnemonic('S');
@@ -800,7 +776,6 @@ public class WollMuxBarConfig
         myFrameWidth = getWidthHeight(inputWidth.getSelectedItem().toString());
         myFrameHeight = getWidthHeight(inputHeight.getSelectedItem().toString());
         myFrameFontzoom = getFontZoom(fontZoom.getValue());
-        confIds = getConfIDsFromCheckboxes(checkboxes);
 
         doSave();
         finishedAction.actionPerformed(new ActionEvent(this, 0, "OK"));
@@ -827,106 +802,6 @@ public class WollMuxBarConfig
     myDialog.setVisible(true);
     parent.setEnabled(false);
     myDialog.requestFocus();
-  }
-
-  /**
-   * Liefert die zu den selektierten Checkboxen aus checkboxes, die durch
-   * {@link #addCheckboxesForConfIDs(JPanel, GridBagConstraints, List)} erzeugt
-   * worden sein müssen, zugehörigen CONF_IDs.
-   *
-   * TESTED
-   */
-  protected Set<String> getConfIDsFromCheckboxes(List<JCheckBox> checkboxes)
-  {
-    Set<String> checkboxIds = new HashSet<String>();
-
-    List<MenuManager.ConfigID> configIDs =
-      MenuManager.parseConfigIDs(defaultConf, userConf);
-
-    Collections.sort(configIDs);
-
-    Iterator<JCheckBox> iter = checkboxes.iterator();
-
-    for (MenuManager.ConfigID configID : configIDs)
-    {
-      JCheckBox checkBox = iter.next();
-      if (checkBox.isSelected())
-        checkboxIds.add(configID.id);
-    }
-
-    return checkboxIds;
-  }
-
-  /**
-   * Setzt die Checkboxen aus checkboxes, die durch
-   * {@link #addCheckboxesForConfIDs(JPanel, GridBagConstraints, List)} erzeugt
-   * worden sein müssen, auf die Zustände auf die sie von
-   * {@link #addCheckboxesForConfIDs(JPanel, GridBagConstraints, List)} gesetzt
-   * worden wären, wenn für das Bestimmen von {@link #confIds} nur
-   * {@link #defaultConf} herangezogen worden wäre.
-   *
-   * TESTED
-   */
-  protected void setCheckboxesForConfIDsToDefaultValues(List<JCheckBox> checkboxes)
-  {
-    List<MenuManager.ConfigID> configIDs =
-      MenuManager.parseConfigIDs(defaultConf, userConf);
-
-    Collections.sort(configIDs);
-
-    Set<String> checkboxIds = new HashSet<String>();
-    ConfigThingy activeIds =
-      defaultConf.query("WollMuxBarKonfigurationen", 1).query("Aktiv", 2);
-
-    try
-    {
-      for (ConfigThingy idConf : activeIds.getLastChild())
-        checkboxIds.add(idConf.getName());
-    }
-    catch (NodeNotFoundException x)
-    {
-      // Falls getLastChild() wirft, bleibt conf_ids einfach leer
-    }
-
-    Iterator<JCheckBox> iter = checkboxes.iterator();
-
-    for (MenuManager.ConfigID configID : configIDs)
-    {
-      JCheckBox checkBox = iter.next();
-      checkBox.setSelected(checkboxIds.contains(configID.id));
-    }
-  }
-
-  /**
-   * Fügt mainPanel je eine Checkbox für jede in einem
-   * WollMuxBarKonfigurationen/Labels-Abschnitt definierte CONF_ID hinzu, wobei
-   * gbcCheckbox als LayoutConstraints übergeben wird (es wird jeweils y eins
-   * raufgezählt). Die so erstellten Checkboxen werden außerdem zur Liste checkboxes
-   * hinzugefügt. Der initiale Aktivierungswert der Checkboxen richtet sich nach
-   * {@link #confIds}.
-   *
-   * TESTED
-   */
-  private void addCheckboxesForConfIDs(JPanel mainPanel,
-      GridBagConstraints gbcCheckbox, List<JCheckBox> checkboxes)
-  {
-    List<MenuManager.ConfigID> configIDs =
-      MenuManager.parseConfigIDs(defaultConf, userConf);
-
-    Collections.sort(configIDs);
-
-    for (MenuManager.ConfigID configID : configIDs)
-    {
-      String label = configID.label_user;
-      if (label == null)
-        label = configID.label_default;
-      JCheckBox checkbox = new JCheckBox(label);
-      checkboxes.add(checkbox);
-      mainPanel.add(checkbox, gbcCheckbox);
-      ++gbcCheckbox.gridy;
-      if (isIDActive(configID.id))
-        checkbox.setSelected(true);
-    }
   }
 
   /**

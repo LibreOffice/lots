@@ -70,7 +70,6 @@ public class UIFactory
     SUPPORTED_ACTIONS.add("abort");
     SUPPORTED_ACTIONS.add("kill");
     SUPPORTED_ACTIONS.add("about");
-    SUPPORTED_ACTIONS.add("menuManager");
     SUPPORTED_ACTIONS.add("options");
   }
 

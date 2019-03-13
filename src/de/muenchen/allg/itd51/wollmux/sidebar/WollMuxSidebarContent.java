@@ -59,10 +59,10 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractMenuListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractFocusListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractMenuListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractMouseListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
@@ -182,7 +182,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     catch (NodeNotFoundException e)
     {}
 
-    readWollMuxBarConf(false, allowUserConfig, false, conf);
+    readWollMuxBarConf(allowUserConfig, conf);
 
     XMultiComponentFactory xMCF =
       UnoRuntime.queryInterface(XMultiComponentFactory.class,
@@ -290,8 +290,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     return 100;
   }
 
-  private static void readWollMuxBarConf(boolean menumanager,
-      boolean allowUserConfig, boolean allowMenuManager, ConfigThingy wollmuxConf)
+  private static void readWollMuxBarConf(boolean allowUserConfig,
+      ConfigThingy wollmuxConf)
   {
     ConfigThingy wollmuxbarConf = null;
     File wollmuxbarConfFile =
@@ -340,10 +340,6 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         config =
           new WollMuxBarConfig(0, wollmuxConf, wollmuxbarConf, allowUserConfig);
       }
-
-      if (menumanager)
-      {}
-
     }
     catch (Exception x)
     {

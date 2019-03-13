@@ -94,10 +94,6 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     {
       WollMuxEventHandler.getInstance().handleAbout(WollMuxBar.getBuildInfo());
     }
-    else if (action.equals("menuManager"))
-    {
-      // menuManager();
-    }
     else if (action.equals("options"))
     {
       // options();
