@@ -1,7 +1,5 @@
 package de.muenchen.allg.itd51.wollmux.document;
 
-import java.lang.reflect.Method;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +8,6 @@ import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
 import com.sun.star.frame.XFrame;
 import com.sun.star.text.XTextDocument;
-import com.sun.star.uno.UnoRuntime;
 import com.sun.star.view.DocumentZoomType;
 
 import de.muenchen.allg.afid.UNO;
@@ -86,10 +83,16 @@ public class FrameController
       window = getFrame().getContainerWindow();
     }
     catch (java.lang.Exception e)
-    {}
+    {
+      LOGGER.debug("", e);
+    }
 
     // Insets bestimmen (Rahmenmaße des Windows)
-    int insetLeft = 0, insetTop = 0, insetRight = 0, insetButtom = 0;
+    int insetLeft = 0;
+    int insetTop = 0;
+    int insetRight = 0;
+    int insetButtom = 0;
+    
     if (UNO.XDevice(window) != null)
     {
       DeviceInfo di = UNO.XDevice(window).getInfo();
@@ -110,7 +113,9 @@ public class FrameController
       }
     }
     catch (NumberFormatException | NodeNotFoundException e)
-    {}
+    {
+      LOGGER.debug("", e);
+    }
     // Dimensions setzen:
     try
     {
@@ -121,7 +126,9 @@ public class FrameController
           - insetButtom, PosSize.SIZE);
     }
     catch (NumberFormatException | NodeNotFoundException e)
-    {}
+    {
+      LOGGER.debug("", e);
+    }
 
     // Zoom setzen:
     setDocumentZoom(settings);
@@ -184,7 +191,9 @@ public class FrameController
           zoomValue = Short.valueOf(zoom);
         }
         catch (NumberFormatException e)
-        {}
+        {
+          LOGGER.debug("", e);
+        }
       }
     }
 
@@ -196,7 +205,9 @@ public class FrameController
         UNO.XViewSettingsSupplier(doc.getCurrentController()).getViewSettings();
     }
     catch (java.lang.Exception e)
-    {}
+    {
+      LOGGER.debug("", e);
+    }
     if (zoomType != null)
       Utils.setProperty(viewSettings, "ZoomType", zoomType);
     else if (zoomValue != null)
@@ -223,7 +234,9 @@ public class FrameController
       }
     }
     catch (java.lang.Exception e)
-    {}
+    {
+      LOGGER.debug("", e);
+    }
     return title;
   }
 }

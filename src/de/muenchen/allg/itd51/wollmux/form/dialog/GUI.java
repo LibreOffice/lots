@@ -8,15 +8,12 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -39,7 +36,6 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
 import org.slf4j.Logger;
@@ -87,6 +83,8 @@ public class GUI
    * zu bieten für das Hinzufügen von Elementen, die immer vorhanden sein sollen.
    */
   private static final int GRID_MAX = 500;
+  
+  private static final String NEXT_TAB = "nextTab";
 
   /**
    * Die Farbe mit der Felder normalerweise eingefärbt sind. Gegenstück zu
@@ -274,9 +272,10 @@ public class GUI
             }
           } catch (Exception x)
           {
+            LOGGER.debug("", x);
           }
         } else
-          labelX = 1;
+            labelX = 1;
 
         if (label != null && !labelIsEmpty)
         {
@@ -412,7 +411,6 @@ public class GUI
     tabSwitcherCompo.setRequestFocusEnabled(false);
     tabSwitcherCompo.addFocusListener(new FocusAdapter()
     {
-
       @Override
       public void focusGained(FocusEvent e)
       {
@@ -427,16 +425,14 @@ public class GUI
           do
           {
             ++idx;
-            if (idx >= myTabbedPane.getTabCount())
+            if (idx >= myTabbedPane.getTabCount() || myTabbedPane.isEnabledAt(idx))
             {
               idx = -1;
               break;
-            }
-            if (myTabbedPane.isEnabledAt(idx))
-              break;
+            }           
           } while (idx != startIdx);
           if (idx > -1)
-            processUiElementEvent(null, "action", new String[] { "nextTab" });
+            processUiElementEvent(null, "action", new String[] { NEXT_TAB });
           else
             buttonPanel.getComponent(buttonPanel.getComponentCount() - 1).requestFocusInWindow();
         }
@@ -468,7 +464,7 @@ public class GUI
         if (e.getComponent() instanceof JTextArea)
           c = c.getParent();
 
-        if (c != null && c instanceof JComponent)
+        if (c instanceof JComponent)
         {
           java.awt.Rectangle b = e.getComponent().getBounds();
           b.x = 0;
@@ -586,7 +582,7 @@ public class GUI
 
     Set<String> supportedActions = new HashSet<>();
     supportedActions.add("abort");
-    supportedActions.add("nextTab");
+    supportedActions.add(NEXT_TAB);
     supportedActions.add("prevTab");
     supportedActions.add("funcDialog");
     supportedActions.add("form2PDF");
@@ -717,10 +713,12 @@ public class GUI
           myFrame.dispose();
         } catch (Exception x)
         {
+          LOGGER.debug("", x);
         }
       });
     } catch (Exception x)
     {
+      LOGGER.debug("", x);
     }
   }
 
@@ -735,7 +733,7 @@ public class GUI
       }
       else
         SwingUtilities.invokeAndWait(runner);
-    } catch (InvocationTargetException | InterruptedException x)
+    } catch (Exception x)
     {
       LOGGER.error("", x);
     }
@@ -774,7 +772,7 @@ public class GUI
         if ("abort".equals(action))
         {
           controller.close();
-        } else if ("nextTab".equals(action))
+        } else if (NEXT_TAB.equals(action))
         {
           nextTab();
         } else if ("prevTab".equals(action))

@@ -62,11 +62,11 @@ public class FormController
   private PropertyChangeSupport changes = new PropertyChangeSupport( this );
   private PropertyChangeSupport fieldIdChanges = new PropertyChangeSupport( this );
   
-  public Rectangle frameBounds;
-  public Rectangle maxWindowBounds;
-  public Insets windowInsets;
+  private Rectangle frameBounds;
+  private Rectangle maxWindowBounds;
+  private Insets windowInsets;
   
-  public String fieldId;
+  private String fieldId;
   
   public Rectangle getFrameBounds()
   {

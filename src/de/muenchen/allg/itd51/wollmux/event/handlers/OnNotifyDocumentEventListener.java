@@ -2,7 +2,6 @@ package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 
@@ -113,14 +112,9 @@ public class OnNotifyDocumentEventListener extends BasicEvent
 
         setWindowPosSize(formController, documentController, xTextDoc);
 
-        formController.addPropertyChangeListener(new PropertyChangeListener()
-        {
-          @Override
-          public void propertyChange(PropertyChangeEvent e)
-          {
-            setWindowPosSize(formController, documentController, xTextDoc);
-          }
-        });
+        formController.addPropertyChangeListener(
+          (PropertyChangeEvent e) -> setWindowPosSize(formController, documentController, xTextDoc)
+        );
       }
     }
   }
@@ -155,7 +149,8 @@ public class OnNotifyDocumentEventListener extends BasicEvent
         setIsMaximized.invoke(o, false);
       }
     } catch (java.lang.Exception e)
-    {
+    {      
+      LOGGER.debug("", e);
     }
 
     java.awt.Rectangle frameB = formController.getFrameBounds();
