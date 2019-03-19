@@ -1,6 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 import com.sun.star.frame.XFrame;
+import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;

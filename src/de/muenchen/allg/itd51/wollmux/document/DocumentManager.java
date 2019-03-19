@@ -109,6 +109,10 @@ public class DocumentManager
   {
     info.put(new HashableComponent(compo), new TextDocumentInfo(compo));
   }
+  
+  public Map<HashableComponent, Info> getTextDocumentList() {
+    return info;
+  }
 
   /**
    * Fügt compo den gemanageten Objekten hinzu, ohne weitere Informationen zu
@@ -391,7 +395,7 @@ public class DocumentManager
      */
     public TextDocumentController getTextDocumentController()
     {
-      throw new UnsupportedOperationException();
+      return null;
     }
 
     /**

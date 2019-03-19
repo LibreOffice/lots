@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="seriendruck_mail" dlg:left="85" dlg:top="5" dlg:width="170" dlg:height="210" dlg:closeable="true" dlg:moveable="true" dlg:withtitlebar="false">
+ <dlg:bulletinboard>
+  <dlg:titledbox dlg:id="header" dlg:tab-index="0" dlg:left="5" dlg:top="5" dlg:width="160" dlg:height="100">
+   <dlg:title dlg:value="Absender, Empfänger, Betreff"/>
+  </dlg:titledbox>
+  <dlg:text dlg:id="sender_label" dlg:tab-index="1" dlg:left="10" dlg:top="15" dlg:width="150" dlg:height="10" dlg:value="Absender"/>
+  <dlg:textfield dlg:id="sender" dlg:tab-index="2" dlg:left="10" dlg:top="25" dlg:width="150" dlg:height="15"/>
+  <dlg:text dlg:id="reciever_label" dlg:tab-index="3" dlg:left="10" dlg:top="45" dlg:width="149" dlg:height="10" dlg:value="Feld für Empfängeradresse"/>
+  <dlg:combobox dlg:id="reciever" dlg:tab-index="4" dlg:left="10" dlg:top="55" dlg:width="150" dlg:height="15" dlg:spin="true"/>
+  <dlg:text dlg:id="subject_label" dlg:tab-index="5" dlg:left="10" dlg:top="75" dlg:width="150" dlg:height="10" dlg:value="Betreff"/>
+  <dlg:titledbox dlg:id="message_frame" dlg:tab-index="7" dlg:left="5" dlg:top="110" dlg:width="160" dlg:height="95">
+   <dlg:title dlg:value="E-Mail Nachricht"/>
+  </dlg:titledbox>
+  <dlg:textfield dlg:id="message" dlg:tab-index="8" dlg:left="10" dlg:top="120" dlg:width="150" dlg:height="60" dlg:hide-inactive-selection="false" dlg:hscroll="true" dlg:vscroll="true" dlg:multiline="true"/>
+  <dlg:button dlg:id="CommandButton1" dlg:tab-index="9" dlg:left="10" dlg:top="185" dlg:width="70" dlg:height="15" dlg:value="Seriendruckfeld"/>
+  <dlg:button dlg:id="CommandButton2" dlg:tab-index="10" dlg:left="90" dlg:top="185" dlg:width="70" dlg:height="15" dlg:value="Spezialfeld"/>
+  <dlg:textfield dlg:id="subject" dlg:tab-index="6" dlg:left="10" dlg:top="85" dlg:width="150" dlg:height="15"/>
+ </dlg:bulletinboard>
+</dlg:window>

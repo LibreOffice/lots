@@ -79,7 +79,9 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 import de.muenchen.allg.itd51.wollmux.event.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
+
 
 /**
  * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service hat
@@ -203,10 +205,15 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     com.sun.star.lang.XSingleComponentFactory xFactory = null;
     if (sImplName.equals(WollMux.class.getName()))
       xFactory = Factory.createComponentFactory(WollMux.class, SERVICENAMES);
+
     if (sImplName.equals(WollMuxSidebarFactory.class.getName()))
       xFactory =
         Factory.createComponentFactory(WollMuxSidebarFactory.class,
           new String[] { WollMuxSidebarFactory.__serviceName });
+
+    if (sImplName.equals(SeriendruckSidebarFactory.class.getName()))
+      xFactory = Factory.createComponentFactory(SeriendruckSidebarFactory.class,
+          new String[] { SeriendruckSidebarFactory.__serviceName });
 
     return xFactory;
   }
@@ -225,6 +232,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     {
       FactoryHelper.writeRegistryServiceInfo(WollMuxSidebarFactory.class.getName(),
         WollMuxSidebarFactory.__serviceName, xRegKey);
+
+      FactoryHelper.writeRegistryServiceInfo(SeriendruckSidebarFactory.class.getName(),
+          SeriendruckSidebarFactory.__serviceName, xRegKey);
 
       return Factory.writeRegistryServiceInfo(WollMux.class.getName(),
         WollMux.SERVICENAMES, xRegKey);
@@ -258,6 +268,12 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
                 WollMuxSidebarFactory.__serviceName,
                 xFactory,
                 xKey);
+    }
+
+    if (sImplementationName.equals(SeriendruckSidebarFactory.class.getName()))
+    {
+      xResult = FactoryHelper.getServiceFactory(SeriendruckSidebarFactory.class,
+          SeriendruckSidebarFactory.__serviceName, xFactory, xKey);
       }
       
       return xResult;

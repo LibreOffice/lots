@@ -15,6 +15,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
+import de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
 
 /**
@@ -72,10 +73,15 @@ public class DebugExternalWollMux
 
     factoryRegistration.registerFactory("toolpanel", "WollMuxSidebarFactory", null,
       "de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory");
+
+    factoryRegistration.registerFactory("toolpanel", "SeriendruckSidebarFactory", null,
+        "de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarFactory");
+
     XSet set =
       UnoRuntime.queryInterface(XSet.class, UNO.defaultContext.getServiceManager());
     set.insert(WollMux.__getComponentFactory(WollMux.class.getName()));
     set.insert(WollMux.__getComponentFactory(WollMuxSidebarFactory.class.getName()));
+    set.insert(WollMux.__getComponentFactory(SeriendruckSidebarFactory.class.getName()));
 
     WollMux wm = new WollMux(UNO.defaultContext);
   }
