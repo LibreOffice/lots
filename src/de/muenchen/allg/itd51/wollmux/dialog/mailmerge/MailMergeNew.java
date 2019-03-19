@@ -36,17 +36,11 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -54,44 +48,49 @@ import java.util.List;
 import java.util.Map;
 
 import javax.mail.MessagingException;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.JTextField;
-import javax.swing.WindowConstants;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.awt.ItemEvent;
+import com.sun.star.awt.Rectangle;
+import com.sun.star.awt.TextEvent;
+import com.sun.star.awt.WindowAttribute;
+import com.sun.star.awt.WindowClass;
+import com.sun.star.awt.WindowDescriptor;
+import com.sun.star.awt.XButton;
+import com.sun.star.awt.XContainerWindowProvider;
+import com.sun.star.awt.XControlContainer;
+import com.sun.star.awt.XListBox;
+import com.sun.star.awt.XNumericField;
+import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XTopWindow;
+import com.sun.star.awt.XWindow;
+import com.sun.star.awt.XWindowPeer;
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XStorable;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResultsWithSchema;
-import de.muenchen.allg.itd51.wollmux.core.dialog.DimAdjust;
-import de.muenchen.allg.itd51.wollmux.core.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.core.dialog.TextComponentTags;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
-import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
+import de.muenchen.allg.itd51.wollmux.dialog.MailmergeWizardController;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.DatasetSelectionType;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.IndexSelection;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.SubmitArgument;
@@ -199,28 +198,24 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    */
   private int previewDatasetNumberMax = Integer.MAX_VALUE;
 
-  /**
-   * Das Textfield in dem Benutzer direkt eine Datensatznummer für die Vorschau
-   * eingeben können.
-   */
-  private JTextField previewDatasetNumberTextfield;
+  private XNumericField datasetNumber;
 
-  private Collection<JComponent> elementsDisabledWhenNoDatasourceSelected =
+  private Collection<XWindow> elementsDisabledWhenNoDatasourceSelected =
     new ArrayList<>();
 
-  private Collection<JComponent> elementsDisabledWhenNotInPreviewMode =
+  private Collection<XWindow> elementsDisabledWhenNotInPreviewMode =
     new ArrayList<>();
 
-  private Collection<JComponent> elementsDisabledWhenFirstDatasetSelected =
+  private Collection<XWindow> elementsDisabledWhenFirstDatasetSelected =
     new ArrayList<>();
 
-  private Collection<JComponent> elementsDisabledWhenLastDatasetSelected =
+  private Collection<XWindow> elementsDisabledWhenLastDatasetSelected =
     new ArrayList<>();
 
   /**
    * Enthält alle elementsDisabledWhen... Collections.
    */
-  private ArrayList<Collection<JComponent>> listsOfElementsDisabledUnderCertainCircumstances =
+  private ArrayList<Collection<XWindow>> listsOfElementsDisabledUnderCertainCircumstances =
     new ArrayList<>();
 
   /**
@@ -229,23 +224,12 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   private JFrame myFrame;
 
   /**
-   * Der WindowListener, der an {@link #myFrame} hängt.
-   */
-  private MyWindowListener oehrchen;
-
-  /**
    * Falls nicht null wird dieser Listener aufgerufen nachdem der MailMergeNew
    * geschlossen wurde.
    */
   private ActionListener abortListener = null;
 
   private MailMergeParams mailMergeParams = new MailMergeParams();
-
-  /**
-   * Enthält den Controller, der an das Dokumentfenster dieses Dokuments angekoppelte
-   * Fenster überwacht und steuert.
-   */
-  private CoupledWindowController coupledWindowController = null;
 
   private TextDocumentController documentController;
 
@@ -259,32 +243,10 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   public MailMergeNew(TextDocumentController documentController, ActionListener abortListener)
   {
     this.documentController = documentController;
-    this.ds = new MailMergeDatasource(documentController);
+    this.ds = new MailMergeDatasource();
     this.abortListener = abortListener;
-
-    // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
-    try
-    {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          try
-          {
-            createGUI();
-          }
-          catch (Exception x)
-          {
-            LOGGER.error("", x);
-          }
-        }
-      });
-    }
-    catch (Exception x)
-    {
-      LOGGER.error("", x);
-    }
+    
+    createGUI();
   }
 
   private void createGUI()
@@ -298,275 +260,351 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     listsOfElementsDisabledUnderCertainCircumstances.add(elementsDisabledWhenNotInPreviewMode);
     listsOfElementsDisabledUnderCertainCircumstances.add(elementsDisabledWhenFirstDatasetSelected);
     listsOfElementsDisabledUnderCertainCircumstances.add(elementsDisabledWhenLastDatasetSelected);
-
-    myFrame = new JFrame(L.m("Seriendruck (WollMux)"));
-    myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    oehrchen = new MyWindowListener();
-    myFrame.addWindowListener(oehrchen);
-
-    // WollMux-Icon für den Seriendruck-Frame
-    Common.setWollMuxIcon(myFrame);
-
-    Box hbox = Box.createHorizontalBox();
-    myFrame.add(hbox);
-    JButton button;
-    button = new JButton(L.m("Datenquelle"));
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        ds.showDatasourceSelectionDialog(myFrame, new Runnable()
-        {
-          @Override
-          public void run()
-          {
-            updateEnabledDisabledState();
-          }
-        });
-      }
-    });
-    hbox.add(button);
-
-    button =
-      new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
-        new Iterable<Action>()
-        {
-          @Override
-          public Iterator<Action> iterator()
-          {
-            return getInsertFieldActionList().iterator();
-          }
-        });
-    hbox.add(button);
-    elementsDisabledWhenNoDatasourceSelected.add(button);
-
-    button = new JButton(L.m("Spezialfeld"));
-    final JButton specialFieldButton = button;
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        showInsertSpecialFieldPopup(specialFieldButton, 0,
-          specialFieldButton.getSize().height);
-      }
-    });
-    hbox.add(button);
-
-    final String VORSCHAU = L.m("   Vorschau   ");
-    button = new JButton(VORSCHAU);
+    
     previewMode = false;
     documentController.setFormFieldsPreviewMode(previewMode);
-
-    final JButton previewButton = button;
-    button.addActionListener(new ActionListener()
+    try
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
+      com.sun.star.awt.Rectangle rect = new Rectangle();
+      rect.X = 0;
+      rect.Y = 0;
+      rect.Width = 385;
+      rect.Height = 18;
+  
+      WindowDescriptor aWindow = new WindowDescriptor();
+      aWindow.Type = WindowClass.TOP;
+      aWindow.WindowServiceName = "dialog";
+      aWindow.Parent = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
+      aWindow.ParentIndex = -1;
+      aWindow.Bounds = rect;
+  
+      aWindow.WindowAttributes = WindowAttribute.CLOSEABLE | WindowAttribute.SIZEABLE
+          | WindowAttribute.MOVEABLE | WindowAttribute.BORDER;
+  
+      XToolkit toolkit = UNO.XToolkit(UNO.xMCF.createInstanceWithContext("com.sun.star.awt.Toolkit", UNO.defaultContext));
+      XWindowPeer peer = toolkit.createWindow(aWindow);
+      XContainerWindowProvider provider = UnoRuntime.queryInterface(XContainerWindowProvider.class, UNO.xMCF
+          .createInstanceWithContext("com.sun.star.awt.ContainerWindowProvider", UNO.defaultContext));
+      XWindow window = provider.createContainerWindow(
+          "vnd.sun.star.script:WollMux.seriendruck_main?location=application", "", peer, null);
+      XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
+      
+      XButton datasource = UNO.XButton(container.getControl("datasource"));
+      XListBox mailmerge = UnoRuntime.queryInterface(XListBox.class, container.getControl("mailmerge"));
+      datasource.addActionListener(new AbstractActionListener()
       {
-        if (!ds.hasDatasource()) {
-          return;
-        }
-        if (previewMode)
-        {
-          documentController.collectNonWollMuxFormFields();
-          previewButton.setText(VORSCHAU);
-          previewMode = false;
-          documentController.setFormFieldsPreviewMode(false);
-          updateEnabledDisabledState();
-        }
-        else
-        {
-          documentController.collectNonWollMuxFormFields();
-          previewButton.setText(L.m("<Feldname>"));
-          previewMode = true;
-          documentController.setFormFieldsPreviewMode(true);
-          updatePreviewFields();
-        }
-      }
-    });
-    hbox.add(DimAdjust.fixedPreferredSize(button));
-    elementsDisabledWhenNoDatasourceSelected.add(button);
-
-    button = new JButton("|<");
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        previewDatasetNumber = 1;
-        updatePreviewFields();
-      }
-    });
-    hbox.add(button);
-    elementsDisabledWhenNotInPreviewMode.add(button);
-    elementsDisabledWhenFirstDatasetSelected.add(button);
-
-    button = new JButton("<");
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        --previewDatasetNumber;
-        if (previewDatasetNumber < 1) {
-          previewDatasetNumber = 1;
-        }
-        updatePreviewFields();
-      }
-    });
-    hbox.add(button);
-    elementsDisabledWhenNotInPreviewMode.add(button);
-    elementsDisabledWhenFirstDatasetSelected.add(button);
-
-    previewDatasetNumberTextfield = new JTextField("1", 3);
-    previewDatasetNumberTextfield.addKeyListener(NonNumericKeyConsumer.instance);
-    previewDatasetNumberTextfield.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        String tfValue = previewDatasetNumberTextfield.getText();
-        try
-        {
-          int newValue = Integer.parseInt(tfValue);
-          previewDatasetNumber = newValue;
-        }
-        catch (Exception x)
-        {
-          previewDatasetNumberTextfield.setText("" + previewDatasetNumber);
-        }
-        updatePreviewFields();
-      }
-    });
-    previewDatasetNumberTextfield.setMaximumSize(new Dimension(Integer.MAX_VALUE,
-      button.getPreferredSize().height));
-    hbox.add(previewDatasetNumberTextfield);
-    elementsDisabledWhenNotInPreviewMode.add(previewDatasetNumberTextfield);
-
-    button = new JButton(">");
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        ++previewDatasetNumber;
-        updatePreviewFields();
-      }
-    });
-    hbox.add(button);
-    elementsDisabledWhenNotInPreviewMode.add(button);
-    elementsDisabledWhenLastDatasetSelected.add(button);
-
-    button = new JButton(">|");
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        previewDatasetNumber = Integer.MAX_VALUE;
-        updatePreviewFields();
-      }
-    });
-    hbox.add(button);
-    elementsDisabledWhenNotInPreviewMode.add(button);
-    elementsDisabledWhenLastDatasetSelected.add(button);
-
-    button = new JButton(L.m("Drucken"));
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        if (ds.hasDatasource())
-          mailMergeParams.showDoMailmergeDialog(myFrame, MailMergeNew.this);
-      }
-    });
-    hbox.add(button);
-    elementsDisabledWhenNoDatasourceSelected.add(button);
-
-    final JPopupMenu tabelleMenu = new JPopupMenu();
-    JMenuItem item = new JMenuItem(L.m("Tabelle bearbeiten"));
-    item.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        ds.toFront();
-      }
-    });
-    tabelleMenu.add(item);
-
-    final JMenuItem addColumnsMenuItem =
-      new JMenuItem(L.m("Tabellenspalten ergänzen"));
-    addColumnsMenuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        AdjustFields.showAddMissingColumnsDialog(myFrame, documentController, ds);
-      }
-    });
-    tabelleMenu.add(addColumnsMenuItem);
-
-    final JMenuItem adjustFieldsMenuItem =
-      new JMenuItem(L.m("Alle Felder anpassen"));
-    adjustFieldsMenuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        AdjustFields.showAdjustFieldsDialog(myFrame, documentController, ds);
-      }
-    });
-    tabelleMenu.add(adjustFieldsMenuItem);
-
-    button = new JButton(L.m("Tabelle"));
-    final JButton tabelleButton = button;
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
-        // entsprechenden Datenquellenfeldern zugeordnet werden können.
-        // Tabellenspalten ergänzen wird außerdem ausgegraut, wenn die Datenquelle
-        // dies nicht unterstützt
-        boolean hasUnmappedFields =
-            documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(
-            ds.getColumnNames())).length > 0;
-        adjustFieldsMenuItem.setEnabled(hasUnmappedFields);
-        addColumnsMenuItem.setEnabled(hasUnmappedFields && ds.supportsAddColumns());
-
-        tabelleMenu.show(tabelleButton, 0, tabelleButton.getSize().height);
-      }
-    });
-    hbox.add(button);
-    elementsDisabledWhenNoDatasourceSelected.add(button);
-
-    updateEnabledDisabledState();
-    myFrame.setAlwaysOnTop(true);
-    myFrame.pack();
-    int frameWidth = myFrame.getWidth();
-    int frameHeight = myFrame.getHeight();
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width / 2 - frameWidth / 2;
-    int y = frameHeight * 3;// screenSize.height/2 - frameHeight/2;
-    myFrame.setLocation(x, y);
-    myFrame.setResizable(false);
-    addCoupledWindow(myFrame);
-    myFrame.setVisible(true);
-
-    if (!ds.hasDatasource())
-      ds.showDatasourceSelectionDialog(myFrame, new Runnable()
-      {
+        
         @Override
-        public void run()
+        public void actionPerformed(com.sun.star.awt.ActionEvent event)
         {
-          updateEnabledDisabledState();
+//          ds.showDatasourceSelectionDialog(myFrame, () -> {
+//            updateEnabledDisabledState();
+//            addMailmergeEntries(mailmerge);
+//          });
         }
       });
+      
+      mailmerge.addItemListener(new AbstractItemListener()
+      {
+
+        @Override
+        public void itemStateChanged(ItemEvent event)
+        {
+          LOGGER.debug("mailmerge {}", event.Selected);
+          if (event.Selected == 0)
+            return;
+          
+          String name = mailmerge.getSelectedItem();
+          documentController.insertMailMergeFieldAtCursorPosition(name);
+          mailmerge.selectItemPos((short) 0, true);
+        }
+
+      });
+      elementsDisabledWhenNoDatasourceSelected.add(UNO.XWindow(mailmerge));
+      
+      XListBox special = UnoRuntime.queryInterface(XListBox.class, container.getControl("special"));
+      special.addItemListener(new AbstractItemListener()
+      {
+
+        @Override
+        public void itemStateChanged(ItemEvent event)
+        {
+          LOGGER.debug("special {}", event.Selected);
+          if (event.Selected == 0)
+            return;
+          
+          switch (event.Selected)
+          {
+          case 0:
+            break;
+          case 1:
+            // ConfigThingy für leere Gender-Funktion zusammenbauen.
+            ConfigThingy genderConf = GenderDialog
+                .generateGenderTrafoConf(ds.getColumnNames().get(0), "", "", "");
+            insertFieldFromTrafoDialog(ds.getColumnNames(), special.getItem((short) 1), genderConf);
+            break;
+          case 2:
+            // ConfigThingy für leere WennDannSonst-Funktion zusammenbauen. Aufbau:
+            // IF(STRCMP(VALUE '<firstField>', '') THEN('') ELSE(''))
+            ConfigThingy ifConf = new ConfigThingy("IF");
+            ConfigThingy strCmpConf = ifConf.add("STRCMP");
+            strCmpConf.add("VALUE").add(ds.getColumnNames().get(0));
+            strCmpConf.add("");
+            ifConf.add("THEN").add("");
+            ifConf.add("ELSE").add("");
+            insertFieldFromTrafoDialog(ds.getColumnNames(), special.getItem((short) 2), ifConf);
+            break;
+          case 3:
+            documentController
+                .insertMailMergeFieldAtCursorPosition(MailMergeParams.TAG_DATENSATZNUMMER);
+            break;
+          case 4:
+            documentController
+                .insertMailMergeFieldAtCursorPosition(MailMergeParams.TAG_SERIENBRIEFNUMMER);
+            break;
+          case 5:
+            documentController.insertNextDatasetFieldAtCursorPosition();
+            break;
+          case 6:
+            // editFieldDialog.show(L.m("Spezialfeld bearbeiten"), myFrame);
+            break;
+          default:
+            break;
+          }
+          special.selectItemPos((short) 0, true);
+        }
+
+      });
+      
+      XButton preview = UNO.XButton(container.getControl("preview"));
+      preview.addActionListener(new AbstractActionListener()
+      {
+        
+        @Override
+        public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
+        {
+          if (!ds.hasDatasource()) {
+          return;
+          }
+          if (previewMode)
+          {
+            documentController.collectNonWollMuxFormFields();
+            preview.setLabel("Vorschau");
+            previewMode = false;
+            documentController.setFormFieldsPreviewMode(false);
+            updateEnabledDisabledState();
+          }
+          else
+          {
+            documentController.collectNonWollMuxFormFields();
+            preview.setLabel(L.m("<Feldname>"));
+            previewMode = true;
+            documentController.setFormFieldsPreviewMode(true);
+            //updatePreviewFields();
+          }
+        }
+      });
+      elementsDisabledWhenNoDatasourceSelected.add(UNO.XWindow(preview));
+      
+      XButton first = UNO.XButton(container.getControl("first"));
+      first.addActionListener(new AbstractActionListener()
+      {
+        
+        @Override
+        public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
+        {
+          previewDatasetNumber = 1;
+          //updatePreviewFields();
+        }
+      });
+      elementsDisabledWhenNotInPreviewMode.add(UNO.XWindow(first));
+      elementsDisabledWhenFirstDatasetSelected.add(UNO.XWindow(first));
+      
+      datasetNumber = UNO.XNumericField(container.getControl("data"));
+      UNO.XTextComponent(datasetNumber).addTextListener(new AbstractTextListener()
+      {
+        
+        @Override
+        public void textChanged(TextEvent event)
+        {
+          previewDatasetNumber = (int) datasetNumber.getValue();
+          //updatePreviewFields();
+        }
+      });
+      elementsDisabledWhenNotInPreviewMode.add(UNO.XWindow(datasetNumber));
+      
+      XButton last = UNO.XButton(container.getControl("last"));
+      last.addActionListener(new AbstractActionListener()
+      {
+        
+        @Override
+        public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
+        {
+          previewDatasetNumber = Integer.MAX_VALUE;
+          //updatePreviewFields();
+        }
+      });
+      elementsDisabledWhenNotInPreviewMode.add(UNO.XWindow(last));
+      elementsDisabledWhenLastDatasetSelected.add(UNO.XWindow(last));
+      
+      XButton print = UNO.XButton(container.getControl("print"));
+      print.addActionListener(new AbstractActionListener()
+      {
+        
+        @Override
+        public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
+        {
+          if (ds.hasDatasource())
+          {
+            MailmergeWizardController controller = new MailmergeWizardController(mailMergeParams);
+            controller.createWizard();
+          }
+        }
+      });
+      elementsDisabledWhenNoDatasourceSelected.add(UNO.XWindow(print));
+      
+      XButton table = UNO.XButton(container.getControl("table"));
+      table.addActionListener(new AbstractActionListener()
+      {
+        
+        @Override
+        public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
+        {
+          // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
+          // entsprechenden Datenquellenfeldern zugeordnet werden können.
+          // Tabellenspalten ergänzen wird außerdem ausgegraut, wenn die Datenquelle
+          // dies nicht unterstützt
+          boolean hasUnmappedFields =
+              documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(
+              ds.getColumnNames())).length > 0;
+//        adjustFieldsMenuItem.setEnabled(hasUnmappedFields);
+//        addColumnsMenuItem.setEnabled(hasUnmappedFields && ds.supportsAddColumns());
+//
+//        tabelleMenu.show(tabelleButton, 0, tabelleButton.getSize().height);
+        }
+      });
+      elementsDisabledWhenNoDatasourceSelected.add(UNO.XWindow(table));
+
+      documentController.setFormFieldsPreviewMode(previewMode);
+      updateEnabledDisabledState();
+      window.setVisible(true);
+      XTopWindow topWindow = UNO.XTopWindow(window);
+      // topWindow.addTopWindowListener(new AbstractTopWindowListener()
+      // {
+      //
+      // @Override
+      // public void windowClosing(EventObject event)
+      // {
+      // peer.dispose();
+      // dispose();
+      // }
+      // });
+    }
+    catch (Exception e)
+    {
+      LOGGER.error("", e);
+    }
+//
+//    myFrame = new JFrame(L.m("Seriendruck (WollMux)"));
+//    myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+//    oehrchen = new MyWindowListener();
+//    myFrame.addWindowListener(oehrchen);
+//
+//    // WollMux-Icon für den Seriendruck-Frame
+//    Common.setWollMuxIcon(myFrame);
+//
+//    Box hbox = Box.createHorizontalBox();
+//    myFrame.add(hbox);
+//    JButton button;
+
+//
+//    final JPopupMenu tabelleMenu = new JPopupMenu();
+//    JMenuItem item = new JMenuItem(L.m("Tabelle bearbeiten"));
+//    item.addActionListener(new ActionListener()
+//    {
+//      @Override
+//      public void actionPerformed(ActionEvent e)
+//      {
+//        ds.toFront();
+//      }
+//    });
+//    tabelleMenu.add(item);
+//
+//    final JMenuItem addColumnsMenuItem =
+//      new JMenuItem(L.m("Tabellenspalten ergänzen"));
+//    addColumnsMenuItem.addActionListener(new ActionListener()
+//    {
+//      @Override
+//      public void actionPerformed(ActionEvent e)
+//      {
+//        AdjustFields.showAddMissingColumnsDialog(myFrame, documentController, ds);
+//      }
+//    });
+//    tabelleMenu.add(addColumnsMenuItem);
+//
+//    final JMenuItem adjustFieldsMenuItem =
+//      new JMenuItem(L.m("Alle Felder anpassen"));
+//    adjustFieldsMenuItem.addActionListener(new ActionListener()
+//    {
+//      @Override
+//      public void actionPerformed(ActionEvent e)
+//      {
+//        AdjustFields.showAdjustFieldsDialog(myFrame, documentController, ds);
+//      }
+//    });
+//    tabelleMenu.add(adjustFieldsMenuItem);
+//
+//    button = new JButton(L.m("Tabelle"));
+//    final JButton tabelleButton = button;
+//    button.addActionListener(new ActionListener()
+//    {
+//      @Override
+//      public void actionPerformed(ActionEvent e)
+//      {
+//        // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
+//        // entsprechenden Datenquellenfeldern zugeordnet werden können.
+//        // Tabellenspalten ergänzen wird außerdem ausgegraut, wenn die Datenquelle
+//        // dies nicht unterstützt
+//        boolean hasUnmappedFields =
+//            documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(
+//            ds.getColumnNames())).length > 0;
+//        adjustFieldsMenuItem.setEnabled(hasUnmappedFields);
+//        addColumnsMenuItem.setEnabled(hasUnmappedFields && ds.supportsAddColumns());
+//
+//        tabelleMenu.show(tabelleButton, 0, tabelleButton.getSize().height);
+//      }
+//    });
+//    hbox.add(button);
+//    elementsDisabledWhenNoDatasourceSelected.add(button);
+//
+//    myFrame.setAlwaysOnTop(true);
+//    myFrame.pack();
+//    int frameWidth = myFrame.getWidth();
+//    int frameHeight = myFrame.getHeight();
+//    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+//    int x = screenSize.width / 2 - frameWidth / 2;
+//    int y = frameHeight * 3;// screenSize.height/2 - frameHeight/2;
+//    myFrame.setLocation(x, y);
+//    myFrame.setResizable(false);
+//    addCoupledWindow(myFrame);
+//    myFrame.setVisible(true);
+//
+//    if (!ds.hasDatasource())
+//      ds.showDatasourceSelectionDialog(myFrame, new Runnable()
+//      {
+//        @Override
+//        public void run()
+//        {
+//          updateEnabledDisabledState();
+//        }
+//      });
+  }
+  
+  private void addMailmergeEntries(XListBox mailmerge)
+  {
+    mailmerge.removeItems((short) 1, mailmerge.getItemCount());
+    mailmerge.addItems(ds.getColumnNames().toArray(new String[0]), (short) 1);
+    mailmerge.selectItemPos((short) 0, true);
   }
 
   /**
@@ -579,29 +617,31 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   private void updateEnabledDisabledState()
   {
     // Zuerst alles enablen.
-    for (Collection<JComponent> list : listsOfElementsDisabledUnderCertainCircumstances)
+    for (Collection<XWindow> list : listsOfElementsDisabledUnderCertainCircumstances)
     {
-      for (JComponent compo : list)
+      for (XWindow compo : list)
       {
-        compo.setEnabled(true);
+        compo.setEnable(true);
       }
     }
 
     if (!ds.hasDatasource())
-      for (JComponent compo : elementsDisabledWhenNoDatasourceSelected)
-        compo.setEnabled(false);
+    {
+      for (XWindow compo : elementsDisabledWhenNoDatasourceSelected)
+        compo.setEnable(false);
+    }
 
     if (previewDatasetNumber <= 1)
-      for (JComponent compo : elementsDisabledWhenFirstDatasetSelected)
-        compo.setEnabled(false);
+      for (XWindow compo : elementsDisabledWhenFirstDatasetSelected)
+        compo.setEnable(false);
 
     if (previewDatasetNumber >= previewDatasetNumberMax)
-      for (JComponent compo : elementsDisabledWhenLastDatasetSelected)
-        compo.setEnabled(false);
+      for (XWindow compo : elementsDisabledWhenLastDatasetSelected)
+        compo.setEnable(false);
 
     if (!previewMode) {
-      for (JComponent compo : elementsDisabledWhenNotInPreviewMode) {
-        compo.setEnabled(false);
+      for (XWindow compo : elementsDisabledWhenNotInPreviewMode) {
+        compo.setEnable(false);
       }
     }
   }
@@ -616,50 +656,50 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    *
    *         TESTED
    */
-  private void updatePreviewFields()
-  {
-    if (!ds.hasDatasource()) {
-      return;
-    }
-
-    int count = ds.getNumberOfDatasets();
-    previewDatasetNumberMax = count;
-
-    if (previewDatasetNumber > count) {
-      previewDatasetNumber = count;
-    }
-    if (previewDatasetNumber <= 0) {
-      previewDatasetNumber = 1;
-    }
-
-    String previewDatasetNumberStr = "" + previewDatasetNumber;
-    previewDatasetNumberTextfield.setText(previewDatasetNumberStr);
-
-    updateEnabledDisabledState();
-
-    if (!previewMode) {
-      return;
-    }
-
-    List<String> schema = ds.getColumnNames();
-    List<String> data = ds.getValuesForDataset(previewDatasetNumber);
-
-    if (schema.size() != data.size())
-    {
-      LOGGER.error(L.m("Daten haben sich zwischen dem Auslesen von Schema und Werten verändert"));
-      return;
-    }
-
-    Iterator<String> dataIter = data.iterator();
-    for (String column : schema)
-    {
-      WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc, column, dataIter.next(), null);
-    }
-    WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
-      MailMergeParams.TAG_DATENSATZNUMMER, previewDatasetNumberStr, null);
-    WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
-      MailMergeParams.TAG_SERIENBRIEFNUMMER, previewDatasetNumberStr, null);
-  }
+//  private void updatePreviewFields()
+//  {
+//    if (!ds.hasDatasource()) {
+//      return;
+//    }
+//
+//    int count = ds.getNumberOfDatasets();
+//    previewDatasetNumberMax = count;
+//
+//    if (previewDatasetNumber > count) {
+//      previewDatasetNumber = count;
+//    }
+//    if (previewDatasetNumber <= 0) {
+//      previewDatasetNumber = 1;
+//    }
+//
+//    String previewDatasetNumberStr = "" + previewDatasetNumber;
+//    datasetNumber.setValue(previewDatasetNumber);
+//
+//    updateEnabledDisabledState();
+//
+//    if (!previewMode) {
+//      return;
+//    }
+//
+//    List<String> schema = ds.getColumnNames();
+//    List<String> data = ds.getValuesForDataset(previewDatasetNumber);
+//
+//    if (schema.size() != data.size())
+//    {
+//      LOGGER.error(L.m("Daten haben sich zwischen dem Auslesen von Schema und Werten verändert"));
+//      return;
+//    }
+//
+//    Iterator<String> dataIter = data.iterator();
+//    for (String column : schema)
+//    {
+//      WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc, column, dataIter.next(), null);
+//    }
+//    WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
+//      MailMergeParams.TAG_DATENSATZNUMMER, previewDatasetNumberStr, null);
+//    WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
+//      MailMergeParams.TAG_SERIENBRIEFNUMMER, previewDatasetNumberStr, null);
+//  }
 
   /**
    * Schliesst den MailMergeNew und alle zugehörigen Fenster.
@@ -668,165 +708,8 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    */
   public void dispose()
   {
-    try
-    {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          try
-          {
-            abort();
-          }
-          catch (Exception x)
-          {}
-        }
-      });
-    }
-    catch (Exception x)
-    {}
-  }
-
-  /**
-   * Erzeugt eine Liste mit {@link javax.swing.Action}s für alle Namen aus
-   * {@link #ds},getColumnNames(), die ein entsprechendes Seriendruckfeld einfügen.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private List<Action> getInsertFieldActionList()
-  {
-    List<Action> actions = new ArrayList<>();
-    List<String> columnNames = ds.getColumnNames();
-
-    Collections.sort(columnNames);
-
-    Iterator<String> iter = columnNames.iterator();
-    while (iter.hasNext())
-    {
-      final String name = iter.next();
-      Action button = new AbstractAction(name)
-      {
-        private static final long serialVersionUID = 0; // Eclipse-Warnung totmachen
-
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          documentController.insertMailMergeFieldAtCursorPosition(name);
-        }
-      };
-      actions.add(button);
-    }
-
-    return actions;
-  }
-
-  /**
-   * Erzeugt ein JPopupMenu, das Einträge für das Einfügen von Spezialfeldern enthält
-   * und zeigt es an neben invoker an der relativen Position x,y.
-   *
-   * @param invoker
-   *          zu welcher Komponente gehört das Popup
-   * @param x
-   *          Koordinate des Popups im Koordinatenraum von invoker.
-   * @param y
-   *          Koordinate des Popups im Koordinatenraum von invoker.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void showInsertSpecialFieldPopup(JComponent invoker, int x, int y)
-  {
-    boolean dsHasFields = !ds.getColumnNames().isEmpty();
-    final TrafoDialog editFieldDialog = getTrafoDialogForCurrentSelection();
-
-    JPopupMenu menu = new JPopupMenu();
-
-    JMenuItem button;
-
-    final String genderButtonName = L.m("Gender");
-    button = new JMenuItem(genderButtonName);
-    button.setEnabled(dsHasFields);
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        // ConfigThingy für leere Gender-Funktion zusammenbauen.
-        ConfigThingy genderConf =
-          GenderDialog.generateGenderTrafoConf(ds.getColumnNames().get(0), "", "",
-            "");
-        insertFieldFromTrafoDialog(ds.getColumnNames(), genderButtonName, genderConf);
-      }
-    });
-    menu.add(button);
-
-    final String iteButtonName = L.m("Wenn...Dann...Sonst...");
-    button = new JMenuItem(iteButtonName);
-    button.setEnabled(dsHasFields);
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        // ConfigThingy für leere WennDannSonst-Funktion zusammenbauen. Aufbau:
-        // IF(STRCMP(VALUE '<firstField>', '') THEN('') ELSE(''))
-        ConfigThingy ifConf = new ConfigThingy("IF");
-        ConfigThingy strCmpConf = ifConf.add("STRCMP");
-        strCmpConf.add("VALUE").add(ds.getColumnNames().get(0));
-        strCmpConf.add("");
-        ifConf.add("THEN").add("");
-        ifConf.add("ELSE").add("");
-        insertFieldFromTrafoDialog(ds.getColumnNames(), iteButtonName, ifConf);
-      }
-    });
-    menu.add(button);
-
-    button = new JMenuItem(L.m("Datensatznummer"));
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        documentController.insertMailMergeFieldAtCursorPosition(MailMergeParams.TAG_DATENSATZNUMMER);
-      }
-    });
-    menu.add(button);
-
-    button = new JMenuItem(L.m("Serienbriefnummer"));
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        documentController.insertMailMergeFieldAtCursorPosition(MailMergeParams.TAG_SERIENBRIEFNUMMER);
-      }
-    });
-    menu.add(button);
-
-    button = new JMenuItem(L.m("Nächster Datensatz"));
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        documentController.insertNextDatasetFieldAtCursorPosition();
-      }
-    });
-    menu.add(button);
-
-    button = new JMenuItem(L.m("Feld bearbeiten..."));
-    button.setEnabled(editFieldDialog != null);
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        editFieldDialog.show(L.m("Spezialfeld bearbeiten"), myFrame);
-      }
-
-    });
-    menu.add(button);
-
-    menu.show(invoker, x, y);
+    if (abortListener != null)
+      abortListener.actionPerformed(new ActionEvent(this, 0, ""));
   }
 
   /**
@@ -851,7 +734,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  protected void insertFieldFromTrafoDialog(List<String> fieldNames,
+  public void insertFieldFromTrafoDialog(List<String> fieldNames,
       final String buttonName, ConfigThingy trafoConf)
   {
     TrafoDialogParameters params = new TrafoDialogParameters();
@@ -859,23 +742,17 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     params.conf.addChild(trafoConf);
     params.isValid = true;
     params.fieldNames = fieldNames;
-    params.closeAction = new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
+    params.closeAction = event -> {
+      TrafoDialog dialog = (TrafoDialog) event.getSource();
+      TrafoDialogParameters status = dialog.getExitStatus();
+      if (status.isValid)
       {
-        TrafoDialog dialog = (TrafoDialog) e.getSource();
-        TrafoDialogParameters status = dialog.getExitStatus();
-        if (status.isValid)
+        try
         {
-          try
-          {
-            documentController.replaceSelectionWithTrafoField(status.conf, buttonName);
-          }
-          catch (Exception x)
-          {
-            LOGGER.error("", x);
-          }
+          documentController.replaceSelectionWithTrafoField(status.conf, buttonName);
+        } catch (Exception x)
+        {
+          LOGGER.error("", x);
         }
       }
     };
@@ -1593,100 +1470,5 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   public XTextDocument getTextDocument()
   {
     return documentController.getModel().doc;
-  }
-
-  private class MyWindowListener extends WindowAdapter
-  {
-    @Override
-    public void windowClosing(WindowEvent e)
-    {
-      abort();
-    }
-  }
-
-  private void abort()
-  {
-    removeCoupledWindow(myFrame);
-    /*
-     * Wegen folgendem Java Bug (WONTFIX)
-     * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304 sind die folgenden
-     * 3 Zeilen nötig, damit der MailMerge gc'ed werden kann. Die Befehle sorgen
-     * dafür, dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager)
-     * indirekt über den JFrame den MailMerge kennt.
-     */
-    myFrame.removeWindowListener(oehrchen);
-    myFrame.getContentPane().remove(0);
-    myFrame.setJMenuBar(null);
-
-    myFrame.dispose();
-    myFrame = null;
-
-    ds.dispose();
-
-    if (abortListener != null)
-      abortListener.actionPerformed(new ActionEvent(this, 0, ""));
-  }
-
-  /**
-   * Koppelt das AWT-Window window an das Fenster dieses Textdokuments an. Die
-   * Methode muss aufgerufen werden, solange das Fenster window unsichtbar und nicht
-   * aktiv ist (also z.B. vor dem Aufruf von window.setVisible(true)).
-   *
-   * @param window
-   *          das Fenster, das an das Hauptfenster angekoppelt werden soll.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  private synchronized void addCoupledWindow(Window window)
-  {
-    if (window == null) {
-      return;
-    }
-    if (coupledWindowController == null)
-    {
-      coupledWindowController = new CoupledWindowController();
-      XFrame f = documentController.getFrameController().getFrame();
-      XTopWindow w = null;
-      if (f != null) {
-        w = UNO.XTopWindow(f.getContainerWindow());
-      }
-      if (w != null) {
-        coupledWindowController.setTopWindow(w);
-      }
-    }
-
-    coupledWindowController.addCoupledWindow(window);
-  }
-
-  /**
-   * Löst die Bindung eines angekoppelten Fensters window an das Dokumentfenster.
-   *
-   * @param window
-   *          das Fenster, dessen Bindung zum Hauptfenster gelöst werden soll. Ist
-   *          das Fenster nicht angekoppelt, dann passiert nichts.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  private synchronized void removeCoupledWindow(Window window)
-  {
-    if (window == null || coupledWindowController == null) {
-      return;
-    }
-
-    coupledWindowController.removeCoupledWindow(window);
-
-    if (!coupledWindowController.hasCoupledWindows())
-    {
-      // deregistriert den windowListener.
-      XFrame f = documentController.getFrameController().getFrame();
-      XTopWindow w = null;
-      if (f != null) {
-        w = UNO.XTopWindow(f.getContainerWindow());
-      }
-      if (w != null) {
-        coupledWindowController.unsetTopWindow(w);
-      }
-      coupledWindowController = null;
-    }
   }
 }

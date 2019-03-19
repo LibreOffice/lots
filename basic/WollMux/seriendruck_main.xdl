@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="seriendruck_main" dlg:left="140" dlg:top="143" dlg:width="283" dlg:height="49" dlg:closeable="true" dlg:moveable="true" dlg:title="Seriendruck (WollMux)">
+ <dlg:bulletinboard>
+  <dlg:button dlg:id="datasource" dlg:tab-index="0" dlg:left="2" dlg:top="2" dlg:width="50" dlg:height="14" dlg:value="Datenquelle"/>
+  <dlg:button dlg:id="preview" dlg:tab-index="1" dlg:left="52" dlg:top="2" dlg:width="50" dlg:height="14" dlg:page="-1" dlg:value="Vorschau"/>
+  <dlg:button dlg:id="first" dlg:tab-index="2" dlg:disabled="true" dlg:left="102" dlg:top="2" dlg:width="15" dlg:height="14" dlg:page="-1" dlg:value="|&lt;"/>
+  <dlg:button dlg:id="last" dlg:tab-index="3" dlg:disabled="true" dlg:left="166" dlg:top="2" dlg:width="15" dlg:height="14" dlg:page="-1" dlg:value="&gt;|"/>
+  <dlg:button dlg:id="print" dlg:tab-index="4" dlg:left="181" dlg:top="2" dlg:width="50" dlg:height="14" dlg:page="-1" dlg:value="Drucken"/>
+  <dlg:button dlg:id="table" dlg:tab-index="5" dlg:left="231" dlg:top="2" dlg:width="50" dlg:height="14" dlg:page="-1" dlg:value="Tabelle"/>
+  <dlg:numericfield dlg:id="data" dlg:tab-index="6" dlg:left="117" dlg:top="4" dlg:width="50" dlg:height="10" dlg:align="center" dlg:strict-format="true" dlg:decimal-accuracy="0" dlg:value="1" dlg:value-min="1" dlg:spin="true"/>
+  <dlg:menulist dlg:id="mailmerge" dlg:tab-index="7" dlg:left="2" dlg:top="21" dlg:width="150" dlg:height="11" dlg:spin="true" dlg:linecount="10">
+   <dlg:menupopup>
+    <dlg:menuitem dlg:value="Serienbrieffeld" dlg:selected="true"/>
+   </dlg:menupopup>
+  </dlg:menulist>
+  <dlg:menulist dlg:id="ListBox1" dlg:tab-index="8" dlg:left="116" dlg:top="29" dlg:width="2" dlg:height="0"/>
+  <dlg:menulist dlg:id="special" dlg:tab-index="9" dlg:left="2" dlg:top="36" dlg:width="150" dlg:height="11" dlg:spin="true" dlg:linecount="10">
+   <dlg:menupopup>
+    <dlg:menuitem dlg:value="Spezialfeld" dlg:selected="true"/>
+    <dlg:menuitem dlg:value="Gender"/>
+    <dlg:menuitem dlg:value="Wenn...Dann...Sonst..."/>
+    <dlg:menuitem dlg:value="Datensatznummer"/>
+    <dlg:menuitem dlg:value="Serienbriefnummer"/>
+    <dlg:menuitem dlg:value="Nächster Datensatz"/>
+    <dlg:menuitem dlg:value="Feld bearbeiten..."/>
+   </dlg:menupopup>
+  </dlg:menulist>
+ </dlg:bulletinboard>
+</dlg:window>

@@ -99,7 +99,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog;
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-class MailMergeParams
+public class MailMergeParams
 {
 
   private static final Logger LOGGER = LoggerFactory
@@ -170,7 +170,7 @@ class MailMergeParams
    *
    * @author Matthias Benkmann (D-III-ITD D.10)
    */
-  public static enum DatasetSelectionType {
+  public enum DatasetSelectionType {
     /**
      * Alle Datensätze.
      */
@@ -185,7 +185,8 @@ class MailMergeParams
     /**
      * Die durch {@link MailMergeNew#selectedIndexes} bestimmten Datensätze.
      */
-    INDIVIDUAL;
+    INDIVIDUAL,
+    NOTHING;
   }
 
   public static class IndexSelection
@@ -275,7 +276,7 @@ class MailMergeParams
           @Override
           public void actionPerformed(ActionEvent e)
           {
-            mmp.currentActionType = value;
+            // mmp.setCurrentActionType(value);
             mmp.updateView();
           }
         };
@@ -309,7 +310,7 @@ class MailMergeParams
           @Override
           public void actionPerformed(ActionEvent e)
           {
-            mmp.datasetSelectionType = DatasetSelectionType.ALL;
+            mmp.setDatasetSelectionType(DatasetSelectionType.ALL);
           }
         };
       }
@@ -325,7 +326,7 @@ class MailMergeParams
           @Override
           public void actionPerformed(ActionEvent e)
           {
-            mmp.datasetSelectionType = DatasetSelectionType.RANGE;
+            mmp.setDatasetSelectionType(DatasetSelectionType.RANGE);
           }
         };
       }
@@ -368,7 +369,7 @@ class MailMergeParams
               if (mmp.ignoreDocPrintFuncs != null && mmp.ignoreDocPrintFuncs)
                 ignoreDocPrintFuncs = true;
               mmp.mmc.doMailMerge(mmp.usePrintFunctions, ignoreDocPrintFuncs,
-                mmp.datasetSelectionType, args);
+                mmp.getDatasetSelectionType(), args);
             }
             catch (UIElement.InvalidArgumentException ex)
             {
@@ -474,13 +475,13 @@ class MailMergeParams
    * Tag für {@link TextComponentTags}, das als Platzhalter für die Serienbriefnummer
    * steht.
    */
-  static final String TAG_SERIENBRIEFNUMMER = "#SB";
+  public static final String TAG_SERIENBRIEFNUMMER = "#SB";
 
   /**
    * Tag für {@link TextComponentTags}, das als Platzhalter für die Datensatznummer
    * steht.
    */
-  static final String TAG_DATENSATZNUMMER = "#DS";
+  public static final String TAG_DATENSATZNUMMER = "#DS";
 
   /**
    * Enthält die Hintergrundfarbe des Beschreibungsfeldes im Druckdialog
@@ -528,6 +529,15 @@ class MailMergeParams
    */
   private ArrayList<Section> sections = new ArrayList<>();
 
+  public enum ACTION
+  {
+    SINGLE_DOCUMENT,
+    DIRECT,
+    MAIL,
+    MULTIPLE_DOCUMENTS,
+    NOTHING;
+  }
+  
   /**
    * Enthält den String der im Attribut VALUE zur zuletzt ausgeführten
    * {@link UIElementAction#setActionType}-Action angegeben war. Beispiel:
@@ -536,7 +546,7 @@ class MailMergeParams
    * "radio" ACTION "setActionType" VALUE "gesamtdok")' ausgewählt, dann enthält
    * diese Variable den Wert "gesamtdok".
    */
-  private String currentActionType = "";
+  private ACTION currentActionType = ACTION.NOTHING;
 
   /**
    * Enthält den String der im Attribut VALUE zur zuletzt ausgeführten
@@ -780,7 +790,7 @@ class MailMergeParams
       {
         RuleStatement statement = RuleStatement.getByname(key.getName());
         if (statement == RuleStatement.ON_ACTION_TYPE)
-          if (!currentActionType.equals(key.toString())) {
+          if (!getCurrentActionType().equals(key.toString())) {
             matches = false;
           }
         if (statement == RuleStatement.ON_OUTPUT)
@@ -901,7 +911,7 @@ class MailMergeParams
           }
           String actionType =
             rule.getString(RuleStatement.ON_ACTION_TYPE.toString(), null);
-          if (actionType == null || !actionType.equals(currentActionType)) {
+          if (actionType == null || !actionType.equals(getCurrentActionType())) {
             continue;
           }
           if (requiredPrintfunctionsAvailable(rule, reasons)) {
@@ -1065,6 +1075,26 @@ class MailMergeParams
         break;
     }
     return null;
+  }
+
+  public ACTION getCurrentActionType()
+  {
+    return currentActionType;
+  }
+
+  public void setCurrentActionType(ACTION currentActionType)
+  {
+    this.currentActionType = currentActionType;
+  }
+
+  public DatasetSelectionType getDatasetSelectionType()
+  {
+    return datasetSelectionType;
+  }
+
+  public void setDatasetSelectionType(DatasetSelectionType datasetSelectionType)
+  {
+    this.datasetSelectionType = datasetSelectionType;
   }
 
   /**
@@ -1331,7 +1361,7 @@ class MailMergeParams
       public void update()
       {
         fromRadioButton.setSelected(true);
-        mmp.datasetSelectionType = DatasetSelectionType.RANGE;
+        mmp.setDatasetSelectionType(DatasetSelectionType.RANGE);
         try
         {
           indexSelection.rangeStart = Integer.parseInt(start.getText());
