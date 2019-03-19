@@ -36,6 +36,25 @@
 					<value>0</value>
 				</prop>
 			</node>
+			<node oor:name="WollMuxSeriendruckDeck" oor:op="replace">
+				<prop oor:name="Title" oor:type="xs:string">
+					<value xml:lang="en-US">WollMux Seriendruck</value>
+				</prop>
+				<prop oor:name="Id" oor:type="xs:string">
+					<value>WollMuxSeriendruckDeck</value>
+				</prop>
+				<prop oor:name="IconURL" oor:type="xs:string">
+					<value>vnd.sun.star.extension://de.muenchen.allg.d101.wollmux/icons/wollmux.png</value>
+				</prop>
+				<prop oor:name="ContextList">
+					<value oor:separator=";">
+						any, any, visible ;
+					</value>
+				</prop>
+				<prop oor:name="OrderIndex" oor:type="xs:int">
+					<value>1</value>
+				</prop>
+			</node>
 		</node>
 		<node oor:name="PanelList">
 			<node oor:name="WollMuxSidebarPanel" oor:op="replace">
@@ -68,9 +87,37 @@
 				<prop oor:name="WantsCanvas" oor:type="xs:boolean">
 					<value>false</value>
 				</prop>
-<!-- 				<prop oor:name="DefaultMenuCommand"> -->
-<!-- 					<value>org.apache.openoffice.sidebar:ShowAnalogClockOptionsDialog</value> -->
-<!-- 				</prop> -->
+			</node>
+			<node oor:name="WollMuxSeriendruckPanel" oor:op="replace">
+				<prop oor:name="Title" oor:type="xs:string">
+					<value xml:lang="en-US">WollMux Seriendruck</value>
+				</prop>
+				<prop oor:name="Id" oor:type="xs:string">
+					<value>WollMuxSeriendruckPanel</value>
+				</prop>
+				<prop oor:name="DeckId" oor:type="xs:string">
+					<value>WollMuxSeriendruckDeck</value>
+				</prop>
+				<prop oor:name="ContextList">
+					<value oor:separator=";">
+						any, any, visible ;
+					</value>
+				</prop>
+				<prop oor:name="ImplementationURL" oor:type="xs:string">
+					<value>private:resource/toolpanel/SeriendruckSidebarFactory/SeriendruckSidebarPanel</value>
+				</prop>
+				<prop oor:name="OrderIndex" oor:type="xs:int">
+					<value>1</value>
+				</prop>
+				<prop oor:name="TitleBarIsOptional" oor:type="xs:boolean">
+					<value>true</value>
+				</prop>
+				<prop oor:name="ShowForReadOnlyDocument" oor:type="xs:boolean">
+					<value>true</value>
+				</prop>
+				<prop oor:name="WantsCanvas" oor:type="xs:boolean">
+					<value>false</value>
+				</prop>
 			</node>
 		</node>
 	</node>

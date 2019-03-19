@@ -19,7 +19,7 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
  * 
  * @author Christoph Lutz (D-III-ITD-D101)
  */
-class WollMuxDocument implements XWollMuxDocument
+public class WollMuxDocument implements XWollMuxDocument
 {
   private XTextDocument doc;
 
