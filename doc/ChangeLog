@@ -1,3 +1,9 @@
+ ==================== Neu in Version 18.0.8 ====================
+
+    * Bugfixes
+          o WollMux verhinder nun immer das der LibreOffice-Dialog für 
+            Formularelemente sich öffnet.
+
  ==================== Neu in Version 18.0.7 ====================
 
     * Bugfixes
