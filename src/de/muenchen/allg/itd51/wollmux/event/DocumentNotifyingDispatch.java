@@ -132,7 +132,6 @@ public class DocumentNotifyingDispatch extends NotifyingDispatch implements
       Logger.debug("Dispatch Original " + origUrl.Complete + " im Synchron Mode");
       if (listener == null)
       {
-        if(!origUrl.Complete.equalsIgnoreCase(".uno:UpdateInputFields"))
           origDisp.dispatch(origUrl, newProps);
       }
       else

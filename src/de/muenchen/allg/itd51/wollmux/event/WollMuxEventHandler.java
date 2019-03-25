@@ -4749,15 +4749,7 @@ public class WollMuxEventHandler
         {
           if (UnoRuntime.areSame(doc, event.Source) && ON_WOLLMUX_PROCESSING_FINISHED.equals(event.EventName))
           {
-            if (DocumentManager.getTextDocumentController(doc).getModel().isFormDocument())
-            {
-              Logger.log(
-                  "LibreOffice Formulareingabe unterdrückt, da es sich um ein WollMux-Formular handelt.");
-              helper.dispatchFinished(true);
-            } else
-            {
-              helper.dispatchOriginal();
-            }
+            helper.dispatchFinished(true);
             handle(new OnRemoveDocumentEventListener(this));
           }
         }
