@@ -212,6 +212,7 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 			</zipfileset>
 			<fileset dir="${RDB_DIR}/BUTTONS_ONLY" includes="META-INF/manifest.xml" />
 			<fileset dir="misc" includes="buildinfo" />
+			<fileset dir="." includes="basic/**"/>
 		</zip>
 		
 		<echo level="info">unopkg remove ${PKG_NAME}:</echo>
