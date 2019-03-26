@@ -484,9 +484,9 @@ public class WollMuxEventHandler
    * Dieses Event wird vom WollMux-Service (...comp.WollMux) ausgelöst, wenn die
    * WollMux-url "wollmux:about" aufgerufen wurde.
    */
-  public void handleAbout(String wollMuxBarVersion)
+  public void handleAbout()
   {
-    handle(new OnAbout(wollMuxBarVersion));
+    handle(new OnAbout());
   }
 
   /**

@@ -144,9 +144,7 @@ public class Dispatch extends BaseDispatch
 
   public void dispatch_wollmux_about(String arg, PropertyValue[] props)
   {
-    String wollMuxBarVersion = null;
-    if (arg.length() > 0) wollMuxBarVersion = arg;
-    WollMuxEventHandler.getInstance().handleAbout(wollMuxBarVersion);
+    WollMuxEventHandler.getInstance().handleAbout();
   }
 
   public void dispatch_wollmux_dumpinfo(String arg, PropertyValue[] props)
