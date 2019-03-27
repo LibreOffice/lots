@@ -1,7 +1,8 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
@@ -26,6 +27,9 @@ import de.muenchen.allg.itd51.wollmux.form.control.FormController;
  */
 public class OnProcessTextDocument extends BasicEvent
 {
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(OnProcessTextDocument.class);
+  
   TextDocumentController documentController;
 
   boolean visible;
@@ -52,6 +56,7 @@ public class OnProcessTextDocument extends BasicEvent
         documentController.getFrameController().setWindowViewSettings(tds);
       } catch (NodeNotFoundException e)
       {
+        LOGGER.debug("", e);
       }
 
     // Mögliche Aktionen für das neu geöffnete Dokument:
@@ -94,6 +99,7 @@ public class OnProcessTextDocument extends BasicEvent
                     "Formular").getLastChild().query("ZOOM"));
           } catch (java.lang.Exception e)
           {
+            LOGGER.debug("", e);
           }
 
         // FormGUI starten
@@ -106,15 +112,8 @@ public class OnProcessTextDocument extends BasicEvent
           formController.formControllerInitCompleted();
           
           formController.focusGained(formController.getFieldId());
-          
-          formController.addPropertyChangeListener(new PropertyChangeListener()
-          {
-            @Override
-            public void propertyChange(PropertyChangeEvent e)
-            {
-              formController.focusGained( formController.getFieldId());
-            }
-          });
+
+          formController.addPropertyChangeListener((PropertyChangeEvent e) -> formController.focusGained( formController.getFieldId()));          
         } catch (FormModelException e)
         {
           throw new WMCommandsFailedException(
@@ -140,6 +139,7 @@ public class OnProcessTextDocument extends BasicEvent
       documentController.getFrameController().getFrame().contextChanged();
     } catch (java.lang.Exception e)
     {
+      LOGGER.debug("", e);
     }
 
     stabilize();
