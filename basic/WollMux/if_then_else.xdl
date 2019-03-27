@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="IfThenElseDialog" dlg:left="222" dlg:top="119" dlg:width="329" dlg:height="171" dlg:closeable="true" dlg:moveable="true">
+ <dlg:bulletinboard>
+  <dlg:titledbox dlg:id="FrameControl1" dlg:tab-index="0" dlg:left="5" dlg:top="4" dlg:width="319" dlg:height="27">
+   <dlg:title dlg:value="Wenn"/>
+  </dlg:titledbox>
+  <dlg:combobox dlg:id="cbField" dlg:tab-index="1" dlg:left="10" dlg:top="13" dlg:width="75" dlg:height="12" dlg:spin="true"/>
+  <dlg:combobox dlg:id="cbCompare" dlg:tab-index="2" dlg:left="94" dlg:top="13" dlg:width="34" dlg:height="12" dlg:spin="true"/>
+  <dlg:combobox dlg:id="cbIs" dlg:tab-index="3" dlg:left="136" dlg:top="13" dlg:width="66" dlg:height="12" dlg:spin="true"/>
+  <dlg:textfield dlg:id="txtIf" dlg:tab-index="4" dlg:left="209" dlg:top="13" dlg:width="109" dlg:height="12"/>
+  <dlg:text dlg:id="Label1" dlg:tab-index="5" dlg:left="8" dlg:top="37" dlg:width="50" dlg:height="12" dlg:value="Dann"/>
+  <dlg:textfield dlg:id="txtThen" dlg:tab-index="6" dlg:left="8" dlg:top="52" dlg:width="311" dlg:height="32"/>
+  <dlg:textfield dlg:id="txtElse" dlg:tab-index="7" dlg:left="8" dlg:top="110" dlg:width="313" dlg:height="32"/>
+  <dlg:text dlg:id="Label2" dlg:tab-index="8" dlg:left="8" dlg:top="95" dlg:width="55" dlg:height="10" dlg:value="Sonst"/>
+  <dlg:radiogroup>
+   <dlg:radio dlg:id="radioThenText" dlg:tab-index="9" dlg:left="94" dlg:top="37" dlg:width="45" dlg:height="12" dlg:value="Text"/>
+   <dlg:radio dlg:id="radioThenIfThenElse" dlg:tab-index="10" dlg:left="161" dlg:top="37" dlg:width="64" dlg:height="12" dlg:value="Wenn...Dann...Sonst"/>
+  </dlg:radiogroup>
+  <dlg:combobox dlg:id="cbSerienbrieffeldThen" dlg:tab-index="11" dlg:left="238" dlg:top="35" dlg:width="80" dlg:height="12" dlg:spin="true"/>
+  <dlg:radiogroup>
+   <dlg:radio dlg:id="radioElseText" dlg:tab-index="12" dlg:left="94" dlg:top="94" dlg:width="45" dlg:height="12" dlg:value="Text"/>
+   <dlg:radio dlg:id="radioElseIfThenElse" dlg:tab-index="13" dlg:left="160" dlg:top="94" dlg:width="64" dlg:height="12" dlg:value="Wenn...Dann...Sonst"/>
+  </dlg:radiogroup>
+  <dlg:combobox dlg:id="cbSerienbrieffeldElse" dlg:tab-index="14" dlg:left="238" dlg:top="92" dlg:width="80" dlg:height="12" dlg:spin="true"/>
+  <dlg:button dlg:id="btnAbort" dlg:tab-index="15" dlg:left="10" dlg:top="152" dlg:width="78" dlg:height="14" dlg:value="Abbrechen"/>
+  <dlg:button dlg:id="btnOK" dlg:tab-index="16" dlg:left="263" dlg:top="152" dlg:width="59" dlg:height="14" dlg:value="OK"/>
+ </dlg:bulletinboard>
+</dlg:window>
