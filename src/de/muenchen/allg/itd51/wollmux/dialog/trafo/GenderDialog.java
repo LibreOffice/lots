@@ -31,23 +31,16 @@
 package de.muenchen.allg.itd51.wollmux.dialog.trafo;
 
 import java.awt.BorderLayout;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -60,7 +53,19 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
-import de.muenchen.allg.itd51.wollmux.core.dialog.DimAdjust;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sun.star.awt.XComboBox;
+import com.sun.star.awt.XContainerWindowProvider;
+import com.sun.star.awt.XControlContainer;
+import com.sun.star.awt.XDialog;
+import com.sun.star.awt.XTextComponent;
+import com.sun.star.awt.XWindow;
+import com.sun.star.awt.XWindowPeer;
+import com.sun.star.uno.UnoRuntime;
+
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -70,13 +75,13 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
  */
-public class GenderDialog extends TrafoDialog
+public class GenderDialog
 {
+  private static final Logger LOGGER = LoggerFactory.getLogger(GenderDialog.class);
+
   private TrafoDialogParameters params;
 
   private JDialog myDialog;
-
-  private MyWindowListener oehrchen;
 
   private JPanel genderPanel;
 
@@ -88,11 +93,13 @@ public class GenderDialog extends TrafoDialog
 
   private JTextField tfSonst;
 
+  private XControlContainer controlContainer;
+
   public GenderDialog(TrafoDialogParameters params)
   {
     this.params = params;
-    if (!params.isValid || params.conf == null || params.fieldNames == null
-      || params.fieldNames.size() == 0) throw new IllegalArgumentException();
+    // if (!params.isValid || params.conf == null || params.fieldNames == null
+    // || params.fieldNames.size() == 0) throw new IllegalArgumentException();
 
     ConfigThingy conf = params.conf;
 
@@ -108,14 +115,14 @@ public class GenderDialog extends TrafoDialog
       String textSonst = null;
       String anredeId = null;
 
-      if (conf.count() != 1) stop();
+      // if (conf.count() != 1) stop();
       ConfigThingy bind = conf.getFirstChild();
-      if (!bind.getName().equals("BIND")) stop();
+      // if (!bind.getName().equals("BIND")) stop();
 
       ConfigThingy funcs = bind.query("FUNCTION", 1);
-      if (funcs.count() != 1) stop();
+      // if (funcs.count() != 1) stop();
       ConfigThingy func = funcs.getLastChild();
-      if (!func.toString().equals("Gender")) stop();
+      // if (!func.toString().equals("Gender")) stop();
 
       for (ConfigThingy set : bind)
       {
@@ -133,8 +140,8 @@ public class GenderDialog extends TrafoDialog
           textSonst = value.getName();
       }
 
-      if (anredeId == null || textHerr == null || textFrau == null
-        || textSonst == null) stop();
+      // if (anredeId == null || textHerr == null || textFrau == null
+      // || textSonst == null) stop();
 
       HashSet<String> uniqueFieldNames = new HashSet<>(params.fieldNames);
       uniqueFieldNames.add(anredeId);
@@ -145,21 +152,10 @@ public class GenderDialog extends TrafoDialog
     }
     catch (NodeNotFoundException e)
     {
-      stop();
+      // stop();
     }
   }
 
-  /**
-   * Schreiberleichterung für throw new IllegalArgumentException();
-   * 
-   * @throws IllegalArgumentException
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  private void stop() throws IllegalArgumentException
-  {
-    throw new IllegalArgumentException();
-  }
 
   /**
    * Baut das genderPanel auf.
@@ -169,75 +165,37 @@ public class GenderDialog extends TrafoDialog
   private void buildGUI(String anredeId, String textHerr, String textFrau,
       String textSonst, final List<String> fieldNames)
   {
-    genderPanel = new JPanel(new BorderLayout());
-    genderPanel.setBorder(BorderFactory.createTitledBorder(
-      BorderFactory.createEtchedBorder(),
-      L.m("Verschiedene Texte abhängig vom Geschlecht")));
-    Box vbox = Box.createVerticalBox();
-    vbox.setBorder(BorderFactory.createEmptyBorder(5, 5, 2, 5));
-    genderPanel.add(vbox, BorderLayout.CENTER);
+    XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
+    XContainerWindowProvider provider = null;
 
-    Box hbox;
-    JLabel label;
-    int maxLabelWidth = 0;
-    List<JLabel> labels = new ArrayList<>();
-
-    hbox = Box.createHorizontalBox();
-    label = new JLabel(L.m("Geschlechtsbestimmendes Feld"));
-    label.setFont(label.getFont().deriveFont(Font.PLAIN));
-    hbox.add(label);
-    cbAnrede = new JComboBox<>(new Vector<>(fieldNames));
-    cbAnrede.setSelectedItem(anredeId);
-    cbAnrede.setEditable(false);
-    hbox.add(Box.createHorizontalGlue());
-    hbox.add(cbAnrede);
-    vbox.add(hbox);
-
-    addText(vbox, L.m("(Kann z.B. \"Herr\", \"weibl.\", \"m\", \"w\" enthalten)")
-      + "\n ");
-
-    hbox = Box.createHorizontalBox();
-    label = new JLabel(L.m("Text weibl."));
-    labels.add(label);
-    maxLabelWidth = DimAdjust.maxWidth(maxLabelWidth, label);
-    hbox.add(label);
-    tfFrau = new JTextField(textFrau);
-    hbox.add(tfFrau);
-    vbox.add(hbox);
-    addText(vbox, " ");
-
-    hbox = Box.createHorizontalBox();
-    label = new JLabel(L.m("Text männl."));
-    labels.add(label);
-    maxLabelWidth = DimAdjust.maxWidth(maxLabelWidth, label);
-    hbox.add(label);
-    tfHerr = new JTextField(textHerr);
-    hbox.add(tfHerr);
-    vbox.add(hbox);
-    addText(vbox, " ");
-
-    hbox = Box.createHorizontalBox();
-    label = new JLabel(L.m("Text sonst."));
-    labels.add(label);
-    maxLabelWidth = DimAdjust.maxWidth(maxLabelWidth, label);
-    hbox.add(label);
-    tfSonst = new JTextField(textSonst);
-    hbox.add(tfSonst);
-    vbox.add(hbox);
-    addText(vbox, " ");
-
-    // einheitliche Breite für alle Labels vergeben:
-    for (Iterator<JLabel> iter = labels.iterator(); iter.hasNext();)
+    try
     {
-      label = iter.next();
-      Dimension d = label.getPreferredSize();
-      d.width = maxLabelWidth + 10;
-      label.setPreferredSize(d);
+      provider = UnoRuntime.queryInterface(XContainerWindowProvider.class,
+          UNO.xMCF.createInstanceWithContext("com.sun.star.awt.ContainerWindowProvider",
+              UNO.defaultContext));
+    } catch (com.sun.star.uno.Exception e)
+    {
+      LOGGER.error("", e);
     }
 
-    addText(
-      vbox,
-      L.m("Der Text sonst. wird z.B. verwendet, um bei der Anrede\nvon Firmen \"geehrte Damen und Herren\" einzufügen."));
+    XWindow window = provider.createContainerWindow(
+        "vnd.sun.star.script:WollMux.gender_dialog?location=application", "", peer, null);
+    controlContainer = UnoRuntime.queryInterface(XControlContainer.class, window);
+
+    XComboBox cbAnrede = UNO.XComboBox(controlContainer.getControl("cbSerienbrieffeld"));
+    cbAnrede.addItems(fieldNames.toArray(new String[fieldNames.size()]), (short) 0);
+
+    XTextComponent txtFemale = UNO.XTextComponent(controlContainer.getControl("txtFemale"));
+    txtFemale.setText(textFrau);
+
+    XTextComponent txtMale = UNO.XTextComponent(controlContainer.getControl("txtMale"));
+    txtMale.setText(textHerr);
+
+    XTextComponent txtOther = UNO.XTextComponent(controlContainer.getControl("txtOthers"));
+    txtOther.setText(textSonst);
+
+    UnoRuntime.queryInterface(XDialog.class, window).execute();
+
   }
 
   /**
@@ -259,17 +217,6 @@ public class GenderDialog extends TrafoDialog
       hbox.add(Box.createHorizontalGlue());
       compo.add(hbox);
     }
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog#getExitStatus()
-   */
-  @Override
-  public TrafoDialogParameters getExitStatus()
-  {
-    return params;
   }
 
   /**
@@ -298,9 +245,9 @@ public class GenderDialog extends TrafoDialog
 
     dialog.setAlwaysOnTop(true);
     dialog.setTitle(windowTitle);
-    oehrchen = new MyWindowListener();
+    // oehrchen = new MyWindowListener();
     dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    dialog.addWindowListener(oehrchen);
+    // dialog.addWindowListener(oehrchen);
 
     JPanel myPanel = new JPanel(new BorderLayout());
     myPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
@@ -317,7 +264,7 @@ public class GenderDialog extends TrafoDialog
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        abort();
+        // abort();
       }
     });
     JButton insert = new JButton(L.m("OK"));
@@ -327,7 +274,7 @@ public class GenderDialog extends TrafoDialog
       public void actionPerformed(ActionEvent e)
       {
         updateTrafoConf();
-        abort();
+        // abort();
       }
     });
     lowerButtons.add(cancel);
@@ -346,132 +293,6 @@ public class GenderDialog extends TrafoDialog
     dialog.setVisible(true);
 
     this.myDialog = dialog;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog#show(java.lang.String,
-   *      java.awt.Dialog)
-   */
-  @Override
-  public void show(String windowTitle, Dialog owner)
-  {
-    if (owner == null)
-      show(windowTitle, new JDialog());
-    else
-      show(windowTitle, new JDialog(owner));
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog#show(java.lang.String,
-   *      java.awt.Frame)
-   */
-  @Override
-  public void show(String windowTitle, Frame owner)
-  {
-    if (owner == null)
-      show(windowTitle, new JDialog());
-    else
-      show(windowTitle, new JDialog(owner));
-  }
-
-  /**
-   * Der Windowlistener, der die Close-Action des "X"-Knopfs abfängt und den Dialog
-   * sauber mit abort beendet.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  private class MyWindowListener implements WindowListener
-  {
-    @Override
-    public void windowOpened(WindowEvent e)
-    {}
-
-    @Override
-    public void windowClosing(WindowEvent e)
-    {
-      abort();
-    }
-
-    @Override
-    public void windowClosed(WindowEvent e)
-    {}
-
-    @Override
-    public void windowIconified(WindowEvent e)
-    {}
-
-    @Override
-    public void windowDeiconified(WindowEvent e)
-    {}
-
-    @Override
-    public void windowActivated(WindowEvent e)
-    {}
-
-    @Override
-    public void windowDeactivated(WindowEvent e)
-    {}
-  }
-
-  /**
-   * Beendet den Dialog und ruft insbesondere den close-ActionListener der
-   * darüberliegenden Anwendung auf.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  private void abort()
-  {
-    /*
-     * Wegen folgendem Java Bug (WONTFIX)
-     * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304 sind die folgenden
-     * 3 Zeilen nötig, damit der Dialog gc'ed werden kann. Die Befehle sorgen dafür,
-     * dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager) indirekt über
-     * den JFrame den MailMerge kennt.
-     */
-    if (myDialog != null)
-    {
-      myDialog.removeWindowListener(oehrchen);
-      myDialog.getContentPane().remove(0);
-      myDialog.setJMenuBar(null);
-
-      myDialog.dispose();
-      myDialog = null;
-    }
-
-    if (params.closeAction != null)
-      params.closeAction.actionPerformed(new ActionEvent(this, 0, ""));
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog#dispose()
-   */
-  @Override
-  public void dispose()
-  {
-    try
-    {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          try
-          {
-            abort();
-          }
-          catch (Exception x)
-          {}
-        }
-      });
-    }
-    catch (Exception x)
-    {}
   }
 
   /**

@@ -22,10 +22,8 @@ import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
-import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertySet;
-import com.sun.star.frame.XFrame;
 import com.sun.star.lang.DisposedException;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.WrappedTargetException;
@@ -35,12 +33,9 @@ import com.sun.star.ui.XSidebarPanel;
 import com.sun.star.ui.XToolPanel;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
-import com.sun.star.util.CloseVetoException;
-import com.sun.star.util.XCloseListener;
 import com.sun.star.util.XCloseable;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
@@ -60,6 +55,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeDatasource.CalcM
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeDatasource.SOURCE_TYPE;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
+import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager.Info;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
@@ -164,7 +160,8 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     cbSpezialfeld.setControlPercentSize(70, 30);
     cbSpezialfeld.setComboBoxDropDown(true);
     XComboBox comboBox = UNO.XComboBox(cbSpezialfeld.getXControl());
-    comboBox.addItems(new String[] { "Gender", "Wenn...Dann...Sonst", "Datensatznummer",
+    comboBox.addItems(new String[] { "Bitte wählen..", "Gender", "Wenn...Dann...Sonst",
+        "Datensatznummer",
         "Serienbriefnummer", "Feld bearbeiten..." }, (short) 0);
     comboBox.addItemListener(specialItemListener);
 
@@ -341,7 +338,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     @Override
     public void itemStateChanged(ItemEvent event)
     {
-      XListBox listBox = UNO.XListBox(event.Source);
+      XTextComponent listBox = UNO.XTextComponent(event.Source);
 
       LOGGER.debug("special {}", event.Selected);
       if (event.Selected == 0)
@@ -355,8 +352,16 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
         // ConfigThingy für leere Gender-Funktion zusammenbauen.
         ConfigThingy genderConf = GenderDialog
             .generateGenderTrafoConf(mailMergeDatasource.getColumnNames().get(0), "", "", "");
-        mailMergeDatasource.insertFieldFromTrafoDialog(mailMergeDatasource.getColumnNames(),
-            listBox.getSelectedItem(), genderConf);
+        // mailMergeDatasource.insertFieldFromTrafoDialog(mailMergeDatasource.getColumnNames(),
+        // listBox.getText(), genderConf);
+
+        TrafoDialogParameters params = new TrafoDialogParameters();
+        params.conf = new ConfigThingy("Func");
+        params.conf.addChild(genderConf);
+        params.isValid = true;
+        params.fieldNames = mailMergeDatasource.getColumnNames();
+
+        GenderDialog genderDialog = new GenderDialog(params);
         break;
       case 2:
         // ConfigThingy für leere WennDannSonst-Funktion zusammenbauen. Aufbau:
@@ -388,7 +393,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
         break;
       }
 
-      listBox.selectItemPos((short) 0, true);
+      // listBox.selectItemPos((short) 0, true);
     }
   };
 
