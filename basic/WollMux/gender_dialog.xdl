@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="gender_dialog" dlg:left="222" dlg:top="119" dlg:width="185" dlg:height="130" dlg:closeable="true" dlg:moveable="true">
+ <dlg:bulletinboard>
+  <dlg:text dlg:id="Label1" dlg:tab-index="0" dlg:left="7" dlg:top="3" dlg:width="153" dlg:height="12" dlg:value="Verschiedene Texte abhängig vom Geschlecht"/>
+  <dlg:combobox dlg:id="cbSerienbrieffeld" dlg:tab-index="1" dlg:left="110" dlg:top="17" dlg:width="66" dlg:height="12" dlg:spin="true"/>
+  <dlg:text dlg:id="Label2" dlg:tab-index="2" dlg:left="7" dlg:top="17" dlg:width="98" dlg:height="12" dlg:value="Geschlechtsbestimmendes Feld"/>
+  <dlg:text dlg:id="Label3" dlg:tab-index="3" dlg:left="7" dlg:top="33" dlg:width="125" dlg:height="12" dlg:value="(Kann z.B. &quot;Herr&quot;, &quot;weibl.&quot;, &quot;m&quot;, &quot;w&quot; enthalten"/>
+  <dlg:textfield dlg:id="txtFemale" dlg:tab-index="4" dlg:left="51" dlg:top="53" dlg:width="125" dlg:height="12"/>
+  <dlg:textfield dlg:id="txtMale" dlg:tab-index="5" dlg:left="51" dlg:top="71" dlg:width="125" dlg:height="12"/>
+  <dlg:textfield dlg:id="txtOthers" dlg:tab-index="6" dlg:left="51" dlg:top="89" dlg:width="125" dlg:height="12"/>
+  <dlg:text dlg:id="Label4" dlg:tab-index="7" dlg:left="7" dlg:top="108" dlg:width="173" dlg:height="12" dlg:value="Der Text sons. wird z.B. verwendet, um bei der Anrede von Firmen &quot;geehrte Damen und Herren&quot; einzufügen."/>
+  <dlg:text dlg:id="Label5" dlg:tab-index="8" dlg:left="7" dlg:top="53" dlg:width="43" dlg:height="12" dlg:value="Text weibl."/>
+  <dlg:text dlg:id="Label6" dlg:tab-index="9" dlg:left="7" dlg:top="72" dlg:width="43" dlg:height="12" dlg:value="Text männl."/>
+  <dlg:text dlg:id="Label7" dlg:tab-index="10" dlg:left="7" dlg:top="89" dlg:width="43" dlg:height="12" dlg:value="Text sons."/>
+ </dlg:bulletinboard>
+</dlg:window>
