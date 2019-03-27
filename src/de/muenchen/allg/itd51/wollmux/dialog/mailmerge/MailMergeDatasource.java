@@ -82,7 +82,6 @@ import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
@@ -356,6 +355,8 @@ public class MailMergeDatasource
   {
     XFilePicker picker = UNO
         .XFilePicker(UNO.createUNOService("com.sun.star.ui.dialogs.FilePicker"));
+    picker.setMultiSelectionMode(false);
+
     short res = picker.execute();
     String[] sheets = null;
     String windowTitle = "";
@@ -369,6 +370,10 @@ public class MailMergeDatasource
       {
         LOGGER.debug(L.m("Öffne %1 als Datenquelle für Seriendruck", files[0]));
         XSpreadsheetDocument doc = getCalcDocByFile(files[0]);
+
+        if (doc == null)
+          return new ArrayList<CalcModel>();
+
         sheets = doc.getSheets().getElementNames();
         String docUrl = UNO.XModel(doc).getURL();
 
@@ -1613,20 +1618,20 @@ public class MailMergeDatasource
     params.conf.addChild(trafoConf);
     params.isValid = true;
     params.fieldNames = fieldNames;
-    params.closeAction = event -> {
-      TrafoDialog dialog = (TrafoDialog) event.getSource();
-      TrafoDialogParameters status = dialog.getExitStatus();
-      if (status.isValid)
-      {
-        try
-        {
-          getDocumentController().replaceSelectionWithTrafoField(status.conf, buttonName);
-        } catch (Exception x)
-        {
-          LOGGER.error("", x);
-        }
-      }
-    };
+    // params.closeAction = event -> {
+    // TrafoDialog dialog = (TrafoDialog) event.getSource();
+    // TrafoDialogParameters status = dialog.getExitStatus();
+    // if (status.isValid)
+    // {
+    // try
+    // {
+    // getDocumentController().replaceSelectionWithTrafoField(status.conf, buttonName);
+    // } catch (Exception x)
+    // {
+    // LOGGER.error("", x);
+    // }
+    // }
+    // };
 
     // try
     // {
