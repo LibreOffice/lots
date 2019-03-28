@@ -147,6 +147,8 @@ public class EMailSender
         {
           username = pattern.pattern();
         }
+
+        mailserver.setUsername(username);
       }
     }
     catch (MessagingException e)

@@ -44,6 +44,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -201,6 +202,8 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
    * Datensätzen in {@link #ds}.
    */
   private int previewDatasetNumberMax = Integer.MAX_VALUE;
+
+  private static File attachment = null;
 
   /**
    * Das Textfield in dem Benutzer direkt eine Datensatznummer für die Vorschau
@@ -1352,7 +1355,6 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       message = messageTags.getContent(ds);
     }
 
-    File attachment = null;
     try
     {
       attachment = saveToFile(pmod, isODT);
@@ -1360,26 +1362,25 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
       mail.createNewMultipartMail(from, to, subject, message);
       MailServerSettings smtpSettings = mail.getWollMuxMailServerSettings();
       
-      IAuthenticationDialogListener authDialogListener = new IAuthenticationDialogListener()
+      IAuthenticationDialogListener authDialogListener = (String username, String password) ->
       {
-        @Override
-        public void setCredentails(String username, String password)
+        if (username == null || password == null)
+          return;
+
+        smtpSettings.setUsername(username);
+        smtpSettings.setPassword(password);
+
+        try
         {
-          if (username == null || password == null)
-            return;
-          
-          smtpSettings.setUsername(username);
-          smtpSettings.setPassword(password);
+          mail.addAttachment(attachment);
+          mail.sendMessage(smtpSettings);
+        } catch (ConfigurationErrorException | MessagingException | IOException e)
+        {
+          LOGGER.error("", e);
         }
       };
       
-      if (smtpSettings.getUsername() == null || smtpSettings.getUsername().isEmpty())
-      {
-        new AuthenticationDialog(authDialogListener);
-      }
-      
-      mail.addAttachment(attachment);
-      mail.sendMessage(smtpSettings);
+      new AuthenticationDialog(smtpSettings.getUsername(), authDialogListener);
     }
     catch (ConfigurationErrorException e)
     {
