@@ -289,7 +289,7 @@
 							<jar>dist/WollMuxBar.jar</jar>
 							<errTitle>WollMux</errTitle>
 							<jre>
-								<minVersion>1.6.0</minVersion>
+								<minVersion>1.8.0</minVersion>
 								<bundledJre64Bit>false</bundledJre64Bit>
 								<bundledJreAsFallback>false</bundledJreAsFallback>
 								<jdkPreference>preferJre</jdkPreference>
@@ -328,6 +328,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
 				<version>2.5.2</version>
+				<configuration>
+					<tagNameFormat>RELEASE_@{project.version}</tagNameFormat>
+					<releaseProfiles>release</releaseProfiles>
+				</configuration>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -553,4 +557,75 @@
 			<version>27.0.1-jre</version>
 		</dependency>
 	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.8</version>
+						<executions>
+							<execution>
+								<id>deb</id>
+								<phase>package</phase>
+								<configuration>
+									<target>
+										<property name="DEBIAN_VERSION" value="${project.version}" />
+										<ant antfile="${basedir}/build.xml">
+											<target name="deb" />
+										</ant>
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<version>2.5.5</version>
+						<configuration>
+							<recompressZippedFiles>true</recompressZippedFiles>
+							<tarLongFileMode>posix</tarLongFileMode>
+						</configuration>
+						<executions>
+							<execution>
+								<id>assemble-manual-installation</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<finalName>WollMux-${project.version}-manual_installation</finalName>
+									<appendAssemblyId>false</appendAssemblyId>
+									<descriptors>
+										<descriptor>misc/assembly-manual-installation.xml</descriptor>
+									</descriptors>
+								</configuration>
+							</execution>
+							<execution>
+								<id>assemble-release</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}</outputDirectory>
+									<finalName>WollMux-${project.version}</finalName>
+									<appendAssemblyId>false</appendAssemblyId>
+									<descriptors>
+										<descriptor>misc/assembly-release.xml</descriptor>
+									</descriptors>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

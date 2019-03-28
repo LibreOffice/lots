@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Managed die Dateien auf die der WollMux zugreift (z.B. wollmux.conf)
  *
- * Copyright (c) 2009-2018 Landeshauptstadt München
+ * Copyright (c) 2009-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -366,24 +366,33 @@ public class WollMuxFiles
       searchPaths.add(ETC_WOLLMUX_WOLLMUX_CONF);
 
       // Falls Windows:
-      // Versuch den Pfad der wollmux.conf aus HKCU-Registry zu lesen
       if (windowsOS)
       {
+        // Versuch den Pfad der wollmux.conf aus HKCU-Registry zu lesen
         try
         {
           wollmuxConfPath =
             RegistryAccess.getStringValueFromRegistry(WinReg.HKEY_CURRENT_USER,
               WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
           searchPaths.add(wollmuxConfPath);
+        }
+        catch (RegistryAccessException ex)
+        {
+          LOGGER.debug("Kein Registry-Eintrag unter HKEY_CURRENT_USER");
+        }
 
+        // Versuch den Pfad der wollmux.conf aus HKLM-Registry zu lesen
+        try
+        {
           wollmuxConfPath =
             RegistryAccess.getStringValueFromRegistry(WinReg.HKEY_LOCAL_MACHINE,
               WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
-
           searchPaths.add(wollmuxConfPath);
         }
         catch (RegistryAccessException ex)
-        {}
+        {
+          LOGGER.debug("Kein Registry-Eintrag unter HKEY_LOCAL_MACHINE");
+        }
 
         Shell32 shell = Shell32.INSTANCE;
 

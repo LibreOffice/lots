@@ -1,3 +1,50 @@
+ ==================== Neu in Version 18.0.8 ====================
+
+    * Bugfixes
+          o WollMux verhinder nun immer das der LibreOffice-Dialog für 
+            Formularelemente sich öffnet.
+
+ ==================== Neu in Version 18.0.7 ====================
+
+    * Bugfixes
+          o WollMux behandelt die Eingabefelder selbst und zeigt sie nur an,
+            wenn es sich um kein WollMux-Formular handelt. Nachkorrektur für
+            Formulare, die per Doppelklick geöffnet werden.
+          o Der Speichern-Dialog des WollMux wird nun im Vordergrund geöffnet.
+          o Der FormularMax4000 Dialog wird im Vordergrund geöffnet. Die
+            Verwendung des FormularMax4000 ist nur für Vorlagen (keine
+            FormularGUI) gedacht. Das Verhalten bei geöffneter FormularGUI ist
+            nicht genau spezifiert, der Dialog kann auch im Hintergrund
+            erscheinen.
+
+ ==================== Neu in Version 18.0.6 ====================
+
+    * Bugfixes
+
+          o WollMux behandelt die Eingabefelder selbst und zeigt sie nur an,
+            wenn es sich um kein WollMux-Formular handelt.
+
+
+ ==================== Neu in Version 18.0.5 ====================
+
+    * Bugfixes
+          o Der FormularMax4000 ist nicht mehr immer im Vordergrund. Dafür
+            öffnet er sich nun wieder ab und zu im Hintergrund. Das wurde auf
+            wollmux.org -> FormularMax Handbuch dokumentiert.
+          o Wenn die WollMuxBar im Modus "Minimize" mit TrayIcon "Iconify" oder
+            "IconfiyAndPopup" betrieben wurde, dann konnte die WollMuxBar nicht
+            über einen Klick in die Taskbar minimiert werden.
+          o Eine Änderung in der FormularGUI (wie es auch durch den Seriendruck
+            geschieht) wird jetzt immer ins Dokument übertragen. Es kam beim
+            Seriendruck zu Situationen, in denen die Daten in der FormularGUI
+            nicht konsistent mit den Daten im Dokument waren.
+          o Ein Fehler beim Auslesen der Windows-Registry wurde behoben.
+          o Das Plugin lhmDateinamensanpassung wurde in den WollMux integriert.
+            Außerdem werden nun auch relative Pfade korrekt auf 240 Zeichen
+            gekürzt.
+          o Es wurde eine zirkuläre Debianabhängigkeit aufgelöst.
+
+
  ==================== Neu in Version 18.0.4 ====================
 
     * neue Features

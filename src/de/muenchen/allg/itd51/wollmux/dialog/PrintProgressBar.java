@@ -2,8 +2,8 @@
  * Dateiname: PrintProgressBar.java
  * Projekt  : WollMux
  * Funktion : Implementiert eine Fortschrittsanzeige für den WollMux-Komfortdruck
- *
- * Copyright (c) 2010-2018 Landeshauptstadt München
+ * 
+ * Copyright (c) 2010-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),

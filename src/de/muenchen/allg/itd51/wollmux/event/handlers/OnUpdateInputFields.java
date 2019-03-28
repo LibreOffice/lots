@@ -1,38 +1,46 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.sun.star.document.XEventListener;
+import com.sun.star.lang.EventObject;
+import com.sun.star.text.XTextDocument;
+import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
-import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.DispatchHelper;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 public class OnUpdateInputFields extends BasicEvent
 {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(OnUpdateInputFields.class);
-
-  TextDocumentController documentController;
+  XTextDocument doc;
   DispatchHelper helper;
 
-  public OnUpdateInputFields(TextDocumentController documentController, DispatchHelper helper)
+  public OnUpdateInputFields(XTextDocument doc, DispatchHelper helper)
   {
-    this.documentController = documentController;
+    this.doc = doc;
     this.helper = helper;
   }
 
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-    if (documentController.getModel().isFormDocument())
+    WollMuxEventHandler.getInstance().handleAddDocumentEventListener(new XEventListener()
     {
-      LOGGER.info(
-          "LibreOffice Formulareingabe unterdrückt, da es sich um ein WollMux-Formular handelt.");
-      helper.dispatchFinished(true);
-    } else
-    {
-      helper.dispatchOriginal();
-    }
+      @Override
+      public void disposing(EventObject arg0)
+      {
+        // nothing to do
+      }
+    
+      @Override
+      public void notifyEvent(com.sun.star.document.EventObject event)
+      {
+        if (UnoRuntime.areSame(doc, event.Source)
+            && WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED.equals(event.EventName))
+        {
+          helper.dispatchFinished(true);
+          WollMuxEventHandler.getInstance().handleRemoveDocumentEventListener(this);
+        }
+      }
+    });
   }
-
 }

@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Implementiert XDispatch und kann alle Dispatch-URLs behandeln, die kein DocumentModel erfordern.
  * 
- * Copyright (c) 2009-2018 Landeshauptstadt München
+ * Copyright (c) 2009-2019 Landeshauptstadt München
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 

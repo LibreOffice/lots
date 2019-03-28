@@ -1,5 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.event;
 
+import java.util.Arrays;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.DispatchResultEvent;
 import com.sun.star.frame.DispatchResultState;
@@ -26,10 +28,9 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  *
  * @author Daniel Sikeler
  */
-public class DocumentNotifyingDispatch extends NotifyingDispatch implements
-    DispatchHelper
+public class DocumentNotifyingDispatch extends NotifyingDispatch implements DispatchHelper
 {
-
+  
   /**
    * Ein XDispatch-Objekt, das die ursprüngliche Standard-Aktion der URL url ist.
    *
@@ -121,15 +122,20 @@ public class DocumentNotifyingDispatch extends NotifyingDispatch implements
   {
     if (origDisp != null)
     {
+      int index = props.length;
+      PropertyValue[] newProps = Arrays.copyOf(props, props.length + 1);
+      newProps[index] = new PropertyValue();
+      newProps[index].Name = "SynchronMode";
+      newProps[index].Value = false;
       if (listener == null)
       {
-        origDisp.dispatch(origUrl, props);
+          origDisp.dispatch(origUrl, newProps);
       }
       else
       {
         final XNotifyingDispatch nd =
           UnoRuntime.queryInterface(XNotifyingDispatch.class, origDisp);
-        nd.dispatchWithNotification(origUrl, props, listener);
+        nd.dispatchWithNotification(origUrl, newProps, listener);
       }
     }
   }
@@ -212,15 +218,15 @@ public class DocumentNotifyingDispatch extends NotifyingDispatch implements
   public void dispatch__uno_updateinputfields(String arg, PropertyValue[] props)
   {
     this.props = props;
-    WollMuxEventHandler.getInstance().handleUpdateInputFields(getDocumentController(), this,
-        isSynchronMode(props));
+    WollMuxEventHandler.getInstance().handleUpdateInputFields(UNO.XTextDocument(frame.getController().getModel()),
+        this, isSynchronMode(props));
   }
 
   public void dispatch__uno_updateinputfields(String arg, PropertyValue[] props, XDispatchResultListener listener)
   {
     this.props = props;
     this.listener = listener;
-    WollMuxEventHandler.getInstance().handleUpdateInputFields(getDocumentController(), this,
-        isSynchronMode(props));
+    WollMuxEventHandler.getInstance().handleUpdateInputFields(UNO.XTextDocument(frame.getController().getModel()),
+        this, isSynchronMode(props));
   }
 }
