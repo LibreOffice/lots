@@ -30,13 +30,8 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,28 +39,32 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.WindowConstants;
+import com.sun.star.awt.ItemEvent;
+import com.sun.star.awt.XButton;
+import com.sun.star.awt.XComboBox;
+import com.sun.star.awt.XTextComponent;
+import com.sun.star.awt.XWindow;
 
-import de.muenchen.allg.itd51.wollmux.core.dialog.DimAdjust;
-import de.muenchen.allg.itd51.wollmux.core.dialog.JPotentiallyOverlongPopupMenuButton;
-import de.muenchen.allg.itd51.wollmux.core.dialog.TextComponentTags;
+import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.ControlType;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Dock;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
+import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
+import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractFocusListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.ReferencedFieldID;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 
@@ -76,6 +75,25 @@ import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpret
  */
 class AdjustFields
 {
+  /**
+   * Präfix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
+   * Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber zur
+   * Unterscheidung des Präfix von den Benutzereingaben) und dem "<"-Zeichen.
+   */
+  private static final String TAG_PREFIX = "" + Character.toChars(0x200B)[0] + "<";
+
+  /**
+   * Suffix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
+   * Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber zur
+   * Unterscheidung des Präfix von den Benutzereingaben) und dem ">"-Zeichen.
+   */
+  private static final String TAG_SUFFIX = "" + Character.toChars(0x200B)[0] + ">";
+
+  /**
+   * Beschreibt einen regulären Ausdruck, mit dem nach Tags im Text gesucht
+   * werden kann. Ein Match liefert in Gruppe 1 den Text des Tags.
+   */
+  private static final Pattern TAG_PATTERN = Pattern.compile("(" + TAG_PREFIX + "(.*?)" + TAG_SUFFIX + ")");
 
   private AdjustFields() {}
   
@@ -89,7 +107,7 @@ class AdjustFields
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  static void showAdjustFieldsDialog(JFrame parent, final TextDocumentController documentController,
+  static void showAdjustFieldsDialog(final TextDocumentController documentController,
       MailMergeDatasource ds)
   {
     ReferencedFieldID[] fieldIDs =
@@ -97,35 +115,34 @@ class AdjustFields
         ds.getColumnNames()));
     ActionListener submitActionListener = e ->
     {
-        HashMap<String, FieldSubstitution> mapIdToSubstitution =
-          (HashMap<String, FieldSubstitution>) e.getSource();
-        for (Map.Entry<String, FieldSubstitution> ent : mapIdToSubstitution.entrySet())
+      Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
+          .getSource();
+      for (Map.Entry<String, FieldSubstitution> ent : mapIdToSubstitution.entrySet())
+      {
+        String fieldId = ent.getKey();
+        FieldSubstitution subst = ent.getValue();
+        documentController.applyFieldSubstitution(fieldId, subst);
+
+        // Datenstrukturen aktualisieren
+        documentController.updateDocumentCommands();
+        DocumentCommandInterpreter dci = new DocumentCommandInterpreter(documentController);
+        dci.scanGlobalDocumentCommands();
+        // collectNonWollMuxFormFields() wird im folgenden scan auch noch erledigt
+        dci.scanInsertFormValueCommands();
+
+        // Alte Formularwerte aus den persistenten Daten entfernen
+        documentController.setFormFieldValue(fieldId, null);
+
+        // Ansicht der betroffenen Felder aktualisieren
+        for (Iterator<FieldSubstitution.SubstElement> iter = subst.iterator(); iter.hasNext();)
         {
-          String fieldId = ent.getKey();
-          FieldSubstitution subst = ent.getValue();
-          documentController.applyFieldSubstitution(fieldId, subst);
-          
-          // Datenstrukturen aktualisieren
-          documentController.updateDocumentCommands();
-          DocumentCommandInterpreter dci = new DocumentCommandInterpreter(documentController);
-          dci.scanGlobalDocumentCommands();
-          // collectNonWollMuxFormFields() wird im folgenden scan auch noch erledigt
-          dci.scanInsertFormValueCommands();
-
-          // Alte Formularwerte aus den persistenten Daten entfernen
-          documentController.setFormFieldValue(fieldId, null);
-
-          // Ansicht der betroffenen Felder aktualisieren
-          for (Iterator<FieldSubstitution.SubstElement> iter = subst.iterator(); iter.hasNext();)
-          {
-            FieldSubstitution.SubstElement ele = iter.next();
-            if (ele.isField()) documentController.updateFormFields(ele.getValue());
-          }
-
+          FieldSubstitution.SubstElement ele = iter.next();
+          if (ele.isField())
+            documentController.updateFormFields(ele.getValue());
         }
+      }
     };
-    showFieldMappingDialog(parent, fieldIDs, L.m("Felder anpassen"),
-      L.m("Altes Feld"), L.m("Neue Belegung"), L.m("Felder anpassen"),
+    showFieldMappingDialog(fieldIDs,L.m("Altes Feld"), L.m("Neue Belegung"), L.m("Felder anpassen"),
       ds.getColumnNames(), submitActionListener, false);
   }
 
@@ -139,7 +156,7 @@ class AdjustFields
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  static void showAddMissingColumnsDialog(JFrame parent, TextDocumentController documentController,
+  static void showAddMissingColumnsDialog(TextDocumentController documentController,
       final MailMergeDatasource ds)
   {
     ReferencedFieldID[] fieldIDs =
@@ -147,12 +164,11 @@ class AdjustFields
         ds.getColumnNames()));
     ActionListener submitActionListener = e ->
     {
-      HashMap<String, FieldSubstitution> mapIdToSubstitution =
+      Map<String, FieldSubstitution> mapIdToSubstitution =
         (HashMap<String, FieldSubstitution>) e.getSource();
       ds.addColumns(mapIdToSubstitution);
     };
-    showFieldMappingDialog(parent, fieldIDs, L.m("Tabellenspalten ergänzen"),
-      L.m("Spalte"), L.m("Vorbelegung"), L.m("Spalten ergänzen"),
+    showFieldMappingDialog(fieldIDs, L.m("Spalte"), L.m("Vorbelegung"), L.m("Spalten ergänzen"),
       ds.getColumnNames(), submitActionListener, true);
 
   }
@@ -201,203 +217,229 @@ class AdjustFields
    *          Auswahlmöglichkeiten.
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private static void showFieldMappingDialog(JFrame parent,
-      ReferencedFieldID[] fieldIDs, String title, String labelOldFields,
+  private static void showFieldMappingDialog(
+      ReferencedFieldID[] fieldIDs, String labelOldFields,
       String labelNewFields, String labelSubmitButton,
       final List<String> fieldNames, final ActionListener submitActionListener,
       boolean ignoreIsTransformed)
   {
-    //set JDialog to Modeless type so that it remains visible when changing focus between opened 
-    //calc and writer document. Drawback: when this Dialog is open, the "Seriendruck" bar is 
-    //active too.
-    final JDialog dialog = new JDialog(parent, title, false);
-    dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
-    final TextComponentTags[] currentField = new TextComponentTags[] { null };
-    final HashMap<TextComponentTags, String> mapTextComponentTagsToFieldname = new HashMap<>();
-
-    Box headers = Box.createHorizontalBox();
-    final JButton insertFieldButton =
-      new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
-        new Iterable<Action>()
-        {
-          @Override
-          public Iterator<Action> iterator()
-          {
-            List<Action> actions = new ArrayList<>();
-            List<String> columnNames = new ArrayList<>(fieldNames);
-            Collections.sort(columnNames);
-
-            Iterator<String> iter = columnNames.iterator();
-            while (iter.hasNext())
-            {
-              final String name = iter.next();
-              Action button = new AbstractAction(name)
-              {
-                private static final long serialVersionUID = 3688585907102784521L;
-
-                @Override
-                public void actionPerformed(ActionEvent e)
-                {
-                  if (currentField[0] != null) currentField[0].insertTag(name);
-                }
-              };
-              actions.add(button);
-            }
-
-            return actions.iterator();
-          }
-        });
-    insertFieldButton.setFocusable(false);
-    headers.add(Box.createHorizontalGlue());
-    headers.add(insertFieldButton);
-
-    Box itemBox = Box.createVerticalBox();
-    ArrayList<JLabel> labels = new ArrayList<>();
-    int maxLabelWidth = 0;
-
-    Box hbox = Box.createHorizontalBox();
-    JLabel label = new JLabel(labelOldFields);
-    labels.add(label);
-    maxLabelWidth = DimAdjust.maxWidth(maxLabelWidth, label);
-    label.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
-    hbox.add(label);
-    label = new JLabel(labelNewFields);
-    label.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
-    DimAdjust.maxHeightIsPrefMaxWidthUnlimited(label);
-    hbox.add(label);
-    hbox.add(Box.createHorizontalStrut(200));
-    DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox);
-    itemBox.add(hbox);
-
-    HashSet<String> addedFields = new HashSet<>();
-    for (int i = 0; i < fieldIDs.length; i++)
+    final XTextComponent[] currentField = new XTextComponent[] { null };
+    final Map<XTextComponent, ReferencedFieldID> mapXTextComponentToFieldname = new HashMap<>();
+    UNODialogFactory dialogFactory = new UNODialogFactory();
+    XWindow dialogWindow = dialogFactory.createDialog(780, 450, 0xF2F2F2);
+    dialogFactory.showDialog();
+    
+    SimpleDialogLayout layout = new SimpleDialogLayout(dialogWindow);
+    layout.setMarginBetweenControls(15);
+    layout.setMarginTop(20);
+    layout.setMarginLeft(20);
+    layout.setWindowBottomMargin(10);
+    
+    ControlProperties mailmerge = new ControlProperties(ControlType.COMBOBOX, "mailmerge");
+    mailmerge.setControlPercentSize(50, 40);
+    mailmerge.setLabel("Serienbrieffeld");
+    mailmerge.setComboBoxDropDown(true);
+    XComboBox mailmergeButton = UNO.XComboBox(mailmerge.getXControl());
+    mailmergeButton.addItem("Serienbrieffeld", (short) 0);
+    List<String> columnNames = new ArrayList<>(fieldNames);
+    Collections.sort(columnNames);
+    mailmergeButton.addItems(columnNames.toArray(new String[0]), (short) 1);
+    UNO.XTextComponent(mailmergeButton).setText(mailmergeButton.getItem((short) 0));
+    mailmergeButton.addItemListener(new AbstractItemListener()
     {
-      String fieldId = fieldIDs[i].getFieldId();
-      if (addedFields.contains(fieldId)) continue;
-      final boolean isTransformed =
-        fieldIDs[i].isTransformed() && !ignoreIsTransformed;
-      addedFields.add(fieldId);
-
-      hbox = Box.createHorizontalBox();
-
-      label = new JLabel(fieldId);
-      label.setFont(label.getFont().deriveFont(Font.PLAIN));
-      labels.add(label);
-      maxLabelWidth = DimAdjust.maxWidth(maxLabelWidth, label);
-      label.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
-      hbox.add(label);
-
-      final TextComponentTags field = new TextComponentTags(new JTextField())
+      
+      @Override
+      public void itemStateChanged(ItemEvent event)
       {
-        @Override
-        public boolean isContentValid()
+        if (event.Selected == 0)
         {
-          if (!isTransformed) return true;
-          List<TextComponentTags.ContentElement> c = getContent();
-          if (c.isEmpty()) return true;
-          return c.size() == 1 && c.get(0).isTag();
+          return;
         }
-      };
-      mapTextComponentTagsToFieldname.put(field, fieldId);
-      Box fbox = Box.createHorizontalBox();
-      hbox.add(fbox); // fbox für zeilenbündige Ausrichtung benötigt
-      fbox.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
-      field.getJTextComponent().addFocusListener(new FocusListener()
+        if (currentField[0] != null)
+        {
+          String text = TAG_PREFIX + mailmergeButton.getItem((short) event.Selected) + TAG_SUFFIX;
+          currentField[0].insertText(currentField[0].getSelection(), text);
+        }
+        UNO.XTextComponent(mailmergeButton).setText(mailmergeButton.getItem((short) 0));
+      }
+    });
+    List<ControlProperties> controls = new ArrayList<>();
+    controls.add(mailmerge);
+    layout.addControlsToList(new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls, Optional.of(Dock.TOP)));
+    
+    ControlProperties column = new ControlProperties(ControlType.LABEL, "column");
+    column.setControlPercentSize(40, 20);
+    column.setLabel(labelOldFields);
+    ControlProperties preset = new ControlProperties(ControlType.LABEL, "preset");
+    preset.setControlPercentSize(40, 20);
+    preset.setLabel(labelNewFields);
+    controls = new ArrayList<>();
+    controls.add(column);
+    controls.add(preset);
+    layout.addControlsToList(new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls, Optional.of(Dock.TOP)));
+    
+    HashSet<ReferencedFieldID> addedFields = new HashSet<>();
+    for (ReferencedFieldID fieldId : fieldIDs)
+    {
+      if (addedFields.contains(fieldId))
+      {
+        continue;
+      }
+      addedFields.add(fieldId);
+      ControlProperties label = new ControlProperties(ControlType.LABEL, "label_" + fieldId.getFieldId());
+      label.setControlPercentSize(40, 20);
+      label.setLabel(fieldId.getFieldId());
+      ControlProperties edit = new ControlProperties(ControlType.EDIT, "edit_" + fieldId.getFieldId());
+      edit.setControlPercentSize(40, 20);
+      XTextComponent editField = UNO.XTextComponent(edit.getXControl());
+      UNO.XWindow(edit.getXControl()).addFocusListener(new AbstractFocusListener()
       {
         @Override
-        public void focusLost(FocusEvent e)
-        {}
-
-        @Override
-        public void focusGained(FocusEvent e)
+        public void focusGained(com.sun.star.awt.FocusEvent event)
         {
-          currentField[0] = field;
+          currentField[0] = editField;
         }
       });
-      DimAdjust.maxHeightIsPrefMaxWidthUnlimited(field.getJTextComponent());
-      fbox.add(field.getJTextComponent());
-
-      itemBox.add(hbox);
+      mapXTextComponentToFieldname.put(editField, fieldId);
+      controls = new ArrayList<>();
+      controls.add(label);
+      controls.add(edit);
+      layout.addControlsToList(new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls, Optional.of(Dock.TOP))); 
     }
 
-    // einheitliche Breite für alle Labels vergeben:
-    for (Iterator<JLabel> iter = labels.iterator(); iter.hasNext();)
+    ControlProperties abort = new ControlProperties(ControlType.BUTTON, "abort");
+    abort.setControlPercentSize(50, 40);
+    abort.setLabel("Abbrechen");
+    XButton abortXBtn = UNO.XButton(abort.getXControl());
+    abortXBtn.addActionListener(new AbstractActionListener()
     {
-      label = iter.next();
+      @Override
+      public void actionPerformed(com.sun.star.awt.ActionEvent event)
+      {
+        dialogFactory.closeDialog();
+      }
+    });
 
-      Dimension d = label.getPreferredSize();
-      d.width = maxLabelWidth + 10;
-      label.setPreferredSize(d);
-    }
-
-    Box buttonBox = Box.createHorizontalBox();
-    JButton button = new JButton(L.m("Abbrechen"));
-    button.addActionListener(e -> dialog.dispose());
-    buttonBox.add(button);
-
-    buttonBox.add(Box.createHorizontalGlue());
-
-    button = new JButton(labelSubmitButton);
-    button.addActionListener(e ->
+    ControlProperties edit = new ControlProperties(ControlType.BUTTON, "add");
+    edit.setControlPercentSize(50, 40);
+    edit.setLabel(labelSubmitButton);
+    XButton editXBtn = UNO.XButton(edit.getXControl());
+    editXBtn.addActionListener(new AbstractActionListener()
     {
+      
+      @Override
+      public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
+      {
         final HashMap<String, FieldSubstitution> result = new HashMap<>();
 
-      for (TextComponentTags f : mapTextComponentTagsToFieldname.keySet())
+        for (Map.Entry<XTextComponent, ReferencedFieldID> entry : mapXTextComponentToFieldname.entrySet())
         {
-          if (!f.isContentValid()) continue;
-          String fieldId = "" + mapTextComponentTagsToFieldname.get(f);
+          if (!isContentValid(entry.getKey(), entry.getValue().isTransformed() && !ignoreIsTransformed))
+            continue;
           FieldSubstitution subst = new TextDocumentModel.FieldSubstitution();
-          for (TextComponentTags.ContentElement ce : f.getContent())
+          for (ContentElement ce : getContent(entry.getKey()))
           {
             if (ce.isTag())
               subst.addField(ce.toString());
             else
               subst.addFixedText(ce.toString());
           }
-          result.put(fieldId, subst);
+          result.put(entry.getValue().getFieldId(), subst);
         }
 
-        dialog.dispose();
-
-        if (submitActionListener != null) new Thread()
-        {
-          @Override
-          public void run()
-          {
-            submitActionListener.actionPerformed(new ActionEvent(result, 0,
-              "showSubstitutionDialogReturned"));
-          }
-        }.start();
+        dialogFactory.closeDialog();
+        if (submitActionListener != null)
+          submitActionListener
+            .actionPerformed(new ActionEvent(result, 0, "showSubstitutionDialogReturned"));
+      }
     });
-    buttonBox.add(button);
 
-    JScrollPane spane =
-      new JScrollPane(itemBox, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-    spane.getVerticalScrollBar().setUnitIncrement(
-      Common.getVerticalScrollbarUnitIncrement());
 
-    spane.setBorder(BorderFactory.createEmptyBorder());
-    dialog.add(spane);
+    controls = new ArrayList<>();
+    controls.add(abort);
+    controls.add(edit);
+    layout.addControlsToList(new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls, Optional.of(Dock.BOTTOM)));
 
-    Box vbox = Box.createVerticalBox();
-    vbox.add(headers);
-    vbox.add(spane);
-    vbox.add(Box.createVerticalGlue());
-    vbox.add(buttonBox);
-    vbox.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    layout.draw();
+  }
+  
+  private static boolean isContentValid(XTextComponent compo, boolean isTransformed)
+  {
+    if (!isTransformed)
+    {
+      return true;
+    }
+    List<ContentElement> c = getContent(compo);
+    if (c.isEmpty())
+    {
+      return true;
+    }
+    return c.size() == 1 && c.get(0).isTag();
+  }
+  
+  /**
+   * Liefert eine Liste von {@link ContentElement}-Objekten, die den aktuellen
+   * Inhalt der JTextComponent repräsentiert und dabei enthaltenen Text und
+   * evtl. enthaltene Tags als eigene Objekte kapselt.
+   */
+  private static List<ContentElement> getContent(XTextComponent compo)
+  {
+    List<ContentElement> list = new ArrayList<>();
+    String t = compo.getText();
+    Matcher m = TAG_PATTERN.matcher(t);
+    int lastEndPos = 0;
+    int startPos = 0;
+    while (m.find())
+    {
+      startPos = m.start();
+      String tag = m.group(2);
+      list.add(new ContentElement(t.substring(lastEndPos, startPos), false));
+      if (tag.length() > 0)
+      {
+        list.add(new ContentElement(tag, true));
+      }
+      lastEndPos = m.end();
+    }
+    String text = t.substring(lastEndPos);
+    if (text.length() > 0)
+    {
+      list.add(new ContentElement(text, false));
+    }
+    return list;
+  }
+  
+  /**
+   * Beschreibt ein Element des Inhalts dieser JTextComponent und kann entweder
+   * ein eingefügtes Tag oder ein normaler String sein. Auskunft über den Typ
+   * des Elements erteilt die Methode isTag(), auf den String-Wert kann über die
+   * toString()-Methode zugegriffen werden.
+   */
+  public static class ContentElement
+  {
+    private String value;
 
-    dialog.add(vbox);
+    private boolean isTag;
 
-    dialog.pack();
-    int frameWidth = dialog.getWidth();
-    int frameHeight = dialog.getHeight();
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width / 2 - frameWidth / 2;
-    int y = screenSize.height / 2 - frameHeight / 2;
-    dialog.setLocation(x, y);
-    dialog.setVisible(true);
+    private ContentElement(String value, boolean isTag)
+    {
+      this.value = value;
+      this.isTag = isTag;
+    }
+
+    @Override
+    public String toString()
+    {
+      return value;
+    }
+
+    /**
+     * Liefert true, wenn dieses Element ein Tag ist oder false, wenn es sich um
+     * normalen Text handelt.
+     */
+    public boolean isTag()
+    {
+      return isTag;
+    }
   }
 
 }

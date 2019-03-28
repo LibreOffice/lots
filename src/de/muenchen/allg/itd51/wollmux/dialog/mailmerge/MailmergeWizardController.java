@@ -1,4 +1,7 @@
-package de.muenchen.allg.itd51.wollmux.dialog;
+package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
 import com.sun.star.container.NoSuchElementException;
+import com.sun.star.text.XTextDocument;
+import com.sun.star.ui.dialogs.ExecutableDialogResults;
 import com.sun.star.ui.dialogs.Wizard;
 import com.sun.star.ui.dialogs.WizardButton;
 import com.sun.star.ui.dialogs.XWizard;
@@ -14,20 +19,24 @@ import com.sun.star.ui.dialogs.XWizardPage;
 import com.sun.star.util.InvalidStateException;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.ACTION;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.DatasetSelectionType;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.FORMAT;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.SubmitArgument;
+import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIElementAction;
 
 public class MailmergeWizardController implements XWizardController
 {
   
   private static final Logger LOGGER = LoggerFactory.getLogger(MailmergeWizardController.class);
 
-  private static final int PAGE_COUNT = 4;
+  private static final int PAGE_COUNT = 5;
   
   public enum PATH {
     STANDRAD(new short[] { 0 }),
     DIRECT_PRINT(new short[] { 0, 2 }),
     MAIL(new short[] { 0, 1, 3 }),
-    SINGLE_FILES(new short[] { 0, 1 });
+    SINGLE_FILES(new short[] { 0, 1, 4});
     
     final short[] path;
     
@@ -43,27 +52,59 @@ public class MailmergeWizardController implements XWizardController
     START,
     FORMAT,
     PRINTER,
-    MAIL;
+    MAIL,
+    SINGLE;
   }
   
   private String[] title = {
       "Aktionen",
       "Format",
       "Drucker",
-      "E-Mail"
+      "E-Mail",
+      "Zielverzeichnis"
   };
-  
-  private MailMergeParams params;
   
   private XWizardPage[] pages = new XWizardPage[PAGE_COUNT];
   
-  private PAGE_ID currentPage = PAGE_ID.START;
-  
   private XWizard wizard;
   
-  public MailmergeWizardController(MailMergeParams params)
+  /**
+   * Enthält den String der im Attribut VALUE zur zuletzt ausgeführten
+   * {@link UIElementAction#setActionType}-Action angegeben war. Beispiel:
+   *
+   * Wird in der GUI das Formularelement '(LABEL "Gesamtdokument erstellen" TYPE
+   * "radio" ACTION "setActionType" VALUE "gesamtdok")' ausgewählt, dann enthält
+   * diese Variable den Wert "gesamtdok".
+   */
+  public ACTION currentActionType = ACTION.NOTHING;
+  
+  /**
+   * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
+   */
+  public DatasetSelectionType datasetSelectionType = DatasetSelectionType.ALL;
+  
+  public FORMAT format = FORMAT.ODT;
+
+  /**
+   * Enthält den Wert des zuletzt ausgeführten
+   * {@link RuleStatement#IGNORE_DOC_PRINTFUNCTIONS}-Statements
+   */
+  public boolean ignoreDocPrintFuncs = true;
+  public Map<SubmitArgument, Object> arguments;
+  MailMergeController controller;
+  
+  public MailMergeController getController()
   {
-    this.params = params;
+    return controller;
+  }
+
+  XTextDocument doc;
+  
+  public MailmergeWizardController(MailMergeController controller, XTextDocument doc)
+  {
+    arguments = new EnumMap<>(SubmitArgument.class);
+    this.controller = controller;
+    this.doc = doc;
   }
 
   @Override
@@ -76,7 +117,7 @@ public class MailmergeWizardController implements XWizardController
   @Override
   public boolean confirmFinish()
   {
-    return false;
+    return true;
   }
 
   @Override
@@ -90,16 +131,19 @@ public class MailmergeWizardController implements XWizardController
       switch (getPageId(pageId))
       {
       case START:
-        page = new StartWizardPage(parentWindow, pageId, this, params);
+        page = new StartWizardPage(parentWindow, pageId, this);
         break;
       case FORMAT:
         page = new FormatWizardPage(parentWindow, pageId, this);
         break;
       case PRINTER:
-        page = new PrintWizardPage(parentWindow, pageId, params);
+        page = new PrintWizardPage(parentWindow, pageId, doc);
         break;
       case MAIL:
         page = new MailWizardPage(parentWindow, pageId, this);
+        break;
+      case SINGLE:
+        page = new SingleWizardPage(parentWindow, pageId, this);
         break;
       }
       pages[pageId] = page;
@@ -120,7 +164,6 @@ public class MailmergeWizardController implements XWizardController
   public void onActivatePage(short pageId)
   {
     LOGGER.debug("Aktiviere Page {} mit Titel {}", pageId, title[pageId]);
-    currentPage = getPageId(pageId);
     pages[pageId].activatePage();
     activateNextButton(wizard.getCurrentPage().canAdvance());
   }
@@ -131,11 +174,16 @@ public class MailmergeWizardController implements XWizardController
     LOGGER.debug("Deaktiviere Page {} mit Titel {}", pageId, title[pageId]);
   }
   
-  public void createWizard()
+  public void startWizard()
   {
     wizard = Wizard.createMultiplePathsWizard(UNO.defaultContext, PATHS, this);
     wizard.enableButton(WizardButton.HELP, false);
-    wizard.execute();
+    wizard.enableButton(WizardButton.NEXT, false);
+    short result = wizard.execute();
+    if (result == ExecutableDialogResults.OK)
+    {
+      controller.doMailMerge(currentActionType, format, datasetSelectionType, arguments);
+    }
   }
   
   public void changePath(PATH newPath)
@@ -175,5 +223,24 @@ public class MailmergeWizardController implements XWizardController
     }
     wizard.enableButton(WizardButton.FINISH, enable);
   }
+  
+  public ACTION getCurrentActionType()
+  {
+    return currentActionType;
+  }
 
+  public void setCurrentActionType(ACTION currentActionType)
+  {
+    this.currentActionType = currentActionType;
+  }
+  
+  public DatasetSelectionType getDatasetSelectionType()
+  {
+    return datasetSelectionType;
+  }
+
+  public void setDatasetSelectionType(DatasetSelectionType datasetSelectionType)
+  {
+    this.datasetSelectionType = datasetSelectionType;
+  }
 }

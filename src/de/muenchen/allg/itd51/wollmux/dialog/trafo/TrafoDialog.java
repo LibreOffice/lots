@@ -61,6 +61,9 @@ public abstract class TrafoDialog
    */
   public abstract void show(String windowTitle, Dialog owner);
   
+
+  public abstract void show(String windowTitle);
+  
   /**
    * Zeigt den Dialog an.
    * 

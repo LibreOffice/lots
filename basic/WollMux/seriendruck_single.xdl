@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="seriendruck_single" dlg:left="85" dlg:top="5" dlg:width="170" dlg:height="60" dlg:closeable="true" dlg:moveable="true" dlg:withtitlebar="false">
+ <dlg:bulletinboard>
+  <dlg:titledbox dlg:id="targetFrame" dlg:tab-index="0" dlg:left="5" dlg:top="5" dlg:width="160" dlg:height="50">
+   <dlg:title dlg:value="Zielverzeichnis"/>
+  </dlg:titledbox>
+  <dlg:textfield dlg:id="targetDir" dlg:tab-index="1" dlg:left="10" dlg:top="15" dlg:width="150" dlg:height="12"/>
+  <dlg:button dlg:id="search" dlg:tab-index="2" dlg:left="10" dlg:top="30" dlg:width="150" dlg:height="15" dlg:value="Suchen"/>
+ </dlg:bulletinboard>
+</dlg:window>

@@ -335,4 +335,10 @@ public class GenderDialog
 
     return bind;
   }
+
+  public void show(String windowTitle)
+  {
+    // TODO Auto-generated method stub
+    
+  }
 }

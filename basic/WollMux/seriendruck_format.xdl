@@ -13,7 +13,7 @@
    <dlg:title dlg:value="Dateinamensmuster"/>
   </dlg:titledbox>
   <dlg:textfield dlg:id="name" dlg:tab-index="4" dlg:left="10" dlg:top="55" dlg:width="150" dlg:height="12"/>
-  <dlg:button dlg:id="mailmerge" dlg:tab-index="5" dlg:left="10" dlg:top="70" dlg:width="70" dlg:height="15" dlg:value="Seriendruckfeld"/>
-  <dlg:button dlg:id="special" dlg:tab-index="6" dlg:left="90" dlg:top="70" dlg:width="70" dlg:height="15" dlg:value="Spezialfeld"/>
+  <dlg:combobox dlg:id="mailmerge" dlg:tab-index="5" dlg:left="10" dlg:top="70" dlg:width="70" dlg:height="15" dlg:spin="true"/>
+  <dlg:combobox dlg:id="special" dlg:tab-index="6" dlg:left="90" dlg:top="70" dlg:width="70" dlg:height="15" dlg:spin="true"/>
  </dlg:bulletinboard>
 </dlg:window>

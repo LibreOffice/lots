@@ -65,7 +65,6 @@ import com.sun.star.sheet.XSpreadsheetDocument;
 import com.sun.star.sheet.XSpreadsheets;
 import com.sun.star.table.CellRangeAddress;
 import com.sun.star.table.XCellRange;
-import com.sun.star.text.XTextDocument;
 import com.sun.star.ui.dialogs.XFilePicker;
 
 import de.muenchen.allg.afid.UNO;
@@ -83,7 +82,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
-import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
@@ -110,7 +108,7 @@ public class MailMergeDatasource
     DB,
   }
 
-  private SOURCE_TYPE currentSourceType;
+  private SOURCE_TYPE currentSourceType = SOURCE_TYPE.NONE;
 
   /**
    * Wenn nach dieser Zeit in ms nicht alle Daten des Seriendruckauftrags ausgelesen werden konnten,
@@ -169,6 +167,11 @@ public class MailMergeDatasource
    * nicht in der entsprechenden Datenquelle existiert.
    */
   private String tableName = "";
+  
+  /**
+   * Wird verwendet zum Speichern/Wiedereinlesen der zuletzt ausgewählten Datenquelle.
+   */
+  private TextDocumentController documentController;
 
   /**
    * Erzeugt eine neue Datenquelle.
@@ -177,9 +180,10 @@ public class MailMergeDatasource
    *          wird verwendet zum Speichern/Wiedereinlesen der zuletzt ausgewählten Datenquelle.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public MailMergeDatasource()
+  public MailMergeDatasource(TextDocumentController documentController)
   {
-    // openDatasourceFromLastStoredSettings();
+    this.documentController = documentController;
+    openDatasourceFromLastStoredSettings();
   }
 
   /**
@@ -330,12 +334,12 @@ public class MailMergeDatasource
     Iterator<String> dataIter = data.iterator();
     for (String column : schema)
     {
-      WollMuxEventHandler.getInstance().handleSetFormValue(getDocumentController().getModel().doc,
+      WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
           column, dataIter.next(), null);
     }
-    WollMuxEventHandler.getInstance().handleSetFormValue(getDocumentController().getModel().doc,
+    WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
         MailMergeParams.TAG_DATENSATZNUMMER, previewDatasetNumberStr, null);
-    WollMuxEventHandler.getInstance().handleSetFormValue(getDocumentController().getModel().doc,
+    WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
         MailMergeParams.TAG_SERIENBRIEFNUMMER, previewDatasetNumberStr, null);
   }
 
@@ -372,7 +376,7 @@ public class MailMergeDatasource
         XSpreadsheetDocument doc = getCalcDocByFile(files[0]);
 
         if (doc == null)
-          return new ArrayList<CalcModel>();
+          return new ArrayList<>();
 
         sheets = doc.getSheets().getElementNames();
         String docUrl = UNO.XModel(doc).getURL();
@@ -457,21 +461,13 @@ public class MailMergeDatasource
     }
   }
 
-  private TextDocumentController getDocumentController()
-  {
-    XTextDocument doc = UNO.getCurrentTextDocument();
-    // DocumentManager.getDocumentManager().addTextDocument(doc);
-
-    return DocumentManager.getDocumentManager().getTextDocumentController(doc);
-  }
-
   /**
    * Öffnet die Datenquelle die durch einen früheren Aufruf von storeDatasourceSettings() im
    * Dokument hinterlegt wurde.
    */
   private void openDatasourceFromLastStoredSettings()
   {
-    ConfigThingy mmconf = getDocumentController().getModel().getMailmergeConfig();
+    ConfigThingy mmconf = documentController.getModel().getMailmergeConfig();
     ConfigThingy datenquelle = new ConfigThingy("");
     try
     {
@@ -573,7 +569,7 @@ public class MailMergeDatasource
       seriendruck.addChild(dq);
     }
 
-    getDocumentController().setMailmergeConfig(seriendruck);
+    documentController.setMailmergeConfig(seriendruck);
   }
 
   /**
@@ -1013,7 +1009,7 @@ public class MailMergeDatasource
     return str;
   }
 
-  public List<CalcModel> openSpreedSheetDocuments;
+  public List<CalcModel> openSpreedSheetDocuments = new ArrayList<>();
 
   public class CalcModel
   {
@@ -1062,8 +1058,6 @@ public class MailMergeDatasource
    */
   public List<CalcModel> getOpenCalcWindows()
   {
-    openSpreedSheetDocuments = new ArrayList<>();
-
     try
     {
       XSpreadsheetDocument spread = null;
