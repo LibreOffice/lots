@@ -13,7 +13,6 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
-import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarEventHandler;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
@@ -28,12 +27,9 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
   private static final Logger LOGGER = LoggerFactory
       .getLogger(WollMuxSidebarUIElementEventHandler.class);
 
-  private WollMuxBarEventHandler eventHandler;
-
-  public WollMuxSidebarUIElementEventHandler(WollMuxBarEventHandler eventHandler)
+  public WollMuxSidebarUIElementEventHandler()
   {
     super();
-    this.eventHandler = eventHandler;
   }
 
   @Override
@@ -128,18 +124,7 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
           showError(x.getMessage());
         });
 
-      /**
-       * Falls /loadComponentFromURL/ bei den Programmen ist, muss ein Kontakt zu OOo
-       * hergestellt werden vor dem Launch.
-       */
-      boolean mustConnectToOOo = false;
-      for (String program : openExt.getPrograms())
-        if (program.startsWith("/loadComponentFromURL/")) mustConnectToOOo = true;
-
-      if (mustConnectToOOo)
-        eventHandler.handleDoWithConnection(launch);
-      else
-        launch.run();
+      launch.run();
     }
     catch (Exception x)
     {

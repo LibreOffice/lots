@@ -16,7 +16,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarConfig;
-import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarEventHandler;
 
 /**
  * Erzeugt {@link UIControl}s für Menüs und Buttons, die in der WollMux-Konfiguration
@@ -78,9 +77,7 @@ public class UIFactory
     this.config = config;
     listeners = new ArrayList<>();
 
-    WollMuxBarEventHandler wmEventHandler = new WollMuxBarEventHandler(null);
-    //wmEventHandler.start();
-    eventHandler = new WollMuxSidebarUIElementEventHandler(wmEventHandler);
+    eventHandler = new WollMuxSidebarUIElementEventHandler();
   }
 
   /**

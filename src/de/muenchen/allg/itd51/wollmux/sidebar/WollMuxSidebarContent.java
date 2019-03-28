@@ -3,7 +3,9 @@ package de.muenchen.allg.itd51.wollmux.sidebar;
 import java.awt.SystemColor;
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -69,8 +71,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
-import de.muenchen.allg.itd51.wollmux.dialog.SearchBox;
-import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar;
 import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarConfig;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIButton;
@@ -96,6 +96,35 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(WollMuxSidebarContent.class);
+  
+  public static final String ALLOW_USER_CONFIG = "ALLOW_USER_CONFIG";
+  
+  /**
+   * Name der Datei in der die WollMuxBar ihre Konfiguration schreibt.
+   */
+  public static final String WOLLMUXBAR_CONF = "wollmuxbar.conf";
+
+  public static final Set<String> SUPPORTED_ACTIONS = new HashSet<>();
+  static
+  {
+    SUPPORTED_ACTIONS.add("openTemplate");
+    SUPPORTED_ACTIONS.add("absenderAuswaehlen");
+    SUPPORTED_ACTIONS.add("openDocument");
+    SUPPORTED_ACTIONS.add("openExt");
+    SUPPORTED_ACTIONS.add("open");
+    SUPPORTED_ACTIONS.add("dumpInfo");
+    SUPPORTED_ACTIONS.add("abort");
+    SUPPORTED_ACTIONS.add("kill");
+    SUPPORTED_ACTIONS.add("about");
+    SUPPORTED_ACTIONS.add("options");
+  }
+  
+  public static final String WOLLMUX_CONFIG_ERROR_MESSAGE =
+      L.m("Aus Ihrer WollMux-Konfiguration konnte kein Abschnitt \"Symbolleisten\" gelesen werden. "
+        + "Die WollMux-Leiste kann daher nicht gestartet werden. Bitte überprüfen Sie, ob in Ihrer wollmux.conf "
+        + "der %include für die Konfiguration der WollMuxBar (z.B. wollmuxbar_standard.conf) vorhanden ist und "
+        + "überprüfen Sie anhand der wollmux.log ob evtl. beim Verarbeiten eines %includes ein Fehler "
+        + "aufgetreten ist.");
 
   private static WollMuxBarConfig config;
 
@@ -175,7 +204,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     try
     {
       allowUserConfig =
-        conf.query(WollMuxBar.ALLOW_USER_CONFIG, 1).getLastChild().toString().equalsIgnoreCase(
+        conf.query(ALLOW_USER_CONFIG, 1).getLastChild().toString().equalsIgnoreCase(
           "true");
     }
     catch (NodeNotFoundException e)
@@ -294,7 +323,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
   {
     ConfigThingy wollmuxbarConf = null;
     File wollmuxbarConfFile =
-      new File(WollMuxFiles.getWollMuxDir(), WollMuxBar.WOLLMUXBAR_CONF);
+      new File(WollMuxFiles.getWollMuxDir(), WOLLMUXBAR_CONF);
 
     if (wollmuxbarConfFile.exists())
     {
@@ -331,8 +360,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
       if (combinedConf.query("Symbolleisten").count() == 0)
       {
-        LOGGER.error(WollMuxBar.WOLLMUX_CONFIG_ERROR_MESSAGE);
-        InfoDialog.showInfoModal(L.m("Fehlerhafte Konfiguration"), WollMuxBar.WOLLMUX_CONFIG_ERROR_MESSAGE);
+        LOGGER.error(WOLLMUX_CONFIG_ERROR_MESSAGE);
+        InfoDialog.showInfoModal(L.m("Fehlerhafte Konfiguration"), WOLLMUX_CONFIG_ERROR_MESSAGE);
       }
       else
       {
@@ -411,6 +440,44 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       LOGGER.error("", e);
     }
   }
+  
+  /**
+   * Liefert true gdw. das durch button beschriebene Element ein button ist
+   * (TYPE-Attribut muss "button" sein) und alle in words enthaltenen strings ohne
+   * Beachtung der Groß-/Kleinschreibung im Wert des LABEL-Attributs (das natürlich
+   * vorhanden sein muss) vorkommen.
+   * 
+   * @param button
+   *          Den ConfigThingy-Knoten, der ein UI-Element beschreibt, wie z.B.
+   *          "(TYPE 'button' LABEL 'Hallo' ...)"
+   * @param words
+   *          Diese Wörter müssen ALLE im LABEL vorkommen (ohne Beachtung der
+   *          Groß-/Kleinschreibung).
+   */
+  public static boolean buttonMatches(ConfigThingy button, String[] words)
+  {
+    if (words == null || words.length == 0) return false;
+    String type = button.getString("TYPE", "");
+    if (!type.equals("button"))
+    {
+      return false;
+    }
+
+    String label = button.getString("LABEL", "");
+    if (label.isEmpty())
+    {
+      return false;
+    }
+
+    for (String word : words)
+    {
+      if (!label.toLowerCase().contains(word.toLowerCase()))
+      {
+        return false;
+      }
+    }
+    return true;
+  }
 
   private void createSearchbox(UISearchbox element)
       throws com.sun.star.uno.Exception, UnknownPropertyException,
@@ -461,7 +528,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
               ConfigThingy action = l.query("ACTION");
               if (action.count() != 0)
               {
-                if (SearchBox.buttonMatches(l, words))
+                if (buttonMatches(l, words))
                 {
                   UIMenuItem item = (UIMenuItem) uiFactory.createUIMenuElement(null, l, "");
                   items.insertItemText(n, item.getLabel());
