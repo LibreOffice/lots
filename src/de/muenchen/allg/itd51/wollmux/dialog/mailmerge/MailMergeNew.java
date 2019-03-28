@@ -45,10 +45,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.mail.MessagingException;
-import javax.swing.JFrame;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,14 +55,12 @@ import com.sun.star.awt.XNumericField;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XStorable;
-import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResultsWithSchema;
 import de.muenchen.allg.itd51.wollmux.core.dialog.TextComponentTags;
 import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
@@ -73,9 +69,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
-import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.DatasetSelectionType;
-import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.IndexSelection;
-import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.SubmitArgument;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
@@ -92,11 +85,59 @@ import de.muenchen.allg.itd51.wollmux.print.PrintModels;
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class MailMergeNew implements MailMergeParams.MailMergeController
+public class MailMergeNew
 {
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(MailMergeNew.class);
+
+  /**
+   * true gdw wir uns im Vorschau-Modus befinden.
+   */
+  public boolean previewMode;
+
+  /**
+   * Die Nummer des zu previewenden Datensatzes. ACHTUNG! Kann aufgrund von
+   * Veränderung der Daten im Hintergrund größer sein als die Anzahl der Datensätze.
+   * Darauf muss geachtet werden.
+   */
+  private int previewDatasetNumber = 1;
+
+  /**
+   * Die beim letzten Aufruf von {@link #updatePreviewFields()} aktuelle Anzahl an
+   * Datensätzen in {@link #ds}.
+   */
+  private int previewDatasetNumberMax = Integer.MAX_VALUE;
+
+  private static File attachment = null;
+
+  private XNumericField datasetNumber;
+
+  private Collection<XWindow> elementsDisabledWhenNoDatasourceSelected =
+    new ArrayList<>();
+
+  private Collection<XWindow> elementsDisabledWhenNotInPreviewMode =
+    new ArrayList<>();
+
+  private Collection<XWindow> elementsDisabledWhenFirstDatasetSelected =
+    new ArrayList<>();
+
+  private Collection<XWindow> elementsDisabledWhenLastDatasetSelected =
+    new ArrayList<>();
+
+  /**
+   * Enthält alle elementsDisabledWhen... Collections.
+   */
+  private ArrayList<Collection<XWindow>> listsOfElementsDisabledUnderCertainCircumstances =
+    new ArrayList<>();
+
+  /**
+   * Falls nicht null wird dieser Listener aufgerufen nachdem der MailMergeNew
+   * geschlossen wurde.
+   */
+  private ActionListener abortListener = null;
+
+  private MailMergeParams mailMergeParams = new MailMergeParams();
 
   /**
    * ID der Property in der die Serienbriefdaten gespeichert werden.
@@ -157,66 +198,18 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
   private static final String MAIL_ERROR_MESSAGE_TITLE =
     L.m("Fehler beim E-Mail-Versand");
-
+  
+  private TextDocumentController documentController;
+  
   /**
    * Stellt die Felder und Datensätze für die Serienbriefverarbeitung bereit.
    */
   private MailMergeDatasource ds;
 
-  /**
-   * true gdw wir uns im Vorschau-Modus befinden.
-   */
-  private boolean previewMode;
-
-  /**
-   * Die Nummer des zu previewenden Datensatzes. ACHTUNG! Kann aufgrund von
-   * Veränderung der Daten im Hintergrund größer sein als die Anzahl der Datensätze.
-   * Darauf muss geachtet werden.
-   */
-  private int previewDatasetNumber = 1;
-
-  /**
-   * Die beim letzten Aufruf von {@link #updatePreviewFields()} aktuelle Anzahl an
-   * Datensätzen in {@link #ds}.
-   */
-  private int previewDatasetNumberMax = Integer.MAX_VALUE;
-
-  private static File attachment = null;
-
-  private XNumericField datasetNumber;
-
-  private Collection<XWindow> elementsDisabledWhenNoDatasourceSelected =
-    new ArrayList<>();
-
-  private Collection<XWindow> elementsDisabledWhenNotInPreviewMode =
-    new ArrayList<>();
-
-  private Collection<XWindow> elementsDisabledWhenFirstDatasetSelected =
-    new ArrayList<>();
-
-  private Collection<XWindow> elementsDisabledWhenLastDatasetSelected =
-    new ArrayList<>();
-
-  /**
-   * Enthält alle elementsDisabledWhen... Collections.
-   */
-  private ArrayList<Collection<XWindow>> listsOfElementsDisabledUnderCertainCircumstances =
-    new ArrayList<>();
-
-  /**
-   * Das Toolbar-Fenster.
-   */
-  private JFrame myFrame;
-
-  /**
-   * Falls nicht null wird dieser Listener aufgerufen nachdem der MailMergeNew
-   * geschlossen wurde.
-   */
-  private ActionListener abortListener = null;
-
-  private MailMergeParams mailMergeParams = new MailMergeParams();
-
-  private TextDocumentController documentController;
+  public MailMergeDatasource getDs()
+  {
+    return ds;
+  }
 
   /**
    * Die zentrale Klasse, die die Serienbrieffunktionalität bereitstellt.
@@ -228,7 +221,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   public MailMergeNew(TextDocumentController documentController, ActionListener abortListener)
   {
     this.documentController = documentController;
-    this.ds = new MailMergeDatasource();
+    this.ds = new MailMergeDatasource(documentController);
     this.abortListener = abortListener;
   }
 
@@ -290,8 +283,7 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
 
     try
     {
-      TrafoDialogFactory.createDialog(params).show(
-        L.m("Spezialfeld %1 einfügen", buttonName), myFrame);
+      TrafoDialogFactory.createDialog(params).show(L.m("Spezialfeld %1 einfügen", buttonName));
     }
     catch (UnavailableException e)
     {
@@ -349,148 +341,6 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
     {
       return null;
     }
-  }
-
-  /**
-   * Startet den Seriendruck (und wird vom Seriendruckdialog aus
-   * {@link MailMergeParams} über das Submit-Event aufgerufen.
-   *
-   * @param usePrintFunctions
-   *          Liste der (in der Konfigurationsdatei definierten) Namen der
-   *          Druckfunktionen, die für den Seriendruck verwendet werden sollen.
-   * @param ignoreDocPrintFuncs
-   *          gibt an, ob bereits im Dokument festgelegte Druckfunktionen für den
-   *          Seriendruck ignoriert werden sollen (wird z.B. im E-Mail Fall benötigt,
-   *          in dem SLVs nicht bereits zum Zeitpunkt des Seriendrucks expandiert
-   *          werden sollen, damit mit der E-Mail-Funktion WollMuxFormulare
-   *          verschickt werden können)
-   * @param datasetSelectionType
-   *          Beschreibt den Typ der Datensatzauswahl.
-   * @param args
-   *          Weitere Argumente, die abhängig von den Benutzereingaben im
-   *          Seriendruckdialog gesetzt oder nicht gesetzt sind.
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  @Override
-  public void doMailMerge(List<String> usePrintFunctions,
-      boolean ignoreDocPrintFuncs, DatasetSelectionType datasetSelectionType,
-      Map<SubmitArgument, Object> args)
-  {
-    documentController.collectNonWollMuxFormFields();
-    QueryResultsWithSchema data = ds.getData();
-
-    List<Integer> selected = new ArrayList<>();
-    switch (datasetSelectionType)
-    {
-      case ALL:
-        for (int i = 0; i < data.size(); ++i)
-          selected.add(i);
-        break;
-      case INDIVIDUAL:
-        IndexSelection indexSelection =
-          (IndexSelection) args.get(SubmitArgument.indexSelection);
-        selected.addAll(indexSelection.selectedIndexes);
-        break;
-      case RANGE:
-        indexSelection = (IndexSelection) args.get(SubmitArgument.indexSelection);
-        if (indexSelection.rangeStart < 1) {
-          indexSelection.rangeStart = 1;
-        }
-        if (indexSelection.rangeEnd < 1) {
-          indexSelection.rangeEnd = data.size();
-        }
-        if (indexSelection.rangeEnd > data.size())
-          indexSelection.rangeEnd = data.size();
-        if (indexSelection.rangeStart > data.size())
-          indexSelection.rangeStart = data.size();
-        if (indexSelection.rangeStart > indexSelection.rangeEnd)
-        {
-          int t = indexSelection.rangeStart;
-          indexSelection.rangeStart = indexSelection.rangeEnd;
-          indexSelection.rangeEnd = t;
-        }
-        for (int i = indexSelection.rangeStart; i <= indexSelection.rangeEnd; ++i)
-          selected.add(i - 1); // wir zählen ab 0, anders als rangeStart/End
-        break;
-    }
-
-    // PrintModel erzeugen und Parameter setzen:
-    final XPrintModel pmod = PrintModels.createPrintModel(documentController, !ignoreDocPrintFuncs);
-    try
-    {
-      pmod.setPropertyValue("MailMergeNew_Schema", data.getSchema());
-      pmod.setPropertyValue(PROP_QUERYRESULTS, data);
-      pmod.setPropertyValue(PROP_MAILMERGENEW_SELECTION, selected);
-
-      Object o = args.get(SubmitArgument.targetDirectory);
-      if (o != null) {
-        pmod.setPropertyValue(PROP_TARGETDIR, o);
-      }
-
-      o = args.get(SubmitArgument.filenameTemplate);
-      if (o != null) {
-        pmod.setPropertyValue(PROP_FILEPATTERN, o);
-      }
-
-      o = args.get(SubmitArgument.emailToFieldName);
-      if (o != null) {
-        pmod.setPropertyValue(PROP_EMAIL_TO_FIELD_NAME, o);
-      }
-
-      o = args.get(SubmitArgument.emailFrom);
-      if (o != null) {
-        pmod.setPropertyValue(PROP_EMAIL_FROM, o);
-      }
-
-      o = args.get(SubmitArgument.emailSubject);
-      if (o != null) {
-        pmod.setPropertyValue(PROP_EMAIL_SUBJECT, o);
-      }
-
-      o = args.get(SubmitArgument.emailText);
-      if (o != null) {
-        pmod.setPropertyValue(PROP_EMAIL_MESSAGE_TEXTTAGS, o);
-      }
-    }
-    catch (Exception x)
-    {
-      LOGGER.error("", x);
-      return;
-    }
-
-    // Benötigte Druckfunktionen zu pmod hinzufügen:
-    try
-    {
-      for (String printFunctionName : usePrintFunctions)
-        pmod.usePrintFunction(printFunctionName);
-    }
-    catch (NoSuchMethodException e)
-    {
-      LOGGER.error("Eine notwendige Druckfunktion ist nicht definiert.", e);
-      InfoDialog.showInfoModal(
-        L.m("Fehler beim Drucken"),
-        L.m(
-          "Eine notwendige Druckfunktion ist nicht definiert. Bitte wenden Sie sich an Ihre Systemadministration damit Ihre Konfiguration entsprechend erweitert bzw. aktualisiert werden kann."));
-      pmod.cancel();
-      return;
-    }
-
-    // Drucken im Hintergrund, damit der EDT nicht blockiert.
-    new Thread()
-    {
-      @Override
-      public void run()
-      {
-        long startTime = System.currentTimeMillis();
-
-        documentController.setFormFieldsPreviewMode(true);
-        pmod.printWithProps();
-        documentController.setFormFieldsPreviewMode(false);
-
-        long duration = (System.currentTimeMillis() - startTime) / 1000;
-        LOGGER.debug(L.m("MailMerge finished after %1 seconds", duration));
-      }
-    }.start();
   }
 
   /**
@@ -951,70 +801,5 @@ public class MailMergeNew implements MailMergeParams.MailMergeController
   private static String simplifyFilename(String name)
   {
     return name.replaceAll("[^\\p{javaLetterOrDigit},.()=+_-]", "_");
-  }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
-   * #hasPrintfunction(java.lang.String)
-   */
-  @Override
-  public boolean hasPrintfunction(String name)
-  {
-    final XPrintModel pmod = PrintModels.createPrintModel(documentController, true);
-    try
-    {
-      pmod.usePrintFunction(name);
-      return true;
-    }
-    catch (NoSuchMethodException ex)
-    {
-      return false;
-    }
-  }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
-   * #getColumnNames()
-   */
-  @Override
-  public List<String> getColumnNames()
-  {
-    return ds.getColumnNames();
-  }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
-   * #getDefaultFilename()
-   */
-  @Override
-  public String getDefaultFilename()
-  {
-    String title = documentController.getFrameController().getTitle();
-    // Suffix entfernen:
-    if (title.toLowerCase().matches(".+\\.(odt|doc|ott|dot)$"))
-      title = title.substring(0, title.length() - 4);
-    return simplifyFilename(title);
-  }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeController
-   * #getTextDocument()
-   */
-  @Override
-  public XTextDocument getTextDocument()
-  {
-    return documentController.getModel().doc;
   }
 }

@@ -1,4 +1,4 @@
-package de.muenchen.allg.itd51.wollmux.dialog;
+package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,10 +14,11 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
-import de.muenchen.allg.itd51.wollmux.dialog.MailmergeWizardController.PATH;
-import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams;
-import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.ACTION;
-import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.DatasetSelectionType;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.ACTION;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.DatasetSelectionType;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.IndexSelection;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.SubmitArgument;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailmergeWizardController.PATH;
 
 public class StartWizardPage extends AbstractXWizardPage
 {
@@ -29,13 +30,14 @@ public class StartWizardPage extends AbstractXWizardPage
   private final XRadioButton mails;
   private final XRadioButton multipleDocuments;
   
-  private MailMergeParams params;
   private MailmergeWizardController controller;
   
   private final XRadioButton all;
   private final XRadioButton range;
   private final XNumericField from;
   private final XNumericField till;
+  
+  private IndexSelection selection = new IndexSelection();
   
   private class ActionItemListener implements AbstractItemListener {
     
@@ -54,10 +56,9 @@ public class StartWizardPage extends AbstractXWizardPage
     }
   }
   
-  public StartWizardPage(XWindow parentWindow, short pageId, MailmergeWizardController controller, MailMergeParams params) throws Exception
+  public StartWizardPage(XWindow parentWindow, short pageId, MailmergeWizardController controller) throws Exception
   {
     super(pageId, parentWindow, "seriendruck_start");
-    this.params = params;
     this.controller = controller;
     XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
     singleDocument = UNO.XRadio(container.getControl("gesamtDoc"));
@@ -71,7 +72,9 @@ public class StartWizardPage extends AbstractXWizardPage
     all = UNO.XRadio(container.getControl("selectAll"));
     range = UNO.XRadio(container.getControl("selectRange"));
     from = UNO.XNumericField(container.getControl("from"));
+    from.setMax(controller.getController().getDs().getNumberOfDatasets());
     till = UNO.XNumericField(container.getControl("till"));
+    till.setMax(controller.getController().getDs().getNumberOfDatasets());
   }
 
   @Override
@@ -79,7 +82,7 @@ public class StartWizardPage extends AbstractXWizardPage
   {
     LOGGER.debug("canAdvance");
     ACTION action = getSelectedAction();
-    return (action != ACTION.NOTHING || action == ACTION.SINGLE_DOCUMENT)
+    return (action != ACTION.NOTHING || action != ACTION.SINGLE_DOCUMENT)
         && getSelectedRange() != DatasetSelectionType.NOTHING;
   }
 
@@ -88,25 +91,24 @@ public class StartWizardPage extends AbstractXWizardPage
   {
     ACTION action = getSelectedAction();
     DatasetSelectionType rangeValue = getSelectedRange();
-    double start = -1;
-    double end = -1;
     switch (rangeValue)
     {
       case ALL:
-        start = 0;
-        end = Double.MAX_VALUE;
+        selection = new IndexSelection();
         break;
       case RANGE:
-        start = from.getValue();
-        end = till.getValue();
+        selection.rangeStart = (int) from.getValue();
+        selection.rangeEnd = (int) till.getValue();
         break;
       default:
         break;  
     }
-    LOGGER.debug("Aktion {}, Range {}, Start {}, End {}", action, rangeValue, start, end);
+
+    LOGGER.debug("Aktion {}, Range {}", action, rangeValue);
     window.setVisible(false);
-    params.setCurrentActionType(getSelectedAction());
-    params.setDatasetSelectionType(getSelectedRange());
+    controller.setCurrentActionType(getSelectedAction());
+    controller.setDatasetSelectionType(getSelectedRange());
+    controller.arguments.put(SubmitArgument.indexSelection, selection);
     return true;
   }
   

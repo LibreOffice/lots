@@ -14,8 +14,8 @@
    <dlg:title dlg:value="E-Mail Nachricht"/>
   </dlg:titledbox>
   <dlg:textfield dlg:id="message" dlg:tab-index="8" dlg:left="10" dlg:top="120" dlg:width="150" dlg:height="60" dlg:hide-inactive-selection="false" dlg:hscroll="true" dlg:vscroll="true" dlg:multiline="true"/>
-  <dlg:button dlg:id="CommandButton1" dlg:tab-index="9" dlg:left="10" dlg:top="185" dlg:width="70" dlg:height="15" dlg:value="Seriendruckfeld"/>
-  <dlg:button dlg:id="CommandButton2" dlg:tab-index="10" dlg:left="90" dlg:top="185" dlg:width="70" dlg:height="15" dlg:value="Spezialfeld"/>
+  <dlg:combobox dlg:id="special" dlg:tab-index="9" dlg:left="10" dlg:top="185" dlg:width="70" dlg:height="15" dlg:spin="true"/>
+  <dlg:combobox dlg:id="mailmerge" dlg:tab-index="10" dlg:left="90" dlg:top="185" dlg:width="70" dlg:height="15" dlg:spin="true"/>
   <dlg:textfield dlg:id="subject" dlg:tab-index="6" dlg:left="10" dlg:top="85" dlg:width="150" dlg:height="15"/>
  </dlg:bulletinboard>
 </dlg:window>

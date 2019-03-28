@@ -758,4 +758,11 @@ public class IfThenElseDialog extends TrafoDialog
       abort();
     }
   }
+
+  @Override
+  public void show(String windowTitle)
+  {
+    // TODO Auto-generated method stub
+    
+  }
 }

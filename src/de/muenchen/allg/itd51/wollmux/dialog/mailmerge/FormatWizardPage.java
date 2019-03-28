@@ -1,11 +1,11 @@
-package de.muenchen.allg.itd51.wollmux.dialog;
+package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.ItemEvent;
 import com.sun.star.awt.TextEvent;
-import com.sun.star.awt.XButton;
+import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XRadioButton;
 import com.sun.star.awt.XTextComponent;
@@ -17,27 +17,24 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.FORMAT;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.SubmitArgument;
 
 public class FormatWizardPage extends AbstractXWizardPage
 {
-  
+
   private static final Logger LOGGER = LoggerFactory.getLogger(FormatWizardPage.class);
-  
+
   private final XRadioButton odt;
   private final XRadioButton pdf;
   private final XTextComponent name;
-  private final XButton mailmerge;
-  private final XButton special;
-  
-  enum FORMAT {
-    ODT,
-    PDF,
-    NOTHING;
-  }
-  
+  private final XComboBox mailmerge;
+  private final XComboBox special;
+
   private final MailmergeWizardController controller;
-  
-  private final AbstractItemListener formatListener = new AbstractItemListener() {
+
+  private final AbstractItemListener formatListener = new AbstractItemListener()
+  {
 
     @Override
     public void itemStateChanged(ItemEvent event)
@@ -45,8 +42,9 @@ public class FormatWizardPage extends AbstractXWizardPage
       controller.activateNextButton(canAdvance());
     }
   };
-  
-  public FormatWizardPage(XWindow parentWindow, short pageId, MailmergeWizardController controller) throws Exception
+
+  public FormatWizardPage(XWindow parentWindow, short pageId, MailmergeWizardController controller)
+      throws Exception
   {
     super(pageId, parentWindow, "seriendruck_format");
     this.controller = controller;
@@ -58,17 +56,36 @@ public class FormatWizardPage extends AbstractXWizardPage
     name = UNO.XTextComponent(container.getControl("name"));
     name.addTextListener(new AbstractTextListener()
     {
-      
+
       @Override
       public void textChanged(TextEvent arg0)
       {
         controller.activateNextButton(canAdvance());
       }
     });
-    mailmerge = UNO.XButton(container.getControl("mailmerge"));
-    special = UNO.XButton(container.getControl("special"));
+    mailmerge = UNO.XComboBox(container.getControl("mailmerge"));
+    new MailMergeField(mailmerge).setMailMergeDatasource(controller.getController().getDs());
+    mailmerge.addItemListener(new AbstractItemListener()
+    {
+      @Override
+      public void itemStateChanged(ItemEvent event)
+      {
+        name.setText(name.getText() + mailmerge.getItem((short) event.Selected));
+      }
+    });
+    special = UNO.XComboBox(container.getControl("special"));
+    SpecialField.addItems(special);
+    special.addItemListener(new AbstractItemListener()
+    {
+
+      @Override
+      public void itemStateChanged(ItemEvent event)
+      {
+        name.setText(name.getText() + special.getItem((short) event.Selected));
+      }
+    });
   }
-  
+
   private FORMAT getSelectedFormat()
   {
     if (odt.getState())
@@ -81,7 +98,7 @@ public class FormatWizardPage extends AbstractXWizardPage
     }
     return FORMAT.NOTHING;
   }
-  
+
   private String getNamingTemplate()
   {
     return name.getText();
@@ -97,6 +114,8 @@ public class FormatWizardPage extends AbstractXWizardPage
   @Override
   public boolean commitPage(short reason)
   {
+    controller.arguments.put(SubmitArgument.filenameTemplate, name.getText());
+    controller.format = getSelectedFormat();
     window.setVisible(false);
     LOGGER.debug("Fromat {}, Name {}", getSelectedFormat(), getNamingTemplate());
     return true;

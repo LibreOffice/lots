@@ -16,7 +16,7 @@
   </dlg:titledbox>
   <dlg:radiogroup>
    <dlg:radio dlg:id="selectAll" dlg:tab-index="6" dlg:left="10" dlg:top="75" dlg:width="150" dlg:height="8" dlg:value="Alle" dlg:group-name="dataset" dlg:checked="true"/>
-   <dlg:radio dlg:id="selectRange" dlg:tab-index="7" dlg:left="10" dlg:top="87" dlg:width="150" dlg:height="8" dlg:group-name="dataset"/>
+   <dlg:radio dlg:id="selectRange" dlg:tab-index="7" dlg:left="10" dlg:top="87" dlg:width="10" dlg:height="8" dlg:group-name="dataset"/>
   </dlg:radiogroup>
   <dlg:text dlg:id="Label1" dlg:tab-index="9" dlg:left="22" dlg:top="88" dlg:width="12" dlg:height="8" dlg:value="Von"/>
   <dlg:text dlg:id="Label2" dlg:tab-index="10" dlg:left="78" dlg:top="88" dlg:width="12" dlg:height="8" dlg:value="Bis"/>
