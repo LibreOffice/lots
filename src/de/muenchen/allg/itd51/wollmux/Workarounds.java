@@ -59,11 +59,7 @@ public class Workarounds
 
   private static Boolean workaround89783 = null;
 
-  private static Boolean workaround102164 = null;
-
   private static Boolean workaround73229 = null;
-
-  private static ClassLoader workaround102164CL = null;
 
   private static Boolean workaroundWMClass = null;
 

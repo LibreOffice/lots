@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="email_auth" dlg:left="205" dlg:top="119" dlg:width="203" dlg:height="105" dlg:closeable="true" dlg:moveable="true" dlg:title="E-Mail Zugangsdaten">
+ <dlg:bulletinboard>
+  <dlg:text dlg:id="Label1" dlg:tab-index="0" dlg:left="9" dlg:top="32" dlg:width="71" dlg:height="16" dlg:value="Benutzername"/>
+  <dlg:text dlg:id="Label2" dlg:tab-index="1" dlg:left="9" dlg:top="55" dlg:width="71" dlg:height="16" dlg:value="Passwort"/>
+  <dlg:text dlg:id="Label3" dlg:tab-index="4" dlg:left="9" dlg:top="5" dlg:width="185" dlg:height="16" dlg:value="Bitte Zugangsdaten zum E-Mailserver eingeben."/>
+  <dlg:button dlg:id="btnOK" dlg:tab-index="6" dlg:left="114" dlg:top="85" dlg:width="80" dlg:height="16" dlg:value="OK"/>
+  <dlg:button dlg:id="btnAbort" dlg:tab-index="5" dlg:left="8" dlg:top="85" dlg:width="80" dlg:height="16" dlg:value="Abbrechen"/>
+  <dlg:textfield dlg:id="txtUsername" dlg:tab-index="2" dlg:left="86" dlg:top="32" dlg:width="109" dlg:height="16"/>
+  <dlg:textfield dlg:id="txtPassword" dlg:tab-index="3" dlg:left="86" dlg:top="55" dlg:width="109" dlg:height="16" dlg:echochar="*"/>
+ </dlg:bulletinboard>
+</dlg:window>
