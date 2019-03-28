@@ -30,8 +30,6 @@
  */package de.muenchen.allg.itd51.wollmux;
 
 import java.awt.Toolkit;
-import java.net.URL;
-import java.net.URLClassLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,44 +92,6 @@ public class Workarounds
       workaround73229 = applyWorkaround("73229");
     }
     return workaround73229.booleanValue();
-  }
-
-  /**
-   * Beim Erzeugen eines neuen Threads wird der Classloader nicht gesetzt und muss
-   * explizit gesetzt werden.
-   * 
-   * Issue #102164 betrifft OOo 3.2. Es ist unklar, wann der Workaround entfernt
-   * werden kann, da er aufgrund eines Bugs in der Swing-Implementierung von Java 6
-   * zurückgeht.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   */
-  public static void applyWorkaroundForOOoIssue102164()
-  {
-    if (workaround102164 == null)
-    {
-      String version = Utils.getOOoVersion();
-      if (version != null && !version.startsWith("3.1") && !version.startsWith("2")
-        && !version.startsWith("3.0"))
-      {
-        workaround102164 = applyWorkaround("102164");
-      }
-      else
-        workaround102164 = Boolean.FALSE;
-    }
-
-    if (workaround102164.booleanValue())
-    {
-      if (workaround102164CL == null)
-        workaround102164CL = Thread.currentThread().getContextClassLoader();
-      if (workaround102164CL == null)
-        workaround102164CL = Workarounds.class.getClassLoader();
-      if (workaround102164CL == null)
-        workaround102164CL = ClassLoader.getSystemClassLoader();
-      if (workaround102164CL == null)
-        workaround102164CL = new URLClassLoader(new URL[] {});
-      Thread.currentThread().setContextClassLoader(workaround102164CL);
-    }
   }
 
   /**

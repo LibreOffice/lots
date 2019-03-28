@@ -41,7 +41,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
@@ -92,16 +91,10 @@ public class EMailSender
   {
     try
     {
-      // TODO: ohne Workarounds testen.
-      Workarounds.applyWorkaroundForOOoIssue102164();
       Transport tr = session.getTransport("smtp");
-      Workarounds.applyWorkaroundForOOoIssue102164();
       tr.connect(mailServerSettings.getMailserver(), mailServerSettings.getMailserverport(),
           mailServerSettings.getUsername(), mailServerSettings.getPassword());
-      Workarounds.applyWorkaroundForOOoIssue102164();
       email.saveChanges();
-
-      Workarounds.applyWorkaroundForOOoIssue102164();
       tr.sendMessage(email, email.getAllRecipients());
     }
     catch (MessagingException e)
