@@ -767,8 +767,7 @@ public class WollMuxEventHandler
    * Das Event wird vom FormModel erzeugt, wenn es vom FormController eine
    * entsprechende Nachricht erhält.
    */
-  public void handleFormControllerInitCompleted(
-      TextDocumentController documentController)
+  public void handleFormControllerInitCompleted(TextDocumentController documentController)
   {
     handle(new OnFormControllerInitCompleted(documentController));
   }
@@ -1002,10 +1001,9 @@ public class WollMuxEventHandler
     handle(new OnExecutePrintFunction(documentController));
   }
 
-  public void handleUpdateInputFields(TextDocumentController documentController,
-      DispatchHelper helper, boolean sync)
+  public void handleUpdateInputFields(XTextDocument doc, DispatchHelper helper, boolean sync)
   {
-    BasicEvent event = new OnUpdateInputFields(documentController, helper);
+    BasicEvent event = new OnUpdateInputFields(doc, helper);
     if (sync)
     {
       event.process();

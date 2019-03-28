@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Reagiert auf globale Ereignisse
  * 
- * Copyright (c) 2008-2018 Landeshauptstadt München
+ * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.UnknownPropertyException;
+import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
@@ -190,11 +191,11 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     // nicht im docManager mitgeführt werden.
     if (isTempMailMergeDocument(compo))
     {
-      // docManager.remove(source) ist hier nicht erforderlich, weil für Dokumente
-      // mit URL kein OnCreate-Event kommt.
       return;
     }
 
+
+    registerDispatcher(compo.getCurrentController().getFrame());
     // Prüfen ob Doppelt- oder Halbinstallation vorliegt.
     WollMuxEventHandler.getInstance().handleCheckInstallation();
     WollMuxEventHandler.getInstance().handleInitialize();
@@ -340,5 +341,38 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
   public void disposing(EventObject arg0)
   {
     // nothing to do
+  }
+
+  /**
+   * Registriert für den Frame einen Dispatch Interceptor.
+   * 
+   * @param frame
+   *          Das Dokument.
+   */
+  private void registerDispatcher(XFrame frame)
+  {
+    if (frame == null)
+    {
+      LOGGER.debug(L.m("Ignoriere handleRegisterDispatchInterceptor(null)"));
+      return;
+    }
+    try
+    {
+      DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(frame);
+    }
+    catch (java.lang.Exception e)
+    {
+      LOGGER.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
+    }
+
+    // Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
+    try
+    {
+      frame.contextChanged();
+    }
+    catch (java.lang.Exception e)
+    {
+      LOGGER.debug("", e);
+    }
   }
 }

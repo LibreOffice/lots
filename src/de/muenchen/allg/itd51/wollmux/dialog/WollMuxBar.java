@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Menü-Leiste als zentraler Ausgangspunkt für WollMux-Funktionen
  *
- * Copyright (c) 2010-2018 Landeshauptstadt München
+ * Copyright (c) 2010-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -1588,7 +1588,27 @@ public class WollMuxBar
       || trayIconMode == WollMuxBarConfig.ICONIFY_TRAY_ICON
       || trayIconMode == WollMuxBarConfig.ICONIFY_AND_POPUP_TRAY_ICON)
     {
-      myFrame.setExtendedState(Frame.ICONIFIED);
+      if (windowMode == WollMuxBarConfig.MINIMIZE_TO_TASKBAR_MODE)
+      {
+        /*
+         * Wir brauchen hier einen Timer, weil wenn auf das Icon in der
+         * Taskbar gedrückt wird, zuerst der Fokus verloren geht und dadurch
+         * sonst auch der Status auf ICONIFIED gesetzt wird und dann
+         * der Frame durch den Klick wieder in den Vordergrund gebracht
+         * werden würde.
+         */
+        Timer t = new Timer(200, e -> {
+          if (myFrame.getExtendedState() != Frame.ICONIFIED)
+          {
+            myFrame.setExtendedState(Frame.ICONIFIED);
+          }
+        });
+        t.setRepeats(false);
+        t.start();
+      } else
+      {
+        myFrame.setExtendedState(Frame.ICONIFIED);
+      }
       return;
     }
 

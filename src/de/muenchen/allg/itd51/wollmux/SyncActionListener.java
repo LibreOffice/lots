@@ -4,7 +4,7 @@
  * Funktion : Vereinfacht die Synchronisation verschiedener Threads mittels 
  *            ActionListener
  * 
- * Copyright (c) 2009-2018 Landeshauptstadt München
+ * Copyright (c) 2009-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),

@@ -2,9 +2,9 @@
  * Dateiname: DocumentManager.java
  * Projekt  : WollMux
  * Funktion : Verwaltet Informationen zu allen offenen OOo-Dokumenten
- *
- * Copyright (c) 2009-2018 Landeshauptstadt München
- *
+ * 
+ * Copyright (c) 2009-2019 Landeshauptstadt München
+ * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
  * version 1.0 (or any later version).
@@ -62,7 +62,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
@@ -444,11 +443,6 @@ public class DocumentManager
                 WollMuxSingleton.getVersion(), Utils.getOOoVersion()),
             GlobalFunctions.getInstance().getGlobalFunctions(),
             GlobalFunctions.getInstance().getFunctionDialogs());
-
-        /**
-         * Dispatch Handler in eigenem Event registrieren, da es Deadlocks gegeben hat.
-         */
-        WollMuxEventHandler.getInstance().handleRegisterDispatchInterceptor(documentController);
       }
       return documentController;
     }

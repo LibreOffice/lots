@@ -19,6 +19,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
@@ -118,7 +119,7 @@ public class FormularMax4kView extends JFrame
 
     setFrameSize();
     setResizable(true);
-    setAlwaysOnTop(true);
+    SwingUtilities.invokeLater(this::toFront);
   }
 
   private JMenuBar createMainMenu()
