@@ -103,6 +103,9 @@
 		<variable name="hklmLO" checkonce="true"
 			regkey="HKEY_LOCAL_MACHINE\Software\LibreOffice\UNO\InstallPath"
 			regvalue="@" />
+		<variable name="LOexecutable" checkonce="true"
+			regkey="HKEY_LOCAL_MACHINE\Software\LibreOffice\LibreOffice\6.1"
+			regvalue="Path" />
 		
 		<variable name="oooPath" value="${hkcuOOo}" condition="hkcuOOoExists" />
 		<variable name="oooPath" value="${hklmOOo}" condition="hklmOOoExists" />
