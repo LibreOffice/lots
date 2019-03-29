@@ -10,7 +10,7 @@
 	<files>
 		<file>
 			<source>dist/WollMuxBar.jar</source>
-			<destName>WollMux.uno.jar</destName>
+			<destName>WollMuxBar.jar</destName>
 		</file>
 		<file>
 			<source>misc/buildinfo</source>

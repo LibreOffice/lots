@@ -45,11 +45,7 @@ Enter the following command
 If everything built successfully, install the program with the following commands
 
   sudo -s
-  cp dist/WollMuxBar.jar /usr/share/java
-  chmod a+r /usr/share/java/WollMuxBar.jar
   unopkg add --shared dist/WollMux.oxt
-  cp dist/wollmuxbar /usr/bin
-  chmod a+rx /usr/bin/wollmuxbar
 
 Finally you need a configuration. A quick way to get a working configuration is to download
   http://code.google.com/r/mux2005-wollmux/source/browse/dist/wollmux-config-self-extractor.jar

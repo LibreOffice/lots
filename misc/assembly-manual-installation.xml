@@ -12,10 +12,6 @@
 			<directory>dist</directory>
 			<outputDirectory>.</outputDirectory>
 			<includes>
-				<include>WollMuxBar.jar</include>
-				<include>wollmuxbar.exe</include>
-				<include>wollmuxbar</include>
-				<include>wollmuxbar.l4j.ini</include>
 				<include>*.oxt</include>
 			</includes>
 		</fileSet>
