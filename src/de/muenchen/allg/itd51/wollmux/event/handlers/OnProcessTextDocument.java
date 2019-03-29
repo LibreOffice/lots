@@ -56,7 +56,7 @@ public class OnProcessTextDocument extends BasicEvent
         documentController.getFrameController().setWindowViewSettings(tds);
       } catch (NodeNotFoundException e)
       {
-        LOGGER.debug("", e);
+//        kein Fehler
       }
 
     // Mögliche Aktionen für das neu geöffnete Dokument:
@@ -99,7 +99,7 @@ public class OnProcessTextDocument extends BasicEvent
                     "Formular").getLastChild().query("ZOOM"));
           } catch (java.lang.Exception e)
           {
-            LOGGER.debug("", e);
+            // kein Fehler
           }
 
         // FormGUI starten
@@ -141,8 +141,6 @@ public class OnProcessTextDocument extends BasicEvent
     {
       LOGGER.debug("", e);
     }
-
-    stabilize();
   }
 
   @Override

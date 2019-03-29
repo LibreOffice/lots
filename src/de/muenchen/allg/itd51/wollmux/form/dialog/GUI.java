@@ -14,6 +14,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -425,11 +426,13 @@ public class GUI
           do
           {
             ++idx;
-            if (idx >= myTabbedPane.getTabCount() || myTabbedPane.isEnabledAt(idx))
+            if (idx >= myTabbedPane.getTabCount())
             {
               idx = -1;
               break;
             }           
+            if (myTabbedPane.isEnabledAt(idx))
+              break;
           } while (idx != startIdx);
           if (idx > -1)
             processUiElementEvent(null, "action", new String[] { NEXT_TAB });
@@ -733,9 +736,10 @@ public class GUI
       }
       else
         SwingUtilities.invokeAndWait(runner);
-    } catch (Exception x)
+    } catch (InvocationTargetException | InterruptedException x)
     {
-      LOGGER.error("", x);
+      LOGGER.debug("", x);
+      Thread.currentThread().interrupt();
     }
   }
 
