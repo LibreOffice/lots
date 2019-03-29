@@ -1,20 +1,17 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
-import java.awt.Component;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.ui.dialogs.FilePicker;
+import com.sun.star.ui.dialogs.TemplateDescription;
+import com.sun.star.ui.dialogs.XFilePicker3;
 import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
@@ -81,43 +78,20 @@ public class OnSaveAs extends BasicEvent
       return;
     }
 
-    boolean done = false;
     File file = ensureFileHasODTSuffix(getDefaultFile(func));
-    JFileChooser fc = createODTFileChooser(file);
-    while (!done)
+    XFilePicker3 picker = FilePicker.createWithMode(UNO.defaultContext,
+        TemplateDescription.FILESAVE_AUTOEXTENSION_TEMPLATE);
+    picker.setDisplayDirectory(file.getParent());
+    picker.setDefaultName(file.getAbsolutePath());
+    String filterName = "ODF Textdokument";
+    picker.appendFilter(filterName, "odt");
+    picker.appendFilter("Alle Dateien", "");
+    picker.setCurrentFilter(filterName);
+    short res = picker.execute();
+    if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)
     {
-      done = true;
-      if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION)
-      {
-        boolean save = true;
-        File f = ensureFileHasODTSuffix(fc.getSelectedFile());
-
-        // Sicherheitsabfage vor Überschreiben
-        if (f.exists())
-        {
-          save = false;
-          int res = JOptionPane.showConfirmDialog(
-              null,
-              L.m("Datei %1 existiert bereits. Soll sie überschrieben werden?",
-                  f.getName()),
-              L.m("Überschreiben?"),
-              JOptionPane.YES_NO_CANCEL_OPTION);
-          
-          if (res == JOptionPane.NO_OPTION)
-          {
-            done = false;
-          }
-          if (res == JOptionPane.OK_OPTION)
-          {
-            save = true;
-          }
-        }
-
-        if (save)
-        {
-          helper.dispatchFinished(saveAs(f));
-        }
-      }
+      String[] files = picker.getFiles();
+      helper.dispatchFinished(saveAs(files[0]));
     }
   }
 
@@ -151,62 +125,22 @@ public class OnSaveAs extends BasicEvent
     return new File(filename);
   }
 
-  private JFileChooser createODTFileChooser(File file)
-  {
-    JFileChooser fc = new JFileChooser()
-    {
-      private static final long serialVersionUID = 1560806929064954454L;
-
-      // Laut Didi kommt der JFileChooser unter Windows nicht im Vordergrund.
-      // Deshalb das Überschreiben der createDialog-Methode und Setzen von
-      // alwaysOnTop(true)
-      @Override
-      protected JDialog createDialog(Component parent)
-      {
-        JDialog dialog = super.createDialog(parent);
-        dialog.setAlwaysOnTop(true);
-        return dialog;
-      }
-    };
-    fc.setMultiSelectionEnabled(false);
-    fc.setFileFilter(new FileFilter()
-    {
-      @Override
-      public String getDescription()
-      {
-        return L.m("ODF Textdokument");
-      }
-
-      @Override
-      public boolean accept(File f)
-      {
-        return f.getName().toLowerCase().endsWith(".odt") || f.isDirectory();
-      }
-    });
-    fc.setSelectedFile(file);
-    return fc;
-  }
-
-  private boolean saveAs(File f)
+  private boolean saveAs(String url)
   {
     documentController.flushPersistentData();
     try
     {
-      String url = UNO.getParsedUNOUrl(f.toURI().toURL().toString()).Complete;
       if (UNO.XStorable(documentController.getModel().doc) != null)
       {
         UNO.XStorable(documentController.getModel().doc).storeAsURL(url,
             new PropertyValue[] {});
       }
       return true;
-    } catch (MalformedURLException e)
-    {
-      LOGGER.error(L.m("das darf nicht passieren"), e);
     } catch (com.sun.star.io.IOException e)
     {
       LOGGER.error("", e);
       InfoDialog.showInfoModal(L.m("Fehler beim Speichern"), L.m(
-          "Das Speichern der Datei %1 ist fehlgeschlagen!", f.toString()));
+          "Das Speichern der Datei %1 ist fehlgeschlagen!", url));
     }
     return false;
   }
