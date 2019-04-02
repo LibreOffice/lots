@@ -168,7 +168,11 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     XModel compo = UNO.XModel(source);
     if (compo != null)
     {
-      registerDispatcher(compo.getCurrentController().getFrame());
+      XTextDocument xTextDocument = UNO.XTextDocument(compo);
+      if(xTextDocument != null)
+      {
+        registerDispatcher(compo.getCurrentController().getFrame());
+      }
       WollMuxEventHandler.handleOnViewCreated(compo);
     }
   }
