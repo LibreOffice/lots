@@ -194,8 +194,12 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       return;
     }
 
+    XTextDocument xTextDoc = UNO.XTextDocument(compo);
+    if (xTextDoc != null)
+    {
+      registerDispatcher(compo.getCurrentController().getFrame());
+    }
 
-    registerDispatcher(compo.getCurrentController().getFrame());
     // Prüfen ob Doppelt- oder Halbinstallation vorliegt.
     WollMuxEventHandler.getInstance().handleCheckInstallation();
     WollMuxEventHandler.getInstance().handleInitialize();
@@ -203,7 +207,6 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     Info docInfo = docManager.getInfo(compo);
     // docInfo ist hier nur dann ungleich null, wenn das Dokument mit Create erzeugt
     // wurde.
-    XTextDocument xTextDoc = UNO.XTextDocument(compo);
     if (xTextDoc != null && docInfo != null && isDocumentLoadedHidden(compo))
     {
       docManager.remove(compo);
