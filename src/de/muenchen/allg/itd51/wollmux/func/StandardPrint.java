@@ -53,7 +53,6 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
-import de.muenchen.allg.itd51.wollmux.print.MailMerge;
 import de.muenchen.allg.itd51.wollmux.print.OOoBasedMailMerge;
 import de.muenchen.allg.itd51.wollmux.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
@@ -177,41 +176,6 @@ public class StandardPrint
     pmod.print((short) 1);
 
 		new de.muenchen.allg.afid.UnoService(pmod).msgboxFeatures();
-  }
-
-  /**
-   * Druckt das zu pmod gehörende Dokument für jeden Datensatz der aktuell über
-   * Bearbeiten/Datenbank austauschen eingestellten Tabelle einmal aus.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-   */
-  public static void mailMergeWithoutSelection(XPrintModel pmod)
-  {
-    MailMerge.mailMerge(pmod, false);
-  }
-
-  /**
-   * Druckt das zu pmod gehörende Dokument für die Datensätze, die der Benutzer in
-   * einem Dialog auswählt. Für die Anzeige der Datensätze im Dialog wird die Spalte
-   * "WollMuxDescription" verwendet. Falls die Spalte "WollMuxSelected" vorhanden ist
-   * und "1", "ja" oder "true" enthält, so ist der entsprechende Datensatz in der
-   * Auswahlliste bereits vorselektiert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-   */
-  public static void mailMergeWithSelection(XPrintModel pmod)
-  {
-    MailMerge.mailMerge(pmod, true);
-  }
-
-  /**
-   * Startet den ultimativen MailMerge für pmod.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public static void superMailMerge(XPrintModel pmod)
-  {
-    MailMerge.superMailMerge(pmod);
   }
 
   /**
