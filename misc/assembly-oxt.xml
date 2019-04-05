@@ -24,6 +24,10 @@
 			<source>oxt/wollmux.png</source>
 			<outputDirectory>icons</outputDirectory>
 		</file>
+		<file>
+			<source>oxt/mailmerge.png</source>
+			<outputDirectory>icons</outputDirectory>
+		</file>
 	</files>
 	<fileSets>
 		<fileSet>
