@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
-import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.XServiceInfo;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.ui.XUIElement;
@@ -21,17 +20,14 @@ public class SeriendruckSidebarFactory extends WeakBase implements XUIElementFac
 
   public static final String __serviceName = "de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarFactory";
 
-  private XComponentContext context;
-
   public SeriendruckSidebarFactory(XComponentContext context)
   {
     LOGGER.debug("SeriendruckSidebarFactory");
-    this.context = context;
   }
 
   @Override
   public XUIElement createUIElement(String resourceUrl, PropertyValue[] arguments)
-      throws NoSuchElementException, IllegalArgumentException
+      throws NoSuchElementException
   {
     LOGGER.debug("SeriendruckSidebarFactory:createUIElement");
 
@@ -51,7 +47,7 @@ public class SeriendruckSidebarFactory extends WeakBase implements XUIElementFac
       }
     }
 
-    return new SeriendruckSidebarPanel(context, parentWindow, resourceUrl);
+    return new SeriendruckSidebarPanel(parentWindow, resourceUrl);
   }
 
   @Override

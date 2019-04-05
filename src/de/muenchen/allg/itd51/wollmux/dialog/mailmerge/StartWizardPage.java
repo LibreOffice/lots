@@ -108,7 +108,7 @@ public class StartWizardPage extends AbstractXWizardPage
     window.setVisible(false);
     controller.setCurrentActionType(getSelectedAction());
     controller.setDatasetSelectionType(getSelectedRange());
-    controller.arguments.put(SubmitArgument.indexSelection, selection);
+    controller.arguments.put(SubmitArgument.INDEX_SELECTION, selection);
     return true;
   }
   

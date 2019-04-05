@@ -233,11 +233,11 @@ public class MailMergeController
         break;
       case INDIVIDUAL:
         IndexSelection indexSelection =
-          (IndexSelection) args.get(SubmitArgument.indexSelection);
+          (IndexSelection) args.get(SubmitArgument.INDEX_SELECTION);
         selected.addAll(indexSelection.selectedIndexes);
         break;
       case RANGE:
-        indexSelection = (IndexSelection) args.get(SubmitArgument.indexSelection);
+        indexSelection = (IndexSelection) args.get(SubmitArgument.INDEX_SELECTION);
         if (indexSelection.rangeStart < 1) {
           indexSelection.rangeStart = 1;
         }
@@ -269,32 +269,32 @@ public class MailMergeController
       pmod.setPropertyValue(PROP_QUERYRESULTS, data);
       pmod.setPropertyValue(PROP_MAILMERGENEW_SELECTION, selected);
 
-      Object o = args.get(SubmitArgument.targetDirectory);
+      Object o = args.get(SubmitArgument.TARGET_DIRECTORY);
       if (o != null) {
         pmod.setPropertyValue(PROP_TARGETDIR, o);
       }
 
-      o = args.get(SubmitArgument.filenameTemplate);
+      o = args.get(SubmitArgument.FILENAME_TEMPLATE);
       if (o != null) {
         pmod.setPropertyValue(PROP_FILEPATTERN, o);
       }
 
-      o = args.get(SubmitArgument.emailToFieldName);
+      o = args.get(SubmitArgument.EMAIL_TO_FIELD_NAME);
       if (o != null) {
         pmod.setPropertyValue(PROP_EMAIL_TO_FIELD_NAME, o);
       }
 
-      o = args.get(SubmitArgument.emailFrom);
+      o = args.get(SubmitArgument.EMAIL_FROM);
       if (o != null) {
         pmod.setPropertyValue(PROP_EMAIL_FROM, o);
       }
 
-      o = args.get(SubmitArgument.emailSubject);
+      o = args.get(SubmitArgument.EMAIL_SUBJECT);
       if (o != null) {
         pmod.setPropertyValue(PROP_EMAIL_SUBJECT, o);
       }
 
-      o = args.get(SubmitArgument.emailText);
+      o = args.get(SubmitArgument.EMAIL_TEXT);
       if (o != null) {
         pmod.setPropertyValue(PROP_EMAIL_MESSAGE_TEXTTAGS, o);
       }
@@ -363,13 +363,13 @@ public class MailMergeController
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public enum SubmitArgument {
-    targetDirectory,
-    filenameTemplate,
-    emailFrom,
-    emailToFieldName,
-    emailText,
-    emailSubject,
-    indexSelection,
+    TARGET_DIRECTORY,
+    FILENAME_TEMPLATE,
+    EMAIL_FROM,
+    EMAIL_TO_FIELD_NAME,
+    EMAIL_TEXT,
+    EMAIL_SUBJECT,
+    INDEX_SELECTION,
   }
 
   /**

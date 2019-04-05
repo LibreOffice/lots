@@ -97,10 +97,10 @@ public class MailWizardPage extends AbstractXWizardPage
   @Override
   public boolean commitPage(short reason)
   {
-    controller.arguments.put(SubmitArgument.emailFrom, sender.getText());
-    controller.arguments.put(SubmitArgument.emailSubject, subject.getText());
-    controller.arguments.put(SubmitArgument.emailText, message.getText());
-    controller.arguments.put(SubmitArgument.emailToFieldName, recieverValue);
+    controller.arguments.put(SubmitArgument.EMAIL_FROM, sender.getText());
+    controller.arguments.put(SubmitArgument.EMAIL_SUBJECT, subject.getText());
+    controller.arguments.put(SubmitArgument.EMAIL_TEXT, message.getText());
+    controller.arguments.put(SubmitArgument.EMAIL_TO_FIELD_NAME, recieverValue);
     window.setVisible(false);
     return true;
   }
