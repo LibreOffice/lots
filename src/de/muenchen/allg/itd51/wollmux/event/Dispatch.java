@@ -92,8 +92,6 @@ public class Dispatch extends BaseDispatch
   public static final String DISP_wmTextbausteinVerweisEinfuegen =
     "wollmux:TextbausteinVerweisEinfuegen";
 
-  public static final String DISP_wmSeriendruck = "wollmux:Seriendruck";
-
   public static final String DISP_wmTest = "wollmux:Test";
 
   public static final String DISP_wmPrintPage = "wollmux:PrintPage";

@@ -60,7 +60,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemovePALChangeEventListe
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnReprocessTextDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveAs;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveTempAndOpenExt;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnSeriendruck;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValueFinished;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetInsertValues;
@@ -364,19 +363,6 @@ public class WollMuxEventHandler
   public void handleJumpToPlaceholder(TextDocumentController documentController)
   {
     handle(new OnJumpToPlaceholder(documentController));
-  }
-
-  /**
-   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass die neue
-   * Seriendruckfunktion des WollMux gestartet werden soll.
-   *
-   * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü
-   * "Extras->Seriendruck (WollMux)" die dispatch-url wollmux:SeriendruckNeu
-   * abgesetzt wurde.
-   */
-  public void handleSeriendruck(TextDocumentController documentController)
-  {
-    handle(new OnSeriendruck(documentController));
   }
 
   /**

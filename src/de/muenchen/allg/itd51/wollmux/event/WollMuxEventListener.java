@@ -36,7 +36,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemovePALChangeEventListe
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnReprocessTextDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveAs;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveTempAndOpenExt;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnSeriendruck;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValueFinished;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetInsertValues;
@@ -305,12 +304,6 @@ public class WollMuxEventListener
 
   @Subscribe
   public void onRemoveDocumentEventListener(OnRemoveDocumentEventListener event)
-  {
-    event.process();
-  }
-
-  @Subscribe
-  public void onSeriendruck(OnSeriendruck event)
   {
     event.process();
   }
