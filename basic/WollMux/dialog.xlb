@@ -6,4 +6,5 @@
 	<library:element library:name="DatensatzBearbeitenPerson"/>
 	<library:element library:name="DatensatzBearbeitenOrga"/>
 	<library:element library:name="DatensatzBearbeitenFusszeile"/>
+	<library:element library:name="print_progress"/>
 </library:library>
