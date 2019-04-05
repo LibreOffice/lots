@@ -5,7 +5,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.awt.ActionEvent;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
@@ -19,7 +18,6 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 
 public class DatensatzBearbeitenPersonWizardPage extends DatensatzBearbeitenBaseWizardPage
 {
@@ -86,15 +84,4 @@ public class DatensatzBearbeitenPersonWizardPage extends DatensatzBearbeitenBase
       LOGGER.error("", e);
     }
   }
-
-  protected AbstractActionListener testActionListener = new AbstractActionListener()
-  {
-
-    @Override
-    public void actionPerformed(ActionEvent arg0)
-    {
-      System.out.println("actionPerformend");
-    }
-  };
-
 }

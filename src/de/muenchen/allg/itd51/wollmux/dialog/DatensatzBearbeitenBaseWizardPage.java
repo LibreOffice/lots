@@ -130,7 +130,6 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
     @Override
     public void actionPerformed(ActionEvent arg0)
     {
-      System.out.println("actionPerformend");
       XControl xControl = UNO.XControl(arg0.Source);
 
       if (xControl == null)
