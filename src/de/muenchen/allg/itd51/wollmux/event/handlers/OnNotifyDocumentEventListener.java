@@ -101,20 +101,23 @@ public class OnNotifyDocumentEventListener extends BasicEvent
       DocumentManager.getDocumentManager().setProcessingFinished(
           compo);
       XTextDocument xTextDoc = UNO.XTextDocument(source);
-      TextDocumentController documentController = DocumentManager
-          .getTextDocumentController(xTextDoc);
-
-      if (documentController.getModel().isFormDocument())
+      if (xTextDoc != null)
       {
+        TextDocumentController documentController = DocumentManager
+            .getTextDocumentController(xTextDoc);
 
-        FormController formController = DocumentManager.getDocumentManager()
-            .getFormModel(xTextDoc);
+        if (documentController.getModel().isFormDocument())
+        {
 
-        setWindowPosSize(formController, documentController, xTextDoc);
+          FormController formController = DocumentManager.getDocumentManager()
+              .getFormModel(xTextDoc);
 
-        formController.addPropertyChangeListener(
-          (PropertyChangeEvent e) -> setWindowPosSize(formController, documentController, xTextDoc)
-        );
+          setWindowPosSize(formController, documentController, xTextDoc);
+
+          formController.addPropertyChangeListener(
+            (PropertyChangeEvent e) -> setWindowPosSize(formController, documentController, xTextDoc)
+          );
+        }
       }
     }
   }
