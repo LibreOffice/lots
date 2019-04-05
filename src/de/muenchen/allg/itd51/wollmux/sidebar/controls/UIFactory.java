@@ -15,7 +15,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarConfig;
 
 /**
  * Erzeugt {@link UIControl}s für Menüs und Buttons, die in der WollMux-Konfiguration
@@ -53,8 +52,6 @@ public class UIFactory
 
   private List<UIElementCreateListener> listeners;
 
-  private WollMuxBarConfig config;
-
   private WollMuxSidebarUIElementEventHandler eventHandler;
 
   public static final Set<String> SUPPORTED_ACTIONS = new HashSet<>();
@@ -72,9 +69,8 @@ public class UIFactory
     SUPPORTED_ACTIONS.add("options");
   }
 
-  public UIFactory(WollMuxBarConfig config)
+  public UIFactory()
   {
-    this.config = config;
     listeners = new ArrayList<>();
 
     eventHandler = new WollMuxSidebarUIElementEventHandler();
@@ -95,7 +91,7 @@ public class UIFactory
    *          umgewandelt, sonst in {@link UIButton}.
    */
   public void createUIElements(UIElementContext context, ConfigThingy menuConf,
-      ConfigThingy elementParent, boolean isMenu)
+      ConfigThingy elementParent, boolean isMenu, Set<String> confIds)
   {
     for (ConfigThingy uiElementDesc : elementParent)
     {
@@ -123,7 +119,7 @@ public class UIFactory
         boolean active = false;
         for (ConfigThingy conf_id_group : conf_ids)
           for (ConfigThingy conf_id : conf_id_group)
-            if (config.isIDActive(conf_id.getName()))
+            if (confIds.contains(conf_id.getName()))
             {
               active = true;
               break;

@@ -71,7 +71,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
-import de.muenchen.allg.itd51.wollmux.dialog.WollMuxBarConfig;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIButton;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIControl;
@@ -126,7 +125,10 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         + "überprüfen Sie anhand der wollmux.log ob evtl. beim Verarbeiten eines %includes ein Fehler "
         + "aufgetreten ist.");
 
-  private static WollMuxBarConfig config;
+  /**
+   * Die aktiven CONF_IDs.
+   */
+  private Set<String> confIds;
 
   private XComponentContext context;
 
@@ -249,7 +251,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
           layout.add(line);
 
-          uiFactory = new UIFactory(config);
+          uiFactory = new UIFactory();
           uiFactory.addElementCreateListener(this);
 
           ConfigThingy menubar = conf.query("Menueleiste");
@@ -258,18 +260,18 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           if (menubar.count() > 0)
           {
             uiFactory.createUIElements(new UIElementContext(), null,
-              menubar.getLastChild(), false);
+              menubar.getLastChild(), false, confIds);
 
             for (ConfigThingy menuDef : menuConf.getLastChild())
             {
               uiFactory.createUIElements(new UIElementContext(), menuDef,
-                menuDef.getLastChild(), true);
+                menuDef.getLastChild(), true, confIds);
             }
           }
 
           ConfigThingy bkl = conf.query("Symbolleisten").query("Briefkopfleiste");
           uiFactory.createUIElements(new UIElementContext(), menuConf,
-            bkl.getLastChild(), false);
+            bkl.getLastChild(), false, confIds);
 
           tree.expandNode(root);
           window.setVisible(true);
@@ -318,8 +320,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     return 100;
   }
 
-  private static void readWollMuxBarConf(boolean allowUserConfig,
-      ConfigThingy wollmuxConf)
+  private void readWollMuxBarConf(boolean allowUserConfig, ConfigThingy wollmuxConf)
   {
     ConfigThingy wollmuxbarConf = null;
     File wollmuxbarConfFile =
@@ -365,13 +366,37 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       }
       else
       {
-        config =
-          new WollMuxBarConfig(0, wollmuxConf, wollmuxbarConf, allowUserConfig);
+        readConfIds(wollmuxConf, wollmuxbarConf);
       }
     }
     catch (Exception x)
     {
       LOGGER.error("", x);
+    }
+  }
+
+  private void readConfIds(ConfigThingy defaultConf, ConfigThingy userConf)
+  {
+    this.confIds = new HashSet<>();
+    ConfigThingy activeIds = new ConfigThingy("aciveIDs");
+    if (userConf != null)
+      activeIds = userConf.query("WollMuxBarKonfigurationen", 1).query("Aktiv", 2);
+    if (activeIds.count() == 0)
+      activeIds =
+        defaultConf.query("WollMuxBarKonfigurationen", 1).query("Aktiv", 2);
+
+    if (activeIds.count() > 0)
+    {
+      try
+      {
+        activeIds = activeIds.getLastChild();
+      }
+      catch (NodeNotFoundException x)
+      {}
+      for (ConfigThingy idConf : activeIds)
+      {
+        confIds.add(idConf.getName());
+      }
     }
   }
 
