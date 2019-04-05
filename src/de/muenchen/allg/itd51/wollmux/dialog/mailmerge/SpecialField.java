@@ -6,6 +6,11 @@ import de.muenchen.allg.afid.UNO;
 
 public class SpecialField
 {
+  private SpecialField()
+  {
+    // nothing to do
+  }
+  
   public static void addItems(XComboBox comboBox)
   {
     comboBox.addItems(new String[] { "Bitte wählen..", "Gender", "Wenn...Dann...Sonst",

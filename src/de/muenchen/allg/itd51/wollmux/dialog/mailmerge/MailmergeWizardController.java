@@ -27,62 +27,60 @@ import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIElementAction;
 
 public class MailmergeWizardController implements XWizardController
 {
-  
+
   private static final Logger LOGGER = LoggerFactory.getLogger(MailmergeWizardController.class);
 
   private static final int PAGE_COUNT = 5;
-  
-  public enum PATH {
+
+  public enum PATH
+  {
     STANDRAD(new short[] { 0 }),
     DIRECT_PRINT(new short[] { 0, 2 }),
     MAIL(new short[] { 0, 1, 3 }),
-    SINGLE_FILES(new short[] { 0, 1, 4});
-    
+    SINGLE_FILES(new short[] { 0, 1, 4 });
+
     final short[] path;
-    
-    PATH(short[] path) {
+
+    PATH(short[] path)
+    {
       this.path = path;
     }
   }
-  
-  private final short[][] PATHS = { PATH.STANDRAD.path, PATH.DIRECT_PRINT.path, PATH.MAIL.path, PATH.SINGLE_FILES.path };
+
+  private static final short[][] paths = { PATH.STANDRAD.path, PATH.DIRECT_PRINT.path, PATH.MAIL.path,
+      PATH.SINGLE_FILES.path };
   private PATH currentPath = PATH.STANDRAD;
-  
-  private enum PAGE_ID {
+
+  private enum PAGE_ID
+  {
     START,
     FORMAT,
     PRINTER,
     MAIL,
     SINGLE;
   }
-  
-  private String[] title = {
-      "Aktionen",
-      "Format",
-      "Drucker",
-      "E-Mail",
-      "Zielverzeichnis"
-  };
-  
+
+  private String[] title = { "Aktionen", "Format", "Drucker", "E-Mail", "Zielverzeichnis" };
+
   private XWizardPage[] pages = new XWizardPage[PAGE_COUNT];
-  
+
   private XWizard wizard;
-  
+
   /**
    * Enthält den String der im Attribut VALUE zur zuletzt ausgeführten
    * {@link UIElementAction#setActionType}-Action angegeben war. Beispiel:
    *
-   * Wird in der GUI das Formularelement '(LABEL "Gesamtdokument erstellen" TYPE
-   * "radio" ACTION "setActionType" VALUE "gesamtdok")' ausgewählt, dann enthält
-   * diese Variable den Wert "gesamtdok".
+   * Wird in der GUI das Formularelement '(LABEL "Gesamtdokument erstellen" TYPE "radio" ACTION
+   * "setActionType" VALUE "gesamtdok")' ausgewählt, dann enthält diese Variable den Wert
+   * "gesamtdok".
    */
   public ACTION currentActionType = ACTION.NOTHING;
-  
+
   /**
    * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
    */
   public DatasetSelectionType datasetSelectionType = DatasetSelectionType.ALL;
-  
+
   public FORMAT format = FORMAT.ODT;
 
   /**
@@ -92,14 +90,14 @@ public class MailmergeWizardController implements XWizardController
   public boolean ignoreDocPrintFuncs = true;
   public Map<SubmitArgument, Object> arguments;
   MailMergeController controller;
-  
+
   public MailMergeController getController()
   {
     return controller;
   }
 
   XTextDocument doc;
-  
+
   public MailmergeWizardController(MailMergeController controller, XTextDocument doc)
   {
     arguments = new EnumMap<>(SubmitArgument.class);
@@ -147,7 +145,8 @@ public class MailmergeWizardController implements XWizardController
         break;
       }
       pages[pageId] = page;
-    } catch (Exception ex) {
+    } catch (Exception ex)
+    {
       LOGGER.error("Page {} konnte nicht erstellt werden", pageId);
       LOGGER.error("", ex);
     }
@@ -173,10 +172,10 @@ public class MailmergeWizardController implements XWizardController
   {
     LOGGER.debug("Deaktiviere Page {} mit Titel {}", pageId, title[pageId]);
   }
-  
+
   public void startWizard()
   {
-    wizard = Wizard.createMultiplePathsWizard(UNO.defaultContext, PATHS, this);
+    wizard = Wizard.createMultiplePathsWizard(UNO.defaultContext, paths, this);
     wizard.enableButton(WizardButton.HELP, false);
     wizard.enableButton(WizardButton.NEXT, false);
     short result = wizard.execute();
@@ -185,7 +184,7 @@ public class MailmergeWizardController implements XWizardController
       controller.doMailMerge(currentActionType, format, datasetSelectionType, arguments);
     }
   }
-  
+
   public void changePath(PATH newPath)
   {
     LOGGER.debug("Neuer Pfad {}", newPath);
@@ -202,28 +201,28 @@ public class MailmergeWizardController implements XWizardController
       }
     }
   }
-  
+
   public void activateNextButton(boolean activate)
   {
     wizard.enableButton(WizardButton.NEXT, activate);
     enableFinishButton();
   }
-  
+
   private PAGE_ID getPageId(short pageId)
   {
     return PAGE_ID.values()[pageId];
   }
-  
+
   private void enableFinishButton()
   {
     boolean enable = true;
-    for(short i : currentPath.path)
+    for (short i : currentPath.path)
     {
       enable = enable && pages[i].canAdvance();
     }
     wizard.enableButton(WizardButton.FINISH, enable);
   }
-  
+
   public ACTION getCurrentActionType()
   {
     return currentActionType;
@@ -233,7 +232,7 @@ public class MailmergeWizardController implements XWizardController
   {
     this.currentActionType = currentActionType;
   }
-  
+
   public DatasetSelectionType getDatasetSelectionType()
   {
     return datasetSelectionType;

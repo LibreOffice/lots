@@ -40,7 +40,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -51,8 +50,6 @@ import javax.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.awt.XNumericField;
-import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XStorable;
 import com.sun.star.text.XTextDocument;
@@ -96,48 +93,25 @@ public class MailMergeNew
    */
   public boolean previewMode;
 
-  /**
-   * Die Nummer des zu previewenden Datensatzes. ACHTUNG! Kann aufgrund von
-   * Veränderung der Daten im Hintergrund größer sein als die Anzahl der Datensätze.
-   * Darauf muss geachtet werden.
-   */
-  private int previewDatasetNumber = 1;
-
-  /**
-   * Die beim letzten Aufruf von {@link #updatePreviewFields()} aktuelle Anzahl an
-   * Datensätzen in {@link #ds}.
-   */
-  private int previewDatasetNumberMax = Integer.MAX_VALUE;
-
   private static File attachment = null;
-
-  private XNumericField datasetNumber;
-
-  private Collection<XWindow> elementsDisabledWhenNoDatasourceSelected =
-    new ArrayList<>();
-
-  private Collection<XWindow> elementsDisabledWhenNotInPreviewMode =
-    new ArrayList<>();
-
-  private Collection<XWindow> elementsDisabledWhenFirstDatasetSelected =
-    new ArrayList<>();
-
-  private Collection<XWindow> elementsDisabledWhenLastDatasetSelected =
-    new ArrayList<>();
-
-  /**
-   * Enthält alle elementsDisabledWhen... Collections.
-   */
-  private ArrayList<Collection<XWindow>> listsOfElementsDisabledUnderCertainCircumstances =
-    new ArrayList<>();
 
   /**
    * Falls nicht null wird dieser Listener aufgerufen nachdem der MailMergeNew
    * geschlossen wurde.
    */
   private ActionListener abortListener = null;
+  
+  /**
+   * Tag für {@link TextComponentTags}, das als Platzhalter für die Serienbriefnummer
+   * steht.
+   */
+  public static final String TAG_SERIENBRIEFNUMMER = "#SB";
 
-  private MailMergeParams mailMergeParams = new MailMergeParams();
+  /**
+   * Tag für {@link TextComponentTags}, das als Platzhalter für die Datensatznummer
+   * steht.
+   */
+  public static final String TAG_DATENSATZNUMMER = "#DS";
 
   /**
    * ID der Property in der die Serienbriefdaten gespeichert werden.
@@ -423,7 +397,7 @@ public class MailMergeNew
         continue;
       }
 
-      int datensatzNummer = index + 1; // same as datensatzNummer = selectedIdx+1;
+      int datensatzNummer = index + 1;
 
       if (selIter.hasNext())
         selectedIdx = selIter.next();
@@ -448,11 +422,11 @@ public class MailMergeNew
         pmod.setFormValue(spalte, value);
         dataSetExport.put(spalte, value);
       }
-      pmod.setFormValue(MailMergeParams.TAG_DATENSATZNUMMER, "" + datensatzNummer);
-      dataSetExport.put(MailMergeParams.TAG_DATENSATZNUMMER, "" + datensatzNummer);
-      pmod.setFormValue(MailMergeParams.TAG_SERIENBRIEFNUMMER, ""
+      pmod.setFormValue(TAG_DATENSATZNUMMER, "" + datensatzNummer);
+      dataSetExport.put(TAG_DATENSATZNUMMER, "" + datensatzNummer);
+      pmod.setFormValue(TAG_SERIENBRIEFNUMMER, ""
         + serienbriefNummer);
-      dataSetExport.put(MailMergeParams.TAG_SERIENBRIEFNUMMER, ""
+      dataSetExport.put(TAG_SERIENBRIEFNUMMER, ""
         + serienbriefNummer);
 
       // Weiterreichen des Drucks an die nächste Druckfunktion. Dies findet nicht
@@ -767,8 +741,8 @@ public class MailMergeNew
         new HashMap<String, String>()));
 
     // Zähler für #DS und #SB mit gleicher Länge erzeugen (ggf. mit 0en auffüllen)
-    fillWithLeading0(dataset, MailMergeParams.TAG_DATENSATZNUMMER, digits);
-    fillWithLeading0(dataset, MailMergeParams.TAG_SERIENBRIEFNUMMER, digits);
+    fillWithLeading0(dataset, TAG_DATENSATZNUMMER, digits);
+    fillWithLeading0(dataset, TAG_SERIENBRIEFNUMMER, digits);
 
     String fileName = filePattern.getContent(dataset);
     return simplifyFilename(fileName);

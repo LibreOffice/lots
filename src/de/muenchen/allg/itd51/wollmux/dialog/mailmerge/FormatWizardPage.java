@@ -114,7 +114,7 @@ public class FormatWizardPage extends AbstractXWizardPage
   @Override
   public boolean commitPage(short reason)
   {
-    controller.arguments.put(SubmitArgument.filenameTemplate, name.getText());
+    controller.arguments.put(SubmitArgument.FILENAME_TEMPLATE, name.getText());
     controller.format = getSelectedFormat();
     window.setVisible(false);
     LOGGER.debug("Fromat {}, Name {}", getSelectedFormat(), getNamingTemplate());

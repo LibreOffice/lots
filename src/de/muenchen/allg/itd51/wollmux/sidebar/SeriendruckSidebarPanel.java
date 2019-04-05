@@ -8,18 +8,17 @@ import com.sun.star.ui.UIElementType;
 import com.sun.star.ui.XToolPanel;
 import com.sun.star.ui.XUIElement;
 import com.sun.star.uno.UnoRuntime;
-import com.sun.star.uno.XComponentContext;
 
 public class SeriendruckSidebarPanel extends ComponentBase implements XUIElement
 {
   private String resourceUrl;
   private XToolPanel panel;
 
-  public SeriendruckSidebarPanel(XComponentContext context, XWindow parentWindow,
+  public SeriendruckSidebarPanel(XWindow parentWindow,
       String resourceUrl)
   {
     this.resourceUrl = resourceUrl;
-    panel = new SeriendruckSidebar(context, parentWindow);
+    panel = new SeriendruckSidebar(parentWindow);
   }
 
   @Override

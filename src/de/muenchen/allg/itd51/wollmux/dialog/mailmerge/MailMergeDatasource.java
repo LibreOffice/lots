@@ -101,7 +101,7 @@ public class MailMergeDatasource
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MailMergeDatasource.class);
 
-  public static enum SOURCE_TYPE
+  public enum SOURCE_TYPE
   {
     NONE,
     CALC,
@@ -338,9 +338,9 @@ public class MailMergeDatasource
           column, dataIter.next(), null);
     }
     WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
-        MailMergeParams.TAG_DATENSATZNUMMER, previewDatasetNumberStr, null);
+        MailMergeNew.TAG_DATENSATZNUMMER, previewDatasetNumberStr, null);
     WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
-        MailMergeParams.TAG_SERIENBRIEFNUMMER, previewDatasetNumberStr, null);
+        MailMergeNew.TAG_SERIENBRIEFNUMMER, previewDatasetNumberStr, null);
   }
 
   /**
@@ -355,7 +355,7 @@ public class MailMergeDatasource
    * Öffnet einen FilePicker und falls der Benutzer dort eine Tabelle auswählt, wird diese geöffnet
    * und als Datenquelle verwendet.
    */
-  public List<CalcModel> selectFileAsDatasource()
+  public CalcModel selectFileAsDatasource()
   {
     XFilePicker picker = UNO
         .XFilePicker(UNO.createUNOService("com.sun.star.ui.dialogs.FilePicker"));
@@ -365,8 +365,7 @@ public class MailMergeDatasource
     String[] sheets = null;
     String windowTitle = "";
 
-    List<String> result = new ArrayList<>();
-
+    CalcModel model = null;
     if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)
     {
       String[] files = picker.getFiles();
@@ -376,20 +375,16 @@ public class MailMergeDatasource
         XSpreadsheetDocument doc = getCalcDocByFile(files[0]);
 
         if (doc == null)
-          return new ArrayList<>();
+          return null;
 
         sheets = doc.getSheets().getElementNames();
         String docUrl = UNO.XModel(doc).getURL();
 
         windowTitle = UNO.getPropertyByPropertyValues(UNO.XModel(doc).getArgs(), "Title");
 
-        for (String sheet : sheets)
-        {
-          result.add(windowTitle + " - " + sheet);
-        }
+        model = new CalcModel(stripOpenOfficeFromWindowName(windowTitle), docUrl, sheets, doc);
+        openSpreedSheetDocuments.add(model);
 
-        openSpreedSheetDocuments
-            .add(new CalcModel(stripOpenOfficeFromWindowName(windowTitle), docUrl, sheets, doc));
         if (sheets.length > 0)
         {
           setTable(sheets[0]);
@@ -400,7 +395,7 @@ public class MailMergeDatasource
       }
     }
     
-    return openSpreedSheetDocuments;
+    return model;
   }
   
   /**
@@ -1011,43 +1006,6 @@ public class MailMergeDatasource
 
   public List<CalcModel> openSpreedSheetDocuments = new ArrayList<>();
 
-  public class CalcModel
-  {
-    private String windowTitle;
-    private String calcUrl;
-    private XSpreadsheetDocument spreadSheetDocument;
-    private String[] spreadSheetTableTitles;
-
-    public CalcModel(String windowTitle, String calcUrl, String[] spreadSheetTableTitles,
-        XSpreadsheetDocument spreadSheetDocument)
-    {
-      this.windowTitle = windowTitle;
-      this.calcUrl = calcUrl;
-      this.spreadSheetTableTitles = spreadSheetTableTitles;
-      this.spreadSheetDocument = spreadSheetDocument;
-    }
-
-    public String getWindowTitle()
-    {
-      return this.windowTitle;
-    }
-
-    public String getCalcUrl()
-    {
-      return this.calcUrl;
-    }
-
-    public String[] getSpreadSheetTableTitles()
-    {
-      return this.spreadSheetTableTitles;
-    }
-
-    public XSpreadsheetDocument getSpreadSheetDocument()
-    {
-      return this.spreadSheetDocument;
-    }
-  }
-
   /**
    * Liefert ein CalcModel und zugehörigen XSpreadsheetDocuments aller offenen Calc-Fenster.
    *
@@ -1352,33 +1310,6 @@ public class MailMergeDatasource
   }
 
   /**
-   * Liefert die Namen aller relevanten Tabellen der aktuell ausgewählten Datenquelle. Wenn keine
-   * Datenquelle ausgewählt ist, oder es keine Tabellen darin gibt, so wird eine leere Liste
-   * geliefert. Eine Tabelle in einem Calc-Dokument ist nur relevant, wenn sie nicht leer ist.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private List<String> getTableNames()
-  {
-    try
-    {
-      switch (currentSourceType)
-      {
-      case CALC:
-        return getRelevantTableNames(selectedCalcDoc);
-      case DB:
-        return getDbTableNames();
-      default:
-        return new ArrayList<>();
-      }
-    } catch (Exception x)
-    {
-      LOGGER.error("", x);
-      return new ArrayList<>();
-    }
-  }
-
-  /**
    * Liefert die Namen aller Tabellen der aktuell ausgewählten OOo-Datenquelle. Wenn keine
    * OOo-Datenquelle ausgewählt ist, oder es keine nicht-leere Tabelle gibt, so wird eine leere
    * Liste geliefert.
@@ -1414,51 +1345,6 @@ public class MailMergeDatasource
       }
     }
     return tableNames;
-  }
-
-  /**
-   * Liefert die Namen aller nicht-leeren Tabellenblätter von calcDoc. Falls calcDoc == null wird
-   * eine leere Liste geliefert. Falls alle Tabellen leer sind, wird trotzdem eine Liste mit dem
-   * Namen der ersten Tabelle zurückgeliefert.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-   */
-  private List<String> getRelevantTableNames(XSpreadsheetDocument calcDoc)
-  {
-    List<String> nonEmptyTableNames = new ArrayList<>();
-    if (calcDoc != null)
-      try
-      {
-        XSpreadsheets sheets = calcDoc.getSheets();
-        String[] tableNames = sheets.getElementNames();
-        SortedSet<Integer> columns = new TreeSet<>();
-        SortedSet<Integer> rows = new TreeSet<>();
-        for (int i = 0; i < tableNames.length; ++i)
-        {
-          try
-          {
-            XCellRangesQuery sheet = UNO.XCellRangesQuery(sheets.getByName(tableNames[i]));
-            columns.clear();
-            rows.clear();
-            getVisibleNonemptyRowsAndColumns(sheet, columns, rows);
-            if (!columns.isEmpty() && !rows.isEmpty())
-            {
-              nonEmptyTableNames.add(tableNames[i]);
-            }
-          } catch (Exception x)
-          {
-            LOGGER.error("", x);
-          }
-        }
-
-        if (nonEmptyTableNames.isEmpty() && tableNames.length > 0)
-          nonEmptyTableNames.add(tableNames[0]);
-
-      } catch (Exception x)
-      {
-        LOGGER.error("", x);
-      }
-    return nonEmptyTableNames;
   }
 
   /**

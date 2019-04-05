@@ -8,9 +8,6 @@ import com.sun.star.awt.XButton;
 import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XWindow;
-import com.sun.star.frame.XDispatch;
-import com.sun.star.frame.XDispatchProvider;
-import com.sun.star.text.XTextDocument;
 import com.sun.star.ui.dialogs.ExecutableDialogResults;
 import com.sun.star.ui.dialogs.XFolderPicker2;
 import com.sun.star.uno.Exception;
@@ -30,7 +27,6 @@ public class SingleWizardPage extends AbstractXWizardPage
   private final XButton search;
 
   private MailmergeWizardController controller;
-  private XTextDocument doc;
 
   public SingleWizardPage(XWindow parentWindow, short pageId, MailmergeWizardController controller)
       throws Exception
@@ -73,32 +69,8 @@ public class SingleWizardPage extends AbstractXWizardPage
   @Override
   public boolean commitPage(short reason)
   {
-    controller.arguments.put(SubmitArgument.targetDirectory, targetDir.getText());
+    controller.arguments.put(SubmitArgument.TARGET_DIRECTORY, targetDir.getText());
     window.setVisible(false);
     return true;
-  }
-
-  /**
-   * Holt sich den Frame von doc, führt auf diesem ein queryDispatch() mit der zu urlStr gehörenden
-   * URL aus und liefert den Ergebnis XDispatch zurück oder null, falls der XDispatch nicht
-   * verfügbar ist.
-   *
-   * @param doc
-   *          Das Dokument, dessen Frame für den Dispatch verwendet werden soll.
-   * @param urlStr
-   *          die URL in Form eines Strings (wird intern zu URL umgewandelt).
-   * @return den gefundenen XDispatch oder null, wenn der XDispatch nicht verfügbar ist.
-   */
-  private XDispatch getDispatchForModel(com.sun.star.util.URL url)
-  {
-    XDispatchProvider dispProv = null;
-
-    dispProv = UNO.XDispatchProvider(UNO.XModel(doc).getCurrentController().getFrame());
-
-    if (dispProv != null)
-    {
-      return dispProv.queryDispatch(url, "_self", com.sun.star.frame.FrameSearchFlag.SELF);
-    }
-    return null;
   }
 }
