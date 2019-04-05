@@ -39,8 +39,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.swing.SwingUtilities;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -443,34 +441,27 @@ public class PrintParametersDialog
 
           if (disp != null)
           {
-            disp.dispatchWithNotification(url, new PropertyValue[] {},
-                new XDispatchResultListener()
-                {
-                  @Override
-                  public void disposing(EventObject arg0)
-                  {
-                    // unused
-                  }
+            disp.dispatchWithNotification(url, new PropertyValue[] {}, new XDispatchResultListener()
+            {
+              @Override
+              public void disposing(EventObject arg0)
+              {
+                // unused
+              }
 
-                  @Override
-                  public void dispatchFinished(DispatchResultEvent arg0)
-                  {
-                    SwingUtilities.invokeLater(new Runnable()
-                    {
-                      @Override
-                      public void run()
-                      {
-                        XFixedText printerNameLabel = UNO.XFixedText(layout.getControl("printerSettingsPrintModel"));
+              @Override
+              public void dispatchFinished(DispatchResultEvent arg0)
+              {
 
-                        if (printerNameLabel == null)
-                          return;
+                XFixedText printerNameLabel = UNO
+                    .XFixedText(layout.getControl("printerSettingsPrintModel"));
 
-                        printerNameLabel
-                            .setText(" " + getCurrentPrinterName(doc) + " ");
-                      }
-                    });
-                  }
-                });
+                if (printerNameLabel == null)
+                  return;
+
+                printerNameLabel.setText(" " + getCurrentPrinterName(doc) + " ");
+              }
+            });
           }
         }
         catch (java.lang.Exception e)
