@@ -32,12 +32,12 @@ package de.muenchen.allg.itd51.wollmux.print;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.AbstractMap.SimpleEntry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -542,7 +542,6 @@ public class PrintModels
     public void setStage(String stage)
     {
       currentStage = stage;
-      if (printProgressBar != null) printProgressBar.setTitle(currentStage);
     }
 
     /**
@@ -995,7 +994,10 @@ public class PrintModels
     @Override
     public void setPrintMessage(String value)
     {
-      if (printProgressBar != null) printProgressBar.setMessage(this, value);
+      if (printProgressBar != null)
+      {
+        printProgressBar.setMessage(value);
+      }
     }
   }
 
