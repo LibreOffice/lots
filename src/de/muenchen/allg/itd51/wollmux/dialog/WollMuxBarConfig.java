@@ -54,6 +54,7 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarContent;
 
 /**
  * Verwaltet die Konfiguration der WollMuxbar und bietet einen Dialog zum Ändern
@@ -935,7 +936,7 @@ public class WollMuxBarConfig
     }
 
     File wollmuxbarConfFile =
-      new File(WollMuxFiles.getWollMuxDir(), WollMuxBar.WOLLMUXBAR_CONF);
+      new File(WollMuxFiles.getWollMuxDir(), WollMuxSidebarContent.WOLLMUXBAR_CONF);
     try
     {
       WollMuxFiles.writeConfToFile(wollmuxbarConfFile, userConf);

@@ -1,10 +1,9 @@
 basic/                          opt/libreoffice6.1/share/extensions/wollmux/
 debian/lhm/buildinfo            opt/libreoffice6.1/share/extensions/wollmux/
 debian/lhm/description.xml      opt/libreoffice6.1/share/extensions/wollmux/
-debian/lhm/wollmuxbar           usr/bin/
 debian/wollmuxbar.desktop       usr/share/applications/
 debian/wollmuxbar.png           usr/share/icons/
-dist/WollMuxBar.jar             usr/share/java/
+dist/WollMuxBar.jar             opt/libreoffice6.1/share/extensions/wollmux/
 oxt/Addons.xcu                  opt/libreoffice6.1/share/extensions/wollmux/
 oxt/Factories.xcu               opt/libreoffice6.1/share/extensions/wollmux/
 oxt/META-INF/manifest.xml       opt/libreoffice6.1/share/extensions/wollmux/META-INF/

@@ -2,7 +2,7 @@
 	<skipIfNotSupported />
 	<programGroup defaultName="Landeshauptstadt München\WollMux"
 		location="startMenu" />
-	<shortcut name="WollMux" target="$INSTALL_PATH\wollmuxbar.exe"
+	<shortcut name="WollMux" target="$LOexecutable"
 		commandLine="" workingDirectory="$INSTALL_PATH"
 		description="WollMux - das Briefkopf- und Formularsystem" iconFile="$INSTALL_PATH\wollmux.ico"
 		iconIndex="0" initialState="normal" programGroup="yes" desktop="yes"

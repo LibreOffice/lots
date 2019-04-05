@@ -57,6 +57,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarContent;
 
 /**
  * Bietet einen Dialog zur Bearbeitung eines UIElement-beschreibenden
@@ -575,7 +576,7 @@ public class UIElementConfigThingyEditor
     public JActionAttributeEditor()
     {
       super("ACTION", false);
-      Vector<String> actions = new Vector<>(WollMuxBar.SUPPORTED_ACTIONS);
+      Vector<String> actions = new Vector<>(WollMuxSidebarContent.SUPPORTED_ACTIONS);
       actions.remove("open"); // FIXME: "open"-Actions werden nicht unterstützt!
       Collections.sort(actions);
       combo = new JComboBox<>(actions);

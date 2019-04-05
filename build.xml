@@ -67,8 +67,6 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 	<property name="THIRDPARTY" value="thirdparty"/>
 	
 	<property name="WOLLMUXBAR_NAME" value="WollMuxBar" />
-	<property name="WOLLMUXBAR_JAR_NAME" value="${WOLLMUXBAR_NAME}.jar" />
-	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/${WOLLMUXBAR_JAR_NAME}" />
 	<property name="WOLLMUXBAR_EXE_NAME" value="wollmuxbar.exe" />
 	<property name="WOLLMUXBAR_EXE" value="${PACKAGE_DIR}/${WOLLMUXBAR_EXE_NAME}" />
 	<property name="DEBIAN_VERSION" value=""/>

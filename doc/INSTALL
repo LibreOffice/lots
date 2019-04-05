@@ -155,21 +155,3 @@ Rebuilding classes.tar.gz on a Debian system requires the package mingw32.
   For a user installation, launch OpenOffice.org, 
   go to the menu Tools/Extension Manager and use Add to install the
   extension.
-
-  Next, you need to install the file WollMuxBar.jar somewhere and to
-  establish a way to launch it. Depending on your system, it may already be
-  possible to run it by simply double-clicking it. Otherwise the command
-
-    java -jar <path_to>/WollMuxBar.jar
-
-  or under Windows
-
-    javaw.exe -jar <path_to>/WollMuxBar.jar
-
-  will run the WollMux toolbar. The dist/ directory contains a UNIX shell
-  script called wollmuxbar that demonstrates this.
-  For Windows an executable wollmuxbar.exe can be found in the dist/ directory.
-  wollmuxbar.exe needs to be put in the same directory as the WollMuxBar.jar.
-  Note, however, that you need a working configuration 
-  (not described in this document) before any of this will work.
-

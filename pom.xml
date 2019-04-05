@@ -47,8 +47,6 @@
 							<excludes>
 								<exclude>**/README</exclude>
 								<exclude>**/*.xml*</exclude>
-								<exclude>**/wollmuxbar</exclude>
-								<exclude>**/wollmuxbar.l4j.ini</exclude>
 								<exclude>**/*.bat</exclude>
 								<exclude>**/*.sh</exclude>
 							</excludes>
@@ -205,14 +203,6 @@
 									<Main-Class>com.sun.star.lib.loader.Loader</Main-Class>
 									<UNO-Type-Path>&lt;&gt;</UNO-Type-Path>
 								</manifestEntries>
-								<manifestSections>
-									<manifestSection>
-										<name>com/sun/star/lib/loader/Loader.class</name>
-										<manifestEntries>
-											<Application-Class>de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar</Application-Class>
-										</manifestEntries>
-									</manifestSection>
-								</manifestSections>
 							</archive>
 							<archiverConfig>
 								<compress>false</compress>
@@ -269,33 +259,6 @@
 						<goals>
 							<goal>run</goal>
 						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>com.akathist.maven.plugins.launch4j</groupId>
-				<artifactId>launch4j-maven-plugin</artifactId>
-				<version>1.7.24</version>
-				<executions>
-					<execution>
-						<id>l4j-clui</id>
-						<phase>package</phase>
-						<goals>
-							<goal>launch4j</goal>
-						</goals>
-						<configuration>
-							<headerType>gui</headerType>
-							<outfile>dist/wollmuxbar.exe</outfile>
-							<jar>dist/WollMuxBar.jar</jar>
-							<errTitle>WollMux</errTitle>
-							<jre>
-								<minVersion>1.8.0</minVersion>
-								<bundledJre64Bit>false</bundledJre64Bit>
-								<bundledJreAsFallback>false</bundledJreAsFallback>
-								<jdkPreference>preferJre</jdkPreference>
-								<runtimeBits>64/32</runtimeBits>
-							</jre>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
