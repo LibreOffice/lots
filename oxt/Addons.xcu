@@ -383,6 +383,32 @@
         </node>
       </node>
       
+      
+      <node oor:name="de.muenchen.allg.itd51.wollmux.WollMuxSidebar"
+        oor:op="replace">
+        <node oor:name="m1" oor:op="replace">
+          <prop oor:name="Context" oor:type="xs:string">
+            <value>com.sun.star.sheet.SpreadsheetDocument,com.sun.star.drawing.DrawingDocument,com.sun.star.presentation.PresentationDocument</value>
+          </prop>
+          <prop oor:name="URL" oor:type="xs:string">
+            <value>wollmux:About</value>
+          </prop>
+          <prop oor:name="ImageIdentifier" oor:type="xs:string">
+            <value>%origin%/icons/imagePw</value>
+          </prop>
+          <prop oor:name="Title" oor:type="xs:string">
+            <value>WollMux Version</value>
+            <value xml:lang="de">WollMux Version</value>
+            <value xml:lang="nl">WollMux Version</value>
+            <value xml:lang="en">WollMux Version</value>
+          </prop>
+          <prop oor:name="Target" oor:type="xs:string">
+            <value>_self</value>
+          </prop>
+        </node>
+      </node>
+      
+     
     </node>
   </node>
 </oor:component-data>
