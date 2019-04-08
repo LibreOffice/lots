@@ -50,9 +50,12 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.dialog.AbstractNotifier;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.AdjustFields;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.CalcModel;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.DBDatasourceDialog;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.DBModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController;
-import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeDatasource.SOURCE_TYPE;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeField;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailmergeWizardController;
@@ -386,6 +389,15 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
 
   private void updateControls()
   {
+    boolean hasUnmappedFields = mailMerge.getDs().checkUnmappedFields(mailMerge.getDs().getColumnNames());
+    
+    if (hasUnmappedFields)
+    {
+      AdjustFields adjustFieldsDialog = new AdjustFields();
+      getDocumentController().ifPresent(controller -> {
+        adjustFieldsDialog.showAdjustFieldsDialog(controller, mailMerge.getDs());
+      });
+    }
     // Spezialfeld-ComboBox aktualisieren
     mailMergeField.setMailMergeDatasource(mailMerge.getDs());
     XNumericField currentDatasourceCountText = UNO.XNumericField(printCount);
@@ -428,8 +440,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     {
       XListBox listbox = UNO.XListBox(arg0.Source);
 
-      mailMerge.getDs().setDatasource(SOURCE_TYPE.CALC);
-      mailMerge.getDs().setTable(listbox.getSelectedItem());
+      mailMerge.getDs().setDatasource(listbox.getSelectedItem());
       updateControls();
     }
   };
@@ -454,14 +465,29 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
       });
     }
   };
+  
+  private AbstractNotifier palListener = new AbstractNotifier()
+  {
+    @Override
+    public void notify(String message)
+    {
+      XListBox currentDatasources = UNO.XListBox(layout.getControl("currentDatasources"));
+
+      List<String> dbTableNames = mailMerge.getDs().getDbTableNames(message);
+      mailMerge.getDs().addCachedDbConnection(new DBModel(message, dbTableNames));
+      
+      currentDatasources.addItems(dbTableNames.toArray(new String[dbTableNames.size()]), 
+          (short) (currentDatasources.getItemCount() + 1));
+    }
+  };
 
   private AbstractActionListener dbActionListener = new AbstractActionListener()
   {
-
     @Override
     public void actionPerformed(ActionEvent arg0)
     {
-      // mailMerge.getDs().selectOOoDatasourceAsDatasource();
+      DBDatasourceDialog oooDSDialog = new DBDatasourceDialog(palListener);
+       //mailMerge.getDs().selectOOoDatasourceAsDatasource();
       // updateVisibleTables();
     }
   };
@@ -504,7 +530,6 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     @Override
     public void actionPerformed(ActionEvent arg0)
     {
-      mailMerge.getDs().setDatasource(SOURCE_TYPE.CALC);
       CalcModel model = mailMerge.getDs().selectFileAsDatasource();
       if (model != null)
       {
@@ -596,7 +621,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
   @Override
   public int getMinimalWidth()
   {
-    return 300; // crash
+    return 300;
   }
 
   @Override
