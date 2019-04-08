@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oor:component-data xmlns:oor="http://openoffice.org/2001/registry"
+ xmlns:xs="http://www.w3.org/2001/XMLSchema"
+ oor:name="DrawWindowState"
+ oor:package="org.openoffice.Office.UI">
+    <node oor:name="UIElements">
+	<node oor:name="States">
+			
+	<!-- 
+      
+			Diese Konfigurationsdatei wird benötigt, um die Symbolleiste "Add-on X"
+			in "WollMux Version (WollMux)" umzubenennen und die Leiste standardmäßig auf 
+			unsichtbar zu stellen.
+			
+			es handelt sich hierbei um ein neues Feature, das seit OOo2.0.3 genutzt werden
+			kann. Früher konnte der Name nicht angepasst werden und der Titel der Symbolleiste
+			war immer fix "Add-on 1".
+			
+			siehe http://www.mail-archive.com/dev@api.openoffice.org/msg03281.html
+			
+	--> 			
+			
+		<node oor:name="private:resource/toolbar/addon_de.muenchen.allg.itd51.wollmux.WollMuxSidebar" oor:op="replace">
+			<prop oor:name="UIName" oor:type="xs:string">
+			    <value>WollMux Version (WollMux)</value>
+			    <value xml:lang="de">WollMux Version (WollMux)</value>
+			    <value xml:lang="nl">WollMux Version (WollMux)</value>
+			    <value xml:lang="en">WollMux Version (WollMux)</value>
+			</prop>
+			<prop oor:name="Visible" oor:type="xs:boolean">
+			    <value>false</value>
+			</prop>
+		</node>
+			
+	</node>
+    </node>
+</oor:component-data>

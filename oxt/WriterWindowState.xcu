@@ -42,7 +42,7 @@
        <!-- 
       
            Diese Konfigurationsdatei wird benötigt, um die Symbolleiste "Add-on 2"
-           in "Sachleitende Verfügungen" umzubenennen und die Leiste standardmäßig auf 
+           in "Textbausteine" umzubenennen und die Leiste standardmäßig auf 
            unsichtbar zu stellen.
            
            es handelt sich hierbei um ein neues Feature, das seit OOo2.0.3 genutzt werden
@@ -80,7 +80,7 @@
        <!-- 
       
            Diese Konfigurationsdatei wird benötigt, um die Symbolleiste "Add-on 3"
-           in "Sachleitende Verfügungen" umzubenennen und die Leiste standardmäßig auf 
+           in "Werkzeuge für Vorlagenersteller (WollMux)" umzubenennen und die Leiste standardmäßig auf 
            unsichtbar zu stellen.
            
            es handelt sich hierbei um ein neues Feature, das seit OOo2.0.3 genutzt werden
