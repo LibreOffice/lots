@@ -30,32 +30,15 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog.trafo;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.WindowConstants;
-import javax.swing.border.EmptyBorder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.awt.XButton;
 import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XContainerWindowProvider;
 import com.sun.star.awt.XControlContainer;
@@ -66,9 +49,9 @@ import com.sun.star.awt.XWindowPeer;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
  * Erlaubt die Bearbeitung der Funktion eines Gender-Feldes.
@@ -81,19 +64,9 @@ public class GenderDialog
 
   private TrafoDialogParameters params;
 
-  private JDialog myDialog;
-
-  private JPanel genderPanel;
-
-  private JComboBox<String> cbAnrede;
-
-  private JTextField tfHerr;
-
-  private JTextField tfFrau;
-
-  private JTextField tfSonst;
-
   private XControlContainer controlContainer;
+  
+  private XDialog dialog;
 
   public GenderDialog(TrafoDialogParameters params)
   {
@@ -140,9 +113,6 @@ public class GenderDialog
           textSonst = value.getName();
       }
 
-      // if (anredeId == null || textHerr == null || textFrau == null
-      // || textSonst == null) stop();
-
       HashSet<String> uniqueFieldNames = new HashSet<>(params.fieldNames);
       uniqueFieldNames.add(anredeId);
       List<String> sortedNames = new ArrayList<>(uniqueFieldNames);
@@ -152,7 +122,7 @@ public class GenderDialog
     }
     catch (NodeNotFoundException e)
     {
-      // stop();
+      LOGGER.error("", e);
     }
   }
 
@@ -193,31 +163,26 @@ public class GenderDialog
 
     XTextComponent txtOther = UNO.XTextComponent(controlContainer.getControl("txtOthers"));
     txtOther.setText(textSonst);
-
-    UnoRuntime.queryInterface(XDialog.class, window).execute();
+    
+    XButton btnAbort = UNO.XButton(controlContainer.getControl("btnAbort"));
+    btnAbort.addActionListener(btnAbortActionListener);
+    
+    XButton btnOK = UNO.XButton(controlContainer.getControl("btnOK"));
+    btnOK.addActionListener(btnOKActionListener);
+    
+    dialog = UnoRuntime.queryInterface(XDialog.class, window);
+    dialog.execute();
 
   }
-
-  /**
-   * Fügt der JComponent compo abhängig vom Text ein oder mehrere H-Boxen mit dem
-   * Text text hinzu, wobei der Text an Zeilenumbrüchen umgebrochen und linksbündig
-   * dargestellt wird.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  private void addText(JComponent compo, String text)
-  {
-    String[] split = text.split("\n");
-    for (int i = 0; i < split.length; i++)
-    {
-      Box hbox = Box.createHorizontalBox();
-      JLabel label = new JLabel(split[i]);
-      label.setFont(label.getFont().deriveFont(Font.PLAIN));
-      hbox.add(label);
-      hbox.add(Box.createHorizontalGlue());
-      compo.add(hbox);
-    }
-  }
+  
+  private AbstractActionListener btnAbortActionListener = event -> {
+    dialog.endExecute();
+  };
+  
+  private AbstractActionListener btnOKActionListener = event -> {
+    updateTrafoConf();
+    dialog.endExecute();
+  };
 
   /**
    * Aktualisiert {@link #params},conf anhand des aktuellen Dialogzustandes und
@@ -228,71 +193,11 @@ public class GenderDialog
   {
     params.conf = new ConfigThingy(params.conf.getName());
     params.conf.addChild(generateGenderTrafoConf(
-      cbAnrede.getSelectedItem().toString(), tfHerr.getText(), tfFrau.getText(),
-      tfSonst.getText()));
+      UNO.XTextComponent(controlContainer.getControl("cbSerienbrieffeld")).getText(),
+      UNO.XTextComponent(controlContainer.getControl("txtMale")).getText(), 
+      UNO.XTextComponent(controlContainer.getControl("txtFemale")).getText(),
+      UNO.XTextComponent(controlContainer.getControl("txtOthers")).getText()));
     params.isValid = true;
-  }
-
-  /**
-   * Fügt {@link #genderPanel} in dialog ein und zeigt ihn an.
-   * 
-   * @param dialog
-   * @author Matthias Benkmann (D-III-ITD D.10), Christoph Lutz (D-III-ITD D.10)
-   */
-  private void show(String windowTitle, JDialog dialog)
-  {
-    params.isValid = false; // wird später in updateTrafoConf auf true gesetzt.
-
-    dialog.setAlwaysOnTop(true);
-    dialog.setTitle(windowTitle);
-    // oehrchen = new MyWindowListener();
-    dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    // dialog.addWindowListener(oehrchen);
-
-    JPanel myPanel = new JPanel(new BorderLayout());
-    myPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
-    dialog.add(myPanel);
-    JScrollPane scrollPane = new JScrollPane(genderPanel);
-    scrollPane.setBorder(null);
-    myPanel.add(scrollPane, BorderLayout.CENTER);
-    Box lowerButtons = Box.createHorizontalBox();
-    lowerButtons.setBorder(new EmptyBorder(10, 4, 5, 4));
-    myPanel.add(lowerButtons, BorderLayout.SOUTH);
-    JButton cancel = new JButton(L.m("Abbrechen"));
-    cancel.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        // abort();
-      }
-    });
-    JButton insert = new JButton(L.m("OK"));
-    insert.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        updateTrafoConf();
-        // abort();
-      }
-    });
-    lowerButtons.add(cancel);
-    lowerButtons.add(Box.createHorizontalGlue());
-    lowerButtons.add(insert);
-
-    dialog.setVisible(false);
-    dialog.pack();
-    int frameWidth = dialog.getWidth();
-    int frameHeight = dialog.getHeight();
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width / 2 - frameWidth / 2;
-    int y = screenSize.height / 2 - frameHeight / 2;
-    dialog.setLocation(x, y);
-    dialog.setResizable(false);
-    dialog.setVisible(true);
-
-    this.myDialog = dialog;
   }
 
   /**
@@ -334,11 +239,5 @@ public class GenderDialog
     setSonst.add(textSonst);
 
     return bind;
-  }
-
-  public void show(String windowTitle)
-  {
-    // TODO Auto-generated method stub
-    
   }
 }
