@@ -73,7 +73,7 @@ import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpret
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-class AdjustFields
+public class AdjustFields
 {
   /**
    * Präfix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
@@ -95,7 +95,7 @@ class AdjustFields
    */
   private static final Pattern TAG_PATTERN = Pattern.compile("(" + TAG_PREFIX + "(.*?)" + TAG_SUFFIX + ")");
 
-  private AdjustFields() {}
+  public AdjustFields() {}
   
   /**
    * Diese Methode zeigt den Dialog an, mit dem die Felder im Dokument an eine
@@ -107,7 +107,7 @@ class AdjustFields
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  static void showAdjustFieldsDialog(final TextDocumentController documentController,
+  public void showAdjustFieldsDialog(final TextDocumentController documentController,
       MailMergeDatasource ds)
   {
     ReferencedFieldID[] fieldIDs =

@@ -98,8 +98,6 @@ public class AbsenderAuswaehlen
   private UNODialogFactory dialogFactory;
   
   private SimpleDialogLayout layout;
-  
-  private int count = 0;
 
   /**
    * Erzeugt einen neuen Dialog.
@@ -215,11 +213,15 @@ public class AbsenderAuswaehlen
     WollMuxEventHandler.getInstance().handlePALChangedNotify();
     dialogFactory.closeDialog();
   };
-
-  private IPersoenlicheAbsenderlisteVerwalten palListener = () -> 
+  
+  private AbstractNotifier palListener = new AbstractNotifier()
   {
+    @Override
+    public void dialogClosed()
+    {
       dialogFactory.setVisible(true);
       setListElements();
+    }
   };
 
   private AbstractActionListener editActionListener = event -> {
@@ -244,6 +246,7 @@ public class AbsenderAuswaehlen
     xListBox.removeItems((short) 0, xListBox.getItemCount());
 
     short itemToHightlightPos = 0;
+    int count = 0;
     
     for (Dataset dataset : dj.getLOS())
     {

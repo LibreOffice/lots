@@ -137,7 +137,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   private UNODialogFactory dialogFactory;
   private List<DJDatasetListElement> resultDJDatasetList = null;
   private List<DJDatasetListElement> cachedPAL = new ArrayList<>();
-  private IPersoenlicheAbsenderlisteVerwalten palListener;
+  private INotify palListener;
 
   private int count = 0;
   private short itemToHighlightPos = 0;
@@ -161,7 +161,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    *           Im Falle von nicht konfigurierten Suchfeldern in ConfigThingy.
    */
   public PersoenlicheAbsenderlisteVerwalten(ConfigThingy conf, DatasourceJoiner dj,
-      IPersoenlicheAbsenderlisteVerwalten palListener)
+      INotify palListener)
   {
     this.dj = dj;
     this.palListener = palListener;
