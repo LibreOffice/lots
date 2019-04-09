@@ -97,6 +97,7 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 	</target>
 	
 	<target name="makeversion_unix" unless="isWindows">
+		<mkdir dir="${LHM_DIR}"/>
 		<exec executable="bash" failifexecutionfails="false">
 			<arg file="${MISC}/makeversion"/>
 			<arg file="${VERSION_FILE}"/>
@@ -107,6 +108,7 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 	</target>
 	
 	<target name="makeversion_windows" if="isWindows">
+		<mkdir dir="${LHM_DIR}"/>
 		<exec executable="powershell" failifexecutionfails="false">
 			<arg value="-File"/>
 			<arg file="${MISC}/makeversion.ps1"/>
