@@ -14,7 +14,8 @@ public class SpecialField
   public static void addItems(XComboBox comboBox)
   {
     comboBox.addItems(new String[] { "Bitte wählen..", "Gender", "Wenn...Dann...Sonst",
-        "Datensatznummer", "Serienbriefnummer", "Feld bearbeiten..." }, (short) 0);
+        "Datensatznummer", "Serienbriefnummer", "Nächster Datensatz", "Felder bearbeiten..." },
+        (short) 0);
     UNO.XTextComponent(comboBox).setText(comboBox.getItem((short) 0));
   }
 }
