@@ -492,7 +492,7 @@ public class MailMergeDatasource
       dq.addChild(arg);
       break;
     case DB:
-      if (selectedDBModel.datasourceName == null || selectedDBModel.getTableNames().size() == 0)
+      if (selectedDBModel == null || selectedDBModel.datasourceName == null || selectedDBModel.getTableNames().size() == 0)
       {
         break;
       }
@@ -918,6 +918,7 @@ public class MailMergeDatasource
         for (String tableName : model.getTableNames()) {
           if (tableName.equals(name)) {
             selectedDBModel = model;
+            this.tableName = tableName;
             break;
           }
         }
