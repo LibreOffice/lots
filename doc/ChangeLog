@@ -1,3 +1,46 @@
+ ==================== Neu in Version 18.1.0 ====================
+
+    * Neue Features
+          o Die LDAP-Suche wurde verbessert. Es gibt nun mehrere Suchfelder für
+            Name, Vorname usw. Zudem findet eine Suche statt, mit der auch
+            alternative Schreibweisen gefunden werden.
+          o Das Logging Framework log4j wird verwendet.
+          o Der WollMux verwendet jetzt einen In-Memory-Cache. Dateien, die
+            einmal vom Server geladen werden, werden im Speicher gecacht.
+            Danach werden die Dateien aus dem Cache verwendet. Die Lebensdauer
+            eines Dokuments im Cache ist 8 Stunden. Dadurch können Dokumente
+            bei schlechten Internetanbindungen deutlich schneller geladen
+            werden.
+          o Einige Dialoge des WollMux wurden als native LibreOffice-Dialoge
+            umgesetzt:
+                # Sachleitende-Verfügungen-Druckdialog
+                # Info- und Fehlerdialoge
+                # Persönliche Absenderliste
+                # Absender Bearbeiten
+                # Druckerauswahl
+                # Druckfortschritt bei Sachleitenden-Verfügungen und
+                  Seriendruck
+                # Versionsinformationen
+          o Der Seriendruck ist nun über die Sidebar und nicht mehr über die
+            extra Dialoge erreichbar. Alle zugehörigen Dialoge wurden als
+            native LibreOffice-Dialoge umgesetzt.
+          o Beim Absenderauswählen und der Persönlichen Absenderliste werden
+            Abweichungen zum LDAP-Datensatz dargestellt. Diese Änderungen
+            können im Datensatz-Bearbeiten-Dialog mit den Werten aus dem LDAP-
+            Datensatz aktualisiert werden.
+          o Der Eventhandler des WollMux wurde durch den Guava-Eventbus
+            ausgetauscht.
+    * Entfernte Features
+          o Multiformulare werden nicht mehr unterstützt.
+          o Das experimentelle Feature "Menümanager" wurde wieder entfernt.
+          o Die WollMuxBar als externe Java-Anwendung wurde entfernt und steht
+            nur noch in der Sidebar zur Verfügung.
+
+ ==================== Neu in Version 18.0.9 ====================
+
+    * Bugfixes
+          o WollMux verhindert nicht mehr das Speichern von Dokumenten.
+
  ==================== Neu in Version 18.0.8 ====================
 
     * Bugfixes
