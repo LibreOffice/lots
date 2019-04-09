@@ -9,6 +9,7 @@
 	<library:element library:name="print_progress"/>
 	<library:element library:name="gender_dialog"/>
 	<library:element library:name="if_then_else"/>
+	<library:element library:name="if_then_else2"/>
 	<library:element library:name="seriendruck_format"/>
 	<library:element library:name="seriendruck_mail"/>
 	<library:element library:name="seriendruck_printer"/>

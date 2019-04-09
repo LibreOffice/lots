@@ -61,6 +61,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailmergeWizardController;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.SpecialField;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
+import de.muenchen.allg.itd51.wollmux.dialog.trafo.IfThenElseDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
@@ -240,8 +241,16 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
           strCmpConf.add("");
           ifConf.add("THEN").add("");
           ifConf.add("ELSE").add("");
+          
+          TrafoDialogParameters paramsIfThenElse = new TrafoDialogParameters();
+          paramsIfThenElse.conf = new ConfigThingy("IF");
+          paramsIfThenElse.conf.addChild(ifConf);
+          paramsIfThenElse.isValid = true;
+          paramsIfThenElse.fieldNames = mailMerge.getDs().getColumnNames();
+          
           // TODO: //insertFieldFromTrafoDialog(mailMergeDatasource.getColumnNames(),
           // listBox.getItem((short) 2), ifConf);
+          IfThenElseDialog ifThenElseDialog = new IfThenElseDialog(paramsIfThenElse);
           break;
         case 3:
           getDocumentController().ifPresent(controller -> controller
