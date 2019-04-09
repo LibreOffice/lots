@@ -221,8 +221,6 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
           // ConfigThingy für leere Gender-Funktion zusammenbauen.
           ConfigThingy genderConf = GenderDialog
               .generateGenderTrafoConf(mailMerge.getDs().getColumnNames().get(0), "", "", "");
-          // mailMergeDatasource.insertFieldFromTrafoDialog(mailMergeDatasource.getColumnNames(),
-          // listBox.getText(), genderConf);
 
           TrafoDialogParameters params = new TrafoDialogParameters();
           params.conf = new ConfigThingy("Func");
@@ -248,9 +246,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
           paramsIfThenElse.isValid = true;
           paramsIfThenElse.fieldNames = mailMerge.getDs().getColumnNames();
           
-          // TODO: //insertFieldFromTrafoDialog(mailMergeDatasource.getColumnNames(),
-          // listBox.getItem((short) 2), ifConf);
-          IfThenElseDialog ifThenElseDialog = new IfThenElseDialog(paramsIfThenElse);
+          new IfThenElseDialog(paramsIfThenElse);
           break;
         case 3:
           getDocumentController().ifPresent(controller -> controller
@@ -265,7 +261,16 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
               .ifPresent(TextDocumentController::insertNextDatasetFieldAtCursorPosition);
           break;
         case 6:
-          // editFieldDialog.show(L.m("Spezialfeld bearbeiten"), myFrame);
+          boolean hasUnmappedFields = mailMerge.getDs()
+              .checkUnmappedFields(mailMerge.getDs().getColumnNames());
+
+          if (hasUnmappedFields)
+          {
+            AdjustFields adjustFieldsDialog = new AdjustFields();
+            getDocumentController().ifPresent(controller -> {
+              adjustFieldsDialog.showAdjustFieldsDialog(controller, mailMerge.getDs());
+            });
+          }
           break;
         default:
           break;
@@ -398,15 +403,6 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
 
   private void updateControls()
   {
-    boolean hasUnmappedFields = mailMerge.getDs().checkUnmappedFields(mailMerge.getDs().getColumnNames());
-    
-    if (hasUnmappedFields)
-    {
-      AdjustFields adjustFieldsDialog = new AdjustFields();
-      getDocumentController().ifPresent(controller -> {
-        adjustFieldsDialog.showAdjustFieldsDialog(controller, mailMerge.getDs());
-      });
-    }
     // Spezialfeld-ComboBox aktualisieren
     mailMergeField.setMailMergeDatasource(mailMerge.getDs());
     XNumericField currentDatasourceCountText = UNO.XNumericField(printCount);
@@ -496,8 +492,6 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     public void actionPerformed(ActionEvent arg0)
     {
       DBDatasourceDialog oooDSDialog = new DBDatasourceDialog(palListener);
-       //mailMerge.getDs().selectOOoDatasourceAsDatasource();
-      // updateVisibleTables();
     }
   };
 
