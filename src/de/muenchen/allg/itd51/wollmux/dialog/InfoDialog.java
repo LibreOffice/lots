@@ -8,7 +8,9 @@ import com.sun.star.awt.MessageBoxResults;
 import com.sun.star.awt.MessageBoxType;
 import com.sun.star.awt.XMessageBox;
 import com.sun.star.awt.XToolkit2;
+import com.sun.star.awt.XWindow;
 import com.sun.star.lang.XMultiComponentFactory;
+import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
@@ -32,6 +34,11 @@ public class InfoDialog
    * @param message
    *          die Nachricht, die im Dialog angezeigt werden soll.
    */
+  public static void showInfoModal(XWindow window, String title, String message)
+  {
+    createDialog(window, title, message, MessageBoxType.INFOBOX, MessageBoxButtons.BUTTONS_OK);
+  }
+
   public static void showInfoModal(String title, String message)
   {
     createDialog(title, message, MessageBoxType.INFOBOX, MessageBoxButtons.BUTTONS_OK);
@@ -77,18 +84,61 @@ public class InfoDialog
   {
     try
     {
-      XMultiComponentFactory xMCF = UNO.defaultContext.getServiceManager();
-      XToolkit2 toolkit = UnoRuntime.queryInterface(XToolkit2.class,
-          xMCF.createInstanceWithContext("com.sun.star.awt.Toolkit", UNO.defaultContext));
+      XToolkit2 toolkit = createToolkit();
+
+      if (toolkit == null)
+        return -1;
+
       XMessageBox messageBox = toolkit.createMessageBox(
           UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow()), type, buttons, title,
           message);
+
       return messageBox.execute();
-    } catch (com.sun.star.uno.Exception | NullPointerException e)
+    } catch (NullPointerException e)
     {
       LOGGER.error("Info Dialog {} konnte nicht erstellt werden.", title);
       LOGGER.error("", e);
     }
     return -1;
+  }
+
+  private static short createDialog(XWindow window, String title, String message,
+      MessageBoxType type, int buttons)
+  {
+    try
+    {
+      XToolkit2 toolkit = createToolkit();
+
+      if (toolkit == null)
+        return -1;
+
+      XMessageBox messageBox = toolkit.createMessageBox(
+          UNO.XWindowPeer(window), type, buttons, title,
+          message);
+
+      return messageBox.execute();
+    } catch (NullPointerException e)
+    {
+      LOGGER.error("Info Dialog {} konnte nicht erstellt werden.", title);
+      LOGGER.error("", e);
+    }
+    return -1;
+  }
+
+  private static XToolkit2 createToolkit()
+  {
+    XMultiComponentFactory xMCF = UNO.defaultContext.getServiceManager();
+    XToolkit2 toolkit = null;
+
+    try
+    {
+      toolkit = UnoRuntime.queryInterface(XToolkit2.class,
+          xMCF.createInstanceWithContext("com.sun.star.awt.Toolkit", UNO.defaultContext));
+    } catch (Exception e)
+    {
+      LOGGER.error("", e);
+    }
+
+    return toolkit;
   }
 }

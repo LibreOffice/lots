@@ -1,7 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +23,6 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
-import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
@@ -59,23 +57,6 @@ public class OnInitialize extends BasicEvent
         WollMuxEventHandler.getInstance().handleShowDialogAbsenderAuswaehlen();
       else
         WollMuxEventHandler.getInstance().handlePALChangedNotify();
-    } else
-    {
-      // Liste der nicht zuordnenbaren Datensätze erstellen und ausgeben:
-      String names = "";
-      List<String> lost = DatasourceJoinerFactory
-          .getLostDatasetDisplayStrings();
-      if (!lost.isEmpty())
-      {
-        for (String l : lost)
-          names += "- " + l + "\n";
-        String message = L.m("Die folgenden Datensätze konnten nicht "
-            + "aus der Datenbank aktualisiert werden:\n\n" + "%1\n"
-            + "Wenn dieses Problem nicht temporärer "
-            + "Natur ist, sollten Sie diese Datensätze aus "
-            + "ihrer Absenderliste löschen und neu hinzufügen!", names);
-        InfoDialog.showInfoModal(L.m("WollMux-Info"), message);
-      }
     }
   }
 

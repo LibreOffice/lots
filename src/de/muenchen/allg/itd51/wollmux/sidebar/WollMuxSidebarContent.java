@@ -4,6 +4,7 @@ import java.awt.SystemColor;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -59,6 +60,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractFocusListener;
@@ -70,6 +72,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIButton;
@@ -199,6 +202,27 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
     this.parentWindow.addWindowListener(this.windowAdapter);
     layout = new SimpleLayoutManager(this.parentWindow);
+    
+    DatasourceJoiner dj = DatasourceJoinerFactory.getDatasourceJoiner();
+    
+    if (dj.getLOS().size() > 0)
+    {
+      // Liste der nicht zuordnenbaren Datensätze erstellen und ausgeben:
+      String names = "";
+      List<String> lost = DatasourceJoinerFactory
+          .getLostDatasetDisplayStrings();
+      if (!lost.isEmpty())
+      {
+        for (String l : lost)
+          names += "- " + l + "\n";
+        String message = L.m("Die folgenden Datensätze konnten nicht "
+            + "aus der Datenbank aktualisiert werden:\n\n" + "%1\n"
+            + "Wenn dieses Problem nicht temporärer "
+            + "Natur ist, sollten Sie diese Datensätze aus "
+            + "ihrer Absenderliste löschen und neu hinzufügen!", names);
+        InfoDialog.showInfoModal(this.parentWindow, L.m("WollMux-Info"), message);
+      }
+    }
 
     ConfigThingy conf = WollMuxFiles.getWollmuxConf();
 
