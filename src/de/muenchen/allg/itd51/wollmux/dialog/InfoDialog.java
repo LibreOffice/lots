@@ -84,7 +84,12 @@ public class InfoDialog
   {
     try
     {
-      XMessageBox messageBox = createToolkit().createMessageBox(
+      XToolkit2 toolkit = createToolkit();
+
+      if (toolkit == null)
+        return -1;
+
+      XMessageBox messageBox = toolkit.createMessageBox(
           UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow()), type, buttons, title,
           message);
 
@@ -102,7 +107,12 @@ public class InfoDialog
   {
     try
     {
-      XMessageBox messageBox = createToolkit().createMessageBox(
+      XToolkit2 toolkit = createToolkit();
+
+      if (toolkit == null)
+        return -1;
+
+      XMessageBox messageBox = toolkit.createMessageBox(
           UNO.XWindowPeer(window), type, buttons, title,
           message);
 
