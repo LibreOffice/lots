@@ -786,7 +786,6 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     String dbNachname = "";
     String dbVorname = "";
-    String dbOrgaKurz = "";
     String dbRolle = "";
 
     try
@@ -795,14 +794,12 @@ public class PersoenlicheAbsenderlisteVerwalten
           : "(" + ds.get("Rolle") + ")";
       dbNachname = ds.get("Nachname") == null ? "" : ds.get("Nachname");
       dbVorname = ds.get("Vorname") == null ? "" : ds.get("Vorname");
-      dbOrgaKurz = ds.get("OrgaKurz") == null ? "" : ds.get("OrgaKurz");
-
     } catch (ColumnNotFoundException e)
     {
       LOGGER.error("", e);
     }
 
-    return dbRolle + dbNachname + ", " + dbVorname + " " + dbOrgaKurz;
+    return dbRolle + dbNachname + ", " + dbVorname;
   }
 
   private Map<String, String> buildSearchQuery()
