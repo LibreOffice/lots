@@ -12,16 +12,16 @@
   <dlg:text dlg:id="Label8" dlg:tab-index="27" dlg:left="15" dlg:top="149" dlg:width="60" dlg:height="15" dlg:value="E-Mail"/>
   <dlg:text dlg:id="Label9" dlg:tab-index="28" dlg:left="15" dlg:top="169" dlg:width="60" dlg:height="15" dlg:value="Telefon"/>
   <dlg:text dlg:id="Label10" dlg:tab-index="29" dlg:left="15" dlg:top="189" dlg:width="60" dlg:height="15" dlg:value="Fax"/>
-  <dlg:textfield dlg:id="txtReferat" dlg:tab-index="1" dlg:left="92" dlg:top="9" dlg:width="255" dlg:height="15"/>
-  <dlg:textfield dlg:id="txtOrgaKurz" dlg:tab-index="3" dlg:left="92" dlg:top="29" dlg:width="255" dlg:height="15"/>
-  <dlg:textfield dlg:id="txtOrgaLang" dlg:tab-index="5" dlg:left="92" dlg:top="49" dlg:width="255" dlg:height="15"/>
-  <dlg:textfield dlg:id="txtDienststelle" dlg:tab-index="7" dlg:left="92" dlg:top="69" dlg:width="255" dlg:height="15"/>
-  <dlg:textfield dlg:id="txtStr" dlg:tab-index="9" dlg:left="92" dlg:top="89" dlg:width="255" dlg:height="15"/>
-  <dlg:textfield dlg:id="txtPLZ" dlg:tab-index="11" dlg:left="92" dlg:top="109" dlg:width="255" dlg:height="15"/>
-  <dlg:textfield dlg:id="txtOrt" dlg:tab-index="13" dlg:left="92" dlg:top="129" dlg:width="255" dlg:height="15"/>
-  <dlg:textfield dlg:id="txtEMail" dlg:tab-index="15" dlg:left="92" dlg:top="149" dlg:width="255" dlg:height="15"/>
-  <dlg:textfield dlg:id="txtTelefon" dlg:tab-index="17" dlg:left="92" dlg:top="169" dlg:width="255" dlg:height="15"/>
-  <dlg:textfield dlg:id="txtFax" dlg:tab-index="19" dlg:left="92" dlg:top="189" dlg:width="255" dlg:height="15"/>
+  <dlg:textfield dlg:id="Referat" dlg:tab-index="1" dlg:left="92" dlg:top="9" dlg:width="255" dlg:height="15"/>
+  <dlg:textfield dlg:id="OrgaKurz" dlg:tab-index="3" dlg:left="92" dlg:top="29" dlg:width="255" dlg:height="15"/>
+  <dlg:textfield dlg:id="OrgaLang" dlg:tab-index="5" dlg:left="92" dlg:top="49" dlg:width="255" dlg:height="15"/>
+  <dlg:textfield dlg:id="Dienststelle" dlg:tab-index="7" dlg:left="92" dlg:top="69" dlg:width="255" dlg:height="15"/>
+  <dlg:textfield dlg:id="Postanschrift" dlg:tab-index="9" dlg:left="92" dlg:top="89" dlg:width="255" dlg:height="15"/>
+  <dlg:textfield dlg:id="PostPLZ" dlg:tab-index="11" dlg:left="92" dlg:top="109" dlg:width="255" dlg:height="15"/>
+  <dlg:textfield dlg:id="PostOrt" dlg:tab-index="13" dlg:left="92" dlg:top="129" dlg:width="255" dlg:height="15"/>
+  <dlg:textfield dlg:id="OrgaEmail" dlg:tab-index="15" dlg:left="92" dlg:top="149" dlg:width="255" dlg:height="15"/>
+  <dlg:textfield dlg:id="OrgaTelefon" dlg:tab-index="17" dlg:left="92" dlg:top="169" dlg:width="255" dlg:height="15"/>
+  <dlg:textfield dlg:id="OrgaFax" dlg:tab-index="19" dlg:left="92" dlg:top="189" dlg:width="255" dlg:height="15"/>
   <dlg:button dlg:id="btnReferat" dlg:tab-index="0" dlg:visible="false" dlg:left="80" dlg:top="12" dlg:width="10" dlg:height="10" dlg:value="*"/>
   <dlg:button dlg:id="btnOrgaKurz" dlg:tab-index="2" dlg:visible="false" dlg:left="80" dlg:top="32" dlg:width="10" dlg:height="10" dlg:value="*"/>
   <dlg:button dlg:id="btnOrgaLang" dlg:tab-index="4" dlg:visible="false" dlg:left="80" dlg:top="52" dlg:width="10" dlg:height="10" dlg:value="*"/>
