@@ -29,9 +29,6 @@ makeversion: Attempt to regenerate version information and set VERSION property 
 documentation: Download WollMux documentation from WollMux Wiki and prepare it for 
                offline usage.
 
-makechangelog: Attempt to create ChangeLog file from LiMux Wiki. Only works inside
-             the LHM's network.
-
 bumpversion: Auto-generates lhmdeb/changelog with the correct version.
              Only executed if no debian/rules file present, i.e. this target is not
              executed for a true Debian build.
@@ -130,12 +127,6 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 		</exec>
 	</target>
 	
-	<target name="makechangelog">
-		<exec executable="perl" failifexecutionfails="false" output="${CHANGELOG_FILE}">
-		  <arg line="-l misc/makechangelog "/>
-		</exec>		
-	</target>
-
 	<target name="documentation">
 		<!-- Download all pages belonging to the WollMux manual category --> 
 		<get dest="${DOC_DIR}">
