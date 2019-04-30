@@ -39,6 +39,7 @@
 				<include>META-INF/manifest.xml</include>
 				<include>help/component*.txt</include>
 				<include>icons/*</include>
+				<include>image/*</include>
 			</includes>
 			<excludes>
 				<exclude>META-INF/manifest_AOO.xml</exclude>
