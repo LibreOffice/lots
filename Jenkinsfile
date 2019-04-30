@@ -51,6 +51,7 @@ pipeline {
                 }
               }
             }
+            archiveArtifacts artifacts: 'dist/WollMux.oxt', onlyIfSuccessful: true
           }
         }
       }
