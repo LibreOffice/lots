@@ -1,11 +1,13 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
+import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
@@ -39,9 +41,9 @@ public class OnSetSender extends BasicEvent
     // die Absenderliste der entfernten WollMuxBar konsistent war.
     if (idx >= 0 && idx < pal.length && pal[idx].equals(senderName))
     {
-      DJDatasetListElement[] palDatasets = PersoenlicheAbsenderliste
+      List<DJDataset> palDatasets = PersoenlicheAbsenderliste
           .getInstance().getSortedPALEntries();
-      palDatasets[idx].getDataset().select();
+      palDatasets.get(idx).select();
     } else
     {
       LOGGER.error(L.m(
