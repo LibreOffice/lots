@@ -266,9 +266,9 @@ public class AbsenderAuswaehlen
           && ldapDataset != null
           && Search.hasLDAPDataChanged(dataset, ldapDataset,
           DatasourceJoinerFactory.getDatasourceJoiner()))
-        xListBox.addItem("* " + buildListBoxString(ds), (short) count);
+        xListBox.addItem("* " + ds.toString(), (short) count);
       else
-        xListBox.addItem(buildListBoxString(ds), (short) count);
+        xListBox.addItem(ds.toString(), (short) count);
 
       elements.add(ds);
       if (ds.isSelectedDataset())
@@ -279,25 +279,5 @@ public class AbsenderAuswaehlen
 
     xListBox.selectItemPos(itemToHightlightPos, true);
   }
-  
-  private String buildListBoxString(DJDataset ds)
-  {
-    String dbNachname = "";
-    String dbVorname = "";
-    String dbRolle = "";
 
-    try
-    {
-      dbRolle = ds.get("Rolle");
-      dbRolle = dbRolle == null || dbRolle.isEmpty() ? "" : "(" + dbRolle + ")";
-      dbNachname = ds.get("Nachname") == null ? "" : ds.get("Nachname");
-      dbVorname = ds.get("Vorname") == null ? "" : ds.get("Vorname");
-
-    } catch (ColumnNotFoundException e)
-    {
-      LOGGER.error("", e);
-    }
-
-    return dbRolle + dbNachname + ", " + dbVorname;
-  }
 }

@@ -88,7 +88,6 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.AsyncLdapSearch;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
@@ -135,8 +134,8 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private SimpleDialogLayout layout;
   private UNODialogFactory dialogFactory;
-  private List<DJDatasetListElement> resultDJDatasetList = null;
-  private List<DJDatasetListElement> cachedPAL = new ArrayList<>();
+  private List<DJDataset> resultDJDatasetList = null;
+  private List<DJDataset> cachedPAL = new ArrayList<>();
   private INotify palListener;
 
   private int count = 0;
@@ -265,6 +264,9 @@ public class PersoenlicheAbsenderlisteVerwalten
     {
       DJDataset ds = (DJDataset) dataset;
 
+      DJDataset ds2 = (DJDataset) dataset;
+      ds2.toString();
+
       Dataset ldapDataset = null;
       try
       {
@@ -276,11 +278,11 @@ public class PersoenlicheAbsenderlisteVerwalten
 
       if (dj.getCachedLdapResults() != null && Search.hasLDAPDataChanged(dataset, ldapDataset,
           DatasourceJoinerFactory.getDatasourceJoiner()))
-        palListe.addItem("* " + buildListBoxString(ds), (short) count);
+        palListe.addItem("* " + ds.toString(), (short) count);
       else
-        palListe.addItem(buildListBoxString(ds), (short) count);
+        palListe.addItem(ds.toString(), (short) count);
 
-      cachedPAL.add(new DJDatasetListElement(ds));
+      cachedPAL.add(ds);
 
       if (ds.isSelectedDataset())
         itemToHighlightPos = (short) count;
@@ -546,7 +548,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   };
 
   private AbstractItemListener palListBoxItemListener = event -> {
-    cachedPAL.get(event.Selected).getDataset().select();
+    cachedPAL.get(event.Selected).select();
 
     WollMuxEventHandler.getInstance().handlePALChangedNotify();
   };
@@ -576,14 +578,14 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     short[] selectedItemsPos = xListBoxResults.getSelectedItemsPos();
 
-    List<DJDatasetListElement> entriesToAdd = new ArrayList<>();
+    List<DJDataset> entriesToAdd = new ArrayList<>();
     for (short index : selectedItemsPos)
     {
-      DJDatasetListElement dsToAdd = resultDJDatasetList.get(index);
+      DJDataset dsToAdd = resultDJDatasetList.get(index);
 
       try
       {
-        if (dj.getOIDsFromLOS().contains(dsToAdd.getDataset().get("OID")))
+        if (dj.getOIDsFromLOS().contains(dsToAdd.get("OID")))
         {
           short res = InfoDialog.showYesNoModal("PAL",
               "Datensatz ist bereits in der Absenderliste vorhanden, Datensatz trotzdem erneut speichern?");
@@ -601,12 +603,12 @@ public class PersoenlicheAbsenderlisteVerwalten
         LOGGER.error("", e);
       }
       
-      dj.addCachedLdapResult(dsToAdd.getDataset());
+      dj.addCachedLdapResult(dsToAdd);
     }
 
-    for (DJDatasetListElement entry : entriesToAdd)
+    for (DJDataset entry : entriesToAdd)
     {
-      entry.getDataset().copy();
+      entry.copy();
     }
     
     WollMuxEventHandler.getInstance().handlePALChangedNotify();
@@ -658,18 +660,18 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     XListBox pal = UNO.XListBox(layout.getControl("palListe"));
     short selectedPos = pal.getSelectedItemPos();
-    DJDatasetListElement djDataset = cachedPAL.get(selectedPos);
+    DJDataset djDataset = cachedPAL.get(selectedPos);
 
     Dataset ldapDataset = null;
     try
     {
-      ldapDataset = dj.getCachedLdapResultByOID(djDataset.getDataset().get("OID"));
+      ldapDataset = dj.getCachedLdapResultByOID(djDataset.get("OID"));
     } catch (ColumnNotFoundException e)
     {
       LOGGER.error("", e);
     }
 
-    DatensatzBearbeiten editDSWizard = new DatensatzBearbeiten(djDataset.getDataset(), ldapDataset,
+    DatensatzBearbeiten editDSWizard = new DatensatzBearbeiten(djDataset, ldapDataset,
         dj.getMainDatasourceSchema());
 
     short result = editDSWizard.executeWizard();
@@ -699,9 +701,9 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     for (short index : sel)
     {
-      DJDataset datasetCopy = copyDJDataset(cachedPAL.get(index).getDataset());
-      cachedPAL.add(new DJDatasetListElement(datasetCopy));
-      xListBoxPal.addItem(buildListBoxString(datasetCopy),
+      DJDataset datasetCopy = copyDJDataset(cachedPAL.get(index));
+      cachedPAL.add(datasetCopy);
+      xListBoxPal.addItem(datasetCopy.toString(),
           (short) (xListBoxPal.getItemCount() + 1));
     }
   }
@@ -733,7 +735,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (xListBoxPal == null)
       return;
 
-    cachedPAL.add(new DJDatasetListElement(newDataset));
+    cachedPAL.add(newDataset);
     xListBoxPal.addItem("Neuer Datensatz", (short) (xListBoxPal.getItemCount() + 1));
   };
 
@@ -754,11 +756,10 @@ public class PersoenlicheAbsenderlisteVerwalten
     resultDJDatasetList = new ArrayList<>();
 
     data.forEach(item -> {
-      DJDatasetListElement element = new DJDatasetListElement((DJDataset) item);
-      resultDJDatasetList.add(element);
+      resultDJDatasetList.add((DJDataset) item);
     });
 
-    Collections.sort(resultDJDatasetList);
+    Collections.sort(resultDJDatasetList, dj.sortPAL);
 
     XControl xControl = layout.getControl("searchResultList");
 
@@ -777,29 +778,8 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     for (int i = 0; i < resultDJDatasetList.size(); i++)
     {
-      DJDataset ds = resultDJDatasetList.get(i).getDataset();
-      xListBox.addItem(buildListBoxString(ds), (short) i);
+      xListBox.addItem(resultDJDatasetList.get(i).toString(), (short) i);
     }
-  }
-
-  private String buildListBoxString(DJDataset ds)
-  {
-    String dbNachname = "";
-    String dbVorname = "";
-    String dbRolle = "";
-
-    try
-    {
-      dbRolle = ds.get("Rolle") == null || ds.get("Rolle").isEmpty() ? ""
-          : "(" + ds.get("Rolle") + ")";
-      dbNachname = ds.get("Nachname") == null ? "" : ds.get("Nachname");
-      dbVorname = ds.get("Vorname") == null ? "" : ds.get("Vorname");
-    } catch (ColumnNotFoundException e)
-    {
-      LOGGER.error("", e);
-    }
-
-    return dbRolle + dbNachname + ", " + dbVorname;
   }
 
   private Map<String, String> buildSearchQuery()
