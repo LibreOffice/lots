@@ -93,7 +93,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
   private static final String ON_CREATE = "OnCreate";
 
   private static final String ON_VIEW_CREATED = "OnViewCreated";
-
+ 
   private DocumentManager docManager;
 
   public GlobalEventListener(DocumentManager docManager)
@@ -118,7 +118,14 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       // schon unnötig Performance fressen)
       if (docEvent.Source == null) return;
       String event = docEvent.EventName;
-
+      LOGGER.debug(event);
+      
+      // https://wiki.openoffice.org/wiki/Documentation/DevGuide/WritingUNO/Jobs/List_of_Supported_Events
+      // Info: ON_VIEW_CREATED wird erst nach instanziierung der WollMux/Seriendruck-Sidebar
+      // ausgelöst. Falls im Konstruktor der Sidebar ein Zugriff auf das Dokument erforderlich ist,
+      // müsste für Dokumente die über 'Datei -> Öffnen' geöffnet werden (-> Sidebar wird neu instanziiert)
+      // OnLoadFinished mit Aufruf von onCreate() verwendet werden um den DocumentManager das Dokument
+      // frühzeitig bekannt zu machen.
       if (ON_CREATE.equals(event))
         onCreate(docEvent.Source);
       else if (ON_VIEW_CREATED.equals(event))
