@@ -317,7 +317,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     printCountFieldProps.setEnabled(false);
     printCount = UNO.XSpinField(printCountFieldProps.getXControl());
     UNO.XTextComponent(printCount).addTextListener(documentCountFieldListener);
-    UNO.XNumericField(printCount).setMin(0);
+    UNO.XNumericField(printCount).setMin(1);
 
     ControlProperties jumpToLastBtnProps = new ControlProperties(ControlType.BUTTON, "btnJumpToLast");
     jumpToLastBtnProps.setControlPercentSize(10, 30);
