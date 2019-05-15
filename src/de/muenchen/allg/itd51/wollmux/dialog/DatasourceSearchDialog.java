@@ -439,7 +439,7 @@ public class DatasourceSearchDialog implements Dialog
     /**
      * Die durch den Spaltenumsetzung-Abschnitt definierten Spaltennamen.
      */
-    private Set<String> dialogWindowSchema;
+    private List<String> dialogWindowSchema;
 
     /**
      * Die Suchstrategie für Suchanfragen.

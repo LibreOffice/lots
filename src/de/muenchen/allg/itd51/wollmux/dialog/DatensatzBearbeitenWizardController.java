@@ -1,6 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.util.Set;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public class DatensatzBearbeitenWizardController implements XWizardController
   private XWizardPage[] pages = new XWizardPage[PAGE_COUNT];
   private DJDataset dataset;
   private Dataset ldapDataset;
-  private Set<String> dbSchema;
+  private List<String> dbSchema;
 
   protected static final short[] PATHS = { 0, 1, 2 };
 
@@ -34,7 +34,8 @@ public class DatensatzBearbeitenWizardController implements XWizardController
 
   private String[] title = { "Person", "Orga", "Fusszeile" };
 
-  public DatensatzBearbeitenWizardController(DJDataset dataset, Dataset ldapDataset, Set<String> dbSchema)
+  public DatensatzBearbeitenWizardController(DJDataset dataset, Dataset ldapDataset,
+      List<String> dbSchema)
   {
     this.dataset = dataset;
     this.ldapDataset = ldapDataset;

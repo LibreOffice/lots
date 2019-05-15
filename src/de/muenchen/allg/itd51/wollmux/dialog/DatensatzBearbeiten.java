@@ -50,7 +50,7 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.event.ActionListener;
-import java.util.Set;
+import java.util.List;
 
 import com.sun.star.ui.dialogs.Wizard;
 import com.sun.star.ui.dialogs.WizardButton;
@@ -84,7 +84,7 @@ public class DatensatzBearbeiten
    * @param edit
    * @throws ConfigurationErrorException
    */
-  protected DatensatzBearbeiten(DJDataset datensatz, Dataset ldapDataset, Set<String> dbSchema)
+  protected DatensatzBearbeiten(DJDataset datensatz, Dataset ldapDataset, List<String> dbSchema)
   {
     wizard = Wizard.createSinglePathWizard(UNO.defaultContext,
         DatensatzBearbeitenWizardController.PATHS,

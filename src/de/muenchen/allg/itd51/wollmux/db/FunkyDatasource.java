@@ -30,12 +30,10 @@
  */
 package de.muenchen.allg.itd51.wollmux.db;
 
-import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnTransformer;
 import de.muenchen.allg.itd51.wollmux.core.db.Datasource;
@@ -62,7 +60,7 @@ public class FunkyDatasource implements Datasource
 {
   private Datasource source;
 
-  private Set<String> schema;
+  private List<String> schema;
 
   private String name;
 
@@ -136,28 +134,33 @@ public class FunkyDatasource implements Datasource
     schema.addAll(source.getSchema());
   }
 
-  public Set<String> getSchema()
+  @Override
+  public List<String> getSchema()
   {
     return schema;
   }
 
+  @Override
   public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
       throws TimeoutException
   {
     return columnTransformer.transform(source.getDatasetsByKey(keys, timeout));
   }
 
+  @Override
   public QueryResults getContents(long timeout) throws TimeoutException
   {
     return columnTransformer.transform(source.getContents(timeout));
   }
 
+  @Override
   public QueryResults find(List<QueryPart> query, long timeout)
       throws TimeoutException
   {
     return columnTransformer.transform(source.find(query, timeout));
   }
 
+  @Override
   public String getName()
   {
     return name;
