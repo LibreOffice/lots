@@ -32,7 +32,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,7 +39,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -51,6 +49,7 @@ import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.lang.DisposedException;
+import com.sun.star.sdbc.SQLException;
 import com.sun.star.sdbc.XConnection;
 import com.sun.star.sdbc.XDataSource;
 import com.sun.star.sdbc.XRow;
@@ -241,7 +240,7 @@ public class MailMergeDatasource
       switch (currentSourceType)
       {
       case CALC:
-        return getValuesForDataset(selectedCalcDoc, tableName, rowIndex);
+        return getValuesFromSpreadsheetDocument(selectedCalcDoc, tableName, rowIndex);
       case DB:
         return getDbValuesForDataset(getOOoDatasource(), rowIndex);
       default:
@@ -305,7 +304,7 @@ public class MailMergeDatasource
       switch (currentSourceType)
       {
       case CALC:
-        return getData(selectedCalcDoc, tableName);
+        return getSpreadsheetDocumentData(selectedCalcDoc, tableName);
       case DB:
         return getDbData(getOOoDatasource());
       default:
@@ -422,6 +421,7 @@ public class MailMergeDatasource
       datenquelle = mmconf.query("Datenquelle").getLastChild();
     } catch (NodeNotFoundException e)
     {
+      LOGGER.error("", e);
     }
 
     String type = datenquelle.getString("TYPE", null);
@@ -591,8 +591,9 @@ public class MailMergeDatasource
         try
         {
           conn.close();
-        } catch (Exception e)
+        } catch (SQLException e)
         {
+          LOGGER.error("", e);
         }
       }
     }
@@ -647,7 +648,7 @@ public class MailMergeDatasource
   {
     List<String> columnNames = new ArrayList<>();
     columnNames.addAll(oooDatasource.getSchema());
-    Collections.sort(columnNames);
+
     return columnNames;
   }
 
@@ -768,7 +769,7 @@ public class MailMergeDatasource
    * wird ein leerer Vektor zurückgeliefert.
    *
    */
-  private List<String> getValuesForDataset(XSpreadsheetDocument calcDoc, String tableName,
+  private List<String> getValuesFromSpreadsheetDocument(XSpreadsheetDocument calcDoc, String tableName,
       int rowIndex)
   {
     List<String> columnValues = new ArrayList<>();
@@ -839,7 +840,7 @@ public class MailMergeDatasource
    */
   private QueryResultsWithSchema getDbData(Datasource oooDatasource) throws Exception
   {
-    Set<String> schema = oooDatasource.getSchema();
+    List<String> schema = oooDatasource.getSchema();
     QueryResults res = oooDatasource.getContents(MAILMERGE_GETCONTENTS_TIMEOUT);
     return new QueryResultsWithSchema(res, schema);
   }
@@ -848,9 +849,9 @@ public class MailMergeDatasource
    * Liefert die sichtbaren Zellen aus der Tabelle tableName des Dokuments calcDoc als
    * QueryResultsWithSchema zurück.
    */
-  private QueryResultsWithSchema getData(XSpreadsheetDocument calcDoc, String tableName)
+  private QueryResultsWithSchema getSpreadsheetDocumentData(XSpreadsheetDocument calcDoc, String tableName)
   {
-    Set<String> schema = new HashSet<>();
+    List<String> schema = new ArrayList<>();
     QueryResults res = getVisibleCalcData(calcDoc, tableName, schema);
     return new QueryResultsWithSchema(res, schema);
   }
@@ -1071,6 +1072,7 @@ public class MailMergeDatasource
     conf.add("NAME").add("Knuddel");
     conf.add("TABLE").add(tableName);
     conf.add("SOURCE").add(selectedDBModel.datasourceName);
+
     try
     {
       oooDatasource = new OOoDatasource(new HashMap<String, Datasource>(), conf, true);
@@ -1357,7 +1359,7 @@ public class MailMergeDatasource
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static QueryResults getVisibleCalcData(XSpreadsheetDocument doc, String sheetName,
-      Set<String> schema)
+      List<String> schema)
   {
     MailMergeDatasource.CalcCellQueryResults results = new CalcCellQueryResults();
 

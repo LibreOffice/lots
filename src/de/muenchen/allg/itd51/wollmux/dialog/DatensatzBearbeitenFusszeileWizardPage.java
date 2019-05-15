@@ -1,6 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.util.Set;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,8 @@ public class DatensatzBearbeitenFusszeileWizardPage extends DatensatzBearbeitenB
   private static final Logger LOGGER = LoggerFactory
       .getLogger(DatensatzBearbeitenFusszeileWizardPage.class);
 
-  public DatensatzBearbeitenFusszeileWizardPage(XWindow parentWindow, short pageId, DJDataset dataset, Dataset ldapDataset, Set<String> dbSchema)
+  public DatensatzBearbeitenFusszeileWizardPage(XWindow parentWindow, short pageId,
+      DJDataset dataset, Dataset ldapDataset, List<String> dbSchema)
       throws Exception
   {
     super(pageId, parentWindow, "DatensatzBearbeitenFusszeile", dataset, ldapDataset, dbSchema);

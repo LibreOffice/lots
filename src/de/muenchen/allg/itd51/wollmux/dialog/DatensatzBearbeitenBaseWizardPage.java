@@ -1,6 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.util.Set;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,13 +38,13 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
       .getLogger(DatensatzBearbeitenBaseWizardPage.class);
   protected DJDataset dataset;
   protected Dataset ldapDataset;
-  protected Set<String> dbSchema;
+  protected List<String> dbSchema;
   private XControlContainer controlContainer;
   private short selectedItemIndex = 0;
   private static final String TEXT_COLOR = "TextColor";
 
   public DatensatzBearbeitenBaseWizardPage(short pageId, XWindow parentWindow, String dialogName,
-      DJDataset dataset, Dataset ldapDataset, Set<String> dbSchema) throws Exception
+      DJDataset dataset, Dataset ldapDataset, List<String> dbSchema) throws Exception
   {
     super(pageId, parentWindow, dialogName);
     this.dataset = dataset;

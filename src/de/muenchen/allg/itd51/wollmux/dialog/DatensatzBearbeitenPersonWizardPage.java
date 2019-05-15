@@ -1,6 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.util.Set;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public class DatensatzBearbeitenPersonWizardPage extends DatensatzBearbeitenBase
       .getLogger(DatensatzBearbeitenPersonWizardPage.class);
 
   public DatensatzBearbeitenPersonWizardPage(XWindow parentWindow, short pageId, DJDataset dataset,
-      Dataset ldapDataset, Set<String> dbSchema) throws Exception
+      Dataset ldapDataset, List<String> dbSchema) throws Exception
   {
     super(pageId, parentWindow, "DatensatzBearbeitenPerson", dataset, ldapDataset, dbSchema);
 
