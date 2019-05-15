@@ -925,7 +925,7 @@ public class MailMergeDatasource
       }
     }
 
-    openSpreedSheetDocuments.parallelStream().forEach(item -> {
+    openSpreedSheetDocuments.stream().forEach(item -> {
       for (String tableName : item.getSpreadSheetTableTitles())
       {
         if (name.contains(tableName) && name.contains(item.getWindowTitle()))

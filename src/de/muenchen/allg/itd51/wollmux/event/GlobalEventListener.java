@@ -93,7 +93,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
   private static final String ON_CREATE = "OnCreate";
 
   private static final String ON_VIEW_CREATED = "OnViewCreated";
- 
+
   private DocumentManager docManager;
 
   public GlobalEventListener(DocumentManager docManager)
