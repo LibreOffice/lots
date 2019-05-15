@@ -1073,8 +1073,7 @@ public class MailMergeDatasource
     conf.add("SOURCE").add(selectedDBModel.datasourceName);
     try
     {
-      oooDatasource = new OOoDatasource(new HashMap<String, Datasource>(), conf,
-          new URL("file:///"), true);
+      oooDatasource = new OOoDatasource(new HashMap<String, Datasource>(), conf, true);
     } catch (Exception x)
     {
       throw new UnavailableException(x);

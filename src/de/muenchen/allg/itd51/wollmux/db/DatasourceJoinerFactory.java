@@ -176,10 +176,10 @@ public class DatasourceJoinerFactory
           ds = new LDAPDatasource(datasources, sourceDesc, context);
           break;
         case "ooo":
-          ds = new OOoDatasource(datasources, sourceDesc, context);
+          ds = new OOoDatasource(datasources, sourceDesc);
           break;
         case "funky":
-          ds = new FunkyDatasource(datasources, sourceDesc, context);
+          ds = new FunkyDatasource(datasources, sourceDesc);
           break;
         default:
           LOGGER.error(L.m("Ununterstützter Datenquellentyp: %1", type));
