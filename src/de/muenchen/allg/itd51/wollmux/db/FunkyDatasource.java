@@ -82,7 +82,7 @@ public class FunkyDatasource implements Datasource
    *          verwendet).
    */
   public FunkyDatasource(Map<String, Datasource> nameToDatasource,
-      ConfigThingy sourceDesc, URL urlContext) throws ConfigurationErrorException
+      ConfigThingy sourceDesc) throws ConfigurationErrorException
   {
     try
     {
