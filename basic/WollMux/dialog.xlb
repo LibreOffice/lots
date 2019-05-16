@@ -15,4 +15,5 @@
 	<library:element library:name="seriendruck_printer"/>
 	<library:element library:name="seriendruck_start"/>
 	<library:element library:name="seriendruck_single"/>
+	<library:element library:name="slv_count"/>
 </library:library>

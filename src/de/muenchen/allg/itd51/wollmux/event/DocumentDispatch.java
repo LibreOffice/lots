@@ -38,7 +38,6 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
@@ -210,12 +209,6 @@ public class DocumentDispatch extends Dispatch
   {
     WollMuxEventHandler.getInstance().handleTextbausteinEinfuegen(getDocumentController(),
 	false);
-  }
-
-  public void dispatch_wollmux_test(String arg, PropertyValue[] props)
-  {
-    if (WollMuxFiles.installQATestHandler())
-      TestHandler.doTest(getDocumentController(), arg);
   }
 
   public void dispatch_wollmux_printpage(String arg, PropertyValue[] props)
