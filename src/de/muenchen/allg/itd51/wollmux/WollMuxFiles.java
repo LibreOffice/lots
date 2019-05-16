@@ -205,11 +205,6 @@ public class WollMuxFiles
   private static boolean showCredits = false;
 
   /**
-   * wollmux.conf: QA_TEST_HANDLER "true/false".
-   */
-  private static boolean installQATestHandler = false;
-
-  /**
    * Erzeugt das .wollmux-Verzeichnis im Home-Verzeichnis des Benutzers (falls es
    * noch nicht existiert), sucht nach der wollmux.conf und parst sie. Initialisiert
    * auch den Logger.
@@ -312,9 +307,6 @@ public class WollMuxFiles
 
     showCredits =
       WollMuxFiles.getWollmuxConf().query("SHOW_CREDITS", 1).query("on").count() > 0;
-
-    installQATestHandler =
-      WollMuxFiles.getWollmuxConf().query("QA_TEST_HANDLER", 1).query("true").count() > 0;
 
     determineDefaultContext();
 
@@ -1135,11 +1127,6 @@ public class WollMuxFiles
         + " test: " + testTime + " dontBark: " + dontBarkTime);
     }
 
-  }
-
-  public static boolean installQATestHandler()
-  {
-    return installQATestHandler;
   }
 
   public static boolean showCredits()
