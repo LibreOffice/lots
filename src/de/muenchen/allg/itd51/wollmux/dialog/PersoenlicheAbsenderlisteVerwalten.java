@@ -264,9 +264,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     {
       DJDataset ds = (DJDataset) dataset;
 
-      DJDataset ds2 = (DJDataset) dataset;
-      ds2.toString();
-
       Dataset ldapDataset = null;
       try
       {
