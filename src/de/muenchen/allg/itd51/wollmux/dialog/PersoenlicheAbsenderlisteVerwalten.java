@@ -752,11 +752,9 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     resultDJDatasetList = new ArrayList<>();
 
-    data.forEach(item -> {
-      resultDJDatasetList.add((DJDataset) item);
-    });
+    data.forEach(item -> resultDJDatasetList.add((DJDataset) item));
 
-    Collections.sort(resultDJDatasetList, dj.sortPAL);
+    Collections.sort(resultDJDatasetList, DatasourceJoiner.sortPAL);
 
     XControl xControl = layout.getControl("searchResultList");
 
