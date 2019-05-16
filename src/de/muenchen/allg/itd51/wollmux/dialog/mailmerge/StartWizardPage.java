@@ -72,8 +72,10 @@ public class StartWizardPage extends AbstractXWizardPage
     all = UNO.XRadio(container.getControl("selectAll"));
     range = UNO.XRadio(container.getControl("selectRange"));
     from = UNO.XNumericField(container.getControl("from"));
+    from.setValue(1);
     from.setMax(controller.getController().getDs().getNumberOfDatasets());
     till = UNO.XNumericField(container.getControl("till"));
+    till.setValue(controller.getController().getDs().getNumberOfDatasets());
     till.setMax(controller.getController().getDs().getNumberOfDatasets());
   }
 
