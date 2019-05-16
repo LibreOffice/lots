@@ -16,6 +16,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 
@@ -164,7 +165,8 @@ public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALCha
       listDataset.add((DJDataset) iter.next());
     }
 
-    Collections.sort(listDataset, DatasourceJoinerFactory.getDatasourceJoiner().sortPAL);
+    DatasourceJoinerFactory.getDatasourceJoiner();
+    Collections.sort(listDataset, DatasourceJoiner.sortPAL);
   
     return listDataset;
   }
