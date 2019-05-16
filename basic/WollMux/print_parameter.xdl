@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="print_parameter" dlg:left="208" dlg:top="111" dlg:width="180" dlg:height="115" dlg:closeable="true" dlg:moveable="true" dlg:title="Drucker Einstellungen">
+ <dlg:styles>
+  <dlg:style dlg:style-id="0" dlg:font-weight="150"/>
+ </dlg:styles>
+ <dlg:bulletinboard>
+  <dlg:text dlg:id="printerLabel" dlg:tab-index="1" dlg:left="10" dlg:top="15" dlg:width="20" dlg:height="10" dlg:value="Name:"/>
+  <dlg:titledbox dlg:id="printerFrame" dlg:tab-index="0" dlg:left="5" dlg:top="5" dlg:width="170" dlg:height="28">
+   <dlg:title dlg:value="Drucker"/>
+  </dlg:titledbox>
+  <dlg:text dlg:style-id="0" dlg:id="printer" dlg:tab-index="2" dlg:left="35" dlg:top="15" dlg:width="70" dlg:height="10" dlg:value="Drucker"/>
+  <dlg:button dlg:id="change" dlg:tab-index="3" dlg:left="110" dlg:top="11" dlg:width="60" dlg:height="20" dlg:value="Drucker wechseln / einrichten" dlg:multiline="true"/>
+  <dlg:titledbox dlg:id="FrameControl1" dlg:tab-index="4" dlg:left="5" dlg:top="35" dlg:width="110" dlg:height="55"/>
+  <dlg:radiogroup>
+   <dlg:radio dlg:id="all" dlg:tab-index="5" dlg:left="10" dlg:top="40" dlg:width="30" dlg:height="10" dlg:value="Alles" dlg:group-name="pagesGroup" dlg:checked="true"/>
+   <dlg:radio dlg:id="pages" dlg:tab-index="6" dlg:left="10" dlg:top="52" dlg:width="30" dlg:height="10" dlg:value="Seiten" dlg:group-name="pagesGroup"/>
+   <dlg:radio dlg:id="current" dlg:tab-index="7" dlg:left="10" dlg:top="64" dlg:width="50" dlg:height="10" dlg:value="Aktuelle Seite" dlg:group-name="pagesGroup"/>
+   <dlg:radio dlg:id="tillEnd" dlg:tab-index="8" dlg:left="10" dlg:top="76" dlg:width="100" dlg:height="10" dlg:value="Aktuelle Seite bis Dokumentende" dlg:group-name="pagesGroup"/>
+  </dlg:radiogroup>
+  <dlg:textfield dlg:id="pageText" dlg:tab-index="9" dlg:left="55" dlg:top="51" dlg:width="55" dlg:height="12" dlg:help-text="Mögliche Eingaben sind z.B. &apos;1&apos;, &apos;2-5&apos; oder &apos;1,3,5&apos;"/>
+  <dlg:button dlg:id="abort" dlg:tab-index="10" dlg:left="5" dlg:top="95" dlg:width="75" dlg:height="15" dlg:value="Abbrechen"/>
+  <dlg:button dlg:id="print" dlg:tab-index="11" dlg:left="100" dlg:top="95" dlg:width="75" dlg:height="15" dlg:value="Drucken"/>
+  <dlg:numericfield dlg:id="count" dlg:tab-index="14" dlg:left="125" dlg:top="51" dlg:width="45" dlg:height="12" dlg:decimal-accuracy="0" dlg:value="1" dlg:value-min="0" dlg:value-max="999998" dlg:spin="true"/>
+  <dlg:titledbox dlg:id="countFrame" dlg:tab-index="12" dlg:left="120" dlg:top="35" dlg:width="55" dlg:height="55"/>
+  <dlg:text dlg:id="countLabel" dlg:tab-index="13" dlg:left="125" dlg:top="40" dlg:width="45" dlg:height="10" dlg:value="Exemplare:"/>
+ </dlg:bulletinboard>
+</dlg:window>
