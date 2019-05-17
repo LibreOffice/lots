@@ -1,3 +1,14 @@
+ ==================== Neu in Version 18.1.1 ====================
+
+    * Bugfixes
+          o Sachleitende-Verfügungen-Druckdialog nochmals verbessert
+          o Dialog Druckfortschritt bei Sachleitenden-Verfügungen und
+            Seriendruck nochmals verbessert
+          o Beim Seriendruck konnte die erste Zeile (Überschriften) als
+            Empfänger ausgewählt werden. Dieser Fehler wurde behoben.
+          o Seriendruck mit einer Datenbank funktioniert wieder.
+          o Fehlende Dateien im Debian-Paket ergänzt.
+
  ==================== Neu in Version 18.1.0 ====================
 
     * Neue Features
