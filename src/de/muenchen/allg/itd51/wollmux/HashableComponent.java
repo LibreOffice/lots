@@ -61,8 +61,6 @@ public class HashableComponent
 
   /**
    * Liefert die Komponente, die durch diese {@link HashableComponent} gewrappt ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public XInterface getComponent()
   {

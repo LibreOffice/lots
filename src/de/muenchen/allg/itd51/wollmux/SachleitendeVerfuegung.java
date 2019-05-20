@@ -1300,8 +1300,6 @@ public class SachleitendeVerfuegung
    * @param doc
    *          das TextDocument in dem gezählt werden soll.
    * @return die Anzahl der im XTextDocument doc enthaltenen Verfügungspunkte
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static int countVerfuegungspunkte(XTextDocument doc)
   {
@@ -1507,8 +1505,6 @@ public class SachleitendeVerfuegung
    *          sollen.
    * @return eine Liste aller TextSections, die an oder nach pos starten oder eine
    *         leere Liste, wenn es Fehler gab oder keine Textsection gefunden wurde.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private static List<XTextSection> getSectionsFromPosition(XTextDocument doc,
       XTextRange pos)
@@ -1801,8 +1797,6 @@ public class SachleitendeVerfuegung
    * Standardwert gesetzt.
    *
    * @return Kopiebezeichner als String
-   *
-   * @author Jan Gerrit Möltgen (JanGerrit@burg-borgholz.de), Christoph Lutz
    */
   private static String getCopyName()
   {
@@ -1825,8 +1819,6 @@ public class SachleitendeVerfuegung
    * verwendet.
    *
    * @return Ziffern als String array
-   *
-   * @author Jan Gerrit Möltgen (JanGerrit@burg-borgholz.de), Christoph Lutz
    */
   private static String[] getNumbers()
   {
@@ -1865,8 +1857,6 @@ public class SachleitendeVerfuegung
    * Sorgt ohne Verlust von sichtbaren Formatierungseigenschaften dafür, dass alle
    * Formatvorlagen des Dokuments doc, die in Sachleitenden Verfügungen eine
    * besondere Rolle spielen, zukünftig nicht mehr vom WollMux interpretiert werden.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static void deMuxSLVStyles(XTextDocument doc)
   {

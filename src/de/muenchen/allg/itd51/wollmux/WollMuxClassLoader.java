@@ -23,8 +23,6 @@ public class WollMuxClassLoader extends ConfClassLoader
   /**
    * Parst die CLASSPATH Direktiven und hängt für jede eine weitere URL an den
    * Suchpfad von {@link WollMuxClassLoader#classLoader} an.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public static void initClassLoader()
   {
