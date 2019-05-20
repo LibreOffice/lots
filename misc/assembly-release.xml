@@ -24,5 +24,12 @@
 				<include>*</include>
 			</includes>
 		</fileSet>
+		<fileSet>
+			<directory>dist</directory>
+			<outputDirectory>windows</outputDirectory>
+			<includes>
+				<include>WollMux.zip</include>
+			</includes>
+		</fileSet>
 	</fileSets>
 </assembly>
