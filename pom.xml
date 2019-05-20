@@ -306,7 +306,7 @@
 						<phase>prepare-package</phase>
 						<configuration>
 							<target>
-								<move file="dist/WollMux.zip" tofile="dist/WollMux.oxt" />
+								<copy file="dist/WollMux.zip" tofile="dist/WollMux.oxt" />
 								<move file="dist/WollMux-AOO.zip" tofile="dist/WollMux-AOO.oxt" />
 							</target>
 						</configuration>
@@ -600,7 +600,7 @@
 							</execution>
 							<execution>
 								<id>assemble-release</id>
-								<phase>deploy</phase>
+								<phase>verify</phase>
 								<goals>
 									<goal>single</goal>
 								</goals>
