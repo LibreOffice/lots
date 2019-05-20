@@ -1,8 +1,8 @@
 /*
  * Dateiname: WollMux.java
  * Projekt  : WollMux
- * Funktion : zentraler UNO-Service WollMux 
- * 
+ * Funktion : zentraler UNO-Service WollMux
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,13 +25,13 @@
  * 09.11.2005 | LUT | + Logfile wird jetzt erweitert (append-modus)
  *                    + verwenden des Konfigurationsparameters SENDER_SOURCE
  *                    + Erster Start des wollmux über wm_configured feststellen.
- * 05.12.2005 | BNK | line.separator statt \n                 |  
+ * 05.12.2005 | BNK | line.separator statt \n                 |
  * 06.06.2006 | LUT | + Ablösung der Event-Klasse durch saubere Objektstruktur
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 
 package de.muenchen.allg.itd51.wollmux.comp;
@@ -111,13 +111,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * eigentlichen WollMux. Der Konstuktor wird aufgerufen, bevor Office die
    * Methode executeAsync() aufrufen kann, die bei einem ON_FIRST_VISIBLE_TASK-Event
    * über den Job-Mechanismus ausgeführt wird.
-   * 
+   *
    * @param context
    */
   public WollMux(XComponentContext ctx)
   {
     WollMuxSingleton.initialize(ctx);
-    
+
     if (!WollMuxSingleton.getInstance().isMenusCreated())
     {
       createMenuItems();
@@ -127,7 +127,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see com.sun.star.lang.XServiceInfo#getSupportedServiceNames()
    */
   @Override
@@ -138,7 +138,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see com.sun.star.lang.XServiceInfo#supportsService(java.lang.String)
    */
   @Override
@@ -154,7 +154,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see com.sun.star.lang.XServiceInfo#getImplementationName()
    */
   @Override
@@ -165,7 +165,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see com.sun.star.frame.XDispatchProvider#queryDispatch(com.sun.star.util.URL,
    * java.lang.String, int)
    */
@@ -180,7 +180,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @seecom.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.
    * DispatchDescriptor[])
    */
@@ -195,7 +195,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * zu erzeugen. Die Methode wird von UNO intern benötigt. Die Methoden
    * __getComponentFactory und __writeRegistryServiceInfo stellen das Herzstück des
    * UNO-Service dar.
-   * 
+   *
    * @param sImplName
    * @return
    */
@@ -222,7 +222,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * Diese Methode registriert den UNO-Service. Sie wird z.B. beim unopkg-add im
    * Hintergrund aufgerufen. Die Methoden __getComponentFactory und
    * __writeRegistryServiceInfo stellen das Herzstück des UNO-Service dar.
-   * 
+   *
    * @param xRegKey
    * @return
    */
@@ -254,7 +254,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
       return false;
     }
   }
-  
+
   public synchronized static XSingleServiceFactory __getServiceFactory(
       final String sImplementationName,
       final XMultiServiceFactory xFactory,
@@ -275,7 +275,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
       xResult = FactoryHelper.getServiceFactory(SeriendruckSidebarFactory.class,
           SeriendruckSidebarFactory.__serviceName, xFactory, xKey);
       }
-      
+
       return xResult;
   }
 
@@ -286,7 +286,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * erster update aller Listener ausgeführt wird. Die Methode ignoriert alle
    * XPALChangeEventListenener-Instanzen, die bereits registriert wurden.
    * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventBroadcaster#addPALChangeEventListener(de.muenchen.allg.itd51.wollmux.XPALChangeEventListener)
    */
   @Override
@@ -296,27 +296,22 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Diese Methode registriert einen XPALChangeEventListener, der updates empfängt
-   * wenn sich die PAL ändert; nach der Registrierung wird geprüft, ob der WollMux
-   * und der XPALChangeEventListener die selbe WollMux-Konfiguration verwenden, wozu
-   * der Listener den HashCode wollmuxConfHashCode der aktuellen
-   * WollMux-Konfiguration übermittelt. Stimmt wollmuxConfHashCode nicht mit dem
-   * HashCode der WollMux-Konfiguration des WollMux überein, so erscheint ein Dialog,
-   * der vor möglichen Fehlern warnt. Nach dem Registrieren wird sofort ein
-   * ON_SELECTION_CHANGED Ereignis ausgelöst, welches dafür sort, dass sofort ein
-   * erster update aller Listener ausgeführt wird. Die Methode ignoriert alle
-   * XPALChangeEventListenener-Instanzen, die bereits registriert wurden.
+   * Diese Methode registriert einen XPALChangeEventListener, der updates empfängt wenn sich die PAL
+   * ändert; nach der Registrierung wird geprüft, ob der WollMux und der XPALChangeEventListener die
+   * selbe WollMux-Konfiguration verwenden, wozu der Listener den HashCode wollmuxConfHashCode der
+   * aktuellen WollMux-Konfiguration übermittelt. Stimmt wollmuxConfHashCode nicht mit dem HashCode
+   * der WollMux-Konfiguration des WollMux überein, so erscheint ein Dialog, der vor möglichen
+   * Fehlern warnt. Nach dem Registrieren wird sofort ein ON_SELECTION_CHANGED Ereignis ausgelöst,
+   * welches dafür sort, dass sofort ein erster update aller Listener ausgeführt wird. Die Methode
+   * ignoriert alle XPALChangeEventListenener-Instanzen, die bereits registriert wurden.
    * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
-   * 
+   *
    * @param l
    *          Der zu registrierende XPALChangeEventListener
    * @param wollmuxConfHashCode
-   *          Der HashCode der WollMux-Config der zur Konsistenzprüfung herangezogen
-   *          wird und über
-   *          WollMuxFiles.getWollMuxConf().getStringRepresentation().hashCode()
-   *          erzeugt wird.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
+   *          Der HashCode der WollMux-Config der zur Konsistenzprüfung herangezogen wird und über
+   *          WollMuxFiles.getWollMuxConf().getStringRepresentation().hashCode() erzeugt wird.
+   *
    * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventBroadcaster#addPALChangeEventListenerWithConsistencyCheck(de.muenchen.allg.itd51.wollmux.XPALChangeEventListener,
    *      int)
    */
@@ -329,28 +324,26 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Diese Methode registriert einen Listener im WollMux, über den der WollMux über
-   * den Status der Dokumentbearbeitung informiert (z.B. wenn ein Dokument
-   * vollständig bearbeitet/expandiert wurde). Die Methode ignoriert alle
-   * XEventListenener-Instanzen, die bereits registriert wurden.
+   * Diese Methode registriert einen Listener im WollMux, über den der WollMux über den Status der
+   * Dokumentbearbeitung informiert (z.B. wenn ein Dokument vollständig bearbeitet/expandiert
+   * wurde). Die Methode ignoriert alle XEventListenener-Instanzen, die bereits registriert wurden.
    * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
-   * 
-   * Tritt ein entstprechendes Ereignis ein, so erfolgt der Aufruf der entsprechenden
-   * Methoden XEventListener.notifyEvent(...) immer gleichzeitig (d.h. für jeden
-   * Listener in einem eigenen Thread).
-   * 
+   *
+   * Tritt ein entstprechendes Ereignis ein, so erfolgt der Aufruf der entsprechenden Methoden
+   * XEventListener.notifyEvent(...) immer gleichzeitig (d.h. für jeden Listener in einem eigenen
+   * Thread).
+   *
    * Der WollMux liefert derzeit folgende Events:
-   * 
-   * OnWollMuxProcessingFinished: Dieses Event wird erzeugt, wenn ein Textdokument
-   * nach dem Öffnen vollständig vom WollMux bearbeitet und expandiert wurde oder bei
-   * allen anderen Dokumenttypen direkt nach dem Öffnen. D.h. für jedes in OOo
-   * geöffnete Dokument erfolgt früher oder später ein solches Event.
-   * 
+   *
+   * OnWollMuxProcessingFinished: Dieses Event wird erzeugt, wenn ein Textdokument nach dem Öffnen
+   * vollständig vom WollMux bearbeitet und expandiert wurde oder bei allen anderen Dokumenttypen
+   * direkt nach dem Öffnen. D.h. für jedes in OOo geöffnete Dokument erfolgt früher oder später ein
+   * solches Event.
+   *
    * @param l
-   *          Der XEventListener, der bei Statusänderungen der Dokumentbearbeitung
-   *          informiert werden soll.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
+   *          Der XEventListener, der bei Statusänderungen der Dokumentbearbeitung informiert werden
+   *          soll.
+   *
    * @see com.sun.star.document.XEventBroadcaster#addEventListener(com.sun.star.document.XEventListener)
    */
   @Override
@@ -362,7 +355,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   /**
    * Diese Methode deregistriert einen XPALChangeEventListener wenn er bereits
    * registriert war.
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventBroadcaster#removePALChangeEventListener(de.muenchen.allg.itd51.wollmux.XPALChangeEventListener)
    */
   @Override
@@ -372,13 +365,12 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Diese Methode deregistriert einen mit registerEventListener(XEventListener l)
-   * registrierten XEventListener.
-   * 
+   * Diese Methode deregistriert einen mit registerEventListener(XEventListener l) registrierten
+   * XEventListener.
+   *
    * @param l
    *          der XEventListener, der deregistriert werden soll.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
+   *
    * @see com.sun.star.document.XEventBroadcaster#removeEventListener(com.sun.star.document.XEventListener)
    */
   @Override
@@ -404,22 +396,19 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Liefert die zum aktuellen Zeitpunkt im WollMux ausgewählten Absenderdaten (die
-   * über das Dokumentkommandos WM(CMD'insertValue' DB_SPALTE'<dbSpalte>') in ein
-   * Dokument eingefügt würden) in einem Array von {@link PropertyValue}-Objekten
-   * zurück. Dabei repräsentieren die Attribute {@link PropertyValue.Name} die
-   * verfügbaren DB_SPALTEn und die Attribute {@link PropertyValue.Value} die zu
-   * DB_SPALTE zugehörigen Absenderdaten.
-   * 
-   * Jeder Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit allen
-   * Einträgen die zu dem Zeitpunkt gültig sind. Eine Änderung der Werte des
-   * Rückgabeobjekts hat daher keine Auswirkung auf den WollMux.
-   * 
-   * @return Array von PropertyValue-Objekten mit den aktuell im WollMux gesetzten
-   *         Absenderdaten. Gibt es keine Absenderdaten, so ist das Array leer (aber
-   *         != null).
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
+   * Liefert die zum aktuellen Zeitpunkt im WollMux ausgewählten Absenderdaten (die über das
+   * Dokumentkommandos WM(CMD'insertValue' DB_SPALTE'<dbSpalte>') in ein Dokument eingefügt würden)
+   * in einem Array von {@link PropertyValue}-Objekten zurück. Dabei repräsentieren die Attribute
+   * {@link PropertyValue.Name} die verfügbaren DB_SPALTEn und die Attribute
+   * {@link PropertyValue.Value} die zu DB_SPALTE zugehörigen Absenderdaten.
+   *
+   * Jeder Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit allen Einträgen die zu dem
+   * Zeitpunkt gültig sind. Eine Änderung der Werte des Rückgabeobjekts hat daher keine Auswirkung
+   * auf den WollMux.
+   *
+   * @return Array von PropertyValue-Objekten mit den aktuell im WollMux gesetzten Absenderdaten.
+   *         Gibt es keine Absenderdaten, so ist das Array leer (aber != null).
+   *
    */
   @Override
   public PropertyValue[] getInsertValues()
@@ -454,10 +443,10 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * DB_SPALTE'<dbSpalte>') in das Dokument einfügen würde, oder den Leerstring ""
    * wenn dieser Wert nicht bestimmt werden kann (z.B. wenn ein ungültiger
    * Spaltennamen dbSpalte übergeben wurde).
-   * 
+   *
    * Anmerkung: Diese Methode wird durch die Methode getInsertValues() ergänzt die
    * alle Spaltennamen und Spaltenwerte zurück liefern kann.
-   * 
+   *
    * @param dbSpalte
    *          Name der Datenbankspalte deren Wert zurückgeliefert werden soll.
    * @return Der Wert der Datenbankspalte dbSpalte des aktuell ausgewählten Absenders
@@ -469,7 +458,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     /*
      * Diese Methode nimmt keine Synchronisierung über den WollMuxEventHandler vor,
      * da das reine Auslesen der Datenstrukturen unkritisch ist.
-     * 
+     *
      * Im Test hatte ich einmal eine über den WollMuxEventHandler synchronisierte
      * Variante der Funktion getestet und beim Aufruf der Funktion über ein
      * Basic-Makro kam es zu einem Deadlock (Das Basic-Makro bekommt exclusiven
@@ -496,7 +485,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * Macht das selbe wie XWollMuxDocument wdoc = getWollMuxDocument(doc); if (wdoc !=
    * null) wdoc.addPrintFunction(functionName) und sollte durch diese Anweisungen
    * entsprechend ersetzt werden.
-   * 
+   *
    * @param doc
    *          Das Dokument, dem die Druckfunktion functionName hinzugefügt werden
    *          soll.
@@ -504,8 +493,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    *          der Name einer Druckfunktion, die im Abschnitt "Druckfunktionen" der
    *          WollMux-Konfiguration definiert sein muss.
    * @deprecated since 2009-09-18
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   @Deprecated
   @Override
@@ -519,14 +506,12 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * Macht das selbe wie XWollMuxDocument wdoc = getWollMuxDocument(doc); if (wdoc !=
    * null) wdoc.removePrintFunction(functionName) und sollte durch diese Anweisungen
    * entsprechend ersetzt werden.
-   * 
+   *
    * @param doc
    *          Das Dokument, dem die Druckfunktion functionName genommen werden soll.
    * @param functionName
    *          der Name einer Druckfunktion, die im Dokument gesetzt ist.
    * @deprecated since 2009-09-18
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   @Deprecated
   @Override
@@ -545,22 +530,20 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * WollMux für das Dokument sinnvolle Funktionen bereitstellt. Es ist möglich, dass
    * Aufrufe der entsprechenden Funktionen des XWollMuxDocument-Interfaces nichts
    * tun.
-   * 
+   *
    * Hinweis zur Synchronisation: Aufrufe der Funktionen von XWollMuxDocument können
    * ohne weitere Synchronisation sofort erfolgen. Jedoch ersetzt
    * getWollMuxDocument() keinesfalls die Synchronisation mit dem WollMux.
    * Insbesondere ist es möglich, dass getWollMuxDocument() zurückkehrt BEVOR der
    * WollMux das Dokument doc bearbeitet hat. Vergleiche hierzu die Beschreibung von
    * XWollMuxDocument.
-   * 
+   *
    * @param doc
    *          Ein Office-Dokument, in dem dokumentspezifische Funktionen des
    *          WollMux aufgerufen werden sollen.
    * @return Liefert null, falls doc durch den WollMux nicht bearbeitet wird und eine
    *         Instanz von XWollMuxDocument, falls es sich bei doc prinzipiell um ein
    *         WollMux-Dokument handelt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101), Christoph Lutz (D-III-ITD-D101)
    */
   @Override
   public XWollMuxDocument getWollMuxDocument(XComponent doc)
@@ -569,7 +552,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     if (tdoc != null) return new WollMuxDocument(tdoc);
     return null;
   }
-  
+
   private void createMenuItems()
   {
     // "Extras->Seriendruck (WollMux)" erzeugen:
@@ -594,7 +577,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
       List<String> removeCmdUrls)
   {
     final String settingsUrl = "private:resource/menubar/menubar";
-  
+
     try
     {
       // Menüleiste aus des Moduls com.sun.star.text.TextDocument holen:
@@ -603,7 +586,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
       XUIConfigurationManager cfgMgr =
         UNO.XUIConfigurationManager(suppl.getUIConfigurationManager("com.sun.star.text.TextDocument"));
       XIndexAccess menubar = UNO.XIndexAccess(cfgMgr.getSettings(settingsUrl, true));
-  
+
       int idx = findElementWithCmdURL(menubar, insertIntoMenuUrl);
       if (idx >= 0)
       {
@@ -611,14 +594,14 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
         // Elemente des .uno:ToolsMenu besorgen:
         XIndexContainer toolsMenu =
           UNO.XIndexContainer(desc.getPropertyValue("ItemDescriptorContainer"));
-  
+
         // Seriendruck-Button löschen, wenn er bereits vorhanden ist.
         for (String rCmdUrl : removeCmdUrls)
         {
           idx = findElementWithCmdURL(toolsMenu, rCmdUrl);
           if (idx >= 0) toolsMenu.removeByIndex(idx);
         }
-  
+
         // SeriendruckAssistent suchen
         idx = findElementWithCmdURL(toolsMenu, insertBeforeElementUrl);
         if (idx >= 0)
@@ -636,12 +619,12 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     catch (Exception e)
     {}
   }
-  
+
   /**
    * Liefert den Index des ersten Menüelements aus dem Menü menu zurück, dessen
    * CommandURL mit cmdUrl identisch ist oder -1, falls kein solches Element gefunden
    * wurde.
-   * 
+   *
    * @return Liefert den Index des ersten Menüelements mit CommandURL cmdUrl oder -1.
    */
   private static int findElementWithCmdURL(XIndexAccess menu, String cmdUrl)
@@ -662,5 +645,5 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     {}
     return -1;
   }
-  
+
 }

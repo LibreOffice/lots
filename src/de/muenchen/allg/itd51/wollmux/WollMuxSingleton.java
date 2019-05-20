@@ -266,8 +266,6 @@ public class WollMuxSingleton
 
   /**
    * Liefert die Versionsnummer des WollMux (z.B. "5.9.2") zurück.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public static String getVersion()
   {
@@ -351,8 +349,6 @@ public class WollMuxSingleton
    * 
    * @param context
    *          gibt an relativ zu was relative URLs aufgelöst werden sollen.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static void registerDatasources(ConfigThingy conf, URL context)
   {
@@ -547,7 +543,6 @@ public class WollMuxSingleton
    *
    * @throws IOException
    *           falls von url nicht gelesen werden kann.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void checkURL(URL url) throws IOException
   {

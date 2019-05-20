@@ -228,8 +228,6 @@ public class WollMuxFiles
    * </ol>
    *
    * @return false für den den Fall no Config, true bei gefundener wollmux.conf
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * @author Daniel Benkmann (D-III-ITD-D101)
    */
   public static boolean setupWollMuxDir()
   {
@@ -431,8 +429,6 @@ public class WollMuxFiles
 
   /**
    * Liefert das Verzeichnis ,wollmux zurück.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static File getWollMuxDir()
   {
@@ -492,8 +488,6 @@ public class WollMuxFiles
   /**
    * Liefert eine URL zum String urlStr, wobei relative Pfade relativ zum
    * DEFAULT_CONTEXT aufgelöst werden.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    * @throws MalformedURLException
    *           falls urlStr keine legale URL darstellt.
    */
@@ -510,8 +504,6 @@ public class WollMuxFiles
    *
    * Sollte {{@link #defaultContextURL} nicht <code>null</code> sein, tut diese
    * Methode nichts.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static void determineDefaultContext()
   {
@@ -560,8 +552,6 @@ public class WollMuxFiles
   /**
    * Wertet die FONT_ZOOM-Direktive des Dialoge-Abschnitts aus und zoomt die Fonts
    * falls erforderlich.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void setLookAndFeel()
   {
@@ -584,8 +574,6 @@ public class WollMuxFiles
 
   /**
    * Zoomt die Fonts auf zoomFactor, falls erforderlich.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void zoomFonts(double zoomFactor)
   {
@@ -672,8 +660,6 @@ public class WollMuxFiles
    * Erstellt eine Dump-Datei im WollMux-Verzeichnis, die wichtige Informationen zur
    * Fehlersuche enthält und liefert den Namen dieser Datei als String zurück, oder
    * null falls bei der Erstellung Fehler auftraten.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz
    */
   public static String dumpInfo()
   {
@@ -928,8 +914,6 @@ public class WollMuxFiles
 
   /**
    * Kopiert den Inhalt von file nach out (binär).
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static void copyFile(File file, OutputStream out)
   {
@@ -951,8 +935,6 @@ public class WollMuxFiles
   /**
    * Gibt den Inhalt der OOo-Konfiguration einschließlich aller Unterknoten am Knoten
    * nodePath zurück.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static String dumpOOoConfiguration(String nodePath)
   {
@@ -985,8 +967,6 @@ public class WollMuxFiles
    * @param spaces
    * @return
    * @throws Exception
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static String dumpNode(Object element, String spaces)
   {
