@@ -70,7 +70,7 @@ public class FormatWizardPage extends AbstractXWizardPage
       @Override
       public void itemStateChanged(ItemEvent event)
       {
-        name.setText(name.getText() + mailmerge.getItem((short) event.Selected));
+        name.setText(name.getText() + MailMergeNew.addMergeFieldTags(mailmerge.getItem((short) event.Selected)));
       }
     });
     special = UNO.XComboBox(container.getControl("special"));

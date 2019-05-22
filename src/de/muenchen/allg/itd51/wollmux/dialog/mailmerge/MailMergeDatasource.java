@@ -348,9 +348,9 @@ public class MailMergeDatasource
           column, dataIter.next(), null);
     }
     WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
-        MailMergeNew.TAG_DATENSATZNUMMER, previewDatasetNumberStr, null);
+        MailMergeController.TAG_DATENSATZNUMMER, previewDatasetNumberStr, null);
     WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
-        MailMergeNew.TAG_SERIENBRIEFNUMMER, previewDatasetNumberStr, null);
+        MailMergeController.TAG_SERIENBRIEFNUMMER, previewDatasetNumberStr, null);
   }
 
   /**

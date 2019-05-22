@@ -31,63 +31,75 @@ public class MailMergeController
   private static final Logger LOGGER = LoggerFactory.getLogger(MailMergeController.class);
   
   /**
+  * Tag für {@link TextComponentTags}, das als Platzhalter für die Serienbriefnummer
+  * steht.
+  */
+  public static final String TAG_SERIENBRIEFNUMMER = "#SB";
+  
+  /**
+  * Tag für {@link TextComponentTags}, das als Platzhalter für die Datensatznummer
+  * steht.
+  */
+  public static final String TAG_DATENSATZNUMMER = "#DS";
+  
+  /**
    * ID der Property in der die Serienbriefdaten gespeichert werden.
    */
-  private static final String PROP_QUERYRESULTS = "MailMergeNew_QueryResults";
+  public static final String PROP_QUERYRESULTS = "MailMergeNew_QueryResults";
 
   /**
    * ID der Property in der das Zielverzeichnis für den Druck in Einzeldokumente
    * gespeichert wird.
    */
-  private static final String PROP_TARGETDIR = "MailMergeNew_TargetDir";
+  public static final String PROP_TARGETDIR = "MailMergeNew_TargetDir";
 
   /**
    * ID der Property in der das Dateinamenmuster für den Einzeldokumentdruck
    * gespeichert wird.
    */
-  private static final String PROP_FILEPATTERN = "MailMergeNew_FilePattern";
+  public static final String PROP_FILEPATTERN = "MailMergeNew_FilePattern";
 
   /**
    * ID der Property in der der Name des Feldes gespeichert wird, in dem die
    * E-Mail-Adressen der Empfänger enthalten ist.
    */
-  private static final String PROP_EMAIL_TO_FIELD_NAME =
+  public static final String PROP_EMAIL_TO_FIELD_NAME =
     "MailMergeNew_EMailToFieldName";
 
   /**
    * ID der Property in der der Name des Feldes gespeichert wird, in dem die
    * E-Mail-Adressen der Empfänger enthalten sind.
    */
-  private static final String PROP_EMAIL_FROM = "MailMergeNew_EMailFrom";
+  public static final String PROP_EMAIL_FROM = "MailMergeNew_EMailFrom";
 
   /**
    * ID der Property in der die Betreffzeile vom Typ String der zu verschickenden
    * E-Mail enthalten ist.
    */
-  private static final String PROP_EMAIL_SUBJECT = "MailMergeNew_EMailSubject";
+  public static final String PROP_EMAIL_SUBJECT = "MailMergeNew_EMailSubject";
 
   /**
    * ID der Property in der die Betreffzeile vom Typ String der zu verschickenden
    * E-Mail enthalten ist.
    */
-  private static final String PROP_EMAIL_MESSAGE_TEXTTAGS =
+  public static final String PROP_EMAIL_MESSAGE_TEXTTAGS =
     "MailMergeNew_EMailMessageTextTags";
 
   /**
    * ID der Property in der das Dateinamenmuster für den Einzeldokumentdruck
    * gespeichert wird.
    */
-  private static final String PROP_DATASET_EXPORT = "MailMergeNew_DatasetExport";
+  public static final String PROP_DATASET_EXPORT = "MailMergeNew_DatasetExport";
 
   /**
    * ID der Property, die einen List der Indizes der zu druckenden Datensätze
    * speichert.
    */
-  private static final String PROP_MAILMERGENEW_SELECTION = "MailMergeNew_Selection";
+  public static final String PROP_MAILMERGENEW_SELECTION = "MailMergeNew_Selection";
 
-  private static final String TEMP_MAIL_DIR_PREFIX = "wollmuxmail";
+  public static final String TEMP_MAIL_DIR_PREFIX = "wollmuxmail";
 
-  private static final String MAIL_ERROR_MESSAGE_TITLE =
+  public static final String MAIL_ERROR_MESSAGE_TITLE =
     L.m("Fehler beim E-Mail-Versand");
   
   private TextDocumentController documentController;

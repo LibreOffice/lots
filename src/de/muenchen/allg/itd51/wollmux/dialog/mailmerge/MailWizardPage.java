@@ -71,7 +71,7 @@ public class MailWizardPage extends AbstractXWizardPage
       @Override
       public void itemStateChanged(ItemEvent event)
       {
-        message.setText(message.getText() + mailmerge.getItem((short) event.Selected));
+        message.setText(message.getText() + MailMergeNew.addMergeFieldTags(mailmerge.getItem((short) event.Selected)));
       }
     });
     special = UNO.XComboBox(container.getControl("special"));
