@@ -225,10 +225,10 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
           break;
         case 3:
           
-          textDocumentController.insertMailMergeFieldAtCursorPosition(MailMergeNew.TAG_DATENSATZNUMMER);
+          textDocumentController.insertMailMergeFieldAtCursorPosition(MailMergeController.TAG_DATENSATZNUMMER);
           break;
         case 4:
-          textDocumentController.insertMailMergeFieldAtCursorPosition(MailMergeNew.TAG_SERIENBRIEFNUMMER);
+          textDocumentController.insertMailMergeFieldAtCursorPosition(MailMergeController.TAG_SERIENBRIEFNUMMER);
           break;
         case 5:
           textDocumentController.insertNextDatasetFieldAtCursorPosition();

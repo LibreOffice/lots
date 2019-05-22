@@ -165,6 +165,7 @@ public class StandardPrint
    *
    * @deprecated
    */
+  @Deprecated
   public static void myTestPrintFunction(XPrintModel pmod, Object arg)
   {
     ConfigThingy conf = new ConfigThingy("ARG");
@@ -244,7 +245,8 @@ public class StandardPrint
       throws Exception
   {
     boolean isODT = true;
-    MailMergeNew.saveToFile(pmod, isODT);
+    MailMergeNew.saveOutputFile(MailMergeNew.createTempDocumentFileByFilePattern(pmod, isODT), 
+        pmod.getTextDocument());
   }
 
   /**
@@ -258,7 +260,8 @@ public class StandardPrint
       throws Exception
   {
     boolean isODT = false;
-    MailMergeNew.saveToFile(pmod, isODT);
+    MailMergeNew.saveOutputFile(MailMergeNew.createTempDocumentFileByFilePattern(pmod, isODT), 
+        pmod.getTextDocument());
   }
 
   /**
