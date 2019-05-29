@@ -4,19 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.MessagingException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.lang.NoSuchMethodException;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResultsWithSchema;
+import de.muenchen.allg.itd51.wollmux.core.dialog.TextComponentTags;
 import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.email.EMailSender;
+import de.muenchen.allg.itd51.wollmux.email.MailServerSettings;
 import de.muenchen.allg.itd51.wollmux.print.PrintModels;
 
 /**
@@ -84,6 +92,20 @@ public class MailMergeController
    */
   public static final String PROP_EMAIL_MESSAGE_TEXTTAGS =
     "MailMergeNew_EMailMessageTextTags";
+
+  /**
+   * Wenn der Seriendruck per E-Mail gestartet wird, wird nach erfolgreichen Versand der Empfänger
+   * in diese Liste hinzugefügt.
+   */
+  public static final String PROP_EMAIL_REPORT_RECIPIENT_LIST = "MailMergeNew_EMailReportReciptienList";
+
+  /**
+   * Wenn der Seriendruck per E-Mail gestartet wird, wird nach jedem erfolgreichen Versand einer
+   * E-Mail hochgezählt.
+   */
+  public static final String PROP_EMAIL_REPORT_EMAILS_SENT_COUNT = "MailMergeNew_EMailReportEMailsSentCount";
+
+  public static final String PROP_EMAIL_MAIL_SERVER_SETTINGS = "MailMergeNew_MailServerSettings";
 
   /**
    * ID der Property in der das Dateinamenmuster für den Einzeldokumentdruck
@@ -347,6 +369,52 @@ public class MailMergeController
         documentController.setFormFieldsPreviewMode(false);
 
         long duration = (System.currentTimeMillis() - startTime) / 1000;
+        
+        // Wenn der Seriendruck per E-Mail versendet wird, sende Zusammenfassung
+        // Liste der Empfänger-Emails und Anzahl versendeter Emails
+        String eMailFrom = pmod.getProp(MailMergeController.PROP_EMAIL_FROM, "").toString();
+
+        List<String> recipintList = (List<String>) pmod
+            .getProp(MailMergeController.PROP_EMAIL_REPORT_RECIPIENT_LIST, null);
+        int mailsSentCount = (int) pmod
+            .getProp(MailMergeController.PROP_EMAIL_REPORT_EMAILS_SENT_COUNT, 0);
+
+        if (recipintList == null)
+          return;
+
+          EMailSender mail = new EMailSender();
+        StringBuilder buildMessage = new StringBuilder();
+
+          for (String recipient : recipintList)
+          {
+          buildMessage.append(recipient);
+          buildMessage.append("\r\n");
+          }
+
+        buildMessage.append("\r\n");
+        buildMessage.append("Anzahl gesendeter E-Mails: ");
+        buildMessage.append(mailsSentCount);
+
+          try
+          {
+          mail.createNewMultipartMail(eMailFrom, eMailFrom, "Report", buildMessage.toString());
+          } catch (MessagingException e)
+          {
+            LOGGER.error("", e);
+          }
+
+          try
+          {
+            MailServerSettings smtpSettings = (MailServerSettings) pmod
+                .getPropertyValue(PROP_EMAIL_MAIL_SERVER_SETTINGS);
+            mail.sendMessage(smtpSettings);
+
+          } catch (ConfigurationErrorException | MessagingException | WrappedTargetException
+              | UnknownPropertyException e)
+          {
+            LOGGER.error("", e);
+          }
+
         LOGGER.debug(L.m("MailMerge finished after %1 seconds", duration));
       }
     }.start();

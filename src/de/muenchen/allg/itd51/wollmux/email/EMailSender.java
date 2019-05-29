@@ -40,6 +40,9 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
@@ -47,6 +50,8 @@ import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 
 public class EMailSender
 {
+  private static final Logger LOGGER = LoggerFactory.getLogger(EMailSender.class);
+
   private Properties props;
 
   private Message email;
@@ -92,6 +97,8 @@ public class EMailSender
     try
     {
       Transport tr = session.getTransport("smtp");
+      // FYI: falls getUsername() || getPassword() = "" muss NULL übergeben werden,
+      // auch bei "" glaubt javamail AUTH aktivieren zu müssen was zu einer Auth-Exception führt.
       tr.connect(mailServerSettings.getMailserver(), mailServerSettings.getMailserverport(),
           mailServerSettings.getUsername(), mailServerSettings.getPassword());
       email.saveChanges();
@@ -99,7 +106,7 @@ public class EMailSender
     }
     catch (MessagingException e)
     {
-      throw new MessagingException(e.getMessage(), e);
+      LOGGER.error("", e);
     }
   }
 
