@@ -40,6 +40,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -52,7 +53,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.PropertyVetoException;
+import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.frame.XStorable;
+import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
@@ -92,6 +97,8 @@ public class MailMergeNew
    * true gdw wir uns im Vorschau-Modus befinden.
    */
   public boolean previewMode;
+
+  private static MailServerSettings smtpSettings = null;
 
   /**
    * Falls nicht null wird dieser Listener aufgerufen nachdem der MailMergeNew
@@ -392,9 +399,8 @@ public class MailMergeNew
       new File(pmod.getProp(MailMergeController.PROP_TARGETDIR,
         System.getProperty("user.home") + "/Seriendruck").toString());
 
-    HashMap<String, String> dataset =
-        new HashMap<>((HashMap<String, String>) pmod.getProp(MailMergeController.PROP_DATASET_EXPORT,
-          new HashMap<String, String>()));
+    HashMap<String, String> dataset = new HashMap<>((HashMap<String, String>) pmod
+        .getProp(MailMergeController.PROP_DATASET_EXPORT, new HashMap<String, String>()));
     
     String filename = replaceTextByMergeFieldValue((String) pmod.getProp(MailMergeController.PROP_FILEPATTERN, null),
         dataset);
@@ -418,7 +424,8 @@ public class MailMergeNew
    * @param dataset: Key = Serienbrieffeld, Value = Wert des Datensatzes
    * @return 
    */
-  private static String replaceTextByMergeFieldValue(String text, HashMap<String, String> dataset)
+  private static String replaceTextByMergeFieldValue(String text,
+      HashMap<String, String> dataset)
   {
     for (Entry<String, String> entry : dataset.entrySet())
     {
@@ -457,7 +464,8 @@ public class MailMergeNew
         tmpOutDir.mkdir();
         try
         {
-          pmod.setPropertyValue(MailMergeController.PROP_TARGETDIR, tmpOutDir.toString());
+          pmod.setPropertyValue(MailMergeController.PROP_TARGETDIR,
+              tmpOutDir.toURI().toURL().toString());
         }
         catch (Exception e)
         {
@@ -489,9 +497,9 @@ public class MailMergeNew
 
     String fieldName = pmod.getProp(MailMergeController.PROP_EMAIL_TO_FIELD_NAME, "").toString();
     @SuppressWarnings("unchecked")
-    HashMap<String, String> ds =
-      new HashMap<>((HashMap<String, String>) pmod.getProp(
-          MailMergeController.PROP_DATASET_EXPORT, new HashMap<String, String>()));
+    HashMap<String, String> ds = new HashMap<>((HashMap<String, String>) pmod
+        .getProp(
+            MailMergeController.PROP_DATASET_EXPORT, new HashMap<String, String>()));
     String to = ds.get(fieldName);
     PrintModels.setStage(pmod, L.m("Sende an %1", to));
     if (!isMailAddress(to))
@@ -516,8 +524,16 @@ public class MailMergeNew
       EMailSender mail = new EMailSender();
       mail.createNewMultipartMail(from, to, replaceTextByMergeFieldValue(subject, ds), 
           replaceTextByMergeFieldValue(message, ds));
-      MailServerSettings smtpSettings = mail.getWollMuxMailServerSettings();
       
+      smtpSettings = (MailServerSettings) pmod
+          .getProp(MailMergeController.PROP_EMAIL_MAIL_SERVER_SETTINGS, null);
+
+      if (smtpSettings == null)
+      {
+        smtpSettings = mail.getWollMuxMailServerSettings();
+        pmod.setPropertyValue(MailMergeController.PROP_EMAIL_MAIL_SERVER_SETTINGS, smtpSettings);
+      }
+
       IAuthenticationDialogListener authDialogListener = (String username, String password) ->
       {
         if (username == null || password == null)
@@ -525,23 +541,55 @@ public class MailMergeNew
 
         smtpSettings.setUsername(username);
         smtpSettings.setPassword(password);
-
-        File document = saveOutputFile(createTempDocumentFileByFilePattern(pmod, isODT), pmod.getTextDocument());
-        
         try
         {
-          mail.addAttachment(document);
-          mail.sendMessage(smtpSettings);
-        } catch (ConfigurationErrorException | MessagingException | IOException e)
+          pmod.setPropertyValue(MailMergeController.PROP_EMAIL_MAIL_SERVER_SETTINGS, smtpSettings);
+        } catch (IllegalArgumentException | UnknownPropertyException | PropertyVetoException
+            | WrappedTargetException e)
         {
           LOGGER.error("", e);
-        } finally {
-          if (document != null)
-            document.delete();
         }
       };
       
-      new AuthenticationDialog(smtpSettings.getUsername(), authDialogListener);
+      if ((smtpSettings.getUsername() != null && !smtpSettings.getUsername().isEmpty())
+          && (smtpSettings.getPassword() == null || smtpSettings.getPassword().isEmpty()))
+        new AuthenticationDialog(smtpSettings.getUsername(), authDialogListener);
+
+      File document = saveOutputFile(createTempDocumentFileByFilePattern(pmod, isODT),
+          pmod.getTextDocument());
+
+      sendMail(mail, smtpSettings, document);
+
+      // Wenn Properties noch nicht gesetzt worden sind initial setzen da
+      // sonst bei getPropertyValue() UnknownPropertyException geworfen wird.
+      if (!pmod.getPropertySetInfo()
+          .hasPropertyByName(MailMergeController.PROP_EMAIL_REPORT_RECIPIENT_LIST))
+      {
+        pmod.setPropertyValue(MailMergeController.PROP_EMAIL_REPORT_RECIPIENT_LIST,
+          new ArrayList<String>());
+      }
+
+      if (!pmod.getPropertySetInfo()
+          .hasPropertyByName(MailMergeController.PROP_EMAIL_REPORT_EMAILS_SENT_COUNT))
+      {
+        pmod.setPropertyValue(MailMergeController.PROP_EMAIL_REPORT_EMAILS_SENT_COUNT, 0);
+      }
+
+      List<String> reportRecipientList = (List<String>) pmod
+          .getPropertyValue(MailMergeController.PROP_EMAIL_REPORT_RECIPIENT_LIST);
+      int mailsSentCount = (int) pmod
+          .getPropertyValue(MailMergeController.PROP_EMAIL_REPORT_EMAILS_SENT_COUNT);
+
+      if (reportRecipientList == null)
+        reportRecipientList = new ArrayList<>();
+
+      reportRecipientList.add(to);
+      mailsSentCount++;
+
+      pmod.setPropertyValue(MailMergeController.PROP_EMAIL_REPORT_RECIPIENT_LIST,
+          reportRecipientList);
+      pmod.setPropertyValue(MailMergeController.PROP_EMAIL_REPORT_EMAILS_SENT_COUNT,
+          mailsSentCount);
     }
     catch (ConfigurationErrorException e)
     {
@@ -568,6 +616,22 @@ public class MailMergeNew
     }
   }
 
+  private static void sendMail(EMailSender mail, MailServerSettings smtpSettings, File document)
+  {
+    try
+    {
+      mail.addAttachment(document);
+      mail.sendMessage(smtpSettings);
+    } catch (ConfigurationErrorException | MessagingException | IOException e)
+    {
+      LOGGER.error("", e);
+    } finally
+    {
+      if (document != null)
+        document.delete();
+    }
+  }
+
   /**
    * grobe Plausiprüfung, ob E-Mailadresse gültig ist.
    *
@@ -586,12 +650,12 @@ public class MailMergeNew
   {
     try
     {
-      String unparsedUrl = outFile.toString();
+      String outFilePath = outFile.toString();
       XStorable store = UNO.XStorable(doc);
       PropertyValue[] options;
 
       // fyi: http://wiki.services.openoffice.org/wiki/API/Tutorials/PDF_export
-      if (unparsedUrl.endsWith(".pdf"))
+      if (outFilePath.endsWith(".pdf"))
       {
         options = new PropertyValue[1];
 
@@ -599,7 +663,7 @@ public class MailMergeNew
         options[0].Name = "FilterName";
         options[0].Value = "writer_pdf_Export";
       }
-      else if (unparsedUrl.endsWith(".doc"))
+      else if (outFilePath.endsWith(".doc"))
       {
         options = new PropertyValue[1];
 
@@ -609,14 +673,15 @@ public class MailMergeNew
       }
       else
       {
-        if (!unparsedUrl.endsWith(".odt")) {
-          unparsedUrl = unparsedUrl + ".odt";
+        if (!outFilePath.endsWith(".odt"))
+        {
+          outFilePath = outFilePath + ".odt";
         }
 
         options = new PropertyValue[0];
       }
 
-      com.sun.star.util.URL url = UNO.getParsedUNOUrl(unparsedUrl);
+      com.sun.star.util.URL url = UNO.getParsedUNOUrl(outFilePath);
 
       // storeTOurl() has to be used instead of storeASurl() for PDF export
       store.storeToURL(url.Complete, options);
