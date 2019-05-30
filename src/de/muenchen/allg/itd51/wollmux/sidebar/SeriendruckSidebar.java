@@ -359,7 +359,8 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     printBtn.setControlPercentSize(100, 30);
     printBtn.setLabel("Drucken");
     UNO.XButton(printBtn.getXControl()).addActionListener(printActionListener);
-
+    UNO.XWindow(printBtn.getXControl()).setEnable(false);
+    
     bottomControls.add(printBtn);
 
     return new ControlModel(Orientation.HORIZONTAL, Align.NONE, bottomControls, Optional.empty());
@@ -414,7 +415,8 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
       UNO.XWindow(layout.getControl("btnPreview")).setEnable(active);
       UNO.XWindow(layout.getControl("btnPrint")).setEnable(active);
       UNO.XWindow(layout.getControl("cbSerienbrieffeld")).setEnable(active);
-      UNO.XWindow(layout.getControl("cbSpezialfeld")).setEnable(true);
+      UNO.XWindow(layout.getControl("cbSpezialfeld")).setEnable(active);
+      UNO.XWindow(layout.getControl("btnPrint")).setEnable(active);
     }
   };
 
