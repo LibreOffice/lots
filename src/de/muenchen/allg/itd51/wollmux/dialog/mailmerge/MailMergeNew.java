@@ -40,6 +40,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -620,15 +622,19 @@ public class MailMergeNew
   {
     try
     {
-      mail.addAttachment(document);
+      // fyi: java mail api...addAttachment(File file) erwartet File, stört sich dann aber
+      // an URI..daher "file:/tmp/doc.odt" -> FileNotFoundException, "/tmp/doc.odt" = gültiger Pfad.
+      URI uri = new URI(document.getPath());
+      String filePath = uri.getPath();
+      File file = new File(filePath);
+      mail.addAttachment(file);
       mail.sendMessage(smtpSettings);
-    } catch (ConfigurationErrorException | MessagingException | IOException e)
+    } catch (ConfigurationErrorException | MessagingException | IOException | URISyntaxException e)
     {
       LOGGER.error("", e);
     } finally
     {
-      if (document != null)
-        document.delete();
+      document.delete();
     }
   }
 
@@ -692,16 +698,5 @@ public class MailMergeNew
     }
     
     return outFile;
-  }
-
-  /**
-   * Ersetzt alle möglicherweise bösen Zeichen im Dateinamen name durch eine
-   * Unterstrich.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  private static String simplifyFilename(String name)
-  {
-    return name.replaceAll("[^\\p{javaLetterOrDigit},.()=+_-]", "_");
   }
 }

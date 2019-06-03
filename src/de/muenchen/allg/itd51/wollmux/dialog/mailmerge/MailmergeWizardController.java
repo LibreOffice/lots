@@ -164,7 +164,24 @@ public class MailmergeWizardController implements XWizardController
   {
     LOGGER.debug("Aktiviere Page {} mit Titel {}", pageId, title[pageId]);
     pages[pageId].activatePage();
-    activateNextButton(wizard.getCurrentPage().canAdvance());
+
+    boolean canAdvance = wizard.getCurrentPage().canAdvance();
+
+    short lastPathValue = currentPath.path[PATH.MAIL.path.length - 1];
+
+    if (canAdvance)
+    {
+      activateNextButton(canAdvance);
+    }
+
+    if (pageId == lastPathValue && canAdvance)
+    {
+      enableFinishButton(true);
+      activateNextButton(false);
+    } else
+    {
+      enableFinishButton(false);
+    }
   }
 
   @Override
@@ -205,7 +222,6 @@ public class MailmergeWizardController implements XWizardController
   public void activateNextButton(boolean activate)
   {
     wizard.enableButton(WizardButton.NEXT, activate);
-    enableFinishButton();
   }
 
   private PAGE_ID getPageId(short pageId)
@@ -213,14 +229,9 @@ public class MailmergeWizardController implements XWizardController
     return PAGE_ID.values()[pageId];
   }
 
-  private void enableFinishButton()
+  public void enableFinishButton(boolean active)
   {
-    boolean enable = true;
-    for (short i : currentPath.path)
-    {
-      enable = enable && pages[i].canAdvance();
-    }
-    wizard.enableButton(WizardButton.FINISH, enable);
+    wizard.enableButton(WizardButton.FINISH, active);
   }
 
   public ACTION getCurrentActionType()
