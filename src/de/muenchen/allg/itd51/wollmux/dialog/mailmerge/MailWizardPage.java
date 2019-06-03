@@ -25,7 +25,8 @@ public class MailWizardPage extends AbstractXWizardPage
   private String recieverValue = "";
   private final XComboBox mailmerge;
   private final XComboBox special;
-
+  private final XControlContainer container;
+  
   private final MailmergeWizardController controller;
 
   private AbstractTextListener textListener = new AbstractTextListener()
@@ -34,7 +35,7 @@ public class MailWizardPage extends AbstractXWizardPage
     @Override
     public void textChanged(TextEvent arg0)
     {
-      controller.activateNextButton(canAdvance());
+        controller.enableFinishButton(true);
     }
   };
 
@@ -43,7 +44,7 @@ public class MailWizardPage extends AbstractXWizardPage
   {
     super(pageId, parentWindow, "seriendruck_mail");
     this.controller = controller;
-    XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
+    container = UnoRuntime.queryInterface(XControlContainer.class, window);
     sender = UNO.XTextComponent(container.getControl("sender"));
     sender.addTextListener(textListener);
     subject = UNO.XTextComponent(container.getControl("subject"));

@@ -382,38 +382,42 @@ public class MailMergeController
         if (recipintList == null)
           return;
 
-          EMailSender mail = new EMailSender();
+        EMailSender mail = new EMailSender();
         StringBuilder buildMessage = new StringBuilder();
 
-          for (String recipient : recipintList)
-          {
+        buildMessage.append(
+            "Der WollMux-Serienbrief wurde erfolgreich an folgende E-Mail-Adressen versandt:");
+
+        for (String recipient : recipintList)
+        {
           buildMessage.append(recipient);
           buildMessage.append("\r\n");
-          }
+        }
 
         buildMessage.append("\r\n");
         buildMessage.append("Anzahl gesendeter E-Mails: ");
         buildMessage.append(mailsSentCount);
 
-          try
-          {
-          mail.createNewMultipartMail(eMailFrom, eMailFrom, "Report", buildMessage.toString());
-          } catch (MessagingException e)
-          {
-            LOGGER.error("", e);
-          }
+        try
+        {
+          mail.createNewMultipartMail(eMailFrom, eMailFrom,
+              "WollMux-Seriendruck: Bericht über Ihren E-Mail-Versand", buildMessage.toString());
+        } catch (MessagingException e)
+        {
+          LOGGER.error("", e);
+        }
 
-          try
-          {
-            MailServerSettings smtpSettings = (MailServerSettings) pmod
-                .getPropertyValue(PROP_EMAIL_MAIL_SERVER_SETTINGS);
-            mail.sendMessage(smtpSettings);
+        try
+        {
+          MailServerSettings smtpSettings = (MailServerSettings) pmod
+              .getPropertyValue(PROP_EMAIL_MAIL_SERVER_SETTINGS);
+          mail.sendMessage(smtpSettings);
 
-          } catch (ConfigurationErrorException | MessagingException | WrappedTargetException
-              | UnknownPropertyException e)
-          {
-            LOGGER.error("", e);
-          }
+        } catch (ConfigurationErrorException | MessagingException | WrappedTargetException
+            | UnknownPropertyException e)
+        {
+          LOGGER.error("", e);
+        }
 
         LOGGER.debug(L.m("MailMerge finished after %1 seconds", duration));
       }
