@@ -152,9 +152,7 @@ public class PrintWizardPage extends AbstractXWizardPage
   public void setCurrentPrinterName(String druckerName)
   {
     XPrintable printable = UNO.XPrintable(doc);
-    PropertyValue[] printer = null;
-    UnoProps printerInfo = new UnoProps(printer);
-    printerInfo.setPropertyValue("Name", druckerName);
+    UnoProps printerInfo = new UnoProps("Name", druckerName);
     if (printable != null)
     {
       printable.setPrinter(printerInfo.getProps());
