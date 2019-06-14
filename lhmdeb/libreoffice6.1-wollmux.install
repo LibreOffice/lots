@@ -18,4 +18,6 @@ oxt/help/component*.txt         opt/libreoffice6.1/share/extensions/wollmux/help
 oxt/wollmux.png                 opt/libreoffice6.1/share/extensions/wollmux/icons/
 oxt/mailmerge.png               opt/libreoffice6.1/share/extensions/wollmux/icons/
 oxt/image/wollmux.jpg			opt/libreoffice6.1/share/extensions/wollmux/image/
-oxt/icons/*.bmp					opt/libreoffice6.1/share/extensions/wollmux/icons
+oxt/icons/*.bmp					opt/libreoffice6.1/share/extensions/wollmux/icons/
+oxt/icons/add.png 				opt/libreoffice6.1/share/extensions/wollmux/icons/
+oxt/icons/minus.png				opt/libreoffice6.1/share/extensions/wollmux/icons/

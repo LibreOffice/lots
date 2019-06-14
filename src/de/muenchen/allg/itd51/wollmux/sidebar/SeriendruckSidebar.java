@@ -205,19 +205,8 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
 
           GenderDialog genderDialog = new GenderDialog(params);
           break;
-        case 2:
-          // ConfigThingy für leere WennDannSonst-Funktion zusammenbauen. Aufbau:
-          // IF(STRCMP(VALUE '<firstField>', '') THEN('') ELSE(''))
-          ConfigThingy ifConf = new ConfigThingy("IF");
-          ConfigThingy strCmpConf = ifConf.add("STRCMP");
-          strCmpConf.add("VALUE").add(mailMerge.getDs().getColumnNames().get(0));
-          strCmpConf.add("");
-          ifConf.add("THEN").add("");
-          ifConf.add("ELSE").add("");
-          
+        case 2:          
           TrafoDialogParameters paramsIfThenElse = new TrafoDialogParameters();
-          paramsIfThenElse.conf = new ConfigThingy("IF");
-          paramsIfThenElse.conf.addChild(ifConf);
           paramsIfThenElse.isValid = true;
           paramsIfThenElse.fieldNames = mailMerge.getDs().getColumnNames();
           
