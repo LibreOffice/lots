@@ -54,7 +54,7 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 	<property name="UPDATE_XML" value="${LHM_DIR}/${COMPONENT}.update.xml" />
 	<property name="VERSION_FILE" value="${MISC}/version"/>
 	<property name="CHANGELOG_FILE" value="doc/ChangeLog"/>
-	<property name="WOLLMUX_WIKI_URL" value="http://www.wollmux.net/wiki" />
+	<property name="WOLLMUX_WIKI_URL" value="https://www.wollmux.net/wiki" />
 
 	<property name="MY_CLASSES" value="bin" />
 
@@ -202,10 +202,8 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 				<include name="Sidebar.xcu" />
 				<include name="WriterWindowState.xcu" />
 				<include name="image/*" />
+				<include name="icons/*" />
 			</fileset>
-			<zipfileset dir="${RDB_DIR}" prefix="icons">
-				<include name="tools-large.png" />
-			</zipfileset>
 			<fileset dir="${RDB_DIR}/BUTTONS_ONLY" includes="META-INF/manifest.xml" />
 			<fileset dir="misc" includes="buildinfo" />
 			<fileset dir="." includes="basic/**"/>

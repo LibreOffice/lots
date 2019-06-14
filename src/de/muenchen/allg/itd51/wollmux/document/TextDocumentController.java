@@ -488,7 +488,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
         master =
           UNO.XPropertySet(UNO.XMultiServiceFactory(model.doc).createInstance(
             "com.sun.star.text.FieldMaster.User"));
-        UNO.setProperty(master, "Value", Integer.valueOf(0));
+        UNO.setProperty(master, "Value", Double.valueOf(0));
         UNO.setProperty(master, "Name", userFieldName);
       }
 
@@ -2085,7 +2085,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     FunctionLibrary funcLib = getFunctionLibrary();
     DialogLibrary dialogLib = getDialogLibrary();
     Map<Object, Object> context = getFunctionContext();
-
+    
     // eindeutigen Namen für die neue Autofunktion erzeugen:
     Set<String> currentFunctionNames = funcLib.getFunctionNames();
     String name = null;
@@ -2106,6 +2106,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       }
       model.getFunktionenConf().addChild(betterNameFunc);
 
+      // TODO: srp
       storeCurrentFormDescription();
       return name;
     }
