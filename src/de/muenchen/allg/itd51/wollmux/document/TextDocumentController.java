@@ -1370,7 +1370,7 @@ public class TextDocumentController
         boolean setVisible = true;
         for (String gid : groups)
         {
-          if (groupState.get(gid).equals(Boolean.FALSE)) setVisible = false;
+          if (groupState.get(gid) != null && groupState.get(gid).equals(Boolean.FALSE)) setVisible = false;
         }
 
         // Element merken, dessen Sichtbarkeitsstatus sich zuerst ändert und
