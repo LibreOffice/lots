@@ -84,7 +84,7 @@ public class GUI
    * zu bieten für das Hinzufügen von Elementen, die immer vorhanden sein sollen.
    */
   private static final int GRID_MAX = 500;
-  
+
   private static final String NEXT_TAB = "nextTab";
 
   /**
@@ -156,10 +156,17 @@ public class GUI
    */
   private boolean processUIElementEvents = false;
 
+  private boolean processValueChangedEvents = false;
+
   public GUI(FormController controller, ConfigThingy formFensterConf)
   {
     this.controller = controller;
     formGUIBounds = Common.parseDimensions(formFensterConf);
+  }
+
+  public void setProcessValueChangedEvents(boolean processValueChangedEvents)
+  {
+    this.processValueChangedEvents = processValueChangedEvents;
   }
 
   public void create(FormModel model, boolean visible)
@@ -431,7 +438,7 @@ public class GUI
             {
               idx = -1;
               break;
-            }           
+            }
             if (myTabbedPane.isEnabledAt(idx))
               break;
           } while (idx != startIdx);
@@ -915,13 +922,11 @@ public class GUI
   @Override
   public void valueChanged(String id, String value)
   {
-    SwingUtilities.invokeLater(() -> {
-      if (uiElements.containsKey(id))
-      {
-        processUIElementEvents = false;
-        uiElements.get(id).setString(value);
-        processUIElementEvents = true;
-      }
-    });
+    if (processValueChangedEvents && SwingUtilities.isEventDispatchThread())
+    {
+      processUIElementEvents = false;
+      uiElements.get(id).setString(value);
+      processUIElementEvents = true;
+    }
   }
 }
