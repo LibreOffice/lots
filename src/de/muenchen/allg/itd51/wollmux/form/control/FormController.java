@@ -1,7 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.form.control;
 
-import java.awt.Rectangle;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -25,12 +25,12 @@ import de.muenchen.allg.itd51.wollmux.form.dialog.GUI;
 
 /**
  * Der Controller für die FormularGUI.
- * 
+ *
  * Alle Änderungen in der GUI werden über diesen Controller auf das Model übertragen. Außerdem
  * werden entsprechende Aktionen an den LibreOffice-Controller mittels Events weitergereicht.
- * 
+ *
  * Der Controller beinhaltet keine Business-Logik (Sichtbarkeiten, Plausis, ...)
- * 
+ *
  * @author daniel.sikeler
  *
  */
@@ -61,13 +61,13 @@ public class FormController
 
   private PropertyChangeSupport changes = new PropertyChangeSupport( this );
   private PropertyChangeSupport fieldIdChanges = new PropertyChangeSupport( this );
-  
+
   private Rectangle frameBounds;
   private Rectangle maxWindowBounds;
   private Insets windowInsets;
-  
+
   private String fieldId;
-  
+
   public Rectangle getFrameBounds()
   {
     return frameBounds;
@@ -76,12 +76,12 @@ public class FormController
   {
     return maxWindowBounds;
   }
-  
+
   public Insets getWindowInsets()
   {
     return windowInsets;
   }
-  
+
   public void setFrameBounds(Rectangle frameBounds, Rectangle maxWindowBounds, Insets windowInsets)
   {
     this.frameBounds = frameBounds;
@@ -89,7 +89,7 @@ public class FormController
     this.windowInsets = windowInsets;
     changes.firePropertyChange("name", null, null);
   }
-  
+
   public void addPropertyChangeListener( PropertyChangeListener l )
   {
     changes.addPropertyChangeListener( l );
@@ -99,23 +99,23 @@ public class FormController
   {
     changes.removePropertyChangeListener( l );
   }
-  
+
   public String getFieldId()
   {
     return fieldId;
   }
-  
+
   public void setFieldId(String fieldId)
   {
     this.fieldId = fieldId;
     fieldIdChanges.firePropertyChange("name", null, null);
   }
-  
-  
+
+
   /**
    * Erzeugt einen neuen Controller. Hierin wird auch die GUI initialisiert, aber noch nicht
    * aufgebaut und angezeigt.
-   * 
+   *
    * @param model
    *          Das Model.
    * @param formFensterConf
@@ -182,7 +182,7 @@ public class FormController
   /**
    * Öffnet durch ACTION-Event ein neues Dokument oder Template. Durch Angabe der FragID wird die
    * entsprechende Vorlage zugeordnet.
-   * 
+   *
    * @param fragIds
    *          Liste der zu öffnenden Vorlagen.
    */
@@ -203,7 +203,7 @@ public class FormController
    * Speichert dieses Formular in eine temporäre Datei unter Verwendung des in ExterneAnwendungen
    * für ext festgelegten FILTERs, startet dann die zugehörige externe Anwendung mit dieser Datei
    * und schließt das Formular.
-   * 
+   *
    * @param ext
    *          Der Filter.
    */
@@ -216,7 +216,7 @@ public class FormController
    * Speichert dieses Formular in eine temporäre Datei unter Verwendung des in ExterneAnwendungen
    * für ext festgelegten FILTERs und startet dann die zugehörige externe Anwendung mit dieser
    * Datei.
-   * 
+   *
    * @param ext
    *          Der Filter.
    */
@@ -229,7 +229,7 @@ public class FormController
    * Das Formularfeld im Dokument mit der ID fieldId erhält den Fokus. Gibt es im Dokument mehrere
    * Formularfelder, die von der ID abhängen, so erhält immer das erste Formularfeld den Fokus -
    * bevorzugt werden dabei auch die nicht transformierten Formularfelder.
-   * 
+   *
    * @param fieldId
    *          id des Formularfeldes, das den Fokus bekommen soll.
    */
@@ -241,7 +241,7 @@ public class FormController
   /**
    * Not Yet Implemented: Nimmt dem Formularfeld mit der ID fieldId den Fokus wieder weg - ergibt
    * aber bisher keinen Sinn.
-   * 
+   *
    * @param fieldId
    *          id des Formularfeldes, das den Fokus verlieren soll.
    */
@@ -254,12 +254,12 @@ public class FormController
    * Informiert das FormModel, dass das zugrundeliegende Dokument source geschlossen wird und das
    * FormModel entsprechend handeln soll um sicherzustellen, dass das Dokument in Zukunft nicht mehr
    * angesprochen wird.
-   * 
+   *
    * Abhängig von der Implementierung des FormModels werden unterschiedliche Aktionen erledigt. Dazu
    * gehören z.B. das Beenden einer bereits gestarteten FormGUI oder das Wiederherstellen der
    * Fensterattribute des Dokumentfensters auf die Werte, die das Fenster vor dem Starten der
    * FormGUI hatte.
-   * 
+   *
    * @param source
    *          Das Dokument das geschlossen wurde.
    */
@@ -300,7 +300,7 @@ public class FormController
 
   /**
    * Setzt den Wert für das Formularfeld mit der ID fieldId im Model auf value.
-   * 
+   *
    * @param fieldId
    *          Die ID des Formularfeldes.
    * @param value
@@ -319,7 +319,7 @@ public class FormController
 
   /**
    * Öffnet einen Funktionsdialog.
-   * 
+   *
    * @param dialogName
    *          Der Name des Dialogs.
    */
@@ -335,7 +335,9 @@ public class FormController
       dlg.instanceFor(model.getFunctionContext()).show(e -> {
         if ("select".equals(e.getActionCommand()))
         {
+          gui.setProcessValueChangedEvents(true);
           model.setDialogAutofills(dialogName);
+          gui.setProcessValueChangedEvents(false);
         }
       }, model.getFuncLib(), model.getDialogLib());
     }
