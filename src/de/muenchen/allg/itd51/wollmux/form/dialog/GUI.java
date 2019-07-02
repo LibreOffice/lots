@@ -321,6 +321,7 @@ public class GUI
       tabBlocker.setOpaque(false);
       tabBlocker.setRequestFocusEnabled(true);
       mainPanel.add(tabBlocker, gbc);
+      y++;
     }
     /******************************************************************************
      * Für die Buttons ein eigenes Panel anlegen und mit UIElementen befüllen.
