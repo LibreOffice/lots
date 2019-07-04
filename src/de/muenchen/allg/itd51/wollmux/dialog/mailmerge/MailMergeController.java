@@ -370,6 +370,8 @@ public class MailMergeController
 
         long duration = (System.currentTimeMillis() - startTime) / 1000;
         
+        LOGGER.debug(L.m("MailMerge finished after %1 seconds", duration));
+
         // Wenn der Seriendruck per E-Mail versendet wird, sende Zusammenfassung
         // Liste der Empfänger-Emails und Anzahl versendeter Emails
         String eMailFrom = pmod.getProp(MailMergeController.PROP_EMAIL_FROM, "").toString();
@@ -418,8 +420,6 @@ public class MailMergeController
         {
           LOGGER.error("", e);
         }
-
-        LOGGER.debug(L.m("MailMerge finished after %1 seconds", duration));
       }
     }.start();
   }
