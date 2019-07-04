@@ -2,7 +2,7 @@
  * Dateiname: MailMergeNew.java
  * Projekt  : WollMux
  * Funktion : Die neuen erweiterten Serienbrief-Funktionalitäten
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -45,10 +45,14 @@ import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.awt.XTopWindow;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
+import com.sun.star.frame.XModel;
 import com.sun.star.lang.DisposedException;
+import com.sun.star.sdb.XDocumentDataSource;
+import com.sun.star.sdb.XOfficeDatabaseDocument;
 import com.sun.star.sdbc.SQLException;
 import com.sun.star.sdbc.XConnection;
 import com.sun.star.sdbc.XDataSource;
@@ -192,7 +196,7 @@ public class MailMergeDatasource
   public List<String> getColumnNames()
   {
     List<String> columnNames = null;
-    
+
     try
     {
       switch (currentSourceType)
@@ -213,10 +217,10 @@ public class MailMergeDatasource
       LOGGER.error("", x);
       return Collections.emptyList();
     }
-        
+
     return columnNames;
   }
-  
+
   public boolean checkUnmappedFields(List<String> columnNames) {
         return documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(
         columnNames)).length > 0;
@@ -406,6 +410,64 @@ public class MailMergeDatasource
     }
 
     return model;
+  }
+
+  /**
+   * Versucht die Datenquelle in den Vordergrund zu holen und wird vom Button "Tabelle bearbeiten"
+   * aufgerufen.
+   */
+  public void toFront()
+  {
+    Object document = null;
+    if (currentSourceType == SOURCE_TYPE.CALC)
+    {
+      document = selectedCalcDoc;
+    } else if (currentSourceType == SOURCE_TYPE.DB)
+    {
+      try
+      {
+        XDocumentDataSource ds = UNO
+            .XDocumentDataSource(UNO.dbContext.getRegisteredObject(selectedDBModel.datasourceName));
+        XOfficeDatabaseDocument dbdoc = ds.getDatabaseDocument();
+        String url = UNO.XModel(dbdoc).getURL();
+
+        XEnumeration xenu = UNO.desktop.getComponents().createEnumeration();
+        while (xenu.hasMoreElements())
+        {
+          try
+          {
+            XModel model = UNO.XModel(xenu.nextElement());
+            if (model.getURL().equals(url))
+            {
+              document = model;
+              break;
+            }
+          } catch (Exception x)
+          {
+          }
+        }
+
+        if (document == null)
+          document = UNO.loadComponentFromURL(url, false, false);
+      } catch (Exception x)
+      {
+        LOGGER.error("", x);
+      }
+    }
+
+    try
+    {
+      XModel documentModel = UNO.XModel(document);
+      if (documentModel != null)
+      {
+        XTopWindow win = UNO
+            .XTopWindow(documentModel.getCurrentController().getFrame().getContainerWindow());
+        win.toFront();
+      }
+    } catch (Exception x)
+    {
+      LOGGER.error("", x);
+    }
   }
 
   /**
@@ -886,13 +948,13 @@ public class MailMergeDatasource
 
     return calcModel;
   }
-  
+
   private List<DBModel> cachedDBConnections = new ArrayList<>();
-  
+
   public void addCachedDbConnection(DBModel dbModel) {
     cachedDBConnections.add(dbModel);
   }
-  
+
   private DBModel selectedDBModel = null;
 
   /**
@@ -910,11 +972,11 @@ public class MailMergeDatasource
       LOGGER.error("MailMergeDatasource: setDatasource: name is NULL.");
       return;
     }
-    
+
     if (openSpreedSheetDocuments.isEmpty())
     {
       currentSourceType = SOURCE_TYPE.DB;
-      
+
       for (DBModel model : cachedDBConnections) {
         for (String tableName : model.getTableNames()) {
           if (tableName.equals(name)) {
@@ -937,7 +999,7 @@ public class MailMergeDatasource
           currentSourceType = SOURCE_TYPE.CALC;
           oooDatasource = null;
           break;
-        } else 
+        } else
         {
           currentSourceType = SOURCE_TYPE.DB;
           for (DBModel model : cachedDBConnections) {
@@ -1309,9 +1371,9 @@ public class MailMergeDatasource
 
     return tableNames;
   }
-  
-  public Object getDbTableByName(String datasourceName, String tableName) 
-  {    
+
+  public Object getDbTableByName(String datasourceName, String tableName)
+  {
     try
     {
       XDataSource ds = UNO.XDataSource(UNO.dbContext.getRegisteredObject(datasourceName));
@@ -1323,7 +1385,7 @@ public class MailMergeDatasource
       ds.setLoginTimeout((int) lgto);
       XConnection conn = ds.getConnection("", "");
       XNameAccess tables = UNO.XTablesSupplier(conn).getTables();
-      
+
       return tables.getByName(tableName);
     } catch (Exception x)
     {
@@ -1332,22 +1394,22 @@ public class MailMergeDatasource
 
     return null;
   }
-  
+
   public List<String> getDbColumns(Object table) {
     XColumnsSupplier columnsSupplier = UnoRuntime.queryInterface(XColumnsSupplier.class, table);
-    
+
     if (columnsSupplier == null)
       return Collections.emptyList();
-    
+
     List<String> columnNames = new ArrayList<>();
-    
+
     XNameAccess xColumns = columnsSupplier.getColumns();
     String[] aColumnNames = xColumns.getElementNames();
     for ( int i = 0; i <= aColumnNames.length - 1; i++ )
     {
         columnNames.add(aColumnNames[i]);
     }
-    
+
     return columnNames;
   }
 

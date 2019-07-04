@@ -81,7 +81,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
   private TextDocumentController textDocumentController;
   private XControlModel unoControlContainerModel = null;
   private XControl dialogControl = null;
-  
+
   private AbstractWindowListener windowAdapter = new AbstractWindowListener()
   {
     @Override
@@ -95,7 +95,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
   {
     this.parentWindow = parentWindow;
     this.parentWindow.addWindowListener(this.windowAdapter);
-   
+
     Object cont = UNO.createUNOService("com.sun.star.awt.UnoControlContainer");
     dialogControl = UnoRuntime.queryInterface(XControl.class, cont);
 
@@ -122,6 +122,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
       layout.addControlsToList(addSerienbriefFeld());
       layout.addControlsToList(addSpezialfeld());
       layout.addControlsToList(addPrintControls());
+      layout.addControlsToList(addTableControls());
 
       window.setVisible(true);
       window.setEnable(true);
@@ -214,17 +215,17 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
           strCmpConf.add("");
           ifConf.add("THEN").add("");
           ifConf.add("ELSE").add("");
-          
+
           TrafoDialogParameters paramsIfThenElse = new TrafoDialogParameters();
           paramsIfThenElse.conf = new ConfigThingy("IF");
           paramsIfThenElse.conf.addChild(ifConf);
           paramsIfThenElse.isValid = true;
           paramsIfThenElse.fieldNames = mailMerge.getDs().getColumnNames();
-          
+
           new IfThenElseDialog(paramsIfThenElse);
           break;
         case 3:
-          
+
           textDocumentController.insertMailMergeFieldAtCursorPosition(MailMergeController.TAG_DATENSATZNUMMER);
           break;
         case 4:
@@ -360,10 +361,24 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     printBtn.setLabel("Drucken");
     UNO.XButton(printBtn.getXControl()).addActionListener(printActionListener);
     UNO.XWindow(printBtn.getXControl()).setEnable(false);
-    
+
     bottomControls.add(printBtn);
 
     return new ControlModel(Orientation.HORIZONTAL, Align.NONE, bottomControls, Optional.empty());
+  }
+
+  private ControlModel addTableControls()
+  {
+    List<ControlProperties> tableControls = new ArrayList<>();
+
+    ControlProperties editBtn = new ControlProperties(ControlType.BUTTON, "btnEditTable");
+    editBtn.setControlPercentSize(100, 30);
+    editBtn.setLabel("Tabelle bearbeiten");
+    UNO.XButton(editBtn.getXControl()).addActionListener(editTableActionListener);
+    UNO.XWindow(editBtn.getXControl()).setEnable(false);
+    tableControls.add(editBtn);
+
+    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, tableControls, Optional.empty());
   }
 
   private AbstractTextListener documentCountFieldListener = new AbstractTextListener()
@@ -405,7 +420,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
       mailMerge.getDs().setDatasource(listbox.getSelectedItem());
       updateControls();
     }
-    
+
     private void updateControls()
     {
       mailMergeField.setMailMergeDatasource(mailMerge.getDs());
@@ -417,6 +432,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
       UNO.XWindow(layout.getControl("cbSerienbrieffeld")).setEnable(active);
       UNO.XWindow(layout.getControl("cbSpezialfeld")).setEnable(active);
       UNO.XWindow(layout.getControl("btnPrint")).setEnable(active);
+      UNO.XWindow(layout.getControl("btnEditTable")).setEnable(active);
     }
   };
 
@@ -437,7 +453,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
         textDocumentController.setFormFieldsPreviewMode(true);
     }
   };
-  
+
   private AbstractNotifier dbDatasourceListener = new AbstractNotifier()
   {
     @Override
@@ -448,8 +464,8 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
 
       List<String> dbTableNames = mailMerge.getDs().getDbTableNames(message);
       mailMerge.getDs().addCachedDbConnection(new DBModel(message, dbTableNames));
-      
-      currentDatasources.addItems(dbTableNames.toArray(new String[dbTableNames.size()]), 
+
+      currentDatasources.addItems(dbTableNames.toArray(new String[dbTableNames.size()]),
           (short) (currentDatasources.getItemCount() + 1));
     }
   };
@@ -540,6 +556,16 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     }
   };
 
+  private AbstractActionListener editTableActionListener = new AbstractActionListener()
+  {
+
+    @Override
+    public void actionPerformed(ActionEvent arg0)
+    {
+      mailMerge.getDs().toFront();
+    }
+  };
+
   private AbstractActionListener previewActionListener = new AbstractActionListener()
   {
 
@@ -568,7 +594,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
             return;
           }
 
-          
+
           textDocumentController.collectNonWollMuxFormFields();
           textDocumentController.setFormFieldsPreviewMode(true);
           mailMerge.getDs().updatePreviewFields(mailMerge.getDs().getPreviewDatasetNumber());
@@ -584,28 +610,28 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
       }
     }
   };
-  
+
   private void setMailMergeOnDocument() {
     textDocumentController = DocumentManager.getTextDocumentController(UNO.getCurrentTextDocument());
-    
+
     if (textDocumentController == null)
     {
       LOGGER.debug("SeriendruckSidebar: setMailMergeOnDocument(): textDocumentController is NULL.");
       return;
     }
-    
+
     textDocumentController.setFormFieldsPreviewMode(false);
-    
+
     mailMerge = DocumentManager.getDocumentManager()
         .getCurrentMailMergeNew(textDocumentController.getModel().doc);
-    
+
     if (mailMerge == null)
     {
       mailMerge = new MailMergeNew(textDocumentController, actionEvent -> {
         if (actionEvent.getSource() instanceof MailMergeNew)
           WollMuxEventHandler.getInstance().handleMailMergeNewReturned(textDocumentController);
       });
-      
+
       DocumentManager.getDocumentManager().setCurrentMailMergeNew(textDocumentController.getModel().doc,
           mailMerge);
     }
