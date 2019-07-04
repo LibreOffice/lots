@@ -51,6 +51,7 @@ import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.DisposedException;
+import com.sun.star.lang.XComponent;
 import com.sun.star.sdb.XDocumentDataSource;
 import com.sun.star.sdb.XOfficeDatabaseDocument;
 import com.sun.star.sdbc.SQLException;
@@ -69,6 +70,7 @@ import com.sun.star.ui.dialogs.XFilePicker;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
@@ -148,12 +150,6 @@ public class MailMergeDatasource
    * SOURCE_CALC ist unzulässig.
    */
   private String calcUrl = null;
-
-  /**
-   * Falls {@link #sourceType} == {@link #DB}, so ist dies der Name der ausgewählten
-   * OOo-Datenquelle, ansonsten null.
-   */
-  //private String oooDatasourceName = null;
 
   /**
    * Falls {@link #sourceType} == {@link #DB} und die Datenquelle bereits initialisiert wurde (durch
@@ -431,19 +427,14 @@ public class MailMergeDatasource
         XOfficeDatabaseDocument dbdoc = ds.getDatabaseDocument();
         String url = UNO.XModel(dbdoc).getURL();
 
-        XEnumeration xenu = UNO.desktop.getComponents().createEnumeration();
-        while (xenu.hasMoreElements())
+        for (XComponent comp : UnoCollection.getCollection(UNO.desktop.getComponents(),
+            XComponent.class))
         {
-          try
+          XModel model = UNO.XModel(comp);
+          if (model.getURL().equals(url))
           {
-            XModel model = UNO.XModel(xenu.nextElement());
-            if (model.getURL().equals(url))
-            {
-              document = model;
-              break;
-            }
-          } catch (Exception x)
-          {
+            document = model;
+            break;
           }
         }
 

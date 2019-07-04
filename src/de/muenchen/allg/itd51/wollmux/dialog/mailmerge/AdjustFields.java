@@ -2,7 +2,7 @@
  * Dateiname: AdjustFields.java
  * Projekt  : WollMux
  * Funktion : "Felder anpassen" Dialog der neuen erweiterten Serienbrief-Funktionalitäten
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
@@ -70,7 +70,7 @@ import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpret
 
 /**
  * "Felder anpassen" Dialog der neuen erweiterten Serienbrief-Funktionalitäten.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AdjustFields
@@ -95,20 +95,25 @@ public class AdjustFields
    */
   private static final Pattern TAG_PATTERN = Pattern.compile("(" + TAG_PREFIX + "(.*?)" + TAG_SUFFIX + ")");
 
-  public AdjustFields() {}
-  
+  private AdjustFields()
+  {
+    // nothing to initialize
+  }
+
   /**
-   * Diese Methode zeigt den Dialog an, mit dem die Felder im Dokument an eine
-   * Datenquelle angepasst werden können, die nicht die selben Spalten enthält wie
-   * die Datenquelle, für die das Dokument gemacht wurde.
-   * 
-   * @param parent
-   *          das Elternfenster des anzuzeigenden Dialogs
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
+   * Diese Methode zeigt den Dialog an, mit dem die Felder im Dokument an eine Datenquelle angepasst
+   * werden können, die nicht die selben Spalten enthält wie die Datenquelle, für die das Dokument
+   * gemacht wurde.
+   *
+   * @param documentController
+   *          Der Controller des Dokumentes.
+   * @param ds
+   *          Die Datenquelle.
+   * @param finishedListener
+   *          Der Listener wird aufgerufen, sobald der Dialog erfolgreich beendet wird.
    */
-  public void showAdjustFieldsDialog(final TextDocumentController documentController,
-      MailMergeDatasource ds)
+  public static void showAdjustFieldsDialog(final TextDocumentController documentController,
+      MailMergeDatasource ds, ActionListener finishedListener)
   {
     ReferencedFieldID[] fieldIDs =
       documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(
@@ -140,24 +145,28 @@ public class AdjustFields
           if (ele.isField())
             documentController.updateFormFields(ele.getValue());
         }
+        finishedListener
+            .actionPerformed(new ActionEvent(new Object(), 0, "AdjustFieldsDialogFinished"));
       }
     };
-    showFieldMappingDialog(fieldIDs,L.m("Altes Feld"), L.m("Neue Belegung"), L.m("Felder anpassen"),
+    showFieldMappingDialog(fieldIDs, L.m("Altes Feld"), L.m("Neue Belegung"),
+        L.m("Felder anpassen"),
       ds.getColumnNames(), submitActionListener, false);
   }
 
   /**
-   * Diese Methode zeigt den Dialog an, mit dem die Spalten der Tabelle ergänzt
-   * werden können, wenn es zu Feldern im Dokument keine passenden Spalten in der
-   * Tabelle gibt.
-   * 
-   * @param parent
-   *          das Elternfenster des anzuzeigenden Dialogs
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
+   * Diese Methode zeigt den Dialog an, mit dem die Spalten der Tabelle ergänzt werden können, wenn
+   * es zu Feldern im Dokument keine passenden Spalten in der Tabelle gibt.
+   *
+   * @param documentController
+   *          Der Controller des Dokumentes.
+   * @param ds
+   *          Die Datenquelle.
+   * @param finishedListener
+   *          Der Listener wird aufgerufen, sobald der Dialog erfolgreich beendet wird.
    */
-  static void showAddMissingColumnsDialog(TextDocumentController documentController,
-      final MailMergeDatasource ds)
+  public static void showAddMissingColumnsDialog(TextDocumentController documentController,
+      final MailMergeDatasource ds, ActionListener finishedListener)
   {
     ReferencedFieldID[] fieldIDs =
         documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(
@@ -167,10 +176,11 @@ public class AdjustFields
       Map<String, FieldSubstitution> mapIdToSubstitution =
         (HashMap<String, FieldSubstitution>) e.getSource();
       ds.addColumns(mapIdToSubstitution);
+      finishedListener
+          .actionPerformed(new ActionEvent(new Object(), 0, "AddMissingDialogFinished"));
     };
     showFieldMappingDialog(fieldIDs, L.m("Spalte"), L.m("Vorbelegung"), L.m("Spalten ergänzen"),
       ds.getColumnNames(), submitActionListener, true);
-
   }
 
   /**
@@ -183,7 +193,7 @@ public class AdjustFields
    * wird für dieses Feld nur die Eingabe einer 1-zu-1 Zuordnung von Feldern
    * akzeptiert, das andere Zuordnungen für transformierte Felder derzeit nicht
    * unterstützt werden.
-   * 
+   *
    * @param parent
    *          Das Elternfenster dieses Dialogs.
    * @param fieldIDs
@@ -215,7 +225,6 @@ public class AdjustFields
    *          falls true, werden Felder mit isTransformed()==true nicht speziell
    *          behandelt und es gibt keine Einschränkungen bzw. der
    *          Auswahlmöglichkeiten.
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private static void showFieldMappingDialog(
       ReferencedFieldID[] fieldIDs, String labelOldFields,
@@ -228,26 +237,28 @@ public class AdjustFields
     UNODialogFactory dialogFactory = new UNODialogFactory();
     XWindow dialogWindow = dialogFactory.createDialog(780, 450, 0xF2F2F2);
     dialogFactory.showDialog();
-    
+
     SimpleDialogLayout layout = new SimpleDialogLayout(dialogWindow);
     layout.setMarginBetweenControls(15);
     layout.setMarginTop(20);
     layout.setMarginLeft(20);
     layout.setWindowBottomMargin(10);
-    
+
+    ControlProperties mailmergeLabel = new ControlProperties(ControlType.LABEL, "mailmergeLabel");
+    mailmergeLabel.setControlPercentSize(40, 20);
+    mailmergeLabel.setLabel("Serienbrieffeld");
     ControlProperties mailmerge = new ControlProperties(ControlType.COMBOBOX, "mailmerge");
-    mailmerge.setControlPercentSize(50, 40);
-    mailmerge.setLabel("Serienbrieffeld");
+    mailmerge.setControlPercentSize(40, 20);
     mailmerge.setComboBoxDropDown(true);
     XComboBox mailmergeButton = UNO.XComboBox(mailmerge.getXControl());
-    mailmergeButton.addItem("Serienbrieffeld", (short) 0);
+    mailmergeButton.addItem("", (short) 0);
     List<String> columnNames = new ArrayList<>(fieldNames);
     Collections.sort(columnNames);
     mailmergeButton.addItems(columnNames.toArray(new String[0]), (short) 1);
     UNO.XTextComponent(mailmergeButton).setText(mailmergeButton.getItem((short) 0));
     mailmergeButton.addItemListener(new AbstractItemListener()
     {
-      
+
       @Override
       public void itemStateChanged(ItemEvent event)
       {
@@ -264,9 +275,10 @@ public class AdjustFields
       }
     });
     List<ControlProperties> controls = new ArrayList<>();
+    controls.add(mailmergeLabel);
     controls.add(mailmerge);
     layout.addControlsToList(new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls, Optional.of(Dock.TOP)));
-    
+
     ControlProperties column = new ControlProperties(ControlType.LABEL, "column");
     column.setControlPercentSize(40, 20);
     column.setLabel(labelOldFields);
@@ -277,7 +289,7 @@ public class AdjustFields
     controls.add(column);
     controls.add(preset);
     layout.addControlsToList(new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls, Optional.of(Dock.TOP)));
-    
+
     HashSet<ReferencedFieldID> addedFields = new HashSet<>();
     for (ReferencedFieldID fieldId : fieldIDs)
     {
@@ -304,7 +316,7 @@ public class AdjustFields
       controls = new ArrayList<>();
       controls.add(label);
       controls.add(edit);
-      layout.addControlsToList(new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls, Optional.of(Dock.TOP))); 
+      layout.addControlsToList(new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls, Optional.of(Dock.TOP)));
     }
 
     ControlProperties abort = new ControlProperties(ControlType.BUTTON, "abort");
@@ -326,7 +338,7 @@ public class AdjustFields
     XButton editXBtn = UNO.XButton(edit.getXControl());
     editXBtn.addActionListener(new AbstractActionListener()
     {
-      
+
       @Override
       public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
       {
@@ -362,7 +374,7 @@ public class AdjustFields
 
     layout.draw();
   }
-  
+
   private static boolean isContentValid(XTextComponent compo, boolean isTransformed)
   {
     if (!isTransformed)
@@ -376,7 +388,7 @@ public class AdjustFields
     }
     return c.size() == 1 && c.get(0).isTag();
   }
-  
+
   /**
    * Liefert eine Liste von {@link ContentElement}-Objekten, die den aktuellen
    * Inhalt der JTextComponent repräsentiert und dabei enthaltenen Text und
@@ -407,7 +419,7 @@ public class AdjustFields
     }
     return list;
   }
-  
+
   /**
    * Beschreibt ein Element des Inhalts dieser JTextComponent und kann entweder
    * ein eingefügtes Tag oder ein normaler String sein. Auskunft über den Typ

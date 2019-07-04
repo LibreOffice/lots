@@ -1,5 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.sidebar;
 
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +23,7 @@ import com.sun.star.awt.XSpinField;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
+import com.sun.star.awt.XWindow2;
 import com.sun.star.awt.XWindowPeer;
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.UnknownPropertyException;
@@ -240,10 +242,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
 
           if (hasUnmappedFields)
           {
-            AdjustFields adjustFieldsDialog = new AdjustFields();
-
-              adjustFieldsDialog.showAdjustFieldsDialog(textDocumentController, mailMerge.getDs());
-
+            // TODO: richtigen Dialog öffnen (PR von Björn)
           }
           break;
         default:
@@ -378,7 +377,21 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     UNO.XWindow(editBtn.getXControl()).setEnable(false);
     tableControls.add(editBtn);
 
-    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, tableControls, Optional.empty());
+    ControlProperties addColumnsBtn = new ControlProperties(ControlType.BUTTON, "btnAddColumns");
+    addColumnsBtn.setControlPercentSize(100, 30);
+    addColumnsBtn.setLabel("Tabellenspalten ergänzen");
+    UNO.XButton(addColumnsBtn.getXControl()).addActionListener(addTableColumnsActionListener);
+    UNO.XWindow(addColumnsBtn.getXControl()).setEnable(false);
+    tableControls.add(addColumnsBtn);
+
+    ControlProperties changeAllBtn = new ControlProperties(ControlType.BUTTON, "btnChangeAll");
+    changeAllBtn.setControlPercentSize(100, 30);
+    changeAllBtn.setLabel("Alle Felder anpassen");
+    UNO.XButton(changeAllBtn.getXControl()).addActionListener(changeFieldsActionListener);
+    UNO.XWindow(changeAllBtn.getXControl()).setEnable(false);
+    tableControls.add(changeAllBtn);
+
+    return new ControlModel(Orientation.VERTICAL, Align.NONE, tableControls, Optional.empty());
   }
 
   private AbstractTextListener documentCountFieldListener = new AbstractTextListener()
@@ -433,6 +446,12 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
       UNO.XWindow(layout.getControl("cbSpezialfeld")).setEnable(active);
       UNO.XWindow(layout.getControl("btnPrint")).setEnable(active);
       UNO.XWindow(layout.getControl("btnEditTable")).setEnable(active);
+
+      boolean hasUnmappedFields = mailMerge.getDs()
+          .checkUnmappedFields(mailMerge.getDs().getColumnNames());
+      UNO.XWindow(layout.getControl("btnAddColumns"))
+          .setEnable(active && hasUnmappedFields && mailMerge.getDs().supportsAddColumns());
+      UNO.XWindow(layout.getControl("btnChangeAll")).setEnable(active && hasUnmappedFields);
     }
   };
 
@@ -563,6 +582,37 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     public void actionPerformed(ActionEvent arg0)
     {
       mailMerge.getDs().toFront();
+    }
+  };
+
+  private ActionListener adjustFieldsFinishListener = e -> {
+    boolean hasUnmappedFields = mailMerge.getDs()
+        .checkUnmappedFields(mailMerge.getDs().getColumnNames());
+    XWindow2 btnChangeAll = UNO.XWindow2(layout.getControl("btnChangeAll"));
+    btnChangeAll.setEnable(btnChangeAll.isVisible() && hasUnmappedFields);
+    XWindow2 btnAddColumns = UNO.XWindow2(layout.getControl("btnAddColumns"));
+    btnAddColumns.setEnable(btnAddColumns.isVisible() && hasUnmappedFields);
+  };
+
+  private AbstractActionListener addTableColumnsActionListener = new AbstractActionListener()
+  {
+
+    @Override
+    public void actionPerformed(ActionEvent arg0)
+    {
+      AdjustFields.showAddMissingColumnsDialog(textDocumentController, mailMerge.getDs(),
+          adjustFieldsFinishListener);
+    }
+  };
+
+  private AbstractActionListener changeFieldsActionListener = new AbstractActionListener()
+  {
+
+    @Override
+    public void actionPerformed(ActionEvent arg0)
+    {
+      AdjustFields.showAdjustFieldsDialog(textDocumentController, mailMerge.getDs(),
+          adjustFieldsFinishListener);
     }
   };
 
