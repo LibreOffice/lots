@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.awt.KeyEvent;
 import com.sun.star.awt.MouseEvent;
 import com.sun.star.awt.PosSize;
+import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XContainerWindowProvider;
@@ -101,18 +102,14 @@ public class IfThenElseDialog
 
   private XComboBox cbWennNot;
 
-  private XTextComponent txtValueWenn;
+  private XTextComponent txtValue;
 
-  private XTextComponent txtValueDann;
+  private XComboBox cbSerienbrieffeld;
 
-  private XTextComponent txtValueSonst;
+  private XButton newConditionBtn;
 
-  private XComboBox cbWennSerienbrieffeld;
-
-  private XComboBox cbDannSerienbrieffeld;
-
-  private XComboBox cbSonstSerienbrieffeld;
-
+  private XButton removeConditionBtn;
+  
   private XMutableTreeNode selectedNode;
   
   private XMutableTreeNode rootNode;
@@ -127,6 +124,10 @@ public class IfThenElseDialog
   
   private TextDocumentController documentController;
 
+  private int firstControlX, firstControlY;
+
+  private int txtControlX, txtControlY;
+
   private static final String WENN = "WENN";
   
   private static final String DANN = "DANN";
@@ -134,6 +135,8 @@ public class IfThenElseDialog
   private static final String SONST = "SONST";
 
   private static final String EXTENSION_ID = "de.muenchen.allg.d101.wollmux";
+
+  private static String imgLocation = null;
 
   /**
    * Das Objekt, das den Startinhalt des Dialogs spezifiziert (und am Ende verwendet wird, um den
@@ -151,6 +154,11 @@ public class IfThenElseDialog
 
     params.isValid = false; // erst bei Beendigung mit Okay werden sie wieder valid
     
+    // Zugriff auf Ressourcen
+    XPackageInformationProvider xPackageInformationProvider = PackageInformationProvider
+        .get(UNO.defaultContext);
+    imgLocation = xPackageInformationProvider.getPackageLocation(EXTENSION_ID) + "/image/";
+
     addNodeImages();
     
     buildGUI(params);
@@ -158,10 +166,6 @@ public class IfThenElseDialog
   
   private void addNodeImages()
   {
-    XPackageInformationProvider xPackageInformationProvider = PackageInformationProvider
-        .get(UNO.defaultContext);
-    String imgLocation = xPackageInformationProvider.getPackageLocation(EXTENSION_ID) + "/image/";
-
     randomImages.add(imgLocation + "if.png");
     randomImages.add(imgLocation + "else.png");
     randomImages.add(imgLocation + "then.png");
@@ -211,26 +215,52 @@ public class IfThenElseDialog
     
     window.setPosSize(30, 30, 600, 600, PosSize.SIZE);
 
-    cbWennSerienbrieffeld = UNO
+    removeConditionBtn = UNO.XButton(controlContainer.getControl("removeConditionBtn"));
+    XPropertySet btnRemoveProps = UNO.XPropertySet(UNO.XControl(removeConditionBtn).getModel());
+    try
+    {
+      btnRemoveProps.setPropertyValue("ImageURL", imgLocation + "minus.png");
+      btnRemoveProps.setPropertyValue("ImageAlign", 2);
+    } catch (com.sun.star.lang.IllegalArgumentException | UnknownPropertyException
+        | PropertyVetoException | WrappedTargetException e)
+    {
+      LOGGER.error("", e);
+    }
+    removeConditionBtn.addActionListener(removeConditionBtnActionListener);
+
+    newConditionBtn = UNO.XButton(controlContainer.getControl("newConditionBtn"));
+    XPropertySet btnNewConditionProps = UNO.XPropertySet(UNO.XControl(newConditionBtn).getModel());
+    try
+    {
+      btnNewConditionProps.setPropertyValue("ImageURL", imgLocation + "add.png");
+      btnNewConditionProps.setPropertyValue("ImageAlign", 2);
+    } catch (com.sun.star.lang.IllegalArgumentException | UnknownPropertyException
+        | PropertyVetoException | WrappedTargetException e)
+    {
+      LOGGER.error("", e);
+    }
+    newConditionBtn.addActionListener(newConditionBtnActionListener);
+    
+    cbSerienbrieffeld = UNO
         .XComboBox(controlContainer.getControl("cbWennSerienbrieffeld"));
-    cbWennSerienbrieffeld.addItemListener(cbWennSerienbrieffeldItemListener);
-    cbDannSerienbrieffeld = UNO
-        .XComboBox(controlContainer.getControl("cbDannSerienbrieffeld"));
-    cbSonstSerienbrieffeld = UNO
-        .XComboBox(controlContainer.getControl("cbSonstSerienbrieffeld"));
-    UNO.XTextComponent(cbWennSerienbrieffeld).setText("Serienbrieffeld");
-    UNO.XTextComponent(cbDannSerienbrieffeld).setText("Serienbrieffeld");
-    UNO.XTextComponent(cbSonstSerienbrieffeld).setText("Serienbrieffeld");
+    UNO.XTextComponent(cbSerienbrieffeld).setText("Serienbrieffeld");
+    cbSerienbrieffeld.addItemListener(cbWennSerienbrieffeldItemListener);
+
+    // initale x,y-Werte werden für die spätere Verwendung gespeichrt um die Position
+    // des Controls wiederherzustellen.
+    Rectangle rect = UNO.XWindow(cbSerienbrieffeld).getPosSize();
+    firstControlY = rect.Y;
+    firstControlX = rect.X;
 
     params.fieldNames.forEach(fieldName -> {
-      cbWennSerienbrieffeld.addItem(fieldName, (short) (cbWennSerienbrieffeld.getItemCount() + 1));
-      cbDannSerienbrieffeld.addItem(fieldName, (short) (cbWennSerienbrieffeld.getItemCount() + 1));
-      cbSonstSerienbrieffeld.addItem(fieldName, (short) (cbWennSerienbrieffeld.getItemCount() + 1));
+      cbSerienbrieffeld.addItem(fieldName, (short) (cbSerienbrieffeld.getItemCount() + 1));
     });
 
     cbWennComperator = UNO.XComboBox(controlContainer.getControl("cbWennComporator"));
     testTypes.forEach(item -> cbWennComperator.addItem(item.label,
         (short) (cbWennComperator.getItemCount() + 1)));
+    // default wert setzen
+    UNO.XTextComponent(cbWennComperator).setText(cbWennComperator.getItem((short) 0));
     cbWennComperator.addItemListener(comparatorItemListener);
 
     cbWennNot = UNO.XComboBox(controlContainer.getControl("cbNot"));
@@ -238,23 +268,14 @@ public class IfThenElseDialog
     cbWennNot.addItem("NOT", (short) 1);
     cbWennNot.addItemListener(notItemListener);
 
-    XButton wennButton = UNO.XButton(controlContainer.getControl("tbnWenn"));
-    wennButton.addActionListener(wennActionListener);
+    txtValue = UNO.XTextComponent(controlContainer.getControl("txtValue"));
+    txtValue.addTextListener(txtValueWennListener);
 
-    XButton dannButton = UNO.XButton(controlContainer.getControl("btnDann"));
-    dannButton.addActionListener(dannActionListener);
-
-    XButton sonstButton = UNO.XButton(controlContainer.getControl("btnSonst"));
-    sonstButton.addActionListener(sonstActionListener);
-
-    txtValueWenn = UNO.XTextComponent(controlContainer.getControl("txtValueWenn"));
-    txtValueWenn.addTextListener(txtValueWennListener);
-    
-    txtValueDann = UNO.XTextComponent(controlContainer.getControl("txtValueDann"));
-    txtValueDann.addTextListener(txtValueDannListener);
-    
-    txtValueSonst = UNO.XTextComponent(controlContainer.getControl("txtValueSonst"));
-    txtValueSonst.addTextListener(txtValueSonstListener);
+    // initale x,y-Werte werden für die spätere Verwendung gespeichrt um die Position
+    // des Controls wiederherzustellen.
+    Rectangle txtValueRect = UNO.XWindow(txtValue).getPosSize();
+    txtControlX = txtValueRect.X;
+    txtControlY = txtValueRect.Y;
 
     try
     {
@@ -293,6 +314,56 @@ public class IfThenElseDialog
     } 
   }
   
+  private AbstractActionListener removeConditionBtnActionListener = event -> {
+    removeNode();
+  };
+
+  private AbstractActionListener newConditionBtnActionListener = event -> {
+    String not = cbWennNot.getItem((short) 0);
+    String selectedValue = txtValue.getText();
+    String serienBriefFeld = UNO.XTextComponent(cbSerienbrieffeld).getSelectedText();
+
+    XTextComponent comparator = UNO.XTextComponent(controlContainer.getControl("cbWennComporator"));
+    String comparatorValue = comparator.getSelectedText();
+
+    Random rand = new Random();
+    int randomNumber = rand.nextInt(randomImages.size());
+
+    String randomImageFileName = randomImages.get(randomNumber);
+    XMutableTreeNode ifNode = createIfNode(serienBriefFeld, not, comparatorValue, selectedValue,
+        randomImageFileName);
+
+    // duplikate vermeiden. nach Verwendung löschen, nicht endlich, daher wieder füllen.
+    randomImages.remove(randomNumber);
+
+    if (randomImages.isEmpty())
+      addNodeImages();
+
+    if (selectedNode == null)
+    {
+      try
+      {
+        XMutableTreeNode root = createRootNode();
+        treeNodeModel.setRoot(root);
+        selectedNode = root;
+
+        XPropertySet xTreeModelProperty = UnoRuntime.queryInterface(XPropertySet.class,
+            xControlModel);
+        xTreeModelProperty.setPropertyValue("DataModel", treeNodeModel);
+
+        treeControl.expandNode(root);
+      } catch (UnknownPropertyException | PropertyVetoException | WrappedTargetException
+          | IllegalArgumentException | ExpandVetoException e)
+      {
+        LOGGER.error("", e);
+      }
+    }
+
+    selectedNode.appendChild(ifNode);
+    selectedNode.appendChild(createThenNode("", randomImageFileName));
+    selectedNode.appendChild(createElseNode("", randomImageFileName));
+  };
+
   private AbstractMouseListener mouseListener = new AbstractMouseListener()
   {
     @Override
@@ -325,20 +396,26 @@ public class IfThenElseDialog
       {
         case WENN:
           // data[1] = id, [2] = serienbrieffeld, [3] = not, [4] = comp, [5] = textfieldvalue
-          UNO.XTextComponent(cbWennSerienbrieffeld).setText(data[2]);
+          UNO.XTextComponent(cbSerienbrieffeld).setText(data[2]);
           UNO.XTextComponent(cbWennNot).setText(data[3]);
           UNO.XTextComponent(cbWennComperator).setText(data[4]);
-          txtValueWenn.setText(data[5]);
+          txtValue.setText(data[5]);
+          activeWennControls(true);
+        setPosition(true);
           break;
          
         case DANN:
           // dest[1] = id, [2] = txtfieldvalue
-          txtValueDann.setText(data[2]);
+          txtValue.setText(data[2]);
+          activeWennControls(false);
+        setPosition(false);
           break;
           
         case SONST:
           // dest[1] = id, [2] = txtfieldvalue
-          txtValueSonst.setText(data[2]);
+          txtValue.setText(data[2]);
+          activeWennControls(false);
+        setPosition(false);
           break;
 
       default:
@@ -346,6 +423,40 @@ public class IfThenElseDialog
       }
     }
   };
+  
+  private void activeWennControls(boolean active)
+  {
+    UNO.XWindow(cbWennNot).setVisible(active);
+    UNO.XWindow(cbWennComperator).setVisible(active);
+    UNO.XWindow(cbSerienbrieffeld).setVisible(active);
+  }
+
+  
+  /*
+   * Control tauschen um unnötigen freien Bereich bei ausgeblendeten Controls zu vermeiden.
+   *
+   * WENN-Layout ([----] = Control):
+   * [----] (Serienbrieffeld)
+   * [----] (NOT-Combobox)
+   * [----] (Comparator-ComboBox)
+   * [----] (TextFeld)
+   *   ...
+   * 
+   * DANN/SONST-Layout:
+   * [----] (TextFeld)
+   *   ...
+   * Serienbrieffeld, NOT-CB und Comparator-CB sind ausgeblendet, TextFeld wird daher nach oben verschoben. 
+   */
+  private void setPosition(boolean active)
+  {
+    if (active == false)
+    {
+      UNO.XWindow(txtValue).setPosSize(firstControlX, firstControlY, 0, 0, PosSize.POS);
+    } else
+    {
+      UNO.XWindow(txtValue).setPosSize(txtControlX, txtControlY, 0, 0, PosSize.POS);
+    }
+  }
   
   private String[] nodeDataValueToStringArray(XMutableTreeNode node) {
     Object[] data = (Object[]) node.getDataValue();
@@ -422,44 +533,37 @@ public class IfThenElseDialog
     // DisplayValue aus DataValue generieren, Änderungen speichern.
     String[] data = nodeDataValueToStringArray(selectedNode);
     
-    //data[0] = condition, data[1] = id, [2] = serienbrieffeld, [3] = not, [4] = comp, [5] = textfieldvalue
-    if (WENN.equals(data[0])) {
-      data[5] = txtValueWenn.getText();
-      selectedNode.setDataValue(data);
-      selectedNode.setDisplayValue(
-          data[0] + " " + data[2] + " " + data[3] + " " + data[4] + " " + data[5]);
+    //switch condition
+    switch(data[0])
+    {
+      case WENN:
+      //data[0] = condition, data[1] = id, [2] = serienbrieffeld, [3] = not, [4] = comp, [5] = textfieldvalue
+        data[5] = txtValue.getText();
+        selectedNode.setDataValue(data);
+        selectedNode.setDisplayValue(
+            data[0] + " " + data[2] + " " + data[3] + " " + data[4] + " " + data[5]);
+        break;
+        
+      case DANN:
+      //data[0] = condition, data[1] = id, [2] = value
+        data[2] = txtValue.getText();
+        selectedNode.setDataValue(data);
+        selectedNode.setDisplayValue(
+            data[0] + " " + data[2]);
+        break;
+        
+      case SONST:
+        //data[0] = condition, data[1] = id, [2] = value
+        data[2] = txtValue.getText();
+        selectedNode.setDataValue(data);
+        selectedNode.setDisplayValue(
+            data[0] + " " + data[2]);
+        break;
+        
+        default: return;
     }
   };
-  
-  private AbstractTextListener txtValueDannListener = event -> {    
-    // DisplayValue aus DataValue generieren, Änderungen speichern.
-    String[] data = nodeDataValueToStringArray(selectedNode);
-    
-    //data[0] = condition, data[1] = id, [2] = value
-    if (DANN.equals(data[0])) {
-      data[2] = txtValueDann.getText();
-      selectedNode.setDataValue(data);
-      selectedNode.setDisplayValue(
-          data[0] + " " + data[2]);
-    }
-  };
-  
-  private AbstractTextListener txtValueSonstListener = event -> {    
-    // DisplayValue aus DataValue generieren, Änderungen speichern.
-    String[] data = nodeDataValueToStringArray(selectedNode);
-    
-    //data[0] = condition, data[1] = id, [2] = value
-    if (SONST.equals(data[0])) {
-      data[2] = txtValueSonst.getText();
-      selectedNode.setDataValue(data);
-      selectedNode.setDisplayValue(
-          data[0] + " " + data[2]);
-    }
-  };
-
-  private AbstractActionListener sonstActionListener = event -> 
-    selectedNode.appendChild(createElseNode(txtValueSonst.getText(), ""));
-
+ 
   private XMutableTreeNode createElseNode(String displayValue, String imgFileName)
   {
     String id = UUID.randomUUID().toString();
@@ -529,59 +633,6 @@ public class IfThenElseDialog
     return rootNode;
   }
 
-  private AbstractActionListener wennActionListener = event -> {
-    String not = cbWennNot.getItem((short) 0);
-    String value = txtValueWenn.getText();
-    String serienBriefFeld = UNO.XTextComponent(cbWennSerienbrieffeld).getSelectedText();
-
-    XTextComponent comparator = UNO.XTextComponent(controlContainer.getControl("cbWennComporator"));
-    String comparatorValue = comparator.getSelectedText();
-
-    Random rand = new Random();
-    int randomNumber = rand.nextInt(randomImages.size());
-    
-    String randomImageFileName = randomImages.get(randomNumber);
-    XMutableTreeNode ifNode = createIfNode(serienBriefFeld, not, comparatorValue, value,
-        randomImageFileName);
-    
-    // duplikate vermeiden. nach Verwendung löschen, nicht endlich, daher wieder füllen.
-    randomImages.remove(randomNumber);
-    
-    if (randomImages.isEmpty())
-      addNodeImages();
-   
-    if (selectedNode == null)
-    {
-      try
-      {
-        XMutableTreeNode root = createRootNode();
-        treeNodeModel.setRoot(root);
-        selectedNode = root;
-        selectedNode.appendChild(ifNode);
-        selectedNode.appendChild(createThenNode("", randomImageFileName));
-        selectedNode.appendChild(createElseNode("", randomImageFileName));
-
-        XPropertySet xTreeModelProperty = UnoRuntime.queryInterface(
-            XPropertySet.class, xControlModel);
-        xTreeModelProperty.setPropertyValue("DataModel", treeNodeModel);
-        
-        treeControl.expandNode(root);
-      } catch (UnknownPropertyException | PropertyVetoException 
-          | WrappedTargetException | IllegalArgumentException | ExpandVetoException e)
-      {
-        LOGGER.error("", e);
-      }
-    } else
-    {      
-      selectedNode.appendChild(ifNode);
-      selectedNode.appendChild(createThenNode("", randomImageFileName));
-      selectedNode.appendChild(createElseNode("", randomImageFileName));
-    }
-  };
-
-  private AbstractActionListener dannActionListener = event ->
-    selectedNode.appendChild(createThenNode(txtValueDann.getText(), ""));
-
   private AbstractItemListener notItemListener = event -> {
     String[] data = nodeDataValueToStringArray(selectedNode);
     
@@ -596,11 +647,22 @@ public class IfThenElseDialog
   private AbstractItemListener cbWennSerienbrieffeldItemListener = event -> {
     String[] data = nodeDataValueToStringArray(selectedNode);
     
-    if (WENN.equals(data[0])) {
-      data[2] = UNO.XTextComponent(cbWennSerienbrieffeld).getText();
+    switch (data[0])
+    {
+    case WENN:
+      data[2] = UNO.XTextComponent(cbSerienbrieffeld).getText();
       selectedNode.setDataValue(data);
       selectedNode.setDisplayValue(
           data[0] + " " + data[2] + " " + data[3] + " " + data[4] + " " + data[5]);
+      break;
+      
+    case DANN:
+      break;
+      
+    case SONST:
+      break;
+      
+      default: return;
     }
   };
 
@@ -630,8 +692,7 @@ public class IfThenElseDialog
 
   private ConfigThingy addIf(ConfigThingy conf)
   {
-      
-      return conf.add("IF");
+    return conf.add("IF");
   }
 
   private ConfigThingy addThen(ConfigThingy conf)
@@ -648,7 +709,6 @@ public class IfThenElseDialog
   {
     ConfigThingy catConf = new ConfigThingy("CAT");
     catConf.add(value);
-    
     
     return catConf;
   }
@@ -686,9 +746,9 @@ public class IfThenElseDialog
   }
 
   private static final List<TestType> testTypes = Arrays.asList(
-      new TestType(L.m("="), "STRCMP"), new TestType(L.m("="), "NUMCMP"),
-      new TestType(L.m("<"), "LT"), new TestType(L.m("<="), "LE"), new TestType(L.m(">"), "GT"),
-      new TestType(L.m(">="), "GE"),
+      new TestType(L.m("genau ="), "STRCMP"), new TestType(L.m("numerisch ="), "NUMCMP"),
+      new TestType(L.m("numerisch <"), "LT"), new TestType(L.m("numerisch <="), "LE"),
+      new TestType(L.m("numerisch >"), "GT"), new TestType(L.m("numerisch >="), "GE"),
       new TestType(L.m("regulärer A."), "MATCH"));
 
   private AbstractKeyHandler keyHandler = new AbstractKeyHandler()
@@ -701,40 +761,38 @@ public class IfThenElseDialog
         if (selectedNode == null)
           return false;
 
-        int nodeToDelIndex = selectedNode.getParent().getIndex(selectedNode);
-        try
-        {
-          XMutableTreeNode parentNode = UnoRuntime.queryInterface(XMutableTreeNode.class, selectedNode.getParent());
-          String[] data = nodeDataValueToStringArray(parentNode);
-          String[] dataSelectedNode = nodeDataValueToStringArray(selectedNode);
-          
-          if (WENN.equals(data[0]) && WENN.equals(dataSelectedNode[0])) {
-            
-            int childCount = parentNode.getChildCount();
-            
-            // letztes child zuerst entfernen, TreeView kommt bei
-            // node.removeChildByIndex(0)
-            // node.removeChildByIndex(1)
-            // node.removeChildByIndex(2)
-            // durcheinander da der interne Index der TreeView bei Aufruf von removeChildByIndex()
-            // dekrementiert wird.
-            // Prüfung der children, dann oder sonst kann bereits gelöscht sein.         
-            for (int i = childCount; i >= 0; i--)
-            {
-              parentNode.removeChildByIndex(i - 1);
-            }
-          } else {
-            parentNode.removeChildByIndex(nodeToDelIndex);
-          }
-        } catch (IndexOutOfBoundsException |
-            IllegalArgumentException e)
-        {
-          LOGGER.error("", e);
-        }
+        removeNode();
       }
 
       return false;
     }
   };
+
+  // Entfernt Wenn/Dann/Sonst node.
+  private void removeNode()
+  {
+    try
+    {
+      XMutableTreeNode parentNode = UnoRuntime.queryInterface(XMutableTreeNode.class,
+          selectedNode.getParent());
+
+      int childCount = parentNode.getChildCount();
+
+      // letztes child zuerst entfernen, TreeView kommt bei
+      // node.removeChildByIndex(0)
+      // node.removeChildByIndex(1)
+      // node.removeChildByIndex(2)
+      // durcheinander da der interne Index der TreeView bei Aufruf von removeChildByIndex()
+      // dekrementiert wird.
+      // Prüfung der children, dann oder sonst kann bereits gelöscht sein.
+      for (int i = childCount; i >= 0; i--)
+      {
+        parentNode.removeChildByIndex(i - 1);
+      }
+    } catch (IndexOutOfBoundsException | IllegalArgumentException e)
+    {
+      LOGGER.error("", e);
+    }
+  }
 }
 

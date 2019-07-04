@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
-<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="if_then_else_2" dlg:left="132" dlg:top="100" dlg:width="292" dlg:height="482" dlg:closeable="true" dlg:moveable="true">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="if_then_else_2" dlg:left="132" dlg:top="100" dlg:width="394" dlg:height="425" dlg:closeable="true" dlg:moveable="true">
+ <dlg:styles>
+  <dlg:style dlg:style-id="0" dlg:border="simple"/>
+ </dlg:styles>
  <dlg:bulletinboard>
-  <dlg:button dlg:id="btnSonst" dlg:tab-index="2" dlg:left="15" dlg:top="55" dlg:width="48" dlg:height="16" dlg:value="Sonst"/>
-  <dlg:button dlg:id="btnDann" dlg:tab-index="1" dlg:left="15" dlg:top="33" dlg:width="48" dlg:height="16" dlg:value="Dann"/>
-  <dlg:button dlg:id="tbnWenn" dlg:tab-index="0" dlg:left="15" dlg:top="10" dlg:width="48" dlg:height="16" dlg:value="Wenn"/>
-  <dlg:combobox dlg:id="cbWennSerienbrieffeld" dlg:tab-index="4" dlg:left="72" dlg:top="10" dlg:width="52" dlg:height="16" dlg:spin="true"/>
-  <dlg:combobox dlg:id="cbDannSerienbrieffeld" dlg:tab-index="7" dlg:left="72" dlg:top="32" dlg:width="52" dlg:height="16" dlg:spin="true"/>
-  <dlg:textfield dlg:id="txtValueSonst" dlg:tab-index="9" dlg:left="130" dlg:top="52" dlg:width="52" dlg:height="18" dlg:value="Text"/>
-  <dlg:textfield dlg:id="txtValueWenn" dlg:tab-index="6" dlg:left="226" dlg:top="8" dlg:width="52" dlg:height="18" dlg:value="Text"/>
-  <dlg:combobox dlg:id="cbWennComporator" dlg:tab-index="5" dlg:left="164" dlg:top="9" dlg:width="52" dlg:height="16" dlg:spin="true"/>
-  <dlg:textfield dlg:id="txtValueDann" dlg:tab-index="8" dlg:left="130" dlg:top="32" dlg:width="52" dlg:height="18" dlg:value="Text"/>
-  <dlg:treecontrol dlg:id="resultTreeControl" dlg:tab-index="3" dlg:left="4" dlg:top="75" dlg:width="285" dlg:height="400"/>
-  <dlg:combobox dlg:id="cbSonstSerienbrieffeld" dlg:tab-index="10" dlg:left="73" dlg:top="54" dlg:width="52" dlg:height="16" dlg:spin="true"/>
-  <dlg:combobox dlg:id="cbNot" dlg:tab-index="11" dlg:left="128" dlg:top="9" dlg:width="30" dlg:height="16" dlg:spin="true"/>
+  <dlg:combobox dlg:id="cbWennSerienbrieffeld" dlg:tab-index="1" dlg:left="6" dlg:top="7" dlg:width="112" dlg:height="16" dlg:spin="true"/>
+  <dlg:textfield dlg:id="txtValue" dlg:tab-index="3" dlg:left="6" dlg:top="64" dlg:width="112" dlg:height="16" dlg:value="Text"/>
+  <dlg:combobox dlg:id="cbWennComporator" dlg:tab-index="2" dlg:left="6" dlg:top="45" dlg:width="112" dlg:height="16" dlg:spin="true"/>
+  <dlg:treecontrol dlg:style-id="0" dlg:id="resultTreeControl" dlg:tab-index="0" dlg:left="127" dlg:top="6" dlg:width="262" dlg:height="409"/>
+  <dlg:combobox dlg:id="cbNot" dlg:tab-index="4" dlg:left="6" dlg:top="26" dlg:width="112" dlg:height="16" dlg:spin="true"/>
+  <dlg:button dlg:id="newConditionBtn" dlg:tab-index="5" dlg:left="6" dlg:top="88" dlg:width="112" dlg:height="18" dlg:value="Neue Bedingung" dlg:image-position="left-center" dlg:image-align="left"/>
+  <dlg:button dlg:id="removeConditionBtn" dlg:tab-index="6" dlg:left="6" dlg:top="109" dlg:width="112" dlg:height="18" dlg:value="Bedingung löschen" dlg:image-position="left-center" dlg:image-align="left"/>
  </dlg:bulletinboard>
 </dlg:window>
