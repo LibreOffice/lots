@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
-<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="seriendruck_format" dlg:left="85" dlg:top="5" dlg:width="175" dlg:height="95" dlg:closeable="true" dlg:moveable="true" dlg:withtitlebar="false">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="seriendruck_format" dlg:left="85" dlg:top="5" dlg:width="175" dlg:height="102" dlg:closeable="true" dlg:moveable="true" dlg:withtitlebar="false">
  <dlg:bulletinboard>
   <dlg:radiogroup>
    <dlg:radio dlg:id="odt" dlg:tab-index="1" dlg:left="10" dlg:top="15" dlg:width="150" dlg:height="8" dlg:value="ODT-Datei" dlg:group-name="format" dlg:checked="true"/>
@@ -9,11 +9,13 @@
   <dlg:titledbox dlg:id="format" dlg:tab-index="0" dlg:left="5" dlg:top="5" dlg:width="160" dlg:height="35">
    <dlg:title dlg:value="Ausgabeformat"/>
   </dlg:titledbox>
-  <dlg:titledbox dlg:id="template" dlg:tab-index="3" dlg:left="5" dlg:top="45" dlg:width="160" dlg:height="45">
+  <dlg:titledbox dlg:id="template" dlg:tab-index="3" dlg:left="5" dlg:top="45" dlg:width="160" dlg:height="52">
    <dlg:title dlg:value="Dateinamensmuster"/>
   </dlg:titledbox>
   <dlg:textfield dlg:id="name" dlg:tab-index="4" dlg:left="10" dlg:top="55" dlg:width="150" dlg:height="12"/>
-  <dlg:combobox dlg:id="mailmerge" dlg:tab-index="5" dlg:left="10" dlg:top="70" dlg:width="70" dlg:height="15" dlg:spin="true"/>
-  <dlg:combobox dlg:id="special" dlg:tab-index="6" dlg:left="90" dlg:top="70" dlg:width="70" dlg:height="15" dlg:spin="true"/>
+  <dlg:combobox dlg:id="mailmerge" dlg:tab-index="5" dlg:left="10" dlg:top="77" dlg:width="70" dlg:height="15" dlg:spin="true"/>
+  <dlg:combobox dlg:id="special" dlg:tab-index="6" dlg:left="90" dlg:top="77" dlg:width="70" dlg:height="15" dlg:spin="true"/>
+  <dlg:text dlg:id="mailmerge_label" dlg:tab-index="7" dlg:left="10" dlg:top="70" dlg:width="70" dlg:height="8" dlg:value="Serienbrieffeld:"/>
+  <dlg:text dlg:id="special_label" dlg:tab-index="8" dlg:left="90" dlg:top="70" dlg:width="70" dlg:height="8" dlg:value="Spezialfeld:"/>
  </dlg:bulletinboard>
 </dlg:window>

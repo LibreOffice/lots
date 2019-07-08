@@ -10,12 +10,17 @@ public class SpecialField
   {
     // nothing to do
   }
-  
+
   public static void addItems(XComboBox comboBox)
   {
-    comboBox.addItems(new String[] { "Bitte wählen..", "Gender", "Wenn...Dann...Sonst",
-        "Datensatznummer", "Serienbriefnummer", "Nächster Datensatz", "Felder bearbeiten..." },
-        (short) 0);
+    String[] items = new String[] { "Bitte wählen..", "Gender", "Wenn...Dann...Sonst",
+        "Datensatznummer", "Serienbriefnummer", "Nächster Datensatz", "Felder bearbeiten..." };
+    addItems(comboBox, items);
+  }
+
+  public static void addItems(XComboBox comboBox, String[] items)
+  {
+    comboBox.addItems(items, (short) 0);
     UNO.XTextComponent(comboBox).setText(comboBox.getItem((short) 0));
   }
 }
