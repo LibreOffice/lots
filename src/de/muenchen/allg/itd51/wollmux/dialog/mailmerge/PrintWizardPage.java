@@ -71,7 +71,7 @@ public class PrintWizardPage extends AbstractXWizardPage
               @Override
               public void dispatchFinished(DispatchResultEvent arg0)
               {
-                name.setText(" " + getCurrentPrinterName() + " ");
+                name.setText(getCurrentPrinterName());
               }
             });
           }
@@ -92,7 +92,6 @@ public class PrintWizardPage extends AbstractXWizardPage
   @Override
   public boolean commitPage(short reason)
   {
-    setCurrentPrinterName(name.getText());
     window.setVisible(false);
     return true;
   }
@@ -143,20 +142,4 @@ public class PrintWizardPage extends AbstractXWizardPage
       return L.m("unbekannt");
     }
   }
-
-  /**
-   * Setzt den Namen des aktuell zu diesem Dokument eingestellten Druckers.
-   *
-   * @author Judith Baur, Simona Loi
-   */
-  public void setCurrentPrinterName(String druckerName)
-  {
-    XPrintable printable = UNO.XPrintable(doc);
-    UnoProps printerInfo = new UnoProps("Name", druckerName);
-    if (printable != null)
-    {
-      printable.setPrinter(printerInfo.getProps());
-    }
-  }
-
 }
