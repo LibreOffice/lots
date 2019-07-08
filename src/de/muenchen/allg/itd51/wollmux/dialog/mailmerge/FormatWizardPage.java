@@ -63,6 +63,9 @@ public class FormatWizardPage extends AbstractXWizardPage
         controller.activateNextButton(canAdvance());
       }
     });
+    name.setText(
+        controller.getController().getDefaultFilename()
+            + MailMergeNew.addMergeFieldTags(MailMergeController.TAG_DATENSATZNUMMER));
     mailmerge = UNO.XComboBox(container.getControl("mailmerge"));
     new MailMergeField(mailmerge).setMailMergeDatasource(controller.getController().getDs());
     mailmerge.addItemListener(new AbstractItemListener()
@@ -74,14 +77,27 @@ public class FormatWizardPage extends AbstractXWizardPage
       }
     });
     special = UNO.XComboBox(container.getControl("special"));
-    SpecialField.addItems(special);
+    SpecialField.addItems(special,
+        new String[] { "Bitte wählen...", "Datensatznummer", "Serienbriefnummer" });
     special.addItemListener(new AbstractItemListener()
     {
 
       @Override
       public void itemStateChanged(ItemEvent event)
       {
-        name.setText(name.getText() + special.getItem((short) event.Selected));
+        String append = "";
+        switch (event.Selected)
+        {
+        case 1:
+          append = MailMergeNew.addMergeFieldTags(MailMergeController.TAG_DATENSATZNUMMER);
+          break;
+        case 2:
+          append = MailMergeNew.addMergeFieldTags(MailMergeController.TAG_SERIENBRIEFNUMMER);
+          break;
+        default:
+          break;
+        }
+        name.setText(name.getText() + append);
       }
     });
   }
@@ -117,7 +133,7 @@ public class FormatWizardPage extends AbstractXWizardPage
     controller.arguments.put(SubmitArgument.FILENAME_TEMPLATE, name.getText());
     controller.format = getSelectedFormat();
     window.setVisible(false);
-    LOGGER.debug("Fromat {}, Name {}", getSelectedFormat(), getNamingTemplate());
+    LOGGER.debug("Format {}, Name {}", getSelectedFormat(), getNamingTemplate());
     return true;
   }
 }
