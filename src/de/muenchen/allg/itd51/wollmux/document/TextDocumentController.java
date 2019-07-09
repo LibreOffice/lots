@@ -1440,7 +1440,8 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
         boolean setVisible = true;
         for (String gid : groups)
         {
-          if (groupState.get(gid).equals(Boolean.FALSE)) {
+          if (Boolean.FALSE.equals(groupState.get(gid)))
+          {
             setVisible = false;
           }
         }
