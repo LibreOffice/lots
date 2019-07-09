@@ -1,3 +1,23 @@
+ ==================== Neu in Version 18.1.3 ====================
+
+    * Bugfixes
+          o Beim "Direkt Druck" im Seriendruck, kann der Drucker wieder
+            gewechselt werden.
+          o Der Log-Eintrag, wie lange der Seriendruck gedauert hat, erscheint
+            wieder.
+          o Die Eingabefelder in der FormularGUI verhalten sich wieder korrekt.
+          o Standardelemente in der FormularGUI werden auch bei sonst leerer GUI
+            angezeigt.
+          o Die Funktionalität, Tabellen-Spalten im Seriendruck zu ändern wurde
+            wieder hergestellt.
+          o Platzhalter beim "Dateiname vorgeben" werden als erstes ersetzt,
+            bevor der Pfad überprüft wird.
+          o Das Dateinamensmuster im Seriendruck "Einzeldokumente" unterstützt
+            wieder die Spezialfelder Datensatznummer und Serienbriefnummer.
+          o Der Writer wird an Stelle des allgemeinen LibreOffice geöffnet.
+          o Manchmal wurden Sichtbarkeiten wegen einer Exception nicht richtig
+            ausgeblendet. Diese Exception wird jetzt korrekt behandelt.
+
  ==================== Neu in Version 18.1.2 ====================
 
     * Neue Features
