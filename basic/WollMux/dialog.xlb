@@ -2,6 +2,7 @@
 <!DOCTYPE library:library PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "library.dtd">
 <library:library xmlns:library="http://openoffice.org/2000/library" library:name="WollMux" library:readonly="false" library:passwordprotected="false">
 	<library:element library:name="about"/>
+	<library:element library:name="absender_auswahl"/>
 	<library:element library:name="email_auth"/>
 	<library:element library:name="DatensatzBearbeitenPerson"/>
 	<library:element library:name="DatensatzBearbeitenOrga"/>
