@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="absender_auswahl" dlg:left="144" dlg:top="119" dlg:width="263" dlg:height="184" dlg:closeable="true" dlg:moveable="true" dlg:title="Absender-Auswahl">
+ <dlg:bulletinboard>
+  <dlg:text dlg:id="Label1" dlg:tab-index="0" dlg:left="6" dlg:top="5" dlg:width="230" dlg:height="12" dlg:value="Welchen Absender möchten Sie für Ihre Briefköpfe verwenden?"/>
+  <dlg:menulist dlg:id="absAuswahl" dlg:tab-index="1" dlg:left="6" dlg:top="17" dlg:width="249" dlg:height="135"/>
+  <dlg:button dlg:id="abortBtn" dlg:tab-index="2" dlg:left="6" dlg:top="163" dlg:width="60" dlg:height="18" dlg:value="Abbrechen"/>
+  <dlg:button dlg:id="editBtn" dlg:tab-index="4" dlg:left="127" dlg:top="163" dlg:width="60" dlg:height="18" dlg:value="Bearbeiten"/>
+  <dlg:button dlg:id="okBtn" dlg:tab-index="3" dlg:left="195" dlg:top="163" dlg:width="60" dlg:height="18" dlg:value="OK"/>
+ </dlg:bulletinboard>
+</dlg:window>
