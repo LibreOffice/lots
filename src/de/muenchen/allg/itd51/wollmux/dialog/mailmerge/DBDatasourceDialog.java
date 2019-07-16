@@ -74,9 +74,10 @@ public class DBDatasourceDialog
   }
 
   private AbstractActionListener oooDSActionListener = (event) -> {
-    
+
     // Datenquellen-Listbox der Seriendruck-Sidebar aktualisieren.
     listener.notify(event.ActionCommand);
+    dialogFactory.closeDialog();
   };
 
   private AbstractWindowListener windowAdapter = new AbstractWindowListener()

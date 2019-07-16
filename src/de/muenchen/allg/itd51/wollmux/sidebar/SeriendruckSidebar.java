@@ -3,8 +3,10 @@ package de.muenchen.allg.itd51.wollmux.sidebar;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,6 +148,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
         "cbSerienbrieffeld");
     cbSerienbrieffeld.setControlPercentSize(70, 30);
     cbSerienbrieffeld.setComboBoxDropDown(true);
+    cbSerienbrieffeld.setEnabled(false);
     XComboBox comboBox = UNO.XComboBox(cbSerienbrieffeld.getXControl());
     mailMergeField = new MailMergeField(comboBox);
     comboBox.addItemListener(new AbstractItemListener()
@@ -403,13 +406,13 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     }
   };
 
-  private void updateVisibleTables(CalcModel model, boolean add)
+  private void updateVisibleTables(String title, String[] tabs, boolean add)
   {
-    List<String> items = new ArrayList<>(Arrays.asList(currentDatasources.getItems()));
+    Set<String> items = new LinkedHashSet<>(Arrays.asList(currentDatasources.getItems()));
     List<String> titles = new ArrayList<>();
-    for (String spreadSheetTitle : model.getSpreadSheetTableTitles())
+    for (String spreadSheetTitle : tabs)
     {
-      titles.add(model.getWindowTitle() + " - " + spreadSheetTitle);
+      titles.add(title + " - " + spreadSheetTitle);
     }
     if (add)
     {
@@ -417,9 +420,15 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     } else
     {
       items.removeAll(titles);
+      String item = currentDatasources.getSelectedItem();
+      currentDatasources.selectItem(item, !titles.contains(item));
     }
     currentDatasources.removeItems((short) 0, currentDatasources.getItemCount());
     currentDatasources.addItems(items.toArray(new String[] {}), (short) 0);
+    if (add)
+    {
+      currentDatasources.selectItem(titles.get(0), true);
+    }
   }
 
   private AbstractItemListener currentDatasourcesListener = new AbstractItemListener()
@@ -428,9 +437,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     @Override
     public void itemStateChanged(ItemEvent arg0)
     {
-      XListBox listbox = UNO.XListBox(arg0.Source);
-      setMailMergeOnDocument();
-      mailMerge.getDs().setDatasource(listbox.getSelectedItem());
+      mailMerge.getDs().setDatasource(currentDatasources.getSelectedItem());
       updateControls();
     }
 
@@ -479,13 +486,12 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     public void notify(String message)
     {
       setMailMergeOnDocument();
-      XListBox currentDatasources = UNO.XListBox(layout.getControl("currentDatasources"));
 
       List<String> dbTableNames = mailMerge.getDs().getDbTableNames(message);
-      mailMerge.getDs().addCachedDbConnection(new DBModel(message, dbTableNames));
-
-      currentDatasources.addItems(dbTableNames.toArray(new String[dbTableNames.size()]),
-          (short) (currentDatasources.getItemCount() + 1));
+      DBModel model = new DBModel(message, dbTableNames);
+      mailMerge.getDs().addCachedDbConnection(model);
+      updateVisibleTables(model.getDatasourceName(), model.getTableNames().toArray(new String[] {}),
+          true);
     }
   };
 
@@ -508,7 +514,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
       setMailMergeOnDocument();
       CalcModel calcModel = mailMerge.getDs().openAndselectNewCalcTableAsDatasource();
       UNO.XCloseable(calcModel.getSpreadSheetDocument()).addCloseListener(documentCloseListener);
-      updateVisibleTables(calcModel, true);
+      updateVisibleTables(calcModel.getWindowTitle(), calcModel.getSpreadSheetTableTitles(), true);
     }
   };
 
@@ -528,7 +534,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
         return;
       }
       CalcModel model = new CalcModel(title, "", doc.getSheets().getElementNames(), doc);
-      updateVisibleTables(model, false);
+      updateVisibleTables(model.getWindowTitle(), model.getSpreadSheetTableTitles(), false);
     }
   };
 
@@ -543,7 +549,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
       if (model != null)
       {
         UNO.XCloseable(model.getSpreadSheetDocument()).addCloseListener(documentCloseListener);
-        updateVisibleTables(model, true);
+        updateVisibleTables(model.getWindowTitle(), model.getSpreadSheetTableTitles(), true);
       }
     }
   };
