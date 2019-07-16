@@ -958,9 +958,12 @@ public class MailMergeDatasource
    */
   public void setDatasource(String name)
   {
-    if (name == null)
+    if (name == null || name.isEmpty())
     {
-      LOGGER.error("MailMergeDatasource: setDatasource: name is NULL.");
+      LOGGER.info("Es ist keine Datenquelle mehr ausgewählt.");
+      currentSourceType = SOURCE_TYPE.NONE;
+      selectedCalcDoc = null;
+      selectedDBModel = null;
       return;
     }
 
@@ -970,7 +973,8 @@ public class MailMergeDatasource
 
       for (DBModel model : cachedDBConnections) {
         for (String tableName : model.getTableNames()) {
-          if (tableName.equals(name)) {
+          if (name.contains(model.getDatasourceName()) && name.contains(tableName))
+          {
             selectedDBModel = model;
             this.tableName = tableName;
             break;
