@@ -1,8 +1,11 @@
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.star.sheet.XSpreadsheetDocument;
 
-public class CalcModel
+public class CalcModel implements DatasourceModel
 {
   private String windowTitle;
   private String calcUrl;
@@ -21,6 +24,16 @@ public class CalcModel
   public String getWindowTitle()
   {
     return this.windowTitle;
+  }
+
+  public String getDatasourceName()
+  {
+    return getWindowTitle();
+  }
+
+  public List<String> getTableNames()
+  {
+    return Arrays.asList(getSpreadSheetTableTitles());
   }
 
   public String getCalcUrl()
