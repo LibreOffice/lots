@@ -156,7 +156,7 @@ public class GUI
    */
   private boolean processUIElementEvents = false;
 
-  private boolean processValueChangedEvents = false;
+  private List<String> noProcessValueChangedEvents = new ArrayList<>();
 
   public GUI(FormController controller, ConfigThingy formFensterConf)
   {
@@ -164,9 +164,14 @@ public class GUI
     formGUIBounds = Common.parseDimensions(formFensterConf);
   }
 
-  public void setProcessValueChangedEvents(boolean processValueChangedEvents)
+  public void stopProcessingValueChangedEvents(String id)
   {
-    this.processValueChangedEvents = processValueChangedEvents;
+    noProcessValueChangedEvents.add(id);
+  }
+
+  public void startProcessingValueChangedEvents(String id)
+  {
+    noProcessValueChangedEvents.remove(id);
   }
 
   public void create(FormModel model, boolean visible)
@@ -777,7 +782,9 @@ public class GUI
 
       if ("valueChanged".equals(eventType))
       {
+        stopProcessingValueChangedEvents(source.getId());
         controller.setValue(source.getId(), source.getString(), null);
+        startProcessingValueChangedEvents(source.getId());
       } else if ("action".equals(eventType))
       {
         String action = (String) args[0];
@@ -922,11 +929,13 @@ public class GUI
   @Override
   public void valueChanged(String id, String value)
   {
-    if (processValueChangedEvents && SwingUtilities.isEventDispatchThread())
+    if (!noProcessValueChangedEvents.contains(id))
     {
-      processUIElementEvents = false;
-      uiElements.get(id).setString(value);
-      processUIElementEvents = true;
+      SwingUtilities.invokeLater(() -> {
+        processUIElementEvents = false;
+        uiElements.get(id).setString(value);
+        processUIElementEvents = true;
+      });
     }
   }
 }
