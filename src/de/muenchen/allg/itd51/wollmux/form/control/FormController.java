@@ -335,9 +335,7 @@ public class FormController
       dlg.instanceFor(model.getFunctionContext()).show(e -> {
         if ("select".equals(e.getActionCommand()))
         {
-          gui.setProcessValueChangedEvents(true);
           model.setDialogAutofills(dialogName);
-          gui.setProcessValueChangedEvents(false);
         }
       }, model.getFuncLib(), model.getDialogLib());
     }
