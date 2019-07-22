@@ -136,20 +136,10 @@ public class MailMergeDatasource
 
   /**
    * Wenn {@link #sourceType} == {@link #CALC} und das Calc-Dokument derzeit offen ist, dann ist
-   * diese Variable != null. Falls das Dokument nicht offen ist, so ist seine URL in
-   * {@link #calcUrl} zu finden. Die Kombination calcDoc == null && calcUrl == null && sourceType ==
-   * SOURCE_CALC ist unzulässig.
+   * diese Variable != null. Die Kombination selectedCalcModel == null && sourceType ==
+   * SOURCE_TYPE.CALC ist unzulässig.
    */
-  private XSpreadsheetDocument selectedCalcDoc = null;
-
-  /**
-   * Wenn {@link #sourceType} == {@link #CALC} und das Calc-Dokument bereits einmal gespeichert
-   * wurde, findet sich hier die URL des Dokuments, ansonsten ist der Wert null. Falls das Dokument
-   * nur als UnbenanntX im Speicher existiert, so ist eine Referenz auf das Dokument in
-   * {@link #calcDoc} zu finden. Die Kombination calcDoc == null && calcUrl == null && sourceType ==
-   * SOURCE_CALC ist unzulässig.
-   */
-  private String calcUrl = null;
+  private CalcModel selectedCalcModel = null;
 
   /**
    * Falls {@link #sourceType} == {@link #DB} und die Datenquelle bereits initialisiert wurde (durch
@@ -171,6 +161,18 @@ public class MailMergeDatasource
   private TextDocumentController documentController;
 
   /**
+   * Liste der vorhandenen Datenquellen.
+   */
+  private List<DatasourceModel> connections = new ArrayList<>();
+
+  /**
+   * Wenn {@link #sourceType} == {@link #DB} und die Datenbank derzeit offen ist, dann ist diese
+   * Variable != null. Die Kombination selectedDBModel == null && sourceType == SOURCE_TYPE.DB ist
+   * unzulässig.
+   */
+  private DBModel selectedDBModel = null;
+
+  /**
    * Erzeugt eine neue Datenquelle.
    *
    * @param documentController
@@ -181,6 +183,7 @@ public class MailMergeDatasource
   {
     this.documentController = documentController;
     openDatasourceFromLastStoredSettings();
+    connections.addAll(getOpenCalcWindows());
   }
 
   /**
@@ -198,10 +201,11 @@ public class MailMergeDatasource
       switch (currentSourceType)
       {
       case CALC:
-        columnNames = getColumnNames(selectedCalcDoc, tableName);
+        columnNames = getColumnNames(selectedCalcModel.getSpreadSheetDocument(), tableName);
         break;
       case DB:
-        Object table = getDbTableByName(selectedDBModel.datasourceName, selectedDBModel.getTableNames().get(0));
+        Object table = getDbTableByName(selectedDBModel.getDatasourceName(),
+            selectedDBModel.getTableNames().get(0));
         columnNames = getDbColumns(table);
         break;
       default:
@@ -240,7 +244,8 @@ public class MailMergeDatasource
       switch (currentSourceType)
       {
       case CALC:
-        return getValuesFromSpreadsheetDocument(selectedCalcDoc, tableName, rowIndex);
+        return getValuesFromSpreadsheetDocument(selectedCalcModel.getSpreadSheetDocument(),
+            tableName, rowIndex);
       case DB:
         return getDbValuesForDataset(getOOoDatasource(), rowIndex);
       default:
@@ -264,7 +269,7 @@ public class MailMergeDatasource
       switch (currentSourceType)
       {
       case CALC:
-        return getNumberOfDatasets(selectedCalcDoc, tableName);
+        return getNumberOfDatasets(selectedCalcModel.getSpreadSheetDocument(), tableName);
       case DB:
         return getDbNumberOfDatasets();
       default:
@@ -304,7 +309,7 @@ public class MailMergeDatasource
       switch (currentSourceType)
       {
       case CALC:
-        return getSpreadsheetDocumentData(selectedCalcDoc, tableName);
+        return getSpreadsheetDocumentData(selectedCalcModel.getSpreadSheetDocument(), tableName);
       case DB:
         return getDbData(getOOoDatasource());
       default:
@@ -393,7 +398,7 @@ public class MailMergeDatasource
         windowTitle = UNO.getPropertyByPropertyValues(UNO.XModel(doc).getArgs(), "Title");
 
         model = new CalcModel(stripOpenOfficeFromWindowName(windowTitle), docUrl, sheets, doc);
-        openSpreedSheetDocuments.add(model);
+        connections.add(model);
 
         if (sheets.length > 0)
         {
@@ -417,13 +422,14 @@ public class MailMergeDatasource
     Object document = null;
     if (currentSourceType == SOURCE_TYPE.CALC)
     {
-      document = selectedCalcDoc;
+      document = selectedCalcModel.getSpreadSheetDocument();
     } else if (currentSourceType == SOURCE_TYPE.DB)
     {
       try
       {
         XDocumentDataSource ds = UNO
-            .XDocumentDataSource(UNO.dbContext.getRegisteredObject(selectedDBModel.datasourceName));
+            .XDocumentDataSource(
+                UNO.dbContext.getRegisteredObject(selectedDBModel.getDatasourceName()));
         XOfficeDatabaseDocument dbdoc = ds.getDatabaseDocument();
         String url = UNO.XModel(dbdoc).getURL();
 
@@ -530,7 +536,7 @@ public class MailMergeDatasource
     switch (currentSourceType)
     {
     case CALC:
-      if (calcUrl == null || tableName.length() == 0)
+      if (selectedCalcModel.getCalcUrl() == null || tableName.length() == 0)
       {
         break;
       }
@@ -538,7 +544,7 @@ public class MailMergeDatasource
       arg.addChild(new ConfigThingy("calc"));
       dq.addChild(arg);
       arg = new ConfigThingy("URL");
-      arg.addChild(new ConfigThingy(calcUrl));
+      arg.addChild(new ConfigThingy(selectedCalcModel.getCalcUrl()));
       dq.addChild(arg);
       arg = new ConfigThingy("TABLE");
       arg.addChild(new ConfigThingy(tableName));
@@ -928,7 +934,7 @@ public class MailMergeDatasource
       calcModel = new CalcModel(stripOpenOfficeFromWindowName(title), UNO.XModel(spread).getURL(),
           spread.getSheets().getElementNames(), spread);
 
-      openSpreedSheetDocuments.add(calcModel);
+      connections.add(calcModel);
       this.currentSourceType = SOURCE_TYPE.CALC;
       setDatasource(sheetNames[0]);
 
@@ -940,13 +946,9 @@ public class MailMergeDatasource
     return calcModel;
   }
 
-  private List<DBModel> cachedDBConnections = new ArrayList<>();
-
   public void addCachedDbConnection(DBModel dbModel) {
-    cachedDBConnections.add(dbModel);
+    connections.add(dbModel);
   }
-
-  private DBModel selectedDBModel = null;
 
   /**
    * Setzt die zu verwendende Tabelle auf den Namen name und speichert die Einstellungen persistent
@@ -962,53 +964,33 @@ public class MailMergeDatasource
     {
       LOGGER.info("Es ist keine Datenquelle mehr ausgewählt.");
       currentSourceType = SOURCE_TYPE.NONE;
-      selectedCalcDoc = null;
+      selectedCalcModel = null;
       selectedDBModel = null;
       return;
     }
 
-    if (openSpreedSheetDocuments.isEmpty())
+    for (DatasourceModel model : connections)
     {
-      currentSourceType = SOURCE_TYPE.DB;
-
-      for (DBModel model : cachedDBConnections) {
-        for (String tableName : model.getTableNames()) {
-          if (name.contains(model.getDatasourceName()) && name.contains(tableName))
+      for (String tableName : model.getTableNames())
+      {
+        if (name.contains(model.getDatasourceName()) && name.contains(tableName))
+        {
+          if (model instanceof DBModel)
           {
-            selectedDBModel = model;
+            selectedDBModel = (DBModel) model;
             this.tableName = tableName;
-            break;
+            currentSourceType = SOURCE_TYPE.DB;
+          } else
+          {
+            selectedCalcModel = (CalcModel) model;
+            this.tableName = tableName;
+            currentSourceType = SOURCE_TYPE.CALC;
+            oooDatasource = null;
           }
+          break;
         }
       }
     }
-
-    openSpreedSheetDocuments.stream().forEach(item -> {
-      for (String tableName : item.getSpreadSheetTableTitles())
-      {
-        if (name.contains(tableName) && name.contains(item.getWindowTitle()))
-        {
-          calcUrl = item.getCalcUrl();
-          selectedCalcDoc = item.getSpreadSheetDocument();
-          this.tableName = tableName;
-          currentSourceType = SOURCE_TYPE.CALC;
-          oooDatasource = null;
-          break;
-        } else
-        {
-          currentSourceType = SOURCE_TYPE.DB;
-          for (DBModel model : cachedDBConnections) {
-            for (String dbTableName : model.getTableNames()) {
-              if (dbTableName.equals(name)) {
-                selectedDBModel = model;
-                break;
-              }
-            }
-          }
-        }
-      }
-    });
-
     storeDatasourceSettings();
   }
 
@@ -1031,8 +1013,6 @@ public class MailMergeDatasource
     return str;
   }
 
-  public List<CalcModel> openSpreedSheetDocuments = new ArrayList<>();
-
   /**
    * Liefert ein CalcModel und zugehörigen XSpreadsheetDocuments aller offenen Calc-Fenster.
    *
@@ -1041,8 +1021,9 @@ public class MailMergeDatasource
    *         MAp ist das eigentliche UNO Dokumente, über XSpreedSheetDocument.getSheets können die
    *         Tabellen abgerufen werden.
    */
-  public List<CalcModel> getOpenCalcWindows()
+  public static List<CalcModel> getOpenCalcWindows()
   {
+    ArrayList<CalcModel> models = new ArrayList<>();
     try
     {
       XSpreadsheetDocument spread = null;
@@ -1054,7 +1035,7 @@ public class MailMergeDatasource
         if (spread != null)
         {
           String title = UNO.getPropertyByPropertyValues(UNO.XModel(spread).getArgs(), "Title");
-          openSpreedSheetDocuments.add(new CalcModel(stripOpenOfficeFromWindowName(title),
+          models.add(new CalcModel(stripOpenOfficeFromWindowName(title),
               UNO.XModel(spread).getURL(), spread.getSheets().getElementNames(), spread));
         }
       }
@@ -1063,7 +1044,7 @@ public class MailMergeDatasource
       LOGGER.error("", x);
     }
 
-    return openSpreedSheetDocuments;
+    return models;
   }
 
   private XSpreadsheetDocument getCalcDocByFile(String url)
@@ -1168,7 +1149,7 @@ public class MailMergeDatasource
     }
 
     currentSourceType = SOURCE_TYPE.DB;
-    selectedCalcDoc = null;
+    selectedCalcModel = null;
 
     selectedDBModel.datasourceName = newDsName;
     oooDatasource = null;
@@ -1213,7 +1194,8 @@ public class MailMergeDatasource
     XCellRangesQuery sheet;
     try
     {
-      sheet = UNO.XCellRangesQuery(selectedCalcDoc.getSheets().getByName(tableName));
+      sheet = UNO.XCellRangesQuery(
+          selectedCalcModel.getSpreadSheetDocument().getSheets().getByName(tableName));
     } catch (Exception x)
     {
       return;
