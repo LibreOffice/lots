@@ -80,7 +80,7 @@ public class OnAbout extends BasicEvent
 
       // Info
       XFixedText wmVersion = UNO.XFixedText(container.getControl("wmVersion"));
-      wmVersion.setText("WollMux Version: " + WollMuxSingleton.getVersion());
+      wmVersion.setText("WollMux " + WollMuxSingleton.getVersion());
       XFixedText wmConfig = UNO.XFixedText(container.getControl("wmConfig"));
       wmConfig
           .setText("WollMux-Konfiguration: " + WollMuxSingleton.getInstance().getConfVersionInfo());
