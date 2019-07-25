@@ -38,17 +38,7 @@ class TextFieldUpdater extends AbstractExecutor
    */
   int execute(DocumentCommands commands)
   {
-    try
-    {
-      this.documentCommandInterpreter.getDocumentController().setLockControllers(true);
-
-      return executeAll(commands);
-    }
-    finally
-    {
-      this.documentCommandInterpreter.getDocumentController().setLockControllers(false);
-    }
-
+    return executeAll(commands);
   }
 
   /**

@@ -667,29 +667,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   }
 
   /**
-   * Diese Methode blockt/unblocked die Contoller, die für das Rendering der
-   * Darstellung in den Dokumenten zuständig sind, jedoch nur, wenn nicht der
-   * debug-modus gesetzt ist.
-   *
-   * @param state
-   */
-  public synchronized void setLockControllers(boolean lock)
-  {
-    try
-    {
-      if (!WollMuxFiles.isDebugMode() && UNO.XModel(model.doc) != null)
-      {
-        if (lock)
-          UNO.XModel(model.doc).lockControllers();
-        else
-          UNO.XModel(model.doc).unlockControllers();
-      }
-    }
-    catch (java.lang.Exception e)
-    {}
-  }
-
-  /**
    * Diese Methode prüft ob die Formularwerte der in fields enthaltenen
    * Formularfelder konsistent aus den in mapIdToValue enthaltenen Werten abgeleitet
    * werden können; Der Wert value beschreibt dabei den Wert der für

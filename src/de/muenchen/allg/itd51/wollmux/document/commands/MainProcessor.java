@@ -12,14 +12,14 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 
 /**
  * Der Hauptverarbeitungsschritt, in dem vor allem die Textinhalte gefüllt werden.
- * 
+ *
  * @author christoph.lutz
- * 
+ *
  */
 class MainProcessor extends AbstractExecutor
 {
   /**
-   * 
+   *
    */
   private final DocumentCommandInterpreter documentCommandInterpreter;
 
@@ -36,18 +36,7 @@ class MainProcessor extends AbstractExecutor
    */
   int execute(DocumentCommands commands)
   {
-    try
-    {
-      this.documentCommandInterpreter.getDocumentController().setLockControllers(true);
-
-      int errors = executeAll(commands);
-
-      return errors;
-    }
-    finally
-    {
-      this.documentCommandInterpreter.getDocumentController().setLockControllers(false);
-    }
+    return executeAll(commands);
   }
 
   /**
