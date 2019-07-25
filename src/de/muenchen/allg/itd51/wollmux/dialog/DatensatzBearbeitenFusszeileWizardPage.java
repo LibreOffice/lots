@@ -51,7 +51,7 @@ public class DatensatzBearbeitenFusszeileWizardPage extends DatensatzBearbeitenB
           setTextColor(xControl, 16711680); // rot
         }
         
-        xTextComponent.setText(dataset.get(columnName));
+        xTextComponent.setText(dataset.get(columnName) == null ? "" : dataset.get(columnName));
       }
       
       for (XControl control : controlContainerFusszeile.getControls())

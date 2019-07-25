@@ -37,8 +37,7 @@ public class DatensatzBearbeitenPersonWizardPage extends DatensatzBearbeitenBase
     {
       XComboBox anredeComboBox = UNO.XComboBox(controlContainerPerson.getControl("Anrede"));
       XTextComponent anredeTextComponent = UNO.XTextComponent(anredeComboBox);
-      String anrede = dataset.get("Anrede");
-      anredeTextComponent.setText(anrede);
+      anredeTextComponent.setText(dataset.get("Anrede") == null ? "" : dataset.get("Anrede"));
 
       anredeComboBox.removeItems((short) 0, anredeComboBox.getItemCount());
       anredeComboBox.addItems(new String[] { "Herr", "Frau" }, (short) 0);
@@ -57,7 +56,7 @@ public class DatensatzBearbeitenPersonWizardPage extends DatensatzBearbeitenBase
         if (xTextComponent == null)
           continue;
 
-        xTextComponent.setText(dataset.get(columnName));
+        xTextComponent.setText(dataset.get(columnName) == null ? "" : dataset.get(columnName));
         
         if (isDifferentFromLdapDataset(columnName))
         {
