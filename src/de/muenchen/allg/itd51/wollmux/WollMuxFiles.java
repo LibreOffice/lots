@@ -145,8 +145,8 @@ public class WollMuxFiles
    */
   private static final String WOLLMUX_CONF_PATH_VALUE_NAME = "ConfigPath";
 
-  private static final String WOLLMUX_NOCONF =
-    L.m("Es wurde keine WollMux-Konfiguration (wollmux.conf) gefunden - deshalb läuft WollMux im NoConfig-Modus.");
+  private static final String WOLLMUX_NOCONF = L.m(
+      "Es wurde keine WollMux-Konfiguration (wollmux.conf) gefunden - deshalb läuft WollMux im NoConfig-Modus.");
 
   /**
    * Wenn nach dieser Anzahl Millisekunden die Konfiguration noch nicht vollständig

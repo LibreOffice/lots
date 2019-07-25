@@ -59,6 +59,7 @@ import com.sun.star.uno.XComponentContext;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
@@ -98,9 +99,9 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(WollMuxSidebarContent.class);
-  
+
   public static final String ALLOW_USER_CONFIG = "ALLOW_USER_CONFIG";
-  
+
   /**
    * Name der Datei in der die WollMuxBar ihre Konfiguration schreibt.
    */
@@ -120,7 +121,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     SUPPORTED_ACTIONS.add("about");
     SUPPORTED_ACTIONS.add("options");
   }
-  
+
   public static final String WOLLMUX_CONFIG_ERROR_MESSAGE =
       L.m("Aus Ihrer WollMux-Konfiguration konnte kein Abschnitt \"Symbolleisten\" gelesen werden. "
         + "Die WollMux-Leiste kann daher nicht gestartet werden. Bitte überprüfen Sie, ob in Ihrer wollmux.conf "
@@ -181,7 +182,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
   };
 
   private UIFactory uiFactory;
-  
+
   private AbstractWindowListener windowAdapter = new AbstractWindowListener()
   {
     @Override
@@ -202,9 +203,9 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
     this.parentWindow.addWindowListener(this.windowAdapter);
     layout = new SimpleLayoutManager(this.parentWindow);
-    
+
     DatasourceJoiner dj = DatasourceJoinerFactory.getDatasourceJoiner();
-    
+
     if (dj.getLOS().size() > 0)
     {
       // Liste der nicht zuordnenbaren Datensätze erstellen und ausgeben:
@@ -236,26 +237,38 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     catch (NodeNotFoundException e)
     {}
 
-    readWollMuxBarConf(allowUserConfig, conf);
-
     XMultiComponentFactory xMCF =
       UnoRuntime.queryInterface(XMultiComponentFactory.class,
         context.getServiceManager());
     XWindowPeer parentWindowPeer =
       UnoRuntime.queryInterface(XWindowPeer.class, parentWindow);
 
-    if (parentWindowPeer != null)
+    if (parentWindowPeer == null)
     {
-      toolkit = parentWindowPeer.getToolkit();
-      windowPeer = GuiFactory.createWindow(toolkit, parentWindowPeer);
-      windowPeer.setBackground(0xffffffff);
-      window = UnoRuntime.queryInterface(XWindow.class, windowPeer);
+      return;
+    }
 
-      if (window != null)
+    toolkit = parentWindowPeer.getToolkit();
+    windowPeer = GuiFactory.createWindow(toolkit, parentWindowPeer);
+    windowPeer.setBackground(0xffffffff);
+    window = UnoRuntime.queryInterface(XWindow.class, windowPeer);
+
+    if (window != null)
+    {
+      try
       {
 
-        try
+        if (WollMuxSingleton.getInstance().isNoConfig())
         {
+          String text = L.m("WollMux läuft ohne wollmux.conf !\n"
+              + "Aus diesem Grund ist leider nicht der komplette Funktionsumfang verfügbar.");
+          XControl txt = GuiFactory.createLabel(xMCF, context, toolkit, windowPeer,
+              text, new Rectangle(5, 15, 10, 80));
+          layout.add(txt);
+        } else
+        {
+          readWollMuxBarConf(allowUserConfig, conf);
+
           dataModel = GuiFactory.createTreeModel(xMCF, context);
 
           XMutableTreeNode root = dataModel.createNode("Vorlagen", false);
@@ -298,12 +311,13 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
             bkl.getLastChild(), false, confIds);
 
           tree.expandNode(root);
-          window.setVisible(true);
         }
-        catch (Exception ex)
-        {
-          LOGGER.error("", ex);
-        }
+
+        window.setVisible(true);
+      }
+      catch (Exception ex)
+      {
+        LOGGER.error("", ex);
       }
     }
   }
@@ -489,13 +503,13 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       LOGGER.error("", e);
     }
   }
-  
+
   /**
    * Liefert true gdw. das durch button beschriebene Element ein button ist
    * (TYPE-Attribut muss "button" sein) und alle in words enthaltenen strings ohne
    * Beachtung der Groß-/Kleinschreibung im Wert des LABEL-Attributs (das natürlich
    * vorhanden sein muss) vorkommen.
-   * 
+   *
    * @param button
    *          Den ConfigThingy-Knoten, der ein UI-Element beschreibt, wie z.B.
    *          "(TYPE 'button' LABEL 'Hallo' ...)"
@@ -759,7 +773,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         try
         {
           UnoReflect.with(menu).method("clear").invoke();
-          
+
           short n = 0;
           for (String entry : entries)
           {
@@ -788,7 +802,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         e.printStackTrace();
       }
     };
-    
+
     xbutton.addActionListener(xButtonAction);
 
     layout.add(button);
