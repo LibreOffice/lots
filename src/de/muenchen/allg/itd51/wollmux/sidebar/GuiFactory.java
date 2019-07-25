@@ -17,6 +17,7 @@ import com.sun.star.awt.XButton;
 import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlModel;
+import com.sun.star.awt.XFixedText;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
@@ -30,10 +31,12 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.afid.UNO;
+
 /**
- * Die Factory enthält Hilfsfunktionen zum einfacheren Erzeugen von 
- * UNO-Steuerelementen. 
- * 
+ * Die Factory enthält Hilfsfunktionen zum einfacheren Erzeugen von
+ * UNO-Steuerelementen.
+ *
  */
 public class GuiFactory
 {
@@ -44,7 +47,7 @@ public class GuiFactory
   /**
    * Erzeugt ein Fenster ohne Dekorationen. Das Fenster kann als Inhalt eines
    * Sidebar-Panels verwendet werden.
-   * 
+   *
    * @param toolkit
    * @param parentWindow
    * @return
@@ -65,7 +68,7 @@ public class GuiFactory
 
   /**
    * Erzeugt einen Button mit Label und ActionListener.
-   * 
+   *
    * @param xMCF
    * @param context
    * @param toolkit
@@ -92,7 +95,7 @@ public class GuiFactory
 
   /**
    * Erzeugt die Senderbox für die WollMux-Sidebar.
-   * 
+   *
    * @param xMCF
    * @param context
    * @param toolkit
@@ -110,10 +113,10 @@ public class GuiFactory
   {
     XControl buttonCtrl =
       createButton(xMCF, context, toolkit, windowPeer, label, listener, size);
-    
+
     if(buttonCtrl == null)
       throw new Exception();
-    
+
     XControlModel model = buttonCtrl.getModel();
     XPropertySet props = UnoRuntime.queryInterface(XPropertySet.class, model);
     props.setPropertyValue("FocusOnClick", false);
@@ -122,7 +125,7 @@ public class GuiFactory
 
   /**
    * Erzeugt ein Texteingabefeld.
-   * 
+   *
    * @param xMCF
    * @param context
    * @param toolkit
@@ -139,15 +142,40 @@ public class GuiFactory
     XControl buttonCtrl =
       createControl(xMCF, context, toolkit, windowPeer,
         "com.sun.star.awt.UnoControlEdit", null, null, size);
-    
+
     XTextComponent txt = UnoRuntime.queryInterface(XTextComponent.class, buttonCtrl);
     txt.setText(text);
     return buttonCtrl;
   }
 
   /**
+   * Erzeugt ein Label.
+   *
+   * @param xMCF
+   * @param context
+   * @param toolkit
+   * @param windowPeer
+   * @param text
+   * @param size
+   * @return
+   * @throws com.sun.star.uno.Exception
+   */
+  public static XControl createLabel(XMultiComponentFactory xMCF, XComponentContext context,
+      XToolkit toolkit, XWindowPeer windowPeer, String text, Rectangle size)
+  {
+    String[] propNames = new String[] { "MultiLine" };
+    Object[] propValues = new Object[] { Boolean.TRUE };
+    XControl buttonCtrl = createControl(xMCF, context, toolkit, windowPeer,
+        "com.sun.star.awt.UnoControlFixedText", propNames, propValues, size);
+
+    XFixedText txt = UNO.XFixedText(buttonCtrl);
+    txt.setText(text);
+    return buttonCtrl;
+  }
+
+  /**
    * Erzeugt ein Datenmodell für einen Baum-Steuerelement.
-   * 
+   *
    * @param xMCF
    * @param context
    * @return
@@ -160,12 +188,12 @@ public class GuiFactory
       xMCF.createInstanceWithContext("com.sun.star.awt.tree.MutableTreeDataModel",
         context));
   }
-  
+
   /**
    * Erzeugt ein Baum-Steuerelement mit einem vorgegebenen Datenmodell.
    * Das Datenmodel kann mit {@link #createTreeModel(XMultiComponentFactory, XComponentContext)}
    * erzeugt werden.
-   * 
+   *
    * @param xMCF
    * @param context
    * @param toolkit
@@ -185,10 +213,10 @@ public class GuiFactory
     XPropertySet props =
         UnoRuntime.queryInterface(XPropertySet.class, treeCtrl.getModel());
     props.setPropertyValue("DataModel", dataModel);
-    
+
     return treeCtrl;
   }
-  
+
   public static XControl createCombobox(XMultiComponentFactory xMCF,
       XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer, String text, Rectangle size)
   {
@@ -199,16 +227,16 @@ public class GuiFactory
     tf.setText(text);
     XComboBox cmb = UnoRuntime.queryInterface(XComboBox.class, ctrl);
     cmb.setDropDownLineCount((short) 10);
-    
+
     try
     {
       if (ctrl == null)
         throw new NullPointerException();
-      
+
       XControlModel model = ctrl.getModel();
 //        UnoRuntime.queryInterface(XControlModel.class,
 //          xMCF.createInstanceWithContext("com.sun.star.awt.UnoControlComboBoxModel", context));
-      
+
       XPropertySet props =
           UnoRuntime.queryInterface(XPropertySet.class, model);
 
@@ -293,8 +321,8 @@ public class GuiFactory
   }
 
   /**
-   * Ändert die Größe und Position eines Fensters. 
-   * 
+   * Ändert die Größe und Position eines Fensters.
+   *
    * @param window
    * @param posSize
    */
