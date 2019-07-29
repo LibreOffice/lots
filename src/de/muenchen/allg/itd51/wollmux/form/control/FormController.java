@@ -9,13 +9,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
+import de.muenchen.allg.itd51.wollmux.core.form.model.Control;
 import de.muenchen.allg.itd51.wollmux.core.form.model.FormModel;
+import de.muenchen.allg.itd51.wollmux.core.form.model.Tab;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
@@ -296,6 +299,20 @@ public class FormController
       }
     };
     gui.createGUI(runner);
+  }
+
+  /**
+   * Schreibt die Werte in die GUI und stößt dadurch auch eine aktualisierung des Dokumentes an.
+   */
+  public void initValues()
+  {
+    for (Map.Entry<String, Tab> entry : model.getTabs().entrySet())
+    {
+      for (Control control : entry.getValue().getControls())
+      {
+        setValue(control.getId(), control.getValue(), null);
+      }
+    }
   }
 
   /**

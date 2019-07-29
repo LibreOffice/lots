@@ -308,7 +308,6 @@ public class GUI
       mainPanel.add(component, gbc);
       gbc.gridwidth -= compoWidthIncrement; // wieder abziehen, weil Objekt ja shared ist
 
-      uiElement.setString(control.getValue());
       uiElement.setVisible(visible);
       if (!control.isOkay())
       {
