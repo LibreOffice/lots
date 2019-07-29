@@ -11,7 +11,6 @@ import com.sun.star.ui.dialogs.XWizardController;
 import com.sun.star.ui.dialogs.XWizardPage;
 
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 
 public class DatensatzBearbeitenWizardController implements XWizardController
 {
@@ -20,7 +19,6 @@ public class DatensatzBearbeitenWizardController implements XWizardController
   private static final int PAGE_COUNT = 3;
   private XWizardPage[] pages = new XWizardPage[PAGE_COUNT];
   private DJDataset dataset;
-  private Dataset ldapDataset;
   private List<String> dbSchema;
 
   protected static final short[] PATHS = { 0, 1, 2 };
@@ -34,11 +32,10 @@ public class DatensatzBearbeitenWizardController implements XWizardController
 
   private String[] title = { "Person", "Orga", "Fusszeile" };
 
-  public DatensatzBearbeitenWizardController(DJDataset dataset, Dataset ldapDataset,
+  public DatensatzBearbeitenWizardController(DJDataset dataset,
       List<String> dbSchema)
   {
     this.dataset = dataset;
-    this.ldapDataset = ldapDataset;
     this.dbSchema = dbSchema;
   }
 
@@ -65,15 +62,15 @@ public class DatensatzBearbeitenWizardController implements XWizardController
       switch (getPageId(arg1))
       {
       case PERSON:
-        page = new DatensatzBearbeitenPersonWizardPage(arg0, arg1, dataset, ldapDataset, dbSchema);
+        page = new DatensatzBearbeitenPersonWizardPage(arg0, arg1, dataset, dbSchema);
         break;
         
       case ORGA:
-        page = new DatensatzBearbeitenOrgaWizardPage(arg0, arg1, dataset, ldapDataset, dbSchema);
+        page = new DatensatzBearbeitenOrgaWizardPage(arg0, arg1, dataset, dbSchema);
         break;
         
       case FUSSZEILE:
-        page = new DatensatzBearbeitenFusszeileWizardPage(arg0, arg1, dataset, ldapDataset, dbSchema);
+        page = new DatensatzBearbeitenFusszeileWizardPage(arg0, arg1, dataset, dbSchema);
         break;
       }
       pages[arg1] = page;

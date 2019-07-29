@@ -15,7 +15,6 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 
 public class DatensatzBearbeitenFusszeileWizardPage extends DatensatzBearbeitenBaseWizardPage
 {
@@ -23,10 +22,10 @@ public class DatensatzBearbeitenFusszeileWizardPage extends DatensatzBearbeitenB
       .getLogger(DatensatzBearbeitenFusszeileWizardPage.class);
 
   public DatensatzBearbeitenFusszeileWizardPage(XWindow parentWindow, short pageId,
-      DJDataset dataset, Dataset ldapDataset, List<String> dbSchema)
+      DJDataset dataset, List<String> dbSchema)
       throws Exception
   {
-    super(pageId, parentWindow, "DatensatzBearbeitenFusszeile", dataset, ldapDataset, dbSchema);
+    super(pageId, parentWindow, "DatensatzBearbeitenFusszeile", dataset, dbSchema);
 
     try
     {

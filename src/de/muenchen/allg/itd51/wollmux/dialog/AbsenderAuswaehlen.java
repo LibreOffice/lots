@@ -54,15 +54,13 @@ import com.sun.star.awt.XWindowPeer;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.core.db.Search;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
@@ -196,24 +194,33 @@ public class AbsenderAuswaehlen
 
     for (Dataset dataset : dj.getLOS())
     {
-      DJDataset ds = (DJDataset) dataset;
+      boolean valueChanged = false;
+      LOSDJDataset ds = (LOSDJDataset) dataset;
 
-      Dataset ldapDataset = null;
+      if (ds.getLOS() != null && !ds.getLOS().isEmpty())
+      {
+        for (String attribute : dj.getMainDatasourceSchema())
+        {
+          if (ds.isDifferentFromLdapDataset(attribute, ds))
+          {
+            valueChanged = true;
+            break;
+          } else
+          {
+            valueChanged = false;
+          }
+        }
 
-      try
-      {
-        ldapDataset = dj.getCachedLdapResultByOID(dataset.get("OID"));
-      } catch (ColumnNotFoundException e)
-      {
-        LOGGER.error("", e);
       }
 
-      if (dj.getCachedLdapResults() != null && ldapDataset != null && Search
-          .hasLDAPDataChanged(dataset, ldapDataset, DatasourceJoinerFactory.getDatasourceJoiner()))
+      if (valueChanged)
+      {
         absAuswahl.addItem("* " + ds.toString(), (short) count);
-      else
+      } else
+      {
         absAuswahl.addItem(ds.toString(), (short) count);
-
+      }
+      
       elements.add(ds);
       if (ds.isSelectedDataset())
         itemToHightlightPos = (short) count;
@@ -223,5 +230,4 @@ public class AbsenderAuswaehlen
 
     absAuswahl.selectItemPos(itemToHightlightPos, true);
   }
-
 }
