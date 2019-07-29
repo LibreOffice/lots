@@ -449,12 +449,19 @@ public class PersoenlicheAbsenderlisteVerwalten
     WollMuxEventHandler.getInstance().handlePALChangedNotify();
   }
 
-  private AbstractActionListener editBtnActionListener = event -> editEntry();
+  private AbstractActionListener editBtnActionListener = event -> editEntry(
+      palListe.getSelectedItemPos());
 
-  private void editEntry()
+  private void editEntry(short index)
   {
-    short selectedPos = palListe.getSelectedItemPos();
-    DJDataset djDataset = cachedPAL.get(selectedPos);
+    if (index == -1)
+    {
+      LOGGER.debug(
+          "PersoenlicheAbsenderListe: editEntry(): index -1 is not a valid value.returning..");
+      return;
+    }
+
+    DJDataset djDataset = cachedPAL.get(index);
 
     Dataset ldapDataset = null;
     try
@@ -513,7 +520,9 @@ public class PersoenlicheAbsenderlisteVerwalten
     DJDataset newDataset = dj.newDataset();
 
     cachedPAL.add(newDataset);
-    palListe.addItem("Neuer Datensatz", (short) (palListe.getItemCount() + 1));
+    short newItemIndex = (palListe.getItemCount());
+    palListe.addItem("Neuer Datensatz", newItemIndex);
+    editEntry(newItemIndex);
   };
 
   private AbstractActionListener abortBtnActionListener = event -> {
@@ -523,7 +532,15 @@ public class PersoenlicheAbsenderlisteVerwalten
   };
 
   private AbstractActionListener okActionListener = event -> {
-    DJDataset selectedDataset = cachedPAL.get(palListe.getSelectedItemPos());
+    int selectedIndex = palListe.getSelectedItemPos();
+
+    if (selectedIndex == -1)
+    {
+      dialog.endExecute();
+      return;
+    }
+
+    DJDataset selectedDataset = cachedPAL.get(selectedIndex);
 
     if (selectedDataset == null)
     {
@@ -579,9 +596,9 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (ldapSearchResults == null)
     {
       InfoDialog.showInfoModal("Fehler.",
-          "Das Bearbeiten Ihrer Suchanfrage hat zu lange gedauert und wurde deshalb abgebrochen.\n"
-              + "Grund hierfür könnte ein Problem mit der Datenquelle sein oder mit dem verwendeten\n"
-              + "Suchbegriff, der auf zu viele Ergebnisse zutrifft.\n"
+          "Das Bearbeiten Ihrer Suchanfrage hat zu lange gedauert und wurde deshalb abgebrochen."
+              + "Grund hierfür könnte ein Problem mit der Datenquelle sein oder mit dem verwendeten"
+              + "Suchbegriff, der auf zu viele Ergebnisse zutrifft."
               + "Bitte versuchen Sie eine andere, präzisere Suchanfrage.");
 
     } else if (ldapSearchResults.isEmpty())
