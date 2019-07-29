@@ -1,6 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 import java.beans.PropertyChangeEvent;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ public class OnProcessTextDocument extends BasicEvent
 {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(OnProcessTextDocument.class);
-  
+
   TextDocumentController documentController;
 
   boolean visible;
@@ -109,11 +110,12 @@ public class OnProcessTextDocument extends BasicEvent
           DocumentManager.getDocumentManager().setFormModel(documentController.getModel().doc,
               formController);
           formController.startFormGUI();
+          formController.initValues();
           formController.formControllerInitCompleted();
-          
+
           formController.focusGained(formController.getFieldId());
 
-          formController.addPropertyChangeListener((PropertyChangeEvent e) -> formController.focusGained( formController.getFieldId()));          
+          formController.addPropertyChangeListener((PropertyChangeEvent e) -> formController.focusGained( formController.getFieldId()));
         } catch (FormModelException e)
         {
           throw new WMCommandsFailedException(
