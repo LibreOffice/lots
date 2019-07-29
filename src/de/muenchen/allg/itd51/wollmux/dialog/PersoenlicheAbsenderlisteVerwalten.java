@@ -596,9 +596,9 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (ldapSearchResults == null)
     {
       InfoDialog.showInfoModal("Fehler.",
-          "Das Bearbeiten Ihrer Suchanfrage hat zu lange gedauert und wurde deshalb abgebrochen."
-              + "Grund hierfür könnte ein Problem mit der Datenquelle sein oder mit dem verwendeten"
-              + "Suchbegriff, der auf zu viele Ergebnisse zutrifft."
+          "Das Bearbeiten Ihrer Suchanfrage hat zu lange gedauert und wurde deshalb abgebrochen. "
+              + "Grund hierfür könnte ein Problem mit der Datenquelle sein oder mit dem verwendeten "
+              + "Suchbegriff, der auf zu viele Ergebnisse zutrifft. "
               + "Bitte versuchen Sie eine andere, präzisere Suchanfrage.");
 
     } else if (ldapSearchResults.isEmpty())
