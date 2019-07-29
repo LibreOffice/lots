@@ -17,7 +17,6 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 
 public class DatensatzBearbeitenPersonWizardPage extends DatensatzBearbeitenBaseWizardPage
 {
@@ -25,9 +24,9 @@ public class DatensatzBearbeitenPersonWizardPage extends DatensatzBearbeitenBase
       .getLogger(DatensatzBearbeitenPersonWizardPage.class);
 
   public DatensatzBearbeitenPersonWizardPage(XWindow parentWindow, short pageId, DJDataset dataset,
-      Dataset ldapDataset, List<String> dbSchema) throws Exception
+      List<String> dbSchema) throws Exception
   {
-    super(pageId, parentWindow, "DatensatzBearbeitenPerson", dataset, ldapDataset, dbSchema);
+    super(pageId, parentWindow, "DatensatzBearbeitenPerson", dataset, dbSchema);
 
     XControlContainer controlContainerPerson = UnoRuntime.queryInterface(XControlContainer.class,
         window);

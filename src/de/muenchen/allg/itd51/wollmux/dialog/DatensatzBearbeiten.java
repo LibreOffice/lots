@@ -58,7 +58,6 @@ import com.sun.star.ui.dialogs.XWizard;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 
@@ -84,11 +83,11 @@ public class DatensatzBearbeiten
    * @param edit
    * @throws ConfigurationErrorException
    */
-  protected DatensatzBearbeiten(DJDataset datensatz, Dataset ldapDataset, List<String> dbSchema)
+  protected DatensatzBearbeiten(DJDataset datensatz, List<String> dbSchema)
   {
     wizard = Wizard.createSinglePathWizard(UNO.defaultContext,
         DatensatzBearbeitenWizardController.PATHS,
-        new DatensatzBearbeitenWizardController(datensatz, ldapDataset, dbSchema));
+        new DatensatzBearbeitenWizardController(datensatz, dbSchema));
       wizard.enableButton(WizardButton.HELP, false);
       wizard.setTitle("Datensatz bearbeiten");
   }

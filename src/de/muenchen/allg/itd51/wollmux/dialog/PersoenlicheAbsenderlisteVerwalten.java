@@ -86,8 +86,8 @@ import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.core.db.Search;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
@@ -257,23 +257,32 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     for (Dataset dataset : dj.getLOS())
     {
-      DJDataset ds = (DJDataset) dataset;
+      boolean valueChanged = false;
+      LOSDJDataset ds = (LOSDJDataset) dataset;
 
-      Dataset ldapDataset = null;
-      try
+      if (ds.getLOS() != null && !ds.getLOS().isEmpty())
       {
-        ldapDataset = dj.getCachedLdapResultByOID(dataset.get("OID"));
-      } catch (ColumnNotFoundException e)
-      {
-        LOGGER.error("", e);
+        for (String attribute : dj.getMainDatasourceSchema())
+        {
+          if (ds.isDifferentFromLdapDataset(attribute, ds))
+          {
+            valueChanged = true;
+            break;
+          } else
+          {
+            valueChanged = false;
+          }
+        }
       }
 
-      if (dj.getCachedLdapResults() != null && Search.hasLDAPDataChanged(dataset, ldapDataset,
-          DatasourceJoinerFactory.getDatasourceJoiner()))
+      if (valueChanged)
+      {
         palListe.addItem("* " + ds.toString(), (short) count);
-      else
+      } else
+      {
         palListe.addItem(ds.toString(), (short) count);
-
+      }
+      
       cachedPAL.add(ds);
 
       if (ds.isSelectedDataset())
@@ -384,32 +393,60 @@ public class PersoenlicheAbsenderlisteVerwalten
     for (short index : selectedItemsPos)
     {
       DJDataset dsToAdd = resultDJDatasetList.get(index);
+      
+      if (!dj.getLOS().isEmpty()) 
+      {
+        for (Dataset ds : dj.getLOS())
+        {
+          try
+          {
+            if (ds.get("OID").equals(dsToAdd.get("OID"))) {
+              short res = InfoDialog.showYesNoModal("PAL",
+                  "Datensatz ist bereits in der Absenderliste vorhanden, Datensatz trotzdem erneut speichern?");
+  
+              if (res == MessageBoxResults.YES)
+              {
+                entriesToAdd.add(dsToAdd);
+                break;
+              } 
+            } else
+            {
+              entriesToAdd.add(dsToAdd);
+              break;
+            }
+          } catch (ColumnNotFoundException e)
+          {
+            LOGGER.error("", e);
+          }
+        }
+      } else 
+      {
+        entriesToAdd.add(dsToAdd);
+      }
+    }
 
+    for (DJDataset entry : entriesToAdd)
+    {
       try
       {
-        if (dj.getOIDsFromLOS().contains(dsToAdd.get("OID")))
+        // Es kann im produktiven LDAP eigentlich nicht vorkommen das OID leer oder '*'
+        // ist (Pflichtfeld produktiv, wird automatisch beim Anlegen eines neuen Users erzeugt).
+        // Der LDAP im Entwicklungs und Testnetz lässt das allerdings zu, die LDAP-Abfrage bei
+        // nicht gesetzter OID ist dann eine wildcard-Abfrage (*), es tauchen dann daher
+        // alle User in der PAL auf.
+        // Wildcard-Suche ist daher erlaubt, in die PAL übernehmen jedoch nicht.
+        String oid = entry.get("OID");
+        if (oid == null || oid.isEmpty() || "*".equals(oid))
         {
-          short res = InfoDialog.showYesNoModal("PAL",
-              "Datensatz ist bereits in der Absenderliste vorhanden, Datensatz trotzdem erneut speichern?");
-
-          if (res == MessageBoxResults.YES)
-          {
-            entriesToAdd.add(dsToAdd);
-          }
-        } else
-        {
-          entriesToAdd.add(dsToAdd);
+          InfoDialog.showInfoModal("Fehler.", "Der Datensatz enthält keine gültige OID und wird "
+              + "daher nicht in die PAL übernommen.");
+          continue;
         }
       } catch (ColumnNotFoundException e)
       {
         LOGGER.error("", e);
       }
-      
-      dj.addCachedLdapResult(dsToAdd);
-    }
 
-    for (DJDataset entry : entriesToAdd)
-    {
       entry.copy();
     }
     
@@ -463,17 +500,7 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     DJDataset djDataset = cachedPAL.get(index);
 
-    Dataset ldapDataset = null;
-    try
-    {
-      ldapDataset = dj.getCachedLdapResultByOID(djDataset.get("OID"));
-    } catch (ColumnNotFoundException e)
-    {
-      LOGGER.error("", e);
-    }
-
-    DatensatzBearbeiten editDSWizard = new DatensatzBearbeiten(djDataset, ldapDataset,
-        dj.getMainDatasourceSchema());
+    DatensatzBearbeiten editDSWizard = new DatensatzBearbeiten(djDataset, dj.getMainDatasourceSchema());
 
     short result = editDSWizard.executeWizard();
 

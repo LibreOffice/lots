@@ -55,9 +55,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +68,6 @@ import com.sun.star.util.XChangesBatch;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.itd51.wollmux.core.db.AsyncLdapSearch;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -153,67 +150,51 @@ public class WollMuxSingleton
       successfulStartup = false;
     } else
     {
-      // Cachen der aktuellen Datensätze von LDAP anhand PAL-Liste (OIDs). Wird später von
-      // AbsenderAuswaehlen- ,
-      // PAL- und DatensatzBearbeiten-Dialog benötigt um dem User eine Synchronisation aktueller
-      // Datensätze
-      // zu ermöglichen.
-
-      Map<String, String> searchQuery = new HashMap<>();
-      for (String oid : DatasourceJoinerFactory.getDatasourceJoiner().getOIDsFromLOS())
+      // Initialisiere EventProcessor
+      WollMuxEventHandler.getInstance().setAcceptEvents(successfulStartup);
+  
+      // register global EventListener
+      try
       {
-        searchQuery.put("OID", oid);
+        XEventBroadcaster eventBroadcaster = UNO.XEventBroadcaster(ctx.getServiceManager()
+            .createInstanceWithContext("com.sun.star.frame.GlobalEventBroadcaster", ctx));
+        eventBroadcaster
+            .addEventListener(new GlobalEventListener(DocumentManager.getDocumentManager()));
+      } catch (Exception e)
+      {
+        LOGGER.error("", e);
       }
-
-      AsyncLdapSearch ldapSearchAsync = new AsyncLdapSearch(searchQuery,
-          DatasourceJoinerFactory.getDatasourceJoiner());
-      ldapSearchAsync.runLdapSearchAsync()
-          .thenAcceptAsync(
-              result -> DatasourceJoinerFactory.getDatasourceJoiner().setCachedLdapResults(result));
+  
+      /*
+       * FIXME: Darf nur im Falle des externen WollMux gemacht werden, da ansonsten endlosschleifen
+       * mit dem ProtocolHandler möglich sind. Evtl. auch lösbar dadurch, dass URLS, die mit
+       * ignorecase("wollmux:") anfangen, niemals an den Slave delegiert werden. Ist aber nicht so
+       * schön als Lösung. UNO.XDispatchProviderInterception
+       * (UNO.desktop).registerDispatchProviderInterceptor( DispatchHandler.globalWollMuxDispatches);
+       */
+  
+      // setzen von shortcuts
+      ConfigThingy tastenkuerzel = new ConfigThingy("");
+      try
+      {
+        tastenkuerzel = WollMuxFiles.getWollmuxConf().query("Tastenkuerzel").getLastChild();
+      } catch (NodeNotFoundException e)
+      {
+        LOGGER.error("", e);
+      }
+      
+      try
+      {
+        Shortcuts.createShortcuts(tastenkuerzel);
+      } catch (Exception e)
+      {
+        LOGGER.error("", e);
+      }
+  
+      // Setzen der in den Abschnitten OOoEinstellungen eingestellten
+      // Konfigurationsoptionen
+      this.setOOoConfiguration(WollMuxFiles.getWollmuxConf().query("OOoEinstellungen"));
     }
-
-    // Initialisiere EventProcessor
-    WollMuxEventHandler.getInstance().setAcceptEvents(successfulStartup);
-
-    // register global EventListener
-    try
-    {
-      XEventBroadcaster eventBroadcaster = UNO.XEventBroadcaster(ctx.getServiceManager()
-          .createInstanceWithContext("com.sun.star.frame.GlobalEventBroadcaster", ctx));
-      eventBroadcaster
-          .addEventListener(new GlobalEventListener(DocumentManager.getDocumentManager()));
-    } catch (Exception e)
-    {
-      LOGGER.error("", e);
-    }
-
-    /*
-     * FIXME: Darf nur im Falle des externen WollMux gemacht werden, da ansonsten endlosschleifen
-     * mit dem ProtocolHandler möglich sind. Evtl. auch lösbar dadurch, dass URLS, die mit
-     * ignorecase("wollmux:") anfangen, niemals an den Slave delegiert werden. Ist aber nicht so
-     * schön als Lösung. UNO.XDispatchProviderInterception
-     * (UNO.desktop).registerDispatchProviderInterceptor( DispatchHandler.globalWollMuxDispatches);
-     */
-
-    // setzen von shortcuts
-    ConfigThingy tastenkuerzel = new ConfigThingy("");
-    try
-    {
-      tastenkuerzel = WollMuxFiles.getWollmuxConf().query("Tastenkuerzel").getLastChild();
-    } catch (NodeNotFoundException e)
-    {
-    }
-    try
-    {
-      Shortcuts.createShortcuts(tastenkuerzel);
-    } catch (Exception e)
-    {
-      LOGGER.error("", e);
-    }
-
-    // Setzen der in den Abschnitten OOoEinstellungen eingestellten
-    // Konfigurationsoptionen
-    this.setOOoConfiguration(WollMuxFiles.getWollmuxConf().query("OOoEinstellungen"));
   }
 
   private void setOOoConfiguration(ConfigThingy oooEinstellungenConf)

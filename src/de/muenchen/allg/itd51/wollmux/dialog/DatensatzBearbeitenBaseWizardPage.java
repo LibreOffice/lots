@@ -25,7 +25,7 @@ import com.sun.star.uno.Exception;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
@@ -36,19 +36,17 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
 {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(DatensatzBearbeitenBaseWizardPage.class);
-  protected DJDataset dataset;
-  protected Dataset ldapDataset;
+  protected LOSDJDataset dataset;
   protected List<String> dbSchema;
   private XControlContainer controlContainer;
   private short selectedItemIndex = 0;
   private static final String TEXT_COLOR = "TextColor";
 
   public DatensatzBearbeitenBaseWizardPage(short pageId, XWindow parentWindow, String dialogName,
-      DJDataset dataset, Dataset ldapDataset, List<String> dbSchema) throws Exception
+      DJDataset dataset, List<String> dbSchema) throws Exception
   {
     super(pageId, parentWindow, dialogName);
-    this.dataset = dataset;
-    this.ldapDataset = ldapDataset;
+    this.dataset = (LOSDJDataset) dataset;
     this.dbSchema = dbSchema;
   }
 
@@ -68,6 +66,13 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
 
     XControl xControl = this.controlContainer.getControl("btn" + columnName);
 
+    if (xControl == null)
+    {
+      LOGGER
+          .debug("DatensatzBearbeitenBaseWizardPage: showAcceptLdapValueButton: xControl is NULL.");
+      return;
+    }
+
     XPropertySet props = UNO.XPropertySet(xControl.getModel());
 
     try
@@ -80,27 +85,15 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
     }
   }
 
-  protected boolean isDifferentFromLdapDataset(String columnName)
-  {
-    try
-    {
-      if (ldapDataset == null)
-        return false;
+  protected boolean isDifferentFromLdapDataset(String columnName) {
+    LOSDJDataset losDJ = dataset;
+    String losValue = losDJ.getLOS().get(columnName);
+    String bsValue = losDJ.getBS().get(columnName);
 
-      String datasetValue = dataset.get(columnName);
-      String ldapDSValue = ldapDataset.get(columnName);
-
-      if ((ldapDSValue == null && datasetValue != null && !datasetValue.isEmpty())
-          || ldapDSValue != null && datasetValue != null && !ldapDSValue.equals(datasetValue))
-      {
-        return true;
-      }
-    } catch (ColumnNotFoundException e1)
-    {
-      LOGGER.error("", e1);
-    }
-
-    return false;
+    if (losValue == null || losValue.isEmpty() || bsValue == null || bsValue.isEmpty())
+      return false;
+    else
+      return !losValue.equals(bsValue);
   }
 
   protected void setTextColor(XControl xControl, int textColor)
@@ -153,7 +146,7 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
         if (xTextComponent == null)
           return;
 
-        String ldapValue = ldapDataset.get(buttonLabel);
+        String ldapValue = dataset.getBS().get(buttonLabel);
         
         int res = 0;
         
@@ -177,7 +170,7 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
           setTextColor(targetTextField, 00000000);
         }
 
-      } catch (UnknownPropertyException | WrappedTargetException | ColumnNotFoundException e)
+      } catch (UnknownPropertyException | WrappedTargetException e)
       {
         LOGGER.error("", e);
       }
