@@ -105,10 +105,6 @@ public class IfThenElseDialog
   private XTextComponent txtValue;
 
   private XComboBox cbSerienbrieffeld;
-
-  private XButton newConditionBtn;
-
-  private XButton removeConditionBtn;
   
   private XMutableTreeNode selectedNode;
   
@@ -124,9 +120,13 @@ public class IfThenElseDialog
   
   private TextDocumentController documentController;
 
-  private int firstControlX, firstControlY;
+  private int firstControlX; 
+  
+  private int firstControlY;
 
-  private int txtControlX, txtControlY;
+  private int txtControlX;
+  
+  private int txtControlY;
 
   private static final String WENN = "WENN";
   
@@ -215,7 +215,7 @@ public class IfThenElseDialog
     
     window.setPosSize(30, 30, 600, 600, PosSize.SIZE);
 
-    removeConditionBtn = UNO.XButton(controlContainer.getControl("removeConditionBtn"));
+    XButton removeConditionBtn = UNO.XButton(controlContainer.getControl("removeConditionBtn"));
     XPropertySet btnRemoveProps = UNO.XPropertySet(UNO.XControl(removeConditionBtn).getModel());
     try
     {
@@ -228,7 +228,7 @@ public class IfThenElseDialog
     }
     removeConditionBtn.addActionListener(removeConditionBtnActionListener);
 
-    newConditionBtn = UNO.XButton(controlContainer.getControl("newConditionBtn"));
+    XButton newConditionBtn = UNO.XButton(controlContainer.getControl("newConditionBtn"));
     XPropertySet btnNewConditionProps = UNO.XPropertySet(UNO.XControl(newConditionBtn).getModel());
     try
     {
@@ -252,9 +252,8 @@ public class IfThenElseDialog
     firstControlY = rect.Y;
     firstControlX = rect.X;
 
-    params.fieldNames.forEach(fieldName -> {
-      cbSerienbrieffeld.addItem(fieldName, (short) (cbSerienbrieffeld.getItemCount() + 1));
-    });
+    params.fieldNames.forEach(fieldName -> cbSerienbrieffeld.addItem(fieldName,
+        (short) (cbSerienbrieffeld.getItemCount() + 1)));
 
     cbWennComperator = UNO.XComboBox(controlContainer.getControl("cbWennComporator"));
     testTypes.forEach(item -> cbWennComperator.addItem(item.label,
@@ -314,9 +313,7 @@ public class IfThenElseDialog
     } 
   }
   
-  private AbstractActionListener removeConditionBtnActionListener = event -> {
-    removeNode();
-  };
+  private AbstractActionListener removeConditionBtnActionListener = event -> removeNode();
 
   private AbstractActionListener newConditionBtnActionListener = event -> {
     String not = cbWennNot.getItem((short) 0);
@@ -422,41 +419,34 @@ public class IfThenElseDialog
         break;
       }
     }
-  };
-  
-  private void activeWennControls(boolean active)
-  {
-    UNO.XWindow(cbWennNot).setVisible(active);
-    UNO.XWindow(cbWennComperator).setVisible(active);
-    UNO.XWindow(cbSerienbrieffeld).setVisible(active);
-  }
 
-  
-  /*
-   * Control tauschen um unnötigen freien Bereich bei ausgeblendeten Controls zu vermeiden.
-   *
-   * WENN-Layout ([----] = Control):
-   * [----] (Serienbrieffeld)
-   * [----] (NOT-Combobox)
-   * [----] (Comparator-ComboBox)
-   * [----] (TextFeld)
-   *   ...
-   * 
-   * DANN/SONST-Layout:
-   * [----] (TextFeld)
-   *   ...
-   * Serienbrieffeld, NOT-CB und Comparator-CB sind ausgeblendet, TextFeld wird daher nach oben verschoben. 
-   */
-  private void setPosition(boolean active)
-  {
-    if (active == false)
+    /*
+     * Control tauschen um unnötigen freien Bereich bei ausgeblendeten Controls zu vermeiden.
+     *
+     * WENN-Layout ([----] = Control): [----] (Serienbrieffeld) [----] (NOT-Combobox) [----]
+     * (Comparator-ComboBox) [----] (TextFeld) ...
+     * 
+     * DANN/SONST-Layout: [----] (TextFeld) ... Serienbrieffeld, NOT-CB und Comparator-CB sind
+     * ausgeblendet, TextFeld wird daher nach oben verschoben.
+     */
+    private void setPosition(boolean active)
     {
-      UNO.XWindow(txtValue).setPosSize(firstControlX, firstControlY, 0, 0, PosSize.POS);
-    } else
-    {
-      UNO.XWindow(txtValue).setPosSize(txtControlX, txtControlY, 0, 0, PosSize.POS);
+      if (!active)
+      {
+        UNO.XWindow(txtValue).setPosSize(firstControlX, firstControlY, 0, 0, PosSize.POS);
+      } else
+      {
+        UNO.XWindow(txtValue).setPosSize(txtControlX, txtControlY, 0, 0, PosSize.POS);
+      }
     }
-  }
+
+    private void activeWennControls(boolean active)
+    {
+      UNO.XWindow(cbWennNot).setVisible(active);
+      UNO.XWindow(cbWennComperator).setVisible(active);
+      UNO.XWindow(cbSerienbrieffeld).setVisible(active);
+    }
+  };
   
   private String[] nodeDataValueToStringArray(XMutableTreeNode node) {
     Object[] data = (Object[]) node.getDataValue();
