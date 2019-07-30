@@ -216,29 +216,9 @@ public class IfThenElseDialog
     window.setPosSize(30, 30, 600, 600, PosSize.SIZE);
 
     XButton removeConditionBtn = UNO.XButton(controlContainer.getControl("removeConditionBtn"));
-    XPropertySet btnRemoveProps = UNO.XPropertySet(UNO.XControl(removeConditionBtn).getModel());
-    try
-    {
-      btnRemoveProps.setPropertyValue("ImageURL", imgLocation + "minus.png");
-      btnRemoveProps.setPropertyValue("ImageAlign", 2);
-    } catch (com.sun.star.lang.IllegalArgumentException | UnknownPropertyException
-        | PropertyVetoException | WrappedTargetException e)
-    {
-      LOGGER.error("", e);
-    }
     removeConditionBtn.addActionListener(removeConditionBtnActionListener);
 
     XButton newConditionBtn = UNO.XButton(controlContainer.getControl("newConditionBtn"));
-    XPropertySet btnNewConditionProps = UNO.XPropertySet(UNO.XControl(newConditionBtn).getModel());
-    try
-    {
-      btnNewConditionProps.setPropertyValue("ImageURL", imgLocation + "add.png");
-      btnNewConditionProps.setPropertyValue("ImageAlign", 2);
-    } catch (com.sun.star.lang.IllegalArgumentException | UnknownPropertyException
-        | PropertyVetoException | WrappedTargetException e)
-    {
-      LOGGER.error("", e);
-    }
     newConditionBtn.addActionListener(newConditionBtnActionListener);
     
     cbSerienbrieffeld = UNO
