@@ -146,61 +146,6 @@ public class MailMergeNew
   }
 
   /**
-   * Öffnet den Dialog zum Einfügen eines Spezialfeldes, das über die Funktion
-   * trafoConf beschrieben ist, erzeugt daraus ein transformiertes Feld und fügt
-   * dieses Feld in das Dokument mod ein; Es erwartet darüber hinaus den Namen des
-   * Buttons buttonName, aus dem das Label des Dialogs, und später der Mouse-Over
-   * hint erzeugt wird und die Liste der aktuellen Felder, die evtl. im Dialog zur
-   * Verfügung stehen sollen.
-   *
-   * @param fieldNames
-   *          Eine Liste der Feldnamen, die der Dialog anzeigt, falls er Buttons zum
-   *          Einfügen von Serienbrieffeldern bereitstellt.
-   * @param buttonName
-   *          Der Name des Buttons, aus dem die Titelzeile des Dialogs und der
-   *          Mouse-Over Hint des neu erzeugten Formularfeldes generiert wird.
-   * @param trafoConf
-   *          ConfigThingy, das die Funktion und damit den aufzurufenden Dialog
-   *          spezifiziert. Der von den Dialogen benötigte äußere Knoten
-   *          "Func(...trafoConf...) wird dabei von dieser Methode erzeugt, so dass
-   *          trafoConf nur die eigentliche Funktion darstellen muss.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public void insertFieldFromTrafoDialog(List<String> fieldNames,
-      final String buttonName, ConfigThingy trafoConf)
-  {
-    TrafoDialogParameters params = new TrafoDialogParameters();
-    params.conf = new ConfigThingy("Func");
-    params.conf.addChild(trafoConf);
-    params.isValid = true;
-    params.fieldNames = fieldNames;
-    params.closeAction = event -> {
-      TrafoDialog dialog = (TrafoDialog) event.getSource();
-      TrafoDialogParameters status = dialog.getExitStatus();
-      if (status.isValid)
-      {
-        try
-        {
-          documentController.replaceSelectionWithTrafoField(status.conf, buttonName);
-        } catch (Exception x)
-        {
-          LOGGER.error("", x);
-        }
-      }
-    };
-
-    try
-    {
-      TrafoDialogFactory.createDialog(params).show(L.m("Spezialfeld %1 einfügen", buttonName));
-    }
-    catch (UnavailableException e)
-    {
-      LOGGER.error(L.m("Das darf nicht passieren!"));
-    }
-  }
-
-  /**
    * Prüft, ob sich in der akutellen Selektion ein transformiertes Feld befindet und
    * liefert ein mit Hilfe der TrafoDialogFactory erzeugtes zugehöriges
    * TrafoDialog-Objekt zurück, oder null, wenn keine transformierte Funktion
