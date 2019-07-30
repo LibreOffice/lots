@@ -199,6 +199,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
         {
         case 0:
           break;
+
         case 1:
           // ConfigThingy für leere Gender-Funktion zusammenbauen.
           ConfigThingy genderConf = GenderDialog
@@ -219,25 +220,19 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
           paramsIfThenElse.fieldNames = mailMerge.getDs().getColumnNames();
           new IfThenElseDialog(paramsIfThenElse, textDocumentController);
           break;
-        case 3:
 
+        case 3:
           textDocumentController.insertMailMergeFieldAtCursorPosition(MailMergeController.TAG_DATENSATZNUMMER);
           break;
+
         case 4:
           textDocumentController.insertMailMergeFieldAtCursorPosition(MailMergeController.TAG_SERIENBRIEFNUMMER);
           break;
+
         case 5:
           textDocumentController.insertNextDatasetFieldAtCursorPosition();
           break;
-        case 6:
-          boolean hasUnmappedFields = mailMerge.getDs()
-              .checkUnmappedFields(mailMerge.getDs().getColumnNames());
 
-          if (hasUnmappedFields)
-          {
-            // TODO: richtigen Dialog öffnen (PR von Björn)
-          }
-          break;
         default:
           break;
         }
