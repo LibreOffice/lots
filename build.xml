@@ -54,7 +54,7 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 	<property name="UPDATE_XML" value="${LHM_DIR}/${COMPONENT}.update.xml" />
 	<property name="VERSION_FILE" value="${MISC}/version"/>
 	<property name="CHANGELOG_FILE" value="doc/ChangeLog"/>
-	<property name="WOLLMUX_WIKI_URL" value="https://www.wollmux.net/wiki" />
+	<property name="WOLLMUX_WIKI_URL" value="http://www.wollmux.org" />
 
 	<property name="MY_CLASSES" value="bin" />
 
@@ -125,73 +125,6 @@ bumpversion: Auto-generates lhmdeb/changelog with the correct version.
 		<exec executable="bash">
 		  <arg line="misc/bumpversion lhmdeb/changelog ${DEB_VERSION}"/>
 		</exec>
-	</target>
-	
-	<target name="documentation">
-		<!-- Download all pages belonging to the WollMux manual category --> 
-		<get dest="${DOC_DIR}">
-			<resourcelist>
-				<url url="${WOLLMUX_WIKI_URL}/index.php?title=Spezial:Exportieren&amp;action=submit&amp;catname=Handbuch_des_WollMux&amp;addcat=Hinzuf%C3%BCgen&amp;wpDownload=1" />
-				<filterchain>
-					<replaceregex pattern='.*&lt;.*textarea name="pages"[^>]*>\n([^&lt;]*).*' replace="\1" flags="gis" byline="false" />
-					<tokenfilter>
-						<linetokenizer />
-						<replaceregex pattern='^' replace='${WOLLMUX_WIKI_URL}/' />
-					</tokenfilter>
-				</filterchain>
-			</resourcelist>
-		</get>
-
-		<!-- Modify downloaded files for offline usage -->
-		<!-- Change links to reference local files -->
-		<replaceregexp match='"/wiki/(Datei:)?' replace='"' flags="g">
-			<fileset dir="${DOC_DIR}" />
-		</replaceregexp>
-		<!-- Remove navigation bar -->
-		<replaceregexp match='\s*&lt;!-- jumpto -->.*&lt;!-- /jumpto -->' replace="" flags="gis">
-			<fileset dir="${DOC_DIR}" />
-		</replaceregexp>
-		<!-- Remove footer (except for license information) -->
-		<replaceregexp match='\s*&lt;!-- catlinks -->.*(&lt;li id="footer-info-copyright">.*?&lt;/li).*&lt;!-- /footer -->' replace='\1&lt;/div>' flags="gis">
-			<fileset dir="${DOC_DIR}" />
-		</replaceregexp>
-		<!-- Remove magnifying links -->
-		<replaceregexp match='&lt;div class="magnify">.*?&lt;/div>' replace='' flags="g">
-			<fileset dir="${DOC_DIR}" />
-		</replaceregexp>
-		<!-- Direct references to original images -->
-		<replaceregexp match='&lt;a[^>]*class="image"[^>]*>\s*&lt;img [^>]*src="(images/(thumb/)?([^/]+/[^/]+/[^/"]+)[^>]*)[^>]*"[^>]*>&lt;/a>' replace='&lt;img src="images/\3" />' flags="g">
-			<fileset dir="${DOC_DIR}" />
-		</replaceregexp>
-
-		<!-- Download images -->
-		<get dest="${DOC_DIR}">
-			<resourcelist>
-				<fileset dir="${DOC_DIR}" />
-				<filterchain>
-					<tokenfilter>
-						<linetokenizer />
-						<containsstring contains="&lt;img" />
-						<replaceregex pattern='.*&lt;img [^>]*src="([^"]*)".*' replace="${WOLLMUX_WIKI_URL}/\1" />
-					</tokenfilter>
-				</filterchain>
-			</resourcelist>
-		</get>
-		<!-- Use local directory for images -->
-		<replaceregexp match='&lt;img src="[^"]*/([^"]*)"' replace='&lt;img src="\1"' flags="g">
-			<fileset dir="${DOC_DIR}" />
-		</replaceregexp>
-
-		<!-- Restore umlauts in filenames -->
-		<move todir="${DOC_DIR}">
-			<fileset dir="${DOC_DIR}" />
-			<mapper>
-				<filtermapper>
-					<replacestring from="%C3%BC" to="ü" />
-					<replacestring from="%C3%A4" to="ä" />
-				</filtermapper>
-			</mapper>
-		</move>
 	</target>
 
 	<target name="WollMux.oxt-ButtonsOnly">
