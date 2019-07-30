@@ -692,8 +692,9 @@ public class IfThenElseDialog
   {
     params.conf = conf;
     params.isValid = true;
-    System.out.println(params.conf.stringRepresentation());
-    documentController.replaceSelectionWithTrafoField(params.conf, "Wenn...Dann...Sonst");
+    ConfigThingy thing = new ConfigThingy("RootNode");
+    thing.addChild(params.conf);
+    documentController.replaceSelectionWithTrafoField(thing, "Wenn...Dann...Sonst");
   }
 
   private static class TestType
