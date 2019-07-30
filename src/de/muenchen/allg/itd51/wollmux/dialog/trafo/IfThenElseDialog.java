@@ -64,7 +64,6 @@ import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.deployment.PackageInformationProvider;
-import com.sun.star.deployment.XPackageInformationProvider;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IndexOutOfBoundsException;
 import com.sun.star.lang.WrappedTargetException;
@@ -136,7 +135,9 @@ public class IfThenElseDialog
 
   private static final String EXTENSION_ID = "de.muenchen.allg.d101.wollmux";
 
-  private static String imgLocation = null;
+  // Zugriff auf Ressourcen
+  private String imgLocation = PackageInformationProvider.get(UNO.defaultContext)
+      .getPackageLocation(EXTENSION_ID) + "/image/";
 
   /**
    * Das Objekt, das den Startinhalt des Dialogs spezifiziert (und am Ende verwendet wird, um den
@@ -153,11 +154,6 @@ public class IfThenElseDialog
       throw new IllegalArgumentException();
 
     params.isValid = false; // erst bei Beendigung mit Okay werden sie wieder valid
-    
-    // Zugriff auf Ressourcen
-    XPackageInformationProvider xPackageInformationProvider = PackageInformationProvider
-        .get(UNO.defaultContext);
-    imgLocation = xPackageInformationProvider.getPackageLocation(EXTENSION_ID) + "/image/";
 
     addNodeImages();
     
@@ -367,36 +363,22 @@ public class IfThenElseDialog
       
       String[] data = nodeDataValueToStringArray(selectedNode);
 
-      String identifier = data[0];
-
-      switch (identifier)
+      // data[0] = identifier
+      if (WENN.equals(data[0]))
       {
-        case WENN:
-          // data[1] = id, [2] = serienbrieffeld, [3] = not, [4] = comp, [5] = textfieldvalue
-          UNO.XTextComponent(cbSerienbrieffeld).setText(data[2]);
-          UNO.XTextComponent(cbWennNot).setText(data[3]);
-          UNO.XTextComponent(cbWennComperator).setText(data[4]);
-          txtValue.setText(data[5]);
-          activeWennControls(true);
+        // data[1] = id, [2] = serienbrieffeld, [3] = not, [4] = comp, [5] = textfieldvalue
+        UNO.XTextComponent(cbSerienbrieffeld).setText(data[2]);
+        UNO.XTextComponent(cbWennNot).setText(data[3]);
+        UNO.XTextComponent(cbWennComperator).setText(data[4]);
+        txtValue.setText(data[5]);
+        activeWennControls(true);
         setPosition(true);
-          break;
-         
-        case DANN:
-          // dest[1] = id, [2] = txtfieldvalue
-          txtValue.setText(data[2]);
-          activeWennControls(false);
+      } else
+      {
+        // dest[1] = id, [2] = txtfieldvalue
+        txtValue.setText(data[2]);
+        activeWennControls(false);
         setPosition(false);
-          break;
-          
-        case SONST:
-          // dest[1] = id, [2] = txtfieldvalue
-          txtValue.setText(data[2]);
-          activeWennControls(false);
-        setPosition(false);
-          break;
-
-      default:
-        break;
       }
     }
 
@@ -481,7 +463,7 @@ public class IfThenElseDialog
         if (currentChildNode.getChildCount() > 0)
           buildRec(currentChildNode, thenConfig);
         else {
-          ConfigThingy catConf = addCAT(thenConfig, dataChildNode[2]);
+          ConfigThingy catConf = addCAT(dataChildNode[2]);
           thenConfig.addChild(catConf);
         }
       } else if (SONST.equals(conditionType)) {
@@ -490,7 +472,7 @@ public class IfThenElseDialog
         if (currentChildNode.getChildCount() > 0)
           buildRec(currentChildNode, elseConf);
         else {
-          ConfigThingy catConf = addCAT(elseConf, dataChildNode[2]);
+          ConfigThingy catConf = addCAT(dataChildNode[2]);
           elseConf.addChild(catConf);
         }
       }
@@ -503,34 +485,19 @@ public class IfThenElseDialog
     // DisplayValue aus DataValue generieren, Änderungen speichern.
     String[] data = nodeDataValueToStringArray(selectedNode);
     
-    //switch condition
-    switch(data[0])
+    if (WENN.equals(data[0]))
     {
-      case WENN:
-      //data[0] = condition, data[1] = id, [2] = serienbrieffeld, [3] = not, [4] = comp, [5] = textfieldvalue
-        data[5] = txtValue.getText();
-        selectedNode.setDataValue(data);
-        selectedNode.setDisplayValue(
-            data[0] + " " + data[2] + " " + data[3] + " " + data[4] + " " + data[5]);
-        break;
-        
-      case DANN:
-      //data[0] = condition, data[1] = id, [2] = value
-        data[2] = txtValue.getText();
-        selectedNode.setDataValue(data);
-        selectedNode.setDisplayValue(
-            data[0] + " " + data[2]);
-        break;
-        
-      case SONST:
-        //data[0] = condition, data[1] = id, [2] = value
-        data[2] = txtValue.getText();
-        selectedNode.setDataValue(data);
-        selectedNode.setDisplayValue(
-            data[0] + " " + data[2]);
-        break;
-        
-        default: return;
+      // data[0] = condition, data[1] = id, [2] = serienbrieffeld, [3] = not, [4] = comp, [5] =
+      data[5] = txtValue.getText();
+      selectedNode.setDataValue(data);
+      selectedNode
+          .setDisplayValue(data[0] + " " + data[2] + " " + data[3] + " " + data[4] + " " + data[5]);
+    } else
+    {
+      // data[0] = condition, data[1] = id, [2] = value
+      data[2] = txtValue.getText();
+      selectedNode.setDataValue(data);
+      selectedNode.setDisplayValue(data[0] + " " + data[2]);
     }
   };
  
@@ -617,22 +584,12 @@ public class IfThenElseDialog
   private AbstractItemListener cbWennSerienbrieffeldItemListener = event -> {
     String[] data = nodeDataValueToStringArray(selectedNode);
     
-    switch (data[0])
+    if (WENN.equals(data[0]))
     {
-    case WENN:
       data[2] = UNO.XTextComponent(cbSerienbrieffeld).getText();
       selectedNode.setDataValue(data);
       selectedNode.setDisplayValue(
           data[0] + " " + data[2] + " " + data[3] + " " + data[4] + " " + data[5]);
-      break;
-      
-    case DANN:
-      break;
-      
-    case SONST:
-      break;
-      
-      default: return;
     }
   };
 
@@ -675,7 +632,7 @@ public class IfThenElseDialog
     return conf.add("ELSE");
   }
 
-  private ConfigThingy addCAT(ConfigThingy rootNode, String value)
+  private ConfigThingy addCAT(String value)
   {
     ConfigThingy catConf = new ConfigThingy("CAT");
     catConf.add(value);
