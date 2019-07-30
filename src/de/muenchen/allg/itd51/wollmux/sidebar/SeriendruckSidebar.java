@@ -210,7 +210,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
           params.isValid = true;
           params.fieldNames = mailMerge.getDs().getColumnNames();
 
-          new GenderDialog(params);
+          new GenderDialog(params, textDocumentController);
           break;
 
         case 2:          

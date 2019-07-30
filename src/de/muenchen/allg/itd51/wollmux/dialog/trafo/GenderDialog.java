@@ -52,6 +52,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
  * Erlaubt die Bearbeitung der Funktion eines Gender-Feldes.
@@ -68,7 +69,9 @@ public class GenderDialog
   
   private XDialog dialog;
 
-  public GenderDialog(TrafoDialogParameters params)
+  private TextDocumentController documentController;
+
+  public GenderDialog(TrafoDialogParameters params, TextDocumentController documentController)
   {
     this.params = params;
     this.documentController = documentController;
@@ -175,6 +178,7 @@ public class GenderDialog
   
   private AbstractActionListener btnOKActionListener = event -> {
     updateTrafoConf();
+    documentController.replaceSelectionWithTrafoField(params.conf, "Gender");
     dialog.endExecute();
   };
 
