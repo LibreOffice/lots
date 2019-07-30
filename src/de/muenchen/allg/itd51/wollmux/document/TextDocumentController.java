@@ -2106,7 +2106,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       }
       model.getFunktionenConf().addChild(betterNameFunc);
 
-      // TODO: srp
+      // TODO: Single-Responsibility-Prinzip
       storeCurrentFormDescription();
       return name;
     }

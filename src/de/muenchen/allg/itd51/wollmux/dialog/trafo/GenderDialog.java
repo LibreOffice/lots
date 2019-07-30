@@ -71,8 +71,7 @@ public class GenderDialog
   public GenderDialog(TrafoDialogParameters params)
   {
     this.params = params;
-    // if (!params.isValid || params.conf == null || params.fieldNames == null
-    // || params.fieldNames.size() == 0) throw new IllegalArgumentException();
+    this.documentController = documentController;
 
     ConfigThingy conf = params.conf;
 
@@ -88,14 +87,9 @@ public class GenderDialog
       String textSonst = null;
       String anredeId = null;
 
-      // if (conf.count() != 1) stop();
       ConfigThingy bind = conf.getFirstChild();
-      // if (!bind.getName().equals("BIND")) stop();
-
       ConfigThingy funcs = bind.query("FUNCTION", 1);
-      // if (funcs.count() != 1) stop();
       ConfigThingy func = funcs.getLastChild();
-      // if (!func.toString().equals("Gender")) stop();
 
       for (ConfigThingy set : bind)
       {
