@@ -262,7 +262,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
 
     ControlProperties jumpToFirstBtn = new ControlProperties(ControlType.BUTTON, "btnJumpToFirst");
     jumpToFirstBtn.setControlPercentSize(10, 30);
-    jumpToFirstBtn.setLabel("<");
+    jumpToFirstBtn.setLabel("<<");
     jumpToFirstBtn.setEnabled(false);
     jumpToFirst = UNO.XButton(jumpToFirstBtn.getXControl());
     jumpToFirst.addActionListener(jumpToFirstActionListener);
@@ -282,7 +282,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
 
     ControlProperties jumpToLastBtnProps = new ControlProperties(ControlType.BUTTON, "btnJumpToLast");
     jumpToLastBtnProps.setControlPercentSize(10, 30);
-    jumpToLastBtnProps.setLabel(">");
+    jumpToLastBtnProps.setLabel(">>");
     jumpToLastBtnProps.setEnabled(false);
     jumpToLast = UNO.XButton(jumpToLastBtnProps.getXControl());
     jumpToLast.addActionListener(jumpToLastActionListener);
