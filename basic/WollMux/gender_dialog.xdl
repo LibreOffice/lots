@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
-<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="gender_dialog" dlg:left="222" dlg:top="119" dlg:width="191" dlg:height="153" dlg:closeable="true" dlg:moveable="true">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="gender_dialog" dlg:left="222" dlg:top="119" dlg:width="191" dlg:height="153" dlg:closeable="true" dlg:moveable="true" dlg:title="Geschlechtsbestimmendes Feld">
  <dlg:bulletinboard>
   <dlg:text dlg:id="Label1" dlg:tab-index="0" dlg:left="7" dlg:top="3" dlg:width="153" dlg:height="12" dlg:value="Verschiedene Texte abhängig vom Geschlecht"/>
   <dlg:combobox dlg:id="cbSerienbrieffeld" dlg:tab-index="1" dlg:left="110" dlg:top="17" dlg:width="66" dlg:height="12" dlg:spin="true"/>
