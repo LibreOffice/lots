@@ -75,8 +75,9 @@ public class MailWizardPage extends AbstractXWizardPage
         message.setText(message.getText() + MailMergeNew.addMergeFieldTags(mailmerge.getItem((short) event.Selected)));
       }
     });
+
     special = UNO.XComboBox(container.getControl("special"));
-    SpecialField.addItems(special);
+    special.addItems(new String[] { "Datensatznummer", "Serienbriefnummer" }, (short) 0);
     special.addItemListener(new AbstractItemListener()
     {
 
