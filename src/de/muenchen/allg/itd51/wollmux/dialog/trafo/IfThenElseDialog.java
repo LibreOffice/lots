@@ -33,6 +33,7 @@ package de.muenchen.allg.itd51.wollmux.dialog.trafo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -67,7 +68,6 @@ import com.sun.star.deployment.PackageInformationProvider;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IndexOutOfBoundsException;
 import com.sun.star.lang.WrappedTargetException;
-import com.sun.star.ui.dialogs.ExecutableDialogResults;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
@@ -97,7 +97,7 @@ public class IfThenElseDialog
 
   private XWindow window;
 
-  private XComboBox cbWennComperator;
+  private XComboBox cbComparator;
 
   private XComboBox cbWennNot;
 
@@ -193,7 +193,7 @@ public class IfThenElseDialog
     }
 
     window = provider.createContainerWindow(
-        "vnd.sun.star.script:WollMux.if_then_else2?location=application", "", peer, null);
+        "vnd.sun.star.script:WollMux.if_then_else?location=application", "", peer, null);
 
     try
     {
@@ -208,8 +208,6 @@ public class IfThenElseDialog
     }
 
     controlContainer = UnoRuntime.queryInterface(XControlContainer.class, window);
-    
-    window.setPosSize(30, 30, 600, 600, PosSize.SIZE);
 
     XButton removeConditionBtn = UNO.XButton(controlContainer.getControl("removeConditionBtn"));
     removeConditionBtn.addActionListener(removeConditionBtnActionListener);
@@ -217,10 +215,16 @@ public class IfThenElseDialog
     XButton newConditionBtn = UNO.XButton(controlContainer.getControl("newConditionBtn"));
     newConditionBtn.addActionListener(newConditionBtnActionListener);
     
+    XButton okBtn = UNO.XButton(controlContainer.getControl("okBtn"));
+    okBtn.addActionListener(okBtnActionListener);
+
+    XButton abortBtn = UNO.XButton(controlContainer.getControl("abortBtn"));
+    abortBtn.addActionListener(abortBtnActionListener);
+
     cbSerienbrieffeld = UNO
-        .XComboBox(controlContainer.getControl("cbWennSerienbrieffeld"));
+        .XComboBox(controlContainer.getControl("cbSerienbrieffeld"));
     UNO.XTextComponent(cbSerienbrieffeld).setText("Serienbrieffeld");
-    cbSerienbrieffeld.addItemListener(cbWennSerienbrieffeldItemListener);
+    cbSerienbrieffeld.addItemListener(cbSerienbrieffeldItemListener);
 
     // initale x,y-Werte werden für die spätere Verwendung gespeichrt um die Position
     // des Controls wiederherzustellen.
@@ -231,12 +235,12 @@ public class IfThenElseDialog
     params.fieldNames.forEach(fieldName -> cbSerienbrieffeld.addItem(fieldName,
         (short) (cbSerienbrieffeld.getItemCount() + 1)));
 
-    cbWennComperator = UNO.XComboBox(controlContainer.getControl("cbWennComporator"));
-    testTypes.forEach(item -> cbWennComperator.addItem(item.label,
-        (short) (cbWennComperator.getItemCount() + 1)));
+    cbComparator = UNO.XComboBox(controlContainer.getControl("cbComparator"));
+    testTypes.forEach(
+        item -> cbComparator.addItem(item.label, (short) (cbComparator.getItemCount() + 1)));
     // default wert setzen
-    UNO.XTextComponent(cbWennComperator).setText(cbWennComperator.getItem((short) 0));
-    cbWennComperator.addItemListener(comparatorItemListener);
+    UNO.XTextComponent(cbComparator).setText(cbComparator.getItem((short) 0));
+    cbComparator.addItemListener(comparatorItemListener);
 
     cbWennNot = UNO.XComboBox(controlContainer.getControl("cbNot"));
     cbWennNot.addItem("", (short) 0);
@@ -279,25 +283,26 @@ public class IfThenElseDialog
     }
 
     dialog = UnoRuntime.queryInterface(XDialog.class, window);
-    short result = dialog.execute();
-
-    if (result != ExecutableDialogResults.OK)
-    {
-      ConfigThingy resultConf = buildRec(rootNode, new ConfigThingy("Func"));
-      updateTrafoConf(resultConf);
-      dialog.endExecute();
-    } 
+    dialog.execute();
   }
   
   private AbstractActionListener removeConditionBtnActionListener = event -> removeNode();
+
+  private AbstractActionListener okBtnActionListener = event -> {
+    ConfigThingy resultConf = buildRec(rootNode, new ConfigThingy("Func"));
+    updateTrafoConf(resultConf);
+    dialog.endExecute();
+  };
+
+  private AbstractActionListener abortBtnActionListener = event -> dialog.endExecute();
 
   private AbstractActionListener newConditionBtnActionListener = event -> {
     String not = cbWennNot.getItem((short) 0);
     String selectedValue = txtValue.getText();
     String serienBriefFeld = UNO.XTextComponent(cbSerienbrieffeld).getSelectedText();
 
-    XTextComponent comparator = UNO.XTextComponent(controlContainer.getControl("cbWennComporator"));
-    String comparatorValue = comparator.getSelectedText();
+    String comparatorValue = UNO.XTextComponent(controlContainer.getControl("cbWennComporator"))
+        .getText();
 
     Random rand = new Random();
     int randomNumber = rand.nextInt(randomImages.size());
@@ -369,7 +374,7 @@ public class IfThenElseDialog
         // data[1] = id, [2] = serienbrieffeld, [3] = not, [4] = comp, [5] = textfieldvalue
         UNO.XTextComponent(cbSerienbrieffeld).setText(data[2]);
         UNO.XTextComponent(cbWennNot).setText(data[3]);
-        UNO.XTextComponent(cbWennComperator).setText(data[4]);
+        UNO.XTextComponent(cbComparator).setText(data[4]);
         txtValue.setText(data[5]);
         activeWennControls(true);
         setPosition(true);
@@ -389,7 +394,7 @@ public class IfThenElseDialog
      * (Comparator-ComboBox) [----] (TextFeld) ...
      * 
      * DANN/SONST-Layout: [----] (TextFeld) ... Serienbrieffeld, NOT-CB und Comparator-CB sind
-     * ausgeblendet, TextFeld wird daher nach oben verschoben.
+     * ausgeblendet, TextFeld wird an erste Position verschoben.
      */
     private void setPosition(boolean active)
     {
@@ -405,7 +410,7 @@ public class IfThenElseDialog
     private void activeWennControls(boolean active)
     {
       UNO.XWindow(cbWennNot).setVisible(active);
-      UNO.XWindow(cbWennComperator).setVisible(active);
+      UNO.XWindow(cbComparator).setVisible(active);
       UNO.XWindow(cbSerienbrieffeld).setVisible(active);
     }
   };
@@ -418,12 +423,6 @@ public class IfThenElseDialog
     return dest;
   }
   
-  /**
-   * 
-   * @param currentNode
-   * @param currentConfig
-   * @return
-   */
   private ConfigThingy buildRec(XTreeNode currentNode, ConfigThingy currentConfig) {
     
     if (currentNode.getChildCount() < 1)
@@ -571,6 +570,9 @@ public class IfThenElseDialog
   }
 
   private AbstractItemListener notItemListener = event -> {
+    if (selectedNode == null)
+      return;
+
     String[] data = nodeDataValueToStringArray(selectedNode);
     
     if (WENN.equals(data[0])) {
@@ -581,7 +583,10 @@ public class IfThenElseDialog
     }
   };
   
-  private AbstractItemListener cbWennSerienbrieffeldItemListener = event -> {
+  private AbstractItemListener cbSerienbrieffeldItemListener = event -> {
+    if (selectedNode == null)
+      return;
+
     String[] data = nodeDataValueToStringArray(selectedNode);
     
     if (WENN.equals(data[0]))
@@ -593,23 +598,48 @@ public class IfThenElseDialog
     }
   };
 
-  private AbstractItemListener comparatorItemListener = event -> {   
+  private AbstractItemListener comparatorItemListener = event -> {
+    // Usability. Setzt je nach selektiertem Vergleichsoperator
+    // den zu eingebenden Wert im txtValue-TextFeld.
+    String comparatorValue = UNO.XTextComponent(cbComparator).getText();
+    if (comparatorValue.equals("genau ="))
+    {
+      txtValue.setText("Text");
+    } else if (comparatorValue.equals("regulärer A."))
+    {
+      txtValue.setText("Regulärer Ausdruck");
+    } else
+    {
+      txtValue.setText("Numerischer Wert");
+    }
+
+    if (selectedNode == null)
+      return;
+
+    // Vergleichsoperator speichern
     String[] data = nodeDataValueToStringArray(selectedNode);
-    
-    if (WENN.equals(data[0])) {
-      data[4] = UNO.XTextComponent(cbWennComperator).getText();
+
+    if (WENN.equals(data[0]))
+    {
+      data[4] = UNO.XTextComponent(cbComparator).getText();
       selectedNode.setDataValue(data);
-      selectedNode.setDisplayValue(
-          data[0] + " " + data[2] + " " + data[3] + " " + data[4] + " " + data[5]);
+      selectedNode
+          .setDisplayValue(data[0] + " " + data[2] + " " + data[3] + " " + data[4] + " " + data[5]);
     }
   };
 
   private void addSTRCMPBlock(ConfigThingy ifConf, String comparator, String value1,
       String value2)
   {
-    ConfigThingy strCmpConf = ifConf.add("STRCMP");
-    strCmpConf.add("VALUE").add(value1 == null || value1.isEmpty() ? "" : value1);
-    strCmpConf.add(value2 == null || value2.isEmpty() ? "" : value2);
+    Optional<TestType> resultTestType = testTypes.stream()
+        .filter(item -> comparator.equals(item.label)).findFirst();
+
+    if (resultTestType.isPresent())
+    {
+      ConfigThingy strCmpConf = ifConf.add(resultTestType.get().func);
+      strCmpConf.add("VALUE").add(value1 == null || value1.isEmpty() ? "" : value1);
+      strCmpConf.add(value2 == null || value2.isEmpty() ? "" : value2);
+    }
   }
   
   private ConfigThingy addNot(ConfigThingy rootNode)
@@ -699,6 +729,9 @@ public class IfThenElseDialog
   // Entfernt Wenn/Dann/Sonst node.
   private void removeNode()
   {
+    if (selectedNode == null)
+      return;
+
     try
     {
       XMutableTreeNode parentNode = UnoRuntime.queryInterface(XMutableTreeNode.class,
