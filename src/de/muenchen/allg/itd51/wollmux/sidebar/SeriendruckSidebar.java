@@ -124,10 +124,10 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
 
       layout.addControlsToList(addPreviewControls());
       layout.addControlsToList(addDatasourcesControls());
+      layout.addControlsToList(addTableControls());
       layout.addControlsToList(addSerienbriefFeld());
       layout.addControlsToList(addSpezialfeld());
       layout.addControlsToList(addPrintControls());
-      layout.addControlsToList(addTableControls());
 
       window.setVisible(true);
       window.setEnable(true);
@@ -269,7 +269,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
 
     ControlProperties printCountFieldProps = new ControlProperties(ControlType.NUMERIC_FIELD,
         "currentDocument");
-    printCountFieldProps.setControlPercentSize(40, 30);
+    printCountFieldProps.setControlPercentSize(30, 30);
     printCountFieldProps.setBorder((short) 2);
     printCountFieldProps.setBorderColor(666666);
     printCountFieldProps.setSpinEnabled(Boolean.TRUE);
@@ -325,7 +325,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
 
     ControlProperties currentDatasourceProps = new ControlProperties(ControlType.LIST_BOX,
         "currentDatasources");
-    currentDatasourceProps.setControlPercentSize(100, 100);
+    currentDatasourceProps.setControlPercentSize(100, 200);
     currentDatasources = UNO.XListBox(currentDatasourceProps.getXControl());
     currentDatasources.addItemListener(currentDatasourcesListener);
 
@@ -357,7 +357,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
 
     bottomControls.add(printBtn);
 
-    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, bottomControls, Optional.empty());
+    return new ControlModel(Orientation.VERTICAL, Align.NONE, bottomControls, Optional.empty());
   }
 
   private ControlModel addTableControls()
@@ -496,7 +496,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     public void actionPerformed(ActionEvent arg0)
     {
       setMailMergeOnDocument();
-      DBDatasourceDialog oooDSDialog = new DBDatasourceDialog(dbDatasourceListener);
+      new DBDatasourceDialog(dbDatasourceListener);
     }
   };
 
