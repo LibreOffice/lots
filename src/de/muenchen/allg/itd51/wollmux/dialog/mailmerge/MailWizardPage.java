@@ -49,8 +49,13 @@ public class MailWizardPage extends AbstractXWizardPage
     sender.addTextListener(textListener);
     subject = UNO.XTextComponent(container.getControl("subject"));
     subject.addTextListener(textListener);
+
     message = UNO.XTextComponent(container.getControl("message"));
+    // default text
+    message.setText(
+        "Sehr geehrte Damen und Herren, \n\n anbei erhalten Sie ... \n\n Mit freundlichen Grüßen \n ...");
     message.addTextListener(textListener);
+
     reciever = UNO.XComboBox(container.getControl("reciever"));
     reciever.addItems(controller.getController().getColumnNames().toArray(new String[] {}),
         (short) 0);
