@@ -235,7 +235,7 @@ public class AdjustFields
     final XTextComponent[] currentField = new XTextComponent[] { null };
     final Map<XTextComponent, ReferencedFieldID> mapXTextComponentToFieldname = new HashMap<>();
     UNODialogFactory dialogFactory = new UNODialogFactory();
-    XWindow dialogWindow = dialogFactory.createDialog(780, 450, 0xF2F2F2);
+    XWindow dialogWindow = dialogFactory.createDialog(780, 700, 0xF2F2F2);
     dialogFactory.showDialog();
 
     SimpleDialogLayout layout = new SimpleDialogLayout(dialogWindow);
@@ -248,7 +248,7 @@ public class AdjustFields
     mailmergeLabel.setControlPercentSize(40, 20);
     mailmergeLabel.setLabel("Serienbrieffeld");
     ControlProperties mailmerge = new ControlProperties(ControlType.COMBOBOX, "mailmerge");
-    mailmerge.setControlPercentSize(40, 20);
+    mailmerge.setControlPercentSize(60, 20);
     mailmerge.setComboBoxDropDown(true);
     XComboBox mailmergeButton = UNO.XComboBox(mailmerge.getXControl());
     mailmergeButton.addItem("", (short) 0);
@@ -302,7 +302,7 @@ public class AdjustFields
       label.setControlPercentSize(40, 20);
       label.setLabel(fieldId.getFieldId());
       ControlProperties edit = new ControlProperties(ControlType.EDIT, "edit_" + fieldId.getFieldId());
-      edit.setControlPercentSize(40, 20);
+      edit.setControlPercentSize(60, 20);
       XTextComponent editField = UNO.XTextComponent(edit.getXControl());
       UNO.XWindow(edit.getXControl()).addFocusListener(new AbstractFocusListener()
       {
