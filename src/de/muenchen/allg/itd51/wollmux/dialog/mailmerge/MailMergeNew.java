@@ -656,7 +656,7 @@ public class MailMergeNew
   {
     try
     {
-      String outFilePath = outFile.toString();
+      String outFilePath = outFile.getPath();
       XStorable store = UNO.XStorable(doc);
       PropertyValue[] options;
 
@@ -687,6 +687,11 @@ public class MailMergeNew
         options = new PropertyValue[0];
       }
 
+      if (System.getProperty("os.name").toLowerCase().contains("windows"))
+      {
+    	  outFilePath = outFilePath.replace("\\", "/");
+      }
+      
       com.sun.star.util.URL url = UNO.getParsedUNOUrl(outFilePath);
 
       // storeTOurl() has to be used instead of storeASurl() for PDF export
