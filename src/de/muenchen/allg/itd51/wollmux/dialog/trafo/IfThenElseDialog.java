@@ -136,7 +136,7 @@ public class IfThenElseDialog
   private static final String EXTENSION_ID = "de.muenchen.allg.d101.wollmux";
 
   // Zugriff auf Ressourcen
-  private String imgLocation = PackageInformationProvider.get(UNO.defaultContext)
+  private static final String imgLocation = PackageInformationProvider.get(UNO.defaultContext)
       .getPackageLocation(EXTENSION_ID) + "/image/";
 
   /**
@@ -244,7 +244,7 @@ public class IfThenElseDialog
 
     cbWennNot = UNO.XComboBox(controlContainer.getControl("cbNot"));
     cbWennNot.addItem("", (short) 0);
-    cbWennNot.addItem("NOT", (short) 1);
+    cbWennNot.addItem("nicht", (short) 1);
     cbWennNot.addItemListener(notItemListener);
 
     txtValue = UNO.XTextComponent(controlContainer.getControl("txtValue"));
@@ -298,10 +298,15 @@ public class IfThenElseDialog
 
   private AbstractActionListener newConditionBtnActionListener = event -> {
     String not = cbWennNot.getItem((short) 0);
+    
+    if ("nicht".equals(not)) {
+      not = "NOT";
+    }
+    
     String selectedValue = txtValue.getText();
     String serienBriefFeld = UNO.XTextComponent(cbSerienbrieffeld).getSelectedText();
 
-    String comparatorValue = UNO.XTextComponent(controlContainer.getControl("cbWennComporator"))
+    String comparatorValue = UNO.XTextComponent(controlContainer.getControl("cbComparator"))
         .getText();
 
     Random rand = new Random();
@@ -605,7 +610,7 @@ public class IfThenElseDialog
     if (comparatorValue.equals("genau ="))
     {
       txtValue.setText("Text");
-    } else if (comparatorValue.equals("regulärer A."))
+    } else if (comparatorValue.equals("regulärer Ausdruck"))
     {
       txtValue.setText("Regulärer Ausdruck");
     } else
@@ -707,7 +712,7 @@ public class IfThenElseDialog
       new TestType(L.m("genau ="), "STRCMP"), new TestType(L.m("numerisch ="), "NUMCMP"),
       new TestType(L.m("numerisch <"), "LT"), new TestType(L.m("numerisch <="), "LE"),
       new TestType(L.m("numerisch >"), "GT"), new TestType(L.m("numerisch >="), "GE"),
-      new TestType(L.m("regulärer A."), "MATCH"));
+      new TestType(L.m("regulärer Ausdruck"), "MATCH"));
 
   private AbstractKeyHandler keyHandler = new AbstractKeyHandler()
   {
