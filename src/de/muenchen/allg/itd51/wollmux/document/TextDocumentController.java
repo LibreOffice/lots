@@ -2085,7 +2085,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     FunctionLibrary funcLib = getFunctionLibrary();
     DialogLibrary dialogLib = getDialogLibrary();
     Map<Object, Object> context = getFunctionContext();
-    
     // eindeutigen Namen für die neue Autofunktion erzeugen:
     Set<String> currentFunctionNames = funcLib.getFunctionNames();
     String name = null;
