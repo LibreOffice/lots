@@ -297,12 +297,7 @@ public class IfThenElseDialog
   private AbstractActionListener abortBtnActionListener = event -> dialog.endExecute();
 
   private AbstractActionListener newConditionBtnActionListener = event -> {
-    String not = cbWennNot.getItem((short) 0);
-    
-    if ("nicht".equals(not)) {
-      not = "NOT";
-    }
-    
+    String not = UNO.XTextComponent(cbWennNot).getSelectedText();    
     String selectedValue = txtValue.getText();
     String serienBriefFeld = UNO.XTextComponent(cbSerienbrieffeld).getSelectedText();
 
@@ -377,6 +372,10 @@ public class IfThenElseDialog
       if (WENN.equals(data[0]))
       {
         // data[1] = id, [2] = serienbrieffeld, [3] = not, [4] = comp, [5] = textfieldvalue
+        if ("NOT".equals(data[3])) {
+          data[3] = "nicht";
+        }
+        
         UNO.XTextComponent(cbSerienbrieffeld).setText(data[2]);
         UNO.XTextComponent(cbWennNot).setText(data[3]);
         UNO.XTextComponent(cbComparator).setText(data[4]);
@@ -454,10 +453,13 @@ public class IfThenElseDialog
       if (WENN.equals(conditionType)) {
         currentConfig = addIf(currentConfig);
         
-        if (!UNO.XTextComponent(cbWennNot).getText().isEmpty())
-          currentConfig = addNot(currentConfig);
+        if (!UNO.XTextComponent(cbWennNot).getText().isEmpty()) {
+          ConfigThingy notConf = currentConfig.add("NOT");
+          addSTRCMPBlock(notConf, dataChildNode[4], dataChildNode[2], dataChildNode[5]);
+        } else {
+          addSTRCMPBlock(currentConfig, dataChildNode[4], dataChildNode[2], dataChildNode[5]);
+        }
 
-        addSTRCMPBlock(currentConfig, dataChildNode[4], dataChildNode[2], dataChildNode[5]);
         if (currentChildNode.getChildCount() > 0)
           buildRec(currentChildNode, currentConfig);
 
@@ -494,6 +496,11 @@ public class IfThenElseDialog
       // data[0] = condition, data[1] = id, [2] = serienbrieffeld, [3] = not, [4] = comp, [5] =
       data[5] = txtValue.getText();
       selectedNode.setDataValue(data);
+      
+      if ("NOT".equals(data[3])) {
+        data[3] = "nicht";
+      }
+      
       selectedNode
           .setDisplayValue(data[0] + " " + data[2] + " " + data[3] + " " + data[4] + " " + data[5]);
     } else
@@ -551,6 +558,10 @@ public class IfThenElseDialog
     ifNode.setDisplayValue(
         WENN + " " + serienbriefFeld + " " + not + " " + comparatorValue + " " + value);
 
+    if ("nicht".equals(not)) {
+      not = "NOT";
+    }
+    
     List<String> data = new ArrayList<>();
     data.add(WENN);
     data.add(id);
@@ -633,7 +644,7 @@ public class IfThenElseDialog
     }
   };
 
-  private void addSTRCMPBlock(ConfigThingy ifConf, String comparator, String value1,
+  private ConfigThingy addSTRCMPBlock(ConfigThingy ifConf, String comparator, String value1,
       String value2)
   {
     Optional<TestType> resultTestType = testTypes.stream()
@@ -644,12 +655,11 @@ public class IfThenElseDialog
       ConfigThingy strCmpConf = ifConf.add(resultTestType.get().func);
       strCmpConf.add("VALUE").add(value1 == null || value1.isEmpty() ? "" : value1);
       strCmpConf.add(value2 == null || value2.isEmpty() ? "" : value2);
+      
+      return strCmpConf;
     }
-  }
-  
-  private ConfigThingy addNot(ConfigThingy rootNode)
-  {
-    return rootNode.add("NOT");
+   
+    return null;
   }
 
   private ConfigThingy addIf(ConfigThingy conf)
