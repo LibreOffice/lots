@@ -340,6 +340,14 @@ public class IfThenElseDialog
     selectedNode.appendChild(ifNode);
     selectedNode.appendChild(createThenNode("", randomImageFileName));
     selectedNode.appendChild(createElseNode("", randomImageFileName));
+    
+    try
+    {
+      treeControl.expandNode(selectedNode);
+    } catch (com.sun.star.lang.IllegalArgumentException | ExpandVetoException e)
+    {
+      LOGGER.error("", e);
+    }
   };
 
   private AbstractMouseListener mouseListener = new AbstractMouseListener()
