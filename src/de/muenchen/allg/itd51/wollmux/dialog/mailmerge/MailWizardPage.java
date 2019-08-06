@@ -1,6 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
 import com.sun.star.awt.ItemEvent;
+import com.sun.star.awt.Selection;
 import com.sun.star.awt.TextEvent;
 import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControlContainer;
@@ -77,7 +78,8 @@ public class MailWizardPage extends AbstractXWizardPage
       @Override
       public void itemStateChanged(ItemEvent event)
       {
-        message.setText(message.getText() + MailMergeNew.addMergeFieldTags(mailmerge.getItem((short) event.Selected)));
+        Selection currentSelection = message.getSelection();
+        message.insertText(currentSelection, MailMergeNew.addMergeFieldTags(mailmerge.getItem((short) event.Selected)));
       }
     });
 
@@ -89,7 +91,15 @@ public class MailWizardPage extends AbstractXWizardPage
       @Override
       public void itemStateChanged(ItemEvent event)
       {
-        message.setText(message.getText() + special.getItem((short) event.Selected));
+        String selectedValue = special.getItem((short) event.Selected);
+        
+        if (selectedValue.equals("Datensatznummer"))
+          selectedValue = "{{#DS}}";
+        else
+          selectedValue = "{{#SB}}";
+        
+        Selection currentSelection = message.getSelection();
+        message.insertText(currentSelection, selectedValue);
       }
     });
   }
