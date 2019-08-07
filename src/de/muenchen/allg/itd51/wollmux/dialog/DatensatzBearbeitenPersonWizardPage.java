@@ -16,14 +16,15 @@ import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 
 public class DatensatzBearbeitenPersonWizardPage extends DatensatzBearbeitenBaseWizardPage
 {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(DatensatzBearbeitenPersonWizardPage.class);
 
-  public DatensatzBearbeitenPersonWizardPage(XWindow parentWindow, short pageId, DJDataset dataset,
+  public DatensatzBearbeitenPersonWizardPage(XWindow parentWindow, short pageId,
+      LOSDJDataset dataset,
       List<String> dbSchema) throws Exception
   {
     super(pageId, parentWindow, "DatensatzBearbeitenPerson", dataset, dbSchema);
@@ -57,9 +58,9 @@ public class DatensatzBearbeitenPersonWizardPage extends DatensatzBearbeitenBase
 
         xTextComponent.setText(dataset.get(columnName) == null ? "" : dataset.get(columnName));
         
-        if (isDifferentFromLdapDataset(columnName))
+        if (dataset.isDifferentFromLdapDataset(columnName, dataset))
         {
-          showAcceptLdapValueButton(columnName);
+          showAcceptLdapValueButton(columnName, true);
           super.setTextColor(xControl, 16711680); // rot
         }
       }

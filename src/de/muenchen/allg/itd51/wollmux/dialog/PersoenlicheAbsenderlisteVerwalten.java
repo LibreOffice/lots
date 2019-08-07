@@ -500,7 +500,8 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     DJDataset djDataset = cachedPAL.get(index);
 
-    DatensatzBearbeiten editDSWizard = new DatensatzBearbeiten(djDataset, dj.getMainDatasourceSchema());
+    DatensatzBearbeiten editDSWizard = new DatensatzBearbeiten((LOSDJDataset) djDataset,
+        dj.getMainDatasourceSchema());
 
     short result = editDSWizard.executeWizard();
 

@@ -58,6 +58,7 @@ import com.sun.star.ui.dialogs.XWizard;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 
@@ -83,7 +84,7 @@ public class DatensatzBearbeiten
    * @param edit
    * @throws ConfigurationErrorException
    */
-  protected DatensatzBearbeiten(DJDataset datensatz, List<String> dbSchema)
+  protected DatensatzBearbeiten(LOSDJDataset datensatz, List<String> dbSchema)
   {
     wizard = Wizard.createSinglePathWizard(UNO.defaultContext,
         DatensatzBearbeitenWizardController.PATHS,
