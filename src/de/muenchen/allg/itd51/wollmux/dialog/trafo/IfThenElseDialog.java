@@ -323,17 +323,25 @@ public class IfThenElseDialog
       {
         XMutableTreeNode root = createRootNode();
         treeNodeModel.setRoot(root);
-        selectedNode = root;
-
         XPropertySet xTreeModelProperty = UnoRuntime.queryInterface(XPropertySet.class,
             xControlModel);
         xTreeModelProperty.setPropertyValue("DataModel", treeNodeModel);
-
+        selectedNode = root;
         treeControl.expandNode(root);
       } catch (UnknownPropertyException | PropertyVetoException | WrappedTargetException
           | IllegalArgumentException | ExpandVetoException e)
       {
         LOGGER.error("", e);
+      }
+    } else {
+      // falls durch den Benutzer bereits ein (Text)-Wert für einen "WENN" oder "SONST"-Node gesetzt wurde,
+      // -> nicht erlaubt, daher zurücksetzen.
+      String[] data = nodeDataValueToStringArray(selectedNode);
+      if (DANN.equals(data[0]) || SONST.equals(data[0]))
+      {
+        data[2] = "";
+        selectedNode.setDataValue(data);
+        selectedNode.setDisplayValue(data[0] + " " + data[2]);
       }
     }
 
@@ -498,6 +506,16 @@ public class IfThenElseDialog
   private AbstractTextListener txtValueWennListener = event -> {    
     // DisplayValue aus DataValue generieren, Änderungen speichern.
     String[] data = nodeDataValueToStringArray(selectedNode);
+    
+    // Bedingung 'dann' oder 'sonst' darf nicht mit Text-Wert editierbar
+    // sein wenn weitere Bedingung (IF) gesetzt ist.
+    if (selectedNode.getChildCount() > 0) {
+      //default setzen falls zuvor schon editiert wurde.
+      data[2] = "";
+      selectedNode.setDataValue(data);
+      selectedNode.setDisplayValue(data[0] + " " + data[2]);
+      return;
+    }
     
     if (WENN.equals(data[0]))
     {
