@@ -271,7 +271,6 @@ public class SachleitendeVerfuegungenDruckdialog
         label.setText(cutContent(punkt.getHeading()));
 
         XNumericField countNum = UNO.XNumericField(container.getControl("Count" + i));
-        countNum.setMin(punkt.getNumberOfCopies());
         countNum.setValue(info.getCopyCount());
         spinListener[i - 1].setInfo(info);
 
