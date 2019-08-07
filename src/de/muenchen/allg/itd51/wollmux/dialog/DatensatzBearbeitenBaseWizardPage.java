@@ -55,7 +55,7 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
     this.controlContainer = controlContainer;
   }
 
-  protected void showAcceptLdapValueButton(String columnName)
+  protected void showAcceptLdapValueButton(String columnName, boolean visible)
   {
     if (this.controlContainer == null)
     {
@@ -77,23 +77,12 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
 
     try
     {
-      props.setPropertyValue("EnableVisible", true);
+      props.setPropertyValue("EnableVisible", visible);
     } catch (IllegalArgumentException | UnknownPropertyException | PropertyVetoException
         | WrappedTargetException e)
     {
       LOGGER.error("", e);
     }
-  }
-
-  protected boolean isDifferentFromLdapDataset(String columnName) {
-    LOSDJDataset losDJ = dataset;
-    String losValue = losDJ.getLOS().get(columnName);
-    String bsValue = losDJ.getBS().get(columnName);
-
-    if (losValue == null || losValue.isEmpty() || bsValue == null || bsValue.isEmpty())
-      return false;
-    else
-      return !losValue.equals(bsValue);
   }
 
   protected void setTextColor(XControl xControl, int textColor)
@@ -204,11 +193,14 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
           String textComponentText = xTextComponent.getText();
           String dataSetValue = dataset.get(label);
 
-          if (dataSetValue == null || !dataSetValue.equals(textComponentText))
+          if (dataset.getBS() != null
+              && (dataSetValue == null || !dataSetValue.equals(textComponentText)))
           {
+            showAcceptLdapValueButton(label, true);
             setTextColor(xControl, 16711680);
           } else
           {
+            showAcceptLdapValueButton(label, false);
             setTextColor(xControl, 00000000);
           }
         }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.awt.XButton;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XTextComponent;
@@ -14,7 +15,7 @@ import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 
 public class DatensatzBearbeitenFusszeileWizardPage extends DatensatzBearbeitenBaseWizardPage
 {
@@ -22,7 +23,7 @@ public class DatensatzBearbeitenFusszeileWizardPage extends DatensatzBearbeitenB
       .getLogger(DatensatzBearbeitenFusszeileWizardPage.class);
 
   public DatensatzBearbeitenFusszeileWizardPage(XWindow parentWindow, short pageId,
-      DJDataset dataset, List<String> dbSchema)
+      LOSDJDataset dataset, List<String> dbSchema)
       throws Exception
   {
     super(pageId, parentWindow, "DatensatzBearbeitenFusszeile", dataset, dbSchema);
@@ -46,7 +47,9 @@ public class DatensatzBearbeitenFusszeileWizardPage extends DatensatzBearbeitenB
         if (xTextComponent == null)
           continue;
         
-        if (isDifferentFromLdapDataset(columnName)) {
+        if (dataset.isDifferentFromLdapDataset(columnName, dataset))
+        {
+          showAcceptLdapValueButton(columnName, true);
           setTextColor(xControl, 16711680); // rot
         }
         
@@ -57,10 +60,13 @@ public class DatensatzBearbeitenFusszeileWizardPage extends DatensatzBearbeitenB
       {
         XTextComponent textComponent = UNO.XTextComponent(control);
 
-        if (textComponent == null)
-          continue;
+        XButton xButton = UNO.XButton(control);
 
-        textComponent.addTextListener(textListener);
+        if (textComponent != null)
+          textComponent.addTextListener(textListener);
+
+        if (xButton != null)
+          xButton.addActionListener(buttonActionListener);
       }
       
     } catch (ColumnNotFoundException e)
