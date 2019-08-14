@@ -380,4 +380,17 @@ public class FormController
   {
     documentController.getModel().importFormValues(f);
   }
+
+  /**
+   * Besitzt das Formular, welches von diesem Controller verwaltet wird, ein Feld mit der ID
+   * fieldId?
+   *
+   * @param fieldId
+   *          Die ID des gesuchten Feldes.
+   * @return True falls ein solches Feld existiert, sonst False.
+   */
+  public boolean hasFieldId(String fieldId)
+  {
+    return model.hasFieldId(fieldId);
+  }
 }
