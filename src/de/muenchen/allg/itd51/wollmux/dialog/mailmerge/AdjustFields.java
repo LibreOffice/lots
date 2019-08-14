@@ -33,6 +33,7 @@ package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,24 +44,30 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.awt.ItemEvent;
+import com.sun.star.awt.TextEvent;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XComboBox;
+import com.sun.star.awt.XContainerWindowProvider;
+import com.sun.star.awt.XControlContainer;
+import com.sun.star.awt.XDialog;
+import com.sun.star.awt.XFixedText;
+import com.sun.star.awt.XScrollBar;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XWindow;
+import com.sun.star.awt.XWindowPeer;
+import com.sun.star.uno.Exception;
+import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.ControlType;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Dock;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
-import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
-import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractAdjustmentListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractFocusListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.ReferencedFieldID;
@@ -75,25 +82,29 @@ import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpret
  */
 public class AdjustFields
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(AdjustFields.class);
+
   /**
-   * Präfix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
-   * Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber zur
-   * Unterscheidung des Präfix von den Benutzereingaben) und dem "<"-Zeichen.
+   * Präfix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die Zuordnung beginnt mit
+   * einem zero width space (nicht sichtbar, aber zur Unterscheidung des Präfix von den
+   * Benutzereingaben) und dem "<"-Zeichen.
    */
   private static final String TAG_PREFIX = "" + Character.toChars(0x200B)[0] + "<";
 
   /**
-   * Suffix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
-   * Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber zur
-   * Unterscheidung des Präfix von den Benutzereingaben) und dem ">"-Zeichen.
+   * Suffix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die Zuordnung beginnt mit
+   * einem zero width space (nicht sichtbar, aber zur Unterscheidung des Präfix von den
+   * Benutzereingaben) und dem ">"-Zeichen.
    */
   private static final String TAG_SUFFIX = "" + Character.toChars(0x200B)[0] + ">";
 
   /**
-   * Beschreibt einen regulären Ausdruck, mit dem nach Tags im Text gesucht
-   * werden kann. Ein Match liefert in Gruppe 1 den Text des Tags.
+   * Beschreibt einen regulären Ausdruck, mit dem nach Tags im Text gesucht werden kann. Ein Match
+   * liefert in Gruppe 1 den Text des Tags.
    */
-  private static final Pattern TAG_PATTERN = Pattern.compile("(" + TAG_PREFIX + "(.*?)" + TAG_SUFFIX + ")");
+  private static final Pattern TAG_PATTERN = Pattern
+      .compile("(" + TAG_PREFIX + "(.*?)" + TAG_SUFFIX + ")");
 
   private AdjustFields()
   {
@@ -115,11 +126,9 @@ public class AdjustFields
   public static void showAdjustFieldsDialog(final TextDocumentController documentController,
       MailMergeDatasource ds, ActionListener finishedListener)
   {
-    ReferencedFieldID[] fieldIDs =
-      documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(
-        ds.getColumnNames()));
-    ActionListener submitActionListener = e ->
-    {
+    ReferencedFieldID[] fieldIDs = documentController.getModel()
+        .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(ds.getColumnNames()));
+    ActionListener submitActionListener = e -> {
       Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
           .getSource();
       for (Map.Entry<String, FieldSubstitution> ent : mapIdToSubstitution.entrySet())
@@ -145,13 +154,12 @@ public class AdjustFields
           if (ele.isField())
             documentController.updateFormFields(ele.getValue());
         }
-        finishedListener
-            .actionPerformed(new ActionEvent(new Object(), 0, "AdjustFieldsDialogFinished"));
       }
+      finishedListener
+          .actionPerformed(new ActionEvent(new Object(), 0, "AdjustFieldsDialogFinished"));
     };
-    showFieldMappingDialog(fieldIDs, L.m("Altes Feld"), L.m("Neue Belegung"),
-        L.m("Felder anpassen"),
-      ds.getColumnNames(), submitActionListener, false);
+    showFieldMappingDialog("Felder anpassen", fieldIDs, L.m("Altes Feld"), L.m("Neue Belegung"),
+        L.m("Felder anpassen"), ds.getColumnNames(), submitActionListener, false);
   }
 
   /**
@@ -168,220 +176,227 @@ public class AdjustFields
   public static void showAddMissingColumnsDialog(TextDocumentController documentController,
       final MailMergeDatasource ds, ActionListener finishedListener)
   {
-    ReferencedFieldID[] fieldIDs =
-        documentController.getModel().getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(
-        ds.getColumnNames()));
-    ActionListener submitActionListener = e ->
-    {
-      Map<String, FieldSubstitution> mapIdToSubstitution =
-        (HashMap<String, FieldSubstitution>) e.getSource();
+    ReferencedFieldID[] fieldIDs = documentController.getModel()
+        .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(ds.getColumnNames()));
+    ActionListener submitActionListener = e -> {
+      Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
+          .getSource();
       ds.addColumns(mapIdToSubstitution);
       finishedListener
           .actionPerformed(new ActionEvent(new Object(), 0, "AddMissingDialogFinished"));
     };
-    showFieldMappingDialog(fieldIDs, L.m("Spalte"), L.m("Vorbelegung"), L.m("Spalten ergänzen"),
-      ds.getColumnNames(), submitActionListener, true);
+    showFieldMappingDialog("Tabellenspalten ergänzen", fieldIDs, L.m("Spalte"), L.m("Vorbelegung"),
+        L.m("Spalten ergänzen"), ds.getColumnNames(), submitActionListener, true);
   }
 
   /**
-   * Zeigt einen Dialog mit dem bestehende Felder fieldIDs über ein Textfeld neu
-   * belegt werden können; für die neue Belegung stehen die neuen Felder der
-   * aktuellen Datasource und Freitext zur Verfügung. Die Felder fieldIDs werden
-   * dabei in der Reihenfolge angezeigt, in der sie in der Liste aufgeführt sind, ein
-   * bereits aufgeführtes Feld wird aber nicht zweimal angezeigt. Ist bei einem Feld
-   * die Eigenschaft isTransformed()==true und ignoreIsTransformed == false, dann
-   * wird für dieses Feld nur die Eingabe einer 1-zu-1 Zuordnung von Feldern
-   * akzeptiert, das andere Zuordnungen für transformierte Felder derzeit nicht
-   * unterstützt werden.
+   * Zeigt einen Dialog mit dem bestehende Felder fieldIDs über ein Textfeld neu belegt werden
+   * können; für die neue Belegung stehen die neuen Felder der aktuellen Datasource und Freitext zur
+   * Verfügung. Die Felder fieldIDs werden dabei in der Reihenfolge angezeigt, in der sie in der
+   * Liste aufgeführt sind, ein bereits aufgeführtes Feld wird aber nicht zweimal angezeigt. Ist bei
+   * einem Feld die Eigenschaft isTransformed()==true und ignoreIsTransformed == false, dann wird
+   * für dieses Feld nur die Eingabe einer 1-zu-1 Zuordnung von Feldern akzeptiert, das andere
+   * Zuordnungen für transformierte Felder derzeit nicht unterstützt werden.
    *
-   * @param parent
-   *          Das Elternfenster dieses Dialogs.
    * @param fieldIDs
-   *          Die field-IDs der alten, bereits im Dokument enthaltenen Felder, die in
-   *          der gegebenen Reihenfolge angezeigt werden, Dupletten werden aber
-   *          entfernt.
-   * @param title
-   *          Die Titelzeile des Dialogs
+   *          Die field-IDs der alten, bereits im Dokument enthaltenen Felder, die in der gegebenen
+   *          Reihenfolge angezeigt werden, Dupletten werden aber entfernt.
    * @param labelOldFields
-   *          Die Spaltenüberschrift für die linke Spalte, in der die alten Felder
-   *          angezeigt werden.
+   *          Die Spaltenüberschrift für die linke Spalte, in der die alten Felder angezeigt werden.
    * @param labelNewFields
-   *          Die Spaltenüberschrift für die rechte Spalte, in dem die neue Zuordnung
-   *          getroffen wird.
+   *          Die Spaltenüberschrift für die rechte Spalte, in dem die neue Zuordnung getroffen
+   *          wird.
    * @param labelSubmitButton
-   *          Die Beschriftung des Submit-Knopfes unten rechts, der die entsprechende
-   *          Aktion auslöst.
+   *          Die Beschriftung des Submit-Knopfes unten rechts, der die entsprechende Aktion
+   *          auslöst.
    * @param fieldNames
-   *          Die Namen aller Serienbrieffelder, die in dem Mapping verwendet werden
-   *          können.
+   *          Die Namen aller Serienbrieffelder, die in dem Mapping verwendet werden können.
    * @param submitActionListener
-   *          Nach Beendigung des Dialogs über den Submit-Knopf (unten rechts) wird
-   *          die Methode submitActionListener.actionPerformed(actionEvent) in einem
-   *          separaten Thread aufgerufen. Dort kann der Code stehen, der gewünschten
-   *          Aktionen durchführt. Der ActionListener bekommt dabei in actionEvent
-   *          eine HashMap übergeben, die eine Zuordnung von den alten fieldIDs auf
-   *          den jeweiligen im Dialog gewählten Ersatzstring enthält.
+   *          Nach Beendigung des Dialogs über den Submit-Knopf (unten rechts) wird die Methode
+   *          submitActionListener.actionPerformed(actionEvent) in einem separaten Thread
+   *          aufgerufen. Dort kann der Code stehen, der gewünschten Aktionen durchführt. Der
+   *          ActionListener bekommt dabei in actionEvent eine HashMap übergeben, die eine Zuordnung
+   *          von den alten fieldIDs auf den jeweiligen im Dialog gewählten Ersatzstring enthält.
    * @param ignoreIsTransformed
-   *          falls true, werden Felder mit isTransformed()==true nicht speziell
-   *          behandelt und es gibt keine Einschränkungen bzw. der
-   *          Auswahlmöglichkeiten.
+   *          falls true, werden Felder mit isTransformed()==true nicht speziell behandelt und es
+   *          gibt keine Einschränkungen bzw. der Auswahlmöglichkeiten.
    */
-  private static void showFieldMappingDialog(
-      ReferencedFieldID[] fieldIDs, String labelOldFields,
-      String labelNewFields, String labelSubmitButton,
+  private static void showFieldMappingDialog(String title, ReferencedFieldID[] fieldIDs,
+      String labelOldFields, String labelNewFields, String labelSubmitButton,
       final List<String> fieldNames, final ActionListener submitActionListener,
       boolean ignoreIsTransformed)
   {
-    final XTextComponent[] currentField = new XTextComponent[] { null };
-    final Map<XTextComponent, ReferencedFieldID> mapXTextComponentToFieldname = new HashMap<>();
-    UNODialogFactory dialogFactory = new UNODialogFactory();
-    XWindow dialogWindow = dialogFactory.createDialog(780, 700, 0xF2F2F2);
-    dialogFactory.showDialog();
-
-    SimpleDialogLayout layout = new SimpleDialogLayout(dialogWindow);
-    layout.setMarginBetweenControls(15);
-    layout.setMarginTop(20);
-    layout.setMarginLeft(20);
-    layout.setWindowBottomMargin(10);
-
-    ControlProperties mailmergeLabel = new ControlProperties(ControlType.LABEL, "mailmergeLabel");
-    mailmergeLabel.setControlPercentSize(40, 20);
-    mailmergeLabel.setLabel("Serienbrieffeld");
-    ControlProperties mailmerge = new ControlProperties(ControlType.COMBOBOX, "mailmerge");
-    mailmerge.setControlPercentSize(60, 20);
-    mailmerge.setComboBoxDropDown(true);
-    XComboBox mailmergeButton = UNO.XComboBox(mailmerge.getXControl());
-    mailmergeButton.addItem("", (short) 0);
-    List<String> columnNames = new ArrayList<>(fieldNames);
-    Collections.sort(columnNames);
-    mailmergeButton.addItems(columnNames.toArray(new String[0]), (short) 1);
-    UNO.XTextComponent(mailmergeButton).setText(mailmergeButton.getItem((short) 0));
-    mailmergeButton.addItemListener(new AbstractItemListener()
+    try
     {
+      XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
+      XContainerWindowProvider provider = UnoRuntime.queryInterface(XContainerWindowProvider.class,
+          UNO.xMCF.createInstanceWithContext("com.sun.star.awt.ContainerWindowProvider",
+              UNO.defaultContext));
+      XWindow window = provider.createContainerWindow(
+          "vnd.sun.star.script:WollMux.edit_table_columns?location=application", "", peer, null);
+      XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
+      XDialog dialog = UnoRuntime.queryInterface(XDialog.class, window);
+      dialog.setTitle(title);
 
-      @Override
-      public void itemStateChanged(ItemEvent event)
-      {
-        if (event.Selected == 0)
-        {
-          return;
-        }
-        if (currentField[0] != null)
-        {
-          String text = TAG_PREFIX + mailmergeButton.getItem((short) event.Selected) + TAG_SUFFIX;
-          currentField[0].insertText(currentField[0].getSelection(), text);
-        }
-        UNO.XTextComponent(mailmergeButton).setText(mailmergeButton.getItem((short) 0));
-      }
-    });
-    List<ControlProperties> controls = new ArrayList<>();
-    controls.add(mailmergeLabel);
-    controls.add(mailmerge);
-    layout.addControlsToList(new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls, Optional.of(Dock.TOP)));
+      XTextComponent[] currentField = new XTextComponent[] { null };
+      Map<ReferencedFieldID, String> mapIdTwoNewValue = new HashMap<>();
 
-    ControlProperties column = new ControlProperties(ControlType.LABEL, "column");
-    column.setControlPercentSize(40, 20);
-    column.setLabel(labelOldFields);
-    ControlProperties preset = new ControlProperties(ControlType.LABEL, "preset");
-    preset.setControlPercentSize(40, 20);
-    preset.setLabel(labelNewFields);
-    controls = new ArrayList<>();
-    controls.add(column);
-    controls.add(preset);
-    layout.addControlsToList(new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls, Optional.of(Dock.TOP)));
+      XComboBox mailmergeFields = UNO.XComboBox(container.getControl("mailmergeFields"));
+      mailmergeFields.addItem("", (short) 0);
+      Collections.sort(fieldNames);
+      mailmergeFields.addItems(fieldNames.toArray(new String[fieldNames.size()]), (short) 1);
+      mailmergeFields.addItemListener(new AbstractItemListener()
+      {
 
-    HashSet<ReferencedFieldID> addedFields = new HashSet<>();
-    for (ReferencedFieldID fieldId : fieldIDs)
-    {
-      if (addedFields.contains(fieldId))
-      {
-        continue;
-      }
-      addedFields.add(fieldId);
-      ControlProperties label = new ControlProperties(ControlType.LABEL, "label_" + fieldId.getFieldId());
-      label.setControlPercentSize(40, 20);
-      label.setLabel(fieldId.getFieldId());
-      ControlProperties edit = new ControlProperties(ControlType.EDIT, "edit_" + fieldId.getFieldId());
-      edit.setControlPercentSize(60, 20);
-      XTextComponent editField = UNO.XTextComponent(edit.getXControl());
-      UNO.XWindow(edit.getXControl()).addFocusListener(new AbstractFocusListener()
-      {
         @Override
-        public void focusGained(com.sun.star.awt.FocusEvent event)
+        public void itemStateChanged(ItemEvent event)
         {
-          currentField[0] = editField;
+          if (event.Selected == 0)
+          {
+            return;
+          }
+          if (currentField[0] != null)
+          {
+            String text = TAG_PREFIX + mailmergeFields.getItem((short) event.Selected) + TAG_SUFFIX;
+            currentField[0].insertText(currentField[0].getSelection(), text);
+          }
+          UNO.XTextComponent(mailmergeFields).setText(mailmergeFields.getItem((short) 0));
         }
       });
-      mapXTextComponentToFieldname.put(editField, fieldId);
-      controls = new ArrayList<>();
-      controls.add(label);
-      controls.add(edit);
-      layout.addControlsToList(new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls, Optional.of(Dock.TOP)));
-    }
 
-    ControlProperties abort = new ControlProperties(ControlType.BUTTON, "abort");
-    abort.setControlPercentSize(50, 40);
-    abort.setLabel("Abbrechen");
-    XButton abortXBtn = UNO.XButton(abort.getXControl());
-    abortXBtn.addActionListener(new AbstractActionListener()
-    {
-      @Override
-      public void actionPerformed(com.sun.star.awt.ActionEvent event)
+      XFixedText leftColumn = UNO.XFixedText(container.getControl("column"));
+      leftColumn.setText(labelOldFields);
+
+      XFixedText rightColumn = UNO.XFixedText(container.getControl("values"));
+      rightColumn.setText(labelNewFields);
+
+      XScrollBar scrollBar = UnoRuntime.queryInterface(XScrollBar.class,
+          container.getControl("ScrollBar"));
+      scrollBar.setMaximum(fieldIDs.length);
+      AbstractAdjustmentListener scrollListener = event -> update(event.Value, container, fieldIDs,
+          mapIdTwoNewValue);
+      scrollBar.addAdjustmentListener(scrollListener);
+
+      for (int i = 0; i < 10; i++)
       {
-        dialogFactory.closeDialog();
-      }
-    });
-
-    ControlProperties edit = new ControlProperties(ControlType.BUTTON, "add");
-    edit.setControlPercentSize(50, 40);
-    edit.setLabel(labelSubmitButton);
-    XButton editXBtn = UNO.XButton(edit.getXControl());
-    editXBtn.addActionListener(new AbstractActionListener()
-    {
-
-      @Override
-      public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
-      {
-        final HashMap<String, FieldSubstitution> result = new HashMap<>();
-
-        for (Map.Entry<XTextComponent, ReferencedFieldID> entry : mapXTextComponentToFieldname.entrySet())
+        int index = i;
+        XTextComponent field = UNO.XTextComponent(container.getControl("TextField" + index));
+        field.addTextListener(new AbstractTextListener()
         {
-          if (!isContentValid(entry.getKey(), entry.getValue().isTransformed() && !ignoreIsTransformed))
-            continue;
-          FieldSubstitution subst = new TextDocumentModel.FieldSubstitution();
-          for (ContentElement ce : getContent(entry.getKey()))
+
+          @Override
+          public void textChanged(TextEvent event)
           {
-            if (ce.isTag())
-              subst.addField(ce.toString());
-            else
-              subst.addFixedText(ce.toString());
+            String labelText = UNO.XFixedText(container.getControl("Label" + index)).getText();
+            Optional<ReferencedFieldID> optionalId = Arrays.stream(fieldIDs)
+                .filter(id -> id.getFieldId().equals(labelText)).findFirst();
+            optionalId.ifPresent(id -> mapIdTwoNewValue.put(id, field.getText()));
           }
-          result.put(entry.getValue().getFieldId(), subst);
-        }
-
-        dialogFactory.closeDialog();
-        if (submitActionListener != null)
-          submitActionListener
-            .actionPerformed(new ActionEvent(result, 0, "showSubstitutionDialogReturned"));
+        });
+        UNO.XWindow(field).addFocusListener(new AbstractFocusListener()
+        {
+          @Override
+          public void focusGained(com.sun.star.awt.FocusEvent event)
+          {
+            currentField[0] = field;
+          }
+        });
       }
-    });
 
+      XButton submitXBtn = UNO.XButton(container.getControl("submit"));
+      submitXBtn.setLabel(labelSubmitButton);
+      submitXBtn.addActionListener(new AbstractActionListener()
+      {
 
-    controls = new ArrayList<>();
-    controls.add(abort);
-    controls.add(edit);
-    layout.addControlsToList(new ControlModel(Orientation.HORIZONTAL, Align.NONE, controls, Optional.of(Dock.BOTTOM)));
+        @Override
+        public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
+        {
+          final HashMap<String, FieldSubstitution> result = new HashMap<>();
 
-    layout.draw();
+          for (Map.Entry<ReferencedFieldID, String> entry : mapIdTwoNewValue.entrySet())
+          {
+            if (!isContentValid(entry.getValue(),
+                entry.getKey().isTransformed() && !ignoreIsTransformed))
+            {
+              continue;
+            }
+            FieldSubstitution subst = new TextDocumentModel.FieldSubstitution();
+            for (ContentElement ce : getContent(entry.getValue()))
+            {
+              if (ce.isTag())
+                subst.addField(ce.toString());
+              else
+                subst.addFixedText(ce.toString());
+            }
+            result.put(entry.getKey().getFieldId(), subst);
+          }
+
+          dialog.endExecute();
+          if (submitActionListener != null)
+            submitActionListener
+                .actionPerformed(new ActionEvent(result, 0, "showSubstitutionDialogReturned"));
+        }
+      });
+
+      XButton abortXBtn = UNO.XButton(container.getControl("abort"));
+      abortXBtn.addActionListener(new AbstractActionListener()
+      {
+        @Override
+        public void actionPerformed(com.sun.star.awt.ActionEvent event)
+        {
+          dialog.endExecute();
+        }
+      });
+
+      update(0, container, fieldIDs, mapIdTwoNewValue);
+      dialog.execute();
+    } catch (Exception e)
+    {
+      LOGGER.error("Tabellenspalten-Bearbeiten-Dialog konnte nicht angezeigt werden.", e);
+    }
   }
 
-  private static boolean isContentValid(XTextComponent compo, boolean isTransformed)
+  /**
+   * Aktualisiert die Steuerelemente für die Feldanpassungen an Hand der Scrollbar.
+   *
+   * @param value
+   *          Der Wert der Scrollbar.
+   * @param container
+   *          Der ControlContainer mit allen Steuerelementen.
+   * @param fieldIds
+   *          Die field-IDs der alten, bereits im Dokument enthaltenen Felder, die in der gegebenen
+   *          Reihenfolge angezeigt werden, Dupletten werden aber entfernt.
+   * @param mapIdTwoNewValue
+   *          Mapping von FieldIds auf deren neuen Wert.
+   */
+  private static void update(int value, XControlContainer container, ReferencedFieldID[] fieldIDs,
+      Map<ReferencedFieldID, String> mapIdTwoNewValue)
+  {
+    for (int i = 0; i < 10; i++)
+    {
+      XFixedText label = UNO.XFixedText(container.getControl("Label" + i));
+      XTextComponent field = UNO.XTextComponent(container.getControl("TextField" + i));
+      // Nicht benötigte Textfelder ausblenden
+      if (i >= fieldIDs.length)
+      {
+        UNO.XWindow(field).setVisible(false);
+      } else
+      {
+        int index = value + i;
+        String id = fieldIDs[index].getFieldId();
+        label.setText(id);
+        field.setText(mapIdTwoNewValue.getOrDefault(id, ""));
+      }
+    }
+  }
+
+  private static boolean isContentValid(String text, boolean isTransformed)
   {
     if (!isTransformed)
     {
       return true;
     }
-    List<ContentElement> c = getContent(compo);
+    List<ContentElement> c = getContent(text);
     if (c.isEmpty())
     {
       return true;
@@ -390,41 +405,39 @@ public class AdjustFields
   }
 
   /**
-   * Liefert eine Liste von {@link ContentElement}-Objekten, die den aktuellen
-   * Inhalt der JTextComponent repräsentiert und dabei enthaltenen Text und
-   * evtl. enthaltene Tags als eigene Objekte kapselt.
+   * Liefert eine Liste von {@link ContentElement}-Objekten, die den aktuellen Inhalt der
+   * JTextComponent repräsentiert und dabei enthaltenen Text und evtl. enthaltene Tags als eigene
+   * Objekte kapselt.
    */
-  private static List<ContentElement> getContent(XTextComponent compo)
+  private static List<ContentElement> getContent(String text)
   {
     List<ContentElement> list = new ArrayList<>();
-    String t = compo.getText();
-    Matcher m = TAG_PATTERN.matcher(t);
+    Matcher m = TAG_PATTERN.matcher(text);
     int lastEndPos = 0;
     int startPos = 0;
     while (m.find())
     {
       startPos = m.start();
       String tag = m.group(2);
-      list.add(new ContentElement(t.substring(lastEndPos, startPos), false));
+      list.add(new ContentElement(text.substring(lastEndPos, startPos), false));
       if (tag.length() > 0)
       {
         list.add(new ContentElement(tag, true));
       }
       lastEndPos = m.end();
     }
-    String text = t.substring(lastEndPos);
-    if (text.length() > 0)
+    String t = text.substring(lastEndPos);
+    if (t.length() > 0)
     {
-      list.add(new ContentElement(text, false));
+      list.add(new ContentElement(t, false));
     }
     return list;
   }
 
   /**
-   * Beschreibt ein Element des Inhalts dieser JTextComponent und kann entweder
-   * ein eingefügtes Tag oder ein normaler String sein. Auskunft über den Typ
-   * des Elements erteilt die Methode isTag(), auf den String-Wert kann über die
-   * toString()-Methode zugegriffen werden.
+   * Beschreibt ein Element des Inhalts dieser JTextComponent und kann entweder ein eingefügtes Tag
+   * oder ein normaler String sein. Auskunft über den Typ des Elements erteilt die Methode isTag(),
+   * auf den String-Wert kann über die toString()-Methode zugegriffen werden.
    */
   public static class ContentElement
   {
@@ -445,8 +458,8 @@ public class AdjustFields
     }
 
     /**
-     * Liefert true, wenn dieses Element ein Tag ist oder false, wenn es sich um
-     * normalen Text handelt.
+     * Liefert true, wenn dieses Element ein Tag ist oder false, wenn es sich um normalen Text
+     * handelt.
      */
     public boolean isTag()
     {
