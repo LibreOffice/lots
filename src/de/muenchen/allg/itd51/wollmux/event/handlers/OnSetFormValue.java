@@ -36,7 +36,7 @@ public class OnSetFormValue extends BasicEvent
         .getTextDocumentController(doc);
 
     FormController formModel = DocumentManager.getDocumentManager().getFormModel(doc);
-    if (formModel != null)
+    if (formModel != null && formModel.hasFieldId(id))
     {
       // Werte über den FormController (den das FormModel kennt) setzen lassen
       // (damit sind auch automatisch alle Abhängigkeiten richtig aufgelöst)
