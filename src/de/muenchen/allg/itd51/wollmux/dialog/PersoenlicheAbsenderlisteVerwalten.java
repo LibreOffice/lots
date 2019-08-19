@@ -220,12 +220,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     txtFieldEMail = UNO.XTextComponent(controlContainer.getControl("txtEmail"));
     txtFieldOrga = UNO.XTextComponent(controlContainer.getControl("txtOrga"));
 
-    XButton okBtn = UNO.XButton(controlContainer.getControl("okBtn"));
-    okBtn.addActionListener(okActionListener);
-
-    XButton abortBtn = UNO.XButton(controlContainer.getControl("abortBtn"));
-    abortBtn.addActionListener(abortBtnActionListener);
-
     searchBtn = UNO.XButton(controlContainer.getControl("btnSearch"));
     searchBtn.addActionListener(startSearchBtnActionListener);
 
@@ -282,7 +276,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       {
         palListe.addItem(ds.toString(), (short) count);
       }
-      
+
       cachedPAL.add(ds);
 
       if (ds.isSelectedDataset())
@@ -393,8 +387,8 @@ public class PersoenlicheAbsenderlisteVerwalten
     for (short index : selectedItemsPos)
     {
       DJDataset dsToAdd = resultDJDatasetList.get(index);
-      
-      if (!dj.getLOS().isEmpty()) 
+
+      if (!dj.getLOS().isEmpty())
       {
         for (Dataset ds : dj.getLOS())
         {
@@ -403,12 +397,12 @@ public class PersoenlicheAbsenderlisteVerwalten
             if (ds.get("OID").equals(dsToAdd.get("OID"))) {
               short res = InfoDialog.showYesNoModal("PAL",
                   "Datensatz ist bereits in der Absenderliste vorhanden, Datensatz trotzdem erneut speichern?");
-  
+
               if (res == MessageBoxResults.YES)
               {
                 entriesToAdd.add(dsToAdd);
                 break;
-              } 
+              }
             } else
             {
               entriesToAdd.add(dsToAdd);
@@ -419,7 +413,7 @@ public class PersoenlicheAbsenderlisteVerwalten
             LOGGER.error("", e);
           }
         }
-      } else 
+      } else
       {
         entriesToAdd.add(dsToAdd);
       }
@@ -449,7 +443,7 @@ public class PersoenlicheAbsenderlisteVerwalten
 
       entry.copy();
     }
-    
+
     WollMuxEventHandler.getInstance().handlePALChangedNotify();
     addPalEntriesToListBox();
   }
@@ -551,35 +545,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     short newItemIndex = (palListe.getItemCount());
     palListe.addItem("Neuer Datensatz", newItemIndex);
     editEntry(newItemIndex);
-  };
-
-  private AbstractActionListener abortBtnActionListener = event -> {
-    WollMuxEventHandler.getInstance().handlePALChangedNotify();
-    palListener.dialogClosed();
-    dialog.endExecute();
-  };
-
-  private AbstractActionListener okActionListener = event -> {
-    int selectedIndex = palListe.getSelectedItemPos();
-
-    if (selectedIndex == -1)
-    {
-      dialog.endExecute();
-      return;
-    }
-
-    DJDataset selectedDataset = cachedPAL.get(selectedIndex);
-
-    if (selectedDataset == null)
-    {
-      dialog.endExecute();
-      return;
-    }
-
-    selectedDataset.select();
-    WollMuxEventHandler.getInstance().handlePALChangedNotify();
-    palListener.dialogClosed();
-    dialog.endExecute();
   };
 
   private void setLdapSearchResults(QueryResults data)

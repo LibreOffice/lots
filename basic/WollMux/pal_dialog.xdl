@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
-<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="pal_dialog" dlg:left="141" dlg:top="119" dlg:width="419" dlg:height="233" dlg:closeable="true" dlg:moveable="true" dlg:title="Persönliche Absenderliste">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="pal_dialog" dlg:left="141" dlg:top="119" dlg:width="419" dlg:height="195" dlg:closeable="true" dlg:moveable="true" dlg:title="Persönliche Absenderliste">
  <dlg:bulletinboard>
   <dlg:text dlg:id="Label1" dlg:tab-index="0" dlg:left="9" dlg:top="5" dlg:width="214" dlg:height="16" dlg:value="Sie können nach Vorname, Nachname, E-Mail und Orga-Einheit suchen"/>
   <dlg:text dlg:id="Label2" dlg:tab-index="1" dlg:left="9" dlg:top="30" dlg:width="59" dlg:height="14" dlg:value="Nachname"/>
@@ -8,8 +8,6 @@
   <dlg:text dlg:id="Label4" dlg:tab-index="3" dlg:left="198" dlg:top="30" dlg:width="59" dlg:height="14" dlg:value="Vorname"/>
   <dlg:text dlg:id="Label5" dlg:tab-index="4" dlg:left="198" dlg:top="48" dlg:width="59" dlg:height="14" dlg:value="Orga"/>
   <dlg:button dlg:id="addToPALBtn" dlg:tab-index="11" dlg:left="168" dlg:top="69" dlg:width="25" dlg:height="14" dlg:value="-&gt;"/>
-  <dlg:button dlg:id="abortBtn" dlg:tab-index="12" dlg:left="7" dlg:top="211" dlg:width="88" dlg:height="18" dlg:value="Abbrechen"/>
-  <dlg:button dlg:id="okBtn" dlg:tab-index="13" dlg:left="322" dlg:top="211" dlg:width="88" dlg:height="18" dlg:value="OK"/>
   <dlg:menulist dlg:id="palListe" dlg:tab-index="10" dlg:left="198" dlg:top="69" dlg:width="213" dlg:height="103"/>
   <dlg:menulist dlg:id="searchResultList" dlg:tab-index="9" dlg:left="9" dlg:top="69" dlg:width="153" dlg:height="103"/>
   <dlg:textfield dlg:id="txtNachname" dlg:tab-index="5" dlg:left="72" dlg:top="30" dlg:width="90" dlg:height="14"/>
