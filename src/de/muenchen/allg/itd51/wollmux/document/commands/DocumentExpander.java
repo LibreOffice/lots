@@ -15,6 +15,7 @@ import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.io.IOException;
+import com.sun.star.io.XInputStream;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.style.XStyleFamiliesSupplier;
 import com.sun.star.style.XStyleLoader;
@@ -336,11 +337,15 @@ class DocumentExpander extends AbstractExecutor
     // nicht auflösbar. http://qa.openoffice.org/issues/show_bug.cgi?id=57049
     // Hier wird versucht, die URL über den java-Klasse url aufzulösen und bei
     // Fehlern abgebrochen.
-    WollMuxSingleton.checkURL(url);
 
     // URL durch den URLTransformer von OOo jagen, damit die URL auch von OOo
     // verarbeitet werden kann.
     String urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
+
+    if (!DocumentLoader.getInstance().hasDocument(urlStr))
+    {
+      WollMuxSingleton.checkURL(url);
+    }
 
     // Workaround: Alten Paragraphenstyle merken. Problembeschreibung siehe
     // http://qa.openoffice.org/issues/show_bug.cgi?id=60475
@@ -423,14 +428,19 @@ class DocumentExpander extends AbstractExecutor
   private void insertStylesFromURL(DocumentCommand cmd, Set<String> styles, URL url)
       throws java.io.IOException, IOException
   {
-    // Workaround für Einfrierfehler von OOo, wenn ressource nicht auflösbar
-    // (ich habe nicht geprüft, ob das für insertStylesFromURL notwendig ist,
-    // aber schaden kann es bestimmt nicht)
-    WollMuxSingleton.checkURL(url);
+    // Workaround: OOo friert ein, wenn ressource bei insertDocumentFromURL
+    // nicht auflösbar. http://qa.openoffice.org/issues/show_bug.cgi?id=57049
+    // Hier wird versucht, die URL über den java-Klasse url aufzulösen und bei
+    // Fehlern abgebrochen.
 
     // URL durch den URLTransformer von OOo jagen, damit die URL auch von OOo
     // verarbeitet werden kann.
     String urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
+
+    if (!DocumentLoader.getInstance().hasDocument(urlStr))
+    {
+      WollMuxSingleton.checkURL(url);
+    }
 
     // Styles einfügen:
     try
@@ -449,7 +459,9 @@ class DocumentExpander extends AbstractExecutor
         Boolean.valueOf(styles.contains("numberingstyles")));
       XStyleFamiliesSupplier sfs = UNO.XStyleFamiliesSupplier(this.documentCommandInterpreter.getModel().doc);
       XStyleLoader loader = UNO.XStyleLoader(sfs.getStyleFamilies());
-      loader.loadStylesFromURL(urlStr, props.getProps());
+      XInputStream stream = DocumentLoader.getInstance().getDocumentStream(urlStr);
+      props.setPropertyValue("InputStream", stream);
+      loader.loadStylesFromURL("private:stream", props.getProps());
     }
     catch (NullPointerException e)
     {
