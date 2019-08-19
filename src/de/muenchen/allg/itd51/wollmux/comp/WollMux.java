@@ -36,9 +36,6 @@
 
 package de.muenchen.allg.itd51.wollmux.comp;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -555,26 +552,64 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
 
   private void createMenuItems()
   {
-    // "Extras->Seriendruck (WollMux)" erzeugen:
-    List<String> removeButtonsFor = new ArrayList<>();
-    removeButtonsFor.add("wollmux:Seriendruck");
-    removeButtonsFor.add(Dispatch.DISP_wmAbout);
+    // Alten Seriendruck-Eintrag löschen
+    deleteMenuButton("wollmux:Seriendruck", ".uno:ToolsMenu");
+    deleteMenuButton(Dispatch.DISP_wmAbout, ".uno:HelpMenu");
     WollMux.createMenuButton(Dispatch.DISP_wmAbout,
       L.m("Info über Vorlagen und Formulare (WollMux)"), ".uno:HelpMenu",
-      ".uno:About", removeButtonsFor);
+        ".uno:About");
   }
 
   /**
-   * Erzeugt einen persistenten Menüeintrag mit der KommandoUrl cmdUrl und dem Label
-   * label in dem durch mit insertIntoMenuUrl beschriebenen Toplevelmenü des Writers
-   * und ordnet ihn direkt oberhalb des bereits bestehenden Menüpunktes mit der URL
-   * insertBeforeElementUrl an. Alle Buttons, deren Url in der Liste removeCmdUrls
-   * aufgeführt sind werden dabei vorher gelöscht (v.a. sollte cmdUrl aufgeführt
-   * sein, damit nicht der selbe Button doppelt erscheint).
+   * Löscht einen persistenten Menüeintrag aus dem Toplevelmenü des Writers.
+   *
+   * @param removeCmdUrl
+   *          Die Dispatch-URL des Menüeintrags.
+   * @param deleteFromMenuUrl
+   *          Das Toplevelmenü.
+   */
+  private static void deleteMenuButton(String removeCmdUrl, String deleteFromMenuUrl)
+  {
+    final String settingsUrl = "private:resource/menubar/menubar";
+
+    try
+    {
+      // Menüleiste aus des Moduls com.sun.star.text.TextDocument holen:
+      XModuleUIConfigurationManagerSupplier suppl = UNO.XModuleUIConfigurationManagerSupplier(
+          UNO.createUNOService("com.sun.star.ui.ModuleUIConfigurationManagerSupplier"));
+      XUIConfigurationManager cfgMgr = UNO.XUIConfigurationManager(
+          suppl.getUIConfigurationManager("com.sun.star.text.TextDocument"));
+      XIndexAccess menubar = UNO.XIndexAccess(cfgMgr.getSettings(settingsUrl, true));
+
+      int idx = findElementWithCmdURL(menubar, deleteFromMenuUrl);
+      if (idx >= 0)
+      {
+        UnoProps desc = new UnoProps((PropertyValue[]) menubar.getByIndex(idx));
+        // Elemente des .uno:ToolsMenu besorgen:
+        XIndexContainer toolsMenu = UNO
+            .XIndexContainer(desc.getPropertyValue("ItemDescriptorContainer"));
+
+        idx = findElementWithCmdURL(toolsMenu, removeCmdUrl);
+        if (idx >= 0)
+        {
+          toolsMenu.removeByIndex(idx);
+          cfgMgr.replaceSettings(settingsUrl, menubar);
+          UNO.XUIConfigurationPersistence(cfgMgr).store();
+        }
+      }
+    } catch (Exception e)
+    {
+    }
+  }
+
+  /**
+   * Erzeugt einen persistenten Menüeintrag mit der KommandoUrl cmdUrl und dem Label label in dem
+   * durch mit insertIntoMenuUrl beschriebenen Toplevelmenü des Writers und ordnet ihn direkt
+   * oberhalb des bereits bestehenden Menüpunktes mit der URL insertBeforeElementUrl an. Der Button
+   * sollte vorher mit {@link #deleteMenuButton(String, String)} gelöscht werden.
    */
   private static void createMenuButton(String cmdUrl, String label,
-      String insertIntoMenuUrl, String insertBeforeElementUrl,
-      List<String> removeCmdUrls)
+      String insertIntoMenuUrl, String insertBeforeElementUrl)
   {
     final String settingsUrl = "private:resource/menubar/menubar";
 
@@ -594,13 +629,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
         // Elemente des .uno:ToolsMenu besorgen:
         XIndexContainer toolsMenu =
           UNO.XIndexContainer(desc.getPropertyValue("ItemDescriptorContainer"));
-
-        // Seriendruck-Button löschen, wenn er bereits vorhanden ist.
-        for (String rCmdUrl : removeCmdUrls)
-        {
-          idx = findElementWithCmdURL(toolsMenu, rCmdUrl);
-          if (idx >= 0) toolsMenu.removeByIndex(idx);
-        }
 
         // SeriendruckAssistent suchen
         idx = findElementWithCmdURL(toolsMenu, insertBeforeElementUrl);
