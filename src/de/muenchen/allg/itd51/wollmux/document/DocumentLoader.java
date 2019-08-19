@@ -2,7 +2,6 @@ package de.muenchen.allg.itd51.wollmux.document;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutionException;
@@ -36,11 +35,11 @@ public class DocumentLoader
     .getLogger(DocumentLoader.class);
 
   private static DocumentLoader instance;
-  private LoadingCache<URL, ByteBuffer> cache;
+  private LoadingCache<String, ByteBuffer> cache;
 
   /**
    * Zugriff auf den DocumentLoader als Singleton.
-   * 
+   *
    * @return Singleton-Instanz des DocumentLoaders
    */
   public static DocumentLoader getInstance()
@@ -57,20 +56,20 @@ public class DocumentLoader
     cache = CacheBuilder.newBuilder()
       .maximumSize(50)
       .expireAfterAccess(8, TimeUnit.HOURS)
-      .build(new CacheLoader<URL, ByteBuffer>()
+        .build(new CacheLoader<String, ByteBuffer>()
       {
         @Override
-        public ByteBuffer load(URL url) throws Exception
+          public ByteBuffer load(String url) throws Exception
         {
           return downloadDocument(url);
         }
       });
   }
 
-  private ByteBuffer downloadDocument(URL url)
+  private ByteBuffer downloadDocument(String url)
   {
     byte[] buf = null;
-    try (InputStream in = url.openStream())
+    try (InputStream in = new URL(url).openStream())
     {
       buf = IOUtils.toByteArray(in);
     } catch (IOException e)
@@ -86,7 +85,7 @@ public class DocumentLoader
   /**
    * Lädt ein Dokument und fügt es an der Stelle von target ein. target muss den
    * Service XDocumentInsertable unterstützen.
-   * 
+   *
    * @param target
    * @param path   URL des Dokuments
    */
@@ -94,7 +93,7 @@ public class DocumentLoader
   {
     try
     {
-      ByteBuffer buf = cache.get(new URL(path));
+      ByteBuffer buf = cache.get(path);
       XInputStream in = new ByteBufferInputStream(buf);
       UNO.XDocumentInsertable(target).insertDocumentFromURL(path,
         new PropertyValue[] {
@@ -102,20 +101,19 @@ public class DocumentLoader
           new PropertyValue("FilterName", -1, "StarOffice XML (Writer)",
             PropertyState.DIRECT_VALUE)
         });
-    } catch (MalformedURLException | IllegalArgumentException
-      | com.sun.star.io.IOException | ExecutionException e)
+    } catch (IllegalArgumentException | com.sun.star.io.IOException | ExecutionException e)
     {
       LOGGER.error("", e);
     }
   }
-  
+
   /**
    * Lädt ein Dokument und öffnet es.
-   * 
+   *
    * @param path        URL des Dokuments
    * @param asTemplate  behandelt das Dokument als Template
    * @param allowMacros erlaubt die Ausführung von Makros
-   * 
+   *
    * @return
    */
   public XComponent loadDocument(String path, boolean asTemplate,
@@ -123,19 +121,34 @@ public class DocumentLoader
   {
     try
     {
-      ByteBuffer buf = cache.get(new URL(path));
+      ByteBuffer buf = cache.get(path);
       XInputStream in = new ByteBufferInputStream(buf);
       return UNO.loadComponentFromURL(path, asTemplate, allowMacros,
-          new PropertyValue("InputStream", -1, in, PropertyState.DIRECT_VALUE),
-          new PropertyValue("FilterName", -1, "StarOffice XML (Writer)",
-            PropertyState.DIRECT_VALUE)
-      );
-    }
-    catch (UnoHelperException | MalformedURLException | ExecutionException e)
+          new PropertyValue("InputStream", -1, in, PropertyState.DIRECT_VALUE), new PropertyValue(
+              "FilterName", -1, "StarOffice XML (Writer)", PropertyState.DIRECT_VALUE));
+    } catch (UnoHelperException | ExecutionException e)
     {
       LOGGER.error("", e);
     }
 
+    return null;
+  }
+
+  public boolean hasDocument(String path)
+  {
+    return cache.getIfPresent(path) != null;
+  }
+
+  public XInputStream getDocumentStream(String path)
+  {
+    try
+    {
+      ByteBuffer buf = cache.get(path);
+      return new ByteBufferInputStream(buf);
+    } catch (ExecutionException e)
+    {
+      LOGGER.error("", e);
+    }
     return null;
   }
 }
