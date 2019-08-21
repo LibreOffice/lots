@@ -68,14 +68,9 @@ import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
-import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
-import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
-import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.email.AuthenticationDialog;
@@ -107,9 +102,7 @@ public class MailMergeNew
    * geschlossen wurde.
    */
   private ActionListener abortListener = null;
-  
-  private TextDocumentController documentController;
-  
+
   /**
    * Stellt die Felder und Datensätze für die Serienbriefverarbeitung bereit.
    */
@@ -129,7 +122,6 @@ public class MailMergeNew
    */
   public MailMergeNew(TextDocumentController documentController, ActionListener abortListener)
   {
-    this.documentController = documentController;
     this.ds = new MailMergeDatasource(documentController);
     this.abortListener = abortListener;
   }
@@ -143,58 +135,6 @@ public class MailMergeNew
   {
     if (abortListener != null)
       abortListener.actionPerformed(new ActionEvent(this, 0, ""));
-  }
-
-  /**
-   * Prüft, ob sich in der akutellen Selektion ein transformiertes Feld befindet und
-   * liefert ein mit Hilfe der TrafoDialogFactory erzeugtes zugehöriges
-   * TrafoDialog-Objekt zurück, oder null, wenn keine transformierte Funktion
-   * selektiert ist oder für die Trafo kein Dialog existiert.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  private TrafoDialog getTrafoDialogForCurrentSelection()
-  {
-    ConfigThingy trafoConf = documentController.getModel().getFormFieldTrafoFromSelection();
-    if (trafoConf == null) {
-      return null;
-    }
-
-    final String trafoName = trafoConf.getName();
-
-    TrafoDialogParameters params = new TrafoDialogParameters();
-    params.conf = trafoConf;
-    params.isValid = true;
-    params.fieldNames = ds.getColumnNames();
-    params.closeAction = new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        TrafoDialog dialog = (TrafoDialog) e.getSource();
-        TrafoDialogParameters status = dialog.getExitStatus();
-        if (status.isValid)
-        {
-          try
-          {
-            documentController.setTrafo(trafoName, status.conf);
-          }
-          catch (Exception x)
-          {
-            LOGGER.error("", x);
-          }
-        }
-      }
-    };
-
-    try
-    {
-      return TrafoDialogFactory.createDialog(params);
-    }
-    catch (UnavailableException e)
-    {
-      return null;
-    }
   }
 
   /**
@@ -348,7 +288,7 @@ public class MailMergeNew
 
     HashMap<String, String> dataset = new HashMap<>((HashMap<String, String>) pmod
         .getProp(MailMergeController.PROP_DATASET_EXPORT, new HashMap<String, String>()));
-    
+
     String filename = replaceTextByMergeFieldValue((String) pmod.getProp(MailMergeController.PROP_FILEPATTERN, null),
         dataset);
 
@@ -363,13 +303,13 @@ public class MailMergeNew
 
     return new File(outputDir, filename);
   }
-  
+
   /**
    * Ersetzt Serienbrieffelder im Format '{{Name}}' durch den entsprechenden Wert im Datensatz.
-   * 
+   *
    * @param text: Zu ersetzender Text der Serienbrieffelder im Format '{{Name}}' enthält
    * @param dataset: Key = Serienbrieffeld, Value = Wert des Datensatzes
-   * @return 
+   * @return
    */
   private static String replaceTextByMergeFieldValue(String text,
       HashMap<String, String> dataset)
@@ -377,7 +317,7 @@ public class MailMergeNew
     for (Entry<String, String> entry : dataset.entrySet())
     {
       String mergeFieldWithTags = addMergeFieldTags(entry.getKey());
-      
+
       if (text.contains(mergeFieldWithTags))
       {
         text = text.replace(mergeFieldWithTags, entry.getValue());
@@ -386,7 +326,7 @@ public class MailMergeNew
 
     return text;
   }
-  
+
   public static String addMergeFieldTags(String mergeField) {
     return "{{" + mergeField + "}}";
   }
@@ -423,7 +363,7 @@ public class MailMergeNew
       {
         LOGGER.error("", e);
       }
-    
+
     if (tmpOutDir == null)
     {
       InfoDialog.showInfoModal(MailMergeController.MAIL_ERROR_MESSAGE_TITLE, L.m(
@@ -465,13 +405,13 @@ public class MailMergeNew
       pmod.getProp(MailMergeController.PROP_EMAIL_SUBJECT, L.m("<kein Betreff>")).toString();
     String message =
       (String) pmod.getProp(MailMergeController.PROP_EMAIL_MESSAGE_TEXTTAGS, null);
-    
+
     try
     {
       EMailSender mail = new EMailSender();
-      mail.createNewMultipartMail(from, to, replaceTextByMergeFieldValue(subject, ds), 
+      mail.createNewMultipartMail(from, to, replaceTextByMergeFieldValue(subject, ds),
           replaceTextByMergeFieldValue(message, ds));
-      
+
       smtpSettings = (MailServerSettings) pmod
           .getProp(MailMergeController.PROP_EMAIL_MAIL_SERVER_SETTINGS, null);
 
@@ -497,7 +437,7 @@ public class MailMergeNew
           LOGGER.error("", e);
         }
       };
-      
+
       if ((smtpSettings.getUsername() != null && !smtpSettings.getUsername().isEmpty())
           && (smtpSettings.getPassword() == null || smtpSettings.getPassword().isEmpty()))
         new AuthenticationDialog(smtpSettings.getUsername(), authDialogListener);
@@ -636,7 +576,7 @@ public class MailMergeNew
       {
     	  outFilePath = outFilePath.replace("\\", "/");
       }
-      
+
       com.sun.star.util.URL url = UNO.getParsedUNOUrl(outFilePath);
 
       // storeTOurl() has to be used instead of storeASurl() for PDF export
@@ -646,7 +586,7 @@ public class MailMergeNew
     {
       LOGGER.error("", x);
     }
-    
+
     return outFile;
   }
 }

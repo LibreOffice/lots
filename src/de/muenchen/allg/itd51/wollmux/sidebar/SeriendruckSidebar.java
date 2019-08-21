@@ -51,7 +51,6 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractCloseListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.dialog.AbstractNotifier;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.AdjustFields;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.CalcModel;
@@ -65,7 +64,6 @@ import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailmergeWizardController
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.SpecialField;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.IfThenElseDialog;
-import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -201,17 +199,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
           break;
 
         case 1:
-          // ConfigThingy für leere Gender-Funktion zusammenbauen.
-          ConfigThingy genderConf = GenderDialog
-              .generateGenderTrafoConf(mailMerge.getDs().getColumnNames().get(0), "", "", "");
-
-          TrafoDialogParameters params = new TrafoDialogParameters();
-          params.conf = new ConfigThingy("Func");
-          params.conf.addChild(genderConf);
-          params.isValid = true;
-          params.fieldNames = mailMerge.getDs().getColumnNames();
-
-          new GenderDialog(params, textDocumentController);
+          new GenderDialog(mailMerge.getDs().getColumnNames(), textDocumentController);
           break;
 
         case 2:
