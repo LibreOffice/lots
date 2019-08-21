@@ -476,7 +476,11 @@ public class MailMergeDatasource
     ConfigThingy datenquelle = new ConfigThingy("");
     try
     {
-      datenquelle = mmconf.query("Datenquelle").getLastChild();
+      ConfigThingy query = mmconf.query("Datenquelle");
+      if (query.count() > 0)
+      {
+        datenquelle = query.getLastChild();
+      }
     } catch (NodeNotFoundException e)
     {
       LOGGER.error("", e);
