@@ -214,11 +214,8 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
           new GenderDialog(params, textDocumentController);
           break;
 
-        case 2:          
-          TrafoDialogParameters paramsIfThenElse = new TrafoDialogParameters();
-          paramsIfThenElse.isValid = true;
-          paramsIfThenElse.fieldNames = mailMerge.getDs().getColumnNames();
-          new IfThenElseDialog(paramsIfThenElse, textDocumentController);
+        case 2:
+          new IfThenElseDialog(mailMerge.getDs().getColumnNames(), textDocumentController);
           break;
 
         case 3:
