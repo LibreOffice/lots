@@ -195,6 +195,7 @@ public class MailmergeWizardController implements XWizardController
     wizard = Wizard.createMultiplePathsWizard(UNO.defaultContext, paths, this);
     wizard.enableButton(WizardButton.HELP, false);
     wizard.enableButton(WizardButton.NEXT, false);
+    wizard.setTitle("WollMux Seriendruck - Optionen");
     short result = wizard.execute();
     if (result == ExecutableDialogResults.OK)
     {
