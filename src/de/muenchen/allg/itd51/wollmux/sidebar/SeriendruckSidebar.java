@@ -623,6 +623,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
           UNO.XWindow(jumpToLast).setEnable(false);
           UNO.XWindow(jumpToFirst).setEnable(false);
           UNO.XWindow(printCount).setEnable(false);
+          UNO.XButton(previewBtn).setLabel("Vorschau");
         } else if (toggleState == 1)
         {
           if (!mailMerge.getDs().hasDatasource() && mailMerge.getDs().getNumberOfDatasets() <= 0)
@@ -639,6 +640,7 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
           UNO.XWindow(jumpToLast).setEnable(true);
           UNO.XWindow(jumpToFirst).setEnable(true);
           UNO.XWindow(printCount).setEnable(true);
+          UNO.XButton(previewBtn).setLabel("<<Feldnamen>>");
         }
       } catch (UnknownPropertyException | WrappedTargetException | IllegalArgumentException
           | PropertyVetoException e)
