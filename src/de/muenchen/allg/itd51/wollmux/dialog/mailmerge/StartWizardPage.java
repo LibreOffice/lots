@@ -22,27 +22,27 @@ import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailmergeWizardController
 
 public class StartWizardPage extends AbstractXWizardPage
 {
-  
+
   private static final Logger LOGGER = LoggerFactory.getLogger(StartWizardPage.class);
-  
+
   private final XRadioButton singleDocument;
   private final XRadioButton direct;
   private final XRadioButton mails;
   private final XRadioButton multipleDocuments;
-  
+
   private MailmergeWizardController controller;
-  
+
   private final XRadioButton all;
   private final XRadioButton range;
   private final XNumericField from;
   private final XNumericField till;
-  
+
   private IndexSelection selection = new IndexSelection();
-  
+
   private class ActionItemListener implements AbstractItemListener {
-    
+
     private PATH path;
-    
+
     public ActionItemListener(PATH path)
     {
       this.path = path;
@@ -55,7 +55,7 @@ public class StartWizardPage extends AbstractXWizardPage
       controller.activateNextButton(canAdvance());
     }
   }
-  
+
   public StartWizardPage(XWindow parentWindow, short pageId, MailmergeWizardController controller) throws Exception
   {
     super(pageId, parentWindow, "seriendruck_start");
@@ -69,14 +69,36 @@ public class StartWizardPage extends AbstractXWizardPage
     mails.addItemListener(new ActionItemListener(PATH.MAIL));
     multipleDocuments = UNO.XRadio(container.getControl("einzel"));
     multipleDocuments.addItemListener(new ActionItemListener(PATH.SINGLE_FILES));
-    all = UNO.XRadio(container.getControl("selectAll"));
-    range = UNO.XRadio(container.getControl("selectRange"));
     from = UNO.XNumericField(container.getControl("from"));
     from.setValue(1);
     from.setMax(controller.getController().getDs().getNumberOfDatasets());
+    UNO.XWindow(from).setEnable(false);
     till = UNO.XNumericField(container.getControl("till"));
     till.setValue(controller.getController().getDs().getNumberOfDatasets());
     till.setMax(controller.getController().getDs().getNumberOfDatasets());
+    UNO.XWindow(till).setEnable(false);
+    all = UNO.XRadio(container.getControl("selectAll"));
+    all.addItemListener(new AbstractItemListener()
+    {
+
+      @Override
+      public void itemStateChanged(ItemEvent arg0)
+      {
+        UNO.XWindow(from).setEnable(false);
+        UNO.XWindow(till).setEnable(false);
+      }
+    });
+    range = UNO.XRadio(container.getControl("selectRange"));
+    range.addItemListener(new AbstractItemListener()
+    {
+
+      @Override
+      public void itemStateChanged(ItemEvent arg0)
+      {
+        UNO.XWindow(from).setEnable(true);
+        UNO.XWindow(till).setEnable(true);
+      }
+    });
   }
 
   @Override
@@ -103,7 +125,7 @@ public class StartWizardPage extends AbstractXWizardPage
         selection.rangeEnd = (int) till.getValue();
         break;
       default:
-        break;  
+        break;
     }
 
     LOGGER.debug("Aktion {}, Range {}", action, rangeValue);
@@ -113,7 +135,7 @@ public class StartWizardPage extends AbstractXWizardPage
     controller.arguments.put(SubmitArgument.INDEX_SELECTION, selection);
     return true;
   }
-  
+
   private ACTION getSelectedAction()
   {
     if (singleDocument.getState())
@@ -134,7 +156,7 @@ public class StartWizardPage extends AbstractXWizardPage
     }
     return ACTION.NOTHING;
   }
-  
+
   private DatasetSelectionType getSelectedRange()
   {
     if (all.getState())
