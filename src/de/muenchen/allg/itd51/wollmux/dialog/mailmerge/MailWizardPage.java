@@ -27,7 +27,7 @@ public class MailWizardPage extends AbstractXWizardPage
   private final XComboBox mailmerge;
   private final XComboBox special;
   private final XControlContainer container;
-  
+
   private final MailmergeWizardController controller;
 
   private AbstractTextListener textListener = new AbstractTextListener()
@@ -78,28 +78,39 @@ public class MailWizardPage extends AbstractXWizardPage
       @Override
       public void itemStateChanged(ItemEvent event)
       {
-        Selection currentSelection = message.getSelection();
-        message.insertText(currentSelection, MailMergeNew.addMergeFieldTags(mailmerge.getItem((short) event.Selected)));
+        if (event.Selected != 0)
+        {
+          Selection currentSelection = message.getSelection();
+          message.insertText(currentSelection,
+              MailMergeNew.addMergeFieldTags(mailmerge.getItem((short) event.Selected)));
+          UNO.XTextComponent(special).setText(special.getItem((short) 0));
+        }
       }
     });
 
     special = UNO.XComboBox(container.getControl("special"));
-    special.addItems(new String[] { "Datensatznummer", "Serienbriefnummer" }, (short) 0);
+    special.addItems(new String[] { "Bitte wählen", "Datensatznummer", "Serienbriefnummer" },
+        (short) 0);
+    UNO.XTextComponent(special).setText(special.getItem((short) 0));
     special.addItemListener(new AbstractItemListener()
     {
 
       @Override
       public void itemStateChanged(ItemEvent event)
       {
-        String selectedValue = special.getItem((short) event.Selected);
-        
-        if (selectedValue.equals("Datensatznummer"))
-          selectedValue = "{{#DS}}";
-        else
-          selectedValue = "{{#SB}}";
-        
-        Selection currentSelection = message.getSelection();
-        message.insertText(currentSelection, selectedValue);
+        if (event.Selected != 0)
+        {
+          String selectedValue = special.getItem((short) event.Selected);
+
+          if (selectedValue.equals("Datensatznummer"))
+            selectedValue = "{{#DS}}";
+          else
+            selectedValue = "{{#SB}}";
+
+          Selection currentSelection = message.getSelection();
+          message.insertText(currentSelection, selectedValue);
+          UNO.XTextComponent(special).setText(special.getItem((short) 0));
+        }
       }
     });
   }
