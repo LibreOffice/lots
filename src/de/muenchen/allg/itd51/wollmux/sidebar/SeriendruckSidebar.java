@@ -668,7 +668,14 @@ public class SeriendruckSidebar implements XToolPanel, XSidebarPanel
     {
       mailMerge = new MailMergeNew(textDocumentController, actionEvent -> {
         if (actionEvent.getSource() instanceof MailMergeNew)
+        {
+          for (CalcModel model : MailMergeDatasource.getOpenCalcWindows())
+          {
+            UNO.XCloseable(model.getSpreadSheetDocument())
+                .removeCloseListener(documentCloseListener);
+          }
           WollMuxEventHandler.getInstance().handleMailMergeNewReturned(textDocumentController);
+        }
       });
 
       DocumentManager.getDocumentManager().setCurrentMailMergeNew(textDocumentController.getModel().doc,
