@@ -388,7 +388,8 @@ public class MailMergeController
         StringBuilder buildMessage = new StringBuilder();
 
         buildMessage.append(
-            "Der WollMux-Serienbrief wurde erfolgreich an folgende E-Mail-Adressen versandt:");
+            "Der WollMux-Serienbrief wurde an folgende E-Mail-Adressen versandt:");
+        buildMessage.append("\r\n");
 
         for (String recipient : recipintList)
         {
@@ -399,6 +400,10 @@ public class MailMergeController
         buildMessage.append("\r\n");
         buildMessage.append("Anzahl gesendeter E-Mails: ");
         buildMessage.append(mailsSentCount);
+
+        buildMessage.append("\r\n");
+        buildMessage.append(
+            "Wenn eine Nachricht nicht zugestellt werden konnte, erhalten Sie in Kürze eine entsprechende Email.");
 
         try
         {
