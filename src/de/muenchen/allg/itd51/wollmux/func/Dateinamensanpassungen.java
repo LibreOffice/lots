@@ -140,7 +140,7 @@ public class Dateinamensanpassungen
       String propVal = System.getProperty(m.group(1).trim());
       if (propVal == null)
         propVal = "";
-      m.appendReplacement(buf, propVal);
+      m.appendReplacement(buf, Matcher.quoteReplacement(propVal));
     }
     m.appendTail(buf);
     return buf.toString();
