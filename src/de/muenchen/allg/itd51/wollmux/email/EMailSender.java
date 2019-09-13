@@ -27,9 +27,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -85,9 +82,7 @@ public class EMailSender
   public void addAttachment(File attachment) throws MessagingException, IOException
   {
     MimeBodyPart messageBodyPart = new MimeBodyPart();
-    DataSource dataSource = new FileDataSource(attachment);
-    messageBodyPart.setDataHandler(new DataHandler(dataSource));
-    messageBodyPart.setFileName(attachment.getName());
+    messageBodyPart.attachFile(attachment);
     ((Multipart) email.getContent()).addBodyPart(messageBodyPart);
   }
 

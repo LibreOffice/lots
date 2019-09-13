@@ -40,8 +40,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -352,7 +350,7 @@ public class MailMergeNew
         try
         {
           pmod.setPropertyValue(MailMergeController.PROP_TARGETDIR,
-              tmpOutDir.toURI().toURL().toString());
+              tmpOutDir.toURI().toString());
         }
         catch (Exception e)
         {
@@ -507,14 +505,17 @@ public class MailMergeNew
   {
     try
     {
-      // fyi: java mail api...addAttachment(File file) erwartet File, stört sich dann aber
-      // an URI..daher "file:/tmp/doc.odt" -> FileNotFoundException, "/tmp/doc.odt" = gültiger Pfad.
-      URI uri = new URI(document.getPath());
-      String filePath = uri.getPath();
-      File file = new File(filePath);
-      mail.addAttachment(file);
+      String path = document.getPath();
+      if (!document.isAbsolute())
+      {
+        // Pfad unter Windows korrigieren
+        path = path.replaceFirst("file:\\\\", "");
+        // Pfad unter Linux korrigieren
+        path = path.replaceFirst("file:", "");
+      }
+      mail.addAttachment(new File(path));
       mail.sendMessage(smtpSettings);
-    } catch (ConfigurationErrorException | MessagingException | IOException | URISyntaxException e)
+    } catch (ConfigurationErrorException | MessagingException | IOException e)
     {
       LOGGER.error("", e);
     } finally
