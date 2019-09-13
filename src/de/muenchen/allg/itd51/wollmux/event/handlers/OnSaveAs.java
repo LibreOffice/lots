@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,12 +81,18 @@ public class OnSaveAs extends BasicEvent
 
     File file = ensureFileHasODTSuffix(getDefaultFile(func));
     XFilePicker3 picker = FilePicker.createWithMode(UNO.defaultContext,
-        TemplateDescription.FILESAVE_AUTOEXTENSION_TEMPLATE);
+        TemplateDescription.FILESAVE_AUTOEXTENSION);
     picker.setDisplayDirectory(file.getParent());
-    picker.setDefaultName(file.getAbsolutePath());
+    if (SystemUtils.IS_OS_WINDOWS)
+    {
+      picker.setDefaultName(file.getName());
+    } else
+    {
+      picker.setDefaultName(file.getAbsolutePath());
+    }
     String filterName = "ODF Textdokument";
-    picker.appendFilter(filterName, "odt");
-    picker.appendFilter("Alle Dateien", "");
+    picker.appendFilter(filterName, "*.odt");
+    picker.appendFilter("Alle Dateien", "*");
     picker.setCurrentFilter(filterName);
     short res = picker.execute();
     if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)
