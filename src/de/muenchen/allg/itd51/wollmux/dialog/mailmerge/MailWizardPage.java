@@ -1,5 +1,8 @@
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.awt.ItemEvent;
 import com.sun.star.awt.Selection;
 import com.sun.star.awt.TextEvent;
@@ -11,13 +14,18 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.SubmitArgument;
 
 public class MailWizardPage extends AbstractXWizardPage
 {
+	private static final Logger LOGGER = LoggerFactory
+		      .getLogger(MailWizardPage.class);
 
   private final XTextComponent sender;
   private final XTextComponent subject;
@@ -47,6 +55,13 @@ public class MailWizardPage extends AbstractXWizardPage
     this.controller = controller;
     container = UnoRuntime.queryInterface(XControlContainer.class, window);
     sender = UNO.XTextComponent(container.getControl("sender"));
+    String senderName = "";
+	try {
+		senderName = DatasourceJoinerFactory.getDatasourceJoiner().getSelectedDataset().get("Mail");
+	} catch (ColumnNotFoundException | DatasetNotFoundException e) {
+		LOGGER.debug("Kein Eintrag für Mail vorhanden", e);
+	}
+    sender.setText(senderName == null ? "" : senderName);
     sender.addTextListener(textListener);
     subject = UNO.XTextComponent(container.getControl("subject"));
     subject.addTextListener(textListener);
