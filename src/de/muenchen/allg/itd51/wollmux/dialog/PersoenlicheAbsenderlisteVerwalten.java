@@ -576,10 +576,30 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     Map<String, String> resultSearchQuery = new HashMap<>();
 
-    resultSearchQuery.put("Vorname", txtFieldVorname.getText());
-    resultSearchQuery.put("Nachname", txtFieldNachname.getText());
-    resultSearchQuery.put("Mail", txtFieldEMail.getText());
-    resultSearchQuery.put("OrgaKurz", txtFieldOrga.getText());
+    String vorname = txtFieldVorname.getText();
+    if (!vorname.isEmpty() && !vorname.endsWith("*"))
+    {
+      vorname += "*";
+    }
+    String nachname = txtFieldNachname.getText();
+    if (!nachname.isEmpty() && !nachname.endsWith("*"))
+    {
+      nachname += "*";
+    }
+    String mail = txtFieldEMail.getText();
+    if (!mail.isEmpty() && !mail.endsWith("*"))
+    {
+      mail += "*";
+    }
+    String orga = txtFieldOrga.getText();
+    if (!orga.isEmpty() && !orga.endsWith("*"))
+    {
+      orga += "*";
+    }
+    resultSearchQuery.put("Vorname", vorname);
+    resultSearchQuery.put("Nachname", nachname);
+    resultSearchQuery.put("Mail", mail);
+    resultSearchQuery.put("OrgaKurz", orga);
 
     return resultSearchQuery;
   }
