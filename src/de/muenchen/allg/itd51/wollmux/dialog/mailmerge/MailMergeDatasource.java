@@ -66,7 +66,9 @@ import com.sun.star.sheet.XSpreadsheetDocument;
 import com.sun.star.sheet.XSpreadsheets;
 import com.sun.star.table.CellRangeAddress;
 import com.sun.star.table.XCellRange;
-import com.sun.star.ui.dialogs.XFilePicker;
+import com.sun.star.ui.dialogs.FilePicker;
+import com.sun.star.ui.dialogs.TemplateDescription;
+import com.sun.star.ui.dialogs.XFilePicker3;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
@@ -371,8 +373,12 @@ public class MailMergeDatasource
    */
   public CalcModel selectFileAsDatasource()
   {
-    XFilePicker picker = UNO
-        .XFilePicker(UNO.createUNOService("com.sun.star.ui.dialogs.FilePicker"));
+    XFilePicker3 picker = FilePicker.createWithMode(UNO.defaultContext,
+        TemplateDescription.FILEOPEN_SIMPLE);
+    String filterName = "Tabellendokument";
+    picker.appendFilter(filterName, "*.ods");
+    picker.appendFilter("Alle Dateien", "*");
+    picker.setCurrentFilter(filterName);
     picker.setMultiSelectionMode(false);
 
     short res = picker.execute();
