@@ -355,7 +355,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
   @Override
   public int getMinimalWidth()
   {
-    return 100;
+    return 300;
   }
 
   private void readWollMuxBarConf(boolean allowUserConfig, ConfigThingy wollmuxConf)
