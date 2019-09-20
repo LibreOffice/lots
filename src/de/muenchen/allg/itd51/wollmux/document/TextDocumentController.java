@@ -2392,7 +2392,9 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       {
         ConfigThingy formConf = getFormDescription().get("Formular");
         formModel = new FormModel(formConf, getWindowTitle(), getFunctionContext(),
-            getFunctionLibrary(), getDialogLibrary(), getIDToPresetValue(), this, this);
+            getFunctionLibrary(), getDialogLibrary(), getIDToPresetValue());
+        formModel.addFormModelChangedListener(this, true);
+        formModel.addVisibilityChangedListener(this, true);
       } catch (NodeNotFoundException e)
       {
         throw new FormModelException(
@@ -2508,8 +2510,10 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   @Override
   public void valueChanged(String id, String value)
   {
-    if (id.length() > 0)
+    if (!id.isEmpty())
+    {
       WollMuxEventHandler.getInstance().handleFormValueChanged(this, id, value);
+    }
   }
 
   /**

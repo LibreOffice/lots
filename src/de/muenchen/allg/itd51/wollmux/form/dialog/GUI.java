@@ -220,6 +220,8 @@ public class GUI
 
     setFormGUISizeAndLocation();
     arrangeWindows();
+    model.addFormModelChangedListener(this, true);
+    model.addVisibilityChangedListener(this, true);
 
     processUIElementEvents = true;
   }
@@ -257,7 +259,6 @@ public class GUI
         if (!visibilityGroups.containsKey(group.getGroupId()))
         {
           visibilityGroups.put(group.getGroupId(), new ArrayList<>(1));
-          group.addVisibilityChangedListener(this);
         }
         visibilityGroups.get(group.getGroupId()).add(uiElement);
       }
@@ -313,7 +314,6 @@ public class GUI
       {
         uiElement.setBackground(plausiMarkerColor);
       }
-      control.addFormModelChangedListener(this);
 
       if (y > GRID_MAX)
         break;
@@ -365,12 +365,10 @@ public class GUI
         if (!visibilityGroups.containsKey(group.getGroupId()))
         {
           visibilityGroups.put(group.getGroupId(), new ArrayList<>(1));
-          group.addVisibilityChangedListener(this);
         }
         visibilityGroups.get(group.getGroupId()).add(uiElement);
       }
       uiElement.setEnabled(visible);
-      control.addFormModelChangedListener(this);
       int compoX = x;
       if (!uiElement.getLabelType().equals(UIElement.LabelPosition.NONE))
       {
