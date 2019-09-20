@@ -110,7 +110,6 @@ public class OnProcessTextDocument extends BasicEvent
           DocumentManager.getDocumentManager().setFormModel(documentController.getModel().doc,
               formController);
           formController.startFormGUI();
-          formController.initValues();
           formController.formControllerInitCompleted();
 
           formController.focusGained(formController.getFieldId());
