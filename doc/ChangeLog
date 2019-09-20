@@ -1,3 +1,31 @@
+ ==================== Neu in Version 18.1.6 ====================
+
+    * Bugfixes
+          o Die Breite der WollMux-Sidebar wurde vergrößert.
+          o "Aktuelle Seite" Drucken kommt auch mit Dokument mit eingefügten
+            Leerseiten zurecht.
+          o Der aktuell am System angemeldete Benutzer wird als Absender
+            vorausgewählt, wenn noch kein Absender definiert wurde.
+          o FileNameGeneratorFunktion unter Windows funktioniert wieder. Die
+            Dateiendungen werden korrekt angehänt.
+          o Seriendruck per Email unter Windows funktioniert wieder.
+          o Das Absenderfeld im Email-Wizard wird mit der Mail-Adresse des
+            aktuellen Absenders vorbelegt.
+          o Die Suche nach Absenderdaten funktioniert wie die Suche im
+            Telefonbuch.
+
+ ==================== Neu in Version 18.1.5 ====================
+
+    * Bugfixes
+          o Der Dialog für "Wenn...Dann...Sonst..." Felder im Seriendruck wurde
+            weiter verbessert.
+          o Zyklen zwischen Formularfeldern führen nicht mehr zu einem Fehler.
+          o Der Dialog "Tabellenspalten ergänzen" wurde verbessert.
+          o Der Text Email-Zusammenfassung beim Seriendruck wurde geändert.
+          o Der Menüeintrag für den Seriendruck wurde entfernt.
+          o Verbesserung der ersten Seite und Email-Seite des Seriendruck-
+            Wizards.
+
  ==================== Neu in Version 18.1.4 ====================
 
     * Bugfixes
