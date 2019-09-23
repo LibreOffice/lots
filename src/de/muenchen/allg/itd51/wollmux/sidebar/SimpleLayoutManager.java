@@ -14,28 +14,28 @@ import com.sun.star.uno.UnoRuntime;
  * Fenster. Alle Steuerlemente werde vertikal untereinander ausgerichtet in der
  * Reihenfolge, in der sie dem LayoutManager hinzugefügt wurden. Die Breite der
  * Steuerelemente wird auf die Breite des Parent-Fensters gestreckt.
- * 
+ *
  */
 public class SimpleLayoutManager
 {
   private XWindow owner;
 
   private Set<XControl> controls;
-  
+
   private int height = 0;
 
   /**
    * Erzeugt einen LayoutManager für eine Fenster. Ein Fenster kann jedes UNO-Objekt
    * sein, dass das XWindow-Interface unterstützt.
-   * 
+   *
    * @param owner
    */
   public SimpleLayoutManager(XWindow owner)
   {
     this.owner = owner;
-    controls = new LinkedHashSet<XControl>();
+    controls = new LinkedHashSet<>();
   }
-  
+
   public int getHeight()
   {
     return height;
@@ -45,7 +45,7 @@ public class SimpleLayoutManager
    * Steuerelemente müssen dem LayoutManager hinzugefügt werden, damit sie von diesem
    * erkannt werden. Es dürfen nur Steuerelemente hinzugefügt werden, die zu dem
    * Fenster des LayoutManagers gehören.
-   * 
+   *
    * @param control
    */
   public void add(XControl control)
@@ -57,7 +57,7 @@ public class SimpleLayoutManager
   /**
    * Diese Funktion muss immer dann aufgerufen werden, wenn sich die Größe des vom
    * LayoutManager gesteuerten Fensters ändert.
-   * 
+   *
    */
   public void layout()
   {
@@ -72,7 +72,7 @@ public class SimpleLayoutManager
       Rectangle cr = wnd.getPosSize();
       yOffset += cr.Height;
     }
-    
+
     height = yOffset;
   }
 }

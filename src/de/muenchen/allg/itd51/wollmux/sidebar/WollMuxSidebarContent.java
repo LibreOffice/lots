@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -263,7 +265,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           String text = L.m("WollMux läuft ohne wollmux.conf !\n"
               + "Aus diesem Grund ist leider nicht der komplette Funktionsumfang verfügbar.");
           XControl txt = GuiFactory.createLabel(xMCF, context, toolkit, windowPeer,
-              text, new Rectangle(5, 15, 10, 80));
+              text, new Rectangle(5, 15, 10, 80), null);
           layout.add(txt);
         } else
         {
@@ -284,7 +286,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
           XControl line =
               GuiFactory.createControl(xMCF, context, toolkit, windowPeer,
-                "com.sun.star.awt.UnoControlFixedLine", null, null, new Rectangle(0, 0, 10, 4));
+                  "com.sun.star.awt.UnoControlFixedLine", null, new Rectangle(0, 0, 10, 4));
 
           layout.add(line);
 
@@ -454,7 +456,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         final UIButton uiButton = (UIButton) element;
         XControl button =
           GuiFactory.createButton(UNO.xMCF, context, toolkit, windowPeer,
-            uiButton.getLabel(), null, new Rectangle(0, 0, 100, 32));
+                uiButton.getLabel(), null, new Rectangle(0, 0, 100, 32), null);
 
         XButton xbutton = UnoRuntime.queryInterface(XButton.class, button);
         AbstractActionListener xButtonAction = event -> uiButton.getAction().performAction();
@@ -548,19 +550,17 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
   {
     String label = L.m("Suchen...");
 
+    SortedMap<String, Object> props = new TreeMap<>();
+    props.put("TextColor", SystemColor.textInactiveText.getRGB() & ~0xFF000000);
+    props.put("Autocomplete", false);
+    props.put("HideInactiveSelection", true);
     XControl searchBox =
       GuiFactory.createCombobox(UNO.xMCF, context, toolkit, windowPeer, label,
-        new Rectangle(0, 0, 100, 32));
+            new Rectangle(0, 0, 100, 32), props);
 
     final XWindow wnd = UnoRuntime.queryInterface(XWindow.class, searchBox);
     XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, searchBox);
 
-    XControlModel model = searchBox.getModel();
-    XPropertySet props =
-        UnoRuntime.queryInterface(XPropertySet.class, model);
-    props.setPropertyValue("TextColor", new Integer(SystemColor.textInactiveText.getRGB() & ~0xFF000000));
-
-    searchBox.setModel(model);
 
     AbstractTextListener tfListener = event -> {
       XControl ctrl = UnoRuntime.queryInterface(XControl.class, event.Source);
@@ -714,9 +714,11 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       uiSenderbox.setLabel(PersoenlicheAbsenderliste.getInstance().getCurrentSender().split("§§%=%§§")[0]);
     }
 
+    SortedMap<String, Object> props = new TreeMap<>();
+    props.put("FocusOnClick", false);
     XControl button =
-        GuiFactory.createSenderbox(UNO.xMCF, context, toolkit, windowPeer,
-          uiSenderbox.getLabel(), null, new Rectangle(0, 0, 100, 32));
+        GuiFactory.createButton(UNO.xMCF, context, toolkit, windowPeer,
+            uiSenderbox.getLabel(), null, new Rectangle(0, 0, 100, 32), props);
     final XButton xbutton = UnoRuntime.queryInterface(XButton.class, button);
 
     String[] palEntries = PersoenlicheAbsenderliste.getInstance().getPALEntries();
