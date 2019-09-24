@@ -17,6 +17,7 @@ import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlModel;
 import com.sun.star.awt.XFixedText;
+import com.sun.star.awt.XItemListener;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XTextListener;
 import com.sun.star.awt.XToolkit;
@@ -219,7 +220,7 @@ public class GuiFactory
     XControl ctrl = createControl(xMCF, context, toolkit, windowPeer,
         "com.sun.star.awt.UnoControlNumericField", props, size);
     UNO.XNumericField(ctrl).setValue(value);
-    ctrl.addEventListener(listener);
+    UNO.XTextComponent(ctrl).addTextListener(listener);
 
     return ctrl;
   }
@@ -236,6 +237,25 @@ public class GuiFactory
     props.put("Spin", Boolean.TRUE);
 
     return createNumericField(xMCF, context, toolkit, windowPeer, value, listener, size, props);
+  }
+
+  public static XControl createHLine(XMultiComponentFactory xMCF, XComponentContext context,
+      XToolkit toolkit, XWindowPeer windowPeer, Rectangle size, SortedMap<String, Object> props)
+  {
+    return createControl(xMCF, context, toolkit, windowPeer, "com.sun.star.awt.UnoControlFixedLine",
+        props, size);
+  }
+
+  public static XControl createListBox(XMultiComponentFactory xMCF, XComponentContext context,
+      XToolkit toolkit, XWindowPeer windowPeer, XItemListener listener, Rectangle size,
+      SortedMap<String, Object> props)
+  {
+    XControl ctrl = createControl(xMCF, context, toolkit, windowPeer,
+        "com.sun.star.awt.UnoControlListBox",
+        props, size);
+    UNO.XListBox(ctrl).addItemListener(listener);
+
+    return ctrl;
   }
 
   /**

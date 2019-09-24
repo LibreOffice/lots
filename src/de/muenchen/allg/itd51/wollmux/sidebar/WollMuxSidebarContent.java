@@ -87,6 +87,8 @@ import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIMenu;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIMenuItem;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UISearchbox;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UISenderbox;
+import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
+import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
 import de.muenchen.uno.UnoReflect;
 
 /**
@@ -142,7 +144,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
   private XWindow window;
 
-  private SimpleLayoutManager layout;
+  private Layout layout;
 
   private XWindowPeer windowPeer;
 
@@ -190,7 +192,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     @Override
     public void windowResized(WindowEvent e)
     {
-      layout.layout();
+      layout.layout(parentWindow.getPosSize());
     }
   };
 
@@ -204,7 +206,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     searchActions = new HashMap<>();
 
     this.parentWindow.addWindowListener(this.windowAdapter);
-    layout = new SimpleLayoutManager(this.parentWindow);
+    layout = new VerticalLayout(5, 5);
 
     DatasourceJoiner dj = DatasourceJoinerFactory.getDatasourceJoiner();
 
@@ -266,7 +268,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
               + "Aus diesem Grund ist leider nicht der komplette Funktionsumfang verfügbar.");
           XControl txt = GuiFactory.createLabel(xMCF, context, toolkit, windowPeer,
               text, new Rectangle(5, 15, 10, 80), null);
-          layout.add(txt);
+          layout.addControl(txt);
         } else
         {
           readWollMuxBarConf(allowUserConfig, conf);
@@ -279,16 +281,16 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           XControl treeCtrl =
             GuiFactory.createTree(xMCF, context, toolkit, windowPeer, dataModel);
           tree = UnoRuntime.queryInterface(XTreeControl.class, treeCtrl);
-          layout.add(treeCtrl);
+          layout.addControl(treeCtrl, 6);
 
           XWindow treeWnd = UnoRuntime.queryInterface(XWindow.class, treeCtrl);
           treeWnd.addMouseListener(xMouseListener);
 
           XControl line =
-              GuiFactory.createControl(xMCF, context, toolkit, windowPeer,
-                  "com.sun.star.awt.UnoControlFixedLine", null, new Rectangle(0, 0, 10, 4));
+              GuiFactory.createHLine(xMCF, context, toolkit, parentWindowPeer,
+                  new Rectangle(0, 0, 10, 4), null);
 
-          layout.add(line);
+          layout.addControl(line, 1);
 
           uiFactory = new UIFactory();
           uiFactory.addElementCreateListener(this);
@@ -461,7 +463,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         XButton xbutton = UnoRuntime.queryInterface(XButton.class, button);
         AbstractActionListener xButtonAction = event -> uiButton.getAction().performAction();
         xbutton.addActionListener(xButtonAction);
-        layout.add(button);
+        layout.addControl(button);
       }
       else if (element.getClass().equals(UISenderbox.class))
       {
@@ -637,7 +639,6 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           }
 
           windowPeer.invalidate((short)(InvalidateStyle.UPDATE | InvalidateStyle.TRANSPARENT));
-          layout.layout();
         }
         catch (Exception e)
         {
@@ -671,7 +672,6 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           }
 
           windowPeer.invalidate((short)(InvalidateStyle.UPDATE | InvalidateStyle.TRANSPARENT));
-          layout.layout();
         }
         catch (Exception e)
         {
@@ -702,7 +702,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     };
     cmb.addItemListener(cmbItemListener);
 
-    layout.add(searchBox);
+    layout.addControl(searchBox);
   }
 
   private void createSenderbox(UISenderbox uiSenderbox)
@@ -807,7 +807,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
     xbutton.addActionListener(xButtonAction);
 
-    layout.add(button);
+    layout.addControl(button);
   }
 
 }
