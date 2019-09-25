@@ -2,7 +2,7 @@
  * Dateiname: DocumentCommandInterpreter.java
  * Projekt  : WollMux
  * Funktion : Interpretiert die in einem Dokument enthaltenen Dokumentkommandos.
- * 
+ *
  * Copyright (c) 2009-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -90,16 +90,11 @@ public class DocumentCommandInterpreter
   boolean debugMode;
 
   /**
-   * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
-   * Dokumentkommandos im übergebenen Dokument xDoc scannen und interpretieren kann.
+   * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle Dokumentkommandos im
+   * übergebenen Dokument xDoc scannen und interpretieren kann.
    *
-   * @param xDoc
-   *          Das Dokument, dessen Kommandos ausgeführt werden sollen.
-   * @param mux
-   *          Die Instanz des zentralen WollMux-Singletons
-   * @param frag_urls
-   *          Eine Liste mit fragment-urls, die für das Kommando insertContent
-   *          benötigt wird.
+   * @param documentController
+   * @param debugMode
    */
   public DocumentCommandInterpreter(TextDocumentController documentController, boolean debugMode)
   {
@@ -108,14 +103,10 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
-   * Dokumentkommandos im übergebenen Dokument xDoc scannen und interpretieren kann.
+   * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle Dokumentkommandos im
+   * übergebenen Dokument xDoc scannen und interpretieren kann.
    *
-   * @param xDoc
-   *          Das Dokument, dessen Kommandos ausgeführt werden sollen.
-   * @param frag_urls
-   *          Eine Liste mit fragment-urls, die für das Kommando insertContent
-   *          benötigt wird.
+   * @param documentController
    */
   public DocumentCommandInterpreter(TextDocumentController documentController)
   {
@@ -157,20 +148,16 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Diese Methode scannt alle insertFormValue-Kommandos des Dokuments, verarbeitet
-   * diese und reicht das gefundene Mapping von IDs zu FormFields an das
-   * TextDocumentModel weiter. Zudem wird von dieser Methode auch noch
-   * {@link TextDocumentModel#collectNonWollMuxFormFields()} aufgerufen, so dass auch
-   * alle Formularfelder aufgesammelt werden, die nicht von WollMux-Kommandos umgeben
-   * sind, jedoch trotzdem vom WollMux verstanden und befüllt werden.
+   * Diese Methode scannt alle insertFormValue-Kommandos des Dokuments, verarbeitet diese und reicht
+   * das gefundene Mapping von IDs zu FormFields an das TextDocumentModel weiter. Zudem wird von
+   * dieser Methode auch noch {@link TextDocumentController#collectNonWollMuxFormFields()}
+   * aufgerufen, so dass auch alle Formularfelder aufgesammelt werden, die nicht von
+   * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden und befüllt werden.
    *
-   * Diese Methode wurde aus der Methode {@link #scanGlobalDocumentCommands()}
-   * ausgelagert, die früher neben den globalen Dokumentkommandos auch die
-   * insertFormValue-Kommandos bearbeitet hat. Die Auslagerung geschah hauptsächlich
-   * aus Performance-Optimierungsgründen, da so beim OnProcessTextDocument-Event nur
-   * einmal die insertFormValue-Kommandos ausgewertet werden müssen.
-   *
-   * @author Daniel Benkmann (D-III-ITD-D101)
+   * Diese Methode wurde aus der Methode {@link #scanGlobalDocumentCommands()} ausgelagert, die
+   * früher neben den globalen Dokumentkommandos auch die insertFormValue-Kommandos bearbeitet hat.
+   * Die Auslagerung geschah hauptsächlich aus Performance-Optimierungsgründen, da so beim
+   * OnProcessTextDocument-Event nur einmal die insertFormValue-Kommandos ausgewertet werden müssen.
    */
   public void scanInsertFormValueCommands()
   {

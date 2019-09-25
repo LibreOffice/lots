@@ -169,7 +169,7 @@ public class WollMuxEventHandler
     handle(new OnAddDocumentEventListener(listener));
   }
 
-  // *******************************************************************************************	
+  // *******************************************************************************************
 
   /**
    * Über dieses Event werden alle registrierten DocumentEventListener (falls
@@ -187,8 +187,6 @@ public class WollMuxEventHandler
    * @param source
    *          Das von der Statusänderung betroffene Dokument (üblicherweise eine
    *          XComponent)
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public void handleNotifyDocumentEventListener(XEventListener listener,
       String eventName, Object source)
@@ -218,7 +216,6 @@ public class WollMuxEventHandler
    * beendet wird und die entsprechenden internen Referenzen gelöscht werden können.
    *
    * Dieses Event wird vom EventProcessor geworfen, wenn der FormularMax zurückkehrt.
-  * @return 
    */
   public void handleFormularMax4000Returned(
       TextDocumentController documentController)
@@ -227,13 +224,11 @@ public class WollMuxEventHandler
   }
 
   /**
-   * Der Handler für das Drucken eines TextDokuments führt in Abhängigkeit von der
-   * Existenz von Serienbrieffeldern und Druckfunktion die entsprechenden Aktionen
-   * aus.
+   * Der Handler für das Drucken eines TextDokuments führt in Abhängigkeit von der Existenz von
+   * Serienbrieffeldern und Druckfunktion die entsprechenden Aktionen aus.
    *
-   * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü
-   * "Datei->Drucken" oder über die Symbolleiste die dispatch-url .uno:Print bzw.
-   * .uno:PrintDefault abgesetzt wurde.
+   * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü "Datei-&gt;Drucken"
+   * oder über die Symbolleiste die dispatch-url .uno:Print bzw. .uno:PrintDefault abgesetzt wurde.
    */
   public void handlePrint(TextDocumentController documentController,
       XDispatch origDisp,
@@ -374,13 +369,12 @@ public class WollMuxEventHandler
   }
 
   /**
-   * Der Handler für einen abgespeckten Speichern-Unter-Dialog des WollMux, der in
-   * Abängigkeit von einer gesetzten FilenameGeneratorFunction über den WollMux
-   * aufgrufen und mit dem generierten Filenamen vorbelegt wird.
+   * Der Handler für einen abgespeckten Speichern-Unter-Dialog des WollMux, der in Abängigkeit von
+   * einer gesetzten FilenameGeneratorFunction über den WollMux aufgrufen und mit dem generierten
+   * Filenamen vorbelegt wird.
    *
-   * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü
-   * "Datei->SaveAs" oder über die Symbolleiste die dispatch-url .uno:Save bzw.
-   * .uno:SaveAs abgesetzt wurde.
+   * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü "Datei-&gt;SaveAs"
+   * oder über die Symbolleiste die dispatch-url .uno:Save bzw. .uno:SaveAs abgesetzt wurde.
    */
   public void handleSaveAs(TextDocumentController documentController,
       DispatchHelper helper, boolean sync)
@@ -510,30 +504,32 @@ public class WollMuxEventHandler
   }
 
   /**
-   * Erzeugt ein neues WollMuxEvent, das Auskunft darüber gibt, dass ein TextDokument
-   * geschlossen wurde und damit auch das TextDocumentModel disposed werden soll.
+   * Erzeugt ein neues WollMuxEvent, das Auskunft darüber gibt, dass ein TextDokument geschlossen
+   * wurde und damit auch das TextDocumentModel disposed werden soll.
    *
    * Dieses Event wird ausgelöst, wenn ein TextDokument geschlossen wird.
    *
    * @param docInfo
-   *          ein {@link DocumentManager.Info} Objekt, an dem das TextDocumentModel
-   *          dranhängt des Dokuments, das geschlossen wurde. ACHTUNG! docInfo hat
-   *          nicht zwingend ein TextDocumentModel. Es muss
-   *          {@link DocumentManager.Info#hasTextDocumentModel()} verwendet werden.
+   *          ein {@link DocumentManager.Info} Objekt, an dem das TextDocumentModel dranhängt des
+   *          Dokuments, das geschlossen wurde. ACHTUNG! docInfo hat nicht zwingend ein
+   *          TextDocumentModel. Es muss {@link DocumentManager.Info#hasTextDocumentModel()}
+   *          verwendet werden.
    *
    *
-   *          ACHTUNG! ACHTUNG! Die Implementierung wurde extra so gewählt, dass hier
-   *          ein DocumentManager.Info anstatt direkt eines TextDocumentModel
-   *          übergeben wird. Es kam nämlich bei einem Dokument, das schnell geöffnet
-   *          und gleich wieder geschlossen wurde zu folgendem Deadlock:
+   *          ACHTUNG! ACHTUNG! Die Implementierung wurde extra so gewählt, dass hier ein
+   *          DocumentManager.Info anstatt direkt eines TextDocumentModel übergeben wird. Es kam
+   *          nämlich bei einem Dokument, das schnell geöffnet und gleich wieder geschlossen wurde
+   *          zu folgendem Deadlock:
    *
-   *          {@link OnProcessTextDocument} =>
+   *          {@link OnProcessTextDocument} =&gt;
    *          {@link de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo#getTextDocumentController()}
-   *          => {@link TextDocumentModel#TextDocumentModel(XTextDocument)} =>
+   *          =&gt;
+   *          {@link TextDocumentModel#TextDocumentModel(XTextDocument, de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer, String, String)}
+   *          =&gt;
    *          {@link DispatchProviderAndInterceptor#registerDocumentDispatchInterceptor(XFrame)}
-   *          => OOo Proxy =>
+   *          =&gt; OOo Proxy =&gt;
    *          {@link GlobalEventListener#notifyEvent(com.sun.star.document.EventObject)}
-   *          ("OnUnload") =>
+   *          ("OnUnload") =&t;
    *          {@link de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo#hasTextDocumentModel()}
    *
    *          Da {@link TextDocumentInfo} synchronized ist kam es zum Deadlock.
@@ -578,17 +574,15 @@ public class WollMuxEventHandler
   }
 
   /**
-   * Sammelt alle Formularfelder des Dokuments model auf, die nicht von
-   * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden und
-   * befüllt werden (derzeit c,s,s,t,textfield,Database-Felder).
+   * Sammelt alle Formularfelder des Dokuments model auf, die nicht von WollMux-Kommandos umgeben
+   * sind, jedoch trotzdem vom WollMux verstanden und befüllt werden (derzeit
+   * c,s,s,t,textfield,Database-Felder).
    *
-   * Das Event wird aus der Implementierung von XPrintModel (siehe TextDocumentModel)
-   * geworfen, wenn dort die Methode collectNonWollMuxFormFields aufgerufen wird.
+   * Das Event wird aus der Implementierung von XPrintModel (siehe TextDocumentModel) geworfen, wenn
+   * dort die Methode collectNonWollMuxFormFields aufgerufen wird.
    *
    * @param documentController
-   * @param unlockActionListener
-   *          Der unlockActionListener wird immer informiert, wenn alle notwendigen
-   *          Anpassungen durchgeführt wurden.
+   * @param listener
    */
   public void handleCollectNonWollMuxFormFieldsViaPrintModel(
       TextDocumentController documentController, ActionListener listener)
@@ -613,8 +607,6 @@ public class WollMuxEventHandler
    *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur, wenn
    *          zu einem betroffenen Druckblock auch eine Hintergrundfarbe angegeben
    *          ist).
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public void handleSetPrintBlocksPropsViaPrintModel(XTextDocument doc,
       String blockName, boolean visible, boolean showHighlightColor,
@@ -656,8 +648,6 @@ public class WollMuxEventHandler
    *          ist remove==false, so wird die Druckfunktion functionName in die Liste
    *          der Druckfunktionen für dieses Dokument aufgenommen; ist remove==true,
    *          so wird die Druckfunktion aus der Liste entfernt.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   public void handleManagePrintFunction(XTextDocument doc,
       String functionName, boolean remove)
@@ -684,8 +674,6 @@ public class WollMuxEventHandler
    *          neuer Inhalt des Bookmarks gesetzt.
    * @param unlockActionListener
    *          Wird informiert, sobald das Event vollständig abgearbeitet wurde.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   public void handleSetInsertValues(XTextDocument doc,
       Map<String, String> mapDbSpalteToValue,
@@ -707,21 +695,18 @@ public class WollMuxEventHandler
   }
 
   /**
-   * Erzeugt ein Event, das den ViewCursor des Dokuments auf das aktuell in der
-   * Formular-GUI bearbeitete Formularfeld setzt.
+   * Erzeugt ein Event, das den ViewCursor des Dokuments auf das aktuell in der Formular-GUI
+   * bearbeitete Formularfeld setzt.
    *
-   * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
-   * Formular-GUI ein Formularfeld den Fokus bekommen hat und es sorgt dafür, dass
-   * der View-Cursor des Dokuments das entsprechende FormField im Dokument anspringt.
+   * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der Formular-GUI ein
+   * Formularfeld den Fokus bekommen hat und es sorgt dafür, dass der View-Cursor des Dokuments das
+   * entsprechende FormField im Dokument anspringt.
    *
-   * @param idToFormValues
-   *          Eine HashMap die unter dem Schlüssel fieldID den Vektor aller
-   *          FormFields mit der ID fieldID liefert.
+   * @param documentController
    * @param fieldId
-   *          die ID des Formularfeldes das den Fokus bekommen soll. Besitzen mehrere
-   *          Formularfelder diese ID, so wird bevorzugt das erste Formularfeld aus
-   *          dem Vektor genommen, das keine Trafo enthält. Ansonsten wird das erste
-   *          Formularfeld im Vektor verwendet.
+   *          die ID des Formularfeldes das den Fokus bekommen soll. Besitzen mehrere Formularfelder
+   *          diese ID, so wird bevorzugt das erste Formularfeld aus dem Vektor genommen, das keine
+   *          Trafo enthält. Ansonsten wird das erste Formularfeld im Vektor verwendet.
    */
   public void handleFocusFormField(TextDocumentController documentController,
       String fieldId)
@@ -733,9 +718,7 @@ public class WollMuxEventHandler
    * Erzeugt ein neues WollMuxEvent zum Registrieren eines (frischen)
    * {@link DispatchProviderAndInterceptor} auf frame.
    *
-   * @param frame
-   *          der {@link XFrame} auf den der {@link DispatchProviderAndInterceptor}
-   *          registriert werden soll.
+   * @param documentController
    */
   public void handleRegisterDispatchInterceptor(
       TextDocumentController documentController)
@@ -759,25 +742,19 @@ public class WollMuxEventHandler
   }
 
   /**
-   * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass alle Formularfelder
-   * Dokument auf den neuen Wert gesetzt werden. Bei Formularfeldern mit
-   * TRAFO-Funktion wird die Transformation entsprechend durchgeführt.
+   * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass alle Formularfelder Dokument auf den
+   * neuen Wert gesetzt werden. Bei Formularfeldern mit TRAFO-Funktion wird die Transformation
+   * entsprechend durchgeführt.
    *
-   * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
-   * Formular-GUI der Wert des Formularfeldes fieldID geändert wurde und sorgt dafür,
-   * dass die Wertänderung auf alle betroffenen Formularfelder im Dokument doc
-   * übertragen werden.
+   * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der Formular-GUI der Wert des
+   * Formularfeldes fieldID geändert wurde und sorgt dafür, dass die Wertänderung auf alle
+   * betroffenen Formularfelder im Dokument doc übertragen werden.
    *
-   * @param idToFormValues
-   *          Eine HashMap die unter dem Schlüssel fieldID den Vektor aller
-   *          FormFields mit der ID fieldID liefert.
+   * @param documentController
    * @param fieldId
    *          Die ID der Formularfelder, deren Werte angepasst werden sollen.
    * @param newValue
    *          Der neue untransformierte Wert des Formularfeldes.
-   * @param funcLib
-   *          Die Funktionsbibliothek, die zur Gewinnung der Trafo-Funktion verwendet
-   *          werden soll.
    */
   public void handleFormValueChanged(TextDocumentController documentController,
       String fieldId,
@@ -896,8 +873,6 @@ public class WollMuxEventHandler
    * @param listener
    *          Der listener, der nach Durchführung des Events benachrichtigt wird
    *          (kann auch null sein, dann gibt's keine Nachricht).
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public void handleSetVisibleState(TextDocumentController documentController,
       String groupId,

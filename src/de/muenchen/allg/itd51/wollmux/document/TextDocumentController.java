@@ -204,8 +204,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   /**
    * Liefert die Funktionsbibliothek mit den globalen Funktionen des WollMux und den
    * lokalen Funktionen dieses Dokuments.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public synchronized FunctionLibrary getFunctionLibrary()
   {
@@ -228,8 +226,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   /**
    * Liefert die eine Bibliothek mit den globalen Dialogfunktionen des WollMux und
    * den lokalen Dialogfunktionen dieses Dokuments.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public synchronized DialogLibrary getDialogLibrary()
   {
@@ -252,8 +248,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   /**
    * Liefert den Kontext mit dem die dokumentlokalen Dokumentfunktionen beim Aufruf
    * von getFunctionLibrary() und getDialogLibrary() erzeugt werden.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public synchronized Map<Object, Object> getFunctionContext()
   {
@@ -269,8 +263,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * gesetzten Simulationslauf, so werden die im Simulationslauf gesetzten Werte
    * zurück geliefert, die nicht zwangsweise mit den reell gesetzten Werten
    * übereinstimmen müssen.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public synchronized Map<String, String> getFormFieldValues()
   {
@@ -295,10 +287,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * @param formularConf
    *          ein "WM" Knoten unterhalb dessen sich eine normale Formularbeschreibung
    *          befindet ("Formular" Knoten).
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
-   *         TESTED
    */
   private ConfigThingy applyFormularanpassung(ConfigThingy formularConf)
   {
@@ -373,10 +361,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * korrekt um, da {@link ConfigThingy#query(String)} nur die Ergebnisse auf einer
    * Ebene zurückliefert. In der Praxis sollten jedoch keine Fälle auftreten wo dies
    * zum Problem wird.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
-   *         TESTED
    */
   private static boolean matches(ConfigThingy conf, ConfigThingy matchConf)
   {
@@ -416,21 +400,15 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   }
 
   /**
-   * Führt alle Funktionen aus funcs der Reihe nach aus, solange bis eine davon einen
-   * nicht-leeren String zurückliefert und interpretiert diesen als Angabe, welche
-   * Aktionen für das Dokument auszuführen sind. Derzeit werden nur "noaction" und
-   * "allactions" unterstützt. Den Funktionen werden als {@link Values} diverse Daten
-   * zur Verfügung gestellt. Derzeit sind dies
+   * Führt alle Funktionen aus funcs der Reihe nach aus, solange bis eine davon einen nicht-leeren
+   * String zurückliefert und interpretiert diesen als Angabe, welche Aktionen für das Dokument
+   * auszuführen sind. Derzeit werden nur "noaction" und "allactions" unterstützt. Den Funktionen
+   * werden als {@link Values} diverse Daten zur Verfügung gestellt. Derzeit sind dies
    * <ul>
-   * <li>"User/<Name>" Werte von Benutzervariablen (vgl.
-   * {@link #getUserFieldMaster(String)}</li>
+   * <li>"User/<Name>" Werte von Benutzervariablen (vgl. {@link #getUserFieldMaster(String)}</li>
    * </ul>
    *
-   * @return 0 => noaction, Integer.MAX_VALUE => allactions, -1 => WollMux-Default
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
-   *         TESTED
+   * @return 0 =&gt; noaction, Integer.MAX_VALUE =&gt; allactions, -1 =&gt; WollMux-Default
    */
   public int evaluateDocumentActions(Iterator<Function> funcs)
   {
@@ -467,8 +445,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    *          Ein Hinweistext, der im Feld angezeigt werden soll, wenn man mit der
    *          Maus drüber fährt - kann auch null sein, dann wird der Hint nicht
    *          gesetzt.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   synchronized public void addNewInputUserField(XTextRange r, String trafoName,
       String hint)
@@ -513,8 +489,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * umgeben sind, jedoch trotzdem vom WollMux verstanden und befüllt werden (derzeit
    * c,s,s,t,textfield,Database-Felder und manche
    * c,s,s,t,textfield,InputUser-Felder).
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public synchronized void collectNonWollMuxFormFields()
   {
@@ -688,8 +662,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    *          erwartet, verwendet werden soll.
    * @return true, wenn alle Felder konsistent aus den Werten mapIdToValue und value
    *         abgeleitet werden können oder false, falls nicht.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private boolean fieldValuesConsistent(List<FormField> fields,
       HashMap<String, String> mapIdToValues, String value)
@@ -844,10 +816,8 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
 
   /**
    * Markiert das Dokument als Formulardokument - damit liefert
-   * {@link #isFormDocument()} zukünftig true und der Typ "formDocument" wird
+   * {@link TextDocumentModel#isFormDocument()} zukünftig true und der Typ "formDocument" wird
    * persistent im Dokument hinterlegt.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   public synchronized void markAsFormDocument()
   {
@@ -860,8 +830,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * Entfernt die WollMux-Kommandos "insertFormValue", "setGroups", "setType
    * formDocument" und "form", sowie die WollMux-Formularbeschreibung und Daten aus
    * dem Dokument doc.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public synchronized void deForm()
   {
@@ -930,8 +898,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
 
   /**
    * Entfernt alle Bookmarks, die keine WollMux-Bookmarks sind aus dem Dokument doc.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public synchronized void removeNonWMBookmarks()
   {
@@ -973,8 +939,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur, wenn
    *          zu einem betroffenen Druckblock auch eine Hintergrundfarbe angegeben
    *          ist).
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public synchronized void setPrintBlocksProps(String blockName, boolean visible,
       boolean showHighlightColor)
@@ -1025,8 +989,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   /**
    * Stellt sicher, dass persistente Daten dieses Dokuments auch tatsächlich
    * persistiert werden.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   public synchronized void flushPersistentData()
   {
@@ -1073,8 +1035,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * @param subst
    *          die Ersetzungsregel, die beschreibt, welche Inhalte an Stelle des alten
    *          Feldes eingesetzt werden sollen.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
   public synchronized void applyFieldSubstitution(String fieldId,
       FieldSubstitution subst)
@@ -1322,8 +1282,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * Kindknoten von conf.
    *
    * @param conf
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
   public synchronized void setMailmergeConfig(ConfigThingy conf)
   {
@@ -1482,7 +1440,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * @param applyTrafo
    *          gibt an, ob eine evtl. vorhandene TRAFO-Funktion angewendet werden soll
    *          (true) oder nicht (false).
-   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
   private void setFormFields(String fieldId, String value, boolean applyTrafo)
   {
@@ -1505,8 +1462,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    *          als Parameter, oder ob alle erwarteten Parameter mit dem Wert value
    *          (false) versorgt werden - wird aus Gründen der Abwärtskompatiblität zu
    *          den bisherigen insertFormValue-Kommandos benötigt.
-   *
-   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
   private void setFormFields(List<FormField> formFields, String value,
       boolean applyTrafo, boolean useKnownFormValues)
@@ -1553,8 +1508,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * @param previewMode
    *          true schaltet den Modus an, false schaltet auf den Vorschaumodus zurück
    *          in dem die aktuell gesetzten Werte wieder angezeigt werden.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public synchronized void setFormFieldsPreviewMode(boolean previewMode)
   {
@@ -1615,8 +1568,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * nicht mehr benötigte TextFieldMaster von ehemaligen InputUser-Textfeldern -
    * Durch die Aufräumaktion ändert sich der DocumentModified-Status des Dokuments
    * nicht.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
   private void cleanupGarbageOfUnreferencedAutofunctions()
   {
@@ -1725,7 +1676,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * @param conf
    *          ein WM-Knoten, der "Formular"-Kinder hat. Falls conf == null, so wird
    *          die Formularbeschreibungsnotiz gelöscht.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public synchronized void setFormDescription(ConfigThingy conf)
   {
@@ -1748,8 +1698,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * gestarteten Simulationslauf, so werden die persistenten Daten nicht verändert
    * und der neue Wert nur in einem internen Objekt des Simulationslaufs gespeichert
    * anstatt im Dokument.
-   *
-   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
   public synchronized void setFormFieldValue(String fieldId, String value)
   {
@@ -1801,8 +1749,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * Dokuments oder löscht den entsprechenden Abschnitt aus den persistenten Daten,
    * wenn die Formularbeschreibung nur aus einer leeren Struktur ohne eigentlichen
    * Formularinhalt besteht.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private void storeCurrentFormDescription()
   {
@@ -1838,8 +1784,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    *          Die alte Feld-ID, die durch newFieldId ersetzt werden soll.
    * @param newFieldId
    *          die neue Feld-ID, die oldFieldId ersetzt.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
   private void substituteFieldIdInTrafo(String trafoName, String oldFieldId,
       String newFieldId)
@@ -1901,8 +1845,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * @param hint
    *          Ein Hinweistext der als Tooltip des neuen Formularfeldes angezeigt
    *          werden soll. hint kann null sein, dann wird kein Hinweistext angezeigt.
-   *
-   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TESTED
    */
   public synchronized void replaceSelectionWithTrafoField(ConfigThingy trafoConf,
       String hint)
@@ -2002,7 +1944,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    *           Funktionsbeschreibung definiert ist.
    * @throws ConfigurationErrorException
    *           beim Parsen der Funktion trafoConf trat ein Fehler auf.
-   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TESTED
    */
   public synchronized void setTrafo(String trafoName, ConfigThingy trafoConf)
       throws UnavailableException, ConfigurationErrorException
@@ -2077,8 +2018,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    *          Funktionsname, z.B. "AND" sein. Der Bezeichner wird NICHT als Name der
    *          TRAFO verwendet. Stattdessen wird ein neuer eindeutiger TRAFO-Name
    *          generiert.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private String addLocalAutofunction(ConfigThingy funcConf)
   {
@@ -2122,8 +2061,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    *
    * @param conf
    *          Das ConfigThingy, in dem rekursiv ersetzt wird.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private static void substituteValueRecursive(ConfigThingy conf, String oldFieldId,
       String newFieldId)
@@ -2160,8 +2097,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * @param userFieldName
    * @return den TextFieldMaster oder null, wenn das Benutzerfeld userFieldName nicht
    *         existiert.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private XPropertySet getUserFieldMaster(String userFieldName)
   {
@@ -2287,10 +2222,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    *
    * parst es und initialisiert damit {@link #overrideFragMap}. NEW_FRAG_ID ist
    * optional und wird als leerer String behandelt wenn es fehlt.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
-   *         TESTED
    */
   private void parseInitialOverrideFragMap(ConfigThingy initialOverrideFragMap)
   {
@@ -2325,10 +2256,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
 
   /**
    * Liefert die persönliche OverrideFrag-Liste des aktuell gewählten Absenders.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
-   *         TESTED
    */
   private ConfigThingy getInitialOverrideFragMap()
   {

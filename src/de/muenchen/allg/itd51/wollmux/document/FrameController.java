@@ -31,10 +31,9 @@ public class FrameController
   }
 
   /**
-   * Liefert den Frame zu diesem TextDocument oder null, wenn der Frame nicht
-   * bestimmt werden kann.
+   * Liefert den Frame zu diesem TextDocument oder null, wenn der Frame nicht bestimmt werden kann.
    *
-   * @return
+   * @return Den Frame des TextDocuments, oder null.
    */
   public synchronized XFrame getFrame()
   {
@@ -92,7 +91,7 @@ public class FrameController
     int insetTop = 0;
     int insetRight = 0;
     int insetButtom = 0;
-    
+
     if (UNO.XDevice(window) != null)
     {
       DeviceInfo di = UNO.XDevice(window).getInfo();
@@ -135,12 +134,12 @@ public class FrameController
   }
 
   /**
-   * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht des
-   * Dokuments auf den neuen Wert den das ConfigThingy conf im Knoten ZOOM angibt,
-   * der entwender eine ganzzahliger Prozentwert (ohne "%"-Zeichen") oder einer der
-   * Werte "Optimal", "PageWidth", "PageWidthExact" oder "EntirePage" ist.
+   * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht des Dokuments auf den
+   * neuen Wert den das ConfigThingy conf im Knoten ZOOM angibt, der entwender eine ganzzahliger
+   * Prozentwert (ohne "%"-Zeichen") oder einer der Werte "Optimal", "PageWidth", "PageWidthExact"
+   * oder "EntirePage" ist.
    *
-   * @param zoom
+   * @param conf
    * @throws ConfigurationErrorException
    */
   public synchronized void setDocumentZoom(ConfigThingy conf)

@@ -2,11 +2,11 @@
  * Dateiname: InsertionModel.java
  * Projekt  : WollMux
  * Funktion : Stellt eine Einfügestelle im Dokument dar (z.B. insertValue).
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL), 
+ * it under the terms of the European Union Public Licence (EUPL),
  * version 1.0 (or any later version).
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,7 +15,7 @@
  * European Union Public Licence for more details.
  *
  * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see 
+ * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
  * Änderungshistorie:
@@ -26,7 +26,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD D.10)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
@@ -60,35 +60,29 @@ public abstract class InsertionModel
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert
    * werden wollen.
    */
-  private List<ModelChangeListener> listeners = new Vector<ModelChangeListener>(1);
+  private List<ModelChangeListener> listeners = new Vector<>(1);
 
   /**
    * Entfernt die Einfügestelle komplett aus dem Dokument, d,h, sowohl das eventuell
    * vorhandene WollMux-Bookmark als auch den Feldbefehl.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public abstract void removeFromDocument();
 
   /**
    * Liefert den "Namen" der Einfügestelle. Dies kann z.B. der Name des Bookmarks
    * sein, das die Einfügestelle umschließt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public abstract String getName();
 
   /**
    * Setzt den ViewCursor auf die Einfügestelle.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public abstract void selectWithViewCursor();
 
   /**
    * Lässt dieses {@link InsertionModel} sein zugehöriges Bookmark bzw, sonstige
    * Daten updaten, die die TRAFO betreffen.
-   * 
+   *
    * @param mapFunctionNameToConfigThingy
    *          bildet einen Funktionsnamen auf ein ConfigThingy ab, dessen Wurzel der
    *          Funktionsname ist und dessen Inhalt eine Funktionsdefinition. Wenn
@@ -99,15 +93,12 @@ public abstract class InsertionModel
    * @return false, wenn ein update nicht möglich ist. In dem Fall wird das
    *         entsprechende Bookmark entfernt und dieses InsertionModel sollte nicht
    *         weiter verwendet werden.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public abstract boolean updateDocument(
       Map<String, ConfigThingy> mapFunctionNameToConfigThingy);
 
   /**
    * Liefert den FormularMax4000 zu dem dieses Model gehört.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormularMax4kController getFormularMax4000()
   {
@@ -120,8 +111,6 @@ public abstract class InsertionModel
    * d.h. Änderungen an diesem Attribut werden nicht im FM4000 propagiert. Diese
    * Funktion kann also derzeit nur sinnvoll auf einem frischen InsertionModel
    * verwendet werden, bevor es zur insertionModelList hinzugefügt wird.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setTrafo(FunctionSelection trafo)
   {
@@ -131,8 +120,6 @@ public abstract class InsertionModel
 
   /**
    * Liefert true gdw dieses InsertionModel eine TRAFO gesetzt hat.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean hasTrafo()
   {
@@ -141,8 +128,6 @@ public abstract class InsertionModel
 
   /**
    * Liefert ein Interface zum Zugriff auf die TRAFO dieses Objekts.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public FunctionSelectionAccess getTrafoAccess()
   {
@@ -151,8 +136,6 @@ public abstract class InsertionModel
 
   /**
    * listener wird über Änderungen des Models informiert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void addListener(ModelChangeListener listener)
   {
@@ -163,8 +146,6 @@ public abstract class InsertionModel
    * Benachrichtigt alle auf diesem Model registrierten Listener, dass das Model aus
    * seinem Container entfernt wurde. ACHTUNG! Darf nur von einem entsprechenden
    * Container aufgerufen werden, der das Model enthält.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void hasBeenRemoved()
   {
@@ -201,7 +182,7 @@ public abstract class InsertionModel
    * schicken. Allerdings ist dies derzeit nicht implementiert, weil es derzeit genau
    * eine View gibt für die Trafo, so dass konkurrierende Änderungen gar nicht
    * möglich sind.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class MyTrafoAccess implements FunctionSelectionAccess
@@ -286,22 +267,20 @@ public abstract class InsertionModel
   /**
    * Interface für Listener, die über Änderungen eines Models informiert werden
    * wollen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static interface ModelChangeListener
   {
     /**
      * Wird aufgerufen wenn ein Attribut des Models sich geändert hat.
-     * 
+     *
      * @param model
      *          das InsertionModel, das sich geändert hat.
      * @param attributeId
-     *          eine der {@link InsertionModel#ID_ATTR Attribut-ID-Konstanten}.
+     *          eine der {@link InsertionModel4InsertXValue#ID_ATTR Attribut-ID-Konstanten}.
      * @param newValue
-     *          der neue Wert des Attributs. Numerische Attribute werden als Integer
-     *          übergeben.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
+     *          der neue Wert des Attributs. Numerische Attribute werden als Integer übergeben.
      */
     public void attributeChanged(InsertionModel model, int attributeId,
         Object newValue);
@@ -309,8 +288,6 @@ public abstract class InsertionModel
     /**
      * Wird aufgerufen, wenn model aus seinem Container entfernt wird (und damit in
      * keiner View mehr angezeigt werden soll).
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void modelRemoved(InsertionModel model);
   }

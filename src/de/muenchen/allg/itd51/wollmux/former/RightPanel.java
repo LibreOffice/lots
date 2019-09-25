@@ -2,7 +2,7 @@
  * Dateiname: RightPanel.java
  * Projekt  : WollMux
  * Funktion : Managet die rechte Hälfte des FM4000.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former;
 
@@ -48,7 +48,7 @@ import de.muenchen.allg.itd51.wollmux.former.view.View;
 
 /**
  * Managet die rechte Hälfte des FM4000.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class RightPanel implements View
@@ -89,15 +89,13 @@ public class RightPanel implements View
 
   /**
    * Erzeugt ein neues RightPanel. Zur Erläuterung der Parameter siehe
-   * {@link de.muenchen.allg.itd51.wollmux.former.insertion.AllInsertionTrafoViewsPanel#AllInsertionTrafoViewsPanel(InsertionModelList, FunctionLibrary, FormularMax4000)}
+   * {@link AllInsertionTrafoViewsPanel#AllInsertionTrafoViewsPanel(InsertionModelList, FunctionLibrary, FormularMax4kController)}
    * und
-   * {@link de.muenchen.allg.itd51.wollmux.former.control.AllFormControlExtViewsPanel#AllFormControlExtViewsPanel(FormControlModelList, FunctionLibrary, FormularMax4000)}.
+   * {@link AllFormControlExtViewsPanel#AllFormControlExtViewsPanel(FormControlModelList, FunctionLibrary, GroupModelList, FormularMax4kController)}.
    * und
-   * {@link AllGroupFuncViewsPanel#AllGroupFuncViewsPanel(GroupModelList, FunctionLibrary, FormularMax4000)}
+   * {@link AllGroupFuncViewsPanel#AllGroupFuncViewsPanel(GroupModelList, FunctionLibrary, FormularMax4kController)}
    * und
-   * {@link AllSectionExtViewsPanel#AllSectionExtViewsPanel(SectionModelList, GroupModelList, FormularMax4000)}
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   * {@link AllSectionExtViewsPanel#AllSectionExtViewsPanel(SectionModelList, GroupModelList, FormularMax4kController)}
    */
   public RightPanel(InsertionModelList insertionModelList,
       FormControlModelList formControlModelList, GroupModelList groupModelList,
@@ -133,21 +131,25 @@ public class RightPanel implements View
 
   private class MyBroadcastListener extends BroadcastListener
   {
+    @Override
     public void broadcastAllInsertionsViewSelected()
     {
       cards.show(myPanel, ALL_INSERTION_TRAFO_VIEWS_PANEL);
     }
 
+    @Override
     public void broadcastAllFormControlsViewSelected()
     {
       cards.show(myPanel, ALL_FORMCONTROL_EXT_VIEWS_PANEL);
     }
 
+    @Override
     public void broadcastAllGroupsViewSelected()
     {
       cards.show(myPanel, ALL_GROUP_FUNC_VIEWS_PANEL);
     }
 
+    @Override
     public void broadcastAllSectionsViewSelected()
     {
       cards.show(myPanel, ALL_SECTION_EXT_VIEWS_PANEL);

@@ -101,8 +101,6 @@ public class OneSectionLineView extends LineView
 
   /**
    * Erzeugt eine neue View für model.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public OneSectionLineView(SectionModel model, ViewChangeListener bigDaddy,
       FormularMax4kController formularMax4000)
@@ -130,8 +128,6 @@ public class OneSectionLineView extends LineView
   /**
    * Liefert eine Komponente, die den Namen des Bereichs anzeigt und Änderungen an
    * das Model weitergibt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private JComponent makeNameView()
   {
@@ -200,8 +196,6 @@ public class OneSectionLineView extends LineView
 
   /**
    * Liefert das {@link SectionModel} das zu dieser View gehört.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public SectionModel getModel()
   {
@@ -239,8 +233,6 @@ public class OneSectionLineView extends LineView
    * in Broadcasts, die signalisieren, dass das entsprechende Model selektiert wurde.
    * Je nachdem ob CTRL gedrückt ist oder nicht wird die Selektion erweitert oder
    * ersetzt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class MyMouseListener implements MouseListener
   {

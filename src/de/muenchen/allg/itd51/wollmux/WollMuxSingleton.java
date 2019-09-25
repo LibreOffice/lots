@@ -523,12 +523,6 @@ public class WollMuxSingleton
     url.openStream().close();
   }
 
-  /**
-   * Git zurück, ob sich der WollMux im NoConfig-Modus befindet, d.h. es wurde keine Config-Datei
-   * gefunden.
-   *
-   * @return
-   */
   public boolean isNoConfig()
   {
     return noConfig;

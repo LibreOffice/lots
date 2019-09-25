@@ -2,7 +2,7 @@
  * Dateiname: BasicWollMuxDispatchProvider.java
  * Projekt  : WollMux
  * Funktion : Liefert zu Dispatch-URLs, die der WollMux ohne ein zugehöriges TextDocumentModel behandeln kann XDispatch-Objekte.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -85,7 +85,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
    * das zugehörige Textdokument geschlossen wird.
    */
   private static final Set<DispatchProviderAndInterceptor> documentDispatchProviderAndInterceptors =
-    new HashSet<DispatchProviderAndInterceptor>();
+      new HashSet<>();
 
   private XDispatchProvider slave = null;
 
@@ -108,8 +108,6 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   /**
    * Erzeugt einen {@link DispatchProviderAndInterceptor}, der nur globale URLs
    * behandeln kann.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   private DispatchProviderAndInterceptor()
   {}
@@ -117,10 +115,8 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   /**
    * Erzeugt einen {@link DispatchProviderAndInterceptor}, der sowohl globale als
    * auch für model-spezifische URLs behandeln kann.
-   * 
+   *
    * @param model
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
    */
   private DispatchProviderAndInterceptor(XFrame frame)
   {
@@ -150,10 +146,6 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   /**
    * Liefert true, wenn die Methode methodName(String, PropertyValue[]) in der Klasse
    * c vorhanden ist, andern falls false.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   *         TESTED
    */
   protected boolean hasMethod(Class<?> c, String methodName)
   {
@@ -170,7 +162,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see com.sun.star.frame.XDispatchProvider#queryDispatch(com.sun.star.util.URL,
    * java.lang.String, int)
    */
@@ -201,7 +193,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @seecom.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.
    * DispatchDescriptor[])
    */
@@ -234,9 +226,6 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   /**
    * Registriert einen DocumentDispatchProvider im Frame frame (nur dann, wenn er
    * nicht bereits registriert wurde).
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101), Christoph Lutz (D-III-ITD-D101)
-   *         TESTED
    */
   public static void registerDocumentDispatchInterceptor(XFrame frame)
   {
@@ -271,7 +260,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
    * wieder freigeben zu können, wenn der Frame disposed wird (drücken auf den großen
    * "X"-Button) bzw. wenn der Frame nicht mehr an das XTextDocument gebunden ist
    * (z.B. beim Drücken des kleinen "X"-Buttons)
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private static class DPIFrameActionListener implements XFrameActionListener
@@ -311,8 +300,6 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
    * Merkt sich den übergebenen dokumentgebundenen DispatchProviderAndInterceptor in
    * einem internen statischen Set; Der Zugriff auf dieses Set erfolgt
    * synchronisiert. Ist dpi==null wird nichts gemacht.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private static void registerDPI(DispatchProviderAndInterceptor dpi)
   {
@@ -327,8 +314,6 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
    * Entfernt den übergebenen dokumentgebundenen DispatchProviderAndInterceptor aus
    * einem internen statischen Set; Der Zugriff auf dieses Set erfolgt
    * synchronisiert. Ist dpi==null wird nichts gemacht.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private static void deregisterDPI(DispatchProviderAndInterceptor dpi)
   {
@@ -347,8 +332,6 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
    * diesen Frame noch keinen {@link DispatchProviderAndInterceptor} registriert hat;
    * Die Abfrage auf das interne Set der registrierten
    * {@link DispatchProviderAndInterceptor}-Objekten ist synchronisiert.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private static DispatchProviderAndInterceptor getRegisteredDPI(XFrame frame)
   {

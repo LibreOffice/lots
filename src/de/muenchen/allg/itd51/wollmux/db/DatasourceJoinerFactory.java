@@ -53,8 +53,6 @@ public class DatasourceJoinerFactory
   /**
    * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null, falls
    * ein Fehler während der Initialisierung aufgetreten ist).
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static DatasourceJoiner getDatasourceJoiner()
   {
@@ -73,7 +71,7 @@ public class DatasourceJoinerFactory
         // sondern erst später, wnn
         // tatsächlich auf die Datenquelle "null" zurück gegriffen wird.
       }
-  
+
       ConfigThingy dataSourceTimeout =
         WollMuxFiles.getWollmuxConf().query("DATASOURCE_TIMEOUT", 1);
       long datasourceTimeoutLong = 0;
@@ -94,16 +92,16 @@ public class DatasourceJoinerFactory
         LOGGER.error(L.m("DATASOURCE_TIMEOUT muss eine ganze Zahl sein"));
         datasourceTimeoutLong = DatasourceJoiner.DATASOURCE_TIMEOUT;
       }
-  
+
       try
       {
         if (null == senderSourceStr)
           senderSourceStr = DatasourceJoiner.NOCONFIG;
-  
+
         datasourceJoiner =
           new DatasourceJoiner(collectDatasources(WollMuxFiles.getWollmuxConf(),
-              WollMuxFiles.getDEFAULT_CONTEXT()), 
-              senderSourceStr, 
+              WollMuxFiles.getDEFAULT_CONTEXT()),
+              senderSourceStr,
               createLocalOverrideStorage(senderSourceStr, WollMuxFiles.getLosCacheFile(), WollMuxFiles.getDEFAULT_CONTEXT()),
               datasourceTimeoutLong);
         /*
@@ -130,14 +128,14 @@ public class DatasourceJoinerFactory
         LOGGER.error("", e);
       }
     }
-  
+
     return datasourceJoiner;
   }
 
   private static Map<String, Datasource> collectDatasources(ConfigThingy joinConf, URL context)
   {
     HashMap<String, Datasource> datasources = new HashMap<>();
-    
+
     ConfigThingy datenquellen = joinConf.query("Datenquellen").query("Datenquelle");
     for (ConfigThingy sourceDesc : datenquellen)
     {
@@ -208,16 +206,16 @@ public class DatasourceJoinerFactory
 
       datasources.put(name, ds);
     }
-    
+
     return datasources;
   }
-  
+
   private static LocalOverrideStorage createLocalOverrideStorage(String mainSourceName, File losCache, URL context)
   {
     // kann sein, dass noch kein singleton erstellt ist - kein Zugriff auf no config
     if (mainSourceName.equals(DatasourceJoiner.NOCONFIG))
     {
-      return new LocalOverrideStorageDummyImpl();// no config, kein cache ! 
+      return new LocalOverrideStorageDummyImpl();// no config, kein cache !
     }
     else
     {
@@ -226,15 +224,10 @@ public class DatasourceJoinerFactory
   }
 
   /**
-   * Diese Methode liefert eine Liste mit den über {@link #senderDisplayTemplate}
-   * definierten String-Repräsentation aller verlorenen gegangenen Datensätze des
-   * DatasourceJoiner (gemäß {@link DatasourceJoiner.Status.lostDatasets}) zurück.
-   * Die genaue Form der String-Repräsentation ist abhängig von
-   * {@link #senderDisplayTemplate}, das in der WollMux-Konfiguration über den Wert
-   * von SENDER_DISPLAYTEMPLATE gesetzt werden kann. Gibt es keine verloren
-   * gegangenen Datensätze, so bleibt die Liste leer.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
+   * Diese Methode liefert eine Liste aller verlorenen gegangenen Datensätze des DatasourceJoiner
+   * (gemäß {@link DatasourceJoiner.Status#lostDatasets}) zurück.
+   *
+   * @return List der verlorenen Datensätze im Format "<oid> <vorname> <nachname>".
    */
   public static List<String> getLostDatasetDisplayStrings()
   {

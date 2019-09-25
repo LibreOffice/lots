@@ -2,7 +2,7 @@
  * Dateiname: BroadcastListener.java
  * Projekt  : WollMux
  * Funktion : Abstrakte Basisklasse für Horcher auf dem globalen Broadcast-Kanal.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former;
 
@@ -40,7 +40,7 @@ import java.util.Set;
  * diesen globalen Objekten wegen des Ausuferns der Verbindungen nicht in einer
  * Beziehung stehen sollen. BroadcastListener dürfen nur permanente Objekte sein,
  * d.h. Objekte deren Lebensdauer nicht vor Beenden des FM4000 endet.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public abstract class BroadcastListener
@@ -48,8 +48,6 @@ public abstract class BroadcastListener
   /**
    * getObject() ist ein
    * {@link de.muenchen.allg.itd51.wollmux.former.control.FormControlModel}.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
   {}
@@ -57,8 +55,6 @@ public abstract class BroadcastListener
   /**
    * getObject() ist ein
    * {@link de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel}.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastInsertionModelSelection(BroadcastObjectSelection b)
   {}
@@ -66,8 +62,6 @@ public abstract class BroadcastListener
   /**
    * getObject() ist ein
    * {@link de.muenchen.allg.itd51.wollmux.former.group.GroupModel}.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastGroupModelSelection(BroadcastObjectSelection b)
   {}
@@ -75,57 +69,44 @@ public abstract class BroadcastListener
   /**
    * getObject() ist ein
    * {@link de.muenchen.allg.itd51.wollmux.former.section.SectionModel}.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastSectionModelSelection(BroadcastObjectSelection b)
   {}
 
   /**
    * Eine View die Views aller InsertionModel enthält wurde ausgewählt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastAllInsertionsViewSelected()
   {}
 
   /**
    * Eine View die Views aller FormControlModels enthält wurde ausgewählt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastAllFormControlsViewSelected()
   {}
 
   /**
    * Eine View die Views aller GroupModels enthält wurde ausgewählt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastAllGroupsViewSelected()
   {}
 
   /**
    * Eine View die Views aller SectionModels enthält wurde ausgewählt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastAllSectionsViewSelected()
   {}
 
   /**
    * Eine Menge von Bookmarks wurde ausgewählt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastBookmarkSelection(Set<String> bookmarkNames)
   {}
 
   /**
    * Der {@link ViewVisibilityDescriptor} hat sich geändert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastViewVisibilitySettings(ViewVisibilityDescriptor desc)
-  {};
+  {
+  }
 }

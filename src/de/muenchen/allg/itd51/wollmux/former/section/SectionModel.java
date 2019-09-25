@@ -2,11 +2,11 @@
  * Dateiname: SectionModel.java
  * Projekt  : WollMux
  * Funktion : Stellt einen Bereich da (Format/Bereiche...)
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL), 
+ * it under the terms of the European Union Public Licence (EUPL),
  * version 1.0 (or any later version).
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,7 +15,7 @@
  * European Union Public Licence for more details.
  *
  * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see 
+ * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
  * Änderungshistorie:
@@ -26,7 +26,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD D.10)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.section;
 
@@ -51,7 +51,6 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupsProvider;
-import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
 
 /**
  * Stellt einen Bereich da (Format/Bereiche...)
@@ -82,7 +81,7 @@ public class SectionModel
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert
    * werden wollen.
    */
-  private List<ModelChangeListener> listeners = new Vector<ModelChangeListener>(1);
+  private List<ModelChangeListener> listeners = new Vector<>(1);
 
   /** GROUPS. */
   private GroupsProvider groups;
@@ -118,12 +117,9 @@ public class SectionModel
   /**
    * Erzeugt ein neues SectionModel für einen Bereich names sectionName, der über doc
    * ansprechbar ist.
-   * 
+   *
    * @param formularMax4000
    *          der dieses SectionModel verwaltet
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   * TESTED
    */
   public SectionModel(String sectionName, XTextSectionsSupplier doc,
       FormularMax4kController formularMax4000)
@@ -137,11 +133,8 @@ public class SectionModel
    * Nimmt den vollständigen Bereichsnamen entgegen und initialisiert
    * {@link #sectionNameComplete} und {@link #sectionNamePrefix} sowie
    * {@link #groups}.
-   * 
+   *
    * @param name
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   * TESTED
    */
   private void parseName(String name)
   {
@@ -157,7 +150,7 @@ public class SectionModel
       {
         ConfigThingy conf = new ConfigThingy("GROUPS", m.group(2)); // GROUPS-GROUPS-(...)
         conf = conf.getFirstChild(); // der eigentliche "GROUPS" Knoten
-        HashSet<IDManager.ID> set = new HashSet<IDManager.ID>(conf.count());
+        HashSet<IDManager.ID> set = new HashSet<>(conf.count());
         Iterator<ConfigThingy> iter = conf.iterator();
         while (iter.hasNext())
         {
@@ -178,8 +171,6 @@ public class SectionModel
 
   /**
    * Liefert den FormularMax4000 zu dem dieses Model gehört.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormularMax4kController getFormularMax4000()
   {
@@ -190,8 +181,6 @@ public class SectionModel
    * Wenn der Name dieses Bereichs eine GROUPS-Angabe oder/und ein numerisches Suffix
    * hat, so wird der Name ohne diese Teile zurückgeliefert, ansonsten der komplette
    * Name.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public String getNamePrefix()
   {
@@ -200,10 +189,6 @@ public class SectionModel
 
   /**
    * Setzt name als neuen Namen dieses Bereichs (exklusive GROUPS-Angabe).
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   * TESTED
    */
   public void setNamePrefix(String name)
   {
@@ -214,10 +199,6 @@ public class SectionModel
 
   /**
    * Entfernt den Bereich aus dem Dokument.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   * TESTED
    */
   public void removeFromDocument()
   {
@@ -239,10 +220,6 @@ public class SectionModel
    *
    * @return false, wenn beim Update etwas schief geht (typischerweise weil der
    *         Benutzer den Bereich hinterrücks gelöscht oder umbenannt hat)
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
-   * TESTED
    */
   public boolean updateDocument()
   {
@@ -276,10 +253,6 @@ public class SectionModel
 
   /**
    * Liefert true gdw diese Section sichtbar ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   * TODO Testen
    */
   public boolean isVisible()
   {
@@ -298,10 +271,6 @@ public class SectionModel
 
   /**
    * Setzt die Sichtbarkeit dieses Bereichs auf visible.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
-   * TESTED
    */
   public void setVisible(boolean visible)
   {
@@ -322,8 +291,6 @@ public class SectionModel
 
   /**
    * Liefert true gdw, die GROUPS-Angabe nicht leer ist.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public boolean hasGroups()
   {
@@ -332,8 +299,6 @@ public class SectionModel
 
   /**
    * Liefert den GroupsProvider, der die GROUPS dieses Models managet.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public GroupsProvider getGroupsProvider()
   {
@@ -343,10 +308,6 @@ public class SectionModel
   /**
    * Setzt {@link #sectionNamePrefix} und {@link #groups} zu einem kompletten
    * Bereichsnamen zusammen (noch ohne numerisches Suffix).
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   * TESTED
    */
   private String generateCompleteName()
   {
@@ -369,8 +330,6 @@ public class SectionModel
 
   /**
    * listener wird über Änderungen des Models informiert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void addListener(ModelChangeListener listener)
   {
@@ -381,8 +340,6 @@ public class SectionModel
    * Benachrichtigt alle auf diesem Model registrierten Listener, dass das Model aus
    * seinem Container entfernt wurde. ACHTUNG! Darf nur von einem entsprechenden
    * Container aufgerufen werden, der das Model enthält.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void hasBeenRemoved()
   {
@@ -396,9 +353,8 @@ public class SectionModel
   }
 
   /**
-   * Ruft für jeden auf diesem Model registrierten {@link ModelChangeListener} die
-   * Methode
-   * {@link ModelChangeListener#attributeChanged(InsertionModel, int, Object)} auf.
+   * Ruft für jeden auf diesem Model registrierten {@link ModelChangeListener} die Methode
+   * {@link ModelChangeListener#attributeChanged(SectionModel, int, Object)} auf.
    */
   protected void notifyListeners(int attributeId, Object newValue)
   {
@@ -414,14 +370,12 @@ public class SectionModel
   /**
    * Interface für Listener, die über Änderungen eines Models informiert werden
    * wollen.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static interface ModelChangeListener
   {
     /**
      * Wird aufgerufen wenn ein Attribut des Models sich geändert hat.
-     * 
+     *
      * @param model
      *          das SectionModel, das sich geändert hat.
      * @param attributeId
@@ -429,15 +383,12 @@ public class SectionModel
      * @param newValue
      *          der neue Wert des Attributs. Numerische Attribute werden als Integer
      *          übergeben.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void attributeChanged(SectionModel model, int attributeId, Object newValue);
 
     /**
      * Wird aufgerufen, wenn model aus seinem Container entfernt wird (und damit in
      * keiner View mehr angezeigt werden soll).
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void modelRemoved(SectionModel model);
   }

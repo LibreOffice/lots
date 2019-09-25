@@ -109,11 +109,14 @@ public class DocumentLoader
   /**
    * Lädt ein Dokument und öffnet es.
    *
-   * @param path        URL des Dokuments
-   * @param asTemplate  behandelt das Dokument als Template
-   * @param allowMacros erlaubt die Ausführung von Makros
+   * @param path
+   *          URL des Dokuments
+   * @param asTemplate
+   *          behandelt das Dokument als Template
+   * @param allowMacros
+   *          erlaubt die Ausführung von Makros
    *
-   * @return
+   * @return Das geladene Dokument.
    */
   public XComponent loadDocument(String path, boolean asTemplate,
     boolean allowMacros)

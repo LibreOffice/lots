@@ -2,7 +2,7 @@
  * Dateiname: OneInsertionLineView.java
  * Projekt  : WollMux
  * Funktion : Eine einzeilige Sicht auf eine Einfügestelle im Dokument.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
@@ -100,8 +100,6 @@ public class OneInsertionLineView extends LineView
 
   /**
    * Erzeugt eine neue View für model.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public OneInsertionLineView(InsertionModel model, ViewChangeListener bigDaddy,
       FormularMax4kController formularMax4000)
@@ -128,12 +126,10 @@ public class OneInsertionLineView extends LineView
   /**
    * Liefert eine Komponente, die je nach Art der Einfügung das DB_SPALTE oder ID
    * Attribut anzeigt und Änderungen an das Model weitergibt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private JComponent makeIDView()
   {
-    idBox = new JComboBox<String>();
+    idBox = new JComboBox<>();
 
     if (!(this.model instanceof InsertionModel4InsertXValue))
     {
@@ -210,8 +206,6 @@ public class OneInsertionLineView extends LineView
 
   /**
    * Liefert das {@link InsertionModel} das zu dieser View gehört.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public InsertionModel getModel()
   {
@@ -250,8 +244,6 @@ public class OneInsertionLineView extends LineView
    * in Broadcasts, die signalisieren, dass das entsprechende Model selektiert wurde.
    * Je nachdem ob CTRL gedrückt ist oder nicht wird die Selektion erweitert oder
    * ersetzt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class MyMouseListener implements MouseListener
   {

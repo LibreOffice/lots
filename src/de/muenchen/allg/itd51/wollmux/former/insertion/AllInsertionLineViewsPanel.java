@@ -2,7 +2,7 @@
  * Dateiname: AllInsertionLineViewsPanel.java
  * Projekt  : WollMux
  * Funktion : Enthält alle OneInsertionLineViews.
- * 
+ *
  * Copyright (c) 2010-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,11 +23,11 @@
  * -------------------------------------------------------------------
  * 13.09.2006 | BNK | Erstellung
  * 23.03.2010 | ERT | [R5721]Unterstützung für Shift-Klick
- * 20.04.2010 | BED | "Löschen"-Button weg, "DeMux" umbenannt in "Entfernen (DeMux)" 
+ * 20.04.2010 | BED | "Löschen"-Button weg, "DeMux" umbenannt in "Entfernen (DeMux)"
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
@@ -35,8 +35,6 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -60,7 +58,7 @@ import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
 /**
  * Enthält alle OneInsertionLineViews.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AllInsertionLineViewsPanel implements View
@@ -68,7 +66,7 @@ public class AllInsertionLineViewsPanel implements View
   /**
    * Rand um Buttons (in Pixeln).
    */
-  private final static int BUTTON_BORDER = 2;
+  private static final int BUTTON_BORDER = 2;
 
   /**
    * Der {@link FormularMax4000} zu dem diese View gehört.
@@ -116,8 +114,6 @@ public class AllInsertionLineViewsPanel implements View
    * Erzeugt ein AllInsertionLineViewsPanel, die den Inhalt von insertionModelList
    * anzeigt. ACHTUNG! insertionModelList sollte leer sein, da nur neu hinzugekommene
    * Elemente in der View angezeigt werden.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public AllInsertionLineViewsPanel(InsertionModelList insertionModelList,
       FormularMax4kController formularMax4000)
@@ -163,8 +159,6 @@ public class AllInsertionLineViewsPanel implements View
 
   /**
    * Fügt dieser View eine {@link OneInsertionLineView} für model hinzu.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void addItem(InsertionModel model)
   {
@@ -184,8 +178,6 @@ public class AllInsertionLineViewsPanel implements View
 
   /**
    * Entfernt view aus diesem Container (falls dort vorhanden).
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void removeItem(OneInsertionLineView view)
   {
@@ -200,8 +192,6 @@ public class AllInsertionLineViewsPanel implements View
 
   /**
    * Hebt die Selektion aller Elemente auf.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void clearSelection()
   {
@@ -219,8 +209,6 @@ public class AllInsertionLineViewsPanel implements View
    * Löscht die WollMux-Bookmarks um alle ausgewählten Elemente. Da es damit keine
    * Einfügestellen mehr sind, werden die entsprechenden LineViews ebenfalls
    * entfernt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void demuxSelectedElements()
   {

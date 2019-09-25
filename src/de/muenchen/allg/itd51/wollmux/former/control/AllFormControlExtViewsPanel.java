@@ -71,7 +71,6 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
    *          Auswahl anbieten sollen.
    * @param groupModelList
    *          die Liste der Gruppen, die zur Auswahl stehen sollen.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public AllFormControlExtViewsPanel(FormControlModelList formControlModelList,
       FunctionLibrary funcLib, GroupModelList groupModelList,

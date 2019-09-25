@@ -2,11 +2,11 @@
  * Dateiname: GroupsProvider.java
  * Projekt  : WollMux
  * Funktion : c
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL), 
+ * it under the terms of the European Union Public Licence (EUPL),
  * version 1.0 (or any later version).
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,7 +15,7 @@
  * European Union Public Licence for more details.
  *
  * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see 
+ * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
  * Änderungshistorie:
@@ -26,7 +26,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD D.10)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.group;
 
@@ -44,18 +44,18 @@ import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 
 /**
  * Ein Ding, das GROUPS über ihre IDs referenziert.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
 public class GroupsProvider implements Iterable<IDManager.ID>
 {
-  private Set<IDManager.ID> groups = new HashSet<IDManager.ID>();
+  private Set<IDManager.ID> groups = new HashSet<>();
 
   /**
    * Wer wird alles benachrichtigt, wenn Gruppen hinzukommen oder entfernt werden.
    */
   private List<WeakReference<GroupsChangedListener>> listeners =
-    new Vector<WeakReference<GroupsChangedListener>>();
+      new Vector<>();
 
   /**
    * Der heilige Meister, den wir anbeten.
@@ -63,11 +63,8 @@ public class GroupsProvider implements Iterable<IDManager.ID>
   private FormularMax4kController formularMax4000;
 
   /**
-   * Erzeugt einen neuen GroupsProvider, der
-   * {@link FormularMax4000#documentNeedsUpdating()} aufruft, wenn etwas an seiner
-   * Liste geändert wird.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
+   * Erzeugt einen neuen GroupsProvider, der {@link FormularMax4kController#documentNeedsUpdating()}
+   * aufruft, wenn etwas an seiner Liste geändert wird.
    */
   public GroupsProvider(FormularMax4kController formularMax4000)
   {
@@ -81,18 +78,14 @@ public class GroupsProvider implements Iterable<IDManager.ID>
    * {@link #addGroup(de.muenchen.allg.itd51.wollmux.former.IDManager.ID)} bzw.
    * {@link #removeGroup(de.muenchen.allg.itd51.wollmux.former.IDManager.ID)}
    * erfolgen.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public Set<IDManager.ID> getGroups()
   {
-    return new HashSet<IDManager.ID>(groups);
+    return new HashSet<>(groups);
   }
 
   /**
    * Fügt id zu den GROUPS hinzu, falls noch nicht enthalten.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public void addGroup(IDManager.ID id)
   {
@@ -107,9 +100,7 @@ public class GroupsProvider implements Iterable<IDManager.ID>
 
   /**
    * Entfernt id aus GROUPS, falls dort enthalten.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    */
   public void removeGroup(IDManager.ID id)
   {
@@ -120,8 +111,6 @@ public class GroupsProvider implements Iterable<IDManager.ID>
 
   /**
    * Wird von {@link #removeGroup(ID)} und {@link MyIterator#remove()} aufgerufen.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   private void groupHasBeenRemoved(IDManager.ID id)
   {
@@ -133,8 +122,6 @@ public class GroupsProvider implements Iterable<IDManager.ID>
    * Ersetzt die interne Gruppenliste durch groups. ACHTUNG! FormularMax 4000 wird
    * nicht aufgefordert, das Dokument zu updaten. Diese Methode sollte nur zur
    * Initialisierung des Objekts vor der Verwendung aufgerufen werden.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public void initGroups(Set<IDManager.ID> groups)
   {
@@ -143,8 +130,6 @@ public class GroupsProvider implements Iterable<IDManager.ID>
 
   /**
    * Liefert true gdw, die GROUPS-Angabe nicht leer ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public boolean hasGroups()
   {
@@ -156,11 +141,8 @@ public class GroupsProvider implements Iterable<IDManager.ID>
    * ACHTUNG! Es wird nur eine {@link WeakReference} auf listener gehalten! Das
    * heisst der Listener muss auf andere Weise am Leben gehalten werden. Andererseits
    * muss er nicht deregistriert werden, wenn er verschwindet.
-   * 
+   *
    * @param listener
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   * TESTED
    */
   public void addGroupsChangedListener(GroupsChangedListener listener)
   {
@@ -179,10 +161,6 @@ public class GroupsProvider implements Iterable<IDManager.ID>
   /**
    * Benachrichtigt alle {@link GroupsChangedListener}, dass id hinzugefügt
    * (remove==false) oder entfernt (remove==true) wurde.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   * TESTED
    */
   private void notifyListeners(IDManager.ID id, boolean remove)
   {

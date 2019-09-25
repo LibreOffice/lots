@@ -80,8 +80,6 @@ public class ParamValue
 
   /**
    * Copy Constructor.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ParamValue(ParamValue orig)
   {
@@ -92,8 +90,6 @@ public class ParamValue
 
   /**
    * Liefert true gdw dieser Parameterwert unspezifiziert ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isUnspecified()
   {
@@ -103,8 +99,6 @@ public class ParamValue
   /**
    * Liefert true gdw dieser Parameterwert eine Referenz auf ein Feld mit ID
    * {@link #getString()} ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isFieldReference()
   {
@@ -114,8 +108,6 @@ public class ParamValue
   /**
    * Liefert true gdw dieser Parameterwert der literale String {@link #getString()}
    * ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isLiteral()
   {
@@ -125,8 +117,6 @@ public class ParamValue
   /**
    * Liefert die Feld ID, wenn {@link #isFieldReference()}, den literalen String,
    * wenn {@link #isLiteral()} und ansonsten null.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String getString()
   {
@@ -137,8 +127,6 @@ public class ParamValue
 
   /**
    * Liefert einen unspezifizierten ParamValue.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static ParamValue unspecified()
   {
@@ -147,8 +135,6 @@ public class ParamValue
 
   /**
    * Liefert einen ParamValue der eine Referenz auf das Feld mit ID id darstellt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static ParamValue field(IDManager.ID id)
   {
@@ -157,8 +143,6 @@ public class ParamValue
 
   /**
    * Liefert einen ParamValue, der das String-Literal str darstellt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static ParamValue literal(String str)
   {

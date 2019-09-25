@@ -41,8 +41,6 @@ public interface View
 {
   /**
    * Liefert die Komponente für diese View.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public JComponent getComponent();
 }

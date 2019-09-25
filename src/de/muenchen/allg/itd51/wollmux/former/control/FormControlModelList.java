@@ -2,7 +2,7 @@
  * Dateiname: FormControlModelList.java
  * Projekt  : WollMux
  * Funktion : Verwaltet eine Liste von FormControlModels.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,13 +26,13 @@
  * 10.09.2006 | BNK | [R3207]Maximale Anzahl von Steuerelementen pro Tab wird überwacht.
  * 10.09.2006 | BNK | automatisch Tab einfügen, wenn nach Button ein in der Button-Zeile
  *                    unsinniges Element auftaucht.
- * 16.03.2007 | BNK | Für jedes hinzugekommene FormControlModel die ID broadcasten. 
+ * 16.03.2007 | BNK | Für jedes hinzugekommene FormControlModel die ID broadcasten.
  * 12.07.2007 | BNK | Umgestellt auf Verwendung von IDManager.
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.control;
 
@@ -47,7 +47,7 @@ import de.muenchen.allg.itd51.wollmux.former.IDManager;
 
 /**
  * Verwaltet eine Liste von FormControlModels.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class FormControlModelList implements Iterable<FormControlModel>
@@ -61,13 +61,13 @@ public class FormControlModelList implements Iterable<FormControlModel>
   /**
    * Die Liste der {@link FormControlModel}s.
    */
-  private List<FormControlModel> models = new ArrayList<FormControlModel>();
+  private List<FormControlModel> models = new ArrayList<>();
 
   /**
    * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts
    * informiert werden wollen.
    */
-  private List<ItemListener> listeners = new ArrayList<ItemListener>(1);
+  private List<ItemListener> listeners = new ArrayList<>(1);
 
   /**
    * Der FormularMax4000 zu dem diese Liste gehört.
@@ -81,8 +81,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
 
   /**
    * Löscht alle bestehenden FormControlModels aus der Liste.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void clear()
   {
@@ -96,8 +94,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
 
   /**
    * Liefert die Anzahl der {@link FormControlModel}s in dieser Liste.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public int size()
   {
@@ -106,8 +102,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
 
   /**
    * Liefert true gdw diese Liste keine Elemente enthält.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isEmpty()
   {
@@ -121,8 +115,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
    * Iteration keine Veränderungen an der InsertionModelList vorkommen, da der
    * Iterator direkt auf der internen Datenstruktur arbeitet und es daher zur
    * {@link java.util.ConcurrentModificationException} kommen würde.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   @Override
   public Iterator<FormControlModel> iterator()
@@ -133,8 +125,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
   /**
    * Bittet die FormControlModelList darum, das Element model aus sich zu entfernen
    * (falls es in der Liste ist).
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void remove(FormControlModel model)
   {
@@ -150,8 +140,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
    * Macht aus str einen Identifier, der noch von keinem FormControlModel dieser
    * Liste verwendet wird und liefert diesen Identifier zurück. Falls str == "" wird
    * str zurückgeliefert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String makeUniqueId(String str)
   {
@@ -183,11 +171,9 @@ public class FormControlModelList implements Iterable<FormControlModel>
   }
 
   /**
-   * Falls idx >= 0 wird model an Index idx in die Liste eingefügt (das Element das
-   * sich vorher an diesem Index befand hat danach Index idx+1); falls idx < 0 wird
-   * model an das Ende der Liste angehängt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * Falls idx &gt;= 0 wird model an Index idx in die Liste eingefügt (das Element das sich vorher
+   * an diesem Index befand hat danach Index idx+1); falls idx %lt; 0 wird model an das Ende der
+   * Liste angehängt.
    */
   public void add(final FormControlModel model, int idx)
   {
@@ -202,8 +188,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
 
   /**
    * model wird an das Ende der Liste angehängt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void add(FormControlModel model)
   {
@@ -232,7 +216,7 @@ public class FormControlModelList implements Iterable<FormControlModel>
   /**
    * Schiebt die ausgewählten FormControlModels in der Liste nach oben, d,h,
    * reduziert ihre Indizes um 1.
-   * 
+   *
    * @param iter
    *          iteriert über eine Menge von Integer-Objekten, die die Indizes der zu
    *          verschiebenden FormControlModels spezifizieren. Die Liste muss
@@ -240,7 +224,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
    *          erste Element von indices die 0 oder 1, so wird nichts getan. Ansonsten
    *          werden die Indizes i aus indices der Reihe nach abgearbeitet und
    *          Element i wird mit Element i-1 vertauscht.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void moveElementsUp(Iterator<Integer> iter)
   {
@@ -262,7 +245,7 @@ public class FormControlModelList implements Iterable<FormControlModel>
   /**
    * Schiebt die ausgewählten FormControlModels in der Liste nach unten, d,h, erhöht
    * ihre Indizes um 1.
-   * 
+   *
    * @param iter
    *          iteriert von hinten (d.h. startet hinter dem letzten Element) über eine
    *          Menge von Integer-Objekten, die die Indizes der zu verschiebenden
@@ -273,7 +256,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
    *          Indizes i aus indices von hinten beginnend abgearbeitet und Element i
    *          wird mit Element i+1 vertauscht. Element 0 wird dabei niemals
    *          angefasst, auch wenn Index 0 in der Liste ist.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void moveElementsDown(ListIterator<Integer> iter)
   {
@@ -296,15 +278,13 @@ public class FormControlModelList implements Iterable<FormControlModel>
   /**
    * Liefert ein ConfigThingy, dessen Wurzel ein "Fenster"-Knoten ist und alle
    * FormControlModels dieser Liste enthält.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ConfigThingy export()
   {
     ConfigThingy export = new ConfigThingy("Fenster");
     ConfigThingy conf = export;
     ConfigThingy tabConf = export;
-   
+
     int phase = 0; // 0: tab start, 1: Eingabefelder, 2: Buttons
     String id = makeUniqueId(FormularMax4kController.STANDARD_TAB_NAME);
     FormControlModel currentTab =
@@ -326,7 +306,7 @@ public class FormControlModelList implements Iterable<FormControlModel>
       else if (phase == 0 && model.getType() == FormControlModel.BUTTON_TYPE)
       {
         tabConf = outputTab(currentTab, export);
-        
+
         //wenn der Button ein trac#20601 Button ist, soll dieser nicht in einen eigenen Knoten Button( ... ) exportiert werden
         //da er sonst in der Fusszeile der FormularGUI auftauchen würde in der auch die Standardbuttons gezeigt werden.
         //der button wird dadurch ohne expliziten Button-Knoten in den Knoten "Eingabefelder" exportiert.
@@ -336,7 +316,7 @@ public class FormControlModelList implements Iterable<FormControlModel>
         else {
           conf = tabConf.add("Buttons");
         }
-        
+
         conf.addChild(model.export());
         phase = 2;
       }
@@ -347,20 +327,20 @@ public class FormControlModelList implements Iterable<FormControlModel>
           conf.addChild(makeGlue());
           conf = tabConf.add("Buttons");
         }
-        
+
         conf.addChild(model.export());
         phase = 2;
       }
       else if (phase == 2 && model.getType() == FormControlModel.BUTTON_TYPE)
       {
-	  if(!model.getAction().equals("openExt") 
+	  if(!model.getAction().equals("openExt")
 	      && !model.getAction().equals("openTemplate")
 	      && tabConf.query("Buttons") != null
 	      && tabConf.query("Buttons").count() < 1) {
-	    
+
 	    conf = tabConf.add("Buttons");
 	  }
-	
+
 	conf.addChild(model.export());
       }
       else if (phase == 2 && model.getType() != FormControlModel.BUTTON_TYPE
@@ -394,8 +374,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
 
   /**
    * Liefert (TYPE "glue") zurück.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private ConfigThingy makeGlue()
   {
@@ -408,8 +386,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
    * Erzeugt ein ConfigThingy für den Reiter tab, hängt es an conf an und liefert es
    * zurück. Das erzeugte ConfigThingy hat folgenden Aufbau: <br>
    * ReiterId(TITLE "title" CLOSEACTION "action" TIP "tip" HOTKEY "hotkey")
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private ConfigThingy outputTab(FormControlModel tab, ConfigThingy conf)
   {
@@ -425,8 +401,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
 
   /**
    * listener wird über Änderungen der Liste informiert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void addListener(ItemListener listener)
   {
@@ -439,8 +413,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
   /**
    * Benachrichtigt alle ItemListener über das Hinzufügen von model zur Liste an
    * Index index.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void notifyListeners(FormControlModel model, int index)
   {
@@ -456,8 +428,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
   /**
    * Benachrichtigt alle ItemListener über das Vertauschen der Models mit Indizes
    * index1 und index2.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void notifyListeners(int index1, int index2)
   {
@@ -473,23 +443,19 @@ public class FormControlModelList implements Iterable<FormControlModel>
   /**
    * Interface für Klassen, die interessiert sind, zu erfahren, wenn sich die Liste
    * ändert.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static interface ItemListener
   {
     /**
      * Wird aufgerufen nachdem model zur Liste hinzugefügt wurde (an Index index).
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void itemAdded(FormControlModel model, int index);
 
     /**
      * Wird aufgerufen, nachdem Model mit Index index1 und Model mit index2
      * vertauscht wurden.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void itemSwapped(int index1, int index2);
   }

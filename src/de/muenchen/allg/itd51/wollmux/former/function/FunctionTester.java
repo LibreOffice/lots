@@ -2,7 +2,7 @@
  * Dateiname: FunctionTester.java
  * Projekt  : WollMux
  * Funktion : GUI zum interaktiven Zusammenbauen und Testen von WollMux-Funktionen.
- * 
+ *
  * Copyright (c) 2010-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.function;
 
@@ -125,7 +125,7 @@ public class FunctionTester
   /**
    * Liste aller angezeigten {@link FunctionTester.ValueBox}es.
    */
-  private List<ValueBox> valueBoxes = new Vector<ValueBox>();
+  private List<ValueBox> valueBoxes = new Vector<>();
 
   /**
    * Die Funktionsbibliothek, deren Funktionen für BIND zur Verfügung stehen.
@@ -135,7 +135,7 @@ public class FunctionTester
   /**
    * Kontext für die parse()-Funktionen von {@link FunctionFactory}.
    */
-  private Map<Object, Object> myContext = new HashMap<Object, Object>();
+  private Map<Object, Object> myContext = new HashMap<>();
 
   /**
    * Liefert die Parameter für das Auswerten der Funktion, wobei die Werte aus
@@ -152,7 +152,7 @@ public class FunctionTester
   /**
    * Erzeugt ein neues FunctionTester-Fenster, das auch gleich angezeigt wird. Darf
    * nur aus dem Event-Dispatching-Thread aufgerufen werden.
-   * 
+   *
    * @param idManager
    *          die IDs dieses Managers werden in den ComboBoxen für die
    *          Werte-Festlegung angeboten.
@@ -163,7 +163,6 @@ public class FunctionTester
    * @param abortListener
    *          falls nicht null wird dieser Listener benachrichtigt, wenn das
    *          FunctionTester-Fenster geschlossen wird.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public FunctionTester(FunctionLibrary funcLib, ActionListener abortListener,
       IDManager idManager, Object namespace)
@@ -217,7 +216,7 @@ public class FunctionTester
   private ValueBox makeValueBox()
   {
     Box hbox = Box.createHorizontalBox();
-    final JComboBox<String> combo = new JComboBox<String>();
+    final JComboBox<String> combo = new JComboBox<>();
     combo.setEditable(true);
 
     updateParameterBox(combo);
@@ -260,7 +259,7 @@ public class FunctionTester
 
   /**
    * Ersetzt die aktuelle Selektion der Code-Textarea durch code.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void insertCode(String code)
@@ -271,7 +270,7 @@ public class FunctionTester
   /**
    * Aktualisiert die Liste der Einträge in combo, so dass sie den aktiven IDs von
    * {@link #idManager} entspricht.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void updateParameterBox(JComboBox<String> combo)
@@ -305,7 +304,7 @@ public class FunctionTester
   /**
    * Liefert ein Panel, das Buttons zum Einfügen von Funktionstemplates in den
    * Code-Edit-Bereich anbietet.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private JComponent makeFunctionInsertPanel()
@@ -448,7 +447,7 @@ public class FunctionTester
   /**
    * Liefert einen Button, der mit label beschriftet ist und den Code code an Stelle
    * der aktuellen Selektion im Code-Bereich einfügt.
-   * 
+   *
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -470,7 +469,7 @@ public class FunctionTester
    * Liefert den aktuellen Wert, der in combo ausgewählt ist, oder errorValue, falls
    * beim Auswerten ein Fehler auftritt. In letzterem Fall wird auch eine Meldung
    * geloggert.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String getComboBoxValue(JComboBox<String> combo, String errorValue)
@@ -491,7 +490,7 @@ public class FunctionTester
   /**
    * Eine Box, die eine ComboBox zur Angabe einer ID und ein Textfield zur Angabe
    * eines Wertes enthält.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class ValueBox
@@ -562,7 +561,7 @@ public class FunctionTester
   /**
    * Stellt den jeweils aktuellen Zustand der {@link FunctionTester#valueBoxes} als
    * {@link Values} zur Verfügung.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class ValueBoxesValues implements Values

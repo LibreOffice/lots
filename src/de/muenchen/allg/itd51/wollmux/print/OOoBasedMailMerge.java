@@ -133,8 +133,6 @@ public class OOoBasedMailMerge
   /**
    * Druckfunktion für den Seriendruck in ein Gesamtdokument mit Hilfe des
    * Office-Seriendrucks.
-   * 
-   * @author Christoph Lutz (D-III-ITD 5.1)
    */
   public static void oooMailMerge(final XPrintModel pmod, OutputType type)
   {
@@ -393,30 +391,22 @@ public class OOoBasedMailMerge
     /**
      * Liefert das für die Registrierung der OOo-Datenquelle benötigte
      * {@link XDocumentDataSource}-Objekt zurück.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     abstract public XDocumentDataSource createXDocumentDatasource();
 
     /**
      * Liefert einen {@link DataSourceWriter} zurück, über den Datensätze in die
      * Datenquelle geschrieben werden können.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     abstract public DataSourceWriter getDataSourceWriter();
 
     /**
      * Liefert die Anzahl der Datensätze der Datenquelle zurück.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     abstract public int getSize();
 
     /**
      * Entfernt die Datenquelle
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     abstract public void remove();
 
@@ -602,8 +592,6 @@ public class OOoBasedMailMerge
      * 
      * @throws Exception
      *           falls etwas beim Hinzufügen schief geht.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     public void addDataset(HashMap<String, String> ds) throws Exception;
 
@@ -616,16 +604,12 @@ public class OOoBasedMailMerge
      * 
      * @throws Exception
      *           falls etwas beim Finalisieren schief geht.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     public void flushAndClose() throws Exception;
 
     /**
      * Liefert die Anzahl der (bisher) mit {@link #addDataset(HashMap)} hinzugefügten
      * Datensätze zurück.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     public int getSize();
   }
@@ -725,8 +709,6 @@ public class OOoBasedMailMerge
     /**
      * Erzeugt die zu dem durch list repräsentierten Datensatz zugehörige
      * vollständige Textzeile für die csv-Datei.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     private String line(List<String> list)
     {
@@ -755,8 +737,6 @@ public class OOoBasedMailMerge
     /**
      * Liefert eine alphabetisch sortierte Liste alle Spaltennamen zurück, die jemals
      * über {@link #addDataset(HashMap)} benutzt bzw. gesetzt wurden.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     private ArrayList<String> getHeaders()
     {
@@ -768,8 +748,6 @@ public class OOoBasedMailMerge
 
     /**
      * Liefert das File-Objekt der csv-Datei zurück, in die geschrieben wird/wurde.
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     public File getCSVFile()
     {
@@ -782,8 +760,6 @@ public class OOoBasedMailMerge
    * Input-Dokument im Verzeichnis tmpDir und nimmt alle notwendigen Anpassungen vor,
    * damit der Seriendruck über die temporäre Datenbank dbName korrekt und möglichst
    * performant funktioniert, und liefert dieses zurück.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private static File createAndAdjustInputFile(File tmpDir, XTextDocument origDoc,
       String dbName)
@@ -936,8 +912,6 @@ public class OOoBasedMailMerge
    * Entfernt alle Metadaten des WollMux aus dem Dokument doc die nicht reine
    * Infodaten des WollMux sind (wie z.B. WollMuxVersion, OOoVersion) um
    * sicherzustellen, dass der WollMux das Gesamtdokument nicht interpretiert.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private static void removeWollMuxMetadata(XTextDocument doc)
   {
@@ -958,8 +932,6 @@ public class OOoBasedMailMerge
    * Bereiche sind auch ein möglicher Auslöser von allen möglichen falsch gesetzten
    * Seitenumbrüchen (siehe z.B. Issue:
    * http://openoffice.org/bugzilla/show_bug.cgi?id=73229)
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static void removeHiddenSections(XComponent tmpDoc)
   {
@@ -996,8 +968,6 @@ public class OOoBasedMailMerge
    * Dokument bleiben müssen, so müssen zumindest die Bookmarks von
    * WollMux-Dokumentkommandos gelöscht werden, damit sie nicht noch einmal durch den
    * WollMux bearbeitet werden.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static void removeAllBookmarks(XComponent tmpDoc)
   {
@@ -1037,8 +1007,6 @@ public class OOoBasedMailMerge
   /**
    * Fügt dem Dokument doc für alle enthaltenen insertFormValue-Bookmarks zugehörige
    * OOo-Seriendruckfelder mit Verweis auf die Datenbank dbName hinzu.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private static void addDatabaseFieldsForInsertFormValueBookmarks(
       XTextDocument doc, String dbName)
@@ -1088,8 +1056,6 @@ public class OOoBasedMailMerge
    * wieder ausgelesen werden kann oder null, wenn das Formularfeld über einen
    * primitiven Spaltennamen (der nur aus einer in den setValues gesetzten IDs
    * besteht) gefüllt werden kann.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private static String getSpecialColumnNameForFormField(FormField field)
   {
@@ -1117,8 +1083,6 @@ public class OOoBasedMailMerge
    * Passt bereits enthaltene OOo-Seriendruckfelder und Nächster-Datensatz-Felder in
    * tmpDoc so an, dass sie über die Datenbank dbName befüllt werden und ersetzt
    * InputUser-Felder durch entsprechende OOo-Seriendruckfelder.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private static void adjustDatabaseAndInputUserFields(XComponent tmpDoc,
       String dbName)
@@ -1189,8 +1153,6 @@ public class OOoBasedMailMerge
   /**
    * Zählt die Anzahl an "Nächster Datensatz"-Feldern zur Berechnung der Gesamtzahl
    * der zu verarbeitenden Dokumente.
-   * 
-   * @author Ignaz Forster (ITM-I23)
    */
   private static int countNextSets(XComponent doc)
   {
@@ -1230,8 +1192,6 @@ public class OOoBasedMailMerge
    * @throws IllegalArgumentException
    *           Wenn irgendetwas mit den Attributen dbName, tableName oder columnName
    *           nicht stimmt.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static XDependentTextField createDatabaseField(
       XMultiServiceFactory factory, String dbName, String tableName,
@@ -1252,8 +1212,6 @@ public class OOoBasedMailMerge
    * Deregistriert die Datenbank dbName aus der Liste der Datenbanken (wie z.B. über
    * Extras->Optionen->Base/Datenbanken einsehbar) und löscht das zugehörige in
    * tmpDir enthaltene .odb-File von der Platte.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static void removeTempDatasource(String dbName, File tmpDir)
   {
@@ -1278,8 +1236,6 @@ public class OOoBasedMailMerge
    * Zufallsnamen in OOo (so, dass sie z.B. in der Liste der Datenbanken unter
    * Tools->Extras->Optionen->Base/Datenbanken auftaucht) und gibt den Zufallsnamen
    * zurück.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static String registerTempDatasouce(XDocumentDataSource dataSource)
   {
@@ -1376,8 +1332,6 @@ public class OOoBasedMailMerge
    *          Drucker fuer den Seriendruck
    * @throws Exception
    *           falls der MailMergeService nicht erzeugt werden kann.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static MailMergeThread runMailMerge(String dbName, final File outputDir,
       File inputFile, final ProgressUpdater progress, final OutputType type,
@@ -1455,8 +1409,6 @@ public class OOoBasedMailMerge
    * "<TEMP_WOLLMUX_MAILMERGE_PREFIX>xxx" (wobei xxx eine garantiert 3-stellige Zahl
    * ist), in dem sämtliche (temporäre) Dateien für den Seriendruck abgelegt werden
    * und liefert dieses zurück.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static File createMailMergeTempdir()
   {

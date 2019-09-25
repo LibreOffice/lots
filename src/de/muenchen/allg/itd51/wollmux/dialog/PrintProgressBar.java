@@ -2,7 +2,7 @@
  * Dateiname: PrintProgressBar.java
  * Projekt  : WollMux
  * Funktion : Implementiert eine Fortschrittsanzeige für den WollMux-Komfortdruck
- * 
+ *
  * Copyright (c) 2010-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -95,7 +95,7 @@ public class PrintProgressBar
   private ActionListener abortListener;
 
   private XWindow window;
-  
+
   /**
    * Enthält die ProgressBar zur Darstellung des Gesamtdruckverlaufs
    */
@@ -162,7 +162,7 @@ public class PrintProgressBar
         {
           finished = false;
           window.dispose();
-        }    
+        }
       });
       window.setEnable(true);
       window.setVisible(true);
@@ -183,13 +183,13 @@ public class PrintProgressBar
       abortListener.actionPerformed(new ActionEvent(this, 0, ""));
     }
   }
-  
+
   public void dispose()
   {
     finished = true;
     window.dispose();
   }
-  
+
   public void setMessage(String text)
   {
     statusLabel.setText(text);
@@ -255,7 +255,7 @@ public class PrintProgressBar
    *          repräsentiert eine Druckfunktion, die über den neuen Fortschritt informiert.
    * @param value
    *          enthält die aktuellen Anzahl der Versionen, die bereits von der Druckfunktion gedruckt
-   *          wurden und muss damit im Bereich 0 <= value <= maxValue (siehe setMaxValue(...))
+   *          wurden und muss damit im Bereich 0 &lt;= value &lt;= maxValue (siehe setMaxValue(...))
    *          liegen.
    */
   public void setValue(Object key, int value)

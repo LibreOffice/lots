@@ -2,7 +2,7 @@
  * Dateiname: GroupModel.java
  * Projekt  : WollMux
  * Funktion : Eine Sichtbarkeitsgruppe.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.group;
 
@@ -50,7 +50,7 @@ import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 
 /**
  * Eine Sichtbarkeitsgruppe.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class GroupModel
@@ -80,7 +80,7 @@ public class GroupModel
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert
    * werden wollen.
    */
-  private List<ModelChangeListener> listeners = new Vector<ModelChangeListener>(1);
+  private List<ModelChangeListener> listeners = new Vector<>(1);
 
   /**
    * Der FormularMax4000 zu dem dieses Model gehört.
@@ -94,13 +94,12 @@ public class GroupModel
 
   /**
    * Erzeugt eine neue Gruppe mit Name/ID id. ACHTUNG! id muss activated sein!
-   * 
+   *
    * @param condition
-   *          wird direkt als Referenz übernommen und bestimmt die
-   *          Sichtbarkeitsbedingung dieser Gruppe.
+   *          wird direkt als Referenz übernommen und bestimmt die Sichtbarkeitsbedingung dieser
+   *          Gruppe.
    * @param formularMax4000
-   *          der {@link FormularMax4000} zu dem diese Gruppe gehört.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   *          der {@link FormularMax4kController} zu dem diese Gruppe gehört.
    */
   public GroupModel(IDManager.ID id, FunctionSelection condition,
       FormularMax4kController formularMax4000)
@@ -115,8 +114,6 @@ public class GroupModel
 
   /**
    * Liefert den FormularMax4000 zu dem dieses Model gehört.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormularMax4kController getFormularMax4000()
   {
@@ -127,8 +124,6 @@ public class GroupModel
    * Benachrichtigt alle auf diesem Model registrierten Listener, dass das Model aus
    * seinem Container entfernt wurde. ACHTUNG! Darf nur von einem entsprechenden
    * Container aufgerufen werden, der das Model enthält.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void hasBeenRemoved()
   {
@@ -143,8 +138,6 @@ public class GroupModel
 
   /**
    * listener wird über Änderungen des Models informiert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void addListener(ModelChangeListener listener)
   {
@@ -155,8 +148,6 @@ public class GroupModel
    * Liefert immer true. Diese Funktion existiert nur, damit der entsprechende Code
    * in {@link AllGroupFuncViewsPanel} analog zu den anderen Panels gehalten werden
    * kann.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public boolean hasFunc()
   {
@@ -165,21 +156,12 @@ public class GroupModel
 
   /**
    * Liefert ein Interface zum Zugriff auf die Sichtbarkeitsbedingung dieses Objekts.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public FunctionSelectionAccess getConditionAccess()
   {
     return new MyConditionAccess();
   }
 
-  /**
-   * Liefert die {@link IDManager.ID} dieser Sichtbarkeitsgruppe zurück.
-   * 
-   * @return
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   */
   public IDManager.ID getID()
   {
     return id;
@@ -190,14 +172,10 @@ public class GroupModel
    * alle mittels
    * {@link #addListener(de.muenchen.allg.itd51.wollmux.former.group.GroupModel.ModelChangeListener)}
    * registrierten Listener.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    * @throws DuplicateIDException
    *           falls newID bereits von einer anderen Sichtbarkeitsgruppe verwendet
    *           wird.
-   * 
-   * TESTED
    */
   public void setID(String newID) throws DuplicateIDException, SyntaxErrorException
   {
@@ -205,16 +183,14 @@ public class GroupModel
       throw new SyntaxErrorException(L.m(
         "'%1' ist keine syntaktisch korrekte ID für Sichtbarkeitsgruppen", newID));
     id.setID(newID);
-    /**
-     * IDManager.ID ruft MyIDChangeListener.idHasChanged() auf, was wiederum die
-     * Listener auf diesem Model benachrichtigt.
+    /*
+     * IDManager.ID ruft MyIDChangeListener.idHasChanged() auf, was wiederum die Listener auf diesem
+     * Model benachrichtigt.
      */
   }
 
   /**
    * Liefert true gdw, id auf {@link #ID_PATTERN} matcht.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private boolean isLegalID(String id)
   {
@@ -224,8 +200,6 @@ public class GroupModel
   /**
    * Liefert ein ConfigThingy zurück, dessen Name der Name der Gruppe ist und dessen
    * Inhalt die Definition der Sichtbarkeitsfunktion der Gruppe ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ConfigThingy export()
   {
@@ -251,14 +225,14 @@ public class GroupModel
   /**
    * Interface für Listener, die über Änderungen eines Models informiert werden
    * wollen.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static interface ModelChangeListener
   {
     /**
      * Wird aufgerufen wenn ein Attribut des Models sich geändert hat.
-     * 
+     *
      * @param model
      *          das Model, das sich geändert hat.
      * @param attributeId
@@ -266,15 +240,12 @@ public class GroupModel
      * @param newValue
      *          der neue Wert des Attributs. Die ID wird als {@link IDManager.ID}
      *          übergeben.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void attributeChanged(GroupModel model, int attributeId, Object newValue);
 
     /**
      * Wird aufgerufen, wenn model aus seinem Container entfernt wird (und damit in
      * keiner View mehr angezeigt werden soll).
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void modelRemoved(GroupModel model);
   }
@@ -296,7 +267,7 @@ public class GroupModel
    * Allerdings ist dies derzeit nicht implementiert, weil es derzeit genau eine View
    * gibt für die Condition, so dass konkurrierende Änderungen gar nicht möglich
    * sind.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class MyConditionAccess implements FunctionSelectionAccess

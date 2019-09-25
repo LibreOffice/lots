@@ -246,7 +246,7 @@ public class FormController
    * Fensterattribute des Dokumentfensters auf die Werte, die das Fenster vor dem Starten der
    * FormGUI hatte.
    *
-   * @param source
+   * @param sender
    *          Das Dokument das geschlossen wurde.
    */
   public void closing(Object sender)

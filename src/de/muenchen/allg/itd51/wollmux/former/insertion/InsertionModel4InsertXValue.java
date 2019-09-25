@@ -2,7 +2,7 @@
  * Dateiname: InsertionModel.java
  * Projekt  : WollMux
  * Funktion : Stellt eine Einfügestelle im Dokument (insertValue oder insertFormValue) dar.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
@@ -89,7 +89,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
 
   /**
    * Attribut-ID-Konstante für
-   * {@link ModelChangeListener#attributeChanged(InsertionModel, int, Object)}.
+   * {@link InsertionModel.ModelChangeListener#attributeChanged(InsertionModel, int, Object)}.
    */
   public static final int ID_ATTR = 0;
 
@@ -107,7 +107,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
 
   /**
    * Gibt an, um woher die Einfügung ihre Daten bezieht.
-   * 
+   *
    * @see #FORM_TYPE
    * @see #DATABASE_TYPE
    */
@@ -121,7 +121,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
   /**
    * Liste von {@link InsertionModel.AutosepInfo} Objekten.
    */
-  private List<AutosepInfo> autosep = new Vector<AutosepInfo>();
+  private List<AutosepInfo> autosep = new Vector<>();
 
   /**
    * Das Bookmark, das diese Einfügestelle umschließt.
@@ -133,7 +133,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
   /**
    * Erzeugt ein neues InsertionModel für das Bookmark mit Namen bookmarkName, das
    * bereits im Dokument vorhanden sein muss.
-   * 
+   *
    * @param doc
    *          das Dokument in dem sich das Bookmark befindet
    * @param funcSelections
@@ -146,7 +146,6 @@ public class InsertionModel4InsertXValue extends InsertionModel
    *           korrektes Einfügekommando ist.
    * @throws NoSuchElementException
    *           wenn ein Bookmark dieses Namens in doc nicht existiert.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public InsertionModel4InsertXValue(String bookmarkName, XBookmarksSupplier doc,
       FunctionSelectionProvider funcSelections, FormularMax4kController formularMax4000)
@@ -306,8 +305,6 @@ public class InsertionModel4InsertXValue extends InsertionModel
 
   /**
    * Liefert je nach Typ der Einfügung das DB_SPALTE oder ID Attribut.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public IDManager.ID getDataID()
   {
@@ -315,22 +312,20 @@ public class InsertionModel4InsertXValue extends InsertionModel
   }
 
   /**
-   * Ändert je nach Type der Einfügung DB_SPALTE oder ID Attribut auf den Wert newId
-   * (falls newId gleich der alten ID ist, wird nichts getan). ACHTUNG! Die Änderung
-   * betrifft nur die Einfügung und wird nicht auf die Formularelemente übertragen
-   * (wogegen umgekehrt Änderungen an den Formularelemente-IDs zu Änderungen der
-   * Einfügungen führen). Hintergrund dieser Implementierung ist, dass man einerseits
-   * normalerweise nicht in der Einfügungen-Sicht IDs von Steuerelementen ändern
-   * möchte und andererseits nur so ermöglicht wird, die Quelle einer Einfügung auf
-   * ein anderes Steuerelement zu ändern.
-   * 
+   * Ändert je nach Type der Einfügung DB_SPALTE oder ID Attribut auf den Wert newId (falls newId
+   * gleich der alten ID ist, wird nichts getan). ACHTUNG! Die Änderung betrifft nur die Einfügung
+   * und wird nicht auf die Formularelemente übertragen (wogegen umgekehrt Änderungen an den
+   * Formularelemente-IDs zu Änderungen der Einfügungen führen). Hintergrund dieser Implementierung
+   * ist, dass man einerseits normalerweise nicht in der Einfügungen-Sicht IDs von Steuerelementen
+   * ändern möchte und andererseits nur so ermöglicht wird, die Quelle einer Einfügung auf ein
+   * anderes Steuerelement zu ändern.
+   *
    * @throws UnknownIDException
-   *           falls diese Einfügung eine Formularwert-Einfügung ist (d.h. das
-   *           ID-Attribut betroffen wäre) und newID dem IDManager im Namensraum
-   *           {@link FormularMax4000#NAMESPACE_FORMCONTROLMODEL} unbekannt ist, oder
-   *           falls newId der leere String ist. Im Falle des DB_SPALTE Attributs
-   *           wird nur geworfen, wenn newId der leere String ist.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   *           falls diese Einfügung eine Formularwert-Einfügung ist (d.h. das ID-Attribut betroffen
+   *           wäre) und newID dem IDManager im Namensraum
+   *           {@link FormularMax4kController#NAMESPACE_FORMCONTROLMODEL} unbekannt ist, oder falls
+   *           newId der leere String ist. Im Falle des DB_SPALTE Attributs wird nur geworfen, wenn
+   *           newId der leere String ist.
    */
   public void setDataID(String newId) throws UnknownIDException
   {
@@ -386,8 +381,6 @@ public class InsertionModel4InsertXValue extends InsertionModel
   /**
    * Entfernt das zur Einfügestelle gehörende WollMux-Bookmark, nicht jedoch den
    * zugehörigen Feldbefehl.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void removeBookmark()
   {

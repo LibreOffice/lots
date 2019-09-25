@@ -31,8 +31,6 @@ public class DialogFactory
    *          der Kontext in dem in Dialogen enthaltene Funktionsdefinitionen
    *          ausgewertet werden sollen (insbesondere DIALOG-Funktionen). ACHTUNG!
    *          Hier werden Werte gespeichert, es ist nicht nur ein Schlüssel.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static DialogLibrary parseFunctionDialogs(ConfigThingy conf,
       DialogLibrary baselib, Map<Object, Object> context)

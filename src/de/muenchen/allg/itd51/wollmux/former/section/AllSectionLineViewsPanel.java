@@ -2,11 +2,11 @@
  * Dateiname: AllSectionLineViewsPanel.java
  * Projekt  : WollMux
  * Funktion : Enthält alle OneSectionLineViews.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL), 
+ * it under the terms of the European Union Public Licence (EUPL),
  * version 1.0 (or any later version).
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,7 +15,7 @@
  * European Union Public Licence for more details.
  *
  * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see 
+ * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
  * Änderungshistorie:
@@ -27,7 +27,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD D.10)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.section;
 
@@ -35,8 +35,6 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -73,7 +71,7 @@ import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
 /**
  * Enthält alle OneSectionLineViews.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AllSectionLineViewsPanel implements View
@@ -85,7 +83,7 @@ public class AllSectionLineViewsPanel implements View
   /**
    * Rand um Buttons (in Pixeln).
    */
-  private final static int BUTTON_BORDER = 2;
+  private static final int BUTTON_BORDER = 2;
 
   /**
    * Der {@link FormularMax4000} zu dem diese View gehört.
@@ -117,7 +115,7 @@ public class AllSectionLineViewsPanel implements View
   /**
    * Die Liste der {@link OneSectionLineView}s in dieser View.
    */
-  private List<OneSectionLineView> views = new Vector<OneSectionLineView>();
+  private List<OneSectionLineView> views = new Vector<>();
 
   /**
    * Liste von Indizes der selektierten Objekte in der {@link #views} Liste.
@@ -138,8 +136,6 @@ public class AllSectionLineViewsPanel implements View
    * Erzeugt ein AllSectionLineViewsPanel, die den Inhalt von sectionModelList
    * anzeigt. ACHTUNG! sectionModelList sollte leer sein, da nur neu hinzugekommene
    * Elemente in der View angezeigt werden.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public AllSectionLineViewsPanel(SectionModelList sectionModelList,
       FormularMax4kController formularMax4000, XTextDocument doc)
@@ -187,7 +183,7 @@ public class AllSectionLineViewsPanel implements View
     buttonPanel.add(button, gbcButton);
 
     ++gbcButton.gridx;
-    
+
     for (SectionModel m : sectionModelList)
     {
       addItem(m);
@@ -201,13 +197,9 @@ public class AllSectionLineViewsPanel implements View
    * aktuellen Selektion (oder dem Dokumentende, falls es keinen solchen gibt) und
    * erzeugt ein zugehöriges {@link SectionModel} und fügt es zu
    * {@link #sectionModelList} hinzu.
-   * 
+   *
    * ACHTUNG! Derzeit wird nur BreakType.PAGE_BEFORE unterstützt. Andere Breaks
    * werden ignoriert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   *         TESTED
    */
   private void createNewSectionFromAllPagesTouchedBySelection()
   {
@@ -263,10 +255,6 @@ public class AllSectionLineViewsPanel implements View
 
   /**
    * Liefert true gdw der erste Absatz in range einen BreakType.PAGE_BEFORE hat.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
-   *         TESTED
    */
   private boolean firstParagraphOfRangeHasHardBreak(XTextRange range)
   {
@@ -289,10 +277,6 @@ public class AllSectionLineViewsPanel implements View
    * Erzeugt einen neuen Bereich an der Stelle der aktuellen Selektion und erzeugt
    * ein zugehöriges {@link SectionModel} und fügt es zu {@link #sectionModelList}
    * hinzu.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   *         TESTED
    */
   private void createNewSectionFromSelection()
   {
@@ -315,9 +299,6 @@ public class AllSectionLineViewsPanel implements View
    *
    * @throws Exception
    *           , wenn was schief geht
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
-   *         TESTED
    */
   private void createNewSectionFromTextRange(XTextRange range) throws Exception
   {
@@ -339,8 +320,6 @@ public class AllSectionLineViewsPanel implements View
 
   /**
    * Fügt dieser View eine {@link OneSectionLineView} für model hinzu.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void addItem(SectionModel model)
   {
@@ -360,8 +339,6 @@ public class AllSectionLineViewsPanel implements View
 
   /**
    * Entfernt view aus diesem Container (falls dort vorhanden).
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void removeItem(OneSectionLineView view)
   {
@@ -376,8 +353,6 @@ public class AllSectionLineViewsPanel implements View
 
   /**
    * Hebt die Selektion aller Elemente auf.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void clearSelection()
   {
@@ -393,8 +368,6 @@ public class AllSectionLineViewsPanel implements View
 
   /**
    * Löscht alle ausgewählten Elemente.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void deleteSelectedElements()
   {

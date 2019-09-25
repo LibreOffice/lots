@@ -116,7 +116,6 @@ public class MailMergeNew
    *
    * @param documentController
    *          das {@link TextDocumentModel} an dem die Toolbar hängt.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public MailMergeNew(TextDocumentController documentController, ActionListener abortListener)
   {
@@ -126,8 +125,6 @@ public class MailMergeNew
 
   /**
    * Schliesst den MailMergeNew und alle zugehörigen Fenster.
-   *
-   * @author Christoph Lutz (D-III-ITD 5.1)
    */
   public void dispose()
   {
@@ -136,15 +133,13 @@ public class MailMergeNew
   }
 
   /**
-   * PrintFunction, die das jeweils nächste Element der Seriendruckdaten nimmt und
-   * die Seriendruckfelder im Dokument entsprechend setzt. Herangezogen werden die
-   * Properties {@link #PROP_QUERYRESULTS} (ein Objekt vom Typ {@link QueryResults})
-   * und "MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält, sowie
-   * {@link #PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der
-   * ausgewählten Datensätze ist (0 ist der erste Datensatz). Dies funktioniert
-   * natürlich nur dann, wenn pmod kein Proxy ist.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   * PrintFunction, die das jeweils nächste Element der Seriendruckdaten nimmt und die
+   * Seriendruckfelder im Dokument entsprechend setzt. Herangezogen werden die Properties
+   * {@link MailMergeController#PROP_QUERYRESULTS} (ein Objekt vom Typ {@link QueryResults}) und
+   * "MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält, sowie
+   * {@link MailMergeController#PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der
+   * ausgewählten Datensätze ist (0 ist der erste Datensatz). Dies funktioniert natürlich nur dann,
+   * wenn pmod kein Proxy ist.
    */
   public static void mailMergeNewSetFormValue(XPrintModel pmod) throws Exception
   {
@@ -152,34 +147,30 @@ public class MailMergeNew
   }
 
   /**
-   * Implementierung einer Druckfunktion, die das jeweils nächste Element der
-   * Seriendruckdaten nimmt und die Seriendruckfelder im Dokument entsprechend setzt;
-   * wird der SimulationsResultsProcessor simProc übergeben, so werden die
-   * Dokumentänderungen nur simuliert und nicht tatsächlich im Dokument ausgeführt.
-   * Im Fall, dass simProc != null ist, wird auch die nächste Druckfunktion in der
-   * Aufrufkette nicht aufgerufen, sondern statt dessen der in simProc enthaltene
-   * handler. Die Druckfunktion zieht folgende Properties heran:
+   * Implementierung einer Druckfunktion, die das jeweils nächste Element der Seriendruckdaten nimmt
+   * und die Seriendruckfelder im Dokument entsprechend setzt; wird der SimulationsResultsProcessor
+   * simProc übergeben, so werden die Dokumentänderungen nur simuliert und nicht tatsächlich im
+   * Dokument ausgeführt. Im Fall, dass simProc != null ist, wird auch die nächste Druckfunktion in
+   * der Aufrufkette nicht aufgerufen, sondern statt dessen der in simProc enthaltene handler. Die
+   * Druckfunktion zieht folgende Properties heran:
    *
    * <ul>
-   * <li>{@link #PROP_QUERYRESULTS} (ein Objekt vom Typ {@link QueryResults})</li>
+   * <li>{@link MailMergeController#PROP_QUERYRESULTS} (ein Objekt vom Typ
+   * {@link QueryResults})</li>
    *
    * <li>"MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält</li>
    *
-   * <li>{@link #PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der
+   * <li>{@link MailMergeController#PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der
    * ausgewählten Datensätze ist (0 ist der erste Datensatz).</li> *
    * <ul>
    *
    * @param pmod
    *          PrintModel welches das Hauptdokument des Seriendrucks beschreibt.
    * @param simProc
-   *          Ist simProc != null, so werden die Wertänderungen nur simuliert und
-   *          nach jedem Datensatz einmal der in simProc enthaltene handler
-   *          aufgerufen.
+   *          Ist simProc != null, so werden die Wertänderungen nur simuliert und nach jedem
+   *          Datensatz einmal der in simProc enthaltene handler aufgerufen.
    * @throws Exception
    *           Falls irgend etwas schief geht
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-D101)
-   *         TESTED
    */
   public static void mailMergeNewSetFormValue(XPrintModel pmod,
       SimulationResultsProcessor simProc) throws Exception
@@ -332,8 +323,6 @@ public class MailMergeNew
   /**
    * Speichert das übergebene Dokument in eine ODF-Datei. Die WollMux-Daten bleiben
    * dabei erhalten.
-   *
-   * @author Ignaz Forster (D-III-ITD-D102)
    */
   public static void sendAsEmail(XPrintModel pmod, boolean isODT)
   {
@@ -526,8 +515,6 @@ public class MailMergeNew
 
   /**
    * grobe Plausiprüfung, ob E-Mailadresse gültig ist.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static boolean isMailAddress(String mail)
   {
@@ -536,7 +523,6 @@ public class MailMergeNew
 
   /**
    * Speichert doc unter dem in outFile angegebenen Dateipfad und schließt dann doc.
-   *
    */
   public static File saveOutputFile(File outFile, XTextDocument doc)
   {

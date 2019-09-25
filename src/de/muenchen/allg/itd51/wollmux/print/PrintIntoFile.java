@@ -2,7 +2,7 @@
  * Dateiname: PrintIntoFile.java
  * Projekt  : WollMux
  * Funktion : "Druck"funktion, die das zu druckende Dokument an ein Ergebnisdokument anhängt.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,13 +24,13 @@
  * 29.10.2007 | BNK | Erstellung
  * 29.01.2008 | BNK | Fertigstellung
  * 30.01.2008 | BNK | Workaround für Issue 73229
- * 04.05.2011 | ERT | (ERT)[R120366][#6797]In appendToFile wurde das 
+ * 04.05.2011 | ERT | (ERT)[R120366][#6797]In appendToFile wurde das
  *                    Property PageStyleName nicht korrekt ausgelesen.
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.print;
 
@@ -95,14 +95,13 @@ public class PrintIntoFile
 
   /**
    * Hängt den Inhalt von inputDoc an outputDoc an.
-   * 
+   *
    * @param firstAppend
    *          muss auf true gesetzt werden, wenn dies das erste Mal ist, das etwas an
    *          das Gesamtdokument angehängt wird. In diesem Fall werden die Formate
    *          aus inputDoc zuerst nach outputDoc übertragen und es wird kein
    *          Zeilenumbruch eingefügt. Außerdem werden in diesem Fall die
    *          com.sun.star.document.Settings von inputDoc auf outputDoc übertragen.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public static void appendToFile(XTextDocument outputDoc, XTextDocument inputDoc,
       boolean firstAppend)
@@ -213,12 +212,11 @@ public class PrintIntoFile
         oldSections.addAll(Arrays.asList(sectionNames));
       }
 
-      /**
-       * Einfügen des 2. Dokuments OOo Issue 37417 beachten --> When inserting a
-       * document (via "Insert->Document") on the first paragraph of a page after a
-       * pagebreak, and the document contains only one paragraph, the pagebreak will
-       * be removed. Inserting documents with more than one paragraph works as
-       * expected.
+      /*
+       * Einfügen des 2. Dokuments OOo Issue 37417 beachten --> When inserting a document (via
+       * "Insert->Document") on the first paragraph of a page after a pagebreak, and the document
+       * contains only one paragraph, the pagebreak will be removed. Inserting documents with more
+       * than one paragraph works as expected.
        */
       cursor = text.createTextCursorByRange(text.getEnd());
       LOGGER.trace("================= OID dump BEFORE insert ==================");
@@ -288,8 +286,6 @@ public class PrintIntoFile
   /**
    * Liefert true gdw der Anfang von range mit dem Anfang einer Section aus doc
    * zusammenfällt, deren Name nicht in oldSections ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static boolean rangeStartTouchesNewSection(XTextRange range,
       Set<String> oldSectionNames, XTextDocument doc)
@@ -323,8 +319,6 @@ public class PrintIntoFile
   /**
    * Liefert true gdw der Start von doc mit dem Starter einer Section von doc
    * zusammenfällt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static boolean startsWithSection(XTextDocument doc)
   {
@@ -354,12 +348,11 @@ public class PrintIntoFile
    * mit einem noch nicht verwendeten Namen und das PageDescName-Property
    * entsprechend geändert, dass es auf das neue Format verweist. Das selbe Format
    * wird jeweils nur einmal kopiert.
-   * 
+   *
    * @param doc
    *          das Dokument in dem der Cursor wandert
    * @param oldPageStyles
    *          die PageStyles Familie des alten Dokuments
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static void renamePageStyles(XParagraphCursor cursor, XTextDocument doc,
       XNameAccess oldPageStyles)
@@ -377,7 +370,7 @@ public class PrintIntoFile
       return;
     }
     Map<String, String> mapOldPageStyleName2NewPageStyleName =
-      new HashMap<String, String>();
+        new HashMap<>();
     while (true)
     {
       try
@@ -414,8 +407,6 @@ public class PrintIntoFile
 
   /**
    * Gibt die OIDs aller Shapes von outputDoc aus.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static void dumpOids(XTextDocument outputDoc)
   {
@@ -433,7 +424,7 @@ public class PrintIntoFile
         if (named != null) {
           name = named.getName();
         }
-        LOGGER.trace(name + " -> " + UnoRuntime.generateOid(ob));
+        LOGGER.trace("{} -> {}", name, UnoRuntime.generateOid(ob));
       }
     }
     catch (Exception x)
@@ -446,7 +437,6 @@ public class PrintIntoFile
    * Ersetzt alle TextFields des Typs PageCount in textFields durch den Wert
    * pageCount.
    *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    * @throws WrappedTargetException
    * @throws NoSuchElementException
    *           sollte nie geworfen werden
@@ -480,7 +470,7 @@ public class PrintIntoFile
    * c,s,s,t,textfield,InputUser durch ihren Stringwert. Diese Ersetzung ist
    * notwendig, da InputUser-Felder als Spezialfelder (z.B. Wenn...Dann...Sonst...)
    * verwendet werden und sie dokumentglobal nur den selben Wert haben können.
-   * 
+   *
    * Felder vom Typ c.s.s.t.textfield.User verwenden ebenfalls einen dokumentglobalen
    * Textfieldmaster, müssen aber nicht durch die textuelle Repräsentation ersetzt
    * werden, da sich mit dem Seriendruck nur die durch WollMux gesetzten
@@ -488,12 +478,11 @@ public class PrintIntoFile
    * User-Felder in ein Dokument eingefügt werden können (Es kann über die OOo-GUI
    * kein User-Feld auf "WM(Function 'Autofunction....')" eingefügt werden, da der
    * Name ein Leerzeichen enthält.
-   * 
+   *
    * Der Fix wurde in der Vergangenheit auf alle Textfelder des Dokuments angewandt,
    * womit aber PageNumber-Felder in Kopf- und Fußzeilen unbrauchbar wurden. Daher
    * gibt es jetzt nur noch eine "Whitelist" von Feldern, die ersetzt werden.
-   * 
-   * @author Matthias Benkmann (D-III-ITD D.10), Christoph Lutz (D-III-ITD D.10)
+   *
    * @throws WrappedTargetException
    * @throws NoSuchElementException
    */
@@ -534,8 +523,6 @@ public class PrintIntoFile
   /**
    * Addiert auf die AnchorPageNo Property aller Objekte aus objects, die nicht (als
    * HashableComponent) in old enthalten sind den Wert pageNumberOffset.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static void fixPageAnchoredObjects(XIndexAccess objects,
       Set<HashableComponent> old, int pageNumberOffset)
@@ -591,7 +578,7 @@ public class PrintIntoFile
   /**
    * Speichert inputDoc in einer temporären Datei und liefert eine UNO-taugliche URL
    * zu dieser Datei zurück.
-   * 
+   *
    * @param inputDoc
    *          das zu speichernde Dokument
    * @param dest
@@ -604,7 +591,6 @@ public class PrintIntoFile
    *           kann eigentlich nicht passieren
    * @throws com.sun.star.io.IOException
    *           falls was schief geht.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static String storeInTemporaryFile(XTextDocument inputDoc, File[] dest)
       throws IOException, MalformedURLException, com.sun.star.io.IOException

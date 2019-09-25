@@ -88,8 +88,6 @@ public class InsertionModel4InputUser extends InsertionModel
    * @throws SyntaxErrorException
    *           wenn das Content-Property von textField nicht korrekte
    *           ConfigThingy-Syntax hat oder keine korrekte Funktionsreferenz ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public InsertionModel4InputUser(Object textField, XTextDocument doc,
       FunctionSelectionProvider funcSelections, FormularMax4kController formularMax4000)
@@ -174,10 +172,6 @@ public class InsertionModel4InputUser extends InsertionModel
    * 
    * @throws Exception
    *           falls was schief geht.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   * TESTED
    */
   private void rename(String newName) throws Exception
   {

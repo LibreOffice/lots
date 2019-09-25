@@ -178,7 +178,6 @@ public class MailMergeDatasource
    *
    * @param documentController
    *          wird verwendet zum Speichern/Wiedereinlesen der zuletzt ausgewählten Datenquelle.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public MailMergeDatasource(TextDocumentController documentController)
   {
@@ -1025,10 +1024,9 @@ public class MailMergeDatasource
   /**
    * Liefert ein CalcModel und zugehörigen XSpreadsheetDocuments aller offenen Calc-Fenster.
    *
-   * @return Map<CalcModel, XSpreadsheetDocument> Das CalcModel entält den Titel des Calc-Fensters,
-   *         die Datei-URL sowie eine Liste mit Tabellennamen des Dokuments. Das zweite Objekt der
-   *         MAp ist das eigentliche UNO Dokumente, über XSpreedSheetDocument.getSheets können die
-   *         Tabellen abgerufen werden.
+   * @return Das CalcModel entält den Titel des Calc-Fensters, die Datei-URL sowie eine Liste mit
+   *         Tabellennamen des Dokuments. Das zweite Objekt der Map ist das eigentliche UNO
+   *         Dokumente, über XSpreedSheetDocument.getSheets können die Tabellen abgerufen werden.
    */
   public static List<CalcModel> getOpenCalcWindows()
   {
@@ -1102,9 +1100,6 @@ public class MailMergeDatasource
    * Falls aktuell eine OOo-Datenquelle als Datenquelle ausgewählt ist, so wird diese
    * zurückgeliefert. Falls es aus irgendeinem Grund nicht möglich ist, diese zurückzuliefern, wird
    * eine {@link de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException} geworfen.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
    */
   public Datasource getOOoDatasource() throws UnavailableException
   {
@@ -1134,10 +1129,6 @@ public class MailMergeDatasource
   /**
    * Setzt die registrierte Datenquelle mit Namen newDsName als neue Datenquelle für den
    * Seriendruck.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
-   *         TESTED
    */
   private void getOOoDatasource(String newDsName)
   {
@@ -1167,10 +1158,6 @@ public class MailMergeDatasource
 
   /**
    * Liefert den Spaltennamen (z,B, "A") zu Spalte col. Dabei ist Spalte 1 = "A".
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
-   *         TESTED
    */
   private static String getCalcColumnNameForColumnIndex(int col)
   {
@@ -1184,14 +1171,10 @@ public class MailMergeDatasource
   }
 
   /**
-   * Falls unterstützt (siehe {@link #supportsAddColumns()}), wird für jedes Mapping fieldId->subst
-   * eine neue Spalte in die Datenbank eingefügt mit Titel fieldId, deren Inhalt durch subst
-   * beschrieben wird. Referenzen auf andere Felder innerhalb von subst werden interpretiert als
-   * Referenzen auf die Tabellenspalten mit entsprechenden Titeln.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
-   *         TESTED
+   * Falls unterstützt (siehe {@link #supportsAddColumns()}), wird für jedes Mapping
+   * fieldId-&gt;subst eine neue Spalte in die Datenbank eingefügt mit Titel fieldId, deren Inhalt
+   * durch subst beschrieben wird. Referenzen auf andere Felder innerhalb von subst werden
+   * interpretiert als Referenzen auf die Tabellenspalten mit entsprechenden Titeln.
    */
   public void addColumns(Map<String, FieldSubstitution> mapIdToSubstitution)
   {
@@ -1325,10 +1308,6 @@ public class MailMergeDatasource
    * Liefert die Namen aller Tabellen der aktuell ausgewählten OOo-Datenquelle. Wenn keine
    * OOo-Datenquelle ausgewählt ist, oder es keine nicht-leere Tabelle gibt, so wird eine leere
    * Liste geliefert.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   *
-   *         TESTED
    */
   public List<String> getDbTableNames(String oooDatasourceName)
   {
@@ -1403,8 +1382,6 @@ public class MailMergeDatasource
    * Liefert die sichtbaren Zellen des Arbeitsblattes mit Namen sheetName aus dem Calc Dokument doc.
    * Die erste sichtbare Zeile der Calc-Tabelle wird herangezogen als Spaltennamen. Diese
    * Spaltennamen werden zu schema hinzugefügt.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static QueryResults getVisibleCalcData(XSpreadsheetDocument doc, String sheetName,
       List<String> schema)
@@ -1495,7 +1472,6 @@ public class MailMergeDatasource
    *          diesem Set werden die Spaltenindizes hinzugefügt
    * @param rowIndexes
    *          diesem Set werden die Zeilenindizes hinzugefügt
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static void getVisibleNonemptyRowsAndColumns(XCellRangesQuery sheet,
       SortedSet<Integer> columnIndexes, SortedSet<Integer> rowIndexes)

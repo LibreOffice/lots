@@ -60,23 +60,17 @@ public interface FunctionSelectionAccess
    * Liefert true gdw diese FunctionSelection eine Referenz auf eine benannte
    * Funktion ist, d,h, wenn {@link #getFunctionName()} einen sinnvollen Namen
    * liefert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isReference();
 
   /**
    * Liefert true gdw diese FunctionSelection eine vom Benutzer manuell eingegebene
    * Funktion ist, die von {@link #getExpertFunction()} zurückgeliefert werden kann.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isExpert();
 
   /**
    * Liefert true gdw, keine Funktion ausgewählt ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isNone();
 
@@ -84,24 +78,18 @@ public interface FunctionSelectionAccess
    * Liefert true gdw diese FunctionSelection eine Referenz auf eine benannte
    * Funktion ist und für mindestens einen Parameter dieser Funktion einen Wert
    * spezifiziert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean hasSpecifiedParameters();
 
   /**
    * Liefert den Namen der Funktion, falls es eine Referenz auf eine externe Funktion
    * ist, oder {@link #NO_FUNCTION} bzw, {@link #EXPERT_FUNCTION}.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String getFunctionName();
 
   /**
    * Liefert die Namen der Funktionsparameter, die die momentan ausgewählte Funktion
    * erwartet.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String[] getParameterNames();
 
@@ -111,7 +99,6 @@ public interface FunctionSelectionAccess
    * 
    * @param mapNameToParamValue
    *          wird direkt als Referenz übernommen.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setParameterValues(Map<String, ParamValue> mapNameToParamValue);
 
@@ -121,8 +108,6 @@ public interface FunctionSelectionAccess
    * {@link ParamValue#isUnspecified()} true liefert. Das zurückgelieferte Objekt ist
    * kann vom Aufrufer verändert werden, ohne Auswirkungen auf das
    * FunctionSelectionAccess Objekt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ParamValue getParameterValue(String paramName);
 
@@ -132,7 +117,6 @@ public interface FunctionSelectionAccess
    * @param paramValue
    *          wird direkt als Referenz in die internen Datenstrukturen übernommen,
    *          darf also vom Aufrufer nachher nicht mehr geändert werden.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setParameterValue(String paramName, ParamValue paramValue);
 
@@ -147,7 +131,6 @@ public interface FunctionSelectionAccess
    *          wird ignoriert, falls {@link #NO_FUNCTION} oder
    *          {@link #EXPERT_FUNCTION} übergeben wird. Wird ansonsten kopiert, nicht
    *          direkt als Referenz verwendet.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setFunction(String functionName, String[] paramNames);
 
@@ -156,7 +139,6 @@ public interface FunctionSelectionAccess
    * Ist keine gesetzt, so wird ein ConfigThingy ohne Kinder zurückgeliefert.
    * 
    * @return ein Objekt, das der Aufrufer ändern darf.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ConfigThingy getExpertFunction();
 
@@ -168,7 +150,6 @@ public interface FunctionSelectionAccess
    * 
    * @param funConf
    *          wird kopiert, nicht als Referenz übernommen.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setExpertFunction(ConfigThingy funConf);
 

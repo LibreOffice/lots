@@ -48,9 +48,6 @@ public abstract class BaseDispatch implements XDispatch
 
   /**
    * Liefert zu url den Namen der Methode, die den Dispatch behandeln würde.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
    */
   public static String getDispatchMethodName(URL url)
   {
@@ -59,18 +56,18 @@ public abstract class BaseDispatch implements XDispatch
   }
 
   /**
-   * Gibt den Namen der Methode zurück, über die der Anzeigestatus
-   * eines Menüs oder Toolbarbuttons abgefragt werden kann.
-   * 
+   * Gibt den Namen der Methode zurück, über die der Anzeigestatus eines Menüs oder Toolbarbuttons
+   * abgefragt werden kann.
+   *
    * @param url
-   * @return
+   * @return Name der Methode.
    */
   public static String getStatusMethodName(URL url)
   {
     String part = url.Complete.split("#")[0];
     return "status_" + part.replaceAll("\\W", "_").toLowerCase();
   }
-  
+
   /**
    * Wertet die Properties aus, ob der SynchronMode gesetzt ist.
    *
@@ -123,7 +120,7 @@ public abstract class BaseDispatch implements XDispatch
   protected void notifyStatusListener(XStatusListener listener, URL url)
   {
     boolean isEnabled = queryStatus(url);
-    
+
     FeatureStateEvent fse = new FeatureStateEvent();
     fse.FeatureURL = url;
     fse.IsEnabled = isEnabled;
@@ -158,13 +155,13 @@ public abstract class BaseDispatch implements XDispatch
       LOGGER.error("", x);
     }
   }
-  
+
   /**
-   * Sucht im Dispatcher nach einer Methode "status_<url>", über die entschieden wird,
-   * ob ein Menüpunkt oder Toolbarbutton aktiv ist.
-   * 
+   * Sucht im Dispatcher nach einer Methode "status_<url>", über die entschieden wird, ob ein
+   * Menüpunkt oder Toolbarbutton aktiv ist.
+   *
    * @param url
-   * @return
+   * @return True, wenn die Toolbar aktiv sein soll, false sonst.
    */
   public boolean queryStatus(URL url)
   {

@@ -46,7 +46,6 @@ public abstract class DatasetChecker
    *          kann für Präfix/Suffix/Teilstringsuche
    * @return ein DatasetChecker, der Datensätze überprüft darauf, ob sie in Spalte
    *         columnName den Suchstring query stehen haben.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static DatasetChecker makeChecker(String columnName, String query)
   {
@@ -74,7 +73,6 @@ public abstract class DatasetChecker
    * 
    * @param query
    *          Liste von QueryParts.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static DatasetChecker makeChecker(List<QueryPart> query)
   {
@@ -92,8 +90,6 @@ public abstract class DatasetChecker
 
   /**
    * Liefert true, wenn die Bedingung dieses Checkers auf ds zutrifft.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public abstract boolean matches(Dataset ds);
 
@@ -102,8 +98,6 @@ public abstract class DatasetChecker
    * die Bedingung von check2 prüft. Die matches() Funktion des zurückgelieferten
    * Checkers liefert nur true, wenn die matches() Methoden von beiden Checkern true
    * liefern.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public DatasetChecker and(DatasetChecker check2)
   {
@@ -115,8 +109,6 @@ public abstract class DatasetChecker
    * die Bedingung von check2 prüft. Die matches() Funktion des zurückgelieferten
    * Checkers liefert true, wenn die matches() Methode von mindestens einem der
    * beiden Checker true liefert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public DatasetChecker or(DatasetChecker check2)
   {

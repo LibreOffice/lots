@@ -2,7 +2,7 @@
  * Dateiname: TextModul.java
  * Projekt  : WollMux
  * Funktion : Hilfsmethoden zum Textbausteinsystem
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux;
 
@@ -85,7 +85,7 @@ public class TextModule
    * 'insertFrag' mit den gefundenen Argumenten. Aufgehört wird beim ersten Absatz in
    * dem kein Textbausteinbezeichner identifiziert werden konnte oder wo bereits ein
    * insertFrag vorhanden war.
-   * 
+   *
    * @param doc
    *          Aktuelle Textdocument in dem gesucht werden soll
    * @param range
@@ -96,7 +96,7 @@ public class TextModule
    * @param isManual
    *          kennzeichnet Einfügungen, die manuell vorgenommen worden sind. Setzt
    *          den optionalen Knoten MODE = "manual"
-   * 
+   *
    * @throws WollMuxFehlerException
    *           falls ein Problem aufgetreten ist (z.B. kein Textbaustein erkannt oder
    *           bereits ein insertFrag-Befehl vorhanden). Eine Exception wird genau
@@ -173,7 +173,7 @@ public class TextModule
           /*
            * Es wurde bereits ein insertFrag-Kommando an der aktuellen Cursorposition
            * gefunden.
-           * 
+           *
            * Wir werfen nur dann einen Fehler, wenn wir noch gar keinen Textbaustein
            * verarbeitet haben. Ansonsten hören wir einfach nur auf ohne Fehler. Es
            * ist ein absolut legitimer Anwendungsfall, dass ein Anwender erst "TB1"
@@ -224,7 +224,7 @@ public class TextModule
    * und liefert null zurück, wenn es keine Übereinstimmung mit den MATCHes gab oder
    * falls es eine Übereinstimmung gab ein Array, das an der ersten Stelle die neue
    * frag_id enthält und in den folgenden Stellen die Argumente.
-   * 
+   *
    * @param identifierWithArgs
    *          Ein String in der Form "<identifier>#arg1#...#argN", wobei der
    *          Separator "#" über den SEPARATOR-Schlüssel in textbausteine verändert
@@ -255,7 +255,7 @@ public class TextModule
    * enthalten sind und liefert null zurück, wenn es keine Übereinstimmung mit den
    * MATCHes gab oder falls es eine Übereinstimmung gab ein Array, das an der ersten
    * Stelle die neue frag_id enthält und in den folgenden Stellen die Argumente.
-   * 
+   *
    * @param identifierWithArgs
    *          Ein String in der Form "<identifier>#arg1#...#argN", wobei der
    *          Separator "#" über den SEPARATOR-Schlüssel in textbausteine verändert
@@ -343,9 +343,9 @@ public class TextModule
   }
 
   /**
-   * Erzeugt ein Bookmark vom Typ "WM(CMD'insertFrag' FRAG_ID '<args[0]>'
-   * ARGS('<args[1]>' '...' '<args[n]>')" im Dokument doc an der Stelle range.
-   * 
+   * Erzeugt ein Bookmark vom Typ "WM(CMD'insertFrag' FRAG_ID '&lt;args[0]&gt;'
+   * ARGS('&lt;args[1]&gt;' '...' '&lt;args[n]&gt;')" im Dokument doc an der Stelle range.
+   *
    * @param doc
    *          Aktuelles Textdokument
    * @param range
@@ -353,8 +353,8 @@ public class TextModule
    * @param args
    *          Übergebene Parameter
    * @param isManual
-   *          kennzeichnet Einfügungen, die manuell vorgenommen worden sind. Setzt
-   *          den optinalen Knoten MODE = "manual"
+   *          kennzeichnet Einfügungen, die manuell vorgenommen worden sind. Setzt den optinalen
+   *          Knoten MODE = "manual"
    */
   public static void createInsertFrag(XTextDocument doc, XTextRange range,
       String[] args, boolean isManual)
@@ -408,7 +408,7 @@ public class TextModule
   /**
    * Methode springt ab dem aktuellen viewCursor von einem Platzhalterfeld zum
    * nächsten und fängt dann nochmal von vorne an
-   * 
+   *
    * @param viewCursor
    *          Aktueller ViewCursor im Dokument
    */
@@ -494,11 +494,11 @@ public class TextModule
   }
 
   /**
-   * Alte und fehlerhafte Implementierung, da der jumpPlaceholder-Methode, da sie
-   * Platzhalter in Tabellen nicht anspringen kann. Diese Methode wird nur noch als
-   * Workaround für Issue http://openoffice.org/bugzilla/show_bug.cgi?id=102619 in
-   * allen OOo-Versionen < 3.2.1 benötigt.
-   * 
+   * Alte und fehlerhafte Implementierung, da der jumpPlaceholder-Methode, da sie Platzhalter in
+   * Tabellen nicht anspringen kann. Diese Methode wird nur noch als Workaround für Issue
+   * http://openoffice.org/bugzilla/show_bug.cgi?id=102619 in allen OOo-Versionen &lt; 3.2.1
+   * benötigt.
+   *
    * @param viewCursor
    *          Aktueller ViewCursor im Dokument
    */

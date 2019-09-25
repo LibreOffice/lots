@@ -2,7 +2,7 @@
  * Dateiname: IDManager.java
  * Projekt  : WollMux
  * Funktion : Verwaltet Objekte, die ID-Strings repräsentieren.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former;
 
@@ -48,13 +48,12 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
  * mehreren Stellen verwendet werden und da jedes ID-Objekt alle seine Verwender
  * kennt (wenn sie sich als Listener registrieren) können Änderungen an der ID allen
  * Verwendern mitgeteilt werden.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class IDManager
 {
-  private Map<Object, HashMap<String, ID>> mapNamespace2mapString2ID =
-    new HashMap<Object, HashMap<String, ID>>();
+  private Map<Object, HashMap<String, ID>> mapNamespace2mapString2ID = new HashMap<>();
 
   /**
    * Liefert ein {@link IDManager.ID}-Objekt zur String-ID id im Namensraum
@@ -65,10 +64,9 @@ public class IDManager
    * verwendet werden, die die ID als Referenz auf ein anderes Objekt benötigen.
    * Aufrufer, die sich selbst mit der ID identifizieren wollen müssen
    * {@link #getActiveID(Object, String)} verwenden.
-   * 
+   *
    * @param namespace
    *          ein beliebiger Identifikator für den gewünschten Namensraum.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public ID getID(Object namespace, String id)
   {
@@ -86,8 +84,6 @@ public class IDManager
   /**
    * Falls dieser Manager im Namensraum namespace ein Objekt mit String-ID id hat, so
    * wird dieses zurückgeliefert, ansonsten null.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ID getExistingID(Object namespace, String id)
   {
@@ -109,10 +105,9 @@ public class IDManager
    * Aufrufern verwendet zu werden, die sich selbst mit der ID identifizieren wollen.
    * Aufrufer, die die ID als Referenz auf ein anderes Objekt verwenden, müssen
    * {@link #getID(Object, String)} verwenden.
-   * 
+   *
    * @param namespace
    *          ein beliebiger Identifikator für den gewünschten Namensraum.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ID getActiveID(Object namespace, String id) throws DuplicateIDException
   {
@@ -126,39 +121,35 @@ public class IDManager
    * Namensraum namespace registriert sind. ACHTUNG! Die zurückgegebene Collection
    * darf nicht geändert oder gespeichert werden, da sie direkt eine interne
    * Datenstruktur ist!
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public Collection<ID> getAllIDs(Object namespace)
   {
     if (!mapNamespace2mapString2ID.containsKey(namespace))
-      return new ArrayList<ID>();
+      return new ArrayList<>();
 
     Map<String, ID> mapString2ID = mapNamespace2mapString2ID.get(namespace);
     return mapString2ID.values();
   }
-  
+
   /**
    * Liefert eine sortierte {@link Collection} mit allen {@link IDManager.ID} Objekten, die im
    * Namensraum namespace registriert sind. ACHTUNG! Die zurückgegebene Collection
    * darf nicht geändert oder gespeichert werden, da sie direkt eine interne
    * Datenstruktur ist!
-   * 
-   * @author Patric Busanny (ITM-I23)
    */
   public Collection<ID> getAllIDsSorted(Object namespace)
   {
     if (!mapNamespace2mapString2ID.containsKey(namespace))
-      return new ArrayList<ID>();
+      return new ArrayList<>();
 
-    Map<String, ID> MapString2ID = new TreeMap<String, ID>(mapNamespace2mapString2ID.get(namespace));
-    
-    return MapString2ID.values();
+    Map<String, ID> mapString2ID = new TreeMap<>(mapNamespace2mapString2ID.get(namespace));
+
+    return mapString2ID.values();
   }
 
   /**
    * Ein Objekt, das eine String-ID repräsentiert.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static class ID
@@ -187,7 +178,7 @@ public class IDManager
      * Liste von {@link WeakReference}s auf {@link IDManager.IDChangeListener}.
      */
     private List<WeakReference<IDChangeListener>> listeners =
-      new Vector<WeakReference<IDChangeListener>>();
+        new Vector<>();
 
     /**
      * Erstellt ein neues ID Objekt, das inaktiv (siehe {@link #isActive()} ist.
@@ -203,8 +194,6 @@ public class IDManager
      * mit dieser ID identifiziert. False bedeutet, dass alle Verwender dieser ID
      * damit nur ein anderes Objekt referenzieren wollen (das derzeit nicht
      * existiert).
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public boolean isActive()
     {
@@ -214,8 +203,6 @@ public class IDManager
     /**
      * Setzt diese ID auf {@link #isActive() aktiv} oder wirft
      * {@link DuplicateIDException}, falls sie es schon ist.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void activate() throws DuplicateIDException
     {
@@ -225,8 +212,6 @@ public class IDManager
 
     /**
      * Setzt diese ID auf {@link #isActive() inaktiv}.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void deactivate()
     {
@@ -241,8 +226,6 @@ public class IDManager
      * {@link #removeIDChangeListener(IDChangeListener)} nur notwendig, wenn man
      * keine Events mehr empfangen möcht, nicht jedoch vor der Zerstörung des
      * Listeners.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     public void addIDChangeListener(IDChangeListener listen)
     {
@@ -265,8 +248,6 @@ public class IDManager
      * Aufruf von {@link #removeIDChangeListener(IDChangeListener)} nur notwendig,
      * wenn man keine Events mehr empfangen möcht, nicht jedoch vor der Zerstörung
      * des Listeners.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     public void removeIDChangeListener(IDChangeListener listen)
     {
@@ -286,11 +267,10 @@ public class IDManager
      * Exception. ACHTUNG! Normalerweise darf diese Funktion nur von dem Objekt
      * aufgerufen werden, das sich mit dieser ID identifiziert, nicht von Objekten
      * die diese ID nur als Referenz verwenden.
-     * 
+     *
      * @see #addIDChangeListener(IDChangeListener)
      * @throws DuplicateIDException
      *           wenn newID bereits im Namensraum dieses ID-Objekts verwendet wird.
-     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     public void setID(String newID) throws DuplicateIDException
     {
@@ -327,8 +307,6 @@ public class IDManager
 
     /**
      * Liefert die String-ID zurück, die dieses Objekt repräsentiert.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public String getID()
     {
@@ -363,9 +341,8 @@ public class IDManager
   /**
    * Ein IDChangeListener wird benachrichtigt, wenn sich ein {@link IDManager.ID}
    * Objekt ändert.
-   * 
+   *
    * @see IDManager.ID#addIDChangeListener(IDChangeListener)
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public interface IDChangeListener
   {

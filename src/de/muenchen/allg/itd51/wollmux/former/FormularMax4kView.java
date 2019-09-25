@@ -441,8 +441,6 @@ public class FormularMax4kView extends JFrame
   
   /**
    * Initialisiert die GUI für den Quelltexteditor.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void initEditor()
   {
@@ -558,8 +556,6 @@ public class FormularMax4kView extends JFrame
    * Workaround für Problem unter Windows, dass das Layout bei myFrame.pack() die
    * Taskleiste nicht berücksichtigt (das Fenster also dahinter verschwindet),
    * zumindest solange nicht bis man die Taskleiste mal in ihrer Größe verändert hat.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setFrameSize()
   {

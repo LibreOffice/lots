@@ -2,11 +2,11 @@
  * Dateiname: DocumentDispatch.java
  * Projekt  : WollMux
  * Funktion : Implementiert XDispatch und kann alle Dispatch-URLs behandeln, die ein DocumentModel erfordern.
- * 
+ *
  * Copyright (c) 2009-2019 Landeshauptstadt München
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL), 
+ * it under the terms of the European Union Public Licence (EUPL),
  * version 1.0 (or any later version).
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,7 +15,7 @@
  * European Union Public Licence for more details.
  *
  * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see 
+ * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
  * Änderungshistorie:
@@ -25,7 +25,7 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD-D101)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.event;
 
@@ -46,14 +46,15 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  * Implementiert XDispatch und kann alle Dispatch-URLs behandeln, die ein
  * DocumentModel erfordern. Nähere Infos zur Funktionsweise siehe
  * {@link BaseDispatch}.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
+@SuppressWarnings({ "squid:S00100", "squid:S1172" })
 public class DocumentDispatch extends Dispatch
 {
   /**
    * Ein XDispatch-Objekt, das die ursprüngliche Standard-Aktion der URL url ist.
-   * 
+   *
    */
   private XDispatch origDisp;
 
@@ -69,7 +70,7 @@ public class DocumentDispatch extends Dispatch
 
   /**
    * Erzeugt einen neuen DocumentDispatch.
-   * 
+   *
    * @param origDisp
    *          Ein XDispatch-Objekt, das die ursprüngliche Standard-Aktion der
    *          URL url auslösen kann.
@@ -78,8 +79,6 @@ public class DocumentDispatch extends Dispatch
    * @param frame
    *          der Frame des Textdokuments in dessen Kontext der Dispatch
    *          ausgeführt werden soll.
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
    */
   public DocumentDispatch(XDispatch origDisp, com.sun.star.util.URL origUrl,
       XFrame frame)
@@ -92,7 +91,7 @@ public class DocumentDispatch extends Dispatch
   /**
    * Wenn wir ein Original-Dispatch-Objekt haben, überlassen wir diesem das
    * managen des Status.
-   * 
+   *
    * @see #removeStatusListener(XStatusListener, URL)
    */
   @Override
@@ -107,7 +106,7 @@ public class DocumentDispatch extends Dispatch
   /**
    * Wenn wir ein Original-Dispatch-Objekt haben, überlassen wir diesem das
    * managen des Status.
-   * 
+   *
    * @see #addStatusListener(XStatusListener, URL)
    */
   @Override

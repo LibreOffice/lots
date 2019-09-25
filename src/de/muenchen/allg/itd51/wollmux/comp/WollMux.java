@@ -65,6 +65,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
+import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
 import de.muenchen.allg.itd51.wollmux.XWollMuxDocument;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
@@ -104,12 +105,11 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     { "de.muenchen.allg.itd51.wollmux.WollMux" };
 
   /**
-   * Der Konstruktor initialisiert das WollMuxSingleton und startet damit den
-   * eigentlichen WollMux. Der Konstuktor wird aufgerufen, bevor Office die
-   * Methode executeAsync() aufrufen kann, die bei einem ON_FIRST_VISIBLE_TASK-Event
-   * über den Job-Mechanismus ausgeführt wird.
+   * Der Konstruktor initialisiert das WollMuxSingleton und startet damit den eigentlichen WollMux.
+   * Der Konstuktor wird aufgerufen, bevor Office die Methode executeAsync() aufrufen kann, die bei
+   * einem ON_FIRST_VISIBLE_TASK-Event über den Job-Mechanismus ausgeführt wird.
    *
-   * @param context
+   * @param ctx
    */
   public WollMux(XComponentContext ctx)
   {
@@ -188,13 +188,12 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Diese Methode liefert eine Factory zurück, die in der Lage ist den UNO-Service
-   * zu erzeugen. Die Methode wird von UNO intern benötigt. Die Methoden
-   * __getComponentFactory und __writeRegistryServiceInfo stellen das Herzstück des
-   * UNO-Service dar.
+   * Diese Methode liefert eine Factory zurück, die in der Lage ist den UNO-Service zu erzeugen. Die
+   * Methode wird von UNO intern benötigt. Die Methoden __getComponentFactory und
+   * __writeRegistryServiceInfo stellen das Herzstück des UNO-Service dar.
    *
    * @param sImplName
-   * @return
+   * @return Eine ComponentFactory.
    */
   public synchronized static XSingleComponentFactory __getComponentFactory(
       java.lang.String sImplName)
@@ -216,12 +215,12 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Diese Methode registriert den UNO-Service. Sie wird z.B. beim unopkg-add im
-   * Hintergrund aufgerufen. Die Methoden __getComponentFactory und
-   * __writeRegistryServiceInfo stellen das Herzstück des UNO-Service dar.
+   * Diese Methode registriert den UNO-Service. Sie wird z.B. beim unopkg-add im Hintergrund
+   * aufgerufen. Die Methoden __getComponentFactory und __writeRegistryServiceInfo stellen das
+   * Herzstück des UNO-Service dar.
    *
    * @param xRegKey
-   * @return
+   * @return {@link Factory#writeRegistryServiceInfo(String, String[], XRegistryKey)}
    */
   public synchronized static boolean __writeRegistryServiceInfo(XRegistryKey xRegKey)
   {
@@ -377,13 +376,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Diese Methode setzt den aktuellen Absender der Persönlichen Absenderliste (PAL)
-   * auf den Absender sender. Der Absender wird nur gesetzt, wenn die Parameter
-   * sender und idx in der alphabetisch sortierten Absenderliste des WollMux
-   * übereinstimmen - d.h. die Absenderliste der veranlassenden SenderBox zum
-   * Zeitpunkt der Auswahl konsistent zur PAL des WollMux war. Die Methode erwartet
-   * für sender das selben Format wie es von {@link XPALProvider.getCurrentSender()}
-   * bzw. {@link XPALProvider.getPALEntries()} geliefert wird.
+   * Diese Methode setzt den aktuellen Absender der Persönlichen Absenderliste (PAL) auf den
+   * Absender sender. Der Absender wird nur gesetzt, wenn die Parameter sender und idx in der
+   * alphabetisch sortierten Absenderliste des WollMux übereinstimmen - d.h. die Absenderliste der
+   * veranlassenden SenderBox zum Zeitpunkt der Auswahl konsistent zur PAL des WollMux war. Die
+   * Methode erwartet für sender das selben Format wie es von
+   * {@link XPALProvider#getCurrentSender()} bzw. {@link XPALProvider#getPALEntries()} geliefert
+   * wird.
    */
   @Override
   public void setCurrentSender(String sender, short idx)
@@ -396,8 +395,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * Liefert die zum aktuellen Zeitpunkt im WollMux ausgewählten Absenderdaten (die über das
    * Dokumentkommandos WM(CMD'insertValue' DB_SPALTE'<dbSpalte>') in ein Dokument eingefügt würden)
    * in einem Array von {@link PropertyValue}-Objekten zurück. Dabei repräsentieren die Attribute
-   * {@link PropertyValue.Name} die verfügbaren DB_SPALTEn und die Attribute
-   * {@link PropertyValue.Value} die zu DB_SPALTE zugehörigen Absenderdaten.
+   * {@link PropertyValue#Name} die verfügbaren DB_SPALTEn und die Attribute
+   * {@link PropertyValue#Value} die zu DB_SPALTE zugehörigen Absenderdaten.
    *
    * Jeder Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit allen Einträgen die zu dem
    * Zeitpunkt gültig sind. Eine Änderung der Werte des Rückgabeobjekts hat daher keine Auswirkung

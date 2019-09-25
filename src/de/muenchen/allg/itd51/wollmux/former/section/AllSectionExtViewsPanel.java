@@ -61,8 +61,6 @@ public class AllSectionExtViewsPanel extends OnDemandCardView
    * @param groupModelList
    *          die Liste der Sichtbarkeitsgruppen die zur Auswahl angeboten werden
    *          sollen.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public AllSectionExtViewsPanel(SectionModelList sectionModelList,
       GroupModelList groupModelList, FormularMax4kController formularMax4000)
