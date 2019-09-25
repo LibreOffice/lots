@@ -122,8 +122,6 @@ public class PrintWizardPage extends AbstractXWizardPage
 
   /**
    * Liefert den Namen des aktuell zu diesem Dokument eingestellten Druckers.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public String getCurrentPrinterName()
   {

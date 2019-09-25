@@ -72,8 +72,6 @@ public abstract class LineView implements View
 
   /**
    * Markiert diese View optisch als ausgewählt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void mark()
   {
@@ -82,8 +80,6 @@ public abstract class LineView implements View
 
   /**
    * Entfernt die optische Markierung als ausgewählt von dieser View.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void unmark()
   {

@@ -40,8 +40,6 @@ public interface Broadcast
 {
   /**
    * Sendet diese Broadcast-Nachricht an listener.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void sendTo(BroadcastListener listener);
 }

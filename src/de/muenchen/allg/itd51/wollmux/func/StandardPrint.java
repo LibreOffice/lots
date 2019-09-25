@@ -81,8 +81,6 @@ public class StandardPrint
    * auch wirklich in den benötigten Ausfertigungen gedruckt werden, lädt die
    * Druckfunktion noch das Ausgabemodul "SachleitendeVerfuegungOutput" zur Liste der
    * auszuführenden Druckfunktionen hinzu.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static void sachleitendeVerfuegung(XPrintModel pmod)
   {
@@ -120,8 +118,6 @@ public class StandardPrint
    * Ausgabemodul der Sachleitenden Verfügungen: Diese Komfortdruckfunktion druckt
    * die Verfügungspunkte aus, die über die GUI ausgewählt wurden. Dabei wird für
    * jeden Verfügungspunkt die Methode printVerfuegungspunkt(...) ausgeführt.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   @SuppressWarnings("unchecked")
   public static void sachleitendeVerfuegungOutput(XPrintModel pmod)
@@ -161,8 +157,6 @@ public class StandardPrint
    * Druckfunktionen (arg als ConfigThingy) funktioniert und ob pmod sich über die
    * UNO-Mechanismen korrekt inspizieren lässt.
    *
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   *
    * @deprecated
    */
   @Deprecated
@@ -186,7 +180,6 @@ public class StandardPrint
    *
    * @throws Exception
    *           falls was schief geht.
-   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
    */
   public static void mailMergeNewSetFormValue(final XPrintModel pmod)
       throws Exception
@@ -199,7 +192,6 @@ public class StandardPrint
    *
    * @throws Exception
    *           falls was schief geht.
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static void oooMailMergeToOdtFile(final XPrintModel pmod) throws Exception
   {
@@ -227,7 +219,6 @@ public class StandardPrint
    *
    * @throws Exception
    *           falls was schief geht.
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static void oooMailMergeToPrinter(final XPrintModel pmod) throws Exception
   {
@@ -238,7 +229,6 @@ public class StandardPrint
    * Druckfunktion zum Abspeichern der durch den Seriendruck erzeugten Daten in
    * einzelnen Dateien.
    *
-   * @author Ignaz Forster (D-III-ITD-D102)
    * @throws Exception
    */
   public static void mailMergeNewToSingleODT(final XPrintModel pmod)
@@ -253,7 +243,6 @@ public class StandardPrint
    * Druckfunktion zum Abspeichern der durch den Seriendruck erzeugten Daten in
    * einzelnen Dateien.
    *
-   * @author Ignaz Forster (D-III-ITD-D102)
    * @throws Exception
    */
   public static void mailMergeNewToSinglePDF(final XPrintModel pmod)
@@ -268,8 +257,6 @@ public class StandardPrint
    * <b>DEPRECATED</b>: Druckfunktion zum Versenden der durch den Seriendruck erzeugten odt Dokumente per
    * E-Mail. Funktion existiert noch für die Kompatibilität zu alten Konfigurationen. Zukünftig werden
    * <b>"mailMergeNewToODTEMail"</b> bzw. <b>"mailMergeNewToPDFEMail"</b> diese Funktion ersetzen.
-   *
-   * @author Stefan Ströbl (ITM-B17)
    */
   public static void mailMergeNewToEMail(final XPrintModel pmod)
   {
@@ -281,8 +268,6 @@ public class StandardPrint
   /**
    * Druckfunktion zum Versenden der durch den Seriendruck erzeugten odt Dokumente per
    * E-Mail
-   *
-   * @author Ignaz Forster (D-III-ITD-D102)
    */
   public static void mailMergeNewToODTEMail(final XPrintModel pmod)
   {
@@ -293,8 +278,6 @@ public class StandardPrint
   /**
    * Druckfunktion zum Versenden der durch den Seriendruck erzeugten pdf Dokumente per
    * E-Mail
-   *
-   * @author judith baur (D-III-ITD-D102)
    */
   public static void mailMergeNewToPDFEMail(final XPrintModel pmod)
   {
@@ -309,7 +292,6 @@ public class StandardPrint
    *
    * @throws Exception
    *           falls was schief geht.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void printIntoFile(final XPrintModel pmod) throws Exception
   {
@@ -359,8 +341,6 @@ public class StandardPrint
    *          wenn hidden==true ist, wird das Dokument unsichtbar erzeugt.
    *
    * @return das erzeugte neue Zieldokument.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public static XTextDocument createNewTargetDocument(final XPrintModel pmod,
       boolean hidden) throws Exception
@@ -414,8 +394,6 @@ public class StandardPrint
      *
      * @return die neue Druckfunktion oder null, wenn die Funktion nicht definiert
      *         ist.
-     *
-     * @author Christoph Lutz (D-III-ITD-5.1)
      */
     public PrintFunction createPrintFunction()
     {
@@ -441,8 +419,6 @@ public class StandardPrint
    * Diese Methode fügt der PrintFunctionLibrary funcLib alle in dieser Klasse
    * definierten Druckfunktionen hinzu, wenn sie nicht bereits in funcLib enthalten
    * sind.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static void addInternalDefaultPrintFunctions(PrintFunctionLibrary funcLib)
   {

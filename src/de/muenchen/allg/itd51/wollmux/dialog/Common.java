@@ -127,8 +127,6 @@ public class Common
   /**
    * Führt {@link #setLookAndFeel()} aus, aber nur, wenn es bisher noch nicht
    * ausgeführt wurde.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void setLookAndFeelOnce()
   {
@@ -161,8 +159,6 @@ public class Common
    *
    * alt: Setzt das System Look and Feel, falls es nicht MetalLookAndFeel ist.
    * Ansonsten setzt es GTKLookAndFeel falls möglich.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static void setLookAndFeel()
   {
@@ -237,8 +233,6 @@ public class Common
    * Außerdem wird ein Swing-Problem korrigiert, durch das es vorkommen kann, dass in
    * einem JTextField selektierter Text auch nachdem des Textfeld den Focus verloren
    * hat noch als selektiert angezeigt wird.
-   *
-   * @author Daniel Benkmann (D-III-ITD-D101)
    */
   private static void configureTextFieldBehaviour()
   {
@@ -298,8 +292,6 @@ public class Common
    * setLookAndFeel() kann diese Funktion genau einmal verwendet werden und hat in
    * folgenden Aufrufen keine Wirkung mehr, bis wieder setLookAndFeel() aufgerufen
    * wird (was den Zoom wieder zurücksetzt).
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void zoomFonts(double zoomFactor)
   {
@@ -377,8 +369,6 @@ public class Common
    * Parst WIDTH, HEIGHT, X und Y aus fensterConf und liefert ein entsprechendes
    * Rectangle. Spezialwerte wie {@link #COORDINATE_CENTER} und
    * {@link #DIMENSION_MAX} werden verwendet.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static Rectangle parseDimensions(ConfigThingy fensterConf)
   {
@@ -491,7 +481,6 @@ public class Common
    * 
    * @param myFrame
    *          JFrame which should get the WollMux icon
-   * @author Daniel Benkmann
    */
   public static void setWollMuxIcon(JFrame myFrame)
   {

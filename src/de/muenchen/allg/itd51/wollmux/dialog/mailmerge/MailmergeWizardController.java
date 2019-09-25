@@ -67,8 +67,8 @@ public class MailmergeWizardController implements XWizardController
   private XWizard wizard;
 
   /**
-   * Enthält den String der im Attribut VALUE zur zuletzt ausgeführten
-   * {@link UIElementAction#setActionType}-Action angegeben war. Beispiel:
+   * Enthält den String der im Attribut VALUE zur zuletzt ausgeführten {@link UIElementAction}
+   * angegeben war. Beispiel:
    *
    * Wird in der GUI das Formularelement '(LABEL "Gesamtdokument erstellen" TYPE "radio" ACTION
    * "setActionType" VALUE "gesamtdok")' ausgewählt, dann enthält diese Variable den Wert
@@ -83,11 +83,6 @@ public class MailmergeWizardController implements XWizardController
 
   public FORMAT format = FORMAT.ODT;
 
-  /**
-   * Enthält den Wert des zuletzt ausgeführten
-   * {@link RuleStatement#IGNORE_DOC_PRINTFUNCTIONS}-Statements
-   */
-  public boolean ignoreDocPrintFuncs = true;
   public Map<SubmitArgument, Object> arguments;
   MailMergeController controller;
 

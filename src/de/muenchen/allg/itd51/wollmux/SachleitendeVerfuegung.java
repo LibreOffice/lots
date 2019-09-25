@@ -208,19 +208,18 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Erzeugt am Ende des Paragraphen, der von range berührt wird, einen neuen
-   * Paragraphen, setzt diesen auf das Absatzformat WollMuxVerfuegungspunktAbdruck
-   * und belegt ihn mit dem String "Abdruck von <Vorgänger>" ODER löscht alle
-   * Verfügungspunkte die der range berührt, wenn in ihm mindestens ein bereits
-   * bestehender Verfügungspunkt enthalten ist.
+   * Erzeugt am Ende des Paragraphen, der von range berührt wird, einen neuen Paragraphen, setzt
+   * diesen auf das Absatzformat WollMuxVerfuegungspunktAbdruck und belegt ihn mit dem String
+   * "Abdruck von <Vorgänger>" ODER löscht alle Verfügungspunkte die der range berührt, wenn in ihm
+   * mindestens ein bereits bestehender Verfügungspunkt enthalten ist.
    *
-   * @param doc
-   *          Das Dokument, in dem der Verfügungspunkt eingefügt werden soll (wird
-   *          für die Ziffernanpassung benötigt)
-   * @param cursor
-   *          Der Cursor, in dessen Bereich nach Verfügungspunkten gesucht wird.
-   * @return die Position zurück, auf die der ViewCursor gesetzt werden soll oder
-   *         null, falls der ViewCursor unverändert bleibt.
+   * @param documentController
+   *          Der DocumentController des Dokumentes, in dem der Verfügungspunkt eingefügt werden
+   *          soll (wird für die Ziffernanpassung benötigt)
+   * @param range
+   *          Die range, in dessen Bereich nach Verfügungspunkten gesucht wird.
+   * @return die Position zurück, auf die der ViewCursor gesetzt werden soll oder null, falls der
+   *         ViewCursor unverändert bleibt.
    */
   public static XTextRange insertAbdruck(TextDocumentController documentController, XTextRange range)
   {
@@ -264,16 +263,15 @@ public class SachleitendeVerfuegung
 
   /**
    * Formatiert alle Paragraphen die der TextRange range berührt mit dem Absatzformat
-   * WollMuxZuleitungszeile und markiert diese Zeilen damit auch semantisch als
-   * Zuleitungszeilen ODER setzt das Absatzformat der ensprechenden Paragraphen
-   * wieder auf Fließtext zurück, wenn mindestens ein Paragraph bereits eine
-   * Zuleitungszeile ist.
+   * WollMuxZuleitungszeile und markiert diese Zeilen damit auch semantisch als Zuleitungszeilen
+   * ODER setzt das Absatzformat der ensprechenden Paragraphen wieder auf Fließtext zurück, wenn
+   * mindestens ein Paragraph bereits eine Zuleitungszeile ist.
    *
-   * @param doc
-   *          Das Dokument in dem die sich range befindet.
+   * @param documentController
+   *          Der DocumentController des Dokumentes in dem die sich range befindet.
    * @param range
-   * @return die Position zurück, auf die der ViewCursor gesetzt werden soll oder
-   *         null, falls der ViewCursor unverändert bleibt.
+   * @return die Position zurück, auf die der ViewCursor gesetzt werden soll oder null, falls der
+   *         ViewCursor unverändert bleibt.
    */
   public static XTextRange insertZuleitungszeile(TextDocumentController documentController,
       XTextRange range)
@@ -788,16 +786,15 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Sucht nach allen Absätzen im Haupttextbereich des Dokuments doc (also nicht in
-   * Frames), deren Absatzformatname mit "WollMuxVerfuegungspunkt" beginnt und
-   * numeriert die bereits vorhandenen römischen Ziffern neu durch oder erzeugt eine
-   * neue Ziffer, wenn in einem entsprechenden Verfügungspunkt noch keine Ziffer
-   * gesetzt wurde. Ist ein Rahmen mit dem Namen WollMuxVerfuegungspunkt1 vorhanden,
-   * der einen als Verfügungpunkt markierten Paragraphen enthält, so wird dieser
-   * Paragraph immer (gemäß Konzept) als Verfügungspunkt "I" behandelt.
+   * Sucht nach allen Absätzen im Haupttextbereich des Dokuments doc (also nicht in Frames), deren
+   * Absatzformatname mit "WollMuxVerfuegungspunkt" beginnt und numeriert die bereits vorhandenen
+   * römischen Ziffern neu durch oder erzeugt eine neue Ziffer, wenn in einem entsprechenden
+   * Verfügungspunkt noch keine Ziffer gesetzt wurde. Ist ein Rahmen mit dem Namen
+   * WollMuxVerfuegungspunkt1 vorhanden, der einen als Verfügungpunkt markierten Paragraphen
+   * enthält, so wird dieser Paragraph immer (gemäß Konzept) als Verfügungspunkt "I" behandelt.
    *
-   * @param doc
-   *          Das Dokument, in dem alle Verfügungspunkte angepasst werden sollen.
+   * @param documentController
+   *          Der DocumentController für den alle Verfügungspunkte angepasst werden sollen.
    */
   public static void ziffernAnpassen(TextDocumentController documentController)
   {
@@ -1107,11 +1104,10 @@ public class SachleitendeVerfuegung
     }
 
     /**
-     * Fügt einen weitere Zuleitungszeile des Verfügungspunktes hinzu (wenn paragraph
-     * nicht null ist).
+     * Fügt einen weitere Zuleitungszeile des Verfügungspunktes hinzu.
      *
-     * @param paragraph
-     *          XTextRange, das den gesamten Paragraphen der Zuleitungszeile enthält.
+     * @param zuleitung
+     *          String, Text der Zuleitungszeile.
      */
     public void addZuleitungszeile(String zuleitung)
     {

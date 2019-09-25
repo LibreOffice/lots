@@ -27,7 +27,7 @@ public abstract class DataFinder
 {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(DataFinder.class);
-  
+
   private DatasourceJoiner dsj;
 
   public DataFinder(DatasourceJoiner dsj)
@@ -82,7 +82,7 @@ public abstract class DataFinder
     }
     return 0;
   }
-  
+
   /**
    * Sucht in der Datenquelle nach Datensätzen deren Feld dbSpalte den
    * evaluierten Wert von value enthält und überträgt die gefundenen Werte in die
@@ -117,7 +117,7 @@ public abstract class DataFinder
     }
     return 0;
   }
-  
+
 
   /**
    * Liefert den Wert zu einer Variable namens key und muss von jeder konkreten
@@ -172,18 +172,17 @@ public abstract class DataFinder
     }
     return 0;
   }
-  
+
   /**
-   * Ersetzt die Variablen in exp durch deren evaluierten Inhalt, wobei die
-   * Evaluierung über getValueForKey() erfolgt, die von jeder konkreten Klasse
-   * implementiert wird. Evaluate() stellt auch sicher, dass die von
-   * getValueForKey() zurückgelieferten Werte nicht selbst Variablen enthalten
-   * können (indem die Variablenbegrenzer "${" und "}" durch "<" bzw. ">" ersetzt
+   * Ersetzt die Variablen in exp durch deren evaluierten Inhalt, wobei die Evaluierung über
+   * getValueForKey() erfolgt, die von jeder konkreten Klasse implementiert wird. Evaluate() stellt
+   * auch sicher, dass die von getValueForKey() zurückgelieferten Werte nicht selbst Variablen
+   * enthalten können (indem die Variablenbegrenzer "${" und "}" durch "&lt;" bzw. "&gt;" ersetzt
    * werden.
    *
    * @param exp
    *          der zu evaluierende Ausdruck
-   * @return
+   * @return Der evaluierte Ausdruck.
    */
   protected String evaluate(String exp)
   {
@@ -202,7 +201,7 @@ public abstract class DataFinder
     }
     return exp;
   }
-  
+
   /**
    * Kopiert alle matches von QueryResults in die PAL.
    */

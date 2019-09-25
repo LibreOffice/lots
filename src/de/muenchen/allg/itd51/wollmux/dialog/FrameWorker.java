@@ -95,8 +95,6 @@ public class FrameWorker implements Runnable
    * @param showProgressBar
    *          gibt an, ob während des Arbeiten des Workers eine ProgressBar angezeigt
    *          werden soll (=true) oder nicht (=false).
-   * 
-   * @author Daniel Benkmann (D-III-ITD-D101)
    */
   private FrameWorker(JFrame frame, Runnable runnable, boolean showProgressBar)
   {
@@ -124,8 +122,6 @@ public class FrameWorker implements Runnable
    * @param showProgressBar
    *          gibt an, ob während des Arbeitens im Frame ein (indeterminierter)
    *          {@link JProgressBar} angezeigt werden soll (=true) oder nicht (=false).
-   * 
-   * @author Daniel Benkmann (D-III-ITD-D101)
    */
   public static void disableFrameAndWork(JFrame frame, Runnable runnable,
       boolean showProgressBar)
@@ -142,8 +138,6 @@ public class FrameWorker implements Runnable
    * {@link WaitGlassPane}) zu dem Frame hinzugefügt, die alle Mouse- und Key-Events
    * abfängt, und es wird eine (indeterminierte) JProgressBar eingeblendet, sofern
    * {@link #showProgressBar} <code>true</code> ist.
-   * 
-   * @author Daniel Benkmann (D-III-ITD-D101)
    */
   private void startWorking()
   {
@@ -189,8 +183,6 @@ public class FrameWorker implements Runnable
    * (gesichert in {@link #oldGlassPane} wird wieder hergestellt (wodurch auch eine
    * eventuell vorhandene ProgressBar entfernt wird, da diese an der GlassPane
    * hängt).
-   * 
-   * @author Daniel Benkmann (D-III-ITD-D101)
    */
   private void stopWorking()
   {

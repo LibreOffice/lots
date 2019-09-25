@@ -2,7 +2,7 @@
  * Dateiname: AllFormControlLineViewsPanel.java
  * Projekt  : WollMux
  * Funktion : Hält in einem Panel FormControlModelLineViews für alle FormControlModels einer FormControlModelList.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.control;
 
@@ -37,8 +37,6 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,7 +75,7 @@ import de.muenchen.allg.itd51.wollmux.former.view.View;
  * Hält in einem Panel FormControlModelLineViews für alle
  * {@link de.muenchen.allg.itd51.wollmux.former.control.FormControlModel} einer
  * {@link de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList}.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AllFormControlLineViewsPanel implements View, ItemListener,
@@ -136,7 +134,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   /**
    * Enthält die {@link ViewDescriptor}s in der richtigen Reihenfolge.
    */
-  private Vector<Object> viewDescriptors = new Vector<Object>();
+  private Vector<Object> viewDescriptors = new Vector<>();
 
   /**
    * Die Indizes der ausgewählten Elemente in {@link #viewDescriptors}.
@@ -152,7 +150,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    * Der FormularMax4000, zu dem diese View gehört.
    */
   private FormularMax4kController formularMax4000;
-  
+
   /**
    * Sichtbarkeitseinstellungen von FormularMax;
    */
@@ -162,8 +160,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    * Erzeugt eine AllFormControlLineViewsPanel, die den Inhalt von
    * formControlModelList anzeigt. ACHTUNG! formControlModelList sollte leer sein, da
    * nur neu hinzugekommene Elemente in der View angezeigt werden.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public AllFormControlLineViewsPanel(FormControlModelList formControlModelList,
       FormularMax4kController formularMax4000)
@@ -251,7 +247,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     JButton newButton = new JButton(L.m("Neues Label"));
     newButton.addActionListener(e -> insertNewElement());
     buttonPanel.add(newButton, gbcButton);
-    
+
     int index = 0;
     for (FormControlModel m : formControlModelList)
     {
@@ -313,8 +309,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    * Geht die {@link #viewDescriptors} Liste durch und behebt Fehler, die durch
    * strukturelle Änderungen hervorgerufen wurden. Dabei werden auch neue Tabs in
    * {@link #tabPane} angelegt bzw. alte entfernt wenn nötig.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void fixTabStructure()
   {
@@ -373,8 +367,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   /**
    * Liefert den Index des ViewDescriptors, der zu view gehört in der Liste
    * {@link #viewDescriptors} oder -1, wenn die view nicht enthalten ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private int getDescriptorIndexOf(OneFormControlLineView view)
   {
@@ -420,8 +412,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   /**
    * Schiebt alle ausgewählten Elemente um einen Platz nach oben, d,h, in Richtung
    * niedrigerer Indizes. Falls Element 0 ausgewählt ist wird gar nichts getan.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void moveSelectedElementsUp()
   {
@@ -435,8 +425,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
   /**
    * Hebt die Selektion aller Elemente auf.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void clearSelection()
   {
@@ -455,8 +443,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    * Schiebt alle ausgewählten Elemente um einen Platz nach unten, d,h, in Richtung
    * niedrigerer Indizes. Falls das letzte Element ausgewählt ist wird gar nichts
    * getan.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void moveSelectedElementsDown()
   {
@@ -470,8 +456,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
   /**
    * Löscht alle ausgewählten Elemente.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void deleteSelectedElements()
   {
@@ -498,13 +482,11 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    * aus den Labels aller entfernten Checkboxen zusammensetzt. Die Labels aller
    * selektierten Checkboxen müssen verschieden sein. Ein leeres Label ist jedoch
    * erlaubt (auch die Combobox enthält dann einen leeren Eintrag).
-   * 
+   *
    * @return null, falls die Funktion nicht durchgeführt werden konnte (z.B. keine
    *         Checkboxen selektiert oder eine Checkbox hat keine ID). Ansonsten wird
    *         ein {@link ComboboxMergeDescriptor} geliefert, der das Ergebnis der
    *         Operation beschreibt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public ComboboxMergeDescriptor mergeCheckboxesIntoCombobox()
   {
@@ -566,8 +548,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   /**
    * Liefert true gdw sich kein ausgewähltes Element auf dem momentan angezeigten Tab
    * befindet.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private boolean noSelectedElementsOnVisibleTab()
   {
@@ -585,8 +565,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   /**
    * Falls mindestens ein Element ausgewählt ist wird das sichtbare Tab so gesetzt,
    * dass das erste ausgewählte Element angezeigt wird.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void showSelection()
   {
@@ -601,8 +579,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    * Liefert den Index des ersten momentan sichtbaren vom Benutzer ausgewählten
    * Elements oder (falls kein ausgewähltes Element sichtbar ist) den Index des
    * letzten sichtbaren Elements + 1 oder falls kein Tab ausgewählt ist dann -1.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public int getInsertionIndex()
   {
@@ -630,8 +606,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    * Liefert den Index an dem Buttons auf dem aktuell sichtbaren Tab eingefügt werden
    * sollten oder -1, falls kein Tab ausgewählt ist. Der zurückgelieferte Wert (falls
    * nicht -1) entspricht dem Index des letzten sichtbaren Elements + 1.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public int getButtonInsertionIndex()
   {
@@ -648,8 +622,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   /**
    * Fügt vor dem ersten ausgewählten Element (oder ganz am Ende, wenn nichts
    * ausgewählt ist) ein neues Tab zur Liste hinzu.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void insertNewTab()
   {
@@ -664,8 +636,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    * Fügt vor dem ersten ausgewählten Element (oder ganz am Ende des sichtbaren Tabs,
    * wenn nichts ausgewählt ist oder die Selektion auf einem unsichtbaren Tab ist)
    * ein neues Steuerelement zur Liste hinzu.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void insertNewElement()
   {
@@ -695,12 +665,12 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   private class MyBroadcastListener extends BroadcastListener
   {
     private AllFormControlLineViewsPanel panel;
-    
+
     private MyBroadcastListener(AllFormControlLineViewsPanel panel)
     {
       this.panel = panel;
     }
-    
+
     @Override
     public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
     { // TESTED
@@ -724,7 +694,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
             state = 1;
             selindex = index;
           }
-          
+
 
           if (state == -1) {
             view.unmark();
@@ -734,7 +704,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
             view.mark();
             selection.add(index);
           }
-          
+
           break;
         }
         else if (b.getState() == BroadcastObjectSelection.STATE_SHIFT_CLICK)
@@ -778,7 +748,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
   /**
    * Ein Eintrag in der Liste {@link AllFormControlLineViewsPanel#viewDescriptors}.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class ViewDescriptor
@@ -805,8 +775,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
     /**
      * Erzeugt einen neuen ViewDescriptor.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public ViewDescriptor(OneFormControlLineView view, int gridY,
         int containingTabIndex, boolean isTab)

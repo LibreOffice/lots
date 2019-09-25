@@ -11,11 +11,6 @@ public interface UIControl<T>
   
   public T getValue();
   
-  /**
-   * Aktion, die von dem Steuerelement ausgeführt werden soll.
-   * 
-   * @return
-   */
   public UIElementAction getAction();
   
   public void setValue(T value);

@@ -2,7 +2,7 @@
  * Dateiname: GroupModelList.java
  * Projekt  : WollMux
  * Funktion : Verwaltet eine Liste von GroupModels.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 
 package de.muenchen.allg.itd51.wollmux.former.group;
@@ -41,7 +41,7 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
 /**
  * Verwaltet eine Liste von GroupModels
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class GroupModelList implements Iterable<GroupModel>
@@ -49,13 +49,13 @@ public class GroupModelList implements Iterable<GroupModel>
   /**
    * Die Liste der {@link GroupModel}s.
    */
-  private List<GroupModel> models = new LinkedList<GroupModel>();
+  private List<GroupModel> models = new LinkedList<>();
 
   /**
    * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts
    * informiert werden wollen.
    */
-  private List<ItemListener> listeners = new ArrayList<ItemListener>(1);
+  private List<ItemListener> listeners = new ArrayList<>(1);
 
   /**
    * Der FormularMax4000 zu dem diese GroupModelList gehört.
@@ -64,21 +64,17 @@ public class GroupModelList implements Iterable<GroupModel>
 
   /**
    * Erzeugt eine neue GroupModelList.
-   * 
+   *
    * @param formularMax4000
    *          der FormularMax4000 zu dem diese Liste gehört.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public GroupModelList(FormularMax4kController formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
-    // this.formularMax4000.addBroadcastListener(new MyBroadcastListener());
   }
 
   /**
    * Fügt model dieser Liste hinzu.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void add(GroupModel model)
   {
@@ -89,8 +85,6 @@ public class GroupModelList implements Iterable<GroupModel>
 
   /**
    * Löscht alle bestehenden GroupModels aus der Liste.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void clear()
   {
@@ -105,8 +99,6 @@ public class GroupModelList implements Iterable<GroupModel>
 
   /**
    * Liefert true gdw keine GroupModels in der Liste vorhanden sind.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isEmpty()
   {
@@ -115,8 +107,6 @@ public class GroupModelList implements Iterable<GroupModel>
 
   /**
    * Liefert ein ConfigThingy, dessen Wurzel ein "Sichtbarkeit"-Knoten ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ConfigThingy export()
   {
@@ -133,8 +123,6 @@ public class GroupModelList implements Iterable<GroupModel>
   /**
    * Bittet die GroupModelList darum, das Element model aus sich zu entfernen (falls
    * es in der Liste ist).
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void remove(GroupModel model)
   {
@@ -156,8 +144,6 @@ public class GroupModelList implements Iterable<GroupModel>
 
   /**
    * listener wird über Änderungen der Liste informiert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void addListener(ItemListener listener)
   {
@@ -166,8 +152,6 @@ public class GroupModelList implements Iterable<GroupModel>
 
   /**
    * listener wird in Zukunft nicht mehr über Änderungen der Liste informiert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public void removeListener(ItemListener listener)
   {
@@ -177,10 +161,9 @@ public class GroupModelList implements Iterable<GroupModel>
   /**
    * Benachrichtigt alle ItemListener über das Hinzufügen oder Entfernen von model
    * zur bzw. aus der Liste an/von Index index.
-   * 
+   *
    * @param removed
    *          falls true, wurde model entfernt, ansonsten hinzugefügt.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void notifyListeners(GroupModel model, int index, boolean removed)
   {
@@ -199,30 +182,23 @@ public class GroupModelList implements Iterable<GroupModel>
   /**
    * Interface für Klassen, die interessiert sind, zu erfahren, wenn sich die Liste
    * ändert.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static interface ItemListener
   {
     /**
      * Wird aufgerufen nachdem model zur Liste hinzugefügt wurde (an Index index).
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void itemAdded(GroupModel model, int index);
 
     /**
      * Wird aufgerufen, nachdem model aus der Liste entfernt wurde.
-     * 
+     *
      * @param index
      *          der alte Index von model in der Liste.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void itemRemoved(GroupModel model, int index);
   }
-
-  /*
-   * private class MyBroadcastListener extends BroadcastListener {}
-   */
 
 }

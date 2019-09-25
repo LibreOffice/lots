@@ -110,7 +110,6 @@ public class OneFormControlExtView implements LazyView
    * @param myViewChangeListener
    *          typischerweise ein Container, der diese View enthält und über
    *          Änderungen informiert werden soll.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public OneFormControlExtView(FormControlModel model, FunctionLibrary funcLib,
       GroupModelList groupModelList, ViewChangeListener myViewChangeListener)
@@ -172,8 +171,6 @@ public class OneFormControlExtView implements LazyView
 
   /**
    * Liefert das Model zu dieser View.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormControlModel getModel()
   {

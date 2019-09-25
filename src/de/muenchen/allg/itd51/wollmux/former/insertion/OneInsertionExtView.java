@@ -71,7 +71,6 @@ public class OneInsertionExtView implements View
    * @param myViewChangeListener
    *          typischerweise ein Container, der diese View enthält und über
    *          Änderungen informiert werden soll.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public OneInsertionExtView(InsertionModel model, FunctionLibrary funcLib,
       ViewChangeListener myViewChangeListener)
@@ -97,8 +96,6 @@ public class OneInsertionExtView implements View
 
   /**
    * Liefert das Model zu dieser View.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public InsertionModel getModel()
   {

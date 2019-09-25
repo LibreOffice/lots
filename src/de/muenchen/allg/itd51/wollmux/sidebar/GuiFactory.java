@@ -48,12 +48,12 @@ public class GuiFactory
   }
 
   /**
-   * Erzeugt ein Fenster ohne Dekorationen. Das Fenster kann als Inhalt eines
-   * Sidebar-Panels verwendet werden.
+   * Erzeugt ein Fenster ohne Dekorationen. Das Fenster kann als Inhalt eines Sidebar-Panels
+   * verwendet werden.
    *
    * @param toolkit
    * @param parentWindow
-   * @return
+   * @return Ein neues XWindowPeer
    */
   public static XWindowPeer createWindow(XToolkit toolkit, XWindowPeer parentWindow)
   {
@@ -80,7 +80,7 @@ public class GuiFactory
    * @param listener
    * @param size
    * @param props
-   * @return
+   * @return Ein Button-Control.
    */
   @SuppressWarnings("squid:S00107")
   public static XControl createButton(XMultiComponentFactory xMCF,
@@ -106,7 +106,7 @@ public class GuiFactory
    * @param text
    * @param size
    * @param props
-   * @return
+   * @return Ein Textfield-Control.
    */
   public static XControl createTextfield(XMultiComponentFactory xMCF,
       XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer,
@@ -139,7 +139,7 @@ public class GuiFactory
    * @param text
    * @param size
    * @param props
-   * @return
+   * @return Ein Label-Control
    */
   public static XControl createLabel(XMultiComponentFactory xMCF, XComponentContext context,
       XToolkit toolkit, XWindowPeer windowPeer, String text, Rectangle size,
@@ -164,7 +164,7 @@ public class GuiFactory
    *
    * @param xMCF
    * @param context
-   * @return
+   * @return Ein Datenmodell für XTrees.
    * @throws Exception
    */
   public static XMutableTreeDataModel createTreeModel(XMultiComponentFactory xMCF,
@@ -176,16 +176,15 @@ public class GuiFactory
   }
 
   /**
-   * Erzeugt ein Baum-Steuerelement mit einem vorgegebenen Datenmodell.
-   * Das Datenmodel kann mit {@link #createTreeModel(XMultiComponentFactory, XComponentContext)}
-   * erzeugt werden.
+   * Erzeugt ein Baum-Steuerelement mit einem vorgegebenen Datenmodell. Das Datenmodel kann mit
+   * {@link #createTreeModel(XMultiComponentFactory, XComponentContext)} erzeugt werden.
    *
    * @param xMCF
    * @param context
    * @param toolkit
    * @param windowPeer
    * @param dataModel
-   * @return
+   * @return Ein Treel-Control
    */
   public static XControl createTree(XMultiComponentFactory xMCF, XComponentContext context,
       XToolkit toolkit, XWindowPeer windowPeer, XMutableTreeDataModel dataModel)
@@ -269,7 +268,7 @@ public class GuiFactory
    *          Klasse des Steuerelements, das erzeugt werden soll.
    * @param props
    * @param rectangle
-   * @return
+   * @return Ein Control-Element.
    */
   public static XControl createControl(XMultiComponentFactory xMCF,
       XComponentContext xContext, XToolkit toolkit, XWindowPeer windowPeer,

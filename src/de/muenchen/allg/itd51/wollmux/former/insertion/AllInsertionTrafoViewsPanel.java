@@ -64,7 +64,6 @@ public class AllInsertionTrafoViewsPanel extends OnDemandCardView
    * @param funcLib
    *          die Funktionsbibliothek, die die Funktionen enthält, die die Views zur
    *          Auswahl anbieten sollen.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public AllInsertionTrafoViewsPanel(InsertionModelList insertionModelList,
       FunctionLibrary funcLib, FormularMax4kController formularMax4000)

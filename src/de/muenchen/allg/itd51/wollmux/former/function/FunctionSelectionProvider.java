@@ -2,7 +2,7 @@
  * Dateiname: FunctionSelectionProvider.java
  * Projekt  : WollMux
  * Funktion : Liefert {@link FunctionSelection}s.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.function;
 
@@ -44,7 +44,7 @@ import de.muenchen.allg.itd51.wollmux.former.IDManager;
 
 /**
  * Liefert {@link FunctionSelection}s.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class FunctionSelectionProvider
@@ -71,20 +71,16 @@ public class FunctionSelectionProvider
   private Object namespace;
 
   /**
-   * Erzeugt einen FunctionSelectionProvider, der {@link FunctionSelection}s sowohl
-   * zu Funktionen aus funcLib (darf null sein) als auch zu Funktionen, die funConf
-   * (welches ein legaler "Funktionen"-Abschnitt eines Formulars sein muss) definiert
-   * liefern kann. Bei gleichem Namen haben Funktionen aus funConf vorrang vor
-   * solchen aus funcLib.
-   * 
+   * Erzeugt einen FunctionSelectionProvider, der {@link FunctionSelection}s sowohl zu Funktionen
+   * aus funcLib (darf null sein) als auch zu Funktionen, die funConf (welches ein legaler
+   * "Funktionen"-Abschnitt eines Formulars sein muss) definiert liefern kann. Bei gleichem Namen
+   * haben Funktionen aus funConf vorrang vor solchen aus funcLib.
+   *
    * @param idManager
-   *          der IDManager, dessen IDs für Feldreferenzen (VALUE "&lt;id>")verwendet
-   *          werden sollen.
+   *          der IDManager, dessen IDs für Feldreferenzen (VALUE "&lt;id&gt;")verwendet werden
+   *          sollen.
    * @param namespace
-   *          der Namensraum von idManager, aus dem die IDs für Feldreferenzen
-   *          kommen.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   *          der Namensraum von idManager, aus dem die IDs für Feldreferenzen kommen.
    */
   public FunctionSelectionProvider(FunctionLibrary funcLib, ConfigThingy funConf,
       IDManager idManager, Object namespace)
@@ -92,7 +88,7 @@ public class FunctionSelectionProvider
     this.funcLib = funcLib;
     this.idManager = idManager;
     this.namespace = namespace;
-    mapNameToFunctionSelection = new HashMap<String, FunctionSelection>();
+    mapNameToFunctionSelection = new HashMap<>();
     Iterator<ConfigThingy> iter = funConf.iterator();
     while (iter.hasNext())
     {
@@ -110,8 +106,6 @@ public class FunctionSelectionProvider
    * einer leeren Parameterliste. Die gelieferte FunctionSelection ist auf jeden Fall
    * neu erstellt und unabhängig von anderen für den selben Namen früher gelieferten
    * FunctionSelections.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public FunctionSelection getFunctionSelection(String funcName)
   {
@@ -135,8 +129,6 @@ public class FunctionSelectionProvider
    * Liefert zu einer Funktionsdefinition in conf eine FunctionSelection. conf muss
    * einen beliebigen Wurzelknoten haben, der noch keine Grundfunktion ist (z.B.
    * "PLAUSI" oder "AUTOFILL").
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public FunctionSelection getFunctionSelection(ConfigThingy conf)
   {
@@ -144,15 +136,12 @@ public class FunctionSelectionProvider
   }
 
   /**
-   * Liefert zu einer Funktionsdefinition in conf eine FunctionSelection. conf muss
-   * einen beliebigen Wurzelknoten haben, der noch keine Grundfunktion ist (z.B.
-   * "PLAUSI" oder "AUTOFILL").
-   * 
+   * Liefert zu einer Funktionsdefinition in conf eine FunctionSelection. conf muss einen beliebigen
+   * Wurzelknoten haben, der noch keine Grundfunktion ist (z.B. "PLAUSI" oder "AUTOFILL").
+   *
    * @param defaultValue
    *          falls nicht null, so werden bei einer Funktionsreferenz an VALUE
-   *          "&lt;defaultValue>" gebundene Parameter auf unspecified gesetzt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   *          "&lt;defaultValue&gt;" gebundene Parameter auf unspecified gesetzt.
    */
   public FunctionSelection getFunctionSelection(ConfigThingy conf,
       String defaultValue)
@@ -174,7 +163,7 @@ public class FunctionSelectionProvider
      * Wenn wir das nicht können, dann liefern wir das ganze als Expert-Funktion
      * zurück, ansonsten setzen wir das BIND entsprechend um.
      */
-    Map<String, ParamValue> mapNameToParamValue = new HashMap<String, ParamValue>();
+    Map<String, ParamValue> mapNameToParamValue = new HashMap<>();
     String funcName = null;
     Iterator<ConfigThingy> iter = conf.iterator();
     while (iter.hasNext())

@@ -16,7 +16,7 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
  * Implementiert XWollMuxDocument für alle dokumentspezifischen Aktionen
- * 
+ *
  * @author Christoph Lutz (D-III-ITD-D101)
  */
 public class WollMuxDocument implements XWollMuxDocument
@@ -32,15 +32,14 @@ public class WollMuxDocument implements XWollMuxDocument
   }
 
   /**
-   * Nimmt die Druckfunktion functionName in die Liste der Druckfunktionen des
-   * Dokuments auf. Die Druckfunktion wird dabei automatisch aktiv, wenn das
-   * Dokument das nächste mal mit Datei->Drucken gedruckt werden soll. Ist die
-   * Druckfunktion bereits in der Liste der Druckfunktionen des Dokuments
-   * enthalten, so geschieht nichts.
-   * 
-   * Hinweis: Die Ausführung erfolgt asynchron, d.h. addPrintFunction() kehrt unter
-   * Umständen bereits zurück BEVOR die Methode ihre Wirkung entfaltet hat.
-   * 
+   * Nimmt die Druckfunktion functionName in die Liste der Druckfunktionen des Dokuments auf. Die
+   * Druckfunktion wird dabei automatisch aktiv, wenn das Dokument das nächste mal mit
+   * Datei-&gt;Drucken gedruckt werden soll. Ist die Druckfunktion bereits in der Liste der
+   * Druckfunktionen des Dokuments enthalten, so geschieht nichts.
+   *
+   * Hinweis: Die Ausführung erfolgt asynchron, d.h. addPrintFunction() kehrt unter Umständen
+   * bereits zurück BEVOR die Methode ihre Wirkung entfaltet hat.
+   *
    * @param functionName
    *          der Name einer Druckfunktion, die im Abschnitt "Druckfunktionen" der
    *          WollMux-Konfiguration definiert sein muss.
@@ -52,14 +51,14 @@ public class WollMuxDocument implements XWollMuxDocument
   }
 
   /**
-   * Löscht die Druckfunktion functionName aus der Liste der Druckfunktionen des
-   * Dokuments. Die Druckfunktion wird damit ab dem nächsten Aufruf von
-   * Datei->Drucken nicht mehr aufgerufen. Ist die Druckfunktion nicht in der Liste
-   * der Druckfunktionen des Dokuments enthalten, so geschieht nichts.
-   * 
-   * Hinweis: Die Ausführung erfolgt asynchron, d.h. removePrintFunction() kehrt
-   * unter Umständen bereits zurück BEVOR die Methode ihre Wirkung entfaltet hat.
-   * 
+   * Löscht die Druckfunktion functionName aus der Liste der Druckfunktionen des Dokuments. Die
+   * Druckfunktion wird damit ab dem nächsten Aufruf von Datei-&gt;Drucken nicht mehr aufgerufen.
+   * Ist die Druckfunktion nicht in der Liste der Druckfunktionen des Dokuments enthalten, so
+   * geschieht nichts.
+   *
+   * Hinweis: Die Ausführung erfolgt asynchron, d.h. removePrintFunction() kehrt unter Umständen
+   * bereits zurück BEVOR die Methode ihre Wirkung entfaltet hat.
+   *
    * @param functionName
    *          der Name einer Druckfunktion, die im Dokument gesetzt ist.
    */
@@ -74,10 +73,10 @@ public class WollMuxDocument implements XWollMuxDocument
    * nach sich zieht (PLAUSIs, AUTOFILLs, Ein-/Ausblendungen,...). Es ist nicht
    * garantiert, dass der Befehl ausgeführt wird, bevor updateFormGUI() aufgerufen
    * wurde. Eine Implementierung mit einer Queue ist möglich.
-   * 
+   *
    * Anmerkung: Eine Liste aller verfügbaren IDs kann über die Methode
    * XWollMuxDocument.getFormValues() gewonnen werden.
-   * 
+   *
    * @param id
    *          ID zu der der neue Formularwert gesetzt werden soll.
    * @param value
@@ -96,10 +95,10 @@ public class WollMuxDocument implements XWollMuxDocument
    * eingefügt werden soll auf Wert. Es ist nicht garantiert, dass der neue Wert im
    * Dokument sichtbar wird, bevor updateInsertFields() aufgerufen wurde. Eine
    * Implementierung mit einer Queue ist möglich.
-   * 
+   *
    * Anmerkung: Eine Liste aller verfügbaren DB_SPALTEn kann mit der Methode
    * XWollMux.getInsertValues() gewonnen werden.
-   * 
+   *
    * @param dbSpalte
    *          enthält den Namen der Absenderdatenspalte, deren Wert geändert werden
    *          soll.
@@ -143,19 +142,18 @@ public class WollMuxDocument implements XWollMuxDocument
   }
 
   /**
-   * Liefert die zum aktuellen Zeitpunkt gesetzten Formularwerte dieses
-   * WollMux-Dokuments in einem Array von PropertyValue-Objekten zurück. Dabei
-   * repräsentieren die Attribute {@link PropertyValue.Name} die verfügbaren IDs
-   * und die Attribute {@link PropertyValue.Value} die zu ID zugehörigen
-   * Formularwerte.
-   * 
-   * Jeder Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit allen
-   * Einträgen die zu dem Zeitpunkt gültig sind. Eine Änderung der Werte des
-   * Rückgabeobjekts hat daher keine Auswirkung auf den WollMux.
-   * 
-   * @return Array von PropertyValue-Objekten mit den aktuell gesetzten
-   *         Formularwerten dieses WollMux-Dokuments. Gibt es keine Formularwerte
-   *         im Dokument, so ist das Array leer (aber != null).
+   * Liefert die zum aktuellen Zeitpunkt gesetzten Formularwerte dieses WollMux-Dokuments in einem
+   * Array von PropertyValue-Objekten zurück. Dabei repräsentieren die Attribute
+   * {@link PropertyValue#Name} die verfügbaren IDs und die Attribute {@link PropertyValue#Value}
+   * die zu ID zugehörigen Formularwerte.
+   *
+   * Jeder Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit allen Einträgen die zu dem
+   * Zeitpunkt gültig sind. Eine Änderung der Werte des Rückgabeobjekts hat daher keine Auswirkung
+   * auf den WollMux.
+   *
+   * @return Array von PropertyValue-Objekten mit den aktuell gesetzten Formularwerten dieses
+   *         WollMux-Dokuments. Gibt es keine Formularwerte im Dokument, so ist das Array leer (aber
+   *         != null).
    */
   @Override
   public PropertyValue[] getFormValues()

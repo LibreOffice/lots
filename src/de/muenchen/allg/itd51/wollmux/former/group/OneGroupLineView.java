@@ -95,8 +95,6 @@ public class OneGroupLineView extends LineView
 
   /**
    * Erzeugt eine neue View für model.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public OneGroupLineView(GroupModel model, ViewChangeListener bigDaddy,
       FormularMax4kController formularMax4000)
@@ -123,8 +121,6 @@ public class OneGroupLineView extends LineView
   /**
    * Liefert eine Komponente, die die ID anzeigt und Änderungen an das Model
    * weitergibt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private JComponent makeIDView()
   {
@@ -182,8 +178,6 @@ public class OneGroupLineView extends LineView
 
   /**
    * Liefert das {@link GroupModel} das zu dieser View gehört.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public GroupModel getModel()
   {

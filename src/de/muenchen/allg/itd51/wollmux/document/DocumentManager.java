@@ -2,9 +2,9 @@
  * Dateiname: DocumentManager.java
  * Projekt  : WollMux
  * Funktion : Verwaltet Informationen zu allen offenen OOo-Dokumenten
- * 
+ *
  * Copyright (c) 2009-2019 Landeshauptstadt München
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
  * version 1.0 (or any later version).
@@ -99,15 +99,12 @@ public class DocumentManager
   /**
    * Fügt compo den gemanageten Objekten hinzu, wobei die für Textdokumente
    * relevanten Informationen hinterlegt werden.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
    */
   public synchronized void addTextDocument(XTextDocument compo)
   {
     info.put(new HashableComponent(compo), new TextDocumentInfo(compo));
   }
-  
+
   public Map<HashableComponent, Info> getTextDocumentList() {
     return info;
   }
@@ -116,9 +113,6 @@ public class DocumentManager
    * Fügt compo den gemanageten Objekten hinzu, ohne weitere Informationen zu
    * hinterlegen. compo ist also ein Objekt, an dem für den WollMux nur interessant
    * ist, dass es existiert.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
    */
   public synchronized void add(XComponent compo)
   {
@@ -132,8 +126,6 @@ public class DocumentManager
    * vorangehenden UNO-Cast auf XComponent).
    *
    * @return die entfernten Informationen oder null falls keine vorhanden.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public synchronized Info remove(Object compo)
   {
@@ -143,9 +135,6 @@ public class DocumentManager
   /**
    * Liefert die über dieses Objekt bekannten Informationen oder null, falls das
    * Objekt dem Manager nicht bekannt ist.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
    */
   public synchronized Info getInfo(XComponent compo)
   {
@@ -155,10 +144,6 @@ public class DocumentManager
   /**
    * Fügt infoCollector alle Dokumente hinzu für die das
    * OnWollMuxProcessingFinished-Event bereits verschickt wurde.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
-   *         TESTED
    */
   public synchronized void getProcessedDocuments(Collection<XComponent> infoCollector)
   {
@@ -180,9 +165,6 @@ public class DocumentManager
    * bereits verschickt wurde.
    *
    * @param compo
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   *
-   *         TESTED
    */
   public synchronized void setProcessingFinished(XComponent compo)
   {
@@ -270,8 +252,8 @@ public class DocumentManager
    * DocumentCommandInterpreter in der Methode processFormCommands() gestartet hat, falls das
    * Dokument ein Formulardokument ist.
    *
-   * @param formGUI
-   *          Die zu diesem Dokument zugehörige formGUI
+   * @param doc
+   * @param formModel
    */
   public synchronized void setFormModel(XTextDocument doc, FormController formModel)
   {
@@ -290,10 +272,10 @@ public class DocumentManager
   }
 
   /**
-   * Liefert die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
-   * FormularMax4000 zurück, oder null, falls kein FormularMax gestartet wurde.
+   * Liefert die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden FormularMax4000
+   * zurück, oder null, falls kein FormularMax gestartet wurde.
    *
-   * @return
+   * @return Den FormularMax4000 oder null.
    */
   public synchronized FormularMax4kController getCurrentFormularMax4000(XTextDocument doc)
   {
@@ -312,10 +294,10 @@ public class DocumentManager
   }
 
   /**
-   * Liefert die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
-   * MailMergeNew zurück, oder null, falls kein FormularMax gestartet wurde.
+   * Liefert die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden MailMergeNew zurück,
+   * oder null, falls kein FormularMax gestartet wurde.
    *
-   * @return
+   * @return Den MailMerge oder null.
    */
   public synchronized MailMergeNew getCurrentMailMergeNew(XTextDocument doc)
   {
@@ -352,8 +334,6 @@ public class DocumentManager
   /**
    * Liefert eine Referenz auf den von diesem WollMux verwendeten
    * {@link DocumentManager}.
-   *
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public static DocumentManager getDocumentManager()
   {
@@ -374,8 +354,6 @@ public class DocumentManager
     /**
      * Liefert true gdw für das Dokument bereits ein
      * OnWollMuxProcessingFinished-Event an die Listener verschickt wurde.
-     *
-     * @author Matthias Benkmann (D-III-ITD-D101)
      */
     public boolean isProcessingFinished()
     {
@@ -388,8 +366,6 @@ public class DocumentManager
      *
      * @throws UnsupportedOperationException
      *           falls das Dokument kein TextDocument ist.
-     *
-     * @author Matthias Benkmann (D-III-ITD-D101)
      */
     public TextDocumentController getTextDocumentController()
     {
@@ -399,8 +375,6 @@ public class DocumentManager
     /**
      * Liefert true gdw dieses Dokument ein TextDocumentModel zugeordnet haben kann
      * UND ein solches auch bereits angelegt wurde.
-     *
-     * @author Matthias Benkmann (D-III-ITD-D101)
      */
     public boolean hasTextDocumentModel()
     {
@@ -410,8 +384,6 @@ public class DocumentManager
     /**
      * Setzt das Flag, das mit {@link #isProcessingFinished()} abgefragt wird auf
      * true.
-     *
-     * @author Matthias Benkmann (D-III-ITD-D101)
      */
     private void setProcessingFinished()
     {
@@ -446,7 +418,7 @@ public class DocumentManager
             GlobalFunctions.getInstance().getGlobalFunctions(),
             GlobalFunctions.getInstance().getFunctionDialogs());
       }
-      
+
       return documentController;
     }
 
@@ -490,61 +462,58 @@ public class DocumentManager
 
   /**
    * Liefert abhängig von der Konfigurationseinstellung PERSISTENT_DATA_MODE
-   * (annotation|transition|rdfReadLegacy|rdf) den dazugehörigen
-   * PersistentDataContainer für das Dokument doc.
+   * (annotation|transition|rdfReadLegacy|rdf) den dazugehörigen PersistentDataContainer für das
+   * Dokument doc.
    *
-   * Die folgende Aufstellung zeigt das Verhalten der verschiedenen Einstellungen
-   * bezüglich der möglichen Kombinationen von Metadaten in den Ausgangsdokumenten
-   * und der Aktualisierung der Metadaten in den Ergebnisdokumenten. Ein "*"
-   * symbolisiert dabei, welcher Metadatencontainer jeweils aktuell ist bzw. bei
-   * Dokumentänderungen aktualisiert wird.
+   * Die folgende Aufstellung zeigt das Verhalten der verschiedenen Einstellungen bezüglich der
+   * möglichen Kombinationen von Metadaten in den Ausgangsdokumenten und der Aktualisierung der
+   * Metadaten in den Ergebnisdokumenten. Ein "*" symbolisiert dabei, welcher Metadatencontainer
+   * jeweils aktuell ist bzw. bei Dokumentänderungen aktualisiert wird.
    *
-   * Ausgangsdokument -> bearbeitet durch -> Ergebnisdokument
+   * Ausgangsdokument -&gt; bearbeitet durch -&gt; Ergebnisdokument
    *
-   * [N*] -> annotation-Mode (WollMux-Alt) -> [N*]
+   * [N*] -&gt; annotation-Mode (WollMux-Alt) -&gt; [N*]
    *
-   * [N*] -> transition-Mode -> [N*R*]
+   * [N*] -&gt; transition-Mode -&gt; [N*R*]
    *
-   * [N*] -> rdfReadLegacy-Mode -> [R*]
+   * [N*] -&gt; rdfReadLegacy-Mode -&gt; [R*]
    *
-   * [N*] -> rdf-Mode: NICHT UNTERSTÜTZT
+   * [N*] -&gt; rdf-Mode: NICHT UNTERSTÜTZT
    *
-   * [N*R*] -> annotation-Mode (WollMux-Alt) -> [N*R]
+   * [N*R*] -&gt; annotation-Mode (WollMux-Alt) -&gt; [N*R]
    *
-   * [N*R*] -> transition-Mode -> [N*R*]
+   * [N*R*] -&gt; transition-Mode -&gt; [N*R*]
    *
-   * [N*R*] -> rdfReadLegacy-Mode -> [R*]
+   * [N*R*] -&gt; rdfReadLegacy-Mode -&gt; [R*]
    *
-   * [N*R*] -> rdf-Mode -> [NR*]
+   * [N*R*] -&gt; rdf-Mode -&gt; [NR*]
    *
-   * [N*R] -> annotation-Mode (WollMux-Alt) -> [N*R]
+   * [N*R] -&gt; annotation-Mode (WollMux-Alt) -&gt; [N*R]
    *
-   * [N*R] -> transition-Mode -> [N*R*]
+   * [N*R] -&gt; transition-Mode -&gt; [N*R*]
    *
-   * [N*R] -> rdfReadLegacy-Mode -> [R*]
+   * [N*R] -&gt; rdfReadLegacy-Mode -&gt; [R*]
    *
-   * [N*R] -> rdf-Mode: NICHT UNTERSTÜTZT
+   * [N*R] -&gt; rdf-Mode: NICHT UNTERSTÜTZT
    *
-   * [NR*] -> annotation-Mode (WollMux-Alt) : NICHT UNTERSTÜTZT
+   * [NR*] -&gt; annotation-Mode (WollMux-Alt) : NICHT UNTERSTÜTZT
    *
-   * [NR*] -> transition-Mode: NICHT UNTERSTÜTZT
+   * [NR*] -&gt; transition-Mode: NICHT UNTERSTÜTZT
    *
-   * [NR*] -> rdfReadLegacy-Mode: NICHT UNTERSTÜTZT
+   * [NR*] -&gt; rdfReadLegacy-Mode: NICHT UNTERSTÜTZT
    *
-   * [NR*] -> rdf -> [NR*]
+   * [NR*] -&gt; rdf -&gt; [NR*]
    *
-   * [R*] -> annotation-Mode (WollMux-Alt): NICHT UNTERSTÜTZT
+   * [R*] -&gt; annotation-Mode (WollMux-Alt): NICHT UNTERSTÜTZT
    *
-   * [R*] -> transition-Mode -> [N*R*]
+   * [R*] -&gt; transition-Mode -&gt; [N*R*]
    *
-   * [R*] -> rdfReadLegacy-Mode -> [R*]
+   * [R*] -&gt; rdfReadLegacy-Mode -&gt; [R*]
    *
-   * [R*] -> rdf-Mode -> [R*]
+   * [R*] -&gt; rdf-Mode -&gt; [R*]
    *
-   * Agenda: [N]=Dokument mit Notizen; [R]=Dokument mit RDF-Metadaten; [NR]=Dokument
-   * mit Notizen und RDF-Metadaten; *=N/R enthält aktuellen Stand;
-   *
-   * @author Christoph Lutz (D-III-ITD-D101) TESTED
+   * Agenda: [N]=Dokument mit Notizen; [R]=Dokument mit RDF-Metadaten; [NR]=Dokument mit Notizen und
+   * RDF-Metadaten; *=N/R enthält aktuellen Stand;
    */
   public static PersistentDataContainer createPersistentDataContainer(
       XTextDocument doc)

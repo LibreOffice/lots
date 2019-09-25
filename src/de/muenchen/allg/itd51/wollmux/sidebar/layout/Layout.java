@@ -40,7 +40,7 @@ public interface Layout
   }
 
   /**
-   * {@link #addLayout(Layout, int) mit {@link ControlLayout}.
+   * {@link #addLayout(Layout, int)} mit {@link ControlLayout}.
    *
    * @see #addLayout(Layout, int)
    */
@@ -51,7 +51,7 @@ public interface Layout
 
   /**
    * Die Höhe des Layouts.
-   * 
+   *
    * @return Die Höhe.
    */
   int getHeight();

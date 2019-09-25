@@ -80,8 +80,6 @@ public class OneGroupFuncView extends FunctionSelectionAccessView
 
   /**
    * Liefert das Model zu dieser View.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public GroupModel getModel()
   {

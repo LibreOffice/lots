@@ -1,8 +1,8 @@
 /*
  * Dateiname: OneFormControlLineView.java
  * Projekt  : WollMux
- * Funktion : Eine einzeilige Sicht auf ein einzelnes Formularsteuerelement. 
- * 
+ * Funktion : Eine einzeilige Sicht auf ein einzelnes Formularsteuerelement.
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.control;
 
@@ -70,7 +70,7 @@ import de.muenchen.allg.itd51.wollmux.former.view.LineView;
 
 /**
  * Eine einzeilige Sicht auf ein einzelnes Formularsteuerelement.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class OneFormControlLineView extends LineView
@@ -172,11 +172,10 @@ public class OneFormControlLineView extends LineView
 
   /**
    * Erzeugt eine View für model.
-   * 
+   *
    * @param bigDaddy
    *          typischerweise ein Container, der die View enthält und daher über
    *          Änderungen auf dem Laufenden gehalten werden muss.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public OneFormControlLineView(FormControlModel model,
       OneFormControlLineView.ViewChangeListener bigDaddy,
@@ -226,8 +225,6 @@ public class OneFormControlLineView extends LineView
    * dieser View angezeigt werden. ACHTUNG! Das Objekt wird als Referenz gemerkt
    * (jedoch nie durch diese Klasse geändert). Wird null übergeben, so wird für
    * alles true angenommen.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setViewVisibilityDescriptor(ViewVisibilityDescriptor desc)
   {
@@ -283,8 +280,6 @@ public class OneFormControlLineView extends LineView
   /**
    * Liefert eine Komponente, die das LABEL des FormControlModels anzeigt und
    * Änderungen an das Model weitergibt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private JComponent makeLabelView()
   {
@@ -330,8 +325,6 @@ public class OneFormControlLineView extends LineView
   /**
    * Liefert eine Komponente, die das TIP des FormControlModels anzeigt und
    * Änderungen an das Model weitergibt.
-   * 
-   * @author Simona Loi, I23
    */
   private JComponent makeTooltipView()
   {
@@ -377,8 +370,6 @@ public class OneFormControlLineView extends LineView
   /**
    * Liefert eine Komponente, die das READONLY des FormControlModels anzeigt und
    * Änderungen an das Model weitergibt.
-   * 
-   * @author Simona Loi, I23
    */
   private JComponent makeReadOnlyView()
   {
@@ -404,8 +395,6 @@ public class OneFormControlLineView extends LineView
   /**
    * Liefert eine Komponente, die die ID des FormControlModels anzeigt und
    * Änderungen an das Model weitergibt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private JComponent makeIdView()
   {
@@ -457,12 +446,10 @@ public class OneFormControlLineView extends LineView
   /**
    * Liefert eine Komponente, die den TYPE des FormControlModels anzeigt und
    * Änderungen an das Model weitergibt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private JComboBox<Object> makeTypeView()
   {
-    typeView = new JComboBox<Object>();
+    typeView = new JComboBox<>();
     typeView.setToolTipText(L.m("Feldtyp"));
     typeView.setEditable(false);
     typeView.addItem(FormControlModel.COMBOBOX_TYPE);
@@ -496,8 +483,6 @@ public class OneFormControlLineView extends LineView
   /**
    * Liefert ein JPanel zurück mit zusätzlichen Bedienelementen für das
    * Bearbeiten der Werteliste eines FormControls mit TYPE "combobox".
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private JPanel makeComboBoxAdditionalView()
   {
@@ -505,7 +490,7 @@ public class OneFormControlLineView extends LineView
     comboBoxAdditionalView
 	.setLayout(new BoxLayout(comboBoxAdditionalView, BoxLayout.X_AXIS));
 
-    final JComboBox<Object> combo = new JComboBox<Object>();
+    final JComboBox<Object> combo = new JComboBox<>();
     combo.setToolTipText(L.m("Eingabeliste"));
     combo.setEditable(true);
     combo.setPrototypeDisplayValue("Sicherungsgeberin");
@@ -605,8 +590,6 @@ public class OneFormControlLineView extends LineView
   /**
    * Liefert ein JPanel mit zusätzlichen Bedienelementen Action-Liste und
    * FRAG_ID für TYPE "button".
-   * 
-   * @author Björn Ranft
    */
   private JPanel makeButtonAdditionalView()
   {
@@ -618,7 +601,7 @@ public class OneFormControlLineView extends LineView
     final JTextField urlTextField = new JTextField();
     final JTextField extTextField = new JTextField();
 
-    final JComboBox<String> actionComboBox = new JComboBox<String>();
+    final JComboBox<String> actionComboBox = new JComboBox<>();
     actionComboBox.addItem("openTemplate");
     actionComboBox.addItem("openExt");
 
@@ -633,8 +616,6 @@ public class OneFormControlLineView extends LineView
       @Override
       public void keyTyped(KeyEvent e)
       {
-	// TODO Auto-generated method stub
-
       }
 
       @Override
@@ -650,8 +631,6 @@ public class OneFormControlLineView extends LineView
       @Override
       public void keyPressed(KeyEvent e)
       {
-	// TODO Auto-generated method stub
-
       }
     });
 
@@ -661,8 +640,6 @@ public class OneFormControlLineView extends LineView
       @Override
       public void keyTyped(KeyEvent e)
       {
-	// TODO Auto-generated method stub
-
       }
 
       @Override
@@ -677,8 +654,6 @@ public class OneFormControlLineView extends LineView
       @Override
       public void keyPressed(KeyEvent e)
       {
-	// TODO Auto-generated method stub
-
       }
     });
 
@@ -688,8 +663,6 @@ public class OneFormControlLineView extends LineView
       @Override
       public void keyTyped(KeyEvent e)
       {
-	// TODO Auto-generated method stub
-
       }
 
       @Override
@@ -704,8 +677,6 @@ public class OneFormControlLineView extends LineView
       @Override
       public void keyPressed(KeyEvent e)
       {
-	// TODO Auto-generated method stub
-
       }
     });
 
@@ -813,8 +784,6 @@ public class OneFormControlLineView extends LineView
   /**
    * Liefert eine Komponente, die die ID des FormControlModels anzeigt und
    * Änderungen an das Model weitergibt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private JComponent makeTextAreaAdditionalView()
   {
@@ -888,8 +857,6 @@ public class OneFormControlLineView extends LineView
 
   /**
    * Setzt optische Aspekte wie Rand von compo abhängig von type.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setTypeSpecificTraits(JComponent compo, String type)
   {
@@ -920,10 +887,9 @@ public class OneFormControlLineView extends LineView
    * Wird aufgerufen, wenn das LABEL des durch diese View dargestellten
    * {@link FormControlModel}s DURCH EINE ANDERE URSACHE ALS DIESE VIEW geändert
    * wurde.
-   * 
+   *
    * @param newLabel
    *          das neue Label.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void labelChangedDueToExternalReasons(String newLabel)
   {
@@ -936,10 +902,9 @@ public class OneFormControlLineView extends LineView
    * Wird aufgerufen, wenn das TYPE des durch diese View dargestellten
    * {@link FormControlModel}s geändert wurde (egal ob durch diese View selbst
    * verursacht oder durch etwas anderes).
-   * 
+   *
    * @param newType
    *          der new TYPE-Wert.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void typeChanged(String newType)
   {
@@ -953,8 +918,6 @@ public class OneFormControlLineView extends LineView
 
   /**
    * Liefert das {@link FormControlModel} das zu dieser View gehört.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormControlModel getModel()
   {
@@ -963,7 +926,7 @@ public class OneFormControlLineView extends LineView
 
   /**
    * Interface für Klassen, die an Änderungen dieser View interessiert sind.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static interface ViewChangeListener
@@ -972,8 +935,6 @@ public class OneFormControlLineView extends LineView
     /**
      * Wird aufgerufen, wenn sich das Label des Tabs, das das Model von view ist
      * geändert hat.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void tabTitleChanged(OneFormControlLineView view);
   }
@@ -1010,7 +971,7 @@ public class OneFormControlLineView extends LineView
    * MousePressed-Events um in Broadcasts, die signalisieren, dass das
    * entsprechende Model selektiert wurde. Je nachdem ob CTRL gedrückt ist oder
    * nicht wird die Selektion erweitert oder ersetzt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class MyMouseListener implements MouseListener

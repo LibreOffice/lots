@@ -51,15 +51,11 @@ public class OnExecutePrintFunction extends BasicEvent
   }
 
   /**
-   * Es kann sein, dass zum Zeitpunkt des Drucken-Aufrufs eine Druckfunktion
-   * gesetzt hat, die in der aktuellen Situation nicht mehr sinnvoll ist; Dieser
-   * Umstand wird in checkPreconditons geprüft und die betroffene Druckfunktion
-   * ggf. aus der Liste der Druckfunktionen entfernt.
+   * Es kann sein, dass zum Zeitpunkt des Drucken-Aufrufs eine Druckfunktion gesetzt hat, die in der
+   * aktuellen Situation nicht mehr sinnvoll ist; Dieser Umstand wird in checkPreconditons geprüft
+   * und die betroffene Druckfunktion ggf. aus der Liste der Druckfunktionen entfernt.
    *
-   * @param printFunctions
-   *          Menge der aktuell gesetzten Druckfunktionen.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
+   * @param documentController
    */
   protected static void checkPrintPreconditions(
       TextDocumentController documentController)

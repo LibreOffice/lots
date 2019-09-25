@@ -83,16 +83,15 @@ public abstract class BasicEvent implements WollMuxEvent
   protected abstract void doit() throws WollMuxFehlerException;
 
   /**
-   * Diese Methode kann am Ende einer doit()-Methode aufgerufen werden und versucht
-   * die Absturzwahrscheinlichkeit von OOo/WollMux zu senken in dem es den
-   * GarbageCollector der JavaVM triggert freien Speicher freizugeben. Durch
-   * derartige Aufräumaktionen insbesondere nach der Bearbeitung von Events, die
-   * viel mit Dokumenten/Cursorn/Uno-Objekten interagieren, wird die Stabilität des
-   * WollMux spürbar gesteigert.
+   * Diese Methode kann am Ende einer doit()-Methode aufgerufen werden und versucht die
+   * Absturzwahrscheinlichkeit von OOo/WollMux zu senken in dem es den GarbageCollector der JavaVM
+   * triggert freien Speicher freizugeben. Durch derartige Aufräumaktionen insbesondere nach der
+   * Bearbeitung von Events, die viel mit Dokumenten/Cursorn/Uno-Objekten interagieren, wird die
+   * Stabilität des WollMux spürbar gesteigert.
    *
-   * In der Vergangenheit gab es z.B. sporadische, nicht immer reproduzierbare
-   * Abstürze von OOo, die vermutlich in einem fehlerhaften Speichermanagement in
-   * der schwer zu durchschauenden Kette JVM->UNO-Proxies->OOo begründet waren.
+   * In der Vergangenheit gab es z.B. sporadische, nicht immer reproduzierbare Abstürze von OOo, die
+   * vermutlich in einem fehlerhaften Speichermanagement in der schwer zu durchschauenden Kette
+   * JVM-&gt;UNO-Proxies-&gt;OOo begründet waren.
    */
   protected void stabilize()
   {

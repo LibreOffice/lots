@@ -208,24 +208,6 @@ public class WollMuxFiles
    * Erzeugt das .wollmux-Verzeichnis im Home-Verzeichnis des Benutzers (falls es
    * noch nicht existiert), sucht nach der wollmux.conf und parst sie. Initialisiert
    * auch den Logger.
-   * <p>
-   * Die wollmux.conf wird an folgenden Stellen in der angegebenen Reihenfolge
-   * gesucht:
-   *
-   * <ol>
-   * <li>unter dem Dateipfad (inkl. Dateiname!), der im Registrierungswert
-   * "ConfigPath" des Schlüssels HKCU\Software\WollMux\ festgelegt ist (nur Windows!)
-   * </li>
-   * <li>$HOME/.wollmux/wollmux.conf (wobei $HOME unter Windows das Profilverzeichnis
-   * bezeichnet)</li>
-   * <li>unter dem Dateipfad (inkl. Dateiname!), der im Registrierungswert
-   * "ConfigPath" des Schlüssels HKLM\Software\WollMux\ festgelegt ist (nur Windows!)
-   * </li>
-   * <li>unter dem Dateipfad, der in der Konstanten
-   * {@link #C_PROGRAMME_WOLLMUX_WOLLMUX_CONF} festgelegt ist (nur Windows!)</li>
-   * <li>unter dem Dateipfad, der in der Konstanten {@link #ETC_WOLLMUX_WOLLMUX_CONF}
-   * festgelegt ist (nur Linux!)</li>
-   * </ol>
    *
    * @return false für den den Fall no Config, true bei gefundener wollmux.conf
    */
@@ -618,12 +600,12 @@ public class WollMuxFiles
   }
 
   /**
-   * Gibt Auskunft darüber, sich der WollMux im debug-modus befindet; Der debug-modus
-   * wird automatisch aktiviert, wenn der LOGGING_MODE auf "debug" oder "all" gesetzt
-   * wurde. Im debug-mode werden z.B. die Bookmarks abgearbeiteter Dokumentkommandos
-   * nach der Ausführung nicht entfernt, damit sich Fehler leichter finden lassen.
+   * Gibt Auskunft darüber, sich der WollMux im debug-modus befindet; Der debug-modus wird
+   * automatisch aktiviert, wenn der LOGGING_MODE auf "debug" oder "all" gesetzt wurde. Im
+   * debug-mode werden z.B. die Bookmarks abgearbeiteter Dokumentkommandos nach der Ausführung nicht
+   * entfernt, damit sich Fehler leichter finden lassen.
    *
-   * @return
+   * @return true, wenn WollMux im debug-modus ist, sonst false.
    */
   public static boolean isDebugMode()
   {
@@ -959,13 +941,13 @@ public class WollMuxFiles
   }
 
   /**
-   * Gibt den Inhalt eines Knotens element der OOo-Konfiguration mit dem Knotennamen
-   * und allen enthaltenen Properties zurück, wobei die Inhalte pro Zeile um den
-   * String spaces eingerückt werden.
+   * Gibt den Inhalt eines Knotens element der OOo-Konfiguration mit dem Knotennamen und allen
+   * enthaltenen Properties zurück, wobei die Inhalte pro Zeile um den String spaces eingerückt
+   * werden.
    *
    * @param element
    * @param spaces
-   * @return
+   * @return String-Repräsentation des Knotens aus der OOo-Konfiguration.
    * @throws Exception
    */
   public static String dumpNode(Object element, String spaces)

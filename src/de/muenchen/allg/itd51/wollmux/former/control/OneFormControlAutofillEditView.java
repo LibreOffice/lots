@@ -2,7 +2,7 @@
  * Dateiname: OneFormControlAutofillEditView.java
  * Projekt  : WollMux
  * Funktion : Stellt das AUTOFILL-Attribut eines FormControlModels dar und erlaubt seine Bearbeitung.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.control;
 
@@ -38,7 +38,7 @@ import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 /**
  * Stellt das AUTOFILL-Attribut eines FormControlModels dar und erlaubt seine
  * Bearbeitung.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class OneFormControlAutofillEditView extends FunctionSelectionAccessView
@@ -47,7 +47,7 @@ public class OneFormControlAutofillEditView extends FunctionSelectionAccessView
    * Typischerweise ein Container, der die View enthält und daher über Änderungen auf
    * dem Laufenden gehalten werden muss.
    */
-  private ViewChangeListener bigDaddy;
+  private ViewChangeListener viewChangeListener;
 
   /**
    * Das Model zu dieser View.
@@ -58,25 +58,23 @@ public class OneFormControlAutofillEditView extends FunctionSelectionAccessView
 
   /**
    * Erzeugt eine neue View.
-   * 
+   *
    * @param model
    *          das Model dessen Daten angezeigt werden sollen.
    * @param funcLib
-   *          die Funktionsbibliothek deren Funktionen zur Verfügung gestellt werden
-   *          sollen.
-   * @param myViewChangeListener
-   *          typischerweise ein Container, der diese View enthält und über
-   *          Änderungen informiert werden soll.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   *          die Funktionsbibliothek deren Funktionen zur Verfügung gestellt werden sollen.
+   * @param viewChangeListener
+   *          typischerweise ein Container, der diese View enthält und über Änderungen informiert
+   *          werden soll.
    */
   public OneFormControlAutofillEditView(FormControlModel model,
-      FunctionLibrary funcLib, ViewChangeListener bigDaddy)
+      FunctionLibrary funcLib, ViewChangeListener viewChangeListener)
   {
     super(model.getAutofillAccess(), funcLib,
       model.getFormularMax4000().getIDManager(),
       FormularMax4kController.NAMESPACE_FORMCONTROLMODEL);
     this.model = model;
-    this.bigDaddy = bigDaddy;
+    this.viewChangeListener = viewChangeListener;
     listener = new MyModelChangeListener();
     model.addListener(listener);
   }
@@ -84,8 +82,6 @@ public class OneFormControlAutofillEditView extends FunctionSelectionAccessView
   /**
    * Gibt von dieser View belegte Ressourcen frei, damit diese View gc'ed werden
    * kann.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public void dispose()
   {
@@ -98,8 +94,8 @@ public class OneFormControlAutofillEditView extends FunctionSelectionAccessView
     @Override
     public void modelRemoved(FormControlModel model)
     {
-      if (bigDaddy != null)
-        bigDaddy.viewShouldBeRemoved(OneFormControlAutofillEditView.this);
+      if (viewChangeListener != null)
+        viewChangeListener.viewShouldBeRemoved(OneFormControlAutofillEditView.this);
     }
 
     @Override
@@ -110,8 +106,6 @@ public class OneFormControlAutofillEditView extends FunctionSelectionAccessView
 
   /**
    * Liefert das Model zu dieser View.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormControlModel getModel()
   {

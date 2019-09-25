@@ -2,7 +2,7 @@
  * Dateiname: ViewVisibilityDescriptor.java
  * Projekt  : WollMux
  * Funktion : Speichert Informationen dazu, welche Teile von Views sichtbar sein sollen.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,13 +26,13 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former;
 
 /**
  * Speichert Informationen dazu, welche Teile von Views sichtbar sein sollen.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class ViewVisibilityDescriptor
@@ -48,7 +48,7 @@ public class ViewVisibilityDescriptor
    * {@link de.muenchen.allg.itd51.wollmux.former.control.OneFormControlLineView}.
    */
   public boolean formControlLineViewLabel = true;
-  
+
   /**
    * Anzeigen des TYPEs in der
    * {@link de.muenchen.allg.itd51.wollmux.former.control.OneFormControlLineView}.
@@ -61,7 +61,7 @@ public class ViewVisibilityDescriptor
    * die von der Art des Controls abhängen.
    */
   public boolean formControlLineViewAdditional = true;
-  
+
   /**
    * Anzeigen des TOOLTIPs in der
    * {@link de.muenchen.allg.itd51.wollmux.former.control.OneFormControlLineView}.
@@ -76,20 +76,19 @@ public class ViewVisibilityDescriptor
 
 
   public ViewVisibilityDescriptor()
-  {};
+  {
+  }
 
   /**
    * Copy Constructor.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ViewVisibilityDescriptor(ViewVisibilityDescriptor orig)
   {
     this.formControlLineViewId = orig.formControlLineViewId;
-    this.formControlLineViewLabel = orig.formControlLineViewLabel;    
+    this.formControlLineViewLabel = orig.formControlLineViewLabel;
     this.formControlLineViewType = orig.formControlLineViewType;
     this.formControlLineViewAdditional = orig.formControlLineViewAdditional;
     this.formControlLineViewTooltip = orig.formControlLineViewTooltip;
     this.formControlLineViewReadonly = orig.formControlLineViewReadonly;
-  };
+  }
 }

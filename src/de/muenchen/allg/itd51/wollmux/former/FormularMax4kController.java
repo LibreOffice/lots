@@ -85,7 +85,7 @@ public class FormularMax4kController
 
   /**
    * Verwaltet die IDs von Objekten.
-   * 
+   *
    * @see #NAMESPACE_FORMCONTROLMODEL
    */
   private IDManager idManager;
@@ -136,8 +136,7 @@ public class FormularMax4kController
    * dürfen nur permanente Objekte sein, d.h. Objekte deren Lebensdauer nicht vor
    * Beenden des FM4000 endet.
    */
-  private List<BroadcastListener> broadcastListeners =
-    new ArrayList<BroadcastListener>();
+  private List<BroadcastListener> broadcastListeners = new ArrayList<>();
 
   /**
    * Wird bei jeder Änderung von Formularaspekten gestartet, um nach einer
@@ -192,7 +191,7 @@ public class FormularMax4kController
    * Wert von PLAUSI_MARKER_COLOR oder null wenn nicht gesetzt.
    */
   private String plausiMarkerColor = null;
-  
+
   /**
    * Wird auf {@link #selectionSupplier} registriert, um Änderungen der
    * Cursorselektion zu beobachten.
@@ -220,7 +219,7 @@ public class FormularMax4kController
    * Zahl von Formularsteuerelementen in einem Formular, ab der es in Zusammenhang
    * mit einer maximaler Heap Size der JVM, die kleiner ist als
    * {@link #LOWEST_ALLOWED_HEAP_SIZE}, zu Speicherplatzproblemen kommen kann.
-   * 
+   *
    * Der Wert 5000 wurde vollkommen willkürlich gewählt und ist wahrscheinlich zu
    * hoch. Wir warten auf den ersten Bugreport mit einem {@link OutOfMemoryError} und
    * legen den Wert dann anhand des realen Falles neu fest.
@@ -261,17 +260,17 @@ public class FormularMax4kController
     writeChangesTimer.setRepeats(false);
 
     initModelsAndViews(documentController.getFormDescription());
-    
+
     if (!testMemoryRequirements())
     {
       return;
     }
-    
+
     selectionSupplier = getSelectionSupplier();
     if(selectionSupplier != null)
     {
       myXSelectionChangedListener = new MyXSelectionChangedListener();
-      selectionSupplier.addSelectionChangeListener(myXSelectionChangedListener); 
+      selectionSupplier.addSelectionChangeListener(myXSelectionChangedListener);
     }
 }
 
@@ -315,7 +314,6 @@ public class FormularMax4kController
    * Liefert den {@link IDManager}, der für Objekte im Formular verwendet wird.
    *
    * @see #NAMESPACE_FORMCONTROLMODEL
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public IDManager getIDManager()
   {
@@ -358,8 +356,6 @@ public class FormularMax4kController
 
   /**
    * Wird von {@link FormControlModel#setItems(String[])} auf model aufgerufen.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void comboBoxItemsHaveChanged(FormControlModel model)
   {
@@ -369,8 +365,6 @@ public class FormularMax4kController
   /**
    * Wird bei jeder Änderung einer internen Datenstruktur aufgerufen, die ein Updaten
    * des Dokuments erforderlich macht um persistent zu werden.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void documentNeedsUpdating()
   {
@@ -379,8 +373,6 @@ public class FormularMax4kController
 
   /**
    * listener wird über globale {@link Broadcast}s informiert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void addBroadcastListener(BroadcastListener listener)
   {
@@ -393,8 +385,6 @@ public class FormularMax4kController
   /**
    * Sendet die Nachricht b an alle Listener, die auf dem globalen Broadcast-Kanal
    * registriert sind.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void broadcast(Broadcast b)
   {
@@ -437,8 +427,6 @@ public class FormularMax4kController
 
   /**
    * Entfernt die WollMux-Formularmerkmale aus dem Dokument.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void deForm()
   {
@@ -448,8 +436,6 @@ public class FormularMax4kController
 
   /**
    * Entfernt alle Bookmarks, die keine WollMux-Bookmarks sind aus dem Dokument doc.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void removeNonWMBookmarks()
   {
@@ -460,14 +446,12 @@ public class FormularMax4kController
    * Öffnet ein Fenster zum Editieren der Formularbeschreibung. Beim Schliessend des
    * Fensters wird die geänderte Formularbeschreibung neu geparst, falls sie
    * syntaktisch korrekt ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void editFormDescriptor()
   {
     view.setVisible(false);
     ConfigEditor editor = new ConfigEditor("Config Editor", this);
-    
+
     editor.setVisible(true);
     editor.setText(updateDocument(documentController).stringRepresentation());
     editor.addWindowListener(new WindowAdapter()
@@ -497,11 +481,9 @@ public class FormularMax4kController
       functionTester.toFront();
     }
   }
-  
+
   /**
    * Bringt den FormularMax 4000 in den Vordergrund.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void toFront()
   {
@@ -533,8 +515,6 @@ public class FormularMax4kController
    * falls tabConf != null, ansonsten aus einem ConfigThingy was an der URL
    * tabConfUrl gespeichert ist (hier sind TITLE, Eingabefelder, etc, auf oberster
    * Ebene).
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void insertStandardTab(ConfigThingy tabConf, URL tabConfUrl)
   {
@@ -558,8 +538,6 @@ public class FormularMax4kController
    * Button-Spezifikationen) oder (falls conf==null) aus dem ConfigThingy das an
    * confUrl gespeichert ist (kein umschließender Abschnitt, sondern direkt die
    * Button-Beschreibungen) das Ende der Liste.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void insertStandardButtons(ConfigThingy conf, URL confUrl, int index)
   {
@@ -587,12 +565,10 @@ public class FormularMax4kController
    * Nimmt eine Menge von XTextRange Objekten, sucht alle umschlossenen Bookmarks und
    * broadcastet eine entsprechende Nachricht, damit sich die entsprechenden Objekte
    * selektieren.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void selectionChanged(XIndexAccess access)
   {
-    Set<String> names = new HashSet<String>();
+    Set<String> names = new HashSet<>();
 
     int count = access.getCount();
     for (int i = 0; i < count; ++i)
@@ -621,38 +597,32 @@ public class FormularMax4kController
       insertionModelList.mergeCheckboxesIntoCombobox(desc);
     }
   }
-  
+
   /**
    * Ruft die Datei/Speichern Funktion von Office.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void save()
   {
     flushChanges();
     UNO.dispatch(documentController.getModel().doc, ".uno:Save");
   }
-  
+
   /**
    * Ruft die Datei/Speichern unter... Funktion von Office.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void saveAs()
   {
     flushChanges();
     UNO.dispatch(documentController.getModel().doc, ".uno:SaveAs");
   }
-  
+
   public void sendAsEmail() {
 	  flushChanges();
 	  UNO.dispatch(documentController.getModel().doc, ".uno:SendMail");
   }
-  
+
   /**
    * Implementiert die gleichnamige ACTION.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void abort()
   {
@@ -662,9 +632,9 @@ public class FormularMax4kController
 
     if (abortListener != null)
       abortListener.actionPerformed(new ActionEvent(this, 0, ""));
-    
+
     view.close();
-    
+
     try
     {
       selectionSupplier.removeSelectionChangeListener(myXSelectionChangedListener);
@@ -673,12 +643,10 @@ public class FormularMax4kController
     {}
   }
 
-  
+
   /**
    * Ruft {@link #updateDocument(TextDocumentModel)} auf, falls noch Änderungen
    * anstehen.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void flushChanges()
   {
@@ -702,14 +670,11 @@ public class FormularMax4kController
    * Bookmarks etc.
    *
    * @return die aktualisierte Formularbeschreibung
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private ConfigThingy updateDocument(TextDocumentController documentController)
   {
     LOGGER.debug(L.m("Übertrage Formularbeschreibung ins Dokument"));
-    Map<String, ConfigThingy> mapFunctionNameToConfigThingy =
-      new HashMap<String, ConfigThingy>();
+    Map<String, ConfigThingy> mapFunctionNameToConfigThingy = new HashMap<>();
     insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
     sectionModelList.updateDocument();
     ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
@@ -721,12 +686,11 @@ public class FormularMax4kController
    * Liefert ein ConfigThingy zurück, das den aktuellen Zustand der
    * Formularbeschreibung repräsentiert. Zum Exportieren der Formularbeschreibung
    * sollte {@link #updateDocument(XTextDocument)} verwendet werden.
-   * 
+   *
    * @param mapFunctionNameToConfigThingy
    *          bildet einen Funktionsnamen auf ein ConfigThingy ab, dessen Wurzel der
    *          Funktionsname ist und dessen Inhalt eine Funktionsdefinition ist. Diese
    *          Funktionen ergeben den Funktionen-Abschnitt.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private ConfigThingy buildFormDescriptor(
       Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
@@ -759,11 +723,9 @@ public class FormularMax4kController
   }
 
   /**
-   * Wertet formDescription sowie die Bookmarks von {@link #doc} aus und
-   * initialisiert alle internen Strukturen entsprechend. Dies aktualisiert auch die
-   * entsprechenden Views.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   * Wertet formDescription sowie die Bookmarks von {@link TextDocumentModel#doc} aus und
+   * initialisiert alle internen Strukturen entsprechend. Dies aktualisiert auch die entsprechenden
+   * Views.
    */
   public void initModelsAndViews(ConfigThingy formDescription)
   {
@@ -893,11 +855,10 @@ public class FormularMax4kController
   /**
    * Extrahiert aus conf die globalen Eingenschaften des Formulars wie z,B, den
    * Formulartitel oder die Funktionen des Funktionen-Abschnitts.
-   * 
+   *
    * @param conf
    *          der WM-Knoten der über einer beliebigen Anzahl von Formular-Knoten
    *          sitzt.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void parseGlobalFormInfo(ConfigThingy conf)
   {
@@ -957,13 +918,12 @@ public class FormularMax4kController
   /**
    * Parst das Tab conf und fügt entsprechende FormControlModels der
    * {@link #formControlModelList} hinzu.
-   * 
+   *
    * @param conf
    *          der Knoten direkt über "Eingabefelder" und "Buttons".
    * @param idx
    *          falls >= 0 werden die Steuerelemente am entsprechenden Index der Liste
    *          in die Formularbeschreibung eingefügt, ansonsten ans Ende angehängt.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void parseTab(ConfigThingy conf, int index)
   {
@@ -1022,7 +982,7 @@ public class FormularMax4kController
   /**
    * Parst die Kinder der Kinder von grandma als Steuerelemente und fügt der
    * {@link #formControlModelList} entsprechende FormControlModels hinzu.
-   * 
+   *
    * @param idx
    *          falls >= 0 werden die Steuerelemente am entsprechenden Index der Liste
    *          in die Formularbeschreibung eingefügt, ansonsten ans Ende angehängt.
@@ -1030,7 +990,6 @@ public class FormularMax4kController
    *          falls true wird das letzte Steuerelement entfernt, wenn es ein glue
    *          ist.
    * @return die Anzahl der erzeugten Steuerelemente.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private int parseGrandchildren(ConfigThingy grandma, int index,
       boolean killLastGlue)
@@ -1070,8 +1029,6 @@ public class FormularMax4kController
   /**
    * Scannt das Dokument doc durch und erzeugt {@link FormControlModel}s für alle
    * Formularfelder, die noch kein umschließendes WollMux-Bookmark haben.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void scan()
   {
@@ -1105,17 +1062,14 @@ public class FormularMax4kController
    * Elemente als Paragraphen bzw TextTables interpretiert, deren Inhalt enumeriert
    * wird, um daraus alle enthaltenen Bookmarks UND InputUser Felder zu bestimmen und
    * ihre Namen zu names hinzuzufügen.
-   * 
+   *
    * @param doCompare
    *          if true, then text portions will be ignored if they lie outside of
    *          range (as tested with compare). Text portions inside of tables are
    *          always checked, regardless of doCompare.
-   * 
+   *
    * @throws NoSuchElementException
    * @throws WrappedTargetException
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   *         TESTED
    */
   private void handleParagraphEnumeration(Set<String> names,
       XEnumerationAccess enuAccess, XTextRangeCompare compare, XTextRange range,
@@ -1147,13 +1101,9 @@ public class FormularMax4kController
    * Enumeriert über die Zellen von table und ruft für jede
    * {@link #handleParagraph(Set, XEnumerationAccess, XTextRangeCompare, XTextRange, boolean)}
    * auf, wobei für doCompare immer true übergeben wird.
-   * 
+   *
    * @throws NoSuchElementException
    * @throws WrappedTargetException
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   *         TESTED
    */
   private void handleTextTable(Set<String> names, XTextTable table,
       XTextRangeCompare compare, XTextRange range) throws NoSuchElementException,
@@ -1171,17 +1121,14 @@ public class FormularMax4kController
   /**
    * Enumeriert über die TextPortions des Paragraphen para und sammelt alle Bookmarks
    * und InputUser-Felder darin auf und fügt ihre Namen zu names hinzu.
-   * 
+   *
    * @param doCompare
    *          if true, then text portions will be ignored if they lie outside of
    *          range (as tested with compare). Text portions inside of tables are
    *          always checked, regardless of doCompare.
-   * 
+   *
    * @throws NoSuchElementException
    * @throws WrappedTargetException
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   *         TESTED
    */
   private void handleParagraph(Set<String> names, XEnumerationAccess para,
       XTextRangeCompare compare, XTextRange range, boolean doCompare)
@@ -1233,9 +1180,6 @@ public class FormularMax4kController
   /**
    * Returns true iff (doCompare == false OR range2 is null or not an XTextRange OR
    * range2 lies inside of range (tested with compare)).
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
    */
   private boolean isInvalidRange(XTextRangeCompare compare, XTextRange range,
       Object range2, boolean doCompare)
@@ -1261,7 +1205,7 @@ public class FormularMax4kController
     }
     return false;
   }
-  
+
   private boolean testMemoryRequirements()
   {
     // Zuerst überprüfen wir, ob das Formular eine kritische Anzahl an FormControls
@@ -1288,7 +1232,7 @@ public class FormularMax4kController
       DocumentManager.getDocumentManager().setCurrentFormularMax4000(documentController.getModel().doc, null);
       return false;
     }
-    
+
     return true;
   }
 

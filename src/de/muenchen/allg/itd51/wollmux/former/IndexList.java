@@ -2,7 +2,7 @@
  * Dateiname: IndexList.java
  * Projekt  : WollMux
  * Funktion : Verwaltet eine Liste von Indices.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former;
 
@@ -39,14 +39,11 @@ public class IndexList
   /**
    * Die (immer aufsteigend sortierte) Liste der Indizes.
    */
-  private Vector<Integer> indices = new Vector<Integer>();
+  private Vector<Integer> indices = new Vector<>();
 
   /**
-   * Addiert auf alle Indizes in der {@link #indices} Liste größer gleich start den
-   * offset. Indizes die dabei < 0 oder > maxindex werden werden aus der Liste
-   * gelöscht.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   * Addiert auf alle Indizes in der {@link #indices} Liste größer gleich start den offset. Indizes
+   * die dabei &lt; 0 oder &gt; maxindex werden werden aus der Liste gelöscht.
    */
   public void fixup(int start, int offset, int maxindex)
   {
@@ -68,8 +65,6 @@ public class IndexList
 
   /**
    * Ersetzt in {@link #indices} index1 durch index2 und index2 durch index1.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void swap(int index1, int index2)
   {
@@ -88,8 +83,6 @@ public class IndexList
 
   /**
    * Liefert einen Iterator über die Integers in dieser Liste.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ListIterator<Integer> iterator()
   {
@@ -99,8 +92,6 @@ public class IndexList
   /**
    * Liefert einen Listiterator, der hinter dem letzten Element der Liste (von
    * Integers) startet.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ListIterator<Integer> reverseIterator()
   {
@@ -109,8 +100,6 @@ public class IndexList
 
   /**
    * Entfernt den Index i aus der {@link #indices} Liste falls er dort enthalten ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void remove(int i)
   {
@@ -135,13 +124,15 @@ public class IndexList
 
   public int firstElement()
   {
-    if (indices.size() == 0) return -1;
+    if (indices.isEmpty())
+      return -1;
     return indices.firstElement().intValue();
   }
 
   public int lastElement()
   {
-    if (indices.size() == 0) return -1;
+    if (indices.isEmpty())
+      return -1;
     return indices.lastElement().intValue();
   }
 

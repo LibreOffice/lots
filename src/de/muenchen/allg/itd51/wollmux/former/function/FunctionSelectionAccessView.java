@@ -179,7 +179,6 @@ public class FunctionSelectionAccessView implements View
    *          auswählbar.
    * @param namespace
    *          der Namensraum aus dem die IDs von idManager genommen werden sollen.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public FunctionSelectionAccessView(FunctionSelectionAccess funcSel,
       FunctionLibrary funcLib, IDManager idManager, Object namespace)

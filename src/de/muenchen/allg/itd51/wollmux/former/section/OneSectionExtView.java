@@ -71,7 +71,6 @@ public class OneSectionExtView implements View
    * @param myViewChangeListener
    *          typischerweise ein Container, der diese View enthält und über
    *          Änderungen informiert werden soll.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public OneSectionExtView(SectionModel model, GroupModelList groupModelList,
       ViewChangeListener myViewChangeListener)
@@ -94,8 +93,6 @@ public class OneSectionExtView implements View
 
   /**
    * Liefert das Model zu dieser View.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public SectionModel getModel()
   {

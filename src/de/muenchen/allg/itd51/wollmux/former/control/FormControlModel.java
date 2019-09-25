@@ -2,7 +2,7 @@
  * Dateiname: FormControlModel.java
  * Projekt  : WollMux
  * Funktion : Repräsentiert ein Formularsteuerelement.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.control;
 
@@ -57,7 +57,7 @@ import de.muenchen.allg.itd51.wollmux.former.group.GroupsProvider;
 
 /**
  * Repräsentiert ein Formularsteuerelement.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class FormControlModel
@@ -84,7 +84,7 @@ public class FormControlModel
   public static final String CHECKBOX_TYPE = "checkbox";
 
   public static final String BUTTON_TYPE = "button";
-  
+
   public static final String FRAG_ID_TYPE = "frag_id";
 
   /**
@@ -132,10 +132,10 @@ public class FormControlModel
 
   /** EXT. */
   private String ext = "";
-  
+
   /** URL. */
   private String url = "";
-  
+
   /** FRAG_ID */
   private String frag_id = "";
 
@@ -146,7 +146,7 @@ public class FormControlModel
   private char hotkey = 0;
 
   /** VALUES. */
-  private List<String> items = new Vector<String>(0);
+  private List<String> items = new Vector<>(0);
 
   /** EDIT. */
   private boolean editable = false;
@@ -179,7 +179,7 @@ public class FormControlModel
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert
    * werden wollen.
    */
-  private List<ModelChangeListener> listeners = new Vector<ModelChangeListener>(1);
+  private List<ModelChangeListener> listeners = new Vector<>(1);
 
   /**
    * Der FormularMax4000 zu dem dieses Model gehört. Dieser wird über Änderungen des
@@ -193,13 +193,12 @@ public class FormControlModel
    * sicherzustellen, dass keine doppelten IDs vorkommen. Im Falle einer doppelten ID
    * wird automatisch durch ein Suffix disambiguiert. Nicht-existierende bzw. leere
    * IDs sind allerdings okay.
-   * 
+   *
    * @param conf
    *          direkter Vorfahre von "TYPE", "LABEL", usw.
    * @param funcSelProv
    *          der {@link FunctionSelectionProvider}, der zu PLAUSI und AUTOFILL
    *          passende {@link FunctionSelection}s liefern kann.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormControlModel(ConfigThingy conf, FunctionSelectionProvider funcSelProv,
       FormularMax4kController formularMax4000)
@@ -284,12 +283,10 @@ public class FormControlModel
 
   /**
    * Liefert eine Liste, die die String-Werte aller Kinder von conf enthält.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private List<String> parseValues(ConfigThingy conf)
   {
-    Vector<String> list = new Vector<String>(conf.count());
+    Vector<String> list = new Vector<>(conf.count());
     Iterator<ConfigThingy> iter = conf.iterator();
     while (iter.hasNext())
     {
@@ -302,12 +299,10 @@ public class FormControlModel
    * Liefert eine Menge, die {@link IDManager.ID} Objekte im Namensraum
    * {@link FormularMax4000#NAMESPACE_GROUPS} für die String-Werte aller Kinder von
    * conf enthält.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void parseGroups(ConfigThingy conf)
   {
-    HashSet<IDManager.ID> set = new HashSet<IDManager.ID>(conf.count());
+    HashSet<IDManager.ID> set = new HashSet<>(conf.count());
     Iterator<ConfigThingy> iter = conf.iterator();
     while (iter.hasNext())
     {
@@ -324,8 +319,6 @@ public class FormControlModel
    * dass keine doppelten IDs vorkommen. Im Falle einer doppelten ID wird automatisch
    * durch ein Suffix disambiguiert. Nicht-existierende bzw. leere IDs sind
    * allerdings okay.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private FormControlModel(String label, String type, String id,
       FormularMax4kController formularMax4000)
@@ -340,8 +333,6 @@ public class FormControlModel
   /**
    * Liefert ein FormControlModel, das eine Checkbox darstellt mit gegebenem LABEL
    * label und ID id.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static FormControlModel createCheckbox(String label, String id,
       FormularMax4kController formularMax4000)
@@ -352,8 +343,6 @@ public class FormControlModel
   /**
    * Liefert ein FormControlModel, das ein Textfeld darstellt mit gegebenem LABEL
    * label und ID id.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static FormControlModel createTextfield(String label, String id,
       FormularMax4kController formularMax4000)
@@ -366,37 +355,29 @@ public class FormControlModel
 
   /**
    * Liefert ein FormControlModel, das ein Label label darstellt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static FormControlModel createLabel(String label, String id,
       FormularMax4kController formularMax4000)
   {
-    FormControlModel model =
-      new FormControlModel(label, LABEL_TYPE, "ID", formularMax4000);
-    return model;
+    return new FormControlModel(label, LABEL_TYPE, "ID", formularMax4000);
   }
-  
+
   /**
    * Liefert ein FormControlModel, das eine Combobox darstellt mit gegebenem LABEL
    * label und ID id.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static FormControlModel createComboBox(String label, String id,
       String[] items, FormularMax4kController formularMax4000)
   {
     FormControlModel model =
       new FormControlModel(label, COMBOBOX_TYPE, id, formularMax4000);
-    model.items = new Vector<String>(Arrays.asList(items));
+    model.items = new Vector<>(Arrays.asList(items));
     return model;
   }
 
   /**
    * Liefert ein FormControlModel, das den Beginn eines neuen Tabs darstellt mit
    * gegebenem LABEL label und ID id.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static FormControlModel createTab(String label, String id,
       FormularMax4kController formularMax4000)
@@ -409,20 +390,12 @@ public class FormControlModel
 
   /**
    * Liefert den FormularMax4000 zu dem dieses Model gehört.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormularMax4kController getFormularMax4000()
   {
     return formularMax4000;
   }
 
-  /**
-   * Liefert die ID dieses FormControlModels oder null, falls keine gesetzt.
-   * 
-   * @return
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
   public IDManager.ID getId()
   {
     return id;
@@ -432,8 +405,6 @@ public class FormControlModel
    * Liefert den TYPE dieses FormControlModels, wobei immer eine der
    * {@link #COMBOBOX_TYPE *_TYPE Konstanten} geliefert wird, so dass == verglichen
    * werden kann.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String getType()
   {
@@ -442,8 +413,6 @@ public class FormControlModel
 
   /**
    * Liefert true gdw dieses FormControlModel ein Tab darstellt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isTab()
   {
@@ -452,18 +421,14 @@ public class FormControlModel
 
   /**
    * Liefert true gdw dieses FormControlModel eine ComboBox darstellt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isCombo()
   {
     return type == COMBOBOX_TYPE;
   }
-  
+
   /**
    * Liefert true gdw dieses FormControlModel einen Button darstellt.
-   * 
-   * @author Björn Ranft
    */
   public boolean isButton() {
 	  return type == BUTTON_TYPE;
@@ -471,8 +436,6 @@ public class FormControlModel
 
   /**
    * Liefert true gdw dieses FormControlModel eine TextArea darstellt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isTextArea()
   {
@@ -481,8 +444,6 @@ public class FormControlModel
 
   /**
    * Liefert true gdw dieses FormControlModel einen Glue darstellt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isGlue()
   {
@@ -491,8 +452,6 @@ public class FormControlModel
 
   /**
    * Liefert das LABEL dieses FormControlModels.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String getLabel()
   {
@@ -502,17 +461,14 @@ public class FormControlModel
   /**
    * Liefert die ACTION dieses FormControlModels. Falls keine ACTION gesetzt ist wird
    * die Konstante {@link #NO_ACTION} geliefert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String getAction()
   {
     return action;
   }
-  
+
   /**
    * Liefert die FRAG_ID dieses FormControlModels.
-   * @author Björn Ranft
    */
   public String getFragID() {
 	  return this.frag_id;
@@ -520,8 +476,6 @@ public class FormControlModel
 
   /**
    * Liefert den DIALOG dieses FormControlModels.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String getDialog()
   {
@@ -530,8 +484,6 @@ public class FormControlModel
 
   /**
    * Liefert den EXT dieses FormControlModels.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String getExt()
   {
@@ -540,17 +492,13 @@ public class FormControlModel
 
   /**
    * Liefert URL dieses FormControlModels für openExt.
-   * 
-   * @author Björn Ranft
    */
   public String getUrl() {
 	  return url;
   }
-  
+
   /**
    * Liefert den TIP dieses FormControlModels.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String getTooltip()
   {
@@ -559,8 +507,6 @@ public class FormControlModel
 
   /**
    * Liefert den HOTKEY dieses FormControlModels.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public char getHotkey()
   {
@@ -569,8 +515,6 @@ public class FormControlModel
 
   /**
    * Liefert das READONLY-Attribut dieses FormControlModels.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean getReadonly()
   {
@@ -579,8 +523,6 @@ public class FormControlModel
 
   /**
    * Liefert das WRAP-Attribut dieses FormControlModels.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean getWrap()
   {
@@ -589,8 +531,6 @@ public class FormControlModel
 
   /**
    * Liefert das EDIT-Attribut dieses FormControlModels.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean getEditable()
   {
@@ -599,8 +539,6 @@ public class FormControlModel
 
   /**
    * Liefert das LINES-Attribut dieses FormControlModels.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public int getLines()
   {
@@ -609,8 +547,6 @@ public class FormControlModel
 
   /**
    * Liefert das MINSIZE-Attribut dieses FormControlModels.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public int getMinsize()
   {
@@ -619,8 +555,6 @@ public class FormControlModel
 
   /**
    * Liefert das MAXSIZE-Attribut dieses FormControlModels.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public int getMaxsize()
   {
@@ -629,8 +563,6 @@ public class FormControlModel
 
   /**
    * Liefert die Liste der VALUES-Werte dieses FormControlModels.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public List<String> getItems()
   {
@@ -639,8 +571,6 @@ public class FormControlModel
 
   /**
    * Liefert ein Interface zum Zugriff auf das AUTOFILL-Attribut dieses Objekts.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public FunctionSelectionAccess getAutofillAccess()
   {
@@ -649,8 +579,6 @@ public class FormControlModel
 
   /**
    * Liefert ein Interface zum Zugriff auf das PLAUSI-Attribut dieses Objekts.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public FunctionSelectionAccess getPlausiAccess()
   {
@@ -658,12 +586,11 @@ public class FormControlModel
   }
 
   /**
-   * Ersetzt den aktuellen AUTOFILL durch conf. ACHTUNG! Es wird keine Kopie von conf
-   * gemacht, sondern direkt eine Referenz auf conf integriert.
-   * 
-   * @param conf
+   * Ersetzt den aktuellen AUTOFILL durch conf. ACHTUNG! Es wird keine Kopie von conf gemacht,
+   * sondern direkt eine Referenz auf conf integriert.
+   *
+   * @param funcSel
    *          der "AUTOFILL"-Knoten.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setAutofill(FunctionSelection funcSel)
   {
@@ -673,8 +600,6 @@ public class FormControlModel
 
   /**
    * Liefert true gdw ein AUTOFILL gesetzt ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean hasAutofill()
   {
@@ -683,8 +608,6 @@ public class FormControlModel
 
   /**
    * Liefert true gdw eine PLAUSI gesetzt ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean hasPlausi()
   {
@@ -693,8 +616,6 @@ public class FormControlModel
 
   /**
    * Liefert true gdw, die GROUPS-Angabe nicht leer ist.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public boolean hasGroups()
   {
@@ -703,8 +624,6 @@ public class FormControlModel
 
   /**
    * Liefert den GroupsProvider, der die GROUPS dieses Models managet.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public GroupsProvider getGroupsProvider()
   {
@@ -714,8 +633,6 @@ public class FormControlModel
   /**
    * Setzt das ACTION-Attribut auf action, wobei ein leerer String zu
    * {@link #NO_ACTION} konvertiert wird.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setAction(String action)
   {
@@ -726,12 +643,11 @@ public class FormControlModel
 
   /**
    * Setzt das ID-Attribut. Falls id=="", wird die ID gelöscht.
-   * 
+   *
    * @throws DuplicateIDException
    *           falls es bereits ein anderes FormControlModel mit der ID id gibt.
    * @throws SyntaxErrorException
    *           falls id nicht leer und keine legale ID ist.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void setId(final String id) throws DuplicateIDException,
       SyntaxErrorException
@@ -764,8 +680,6 @@ public class FormControlModel
 
   /**
    * Liefert true gdw, id auf {@link #ID_PATTERN} matcht.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private boolean isLegalID(String id)
   {
@@ -776,8 +690,6 @@ public class FormControlModel
    * Initialisiert das Feld {@link #id} mit einer inaktiven ID basierend auf idStr
    * (falls noch keine aktive ID idStr existiert, wird idStr verwendet). Falls idStr ==
    * "", wird die ID gelöscht.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void makeInactiveID(String idStr)
   {
@@ -809,8 +721,6 @@ public class FormControlModel
    * Initialisiert das Feld {@link #id} mit einer eindeutigen ID basierend auf idStr
    * (falls noch kein FormControlModel mit ID idStr existiert, wird idStr verwendet).
    * Falls idStr == "", wird die ID gelöscht.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void makeActiveID(String idStr)
   {
@@ -842,8 +752,6 @@ public class FormControlModel
 
   /**
    * Setzt das LABEL-Attribut.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setLabel(String label)
   {
@@ -853,8 +761,6 @@ public class FormControlModel
 
   /**
    * Setzt das TIP-Attribut.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setTooltip(String tooltip)
   {
@@ -864,8 +770,6 @@ public class FormControlModel
 
   /**
    * Setzt das HOTKEY-Attribut.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setHotkey(char hotkey)
   {
@@ -875,8 +779,6 @@ public class FormControlModel
 
   /**
    * Setzt das READONLY-Attribut.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setReadonly(boolean readonly)
   {
@@ -886,8 +788,6 @@ public class FormControlModel
 
   /**
    * Setzt das WRAP-Attribut.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setWrap(boolean wrap)
   {
@@ -897,8 +797,6 @@ public class FormControlModel
 
   /**
    * Setzt das EDIT-Attribut.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setEditable(boolean editable)
   {
@@ -908,35 +806,30 @@ public class FormControlModel
 
   /**
    * Setzt das LINES-Attribut.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setLines(int lines)
   {
     this.lines = lines;
     formularMax4000.documentNeedsUpdating();
   }
-  
+
   /**
    * Setzt das FRAGID-Attribut.
-   * @author Björn Ranft
    */
   public void setFragID(String frag_id) {
 	  this.frag_id = frag_id;
   }
-  
+
   /**
    *  Setzt EXT-Attribut.
-   *  @author Björn Ranft
    * @param ext
    */
   public void setExt(String ext) {
 	  this.ext = ext;
   }
-  
+
   /**
    *  Setzt das URL-Attribut.
-   *  @author Björn Ranft
    * @param url
    */
   public void setUrl(String url) {
@@ -945,8 +838,6 @@ public class FormControlModel
 
   /**
    * Setzt das MINSIZE-Attribut.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setMinsize(int minsize)
   {
@@ -956,8 +847,6 @@ public class FormControlModel
 
   /**
    * Setzt das MAXSIZE-Attribut.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setMaxsize(int maxsize)
   {
@@ -970,8 +859,6 @@ public class FormControlModel
    * {@link #COMBOBOX_TYPE *_TYPE-Konstanten} übersetzt. ACHTUNG! Der TYPE von Tabs
    * kann nicht verändert werden und andere Elemente können auch nicht in Tabs
    * verwandelt werden.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setType(String type)
   {
@@ -1005,8 +892,6 @@ public class FormControlModel
 
   /**
    * Setzt items als neue VALUES Liste.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setItems(String[] items)
   {
@@ -1021,8 +906,6 @@ public class FormControlModel
    * Liefert ein ConfigThingy, das dieses FormControlModel darstellt. Das
    * ConfigThingy wird immer neu erzeugt, kann vom Aufrufer also frei verwendet
    * werden.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ConfigThingy export()
   {
@@ -1049,7 +932,7 @@ public class FormControlModel
     if (getUrl().length() > 0) conf.add("URL").add("" + getUrl());
 
     List<String> items = getItems();
-    if (items.size() > 0)
+    if (!items.isEmpty())
     {
       ConfigThingy values = conf.add("VALUES");
       Iterator<String> iter = items.iterator();
@@ -1095,8 +978,6 @@ public class FormControlModel
 
   /**
    * Sagt dem Model, dass es einem Container hinzugefügt wurde.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void hasBeenAdded()
   {
@@ -1107,11 +988,6 @@ public class FormControlModel
    * Benachrichtigt alle auf diesem Model registrierten Listener, dass das Model aus
    * seinem Container entfernt wurde. ACHTUNG! Darf nur von einem entsprechenden
    * Container aufgerufen werden, der das Model enthält.
-   * 
-   * @param index
-   *          der Index an dem sich das Model in seinem Container befand.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void hasBeenRemoved()
   {
@@ -1127,8 +1003,6 @@ public class FormControlModel
 
   /**
    * listener wird über Änderungen des FormControlModels informiert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void addListener(ModelChangeListener listener)
   {
@@ -1138,8 +1012,6 @@ public class FormControlModel
   /**
    * listener wird in Zukunft nicht mehr über Änderungen des FormControlModels
    * informiert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public void removeListener(ModelChangeListener listener)
   {
@@ -1149,14 +1021,12 @@ public class FormControlModel
   /**
    * Interface für Listener, die über Änderungen eines FormControlModels informiert
    * werden wollen.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static interface ModelChangeListener
   {
     /**
      * Wird aufgerufen wenn ein Attribut des Models sich geändert hat.
-     * 
+     *
      * @param model
      *          das FormControlModel, das sich geändert hat.
      * @param attributeId
@@ -1164,7 +1034,6 @@ public class FormControlModel
      * @param newValue
      *          der neue Wert des Attributs. Numerische Attribute werden als Integer
      *          übergeben.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void attributeChanged(FormControlModel model, int attributeId,
         Object newValue);
@@ -1172,8 +1041,6 @@ public class FormControlModel
     /**
      * Wird aufgerufen, wenn model aus seinem Container entfernt wird (und damit in
      * keiner View mehr angezeigt werden soll).
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void modelRemoved(FormControlModel model);
   }
@@ -1185,7 +1052,7 @@ public class FormControlModel
    * Zugriff auch einen Event an die ModelChangeListener schicken. Allerdings ist
    * dies derzeit nicht implementiert, weil es derzeit je genau eine View gibt für
    * AUTOFILL und PLAUSI, so dass konkurrierende Änderungen gar nicht möglich sind.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class MyTrafoAccess implements FunctionSelectionAccess

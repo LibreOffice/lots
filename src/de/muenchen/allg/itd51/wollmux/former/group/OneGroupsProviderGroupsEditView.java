@@ -2,11 +2,11 @@
  * Dateiname: OneGroupsProviderGroupsEditView.java
  * Projekt  : WollMux
  * Funktion : Lässt die Liste der Gruppen eines GroupsProvider bearbeiten.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL), 
+ * it under the terms of the European Union Public Licence (EUPL),
  * version 1.0 (or any later version).
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,7 +15,7 @@
  * European Union Public Licence for more details.
  *
  * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see 
+ * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
  * Änderungshistorie:
@@ -26,7 +26,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD D.10)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.group;
 
@@ -52,7 +52,7 @@ import de.muenchen.allg.itd51.wollmux.former.view.View;
 
 /**
  * Lässt die Liste der Gruppen eines {@link GroupsProvider} bearbeiten.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
 public class OneGroupsProviderGroupsEditView implements View
@@ -106,8 +106,8 @@ public class OneGroupsProviderGroupsEditView implements View
     groupModelList.addListener(myListener);
 
     myPanel = new JPanel(new GridLayout(1, 1));
-    listModel = new DefaultListModel<IDManager.ID>();
-    myList = new JList<IDManager.ID>(listModel);
+    listModel = new DefaultListModel<>();
+    myList = new JList<>(listModel);
     myList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
     JScrollPane scrollPane = new JScrollPane(myList);
@@ -141,8 +141,6 @@ public class OneGroupsProviderGroupsEditView implements View
   /**
    * Gibt von dieser View belegte Ressourcen frei, damit diese View gc'ed werden
    * kann.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public void dispose()
   {

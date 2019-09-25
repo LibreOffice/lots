@@ -29,13 +29,12 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.DispatchHelper;
 
 /**
- * Der Handler für einen abgespeckten Speichern-Unter-Dialog des WollMux, der in
- * Abängigkeit von einer gesetzten FilenameGeneratorFunction über den WollMux
- * aufgrufen und mit dem generierten Filenamen vorbelegt wird.
+ * Der Handler für einen abgespeckten Speichern-Unter-Dialog des WollMux, der in Abängigkeit von
+ * einer gesetzten FilenameGeneratorFunction über den WollMux aufgrufen und mit dem generierten
+ * Filenamen vorbelegt wird.
  *
- * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü
- * "Datei->SaveAs" oder über die Symbolleiste die dispatch-url .uno:Save bzw.
- * .uno:SaveAs abgesetzt wurde.
+ * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü "Datei-&gt;SaveAs"
+ * oder über die Symbolleiste die dispatch-url .uno:Save bzw. .uno:SaveAs abgesetzt wurde.
  */
 public class OnSaveAs extends BasicEvent
 {

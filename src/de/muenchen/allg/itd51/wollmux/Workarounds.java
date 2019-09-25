@@ -72,9 +72,9 @@ public class Workarounds
   }
 
   /**
-   * Beim Einfügen eines Dokuments mit einer Section und einem Seitenumbruch in ein 
+   * Beim Einfügen eines Dokuments mit einer Section und einem Seitenumbruch in ein
    * anderes wird eine leere Seite am Anfang eingefügt.
-   *  
+   *
    * Issue #73229 betrifft den WollMux-Seriendruck in ein Gesamtdokument und ist
    * aktuell für OOo Later priorisiert - wird also nicht in absehbarer Zeit behoben
    * sein.
@@ -90,7 +90,7 @@ public class Workarounds
 
   /**
    * Interne Begrenzung von Arrays im Seriendruck auf 65536.
-   * 
+   *
    * Wegen https://bugs.documentfoundation.org/show_bug.cgi?id=89783 muss der
    * OOoMailMerge in mehrere Pakete aufgeteilt werden, wenn das
    * Seriendruck-Hauptdokument doc viele der im Issue genannten Elemente (z.B.
@@ -155,10 +155,9 @@ public class Workarounds
 
   /**
    * Unter Linux kann kein Schnellstarter erstellt werden, da
-   * @see http://bugs.java.com/bugdatabase/view_bug.do?bug_id=6528430.
-   * Damit es funktioniert, muss das Attribut WM_Class gesetzt werden, da dann
-   * eine korrekte Verknüpfung zwischen dem Schnellstarter und der .desktop
-   * Datei entsteht.
+   * <a href="http://bugs.java.com/bugdatabase/view_bug.do?bug_id=6528430">Issue 6528430</a>. Damit
+   * es funktioniert, muss das Attribut WM_Class gesetzt werden, da dann eine korrekte Verknüpfung
+   * zwischen dem Schnellstarter und der .desktop Datei entsteht.
    *
    * @return true wenn WM_Class gesetzt wurde.
    */

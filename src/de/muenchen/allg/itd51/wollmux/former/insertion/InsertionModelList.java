@@ -2,7 +2,7 @@
  * Dateiname: InsertionModelList.java
  * Projekt  : WollMux
  * Funktion : Verwaltet eine Liste von InsertionModels.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
@@ -72,13 +72,13 @@ public class InsertionModelList implements Iterable<InsertionModel>
   /**
    * Die Liste der {@link InsertionModel}s.
    */
-  private List<InsertionModel> models = new LinkedList<InsertionModel>();
+  private List<InsertionModel> models = new LinkedList<>();
 
   /**
    * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts
    * informiert werden wollen.
    */
-  private List<ItemListener> listeners = new ArrayList<ItemListener>(1);
+  private List<ItemListener> listeners = new ArrayList<>(1);
 
   /**
    * Der FormularMax4000 zu dem diese InsertionModelList gehört.
@@ -87,10 +87,9 @@ public class InsertionModelList implements Iterable<InsertionModel>
 
   /**
    * Erzeugt eine neue InsertionModelList.
-   * 
+   *
    * @param formularMax4000
    *          der FormularMax4000 zu dem diese Liste gehört.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public InsertionModelList(FormularMax4kController formularMax4000)
   {
@@ -100,8 +99,6 @@ public class InsertionModelList implements Iterable<InsertionModel>
 
   /**
    * Fügt model dieser Liste hinzu.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void add(InsertionModel model)
   {
@@ -112,8 +109,6 @@ public class InsertionModelList implements Iterable<InsertionModel>
 
   /**
    * Löscht alle bestehenden InsertionModels aus der Liste.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void clear()
   {
@@ -133,8 +128,6 @@ public class InsertionModelList implements Iterable<InsertionModel>
    * Iteration keine Veränderungen an der InsertionModelList vorkommen, da der
    * Iterator direkt auf der internen Datenstruktur arbeitet und es daher zur
    * {@link java.util.ConcurrentModificationException} kommen würde.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   @Override
   public Iterator<InsertionModel> iterator()
@@ -145,8 +138,6 @@ public class InsertionModelList implements Iterable<InsertionModel>
   /**
    * Bittet die InsertionModelList darum, das Element model aus sich zu entfernen
    * (falls es in der Liste ist).
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void remove(InsertionModel model)
   {
@@ -162,9 +153,8 @@ public class InsertionModelList implements Iterable<InsertionModel>
    * ComboBox zusammengefasst wurden, damit die {@link InsertionModel}s, die vorher
    * auf die Checkboxen verwiesen haben entsprechend angepasst werden, so dass sie
    * jetzt auf die neue ComboBox verweisen und eine passende TRAFO bekommen.
-   * 
+   *
    * @param desc
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void mergeCheckboxesIntoCombobox(ComboboxMergeDescriptor desc)
   {
@@ -209,8 +199,6 @@ public class InsertionModelList implements Iterable<InsertionModel>
   /**
    * Setzt die TRAFO von model auf MATCH(VALUE "COMBO_PARAM_ID",
    * "re_escape(comboValue)").
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setMatchTrafo(InsertionModel model, String comboValue)
   {
@@ -225,16 +213,14 @@ public class InsertionModelList implements Iterable<InsertionModel>
   /**
    * Versucht TRAFOs von Einfügungen der ComboBox combo zu reparieren, die durch eine
    * Änderung der Werte-Liste von combo zerbrochen sind.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void fixComboboxInsertions(FormControlModel combo)
   {
     IDManager.ID comboId = combo.getId();
     if (comboId == null) return;
     Collection<String> items = combo.getItems();
-    Collection<String> unusedItems = new HashSet<String>(items);
-    Collection<InsertionModel> brokenInsertionModels = new Vector<InsertionModel>();
+    Collection<String> unusedItems = new HashSet<>(items);
+    Collection<InsertionModel> brokenInsertionModels = new Vector<>();
     Iterator<InsertionModel> iter = iterator();
     while (iter.hasNext())
     {
@@ -294,7 +280,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
      * Wenn wir ein unbenutztes Item haben, dann ändern wir alle TRAFOs, die broken
      * sind so, dass sie auf dieses matchen.
      */
-    if (unusedItems.size() > 0)
+    if (!unusedItems.isEmpty())
     {
       String item = unusedItems.iterator().next();
       iter = brokenInsertionModels.iterator();
@@ -309,8 +295,6 @@ public class InsertionModelList implements Iterable<InsertionModel>
   /**
    * Liefert einen regulären Ausdruck, der genau den String str matcht (aber ohne ^
    * und $).
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private String re_escape(String str)
   {
@@ -337,7 +321,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
    * zugehörigen Bookmarks updaten. Falls beim Update eines Bookmarks etwas
    * schiefgeht wird das entsprechende {@link InsertionModel} aus der Liste gelöscht.
    * Das Ausführen dieser Funktion triggert also potentiell einige Listener.
-   * 
+   *
    * @param mapFunctionNameToConfigThingy
    *          bildet einen Funktionsnamen auf ein ConfigThingy ab, dessen Wurzel der
    *          Funktionsname ist und dessen Inhalt eine Funktionsdefinition. Wenn eine
@@ -346,11 +330,10 @@ public class InsertionModelList implements Iterable<InsertionModel>
    *          vorkommt und ein Mapping für diese Funktion wird in die Map eingefügt.
    *          Nach dem Aufruf von updateDocument() sind zu dieser Map also Einträge
    *          hinzugekommen für alle TRAFOs, die in den Einfügungen vorkommen.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void updateDocument(Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
   {
-    List<InsertionModel> defunct = new Vector<InsertionModel>();
+    List<InsertionModel> defunct = new Vector<>();
     Iterator<InsertionModel> iter = models.iterator();
     while (iter.hasNext())
     {
@@ -367,8 +350,6 @@ public class InsertionModelList implements Iterable<InsertionModel>
 
   /**
    * listener wird über Änderungen der Liste informiert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void addListener(ItemListener listener)
   {
@@ -378,10 +359,9 @@ public class InsertionModelList implements Iterable<InsertionModel>
   /**
    * Benachrichtigt alle ItemListener über das Hinzufügen oder Entfernen von model
    * zur bzw. aus der Liste an/von Index index.
-   * 
+   *
    * @param removed
    *          falls true, wurde model entfernt, ansonsten hinzugefügt.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void notifyListeners(InsertionModel model, int index, boolean removed)
   {
@@ -399,24 +379,21 @@ public class InsertionModelList implements Iterable<InsertionModel>
   /**
    * Interface für Klassen, die interessiert sind, zu erfahren, wenn sich die Liste
    * ändert.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static interface ItemListener
   {
     /**
      * Wird aufgerufen nachdem model zur Liste hinzugefügt wurde (an Index index).
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void itemAdded(InsertionModel model, int index);
 
     /**
      * Wird aufgerufen, nachdem model aus der Liste entfernt wurde.
-     * 
+     *
      * @param index
      *          der alte Index von model in der Liste.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void itemRemoved(InsertionModel model, int index);
   }

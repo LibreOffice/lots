@@ -2,7 +2,7 @@
  * Dateiname: OnDemandCardView.java
  * Projekt  : WollMux
  * Funktion : Basisklasse für Views mit CardLayout für eine Menge von Objekten, wobei die einzelnen Karten erst on-demand erzeugt werden.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.view;
 
@@ -49,7 +49,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 /**
  * Basisklasse für Views mit CardLayout für eine Menge von Objekten, wobei die
  * einzelnen Karten erst on-demand erzeugt werden.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public abstract class OnDemandCardView implements View
@@ -91,7 +91,7 @@ public abstract class OnDemandCardView implements View
    * Bildet ein Model auf das zugehörige {@link ViewCardIdPair} ab.
    */
   private Map<Object, ViewCardIdPair> mapModel2ViewDescriptor =
-    new HashMap<Object, ViewCardIdPair>();
+      new HashMap<>();
 
   private static class ViewCardIdPair
   {
@@ -103,7 +103,7 @@ public abstract class OnDemandCardView implements View
     {
       this.view = view;
       this.cardId = cardId;
-    };
+    }
   }
 
   public OnDemandCardView(String label)
@@ -119,11 +119,10 @@ public abstract class OnDemandCardView implements View
 
   /**
    * Liefert eine View-Karte für model.
-   * 
+   *
    * @param viewChangeListener
    *          wird auf die View registriert, damit die View mitteilen kann, wenn Sie
    *          entfernt werden muss.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   protected abstract View createViewFor(Object model,
       ViewChangeListener viewChangeListener);
@@ -132,8 +131,6 @@ public abstract class OnDemandCardView implements View
    * Fügt dieser View eine View-Karte für model hinzu. Falls die zugehörige View eine
    * {@link LazyView} ist, wird sie erst bei einem entsprechenden
    * {@link #show(Object)} initialisiert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   protected void addItem(Object model)
   {
@@ -148,8 +145,6 @@ public abstract class OnDemandCardView implements View
    * Entfernt view aus diesem Container (falls dort vorhanden). DIESE FUNKTION IST
    * PRIVATE UND MUSS AUCH NICHT PROTECTED SEIN. DAS ENTFERNEN VON VIEWS HANDHABT DIE
    * OnDemandCardView selbstständig über {@link MyViewChangeListener}.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void removeItem(View view)
   {
@@ -175,8 +170,6 @@ public abstract class OnDemandCardView implements View
   /**
    * Liefert einen Identifikationsstring für ob zur Verwendung mit einem
    * {@link CardLayout}.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String getCardIdFor(Object ob)
   {
@@ -186,8 +179,6 @@ public abstract class OnDemandCardView implements View
   /**
    * Liefert ein JPanel, das nur einen Button enthält zum Aktivieren der One...View
    * des aktiven Models.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private JPanel makeInactivePanel(String label)
   {
@@ -234,8 +225,6 @@ public abstract class OnDemandCardView implements View
 
   /**
    * Zeigt die leer View-Karte an.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void showEmpty()
   {
@@ -254,8 +243,6 @@ public abstract class OnDemandCardView implements View
    * Zeigt die passende View-Karte für model an. Dies ist entweder eine richtige
    * View-Karte, oder die View-Karte zum on-demand aktivieren der Sicht. Falls die
    * zugehörige View eine {@link LazyView} ist, so wird diese initialisiert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void show(Object model)
   {

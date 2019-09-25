@@ -2,11 +2,11 @@
  * Dateiname: AllGroupLineViewsPanel.java
  * Projekt  : WollMux
  * Funktion : Enthält alle OneGroupLineViews
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL), 
+ * it under the terms of the European Union Public Licence (EUPL),
  * version 1.0 (or any later version).
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,7 +15,7 @@
  * European Union Public Licence for more details.
  *
  * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see 
+ * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
  * Änderungshistorie:
@@ -27,7 +27,7 @@
  *
  * @author Matthias Benkmann (D-III-ITD D.10)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former.group;
 
@@ -62,7 +62,7 @@ import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
 /**
  * Enthält alle OneInsertionLineViews.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AllGroupLineViewsPanel implements View
@@ -101,7 +101,7 @@ public class AllGroupLineViewsPanel implements View
   /**
    * Die Liste der {@link OneGroupLineView}s in dieser View.
    */
-  private List<OneGroupLineView> views = new Vector<OneGroupLineView>();
+  private List<OneGroupLineView> views = new Vector<>();
 
   /**
    * Liste von Indizes der selektierten Objekte in der {@link #views} Liste.
@@ -117,8 +117,6 @@ public class AllGroupLineViewsPanel implements View
    * Erzeugt ein AllGroupLineViewsPanel, die den Inhalt von groupModelList anzeigt.
    * ACHTUNG! groupModelList sollte leer sein, da nur neu hinzugekommene Elemente in
    * der View angezeigt werden.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public AllGroupLineViewsPanel(GroupModelList groupModelList,
       FormularMax4kController formularMax4000)
@@ -160,7 +158,7 @@ public class AllGroupLineViewsPanel implements View
     buttonPanel.add(button, gbcButton);
 
     ++gbcButton.gridx;
-    
+
     for (GroupModel m : groupModelList)
     {
       addItem(m);
@@ -195,8 +193,6 @@ public class AllGroupLineViewsPanel implements View
 
   /**
    * Fügt dieser View eine {@link OneGroupLineView} für model hinzu.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void addItem(GroupModel model)
   {
@@ -216,8 +212,6 @@ public class AllGroupLineViewsPanel implements View
 
   /**
    * Entfernt view aus diesem Container (falls dort vorhanden).
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void removeItem(OneGroupLineView view)
   {
@@ -232,8 +226,6 @@ public class AllGroupLineViewsPanel implements View
 
   /**
    * Hebt die Selektion aller Elemente auf.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void clearSelection()
   {
@@ -249,8 +241,6 @@ public class AllGroupLineViewsPanel implements View
 
   /**
    * Löscht alle ausgewählten Elemente.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void deleteSelectedElements()
   {
@@ -353,7 +343,7 @@ public class AllGroupLineViewsPanel implements View
             view.mark();
             selection.add(index);
           }
-          
+
           break;
         }
         else if (b.getState() == BroadcastObjectSelection.STATE_SHIFT_CLICK)

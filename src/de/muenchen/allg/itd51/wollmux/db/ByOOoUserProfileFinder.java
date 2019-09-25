@@ -12,9 +12,9 @@ import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
- * Ein konkreter DataFinder, der für die Auflösung der Variable in getValueForKey
- * im Benutzerprofil der OOo Registry nachschaut (das selbe wie
- * Extras->Optionen->LibreOffice->Benutzerdaten).
+ * Ein konkreter DataFinder, der für die Auflösung der Variable in getValueForKey im Benutzerprofil
+ * der OOo Registry nachschaut (das selbe wie
+ * Extras-&gt;Optionen-&gt;LibreOffice-&gt;Benutzerdaten).
  *
  * @author christoph.lutz
  */
@@ -22,7 +22,7 @@ public class ByOOoUserProfileFinder extends DataFinder
 {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(ByOOoUserProfileFinder.class);
-  
+
   public ByOOoUserProfileFinder(DatasourceJoiner dsj)
   {
     super(dsj);

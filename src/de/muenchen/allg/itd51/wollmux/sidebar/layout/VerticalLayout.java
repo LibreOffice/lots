@@ -30,7 +30,7 @@ public class VerticalLayout implements Layout
   private int marginBetween;
 
   /**
-   * {@link #VerticalLayoutManager(int, int)} mit keinen Abständen/Zwischenräumen.
+   * Vertikales Layout mit keinen Abständen/Zwischenräumen.
    */
   public VerticalLayout()
   {

@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Diese Klasse enthält eine Fabrik für die Erzeugung eines PrintModels
  *            und die Klassendefinitionen des MasterPrintModels und des SlavePrintModels.
- * 
+ *
  * Copyright (c) 2009-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.print;
 
@@ -97,31 +97,27 @@ public class PrintModels
    * TextDocumentModel model repräsentiert. Pro Druckvorgang wird dabei ein neuer
    * PrintModelMaster erzeugt, der ein oder mehrere PrintModelSlaves anspricht und so
    * eine Verkettung mehrerer Druckfunktionen ermöglicht.
-   * 
+   *
    * @param documentController
    *          Das Dokument das gedruckt werden soll
    * @return das neue PrintModel für diesen Druckvorgang
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static XPrintModel createPrintModel(TextDocumentController documentController)
   {
     return new MasterPrintModel(documentController);
   }
-  
+
   /**
    * Liefert ein neues zu diesem TextDocumentModel zugehörige XPrintModel für einen
    * Druckvorgang; ist useDocumentPrintFunctions==true, so werden bereits alle im
    * Dokument gesetzten Druckfunktionen per
    * XPrintModel.usePrintFunctionWithArgument(...) hinzugeladen.
-   * 
+   *
    * @param documentController
    *          Das Dokument das gedruckt werden soll
    * @param useDocPrintFunctions
    *          steuert ob das PrintModel mit den im Dokument gesetzten Druckfunktionen
    *          vorbelegt sein soll.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static XPrintModel createPrintModel(TextDocumentController documentController, boolean useDocPrintFunctions)
   {
@@ -150,7 +146,7 @@ public class PrintModels
    * Jedes hier definierte konkrete PrintModel definiert dieses Interface und kann
    * (ausschließlich) innerhalb der Java-VM des WollMux verwendet werden um auf nicht
    * im XPrintModel exportierte Methode der PrintModels zuzugreifen.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static interface InternalPrintModel
@@ -160,15 +156,13 @@ public class PrintModels
      * PrintFunction-Objekt vorliegen) in das XPrintModel und ordnet sie gemäß dem
      * ORDER-Attribut an der richtigen Position in die Aufrufkette der zu
      * bearbeitenden Druckfunktionen ein.
-     * 
+     *
      * @param printFunction
      *          Druckfunktion, die durch das PrintModel verwaltet werden soll.
      * @return liefert true, wenn die Druckfunktion erfolgreich in die Aufrufkette
      *         übernommen wurde oder bereits geladen war und false, wenn die
      *         Druckfunktion aufgrund vorangegangener Fehler nicht in die Aufrufkette
      *         aufgenommen werden konnte.
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
      */
     public boolean useInternalPrintFunction(PrintFunction printFunction);
   }
@@ -181,7 +175,7 @@ public class PrintModels
    * Kommunikation zwischen den verschiedenen Druckfunktionen implementiert es das
    * XPropertySet()-Interface und kann in einer HashMap beliebige
    * funktionsspezifische Daten ablegen.
-   * 
+   *
    * Eine einzelne Druckfunktion wird immer mit einem zugehörigen SlavePrintModel
    * ausgeführt, das seine Position in der Aufrufkette des MasterPrintModles kennt
    * und die Weiterleitung an die nächste Druckfunktion der Aufrufkette erledigt. Da
@@ -192,7 +186,7 @@ public class PrintModels
    * garantiert. Vor dem Einstellen des Action-Ereignisses in den WollMuxEventHandler
    * wird dabei ein lock gesetzt. Nach dem Einstellen des Ereignisses wird so lange
    * gewartet, bis der WollMuxEventHandler die übergebene Callback-Methode aufruft.
-   * 
+   *
    * @author christoph.lutz
    */
   private static class MasterPrintModel implements XPrintModel, InternalPrintModel
@@ -260,14 +254,14 @@ public class PrintModels
      * zwischen den Druckfunktionen vorbelegt ist. Nach der Erzeugung können weitere
      * Druckfunktionen über usePrintFunction/useInternalPrintFunction... hinzugeladen
      * werden und Properties über get/setPropertyValue gesetzt bzw. gelesen werden.
-     * 
+     *
      * @param documentController
      */
     private MasterPrintModel(TextDocumentController documentController)
     {
       this.documentController = documentController;
-      this.props = new HashMap<String, Object>();
-      this.functions = new TreeSet<PrintFunction>();
+      this.props = new HashMap<>();
+      this.functions = new TreeSet<>();
     }
 
     /**
@@ -276,15 +270,15 @@ public class PrintModels
      * richtigen Position in die Aufrufkette der zu bearbeitenden Druckfunktionen
      * ein; Wird die Druckfunktion aufgerufen, so bekommt sie genau ein Argument
      * (dieses XPrintModel) übergeben.
-     * 
+     *
      * @param functionName
      *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
      *          werden soll.
      * @throws NoSuchMethodException
      *           Wird geworfen, wenn die Druckfunktion nicht definiert ist.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-5.1)
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#usePrintFunction(java.lang.String)
      */
     @Override
@@ -301,7 +295,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @seede.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel#
      * useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.func.PrintFunction)
      */
@@ -321,14 +315,12 @@ public class PrintModels
      * ORDER-Attribut definierte Reihenfolge in einer Aufrufkette angeordnet; Diese
      * Methode liefert die Druckfunktion an der Position idx dieser Aufrufkette (die
      * Zählung beginnt mit 0).
-     * 
+     *
      * @param idx
      *          Die Position der Druckfunktion
      * @return Die Druckfunktion an der Position idx in der sortierten Reihenfolge
      *         oder null, wenn es an der Position idx keine Druckfunktion gibt (z.B.
      *         IndexOutOfRange)
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
      */
     protected PrintFunction getPrintFunction(int idx)
     {
@@ -341,7 +333,7 @@ public class PrintModels
 
     /**
      * Liefert das XTextDocument mit dem die Druckfunktion aufgerufen wurde.
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getTextDocument()
      */
     @Override
@@ -352,7 +344,7 @@ public class PrintModels
 
     /**
      * Diese Methode ruft numberOfCopies mal printWithProps() auf.
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#print(short)
      */
     @Override
@@ -370,15 +362,13 @@ public class PrintModels
      * setPropertyValue(...) gesetzt wurden ausgewertet. Die Methode kehrt erst dann
      * wieder zurück, wenn der gesamte Druckvorgang dieser und der darunterliegenden
      * Druckfunktionen vollständig ausgeführt wurde.
-     * 
+     *
      * Im MasterPrintModel sorgt der Aufruf dieser Methode dafür, dass (nur) die
      * erste verfügbare Druckfunktion aufgerufen wird. Das Weiterreichen der Anfrage
      * an die jeweils nächste Druckfunktion übernimmt dann das SlavePrintModel. Ist
      * die Aufrufkette zum Zeitpunkt des Aufrufs leer, so wird ein Dispatch
      * ".uno:Print" abgesetzt, damit der Standarddruckdialog von OOo aufgerufen wird.
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#printWithProps()
      */
     @Override
@@ -419,9 +409,8 @@ public class PrintModels
      * können und startet den Druck. Bei folgenden Aufrufe dieser Methode wird kein
      * Druckdialog mehr angezeigt und die zuletzt getroffenen Einstellungen werden
      * verwendet.
-     * 
+     *
      * @return bei Erfolg true, sonst false.
-     * @author Christoph Lutz (D-III-ITD-5.1)
      */
     protected void finalPrint()
     {
@@ -437,14 +426,14 @@ public class PrintModels
         SyncActionListener s = new SyncActionListener();
         new PrintParametersDialog(documentController.getModel().doc, showCopiesSpinner, s);
         ActionEvent result = s.synchronize();
-        
+
         if (PrintParametersDialog.CMD_CANCEL.equals(result.getActionCommand())) {
           cancel();
           return;
         }
-        
+
         SimpleEntry<Short, PageRange> ppd = (SimpleEntry<Short, PageRange>) result.getSource();
-        
+
         setProperty(PROP_FINAL_COPY_COUNT, ppd.getKey());
         setProperty(PROP_FINAL_PAGE_RANGE, ppd.getValue());
         setProperty(PROP_FINAL_NO_PARAMS_DIALOG, Boolean.TRUE);
@@ -463,14 +452,12 @@ public class PrintModels
      * Druckt den Druckbereich pr des Dokuments copyCount mal auf dem aktuell
      * eingestellten Drucker aus und liefert true zurück, wenn das Drucken
      * erfolgreich war oder false, wenn Fehler auftraten.
-     * 
+     *
      * @param pr
      *          beschreibt zu druckenden Seitenbereich
      * @param copyCount
      *          enthält die Anzahl der anzufertigenden Kopien
      * @return bei Erfolg true, sonst false.
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
      */
     private boolean print(PageRange pr, Short copyCount)
     {
@@ -521,8 +508,6 @@ public class PrintModels
 
     /**
      * synchronisiertes Setzen von props
-     *
-     * @author Christoph Lutz (D-III-ITD-5.1)
      */
     private void setProperty(String prop, Object o)
     {
@@ -536,8 +521,6 @@ public class PrintModels
      * Setzt den die Beschreibung des aktuellen Druckvorgangs auf stage und
      * aktualisiert die Anzeige in der PrintProgressBar (falls eine solche Leiste
      * angezeigt wird).
-     * 
-     * @author Christoph Lutz (D-III-ITD-D101)
      */
     public void setStage(String stage)
     {
@@ -546,8 +529,6 @@ public class PrintModels
 
     /**
      * synchronisiertes Auslesen von props
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
      */
     private Object getProperty(String prop)
     {
@@ -564,14 +545,14 @@ public class PrintModels
      * Formularfelder entsprechend angepasst. Handelt es sich beim zugehörigen
      * Dokument um ein Dokument ohne Formularbeschreibung, so werden nur alle
      * insertFormValue-Kommandos dieses Dokuments angepasst, die die ID id besitzen.
-     * 
+     *
      * @param id
      *          Die ID des Formularfeldes, dessen Wert verändert werden soll. Ist die
      *          FormGUI aktiv, so werden auch alle von id abhängigen Formularwerte
      *          neu gesetzt.
      * @param value
      *          Der neue Wert des Formularfeldes id
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setFormValue(java.lang.String,
      *      java.lang.String)
      */
@@ -586,19 +567,19 @@ public class PrintModels
     /**
      * Liefert true, wenn das Dokument als "modifiziert" markiert ist und damit z.B.
      * die "Speichern?" Abfrage vor dem Schließen erscheint.
-     * 
+     *
      * Manche Druckfunktionen verändern u.U. den Inhalt von Dokumenten. Trotzdem kann
      * es sein, dass eine solche Druckfunktion den "Modifiziert"-Status des Dokuments
      * nicht verändern darf um ungewünschte "Speichern?"-Abfragen zu verhindern. In
      * diesem Fall kann der "Modifiziert"-Status mit folgendem Konstrukt innerhalb
      * der Druckfunktion unverändert gehalten werden:
-     * 
+     *
      * boolean modified = pmod.getDocumentModified();
-     * 
+     *
      * ...die eigentliche Druckfunktion, die das Dokument verändert...
-     * 
+     *
      * pmod.setDocumentModified(modified);
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getDocumentModified()
      */
     @Override
@@ -611,7 +592,7 @@ public class PrintModels
 
     /**
      * Diese Methode setzt den DocumentModified-Status auf modified.
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setDocumentModified(boolean)
      */
     @Override
@@ -638,7 +619,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.sun.star.beans.XPropertySet#getPropertySetInfo()
      */
     @Override
@@ -689,7 +670,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.sun.star.beans.XPropertySet#setPropertyValue(java.lang.String,
      * java.lang.Object)
      */
@@ -703,7 +684,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.sun.star.beans.XPropertySet#getPropertyValue(java.lang.String)
      */
     @Override
@@ -738,7 +719,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.sun.star.beans.XPropertySet#addPropertyChangeListener(java.lang.String,
      * com.sun.star.beans.XPropertyChangeListener)
@@ -752,7 +733,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.sun.star.beans.XPropertySet#removePropertyChangeListener(java.lang.String,
      * com.sun.star.beans.XPropertyChangeListener)
@@ -767,7 +748,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.sun.star.beans.XPropertySet#addVetoableChangeListener(java.lang.String,
      * com.sun.star.beans.XVetoableChangeListener)
@@ -781,7 +762,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.sun.star.beans.XPropertySet#removeVetoableChangeListener(java.lang.String,
      * com.sun.star.beans.XVetoableChangeListener)
@@ -798,7 +779,7 @@ public class PrintModels
      * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die Anzeige der
      * Hintergrundfarbe (showHighlightColor) für alle Druckblöcke eines bestimmten
      * Blocktyps blockName (z.B. "AllVersions").
-     * 
+     *
      * @param blockName
      *          Der Blocktyp dessen Druckblöcke behandelt werden sollen. Folgende
      *          Blocknamen werden derzeit unterstützt: "AllVersions", "DraftOnly",
@@ -810,8 +791,6 @@ public class PrintModels
      *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur, wenn
      *          zu einem betroffenen Druckblock auch eine Hintergrundfarbe angegeben
      *          ist).
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
      */
     @Override
     public void setPrintBlocksProps(String blockName, boolean visible,
@@ -824,21 +803,16 @@ public class PrintModels
     }
 
     /**
-     * Setzt den Sichtbarkeitsstatus der Sichtbarkeitsgruppe groupID auf den neuen
-     * Status visible und wirkt sich damit auf alle Dokumentkommandos
-     * WM(CMD'setGroups'...) bzw. alle Textbereiche aus, die über eine
-     * GROUPS-Zuordnung die Sichtbarkeitsgruppe groupId verknüpft haben.
-     * 
+     * Setzt den Sichtbarkeitsstatus der Sichtbarkeitsgruppe groupID auf den neuen Status visible
+     * und wirkt sich damit auf alle Dokumentkommandos WM(CMD'setGroups'...) bzw. alle Textbereiche
+     * aus, die über eine GROUPS-Zuordnung die Sichtbarkeitsgruppe groupId verknüpft haben.
+     *
      * @param groupID
-     *          Name der Sichtbarkeitsgruppe, deren Sichtbarkeitsstatus verändert
-     *          werden soll
+     *          Name der Sichtbarkeitsgruppe, deren Sichtbarkeitsstatus verändert werden soll
      * @param visible
-     *          Bei dem Wert true ist die Sichtbarkeitsgruppe sichtbar und bei false
-     *          unsichtbar.
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setGroupVisible(java.lang.String,
-     *      boolean)
+     *          Bei dem Wert true ist die Sichtbarkeitsgruppe sichtbar und bei false unsichtbar.
+     *
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setGroupVisible(java.lang.String, boolean)
      */
     @Override
     public void setGroupVisible(String groupID, boolean visible)
@@ -849,13 +823,12 @@ public class PrintModels
     }
 
     /**
-     * Liefert true, wenn der Druckvorgang aufgrund einer Benutzereingabe oder eines
-     * vorangegangenen Fehlers abgebrochen wurde (siehe cancel()) und sollte
-     * insbesonders von Druckfunktionen ausgewertet werden, die mehrmals
-     * printWithProps() aufrufen und dabei aufwendige Vor- und Nacharbeiten leisten
-     * müssen (die in diesem Fall sobald sinnvoll möglich eingestellt werden können).
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
+     * Liefert true, wenn der Druckvorgang aufgrund einer Benutzereingabe oder eines vorangegangenen
+     * Fehlers abgebrochen wurde (siehe cancel()) und sollte insbesonders von Druckfunktionen
+     * ausgewertet werden, die mehrmals printWithProps() aufrufen und dabei aufwendige Vor- und
+     * Nacharbeiten leisten müssen (die in diesem Fall sobald sinnvoll möglich eingestellt werden
+     * können).
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#isCanceled()
      */
     @Override
@@ -868,12 +841,11 @@ public class PrintModels
     }
 
     /**
-     * Setzt das Flag isCanceled() auf true und sorgt dafür, dass künftige Aufrufe
-     * von printWithProps() sofort ohne Wirkung zurückkehren. Die Methode kann von
-     * jeder Druckfunktion aufgerufen werden wenn Fehler auftreten oder der
-     * Druckvorgang durch den Benutzer abgebrochen wurde.
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
+     * Setzt das Flag isCanceled() auf true und sorgt dafür, dass künftige Aufrufe von
+     * printWithProps() sofort ohne Wirkung zurückkehren. Die Methode kann von jeder Druckfunktion
+     * aufgerufen werden wenn Fehler auftreten oder der Druckvorgang durch den Benutzer abgebrochen
+     * wurde.
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#cancel()
      */
     @Override
@@ -886,21 +858,17 @@ public class PrintModels
     }
 
     /**
-     * Diese Methode aktiviert die Anzeige der Fortschrittsleiste und initialisiert
-     * die Anzahl der von dieser Druckfunktion zu erwartenden Versionen auf maxValue,
-     * wenn maxValue größer 0 ist, oder entfernt die Druckfunktion aus der
-     * Fortschrittsanzeige, wenn maxValue gleich 0 ist. Die Fortschrittsanzeige ist
-     * prinzipiell in der Lage, den Druckstatus verschiedener verketteter
-     * Druckfunktionen anzuzeigen. Die Berechnung der Gesamtausfertigungen und des
-     * aktuellen Gesamtstatus wird von der Fortschrittsanzeige übernommen. Damit muss
-     * jede Druckfunktion hier auch nur die Anzahl Versionen setzen, die von der
-     * Druckfunktion selbst erzeugt werden.
-     * 
+     * Diese Methode aktiviert die Anzeige der Fortschrittsleiste und initialisiert die Anzahl der
+     * von dieser Druckfunktion zu erwartenden Versionen auf maxValue, wenn maxValue größer 0 ist,
+     * oder entfernt die Druckfunktion aus der Fortschrittsanzeige, wenn maxValue gleich 0 ist. Die
+     * Fortschrittsanzeige ist prinzipiell in der Lage, den Druckstatus verschiedener verketteter
+     * Druckfunktionen anzuzeigen. Die Berechnung der Gesamtausfertigungen und des aktuellen
+     * Gesamtstatus wird von der Fortschrittsanzeige übernommen. Damit muss jede Druckfunktion hier
+     * auch nur die Anzahl Versionen setzen, die von der Druckfunktion selbst erzeugt werden.
+     *
      * @param maxValue
-     *          den maximalen Wert der von dieser Druckfunktion zu druckenden
-     *          Ausfertigungen.
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
+     *          den maximalen Wert der von dieser Druckfunktion zu druckenden Ausfertigungen.
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintProgressMaxValue(short)
      */
     @Override
@@ -910,16 +878,15 @@ public class PrintModels
     }
 
     /**
-     * Über diese Methode wird der Fortschrittsleiste ein neuer Fortschrittstatus
-     * value (=Anzahl bis jetzt tatsächlich gedruckter Versionen) der aktuellen
-     * Druckfunktion übermittelt. Der Wert value muss im Bereich 0 <= value <=
-     * maxValue (siehe setPrintProgressMaxValue(maxValue)) liegen.
-     * 
+     * Über diese Methode wird der Fortschrittsleiste ein neuer Fortschrittstatus value (=Anzahl bis
+     * jetzt tatsächlich gedruckter Versionen) der aktuellen Druckfunktion übermittelt. Der Wert
+     * value muss im Bereich 0 <= value <= maxValue (siehe setPrintProgressMaxValue(maxValue))
+     * liegen.
+     *
      * @param value
-     *          Die Anzahl der bis jetzt tatsächlich von dieser Druckfunktion
-     *          gedruckten Versionen. Es muss gelten: 0 <= value <= maxValue
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
+     *          Die Anzahl der bis jetzt tatsächlich von dieser Druckfunktion gedruckten Versionen.
+     *          Es muss gelten: 0 <= value <= maxValue
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintProgressValue(short)
      */
     @Override
@@ -934,14 +901,12 @@ public class PrintModels
      * Fortschrittsleiste aktiv, so wird eine neue Fortschrittsleiste erzeugt und
      * aktiviert; ist maxValue==0, so wird die durch key repräsentierte Druckfunktion
      * deregistriert.
-     * 
+     *
      * @param key
      *          repräsentiert eine Druckfunktion (oder genauer Ihr zugehöriges
      *          SlavePrintModel)
      * @param maxValue
      *          den Maximalwert von dieser Funktion zu erwartenden Versionen
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
      */
     private void setPrintProgressMaxValue(Object key, short maxValue)
     {
@@ -965,15 +930,13 @@ public class PrintModels
      * an die Fortschrittsleiste weiter, wenn die Fortschrittsleiste aktiviert wurde
      * (dazu muss mindestens eine Druckfunktion mit setPrintProgressMaxValue(...)
      * registriert worden sein).
-     * 
+     *
      * @param key
      *          repräsentiert die Druckfunktion (oder genauer ihr zugehöriges
      *          SlavePrintModel)
      * @param value
      *          enthält die Anzahl der von dieser Druckfunktion bereits erstellten
      *          Versionen.
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
      */
     private void setPrintProgressValue(Object key, short value)
     {
@@ -985,11 +948,9 @@ public class PrintModels
      * Der Text wird einmalig angezeigt, d.h. wenn danach ein weiterer Aufruf
      * von setPrintProgressValue erfolgt, wird der Text wieder gelöscht und
      * durch den Fortschrittsstatus ersetzt.
-     * 
+     *
      * @param value
      *          enthält den anzuzeigenden Text
-     * 
-     * @author Ignaz Forster (ITM-I23)
      */
     @Override
     public void setPrintMessage(String value)
@@ -1009,11 +970,9 @@ public class PrintModels
    * MasterPrintModel weiterleitet. Das SlavePrintModel kennt seine Position (idx) in
    * der Aufrufkette und sorgt vor allem dafür, dass beim Aufruf von printWithProps()
    * die nächste Druckfunktion der Aufrufkette gestartet wird.
-   * 
+   *
    * Das SlavePrintModel ist von WeakBase abgeleitet, damit es in der Druckfunktion
    * mit den UNO-Mitteln inspiziert werden kann.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private static class SlavePrintModel extends WeakBase implements XPrintModel,
       InternalPrintModel
@@ -1031,7 +990,7 @@ public class PrintModels
     /**
      * Erzeugt ein neues SlavePrintModel, das in der Aufrufkette, die durch das
      * MasterPrintModel master verwaltet wird, an der Stelle idx steht.
-     * 
+     *
      * @param master
      *          Das MasterPrintModel, an das die meisten Anfragen weitergeleitet
      *          werden und das die Aufrufkette der Druckfunktionen verwaltet.
@@ -1047,7 +1006,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getTextDocument()
      */
     @Override
@@ -1058,7 +1017,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#print(short)
      */
     @Override
@@ -1072,7 +1031,7 @@ public class PrintModels
      * Diese Methode ist die wichtigste Methode im SlavePrintModel, denn sie sorgt
      * dafür, dass beim Aufruf von PrintWithProps die Weiterleitung an die nächste
      * Druckfunktion der Aufrufkette veranlasst wird.
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#printWithProps()
      */
     @Override
@@ -1104,7 +1063,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setFormValue(java.lang.String,
      * java.lang.String)
      */
@@ -1116,7 +1075,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getDocumentModified()
      */
     @Override
@@ -1127,7 +1086,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setDocumentModified(boolean)
      */
     @Override
@@ -1138,7 +1097,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#collectNonWollMuxFormFields()
      */
     @Override
@@ -1149,7 +1108,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintBlocksProps(java.lang.String
      * , boolean, boolean)
@@ -1162,7 +1121,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.sun.star.beans.XPropertySet#getPropertySetInfo()
      */
     @Override
@@ -1173,7 +1132,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.sun.star.beans.XPropertySet#setPropertyValue(java.lang.String,
      * java.lang.Object)
      */
@@ -1196,7 +1155,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.sun.star.beans.XPropertySet#getPropertyValue(java.lang.String)
      */
     @Override
@@ -1208,7 +1167,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getProp(java.lang.String,
      * java.lang.Object)
      */
@@ -1220,7 +1179,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.sun.star.beans.XPropertySet#addPropertyChangeListener(java.lang.String,
      * com.sun.star.beans.XPropertyChangeListener)
@@ -1234,7 +1193,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.sun.star.beans.XPropertySet#removePropertyChangeListener(java.lang.String,
      * com.sun.star.beans.XPropertyChangeListener)
@@ -1249,7 +1208,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.sun.star.beans.XPropertySet#addVetoableChangeListener(java.lang.String,
      * com.sun.star.beans.XVetoableChangeListener)
@@ -1263,7 +1222,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.sun.star.beans.XPropertySet#removeVetoableChangeListener(java.lang.String,
      * com.sun.star.beans.XVetoableChangeListener)
@@ -1280,7 +1239,7 @@ public class PrintModels
      * Der wesentliche Unterschied zur gleichnamigen Methode des Masters ist es, dass
      * nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als der
      * ORDER-Wert der aktuellen Druckfunktion ist.
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#usePrintFunction(java.lang.String)
      */
     @Override
@@ -1299,7 +1258,7 @@ public class PrintModels
      * Der wesentliche Unterschied zur gleichnamigen Methode des Masters ist es, dass
      * nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als der
      * ORDER-Wert der aktuellen Druckfunktion ist.
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.print.PrintModels.InternalPrintModel#useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.print.PrintFunction)
      */
     @Override
@@ -1340,7 +1299,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#isCanceled()
      */
     @Override
@@ -1351,7 +1310,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#cancel()
      */
     @Override
@@ -1362,7 +1321,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintProgressMaxValue(short)
      */
@@ -1374,7 +1333,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintProgressValue(short)
      */
     @Override
@@ -1385,7 +1344,7 @@ public class PrintModels
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintMessage(string)
      */
     @Override
@@ -1398,8 +1357,6 @@ public class PrintModels
   /**
    * Setzt die Beschreibung des aktuellen Druckbearbeitungsvorgangs für das
    * XPrintModel pmod auf stage
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static void setStage(XPrintModel pmod, String stage)
   {

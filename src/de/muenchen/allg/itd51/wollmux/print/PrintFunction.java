@@ -2,7 +2,7 @@
  * Dateiname: PrintFunction.java
  * Projekt  : WollMux
  * Funktion : Eine durch ein ConfigThingy beschriebene externe Druckfunktion.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -62,7 +62,7 @@ public class PrintFunction implements Comparable<PrintFunction>
    * und functionName werden für korrekte Sortierung verschiedener
    * Druckfuntionktionen und damit für die Bildung einer definierten Reihenfolge bei
    * der Abarbeitung verschachtelter Druckfunktionen benätigt (siehe compareTo(...)).
-   * 
+   *
    * @throws ConfigurationErrorException
    *           falls die Spezifikation in conf fehlerhaft ist.
    */
@@ -76,8 +76,6 @@ public class PrintFunction implements Comparable<PrintFunction>
 
   /**
    * Liefert den Namen dieser Druckfunktion zurück.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public String getFunctionName()
   {
@@ -87,7 +85,7 @@ public class PrintFunction implements Comparable<PrintFunction>
   /**
    * Ruft die Funktion mit dem XPrintModel pmod als Parameter asynchron (d,h, in
    * einem eigenen Thread) auf und liefert den Thread zurück.
-   * 
+   *
    * @param pmod
    *          das XPrintModel des aktuellen Vordergrunddokuments, das die wichtigsten
    *          Druckkomandos bereitstellt, die die externe Funktion verwenden kann.
@@ -117,21 +115,19 @@ public class PrintFunction implements Comparable<PrintFunction>
   }
 
   /**
-   * Vergleicht this mit otherPrintFunction und liefert -1 zurück, wenn this eine
-   * höhere Priorität besitzt als otherPrintFunction (und damit vor
-   * otherPrintFunction abgearbeitet werden soll) und 1, wenn otherPrintFunction eine
-   * höhere Priorität besitzt als this. Die Priorität ergibt sich dabei aus dem
-   * Attribut ORDER der PrintFunction und deren Namen. Ist die this.order kleiner als
-   * otherPrintFunction.order, so hat this die höhrer Priorität, sind beide
-   * order-Werte gleich, so wird der Name alphabetisch verglichen und ist this.order
-   * größer als otherPrintFunction.order, so hat otherPrintFunction hörere Priorität.
-   * 
+   * Vergleicht this mit otherPrintFunction und liefert -1 zurück, wenn this eine höhere Priorität
+   * besitzt als otherPrintFunction (und damit vor otherPrintFunction abgearbeitet werden soll) und
+   * 1, wenn otherPrintFunction eine höhere Priorität besitzt als this. Die Priorität ergibt sich
+   * dabei aus dem Attribut ORDER der PrintFunction und deren Namen. Ist die this.order kleiner als
+   * otherPrintFunction.order, so hat this die höhrer Priorität, sind beide order-Werte gleich, so
+   * wird der Name alphabetisch verglichen und ist this.order größer als otherPrintFunction.order,
+   * so hat otherPrintFunction hörere Priorität.
+   *
    * @param otherPrintFunction
    *          Die PrintFunction mit der vergleichen werden soll.
-   * @return
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
+   * @return @{see {@link String#compareTo(String)}
    */
+  @Override
   public int compareTo(PrintFunction otherPrintFunction)
   {
     PrintFunction other = otherPrintFunction;
@@ -139,6 +135,7 @@ public class PrintFunction implements Comparable<PrintFunction>
     return this.functionName.compareTo(other.functionName);
   }
 
+  @Override
   public boolean equals(Object o)
   {
     if (o == null) return false;
@@ -151,16 +148,13 @@ public class PrintFunction implements Comparable<PrintFunction>
     return false;
   }
 
+  @Override
   public int hashCode()
   {
     return this.functionName.hashCode();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see java.lang.Object#toString()
-   */
+  @Override
   public String toString()
   {
     return "PrintFunction['" + functionName + "']";

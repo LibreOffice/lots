@@ -17,7 +17,6 @@ import com.sun.star.text.XTextDocument;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResultsWithSchema;
 import de.muenchen.allg.itd51.wollmux.core.dialog.TextComponentTags;
-import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -35,21 +34,21 @@ import de.muenchen.allg.itd51.wollmux.print.PrintModels;
  */
 public class MailMergeController
 {
-  
+
   private static final Logger LOGGER = LoggerFactory.getLogger(MailMergeController.class);
-  
+
   /**
   * Tag für {@link TextComponentTags}, das als Platzhalter für die Serienbriefnummer
   * steht.
   */
   public static final String TAG_SERIENBRIEFNUMMER = "#SB";
-  
+
   /**
   * Tag für {@link TextComponentTags}, das als Platzhalter für die Datensatznummer
   * steht.
   */
   public static final String TAG_DATENSATZNUMMER = "#DS";
-  
+
   /**
    * ID der Property in der die Serienbriefdaten gespeichert werden.
    */
@@ -123,9 +122,9 @@ public class MailMergeController
 
   public static final String MAIL_ERROR_MESSAGE_TITLE =
     L.m("Fehler beim E-Mail-Versand");
-  
+
   private TextDocumentController documentController;
-  
+
   /**
    * Stellt die Felder und Datensätze für die Serienbriefverarbeitung bereit.
    */
@@ -136,14 +135,13 @@ public class MailMergeController
    *
    * @param documentController
    *          das {@link TextDocumentModel} an dem die Toolbar hängt.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public MailMergeController(TextDocumentController documentController, MailMergeDatasource ds)
   {
     this.documentController = documentController;
     this.ds = ds;
   }
-  
+
   public TextDocumentController getDocumentController()
   {
     return documentController;
@@ -195,8 +193,6 @@ public class MailMergeController
 
   /**
    * Liefert das Textdokument für das der Seriendruck gestartet werden soll.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   public XTextDocument getTextDocument()
   {
@@ -211,7 +207,7 @@ public class MailMergeController
   {
     documentController.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
-    
+
     List<String> usePrintFunctions = new ArrayList<>();
     boolean ignoreDocPrintFuncs = true;
     switch (action)
@@ -369,7 +365,7 @@ public class MailMergeController
         documentController.setFormFieldsPreviewMode(false);
 
         long duration = (System.currentTimeMillis() - startTime) / 1000;
-        
+
         LOGGER.debug(L.m("MailMerge finished after %1 seconds", duration));
 
         // Wenn der Seriendruck per E-Mail versendet wird, sende Zusammenfassung
@@ -428,13 +424,13 @@ public class MailMergeController
       }
     }.start();
   }
-  
+
   enum FORMAT {
     ODT,
     PDF,
     NOTHING;
   }
-  
+
   enum ACTION {
     SINGLE_DOCUMENT,
     DIRECT,
@@ -442,12 +438,10 @@ public class MailMergeController
     MULTIPLE_DOCUMENTS,
     NOTHING;
   }
-  
+
   /**
    * Zählt alle Schlüsselwörter auf, die Übergabeargumente für
-   * {@link MailMergeController#doMailMerge(List, boolean, DatasetSelectionType, Map)}
-   * sein können. Jedes UI-Element steuert in {@link UIElement#addSubmitArgs(Map)},
-   * ob und welche Argumente es setzt.
+   * {@link MailMergeController#doMailMerge(ACTION, FORMAT, DatasetSelectionType, Map)} sein können.
    *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -473,13 +467,13 @@ public class MailMergeController
     ALL,
 
     /**
-     * Der durch {@link MailMergeNew#rangeStart} und {@link MailMergeNew#rangeEnd}
-     * gegebene Wert.
+     * Der durch {@link IndexSelection#rangeStart} und {@link IndexSelection#rangeEnd} gegebene
+     * Wert.
      */
     RANGE,
 
     /**
-     * Die durch {@link MailMergeNew#selectedIndexes} bestimmten Datensätze.
+     * Die durch {@link IndexSelection#selectedIndexes} bestimmten Datensätze.
      */
     INDIVIDUAL,
     NOTHING;
@@ -488,31 +482,30 @@ public class MailMergeController
   public static class IndexSelection
   {
     /**
-     * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#RANGE}
-     * bestimmt dies den ersten zu druckenden Datensatz (wobei der erste Datensatz
-     * die Nummer 1 hat). ACHTUNG! Der Wert hier kann 0 oder größer als
+     * Falls {@link MailmergeWizardController#datasetSelectionType} ==
+     * {@link DatasetSelectionType#RANGE} bestimmt dies den ersten zu druckenden Datensatz (wobei
+     * der erste Datensatz die Nummer 1 hat). ACHTUNG! Der Wert hier kann 0 oder größer als
      * {@link #rangeEnd} sein. Dies muss dort behandelt werden, wo er verwendet wird.
      */
     public int rangeStart = 1;
 
     /**
-     * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#RANGE}
-     * bestimmt dies den letzten zu druckenden Datensatz (wobei der erste Datensatz
-     * die Nummer 1 hat). ACHTUNG! Der Wert hier kann 0 oder kleiner als
-     * {@link #rangeStart} sein. Dies muss dort behandelt werden, wo er verwendet
-     * wird.
+     * Falls {@link MailmergeWizardController#datasetSelectionType} ==
+     * {@link DatasetSelectionType#RANGE} bestimmt dies den letzten zu druckenden Datensatz (wobei
+     * der erste Datensatz die Nummer 1 hat). ACHTUNG! Der Wert hier kann 0 oder kleiner als
+     * {@link #rangeStart} sein. Dies muss dort behandelt werden, wo er verwendet wird.
      */
     public int rangeEnd = Integer.MAX_VALUE;
 
     /**
-     * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#INDIVIDUAL}
-     * bestimmt dies die Indizes der ausgewählten Datensätze, wobei 1 den ersten
-     * Datensatz bezeichnet.
+     * Falls {@link MailmergeWizardController#datasetSelectionType} ==
+     * {@link DatasetSelectionType#INDIVIDUAL} bestimmt dies die Indizes der ausgewählten
+     * Datensätze, wobei 1 den ersten Datensatz bezeichnet.
      */
     public List<Integer> selectedIndexes = new ArrayList<>();
 
   }
-  
+
   /**
    * Ersetzt alle möglicherweise bösen Zeichen im Dateinamen name durch eine
    * Unterstrich.

@@ -75,9 +75,6 @@ public class FunkyDatasource implements Datasource
    * @param sourceDesc
    *          der "Datenquelle"-Knoten, der die Beschreibung dieser UnionDatasource
    *          enthält.
-   * @param urlContext
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
-   *          verwendet).
    */
   public FunkyDatasource(Map<String, Datasource> nameToDatasource,
       ConfigThingy sourceDesc) throws ConfigurationErrorException

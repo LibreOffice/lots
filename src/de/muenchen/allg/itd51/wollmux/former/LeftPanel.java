@@ -2,7 +2,7 @@
  * Dateiname: LeftPanel.java
  * Projekt  : WollMux
  * Funktion : Der Übercontainer für die linke Hälfte des FormularMax 4000.
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,15 +26,13 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.former;
 
 import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import com.sun.star.text.XTextDocument;
 
@@ -55,7 +53,7 @@ import de.muenchen.allg.itd51.wollmux.former.view.View;
 
 /**
  * Der Übercontainer für die linke Hälfte des FormularMax 4000.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class LeftPanel implements View
@@ -114,57 +112,26 @@ public class LeftPanel implements View
     myTabbedPane.add(L.m("Sichtbarkeiten"), allGroupModelLineViewsPanel.getComponent());
     myTabbedPane.add(L.m("Bereiche"), allSectionModelLineViewsPanel.getComponent());
 
-    myTabbedPane.addChangeListener(new ChangeListener()
-    {
-      @Override
-      public void stateChanged(ChangeEvent e)
-      {
-        tabSwitched();
-      }
-    });
+    myTabbedPane.addChangeListener(e -> tabSwitched());
   }
 
   private void tabSwitched()
   {
     if (myTabbedPane.getSelectedComponent() == allFormControlModelLineViewsPanel.getComponent())
     {
-      formularMax4000.broadcast(new Broadcast()
-      {
-        public void sendTo(BroadcastListener listener)
-        {
-          listener.broadcastAllFormControlsViewSelected();
-        }
-      });
+      formularMax4000.broadcast(BroadcastListener::broadcastAllFormControlsViewSelected);
     }
     else if (myTabbedPane.getSelectedComponent() == allInsertionModelLineViewsPanel.getComponent())
     {
-      formularMax4000.broadcast(new Broadcast()
-      {
-        public void sendTo(BroadcastListener listener)
-        {
-          listener.broadcastAllInsertionsViewSelected();
-        }
-      });
+      formularMax4000.broadcast(BroadcastListener::broadcastAllInsertionsViewSelected);
     }
     else if (myTabbedPane.getSelectedComponent() == allGroupModelLineViewsPanel.getComponent())
     {
-      formularMax4000.broadcast(new Broadcast()
-      {
-        public void sendTo(BroadcastListener listener)
-        {
-          listener.broadcastAllGroupsViewSelected();
-        }
-      });
+      formularMax4000.broadcast(BroadcastListener::broadcastAllGroupsViewSelected);
     }
     else if (myTabbedPane.getSelectedComponent() == allSectionModelLineViewsPanel.getComponent())
     {
-      formularMax4000.broadcast(new Broadcast()
-      {
-        public void sendTo(BroadcastListener listener)
-        {
-          listener.broadcastAllSectionsViewSelected();
-        }
-      });
+      formularMax4000.broadcast(BroadcastListener::broadcastAllSectionsViewSelected);
     }
   }
 
@@ -173,8 +140,6 @@ public class LeftPanel implements View
    * {@link AllFormControlLineViewsPanel} eingefügt werden sollten oder -1, falls
    * dort kein Tab ausgewählt ist. Der zurückgelieferte Wert (falls nicht -1)
    * entspricht dem Index des letzten sichtbaren Elements + 1.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public int getButtonInsertionIndex()
   {
@@ -190,8 +155,6 @@ public class LeftPanel implements View
   /**
    * Ruft {@link AllFormControlLineViewsPanel#mergeCheckboxesIntoCombobox()} auf und
    * liefert dessen Ergebnis zurück.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ComboboxMergeDescriptor mergeCheckboxesIntoCombobox()
   {
