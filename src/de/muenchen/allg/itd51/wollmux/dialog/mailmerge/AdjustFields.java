@@ -182,6 +182,7 @@ public class AdjustFields
       Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
           .getSource();
       ds.addColumns(mapIdToSubstitution);
+      ds.updatePreviewFields(ds.getPreviewDatasetNumber());
       finishedListener
           .actionPerformed(new ActionEvent(new Object(), 0, "AddMissingDialogFinished"));
     };
@@ -385,7 +386,7 @@ public class AdjustFields
         int index = value + i;
         String id = fieldIDs[index].getFieldId();
         label.setText(id);
-        field.setText(mapIdTwoNewValue.getOrDefault(id, ""));
+        field.setText(mapIdTwoNewValue.getOrDefault(fieldIDs[index], ""));
       }
     }
   }
