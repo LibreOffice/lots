@@ -20,7 +20,7 @@
   </dlg:radiogroup>
   <dlg:text dlg:id="Label1" dlg:tab-index="9" dlg:left="22" dlg:top="88" dlg:width="12" dlg:height="8" dlg:value="Von"/>
   <dlg:text dlg:id="Label2" dlg:tab-index="10" dlg:left="78" dlg:top="88" dlg:width="12" dlg:height="8" dlg:value="Bis"/>
-  <dlg:numericfield dlg:id="from" dlg:tab-index="8" dlg:left="35" dlg:top="88" dlg:width="40" dlg:height="8" dlg:help-text="Von" dlg:decimal-accuracy="0" dlg:value-min="1" dlg:spin="true"/>
-  <dlg:numericfield dlg:id="till" dlg:tab-index="11" dlg:left="93" dlg:top="88" dlg:width="40" dlg:height="8" dlg:help-text="Von" dlg:decimal-accuracy="0" dlg:value-min="1" dlg:spin="true"/>
+  <dlg:numericfield dlg:id="from" dlg:tab-index="8" dlg:left="35" dlg:top="88" dlg:width="40" dlg:height="12" dlg:help-text="Von" dlg:decimal-accuracy="0" dlg:value-min="1" dlg:spin="true"/>
+  <dlg:numericfield dlg:id="till" dlg:tab-index="11" dlg:left="93" dlg:top="88" dlg:width="40" dlg:height="12" dlg:help-text="Von" dlg:decimal-accuracy="0" dlg:value-min="1" dlg:spin="true"/>
  </dlg:bulletinboard>
 </dlg:window>
