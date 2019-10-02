@@ -60,13 +60,10 @@ public class FormController
   private String defaultWindowAttributes;
 
   private PropertyChangeSupport changes = new PropertyChangeSupport( this );
-  private PropertyChangeSupport fieldIdChanges = new PropertyChangeSupport( this );
 
   private Rectangle frameBounds;
   private Rectangle maxWindowBounds;
   private Insets windowInsets;
-
-  private String fieldId;
 
   public Rectangle getFrameBounds()
   {
@@ -98,17 +95,6 @@ public class FormController
   public void removePropertyChangeListener( PropertyChangeListener l )
   {
     changes.removePropertyChangeListener( l );
-  }
-
-  public String getFieldId()
-  {
-    return fieldId;
-  }
-
-  public void setFieldId(String fieldId)
-  {
-    this.fieldId = fieldId;
-    fieldIdChanges.firePropertyChange("name", null, null);
   }
 
 
@@ -284,18 +270,23 @@ public class FormController
    * Baut die GUI zusammen und zeigt diese an. Sobald, die GUI angezeigt wurde wird die Methode
    * {@link #formControllerInitCompleted()} aufgerufen.
    */
-  public void startFormGUI()
+  public void createFormGUI()
   {
     Runnable runner = () -> {
       try
       {
-        gui.create(model, true);
+        gui.create(model);
       } catch (Exception x)
       {
         LOGGER.error("", x);
       }
     };
     gui.createGUI(runner);
+  }
+
+  public void showFormGUI()
+  {
+    gui.show(true);
   }
 
   /**
