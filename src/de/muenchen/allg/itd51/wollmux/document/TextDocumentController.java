@@ -2404,19 +2404,26 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     return formModel;
   }
 
-  public FormController createFormController() throws FormModelException
+  public FormController getFormController() throws FormModelException
   {
-    // Abschnitt Fenster/Formular aus wollmuxConf holen:
-    ConfigThingy formFensterConf;
-    try
+    FormController formController = DocumentManager.getDocumentManager()
+        .getFormModel(getModel().doc);
+    if (formController == null)
     {
-      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular")
-          .getLastChild();
-    } catch (NodeNotFoundException x)
-    {
-      formFensterConf = new ConfigThingy("");
+      // Abschnitt Fenster/Formular aus wollmuxConf holen:
+      ConfigThingy formFensterConf;
+      try
+      {
+        formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular")
+            .getLastChild();
+      } catch (NodeNotFoundException x)
+      {
+        formFensterConf = new ConfigThingy("");
+      }
+      formController = new FormController(getFormModel(), formFensterConf, this);
+      DocumentManager.getDocumentManager().setFormModel(getModel().doc, formController);
     }
-    return new FormController(getFormModel(), formFensterConf, this);
+    return formController;
   }
 
   /**
@@ -2503,7 +2510,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   /**
    * Setzt den Wert aller Formularfelder im Dokument, die von fieldId abhängen auf den neuen Wert
    * newValue (bzw. auf das Ergebnis der zu diesem Formularelement hinterlegten Trafo-Funktion).
-   * 
+   *
    * Es ist nicht garantiert, dass sich der Wert tatsächlich geändert hat. Die fieldId kann leer
    * sein (aber nie null).
    */
@@ -2518,7 +2525,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
 
   /**
    * Setzt den Sichtbarkeitsstatus der Sichtbarkeitsgruppe mit der ID groupID auf visible.
-   * 
+   *
    * @param groupId
    *          Die ID der Gruppe, die Sichtbar/unsichtbar geschalten werden soll.
    * @param visible

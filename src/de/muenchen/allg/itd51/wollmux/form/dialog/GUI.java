@@ -174,7 +174,7 @@ public class GUI
     noProcessValueChangedEvents.remove(id);
   }
 
-  public void create(FormModel model, boolean visible)
+  public void create(FormModel model)
   {
     Common.setLookAndFeelOnce();
     initFactories();
@@ -211,7 +211,6 @@ public class GUI
 
     myFrame.pack();
     myFrame.setResizable(true);
-    myFrame.setVisible(visible);
 
     naturalFrameBounds = myFrame.getBounds();
 
@@ -222,8 +221,11 @@ public class GUI
     arrangeWindows();
     model.addFormModelChangedListener(this, true);
     model.addVisibilityChangedListener(this, true);
+  }
 
-    processUIElementEvents = true;
+  public void show(boolean visible)
+  {
+    myFrame.setVisible(visible);
   }
 
   private Component createTab(Tab tab, Color plausiMarkerColor, boolean focus)
@@ -835,7 +837,7 @@ public class GUI
         if ("lost".equals(args[0]))
           controller.focusLost(source.getId());
         else
-          controller.setFieldId(source.getId());
+          controller.focusGained(source.getId());
       }
     } catch (Exception x)
     {
