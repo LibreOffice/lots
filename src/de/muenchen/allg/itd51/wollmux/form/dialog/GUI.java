@@ -117,6 +117,13 @@ public class GUI
 
   private Map<String, UIElement> uiElements = new HashMap<>();
 
+  /**
+   * tabVisibleCount[i] gibt an, wieviele sichtbare Eingabeelemente (Buttonleiste wird nicht
+   * gezählt) das Tab mit Index i hat. ACHTUNG! Muss mit leerem Array starten, weil es ansonsten in
+   * increaseTabVisibleCount() eine ArrayIndexOutOfBoundsException gibt!
+   */
+  private int[] tabVisibleCount;
+
   private Map<String, List<UIElement>> visibilityGroups = new HashMap<>();
 
   private WindowAdapter windowAdapter = new WindowAdapter()
@@ -196,12 +203,17 @@ public class GUI
     myTabbedPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 
     boolean focus = true;
+    tabVisibleCount = new int[model.getTabs().size()];
+    int tabIndex = 0;
     for (Map.Entry<String, Tab> entry : model.getTabs().entrySet())
     {
       Tab tab = entry.getValue();
-      myTabbedPane.addTab(tab.getTitle(), null, createTab(tab, model.getPlausiMarkerColor(), focus),
+      myTabbedPane.addTab(tab.getTitle(), null,
+          createTab(tab, tabIndex, model.getPlausiMarkerColor(), focus),
           tab.getTip());
+      myTabbedPane.setEnabledAt(tabIndex, tabVisibleCount[tabIndex] > 0);
       focus = false;
+      tabIndex++;
     }
 
     myFrame.getContentPane().add(myTabbedPane);
@@ -228,7 +240,7 @@ public class GUI
     myFrame.setVisible(visible);
   }
 
-  private Component createTab(Tab tab, Color plausiMarkerColor, boolean focus)
+  private Component createTab(Tab tab, int tabIndex, Color plausiMarkerColor, boolean focus)
   {
     JPanel myPanel = new JPanel(new GridBagLayout());
     JPanel mainPanel = new JPanel(new GridBagLayout());
@@ -247,6 +259,7 @@ public class GUI
     for (Control control : tab.getControls())
     {
       UIElement uiElement = uiElementFactory.createUIElement(panelContext, control);
+      uiElement.setTab(tabIndex);
       // Dem ersten Element den Focus geben, wenn dies gewünscht ist.
       if (focus)
       {
@@ -315,6 +328,11 @@ public class GUI
       if (!control.isOkay())
       {
         uiElement.setBackground(plausiMarkerColor);
+      }
+
+      if (!uiElement.isStatic())
+      {
+        tabVisibleCount[tabIndex]++;
       }
 
       if (y > GRID_MAX)
@@ -888,6 +906,32 @@ public class GUI
     myTabbedPane.setSelectedIndex(idx);
   }
 
+  /**
+   * Erhöht oder Verringert den Zähler von tabVisibleCount[tabIndex] um 1. Falls dadurch keine
+   * Elemente mehr sichtbar sind, wird der Tab deaktiviert, ansonsten aktiviert.
+   */
+  private void setTabVisibleCount(int tabIndex, boolean visible)
+  {
+    if (tabIndex >= 0 && tabIndex < tabVisibleCount.length)
+    {
+      if (visible)
+      {
+        tabVisibleCount[tabIndex]++;
+        if (tabVisibleCount[tabIndex] == 1)
+        {
+          myTabbedPane.setEnabledAt(tabIndex, true);
+        }
+      } else
+      {
+        tabVisibleCount[tabIndex]--;
+        if (tabVisibleCount[tabIndex] == 0)
+        {
+          myTabbedPane.setEnabledAt(tabIndex, false);
+        }
+      }
+    }
+  }
+
   @Override
   public void statusChanged(String id, boolean okay)
   {
@@ -919,6 +963,10 @@ public class GUI
           } else
           {
             element.setVisible(visible);
+          }
+          if (!element.isStatic())
+          {
+            setTabVisibleCount(element.getTab(), visible);
           }
         }
       }
