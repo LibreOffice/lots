@@ -91,6 +91,9 @@ public class EMailSender
   {
     try
     {
+      // Notwendig um MIME Types auf Java-Klassen zu mappen.
+      // Manchmal funktioniert der ClassLoader nicht richtig
+      Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
       Transport tr = session.getTransport("smtp");
       // FYI: falls getUsername() || getPassword() = "" muss NULL übergeben werden,
       // auch bei "" glaubt javamail AUTH aktivieren zu müssen was zu einer Auth-Exception führt.
