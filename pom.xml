@@ -428,7 +428,7 @@
 		<dependency>
 			<groupId>de.muenchen</groupId>
 			<artifactId>wollmux-core</artifactId>
-			<version>18.1.7-SNAPSHOT</version>
+			<version>18.1.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.libreoffice</groupId>
