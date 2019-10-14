@@ -1,3 +1,20 @@
+ ==================== Neu in Version 18.1.7 ====================
+
+    * Bugfixes
+          o Dialog Tabellenspalten ergänzen korrigiert.
+          o Weniger und bessere Fehlermeldungen im Logfile.
+          o Bessere Fehlermeldung beim Versuch einen Textbaustein an einer
+            Stelle einzufügen, an der keiner ist.
+          o ComboBoxen ohne Optionen werden wieder unterstützt.
+          o Wenn ein Formular-Feld in der FormularGUI den Fokus erhält, so wird
+            automatisch die richtige Stelle im Dokument angezeigt.
+          o Tabs ohne sichtbare Formular-Felder werden deaktiviert. Sobald ein
+            Formular-Feld sichtbar wird, wird der Tab aktiviert und kann mit den
+            Buttons "weiter" und "zurück" erreicht werden. Ansonsten werden die
+            deaktivierten Tabs übersprungen.
+          o Alle GUI-Elemente der Seriendruck-Sidebar wurden in einem anderen
+            Kontext angelegt, sodass sich die Sidebar nun richtig beendet.
+
  ==================== Neu in Version 18.1.6 ====================
 
     * Bugfixes
