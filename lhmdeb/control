@@ -7,11 +7,11 @@ Build-Depends: ant, cdbs, debhelper (>= 5), inkscape, openjdk-8-jdk|oracle-java8
 Standards-Version: 3.8.0
 Homepage: http://www.wollmux.org
 
-Package: libreoffice6.1-wollmux
+Package: libreoffice6.4-wollmux
 Architecture: all
-Depends: ${misc:Depends}, default-jre, libreoffice6.1-writer, python3
-Conflicts: libreoffice-wollmux (<< ${binary:Version}), wollmux (<< ${binary:Version}), wollmuxbar (<< ${binary:Version}), libreoffice5.2-wollmux
-Replaces: libreoffice-wollmux (<< ${binary:Version}), wollmux (<< ${binary:Version}), wollmuxbar (<< ${binary:Version}), libreoffice5.2-wollmux
+Depends: ${misc:Depends}, default-jre, libreoffice6.4-writer, python3
+Conflicts: libreoffice-wollmux (<< ${binary:Version}), wollmux (<< ${binary:Version}), wollmuxbar (<< ${binary:Version}), libreoffice5.2-wollmux, libreoffice6.1-wollmux
+Replaces: libreoffice-wollmux (<< ${binary:Version}), wollmux (<< ${binary:Version}), wollmuxbar (<< ${binary:Version}), libreoffice5.2-wollmux, libreoffice6.1-wollmux
 Provides: libreoffice-wollmux, wollmux, wollmuxbar
 Multi-arch: foreign
 Description: WollMux extension for LibreOffice
