@@ -20,6 +20,7 @@ import de.muenchen.allg.itd51.wollmux.core.document.VisibleTextFragmentList;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.InvalidIdentifierException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.document.DocumentLoader;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
@@ -129,7 +130,12 @@ public class OnOpenDocument extends BasicEvent
           url = WollMuxFiles.makeURL(urlStr);
           urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
           url = WollMuxFiles.makeURL(urlStr);
-          WollMuxSingleton.checkURL(url);
+          found = DocumentLoader.getInstance().hasDocument(urlStr);
+          if (!found)
+          {
+            WollMuxSingleton.checkURL(url);
+            found = true;
+          }
         } catch (MalformedURLException e)
         {
           LOGGER.info("", e);
@@ -141,8 +147,6 @@ public class OnOpenDocument extends BasicEvent
           errors.append(e.getLocalizedMessage()).append("\n\n");
           continue;
         }
-
-        found = true;
       }
 
       if (!found)
@@ -168,7 +172,7 @@ public class OnOpenDocument extends BasicEvent
     TextDocumentController documentController = null;
     try
     {
-      XComponent doc = UNO.loadComponentFromURL(loadUrlStr, asTemplate, true);
+      XComponent doc = DocumentLoader.getInstance().loadDocument(loadUrlStr, asTemplate, true);
 
       if (UNO.XTextDocument(doc) != null)
       {

@@ -50,7 +50,7 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.event.ActionListener;
-import java.util.Set;
+import java.util.List;
 
 import com.sun.star.ui.dialogs.Wizard;
 import com.sun.star.ui.dialogs.WizardButton;
@@ -58,7 +58,7 @@ import com.sun.star.ui.dialogs.XWizard;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 
@@ -84,11 +84,11 @@ public class DatensatzBearbeiten
    * @param edit
    * @throws ConfigurationErrorException
    */
-  protected DatensatzBearbeiten(DJDataset datensatz, Dataset ldapDataset, Set<String> dbSchema)
+  protected DatensatzBearbeiten(LOSDJDataset datensatz, List<String> dbSchema)
   {
     wizard = Wizard.createSinglePathWizard(UNO.defaultContext,
         DatensatzBearbeitenWizardController.PATHS,
-        new DatensatzBearbeitenWizardController(datensatz, ldapDataset, dbSchema));
+        new DatensatzBearbeitenWizardController(datensatz, dbSchema));
       wizard.enableButton(WizardButton.HELP, false);
       wizard.setTitle("Datensatz bearbeiten");
   }

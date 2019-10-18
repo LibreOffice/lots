@@ -78,8 +78,6 @@ public class Workarounds
    * Issue #73229 betrifft den WollMux-Seriendruck in ein Gesamtdokument und ist
    * aktuell für OOo Later priorisiert - wird also nicht in absehbarer Zeit behoben
    * sein.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static boolean applyWorkaroundForOOoIssue73229()
   {
@@ -106,8 +104,6 @@ public class Workarounds
    *         ohne Einfrierer von der aktuell genutzen Office-Version verarbeitet
    *         werden können. Der Rückgabewert kann auch null sein, dann soll der der
    *         Workaround nicht angewendet werden.
-   *
-   * @author Christoph Lutz (CIB software GmbH)
    */
   public static Integer workaroundForTDFIssue89783(XTextDocument doc)
   {

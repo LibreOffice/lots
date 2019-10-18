@@ -80,12 +80,13 @@ public class OnSaveAs extends BasicEvent
 
     File file = ensureFileHasODTSuffix(getDefaultFile(func));
     XFilePicker3 picker = FilePicker.createWithMode(UNO.defaultContext,
-        TemplateDescription.FILESAVE_AUTOEXTENSION_TEMPLATE);
-    picker.setDisplayDirectory(file.getParent());
-    picker.setDefaultName(file.getAbsolutePath());
+        TemplateDescription.FILESAVE_AUTOEXTENSION);
+    picker.setDisplayDirectory(file.getParentFile().toURI().toString());
+    picker.setDefaultName(file.getName());
+
     String filterName = "ODF Textdokument";
-    picker.appendFilter(filterName, "odt");
-    picker.appendFilter("Alle Dateien", "");
+    picker.appendFilter(filterName, "*.odt");
+    picker.appendFilter("Alle Dateien", "*");
     picker.setCurrentFilter(filterName);
     short res = picker.execute();
     if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)

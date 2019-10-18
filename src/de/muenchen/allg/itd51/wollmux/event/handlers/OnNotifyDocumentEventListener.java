@@ -111,6 +111,7 @@ public class OnNotifyDocumentEventListener extends BasicEvent
 
           FormController formController = DocumentManager.getDocumentManager()
               .getFormModel(xTextDoc);
+          formController.showFormGUI();
 
           setWindowPosSize(formController, documentController, xTextDoc);
 
@@ -121,7 +122,7 @@ public class OnNotifyDocumentEventListener extends BasicEvent
       }
     }
   }
-  
+
   /**
    * Setzt die Position des Fensters auf die übergebenen Koordinaten, wobei die
    * Nachteile der UNO-Methode setWindowPosSize greifen, bei der die Fensterposition
@@ -152,7 +153,7 @@ public class OnNotifyDocumentEventListener extends BasicEvent
         setIsMaximized.invoke(o, false);
       }
     } catch (java.lang.Exception e)
-    {      
+    {
       LOGGER.debug("", e);
     }
 

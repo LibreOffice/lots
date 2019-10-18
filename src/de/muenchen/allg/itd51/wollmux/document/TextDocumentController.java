@@ -488,7 +488,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
         master =
           UNO.XPropertySet(UNO.XMultiServiceFactory(model.doc).createInstance(
             "com.sun.star.text.FieldMaster.User"));
-        UNO.setProperty(master, "Value", Integer.valueOf(0));
+        UNO.setProperty(master, "Value", Double.valueOf(0));
         UNO.setProperty(master, "Name", userFieldName);
       }
 
@@ -664,29 +664,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
         idToPresetValue.put(id, TextDocumentModel.FISHY);
     }
     return idToPresetValue;
-  }
-
-  /**
-   * Diese Methode blockt/unblocked die Contoller, die für das Rendering der
-   * Darstellung in den Dokumenten zuständig sind, jedoch nur, wenn nicht der
-   * debug-modus gesetzt ist.
-   *
-   * @param state
-   */
-  public synchronized void setLockControllers(boolean lock)
-  {
-    try
-    {
-      if (!WollMuxFiles.isDebugMode() && UNO.XModel(model.doc) != null)
-      {
-        if (lock)
-          UNO.XModel(model.doc).lockControllers();
-        else
-          UNO.XModel(model.doc).unlockControllers();
-      }
-    }
-    catch (java.lang.Exception e)
-    {}
   }
 
   /**
@@ -1440,7 +1417,8 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
         boolean setVisible = true;
         for (String gid : groups)
         {
-          if (groupState.get(gid).equals(Boolean.FALSE)) {
+          if (Boolean.FALSE.equals(groupState.get(gid)))
+          {
             setVisible = false;
           }
         }
@@ -2107,7 +2085,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     FunctionLibrary funcLib = getFunctionLibrary();
     DialogLibrary dialogLib = getDialogLibrary();
     Map<Object, Object> context = getFunctionContext();
-
     // eindeutigen Namen für die neue Autofunktion erzeugen:
     Set<String> currentFunctionNames = funcLib.getFunctionNames();
     String name = null;
@@ -2128,6 +2105,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       }
       model.getFunktionenConf().addChild(betterNameFunc);
 
+      // TODO: Single-Responsibility-Prinzip
       storeCurrentFormDescription();
       return name;
     }
@@ -2414,7 +2392,9 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       {
         ConfigThingy formConf = getFormDescription().get("Formular");
         formModel = new FormModel(formConf, getWindowTitle(), getFunctionContext(),
-            getFunctionLibrary(), getDialogLibrary(), getIDToPresetValue(), this, this);
+            getFunctionLibrary(), getDialogLibrary(), getIDToPresetValue());
+        formModel.addFormModelChangedListener(this, true);
+        formModel.addVisibilityChangedListener(this, true);
       } catch (NodeNotFoundException e)
       {
         throw new FormModelException(
@@ -2424,19 +2404,26 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     return formModel;
   }
 
-  public FormController createFormController() throws FormModelException
+  public FormController getFormController() throws FormModelException
   {
-    // Abschnitt Fenster/Formular aus wollmuxConf holen:
-    ConfigThingy formFensterConf;
-    try
+    FormController formController = DocumentManager.getDocumentManager()
+        .getFormModel(getModel().doc);
+    if (formController == null)
     {
-      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular")
-          .getLastChild();
-    } catch (NodeNotFoundException x)
-    {
-      formFensterConf = new ConfigThingy("");
+      // Abschnitt Fenster/Formular aus wollmuxConf holen:
+      ConfigThingy formFensterConf;
+      try
+      {
+        formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular")
+            .getLastChild();
+      } catch (NodeNotFoundException x)
+      {
+        formFensterConf = new ConfigThingy("");
+      }
+      formController = new FormController(getFormModel(), formFensterConf, this);
+      DocumentManager.getDocumentManager().setFormModel(getModel().doc, formController);
     }
-    return new FormController(getFormModel(), formFensterConf, this);
+    return formController;
   }
 
   /**
@@ -2523,20 +2510,22 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   /**
    * Setzt den Wert aller Formularfelder im Dokument, die von fieldId abhängen auf den neuen Wert
    * newValue (bzw. auf das Ergebnis der zu diesem Formularelement hinterlegten Trafo-Funktion).
-   * 
+   *
    * Es ist nicht garantiert, dass sich der Wert tatsächlich geändert hat. Die fieldId kann leer
    * sein (aber nie null).
    */
   @Override
   public void valueChanged(String id, String value)
   {
-    if (id.length() > 0)
+    if (!id.isEmpty())
+    {
       WollMuxEventHandler.getInstance().handleFormValueChanged(this, id, value);
+    }
   }
 
   /**
    * Setzt den Sichtbarkeitsstatus der Sichtbarkeitsgruppe mit der ID groupID auf visible.
-   * 
+   *
    * @param groupId
    *          Die ID der Gruppe, die Sichtbar/unsichtbar geschalten werden soll.
    * @param visible

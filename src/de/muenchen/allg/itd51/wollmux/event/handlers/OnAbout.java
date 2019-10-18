@@ -1,7 +1,5 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
-import java.net.URL;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +12,8 @@ import com.sun.star.awt.XListBox;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
 import com.sun.star.beans.XPropertySet;
+import com.sun.star.deployment.PackageInformationProvider;
+import com.sun.star.deployment.XPackageInformationProvider;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
@@ -36,7 +36,8 @@ import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 public class OnAbout extends BasicEvent
 {
   private static final Logger LOGGER = LoggerFactory.getLogger(OnAbout.class);
-  private final URL imageURL = this.getClass().getClassLoader().getResource("data/wollmux.jpg");
+  private static final String IMAGE_URL = "/image/wollmux.jpg";
+  private static final String EXTENSION_ID = "de.muenchen.allg.d101.wollmux";
 
   public OnAbout()
   {
@@ -68,7 +69,9 @@ public class OnAbout extends BasicEvent
       homepage.setText("Homepage: www.wollmux.org");
       XControl logo = UnoRuntime.queryInterface(XControl.class, container.getControl("logo"));
       XPropertySet logoProperties = UnoRuntime.queryInterface(XPropertySet.class, logo.getModel());
-      logoProperties.setPropertyValue("ImageURL", imageURL.toString());
+      XPackageInformationProvider xPackageInformationProvider = PackageInformationProvider.get(UNO.defaultContext);
+      String location = xPackageInformationProvider.getPackageLocation(EXTENSION_ID);
+      logoProperties.setPropertyValue("ImageURL", location + IMAGE_URL);
 
       // Autoren
       XListBox authors = UNO.XListBox(container.getControl("authors"));
@@ -77,7 +80,7 @@ public class OnAbout extends BasicEvent
 
       // Info
       XFixedText wmVersion = UNO.XFixedText(container.getControl("wmVersion"));
-      wmVersion.setText("WollMux Version: " + WollMuxSingleton.getVersion());
+      wmVersion.setText("WollMux " + WollMuxSingleton.getVersion());
       XFixedText wmConfig = UNO.XFixedText(container.getControl("wmConfig"));
       wmConfig
           .setText("WollMux-Konfiguration: " + WollMuxSingleton.getInstance().getConfVersionInfo());

@@ -6,7 +6,6 @@ import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.awt.InvalidateStyle;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.WindowAttribute;
@@ -17,23 +16,26 @@ import com.sun.star.awt.XButton;
 import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlModel;
+import com.sun.star.awt.XFixedText;
+import com.sun.star.awt.XItemListener;
 import com.sun.star.awt.XTextComponent;
+import com.sun.star.awt.XTextListener;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
 import com.sun.star.awt.tree.XMutableTreeDataModel;
 import com.sun.star.beans.XMultiPropertySet;
-import com.sun.star.beans.XPropertySet;
-import com.sun.star.lang.NullPointerException;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.afid.UNO;
+
 /**
- * Die Factory enthält Hilfsfunktionen zum einfacheren Erzeugen von 
- * UNO-Steuerelementen. 
- * 
+ * Die Factory enthält Hilfsfunktionen zum einfacheren Erzeugen von
+ * UNO-Steuerelementen.
+ *
  */
 public class GuiFactory
 {
@@ -41,10 +43,14 @@ public class GuiFactory
   private static final Logger LOGGER = LoggerFactory
       .getLogger(GuiFactory.class);
 
+  private GuiFactory()
+  {
+  }
+
   /**
    * Erzeugt ein Fenster ohne Dekorationen. Das Fenster kann als Inhalt eines
    * Sidebar-Panels verwendet werden.
-   * 
+   *
    * @param toolkit
    * @param parentWindow
    * @return
@@ -65,7 +71,7 @@ public class GuiFactory
 
   /**
    * Erzeugt einen Button mit Label und ActionListener.
-   * 
+   *
    * @param xMCF
    * @param context
    * @param toolkit
@@ -73,17 +79,17 @@ public class GuiFactory
    * @param label
    * @param listener
    * @param size
+   * @param props
    * @return
-   * @throws com.sun.star.uno.Exception
    */
+  @SuppressWarnings("squid:S00107")
   public static XControl createButton(XMultiComponentFactory xMCF,
       XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer,
-      String label, XActionListener listener, Rectangle size)
-      throws com.sun.star.uno.Exception
+      String label, XActionListener listener, Rectangle size, SortedMap<String, Object> props)
   {
     XControl buttonCtrl =
       createControl(xMCF, context, toolkit, windowPeer,
-        "com.sun.star.awt.UnoControlButton", null, null, size);
+            "com.sun.star.awt.UnoControlButton", props, size);
     XButton button = UnoRuntime.queryInterface(XButton.class, buttonCtrl);
     button.setLabel(label);
     button.addActionListener(listener);
@@ -91,63 +97,71 @@ public class GuiFactory
   }
 
   /**
-   * Erzeugt die Senderbox für die WollMux-Sidebar.
-   * 
-   * @param xMCF
-   * @param context
-   * @param toolkit
-   * @param windowPeer
-   * @param label
-   * @param listener
-   * @param size
-   * @return
-   * @throws com.sun.star.uno.Exception
-   */
-  public static XControl createSenderbox(XMultiComponentFactory xMCF,
-      XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer,
-      String label, XActionListener listener, Rectangle size)
-      throws com.sun.star.uno.Exception
-  {
-    XControl buttonCtrl =
-      createButton(xMCF, context, toolkit, windowPeer, label, listener, size);
-    
-    if(buttonCtrl == null)
-      throw new Exception();
-    
-    XControlModel model = buttonCtrl.getModel();
-    XPropertySet props = UnoRuntime.queryInterface(XPropertySet.class, model);
-    props.setPropertyValue("FocusOnClick", false);
-    return buttonCtrl;
-  }
-
-  /**
    * Erzeugt ein Texteingabefeld.
-   * 
+   *
    * @param xMCF
    * @param context
    * @param toolkit
    * @param windowPeer
    * @param text
    * @param size
+   * @param props
    * @return
-   * @throws com.sun.star.uno.Exception
    */
   public static XControl createTextfield(XMultiComponentFactory xMCF,
       XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer,
-      String text, Rectangle size) throws com.sun.star.uno.Exception
+      String text, Rectangle size, SortedMap<String, Object> props)
   {
+    if (props == null)
+    {
+      props = new TreeMap<>();
+    }
+    props.put("MultiLine", false);
+    props.put("ReadOnly", false);
+    props.put("VScroll", false);
+
     XControl buttonCtrl =
       createControl(xMCF, context, toolkit, windowPeer,
-        "com.sun.star.awt.UnoControlEdit", null, null, size);
-    
+            "com.sun.star.awt.UnoControlEdit", props, size);
+
     XTextComponent txt = UnoRuntime.queryInterface(XTextComponent.class, buttonCtrl);
     txt.setText(text);
     return buttonCtrl;
   }
 
   /**
+   * Erzeugt ein Label.
+   *
+   * @param xMCF
+   * @param context
+   * @param toolkit
+   * @param windowPeer
+   * @param text
+   * @param size
+   * @param props
+   * @return
+   */
+  public static XControl createLabel(XMultiComponentFactory xMCF, XComponentContext context,
+      XToolkit toolkit, XWindowPeer windowPeer, String text, Rectangle size,
+      SortedMap<String, Object> props)
+  {
+    if (props == null)
+    {
+      props = new TreeMap<>();
+    }
+    props.put("MultiLine", true);
+
+    XControl buttonCtrl = createControl(xMCF, context, toolkit, windowPeer,
+        "com.sun.star.awt.UnoControlFixedText", props, size);
+
+    XFixedText txt = UNO.XFixedText(buttonCtrl);
+    txt.setText(text);
+    return buttonCtrl;
+  }
+
+  /**
    * Erzeugt ein Datenmodell für einen Baum-Steuerelement.
-   * 
+   *
    * @param xMCF
    * @param context
    * @return
@@ -160,70 +174,86 @@ public class GuiFactory
       xMCF.createInstanceWithContext("com.sun.star.awt.tree.MutableTreeDataModel",
         context));
   }
-  
+
   /**
    * Erzeugt ein Baum-Steuerelement mit einem vorgegebenen Datenmodell.
    * Das Datenmodel kann mit {@link #createTreeModel(XMultiComponentFactory, XComponentContext)}
    * erzeugt werden.
-   * 
+   *
    * @param xMCF
    * @param context
    * @param toolkit
    * @param windowPeer
    * @param dataModel
    * @return
-   * @throws Exception
    */
-  public static XControl createTree(XMultiComponentFactory xMCF,
-      XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer, XMutableTreeDataModel dataModel) throws Exception
+  public static XControl createTree(XMultiComponentFactory xMCF, XComponentContext context,
+      XToolkit toolkit, XWindowPeer windowPeer, XMutableTreeDataModel dataModel)
   {
-    XControl treeCtrl =
-        GuiFactory.createControl(xMCF, context, toolkit, windowPeer,
-          "com.sun.star.awt.tree.TreeControl", null, null, new Rectangle(0, 0,
+    SortedMap<String, Object> props = new TreeMap<>();
+    props.put("DataModel", dataModel);
+    return GuiFactory.createControl(xMCF, context, toolkit, windowPeer,
+            "com.sun.star.awt.tree.TreeControl", props, new Rectangle(0, 0,
             400, 400));
-
-    XPropertySet props =
-        UnoRuntime.queryInterface(XPropertySet.class, treeCtrl.getModel());
-    props.setPropertyValue("DataModel", dataModel);
-    
-    return treeCtrl;
   }
-  
+
   public static XControl createCombobox(XMultiComponentFactory xMCF,
-      XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer, String text, Rectangle size)
+      XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer, String text,
+      Rectangle size, SortedMap<String, Object> props)
   {
     XControl ctrl =
         createControl(xMCF, context, toolkit, windowPeer,
-          "com.sun.star.awt.UnoControlComboBox", null, null, size);
+            "com.sun.star.awt.UnoControlComboBox", props, size);
     XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, ctrl);
     tf.setText(text);
     XComboBox cmb = UnoRuntime.queryInterface(XComboBox.class, ctrl);
     cmb.setDropDownLineCount((short) 10);
-    
-    try
-    {
-      if (ctrl == null)
-        throw new NullPointerException();
-      
-      XControlModel model = ctrl.getModel();
-//        UnoRuntime.queryInterface(XControlModel.class,
-//          xMCF.createInstanceWithContext("com.sun.star.awt.UnoControlComboBoxModel", context));
-      
-      XPropertySet props =
-          UnoRuntime.queryInterface(XPropertySet.class, model);
 
-      props.setPropertyValue("Dropdown", Boolean.TRUE);
-      //props.setPropertyValue("ReadOnly", Boolean.TRUE);
-      props.setPropertyValue("Autocomplete", Boolean.FALSE);
-      props.setPropertyValue("HideInactiveSelection", Boolean.TRUE);
+    return ctrl;
+  }
 
-      ctrl.setModel(model);
-      ctrl.getPeer().invalidate(InvalidateStyle.UPDATE);
-    }
-    catch (Exception e)
+  @SuppressWarnings("squid:S00107")
+  public static XControl createNumericField(XMultiComponentFactory xMCF, XComponentContext context,
+      XToolkit toolkit, XWindowPeer windowPeer, int value, XTextListener listener, Rectangle size,
+      SortedMap<String, Object> props)
+  {
+    XControl ctrl = createControl(xMCF, context, toolkit, windowPeer,
+        "com.sun.star.awt.UnoControlNumericField", props, size);
+    UNO.XNumericField(ctrl).setValue(value);
+    UNO.XTextComponent(ctrl).addTextListener(listener);
+
+    return ctrl;
+  }
+
+  @SuppressWarnings("squid:S00107")
+  public static XControl createSpinField(XMultiComponentFactory xMCF, XComponentContext context,
+      XToolkit toolkit, XWindowPeer windowPeer, int value, XTextListener listener, Rectangle size,
+      SortedMap<String, Object> props)
+  {
+    if (props == null)
     {
-      LOGGER.error("", e);
+      props = new TreeMap<>();
     }
+    props.put("Spin", Boolean.TRUE);
+
+    return createNumericField(xMCF, context, toolkit, windowPeer, value, listener, size, props);
+  }
+
+  public static XControl createHLine(XMultiComponentFactory xMCF, XComponentContext context,
+      XToolkit toolkit, XWindowPeer windowPeer, Rectangle size, SortedMap<String, Object> props)
+  {
+    return createControl(xMCF, context, toolkit, windowPeer, "com.sun.star.awt.UnoControlFixedLine",
+        props, size);
+  }
+
+  public static XControl createListBox(XMultiComponentFactory xMCF, XComponentContext context,
+      XToolkit toolkit, XWindowPeer windowPeer, XItemListener listener, Rectangle size,
+      SortedMap<String, Object> props)
+  {
+    XControl ctrl = createControl(xMCF, context, toolkit, windowPeer,
+        "com.sun.star.awt.UnoControlListBox",
+        props, size);
+    UNO.XListBox(ctrl).addItemListener(listener);
 
     return ctrl;
   }
@@ -235,15 +265,15 @@ public class GuiFactory
    * @param xContext
    * @param toolkit
    * @param windowPeer
-   * @param type Klasse des Steuerelements, das erzeugt werden soll.
-   * @param propNames
-   * @param propValues
+   * @param type
+   *          Klasse des Steuerelements, das erzeugt werden soll.
+   * @param props
    * @param rectangle
    * @return
    */
   public static XControl createControl(XMultiComponentFactory xMCF,
       XComponentContext xContext, XToolkit toolkit, XWindowPeer windowPeer,
-      String type, String[] propNames, Object[] propValues, Rectangle rectangle)
+      String type, SortedMap<String, Object> props, Rectangle rectangle)
   {
     try
     {
@@ -256,25 +286,7 @@ public class GuiFactory
       control.setModel(controlModel);
       XMultiPropertySet properties =
         UnoRuntime.queryInterface(XMultiPropertySet.class, control.getModel());
-      SortedMap<String, Object> props = new TreeMap<String, Object>();
-      if (type.equals("com.sun.star.awt.UnoControlImageControl"))
-      {
-        props.put("Border", (short) 0);
-      }
-      else if (type.equals("com.sun.star.awt.UnoControlEdit"))
-      {
-        props.put("MultiLine", false);
-        props.put("ReadOnly", false);
-        props.put("VScroll", false);
-      }
-      if (propNames != null)
-      {
-        for (int i = 0; i < propNames.length; i++)
-        {
-          props.put(propNames[i], propValues[i]);
-        }
-      }
-      if (props.size() > 0)
+      if (props != null && props.size() > 0)
       {
         properties.setPropertyValues(
           props.keySet().toArray(new String[props.size()]),
@@ -293,8 +305,8 @@ public class GuiFactory
   }
 
   /**
-   * Ändert die Größe und Position eines Fensters. 
-   * 
+   * Ändert die Größe und Position eines Fensters.
+   *
    * @param window
    * @param posSize
    */

@@ -20,9 +20,12 @@ public class SeriendruckSidebarFactory extends WeakBase implements XUIElementFac
 
   public static final String __serviceName = "de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarFactory";
 
+  private XComponentContext context;
+
   public SeriendruckSidebarFactory(XComponentContext context)
   {
     LOGGER.debug("SeriendruckSidebarFactory");
+    this.context = context;
   }
 
   @Override
@@ -47,7 +50,7 @@ public class SeriendruckSidebarFactory extends WeakBase implements XUIElementFac
       }
     }
 
-    return new SeriendruckSidebarPanel(parentWindow, resourceUrl);
+    return new SeriendruckSidebarPanel(context, parentWindow, resourceUrl);
   }
 
   @Override

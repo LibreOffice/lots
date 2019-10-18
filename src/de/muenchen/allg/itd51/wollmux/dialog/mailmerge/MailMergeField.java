@@ -1,5 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
+import java.util.Arrays;
+
 import com.sun.star.awt.XComboBox;
 
 import de.muenchen.allg.afid.UNO;
@@ -19,7 +21,9 @@ public class MailMergeField
     comboBox.removeItems((short) 1, comboBox.getItemCount());
     if (mailMergeDatasource.hasDatasource())
     {
-      comboBox.addItems(mailMergeDatasource.getColumnNames().toArray(new String[] {}), (short) 1);
+      String[] mailMergeColumnNames = mailMergeDatasource.getColumnNames().toArray(new String[] {});
+      Arrays.sort(mailMergeColumnNames);
+      comboBox.addItems(mailMergeColumnNames, (short) 1);
     }
     UNO.XTextComponent(comboBox).setText(comboBox.getItem((short) 0));
   }

@@ -39,22 +39,12 @@ public class Dateinamensanpassungen
     String first = null;
     for (String p : paths)
     {
-      // alle ${<prop>} durch evaluierten Inhalt ersetzen
-      Matcher m = PROP.matcher(p);
-      StringBuffer buf = new StringBuffer();
-      while (m.find())
-      {
-        String propVal = System.getProperty(m.group(1).trim());
-        if (propVal == null)
-          propVal = "";
-        m.appendReplacement(buf, propVal);
-      }
-      m.appendTail(buf);
+      String replacePath = replaceProperties(p);
 
       if (first == null)
-        first = buf.toString();
+        first = replacePath;
 
-      File f = new File(buf.toString());
+      File f = new File(replacePath);
       File parent = f.getParentFile();
       if (parent != null && parent.isDirectory())
         return f.toString();
@@ -69,31 +59,32 @@ public class Dateinamensanpassungen
    * {@link Dateinamensanpassungen#verfuegbarenPfadVerwenden(String)} und
    * nimmt zusätzlich die folgenden LHM-spezifischen Dateinamensanpassungen
    * vor:
-   * 
+   *
    * a. Substituiert werden ß in ss ä in ae ö in oe ü in ue, Ä in Ae, Ü in ue,
    * Ö in Oe
-   * 
+   *
    * b. Alle Sonderzeichen, Satzzeichen etc. sollen durch _ ersetzt werden,
    * außer dem Punkt vor der Dateiendung (.odt)
-   * 
+   *
    * c. Damit sind im Dateinamen nur noch die Zahlen von 0-9, die Buchstaben
    * von a-z und A-Z und der Unterstrich _ vorhanden
-   * 
+   *
    * d. Die Länge des Dateinamens wird auf maximal 240 Zeichen (inkl. Pfad)
    * begrenzt; ist der ermittelte Dateiname länger, so wird er nach 240
    * Zeichen abgeschnitten (genau genommen wird nach 236 Zeichen abgeschnitten
    * und dann wird die Endung .odt angehängt).
-   * 
+   *
    * Arbeitsverzeichnispfad in LibreOffice wird an Dateiname angehängt, falls spezifizierte Dateiname nicht absolut ist.
    */
   public static String lhmDateinamensanpassung(String fileName)
   {
+    fileName = replaceProperties(fileName);
     File f = new File(fileName);
     if (!f.isAbsolute())
     {
       try
       {
-//      holt das Arbeitsverzeichnispfad aus LO  
+        // holt den Arbeitsverzeichnispfad aus LO
         Object ps = UNO.createUNOService("com.sun.star.util.PathSettings");
         URL dir = new URL(AnyConverter.toString(UNO.getProperty(ps, "Work")));
         f = new File(dir.getPath(), fileName);
@@ -137,5 +128,21 @@ public class Dateinamensanpassungen
 
     file = new File(file.getParentFile(), name);
     return file.toString();
+  }
+
+  private static String replaceProperties(final String fileName)
+  {
+    // alle ${<prop>} durch evaluierten Inhalt ersetzen
+    Matcher m = PROP.matcher(fileName);
+    StringBuffer buf = new StringBuffer();
+    while (m.find())
+    {
+      String propVal = System.getProperty(m.group(1).trim());
+      if (propVal == null)
+        propVal = "";
+      m.appendReplacement(buf, Matcher.quoteReplacement(propVal));
+    }
+    m.appendTail(buf);
+    return buf.toString();
   }
 }

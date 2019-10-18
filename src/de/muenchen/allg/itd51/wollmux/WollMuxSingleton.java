@@ -2,7 +2,7 @@
  * Dateiname: WollMuxSingleton.java
  * Projekt  : WollMux
  * Funktion : Singleton für zentrale WollMux-Methoden.
- * 
+ *
  * Copyright (c) 2010-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,12 +25,12 @@
  * 09.11.2005 | LUT | + Logfile wird jetzt erweitert (append-modus)
  *                    + verwenden des Konfigurationsparameters SENDER_SOURCE
  *                    + Erster Start des wollmux über wm_configured feststellen.
- * 05.12.2005 | BNK | line.separator statt \n     
+ * 05.12.2005 | BNK | line.separator statt \n
  * 13.04.2006 | BNK | .wollmux/ Handling ausgegliedert in WollMuxFiles.
- * 20.04.2006 | LUT | Überarbeitung Code-Kommentare  
+ * 20.04.2006 | LUT | Überarbeitung Code-Kommentare
  * 20.04.2006 | BNK | DEFAULT_CONTEXT ausgegliedert nach WollMuxFiles
- * 21.04.2006 | LUT | + Robusteres Verhalten bei Fehlern während dem Einlesen 
- *                    von Konfigurationsdateien; 
+ * 21.04.2006 | LUT | + Robusteres Verhalten bei Fehlern während dem Einlesen
+ *                    von Konfigurationsdateien;
  *                    + wohldefinierte Datenstrukturen
  *                    + Flag für EventProcessor: acceptEvents
  * 08.05.2006 | LUT | + isDebugMode()
@@ -42,11 +42,11 @@
  * 29.12.2006 | BNK | +registerDatasources()
  * 27.03.2007 | BNK | Default-oooEinstellungen ausgelagert nach data/...
  * 16.12.2009 | ERT | Cast XTextField-Interface entfernt
- * 07.04.2010 | BED | Konfigurierbares SENDER_DISPLAYTEMPLATE 
+ * 07.04.2010 | BED | Konfigurierbares SENDER_DISPLAYTEMPLATE
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * 
+ *
  */
 
 package de.muenchen.allg.itd51.wollmux;
@@ -55,9 +55,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +68,6 @@ import com.sun.star.util.XChangesBatch;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.itd51.wollmux.core.db.AsyncLdapSearch;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -101,7 +98,7 @@ public class WollMuxSingleton
   /**
    * Verwaltet Informationen zum NoConfig mode.
    */
-  private NoConfig noConfig;
+  private boolean noConfig;
 
   private boolean menusCreated = false;
 
@@ -126,14 +123,7 @@ public class WollMuxSingleton
 
     boolean successfulStartup = true;
 
-    if (!WollMuxFiles.setupWollMuxDir())
-    {
-      noConfig = new NoConfig(true);
-      showNoConfigInfo();
-    } else
-    {
-      noConfig = new NoConfig(false);
-    }
+    noConfig = !WollMuxFiles.setupWollMuxDir();
 
     WollMuxClassLoader.initClassLoader();
 
@@ -160,67 +150,51 @@ public class WollMuxSingleton
       successfulStartup = false;
     } else
     {
-      // Cachen der aktuellen Datensätze von LDAP anhand PAL-Liste (OIDs). Wird später von
-      // AbsenderAuswaehlen- ,
-      // PAL- und DatensatzBearbeiten-Dialog benötigt um dem User eine Synchronisation aktueller
-      // Datensätze
-      // zu ermöglichen.
-
-      Map<String, String> searchQuery = new HashMap<>();
-      for (String oid : DatasourceJoinerFactory.getDatasourceJoiner().getOIDsFromLOS())
+      // Initialisiere EventProcessor
+      WollMuxEventHandler.getInstance().setAcceptEvents(successfulStartup);
+  
+      // register global EventListener
+      try
       {
-        searchQuery.put("OID", oid);
+        XEventBroadcaster eventBroadcaster = UNO.XEventBroadcaster(ctx.getServiceManager()
+            .createInstanceWithContext("com.sun.star.frame.GlobalEventBroadcaster", ctx));
+        eventBroadcaster
+            .addEventListener(new GlobalEventListener(DocumentManager.getDocumentManager()));
+      } catch (Exception e)
+      {
+        LOGGER.error("", e);
       }
-
-      AsyncLdapSearch ldapSearchAsync = new AsyncLdapSearch(searchQuery,
-          DatasourceJoinerFactory.getDatasourceJoiner());
-      ldapSearchAsync.runLdapSearchAsync()
-          .thenAcceptAsync(
-              result -> DatasourceJoinerFactory.getDatasourceJoiner().setCachedLdapResults(result));
+  
+      /*
+       * FIXME: Darf nur im Falle des externen WollMux gemacht werden, da ansonsten endlosschleifen
+       * mit dem ProtocolHandler möglich sind. Evtl. auch lösbar dadurch, dass URLS, die mit
+       * ignorecase("wollmux:") anfangen, niemals an den Slave delegiert werden. Ist aber nicht so
+       * schön als Lösung. UNO.XDispatchProviderInterception
+       * (UNO.desktop).registerDispatchProviderInterceptor( DispatchHandler.globalWollMuxDispatches);
+       */
+  
+      // setzen von shortcuts
+      ConfigThingy tastenkuerzel = new ConfigThingy("");
+      try
+      {
+        tastenkuerzel = WollMuxFiles.getWollmuxConf().query("Tastenkuerzel").getLastChild();
+      } catch (NodeNotFoundException e)
+      {
+        LOGGER.error("", e);
+      }
+      
+      try
+      {
+        Shortcuts.createShortcuts(tastenkuerzel);
+      } catch (Exception e)
+      {
+        LOGGER.error("", e);
+      }
+  
+      // Setzen der in den Abschnitten OOoEinstellungen eingestellten
+      // Konfigurationsoptionen
+      this.setOOoConfiguration(WollMuxFiles.getWollmuxConf().query("OOoEinstellungen"));
     }
-
-    // Initialisiere EventProcessor
-    WollMuxEventHandler.getInstance().setAcceptEvents(successfulStartup);
-
-    // register global EventListener
-    try
-    {
-      XEventBroadcaster eventBroadcaster = UNO.XEventBroadcaster(ctx.getServiceManager()
-          .createInstanceWithContext("com.sun.star.frame.GlobalEventBroadcaster", ctx));
-      eventBroadcaster
-          .addEventListener(new GlobalEventListener(DocumentManager.getDocumentManager()));
-    } catch (Exception e)
-    {
-      LOGGER.error("", e);
-    }
-
-    /*
-     * FIXME: Darf nur im Falle des externen WollMux gemacht werden, da ansonsten endlosschleifen
-     * mit dem ProtocolHandler möglich sind. Evtl. auch lösbar dadurch, dass URLS, die mit
-     * ignorecase("wollmux:") anfangen, niemals an den Slave delegiert werden. Ist aber nicht so
-     * schön als Lösung. UNO.XDispatchProviderInterception
-     * (UNO.desktop).registerDispatchProviderInterceptor( DispatchHandler.globalWollMuxDispatches);
-     */
-
-    // setzen von shortcuts
-    ConfigThingy tastenkuerzel = new ConfigThingy("");
-    try
-    {
-      tastenkuerzel = WollMuxFiles.getWollmuxConf().query("Tastenkuerzel").getLastChild();
-    } catch (NodeNotFoundException e)
-    {
-    }
-    try
-    {
-      Shortcuts.createShortcuts(tastenkuerzel);
-    } catch (Exception e)
-    {
-      LOGGER.error("", e);
-    }
-
-    // Setzen der in den Abschnitten OOoEinstellungen eingestellten
-    // Konfigurationsoptionen
-    this.setOOoConfiguration(WollMuxFiles.getWollmuxConf().query("OOoEinstellungen"));
   }
 
   private void setOOoConfiguration(ConfigThingy oooEinstellungenConf)
@@ -234,7 +208,7 @@ public class WollMuxSingleton
   /**
    * Diese Methode liefert die Instanz des WollMux-Singletons. Ist der WollMux noch nicht
    * initialisiert, so liefert die Methode null!
-   * 
+   *
    * @return Instanz des WollMuxSingletons oder null.
    */
   public static WollMuxSingleton getInstance()
@@ -266,8 +240,6 @@ public class WollMuxSingleton
 
   /**
    * Liefert die Versionsnummer des WollMux (z.B. "5.9.2") zurück.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public static String getVersion()
   {
@@ -280,10 +252,10 @@ public class WollMuxSingleton
    * "svn info" auf das Projektverzeichnis erstellt. Die Buildinfo-Datei buildinfo enthält die
    * Paketnummer und die svn-Revision und ist im WollMux.oxt-Paket sowie in der
    * WollMux.uno.jar-Datei abgelegt.
-   * 
+   *
    * Kann dieses File nicht gelesen werden, so wird eine entsprechende Ersatzmeldung erzeugt (siehe
    * Sourcecode).
-   * 
+   *
    * @return Der Build-Status der aktuellen WollMux-Installation.
    */
   public static String getBuildInfo()
@@ -315,7 +287,7 @@ public class WollMuxSingleton
    * (z.B. "wollmux-standard-config-2.2.1") als String zurück, wenn in der Konfiguration ein
    * entsprechender CONF_VERSION-Schlüssel definiert ist, oder "unbekannt", falls der dieser
    * Schlüssel nicht existiert.
-   * 
+   *
    * @return Der Versionsinformation der aktuellen WollMux-Konfiguration (falls definiert) oder
    *         "unbekannt", falls nicht.
    */
@@ -327,7 +299,7 @@ public class WollMuxSingleton
       return versions.getLastChild().toString();
     } catch (NodeNotFoundException e)
     {
-      if (noConfig != null && noConfig.isNoConfig())
+      if (noConfig)
       {
         return L.m("keine geladen");
       } else
@@ -348,11 +320,9 @@ public class WollMuxSingleton
   /**
    * Verarbeitet alle Datenquellen/Registriere-Unterabschnitte von conf und registriert die
    * entsprechenden Datenquellen in OOo, falls dort noch nicht vorhanden.
-   * 
+   *
    * @param context
    *          gibt an relativ zu was relative URLs aufgelöst werden sollen.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static void registerDatasources(ConfigThingy conf, URL context)
   {
@@ -444,7 +414,7 @@ public class WollMuxSingleton
   /**
    * Setzt die im ConfigThingy übergebenen OOoEinstellungen-Abschnitt enthaltenen Einstellungen in
    * der OOo-Registry.
-   * 
+   *
    * @param oooEinstellungenConf
    *          Der Knoten OOoEinstellungen eines solchen Abschnitts.
    */
@@ -472,7 +442,7 @@ public class WollMuxSingleton
   /**
    * Konvertiert den als String übergebenen Wert value in ein Objekt vom Typ type oder liefert eine
    * IllegalArgumentException, wenn die Werte nicht konvertiert werden können.
-   * 
+   *
    * @param type
    *          Der Typ in den konvertiert werden soll ('boolean', 'integer', 'float', 'string').
    * @param value
@@ -511,7 +481,7 @@ public class WollMuxSingleton
   /**
    * Setzt eine Einstellung value in der OOo-Registry, wobei die Position im Registry-Baum durch
    * node und prop beschrieben wird.
-   * 
+   *
    * @param node
    *          z.B. "/org.openoffice.Inet/Settings"
    * @param prop
@@ -547,7 +517,6 @@ public class WollMuxSingleton
    *
    * @throws IOException
    *           falls von url nicht gelesen werden kann.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void checkURL(URL url) throws IOException
   {
@@ -557,21 +526,11 @@ public class WollMuxSingleton
   /**
    * Git zurück, ob sich der WollMux im NoConfig-Modus befindet, d.h. es wurde keine Config-Datei
    * gefunden.
-   * 
+   *
    * @return
    */
   public boolean isNoConfig()
   {
-    return (null != noConfig) ? noConfig.isNoConfig() : false;
-  }
-
-  /**
-   * Schreibt Meldung in die Log-Datei, wenn der NoConfig-Modus aktiv ist.
-   * 
-   * @return
-   */
-  public boolean showNoConfigInfo()
-  {
-    return noConfig.showNoConfigInfo();
+    return noConfig;
   }
 }

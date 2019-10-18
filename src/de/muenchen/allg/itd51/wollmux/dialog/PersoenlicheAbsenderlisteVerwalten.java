@@ -55,30 +55,26 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Spliterators;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
-import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.sun.star.awt.Key;
 import com.sun.star.awt.MessageBoxResults;
-import com.sun.star.awt.XControl;
+import com.sun.star.awt.XButton;
+import com.sun.star.awt.XContainerWindowProvider;
+import com.sun.star.awt.XControlContainer;
+import com.sun.star.awt.XDialog;
 import com.sun.star.awt.XExtendedToolkit;
-import com.sun.star.awt.XFixedText;
 import com.sun.star.awt.XKeyHandler;
 import com.sun.star.awt.XListBox;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
+import com.sun.star.awt.XWindowPeer;
 import com.sun.star.lang.EventObject;
 import com.sun.star.ui.dialogs.ExecutableDialogResults;
 import com.sun.star.uno.Exception;
@@ -88,21 +84,11 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.AsyncLdapSearch;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.core.db.Search;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.ControlType;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Dock;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
-import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
-import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
@@ -133,22 +119,31 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private DatasourceJoiner dj;
 
-  private SimpleDialogLayout layout;
-  private UNODialogFactory dialogFactory;
-  private List<DJDatasetListElement> resultDJDatasetList = null;
-  private List<DJDatasetListElement> cachedPAL = new ArrayList<>();
+  private List<DJDataset> resultDJDatasetList = null;
+
+  private List<DJDataset> cachedPAL = new ArrayList<>();
+
   private INotify palListener;
 
+  private XButton searchBtn;
+
+  private XListBox searchResultList;
+
+  private XListBox palListe;
+
+  private XTextComponent txtFieldNachname;
+
+  private XTextComponent txtFieldVorname;
+
+  private XTextComponent txtFieldOrga;
+
+  private XTextComponent txtFieldEMail;
+
+  private XDialog dialog;
+
   private int count = 0;
+
   private short itemToHighlightPos = 0;
-
-  /**
-   * Die Textfelder in dem der Benutzer seine Suchanfrage eintippt.
-   */
-  private Map<String, String> queryNames = ImmutableMap.of("Nachname", "Nachname", "Vorname",
-      "Vorname", "Email", "Mail", "Orga", "OrgaKurz");
-
-  private List<ControlModel> query2 = new ArrayList<>();
 
   /**
    * Erzeugt einen neuen Dialog.
@@ -166,24 +161,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     this.dj = dj;
     this.palListener = palListener;
 
-    ConfigThingy suchfelder;
-    try
-    {
-      suchfelder = conf.query("Suchfelder").getFirstChild();
-
-      queryNames = StreamSupport
-          .stream(Spliterators.spliteratorUnknownSize(suchfelder.iterator(), 0), false)
-          .sorted((a, b) -> {
-            int s1 = NumberUtils.toInt(a.getString("SORT"));
-            int s2 = NumberUtils.toInt(b.getString("SORT"));
-            return s1 - s2;
-          }).collect(Collectors.toMap(it -> it.getString("LABEL"), it -> it.getString("DB_SPALTE"),
-              (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-    } catch (NodeNotFoundException e)
-    {
-      LOGGER.error(L.m("Es wurden keine Suchfelder definiert."));
-    }
-
     createGUI();
   }
 
@@ -194,93 +171,113 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   private void createGUI()
   {
-    dialogFactory = new UNODialogFactory();
-    XWindow dialogWindow = dialogFactory.createDialog(780, 450, 0xF2F2F2);
-    dialogWindow.addWindowListener(xWindowListener);
+    XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
+    XContainerWindowProvider provider = null;
 
-    Object toolkit = null;
+    try
+    {
+      provider = UnoRuntime.queryInterface(XContainerWindowProvider.class,
+          UNO.xMCF.createInstanceWithContext("com.sun.star.awt.ContainerWindowProvider",
+              UNO.defaultContext));
+    } catch (com.sun.star.uno.Exception e)
+    {
+      LOGGER.error("", e);
+    }
+
+    if (provider == null)
+    {
+      LOGGER.error("PersoenlicheAbsenderliste: createGUI(): XContainerProvider is NULL.");
+      return;
+    }
+
+    XWindow window = provider.createContainerWindow(
+        "vnd.sun.star.script:WollMux.pal_dialog?location=application", "", peer, null);
+    window.addWindowListener(xWindowListener);
+
     XToolkit xToolkit = null;
     try
     {
-      toolkit = UNO.xMCF.createInstanceWithContext("com.sun.star.awt.Toolkit", UNO.defaultContext);
-      xToolkit = UNO.XToolkit(toolkit);
-      XExtendedToolkit extToolkit = UnoRuntime.queryInterface(XExtendedToolkit.class, xToolkit);
-      extToolkit.addKeyHandler(keyHandler);
+      xToolkit = UNO.XToolkit(
+          UNO.xMCF.createInstanceWithContext("com.sun.star.awt.Toolkit", UNO.defaultContext));
     } catch (Exception e)
     {
       LOGGER.error("", e);
     }
 
-    dialogFactory.showDialog();
+    XExtendedToolkit extToolkit = UnoRuntime.queryInterface(XExtendedToolkit.class, xToolkit);
+    extToolkit.addKeyHandler(keyHandler);
 
-    layout = new SimpleDialogLayout(dialogWindow);
-    layout.setMarginBetweenControls(15);
-    layout.setMarginTop(20);
-    layout.setMarginLeft(20);
-    layout.setWindowBottomMargin(10);
+    XControlContainer controlContainer = UnoRuntime.queryInterface(XControlContainer.class, window);
 
-    layout.addControlsToList(addIntroControls());
+    palListe = UNO.XListBox(controlContainer.getControl("palListe"));
+    palListe.setMultipleMode(true);
 
-    List<String> keys = new ArrayList<>(queryNames.keySet());
+    searchResultList = UNO.XListBox(controlContainer.getControl("searchResultList"));
+    searchResultList.setMultipleMode(true);
 
-    for (int i = 1; i < queryNames.keySet().size() + 1; i++)
-    {
-      // erstellt controls paarweise horizontal
-      if (i > 1 && i % 2 == 0)
-      {
-        boolean isLastRow = i == queryNames.keySet().size();
+    txtFieldNachname = UNO.XTextComponent(controlContainer.getControl("txtNachname"));
+    txtFieldVorname = UNO.XTextComponent(controlContainer.getControl("txtVorname"));
+    txtFieldEMail = UNO.XTextComponent(controlContainer.getControl("txtEmail"));
+    txtFieldOrga = UNO.XTextComponent(controlContainer.getControl("txtOrga"));
 
-        ControlModel searchFields = addSearchControlsTwoColumns(keys.get(i - 2), keys.get(i - 1),
-            isLastRow);
+    searchBtn = UNO.XButton(controlContainer.getControl("btnSearch"));
+    searchBtn.addActionListener(startSearchBtnActionListener);
 
-        layout.addControlsToList(searchFields);
-        query2.add(searchFields);
-      } else if (i == queryNames.keySet().size())
-      {
-        // Zeile mit einem Control-Paar falls ungerade Anzahl von Suchfeldern konfiguriert wurde.
-        ControlModel searchFields = addSearchControlsOneColumn(keys.get(i - 1));
-        layout.addControlsToList(searchFields);
-        query2.add(searchFields);
-      }
-    }
+    XButton newBtn = UNO.XButton(controlContainer.getControl("btnNew"));
+    newBtn.addActionListener(newBtnActionListener);
 
-    layout.addControlsToList(addStatusTextField());
-    layout.addControlsToList(addPalButtonControls());
-    layout.addControlsToList(addSearchResultControls());
-    layout.addControlsToList(addBottomControls());
+    XButton editBtn = UNO.XButton(controlContainer.getControl("btnEdit"));
+    editBtn.addActionListener(editBtnActionListener);
 
-    layout.draw();
+    XButton copyBtn = UNO.XButton(controlContainer.getControl("btnCopy"));
+    copyBtn.addActionListener(copyBtnActionListener);
+
+    XButton delBtn = UNO.XButton(controlContainer.getControl("btnDel"));
+    delBtn.addActionListener(deleteBtnActionListener);
+
+    XButton addToPalBtn = UNO.XButton(controlContainer.getControl("addToPALBtn"));
+    addToPalBtn.addActionListener(addToPalActionListener);
 
     addPalEntriesToListBox();
+
+    dialog = UnoRuntime.queryInterface(XDialog.class, window);
+    dialog.execute();
   }
 
   private void addPalEntriesToListBox()
   {
-    XListBox palListe = UNO.XListBox(layout.getControl("palListe"));
-
     cachedPAL.clear();
     palListe.removeItems((short) 0, palListe.getItemCount());
 
     for (Dataset dataset : dj.getLOS())
     {
-      DJDataset ds = (DJDataset) dataset;
+      boolean valueChanged = false;
+      LOSDJDataset ds = (LOSDJDataset) dataset;
 
-      Dataset ldapDataset = null;
-      try
+      if (ds.getLOS() != null && !ds.getLOS().isEmpty())
       {
-        ldapDataset = dj.getCachedLdapResultByOID(dataset.get("OID"));
-      } catch (ColumnNotFoundException e)
-      {
-        LOGGER.error("", e);
+        for (String attribute : dj.getMainDatasourceSchema())
+        {
+          if (ds.isDifferentFromLdapDataset(attribute, ds))
+          {
+            valueChanged = true;
+            break;
+          } else
+          {
+            valueChanged = false;
+          }
+        }
       }
 
-      if (dj.getCachedLdapResults() != null && Search.hasLDAPDataChanged(dataset, ldapDataset,
-          DatasourceJoinerFactory.getDatasourceJoiner()))
-        palListe.addItem("* " + buildListBoxString(ds), (short) count);
-      else
-        palListe.addItem(buildListBoxString(ds), (short) count);
+      if (valueChanged)
+      {
+        palListe.addItem("* " + ds.toString(), (short) count);
+      } else
+      {
+        palListe.addItem(ds.toString(), (short) count);
+      }
 
-      cachedPAL.add(new DJDatasetListElement(ds));
+      cachedPAL.add(ds);
 
       if (ds.isSelectedDataset())
         itemToHighlightPos = (short) count;
@@ -306,12 +303,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       {
         // visuelle Rückmeldung. Fokusiert den Suchknopf beim Drücken von Return.
         // Suchknopf wird je nach OS-Theme farbig markiert.
-        XControl xButton = layout.getControl("startSearch");
-
-        if (xButton == null)
-          return false;
-
-        XWindow xWnd = UNO.XWindow(xButton);
+        XWindow xWnd = UNO.XWindow(searchBtn);
 
         if (xWnd == null)
           return false;
@@ -322,12 +314,11 @@ public class PersoenlicheAbsenderlisteVerwalten
             DatasourceJoinerFactory.getDatasourceJoiner());
         ldapSearchAsync.runLdapSearchAsync().thenAcceptAsync(result -> {
           setLdapSearchResults(result);
-          setStatusText(result);
+          showInfoDialog(result);
         });
       } else if (arg0.KeyCode == Key.DELETE)
       {
         // Einträge aus PAL-Listbox entfernen
-        XListBox palListe = UNO.XListBox(layout.getControl("palListe"));
         short[] selectedItems = palListe.getSelectedItemsPos();
 
         boolean firstIteration = true;
@@ -366,175 +357,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
   };
 
-  private ControlModel addIntroControls()
-  {
-    List<ControlProperties> introControls = new ArrayList<>();
-
-    ControlProperties label = new ControlProperties(ControlType.LABEL, "introLabel");
-    label.setControlPercentSize(100, 20);
-    label.setLabel("Sie können nach Vorname, Nachname, Email und Orga-Einheit suchen");
-
-    introControls.add(label);
-
-    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, introControls, Optional.empty());
-  }
-
-  private ControlModel addSearchControlsTwoColumns(String firstKey, String secondKey,
-      boolean isLastRow)
-  {
-    List<ControlProperties> searchControls = new ArrayList<>();
-
-    ControlProperties label = new ControlProperties(ControlType.LABEL, firstKey + "Label");
-    label.setControlPercentSize(10, 30);
-    label.setLabel(firstKey);
-    searchControls.add(label);
-
-    ControlProperties edit = new ControlProperties(ControlType.EDIT, firstKey + "Edit");
-    edit.setControlPercentSize(30, 30);
-    searchControls.add(edit);
-
-    ControlProperties labelSecond = new ControlProperties(ControlType.LABEL, secondKey + "Label");
-    labelSecond.setControlPercentSize(10, 30);
-    labelSecond.setLabel(secondKey);
-    searchControls.add(labelSecond);
-
-    ControlProperties editSecond = new ControlProperties(ControlType.EDIT, secondKey + "Edit");
-    editSecond.setControlPercentSize(30, 30);
-    searchControls.add(editSecond);
-
-    ControlProperties labelPlaceholder = null;
-    ControlProperties startSearchBtn = null;
-
-    if (!isLastRow)
-    {
-      labelPlaceholder = new ControlProperties(ControlType.LABEL, firstKey + "LabelP");
-      labelPlaceholder.setControlPercentSize(20, 30);
-      labelPlaceholder.setLabel("");
-      searchControls.add(labelPlaceholder);
-    } else
-    {
-      startSearchBtn = new ControlProperties(ControlType.BUTTON, "startSearch");
-      startSearchBtn.setControlPercentSize(20, 30);
-      startSearchBtn.setLabel("Suchen");
-      UNO.XButton(startSearchBtn.getXControl()).addActionListener(startSearchBtnActionListener);
-      searchControls.add(startSearchBtn);
-    }
-
-    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, searchControls, Optional.empty());
-  }
-
-  private ControlModel addSearchControlsOneColumn(String firstKey)
-  {
-    List<ControlProperties> searchControls = new ArrayList<>();
-
-    ControlProperties label = new ControlProperties(ControlType.LABEL, firstKey);
-    label.setControlPercentSize(30, 20);
-    label.setLabel(firstKey);
-
-    ControlProperties edit = new ControlProperties(ControlType.EDIT, firstKey);
-    edit.setControlPercentSize(70, 20);
-
-    searchControls.add(label);
-    searchControls.add(edit);
-
-    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, searchControls, Optional.empty());
-  }
-
-  private ControlModel addSearchResultControls()
-  {
-    List<ControlProperties> searchResultControls = new ArrayList<>();
-
-    ControlProperties searchResultListBox = new ControlProperties(ControlType.LIST_BOX,
-        "searchResultList");
-    searchResultListBox.setControlPercentSize(45, 150);
-    UNO.XListBox(searchResultListBox.getXControl()).setMultipleMode(true);
-
-    ControlProperties addToPalBtn = new ControlProperties(ControlType.BUTTON, "addToPalBtn");
-    addToPalBtn.setControlPercentSize(10, 30);
-    addToPalBtn.setLabel("->");
-    UNO.XButton(addToPalBtn.getXControl()).addActionListener(addToPalActionListener);
-
-    ControlProperties palListBox = new ControlProperties(ControlType.LIST_BOX, "palListe");
-    palListBox.setControlPercentSize(45, 150);
-    XListBox palXListBox = UNO.XListBox(palListBox.getXControl());
-    palXListBox.setMultipleMode(true);
-    palXListBox.addItemListener(palListBoxItemListener);
-
-    searchResultControls.add(searchResultListBox);
-    searchResultControls.add(addToPalBtn);
-    searchResultControls.add(palListBox);
-
-    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, searchResultControls,
-        Optional.empty());
-  }
-
-  private ControlModel addStatusTextField()
-  {
-    List<ControlProperties> statusControls = new ArrayList<>();
-
-    ControlProperties label = new ControlProperties(ControlType.LABEL, "statusText");
-    label.setControlPercentSize(100, 20);
-
-    statusControls.add(label);
-
-    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, statusControls, Optional.empty());
-  }
-
-  private ControlModel addPalButtonControls()
-  {
-    List<ControlProperties> bottomControls = new ArrayList<>();
-
-    ControlProperties deleteBtn = new ControlProperties(ControlType.BUTTON, "delBtn");
-    deleteBtn.setControlPercentSize(25, 25);
-    deleteBtn.setMarginBetweenControls(5);
-    deleteBtn.setLabel("Löschen");
-    UNO.XButton(deleteBtn.getXControl()).addActionListener(deleteBtnActionListener);
-
-    ControlProperties editBtn = new ControlProperties(ControlType.BUTTON, "editBtn");
-    editBtn.setControlPercentSize(25, 25);
-    editBtn.setMarginBetweenControls(5);
-    editBtn.setLabel("Bearbeiten");
-    UNO.XButton(editBtn.getXControl()).addActionListener(editBtnActionListener);
-
-    ControlProperties copyBtn = new ControlProperties(ControlType.BUTTON, "copyBtn");
-    copyBtn.setControlPercentSize(25, 25);
-    copyBtn.setMarginBetweenControls(5);
-    copyBtn.setLabel("Kopieren");
-    UNO.XButton(copyBtn.getXControl()).addActionListener(copyBtnActionListener);
-
-    ControlProperties newBtn = new ControlProperties(ControlType.BUTTON, "newBtn");
-    newBtn.setControlPercentSize(25, 25);
-    newBtn.setMarginBetweenControls(5);
-    newBtn.setLabel("Neu");
-    UNO.XButton(newBtn.getXControl()).addActionListener(newBtnActionListener);
-
-    bottomControls.add(deleteBtn);
-    bottomControls.add(editBtn);
-    bottomControls.add(copyBtn);
-    bottomControls.add(newBtn);
-
-    ControlModel controlModel = new ControlModel(Orientation.HORIZONTAL, Align.NONE, bottomControls,
-        Optional.empty());
-    controlModel.setBindToControlWidthAndXOffset("palListe");
-
-    return controlModel;
-  }
-
-  private ControlModel addBottomControls()
-  {
-    List<ControlProperties> bottomControls = new ArrayList<>();
-
-    ControlProperties abortBtn = new ControlProperties(ControlType.BUTTON, "abortBtn");
-    abortBtn.setControlPercentSize(30, 40);
-    abortBtn.setLabel("Abbrechen");
-    UNO.XButton(abortBtn.getXControl()).addActionListener(abortBtnActionListener);
-
-    bottomControls.add(abortBtn);
-
-    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, bottomControls,
-        Optional.of(Dock.BOTTOM));
-  }
-
   private AbstractWindowListener xWindowListener = new AbstractWindowListener()
   {
     @Override
@@ -542,13 +364,8 @@ public class PersoenlicheAbsenderlisteVerwalten
     {
       palListener.dialogClosed();
       WollMuxEventHandler.getInstance().handlePALChangedNotify();
+      dialog.endExecute();
     }
-  };
-
-  private AbstractItemListener palListBoxItemListener = event -> {
-    cachedPAL.get(event.Selected).getDataset().select();
-
-    WollMuxEventHandler.getInstance().handlePALChangedNotify();
   };
 
   private AbstractActionListener startSearchBtnActionListener = event -> {
@@ -556,7 +373,7 @@ public class PersoenlicheAbsenderlisteVerwalten
         DatasourceJoinerFactory.getDatasourceJoiner());
     ldapSearchAsync.runLdapSearchAsync().thenAcceptAsync(result -> {
       setLdapSearchResults(result);
-      setStatusText(result);
+      showInfoDialog(result);
     });
   };
 
@@ -564,51 +381,69 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private void addToPAL()
   {
-    XControl xControlResults = layout.getControl("searchResultList");
+    short[] selectedItemsPos = searchResultList.getSelectedItemsPos();
 
-    if (xControlResults == null)
-      return;
-
-    XListBox xListBoxResults = UNO.XListBox(xControlResults);
-
-    if (xListBoxResults == null)
-      return;
-
-    short[] selectedItemsPos = xListBoxResults.getSelectedItemsPos();
-
-    List<DJDatasetListElement> entriesToAdd = new ArrayList<>();
+    List<DJDataset> entriesToAdd = new ArrayList<>();
     for (short index : selectedItemsPos)
     {
-      DJDatasetListElement dsToAdd = resultDJDatasetList.get(index);
+      DJDataset dsToAdd = resultDJDatasetList.get(index);
 
+      if (!dj.getLOS().isEmpty())
+      {
+        for (Dataset ds : dj.getLOS())
+        {
+          try
+          {
+            if (ds.get("OID").equals(dsToAdd.get("OID"))) {
+              short res = InfoDialog.showYesNoModal("PAL",
+                  "Datensatz ist bereits in der Absenderliste vorhanden, Datensatz trotzdem erneut speichern?");
+
+              if (res == MessageBoxResults.YES)
+              {
+                entriesToAdd.add(dsToAdd);
+                break;
+              }
+            } else
+            {
+              entriesToAdd.add(dsToAdd);
+              break;
+            }
+          } catch (ColumnNotFoundException e)
+          {
+            LOGGER.error("", e);
+          }
+        }
+      } else
+      {
+        entriesToAdd.add(dsToAdd);
+      }
+    }
+
+    for (DJDataset entry : entriesToAdd)
+    {
       try
       {
-        if (dj.getOIDsFromLOS().contains(dsToAdd.getDataset().get("OID")))
+        // Es kann im produktiven LDAP eigentlich nicht vorkommen das OID leer oder '*'
+        // ist (Pflichtfeld produktiv, wird automatisch beim Anlegen eines neuen Users erzeugt).
+        // Der LDAP im Entwicklungs und Testnetz lässt das allerdings zu, die LDAP-Abfrage bei
+        // nicht gesetzter OID ist dann eine wildcard-Abfrage (*), es tauchen dann daher
+        // alle User in der PAL auf.
+        // Wildcard-Suche ist daher erlaubt, in die PAL übernehmen jedoch nicht.
+        String oid = entry.get("OID");
+        if (oid == null || oid.isEmpty() || "*".equals(oid))
         {
-          short res = InfoDialog.showYesNoModal("PAL",
-              "Datensatz ist bereits in der Absenderliste vorhanden, Datensatz trotzdem erneut speichern?");
-
-          if (res == MessageBoxResults.YES)
-          {
-            entriesToAdd.add(dsToAdd);
-          }
-        } else
-        {
-          entriesToAdd.add(dsToAdd);
+          InfoDialog.showInfoModal("Fehler.", "Der Datensatz enthält keine gültige OID und wird "
+              + "daher nicht in die PAL übernommen.");
+          continue;
         }
       } catch (ColumnNotFoundException e)
       {
         LOGGER.error("", e);
       }
-      
-      dj.addCachedLdapResult(dsToAdd.getDataset());
+
+      entry.copy();
     }
 
-    for (DJDatasetListElement entry : entriesToAdd)
-    {
-      entry.getDataset().copy();
-    }
-    
     WollMuxEventHandler.getInstance().handlePALChangedNotify();
     addPalEntriesToListBox();
   }
@@ -617,14 +452,7 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private void removeFromPAL()
   {
-    XControl xControlPAL = layout.getControl("palListe");
-    if (xControlPAL == null)
-      return;
-    XListBox xListBoxPal = UNO.XListBox(xControlPAL);
-    if (xListBoxPal == null)
-      return;
-
-    short[] selectedItemsPos = xListBoxPal.getSelectedItemsPos();
+    short[] selectedItemsPos = palListe.getSelectedItemsPos();
 
     boolean firstIteration = true;
     List<Dataset> datasetArray = Lists.newArrayList(dj.getLOS());
@@ -634,14 +462,14 @@ public class PersoenlicheAbsenderlisteVerwalten
     {
       if (firstIteration)
       {
-        xListBoxPal.removeItems(pos, (short) 1);
+        palListe.removeItems(pos, (short) 1);
         cachedPAL.remove(pos);
         DJDataset ds = (DJDataset) datasetArray.remove(pos);
         ds.remove();
         firstIteration = false;
       } else
       {
-        xListBoxPal.removeItems((short) (pos - 1 - iteration), (short) 1);
+        palListe.removeItems((short) (pos - 1 - iteration), (short) 1);
         cachedPAL.remove(pos - 1 - iteration);
         DJDataset ds = (DJDataset) datasetArray.remove(pos - 1 - iteration);
         ds.remove();
@@ -652,24 +480,21 @@ public class PersoenlicheAbsenderlisteVerwalten
     WollMuxEventHandler.getInstance().handlePALChangedNotify();
   }
 
-  private AbstractActionListener editBtnActionListener = event -> editEntry();
+  private AbstractActionListener editBtnActionListener = event -> editEntry(
+      palListe.getSelectedItemPos());
 
-  private void editEntry()
+  private void editEntry(short index)
   {
-    XListBox pal = UNO.XListBox(layout.getControl("palListe"));
-    short selectedPos = pal.getSelectedItemPos();
-    DJDatasetListElement djDataset = cachedPAL.get(selectedPos);
-
-    Dataset ldapDataset = null;
-    try
+    if (index == -1)
     {
-      ldapDataset = dj.getCachedLdapResultByOID(djDataset.getDataset().get("OID"));
-    } catch (ColumnNotFoundException e)
-    {
-      LOGGER.error("", e);
+      LOGGER.debug(
+          "PersoenlicheAbsenderListe: editEntry(): index -1 is not a valid value.returning..");
+      return;
     }
 
-    DatensatzBearbeiten editDSWizard = new DatensatzBearbeiten(djDataset.getDataset(), ldapDataset,
+    DJDataset djDataset = cachedPAL.get(index);
+
+    DatensatzBearbeiten editDSWizard = new DatensatzBearbeiten((LOSDJDataset) djDataset,
         dj.getMainDatasourceSchema());
 
     short result = editDSWizard.executeWizard();
@@ -689,20 +514,13 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private void copyEntry()
   {
-    XControl xControlPAL = layout.getControl("palListe");
-
-    if (xControlPAL == null)
-      return;
-
-    XListBox xListBoxPal = UNO.XListBox(xControlPAL);
-    short[] sel = xListBoxPal.getSelectedItemsPos();
+    short[] sel = palListe.getSelectedItemsPos();
 
     for (short index : sel)
     {
-      DJDataset datasetCopy = copyDJDataset(cachedPAL.get(index).getDataset());
-      cachedPAL.add(new DJDatasetListElement(datasetCopy));
-      xListBoxPal.addItem(buildListBoxString(datasetCopy),
-          (short) (xListBoxPal.getItemCount() + 1));
+      DJDataset datasetCopy = copyDJDataset(cachedPAL.get(index));
+      cachedPAL.add(datasetCopy);
+      palListe.addItem(datasetCopy.toString(), (short) (palListe.getItemCount() + 1));
     }
   }
 
@@ -723,24 +541,10 @@ public class PersoenlicheAbsenderlisteVerwalten
   private AbstractActionListener newBtnActionListener = event -> {
     DJDataset newDataset = dj.newDataset();
 
-    XControl xControlPAL = layout.getControl("palListe");
-
-    if (xControlPAL == null)
-      return;
-
-    XListBox xListBoxPal = UNO.XListBox(xControlPAL);
-
-    if (xListBoxPal == null)
-      return;
-
-    cachedPAL.add(new DJDatasetListElement(newDataset));
-    xListBoxPal.addItem("Neuer Datensatz", (short) (xListBoxPal.getItemCount() + 1));
-  };
-
-  private AbstractActionListener abortBtnActionListener = event -> {
-    WollMuxEventHandler.getInstance().handlePALChangedNotify();
-    palListener.dialogClosed();
-    dialogFactory.closeDialog();
+    cachedPAL.add(newDataset);
+    short newItemIndex = (palListe.getItemCount());
+    palListe.addItem("Neuer Datensatz", newItemIndex);
+    editEntry(newItemIndex);
   };
 
   private void setLdapSearchResults(QueryResults data)
@@ -753,118 +557,66 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     resultDJDatasetList = new ArrayList<>();
 
-    data.forEach(item -> {
-      DJDatasetListElement element = new DJDatasetListElement((DJDataset) item);
-      resultDJDatasetList.add(element);
-    });
+    data.forEach(item -> resultDJDatasetList.add((DJDataset) item));
 
-    Collections.sort(resultDJDatasetList);
+    Collections.sort(resultDJDatasetList, DatasourceJoiner.sortPAL);
 
-    XControl xControl = layout.getControl("searchResultList");
-
-    if (xControl == null)
-      return;
-
-    XListBox xListBox = UNO.XListBox(xControl);
-
-    if (xListBox == null)
-      return;
-
-    if (xListBox.getItemCount() > 0)
+    if (searchResultList.getItemCount() > 0)
     {
-      xListBox.removeItems((short) 0, xListBox.getItemCount());
+      searchResultList.removeItems((short) 0, searchResultList.getItemCount());
     }
 
     for (int i = 0; i < resultDJDatasetList.size(); i++)
     {
-      DJDataset ds = resultDJDatasetList.get(i).getDataset();
-      xListBox.addItem(buildListBoxString(ds), (short) i);
+      searchResultList.addItem(resultDJDatasetList.get(i).toString(), (short) i);
     }
-  }
-
-  private String buildListBoxString(DJDataset ds)
-  {
-    String dbNachname = "";
-    String dbVorname = "";
-    String dbOrgaKurz = "";
-    String dbRolle = "";
-
-    try
-    {
-      dbRolle = ds.get("Rolle") == null || ds.get("Rolle").isEmpty() ? ""
-          : "(" + ds.get("Rolle") + ")";
-      dbNachname = ds.get("Nachname") == null ? "" : ds.get("Nachname");
-      dbVorname = ds.get("Vorname") == null ? "" : ds.get("Vorname");
-      dbOrgaKurz = ds.get("OrgaKurz") == null ? "" : ds.get("OrgaKurz");
-
-    } catch (ColumnNotFoundException e)
-    {
-      LOGGER.error("", e);
-    }
-
-    return dbRolle + dbNachname + ", " + dbVorname + " " + dbOrgaKurz;
   }
 
   private Map<String, String> buildSearchQuery()
   {
     Map<String, String> resultSearchQuery = new HashMap<>();
 
-    for (ControlModel model : query2)
+    String vorname = txtFieldVorname.getText();
+    if (!vorname.isEmpty() && !vorname.endsWith("*"))
     {
-      for (int i = 0; i < model.getControls().size(); i++)
-      {
-
-        XFixedText xLabel = UNO.XFixedText(model.getControls().get(i).getXControl());
-
-        if (xLabel == null)
-          continue;
-
-        String labelText = xLabel.getText();
-
-        if (labelText.isEmpty())
-          continue;
-
-        XTextComponent editField = UNO.XTextComponent(model.getControls().get(i + 1).getXControl());
-
-        if (editField == null)
-          continue;
-
-        String mappedDBCloumnName = queryNames.get(labelText);
-
-        if (mappedDBCloumnName == null || mappedDBCloumnName.isEmpty())
-          continue;
-
-        resultSearchQuery.put(mappedDBCloumnName, editField.getText());
-      }
+      vorname += "*";
     }
+    String nachname = txtFieldNachname.getText();
+    if (!nachname.isEmpty() && !nachname.endsWith("*"))
+    {
+      nachname += "*";
+    }
+    String mail = txtFieldEMail.getText();
+    if (!mail.isEmpty() && !mail.endsWith("*"))
+    {
+      mail += "*";
+    }
+    String orga = txtFieldOrga.getText();
+    if (!orga.isEmpty() && !orga.endsWith("*"))
+    {
+      orga += "*";
+    }
+    resultSearchQuery.put("Vorname", vorname);
+    resultSearchQuery.put("Nachname", nachname);
+    resultSearchQuery.put("Mail", mail);
+    resultSearchQuery.put("OrgaKurz", orga);
 
     return resultSearchQuery;
   }
 
-  private void setStatusText(QueryResults ldapSearchResults)
+  private void showInfoDialog(QueryResults ldapSearchResults)
   {
-    XControl statusTextXControl = layout.getControl("statusText");
-
-    if (statusTextXControl == null)
-      return;
-
-    XFixedText statusText = UNO.XFixedText(statusTextXControl);
-
-    if (statusText == null)
-      return;
-
-    statusText.setText("");
-
     if (ldapSearchResults == null)
     {
-      statusText.setText(
-          "Das Bearbeiten Ihrer Suchanfrage hat zu lange gedauert und wurde deshalb abgebrochen.\n"
-              + "Grund hierfür könnte ein Problem mit der Datenquelle sein oder mit dem verwendeten\n"
-              + "Suchbegriff, der auf zu viele Ergebnisse zutrifft.\n"
+      InfoDialog.showInfoModal("Fehler.",
+          "Das Bearbeiten Ihrer Suchanfrage hat zu lange gedauert und wurde deshalb abgebrochen. "
+              + "Grund hierfür könnte ein Problem mit der Datenquelle sein oder mit dem verwendeten "
+              + "Suchbegriff, der auf zu viele Ergebnisse zutrifft. "
               + "Bitte versuchen Sie eine andere, präzisere Suchanfrage.");
+
     } else if (ldapSearchResults.isEmpty())
     {
-      statusText.setText("Es wurde nichts gefunden.");
+      InfoDialog.showInfoModal("Fehler.", "Es wurde nichts gefunden.");
     }
   }
 

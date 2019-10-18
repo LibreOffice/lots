@@ -115,8 +115,6 @@ public class LocalizationUpdater
    * 
    * @param args
    *          die args werden nicht ausgewertet
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static void main(String[] args)
   {
@@ -125,8 +123,6 @@ public class LocalizationUpdater
 
   /**
    * Macht die eigentliche Arbeit.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private static void updateLocalizationConf()
   {
@@ -306,8 +302,6 @@ public class LocalizationUpdater
    * 
    * @param file
    * @throws FileNotFoundException
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private static String readFile(File file, String encoding)
   {
@@ -334,8 +328,6 @@ public class LocalizationUpdater
   /**
    * Fügt alle Dateien, die mit .java enden aus diesem Verzeichnis fileOrDir und aus
    * allen Unterverzeichnissen zur Liste l hinzu.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private static void addJavaFilesRecursive(List<File> l, File fileOrDir)
   {
@@ -367,8 +359,6 @@ public class LocalizationUpdater
    * @param str
    *          Ein String aus dem SourceCode, der zu übersetzen ist.
    * @return den evaluierten String
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private static String evalString(String str)
   {

@@ -41,6 +41,7 @@
 			<outputDirectory>/</outputDirectory>
 			<excludes>
 				<exclude>.keep</exclude>
+				<exclude>log4j.properties</exclude>
 			</excludes>
 		</fileSet>
 		<fileSet>

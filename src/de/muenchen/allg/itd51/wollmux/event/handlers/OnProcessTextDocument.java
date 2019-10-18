@@ -1,6 +1,5 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
-import java.beans.PropertyChangeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +11,6 @@ import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -29,7 +27,7 @@ public class OnProcessTextDocument extends BasicEvent
 {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(OnProcessTextDocument.class);
-  
+
   TextDocumentController documentController;
 
   boolean visible;
@@ -105,15 +103,9 @@ public class OnProcessTextDocument extends BasicEvent
         // FormGUI starten
         try
         {
-          FormController formController = documentController.createFormController();
-          DocumentManager.getDocumentManager().setFormModel(documentController.getModel().doc,
-              formController);
-          formController.startFormGUI();
+          FormController formController = documentController.getFormController();
+          formController.createFormGUI();
           formController.formControllerInitCompleted();
-          
-          formController.focusGained(formController.getFieldId());
-
-          formController.addPropertyChangeListener((PropertyChangeEvent e) -> formController.focusGained( formController.getFieldId()));          
         } catch (FormModelException e)
         {
           throw new WMCommandsFailedException(

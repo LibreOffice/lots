@@ -1,6 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.util.Set;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,18 +16,18 @@ import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 
 public class DatensatzBearbeitenPersonWizardPage extends DatensatzBearbeitenBaseWizardPage
 {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(DatensatzBearbeitenPersonWizardPage.class);
 
-  public DatensatzBearbeitenPersonWizardPage(XWindow parentWindow, short pageId, DJDataset dataset,
-      Dataset ldapDataset, Set<String> dbSchema) throws Exception
+  public DatensatzBearbeitenPersonWizardPage(XWindow parentWindow, short pageId,
+      LOSDJDataset dataset,
+      List<String> dbSchema) throws Exception
   {
-    super(pageId, parentWindow, "DatensatzBearbeitenPerson", dataset, ldapDataset, dbSchema);
+    super(pageId, parentWindow, "DatensatzBearbeitenPerson", dataset, dbSchema);
 
     XControlContainer controlContainerPerson = UnoRuntime.queryInterface(XControlContainer.class,
         window);
@@ -37,8 +37,7 @@ public class DatensatzBearbeitenPersonWizardPage extends DatensatzBearbeitenBase
     {
       XComboBox anredeComboBox = UNO.XComboBox(controlContainerPerson.getControl("Anrede"));
       XTextComponent anredeTextComponent = UNO.XTextComponent(anredeComboBox);
-      String anrede = dataset.get("Anrede");
-      anredeTextComponent.setText(anrede);
+      anredeTextComponent.setText(dataset.get("Anrede") == null ? "" : dataset.get("Anrede"));
 
       anredeComboBox.removeItems((short) 0, anredeComboBox.getItemCount());
       anredeComboBox.addItems(new String[] { "Herr", "Frau" }, (short) 0);
@@ -57,11 +56,11 @@ public class DatensatzBearbeitenPersonWizardPage extends DatensatzBearbeitenBase
         if (xTextComponent == null)
           continue;
 
-        xTextComponent.setText(dataset.get(columnName));
+        xTextComponent.setText(dataset.get(columnName) == null ? "" : dataset.get(columnName));
         
-        if (isDifferentFromLdapDataset(columnName))
+        if (dataset.isDifferentFromLdapDataset(columnName, dataset))
         {
-          showAcceptLdapValueButton(columnName);
+          showAcceptLdapValueButton(columnName, true);
           super.setTextColor(xControl, 16711680); // rot
         }
       }

@@ -55,7 +55,7 @@ public class OnTextbausteinEinfuegen extends BasicEvent
     } catch (WollMuxFehlerException e)
     {
       LOGGER.error("Textbausteinverweis konnte nicht eingefügt werden.", e);
-      InfoDialog.showInfoModal(L.m("WollMux-Fehler"), "Textbausteinverweis konnte nicht eingefügt werden.");
+      InfoDialog.showInfoModal(L.m("WollMux-Fehler"), e.getMessage());
     }
   }
 

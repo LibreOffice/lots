@@ -3,7 +3,7 @@
 <dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="DatensatzBearbeitenPerson" dlg:left="73" dlg:top="27" dlg:width="413" dlg:height="278" dlg:closeable="true" dlg:moveable="true" dlg:withtitlebar="false">
  <dlg:bulletinboard>
   <dlg:text dlg:id="Label0" dlg:tab-index="0" dlg:left="15" dlg:top="9" dlg:width="65" dlg:height="15" dlg:value="Rolle"/>
-  <dlg:text dlg:id="Label1" dlg:tab-index="17" dlg:left="205" dlg:top="9" dlg:width="50" dlg:height="15" dlg:value="Anrede"/>
+  <dlg:text dlg:id="Label1" dlg:tab-index="17" dlg:left="205" dlg:top="9" dlg:width="30" dlg:height="15" dlg:value="Anrede"/>
   <dlg:text dlg:id="Label2" dlg:tab-index="19" dlg:left="15" dlg:top="29" dlg:width="65" dlg:height="15" dlg:value="Vorname"/>
   <dlg:text dlg:id="Label3" dlg:tab-index="21" dlg:left="15" dlg:top="49" dlg:width="65" dlg:height="15" dlg:value="Nachname"/>
   <dlg:text dlg:id="Label4" dlg:tab-index="23" dlg:left="15" dlg:top="69" dlg:width="65" dlg:height="15" dlg:value="Titel"/>
@@ -45,9 +45,9 @@
   <dlg:button dlg:id="btnDienstgebaeudePLZ" dlg:tab-index="18" dlg:visible="false" dlg:left="85" dlg:top="172" dlg:width="10" dlg:height="10" dlg:value=" *"/>
   <dlg:button dlg:id="btnDienstgebaeudeOrt" dlg:tab-index="22" dlg:visible="false" dlg:left="85" dlg:top="192" dlg:width="10" dlg:height="10" dlg:value=" *"/>
   <dlg:button dlg:id="btnMail" dlg:tab-index="26" dlg:visible="false" dlg:left="85" dlg:top="212" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnZustaendigkeit" dlg:tab-index="30" dlg:visible="false" dlg:left="85" dlg:top="232" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnZustaendigkeit" dlg:tab-index="38" dlg:visible="false" dlg:left="257" dlg:top="232" dlg:width="10" dlg:height="10" dlg:value=" *"/>
   <dlg:button dlg:id="btnFunktion" dlg:tab-index="34" dlg:visible="false" dlg:left="85" dlg:top="252" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnDienstBezKurz" dlg:tab-index="38" dlg:visible="false" dlg:left="257" dlg:top="232" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnDienstBezKurz" dlg:tab-index="30" dlg:visible="false" dlg:left="85" dlg:top="232" dlg:width="10" dlg:height="10" dlg:value=" *"/>
   <dlg:button dlg:id="btnDienstBezLang" dlg:tab-index="42" dlg:visible="false" dlg:left="257" dlg:top="252" dlg:width="10" dlg:height="10" dlg:value=" *"/>
   <dlg:button dlg:id="btnAnrede" dlg:tab-index="46" dlg:visible="false" dlg:left="242" dlg:top="12" dlg:width="10" dlg:height="10" dlg:value=" *"/>
  </dlg:bulletinboard>

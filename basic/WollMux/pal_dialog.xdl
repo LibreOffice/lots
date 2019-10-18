@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="pal_dialog" dlg:left="141" dlg:top="119" dlg:width="419" dlg:height="195" dlg:closeable="true" dlg:moveable="true" dlg:title="Persönliche Absenderliste">
+ <dlg:bulletinboard>
+  <dlg:text dlg:id="Label1" dlg:tab-index="0" dlg:left="9" dlg:top="5" dlg:width="214" dlg:height="16" dlg:value="Sie können nach Vorname, Nachname, E-Mail und Orga-Einheit suchen"/>
+  <dlg:text dlg:id="Label2" dlg:tab-index="1" dlg:left="9" dlg:top="30" dlg:width="59" dlg:height="14" dlg:value="Nachname"/>
+  <dlg:text dlg:id="Label3" dlg:tab-index="2" dlg:left="9" dlg:top="48" dlg:width="59" dlg:height="14" dlg:value="E-Mail"/>
+  <dlg:text dlg:id="Label4" dlg:tab-index="3" dlg:left="198" dlg:top="30" dlg:width="59" dlg:height="14" dlg:value="Vorname"/>
+  <dlg:text dlg:id="Label5" dlg:tab-index="4" dlg:left="198" dlg:top="48" dlg:width="59" dlg:height="14" dlg:value="Orga"/>
+  <dlg:button dlg:id="addToPALBtn" dlg:tab-index="11" dlg:left="168" dlg:top="69" dlg:width="25" dlg:height="14" dlg:value="-&gt;"/>
+  <dlg:menulist dlg:id="palListe" dlg:tab-index="10" dlg:left="198" dlg:top="69" dlg:width="213" dlg:height="103"/>
+  <dlg:menulist dlg:id="searchResultList" dlg:tab-index="9" dlg:left="9" dlg:top="69" dlg:width="153" dlg:height="103"/>
+  <dlg:textfield dlg:id="txtNachname" dlg:tab-index="5" dlg:left="72" dlg:top="30" dlg:width="90" dlg:height="14"/>
+  <dlg:textfield dlg:id="txtEmail" dlg:tab-index="6" dlg:left="72" dlg:top="48" dlg:width="90" dlg:height="14"/>
+  <dlg:textfield dlg:id="txtVorname" dlg:tab-index="7" dlg:left="259" dlg:top="30" dlg:width="91" dlg:height="14"/>
+  <dlg:textfield dlg:id="txtOrga" dlg:tab-index="8" dlg:left="259" dlg:top="48" dlg:width="91" dlg:height="14"/>
+  <dlg:button dlg:id="btnSearch" dlg:tab-index="14" dlg:left="356" dlg:top="48" dlg:width="55" dlg:height="14" dlg:value="Suchen"/>
+  <dlg:button dlg:id="btnNew" dlg:tab-index="15" dlg:left="200" dlg:top="177" dlg:width="50" dlg:height="14" dlg:value="Neu"/>
+  <dlg:button dlg:id="btnEdit" dlg:tab-index="16" dlg:left="255" dlg:top="177" dlg:width="50" dlg:height="14" dlg:value="Bearbeiten"/>
+  <dlg:button dlg:id="btnCopy" dlg:tab-index="17" dlg:left="310" dlg:top="177" dlg:width="50" dlg:height="14" dlg:value="Kopieren"/>
+  <dlg:button dlg:id="btnDel" dlg:tab-index="18" dlg:left="365" dlg:top="177" dlg:width="45" dlg:height="14" dlg:value="Löschen"/>
+ </dlg:bulletinboard>
+</dlg:window>

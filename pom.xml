@@ -1,10 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.muenchen</groupId>
 	<artifactId>wollmux</artifactId>
-	<version>18.1.0-SNAPSHOT</version>
+	<version>18.1.7</version>
 	<name>WollMux</name>
 
 	<properties>
@@ -14,7 +12,7 @@
 
 	<scm>
 		<developerConnection>scm:git:https://github.com/WollMux/WollMux.git</developerConnection>
-		<tag>wollmux-18.0.4</tag>
+		<tag>RELEASE_18.1.7</tag>
 	</scm>
 
 	<build>
@@ -251,9 +249,8 @@
 						<phase>prepare-package</phase>
 						<configuration>
 							<target>
-								<move file="dist/WollMux.zip" tofile="dist/WollMux.oxt" />
-								<move file="dist/WollMux-AOO.zip"
-									tofile="dist/WollMux-AOO.oxt" />
+								<copy file="dist/WollMux.zip" tofile="dist/WollMux.oxt" />
+								<move file="dist/WollMux-AOO.zip" tofile="dist/WollMux-AOO.oxt" />
 							</target>
 						</configuration>
 						<goals>
@@ -431,7 +428,7 @@
 		<dependency>
 			<groupId>de.muenchen</groupId>
 			<artifactId>wollmux-core</artifactId>
-			<version>18.1.0</version>
+			<version>18.1.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.libreoffice</groupId>
@@ -572,7 +569,7 @@
 							</execution>
 							<execution>
 								<id>assemble-release</id>
-								<phase>deploy</phase>
+								<phase>verify</phase>
 								<goals>
 									<goal>single</goal>
 								</goals>

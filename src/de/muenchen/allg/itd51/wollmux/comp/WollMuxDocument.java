@@ -44,8 +44,6 @@ public class WollMuxDocument implements XWollMuxDocument
    * @param functionName
    *          der Name einer Druckfunktion, die im Abschnitt "Druckfunktionen" der
    *          WollMux-Konfiguration definiert sein muss.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   @Override
   public void addPrintFunction(String functionName)
@@ -64,8 +62,6 @@ public class WollMuxDocument implements XWollMuxDocument
    * 
    * @param functionName
    *          der Name einer Druckfunktion, die im Dokument gesetzt ist.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   @Override
   public void removePrintFunction(String functionName)
@@ -86,8 +82,6 @@ public class WollMuxDocument implements XWollMuxDocument
    *          ID zu der der neue Formularwert gesetzt werden soll.
    * @param value
    *          Der neu zu setzende Formularwert.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   @Override
   public void setFormValue(String id, String value)
@@ -111,8 +105,6 @@ public class WollMuxDocument implements XWollMuxDocument
    *          soll.
    * @param value
    *          enthält den neuen Wert für dbSpalte.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   @Override
   public void setInsertValue(String dbSpalte, String value)
@@ -125,8 +117,6 @@ public class WollMuxDocument implements XWollMuxDocument
    * Kommandos. Die Methode kehrt garantiert erst zurück, wenn alle
    * setFormValue()-Kommandos ihre Wirkung im WollMux und im entsprechenden
    * Dokument entfaltet haben.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   @Override
   public void updateFormGUI()
@@ -141,8 +131,6 @@ public class WollMuxDocument implements XWollMuxDocument
    * Kommandos. Die Methode kehrt garantiert erst zurück, wenn alle
    * setInsertValue()-Kommandos ihre Wirkung im WollMux und im entsprechenden
    * Dokument entfaltet haben.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   @Override
   public void updateInsertFields()
@@ -168,8 +156,6 @@ public class WollMuxDocument implements XWollMuxDocument
    * @return Array von PropertyValue-Objekten mit den aktuell gesetzten
    *         Formularwerten dieses WollMux-Dokuments. Gibt es keine Formularwerte
    *         im Dokument, so ist das Array leer (aber != null).
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   @Override
   public PropertyValue[] getFormValues()

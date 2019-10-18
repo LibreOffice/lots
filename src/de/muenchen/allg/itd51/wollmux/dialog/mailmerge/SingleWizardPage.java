@@ -51,6 +51,7 @@ public class SingleWizardPage extends AbstractXWizardPage
           {
             String files = picker.getDirectory();
             targetDir.setText(files);
+            controller.enableFinishButton(true);
           }
         } catch (Exception e)
         {

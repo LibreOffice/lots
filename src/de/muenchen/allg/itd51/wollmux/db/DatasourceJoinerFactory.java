@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.db.AttachDatasource;
+import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnTransformer;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.core.db.DatasetListElement;
 import de.muenchen.allg.itd51.wollmux.core.db.Datasource;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.db.LDAPDatasource;
@@ -176,10 +176,10 @@ public class DatasourceJoinerFactory
           ds = new LDAPDatasource(datasources, sourceDesc, context);
           break;
         case "ooo":
-          ds = new OOoDatasource(datasources, sourceDesc, context);
+          ds = new OOoDatasource(datasources, sourceDesc);
           break;
         case "funky":
-          ds = new FunkyDatasource(datasources, sourceDesc, context);
+          ds = new FunkyDatasource(datasources, sourceDesc);
           break;
         default:
           LOGGER.error(L.m("Ununterstützter Datenquellentyp: %1", type));
@@ -244,7 +244,20 @@ public class DatasourceJoinerFactory
     {
       for (Dataset ds : dj.getStatus().lostDatasets)
       {
-        list.add(new DatasetListElement(ds).toString());
+        try
+        {
+          StringBuilder strBuilder = new StringBuilder();
+          strBuilder.append(ds.get("OID") == null ? "" : ds.get("OID"));
+          strBuilder.append(" ");
+          strBuilder.append(ds.get("Vorname") == null ? "" : ds.get("Vorname"));
+          strBuilder.append(" ");
+          strBuilder.append(ds.get("Nachname") == null ? "" : ds.get("Nachname"));
+
+          list.add(strBuilder.toString());
+        } catch (ColumnNotFoundException e)
+        {
+          LOGGER.error("", e);
+        }
       }
     }
     return list;

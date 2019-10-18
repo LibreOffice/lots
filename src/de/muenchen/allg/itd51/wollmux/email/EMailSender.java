@@ -27,9 +27,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -40,6 +37,9 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
@@ -47,6 +47,8 @@ import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 
 public class EMailSender
 {
+  private static final Logger LOGGER = LoggerFactory.getLogger(EMailSender.class);
+
   private Properties props;
 
   private Message email;
@@ -80,9 +82,7 @@ public class EMailSender
   public void addAttachment(File attachment) throws MessagingException, IOException
   {
     MimeBodyPart messageBodyPart = new MimeBodyPart();
-    DataSource dataSource = new FileDataSource(attachment);
-    messageBodyPart.setDataHandler(new DataHandler(dataSource));
-    messageBodyPart.setFileName(attachment.getName());
+    messageBodyPart.attachFile(attachment);
     ((Multipart) email.getContent()).addBodyPart(messageBodyPart);
   }
 
@@ -91,7 +91,12 @@ public class EMailSender
   {
     try
     {
+      // Notwendig um MIME Types auf Java-Klassen zu mappen.
+      // Manchmal funktioniert der ClassLoader nicht richtig
+      Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
       Transport tr = session.getTransport("smtp");
+      // FYI: falls getUsername() || getPassword() = "" muss NULL übergeben werden,
+      // auch bei "" glaubt javamail AUTH aktivieren zu müssen was zu einer Auth-Exception führt.
       tr.connect(mailServerSettings.getMailserver(), mailServerSettings.getMailserverport(),
           mailServerSettings.getUsername(), mailServerSettings.getPassword());
       email.saveChanges();
@@ -99,7 +104,7 @@ public class EMailSender
     }
     catch (MessagingException e)
     {
-      throw new MessagingException(e.getMessage(), e);
+      LOGGER.error("", e);
     }
   }
 

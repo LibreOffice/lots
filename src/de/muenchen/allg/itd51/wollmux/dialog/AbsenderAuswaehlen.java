@@ -40,42 +40,32 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.XButton;
-import com.sun.star.awt.XControl;
+import com.sun.star.awt.XContainerWindowProvider;
+import com.sun.star.awt.XControlContainer;
+import com.sun.star.awt.XDialog;
 import com.sun.star.awt.XListBox;
 import com.sun.star.awt.XWindow;
-import com.sun.star.lang.EventObject;
+import com.sun.star.awt.XWindowPeer;
+import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.core.db.Search;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.ControlType;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Dock;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
-import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
-import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
- * Diese Klasse stellt einen Dialog zum
- * Auswählen eines Eintrages aus der Persönlichen Absenderliste bereit.
+ * Diese Klasse stellt einen Dialog zum Auswählen eines Eintrages aus der Persönlichen Absenderliste
+ * bereit.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1), Björn Ranft
  */
@@ -94,10 +84,10 @@ public class AbsenderAuswaehlen
   private ConfigThingy verConf;
 
   private List<DJDataset> elements = null;
-  
-  private UNODialogFactory dialogFactory;
-  
-  private SimpleDialogLayout layout;
+
+  private XListBox absAuswahl;
+
+  private XDialog dialog;
 
   /**
    * Erzeugt einen neuen Dialog.
@@ -117,159 +107,120 @@ public class AbsenderAuswaehlen
 
   private void createUNOGUI()
   {
-    dialogFactory = new UNODialogFactory();
-    XWindow dialogWindow = dialogFactory.createDialog(600, 400, 0xF2F2F2);
-    dialogWindow.addWindowListener(windowListener);
+    XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
+    XContainerWindowProvider provider = null;
 
-    dialogFactory.showDialog();
+    try
+    {
+      provider = UnoRuntime.queryInterface(XContainerWindowProvider.class,
+          UNO.xMCF.createInstanceWithContext("com.sun.star.awt.ContainerWindowProvider",
+              UNO.defaultContext));
+    } catch (com.sun.star.uno.Exception e)
+    {
+      LOGGER.error("", e);
+    }
+    
+    if (provider == null)
+      return;
 
-    layout = new SimpleDialogLayout(dialogWindow);
-    layout.setMarginBetweenControls(15);
-    layout.setMarginTop(20);
-    layout.setMarginLeft(20);
-    layout.setWindowBottomMargin(10);
+    XWindow window = provider.createContainerWindow(
+        "vnd.sun.star.script:WollMux.absender_auswahl?location=application", "", peer, null);
+    XControlContainer controlContainer = UnoRuntime.queryInterface(XControlContainer.class, window);
 
-    layout.addControlsToList(addMainControls());
-    layout.addControlsToList(addBottomButtons());
+    absAuswahl = UNO.XListBox(controlContainer.getControl("absAuswahl"));
 
-    layout.draw();
+    XButton okBtn = UNO.XButton(controlContainer.getControl("okBtn"));
+    okBtn.addActionListener(okActionListener);
+
+    XButton editBtn = UNO.XButton(controlContainer.getControl("editBtn"));
+    editBtn.addActionListener(editActionListener);
+
+    XButton abortBtn = UNO.XButton(controlContainer.getControl("abortBtn"));
+    abortBtn.addActionListener(abortActionListener);
 
     QueryResults palEntries = dj.getLOS();
     if (palEntries.isEmpty())
     {
-      dialogFactory.setVisible(false);
       new PersoenlicheAbsenderlisteVerwalten(verConf, dj, palListener);
     } else
     {
       setListElements();
     }
+
+    dialog = UnoRuntime.queryInterface(XDialog.class, window);
+    dialog.execute();
   }
 
-  private AbstractWindowListener windowListener = new AbstractWindowListener()
-  {
+  private AbstractActionListener abortActionListener = event -> dialog.endExecute();
 
-    @Override
-    public void disposing(EventObject arg0)
-    {
-      WollMuxEventHandler.getInstance().handlePALChangedNotify();
-      dialogFactory.closeDialog();
-    }
-  };
-
-  private ControlModel addMainControls()
-  {
-    List<ControlProperties> mainControls = new ArrayList<>();
-
-    ControlProperties absLabel = new ControlProperties(ControlType.LABEL, "absLabel");
-    absLabel.setControlPercentSize(100, 20);
-    absLabel.setLabel("Welchen Absender möchten Sie für Ihre Briefköpfe verwenden?");
-    
-    ControlProperties absListBox = new ControlProperties(ControlType.LIST_BOX, "absListBox");
-    absListBox.setControlPercentSize(100, 200);
-    XListBox absXListBox = UNO.XListBox(absListBox.getXControl());
-    absXListBox.addItemListener(absListBoxItemListener);
-
-    mainControls.add(absLabel);
-    mainControls.add(absListBox);
-
-    return new ControlModel(Orientation.VERTICAL, Align.NONE, mainControls, Optional.empty());
-  }
-
-  private ControlModel addBottomButtons()
-  {
-    List<ControlProperties> bottomBtns = new ArrayList<>();
-
-    ControlProperties abortBtn = new ControlProperties(ControlType.BUTTON, "abortBtn");
-    abortBtn.setControlPercentSize(50, 40);
-    abortBtn.setLabel("Abbrechen");
-    XButton abortXBtn = UNO.XButton(abortBtn.getXControl());
-    abortXBtn.addActionListener(abortActionListener);
-
-    ControlProperties editBtn = new ControlProperties(ControlType.BUTTON, "editBtn");
-    editBtn.setControlPercentSize(50, 40);
-    editBtn.setLabel("Bearbeiten");
-    XButton editXBtn = UNO.XButton(editBtn.getXControl());
-    editXBtn.addActionListener(editActionListener);
-
-    bottomBtns.add(abortBtn);
-    bottomBtns.add(editBtn);
-
-    return new ControlModel(Orientation.HORIZONTAL, Align.NONE, bottomBtns, Optional.of(Dock.BOTTOM));
-  }
-
-  private AbstractItemListener absListBoxItemListener = event -> {
-    DJDataset selectedElement = elements.get(event.Selected);
-
-    if (selectedElement == null) {
-      LOGGER.debug("AbsenderAuswaehlen: itemStateChanged: selectedDataset is NULL.");
-      return;
-    }
-
-    selectedElement.select();
-    WollMuxEventHandler.getInstance().handlePALChangedNotify();
-  };
-
-  private AbstractActionListener abortActionListener = event -> {
-    WollMuxEventHandler.getInstance().handlePALChangedNotify();
-    dialogFactory.closeDialog();
-  };
-  
   private AbstractNotifier palListener = new AbstractNotifier()
   {
     @Override
     public void dialogClosed()
     {
-      dialogFactory.setVisible(true);
       setListElements();
     }
   };
 
+  private AbstractActionListener okActionListener = event -> {
+    DJDataset selectedElement = elements.get(absAuswahl.getSelectedItemPos());
+
+    if (selectedElement == null)
+    {
+      LOGGER.debug("AbsenderAuswaehlen: itemStateChanged: selectedDataset is NULL.");
+      dialog.endExecute();
+      return;
+    }
+
+    selectedElement.select();
+    WollMuxEventHandler.getInstance().handlePALChangedNotify();
+    dialog.endExecute();
+  };
+
   private AbstractActionListener editActionListener = event -> {
-    dialogFactory.setVisible(false);
-    new PersoenlicheAbsenderlisteVerwalten(
-      verConf, dj, palListener);
-    };
+    dialog.endExecute();
+    new PersoenlicheAbsenderlisteVerwalten(verConf, dj, palListener);
+  };
 
   private void setListElements()
   {
-    XControl xControl = layout.getControl("absListBox");
-
-    if (xControl == null)
-      return;
-
-    XListBox xListBox = UNO.XListBox(xControl);
-
-    if (xListBox == null)
-      return;
-
     elements = new ArrayList<>();
-    xListBox.removeItems((short) 0, xListBox.getItemCount());
+
+    if (absAuswahl.getItemCount() > 0)
+      absAuswahl.removeItems((short) 0, absAuswahl.getItemCount());
 
     short itemToHightlightPos = 0;
     int count = 0;
-    
+
     for (Dataset dataset : dj.getLOS())
     {
-      DJDataset ds = (DJDataset) dataset;
+      boolean valueChanged = false;
+      LOSDJDataset ds = (LOSDJDataset) dataset;
 
-      Dataset ldapDataset = null;
+      if (ds.getLOS() != null && !ds.getLOS().isEmpty())
+      {
+        for (String attribute : dj.getMainDatasourceSchema())
+        {
+          if (ds.isDifferentFromLdapDataset(attribute, ds))
+          {
+            valueChanged = true;
+            break;
+          } else
+          {
+            valueChanged = false;
+          }
+        }
 
-      try
-      {
-        ldapDataset = dj.getCachedLdapResultByOID(dataset.get("OID"));
-      } catch (ColumnNotFoundException e)
-      {
-        LOGGER.error("", e);
       }
 
-      if (dj.getCachedLdapResults() != null
-          && ldapDataset != null
-          && Search.hasLDAPDataChanged(dataset, ldapDataset,
-          DatasourceJoinerFactory.getDatasourceJoiner()))
-        xListBox.addItem("* " + buildListBoxString(ds), (short) count);
-      else
-        xListBox.addItem(buildListBoxString(ds), (short) count);
-
+      if (valueChanged)
+      {
+        absAuswahl.addItem("* " + ds.toString(), (short) count);
+      } else
+      {
+        absAuswahl.addItem(ds.toString(), (short) count);
+      }
+      
       elements.add(ds);
       if (ds.isSelectedDataset())
         itemToHightlightPos = (short) count;
@@ -277,29 +228,6 @@ public class AbsenderAuswaehlen
       count++;
     }
 
-    xListBox.selectItemPos(itemToHightlightPos, true);
-  }
-  
-  private String buildListBoxString(DJDataset ds)
-  {
-    String dbNachname = "";
-    String dbVorname = "";
-    String dbOrgaKurz = "";
-    String dbRolle = "";
-
-    try
-    {
-      dbRolle = ds.get("Rolle");
-      dbRolle = dbRolle == null || dbRolle.isEmpty() ? "" : "(" + dbRolle + ")";
-      dbNachname = ds.get("Nachname") == null ? "" : ds.get("Nachname");
-      dbVorname = ds.get("Vorname") == null ? "" : ds.get("Vorname");
-      dbOrgaKurz = ds.get("OrgaKurz") == null ? "" : ds.get("OrgaKurz");
-
-    } catch (ColumnNotFoundException e)
-    {
-      LOGGER.error("", e);
-    }
-
-    return dbRolle + dbNachname + ", " + dbVorname + " " + dbOrgaKurz;
+    absAuswahl.selectItemPos(itemToHightlightPos, true);
   }
 }

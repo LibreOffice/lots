@@ -11,5 +11,12 @@ oxt/ProtocolHandler.xcu         opt/libreoffice6.1/share/extensions/wollmux/
 oxt/Sidebar.xcu                 opt/libreoffice6.1/share/extensions/wollmux/
 oxt/WollMux.rdb                 opt/libreoffice6.1/share/extensions/wollmux/
 oxt/WriterWindowState.xcu       opt/libreoffice6.1/share/extensions/wollmux/
+oxt/CalcWindowState.xcu         opt/libreoffice6.1/share/extensions/wollmux/
+oxt/DrawWindowState.xcu         opt/libreoffice6.1/share/extensions/wollmux/
+oxt/ImpressWindowState.xcu      opt/libreoffice6.1/share/extensions/wollmux/
 oxt/help/component*.txt         opt/libreoffice6.1/share/extensions/wollmux/help/
 oxt/wollmux.png                 opt/libreoffice6.1/share/extensions/wollmux/icons/
+oxt/mailmerge.png               opt/libreoffice6.1/share/extensions/wollmux/icons/
+oxt/image/wollmux.jpg			opt/libreoffice6.1/share/extensions/wollmux/image/
+oxt/image/*.png					opt/libreoffice6.1/share/extensions/wollmux/image/
+oxt/icons/*.bmp					opt/libreoffice6.1/share/extensions/wollmux/icons/

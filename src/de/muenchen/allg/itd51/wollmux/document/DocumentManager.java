@@ -81,9 +81,7 @@ public class DocumentManager
    */
   private static DocumentManager docManager;
 
-  private Map<HashableComponent, Info> info =
-    new HashMap<>();
-
+  private Map<HashableComponent, Info> info = new HashMap<>();
   private Map<XTextDocument, FormularMax4kController> fm4k = new HashMap<>();
   private Map<XTextDocument, MailMergeNew> mailMerge = new HashMap<>();
   private Map<XTextDocument, FormController> controller = new HashMap<>();
@@ -448,6 +446,7 @@ public class DocumentManager
             GlobalFunctions.getInstance().getGlobalFunctions(),
             GlobalFunctions.getInstance().getFunctionDialogs());
       }
+      
       return documentController;
     }
 
@@ -460,7 +459,7 @@ public class DocumentManager
     @Override
     public String toString()
     {
-      return "TextDocumentInfo - model=" + documentController;
+      return "TextDocumentInfo: controller: " + documentController + " doc: " + doc;
     }
   }
 

@@ -22,7 +22,7 @@ import de.muenchen.allg.ooo.TextDocument;
 class SurroundingGarbageCollector extends AbstractExecutor
 {
   /**
-   * 
+   *
    */
   private final DocumentCommandInterpreter documentCommandInterpreter;
 
@@ -98,24 +98,16 @@ class SurroundingGarbageCollector extends AbstractExecutor
 
   /**
    * Löscht die vorher als Müll identifizierten Inhalte. type filter text
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   void removeGarbage()
   {
-    try
+    Iterator<Muellmann> iter = muellmaenner.iterator();
+    while (iter.hasNext())
     {
-      this.documentCommandInterpreter.getDocumentController().setLockControllers(true);
-      Iterator<Muellmann> iter = muellmaenner.iterator();
-      while (iter.hasNext())
-      {
-        Muellmann muellmann = iter.next();
-        muellmann.tueDeinePflicht();
-      }
-    }
-    finally
-    {
-      this.documentCommandInterpreter.getDocumentController().setLockControllers(false);
+      Muellmann muellmann = iter.next();
+      muellmann.tueDeinePflicht();
     }
   }
 
@@ -161,7 +153,7 @@ class SurroundingGarbageCollector extends AbstractExecutor
    * des übergebenen Dokumentkommandos cmd, wobei über removeAnLastEmptyParagraph
    * gesteuert werden kann, ob ein Absatz am Ende eines Textes gelöscht werden soll
    * (bei true) oder nicht (bei false).
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void collectSurroundingGarbageForCommand(DocumentCommand cmd,
@@ -175,29 +167,29 @@ class SurroundingGarbageCollector extends AbstractExecutor
      * Absatzes steht). Ein "T" an dritter Stelle gibt an, dass hinter dem Absatz
      * des Einfügemarkers eine Tabelle folgt. Ein "E" an dritter Stelle gibt an,
      * dass hinter dem Cursor das Dokument aufhört und kein weiterer Absatz kommt.
-     * 
+     *
      * Startmarke: Grundsätzlich gibt es die folgenden Fälle zu unterscheiden.
-     * 
+     *
      * 00: Einfügemarker und Zeilenumbruch DAHINTER löschen
-     * 
+     *
      * 01: nur Einfügemarker löschen
-     * 
+     *
      * 10: nur Einfügemarker löschen
-     * 
+     *
      * 11: nur Einfügemarker löschen
-     * 
+     *
      * 00T: Einfügemarker und Zeilenumbruch DAVOR löschen
-     * 
+     *
      * Die Fälle 01T, 10T und 11T werden nicht unterstützt.
-     * 
+     *
      * Endmarke: Es gibt die folgenden Fälle:
-     * 
+     *
      * 00: Einfügemarker und Zeilenumbruch DAHINTER löschen
-     * 
+     *
      * 00E: Einfügemarker und Zeilenumbruch DAVOR löschen
-     * 
+     *
      * 01, 10, 11: Einfügemarker löschen
-     * 
+     *
      * DO NOT TOUCH THIS CODE ! Dieser Code ist komplex und fehleranfällig.
      * Kleinste Änderungen können dafür sorgen, dass irgendeine der 1000e von
      * Vorlagen plötzlich anders dargestellt wird. Das gewünschte Verhalten dieses

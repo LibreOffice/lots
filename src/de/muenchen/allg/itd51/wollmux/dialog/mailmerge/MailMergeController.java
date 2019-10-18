@@ -4,19 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.MessagingException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.lang.NoSuchMethodException;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResultsWithSchema;
+import de.muenchen.allg.itd51.wollmux.core.dialog.TextComponentTags;
 import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.email.EMailSender;
+import de.muenchen.allg.itd51.wollmux.email.MailServerSettings;
 import de.muenchen.allg.itd51.wollmux.print.PrintModels;
 
 /**
@@ -31,63 +39,89 @@ public class MailMergeController
   private static final Logger LOGGER = LoggerFactory.getLogger(MailMergeController.class);
   
   /**
+  * Tag für {@link TextComponentTags}, das als Platzhalter für die Serienbriefnummer
+  * steht.
+  */
+  public static final String TAG_SERIENBRIEFNUMMER = "#SB";
+  
+  /**
+  * Tag für {@link TextComponentTags}, das als Platzhalter für die Datensatznummer
+  * steht.
+  */
+  public static final String TAG_DATENSATZNUMMER = "#DS";
+  
+  /**
    * ID der Property in der die Serienbriefdaten gespeichert werden.
    */
-  private static final String PROP_QUERYRESULTS = "MailMergeNew_QueryResults";
+  public static final String PROP_QUERYRESULTS = "MailMergeNew_QueryResults";
 
   /**
    * ID der Property in der das Zielverzeichnis für den Druck in Einzeldokumente
    * gespeichert wird.
    */
-  private static final String PROP_TARGETDIR = "MailMergeNew_TargetDir";
+  public static final String PROP_TARGETDIR = "MailMergeNew_TargetDir";
 
   /**
    * ID der Property in der das Dateinamenmuster für den Einzeldokumentdruck
    * gespeichert wird.
    */
-  private static final String PROP_FILEPATTERN = "MailMergeNew_FilePattern";
+  public static final String PROP_FILEPATTERN = "MailMergeNew_FilePattern";
 
   /**
    * ID der Property in der der Name des Feldes gespeichert wird, in dem die
    * E-Mail-Adressen der Empfänger enthalten ist.
    */
-  private static final String PROP_EMAIL_TO_FIELD_NAME =
+  public static final String PROP_EMAIL_TO_FIELD_NAME =
     "MailMergeNew_EMailToFieldName";
 
   /**
    * ID der Property in der der Name des Feldes gespeichert wird, in dem die
    * E-Mail-Adressen der Empfänger enthalten sind.
    */
-  private static final String PROP_EMAIL_FROM = "MailMergeNew_EMailFrom";
+  public static final String PROP_EMAIL_FROM = "MailMergeNew_EMailFrom";
 
   /**
    * ID der Property in der die Betreffzeile vom Typ String der zu verschickenden
    * E-Mail enthalten ist.
    */
-  private static final String PROP_EMAIL_SUBJECT = "MailMergeNew_EMailSubject";
+  public static final String PROP_EMAIL_SUBJECT = "MailMergeNew_EMailSubject";
 
   /**
    * ID der Property in der die Betreffzeile vom Typ String der zu verschickenden
    * E-Mail enthalten ist.
    */
-  private static final String PROP_EMAIL_MESSAGE_TEXTTAGS =
+  public static final String PROP_EMAIL_MESSAGE_TEXTTAGS =
     "MailMergeNew_EMailMessageTextTags";
+
+  /**
+   * Wenn der Seriendruck per E-Mail gestartet wird, wird nach erfolgreichen Versand der Empfänger
+   * in diese Liste hinzugefügt.
+   */
+  public static final String PROP_EMAIL_REPORT_RECIPIENT_LIST = "MailMergeNew_EMailReportReciptienList";
+
+  /**
+   * Wenn der Seriendruck per E-Mail gestartet wird, wird nach jedem erfolgreichen Versand einer
+   * E-Mail hochgezählt.
+   */
+  public static final String PROP_EMAIL_REPORT_EMAILS_SENT_COUNT = "MailMergeNew_EMailReportEMailsSentCount";
+
+  public static final String PROP_EMAIL_MAIL_SERVER_SETTINGS = "MailMergeNew_MailServerSettings";
 
   /**
    * ID der Property in der das Dateinamenmuster für den Einzeldokumentdruck
    * gespeichert wird.
    */
-  private static final String PROP_DATASET_EXPORT = "MailMergeNew_DatasetExport";
+  public static final String PROP_DATASET_EXPORT = "MailMergeNew_DatasetExport";
 
   /**
    * ID der Property, die einen List der Indizes der zu druckenden Datensätze
    * speichert.
    */
-  private static final String PROP_MAILMERGENEW_SELECTION = "MailMergeNew_Selection";
+  public static final String PROP_MAILMERGENEW_SELECTION = "MailMergeNew_Selection";
 
-  private static final String TEMP_MAIL_DIR_PREFIX = "wollmuxmail";
+  public static final String TEMP_MAIL_DIR_PREFIX = "wollmuxmail";
 
-  private static final String MAIL_ERROR_MESSAGE_TITLE =
+  public static final String MAIL_ERROR_MESSAGE_TITLE =
     L.m("Fehler beim E-Mail-Versand");
   
   private TextDocumentController documentController;
@@ -335,7 +369,62 @@ public class MailMergeController
         documentController.setFormFieldsPreviewMode(false);
 
         long duration = (System.currentTimeMillis() - startTime) / 1000;
+        
         LOGGER.debug(L.m("MailMerge finished after %1 seconds", duration));
+
+        // Wenn der Seriendruck per E-Mail versendet wird, sende Zusammenfassung
+        // Liste der Empfänger-Emails und Anzahl versendeter Emails
+        String eMailFrom = pmod.getProp(MailMergeController.PROP_EMAIL_FROM, "").toString();
+
+        List<String> recipintList = (List<String>) pmod
+            .getProp(MailMergeController.PROP_EMAIL_REPORT_RECIPIENT_LIST, null);
+        int mailsSentCount = (int) pmod
+            .getProp(MailMergeController.PROP_EMAIL_REPORT_EMAILS_SENT_COUNT, 0);
+
+        if (recipintList == null)
+          return;
+
+        EMailSender mail = new EMailSender();
+        StringBuilder buildMessage = new StringBuilder();
+
+        buildMessage.append(
+            "Der WollMux-Serienbrief wurde an folgende E-Mail-Adressen versandt:");
+        buildMessage.append("\r\n");
+
+        for (String recipient : recipintList)
+        {
+          buildMessage.append(recipient);
+          buildMessage.append("\r\n");
+        }
+
+        buildMessage.append("\r\n");
+        buildMessage.append("Anzahl gesendeter E-Mails: ");
+        buildMessage.append(mailsSentCount);
+
+        buildMessage.append("\r\n");
+        buildMessage.append(
+            "Wenn eine Nachricht nicht zugestellt werden konnte, erhalten Sie in Kürze eine entsprechende Email.");
+
+        try
+        {
+          mail.createNewMultipartMail(eMailFrom, eMailFrom,
+              "WollMux-Seriendruck: Bericht über Ihren E-Mail-Versand", buildMessage.toString());
+        } catch (MessagingException e)
+        {
+          LOGGER.error("", e);
+        }
+
+        try
+        {
+          MailServerSettings smtpSettings = (MailServerSettings) pmod
+              .getPropertyValue(PROP_EMAIL_MAIL_SERVER_SETTINGS);
+          mail.sendMessage(smtpSettings);
+
+        } catch (ConfigurationErrorException | MessagingException | WrappedTargetException
+            | UnknownPropertyException e)
+        {
+          LOGGER.error("", e);
+        }
       }
     }.start();
   }

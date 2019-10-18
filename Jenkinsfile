@@ -24,7 +24,7 @@ pipeline {
     stage('Quality Gate') {
       steps {
         script {
-          if (GIT_BRANCH == 'master') {
+          if (GIT_BRANCH == 'master' || GIT_BRANCH == 'WollMux_18.1') {
             withMaven(
               maven: 'mvn',
               mavenLocalRepo: '.repo',
@@ -51,6 +51,7 @@ pipeline {
                 }
               }
             }
+            archiveArtifacts artifacts: 'dist/WollMux.oxt', onlyIfSuccessful: true
           }
         }
       }

@@ -1,7 +1,9 @@
 package de.muenchen.allg.itd51.wollmux;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import org.slf4j.Logger;
@@ -12,9 +14,9 @@ import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 
@@ -124,13 +126,14 @@ public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALCha
   @Override
   public String[] getPALEntries()
   {
-    DJDatasetListElement[] pal = getSortedPALEntries();
-    String[] elements = new String[pal.length];
-    for (int i = 0; i < pal.length; i++)
+    List<DJDataset> pal = getSortedPALEntries();
+    String[] elements = new String[pal.size()];
+    for (int i = 0; i < pal.size(); i++)
     {
       elements[i] =
-        pal[i].toString() + SENDER_KEY_SEPARATOR + pal[i].getDataset().getKey();
+          pal.get(i).toString() + SENDER_KEY_SEPARATOR + pal.get(i).getKey();
     }
+
     return elements;
   }
 
@@ -149,20 +152,23 @@ public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALCha
    * @return alle DJDatasetListElemente der Persönlichen Absenderliste (PAL) in
    *         alphabetisch aufsteigend sortierter Reihenfolge.
    */
-  public DJDatasetListElement[] getSortedPALEntries()
+  public List<DJDataset> getSortedPALEntries()
   {
     // Liste der entries aufbauen.
     QueryResults data = DatasourceJoinerFactory.getDatasourceJoiner().getLOS();
   
-    DJDatasetListElement[] elements = new DJDatasetListElement[data.size()];
+    List<DJDataset> listDataset = new ArrayList<>();
     Iterator<Dataset> iter = data.iterator();
-    int i = 0;
+
     while (iter.hasNext())
-      elements[i++] =
-        new DJDatasetListElement((DJDataset) iter.next());
-    Arrays.sort(elements);
+    {
+      listDataset.add((DJDataset) iter.next());
+    }
+
+    DatasourceJoinerFactory.getDatasourceJoiner();
+    Collections.sort(listDataset, DatasourceJoiner.sortPAL);
   
-    return elements;
+    return listDataset;
   }
 
   /**
@@ -188,7 +194,7 @@ public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALCha
     try
     {
       DJDataset selected = DatasourceJoinerFactory.getDatasourceJoiner().getSelectedDataset();
-      return new DJDatasetListElement(selected).toString()
+      return selected.toString()
         + SENDER_KEY_SEPARATOR + selected.getKey();
     }
     catch (DatasetNotFoundException e)

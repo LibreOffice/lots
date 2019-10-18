@@ -462,8 +462,6 @@ public class TextModule
    * Liefert aus dem Dokument doc das erste Text-Field Objekt vom Typ Placemarker,
    * das gemeinsam mit range an der selben Position startet, oder null falls ein
    * solches Objekt nicht gefunden wird.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static XTextField getPlacemarkerStartingWithRange(XTextDocument doc,
       XTextCursor range)
