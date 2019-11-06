@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
-<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="about" dlg:left="208" dlg:top="111" dlg:width="260" dlg:height="193" dlg:closeable="true" dlg:moveable="true" dlg:title="Info über Vorlagen und Formulare (WollMux)">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="about" dlg:left="208" dlg:top="111" dlg:width="280" dlg:height="193" dlg:closeable="true" dlg:moveable="true" dlg:title="Info über Vorlagen und Formulare (WollMux)">
  <dlg:styles>
   <dlg:style dlg:style-id="0" dlg:font-height="13"/>
  </dlg:styles>
  <dlg:bulletinboard>
   <dlg:img dlg:id="logo" dlg:tab-index="0" dlg:left="4" dlg:top="5" dlg:width="50" dlg:height="66"/>
-  <dlg:text dlg:style-id="0" dlg:id="introLabel" dlg:tab-index="1" dlg:left="60" dlg:top="5" dlg:width="195" dlg:height="15"/>
-  <dlg:text dlg:style-id="0" dlg:id="copyright" dlg:tab-index="2" dlg:left="60" dlg:top="23" dlg:width="195" dlg:height="15"/>
-  <dlg:text dlg:style-id="0" dlg:id="license" dlg:tab-index="3" dlg:left="60" dlg:top="41" dlg:width="195" dlg:height="15"/>
-  <dlg:text dlg:style-id="0" dlg:id="homepage" dlg:tab-index="4" dlg:left="60" dlg:top="59" dlg:width="195" dlg:height="15"/>
-  <dlg:titledbox dlg:id="authorFrame" dlg:tab-index="5" dlg:left="4" dlg:top="76" dlg:width="250" dlg:height="60">
+  <dlg:text dlg:style-id="0" dlg:id="introLabel" dlg:tab-index="1" dlg:left="60" dlg:top="5" dlg:width="215" dlg:height="15"/>
+  <dlg:text dlg:style-id="0" dlg:id="copyright" dlg:tab-index="2" dlg:left="60" dlg:top="23" dlg:width="215" dlg:height="15"/>
+  <dlg:text dlg:style-id="0" dlg:id="license" dlg:tab-index="3" dlg:left="60" dlg:top="41" dlg:width="215" dlg:height="15"/>
+  <dlg:text dlg:style-id="0" dlg:id="homepage" dlg:tab-index="4" dlg:left="60" dlg:top="59" dlg:width="215" dlg:height="15"/>
+  <dlg:titledbox dlg:id="authorFrame" dlg:tab-index="5" dlg:left="4" dlg:top="76" dlg:width="270" dlg:height="60">
    <dlg:title dlg:value="Autoren (sortiert nach LOC)"/>
   </dlg:titledbox>
-  <dlg:menulist dlg:id="authors" dlg:tab-index="6" dlg:left="10" dlg:top="85" dlg:width="240" dlg:height="45" dlg:readonly="true"/>
-  <dlg:titledbox dlg:id="infoFrame" dlg:tab-index="7" dlg:left="5" dlg:top="140" dlg:width="250" dlg:height="50">
+  <dlg:menulist dlg:id="authors" dlg:tab-index="6" dlg:left="10" dlg:top="85" dlg:width="260" dlg:height="45" dlg:readonly="true"/>
+  <dlg:titledbox dlg:id="infoFrame" dlg:tab-index="7" dlg:left="5" dlg:top="140" dlg:width="270" dlg:height="50">
    <dlg:title dlg:value="Info"/>
   </dlg:titledbox>
-  <dlg:text dlg:id="wmVersion" dlg:tab-index="8" dlg:left="10" dlg:top="150" dlg:width="240" dlg:height="10"/>
-  <dlg:text dlg:id="wmConfig" dlg:tab-index="9" dlg:left="10" dlg:top="163" dlg:width="240" dlg:height="10"/>
-  <dlg:text dlg:id="default" dlg:tab-index="10" dlg:left="10" dlg:top="176" dlg:width="240" dlg:height="10"/>
+  <dlg:text dlg:id="wmVersion" dlg:tab-index="8" dlg:left="10" dlg:top="150" dlg:width="260" dlg:height="10"/>
+  <dlg:text dlg:id="wmConfig" dlg:tab-index="9" dlg:left="10" dlg:top="163" dlg:width="260" dlg:height="10"/>
+  <dlg:text dlg:id="default" dlg:tab-index="10" dlg:left="10" dlg:top="176" dlg:width="260" dlg:height="10"/>
  </dlg:bulletinboard>
 </dlg:window>
