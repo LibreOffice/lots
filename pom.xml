@@ -6,6 +6,7 @@
 	<name>WollMux</name>
 
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<libreoffice.version>6.4.0-SNAPSHOT</libreoffice.version>
 		<izpack.staging>dist</izpack.staging>
 		<wollmux.oxt.id>de.muenchen.allg.d101.wollmux</wollmux.oxt.id>
