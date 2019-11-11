@@ -25,7 +25,7 @@
 					<value>WollMuxDeck</value>
 				</prop>
 				<prop oor:name="IconURL" oor:type="xs:string">
-					<value>vnd.sun.star.extension://de.muenchen.allg.d101.wollmux/icons/wollmux.png</value>
+					<value>vnd.sun.star.extension://${wollmux.oxt.id}/icons/wollmux.png</value>
 				</prop>
 				<prop oor:name="ContextList">
 					<value oor:separator=";">
@@ -44,7 +44,7 @@
 					<value>WollMuxSeriendruckDeck</value>
 				</prop>
 				<prop oor:name="IconURL" oor:type="xs:string">
-					<value>vnd.sun.star.extension://de.muenchen.allg.d101.wollmux/icons/mailmerge.png</value>
+					<value>vnd.sun.star.extension://${wollmux.oxt.id}/icons/mailmerge.png</value>
 				</prop>
 				<prop oor:name="ContextList">
 					<value oor:separator=";">

@@ -21,12 +21,8 @@
 			<filtered>true</filtered>
 		</file>
 		<file>
-			<source>oxt/wollmux.png</source>
-			<outputDirectory>icons</outputDirectory>
-		</file>
-		<file>
-			<source>oxt/mailmerge.png</source>
-			<outputDirectory>icons</outputDirectory>
+			<source>oxt/Sidebar.xcu</source>
+			<filtered>true</filtered>
 		</file>
 	</files>
 	<fileSets>
@@ -44,6 +40,7 @@
 			<excludes>
 				<exclude>META-INF/manifest_AOO.xml</exclude>
 				<exclude>Addons_AOO.xcu</exclude>
+				<exclude>Sidebar.xcu</exclude>
 			</excludes>
 		</fileSet>
 		<fileSet>
