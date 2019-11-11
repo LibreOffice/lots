@@ -6,13 +6,6 @@
 	<version>15.4.0-SNAPSHOT</version>
 	<name>WollMux Interfaces</name>
 
-	<parent>
-		<groupId>de.muenchen</groupId>
-		<artifactId>wollmux-parent</artifactId>
-		<version>15.4.0-SNAPSHOT</version>
-		<relativePath />
-	</parent>
-
 	<build>
 		<plugins>
 			<plugin>
