@@ -10,7 +10,7 @@
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<dependencySets>
 		<dependencySet>
-			<outputDirectory>/</outputDirectory>
+			<outputDirectory>.</outputDirectory>
 			<useProjectArtifact>false</useProjectArtifact>
 			<unpack>true</unpack>
 			<scope>runtime</scope>
@@ -38,7 +38,7 @@
 	<fileSets>
 		<fileSet>
 			<directory>${project.build.outputDirectory}</directory>
-			<outputDirectory>/</outputDirectory>
+			<outputDirectory>.</outputDirectory>
 			<excludes>
 				<exclude>.keep</exclude>
 				<exclude>log4j.properties</exclude>
