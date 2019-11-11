@@ -260,40 +260,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.codehaus.izpack</groupId>
-				<artifactId>izpack-maven-plugin</artifactId>
-				<version>5.0.6</version>
-				<extensions>true</extensions>
-				<configuration>
-					<baseDir>${izpack.staging}</baseDir>
-					<installFile>${project.build.directory}/classes/install.xml</installFile>
-					<outputDirectory>${project.build.directory}</outputDirectory>
-					<finalName>${project.build.finalName}-installer</finalName>
-					<enableOverrideArtifact>true</enableOverrideArtifact>
-					<mkdirs>true</mkdirs>
-					<autoIncludeUrl>false</autoIncludeUrl>
-					<autoIncludeDevelopers>false</autoIncludeDevelopers>
-				</configuration>
-				<executions>
-					<execution>
-						<id>izpack</id>
-						<phase>package</phase>
-						<goals>
-							<goal>izpack</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.5.2</version>
-				<configuration>
-					<tagNameFormat>RELEASE_@{project.version}</tagNameFormat>
-					<releaseProfiles>release</releaseProfiles>
-				</configuration>
-			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -648,6 +614,40 @@
 								</configuration>
 							</execution>
 						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.izpack</groupId>
+						<artifactId>izpack-maven-plugin</artifactId>
+						<version>5.0.6</version>
+						<extensions>true</extensions>
+						<configuration>
+							<baseDir>${izpack.staging}</baseDir>
+							<installFile>${project.build.directory}/classes/install.xml</installFile>
+							<outputDirectory>${project.build.directory}</outputDirectory>
+							<finalName>${project.build.finalName}-installer</finalName>
+							<enableOverrideArtifact>true</enableOverrideArtifact>
+							<mkdirs>true</mkdirs>
+							<autoIncludeUrl>false</autoIncludeUrl>
+							<autoIncludeDevelopers>false</autoIncludeDevelopers>
+						</configuration>
+						<executions>
+							<execution>
+								<id>izpack</id>
+								<phase>package</phase>
+								<goals>
+									<goal>izpack</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-release-plugin</artifactId>
+						<version>2.5.2</version>
+						<configuration>
+							<tagNameFormat>RELEASE_@{project.version}</tagNameFormat>
+							<releaseProfiles>release</releaseProfiles>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
