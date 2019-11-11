@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -463,7 +464,7 @@ class DocumentExpander extends AbstractExecutor
       props.setPropertyValue("InputStream", stream);
       loader.loadStylesFromURL("private:stream", props.getProps());
     }
-    catch (NullPointerException e)
+    catch (NullPointerException | ExecutionException e)
     {
       LOGGER.error("", e);
     }
