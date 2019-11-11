@@ -8,6 +8,7 @@
 	<properties>
 		<libreoffice.version>6.4.0-SNAPSHOT</libreoffice.version>
 		<izpack.staging>dist</izpack.staging>
+		<wollmux.oxt.id>de.muenchen.allg.d101.wollmux</wollmux.oxt.id>
 	</properties>
 
 	<scm>
@@ -519,6 +520,70 @@
 	</dependencies>
 
 	<profiles>
+		<profile>
+			<id>ButtonsOnly</id>
+			<properties>
+				<wollmux.oxt.id>de.muenchen.allg.d101.wollmux.debug</wollmux.oxt.id>
+			</properties>	
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<version>2.5.5</version>
+						<configuration>
+							<outputDirectory>dist</outputDirectory>
+							<recompressZippedFiles>true</recompressZippedFiles>
+						</configuration>
+						<executions>
+							<execution>
+								<id>buttons-only</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<finalName>WollMux_ButtonsOnly</finalName>
+									<appendAssemblyId>false</appendAssemblyId>
+									<descriptors>
+										<descriptor>misc/assembly-buttons-only.xml</descriptor>
+									</descriptors>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.8</version>
+						<executions>
+							<execution>
+								<id>buttons-only</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<move file="dist/WollMux_ButtonsOnly.zip" tofile="dist/WollMux_ButtonsOnly.oxt" />
+										<echo level="info">unopkg remove:</echo>
+										<exec executable="unopkg" failifexecutionfails="false">
+											<arg line="remove WollMux_ButtonsOnly.oxt" />
+										</exec>
+										<echo level="info">unopkg add:</echo>
+										<exec executable="unopkg" failifexecutionfails="false">
+											<arg line="add dist/WollMux_ButtonsOnly.oxt" />
+										</exec>
+				
+										<tstamp><format property="mytime" pattern="HH:mm:ss"/></tstamp>
+										<echo level="info" message="Install finished at ">${mytime}</echo>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>release</id>
 			<build>

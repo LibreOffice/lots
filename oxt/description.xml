@@ -2,7 +2,7 @@
 <description xmlns="http://openoffice.org/extensions/description/2006"
 	     xmlns:xlink="http://www.w3.org/1999/xlink">
 	<version value="${project.version}" />
-	<identifier value="de.muenchen.allg.d101.wollmux"/>
+	<identifier value="${wollmux.oxt.id}"/>
 	<dependencies>
 		<OpenOffice.org-minimal-version value="2.1" name="OpenOffice.org 2.1"/>
 	</dependencies>
