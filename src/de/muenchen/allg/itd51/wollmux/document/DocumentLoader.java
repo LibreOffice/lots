@@ -122,8 +122,7 @@ public class DocumentLoader
     {
       XInputStream in = getDocumentStream(path);
       return UNO.loadComponentFromURL(path, asTemplate, allowMacros,
-          new PropertyValue("InputStream", -1, in, PropertyState.DIRECT_VALUE), new PropertyValue(
-              "FilterName", -1, "StarOffice XML (Writer)", PropertyState.DIRECT_VALUE));
+          new PropertyValue("InputStream", -1, in, PropertyState.DIRECT_VALUE));
     } catch (UnoHelperException | ExecutionException e)
     {
       LOGGER.error("", e);
