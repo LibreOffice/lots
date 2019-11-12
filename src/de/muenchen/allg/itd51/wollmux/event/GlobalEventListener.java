@@ -2,7 +2,7 @@
  * Dateiname: GlobalEventListener.java
  * Projekt  : WollMux
  * Funktion : Reagiert auf globale Ereignisse
- * 
+ *
  * Copyright (c) 2008-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,12 +25,12 @@
  * 09.11.2005 | LUT | + Logfile wird jetzt erweitert (append-modus)
  *                    + verwenden des Konfigurationsparameters SENDER_SOURCE
  *                    + Erster Start des wollmux über wm_configured feststellen.
- * 05.12.2005 | BNK | line.separator statt \n     
+ * 05.12.2005 | BNK | line.separator statt \n
  * 13.04.2006 | BNK | .wollmux/ Handling ausgegliedert in WollMuxFiles.
- * 20.04.2006 | LUT | Überarbeitung Code-Kommentare  
+ * 20.04.2006 | LUT | Überarbeitung Code-Kommentare
  * 20.04.2006 | BNK | DEFAULT_CONTEXT ausgegliedert nach WollMuxFiles
- * 21.04.2006 | LUT | + Robusteres Verhalten bei Fehlern während dem Einlesen 
- *                    von Konfigurationsdateien; 
+ * 21.04.2006 | LUT | + Robusteres Verhalten bei Fehlern während dem Einlesen
+ *                    von Konfigurationsdateien;
  *                    + wohldefinierte Datenstrukturen
  *                    + Flag für EventProcessor: acceptEvents
  * 08.05.2006 | LUT | + isDebugMode()
@@ -45,7 +45,7 @@
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * 
+ *
  */
 
 package de.muenchen.allg.itd51.wollmux.event;
@@ -75,7 +75,7 @@ import de.muenchen.allg.itd51.wollmux.document.DocumentManager.Info;
  * Verarbeitungsstatus für alle Dokumenttypen (auch nicht-Textdokumente) erfasst
  * wird, damit der WollMux auch für diese Komponenten onWollMuxProcessingFinished
  * liefern kann.
- * 
+ *
  * @author christoph.lutz
  */
 public class GlobalEventListener implements com.sun.star.document.XEventListener
@@ -119,7 +119,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       if (docEvent.Source == null) return;
       String event = docEvent.EventName;
       LOGGER.debug(event);
-      
+
       // https://wiki.openoffice.org/wiki/Documentation/DevGuide/WritingUNO/Jobs/List_of_Supported_Events
       // Info: ON_VIEW_CREATED wird erst nach instanziierung der WollMux/Seriendruck-Sidebar
       // ausgelöst. Falls im Konstruktor der Sidebar ein Zugriff auf das Dokument erforderlich ist,
@@ -149,12 +149,12 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
    * manchmal im Hintergrund unsichtbare leere Dokumente über die Factory. Bekannt
    * sind folgende Fälle: Beim OOo-Seriendruck über den Seriendruck-Assistent (für
    * jeden Datensatz); Beim Einfügen von Autotexten (z.B. mit "bt<F3>" in OOo).
-   * 
+   *
    * Das Event kommt nicht, wenn ein Dokument von einer Datei geladen oder von einer
    * Vorlage erzeugt wird. Das Event kommt auch dann nicht, wenn eine Vorlagendatei
    * als Standardvorlage für neue Dokumente definiert ist und Datei->Neu verwendet
    * wird.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private void onCreate(Object source)
@@ -176,15 +176,15 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
    * OnViewCreated kommt, wenn ein Dokument seitens OOo vollständig aufgebaut ist.
    * Das Event kommt bei allen Dokumenten, egal ob sie neu erzeugt, geladen, sichtbar
    * oder unsichtbar sind.
-   * 
+   *
    * Da das Event in allen möglichen Fällen kommt, und die Bearbeitung von
    * unsichtbaren Dokumenten durch den WollMux für eine andere stadtinterne Anwendung
    * (JavaComm) notwendig ist, wird in diesem Event die eigentliche Verarbeitung von
    * Dokumenten durch den WollMux angestoßen.
-   * 
+   *
    * Ausgenommen von der Verarbeitung werden temporäre Dokumente des OOo-Seriendrucks
    * und alle gerade erzeugten, unsichtbaren Textdokumente.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private void onViewCreated(Object source)
@@ -221,28 +221,29 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     }
 
     // Dokument ggf. in docManager aufnehmen und abhängig vom Typ verarbeiten.
-    if (xTextDoc != null)
+    if (docInfo == null)
     {
-      if (docInfo == null)
+      if (xTextDoc != null)
+      {
         docManager.addTextDocument(xTextDoc);
-      WollMuxEventHandler.getInstance().handleProcessTextDocument(
-          DocumentManager.getTextDocumentController(xTextDoc), !isDocumentLoadedHidden(compo));
-    } else
-    {
-      if (docInfo == null)
+        WollMuxEventHandler.getInstance().handleProcessTextDocument(
+            DocumentManager.getTextDocumentController(xTextDoc), !isDocumentLoadedHidden(compo));
+      } else
+      {
         docManager.add(compo);
-      WollMuxEventHandler.getInstance().handleNotifyDocumentEventListener(null,
-          WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
+        WollMuxEventHandler.getInstance().handleNotifyDocumentEventListener(null,
+            WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
+      }
     }
-	  
+
   }
 
   /**
    * OnSave oder OnSaveAs-Events werden beim Speichern von Dokumenten aufgerufen.
-   * 
+   *
    * Wir verwenden diese beiden Events um die persistenten Daten des WollMux sicher
    * zu persistieren (flush).
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private void onSaveOrSaveAs(Object source)
@@ -258,7 +259,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
    * OnUnlaod kommt als letztes Event wenn ein Dokument geschlossen wurde. Wir nutzen
    * dieses Event um den docManager aufzuräumen und angeschlossene Listener zu
    * informieren.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private void onUnload(Object source)
@@ -281,19 +282,19 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
    * des OOo-Seriendrucks handelt und wird benötigt um solche Dokumente im Workaround
    * für Ticket #3091 zu ignorieren. Dabei kann diese Methode nur Dokumente erkennen,
    * die anhand der Eigenschaft URL als temporäre Datei zu erkennen sind.
-   * 
+   *
    * Anmerkung: Der OOo-Seriendruck kann über Datei->Drucken und über
    * Extras->Seriendruck-Assistent gestartet werden. Verschiedene OOo-Versionen
    * verhalten sich diesbezüglich verschieden:
-   * 
+   *
    * OOo 3.0.1 erzeugt in beiden Varianten für jeden Datensatz eine unsichtbare
    * temporäre Datei mit einer URL, die eine Erkennung der temporären Datei zulässt.
-   * 
+   *
    * OOo 3.2.1 erzeugt nur noch über Datei->Drucken temoräre Dateien mit gesetzter
    * URL. Über Extras->Seriendruck-Assistent ist die URL-Eigenschaft jedoch nicht
    * mehr gesetzt, so dass diese Methode nicht mehr ausreicht, um temporäre Dokumente
    * des Seriendrucks zu identifizieren.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private boolean isTempMailMergeDocument(XModel compo)
@@ -322,11 +323,11 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     if (mmdoc) LOGGER.debug("EventProcessor: akzeptiere neue Events.");
     return mmdoc;
   }
-  
+
   /**
    * Liefert nur dann true zurück, wenn das Dokument mit der
    * MediaDescriptor-Eigenschaft Hidden=true geöffnet wurde.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private boolean isDocumentLoadedHidden(XModel compo)
@@ -346,7 +347,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       return false;
     }
   }
-  
+
   @Override
   public void disposing(EventObject arg0)
   {
@@ -355,7 +356,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
 
   /**
    * Registriert für den Frame einen Dispatch Interceptor.
-   * 
+   *
    * @param frame
    *          Das Dokument.
    */
