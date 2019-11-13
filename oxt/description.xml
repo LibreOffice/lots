@@ -12,7 +12,7 @@
 	</publisher>
 
 	<display-name>
-		<name lang="de-DE">WollMux</name>
+		<name lang="de-DE">${wollmux.oxt.name}</name>
 	</display-name>
 
 	<update-information>
