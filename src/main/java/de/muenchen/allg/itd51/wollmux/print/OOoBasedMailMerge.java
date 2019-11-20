@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.NamedValue;
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
@@ -81,7 +80,6 @@ import com.sun.star.uno.XNamingService;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.URL;
 import com.sun.star.util.XCancellable;
-import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -199,22 +197,11 @@ public class OOoBasedMailMerge
         new ProgressUpdater(pmod, (int) Math.ceil((double) ds.getSize()
           / countNextSets(pmod.getTextDocument())));
 
-      // Lese ausgewählten Drucker
-      XPrintable xprintSD =
-        UnoRuntime.queryInterface(XPrintable.class, pmod.getTextDocument());
-      String pNameSD;
-      PropertyValue[] printer = null;
-      if (xprintSD != null) printer = xprintSD.getPrinter();
-      UnoProps printerInfo = new UnoProps(printer);
-      try
-      {
-        pNameSD = (String) printerInfo.getPropertyValue("Name");
-      }
-      catch (UnknownPropertyException e)
-      {
-        pNameSD = "unbekannt";
-      }
-      t = runMailMerge(dbName, tmpDir, inputFile, updater, type, pNameSD);
+      XPropertySet inSettings = UNO.XPropertySet(UNO.XMultiServiceFactory(pmod.getTextDocument())
+          .createInstance("com.sun.star.document.Settings"));
+      byte[] printerSetup = (byte[]) inSettings.getPropertyValue("PrinterSetup");
+      String pNameSD = (String) inSettings.getPropertyValue("PrinterName");
+      t = runMailMerge(dbName, tmpDir, inputFile, updater, type, pNameSD, printerSetup);
     }
     catch (Exception e)
     {
@@ -1346,7 +1333,7 @@ public class OOoBasedMailMerge
    */
   private static MailMergeThread runMailMerge(String dbName, final File outputDir,
       File inputFile, final ProgressUpdater progress, final OutputType type,
-      String printerName) throws Exception
+      String printerName, byte[] printerSetup) throws Exception
   {
     final XJob mailMerge =
       UnoRuntime.queryInterface(XJob.class, UNO.xMCF.createInstanceWithContext(
@@ -1362,7 +1349,7 @@ public class OOoBasedMailMerge
       final long start = System.currentTimeMillis();
 
       @Override
-      public void notifyMailMergeEvent(MailMergeEvent arg0)
+      public void notifyMailMergeEvent(MailMergeEvent event)
       {
         if (progress != null) progress.incrementProgress();
         count++;
@@ -1371,6 +1358,17 @@ public class OOoBasedMailMerge
         if (count >= progress.maxDatasets && type == OutputType.toPrinter)
         {
           progress.setMessage(L.m("Sende Druckauftrag - bitte warten..."));
+        }
+        if (type == OutputType.toPrinter)
+        {
+          try {
+            XPropertySet inSettings = UNO.XPropertySet(UNO.XMultiServiceFactory(event.Model)
+                .createInstance("com.sun.star.document.Settings"));
+            inSettings.setPropertyValue("PrinterSetup", printerSetup);
+            inSettings.setPropertyValue("PrinterName", printerName);
+          } catch (com.sun.star.uno.Exception e) {
+            LOGGER.error("Druckereinstellungen konnten nicht gesetzt werden.", e);
+          }
         }
       }
     });
@@ -1398,17 +1396,8 @@ public class OOoBasedMailMerge
     else if (type == OutputType.toPrinter)
     {
       mmProps.add(new NamedValue("SinglePrintJobs", Boolean.FALSE));
-      // jgm,07.2013: setze ausgewaehlten Drucker
-      if (printerName != null && printerName.length() > 0)
-      {
-        PropertyValue[] printOpts = new PropertyValue[1];
-        printOpts[0] = new PropertyValue();
-        printOpts[0].Name = "PrinterName";
-        printOpts[0].Value = printerName;
-        LOGGER.debug(L.m("Seriendruck - Setze Drucker: %1", printerName));
-        mmProps.add(new NamedValue("PrintOptions", printOpts));
-      }
-      // jgm ende
+      // Print job properties are set in the notifyMailMergeEvent-Method of the
+      // registered XMailMergeListener.
     }
     MailMergeThread t = new MailMergeThread(mailMerge, outputDir, mmProps);
     t.start();
