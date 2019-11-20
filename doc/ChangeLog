@@ -1,3 +1,20 @@
+ ==================== Neu in Version 18.1.8 ====================
+
+    * Bugfixes
+          o Die Styleinformationen wurden nicht mehr aus den Dokumenten geladen.
+            Dieser Fehler ist durch eine Anpassung für das Caching entstanden.
+            Für die Fehlerbehebung wurde diese Änderung rückgängig gemacht,
+            sodass das Caching nun nicht mehr funktioniert für Dokumente aus
+            denen Styles geladen werden sollen.
+          o Ein Fehler, der zum Absturz von LibreOffice beim Wechseln in die
+            Druckvorschau geführt hat, wurde behoben.
+          o Alle Dokumente werden wieder mit der richtigen LibreOffice Anwendung
+            (Writer, Calc, Impress) geöffnet.
+          o Bei Textareas in der FormularGUI wird wieder die Beschreibung und
+            nicht mehr die Id angezeigt.
+          o Der Info-Dialog wurde verbreitert, sodass unter Windows alle
+            Informationen sichtbar sind.
+
  ==================== Neu in Version 18.1.7 ====================
 
     * Bugfixes

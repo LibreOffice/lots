@@ -15,7 +15,6 @@ import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.io.IOException;
-import com.sun.star.io.XInputStream;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.style.XStyleFamiliesSupplier;
 import com.sun.star.style.XStyleLoader;
@@ -459,9 +458,7 @@ class DocumentExpander extends AbstractExecutor
         Boolean.valueOf(styles.contains("numberingstyles")));
       XStyleFamiliesSupplier sfs = UNO.XStyleFamiliesSupplier(this.documentCommandInterpreter.getModel().doc);
       XStyleLoader loader = UNO.XStyleLoader(sfs.getStyleFamilies());
-      XInputStream stream = DocumentLoader.getInstance().getDocumentStream(urlStr);
-      props.setPropertyValue("InputStream", stream);
-      loader.loadStylesFromURL("private:stream", props.getProps());
+      loader.loadStylesFromURL(urlStr, props.getProps());
     }
     catch (NullPointerException e)
     {

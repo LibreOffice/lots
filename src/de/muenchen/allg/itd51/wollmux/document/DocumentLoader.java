@@ -93,8 +93,7 @@ public class DocumentLoader
   {
     try
     {
-      ByteBuffer buf = cache.get(path);
-      XInputStream in = new ByteBufferInputStream(buf);
+      XInputStream in = getDocumentStream(path);
       UNO.XDocumentInsertable(target).insertDocumentFromURL(path,
         new PropertyValue[] {
           new PropertyValue("InputStream", -1, in, PropertyState.DIRECT_VALUE),
@@ -121,11 +120,9 @@ public class DocumentLoader
   {
     try
     {
-      ByteBuffer buf = cache.get(path);
-      XInputStream in = new ByteBufferInputStream(buf);
+      XInputStream in = getDocumentStream(path);
       return UNO.loadComponentFromURL(path, asTemplate, allowMacros,
-          new PropertyValue("InputStream", -1, in, PropertyState.DIRECT_VALUE), new PropertyValue(
-              "FilterName", -1, "StarOffice XML (Writer)", PropertyState.DIRECT_VALUE));
+          new PropertyValue("InputStream", -1, in, PropertyState.DIRECT_VALUE));
     } catch (UnoHelperException | ExecutionException e)
     {
       LOGGER.error("", e);
@@ -139,16 +136,9 @@ public class DocumentLoader
     return cache.getIfPresent(path) != null;
   }
 
-  public XInputStream getDocumentStream(String path)
+  public XInputStream getDocumentStream(String path) throws ExecutionException
   {
-    try
-    {
-      ByteBuffer buf = cache.get(path);
-      return new ByteBufferInputStream(buf);
-    } catch (ExecutionException e)
-    {
-      LOGGER.error("", e);
-    }
-    return null;
+    ByteBuffer buf = cache.get(path);
+    return new ByteBufferInputStream(buf);
   }
 }
