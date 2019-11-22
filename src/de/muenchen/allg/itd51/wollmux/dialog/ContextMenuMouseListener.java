@@ -2,7 +2,7 @@
  * Dateiname: ContextMenuMouseListener.java
  * Projekt  : WollMux
  * Funktion : MouseListener um ein Kontextmenü beim rechts mouse Klick zu erzeugen.
- * 
+ *
  * Copyright (c) 2010-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -140,7 +140,9 @@ public class ContextMenuMouseListener implements AWTEventListener {
   public void eventDispatched(AWTEvent event) {
       if (event instanceof MouseEvent) {
         MouseEvent  me = (MouseEvent)event;
-        if(me.getID() == MouseEvent.MOUSE_CLICKED && me.getModifiers() == InputEvent.BUTTON3_MASK){
+      if (me.getID() == MouseEvent.MOUSE_CLICKED
+          && me.getModifiersEx() == InputEvent.BUTTON3_DOWN_MASK)
+      {
               if (!(event.getSource() instanceof JTextComponent)) {
                   return;
               }

@@ -1251,6 +1251,7 @@ public class SachleitendeVerfuegung
 
       ActionEvent result = s.synchronize();
       String cmd = result.getActionCommand();
+      @SuppressWarnings("unchecked")
       SimpleEntry<List<VerfuegungspunktInfo>, Boolean> slvd =
         (SimpleEntry<List<VerfuegungspunktInfo>, Boolean>) result.getSource();
 

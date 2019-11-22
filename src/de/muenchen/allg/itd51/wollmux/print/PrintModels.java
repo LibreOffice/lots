@@ -432,6 +432,7 @@ public class PrintModels
           return;
         }
 
+        @SuppressWarnings("unchecked")
         SimpleEntry<Short, PageRange> ppd = (SimpleEntry<Short, PageRange>) result.getSource();
 
         setProperty(PROP_FINAL_COPY_COUNT, ppd.getKey());

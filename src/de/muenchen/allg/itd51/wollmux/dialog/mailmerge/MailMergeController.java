@@ -372,6 +372,7 @@ public class MailMergeController
         // Liste der Empfänger-Emails und Anzahl versendeter Emails
         String eMailFrom = pmod.getProp(MailMergeController.PROP_EMAIL_FROM, "").toString();
 
+        @SuppressWarnings("unchecked")
         List<String> recipintList = (List<String>) pmod
             .getProp(MailMergeController.PROP_EMAIL_REPORT_RECIPIENT_LIST, null);
         int mailsSentCount = (int) pmod

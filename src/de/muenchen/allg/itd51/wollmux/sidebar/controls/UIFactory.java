@@ -80,7 +80,7 @@ public class UIFactory
    * Die Funktion wird aufgerufen, um einen Bereich der Konfiguration zu parsen und
    * {@link UIControl}s zu erzeugen. Für jedes erzeugte Element werden alle Listener
    * aufgerufen.
-   * 
+   *
    * @param context
    * @param menuConf
    * @param elementParent
@@ -98,17 +98,17 @@ public class UIFactory
       // Mit dem Config-Parameter "SIDEBAR" können Elemente in der Sidebar unterdrückt werden.
       ConfigThingy sidebar = uiElementDesc.query("SIDEBAR");
       boolean isSidebar = true;
-      
+
       if (sidebar.count() > 0)
       {
-        isSidebar = new Boolean(sidebar.getString("SIDEBAR", "true"));
+        isSidebar = Boolean.getBoolean(sidebar.getString("SIDEBAR", "true"));
       }
-      
+
       if (!isSidebar)
       {
         continue;
       }
-      
+
       /*
        * Falls kein CONF_ID vorhanden ist, wird das Element angezeigt, ansonsten nur
        * dann wenn mindestens eine CONF_ID aktiv ist.
@@ -157,11 +157,11 @@ public class UIFactory
     if (type.equals("button") || type.equals("menuitem"))
     {
       UIElementAction action = null;
-      String actionName = props.get(ACTION); 
+      String actionName = props.get(ACTION);
       if (actionName != null)
       {
         ConfigThingy actionConf = conf;
-        try 
+        try
         {
           if (actionName.equals("open"))
           {

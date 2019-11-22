@@ -83,6 +83,6 @@ public class DebugExternalWollMux
     set.insert(WollMux.__getComponentFactory(WollMuxSidebarFactory.class.getName()));
     set.insert(WollMux.__getComponentFactory(SeriendruckSidebarFactory.class.getName()));
 
-    WollMux wm = new WollMux(UNO.defaultContext);
+    new WollMux(UNO.defaultContext);
   }
 }
