@@ -129,6 +129,7 @@ public class AdjustFields
     ReferencedFieldID[] fieldIDs = documentController.getModel()
         .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(ds.getColumnNames()));
     ActionListener submitActionListener = e -> {
+      @SuppressWarnings("unchecked")
       Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
           .getSource();
       for (Map.Entry<String, FieldSubstitution> ent : mapIdToSubstitution.entrySet())
@@ -179,6 +180,7 @@ public class AdjustFields
     ReferencedFieldID[] fieldIDs = documentController.getModel()
         .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(ds.getColumnNames()));
     ActionListener submitActionListener = e -> {
+      @SuppressWarnings("unchecked")
       Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
           .getSource();
       ds.addColumns(mapIdToSubstitution);

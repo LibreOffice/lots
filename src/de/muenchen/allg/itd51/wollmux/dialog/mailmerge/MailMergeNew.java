@@ -179,7 +179,9 @@ public class MailMergeNew
       DocumentManager.getTextDocumentController(pmod.getTextDocument());
 
     QueryResults data = (QueryResults) pmod.getPropertyValue(MailMergeController.PROP_QUERYRESULTS);
+    @SuppressWarnings("unchecked")
     Collection<String> schema = (Collection<String>) pmod.getPropertyValue("MailMergeNew_Schema");
+    @SuppressWarnings("unchecked")
     List<Integer> selection =
       (List<Integer>) pmod.getPropertyValue(MailMergeController.PROP_MAILMERGENEW_SELECTION);
     if (selection.isEmpty()) {
@@ -275,6 +277,7 @@ public class MailMergeNew
       new File(pmod.getProp(MailMergeController.PROP_TARGETDIR,
         System.getProperty("user.home") + "/Seriendruck").toString());
 
+    @SuppressWarnings("unchecked")
     HashMap<String, String> dataset = new HashMap<>((HashMap<String, String>) pmod
         .getProp(MailMergeController.PROP_DATASET_EXPORT, new HashMap<String, String>()));
 
@@ -449,6 +452,7 @@ public class MailMergeNew
         pmod.setPropertyValue(MailMergeController.PROP_EMAIL_REPORT_EMAILS_SENT_COUNT, 0);
       }
 
+      @SuppressWarnings("unchecked")
       List<String> reportRecipientList = (List<String>) pmod
           .getPropertyValue(MailMergeController.PROP_EMAIL_REPORT_RECIPIENT_LIST);
       int mailsSentCount = (int) pmod

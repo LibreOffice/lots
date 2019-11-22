@@ -1,8 +1,8 @@
-/* 
+/*
  * Dateiname: MailServerSettings.java
  * Projekt  : WollMux
  * Funktion : Teil des E-Mail-Wrappers für javamail
- * 
+ *
  * Copyright (c) 2011-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -49,7 +49,7 @@ public class MailServerSettings
 
   public void setMailserverport(String mailserverport)
   {
-    this.mailserverport = new Integer(mailserverport);
+    this.mailserverport = Integer.parseInt(mailserverport);
   }
 
   public String getUsername()
