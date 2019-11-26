@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="key">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="value" />
+				<xs:element ref="group" />
+			</xs:choice>
+			<xs:attribute name="id" type="xs:string" use="required" />
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="value" type="xs:string" />
+	<xs:element name="comment" type="xs:string" />
+	<xs:element name="group">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="key" />
+				<xs:element ref="value" />
+				<xs:element ref="comment" />
+				<xs:element ref="group" />
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+    <xs:element name="fileReference" type="xs:string"></xs:element>
+	<xs:element name="file">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="key" />
+				<xs:element ref="value" />
+				<xs:element ref="comment" />
+				<xs:element ref="group" />
+				<xs:element ref="fileReference" />
+			</xs:choice>
+			<xs:attribute name="filename" type="xs:string" use="required" />
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="config">
+		<xs:complexType>
+			<xs:sequence minOccurs="1" maxOccurs="unbounded">
+				<xs:element ref="file" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
