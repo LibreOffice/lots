@@ -630,7 +630,6 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
      * dieses Datensatzes.
      * 
      * @param columnName
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void drop(String columnName)
     { // TESTED
@@ -673,8 +672,6 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
      * Ändert die Referenz auf das Schema dieses Datensatzes. Eine Anpassung der
      * im Datensatz gespeicherten Werte geschieht nicht. Dafür muss drop()
      * verwendet werden.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void setSchema(List<String> losSchema)
     {

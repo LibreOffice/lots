@@ -2,7 +2,7 @@
  * Dateiname: OOoDatasource.java
  * Projekt  : WollMux
  * Funktion : Stellt eine OOo-Datenquelle als WollMux-Datenquelle zur Verfügung
- * 
+ *
  * Copyright (c) 2008-2015 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -31,11 +31,10 @@
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  * @version 1.0
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.core.db;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -104,29 +103,29 @@ public class OOoDatasource implements Datasource
 
   /**
    * Welche Syntax soll verwendet werden.
-   * 
+   *
    * Default ist Oracle-Syntax.
-   * 
+   *
    * o *** ANSI ********* <doublequote symbol> ::= 2 consecutive double quote
    * characters
-   * 
+   *
    * (Lexical Elements, 135 Foundation) Ein delimited Identifier ist ein von "..."
    * umschlossener Identifier. Im Identifier enthaltene Doublequotes werden durch
    * <doublequote symbol> ersetzt. (Lexical Elements, 134 Foundation)
-   * 
+   *
    * <quote symbol> ::= <quote><quote> (2 consecutive quote characters) (Lexical elements, 143 Foundation)
   In einem <character string literal> werden einzelne <quote>s durch <quote symbol> ersetzt.(Lexical elements, 143 Foundation)
-  
+
    o**** Datensätze zu vorgegebener Schlüsselliste finden *********
-   
+
   SELECT * FROM "<id>" WHERE ("<colId>"='<colVal>' AND "<colId>"='<colVal>' AND ...) OR (...) OR ...;
 
   In <id> und <colId> sind Doublequotes durch <doublequote symbol> ersetzt.
-  
+
   In <colVal> sind Quotes durch <quote symbol> ersetzt.
-  
+
   o ***** Datensätze finden, die bestimmte Kriterien erfüllen ********
-  
+
   8.5 <like predicate> (385 Foundation)
   Der String hinter ESCAPE muss genau ein Zeichen lang sein. Ansonsten gibt es eine Exception (387 Foundation, 8.5 General Rules 3b))
   _ und % sowie das ESCAPE-Zeichen selbst müssen im String-Ausdruck hinter LIKE escapet werden (durch Voranstellen des Escape-Zeichens). Andere Zeichen dürfen nicht escapet werden.
@@ -134,7 +133,7 @@ public class OOoDatasource implements Datasource
   SELECT * FROM "<id>" WHERE (lower("<colId>") LIKE lower('<pattern>') ESCAPE '|') AND (...) AND ...;
   In <id> und <colId> sind Doublequotes durch <doublequote symbol> ersetzt.
   In <pattern> sind "_",  "%" und "|" ersetzt durch "|_", "|%" und "||".
-  
+
    ***** Alle Datensätze auslesen ******
 
   SELECT * FROM "<id>";
@@ -180,7 +179,7 @@ public class OOoDatasource implements Datasource
    * Benutzername für den Login bei der Datenbank.
    */
   private String userName = "";
-  
+
   private static final String SQLSelectCommand = "SELECT * FROM ";
 
   /**
@@ -190,8 +189,7 @@ public class OOoDatasource implements Datasource
   private String password = "";
 
   /**
-   * Wie {@link #OOoDatasource(Map, ConfigThingy, URL, boolean)}, wobei noKey==false
-   * übergeben wird.
+   * Wie {@link #OOoDatasource(Map, ConfigThingy, boolean)}, wobei noKey==false übergeben wird.
    */
   public OOoDatasource(Map<String, Datasource> nameToDatasource, ConfigThingy sourceDesc)
   {
@@ -201,7 +199,7 @@ public class OOoDatasource implements Datasource
   /**
    * Erzeugt eine neue OOoDatasource. Wenn kein SQL_SYNTAX Parameter in ConfigThingy
    * gesetzt ist, wird 'mysql' als Standard verwendet.
-   * 
+   *
    * @param nameToDatasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser OOoDatasource
    *          bereits vollständig instanziierten Datenquellen (zur Zeit nicht
@@ -235,9 +233,9 @@ public class OOoDatasource implements Datasource
     password = sourceDesc.getString("PASSWORD", "");
 
     String sqlSyntaxStr = sourceDesc.getString("SQL_SYNTAX", "");
-    
+
     sqlSyntaxStr = sqlSyntaxStr == null || sqlSyntaxStr.isEmpty() ? "mysql" : sqlSyntaxStr;
-    
+
     if ("ansi".equalsIgnoreCase(sqlSyntaxStr))
       sqlSyntax = SQL_SYNTAX_ANSI;
     else if ("oracle".equalsIgnoreCase(sqlSyntaxStr))
@@ -523,7 +521,7 @@ public class OOoDatasource implements Datasource
 
   /**
    * Setzt die SQL-Anfrage query an die Datenbank ab und liefert die Resultate.
-   * 
+   *
    * @param timeout
    *          maximale Zeit in Millisekunden, die die Anfrage dauern darf.
    * @param throwOnTimeout
@@ -697,7 +695,7 @@ public class OOoDatasource implements Datasource
   /**
    * Liefert str zurück, als String-Literal vorbereitet für das Einfügen in
    * SQL-Statements.
-   * 
+   *
    * @param str
    *          beginnt und endet immer mit einem Apostroph.
    */
@@ -709,7 +707,7 @@ public class OOoDatasource implements Datasource
   /**
    * Liefert str zurück, als Identifier-Name vorbereitet für das Einfügen in
    * SQL-Statements.
-   * 
+   *
    * @param str
    *          beginnt und endet immer mit einem Doublequote.
    */
@@ -753,7 +751,7 @@ public class OOoDatasource implements Datasource
 
     /**
      * Setzt aus den Werten der Schlüsselspalten den Schlüssel zusammen.
-     * 
+     *
      * @param keyCols
      *          die Namen der Schlüsselspalten
      */
