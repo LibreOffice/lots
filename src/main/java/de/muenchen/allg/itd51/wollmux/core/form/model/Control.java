@@ -301,8 +301,6 @@ public class Control
    *
    * @param value
    *          Der neue Wert.
-   * @param values
-   *          Die neuen Werte des Models.
    */
   public void setValue(String value)
   {
@@ -350,7 +348,7 @@ public class Control
    * @param values
    *          Die Werte aus dem Model.
    * @return Den berechneten Wert oder null wenn keine Autofill-Funktion vorhanden ist. Der Wert
-   *         muss mit {@link #setValue(String, SimpleMap)} gesetzt werden.
+   *         muss mit {@link #setValue(String)} gesetzt werden.
    */
   public String computeValue(SimpleMap values)
   {
