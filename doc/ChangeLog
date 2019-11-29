@@ -1,3 +1,9 @@
+ ==================== Neu in Version 18.0.12 ====================
+
+    * Bugfixes
+          o Bei nicht geänderten Dokumenten kommt kein Speichern-Dialog mehr.
+          o Das Öffnen von großen Formularen wurde beschleunigt.
+
  ==================== Neu in Version 18.0.11 ====================
 
     * Bugfixes
