@@ -76,22 +76,39 @@ public class RDFReadLegacyModeDataContainer implements
   /**
    * Stellt sicher, dass dataId aus den Notizen gelöscht wurde, bzw. löscht das
    * Element falls es noch nicht gelöscht wurde.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private void ensureRemovedFromLegacy(DataID dataId)
   {
     if (!removedFromLegacy.contains(dataId))
     {
+      XModifiable mod = UNO.XModifiable(doc);
+      boolean modState = false;
+      if (mod != null)
+      {
+        modState = mod.isModified();
+      }
+
       removedFromLegacy.add(dataId);
       legacy.removeData(dataId);
+
+      if (mod != null)
+      {
+        try
+        {
+          mod.setModified(modState);
+        } catch (Exception e)
+        {
+        }
+      }
     }
   }
 
   /**
    * Ruft c.setData(dataId, data) auf, wobei der Modified-Status des Dokuments
    * unangetastet bleibt.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101) TESTED
    */
   private void copyOnRead(PersistentDataContainer c, DataID dataId, String data)
