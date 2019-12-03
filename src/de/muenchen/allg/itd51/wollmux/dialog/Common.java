@@ -207,7 +207,7 @@ public class Common
       font = def.getFont(key);
       if (font != null){
         fontSize = font.getSize();
-        defaultFontsizes.put(key, new Float(fontSize));
+        defaultFontsizes.put(key, fontSize);
       }
     }
     lafSet = true;
