@@ -8,6 +8,10 @@ pipeline {
   options {
     disableConcurrentBuilds()
   }
+
+  tools {
+    jdk 'Java11'
+  }
 	
   stages {
     stage('Build') {
