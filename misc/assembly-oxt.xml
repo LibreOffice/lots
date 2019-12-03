@@ -38,8 +38,6 @@
 				<include>image/*</include>
 			</includes>
 			<excludes>
-				<exclude>META-INF/manifest_AOO.xml</exclude>
-				<exclude>Addons_AOO.xcu</exclude>
 				<exclude>Sidebar.xcu</exclude>
 			</excludes>
 		</fileSet>

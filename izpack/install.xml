@@ -90,14 +90,6 @@
 	</variables>
 	
 	<dynamicvariables>
-		<variable name="hkcuOOo" checkonce="true"
-			regkey="HKCU\Software\OpenOffice.org\UNO\InstallPath" regvalue="" />
-		<variable name="hklmOOo" checkonce="true"
-			regkey="HKLM\Software\OpenOffice.org\UNO\InstallPath" regvalue="" />
-		<variable name="hkcuOO" checkonce="true"
-			regkey="HKCU\Software\OpenOffice\UNO\InstallPath" regvalue="" />
-		<variable name="hklmOO" checkonce="true"
-			regkey="HKLM\Software\OpenOffice.org\UNO\InstallPath" regvalue="" />
 		<variable name="hkcuLO" checkonce="true"
 			regkey="HKCU\Software\LibreOffice\UNO\InstallPath" regvalue="" />
 		<variable name="hklmLO" checkonce="true"
@@ -107,10 +99,6 @@
 			regkey="HKEY_LOCAL_MACHINE\Software\LibreOffice\LibreOffice\6.1"
 			regvalue="Path" />
 		
-		<variable name="oooPath" value="${hkcuOOo}" condition="hkcuOOoExists" />
-		<variable name="oooPath" value="${hklmOOo}" condition="hklmOOoExists" />
-		<variable name="oooPath" value="${hkcuOO}" condition="hkcuOOExists" />
-		<variable name="oooPath" value="${hklmOO}" condition="hklmOOExists" />
 		<variable name="oooPath" value="${hkcuLO}" condition="hkcuLOExists" />
 		<variable name="oooPath" value="${hklmLO}" condition="hklmLOExists" />
 
@@ -177,26 +165,10 @@
 				<os family="unix" />
 			</executable>
 		</pack>
-		<pack name="WollMux (OpenOffice)" required="no" excludeGroup="extension">
-			<description>Installiert WollMux für Apache OpenOffice auf der Festplatte.</description>
-			<fileset dir="." targetdir="${INSTALL_PATH}" override="true">
-				<exclude name="WollMux.oxt"/>
-				<exclude name="*.sh" />
-				<exclude name="*.bat" />
-			</fileset>
-			<singlefile src="WollMux-AOO.oxt" target="${INSTALL_PATH}/WollMux.oxt" />
-			<fileset dir="../misc" targetdir="${INSTALL_PATH}" override="true">
-				<include name="wollmux.ico" />
-			</fileset>
-			<executable targetfile="${INSTALL_PATH}/wollmuxbar" keep="true" stage="never">
-				<os family="mac" />
-				<os family="unix" />
-			</executable>
-		</pack>
 		<!-- Windows -->
 		<pack name="Extension installieren (Windows)" required="no"
 			preselected="yes" condition="oooPathExists">
-			<description>Installiert die WollMux-Extension in OpenOffice/LibreOffice.</description>
+			<description>Installiert die WollMux-Extension in LibreOffice.</description>
 			<os family="windows" />
 			<fileset dir="." targetdir="${INSTALL_PATH}" override="true">
 				<include name="*.bat" />
@@ -217,7 +189,7 @@
 		</pack>
 		<!-- Un*x/Mac -->
 		<pack name="Extension installieren" required="no" preselected="yes">
-			<description>Installiert die WollMux-Extension in OpenOffice/LibreOffice.</description>
+			<description>Installiert die WollMux-Extension in LibreOffice.</description>
 			<os family="mac" />
 			<os family="unix" />
 			<fileset dir="." targetdir="${INSTALL_PATH}" override="true">
