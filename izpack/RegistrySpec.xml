@@ -8,10 +8,4 @@
 	      root="HKLM"
 	      string="$wollmuxConfPath"/>
 	  </pack>
-	  <pack name="WollMux (OpenOffice)">
-	    <value name="ConfigPath"
-	      keypath="SOFTWARE\WollMux"
-	      root="HKLM"
-	      string="$wollmuxConfPath"/>
-	  </pack>  
 </izpack:registry>

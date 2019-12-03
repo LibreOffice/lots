@@ -32,11 +32,9 @@
 				<include>META-INF/manifest.xml</include>
 			</includes>
 			<excludes>
-				<exclude>META-INF/manifest_AOO.xml</exclude>
 				<exclude>Factories.xcu</exclude>
 				<exclude>Sidebar.xcu</exclude>
 				<exclude>ProtocolHandler.xcu</exclude>
-				<exclude>Addons_AOO.xcu</exclude>
 			</excludes>
 		</fileSet>
 		<fileSet>
