@@ -40,8 +40,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Iterator;
@@ -610,61 +610,33 @@ public class OneFormControlLineView extends LineView
     buttonAdditionalView.add(urlTextField);
     buttonAdditionalView.add(extTextField);
 
-    fragIDTextField.addKeyListener(new KeyListener()
+    fragIDTextField.addKeyListener(new KeyAdapter()
     {
-
-      @Override
-      public void keyTyped(KeyEvent e)
-      {
-      }
-
       @Override
       public void keyReleased(KeyEvent e)
       {
-	model.setUrl(""); // prevents writing in config thingy export
-	model.setExt("");
-	model.setFragID(fragIDTextField.getText());
-	model.setAction("openTemplate");
-	formularMax4000.documentNeedsUpdating();
-      }
-
-      @Override
-      public void keyPressed(KeyEvent e)
-      {
+        model.setUrl(""); // prevents writing in config thingy export
+        model.setExt("");
+        model.setFragID(fragIDTextField.getText());
+        model.setAction("openTemplate");
+        formularMax4000.documentNeedsUpdating();
       }
     });
 
-    urlTextField.addKeyListener(new KeyListener()
+    urlTextField.addKeyListener(new KeyAdapter()
     {
-
-      @Override
-      public void keyTyped(KeyEvent e)
-      {
-      }
-
       @Override
       public void keyReleased(KeyEvent e)
       {
-	model.setFragID(""); // prevents writing in config thingy export
-	model.setUrl(urlTextField.getText());
-	model.setAction("openExt");
-	formularMax4000.documentNeedsUpdating();
-      }
-
-      @Override
-      public void keyPressed(KeyEvent e)
-      {
+        model.setFragID(""); // prevents writing in config thingy export
+        model.setUrl(urlTextField.getText());
+        model.setAction("openExt");
+        formularMax4000.documentNeedsUpdating();
       }
     });
 
-    extTextField.addKeyListener(new KeyListener()
+    extTextField.addKeyListener(new KeyAdapter()
     {
-
-      @Override
-      public void keyTyped(KeyEvent e)
-      {
-      }
-
       @Override
       public void keyReleased(KeyEvent e)
       {
@@ -672,11 +644,6 @@ public class OneFormControlLineView extends LineView
 	model.setExt(extTextField.getText());
 	model.setAction("openExt");
 	formularMax4000.documentNeedsUpdating();
-      }
-
-      @Override
-      public void keyPressed(KeyEvent e)
-      {
       }
     });
 
