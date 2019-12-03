@@ -486,27 +486,6 @@
 			<build>
 				<plugins>
 					<plugin>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<version>1.8</version>
-						<executions>
-							<execution>
-								<id>deb</id>
-								<phase>package</phase>
-								<configuration>
-									<target>
-										<property name="DEBIAN_VERSION" value="${project.version}" />
-										<ant antfile="${basedir}/build.xml">
-											<target name="deb" />
-										</ant>
-									</target>
-								</configuration>
-								<goals>
-									<goal>run</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-assembly-plugin</artifactId>
 						<version>2.5.5</version>
