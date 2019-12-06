@@ -7,13 +7,6 @@ idl/de/muenchen/allg/itd51/wollmux/*.class
 bin/de
 bin/data
 bin/com
-dist/deb/wollmux-*.tar.gz
-dist/deb/wollmux_*.orig.tar.gz
-dist/deb/openoffice.org-wollmux_*.deb
-dist/deb/*.deb
-dist/deb/wollmux*.dsc
-dist/deb/wollmux*.diff.gz
-dist/deb/wollmux*.changes
 dist/WollMux.oxt
 dist/WollMux.uno.pkg
 dist/WollMuxBar.jar
@@ -21,8 +14,6 @@ dist/WollMuxInterfaces.jar
 dist/md5sums.txt
 dist/WollMux.update.xml
 dist/TerminateOOo.jar
-dist/wollmux-*-installer.exe
-dist/wollmux-*.tar.gz
 oxt/WollMux.uno.jar
 *~
 /target
@@ -34,10 +25,7 @@ oxt/WollMux.uno.jar
 .vscode/
 dist/WollMux.oxt
 dist/WollMux.zip
-dist/WollMux-AOO.oxt
 dist/WollMux_ButtonsOnly.oxt
 dist/WollMux*manual_installation.tgz
 dist/wollmuxbar.exe
-lhmdeb/lhm/WollMux.update.xml
-lhmdeb/lhm/buildinfo
-lhmdeb/lhm/description.xml
+release.properties
