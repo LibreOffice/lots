@@ -13,10 +13,6 @@
 			<destName>WollMuxBar.jar</destName>
 		</file>
 		<file>
-			<source>misc/buildinfo</source>
-			<filtered>true</filtered>
-		</file>
-		<file>
 			<source>oxt/description.xml</source>
 			<filtered>true</filtered>
 		</file>
