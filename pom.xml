@@ -59,15 +59,6 @@
 									<outputDirectory>${basedir}/oxt</outputDirectory>
 									<destFileName>WollMux.rdb</destFileName>
 								</artifactItem>
-								<artifactItem>
-									<groupId>de.muenchen</groupId>
-									<artifactId>terminate-ooo</artifactId>
-									<version>1.0.0</version>
-									<classifier>fat</classifier>
-									<type>jar</type>
-									<outputDirectory>${basedir}/dist</outputDirectory>
-									<destFileName>TerminateOOo.jar</destFileName>
-								</artifactItem>
 							</artifactItems>
 						</configuration>
 					</execution>
