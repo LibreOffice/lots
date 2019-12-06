@@ -16,10 +16,6 @@
 			<source>oxt/Sidebar.xcu</source>
 			<filtered>true</filtered>
 		</file>
-		<file>
-			<source>misc/buildinfo</source>
-			<outputDirectory>.</outputDirectory>
-		</file>
 	</files>
 	<fileSets>
 		<fileSet>
