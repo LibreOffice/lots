@@ -10,7 +10,6 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<libreoffice.version>6.4.0-SNAPSHOT</libreoffice.version>
-		<izpack.staging>dist</izpack.staging>
 		<wollmux.oxt.id>de.muenchen.allg.d101.wollmux</wollmux.oxt.id>
 		<wollmux.oxt.name>WollMux</wollmux.oxt.name>
 	</properties>
@@ -26,10 +25,6 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 			</resource>
-			<resource>
-				<directory>izpack</directory>
-				<filtering>true</filtering>
-			</resource>
 		</resources>
 		<plugins>
 			<plugin>
@@ -39,13 +34,6 @@
 					<filesets>
 						<fileset>
 							<directory>dist</directory>
-							<excludes>
-								<exclude>**/README</exclude>
-								<exclude>**/*.xml*</exclude>
-								<exclude>**/*.bat</exclude>
-								<exclude>**/*.sh</exclude>
-							</excludes>
-							<followSymlinks>false</followSymlinks>
 						</fileset>
 					</filesets>
 				</configuration>
@@ -354,11 +342,6 @@
 			<version>5.5.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.codehaus.izpack</groupId>
-			<artifactId>izpack-native</artifactId>
-			<version>5.1.3</version>
-		</dependency>
-		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.8.6</version>
@@ -470,71 +453,6 @@
 			<id>release</id>
 			<build>
 				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<version>2.5.5</version>
-						<configuration>
-							<recompressZippedFiles>true</recompressZippedFiles>
-							<tarLongFileMode>posix</tarLongFileMode>
-						</configuration>
-						<executions>
-							<execution>
-								<id>assemble-manual-installation</id>
-								<phase>package</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-								<configuration>
-									<finalName>WollMux-${project.version}-manual_installation</finalName>
-									<appendAssemblyId>false</appendAssemblyId>
-									<descriptors>
-										<descriptor>misc/assembly-manual-installation.xml</descriptor>
-									</descriptors>
-								</configuration>
-							</execution>
-							<execution>
-								<id>assemble-release</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>${project.build.directory}</outputDirectory>
-									<finalName>WollMux-${project.version}</finalName>
-									<appendAssemblyId>false</appendAssemblyId>
-									<descriptors>
-										<descriptor>misc/assembly-release.xml</descriptor>
-									</descriptors>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.codehaus.izpack</groupId>
-						<artifactId>izpack-maven-plugin</artifactId>
-						<version>5.0.6</version>
-						<extensions>true</extensions>
-						<configuration>
-							<baseDir>${izpack.staging}</baseDir>
-							<installFile>${project.build.directory}/classes/install.xml</installFile>
-							<outputDirectory>${project.build.directory}</outputDirectory>
-							<finalName>${project.build.finalName}-installer</finalName>
-							<enableOverrideArtifact>true</enableOverrideArtifact>
-							<mkdirs>true</mkdirs>
-							<autoIncludeUrl>false</autoIncludeUrl>
-							<autoIncludeDevelopers>false</autoIncludeDevelopers>
-						</configuration>
-						<executions>
-							<execution>
-								<id>izpack</id>
-								<phase>package</phase>
-								<goals>
-									<goal>izpack</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-release-plugin</artifactId>
