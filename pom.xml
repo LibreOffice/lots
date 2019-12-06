@@ -106,6 +106,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.1.1</version>
+				<configuration>
+					<failOnWarnings>true</failOnWarnings>
+					<quiet>true</quiet>
+				</configuration>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -439,7 +443,7 @@
 											<arg line="add dist/WollMux_ButtonsOnly.oxt" />
 										</exec>
 				
-										<tstamp><format property="mytime" pattern="HH:mm:ss"/></tstamp>
+										<tstamp><format property="mytime" pattern="HH:mm:ss" /></tstamp>
 										<echo level="info" message="Install finished at ">${mytime}</echo>
 									</target>
 								</configuration>
