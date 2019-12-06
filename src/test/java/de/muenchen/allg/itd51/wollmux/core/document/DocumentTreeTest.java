@@ -21,8 +21,7 @@ public class DocumentTreeTest extends OfficeTest
   public void setUp() throws Exception
   {
     URL file = getClass().getResource("ExternerBriefkopf.odt");
-    UNO.loadComponentFromURL(file.toString(), false, false);
-    xDoc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
+    xDoc = UNO.XTextDocument(UNO.loadComponentFromURL(file.toString(), false, false));
   }
 
   @After
