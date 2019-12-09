@@ -74,20 +74,9 @@ public class OnNotifyDocumentEventListener extends BasicEvent
       {
         final XEventListener docListener = i.next();
         if (this.listener == null || this.listener == docListener)
-          new Thread()
-          {
-            @Override
-            public void run()
-            {
-              try
-              {
-                docListener.notifyEvent(eventObject);
-              } catch (java.lang.Exception x)
-              {
-                LOGGER.debug("", x);
-              }
-            }
-          }.start();
+        {
+          docListener.notifyEvent(eventObject);
+        }
       } catch (java.lang.Exception e)
       {
         i.remove();
