@@ -92,6 +92,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.jna.Native;
+import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.Shell32;
 import com.sun.jna.platform.win32.ShlObj;
 import com.sun.jna.platform.win32.WinDef;
@@ -101,8 +102,6 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.lang.XMultiServiceFactory;
-import com.sun.star.lib.loader.RegistryAccess;
-import com.sun.star.lib.loader.RegistryAccessException;
 import com.sun.star.sdbc.XConnection;
 import com.sun.star.sdbc.XDataSource;
 import com.sun.star.uno.AnyConverter;
@@ -337,31 +336,26 @@ public class WollMuxFiles
       searchPaths.add(System.getProperty("user.dir") + "/.wollmux/wollmux.conf");
       searchPaths.add(ETC_WOLLMUX_WOLLMUX_CONF);
 
-      // Falls Windows:
       if (windowsOS)
       {
-        // Versuch den Pfad der wollmux.conf aus HKCU-Registry zu lesen
-        try
+        // try reading path to wollmux.conf from HKCU registry
+        if (Advapi32Util.registryKeyExists(WinReg.HKEY_CURRENT_USER, WOLLMUX_KEY))
         {
-          wollmuxConfPath =
-            RegistryAccess.getStringValueFromRegistry(WinReg.HKEY_CURRENT_USER,
+          wollmuxConfPath = Advapi32Util.registryGetStringValue(WinReg.HKEY_CURRENT_USER,
               WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
           searchPaths.add(wollmuxConfPath);
-        }
-        catch (RegistryAccessException ex)
+        } else
         {
           LOGGER.debug("Kein Registry-Eintrag unter HKEY_CURRENT_USER");
         }
 
-        // Versuch den Pfad der wollmux.conf aus HKLM-Registry zu lesen
-        try
+        // try reading path to wollmux.conf from HKLM registry
+        if (Advapi32Util.registryKeyExists(WinReg.HKEY_LOCAL_MACHINE, WOLLMUX_KEY))
         {
-          wollmuxConfPath =
-            RegistryAccess.getStringValueFromRegistry(WinReg.HKEY_LOCAL_MACHINE,
+          wollmuxConfPath = Advapi32Util.registryGetStringValue(WinReg.HKEY_LOCAL_MACHINE,
               WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
           searchPaths.add(wollmuxConfPath);
-        }
-        catch (RegistryAccessException ex)
+        } else
         {
           LOGGER.debug("Kein Registry-Eintrag unter HKEY_LOCAL_MACHINE");
         }
