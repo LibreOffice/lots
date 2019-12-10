@@ -8,12 +8,22 @@ WollMux is licensed under the European Union Public Licence (EUPL - http://joinu
 **More information about WollMux can be found at our main page at http://www.wollmux.org**
 
 ## How to build?
+WollMux is separated into 3 modules:
+* wollmux: all main classes of the extension
+* wollmux-interfaces: interfaces of the UNO API (in folder idl)
+* [unohelper](https://github.com/WollMux/UNOHelper): Support classes for using UNO
+
 The following applications have to be installed to compile WollMux:
 * [JAVA JDK](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 * [Apache Maven](https://maven.apache.org/download.cgi)
 * [Git](http://git-scm.com/downloads/)
 
-Perform the following commands to download the sources and build the LibreOffice extension.
+Addtionally the maven plugin [maven-ooo-plugin](https://github.com/oboehm/maven-ooo-plugin) is needed to compile the module wollmux-interfaces.
+It had to be adapted to work with LibreOffice. Therefore two GitHub forks exist for maven-ooo-plugin and ooo-plugin-manager.
+
+Perform the following commands to download the sources and build the LibreOffice extension. Special dependencies of WollMux are hosted at
+[Bintray](https://bintray.com/wollmux/WollMux), which is already configured as maven repository in pom.xml
+
 ```
 git clone https://github.com/WollMux/WollMux.git
 git checkout WollMux_18.2
@@ -25,12 +35,20 @@ The compiled extension can be found at dist/WollMux.oxt
 ## Debugging
 ### External WollMux (Eclipse)
 WollMux.oxt extension is not installed in LibreOffice, but is loaded from external by starting a debug session in eclipse. There exist an additional extension **WollMux_ButtonsOnly.oxt**, which only contains the toolbars and dialogs. This extension must be installed in LibreOffice. Therefore call
+
 ```
 mvn -P ButtonsOnly generate-sources
 ```
-and the extension is build an installed, if the program `unopkg` is availble. Otherwise you have to manually install the extension, which can be found at dist/WollMux_ButtonsOnly.oxt.
 
-Configure a debug-configuration of type "Java Application" with main class **de.muenchen.allg.itd51.wollmux.DebugExternalWollMux**
+and the extension is build and installed, if the program `unopkg` is availble. Otherwise you have to manually install the extension, which can be found at dist/WollMux_ButtonsOnly.oxt.
+
+Configure a debug-configuration of type "Java Application" with main class **de.muenchen.allg.itd51.wollmux.DebugExternalWollMux**. Add a user defined library to the classpath. The library must contain these jars of LibreOffice which can be found at <path_to_LibreOffice>/program/classes:
+* java_uno.jar
+* juh.jar
+* jurt.jar
+* ridl.jar
+* unoloader.jar
+* unoil.jar
 
 Make sure, that there is no running LibreOffice process before starting debugging.
 
