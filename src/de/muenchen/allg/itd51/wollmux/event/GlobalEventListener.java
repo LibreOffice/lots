@@ -193,20 +193,20 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     if (compo == null)
       return;
 
-    // Keine Aktion bei neu (mit Create) erzeugten und temporären, unsichtbaren
-    // Textdokumente des OOo-Seriendrucks. Sicherstellen, dass diese Dokumente auch
-    // nicht im docManager mitgeführt werden.
-    if (isTempMailMergeDocument(compo))
-    {
-      return;
-    }
-
     XTextDocument xTextDoc = UNO.XTextDocument(compo);
     if (xTextDoc != null)
     {
       registerDispatcher(compo.getCurrentController().getFrame());
     }
 
+    // Keine Aktion bei neu (mit Create) erzeugten und temporären, unsichtbaren
+    // Textdokumente des OOo-Seriendrucks. Sicherstellen, dass diese Dokumente auch
+    // nicht im docManager mitgeführt werden.
+    if (isTempMailMergeDocument(compo))
+    {     
+      return;
+    }
+    
     // Prüfen ob Doppelt- oder Halbinstallation vorliegt.
     WollMuxEventHandler.getInstance().handleCheckInstallation();
     WollMuxEventHandler.getInstance().handleInitialize();
