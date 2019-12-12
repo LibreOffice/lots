@@ -38,8 +38,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-
-import de.muenchen.allg.itd51.wollmux.core.db.checker.DatasetChecker;
+import java.util.function.Predicate;
 
 /**
  * Oberklasse für Datasources, die ihre Daten vollständig im Speicher halten
@@ -62,8 +61,8 @@ public class RAMDatasource implements Datasource
   private String name;
 
   /**
-   * Erzeugt eine neue RAMDatasource mit Namen name. data und schema werden direkt
-   * als Referenz eingebunden, nicht kopiert.
+   * Erzeugt eine neue RAMDatasource mit Namen name. data und schema werden direkt als Referenz
+   * eingebunden, nicht kopiert.
    * 
    * @param name
    *          der Name der Datenquelle
@@ -78,17 +77,17 @@ public class RAMDatasource implements Datasource
   }
 
   /**
-   * Erzeugt eine uninitialisierte RAMDatasource. Eine abgeleitete Klasse, die diesen
-   * Konstruktor verwendet sollte init() aufrufen, um die nötigen Initialisierungen
-   * zu erledigen.
+   * Erzeugt eine uninitialisierte RAMDatasource. Eine abgeleitete Klasse, die diesen Konstruktor
+   * verwendet sollte init() aufrufen, um die nötigen Initialisierungen zu erledigen.
    */
   protected RAMDatasource()
-  {}
+  {
+  }
 
   /**
-   * Führt die Initialisierungsaktionen des Konstruktors mit den gleichen Parametern
-   * aus. Diese Methode sollte von abgeleiteten Klassen verwendet werden, wenn sie
-   * den Konstruktor ohne Argumente verwenden.
+   * Führt die Initialisierungsaktionen des Konstruktors mit den gleichen Parametern aus. Diese
+   * Methode sollte von abgeleiteten Klassen verwendet werden, wenn sie den Konstruktor ohne
+   * Argumente verwenden.
    */
   protected void init(String name, List<String> schema, List<Dataset> data)
   {
@@ -112,7 +111,8 @@ public class RAMDatasource implements Datasource
     while (iter.hasNext())
     {
       Dataset ds = iter.next();
-      if (keys.contains(ds.getKey())) {
+      if (keys.contains(ds.getKey()))
+      {
         res.add(ds);
       }
     }
@@ -126,24 +126,24 @@ public class RAMDatasource implements Datasource
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
   @Override
-  public QueryResults find(List<QueryPart> query, long timeout)
-      throws TimeoutException
+  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
   { // TESTED
-    if (query.isEmpty()) {
+    if (query.isEmpty())
+    {
       return new QueryResultsList(new Vector<Dataset>(0));
     }
-    DatasetChecker checker = DatasetChecker.makeChecker(query);
+
+    Predicate<Dataset> pred = DatasetPredicate.makePredicate(query);
 
     List<Dataset> results = new ArrayList<>();
 
-    Iterator<Dataset> iter = data.iterator();
-    while (iter.hasNext())
-    {
-      Dataset ds = iter.next();
-      if (checker.matches(ds)) {
+    data.forEach(ds -> {
+      if (pred.test(ds))
+      {
         results.add(ds);
       }
-    }
+    });
+
     return new QueryResultsList(results);
   }
 

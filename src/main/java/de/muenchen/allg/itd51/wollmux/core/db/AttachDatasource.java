@@ -40,43 +40,39 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.core.db.checker.DatasetChecker;
-import de.muenchen.allg.itd51.wollmux.core.db.checker.MatchAllDatasetChecker;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
- * Eine Datenquelle, die eine andere Datenquelle um Spalten ergänzt. Zur
- * Erstellung der Menge der Ergebnisdatensätze wird jeder Datensatz aus SOURCE1
- * genau einmal verwendet und jeder Datensatz aus SOURCE2 beliebig oft (auch
- * keinmal). Unterschiede zu einem richtigen Join:<br>
+ * Eine Datenquelle, die eine andere Datenquelle um Spalten ergänzt. Zur Erstellung der Menge der
+ * Ergebnisdatensätze wird jeder Datensatz aus SOURCE1 genau einmal verwendet und jeder Datensatz
+ * aus SOURCE2 beliebig oft (auch keinmal). Unterschiede zu einem richtigen Join:<br>
  * <br>
- * a) Verhindert, dass eine Person 2 mal auftaucht, nur weil es 2 Einträge mit
- * Verkehrsverbindungen für ihre Adresse gibt<br>
- * b) Verhindert, dass eine Person rausfliegt, weil es zu ihrer Adresse keine
- * Verkehrsverbindung gibt<br>
- * c) Die Schlüssel der Ergebnisdatensätze bleiben die aus SOURCE1 und werden
- * nicht kombiniert aus SOURCE1 und SOURCE2. Das verhindert, dass ein Datensatz
- * bei einer Änderung der Adresse aus der lokalen Absenderliste fliegt, weil er
- * beim Cache-Refresh nicht mehr gefunden wird. <br>
+ * a) Verhindert, dass eine Person 2 mal auftaucht, nur weil es 2 Einträge mit Verkehrsverbindungen
+ * für ihre Adresse gibt<br>
+ * b) Verhindert, dass eine Person rausfliegt, weil es zu ihrer Adresse keine Verkehrsverbindung
+ * gibt<br>
+ * c) Die Schlüssel der Ergebnisdatensätze bleiben die aus SOURCE1 und werden nicht kombiniert aus
+ * SOURCE1 und SOURCE2. Das verhindert, dass ein Datensatz bei einer Änderung der Adresse aus der
+ * lokalen Absenderliste fliegt, weil er beim Cache-Refresh nicht mehr gefunden wird. <br>
  * <br>
- * In der Ergebnisdatenquelle sind alle Spalten von SOURCE1 unter ihrem
- * ursprünglichen Namen, alle Spalten von SOURCE2 unter dem Namen von SOURCE2
- * konkateniert mit "." konkateniert mit dem Spaltennamen zu finden. <br>
+ * In der Ergebnisdatenquelle sind alle Spalten von SOURCE1 unter ihrem ursprünglichen Namen, alle
+ * Spalten von SOURCE2 unter dem Namen von SOURCE2 konkateniert mit "." konkateniert mit dem
+ * Spaltennamen zu finden. <br>
  * <br>
- * Argument gegen automatische Umbenennung/Aliase für Spalten aus SOURCE2, deren
- * Name sich nicht mit einer Spalte aus SOURCE1 stört:<br>
+ * Argument gegen automatische Umbenennung/Aliase für Spalten aus SOURCE2, deren Name sich nicht mit
+ * einer Spalte aus SOURCE1 stört:<br>
  * <br>
- * - Der Alias würde verschwinden, wenn die Quelle SOURCE1 später einmal um eine
- * Spalte mit dem entsprechenden Namen erweitert wird. Definitionen, die den
- * Alias verwendet haben verwenden ab da stillschweigend die Spalte aus SOURCE1,
- * was schwierig zu findende Fehler nach sich ziehen kann.
+ * - Der Alias würde verschwinden, wenn die Quelle SOURCE1 später einmal um eine Spalte mit dem
+ * entsprechenden Namen erweitert wird. Definitionen, die den Alias verwendet haben verwenden ab da
+ * stillschweigend die Spalte aus SOURCE1, was schwierig zu findende Fehler nach sich ziehen kann.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -109,32 +105,35 @@ public class AttachDatasource implements Datasource
    * Erzeugt eine neue AttachDatasource.
    * 
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser
-   *          AttachDatasource bereits vollständig instanziierten Datenquellen.
+   *          enthält alle bis zum Zeitpunkt der Definition dieser AttachDatasource bereits
+   *          vollständig instanziierten Datenquellen.
    * @param sourceDesc
-   *          der "Datenquelle"-Knoten, der die Beschreibung dieser
-   *          AttachDatasource enthält.
+   *          der "Datenquelle"-Knoten, der die Beschreibung dieser AttachDatasource enthält.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit
-   *          nicht verwendet).
+   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht verwendet).
    */
-  public AttachDatasource(Map<String, Datasource> nameToDatasource, ConfigThingy sourceDesc, URL context)
+  public AttachDatasource(Map<String, Datasource> nameToDatasource, ConfigThingy sourceDesc,
+      URL context)
   {
-    name = sourceDesc.get("NAME", ConfigurationErrorException.class, L.m("NAME der Datenquelle fehlt")).toString();
-    source1Name = sourceDesc.get("SOURCE", ConfigurationErrorException.class, L.m("SOURCE der Datenquelle %1 fehlt", name)).toString();
-    source2Name = sourceDesc.get("ATTACH", ConfigurationErrorException.class, L.m("ATTACH-Angabe der Datenquelle %1 fehlt", name)).toString();
+    name = sourceDesc
+        .get("NAME", ConfigurationErrorException.class, L.m("NAME der Datenquelle fehlt"))
+        .toString();
+    source1Name = sourceDesc.get("SOURCE", ConfigurationErrorException.class,
+        L.m("SOURCE der Datenquelle %1 fehlt", name)).toString();
+    source2Name = sourceDesc.get("ATTACH", ConfigurationErrorException.class,
+        L.m("ATTACH-Angabe der Datenquelle %1 fehlt", name)).toString();
     source1 = nameToDatasource.get(source1Name);
     source2 = nameToDatasource.get(source2Name);
 
     if (source1 == null)
-      throw new ConfigurationErrorException(
-          L.m("Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name,
-              source1Name));
+      throw new ConfigurationErrorException(L.m(
+          "Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert",
+          name, source1Name));
 
     if (source2 == null)
-      throw new ConfigurationErrorException(
-          L.m("Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name,
-              source2Name));
+      throw new ConfigurationErrorException(L.m(
+          "Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert",
+          name, source2Name));
 
     List<String> schema1 = source1.getSchema();
     List<String> schema2 = source2.getSchema();
@@ -146,7 +145,8 @@ public class AttachDatasource implements Datasource
     {
       spalte = source2Prefix + spalte;
       if (schema1.contains(spalte))
-        throw new ConfigurationErrorException(L.m("Kollision mit Spalte \"%1\" aus Datenquelle \"%2\"", spalte, source1Name));
+        throw new ConfigurationErrorException(
+            L.m("Kollision mit Spalte \"%1\" aus Datenquelle \"%2\"", spalte, source1Name));
 
       schema.add(spalte);
     }
@@ -154,7 +154,8 @@ public class AttachDatasource implements Datasource
     ConfigThingy matchesDesc = sourceDesc.query("MATCH");
     int numMatches = matchesDesc.count();
     if (numMatches == 0)
-      throw new ConfigurationErrorException(L.m("Mindestens eine MATCH-Angabe muss bei Datenquelle \"%1\" gemacht werden", name));
+      throw new ConfigurationErrorException(
+          L.m("Mindestens eine MATCH-Angabe muss bei Datenquelle \"%1\" gemacht werden", name));
 
     match1 = new String[numMatches];
     match2 = new String[numMatches];
@@ -164,7 +165,8 @@ public class AttachDatasource implements Datasource
     {
       ConfigThingy matchDesc = iter.next();
       if (matchDesc.count() != 2)
-        throw new ConfigurationErrorException(L.m("Fehlerhafte MATCH Angabe in Datenquelle \"%1\"", name));
+        throw new ConfigurationErrorException(
+            L.m("Fehlerhafte MATCH Angabe in Datenquelle \"%1\"", name));
 
       String spalte1 = "";
       String spalte2 = "";
@@ -202,20 +204,21 @@ public class AttachDatasource implements Datasource
   /*
    * (non-Javadoc)
    * 
-   * @see
-   * de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.
-   * Collection, long)
+   * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util. Collection, long)
    */
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout) throws TimeoutException
+  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
+      throws TimeoutException
   {
     long time = new Date().getTime();
     QueryResults results = source1.getDatasetsByKey(keys, timeout);
     time = (new Date().getTime()) - time;
     timeout -= time;
     if (timeout <= 0 && System.getProperty("DEBUG") == null)
-      throw new TimeoutException(L.m("Datenquelle %1 konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten", source1Name));
-    return attachColumns(results, timeout, new MatchAllDatasetChecker());
+      throw new TimeoutException(
+          L.m("Datenquelle %1 konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten",
+              source1Name));
+    return attachColumns(results, timeout, DatasetPredicate.matchAll);
   }
 
   @Override
@@ -227,8 +230,7 @@ public class AttachDatasource implements Datasource
   /*
    * (non-Javadoc)
    * 
-   * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List,
-   * long)
+   * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
   @Override
   public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
@@ -241,17 +243,19 @@ public class AttachDatasource implements Datasource
     {
       if (p.getColumnName().startsWith(source2Prefix))
       {
-        query2.add(new QueryPart(p.getColumnName().substring(source2Prefix.length()), p.getSearchString()));
+        query2.add(new QueryPart(p.getColumnName().substring(source2Prefix.length()),
+            p.getSearchString()));
         query2WithPrefix.add(p);
       } else
+      {
         query1.add(p);
+      }
     }
 
     /*
-     * Die ATTACH-Datenquelle ist normalerweise nur untergeordnet und
-     * Spaltenbedingungen dafür schränken die Suchergebnisse wenig ein. Deshalb
-     * werten wir falls wir mindestens eine Bedingung an die Hauptdatenquelle
-     * haben, die Anfrage auf dieser Datenquelle aus.
+     * Die ATTACH-Datenquelle ist normalerweise nur untergeordnet und Spaltenbedingungen dafür
+     * schränken die Suchergebnisse wenig ein. Deshalb werten wir falls wir mindestens eine
+     * Bedingung an die Hauptdatenquelle haben, die Anfrage auf dieser Datenquelle aus.
      */
     if (!query1.isEmpty())
     {
@@ -259,18 +263,18 @@ public class AttachDatasource implements Datasource
       time = (new Date().getTime()) - time;
       timeout -= time;
       if (timeout <= 0)
-        throw new TimeoutException(L.m("Datenquelle %1 konnte Anfrage find() nicht schnell genug beantworten", source1Name));
+        throw new TimeoutException(L.m(
+            "Datenquelle %1 konnte Anfrage find() nicht schnell genug beantworten", source1Name));
 
-      DatasetChecker filter = DatasetChecker.makeChecker(query2WithPrefix);
-
-      return attachColumns(results, timeout, filter);
+      return attachColumns(results, timeout, DatasetPredicate.makePredicate(query2WithPrefix));
     } else
     {
       QueryResults results = source2.find(query2, timeout);
       time = (new Date().getTime()) - time;
       timeout -= time;
       if (timeout <= 0)
-        throw new TimeoutException(L.m("Datenquelle %1 konnte Anfrage find() nicht schnell genug beantworten", source2Name));
+        throw new TimeoutException(L.m(
+            "Datenquelle %1 konnte Anfrage find() nicht schnell genug beantworten", source2Name));
       return attachColumnsReversed(results, timeout);
     }
   }
@@ -286,7 +290,8 @@ public class AttachDatasource implements Datasource
     return name;
   }
 
-  private QueryResults attachColumns(QueryResults results, long timeout, DatasetChecker filter) throws TimeoutException
+  private QueryResults attachColumns(QueryResults results, long timeout, Predicate<Dataset> filter)
+      throws TimeoutException
   {
     long endTime = new Date().getTime() + timeout;
 
@@ -318,7 +323,7 @@ public class AttachDatasource implements Datasource
       if (appendix.size() == 0)
       {
         newDataset = new ConcatDataset(ds, null);
-        if (filter.matches(newDataset))
+        if (filter.test(newDataset))
         {
           resultsWithAttachments.add(newDataset);
         }
@@ -327,7 +332,7 @@ public class AttachDatasource implements Datasource
         for (Dataset appenixElement : appendix)
         {
           newDataset = new ConcatDataset(ds, appenixElement);
-          if (filter.matches(newDataset))
+          if (filter.test(newDataset))
           {
             resultsWithAttachments.add(newDataset);
             break;
@@ -339,7 +344,8 @@ public class AttachDatasource implements Datasource
     return new QueryResultsList(resultsWithAttachments);
   }
 
-  private QueryResults attachColumnsReversed(QueryResults results, long timeout) throws TimeoutException
+  private QueryResults attachColumnsReversed(QueryResults results, long timeout)
+      throws TimeoutException
   {
     long endTime = new Date().getTime() + timeout;
 
