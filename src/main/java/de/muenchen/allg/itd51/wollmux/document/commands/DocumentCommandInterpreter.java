@@ -63,12 +63,12 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
 
 /**
  * Diese Klasse repräsentiert den Kommando-Interpreter zur Auswertung von
@@ -208,7 +208,7 @@ public class DocumentCommandInterpreter
       pageStyleWollmuxseiteToStandard(getDocumentController().getModel().doc);
 
       // Ziffern-Anpassen der Sachleitenden Verfügungen aufrufen:
-      SachleitendeVerfuegung.ziffernAnpassen(getDocumentController());
+      ContentBasedDirectiveModel.createModel(documentController).adoptNumbers();
 
       // Jetzt können die TextFelder innerhalb der updateFields Kommandos
       // geupdatet werden. Durch die Auslagerung in einen extra Schritt wird die

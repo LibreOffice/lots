@@ -63,11 +63,13 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
+import com.sun.star.container.XNameContainer;
 import com.sun.star.container.XNamed;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.style.XStyle;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
@@ -105,6 +107,10 @@ public class TextDocumentModel
       .getLogger(TextDocumentModel.class);
 
   public static final String OVERRIDE_FRAG_DB_SPALTE = "OVERRIDE_FRAG_DB_SPALTE";
+
+  private static final String PARAGRAPH_STYLES = "ParagraphStyles";
+
+  private static final String CHARACTER_STYLES = "CharacterStyles";
 
   /**
    * Verwendet für {@link #lastTouchedByOOoVersion} und
@@ -1256,6 +1262,133 @@ public class TextDocumentModel
     {
       LOGGER.trace("", x);
     }
+  }
+
+  /**
+   * Get the paragraph style with a given name.
+   *
+   * @param name
+   *          The name of the paragraph style.
+   * @return The style with the name or null if there is no such style.
+   */
+  public XStyle getParagraphStyle(String name)
+  {
+    XStyle style = null;
+
+    XNameContainer pss = getStyleContainer(PARAGRAPH_STYLES);
+    if (pss != null)
+    {
+      try
+      {
+        style = UNO.XStyle(pss.getByName(name));
+      } catch (java.lang.Exception e)
+      {
+        LOGGER.trace("", e);
+      }
+    }
+    return style;
+  }
+
+  /**
+   * Creates a new paragraph style.
+   *
+   * @param name
+   *          The name of the paragraph style.
+   * @param parentStyleName
+   *          The name of the parent paragraph style or null if there is no parent, which defaults
+   *          to "Standard"
+   * @return The style or null if it cloudn't be created.
+   */
+  public XStyle createParagraphStyle(String name, String parentStyleName)
+  {
+    XNameContainer pss = getStyleContainer(PARAGRAPH_STYLES);
+    if (pss != null)
+    {
+      return createStyle(pss, "com.sun.star.style.ParagraphStyle", name, parentStyleName);
+    }
+    return null;
+  }
+
+  /**
+   * Get the character style with a given name.
+   *
+   * @param name
+   *          The name of the character style.
+   * @return The style with the name or null if there is no such style.
+   */
+  public XStyle getCharacterStyle(String name)
+  {
+    XStyle style = null;
+
+    XNameContainer pss = getStyleContainer(CHARACTER_STYLES);
+    if (pss != null)
+    {
+      try
+      {
+        style = UNO.XStyle(pss.getByName(name));
+      } catch (java.lang.Exception e)
+      {
+        LOGGER.trace("", e);
+      }
+    }
+    return style;
+  }
+
+  /**
+   * Creates a new character style.
+   *
+   * @param name
+   *          The name of the character style.
+   * @param parentStyleName
+   *          The name of the parent paragraph style or null if there is no parent, which defaults
+   *          to "Standard"
+   * @return The style or null if it cloudn't be created.
+   */
+  public XStyle createCharacterStyle(String name, String parentStyleName)
+  {
+    XNameContainer pss = getStyleContainer(CHARACTER_STYLES);
+    if (pss != null)
+    {
+      return createStyle(pss, "com.sun.star.style.CharacterStyle", name, parentStyleName);
+    }
+    return null;
+  }
+
+  private XStyle createStyle(XNameContainer styles, String styleType, String name,
+      String parentStyleName)
+  {
+    try
+    {
+      XStyle style = UNO.XStyle(UNO.XMultiServiceFactory(doc).createInstance(styleType));
+      styles.insertByName(name, style);
+      if (style != null && parentStyleName != null)
+        style.setParentStyle(parentStyleName);
+      return UNO.XStyle(styles.getByName(name));
+    } catch (Exception e)
+    {
+      LOGGER.trace("", e);
+      return null;
+    }
+  }
+
+  /**
+   * Get the styles of the document. Liefert den Styles vom Typ type des Dokuments doc.
+   *
+   * @param type
+   *          The type of styles ({@link #CHARACTER_STYLES}, {@link #PARAGRAPH_STYLES})
+   * @return The containter of the styles or null.
+   */
+  private XNameContainer getStyleContainer(String containerName)
+  {
+    try
+    {
+      return UNO.XNameContainer(UNO.XNameAccess(UNO.XStyleFamiliesSupplier(doc).getStyleFamilies())
+          .getByName(containerName));
+    } catch (java.lang.Exception e)
+    {
+      LOGGER.trace("", e);
+    }
+    return null;
   }
 
   /**

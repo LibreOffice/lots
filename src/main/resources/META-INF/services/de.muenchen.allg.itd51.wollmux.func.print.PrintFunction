@@ -1,5 +1,5 @@
-de.muenchen.allg.itd51.wollmux.func.print.SachleitendeVerfuegung
-de.muenchen.allg.itd51.wollmux.func.print.SachleitendeVerfuegungOutput
+de.muenchen.allg.itd51.wollmux.slv.print.ContentBasedDirectivePrint
+de.muenchen.allg.itd51.wollmux.slv.print.ContentBasedDirectivePrintOutput
 de.muenchen.allg.itd51.wollmux.func.print.SetFormValue
 de.muenchen.allg.itd51.wollmux.func.print.ToOdtEmail
 de.muenchen.allg.itd51.wollmux.func.print.ToOdtFile

@@ -6,9 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.container.NoSuchElementException;
+import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XMultiServiceFactory;
+import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
@@ -90,5 +92,24 @@ public class Utils
       LOGGER.debug("", e);
       return null;
     }
+  }
+
+  /**
+   * Get the string of the given {@link XTextRange}.
+   *
+   * @param textRange
+   *          A text range object.
+   *
+   * @return String The content of the text range.
+   */
+  public static String getStringOfXTextRange(XTextRange textRange)
+  {
+    String str = "";
+    XEnumerationAccess enumerationAccess = UNO.XEnumerationAccess(textRange);
+    if (enumerationAccess.hasElements())
+    {
+      str = textRange.getString();
+    }
+    return str;
   }
 }
