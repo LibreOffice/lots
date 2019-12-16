@@ -24,11 +24,9 @@ import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.handlers.BasicEvent;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnAbdruck;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnAbout;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddPALChangeEventListener;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnButtonZuleitungszeilePressed;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCheckInstallation;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseAndOpenExt;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseTextDocument;
@@ -47,7 +45,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToMark;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToPlaceholder;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnKill;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnManagePrintFunction;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnMarkBlock;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnNotifyDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnPALChangedNotify;
@@ -63,7 +60,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveTempAndOpenExt;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValueFinished;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetInsertValues;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetPrintBlocksPropsViaPrintModel;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetWindowVisible;
@@ -72,9 +68,14 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogPersoenlicheAbs
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextbausteinEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnUpdateInputFields;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnZifferEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
 import de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarContent;
+import de.muenchen.allg.itd51.wollmux.slv.events.ContentBasedDirectiveEventListener;
+import de.muenchen.allg.itd51.wollmux.slv.events.OnChangeCopy;
+import de.muenchen.allg.itd51.wollmux.slv.events.OnChangeDirective;
+import de.muenchen.allg.itd51.wollmux.slv.events.OnChangeRecipient;
+import de.muenchen.allg.itd51.wollmux.slv.events.OnMarkBlock;
+import de.muenchen.allg.itd51.wollmux.slv.events.OnSetPrintBlocksPropsViaPrintModel;
 
 /**
  * The global event handler of {@link WollMuxEvent}.
@@ -122,6 +123,7 @@ public class WollMuxEventHandler
     checkInstallationListener = new CheckInstallation();
     eventBus.register(checkInstallationListener);
     eventBus.register(new WollMuxEventListener());
+    eventBus.register(ContentBasedDirectiveEventListener.getInstance());
   }
 
   public static WollMuxEventHandler getInstance()
@@ -144,6 +146,17 @@ public class WollMuxEventHandler
   {
     eventBus.unregister(checkInstallationListener);
     checkInstallationListener = null;
+  }
+
+  /**
+   * Add a new listener on the event bus.
+   *
+   * @param listener
+   *          A new listener.
+   */
+  public void registerListener(Object listener)
+  {
+    eventBus.register(listener);
   }
 
   /**
@@ -280,7 +293,7 @@ public class WollMuxEventHandler
   public void handleButtonZifferEinfuegenPressed(
       TextDocumentController documentController)
   {
-    handle(new OnZifferEinfuegen(documentController));
+    handle(new OnChangeDirective(documentController));
   }
 
   /**
@@ -294,7 +307,7 @@ public class WollMuxEventHandler
   public void handleButtonAbdruckPressed(
       TextDocumentController documentController)
   {
-    handle(new OnAbdruck(documentController));
+    handle(new OnChangeCopy(documentController));
   }
 
   /**
@@ -309,7 +322,7 @@ public class WollMuxEventHandler
   public void handleButtonZuleitungszeilePressed(
       TextDocumentController documentController)
   {
-    handle(new OnButtonZuleitungszeilePressed(documentController));
+    handle(new OnChangeRecipient(documentController));
   }
 
   /**
@@ -596,23 +609,25 @@ public class WollMuxEventHandler
   }
 
   /**
-   * Diese Methode erzeugt ein neues WollMuxEvent, mit dem die Eigenschaften der
-   * Druckblöcke (z.B. allVersions) gesetzt werden können.
+   * Diese Methode erzeugt ein neues WollMuxEvent, mit dem die Eigenschaften der Druckblöcke (z.B.
+   * allVersions) gesetzt werden können.
    *
-   * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom
-   * XPrintModel aufgerufen und mit diesem synchronisiert.
+   * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom XPrintModel aufgerufen
+   * und mit diesem synchronisiert.
    *
+   * @param doc
+   *          Der TextDocumentController auf dem Einstellungen vorgenommen werden sollen.
    * @param blockName
    *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
    * @param visible
-   *          Der Block wird sichtbar, wenn visible==true und unsichtbar, wenn
-   *          visible==false.
+   *          Der Block wird sichtbar, wenn visible==true und unsichtbar, wenn visible==false.
    * @param showHighlightColor
-   *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur, wenn
-   *          zu einem betroffenen Druckblock auch eine Hintergrundfarbe angegeben
-   *          ist).
+   *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur, wenn zu einem
+   *          betroffenen Druckblock auch eine Hintergrundfarbe angegeben ist).
+   * @param listener
+   *          Ein Listener zum Synchronisieren mit diesem Event.
    */
-  public void handleSetPrintBlocksPropsViaPrintModel(XTextDocument doc,
+  public void handleSetPrintBlocksPropsViaPrintModel(TextDocumentController doc,
       String blockName, boolean visible, boolean showHighlightColor,
       ActionListener listener)
   {

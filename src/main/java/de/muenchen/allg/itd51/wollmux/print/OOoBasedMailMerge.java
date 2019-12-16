@@ -2,11 +2,11 @@
  * Dateiname: OOoBasedMailMerge.java
  * Projekt  : WollMux
  * Funktion : Seriendruck über den OOo MailMergeService
- * 
+ *
  * Copyright (c) 2011-2019 Landeshauptstadt München
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL), 
+ * it under the terms of the European Union Public Licence (EUPL),
  * version 1.0 (or any later version).
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,7 +15,7 @@
  * European Union Public Licence for more details.
  *
  * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see 
+ * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
  *
  * Änderungshistorie:
@@ -26,7 +26,7 @@
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD-D101)
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.print;
 
@@ -85,7 +85,6 @@ import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory.FormField;
@@ -103,6 +102,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.func.print.SetFormValue;
+import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
 
 /**
  * Performs a mailmerge with LibreOffice.
@@ -297,7 +297,7 @@ public class OOoBasedMailMerge
 
   /**
    * A optional XCancellable mail merge thread.
-   * 
+   *
    * @author Jan-Marek Glogowski (ITM-I23)
    */
   private static class MailMergeThread extends Thread
@@ -357,7 +357,7 @@ public class OOoBasedMailMerge
 
   /**
    * Übernimmt das Aktualisieren der Fortschrittsanzeige im XPrintModel pmod.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static class ProgressUpdater
@@ -391,7 +391,7 @@ public class OOoBasedMailMerge
 
   /**
    * Repräsentiert eine (noch nicht registrierte) Datenquelle für Office.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static abstract class OOoDataSource implements SimulationResultsProcessor
@@ -420,7 +420,7 @@ public class OOoBasedMailMerge
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * de.muenchen.allg.itd51.wollmux.SimulationResults.SimulationResultsProcessor
      * #processSimulationResults(de.muenchen.allg.itd51.wollmux.SimulationResults)
@@ -469,7 +469,7 @@ public class OOoBasedMailMerge
   /**
    * Implementierung einer {@link OOoDataSource}, die als Backend ein CSV-Datei
    * verwendet.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static class CsvBasedOOoDataSource extends OOoDataSource
@@ -491,7 +491,7 @@ public class OOoBasedMailMerge
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @seede.muenchen.allg.itd51.wollmux.func.OOoBasedMailMerge.OOoDataSource#
      * getDataSourceWriter()
      */
@@ -503,7 +503,7 @@ public class OOoBasedMailMerge
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @seede.muenchen.allg.itd51.wollmux.func.OOoBasedMailMerge.OOoDataSource#
      * createXDocumentDatasource()
      */
@@ -562,7 +562,7 @@ public class OOoBasedMailMerge
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * de.muenchen.allg.itd51.wollmux.func.OOoBasedMailMerge.OOoDataSource#getSize()
      */
@@ -574,7 +574,7 @@ public class OOoBasedMailMerge
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * de.muenchen.allg.itd51.wollmux.func.OOoBasedMailMerge.OOoDataSource#remove()
      */
@@ -589,7 +589,7 @@ public class OOoBasedMailMerge
    * Beschreibt einen DataSourceWriter mit dem die Daten des Seriendrucks in eine
    * Datenquelle geschrieben werden können. Eine konkrete Ableitungen ist der
    * {@link CSVDataSourceWriter}.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static interface DataSourceWriter
@@ -597,7 +597,7 @@ public class OOoBasedMailMerge
     /**
      * Fügt der zu erzeugenden Datenquelle einen neuen Datensatz hinzu durch
      * Schlüssel/Wert-Paare in einer HashMap definiert ist.
-     * 
+     *
      * @throws Exception
      *           falls etwas beim Hinzufügen schief geht.
      */
@@ -609,7 +609,7 @@ public class OOoBasedMailMerge
      * Aufruf von {@link #flushAndClose()} ist die Erzeugung abgeschlossen und es
      * darf kein weiterer Aufruf von {@link #addDataset(HashMap)} erfolgen (bzw.
      * dieser ist dann ohne Wirkung).
-     * 
+     *
      * @throws Exception
      *           falls etwas beim Finalisieren schief geht.
      */
@@ -625,7 +625,7 @@ public class OOoBasedMailMerge
   /**
    * Implementiert einen DataSourceWriter, der Daten in eine CSV-Datei data.csv in
    * einem frei wählbaren Zielverzeichnis schreibt.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static class CSVDataSourceWriter implements DataSourceWriter
@@ -663,7 +663,7 @@ public class OOoBasedMailMerge
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * de.muenchen.allg.itd51.wollmux.func.OOoBasedMailMerge.DataSourceWriter#getSize
      * ()
@@ -676,7 +676,7 @@ public class OOoBasedMailMerge
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * de.muenchen.allg.itd51.wollmux.func.OOoBasedMailMerge.DataSourceWriter#addDataset
      * (java.util.HashMap)
@@ -690,7 +690,7 @@ public class OOoBasedMailMerge
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @seede.muenchen.allg.itd51.wollmux.func.OOoBasedMailMerge.DataSourceWriter#
      * flushAndClose()
      */
@@ -733,7 +733,7 @@ public class OOoBasedMailMerge
     /**
      * Erzeugt ein für die csv-Datei gültiges literal aus dem Wert value und
      * übernimmt insbesondere das Escaping der Anführungszeichen.
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-D101)
      */
     private String literal(String value)
@@ -795,7 +795,7 @@ public class OOoBasedMailMerge
     {
       return null;
     }
-    
+
     // Workaround für #16487
     try
     {
@@ -829,7 +829,10 @@ public class OOoBasedMailMerge
     adjustDatabaseAndInputUserFields(tmpDoc, dbName);
     removeAllBookmarks(tmpDoc);
     // removeHiddenSections(tmpDoc);
-    SachleitendeVerfuegung.deMuxSLVStyles(UNO.XTextDocument(tmpDoc));
+    ContentBasedDirectiveModel
+        .createModel(DocumentManager.getTextDocumentController(UNO.XTextDocument(tmpDoc)))
+        .renameTextStyles();
+
     removeWollMuxMetadata(UNO.XTextDocument(tmpDoc));
 
     // neues input-Dokument speichern und schließen
@@ -894,16 +897,16 @@ public class OOoBasedMailMerge
             UnoRuntime.queryInterface(XTextSection.class,
               textSections.getByName(sectionName));
           XPropertySet ps = UNO.XPropertySet(section);
-          
+
           XTextRange range = section.getAnchor();
           UNO.setPropertyToDefault(range, "CharHidden");
-          
+
           List<String> conditions = new ArrayList<>();
           for (String groupName : groupNames)
           {
             conditions.add(String.format("([%s] != \"true\")", COLUMN_PREFIX_TEXTSECTION + groupName));
           }
-          
+
           String condition = StringUtils.join(conditions, " or ");
           ps.setPropertyValue("IsVisible", false);
           ps.setPropertyValue("Condition", condition);
@@ -936,7 +939,7 @@ public class OOoBasedMailMerge
    * Verbesserung der Performance, das Löschen der Bereichsinhalte ist notwendig,
    * damit das erzeugte Gesamtdokument korrekt dargestellt wird (hier habe ich wilde
    * Textverschiebungen beobachtet, die so vermieden werden sollen).
-   * 
+   *
    * Bereiche sind auch ein möglicher Auslöser von allen möglichen falsch gesetzten
    * Seitenumbrüchen (siehe z.B. Issue:
    * http://openoffice.org/bugzilla/show_bug.cgi?id=73229)
@@ -971,7 +974,7 @@ public class OOoBasedMailMerge
    * Seriendruck in der Komplexität O(n^2) und werden hier in dieser Methode alle aus
    * dem Dokument tmpDoc gelöscht. Bookmarks sollten im Ergebnisdokument sowieso
    * nicht mehr benötigt werden und sind damit aus meiner Sicht überflüssig.
-   * 
+   *
    * Sollte irgendjemand irgendwann zu der Meinung kommen, dass die Bookmarks im
    * Dokument bleiben müssen, so müssen zumindest die Bookmarks von
    * WollMux-Dokumentkommandos gelöscht werden, damit sie nicht noch einmal durch den
@@ -1194,7 +1197,7 @@ public class OOoBasedMailMerge
    * Erzeugt über die Factory factory ein neues OOo-Seriendruckfeld, das auf die
    * Datenbank dbName, die Tabelle tableName und die Spalte columnName verweist und
    * liefert dieses zurück.
-   * 
+   *
    * @throws Exception
    *           Wenn die Factory das Feld nicht erzeugen kann.
    * @throws IllegalArgumentException
@@ -1274,7 +1277,7 @@ public class OOoBasedMailMerge
 
   /**
    * Steuert den Ausgabetyp beim OOo-Seriendruck.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public static enum OutputType {
@@ -1326,7 +1329,7 @@ public class OOoBasedMailMerge
   /**
    * Startet die Ausführung des Seriendrucks in ein Gesamtdokument mit dem
    * c.s.s.text.MailMergeService in einem eigenen Thread und liefert diesen zurück.
-   * 
+   *
    * @param dbName
    *          Name der Datenbank, die für den Seriendruck verwendet werden soll.
    * @param outputDir

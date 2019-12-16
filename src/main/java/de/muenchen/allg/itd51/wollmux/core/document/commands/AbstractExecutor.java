@@ -12,17 +12,12 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.AllVersions;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.CopyOnly;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.DraftOnly;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.Form;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFrag;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertValue;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InvalidCommand;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.NotInOriginal;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.OriginalOnly;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.OverrideFrag;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.SetGroups;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.SetJumpMark;
@@ -31,6 +26,7 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.Set
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.UpdateFields;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.itd51.wollmux.slv.PrintBlockCommand;
 
 /**
  * Implementiert einen leer-Executor, von dem abgeleitet werden kann, um konkrete
@@ -131,31 +127,7 @@ public abstract class AbstractExecutor implements DocumentCommand.Executor
   }
 
   @Override
-  public int executeCommand(DraftOnly cmd)
-  {
-    return 0;
-  }
-
-  @Override
-  public int executeCommand(CopyOnly cmd)
-  {
-    return 0;
-  }
-
-  @Override
-  public int executeCommand(NotInOriginal cmd)
-  {
-    return 0;
-  }
-
-  @Override
-  public int executeCommand(OriginalOnly cmd)
-  {
-    return 0;
-  }
-
-  @Override
-  public int executeCommand(AllVersions cmd)
+  public int executeCommand(PrintBlockCommand cmd)
   {
     return 0;
   }

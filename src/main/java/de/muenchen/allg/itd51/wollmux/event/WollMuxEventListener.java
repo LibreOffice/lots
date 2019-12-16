@@ -2,11 +2,9 @@ package de.muenchen.allg.itd51.wollmux.event;
 
 import com.google.common.eventbus.Subscribe;
 
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnAbdruck;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnAbout;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddPALChangeEventListener;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnButtonZuleitungszeilePressed;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseAndOpenExt;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseTextDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCollectNonWollMuxFormFieldsViaPrintModel;
@@ -23,7 +21,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToMark;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToPlaceholder;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnKill;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnManagePrintFunction;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnMarkBlock;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnNotifyDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnPALChangedNotify;
@@ -39,7 +36,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveTempAndOpenExt;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValueFinished;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetInsertValues;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetPrintBlocksPropsViaPrintModel;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetWindowVisible;
@@ -48,19 +44,12 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogPersoenlicheAbs
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextbausteinEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnUpdateInputFields;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnZifferEinfuegen;
 
 public class WollMuxEventListener
 {
 
   WollMuxEventListener()
   {
-  }
-
-  @Subscribe
-  public void onZifferEinfuegen(OnZifferEinfuegen event)
-  {
-    event.process();
   }
 
   @Subscribe
@@ -157,12 +146,6 @@ public class WollMuxEventListener
   }
 
   @Subscribe
-  public void onMarkBlock(OnMarkBlock event)
-  {
-    event.process();
-  }
-
-  @Subscribe
   public void onManagePrintFunction(OnManagePrintFunction event)
   {
     event.process();
@@ -229,20 +212,7 @@ public class WollMuxEventListener
   }
 
   @Subscribe
-  public void onAbdruck(OnAbdruck event)
-  {
-    event.process();
-  }
-
-  @Subscribe
   public void onAddPALChangeEventListener(OnAddPALChangeEventListener event)
-  {
-    event.process();
-  }
-
-  @Subscribe
-  public void onButtonZuleitungszeilePressed(
-      OnButtonZuleitungszeilePressed event)
   {
     event.process();
   }
@@ -304,13 +274,6 @@ public class WollMuxEventListener
 
   @Subscribe
   public void onSetFormValue(OnSetFormValue event)
-  {
-    event.process();
-  }
-
-  @Subscribe
-  public void onSetPrintBlocksPropsViaPrintModel(
-      OnSetPrintBlocksPropsViaPrintModel event)
   {
     event.process();
   }
