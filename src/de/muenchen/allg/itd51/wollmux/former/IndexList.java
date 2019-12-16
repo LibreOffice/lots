@@ -30,6 +30,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.former;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ListIterator;
 import java.util.Vector;
@@ -88,23 +89,24 @@ public class IndexList
 
   /**
    * Liefert einen Iterator über die Integers in dieser Liste.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   *
+   * @return An independent iterator of the current list.
    */
   public ListIterator<Integer> iterator()
   {
-    return indices.listIterator();
+    // copy list, so that it is independent of changing selections
+    return new ArrayList<Integer>(indices).listIterator();
   }
 
   /**
-   * Liefert einen Listiterator, der hinter dem letzten Element der Liste (von
-   * Integers) startet.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * Liefert einen Listiterator, der hinter dem letzten Element der Liste (von Integers) startet.
+   *
+   * @return An independent iterator of the current list.
    */
   public ListIterator<Integer> reverseIterator()
   {
-    return indices.listIterator(indices.size());
+    // copy list, so that it is independent of changing selections
+    return new ArrayList<Integer>(indices).listIterator(indices.size());
   }
 
   /**
