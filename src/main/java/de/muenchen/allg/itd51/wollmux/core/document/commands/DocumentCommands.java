@@ -56,18 +56,14 @@ import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.TextSection;
 import de.muenchen.allg.itd51.wollmux.core.document.TreeRelation;
 import de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.AllVersions;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.CopyOnly;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.DraftOnly;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InvalidCommand;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.NotInOriginal;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.OriginalOnly;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.SetGroups;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.slv.PrintBlockCommand;
 
 /**
  * Diese Klasse verwaltet die Dokumentkommandos eines Textdokuments und kann sich
@@ -135,31 +131,7 @@ public class DocumentCommands implements Iterable<DocumentCommand>
    * Enthält ein Set aller notInOrininal-Dokumentkommandos des Dokuments, die für die
    * Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
    */
-  private HashSet<DocumentCommand> notInOriginalCommands;
-
-  /**
-   * Enthält ein Set aller OriginalOnly-Dokumentkommandos des Dokuments, die für die
-   * Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
-   */
-  private HashSet<DocumentCommand> originalOnlyCommands;
-
-  /**
-   * Enthält ein Set aller draftOnly-Dokumentkommandos des Dokuments, die für die
-   * Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
-   */
-  private HashSet<DocumentCommand> draftOnlyCommands;
-
-  /**
-   * Enthält ein Set aller copyOnly-Dokumentkommandos des Dokuments, die für die
-   * Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
-   */
-  private HashSet<DocumentCommand> copyOnlyCommands;
-
-  /**
-   * Enthält ein Set aller all-Dokumentkommandos des Dokuments, die für die
-   * Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
-   */
-  private HashSet<DocumentCommand> allVersionsCommands;
+  private HashSet<PrintBlockCommand> printBlocks;
 
   /**
    * Pattern zum Erkennen von insertValue und insertFormValue-Bookmarks.
@@ -179,11 +151,7 @@ public class DocumentCommands implements Iterable<DocumentCommand>
 
     this.visibilityElements = new LinkedList<>();
     this.setJumpMarkCommands = new LinkedList<>();
-    this.notInOriginalCommands = new HashSet<>();
-    this.originalOnlyCommands = new HashSet<>();
-    this.draftOnlyCommands = new HashSet<>();
-    this.copyOnlyCommands = new HashSet<>();
-    this.allVersionsCommands = new HashSet<>();
+    this.printBlocks = new HashSet<>();
     this.allTextSectionsWithGROUPS = new HashSet<>();
   }
 
@@ -384,9 +352,9 @@ public class DocumentCommands implements Iterable<DocumentCommand>
   private void addNewDocumentCommands(HashSet<DocumentCommand> newDocumentCommands)
   {
     long[] times = new long[] {
-      0, 0, 0, 0, 0, 0, 0, 0 };
+        0, 0, 0, 0, };
     long[] counters = new long[] {
-      0, 0, 0, 0, 0, 0, 0, 0 };
+        0, 0, 0, 0, };
     LOGGER.trace("addNewDocumentCommands");
 
     long lastTime = System.currentTimeMillis();
@@ -407,30 +375,10 @@ public class DocumentCommands implements Iterable<DocumentCommand>
         addNewSetJumpMark((SetJumpMark) cmd);
         id = 2;
       }
-      else if (cmd instanceof NotInOriginal)
+      else if (cmd instanceof PrintBlockCommand)
       {
-        notInOriginalCommands.add(cmd);
+        printBlocks.add((PrintBlockCommand) cmd);
         id = 3;
-      }
-      else if (cmd instanceof OriginalOnly)
-      {
-        originalOnlyCommands.add(cmd);
-        id = 4;
-      }
-      else if (cmd instanceof DraftOnly)
-      {
-        draftOnlyCommands.add(cmd);
-        id = 5;
-      }
-      else if (cmd instanceof AllVersions)
-      {
-        allVersionsCommands.add(cmd);
-        id = 6;
-      }
-      else if (cmd instanceof CopyOnly)
-      {
-        copyOnlyCommands.add(cmd);
-        id = 7;
       }
 
       long currentTime = System.currentTimeMillis();
@@ -445,11 +393,7 @@ public class DocumentCommands implements Iterable<DocumentCommand>
     LOGGER.trace("addNewDocumentCommands statistics (number of elements, overalltime to add):");
     LOGGER.trace("- SetGroups:     {}, {} ms", counters[1], times[1]);
     LOGGER.trace("- SetJumpMark:   {}, {} ms", counters[2], times[2]);
-    LOGGER.trace("- NotInOriginal: {}, {} ms", counters[3], times[3]);
-    LOGGER.trace("- OriginalOnly:  {}, {} ms", counters[4], times[4]);
-    LOGGER.trace("- DraftOnly:     {}, {} ms", counters[5], times[5]);
-    LOGGER.trace("- AllVersions:   {}, {} ms", counters[6], times[6]);
-    LOGGER.trace("- CopyOnly:      {}, {} ms", counters[7], times[7]);
+    LOGGER.trace("- PrintBlocks:   {}, {} ms", counters[3], times[3]);
     LOGGER.trace("- Others:        {}, {} ms", counters[0], times[0]);
   }
 
@@ -563,11 +507,7 @@ public class DocumentCommands implements Iterable<DocumentCommand>
     allCommands.removeAll(retired);
     visibilityElements.removeAll(retired);
     setJumpMarkCommands.removeAll(retired);
-    notInOriginalCommands.removeAll(retired);
-    originalOnlyCommands.removeAll(retired);
-    draftOnlyCommands.removeAll(retired);
-    copyOnlyCommands.removeAll(retired);
-    allVersionsCommands.removeAll(retired);
+    printBlocks.removeAll(retired);
   }
 
   /**
@@ -631,66 +571,15 @@ public class DocumentCommands implements Iterable<DocumentCommand>
   }
 
   /**
-   * Liefert einen Iterator zurück, der die Iteration aller
-   * NotInOrininal-Dokumentkommandos dieses Dokuments ermöglicht.
+   * Liefert einen Iterator zurück, der die Iteration aller PrintBlock-Dokumentkommandos dieses
+   * Dokuments ermöglicht.
    *
-   * @return ein Iterator, der die Iteration aller NotInOrininal-Dokumentkommandos
-   *         dieses Dokuments ermöglicht. Der Iterator kann auch keine Elemente
-   *         enthalten.
+   * @return ein Iterator, der die Iteration aller PrintBlock-Dokumentkommandos dieses Dokuments
+   *         ermöglicht. Der Iterator kann auch keine Elemente enthalten.
    */
-  public Iterator<DocumentCommand> notInOriginalIterator()
+  public Set<PrintBlockCommand> printBlockCommands()
   {
-    return notInOriginalCommands.iterator();
-  }
-
-  /**
-   * Liefert einen Iterator zurück, der die Iteration aller
-   * OrininalOnly-Dokumentkommandos dieses Dokuments ermöglicht.
-   *
-   * @return ein Iterator, der die Iteration aller OriginalOnly-Dokumentkommandos
-   *         dieses Dokuments ermöglicht. Der Iterator kann auch keine Elemente
-   *         enthalten.
-   */
-  public Iterator<DocumentCommand> originalOnlyIterator()
-  {
-    return originalOnlyCommands.iterator();
-  }
-
-  /**
-   * Liefert einen Iterator zurück, der die Iteration aller
-   * DraftOnly-Dokumentkommandos dieses Dokuments ermöglicht.
-   *
-   * @return ein Iterator, der die Iteration aller DraftOnly-Dokumentkommandos dieses
-   *         Dokuments ermöglicht. Der Iterator kann auch keine Elemente enthalten.
-   */
-  public Iterator<DocumentCommand> draftOnlyIterator()
-  {
-    return draftOnlyCommands.iterator();
-  }
-
-  /**
-   * Liefert einen Iterator zurück, der die Iteration aller
-   * CopyOnly-Dokumentkommandos dieses Dokuments ermöglicht.
-   *
-   * @return ein Iterator, der die Iteration aller CopyOnly-Dokumentkommandos dieses
-   *         Dokuments ermöglicht. Der Iterator kann auch keine Elemente enthalten.
-   */
-  public Iterator<DocumentCommand> copyOnlyIterator()
-  {
-    return copyOnlyCommands.iterator();
-  }
-
-  /**
-   * Liefert einen Iterator zurück, der die Iteration aller
-   * AllVersions-Dokumentkommandos dieses Dokuments ermöglicht.
-   *
-   * @return ein Iterator, der die Iteration aller AllVersions-Dokumentkommandos
-   *         dieses Dokuments ermöglicht. Der Iterator kann auch keine Elemente
-   *         enthalten.
-   */
-  public Iterator<DocumentCommand> allVersionsIterator()
-  {
-    return allVersionsCommands.iterator();
+    return printBlocks;
   }
 
   /**
@@ -872,29 +761,11 @@ public class DocumentCommands implements Iterable<DocumentCommand>
         return new DocumentCommand.SetPrintFunction(wmCmd, bookmark);
       }
 
-      else if (cmd.compareToIgnoreCase("draftOnly") == 0)
+      else if (cmd.equalsIgnoreCase("draftOnly") || cmd.equalsIgnoreCase("copyOnly")
+          || cmd.equalsIgnoreCase("notInOriginal") || cmd.equalsIgnoreCase("originalOnly")
+          || cmd.equalsIgnoreCase("allVersions"))
       {
-        return new DocumentCommand.DraftOnly(wmCmd, bookmark);
-      }
-
-      else if (cmd.compareToIgnoreCase("copyOnly") == 0)
-      {
-        return new DocumentCommand.CopyOnly(wmCmd, bookmark);
-      }
-
-      else if (cmd.compareToIgnoreCase("notInOriginal") == 0)
-      {
-        return new DocumentCommand.NotInOriginal(wmCmd, bookmark);
-      }
-
-      else if (cmd.compareToIgnoreCase("originalOnly") == 0)
-      {
-        return new DocumentCommand.OriginalOnly(wmCmd, bookmark);
-      }
-
-      else if (cmd.compareToIgnoreCase("allVersions") == 0)
-      {
-        return new DocumentCommand.AllVersions(wmCmd, bookmark);
+        return new PrintBlockCommand(wmCmd, bookmark);
       }
 
       else if (cmd.compareToIgnoreCase("setJumpMark") == 0)

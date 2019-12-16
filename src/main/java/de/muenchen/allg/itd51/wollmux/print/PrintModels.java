@@ -799,7 +799,7 @@ public class PrintModels
         boolean showHighlightColor)
     {
       SyncActionListener s = new SyncActionListener();
-      WollMuxEventHandler.getInstance().handleSetPrintBlocksPropsViaPrintModel(documentController.getModel().doc,
+      WollMuxEventHandler.getInstance().handleSetPrintBlocksPropsViaPrintModel(documentController,
         blockName, visible, showHighlightColor, s);
       s.synchronize();
     }

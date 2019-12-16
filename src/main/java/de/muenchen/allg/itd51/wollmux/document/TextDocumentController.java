@@ -26,7 +26,6 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.uno.RuntimeException;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
@@ -42,7 +41,6 @@ import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubst
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.OverrideFragChainException;
 import de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.OptionalHighlightColorProvider;
 import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
@@ -921,67 +919,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       catch (Exception x)
       {
         LOGGER.error("", x);
-      }
-    }
-  }
-
-  /**
-   * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die Anzeige der
-   * Hintergrundfarbe (showHighlightColor) für alle Druckblöcke eines bestimmten
-   * Blocktyps blockName (z.B. allVersions).
-   *
-   * @param blockName
-   *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
-   * @param visible
-   *          Der Block wird sichtbar, wenn visible==true und unsichtbar, wenn
-   *          visible==false.
-   * @param showHighlightColor
-   *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur, wenn
-   *          zu einem betroffenen Druckblock auch eine Hintergrundfarbe angegeben
-   *          ist).
-   */
-  public synchronized void setPrintBlocksProps(String blockName, boolean visible,
-      boolean showHighlightColor)
-  {
-    model.updateLastTouchedByVersionInfo();
-
-    Iterator<DocumentCommand> iter = new HashSet<DocumentCommand>().iterator();
-    if (blockName.equals(SachleitendeVerfuegung.BLOCKNAME_SLV_ALL_VERSIONS))
-      iter = model.getDocumentCommands().allVersionsIterator();
-    if (blockName.equals(SachleitendeVerfuegung.BLOCKNAME_SLV_DRAFT_ONLY))
-      iter = model.getDocumentCommands().draftOnlyIterator();
-    if (blockName.equals(SachleitendeVerfuegung.BLOCKNAME_SLV_NOT_IN_ORIGINAL))
-      iter = model.getDocumentCommands().notInOriginalIterator();
-    if (blockName.equals(SachleitendeVerfuegung.BLOCKNAME_SLV_ORIGINAL_ONLY))
-      iter = model.getDocumentCommands().originalOnlyIterator();
-    if (blockName.equals(SachleitendeVerfuegung.BLOCKNAME_SLV_COPY_ONLY))
-      iter = model.getDocumentCommands().copyOnlyIterator();
-
-    while (iter.hasNext())
-    {
-      DocumentCommand cmd = iter.next();
-      cmd.setVisible(visible);
-      String highlightColor =
-        ((OptionalHighlightColorProvider) cmd).getHighlightColor();
-
-      if (highlightColor != null)
-      {
-        if (showHighlightColor)
-          try
-          {
-            Integer bgColor = Integer.valueOf(Integer.parseInt(highlightColor, 16));
-            Utils.setProperty(cmd.getTextCursor(), "CharBackColor", bgColor);
-          }
-          catch (NumberFormatException e)
-          {
-            LOGGER.error(L.m(
-              "Fehler in Dokumentkommando '%1': Die Farbe HIGHLIGHT_COLOR mit dem Wert '%2' ist ungültig.",
-              "" + cmd, highlightColor));
-          }
-        else
-        {
-          UNO.setPropertyToDefault(cmd.getTextCursor(), "CharBackColor");
-        }
       }
     }
   }

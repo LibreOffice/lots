@@ -63,6 +63,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.slv.PrintBlockCommand;
 
 /**
  * Beschreibt ein Dokumentkommando mit allen zugehörigen Eigenschaften wie z.B. die
@@ -136,7 +137,7 @@ public abstract class DocumentCommand
    * @param bookmark
    *          das zugehörige Bookmark
    */
-  private DocumentCommand(ConfigThingy wmCmd, Bookmark bookmark)
+  protected DocumentCommand(ConfigThingy wmCmd, Bookmark bookmark)
   {
     this.wmCmd = wmCmd;
     this.bookmark = bookmark;
@@ -727,7 +728,7 @@ public abstract class DocumentCommand
    *
    * @author christoph.lutz
    */
-  static interface Executor
+  public static interface Executor
   {
     /**
      * Diese Methode fügt das Textfragment frag_id in den gegebenen Bookmark bookmarkName ein. Im
@@ -765,15 +766,14 @@ public abstract class DocumentCommand
 
     public int executeCommand(DocumentCommand.SetPrintFunction cmd);
 
-    public int executeCommand(DocumentCommand.DraftOnly cmd);
-
-    public int executeCommand(DocumentCommand.CopyOnly cmd);
-
-    public int executeCommand(DocumentCommand.NotInOriginal cmd);
-
-    public int executeCommand(DocumentCommand.OriginalOnly cmd);
-
-    public int executeCommand(DocumentCommand.AllVersions cmd);
+    /**
+     * Highlights the text that it is only printed under special circumstances.
+     *
+     * @param cmd
+     *          The command.
+     * @return The number of errors.
+     */
+    public int executeCommand(PrintBlockCommand cmd);
 
     public int executeCommand(DocumentCommand.SetJumpMark cmd);
 
@@ -802,17 +802,6 @@ public abstract class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Beschreibt ein Dokumentkommando, das das optionale Attribut HIGHLIGHT_COLOR
-   * enthalten kann (derzeit AllVersions, DraftOnly, CopyOnly, NotInOriginal und
-   * OriginalOnly)
-   */
-  public static interface OptionalHighlightColorProvider
-  {
-    public String getHighlightColor();
-  }
-
-  // ********************************************************************************
-  /**
    * Eine Exception die geworfen wird, wenn ein Dokumentkommando als ungültig erkannt
    * wurde, z,b, aufgrund eines fehlenden Parameters.
    */
@@ -823,6 +812,19 @@ public abstract class DocumentCommand
     public InvalidCommandException(String message)
     {
       super(message);
+    }
+
+    /**
+     * New InvalidCommandException with message and cause.
+     * 
+     * @param message
+     *          The message.
+     * @param cause
+     *          The cause.
+     */
+    public InvalidCommandException(String message, Throwable cause)
+    {
+      super(message, cause);
     }
   }
 
@@ -1485,201 +1487,6 @@ public abstract class DocumentCommand
       return "" + this.getClass().getSimpleName() + "["
         + (isRetired() ? "RETIRED:" : "") + (isDone() ? "DONE:" : "") + "GROUPS:"
         + groupsSet.toString() + getBookmarkName() + "]";
-    }
-  }
-
-  // ********************************************************************************
-  /**
-   * Beim Drucken von Sachleitenden Verfügungen wird die Ausfertigung, die ALLE
-   * definierten Verfügungpunkte enthält als "Entwurf" bezeichnet. Mit einem
-   * DraftOnly-Kommando können Blöcke im Text definiert werden (auch an anderen
-   * Stellen), die ausschließlich im Entwurf angezeigt werden sollen.
-   */
-  public static class DraftOnly extends DocumentCommand implements
-      OptionalHighlightColorProvider
-  {
-    String highlightColor = null;
-
-    public DraftOnly(ConfigThingy wmCmd, Bookmark bookmark)
-    {
-      super(wmCmd, bookmark);
-
-      try
-      {
-        highlightColor = wmCmd.get("WM").get("HIGHLIGHT_COLOR").toString();
-      }
-      catch (NodeNotFoundException e)
-      {
-        // HIGHLIGHT_COLOR ist optional
-      }
-    }
-
-    @Override
-    public String getHighlightColor()
-    {
-      return highlightColor;
-    }
-
-    @Override
-    public int execute(DocumentCommand.Executor visitable)
-    {
-      return visitable.executeCommand(this);
-    }
-  }
-
-  // ********************************************************************************
-  /**
-   * Beim Drucken von Sachleitenden Verfügungen wird der Verfügungspunkt I als
-   * Original bezeichnet. Mit dem NotInOriginal Kommando ist es möglich Blöcke im
-   * Text zu definieren, die NIEMALS in Originalen abgedruckt werden sollen, jedoch
-   * in allen anderen Ausdrucken, die nicht das Original sind (wie z.B. Abdrücke und
-   * Entwurf).
-   */
-  public static class NotInOriginal extends DocumentCommand implements
-      OptionalHighlightColorProvider
-  {
-    String highlightColor = null;
-
-    public NotInOriginal(ConfigThingy wmCmd, Bookmark bookmark)
-    {
-      super(wmCmd, bookmark);
-
-      try
-      {
-        highlightColor = wmCmd.get("WM").get("HIGHLIGHT_COLOR").toString();
-      }
-      catch (NodeNotFoundException e)
-      {
-        // HIGHLIGHT_COLOR ist optional
-      }
-    }
-
-    @Override
-    public String getHighlightColor()
-    {
-      return highlightColor;
-    }
-
-    @Override
-    public int execute(DocumentCommand.Executor visitable)
-    {
-      return visitable.executeCommand(this);
-    }
-  }
-
-  // ********************************************************************************
-  /**
-   * Beim Drucken von Sachleitenden Verfügungen wird der Verfügungspunkt I als
-   * Original bezeichnet. Mit dem OriginalOnly Kommando ist es möglich Blöcke im Text
-   * zu definieren, die ausschließlich in Originalen abgedruckt werden sollen.
-   */
-  public static class OriginalOnly extends DocumentCommand implements
-      OptionalHighlightColorProvider
-  {
-    String highlightColor = null;
-
-    public OriginalOnly(ConfigThingy wmCmd, Bookmark bookmark)
-    {
-      super(wmCmd, bookmark);
-
-      try
-      {
-        highlightColor = wmCmd.get("WM").get("HIGHLIGHT_COLOR").toString();
-      }
-      catch (NodeNotFoundException e)
-      {
-        // HIGHLIGHT_COLOR ist optional
-      }
-    }
-
-    @Override
-    public String getHighlightColor()
-    {
-      return highlightColor;
-    }
-
-    @Override
-    public int execute(DocumentCommand.Executor visitable)
-    {
-      return visitable.executeCommand(this);
-    }
-  }
-
-  // ********************************************************************************
-  /**
-   * Beim Drucken von Sachleitenden Verfügungen werden die Ausfertigungen, die weder
-   * Original noch Entwurf sind, als "Abdrucke" bezeichnet. Mit einem
-   * CopyOnly-Kommando können Blöcke im Text definiert werden (auch an anderen
-   * Stellen), die ausschließlich in Abdrucken angezeigt werden sollen.
-   */
-  public static class CopyOnly extends DocumentCommand implements
-      OptionalHighlightColorProvider
-  {
-    String highlightColor = null;
-
-    public CopyOnly(ConfigThingy wmCmd, Bookmark bookmark)
-    {
-      super(wmCmd, bookmark);
-
-      try
-      {
-        highlightColor = wmCmd.get("WM").get("HIGHLIGHT_COLOR").toString();
-      }
-      catch (NodeNotFoundException e)
-      {
-        // HIGHLIGHT_COLOR ist optional
-      }
-    }
-
-    @Override
-    public String getHighlightColor()
-    {
-      return highlightColor;
-    }
-
-    @Override
-    public int execute(DocumentCommand.Executor visitable)
-    {
-      return visitable.executeCommand(this);
-    }
-  }
-
-  // ********************************************************************************
-  /**
-   * Beim Drucken von Sachleitenden Verfügungen werden alle Verfügungspunkte
-   * unterhalb des ausgewählten Verfügungspunktes ausgeblendet. Mit dem AllVersions
-   * Kommando ist es möglich Blöcke im Text zu definieren, die IMMER ausgedruckt
-   * werden sollen, d.h. sowohl bei Originalen, als auch bei Abdrucken und Entwürfen.
-   */
-  public static class AllVersions extends DocumentCommand implements
-      OptionalHighlightColorProvider
-  {
-    String highlightColor = null;
-
-    public AllVersions(ConfigThingy wmCmd, Bookmark bookmark)
-    {
-      super(wmCmd, bookmark);
-
-      try
-      {
-        highlightColor = wmCmd.get("WM").get("HIGHLIGHT_COLOR").toString();
-      }
-      catch (NodeNotFoundException e)
-      {
-        // HIGHLIGHT_COLOR ist optional
-      }
-    }
-
-    @Override
-    public String getHighlightColor()
-    {
-      return highlightColor;
-    }
-
-    @Override
-    public int execute(DocumentCommand.Executor visitable)
-    {
-      return visitable.executeCommand(this);
     }
   }
 
