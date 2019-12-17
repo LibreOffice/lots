@@ -60,7 +60,6 @@ import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
@@ -78,11 +77,6 @@ public class AbsenderAuswaehlen
    */
   private DatasourceJoiner dj;
 
-  /**
-   * Das ConfigThingy, das den Dialog zum Bearbeiten der Absenderliste spezifiziert.
-   */
-  private ConfigThingy verConf;
-
   private List<DJDataset> elements = null;
 
   private XListBox absAuswahl;
@@ -92,15 +86,12 @@ public class AbsenderAuswaehlen
   /**
    * Erzeugt einen neuen Dialog.
    *
-   * @param verConf
-   *          das ConfigThingy, das den Absenderliste Verwalten Dialog beschreibt.
    * @param dj
    *          der DatasourceJoiner, der die PAL verwaltet.
    */
-  public AbsenderAuswaehlen(ConfigThingy verConf, DatasourceJoiner dj)
+  public AbsenderAuswaehlen(DatasourceJoiner dj)
   {
     this.dj = dj;
-    this.verConf = verConf;
 
     createUNOGUI();
   }
@@ -141,7 +132,7 @@ public class AbsenderAuswaehlen
     QueryResults palEntries = dj.getLOS();
     if (palEntries.isEmpty())
     {
-      new PersoenlicheAbsenderlisteVerwalten(verConf, dj, palListener);
+      new PersoenlicheAbsenderlisteVerwalten(dj, palListener);
     } else
     {
       setListElements();
@@ -179,7 +170,7 @@ public class AbsenderAuswaehlen
 
   private AbstractActionListener editActionListener = event -> {
     dialog.endExecute();
-    new PersoenlicheAbsenderlisteVerwalten(verConf, dj, palListener);
+    new PersoenlicheAbsenderlisteVerwalten(dj, palListener);
   };
 
   private void setListElements()
