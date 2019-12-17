@@ -90,8 +90,6 @@ import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.L
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -148,14 +146,12 @@ public class PersoenlicheAbsenderlisteVerwalten
   /**
    * Erzeugt einen neuen Dialog.
    *
-   * @param conf
-   *          das ConfigThingy, das die möglichen Suchfelder beschreibt.
    * @param dj
    *          der DatasourceJoiner, der die zu bearbeitende Liste verwaltet.
-   * @throws NodeNotFoundException
-   *           Im Falle von nicht konfigurierten Suchfeldern in ConfigThingy.
+   * @param palListener
+   *          Listener, which is called if a pal is changed.
    */
-  public PersoenlicheAbsenderlisteVerwalten(ConfigThingy conf, DatasourceJoiner dj,
+  public PersoenlicheAbsenderlisteVerwalten(DatasourceJoiner dj,
       INotify palListener)
   {
     this.dj = dj;
