@@ -1,7 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasetPredicate;
@@ -35,7 +35,7 @@ public class DatasetPredicateTest
 
     boolean result = pred.test(ds);
 
-    assertTrue("Given dataset does not match with a given QueryPart:", result);
+    assertTrue(result, "Given dataset does not match with a given QueryPart:");
   }
 
   @Test
@@ -55,7 +55,7 @@ public class DatasetPredicateTest
 
     boolean result = pred.test(ds);
 
-    assertTrue("Given dataset does not match with a given QueryPart:", result);
+    assertTrue(result, "Given dataset does not match with a given QueryPart:");
   }
 
   @Test
@@ -95,7 +95,7 @@ public class DatasetPredicateTest
         count++;
     }
 
-    assertEquals("Given datasets have a wrong match count with given QueryParts:", 1, count);
+    assertEquals(1, count, "Given datasets have a wrong match count with given QueryParts:");
   }
 
   @Test
@@ -131,7 +131,7 @@ public class DatasetPredicateTest
         count++;
     }
 
-    assertEquals("Given datasets have a wrong match count with given QueryParts:", 3, count);
+    assertEquals(3, count, "Given datasets have a wrong match count with given QueryParts:");
   }
 
 }

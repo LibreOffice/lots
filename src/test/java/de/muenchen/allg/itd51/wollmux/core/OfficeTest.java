@@ -2,16 +2,16 @@ package de.muenchen.allg.itd51.wollmux.core;
 
 import java.util.ArrayList;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 
 import de.muenchen.allg.afid.UNO;
 
-@Category(OfficeTests.class)
+@Tag("de.muenchen.allg.itd51.wollmux.core.OfficeTests")
 public abstract class OfficeTest
 {
-  @BeforeClass
+  @BeforeAll
   public static void setUpBefore() throws Exception
   {
     ArrayList<String> options = new ArrayList<>();
@@ -22,7 +22,7 @@ public abstract class OfficeTest
     UNO.init(options);
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDownAfter() throws Exception
   {
     UNO.desktop.terminate();

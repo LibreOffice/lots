@@ -1,8 +1,8 @@
 package de.muenchen.allg.itd51.wollmux.core.form.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
 import java.awt.event.ActionListener;
@@ -13,9 +13,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
@@ -56,7 +56,7 @@ public class TestFormModel
 
   private FormModel model;
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws MalformedURLException, IOException, SyntaxErrorException
   {
     conf = new ConfigThingy("WM",
@@ -102,7 +102,7 @@ public class TestFormModel
     };
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws FormModelException
   {
     Map<String, String> presetValues = new HashMap<>();
@@ -119,33 +119,33 @@ public class TestFormModel
   @Test
   public void testInit() throws FormModelException
   {
-    assertEquals("Falscher Titel", frameTitle + " - Abtretungserklärung", model.getTitle());
-    assertEquals("Falsche Plausi Frabe", Color.PINK, model.getPlausiMarkerColor());
-    assertEquals("Falsche Anzahl an Tabs", 4, model.getTabs().size());
-    assertEquals("Falscher gesetzter Wert für EmpfaengerZeile6", "zeile6",
-        model.getValue("EmpfaengerZeile6"));
-    assertTrue("Falscher Status für EmpfaengerZeile6", model.getStatus("EmpfaengerZeile6"));
-    assertFalse("Falscher Status für SGVorname", model.getStatus("SGVorname"));
-    assertTrue("AbtretungNotOK", model.getGroup("AbtretungNotOK").isVisible());
-    assertFalse("AbtretungOK", model.getGroup("AbtretungOK").isVisible());
+    assertEquals(frameTitle + " - Abtretungserklärung", model.getTitle(), "Falscher Titel");
+    assertEquals(Color.PINK, model.getPlausiMarkerColor(), "Falsche Plausi Frabe");
+    assertEquals(4, model.getTabs().size(), "Falsche Anzahl an Tabs");
+    assertEquals("zeile6", model.getValue("EmpfaengerZeile6"),
+        "Falscher gesetzter Wert für EmpfaengerZeile6");
+    assertTrue(model.getStatus("EmpfaengerZeile6"), "Falscher Status für EmpfaengerZeile6");
+    assertFalse(model.getStatus("SGVorname"), "Falscher Status für SGVorname");
+    assertTrue(model.getGroup("AbtretungNotOK").isVisible(), "AbtretungNotOK");
+    assertFalse(model.getGroup("AbtretungOK").isVisible(), "AbtretungOK");
   }
 
   @Test
   public void testAutofill() throws FormModelException
   {
-    assertTrue("Empfaengerauswahltab fehlt", model.getTabs().containsKey("Empfaengerauswahl"));
+    assertTrue(model.getTabs().containsKey("Empfaengerauswahl"), "Empfaengerauswahltab fehlt");
     Tab tab = model.getTabs().get("Empfaengerauswahl");
-    assertEquals("Tab 1 falsche Anzahl an Controls", 11, tab.getControls().size());
+    assertEquals(11, tab.getControls().size(), "Tab 1 falsche Anzahl an Controls");
     model.setDialogAutofills("Empfaengerauswahl");
-    assertEquals("flascher Wert für EmpfaengerZeile1", "zeile1",
-        model.getValue("EmpfaengerZeile1"));
-    assertEquals("flascher Wert für EmpfaengerZeile2", "zeile2",
-        model.getValue("EmpfaengerZeile2"));
-    assertEquals("flascher Wert für EmpfaengerZeile3", "zeile3",
-        model.getValue("EmpfaengerZeile3"));
-    assertEquals("flascher Wert für EmpfaengerZeile4", "", model.getValue("EmpfaengerZeile4"));
-    assertEquals("flascher Wert für EmpfaengerZeile5", "", model.getValue("EmpfaengerZeile5"));
-    assertEquals("flascher Wert für EmpfaengerZeile6", "", model.getValue("EmpfaengerZeile6"));
+    assertEquals("zeile1", model.getValue("EmpfaengerZeile1"),
+        "flascher Wert für EmpfaengerZeile1");
+    assertEquals("zeile2", model.getValue("EmpfaengerZeile2"),
+        "flascher Wert für EmpfaengerZeile2");
+    assertEquals("zeile3", model.getValue("EmpfaengerZeile3"),
+        "flascher Wert für EmpfaengerZeile3");
+    assertEquals("", model.getValue("EmpfaengerZeile4"), "flascher Wert für EmpfaengerZeile4");
+    assertEquals("", model.getValue("EmpfaengerZeile5"), "flascher Wert für EmpfaengerZeile5");
+    assertEquals("", model.getValue("EmpfaengerZeile6"), "flascher Wert für EmpfaengerZeile6");
   }
 
   @Test
@@ -153,24 +153,24 @@ public class TestFormModel
   {
     String field = "SGVorname";
     model.setValue(field, "test");
-    assertTrue("Falscher Status für " + field, model.getStatus(field));
-    assertEquals("Falscher Wert für " + field, "test", model.getValue(field));
+    assertTrue(model.getStatus(field), "Falscher Status für " + field);
+    assertEquals("test", model.getValue(field), "Falscher Wert für " + field);
     model.setValue(field, "");
-    assertFalse("Falscher Status für " + field, model.getStatus(field));
-    assertEquals("Falscher Wert für " + field, "", model.getValue(field));
+    assertFalse(model.getStatus(field), "Falscher Status für " + field);
+    assertEquals("", model.getValue(field), "Falscher Wert für " + field);
   }
 
   @Test
   public void testVisibility() throws FormModelException
   {
     model.setValue("AbtLohn", "true");
-    assertFalse("AbtretungNotOK", model.getGroup("AbtretungNotOK").isVisible());
-    assertTrue("AbtretungOK", model.getGroup("AbtretungOK").isVisible());
-    assertTrue("AbtLohn", model.getGroup("AbtLohn").isVisible());
+    assertFalse(model.getGroup("AbtretungNotOK").isVisible(), "AbtretungNotOK");
+    assertTrue(model.getGroup("AbtretungOK").isVisible(), "AbtretungOK");
+    assertTrue(model.getGroup("AbtLohn").isVisible(), "AbtLohn");
     model.setValue("AbtLohn", "");
-    assertTrue("AbtretungNotOK", model.getGroup("AbtretungNotOK").isVisible());
-    assertFalse("AbtretungOK", model.getGroup("AbtretungOK").isVisible());
-    assertFalse("AbtLohn", model.getGroup("AbtLohn").isVisible());
+    assertTrue(model.getGroup("AbtretungNotOK").isVisible(), "AbtretungNotOK");
+    assertFalse(model.getGroup("AbtretungOK").isVisible(), "AbtretungOK");
+    assertFalse(model.getGroup("AbtLohn").isVisible(), "AbtLohn");
   }
 
 }
