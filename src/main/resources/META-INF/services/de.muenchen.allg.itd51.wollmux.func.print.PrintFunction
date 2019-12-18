@@ -1,0 +1,10 @@
+de.muenchen.allg.itd51.wollmux.func.print.IntoFile
+de.muenchen.allg.itd51.wollmux.func.print.SachleitendeVerfuegung
+de.muenchen.allg.itd51.wollmux.func.print.SachleitendeVerfuegungOutput
+de.muenchen.allg.itd51.wollmux.func.print.SetFormValue
+de.muenchen.allg.itd51.wollmux.func.print.ToOdtEmail
+de.muenchen.allg.itd51.wollmux.func.print.ToOdtFile
+de.muenchen.allg.itd51.wollmux.func.print.ToPdfEmail
+de.muenchen.allg.itd51.wollmux.func.print.ToPrinter
+de.muenchen.allg.itd51.wollmux.func.print.ToSingleODT
+de.muenchen.allg.itd51.wollmux.func.print.ToSinglePDF
