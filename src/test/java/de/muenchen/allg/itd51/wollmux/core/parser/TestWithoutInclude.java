@@ -1,7 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.core.parser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,7 +22,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -88,7 +88,7 @@ public class TestWithoutInclude
    * The content of the file.
    */
   private final String config = "A 'X\"\"Y'\nB 'X\"Y'\nC \"X''Y\"\nD \"X'Y\"\nGUI (\n  Dialoge (\n    Dialog1 (\n      (TYPE \"textbox\" LABEL \"Name\")\n    )\n  )\n)\nAnredevarianten (\"Herr\", \"Frau\", \"Pinguin\")\n(\"Dies\", \"ist\", \"eine\", \"unbenannte\", \"Liste\")\nNAME \"WollMux%%%n\" # FARBSCHEMA \"Ekelig\"\n\n";
-  private final String config_win = "A 'X\"\"Y'\r\nB 'X\"Y'\r\nC \"X''Y\"\r\nD \"X'Y\"\r\nGUI (\r\n  Dialoge (\r\n    Dialog1 (\r\n      (TYPE \"textbox\" LABEL \"Name\")\r\n    )\r\n  )\r\n)\r\nAnredevarianten (\"Herr\", \"Frau\", \"Pinguin\")\r\n(\"Dies\", \"ist\", \"eine\", \"unbenannte\", \"Liste\")\r\nNAME \"WollMux%%%n\" # FARBSCHEMA \"Ekelig\"\r\n\r\n"; 
+  private final String config_win = "A 'X\"\"Y'\r\nB 'X\"Y'\r\nC \"X''Y\"\r\nD \"X'Y\"\r\nGUI (\r\n  Dialoge (\r\n    Dialog1 (\r\n      (TYPE \"textbox\" LABEL \"Name\")\r\n    )\r\n  )\r\n)\r\nAnredevarianten (\"Herr\", \"Frau\", \"Pinguin\")\r\n(\"Dies\", \"ist\", \"eine\", \"unbenannte\", \"Liste\")\r\nNAME \"WollMux%%%n\" # FARBSCHEMA \"Ekelig\"\r\n\r\n";
 
   /**
    * Scan a file and test whether the correct tokens occur.
@@ -107,10 +107,10 @@ public class TestWithoutInclude
     while (scanner.hasNext())
     {
       final Token token = scanner.next();
-      assertFalse("Tokenstream to long " + token, index >= tokens.length);
-      assertEquals("Token " + index + " is wrong", tokens[index++], token);
+      assertFalse(index >= tokens.length, "Tokenstream to long " + token);
+      assertEquals(tokens[index++], token, "Token " + index + " is wrong");
     }
-    assertFalse("Tokenstream to short", index < tokens.length);
+    assertFalse(index < tokens.length, "Tokenstream to short");
     scanner.close();
   }
 
@@ -144,10 +144,10 @@ public class TestWithoutInclude
     try
     {
       String name = (String) xpath.evaluate("config/file/key[@id='NAME']/value", doc, XPathConstants.STRING);
-      assertEquals("name with \\n", "WollMux%\n", name);
+      assertEquals("WollMux%\n", name, "name with \\n");
     } catch (XPathExpressionException e)
     {
-      assertFalse("No key 'NAME'", true);
+      assertFalse(true, "No key 'NAME'");
     }
     ConfGenerator generator = new ConfGenerator(doc);
     generator.generateConf(new FileOutputStream(out), 0);
@@ -155,15 +155,15 @@ public class TestWithoutInclude
     boolean windowsOS = System.getProperty("os.name").toLowerCase().contains("windows");
     if(windowsOS)
     {
-      assertEquals("Different content length", in.length(), out.length() + 8);
-      assertEquals("wrong string", config_win, generator.generateConf("UTF-8"));
+      assertEquals(in.length(), out.length() + 8, "Different content length");
+      assertEquals(config_win, generator.generateConf("UTF-8"), "wrong string");
     }
     else
     {
-      assertEquals("Different content length", in.length(), out.length() + 9);
-      assertEquals("wrong string", config, generator.generateConf("UTF-8"));
-    }    
-    out.delete();    
+      assertEquals(in.length(), out.length() + 9, "Different content length");
+      assertEquals(config, generator.generateConf("UTF-8"), "wrong string");
+    }
+    out.delete();
   }
 
 }

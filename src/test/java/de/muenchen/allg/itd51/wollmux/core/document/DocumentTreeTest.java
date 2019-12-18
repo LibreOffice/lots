@@ -1,12 +1,13 @@
 package de.muenchen.allg.itd51.wollmux.core.document;
 
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URL;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sun.star.text.XTextDocument;
 
@@ -17,14 +18,14 @@ public class DocumentTreeTest extends OfficeTest
 {
   private XTextDocument xDoc;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception
   {
     URL file = getClass().getResource("ExternerBriefkopf.odt");
     xDoc = UNO.XTextDocument(UNO.loadComponentFromURL(file.toString(), false, false));
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception
   {
     UNO.XCloseable(xDoc).close(false);
@@ -41,7 +42,7 @@ public class DocumentTreeTest extends OfficeTest
     long start = System.currentTimeMillis();
     DocumentTree tree = new DocumentTree(xDoc);
     long time = System.currentTimeMillis() - start;
-    assertTrue("Parsing document took to much time: " + time, time < 1500);
+    assertTrue(time < 1500, "Parsing document took to much time: " + time);
     // TODO: make test instead of console output
     // System.out.println(DocumentTree.treeDump(tree.getRoot(), ""));
   }
