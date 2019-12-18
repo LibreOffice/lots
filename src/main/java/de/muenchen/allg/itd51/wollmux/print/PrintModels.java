@@ -68,6 +68,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRangeType
 import de.muenchen.allg.itd51.wollmux.dialog.PrintProgressBar;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 
 /**
  * Diese Klasse enthält eine Fabrik für die Erzeugung eines XPrintModels, die
@@ -380,7 +381,7 @@ public class PrintModels
       if (f != null)
       {
         XPrintModel pmod = new SlavePrintModel(this, 0);
-        Thread t = f.invoke(pmod);
+        Thread t = f.printAsync(pmod);
         try
         {
           t.join();
@@ -1044,7 +1045,7 @@ public class PrintModels
       if (f != null)
       {
         XPrintModel pmod = new SlavePrintModel(master, idx + 1);
-        Thread t = f.invoke(pmod);
+        Thread t = f.printAsync(pmod);
         try
         {
           t.join();

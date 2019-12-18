@@ -6,32 +6,34 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
-import de.muenchen.allg.itd51.wollmux.print.PrintFunction;
+import de.muenchen.allg.itd51.wollmux.func.print.PrintException;
+import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
 
 public class PrintFunctionLibraryTest
 {
   private static final String functionString = "TestFunction(EXTERN(URL \"java:de.muenchen.allg.itd151.wollmux.print.PrintFunctionLibraryTest.testDefaultPrintFunctions\") ORDER \"50\")";
   private static final String confString = "Druckfunktionen(" + functionString + ")";
-  private static PrintFunction testFunction;
-
-  @BeforeAll
-  public static void setUp() throws Exception
+  private static PrintFunction testFunction = new PrintFunction("test", 300)
   {
-    testFunction = new PrintFunction(new ConfigThingy("test", functionString), "test", 300);
-  }
+
+    @Override
+    public void print(XPrintModel printModel) throws PrintException
+    {
+      // do nothing
+    }
+  };
 
   @Test
   public void testDefaultPrintFunctions()
   {
     PrintFunctionLibrary library = new PrintFunctionLibrary();
-    StandardPrint.addInternalDefaultPrintFunctions(library);
-    assertEquals(9, library.getFunctionNames().size(), "Not enough print functions");
+    PrintFunction.addPrintFunctions(library);
+    assertEquals(10, library.getFunctionNames().size(), "Not enough print functions");
   }
 
   @Test

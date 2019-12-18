@@ -4,13 +4,17 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
-import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
+import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
 
+/**
+ * Collection of all globally defined functions.
+ */
 public class GlobalFunctions
 {
+
   private static GlobalFunctions instance;
-  
+
   /**
    * Enthält die im Funktionen-Abschnitt der wollmux,conf definierten Funktionen.
    */
@@ -27,12 +31,12 @@ public class GlobalFunctions
    * Enthält die im Funktionen-Abschnitt der wollmux,conf definierten Funktionen.
    */
   private PrintFunctionLibrary globalPrintFunctions;
-  
+
   public static GlobalFunctions getInstance()
   {
     if (instance == null)
       instance = new GlobalFunctions();
-    
+
     return instance;
   }
 
@@ -59,7 +63,7 @@ public class GlobalFunctions
      */
     globalPrintFunctions =
       PrintFunctionLibrary.parsePrintFunctions(WollMuxFiles.getWollmuxConf());
-    StandardPrint.addInternalDefaultPrintFunctions(globalPrintFunctions);
+    PrintFunction.addPrintFunctions(globalPrintFunctions);
 
     /*
      * Dokumentaktionen parsen. Diese haben weder Kontext noch Dialoge.
@@ -68,7 +72,7 @@ public class GlobalFunctions
     FunctionFactory.parseFunctions(documentActionFunctions,
       WollMuxFiles.getWollmuxConf(), "Dokumentaktionen", null, null);
   }
-  
+
   /**
    * Liefert die Funktionsbibliothek, die die global definierten Funktionen enthält.
    */
