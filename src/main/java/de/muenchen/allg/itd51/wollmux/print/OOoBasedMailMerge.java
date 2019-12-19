@@ -101,9 +101,12 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
-import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.func.print.SetFormValue;
 
+/**
+ * Performs a mailmerge with LibreOffice.
+ */
 public class OOoBasedMailMerge
 {
 
@@ -130,6 +133,11 @@ public class OOoBasedMailMerge
 
   private static final char OPENSYMBOL_UNCHECKED = 0xE470;
 
+  private OOoBasedMailMerge()
+  {
+    // nothing to initialize
+  }
+
   /**
    * Druckfunktion für den Seriendruck in ein Gesamtdokument mit Hilfe des
    * Office-Seriendrucks.
@@ -152,7 +160,7 @@ public class OOoBasedMailMerge
     OOoDataSource ds = new CsvBasedOOoDataSource(tmpDir);
     try
     {
-      MailMergeNew.mailMergeNewSetFormValue(pmod, ds);
+      SetFormValue.mailMergeNewSetFormValue(pmod, ds);
       if (pmod.isCanceled()) return;
       ds.getDataSourceWriter().flushAndClose();
     }
