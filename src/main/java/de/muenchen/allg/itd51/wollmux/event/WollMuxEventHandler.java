@@ -41,7 +41,7 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormValueChanged;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormularMax4000Returned;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormularMax4000Show;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFunctionDialog;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnHandleMailMergeNewReturned;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnInitMailMergeSidebar;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnInitialize;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToMark;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToPlaceholder;
@@ -74,7 +74,11 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextbausteinEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnUpdateInputFields;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnZifferEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
+import de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarContent;
 
+/**
+ * The global event handler of {@link WollMuxEvent}.
+ */
 public class WollMuxEventHandler
 {
   private static final Logger LOGGER = LoggerFactory
@@ -901,18 +905,6 @@ public class WollMuxEventHandler
   }
 
   /**
-   * Erzeugt ein neues WollMuxEvent, das aufgerufen wird, wenn ein FormularMax4000
-   * beendet wird und die entsprechenden internen Referenzen gelöscht werden können.
-   *
-   * Dieses Event wird vom EventProcessor geworfen, wenn der FormularMax zurückkehrt.
-   */
-  public void handleMailMergeNewReturned(
-      TextDocumentController documentController)
-  {
-    handle(new OnHandleMailMergeNewReturned(documentController));
-  }
-
-  /**
    * Erzeugt ein neues WollMuxEvent, das die eigentliche Dokumentbearbeitung eines
    * TextDokuments startet.
    *
@@ -944,6 +936,17 @@ public class WollMuxEventHandler
   public void handlePALChangedNotify()
   {
     handle(new OnPALChangedNotify());
+  }
+
+  /**
+   * Create a new {@link OnInitMailMergeSidebar} event.
+   *
+   * @param sidebar
+   *          The {@link SeriendruckSidebarContent} to initialize.
+   */
+  public void handleInitMailMergeSidebar(SeriendruckSidebarContent sidebar)
+  {
+    handle(new OnInitMailMergeSidebar(sidebar));
   }
 
   /**

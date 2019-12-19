@@ -54,7 +54,6 @@ import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.DBModel;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeDatasource;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeField;
-import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailmergeWizardController;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.SpecialField;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
@@ -103,8 +102,12 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
   private XComboBox mailmergeBox;
   private XComboBox specialBox;
   private MailMergeField mailMergeField;
+  private boolean disposed = false;
 
-  private MailMergeNew mailMerge;
+  /**
+   * Stellt die Felder und Datensätze für die Serienbriefverarbeitung bereit.
+   */
+  private MailMergeDatasource datasource;
   private TextDocumentController textDocumentController;
 
   private AbstractWindowListener windowAdapter = new AbstractWindowListener()
@@ -131,14 +134,33 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
     windowPeer = GuiFactory.createWindow(toolkit, parentWindowPeer);
     windowPeer.setBackground(0xffffffff);
     window = UnoRuntime.queryInterface(XWindow.class, windowPeer);
+    WollMuxEventHandler.getInstance().handleInitMailMergeSidebar(this);
+  }
 
-    addPreviewControls();
-    addDatasourcesControls();
-    addTableControls();
-    addSerienbriefFeld();
-    addPrintControls();
+  /**
+   * Initialize the UI and the connection to the current document.
+   */
+  public void init()
+  {
+    textDocumentController = DocumentManager
+        .getTextDocumentController(UNO.getCurrentTextDocument());
 
-    window.setVisible(true);
+    if (textDocumentController != null)
+    {
+      addPreviewControls();
+      addDatasourcesControls();
+      addTableControls();
+      addSerienbriefFeld();
+      addPrintControls();
+
+      window.setVisible(true);
+
+      textDocumentController.setFormFieldsPreviewMode(false);
+      datasource = new MailMergeDatasource(textDocumentController);
+    } else
+    {
+      LOGGER.debug("SeriendruckSidebar: setMailMergeOnDocument(): textDocumentController is NULL.");
+    }
   }
 
   @Override
@@ -174,6 +196,21 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
   public int getMinimalWidth()
   {
     return 300;
+  }
+
+  @Override
+  public void dispose()
+  {
+    if (!disposed)
+    {
+      for (CalcModel model : MailMergeDatasource.getOpenCalcWindows())
+      {
+        UNO.XCloseable(model.getSpreadSheetDocument()).removeCloseListener(documentCloseListener);
+      }
+      textDocumentController.setFormFieldsPreviewMode(true);
+      disposed = true;
+    }
+    super.dispose();
   }
 
   private void addPreviewControls()
@@ -289,7 +326,7 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
         }
 
         textDocumentController.collectNonWollMuxFormFields();
-        mailMerge.getDs().updatePreviewFields(mailMerge.getDs().getPreviewDatasetNumber());
+        datasource.updatePreviewFields(datasource.getPreviewDatasetNumber());
       }
     });
     hLayout.addControl(UNO.XControl(mailmergeBox), 6);
@@ -317,11 +354,11 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
           break;
 
         case 1:
-          new GenderDialog(mailMerge.getDs().getColumnNames(), textDocumentController);
+          new GenderDialog(datasource.getColumnNames(), textDocumentController);
           break;
 
         case 2:
-          new IfThenElseDialog(mailMerge.getDs().getColumnNames(), textDocumentController);
+          new IfThenElseDialog(datasource.getColumnNames(), textDocumentController);
           break;
 
         case 3:
@@ -343,7 +380,7 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
         }
 
         textDocumentController.collectNonWollMuxFormFields();
-        mailMerge.getDs().updatePreviewFields(mailMerge.getDs().getPreviewDatasetNumber());
+        datasource.updatePreviewFields(datasource.getPreviewDatasetNumber());
         UNO.XTextComponent(specialBox).setText(specialBox.getItem((short) 0));
       }
     });
@@ -385,58 +422,22 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
     }
   }
 
-  private void setMailMergeOnDocument()
-  {
-    textDocumentController = DocumentManager
-        .getTextDocumentController(UNO.getCurrentTextDocument());
-
-    if (textDocumentController == null)
-    {
-      LOGGER.debug("SeriendruckSidebar: setMailMergeOnDocument(): textDocumentController is NULL.");
-      return;
-    }
-
-    textDocumentController.setFormFieldsPreviewMode(false);
-
-    mailMerge = DocumentManager.getDocumentManager()
-        .getCurrentMailMergeNew(textDocumentController.getModel().doc);
-
-    if (mailMerge == null)
-    {
-      mailMerge = new MailMergeNew(textDocumentController, actionEvent -> {
-        if (actionEvent.getSource() instanceof MailMergeNew)
-        {
-          for (CalcModel model : MailMergeDatasource.getOpenCalcWindows())
-          {
-            UNO.XCloseable(model.getSpreadSheetDocument())
-                .removeCloseListener(documentCloseListener);
-          }
-          WollMuxEventHandler.getInstance().handleMailMergeNewReturned(textDocumentController);
-        }
-      });
-
-      DocumentManager.getDocumentManager()
-          .setCurrentMailMergeNew(textDocumentController.getModel().doc, mailMerge);
-    }
-  }
-
   private ActionListener adjustFieldsFinishListener = e -> {
-    boolean hasUnmappedFields = mailMerge.getDs()
-        .checkUnmappedFields(mailMerge.getDs().getColumnNames());
+    boolean hasUnmappedFields = datasource.checkUnmappedFields(datasource.getColumnNames());
     XWindow2 btnChangeAll = UNO.XWindow2(changeAll);
     btnChangeAll.setEnable(btnChangeAll.isVisible() && hasUnmappedFields);
     XWindow2 btnAddColumns = UNO.XWindow2(addColumns);
     btnAddColumns.setEnable(btnAddColumns.isVisible() && hasUnmappedFields);
   };
 
-  private AbstractActionListener editTableActionListener = e -> mailMerge.getDs().toFront();
+  private AbstractActionListener editTableActionListener = e -> datasource.toFront();
 
   private AbstractActionListener addTableColumnsActionListener = e -> AdjustFields
-      .showAddMissingColumnsDialog(textDocumentController, mailMerge.getDs(),
+      .showAddMissingColumnsDialog(textDocumentController, datasource,
           adjustFieldsFinishListener);
 
   private AbstractActionListener changeFieldsActionListener = e -> AdjustFields
-      .showAdjustFieldsDialog(textDocumentController, mailMerge.getDs(),
+      .showAdjustFieldsDialog(textDocumentController, datasource,
           adjustFieldsFinishListener);
 
   private AbstractCloseListener documentCloseListener = new AbstractCloseListener()
@@ -460,10 +461,10 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
   };
 
   private AbstractActionListener printActionListener = e -> {
-    if (!mailMerge.getDs().hasDatasource())
+    if (!datasource.hasDatasource())
       return;
 
-    MailMergeController c = new MailMergeController(textDocumentController, mailMerge.getDs());
+    MailMergeController c = new MailMergeController(textDocumentController, datasource);
     MailmergeWizardController mwController = new MailmergeWizardController(c,
         textDocumentController.getModel().doc);
     mwController.startWizard();
@@ -477,31 +478,27 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
     @Override
     public void itemStateChanged(ItemEvent arg0)
     {
-      if (mailMerge == null)
-      {
-        setMailMergeOnDocument();
-      }
-      mailMerge.getDs().setDatasource(currentDatasources.getSelectedItem());
+      datasource.setDatasource(currentDatasources.getSelectedItem());
       updateControls();
     }
 
     private void updateControls()
     {
-      mailMergeField.setMailMergeDatasource(mailMerge.getDs());
+      mailMergeField.setMailMergeDatasource(datasource);
       UNO.XNumericField(printCount)
-          .setMax(mailMerge.getDs().hasDatasource() ? mailMerge.getDs().getNumberOfDatasets() : 0);
+          .setMax(datasource.hasDatasource() ? datasource.getNumberOfDatasets() : 0);
 
-      boolean active = mailMerge.getDs() != null && mailMerge.getDs().hasDatasource();
+      boolean active = datasource.hasDatasource();
       UNO.XWindow(preview).setEnable(active);
       UNO.XWindow(print).setEnable(active);
       UNO.XWindow(mailmergeBox).setEnable(active);
       UNO.XWindow(specialBox).setEnable(active);
       UNO.XWindow(editTable).setEnable(active);
 
-      boolean hasUnmappedFields = mailMerge.getDs().hasDatasource()
-          && mailMerge.getDs().checkUnmappedFields(mailMerge.getDs().getColumnNames());
+      boolean hasUnmappedFields = datasource.hasDatasource()
+          && datasource.checkUnmappedFields(datasource.getColumnNames());
       UNO.XWindow(addColumns)
-          .setEnable(active && hasUnmappedFields && mailMerge.getDs().supportsAddColumns());
+          .setEnable(active && hasUnmappedFields && datasource.supportsAddColumns());
       UNO.XWindow(changeAll).setEnable(active && hasUnmappedFields);
     }
   };
@@ -511,32 +508,26 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
     @Override
     public void notify(String message)
     {
-      setMailMergeOnDocument();
-
-      List<String> dbTableNames = mailMerge.getDs().getDbTableNames(message);
+      List<String> dbTableNames = datasource.getDbTableNames(message);
       DBModel model = new DBModel(message, dbTableNames);
-      mailMerge.getDs().addCachedDbConnection(model);
+      datasource.addCachedDbConnection(model);
       updateVisibleTables(model.getDatasourceName(), model.getTableNames().toArray(new String[] {}),
           true, true);
     }
   };
 
-  private AbstractActionListener dbActionListener = e -> {
-    setMailMergeOnDocument();
-    new DBDatasourceDialog(dbDatasourceListener);
-  };
+  private AbstractActionListener dbActionListener = e -> new DBDatasourceDialog(
+      dbDatasourceListener);
 
   private AbstractActionListener newCalcTableActionListener = e -> {
-    setMailMergeOnDocument();
-    CalcModel calcModel = mailMerge.getDs().openAndselectNewCalcTableAsDatasource();
+    CalcModel calcModel = datasource.openAndselectNewCalcTableAsDatasource();
     UNO.XCloseable(calcModel.getSpreadSheetDocument()).addCloseListener(documentCloseListener);
     updateVisibleTables(calcModel.getWindowTitle(), calcModel.getSpreadSheetTableTitles(), true,
         true);
   };
 
   private AbstractActionListener fileActionListener = e -> {
-    setMailMergeOnDocument();
-    CalcModel model = mailMerge.getDs().selectFileAsDatasource();
+    CalcModel model = datasource.selectFileAsDatasource();
     if (model != null)
     {
       UNO.XCloseable(model.getSpreadSheetDocument()).addCloseListener(documentCloseListener);
@@ -544,22 +535,22 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
     }
   };
 
-  private AbstractTextListener documentCountFieldListener = e -> mailMerge.getDs()
+  private AbstractTextListener documentCountFieldListener = e -> datasource
       .updatePreviewFields((int) UNO.XNumericField(e.Source).getValue());
 
   private AbstractActionListener jumpToFirstActionListener = e -> {
     XTextComponent currentDatasourceCountText = UNO.XTextComponent(printCount);
     currentDatasourceCountText.setText("1");
-    mailMerge.getDs().updatePreviewFields(1);
+    datasource.updatePreviewFields(1);
   };
 
   private AbstractActionListener jumpToLastActionListener = e -> {
-    int datasetCount = mailMerge.getDs().getNumberOfDatasets();
+    int datasetCount = datasource.getNumberOfDatasets();
 
     XTextComponent currentDatasourceCountText = UNO.XTextComponent(printCount);
     currentDatasourceCountText.setText(String.valueOf(datasetCount));
 
-    mailMerge.getDs().updatePreviewFields(datasetCount);
+    datasource.updatePreviewFields(datasetCount);
   };
 
   private AbstractActionListener previewActionListener = e -> {
@@ -578,7 +569,7 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
         UNO.XButton(preview).setLabel("Vorschau");
       } else if (toggleState == 1)
       {
-        if (!mailMerge.getDs().hasDatasource() && mailMerge.getDs().getNumberOfDatasets() <= 0)
+        if (!datasource.hasDatasource() && datasource.getNumberOfDatasets() <= 0)
         {
           propertySet.setPropertyValue("State", 0);
           return;
@@ -586,7 +577,7 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
 
         textDocumentController.collectNonWollMuxFormFields();
         textDocumentController.setFormFieldsPreviewMode(true);
-        mailMerge.getDs().updatePreviewFields(mailMerge.getDs().getPreviewDatasetNumber());
+        datasource.updatePreviewFields(datasource.getPreviewDatasetNumber());
 
         UNO.XWindow(jumpToLast).setEnable(true);
         UNO.XWindow(jumpToFirst).setEnable(true);
