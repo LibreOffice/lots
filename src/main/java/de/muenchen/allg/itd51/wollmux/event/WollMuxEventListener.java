@@ -18,7 +18,7 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormValueChanged;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormularMax4000Returned;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormularMax4000Show;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFunctionDialog;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnHandleMailMergeNewReturned;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnInitMailMergeSidebar;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToMark;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToPlaceholder;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnKill;
@@ -279,12 +279,6 @@ public class WollMuxEventListener
   }
 
   @Subscribe
-  public void onHandleMailMergeNewReturned(OnHandleMailMergeNewReturned event)
-  {
-    event.process();
-  }
-
-  @Subscribe
   public void onNotifyDocumentEventListener(OnNotifyDocumentEventListener event)
   {
     event.process();
@@ -341,6 +335,18 @@ public class WollMuxEventListener
 
   @Subscribe
   public void onUpdateInputFields(OnUpdateInputFields event)
+  {
+    event.process();
+  }
+
+  /**
+   * Subscribe on {@link OnInitMailMergeSidebar} events.
+   * 
+   * @param event
+   *          The event.
+   */
+  @Subscribe
+  public void onInitMailMergeSidebar(OnInitMailMergeSidebar event)
   {
     event.process();
   }
