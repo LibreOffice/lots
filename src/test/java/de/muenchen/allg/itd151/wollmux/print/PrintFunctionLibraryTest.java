@@ -33,7 +33,7 @@ public class PrintFunctionLibraryTest
   {
     PrintFunctionLibrary library = new PrintFunctionLibrary();
     PrintFunction.addPrintFunctions(library);
-    assertEquals(10, library.getFunctionNames().size(), "Not enough print functions");
+    assertEquals(9, library.getFunctionNames().size(), "Not enough print functions");
   }
 
   @Test
