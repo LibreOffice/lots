@@ -1,6 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +17,6 @@ import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResultsWithSchema;
-import de.muenchen.allg.itd51.wollmux.core.dialog.TextComponentTags;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -24,6 +24,9 @@ import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.email.EMailSender;
 import de.muenchen.allg.itd51.wollmux.email.MailServerSettings;
+import de.muenchen.allg.itd51.wollmux.func.print.MailMergePrintFunction;
+import de.muenchen.allg.itd51.wollmux.func.print.PrintToEmail;
+import de.muenchen.allg.itd51.wollmux.func.print.SetFormValue;
 import de.muenchen.allg.itd51.wollmux.print.PrintModels;
 
 /**
@@ -36,92 +39,6 @@ public class MailMergeController
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MailMergeController.class);
-
-  /**
-  * Tag für {@link TextComponentTags}, das als Platzhalter für die Serienbriefnummer
-  * steht.
-  */
-  public static final String TAG_SERIENBRIEFNUMMER = "#SB";
-
-  /**
-  * Tag für {@link TextComponentTags}, das als Platzhalter für die Datensatznummer
-  * steht.
-  */
-  public static final String TAG_DATENSATZNUMMER = "#DS";
-
-  /**
-   * ID der Property in der die Serienbriefdaten gespeichert werden.
-   */
-  public static final String PROP_QUERYRESULTS = "MailMergeNew_QueryResults";
-
-  /**
-   * ID der Property in der das Zielverzeichnis für den Druck in Einzeldokumente
-   * gespeichert wird.
-   */
-  public static final String PROP_TARGETDIR = "MailMergeNew_TargetDir";
-
-  /**
-   * ID der Property in der das Dateinamenmuster für den Einzeldokumentdruck
-   * gespeichert wird.
-   */
-  public static final String PROP_FILEPATTERN = "MailMergeNew_FilePattern";
-
-  /**
-   * ID der Property in der der Name des Feldes gespeichert wird, in dem die
-   * E-Mail-Adressen der Empfänger enthalten ist.
-   */
-  public static final String PROP_EMAIL_TO_FIELD_NAME =
-    "MailMergeNew_EMailToFieldName";
-
-  /**
-   * ID der Property in der der Name des Feldes gespeichert wird, in dem die
-   * E-Mail-Adressen der Empfänger enthalten sind.
-   */
-  public static final String PROP_EMAIL_FROM = "MailMergeNew_EMailFrom";
-
-  /**
-   * ID der Property in der die Betreffzeile vom Typ String der zu verschickenden
-   * E-Mail enthalten ist.
-   */
-  public static final String PROP_EMAIL_SUBJECT = "MailMergeNew_EMailSubject";
-
-  /**
-   * ID der Property in der die Betreffzeile vom Typ String der zu verschickenden
-   * E-Mail enthalten ist.
-   */
-  public static final String PROP_EMAIL_MESSAGE_TEXTTAGS =
-    "MailMergeNew_EMailMessageTextTags";
-
-  /**
-   * Wenn der Seriendruck per E-Mail gestartet wird, wird nach erfolgreichen Versand der Empfänger
-   * in diese Liste hinzugefügt.
-   */
-  public static final String PROP_EMAIL_REPORT_RECIPIENT_LIST = "MailMergeNew_EMailReportReciptienList";
-
-  /**
-   * Wenn der Seriendruck per E-Mail gestartet wird, wird nach jedem erfolgreichen Versand einer
-   * E-Mail hochgezählt.
-   */
-  public static final String PROP_EMAIL_REPORT_EMAILS_SENT_COUNT = "MailMergeNew_EMailReportEMailsSentCount";
-
-  public static final String PROP_EMAIL_MAIL_SERVER_SETTINGS = "MailMergeNew_MailServerSettings";
-
-  /**
-   * ID der Property in der das Dateinamenmuster für den Einzeldokumentdruck
-   * gespeichert wird.
-   */
-  public static final String PROP_DATASET_EXPORT = "MailMergeNew_DatasetExport";
-
-  /**
-   * ID der Property, die einen List der Indizes der zu druckenden Datensätze
-   * speichert.
-   */
-  public static final String PROP_MAILMERGENEW_SELECTION = "MailMergeNew_Selection";
-
-  public static final String TEMP_MAIL_DIR_PREFIX = "wollmuxmail";
-
-  public static final String MAIL_ERROR_MESSAGE_TITLE =
-    L.m("Fehler beim E-Mail-Versand");
 
   private TextDocumentController documentController;
 
@@ -295,38 +212,39 @@ public class MailMergeController
     final XPrintModel pmod = PrintModels.createPrintModel(documentController, !ignoreDocPrintFuncs);
     try
     {
-      pmod.setPropertyValue("MailMergeNew_Schema", data.getSchema());
-      pmod.setPropertyValue(PROP_QUERYRESULTS, data);
-      pmod.setPropertyValue(PROP_MAILMERGENEW_SELECTION, selected);
+      pmod.setPropertyValue(SetFormValue.PROP_SCHEMA, data.getSchema());
+      pmod.setPropertyValue(SetFormValue.PROP_QUERYRESULTS, data);
+      Collections.sort(selected);
+      pmod.setPropertyValue(SetFormValue.PROP_RECORD_SELECTION, selected);
 
       Object o = args.get(SubmitArgument.TARGET_DIRECTORY);
       if (o != null) {
-        pmod.setPropertyValue(PROP_TARGETDIR, o);
+        pmod.setPropertyValue(MailMergePrintFunction.PROP_TARGETDIR, o);
       }
 
       o = args.get(SubmitArgument.FILENAME_TEMPLATE);
       if (o != null) {
-        pmod.setPropertyValue(PROP_FILEPATTERN, o);
+        pmod.setPropertyValue(MailMergePrintFunction.PROP_FILEPATTERN, o);
       }
 
       o = args.get(SubmitArgument.EMAIL_TO_FIELD_NAME);
       if (o != null) {
-        pmod.setPropertyValue(PROP_EMAIL_TO_FIELD_NAME, o);
+        pmod.setPropertyValue(PrintToEmail.PROP_EMAIL_TO_FIELD_NAME, o);
       }
 
       o = args.get(SubmitArgument.EMAIL_FROM);
       if (o != null) {
-        pmod.setPropertyValue(PROP_EMAIL_FROM, o);
+        pmod.setPropertyValue(PrintToEmail.PROP_EMAIL_FROM, o);
       }
 
       o = args.get(SubmitArgument.EMAIL_SUBJECT);
       if (o != null) {
-        pmod.setPropertyValue(PROP_EMAIL_SUBJECT, o);
+        pmod.setPropertyValue(PrintToEmail.PROP_EMAIL_SUBJECT, o);
       }
 
       o = args.get(SubmitArgument.EMAIL_TEXT);
       if (o != null) {
-        pmod.setPropertyValue(PROP_EMAIL_MESSAGE_TEXTTAGS, o);
+        pmod.setPropertyValue(PrintToEmail.PROP_EMAIL_MESSAGE_TEXTTAGS, o);
       }
     }
     catch (Exception x)
@@ -370,13 +288,13 @@ public class MailMergeController
 
         // Wenn der Seriendruck per E-Mail versendet wird, sende Zusammenfassung
         // Liste der Empfänger-Emails und Anzahl versendeter Emails
-        String eMailFrom = pmod.getProp(MailMergeController.PROP_EMAIL_FROM, "").toString();
+        String eMailFrom = pmod.getProp(PrintToEmail.PROP_EMAIL_FROM, "").toString();
 
         @SuppressWarnings("unchecked")
         List<String> recipintList = (List<String>) pmod
-            .getProp(MailMergeController.PROP_EMAIL_REPORT_RECIPIENT_LIST, null);
+            .getProp(PrintToEmail.PROP_EMAIL_REPORT_RECIPIENT_LIST, null);
         int mailsSentCount = (int) pmod
-            .getProp(MailMergeController.PROP_EMAIL_REPORT_EMAILS_SENT_COUNT, 0);
+            .getProp(PrintToEmail.PROP_EMAIL_REPORT_EMAILS_SENT_COUNT, 0);
 
         if (recipintList == null)
           return;
@@ -414,7 +332,7 @@ public class MailMergeController
         try
         {
           MailServerSettings smtpSettings = (MailServerSettings) pmod
-              .getPropertyValue(PROP_EMAIL_MAIL_SERVER_SETTINGS);
+              .getPropertyValue(PrintToEmail.PROP_EMAIL_MAIL_SERVER_SETTINGS);
           mail.sendMessage(smtpSettings);
 
         } catch (ConfigurationErrorException | MessagingException | WrappedTargetException

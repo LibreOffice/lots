@@ -88,6 +88,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.func.print.SetFormValue;
 
 /**
  * Stellt eine OOo-Datenquelle oder ein offenes Calc-Dokument über ein gemeinsames Interface zur
@@ -353,9 +354,9 @@ public class MailMergeDatasource
           column, dataIter.next(), null);
     }
     WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
-        MailMergeController.TAG_DATENSATZNUMMER, previewDatasetNumberStr, null);
+        SetFormValue.TAG_RECORD_ID, previewDatasetNumberStr, null);
     WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
-        MailMergeController.TAG_SERIENBRIEFNUMMER, previewDatasetNumberStr, null);
+        SetFormValue.TAG_MAILMERGE_ID, previewDatasetNumberStr, null);
   }
 
   /**

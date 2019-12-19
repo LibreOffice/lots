@@ -19,7 +19,12 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.FORMAT;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.SubmitArgument;
+import de.muenchen.allg.itd51.wollmux.func.print.MailMergePrintFunction;
+import de.muenchen.allg.itd51.wollmux.func.print.SetFormValue;
 
+/**
+ * Format page of the mailmerge wizard.
+ */
 public class FormatWizardPage extends AbstractXWizardPage
 {
 
@@ -65,7 +70,7 @@ public class FormatWizardPage extends AbstractXWizardPage
     });
     name.setText(
         controller.getController().getDefaultFilename()
-            + MailMergeNew.addMergeFieldTags(MailMergeController.TAG_DATENSATZNUMMER));
+            + MailMergePrintFunction.createMergeFieldTag(SetFormValue.TAG_RECORD_ID));
     mailmerge = UNO.XComboBox(container.getControl("mailmerge"));
     new MailMergeField(mailmerge).setMailMergeDatasource(controller.getController().getDs());
     mailmerge.addItemListener(new AbstractItemListener()
@@ -73,7 +78,8 @@ public class FormatWizardPage extends AbstractXWizardPage
       @Override
       public void itemStateChanged(ItemEvent event)
       {
-        name.setText(name.getText() + MailMergeNew.addMergeFieldTags(mailmerge.getItem((short) event.Selected)));
+        name.setText(name.getText()
+            + MailMergePrintFunction.createMergeFieldTag(mailmerge.getItem((short) event.Selected)));
       }
     });
     special = UNO.XComboBox(container.getControl("special"));
@@ -89,10 +95,12 @@ public class FormatWizardPage extends AbstractXWizardPage
         switch (event.Selected)
         {
         case 1:
-          append = MailMergeNew.addMergeFieldTags(MailMergeController.TAG_DATENSATZNUMMER);
+          append = MailMergePrintFunction
+              .createMergeFieldTag(SetFormValue.TAG_RECORD_ID);
           break;
         case 2:
-          append = MailMergeNew.addMergeFieldTags(MailMergeController.TAG_SERIENBRIEFNUMMER);
+          append = MailMergePrintFunction
+              .createMergeFieldTag(SetFormValue.TAG_MAILMERGE_ID);
           break;
         default:
           break;

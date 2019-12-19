@@ -26,12 +26,16 @@ public class IntoFile extends PrintFunction
   private static final Logger LOGGER = LoggerFactory.getLogger(IntoFile.class);
 
   /**
-   * Property of type {@link XTextDocument} for storing the output document.
+   * Key for saving the output document as a property of a {@link XPrintModel}.
+   *
+   * The property type is a {@link XTextDocument}.
    */
   public static final String OUTPUT_DOCUMENT_PROPERTY = "PrintIntoFile_OutputDocument";
 
   /**
-   * Property of type {@link XTextDocument} for storing the previous output document.
+   * Key for saving the previous output document as a property of a {@link XPrintModel}.
+   *
+   * The property type is a {@link XTextDocument} of key-value pairs of type String.
    */
   public static final String PREVIOUS_DOCUMENT_PROPERTY = "PrintIntoFile_PreviousOutputDocument";
 

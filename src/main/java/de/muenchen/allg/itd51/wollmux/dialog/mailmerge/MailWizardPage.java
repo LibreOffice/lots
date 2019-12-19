@@ -21,7 +21,11 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.SubmitArgument;
+import de.muenchen.allg.itd51.wollmux.func.print.MailMergePrintFunction;
 
+/**
+ * Mail page of the mailmerge wizard.
+ */
 public class MailWizardPage extends AbstractXWizardPage
 {
 	private static final Logger LOGGER = LoggerFactory
@@ -97,7 +101,7 @@ public class MailWizardPage extends AbstractXWizardPage
         {
           Selection currentSelection = message.getSelection();
           message.insertText(currentSelection,
-              MailMergeNew.addMergeFieldTags(mailmerge.getItem((short) event.Selected)));
+              MailMergePrintFunction.createMergeFieldTag(mailmerge.getItem((short) event.Selected)));
           UNO.XTextComponent(special).setText(special.getItem((short) 0));
         }
       }

@@ -1,8 +1,8 @@
-/* 
+/*
  * Dateiname: EMailSender.java
  * Projekt  : WollMux
  * Funktion : Teil des E-Mail-Wrappers für javamail
- * 
+ *
  * Copyright (c) 2011-2019 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -108,12 +108,18 @@ public class EMailSender
     }
   }
 
-  public MailServerSettings getWollMuxMailServerSettings()
-      throws ConfigurationErrorException
-  { 
-    MailServerSettings mailserver = new MailServerSettings();
+  /**
+   * Get the mail server settings from the configuration and set them.
+   *
+   * @param mailserver
+   *          The object where the settings are set.
+   * @throws ConfigurationErrorException
+   *           No SERVER entry in the configuration.
+   */
+  public void getWollMuxMailServerSettings(MailServerSettings mailserver)
+  {
     ConfigThingy wollmuxconf = WollMuxFiles.getWollmuxConf();
-    
+
     try
     {
       wollmuxconf = wollmuxconf.query("EMailEinstellungen").getLastChild();
@@ -160,7 +166,5 @@ public class EMailSender
     {
       throw new ConfigurationErrorException();
     }
-    
-    return mailserver;
   }
 }

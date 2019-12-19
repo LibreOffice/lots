@@ -62,6 +62,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.trafo.IfThenElseDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.func.print.SetFormValue;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.HorizontalLayout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
@@ -325,12 +326,12 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
 
         case 3:
           textDocumentController
-              .insertMailMergeFieldAtCursorPosition(MailMergeController.TAG_DATENSATZNUMMER);
+              .insertMailMergeFieldAtCursorPosition(SetFormValue.TAG_RECORD_ID);
           break;
 
         case 4:
           textDocumentController
-              .insertMailMergeFieldAtCursorPosition(MailMergeController.TAG_SERIENBRIEFNUMMER);
+              .insertMailMergeFieldAtCursorPosition(SetFormValue.TAG_MAILMERGE_ID);
           break;
 
         case 5:
