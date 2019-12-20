@@ -9,19 +9,31 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.openoffice.dev</groupId>
-				<artifactId>ooo-maven-plugin</artifactId>
-				<version>1.1.2-SNAPSHOT</version>
-				<configuration>
-					<idlDir>${basedir}/src/main/idl</idlDir>
-					<ooo>${ooo}</ooo>
-					<sdk>${sdk}</sdk>
-				</configuration>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
 				<executions>
 					<execution>
+						<id>idl</id>
 						<phase>generate-sources</phase>
+						<configuration>
+							<target>
+								<property name="idlcOutput" value="target/generated-sources/urd/de/muenchen/allg/itd51/wollmux"/>
+								<exec executable="sh">
+									<arg value="-c"/>
+									<arg value="idlc -O ${idlcOutput} -I /opt/libreoffice5.2/sdk/idl -I src/main/idl src/main/idl/de/muenchen/allg/itd51/wollmux/*.idl"/>
+								</exec>
+								<exec executable="sh">
+									<arg value="-c"/>
+									<arg value="regmerge target/WollMux.rdb /UCR ${idlcOutput}/*"/>
+								</exec>
+								<exec executable="sh">
+									<arg value="-c"/>
+									<arg value="javamaker -Tde.muenchen.allg.itd51.wollmux.* -nD -Gc -O ${project.build.outputDirectory} target/WollMux.rdb -X/opt/libreoffice5.2/program/types.rdb -X/opt/libreoffice5.2/program/types/offapi.rdb"/>
+								</exec>
+							</target>
+						</configuration>
 						<goals>
-							<goal>build-idl</goal>
+							<goal>run</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -40,7 +52,7 @@
 						<configuration>
 							<artifacts>
 								<artifact>
-									<file>${project.build.directory}/types.rdb</file>
+									<file>${project.build.directory}/WollMux.rdb</file>
 									<type>rdb</type>
 								</artifact>
 							</artifacts>
