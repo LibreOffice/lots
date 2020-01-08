@@ -157,59 +157,22 @@ public class PreferDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
-      throws TimeoutException
+  public QueryResults getDatasetsByKey(Collection<String> keys)
   {
-    long endTime = System.currentTimeMillis() + timeout;
-    QueryResults results = source2.getDatasetsByKey(keys, timeout);
-
-    timeout = endTime - System.currentTimeMillis();
-    if (timeout <= 0)
-      throw new TimeoutException(
-        L.m(
-          "Datenquelle %1 konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten",
-          source2Name));
-
-    QueryResults overrideResults = source1.getDatasetsByKey(keys, timeout);
-
-    timeout = endTime - System.currentTimeMillis();
-    if (timeout <= 0)
-      throw new TimeoutException(
-        L.m(
-          "Datenquelle %1 konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten",
-          source1Name));
-
-    return new QueryResultsOverride(results, overrideResults, source1, timeout);
+    return new QueryResultsOverride(source2.getDatasetsByKey(keys), source1.getDatasetsByKey(keys),
+        source1);
   }
 
   @Override
-  public QueryResults getContents(long timeout) throws TimeoutException
+  public QueryResults getContents()
   {
     return new QueryResultsList(new Vector<Dataset>(0));
   }
 
   @Override
-  public QueryResults find(List<QueryPart> query, long timeout)
-      throws TimeoutException
+  public QueryResults find(List<QueryPart> query)
   {
-    long endTime = System.currentTimeMillis() + timeout;
-    QueryResults results = source2.find(query, timeout);
-
-    timeout = endTime - System.currentTimeMillis();
-    if (timeout <= 0)
-      throw new TimeoutException(L.m(
-        "Datenquelle %1 konnte Anfrage find() nicht schnell genug beantworten",
-        source2Name));
-
-    QueryResults overrideResults = source1.find(query, timeout);
-
-    timeout = endTime - System.currentTimeMillis();
-    if (timeout <= 0)
-      throw new TimeoutException(L.m(
-        "Datenquelle %1 konnte Anfrage find() nicht schnell genug beantworten",
-        source1Name));
-
-    return new QueryResultsOverride(results, overrideResults, source1, timeout);
+    return new QueryResultsOverride(source2.find(query), source1.find(query), source1);
   }
 
   @Override
@@ -229,13 +192,11 @@ public class PreferDatasource implements Datasource
     private QueryResults results;
 
     public QueryResultsOverride(QueryResults results, QueryResults overrideResults,
-        Datasource override, long timeout) throws TimeoutException
+        Datasource override)
     {
       this.overrideResults = overrideResults;
-
-      long endTime = System.currentTimeMillis() + timeout;
       this.results = results;
-      size = results.size();
+      this.size = results.size();
 
       Map<String, int[]> keyToCount = new HashMap<>(); // of int[]
 
@@ -249,9 +210,6 @@ public class PreferDatasource implements Datasource
         }
         int[] count = keyToCount.get(key);
         ++count[0];
-        if (System.currentTimeMillis() > endTime) {
-          throw new TimeoutException();
-        }
       }
 
       /**
@@ -260,12 +218,8 @@ public class PreferDatasource implements Datasource
        * Suchbedingung nicht mehr passt) müssen auch mit ihrem Schlüssel auf die
        * Blacklist. Deswegen müssen wir diese Datensätze suchen.
        */
-      timeout = endTime - System.currentTimeMillis();
-      if (timeout <= 0) {
-        throw new TimeoutException();
-      }
       QueryResults blacklistResults =
-        override.getDatasetsByKey(keyToCount.keySet(), timeout);
+          override.getDatasetsByKey(keyToCount.keySet());
 
       size += overrideResults.size();
 
@@ -286,9 +240,6 @@ public class PreferDatasource implements Datasource
             size -= count[0];
             count[0] = 0;
             keyBlacklist.add(key);
-          }
-          if (System.currentTimeMillis() > endTime) {
-            throw new TimeoutException();
           }
         }
       }

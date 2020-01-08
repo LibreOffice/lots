@@ -103,9 +103,8 @@ public class RAMDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
-      throws TimeoutException
-  { // TESTED
+  public QueryResults getDatasetsByKey(Collection<String> keys)
+  {
     List<Dataset> res = new ArrayList<>();
     Iterator<Dataset> iter = data.iterator();
     while (iter.hasNext())
@@ -126,8 +125,8 @@ public class RAMDatasource implements Datasource
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
   @Override
-  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
-  { // TESTED
+  public QueryResults find(List<QueryPart> query)
+  {
     if (query.isEmpty())
     {
       return new QueryResultsList(new Vector<Dataset>(0));
@@ -148,7 +147,7 @@ public class RAMDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getContents(long timeout) throws TimeoutException
+  public QueryResults getContents()
   {
     return new QueryResultsList(new Vector<>(data));
   }

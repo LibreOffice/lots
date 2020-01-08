@@ -33,7 +33,6 @@ package de.muenchen.allg.itd51.wollmux.core.db;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -102,12 +101,12 @@ public class OverlayDatasource implements Datasource
   private Set<String> commonMatchColumns;
 
   /**
-   * true iff mode is "so", "sO", "So" or "SO".
+   * true if mode is "so", "sO", "So" or "SO".
    */
   private boolean modeSO;
 
   /**
-   * true iff mode is "so", "So", "os" or "Os".
+   * true if mode is "so", "So", "os" or "Os".
    */
   private boolean treatEmptyStringsAsNull;
 
@@ -226,22 +225,13 @@ public class OverlayDatasource implements Datasource
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection, long)
    */
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
-      throws TimeoutException
+  public QueryResults getDatasetsByKey(Collection<String> keys)
   {
-    long time = new Date().getTime();
-    QueryResults results = source1.getDatasetsByKey(keys, timeout);
-    time = (new Date().getTime()) - time;
-    timeout -= time;
-    if (timeout <= 0)
-      throw new TimeoutException(
-          L.m("Datenquelle %1 konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten",
-              source1Name));
-    return overlayColumns(results, timeout, DatasetPredicate.matchAll);
+    return overlayColumns(source1.getDatasetsByKey(keys), DatasetPredicate.matchAll);
   }
 
   @Override
-  public QueryResults getContents(long timeout) throws TimeoutException
+  public QueryResults getContents()
   {
     return new QueryResultsList(new Vector<Dataset>(0));
   }
@@ -252,18 +242,13 @@ public class OverlayDatasource implements Datasource
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
   @Override
-  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
+  public QueryResults find(List<QueryPart> query)
   {
     if (query.isEmpty())
     {
       return new QueryResultsList(new ArrayList<Dataset>(0));
     }
 
-    if (timeout <= 0)
-    {
-      throw new TimeoutException();
-    }
-    long endtime = System.currentTimeMillis() + timeout;
     List<QueryPart> queryOnly1 = new ArrayList<>();
     List<QueryPart> queryOnly2 = new ArrayList<>();
     List<QueryPart> queryBoth = new ArrayList<>();
@@ -296,18 +281,13 @@ public class OverlayDatasource implements Datasource
      */
     if (!queryOnly1.isEmpty())
     {
-      QueryResults results = source1.find(queryOnly1, timeout);
+      QueryResults results = source1.find(queryOnly1);
 
       List<QueryPart> restQuery = new ArrayList<>(queryOnly2.size() + queryBoth.size());
       restQuery.addAll(queryBoth);
       restQuery.addAll(queryOnly2);
 
-      timeout = endtime - System.currentTimeMillis();
-      if (timeout < 0)
-      {
-        throw new TimeoutException();
-      }
-      return overlayColumns(results, timeout, DatasetPredicate.makePredicate(restQuery));
+      return overlayColumns(results, DatasetPredicate.makePredicate(restQuery));
     } else if (!queryOnly2.isEmpty())
     { /*
        * in diesem Fall haben wir nur Bedingungen für Spalten, die entweder bei beiden Datenquellen
@@ -317,14 +297,8 @@ public class OverlayDatasource implements Datasource
        * Filtern dann nochmal mit den Spaltenbedingungen für die gemeinsamen Spalten.
        */
 
-      QueryResults results = source2.find(queryOnly2, timeout);
-
-      timeout = endtime - System.currentTimeMillis();
-      if (timeout < 0)
-      {
-        throw new TimeoutException();
-      }
-      return overlayColumnsReversed(results, timeout, DatasetPredicate.makePredicate(queryBoth));
+      return overlayColumnsReversed(source2.find(queryOnly2),
+          DatasetPredicate.makePredicate(queryBoth));
     } else
     { /*
        * An der Abfrage sind nur Spalten beteiligt, die in beiden Datenquellen vorhanden sind. Hier
@@ -349,23 +323,9 @@ public class OverlayDatasource implements Datasource
       restrictingQuery.add(qp);
 
       Predicate<Dataset> predicate = DatasetPredicate.makePredicate(query);
-      QueryResults results1 = source1.find(restrictingQuery, timeout);
 
-      timeout = endtime - System.currentTimeMillis();
-      if (timeout < 0)
-      {
-        throw new TimeoutException();
-      }
-      results1 = overlayColumns(results1, timeout, predicate);
-
-      QueryResults results2 = source2.find(restrictingQuery, timeout);
-
-      timeout = endtime - System.currentTimeMillis();
-      if (timeout < 0)
-      {
-        throw new TimeoutException();
-      }
-      results2 = overlayColumnsReversed(results2, timeout, predicate);
+      QueryResults results1 = overlayColumns(source1.find(restrictingQuery), predicate);
+      QueryResults results2 = overlayColumnsReversed(source2.find(restrictingQuery), predicate);
 
       /*
        * An dieser Stelle haben wir alle gesuchten Datensätze. Allerdings kann es zwischen results1
@@ -400,13 +360,7 @@ public class OverlayDatasource implements Datasource
           finalResults.add(ds);
       }
 
-      timeout = endtime - System.currentTimeMillis();
-      if (timeout < 0)
-      {
-        throw new TimeoutException();
-      }
-
-      QueryResults results3 = getDatasetsByKey(dupKeys, timeout);
+      QueryResults results3 = getDatasetsByKey(dupKeys);
 
       for (Dataset ds : results3)
         if (predicate.test(ds))
@@ -478,11 +432,8 @@ public class OverlayDatasource implements Datasource
     return name;
   }
 
-  private QueryResults overlayColumns(QueryResults results, long timeout, Predicate<Dataset> filter)
-      throws TimeoutException
+  private QueryResults overlayColumns(QueryResults results, Predicate<Dataset> filter)
   {
-    long endTime = new Date().getTime() + timeout;
-
     List<Dataset> resultsWithOverlayments = new ArrayList<>(results.size());
 
     Iterator<Dataset> iter = results.iterator();
@@ -502,12 +453,7 @@ public class OverlayDatasource implements Datasource
         }
       }
 
-      timeout = endTime - (new Date().getTime());
-      if (timeout <= 0)
-      {
-        throw new TimeoutException();
-      }
-      QueryResults appendix = source2.find(query, timeout);
+      QueryResults appendix = source2.find(query);
 
       Dataset newDataset;
 
@@ -536,11 +482,8 @@ public class OverlayDatasource implements Datasource
     return new QueryResultsList(resultsWithOverlayments);
   }
 
-  private QueryResults overlayColumnsReversed(QueryResults results, long timeout,
-      Predicate<Dataset> filter) throws TimeoutException
+  private QueryResults overlayColumnsReversed(QueryResults results, Predicate<Dataset> filter)
   {
-    long endTime = new Date().getTime() + timeout;
-
     List<ConcatDataset> resultsWithOverlayments = new ArrayList<>(results.size());
 
     for (Dataset ds : results)
@@ -557,12 +500,7 @@ public class OverlayDatasource implements Datasource
         }
       }
 
-      timeout = endTime - (new Date().getTime());
-      if (timeout <= 0)
-      {
-        throw new TimeoutException();
-      }
-      QueryResults prependix = source1.find(query, timeout);
+      QueryResults prependix = source1.find(query);
 
       for (Dataset prepend : prependix)
       {

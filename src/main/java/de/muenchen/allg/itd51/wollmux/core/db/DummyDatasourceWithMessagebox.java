@@ -78,13 +78,13 @@ public class DummyDatasourceWithMessagebox implements Datasource
    * , long)
    */
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
+  public QueryResults getDatasetsByKey(Collection<String> keys)
   {
     return emptyResults;
   }
 
   @Override
-  public QueryResults getContents(long timeout) throws TimeoutException
+  public QueryResults getContents()
   {
     return emptyResults;
   }
@@ -96,8 +96,7 @@ public class DummyDatasourceWithMessagebox implements Datasource
   }
 
   @Override
-  public QueryResults find(List<QueryPart> query, long timeout)
-      throws TimeoutException
+  public QueryResults find(List<QueryPart> query)
   {
     return emptyResults;
   }

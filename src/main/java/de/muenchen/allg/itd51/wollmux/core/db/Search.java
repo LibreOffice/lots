@@ -51,7 +51,7 @@ public class Search
 
   private Search()
   {
-    // hide implizite public constructor
+    // hide implicit public constructor
   }
 
   /**
@@ -71,18 +71,12 @@ public class Search
    *          Datenquellen auf jeden Fall immer in der Hauptdatenquelle von dj gesucht werden soll.
    *          Wenn hier <code>true</code> übergeben wird, enthalten die als Ergebnis der Suche
    *          zurückgelieferten QueryResults auf jeden Fall {@link DJDataset}s.
-   * 
-   * @throws TimeoutException
-   *           falls ein Fehler beim Bearbeiten der Suche auftritt oder die Anfrage nicht
-   *           rechtzeitig beendet werden konnte. In letzterem Fall ist das Werfen dieser Exception
-   *           jedoch nicht Pflicht und die bei der Suche verwendete Datenquelle kann stattdessen
-   *           den Teil der Ergebnisse zurückliefern, die in der gegebenen Zeit gewonnen werden
-   *           konnten.
    * @throws IllegalArgumentException
    *           falls eine Datenquelle, in der gesucht werden soll, nicht existiert
+   * @return Results as an Iterable of Dataset as {@link QueryResults}
    */
   public static QueryResults search(String queryString, SearchStrategy searchStrategy,
-      DatasourceJoiner dj, boolean useDjMainDatasource) throws TimeoutException
+      DatasourceJoiner dj, boolean useDjMainDatasource)
   {
     if (queryString == null || searchStrategy == null || dj == null)
     {
@@ -109,8 +103,19 @@ public class Search
     return mergeListOfQueryResultsList(listOfQueryResultsList);
   }
 
+  /**
+   * Führt die übergebene Suchanfrage gemäß der übergebenen Suchstrategie aus und liefert die
+   * Ergebnisse in einem {@link QueryResults}-Objekt zurück. Falls einer der übergebenen Parameter
+   * <code>null</code> ist oder falls der queryString leer ist, wird <code>null</code>
+   * zurückgeliefert.
+   * 
+   * @param query
+   *          die Suchanfrage
+   * @param dj
+   *          die virtuelle Datenbank (siehe {@link DatasourceJoiner}), in der gesucht werden soll
+   * @return Results as an Iterable of Dataset as {@link QueryResults}
+   */
   public static QueryResults search(Map<String, String> query, DatasourceJoiner dj)
-      throws TimeoutException
   {
     List<QueryPart> parts = new ArrayList<>();
 
@@ -123,6 +128,18 @@ public class Search
     return dj.find(parts);
   }
 
+  /**
+   * Compares two given datasets. If one of the values within a dataset is different from the second
+   * dataset, true will be returned.
+   * 
+   * @param dataset
+   *          First dataset.
+   * @param ldapDataset
+   *          A second dataset to compare with.
+   * @param dj
+   *          An instance of the {@link DatasourceJoiner}
+   * @return Returns true if different values were detected.
+   */
   public static boolean hasLDAPDataChanged(Dataset dataset, Dataset ldapDataset,
       DatasourceJoiner dj)
   {
@@ -137,7 +154,7 @@ public class Search
       {
         String ldapDSValue = ldapDataset.get(columnName);
         String datasetValue = dataset.get(columnName);
-        
+
         if ((ldapDSValue == null && datasetValue != null && !datasetValue.isEmpty())
             || (ldapDSValue != null && datasetValue != null && !ldapDSValue.equals(datasetValue)))
         {

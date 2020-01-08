@@ -119,8 +119,7 @@ public class LocalOverrideStorageDummyImpl implements LocalOverrideStorage
   }
 
   @Override
-  public List<Dataset> refreshFromDatabase(Datasource database, long timeout, Status status)
-      throws TimeoutException
+  public List<Dataset> refreshFromDatabase(Datasource database, Status status)
   {
     return new ArrayList<>();
   }

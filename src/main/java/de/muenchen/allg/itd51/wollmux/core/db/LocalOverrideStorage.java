@@ -54,13 +54,10 @@ public interface LocalOverrideStorage extends Iterable<Dataset>
   /**
    * Läd für die Datensätze des LOS aktuelle Daten aus der Datenbank database.
    * 
-   * @param timeout
-   *          die maximale Zeit, die database Zeit hat, anfragen zu beantworten.
    * @param status
    *          hiervon wird das Feld lostDatasets geupdatet.
-   * @throws TimeoutException
    */
-  public List<Dataset> refreshFromDatabase(Datasource database, long timeout, Status status) throws TimeoutException;
+  public List<Dataset> refreshFromDatabase(Datasource database, Status status);
 
   /**
    * Liefert null, falls bislang kein Schema vorhanden (weil das Laden der

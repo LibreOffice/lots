@@ -1,12 +1,16 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
+import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -16,17 +20,15 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
- * Dieses Event wird als erstes WollMuxEvent bei der Initialisierung des WollMux im
- * WollMuxSingleton erzeugt und übernimmt alle benutzersichtbaren (interaktiven)
- * Initialisierungen wie z.B. das Darstellen des AbsenderAuswählen-Dialogs, falls
- * die PAL leer ist.
+ * Dieses Event wird als erstes WollMuxEvent bei der Initialisierung des WollMux im WollMuxSingleton
+ * erzeugt und übernimmt alle benutzersichtbaren (interaktiven) Initialisierungen wie z.B. das
+ * Darstellen des AbsenderAuswählen-Dialogs, falls die PAL leer ist.
  *
- * @author christoph.lutz TESTED
+ * @author christoph.lutz
  */
 public class OnInitialize extends BasicEvent
 {
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(OnInitialize.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(OnInitialize.class);
 
   @Override
   protected void doit()
@@ -51,20 +53,17 @@ public class OnInitialize extends BasicEvent
   }
 
   /**
-   * Wertet den Konfigurationsabschnitt
-   * PersoenlicheAbsenderlisteInitialisierung/Suchstrategie aus und versucht nach
-   * der angegebenen Strategie (mindestens) einen Datensatz im DJ dsj zu finden,
-   * der den aktuellen Benutzer repräsentiert. Fehlt der Konfigurationsabschnitt,
-   * so wird die Defaultsuche BY_OOO_USER_PROFILE(Vorname "${givenname}" Nachname
-   * "${sn}") gestartet. Liefert ein Element der Suchstrategie mindestens einen
-   * Datensatz zurück, so werden die anderen Elemente der Suchstrategie nicht mehr
-   * ausgewertet.
+   * Wertet den Konfigurationsabschnitt PersoenlicheAbsenderlisteInitialisierung/Suchstrategie aus
+   * und versucht nach der angegebenen Strategie (mindestens) einen Datensatz im DJ dsj zu finden,
+   * der den aktuellen Benutzer repräsentiert. Fehlt der Konfigurationsabschnitt, so wird die
+   * Defaultsuche BY_OOO_USER_PROFILE(Vorname "${givenname}" Nachname "${sn}") gestartet. Liefert
+   * ein Element der Suchstrategie mindestens einen Datensatz zurück, so werden die anderen Elemente
+   * der Suchstrategie nicht mehr ausgewertet.
    *
    * @param dsj
-   *          Der DatasourceJoiner, in dem nach dem aktuellen Benutzer gesucht
-   *          wird.
-   * @return liefert die Anzahl der Datensätze, die nach Durchlaufen der
-   *         Suchstrategie gefunden wurden.
+   *          Der DatasourceJoiner, in dem nach dem aktuellen Benutzer gesucht wird.
+   * @return liefert die Anzahl der Datensätze, die nach Durchlaufen der Suchstrategie gefunden
+   *         wurden.
    */
   private int searchDefaultSender(DatasourceJoiner dsj)
   {
@@ -74,41 +73,43 @@ public class OnInitialize extends BasicEvent
     ConfigThingy strat = null;
     try
     {
-      strat = wmConf.query("PersoenlicheAbsenderlisteInitialisierung").query(
-          "Suchstrategie").getLastChild();
+      strat = wmConf.query("PersoenlicheAbsenderlisteInitialisierung").query("Suchstrategie")
+          .getLastChild();
     } catch (NodeNotFoundException e)
     {
       LOGGER.error("", e);
     }
 
+    QueryResults results = null;
     if (strat != null)
     {
       // Suche über Suchstrategie aus Konfiguration
       for (Iterator<ConfigThingy> iter = strat.iterator(); iter.hasNext();)
       {
         ConfigThingy element = iter.next();
-        int found = 0;
+
         if (element.getName().equals("BY_JAVA_PROPERTY"))
         {
-          found = new ByJavaPropertyFinder(dsj).find(element);
+          results = new ByJavaPropertyFinder(dsj).find(element);
         } else if (element.getName().equals("BY_OOO_USER_PROFILE"))
         {
-          found = new ByOOoUserProfileFinder(dsj).find(element);
+          results = new ByOOoUserProfileFinder(dsj).find(element);
         } else
         {
-          LOGGER.error(L.m("Ungültiger Schlüssel in Suchstrategie: %1",
-              element.stringRepresentation()));
+          LOGGER.error(
+              L.m("Ungültiger Schlüssel in Suchstrategie: {}", element.stringRepresentation()));
         }
-        if (found != 0)
-          return found;
       }
     } else
     {
       // Standardsuche über das OOoUserProfile:
-      return new ByOOoUserProfileFinder(dsj).find("Vorname", "${givenname}",
-          "Nachname", "${sn}");
+      List<Pair<String, String>> query = new ArrayList<>();
+      query.add(Pair.with("Vorname", "${givenname}"));
+      query.add(Pair.with("Nachname", "${sn}"));
+
+      results = new ByOOoUserProfileFinder(dsj).find(query);
     }
 
-    return 0;
+    return dsj.addToPAL(results);
   }
 }

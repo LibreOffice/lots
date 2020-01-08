@@ -35,7 +35,6 @@ package de.muenchen.allg.itd51.wollmux.core.db;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -180,10 +179,10 @@ public class AttachDatasource implements Datasource
       }
 
       if (!schema1.contains(spalte1))
-        throw new ConfigurationErrorException(L.m("Spalte \"%1\" ist nicht im Schema", spalte1));
+        throw new ConfigurationErrorException(L.m("Spalte {} ist nicht im Schema", spalte1));
 
       if (!schema2.contains(spalte2))
-        throw new ConfigurationErrorException(L.m("Spalte \"%1\" ist nicht im Schema", spalte2));
+        throw new ConfigurationErrorException(L.m("Spalte {} ist nicht im Schema", spalte2));
 
       match1[i] = spalte1;
       match2[i] = spalte2;
@@ -207,22 +206,13 @@ public class AttachDatasource implements Datasource
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util. Collection, long)
    */
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
-      throws TimeoutException
+  public QueryResults getDatasetsByKey(Collection<String> keys)
   {
-    long time = new Date().getTime();
-    QueryResults results = source1.getDatasetsByKey(keys, timeout);
-    time = (new Date().getTime()) - time;
-    timeout -= time;
-    if (timeout <= 0 && System.getProperty("DEBUG") == null)
-      throw new TimeoutException(
-          L.m("Datenquelle %1 konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten",
-              source1Name));
-    return attachColumns(results, timeout, DatasetPredicate.matchAll);
+    return attachColumns(source1.getDatasetsByKey(keys), DatasetPredicate.matchAll);
   }
 
   @Override
-  public QueryResults getContents(long timeout) throws TimeoutException
+  public QueryResults getContents()
   {
     return new QueryResultsList(new Vector<Dataset>(0));
   }
@@ -233,9 +223,8 @@ public class AttachDatasource implements Datasource
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
   @Override
-  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
+  public QueryResults find(List<QueryPart> query)
   {
-    long time = new Date().getTime();
     List<QueryPart> query1 = new ArrayList<>(query.size() / 2);
     List<QueryPart> query2 = new ArrayList<>(query.size() / 2);
     List<QueryPart> query2WithPrefix = new ArrayList<>(query.size() / 2);
@@ -259,23 +248,12 @@ public class AttachDatasource implements Datasource
      */
     if (!query1.isEmpty())
     {
-      QueryResults results = source1.find(query1, timeout);
-      time = (new Date().getTime()) - time;
-      timeout -= time;
-      if (timeout <= 0)
-        throw new TimeoutException(L.m(
-            "Datenquelle %1 konnte Anfrage find() nicht schnell genug beantworten", source1Name));
+      QueryResults results = source1.find(query1);
 
-      return attachColumns(results, timeout, DatasetPredicate.makePredicate(query2WithPrefix));
+      return attachColumns(results, DatasetPredicate.makePredicate(query2WithPrefix));
     } else
     {
-      QueryResults results = source2.find(query2, timeout);
-      time = (new Date().getTime()) - time;
-      timeout -= time;
-      if (timeout <= 0)
-        throw new TimeoutException(L.m(
-            "Datenquelle %1 konnte Anfrage find() nicht schnell genug beantworten", source2Name));
-      return attachColumnsReversed(results, timeout);
+      return attachColumnsReversed(source2.find(query2));
     }
   }
 
@@ -290,11 +268,8 @@ public class AttachDatasource implements Datasource
     return name;
   }
 
-  private QueryResults attachColumns(QueryResults results, long timeout, Predicate<Dataset> filter)
-      throws TimeoutException
+  private QueryResults attachColumns(QueryResults results, Predicate<Dataset> filter)
   {
-    long endTime = new Date().getTime() + timeout;
-
     List<Dataset> resultsWithAttachments = new ArrayList<>(results.size());
 
     for (Dataset ds : results)
@@ -311,12 +286,7 @@ public class AttachDatasource implements Datasource
         }
       }
 
-      timeout = endTime - (new Date().getTime());
-      if (timeout <= 0)
-      {
-        throw new TimeoutException();
-      }
-      QueryResults appendix = source2.find(query, timeout);
+      QueryResults appendix = source2.find(query);
 
       Dataset newDataset;
 
@@ -344,11 +314,8 @@ public class AttachDatasource implements Datasource
     return new QueryResultsList(resultsWithAttachments);
   }
 
-  private QueryResults attachColumnsReversed(QueryResults results, long timeout)
-      throws TimeoutException
+  private QueryResults attachColumnsReversed(QueryResults results)
   {
-    long endTime = new Date().getTime() + timeout;
-
     List<ConcatDataset> resultsWithAttachments = new ArrayList<>(results.size());
 
     for (Dataset ds : results)
@@ -365,12 +332,7 @@ public class AttachDatasource implements Datasource
         }
       }
 
-      timeout = endTime - (new Date().getTime());
-      if (timeout <= 0)
-      {
-        throw new TimeoutException();
-      }
-      QueryResults prependix = source1.find(query, timeout);
+      QueryResults prependix = source1.find(query);
 
       if (prependix.size() > 0)
       {
@@ -410,7 +372,9 @@ public class AttachDatasource implements Datasource
         }
         return ds2.get(columnName.substring(source2Prefix.length()));
       } else
+      {
         return ds1.get(columnName);
+      }
     }
 
     @Override
