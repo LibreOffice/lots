@@ -45,6 +45,8 @@ public class DatasourceJoinerFactory
    */
   private static DatasourceJoiner datasourceJoiner;
 
+  private static long datasourceTimeout = 10000;
+
   private DatasourceJoinerFactory()
   {
     // hide public constructor
@@ -72,25 +74,24 @@ public class DatasourceJoinerFactory
         // tatsächlich auf die Datenquelle "null" zurück gegriffen wird.
       }
 
-      ConfigThingy dataSourceTimeout =
-        WollMuxFiles.getWollmuxConf().query("DATASOURCE_TIMEOUT", 1);
-      long datasourceTimeoutLong = 0;
+      ConfigThingy dataSourceTimeout = WollMuxFiles.getWollmuxConf().query("DATASOURCE_TIMEOUT", 1);
       try
       {
-        datasourceTimeoutLong = Long.parseLong(dataSourceTimeout.getLastChild().toString());
-        if (datasourceTimeoutLong <= 0)
+        long timeout = Long.parseLong(dataSourceTimeout.getLastChild().toString());
+
+        if (timeout <= 0)
         {
-          LOGGER.error(L.m("DATASOURCE_TIMEOUT muss größer als 0 sein!"));
+          LOGGER.error("DATASOURCE_TIMEOUT muss größer als 0 sein!");
+        } else
+        {
+          datasourceTimeout = timeout;
         }
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
-        datasourceTimeoutLong = DatasourceJoiner.DATASOURCE_TIMEOUT;
-      }
-      catch (NumberFormatException e)
+        LOGGER.error("", e);
+      } catch (NumberFormatException e)
       {
         LOGGER.error(L.m("DATASOURCE_TIMEOUT muss eine ganze Zahl sein"));
-        datasourceTimeoutLong = DatasourceJoiner.DATASOURCE_TIMEOUT;
       }
 
       try
@@ -102,8 +103,8 @@ public class DatasourceJoinerFactory
           new DatasourceJoiner(collectDatasources(WollMuxFiles.getWollmuxConf(),
               WollMuxFiles.getDEFAULT_CONTEXT()),
               senderSourceStr,
-              createLocalOverrideStorage(senderSourceStr, WollMuxFiles.getLosCacheFile(), WollMuxFiles.getDEFAULT_CONTEXT()),
-              datasourceTimeoutLong);
+                createLocalOverrideStorage(senderSourceStr, WollMuxFiles.getLosCacheFile(),
+                    WollMuxFiles.getDEFAULT_CONTEXT()));
         /*
          * Zum Zeitpunkt wo der DJ initialisiert wird sind die Funktions- und
          * Dialogbibliothek des WollMuxSingleton noch nicht initialisiert, deswegen
@@ -180,7 +181,7 @@ public class DatasourceJoinerFactory
           ds = new FunkyDatasource(datasources, sourceDesc);
           break;
         default:
-          LOGGER.error(L.m("Ununterstützter Datenquellentyp: %1", type));
+          LOGGER.error("Ununterstützter Datenquellentyp: {}", type);
           break;
         }
       }
@@ -223,6 +224,11 @@ public class DatasourceJoinerFactory
     }
   }
 
+  public static long getDatasourceTimeout()
+  {
+    return datasourceTimeout;
+  }
+
   /**
    * Diese Methode liefert eine Liste aller verlorenen gegangenen Datensätze des DatasourceJoiner
    * (gemäß {@link DatasourceJoiner.Status#lostDatasets}) zurück.
@@ -235,7 +241,7 @@ public class DatasourceJoinerFactory
     ArrayList<String> list = new ArrayList<>();
     if (dj != null)
     {
-      for (Dataset ds : dj.getStatus().lostDatasets)
+      for (Dataset ds : dj.getStatus().getLostDatasets())
       {
         try
         {

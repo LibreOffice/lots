@@ -34,7 +34,6 @@ package de.muenchen.allg.itd51.wollmux.core.db;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -148,42 +147,21 @@ public class UnionDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
-      throws TimeoutException
+  public QueryResults getDatasetsByKey(Collection<String> keys)
   {
-    long time = new Date().getTime();
-    QueryResults res1 = source1.getDatasetsByKey(keys, timeout);
-    time = (new Date().getTime()) - time;
-    timeout -= time;
-    if (timeout <= 0)
-      throw new TimeoutException(
-        L.m(
-          "Datenquelle \"%1\" konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten",
-          source1Name));
-    QueryResults res2 = source2.getDatasetsByKey(keys, timeout);
-    return new QueryResultsUnion(res1, res2);
+    return new QueryResultsUnion(source1.getDatasetsByKey(keys), source2.getDatasetsByKey(keys));
   }
 
   @Override
-  public QueryResults getContents(long timeout) throws TimeoutException
+  public QueryResults getContents()
   {
     return new QueryResultsList(new Vector<Dataset>(0));
   }
 
   @Override
-  public QueryResults find(List<QueryPart> query, long timeout)
-      throws TimeoutException
+  public QueryResults find(List<QueryPart> query)
   {
-    long time = new Date().getTime();
-    QueryResults res1 = source1.find(query, timeout);
-    time = (new Date().getTime()) - time;
-    timeout -= time;
-    if (timeout <= 0)
-      throw new TimeoutException(L.m(
-        "Datenquelle \"%1\" konnte Anfrage find() nicht schnell genug beantworten",
-        source1Name));
-    QueryResults res2 = source2.find(query, timeout);
-    return new QueryResultsUnion(res1, res2);
+    return new QueryResultsUnion(source1.find(query), source2.find(query));
   }
 
   @Override

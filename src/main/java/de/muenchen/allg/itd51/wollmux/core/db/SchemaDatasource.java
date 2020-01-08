@@ -202,21 +202,19 @@ public class SchemaDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
-      throws TimeoutException
+  public QueryResults getDatasetsByKey(Collection<String> keys)
   {
-    return wrapDatasets(source.getDatasetsByKey(keys, timeout));
+    return wrapDatasets(source.getDatasetsByKey(keys));
   }
 
   @Override
-  public QueryResults getContents(long timeout) throws TimeoutException
+  public QueryResults getContents()
   {
     return new QueryResultsList(new Vector<RenameDataset>(0));
   }
 
   @Override
-  public QueryResults find(List<QueryPart> query, long timeout)
-      throws TimeoutException
+  public QueryResults find(List<QueryPart> query)
   {
     List<QueryPart> translatedQuery = new ArrayList<>(query.size());
     Iterator<QueryPart> iter = query.iterator();
@@ -238,7 +236,7 @@ public class SchemaDatasource implements Datasource
       else
         translatedQuery.add(p);
     }
-    return wrapDatasets(source.find(translatedQuery, timeout));
+    return wrapDatasets(source.find(translatedQuery));
   }
 
   @Override

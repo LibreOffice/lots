@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XNameAccess;
+import com.sun.star.sdbc.SQLException;
 import com.sun.star.sdbc.XColumnLocate;
 import com.sun.star.sdbc.XConnection;
 import com.sun.star.sdbc.XDataSource;
@@ -62,6 +63,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 
 /**
  * Stellt eine OOo-Datenquelle als WollMux-Datenquelle zur Verfügung.
@@ -420,16 +422,14 @@ public class OOoDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
-      throws TimeoutException
-  { // TESTED
+  public QueryResults getDatasetsByKey(Collection<String> keys)
+  {
     if (keys.isEmpty()) {
       return new QueryResultsList(new ArrayList<Dataset>(0));
     }
 
-    long endTime = System.currentTimeMillis() + timeout;
     StringBuilder buffy =
-      new StringBuilder(this.SQLSelectCommand + sqlIdentifier(oooTableName) + " WHERE ");
+        new StringBuilder(SQLSelectCommand + sqlIdentifier(oooTableName) + " WHERE ");
 
     Iterator<String> iter = keys.iterator();
     boolean first = true;
@@ -456,17 +456,12 @@ public class OOoDatasource implements Datasource
 
     buffy.append(';');
 
-    timeout = endTime - System.currentTimeMillis();
-    if (timeout < 1) {
-      timeout = 1;
-    }
-    return sqlQuery(buffy.toString(), timeout, true);
+    return sqlQuery(buffy.toString());
   }
 
   @Override
-  public QueryResults find(List<QueryPart> query, long timeout)
-      throws TimeoutException
-  { // TESTED
+  public QueryResults find(List<QueryPart> query)
+  {
     if (query.isEmpty()) {
       return new QueryResultsList(new Vector<Dataset>(0));
     }
@@ -509,42 +504,23 @@ public class OOoDatasource implements Datasource
     }
 
     buffy.append(';');
-    return sqlQuery(buffy.toString(), timeout, true);
+    return sqlQuery(buffy.toString());
   }
 
   @Override
-  public QueryResults getContents(long timeout) throws TimeoutException
+  public QueryResults getContents()
   {
-    String command = this.SQLSelectCommand + sqlIdentifier(oooTableName) + ";";
-    return sqlQuery(command, timeout, false);
+    return sqlQuery(this.SQLSelectCommand + sqlIdentifier(oooTableName) + ";");
   }
 
   /**
    * Setzt die SQL-Anfrage query an die Datenbank ab und liefert die Resultate.
-   *
-   * @param timeout
-   *          maximale Zeit in Millisekunden, die die Anfrage dauern darf.
-   * @param throwOnTimeout
-   *          falls true wird im Falle des überschreitens des Timeouts eine
-   *          TimeoutException geworfen, ansonsten wird die unvollständige
-   *          Ergebnisliste zurückgeliefert.
    */
-  private QueryResults sqlQuery(String query, long timeout, boolean throwOnTimeout)
-      throws TimeoutException
+  private QueryResults sqlQuery(String query)
   {
-    LOGGER.debug("sqlQuery(\"{}, {}, {})", query, timeout, throwOnTimeout);
-    long endTime = System.currentTimeMillis() + timeout;
+    LOGGER.debug("sqlQuery(\"{}\")", query);
 
     List<OOoDataset> datasets = new ArrayList<>();
-
-    if (System.currentTimeMillis() > endTime)
-    {
-      if (throwOnTimeout)
-        throw new TimeoutException(
-          L.m("Konnte Anfrage nicht innerhalb der vorgegebenen Zeit vollenden"));
-      else
-        return new QueryResultsList(datasets);
-    }
 
     XRowSet results = null;
     XConnection conn = null;
@@ -555,18 +531,13 @@ public class OOoDatasource implements Datasource
       {
         XDataSource ds =
           UNO.XDataSource(UNO.dbContext.getRegisteredObject(oooDatasourceName));
-        long lgto = timeout / 1000;
-        if (lgto < 1) {
-          lgto = 1;
-        }
-        ds.setLoginTimeout((int) lgto);
+
+        ds.setLoginTimeout((int) DatasourceJoinerFactory.getDatasourceTimeout());
         conn = ds.getConnection(userName, password);
       }
-      catch (Exception x)
+      catch (SQLException x)
       {
-        throw new TimeoutException(L.m(
-          "Kann keine Verbindung zur Datenquelle \"%1\" herstellen",
-          oooDatasourceName), x);
+        LOGGER.error("Kann keine Verbindung zur Datenquelle herstellen", x);
       }
 
       Object rowSet = UNO.createUNOService("com.sun.star.sdb.RowSet");
@@ -616,20 +587,12 @@ public class OOoDatasource implements Datasource
           data.put(column, value);
         }
         datasets.add(new OOoDataset(data));
-        if (System.currentTimeMillis() > endTime)
-        {
-          if (throwOnTimeout)
-            throw new TimeoutException(
-              L.m("Konnte Anfrage nicht innerhalb der vorgegebenen Zeit vollenden"));
-          else
-            break;
-        }
       }
 
     }
     catch (Exception x)
     {
-      throw new TimeoutException(L.m("Fehler beim Absetzen der Anfrage"), x);
+      LOGGER.error("Fehler beim Absetzen der Anfrage", x);
     }
     finally
     {
@@ -670,7 +633,7 @@ public class OOoDatasource implements Datasource
       {
         idx = loc.findColumn(column);
       }
-      catch (Exception x)
+      catch (SQLException x)
       {
         LOGGER.trace("", x);
       }
@@ -756,7 +719,7 @@ public class OOoDatasource implements Datasource
      *          die Namen der Schlüsselspalten
      */
     private void initKey(String[] keyCols)
-    { // TESTED
+    {
       StringBuilder buffy = new StringBuilder();
       for (int i = 0; i < keyCols.length; ++i)
       {
@@ -795,7 +758,7 @@ public class OOoDatasource implements Datasource
   }
 
   private static String decode(String str)
-  { // TESTED
+  {
     StringBuilder buffy = new StringBuilder(str);
     int i = 0;
     while (0 <= (i = buffy.indexOf("%", i)))

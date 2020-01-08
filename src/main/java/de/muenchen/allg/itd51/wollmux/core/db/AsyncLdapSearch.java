@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+/**
+ * Performs an asynchronous search through DatasourceJoiner. Depending on the underlying active main
+ * datasource, the query searches against ldap, configthingy, ooodatasource and more datasources.
+ */
 public class AsyncLdapSearch
 {
-  private static final Logger LOGGER = LoggerFactory.getLogger(AsyncLdapSearch.class);
   private Map<String, String> searchQuery = new HashMap<>();
   private DatasourceJoiner dj = null;
 
@@ -25,20 +25,11 @@ public class AsyncLdapSearch
   }
 
   private CompletableFuture<QueryResults> asyncLdapSearch = CompletableFuture.supplyAsync(() -> {
-    QueryResults results = null;
 
-    try
-    {
-      if (searchQuery == null || dj == null)
-        return null;
+    if (searchQuery == null || dj == null)
+      return null;
 
-      results = Search.search(searchQuery, dj);
-    } catch (TimeoutException | IllegalArgumentException e)
-    {
-      LOGGER.error("", e);
-    }
-
-    return results;
+    return Search.search(searchQuery, dj);
   });
 
 }

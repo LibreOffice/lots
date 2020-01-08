@@ -80,7 +80,6 @@ import de.muenchen.allg.itd51.wollmux.core.db.Datasource;
 import de.muenchen.allg.itd51.wollmux.core.db.OOoDatasource;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResultsWithSchema;
-import de.muenchen.allg.itd51.wollmux.core.db.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
@@ -116,16 +115,9 @@ public class MailMergeDatasource
   private SOURCE_TYPE currentSourceType = SOURCE_TYPE.NONE;
 
   /**
-   * Wenn nach dieser Zeit in ms nicht alle Daten des Seriendruckauftrags ausgelesen werden konnten,
-   * dann wird der Druckauftrag nicht ausgeführt (und muss eventuell über die Von Bis Auswahl in
-   * mehrere Aufträge zerteilt werden).
-   */
-  private static final long MAILMERGE_GETCONTENTS_TIMEOUT = 60000;
-
-  /**
    * Timeout für den Login bei einer OOo-Datenquelle.
    */
-  private static final long MAILMERGE_LOGIN_TIMEOUT = 5000;
+  private static final int MAILMERGE_LOGIN_TIMEOUT = 30; // s
 
   /**
    * Ein String der möglichst nie in einem vom Benutzer eingegebenen Felder-Anpassen Feld auftauchen
@@ -605,17 +597,12 @@ public class MailMergeDatasource
       try
       {
         XDataSource ds = UNO.XDataSource(UNO.dbContext.getRegisteredObject(selectedDBModel.datasourceName));
-        long lgto = MAILMERGE_LOGIN_TIMEOUT / 1000;
-        if (lgto < 1)
-        {
-          lgto = 1;
-        }
-        ds.setLoginTimeout((int) lgto);
+        ds.setLoginTimeout(MAILMERGE_LOGIN_TIMEOUT);
         conn = ds.getConnection("", "");
       } catch (Exception x)
       {
-        throw new TimeoutException(
-            L.m("Kann keine Verbindung zur Datenquelle \"%1\" herstellen", selectedDBModel.datasourceName));
+        LOGGER.error("Kann keine Verbindung zur Datenquelle {} herstellen",
+            selectedDBModel.datasourceName);
       }
 
       Object rowSet = UNO.createUNOService("com.sun.star.sdb.RowSet");
@@ -792,7 +779,7 @@ public class MailMergeDatasource
     {
       if (rowIndex < 1)
         throw new IllegalArgumentException(L.m("Illegale Datensatznummer: %1", rowIndex));
-      QueryResults res = oooDatasource.getContents(MAILMERGE_GETCONTENTS_TIMEOUT);
+      QueryResults res = oooDatasource.getContents();
       for (Dataset ds : res)
       {
         if (--rowIndex == 0)
@@ -891,7 +878,9 @@ public class MailMergeDatasource
                   .getString();
               columnValues.add(columnValue);
             } else
+            {
               columnValues.add("");
+            }
           }
         }
       }
@@ -906,10 +895,10 @@ public class MailMergeDatasource
    * Liefert den Inhalt der Tabelle tableName aus der OOo Datenquelle mit Namen oooDatasourceName.
    *
    */
-  private QueryResultsWithSchema getDbData(Datasource oooDatasource) throws Exception
+  private QueryResultsWithSchema getDbData(Datasource oooDatasource)
   {
     List<String> schema = oooDatasource.getSchema();
-    QueryResults res = oooDatasource.getContents(MAILMERGE_GETCONTENTS_TIMEOUT);
+    QueryResults res = oooDatasource.getContents();
     return new QueryResultsWithSchema(res, schema);
   }
 
@@ -1317,12 +1306,7 @@ public class MailMergeDatasource
     try
     {
       XDataSource ds = UNO.XDataSource(UNO.dbContext.getRegisteredObject(oooDatasourceName));
-      long lgto = MAILMERGE_LOGIN_TIMEOUT / 1000;
-      if (lgto < 1)
-      {
-        lgto = 1;
-      }
-      ds.setLoginTimeout((int) lgto);
+      ds.setLoginTimeout(MAILMERGE_LOGIN_TIMEOUT);
       XConnection conn = ds.getConnection("", "");
       XNameAccess tables = UNO.XTablesSupplier(conn).getTables();
       for (String name : tables.getElementNames())
@@ -1343,12 +1327,7 @@ public class MailMergeDatasource
     try
     {
       XDataSource ds = UNO.XDataSource(UNO.dbContext.getRegisteredObject(datasourceName));
-      long lgto = MAILMERGE_LOGIN_TIMEOUT / 1000;
-      if (lgto < 1)
-      {
-        lgto = 1;
-      }
-      ds.setLoginTimeout((int) lgto);
+      ds.setLoginTimeout(MAILMERGE_LOGIN_TIMEOUT);
       XConnection conn = ds.getConnection("", "");
       XNameAccess tables = UNO.XTablesSupplier(conn).getTables();
 
@@ -1425,8 +1404,10 @@ public class MailMergeDatasource
                 schema.add(columnName);
                 ++idx;
               } else
+              {
                 iter.remove(); // Spalten mit leerem Spaltennamen werden nicht
               // benötigt.
+              }
             }
 
             results.setColumnNameToIndexMap(mapColumnNameToIndex);

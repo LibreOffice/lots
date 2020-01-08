@@ -39,7 +39,6 @@ import de.muenchen.allg.itd51.wollmux.core.db.ColumnTransformer;
 import de.muenchen.allg.itd51.wollmux.core.db.Datasource;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryPart;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.core.db.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
@@ -138,23 +137,21 @@ public class FunkyDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
-      throws TimeoutException
+  public QueryResults getDatasetsByKey(Collection<String> keys)
   {
-    return columnTransformer.transform(source.getDatasetsByKey(keys, timeout));
+    return columnTransformer.transform(source.getDatasetsByKey(keys));
   }
 
   @Override
-  public QueryResults getContents(long timeout) throws TimeoutException
+  public QueryResults getContents()
   {
-    return columnTransformer.transform(source.getContents(timeout));
+    return columnTransformer.transform(source.getContents());
   }
 
   @Override
-  public QueryResults find(List<QueryPart> query, long timeout)
-      throws TimeoutException
+  public QueryResults find(List<QueryPart> query)
   {
-    return columnTransformer.transform(source.find(query, timeout));
+    return columnTransformer.transform(source.find(query));
   }
 
   @Override

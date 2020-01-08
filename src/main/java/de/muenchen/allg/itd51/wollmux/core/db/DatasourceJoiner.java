@@ -67,6 +67,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,25 +89,24 @@ public class DatasourceJoiner
    */
   public static final String NOCONFIG = "noconfig";
 
-  /**
-   * Wird an Datasource.find() übergeben, um die maximale Zeit der Bearbeitung einer
-   * Suchanfrage zu begrenzen, damit nicht im Falle eines Netzproblems alles
-   * einfriert.
-   */
-  private long queryTimeout;
-  
+  private static final String NACHNAME = "Nachname";
+
+  private static final String VORNAME = "Vorname";
+
+  private static final String ROLLE = "Rolle";
+
+  private static final String DATASET_NOT_FROM_LOS_ERROR_MSG = "Dataset does not come from the local override storage. ";
+
   /**
    * Muster für erlaubte Suchstrings für den Aufruf von find().
    */
-  private static final Pattern SUCHSTRING_PATTERN =
-    Pattern.compile("^\\*?[^*]+\\*?$");
+  private static final Pattern SUCHSTRING_PATTERN = Pattern.compile("^\\*?[^*]+\\*?$");
 
   /**
-   * Bildet Datenquellenname auf Datasource-Objekt ab. Nur die jeweils zuletzt unter
-   * einem Namen in der Config-Datei aufgeführte Datebank ist hier verzeichnet.
+   * Bildet Datenquellenname auf Datasource-Objekt ab. Nur die jeweils zuletzt unter einem Namen in
+   * der Config-Datei aufgeführte Datebank ist hier verzeichnet.
    */
-  private Map<String, Datasource> nameToDatasource =
-    new HashMap<>();
+  private Map<String, Datasource> nameToDatasource = new HashMap<>();
 
   private LocalOverrideStorage myLOS;
 
@@ -121,63 +121,77 @@ public class DatasourceJoiner
   protected Datasource mainDatasource;
 
   /**
-   * Eine Liste, die die {@link Dataset}s enthält, die mit einer
-   * Hintergrunddatenbank verknüpft sind, deren Schlüssel jedoch darin nicht mehr
-   * gefunden wurde und deshalb nicht aktualisiert werden konnte.
+   * Eine Liste, die die {@link Dataset}s enthält, die mit einer Hintergrunddatenbank verknüpft
+   * sind, deren Schlüssel jedoch darin nicht mehr gefunden wurde und deshalb nicht aktualisiert
+   * werden konnte.
    */
   protected List<Dataset> lostDatasets = new ArrayList<>(0);
-  
+
   private List<Dataset> cachedQueryResults = new ArrayList<>();
 
-  public static final long DATASOURCE_TIMEOUT = 10000;
-  
   /**
    * Repräsentiert den Status eines DatasourceJoiners.
    */
   public static class Status
   {
+
+    private Status()
+    {
+    }
+
     /**
-     * Eine Liste, die die {@link Dataset}s enthält, die mit einer
-     * Hintergrunddatenbank verknüpft sind, deren Schlüssel jedoch darin nicht mehr
-     * gefunden wurde und deshalb nicht aktualisiert werden konnte.
+     * Eine Liste, die die {@link Dataset}s enthält, die mit einer Hintergrunddatenbank verknüpft
+     * sind, deren Schlüssel jedoch darin nicht mehr gefunden wurde und deshalb nicht aktualisiert
+     * werden konnte.
      */
-    public List<Dataset> lostDatasets = new ArrayList<>(0);
+    private List<Dataset> lostDatasets = new ArrayList<>(0);
+
+    public List<Dataset> getLostDatasets()
+    {
+      return this.lostDatasets;
+    }
+
+    public void setLostDatasets(List<Dataset> lostDatasets)
+    {
+      this.lostDatasets = lostDatasets;
+    }
   }
 
   private Status status;
 
   /**
    * Erzeugt einen neuen DatasourceJoiner.
-
+   * 
    * @param dataSources
-   * @param mainSourceName
+   *          Configured Datasources from wollmux.conf file.
+   * @param senderSource
+   *          Name of the Sender Source.
    * @param los
-   * @param datasourceTimeout
+   *          Instance of an local override storage object.
    */
-  public DatasourceJoiner(Map<String, Datasource> dataSources, String mainSourceName, LocalOverrideStorage los, long datasourceTimeout)
+  public DatasourceJoiner(Map<String, Datasource> dataSources, String senderSource,
+      LocalOverrideStorage los)
   {
-    init(dataSources, mainSourceName, los, datasourceTimeout);
+    init(dataSources, senderSource, los);
   }
 
   /**
-   * Nur für die Verwendung durch abgeleitete Klassen, die den parametrisierten
-   * Konstruktor nicht verwenden können, und stattdessen init() benutzen.
+   * Nur für die Verwendung durch abgeleitete Klassen, die den parametrisierten Konstruktor nicht
+   * verwenden können, und stattdessen init() benutzen.
    */
   protected DatasourceJoiner()
-  {}
-  
-  protected void init(Map<String, Datasource> dataSources, String mainSourceName, LocalOverrideStorage los, long datasourceTimeout)
   {
-    queryTimeout = datasourceTimeout;
-    status = new Status();
-    
+  }
+
+  protected void init(Map<String, Datasource> dataSources, String senderSource,
+      LocalOverrideStorage los)
+  {
     for (Map.Entry<String, Datasource> ds : dataSources.entrySet())
     {
       if (ds.getValue() != null)
       {
         nameToDatasource.put(ds.getKey(), ds.getValue());
-      }
-      else
+      } else
       {
         nameToDatasource.remove(ds.getKey());
       }
@@ -186,42 +200,30 @@ public class DatasourceJoiner
     myLOS = los;
     List<String> schema = myLOS.getSchema();
 
-    if (!nameToDatasource.containsKey(mainSourceName))
+    if (!nameToDatasource.containsKey(senderSource))
     {
       if (schema == null)
       {
-        throw new ConfigurationErrorException(L.m(
-          "Datenquelle \"%1\" nicht definiert und Cache nicht vorhanden",
-          mainSourceName));
+        throw new ConfigurationErrorException(
+            L.m("Datenquelle {} nicht definiert und Cache nicht vorhanden", senderSource));
       }
-      
-      if (!mainSourceName.equals(NOCONFIG))
-      {
-        LOGGER.error(L.m("Datenquelle \"%1\" nicht definiert => verwende alte Daten aus Cache",
-                                        mainSourceName));
-        mainDatasource = new EmptyDatasource(schema, mainSourceName);
-      }
-      else
-      {
-        mainDatasource = new DummyDatasourceWithMessagebox(schema, mainSourceName);
-      }
-      
-      nameToDatasource.put(mainSourceName, mainDatasource);
-    }
-    else
-    {
-      mainDatasource = nameToDatasource.get(mainSourceName);
 
-      try
+      if (!senderSource.equals(NOCONFIG))
       {
-        lostDatasets = myLOS.refreshFromDatabase(mainDatasource, queryTimeout(), status);
-      }
-      catch (TimeoutException x)
+        LOGGER.error("Datenquelle {} nicht definiert => verwende alte Daten aus Cache",
+            senderSource);
+        mainDatasource = new EmptyDatasource(schema, senderSource);
+      } else
       {
-        LOGGER.error(L.m(
-          "Timeout beim Zugriff auf Datenquelle \"%1\" => Benutze Daten aus Cache",
-          mainDatasource.getName()), x);
+        mainDatasource = new DummyDatasourceWithMessagebox(schema, senderSource);
       }
+
+      nameToDatasource.put(senderSource, mainDatasource);
+    } else
+    {
+      mainDatasource = nameToDatasource.get(senderSource);
+
+      lostDatasets = myLOS.refreshFromDatabase(mainDatasource, status);
     }
   }
 
@@ -235,6 +237,13 @@ public class DatasourceJoiner
     return mainDatasource;
   }
 
+  /**
+   * Get Datasource by given name.
+   *
+   * @param name
+   *          Name of the Datasource, i.e. "personal", "ldap"
+   * @return A Datasource Object along with the datasource name.
+   */
   public Datasource getDatasource(String name)
   {
     return nameToDatasource.get(name);
@@ -249,7 +258,7 @@ public class DatasourceJoiner
   {
     return mainDatasource.getSchema();
   }
-  
+
   public List<Dataset> getLostDatasets()
   {
     return lostDatasets;
@@ -261,17 +270,16 @@ public class DatasourceJoiner
   }
 
   /**
-   * Durchsucht die Hauptdatenbank (nicht den LOS) nach Datensätzen, die in Spalte
-   * spaltenName den Wert suchString stehen haben. suchString kann vorne und/oder
-   * hinten genau ein Sternchen '*' stehen haben, um Präfix/Suffix/Teilstring-Suche
-   * zu realisieren. Folgen mehrerer Sternchen oder Sternchen in der Mitte des
-   * Suchstrings sind verboten und produzieren eine IllegalArgumentException. Ebenso
-   * verboten ist ein suchString, der nur Sternchen enthält oder einer der leer ist.
-   * Alle Ergebnisse sind {@link DJDataset}s. Die Suche erfolgt grundsätzlich
+   * Durchsucht die Hauptdatenbank (nicht den LOS) nach Datensätzen, die in Spalte spaltenName den
+   * Wert suchString stehen haben. suchString kann vorne und/oder hinten genau ein Sternchen '*'
+   * stehen haben, um Präfix/Suffix/Teilstring-Suche zu realisieren. Folgen mehrerer Sternchen oder
+   * Sternchen in der Mitte des Suchstrings sind verboten und produzieren eine
+   * IllegalArgumentException. Ebenso verboten ist ein suchString, der nur Sternchen enthält oder
+   * einer der leer ist. Alle Ergebnisse sind {@link DJDataset}s. Die Suche erfolgt grundsätzlich
    * case-insensitive.
    * <p>
-   * Im folgenden eine Liste möglicher Suchanfragen mit Angabe, ob sie unterstützt
-   * wird (X) oder nicht (O).
+   * Im folgenden eine Liste möglicher Suchanfragen mit Angabe, ob sie unterstützt wird (X) oder
+   * nicht (O).
    * </p>
    * 
    * <pre>
@@ -300,65 +308,52 @@ public class DatasourceJoiner
    * X           &quot;Vorname N.&quot;
    * </pre>
    * 
-   * @throws TimeoutException
-   *           falls die Anfrage nicht innerhalb einer intern vorgegebenen Zeitspanne
-   *           beendet werden konnte.
-   */
-  public QueryResults find(String spaltenName, String suchString)
-      throws TimeoutException
-  { // TESTED
-    if (suchString == null || !SUCHSTRING_PATTERN.matcher(suchString).matches())
-      throw new IllegalArgumentException(L.m("Illegaler Suchstring: %1", suchString));
-
-    List<QueryPart> query = new ArrayList<>();
-    query.add(new QueryPart(spaltenName, suchString));
-    return find(query);
-  }
-
-  /**
-   * Wie find(spaltenName, suchString), aber mit einer zweiten Spaltenbedingung, die
-   * und-verknüpft wird.
+   * @param query
+   *          of queries as a 2-dimensional String Pair. First string is the 'Column' to search
+   *          against the datasource along with a value.
    * 
-   * @throws TimeoutException
+   * @return A filtered List with QueryPart objects.
    */
-  public QueryResults find(String spaltenName1, String suchString1,
-      String spaltenName2, String suchString2) throws TimeoutException
+  public List<QueryPart> buildQuery(List<Pair<String, String>> query)
   {
-    if (suchString1 == null || !SUCHSTRING_PATTERN.matcher(suchString1).matches())
-      throw new IllegalArgumentException(
-        L.m("Illegaler Suchstring: %1", suchString1));
-    if (suchString2 == null || !SUCHSTRING_PATTERN.matcher(suchString2).matches())
-      throw new IllegalArgumentException(
-        L.m("Illegaler Suchstring: %1", suchString2));
+    List<QueryPart> queryParts = new ArrayList<>();
 
-    List<QueryPart> query = new ArrayList<>();
-    query.add(new QueryPart(spaltenName1, suchString1));
-    query.add(new QueryPart(spaltenName2, suchString2));
-    return find(query);
+    for (Pair<String, String> pair : query)
+    {
+      if (pair.getValue1() == null || !SUCHSTRING_PATTERN.matcher(pair.getValue1()).matches())
+      {
+        continue;
+      }
+
+      queryParts.add(new QueryPart(pair.getValue0(), pair.getValue1()));
+    }
+
+    return queryParts;
   }
 
   /**
    * Durchsucht eine beliebige Datenquelle unter Angabe einer beliebigen Anzahl von
-   * Spaltenbedingungen. ACHTUNG! Die Ergebnisse sind keine DJDatasets, weil diese
-   * Methode nur die Datensätze der in der Query benannten Datenquelle durchreicht.
-   * Diese Methode ist also nur deswegen Teil des DJs, weil der DJ die ganzen
-   * Datenquellen kennt. Ein Wrappen der Datensätze in DJDatasets wäre also nicht
-   * sinnvoll, da es damit möglich wäre durch die copy() Methode Datensätze in den
-   * LOS zu kopieren, die gar nicht aus der SENDER_SOURCE kommen.
+   * Spaltenbedingungen. ACHTUNG! Die Ergebnisse sind keine DJDatasets, weil diese Methode nur die
+   * Datensätze der in der Query benannten Datenquelle durchreicht. Diese Methode ist also nur
+   * deswegen Teil des DJs, weil der DJ die ganzen Datenquellen kennt. Ein Wrappen der Datensätze in
+   * DJDatasets wäre also nicht sinnvoll, da es damit möglich wäre durch die copy() Methode
+   * Datensätze in den LOS zu kopieren, die gar nicht aus der SENDER_SOURCE kommen.
    * 
-   * @throws TimeoutException
+   * @param query
+   *          Query to search against the main datasource.
    * @throws IllegalArgumentException
-   *           falls eine Suchanfrage fehlerhaft ist, weil z.B. die entsprechende
-   *           Datenquelle nicht existiert.
+   *           falls eine Suchanfrage fehlerhaft ist, weil z.B. die entsprechende Datenquelle nicht
+   *           existiert.
+   * @return Results as {@link QueryResults}
    */
-  public QueryResults find(Query query) throws TimeoutException
+  public QueryResults find(Query query)
   {
     Datasource source = nameToDatasource.get(query.getDatasourceName());
     if (source == null)
     {
-      throw new IllegalArgumentException(L.m(
-        "Datenquelle \"%1\" soll durchsucht werden, ist aber nicht definiert",
-        query.getDatasourceName()));
+      throw new IllegalArgumentException(
+          L.m("Datenquelle \"%1\" soll durchsucht werden, ist aber nicht definiert",
+              query.getDatasourceName()));
     }
 
     /*
@@ -369,108 +364,84 @@ public class DatasourceJoiner
       String suchString = part.getSearchString();
       if (suchString == null || !SUCHSTRING_PATTERN.matcher(suchString).matches())
       {
-        throw new IllegalArgumentException(L.m("Illegaler Suchstring: %1",
-          suchString));
+        throw new IllegalArgumentException(L.m("Illegaler Suchstring: %1", suchString));
       }
     }
 
     // Suche ausführen.
-    return source.find(query.getQueryParts(), queryTimeout());
+    return source.find(query.getQueryParts());
   }
 
   /**
-   * Findet Datensätze in der Hauptdatenquelle, die query (Liste von QueryParts)
-   * entsprechen.
+   * Find matches in the main datasource by a List of {@link QueryPart}.
    * 
-   * Die Ergebnisse sind {@link DJDataset}s!
-   * 
-   * @throws TimeoutException
+   * @param query
+   *          Query to search against the main datasource.
+   * @return Search results as {@link QueryResults}
    */
-  public QueryResults find(List<QueryPart> query) throws TimeoutException
-  { // TESTED
-    QueryResults res = mainDatasource.find(query, queryTimeout());
-    List<DJDatasetWrapper> djDatasetsList = StreamSupport
-        .stream(res.spliterator(), false)
-        .map(ds -> new DJDatasetWrapper(ds))
-        .collect(Collectors.toList());
+  public QueryResults find(List<QueryPart> query)
+  {
+    QueryResults res = mainDatasource.find(query);
+    List<DJDatasetWrapper> djDatasetsList = StreamSupport.stream(res.spliterator(), false)
+        .map(ds -> new DJDatasetWrapper(ds)).collect(Collectors.toList());
 
     return new QueryResultsList(djDatasetsList);
   }
 
   /**
-   * Liefert eine implementierungsabhängige Teilmenge der Datensätze der Datenquelle
-   * mit Name datasourceName. Wenn möglich sollte die Datenquelle hier all ihre
-   * Datensätze zurückliefern oder zumindest soviele wie möglich. Es ist jedoch auch
-   * erlaubt, dass hier gar keine Datensätze zurückgeliefert werden. Wenn sinnvoll
-   * sollte anstatt des Werfens einer TimeoutException ein Teil der Daten
+   * Liefert eine implementierungsabhängige Teilmenge der Datensätze der Datenquelle mit Name
+   * datasourceName. Wenn möglich sollte die Datenquelle hier all ihre Datensätze zurückliefern oder
+   * zumindest soviele wie möglich. Es ist jedoch auch erlaubt, dass hier gar keine Datensätze
    * zurückgeliefert werden.
    * 
    * ACHTUNG! Die Ergebnisse sind keine DJDatasets!
    * 
-   * @throws TimeoutException
-   *           falls ein Fehler auftritt oder die Anfrage nicht rechtzeitig beendet
-   *           werden konnte. In letzterem Fall ist das Werfen dieser Exception
-   *           jedoch nicht Pflicht und die Datenquelle kann stattdessen den Teil der
-   *           Ergebnisse zurückliefern, die in der gegebenen Zeit gewonnen werden
-   *           konnten.
-   * @throws IllegalArgumentException
-   *           falls die Datenquelle nicht existiert.
+   * @param datasourceName
+   *          Name of the datasource.
+   * @return {@link QueryResults} All Datasets of the given data source.
    */
-  public QueryResults getContentsOf(String datasourceName) throws TimeoutException
+  public QueryResults getContentsOf(String datasourceName)
   {
     Datasource source = nameToDatasource.get(datasourceName);
     if (source == null)
-      throw new IllegalArgumentException(L.m(
-        "Datenquelle \"%1\" soll abgefragt werden, ist aber nicht definiert",
-        datasourceName));
+      throw new IllegalArgumentException(
+          L.m("Datenquelle {} soll abgefragt werden, ist aber nicht definiert", datasourceName));
 
-    return source.getContents(queryTimeout());
+    return source.getContents();
   }
 
   /**
-   * Liefert eine implementierungsabhängige Teilmenge der Datensätze der
-   * Hauptdatenquelle. Wenn möglich sollte die Datenquelle hier all ihre Datensätze
-   * zurückliefern oder zumindest soviele wie möglich. Es ist jedoch auch erlaubt,
-   * dass hier gar keine Datensätze zurückgeliefert werden. Wenn sinnvoll sollte
-   * anstatt des Werfens einer {@link TimeoutException} ein Teil der Daten
-   * zurückgeliefert werden.
-   * 
+   * Liefert eine implementierungsabhängige Teilmenge der Datensätze der Hauptdatenquelle. Wenn
+   * möglich sollte die Datenquelle hier all ihre Datensätze zurückliefern oder zumindest soviele
+   * wie möglich. Es ist jedoch auch erlaubt, dass hier gar keine Datensätze zurückgeliefert werden.
    * Die Ergebnisse sind DJDatasets!
    * 
    * @return Datensätze aus der Datenquelle.
-   * @throws TimeoutException
-   *           falls ein Fehler auftritt oder die Anfrage nicht rechtzeitig beendet
-   *           werden konnte. In letzterem Fall ist das Werfen dieser Exception
-   *           jedoch nicht Pflicht und die Datenquelle kann stattdessen den Teil der
-   *           Ergebnisse zurückliefern, die in der gegebenen Zeit gewonnen werden
-   *           konnten.
    */
-  public QueryResults getContentsOfMainDatasource() throws TimeoutException
+  public QueryResults getContentsOfMainDatasource()
   {
-    QueryResults res = mainDatasource.getContents(queryTimeout());
-    List<DJDatasetWrapper> djDatasetsList = StreamSupport
-        .stream(res.spliterator(), false)
-        .map(ds -> new DJDatasetWrapper(ds))
-        .collect(Collectors.toList());
+    QueryResults res = mainDatasource.getContents();
+    List<DJDatasetWrapper> djDatasetsList = StreamSupport.stream(res.spliterator(), false)
+        .map(ds -> new DJDatasetWrapper(ds)).collect(Collectors.toList());
 
     return new QueryResultsList(djDatasetsList);
   }
 
-  protected long queryTimeout()
-  {
-    return queryTimeout;
-  }
-
   /**
-   * Speichert den aktuellen LOS samt zugehörigem Cache in die Datei cacheFile.
+   * Saves current local override storage with linked cache in in cache.conf.
+   * 
+   * @param cacheFile
+   *          File Object as{@link File}
+   * @return Cache and local override storage as {@link ConfigThingy} with a preselected default
+   *         dataset.
    */
   public ConfigThingy saveCacheAndLOS(File cacheFile)
   {
-    LOGGER.debug(L.m("Speichere Cache nach %1.", cacheFile));
+    LOGGER.debug("Speichere Cache nach {}.", cacheFile);
     List<String> schema = myLOS.getSchema();
     if (schema == null)
     {
-      LOGGER.error(L.m("Kann Cache nicht speichern, weil nicht initialisiert."));
+      LOGGER.error("Kann Cache nicht speichern, weil nicht initialisiert.");
       return null;
     }
 
@@ -491,13 +462,34 @@ public class DatasourceJoiner
       ConfigThingy ausgewaehlt = conf.add("Ausgewaehlt");
       ausgewaehlt.add(ds.getKey());
       ausgewaehlt.add(Integer.toString(getSelectedDatasetSameKeyIndex()));
-    }
-    catch (DatasetNotFoundException x)
+    } catch (DatasetNotFoundException x)
     {
       LOGGER.trace("", x);
     }
 
     return conf;
+  }
+
+  /**
+   * Copies all datasets from the search result into the personal sender source list.
+   * 
+   * @param results
+   *          Search results from a datasource as {@link QueryResults}.
+   * @return Size of the param as {@link Integer}
+   */
+  public int addToPAL(QueryResults results)
+  {
+    if (results == null || results.isEmpty())
+    {
+      return 0;
+    }
+
+    for (Dataset ds : results)
+    {
+      DJDataset element = (DJDataset) ds;
+      element.copy();
+    }
+    return results.size();
   }
 
   /**
@@ -512,8 +504,8 @@ public class DatasourceJoiner
   }
 
   /**
-   * Liefert die Anzahl der Datensätze im LOS, die den selben Schlüssel haben wie der
-   * ausgewählte, und die vor diesem in der LOS-Liste gespeichert sind.
+   * Liefert die Anzahl der Datensätze im LOS, die den selben Schlüssel haben wie der ausgewählte,
+   * und die vor diesem in der LOS-Liste gespeichert sind.
    * 
    * @throws DatasetNotFoundException
    *           falls der LOS leer ist (ansonsten ist immer ein Datensatz selektiert).
@@ -525,10 +517,9 @@ public class DatasourceJoiner
 
   /**
    * Erlaubt es, einen {@link ColumnTransformer} zu setzen, der von
-   * {@link #getSelectedDatasetTransformed()} verwendet wird. Falls null übergeben
-   * wird, wird die Transformation deaktiviert und
-   * {@link #getSelectedDatasetTransformed()} liefert das selbe Ergebnis wie
-   * {@link #getSelectedDataset()}.
+   * {@link #getSelectedDatasetTransformed()} verwendet wird. Falls null übergeben wird, wird die
+   * Transformation deaktiviert und {@link #getSelectedDatasetTransformed()} liefert das selbe
+   * Ergebnis wie {@link #getSelectedDataset()}.
    */
   public void setTransformer(ColumnTransformer columnTransformer)
   {
@@ -537,9 +528,9 @@ public class DatasourceJoiner
 
   /**
    * Falls kein {@link ColumnTransformer} gesetzt wurde mit
-   * {@link #setTransformer(ColumnTransformer)}, so liefert diese Funktion das selbe
-   * wie {@link #getSelectedDataset()}, ansonsten wird das durch den
-   * ColumnTransformer transformierte Dataset geliefert.
+   * {@link #setTransformer(ColumnTransformer)}, so liefert diese Funktion das selbe wie
+   * {@link #getSelectedDataset()}, ansonsten wird das durch den ColumnTransformer transformierte
+   * Dataset geliefert.
    * 
    * @throws DatasetNotFoundException
    *           falls der LOS leer ist (ansonsten ist immer ein Datensatz selektiert).
@@ -547,57 +538,62 @@ public class DatasourceJoiner
   public Dataset getSelectedDatasetTransformed() throws DatasetNotFoundException
   {
     DJDataset ds = getSelectedDataset();
-    if (columnTransformer == null){
+    if (columnTransformer == null)
+    {
       return ds;
     }
     return columnTransformer.transform(ds);
   }
 
   /**
-   * Liefert alle Datensätze des Lokalen Override Speichers (als {@link DJDataset}).
+   * Get all datasets from the local override storage.
+   * 
+   * @return Datasets from local override storage by type {@link QueryResults}.
    */
   public QueryResults getLOS()
   {
     return new QueryResultsList(myLOS.iterator(), myLOS.size());
   }
-  
+
   public void setCachedLdapResults(QueryResults results)
   {
     results.forEach(ds -> this.cachedQueryResults.add(ds));
   }
-  
+
   public void addCachedLdapResult(Dataset ds)
   {
     Iterator<Dataset> datasetIterator = this.cachedQueryResults.iterator();
-    
-    while (datasetIterator.hasNext()) {
+
+    while (datasetIterator.hasNext())
+    {
       Dataset dataset = datasetIterator.next();
       try
       {
-        if (dataset.get("OID").equals(ds.get("OID"))) {
+        if (dataset.get("OID").equals(ds.get("OID")))
+        {
           datasetIterator.remove();
         }
       } catch (ColumnNotFoundException e)
       {
         LOGGER.error("", e);
       }
-   }
-  
+    }
+
     this.cachedQueryResults.add(ds);
   }
-  
+
   public List<Dataset> getCachedLdapResults()
   {
     return this.cachedQueryResults;
   }
-  
+
   public Dataset getCachedLdapResultByOID(String oid)
   {
     if (this.cachedQueryResults == null || this.cachedQueryResults.isEmpty())
       return null;
 
     Dataset result = null;
-    
+
     for (Dataset ds : this.cachedQueryResults)
     {
       try
@@ -616,9 +612,11 @@ public class DatasourceJoiner
     return result;
   }
 
-  public Set<String> getOIDsFromLOS() {
+  public Set<String> getOIDsFromLOS()
+  {
     Set<String> oids = new HashSet<>();
-    for (Dataset dataset : myLOS) {
+    for (Dataset dataset : myLOS)
+    {
       try
       {
         oids.add(dataset.get("OID"));
@@ -627,15 +625,14 @@ public class DatasourceJoiner
         LOGGER.error("", e);
       }
     }
-    
+
     return oids;
   }
 
-  public static final Comparator<DJDataset> sortPAL = (ds1, ds2) ->
-  {
+  public static final Comparator<DJDataset> sortPAL = (ds1, ds2) -> {
     try
     {
-      return ds1.get("Nachname").compareTo(ds2.get("Nachname"));
+      return ds1.get(NACHNAME).compareTo(ds2.get(NACHNAME));
     } catch (ColumnNotFoundException e)
     {
       LOGGER.error("", e);
@@ -645,9 +642,9 @@ public class DatasourceJoiner
   };
 
   /**
-   * Legt einen neuen Datensatz im LOS an, der nicht mit einer Hintergrunddatenbank
-   * verknüpft ist und liefert ihn zurück. Alle Felder des neuen Datensatzes sind mit
-   * dem Namen der entsprechenden Spalte initialisiert.
+   * Creates a new Dataset in LocalOverrideStorage that is not linked with a backing store database.
+   * 
+   * @return New Dataset. All fields of the new Dataset are prefilled with the associated column.
    */
   public DJDataset newDataset()
   {
@@ -655,10 +652,9 @@ public class DatasourceJoiner
   }
 
   /**
-   * Ein Wrapper um einfache Datasets, wie sie von Datasources als Ergebnisse von
-   * Anfragen zurückgeliefert werden. Der Wrapper ist notwendig, um die auch für
-   * Fremddatensätze sinnvollen DJDataset Funktionen anbieten zu können, allen voran
-   * copy().
+   * Ein Wrapper um einfache Datasets, wie sie von Datasources als Ergebnisse von Anfragen
+   * zurückgeliefert werden. Der Wrapper ist notwendig, um die auch für Fremddatensätze sinnvollen
+   * DJDataset Funktionen anbieten zu können, allen voran copy().
    */
   private class DJDatasetWrapper implements DJDataset
   {
@@ -670,16 +666,13 @@ public class DatasourceJoiner
     }
 
     @Override
-    public void set(String columnName, String newValue)
-        throws ColumnNotFoundException
+    public void set(String columnName, String newValue) throws ColumnNotFoundException
     {
-      throw new UnsupportedOperationException(
-        L.m("Datensatz kommt nicht aus dem LOS"));
+      throw new UnsupportedOperationException(DATASET_NOT_FROM_LOS_ERROR_MSG);
     }
 
     @Override
-    public boolean hasLocalOverride(String columnName)
-        throws ColumnNotFoundException
+    public boolean hasLocalOverride(String columnName) throws ColumnNotFoundException
     {
       return false;
     }
@@ -705,15 +698,14 @@ public class DatasourceJoiner
     @Override
     public void select()
     {
-      throw new UnsupportedOperationException(
-        L.m("Datensatz kommt nicht aus dem LOS"));
+      throw new UnsupportedOperationException(DATASET_NOT_FROM_LOS_ERROR_MSG);
     }
 
     @Override
     public void discardLocalOverride(String columnName)
         throws ColumnNotFoundException, NoBackingStoreException
     {
-    // nichts zu tun
+      // nichts zu tun
     }
 
     @Override
@@ -725,8 +717,7 @@ public class DatasourceJoiner
     @Override
     public void remove()
     {
-      throw new UnsupportedOperationException(
-        L.m("Datensatz kommt nicht aus dem LOS"));
+      throw new UnsupportedOperationException(DATASET_NOT_FROM_LOS_ERROR_MSG);
     }
 
     @Override
@@ -748,9 +739,9 @@ public class DatasourceJoiner
 
       try
       {
-        String rolle = get("Rolle");
-        String nachname = get("Nachname");
-        String vorname = get("Vorname");
+        String rolle = get(ROLLE);
+        String nachname = get(NACHNAME);
+        String vorname = get(VORNAME);
 
         stringBuilder.append(rolle == null || rolle.isEmpty() ? "" : "(" + rolle + ") ");
         stringBuilder.append(nachname == null || nachname.isEmpty() ? "" : nachname);

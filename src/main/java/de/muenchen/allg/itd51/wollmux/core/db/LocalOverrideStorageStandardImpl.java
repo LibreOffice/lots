@@ -32,25 +32,24 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
 {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(LocalOverrideStorageStandardImpl.class);
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(LocalOverrideStorageStandardImpl.class);
 
   /**
-   * Präfix, das vor generierte Schlüssel von LOS-only Datensätzen gesetzt wird,
-   * um diese eindeutig von anderen Schlüsseln unterscheiden zu können.
+   * Präfix, das vor generierte Schlüssel von LOS-only Datensätzen gesetzt wird, um diese eindeutig
+   * von anderen Schlüsseln unterscheiden zu können.
    */
   private static final String LOS_ONLY_MAGIC = "GEHORCHE DEM WOLLMUX!";
 
   /**
-   * Liste aller LOSDJDatasets. Die Liste muss geordnet sein, damit Datensätze
-   * mit gleichem Schlüssel über ihre Position in der Liste identifiziert werden
-   * können.
+   * Liste aller LOSDJDatasets. Die Liste muss geordnet sein, damit Datensätze mit gleichem
+   * Schlüssel über ihre Position in der Liste identifiziert werden können.
    */
   private List<LOSDJDataset> data = new LinkedList<>();
 
   /**
-   * Das Schema des LOS. Dies ist null solange es nicht initialisiert wurde.
-   * Falls beim Laden des Cache ein Fehler auftritt kann dies auch nach dem
-   * Konstruktor noch null sein.
+   * Das Schema des LOS. Dies ist null solange es nicht initialisiert wurde. Falls beim Laden des
+   * Cache ein Fehler auftritt kann dies auch nach dem Konstruktor noch null sein.
    */
   private List<String> losSchema = null;
 
@@ -65,8 +64,8 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
   private long nextGeneratedKey = new Date().getTime();
 
   /**
-   * Versucht, den Cache und den LOS aus der Datei losCache (ConfigThingy) zu
-   * lesen. %includes in losCache werden relativ zu context aufgelöst.
+   * Versucht, den Cache und den LOS aus der Datei losCache (ConfigThingy) zu lesen. %includes in
+   * losCache werden relativ zu context aufgelöst.
    */
   public LocalOverrideStorageStandardImpl(File losCache, URL context)
   { // TESTED
@@ -79,10 +78,9 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
         ConfigThingy cacheData = new ConfigThingy(losCache.getPath(), context,
             new InputStreamReader(new FileInputStream(losCache), ConfigThingy.CHARSET));
         /*
-         * Falls der Cache korrupt ist sollen keine korrupten Daten in unseren
-         * globalen Felder stehen, deswegen erzeugen wir erstmal alles in
-         * temporären Variablen und kopieren diese nachher in die Felder
-         * losSchema und this.data.
+         * Falls der Cache korrupt ist sollen keine korrupten Daten in unseren globalen Felder
+         * stehen, deswegen erzeugen wir erstmal alles in temporären Variablen und kopieren diese
+         * nachher in die Felder losSchema und this.data.
          */
         List<String> newSchema = new ArrayList<>();
         List<LOSDJDataset> newData = new LinkedList<>();
@@ -136,8 +134,9 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
         String spalte = dsNode.getName();
         if (!newSchema.contains(spalte))
         {
-          LOGGER.error(
-              L.m("%1 enthält korrupten Datensatz (Spalte %2 nicht im Schema) => Cache wird ignoriert!", losCachePath, spalte));
+          LOGGER.error(L.m(
+              "%1 enthält korrupten Datensatz (Spalte %2 nicht im Schema) => Cache wird ignoriert!",
+              losCachePath, spalte));
           return null;
         }
 
@@ -152,8 +151,9 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
       String spalte = dsNode.getName();
       if (!newSchema.contains(spalte))
       {
-        LOGGER
-            .error(L.m("%1 enthält korrupten Datensatz (Spalte %2 nicht im Schema) => Cache wird ignoriert!", losCachePath, spalte));
+        LOGGER.error(L.m(
+            "%1 enthält korrupten Datensatz (Spalte %2 nicht im Schema) => Cache wird ignoriert!",
+            losCachePath, spalte));
         return null;
       }
 
@@ -165,9 +165,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
   /*
    * (non-Javadoc)
    * 
-   * @see
-   * de.muenchen.allg.itd51.wollmux.db.LOSInterface#selectDataset(java.lang.
-   * String, int)
+   * @see de.muenchen.allg.itd51.wollmux.db.LOSInterface#selectDataset(java.lang. String, int)
    */
   @Override
   public void selectDataset(String selectKey, int sameKeyIndex)
@@ -191,8 +189,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
   }
 
   /**
-   * Generiert einen neuen (eindeutigen) Schlüssel für die Erzeugung eines
-   * LOS-only Datensatzes.
+   * Generiert einen neuen (eindeutigen) Schlüssel für die Erzeugung eines LOS-only Datensatzes.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -235,8 +232,8 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
   public DJDataset copyNonLOSDataset(Dataset ds)
   {
     if (ds instanceof LOSDJDataset)
-      LOGGER
-          .error(L.m("Diese Funktion darf nicht für LOSDJDatasets aufgerufen werden, da sie immer eine Kopie mit Backing Store erzeugt."));
+      LOGGER.error(L.m(
+          "Diese Funktion darf nicht für LOSDJDatasets aufgerufen werden, da sie immer eine Kopie mit Backing Store erzeugt."));
 
     Map<String, String> dsoverride = new HashMap<>();
     Map<String, String> dscache = new HashMap<>();
@@ -278,8 +275,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
   /*
    * (non-Javadoc)
    * 
-   * @see de.muenchen.allg.itd51.wollmux.db.LOSInterface#
-   * getSelectedDatasetSameKeyIndex()
+   * @see de.muenchen.allg.itd51.wollmux.db.LOSInterface# getSelectedDatasetSameKeyIndex()
    */
   @Override
   public int getSelectedDatasetSameKeyIndex() throws DatasetNotFoundException
@@ -312,22 +308,20 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
    * de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner.Status)
    */
   @Override
-  public List<Dataset> refreshFromDatabase(Datasource database, long timeout, Status status) throws TimeoutException
-  { // TESTED
+  public List<Dataset> refreshFromDatabase(Datasource database, Status status)
+  {
     /*
-     * Zuallererst das Schema anpassen. Insbesondere muss dies VOR dem Leeren
-     * von data erfolgen. Dadurch werden die LOS-Speicher der LOSDJDatasets an
-     * das neue Schema angepasst, bevor der Speicher geleert wird. Dies ist
-     * notwendig, da die LOS-Speicher später direkt an die aus res neu erzeugten
-     * LOSDJDatasets weitergereicht werden.
+     * Zuallererst das Schema anpassen. Insbesondere muss dies VOR dem Leeren von data erfolgen.
+     * Dadurch werden die LOS-Speicher der LOSDJDatasets an das neue Schema angepasst, bevor der
+     * Speicher geleert wird. Dies ist notwendig, da die LOS-Speicher später direkt an die aus res
+     * neu erzeugten LOSDJDatasets weitergereicht werden.
      */
     this.setSchema(database.getSchema());
 
     /*
-     * Mappt Schlüssel auf Listen mit Datensätzen, die diese Schlüssel haben.
-     * Hier werden Listen verwendet, da mehrere Datensätze denselben Schlüssel
-     * haben können, z.B. wenn der selbe LDAP-Datensatz mehrfach eingefügt wurde
-     * um mit verschiedenen Rollen verwendet zu werden.
+     * Mappt Schlüssel auf Listen mit Datensätzen, die diese Schlüssel haben. Hier werden Listen
+     * verwendet, da mehrere Datensätze denselben Schlüssel haben können, z.B. wenn der selbe
+     * LDAP-Datensatz mehrfach eingefügt wurde um mit verschiedenen Rollen verwendet zu werden.
      */
     Map<String, List<LOSDJDataset>> keyToLOSDJDatasetList = new HashMap<>();
 
@@ -338,14 +332,13 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
     }
 
     /*
-     * Aktualisierte Daten abfragen bevor data geleert wird, damit im Falle
-     * eines Timeouts nicht der Cache verloren geht.
+     * Aktualisierte Daten abfragen bevor data geleert wird, damit im Falle eines Timeouts nicht der
+     * Cache verloren geht.
      */
-    QueryResults res = database.getDatasetsByKey(keyToLOSDJDatasetList.keySet(), timeout);
+    QueryResults res = database.getDatasetsByKey(keyToLOSDJDatasetList.keySet());
 
     /*
-     * Schlüssel und Index des selektierten Datensatzes feststellen, bevor data
-     * geleert wird.
+     * Schlüssel und Index des selektierten Datensatzes feststellen, bevor data geleert wird.
      */
     String selectKey = "";
     int sameKeyIndex = 0;
@@ -362,12 +355,11 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
     selectedDataset = null;
 
     /*
-     * Neue Datensätze auf Basis der Query erzeugen. Dabei werden die
-     * LOS-Speicher von den korrespondierenden alten (gefunden via
-     * keyToLOSDJDatasetList) direkt übernommen. ACHTUNG: Hierbei werden auch
-     * temporär im Hintergrundspeicher "verlorene" Datensätze wieder mit dem
-     * Hintergrundspeicher verknüpft. Siehe langer Kommentar weiter unten. Bei
-     * evtl. Änderungen bitte beachten!!!
+     * Neue Datensätze auf Basis der Query erzeugen. Dabei werden die LOS-Speicher von den
+     * korrespondierenden alten (gefunden via keyToLOSDJDatasetList) direkt übernommen. ACHTUNG:
+     * Hierbei werden auch temporär im Hintergrundspeicher "verlorene" Datensätze wieder mit dem
+     * Hintergrundspeicher verknüpft. Siehe langer Kommentar weiter unten. Bei evtl. Änderungen
+     * bitte beachten!!!
      */
     for (Dataset sourceDS : res)
     {
@@ -391,7 +383,8 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
           data.add(new LOSDJDataset(dscache, new HashMap<String, String>(), losSchema, key));
         else
         {
-          overrideList.forEach(override -> data.add(new LOSDJDataset(dscache, override.getLOS(), losSchema, key)));
+          overrideList.forEach(
+              override -> data.add(new LOSDJDataset(dscache, override.getLOS(), losSchema, key)));
         }
       } catch (Exception x)
       {
@@ -400,25 +393,21 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
     }
 
     /*
-     * Es ist möglich, dass noch Datensätze aus dem alten LOS übrig sind für die
-     * keine aktuellen Daten gefunden wurden. Dies sind entweder Datensätze, die
-     * von vorneherein nicht mit einer Hintergrunddatenbank verknüpft waren oder
-     * Datensätze, die aufgrund von Änderungen des Hintergrundspeichers nicht
-     * mehr gefunden wurden. Die Datensätze, die von vorneherein nur im LOS
-     * existierten müssen auf jeden Fall erhalten bleiben. Bei den anderen ist
-     * es eine gute Frage, was sinnvoll ist. Momentan bleiben auch sie erhalten.
-     * Das hat folgende Vor- und Nachteile: Vorteile: - Falls das Verschwinden
-     * des Datensatzes nur ein temporäres Problem war, so wird er wenn er wieder
-     * im Hintergrundspeicher auftaucht (und den selben Schlüssel hat) wieder
-     * damit verknüpft. - Der Benutzer verliert nie Einträge seiner
-     * Absenderliste Nachteile: - Der Benutzer merkt evtl. nicht, dass er
-     * plötzlich vom Hintergrundspeicher abgekoppelt ist und bekommt gewünschte
-     * Änderungen nicht mit. - Die Admins haben keine Möglichkeit, einen Eintrag
-     * aus der Absenderliste eines Benutzers zu entfernen (ausser sie greifen
-     * direkt auf sein .wollmux Verzeichnis zu. - Falls ein Datensatz bewusst
-     * entfernt wurde und später ein neuer Datensatz mit dem selben Schlüssel
-     * angelegt wird, so wird der Eintrag in der Absenderliste mit dem neuen
-     * Eintrag verknüpft, obwohl dieser nichts mit dem alten zu tun hat.
+     * Es ist möglich, dass noch Datensätze aus dem alten LOS übrig sind für die keine aktuellen
+     * Daten gefunden wurden. Dies sind entweder Datensätze, die von vorneherein nicht mit einer
+     * Hintergrunddatenbank verknüpft waren oder Datensätze, die aufgrund von Änderungen des
+     * Hintergrundspeichers nicht mehr gefunden wurden. Die Datensätze, die von vorneherein nur im
+     * LOS existierten müssen auf jeden Fall erhalten bleiben. Bei den anderen ist es eine gute
+     * Frage, was sinnvoll ist. Momentan bleiben auch sie erhalten. Das hat folgende Vor- und
+     * Nachteile: Vorteile: - Falls das Verschwinden des Datensatzes nur ein temporäres Problem war,
+     * so wird er wenn er wieder im Hintergrundspeicher auftaucht (und den selben Schlüssel hat)
+     * wieder damit verknüpft. - Der Benutzer verliert nie Einträge seiner Absenderliste Nachteile:
+     * - Der Benutzer merkt evtl. nicht, dass er plötzlich vom Hintergrundspeicher abgekoppelt ist
+     * und bekommt gewünschte Änderungen nicht mit. - Die Admins haben keine Möglichkeit, einen
+     * Eintrag aus der Absenderliste eines Benutzers zu entfernen (ausser sie greifen direkt auf
+     * sein .wollmux Verzeichnis zu. - Falls ein Datensatz bewusst entfernt wurde und später ein
+     * neuer Datensatz mit dem selben Schlüssel angelegt wird, so wird der Eintrag in der
+     * Absenderliste mit dem neuen Eintrag verknüpft, obwohl dieser nichts mit dem alten zu tun hat.
      */
     List<Dataset> lostDatasets = new ArrayList<>();
     for (List<LOSDJDataset> djDatasetList : keyToLOSDJDatasetList.values())
@@ -437,7 +426,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
       }
     }
 
-    status.lostDatasets = lostDatasets;
+    status.setLostDatasets(lostDatasets);
 
     StringBuilder buf = new StringBuilder();
     Iterator<Dataset> iter2 = lostDatasets.iterator();
@@ -451,7 +440,9 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
       }
     }
     if (buf.length() > 0)
-      LOGGER.info("{}{}", L.m("Die Datensätze mit folgenden Schlüsseln konnten nicht aus der Datenbank aktualisiert werden: "), buf);
+      LOGGER.info(
+          "Die Datensätze mit folgenden Schlüsseln konnten nicht aus der Datenbank aktualisiert werden: {}",
+          buf);
 
     selectDataset(selectKey, sameKeyIndex);
 
@@ -472,8 +463,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
   /*
    * (non-Javadoc)
    * 
-   * @see
-   * de.muenchen.allg.itd51.wollmux.db.LOSInterface#dumpData(de.muenchen.allg.
+   * @see de.muenchen.allg.itd51.wollmux.db.LOSInterface#dumpData(de.muenchen.allg.
    * itd51.parser.ConfigThingy)
    */
   @Override
@@ -520,8 +510,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
   /*
    * (non-Javadoc)
    * 
-   * @see
-   * de.muenchen.allg.itd51.wollmux.db.LOSInterface#setSchema(java.util.Set)
+   * @see de.muenchen.allg.itd51.wollmux.db.LOSInterface#setSchema(java.util.Set)
    */
   @Override
   public void setSchema(List<String> schema)
@@ -545,7 +534,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
     if (spaltenDieWeggefallenSind.isEmpty() && spaltenDieDazuGekommenSind.isEmpty())
       return;
 
-    LOGGER.info(L.m("Das Datenbank-Schema wurde geändert. Der Cache wird angepasst."));
+    LOGGER.info("Das Datenbank-Schema wurde geändert. Der Cache wird angepasst.");
 
     Iterator<LOSDJDataset> iter = data.iterator();
     while (iter.hasNext())
@@ -609,8 +598,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
      * Erzeugt einen neuen LOSDJDataset.
      * 
      * @param dscache
-     *          die Map, deren Werte den gecachten Werten aus der
-     *          Hintergrunddatenbank entsprechen.
+     *          die Map, deren Werte den gecachten Werten aus der Hintergrunddatenbank entsprechen.
      * @param dsoverride
      *          die Map, deren Werte den lokalen Overrides entsprechen.
      * @param schema
@@ -626,13 +614,13 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
     }
 
     /**
-     * Entfernt die Spalte namens columnName aus lokalem Override und Cache
-     * dieses Datensatzes.
+     * Entfernt die Spalte namens columnName aus lokalem Override und Cache dieses Datensatzes.
      * 
      * @param columnName
+     *          Name of the column to remove.
      */
     public void drop(String columnName)
-    { // TESTED
+    {
       if (isFromLOS())
       {
         myLOS.remove(columnName);
@@ -669,9 +657,8 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
     }
 
     /**
-     * Ändert die Referenz auf das Schema dieses Datensatzes. Eine Anpassung der
-     * im Datensatz gespeicherten Werte geschieht nicht. Dafür muss drop()
-     * verwendet werden.
+     * Ändert die Referenz auf das Schema dieses Datensatzes. Eine Anpassung der im Datensatz
+     * gespeicherten Werte geschieht nicht. Dafür muss drop() verwendet werden.
      */
     public void setSchema(List<String> losSchema)
     {
@@ -684,7 +671,8 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
     @Override
     public DJDataset copy()
     {
-      LOSDJDataset newDS = new LOSDJDataset(this.myBS, isFromLOS() ? new HashMap<>(this.myLOS) : new HashMap<String, String>(), this.schema,
+      LOSDJDataset newDS = new LOSDJDataset(this.myBS,
+          isFromLOS() ? new HashMap<>(this.myLOS) : new HashMap<String, String>(), this.schema,
           this.key);
       LocalOverrideStorageStandardImpl.this.data.add(newDS);
       if (selectedDataset == null)
@@ -704,7 +692,8 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
       // Falls dass diese Funktion mal in anderen Kontext gecopynpastet
       // wird. Ein LOSDJDataset ist immer aus dem LOS.
       if (!isFromLOS())
-        throw new UnsupportedOperationException(L.m("Versuch, einen Datensatz, der nicht aus dem LOS kommt zu entfernen"));
+        throw new UnsupportedOperationException(
+            L.m("Versuch, einen Datensatz, der nicht aus dem LOS kommt zu entfernen"));
 
       LocalOverrideStorageStandardImpl.this.data.remove(this);
       if (selectedDataset == this)
@@ -734,7 +723,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
 
     @Override
     public String getKey()
-    { // TESTED
+    {
       return this.key;
     }
   }
