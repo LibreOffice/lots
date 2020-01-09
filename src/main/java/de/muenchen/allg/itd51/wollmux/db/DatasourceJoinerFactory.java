@@ -53,21 +53,19 @@ public class DatasourceJoinerFactory
   }
 
   /**
-   * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null, falls
-   * ein Fehler während der Initialisierung aufgetreten ist).
+   * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null, falls ein Fehler
+   * während der Initialisierung aufgetreten ist).
    */
   public static DatasourceJoiner getDatasourceJoiner()
   {
     if (datasourceJoiner == null)
     {
-      ConfigThingy senderSource =
-        WollMuxFiles.getWollmuxConf().query("SENDER_SOURCE", 1);
+      ConfigThingy senderSource = WollMuxFiles.getWollmuxConf().query("SENDER_SOURCE", 1);
       String senderSourceStr = null;
       try
       {
         senderSourceStr = senderSource.getLastChild().toString();
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
         // hier geben wir im Vergleich zu früher keine Fehlermeldung mehr aus,
         // sondern erst später, wnn
@@ -99,32 +97,19 @@ public class DatasourceJoinerFactory
         if (null == senderSourceStr)
           senderSourceStr = DatasourceJoiner.NOCONFIG;
 
-        datasourceJoiner =
-          new DatasourceJoiner(collectDatasources(WollMuxFiles.getWollmuxConf(),
-              WollMuxFiles.getDEFAULT_CONTEXT()),
-              senderSourceStr,
-                createLocalOverrideStorage(senderSourceStr, WollMuxFiles.getLosCacheFile(),
-                    WollMuxFiles.getDEFAULT_CONTEXT()));
-        /*
-         * Zum Zeitpunkt wo der DJ initialisiert wird sind die Funktions- und
-         * Dialogbibliothek des WollMuxSingleton noch nicht initialisiert, deswegen
-         * können sie hier nicht verwendet werden. Man könnte die Reihenfolge
-         * natürlich ändern, aber diese Reihenfolgeabhängigkeit gefällt mir nicht.
-         * Besser wäre auch bei den Funktionen WollMuxSingleton.getFunctionDialogs()
-         * und WollMuxSingleton.getGlobalFunctions() eine on-demand initialisierung
-         * nach dem Prinzip if (... == null) initialisieren. Aber das heben wir uns
-         * für einen Zeitpunkt auf, wo es benötigt wird und nehmen jetzt erst mal
-         * leere Dummy-Bibliotheken.
-         */
+        datasourceJoiner = new DatasourceJoiner(
+            collectDatasources(WollMuxFiles.getWollmuxConf(), WollMuxFiles.getDEFAULT_CONTEXT()),
+            senderSourceStr, createLocalOverrideStorage(senderSourceStr,
+                WollMuxFiles.getLosCacheFile(), WollMuxFiles.getDEFAULT_CONTEXT()));
+
         FunctionLibrary funcLib = new FunctionLibrary();
         DialogLibrary dialogLib = new DialogLibrary();
         Map<Object, Object> context = new HashMap<>();
-        ColumnTransformer columnTransformer =
-          new ColumnTransformer(FunctionFactory.parseTrafos(WollMuxFiles.getWollmuxConf(),
-            "AbsenderdatenSpaltenumsetzung", funcLib, dialogLib, context));
+        ColumnTransformer columnTransformer = new ColumnTransformer(
+            FunctionFactory.parseTrafos(WollMuxFiles.getWollmuxConf(),
+                "AbsenderdatenSpaltenumsetzung", funcLib, dialogLib, context));
         datasourceJoiner.setTransformer(columnTransformer);
-      }
-      catch (ConfigurationErrorException e)
+      } catch (ConfigurationErrorException e)
       {
         LOGGER.error("", e);
       }
@@ -184,24 +169,20 @@ public class DatasourceJoinerFactory
           LOGGER.error("Ununterstützter Datenquellentyp: {}", type);
           break;
         }
-      }
-      catch (Exception x)
+      } catch (Exception x)
       {
-        LOGGER.error(L.m(
-          "Fehler beim Initialisieren von Datenquelle \"%1\" (Typ \"%2\"):", name,
-          type), x);
+        LOGGER.error(
+            L.m("Fehler beim Initialisieren von Datenquelle \"%1\" (Typ \"%2\"):", name, type), x);
       }
 
       if (ds == null)
       {
-        LOGGER.error(L.m(
-          "Datenquelle '%1' von Typ '%2' konnte nicht initialisiert werden", name,
-          type));
+        LOGGER
+            .error(L.m("Datenquelle {} von Typ {} konnte nicht initialisiert werden", name, type));
         /*
-         * Falls schon eine alte Datenquelle name registriert ist, entferne diese
-         * Registrierung. Ansonsten würde mit der vorher registrierten Datenquelle
-         * weitergearbeitet, was seltsame Effekte zur Folge hätte die schwierig
-         * nachzuvollziehen sind.
+         * Falls schon eine alte Datenquelle name registriert ist, entferne diese Registrierung.
+         * Ansonsten würde mit der vorher registrierten Datenquelle weitergearbeitet, was seltsame
+         * Effekte zur Folge hätte die schwierig nachzuvollziehen sind.
          */
       }
 
@@ -211,16 +192,16 @@ public class DatasourceJoinerFactory
     return datasources;
   }
 
-  private static LocalOverrideStorage createLocalOverrideStorage(String mainSourceName, File losCache, URL context)
+  private static LocalOverrideStorage createLocalOverrideStorage(String mainSourceName,
+      File losCache, URL context)
   {
     // kann sein, dass noch kein singleton erstellt ist - kein Zugriff auf no config
     if (mainSourceName.equals(DatasourceJoiner.NOCONFIG))
     {
       return new LocalOverrideStorageDummyImpl();// no config, kein cache !
-    }
-    else
+    } else
     {
-      return new LocalOverrideStorageStandardImpl(losCache, context);//mit config
+      return new LocalOverrideStorageStandardImpl(losCache, context);// mit config
     }
   }
 
@@ -260,4 +241,5 @@ public class DatasourceJoinerFactory
       }
     }
     return list;
-}}
+  }
+}
