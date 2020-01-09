@@ -928,6 +928,11 @@ public class GUI
         {
           myTabbedPane.setEnabledAt(tabIndex, false);
         }
+        if (tabVisibleCount[tabIndex] < 0)
+        {
+          LOGGER.warn("Anzahl der sichtbaren Elemente auf Tab {} ist {}", tabIndex,
+              tabVisibleCount[tabIndex]);
+        }
       }
     }
   }
@@ -957,14 +962,15 @@ public class GUI
       {
         for (UIElement element : visibilityGroups.get(id))
         {
+          boolean changed = false;
           if (element.getComponent() instanceof JButton)
           {
-            element.setEnabled(visible);
+            changed = element.setEnabled(visible);
           } else
           {
-            element.setVisible(visible);
+            changed = element.setVisible(visible);
           }
-          if (!element.isStatic())
+          if (!element.isStatic() && changed)
           {
             setTabVisibleCount(element.getTab(), visible);
           }

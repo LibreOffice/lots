@@ -160,12 +160,12 @@ public interface UIElement extends Value
    */
   public void setBackground(Color bg);
 
-  public void setEnabled(boolean enabled);
+  public boolean setEnabled(boolean enabled);
 
   /**
    * Setzt die Sichtbarkeit der Komponente und ihres Zusatzlabels (falls vorhanden).
    */
-  public void setVisible(boolean vis);
+  public boolean setVisible(boolean vis);
 
   /**
    * Liefert true, wenn das Element keine Änderungen erlaubt (z,B, ein Separator oder
