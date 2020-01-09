@@ -52,9 +52,11 @@ public abstract class UIElementBase implements UIElement
   }
 
   @Override
-  public void setEnabled(boolean enabled)
+  public boolean setEnabled(boolean enabled)
   {
+    boolean oldState = getComponent().isEnabled();
     this.getComponent().setEnabled(enabled);
+    return oldState != enabled;
   }
 
   @Override
@@ -94,8 +96,9 @@ public abstract class UIElementBase implements UIElement
   }
 
   @Override
-  public void setVisible(boolean vis)
+  public boolean setVisible(boolean vis)
   {
+    boolean oldState = getComponent().isVisible();
     if (getLabel() != null)
     {
       getLabel().setVisible(vis);
@@ -106,6 +109,7 @@ public abstract class UIElementBase implements UIElement
      * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4403550
      */
     ((JComponent) getComponent().getParent()).revalidate();
+    return oldState != vis;
   }
 
   @Override
