@@ -63,7 +63,6 @@ import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
  * Enthält von den Dialogen gemeinsam genutzten Code.
@@ -288,14 +287,57 @@ public class Common
   }
 
   /**
-   * Multipliziert alle Font-Größen mit zoomFactor. ACHTUNG! Nach jedem Aufruf von
-   * setLookAndFeel() kann diese Funktion genau einmal verwendet werden und hat in
-   * folgenden Aufrufen keine Wirkung mehr, bis wieder setLookAndFeel() aufgerufen
-   * wird (was den Zoom wieder zurücksetzt).
+   * Wertet die FONT_ZOOM-Direktive des Dialoge-Abschnitts aus und zoomt die Fonts falls
+   * erforderlich.
+   * 
+   * @param config
+   *          a valid ConfigThingy configuration.
+   * @return {@link Double} returns Zoom factor value.
+   */
+  public static double getFontZoomFactor(ConfigThingy config)
+  {
+    if (config == null)
+    {
+      LOGGER.debug(
+          "Common: getFontZoomFactor(): ConfigThingy is NULL. Returning with default value 1 for zoom.");
+      return 1;
+    }
+
+    Common.setLookAndFeelOnce();
+
+    ConfigThingy zoom = config.query("Dialoge").query("FONT_ZOOM", 2);
+    if (zoom.count() > 0)
+    {
+      try
+      {
+        return Double.parseDouble(zoom.getLastChild().toString());
+      } catch (Exception x)
+      {
+        LOGGER.error("", x);
+      }
+    }
+
+    return 1;
+  }
+
+  /**
+   * Multipliziert alle Font-Größen mit zoomFactor. ACHTUNG! Nach jedem Aufruf von setLookAndFeel()
+   * kann diese Funktion genau einmal verwendet werden und hat in folgenden Aufrufen keine Wirkung
+   * mehr, bis wieder setLookAndFeel() aufgerufen wird (was den Zoom wieder zurücksetzt).
+   * 
+   * @param zoomFactor
+   *          Value for font zoom.
    */
   public static void zoomFonts(double zoomFactor)
   {
-    LOGGER.debug("zoomFonts(" + zoomFactor + ")");
+    if (zoomFactor < 0.5 || zoomFactor > 3)
+    {
+      LOGGER.error("Invalid FONT_ZOOM Value: {} . Zoom has been set to default value.", zoomFactor);
+
+      return;
+    }
+
+    LOGGER.debug("zoomFonts({})", zoomFactor);
     UIDefaults def = UIManager.getLookAndFeelDefaults();
     Set<Map.Entry<Object, Float>> mappings;
     mappings = defaultFontsizes.entrySet();
@@ -303,7 +345,8 @@ public class Common
     Entry<Object,Float> mappingEntry;
     Object key;
     Float size;
-    Font oldFnt, newFont;
+    Font oldFnt;
+    Font newFont;
     int changedFonts = 0;
     while (mappingEntries.hasNext())
     {
@@ -325,39 +368,7 @@ public class Common
       }
     }
 
-    /*Enumeration<Object> enu = def.keys();
-
-    while (enu.hasMoreElements())
-    {
-      Object key = enu.nextElement();
-      //Font elem = def.getFont(key);
-      //if (elem == null ) continue;
-      if (key.toString().endsWith(".font"))
-      {
-        Logger.debug(key.toString());
-        try
-        {
-          Object obj = def.get(key);
-          if (obj instanceof FontUIResource){
-            FontUIResource res = (FontUIResource) def.get(key);
-            Font fnt = res.deriveFont((float) (defaultFontsize * zoomFactor));
-            def.put(key, fnt);
-          }
-          if (obj instanceof Font){
-            Font res = (Font) def.get(key);
-            //Font fnt = res.deriveFont((float) (res.getSize() * zoomFactor));
-            Font fnt = res.deriveFont((float) (defaultFontsize * zoomFactor));
-            def.put(key, fnt);
-          }
-
-        }
-        catch (Exception x)
-        {
-          Logger.debug(x);
-        }
-      }
-    }*/
-    LOGGER.debug(changedFonts + L.m(" Fontgrößen verändert!"));
+    LOGGER.debug("{} Fontgrößen verändert!", changedFonts);
   }
 
   public static int getVerticalScrollbarUnitIncrement()
