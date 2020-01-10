@@ -57,6 +57,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Iterator;
 
+import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +74,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
+import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.event.GlobalEventListener;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -107,12 +109,9 @@ public class WollMuxSingleton
    */
   private WollMuxSingleton(XComponentContext ctx)
   {
-    // Der XComponentContext wir hier gesichert und vom WollMuxSingleton mit
-    // getXComponentContext zurückgeliefert.
     this.ctx = ctx;
 
-    // Initialisiere die UNO-Klasse, so dass auch mit dieser Hilfsklasse
-    // gearbeitet werden kann.
+    // init UNO helper class.
     try
     {
       UNO.init(ctx.getServiceManager());
@@ -123,7 +122,24 @@ public class WollMuxSingleton
 
     boolean successfulStartup = true;
 
-    noConfig = !WollMuxFiles.setupWollMuxDir();
+    noConfig = WollMuxFiles.getWollmuxConf().count() >= 0;
+
+    // set font's zoom mode
+    Common.zoomFonts(Common.getFontZoomFactor(WollMuxFiles.getWollmuxConf()));
+
+    // init Logging.
+    String logLevel = WollMuxFiles.getWollMuxConfLoggingMode(WollMuxFiles.getWollmuxConf());
+    WollMuxFiles.initLoggerOutputFile(WollMuxFiles.getWollMuxLogFile(), Level.toLevel(logLevel));
+
+    // init Localization
+    if (!WollMuxFiles.initLocalization(WollMuxFiles.getWollmuxConf()))
+    {
+      LOGGER
+          .info("No localization found in wollmux.conf. WollMux starts with default localization.");
+    }
+
+    // init default context
+    WollMuxFiles.determineDefaultContext();
 
     WollMuxClassLoader.initClassLoader();
 
@@ -152,7 +168,7 @@ public class WollMuxSingleton
     {
       // Initialisiere EventProcessor
       WollMuxEventHandler.getInstance().setAcceptEvents(successfulStartup);
-  
+
       // register global EventListener
       try
       {
@@ -164,15 +180,16 @@ public class WollMuxSingleton
       {
         LOGGER.error("", e);
       }
-  
+
       /*
        * FIXME: Darf nur im Falle des externen WollMux gemacht werden, da ansonsten endlosschleifen
        * mit dem ProtocolHandler möglich sind. Evtl. auch lösbar dadurch, dass URLS, die mit
        * ignorecase("wollmux:") anfangen, niemals an den Slave delegiert werden. Ist aber nicht so
        * schön als Lösung. UNO.XDispatchProviderInterception
-       * (UNO.desktop).registerDispatchProviderInterceptor( DispatchHandler.globalWollMuxDispatches);
+       * (UNO.desktop).registerDispatchProviderInterceptor(
+       * DispatchHandler.globalWollMuxDispatches);
        */
-  
+
       // setzen von shortcuts
       ConfigThingy tastenkuerzel = new ConfigThingy("");
       try
@@ -182,7 +199,7 @@ public class WollMuxSingleton
       {
         LOGGER.error("", e);
       }
-      
+
       try
       {
         Shortcuts.createShortcuts(tastenkuerzel);
@@ -190,7 +207,7 @@ public class WollMuxSingleton
       {
         LOGGER.error("", e);
       }
-  
+
       // Setzen der in den Abschnitten OOoEinstellungen eingestellten
       // Konfigurationsoptionen
       this.setOOoConfiguration(WollMuxFiles.getWollmuxConf().query("OOoEinstellungen"));
