@@ -90,7 +90,6 @@ import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jna.Native;
 import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.Shell32;
 import com.sun.jna.platform.win32.ShlObj;
@@ -288,22 +287,22 @@ public class WollMuxFiles
       char[] arrWollmuxConfPath = new char[WinDef.MAX_PATH];
       shell.SHGetFolderPath(null, ShlObj.CSIDL_APPDATA, null, ShlObj.SHGFP_TYPE_CURRENT,
           arrWollmuxConfPath);
-      searchPaths.add(Native.toString(arrWollmuxConfPath) + "/.wollmux/wollmux.conf");
+      searchPaths.add(String.valueOf(arrWollmuxConfPath) + "/.wollmux/wollmux.conf");
 
       arrWollmuxConfPath = new char[WinDef.MAX_PATH];
       shell.SHGetFolderPath(null, ShlObj.CSIDL_COMMON_APPDATA, null, ShlObj.SHGFP_TYPE_CURRENT,
           arrWollmuxConfPath);
-      searchPaths.add(Native.toString(arrWollmuxConfPath) + "/.wollmux/wollmux.conf");
+      searchPaths.add(String.valueOf(arrWollmuxConfPath) + "/.wollmux/wollmux.conf");
 
       arrWollmuxConfPath = new char[WinDef.MAX_PATH];
       shell.SHGetFolderPath(null, ShlObj.CSIDL_PROGRAM_FILESX86, null, ShlObj.SHGFP_TYPE_CURRENT,
           arrWollmuxConfPath);
-      searchPaths.add(Native.toString(arrWollmuxConfPath) + "/.wollmux/wollmux.conf");
+      searchPaths.add(String.valueOf(arrWollmuxConfPath) + "/.wollmux/wollmux.conf");
 
       arrWollmuxConfPath = new char[WinDef.MAX_PATH];
       shell.SHGetFolderPath(null, ShlObj.CSIDL_PROGRAM_FILES, null, ShlObj.SHGFP_TYPE_CURRENT,
           arrWollmuxConfPath);
-      searchPaths.add(Native.toString(arrWollmuxConfPath) + "/.wollmux/wollmux.conf");
+      searchPaths.add(String.valueOf(arrWollmuxConfPath) + "/.wollmux/wollmux.conf");
 
     }
 
