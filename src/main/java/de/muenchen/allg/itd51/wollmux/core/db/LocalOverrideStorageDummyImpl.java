@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner.Status;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 
 public class LocalOverrideStorageDummyImpl implements LocalOverrideStorage
@@ -119,7 +118,7 @@ public class LocalOverrideStorageDummyImpl implements LocalOverrideStorage
   }
 
   @Override
-  public List<Dataset> refreshFromDatabase(Datasource database, Status status)
+  public List<Dataset> refreshFromDatabase(Datasource database)
   {
     return new ArrayList<>();
   }

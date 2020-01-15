@@ -18,7 +18,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner.Status;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
@@ -308,7 +307,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
    * de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner.Status)
    */
   @Override
-  public List<Dataset> refreshFromDatabase(Datasource database, Status status)
+  public List<Dataset> refreshFromDatabase(Datasource database)
   {
     /*
      * Zuallererst das Schema anpassen. Insbesondere muss dies VOR dem Leeren von data erfolgen.
@@ -425,8 +424,6 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
         data.add(ds);
       }
     }
-
-    status.setLostDatasets(lostDatasets);
 
     StringBuilder buf = new StringBuilder();
     Iterator<Dataset> iter2 = lostDatasets.iterator();

@@ -212,7 +212,7 @@ public class DatasourceJoinerFactory
 
   /**
    * Diese Methode liefert eine Liste aller verlorenen gegangenen Datensätze des DatasourceJoiner
-   * (gemäß {@link DatasourceJoiner.Status#lostDatasets}) zurück.
+   * zurück.
    *
    * @return List der verlorenen Datensätze im Format "<oid> <vorname> <nachname>".
    */
@@ -222,7 +222,7 @@ public class DatasourceJoinerFactory
     ArrayList<String> list = new ArrayList<>();
     if (dj != null)
     {
-      for (Dataset ds : dj.getStatus().getLostDatasets())
+      for (Dataset ds : dj.getLostDatasets())
       {
         try
         {

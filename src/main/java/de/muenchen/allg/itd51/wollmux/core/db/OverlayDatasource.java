@@ -106,7 +106,7 @@ public class OverlayDatasource implements Datasource
   private boolean modeSO;
 
   /**
-   * true if mode is "so", "So", "os" or "Os".
+   * true if second char in 'MODE' is lower case.
    */
   private boolean treatEmptyStringsAsNull;
 

@@ -152,8 +152,6 @@ public class LDAPDatasource implements Datasource
   private static final Pattern KEY_RE = Pattern.compile("^(\\(&(\\([^()=]+[^()]*\\))+\\))?"
       + KEY_SEPARATOR_0_NON_0_RE + "([a-zA-Z_][a-zA-Z0-9_]*=.*" + SEPARATOR + ")?$");
 
-  private DirContext ctx = null;
-
   /**
    * temporärer cache für relative Attribute (wird bei jeder neuen Suche neu angelegt)
    */
@@ -177,14 +175,6 @@ public class LDAPDatasource implements Datasource
       URL context)
   {
     setTimeout(DatasourceJoinerFactory.getDatasourceTimeout());
-
-    try
-    {
-      ctx = new InitialLdapContext(properties, null);
-    } catch (NamingException ex)
-    {
-      LOGGER.error("", ex);
-    }
 
     datasourceName = parseConfig(sourceDesc, "NAME", () -> L.m("NAME der Datenquelle fehlt"));
     url = parseConfig(sourceDesc, "URL", () -> errorMessage() + L.m("URL des LDAP-Servers fehlt."));
@@ -582,9 +572,11 @@ public class LDAPDatasource implements Datasource
   {
 
     List<Name> paths = null;
+    DirContext ctx = null;
 
     try
     {
+      ctx = new InitialLdapContext(properties, null);
       NameParser np = ctx.getNameParser("");
       int rootSize = np.parse(baseDN).size();
       SearchControls sc = new SearchControls();
@@ -612,9 +604,23 @@ public class LDAPDatasource implements Datasource
           paths.add(pathName);
       }
 
+      ctx.close();
+
     } catch (NamingException e)
     {
       LOGGER.error("Internal error in LDAP.", e);
+    } finally
+    {
+      if (ctx != null)
+      {
+        try
+        {
+          ctx.close();
+        } catch (NamingException e)
+        {
+          LOGGER.error("", e);
+        }
+      }
     }
 
     return new RelativePaths(pathLength, paths);
@@ -1180,136 +1186,115 @@ public class LDAPDatasource implements Datasource
    */
   private Dataset getDataset(SearchResult searchResult)
   {
-
-    if (ctx == null)
-    {
-      LOGGER.error("LDAP context is NULL. No further processing");
-
-      return null;
-    }
-
     Attributes attributes = searchResult.getAttributes();
 
     Map<String, String> relation = new HashMap<>();
+
+    Name pathName = null;
+    Name rootName = null;
+    DirContext ctx = null;
+
     try
     {
-      Name pathName = null;
-      Name rootName = null;
+      String tempPath = searchResult.getNameInNamespace();
+      tempPath = preparePath(tempPath);
 
-      try
-      {
-        String tempPath = searchResult.getNameInNamespace();
-        tempPath = preparePath(tempPath);
+      ctx = new InitialLdapContext(properties, null);
+      NameParser nameParser = ctx.getNameParser("");
+      pathName = nameParser.parse(tempPath);
+      rootName = nameParser.parse(baseDN); // TOD0: Das ist eine Konstante, nur
+      // einmal berechnen (ausser, dass dies
+      // nur mit funktionierender
+      // Netzanbindung moeglich ist). Testen
+      // mit rausgezogenem Netzkabel
 
-        NameParser nameParser = ctx.getNameParser("");
-        pathName = nameParser.parse(tempPath);
-        rootName = nameParser.parse(baseDN); // TOD0: Das ist eine Konstante, nur
-        // einmal berechnen (ausser, dass dies
-        // nur mit funktionierender
-        // Netzanbindung moeglich ist). Testen
-        // mit rausgezogenem Netzkabel
+    } catch (NamingException e)
+    {
+      LOGGER.error("Fehler beim Zugriff auf das LDAP-Verzeichnis.", e);
+    }
 
-      } catch (NamingException e)
-      {
-        LOGGER.error("Fehler beim Zugriff auf das LDAP-Verzeichnis.", e);
-      }
+    for (Map.Entry<String, ColumnDefinition> columnDefEntry : columnDefinitions.entrySet())
+    {
+      ColumnDefinition currentAttribute = columnDefEntry.getValue();
 
-      for (Map.Entry<String, ColumnDefinition> columnDefEntry : columnDefinitions.entrySet())
-      {
-        ColumnDefinition currentAttribute = columnDefEntry.getValue();
+      int relativePath = currentAttribute.relativePath;
+      String attributeName = currentAttribute.attributeName;
 
-        int relativePath = currentAttribute.relativePath;
-        String attributeName = currentAttribute.attributeName;
+      String value = null;
 
-        String value = null;
+      if (relativePath == 0)
+      { // value can be found in the attributes
 
-        if (relativePath == 0)
-        { // value can be found in the attributes
-
-          try
-          {
-            if (attributes.get(attributeName) != null)
-              value = (String) attributes.get(attributeName).get();
-          } catch (NamingException | NullPointerException e)
-          {
-            LOGGER.trace("", e);
-            // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
-          }
-
-        } else
-        { // value is stored somewhere else in the directory
-
-          Name attributePath = (Name) rootName.clone();
-
-          try
-          {
-
-            if (relativePath < 0)
-            { // Pfad relativ zum aktuellen Element
-
-              attributePath.addAll(pathName.getPrefix(pathName.size() + relativePath));
-
-            } else
-            { // relativePath > 0, Pfad relativ zur Wurzel
-
-              attributePath.addAll(pathName.getPrefix(relativePath - rootName.size()));
-            }
-
-            String[] searchAttributes = { attributeName };
-
-            Attributes foundAttributes;
-
-            CacheKey key = new CacheKey(attributePath, searchAttributes);
-            foundAttributes = attributeCache.get(key);
-
-            if (foundAttributes == null)
-            {
-              foundAttributes = ctx.getAttributes(attributePath, searchAttributes);
-              attributeCache.put(key, foundAttributes);
-            }
-
-            Attribute foundAttribute = foundAttributes.get(attributeName);
-
-            if (foundAttribute != null)
-            {
-              value = (String) foundAttribute.get();
-            }
-
-          } catch (NamingException | NullPointerException | IndexOutOfBoundsException e)
-          {
-            // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
-            LOGGER.trace("", e);
-          }
-        }
-
-        if (value != null)
+        try
         {
-          String lineSeparator = currentAttribute.lineSeparator;
-          if (lineSeparator != null)
-          {
-            value = value.replaceAll(lineSeparator, "\n");
+          if (attributes.get(attributeName) != null)
+            value = (String) attributes.get(attributeName).get();
+        } catch (NamingException | NullPointerException e)
+        {
+          LOGGER.trace("", e);
+          // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
+        }
+
+      } else
+      { // value is stored somewhere else in the directory
+
+        Name attributePath = (Name) rootName.clone();
+
+        try
+        {
+
+          if (relativePath < 0)
+          { // Pfad relativ zum aktuellen Element
+
+            attributePath.addAll(pathName.getPrefix(pathName.size() + relativePath));
+
+          } else
+          { // relativePath > 0, Pfad relativ zur Wurzel
+
+            attributePath.addAll(pathName.getPrefix(relativePath - rootName.size()));
           }
-          relation.put(columnDefEntry.getKey(), value);
+
+          String[] searchAttributes = { attributeName };
+
+          Attributes foundAttributes;
+
+          CacheKey key = new CacheKey(attributePath, searchAttributes);
+          foundAttributes = attributeCache.get(key);
+
+          if (foundAttributes == null)
+          {
+            foundAttributes = ctx.getAttributes(attributePath, searchAttributes);
+            attributeCache.put(key, foundAttributes);
+          }
+
+          Attribute foundAttribute = foundAttributes.get(attributeName);
+
+          if (foundAttribute != null)
+          {
+            value = (String) foundAttribute.get();
+          }
+
+        } catch (NamingException | NullPointerException | IndexOutOfBoundsException e)
+        {
+          // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
+          LOGGER.trace("", e);
         }
       }
+
+      if (value != null)
+      {
+        String lineSeparator = currentAttribute.lineSeparator;
+        if (lineSeparator != null)
+        {
+          value = value.replaceAll(lineSeparator, "\n");
+        }
+        relation.put(columnDefEntry.getKey(), value);
+      }
+    }
 
       String key = generateKey(relation);
 
       return new LDAPDataset(key, relation);
-
-    } finally
-    {
-      try
-      {
-        if (ctx != null)
-        {
-          ctx.close();
-        }
-      } catch (Exception e)
-      {
-        LOGGER.error("", e);
-      }
-    }
   }
 
   /**
@@ -1327,19 +1312,13 @@ public class LDAPDatasource implements Datasource
    *          entspricht.
    * @return die Suchergebnisse
    * @author Max Meier (D-III-ITD 5.1)
+   * @throws NamingException
    * 
    */
   private NamingEnumeration<SearchResult> searchLDAP(String path, String filter, int searchScope,
       boolean onlyObjectClass)
   {
     LOGGER.debug("searchLDAP({}, {}, {}, {})", path, filter, searchScope, onlyObjectClass);
-
-    if (ctx == null)
-    {
-      LOGGER.error("LDAP context is NULL. No further processing.");
-
-      return null;
-    }
 
     SearchControls searchControls = new SearchControls();
 
@@ -1358,9 +1337,11 @@ public class LDAPDatasource implements Datasource
     }
 
     Optional<NamingEnumeration<SearchResult>> result = Optional.empty();
+    DirContext ctx = null;
 
     try
     {
+      ctx = new InitialLdapContext(properties, null);
       NameParser nameParser = ctx.getNameParser("");
       Name name = nameParser.parse(path + baseDN);
 
@@ -1371,6 +1352,18 @@ public class LDAPDatasource implements Datasource
     } catch (NamingException e)
     {
       LOGGER.error("", e);
+    } finally
+    {
+      if (ctx != null)
+      {
+        try
+        {
+          ctx.close();
+        } catch (NamingException e)
+        {
+          LOGGER.error("", e);
+        }
+      }
     }
 
     result.ifPresent(r -> LOGGER

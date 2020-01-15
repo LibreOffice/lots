@@ -130,36 +130,6 @@ public class DatasourceJoiner
   private List<Dataset> cachedQueryResults = new ArrayList<>();
 
   /**
-   * Repräsentiert den Status eines DatasourceJoiners.
-   */
-  public static class Status
-  {
-
-    private Status()
-    {
-    }
-
-    /**
-     * Eine Liste, die die {@link Dataset}s enthält, die mit einer Hintergrunddatenbank verknüpft
-     * sind, deren Schlüssel jedoch darin nicht mehr gefunden wurde und deshalb nicht aktualisiert
-     * werden konnte.
-     */
-    private List<Dataset> lostDatasets = new ArrayList<>(0);
-
-    public List<Dataset> getLostDatasets()
-    {
-      return this.lostDatasets;
-    }
-
-    public void setLostDatasets(List<Dataset> lostDatasets)
-    {
-      this.lostDatasets = lostDatasets;
-    }
-  }
-
-  private Status status;
-
-  /**
    * Erzeugt einen neuen DatasourceJoiner.
    * 
    * @param dataSources
@@ -223,13 +193,8 @@ public class DatasourceJoiner
     {
       mainDatasource = nameToDatasource.get(senderSource);
 
-      lostDatasets = myLOS.refreshFromDatabase(mainDatasource, status);
+      lostDatasets = myLOS.refreshFromDatabase(mainDatasource);
     }
-  }
-
-  public Status getStatus()
-  {
-    return status;
   }
 
   public Datasource getMainDatasource()

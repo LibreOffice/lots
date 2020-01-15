@@ -50,7 +50,7 @@ public abstract class DataFinder
       query.add(Pair.with(element.getName(), element.toString()));
     }
 
-    if (query.size() >= 2)
+    if (query.size() > 2)
     {
       LOGGER.error(
           "Nur max zwei Schlüssel/Wert-Paare werden als Argumente für Suchanfragen akzeptiert!");
