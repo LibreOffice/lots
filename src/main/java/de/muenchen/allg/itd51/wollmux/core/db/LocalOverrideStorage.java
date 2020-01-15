@@ -2,7 +2,6 @@ package de.muenchen.allg.itd51.wollmux.core.db;
 
 import java.util.List;
 
-import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner.Status;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 
 public interface LocalOverrideStorage extends Iterable<Dataset>
@@ -54,10 +53,10 @@ public interface LocalOverrideStorage extends Iterable<Dataset>
   /**
    * Läd für die Datensätze des LOS aktuelle Daten aus der Datenbank database.
    * 
-   * @param status
+   * @param database
    *          hiervon wird das Feld lostDatasets geupdatet.
    */
-  public List<Dataset> refreshFromDatabase(Datasource database, Status status);
+  public List<Dataset> refreshFromDatabase(Datasource database);
 
   /**
    * Liefert null, falls bislang kein Schema vorhanden (weil das Laden der

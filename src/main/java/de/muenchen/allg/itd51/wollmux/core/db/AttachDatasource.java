@@ -179,10 +179,10 @@ public class AttachDatasource implements Datasource
       }
 
       if (!schema1.contains(spalte1))
-        throw new ConfigurationErrorException(L.m("Spalte {} ist nicht im Schema", spalte1));
+        throw new ConfigurationErrorException("Spalte " + spalte1 + " ist nicht im Schema.");
 
       if (!schema2.contains(spalte2))
-        throw new ConfigurationErrorException(L.m("Spalte {} ist nicht im Schema", spalte2));
+        throw new ConfigurationErrorException("Spalte " + spalte2 + " ist nicht im Schema.");
 
       match1[i] = spalte1;
       match2[i] = spalte2;
