@@ -58,11 +58,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -126,8 +124,6 @@ public class DatasourceJoiner
    * werden konnte.
    */
   protected List<Dataset> lostDatasets = new ArrayList<>(0);
-
-  private List<Dataset> cachedQueryResults = new ArrayList<>();
 
   /**
    * Erzeugt einen neuen DatasourceJoiner.
@@ -518,80 +514,6 @@ public class DatasourceJoiner
   public QueryResults getLOS()
   {
     return new QueryResultsList(myLOS.iterator(), myLOS.size());
-  }
-
-  public void setCachedLdapResults(QueryResults results)
-  {
-    results.forEach(ds -> this.cachedQueryResults.add(ds));
-  }
-
-  public void addCachedLdapResult(Dataset ds)
-  {
-    Iterator<Dataset> datasetIterator = this.cachedQueryResults.iterator();
-
-    while (datasetIterator.hasNext())
-    {
-      Dataset dataset = datasetIterator.next();
-      try
-      {
-        if (dataset.get("OID").equals(ds.get("OID")))
-        {
-          datasetIterator.remove();
-        }
-      } catch (ColumnNotFoundException e)
-      {
-        LOGGER.error("", e);
-      }
-    }
-
-    this.cachedQueryResults.add(ds);
-  }
-
-  public List<Dataset> getCachedLdapResults()
-  {
-    return this.cachedQueryResults;
-  }
-
-  public Dataset getCachedLdapResultByOID(String oid)
-  {
-    if (this.cachedQueryResults == null || this.cachedQueryResults.isEmpty())
-      return null;
-
-    Dataset result = null;
-
-    for (Dataset ds : this.cachedQueryResults)
-    {
-      try
-      {
-        if (ds.get("OID").equals(oid))
-        {
-          result = ds;
-          break;
-        }
-      } catch (ColumnNotFoundException e)
-      {
-        LOGGER.error("", e);
-      }
-    }
-
-    return result;
-  }
-
-  public Set<String> getOIDsFromLOS()
-  {
-    Set<String> oids = new HashSet<>();
-    for (Dataset dataset : myLOS)
-    {
-      try
-      {
-        oids.add(dataset.get("OID"));
-      } catch (ColumnNotFoundException e)
-      {
-        LOGGER.error("", e);
-      }
-    }
-
-    return oids;
   }
 
   public static final Comparator<DJDataset> sortPAL = (ds1, ds2) -> {
