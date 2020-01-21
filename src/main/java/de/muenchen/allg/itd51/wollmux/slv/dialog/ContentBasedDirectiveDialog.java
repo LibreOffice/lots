@@ -65,6 +65,11 @@ public class ContentBasedDirectiveDialog
   private boolean printOrderAsc = true;
 
   /**
+   * If true, all items should be collected in one file.
+   */
+  private boolean collect = false;
+
+  /**
    * List of current settings for each {@link ContentBasedDirective}.
    */
   private final List<ContentBasedDirectiveSettings> settings = new ArrayList<>();
@@ -138,6 +143,11 @@ public class ContentBasedDirectiveDialog
     return Collections.unmodifiableList(settings);
   }
 
+  public boolean isCollect()
+  {
+    return collect;
+  }
+
   /**
    * Initialize GUI.
    */
@@ -183,6 +193,10 @@ public class ContentBasedDirectiveDialog
       XCheckBox printOrder = UNO.XCheckBox(container.getControl("printOrderCheckbox"));
       AbstractItemListener printOrderListener = event -> printOrderAsc = printOrder.getState() == 0;
       printOrder.addItemListener(printOrderListener);
+
+      XCheckBox collectBox = UNO.XCheckBox(container.getControl("collect"));
+      AbstractItemListener collectListener = event -> collect = collectBox.getState() == 1;
+      collectBox.addItemListener(collectListener);
 
       XButton abort = UNO.XButton(container.getControl("Abort"));
       AbstractActionListener abortListener = event -> {
