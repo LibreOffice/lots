@@ -35,17 +35,15 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.awt.event.ActionEvent;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Random;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.javatuples.Triplet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1227,7 +1225,7 @@ public class SachleitendeVerfuegung
    *          Das Dokument, aus dem die anzuzeigenden Verfügungspunkte ausgelesen
    *          werden.
    */
-  public static List<VerfuegungspunktInfo> callPrintDialog(XTextDocument doc)
+  public static Triplet<List<VerfuegungspunktInfo>, Boolean, Boolean> callPrintDialog(XTextDocument doc)
   {
     //JGM: Update der Dokumentenstruktur (Kommandos und TextSections)
     DocumentManager.getTextDocumentController(doc).updateDocumentCommands();
@@ -1255,35 +1253,13 @@ public class SachleitendeVerfuegung
 
       ActionEvent result = s.synchronize();
       String cmd = result.getActionCommand();
-      SimpleEntry<List<VerfuegungspunktInfo>, Boolean> slvd =
-        (SimpleEntry<List<VerfuegungspunktInfo>, Boolean>) result.getSource();
+      @SuppressWarnings("unchecked")
+      Triplet<List<VerfuegungspunktInfo>, Boolean, Boolean> slvd =
+        (Triplet<List<VerfuegungspunktInfo>, Boolean, Boolean>) result.getSource();
 
       if (SachleitendeVerfuegungenDruckdialog.CMD_SUBMIT.equals(cmd) && slvd != null)
       {
-        List<VerfuegungspunktInfo> verfuegungsPunktInfos = slvd.getKey();
-
-        if (verfuegungsPunktInfos == null || verfuegungsPunktInfos.isEmpty())
-        {
-          LOGGER.debug("Sachleitende Verfuegung: callPrintDialog(): VerfuegungspunktInfos NULL or empty.");
-          return new ArrayList<VerfuegungspunktInfo>();
-        }
-
-        if (slvd.getValue())
-        {
-          return verfuegungsPunktInfos;
-        }
-        else
-        {
-          // sonst in umgekehrter Reihenfolge
-          List<VerfuegungspunktInfo> descVerfuegungsPunktInfos = new ArrayList<>();
-          ListIterator<VerfuegungspunktInfo> lIt = verfuegungsPunktInfos.listIterator(verfuegungsPunktInfos.size());
-
-          while (lIt.hasPrevious()) {
-            descVerfuegungsPunktInfos.add(lIt.previous());
-          }
-
-          return descVerfuegungsPunktInfos;
-        }
+        return slvd;
       }
       return null;
     }

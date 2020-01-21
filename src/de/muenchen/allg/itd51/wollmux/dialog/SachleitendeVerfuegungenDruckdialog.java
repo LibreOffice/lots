@@ -30,10 +30,10 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.event.ActionListener;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.javatuples.Triplet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,6 +107,11 @@ public class SachleitendeVerfuegungenDruckdialog
    * soll.
    */
   private boolean printOrderAsc = true;
+  
+  /**
+   * Should all prints be merged into one file?
+   */
+  private boolean collect = false;
 
   /**
    * Liste mit den aktuellen Einstellungen für jeden Verfügungspunkt.
@@ -141,7 +146,7 @@ public class SachleitendeVerfuegungenDruckdialog
   /**
    * Die Konfiguration, die an den dialogEndListener übergeben wird.
    */
-  private SimpleEntry<List<VerfuegungspunktInfo>, Boolean> config;
+  private Triplet<List<VerfuegungspunktInfo>, Boolean, Boolean> config;
 
   /**
    * Erzeugt einen neuen Dialog.
@@ -180,6 +185,11 @@ public class SachleitendeVerfuegungenDruckdialog
   public boolean getPrintOrderAsc()
   {
     return printOrderAsc;
+  }
+  
+  public boolean isCollect()
+  {
+    return collect;
   }
 
   /**
@@ -226,11 +236,15 @@ public class SachleitendeVerfuegungenDruckdialog
       XCheckBox printOrder = UNO.XCheckBox(container.getControl("printOrderCheckbox"));
       AbstractItemListener printOrderListener = event -> printOrderAsc = printOrder.getState() == 0;
       printOrder.addItemListener(printOrderListener);
+      
+      XCheckBox collectBox = UNO.XCheckBox(container.getControl("collect"));
+      AbstractItemListener collectListener = event -> collect = collectBox.getState() == 1;
+      collectBox.addItemListener(collectListener);
 
       XButton abort = UNO.XButton(container.getControl("Abort"));
       AbstractActionListener abortListener = event -> {
         action = CMD_CANCEL;
-        config = new SimpleEntry<>(settings, getPrintOrderAsc());
+        config = new Triplet<>(settings, getPrintOrderAsc(), isCollect());
         dialog.endExecute();
       };
       abort.addActionListener(abortListener);
@@ -238,7 +252,7 @@ public class SachleitendeVerfuegungenDruckdialog
       XButton print = UNO.XButton(container.getControl("PrintAll"));
       AbstractActionListener printAllListener = event -> {
         action = CMD_SUBMIT;
-        config = new SimpleEntry<>(settings, getPrintOrderAsc());
+        config = new Triplet<>(settings, getPrintOrderAsc(), isCollect());
         dialog.endExecute();
       };
       print.addActionListener(printAllListener);
@@ -376,7 +390,7 @@ public class SachleitendeVerfuegungenDruckdialog
       List<VerfuegungspunktInfo> infos = new ArrayList<>(1);
       infos.add(info);
       action = CMD_SUBMIT;
-      config = new SimpleEntry<>(infos, getPrintOrderAsc());
+      config = new Triplet<>(infos, getPrintOrderAsc(), isCollect());
       dialog.endExecute();
     }
   }

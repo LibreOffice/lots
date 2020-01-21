@@ -30,7 +30,8 @@
   <dlg:scrollbar dlg:id="ScrollBar" dlg:tab-index="24" dlg:left="239" dlg:top="20" dlg:width="8" dlg:height="68" dlg:align="vertical" dlg:pageincrement="3" dlg:maxpos="4" dlg:visible-size="4"/>
   <dlg:text dlg:id="Label5" dlg:tab-index="25" dlg:left="10" dlg:top="92" dlg:width="120" dlg:height="10" dlg:value="Summe aller Ausdrucke"/>
   <dlg:fixedline dlg:id="FixedLine11" dlg:tab-index="26" dlg:left="4" dlg:top="105" dlg:width="235" dlg:height="1"/>
-  <dlg:checkbox dlg:id="printOrderCheckbox" dlg:tab-index="28" dlg:left="10" dlg:top="110" dlg:width="170" dlg:height="12" dlg:value="Ausdruck in umgekehrter Reihenfolge" dlg:checked="false"/>
+  <dlg:checkbox dlg:id="printOrderCheckbox" dlg:tab-index="28" dlg:left="10" dlg:top="110" dlg:width="120" dlg:height="12" dlg:value="Ausdruck in umgekehrter Reihenfolge" dlg:checked="false"/>
+  <dlg:checkbox dlg:id="collect" dlg:tab-index="28" dlg:left="145" dlg:top="110" dlg:width="90" dlg:height="12" dlg:value="Ausdrucke sammeln" dlg:checked="false"/>
   <dlg:button dlg:id="Print3" dlg:tab-index="21" dlg:left="195" dlg:top="56" dlg:width="40" dlg:height="13" dlg:value="Drucken"/>
   <dlg:button dlg:id="Print4" dlg:tab-index="22" dlg:left="195" dlg:top="73" dlg:width="40" dlg:height="13" dlg:value="Drucken"/>
   <dlg:button dlg:id="PrintAll" dlg:tab-index="30" dlg:left="152" dlg:top="125" dlg:width="90" dlg:height="15" dlg:value="Alle Drucken"/>
