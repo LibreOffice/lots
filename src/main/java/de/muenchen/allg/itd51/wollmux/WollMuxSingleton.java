@@ -122,7 +122,7 @@ public class WollMuxSingleton
 
     boolean successfulStartup = true;
 
-    noConfig = WollMuxFiles.getWollmuxConf().count() >= 0;
+    noConfig = WollMuxFiles.getWollmuxConf() != null && WollMuxFiles.getWollmuxConf().count() == 0;
 
     // set font's zoom mode
     Common.zoomFonts(Common.getFontZoomFactor(WollMuxFiles.getWollmuxConf()));
