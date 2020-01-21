@@ -32,26 +32,35 @@
 package de.muenchen.allg.itd51.wollmux.func;
 
 import java.awt.Desktop;
+import java.io.File;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.javatuples.Triplet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.frame.XStorable;
-import com.sun.star.lang.NoSuchMethodException;
+import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.ucb.XFileIdentifierConverter;
 import com.sun.star.ui.dialogs.FilePicker;
 import com.sun.star.ui.dialogs.TemplateDescription;
 import com.sun.star.ui.dialogs.XFilePicker3;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.VerfuegungspunktInfo;
@@ -83,6 +92,8 @@ public class StandardPrint
    */
   public static final String PROP_SLV_SETTINGS = "SLV_Settings";
 
+  public static final String PROP_SLV_COLLECT = "SLV_Collect";
+
   /**
    * GUI der Sachleitenden Verfügungen: Diese Komfortdruckfunktion erzeugt die GUI,
    * mit deren Hilfe die Steuerdaten (in Form der Properties "SLV_SettingsFromGUI")
@@ -97,33 +108,92 @@ public class StandardPrint
    */
   public static void sachleitendeVerfuegung(XPrintModel pmod)
   {
-    // Druckfunktion SachleitendeVerfuegungOutput für SLV-Ausgabe hinzuladen:
+    Triplet<List<VerfuegungspunktInfo>, Boolean, Boolean> settings = SachleitendeVerfuegung
+        .callPrintDialog(pmod.getTextDocument());
+    boolean collect = settings.getValue2();
+    List<VerfuegungspunktInfo> items = settings.getValue0();
+    if (!settings.getValue1())
+    {
+      Collections.reverse(items);
+    }
+
     try
     {
+      pmod.setPropertyValue(PROP_SLV_SETTINGS, items);
       pmod.usePrintFunction(InternalPrintFunction.SachleitendeVerfuegungOutput.name());
-    }
-    catch (NoSuchMethodException e)
+      if (collect)
+      {
+        pmod.usePrintFunction(InternalPrintFunction.SachleitendeVerfuegungCollect.name());
+      }
+    } catch (java.lang.Exception e)
     {
       LOGGER.error("", e);
       pmod.cancel();
       return;
     }
+    pmod.printWithProps();
 
-    List<VerfuegungspunktInfo> settings =
-      SachleitendeVerfuegung.callPrintDialog(pmod.getTextDocument());
-    if (settings != null)
+    // Handle Collection
+    if (collect)
     {
       try
       {
-        pmod.setPropertyValue(PROP_SLV_SETTINGS, settings);
-      }
-      catch (java.lang.Exception e)
+        @SuppressWarnings("unchecked")
+        List<File> collection = (List<File>) pmod.getProp(PROP_SLV_COLLECT, new ArrayList<File>());
+        PDFMergerUtility merger = new PDFMergerUtility();
+        for (File doc : collection)
+        {
+          LOGGER.debug(doc.getAbsolutePath());
+          merger.addSource(doc);
+        }
+
+        XFilePicker3 picker = FilePicker.createWithMode(UNO.defaultContext, TemplateDescription.FILESAVE_AUTOEXTENSION);
+        String filterName = "PDF Dokument";
+        picker.appendFilter(filterName, "*.pdf");
+        picker.appendFilter("Alle Dateien", "*");
+        picker.setCurrentFilter(filterName);
+        short res = picker.execute();
+        if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)
+        {
+          String[] files = picker.getFiles();
+          XFileIdentifierConverter xFileConverter = UnoRuntime.queryInterface(XFileIdentifierConverter.class,
+              UNO.createUNOService("com.sun.star.ucb.FileContentProvider"));
+          String outputFile = xFileConverter.getSystemPathFromFileURL(files[0]);
+          merger.setDestinationFileName(outputFile);
+          merger.mergeDocuments(null);
+          Desktop.getDesktop().open(new File(outputFile));
+        } else
+        {
+          InfoDialog.showInfoModal("Sachleitende Verfügungen drucken",
+              "PDF Dokument mit allen Ausdrucken wurde nicht gespeichert.");
+        }
+      } catch (java.io.IOException e)
       {
-        LOGGER.error("", e);
-        pmod.cancel();
-        return;
+        LOGGER.error("PDF Dokumente konnten nicht zusammengefügt werden.", e);
+        InfoDialog.showInfoModal("Sachleitende Verfügungen drucken",
+            "PDF Dokumente konnten nicht zusammengefügt werden.");
       }
-      pmod.printWithProps();
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static void sachleitendeVerfuegungCollect(XPrintModel pmod)
+  {
+    try
+    {
+      List<File> collection = (List<File>) pmod.getProp(PROP_SLV_COLLECT, new ArrayList<File>());
+      File outputFile = Files.createTempFile("WollMux_SLV_", ".pdf").toFile();
+      UnoProps props = new UnoProps("FilterName", "writer_pdf_Export");
+      XStorable doc = UNO.XStorable(pmod.getProp(PrintFunction.PROP_PRINT_RESULT, pmod.getTextDocument()));
+      doc.storeToURL(UNO.convertFilePathToURL(outputFile.getAbsolutePath()), props.getProps());
+      collection.add(outputFile);
+      pmod.setPropertyValue(PROP_SLV_COLLECT, collection);
+    } catch (IllegalArgumentException | UnknownPropertyException | PropertyVetoException | WrappedTargetException
+        | java.io.IOException | com.sun.star.io.IOException | UnoHelperException e)
+    {
+      LOGGER.error(L.m("Konnte die Dokumente für den Druck der Sachleitenden Verfügung nicht aufsammeln."), e);
+      InfoDialog.showInfoModal("Sachleitende Verfügungen drucken", "Die Dokumente konnten nicht gesammelt werden.");
+      pmod.cancel();
     }
   }
 
@@ -437,6 +507,9 @@ public class StandardPrint
     SachleitendeVerfuegung("sachleitendeVerfuegung", 50),
 
     MailMergeNewSetFormValue("mailMergeNewSetFormValue", 75),
+
+    SachleitendeVerfuegungCollect("sachleitendeVerfuegungCollect",
+        300),
 
     SachleitendeVerfuegungOutput("sachleitendeVerfuegungOutput", 150),
 
