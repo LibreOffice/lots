@@ -962,6 +962,13 @@ public class PrintModels
         printProgressBar.setMessage(value);
       }
     }
+
+    @Override
+    public boolean printProgressBarFinished()
+    {
+      // TODO Auto-generated method stub
+      return false;
+    }
   }
 
   /**
@@ -1353,6 +1360,13 @@ public class PrintModels
     public void setPrintMessage(String value)
     {
       master.setPrintMessage(value);
+    }
+
+    @Override
+    public boolean printProgressBarFinished()
+    {
+      // TODO Auto-generated method stub
+      return false;
     }
   }
 
