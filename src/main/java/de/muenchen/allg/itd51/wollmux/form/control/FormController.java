@@ -111,7 +111,7 @@ public class FormController
    */
   public FormController(final FormModel model, final ConfigThingy formFensterConf, final TextDocumentController documentController)
   {
-    gui = new GUI(this, formFensterConf);
+    gui = new GUI(this, model, formFensterConf);
     this.model = model;
     this.documentController = documentController;
     // Standard-Fensterattribute vor dem Start der Form-GUI sichern um nach
@@ -275,7 +275,7 @@ public class FormController
     Runnable runner = () -> {
       try
       {
-        gui.create(model);
+        gui.create();
       } catch (Exception x)
       {
         LOGGER.error("", x);

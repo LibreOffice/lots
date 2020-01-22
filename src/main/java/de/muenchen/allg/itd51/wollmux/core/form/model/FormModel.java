@@ -303,6 +303,11 @@ public class FormModel
     return visiblities.get(groupId);
   }
 
+  public Control getControl(String controlId)
+  {
+    return formControls.get(controlId);
+  }
+
   /**
    * Parst die Funktion im Kontext dieses Models.
    *
@@ -483,15 +488,11 @@ public class FormModel
    */
   private void addFormField(Control control)
   {
-    if (control.getType() == FormType.CHECKBOX || control.getType() == FormType.COMBOBOX
-        || control.getType() == FormType.TEXTAREA || control.getType() == FormType.TEXTFIELD)
+    if (formControls.containsKey(control.getId()))
     {
-      if (formControls.containsKey(control.getId()))
-      {
-        LOGGER.error(L.m("ID \"%1\" mehrfach vergeben", control.getId()));
-      }
-      formControls.put(control.getId(), control);
+      LOGGER.error(L.m("ID \"%1\" mehrfach vergeben", control.getId()));
     }
+    formControls.put(control.getId(), control);
   }
 
   /**
