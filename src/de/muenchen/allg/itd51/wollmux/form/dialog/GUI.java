@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -113,16 +114,11 @@ public class GUI
 
   private FormController controller;
 
+  private FormModel model;
+
   private JTabbedPane myTabbedPane;
 
   private Map<String, UIElement> uiElements = new HashMap<>();
-
-  /**
-   * tabVisibleCount[i] gibt an, wieviele sichtbare Eingabeelemente (Buttonleiste wird nicht
-   * gezählt) das Tab mit Index i hat. ACHTUNG! Muss mit leerem Array starten, weil es ansonsten in
-   * increaseTabVisibleCount() eine ArrayIndexOutOfBoundsException gibt!
-   */
-  private int[] tabVisibleCount;
 
   private Map<String, List<UIElement>> visibilityGroups = new HashMap<>();
 
@@ -165,9 +161,10 @@ public class GUI
 
   private List<String> noProcessValueChangedEvents = new ArrayList<>();
 
-  public GUI(FormController controller, ConfigThingy formFensterConf)
+  public GUI(FormController controller, FormModel model, ConfigThingy formFensterConf)
   {
     this.controller = controller;
+    this.model = model;
     formGUIBounds = Common.parseDimensions(formFensterConf);
   }
 
@@ -181,7 +178,7 @@ public class GUI
     noProcessValueChangedEvents.remove(id);
   }
 
-  public void create(FormModel model)
+  public void create()
   {
     Common.setLookAndFeelOnce();
     initFactories();
@@ -203,7 +200,6 @@ public class GUI
     myTabbedPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 
     boolean focus = true;
-    tabVisibleCount = new int[model.getTabs().size()];
     int tabIndex = 0;
     for (Map.Entry<String, Tab> entry : model.getTabs().entrySet())
     {
@@ -211,7 +207,6 @@ public class GUI
       myTabbedPane.addTab(tab.getTitle(), null,
           createTab(tab, tabIndex, model.getPlausiMarkerColor(), focus),
           tab.getTip());
-      myTabbedPane.setEnabledAt(tabIndex, tabVisibleCount[tabIndex] > 0);
       focus = false;
       tabIndex++;
     }
@@ -231,6 +226,10 @@ public class GUI
 
     setFormGUISizeAndLocation();
     arrangeWindows();
+    for (int i = 0; i < myTabbedPane.getTabCount(); i++)
+    {
+      setTabVisible(i);
+    }
     model.addFormModelChangedListener(this, true);
     model.addVisibilityChangedListener(this, true);
   }
@@ -328,11 +327,6 @@ public class GUI
       if (!control.isOkay())
       {
         uiElement.setBackground(plausiMarkerColor);
-      }
-
-      if (!uiElement.isStatic())
-      {
-        tabVisibleCount[tabIndex]++;
       }
 
       if (y > GRID_MAX)
@@ -910,29 +904,20 @@ public class GUI
    * Erhöht oder Verringert den Zähler von tabVisibleCount[tabIndex] um 1. Falls dadurch keine
    * Elemente mehr sichtbar sind, wird der Tab deaktiviert, ansonsten aktiviert.
    */
-  private void setTabVisibleCount(int tabIndex, boolean visible)
+  private void setTabVisible(int tabIndex)
   {
-    if (tabIndex >= 0 && tabIndex < tabVisibleCount.length)
+    if (tabIndex >= 0 && tabIndex < myTabbedPane.getTabCount())
     {
-      if (visible)
+      Iterator<Tab> iter = model.getTabs().values().iterator();
+      Tab tab = null;
+      for (int i = 0; i <= tabIndex && iter.hasNext(); i++)
       {
-        tabVisibleCount[tabIndex]++;
-        if (tabVisibleCount[tabIndex] == 1)
-        {
-          myTabbedPane.setEnabledAt(tabIndex, true);
-        }
-      } else
+        tab = iter.next();
+      }
+      if (tab != null)
       {
-        tabVisibleCount[tabIndex]--;
-        if (tabVisibleCount[tabIndex] == 0)
-        {
-          myTabbedPane.setEnabledAt(tabIndex, false);
-        }
-        if (tabVisibleCount[tabIndex] < 0)
-        {
-          LOGGER.warn("Anzahl der sichtbaren Elemente auf Tab {} ist {}", tabIndex,
-              tabVisibleCount[tabIndex]);
-        }
+        boolean vis = tab.getControls().stream().anyMatch(Control::isVisible);
+        myTabbedPane.setEnabledAt(tabIndex, vis);
       }
     }
   }
@@ -962,18 +947,18 @@ public class GUI
       {
         for (UIElement element : visibilityGroups.get(id))
         {
-          boolean changed = false;
+          Control c = model.getControl(element.getId());
+          // Buttons in the bottom aren't found by getControl
+          boolean vis = c != null ? c.getGroups().stream().allMatch(VisibilityGroup::isVisible)
+              : visible;
           if (element.getComponent() instanceof JButton)
           {
-            changed = element.setEnabled(visible);
+            element.setEnabled(vis);
           } else
           {
-            changed = element.setVisible(visible);
+            element.setVisible(vis);
           }
-          if (!element.isStatic() && changed)
-          {
-            setTabVisibleCount(element.getTab(), visible);
-          }
+          setTabVisible(element.getTab());
         }
       }
     });
