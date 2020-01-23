@@ -8,6 +8,8 @@ import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -146,6 +148,11 @@ public class TestFormModel
     assertEquals("", model.getValue("EmpfaengerZeile4"), "flascher Wert für EmpfaengerZeile4");
     assertEquals("", model.getValue("EmpfaengerZeile5"), "flascher Wert für EmpfaengerZeile5");
     assertEquals("", model.getValue("EmpfaengerZeile6"), "flascher Wert für EmpfaengerZeile6");
+    model.setValue("DarlBetrag", "10000");
+    char decimalPoint = ((DecimalFormat) NumberFormat.getInstance()).getDecimalFormatSymbols()
+        .getDecimalSeparator();
+    assertEquals("12000" + decimalPoint + "00", model.getValue("DarlehenplusZusatzkosten"),
+        "wrong autofill for DarlehenplusZusatzkosten");
   }
 
   @Test
@@ -163,14 +170,22 @@ public class TestFormModel
   @Test
   public void testVisibility() throws FormModelException
   {
+    assertTrue(model.getGroup("AbtretungNotOK").isVisible(), "AbtretungNotOK");
+    assertFalse(model.getGroup("AbtretungOK").isVisible(), "AbtretungOK");
+
+    Control c = model.getControl("twoGroups");
     model.setValue("AbtLohn", "true");
     assertFalse(model.getGroup("AbtretungNotOK").isVisible(), "AbtretungNotOK");
     assertTrue(model.getGroup("AbtretungOK").isVisible(), "AbtretungOK");
     assertTrue(model.getGroup("AbtLohn").isVisible(), "AbtLohn");
+
+    assertFalse(c.isVisible(), "Control is visible");
+    model.setValue("AbtAnteile", "true");
+    assertTrue(c.isVisible(), "Control is visible");
+
     model.setValue("AbtLohn", "");
-    assertTrue(model.getGroup("AbtretungNotOK").isVisible(), "AbtretungNotOK");
-    assertFalse(model.getGroup("AbtretungOK").isVisible(), "AbtretungOK");
     assertFalse(model.getGroup("AbtLohn").isVisible(), "AbtLohn");
+    assertFalse(c.isVisible(), "Control is visible");
   }
 
 }
