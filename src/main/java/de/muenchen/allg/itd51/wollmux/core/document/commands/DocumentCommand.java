@@ -729,10 +729,26 @@ public abstract class DocumentCommand
    */
   static interface Executor
   {
+    /**
+     * Diese Methode fügt das Textfragment frag_id in den gegebenen Bookmark bookmarkName ein. Im
+     * Fehlerfall wird eine entsprechende Fehlermeldung eingefügt.
+     *
+     * @param cmd
+     *          The command to execute.
+     * @return The number of errors.
+     */
     public int executeCommand(DocumentCommand.InsertFrag cmd);
 
     public int executeCommand(DocumentCommand.InsertValue cmd);
 
+    /**
+     * Diese Methode fügt das nächste Textfragment aus der dem WMCommandInterpreter übergebenen
+     * frag_urls liste ein. Im Fehlerfall wird eine entsprechende Fehlermeldung eingefügt. *
+     *
+     * @param cmd
+     *          The command to execute.
+     * @return The number of errors.
+     */
     public int executeCommand(DocumentCommand.InsertContent cmd);
 
     public int executeCommand(DocumentCommand.Form cmd);
@@ -761,6 +777,15 @@ public abstract class DocumentCommand
 
     public int executeCommand(DocumentCommand.SetJumpMark cmd);
 
+    /**
+     * Wertet ein OverrideFrag-Kommandos aus, über das Fragmente umgemapped werden können, und setzt
+     * das Kommando sofort auf DONE. Dies geschieht vor der Bearbeitung der anderen Kommandos
+     * (insertFrag/insertContent), da das mapping beim insertFrag/insertContent benötigt wird. *
+     * 
+     * @param cmd
+     *          The command to execute.
+     * @return The number of errors.
+     */
     public int executeCommand(DocumentCommand.OverrideFrag cmd);
   }
 
