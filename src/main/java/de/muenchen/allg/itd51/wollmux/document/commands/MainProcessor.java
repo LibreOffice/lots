@@ -1,5 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.document.commands;
 
+import com.sun.star.text.XTextCursor;
+
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
@@ -111,8 +113,10 @@ class MainProcessor extends AbstractExecutor
     }
     else
     {
-      cmd.setTextRangeString(cmd.getLeftSeparator() + value
-        + cmd.getRightSeparator());
+      XTextCursor cursor = cmd.getTextCursor();
+      String text = cmd.getLeftSeparator() + value + cmd.getRightSeparator();
+      cmd.getAnchor().getStart().setString(text);
+      cursor.setString("");
     }
 
     cmd.markDone(false);
