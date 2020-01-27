@@ -3,12 +3,15 @@ package de.muenchen.allg.itd51.wollmux.slv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.text.XTextCursor;
+
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.PropertyName;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 
 /**
@@ -90,7 +93,10 @@ public class PrintBlockCommand extends DocumentCommand
         try
         {
           Integer bgColor = Integer.valueOf(Integer.parseInt(highlightColor, 16));
-          Utils.setProperty(getTextCursor(), "CharBackColor", bgColor);
+          XTextCursor cursor = getTextCursor();
+          Utils.setProperty(cursor, PropertyName.CHAR_BACK_COLOR, bgColor);
+          cursor.collapseToEnd();
+          UNO.setPropertyToDefault(cursor, PropertyName.CHAR_BACK_COLOR);
         } catch (NumberFormatException e)
         {
           LOGGER.error(L.m(
@@ -100,7 +106,7 @@ public class PrintBlockCommand extends DocumentCommand
       }
       else
       {
-        UNO.setPropertyToDefault(getTextCursor(), "CharBackColor");
+        UNO.setPropertyToDefault(getTextCursor(), PropertyName.CHAR_BACK_COLOR);
       }
     }
   }
