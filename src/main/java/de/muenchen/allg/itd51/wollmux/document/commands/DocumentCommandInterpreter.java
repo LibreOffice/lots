@@ -69,6 +69,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
+import de.muenchen.allg.itd51.wollmux.slv.PrintBlockProcessor;
 
 /**
  * Diese Klasse repräsentiert den Kommando-Interpreter zur Auswertung von
@@ -223,6 +224,9 @@ public class DocumentCommandInterpreter
 
       // Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
       // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
+      errors = new PrintBlockProcessor()
+          .execute(getDocumentController().getModel().getDocumentCommands());
+
       errors +=
         new MainProcessor(this).execute(getDocumentController().getModel().getDocumentCommands());
 

@@ -20,6 +20,7 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.PropertyName;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
@@ -41,8 +42,6 @@ public class OnMarkBlock extends BasicEvent
 
   private String blockname;
   private TextDocumentController documentController;
-
-  private static final String CHAR_BACK_COLOR = "CharBackColor";
 
   /**
    * Create this event.
@@ -144,7 +143,7 @@ public class OnMarkBlock extends BasicEvent
           UNO.XBookmarksSupplier(documentController.getModel().doc));
 
       short result = compareBookmarks(bookmarkToDelete, wollBook);
-      UNO.setPropertyToDefault(bookmarkToDelete.getTextCursor(), CHAR_BACK_COLOR);
+      UNO.setPropertyToDefault(bookmarkToDelete.getTextCursor(), PropertyName.CHAR_BACK_COLOR);
       bookmarkToDelete.remove();
 
       // bookmarkToDelete ends behind wollBook || bookmarkToDelete ends before wollBook
@@ -234,7 +233,7 @@ public class OnMarkBlock extends BasicEvent
 
   /**
    * Create a new print block command.
-   * 
+   *
    * @param bookmarkName
    *          The name of the bookmark.
    * @param range
@@ -250,12 +249,13 @@ public class OnMarkBlock extends BasicEvent
     documentController.getModel().addNewDocumentCommand(range, bookmarkName);
     if (highlightColor != null)
     {
-      Utils.setProperty(range, CHAR_BACK_COLOR, Integer.parseInt(highlightColor, 16));
+      Utils.setProperty(range, PropertyName.CHAR_BACK_COLOR, Integer.parseInt(highlightColor, 16));
       // collapse ViewCursor to show unbiased color
       XTextCursor vc = documentController.getModel().getViewCursor();
       if (vc != null)
       {
         vc.collapseToEnd();
+        UNO.setPropertyToDefault(vc, PropertyName.CHAR_BACK_COLOR);
       }
     }
     InfoDialog.showInfoModal(L.m("Block wurde markiert"),
