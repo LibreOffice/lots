@@ -21,4 +21,5 @@ public final class PropertyName
   public static final String CHAR_HIDDEN = "CharHidden";
   public static final String CHAR_STYLE_NAME = "CharStyleName";
   public static final String CHAR_BACK_COLOR = "CharBackColor";
+  public static final String IS_VISIBLE = "IsVisible";
 }
