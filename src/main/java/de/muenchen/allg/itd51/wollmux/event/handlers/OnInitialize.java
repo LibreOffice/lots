@@ -34,7 +34,6 @@ public class OnInitialize extends BasicEvent
   @Override
   protected void doit()
   {
-    WollMuxEventHandler.getInstance().unregisterInitEventListener();
     DatasourceJoiner dsj = DatasourceJoinerFactory.getDatasourceJoiner();
 
     if (dsj.getLOS().size() == 0)

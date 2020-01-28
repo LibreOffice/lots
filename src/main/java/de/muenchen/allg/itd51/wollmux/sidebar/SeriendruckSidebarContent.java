@@ -138,14 +138,13 @@ public class SeriendruckSidebarContent extends ComponentBase
     windowPeer = GuiFactory.createWindow(toolkit, parentWindowPeer);
     windowPeer.setBackground(0xffffffff);
     window = UnoRuntime.queryInterface(XWindow.class, windowPeer);
-
     WollMuxEventHandler.getInstance().registerListener(this);
     init();
   }
 
   /**
    * Sets TextDocumentController once it is available.
-   * 
+   *
    * @param event
    *          OnTextDocumentControllerInitialized-Object with the instance of
    *          TextDocumentController.
@@ -161,7 +160,7 @@ public class SeriendruckSidebarContent extends ComponentBase
       return;
     }
 
-    this.textDocumentController = controller;
+    textDocumentController = controller;
 
     init();
   }
