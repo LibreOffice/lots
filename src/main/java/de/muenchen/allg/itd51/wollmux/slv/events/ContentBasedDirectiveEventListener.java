@@ -2,32 +2,21 @@ package de.muenchen.allg.itd51.wollmux.slv.events;
 
 import com.google.common.eventbus.Subscribe;
 
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventListener;
+
 /**
  * Event listener for content based directive events.
  *
  * There should be only one instance of this class (singleton-pattern).
  */
-public class ContentBasedDirectiveEventListener
+public class ContentBasedDirectiveEventListener implements WollMuxEventListener
 {
-  private static ContentBasedDirectiveEventListener listener;
-
-  private ContentBasedDirectiveEventListener()
+  /**
+   * Called when this service is instantiated.
+   */
+  public ContentBasedDirectiveEventListener()
   {
     // nothing to initialize
-  }
-
-  /**
-   * Get an instance of the listener.
-   *
-   * @return A new instance if there is none, or the old instance.
-   */
-  public static ContentBasedDirectiveEventListener getInstance()
-  {
-    if (listener == null)
-    {
-      listener = new ContentBasedDirectiveEventListener();
-    }
-    return listener;
   }
 
   /**

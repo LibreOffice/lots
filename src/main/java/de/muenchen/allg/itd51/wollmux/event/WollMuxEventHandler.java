@@ -3,6 +3,7 @@ package de.muenchen.allg.itd51.wollmux.event;
 import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextbausteinEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnUpdateInputFields;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
-import de.muenchen.allg.itd51.wollmux.slv.events.ContentBasedDirectiveEventListener;
 import de.muenchen.allg.itd51.wollmux.slv.events.OnChangeCopy;
 import de.muenchen.allg.itd51.wollmux.slv.events.OnChangeDirective;
 import de.muenchen.allg.itd51.wollmux.slv.events.OnChangeRecipient;
@@ -92,10 +92,6 @@ public class WollMuxEventHandler
 
   private EventBus eventBus;
 
-  private InitEventListener initEventListener;
-
-  private CheckInstallation checkInstallationListener;
-
   private boolean acceptEvents = false;
 
   /**
@@ -116,13 +112,13 @@ public class WollMuxEventHandler
 
   private WollMuxEventHandler()
   {
+    LOGGER.debug("create event handler");
     eventBus = new EventBus();
-    initEventListener = new InitEventListener();
-    eventBus.register(initEventListener);
-    checkInstallationListener = new CheckInstallation();
-    eventBus.register(checkInstallationListener);
-    eventBus.register(new WollMuxEventListener());
-    eventBus.register(ContentBasedDirectiveEventListener.getInstance());
+    ServiceLoader.load(WollMuxEventListener.class, WollMuxEventListener.class.getClassLoader())
+        .forEach(listener -> {
+      LOGGER.debug("register listener {}", listener);
+      eventBus.register(listener);
+    });
   }
 
   public static WollMuxEventHandler getInstance()
@@ -133,29 +129,6 @@ public class WollMuxEventHandler
     }
 
     return instance;
-  }
-
-  /**
-   * Unregister existing listener from the event bus.
-   * 
-   * @param listener
-   *          Listener to remove.
-   */
-  public void unregisterListener(Object listener)
-  {
-    eventBus.unregister(listener);
-  }
-
-  public void unregisterInitEventListener()
-  {
-    eventBus.unregister(initEventListener);
-    initEventListener = null;
-  }
-
-  public void unregisterCheckInstallationListener()
-  {
-    eventBus.unregister(checkInstallationListener);
-    checkInstallationListener = null;
   }
 
   /**
@@ -170,10 +143,21 @@ public class WollMuxEventHandler
   }
 
   /**
-   * Stellt das WollMuxEvent event in die EventQueue des EventProcessors.
+   * Remove a listener of the event bus.
+   *
+   * @param listener
+   *          A listener.
+   */
+  public void unregisterListener(Object listener)
+  {
+    eventBus.unregister(listener);
+  }
+
+  /**
+   * Adds a new event to the event queue.
    *
    * @param event
-   *          Could be any object as parameter to send with.
+   *          New event to be processed.
    */
   public void handle(Object event)
   {
