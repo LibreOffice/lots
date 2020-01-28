@@ -74,8 +74,8 @@ import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
-import de.muenchen.allg.itd51.wollmux.event.Dispatch;
-import de.muenchen.allg.itd51.wollmux.event.DispatchProviderAndInterceptor;
+import de.muenchen.allg.itd51.wollmux.dispatch.AboutDispatch;
+import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
@@ -553,8 +553,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   {
     // Alten Seriendruck-Eintrag löschen
     deleteMenuButton("wollmux:Seriendruck", ".uno:ToolsMenu");
-    deleteMenuButton(Dispatch.DISP_wmAbout, ".uno:HelpMenu");
-    WollMux.createMenuButton(Dispatch.DISP_wmAbout,
+    deleteMenuButton(AboutDispatch.COMMAND, ".uno:HelpMenu");
+    WollMux.createMenuButton(AboutDispatch.COMMAND,
       L.m("Info über Vorlagen und Formulare (WollMux)"), ".uno:HelpMenu",
         ".uno:About");
   }

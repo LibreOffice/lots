@@ -69,6 +69,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.PrintProgressBar;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
+import de.muenchen.allg.itd51.wollmux.slv.events.OnSetPrintBlocksPropsViaPrintModel;
 
 /**
  * Diese Klasse enthält eine Fabrik für die Erzeugung eines XPrintModels, die
@@ -799,8 +800,8 @@ public class PrintModels
         boolean showHighlightColor)
     {
       SyncActionListener s = new SyncActionListener();
-      WollMuxEventHandler.getInstance().handleSetPrintBlocksPropsViaPrintModel(documentController,
-        blockName, visible, showHighlightColor, s);
+      new OnSetPrintBlocksPropsViaPrintModel(documentController, blockName, visible,
+          showHighlightColor, s).emit();
       s.synchronize();
     }
 

@@ -18,8 +18,9 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.core.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.dispatch.PrintDispatch;
+import de.muenchen.allg.itd51.wollmux.dispatch.SaveDispatch;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.form.dialog.GUI;
 
@@ -138,7 +139,7 @@ public class FormController
    */
   public void print()
   {
-    UNO.dispatch(documentController.getModel().doc, Dispatch.DISP_unoPrint);
+    UNO.dispatch(documentController.getModel().doc, PrintDispatch.COMMAND);
   }
 
   /**
@@ -154,7 +155,7 @@ public class FormController
    */
   public void save()
   {
-    UNO.dispatch(documentController.getModel().doc, ".uno:Save");
+    UNO.dispatch(documentController.getModel().doc, SaveDispatch.COMMAND_SAVE);
   }
 
   /**
@@ -162,7 +163,7 @@ public class FormController
    */
   public void saveAs()
   {
-    UNO.dispatch(documentController.getModel().doc, ".uno:SaveAs");
+    UNO.dispatch(documentController.getModel().doc, SaveDispatch.COMMAND_SAVE_AS);
   }
 
   /**

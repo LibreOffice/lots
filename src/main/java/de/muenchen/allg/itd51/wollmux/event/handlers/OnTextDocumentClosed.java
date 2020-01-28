@@ -5,9 +5,9 @@ import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo;
-import de.muenchen.allg.itd51.wollmux.event.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.event.GlobalEventListener;
 
 /**

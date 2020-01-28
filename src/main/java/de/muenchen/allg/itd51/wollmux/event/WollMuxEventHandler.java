@@ -21,6 +21,8 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.dispatch.DispatchHelper;
+import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager.TextDocumentInfo;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
@@ -69,11 +71,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextbausteinEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnUpdateInputFields;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
-import de.muenchen.allg.itd51.wollmux.slv.events.OnChangeCopy;
-import de.muenchen.allg.itd51.wollmux.slv.events.OnChangeDirective;
-import de.muenchen.allg.itd51.wollmux.slv.events.OnChangeRecipient;
-import de.muenchen.allg.itd51.wollmux.slv.events.OnMarkBlock;
-import de.muenchen.allg.itd51.wollmux.slv.events.OnSetPrintBlocksPropsViaPrintModel;
 
 /**
  * The global event handler of {@link WollMuxEvent}.
@@ -159,7 +156,7 @@ public class WollMuxEventHandler
    * @param event
    *          New event to be processed.
    */
-  public void handle(Object event)
+  public void handle(WollMuxEvent event)
   {
     if (acceptEvents)
     {
@@ -274,73 +271,6 @@ public class WollMuxEventHandler
       TextDocumentController documentController)
   {
     handle(new OnFormularMax4000Show(documentController));
-  }
-
-  /**
-   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass eine weitere Ziffer der
-   * Sachleitenden Verfügungen eingefügt werden, bzw. eine bestehende Ziffer gelöscht
-   * werden soll.
-   *
-   * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines Drucks
-   * auf den Knopf der OOo-Symbolleiste ein "wollmux:ZifferEinfuegen" dispatch
-   * erfolgte.
-   */
-  public void handleButtonZifferEinfuegenPressed(
-      TextDocumentController documentController)
-  {
-    handle(new OnChangeDirective(documentController));
-  }
-
-  /**
-   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass eine Abdruckzeile der
-   * Sachleitenden Verfügungen eingefügt werden, bzw. eine bestehende Abdruckzeile
-   * gelöscht werden soll.
-   *
-   * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines Drucks
-   * auf den Knopf der OOo-Symbolleiste ein "wollmux:Abdruck" dispatch erfolgte.
-   */
-  public void handleButtonAbdruckPressed(
-      TextDocumentController documentController)
-  {
-    handle(new OnChangeCopy(documentController));
-  }
-
-  /**
-   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass eine Zuleitungszeile der
-   * Sachleitenden Verfügungen eingefügt werden, bzw. eine bestehende Zuleitungszeile
-   * gelöscht werden soll.
-   *
-   * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines Drucks
-   * auf den Knopf der OOo-Symbolleiste ein "wollmux:Zuleitungszeile" dispatch
-   * erfolgte.
-   */
-  public void handleButtonZuleitungszeilePressed(
-      TextDocumentController documentController)
-  {
-    handle(new OnChangeRecipient(documentController));
-  }
-
-  /**
-   * Erzeugt ein neues WollMuxEvent, das über den Bereich des viewCursors im Dokument
-   * doc ein neues Bookmark mit dem Namen "WM(CMD'<blockname>')" legt, wenn nicht
-   * bereits ein solches Bookmark im markierten Block definiert ist. Ist bereits ein
-   * Bookmark mit diesem Namen vorhanden, so wird dieses gelöscht.
-   *
-   * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines Drucks
-   * auf den Knopf der OOo-Symbolleiste ein "wollmux:markBlock#<blockname>" dispatch
-   * erfolgte.
-   *
-   * @param documentController
-   *          Das Textdokument, in dem der Block eingefügt werden soll.
-   * @param blockname
-   *          Derzeit werden folgende Blocknamen akzeptiert "draftOnly",
-   *          "notInOriginal", "originalOnly", "copyOnly" und "allVersions". Alle
-   *          anderen Blocknamen werden ignoriert und keine Aktion ausgeführt.
-   */
-  public void handleMarkBlock(TextDocumentController documentController,
-      String blockname)
-  {
-    handle(new OnMarkBlock(documentController, blockname));
   }
 
   /**
@@ -601,33 +531,6 @@ public class WollMuxEventHandler
   {
     handle(new OnCollectNonWollMuxFormFieldsViaPrintModel(documentController,
         listener));
-  }
-
-  /**
-   * Diese Methode erzeugt ein neues WollMuxEvent, mit dem die Eigenschaften der Druckblöcke (z.B.
-   * allVersions) gesetzt werden können.
-   *
-   * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom XPrintModel aufgerufen
-   * und mit diesem synchronisiert.
-   *
-   * @param doc
-   *          Der TextDocumentController auf dem Einstellungen vorgenommen werden sollen.
-   * @param blockName
-   *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
-   * @param visible
-   *          Der Block wird sichtbar, wenn visible==true und unsichtbar, wenn visible==false.
-   * @param showHighlightColor
-   *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur, wenn zu einem
-   *          betroffenen Druckblock auch eine Hintergrundfarbe angegeben ist).
-   * @param listener
-   *          Ein Listener zum Synchronisieren mit diesem Event.
-   */
-  public void handleSetPrintBlocksPropsViaPrintModel(TextDocumentController doc,
-      String blockName, boolean visible, boolean showHighlightColor,
-      ActionListener listener)
-  {
-    handle(new OnSetPrintBlocksPropsViaPrintModel(doc, blockName, visible,
-        showHighlightColor, listener));
   }
 
   /**
