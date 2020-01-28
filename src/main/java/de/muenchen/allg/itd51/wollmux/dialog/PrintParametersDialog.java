@@ -73,7 +73,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractSpinListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTopWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.event.Dispatch;
+import de.muenchen.allg.itd51.wollmux.dispatch.PrintDispatch;
 
 public class PrintParametersDialog
 {
@@ -294,7 +294,7 @@ public class PrintParametersDialog
     // Druckereinstellungen-Dialog anzeigen:
     try
     {
-      com.sun.star.util.URL url = UNO.getParsedUNOUrl(Dispatch.DISP_unoPrinterSetup);
+      com.sun.star.util.URL url = UNO.getParsedUNOUrl(PrintDispatch.COMMAND_PRINTER_SETUP);
       XNotifyingDispatch disp = UNO.XNotifyingDispatch(getDispatchForModel(UNO.XModel(doc), url));
 
       if (disp != null)

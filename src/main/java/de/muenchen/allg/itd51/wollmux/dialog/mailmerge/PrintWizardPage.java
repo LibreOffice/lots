@@ -26,7 +26,7 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.event.Dispatch;
+import de.muenchen.allg.itd51.wollmux.dispatch.PrintDispatch;
 
 public class PrintWizardPage extends AbstractXWizardPage
 {
@@ -55,7 +55,7 @@ public class PrintWizardPage extends AbstractXWizardPage
         // Druckereinstellungen-Dialog anzeigen:
         try
         {
-          com.sun.star.util.URL url = UNO.getParsedUNOUrl(Dispatch.DISP_unoPrinterSetup);
+          com.sun.star.util.URL url = UNO.getParsedUNOUrl(PrintDispatch.COMMAND_PRINTER_SETUP);
           XNotifyingDispatch disp = UNO.XNotifyingDispatch(getDispatchForModel(url));
 
           if (disp != null)

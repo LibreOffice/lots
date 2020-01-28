@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.document.XEventListener;
+import com.sun.star.frame.XFrame;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
@@ -305,6 +306,27 @@ public class DocumentManager
     }
 
     return info.getTextDocumentController();
+  }
+
+  /**
+   * Get the controller of the document if the frame belongs to a {@link XTextDocument}.
+   * {@link #getTextDocumentController(XTextDocument)}
+   *
+   * @param frame
+   *          The frame.
+   * @return The {@link TextDocumentController} of the frame or null.
+   */
+  public static TextDocumentController getTextDocumentController(XFrame frame)
+  {
+    if (frame != null)
+    {
+      XTextDocument doc = UNO.XTextDocument(frame.getController().getModel());
+      if (doc != null)
+      {
+        return DocumentManager.getTextDocumentController(doc);
+      }
+    }
+    return null;
   }
 
   /**

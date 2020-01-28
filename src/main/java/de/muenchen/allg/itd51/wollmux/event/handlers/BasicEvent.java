@@ -15,6 +15,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
  * Dient als Basisklasse für konkrete Event-Implementierungen.
@@ -49,6 +50,12 @@ public abstract class BasicEvent implements WollMuxEvent
     {
       LOGGER.error("", t);
     }
+  }
+
+  @Override
+  public void emit()
+  {
+    WollMuxEventHandler.getInstance().handle(this);
   }
 
   /**

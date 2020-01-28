@@ -10,4 +10,6 @@ public interface WollMuxEvent
    * aufgerufen werden.
    */
   public void process();
+
+  public void emit();
 }

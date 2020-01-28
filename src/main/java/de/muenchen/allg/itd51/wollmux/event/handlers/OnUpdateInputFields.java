@@ -6,7 +6,7 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
-import de.muenchen.allg.itd51.wollmux.event.DispatchHelper;
+import de.muenchen.allg.itd51.wollmux.dispatch.DispatchHelper;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 public class OnUpdateInputFields extends BasicEvent

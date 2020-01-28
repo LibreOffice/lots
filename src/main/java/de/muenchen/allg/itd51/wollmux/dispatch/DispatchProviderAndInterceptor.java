@@ -33,15 +33,15 @@
  * @version 1.0
  *
  */
-package de.muenchen.allg.itd51.wollmux.event;
+package de.muenchen.allg.itd51.wollmux.dispatch;
 
 import java.util.HashSet;
+import java.util.ServiceLoader;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.DispatchDescriptor;
 import com.sun.star.frame.FrameAction;
 import com.sun.star.frame.XDispatch;
@@ -54,12 +54,9 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
- * Liefert zu Dispatch-URLs, die der WollMux behandeln kann XDispatch-Objekte.
- *
- * @author Matthias Benkmann (D-III-ITD-D101)
+ * A dispatch provider and interceptor for LibreOffice dispatches.
  */
 public class DispatchProviderAndInterceptor implements XDispatchProvider,
     XDispatchProviderInterceptor
@@ -69,20 +66,14 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
       .getLogger(DispatchProviderAndInterceptor.class);
 
   /**
-   * Enthält einen XDispatchProvider, der Dispatch-Objekte für alle globalen (d.h.
-   * nicht dokumentgebundenen) Funktionalitäten des WollMux bereitstellt.
+   * Dispatch provider for global, not file based, dispatches.
    */
   public static final XDispatchProviderInterceptor globalWollMuxDispatches =
     new DispatchProviderAndInterceptor();
 
   /**
-   * Einthält eine Liste aller jemals registrierten dokumentgebundener
-   * {@link DispatchProviderAndInterceptor}-Objekte; Die Liste wird benötigt um
-   * festzustellen, ob der WollMux bereits einen
-   * {@link DispatchProviderAndInterceptor} auf einem Frame registriert hat
-   * (Vermeidung von Doppeleintragungen) und um
-   * {@link DispatchProviderAndInterceptor}-Objekte deregistrieren zu können, wenn
-   * das zugehörige Textdokument geschlossen wird.
+   * Collection of all registered file based interceptors. It is used to unregister the interceptors
+   * when a document is closed and register only one per document.
    */
   private static final Set<DispatchProviderAndInterceptor> documentDispatchProviderAndInterceptors =
       new HashSet<>();
@@ -92,129 +83,106 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   private XDispatchProvider master = null;
 
   /**
-   * Falls ungleich null, so ist dieser {@link DispatchProviderAndInterceptor} in der
-   * Lage für model-spezifische URLs {@link DocumentDispatch}-Objekte zu liefern.
+   * If not null, this provider can handle file based dispatches.
    */
   private XFrame frame = null;
 
   /**
-   * Bei dokumentgebundenen {@link DispatchProviderAndInterceptor}-Objekten wird auf
-   * dem Frame zusätzlich ein {@link XFrameActionListener} registriert um überwachen
-   * zu können, wann der {@link DispatchProviderAndInterceptor} deregistriert werden
-   * soll. Dieser {@link XFrameActionListener} ist hier hinterlegt.
+   * Close-Listener on the frame.
    */
   private XFrameActionListener frameActionListener = null;
+
+  private static ServiceLoader<Dispatcher> dispatchers = ServiceLoader.load(Dispatcher.class,
+      Dispatcher.class.getClassLoader());
 
   /**
    * Erzeugt einen {@link DispatchProviderAndInterceptor}, der nur globale URLs
    * behandeln kann.
    */
+  /**
+   * New dispatcher for global dispatches.
+   */
   private DispatchProviderAndInterceptor()
-  {}
+  {
+    // nothing to do
+  }
 
   /**
-   * Erzeugt einen {@link DispatchProviderAndInterceptor}, der sowohl globale als
-   * auch für model-spezifische URLs behandeln kann.
+   * New dispatcher for global and file based dispatches.
    *
-   * @param model
+   * @param frame
+   *          The frame of the file.
    */
   private DispatchProviderAndInterceptor(XFrame frame)
   {
     this.frame = frame;
   }
 
+  @Override
   public XDispatchProvider getSlaveDispatchProvider()
   {
     return slave;
   }
 
+  @Override
   public void setSlaveDispatchProvider(XDispatchProvider slave)
   {
     this.slave = slave;
   }
 
+  @Override
   public XDispatchProvider getMasterDispatchProvider()
   {
     return master;
   }
 
+  @Override
   public void setMasterDispatchProvider(XDispatchProvider master)
   {
     this.master = master;
   }
 
-  /**
-   * Liefert true, wenn die Methode methodName(String, PropertyValue[]) in der Klasse
-   * c vorhanden ist, andern falls false.
-   */
-  protected boolean hasMethod(Class<?> c, String methodName)
-  {
-    try
-    {
-      c.getDeclaredMethod(methodName, String.class, PropertyValue[].class);
-      return true;
-    }
-    catch (Throwable x)
-    {
-      return false;
-    }
-  }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.sun.star.frame.XDispatchProvider#queryDispatch(com.sun.star.util.URL,
-   * java.lang.String, int)
-   */
+  @Override
   public XDispatch queryDispatch(URL url, String frameName, int fsFlag)
   {
-    String methodName = Dispatch.getDispatchMethodName(url);
-
-    if (hasMethod(Dispatch.class, methodName))
-      return new Dispatch();
-    else if (hasMethod(NotifyingDispatch.class, methodName))
-      return new NotifyingDispatch();
-    else
+    for (Dispatcher dispatcher : dispatchers)
     {
-      if (frame != null)
+      if (dispatcher.supports(url))
       {
-        if (hasMethod(DocumentDispatch.class, methodName))
-          return new DocumentDispatch(getOrigDispatch(url, frameName, fsFlag), url,
-            frame);
-        else if (hasMethod(DocumentNotifyingDispatch.class, methodName))
-          return new DocumentNotifyingDispatch(getOrigDispatch(url, frameName,
-            fsFlag), url, frame);
+        return dispatcher.create(getOrigDispatch(url, frameName, fsFlag), url, frame);
       }
     }
 
-    // ergibt return null, wenn kein Slave registriert
     return getOrigDispatch(url, frameName, fsFlag);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @seecom.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.
-   * DispatchDescriptor[])
-   */
+  @Override
   public XDispatch[] queryDispatches(DispatchDescriptor[] seqDescripts)
   {
     int nCount = seqDescripts.length;
     XDispatch[] lDispatcher = new XDispatch[nCount];
 
     for (int i = 0; i < nCount; ++i)
-      lDispatcher[i] =
-        queryDispatch(seqDescripts[i].FeatureURL, seqDescripts[i].FrameName,
+    {
+      lDispatcher[i] = queryDispatch(seqDescripts[i].FeatureURL, seqDescripts[i].FrameName,
           seqDescripts[i].SearchFlags);
-
+    }
     return lDispatcher;
   }
 
   /**
-   * Liefert das OriginalDispatch-Objekt, das der registrierte slave-DispatchProvider
-   * liefert oder null falls kein slave.
+   * Get the original dispatch of the registered slave dispatch provider (@see
+   * {@link XDispatchProvider#queryDispatch(URL, String, int)})
+   *
+   * @param url
+   *          The command URL.
+   * @param frameName
+   *          The target frame.
+   * @param fsFlag
+   *          Optional search parameter for finding the frame.
+   * @return The original dispatch or null if there is no slave.
    */
-  public XDispatch getOrigDispatch(com.sun.star.util.URL url, String frameName,
+  public XDispatch getOrigDispatch(URL url, String frameName,
       int fsFlag)
   {
     if (slave != null)
@@ -224,21 +192,23 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   }
 
   /**
-   * Registriert einen DocumentDispatchProvider im Frame frame (nur dann, wenn er
-   * nicht bereits registriert wurde).
+   * Register a dispatch provider on the frame if it is not already registered.
+   *
+   * @param frame
+   *          The frame.
    */
   public static void registerDocumentDispatchInterceptor(XFrame frame)
   {
     if (frame == null || UNO.XDispatchProviderInterception(frame) == null
       || UNO.XDispatchProvider(frame) == null) return;
 
-    // DispatchInterceptor registrieren (wenn nicht bereits registriert):
+    // register interceptor if not already registered
     if (getRegisteredDPI(frame) == null)
     {
       DispatchProviderAndInterceptor dpi = new DispatchProviderAndInterceptor(frame);
 
-      LOGGER.debug(L.m("Registriere DocumentDispatchInterceptor #%1 für frame #%2",
-        Integer.valueOf(dpi.hashCode()), Integer.valueOf(frame.hashCode())));
+      LOGGER.debug("Registriere DocumentDispatchInterceptor #{} für frame #{}",
+          Integer.valueOf(dpi.hashCode()), Integer.valueOf(frame.hashCode()));
 
       UNO.XDispatchProviderInterception(frame).registerDispatchProviderInterceptor(
         dpi);
@@ -248,28 +218,24 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
       frame.addFrameActionListener(dpi.frameActionListener);
     }
     else
-      LOGGER.debug(L.m(
-        "Ignoriere doppelten Aufruf von registerDocumentDispatchInterceptor() für den selben Frame #%1",
-        Integer.valueOf(frame.hashCode())));
+      LOGGER.debug(
+          "Ignoriere doppelten Aufruf von registerDocumentDispatchInterceptor() für den selben Frame #{}",
+          Integer.valueOf(frame.hashCode()));
   }
 
   /**
-   * Wird gleichzeitig mit der Registrierung eines
-   * {@link DispatchProviderAndInterceptor}-Objekts auf einem Frame registriert und
-   * dient zur Überwachung des Frames, um den {@link DispatchProviderAndInterceptor}
-   * wieder freigeben zu können, wenn der Frame disposed wird (drücken auf den großen
-   * "X"-Button) bzw. wenn der Frame nicht mehr an das XTextDocument gebunden ist
-   * (z.B. beim Drücken des kleinen "X"-Buttons)
-   *
-   * @author Christoph Lutz (D-III-ITD-D101) TESTED
+   * Listener on frames to get notified when they are closed, so that the interceptor can be
+   * unregistered.
    */
   private static class DPIFrameActionListener implements XFrameActionListener
   {
+    @Override
     public void disposing(EventObject e)
     {
       deregisterDPI(getRegisteredDPI(UNO.XFrame(e.Source)));
     }
 
+    @Override
     public void frameAction(com.sun.star.frame.FrameActionEvent e)
     {
       if (e.Action == FrameAction.COMPONENT_REATTACHED)
@@ -284,9 +250,8 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
             dpi.frameActionListener = null;
           }
 
-          LOGGER.debug(L.m(
-            "Deregistrierung von DocumentDispatchInterceptor #%1 aus frame #%2",
-            Integer.valueOf(dpi.hashCode()), Integer.valueOf(dpi.frame.hashCode())));
+          LOGGER.debug("Deregistrierung von DocumentDispatchInterceptor #{} aus frame #{}",
+              Integer.valueOf(dpi.hashCode()), Integer.valueOf(dpi.frame.hashCode()));
           UNO.XDispatchProviderInterception(dpi.frame).releaseDispatchProviderInterceptor(
             dpi);
           dpi.frame.contextChanged();
@@ -294,16 +259,40 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
         }
       }
     }
+
+    /**
+     * Remove interceptor as it is not longer registered.
+     *
+     * @param dpi
+     *          The interceptor to unregister.
+     */
+    private static void deregisterDPI(DispatchProviderAndInterceptor dpi)
+    {
+      if (dpi == null)
+      {
+        return;
+      }
+      synchronized (documentDispatchProviderAndInterceptors)
+      {
+        LOGGER.debug("Interne Freigabe des DocumentDispatchInterceptor #{}",
+            Integer.valueOf(dpi.hashCode()));
+        documentDispatchProviderAndInterceptors.remove(dpi);
+      }
+    }
   }
 
   /**
-   * Merkt sich den übergebenen dokumentgebundenen DispatchProviderAndInterceptor in
-   * einem internen statischen Set; Der Zugriff auf dieses Set erfolgt
-   * synchronisiert. Ist dpi==null wird nichts gemacht.
+   * Add a new interceptor, which has been registered on a frame.
+   *
+   * @param dpi
+   *          A new interceptor.
    */
   private static void registerDPI(DispatchProviderAndInterceptor dpi)
   {
-    if (dpi == null) return;
+    if (dpi == null)
+    {
+      return;
+    }
     synchronized (documentDispatchProviderAndInterceptors)
     {
       documentDispatchProviderAndInterceptors.add(dpi);
@@ -311,35 +300,27 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   }
 
   /**
-   * Entfernt den übergebenen dokumentgebundenen DispatchProviderAndInterceptor aus
-   * einem internen statischen Set; Der Zugriff auf dieses Set erfolgt
-   * synchronisiert. Ist dpi==null wird nichts gemacht.
-   */
-  private static void deregisterDPI(DispatchProviderAndInterceptor dpi)
-  {
-    if (dpi == null) return;
-    synchronized (documentDispatchProviderAndInterceptors)
-    {
-      LOGGER.debug(L.m("Interne Freigabe des DocumentDispatchInterceptor #%1",
-        Integer.valueOf(dpi.hashCode())));
-      documentDispatchProviderAndInterceptors.remove(dpi);
-    }
-  }
-
-  /**
-   * Liefert den für frame bereits vom WollMux registrierten
-   * {@link DispatchProviderAndInterceptor} zurück, oder null, wenn der WollMux auf
-   * diesen Frame noch keinen {@link DispatchProviderAndInterceptor} registriert hat;
-   * Die Abfrage auf das interne Set der registrierten
-   * {@link DispatchProviderAndInterceptor}-Objekten ist synchronisiert.
+   * Get an interceptor for a frame.
+   *
+   * @param frame
+   *          The frame.
+   * @return The interceptor created by WollMux or null if WollMux has no interceptor on this frame.
    */
   private static DispatchProviderAndInterceptor getRegisteredDPI(XFrame frame)
   {
-    if (frame == null) return null;
+    if (frame == null)
+    {
+      return null;
+    }
     synchronized (documentDispatchProviderAndInterceptors)
     {
       for (DispatchProviderAndInterceptor dpi : documentDispatchProviderAndInterceptors)
-        if (dpi.frame != null && UnoRuntime.areSame(dpi.frame, frame)) return dpi;
+      {
+        if (dpi.frame != null && UnoRuntime.areSame(dpi.frame, frame))
+        {
+          return dpi;
+        }
+      }
     }
     return null;
   }
