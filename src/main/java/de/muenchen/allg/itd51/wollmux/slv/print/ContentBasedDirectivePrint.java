@@ -8,16 +8,22 @@ import java.util.ListIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.container.NoSuchElementException;
+import com.sun.star.container.XNameAccess;
 import com.sun.star.lang.NoSuchMethodException;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextSection;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.itd51.wollmux.SyncActionListener;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.core.document.TextRangeRelation;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.PropertyName;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
@@ -185,10 +191,11 @@ public class ContentBasedDirectivePrint extends PrintFunction
         items.add(currentVerfpunkt);
       }
 
+      boolean rangeVisible = isRangeVisible(model, paragraph);
       // Add recipients, if line is visible
       if ((item.isRecipientLine() || item.isItemWithRecipient())
           && currentVerfpunkt != null
-          && Boolean.FALSE.equals(Utils.getProperty(paragraph, "CharHidden")))
+          && rangeVisible)
       {
         String recipient = paragraph.getString();
         if (!recipient.isEmpty())
@@ -199,5 +206,47 @@ public class ContentBasedDirectivePrint extends PrintFunction
     }
 
     return items;
+  }
+
+  /**
+   * Test if a range is visible in the model.
+   *
+   * @param model
+   *          The document model.
+   * @param range
+   *          The range to test.
+   * @return False if the chars are hidden or the range lies in an invisible section, true
+   *         otherwise.
+   */
+  private boolean isRangeVisible(ContentBasedDirectiveModel model, XTextRange range)
+  {
+    // text has CharHidden property
+    if ((boolean) Utils.getProperty(range, PropertyName.CHAR_HIDDEN))
+    {
+      return false;
+    }
+
+    // check if range is in an invisible section
+    try
+    {
+      XNameAccess sections = UNO.XTextSectionsSupplier(model.getTextDocument()).getTextSections();
+      for (String sectionName : sections.getElementNames())
+      {
+        XTextSection section = UNO.XTextSection(sections.getByName(sectionName));
+        TextRangeRelation relation = new TextRangeRelation(range, section.getAnchor());
+        if (!(relation.followsOrderschemeAABB() || relation.followsOrderschemeBBAA()))
+        {
+          boolean visible = (boolean) Utils.getProperty(section, PropertyName.IS_VISIBLE);
+          if (!visible)
+          {
+            return false;
+          }
+        }
+      }
+    } catch (WrappedTargetException | NoSuchElementException ex)
+    {
+      LOGGER.debug("", ex);
+    }
+    return true;
   }
 }
