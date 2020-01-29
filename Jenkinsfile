@@ -61,7 +61,6 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: '3eaee9fd-bbdd-4825-a4fd-6b011f9a84c3', passwordVariable: 'GITHUB_ACCESS_TOKEN', usernameVariable: 'USER')]) {
                     sh "mvn $SONAR_MAVEN_GOAL \
                       -Dsonar.host.url=$SONAR_HOST_URL \
-                      -Dsonar.analysis.mode=preview \
                       -Dsonar.github.pullRequest=${env.CHANGE_ID} \
                       -Dsonar.github.repository=wollmux/wollmux \
                       -Dsonar.github.oauth=${GITHUB_ACCESS_TOKEN}"
