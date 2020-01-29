@@ -92,6 +92,8 @@ public class WollMuxSingleton
 
   private static WollMuxSingleton singletonInstance = null;
 
+  private static final String SINGLETONINSTANCE = "";
+
   /**
    * Enthält den default XComponentContext in dem der WollMux (bzw. das OOo) läuft.
    */
