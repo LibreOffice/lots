@@ -45,7 +45,8 @@ pipeline {
 	          withSonarQubeEnv('SonarQube') {
 	            sh "mvn $SONAR_MAVEN_GOAL \
 	              -Dsonar.host.url=$SONAR_HOST_URL \
-	              -Dsonar.branch.name=${GIT_BRANCH}"
+	              -Dsonar.branch.name=${GIT_BRANCH} \
+	              -Dsonar.branch.target=${env.CHANGE_TARGET} "
 	          }
             }
             timeout(time: 1, unit: 'HOURS') {
