@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.javatuples.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,8 +105,8 @@ public class OnInitialize extends BasicEvent
     {
       // Standardsuche über das OOoUserProfile:
       List<Pair<String, String>> query = new ArrayList<>();
-      query.add(Pair.with("Vorname", "${givenname}"));
-      query.add(Pair.with("Nachname", "${sn}"));
+      query.add(new ImmutablePair<>("Vorname", "${givenname}"));
+      query.add(new ImmutablePair<>("Nachname", "${sn}"));
 
       results = new ByOOoUserProfileFinder(dsj).find(query);
     }

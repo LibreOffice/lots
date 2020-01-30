@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.javatuples.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,7 @@ public abstract class DataFinder
     for (Iterator<ConfigThingy> iter = conf.iterator(); iter.hasNext();)
     {
       ConfigThingy element = iter.next();
-      query.add(Pair.with(element.getName(), element.toString()));
+      query.add(new ImmutablePair<>(element.getName(), element.toString()));
     }
 
     if (query.size() > 2)
@@ -78,17 +79,17 @@ public abstract class DataFinder
    *          value0: der Feldname über den nach dem evaluierten Wert von value gesucht wird.
    *          value1: wird vor der Suche mittels evaluate() evaluiert (d.h. evtl. vorhandene
    *          Variablen durch die entsprechenden Inhalte ersetzt ersetzt).
-   * 
+   *
    * @return die Anzahl der gefundenen Datensätze
    */
   public QueryResults find(List<Pair<String, String>> query)
   {
     for (Pair<String, String> pair : query)
     {
-      LOGGER.trace(this.getClass().getSimpleName() + ".find(" + pair.getValue0() + ", "
-          + pair.getValue1() + ")");
+      LOGGER.trace(this.getClass().getSimpleName() + ".find(" + pair.getKey() + ", "
+          + pair.getValue() + ")");
 
-      if (pair.getValue0() == null || evaluate(pair.getValue0()).isEmpty())
+      if (pair.getKey() == null || evaluate(pair.getKey()).isEmpty())
       {
         return null;
       }
