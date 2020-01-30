@@ -460,10 +460,6 @@ public class DocumentManager
     }
     fm4k.remove(doc);
 
-    if (controller.containsKey(doc) && controller.get(doc) != null)
-    {
-      controller.get(doc).closing(doc);
-    }
     controller.remove(doc);
   }
 

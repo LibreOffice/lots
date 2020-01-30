@@ -51,6 +51,7 @@ package de.muenchen.allg.itd51.wollmux.core.form.model;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -195,6 +196,10 @@ public class FormModel
         {
           addFormField(control);
         }
+        for (Control control : tab.getButtons())
+        {
+          addFormField(control);
+        }
       }
       for (Control control : formControls.values())
       {
@@ -213,7 +218,7 @@ public class FormModel
           .decode(conf.get("PLAUSI_MARKER_COLOR", 1).getLastChild().toString());
     } catch (Exception x)
     {
-      plausiMarkerColor = Color.PINK;
+      plausiMarkerColor = Color.RED;
     }
 
     // Gespeicherte Werte und/oder Autofill setzen
@@ -398,6 +403,31 @@ public class FormModel
       return formControls.get(id).getValue();
     }
     throw new FormModelException("Unbekanntes Formularelement " + id);
+  }
+
+  /**
+   * Get collection of {@link Control} with equal group id.
+   * 
+   * @param groupId
+   *          Group id.
+   * @return Collection of {@link Control}.
+   */
+  public Collection<Control> getControlsByGroupId(String groupId)
+  {
+    List<Control> controls = new ArrayList<>();
+
+    for (Map.Entry<String, Control> entry : formControls.entrySet())
+    {
+      for (VisibilityGroup vs : entry.getValue().getGroups())
+      {
+        if (vs.getGroupId().equals(groupId))
+        {
+          controls.add(entry.getValue());
+        }
+      }
+    }
+
+    return controls;
   }
 
   /**

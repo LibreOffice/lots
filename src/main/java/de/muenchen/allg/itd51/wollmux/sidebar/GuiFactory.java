@@ -16,9 +16,15 @@ import com.sun.star.awt.XFixedText;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XTextListener;
 import com.sun.star.awt.XWindow;
+import com.sun.star.awt.tab.XTabPage;
+import com.sun.star.awt.tab.XTabPageContainerModel;
+import com.sun.star.awt.tab.XTabPageModel;
 import com.sun.star.awt.tree.XMutableTreeDataModel;
 import com.sun.star.awt.tree.XTreeControl;
 import com.sun.star.beans.XMultiPropertySet;
+import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lang.IndexOutOfBoundsException;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
@@ -83,22 +89,24 @@ public class GuiFactory
    *          The size of the control.
    * @param props
    *          Some additional properties.
+   * @param textListener
+   *          Listener for changes in the text.
    * @return A new text field.
    */
   public static XControl createTextfield(XMultiComponentFactory xMCF, XComponentContext context, String text,
-      Rectangle size, SortedMap<String, Object> props)
+      Rectangle size, SortedMap<String, Object> props, AbstractTextListener textListener)
   {
     if (props == null)
     {
       props = new TreeMap<>();
     }
-    props.put("MultiLine", false);
-    props.put("ReadOnly", false);
+
     props.put("VScroll", false);
 
     XControl buttonCtrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_EDIT, props, size);
 
     XTextComponent txt = UNO.XTextComponent(buttonCtrl);
+    txt.addTextListener(textListener);
     txt.setText(text);
     return buttonCtrl;
   }
@@ -125,7 +133,6 @@ public class GuiFactory
     {
       props = new TreeMap<>();
     }
-    props.put("MultiLine", true);
 
     XControl buttonCtrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_FIXED_TEXT, props, size);
 
@@ -251,7 +258,7 @@ public class GuiFactory
     {
       props = new TreeMap<>();
     }
-    props.put("Spin", Boolean.TRUE);
+    props.put(UnoProperty.SPIN, Boolean.TRUE);
 
     return createNumericField(xMCF, context, value, listener, size, props);
   }
@@ -297,6 +304,126 @@ public class GuiFactory
     UNO.XListBox(ctrl).addItemListener(listener);
 
     return ctrl;
+  }
+
+
+  /**
+   * Creates a tab at the end of the given model. The tab can be accessed with
+   * {@code model.getTabPageById(tabId);}
+   *
+   * @param xMCF
+   *          The factory.
+   * @param context
+   *          The context.
+   * @param model
+   *          The model of the tab page container.
+   * @param tabTitle
+   *          The title of the tab.
+   * @param tabId
+   *          The Id of the tab.
+   */
+  public static void createTab(XMultiComponentFactory xMCF, XComponentContext context, XTabPageContainerModel model,
+      String tabTitle, short tabId)
+  {
+    XTabPageModel tabPageModel = model.createTabPage(tabId); // 0 is not valid
+    tabPageModel.setTitle(tabTitle);
+
+    XTabPage xTabPage = null;
+    try
+    {
+      Object tabPageService = UnoComponent.createComponentWithContext(UnoComponent.CSS_AWT_TAB_UNO_CONTROL_TAB_PAGE,
+          xMCF, context);
+      xTabPage = UNO.XTabPage(tabPageService);
+      UNO.XControl(xTabPage).setModel(UNO.XControlModel(tabPageModel));
+      model.insertByIndex(model.getCount(), tabPageModel);
+    } catch (IllegalArgumentException | IndexOutOfBoundsException | WrappedTargetException e)
+    {
+      LOGGER.error("", e);
+    }
+  }
+
+  /**
+   * Create a tab container.
+   *
+   * @param xMCF
+   *          The factory.
+   * @param context
+   *          The context.
+   * @return A new tab container.
+   */
+  public static XControl createTabPageContainer(XMultiComponentFactory xMCF, XComponentContext context)
+  {
+    Object tabPageContainerModel = UnoComponent
+        .createComponentWithContext(UnoComponent.CSS_AWT_TAB_UNO_CONTROL_TAB_PAGE_CONTAINER_MODEL, xMCF, context);
+
+    Object tabControlContainer = UnoComponent
+        .createComponentWithContext(UnoComponent.CSS_AWT_TAB_UNO_CONTROL_TAB_PAGE_CONTAINER, xMCF, context);
+    XControl tabControl = UNO.XControl(tabControlContainer);
+
+    XControlModel xControlModel = UNO.XControlModel(tabPageContainerModel);
+    tabControl.setModel(xControlModel);
+    return tabControl;
+  }
+
+  /**
+   * Create a label with a hyper link.
+   *
+   * @param xMCF
+   *          The factory.
+   * @param context
+   *          The context.
+   * @param size
+   *          The size of the control.
+   * @param props
+   *          Some additional properties.
+   * @return A new label with a hyper link.
+   */
+  public static XControl createHyperLinkLabel(XMultiComponentFactory xMCF, XComponentContext context, Rectangle size,
+      SortedMap<String, Object> props)
+  {
+    return createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_FIXED_HYPER_LINK, props, size);
+  }
+
+  /**
+   * Create a check box with an item listener.
+   *
+   * @param xMCF
+   *          The factory.
+   * @param context
+   *          The context.
+   * @param itemListener
+   *          The item listener.
+   * @param size
+   *          The size of the control.
+   * @param props
+   *          Some additional properties.
+   * @return A new check box.
+   */
+  public static XControl createCheckBox(XMultiComponentFactory xMCF, XComponentContext context,
+      AbstractItemListener itemListener, Rectangle size, SortedMap<String, Object> props)
+  {
+    XControl ctrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_CHECK_BOX, props, size);
+    UNO.XCheckBox(ctrl).addItemListener(itemListener);
+    return ctrl;
+  }
+
+  /**
+   * Create a dialog.
+   *
+   * @param xMCF
+   *          The factory.
+   * @param context
+   *          The context.
+   * @param size
+   *          The size of the control.
+   * @param props
+   *          Some additional properties.
+   * @return A new dialog.
+   */
+  public static XControl createDialog(XMultiComponentFactory xMCF, XComponentContext context, Rectangle size,
+      SortedMap<String, Object> props)
+  {
+    return createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_DIALOG, props, size);
   }
 
   /**

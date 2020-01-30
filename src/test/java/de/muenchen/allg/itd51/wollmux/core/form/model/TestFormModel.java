@@ -122,7 +122,7 @@ public class TestFormModel
   public void testInit() throws FormModelException
   {
     assertEquals(frameTitle + " - Abtretungserklärung", model.getTitle(), "Falscher Titel");
-    assertEquals(Color.PINK, model.getPlausiMarkerColor(), "Falsche Plausi Frabe");
+    assertEquals(Color.RED, model.getPlausiMarkerColor(), "Falsche Plausi Frabe");
     assertEquals(4, model.getTabs().size(), "Falsche Anzahl an Tabs");
     assertEquals("zeile6", model.getValue("EmpfaengerZeile6"),
         "Falscher gesetzter Wert für EmpfaengerZeile6");
