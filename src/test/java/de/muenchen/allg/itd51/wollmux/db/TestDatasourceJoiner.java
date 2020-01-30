@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.javatuples.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +31,7 @@ public class TestDatasourceJoiner
   public void testBuildQueryValid1Entry()
   {
     List<Pair<String, String>> query = new ArrayList<>();
-    query.add(Pair.with("Vorname", "Max"));
+    query.add(new ImmutablePair<>("Vorname", "Max"));
 
     List<QueryPart> queryParts = dsJoiner.buildQuery(query);
 
@@ -41,7 +42,7 @@ public class TestDatasourceJoiner
   public void testBuildQueryInValidEntryStar()
   {
     List<Pair<String, String>> query = new ArrayList<>();
-    query.add(Pair.with("Vorname", "*"));
+    query.add(new ImmutablePair<>("Vorname", "*"));
 
     List<QueryPart> queryParts = dsJoiner.buildQuery(query);
 
@@ -52,9 +53,9 @@ public class TestDatasourceJoiner
   public void testBuildQueryInValidEntryStarAndValidElements()
   {
     List<Pair<String, String>> query = new ArrayList<>();
-    query.add(Pair.with("Vorname", "*"));
-    query.add(Pair.with("Nachname", "Mustermann"));
-    query.add(Pair.with("Ort", "Testort"));
+    query.add(new ImmutablePair<>("Vorname", "*"));
+    query.add(new ImmutablePair<>("Nachname", "Mustermann"));
+    query.add(new ImmutablePair<>("Ort", "Testort"));
 
     List<QueryPart> queryParts = dsJoiner.buildQuery(query);
 
@@ -65,8 +66,8 @@ public class TestDatasourceJoiner
   public void testBuildQueryValid2Entries()
   {
     List<Pair<String, String>> query = new ArrayList<>();
-    query.add(Pair.with("Vorname", "Max"));
-    query.add(Pair.with("Nachname", "Mustermann"));
+    query.add(new ImmutablePair<>("Vorname", "Max"));
+    query.add(new ImmutablePair<>("Nachname", "Mustermann"));
 
     List<QueryPart> queryParts = dsJoiner.buildQuery(query);
 
@@ -77,9 +78,9 @@ public class TestDatasourceJoiner
   public void testBuildQueryValid3Entries()
   {
     List<Pair<String, String>> query = new ArrayList<>();
-    query.add(Pair.with("Vorname", "Max"));
-    query.add(Pair.with("Nachname", "Mustermann"));
-    query.add(Pair.with("Ort", "Testort"));
+    query.add(new ImmutablePair<>("Vorname", "Max"));
+    query.add(new ImmutablePair<>("Nachname", "Mustermann"));
+    query.add(new ImmutablePair<>("Ort", "Testort"));
 
     List<QueryPart> queryParts = dsJoiner.buildQuery(query);
 
@@ -90,8 +91,8 @@ public class TestDatasourceJoiner
   public void testBuildQueryInValidAssertsNullPointerException()
   {
     List<Pair<String, String>> query = new ArrayList<>();
-    query.add(Pair.with(null, "Max"));
-    query.add(Pair.with("Nachname", "Mustermann"));
+    query.add(new ImmutablePair<>(null, "Max"));
+    query.add(new ImmutablePair<>("Nachname", "Mustermann"));
 
     assertThrows(NullPointerException.class, () -> dsJoiner.buildQuery(query));
   }
@@ -100,8 +101,8 @@ public class TestDatasourceJoiner
   public void testBuildQueryOneInvalidEntry()
   {
     List<Pair<String, String>> query = new ArrayList<>();
-    query.add(Pair.with("Vorname", null));
-    query.add(Pair.with("Nachname", "Mustermann"));
+    query.add(new ImmutablePair<>("Vorname", null));
+    query.add(new ImmutablePair<>("Nachname", "Mustermann"));
 
     List<QueryPart> queryParts = dsJoiner.buildQuery(query);
 
@@ -112,8 +113,8 @@ public class TestDatasourceJoiner
   public void testBuildQueryTwoInvalidEntry()
   {
     List<Pair<String, String>> query = new ArrayList<>();
-    query.add(Pair.with("Vorname", null));
-    query.add(Pair.with("Nachname", null));
+    query.add(new ImmutablePair<>("Vorname", null));
+    query.add(new ImmutablePair<>("Nachname", null));
 
     List<QueryPart> queryParts = dsJoiner.buildQuery(query);
 

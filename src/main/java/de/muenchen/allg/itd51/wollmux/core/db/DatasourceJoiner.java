@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : stellt eine virtuelle Datenbank zur Verfügung, die ihre Daten
  *            aus verschiedenen Hintergrunddatenbanken zieht.
- * 
+ *
  * Copyright (c) 2010-2015 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -46,11 +46,11 @@
  *                  | cache.conf gespeichert und wieder restauriert, ohne LDAP
  *                  | Anbindung zu verlieren.
  * 18.04.2006 | BNK | Bugfix zur Behebung von P766: ausgewaehlten Datensatz richtig merken
- * 26.05.2006 | BNK | +find(Query)       
+ * 26.05.2006 | BNK | +find(Query)
  * 30.01.2007 | BNK | Timeout nicht mehr statisch, sondern an Konstruktor übergeben.
  * 19.03.2010 | BED | +getContentsOfMainDatasource()
  * -------------------------------------------------------------------
- * 
+ *
  */
 package de.muenchen.allg.itd51.wollmux.core.db;
 
@@ -65,7 +65,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.javatuples.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,7 +127,7 @@ public class DatasourceJoiner
 
   /**
    * Erzeugt einen neuen DatasourceJoiner.
-   * 
+   *
    * @param dataSources
    *          Configured Datasources from wollmux.conf file.
    * @param senderSource
@@ -212,7 +212,7 @@ public class DatasourceJoiner
 
   /**
    * Liefert das Schema der Hauptdatenquelle zurück.
-   * 
+   *
    * @return Schema der Hauptdatenquelle.
    */
   public List<String> getMainDatasourceSchema()
@@ -242,9 +242,9 @@ public class DatasourceJoiner
    * Im folgenden eine Liste möglicher Suchanfragen mit Angabe, ob sie unterstützt wird (X) oder
    * nicht (O).
    * </p>
-   * 
+   *
    * <pre>
-   * Suche nach 
+   * Suche nach
    * X           &quot;vorname.nachname&quot;
    * X           &quot;vorname.nachname@muenchen.de&quot;
    * X           &quot;Nam&quot;
@@ -258,7 +258,7 @@ public class DatasourceJoiner
    * X           &quot;D-III-ITD-5.1&quot;
    * O           &quot;D-HAIII-ITD-5.1&quot;   nicht unterstützt, da HA nicht im lhmOUShortname
    * O           &quot;D-HAIII-ITD5.1&quot;    nicht unterstützt (siehe oben)
-   * 
+   *
    * X           &quot;Nam Vorn&quot;
    * X           &quot;Nam, Vorn&quot;
    * X           &quot;Vorname Name&quot;
@@ -268,11 +268,11 @@ public class DatasourceJoiner
    * X           &quot;V. Nachname&quot;
    * X           &quot;Vorname N.&quot;
    * </pre>
-   * 
+   *
    * @param query
    *          of queries as a 2-dimensional String Pair. First string is the 'Column' to search
    *          against the datasource along with a value.
-   * 
+   *
    * @return A filtered List with QueryPart objects.
    */
   public List<QueryPart> buildQuery(List<Pair<String, String>> query)
@@ -281,12 +281,12 @@ public class DatasourceJoiner
 
     for (Pair<String, String> pair : query)
     {
-      if (pair.getValue1() == null || !SUCHSTRING_PATTERN.matcher(pair.getValue1()).matches())
+      if (pair.getValue() == null || !SUCHSTRING_PATTERN.matcher(pair.getValue()).matches())
       {
         continue;
       }
 
-      queryParts.add(new QueryPart(pair.getValue0(), pair.getValue1()));
+      queryParts.add(new QueryPart(pair.getKey(), pair.getValue()));
     }
 
     return queryParts;
@@ -299,7 +299,7 @@ public class DatasourceJoiner
    * deswegen Teil des DJs, weil der DJ die ganzen Datenquellen kennt. Ein Wrappen der Datensätze in
    * DJDatasets wäre also nicht sinnvoll, da es damit möglich wäre durch die copy() Methode
    * Datensätze in den LOS zu kopieren, die gar nicht aus der SENDER_SOURCE kommen.
-   * 
+   *
    * @param query
    *          Query to search against the main datasource.
    * @throws IllegalArgumentException
@@ -335,7 +335,7 @@ public class DatasourceJoiner
 
   /**
    * Find matches in the main datasource by a List of {@link QueryPart}.
-   * 
+   *
    * @param query
    *          Query to search against the main datasource.
    * @return Search results as {@link QueryResults}
@@ -354,9 +354,9 @@ public class DatasourceJoiner
    * datasourceName. Wenn möglich sollte die Datenquelle hier all ihre Datensätze zurückliefern oder
    * zumindest soviele wie möglich. Es ist jedoch auch erlaubt, dass hier gar keine Datensätze
    * zurückgeliefert werden.
-   * 
+   *
    * ACHTUNG! Die Ergebnisse sind keine DJDatasets!
-   * 
+   *
    * @param datasourceName
    *          Name of the datasource.
    * @return {@link QueryResults} All Datasets of the given data source.
@@ -376,7 +376,7 @@ public class DatasourceJoiner
    * möglich sollte die Datenquelle hier all ihre Datensätze zurückliefern oder zumindest soviele
    * wie möglich. Es ist jedoch auch erlaubt, dass hier gar keine Datensätze zurückgeliefert werden.
    * Die Ergebnisse sind DJDatasets!
-   * 
+   *
    * @return Datensätze aus der Datenquelle.
    */
   public QueryResults getContentsOfMainDatasource()
@@ -390,7 +390,7 @@ public class DatasourceJoiner
 
   /**
    * Saves current local override storage with linked cache in in cache.conf.
-   * 
+   *
    * @param cacheFile
    *          File Object as{@link File}
    * @return Cache and local override storage as {@link ConfigThingy} with a preselected default
@@ -433,7 +433,7 @@ public class DatasourceJoiner
 
   /**
    * Copies all datasets from the search result into the personal sender source list.
-   * 
+   *
    * @param results
    *          Search results from a datasource as {@link QueryResults}.
    * @return Size of the param as {@link Integer}
@@ -455,7 +455,7 @@ public class DatasourceJoiner
 
   /**
    * Liefert den momentan im Lokalen Override Speicher ausgewählten Datensatz.
-   * 
+   *
    * @throws DatasetNotFoundException
    *           falls der LOS leer ist (ansonsten ist immer ein Datensatz selektiert).
    */
@@ -467,7 +467,7 @@ public class DatasourceJoiner
   /**
    * Liefert die Anzahl der Datensätze im LOS, die den selben Schlüssel haben wie der ausgewählte,
    * und die vor diesem in der LOS-Liste gespeichert sind.
-   * 
+   *
    * @throws DatasetNotFoundException
    *           falls der LOS leer ist (ansonsten ist immer ein Datensatz selektiert).
    */
@@ -492,7 +492,7 @@ public class DatasourceJoiner
    * {@link #setTransformer(ColumnTransformer)}, so liefert diese Funktion das selbe wie
    * {@link #getSelectedDataset()}, ansonsten wird das durch den ColumnTransformer transformierte
    * Dataset geliefert.
-   * 
+   *
    * @throws DatasetNotFoundException
    *           falls der LOS leer ist (ansonsten ist immer ein Datensatz selektiert).
    */
@@ -508,7 +508,7 @@ public class DatasourceJoiner
 
   /**
    * Get all datasets from the local override storage.
-   * 
+   *
    * @return Datasets from local override storage by type {@link QueryResults}.
    */
   public QueryResults getLOS()
@@ -530,7 +530,7 @@ public class DatasourceJoiner
 
   /**
    * Creates a new Dataset in LocalOverrideStorage that is not linked with a backing store database.
-   * 
+   *
    * @return New Dataset. All fields of the new Dataset are prefilled with the associated column.
    */
   public DJDataset newDataset()
