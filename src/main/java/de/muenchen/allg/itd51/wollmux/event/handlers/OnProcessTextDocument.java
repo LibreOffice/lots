@@ -104,8 +104,8 @@ public class OnProcessTextDocument extends BasicEvent
         try
         {
           FormController formController = documentController.getFormController();
-          formController.createFormGUI();
-          formController.formControllerInitCompleted();
+          // formController.createFormGUI();
+          // formController.formControllerInitCompleted();
         } catch (FormModelException e)
         {
           throw new WMCommandsFailedException(

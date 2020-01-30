@@ -1,7 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 import java.awt.Insets;
-import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 
@@ -98,15 +97,16 @@ public class OnNotifyDocumentEventListener extends BasicEvent
         if (documentController.getModel().isFormDocument())
         {
 
-          FormController formController = DocumentManager.getDocumentManager()
-              .getFormModel(xTextDoc);
-          formController.showFormGUI();
-
-          setWindowPosSize(formController, documentController, xTextDoc);
-
-          formController.addPropertyChangeListener(
-            (PropertyChangeEvent e) -> setWindowPosSize(formController, documentController, xTextDoc)
-          );
+          // FormController formController = DocumentManager.getDocumentManager()
+          // .getFormModel(xTextDoc);
+          // formController.showFormGUI();
+          //
+          // setWindowPosSize(formController, documentController, xTextDoc);
+          //
+          // formController.addPropertyChangeListener(
+          // (PropertyChangeEvent e) -> setWindowPosSize(formController, documentController,
+          // xTextDoc)
+          // );
         }
       }
     }

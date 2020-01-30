@@ -21,7 +21,6 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
-import de.muenchen.allg.itd51.wollmux.form.dialog.GUI;
 
 /**
  * Der Controller für die FormularGUI.
@@ -42,7 +41,7 @@ public class FormController
   /**
    * Die FormularGUI, die diesem Controller zugeordnet ist.
    */
-  private GUI gui;
+  // private GUI gui;
 
   /**
    * Das Model, das diesem Controller zugeordnet ist.
@@ -111,7 +110,8 @@ public class FormController
    */
   public FormController(final FormModel model, final ConfigThingy formFensterConf, final TextDocumentController documentController)
   {
-    gui = new GUI(this, model, formFensterConf);
+    // gui = new GUI(this, model, formFensterConf);
+
     this.model = model;
     this.documentController = documentController;
     // Standard-Fensterattribute vor dem Start der Form-GUI sichern um nach
@@ -253,40 +253,17 @@ public class FormController
   {
     if (documentController.getModel().doc.equals(sender))
     {
-      if (gui != null)
-      {
-        gui.dispose();
-        gui = null;
-      }
+      // if (gui != null)
+      // {
+      // gui.dispose();
+      // gui = null;
+      // }
 
       // Rücksetzen des defaultWindowAttributes auf den Wert vor dem Schließen
       // des Formulardokuments.
       if (defaultWindowAttributes != null)
         documentController.setDefaultWindowAttributes(defaultWindowAttributes);
     }
-  }
-
-  /**
-   * Baut die GUI zusammen und zeigt diese an. Sobald, die GUI angezeigt wurde wird die Methode
-   * {@link #formControllerInitCompleted()} aufgerufen.
-   */
-  public void createFormGUI()
-  {
-    Runnable runner = () -> {
-      try
-      {
-        gui.create();
-      } catch (Exception x)
-      {
-        LOGGER.error("", x);
-      }
-    };
-    gui.createGUI(runner);
-  }
-
-  public void showFormGUI()
-  {
-    gui.show(true);
   }
 
   /**

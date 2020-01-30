@@ -77,6 +77,7 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 import de.muenchen.allg.itd51.wollmux.event.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.sidebar.FormularGuiSidebarFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
 
@@ -211,6 +212,10 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
       xFactory = Factory.createComponentFactory(SeriendruckSidebarFactory.class,
           new String[] { SeriendruckSidebarFactory.__serviceName });
 
+    if (sImplName.equals(FormularGuiSidebarFactory.class.getName()))
+      xFactory = Factory.createComponentFactory(FormularGuiSidebarFactory.class,
+          new String[] { FormularGuiSidebarFactory.__serviceName });
+
     return xFactory;
   }
 
@@ -232,6 +237,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
       FactoryHelper.writeRegistryServiceInfo(SeriendruckSidebarFactory.class.getName(),
           SeriendruckSidebarFactory.__serviceName, xRegKey);
 
+      FactoryHelper.writeRegistryServiceInfo(FormularGuiSidebarFactory.class.getName(),
+          FormularGuiSidebarFactory.__serviceName, xRegKey);
+
       return Factory.writeRegistryServiceInfo(WollMux.class.getName(),
         WollMux.SERVICENAMES, xRegKey);
     }
@@ -252,27 +260,29 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   public synchronized static XSingleServiceFactory __getServiceFactory(
-      final String sImplementationName,
-      final XMultiServiceFactory xFactory,
+      final String sImplementationName, final XMultiServiceFactory xFactory,
       final XRegistryKey xKey)
   {
-      XSingleServiceFactory xResult = null;
-      if (sImplementationName.equals(WollMuxSidebarFactory.class.getName()))
-      {
-        xResult = FactoryHelper.getServiceFactory(
-                WollMuxSidebarFactory.class,
-                WollMuxSidebarFactory.__serviceName,
-                xFactory,
-                xKey);
+    XSingleServiceFactory xResult = null;
+    if (sImplementationName.equals(WollMuxSidebarFactory.class.getName()))
+    {
+      xResult = FactoryHelper.getServiceFactory(WollMuxSidebarFactory.class,
+          WollMuxSidebarFactory.__serviceName, xFactory, xKey);
     }
 
     if (sImplementationName.equals(SeriendruckSidebarFactory.class.getName()))
     {
       xResult = FactoryHelper.getServiceFactory(SeriendruckSidebarFactory.class,
           SeriendruckSidebarFactory.__serviceName, xFactory, xKey);
-      }
+    }
 
-      return xResult;
+    if (sImplementationName.equals(FormularGuiSidebarFactory.class.getName()))
+    {
+      xResult = FactoryHelper.getServiceFactory(FormularGuiSidebarFactory.class,
+          FormularGuiSidebarFactory.__serviceName, xFactory, xKey);
+    }
+
+    return xResult;
   }
 
   /**
