@@ -134,7 +134,7 @@ public class MailMergeGUI extends AbstractSidebarPanel
   @Override
   public LayoutSize getHeightForWidth(int width)
   {
-    int height = layout.getHeight();
+    int height = layout.getHeightForWidth(width);
     return new LayoutSize(height, height, height);
   }
 

@@ -1107,7 +1107,8 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
         }
 
         // get new visibility state
-        boolean setVisible = groups.stream().map(groupState::get).reduce(Boolean::logicalAnd).orElse(true);
+        boolean setVisible = groups.stream().map(groupState::get).filter(Objects::nonNull).reduce(Boolean::logicalAnd)
+            .orElse(true);
 
         /*
          * remember first changed visibility to set the cursor to its position later cursor can't be

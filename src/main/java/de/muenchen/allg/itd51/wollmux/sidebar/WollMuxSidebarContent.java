@@ -354,7 +354,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
   @Override
   public LayoutSize getHeightForWidth(int width)
   {
-    int height = layout.getHeight();
+    int height = layout.getHeightForWidth(width);
     return new LayoutSize(height, height, height);
   }
 
@@ -562,7 +562,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     props.put("HideInactiveSelection", true);
     XTextComponent searchBox = UNO
         .XTextComponent(GuiFactory.createTextfield(UNO.xMCF, context, toolkit,
-        windowPeer, label, new Rectangle(0, 0, 100, 32), props));
+            windowPeer, label, new Rectangle(0, 0, 100, 32), props, null));
 
     SortedMap<String, Object> propsResult = new TreeMap<>();
     propsResult.put("Enabled", false);

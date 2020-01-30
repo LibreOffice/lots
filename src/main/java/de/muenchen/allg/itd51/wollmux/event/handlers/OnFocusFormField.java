@@ -1,10 +1,11 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.form.dialog.GUI;
+import de.muenchen.allg.itd51.wollmux.form.sidebar.FormSidebarPanel;
 
 /**
- * Event for moving the cursor to the form field associated with the control in the {@link GUI}
+ * Event for moving the cursor to the form field associated with the control in the
+ * {@link FormSidebarPanel}
  */
 public class OnFocusFormField extends WollMuxEvent
 {

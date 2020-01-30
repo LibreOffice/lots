@@ -15,6 +15,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
+import de.muenchen.allg.itd51.wollmux.form.sidebar.FormFactory;
 import de.muenchen.allg.itd51.wollmux.mailmerge.sidebar.MailMergeFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
 import de.muenchen.allg.util.UnoComponent;
@@ -84,19 +85,22 @@ public class DebugExternalWollMux
             UnoComponent.CSS_UI_UI_ELEMENT_FACTORY_MANAGER,
             UNO.defaultContext.getServiceManager(), UNO.defaultContext));
 
-    factoryRegistration.registerFactory("toolpanel", "WollMuxSidebarFactory", null,
+    String interfaceType = "toolpanel";
+    factoryRegistration.registerFactory(interfaceType, "WollMuxSidebarFactory", null,
         WollMuxSidebarFactory.SERVICE_NAME);
 
-    factoryRegistration.registerFactory("toolpanel", "SeriendruckSidebarFactory", null,
+    factoryRegistration.registerFactory(interfaceType, "SeriendruckSidebarFactory", null,
         MailMergeFactory.SERVICE_NAME);
 
-    XSet set =
-      UNO.XSet(UNO.defaultContext.getServiceManager());
+    factoryRegistration.registerFactory(interfaceType, "FormFactory", null, FormFactory.SERVICE_NAME);
+
+    XSet set = UNO.XSet(UNO.defaultContext.getServiceManager());
     set.insert(ComponentRegistration.__getComponentFactory(WollMux.class.getName()));
     set.insert(ComponentRegistration
         .__getComponentFactory(WollMuxSidebarFactory.class.getName()));
     set.insert(ComponentRegistration
         .__getComponentFactory(MailMergeFactory.class.getName()));
+    set.insert(ComponentRegistration.__getComponentFactory(FormFactory.class.getName()));
 
     new WollMux(UNO.defaultContext);
 
