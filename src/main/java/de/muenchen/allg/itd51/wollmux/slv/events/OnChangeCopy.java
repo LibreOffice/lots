@@ -6,14 +6,14 @@ import com.sun.star.text.XTextCursor;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.event.handlers.BasicEvent;
+import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveItem;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
 
 /**
  * An event for adding or deleting a copy of a directive.
  */
-public class OnChangeCopy extends BasicEvent
+public class OnChangeCopy extends WollMuxEvent
 {
 
   private ContentBasedDirectiveModel model;

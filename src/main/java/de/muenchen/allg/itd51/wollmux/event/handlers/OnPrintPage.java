@@ -16,7 +16,7 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 /**
  * Event for printing the current visible page.
  */
-public class OnPrintPage extends BasicEvent
+public class OnPrintPage extends WollMuxEvent
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OnPrintPage.class);
@@ -46,25 +46,7 @@ public class OnPrintPage extends BasicEvent
 
     try
     {
-      boolean printEmptyPages;
-      try
-      {
-        XPropertySet inSettings = UNO
-            .XPropertySet(UNO.XMultiServiceFactory(documentController.getModel().doc)
-                .createInstance("com.sun.star.document.Settings"));
-        printEmptyPages = (Boolean) inSettings.getPropertyValue("PrintEmptyPages");
-      } catch (Exception e)
-      {
-        Object cfgProvider = UNO
-            .createUNOService("com.sun.star.configuration.ConfigurationProvider");
-
-        Object cfgAccess = UNO.XMultiServiceFactory(cfgProvider).createInstanceWithArguments(
-            "com.sun.star.configuration.ConfigurationAccess",
-            new UnoProps("nodepath", "/org.openoffice.Office.Writer/Print").getProps());
-        printEmptyPages = (Boolean) UNO.XPropertySet(cfgAccess).getPropertyValue("EmptyPages");
-      }
-
-      if (!printEmptyPages)
+      if (!isPrintEmptyPages())
       {
         for (short i = page; i > 0; i--)
         {
@@ -75,7 +57,7 @@ public class OnPrintPage extends BasicEvent
         }
         pageCursor.jumpToPage(currentPage);
       }
-    } catch (Exception e)
+    } catch (com.sun.star.uno.Exception e)
     {
       LOGGER.trace("", e);
     }
@@ -90,9 +72,30 @@ public class OnPrintPage extends BasicEvent
     printable.print(props.getProps());
   }
 
-  @Override
-  public String toString()
+  /**
+   * Check if print empty pages is active.
+   *
+   * @return True if empty pages should be printed, false otherwise.
+   * @throws com.sun.star.uno.Exception
+   *           If we can't access the properties.
+   */
+  private boolean isPrintEmptyPages() throws com.sun.star.uno.Exception
   {
-    return this.getClass().getSimpleName() + "()";
+    try
+    {
+      XPropertySet inSettings = UNO
+          .XPropertySet(UNO.XMultiServiceFactory(documentController.getModel().doc)
+              .createInstance("com.sun.star.document.Settings"));
+      return (boolean) inSettings.getPropertyValue("PrintEmptyPages");
+    } catch (com.sun.star.uno.Exception e)
+    {
+      Object cfgProvider = UNO
+          .createUNOService("com.sun.star.configuration.ConfigurationProvider");
+
+      Object cfgAccess = UNO.XMultiServiceFactory(cfgProvider).createInstanceWithArguments(
+          "com.sun.star.configuration.ConfigurationAccess",
+          new UnoProps("nodepath", "/org.openoffice.Office.Writer/Print").getProps());
+      return (boolean) UNO.XPropertySet(cfgAccess).getPropertyValue("EmptyPages");
+    }
   }
 }

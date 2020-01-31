@@ -3,11 +3,15 @@ package de.muenchen.allg.itd51.wollmux.event.handlers;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,14 +24,9 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 
 /**
- * Erzeugt ein neues WollMux-Event, in dem geprüft wird, ob der WollMux korrekt
- * installiert ist und keine Doppel- oder Halbinstallationen vorliegen. Ist der
- * WollMux fehlerhaft installiert, erscheint eine Fehlermeldung mit entsprechenden
- * Hinweisen.
- *
- * Das Event wird geworfen, wenn der WollMux startet.
+ * Event for checking if WollMux is correctly installed. There should be only one installation.
  */
-public class OnCheckInstallation extends BasicEvent
+public class OnCheckInstallation extends WollMuxEvent
 {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(OnCheckInstallation.class);
@@ -35,200 +34,112 @@ public class OnCheckInstallation extends BasicEvent
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-    // Standardwerte für den Warndialog:
-    boolean showdialog = true;
+    // default values
     String title = L.m("Mehrfachinstallation des WollMux");
     String msg = L.m(
         "Es wurden eine systemweite und eine benutzerlokale Installation des WollMux (oder Überreste von einer unvollständigen Deinstallation) gefunden.\nDiese Konstellation kann obskure Fehler verursachen.\n\nEntfernen Sie eine der beiden Installationen.\n\nDie wollmux.log enthält nähere Informationen zu den betroffenen Pfaden.");
     String logMsg = msg;
 
-    // Infos der Installationen einlesen.
-    List<WollMuxInstallationDescriptor> wmInsts = getInstallations();
+    // get all installations
+    List<Triple<String, Date, Boolean>> wmInsts = getInstallations();
 
-    // Variablen recentInstPath / recentInstLastModified / shared / local bestimmen
-    String recentInstPath = "";
-    Date recentInstLastModified = null;
-    boolean shared = false;
-    boolean local = false;
-    for (WollMuxInstallationDescriptor desc : wmInsts)
+    // get newest installation
+    Optional<Triple<String, Date, Boolean>> recentInst = wmInsts.stream()
+        .sorted((t1, t2) -> t1.getMiddle().compareTo(t2.getMiddle())).findFirst();
+
+    // get older installations
+    String otherInstsList = wmInsts.stream()
+        .sorted((t1, t2) -> t1.getMiddle().compareTo(t2.getMiddle())).skip(1)
+        .map(t -> "- " + t.getLeft()).collect(Collectors.joining("\n"));
+
+    if (recentInst.isPresent() && wmInsts.size() > 1)
     {
-      shared = shared || desc.isShared;
-      local = local || !desc.isShared;
-      if (recentInstLastModified == null
-          || desc.date.compareTo(recentInstLastModified) > 0)
-      {
-        recentInstLastModified = desc.date;
-        recentInstPath = desc.path;
-      }
-    }
-
-    // Variable wrongInstList bestimmen:
-    StringBuilder otherInstsList = new StringBuilder();
-    for (WollMuxInstallationDescriptor desc : wmInsts)
-    {
-      if (!desc.path.equals(recentInstPath))
-        otherInstsList.append("- ").append(desc.path).append("\n");
-    }
-
-    // Im Fehlerfall Dialog und Fehlermeldung bringen.
-    if (local && shared)
-    {
-
-      // Variablen in msg evaluieren:
-      DateFormat f = DateFormat.getDateInstance();
-      msg = msg.replaceAll("\\$\\{RECENT_INST_PATH\\}", recentInstPath);
-      msg = msg.replaceAll("\\$\\{RECENT_INST_LAST_MODIFIED\\}",
-          f.format(recentInstLastModified));
-      msg = msg.replaceAll("\\$\\{OTHER_INSTS_LIST\\}",
-          otherInstsList.toString());
-
       logMsg += "\n" + L.m("Die juengste WollMux-Installation liegt unter:")
-          + "\n- "
-          + recentInstPath + "\n"
+          + "\n "
+          + recentInst.get().getLeft() + "\n"
           + L.m("Ausserdem wurden folgende WollMux-Installationen gefunden:")
           + "\n" + otherInstsList;
       LOGGER.error(logMsg);
-
-      if (showdialog)
-        InfoDialog.showInfoModal(title, msg);
-
-    }
-  }
-
-  private static class WollMuxInstallationDescriptor
-  {
-    public String path;
-
-    public Date date;
-
-    public boolean isShared;
-
-    public WollMuxInstallationDescriptor(String path, Date date,
-        boolean isShared)
-    {
-      this.path = path;
-      this.date = date;
-      this.isShared = isShared;
-    }
-
-    @Override
-    public String toString()
-    {
-      return path + " -- " + date + " shared:" + isShared;
+      InfoDialog.showInfoModal(title, msg);
     }
   }
 
   /**
-   * Liefert eine {@link List} mit den aktuell auf dem System vorhandenen
-   * WollMux-Installationen.
+   * Find all installations of WollMux.
    *
-   * @author Christoph Lutz, Matthias Benkmann (D-III-ITD-D101)
+   * @return List of installations (name, date, shared).
    */
-  private List<WollMuxInstallationDescriptor> getInstallations()
+  private List<Triple<String, Date, Boolean>> getInstallations()
   {
-    List<WollMuxInstallationDescriptor> wmInstallations = new ArrayList<>();
-
-    // Installationspfade der Pakete bestimmen:
-    String myPath = null; // user-Pfad
-    String oooPath = null; // shared-Pfad
-    String oooPathNew = null; // shared-Pfad (OOo 3.x)
+    List<Triple<String, Date, Boolean>> wmInstallations = new ArrayList<>();
 
     try
     {
       XStringSubstitution xSS = UNO.XStringSubstitution(
           UNO.createUNOService("com.sun.star.util.PathSubstitution"));
-
-      // Benutzerinstallationspfad LiMux =
-      // /home/<Benutzer>/.openoffice.org2/user
-      // Benutzerinstallationspfad Windows 2000 C:/Dokumente und
-      // Einstellungen/<Benutzer>/Anwendungsdaten/OpenOffice.org2/user
-      myPath = xSS.substituteVariables(
-          "$(user)/uno_packages/cache/uno_packages/", true);
-      // Sharedinstallationspfad LiMux /opt/openoffice.org2.0/
-      // Sharedinstallationspfad Windows C:/Programme/OpenOffice.org<version>
-      oooPath = xSS.substituteVariables(
-          "$(inst)/share/uno_packages/cache/uno_packages/",
+      // user installations
+      String myPath = xSS.substituteVariables("$(user)/uno_packages/cache/uno_packages/", true);
+      // shared installations
+      String oooPath = xSS.substituteVariables("$(inst)/share/uno_packages/cache/uno_packages/",
           true);
-      try
+      String oooPathNew = xSS.substituteVariables(
+          "$(brandbaseurl)/share/uno_packages/cache/uno_packages/",
+          true);
+
+      if (myPath == null || oooPath == null)
       {
-        oooPathNew = xSS.substituteVariables(
-            "$(brandbaseurl)/share/uno_packages/cache/uno_packages/", true);
-      } catch (NoSuchElementException e)
-      {
-        // OOo 2.x does not have $(brandbaseurl)
+        LOGGER.error("Bestimmung der Installationspfade für das WollMux-Paket fehlgeschlagen.");
+        return wmInstallations;
       }
 
-    } catch (java.lang.Exception e)
+      findWollMuxInstallations(wmInstallations, myPath, false);
+      findWollMuxInstallations(wmInstallations, oooPath, true);
+      if (oooPathNew != null)
+      {
+        findWollMuxInstallations(wmInstallations, oooPathNew, true);
+      }
+    } catch (NoSuchElementException e)
     {
       LOGGER.error("", e);
-      return wmInstallations;
     }
-
-    if (myPath == null || oooPath == null)
-    {
-      LOGGER.error(L.m(
-          "Bestimmung der Installationspfade für das WollMux-Paket fehlgeschlagen."));
-      return wmInstallations;
-    }
-
-    findWollMuxInstallations(wmInstallations, myPath, false);
-    findWollMuxInstallations(wmInstallations, oooPath, true);
-    if (oooPathNew != null)
-      findWollMuxInstallations(wmInstallations, oooPathNew, true);
 
     return wmInstallations;
   }
 
   /**
-   * Sucht im übergebenen Pfad path nach Verzeichnissen die WollMux.oxt enthalten
-   * und fügt die Information zu wmInstallations hinzu.
+   * Find directories which contain WollMux.oxt.
    *
-   * @author Bettina Bauer, Christoph Lutz, Matthias Benkmann (D-III-ITD-D101)
+   * @param wmInstallations
+   *          Information about the directory are added to this list.
+   * @param path
+   *          The path to search for directories.
+   * @param isShared
+   *          Contains the path shared installations.
    */
-  private static void findWollMuxInstallations(
-      List<WollMuxInstallationDescriptor> wmInstallations, String path,
-      boolean isShared)
+  private static void findWollMuxInstallations(List<Triple<String, Date, Boolean>> wmInstallations,
+      String path, boolean isShared)
   {
-    URI uriPath;
-    uriPath = null;
     try
     {
-      uriPath = new URI(path);
+      URI uriPath = new URI(path);
+
+      File[] installedPackages = new File(uriPath).listFiles();
+      if (installedPackages != null)
+      {
+        Arrays.stream(installedPackages).filter(File::isDirectory)
+            .forEach(dir -> Arrays.stream(dir.listFiles()).filter(File::isDirectory)
+                .filter(f -> f.getName().startsWith("WollMux.")).forEach(file -> {
+                  // name of directory containing WollMux.oxt
+                  String directoryName = file.getAbsolutePath();
+                  // last modified date of directory containing WollMux.oxt
+                  Date directoryDate = new Date(file.lastModified());
+                  wmInstallations
+                      .add(new ImmutableTriple<>(directoryName, directoryDate, isShared));
+                }));
+      }
     } catch (URISyntaxException e)
     {
       LOGGER.error("", e);
-      return;
-    }
-
-    File[] installedPackages = new File(uriPath).listFiles();
-    if (installedPackages != null)
-    {
-      // iterieren über die Installationsverzeichnisse mit automatisch
-      // generierten Namen (z.B. 31GFBd_)
-      for (int i = 0; i < installedPackages.length; i++)
-      {
-        if (installedPackages[i].isDirectory())
-        {
-          File dir = installedPackages[i];
-          File[] dateien = dir.listFiles();
-          for (int j = 0; j < dateien.length; j++)
-          {
-            // Wenn das Verzeichnis WollMux.oxt enthält, speichern des
-            // Verzeichnisnames und des Verzeichnisdatum in einer HashMap
-            if (dateien[j].isDirectory()
-                && dateien[j].getName().startsWith("WollMux."))
-            {
-              // Name des Verzeichnis in dem sich WollMux.oxt befindet
-              String directoryName = dateien[j].getAbsolutePath();
-              // Datum des Verzeichnis in dem sich WollMux.oxt befindet
-              Date directoryDate = new Date(dateien[j].lastModified());
-              wmInstallations
-                  .add(new WollMuxInstallationDescriptor(directoryName,
-                      directoryDate, isShared));
-            }
-          }
-        }
-      }
     }
   }
 

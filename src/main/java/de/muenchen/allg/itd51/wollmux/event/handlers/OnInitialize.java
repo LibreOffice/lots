@@ -1,7 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -14,19 +13,14 @@ import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.ByJavaPropertyFinder;
 import de.muenchen.allg.itd51.wollmux.db.ByOOoUserProfileFinder;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 
 /**
- * Dieses Event wird als erstes WollMuxEvent bei der Initialisierung des WollMux im WollMuxSingleton
- * erzeugt und übernimmt alle benutzersichtbaren (interaktiven) Initialisierungen wie z.B. das
- * Darstellen des AbsenderAuswählen-Dialogs, falls die PAL leer ist.
- *
- * @author christoph.lutz
+ * Event for initializing WollMux.
  */
-public class OnInitialize extends BasicEvent
+public class OnInitialize extends WollMuxEvent
 {
   private static final Logger LOGGER = LoggerFactory.getLogger(OnInitialize.class);
 
@@ -37,13 +31,10 @@ public class OnInitialize extends BasicEvent
 
     if (dsj.getLOS().size() == 0)
     {
-      // falls es keine Datensätze im LOS gibt:
-      // Die initialen Daten nach Heuristik versuchen zu finden:
+      // try to find a suitable sender
       int found = searchDefaultSender(dsj);
 
-      // Absender Auswählen Dialog starten:
-      // wurde genau ein Datensatz gefunden, kann davon ausgegangen werden,
-      // dass dieser OK ist - der Dialog muss dann nicht erscheinen.
+      // show dialog if no suitable sender was found
       if (found != 1)
       {
         new OnShowDialogAbsenderAuswaehlen().emit();
@@ -56,41 +47,26 @@ public class OnInitialize extends BasicEvent
   }
 
   /**
-   * Wertet den Konfigurationsabschnitt PersoenlicheAbsenderlisteInitialisierung/Suchstrategie aus
-   * und versucht nach der angegebenen Strategie (mindestens) einen Datensatz im DJ dsj zu finden,
-   * der den aktuellen Benutzer repräsentiert. Fehlt der Konfigurationsabschnitt, so wird die
-   * Defaultsuche BY_OOO_USER_PROFILE(Vorname "${givenname}" Nachname "${sn}") gestartet. Liefert
-   * ein Element der Suchstrategie mindestens einen Datensatz zurück, so werden die anderen Elemente
-   * der Suchstrategie nicht mehr ausgewertet.
+   * Search for a sender by evaluating the configuration or using the information of the LibreOffice
+   * profile. If one sender is found, further search strategies aren't evaluated.
    *
    * @param dsj
-   *          Der DatasourceJoiner, in dem nach dem aktuellen Benutzer gesucht wird.
-   * @return liefert die Anzahl der Datensätze, die nach Durchlaufen der Suchstrategie gefunden
-   *         wurden.
+   *          {@link DatasourceJoiner} for searching senders.
+   * @return Number of senders found.
    */
+  @SuppressWarnings("squid:S2629")
   private int searchDefaultSender(DatasourceJoiner dsj)
   {
-    // Auswertung des Abschnitts
-    // PersoenlicheAbsenderlisteInitialisierung/Suchstrategie
-    ConfigThingy wmConf = WollMuxFiles.getWollmuxConf();
-    ConfigThingy strat = null;
-    try
-    {
-      strat = wmConf.query("PersoenlicheAbsenderlisteInitialisierung").query("Suchstrategie")
-          .getLastChild();
-    } catch (NodeNotFoundException e)
-    {
-      LOGGER.error("", e);
-    }
 
     QueryResults results = null;
-    if (strat != null)
+    try
     {
-      // Suche über Suchstrategie aus Konfiguration
-      for (Iterator<ConfigThingy> iter = strat.iterator(); iter.hasNext();)
+      // search by strategy defined in configuration
+      ConfigThingy wmConf = WollMuxFiles.getWollmuxConf();
+      ConfigThingy strat = wmConf.query("PersoenlicheAbsenderlisteInitialisierung")
+          .query("Suchstrategie").getLastChild();
+      for (ConfigThingy element : strat)
       {
-        ConfigThingy element = iter.next();
-
         if (element.getName().equals("BY_JAVA_PROPERTY"))
         {
           results = new ByJavaPropertyFinder(dsj).find(element);
@@ -99,13 +75,14 @@ public class OnInitialize extends BasicEvent
           results = new ByOOoUserProfileFinder(dsj).find(element);
         } else
         {
-          LOGGER.error(
-              L.m("Ungültiger Schlüssel in Suchstrategie: {}", element.stringRepresentation()));
+          LOGGER.error("Ungültiger Schlüssel in Suchstrategie: {}", element.stringRepresentation());
         }
       }
-    } else
+    } catch (NodeNotFoundException e)
     {
-      // Standardsuche über das OOoUserProfile:
+      // search with OOoUserProfile:
+      LOGGER.info("Couldn't find any search strategy");
+      LOGGER.debug("", e);
       List<Pair<String, String>> query = new ArrayList<>();
       query.add(new ImmutablePair<>("Vorname", "${givenname}"));
       query.add(new ImmutablePair<>("Nachname", "${sn}"));

@@ -6,39 +6,28 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 
 /**
- * Erzeugt ein neues WollMuxEvent, das dafür sorgt, dass eine Datei wollmux.dump
- * erzeugt wird, die viele für die Fehlersuche relevanten Informationen enthält wie
- * z.B. Versionsinfo, Inhalt der wollmux.conf, cache.conf, StringRepräsentation der
- * Konfiguration im Speicher und eine Kopie der Log-Datei.
+ * Event for dumping addintional information about WollMux.
  *
- * Das Event wird von der WollMuxBar geworfen, die (speziell für Admins, nicht für
- * Endbenutzer) einen entsprechenden Button besitzt.
+ * @see WollMuxFiles#dumpInfo()
  */
-public class OnDumpInfo extends BasicEvent
+public class OnDumpInfo extends WollMuxEvent
 {
 
   @Override
   protected void doit() throws WollMuxFehlerException
   {
     final String title = L.m("Fehlerinfos erstellen");
-
     String name = WollMuxFiles.dumpInfo();
 
     if (name != null)
-      InfoDialog.showInfoModal(
-          title,
-          L.m(
-              "Die Fehlerinformationen des WollMux wurden erfolgreich in die Datei '%1' geschrieben.",
-              name));
-    else
-      InfoDialog.showInfoModal(
-          title,
-          L.m("Die Fehlerinformationen des WollMux konnten nicht geschrieben werden. Details siehe Datei wollmux.log!"));
-  }
-
-  @Override
-  public String toString()
-  {
-    return this.getClass().getSimpleName() + "()";
+    {
+      InfoDialog.showInfoModal(title, L.m(
+          "Die Fehlerinformationen des WollMux wurden erfolgreich in die Datei '%1' geschrieben.",
+          name));
+    } else
+    {
+      InfoDialog.showInfoModal(title, L.m(
+          "Die Fehlerinformationen des WollMux konnten nicht geschrieben werden. Details siehe Datei wollmux.log!"));
+    }
   }
 }

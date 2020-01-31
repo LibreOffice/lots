@@ -9,21 +9,24 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
- * Dieses Event wird vom FormModelImpl ausgelöst, wenn der Benutzer die Aktion
- * "saveTempAndOpenExt" aktiviert hat.
- *
- * @author matthias.benkmann
+ * Event for saving a temporary file and opening it with an external application.
  */
-
-public class OnSaveTempAndOpenExt extends BasicEvent
+public class OnSaveTempAndOpenExt extends WollMuxEvent
 {
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(OnSaveTempAndOpenExt.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(OnSaveTempAndOpenExt.class);
 
   private String ext;
 
   private TextDocumentController documentController;
 
+  /**
+   * Create this event.
+   *
+   * @param documentController
+   *          The document to save and open.
+   * @param ext
+   *          The identifier of the external application
+   */
   public OnSaveTempAndOpenExt(TextDocumentController documentController,
       String ext)
   {

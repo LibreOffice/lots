@@ -2,16 +2,26 @@ package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import com.sun.star.document.XEventListener;
 import com.sun.star.lang.XComponent;
 
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
-public class OnAddDocumentEventListener extends BasicEvent
+/**
+ * Adds listener for notification about document processing.
+ */
+public class OnAddDocumentEventListener extends WollMuxEvent
 {
   private XEventListener listener;
 
+  /**
+   * Create this event.
+   *
+   * @param listener
+   *          The listener to register.
+   */
   public OnAddDocumentEventListener(XEventListener listener)
   {
     this.listener = listener;

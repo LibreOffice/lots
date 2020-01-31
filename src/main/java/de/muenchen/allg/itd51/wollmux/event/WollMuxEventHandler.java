@@ -7,44 +7,54 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
 
 /**
- * The global event handler of {@link WollMuxEvent}.
+ * The global event handler of {@link WollMuxEvent}. It's a singleton.
  */
 public class WollMuxEventHandler
 {
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(WollMuxEventHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(WollMuxEventHandler.class);
 
   /**
-   * Name des OnWollMuxProcessingFinished-Events.
+   * Value of processing finished event.
    */
   public static final String ON_WOLLMUX_PROCESSING_FINISHED = "OnWollMuxProcessingFinished";
 
+  /**
+   * The only instance of this class.
+   */
   private static WollMuxEventHandler instance;
 
+  /**
+   * The event bus.
+   */
   private EventBus eventBus;
 
+  /**
+   * Does this event handler accept new events?
+   */
   private boolean acceptEvents = false;
 
   /**
-   * Mit dieser Methode ist es möglich die Entgegennahme von Events zu blockieren.
-   * Alle eingehenden Events werden ignoriert, wenn accept auf false gesetzt ist
-   * und entgegengenommen, wenn accept auf true gesetzt ist.
+   * Accept or reject new events.
    *
    * @param accept
+   *          If true new events are accepted, if false events are ignored.
    */
   public void setAcceptEvents(boolean accept)
   {
     acceptEvents = accept;
     if (accept)
-      LOGGER.debug(L.m("EventProcessor: akzeptiere neue Events."));
+      LOGGER.debug("EventProcessor: akzeptiere neue Events.");
     else
-      LOGGER.debug(L.m("EventProcessor: blockiere Entgegennahme von Events!"));
+      LOGGER.debug("EventProcessor: blockiere Entgegennahme von Events!");
   }
 
+  /**
+   * Create a new WollMux event bus and register all listeners implementing
+   * {@link WollMuxEventListener}.
+   */
   private WollMuxEventHandler()
   {
     LOGGER.debug("create event handler");
@@ -56,6 +66,11 @@ public class WollMuxEventHandler
     });
   }
 
+  /**
+   * Get the {@link WollMuxEventHandler}.
+   *
+   * @return The event handler.
+   */
   public static WollMuxEventHandler getInstance()
   {
     if (instance == null)

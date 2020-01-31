@@ -9,17 +9,19 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
 /**
- * Erzeugt ein neues WollMuxEvent, das den FormularMax4000 aufruft für das Dokument
- * doc.
- *
- * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
- * WollMuxEventHandler ausgelöst.
+ * Event for showing FormularMax.
  */
-public class OnFormularMax4000Show extends BasicEvent
+public class OnFormularMax4000Show extends WollMuxEvent
 {
 
   private TextDocumentController documentController;
 
+  /**
+   * Create this event.
+   *
+   * @param documentController
+   *          The document associated with the FormularMax.
+   */
   public OnFormularMax4000Show(TextDocumentController documentController)
   {
     this.documentController = documentController;
@@ -28,7 +30,7 @@ public class OnFormularMax4000Show extends BasicEvent
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-    // Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
+    // move existing FormularMax to front or create a new one
     FormularMax4kController max = DocumentManager.getDocumentManager()
         .getCurrentFormularMax4000(documentController.getModel().doc);
     if (max != null)
@@ -39,14 +41,10 @@ public class OnFormularMax4000Show extends BasicEvent
       ActionListener l = actionEvent -> {
         if (actionEvent.getSource() instanceof FormularMax4kController)
         {
-          new OnFormularMax4000Returned(documentController).emit();
+          new OnRemoveFormularMax(documentController).emit();
         }
       };
 
-      // Der Konstruktor von FormularMax erwartet hier nur die globalen
-      // Funktionsbibliotheken, nicht jedoch die neuen dokumentlokalen
-      // Bibliotheken, die das model bereitstellt. Die dokumentlokalen
-      // Bibliotheken kann der FM4000 selbst auflösen.
       max = new FormularMax4kController(documentController, l,
           GlobalFunctions.getInstance().getGlobalFunctions(),
           GlobalFunctions.getInstance().getGlobalPrintFunctions());

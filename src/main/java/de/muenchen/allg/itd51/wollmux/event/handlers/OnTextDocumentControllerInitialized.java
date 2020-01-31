@@ -11,7 +11,7 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  * an textDocumentController for an (new) document gets initialized.
  *
  */
-public class OnTextDocumentControllerInitialized extends BasicEvent
+public class OnTextDocumentControllerInitialized extends WollMuxEvent
 {
   private final TextDocumentController documentController;
 

@@ -9,12 +9,11 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
- * Dieses Event wird vom FormModelImpl ausgelöst, wenn der Benutzer die Aktion
- * "closeAndOpenExt" aktiviert hat.
+ * Event for closing a document and starting an external application.
  *
- * @author matthias.benkmann
+ * The document is stored as a temporary file and opened by the application.
  */
-public class OnCloseAndOpenExt extends BasicEvent
+public class OnCloseAndOpenExt extends WollMuxEvent
 {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(OnCloseAndOpenExt.class);
@@ -22,8 +21,15 @@ public class OnCloseAndOpenExt extends BasicEvent
   private String ext;
   private TextDocumentController documentController;
 
-  public OnCloseAndOpenExt(TextDocumentController documentController,
-      String ext)
+  /**
+   * Create this event.
+   *
+   * @param documentController
+   *          The document to store and close.
+   * @param ext
+   *          Identifier of the external application.
+   */
+  public OnCloseAndOpenExt(TextDocumentController documentController, String ext)
   {
     this.documentController = documentController;
     this.ext = ext;

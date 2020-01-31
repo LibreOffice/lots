@@ -3,18 +3,22 @@ package de.muenchen.allg.itd51.wollmux.event.handlers;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
- * Dieses Event wird vom FormModelImpl ausgelöst, wenn die Formular-GUI das
- * bearbeitete Dokument sichtbar/unsichtbar schalten möchte. Ruft direkt setVisible
- * der UNO-API auf.
- *
- * @author christoph.lutz
+ * Shows or hides a document window.
  */
-public class OnSetWindowVisible extends BasicEvent
+public class OnSetWindowVisible extends WollMuxEvent
 {
   boolean visible;
 
   private TextDocumentController documentController;
 
+  /**
+   * Create this event.
+   *
+   * @param documentController
+   *          The document.
+   * @param visible
+   *          If true document is shown, otherwise hidden.
+   */
   public OnSetWindowVisible(TextDocumentController documentController,
       boolean visible)
   {

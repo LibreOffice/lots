@@ -17,21 +17,24 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 
 /**
- * Dieses Event wird immer dann ausgelöst, wenn der GlobalEventBroadcaster von OOo
- * ein ON_NEW oder ein ON_LOAD-Event wirft. Das Event sorgt dafür, dass die
- * eigentliche Dokumentbearbeitung durch den WollMux angestossen wird.
- *
- * @author christoph.lutz
+ * Event for processing a document.
  */
-public class OnProcessTextDocument extends BasicEvent
+public class OnProcessTextDocument extends WollMuxEvent
 {
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(OnProcessTextDocument.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(OnProcessTextDocument.class);
 
-  TextDocumentController documentController;
+  private TextDocumentController documentController;
 
-  boolean visible;
+  private boolean visible;
 
+  /**
+   * Create this event.
+   *
+   * @param documentController
+   *          The document to process.
+   * @param visible
+   *          If false, the window of the document is invisible, otherwise it's visible.
+   */
   public OnProcessTextDocument(TextDocumentController documentController,
       boolean visible)
   {
@@ -43,10 +46,12 @@ public class OnProcessTextDocument extends BasicEvent
   protected void doit() throws WollMuxFehlerException
   {
     if (documentController == null)
+    {
       return;
+    }
 
-    // Konfigurationsabschnitt Textdokument verarbeiten falls Dok sichtbar:
     if (visible)
+    {
       try
       {
         ConfigThingy tds = WollMuxFiles.getWollmuxConf().query("Fenster")
@@ -54,42 +59,38 @@ public class OnProcessTextDocument extends BasicEvent
         documentController.getFrameController().setWindowViewSettings(tds);
       } catch (NodeNotFoundException e)
       {
-//        kein Fehler
+        // configuration for Fenster isn't mandatory
       }
+    }
 
-    // Mögliche Aktionen für das neu geöffnete Dokument:
     DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
         documentController, WollMuxFiles.isDebugMode());
 
     try
     {
-      // Globale Dokumentkommandos wie z.B. setType, setPrintFunction, ...
-      // auswerten.
+      // scan global document commands
       dci.scanGlobalDocumentCommands();
 
       int actions = documentController.evaluateDocumentActions(GlobalFunctions
           .getInstance().getDocumentActionFunctions().iterator());
 
-      // Bei Vorlagen: Ausführung der Dokumentkommandos
+      // if it is a template execute the commands
       if ((actions < 0 && documentController.getModel().isTemplate())
           || (actions == Integer.MAX_VALUE))
       {
         dci.executeTemplateCommands();
 
-        // manche Kommandos sind erst nach der Expansion verfügbar
+        // there can be new commands now
         dci.scanGlobalDocumentCommands();
       }
-      // insertFormValue-Kommandos auswerten
       dci.scanInsertFormValueCommands();
 
-      // Bei Formularen:
-      // Anmerkung: actions == allactions wird NICHT so interpretiert, dass auch
-      // bei Dokumenten ohne Formularfunktionen der folgende Abschnitt ausgeführt
-      // wird. Dies würde unsinnige Ergebnisse verursachen.
+      // if it is a form execute form commands
       if (actions != 0 && documentController.getModel().isFormDocument())
       {
         // Konfigurationsabschnitt Fenster/Formular verarbeiten falls Dok sichtbar
         if (visible)
+        {
           try
           {
             documentController.getFrameController().setDocumentZoom(
@@ -97,10 +98,10 @@ public class OnProcessTextDocument extends BasicEvent
                     "Formular").getLastChild().query("ZOOM"));
           } catch (java.lang.Exception e)
           {
-            // kein Fehler
+            // configuration for Fenster isn't mandatory
           }
+        }
 
-        // FormGUI starten
         try
         {
           FormController formController = documentController.getFormController();

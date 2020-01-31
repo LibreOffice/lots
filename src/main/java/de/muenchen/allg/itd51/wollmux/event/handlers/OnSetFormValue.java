@@ -7,10 +7,13 @@ import com.sun.star.text.XTextDocument;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 
-public class OnSetFormValue extends BasicEvent
+/**
+ * Event for setting form values in a document. If the document is a form document processing is
+ * done by the form model of the document to update all dependent fields.
+ */
+public class OnSetFormValue extends WollMuxEvent
 {
   private XTextDocument doc;
 
@@ -20,6 +23,18 @@ public class OnSetFormValue extends BasicEvent
 
   private final ActionListener listener;
 
+  /**
+   * Create this event.
+   *
+   * @param doc
+   *          The document.
+   * @param id
+   *          The ID of the field to update.
+   * @param value
+   *          The new value of the field.
+   * @param listener
+   *          A listener to notify after processing is finished.
+   */
   public OnSetFormValue(XTextDocument doc, String id, String value,
       ActionListener listener)
   {

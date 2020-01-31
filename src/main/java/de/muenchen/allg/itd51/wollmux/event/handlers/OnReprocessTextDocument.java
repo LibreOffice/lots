@@ -1,16 +1,32 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 
-public class OnReprocessTextDocument extends BasicEvent
+/**
+ * Event for reprocessing a document. Only new commands are executed.
+ */
+public class OnReprocessTextDocument extends WollMuxEvent
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(OnReprocessTextDocument.class);
+
   TextDocumentModel model;
   private TextDocumentController documentController;
 
+  /**
+   * Create this event.
+   *
+   * @param documentController
+   *          The document.
+   */
   public OnReprocessTextDocument(TextDocumentController documentController)
   {
     this.documentController = documentController;
@@ -21,25 +37,22 @@ public class OnReprocessTextDocument extends BasicEvent
   protected void doit() throws WollMuxFehlerException
   {
     if (model == null)
+    {
       return;
+    }
 
-    // Dokument mit neuen Dokumentkommandos über den
-    // DocumentCommandInterpreter bearbeiten:
     model.getDocumentCommands().update();
     DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
         documentController, WollMuxFiles.isDebugMode());
+
     try
     {
       dci.executeTemplateCommands();
-
-      // manche Kommandos sind erst nach der Expansion verfügbar
       dci.scanGlobalDocumentCommands();
       dci.scanInsertFormValueCommands();
-    } catch (java.lang.Exception e)
+    } catch (WMCommandsFailedException e)
     {
-      // Hier wird keine Exception erwartet, da Fehler (z.B. beim manuellen
-      // Einfügen von Textbausteinen) bereits dort als Popup angezeigt werden
-      // sollen, wo sie auftreten.
+      LOGGER.debug("", e);
     }
 
     stabilize();

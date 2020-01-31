@@ -9,11 +9,23 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.dispatch.DispatchHelper;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
-public class OnUpdateInputFields extends BasicEvent
+/**
+ * Event for handling LibreOffice UpdateInputField dispatches. The LibreOffice own dialog isn't
+ * shown.
+ */
+public class OnUpdateInputFields extends WollMuxEvent
 {
   XTextDocument doc;
   DispatchHelper helper;
 
+  /**
+   * Create this event.
+   *
+   * @param doc
+   *          The document.
+   * @param helper
+   *          A helper for calling the original dispatch.
+   */
   public OnUpdateInputFields(XTextDocument doc, DispatchHelper helper)
   {
     this.doc = doc;
