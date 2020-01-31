@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.container.XEnumeration;
-import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextCursor;
@@ -491,99 +490,5 @@ public class TextModule
       }
     }
     return null;
-  }
-
-  /**
-   * Alte und fehlerhafte Implementierung, da der jumpPlaceholder-Methode, da sie Platzhalter in
-   * Tabellen nicht anspringen kann. Diese Methode wird nur noch als Workaround für Issue
-   * http://openoffice.org/bugzilla/show_bug.cgi?id=102619 in allen OOo-Versionen &lt; 3.2.1
-   * benötigt.
-   *
-   * @param viewCursor
-   *          Aktueller ViewCursor im Dokument
-   */
-  public static void jumpPlaceholdersOld(XTextDocument doc, XTextCursor viewCursor)
-  {
-    boolean found = false;
-
-    XTextCursor cursor =
-      UNO.XTextCursor(viewCursor.getText().createTextCursorByRange(
-        viewCursor.getEnd()));
-
-    cursor.gotoRange(cursor.getText().getEnd(), true);
-
-    for (int i = 0; i < 2 && found == false; i++)
-    {
-      XEnumeration xEnum = UNO.XEnumerationAccess(cursor).createEnumeration();
-      XEnumerationAccess enuAccess;
-
-      // Schleife über den Textbereich
-      while (xEnum.hasMoreElements() && found == false)
-      {
-        Object ele = null;
-        try
-        {
-          ele = xEnum.nextElement();
-        }
-        catch (Exception e)
-        {
-          continue;
-        }
-        enuAccess = UNO.XEnumerationAccess(ele);
-        if (enuAccess != null) // ist wohl ein SwXParagraph
-        {
-          XEnumeration textPortionEnu = enuAccess.createEnumeration();
-          // Schleife über SwXParagraph und schauen ob es Platzhalterfelder gibt
-          // diese diese werden dann im Vector placeholders gesammelt
-          while (textPortionEnu.hasMoreElements() && found == false)
-          {
-            Object textPortion;
-            try
-            {
-              textPortion = textPortionEnu.nextElement();
-            }
-            catch (java.lang.Exception x)
-            {
-              continue;
-            }
-            String textPortionType =
-                (String) Utils.getProperty(textPortion, "TextPortionType");
-            // Wenn es ein Textfeld ist
-            if (textPortionType.equals("TextField"))
-            {
-              XTextField textField = null;
-              try
-              {
-                textField =
-                  UNO.XTextField(UNO.getProperty(textPortion, "TextField"));
-                // Wenn es ein Platzhalterfeld ist, dem Vector placeholders
-                // hinzufügen
-
-                if (UNO.supportsService(textField,
-                  "com.sun.star.text.TextField.JumpEdit"))
-                {
-                  viewCursor.gotoRange(textField.getAnchor(), false);
-                  found = true;
-                }
-              }
-              catch (java.lang.Exception e)
-              {
-                continue;
-              }
-            }
-          }
-        }
-      }
-      cursor =
-        UNO.XTextCursor(viewCursor.getText().createTextCursorByRange(
-          cursor.getText()));
-    }
-    // Falls kein Platzhalter gefunden wurde wird zur Marke 'setJumpMark'
-    // gesprungen falls vorhanden sonst kommt eine Fehlermeldung -->
-    // Übergabeparameter true
-    if (found == false)
-    {
-      WollMuxEventHandler.getInstance().handleJumpToMark(doc, true);
-    }
   }
 }
