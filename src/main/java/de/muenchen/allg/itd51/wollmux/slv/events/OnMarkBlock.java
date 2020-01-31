@@ -25,7 +25,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
-import de.muenchen.allg.itd51.wollmux.event.handlers.BasicEvent;
+import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveConfig;
 import de.muenchen.allg.itd51.wollmux.slv.PrintBlockSignature;
 import de.muenchen.allg.ooo.TextDocument;
@@ -36,7 +36,7 @@ import de.muenchen.allg.ooo.TextDocument;
  *
  * This event is triggered by the toolbar.
  */
-public class OnMarkBlock extends BasicEvent
+public class OnMarkBlock extends WollMuxEvent
 {
   private static final Logger LOGGER = LoggerFactory.getLogger(OnMarkBlock.class);
 

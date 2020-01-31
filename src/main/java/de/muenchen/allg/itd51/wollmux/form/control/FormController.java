@@ -24,8 +24,8 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseAndOpenExt;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseTextDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFocusFormField;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormControllerInitCompleted;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnResetDocumentState;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveTempAndOpenExt;
 import de.muenchen.allg.itd51.wollmux.form.dialog.GUI;
 
@@ -345,7 +345,7 @@ public class FormController
    */
   public void formControllerInitCompleted()
   {
-    new OnFormControllerInitCompleted(documentController).emit();
+    new OnResetDocumentState(documentController).emit();
   }
 
   public void exportFormValues(File f) throws IOException

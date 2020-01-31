@@ -29,17 +29,11 @@ import de.muenchen.allg.itd51.wollmux.dispatch.DispatchHelper;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
- * Der Handler für einen abgespeckten Speichern-Unter-Dialog des WollMux, der in Abängigkeit von
- * einer gesetzten FilenameGeneratorFunction über den WollMux aufgrufen und mit dem generierten
- * Filenamen vorbelegt wird.
- *
- * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü "Datei-&gt;SaveAs"
- * oder über die Symbolleiste die dispatch-url .uno:Save bzw. .uno:SaveAs abgesetzt wurde.
+ * If a FilenameGeneratorFunction is present the default name of the file is set.
  */
-public class OnSaveAs extends BasicEvent
+public class OnSaveAs extends WollMuxEvent
 {
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(OnSaveAs.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(OnSaveAs.class);
 
   private TextDocumentController documentController;
 
@@ -55,7 +49,6 @@ public class OnSaveAs extends BasicEvent
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-    // FilenameGeneratorFunction auslesen und parsen
     FunctionLibrary lib = documentController.getFunctionLibrary();
     ConfigThingy funcConf = documentController.getFilenameGeneratorFunc();
     Function func = null;
@@ -70,7 +63,6 @@ public class OnSaveAs extends BasicEvent
       }
     }
 
-    // Original-Dispatch ausführen, wenn keine FilenameGeneratorFunction gesetzt
     if (func == null)
     {
       helper.dispatchOriginal();

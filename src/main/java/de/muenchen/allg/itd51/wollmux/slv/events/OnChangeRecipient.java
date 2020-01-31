@@ -8,14 +8,14 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.event.handlers.BasicEvent;
+import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveItem;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
 
 /**
  * An event for changing recipients of content based directives.
  */
-public class OnChangeRecipient extends BasicEvent
+public class OnChangeRecipient extends WollMuxEvent
 {
 
   private TextDocumentController documentController;

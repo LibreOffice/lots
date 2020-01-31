@@ -14,28 +14,9 @@ import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
- * Erzeugt ein neues WollMuxEvent, das dafür sorgt, dass im Textdokument doc alle
- * insertValue-Befehle mit einer DB_SPALTE, die in der übergebenen
- * mapDbSpalteToValue enthalten sind neu für den entsprechenden Wert evaluiert und
- * gesetzt werden, unabhängig davon, ob sie den Status DONE besitzen oder nicht.
- *
- * Das Event wird aus der Implementierung von XWollMuxDocument (siehe
- * compo.WollMux) geworfen, wenn dort die Methode setInsertValue aufgerufen wird.
- *
- * @param doc
- *          Das Dokument, in dem das die insertValue-Kommandos neu gesetzt werden
- *          sollen.
- * @param mapDbSpalteToValue
- *          Enthält eine Zuordnung von DB_SPALTEn auf die zu setzenden Werte.
- *          Enthält ein betroffenes Dokumentkommando eine Trafo, so wird die Trafo
- *          mit dem zugehörigen Wert ausgeführt und das Transformationsergebnis als
- *          neuer Inhalt des Bookmarks gesetzt.
- * @param unlockActionListener
- *          Wird informiert, sobald das Event vollständig abgearbeitet wurde.
- *
- * @author Christoph Lutz (D-III-ITD-D101)
+ * Updates all insertValue commands, even already executed commands.
  */
-public class OnSetInsertValues extends BasicEvent
+public class OnSetInsertValues extends WollMuxEvent
 {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(OnSetInsertValues.class);
@@ -46,6 +27,17 @@ public class OnSetInsertValues extends BasicEvent
 
   private ActionListener listener;
 
+  /**
+   * Create this event
+   *
+   * @param doc
+   *          The document.
+   * @param mapDbSpalteToValue
+   *          Mapping of columns to values. These are the values, which are inserted in the
+   *          document. If there is a transformation, it is executed.
+   * @param unlockActionListener
+   *          Listener to notify after completion.
+   */
   public OnSetInsertValues(XTextDocument doc,
       Map<String, String> mapDbSpalteToValue,
       ActionListener unlockActionListener)
@@ -61,9 +53,8 @@ public class OnSetInsertValues extends BasicEvent
     TextDocumentController documentController = DocumentManager
         .getTextDocumentController(doc);
 
-    for (DocumentCommand cmd : documentController.getModel()
-        .getDocumentCommands())
-      // stellt sicher, dass listener am Schluss informiert wird
+    for (DocumentCommand cmd : documentController.getModel().getDocumentCommands())
+    {
       try
       {
         if (cmd instanceof DocumentCommand.InsertValue)
@@ -72,15 +63,14 @@ public class OnSetInsertValues extends BasicEvent
           String value = mapDbSpalteToValue.get(insVal.getDBSpalte());
           if (value != null)
           {
-            value = documentController
-                .getTransformedValue(insVal.getTrafoName(), value);
+            value = documentController.getTransformedValue(insVal.getTrafoName(), value);
             if ("".equals(value))
             {
               cmd.setTextRangeString("");
             } else
             {
-              cmd.setTextRangeString(insVal.getLeftSeparator() + value
-                  + insVal.getRightSeparator());
+              cmd.setTextRangeString(
+                  insVal.getLeftSeparator() + value + insVal.getRightSeparator());
             }
           }
         }
@@ -88,8 +78,12 @@ public class OnSetInsertValues extends BasicEvent
       {
         LOGGER.error("", e);
       }
+    }
+
     if (listener != null)
+    {
       listener.actionPerformed(null);
+    }
   }
 
   @Override

@@ -5,18 +5,14 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 
 /**
- * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
- * WollMuxEventHandler ausgelöst und sorgt dafür, dass der Dialog
- * PersönlicheAbsendeliste-Verwalten gestartet wird.
- *
- * @author christoph.lutz
+ * Event for showing the personal sender list.
  */
-public class OnShowDialogPersoenlicheAbsenderlisteVerwalten extends BasicEvent
+public class OnShowDialogPersoenlicheAbsenderlisteVerwalten extends WollMuxEvent
 {
+
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-    // Dialog modal starten:
     new PersoenlicheAbsenderlisteVerwalten(DatasourceJoinerFactory.getDatasourceJoiner(), null);
   }
 }

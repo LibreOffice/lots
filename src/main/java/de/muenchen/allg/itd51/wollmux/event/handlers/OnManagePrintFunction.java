@@ -6,7 +6,10 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
-public class OnManagePrintFunction extends BasicEvent
+/**
+ * Event for adding or removing print functions.
+ */
+public class OnManagePrintFunction extends WollMuxEvent
 {
   private XTextDocument doc;
 
@@ -14,6 +17,16 @@ public class OnManagePrintFunction extends BasicEvent
 
   private boolean remove;
 
+  /**
+   * Create this event.
+   *
+   * @param doc
+   *          The document.
+   * @param functionName
+   *          The name of the print function.
+   * @param remove
+   *          If true the function is removed, otherwise added.
+   */
   public OnManagePrintFunction(XTextDocument doc, String functionName,
       boolean remove)
   {
@@ -25,12 +38,14 @@ public class OnManagePrintFunction extends BasicEvent
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-    TextDocumentController documentController = DocumentManager
-        .getTextDocumentController(doc);
+    TextDocumentController documentController = DocumentManager.getTextDocumentController(doc);
     if (remove)
+    {
       documentController.removePrintFunction(functionName);
-    else
+    } else
+    {
       documentController.addPrintFunction(functionName);
+    }
   }
 
   @Override

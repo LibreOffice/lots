@@ -8,15 +8,11 @@ import org.slf4j.LoggerFactory;
 import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
- * Dieses Event wird ausgelöst, wenn im WollMux-Service die methode setSender
- * aufgerufen wird. Es sort dafür, dass ein neuer Absender gesetzt wird.
- *
- * @author christoph.lutz
+ * Event for selecting a new sender.
  */
-public class OnSetSender extends BasicEvent
+public class OnSetSender extends WollMuxEvent
 {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(OnSetSender.class);
@@ -25,6 +21,14 @@ public class OnSetSender extends BasicEvent
 
   private int idx;
 
+  /**
+   * Create this event.
+   *
+   * @param senderName
+   *          The name of the new sender.
+   * @param idx
+   *          The id in the personal sender list of the new sender.
+   */
   public OnSetSender(String senderName, int idx)
   {
     this.senderName = senderName;
@@ -36,9 +40,6 @@ public class OnSetSender extends BasicEvent
   {
     String[] pal = PersoenlicheAbsenderliste.getInstance().getPALEntries();
 
-    // nur den neuen Absender setzen, wenn index und sender übereinstimmen,
-    // d.h.
-    // die Absenderliste der entfernten WollMuxBar konsistent war.
     if (idx >= 0 && idx < pal.length && pal[idx].equals(senderName))
     {
       List<DJDataset> palDatasets = PersoenlicheAbsenderliste

@@ -3,16 +3,18 @@ package de.muenchen.allg.itd51.wollmux.event.handlers;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
- * Dieses Event wird vom FormModelImpl ausgelöst, wenn der Benutzer die
- * Formular-GUI schließt und damit auch das zugehörige TextDokument geschlossen
- * werden soll.
- *
- * @author christoph.lutz
+ * Event for closing a document.
  */
-public class OnCloseTextDocument extends BasicEvent
+public class OnCloseTextDocument extends WollMuxEvent
 {
   private TextDocumentController documentController;
 
+  /**
+   * Create this event.
+   * 
+   * @param documentController
+   *          The document to close.
+   */
   public OnCloseTextDocument(TextDocumentController documentController)
   {
     this.documentController = documentController;

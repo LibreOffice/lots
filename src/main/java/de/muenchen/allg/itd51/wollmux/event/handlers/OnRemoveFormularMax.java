@@ -5,17 +5,20 @@ import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
- * Erzeugt ein neues WollMuxEvent, das aufgerufen wird, wenn ein FormularMax4000
- * beendet wird und die entsprechenden internen Referenzen gelöscht werden können.
- *
- * Dieses Event wird vom EventProcessor geworfen, wenn der FormularMax zurückkehrt.
+ * Event for removing a FormularMax instance.
  */
-public class OnFormularMax4000Returned extends BasicEvent
+public class OnRemoveFormularMax extends WollMuxEvent
 {
 
   private TextDocumentController documentController;
 
-  public OnFormularMax4000Returned(TextDocumentController documentController)
+  /**
+   * Create this event.
+   *
+   * @param documentController
+   *          The document which has no more FormularMax.
+   */
+  public OnRemoveFormularMax(TextDocumentController documentController)
   {
     this.documentController = documentController;
   }
@@ -25,12 +28,5 @@ public class OnFormularMax4000Returned extends BasicEvent
   {
     DocumentManager.getDocumentManager()
         .setCurrentFormularMax4000(documentController.getModel().doc, null);
-  }
-
-  @Override
-  public String toString()
-  {
-    return this.getClass().getSimpleName() + "(#"
-        + documentController.getModel().hashCode() + ")";
   }
 }

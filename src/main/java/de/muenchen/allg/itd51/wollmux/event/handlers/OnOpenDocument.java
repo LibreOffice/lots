@@ -25,35 +25,26 @@ import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
- * Obsolete, aber aus Kompatibilitätgründen noch vorhanden. Bitte handleOpen()
- * statt dessen verwenden.
- *
- * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass ein Dokument geöffnet
- * wird.
- *
- * Dieses Event wird gestartet, wenn der WollMux-Service (...comp.WollMux) das
- * Dispatch-Kommando wollmux:openTemplate bzw. wollmux:openDocument empfängt und
- * sort dafür, dass das entsprechende Dokument geöffnet wird.
- *
- * @param fragIDs
- *          Eine List mit fragIDs, wobei das erste Element die FRAG_ID des zu
- *          öffnenden Dokuments beinhalten muss. Weitere Elemente werden in eine
- *          Liste zusammengefasst und als Parameter für das Dokumentkommando
- *          insertContent verwendet.
- * @param asTemplate
- *          true, wenn das Dokument als "Unbenannt X" geöffnet werden soll (also im
- *          "Template-Modus") und false, wenn das Dokument zum Bearbeiten geöffnet
- *          werden soll.
+ * Event for loading and opening a file.
  */
-public class OnOpenDocument extends BasicEvent
+public class OnOpenDocument extends WollMuxEvent
 {
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(OnOpenDocument.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(OnOpenDocument.class);
 
   private boolean asTemplate;
 
   private List<String> fragIDs;
 
+  /**
+   * Create this event.
+   *
+   * @param fragIDs
+   *          List of fragment IDs. The first ID is the document to open. All other IDs are passed
+   *          as argument to the command "insertContent".
+   * @param asTemplate
+   *          If true opens the template for modification, otherwise a document is created from the
+   *          template.
+   */
   public OnOpenDocument(List<String> fragIDs, boolean asTemplate)
   {
     this.fragIDs = fragIDs;
@@ -107,8 +98,7 @@ public class OnOpenDocument extends BasicEvent
       if (urls.isEmpty())
       {
         throw new WollMuxFehlerException(
-            L.m(
-                "Die URL zum Textfragment mit der FRAG_ID '%1' kann nicht bestimmt werden:",
+            L.m("Die URL zum Textfragment mit der FRAG_ID '%1' kann nicht bestimmt werden:",
                 frag_id),
             error);
       }
@@ -124,10 +114,9 @@ public class OnOpenDocument extends BasicEvent
         urlStr = iterUrls.next();
 
         // URL erzeugen und prüfen, ob sie aufgelöst werden kann
-        URL url;
         try
         {
-          url = WollMuxFiles.makeURL(urlStr);
+          URL url = WollMuxFiles.makeURL(urlStr);
           urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
           url = WollMuxFiles.makeURL(urlStr);
           found = DocumentLoader.getInstance().hasDocument(urlStr);

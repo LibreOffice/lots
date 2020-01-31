@@ -4,13 +4,9 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 
 /**
- * Erzeugt ein neues WollMuxEvent, das signasisiert, dass das gesamte Office (und
- * damit auch der WollMux) OHNE Sicherheitsabfragen(!) beendet werden soll.
- *
- * Das Event wird von der WollMuxBar geworfen, die (speziell für Admins, nicht für
- * Endbenutzer) einen entsprechenden Button besitzt.
+ * Event for shutting down LibreOffice and WollMux without question.
  */
-public class OnKill extends BasicEvent
+public class OnKill extends WollMuxEvent
 {
   @Override
   protected void doit() throws WollMuxFehlerException

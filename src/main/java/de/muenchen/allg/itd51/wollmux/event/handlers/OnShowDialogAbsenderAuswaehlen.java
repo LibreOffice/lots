@@ -5,14 +5,11 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
 
 /**
- * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
- * WollMuxEventHandler ausgelöst und sorgt dafür, dass der Dialog AbsenderAuswählen
- * gestartet wird.
- *
- * @author christoph.lutz
+ * Event for showing the dialog for selecting a sender.
  */
-public class OnShowDialogAbsenderAuswaehlen extends BasicEvent
+public class OnShowDialogAbsenderAuswaehlen extends WollMuxEvent
 {
+
   @Override
   protected void doit() throws WollMuxFehlerException
   {

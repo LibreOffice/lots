@@ -23,31 +23,17 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 
 /**
- * Erzeugt ein neues WollMuxEvent, das einen modalen Dialog anzeigt, der wichtige
- * Versionsinformationen über den WollMux, die Konfiguration und die WollMuxBar (nur falls
- * wollmuxBarVersion nicht der Leersting ist) enthält. Anmerkung: das WollMux-Modul hat keine
- * Ahnung, welche WollMuxBar verwendet wird. Daher ist es möglich, über den Parameter
- * wollMuxBarVersion eine Versionsnummer der WollMuxBar zu übergeben, die im Dialog angezeigt wird,
- * falls wollMuxBarVersion nicht der Leerstring ist.
- *
- * Dieses Event wird vom WollMux-Service (...comp.WollMux) ausgelöst, wenn die WollMux-url
- * "wollmux:about" aufgerufen wurde.
+ * Shows a modal dialog providing important information about WollMux and its configuration.
  */
-public class OnAbout extends BasicEvent
+public class OnAbout extends WollMuxEvent
 {
   private static final Logger LOGGER = LoggerFactory.getLogger(OnAbout.class);
   private static final String IMAGE_URL = "/image/wollmux.jpg";
   private static final String EXTENSION_ID = "de.muenchen.allg.d101.wollmux";
 
-  public OnAbout()
-  {
-    // nothing to initialize
-  }
-
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-
     try
     {
       XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());

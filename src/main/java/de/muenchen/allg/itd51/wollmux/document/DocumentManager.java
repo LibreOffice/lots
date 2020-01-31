@@ -174,14 +174,14 @@ public class DocumentManager
   }
 
   /**
-   * Liefert einen Iterator auf alle registrierten XEventListener-Objekte, die über
-   * Änderungen am Status der Dokumentverarbeitung informiert werden sollen.
+   * Liefert einen Iterator auf alle registrierten XEventListener-Objekte, die über Änderungen am
+   * Status der Dokumentverarbeitung informiert werden sollen.
    *
-   * @return Iterator auf alle registrierten XEventListener-Objekte.
+   * @return Liste aller registrierten XEventListener-Objekte.
    */
-  public Iterator<XEventListener> documentEventListenerIterator()
+  public List<XEventListener> getDocumentEventListener()
   {
-    return registeredDocumentEventListener.iterator();
+    return registeredDocumentEventListener;
   }
 
   /**

@@ -15,21 +15,24 @@ import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
- * Erzeugt ein neues WollMuxEvent, das signasisiert, das die nächste Marke
- * 'setJumpMark' angesprungen werden soll. Wird im
- * DocumentCommandInterpreter.DocumentExpander.fillPlaceholders aufgerufen wenn
- * nach dem Einfügen von Textbausteine keine Einfügestelle vorhanden ist aber eine
- * Marke 'setJumpMark'
+ * Event for setting the cursor to the next bookmark with name "setJumpMark".
  */
-public class OnJumpToMark extends BasicEvent
+public class OnJumpToMark extends WollMuxEvent
 {
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(OnJumpToMark.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(OnJumpToMark.class);
 
   private XTextDocument doc;
 
   private boolean msg;
 
+  /**
+   * Create this event.
+   *
+   * @param doc
+   *          The document.
+   * @param msg
+   *          Show a message if there is no bookmark.
+   */
   public OnJumpToMark(XTextDocument doc, boolean msg)
   {
     this.doc = doc;
@@ -39,13 +42,13 @@ public class OnJumpToMark extends BasicEvent
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-
-    TextDocumentController documentController = DocumentManager
-        .getTextDocumentController(doc);
+    TextDocumentController documentController = DocumentManager.getTextDocumentController(doc);
 
     XTextCursor viewCursor = documentController.getModel().getViewCursor();
     if (viewCursor == null)
+    {
       return;
+    }
 
     DocumentCommand cmd = documentController.getModel().getFirstJumpMark();
 

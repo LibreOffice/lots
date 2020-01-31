@@ -6,23 +6,23 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
- * Sammelt alle Formularfelder des Dokuments model auf, die nicht von
- * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden und
- * befüllt werden (derzeit c,s,s,t,textfield,Database-Felder).
+ * Event for collecting form fields not surrounded by WollMux commands.
  *
- * Das Event wird aus der Implementierung von XPrintModel (siehe TextDocumentModel)
- * geworfen, wenn dort die Methode collectNonWollMuxFormFields aufgerufen wird.
- *
- * @param documentController
- * @param unlockActionListener
- *          Der unlockActionListener wird immer informiert, wenn alle notwendigen
- *          Anpassungen durchgeführt wurden.
+ * @see TextDocumentController#collectNonWollMuxFormFields()
  */
-public class OnCollectNonWollMuxFormFieldsViaPrintModel extends BasicEvent
+public class OnCollectNonWollMuxFormFieldsViaPrintModel extends WollMuxEvent
 {
   private ActionListener listener;
   private TextDocumentController documentController;
 
+  /**
+   * Create this event.
+   *
+   * @param documentController
+   *          The document which contains form fields.
+   * @param listener
+   *          Listener, which is notified as soon as this event is processed.
+   */
   public OnCollectNonWollMuxFormFieldsViaPrintModel(
       TextDocumentController documentController,
       ActionListener listener)

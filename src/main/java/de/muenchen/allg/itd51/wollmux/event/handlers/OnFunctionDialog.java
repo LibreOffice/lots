@@ -1,9 +1,20 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sun.star.awt.XWindow;
+import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XFrames;
+import com.sun.star.lang.IndexOutOfBoundsException;
+import com.sun.star.lang.WrappedTargetException;
+
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
@@ -12,19 +23,29 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
- * Erzeugt ein neues WollMuxEvent, das den Funktionsdialog dialogName aufruft und
- * die zurückgelieferten Werte in die entsprechenden FormField-Objekte des
- * Dokuments doc einträgt.
+ * Event for showing a functional dialog.
  *
- * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
- * WollMuxEventHandler ausgelöst.
+ * The values returned by the dialog are set to the form field of the document.
  */
-public class OnFunctionDialog extends BasicEvent
+public class OnFunctionDialog extends WollMuxEvent
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(OnFunctionDialog.class);
+
   private TextDocumentController documentController;
 
   private String dialogName;
 
+  private boolean[] lock = new boolean[] { true };
+
+  /**
+   * Create this event.
+   *
+   * @param documentController
+   *          The document.
+   * @param dialogName
+   *          The name of the dialog.
+   */
   public OnFunctionDialog(TextDocumentController documentController,
       String dialogName)
   {
@@ -35,65 +56,135 @@ public class OnFunctionDialog extends BasicEvent
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-    // Dialog aus Funktionsdialog-Bibliothek holen:
-    Dialog dialog = GlobalFunctions.getInstance().getFunctionDialogs()
-        .get(dialogName);
+    // get the dialog.
+    Dialog dialog = GlobalFunctions.getInstance().getFunctionDialogs().get(dialogName);
     if (dialog == null)
-      throw new WollMuxFehlerException(L.m(
-          "Funktionsdialog '%1' ist nicht definiert.", dialogName));
+    {
+      throw new WollMuxFehlerException(
+          L.m("Funktionsdialog '%1' ist nicht definiert.", dialogName));
+    }
 
-    // Dialoginstanz erzeugen und modal anzeigen:
-    Dialog dialogInst = null;
     try
     {
-      dialogInst = dialog.instanceFor(new HashMap<Object, Object>());
+      Dialog dialogInst = dialog.instanceFor(new HashMap<>());
 
       setLock();
-      dialogInst.show(unlockActionListener,
-          documentController.getFunctionLibrary(),
+      dialogInst.show(new DialogFinishedListener(dialogInst), documentController.getFunctionLibrary(),
           documentController.getDialogLibrary());
       waitForUnlock();
     } catch (ConfigurationErrorException e)
     {
       throw new CantStartDialogException(e);
     }
-
-    // Abbruch, wenn der Dialog nicht mit OK beendet wurde.
-    String cmd = unlockActionListener.actionEvent.getActionCommand();
-    if (!cmd.equalsIgnoreCase("select"))
-      return;
-
-    // Dem Dokument den Fokus geben, damit die Änderungen des Benutzers
-    // transparent mit verfolgt werden können.
-    try
-    {
-      documentController.getFrameController().getFrame().getContainerWindow()
-          .setFocus();
-    } catch (java.lang.Exception e)
-    {
-      // keine Gefährdung des Ablaufs falls das nicht klappt.
-    }
-
-    // Alle Werte die der Funktionsdialog sicher zurück liefert werden in
-    // das Dokument übernommen.
-    Collection<String> schema = dialogInst.getSchema();
-    Iterator<String> iter = schema.iterator();
-    while (iter.hasNext())
-    {
-      String id = iter.next();
-      String value = dialogInst.getData(id).toString();
-
-      documentController.addFormFieldValue(id, value);
-    }
-
-    stabilize();
   }
 
-  @Override
-  public String toString()
+  /**
+   * Enable all LibreOffice windows. If a window is enabled, it processes user actions like mouse
+   * clicks.
+   *
+   * @param enabled
+   *          If true the windows are enabled, otherwise not.
+   */
+  private static void enableAllOOoWindows(boolean enabled)
   {
-    return this.getClass().getSimpleName() + "(" + documentController + ", '"
-        + dialogName
-        + "')";
+    try
+    {
+      XFrames frames = UNO.XFramesSupplier(UNO.desktop).getFrames();
+      for (int i = 0; i < frames.getCount(); i++)
+      {
+        XFrame frame = UNO.XFrame(frames.getByIndex(i));
+        XWindow contWin = frame.getContainerWindow();
+        if (contWin != null)
+        {
+          contWin.setEnable(enabled);
+        }
+      }
+    } catch (IndexOutOfBoundsException | WrappedTargetException e)
+    {
+      LOGGER.error("", e);
+    }
+  }
+
+  /**
+   * Disables all LibreOffice windows ({@link #enableAllOOoWindows(boolean)} for a modal dialog.
+   * Usage: {@code setLock(); //call dialog waitForUnlock();} {@link #waitForUnlock()} blocks the
+   * thread until {#link {@link #setUnlock()} is called when the dialog is finished.
+   */
+  private void setLock()
+  {
+    enableAllOOoWindows(false);
+    synchronized (lock)
+    {
+      lock[0] = true;
+    }
+  }
+
+  /**
+   * Blocks until a lock is released.
+   *
+   * @see #setLock()
+   */
+  private void waitForUnlock()
+  {
+    try
+    {
+      synchronized (lock)
+      {
+        while (lock[0])
+        {
+          lock.wait();
+        }
+      }
+    } catch (InterruptedException e)
+    {
+      LOGGER.debug("Thread interrupted", e);
+      Thread.currentThread().interrupt();
+    }
+  }
+
+  private class DialogFinishedListener implements ActionListener
+  {
+    private Dialog dialogInst;
+
+    public DialogFinishedListener(Dialog dialogInst)
+    {
+      this.dialogInst = dialogInst;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent event)
+    {
+      setUnlock();
+
+      // abort if dialog wasn't finished with "OK"
+      String cmd = event.getActionCommand();
+      if (cmd.equalsIgnoreCase("select"))
+      {
+        // focus document to show changes
+        documentController.getFrameController().getFrame().getContainerWindow().setFocus();
+
+        Collection<String> schema = dialogInst.getSchema();
+        for (String id : schema)
+        {
+          String value = dialogInst.getData(id).toString();
+          documentController.addFormFieldValue(id, value);
+        }
+      }
+    }
+
+    /**
+     * Activates all LibreOffice windows ({@link #enableAllOOoWindows(boolean)}).
+     *
+     * @see #setLock()
+     */
+    private void setUnlock()
+    {
+      synchronized (lock)
+      {
+        lock[0] = false;
+        lock.notifyAll();
+      }
+      enableAllOOoWindows(true);
+    }
   }
 }

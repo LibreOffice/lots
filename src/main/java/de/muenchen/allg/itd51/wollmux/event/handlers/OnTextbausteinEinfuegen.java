@@ -10,19 +10,12 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
- * Erzeugt ein neues WollMuxEvent, das signasisiert, das ein Textbaustein über den
- * Textbaustein-Bezeichner direkt ins Dokument eingefügt wird. Mit reprocess wird
- * übergeben, wann die Dokumentenkommandos ausgewertet werden soll. Mir reprocess =
- * true sofort.
- *
- * Das Event wird von WollMux.dispatch(...) geworfen z.B über Druck eines
- * Tastenkuerzels oder Druck auf den Knopf der OOo-Symbolleiste ein
- * "wollmux:TextbausteinEinfuegen" dispatch erfolgte.
+ * Event for inserting a boilerplate. It can be inserted as a reference or the reference can be
+ * resolved immediately.
  */
-public class OnTextbausteinEinfuegen extends BasicEvent
+public class OnTextbausteinEinfuegen extends WollMuxEvent
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OnTextbausteinEinfuegen.class);
@@ -30,6 +23,14 @@ public class OnTextbausteinEinfuegen extends BasicEvent
   private boolean reprocess;
   private TextDocumentController documentController;
 
+  /**
+   * Create this event.
+   *
+   * @param documentController
+   *          The document.
+   * @param reprocess
+   *          If true the reference is resolved, otherwise a reference is inserted.
+   */
   public OnTextbausteinEinfuegen(TextDocumentController documentController,
       boolean reprocess)
   {

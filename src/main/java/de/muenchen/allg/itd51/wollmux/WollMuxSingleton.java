@@ -76,7 +76,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.event.GlobalEventListener;
+import de.muenchen.allg.itd51.wollmux.event.LibreOfficeEventListener;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
@@ -175,7 +175,7 @@ public class WollMuxSingleton
         XEventBroadcaster eventBroadcaster = UNO.XEventBroadcaster(ctx.getServiceManager()
             .createInstanceWithContext("com.sun.star.frame.GlobalEventBroadcaster", ctx));
         eventBroadcaster
-            .addEventListener(new GlobalEventListener(DocumentManager.getDocumentManager()));
+            .addEventListener(new LibreOfficeEventListener(DocumentManager.getDocumentManager()));
       } catch (Exception e)
       {
         LOGGER.error("", e);

@@ -1,45 +1,30 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
-import java.lang.reflect.Method;
-import java.util.Iterator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.PosSize;
+import com.sun.star.awt.XTopWindow2;
 import com.sun.star.document.XEventListener;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 
 /**
- * Über dieses Event werden alle registrierten DocumentEventListener (falls
- * listener==null) oder ein bestimmter registrierter DocumentEventListener (falls
- * listener != null) (XEventListener-Objekte) über Statusänderungen der
- * Dokumentbearbeitung informiert
- *
- * @param listener
- *          der zu benachrichtigende XEventListener. Falls null werden alle
- *          registrierten Listener benachrichtig. listener wird auf jeden Fall nur
- *          benachrichtigt, wenn er zur Zeit der Abarbeitung des Events noch
- *          registriert ist.
- * @param eventName
- *          Name des Events
- * @param source
- *          Das von der Statusänderung betroffene Dokument (üblicherweise eine
- *          XComponent)
- *
- * @author Christoph Lutz (D-III-ITD-5.1)
+ * Event for notifying listeners registered on an object.
  */
-public class OnNotifyDocumentEventListener extends BasicEvent
+public class OnNotifyDocumentEventListener extends WollMuxEvent
 {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(OnNotifyDocumentEventListener.class);
@@ -49,6 +34,17 @@ public class OnNotifyDocumentEventListener extends BasicEvent
 
   private XEventListener listener;
 
+  /**
+   * Create this event.
+   *
+   * @param listener
+   *          If listener == null all registered listeners are notified, otherwise only the provided
+   *          listener is notified.
+   * @param eventName
+   *          Name of the notification event.
+   * @param source
+   *          The source of the notification event.
+   */
   public OnNotifyDocumentEventListener(XEventListener listener,
       String eventName,
       Object source)
@@ -65,27 +61,18 @@ public class OnNotifyDocumentEventListener extends BasicEvent
     eventObject.Source = source;
     eventObject.EventName = eventName;
 
-    Iterator<XEventListener> i = DocumentManager.getDocumentManager()
-        .documentEventListenerIterator();
-    while (i.hasNext())
+    for (XEventListener docListener : DocumentManager.getDocumentManager()
+        .getDocumentEventListener())
     {
-      LOGGER.trace("notifying XEventListener (event '{}')", eventName);
-      try
+      if (this.listener == null || this.listener == docListener)
       {
-        final XEventListener docListener = i.next();
-        if (this.listener == null || this.listener == docListener)
-        {
-          docListener.notifyEvent(eventObject);
-        }
-      } catch (java.lang.Exception e)
-      {
-        i.remove();
+        LOGGER.trace("notifying XEventListener (event '{}')", eventName);
+        new Thread(() -> docListener.notifyEvent(eventObject)).start();
       }
     }
 
     XComponent compo = UNO.XComponent(source);
-    if (compo != null
-        && eventName.equals(WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED))
+    if (compo != null && eventName.equals(WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED))
     {
       DocumentManager.getDocumentManager().setProcessingFinished(
           compo);
@@ -102,84 +89,66 @@ public class OnNotifyDocumentEventListener extends BasicEvent
               .getFormModel(xTextDoc);
           formController.showFormGUI();
 
-          setWindowPosSize(formController, documentController, xTextDoc);
+          setWindowPosSize(documentController);
 
           formController.addPropertyChangeListener(
-            (PropertyChangeEvent e) -> setWindowPosSize(formController, documentController, xTextDoc)
-          );
+              (PropertyChangeEvent e) -> setWindowPosSize(documentController));
         }
       }
     }
   }
 
   /**
-   * Setzt die Position des Fensters auf die übergebenen Koordinaten, wobei die
-   * Nachteile der UNO-Methode setWindowPosSize greifen, bei der die Fensterposition
-   * nicht mit dem äusseren Fensterrahmen beginnt, sondern mit der grauen Ecke links
-   * über dem File-Menü.
+   * Set the position of the window.
    *
-   * @param formController
+   * Attention: LibreOffice window position starts with gray edge above the file menu and not with
+   * the window border.
+   *
    * @param documentController
-   * @param xTextDoc
+   *          The controller of the document.
    */
-  private void setWindowPosSize(FormController formController,
-      TextDocumentController documentController, XTextDocument xTextDoc)
+  private void setWindowPosSize(TextDocumentController documentController)
   {
     LOGGER.debug("setWindowPosSize(..)");
-    // Seit KDE4 muss ein maximiertes Fenster vor dem Verschieben "demaximiert" werden
-    // sonst wird die Positionierung ignoriert. Leider ist die dafür benötigte Klasse
-    // erst seit OpenOffice.org 3.4 verfügbar - zur Abwärtskompatibilität erfolgt der
-    // Aufruf daher über Reflection.
+    // Since KDE4 maximized windows can't be positioned
+    XTopWindow2 window = UnoRuntime.queryInterface(XTopWindow2.class,
+        documentController.getFrameController().getFrame().getContainerWindow());
+    if (window != null && window.getIsMaximized())
+    {
+      window.setIsMaximized(false);
+    }
+
     try
     {
-      Class<?> c = Class.forName("com.sun.star.awt.XTopWindow2");
-      Object o = UnoRuntime.queryInterface(c,
-          xTextDoc.getCurrentController().getFrame().getContainerWindow());
-      Method getIsMaximized = c.getMethod("getIsMaximized", (Class[]) null);
-      Method setIsMaximized = c.getMethod("setIsMaximized", (boolean.class));
-      if ((Boolean) getIsMaximized.invoke(o, (Object[]) null))
+      Rectangle frameB = documentController.getFormController().getFrameBounds();
+      Rectangle maxWindowBounds = documentController.getFormController()
+          .getMaxWindowBounds();
+      Insets windowInsets = documentController.getFormController().getWindowInsets();
+
+      /*
+       * Addition of windowInsets.left and right is a heuristic, because setWindowPosSize() behaves
+       * different on Windows and Unix.
+       */
+      int docX = frameB.width + frameB.x + windowInsets.left;
+      int docWidth = maxWindowBounds.width - frameB.width - frameB.x - windowInsets.right;
+      if (docWidth < 0)
       {
-        setIsMaximized.invoke(o, false);
+        docX = maxWindowBounds.x;
+        docWidth = maxWindowBounds.width;
       }
-    } catch (java.lang.Exception e)
+      int docY = maxWindowBounds.y + windowInsets.top;
+      /*
+       * Subtraction is also a heuristic (see above)
+       */
+      int docHeight = maxWindowBounds.y + maxWindowBounds.height - docY - 2 * windowInsets.bottom;
+
+      documentController.getFrameController().getFrame().getContainerWindow().setPosSize(docX, docY,
+          docWidth, docHeight, PosSize.SIZE);
+      documentController.getFrameController().getFrame().getContainerWindow().setPosSize(docX, docY,
+          docWidth, docHeight, PosSize.POS);
+    } catch (FormModelException ex)
     {
-      LOGGER.debug("", e);
+      LOGGER.debug("no form document", ex);
     }
-
-    java.awt.Rectangle frameB = formController.getFrameBounds();
-    java.awt.Rectangle maxWindowBounds = formController.getMaxWindowBounds();
-    Insets windowInsets = formController.getWindowInsets();
-
-    /*
-     * Das Addieren von windowInsets.left und windowInsets.right ist eine Heuristik. Da sich
-     * setWindowPosSize() unter Windows und Linux anders verhält, gibt es keine korrekte Methode
-     * (die mir bekannt ist), um die richtige Ausrichtung zu berechnen.
-     */
-    int docX = frameB.width + frameB.x + windowInsets.left;
-    int docWidth = maxWindowBounds.width - frameB.width - frameB.x
-        - windowInsets.right;
-    if (docWidth < 0)
-    {
-      docX = maxWindowBounds.x;
-      docWidth = maxWindowBounds.width;
-    }
-    int docY = maxWindowBounds.y + windowInsets.top;
-    /*
-     * Das Subtrahieren von 2*windowInsets.bottom ist ebenfalls eine Heuristik. (siehe weiter oben)
-     */
-    int docHeight = maxWindowBounds.y + maxWindowBounds.height - docY
-        - 2 * windowInsets.bottom;
-
-    documentController.getFrameController().getFrame().getContainerWindow()
-        .setPosSize(docX, docY, docWidth, docHeight, PosSize.SIZE);
-    documentController.getFrameController().getFrame().getContainerWindow()
-        .setPosSize(docX, docY, docWidth, docHeight, PosSize.POS);
-  }
-
-  @Override
-  public String toString()
-  {
-    return this.getClass().getSimpleName() + "('" + eventName + "', "
-        + ((source != null) ? "#" + source.hashCode() : "null") + ")";
   }
 }

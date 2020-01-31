@@ -4,17 +4,18 @@ import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 
 /**
- * Dieses Event wird vom WollMux-Service (...comp.WollMux) ausgelöst wenn sich ein
- * externe XPALChangeEventListener beim WollMux deregistriert. Der zu entfernende
- * XPALChangeEventListerner wird anschließend im WollMuxSingleton aus der Liste der
- * registrierten XPALChangeEventListener genommen.
- *
- * @author christoph.lutz
+ * Event for unregistering {@link OnRemovePALChangeEventListener}.
  */
-public class OnRemovePALChangeEventListener extends BasicEvent
+public class OnRemovePALChangeEventListener extends WollMuxEvent
 {
   private XPALChangeEventListener listener;
 
+  /**
+   * Create this event.
+   *
+   * @param listener
+   *          The listener.
+   */
   public OnRemovePALChangeEventListener(XPALChangeEventListener listener)
   {
     this.listener = listener;
