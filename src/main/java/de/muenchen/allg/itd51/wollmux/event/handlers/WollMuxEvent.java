@@ -83,14 +83,4 @@ public abstract class WollMuxEvent
    *           A user visible exception occured.
    */
   protected abstract void doit() throws WollMuxFehlerException;
-
-  /**
-   * Tries to stabilize the LibreOffice and WollMux by calling the garbage collector.
-   *
-   * Sometimes memory leaks after exhaustive use of UNO objects have been noticed.
-   */
-  protected void stabilize()
-  {
-    System.gc();
-  }
 }

@@ -26,8 +26,6 @@ public class OnExecutePrintFunction extends WollMuxEvent
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-    stabilize();
-
     final XPrintModel pmod = PrintModels.createPrintModel(documentController, true);
     new Thread()
     {

@@ -36,6 +36,5 @@ public class OnTextDocumentClosed extends WollMuxEvent
       DocumentManager.getDocumentManager()
           .dispose(docInfo.getTextDocumentController().getModel().doc);
     }
-    stabilize();
   }
 }
