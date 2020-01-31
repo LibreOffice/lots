@@ -67,7 +67,9 @@ import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRange;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRangeType;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintProgressBar;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnCollectNonWollMuxFormFieldsViaPrintModel;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.slv.events.OnSetPrintBlocksPropsViaPrintModel;
 
@@ -563,7 +565,7 @@ public class PrintModels
     public void setFormValue(String id, String value)
     {
       SyncActionListener s = new SyncActionListener();
-      WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc, id, value, s);
+      new OnSetFormValue(documentController.getModel().doc, id, value, s).emit();
       s.synchronize();
     }
 
@@ -616,7 +618,7 @@ public class PrintModels
     public void collectNonWollMuxFormFields()
     {
       SyncActionListener s = new SyncActionListener();
-      WollMuxEventHandler.getInstance().handleCollectNonWollMuxFormFieldsViaPrintModel(documentController, s);
+      new OnCollectNonWollMuxFormFieldsViaPrintModel(documentController, s).emit();
       s.synchronize();
     }
 
@@ -821,7 +823,7 @@ public class PrintModels
     public void setGroupVisible(String groupID, boolean visible)
     {
       SyncActionListener s = new SyncActionListener();
-      WollMuxEventHandler.getInstance().handleSetVisibleState(documentController, groupID, visible, s);
+      new OnSetVisibleState(documentController, groupID, visible, s).emit();
       s.synchronize();
     }
 

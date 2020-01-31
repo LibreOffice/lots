@@ -18,7 +18,6 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.ByJavaPropertyFinder;
 import de.muenchen.allg.itd51.wollmux.db.ByOOoUserProfileFinder;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
  * Dieses Event wird als erstes WollMuxEvent bei der Initialisierung des WollMux im WollMuxSingleton
@@ -46,9 +45,13 @@ public class OnInitialize extends BasicEvent
       // wurde genau ein Datensatz gefunden, kann davon ausgegangen werden,
       // dass dieser OK ist - der Dialog muss dann nicht erscheinen.
       if (found != 1)
-        WollMuxEventHandler.getInstance().handleShowDialogAbsenderAuswaehlen();
+      {
+        new OnShowDialogAbsenderAuswaehlen().emit();
+      }
       else
-        WollMuxEventHandler.getInstance().handlePALChangedNotify();
+      {
+        new OnPALChangedNotify().emit();
+      }
     }
   }
 

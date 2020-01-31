@@ -32,22 +32,19 @@ public class OnSetFormValue extends BasicEvent
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-    TextDocumentController documentController = DocumentManager
-        .getTextDocumentController(doc);
+    TextDocumentController documentController = DocumentManager.getTextDocumentController(doc);
 
     FormController formModel = DocumentManager.getDocumentManager().getFormModel(doc);
     if (formModel != null && formModel.hasFieldId(id))
     {
-      // Werte über den FormController (den das FormModel kennt) setzen lassen
-      // (damit sind auch automatisch alle Abhängigkeiten richtig aufgelöst)
-      formModel.setValue(id, value, e -> WollMuxEventHandler.getInstance()
-          .handleSetFormValueFinished(listener));
+      formModel.setValue(id, value, e -> new OnSetFormValueFinished(listener).emit());
     } else
     {
-      // Werte selber setzen:
       documentController.addFormFieldValue(id, value);
       if (listener != null)
+      {
         listener.actionPerformed(null);
+      }
     }
   }
 

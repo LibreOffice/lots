@@ -7,7 +7,7 @@ import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XFrame;
 import com.sun.star.util.URL;
 
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
 
 /**
  * Dispatch for opening files as template or document.
@@ -40,7 +40,7 @@ public class OpenTemplateDispatch extends WollMuxDispatch
   public void dispatch(URL url, PropertyValue[] props)
   {
     String[] fragIds = getMethodArgument().split("&");
-    WollMuxEventHandler.getInstance().handleOpenDocument(Arrays.asList(fragIds), asTemplate);
+    new OnOpenDocument(Arrays.asList(fragIds), asTemplate).emit();
   }
 
   @Override

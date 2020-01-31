@@ -76,7 +76,11 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dispatch.AboutDispatch;
 import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddDocumentEventListener;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddPALChangeEventListener;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemoveDocumentEventListener;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemovePALChangeEventListener;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
 import de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
 
@@ -288,7 +292,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   @Override
   public void addPALChangeEventListener(XPALChangeEventListener l)
   {
-    WollMuxEventHandler.getInstance().handleAddPALChangeEventListener(l, null);
+    new OnAddPALChangeEventListener(l, null).emit();
   }
 
   /**
@@ -315,8 +319,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   public void addPALChangeEventListenerWithConsistencyCheck(
       XPALChangeEventListener l, int wollmuxConfHashCode)
   {
-    WollMuxEventHandler.getInstance().handleAddPALChangeEventListener(l,
-      Integer.valueOf(wollmuxConfHashCode));
+    new OnAddPALChangeEventListener(l, wollmuxConfHashCode).emit();
   }
 
   /**
@@ -345,7 +348,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   @Override
   public void addEventListener(XEventListener l)
   {
-    WollMuxEventHandler.getInstance().handleAddDocumentEventListener(l);
+    new OnAddDocumentEventListener(l).emit();
   }
 
   /**
@@ -357,7 +360,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   @Override
   public void removePALChangeEventListener(XPALChangeEventListener l)
   {
-    WollMuxEventHandler.getInstance().handleRemovePALChangeEventListener(l);
+    new OnRemovePALChangeEventListener(l).emit();
   }
 
   /**
@@ -372,7 +375,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   @Override
   public void removeEventListener(XEventListener l)
   {
-    WollMuxEventHandler.getInstance().handleRemoveDocumentEventListener(l);
+    new OnRemoveDocumentEventListener(l).emit();
   }
 
   /**
@@ -387,8 +390,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   @Override
   public void setCurrentSender(String sender, short idx)
   {
-    LOGGER.trace("WollMux.setCurrentSender(\"" + sender + "\", " + idx + ")");
-    WollMuxEventHandler.getInstance().handleSetSender(sender, idx);
+    LOGGER.trace("WollMux.setCurrentSender(\"{}\", \"{}\")", sender, idx);
+    new OnSetSender(sender, idx).emit();
   }
 
   /**

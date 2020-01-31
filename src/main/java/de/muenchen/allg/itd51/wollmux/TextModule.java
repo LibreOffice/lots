@@ -57,8 +57,7 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Utils;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToMark;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
@@ -452,7 +451,7 @@ public class TextModule
         viewCursor.gotoRange(oldPos, false);
 
         // und handle jumpToMark aufrufen.
-        WollMuxEventHandler.getInstance().handleJumpToMark(doc, true);
+        new OnJumpToMark(doc, true).emit();
       }
     }
   }

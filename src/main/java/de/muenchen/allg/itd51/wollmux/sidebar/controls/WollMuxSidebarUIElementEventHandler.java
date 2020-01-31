@@ -13,7 +13,11 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnAbout;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnDumpInfo;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnKill;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogAbsenderAuswaehlen;
 
 /**
  * EventHandler für die WollMux-Sidebar. Der EventHandler behandelt alle WollMux-Aktionen,
@@ -40,14 +44,14 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     String action = args[0].toString();
     if (action.equals("absenderAuswaehlen"))
     {
-      WollMuxEventHandler.getInstance().handleShowDialogAbsenderAuswaehlen();
+      new OnShowDialogAbsenderAuswaehlen().emit();
     }
     else if (action.equals("openDocument"))
     {
       String fragId = getFragId((ConfigThingy) args[1], action);
       if (fragId != null)
       {
-        WollMuxEventHandler.getInstance().handleOpenDocument(Arrays.asList(new String[]{fragId}), false);
+        new OnOpenDocument(Arrays.asList(fragId), false).emit();
       }
     }
     else if (action.equals("openTemplate"))
@@ -55,7 +59,7 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
       String fragId = getFragId((ConfigThingy) args[1], action);
       if (fragId != null)
       {
-        WollMuxEventHandler.getInstance().handleOpenDocument(Arrays.asList(new String[]{fragId}), true);
+        new OnOpenDocument(Arrays.asList(fragId), true).emit();
       }
     }
     else if (action.equals("open"))
@@ -74,7 +78,7 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     }
     else if (action.equals("dumpInfo"))
     {
-      WollMuxEventHandler.getInstance().handleDumpInfo();
+      new OnDumpInfo().emit();
     }
     else if (action.equals("abort"))
     {
@@ -82,22 +86,22 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     }
     else if (action.equals("kill"))
     {
-      WollMuxEventHandler.getInstance().handleKill();
+      new OnKill().emit();
       // abort();
     }
     else if (action.equals("about"))
     {
-      WollMuxEventHandler.getInstance().handleAbout();
+      new OnAbout().emit();
     }
     else if (action.equals("options"))
     {
       // options();
     }
   }
-  
+
   /**
    * Führt die gleichnamige ACTION aus.
-   * 
+   *
    * TESTED
    */
   private void executeOpenExt(String ext, String url)

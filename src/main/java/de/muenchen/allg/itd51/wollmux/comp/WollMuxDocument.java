@@ -12,7 +12,9 @@ import de.muenchen.allg.itd51.wollmux.SyncActionListener;
 import de.muenchen.allg.itd51.wollmux.XWollMuxDocument;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnManagePrintFunction;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetInsertValues;
 
 /**
  * Implementiert XWollMuxDocument für alle dokumentspezifischen Aktionen
@@ -47,7 +49,7 @@ public class WollMuxDocument implements XWollMuxDocument
   @Override
   public void addPrintFunction(String functionName)
   {
-    WollMuxEventHandler.getInstance().handleManagePrintFunction(doc, functionName, false);
+    new OnManagePrintFunction(doc, functionName, false).emit();
   }
 
   /**
@@ -65,7 +67,7 @@ public class WollMuxDocument implements XWollMuxDocument
   @Override
   public void removePrintFunction(String functionName)
   {
-    WollMuxEventHandler.getInstance().handleManagePrintFunction(doc, functionName, true);
+    new OnManagePrintFunction(doc, functionName, true).emit();
   }
 
   /**
@@ -86,7 +88,7 @@ public class WollMuxDocument implements XWollMuxDocument
   public void setFormValue(String id, String value)
   {
     SyncActionListener s = new SyncActionListener();
-    WollMuxEventHandler.getInstance().handleSetFormValue(doc, id, value, s);
+    new OnSetFormValue(doc, id, value, s).emit();
     s.synchronize();
   }
 
@@ -134,10 +136,10 @@ public class WollMuxDocument implements XWollMuxDocument
   @Override
   public void updateInsertFields()
   {
-    HashMap<String, String> m = new HashMap<String, String>(mapDbSpalteToValue);
+    Map<String, String> m = new HashMap<>(mapDbSpalteToValue);
     mapDbSpalteToValue.clear();
     SyncActionListener s = new SyncActionListener();
-    WollMuxEventHandler.getInstance().handleSetInsertValues(doc, m, s);
+    new OnSetInsertValues(doc, m, s).emit();
     s.synchronize();
   }
 

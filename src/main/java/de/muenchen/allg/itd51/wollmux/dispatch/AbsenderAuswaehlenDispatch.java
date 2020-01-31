@@ -5,7 +5,7 @@ import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XFrame;
 import com.sun.star.util.URL;
 
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogAbsenderAuswaehlen;
 
 /**
  * Dispatch, which shows the dialog for changing sender.
@@ -25,7 +25,7 @@ public class AbsenderAuswaehlenDispatch extends WollMuxDispatch
   @Override
   public void dispatch(URL url, PropertyValue[] props)
   {
-    WollMuxEventHandler.getInstance().handleShowDialogAbsenderAuswaehlen();
+    new OnShowDialogAbsenderAuswaehlen().emit();
   }
 
   @Override

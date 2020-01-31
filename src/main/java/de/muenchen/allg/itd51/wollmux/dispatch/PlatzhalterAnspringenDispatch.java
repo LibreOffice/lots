@@ -6,8 +6,7 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
-
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToPlaceholder;
 
 /**
  * Dispatch for jumping to the first placeholder in the document.
@@ -27,8 +26,7 @@ public class PlatzhalterAnspringenDispatch extends WollMuxDispatch
   @Override
   public void dispatch(URL url, PropertyValue[] props)
   {
-    WollMuxEventHandler.getInstance()
-        .handleJumpToPlaceholder(DocumentManager.getTextDocumentController(frame));
+    new OnJumpToPlaceholder(DocumentManager.getTextDocumentController(frame)).emit();
   }
 
 }

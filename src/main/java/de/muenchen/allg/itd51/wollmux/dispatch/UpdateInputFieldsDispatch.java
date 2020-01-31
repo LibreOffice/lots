@@ -7,7 +7,8 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnUpdateInputFields;
 
 /**
  * Dispatch for updating input fields.
@@ -30,16 +31,27 @@ public class UpdateInputFieldsDispatch extends WollMuxNotifyingDispatch
   {
     this.props = props;
     this.listener = listener;
-    WollMuxEventHandler.getInstance().handleUpdateInputFields(
-        UNO.XTextDocument(frame.getController().getModel()), this, isSynchronMode(props));
+    emitEvent();
   }
 
   @Override
   public void dispatch(URL url, PropertyValue[] props)
   {
     this.props = props;
-    WollMuxEventHandler.getInstance().handleUpdateInputFields(
-        UNO.XTextDocument(frame.getController().getModel()), this, isSynchronMode(props));
+    emitEvent();
+  }
+
+  private void emitEvent()
+  {
+    WollMuxEvent event = new OnUpdateInputFields(UNO.XTextDocument(frame.getController().getModel()),
+        this);
+    if (isSynchronMode(props))
+    {
+      event.process();
+    } else
+    {
+      event.emit();
+    }
   }
 
 }

@@ -23,13 +23,6 @@ public class OnRemovePALChangeEventListener extends BasicEvent
   @Override
   protected void doit()
   {
-    PersoenlicheAbsenderliste.getInstance()
-        .removePALChangeEventListener(listener);
-  }
-
-  @Override
-  public String toString()
-  {
-    return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
+    PersoenlicheAbsenderliste.getInstance().removePALChangeEventListener(listener);
   }
 }

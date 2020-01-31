@@ -21,7 +21,12 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dispatch.PrintDispatch;
 import de.muenchen.allg.itd51.wollmux.dispatch.SaveDispatch;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseAndOpenExt;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseTextDocument;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnFocusFormField;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormControllerInitCompleted;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveTempAndOpenExt;
 import de.muenchen.allg.itd51.wollmux.form.dialog.GUI;
 
 /**
@@ -131,7 +136,7 @@ public class FormController
    */
   public void close()
   {
-    WollMuxEventHandler.getInstance().handleCloseTextDocument(documentController);
+    new OnCloseTextDocument(documentController).emit();
   }
 
   /**
@@ -175,7 +180,7 @@ public class FormController
    */
   public void openTemplateOrDocument(List<String> fragIds)
   {
-    WollMuxEventHandler.getInstance().handleOpenDocument(fragIds, false);
+    new OnOpenDocument(fragIds, false).emit();
   }
 
   /**
@@ -196,7 +201,7 @@ public class FormController
    */
   public void closeAndOpenExt(String ext)
   {
-    WollMuxEventHandler.getInstance().handleCloseAndOpenExt(documentController, ext);
+    new OnCloseAndOpenExt(documentController, ext).emit();
   }
 
   /**
@@ -209,7 +214,7 @@ public class FormController
    */
   public void saveTempAndOpenExt(String ext)
   {
-    WollMuxEventHandler.getInstance().handleSaveTempAndOpenExt(documentController, ext);
+    new OnSaveTempAndOpenExt(documentController, ext).emit();
   }
 
   /**
@@ -222,7 +227,7 @@ public class FormController
    */
   public void focusGained(String fieldId)
   {
-    WollMuxEventHandler.getInstance().handleFocusFormField(documentController, fieldId);
+    new OnFocusFormField(documentController, fieldId).emit();
   }
 
   /**
@@ -340,7 +345,7 @@ public class FormController
    */
   public void formControllerInitCompleted()
   {
-    WollMuxEventHandler.getInstance().handleFormControllerInitCompleted(documentController);
+    new OnFormControllerInitCompleted(documentController).emit();
   }
 
   public void exportFormValues(File f) throws IOException

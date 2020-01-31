@@ -23,14 +23,14 @@ public class OnUpdateInputFields extends BasicEvent
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-    WollMuxEventHandler.getInstance().handleAddDocumentEventListener(new XEventListener()
+    XEventListener listener = new XEventListener()
     {
       @Override
       public void disposing(EventObject arg0)
       {
         // nothing to do
       }
-    
+
       @Override
       public void notifyEvent(com.sun.star.document.EventObject event)
       {
@@ -38,9 +38,10 @@ public class OnUpdateInputFields extends BasicEvent
             && WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED.equals(event.EventName))
         {
           helper.dispatchFinished(true);
-          WollMuxEventHandler.getInstance().handleRemoveDocumentEventListener(this);
+          new OnRemoveDocumentEventListener(this).emit();
         }
       }
-    });
+    };
+    new OnAddDocumentEventListener(listener).emit();
   }
 }

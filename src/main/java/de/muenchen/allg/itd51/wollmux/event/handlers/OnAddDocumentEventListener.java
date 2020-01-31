@@ -28,9 +28,8 @@ public class OnAddDocumentEventListener extends BasicEvent
 
     for (XComponent compo : processedDocuments)
     {
-      WollMuxEventHandler.getInstance().handleNotifyDocumentEventListener(
-          listener, WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED,
-          compo);
+      new OnNotifyDocumentEventListener(listener,
+          WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo).emit();
     }
   }
 

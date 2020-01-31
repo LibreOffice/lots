@@ -92,7 +92,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnPALChangedNotify;
 
 /**
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung einen Dialog mit
@@ -340,7 +340,7 @@ public class PersoenlicheAbsenderlisteVerwalten
           }
         }
 
-        WollMuxEventHandler.getInstance().handlePALChangedNotify();
+        new OnPALChangedNotify().emit();
       }
 
       return true;
@@ -359,7 +359,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     public void disposing(EventObject arg0)
     {
       palListener.dialogClosed();
-      WollMuxEventHandler.getInstance().handlePALChangedNotify();
+      new OnPALChangedNotify().emit();
       dialog.endExecute();
     }
   };
@@ -440,7 +440,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       entry.copy();
     }
 
-    WollMuxEventHandler.getInstance().handlePALChangedNotify();
+    new OnPALChangedNotify().emit();
     addPalEntriesToListBox();
   }
 
@@ -473,7 +473,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       }
     }
 
-    WollMuxEventHandler.getInstance().handlePALChangedNotify();
+    new OnPALChangedNotify().emit();
   }
 
   private AbstractActionListener editBtnActionListener = event -> editEntry(
@@ -497,7 +497,7 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     if (result == ExecutableDialogResults.OK)
     {
-      WollMuxEventHandler.getInstance().handlePALChangedNotify();
+      new OnPALChangedNotify().emit();
       addPalEntriesToListBox();
       LOGGER.debug("Datensatz bearbeiten: DatensatzBearbeiten(): ExecutableDialogResult.OK");
     } else
