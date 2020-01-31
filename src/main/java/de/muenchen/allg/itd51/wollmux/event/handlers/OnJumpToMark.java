@@ -78,7 +78,6 @@ public class OnJumpToMark extends WollMuxEvent
             L.m("Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!"));
       }
     }
-    stabilize();
   }
 
   @Override

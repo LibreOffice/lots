@@ -42,8 +42,6 @@ public class OnJumpToPlaceholder extends WollMuxEvent
     {
       LOGGER.error("", e);
     }
-
-    stabilize();
   }
 
   @Override

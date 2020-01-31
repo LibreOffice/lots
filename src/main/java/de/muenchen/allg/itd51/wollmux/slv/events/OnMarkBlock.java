@@ -110,8 +110,6 @@ public class OnMarkBlock extends WollMuxEvent
         WollMuxFiles.isDebugMode());
     dci.scanGlobalDocumentCommands();
     dci.scanInsertFormValueCommands();
-
-    stabilize();
   }
 
   /**

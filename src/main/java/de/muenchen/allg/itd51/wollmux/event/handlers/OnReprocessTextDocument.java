@@ -54,8 +54,6 @@ public class OnReprocessTextDocument extends WollMuxEvent
     {
       LOGGER.debug("", e);
     }
-
-    stabilize();
   }
 
   @Override

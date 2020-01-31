@@ -36,9 +36,10 @@ public class OnCollectNonWollMuxFormFieldsViaPrintModel extends WollMuxEvent
   {
     documentController.collectNonWollMuxFormFields();
 
-    stabilize();
     if (listener != null)
+    {
       listener.actionPerformed(null);
+    }
   }
 
   @Override
