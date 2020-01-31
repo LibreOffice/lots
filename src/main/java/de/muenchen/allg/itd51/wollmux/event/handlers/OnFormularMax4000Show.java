@@ -6,7 +6,6 @@ import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
 /**
@@ -39,8 +38,9 @@ public class OnFormularMax4000Show extends BasicEvent
     {
       ActionListener l = actionEvent -> {
         if (actionEvent.getSource() instanceof FormularMax4kController)
-          WollMuxEventHandler.getInstance()
-              .handleFormularMax4000Returned(documentController);
+        {
+          new OnFormularMax4000Returned(documentController).emit();
+        }
       };
 
       // Der Konstruktor von FormularMax erwartet hier nur die globalen

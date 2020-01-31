@@ -6,8 +6,7 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
-
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormularMax4000Show;
 
 /**
  * Dispatch, which shows the GUI for creating or modifying a form.
@@ -27,7 +26,7 @@ public class FormularMaxDispatch extends WollMuxDispatch
   @Override
   public void dispatch(URL url, PropertyValue[] props)
   {
-    WollMuxEventHandler.getInstance().handleFormularMax4000Show(DocumentManager.getTextDocumentController(frame));
+    new OnFormularMax4000Show(DocumentManager.getTextDocumentController(frame)).emit();
   }
 
 }

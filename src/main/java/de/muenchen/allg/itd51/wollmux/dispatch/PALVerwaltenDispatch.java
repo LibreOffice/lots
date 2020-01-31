@@ -5,7 +5,7 @@ import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XFrame;
 import com.sun.star.util.URL;
 
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogPersoenlicheAbsenderlisteVerwalten;
 
 /**
  * Dispatch, which shows the sender list.
@@ -26,7 +26,7 @@ public class PALVerwaltenDispatch extends WollMuxDispatch
   @Override
   public void dispatch(URL url, PropertyValue[] props)
   {
-    WollMuxEventHandler.getInstance().handleShowDialogPersoenlicheAbsenderliste();
+    new OnShowDialogPersoenlicheAbsenderlisteVerwalten().emit();
   }
 
   @Override

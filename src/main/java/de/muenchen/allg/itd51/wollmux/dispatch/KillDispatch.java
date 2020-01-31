@@ -5,7 +5,7 @@ import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XFrame;
 import com.sun.star.util.URL;
 
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnKill;
 
 /**
  * Dispatch for killing WollMux and LibreOffice.
@@ -23,7 +23,7 @@ public class KillDispatch extends WollMuxDispatch
   @Override
   public void dispatch(URL url, PropertyValue[] props)
   {
-    WollMuxEventHandler.getInstance().handleKill();
+    new OnKill().emit();
   }
 
   @Override

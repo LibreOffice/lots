@@ -29,19 +29,17 @@ public class OnPrint extends BasicEvent
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-    boolean hasPrintFunction = !documentController.getModel()
-        .getPrintFunctions().isEmpty();
+    boolean hasPrintFunction = !documentController.getModel().getPrintFunctions().isEmpty();
 
     if (hasPrintFunction)
     {
-      // Druckfunktion aufrufen
-      WollMuxEventHandler.getInstance()
-          .handleExecutePrintFunctions(documentController);
+      new OnExecutePrintFunction(documentController).emit();
     } else
     {
-      // Forward auf Standardfunktion
       if (origDisp != null)
+      {
         origDisp.dispatch(origUrl, origArgs);
+      }
     }
   }
 

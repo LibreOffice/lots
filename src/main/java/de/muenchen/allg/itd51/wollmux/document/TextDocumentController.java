@@ -60,7 +60,8 @@ import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeDatasource;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormValueChanged;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 
 public class TextDocumentController implements FormValueChangedListener, VisibilityChangedListener
@@ -2383,7 +2384,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   {
     if (!id.isEmpty())
     {
-      WollMuxEventHandler.getInstance().handleFormValueChanged(this, id, value);
+      new OnFormValueChanged(this, id, value).emit();
     }
   }
 
@@ -2398,7 +2399,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   @Override
   public void visibilityChanged(String groupId, boolean visible)
   {
-    WollMuxEventHandler.getInstance().handleSetVisibleState(this, groupId, visible, null);
+    new OnSetVisibleState(this, groupId, visible, null).emit();
   }
 
   @Override

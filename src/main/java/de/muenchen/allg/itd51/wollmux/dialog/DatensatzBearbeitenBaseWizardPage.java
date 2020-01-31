@@ -30,7 +30,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnPALChangedNotify;
 
 public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardPage
 {
@@ -136,20 +136,20 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
           return;
 
         String ldapValue = dataset.getBS().get(buttonLabel);
-        
+
         int res = 0;
-        
+
         if (ldapValue == null || ldapValue.isEmpty())
         {
           ldapValue = "";
           res = InfoDialog.showYesNoModal("LDAP Datensatz",
               "Leeren Wert aus LDAP-Datensatz übernehmen?");
-        } else 
+        } else
         {
           res = InfoDialog.showYesNoModal("LDAP Datensatz",
               "Wert \"" + ldapValue + "\" aus LDAP-Datensatz übernehmen?");
         }
-        
+
         if (res == MessageBoxResults.YES)
         {
           xTextComponent.setText(ldapValue);
@@ -249,7 +249,7 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
       LOGGER.error("", e);
     }
 
-    WollMuxEventHandler.getInstance().handlePALChangedNotify();
+    new OnPALChangedNotify().emit();
 
     window.setVisible(false);
 

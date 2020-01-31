@@ -47,11 +47,12 @@ public class OnTextbausteinEinfuegen extends BasicEvent
       TextModule.createInsertFragFromIdentifier(
           documentController.getModel().doc, viewCursor, reprocess);
       if (reprocess)
-        WollMuxEventHandler.getInstance()
-            .handleReprocessTextDocument(documentController);
-      if (!reprocess)
-        InfoDialog.showInfoModal(L.m("WollMux"),
-            L.m("Der Textbausteinverweis wurde eingefügt."));
+      {
+        new OnReprocessTextDocument(documentController).emit();
+      } else
+      {
+        InfoDialog.showInfoModal(L.m("WollMux"), L.m("Der Textbausteinverweis wurde eingefügt."));
+      }
     } catch (WollMuxFehlerException e)
     {
       LOGGER.error("Textbausteinverweis konnte nicht eingefügt werden.", e);

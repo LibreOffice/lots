@@ -114,18 +114,14 @@ public class OnProcessTextDocument extends BasicEvent
       }
     } catch (java.lang.Exception e)
     {
-      throw new WollMuxFehlerException(
-          L.m("Fehler bei der Dokumentbearbeitung."),
-          e);
+      throw new WollMuxFehlerException(L.m("Fehler bei der Dokumentbearbeitung."), e);
     }
 
-    // Registrierte XEventListener (etwas später) informieren, dass die
-    // Dokumentbearbeitung fertig ist.
-    WollMuxEventHandler.getInstance().handleNotifyDocumentEventListener(null,
-        WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED,
-        documentController.getModel().doc);
+    // notify listeners about processing finished
+    new OnNotifyDocumentEventListener(null, WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED,
+        documentController.getModel().doc).emit();
 
-    // ContextChanged auslösen, damit die Dispatches aktualisiert werden.
+    // ContextChanged to update dispatches
     try
     {
       documentController.getFrameController().getFrame().contextChanged();

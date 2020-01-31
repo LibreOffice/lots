@@ -78,7 +78,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIButton;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIControl;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIElementAction;
@@ -747,7 +747,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
               .invoke();
           short pos = (Short) UnoReflect.with(menu).method("getItemPos").withArgs(event.MenuId)
               .invoke();
-          WollMuxEventHandler.getInstance().handleSetSender(name, pos);
+          new OnSetSender(name, pos).emit();
         }
         catch (Exception e)
         {

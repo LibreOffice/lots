@@ -13,6 +13,9 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
+/**
+ * Event for printing the current visible page.
+ */
 public class OnPrintPage extends BasicEvent
 {
 
@@ -20,6 +23,12 @@ public class OnPrintPage extends BasicEvent
 
   private TextDocumentController documentController;
 
+  /**
+   * Create this event.
+   *
+   * @param documentController
+   *          The current document.
+   */
   public OnPrintPage(TextDocumentController documentController)
   {
     this.documentController = documentController;

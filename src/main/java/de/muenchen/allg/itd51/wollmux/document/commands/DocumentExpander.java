@@ -41,7 +41,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentLoader;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToMark;
 
 /**
  * Builds the whole document by expanding each text fragment.
@@ -511,7 +511,7 @@ class DocumentExpander extends AbstractExecutor
     // Cursor auf die definierte Marke setJumpMark (falls Vorhanden)
     if (placeholders.size() <= args.size())
     {
-      WollMuxEventHandler.getInstance().handleJumpToMark(doc, false);
+      new OnJumpToMark(doc, false).emit();
     }
 
     // Wenn mehr Platzhalter angegeben als Einfügestellen vorhanden, erscheint

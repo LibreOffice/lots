@@ -60,7 +60,7 @@ import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnPALChangedNotify;
 
 /**
  * Diese Klasse stellt einen Dialog zum Auswählen eines Eintrages aus der Persönlichen Absenderliste
@@ -110,7 +110,7 @@ public class AbsenderAuswaehlen
     {
       LOGGER.error("", e);
     }
-    
+
     if (provider == null)
       return;
 
@@ -164,7 +164,7 @@ public class AbsenderAuswaehlen
     }
 
     selectedElement.select();
-    WollMuxEventHandler.getInstance().handlePALChangedNotify();
+    new OnPALChangedNotify().emit();
     dialog.endExecute();
   };
 
@@ -211,7 +211,7 @@ public class AbsenderAuswaehlen
       {
         absAuswahl.addItem(ds.toString(), (short) count);
       }
-      
+
       elements.add(ds);
       if (ds.isSelectedDataset())
         itemToHightlightPos = (short) count;

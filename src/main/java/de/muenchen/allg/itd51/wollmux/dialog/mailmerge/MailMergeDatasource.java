@@ -86,7 +86,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
 import de.muenchen.allg.itd51.wollmux.func.print.SetFormValue;
 
 /**
@@ -342,13 +342,12 @@ public class MailMergeDatasource
     Iterator<String> dataIter = data.iterator();
     for (String column : schema)
     {
-      WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
-          column, dataIter.next(), null);
+      new OnSetFormValue(documentController.getModel().doc, column, dataIter.next(), null).emit();
     }
-    WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
-        SetFormValue.TAG_RECORD_ID, previewDatasetNumberStr, null);
-    WollMuxEventHandler.getInstance().handleSetFormValue(documentController.getModel().doc,
-        SetFormValue.TAG_MAILMERGE_ID, previewDatasetNumberStr, null);
+    new OnSetFormValue(documentController.getModel().doc, SetFormValue.TAG_RECORD_ID,
+        previewDatasetNumberStr, null).emit();
+    new OnSetFormValue(documentController.getModel().doc, SetFormValue.TAG_MAILMERGE_ID,
+        previewDatasetNumberStr, null).emit();
   }
 
   /**

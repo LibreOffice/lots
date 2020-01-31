@@ -6,7 +6,7 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnPrintPage;
 
 /**
  * Dispatch for printing to page, where the cursor is located.
@@ -26,8 +26,7 @@ public class PrintPageDispatch extends WollMuxDispatch
   @Override
   public void dispatch(URL url, PropertyValue[] props)
   {
-    WollMuxEventHandler.getInstance()
-        .handlePrintPage(DocumentManager.getTextDocumentController(frame));
+    new OnPrintPage(DocumentManager.getTextDocumentController(frame)).emit();
   }
 
 }

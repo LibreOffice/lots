@@ -51,13 +51,6 @@ public class OnSetSender extends BasicEvent
           senderName, idx));
     }
 
-    WollMuxEventHandler.getInstance().handlePALChangedNotify();
-  }
-
-  @Override
-  public String toString()
-  {
-    return this.getClass().getSimpleName() + "(" + senderName + ", " + idx
-        + ")";
+    new OnPALChangedNotify().emit();
   }
 }

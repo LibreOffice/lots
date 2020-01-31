@@ -7,8 +7,8 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
-
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveAs;
+import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
 
 /**
  * Dispatch for saving files.
@@ -36,24 +36,28 @@ public class SaveDispatch extends WollMuxNotifyingDispatch
   {
     this.listener = listener;
     this.props = props;
-    if (!DocumentManager.getTextDocumentController(frame).getModel().hasURL())
-    {
-      WollMuxEventHandler.getInstance().handleSaveAs(
-          DocumentManager.getTextDocumentController(frame), this, isSynchronMode(props));
-    } else
-    {
-      dispatchOriginal();
-    }
+    emitEvent();
   }
 
   @Override
   public void dispatch(URL url, PropertyValue[] props)
   {
     this.props = props;
+    emitEvent();
+  }
+
+  private void emitEvent()
+  {
     if (!DocumentManager.getTextDocumentController(frame).getModel().hasURL())
     {
-      WollMuxEventHandler.getInstance().handleSaveAs(
-          DocumentManager.getTextDocumentController(frame), this, isSynchronMode(props));
+      WollMuxEvent event = new OnSaveAs(DocumentManager.getTextDocumentController(frame), this);
+      if (isSynchronMode(props))
+      {
+        event.process();
+      } else
+      {
+        event.emit();
+      }
     } else
     {
       dispatchOriginal();

@@ -69,6 +69,11 @@ import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager.Info;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnCheckInstallation;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnInitialize;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnNotifyDocumentEventListener;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnProcessTextDocument;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
 
 /**
@@ -218,8 +223,8 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     }
 
     // Prüfen ob Doppelt- oder Halbinstallation vorliegt.
-    WollMuxEventHandler.getInstance().handleCheckInstallation();
-    WollMuxEventHandler.getInstance().handleInitialize();
+    new OnCheckInstallation().emit();
+    new OnInitialize().emit();
 
     Info docInfo = docManager.getInfo(compo);
     // docInfo ist hier nur dann ungleich null, wenn das Dokument mit Create erzeugt
@@ -236,13 +241,13 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       if (xTextDoc != null)
       {
         docManager.addTextDocument(xTextDoc);
-        WollMuxEventHandler.getInstance().handleProcessTextDocument(
-            DocumentManager.getTextDocumentController(xTextDoc), !isDocumentLoadedHidden(compo));
+        new OnProcessTextDocument(DocumentManager.getTextDocumentController(xTextDoc),
+            !isDocumentLoadedHidden(compo)).emit();
       } else
       {
         docManager.add(compo);
-        WollMuxEventHandler.getInstance().handleNotifyDocumentEventListener(null,
-            WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
+        new OnNotifyDocumentEventListener(null, WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED,
+            compo).emit();
       }
     }
 
@@ -289,7 +294,9 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
      * info.getTextDocumentModel() aufgerufen werden!
      */
     if (info != null)
-      WollMuxEventHandler.getInstance().handleTextDocumentClosed(info);
+    {
+      new OnTextDocumentClosed(info).emit();
+    }
   }
 
   /**

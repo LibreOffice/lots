@@ -6,7 +6,7 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnFunctionDialog;
 
 /**
  * Dispatch for handling a function dialog.
@@ -26,8 +26,8 @@ public class FunctionDialogDispatch extends WollMuxDispatch
   @Override
   public void dispatch(URL url, PropertyValue[] props)
   {
-    WollMuxEventHandler.getInstance().handleFunctionDialog(
-        DocumentManager.getTextDocumentController(frame), getMethodArgument());
+    new OnFunctionDialog(DocumentManager.getTextDocumentController(frame), getMethodArgument())
+        .emit();
   }
 
   @Override
