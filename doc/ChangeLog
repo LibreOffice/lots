@@ -1,3 +1,21 @@
+ ==================== Neu in Version 18.1.9 ====================
+
+    * Bugfixes
+          o Unterstützung von PPD-Druck-Optionen beim WollMux-Seriendruck
+          o Irrelevate Fehler erscheinen nicht mehr im Log
+          o Funktion "Aktuelle Seite Drucken" ist auch bei Dokumenten, die mit
+            dem Seriendruck erzeugt wurden, vorhanden.
+          o Gleichzeitiges Verschieben mehrere Formularelemente funktioniert
+            wieder
+          o Fehler in der FormularGUI behoben:
+                # Manchmal waren Tabs inaktiv, obwohl dort sichtbare Elemente
+                  waren, die dann nicht erreicht werden konnten.
+                # Editierbare ComboBoxen können neue Werte aufnehmen.
+                # Elemente nur anzeigen wenn alle Sichtbarkeiten dieses
+                  Elementes aktiv sind.
+          o Der Speichern-Dialog erscheint nicht mehr, wenn WollMux-Kommentare
+            entfernt werden.
+
  ==================== Neu in Version 18.1.8 ====================
 
     * Bugfixes
