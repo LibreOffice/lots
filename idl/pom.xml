@@ -1,65 +1,78 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.muenchen</groupId>
-	<artifactId>wollmux-interfaces</artifactId>
-	<version>15.4.0-SNAPSHOT</version>
-	<name>WollMux Interfaces</name>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>de.muenchen</groupId>
+  <artifactId>wollmux-interfaces</artifactId>
+  <version>15.4.0-SNAPSHOT</version>
+  <name>WollMux Interfaces</name>
 
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.8</version>
-				<executions>
-					<execution>
-						<id>idl</id>
-						<phase>generate-sources</phase>
-						<configuration>
-							<target>
-								<property name="idlcOutput" value="target/generated-sources/urd/de/muenchen/allg/itd51/wollmux"/>
-								<exec executable="sh">
-									<arg value="-c"/>
-									<arg value="idlc -O ${idlcOutput} -I /opt/libreoffice5.2/sdk/idl -I src/main/idl src/main/idl/de/muenchen/allg/itd51/wollmux/*.idl"/>
-								</exec>
-								<exec executable="sh">
-									<arg value="-c"/>
-									<arg value="regmerge target/WollMux.rdb /UCR ${idlcOutput}/*"/>
-								</exec>
-								<exec executable="sh">
-									<arg value="-c"/>
-									<arg value="javamaker -Tde.muenchen.allg.itd51.wollmux.* -nD -Gc -O ${project.build.outputDirectory} target/WollMux.rdb -X/opt/libreoffice5.2/program/types.rdb -X/opt/libreoffice5.2/program/types/offapi.rdb"/>
-								</exec>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>1.9.1</version>
-				<executions>
-					<execution>
-						<id>attach-artifacts</id>
-						<phase>package</phase>
-						<goals>
-							<goal>attach-artifact</goal>
-						</goals>
-						<configuration>
-							<artifacts>
-								<artifact>
-									<file>${project.build.directory}/WollMux.rdb</file>
-									<type>rdb</type>
-								</artifact>
-							</artifacts>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+  <properties>
+    <libreoffice.sdk>${env.UNO_PATH}/../sdk</libreoffice.sdk>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
+        <executions>
+          <execution>
+            <id>idl</id>
+            <phase>generate-sources</phase>
+            <configuration>
+              <target>
+                <property name="idlcOutput"
+                  value="target/generated-sources/urd/de/muenchen/allg/itd51/wollmux" />
+                  <property environment="env" />
+                <fail unless="env.UNO_PATH" message="No UNO_PATH set!" />
+
+                <echo message="Using UNO_PATH: ${env.UNO_PATH}" />
+                <exec executable="sh" failonerror="true">
+                  <arg value="-c" />
+                  <arg
+                    value="${libreoffice.sdk}/bin/idlc -O ${idlcOutput} -I ${libreoffice.sdk}/idl -I src/main/idl src/main/idl/de/muenchen/allg/itd51/wollmux/*.idl" />
+                </exec>
+                <exec executable="sh" failonerror="true">
+                  <arg value="-c" />
+                  <arg
+                    value="${env.UNO_PATH}/regmerge target/WollMux.rdb /UCR ${idlcOutput}/*" />
+                </exec>
+                <exec executable="sh" failonerror="true">
+                  <arg value="-c" />
+                  <arg
+                    value="${libreoffice.sdk}/bin/javamaker -Tde.muenchen.allg.itd51.wollmux.* -nD -Gc -O ${project.build.outputDirectory} target/WollMux.rdb -X${env.UNO_PATH}/types.rdb -X${env.UNO_PATH}/types/offapi.rdb" />
+                </exec>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.9.1</version>
+        <executions>
+          <execution>
+            <id>attach-artifacts</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>${project.build.directory}/WollMux.rdb</file>
+                  <type>rdb</type>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
