@@ -10,16 +10,14 @@ WollMux is licensed under the European Union Public Licence (EUPL - http://joinu
 ## How to build?
 WollMux is separated into 3 modules:
 * wollmux: all main classes of the extension
-* wollmux-interfaces: interfaces of the UNO API (in folder idl)
+* [wollmux-interfaces](idl/README.md): interfaces of the UNO API
 * [unohelper](https://github.com/WollMux/UNOHelper): Support classes for using UNO
 
 The following applications have to be installed to compile WollMux:
 * [JAVA JDK](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 * [Apache Maven](https://maven.apache.org/download.cgi)
 * [Git](http://git-scm.com/downloads/)
-
-Addtionally the maven plugin [maven-ooo-plugin](https://github.com/oboehm/maven-ooo-plugin) is needed to compile the module wollmux-interfaces.
-It had to be adapted to work with LibreOffice. Therefore two GitHub forks exist for maven-ooo-plugin and ooo-plugin-manager.
+* [LibreOffice SDK](https://api.libreoffice.org/docs/install.html)
 
 Perform the following commands to download the sources and build the LibreOffice extension. Special dependencies of WollMux are hosted at
 [Bintray](https://bintray.com/wollmux/WollMux), which is already configured as maven repository in pom.xml
