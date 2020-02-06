@@ -1221,7 +1221,11 @@ public class MailMergeDatasource
     }
 
     // Erste neue Spalte hinter die letzte Spalte
-    int newColumnX = columnIndexes.last() + 1;
+    int newColumnX = 0;
+    if (!columnIndexes.isEmpty())
+    {
+      newColumnX = columnIndexes.last() + 1;
+    }
 
     for (Map.Entry<String, FieldSubstitution> ent : mapIdToSubstitution.entrySet())
     {
@@ -1269,20 +1273,25 @@ public class MailMergeDatasource
       try
       {
         XCellRange sheetCellRange = UNO.XCellRange(sheet);
-
-        int ymin = rowIndexes.first();
-        int ymax = rowIndexes.last();
-        UNO.XTextRange(sheetCellRange.getCellByPosition(newColumnX, ymin)).setString(fieldId);
-
-        /*
-         * KEINE zusätzlichen Zeilen mit der Formel belegen, weil ansonsten bei Eingabe eines fixen
-         * Textes, auch wenn es nur ein Leerzeichen zwischen <Vorname> und <Nachname> ist, dazu
-         * führt, dass 1007 zusätzliche Datensätze erkannt werden.
-         */
-        for (int y = ymin + 1; y <= ymax + 0; ++y)
+        if (!rowIndexes.isEmpty())
         {
-          UNO.XCell(sheetCellRange.getCellByPosition(newColumnX, y))
-              .setFormula(formulaStr.replaceAll(ROW_NUM_PLACEHOLDER, "" + (y + 1)));
+          int ymin = rowIndexes.first();
+          int ymax = rowIndexes.last();
+          UNO.XTextRange(sheetCellRange.getCellByPosition(newColumnX, ymin)).setString(fieldId);
+
+          /*
+           * KEINE zusätzlichen Zeilen mit der Formel belegen, weil ansonsten bei Eingabe eines
+           * fixen Textes, auch wenn es nur ein Leerzeichen zwischen <Vorname> und <Nachname> ist,
+           * dazu führt, dass 1007 zusätzliche Datensätze erkannt werden.
+           */
+          for (int y = ymin + 1; y <= ymax + 0; ++y)
+          {
+            UNO.XCell(sheetCellRange.getCellByPosition(newColumnX, y))
+                .setFormula(formulaStr.replaceAll(ROW_NUM_PLACEHOLDER, "" + (y + 1)));
+          }
+        } else
+        {
+          UNO.XTextRange(sheetCellRange.getCellByPosition(newColumnX, 0)).setString(fieldId);
         }
 
         ++newColumnX;
