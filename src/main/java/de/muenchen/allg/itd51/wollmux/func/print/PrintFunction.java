@@ -24,9 +24,6 @@ public abstract class PrintFunction implements Comparable<PrintFunction>
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PrintFunction.class);
 
-  private static ServiceLoader<PrintFunction> serviceLoader = ServiceLoader
-      .load(PrintFunction.class);
-
   private String functionName;
 
   private int order;
@@ -136,7 +133,8 @@ public abstract class PrintFunction implements Comparable<PrintFunction>
    */
   public static void addPrintFunctions(PrintFunctionLibrary library)
   {
-    serviceLoader.forEach(printFunction -> {
+    ServiceLoader.load(PrintFunction.class, PrintFunction.class.getClassLoader())
+        .forEach(printFunction -> {
       if (library.get(printFunction.functionName) == null)
       {
         library.add(printFunction.functionName, printFunction);
