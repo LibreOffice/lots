@@ -2,6 +2,7 @@ package de.muenchen.allg.itd51.wollmux.sidebar;
 
 import java.awt.SystemColor;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,10 +25,10 @@ import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.Selection;
 import com.sun.star.awt.WindowEvent;
 import com.sun.star.awt.XButton;
-import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlModel;
 import com.sun.star.awt.XItemList;
+import com.sun.star.awt.XListBox;
 import com.sun.star.awt.XMenu;
 import com.sun.star.awt.XPopupMenu;
 import com.sun.star.awt.XTextComponent;
@@ -556,35 +557,52 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     props.put("TextColor", SystemColor.textInactiveText.getRGB() & ~0xFF000000);
     props.put("Autocomplete", false);
     props.put("HideInactiveSelection", true);
-    XControl searchBox =
-      GuiFactory.createCombobox(UNO.xMCF, context, toolkit, windowPeer, label,
-            new Rectangle(0, 0, 100, 32), props);
+    XTextComponent searchBox = UNO
+        .XTextComponent(GuiFactory.createTextfield(UNO.xMCF, context, toolkit,
+        windowPeer, label, new Rectangle(0, 0, 100, 32), props));
+
+    SortedMap<String, Object> propsResult = new TreeMap<>();
+    propsResult.put("Enabled", false);
+    propsResult.put("TextColor", SystemColor.textText.getRGB() & ~0xFF000000);
+    AbstractItemListener resultListener = event -> {
+      try
+      {
+        XControl ctrl = UnoRuntime.queryInterface(XControl.class, event.Source);
+        XItemList items = UnoRuntime.queryInterface(XItemList.class, ctrl.getModel());
+        String uuid = (String) items.getItemData(event.Selected);
+        UIElementAction action = searchActions.get(uuid);
+        if (action != null)
+        {
+          action.performAction();
+        }
+      } catch (IndexOutOfBoundsException e)
+      {
+        LOGGER.error("", e);
+      }
+    };
+    XListBox resultBox = UNO.XListBox(GuiFactory.createListBox(UNO.xMCF, context, toolkit,
+        windowPeer, resultListener, new Rectangle(0, 0, 100, 0), propsResult));
+    UNO.XWindow(resultBox).setVisible(false);
 
     final XWindow wnd = UnoRuntime.queryInterface(XWindow.class, searchBox);
-    XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, searchBox);
-
 
     AbstractTextListener tfListener = event -> {
-      XControl ctrl = UnoRuntime.queryInterface(XControl.class, event.Source);
-      XTextComponent tfComponent = UnoRuntime.queryInterface(XTextComponent.class, event.Source);
-      XComboBox cmb = UnoRuntime.queryInterface(XComboBox.class, event.Source);
-      String text = tfComponent.getText();
-
-      XControlModel tfModel = ctrl.getModel();
-      XItemList items = UnoRuntime.queryInterface(XItemList.class, tfModel);
+      String text = searchBox.getText();
+      XItemList items = UnoRuntime.queryInterface(XItemList.class,
+          UNO.XControl(resultBox).getModel());
 
       if (text.length() > 0)
       {
         String[] words = text.split("\\s+");
         try
         {
-          cmb.removeItems((short) 0, cmb.getItemCount());
+          resultBox.removeItems((short) 0, resultBox.getItemCount());
           searchActions.clear();
 
           ConfigThingy menues = WollMuxFiles.getWollmuxConf().get("Menues");
           ConfigThingy labels = menues.queryAll("LABEL", 4, true);
 
-          int n = 0;
+          List<UIMenuItem> newItems = new ArrayList<>(labels.count());
           for (ConfigThingy l : labels)
           {
             ConfigThingy type = l.query("TYPE");
@@ -596,23 +614,28 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
                 if (buttonMatches(l, words))
                 {
                   UIMenuItem item = (UIMenuItem) uiFactory.createUIMenuElement(null, l, "");
-                  items.insertItemText(n, item.getLabel());
-                  UUID uuid = UUID.randomUUID();
-                  searchActions.put(uuid.toString(), item.getAction());
-                  items.setItemData(n, uuid.toString());
-                  n++;
+                  newItems.add(item);
                 }
               }
             }
           }
+
+          newItems.sort((item1, item2) -> item1.getLabel().compareTo(item2.getLabel()));
+          for (short n = 0; n < newItems.size(); n++)
+          {
+            items.insertItemText(n, newItems.get(n).getLabel());
+            UUID uuid = UUID.randomUUID();
+            searchActions.put(uuid.toString(), newItems.get(n).getAction());
+            items.setItemData(n, uuid.toString());
+          }
         }
         catch (Exception e)
         {
-          e.printStackTrace();
+          LOGGER.error("", e);
         }
       }
     };
-    tf.addTextListener(tfListener);
+    searchBox.addTextListener(tfListener);
 
     AbstractFocusListener wndListener = new AbstractFocusListener()
     {
@@ -621,17 +644,14 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       {
         try
         {
-          XControl searchBox =
-            UnoRuntime.queryInterface(XControl.class, event.Source);
-          XTextComponent tf =
-            UnoRuntime.queryInterface(XTextComponent.class, searchBox);
+          XTextComponent searchBox = UnoRuntime.queryInterface(XTextComponent.class, event.Source);
 
-          wnd.setPosSize(0, 0, 0, 32, PosSize.HEIGHT);
+          activate(false);
 
-          if (tf.getText().isEmpty())
+          if (searchBox.getText().isEmpty())
           {
-            tf.setText(L.m("Suchen..."));
-            XControlModel model = searchBox.getModel();
+            searchBox.setText(L.m("Suchen..."));
+            XControlModel model = UNO.XControl(searchBox).getModel();
             XPropertySet props =
               UnoRuntime.queryInterface(XPropertySet.class, model);
             props.setPropertyValue("TextColor",
@@ -651,14 +671,12 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       {
         try
         {
-          XControl searchBox =
-            UnoRuntime.queryInterface(XControl.class, event.Source);
-          XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, searchBox);
-          XControlModel model = searchBox.getModel();
+          XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, event.Source);
+          XControlModel model = UNO.XControl(searchBox).getModel();
           XPropertySet props =
             UnoRuntime.queryInterface(XPropertySet.class, model);
 
-          wnd.setPosSize(0, 0, 0, 320, PosSize.HEIGHT);
+          activate(true);
 
           int color = (Integer) props.getPropertyValue("TextColor");
           if (color == (SystemColor.textInactiveText.getRGB() & ~0xFF000000))
@@ -678,31 +696,18 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           LOGGER.error("", e);
         }
       }
+
+      private void activate(boolean active)
+      {
+        UNO.XWindow(resultBox).setVisible(active);
+        UNO.XWindow(resultBox).setEnable(active);
+        UNO.XWindow(resultBox).setPosSize(0, 0, 0, active ? 200 : 0, PosSize.HEIGHT);
+      }
     };
     wnd.addFocusListener(wndListener);
 
-    XComboBox cmb = UnoRuntime.queryInterface(XComboBox.class, searchBox);
-    AbstractItemListener cmbItemListener = event -> {
-      try
-      {
-        XControl ctrl = UnoRuntime.queryInterface(XControl.class, event.Source);
-        XItemList items =
-          UnoRuntime.queryInterface(XItemList.class, ctrl.getModel());
-        String uuid = (String) items.getItemData(event.Selected);
-        UIElementAction action = searchActions.get(uuid);
-        if (action != null)
-        {
-          action.performAction();
-        }
-      }
-      catch (IndexOutOfBoundsException e)
-      {
-        LOGGER.error("", e);
-      }
-    };
-    cmb.addItemListener(cmbItemListener);
-
-    layout.addControl(searchBox);
+    layout.addControl(UNO.XControl(searchBox));
+    layout.addControl(UNO.XControl(resultBox));
   }
 
   private void createSenderbox(UISenderbox uiSenderbox)
