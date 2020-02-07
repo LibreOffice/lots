@@ -39,7 +39,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormValueChanged;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormularMax4000Returned;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormularMax4000Show;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFunctionDialog;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnInitMailMergeSidebar;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnInitialize;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToMark;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToPlaceholder;
@@ -69,7 +68,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextbausteinEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnUpdateInputFields;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
-import de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarContent;
 import de.muenchen.allg.itd51.wollmux.slv.events.ContentBasedDirectiveEventListener;
 import de.muenchen.allg.itd51.wollmux.slv.events.OnChangeCopy;
 import de.muenchen.allg.itd51.wollmux.slv.events.OnChangeDirective;
@@ -91,6 +89,7 @@ public class WollMuxEventHandler
   public static final String ON_WOLLMUX_PROCESSING_FINISHED = "OnWollMuxProcessingFinished";
 
   private static WollMuxEventHandler instance;
+
   private EventBus eventBus;
 
   private InitEventListener initEventListener;
@@ -136,6 +135,17 @@ public class WollMuxEventHandler
     return instance;
   }
 
+  /**
+   * Unregister existing listener from the event bus.
+   * 
+   * @param listener
+   *          Listener to remove.
+   */
+  public void unregisterListener(Object listener)
+  {
+    eventBus.unregister(listener);
+  }
+
   public void unregisterInitEventListener()
   {
     eventBus.unregister(initEventListener);
@@ -164,7 +174,7 @@ public class WollMuxEventHandler
    *
    * @param event
    */
-  private void handle(WollMuxEvent event)
+  public void handle(Object event)
   {
     if (acceptEvents)
     {
@@ -951,17 +961,6 @@ public class WollMuxEventHandler
   public void handlePALChangedNotify()
   {
     handle(new OnPALChangedNotify());
-  }
-
-  /**
-   * Create a new {@link OnInitMailMergeSidebar} event.
-   *
-   * @param sidebar
-   *          The {@link SeriendruckSidebarContent} to initialize.
-   */
-  public void handleInitMailMergeSidebar(SeriendruckSidebarContent sidebar)
-  {
-    handle(new OnInitMailMergeSidebar(sidebar));
   }
 
   /**
