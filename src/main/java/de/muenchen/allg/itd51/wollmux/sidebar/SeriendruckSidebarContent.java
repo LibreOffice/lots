@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.Subscribe;
 import com.sun.star.accessibility.XAccessible;
 import com.sun.star.awt.ItemEvent;
 import com.sun.star.awt.Rectangle;
@@ -34,6 +35,7 @@ import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.lib.uno.helper.ComponentBase;
 import com.sun.star.sheet.XSpreadsheetDocument;
+import com.sun.star.text.XTextDocument;
 import com.sun.star.ui.LayoutSize;
 import com.sun.star.ui.XSidebarPanel;
 import com.sun.star.ui.XToolPanel;
@@ -60,6 +62,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.IfThenElseDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.event.OnTextDocumentControllerInitialized;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.func.print.SetFormValue;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.HorizontalLayout;
@@ -71,7 +74,8 @@ import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
  * zur Auswahl von Vorlagen und darunter eine Reihe von Buttons für häufig benutzte Funktionen.
  *
  */
-public class SeriendruckSidebarContent extends ComponentBase implements XToolPanel, XSidebarPanel
+public class SeriendruckSidebarContent extends ComponentBase
+    implements XToolPanel, XSidebarPanel
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SeriendruckSidebarContent.class);
@@ -134,7 +138,30 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
     windowPeer = GuiFactory.createWindow(toolkit, parentWindowPeer);
     windowPeer.setBackground(0xffffffff);
     window = UnoRuntime.queryInterface(XWindow.class, windowPeer);
-    WollMuxEventHandler.getInstance().handleInitMailMergeSidebar(this);
+
+    WollMuxEventHandler.getInstance().registerListener(this);
+    init();
+  }
+
+  /**
+   * Sets TextDocumentController once it is available.
+   * 
+   * @param event
+   */
+  @Subscribe
+  public void onTextDocumentControllerInitialized(OnTextDocumentControllerInitialized event)
+  {
+    TextDocumentController controller = event.getTextDocumentController();
+
+    if (controller == null)
+    {
+      LOGGER.error("{} notify(): documentController is NULL.", this.getClass().getSimpleName());
+      return;
+    }
+
+    this.textDocumentController = controller;
+
+    init();
   }
 
   /**
@@ -142,8 +169,27 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
    */
   public void init()
   {
-    textDocumentController = DocumentManager
-        .getTextDocumentController(UNO.getCurrentTextDocument());
+    // An instance of DocumentManager.getTextDocumentController() may exist if another sidebar deck
+    // was active when LO was started, see {@link TextDocumentControllerObserver}.
+    // If this deck was the active one at startup, this method should be notified by subscribed
+    // TextDocumentControllerEvent in the Constructor of this class which sets
+    // textDocumentController instance once it exists.
+    if (textDocumentController == null)
+    {
+      // We can't use this everytime. If this sidebar is the active one at startup,
+      // UNO.getCurrentTextDocument() throws NULL due UNO.desktop.getCurrentComponent()
+      // is not initialized. If NULL, we return and wait for an notification by
+      // TextDocumentControllerEvent;
+      XTextDocument currentDoc = UNO.getCurrentTextDocument();
+
+      if (currentDoc == null)
+      {
+        LOGGER.error("{} init(): Current Text Document is NULL.", this.getClass().getName());
+        return;
+      }
+
+      textDocumentController = DocumentManager.getTextDocumentController(currentDoc);
+    }
 
     if (textDocumentController != null)
     {
@@ -153,13 +199,13 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
       addSerienbriefFeld();
       addPrintControls();
 
-      window.setVisible(true);
-
       textDocumentController.setFormFieldsPreviewMode(false);
       datasource = new MailMergeDatasource(textDocumentController);
+      WollMuxEventHandler.getInstance().unregisterListener(this);
+      window.setVisible(true);
     } else
     {
-      LOGGER.debug("SeriendruckSidebar: setMailMergeOnDocument(): textDocumentController is NULL.");
+      LOGGER.error("SeriendruckSidebar: setMailMergeOnDocument(): textDocumentController is NULL.");
     }
   }
 

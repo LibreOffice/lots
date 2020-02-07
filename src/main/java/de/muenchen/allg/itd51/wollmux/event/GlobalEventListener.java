@@ -236,6 +236,8 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       }
     }
 
+    WollMuxEventHandler.getInstance().handle(new OnTextDocumentControllerInitialized(
+        DocumentManager.getTextDocumentController(xTextDoc)));
   }
 
   /**
