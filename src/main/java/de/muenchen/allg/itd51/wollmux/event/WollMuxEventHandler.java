@@ -173,6 +173,7 @@ public class WollMuxEventHandler
    * Stellt das WollMuxEvent event in die EventQueue des EventProcessors.
    *
    * @param event
+   *          Could be any object as parameter to send with.
    */
   public void handle(Object event)
   {

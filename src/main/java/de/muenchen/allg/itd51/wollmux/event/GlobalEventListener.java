@@ -67,6 +67,7 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager.Info;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
 
 /**
  * Der GlobalEventListener sorgt dafür, dass der WollMux alle wichtigen globalen

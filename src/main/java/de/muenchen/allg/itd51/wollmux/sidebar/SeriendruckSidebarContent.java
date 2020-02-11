@@ -62,8 +62,8 @@ import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.IfThenElseDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.event.OnTextDocumentControllerInitialized;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
 import de.muenchen.allg.itd51.wollmux.func.print.SetFormValue;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.HorizontalLayout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
@@ -147,6 +147,8 @@ public class SeriendruckSidebarContent extends ComponentBase
    * Sets TextDocumentController once it is available.
    * 
    * @param event
+   *          OnTextDocumentControllerInitialized-Object with the instance of
+   *          TextDocumentController.
    */
   @Subscribe
   public void onTextDocumentControllerInitialized(OnTextDocumentControllerInitialized event)
@@ -170,16 +172,16 @@ public class SeriendruckSidebarContent extends ComponentBase
   public void init()
   {
     // An instance of DocumentManager.getTextDocumentController() may exist if another sidebar deck
-    // was active when LO was started, see {@link TextDocumentControllerObserver}.
+    // was active when LO was started, see {@link OnTextDocumentControllerInitialized}.
     // If this deck was the active one at startup, this method should be notified by subscribed
-    // TextDocumentControllerEvent in the Constructor of this class which sets
+    // {@link OnTextDocumentControllerInitialized} in the Constructor of this class which sets
     // textDocumentController instance once it exists.
     if (textDocumentController == null)
     {
       // We can't use this everytime. If this sidebar is the active one at startup,
       // UNO.getCurrentTextDocument() throws NULL due UNO.desktop.getCurrentComponent()
       // is not initialized. If NULL, we return and wait for an notification by
-      // TextDocumentControllerEvent;
+      // {@link OnTextDocumentControllerInitialized}.
       XTextDocument currentDoc = UNO.getCurrentTextDocument();
 
       if (currentDoc == null)
