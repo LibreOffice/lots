@@ -24,8 +24,6 @@
 			<excludes>
 				<exclude>org.libreoffice:ridl</exclude>
 				<exclude>org.libreoffice:juh</exclude>
-				<exclude>org.libreoffice:jurt</exclude>
-				<exclude>org.libreoffice:unoil</exclude>
 			</excludes>
 		</dependencySet>
 	</dependencySets>
