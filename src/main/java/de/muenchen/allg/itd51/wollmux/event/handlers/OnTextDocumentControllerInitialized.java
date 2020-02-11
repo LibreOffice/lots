@@ -1,4 +1,4 @@
-package de.muenchen.allg.itd51.wollmux.event;
+package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
@@ -19,6 +19,7 @@ public class OnTextDocumentControllerInitialized
    * Handled if TextDocumentController is initialized.
    * 
    * @param documentController
+   *          Instance of TextDocumentController.
    */
   public OnTextDocumentControllerInitialized(TextDocumentController documentController)
   {
