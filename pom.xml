@@ -296,16 +296,6 @@
 			<version>${libreoffice.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.libreoffice</groupId>
-			<artifactId>jurt</artifactId>
-			<version>${libreoffice.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.libreoffice</groupId>
-			<artifactId>unoil</artifactId>
-			<version>${libreoffice.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>de.muenchen</groupId>
 			<artifactId>unohelper</artifactId>
 			<version>3.0.0-SNAPSHOT</version>
