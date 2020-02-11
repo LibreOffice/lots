@@ -163,6 +163,13 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     XComponent compo = UNO.XComponent(source);
     if (compo == null) return;
 
+    XModel compoModel = UNO.XModel(compo);
+
+    if (compoModel == null || isTempMailMergeDocument(compoModel))
+    {
+      return;
+    }
+
     // durch das Hinzufügen zum docManager kann im Event onViewCreated erkannt
     // werden, dass das Dokument frisch erzeugt wurde:
     XTextDocument xTextDoc = UNO.XTextDocument(source);
@@ -305,26 +312,19 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     String url = compo.getURL();
     int idx = url.lastIndexOf('/');
     PropertyValue[] args = compo.getArgs();
-    String fileName = "";
     boolean hidden = false;
     for (PropertyValue p : args)
     {
-      if (p.Name.equals("FileName"))
-        fileName = (String) p.Value;
       if (p.Name.equals("Hidden"))
         hidden = (Boolean)p.Value;
     }
 
-    boolean mmdoc =
-      (/* wird über datei->Drucken in Serienbrief erzeugt: */(url.startsWith(
+    return (/* wird über datei->Drucken in Serienbrief erzeugt: */(url.startsWith(
         ".tmp/", idx - 4) && url.endsWith(".tmp"))
         || /* wird über den Service css.text.MailMerge erzeugt: */(url.startsWith(
           "/SwMM", idx) && url.endsWith(".odt")) || /* wird vom WollMux erzeugt: */url.startsWith(
-        "/WollMuxMailMerge", idx - 20) || (fileName.equals("private:object") && hidden));
-
-    // debug-Meldung bewusst ohne L.m gewählt (WollMux halt dich raus!)
-    if (mmdoc) LOGGER.debug("EventProcessor: akzeptiere neue Events.");
-    return mmdoc;
+            "/WollMuxMailMerge", idx - 20)
+        || (url.equals("private:object") && hidden));
   }
 
   /**
