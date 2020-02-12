@@ -48,7 +48,7 @@
 				</prop>
 				<prop oor:name="ContextList">
 					<value oor:separator=";">
-						any, any, visible ;
+						Writer, any, visible ;
 					</value>
 				</prop>
 				<prop oor:name="OrderIndex" oor:type="xs:int">
