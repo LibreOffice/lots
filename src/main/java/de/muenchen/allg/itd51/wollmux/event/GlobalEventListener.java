@@ -211,10 +211,10 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     // Textdokumente des OOo-Seriendrucks. Sicherstellen, dass diese Dokumente auch
     // nicht im docManager mitgeführt werden.
     if (isTempMailMergeDocument(compo))
-    {     
+    {
       return;
     }
-    
+
     // Prüfen ob Doppelt- oder Halbinstallation vorliegt.
     WollMuxEventHandler.getInstance().handleCheckInstallation();
     WollMuxEventHandler.getInstance().handleInitialize();
@@ -244,8 +244,11 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       }
     }
 
-    WollMuxEventHandler.getInstance().handle(new OnTextDocumentControllerInitialized(
-        DocumentManager.getTextDocumentController(xTextDoc)));
+    if (xTextDoc != null)
+    {
+      WollMuxEventHandler.getInstance().handle(new OnTextDocumentControllerInitialized(
+          DocumentManager.getTextDocumentController(xTextDoc)));
+    }
   }
 
   /**
