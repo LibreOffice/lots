@@ -182,36 +182,48 @@ public class FormularGuiSidebarContent implements XToolPanel, XSidebarPanel
 
     window.setVisible(true);
 
+    XTabPageContainer tabPageContainer = UnoRuntime.queryInterface(XTabPageContainer.class,
+        tabControlContainer);
+    UNO.XWindow(tabControlContainer).setPosSize(0, 0, 200, 400, PosSize.POSSIZE);
+    UNO.XWindow(tabPageContainer).setPosSize(0, 0, 400, 400, PosSize.POSSIZE);
+
     Map<Short, List<XControl>> buttonsToAdd = new HashMap<>();
 
+    // Test 1 und 2
     for (Map.Entry<String, Tab> entry : model.getTabs().entrySet())
     {
       Tab tab = entry.getValue();
       XTabPage xTabPage = createTab(xTabPageContainerModel, tab.getTitle());
-      XControlContainer tabPageControlContainer = UnoRuntime.queryInterface(XControlContainer.class,
-          UNO.XControl(xTabPage));
+
+      // UNO.XWindow(xTabPage).setPosSize(0, 0, 400, 400, PosSize.POSSIZE); // (1) nur zwecks test
+
+      // XControlContainer tabPageControlContainer =
+      // UnoRuntime.queryInterface(XControlContainer.class,
+      // UNO.XControl(xTabPage)); // (1) eigentlich selbes wie bei Z:224?
+
+      // UNO.XWindow(tabPageControlContainer).setPosSize(0, 0, 400, 400, PosSize.POSSIZE); // (1)
+      // nur
+                                                                                        // zwecks
+                                                                                        // test
 
       tab.getButtons().forEach(button -> {
         List<XControl> buttonList = new ArrayList<>();
+
+        // nicht beachten
         // XControl btn = GuiFactory.createButton(UNO.xMCF, context, toolkit,
         // windowPeer, button.getLabel(),
         // btnActionListener, new Rectangle(0, 0, 50, 50), null);
 
         XButton btn = createButton(0, 0, 100, button.getLabel());
 
-        // "On-The-Fly" funktioniert nicht.
+        // (1) "On-The-Fly" funktioniert nicht. keine Buttons angezeigt
         // tabPageControlContainer.addControl(generateRandomId(), UNO.XControl(btn));
 
         buttonList.add(UNO.XControl(btn));
-        buttonsToAdd.put(tabPagesCount, buttonList);
+        // buttonsToAdd.put(tabPagesCount, buttonList); // funktioniert, aber seltsam(2)
         tabPagesCount++;
       });
     }
-
-    XTabPageContainer tabPageContainer = UnoRuntime.queryInterface(XTabPageContainer.class,
-        tabControlContainer);
-    UNO.XWindow(tabControlContainer).setPosSize(0, 0, 200, 400, PosSize.POSSIZE);
-    UNO.XWindow(tabPageContainer).setPosSize(0, 0, 400, 400, PosSize.POSSIZE);
 
     for (Map.Entry<Short, List<XControl>> entry : buttonsToAdd.entrySet())
     {
