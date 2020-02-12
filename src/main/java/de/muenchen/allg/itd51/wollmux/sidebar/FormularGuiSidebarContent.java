@@ -1,24 +1,36 @@
 package de.muenchen.allg.itd51.wollmux.sidebar;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.eventbus.Subscribe;
 import com.sun.star.accessibility.XAccessible;
+import com.sun.star.awt.ActionEvent;
+import com.sun.star.awt.PosSize;
+import com.sun.star.awt.WindowEvent;
+import com.sun.star.awt.XActionListener;
+import com.sun.star.awt.XButton;
+import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlContainer;
-import com.sun.star.awt.XTabController;
-import com.sun.star.awt.XTabControllerModel;
+import com.sun.star.awt.XControlModel;
 import com.sun.star.awt.XToolkit;
-import com.sun.star.awt.XUnoControlContainer;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
+import com.sun.star.awt.tab.XTabPage;
+import com.sun.star.awt.tab.XTabPageContainer;
 import com.sun.star.awt.tab.XTabPageContainerModel;
 import com.sun.star.awt.tab.XTabPageModel;
-import com.sun.star.document.EventObject;
-import com.sun.star.document.XEventListener;
+import com.sun.star.beans.XMultiPropertySet;
 import com.sun.star.lang.DisposedException;
+import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.IndexOutOfBoundsException;
 import com.sun.star.lang.WrappedTargetException;
-import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.ui.LayoutSize;
 import com.sun.star.ui.XSidebarPanel;
 import com.sun.star.ui.XToolPanel;
@@ -26,122 +38,276 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.core.form.model.Tab;
-import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
+import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
+import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
 
 public class FormularGuiSidebarContent implements XToolPanel, XSidebarPanel
 {
+  private static final Logger LOGGER = LoggerFactory.getLogger(FormularGuiSidebarContent.class);
+
   private XComponentContext context;
   private XWindow parentWindow;
+  private XWindowPeer parentWindowPeer;
   private XToolkit toolkit;
   private XWindowPeer windowPeer;
   private XWindow window;
-  private XMultiComponentFactory xMCF;
+  private TextDocumentController documentController;
+  private Layout vLayout;
+  private Object tabControlContainer;
+  private XTabPageContainerModel xTabPageContainerModel;
 
-  // FormController formController, ConfigThingy formFensterConf
+  private AbstractWindowListener windowAdapter = new AbstractWindowListener()
+  {
+    @Override
+    public void windowResized(WindowEvent e)
+    {
+      vLayout.layout(parentWindow.getPosSize());
+    }
+  };
+
   public FormularGuiSidebarContent(XComponentContext context, XWindow parentWindow)
   {
     this.context = context;
     this.parentWindow = parentWindow;
+    this.parentWindow.addWindowListener(this.windowAdapter);
+    vLayout = new VerticalLayout();
 
-    xMCF = UnoRuntime.queryInterface(XMultiComponentFactory.class, context.getServiceManager());
-    XWindowPeer parentWindowPeer = UnoRuntime.queryInterface(XWindowPeer.class, parentWindow);
-
+    parentWindowPeer = UnoRuntime.queryInterface(XWindowPeer.class, parentWindow);
     toolkit = parentWindowPeer.getToolkit();
     windowPeer = GuiFactory.createWindow(toolkit, parentWindowPeer);
     windowPeer.setBackground(0xffffffff);
     window = UnoRuntime.queryInterface(XWindow.class, windowPeer);
-    // WollMuxEventHandler.getInstance().handleInitFormularGuiSidebar(this);
-    WollMuxEventHandler.getInstance().handleAddDocumentEventListener(new XEventListener()
+
+    Object cont = UNO.createUNOService("com.sun.star.awt.UnoControlContainer");
+    XControl dialogControl = UnoRuntime.queryInterface(XControl.class, cont);
+
+    // Instanzierung eines ControlContainers für das aktuelle Fenster
+    Object unoControlContainerModelO = UNO
+        .createUNOService("com.sun.star.awt.UnoControlContainerModel");
+    XControlModel unoControlContainerModel = UnoRuntime.queryInterface(XControlModel.class,
+        unoControlContainerModelO);
+    dialogControl.setModel(unoControlContainerModel);
+
+    if (windowPeer != null)
     {
+      dialogControl.createPeer(toolkit, parentWindowPeer);
+      window = UNO.XWindow(dialogControl);
 
-      @Override
-      public void disposing(com.sun.star.lang.EventObject arg0)
-      {
-        // TODO Auto-generated method stub
+      // TabControl muss zuerst in den Container eingefügt werden, bevor die TabPages hinzugefügt
+      // werden können
+      Object tabPageContainerModel = UNO
+          .createUNOService("com.sun.star.awt.tab.UnoControlTabPageContainerModel");
+      xTabPageContainerModel = UnoRuntime.queryInterface(XTabPageContainerModel.class,
+          tabPageContainerModel);
 
-      }
+      tabControlContainer = UNO.createUNOService("com.sun.star.awt.tab.UnoControlTabPageContainer");
+      XControl xControl = UnoRuntime.queryInterface(XControl.class, tabControlContainer);
 
-      @Override
-      public void notifyEvent(EventObject arg0)
-      {
-        init();
-      }
-    });
+      XControlModel xControlModel = UnoRuntime.queryInterface(XControlModel.class,
+          tabPageContainerModel);
+      xControl.setModel(xControlModel);
+      Object toolkitAWT = UNO.createUNOService("com.sun.star.awt.Toolkit");
+      XToolkit xToolkit = UnoRuntime.queryInterface(XToolkit.class, toolkitAWT);
+      xControl.createPeer(xToolkit, dialogControl.getPeer());
+
+      vLayout.addControl(xControl);
+
+      window.setVisible(true);
+      window.setEnable(true);
+    }
+
+    init();
+    WollMuxEventHandler.getInstance().registerListener(this);
   }
 
-  public void init()
+  /**
+   * Sets TextDocumentController once it is available.
+   * 
+   * @param event
+   *          OnTextDocumentControllerInitialized-Object with the instance of
+   *          TextDocumentController.
+   */
+  @Subscribe
+  public void onTextDocumentControllerInitialized(OnTextDocumentControllerInitialized event)
   {
+    TextDocumentController controller = event.getTextDocumentController();
+
+    if (controller == null)
+    {
+      LOGGER.error("{} notify(): documentController is NULL.", this.getClass().getSimpleName());
+      return;
+    }
+
+    documentController = controller;
+
+    init();
+  }
+
+  private int btnCount = 0;
+
+  private void init()
+  {
+    if (documentController == null)
+    {
+      LOGGER.debug("{} documentController is NULL.", this.getClass().getSimpleName());
+      return;
+    }
+
+    WollMuxEventHandler.getInstance().unregisterListener(this);
+
     FormModel model = null;
     try
     {
-      model = DocumentManager.getDocumentManager()
-          .getTextDocumentController(UNO.getCurrentTextDocument()).getFormModel();
+      model = documentController.getFormModel();
     } catch (FormModelException e)
     {
-      //
+      LOGGER.error("", e);
+      return;
     }
 
     if (model == null)
+    {
+      LOGGER.debug("{} FormModel is NULL. No form description found.",
+          this.getClass().getSimpleName());
       return;
+    }
 
     window.setVisible(true);
-    XTabPageContainerModel tabContainerModel = initTabControl();
+
+    List<XControl> buttonsToAdd = new ArrayList<>();
 
     for (Map.Entry<String, Tab> entry : model.getTabs().entrySet())
     {
       Tab tab = entry.getValue();
-      createTab(tabContainerModel, tab.getTitle());
+      XTabPage xTabPage = createTab(xTabPageContainerModel, tab.getTitle());
+      XControlContainer tabPageControlContainer = UnoRuntime.queryInterface(XControlContainer.class,
+          UNO.XControl(xTabPage));
+
+      // UNO.XWindow(tabPageControlContainer).setPosSize(0, 0, 400, 400, PosSize.POSSIZE);
+
+      tab.getButtons().forEach(button -> {
+        // XControl btn = GuiFactory.createButton(UNO.xMCF, context, toolkit,
+        // windowPeer, button.getLabel(),
+        // btnActionListener, new Rectangle(0, 0, 50, 50), null);
+
+        XButton btn = createButton(0, 0, 100, button.getLabel());
+        tabPageControlContainer.addControl(generateRandomId(), UNO.XControl(btn));
+
+        buttonsToAdd.add(UNO.XControl(btn));
+        btnCount++;
+      });
     }
+
+    XTabPageContainer tabPage = UnoRuntime.queryInterface(XTabPageContainer.class,
+        tabControlContainer);
+    UNO.XWindow(tabControlContainer).setPosSize(0, 0, 200, 400, PosSize.POSSIZE);
+    UNO.XWindow(tabPage).setPosSize(0, 0, 400, 400, PosSize.POSSIZE);
+
+    XTabPage firstTabPage = tabPage.getTabPage((short) 0);
+    UNO.XWindow(firstTabPage).setPosSize(0, 0, 400, 400, PosSize.POSSIZE);
+
+    // XControlContainer cc = UnoRuntime.queryInterface(XControlContainer.class, firstTabPage);
+    // UNO.XWindow(cc).setPosSize(0, 0, 400, 400, PosSize.POSSIZE);
+
+    // for (XControl btn : buttonsToAdd)
+    // {
+    // cc.addControl(generateRandomId(), btn);
+    // }
   }
 
-  private void createTab(XTabPageContainerModel model, String tabTitle)
+  private String generateRandomId()
   {
-    XTabPageModel tabPageModel = model.createTabPage((short) 1);
+    int leftLimit = 97; // letter 'a'
+    int rightLimit = 122; // letter 'z'
+    int targetStringLength = 8;
+    Random random = new Random();
+
+    return random.ints(leftLimit, rightLimit + 1).limit(targetStringLength)
+        .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+        .toString();
+  }
+
+  private XActionListener btnActionListener = new XActionListener()
+  {
+
+    @Override
+    public void disposing(EventObject arg0)
+    {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent arg0)
+    {
+      // TODO Auto-generated method stub
+
+    }
+  };
+
+  private int count = 0;
+
+  private XTabPage createTab(XTabPageContainerModel model, String tabTitle)
+  {
+    XTabPageModel tabPageModel = model.createTabPage((short) (count + 1)); // 0 is not valid;
     tabPageModel.setTitle(tabTitle);
     tabPageModel.setEnabled(true);
+
+    XTabPage xTabPage = null;
     try
     {
-      model.insertByIndex(0, tabPageModel);
+      Object tabPageService = UNO.createUNOService("com.sun.star.awt.tab.UnoControlTabPage");
+      xTabPage = UnoRuntime.queryInterface(XTabPage.class, tabPageService);
+      UNO.XControl(xTabPage).setModel(UnoRuntime.queryInterface(XControlModel.class, tabPageModel));
+      model.insertByIndex(count, tabPageModel); // first index must be zero.
     } catch (IllegalArgumentException | IndexOutOfBoundsException | WrappedTargetException e)
+    {
+      LOGGER.error("", e);
+    }
+
+    count++;
+
+    return xTabPage;
+  }
+
+  private XButton createButton(int posX, int posY, int width, String label)
+  {
+    XButton xButton = null;
+    try
+    {
+      String sName = "btn" + count;
+      Object oButtonModel = UNO.xMSF.createInstance("com.sun.star.awt.UnoControlButtonModel");
+      XMultiPropertySet xButtonMPSet = UnoRuntime.queryInterface(XMultiPropertySet.class,
+          oButtonModel);
+
+      xButtonMPSet.setPropertyValues(
+          new String[] { "Height", "Label", "Name", "PositionX", "PositionY",
+              "Width" },
+          new Object[] { Integer.valueOf(14), label, sName, Integer.valueOf(posX),
+              Integer.valueOf(posY), Integer.valueOf(width) });
+
+      Object buttonService = UNO.createUNOService("com.sun.star.awt.UnoControlButton");
+      xButton = UnoRuntime.queryInterface(XButton.class, buttonService);
+      UNO.XControl(xButton).setModel(UnoRuntime.queryInterface(XControlModel.class, oButtonModel));
+    } catch (com.sun.star.uno.Exception ex)
     {
       //
     }
-  }
 
-  private XTabPageContainerModel initTabControl()
-  {
-    Object tabPagesContainerModel = UNO
-        .createUNOService("com.sun.star.awt.tab.UnoControlTabPageContainerModel");
-    XTabPageContainerModel xTabPageContainerModel = UnoRuntime
-        .queryInterface(XTabPageContainerModel.class, tabPagesContainerModel);
-
-    Object tabController = UNO.createUNOService("com.sun.star.awt.TabController");
-    XTabController xTabController = UnoRuntime.queryInterface(XTabController.class, tabController);
-
-    Object tabControllerModel = UNO.createUNOService("com.sun.star.awt.TabControllerModel");
-    XTabControllerModel tabCModel = UnoRuntime.queryInterface(XTabControllerModel.class,
-        tabControllerModel);
-    xTabController.setModel(tabCModel);
-
-    xTabController.setContainer(UnoRuntime.queryInterface(XControlContainer.class, this));
-
-    XUnoControlContainer xcc = UnoRuntime.queryInterface(XUnoControlContainer.class, this);
-    xcc.addTabController(xTabController);
-
-    xTabController.activateFirst();
-
-    return xTabPageContainerModel;
+    return xButton;
   }
 
   @Override
   public LayoutSize getHeightForWidth(int arg0)
   {
-    // int height = layout.getHeight();
-    return new LayoutSize(200, 200, 200);
+    return new LayoutSize(400, 400, 400);
   }
 
   @Override
@@ -157,8 +323,7 @@ public class FormularGuiSidebarContent implements XToolPanel, XSidebarPanel
     {
       throw new DisposedException("", this);
     }
-    // TODO: the following is wrong, since it doesn't respect i_rParentAccessible. In
-    // a real extension, you should implement this correctly :)
+
     return UnoRuntime.queryInterface(XAccessible.class, getWindow());
   }
 

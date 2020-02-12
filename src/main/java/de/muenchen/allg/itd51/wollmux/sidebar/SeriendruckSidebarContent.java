@@ -169,7 +169,7 @@ public class SeriendruckSidebarContent extends ComponentBase
   /**
    * Initialize the UI and the connection to the current document.
    */
-  public void init()
+  private void init()
   {
     // An instance of DocumentManager.getTextDocumentController() may exist if another sidebar deck
     // was active when LO was started, see {@link OnTextDocumentControllerInitialized}.
@@ -195,6 +195,8 @@ public class SeriendruckSidebarContent extends ComponentBase
 
     if (textDocumentController != null)
     {
+      WollMuxEventHandler.getInstance().unregisterListener(this);
+
       addPreviewControls();
       addDatasourcesControls();
       addTableControls();
@@ -203,7 +205,6 @@ public class SeriendruckSidebarContent extends ComponentBase
 
       textDocumentController.setFormFieldsPreviewMode(false);
       datasource = new MailMergeDatasource(textDocumentController);
-      WollMuxEventHandler.getInstance().unregisterListener(this);
       window.setVisible(true);
     } else
     {
