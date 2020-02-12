@@ -1,6 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.sidebar;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -150,7 +151,7 @@ public class FormularGuiSidebarContent implements XToolPanel, XSidebarPanel
     init();
   }
 
-  private int btnCount = 0;
+  private short tabPagesCount = 0;
 
   private void init()
   {
@@ -181,7 +182,7 @@ public class FormularGuiSidebarContent implements XToolPanel, XSidebarPanel
 
     window.setVisible(true);
 
-    List<XControl> buttonsToAdd = new ArrayList<>();
+    Map<Short, List<XControl>> buttonsToAdd = new HashMap<>();
 
     for (Map.Entry<String, Tab> entry : model.getTabs().entrySet())
     {
@@ -190,36 +191,60 @@ public class FormularGuiSidebarContent implements XToolPanel, XSidebarPanel
       XControlContainer tabPageControlContainer = UnoRuntime.queryInterface(XControlContainer.class,
           UNO.XControl(xTabPage));
 
-      // UNO.XWindow(tabPageControlContainer).setPosSize(0, 0, 400, 400, PosSize.POSSIZE);
-
       tab.getButtons().forEach(button -> {
+        List<XControl> buttonList = new ArrayList<>();
         // XControl btn = GuiFactory.createButton(UNO.xMCF, context, toolkit,
         // windowPeer, button.getLabel(),
         // btnActionListener, new Rectangle(0, 0, 50, 50), null);
 
         XButton btn = createButton(0, 0, 100, button.getLabel());
-        tabPageControlContainer.addControl(generateRandomId(), UNO.XControl(btn));
 
-        buttonsToAdd.add(UNO.XControl(btn));
-        btnCount++;
+        // "On-The-Fly" funktioniert nicht.
+        // tabPageControlContainer.addControl(generateRandomId(), UNO.XControl(btn));
+
+        buttonList.add(UNO.XControl(btn));
+        buttonsToAdd.put(tabPagesCount, buttonList);
+        tabPagesCount++;
       });
     }
 
-    XTabPageContainer tabPage = UnoRuntime.queryInterface(XTabPageContainer.class,
+    XTabPageContainer tabPageContainer = UnoRuntime.queryInterface(XTabPageContainer.class,
         tabControlContainer);
     UNO.XWindow(tabControlContainer).setPosSize(0, 0, 200, 400, PosSize.POSSIZE);
-    UNO.XWindow(tabPage).setPosSize(0, 0, 400, 400, PosSize.POSSIZE);
+    UNO.XWindow(tabPageContainer).setPosSize(0, 0, 400, 400, PosSize.POSSIZE);
 
-    XTabPage firstTabPage = tabPage.getTabPage((short) 0);
-    UNO.XWindow(firstTabPage).setPosSize(0, 0, 400, 400, PosSize.POSSIZE);
+    for (Map.Entry<Short, List<XControl>> entry : buttonsToAdd.entrySet())
+    {
+      Layout vLayout = new VerticalLayout();
 
-    // XControlContainer cc = UnoRuntime.queryInterface(XControlContainer.class, firstTabPage);
-    // UNO.XWindow(cc).setPosSize(0, 0, 400, 400, PosSize.POSSIZE);
+      XTabPage tabPageByIndex = tabPageContainer.getTabPage((short) entry.getKey());
+      UNO.XWindow(tabPageByIndex).setPosSize(0, 0, 400, 400, PosSize.POSSIZE);
 
-    // for (XControl btn : buttonsToAdd)
-    // {
-    // cc.addControl(generateRandomId(), btn);
-    // }
+      XControlContainer cc = UnoRuntime.queryInterface(XControlContainer.class, tabPageByIndex);
+      UNO.XWindow(cc).setPosSize(0, 0, 400, 400, PosSize.POSSIZE);
+
+      for (XControl btn : entry.getValue())
+      {
+        cc.addControl(generateRandomId(), btn);
+      }
+
+      // nicht weiter beachten
+      // add btn's to layout
+      // for (XControl btn : entry.getValue())
+      // {
+      // // cc.addControl(generateRandomId(), btn);
+      // vLayout.addControl(btn);
+      // }
+      //
+      // // compute layout
+      // vLayout.layout(UNO.XWindow(cc).getPosSize());
+      //
+      // // add xcontrols to control container
+      // for (Map.Entry<Layout, Integer> layoutEntry : vLayout.getLayouts().entrySet())
+      // {
+      // cc.addControl(generateRandomId(), layoutEntry.getKey().getControl());
+      // }
+    }
   }
 
   private String generateRandomId()
@@ -282,7 +307,7 @@ public class FormularGuiSidebarContent implements XToolPanel, XSidebarPanel
     XButton xButton = null;
     try
     {
-      String sName = "btn" + count;
+      String sName = "btn" + generateRandomId();
       Object oButtonModel = UNO.xMSF.createInstance("com.sun.star.awt.UnoControlButtonModel");
       XMultiPropertySet xButtonMPSet = UnoRuntime.queryInterface(XMultiPropertySet.class,
           oButtonModel);
