@@ -1594,6 +1594,15 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     ffs.addAll(model.getStaticTextFieldFormFields());
     for (FormField ff : ffs)
       simulationResult.setFormFieldContent(ff, ff.getValue());
+
+    FormController formController = DocumentManager.getDocumentManager().getFormModel(model.doc);
+    for (Map.Entry<String, String> values : simulationResult.getFormFieldValues().entrySet())
+    {
+      if (formController.hasFieldId(values.getKey()))
+      {
+        formController.setValue(values.getKey(), values.getValue(), null);
+      }
+    }
   }
 
   /**

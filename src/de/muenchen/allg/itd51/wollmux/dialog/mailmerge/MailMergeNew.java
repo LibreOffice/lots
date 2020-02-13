@@ -225,6 +225,7 @@ public class MailMergeNew
         documentController.startSimulation();
       }
 
+      // only used internally, isn't the datasource for the actual mailmerge
       HashMap<String, String> dataSetExport = new HashMap<>();
       try
       {
