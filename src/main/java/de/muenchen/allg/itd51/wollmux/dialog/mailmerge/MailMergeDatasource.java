@@ -932,6 +932,7 @@ public class MailMergeDatasource
           spread.getSheets().getElementNames(), spread);
 
       connections.add(calcModel);
+      this.selectedCalcModel = calcModel;
       this.currentSourceType = SOURCE_TYPE.CALC;
       setDatasource(sheetNames[0]);
 
