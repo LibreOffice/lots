@@ -1431,8 +1431,14 @@ public class OOoBasedMailMerge
     else if (type == OutputType.toPrinter)
     {
       mmProps.add(new NamedValue("SinglePrintJobs", Boolean.FALSE));
-      // Print job properties are set in the notifyMailMergeEvent-Method of the
-      // registered XMailMergeListener.
+      // is also set in notifyMailMergeEvent-Method, but if it isn't set here
+      // the default printer is always used.
+      PropertyValue[] printOps = new PropertyValue[1];
+      printOps[0] = new PropertyValue();
+      printOps[0].Name = "PrinterName";
+      printOps[0].Value = printerName;
+      LOGGER.debug(L.m("Seriendruck - Setze Drucker: %1", printerName));
+      mmProps.add(new NamedValue("PrintOptions", printOps));
     }
     MailMergeThread t = new MailMergeThread(mailMerge, outputDir, mmProps);
     t.start();
