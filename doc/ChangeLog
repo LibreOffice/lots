@@ -1,3 +1,15 @@
+ ==================== Neu in Version 18.1.10 ====================
+
+    * Bugfixes
+          o Die Auswahl eines Druckers beim Seriendruck wird wieder
+            berücksichtigt und nicht mehr immer auf dem Standard-Drucker
+            gedruckt.
+          o In manchen Situationen, konnte es dazu kommen, dass Datensätze beim
+            Seriendruck miteinander vermischt wurden.
+          o Beim Auswählen einer neuen Calc-Tabelle im Seriendruck kam es zu
+            einer Fehlermeldung im Log.
+          o Die Seriendruck-Sidebar ist nur noch im Writer aktivierbar.
+
  ==================== Neu in Version 18.1.9 ====================
 
     * Bugfixes
