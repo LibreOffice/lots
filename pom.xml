@@ -250,7 +250,7 @@
 						<configuration>
 							<target>
 								<copy file="dist/WollMux.zip" tofile="dist/WollMux.oxt" />
-								<move file="dist/WollMux-AOO.zip" tofile="dist/WollMux-AOO.oxt" />
+								<copy file="dist/WollMux-AOO.zip" tofile="dist/WollMux-AOO.oxt" />
 							</target>
 						</configuration>
 						<goals>
