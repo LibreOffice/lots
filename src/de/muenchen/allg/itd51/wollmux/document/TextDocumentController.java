@@ -1578,6 +1578,12 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    */
   public synchronized void startSimulation()
   {
+    if (model == null || model.doc == null)
+    {
+      LOGGER.error("{} startSimulation: model is NULL.", this.getClass().getSimpleName());
+      return;
+    }
+
     simulationResult = new SimulationResults();
     simulationResult.setFormFieldValues(model.getFormFieldValuesMap());
     simulationResult.setGroupsVisibilityState(model.getMapGroupIdToVisibilityState());
@@ -1596,11 +1602,15 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       simulationResult.setFormFieldContent(ff, ff.getValue());
 
     FormController formController = DocumentManager.getDocumentManager().getFormModel(model.doc);
-    for (Map.Entry<String, String> values : simulationResult.getFormFieldValues().entrySet())
+
+    if (formController != null)
     {
-      if (formController.hasFieldId(values.getKey()))
+      for (Map.Entry<String, String> values : simulationResult.getFormFieldValues().entrySet())
       {
-        formController.setValue(values.getKey(), values.getValue(), null);
+        if (formController.hasFieldId(values.getKey()))
+        {
+          formController.setValue(values.getKey(), values.getValue(), null);
+        }
       }
     }
   }
