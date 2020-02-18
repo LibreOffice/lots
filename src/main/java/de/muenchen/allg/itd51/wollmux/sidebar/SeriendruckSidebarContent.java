@@ -514,9 +514,10 @@ public class SeriendruckSidebarContent extends ComponentBase
     MailMergeController c = new MailMergeController(textDocumentController, datasource);
     MailmergeWizardController mwController = new MailmergeWizardController(c,
         textDocumentController.getModel().doc);
-    mwController.startWizard();
+
     textDocumentController.collectNonWollMuxFormFields();
     textDocumentController.setFormFieldsPreviewMode(true);
+    mwController.startWizard(); // blocks
   };
 
   private AbstractItemListener currentDatasourcesListener = new AbstractItemListener()
