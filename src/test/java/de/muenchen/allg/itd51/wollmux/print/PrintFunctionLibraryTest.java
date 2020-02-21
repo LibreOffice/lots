@@ -1,4 +1,4 @@
-package de.muenchen.allg.itd151.wollmux.print;
+package de.muenchen.allg.itd51.wollmux.print;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,11 +12,10 @@ import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintException;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
-import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
 
 public class PrintFunctionLibraryTest
 {
-  private static final String functionString = "TestFunction(EXTERN(URL \"java:de.muenchen.allg.itd151.wollmux.print.PrintFunctionLibraryTest.testDefaultPrintFunctions\") ORDER \"50\")";
+  private static final String functionString = "TestFunction(EXTERN(URL \"java:de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibraryTest.testDefaultPrintFunctions\") ORDER \"50\")";
   private static final String confString = "Druckfunktionen(" + functionString + ")";
   private static PrintFunction testFunction = new PrintFunction("test", 300)
   {
