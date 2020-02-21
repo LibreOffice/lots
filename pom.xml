@@ -12,6 +12,7 @@
 		<libreoffice.version>6.4.0-SNAPSHOT</libreoffice.version>
 		<wollmux.oxt.id>de.muenchen.allg.d101.wollmux</wollmux.oxt.id>
 		<wollmux.oxt.name>WollMux</wollmux.oxt.name>
+		<maven.javadoc.failOnWarnings>true</maven.javadoc.failOnWarnings>
 	</properties>
 
 	<scm>
@@ -93,7 +94,6 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.1.1</version>
 				<configuration>
-					<failOnWarnings>true</failOnWarnings>
 					<quiet>true</quiet>
 				</configuration>
 				<executions>
