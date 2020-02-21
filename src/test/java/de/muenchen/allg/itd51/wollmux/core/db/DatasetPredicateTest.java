@@ -1,4 +1,4 @@
-package de.muenchen.allg.itd51.wollmux.core;
+package de.muenchen.allg.itd51.wollmux.core.db;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,11 +10,6 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
-
-import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.core.db.DatasetPredicate;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryPart;
-import de.muenchen.allg.itd51.wollmux.core.db.SimpleDataset;
 
 public class DatasetPredicateTest
 {

@@ -1,4 +1,4 @@
-package de.muenchen.allg.itd51.wollmux.core;
+package de.muenchen.allg.itd51.wollmux;
 
 import java.util.ArrayList;
 
