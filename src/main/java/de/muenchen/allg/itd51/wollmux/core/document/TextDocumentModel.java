@@ -1440,6 +1440,11 @@ public class TextDocumentModel
         {
           UNO.XCloseable(doc).close(true);
         }
+
+        XFrame[] frames = UNO.XFramesSupplier(UNO.desktop).getFrames()
+            .queryFrames(FrameSearchFlag.ALL);
+        if (frames.length <= 1)
+          UNO.desktop.terminate();
       }
       catch (CloseVetoException e)
       {
