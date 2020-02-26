@@ -80,6 +80,7 @@ import com.sun.star.uno.XNamingService;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.URL;
 import com.sun.star.util.XCancellable;
+import com.sun.star.util.XChangesBatch;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -175,8 +176,18 @@ public class OOoBasedMailMerge
 
     String dbName = registerTempDatasouce(dataSource);
 
-    File inputFile =
-      createAndAdjustInputFile(tmpDir, pmod.getTextDocument(), dbName);
+    boolean loadPrintSettings = false;
+    try
+    {
+      loadPrintSettings = modifyLoadPrinterSetting(true);
+    } catch (Exception e1)
+    {
+      LOGGER.warn(
+          "Die Option 'Laden von Druckeinstellungen mit dem Dokument' konnte nicht gesetzt werden.\n"
+              + "Seriendrucke auf einem Drucker haben eventuell falsche Optionen gesetzt.");
+      LOGGER.debug("", e1);
+    }
+    File inputFile = createAndAdjustInputFile(tmpDir, pmod.getTextDocument(), dbName);
 
     LOGGER.debug(L.m("Temporäre Datenquelle: %1", dbName));
     if (pmod.isCanceled()) {
@@ -191,11 +202,7 @@ public class OOoBasedMailMerge
         new ProgressUpdater(pmod, (int) Math.ceil((double) ds.getSize()
           / countNextSets(pmod.getTextDocument())));
 
-      XPropertySet inSettings = UNO.XPropertySet(UNO.XMultiServiceFactory(pmod.getTextDocument())
-          .createInstance("com.sun.star.document.Settings"));
-      byte[] printerSetup = (byte[]) inSettings.getPropertyValue("PrinterSetup");
-      String pNameSD = (String) inSettings.getPropertyValue("PrinterName");
-      t = runMailMerge(dbName, tmpDir, inputFile, updater, type, pNameSD, printerSetup);
+      t = runMailMerge(dbName, tmpDir, inputFile, updater, type);
     }
     catch (Exception e)
     {
@@ -226,6 +233,15 @@ public class OOoBasedMailMerge
     removeTempDatasource(dbName, tmpDir);
     ds.remove();
     inputFile.delete();
+    try
+    {
+      modifyLoadPrinterSetting(loadPrintSettings);
+    } catch (Exception e1)
+    {
+      LOGGER.warn(
+          "Die Einstellung 'Laden von Druckeinstellungen mit dem Dokument' konnte nicht zurückgesetzt werden.");
+      LOGGER.debug("", e1);
+    }
 
     // ... jetzt können wir nach Benutzerabbruch aufhören
     if (pmod.isCanceled()) return;
@@ -762,6 +778,31 @@ public class OOoBasedMailMerge
     {
       return csvFile;
     }
+  }
+
+  /**
+   * Modifies the configuration option for loading print properties when files are opened.
+   *
+   * @param load
+   *          True if the properties should be loaded, false otherwise. @return The value before the
+   *          modification.
+   * @throws com.sun.star.uno.Exception
+   *           Couldn't modify the property.
+   */
+  private static Boolean modifyLoadPrinterSetting(boolean load) throws com.sun.star.uno.Exception
+  {
+    Object cp = UNO.createUNOService("com.sun.star.configuration.ConfigurationProvider");
+    com.sun.star.beans.PropertyValue aPathArgument = new com.sun.star.beans.PropertyValue();
+    aPathArgument.Name = "nodepath";
+    aPathArgument.Value = "/org.openoffice.Office.Common/Save/Document";
+
+    Object ca = UNO.XMultiServiceFactory(cp).createInstanceWithArguments(
+        "com.sun.star.configuration.ConfigurationUpdateAccess", new Object[] { aPathArgument });
+    XPropertySet props = UNO.XPropertySet(ca);
+    boolean lastValue = AnyConverter.toBoolean(props.getPropertyValue("LoadPrinter"));
+    props.setPropertyValue("LoadPrinter", load);
+    UnoRuntime.queryInterface(XChangesBatch.class, ca).commitChanges();
+    return lastValue;
   }
 
   /**
@@ -1363,12 +1404,11 @@ public class OOoBasedMailMerge
    *          Drucker fuer den Seriendruck
    * @throws Exception
    *           falls der MailMergeService nicht erzeugt werden kann.
-   * 
+   *
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   private static MailMergeThread runMailMerge(String dbName, final File outputDir,
-      File inputFile, final ProgressUpdater progress, final OutputType type,
-      String printerName, byte[] printerSetup) throws Exception
+      File inputFile, final ProgressUpdater progress, final OutputType type) throws Exception
   {
     final XJob mailMerge =
       UnoRuntime.queryInterface(XJob.class, UNO.xMCF.createInstanceWithContext(
@@ -1393,17 +1433,6 @@ public class OOoBasedMailMerge
         if (count >= progress.maxDatasets && type == OutputType.toPrinter)
         {
           progress.setMessage(L.m("Sende Druckauftrag - bitte warten..."));
-        }
-        if (type == OutputType.toPrinter)
-        {
-          try {
-            XPropertySet inSettings = UNO.XPropertySet(UNO.XMultiServiceFactory(event.Model)
-                .createInstance("com.sun.star.document.Settings"));
-            inSettings.setPropertyValue("PrinterSetup", printerSetup);
-            inSettings.setPropertyValue("PrinterName", printerName);
-          } catch (com.sun.star.uno.Exception e) {
-            LOGGER.error("Druckereinstellungen konnten nicht gesetzt werden.", e);
-          }
         }
       }
     });
@@ -1431,14 +1460,6 @@ public class OOoBasedMailMerge
     else if (type == OutputType.toPrinter)
     {
       mmProps.add(new NamedValue("SinglePrintJobs", Boolean.FALSE));
-      // is also set in notifyMailMergeEvent-Method, but if it isn't set here
-      // the default printer is always used.
-      PropertyValue[] printOps = new PropertyValue[1];
-      printOps[0] = new PropertyValue();
-      printOps[0].Name = "PrinterName";
-      printOps[0].Value = printerName;
-      LOGGER.debug(L.m("Seriendruck - Setze Drucker: %1", printerName));
-      mmProps.add(new NamedValue("PrintOptions", printOps));
     }
     MailMergeThread t = new MailMergeThread(mailMerge, outputDir, mmProps);
     t.start();
