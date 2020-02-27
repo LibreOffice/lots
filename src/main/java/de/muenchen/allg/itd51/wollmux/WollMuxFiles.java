@@ -74,8 +74,16 @@ import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
+import java.net.http.HttpTimeoutException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -193,7 +201,7 @@ public class WollMuxFiles
     return wollmuxDir;
   }
 
-  private static ConfigThingy parseWollMuxConf(File wollMuxConfigFile)
+  protected static ConfigThingy parseWollMuxConf(File wollMuxConfigFile)
   {
     wollmuxConf = new ConfigThingy("wollmuxConf");
 
@@ -202,6 +210,22 @@ public class WollMuxFiles
       try
       {
         wollmuxConf = new ConfigThingy("wollmuxConf", wollMuxConfigFile.toURI().toURL());
+        String serverURI = wollmuxConf.getString("SERVER", null);
+        if (serverURI != null)
+        {
+          String user = wollmuxConf.getString("USERNAME", System.getProperty("user.name"));
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder().uri(URI.create(serverURI))
+              .header("Content-Type", "application/json")
+              .POST(BodyPublishers.ofString(("{ \"username\":\"" + user + "\"}")))
+              .timeout(Duration.ofSeconds(5)).build();
+
+          HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+
+          wollmuxConf = new ConfigThingy("wollmuxConf", response.body());
+        }
+      } catch (HttpTimeoutException ex) {
+        LOGGER.error("Serverrespond takes more than 5 seconds", ex);
       } catch (Exception e)
       {
         LOGGER.error("", e);
