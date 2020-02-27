@@ -1,3 +1,12 @@
+ ==================== Neu in Version 18.1.11 ====================
+
+    * Bugfixes
+          o Die Auswahl eines Druckers beim Seriendruck wird wieder
+            berücksichtigt und nicht mehr immer auf dem Standard-Drucker
+            gedruckt.
+          o Drucker-Einstellungen werden wieder durch den Seriendruck
+            ausgewertet.
+
  ==================== Neu in Version 18.1.10 ====================
 
     * Bugfixes
