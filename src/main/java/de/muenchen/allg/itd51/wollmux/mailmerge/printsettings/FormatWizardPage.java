@@ -17,16 +17,14 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
-import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController;
-import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController.FORMAT;
-import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController.SubmitArgument;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.MailMergePrintFunction;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.SetFormValue;
+import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.PrintSettings.FORMAT;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ui.MailMergeField;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ui.SpecialField;
 
 /**
- * Format page of the mailmerge wizard.
+ * A page of the mail merge wizard. Settings for creating files can be done here.
  */
 public class FormatWizardPage extends AbstractXWizardPage
 {
@@ -40,6 +38,7 @@ public class FormatWizardPage extends AbstractXWizardPage
   private final XComboBox special;
 
   private final MailmergeWizardController controller;
+  private final PrintSettings settings;
 
   private final AbstractItemListener formatListener = new AbstractItemListener()
   {
@@ -47,15 +46,30 @@ public class FormatWizardPage extends AbstractXWizardPage
     @Override
     public void itemStateChanged(ItemEvent event)
     {
-      controller.activateNextButton(canAdvance());
+      controller.updateTravelUI();
     }
   };
 
-  public FormatWizardPage(XWindow parentWindow, short pageId, MailmergeWizardController controller)
-      throws Exception
+  /**
+   * Create this page.
+   *
+   * @param parentWindow
+   *          The containing window.
+   * @param pageId
+   *          The id of this page.
+   * @param controller
+   *          The wizard controller.
+   * @param settings
+   *          The print settings.
+   * @throws Exception
+   *           If this page can't be created.
+   */
+  public FormatWizardPage(XWindow parentWindow, short pageId, MailmergeWizardController controller,
+      PrintSettings settings) throws Exception
   {
     super(pageId, parentWindow, "seriendruck_format");
     this.controller = controller;
+    this.settings = settings;
     XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
     odt = UNO.XRadio(container.getControl("odt"));
     odt.addItemListener(formatListener);
@@ -68,7 +82,7 @@ public class FormatWizardPage extends AbstractXWizardPage
       @Override
       public void textChanged(TextEvent arg0)
       {
-        controller.activateNextButton(canAdvance());
+        controller.updateTravelUI();
       }
     });
     name.setText(
@@ -81,8 +95,8 @@ public class FormatWizardPage extends AbstractXWizardPage
       @Override
       public void itemStateChanged(ItemEvent event)
       {
-        name.setText(name.getText()
-            + MailMergePrintFunction.createMergeFieldTag(mailmerge.getItem((short) event.Selected)));
+        name.setText(name.getText() + MailMergePrintFunction
+            .createMergeFieldTag(mailmerge.getItem((short) event.Selected)));
       }
     });
     special = UNO.XComboBox(container.getControl("special"));
@@ -98,12 +112,10 @@ public class FormatWizardPage extends AbstractXWizardPage
         switch (event.Selected)
         {
         case 1:
-          append = MailMergePrintFunction
-              .createMergeFieldTag(SetFormValue.TAG_RECORD_ID);
+          append = MailMergePrintFunction.createMergeFieldTag(SetFormValue.TAG_RECORD_ID);
           break;
         case 2:
-          append = MailMergePrintFunction
-              .createMergeFieldTag(SetFormValue.TAG_MAILMERGE_ID);
+          append = MailMergePrintFunction.createMergeFieldTag(SetFormValue.TAG_MAILMERGE_ID);
           break;
         default:
           break;
@@ -134,15 +146,14 @@ public class FormatWizardPage extends AbstractXWizardPage
   @Override
   public boolean canAdvance()
   {
-    LOGGER.debug("canAdvance");
     return getSelectedFormat() != FORMAT.NOTHING && !getNamingTemplate().isEmpty();
   }
 
   @Override
   public boolean commitPage(short reason)
   {
-    controller.arguments.put(SubmitArgument.FILENAME_TEMPLATE, name.getText());
-    controller.format = getSelectedFormat();
+    settings.setFilenameTemplate(name.getText());
+    settings.setFormat(getSelectedFormat());
     window.setVisible(false);
     LOGGER.debug("Format {}, Name {}", getSelectedFormat(), getNamingTemplate());
     return true;

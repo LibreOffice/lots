@@ -14,13 +14,13 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
-import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController;
-import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController.ACTION;
-import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController.DatasetSelectionType;
-import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController.IndexSelection;
-import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController.SubmitArgument;
 import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.MailmergeWizardController.PATH;
+import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.PrintSettings.ACTION;
+import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.PrintSettings.DatasetSelectionType;
 
+/**
+ * The first page of the mail merge wizard. Some basic settings can be done here.
+ */
 public class StartWizardPage extends AbstractXWizardPage
 {
 
@@ -33,14 +33,15 @@ public class StartWizardPage extends AbstractXWizardPage
 
   private MailmergeWizardController controller;
 
+  private PrintSettings settings;
+
   private final XRadioButton all;
   private final XRadioButton range;
   private final XNumericField from;
   private final XNumericField till;
 
-  private IndexSelection selection = new IndexSelection();
-
-  private class ActionItemListener implements AbstractItemListener {
+  private class ActionItemListener implements AbstractItemListener
+  {
 
     private PATH path;
 
@@ -53,17 +54,33 @@ public class StartWizardPage extends AbstractXWizardPage
     public void itemStateChanged(ItemEvent event)
     {
       controller.changePath(path);
-      controller.activateNextButton(canAdvance());
+      controller.updateTravelUI();
     }
   }
 
-  public StartWizardPage(XWindow parentWindow, short pageId, MailmergeWizardController controller) throws Exception
+  /**
+   * Creates the first page.
+   *
+   * @param parentWindow
+   *          The containing window.
+   * @param pageId
+   *          The id of this page.
+   * @param controller
+   *          The controller of the wizard.
+   * @param settings
+   *          The print settings.
+   * @throws Exception
+   *           If the page can't be created.
+   */
+  public StartWizardPage(XWindow parentWindow, short pageId, MailmergeWizardController controller,
+      PrintSettings settings) throws Exception
   {
     super(pageId, parentWindow, "seriendruck_start");
     this.controller = controller;
+    this.settings = settings;
     XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
     singleDocument = UNO.XRadio(container.getControl("gesamtDoc"));
-    singleDocument.addItemListener(new ActionItemListener(PATH.STANDRAD));
+    singleDocument.addItemListener(new ActionItemListener(PATH.STANDARD));
     direct = UNO.XRadio(container.getControl("drucken"));
     direct.addItemListener(new ActionItemListener(PATH.DIRECT_PRINT));
     mails = UNO.XRadio(container.getControl("emails"));
@@ -72,9 +89,9 @@ public class StartWizardPage extends AbstractXWizardPage
     multipleDocuments.addItemListener(new ActionItemListener(PATH.SINGLE_FILES));
     from = UNO.XNumericField(container.getControl("from"));
     from.setValue(1);
-    from.setMax(controller.getController().getDs().getNumberOfDatasets());
     UNO.XWindow(from).setEnable(false);
     till = UNO.XNumericField(container.getControl("till"));
+    from.setMax(controller.getController().getDs().getNumberOfDatasets());
     till.setValue(controller.getController().getDs().getNumberOfDatasets());
     till.setMax(controller.getController().getDs().getNumberOfDatasets());
     UNO.XWindow(till).setEnable(false);
@@ -87,6 +104,7 @@ public class StartWizardPage extends AbstractXWizardPage
       {
         UNO.XWindow(from).setEnable(false);
         UNO.XWindow(till).setEnable(false);
+        controller.updateTravelUI();
       }
     });
     range = UNO.XRadio(container.getControl("selectRange"));
@@ -98,6 +116,7 @@ public class StartWizardPage extends AbstractXWizardPage
       {
         UNO.XWindow(from).setEnable(true);
         UNO.XWindow(till).setEnable(true);
+        controller.updateTravelUI();
       }
     });
   }
@@ -105,10 +124,8 @@ public class StartWizardPage extends AbstractXWizardPage
   @Override
   public boolean canAdvance()
   {
-    LOGGER.debug("canAdvance");
     ACTION action = getSelectedAction();
-    return (action != ACTION.NOTHING || action != ACTION.SINGLE_DOCUMENT)
-        && getSelectedRange() != DatasetSelectionType.NOTHING;
+    return action != ACTION.NOTHING && getSelectedRange() != DatasetSelectionType.NOTHING;
   }
 
   @Override
@@ -118,22 +135,22 @@ public class StartWizardPage extends AbstractXWizardPage
     DatasetSelectionType rangeValue = getSelectedRange();
     switch (rangeValue)
     {
-      case ALL:
-        selection = new IndexSelection();
-        break;
-      case RANGE:
-        selection.rangeStart = (int) from.getValue();
-        selection.rangeEnd = (int) till.getValue();
-        break;
-      default:
-        break;
+    case ALL:
+      settings.setRangeStart(1);
+      settings.setRangeEnd(Integer.MAX_VALUE);
+      break;
+    case RANGE:
+      settings.setRangeStart((int) from.getValue());
+      settings.setRangeEnd((int) till.getValue());
+      break;
+    default:
+      break;
     }
 
     LOGGER.debug("Aktion {}, Range {}", action, rangeValue);
     window.setVisible(false);
-    controller.setCurrentActionType(getSelectedAction());
-    controller.setDatasetSelectionType(getSelectedRange());
-    controller.arguments.put(SubmitArgument.INDEX_SELECTION, selection);
+    settings.setAction(getSelectedAction());
+    settings.setSelection(getSelectedRange());
     return true;
   }
 

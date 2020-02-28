@@ -61,13 +61,19 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XNameContainer;
 import com.sun.star.container.XNamed;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
+import com.sun.star.frame.XDispatch;
+import com.sun.star.frame.XDispatchProvider;
+import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.style.XStyle;
 import com.sun.star.text.XTextCursor;
@@ -81,8 +87,10 @@ import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.XModifiable2;
+import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer.DataID;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.SetJumpMark;
@@ -92,6 +100,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.itd51.wollmux.dispatch.PrintDispatch;
 
 /**
  * Diese Klasse repräsentiert das Modell eines aktuell geöffneten TextDokuments und
@@ -1389,6 +1398,71 @@ public class TextDocumentModel
       LOGGER.trace("", e);
     }
     return null;
+  }
+
+  /**
+   * Get the name of the currently selected printer in the document.
+   */
+  public String getCurrentPrinterName()
+  {
+    XPrintable printable = UNO.XPrintable(doc);
+    PropertyValue[] printer = null;
+    if (printable != null)
+    {
+      printer = printable.getPrinter();
+    }
+    UnoProps printerInfo = new UnoProps(printer);
+    try
+    {
+      return (String) printerInfo.getPropertyValue("Name");
+    } catch (UnknownPropertyException e)
+    {
+      return L.m("unbekannt");
+    }
+  }
+
+  /**
+   * Get the frame of the document and execute {link
+   * {@link XDispatchProvider#queryDispatch(com.sun.star.util.URL, String, int)}.
+   *
+   * @param urlStr
+   *          The command URL of the dispatch.
+   * @return A dispatch or null, if no such dispatch exists.
+   */
+  private XDispatch getDispatchForModel(com.sun.star.util.URL url)
+  {
+    XDispatchProvider dispProv = null;
+
+    dispProv = UNO.XDispatchProvider(UNO.XModel(doc).getCurrentController().getFrame());
+
+    if (dispProv != null)
+    {
+      return dispProv.queryDispatch(url, "_self", com.sun.star.frame.FrameSearchFlag.SELF);
+    }
+    return null;
+  }
+
+  /**
+   * Show the LibreOffice dialog for configuring the printer.
+   *
+   * @param listener
+   *          A result listener.
+   */
+  public void configurePrinter(XDispatchResultListener listener)
+  {
+    try
+    {
+      com.sun.star.util.URL url = UNO.getParsedUNOUrl(PrintDispatch.COMMAND_PRINTER_SETUP);
+      XNotifyingDispatch disp = UNO.XNotifyingDispatch(getDispatchForModel(url));
+
+      if (disp != null)
+      {
+        disp.dispatchWithNotification(url, new PropertyValue[] {}, listener);
+      }
+    } catch (java.lang.Exception e)
+    {
+      LOGGER.error("", e);
+    }
   }
 
   /**
