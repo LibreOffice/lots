@@ -89,7 +89,8 @@ public class FormatWizardPage extends AbstractXWizardPage
         controller.getController().getDefaultFilename()
             + MailMergePrintFunction.createMergeFieldTag(SetFormValue.TAG_RECORD_ID));
     mailmerge = UNO.XComboBox(container.getControl("mailmerge"));
-    new MailMergeField(mailmerge).setMailMergeDatasource(controller.getController().getDs());
+    new MailMergeField(mailmerge)
+        .setMailMergeDatasource(controller.getController().getDs());
     mailmerge.addItemListener(new AbstractItemListener()
     {
       @Override

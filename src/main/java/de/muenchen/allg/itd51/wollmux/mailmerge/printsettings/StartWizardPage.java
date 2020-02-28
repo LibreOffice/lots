@@ -14,6 +14,7 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
+import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
 import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.MailmergeWizardController.PATH;
 import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.PrintSettings.ACTION;
 import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.PrintSettings.DatasetSelectionType;
@@ -91,9 +92,18 @@ public class StartWizardPage extends AbstractXWizardPage
     from.setValue(1);
     UNO.XWindow(from).setEnable(false);
     till = UNO.XNumericField(container.getControl("till"));
-    from.setMax(controller.getController().getDs().getNumberOfDatasets());
-    till.setValue(controller.getController().getDs().getNumberOfDatasets());
-    till.setMax(controller.getController().getDs().getNumberOfDatasets());
+    int datasets = 0;
+    try
+    {
+      datasets = controller.getController().getDs().getNumberOfRecords();
+    } catch (NoTableSelectedException ex)
+    {
+      // nothing to do
+    }
+    from.setMax(datasets);
+    till.setValue(datasets);
+    till.setMax(datasets);
+
     UNO.XWindow(till).setEnable(false);
     all = UNO.XRadio(container.getControl("selectAll"));
     all.addItemListener(new AbstractItemListener()

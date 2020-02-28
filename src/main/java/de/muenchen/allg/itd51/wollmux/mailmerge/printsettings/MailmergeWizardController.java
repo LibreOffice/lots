@@ -15,8 +15,10 @@ import com.sun.star.ui.dialogs.XWizardPage;
 import com.sun.star.util.InvalidStateException;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController;
+import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
 
 /**
  * Handles the wizard for configuring mail merge.
@@ -182,7 +184,13 @@ public class MailmergeWizardController implements XWizardController
     short result = wizard.execute();
     if (result == ExecutableDialogResults.OK)
     {
-      controller.doMailMerge(settings);
+      try
+      {
+        controller.doMailMerge(settings);
+      } catch (NoTableSelectedException e)
+      {
+        InfoDialog.showInfoModal("Seriendruck fehlgeschlagen", e.getMessage());
+      }
     }
   }
 
