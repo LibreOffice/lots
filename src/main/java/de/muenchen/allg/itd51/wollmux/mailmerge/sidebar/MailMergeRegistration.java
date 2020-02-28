@@ -3,7 +3,7 @@ package de.muenchen.allg.itd51.wollmux.mailmerge.sidebar;
 import de.muenchen.allg.itd51.wollmux.ComponentRegistration;
 
 /**
- * Factory for {@link SeriendruckSidebarFactory}.
+ * Factory for {@link MailMergeFactory}.
  */
 public class MailMergeRegistration implements ComponentRegistration
 {
@@ -11,19 +11,19 @@ public class MailMergeRegistration implements ComponentRegistration
   @Override
   public Class<?> getComponent()
   {
-    return SeriendruckSidebarFactory.class;
+    return MailMergeFactory.class;
   }
 
   @Override
   public String getName()
   {
-    return SeriendruckSidebarFactory.class.getName();
+    return MailMergeFactory.class.getName();
   }
 
   @Override
   public String[] getServiceNames()
   {
-    return new String[] { SeriendruckSidebarFactory.__serviceName };
+    return new String[] { MailMergeFactory.__serviceName };
   }
 
 }

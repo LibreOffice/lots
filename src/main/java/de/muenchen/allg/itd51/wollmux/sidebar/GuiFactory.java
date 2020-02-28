@@ -11,13 +11,11 @@ import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.WindowAttribute;
 import com.sun.star.awt.WindowClass;
 import com.sun.star.awt.WindowDescriptor;
-import com.sun.star.awt.XActionListener;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlModel;
 import com.sun.star.awt.XFixedText;
-import com.sun.star.awt.XItemListener;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XTextListener;
 import com.sun.star.awt.XToolkit;
@@ -31,6 +29,9 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 
 /**
  * Die Factory enthält Hilfsfunktionen zum einfacheren Erzeugen von
@@ -85,7 +86,8 @@ public class GuiFactory
   @SuppressWarnings("squid:S00107")
   public static XControl createButton(XMultiComponentFactory xMCF,
       XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer,
-      String label, XActionListener listener, Rectangle size, SortedMap<String, Object> props)
+      String label, AbstractActionListener listener, Rectangle size,
+      SortedMap<String, Object> props)
   {
     XControl buttonCtrl =
       createControl(xMCF, context, toolkit, windowPeer,
@@ -198,7 +200,8 @@ public class GuiFactory
 
   public static XControl createCombobox(XMultiComponentFactory xMCF,
       XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer, String text,
-      Rectangle size, SortedMap<String, Object> props)
+      AbstractItemListener listener, Rectangle size,
+      SortedMap<String, Object> props)
   {
     XControl ctrl =
         createControl(xMCF, context, toolkit, windowPeer,
@@ -206,6 +209,7 @@ public class GuiFactory
     XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, ctrl);
     tf.setText(text);
     XComboBox cmb = UnoRuntime.queryInterface(XComboBox.class, ctrl);
+    cmb.addItemListener(listener);
     cmb.setDropDownLineCount((short) 10);
 
     return ctrl;
@@ -225,8 +229,9 @@ public class GuiFactory
   }
 
   @SuppressWarnings("squid:S00107")
-  public static XControl createSpinField(XMultiComponentFactory xMCF, XComponentContext context,
-      XToolkit toolkit, XWindowPeer windowPeer, int value, XTextListener listener, Rectangle size,
+  public static XControl createSpinField(XMultiComponentFactory xMCF,
+      XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer,
+      int value, AbstractTextListener listener, Rectangle size,
       SortedMap<String, Object> props)
   {
     if (props == null)
@@ -245,8 +250,9 @@ public class GuiFactory
         props, size);
   }
 
-  public static XControl createListBox(XMultiComponentFactory xMCF, XComponentContext context,
-      XToolkit toolkit, XWindowPeer windowPeer, XItemListener listener, Rectangle size,
+  public static XControl createListBox(XMultiComponentFactory xMCF,
+      XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer,
+      AbstractItemListener listener, Rectangle size,
       SortedMap<String, Object> props)
   {
     XControl ctrl = createControl(xMCF, context, toolkit, windowPeer,

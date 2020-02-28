@@ -1,0 +1,794 @@
+package de.muenchen.allg.itd51.wollmux.mailmerge.sidebar;
+
+import java.awt.event.ActionListener;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.eventbus.Subscribe;
+import com.sun.star.awt.ActionEvent;
+import com.sun.star.awt.ItemEvent;
+import com.sun.star.awt.TextEvent;
+import com.sun.star.awt.XWindow;
+import com.sun.star.beans.UnknownPropertyException;
+import com.sun.star.beans.XPropertySet;
+import com.sun.star.frame.XModel;
+import com.sun.star.lang.WrappedTargetException;
+import com.sun.star.lang.XComponent;
+import com.sun.star.sdb.XDocumentDataSource;
+import com.sun.star.sdb.XOfficeDatabaseDocument;
+import com.sun.star.sdbc.XDataSource;
+import com.sun.star.sheet.XSpreadsheetDocument;
+import com.sun.star.text.XTextDocument;
+import com.sun.star.ui.XToolPanel;
+import com.sun.star.ui.dialogs.FilePicker;
+import com.sun.star.ui.dialogs.TemplateDescription;
+import com.sun.star.ui.dialogs.XFilePicker3;
+import com.sun.star.uno.UnoRuntime;
+import com.sun.star.uno.XComponentContext;
+
+import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoCollection;
+import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.ReferencedFieldID;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.dialog.AbstractNotifier;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
+import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
+import de.muenchen.allg.itd51.wollmux.dialog.trafo.IfThenElseDialog;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModel;
+import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DBDatasourceDialog;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModelListener;
+import de.muenchen.allg.itd51.wollmux.mailmerge.print.SetFormValue;
+import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.MailmergeWizardController;
+
+/**
+ * Controller of the sidebar.
+ */
+public class MailMergeController implements PreviewModelListener, DatasourceModelListener
+{
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(MailMergeController.class);
+
+  /**
+   * The selected data source. Do not change directly, use {@link #setDatasource(Optional)}.
+   */
+  private Optional<DatasourceModel> datasourceModel;
+
+  /**
+   * Model for preview mode.
+   */
+  private PreviewModel previewModel;
+
+  /**
+   * The controller of the document.
+   */
+  private TextDocumentController textDocumentController;
+
+  /**
+   * The sidebar panel.
+   */
+  private MailMergeGUI gui;
+
+  /**
+   * The event listener on {@link WollMuxEventHandler} has been unregistered.
+   */
+  private boolean isUnregistered;
+
+  /**
+   * Create a new controller and the gui of the sidebar.
+   *
+   * @param context
+   *          The context of the sidebar.
+   * @param parentWindow
+   *          The parent window, which contains the sidebar.
+   * @param model
+   *          The model of the document to which the sidebar belongs.
+   */
+  public MailMergeController(XComponentContext context, XWindow parentWindow,
+      XModel model)
+  {
+    datasourceModel = Optional.empty();
+    previewModel = new PreviewModel();
+    previewModel.setDatasourceModel(datasourceModel);
+    previewModel.addListener(this);
+    gui = new MailMergeGUI(this, context, parentWindow);
+    gui.createGUI();
+    XTextDocument doc = UNO.XTextDocument(model);
+    if (DocumentManager.hasTextDocumentController(doc))
+    {
+      isUnregistered = true;
+      onTextDocumentControllerInitialized(
+          new OnTextDocumentControllerInitialized(DocumentManager.getTextDocumentController(doc)));
+    } else
+    {
+      isUnregistered = false;
+      WollMuxEventHandler.getInstance().registerListener(this);
+    }
+  }
+
+  public XToolPanel getGUI()
+  {
+    return gui;
+  }
+
+  /**
+   * Sets {@link TextDocumentController} once it is available.
+   *
+   * @param event
+   *          Event with the instance of {@link TextDocumentController}.
+   */
+  @Subscribe
+  public void onTextDocumentControllerInitialized(OnTextDocumentControllerInitialized event)
+  {
+    if (textDocumentController == null)
+    {
+      textDocumentController = event.getTextDocumentController();
+      if (textDocumentController != null)
+      {
+        LOGGER.debug("initialized");
+        openDatasourceFromLastStoredSettings(
+            textDocumentController.getModel().getMailmergeConfig());
+        showPreviewFiedls(false);
+        unregisterListener();
+      }
+    }
+  }
+
+  @Override
+  public void previewChanged()
+  {
+    boolean isPreview = previewModel.isPreview();
+    gui.updatePreview(isPreview, previewModel.getPreviewNumber());
+    textDocumentController.collectNonWollMuxFormFields();
+    showPreviewFiedls(isPreview);
+    updatePreviewFields();
+  }
+
+  @Override
+  public void datasourceChanged()
+  {
+    datasourceModel.ifPresent(ds -> {
+      try
+      {
+        boolean hasUnmappedFields = textDocumentController.getModel()
+            .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(ds.getColumnNames())).length > 0;
+        gui.activateControls(ds, ds.getNumberOfRecords(), hasUnmappedFields,
+            ds.supportsAddColumns());
+        textDocumentController.collectNonWollMuxFormFields();
+        updatePreviewFields();
+
+        ConfigThingy seriendruck = new ConfigThingy("Seriendruck");
+        ConfigThingy dq = ds.getSettings();
+        if (dq.count() > 0)
+        {
+          seriendruck.addChild(dq);
+        }
+        textDocumentController.setMailmergeConfig(seriendruck);
+      } catch (NoTableSelectedException ex)
+      {
+        gui.deactivateControls(ds);
+      }
+    });
+  }
+
+  /**
+   * Close this controller.
+   */
+  public void dispose()
+  {
+    unregisterListener();
+  }
+
+  /**
+   * Changes the document to show the field names or their content.
+   *
+   * @param hide
+   *          If true, the content is shown, otherwise the names.
+   */
+  public void showPreviewFiedls(boolean hide)
+  {
+    textDocumentController.setFormFieldsPreviewMode(hide);
+  }
+
+  /**
+   * Each time this method is called the preview status is changed from activated to deactivated or
+   * vice versa.
+   *
+   * @param event
+   *          The event of the button.
+   */
+  public void togglePreview(ActionEvent event)
+  {
+    try
+    {
+      XPropertySet propertySet = UNO.XPropertySet(UNO.XControl(event.Source).getModel());
+      short toggleState = (short) propertySet.getPropertyValue("State");
+      previewModel.setPreview(toggleState == 1);
+    } catch (UnknownPropertyException | WrappedTargetException | IllegalArgumentException
+        | NoTableSelectedException ex)
+    {
+      LOGGER.error("", ex);
+    }
+  }
+
+  /**
+   * Show the first record of the data source.
+   *
+   * @param event
+   *          The event of the button.
+   */
+  public void jumpToFirstRecord(ActionEvent event)
+  {
+    previewModel.setPreviewNumber(1);
+  }
+
+  /**
+   * Show a record of the data source.
+   *
+   * @param event
+   *          An event of the numeric field providing the record id.
+   */
+  public void updateCurrentRecord(TextEvent event)
+  {
+    previewModel.setPreviewNumber((int) UNO.XNumericField(event.Source).getValue());
+  }
+
+  /**
+   * Show the last record of the data source.
+   *
+   * @param event
+   *          The event of the button.
+   */
+  public void jumpToLastRecord(ActionEvent event)
+  {
+    try
+    {
+      previewModel.gotoLastDataset();
+    } catch (NoTableSelectedException ex)
+    {
+      LOGGER.error("", ex);
+    }
+  }
+
+  /**
+   * Change to a new data source.
+   *
+   * @param event
+   *          An event of the list box providing the name of the data source.
+   */
+  public void changeDatasource(ItemEvent event)
+  {
+    try
+    {
+      setDatasource(ConnectionModel.selectDatasource(UNO.XListBox(event.Source).getSelectedItem()));
+    } catch (NoTableSelectedException e1)
+    {
+      LOGGER.debug("", e1);
+    }
+  }
+
+  /**
+   * Shows the dialog for selecting a database data source. The selected database is set as data
+   * source.
+   *
+   * @param event
+   *          The button event.
+   */
+  public void openDatasourceDialog(ActionEvent event)
+  {
+    new DBDatasourceDialog(new AbstractNotifier()
+    {
+      @Override
+      public void notify(String dbName)
+      {
+        try
+        {
+          setDatasource(
+              ConnectionModel.addAndSelectDatasource(loadDataSource(dbName), Optional.empty()));
+          gui.selectDatasource(ConnectionModel.buildConnectionName(datasourceModel));
+        } catch (NoTableSelectedException e)
+        {
+          LOGGER.debug("", e);
+        }
+      }
+    });
+  }
+
+  /**
+   * Open a new calc file and select it as data source.
+   *
+   * @param event
+   *          The button event.
+   */
+  public void openAndselectNewCalcTableAsDatasource(ActionEvent event)
+  {
+    LOGGER.debug("Öffne neues Calc-Dokument als Datenquelle für Seriendruck");
+    try
+    {
+      XSpreadsheetDocument spread = UNO
+          .XSpreadsheetDocument(UNO.loadComponentFromURL("private:factory/scalc", true, true));
+
+      setDatasource(ConnectionModel.addAndSelectDatasource(spread, Optional.empty()));
+      gui.selectDatasource(ConnectionModel.buildConnectionName(datasourceModel));
+    } catch (UnoHelperException | NoTableSelectedException e)
+    {
+      LOGGER.error("", e);
+    }
+  }
+
+  /**
+   * Open a calc file and select it as data source.
+   *
+   * @param event
+   *          The button event.
+   */
+  public void selectFileAsDatasource(ActionEvent event)
+  {
+    XFilePicker3 picker = FilePicker.createWithMode(UNO.defaultContext,
+        TemplateDescription.FILEOPEN_SIMPLE);
+    String filterName = "Tabellendokument";
+    picker.appendFilter(filterName, "*.ods");
+    picker.appendFilter("Alle Dateien", "*");
+    picker.setCurrentFilter(filterName);
+    picker.setMultiSelectionMode(false);
+
+    short res = picker.execute();
+    if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)
+    {
+      String[] files = picker.getFiles();
+      try
+      {
+        LOGGER.debug("Öffne {} als Datenquelle für Seriendruck", files[0]);
+        XSpreadsheetDocument doc = getCalcDocByFile(files[0]);
+
+        if (doc != null)
+        {
+          setDatasource(ConnectionModel.addAndSelectDatasource(doc, Optional.empty()));
+          gui.selectDatasource(ConnectionModel.buildConnectionName(datasourceModel));
+        }
+      } catch (Exception e)
+      {
+        LOGGER.error("", e);
+      }
+    }
+  }
+
+  /**
+   * Show the data source so it can be modified by the user.
+   *
+   * @param event
+   *          The button event.
+   */
+  public void editDatasource(ActionEvent event)
+  {
+    datasourceModel.ifPresent(DatasourceModel::toFront);
+  }
+
+  /**
+   * Show the dialog for adding new columns to a data source.
+   *
+   * @param event
+   *          The button event.
+   */
+  public void showAddColumnsDialog(ActionEvent event)
+  {
+    datasourceModel.ifPresent(datasource -> {
+      ActionListener addTableColumnsFinishListener = e -> {
+        datasourceModel.ifPresent(ds -> {
+          @SuppressWarnings("unchecked")
+          Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
+              .getSource();
+          try
+          {
+            ds.addColumns(mapIdToSubstitution);
+          } catch (NoTableSelectedException e1)
+          {
+            InfoDialog.showInfoModal("", e1.getMessage());
+          }
+        });
+        updateDatasourceControls();
+      };
+      try
+      {
+        ReferencedFieldID[] fieldIDs = textDocumentController.getModel()
+            .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(datasource.getColumnNames()));
+        List<String> columns = new ArrayList<>(datasource.getColumnNames());
+
+        AdjustFields.showFieldMappingDialog("Tabellenspalten ergänzen", L.m("Spalte"),
+            L.m("Vorbelegung"), L.m("Spalten ergänzen"), fieldIDs, columns, true,
+            addTableColumnsFinishListener);
+      } catch (NoTableSelectedException ex)
+      {
+        InfoDialog.showInfoModal("", ex.getMessage());
+      }
+    });
+  }
+
+  /**
+   * Show a dialog for modifying the fields in the document.
+   *
+   * @param event
+   *          The button event.
+   */
+  public void showModifyDocDialog(ActionEvent event)
+  {
+    datasourceModel.ifPresent(ds -> {
+      ActionListener adjustFieldsFinishListener = e -> {
+	@SuppressWarnings("unchecked")
+	Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
+	    .getSource();
+	textDocumentController.adjustFields(mapIdToSubstitution);
+	updateDatasourceControls();
+      };
+      try
+      {
+        ReferencedFieldID[] fieldIDs = textDocumentController.getModel()
+            .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(ds.getColumnNames()));
+        List<String> columns = new ArrayList<>(ds.getColumnNames());
+        AdjustFields.showFieldMappingDialog("Felder anpassen", L.m("Altes Feld"),
+            L.m("Neue Belegung"), L.m("Felder anpassen"), fieldIDs, columns, false,
+            adjustFieldsFinishListener);
+      } catch (NoTableSelectedException ex)
+      {
+        InfoDialog.showInfoModal("", ex.getMessage());
+      }
+    });
+  }
+
+  /**
+   * Add a new field to the document.
+   *
+   * @param event
+   *          An event of a combo box providing the name of column to be used in the field.
+   */
+  public void addMailMergeField(ItemEvent event)
+  {
+    if (event.Selected != 0)
+    {
+      String name = UNO.XComboBox(event.Source).getItem((short) event.Selected);
+      textDocumentController.insertMailMergeFieldAtCursorPosition(name);
+      UNO.XTextComponent(event.Source).setText(UNO.XComboBox(event.Source).getItem((short) 0));
+    }
+
+    textDocumentController.collectNonWollMuxFormFields();
+    updatePreviewFields();
+  }
+
+  /**
+   * Add a new special field to the document.
+   *
+   * @param event
+   *          An event of a combo box providing the type of field.
+   */
+  public void addSpecialField(ItemEvent event)
+  {
+    switch (event.Selected)
+    {
+    case 0:
+      break;
+
+    case 1:
+      datasourceModel.ifPresent(ds -> {
+        try
+        {
+          new GenderDialog(new ArrayList<String>(ds.getColumnNames()), textDocumentController);
+        } catch (NoTableSelectedException ex)
+        {
+          LOGGER.debug("", ex);
+        }
+      });
+      break;
+
+    case 2:
+      datasourceModel.ifPresent(ds -> {
+        try
+        {
+          new IfThenElseDialog(new ArrayList<String>(ds.getColumnNames()), textDocumentController);
+
+        } catch (NoTableSelectedException ex)
+        {
+          LOGGER.debug("", ex);
+        }
+      });
+      break;
+
+    case 3:
+      textDocumentController.insertMailMergeFieldAtCursorPosition(SetFormValue.TAG_RECORD_ID);
+      break;
+
+    case 4:
+      textDocumentController.insertMailMergeFieldAtCursorPosition(SetFormValue.TAG_MAILMERGE_ID);
+      break;
+
+    case 5:
+      textDocumentController.insertNextDatasetFieldAtCursorPosition();
+      break;
+
+    default:
+      break;
+    }
+
+    textDocumentController.collectNonWollMuxFormFields();
+    updatePreviewFields();
+    UNO.XTextComponent(event.Source).setText(UNO.XComboBox(event.Source).getItem((short) 0));
+  }
+
+  /**
+   * Show the print settings dialog.
+   *
+   * @param event
+   *          The button event.
+   */
+  public void print(ActionEvent event)
+  {
+    datasourceModel.ifPresent(ds -> {
+      try
+      {
+        de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController controller = new de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController(
+            textDocumentController, ds);
+        MailmergeWizardController mwController = new MailmergeWizardController(controller,
+            textDocumentController);
+        textDocumentController.collectNonWollMuxFormFields();
+        mwController.startWizard();
+      } catch (NoTableSelectedException ex)
+      {
+        LOGGER.debug("", ex);
+        InfoDialog.showInfoModal("Druck konnte nicht gestartet werden", ex.getMessage());
+      }
+    });
+  }
+
+  /**
+   * Unregister the listener on the WollMux Event Bus.
+   */
+  private void unregisterListener()
+  {
+    if (!isUnregistered)
+    {
+      WollMuxEventHandler.getInstance().unregisterListener(this);
+      isUnregistered = true;
+    }
+  }
+
+  /**
+   * Change the data source.
+   *
+   * @param model
+   *          The new data source.
+   */
+  private void setDatasource(Optional<DatasourceModel> model)
+  {
+    datasourceModel.ifPresent(ds -> ds.removeDatasourceListener(this));
+    datasourceModel = model;
+    previewModel.setDatasourceModel(datasourceModel);
+    datasourceModel.ifPresent(ds -> ds.addDatasourceListener(this));
+    datasourceChanged();
+  }
+
+  /**
+   * Set the fields in the document to the content of the data source.
+   */
+  private void updatePreviewFields()
+  {
+    if (previewModel.isPreview())
+    {
+      try
+      {
+        for (Map.Entry<String, String> entry : previewModel.getCurrentRecord().entrySet())
+        {
+          new OnSetFormValue(textDocumentController.getModel().doc, entry.getKey(),
+              entry.getValue(), null).emit();
+        }
+        String previewDatasetNumberStr = "" + previewModel.getPreviewNumber();
+        new OnSetFormValue(textDocumentController.getModel().doc, SetFormValue.TAG_RECORD_ID,
+            previewDatasetNumberStr, null).emit();
+        new OnSetFormValue(textDocumentController.getModel().doc, SetFormValue.TAG_MAILMERGE_ID,
+            previewDatasetNumberStr, null).emit();
+      } catch (NoTableSelectedException ex)
+      {
+        LOGGER.debug("", ex);
+      }
+    }
+  }
+
+  /**
+   * Update the controls to modify a data source.
+   */
+  private void updateDatasourceControls()
+  {
+    datasourceModel.ifPresentOrElse(ds -> {
+      try
+      {
+        boolean hasUnmappedFields = textDocumentController.getModel()
+            .getReferencedFieldIDsThatAreNotInSchema(ds.getColumnNames()).length > 0;
+        gui.updateFieldControls(hasUnmappedFields);
+      } catch (NoTableSelectedException ex)
+      {
+        LOGGER.debug("", ex);
+      }
+    }, () -> gui.updateFieldControls(false));
+  }
+
+  /**
+   * Open the data source stored in the meta data.
+   *
+   * @param mmconf
+   *          The meta data configuration.
+   */
+  private void openDatasourceFromLastStoredSettings(ConfigThingy mmconf)
+  {
+    ConfigThingy datenquelle = new ConfigThingy("");
+    String type = "unknown";
+    try
+    {
+      ConfigThingy query = mmconf.query("Datenquelle");
+      if (query.count() > 0)
+      {
+        datenquelle = query.getLastChild();
+        type = datenquelle.getString("TYPE", null);
+
+        if ("calc".equalsIgnoreCase(type))
+        {
+          openCalcFromSettings(datenquelle);
+        } else if ("ooo".equalsIgnoreCase(type))
+        {
+          openBaseFromSettings(datenquelle);
+        } else if (type != null)
+        {
+          LOGGER.error("Ignoriere Datenquelle mit unbekanntem Typ '{}'", type);
+        }
+      }
+    } catch (NodeNotFoundException e)
+    {
+      LOGGER.error(L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type), e);
+    } catch (NoTableSelectedException ex)
+    {
+      LOGGER.error("Die Tabelle existiert nicht", ex);
+    }
+  }
+
+  /**
+   * Open the base data source stored in the meta data.
+   *
+   * @param datenquelle
+   *          The meta data configuration.
+   *
+   * @throws NodeNotFoundException
+   *           Invalid configuration.
+   * @throws NoTableSelectedException
+   *           The table doesn't exist.
+   */
+  private void openBaseFromSettings(ConfigThingy datenquelle)
+      throws NodeNotFoundException, NoTableSelectedException
+  {
+    String source = datenquelle.get("SOURCE").toString();
+    String table = datenquelle.get("TABLE").toString();
+    if (ConnectionModel.hasConnection(source, table))
+    {
+      setDatasource(
+          ConnectionModel.selectDatasource(ConnectionModel.buildConnectionName(source, table)));
+    } else
+    {
+      XOfficeDatabaseDocument ds = loadDataSource(source);
+      if (ds != null)
+      {
+        setDatasource(ConnectionModel.addAndSelectDatasource(ds, Optional.ofNullable(table)));
+      }
+    }
+    gui.selectDatasource(ConnectionModel.buildConnectionName(datasourceModel));
+  }
+
+  /**
+   * Open the calc data source stored in the meta data.
+   *
+   * @param datenquelle
+   *          The meta data configuration.
+   *
+   * @throws NodeNotFoundException
+   *           Invalid configuration.
+   * @throws NoTableSelectedException
+   *           The table doesn't exist.
+   */
+  private void openCalcFromSettings(ConfigThingy datenquelle)
+      throws NodeNotFoundException, NoTableSelectedException
+  {
+    String url = datenquelle.get("URL").toString();
+    String model = "";
+    try
+    {
+      String[] splittedURL = Paths.get(new URL(url).toURI()).toFile().getName().split("\\.");
+      model = splittedURL[splittedURL.length - 2];
+    } catch (MalformedURLException | URISyntaxException e)
+    {
+      LOGGER.debug("", e);
+    }
+    String table = datenquelle.get("TABLE").toString();
+    if (ConnectionModel.hasConnection(model, table))
+    {
+      String connectionName = ConnectionModel.buildConnectionName(model, table);
+      setDatasource(ConnectionModel.selectDatasource(connectionName));
+    } else
+    {
+      XSpreadsheetDocument doc = getCalcDocByFile(url);
+      if (doc != null)
+      {
+        setDatasource(ConnectionModel.addAndSelectDatasource(doc, Optional.ofNullable(table)));
+      }
+    }
+    gui.selectDatasource(ConnectionModel.buildConnectionName(datasourceModel));
+  }
+
+  /**
+   * Open a LibreOffice data base.
+   *
+   * @param dbName
+   *          The name of the data base.
+   * @return The data base.
+   */
+  private XOfficeDatabaseDocument loadDataSource(String dbName)
+  {
+    try
+    {
+      XDataSource ds = UNO.XDataSource(UNO.dbContext.getRegisteredObject(dbName));
+      XDocumentDataSource dds = UNO.XDocumentDataSource(ds);
+      XOfficeDatabaseDocument dbdoc = dds.getDatabaseDocument();
+      String url = UNO.XModel(dbdoc).getURL();
+
+      for (XComponent comp : UnoCollection.getCollection(UNO.desktop.getComponents(),
+          XComponent.class))
+      {
+        XModel dbModel = UNO.XModel(comp);
+        if (dbModel.getURL().equals(url))
+        {
+          return dbdoc;
+        }
+      }
+      return UnoRuntime.queryInterface(XOfficeDatabaseDocument.class,
+          UNO.loadComponentFromURL(url, false, false, true));
+    } catch (com.sun.star.uno.Exception | UnoHelperException e)
+    {
+      LOGGER.error("", e);
+      return null;
+    }
+  }
+
+  /**
+   * Open a calc file.
+   *
+   * @param file
+   *          The file name.
+   * @return The document.
+   */
+  private XSpreadsheetDocument getCalcDocByFile(String file)
+  {
+    try
+    {
+      return UNO.XSpreadsheetDocument(UNO.loadComponentFromURL(file, false, true));
+    } catch (UnoHelperException e)
+    {
+      LOGGER.error("", e);
+      return null;
+    }
+  }
+}
