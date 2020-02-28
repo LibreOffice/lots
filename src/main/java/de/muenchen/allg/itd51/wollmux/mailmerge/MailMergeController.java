@@ -3,14 +3,17 @@ package de.muenchen.allg.itd51.wollmux.mailmerge;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.mail.MessagingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.UnknownPropertyException;
+import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XTextDocument;
@@ -27,7 +30,7 @@ import de.muenchen.allg.itd51.wollmux.email.MailServerSettings;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.MailMergePrintFunction;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.PrintToEmail;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.SetFormValue;
-import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.MailmergeWizardController;
+import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.PrintSettings;
 import de.muenchen.allg.itd51.wollmux.print.PrintModels;
 
 /**
@@ -120,15 +123,14 @@ public class MailMergeController
   /**
    * Startet den MailMerge
    */
-  public void doMailMerge(ACTION action, FORMAT format, DatasetSelectionType datasetSelectionType,
-      Map<SubmitArgument, Object> args)
+  public void doMailMerge(PrintSettings settings)
   {
     documentController.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
 
     List<String> usePrintFunctions = new ArrayList<>();
     boolean ignoreDocPrintFuncs = true;
-    switch (action)
+    switch (settings.getAction())
     {
     case SINGLE_DOCUMENT:
       ignoreDocPrintFuncs = false;
@@ -141,7 +143,7 @@ public class MailMergeController
     case MAIL:
       ignoreDocPrintFuncs = true;
       usePrintFunctions.add("MailMergeNewSetFormValue");
-      switch (format)
+      switch (settings.getFormat())
       {
       case ODT:
         usePrintFunctions.add("MailMergeNewToODTEMail");
@@ -156,7 +158,7 @@ public class MailMergeController
     case MULTIPLE_DOCUMENTS:
       ignoreDocPrintFuncs = true;
       usePrintFunctions.add("MailMergeNewSetFormValue");
-      switch (format)
+      switch (settings.getFormat())
       {
       case ODT:
         usePrintFunctions.add("MailMergeNewToSingleODT");
@@ -173,40 +175,18 @@ public class MailMergeController
     }
 
     List<Integer> selected = new ArrayList<>();
-    switch (datasetSelectionType)
+    switch (settings.getSelection())
     {
-      case ALL:
-        for (int i = 0; i < data.size(); ++i)
-          selected.add(i);
-        break;
-      case INDIVIDUAL:
-        IndexSelection indexSelection =
-          (IndexSelection) args.get(SubmitArgument.INDEX_SELECTION);
-        selected.addAll(indexSelection.selectedIndexes);
-        break;
-      case RANGE:
-        indexSelection = (IndexSelection) args.get(SubmitArgument.INDEX_SELECTION);
-        if (indexSelection.rangeStart < 1) {
-          indexSelection.rangeStart = 1;
-        }
-        if (indexSelection.rangeEnd < 1) {
-          indexSelection.rangeEnd = data.size();
-        }
-        if (indexSelection.rangeEnd > data.size())
-          indexSelection.rangeEnd = data.size();
-        if (indexSelection.rangeStart > data.size())
-          indexSelection.rangeStart = data.size();
-        if (indexSelection.rangeStart > indexSelection.rangeEnd)
-        {
-          int t = indexSelection.rangeStart;
-          indexSelection.rangeStart = indexSelection.rangeEnd;
-          indexSelection.rangeEnd = t;
-        }
-        for (int i = indexSelection.rangeStart; i <= indexSelection.rangeEnd; ++i)
-          selected.add(i - 1); // wir zählen ab 0, anders als rangeStart/End
-        break;
-      case NOTHING:
-        break;
+    case ALL:
+      selected = IntStream.range(0, data.size()).boxed().collect(Collectors.toList());
+      break;
+    case RANGE:
+      int rangeStart = Math.min(settings.getRangeStart(), data.size());
+      int rangeEnd = Math.min(settings.getRangeEnd(), data.size());
+      selected = IntStream.range(rangeStart - 1, rangeEnd).boxed().collect(Collectors.toList());
+      break;
+    case NOTHING:
+      break;
     }
 
     // PrintModel erzeugen und Parameter setzen:
@@ -218,35 +198,21 @@ public class MailMergeController
       Collections.sort(selected);
       pmod.setPropertyValue(SetFormValue.PROP_RECORD_SELECTION, selected);
 
-      Object o = args.get(SubmitArgument.TARGET_DIRECTORY);
-      if (o != null) {
-        pmod.setPropertyValue(MailMergePrintFunction.PROP_TARGETDIR, o);
-      }
+      // TODO error handling
+      settings.getTargetDirectory().ifPresent(
+          targetDir -> setPropertyValue(pmod, MailMergePrintFunction.PROP_TARGETDIR, targetDir));
 
-      o = args.get(SubmitArgument.FILENAME_TEMPLATE);
-      if (o != null) {
-        pmod.setPropertyValue(MailMergePrintFunction.PROP_FILEPATTERN, o);
-      }
+      settings.getFilenameTemplate().ifPresent(
+          template -> setPropertyValue(pmod, MailMergePrintFunction.PROP_FILEPATTERN, template));
 
-      o = args.get(SubmitArgument.EMAIL_TO_FIELD_NAME);
-      if (o != null) {
-        pmod.setPropertyValue(PrintToEmail.PROP_EMAIL_TO_FIELD_NAME, o);
-      }
-
-      o = args.get(SubmitArgument.EMAIL_FROM);
-      if (o != null) {
-        pmod.setPropertyValue(PrintToEmail.PROP_EMAIL_FROM, o);
-      }
-
-      o = args.get(SubmitArgument.EMAIL_SUBJECT);
-      if (o != null) {
-        pmod.setPropertyValue(PrintToEmail.PROP_EMAIL_SUBJECT, o);
-      }
-
-      o = args.get(SubmitArgument.EMAIL_TEXT);
-      if (o != null) {
-        pmod.setPropertyValue(PrintToEmail.PROP_EMAIL_MESSAGE_TEXTTAGS, o);
-      }
+      settings.getEmailToFieldName()
+          .ifPresent(name -> setPropertyValue(pmod, PrintToEmail.PROP_EMAIL_TO_FIELD_NAME, name));
+      settings.getEmailFrom()
+          .ifPresent(sender -> setPropertyValue(pmod, PrintToEmail.PROP_EMAIL_FROM, sender));
+      settings.getEmailSubject().ifPresent(subject -> setPropertyValue(pmod,
+          PrintToEmail.PROP_EMAIL_SUBJECT, subject));
+      settings.getEmailText().ifPresent(text -> setPropertyValue(pmod,
+          PrintToEmail.PROP_EMAIL_MESSAGE_TEXTTAGS, text));
     }
     catch (Exception x)
     {
@@ -345,89 +311,6 @@ public class MailMergeController
     }.start();
   }
 
-  public enum FORMAT
-  {
-    ODT,
-    PDF,
-    NOTHING;
-  }
-
-  public enum ACTION
-  {
-    SINGLE_DOCUMENT,
-    DIRECT,
-    MAIL,
-    MULTIPLE_DOCUMENTS,
-    NOTHING;
-  }
-
-  /**
-   * Zählt alle Schlüsselwörter auf, die Übergabeargumente für
-   * {@link MailMergeController#doMailMerge(ACTION, FORMAT, DatasetSelectionType, Map)} sein können.
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  public enum SubmitArgument {
-    TARGET_DIRECTORY,
-    FILENAME_TEMPLATE,
-    EMAIL_FROM,
-    EMAIL_TO_FIELD_NAME,
-    EMAIL_TEXT,
-    EMAIL_SUBJECT,
-    INDEX_SELECTION,
-  }
-
-  /**
-   * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
-   *
-   * @author Matthias Benkmann (D-III-ITD D.10)
-   */
-  public enum DatasetSelectionType {
-    /**
-     * Alle Datensätze.
-     */
-    ALL,
-
-    /**
-     * Der durch {@link IndexSelection#rangeStart} und {@link IndexSelection#rangeEnd} gegebene
-     * Wert.
-     */
-    RANGE,
-
-    /**
-     * Die durch {@link IndexSelection#selectedIndexes} bestimmten Datensätze.
-     */
-    INDIVIDUAL,
-    NOTHING;
-  }
-
-  public static class IndexSelection
-  {
-    /**
-     * Falls {@link MailmergeWizardController#datasetSelectionType} ==
-     * {@link DatasetSelectionType#RANGE} bestimmt dies den ersten zu druckenden Datensatz (wobei
-     * der erste Datensatz die Nummer 1 hat). ACHTUNG! Der Wert hier kann 0 oder größer als
-     * {@link #rangeEnd} sein. Dies muss dort behandelt werden, wo er verwendet wird.
-     */
-    public int rangeStart = 1;
-
-    /**
-     * Falls {@link MailmergeWizardController#datasetSelectionType} ==
-     * {@link DatasetSelectionType#RANGE} bestimmt dies den letzten zu druckenden Datensatz (wobei
-     * der erste Datensatz die Nummer 1 hat). ACHTUNG! Der Wert hier kann 0 oder kleiner als
-     * {@link #rangeStart} sein. Dies muss dort behandelt werden, wo er verwendet wird.
-     */
-    public int rangeEnd = Integer.MAX_VALUE;
-
-    /**
-     * Falls {@link MailmergeWizardController#datasetSelectionType} ==
-     * {@link DatasetSelectionType#INDIVIDUAL} bestimmt dies die Indizes der ausgewählten
-     * Datensätze, wobei 1 den ersten Datensatz bezeichnet.
-     */
-    public List<Integer> selectedIndexes = new ArrayList<>();
-
-  }
-
   /**
    * Ersetzt alle möglicherweise bösen Zeichen im Dateinamen name durch eine
    * Unterstrich.
@@ -437,5 +320,19 @@ public class MailMergeController
   private static String simplifyFilename(String name)
   {
     return name.replaceAll("[^\\p{javaLetterOrDigit},.()=+_-]", "_");
+  }
+
+  private static boolean setPropertyValue(XPrintModel pmod, String property, Object value)
+  {
+    try
+    {
+      pmod.setPropertyValue(property, value);
+      return true;
+    } catch (IllegalArgumentException | UnknownPropertyException | PropertyVetoException
+        | WrappedTargetException e)
+    {
+      LOGGER.error("", e);
+      return false;
+    }
   }
 }

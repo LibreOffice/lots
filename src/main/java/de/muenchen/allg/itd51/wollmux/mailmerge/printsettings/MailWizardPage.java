@@ -20,17 +20,15 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
-import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController.SubmitArgument;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.MailMergePrintFunction;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ui.MailMergeField;
 
 /**
- * Mail page of the mailmerge wizard.
+ * A page of the mail merge wizard. Settings for mails can be done here.
  */
 public class MailWizardPage extends AbstractXWizardPage
 {
-	private static final Logger LOGGER = LoggerFactory
-		      .getLogger(MailWizardPage.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MailWizardPage.class);
 
   private final XTextComponent sender;
   private final XTextComponent subject;
@@ -42,6 +40,7 @@ public class MailWizardPage extends AbstractXWizardPage
   private final XControlContainer container;
 
   private final MailmergeWizardController controller;
+  private final PrintSettings settings;
 
   private AbstractTextListener textListener = new AbstractTextListener()
   {
@@ -49,23 +48,40 @@ public class MailWizardPage extends AbstractXWizardPage
     @Override
     public void textChanged(TextEvent arg0)
     {
-        controller.enableFinishButton(true);
+      controller.updateTravelUI();
     }
   };
 
-  public MailWizardPage(XWindow parentWindow, short pageId, MailmergeWizardController controller)
-      throws Exception
+  /**
+   * Create this page.
+   *
+   * @param parentWindow
+   *          The containing window.
+   * @param pageId
+   *          The id of this page.
+   * @param controller
+   *          The wizard controller.
+   * @param settings
+   *          The print settings.
+   * @throws Exception
+   *           If this page can't be created.
+   */
+  public MailWizardPage(XWindow parentWindow, short pageId, MailmergeWizardController controller,
+      PrintSettings settings) throws Exception
   {
     super(pageId, parentWindow, "seriendruck_mail");
     this.controller = controller;
+    this.settings = settings;
     container = UnoRuntime.queryInterface(XControlContainer.class, window);
     sender = UNO.XTextComponent(container.getControl("sender"));
     String senderName = "";
-	try {
-		senderName = DatasourceJoinerFactory.getDatasourceJoiner().getSelectedDataset().get("Mail");
-	} catch (ColumnNotFoundException | DatasetNotFoundException e) {
-		LOGGER.debug("Kein Eintrag für Mail vorhanden", e);
-	}
+    try
+    {
+      senderName = DatasourceJoinerFactory.getDatasourceJoiner().getSelectedDataset().get("Mail");
+    } catch (ColumnNotFoundException | DatasetNotFoundException e)
+    {
+      LOGGER.debug("Kein Eintrag für Mail vorhanden", e);
+    }
     sender.setText(senderName == null ? "" : senderName);
     sender.addTextListener(textListener);
     subject = UNO.XTextComponent(container.getControl("subject"));
@@ -86,7 +102,7 @@ public class MailWizardPage extends AbstractXWizardPage
       @Override
       public void itemStateChanged(ItemEvent event)
       {
-        controller.activateNextButton(canAdvance());
+        controller.updateTravelUI();
         recieverValue = reciever.getItem((short) event.Selected);
       }
     });
@@ -101,8 +117,8 @@ public class MailWizardPage extends AbstractXWizardPage
         if (event.Selected != 0)
         {
           Selection currentSelection = message.getSelection();
-          message.insertText(currentSelection,
-              MailMergePrintFunction.createMergeFieldTag(mailmerge.getItem((short) event.Selected)));
+          message.insertText(currentSelection, MailMergePrintFunction
+              .createMergeFieldTag(mailmerge.getItem((short) event.Selected)));
           UNO.XTextComponent(special).setText(special.getItem((short) 0));
         }
       }
@@ -145,10 +161,10 @@ public class MailWizardPage extends AbstractXWizardPage
   @Override
   public boolean commitPage(short reason)
   {
-    controller.arguments.put(SubmitArgument.EMAIL_FROM, sender.getText());
-    controller.arguments.put(SubmitArgument.EMAIL_SUBJECT, subject.getText());
-    controller.arguments.put(SubmitArgument.EMAIL_TEXT, message.getText());
-    controller.arguments.put(SubmitArgument.EMAIL_TO_FIELD_NAME, recieverValue);
+    settings.setEmailFrom(sender.getText());
+    settings.setEmailSubject(subject.getText());
+    settings.setEmailText(message.getText());
+    settings.setEmailToFieldName(recieverValue);
     window.setVisible(false);
     return true;
   }
