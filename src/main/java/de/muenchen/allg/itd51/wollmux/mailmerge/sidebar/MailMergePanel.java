@@ -2,6 +2,7 @@ package de.muenchen.allg.itd51.wollmux.mailmerge.sidebar;
 
 import com.sun.star.awt.XWindow;
 import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XModel;
 import com.sun.star.lang.XComponent;
 import com.sun.star.lib.uno.helper.ComponentBase;
 import com.sun.star.ui.UIElementType;
@@ -10,16 +11,33 @@ import com.sun.star.ui.XUIElement;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
-public class SeriendruckSidebarPanel extends ComponentBase implements XUIElement
+/**
+ * The sidebar panel.
+ */
+public class MailMergePanel extends ComponentBase implements XUIElement
 {
   private String resourceUrl;
   private XToolPanel panel;
 
-  public SeriendruckSidebarPanel(XComponentContext context, XWindow parentWindow,
-      String resourceUrl)
+  /**
+   * Creates a new sidebar panel.
+   *
+   * @param context
+   *          The context of the sidebar.
+   * @param parentWindow
+   *          The parent window.
+   * @param model
+   *          The model of the document to which the sidebar belongs.
+   * @param resourceUrl
+   *          The resource description.
+   */
+  public MailMergePanel(XComponentContext context, XWindow parentWindow,
+      XModel model, String resourceUrl)
   {
     this.resourceUrl = resourceUrl;
-    panel = new SeriendruckSidebarContent(context, parentWindow);
+    MailMergeController controller = new MailMergeController(context,
+        parentWindow, model);
+    panel = controller.getGUI();
   }
 
   @Override
@@ -49,7 +67,8 @@ public class SeriendruckSidebarPanel extends ComponentBase implements XUIElement
   @Override
   public void dispose()
   {
-    XComponent xPanelComponent = UnoRuntime.queryInterface(XComponent.class, panel);
+    XComponent xPanelComponent = UnoRuntime.queryInterface(XComponent.class,
+        panel);
     xPanelComponent.dispose();
   }
 

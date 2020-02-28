@@ -1,30 +1,37 @@
 package de.muenchen.allg.itd51.wollmux.mailmerge.sidebar;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
+import com.sun.star.frame.XModel;
 import com.sun.star.lang.XServiceInfo;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.ui.XUIElement;
 import com.sun.star.ui.XUIElementFactory;
-import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
-public class SeriendruckSidebarFactory extends WeakBase implements XUIElementFactory, XServiceInfo
+import de.muenchen.allg.afid.UNO;
+
+/**
+ * Factory for creating the sidebar.
+ */
+public class MailMergeFactory extends WeakBase implements XUIElementFactory, XServiceInfo
 {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SeriendruckSidebarFactory.class);
-
-  public static final String __serviceName = "de.muenchen.allg.itd51.wollmux.mailmerge.sidebar.SeriendruckSidebarFactory";
+  @SuppressWarnings("java:S115")
+  public static final String SERVICE_NAME = "de.muenchen.allg.itd51.wollmux.mailmerge.sidebar."
+      + "SeriendruckSidebarFactory";
 
   private XComponentContext context;
 
-  public SeriendruckSidebarFactory(XComponentContext context)
+  /**
+   * Create the factory.
+   *
+   * @param context
+   *          The context of the factory.
+   */
+  public MailMergeFactory(XComponentContext context)
   {
-    LOGGER.debug("SeriendruckSidebarFactory");
     this.context = context;
   }
 
@@ -32,8 +39,6 @@ public class SeriendruckSidebarFactory extends WeakBase implements XUIElementFac
   public XUIElement createUIElement(String resourceUrl, PropertyValue[] arguments)
       throws NoSuchElementException
   {
-    LOGGER.debug("SeriendruckSidebarFactory:createUIElement");
-
     if (!resourceUrl
         .startsWith("private:resource/toolpanel/SeriendruckSidebarFactory/SeriendruckSidebar"))
     {
@@ -41,22 +46,25 @@ public class SeriendruckSidebarFactory extends WeakBase implements XUIElementFac
     }
 
     XWindow parentWindow = null;
+    XModel model = null;
     for (int i = 0; i < arguments.length; i++)
     {
       if (arguments[i].Name.equals("ParentWindow"))
       {
-        parentWindow = UnoRuntime.queryInterface(XWindow.class, arguments[i].Value);
-        break;
+        parentWindow = UNO.XWindow(arguments[i].Value);
+      } else if (arguments[i].Name.equals("Controller"))
+      {
+        model = UNO.XController(arguments[i].Value).getModel();
       }
     }
 
-    return new SeriendruckSidebarPanel(context, parentWindow, resourceUrl);
+    return new MailMergePanel(context, parentWindow, model, resourceUrl);
   }
 
   @Override
   public String getImplementationName()
   {
-    return SeriendruckSidebarFactory.class.getName();
+    return MailMergeFactory.class.getName();
   }
 
   @Override

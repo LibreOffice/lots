@@ -285,6 +285,20 @@ public class DocumentManager
   }
 
   /**
+   * Test whether a {@link TextDocumentController} has been created for the
+   * given document.
+   *
+   * @param doc
+   *          The document.
+   * @return True if there's a {@link TextDocumentController}, false otherwise.
+   */
+  public static boolean hasTextDocumentController(XTextDocument doc)
+  {
+    return doc != null && getDocumentManager().getTextDocumentList()
+        .containsKey(new HashableComponent(doc));
+  }
+
+  /**
    * Liefert das aktuelle TextDocumentModel zum übergebenen XTextDocument doc;
    * existiert zu doc noch kein TextDocumentModel, so wird hier eines erzeugt und das
    * neu erzeugte zurück geliefert.
