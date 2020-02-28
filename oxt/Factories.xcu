@@ -29,7 +29,7 @@
 					<value />
 				</prop>
 				<prop oor:name="FactoryImplementation">
-					<value>de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarFactory</value>
+					<value>de.muenchen.allg.itd51.wollmux.mailmerge.sidebar.SeriendruckSidebarFactory</value>
 				</prop>
 			</node>
 		</node>
