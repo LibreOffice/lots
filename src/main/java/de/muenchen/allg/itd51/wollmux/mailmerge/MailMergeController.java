@@ -3,6 +3,7 @@ package de.muenchen.allg.itd51.wollmux.mailmerge;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -11,6 +12,7 @@ import javax.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Table;
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.lang.IllegalArgumentException;
@@ -19,7 +21,6 @@ import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResultsWithSchema;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -27,6 +28,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.email.EMailSender;
 import de.muenchen.allg.itd51.wollmux.email.MailServerSettings;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.MailMergePrintFunction;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.PrintToEmail;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.SetFormValue;
@@ -49,7 +51,7 @@ public class MailMergeController
   /**
    * Stellt die Felder und Datensätze für die Serienbriefverarbeitung bereit.
    */
-  private MailMergeDatasource ds;
+  private DatasourceModel ds;
 
   /**
    * Die zentrale Klasse, die die Serienbrieffunktionalität bereitstellt.
@@ -57,7 +59,8 @@ public class MailMergeController
    * @param documentController
    *          das {@link TextDocumentModel} an dem die Toolbar hängt.
    */
-  public MailMergeController(TextDocumentController documentController, MailMergeDatasource ds)
+  public MailMergeController(TextDocumentController documentController,
+      DatasourceModel ds)
   {
     this.documentController = documentController;
     this.ds = ds;
@@ -68,7 +71,7 @@ public class MailMergeController
     return documentController;
   }
 
-  public MailMergeDatasource getDs()
+  public DatasourceModel getDs()
   {
     return ds;
   }
@@ -92,8 +95,10 @@ public class MailMergeController
 
   /**
    * Liefert die Spaltennamen der aktuellen Datenquelle
+   *
+   * @throws NoTableSelectedException
    */
-  public List<String> getColumnNames()
+  public Set<String> getColumnNames() throws NoTableSelectedException
   {
     return ds.getColumnNames();
   }
@@ -122,11 +127,14 @@ public class MailMergeController
 
   /**
    * Startet den MailMerge
+   *
+   * @throws NoTableSelectedException
    */
   public void doMailMerge(PrintSettings settings)
+      throws NoTableSelectedException
   {
     documentController.collectNonWollMuxFormFields();
-    QueryResultsWithSchema data = ds.getData();
+    Table<Integer, String, String> data = ds.getData();
 
     List<String> usePrintFunctions = new ArrayList<>();
     boolean ignoreDocPrintFuncs = true;
@@ -193,7 +201,6 @@ public class MailMergeController
     final XPrintModel pmod = PrintModels.createPrintModel(documentController, !ignoreDocPrintFuncs);
     try
     {
-      pmod.setPropertyValue(SetFormValue.PROP_SCHEMA, data.getSchema());
       pmod.setPropertyValue(SetFormValue.PROP_QUERYRESULTS, data);
       Collections.sort(selected);
       pmod.setPropertyValue(SetFormValue.PROP_RECORD_SELECTION, selected);

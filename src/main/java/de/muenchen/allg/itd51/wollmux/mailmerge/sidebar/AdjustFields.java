@@ -72,9 +72,11 @@ import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.ReferencedFieldID;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
-import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeDatasource;
+import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
 
 /**
  * "Felder anpassen" Dialog der neuen erweiterten Serienbrief-Funktionalitäten.
@@ -125,43 +127,50 @@ public class AdjustFields
    *          Der Listener wird aufgerufen, sobald der Dialog erfolgreich beendet wird.
    */
   public static void showAdjustFieldsDialog(final TextDocumentController documentController,
-      MailMergeDatasource ds, ActionListener finishedListener)
+      DatasourceModel ds, ActionListener finishedListener)
   {
-    ReferencedFieldID[] fieldIDs = documentController.getModel()
-        .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(ds.getColumnNames()));
-    ActionListener submitActionListener = e -> {
-      @SuppressWarnings("unchecked")
-      Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
-          .getSource();
-      for (Map.Entry<String, FieldSubstitution> ent : mapIdToSubstitution.entrySet())
-      {
-        String fieldId = ent.getKey();
-        FieldSubstitution subst = ent.getValue();
-        documentController.applyFieldSubstitution(fieldId, subst);
-
-        // Datenstrukturen aktualisieren
-        documentController.updateDocumentCommands();
-        DocumentCommandInterpreter dci = new DocumentCommandInterpreter(documentController);
-        dci.scanGlobalDocumentCommands();
-        // collectNonWollMuxFormFields() wird im folgenden scan auch noch erledigt
-        dci.scanInsertFormValueCommands();
-
-        // Alte Formularwerte aus den persistenten Daten entfernen
-        documentController.setFormFieldValue(fieldId, null);
-
-        // Ansicht der betroffenen Felder aktualisieren
-        for (Iterator<FieldSubstitution.SubstElement> iter = subst.iterator(); iter.hasNext();)
+    try
+    {
+      ReferencedFieldID[] fieldIDs = documentController.getModel()
+          .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(ds.getColumnNames()));
+      ActionListener submitActionListener = e -> {
+        @SuppressWarnings("unchecked")
+        Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
+            .getSource();
+        for (Map.Entry<String, FieldSubstitution> ent : mapIdToSubstitution.entrySet())
         {
-          FieldSubstitution.SubstElement ele = iter.next();
-          if (ele.isField())
-            documentController.updateFormFields(ele.getValue());
+          String fieldId = ent.getKey();
+          FieldSubstitution subst = ent.getValue();
+          documentController.applyFieldSubstitution(fieldId, subst);
+
+          // Datenstrukturen aktualisieren
+          documentController.updateDocumentCommands();
+          DocumentCommandInterpreter dci = new DocumentCommandInterpreter(documentController);
+          dci.scanGlobalDocumentCommands();
+          // collectNonWollMuxFormFields() wird im folgenden scan auch noch erledigt
+          dci.scanInsertFormValueCommands();
+
+          // Alte Formularwerte aus den persistenten Daten entfernen
+          documentController.setFormFieldValue(fieldId, null);
+
+          // Ansicht der betroffenen Felder aktualisieren
+          for (Iterator<FieldSubstitution.SubstElement> iter = subst.iterator(); iter.hasNext();)
+          {
+            FieldSubstitution.SubstElement ele = iter.next();
+            if (ele.isField())
+              documentController.updateFormFields(ele.getValue());
+          }
         }
-      }
-      finishedListener
-          .actionPerformed(new ActionEvent(new Object(), 0, "AdjustFieldsDialogFinished"));
-    };
-    showFieldMappingDialog("Felder anpassen", fieldIDs, L.m("Altes Feld"), L.m("Neue Belegung"),
-        L.m("Felder anpassen"), ds.getColumnNames(), submitActionListener, false);
+        finishedListener
+            .actionPerformed(new ActionEvent(new Object(), 0, "AdjustFieldsDialogFinished"));
+      };
+      showFieldMappingDialog("Felder anpassen", fieldIDs, L.m("Altes Feld"), L.m("Neue Belegung"),
+          L.m("Felder anpassen"), new ArrayList<String>(ds.getColumnNames()), submitActionListener,
+          false);
+    } catch (NoTableSelectedException ex)
+    {
+      InfoDialog.showInfoModal("", ex.getMessage());
+    }
   }
 
   /**
@@ -176,21 +185,33 @@ public class AdjustFields
    *          Der Listener wird aufgerufen, sobald der Dialog erfolgreich beendet wird.
    */
   public static void showAddMissingColumnsDialog(TextDocumentController documentController,
-      final MailMergeDatasource ds, ActionListener finishedListener)
+      final DatasourceModel ds, ActionListener finishedListener)
   {
-    ReferencedFieldID[] fieldIDs = documentController.getModel()
-        .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(ds.getColumnNames()));
-    ActionListener submitActionListener = e -> {
-      @SuppressWarnings("unchecked")
-      Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
-          .getSource();
-      ds.addColumns(mapIdToSubstitution);
-      ds.updatePreviewFields(ds.getPreviewDatasetNumber());
-      finishedListener
-          .actionPerformed(new ActionEvent(new Object(), 0, "AddMissingDialogFinished"));
-    };
-    showFieldMappingDialog("Tabellenspalten ergänzen", fieldIDs, L.m("Spalte"), L.m("Vorbelegung"),
-        L.m("Spalten ergänzen"), ds.getColumnNames(), submitActionListener, true);
+    try
+    {
+      ReferencedFieldID[] fieldIDs = documentController.getModel()
+          .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(ds.getColumnNames()));
+      ActionListener submitActionListener = e -> {
+        @SuppressWarnings("unchecked")
+        Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
+            .getSource();
+        try
+        {
+          ds.addColumns(mapIdToSubstitution);
+	} catch (NoTableSelectedException e1)
+        {
+          InfoDialog.showInfoModal("", e1.getMessage());
+        }
+        finishedListener
+            .actionPerformed(new ActionEvent(new Object(), 0, "AddMissingDialogFinished"));
+      };
+      showFieldMappingDialog("Tabellenspalten ergänzen", fieldIDs, L.m("Spalte"),
+          L.m("Vorbelegung"), L.m("Spalten ergänzen"), new ArrayList<String>(ds.getColumnNames()),
+          submitActionListener, true);
+    } catch (NoTableSelectedException ex)
+    {
+      InfoDialog.showInfoModal("", ex.getMessage());
+    }
   }
 
   /**

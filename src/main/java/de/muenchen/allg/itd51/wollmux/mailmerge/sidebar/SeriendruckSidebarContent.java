@@ -2,10 +2,10 @@ package de.muenchen.allg.itd51.wollmux.mailmerge.sidebar;
 
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -29,37 +29,51 @@ import com.sun.star.awt.XWindowPeer;
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertySet;
+import com.sun.star.frame.XModel;
 import com.sun.star.lang.DisposedException;
-import com.sun.star.lang.EventObject;
 import com.sun.star.lang.WrappedTargetException;
+import com.sun.star.lang.XComponent;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.lib.uno.helper.ComponentBase;
+import com.sun.star.sdb.XDocumentDataSource;
+import com.sun.star.sdb.XOfficeDatabaseDocument;
+import com.sun.star.sdbc.XDataSource;
 import com.sun.star.sheet.XSpreadsheetDocument;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.ui.LayoutSize;
 import com.sun.star.ui.XSidebarPanel;
 import com.sun.star.ui.XToolPanel;
+import com.sun.star.ui.dialogs.FilePicker;
+import com.sun.star.ui.dialogs.TemplateDescription;
+import com.sun.star.ui.dialogs.XFilePicker3;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoCollection;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractCloseListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.AbstractNotifier;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.IfThenElseDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModel;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModelListener;
 import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController;
-import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeDatasource;
-import de.muenchen.allg.itd51.wollmux.mailmerge.ds.CalcModel;
+import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DBDatasourceDialog;
-import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DBModel;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModelListener;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.SetFormValue;
 import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.MailmergeWizardController;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ui.MailMergeField;
@@ -75,7 +89,8 @@ import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
  *
  */
 public class SeriendruckSidebarContent extends ComponentBase
-    implements XToolPanel, XSidebarPanel
+    implements XToolPanel, XSidebarPanel, ConnectionModelListener,
+    PreviewModelListener, DatasourceModelListener
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SeriendruckSidebarContent.class);
@@ -111,7 +126,8 @@ public class SeriendruckSidebarContent extends ComponentBase
   /**
    * Stellt die Felder und Datensätze für die Serienbriefverarbeitung bereit.
    */
-  private MailMergeDatasource datasource;
+  private Optional<DatasourceModel> datasourceModel;
+  private PreviewModel previewModel;
   private TextDocumentController textDocumentController;
 
   private AbstractWindowListener windowAdapter = new AbstractWindowListener()
@@ -127,6 +143,10 @@ public class SeriendruckSidebarContent extends ComponentBase
   {
     this.context = context;
     this.parentWindow = parentWindow;
+    datasourceModel = Optional.empty();
+    previewModel = new PreviewModel();
+    previewModel.setDatasourceModel(datasourceModel);
+    previewModel.addListener(this);
 
     this.parentWindow.addWindowListener(this.windowAdapter);
     layout = new VerticalLayout(5, 15);
@@ -194,14 +214,15 @@ public class SeriendruckSidebarContent extends ComponentBase
 
     if (textDocumentController != null)
     {
+      openDatasourceFromLastStoredSettings(textDocumentController.getModel().getMailmergeConfig());
       addPreviewControls();
       addDatasourcesControls();
       addTableControls();
       addSerienbriefFeld();
       addPrintControls();
+      ConnectionModel.addListener(this);
 
       textDocumentController.setFormFieldsPreviewMode(false);
-      datasource = new MailMergeDatasource(textDocumentController);
       WollMuxEventHandler.getInstance().unregisterListener(this);
       window.setVisible(true);
     } else
@@ -250,14 +271,145 @@ public class SeriendruckSidebarContent extends ComponentBase
   {
     if (!disposed)
     {
-      for (CalcModel model : MailMergeDatasource.getOpenCalcWindows())
-      {
-        UNO.XCloseable(model.getSpreadSheetDocument()).removeCloseListener(documentCloseListener);
-      }
       textDocumentController.setFormFieldsPreviewMode(true);
+      ConnectionModel.removeListener(this);
       disposed = true;
     }
     super.dispose();
+  }
+
+  @Override
+  public void connectionsChanged()
+  {
+    try
+    {
+      currentDatasources.removeItems((short) 0, currentDatasources.getItemCount());
+      List<String> titles = ConnectionModel.getConnections();
+      currentDatasources.addItems(titles.toArray(new String[] {}), (short) 0);
+      currentDatasources.selectItem(
+          ConnectionModel.buildConnectionName(datasourceModel), true);
+    } catch (NoTableSelectedException ex)
+    {
+      LOGGER.debug("", ex);
+    }
+  }
+
+  private void activateControls(DatasourceModel ds)
+  {
+    try
+    {
+      datasourceModel.ifPresent(mailMergeField::setMailMergeDatasource);
+
+      UNO.XWindow(preview).setEnable(true);
+      UNO.XWindow(print).setEnable(true);
+      UNO.XWindow(mailmergeBox).setEnable(true);
+      UNO.XWindow(specialBox).setEnable(true);
+      UNO.XWindow(editTable).setEnable(true);
+
+      UNO.XNumericField(printCount).setMax(ds.getNumberOfRecords());
+
+      boolean hasUnmappedFields = textDocumentController.getModel()
+          .getReferencedFieldIDsThatAreNotInSchema(
+              new HashSet<>(ds.getColumnNames())).length > 0;
+      UNO.XWindow(changeAll).setEnable(hasUnmappedFields);
+
+      ConfigThingy seriendruck = new ConfigThingy("Seriendruck");
+      ConfigThingy dq = ds.getSettings();
+      if (dq.count() > 0)
+      {
+	seriendruck.addChild(dq);
+      }
+      textDocumentController.setMailmergeConfig(seriendruck);
+    } catch (NoTableSelectedException ex)
+    {
+      deactivateControls();
+    }
+  }
+
+  private void deactivateControls()
+  {
+    datasourceModel.ifPresent(mailMergeField::setMailMergeDatasource);
+    UNO.XNumericField(printCount).setMax(0);
+    UNO.XWindow(changeAll).setEnable(false);
+    UNO.XWindow(preview).setEnable(false);
+    UNO.XWindow(print).setEnable(false);
+    UNO.XWindow(mailmergeBox).setEnable(false);
+    UNO.XWindow(specialBox).setEnable(false);
+    UNO.XWindow(editTable).setEnable(false);
+  }
+
+  @Override
+  public void previewChanged()
+  {
+    boolean isPreview = previewModel.isPreview();
+
+    XPropertySet propertySet = UNO.XPropertySet(preview.getModel());
+    try
+    {
+      propertySet.setPropertyValue("State", (short) (isPreview ? 1 : 0));
+    } catch (com.sun.star.lang.IllegalArgumentException | UnknownPropertyException
+        | PropertyVetoException | WrappedTargetException e)
+    {
+      LOGGER.debug("", e);
+    }
+    if (isPreview)
+    {
+      XTextComponent currentDatasourceCountText = UNO.XTextComponent(printCount);
+      currentDatasourceCountText.setText(String.valueOf(previewModel.getPreviewNumber()));
+
+      textDocumentController.collectNonWollMuxFormFields();
+      textDocumentController.setFormFieldsPreviewMode(true);
+
+      UNO.XWindow(jumpToLast).setEnable(true);
+      UNO.XWindow(jumpToFirst).setEnable(true);
+      UNO.XWindow(printCount).setEnable(true);
+      UNO.XButton(preview).setLabel("<<Feldnamen>>");
+
+      updatePreviewFields();
+    } else
+    {
+      textDocumentController.setFormFieldsPreviewMode(false);
+      UNO.XWindow(jumpToLast).setEnable(false);
+      UNO.XWindow(jumpToFirst).setEnable(false);
+      UNO.XWindow(printCount).setEnable(false);
+      UNO.XButton(preview).setLabel("Vorschau");
+    }
+  }
+
+  @Override
+  public void datasourceChanged()
+  {
+    datasourceModel.ifPresent(this::activateControls);
+  }
+
+  private void changeDatasource(Optional<DatasourceModel> model)
+  {
+    datasourceModel.ifPresent(ds -> ds.removeDatasourceListener(this));
+    datasourceModel = model;
+    previewModel.setDatasourceModel(datasourceModel);
+    datasourceModel.ifPresent(ds -> ds.addDatasourceListener(this));
+    datasourceModel.ifPresentOrElse(this::activateControls,
+        this::deactivateControls);
+  }
+
+  private void updatePreviewFields()
+  {
+    try
+    {
+      for (Map.Entry<String, String> entry : previewModel.getCurrentRecord().entrySet())
+      {
+        new OnSetFormValue(textDocumentController.getModel().doc, entry.getKey(), entry.getValue(),
+            null).emit();
+      }
+      String previewDatasetNumberStr = "" + previewModel.getPreviewNumber();
+      new OnSetFormValue(textDocumentController.getModel().doc, SetFormValue.TAG_RECORD_ID,
+          previewDatasetNumberStr, null).emit();
+      new OnSetFormValue(textDocumentController.getModel().doc, SetFormValue.TAG_MAILMERGE_ID,
+          previewDatasetNumberStr, null).emit();
+    } catch (NoTableSelectedException ex)
+    {
+      LOGGER.debug("", ex);
+    }
   }
 
   private void addPreviewControls()
@@ -316,12 +468,6 @@ public class SeriendruckSidebarContent extends ComponentBase
     currentDatasources = UNO.XListBox(ctrl);
     vLayout.addControl(ctrl, 6);
     layout.addLayout(vLayout, 1);
-
-    for (CalcModel calcModel : MailMergeDatasource.getOpenCalcWindows())
-    {
-      updateVisibleTables(calcModel.getWindowTitle(), calcModel.getSpreadSheetTableTitles(), true,
-          false);
-    }
   }
 
   private void addTableControls()
@@ -373,7 +519,7 @@ public class SeriendruckSidebarContent extends ComponentBase
         }
 
         textDocumentController.collectNonWollMuxFormFields();
-        datasource.updatePreviewFields(datasource.getPreviewDatasetNumber());
+        updatePreviewFields();
       }
     });
     hLayout.addControl(UNO.XControl(mailmergeBox), 6);
@@ -395,39 +541,58 @@ public class SeriendruckSidebarContent extends ComponentBase
       @Override
       public void itemStateChanged(ItemEvent event)
       {
-        switch (event.Selected)
-        {
-        case 0:
-          break;
+	switch (event.Selected)
+	{
+	case 0:
+	  break;
 
-        case 1:
-          new GenderDialog(datasource.getColumnNames(), textDocumentController);
-          break;
+	case 1:
+	  datasourceModel.ifPresent(ds -> {
+	    try
+	    {
+	      new GenderDialog(new ArrayList<String>(ds.getColumnNames()),
+	          textDocumentController);
+	    } catch (NoTableSelectedException ex)
+	    {
+	      LOGGER.debug("", ex);
+	    }
+	  });
+	  break;
 
-        case 2:
-          new IfThenElseDialog(datasource.getColumnNames(), textDocumentController);
-          break;
+	case 2:
+	  datasourceModel.ifPresent(ds -> {
+	    try
+	    {
+	      new IfThenElseDialog(new ArrayList<String>(ds.getColumnNames()),
+	          textDocumentController);
 
-        case 3:
-          textDocumentController
-              .insertMailMergeFieldAtCursorPosition(SetFormValue.TAG_RECORD_ID);
-          break;
+	    } catch (NoTableSelectedException ex)
+	    {
+	      LOGGER.debug("", ex);
+	    }
+	  });
+	  break;
 
-        case 4:
-          textDocumentController
-              .insertMailMergeFieldAtCursorPosition(SetFormValue.TAG_MAILMERGE_ID);
-          break;
+	case 3:
+	  textDocumentController
+	      .insertMailMergeFieldAtCursorPosition(SetFormValue.TAG_RECORD_ID);
+	  break;
 
-        case 5:
-          textDocumentController.insertNextDatasetFieldAtCursorPosition();
-          break;
+	case 4:
+	  textDocumentController.insertMailMergeFieldAtCursorPosition(
+	      SetFormValue.TAG_MAILMERGE_ID);
+	  break;
 
-        default:
-          break;
-        }
+	case 5:
+	  textDocumentController.insertNextDatasetFieldAtCursorPosition();
+	  break;
 
-        textDocumentController.collectNonWollMuxFormFields();
-        datasource.updatePreviewFields(datasource.getPreviewDatasetNumber());
+	default:
+	  break;
+	}
+
+	textDocumentController.collectNonWollMuxFormFields();
+	updatePreviewFields();
         UNO.XTextComponent(specialBox).setText(specialBox.getItem((short) 0));
       }
     });
@@ -444,195 +609,239 @@ public class SeriendruckSidebarContent extends ComponentBase
     layout.addControl(print);
   }
 
-  private void updateVisibleTables(String title, String[] tabs, boolean add, boolean select)
+  private void openDatasourceFromLastStoredSettings(ConfigThingy mmconf)
   {
-    Set<String> items = new LinkedHashSet<>(Arrays.asList(currentDatasources.getItems()));
-    List<String> titles = new ArrayList<>();
-    for (String spreadSheetTitle : tabs)
+    ConfigThingy datenquelle = new ConfigThingy("");
+    String type = "unknown";
+    try
     {
-      titles.add(title + " - " + spreadSheetTitle);
-    }
-    if (add)
+      ConfigThingy query = mmconf.query("Datenquelle");
+      if (query.count() > 0)
+      {
+        datenquelle = query.getLastChild();
+        type = datenquelle.getString("TYPE", null);
+
+        if ("calc".equalsIgnoreCase(type))
+        {
+          String url = datenquelle.get("URL").toString();
+          String table = datenquelle.get("TABLE").toString();
+          XSpreadsheetDocument doc = getCalcDocByFile(url);
+          if (doc != null)
+          {
+	    changeDatasource(ConnectionModel.addAndSelectDatasource(doc,
+	        Optional.ofNullable(table)));
+          }
+        } else if ("ooo".equalsIgnoreCase(type))
+        {
+          String source = datenquelle.get("SOURCE").toString();
+          String table = datenquelle.get("TABLE").toString();
+          XOfficeDatabaseDocument ds = loadDataSource(source);
+          if (ds != null)
+          {
+	    changeDatasource(ConnectionModel.addAndSelectDatasource(ds,
+	        Optional.ofNullable(table)));
+          }
+        } else if (type != null)
+        {
+          LOGGER.error("Ignoriere Datenquelle mit unbekanntem Typ '{}'", type);
+        }
+      }
+    } catch (NodeNotFoundException e)
     {
-      items.addAll(titles);
-    } else
+      LOGGER.error(L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type), e);
+    } catch (NoTableSelectedException ex)
     {
-      items.removeAll(titles);
-      String item = currentDatasources.getSelectedItem();
-      currentDatasources.selectItem(item, !titles.contains(item));
-    }
-    currentDatasources.removeItems((short) 0, currentDatasources.getItemCount());
-    currentDatasources.addItems(items.toArray(new String[] {}), (short) 0);
-    if (select)
-    {
-      currentDatasources.selectItem(titles.get(0), true);
+      LOGGER.error("Die Tabelle existiert nicht", ex);
     }
   }
 
-  private ActionListener adjustFieldsFinishListener = e -> {
-    boolean hasUnmappedFields = datasource.checkUnmappedFields(datasource.getColumnNames());
-    XWindow2 btnChangeAll = UNO.XWindow2(changeAll);
-    btnChangeAll.setEnable(btnChangeAll.isVisible() && hasUnmappedFields);
-    XWindow2 btnAddColumns = UNO.XWindow2(addColumns);
-    btnAddColumns.setEnable(btnAddColumns.isVisible() && hasUnmappedFields);
-  };
-
-  private AbstractActionListener editTableActionListener = e -> datasource.toFront();
-
-  private AbstractActionListener addTableColumnsActionListener = e -> AdjustFields
-      .showAddMissingColumnsDialog(textDocumentController, datasource,
-          adjustFieldsFinishListener);
-
-  private AbstractActionListener changeFieldsActionListener = e -> AdjustFields
-      .showAdjustFieldsDialog(textDocumentController, datasource,
-          adjustFieldsFinishListener);
-
-  private AbstractCloseListener documentCloseListener = new AbstractCloseListener()
+  private XOfficeDatabaseDocument loadDataSource(String dbName)
   {
-    @Override
-    public void disposing(EventObject arg0)
+    try
     {
-      XSpreadsheetDocument doc = UNO.XSpreadsheetDocument(arg0.Source);
+      XDataSource ds = UNO.XDataSource(UNO.dbContext.getRegisteredObject(dbName));
+      XDocumentDataSource dds = UNO.XDocumentDataSource(ds);
+      XOfficeDatabaseDocument dbdoc = dds.getDatabaseDocument();
+      String url = UNO.XModel(dbdoc).getURL();
 
-      String title = UNO.getPropertyByPropertyValues(UNO.XModel(doc).getArgs(), "Title");
-
-      if (title == null)
+      for (XComponent comp : UnoCollection.getCollection(UNO.desktop.getComponents(),
+          XComponent.class))
       {
-        LOGGER.debug("SeriendruckSidebar: documentCloseListener: title is NULL."
-            + " Could not close Window successfully.");
-        return;
+        XModel dbModel = UNO.XModel(comp);
+        if (dbModel.getURL().equals(url))
+        {
+          return dbdoc;
+        }
       }
-      CalcModel model = new CalcModel(title, "", doc.getSheets().getElementNames(), doc);
-      updateVisibleTables(model.getWindowTitle(), model.getSpreadSheetTableTitles(), false, false);
+      return UnoRuntime.queryInterface(XOfficeDatabaseDocument.class,
+          UNO.loadComponentFromURL(url, false, false, true));
+    } catch (com.sun.star.uno.Exception | UnoHelperException e)
+    {
+      LOGGER.error("", e);
+      return null;
     }
-  };
+  }
 
-  private AbstractActionListener printActionListener = e -> {
-    if (!datasource.hasDatasource())
-      return;
-
-    MailMergeController c = new MailMergeController(textDocumentController, datasource);
-    MailmergeWizardController mwController = new MailmergeWizardController(c,
-        textDocumentController);
-    textDocumentController.collectNonWollMuxFormFields();
-    textDocumentController.setFormFieldsPreviewMode(true);
-    mwController.startWizard(); // blocks
-  };
-
-  private AbstractItemListener currentDatasourcesListener = new AbstractItemListener()
+  /**
+   * Öffnet ein neues Calc-Dokument und setzt es als Seriendruckdatenquelle.
+   */
+  private void openAndselectNewCalcTableAsDatasource()
   {
-
-    @Override
-    public void itemStateChanged(ItemEvent arg0)
+    LOGGER.debug(L.m("Öffne neues Calc-Dokument als Datenquelle für Seriendruck"));
+    try
     {
-      datasource.setDatasource(currentDatasources.getSelectedItem());
-      updateControls();
-    }
+      XSpreadsheetDocument spread = UNO
+          .XSpreadsheetDocument(UNO.loadComponentFromURL("private:factory/scalc", true, true));
 
-    private void updateControls()
+      changeDatasource(
+          ConnectionModel.addAndSelectDatasource(spread, Optional.empty()));
+    } catch (UnoHelperException | NoTableSelectedException e)
     {
-      mailMergeField.setMailMergeDatasource(datasource);
-      UNO.XNumericField(printCount)
-          .setMax(datasource.hasDatasource() ? datasource.getNumberOfDatasets() : 0);
-
-      boolean active = datasource.hasDatasource();
-      UNO.XWindow(preview).setEnable(active);
-      UNO.XWindow(print).setEnable(active);
-      UNO.XWindow(mailmergeBox).setEnable(active);
-      UNO.XWindow(specialBox).setEnable(active);
-      UNO.XWindow(editTable).setEnable(active);
-
-      boolean hasUnmappedFields = datasource.hasDatasource()
-          && datasource.checkUnmappedFields(datasource.getColumnNames());
-      UNO.XWindow(addColumns)
-          .setEnable(active && hasUnmappedFields && datasource.supportsAddColumns());
-      UNO.XWindow(changeAll).setEnable(active && hasUnmappedFields);
+      LOGGER.error("", e);
     }
-  };
+  }
 
-  private AbstractNotifier dbDatasourceListener = new AbstractNotifier()
+  private void selectFileAsDatasource()
   {
-    @Override
-    public void notify(String message)
+    XFilePicker3 picker = FilePicker.createWithMode(UNO.defaultContext,
+        TemplateDescription.FILEOPEN_SIMPLE);
+    String filterName = "Tabellendokument";
+    picker.appendFilter(filterName, "*.ods");
+    picker.appendFilter("Alle Dateien", "*");
+    picker.setCurrentFilter(filterName);
+    picker.setMultiSelectionMode(false);
+
+    short res = picker.execute();
+    if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)
     {
-      List<String> dbTableNames = datasource.getDbTableNames(message);
-      DBModel model = new DBModel(message, dbTableNames);
-      datasource.addCachedDbConnection(model);
-      updateVisibleTables(model.getDatasourceName(), model.getTableNames().toArray(new String[] {}),
-          true, true);
+      String[] files = picker.getFiles();
+      try
+      {
+        LOGGER.debug(L.m("Öffne %1 als Datenquelle für Seriendruck", files[0]));
+        XSpreadsheetDocument doc = getCalcDocByFile(files[0]);
+
+        if (doc != null)
+        {
+	  changeDatasource(
+	      ConnectionModel.addAndSelectDatasource(doc, Optional.empty()));
+        }
+      } catch (Exception e)
+      {
+        LOGGER.error("", e);
+      }
+    }
+  }
+
+  private XSpreadsheetDocument getCalcDocByFile(String file)
+  {
+    try
+    {
+      return UNO.XSpreadsheetDocument(UNO.loadComponentFromURL(file, false, true));
+    } catch (UnoHelperException e)
+    {
+      LOGGER.error("", e);
+      return null;
+    }
+  }
+
+  private ActionListener adjustFieldsFinishListener = e -> datasourceModel
+      .ifPresentOrElse(ds -> {
+        try
+        {
+          boolean hasUnmappedFields = textDocumentController.getModel()
+              .getReferencedFieldIDsThatAreNotInSchema(
+                  ds.getColumnNames()).length > 0;
+          XWindow2 btnChangeAll = UNO.XWindow2(changeAll);
+          btnChangeAll.setEnable(btnChangeAll.isVisible() && hasUnmappedFields);
+          XWindow2 btnAddColumns = UNO.XWindow2(addColumns);
+          btnAddColumns
+              .setEnable(btnAddColumns.isVisible() && hasUnmappedFields);
+        } catch (NoTableSelectedException ex)
+        {
+          LOGGER.debug("", ex);
+        }
+      }, () -> {
+        UNO.XWindow2(changeAll).setEnable(false);
+        UNO.XWindow2(addColumns).setEnable(false);
+      });
+
+  private AbstractActionListener editTableActionListener = e -> datasourceModel
+      .ifPresent(DatasourceModel::toFront);
+
+  private AbstractActionListener addTableColumnsActionListener = e -> datasourceModel
+      .ifPresent(ds -> AdjustFields.showAddMissingColumnsDialog(
+          textDocumentController, ds, adjustFieldsFinishListener));
+
+  private AbstractActionListener changeFieldsActionListener = e -> datasourceModel
+      .ifPresent(ds -> AdjustFields.showAdjustFieldsDialog(
+          textDocumentController, ds, adjustFieldsFinishListener));
+
+  private AbstractActionListener printActionListener = e -> datasourceModel
+      .ifPresent(ds -> {
+        MailMergeController c = new MailMergeController(textDocumentController,
+            ds);
+        MailmergeWizardController mwController = new MailmergeWizardController(
+            c, textDocumentController);
+        mwController.startWizard();
+        textDocumentController.collectNonWollMuxFormFields();
+        textDocumentController.setFormFieldsPreviewMode(true);
+      });
+
+  private AbstractItemListener currentDatasourcesListener = e -> {
+    try
+    {
+      changeDatasource(ConnectionModel
+          .selectDatasource(currentDatasources.getSelectedItem()));
+    } catch (NoTableSelectedException e1)
+    {
+      LOGGER.debug("", e1);
     }
   };
 
   private AbstractActionListener dbActionListener = e -> new DBDatasourceDialog(
-      dbDatasourceListener);
+      new AbstractNotifier()
+      {
+        @Override
+        public void notify(String dbName)
+        {
+          try
+          {
+	    changeDatasource(ConnectionModel.addAndSelectDatasource(
+	        loadDataSource(dbName), Optional.empty()));
+          } catch (NoTableSelectedException e)
+          {
+            LOGGER.debug("", e);
+          }
+        }
+      });
 
-  private AbstractActionListener newCalcTableActionListener = e -> {
-    CalcModel calcModel = datasource.openAndselectNewCalcTableAsDatasource();
-    UNO.XCloseable(calcModel.getSpreadSheetDocument()).addCloseListener(documentCloseListener);
-    updateVisibleTables(calcModel.getWindowTitle(), calcModel.getSpreadSheetTableTitles(), true,
-        true);
-  };
+  private AbstractActionListener newCalcTableActionListener = e -> openAndselectNewCalcTableAsDatasource();
 
-  private AbstractActionListener fileActionListener = e -> {
-    CalcModel model = datasource.selectFileAsDatasource();
-    if (model != null)
+  private AbstractActionListener fileActionListener = e -> selectFileAsDatasource();
+
+  private AbstractTextListener documentCountFieldListener = e -> previewModel
+      .setPreviewNumber((int) UNO.XNumericField(e.Source).getValue());
+
+  private AbstractActionListener jumpToFirstActionListener = e -> previewModel.setPreviewNumber(1);
+
+  private AbstractActionListener jumpToLastActionListener = e -> {
+    try
     {
-      UNO.XCloseable(model.getSpreadSheetDocument()).addCloseListener(documentCloseListener);
-      updateVisibleTables(model.getWindowTitle(), model.getSpreadSheetTableTitles(), true, true);
+      previewModel.gotoLastDataset();
+    } catch (NoTableSelectedException ex)
+    {
+      LOGGER.error("", ex);
     }
   };
 
-  private AbstractTextListener documentCountFieldListener = e -> datasource
-      .updatePreviewFields((int) UNO.XNumericField(e.Source).getValue());
-
-  private AbstractActionListener jumpToFirstActionListener = e -> {
-    XTextComponent currentDatasourceCountText = UNO.XTextComponent(printCount);
-    currentDatasourceCountText.setText("1");
-    datasource.updatePreviewFields(1);
-  };
-
-  private AbstractActionListener jumpToLastActionListener = e -> {
-    int datasetCount = datasource.getNumberOfDatasets();
-
-    XTextComponent currentDatasourceCountText = UNO.XTextComponent(printCount);
-    currentDatasourceCountText.setText(String.valueOf(datasetCount));
-
-    datasource.updatePreviewFields(datasetCount);
-  };
-
   private AbstractActionListener previewActionListener = e -> {
-    XPropertySet propertySet = UNO.XPropertySet(preview.getModel());
-
     try
     {
+      XPropertySet propertySet = UNO.XPropertySet(preview.getModel());
       short toggleState = (short) propertySet.getPropertyValue("State");
-
-      if (toggleState == 0)
-      {
-        textDocumentController.setFormFieldsPreviewMode(false);
-        UNO.XWindow(jumpToLast).setEnable(false);
-        UNO.XWindow(jumpToFirst).setEnable(false);
-        UNO.XWindow(printCount).setEnable(false);
-        UNO.XButton(preview).setLabel("Vorschau");
-      } else if (toggleState == 1)
-      {
-        if (!datasource.hasDatasource() && datasource.getNumberOfDatasets() <= 0)
-        {
-          propertySet.setPropertyValue("State", 0);
-          return;
-        }
-
-        textDocumentController.collectNonWollMuxFormFields();
-        textDocumentController.setFormFieldsPreviewMode(true);
-        datasource.updatePreviewFields(datasource.getPreviewDatasetNumber());
-
-        UNO.XWindow(jumpToLast).setEnable(true);
-        UNO.XWindow(jumpToFirst).setEnable(true);
-        UNO.XWindow(printCount).setEnable(true);
-        UNO.XButton(preview).setLabel("<<Feldnamen>>");
-      }
+      previewModel.setPreview(toggleState == 1);
     } catch (UnknownPropertyException | WrappedTargetException | IllegalArgumentException
-        | PropertyVetoException ex)
+        | NoTableSelectedException ex)
     {
       LOGGER.error("", ex);
     }

@@ -20,6 +20,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
+import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.MailMergePrintFunction;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ui.MailMergeField;
 
@@ -94,8 +95,14 @@ public class MailWizardPage extends AbstractXWizardPage
     message.addTextListener(textListener);
 
     reciever = UNO.XComboBox(container.getControl("reciever"));
-    reciever.addItems(controller.getController().getColumnNames().toArray(new String[] {}),
-        (short) 0);
+    try
+    {
+      reciever.addItems(controller.getController().getColumnNames().toArray(new String[] {}),
+          (short) 0);
+    } catch (NoTableSelectedException e)
+    {
+      // nothing to do
+    }
     reciever.addItemListener(new AbstractItemListener()
     {
 
@@ -107,7 +114,8 @@ public class MailWizardPage extends AbstractXWizardPage
       }
     });
     mailmerge = UNO.XComboBox(container.getControl("mailmerge"));
-    new MailMergeField(mailmerge).setMailMergeDatasource(controller.getController().getDs());
+    new MailMergeField(mailmerge)
+        .setMailMergeDatasource(controller.getController().getDs());
     mailmerge.addItemListener(new AbstractItemListener()
     {
 

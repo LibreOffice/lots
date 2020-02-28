@@ -62,7 +62,6 @@ import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormValueChanged;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
-import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeDatasource;
 
 public class TextDocumentController implements FormValueChangedListener, VisibilityChangedListener
 {
@@ -2319,7 +2318,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     {
       XFrame frame = UNO.XModel(getModel().doc).getCurrentController().getFrame();
       String frameTitle = (String) UNO.getProperty(frame, "Title");
-      frameTitle = MailMergeDatasource.stripOpenOfficeFromWindowName(frameTitle);
+      frameTitle = UNO.stripOpenOfficeFromWindowName(frameTitle);
       return frameTitle;
     } catch (Exception x)
     {
