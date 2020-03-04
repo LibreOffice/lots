@@ -95,7 +95,8 @@ public class StartWizardPage extends AbstractXWizardPage
     int datasets = 0;
     try
     {
-      datasets = controller.getController().getDs().getNumberOfRecords();
+
+      datasets = controller.getModel().getNumberOfRecords();
     } catch (NoTableSelectedException ex)
     {
       // nothing to do

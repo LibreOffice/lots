@@ -17,8 +17,9 @@ import com.sun.star.util.InvalidStateException;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController;
+import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeRunner;
 import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
 
 /**
  * Handles the wizard for configuring mail merge.
@@ -78,7 +79,7 @@ public class MailmergeWizardController implements XWizardController
   private XWizardPage[] pages = new XWizardPage[PAGE_COUNT];
 
   private XWizard wizard;
-  private MailMergeController controller;
+  private DatasourceModel model;
   private PrintSettings settings;
 
   private TextDocumentController textDocumentController;
@@ -86,24 +87,24 @@ public class MailmergeWizardController implements XWizardController
   /**
    * Create a new wizard controller.
    *
-   * @param controller
-   *          The controller of the mail merge.
+   * @param model
+   *          The model of the mail merge.
    * @param textDocumentController
    *          The controller of the document.
    * @throws NoTableSelectedException
    *           No table in the model was selected.
    */
-  public MailmergeWizardController(MailMergeController controller,
+  public MailmergeWizardController(DatasourceModel model,
       TextDocumentController textDocumentController) throws NoTableSelectedException
   {
-    this.controller = controller;
+    this.model = model;
     this.textDocumentController = textDocumentController;
-    settings = new PrintSettings(controller.getDs().getNumberOfRecords());
+    settings = new PrintSettings(model.getNumberOfRecords());
   }
 
-  public MailMergeController getController()
+  public DatasourceModel getModel()
   {
-    return controller;
+    return model;
   }
 
   @Override
@@ -186,7 +187,8 @@ public class MailmergeWizardController implements XWizardController
     {
       try
       {
-        controller.doMailMerge(settings);
+	new Thread(new MailMergeRunner(textDocumentController, model, settings))
+	    .start();
       } catch (NoTableSelectedException e)
       {
         InfoDialog.showInfoModal("Seriendruck fehlgeschlagen", e.getMessage());
@@ -231,6 +233,16 @@ public class MailmergeWizardController implements XWizardController
       finishActivated &= pages[id] != null && pages[id].canAdvance();
     }
     wizard.enableButton(WizardButton.FINISH, finishActivated);
+  }
+
+  public String getDefaultFilename()
+  {
+    String fileName = textDocumentController.getFrameController().getTitle();
+    // remove suffix
+    if (fileName.toLowerCase().matches(".+\\.(odt|doc|ott|dot)$"))
+      fileName = fileName.substring(0, fileName.length() - 4);
+    // replace malicious chars
+    return fileName.replaceAll("[^\\p{javaLetterOrDigit},.()=+_-]", "_");
   }
 
   private PAGE_ID getPageId(short pageId)
