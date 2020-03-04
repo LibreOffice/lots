@@ -97,7 +97,8 @@ public class MailWizardPage extends AbstractXWizardPage
     reciever = UNO.XComboBox(container.getControl("reciever"));
     try
     {
-      reciever.addItems(controller.getController().getColumnNames().toArray(new String[] {}),
+      reciever.addItems(
+          controller.getModel().getColumnNames().toArray(new String[] {}),
           (short) 0);
     } catch (NoTableSelectedException e)
     {
@@ -114,8 +115,7 @@ public class MailWizardPage extends AbstractXWizardPage
       }
     });
     mailmerge = UNO.XComboBox(container.getControl("mailmerge"));
-    new MailMergeField(mailmerge)
-        .setMailMergeDatasource(controller.getController().getDs());
+    new MailMergeField(mailmerge).setMailMergeDatasource(controller.getModel());
     mailmerge.addItemListener(new AbstractItemListener()
     {
 

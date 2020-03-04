@@ -85,12 +85,10 @@ public class FormatWizardPage extends AbstractXWizardPage
         controller.updateTravelUI();
       }
     });
-    name.setText(
-        controller.getController().getDefaultFilename()
-            + MailMergePrintFunction.createMergeFieldTag(SetFormValue.TAG_RECORD_ID));
+    name.setText(controller.getDefaultFilename()
+        + MailMergePrintFunction.createMergeFieldTag(SetFormValue.TAG_RECORD_ID));
     mailmerge = UNO.XComboBox(container.getControl("mailmerge"));
-    new MailMergeField(mailmerge)
-        .setMailMergeDatasource(controller.getController().getDs());
+    new MailMergeField(mailmerge).setMailMergeDatasource(controller.getModel());
     mailmerge.addItemListener(new AbstractItemListener()
     {
       @Override

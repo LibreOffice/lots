@@ -545,9 +545,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
     datasourceModel.ifPresent(ds -> {
       try
       {
-        de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController controller = new de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeController(
-            textDocumentController, ds);
-        MailmergeWizardController mwController = new MailmergeWizardController(controller,
+        MailmergeWizardController mwController = new MailmergeWizardController(ds,
             textDocumentController);
         textDocumentController.collectNonWollMuxFormFields();
         mwController.startWizard();
