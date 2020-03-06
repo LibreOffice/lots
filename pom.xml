@@ -7,8 +7,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>11</maven.compiler.source>
 		<libreoffice.version>6.4.0-SNAPSHOT</libreoffice.version>
 		<wollmux.oxt.id>de.muenchen.allg.d101.wollmux</wollmux.oxt.id>
 		<wollmux.oxt.name>WollMux</wollmux.oxt.name>
