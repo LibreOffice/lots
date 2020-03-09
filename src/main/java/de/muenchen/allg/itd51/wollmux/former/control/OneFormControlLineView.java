@@ -195,21 +195,7 @@ public class OneFormControlLineView extends LineView
     myPanel.add(makeTypeView());
     myPanel.add(makeComboBoxAdditionalView());
     myPanel.add(makeTextAreaAdditionalView());
-
-    // additionalview nur bauen wenn kein standard button,
-    // makeButtonAdditionalView baut controls für openTemplate und openExt
-    if (!model.getAction().equals("abort")
-	&& !model.getAction().equals("prevTab")
-	&& !model.getAction().equals("nextTab")
-	&& !model.getAction().equals("funcDialog")
-	&& !model.getAction().equals("form2PDF")
-	&& !model.getAction().equals("save")
-	&& !model.getAction().equals("saveAs")
-	&& !model.getAction().equals("printForm")
-	&& !model.getAction().equals("closeAndOpenExt")
-	&& !model.getAction().equals("saveTempAndOpenExt")
-	&& !model.getAction().equals("form2EMail"))
-      myPanel.add(makeButtonAdditionalView());
+    myPanel.add(makeButtonAdditionalView());
 
     myPanel.add(makeReadOnlyView());
     normalFont = labelTextfield.getFont();
@@ -240,25 +226,29 @@ public class OneFormControlLineView extends LineView
 
     idTextfield.setVisible(model.isTab() || viewVisibilityDescriptor == null
 	|| viewVisibilityDescriptor.formControlLineViewId);
+
     labelTextfield.setVisible(model.isTab() || viewVisibilityDescriptor == null
 	|| viewVisibilityDescriptor.formControlLineViewLabel);
+
     tipTextfield.setVisible(!model.isTab() && viewVisibilityDescriptor != null
 	&& viewVisibilityDescriptor.formControlLineViewTooltip);
+
     typeView.setVisible(!model.isTab() && (viewVisibilityDescriptor == null
 	|| viewVisibilityDescriptor.formControlLineViewType));
+
     comboBoxAdditionalView
 	.setVisible(model.isCombo() && (viewVisibilityDescriptor == null
 	    || viewVisibilityDescriptor.formControlLineViewAdditional));
+
     textAreaAdditionalView
 	.setVisible(model.isTextArea() && (viewVisibilityDescriptor == null
 	    || viewVisibilityDescriptor.formControlLineViewAdditional));
+
     readOnlyfield.setVisible(!model.isTab() && viewVisibilityDescriptor != null
 	&& viewVisibilityDescriptor.formControlLineViewReadonly);
 
-    if (buttonAdditionalView != null)
-      buttonAdditionalView
-	  .setVisible(model.isButton() && (viewVisibilityDescriptor == null
-	      || viewVisibilityDescriptor.formControlLineViewAdditional));
+    buttonAdditionalView.setVisible(model.isButton() && (viewVisibilityDescriptor == null
+        || viewVisibilityDescriptor.formControlLineViewAdditional));
 
     /*
      * Wenn alle abgeschaltet sind, aktiviere zumindest das ID-Feld
