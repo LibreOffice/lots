@@ -90,7 +90,6 @@ import de.muenchen.allg.itd51.wollmux.sidebar.controls.UISearchbox;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UISenderbox;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
-import de.muenchen.uno.UnoReflect;
 
 /**
  * Erzeugt das Fenster, dass in der WollMux-Sidebar angezeigt wird. Das Fenster
@@ -743,10 +742,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         XMenu menu = UnoRuntime.queryInterface(XMenu.class, event.Source);
         try
         {
-          String name = (String) UnoReflect.with(menu).method("getCommand").withArgs(event.MenuId)
-              .invoke();
-          short pos = (Short) UnoReflect.with(menu).method("getItemPos").withArgs(event.MenuId)
-              .invoke();
+          String name = menu.getCommand(event.MenuId);
+          short pos = menu.getItemPos(event.MenuId);
           new OnSetSender(name, pos).emit();
         }
         catch (Exception e)
@@ -761,7 +758,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     for (String entry : palEntries)
     {
       menu.insertItem((short)(n+1), entry.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0], (short) 0, (short) (n+1));
-      UnoReflect.with(menu).method("setCommand").withArgs((short) (n + 1), entry).invoke();
+      menu.setCommand((short) (n + 1), entry);
       n++;
     }
 
@@ -779,20 +776,16 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         String current = PersoenlicheAbsenderliste.getInstance().getCurrentSender();
 
         xbutton.setLabel(current.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0]);
-        try
-        {
-          UnoReflect.with(menu).method("clear").invoke();
+        menu.clear();
 
-          short n = 0;
-          for (String entry : entries)
-          {
-            menu.insertItem((short)(n+1), entry.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0], (short) 0, (short) (n+1));
-            UnoReflect.with(menu).method("setCommand").withArgs((short) (n + 1), entry).invoke();
-            n++;
-          }
-        } catch (NoSuchMethodException e)
+        short n = 0;
+        for (String entry : entries)
         {
-          LOGGER.error("", e);
+          menu.insertItem((short) (n + 1),
+              entry.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0], (short) 0,
+              (short) (n + 1));
+          menu.setCommand((short) (n + 1), entry);
+          n++;
         }
       }
     });
