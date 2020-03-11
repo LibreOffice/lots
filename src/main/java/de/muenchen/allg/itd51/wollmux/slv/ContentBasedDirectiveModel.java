@@ -1,16 +1,20 @@
 package de.muenchen.allg.itd51.wollmux.slv;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.FontWeight;
-import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNamed;
-import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.style.XStyle;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextDocument;
@@ -19,16 +23,23 @@ import com.sun.star.text.XTextFramesSupplier;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.AnyConverter;
 
+import de.muenchen.allg.afid.TextRangeRelation;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoCollection;
+import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.document.text.StyleService;
 import de.muenchen.allg.itd51.wollmux.core.HashableComponent;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.slv.print.ContentBasedDirectivePrint;
+import de.muenchen.allg.ooo.TextDocument;
 import de.muenchen.allg.util.UnoProperty;
+
 
 /**
  * A model for working with content based directives. There is only one model per document
@@ -100,16 +111,40 @@ public class ContentBasedDirectiveModel
    */
   private ContentBasedDirectiveModel(TextDocumentController documentController)
   {
-    this.documentController = documentController;
-    this.doc = documentController.getModel().doc;
-    createUsedStyles();
+    this(documentController, documentController.getModel().doc);
   }
 
   private ContentBasedDirectiveModel(XTextDocument doc)
   {
+    this(null, doc);
+  }
+
+  private ContentBasedDirectiveModel(TextDocumentController documentController, XTextDocument doc)
+  {
+    this.documentController = documentController;
     this.doc = doc;
-    this.documentController = null;
     createUsedStyles();
+    List<Bookmark> bookmarks = getAllPrintBlocks().collect(Collectors.toList());
+    for (Bookmark bm : bookmarks)
+    {
+      for (Bookmark bm2 : bookmarks)
+      {
+        try
+        {
+          TextRangeRelation relation = TextRangeRelation.compareTextRanges(bm.getAnchor(), bm2.getAnchor());
+          if (TextRangeRelation.A_MATCH_B != relation && !TextRangeRelation.DISTINCT.contains(relation))
+          {
+            InfoDialog.showInfoModal("Überschneidende Druckblöcke",
+                "Das Verhalten bei sich überscheidenen Druckblöcken ist nicht definiert.\n"
+                    + "Das kann zu unerwartetem Verhalten führen. Bitte kontaktieren Sie den Ersteller der Vorlage.");
+            return;
+          }
+        } catch (UnoHelperException e)
+        {
+          LOGGER.debug("Can't find a book mark.", e);
+        }
+      }
+    }
   }
 
   public TextDocumentController getDocumentController()
@@ -139,7 +174,7 @@ public class ContentBasedDirectiveModel
       XTextFramesSupplier supplier = UNO.XTextFramesSupplier(doc);
       if (supplier != null)
       {
-        XTextFrame frame = UNO.XTextFrame(supplier.getTextFrames().getByName(FRAME_NAME_FIRST_CBD));
+        XTextFrame frame = UnoDictionary.create(supplier.getTextFrames(), XTextFrame.class).get(FRAME_NAME_FIRST_CBD);
 
         if (frame != null)
         {
@@ -152,11 +187,11 @@ public class ContentBasedDirectiveModel
           }
 
           // set style
-          Utils.setProperty(cursor, UnoProperty.PARA_STYLE_NAME, PARA_STYLE_NAME_FIRST_CBD);
+          UnoProperty.setProperty(cursor, UnoProperty.PARA_STYLE_NAME, PARA_STYLE_NAME_FIRST_CBD);
           return item;
         }
       }
-    } catch (WrappedTargetException | NoSuchElementException e)
+    } catch (UnoHelperException e)
     {
       LOGGER.trace("No frame found", e);
     }
@@ -290,21 +325,25 @@ public class ContentBasedDirectiveModel
       ContentBasedDirectiveItem item = new ContentBasedDirectiveItem(cursor);
       do
       {
-	cursor.gotoEndOfParagraph(true);
+        try
+        {
+          cursor.gotoEndOfParagraph(true);
 
-	if (item.isItem() || item.isRecipientLine()
-	    || item.isItemWithRecipient())
-	{
-	  String oldName = AnyConverter.toString(
-              Utils.getProperty(cursor, UnoProperty.PARA_STYLE_NAME));
+          if (item.isItem() || item.isRecipientLine() || item.isItemWithRecipient())
+          {
+            String oldName = AnyConverter.toString(UnoProperty.getProperty(cursor, UnoProperty.PARA_STYLE_NAME));
 
-	  // create new style based on old if necessary
-          String newName = mapOldNameToNewName.computeIfAbsent(oldName, this::createNewStyle);
-	  // Save and restore CharHidden property when changing ParaStyleName
-          Object hidden = Utils.getProperty(cursor, UnoProperty.CHAR_HIDDEN);
-          Utils.setProperty(cursor, UnoProperty.PARA_STYLE_NAME, newName);
-          Utils.setProperty(cursor, UnoProperty.CHAR_HIDDEN, hidden);
-	}
+            // create new style based on old if necessary
+            String newName = mapOldNameToNewName.computeIfAbsent(oldName, this::createNewStyle);
+            // Save and restore CharHidden property when changing ParaStyleName
+            Object hidden = UnoProperty.getProperty(cursor, UnoProperty.CHAR_HIDDEN);
+            UnoProperty.setProperty(cursor, UnoProperty.PARA_STYLE_NAME, newName);
+            UnoProperty.setProperty(cursor, UnoProperty.CHAR_HIDDEN, hidden);
+          }
+        } catch (UnoHelperException e)
+        {
+          LOGGER.debug("Can't rename a style", e);
+        }
       } while (cursor.gotoNextParagraph(false));
     }
 
@@ -436,5 +475,49 @@ public class ContentBasedDirectiveModel
     {
       LOGGER.debug("Can't create styles", e);
     }
+  }
+
+  /**
+   * Collect all book marks with print block commands.
+   * 
+   * @return Stream of all book marks with print block commands.
+   */
+  public Stream<Bookmark> getAllPrintBlocks()
+  {
+    List<Pattern> patterns = getBookmarkPatterns();
+    return patterns.stream().flatMap(pattern -> TextDocument.getBookmarkNamesMatching(pattern, doc.getText()).stream())
+        .map(name -> {
+          try
+          {
+            return new Bookmark(name, UNO.XBookmarksSupplier(doc));
+              } catch (UnoHelperException ex)
+          {
+            LOGGER.debug("", ex);
+            return null;
+          }
+        }).filter(Objects::nonNull).distinct();
+  }
+
+  /**
+   * Get patterns for all print block commands.
+   * 
+   * @return List of command patterns.
+   */
+  private static List<Pattern> getBookmarkPatterns()
+  {
+    Pattern allVersionPattern = DocumentCommands.getPatternForCommand("allVersions");
+    Pattern draftOnlyPattern = DocumentCommands.getPatternForCommand("draftOnly");
+    Pattern notInOriginalPattern = DocumentCommands.getPatternForCommand("notInOriginal");
+    Pattern originalOnlyPattern = DocumentCommands.getPatternForCommand("originalOnly");
+    Pattern copyOnlyPattern = DocumentCommands.getPatternForCommand("copyOnly");
+
+    List<Pattern> bookmarkPatterns = new ArrayList<>();
+    bookmarkPatterns.add(allVersionPattern);
+    bookmarkPatterns.add(draftOnlyPattern);
+    bookmarkPatterns.add(notInOriginalPattern);
+    bookmarkPatterns.add(originalOnlyPattern);
+    bookmarkPatterns.add(copyOnlyPattern);
+
+    return bookmarkPatterns;
   }
 }
