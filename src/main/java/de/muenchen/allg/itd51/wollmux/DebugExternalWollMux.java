@@ -84,5 +84,7 @@ public class DebugExternalWollMux
     set.insert(WollMux.__getComponentFactory(SeriendruckSidebarFactory.class.getName()));
 
     new WollMux(UNO.defaultContext);
+
+    UNO.loadComponentFromURL("private:factory/swriter", false, true);
   }
 }
