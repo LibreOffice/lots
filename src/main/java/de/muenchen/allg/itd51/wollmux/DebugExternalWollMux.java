@@ -79,9 +79,11 @@ public class DebugExternalWollMux
 
     XSet set =
       UnoRuntime.queryInterface(XSet.class, UNO.defaultContext.getServiceManager());
-    set.insert(WollMux.__getComponentFactory(WollMux.class.getName()));
-    set.insert(WollMux.__getComponentFactory(WollMuxSidebarFactory.class.getName()));
-    set.insert(WollMux.__getComponentFactory(SeriendruckSidebarFactory.class.getName()));
+    set.insert(ComponentRegistration.__getComponentFactory(WollMux.class.getName()));
+    set.insert(ComponentRegistration
+        .__getComponentFactory(WollMuxSidebarFactory.class.getName()));
+    set.insert(ComponentRegistration
+        .__getComponentFactory(SeriendruckSidebarFactory.class.getName()));
 
     new WollMux(UNO.defaultContext);
 

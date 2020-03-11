@@ -40,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.comp.loader.FactoryHelper;
 import com.sun.star.container.XIndexAccess;
 import com.sun.star.container.XIndexContainer;
 import com.sun.star.document.XEventListener;
@@ -49,13 +48,8 @@ import com.sun.star.frame.DispatchDescriptor;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
 import com.sun.star.lang.XComponent;
-import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.lang.XServiceInfo;
-import com.sun.star.lang.XSingleComponentFactory;
-import com.sun.star.lang.XSingleServiceFactory;
-import com.sun.star.lib.uno.helper.Factory;
 import com.sun.star.lib.uno.helper.WeakBase;
-import com.sun.star.registry.XRegistryKey;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.ui.XModuleUIConfigurationManagerSupplier;
 import com.sun.star.ui.XUIConfigurationManager;
@@ -81,8 +75,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddPALChangeEventListener
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemoveDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemovePALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
-import de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarFactory;
-import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
 
 
 /**
@@ -105,8 +97,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * Dieses Feld entält eine Liste aller Services, die dieser UNO-Service
    * implementiert.
    */
-  private static final java.lang.String[] SERVICENAMES =
-    { "de.muenchen.allg.itd51.wollmux.WollMux" };
+  public static final String[] SERVICENAMES = {
+      "de.muenchen.allg.itd51.wollmux.WollMux" };
 
   /**
    * Der Konstruktor initialisiert das WollMuxSingleton und startet damit den eigentlichen WollMux.
@@ -189,94 +181,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   public XDispatch[] queryDispatches( /* IN */DispatchDescriptor[] seqDescripts)
   {
     return DispatchProviderAndInterceptor.globalWollMuxDispatches.queryDispatches(seqDescripts);
-  }
-
-  /**
-   * Diese Methode liefert eine Factory zurück, die in der Lage ist den UNO-Service zu erzeugen. Die
-   * Methode wird von UNO intern benötigt. Die Methoden __getComponentFactory und
-   * __writeRegistryServiceInfo stellen das Herzstück des UNO-Service dar.
-   *
-   * @param sImplName
-   * @return Eine ComponentFactory.
-   */
-  public synchronized static XSingleComponentFactory __getComponentFactory(
-      java.lang.String sImplName)
-  {
-    com.sun.star.lang.XSingleComponentFactory xFactory = null;
-    if (sImplName.equals(WollMux.class.getName()))
-      xFactory = Factory.createComponentFactory(WollMux.class, SERVICENAMES);
-
-    if (sImplName.equals(WollMuxSidebarFactory.class.getName()))
-      xFactory =
-        Factory.createComponentFactory(WollMuxSidebarFactory.class,
-          new String[] { WollMuxSidebarFactory.__serviceName });
-
-    if (sImplName.equals(SeriendruckSidebarFactory.class.getName()))
-      xFactory = Factory.createComponentFactory(SeriendruckSidebarFactory.class,
-          new String[] { SeriendruckSidebarFactory.__serviceName });
-
-    return xFactory;
-  }
-
-  /**
-   * Diese Methode registriert den UNO-Service. Sie wird z.B. beim unopkg-add im Hintergrund
-   * aufgerufen. Die Methoden __getComponentFactory und __writeRegistryServiceInfo stellen das
-   * Herzstück des UNO-Service dar.
-   *
-   * @param xRegKey
-   * @return {@link Factory#writeRegistryServiceInfo(String, String[], XRegistryKey)}
-   */
-  public synchronized static boolean __writeRegistryServiceInfo(XRegistryKey xRegKey)
-  {
-    try
-    {
-      FactoryHelper.writeRegistryServiceInfo(WollMuxSidebarFactory.class.getName(),
-        WollMuxSidebarFactory.__serviceName, xRegKey);
-
-      FactoryHelper.writeRegistryServiceInfo(SeriendruckSidebarFactory.class.getName(),
-          SeriendruckSidebarFactory.__serviceName, xRegKey);
-
-      return Factory.writeRegistryServiceInfo(WollMux.class.getName(),
-        WollMux.SERVICENAMES, xRegKey);
-    }
-    catch (Throwable t)
-    {
-      // Es ist besser hier alles zu fangen was fliegt und es auf stderr auszugeben.
-      // So kann man z.B. mit "unopkg add <paketname>" immer gleich sehen, warum sich
-      // die Extension nicht installieren lässt. Fängt man hier nicht, erzeugt
-      // "unopkg add" eine unverständliche Fehlerausgabe und man sucht lange nach der
-      // Ursache. Wir hatten bei java-Extensions vor allem schon Probleme mit
-      // verschiedenen OOo/LO-Versionen, die wir erst finden konnten, als wir die
-      // Exception ausgegeben haben. Die Logger-Klasse möchte ich hier für die
-      // Ausgabe nicht verwenden weil dies ein Problem während der Installation und
-      // nicht während der Laufzeit ist.
-      t.printStackTrace();
-      return false;
-    }
-  }
-
-  public synchronized static XSingleServiceFactory __getServiceFactory(
-      final String sImplementationName,
-      final XMultiServiceFactory xFactory,
-      final XRegistryKey xKey)
-  {
-      XSingleServiceFactory xResult = null;
-      if (sImplementationName.equals(WollMuxSidebarFactory.class.getName()))
-      {
-        xResult = FactoryHelper.getServiceFactory(
-                WollMuxSidebarFactory.class,
-                WollMuxSidebarFactory.__serviceName,
-                xFactory,
-                xKey);
-    }
-
-    if (sImplementationName.equals(SeriendruckSidebarFactory.class.getName()))
-    {
-      xResult = FactoryHelper.getServiceFactory(SeriendruckSidebarFactory.class,
-          SeriendruckSidebarFactory.__serviceName, xFactory, xKey);
-      }
-
-      return xResult;
   }
 
   /**
