@@ -81,6 +81,6 @@ public enum PrintBlockSignature
       if (pbName.name.equalsIgnoreCase(name))
         return pbName;
     }
-    throw new IllegalArgumentException("No no constant with the name: " + name);
+    throw new IllegalArgumentException("No constant with the name: " + name);
   }
 }

@@ -2,31 +2,29 @@ package de.muenchen.allg.itd51.wollmux.slv.events;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.container.XNamed;
+import com.sun.star.awt.MessageBoxResults;
 import com.sun.star.text.XTextCursor;
-import com.sun.star.text.XTextRange;
-import com.sun.star.text.XTextRangeCompare;
 
+import de.muenchen.allg.afid.TextRangeRelation;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveConfig;
+import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
 import de.muenchen.allg.itd51.wollmux.slv.PrintBlockSignature;
-import de.muenchen.allg.ooo.TextDocument;
 import de.muenchen.allg.util.UnoProperty;
 
 /**
@@ -37,6 +35,7 @@ import de.muenchen.allg.util.UnoProperty;
  */
 public class OnMarkBlock extends WollMuxEvent
 {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(OnMarkBlock.class);
 
   private String blockname;
@@ -60,16 +59,14 @@ public class OnMarkBlock extends WollMuxEvent
   protected void doit() throws WollMuxFehlerException
   {
     XTextCursor range = documentController.getModel().getViewCursor();
-    if (UNO.XBookmarksSupplier(documentController.getModel().doc) == null || blockname == null
-        || range == null)
+    if (UNO.XBookmarksSupplier(documentController.getModel().doc) == null || blockname == null || range == null)
     {
       return;
     }
 
     if (range.isCollapsed())
     {
-      InfoDialog.showInfoModal(L.m("Fehler"),
-          L.m("Bitte wählen Sie einen Bereich aus, der markiert werden soll."));
+      InfoDialog.showInfoModal(L.m("Fehler"), L.m("Bitte wählen Sie einen Bereich aus, der markiert werden soll."));
       return;
     }
 
@@ -80,154 +77,140 @@ public class OnMarkBlock extends WollMuxEvent
     String bookmarkStart = "WM(CMD '" + blockname + "'";
     String hcAtt = " HIGHLIGHT_COLOR '" + highlightColor + "'";
     String bookmarkName = bookmarkStart + hcAtt + ")";
-    List<XNamed> bookmarkByRange = TextDocument.getBookmarkByTextRange(range);
-    Pattern bookmarkPattern = DocumentCommands.getPatternForCommand(blockname);
-    Set<String> bmNames = TextDocument.getBookmarkNamesMatching(bookmarkPattern, range);
+    ContentBasedDirectiveModel model = ContentBasedDirectiveModel.createModel(documentController);
 
-    if (bmNames == null || bmNames.isEmpty())
+    Map<TextRangeRelation, List<Bookmark>> relations = model.getAllPrintBlocks().collect(Collectors.toMap(b -> {
+      try
+      {
+        return TextRangeRelation.compareTextRanges(range, b.getAnchor());
+      } catch (UnoHelperException e)
+      {
+        LOGGER.debug("Can't compare text ranges", e);
+        return TextRangeRelation.IMPOSSIBLE;
+      }
+    }, List::of, (l1, l2) -> {
+      List<Bookmark> merged = new ArrayList<>(l1);
+      merged.addAll(l2);
+          return merged;
+        }));
+
+    if (relations.isEmpty())
     {
-      deleteCurrentCommand(range);
+      setNewDocumentCommand(bookmarkName, range, highlightColor, markChange);
+    } else if (relations.containsKey(TextRangeRelation.A_MATCH_B))
+    {
+      deleteOrUpdate(range, highlightColor, markChange, bookmarkName, relations.get(TextRangeRelation.A_MATCH_B));
+    } else if (TextRangeRelation.DISTINCT.containsAll(relations.keySet()))
+    {
+      // ranges don't overlap
       setNewDocumentCommand(bookmarkName, range, highlightColor, markChange);
     } else
     {
-      for (String matchedBookmark : bmNames)
+      for (Map.Entry<TextRangeRelation, List<Bookmark>> relation : relations.entrySet())
       {
-        for (XNamed bookmark : bookmarkByRange)
+        if (!TextRangeRelation.DISTINCT.contains(relation.getKey()))
         {
-          if (bookmark != null)
-          {
-            updateOrDeleteBookmark(range, markChange, bookmark, matchedBookmark, bookmarkName,
-                highlightColor);
-          }
+          deleteOrUpdateWithWarning(range, highlightColor, markChange, bookmarkName, relation.getValue());
+          break;
         }
       }
     }
 
     // parse commands
     documentController.getModel().getDocumentCommands().update();
-    DocumentCommandInterpreter dci = new DocumentCommandInterpreter(documentController,
-        WollMuxFiles.isDebugMode());
+    DocumentCommandInterpreter dci = new DocumentCommandInterpreter(documentController, WollMuxFiles.isDebugMode());
     dci.scanGlobalDocumentCommands();
     dci.scanInsertFormValueCommands();
   }
 
   /**
-   * If there is a bookmark with the same name at the text cursor it is deleted otherwise the
-   * information is updated.
-   *
+   * The list of bookmarks is deleted if it contains only bookmarks with the same command. Otherwise
+   * the bookmarks arent'deleted and the user is request to confirm, that he wants to create a
+   * possibly conflicting command.
+   * 
    * @param range
-   *          The current text cursor.
+   *          The range of the new bookmark.
+   * @param highlightColor
+   *          The background color of the new bookmark.
    * @param markChange
-   *          The message of the block.
-   * @param bookmark
-   *          The bookmark in the current Range.
-   * @param matchedBookmark
-   *          The name of the current bookmark.
+   *          The text to show in a dialog.
    * @param bookmarkName
    *          The name of the new bookmark.
-   * @param highlightColor
-   *          The highlightColor of updated command.
+   * @param bookmarks
+   *          List of other bookmarks in this range.
    */
-  private void updateOrDeleteBookmark(XTextCursor range, String markChange, XNamed bookmark,
-      String matchedBookmark, String bookmarkName, String highlightColor)
+  private void deleteOrUpdateWithWarning(XTextCursor range, String highlightColor, String markChange,
+      String bookmarkName, List<Bookmark> bookmarks)
+  {
+    boolean allMatch = bookmarks.stream().allMatch(bookmark -> bookmark.getName().equalsIgnoreCase(bookmarkName));
+    if (allMatch)
+    {
+      bookmarks.forEach(this::deleteBookmark);
+      InfoDialog.showInfoModal(L.m("Markierung des Blockes aufgehoben"),
+          L.m("Der ausgewählte Block enthielt bereits eine Markierung 'Block %1'. "
+              + "Die bestehende Markierung wurde aufgehoben.", markChange));
+    } else
+    {
+      short result = InfoDialog.showYesNoModal(L.m("Verschiedene Blöcke"),
+          L.m("Der ausgewählte Bock enthält bereits eine andere Markierungen.\n"
+              + "Soll der neue Block wirklich angelegt werden?\n"
+              + "Das kann zu unerwartetem Verhatlten führen und zeigt einen\nWarndialog beim Öffnen der Datei."));
+      if (result == MessageBoxResults.YES)
+      {
+        setNewDocumentCommand(bookmarkName, range, highlightColor, markChange);
+      }
+    }
+  }
+
+  /**
+   * The list of bookmarks is deleted. If the list of bookmarks contains bookmarks with other
+   * commands a new command is created.
+   * 
+   * @param The
+   *          range of the new bookmark.
+   * @param highlightColor
+   *          The background color of the new bookmark.
+   * @param markChange
+   *          The text to show in a dialog.
+   * @param bookmarkName
+   *          The name of the new bookmark.
+   * @param bookmarks
+   *          List of other bokmarks in this range.
+   */
+  private void deleteOrUpdate(XTextCursor range, String highlightColor, String markChange, String bookmarkName,
+      List<Bookmark> bookmarks)
+  {
+    boolean allMatch = bookmarks.stream().allMatch(bookmark -> bookmark.getName().equalsIgnoreCase(bookmarkName));
+    bookmarks.forEach(this::deleteBookmark);
+    if (allMatch)
+    {
+      InfoDialog.showInfoModal(L.m("Markierung des Blockes aufgehoben"), L.m(
+          "Der ausgewählte Block enthielt bereits eine Markierung 'Block %1'. "
+              + "Die bestehende Markierung wurde aufgehoben.",
+          markChange));
+    } else
+    {
+      // if there is an other command, update it
+      setNewDocumentCommand(bookmarkName, range, highlightColor, markChange);
+    }
+  }
+
+  /**
+   * Delete a bookmark and reset the background color.
+   * 
+   * @param bookmark
+   *          The bookmark to delete.
+   */
+  private void deleteBookmark(Bookmark bookmark)
   {
     try
     {
-      Bookmark bookmarkToDelete = new Bookmark(matchedBookmark,
-          UNO.XBookmarksSupplier(documentController.getModel().doc));
-
-      Bookmark wollBook = new Bookmark(bookmark.getName(),
-          UNO.XBookmarksSupplier(documentController.getModel().doc));
-
-      short result = compareBookmarks(bookmarkToDelete, wollBook);
-      UnoProperty.setPropertyToDefault(bookmarkToDelete.getTextCursor(), UnoProperty.CHAR_BACK_COLOR);
-      bookmarkToDelete.remove();
-
-      // bookmarkToDelete ends behind wollBook || bookmarkToDelete ends before wollBook
-      if ((result == -1 || result == 1)
-          && !(bookmarkToDelete.getName().equals(bookmarkName)))
-      {
-        setNewDocumentCommand(bookmarkName, range, highlightColor, markChange);
-      } else // bookmarkToDelete ends at same position as wollBook
-      {
-        InfoDialog.showInfoModal(L.m("Markierung des Blockes aufgehoben"),
-            L.m("Der ausgewählte Block enthielt bereits eine Markierung 'Block %1'. "
-                + "Die bestehende Markierung wurde aufgehoben.", markChange));
-      }
-    } catch (UnoHelperException ex)
+      UnoProperty.setPropertyToDefault(bookmark.getTextCursor(), UnoProperty.CHAR_BACK_COLOR);
+      bookmark.remove();
+    } catch (UnoHelperException e)
     {
-      LOGGER.error("", ex);
+      LOGGER.debug("Can't delete the book mark.", e);
     }
-  }
-
-  /**
-   * Compares the anchor of the bookmarks.
-   *
-   * @param first
-   *          The first bookmark.
-   * @param second
-   *          The second bookmark.
-   * @return {@#link XTextRangeCompare#compareRegionStarts(XTextRange, XTextRange)
-   * 
-   * @throws UnoHelperException
-   *           Can't access a book mark.
-   */
-  private short compareBookmarks(Bookmark first, Bookmark second) throws UnoHelperException
-  {
-    XTextRange bookMarkToDeleteAnchor = first.getAnchor();
-    XTextRange wollBookAnchor = second.getAnchor();
-
-    XTextRangeCompare c = UNO.XTextRangeCompare(bookMarkToDeleteAnchor.getText());
-    return c.compareRegionStarts(bookMarkToDeleteAnchor, wollBookAnchor);
-  }
-
-  /**
-   * Delete every print block command covered exactly by the range.
-   *
-   * @param range
-   *          The range to check.
-   */
-  private void deleteCurrentCommand(XTextCursor range)
-  {
-    for (Pattern pattern : getBookmarkPatterns())
-    {
-      Set<String> existingBookmarks = TextDocument.getBookmarkNamesMatching(pattern, range);
-
-      for (String bookmark : existingBookmarks)
-      {
-        try
-        {
-          Bookmark wollBook = new Bookmark(bookmark, UNO.XBookmarksSupplier(documentController.getModel().doc));
-          wollBook.remove();
-        } catch (UnoHelperException e)
-        {
-          LOGGER.error("", e);
-        }
-      }
-    }
-  }
-
-  /**
-   * Get patterns for all print block commands.
-   *
-   * @return List of command patterns.
-   */
-  private static List<Pattern> getBookmarkPatterns()
-  {
-    Pattern allVersionPattern = DocumentCommands.getPatternForCommand("allVersions");
-    Pattern draftOnlyPattern = DocumentCommands.getPatternForCommand("draftOnly");
-    Pattern notInOrginalPattern = DocumentCommands.getPatternForCommand("notInOriginal");
-    Pattern originalOnlyPattern = DocumentCommands.getPatternForCommand("originalOnly");
-    Pattern copyOnlyPattern = DocumentCommands.getPatternForCommand("copyOnly");
-
-    List<Pattern> bookmarkPatterns = new ArrayList<>();
-    bookmarkPatterns.add(allVersionPattern);
-    bookmarkPatterns.add(draftOnlyPattern);
-    bookmarkPatterns.add(notInOrginalPattern);
-    bookmarkPatterns.add(originalOnlyPattern);
-    bookmarkPatterns.add(copyOnlyPattern);
-
-    return bookmarkPatterns;
   }
 
   /**
@@ -268,7 +251,6 @@ public class OnMarkBlock extends WollMuxEvent
   @Override
   public String toString()
   {
-    return this.getClass().getSimpleName() + "(#" + documentController.getModel().hashCode() + ", '"
-        + blockname + "')";
+    return this.getClass().getSimpleName() + "(#" + documentController.getModel().hashCode() + ", '" + blockname + "')";
   }
 }
