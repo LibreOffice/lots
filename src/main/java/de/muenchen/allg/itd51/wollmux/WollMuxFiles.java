@@ -210,7 +210,7 @@ public class WollMuxFiles
       try
       {
         wollmuxConf = new ConfigThingy("wollmuxConf", wollMuxConfigFile.toURI().toURL());
-        String serverURI = wollmuxConf.getString("SERVER", null);
+	String serverURI = wollmuxConf.getString("CONF_SERVER", null);
         if (serverURI != null)
         {
           String user = wollmuxConf.getString("USERNAME", System.getProperty("user.name"));
