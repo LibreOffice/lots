@@ -102,12 +102,12 @@ public abstract class WollMuxDispatch implements XDispatch
   protected boolean isElementInPrintPreview()
   {
     boolean flag = false;
-    XLayoutManager layout = UNO.XLayoutManager(Utils.getProperty(
-        UNO.XTextDocument(frame.getController().getModel()).getCurrentController().getFrame(),
-        "LayoutManager"));
+    XLayoutManager layout = UNO
+        .XLayoutManager(Utils.getProperty(frame, "LayoutManager"));
     if (layout != null)
     {
-      flag = !layout.isElementVisible("private:resource/toolbar/previewobjectbar");
+      flag = !layout
+          .isElementVisible("private:resource/toolbar/previewobjectbar");
     }
     return flag;
   }
