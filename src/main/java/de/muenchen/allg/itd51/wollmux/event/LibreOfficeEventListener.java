@@ -156,16 +156,16 @@ public class LibreOfficeEventListener implements XEventListener
     if (compo == null)
       return;
 
-    XTextDocument xTextDoc = UNO.XTextDocument(compo);
-    if (xTextDoc != null)
-    {
-      registerDispatcher(compo.getCurrentController().getFrame());
-    }
-
     // no action for temporary files
     if (isTempMailMergeDocument(compo))
     {
       return;
+    }
+
+    XTextDocument xTextDoc = UNO.XTextDocument(compo);
+    if (xTextDoc != null)
+    {
+      registerDispatcher(compo.getCurrentController().getFrame());
     }
 
     // Check installation is only executed on first event because the listener is unregistered
@@ -262,18 +262,27 @@ public class LibreOfficeEventListener implements XEventListener
     for (PropertyValue p : args)
     {
       if (p.Name.equals("FileName"))
-        fileName = (String) p.Value;
-      if (p.Name.equals("Hidden"))
-        hidden = (Boolean) p.Value;
+      {
+	fileName = (String) p.Value;
+      } else if (p.Name.equals("Hidden"))
+      {
+	hidden = (Boolean) p.Value;
+      }
     }
-    // file -> print to mailmerge
+    // file -> print to mail merge
     boolean tmp = url.startsWith(".tmp/", idx - 4) && url.endsWith(".tmp");
     // create by css.text.MailMerge
     boolean mmService = url.startsWith("/SwMM", idx) && url.endsWith(".odt");
-    // create by WollMux mailmerge
+    /*
+     * files created by css.text.MailMerge have only 3 properties whereas normal
+     * files have far more.
+     */
+    mmService |= args.length == 3;
+    // create by WollMux mail merge
     boolean wmMailmerge = url.startsWith("/WollMuxMailMerge", idx - 20);
 
-    return tmp || mmService || wmMailmerge || (fileName.equals("private:object") && hidden);
+    return tmp || mmService || wmMailmerge
+        || (fileName.equals("private:object") && hidden);
   }
 
   /**
