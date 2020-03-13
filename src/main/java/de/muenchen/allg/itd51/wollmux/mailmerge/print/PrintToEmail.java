@@ -143,8 +143,7 @@ public abstract class PrintToEmail extends MailMergePrintFunction
       return;
     }
 
-    String subject = pmod.getProp(PROP_EMAIL_SUBJECT, L.m("<kein Betreff>"))
-        .toString();
+    String subject = pmod.getProp(PROP_EMAIL_SUBJECT, L.m("<kein Betreff>")).toString();
     String message = (String) pmod.getProp(PROP_EMAIL_MESSAGE_TEXTTAGS, null);
 
     try
@@ -155,22 +154,18 @@ public abstract class PrintToEmail extends MailMergePrintFunction
 
       MailServerSettings smtpSettings = getMailServerSettings(pmod, mail);
 
-      File document = saveOutputFile(createTempDocument(pmod, isODT),
-          pmod.getTextDocument());
+      File document = saveOutputFile(createTempDocument(pmod, isODT), pmod.getTextDocument());
 
       sendMail(mail, smtpSettings, document);
 
       // Wenn Properties noch nicht gesetzt worden sind initial setzen da
       // sonst bei getPropertyValue() UnknownPropertyException geworfen wird.
-      if (!pmod.getPropertySetInfo()
-          .hasPropertyByName(PROP_EMAIL_REPORT_RECIPIENT_LIST))
+      if (!pmod.getPropertySetInfo().hasPropertyByName(PROP_EMAIL_REPORT_RECIPIENT_LIST))
       {
-        pmod.setPropertyValue(PROP_EMAIL_REPORT_RECIPIENT_LIST,
-            new ArrayList<String>());
+        pmod.setPropertyValue(PROP_EMAIL_REPORT_RECIPIENT_LIST, new ArrayList<String>());
       }
 
-      if (!pmod.getPropertySetInfo()
-          .hasPropertyByName(PROP_EMAIL_REPORT_EMAILS_SENT_COUNT))
+      if (!pmod.getPropertySetInfo().hasPropertyByName(PROP_EMAIL_REPORT_EMAILS_SENT_COUNT))
       {
         pmod.setPropertyValue(PROP_EMAIL_REPORT_EMAILS_SENT_COUNT, 0);
       }
@@ -178,8 +173,7 @@ public abstract class PrintToEmail extends MailMergePrintFunction
       @SuppressWarnings("unchecked")
       List<String> reportRecipientList = (List<String>) pmod
           .getPropertyValue(PROP_EMAIL_REPORT_RECIPIENT_LIST);
-      int mailsSentCount = (int) pmod
-          .getPropertyValue(PROP_EMAIL_REPORT_EMAILS_SENT_COUNT);
+      int mailsSentCount = (int) pmod.getPropertyValue(PROP_EMAIL_REPORT_EMAILS_SENT_COUNT);
 
       if (reportRecipientList == null)
         reportRecipientList = new ArrayList<>();
@@ -187,15 +181,14 @@ public abstract class PrintToEmail extends MailMergePrintFunction
       reportRecipientList.add(to);
       mailsSentCount++;
 
-      pmod.setPropertyValue(PROP_EMAIL_REPORT_RECIPIENT_LIST,
-          reportRecipientList);
-      pmod.setPropertyValue(PROP_EMAIL_REPORT_EMAILS_SENT_COUNT,
-          mailsSentCount);
+      pmod.setPropertyValue(PROP_EMAIL_REPORT_RECIPIENT_LIST, reportRecipientList);
+      pmod.setPropertyValue(PROP_EMAIL_REPORT_EMAILS_SENT_COUNT, mailsSentCount);
     } catch (ConfigurationErrorException e)
     {
       LOGGER.error("Kein Mailserver", e);
       InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m(
-          "Es konnten keine Angaben zum Mailserver gefunden werden - eventuell ist die WollMux-Konfiguration nicht vollständig."));
+          "Es konnten keine Angaben zum Mailserver gefunden werden - eventuell ist die WollMux-Konfiguration "
+              + "nicht vollständig."));
       pmod.cancel();
       return;
     } catch (MessagingException e)

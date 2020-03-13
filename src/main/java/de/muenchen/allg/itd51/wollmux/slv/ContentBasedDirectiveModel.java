@@ -21,9 +21,11 @@ import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoCollection;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.core.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.core.util.PropertyName;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.document.StyleService;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.slv.print.ContentBasedDirectivePrint;
 
@@ -46,27 +48,51 @@ public class ContentBasedDirectiveModel
   static final String CHAR_STYLE_NAME_DEFAULT = "Fließtext";
   static final String CHAR_STYLE_NAME_NUMBER = "WollMuxRoemischeZiffer";
 
-  private static final Map<TextDocumentController, ContentBasedDirectiveModel> models = new HashMap<>();
+  private static final Map<HashableComponent, ContentBasedDirectiveModel> models = new HashMap<>();
 
   /**
-   * Creates a model for the given controller if it doesn't exist. Otherwise returns the associated
-   * model.
+   * Creates a model for the given controller if it doesn't exist. Otherwise
+   * returns the associated model.
    *
    * @param doc
    *          A controller of a document.
    * @return A newly created model or the model associated with this controller.
    */
-  public static ContentBasedDirectiveModel createModel(TextDocumentController doc)
+  public static ContentBasedDirectiveModel createModel(
+      TextDocumentController doc)
   {
-    return models.computeIfAbsent(doc, ContentBasedDirectiveModel::new);
+    HashableComponent hash = new HashableComponent(doc.getModel().doc);
+    if (!models.containsKey(hash))
+    {
+      models.put(hash, new ContentBasedDirectiveModel(doc));
+    }
+    return models.get(hash);
   }
 
-  private final TextDocumentController documentController;
-  private final TextDocumentModel documentModel;
+  /**
+   * Creates a model for the given document if it doesn't exist. Otherwise
+   * returns the associated model.
+   *
+   * @param doc
+   *          A document.
+   * @return A newly created model or the model associated with this document.
+   */
+  public static ContentBasedDirectiveModel createModel(XTextDocument doc)
+  {
+    HashableComponent hash = new HashableComponent(doc);
+    if (!models.containsKey(hash))
+    {
+      models.put(hash, new ContentBasedDirectiveModel(doc));
+    }
+    return models.get(hash);
+  }
+
+  private TextDocumentController documentController;
   private final XTextDocument doc;
 
   /**
-   * Creates a new model for the document. This implies creating all necessary styles.
+   * Creates a new model for the document. This implies creating all necessary
+   * styles.
    *
    * @param documentController
    *          The controller of the document.
@@ -74,13 +100,23 @@ public class ContentBasedDirectiveModel
   private ContentBasedDirectiveModel(TextDocumentController documentController)
   {
     this.documentController = documentController;
-    this.documentModel = documentController.getModel();
-    this.doc = documentModel.doc;
+    this.doc = documentController.getModel().doc;
+    createUsedStyles();
+  }
+
+  private ContentBasedDirectiveModel(XTextDocument doc)
+  {
+    this.doc = doc;
+    this.documentController = null;
     createUsedStyles();
   }
 
   public TextDocumentController getDocumentController()
   {
+    if (documentController == null)
+    {
+      documentController = DocumentManager.getTextDocumentController(doc);
+    }
     return documentController;
   }
 
@@ -224,56 +260,57 @@ public class ContentBasedDirectiveModel
       XTextRange zifferOnly = item.getZifferOnly();
       if (zifferOnly != null)
       {
-        if (!visible)
-        {
-          zifferOnly.setString("");
-        }
+	if (!visible)
+	{
+	  zifferOnly.setString("");
+	}
       } else
       {
-        if (visible)
-        {
-          item.getTextRange().getStart().setString(ContentBasedDirectiveConfig.getNumber(1));
-        }
+	if (visible)
+	{
+	  item.getTextRange().getStart()
+	      .setString(ContentBasedDirectiveConfig.getNumber(1));
+	}
       }
     }
   }
 
   /**
-   * Creates for all content based directives styles in the document. A new style and changes the
-   * style usage.
+   * Creates for all content based directives styles in the document. A new
+   * style and changes the style usage.
    */
   public void renameTextStyles()
   {
     HashMap<String, String> mapOldNameToNewName = new HashMap<>();
-    XParagraphCursor cursor = UNO
-        .XParagraphCursor(doc.getText().createTextCursorByRange(doc.getText().getStart()));
+    XParagraphCursor cursor = UNO.XParagraphCursor(
+        doc.getText().createTextCursorByRange(doc.getText().getStart()));
     if (cursor != null)
     {
       ContentBasedDirectiveItem item = new ContentBasedDirectiveItem(cursor);
       do
       {
-        cursor.gotoEndOfParagraph(true);
+	cursor.gotoEndOfParagraph(true);
 
-        if (item.isItem() || item.isRecipientLine()
-            || item.isItemWithRecipient())
-        {
-          String oldName = AnyConverter
-              .toString(Utils.getProperty(cursor, PropertyName.PARA_STYLE_NAME));
+	if (item.isItem() || item.isRecipientLine()
+	    || item.isItemWithRecipient())
+	{
+	  String oldName = AnyConverter.toString(
+	      Utils.getProperty(cursor, PropertyName.PARA_STYLE_NAME));
 
-          // create new style based on old if necessary
-          String newName = mapOldNameToNewName.computeIfAbsent(oldName, key -> {
-            String name = "";
-            do
-            {
-              name = "NO" + new Random().nextInt(1000) + "_" + key;
-            } while (documentModel.createParagraphStyle(name, key) == null);
-            return name;
-          });
-          // Save and restore CharHidden property when changing ParaStyleName
-          Object hidden = Utils.getProperty(cursor, PropertyName.CHAR_HIDDEN);
-          Utils.setProperty(cursor, PropertyName.PARA_STYLE_NAME, newName);
-          Utils.setProperty(cursor, PropertyName.CHAR_HIDDEN, hidden);
-        }
+	  // create new style based on old if necessary
+	  String newName = mapOldNameToNewName.computeIfAbsent(oldName, key -> {
+	    String name = "";
+	    do
+	    {
+	      name = "NO" + new Random().nextInt(1000) + "_" + key;
+	    } while (StyleService.createParagraphStyle(doc, name, key) == null);
+	    return name;
+	  });
+	  // Save and restore CharHidden property when changing ParaStyleName
+	  Object hidden = Utils.getProperty(cursor, PropertyName.CHAR_HIDDEN);
+	  Utils.setProperty(cursor, PropertyName.PARA_STYLE_NAME, newName);
+	  Utils.setProperty(cursor, PropertyName.CHAR_HIDDEN, hidden);
+	}
       } while (cursor.gotoNextParagraph(false));
     }
 
@@ -303,80 +340,100 @@ public class ContentBasedDirectiveModel
   private void createUsedStyles()
   {
     // paragraph styles
-    XStyle style = documentModel.getParagraphStyle(PARA_STYLE_NAME_DEFAULT);
+    XStyle style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_DEFAULT);
     if (style == null)
     {
-      style = documentModel.createParagraphStyle(PARA_STYLE_NAME_DEFAULT,
+      style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_DEFAULT,
           null);
-      Utils.setProperty(style, PropertyName.FOLLOW_STYLE, PARA_STYLE_NAME_DEFAULT);
+      Utils.setProperty(style, PropertyName.FOLLOW_STYLE,
+          PARA_STYLE_NAME_DEFAULT);
       Utils.setProperty(style, PropertyName.CHAR_HEIGHT, Integer.valueOf(11));
       Utils.setProperty(style, PropertyName.CHAR_FONT_NAME, "Arial");
     }
 
-    style = documentModel.getParagraphStyle(PARA_STYLE_NAME_CBD);
+    style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_CBD);
     if (style == null)
     {
-      style = documentModel.createParagraphStyle(PARA_STYLE_NAME_CBD, PARA_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.FOLLOW_STYLE, PARA_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.CHAR_WEIGHT, Float.valueOf(FontWeight.BOLD));
-      Utils.setProperty(style, PropertyName.PARA_FIRST_LINE_INDENT, Integer.valueOf(-700));
-      Utils.setProperty(style, PropertyName.PARA_TOP_MARGIN, Integer.valueOf(460));
-    }
-
-    style = documentModel.getParagraphStyle(PARA_STYLE_NAME_FIRST_CBD);
-    if (style == null)
-    {
-      style = documentModel.createParagraphStyle(PARA_STYLE_NAME_FIRST_CBD, PARA_STYLE_NAME_CBD);
-      Utils.setProperty(style, PropertyName.FOLLOW_STYLE, PARA_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.PARA_FIRST_LINE_INDENT, Integer.valueOf(0));
-      Utils.setProperty(style, PropertyName.PARA_TOP_MARGIN, Integer.valueOf(0));
-    }
-
-    style = documentModel.getParagraphStyle(PARA_STYLE_NAME_COPY);
-    if (style == null)
-    {
-      style = documentModel.createParagraphStyle(PARA_STYLE_NAME_COPY, PARA_STYLE_NAME_CBD);
-      Utils.setProperty(style, PropertyName.FOLLOW_STYLE, PARA_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.CHAR_WEIGHT, Integer.valueOf(100));
-      Utils.setProperty(style, PropertyName.PARA_FIRST_LINE_INDENT, Integer.valueOf(-700));
-      Utils.setProperty(style, PropertyName.PARA_TOP_MARGIN, Integer.valueOf(460));
-    }
-
-    style = documentModel.getParagraphStyle(PARA_STYLE_NAME_RECIPIENT);
-    if (style == null)
-    {
-      style = documentModel.createParagraphStyle(PARA_STYLE_NAME_RECIPIENT,
+      style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_CBD,
           PARA_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.FOLLOW_STYLE, PARA_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.CHAR_UNDERLINE, Integer.valueOf(1));
-      Utils.setProperty(style, PropertyName.CHAR_WEIGHT, Float.valueOf(FontWeight.BOLD));
+      Utils.setProperty(style, PropertyName.FOLLOW_STYLE,
+          PARA_STYLE_NAME_DEFAULT);
+      Utils.setProperty(style, PropertyName.CHAR_WEIGHT,
+          Float.valueOf(FontWeight.BOLD));
+      Utils.setProperty(style, PropertyName.PARA_FIRST_LINE_INDENT,
+          Integer.valueOf(-700));
+      Utils.setProperty(style, PropertyName.PARA_TOP_MARGIN,
+          Integer.valueOf(460));
     }
 
-    style = documentModel
-        .getParagraphStyle(PARA_STYLE_NAME_CBD_WITH_RECIPIENT);
+    style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_FIRST_CBD);
     if (style == null)
     {
-      style = documentModel.createParagraphStyle(PARA_STYLE_NAME_CBD_WITH_RECIPIENT,
+      style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_FIRST_CBD,
           PARA_STYLE_NAME_CBD);
-      Utils.setProperty(style, PropertyName.FOLLOW_STYLE, PARA_STYLE_NAME_DEFAULT);
+      Utils.setProperty(style, PropertyName.FOLLOW_STYLE,
+          PARA_STYLE_NAME_DEFAULT);
+      Utils.setProperty(style, PropertyName.PARA_FIRST_LINE_INDENT,
+          Integer.valueOf(0));
+      Utils.setProperty(style, PropertyName.PARA_TOP_MARGIN,
+          Integer.valueOf(0));
+    }
+
+    style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_COPY);
+    if (style == null)
+    {
+      style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_COPY,
+          PARA_STYLE_NAME_CBD);
+      Utils.setProperty(style, PropertyName.FOLLOW_STYLE,
+          PARA_STYLE_NAME_DEFAULT);
+      Utils.setProperty(style, PropertyName.CHAR_WEIGHT, Integer.valueOf(100));
+      Utils.setProperty(style, PropertyName.PARA_FIRST_LINE_INDENT,
+          Integer.valueOf(-700));
+      Utils.setProperty(style, PropertyName.PARA_TOP_MARGIN,
+          Integer.valueOf(460));
+    }
+
+    style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_RECIPIENT);
+    if (style == null)
+    {
+      style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_RECIPIENT,
+          PARA_STYLE_NAME_DEFAULT);
+      Utils.setProperty(style, PropertyName.FOLLOW_STYLE,
+          PARA_STYLE_NAME_DEFAULT);
+      Utils.setProperty(style, PropertyName.CHAR_UNDERLINE, Integer.valueOf(1));
+      Utils.setProperty(style, PropertyName.CHAR_WEIGHT,
+          Float.valueOf(FontWeight.BOLD));
+    }
+
+    style = StyleService.getParagraphStyle(doc,
+        PARA_STYLE_NAME_CBD_WITH_RECIPIENT);
+    if (style == null)
+    {
+      style = StyleService.createParagraphStyle(doc,
+          PARA_STYLE_NAME_CBD_WITH_RECIPIENT, PARA_STYLE_NAME_CBD);
+      Utils.setProperty(style, PropertyName.FOLLOW_STYLE,
+          PARA_STYLE_NAME_DEFAULT);
       Utils.setProperty(style, PropertyName.CHAR_UNDERLINE, Integer.valueOf(1));
     }
 
     // character styles
-    style = documentModel.getCharacterStyle(CHAR_STYLE_NAME_DEFAULT);
+    style = StyleService.getCharacterStyle(doc, CHAR_STYLE_NAME_DEFAULT);
     if (style == null)
     {
-      style = documentModel.createCharacterStyle(CHAR_STYLE_NAME_DEFAULT, null);
+      style = StyleService.createCharacterStyle(doc, CHAR_STYLE_NAME_DEFAULT,
+          null);
       Utils.setProperty(style, PropertyName.CHAR_HEIGHT, Integer.valueOf(11));
       Utils.setProperty(style, PropertyName.CHAR_FONT_NAME, "Arial");
       Utils.setProperty(style, PropertyName.CHAR_UNDERLINE, Integer.valueOf(0));
     }
 
-    style = documentModel.getCharacterStyle(CHAR_STYLE_NAME_NUMBER);
+    style = StyleService.getCharacterStyle(doc, CHAR_STYLE_NAME_NUMBER);
     if (style == null)
     {
-      style = documentModel.createCharacterStyle(CHAR_STYLE_NAME_NUMBER, CHAR_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.CHAR_WEIGHT, Float.valueOf(FontWeight.BOLD));
+      style = StyleService.createCharacterStyle(doc, CHAR_STYLE_NAME_NUMBER,
+          CHAR_STYLE_NAME_DEFAULT);
+      Utils.setProperty(style, PropertyName.CHAR_WEIGHT,
+          Float.valueOf(FontWeight.BOLD));
     }
   }
 }

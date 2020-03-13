@@ -4,7 +4,7 @@ import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 
 /**
- * Print function for creating one pdf file per mailmerge record.
+ * Print function for creating one PDF file per mail merge record.
  */
 public class ToSinglePDF extends MailMergePrintFunction
 {

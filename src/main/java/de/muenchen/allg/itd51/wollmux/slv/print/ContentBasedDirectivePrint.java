@@ -164,7 +164,7 @@ public class ContentBasedDirectivePrint extends PrintFunction
   {
     List<ContentBasedDirective> items = new ArrayList<>();
 
-    // VCheck if first content based directive is present
+    // Check if first content based directive is present
     ContentBasedDirectiveItem item = model.getFirstItem();
     if (item != null)
     {
@@ -182,26 +182,30 @@ public class ContentBasedDirectivePrint extends PrintFunction
     ContentBasedDirective currentVerfpunkt = null;
     for (XTextRange paragraph : paragraphs)
     {
+      if (paragraph == null)
+      {
+	continue;
+      }
+
       item = new ContentBasedDirectiveItem(paragraph);
       if (item.isItem())
       {
-        String heading = paragraph.getString();
-        currentVerfpunkt = new ContentBasedDirective(heading);
-        currentVerfpunkt.setMinNumberOfCopies(1);
-        items.add(currentVerfpunkt);
+	String heading = paragraph.getString();
+	currentVerfpunkt = new ContentBasedDirective(heading);
+	currentVerfpunkt.setMinNumberOfCopies(1);
+	items.add(currentVerfpunkt);
       }
 
       boolean rangeVisible = isRangeVisible(model, paragraph);
       // Add recipients, if line is visible
       if ((item.isRecipientLine() || item.isItemWithRecipient())
-          && currentVerfpunkt != null
-          && rangeVisible)
+          && currentVerfpunkt != null && rangeVisible)
       {
-        String recipient = paragraph.getString();
-        if (!recipient.isEmpty())
-        {
-          currentVerfpunkt.addReceiverLine(recipient);
-        }
+	String recipient = paragraph.getString();
+	if (!recipient.isEmpty())
+	{
+	  currentVerfpunkt.addReceiverLine(recipient);
+	}
       }
     }
 
