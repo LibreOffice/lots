@@ -24,7 +24,7 @@ import de.muenchen.allg.itd51.wollmux.func.print.PrintException;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 
 /**
- * A print function, which sets the mailmerge fields to the values of the next mailmerge data.
+ * A print function, which sets the mail merge fields to the values of the next mail merge data.
  */
 public class SetFormValue extends PrintFunction
 {
@@ -32,7 +32,7 @@ public class SetFormValue extends PrintFunction
   private static final Logger LOGGER = LoggerFactory.getLogger(SetFormValue.class);
 
   /**
-   * Tag replaced by the mailmerge number.
+   * Tag replaced by the mail merge number.
    */
   public static final String TAG_MAILMERGE_ID = "#SB";
 
@@ -138,8 +138,8 @@ public class SetFormValue extends PrintFunction
       Map<String, String> record = data.row(sel);
       for (Map.Entry<String, String> entry : record.entrySet())
       {
-	pmod.setFormValue(entry.getKey(), entry.getValue());
-	dataSetExport.put(entry.getKey(), entry.getValue());
+        pmod.setFormValue(entry.getKey(), entry.getValue());
+        dataSetExport.put(entry.getKey(), entry.getValue());
       }
       pmod.setFormValue(TAG_RECORD_ID, "" + sel);
       dataSetExport.put(TAG_RECORD_ID, "" + sel);
@@ -151,10 +151,10 @@ public class SetFormValue extends PrintFunction
       // simProc.
       if (simProc == null)
       {
-	pmod.printWithProps();
+        pmod.printWithProps();
       } else
       {
-	simProc.processSimulationResults(documentController.stopSimulation());
+        simProc.processSimulationResults(documentController.stopSimulation());
       }
 
       pmod.setPrintProgressValue((short) mailMergeNumber);
