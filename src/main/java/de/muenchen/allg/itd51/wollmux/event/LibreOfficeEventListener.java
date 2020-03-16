@@ -75,7 +75,7 @@ public class LibreOfficeEventListener implements XEventListener
         return;
       }
       String event = docEvent.EventName;
-      LOGGER.debug(event);
+      LOGGER.trace(event);
 
       switch (event)
       {
