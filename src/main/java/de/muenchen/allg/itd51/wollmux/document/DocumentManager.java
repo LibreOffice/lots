@@ -62,6 +62,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
@@ -398,16 +399,7 @@ public class DocumentManager
     public TextDocumentInfo(XTextDocument doc)
     {
       this.doc = doc;
-    }
 
-    /**
-     * Auf die Methoden getTextDocumentController() und hasTextDocumentModel() wird
-     * möglicherweise aus verschiedenen Threads zugegriffen (WollMux Event Queue und
-     * Event Handler im Singleton), daher ist synchronized notwendig.
-     */
-    @Override
-    public synchronized TextDocumentController getTextDocumentController()
-    {
       if (documentController == null)
       {
         documentController = new TextDocumentController(
@@ -415,8 +407,18 @@ public class DocumentManager
                 WollMuxSingleton.getVersion(), Utils.getOOoVersion()),
             GlobalFunctions.getInstance().getGlobalFunctions(),
             GlobalFunctions.getInstance().getFunctionDialogs());
-      }
 
+        new OnTextDocumentControllerInitialized(documentController).emit();
+      }
+    }
+
+    /**
+     * synchronized is required due WollMux Event Queue and LO's event handler. Two different
+     * threads.
+     */
+    @Override
+    public synchronized TextDocumentController getTextDocumentController()
+    {
       return documentController;
     }
 
