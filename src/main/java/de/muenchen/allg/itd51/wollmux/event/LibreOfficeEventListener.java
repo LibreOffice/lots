@@ -21,9 +21,7 @@ import de.muenchen.allg.itd51.wollmux.document.DocumentManager.Info;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCheckInstallation;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnInitialize;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnNotifyDocumentEventListener;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnProcessTextDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
 
 /**
  * A listener for LibreOffice events of documents like OnNew or OnLoad. <a href=
@@ -118,44 +116,28 @@ public class LibreOfficeEventListener implements XEventListener
       return;
     }
 
-    XTextDocument xTextDoc = UNO.XTextDocument(compo);
-    if (xTextDoc != null)
-    {
-      registerDispatcher(compo.getCurrentController().getFrame());
-    }
-
     // Check installation is only executed on first event because the listener is unregistered
     // afterwards.
     new OnCheckInstallation().emit();
     new OnInitialize().emit();
 
     Info docInfo = docManager.getInfo(compo);
-    if (xTextDoc != null && docInfo != null && isDocumentLoadedHidden(compo))
-    {
-      docManager.remove(compo);
-      return;
-    }
 
     // start processing
     if (docInfo == null)
     {
+      XTextDocument xTextDoc = UNO.XTextDocument(compo);
+
       if (xTextDoc != null)
       {
+        registerDispatcher(compo.getCurrentController().getFrame());
         docManager.addTextDocument(xTextDoc);
-        new OnProcessTextDocument(DocumentManager.getTextDocumentController(xTextDoc),
-            !isDocumentLoadedHidden(compo)).emit();
       } else
       {
         docManager.add(compo);
         new OnNotifyDocumentEventListener(null, WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED,
             compo).emit();
       }
-    }
-
-    if (xTextDoc != null)
-    {
-      new OnTextDocumentControllerInitialized(DocumentManager.getTextDocumentController(xTextDoc))
-          .emit();
     }
   }
 

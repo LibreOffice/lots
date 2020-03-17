@@ -23,7 +23,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnPALChangedNotify;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnPrint;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnPrintPage;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnProcessTextDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemoveDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemoveFormularMax;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemovePALChangeEventListener;
@@ -179,18 +178,6 @@ public class WollMuxEventListenerImpl implements WollMuxEventListener
   @Subscribe
   public void onRemovePALChangeEventListener(
       OnRemovePALChangeEventListener event)
-  {
-    event.process();
-  }
-
-  /**
-   * Execute the event
-   *
-   * @param event
-   *          The event.
-   */
-  @Subscribe
-  public void onProcessTextDocument(OnProcessTextDocument event)
   {
     event.process();
   }

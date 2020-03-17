@@ -1,10 +1,11 @@
-package de.muenchen.allg.itd51.wollmux.event.handlers;
+package de.muenchen.allg.itd51.wollmux.document.commands;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.Subscribe;
+
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
-import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
@@ -12,55 +13,38 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventListener;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnNotifyDocumentEventListener;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 
 /**
  * Event for processing a document.
  */
-public class OnProcessTextDocument extends WollMuxEvent
+public class OnProcessTextDocument implements WollMuxEventListener
 {
   private static final Logger LOGGER = LoggerFactory.getLogger(OnProcessTextDocument.class);
 
-  private TextDocumentController documentController;
-
-  private boolean visible;
-
-  /**
-   * Create this event.
-   *
-   * @param documentController
-   *          The document to process.
-   * @param visible
-   *          If false, the window of the document is invisible, otherwise it's visible.
-   */
-  public OnProcessTextDocument(TextDocumentController documentController,
-      boolean visible)
+  @Subscribe
+  public void onTextDocumentControllerInitialized(OnTextDocumentControllerInitialized event)
   {
-    this.documentController = documentController;
-    this.visible = visible;
-  }
+    TextDocumentController documentController = event.getTextDocumentController();
 
-  @Override
-  protected void doit() throws WollMuxFehlerException
-  {
     if (documentController == null)
     {
+      LOGGER.trace("{} : DocumentController is NULL.", this.getClass().getSimpleName());
       return;
     }
 
-    if (visible)
+    try
     {
-      try
-      {
-        ConfigThingy tds = WollMuxFiles.getWollmuxConf().query("Fenster")
-            .query("Textdokument").getLastChild();
-        documentController.getFrameController().setWindowViewSettings(tds);
-      } catch (NodeNotFoundException e)
-      {
-        // configuration for Fenster isn't mandatory
-      }
+      ConfigThingy tds = WollMuxFiles.getWollmuxConf().query("Fenster").query("Textdokument")
+          .getLastChild();
+      documentController.getFrameController().setWindowViewSettings(tds);
+    } catch (NodeNotFoundException e)
+    {
+      // configuration for Fenster isn't mandatory
     }
 
     DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
@@ -88,18 +72,14 @@ public class OnProcessTextDocument extends WollMuxEvent
       // if it is a form execute form commands
       if (actions != 0 && documentController.getModel().isFormDocument())
       {
-        // Konfigurationsabschnitt Fenster/Formular verarbeiten falls Dok sichtbar
-        if (visible)
+
+        try
         {
-          try
-          {
-            documentController.getFrameController().setDocumentZoom(
-                WollMuxFiles.getWollmuxConf().query("Fenster").query(
-                    "Formular").getLastChild().query("ZOOM"));
-          } catch (java.lang.Exception e)
-          {
-            // configuration for Fenster isn't mandatory
-          }
+          documentController.getFrameController().setDocumentZoom(WollMuxFiles.getWollmuxConf()
+              .query("Fenster").query("Formular").getLastChild().query("ZOOM"));
+        } catch (java.lang.Exception e)
+        {
+          // configuration for Fenster isn't mandatory
         }
 
         try
@@ -109,13 +89,13 @@ public class OnProcessTextDocument extends WollMuxEvent
           formController.formControllerInitCompleted();
         } catch (FormModelException e)
         {
-          throw new WMCommandsFailedException(
-              L.m("Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\nBitte kontaktieren Sie Ihre Systemadministration."));
+          throw new WMCommandsFailedException(L.m(
+              "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\nBitte kontaktieren Sie Ihre Systemadministration."));
         }
       }
     } catch (java.lang.Exception e)
     {
-      throw new WollMuxFehlerException(L.m("Fehler bei der Dokumentbearbeitung."), e);
+      LOGGER.error("", e);
     }
 
     // notify listeners about processing finished
@@ -132,10 +112,4 @@ public class OnProcessTextDocument extends WollMuxEvent
     }
   }
 
-  @Override
-  public String toString()
-  {
-    return this.getClass().getSimpleName() + "(#"
-        + documentController.hashCode() + ")";
-  }
 }
