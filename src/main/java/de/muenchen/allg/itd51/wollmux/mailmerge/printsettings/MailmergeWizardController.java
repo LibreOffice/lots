@@ -94,11 +94,11 @@ public class MailmergeWizardController implements XWizardController
    *           No table in the model was selected.
    */
   public MailmergeWizardController(MailMergeController controller,
-      TextDocumentController textDocumentController)
+      TextDocumentController textDocumentController) throws NoTableSelectedException
   {
     this.controller = controller;
     this.textDocumentController = textDocumentController;
-    settings = new PrintSettings(controller.getDs().getNumberOfDatasets());
+    settings = new PrintSettings(controller.getDs().getNumberOfRecords());
   }
 
   public MailMergeController getController()

@@ -59,6 +59,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormValueChanged;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
@@ -973,8 +974,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    *          die Ersetzungsregel, die beschreibt, welche Inhalte an Stelle des alten
    *          Feldes eingesetzt werden sollen.
    */
-  public synchronized void applyFieldSubstitution(String fieldId,
-      FieldSubstitution subst)
+  private void applyFieldSubstitution(String fieldId, FieldSubstitution subst)
   {
     // keine Ersetzung, wenn subst leer ist.
     if (!subst.iterator().hasNext()) {
@@ -1257,7 +1257,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    *          Die ID des Formularfeldes bzw. der Formularfelder, die im Dokument
    *          angepasst werden sollen.
    */
-  public synchronized void updateFormFields(String fieldId)
+  private void updateFormFields(String fieldId)
   {
     if (formFieldPreviewMode)
     {
@@ -1655,7 +1655,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * und der neue Wert nur in einem internen Objekt des Simulationslaufs gespeichert
    * anstatt im Dokument.
    */
-  public synchronized void setFormFieldValue(String fieldId, String value)
+  private void setFormFieldValue(String fieldId, String value)
   {
     if (simulationResult == null)
     {
@@ -2424,5 +2424,35 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   public void statusChanged(String id, boolean okay)
   {
     // nothing to do here, only for form gui.
+  }
+
+  public void adjustFields(Map<String, FieldSubstitution> mapIdToSubstitution)
+  {
+    for (Map.Entry<String, FieldSubstitution> ent : mapIdToSubstitution
+        .entrySet())
+    {
+      String fieldId = ent.getKey();
+      FieldSubstitution subst = ent.getValue();
+      applyFieldSubstitution(fieldId, subst);
+
+      // Datenstrukturen aktualisieren
+      updateDocumentCommands();
+      DocumentCommandInterpreter dci = new DocumentCommandInterpreter(this);
+      dci.scanGlobalDocumentCommands();
+      // collectNonWollMuxFormFields() wird im folgenden scan auch noch erledigt
+      dci.scanInsertFormValueCommands();
+
+      // Alte Formularwerte aus den persistenten Daten entfernen
+      setFormFieldValue(fieldId, null);
+
+      // Ansicht der betroffenen Felder aktualisieren
+      for (Iterator<FieldSubstitution.SubstElement> iter = subst
+          .iterator(); iter.hasNext();)
+      {
+	FieldSubstitution.SubstElement ele = iter.next();
+	if (ele.isField())
+	  updateFormFields(ele.getValue());
+      }
+    }
   }
 }
