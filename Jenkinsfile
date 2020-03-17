@@ -64,9 +64,11 @@ pipeline {
               mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
               publisherStrategy: 'EXPLICIT') {
               withSonarQubeEnv('SonarQube') {
-                sh "mvn $SONAR_MAVEN_GOAL \
-                  -Dsonar.host.url=$SONAR_HOST_URL \
-                  -Dsonar.branch.name=${GIT_BRANCH}"
+              sh "mvn $SONAR_MAVEN_GOAL \
+                -Dsonar.host.url=$SONAR_HOST_URL \
+                -Dsonar.branch.name=${GIT_BRANCH} \
+                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                -Dsonar.junit.reportPaths=target/surefire-reports"
               }
             }
           } else {
@@ -75,15 +77,17 @@ pipeline {
               mavenLocalRepo: '.repo',
               mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
               publisherStrategy: 'EXPLICIT') {
-	          withSonarQubeEnv('SonarQube') {
-	            sh "mvn $SONAR_MAVEN_GOAL \
-	              -Dsonar.host.url=$SONAR_HOST_URL \
-	              -Dsonar.branch.name=${GIT_BRANCH} \
-	              -Dsonar.branch.target=${env.CHANGE_TARGET} "
-	          }
+              withSonarQubeEnv('SonarQube') {
+              sh "mvn $SONAR_MAVEN_GOAL \
+                -Dsonar.host.url=$SONAR_HOST_URL \
+                -Dsonar.branch.name=${GIT_BRANCH} \
+                -Dsonar.branch.target=${env.CHANGE_TARGET} \
+                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                -Dsonar.junit.reportPaths=target/surefire-reports"
+              }
             }
             timeout(time: 1, unit: 'HOURS') {
-             waitForQualityGate abortPipeline: true
+              waitForQualityGate abortPipeline: true
             }
             archiveArtifacts artifacts: 'dist/WollMux.oxt', onlyIfSuccessful: true
           }
