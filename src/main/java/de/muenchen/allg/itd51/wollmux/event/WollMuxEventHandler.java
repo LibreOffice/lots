@@ -100,7 +100,13 @@ public class WollMuxEventHandler
    */
   public void unregisterListener(Object listener)
   {
-    eventBus.unregister(listener);
+    try
+    {
+      eventBus.unregister(listener);
+    } catch (IllegalArgumentException e)
+    {
+      LOGGER.error("", e);
+    }
   }
 
   /**
