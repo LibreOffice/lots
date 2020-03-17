@@ -1,5 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
+import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
@@ -32,8 +33,8 @@ public class OnTextDocumentControllerInitialized extends WollMuxEvent
   }
 
   @Override
-  public void doit()
+  protected void doit() throws WollMuxFehlerException
   {
-    // nothing to do
+    // nothing to do.
   }
 }
