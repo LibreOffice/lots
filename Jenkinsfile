@@ -21,19 +21,35 @@ pipeline {
           mavenLocalRepo: '.repo',
           mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
           publisherStrategy: 'EXPLICIT') {
-          sh "mvn -Dmaven.javadoc.skip=true clean package"
+          sh "mvn -Dmaven.javadoc.skip=true -DskipTests clean package"
         }
       }
     }
 
-    stage('Javadoc') {
-      steps {
-        withMaven(
-          maven: 'mvn',
-          mavenLocalRepo: '.repo',
-          mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
-          publisherStrategy: 'EXPLICIT') {
-          sh "mvn javadoc:javadoc"
+    stage('Parallel') {
+      parallel {
+        stage('Junit') {
+          steps {
+            withMaven(
+              maven: 'mvn',
+              mavenLocalRepo: '.repo',
+              mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
+              publisherStrategy: 'EXPLICIT') {
+              sh "mvn -P OfficeTests test"
+            }
+          }
+        }
+
+        stage('Javadoc') {
+          steps {
+            withMaven(
+              maven: 'mvn',
+              mavenLocalRepo: '.repo',
+              mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
+              publisherStrategy: 'EXPLICIT') {
+              sh "mvn javadoc:javadoc"
+            }
+          }
         }
       }
     }
