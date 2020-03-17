@@ -2,6 +2,7 @@ package de.muenchen.allg.itd51.wollmux.mailmerge.sidebar;
 
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,6 @@ import com.sun.star.awt.XNumericField;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
-import com.sun.star.awt.XWindow2;
 import com.sun.star.awt.XWindowPeer;
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.UnknownPropertyException;
@@ -56,10 +56,13 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
+import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.ReferencedFieldID;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.AbstractNotifier;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.IfThenElseDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
@@ -744,47 +747,106 @@ public class SeriendruckSidebarContent extends ComponentBase
     }
   }
 
-  private ActionListener adjustFieldsFinishListener = e -> datasourceModel
-      .ifPresentOrElse(ds -> {
-        try
-        {
-          boolean hasUnmappedFields = textDocumentController.getModel()
-              .getReferencedFieldIDsThatAreNotInSchema(
-                  ds.getColumnNames()).length > 0;
-          XWindow2 btnChangeAll = UNO.XWindow2(changeAll);
-          btnChangeAll.setEnable(btnChangeAll.isVisible() && hasUnmappedFields);
-          XWindow2 btnAddColumns = UNO.XWindow2(addColumns);
-          btnAddColumns
-              .setEnable(btnAddColumns.isVisible() && hasUnmappedFields);
-        } catch (NoTableSelectedException ex)
-        {
-          LOGGER.debug("", ex);
-        }
-      }, () -> {
-        UNO.XWindow2(changeAll).setEnable(false);
-        UNO.XWindow2(addColumns).setEnable(false);
-      });
+  /**
+   * Update the controls to modify a data source.
+   */
+  private void updateDatasourceControls()
+  {
+    datasourceModel.ifPresentOrElse(ds -> {
+      try
+      {
+	boolean hasUnmappedFields = textDocumentController.getModel()
+	    .getReferencedFieldIDsThatAreNotInSchema(
+	        ds.getColumnNames()).length > 0;
+	UNO.XWindow2(changeAll).setEnable(
+	    hasUnmappedFields && UNO.XWindow2(changeAll).isVisible());
+	UNO.XWindow2(addColumns).setEnable(
+	    hasUnmappedFields && UNO.XWindow2(addColumns).isVisible());
+      } catch (NoTableSelectedException ex)
+      {
+	LOGGER.debug("", ex);
+      }
+    }, () -> {
+      UNO.XWindow2(changeAll).setEnable(false);
+      UNO.XWindow2(addColumns).setEnable(false);
+    });
+  }
 
   private AbstractActionListener editTableActionListener = e -> datasourceModel
       .ifPresent(DatasourceModel::toFront);
 
-  private AbstractActionListener addTableColumnsActionListener = e -> datasourceModel
-      .ifPresent(ds -> AdjustFields.showAddMissingColumnsDialog(
-          textDocumentController, ds, adjustFieldsFinishListener));
+  private AbstractActionListener addTableColumnsActionListener = event -> datasourceModel
+      .ifPresent(datasource -> {
+        ActionListener addTableColumnsFinishListener = e -> {
+          datasourceModel.ifPresent(ds -> {
+	    @SuppressWarnings("unchecked")
+	    Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
+	        .getSource();
+	    try
+	    {
+	      ds.addColumns(mapIdToSubstitution);
+	    } catch (NoTableSelectedException e1)
+	    {
+	      InfoDialog.showInfoModal("", e1.getMessage());
+	    }
+          });
+          updateDatasourceControls();
+        };
+        try
+        {
+          ReferencedFieldID[] fieldIDs = textDocumentController.getModel()
+              .getReferencedFieldIDsThatAreNotInSchema(
+                  new HashSet<>(datasource.getColumnNames()));
+          List<String> columns = new ArrayList<>(datasource.getColumnNames());
 
-  private AbstractActionListener changeFieldsActionListener = e -> datasourceModel
-      .ifPresent(ds -> AdjustFields.showAdjustFieldsDialog(
-          textDocumentController, ds, adjustFieldsFinishListener));
+          AdjustFields.showFieldMappingDialog("Tabellenspalten ergänzen",
+              L.m("Spalte"), L.m("Vorbelegung"), L.m("Spalten ergänzen"),
+              fieldIDs, columns, true, addTableColumnsFinishListener);
+        } catch (NoTableSelectedException ex)
+        {
+          InfoDialog.showInfoModal("", ex.getMessage());
+        }
+      });
+
+  private AbstractActionListener changeFieldsActionListener = event -> datasourceModel
+      .ifPresent(ds -> {
+        ActionListener adjustFieldsFinishListener = e -> {
+          @SuppressWarnings("unchecked")
+          Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
+              .getSource();
+          textDocumentController.adjustFields(mapIdToSubstitution);
+          updateDatasourceControls();
+        };
+        try
+        {
+          ReferencedFieldID[] fieldIDs = textDocumentController.getModel()
+              .getReferencedFieldIDsThatAreNotInSchema(
+                  new HashSet<>(ds.getColumnNames()));
+          List<String> columns = new ArrayList<>(ds.getColumnNames());
+          AdjustFields.showFieldMappingDialog("Felder anpassen",
+              L.m("Altes Feld"), L.m("Neue Belegung"), L.m("Felder anpassen"),
+              fieldIDs, columns, false, adjustFieldsFinishListener);
+        } catch (NoTableSelectedException ex)
+        {
+          InfoDialog.showInfoModal("", ex.getMessage());
+        }
+      });
 
   private AbstractActionListener printActionListener = e -> datasourceModel
       .ifPresent(ds -> {
-        MailMergeController c = new MailMergeController(textDocumentController,
-            ds);
-        MailmergeWizardController mwController = new MailmergeWizardController(
-            c, textDocumentController);
-        mwController.startWizard();
-        textDocumentController.collectNonWollMuxFormFields();
-        textDocumentController.setFormFieldsPreviewMode(true);
+        try
+        {
+          MailMergeController c = new MailMergeController(textDocumentController, ds);
+          MailmergeWizardController mwController = new MailmergeWizardController(c,
+              textDocumentController);
+          mwController.startWizard();
+          textDocumentController.collectNonWollMuxFormFields();
+          textDocumentController.setFormFieldsPreviewMode(true);
+        } catch (NoTableSelectedException ex)
+        {
+          LOGGER.debug("", ex);
+          InfoDialog.showInfoModal("Fehler beim Seriendruck", ex.getMessage());
+        }
       });
 
   private AbstractItemListener currentDatasourcesListener = e -> {

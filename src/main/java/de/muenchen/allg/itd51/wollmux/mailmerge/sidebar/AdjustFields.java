@@ -36,14 +36,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,17 +69,9 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.ReferencedFieldID;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
-import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
-import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
-import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
 
 /**
- * "Felder anpassen" Dialog der neuen erweiterten Serienbrief-Funktionalitäten.
- *
- * @author Matthias Benkmann (D-III-ITD 5.1)
+ * Dialogs for manipulating the mapping of fields to data source columns.
  */
 public class AdjustFields
 {
@@ -89,22 +79,17 @@ public class AdjustFields
   private static final Logger LOGGER = LoggerFactory.getLogger(AdjustFields.class);
 
   /**
-   * Präfix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die Zuordnung beginnt mit
-   * einem zero width space (nicht sichtbar, aber zur Unterscheidung des Präfix von den
-   * Benutzereingaben) und dem "<"-Zeichen.
+   * Suffix of a tag.
    */
   private static final String TAG_PREFIX = "" + Character.toChars(0x200B)[0] + "<";
 
   /**
-   * Suffix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die Zuordnung beginnt mit
-   * einem zero width space (nicht sichtbar, aber zur Unterscheidung des Präfix von den
-   * Benutzereingaben) und dem ">"-Zeichen.
+   * Suffix of a tag.
    */
   private static final String TAG_SUFFIX = "" + Character.toChars(0x200B)[0] + ">";
 
   /**
-   * Beschreibt einen regulären Ausdruck, mit dem nach Tags im Text gesucht werden kann. Ein Match
-   * liefert in Gruppe 1 den Text des Tags.
+   * Regular expression for searching tags. The first group contains the text of the tag.
    */
   private static final Pattern TAG_PATTERN = Pattern
       .compile("(" + TAG_PREFIX + "(.*?)" + TAG_SUFFIX + ")");
@@ -115,141 +100,33 @@ public class AdjustFields
   }
 
   /**
-   * Diese Methode zeigt den Dialog an, mit dem die Felder im Dokument an eine Datenquelle angepasst
-   * werden können, die nicht die selben Spalten enthält wie die Datenquelle, für die das Dokument
-   * gemacht wurde.
-   *
-   * @param documentController
-   *          Der Controller des Dokumentes.
-   * @param ds
-   *          Die Datenquelle.
-   * @param finishedListener
-   *          Der Listener wird aufgerufen, sobald der Dialog erfolgreich beendet wird.
-   */
-  public static void showAdjustFieldsDialog(final TextDocumentController documentController,
-      DatasourceModel ds, ActionListener finishedListener)
-  {
-    try
-    {
-      ReferencedFieldID[] fieldIDs = documentController.getModel()
-          .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(ds.getColumnNames()));
-      ActionListener submitActionListener = e -> {
-        @SuppressWarnings("unchecked")
-        Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
-            .getSource();
-        for (Map.Entry<String, FieldSubstitution> ent : mapIdToSubstitution.entrySet())
-        {
-          String fieldId = ent.getKey();
-          FieldSubstitution subst = ent.getValue();
-          documentController.applyFieldSubstitution(fieldId, subst);
-
-          // Datenstrukturen aktualisieren
-          documentController.updateDocumentCommands();
-          DocumentCommandInterpreter dci = new DocumentCommandInterpreter(documentController);
-          dci.scanGlobalDocumentCommands();
-          // collectNonWollMuxFormFields() wird im folgenden scan auch noch erledigt
-          dci.scanInsertFormValueCommands();
-
-          // Alte Formularwerte aus den persistenten Daten entfernen
-          documentController.setFormFieldValue(fieldId, null);
-
-          // Ansicht der betroffenen Felder aktualisieren
-          for (Iterator<FieldSubstitution.SubstElement> iter = subst.iterator(); iter.hasNext();)
-          {
-            FieldSubstitution.SubstElement ele = iter.next();
-            if (ele.isField())
-              documentController.updateFormFields(ele.getValue());
-          }
-        }
-        finishedListener
-            .actionPerformed(new ActionEvent(new Object(), 0, "AdjustFieldsDialogFinished"));
-      };
-      showFieldMappingDialog("Felder anpassen", fieldIDs, L.m("Altes Feld"), L.m("Neue Belegung"),
-          L.m("Felder anpassen"), new ArrayList<String>(ds.getColumnNames()), submitActionListener,
-          false);
-    } catch (NoTableSelectedException ex)
-    {
-      InfoDialog.showInfoModal("", ex.getMessage());
-    }
-  }
-
-  /**
-   * Diese Methode zeigt den Dialog an, mit dem die Spalten der Tabelle ergänzt werden können, wenn
-   * es zu Feldern im Dokument keine passenden Spalten in der Tabelle gibt.
-   *
-   * @param documentController
-   *          Der Controller des Dokumentes.
-   * @param ds
-   *          Die Datenquelle.
-   * @param finishedListener
-   *          Der Listener wird aufgerufen, sobald der Dialog erfolgreich beendet wird.
-   */
-  public static void showAddMissingColumnsDialog(TextDocumentController documentController,
-      final DatasourceModel ds, ActionListener finishedListener)
-  {
-    try
-    {
-      ReferencedFieldID[] fieldIDs = documentController.getModel()
-          .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(ds.getColumnNames()));
-      ActionListener submitActionListener = e -> {
-        @SuppressWarnings("unchecked")
-        Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
-            .getSource();
-        try
-        {
-          ds.addColumns(mapIdToSubstitution);
-	} catch (NoTableSelectedException e1)
-        {
-          InfoDialog.showInfoModal("", e1.getMessage());
-        }
-        finishedListener
-            .actionPerformed(new ActionEvent(new Object(), 0, "AddMissingDialogFinished"));
-      };
-      showFieldMappingDialog("Tabellenspalten ergänzen", fieldIDs, L.m("Spalte"),
-          L.m("Vorbelegung"), L.m("Spalten ergänzen"), new ArrayList<String>(ds.getColumnNames()),
-          submitActionListener, true);
-    } catch (NoTableSelectedException ex)
-    {
-      InfoDialog.showInfoModal("", ex.getMessage());
-    }
-  }
-
-  /**
-   * Zeigt einen Dialog mit dem bestehende Felder fieldIDs über ein Textfeld neu belegt werden
-   * können; für die neue Belegung stehen die neuen Felder der aktuellen Datasource und Freitext zur
-   * Verfügung. Die Felder fieldIDs werden dabei in der Reihenfolge angezeigt, in der sie in der
-   * Liste aufgeführt sind, ein bereits aufgeführtes Feld wird aber nicht zweimal angezeigt. Ist bei
-   * einem Feld die Eigenschaft isTransformed()==true und ignoreIsTransformed == false, dann wird
-   * für dieses Feld nur die Eingabe einer 1-zu-1 Zuordnung von Feldern akzeptiert, das andere
-   * Zuordnungen für transformierte Felder derzeit nicht unterstützt werden.
-   *
-   * @param fieldIDs
-   *          Die field-IDs der alten, bereits im Dokument enthaltenen Felder, die in der gegebenen
-   *          Reihenfolge angezeigt werden, Dupletten werden aber entfernt.
+   * Show a dialog to override existing fields with free text or other fields.
+   * 
+   * @param title
+   *          The title of the dialog.
    * @param labelOldFields
-   *          Die Spaltenüberschrift für die linke Spalte, in der die alten Felder angezeigt werden.
+   *          The name of the column with old fields.
    * @param labelNewFields
-   *          Die Spaltenüberschrift für die rechte Spalte, in dem die neue Zuordnung getroffen
-   *          wird.
+   *          The name of the column with new fields.
    * @param labelSubmitButton
-   *          Die Beschriftung des Submit-Knopfes unten rechts, der die entsprechende Aktion
-   *          auslöst.
+   *          The text of the submit button.
+   * @param fieldIDs
+   *          The ids of the existing fields. They are presented in the given order, but duplicates
+   *          are ignored.
    * @param fieldNames
-   *          Die Namen aller Serienbrieffelder, die in dem Mapping verwendet werden können.
-   * @param submitActionListener
-   *          Nach Beendigung des Dialogs über den Submit-Knopf (unten rechts) wird die Methode
-   *          submitActionListener.actionPerformed(actionEvent) in einem separaten Thread
-   *          aufgerufen. Dort kann der Code stehen, der gewünschten Aktionen durchführt. Der
-   *          ActionListener bekommt dabei in actionEvent eine HashMap übergeben, die eine Zuordnung
-   *          von den alten fieldIDs auf den jeweiligen im Dialog gewählten Ersatzstring enthält.
+   *          The new fields, which can be used.
    * @param ignoreIsTransformed
-   *          falls true, werden Felder mit isTransformed()==true nicht speziell behandelt und es
-   *          gibt keine Einschränkungen bzw. der Auswahlmöglichkeiten.
+   *          If false, fields with {@link ReferencedFieldID#isTransformed()}==true are treated
+   *          special. Than only 1-to-1 substitutions are allowed.
+   * @param submitActionListener
+   *          The listener, which is called as soon as the dialog is closed. As argument it gets a
+   *          {@link Map} of {@link String}s to {@link FieldSubstitution}.
    */
-  private static void showFieldMappingDialog(String title, ReferencedFieldID[] fieldIDs,
-      String labelOldFields, String labelNewFields, String labelSubmitButton,
-      final List<String> fieldNames, final ActionListener submitActionListener,
-      boolean ignoreIsTransformed)
+  @SuppressWarnings("java:S107")
+  public static void showFieldMappingDialog(String title, String labelOldFields,
+      String labelNewFields, String labelSubmitButton, ReferencedFieldID[] fieldIDs,
+      final List<String> fieldNames, boolean ignoreIsTransformed,
+      final ActionListener submitActionListener)
   {
     try
     {
@@ -308,14 +185,12 @@ public class AdjustFields
         XTextComponent field = UNO.XTextComponent(container.getControl("TextField" + index));
         field.addTextListener(new AbstractTextListener()
         {
-
           @Override
           public void textChanged(TextEvent event)
           {
             String labelText = UNO.XFixedText(container.getControl("Label" + index)).getText();
-            Optional<ReferencedFieldID> optionalId = Arrays.stream(fieldIDs)
-                .filter(id -> id.getFieldId().equals(labelText)).findFirst();
-            optionalId.ifPresent(id -> mapIdTwoNewValue.put(id, field.getText()));
+            Arrays.stream(fieldIDs).filter(id -> id.getFieldId().equals(labelText)).findFirst()
+                .ifPresent(id -> mapIdTwoNewValue.put(id, field.getText()));
           }
         });
         UNO.XWindow(field).addFocusListener(new AbstractFocusListener()
@@ -336,30 +211,7 @@ public class AdjustFields
         @Override
         public void actionPerformed(com.sun.star.awt.ActionEvent arg0)
         {
-          final HashMap<String, FieldSubstitution> result = new HashMap<>();
-
-          for (Map.Entry<ReferencedFieldID, String> entry : mapIdTwoNewValue.entrySet())
-          {
-            if (!isContentValid(entry.getValue(),
-                entry.getKey().isTransformed() && !ignoreIsTransformed))
-            {
-              continue;
-            }
-            FieldSubstitution subst = new TextDocumentModel.FieldSubstitution();
-            for (ContentElement ce : getContent(entry.getValue()))
-            {
-              if (ce.isTag())
-                subst.addField(ce.toString());
-              else
-                subst.addFixedText(ce.toString());
-            }
-            result.put(entry.getKey().getFieldId(), subst);
-          }
-
-          dialog.endExecute();
-          if (submitActionListener != null)
-            submitActionListener
-                .actionPerformed(new ActionEvent(result, 0, "showSubstitutionDialogReturned"));
+          submit(submitActionListener, ignoreIsTransformed, dialog, mapIdTwoNewValue);
         }
       });
 
@@ -382,17 +234,61 @@ public class AdjustFields
   }
 
   /**
-   * Aktualisiert die Steuerelemente für die Feldanpassungen an Hand der Scrollbar.
+   * Collect the mappings and call the listener.
+   * 
+   * @param submitActionListener
+   *          The listener.
+   * @param ignoreIsTransformed
+   * @param dialog
+   *          The dialog.
+   * @param mapIdTwoNewValue
+   *          The mapping of ids to new values.
+   */
+  private static void submit(final ActionListener submitActionListener, boolean ignoreIsTransformed,
+      XDialog dialog, Map<ReferencedFieldID, String> mapIdTwoNewValue)
+  {
+    final HashMap<String, FieldSubstitution> result = new HashMap<>();
+
+    for (Map.Entry<ReferencedFieldID, String> entry : mapIdTwoNewValue.entrySet())
+    {
+      if (!isContentValid(entry.getValue(), entry.getKey().isTransformed() && !ignoreIsTransformed))
+      {
+        continue;
+      }
+      FieldSubstitution subst = new TextDocumentModel.FieldSubstitution();
+      for (Pair<String, Boolean> ce : getContent(entry.getValue()))
+      {
+        if (ce.getValue())
+        {
+          subst.addField(ce.getKey());
+        } else
+        {
+          subst.addFixedText(ce.getKey());
+        }
+      }
+      result.put(entry.getKey().getFieldId(), subst);
+    }
+
+    dialog.endExecute();
+    if (submitActionListener != null)
+    {
+      submitActionListener
+          .actionPerformed(new ActionEvent(result, 0, "showSubstitutionDialogReturned"));
+    }
+  }
+
+  /**
+   * Update the controls according to the scroll bar.
    *
    * @param value
-   *          Der Wert der Scrollbar.
+   *          The value of the scroll bar.
    * @param container
-   *          Der ControlContainer mit allen Steuerelementen.
+   *          The control container.
    * @param fieldIds
-   *          Die field-IDs der alten, bereits im Dokument enthaltenen Felder, die in der gegebenen
-   *          Reihenfolge angezeigt werden, Dupletten werden aber entfernt.
+   *          The ids of the old (already in the document) fields, which are presented in the order
+   *          of the list. Duplicates are ignored.
    * @param mapIdTwoNewValue
-   *          Mapping von FieldIds auf deren neuen Wert.
+   *          Mapping of ids to new values.
    */
   private static void update(int value, XControlContainer container, ReferencedFieldID[] fieldIDs,
       Map<ReferencedFieldID, String> mapIdTwoNewValue)
@@ -401,7 +297,7 @@ public class AdjustFields
     {
       XFixedText label = UNO.XFixedText(container.getControl("Label" + i));
       XTextComponent field = UNO.XTextComponent(container.getControl("TextField" + i));
-      // Nicht benötigte Textfelder ausblenden
+      // hide unused text fields
       if (i >= fieldIDs.length)
       {
         UNO.XWindow(field).setVisible(false);
@@ -415,28 +311,39 @@ public class AdjustFields
     }
   }
 
+  /**
+   * Check whether a string is valid.
+   * 
+   * @param text
+   *          The string.
+   * @param isTransformed
+   *          If true only a 1-to-1 substitution is allowed.
+   * @return True if text consists of one part, which is a tag, false otherwise.
+   */
   private static boolean isContentValid(String text, boolean isTransformed)
   {
     if (!isTransformed)
     {
       return true;
     }
-    List<ContentElement> c = getContent(text);
+    List<Pair<String, Boolean>> c = getContent(text);
     if (c.isEmpty())
     {
       return true;
     }
-    return c.size() == 1 && c.get(0).isTag();
+    return c.size() == 1 && c.get(0).getValue();
   }
 
   /**
-   * Liefert eine Liste von {@link ContentElement}-Objekten, die den aktuellen Inhalt der
-   * JTextComponent repräsentiert und dabei enthaltenen Text und evtl. enthaltene Tags als eigene
-   * Objekte kapselt.
+   * Divide the text in several parts by tags. Each tag is also a part.
+   * 
+   * @param text
+   *          The text.
+   * @return A list of parts.
    */
-  private static List<ContentElement> getContent(String text)
+  private static List<Pair<String, Boolean>> getContent(String text)
   {
-    List<ContentElement> list = new ArrayList<>();
+    List<Pair<String, Boolean>> list = new ArrayList<>();
     Matcher m = TAG_PATTERN.matcher(text);
     int lastEndPos = 0;
     int startPos = 0;
@@ -444,52 +351,18 @@ public class AdjustFields
     {
       startPos = m.start();
       String tag = m.group(2);
-      list.add(new ContentElement(text.substring(lastEndPos, startPos), false));
+      list.add(Pair.of(text.substring(lastEndPos, startPos), false));
       if (tag.length() > 0)
       {
-        list.add(new ContentElement(tag, true));
+        list.add(Pair.of(tag, true));
       }
       lastEndPos = m.end();
     }
     String t = text.substring(lastEndPos);
     if (t.length() > 0)
     {
-      list.add(new ContentElement(t, false));
+      list.add(Pair.of(t, false));
     }
     return list;
   }
-
-  /**
-   * Beschreibt ein Element des Inhalts dieser JTextComponent und kann entweder ein eingefügtes Tag
-   * oder ein normaler String sein. Auskunft über den Typ des Elements erteilt die Methode isTag(),
-   * auf den String-Wert kann über die toString()-Methode zugegriffen werden.
-   */
-  public static class ContentElement
-  {
-    private String value;
-
-    private boolean isTag;
-
-    private ContentElement(String value, boolean isTag)
-    {
-      this.value = value;
-      this.isTag = isTag;
-    }
-
-    @Override
-    public String toString()
-    {
-      return value;
-    }
-
-    /**
-     * Liefert true, wenn dieses Element ein Tag ist oder false, wenn es sich um normalen Text
-     * handelt.
-     */
-    public boolean isTag()
-    {
-      return isTag;
-    }
-  }
-
 }
