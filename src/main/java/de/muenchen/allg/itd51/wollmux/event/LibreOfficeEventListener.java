@@ -9,7 +9,6 @@ import com.sun.star.document.XEventListener;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
-import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.AnyConverter;
 
@@ -45,8 +44,6 @@ public class LibreOfficeEventListener implements XEventListener
 
   private static final String ON_UNLOAD = "OnUnload";
 
-  private static final String ON_CREATE = "OnCreate";
-
   private static final String ON_VIEW_CREATED = "OnViewCreated";
 
   private DocumentManager docManager;
@@ -79,9 +76,6 @@ public class LibreOfficeEventListener implements XEventListener
 
       switch (event)
       {
-      case ON_CREATE:
-        onCreate(docEvent.Source);
-        break;
       case ON_VIEW_CREATED:
         onViewCreated(docEvent.Source);
         break;
@@ -99,44 +93,6 @@ public class LibreOfficeEventListener implements XEventListener
     catch (Throwable t)
     {
       LOGGER.error("", t);
-    }
-  }
-
-  /**
-   * OnCreate is the first event emitted as soon as a new empty document is created. The following
-   * actions cause such an event:
-   * <ul>
-   * <li>{@code loadComponentFromURL("private:factory/swriter", ...) }</li>
-   * <li>file &gt; new, if there's no default template</li>
-   * <li>LibreOffice mailmerge</li>
-   * <li>Insertion of auto texts (bt&lt;F3&gt;)</li>
-   * </ul>
-   *
-   * Opening a file or a template doesn't create this event.
-   */
-  private void onCreate(Object source)
-  {
-    XComponent compo = UNO.XComponent(source);
-    if (compo == null)
-    {
-      return;
-    }
-
-    XModel compoModel = UNO.XModel(compo);
-
-    if (compoModel == null || isTempMailMergeDocument(compoModel))
-    {
-      return;
-    }
-
-    // we add the document to the manager, so we know in onViewCreated that it's a new document
-    XTextDocument xTextDoc = UNO.XTextDocument(source);
-    if (xTextDoc != null)
-    {
-      docManager.addTextDocument(xTextDoc);
-    } else
-    {
-      docManager.add(compo);
     }
   }
 
