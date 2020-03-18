@@ -302,7 +302,7 @@ public class ContentBasedDirectiveModel
    */
   private void createUsedStyles()
   {
-    // Absatzformate:
+    // paragraph styles
     XStyle style = documentModel.getParagraphStyle(PARA_STYLE_NAME_DEFAULT);
     if (style == null)
     {
@@ -362,13 +362,11 @@ public class ContentBasedDirectiveModel
       Utils.setProperty(style, PropertyName.CHAR_UNDERLINE, Integer.valueOf(1));
     }
 
-    // Zeichenformate:
-
+    // character styles
     style = documentModel.getCharacterStyle(CHAR_STYLE_NAME_DEFAULT);
     if (style == null)
     {
       style = documentModel.createCharacterStyle(CHAR_STYLE_NAME_DEFAULT, null);
-      Utils.setProperty(style, PropertyName.FOLLOW_STYLE, CHAR_STYLE_NAME_DEFAULT);
       Utils.setProperty(style, PropertyName.CHAR_HEIGHT, Integer.valueOf(11));
       Utils.setProperty(style, PropertyName.CHAR_FONT_NAME, "Arial");
       Utils.setProperty(style, PropertyName.CHAR_UNDERLINE, Integer.valueOf(0));
@@ -378,7 +376,6 @@ public class ContentBasedDirectiveModel
     if (style == null)
     {
       style = documentModel.createCharacterStyle(CHAR_STYLE_NAME_NUMBER, CHAR_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.FOLLOW_STYLE, CHAR_STYLE_NAME_DEFAULT);
       Utils.setProperty(style, PropertyName.CHAR_WEIGHT, Float.valueOf(FontWeight.BOLD));
     }
   }
