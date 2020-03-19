@@ -102,7 +102,9 @@ public class DocumentManager
    */
   public synchronized void addTextDocument(XTextDocument compo)
   {
-    info.put(new HashableComponent(compo), new TextDocumentInfo(compo));
+    TextDocumentInfo docInfo = new TextDocumentInfo(compo);
+    info.put(new HashableComponent(compo), docInfo);
+    new OnTextDocumentControllerInitialized(docInfo.getTextDocumentController()).emit();
   }
 
   public Map<HashableComponent, Info> getTextDocumentList() {
@@ -407,8 +409,6 @@ public class DocumentManager
                 WollMuxSingleton.getVersion(), Utils.getOOoVersion()),
             GlobalFunctions.getInstance().getGlobalFunctions(),
             GlobalFunctions.getInstance().getFunctionDialogs());
-
-        new OnTextDocumentControllerInitialized(documentController).emit();
       }
     }
 
