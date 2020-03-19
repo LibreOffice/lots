@@ -31,8 +31,6 @@
 package de.muenchen.allg.itd51.wollmux.former.view;
 
 import java.awt.CardLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -204,15 +202,12 @@ public abstract class OnDemandCardView implements View
 
     inactivePanel.add(Box.createGlue());
 
-    button.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        if (currentModel == null) return; // sollte nicht passieren können, aber zur
-        // Sicherheit
-        addItem(currentModel);
-        show(currentModel);
-      }
+    button.addActionListener(e -> {
+      if (currentModel == null)
+        return;
+
+      addItem(currentModel);
+      show(currentModel);
     });
 
     return inactivePanel;

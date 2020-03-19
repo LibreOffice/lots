@@ -967,12 +967,11 @@ public class FormControlModel
    */
   private void notifyListeners(int attributeId, Object newValue)
   {
-    Iterator<ModelChangeListener> iter = listeners.iterator();
-    while (iter.hasNext())
+    for (ModelChangeListener listener : listeners)
     {
-      ModelChangeListener listener = iter.next();
       listener.attributeChanged(this, attributeId, newValue);
     }
+
     formularMax4000.documentNeedsUpdating();
   }
 
