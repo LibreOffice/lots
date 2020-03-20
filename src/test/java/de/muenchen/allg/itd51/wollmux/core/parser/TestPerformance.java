@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.generator.xml.XMLGenerator;
 import de.muenchen.allg.itd51.wollmux.core.parser.generator.xml.XMLGeneratorException;
 
@@ -12,6 +15,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.generator.xml.XMLGeneratorExce
  *
  * @author Daniel Sikeler
  */
+@Disabled
 public class TestPerformance
 {
 
@@ -23,7 +27,7 @@ public class TestPerformance
    * @throws XMLGeneratorException
    *           Problems with generator.
    */
-  @org.junit.jupiter.api.Test
+  @Test
   public void performance() throws IOException, XMLGeneratorException
   {
     final XMLGenerator generator = new XMLGenerator(getClass().getResource("performance.conf"));
