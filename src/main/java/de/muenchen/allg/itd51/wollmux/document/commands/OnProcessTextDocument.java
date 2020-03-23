@@ -20,12 +20,19 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerIni
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 
 /**
- * Event for processing a document.
+ * Processes text documents.
  */
 public class OnProcessTextDocument implements WollMuxEventListener
 {
   private static final Logger LOGGER = LoggerFactory.getLogger(OnProcessTextDocument.class);
 
+  /**
+   * Processes the document given by the {@link TextDocumentController} of the
+   * event.
+   *
+   * @param event
+   *          An {@link OnTextDocumentControllerInitialized} event.
+   */
   @Subscribe
   public void onTextDocumentControllerInitialized(OnTextDocumentControllerInitialized event)
   {
@@ -72,26 +79,7 @@ public class OnProcessTextDocument implements WollMuxEventListener
       // if it is a form execute form commands
       if (actions != 0 && documentController.getModel().isFormDocument())
       {
-
-        try
-        {
-          documentController.getFrameController().setDocumentZoom(WollMuxFiles.getWollmuxConf()
-              .query("Fenster").query("Formular").getLastChild().query("ZOOM"));
-        } catch (java.lang.Exception e)
-        {
-          // configuration for Fenster isn't mandatory
-        }
-
-        try
-        {
-          FormController formController = documentController.getFormController();
-          formController.createFormGUI();
-          formController.formControllerInitCompleted();
-        } catch (FormModelException e)
-        {
-          throw new WMCommandsFailedException(L.m(
-              "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\nBitte kontaktieren Sie Ihre Systemadministration."));
-        }
+	startForm(documentController);
       }
     } catch (java.lang.Exception e)
     {
@@ -109,6 +97,38 @@ public class OnProcessTextDocument implements WollMuxEventListener
     } catch (java.lang.Exception e)
     {
       LOGGER.debug("", e);
+    }
+  }
+
+  /**
+   * Start form processing.
+   *
+   * @param documentController
+   *          The controller of the document.
+   * @throws WMCommandsFailedException
+   *           The form is invalid.
+   */
+  private void startForm(TextDocumentController documentController)
+      throws WMCommandsFailedException
+  {
+    try
+    {
+      documentController.getFrameController().setDocumentZoom(WollMuxFiles.getWollmuxConf()
+          .query("Fenster").query("Formular").getLastChild().query("ZOOM"));
+    } catch (java.lang.Exception e)
+    {
+      // configuration for Fenster isn't mandatory
+    }
+
+    try
+    {
+      FormController formController = documentController.getFormController();
+      formController.createFormGUI();
+      formController.formControllerInitCompleted();
+    } catch (FormModelException e)
+    {
+      throw new WMCommandsFailedException(L.m(
+          "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\nBitte kontaktieren Sie Ihre Systemadministration."));
     }
   }
 
