@@ -397,7 +397,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    *          WollMux-Konfiguration definiert sein muss.
    * @deprecated since 2009-09-18
    */
-  @Deprecated
+  @Deprecated(since = "10.8")
   @Override
   public void addPrintFunction(XTextDocument doc, String functionName)
   {
@@ -416,7 +416,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    *          der Name einer Druckfunktion, die im Dokument gesetzt ist.
    * @deprecated since 2009-09-18
    */
-  @Deprecated
+  @Deprecated(since = "10.8")
   @Override
   public void removePrintFunction(XTextDocument doc, String functionName)
   {
