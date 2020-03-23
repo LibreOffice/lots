@@ -36,4 +36,10 @@ public class FunctionDialogDispatch extends WollMuxDispatch
     return true;
   }
 
+  @Override
+  public boolean isGlobal()
+  {
+    return true;
+  }
+
 }

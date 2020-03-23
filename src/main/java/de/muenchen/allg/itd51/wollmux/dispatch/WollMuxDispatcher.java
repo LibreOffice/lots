@@ -25,7 +25,7 @@ public class WollMuxDispatcher extends Dispatcher
   }
 
   @Override
-  public XDispatch create(XDispatch origDisp, URL origUrl, XFrame frame)
+  public WollMuxDispatch create(XDispatch origDisp, URL origUrl, XFrame frame)
   {
     switch (getDispatchMethodName(origUrl))
     {

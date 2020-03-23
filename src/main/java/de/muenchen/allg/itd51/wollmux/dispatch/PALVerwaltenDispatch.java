@@ -35,4 +35,10 @@ public class PALVerwaltenDispatch extends WollMuxDispatch
     return true;
   }
 
+  @Override
+  public boolean isGlobal()
+  {
+    return true;
+  }
+
 }

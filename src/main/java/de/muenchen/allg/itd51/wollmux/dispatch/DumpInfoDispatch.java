@@ -34,4 +34,10 @@ public class DumpInfoDispatch extends WollMuxDispatch
     return true;
   }
 
+  @Override
+  public boolean isGlobal()
+  {
+    return true;
+  }
+
 }
