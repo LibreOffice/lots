@@ -48,9 +48,9 @@ import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
-import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
+import de.muenchen.allg.itd51.wollmux.core.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.core.document.AnnotationBasedPersistentDataContainer;
 import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer;
 import de.muenchen.allg.itd51.wollmux.core.document.RDFBasedPersistentDataContainer;
