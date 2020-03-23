@@ -832,10 +832,11 @@ public class GUI
           controller.saveAs();
         } else if ("openTemplate".equals(action) || "openDocument".equals(action))
         {
+	  boolean asTemplate = "openTemplate".equals(action);
           String fragId = (String) args[1];
           List<String> fragIds = new ArrayList<>();
           fragIds.add(fragId);
-          controller.openTemplateOrDocument(fragIds);
+	  controller.openTemplateOrDocument(fragIds, asTemplate);
         } else if ("openExt".equals(action))
         {
           OpenExt openExInstance = OpenExt.getInstance((String) args[1], (String) args[2]);

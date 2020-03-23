@@ -172,15 +172,17 @@ public class FormController
   }
 
   /**
-   * Öffnet durch ACTION-Event ein neues Dokument oder Template. Durch Angabe der FragID wird die
-   * entsprechende Vorlage zugeordnet.
+   * Öffnet durch ACTION-Event ein neues Dokument oder Template. Durch Angabe
+   * der FragID wird die entsprechende Vorlage zugeordnet.
    *
    * @param fragIds
    *          Liste der zu öffnenden Vorlagen.
+   * @param asTemplate
+   *          Open the document as a template.
    */
-  public void openTemplateOrDocument(List<String> fragIds)
+  public void openTemplateOrDocument(List<String> fragIds, boolean asTemplate)
   {
-    new OnOpenDocument(fragIds, false).emit();
+    new OnOpenDocument(fragIds, asTemplate).emit();
   }
 
   /**
