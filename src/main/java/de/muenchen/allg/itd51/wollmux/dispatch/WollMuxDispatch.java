@@ -95,6 +95,16 @@ public abstract class WollMuxDispatch implements XDispatch
   }
 
   /**
+   * Does this dispatch need a frame.
+   *
+   * @return True, if it needs none. False otherwise.
+   */
+  public boolean isGlobal()
+  {
+    return false;
+  }
+
+  /**
    * Check if the frame is in print preview mode.
    *
    * @return True if print preview is active, false otherwise.

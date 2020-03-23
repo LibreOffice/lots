@@ -49,4 +49,10 @@ public class OpenTemplateDispatch extends WollMuxDispatch
     return true;
   }
 
+  @Override
+  public boolean isGlobal()
+  {
+    return true;
+  }
+
 }

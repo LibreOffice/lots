@@ -5,6 +5,7 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.itd51.wollmux.dispatch.Dispatcher;
+import de.muenchen.allg.itd51.wollmux.dispatch.WollMuxDispatch;
 
 /**
  * Dispatcher for content based directive commands.
@@ -21,7 +22,7 @@ public class ContentBasedDirectiveDispatcher extends Dispatcher
   }
 
   @Override
-  public XDispatch create(XDispatch origDisp, URL origUrl, XFrame frame)
+  public WollMuxDispatch create(XDispatch origDisp, URL origUrl, XFrame frame)
   {
     switch (getDispatchMethodName(origUrl))
     {
