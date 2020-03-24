@@ -22,6 +22,7 @@ import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
 import com.sun.star.awt.tree.XMutableTreeDataModel;
+import com.sun.star.awt.tree.XTreeControl;
 import com.sun.star.beans.XMultiPropertySet;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.uno.Exception;
@@ -34,9 +35,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 
 /**
- * Die Factory enthält Hilfsfunktionen zum einfacheren Erzeugen von
- * UNO-Steuerelementen.
- *
+ * Factory for creating UNO control elements.
  */
 public class GuiFactory
 {
@@ -46,15 +45,18 @@ public class GuiFactory
 
   private GuiFactory()
   {
+    // nothing to initialize.
   }
 
   /**
-   * Erzeugt ein Fenster ohne Dekorationen. Das Fenster kann als Inhalt eines Sidebar-Panels
-   * verwendet werden.
+   * Create a window without decoration. The window can be used as content of a
+   * sidebar panel.
    *
    * @param toolkit
+   *          The toolkit to create the window.
    * @param parentWindow
-   * @return Ein neues XWindowPeer
+   *          The parent window.
+   * @return A new {@link XWindowPeer}.
    */
   public static XWindowPeer createWindow(XToolkit toolkit, XWindowPeer parentWindow)
   {
@@ -71,17 +73,25 @@ public class GuiFactory
   }
 
   /**
-   * Erzeugt einen Button mit Label und ActionListener.
+   * Create a button with label and action listener.
    *
    * @param xMCF
+   *          The factory.
    * @param context
+   *          The context.
    * @param toolkit
+   *          The toolkit.
    * @param windowPeer
+   *          The window in which the control is located.
    * @param label
+   *          The label.
    * @param listener
+   *          The action listener.
    * @param size
+   *          The size of the control.
    * @param props
-   * @return Ein Button-Control.
+   *          Some additional properties.
+   * @return A new button.
    */
   @SuppressWarnings("squid:S00107")
   public static XControl createButton(XMultiComponentFactory xMCF,
@@ -99,16 +109,23 @@ public class GuiFactory
   }
 
   /**
-   * Erzeugt ein Texteingabefeld.
+   * Create a text field.
    *
    * @param xMCF
+   *          The factory.
    * @param context
+   *          The context.
    * @param toolkit
+   *          The toolkit.
    * @param windowPeer
+   *          The window in which the control is located.
    * @param text
+   *          The text.
    * @param size
+   *          The size of the control.
    * @param props
-   * @return Ein Textfield-Control.
+   *          Some additional properties.
+   * @return A new text field.
    */
   public static XControl createTextfield(XMultiComponentFactory xMCF,
       XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer,
@@ -132,16 +149,23 @@ public class GuiFactory
   }
 
   /**
-   * Erzeugt ein Label.
+   * Create a label.
    *
    * @param xMCF
+   *          The factory.
    * @param context
+   *          The context.
    * @param toolkit
+   *          The toolkit.
    * @param windowPeer
+   *          The window in which the control is located.
    * @param text
+   *          The text of the label.
    * @param size
+   *          The size of the control.
    * @param props
-   * @return Ein Label-Control
+   *          Some additional properties.
+   * @return A new label.
    */
   public static XControl createLabel(XMultiComponentFactory xMCF, XComponentContext context,
       XToolkit toolkit, XWindowPeer windowPeer, String text, Rectangle size,
@@ -162,12 +186,15 @@ public class GuiFactory
   }
 
   /**
-   * Erzeugt ein Datenmodell für einen Baum-Steuerelement.
+   * Create a data model for a {@link XTreeControl}.
    *
    * @param xMCF
+   *          The factory.
    * @param context
-   * @return Ein Datenmodell für XTrees.
+   *          The context.
+   * @return The model.
    * @throws Exception
+   *           Model can't be created.
    */
   public static XMutableTreeDataModel createTreeModel(XMultiComponentFactory xMCF,
       XComponentContext context) throws Exception
@@ -178,15 +205,20 @@ public class GuiFactory
   }
 
   /**
-   * Erzeugt ein Baum-Steuerelement mit einem vorgegebenen Datenmodell. Das Datenmodel kann mit
-   * {@link #createTreeModel(XMultiComponentFactory, XComponentContext)} erzeugt werden.
+   * Create a tree control with a given data model
+   * {@link #createTreeModel(XMultiComponentFactory, XComponentContext)}.
    *
    * @param xMCF
+   *          The factory.
    * @param context
+   *          The context.
    * @param toolkit
+   *          The toolkit.
    * @param windowPeer
+   *          The window in which the control is located.
    * @param dataModel
-   * @return Ein Treel-Control
+   *          The data model.
+   * @return A new tree control.
    */
   public static XControl createTree(XMultiComponentFactory xMCF, XComponentContext context,
       XToolkit toolkit, XWindowPeer windowPeer, XMutableTreeDataModel dataModel)
@@ -198,6 +230,28 @@ public class GuiFactory
             400, 400));
   }
 
+  /**
+   * Create a combo box with options and item listener.
+   *
+   * @param xMCF
+   *          The factory.
+   * @param context
+   *          The context.
+   * @param toolkit
+   *          The toolkit.
+   * @param windowPeer
+   *          The window in which the control is located.
+   * @param text
+   *          The selected text.
+   * @param listener
+   *          The item listener.
+   * @param size
+   *          The size of the control.
+   * @param props
+   *          Some additional properties.
+   * @return A new combo box.
+   */
+  @SuppressWarnings("squid:S00107")
   public static XControl createCombobox(XMultiComponentFactory xMCF,
       XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer, String text,
       AbstractItemListener listener, Rectangle size,
@@ -215,6 +269,27 @@ public class GuiFactory
     return ctrl;
   }
 
+  /**
+   * Create a numeric field with value and text listener.
+   *
+   * @param xMCF
+   *          The factory.
+   * @param context
+   *          The context.
+   * @param toolkit
+   *          The toolkit.
+   * @param windowPeer
+   *          The window in which the control is located.
+   * @param value
+   *          The value.
+   * @param listener
+   *          The text listener.
+   * @param size
+   *          The size of the control.
+   * @param props
+   *          Some additional properties.
+   * @return A new numeric field.
+   */
   @SuppressWarnings("squid:S00107")
   public static XControl createNumericField(XMultiComponentFactory xMCF, XComponentContext context,
       XToolkit toolkit, XWindowPeer windowPeer, int value, XTextListener listener, Rectangle size,
@@ -228,6 +303,27 @@ public class GuiFactory
     return ctrl;
   }
 
+  /**
+   * Create a spin field with value and text listener.
+   *
+   * @param xMCF
+   *          The factory.
+   * @param context
+   *          The context.
+   * @param toolkit
+   *          The toolkit.
+   * @param windowPeer
+   *          The window in which the control is located.
+   * @param value
+   *          The value.
+   * @param listener
+   *          The text listener.
+   * @param size
+   *          The size of the control.
+   * @param props
+   *          Some additional properties.
+   * @return A new button.
+   */
   @SuppressWarnings("squid:S00107")
   public static XControl createSpinField(XMultiComponentFactory xMCF,
       XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer,
@@ -243,6 +339,23 @@ public class GuiFactory
     return createNumericField(xMCF, context, toolkit, windowPeer, value, listener, size, props);
   }
 
+  /**
+   * Create a horizontal line.
+   *
+   * @param xMCF
+   *          The factory.
+   * @param context
+   *          The context.
+   * @param toolkit
+   *          The toolkit.
+   * @param windowPeer
+   *          The window in which the control is located.
+   * @param size
+   *          The size.
+   * @param props
+   *          Some additional properties.
+   * @return A new horizontal line.
+   */
   public static XControl createHLine(XMultiComponentFactory xMCF, XComponentContext context,
       XToolkit toolkit, XWindowPeer windowPeer, Rectangle size, SortedMap<String, Object> props)
   {
@@ -250,6 +363,25 @@ public class GuiFactory
         props, size);
   }
 
+  /**
+   * Create a list box with an item listener.
+   *
+   * @param xMCF
+   *          The factory.
+   * @param context
+   *          The context.
+   * @param toolkit
+   *          The toolkit.
+   * @param windowPeer
+   *          The window in which the control is located.
+   * @param listener
+   *          The item listener.
+   * @param size
+   *          The size of the control.
+   * @param props
+   *          Some additional properties.
+   * @return A new button.
+   */
   public static XControl createListBox(XMultiComponentFactory xMCF,
       XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer,
       AbstractItemListener listener, Rectangle size,
@@ -264,17 +396,24 @@ public class GuiFactory
   }
 
   /**
-   * Eine allgemeine Hilfsfunktion, mit der UNO-Steuerelemente erzeugt werden.
+   * Creates any control.
    *
    * @param xMCF
+   *          The factory.
    * @param xContext
+   *          The context.
    * @param toolkit
+   *          The toolkit.
    * @param windowPeer
+   *          The window in which the control is located.
    * @param type
-   *          Klasse des Steuerelements, das erzeugt werden soll.
+   *          The type of control (FQDN), eg.
+   *          com.sun.star.awt.UnoControlFixedText.
    * @param props
+   *          Some additional properties of the control.
    * @param rectangle
-   * @return Ein Control-Element.
+   *          The size of the control.
+   * @return A control or null.
    */
   public static XControl createControl(XMultiComponentFactory xMCF,
       XComponentContext xContext, XToolkit toolkit, XWindowPeer windowPeer,
@@ -310,21 +449,17 @@ public class GuiFactory
   }
 
   /**
-   * Ändert die Größe und Position eines Fensters.
+   * Change size and position of a window/control.
    *
    * @param window
+   *          The window/control to change.
    * @param posSize
+   *          The new position and size.
    */
   public static void setWindowPosSize(XWindow window, Rectangle posSize)
   {
-    setWindowPosSize(window, posSize, 0, 0);
-  }
-
-  private static void setWindowPosSize(XWindow window, Rectangle posSize,
-      int horizontalOffset, int verticalOffset)
-  {
-    window.setPosSize(posSize.X - horizontalOffset, posSize.Y - verticalOffset,
-      posSize.Width, posSize.Height, PosSize.POSSIZE);
+    window.setPosSize(posSize.X, posSize.Y, posSize.Width, posSize.Height,
+        PosSize.POSSIZE);
   }
 
 }
