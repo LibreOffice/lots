@@ -24,7 +24,6 @@ import com.sun.star.beans.XPropertySet;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XMultiComponentFactory;
-import com.sun.star.lib.uno.helper.ComponentBase;
 import com.sun.star.ui.LayoutSize;
 import com.sun.star.ui.XSidebarPanel;
 import com.sun.star.ui.XToolPanel;
@@ -32,6 +31,7 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractSidebarPanel;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModelListener;
@@ -46,7 +46,7 @@ import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
 /**
  * The content of the sidebar.
  */
-public class MailMergeGUI extends ComponentBase
+public class MailMergeGUI extends AbstractSidebarPanel
     implements XToolPanel, XSidebarPanel, ConnectionModelListener
 {
 
@@ -76,6 +76,8 @@ public class MailMergeGUI extends ComponentBase
   /**
    * Create a new panel.
    *
+   * @param resourceUrl
+   *          The resource description
    * @param controller
    *          The controller of the panel.
    * @param context
@@ -83,9 +85,11 @@ public class MailMergeGUI extends ComponentBase
    * @param parentWindow
    *          The parent window.
    */
-  public MailMergeGUI(MailMergeController controller, XComponentContext context,
-      XWindow parentWindow)
+  public MailMergeGUI(String resourceUrl, MailMergeController controller,
+      XComponentContext context, XWindow parentWindow)
   {
+    super(resourceUrl);
+    panel = this;
     this.controller = controller;
     this.context = context;
     layout = new VerticalLayout(5, 15);
@@ -153,7 +157,6 @@ public class MailMergeGUI extends ComponentBase
   {
     ConnectionModel.removeListener(this);
     controller.dispose();
-    super.dispose();
   }
 
   @Override

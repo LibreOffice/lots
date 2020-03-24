@@ -54,6 +54,8 @@ public class MailMergeFactory extends AbstractSidebarFactory
       }
     }
 
-    return new MailMergePanel(context, parentWindow, model, resourceUrl);
+    MailMergeController controller = new MailMergeController(resourceUrl,
+        context, parentWindow, model);
+    return controller.getGUI();
   }
 }
