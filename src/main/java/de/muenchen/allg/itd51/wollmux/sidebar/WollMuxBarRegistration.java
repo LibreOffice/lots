@@ -23,7 +23,7 @@ public class WollMuxBarRegistration implements ComponentRegistration
   @Override
   public String[] getServiceNames()
   {
-    return new String[] { WollMuxSidebarFactory.__serviceName };
+    return new String[] { WollMuxSidebarFactory.SERVICE_NAME };
   }
 
 }

@@ -23,7 +23,7 @@ public class MailMergeRegistration implements ComponentRegistration
   @Override
   public String[] getServiceNames()
   {
-    return new String[] { MailMergeFactory.__serviceName };
+    return new String[] { MailMergeFactory.SERVICE_NAME };
   }
 
 }
