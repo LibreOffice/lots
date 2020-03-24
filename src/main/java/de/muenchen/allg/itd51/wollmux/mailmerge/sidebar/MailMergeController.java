@@ -30,7 +30,7 @@ import com.sun.star.sdb.XOfficeDatabaseDocument;
 import com.sun.star.sdbc.XDataSource;
 import com.sun.star.sheet.XSpreadsheetDocument;
 import com.sun.star.text.XTextDocument;
-import com.sun.star.ui.XToolPanel;
+import com.sun.star.ui.XUIElement;
 import com.sun.star.ui.dialogs.FilePicker;
 import com.sun.star.ui.dialogs.TemplateDescription;
 import com.sun.star.ui.dialogs.XFilePicker3;
@@ -99,6 +99,8 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
   /**
    * Create a new controller and the gui of the sidebar.
    *
+   * @param resourceUrl
+   *          The resource description
    * @param context
    *          The context of the sidebar.
    * @param parentWindow
@@ -106,14 +108,14 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
    * @param model
    *          The model of the document to which the sidebar belongs.
    */
-  public MailMergeController(XComponentContext context, XWindow parentWindow,
-      XModel model)
+  public MailMergeController(String resourceUrl, XComponentContext context,
+      XWindow parentWindow, XModel model)
   {
     datasourceModel = Optional.empty();
     previewModel = new PreviewModel();
     previewModel.setDatasourceModel(datasourceModel);
     previewModel.addListener(this);
-    gui = new MailMergeGUI(this, context, parentWindow);
+    gui = new MailMergeGUI(resourceUrl, this, context, parentWindow);
     gui.createGUI();
     XTextDocument doc = UNO.XTextDocument(model);
     if (DocumentManager.hasTextDocumentController(doc))
@@ -128,7 +130,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
     }
   }
 
-  public XToolPanel getGUI()
+  public XUIElement getGUI()
   {
     return gui;
   }
