@@ -4,25 +4,21 @@ import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.frame.XModel;
-import com.sun.star.lang.XServiceInfo;
-import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.ui.XUIElement;
-import com.sun.star.ui.XUIElementFactory;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractSidebarFactory;
 
 /**
  * Factory for creating the sidebar.
  */
-public class MailMergeFactory extends WeakBase implements XUIElementFactory, XServiceInfo
+public class MailMergeFactory extends AbstractSidebarFactory
 {
 
   @SuppressWarnings("java:S115")
   public static final String SERVICE_NAME = "de.muenchen.allg.itd51.wollmux.mailmerge.sidebar."
       + "SeriendruckSidebarFactory";
-
-  private XComponentContext context;
 
   /**
    * Create the factory.
@@ -32,7 +28,7 @@ public class MailMergeFactory extends WeakBase implements XUIElementFactory, XSe
    */
   public MailMergeFactory(XComponentContext context)
   {
-    this.context = context;
+    super(SERVICE_NAME, context);
   }
 
   @Override
@@ -59,26 +55,5 @@ public class MailMergeFactory extends WeakBase implements XUIElementFactory, XSe
     }
 
     return new MailMergePanel(context, parentWindow, model, resourceUrl);
-  }
-
-  @Override
-  public String getImplementationName()
-  {
-    return MailMergeFactory.class.getName();
-  }
-
-  @Override
-  public String[] getSupportedServiceNames()
-  {
-    return new String[] { __serviceName };
-  }
-
-  @Override
-  public boolean supportsService(String serviceName)
-  {
-    for (final String supportedServiceName : getSupportedServiceNames())
-      if (supportedServiceName.equals(serviceName))
-        return true;
-    return false;
   }
 }

@@ -37,6 +37,15 @@ public class DebugExternalWollMux
   private static final Logger LOGGER = LoggerFactory
       .getLogger(DebugExternalWollMux.class);
 
+  /**
+   * Start LibreOffice, register WollMux extension and open a text document.
+   *
+   * @param args
+   *          Program arguments (unused).
+   * @throws Exception
+   *           Something went wrong.
+   */
+  @SuppressWarnings("java:S106")
   public static void main(String[] args) throws Exception
   {
     // Logger zum Debuggen auf stdout initialisieren und die zukünftigen
@@ -51,11 +60,15 @@ public class DebugExternalWollMux
 
       @Override
       public void disposing(EventObject arg0)
-      {}
+      {
+	// nothing to do
+      }
 
       @Override
       public void queryTermination(EventObject arg0) throws TerminationVetoException
-      {}
+      {
+	// nothing to do
+      }
 
       @Override
       public void notifyTermination(EventObject arg0)
@@ -72,10 +85,10 @@ public class DebugExternalWollMux
           "com.sun.star.ui.UIElementFactoryManager", UNO.defaultContext));
 
     factoryRegistration.registerFactory("toolpanel", "WollMuxSidebarFactory", null,
-        WollMuxSidebarFactory.__serviceName);
+        WollMuxSidebarFactory.SERVICE_NAME);
 
     factoryRegistration.registerFactory("toolpanel", "SeriendruckSidebarFactory", null,
-        MailMergeFactory.__serviceName);
+        MailMergeFactory.SERVICE_NAME);
 
     XSet set =
       UnoRuntime.queryInterface(XSet.class, UNO.defaultContext.getServiceManager());
