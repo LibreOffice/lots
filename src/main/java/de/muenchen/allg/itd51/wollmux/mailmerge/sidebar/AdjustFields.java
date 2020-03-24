@@ -66,9 +66,8 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractAdjustmentList
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractFocusListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.ReferencedFieldID;
+import de.muenchen.allg.itd51.wollmux.mailmerge.FieldSubstitution;
 
 /**
  * Dialogs for manipulating the mapping of fields to data source columns.
@@ -255,7 +254,7 @@ public class AdjustFields
       {
         continue;
       }
-      FieldSubstitution subst = new TextDocumentModel.FieldSubstitution();
+      FieldSubstitution subst = new FieldSubstitution();
       for (Pair<String, Boolean> ce : getContent(entry.getValue()))
       {
         if (ce.getValue())
