@@ -40,7 +40,6 @@ import com.sun.star.uno.XComponentContext;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.ReferencedFieldID;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
@@ -51,10 +50,12 @@ import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.IfThenElseDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModel;
+import de.muenchen.allg.itd51.wollmux.mailmerge.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DBDatasourceDialog;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
@@ -438,7 +439,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
 	@SuppressWarnings("unchecked")
 	Map<String, FieldSubstitution> mapIdToSubstitution = (HashMap<String, FieldSubstitution>) e
 	    .getSource();
-	textDocumentController.adjustFields(mapIdToSubstitution);
+	adjustFields(mapIdToSubstitution);
 	updateDatasourceControls();
       };
       try
@@ -787,6 +788,43 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
     {
       LOGGER.error("", e);
       return null;
+    }
+  }
+
+  /**
+   * Adjust all the fields given by the map.
+   *
+   * @param mapIdToSubstitution
+   *          Mapping from a field id to their substitution.
+   */
+  private void adjustFields(Map<String, FieldSubstitution> mapIdToSubstitution)
+  {
+    for (Map.Entry<String, FieldSubstitution> ent : mapIdToSubstitution
+        .entrySet())
+    {
+      String fieldId = ent.getKey();
+      FieldSubstitution subst = ent.getValue();
+      subst.apply(textDocumentController, fieldId);
+
+      // update data structure
+      textDocumentController.updateDocumentCommands();
+      DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
+          textDocumentController);
+      dci.scanGlobalDocumentCommands();
+      // does also collectNonWollMuxFormFields()
+      dci.scanInsertFormValueCommands();
+
+      // reset value
+      textDocumentController.setFormFieldValue(fieldId, null);
+
+      // update view
+      for (FieldSubstitution.SubstElement ele : subst)
+      {
+	if (ele.isField())
+	{
+	  textDocumentController.updateFormFields(ele.getValue());
+	}
+      }
     }
   }
 }
