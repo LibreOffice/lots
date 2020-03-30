@@ -39,8 +39,8 @@
         </excludes>
       </unpackOptions>
       <excludes>
-        <exclude>org.libreoffice:ridl</exclude>
-        <exclude>org.libreoffice:juh</exclude>
+        <exclude>org.libreoffice:libreoffice</exclude>
+        <exclude>org.libreoffice:unoloader</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>
