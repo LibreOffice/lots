@@ -90,7 +90,7 @@ public class OnChangeCopy extends WollMuxEvent
     if (cursor != null)
       do
       {
-        if (item.isItem())
+        if (item.isItem() && model.isItemVisible(item))
           count++;
       } while (cursor.gotoPreviousParagraph(false));
 

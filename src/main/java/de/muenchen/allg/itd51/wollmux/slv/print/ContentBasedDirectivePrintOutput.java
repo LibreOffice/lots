@@ -125,7 +125,7 @@ public class ContentBasedDirectivePrintOutput extends PrintFunction
       count++;
 
     // Get invisible section
-    XTextRange setInvisibleRange = getInvisibleRange(verfPunkt, doc, count);
+    XTextRange setInvisibleRange = getInvisibleRange(model, verfPunkt, count);
 
     // Hide text sections in invisible area and remember their status
     List<XTextSection> hidingSections = getSectionsFromPosition(pmod.getTextDocument(),
@@ -228,18 +228,18 @@ public class ContentBasedDirectivePrintOutput extends PrintFunction
     }
   }
 
-  private XTextRange getInvisibleRange(int verfPunkt, XTextDocument doc, int count)
+  private XTextRange getInvisibleRange(ContentBasedDirectiveModel model, int verfPunkt, int count)
   {
     XTextRange setInvisibleRange = null;
-    XParagraphCursor cursor = UNO
-        .XParagraphCursor(doc.getText().createTextCursorByRange(doc.getText().getStart()));
+    XParagraphCursor cursor = UNO.XParagraphCursor(
+        model.getTextDocument().getText().createTextCursorByRange(model.getTextDocument().getText().getStart()));
     ContentBasedDirectiveItem item = new ContentBasedDirectiveItem(cursor);
     if (cursor != null)
       do
       {
         cursor.gotoEndOfParagraph(true);
 
-        if (item.isItem())
+        if (item.isItem() && model.isItemVisible(item))
         {
           count++;
 

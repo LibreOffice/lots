@@ -3,6 +3,8 @@ package de.muenchen.allg.itd51.wollmux.slv.events;
 import com.google.common.eventbus.Subscribe;
 
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventListener;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
+import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
 
 /**
  * Event listener for content based directive events.
@@ -77,5 +79,17 @@ public class ContentBasedDirectiveEventListener implements WollMuxEventListener
   public void onSetPrintBlocksPropsViaPrintModel(OnSetPrintBlocksPropsViaPrintModel event)
   {
     event.process();
+  }
+
+  /**
+   * Event handler for {@link OnSetVisibleState} event.
+   *
+   * @param event
+   *          A {@link OnSetVisibleState} event.
+   */
+  @Subscribe
+  public void onSetVisibleState(OnSetVisibleState event)
+  {
+    ContentBasedDirectiveModel.createModel(event.getDocumentController()).adoptNumbers();
   }
 }

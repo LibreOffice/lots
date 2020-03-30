@@ -21,6 +21,7 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextFrame;
 import com.sun.star.text.XTextFramesSupplier;
 import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextSection;
 import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.TextRangeRelation;
@@ -32,10 +33,12 @@ import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.document.text.StyleService;
 import de.muenchen.allg.itd51.wollmux.core.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
+import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.slv.print.ContentBasedDirective;
 import de.muenchen.allg.itd51.wollmux.slv.print.ContentBasedDirectivePrint;
 import de.muenchen.allg.ooo.TextDocument;
 import de.muenchen.allg.util.UnoProperty;
@@ -162,6 +165,61 @@ public class ContentBasedDirectiveModel
   }
 
   /**
+   * Collect information about visible content based directives from the document.
+   *
+   * @return List of settings for each item.
+   */
+  public List<ContentBasedDirective> scanItems()
+  {
+    List<ContentBasedDirective> items = new ArrayList<>();
+
+    // Check if first content based directive is present
+    ContentBasedDirectiveItem item = getFirstItem();
+    if (item != null)
+    {
+      ContentBasedDirective original = new ContentBasedDirective(
+          L.m(ContentBasedDirectiveConfig.getNumber(1) + " Original"));
+      original.addReceiverLine(L.m("Empfänger siehe Empfängerfeld"));
+      items.add(original);
+    }
+
+    // Iterate over all paragraphs
+    XParagraphCursor cursor = UNO
+        .XParagraphCursor(getTextDocument().getText().createTextCursorByRange(getTextDocument().getText()));
+
+    UnoCollection<XTextRange> paragraphs = UnoCollection.getCollection(cursor, XTextRange.class);
+    ContentBasedDirective currentVerfpunkt = null;
+    for (XTextRange paragraph : paragraphs)
+    {
+      if (paragraph == null)
+      {
+        continue;
+      }
+
+      item = new ContentBasedDirectiveItem(paragraph);
+      if (item.isItem() && isItemVisible(item))
+      {
+        String heading = paragraph.getString();
+        currentVerfpunkt = new ContentBasedDirective(heading);
+        currentVerfpunkt.setMinNumberOfCopies(1);
+        items.add(currentVerfpunkt);
+      }
+
+      // Add recipients, if line is visible
+      if ((item.isRecipientLine() || item.isItemWithRecipient()) && currentVerfpunkt != null && isItemVisible(item))
+      {
+        String recipient = paragraph.getString();
+        if (!recipient.isEmpty())
+        {
+          currentVerfpunkt.addReceiverLine(recipient);
+        }
+      }
+    }
+
+    return items;
+  }
+
+  /**
    * Gets a {@link ContentBasedDirectiveItem} of the frame {@link #FRAME_NAME_FIRST_CBD} or null if
    * the frame doesn't exists.
    *
@@ -259,7 +317,7 @@ public class ContentBasedDirectiveModel
         // select whole paragraph
         cursor.gotoEndOfParagraph(true);
 
-        if (item.isItem())
+        if (item.isItem() && isItemVisible(item))
         {
           count++;
           item.adoptNumber(count);
@@ -519,5 +577,39 @@ public class ContentBasedDirectiveModel
     bookmarkPatterns.add(copyOnlyPattern);
 
     return bookmarkPatterns;
+  }
+
+  /**
+   * Test if a range is visible in the model.
+   *
+   * @param item
+   *          The item to test.
+   * @return False if the chars are hidden or the range lies in an invisible section, true
+   *         otherwise.
+   */
+  public boolean isItemVisible(ContentBasedDirectiveItem item)
+  {
+    // text has CharHidden property
+    if ((boolean) Utils.getProperty(item.getTextRange(), UnoProperty.CHAR_HIDDEN))
+    {
+      return false;
+    }
+
+    // check if range is in an invisible section
+    UnoDictionary<XTextSection> sections = UnoDictionary
+        .create(UNO.XTextSectionsSupplier(getTextDocument()).getTextSections(), XTextSection.class);
+    for (XTextSection section : sections.values())
+    {
+      TextRangeRelation relation = TextRangeRelation.compareTextRanges(item.getTextRange(), section.getAnchor());
+      if (!TextRangeRelation.DISTINCT.contains(relation))
+      {
+        boolean visible = (boolean) Utils.getProperty(section, UnoProperty.IS_VISIBLE);
+        if (!visible)
+        {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 }
