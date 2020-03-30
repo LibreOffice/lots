@@ -39,6 +39,11 @@ public class OnSetVisibleState extends WollMuxEvent
     this.listener = listener;
   }
 
+  public TextDocumentController getDocumentController()
+  {
+    return documentController;
+  }
+
   @Override
   protected void doit()
   {
