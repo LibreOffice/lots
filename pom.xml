@@ -42,16 +42,13 @@
     <resources>
       <resource>
         <directory>src/main/resources</directory>
-        <excludes>
-          <exclude>log4j.properties</exclude>
-        </excludes>
-        <filtering>true</filtering>
       </resource>
       <resource>
         <directory>src/main/resources</directory>
         <includes>
-          <include>log4j.properties</include>
+          <include>*.properties</include>
         </includes>
+        <filtering>true</filtering>
       </resource>
     </resources>
     <testResources>
@@ -254,6 +251,7 @@
                   <classpathPrefix>lib/</classpathPrefix>
                 </manifest>
                 <manifestEntries>
+                  <Multi-Release>true</Multi-Release>
                   <RegistrationClassName>de.muenchen.allg.itd51.wollmux.ComponentRegistration</RegistrationClassName>
                   <Main-Class>com.sun.star.lib.loader.Loader</Main-Class>
                   <UNO-Type-Path>&lt;&gt;</UNO-Type-Path>
@@ -336,7 +334,7 @@
                 </exec>
                 <replaceregexp>
                   <regexp pattern="&lt;vmParameters xsi:nil=&quot;true&quot;/&gt;" />
-                  <substitution expression="&lt;vmParameters xsi:nil=&quot;false&quot;&gt;${line.separator} &lt;param&gt;-DWOLLMUX_CONF_PATH=${wollmux.test.conf}&lt;/param&gt;${line.separator} &lt;param&gt;${line.separator} -Dlog4j.configuration=file://${project.build.testOutputDirectory}/log4j.properties${line.separator} &lt;/param&gt;${line.separator} &lt;param&gt;${jacocoOffice}&lt;/param&gt;${line.separator} &lt;/vmParameters&gt; " />
+                  <substitution expression="&lt;vmParameters xsi:nil=&quot;false&quot;&gt;${line.separator} &lt;param&gt;-DWOLLMUX_CONF_PATH=${wollmux.test.conf}&lt;/param&gt;${line.separator} &lt;param&gt;-Dlog4j2.configurationFile=file://${project.build.testOutputDirectory}/log4j2.xml&lt;/param&gt;${line.separator} &lt;param&gt;${jacocoOffice}&lt;/param&gt;${line.separator} &lt;/vmParameters&gt; " />
                   <fileset dir="${office.user.profile}/user/config">
                     <include name="javasettings*.xml" />
                   </fileset>
@@ -537,9 +535,14 @@
       <version>29.0-jre</version>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.30</version>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>2.13.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.13.1</version>
     </dependency>
     <dependency>
       <groupId>com.github.chaosfirebolt.converter</groupId>

@@ -81,7 +81,6 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.util.L;
-import de.muenchen.allg.itd51.wollmux.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
 import de.muenchen.allg.util.UnoComponent;
 import de.muenchen.allg.util.UnoConfiguration;
@@ -513,10 +512,6 @@ public class WollMuxFiles
         out.write("wollmuxConfFile: " + getWollMuxConfFile() + "\n");
       }
       out.write("losCacheFile: " + getLosCacheFile() + "\n");
-
-      out.write("===================== START LOG4J-Settings ==================\n");
-      LogConfig.dumpConfiguration(printWriter);
-      out.write("===================== END LOG4J-Settings ==================\n");
 
       out.write("===================== START JVM-Settings ==================\n");
       dumpJVMSettings(outStream, out);
