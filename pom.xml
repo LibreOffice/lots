@@ -235,6 +235,7 @@
             <configuration>
               <finalName>WollMuxBar</finalName>
               <appendAssemblyId>false</appendAssemblyId>
+              <attach>false</attach>
               <archive>
                 <addMavenDescriptor>false</addMavenDescriptor>
                 <manifest>
@@ -264,6 +265,7 @@
             <configuration>
               <finalName>WollMux</finalName>
               <appendAssemblyId>false</appendAssemblyId>
+              <attach>false</attach>
               <descriptors>
                 <descriptor>misc/assembly-oxt.xml</descriptor>
               </descriptors>
