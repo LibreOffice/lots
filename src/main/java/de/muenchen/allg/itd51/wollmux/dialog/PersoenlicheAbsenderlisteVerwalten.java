@@ -89,6 +89,7 @@ import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractFocusListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
@@ -142,6 +143,8 @@ public class PersoenlicheAbsenderlisteVerwalten
   private int count = 0;
 
   private short itemToHighlightPos = 0;
+  
+  private boolean bPalListeHasFocus = false;
 
   /**
    * Erzeugt einen neuen Dialog.
@@ -235,6 +238,21 @@ public class PersoenlicheAbsenderlisteVerwalten
     addToPalBtn.addActionListener(addToPalActionListener);
 
     addPalEntriesToListBox();
+    
+    UNO.XWindow(palListe).addFocusListener(new AbstractFocusListener()
+    {
+      @Override
+      public void focusGained(com.sun.star.awt.FocusEvent event)
+      {
+        bPalListeHasFocus = true;
+      }
+
+      @Override
+      public void focusLost(com.sun.star.awt.FocusEvent event)
+      {
+        bPalListeHasFocus = false;
+      }
+    });
 
     dialog = UnoRuntime.queryInterface(XDialog.class, window);
     dialog.execute();
@@ -312,7 +330,7 @@ public class PersoenlicheAbsenderlisteVerwalten
           setLdapSearchResults(result);
           showInfoDialog(result);
         });
-      } else if (arg0.KeyCode == Key.DELETE)
+      } else if (arg0.KeyCode == Key.DELETE && bPalListeHasFocus)
       {
         // Einträge aus PAL-Listbox entfernen
         short[] selectedItems = palListe.getSelectedItemsPos();
