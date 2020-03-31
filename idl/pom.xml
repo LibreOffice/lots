@@ -15,6 +15,7 @@
 
   <properties>
     <libreoffice.sdk>${UNO_PATH}/../sdk</libreoffice.sdk>
+    <maven.compiler.release>11</maven.compiler.release>
   </properties>
 
   <build>
@@ -27,6 +28,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -45,13 +50,13 @@
             <configuration>
               <target>
                 <property name="idlcOutput"
-                  value="${project.build.directory}/generated-sources/urd/de/muenchen/allg/itd51/wollmux" />
+                  value="${project.build.directory}/generated-sources/urd/de/muenchen/allg/itd51/wollmux/interfaces" />
                 <fail unless="UNO_PATH" message="No UNO_PATH set! Set UNO_PATH as property in maven settings." />
                 <echo message="Using UNO_PATH: ${UNO_PATH}" />
                 <exec executable="sh" failonerror="true">
                   <arg value="-c" />
                   <arg value="${libreoffice.sdk}/bin/idlc -O ${idlcOutput} -I ${libreoffice.sdk}/idl -I src/main/idl
-                    src/main/idl/de/muenchen/allg/itd51/wollmux/*.idl" />
+                    src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/*.idl" />
                 </exec>
                 <exec executable="sh" failonerror="true">
                   <arg value="-c" />
@@ -59,7 +64,7 @@
                 </exec>
                 <exec executable="sh" failonerror="true">
                   <arg value="-c" />
-                  <arg value="${libreoffice.sdk}/bin/javamaker -Tde.muenchen.allg.itd51.wollmux.* -nD
+                  <arg value="${libreoffice.sdk}/bin/javamaker -Tde.muenchen.allg.itd51.wollmux.interfaces.* -nD
                     -Gc -O ${project.build.directory}/generated-sources/idl ${project.build.directory}/WollMux.rdb
                     -X${UNO_PATH}/types.rdb -X${UNO_PATH}/types/offapi.rdb" />
                 </exec>
@@ -125,4 +130,15 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.libreoffice</groupId>
+      <artifactId>libreoffice</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.libreoffice</groupId>
+      <artifactId>unoloader</artifactId>
+    </dependency>
+  </dependencies>
 </project>

@@ -32,13 +32,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxClassLoader;
-import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.func.ExternalFunction;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintException;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
+import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**

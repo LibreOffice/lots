@@ -32,10 +32,10 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintException;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
+import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 
 public class PrintFunctionLibraryTest
 {

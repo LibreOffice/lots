@@ -38,9 +38,9 @@ import com.sun.star.lang.WrappedTargetException;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.document.text.TextDocument;
-import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
+import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**

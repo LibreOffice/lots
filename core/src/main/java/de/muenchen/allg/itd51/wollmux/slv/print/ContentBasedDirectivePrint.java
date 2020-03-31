@@ -42,12 +42,12 @@ import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.ui.dialogs.ExecutableDialogResults;
 
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
-import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintException;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
+import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
 import de.muenchen.allg.itd51.wollmux.slv.dialog.ContentBasedDirectiveDialog;
 import de.muenchen.allg.itd51.wollmux.slv.dialog.ContentBasedDirectiveSettings;

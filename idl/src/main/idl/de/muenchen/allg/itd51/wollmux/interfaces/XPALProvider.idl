@@ -25,7 +25,7 @@
  
 #include <com/sun/star/uno/XInterface.idl> 
   
-module de {  module muenchen {  module allg { module itd51 { module wollmux {
+module de {  module muenchen {  module allg { module itd51 { module wollmux { module interfaces {
  
 /** 
   Das Interface XPALProvider stellt Methoden zum Auslesen der aktuellen
@@ -66,6 +66,6 @@ interface XPALProvider
 	string getCurrentSender();
 };
 
-}; }; }; }; };
+}; }; }; }; }; };
  
 #endif

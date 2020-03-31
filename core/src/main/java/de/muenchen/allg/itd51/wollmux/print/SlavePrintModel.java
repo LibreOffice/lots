@@ -33,8 +33,8 @@ import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
-import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
+import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**

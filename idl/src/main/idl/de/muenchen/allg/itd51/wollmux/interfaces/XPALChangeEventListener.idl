@@ -27,7 +27,7 @@
 #include <com/sun/star/lang/EventObject.idl> 
 #include <com/sun/star/frame/XFrame.idl> 
   
-module de {  module muenchen {  module allg { module itd51 { module wollmux {
+module de {  module muenchen {  module allg { module itd51 { module wollmux { module interfaces {
  
 /** 
   Das Interface XPALChangeEventListener definiert einen Listener, der Änderungen an der
@@ -49,6 +49,6 @@ interface XPALChangeEventListener
 	void updateContent( [in] com::sun::star::lang::EventObject eventObject );
 };
 
-}; }; }; }; };
+}; }; }; }; }; };
  
 #endif

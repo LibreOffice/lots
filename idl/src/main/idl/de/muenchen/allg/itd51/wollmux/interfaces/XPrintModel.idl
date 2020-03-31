@@ -29,7 +29,7 @@
 #include <com/sun/star/beans/XPropertySet.idl>
 #include <com/sun/star/beans/PropertyValue.idl>
   
-module de {  module muenchen {  module allg { module itd51 { module wollmux {
+module de {  module muenchen {  module allg { module itd51 { module wollmux { module interfaces {
  
 /** 
   Jeder Druckfunktion wird beim Aufruf ein XPrintModel-Objekt übergeben, über
@@ -237,6 +237,6 @@ interface XPrintModel
 	void setPrintMessage([in] string value);
 };
 
-}; }; }; }; };
+}; }; }; }; }; };
  
 #endif

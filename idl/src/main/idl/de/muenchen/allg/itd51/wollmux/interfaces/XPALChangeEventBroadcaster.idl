@@ -25,7 +25,7 @@
  
 #include "XPALChangeEventListener.idl" 
  
-module de {  module muenchen {  module allg { module itd51 { module wollmux {
+module de {  module muenchen {  module allg { module itd51 { module wollmux { module interfaces {
 
 /** 
   Das Interface XPALChangeEventBroadcasteristener definiert einen Broadcaster, der über
@@ -74,6 +74,6 @@ interface XPALChangeEventBroadcaster
 	void removePALChangeEventListener( [in] XPALChangeEventListener listener);
 };
 
-}; }; }; }; };
+}; }; }; }; }; };
  
 #endif

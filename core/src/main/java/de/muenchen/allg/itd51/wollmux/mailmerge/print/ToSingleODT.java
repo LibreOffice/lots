@@ -22,8 +22,8 @@
  */
 package de.muenchen.allg.itd51.wollmux.mailmerge.print;
 
-import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
+import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 
 /**
  * Print function for creating one odt file per mailmerge record.

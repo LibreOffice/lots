@@ -35,8 +35,8 @@ import com.sun.star.frame.XStorable;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
+import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 
 /**
  * An abstract print function for LibreOffice mailmerge.

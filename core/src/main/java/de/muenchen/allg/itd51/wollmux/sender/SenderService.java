@@ -46,8 +46,6 @@ import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
-import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
@@ -64,6 +62,8 @@ import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.interfaces.XPALChangeEventListener;
+import de.muenchen.allg.itd51.wollmux.interfaces.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.sender.dialog.PersoenlicheAbsenderlisteVerwalten;
 
 /**

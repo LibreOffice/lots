@@ -27,7 +27,7 @@
 #include <com/sun/star/text/XTextDocument.idl>
 #include <com/sun/star/beans/PropertyValues.idl>
  
-module de {  module muenchen {  module allg { module itd51 { module wollmux {
+module de {  module muenchen {  module allg { module itd51 { module wollmux { module interfaces {
 
 /**
   Dieses Interface beschreibt Methoden des WollMux, die sich nur dokumentspezifisch
@@ -145,6 +145,6 @@ interface XWollMuxDocument
     
 }; 
   
-}; }; }; }; };
+}; }; }; }; }; };
  
 #endif

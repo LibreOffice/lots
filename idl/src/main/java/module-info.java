@@ -20,29 +20,10 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.mailmerge.print;
-
-import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
-import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
-
-/**
- * Print function for creating one PDF file per mail merge record.
- */
-public class ToSinglePDF extends MailMergePrintFunction
+module wollmux.interfaces
 {
-  /**
-   * A {@link PrintFunction} with name "MailMergeNewToSinglePDF" and order 200.
-   */
-  public ToSinglePDF()
-  {
-    super("MailMergeNewToSinglePDF", 200);
-  }
+  exports de.muenchen.allg.itd51.wollmux.interfaces;
 
-  @Override
-  public void print(XPrintModel printModel)
-  {
-    boolean isODT = false;
-    saveOutputFile(createTempDocument(printModel, isODT), printModel.getTextDocument());
-  }
-
+  requires transitive org.libreoffice.uno;
+  requires transitive org.libreoffice.unoloader;
 }

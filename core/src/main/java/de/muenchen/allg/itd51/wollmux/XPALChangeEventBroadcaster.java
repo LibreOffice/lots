@@ -20,29 +20,18 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.mailmerge.print;
-
-import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
-import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
+package de.muenchen.allg.itd51.wollmux;
 
 /**
- * Print function for creating one PDF file per mail merge record.
+ * Support renaming of IDL interfaces.
+ * 
+ * {@link de.muenchen.allg.itd51.wollmux.interfaces.XPALChangeEventBroadcaster}
+ * 
+ * @deprecated
  */
-public class ToSinglePDF extends MailMergePrintFunction
+@Deprecated(since = "18.2.0", forRemoval = true)
+@SuppressWarnings("java:S2176")
+public interface XPALChangeEventBroadcaster extends de.muenchen.allg.itd51.wollmux.interfaces.XPALChangeEventBroadcaster
 {
-  /**
-   * A {@link PrintFunction} with name "MailMergeNewToSinglePDF" and order 200.
-   */
-  public ToSinglePDF()
-  {
-    super("MailMergeNewToSinglePDF", 200);
-  }
-
-  @Override
-  public void print(XPrintModel printModel)
-  {
-    boolean isODT = false;
-    saveOutputFile(createTempDocument(printModel, isODT), printModel.getTextDocument());
-  }
 
 }

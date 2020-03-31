@@ -40,9 +40,9 @@ import com.sun.star.ui.dialogs.TemplateDescription;
 import com.sun.star.ui.dialogs.XFilePicker3;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
+import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 
 /**
  * Show a document with OS default view for the MIME-Type.

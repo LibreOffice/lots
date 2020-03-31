@@ -55,6 +55,8 @@ pipeline {
               sh "mvn $SONAR_MAVEN_GOAL \
                 -Dsonar.projectKey=de.muenchen:wollmux \
                 -Dsonar.branch.name=${GIT_BRANCH} \
+                -Dsonar.java.source=11 \
+                -Dsonar.java.target=11 \
                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
                 -Dsonar.junit.reportPaths=target/surefire-reports,target/failsafe-reports"
               }
@@ -71,6 +73,8 @@ pipeline {
                 -Dsonar.projectKey=de.muenchen:wollmux \
                 -Dsonar.branch.name=${GIT_BRANCH} \
                 -Dsonar.branch.target=${env.CHANGE_TARGET} \
+                -Dsonar.java.source=11 \
+                -Dsonar.java.target=11 \
                 -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco/jacoco.xml \
                 -Dsonar.junit.reportPaths=target/surefire-reports,target/failsafe-reports"
               }

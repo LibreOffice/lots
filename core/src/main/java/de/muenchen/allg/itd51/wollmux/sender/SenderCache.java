@@ -24,7 +24,7 @@ package de.muenchen.allg.itd51.wollmux.sender;
 
 import java.util.List;
 
-import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
+import de.muenchen.allg.itd51.wollmux.interfaces.XPALChangeEventListener;
 
 /**
  * A cache for the sender list of an user. Every time the
