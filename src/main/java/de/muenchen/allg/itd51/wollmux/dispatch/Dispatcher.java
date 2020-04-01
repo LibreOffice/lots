@@ -60,5 +60,6 @@ public abstract class Dispatcher
    *          The corresponding frame.
    * @return A new dispatch.
    */
-  public abstract XDispatch create(XDispatch origDisp, URL url, XFrame frame);
+  public abstract WollMuxDispatch create(XDispatch origDisp, URL url,
+      XFrame frame);
 }

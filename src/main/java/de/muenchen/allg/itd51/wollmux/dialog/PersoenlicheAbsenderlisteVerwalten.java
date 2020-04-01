@@ -144,7 +144,7 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private short itemToHighlightPos = 0;
   
-  private boolean bPalListeHasFocus = false;
+  private boolean palListeHasFocus = false;
 
   /**
    * Erzeugt einen neuen Dialog.
@@ -244,13 +244,13 @@ public class PersoenlicheAbsenderlisteVerwalten
       @Override
       public void focusGained(com.sun.star.awt.FocusEvent event)
       {
-        bPalListeHasFocus = true;
+        palListeHasFocus = true;
       }
 
       @Override
       public void focusLost(com.sun.star.awt.FocusEvent event)
       {
-        bPalListeHasFocus = false;
+        palListeHasFocus = false;
       }
     });
 

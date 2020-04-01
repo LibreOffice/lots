@@ -149,7 +149,12 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
     {
       if (dispatcher.supports(url))
       {
-        return dispatcher.create(getOrigDispatch(url, frameName, fsFlag), url, frame);
+	WollMuxDispatch dispatch = dispatcher
+	    .create(getOrigDispatch(url, frameName, fsFlag), url, frame);
+	if (dispatch.isGlobal() || (!dispatch.isGlobal() && frame != null))
+	{
+	  return dispatch;
+	}
       }
     }
 

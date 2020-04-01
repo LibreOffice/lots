@@ -1,48 +1,37 @@
 package de.muenchen.allg.itd51.wollmux.sidebar;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
-import com.sun.star.lang.IllegalArgumentException;
-import com.sun.star.lang.XServiceInfo;
-import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.ui.XUIElement;
-import com.sun.star.ui.XUIElementFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractSidebarFactory;
+
 /**
- * Dies ist die Implementation der Sidebar-Factory, die in Factories.xcu
- * definiert ist. Die Factory erzeugt ein {@link WollMuxSidebarPanel}.  
- *
+ * Factory for the WollMux sidebar. It's mentioned in Factories.xcu.
  */
-public class WollMuxSidebarFactory extends WeakBase implements XUIElementFactory,
-    XServiceInfo
+public class WollMuxSidebarFactory extends AbstractSidebarFactory
 {
 
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(WollMuxSidebarFactory.class);
+  public static final String SERVICE_NAME = "de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory";
 
-  public static final String __serviceName =
-    "de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory";
-  
-  private XComponentContext context;
-
+  /**
+   * Create the WollMux bar.
+   *
+   * @param context
+   *          The context of the bar.
+   */
   public WollMuxSidebarFactory(XComponentContext context)
   {
-    LOGGER.debug("WollMuxSidebarFactory:WollMuxSidebarFactory");
-    this.context = context;
+    super(SERVICE_NAME, context);
   }
 
   @Override
   public XUIElement createUIElement(String resourceUrl, PropertyValue[] arguments)
-      throws NoSuchElementException, IllegalArgumentException
+      throws NoSuchElementException
   {
-    LOGGER.debug("WollMuxSidebarFactory:createUIElement");
-
     if (!resourceUrl.startsWith("private:resource/toolpanel/WollMuxSidebarFactory/WollMuxSidebarPanel"))
     {
       throw new NoSuchElementException(resourceUrl, this);
@@ -60,25 +49,5 @@ public class WollMuxSidebarFactory extends WeakBase implements XUIElementFactory
     }
 
     return new WollMuxSidebarPanel(context, parentWindow, resourceUrl);
-  }
-
-  @Override
-  public String getImplementationName()
-  {
-    return WollMuxSidebarFactory.class.getName();
-  }
-
-  @Override
-  public String[] getSupportedServiceNames()
-  {
-    return new String[] { __serviceName };
-  }
-
-  @Override
-  public boolean supportsService(String serviceName)
-  {
-    for (final String supportedServiceName : getSupportedServiceNames())
-      if (supportedServiceName.equals(serviceName)) return true;
-    return false;
   }
 }

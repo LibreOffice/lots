@@ -31,13 +31,11 @@ import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer.DataID;
 import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.OverrideFragChainException;
 import de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
@@ -59,7 +57,6 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
-import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeDatasource;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormValueChanged;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
@@ -934,181 +931,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   }
 
   /**
-   * Diese Methode ersetzt die Referenzen der ID fieldId im gesamten Dokument durch
-   * neue IDs, die in der Ersetzungsregel subst spezifiziert sind. Die
-   * Ersetzungsregel ist vom Typ FieldSubstitution und kann mehrere Elemente (fester
-   * Text oder Felder) enthalten, die an Stelle eines alten Feldes gesetzt werden
-   * sollen. Damit kann eine Ersetzungsregel auch dafür sorgen, dass aus einem früher
-   * atomaren Feld in Zukunft mehrere Felder entstehen. Folgender Abschnitt
-   * beschreibt, wie sich die Ersetzung auf verschiedene Elemente auswirkt.
-   *
-   * 1) Ersetzungsregel "&lt;neueID&gt;" - Einfache Ersetzung mit genau einem neuen
-   * Serienbrieffeld (z.B. "&lt;Vorname&gt;"): bei insertFormValue-Kommandos wird
-   * WM(CMD'insertFormValue' ID '&lt;alteID&gt;' [TRAFO...]) ersetzt durch WM(CMD
-   * 'insertFormValue' ID '&lt;neueID&gt;' [TRAFO...]). Bei Serienbrieffeldern wird
-   * die ID ebenfalls direkt ersetzt durch &lt;neueID&gt;. Bei
-   * WollMux-Benutzerfeldern, die ja immer eine Trafo hinterlegt haben, wird jede
-   * vorkommende Funktion VALUE 'alteID' ersetzt durch VALUE 'neueID'.
-   *
-   * 2) Ersetzungsregel "&lt;A&gt; &lt;B&gt;" - Komplexe Ersetzung mit mehreren neuen
-   * IDs und Text: Diese Ersetzung ist bei transformierten Feldern grundsätzlich
-   * nicht zugelassen. Ein bestehendes insertFormValue-Kommando ohne Trafo wird wie
-   * folgt manipuliert: anstelle des alten Bookmarks WM(CMD'insertFormValue' ID
-   * 'alteId') wird der entsprechende Freitext und entsprechende neue
-   * WM(CMD'insertFormValue' ID 'neueIDn') Bookmarks in den Text eingefügt. Ein
-   * Serienbrieffeld wird ersetzt durch entsprechende neue Serienbrieffelder, die
-   * durch den entsprechenden Freitext getrennt sind.
-   *
-   * 3) Leere Ersetzungsregel - in diesem Fall wird keine Ersetzung vorgenommen und
-   * die Methode kehrt sofort zurück.
-   *
-   * In allen Fällen gilt, dass die Änderung nach Ausführung dieser Methode sofort
-   * aktiv sind und der Aufruf von setFormFieldValue(...) bzw. updateFormFields(...)
-   * mit den neuen IDs direkt in den veränderten Feldern Wirkung zeigt. Ebenso werden
-   * aus dem Formularwerte-Abschnitt in den persistenten Daten die alten Werte der
-   * ersetzten IDs gelöscht.
-   *
-   * @param fieldId
-   *          Feld, das mit Hilfe der Ersetzungsregel subst ersetzt werden soll.
-   * @param subst
-   *          die Ersetzungsregel, die beschreibt, welche Inhalte an Stelle des alten
-   *          Feldes eingesetzt werden sollen.
-   */
-  public synchronized void applyFieldSubstitution(String fieldId,
-      FieldSubstitution subst)
-  {
-    // keine Ersetzung, wenn subst leer ist.
-    if (!subst.iterator().hasNext()) {
-      return;
-    }
-
-    // enthält später die neue FieldId, wenn eine 1-zu-1-Zuordnung vorliegt
-    String newFieldId = null;
-
-    // Neuen Text zusammenbauen, Felder sind darin mit <feldname> gekennzeichnet
-    String substStr = "";
-    int count = 0;
-    for (Iterator<FieldSubstitution.SubstElement> substIter = subst.iterator(); substIter.hasNext();)
-    {
-      FieldSubstitution.SubstElement ele = substIter.next();
-      if (ele.isFixedText())
-      {
-        substStr += ele.getValue();
-      }
-      else if (ele.isField())
-      {
-        substStr += "<" + ele.getValue() + ">";
-        newFieldId = ele.getValue();
-      }
-      count++;
-    }
-    if (count != 1) {
-      newFieldId = null;
-    }
-
-    // Alle InsertFormValue-Felder anpassen:
-    List<FormField> c = model.getIdToFormFields().get(fieldId);
-    if (c != null)
-    {
-      for (Iterator<FormField> iter = c.iterator(); iter.hasNext();)
-      {
-        FormField f = iter.next();
-        if (f.getTrafoName() != null)
-        {
-          // Transformierte Felder soweit möglich behandeln
-          if (newFieldId != null)
-            // 1-zu-1 Zuordnung: Hier kann substitueFieldID verwendet werden
-            f.substituteFieldID(fieldId, newFieldId);
-          else
-            LOGGER.error(L.m("Kann transformiertes Feld nur durch eine 1-zu-1 Zuordnung ersetzen."));
-        }
-        else
-        {
-          // Untransformierte Felder durch neue Felder ersetzen
-          XTextRange anchor = f.getAnchor();
-          if (f.getAnchor() != null)
-          {
-            // Cursor erzeugen, Formularfeld löschen und neuen String setzen
-            XTextCursor cursor = anchor.getText().createTextCursorByRange(anchor);
-            f.dispose();
-            cursor.setString(substStr);
-
-            // Neue Bookmarks passend zum Text platzieren
-            cursor.collapseToStart();
-            for (Iterator<FieldSubstitution.SubstElement> substIter =
-              subst.iterator(); substIter.hasNext();)
-            {
-              FieldSubstitution.SubstElement ele = substIter.next();
-              if (ele.isFixedText())
-              {
-                cursor.goRight((short) ele.getValue().length(), false);
-              }
-              else if (ele.isField())
-              {
-                cursor.goRight((short) (1 + ele.getValue().length() + 1), true);
-                new Bookmark(
-                  "WM(CMD 'insertFormValue' ID '" + ele.getValue() + "')", model.doc,
-                  cursor);
-                cursor.collapseToEnd();
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // Alle Datenbank- und Benutzerfelder anpassen:
-    c = model.getIdToTextFieldFormFields().get(fieldId);
-    if (c != null)
-    {
-      for (Iterator<FormField> iter = c.iterator(); iter.hasNext();)
-      {
-        FormField f = iter.next();
-        if (f.getTrafoName() != null)
-        {
-          // Transformierte Felder soweit möglich behandeln
-          if (newFieldId != null)
-            // 1-zu-1 Zuordnung: hier kann f.substitueFieldId nicht verwendet
-            // werden, dafür kann aber die Trafo angepasst werden.
-            substituteFieldIdInTrafo(f.getTrafoName(), fieldId, newFieldId);
-          else
-            LOGGER.error(L.m("Kann transformiertes Feld nur durch eine 1-zu-1 Zuordnung ersetzen."));
-        }
-        else
-        {
-          // Untransformierte Felder durch neue Felder ersetzen
-          XTextRange anchor = f.getAnchor();
-          if (f.getAnchor() != null)
-          {
-            // Cursor über den Anker erzeugen und Formularfeld löschen
-            XTextCursor cursor = anchor.getText().createTextCursorByRange(anchor);
-            f.dispose();
-            cursor.setString(substStr);
-
-            // Neue Datenbankfelder passend zum Text einfügen
-            cursor.collapseToStart();
-            for (Iterator<FieldSubstitution.SubstElement> substIter =
-              subst.iterator(); substIter.hasNext();)
-            {
-              FieldSubstitution.SubstElement ele = substIter.next();
-              if (ele.isFixedText())
-              {
-                cursor.goRight((short) ele.getValue().length(), false);
-              }
-              else if (ele.isField())
-              {
-                cursor.goRight((short) (1 + ele.getValue().length() + 1), true);
-                insertMailMergeField(ele.getValue(), cursor);
-                cursor.collapseToEnd();
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  /**
    * Fügt an Stelle der aktuellen Selektion ein Serienbrieffeld ein, das auf die
    * Spalte fieldId zugreift und mit dem Wert "" vorbelegt ist, falls noch kein Wert
    * für fieldId gesetzt wurde. Das Serienbrieffeld wird im WollMux registriert und
@@ -1122,11 +944,16 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
 
   /**
    * Fügt an Stelle range ein Serienbrieffeld ein, das auf die Spalte fieldId
-   * zugreift und mit dem Wert "" vorbelegt ist, falls noch kein Wert für fieldId
-   * gesetzt wurde. Das Serienbrieffeld wird im WollMux registriert und kann damit
-   * sofort verwendet werden.
+   * zugreift und mit dem Wert "" vorbelegt ist, falls noch kein Wert für
+   * fieldId gesetzt wurde. Das Serienbrieffeld wird im WollMux registriert und
+   * kann damit sofort verwendet werden.
+   *
+   * @param fieldId
+   *          The column name of the data base.
+   * @param range
+   *          The position of the mail merge field.
    */
-  private void insertMailMergeField(String fieldId, XTextRange range)
+  public void insertMailMergeField(String fieldId, XTextRange range)
   {
     model.updateLastTouchedByVersionInfo();
 
@@ -1258,7 +1085,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    *          Die ID des Formularfeldes bzw. der Formularfelder, die im Dokument
    *          angepasst werden sollen.
    */
-  public synchronized void updateFormFields(String fieldId)
+  public void updateFormFields(String fieldId)
   {
     if (formFieldPreviewMode)
     {
@@ -1646,17 +1473,22 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
 
   /**
    * Speichert den neuen Wert value zum Formularfeld fieldId im
-   * Formularwerte-Abschnitt in den persistenten Daten oder löscht den Eintrag für
-   * fieldId aus den persistenten Daten, wenn value==null ist. ACHTUNG! Damit der
-   * neue Wert angezeigt wird, ist ein Aufruf von {@link #updateFormFields(String)}
-   * erforderlich.
+   * Formularwerte-Abschnitt in den persistenten Daten oder löscht den Eintrag
+   * für fieldId aus den persistenten Daten, wenn value==null ist. ACHTUNG!
+   * Damit der neue Wert angezeigt wird, ist ein Aufruf von
+   * {@link #updateFormFields(String)} erforderlich.
    *
-   * Befindet sich das TextDocumentModel in einem über {@link #startSimulation()}
-   * gestarteten Simulationslauf, so werden die persistenten Daten nicht verändert
-   * und der neue Wert nur in einem internen Objekt des Simulationslaufs gespeichert
-   * anstatt im Dokument.
+   * Befindet sich das TextDocumentModel in einem über
+   * {@link #startSimulation()} gestarteten Simulationslauf, so werden die
+   * persistenten Daten nicht verändert und der neue Wert nur in einem internen
+   * Objekt des Simulationslaufs gespeichert anstatt im Dokument.
+   *
+   * @param fieldId
+   *          The id of the field.
+   * @param value
+   *          The value of the field.
    */
-  public synchronized void setFormFieldValue(String fieldId, String value)
+  public void setFormFieldValue(String fieldId, String value)
   {
     if (simulationResult == null)
     {
@@ -1707,7 +1539,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * wenn die Formularbeschreibung nur aus einer leeren Struktur ohne eigentlichen
    * Formularinhalt besteht.
    */
-  private void storeCurrentFormDescription()
+  public void storeCurrentFormDescription()
   {
     model.updateLastTouchedByVersionInfo();
 
@@ -1725,60 +1557,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     catch (NodeNotFoundException e)
     {
       LOGGER.error(L.m("Dies kann nicht passieren."), e);
-    }
-  }
-
-  /**
-   * Diese Methode ersetzt jedes Vorkommen von VALUE "oldFieldId" in der
-   * dokumentlokalen Trafo-Funktion trafoName durch VALUE "newFieldId", speichert die
-   * neue Formularbeschreibung persistent im Dokument ab und passt die aktuelle
-   * Funktionsbibliothek entsprechend an. Ist einer der Werte trafoName, oldFieldId
-   * oder newFieldId null, dann macht diese Methode nichts.
-   *
-   * @param trafoName
-   *          Die Funktion, in der die Ersetzung vorgenommen werden soll.
-   * @param oldFieldId
-   *          Die alte Feld-ID, die durch newFieldId ersetzt werden soll.
-   * @param newFieldId
-   *          die neue Feld-ID, die oldFieldId ersetzt.
-   */
-  private void substituteFieldIdInTrafo(String trafoName, String oldFieldId,
-      String newFieldId)
-  {
-    if (trafoName == null || oldFieldId == null || newFieldId == null) {
-      return;
-    }
-    try
-    {
-      ConfigThingy trafoConf =
-        model.getFormDescription().query("Formular").query("Funktionen").query(trafoName,
-          2).getLastChild();
-      substituteValueRecursive(trafoConf, oldFieldId, newFieldId);
-
-      // neue Formularbeschreibung persistent machen
-      storeCurrentFormDescription();
-
-      // Funktion neu parsen und Funktionsbibliothek anpassen
-      FunctionLibrary funcLib = getFunctionLibrary();
-      try
-      {
-        Function func =
-          FunctionFactory.parseChildren(trafoConf, funcLib, dialogLib,
-            getFunctionContext());
-        getFunctionLibrary().add(trafoName, func);
-      }
-      catch (ConfigurationErrorException e)
-      {
-        // sollte eigentlich nicht auftreten, da die alte Trafo ja auch schon
-        // einmal erfolgreich geparsed werden konnte.
-        LOGGER.error("", e);
-      }
-    }
-    catch (NodeNotFoundException e)
-    {
-      LOGGER.error(L.m(
-        "Die trafo '%1' ist nicht in diesem Dokument definiert und kann daher nicht verändert werden.",
-        trafoName));
     }
   }
 
@@ -2009,41 +1787,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     {
       LOGGER.error("", e);
       return null;
-    }
-  }
-
-  /**
-   * Durchsucht das ConfigThingy conf rekursiv und ersetzt alle VALUE-Knoten, die
-   * genau ein Kind besitzen durch VALUE-Knoten mit dem neuen Kind newId.
-   *
-   * @param conf
-   *          Das ConfigThingy, in dem rekursiv ersetzt wird.
-   */
-  private static void substituteValueRecursive(ConfigThingy conf, String oldFieldId,
-      String newFieldId)
-  {
-    if (conf == null) {
-      return;
-    }
-
-    if ("VALUE".equals(conf.getName()) && conf.count() == 1
-      && conf.toString().equals(oldFieldId))
-    {
-      try
-      {
-        conf.getLastChild().setName(newFieldId);
-      }
-      catch (NodeNotFoundException e)
-      {
-        // kann wg. der obigen Prüfung nicht auftreten.
-      }
-      return;
-    }
-
-    for (Iterator<ConfigThingy> iter = conf.iterator(); iter.hasNext();)
-    {
-      ConfigThingy child = iter.next();
-      substituteValueRecursive(child, oldFieldId, newFieldId);
     }
   }
 
@@ -2319,7 +2062,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     {
       XFrame frame = UNO.XModel(getModel().doc).getCurrentController().getFrame();
       String frameTitle = (String) UNO.getProperty(frame, "Title");
-      frameTitle = MailMergeDatasource.stripOpenOfficeFromWindowName(frameTitle);
+      frameTitle = UNO.stripOpenOfficeFromWindowName(frameTitle);
       return frameTitle;
     } catch (Exception x)
     {

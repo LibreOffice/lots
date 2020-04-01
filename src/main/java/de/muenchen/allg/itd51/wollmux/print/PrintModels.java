@@ -1264,7 +1264,7 @@ public class PrintModels
      * nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als der
      * ORDER-Wert der aktuellen Druckfunktion ist.
      *
-     * @see de.muenchen.allg.itd51.wollmux.print.PrintModels.InternalPrintModel#useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.print.PrintFunction)
+     * @see de.muenchen.allg.itd51.wollmux.print.PrintModels.InternalPrintModel#useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.func.print.PrintFunction)
      */
     @Override
     public boolean useInternalPrintFunction(PrintFunction function)

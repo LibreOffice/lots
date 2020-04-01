@@ -48,9 +48,9 @@ import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
-import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
+import de.muenchen.allg.itd51.wollmux.core.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.core.document.AnnotationBasedPersistentDataContainer;
 import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer;
 import de.muenchen.allg.itd51.wollmux.core.document.RDFBasedPersistentDataContainer;
@@ -62,6 +62,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
@@ -101,7 +102,9 @@ public class DocumentManager
    */
   public synchronized void addTextDocument(XTextDocument compo)
   {
-    info.put(new HashableComponent(compo), new TextDocumentInfo(compo));
+    TextDocumentInfo docInfo = new TextDocumentInfo(compo);
+    info.put(new HashableComponent(compo), docInfo);
+    new OnTextDocumentControllerInitialized(docInfo.getTextDocumentController()).emit();
   }
 
   public Map<HashableComponent, Info> getTextDocumentList() {
@@ -282,6 +285,20 @@ public class DocumentManager
   }
 
   /**
+   * Test whether a {@link TextDocumentController} has been created for the
+   * given document.
+   *
+   * @param doc
+   *          The document.
+   * @return True if there's a {@link TextDocumentController}, false otherwise.
+   */
+  public static boolean hasTextDocumentController(XTextDocument doc)
+  {
+    return doc != null && getDocumentManager().getTextDocumentList()
+        .containsKey(new HashableComponent(doc));
+  }
+
+  /**
    * Liefert das aktuelle TextDocumentModel zum übergebenen XTextDocument doc;
    * existiert zu doc noch kein TextDocumentModel, so wird hier eines erzeugt und das
    * neu erzeugte zurück geliefert.
@@ -398,16 +415,7 @@ public class DocumentManager
     public TextDocumentInfo(XTextDocument doc)
     {
       this.doc = doc;
-    }
 
-    /**
-     * Auf die Methoden getTextDocumentController() und hasTextDocumentModel() wird
-     * möglicherweise aus verschiedenen Threads zugegriffen (WollMux Event Queue und
-     * Event Handler im Singleton), daher ist synchronized notwendig.
-     */
-    @Override
-    public synchronized TextDocumentController getTextDocumentController()
-    {
       if (documentController == null)
       {
         documentController = new TextDocumentController(
@@ -416,7 +424,15 @@ public class DocumentManager
             GlobalFunctions.getInstance().getGlobalFunctions(),
             GlobalFunctions.getInstance().getFunctionDialogs());
       }
+    }
 
+    /**
+     * synchronized is required due WollMux Event Queue and LO's event handler. Two different
+     * threads.
+     */
+    @Override
+    public synchronized TextDocumentController getTextDocumentController()
+    {
       return documentController;
     }
 

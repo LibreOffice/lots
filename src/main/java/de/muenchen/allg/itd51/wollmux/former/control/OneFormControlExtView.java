@@ -122,6 +122,7 @@ public class OneFormControlExtView implements LazyView
     model.addListener(new MyModelChangeListener());
     myTabbedPane.addChangeListener(new ChangeListener()
     {
+      @Override
       public void stateChanged(ChangeEvent e)
       {
         if (myTabbedPane.getTabCount() > 1 && myTabbedPane.getSelectedIndex() >= 0)
@@ -145,11 +146,13 @@ public class OneFormControlExtView implements LazyView
     myTabbedPane.setSelectedIndex(selectedTab);
   }
 
+  @Override
   public void viewIsVisible()
   {
     if (myTabbedPane.getTabCount() == 0) initPanel();
   }
 
+  @Override
   public void viewIsNotVisible()
   {
     if (myTabbedPane.getTabCount() != 0)
@@ -164,6 +167,7 @@ public class OneFormControlExtView implements LazyView
     }
   }
 
+  @Override
   public JComponent getComponent()
   {
     return myTabbedPane;
@@ -180,12 +184,14 @@ public class OneFormControlExtView implements LazyView
   private class MyModelChangeListener implements
       FormControlModel.ModelChangeListener
   {
+    @Override
     public void modelRemoved(FormControlModel model)
     {
       if (bigDaddy != null)
         bigDaddy.viewShouldBeRemoved(OneFormControlExtView.this);
     }
 
+    @Override
     public void attributeChanged(FormControlModel model, int attributeId,
         Object newValue)
     {}

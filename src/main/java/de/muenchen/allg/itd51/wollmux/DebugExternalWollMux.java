@@ -15,7 +15,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
-import de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarFactory;
+import de.muenchen.allg.itd51.wollmux.mailmerge.sidebar.MailMergeFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
 
 /**
@@ -37,6 +37,15 @@ public class DebugExternalWollMux
   private static final Logger LOGGER = LoggerFactory
       .getLogger(DebugExternalWollMux.class);
 
+  /**
+   * Start LibreOffice, register WollMux extension and open a text document.
+   *
+   * @param args
+   *          Program arguments (unused).
+   * @throws Exception
+   *           Something went wrong.
+   */
+  @SuppressWarnings("java:S106")
   public static void main(String[] args) throws Exception
   {
     // Logger zum Debuggen auf stdout initialisieren und die zukünftigen
@@ -51,11 +60,15 @@ public class DebugExternalWollMux
 
       @Override
       public void disposing(EventObject arg0)
-      {}
+      {
+	// nothing to do
+      }
 
       @Override
       public void queryTermination(EventObject arg0) throws TerminationVetoException
-      {}
+      {
+	// nothing to do
+      }
 
       @Override
       public void notifyTermination(EventObject arg0)
@@ -72,16 +85,18 @@ public class DebugExternalWollMux
           "com.sun.star.ui.UIElementFactoryManager", UNO.defaultContext));
 
     factoryRegistration.registerFactory("toolpanel", "WollMuxSidebarFactory", null,
-      "de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory");
+        WollMuxSidebarFactory.SERVICE_NAME);
 
     factoryRegistration.registerFactory("toolpanel", "SeriendruckSidebarFactory", null,
-        "de.muenchen.allg.itd51.wollmux.sidebar.SeriendruckSidebarFactory");
+        MailMergeFactory.SERVICE_NAME);
 
     XSet set =
       UnoRuntime.queryInterface(XSet.class, UNO.defaultContext.getServiceManager());
-    set.insert(WollMux.__getComponentFactory(WollMux.class.getName()));
-    set.insert(WollMux.__getComponentFactory(WollMuxSidebarFactory.class.getName()));
-    set.insert(WollMux.__getComponentFactory(SeriendruckSidebarFactory.class.getName()));
+    set.insert(ComponentRegistration.__getComponentFactory(WollMux.class.getName()));
+    set.insert(ComponentRegistration
+        .__getComponentFactory(WollMuxSidebarFactory.class.getName()));
+    set.insert(ComponentRegistration
+        .__getComponentFactory(MailMergeFactory.class.getName()));
 
     new WollMux(UNO.defaultContext);
 

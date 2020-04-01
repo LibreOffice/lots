@@ -35,17 +35,12 @@ package de.muenchen.allg.itd51.wollmux.former.control;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -89,6 +84,10 @@ public class OneFormControlLineView extends LineView
    * Standardbreite des Textfelds, das das Tooltip anzeigt.
    */
   private static final int TIP_COLUMNS = 10;
+
+  private static final String OPEN_TEMPLATE = "openTemplate";
+
+  private static final String OPEN_EXT = "openExt";
 
   /**
    * Typischerweise ein Container, der die View enthält und daher über
@@ -196,21 +195,7 @@ public class OneFormControlLineView extends LineView
     myPanel.add(makeTypeView());
     myPanel.add(makeComboBoxAdditionalView());
     myPanel.add(makeTextAreaAdditionalView());
-
-    // additionalview nur bauen wenn kein standard button,
-    // makeButtonAdditionalView baut controls für openTemplate und openExt
-    if (!model.getAction().equals("abort")
-	&& !model.getAction().equals("prevTab")
-	&& !model.getAction().equals("nextTab")
-	&& !model.getAction().equals("funcDialog")
-	&& !model.getAction().equals("form2PDF")
-	&& !model.getAction().equals("save")
-	&& !model.getAction().equals("saveAs")
-	&& !model.getAction().equals("printForm")
-	&& !model.getAction().equals("closeAndOpenExt")
-	&& !model.getAction().equals("saveTempAndOpenExt")
-	&& !model.getAction().equals("form2EMail"))
-      myPanel.add(makeButtonAdditionalView());
+    myPanel.add(makeButtonAdditionalView());
 
     myPanel.add(makeReadOnlyView());
     normalFont = labelTextfield.getFont();
@@ -241,25 +226,29 @@ public class OneFormControlLineView extends LineView
 
     idTextfield.setVisible(model.isTab() || viewVisibilityDescriptor == null
 	|| viewVisibilityDescriptor.formControlLineViewId);
+
     labelTextfield.setVisible(model.isTab() || viewVisibilityDescriptor == null
 	|| viewVisibilityDescriptor.formControlLineViewLabel);
+
     tipTextfield.setVisible(!model.isTab() && viewVisibilityDescriptor != null
 	&& viewVisibilityDescriptor.formControlLineViewTooltip);
+
     typeView.setVisible(!model.isTab() && (viewVisibilityDescriptor == null
 	|| viewVisibilityDescriptor.formControlLineViewType));
+
     comboBoxAdditionalView
 	.setVisible(model.isCombo() && (viewVisibilityDescriptor == null
 	    || viewVisibilityDescriptor.formControlLineViewAdditional));
+
     textAreaAdditionalView
 	.setVisible(model.isTextArea() && (viewVisibilityDescriptor == null
 	    || viewVisibilityDescriptor.formControlLineViewAdditional));
+
     readOnlyfield.setVisible(!model.isTab() && viewVisibilityDescriptor != null
 	&& viewVisibilityDescriptor.formControlLineViewReadonly);
 
-    if (buttonAdditionalView != null)
-      buttonAdditionalView
-	  .setVisible(model.isButton() && (viewVisibilityDescriptor == null
-	      || viewVisibilityDescriptor.formControlLineViewAdditional));
+    buttonAdditionalView.setVisible(model.isButton() && (viewVisibilityDescriptor == null
+        || viewVisibilityDescriptor.formControlLineViewAdditional));
 
     /*
      * Wenn alle abgeschaltet sind, aktiviere zumindest das ID-Feld
@@ -377,15 +366,11 @@ public class OneFormControlLineView extends LineView
     readOnlyfield.setToolTipText("Read Only");
     readOnlyfield.setSelected(model.getReadonly());
     comboBoxAdditionalView.add(readOnlyfield);
-    readOnlyfield.addActionListener(new ActionListener()
+    readOnlyfield.addActionListener(e -> 
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
 	ignoreAttributeChanged = true;
 	model.setReadonly(readOnlyfield.isSelected());
 	ignoreAttributeChanged = false;
-      }
     });
     readOnlyfield.addMouseListener(myMouseListener);
 
@@ -463,16 +448,10 @@ public class OneFormControlLineView extends LineView
 
     typeView.setSelectedItem(model.getType());
 
-    typeView.addItemListener(new ItemListener()
-    {
-      @Override
-      public void itemStateChanged(ItemEvent e)
+    typeView.addItemListener(e -> {
+      if (e.getStateChange() == ItemEvent.SELECTED && !ignoreAttributeChanged)
       {
-	if (e.getStateChange() == ItemEvent.SELECTED)
-	{
-	  if (!ignoreAttributeChanged)
-	    model.setType((String) typeView.getSelectedItem());
-	}
+        model.setType((String) typeView.getSelectedItem());
       }
     });
 
@@ -494,11 +473,9 @@ public class OneFormControlLineView extends LineView
     combo.setToolTipText(L.m("Eingabeliste"));
     combo.setEditable(true);
     combo.setPrototypeDisplayValue("Sicherungsgeberin");
-    List<String> items = model.getItems();
-    Iterator<String> iter = items.iterator();
-    while (iter.hasNext())
+
+    for (String item : model.getItems())
     {
-      String item = iter.next();
       combo.addItem(item);
     }
 
@@ -509,13 +486,9 @@ public class OneFormControlLineView extends LineView
     final JTextComponent tc = (JTextComponent) combo.getEditor()
 	.getEditorComponent();
     tc.setCaretPosition(0);
-    combo.addItemListener(new ItemListener()
+    combo.addItemListener(e ->
     {
-      @Override
-      public void itemStateChanged(ItemEvent e)
-      {
 	tc.setCaretPosition(0);
-      }
     });
 
     comboBoxAdditionalView.add(combo);
@@ -527,15 +500,11 @@ public class OneFormControlLineView extends LineView
     editBox.setToolTipText(L.m("Erweiterbar"));
     editBox.setSelected(model.getEditable());
     comboBoxAdditionalView.add(editBox);
-    editBox.addActionListener(new ActionListener()
+    editBox.addActionListener(e ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
 	ignoreAttributeChanged = true;
 	model.setEditable(editBox.isSelected());
 	ignoreAttributeChanged = false;
-      }
     });
     editBox.addMouseListener(myMouseListener);
     final JButton newButton = new JButton("N");
@@ -543,11 +512,8 @@ public class OneFormControlLineView extends LineView
     Insets ins = newButton.getInsets();
     newButton.setMargin(new Insets(ins.top, 0, ins.bottom, 0));
     comboBoxAdditionalView.add(newButton);
-    newButton.addActionListener(new ActionListener()
+    newButton.addActionListener(e ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
 	String sel = combo.getSelectedItem().toString();
 	combo.addItem(sel);
 	String[] items = new String[combo.getItemCount()];
@@ -556,7 +522,6 @@ public class OneFormControlLineView extends LineView
 	ignoreAttributeChanged = true;
 	model.setItems(items);
 	ignoreAttributeChanged = false;
-      }
     });
     newButton.addMouseListener(myMouseListener);
     JButton delButton = new JButton("X");
@@ -564,11 +529,8 @@ public class OneFormControlLineView extends LineView
     ins = delButton.getInsets();
     delButton.setMargin(new Insets(ins.top, 0, ins.bottom, 0));
     comboBoxAdditionalView.add(delButton);
-    delButton.addActionListener(new ActionListener()
+    delButton.addActionListener(e ->
     {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
 	int idx = combo.getSelectedIndex();
 	if (idx >= 0)
 	{
@@ -579,7 +541,6 @@ public class OneFormControlLineView extends LineView
 	  ignoreAttributeChanged = true;
 	  model.setItems(items);
 	  ignoreAttributeChanged = false;
-	}
       }
     });
     delButton.addMouseListener(myMouseListener);
@@ -602,8 +563,8 @@ public class OneFormControlLineView extends LineView
     final JTextField extTextField = new JTextField();
 
     final JComboBox<String> actionComboBox = new JComboBox<>();
-    actionComboBox.addItem("openTemplate");
-    actionComboBox.addItem("openExt");
+    actionComboBox.addItem(OPEN_TEMPLATE);
+    actionComboBox.addItem(OPEN_EXT);
 
     buttonAdditionalView.add(actionComboBox);
     buttonAdditionalView.add(fragIDTextField);
@@ -618,7 +579,7 @@ public class OneFormControlLineView extends LineView
         model.setUrl(""); // prevents writing in config thingy export
         model.setExt("");
         model.setFragID(fragIDTextField.getText());
-        model.setAction("openTemplate");
+        model.setAction(OPEN_TEMPLATE);
         formularMax4000.documentNeedsUpdating();
       }
     });
@@ -630,7 +591,7 @@ public class OneFormControlLineView extends LineView
       {
         model.setFragID(""); // prevents writing in config thingy export
         model.setUrl(urlTextField.getText());
-        model.setAction("openExt");
+        model.setAction(OPEN_EXT);
         formularMax4000.documentNeedsUpdating();
       }
     });
@@ -642,7 +603,7 @@ public class OneFormControlLineView extends LineView
       {
 	model.setFragID(""); // prevents writing in config thingy export
 	model.setExt(extTextField.getText());
-	model.setAction("openExt");
+        model.setAction(OPEN_EXT);
 	formularMax4000.documentNeedsUpdating();
       }
     });
@@ -656,25 +617,29 @@ public class OneFormControlLineView extends LineView
       fragIDTextField.setText("FRAG_ID");
     }
 
-    if (model != null && model.getAction() != null
-	&& model.getAction().equals("openTemplate"))
+    if (model.getAction() != null
+        && (model.getAction().equals(OPEN_TEMPLATE) || model.getAction().isEmpty()))
     {
       actionComboBox.setSelectedIndex(0);
       urlTextField.setVisible(false);
       extTextField.setVisible(false);
       fragIDTextField.setVisible(true);
 
-      if (model != null && model.getFragID() != null
-	  && model.getFragID().isEmpty())
+      if (model.getFragID().isEmpty())
+      {
 	fragIDTextField.setText("FRAG_ID");
+      }
       else
+      {
 	fragIDTextField.setText(model.getFragID());
+      }
 
-      model.setAction("openTemplate");
+      model.setAction(OPEN_TEMPLATE);
     }
 
-    if (model != null && model.getAction() != null
-	&& model.getAction().equals("openExt"))
+    if (model
+        .getAction() != null
+        && model.getAction().equals(OPEN_EXT))
     {
       actionComboBox.setSelectedIndex(1);
 
@@ -682,24 +647,29 @@ public class OneFormControlLineView extends LineView
       urlTextField.setVisible(true);
       extTextField.setVisible(true);
 
-      if (model != null && model.getUrl() != null && model.getUrl().isEmpty())
+      if (model.getUrl().isEmpty())
+      {
 	urlTextField.setText("URL");
+      }
       else
+      {
 	urlTextField.setText(model.getUrl());
+      }
 
-      if (model != null && model.getExt() != null && model.getExt().isEmpty())
-	extTextField.setText("EXT");
+      if (model.getExt().isEmpty())
+      {
+        extTextField.setText("EXT");
+      }
       else
+      {
 	extTextField.setText(model.getExt());
+      }
 
-      model.setAction("openExt");
+      model.setAction(OPEN_EXT);
     }
 
-    actionComboBox.addItemListener(new ItemListener()
+    actionComboBox.addItemListener(e ->
     {
-      @Override
-      public void itemStateChanged(ItemEvent e)
-      {
 	String selectedAction = actionComboBox.getSelectedItem().toString();
 
 	if (model == null)
@@ -707,34 +677,46 @@ public class OneFormControlLineView extends LineView
 
 	model.setAction(selectedAction);
 
-	if (selectedAction.equals("openTemplate"))
+        if (selectedAction.equals(OPEN_TEMPLATE))
 	{
-	  if (model != null && model.getFragID() != null
+          if (model.getFragID() != null
 	      && model.getFragID().isEmpty())
+          {
 	    fragIDTextField.setText("FRAG_ID");
+          }
 	  else
+          {
 	    fragIDTextField.setText(model.getFragID());
+          }
 
-	  model.setAction("openTemplate");
+          model.setAction(OPEN_TEMPLATE);
 	  urlTextField.setVisible(false);
 	  extTextField.setVisible(false);
 	  fragIDTextField.setVisible(true);
 
 	} else
 	{
-	  if (model != null && model.getUrl() != null
+          if (model.getUrl() != null
 	      && model.getUrl().isEmpty())
+          {
 	    urlTextField.setText("URL");
+          }
 	  else
+	  {
 	    urlTextField.setText(model.getUrl());
+	  }
 
-	  if (model != null && model.getExt() != null
+          if (model.getExt() != null
 	      && model.getExt().isEmpty())
+          {
 	    extTextField.setText("EXT");
+          }
 	  else
+          {
 	    extTextField.setText(model.getExt());
+          }
 
-	  model.setAction("openExt");
+          model.setAction(OPEN_EXT);
 	  fragIDTextField.setVisible(false);
 	  urlTextField.setVisible(true);
 	  extTextField.setVisible(true);
@@ -742,7 +724,6 @@ public class OneFormControlLineView extends LineView
 
 	buttonAdditionalView.revalidate();
 	buttonAdditionalView.repaint();
-      }
     });
 
     return buttonAdditionalView;
@@ -808,15 +789,10 @@ public class OneFormControlLineView extends LineView
     wrapBox.setToolTipText(L.m("Automatischer Zeilenumbruch"));
     wrapBox.setSelected(model.getWrap());
     textAreaAdditionalView.add(wrapBox);
-    wrapBox.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-	ignoreAttributeChanged = true;
-	model.setWrap(wrapBox.isSelected());
-	ignoreAttributeChanged = false;
-      }
+    wrapBox.addActionListener(e -> {
+      ignoreAttributeChanged = true;
+      model.setWrap(wrapBox.isSelected());
+      ignoreAttributeChanged = false;
     });
     wrapBox.addMouseListener(myMouseListener);
     return textAreaAdditionalView;
@@ -914,7 +890,10 @@ public class OneFormControlLineView extends LineView
 	Object newValue)
     {
       if (ignoreAttributeChanged)
+      {
 	return;
+      }
+
       switch (attributeId)
       {
       case FormControlModel.LABEL_ATTR:
@@ -923,6 +902,8 @@ public class OneFormControlLineView extends LineView
       case FormControlModel.TYPE_ATTR:
 	typeChanged((String) newValue);
 	break;
+      default:
+        break;
       }
     }
 
@@ -952,22 +933,32 @@ public class OneFormControlLineView extends LineView
     {
       if (e.getSource().equals(labelTextfield)
 	  && labelTextfield.getText().equals("Label"))
+      {
 	labelTextfield.selectAll();
+      }
+
       if (e.getSource().equals(idTextfield)
 	  && idTextfield.getText().matches("ID[0-9]*"))
+      {
 	idTextfield.selectAll();
+      }
     }
 
     @Override
     public void mousePressed(MouseEvent e)
     {
       int state = BroadcastObjectSelection.STATE_NORMAL_CLICK;
+
       if ((e.getModifiersEx()
 	  & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK)
+      {
 	state = BroadcastObjectSelection.STATE_CTRL_CLICK;
+      }
       else if ((e.getModifiersEx()
 	  & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK)
+      {
 	state = BroadcastObjectSelection.STATE_SHIFT_CLICK;
+      }
 
       formularMax4000.broadcast(new BroadcastObjectSelection(getModel(), state,
 	  state == BroadcastObjectSelection.STATE_NORMAL_CLICK)

@@ -1,7 +1,11 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,11 +23,13 @@ public class WollMuxFilesTest
 {
 
   private ClientAndServer mockServer;
+  private int port;
 
   @BeforeEach
   public void startServer()
   {
-    mockServer = ClientAndServer.startClientAndServer(7549);
+    mockServer = ClientAndServer.startClientAndServer();
+    port = mockServer.getLocalPort();
   }
 
   @AfterEach
@@ -35,8 +41,12 @@ public class WollMuxFilesTest
   @Test
   public void validFileWithServerPara() throws Exception
   {
-    try (MockServerClient client = new MockServerClient("localhost", 7549))
+    File file = File.createTempFile("wollmuxTest", ".conf");
+    try (MockServerClient client = new MockServerClient("localhost", port);
+	BufferedWriter writer = new BufferedWriter(new FileWriter(file)))
     {
+      writer.write(String.format("CONF_SERVER \"http://localhost:%d/\"", port));
+      writer.flush();
       client
           .when(HttpRequest.request().withMethod("POST")
               .withBody(StringBody.subString(System.getProperty("user.name"))))
@@ -44,8 +54,7 @@ public class WollMuxFilesTest
               .withHeader(new Header("Content-Type", "application/json; charset=utf-8"))
               .withBody("DEFAULT_CONTEXT \"test_server\""));
 
-      ConfigThingy test = WollMuxFiles
-          .parseWollMuxConf(new File(getClass().getResource("wollmuxConfTest.conf").toURI()));
+      ConfigThingy test = WollMuxFiles.parseWollMuxConf(file);
       assertEquals("test_server", test.getString("DEFAULT_CONTEXT", null),
           "Got wrong DEFAULT_CONTEXT");
     }
@@ -54,8 +63,14 @@ public class WollMuxFilesTest
   @Test
   public void validFileWithUserPara() throws Exception
   {
-    try (MockServerClient client = new MockServerClient("localhost", 7549))
+    File file = File.createTempFile("wollmuxTest", ".conf");
+    try (MockServerClient client = new MockServerClient("localhost", port);
+	BufferedWriter writer = new BufferedWriter(new FileWriter(file)))
     {
+      writer.write(String.format("CONF_SERVER \"http://localhost:%d/\"", port));
+      writer.newLine();
+      writer.write("USERNAME \"test.user\"");
+      writer.flush();
       client
           .when(
               HttpRequest.request().withMethod("POST").withBody(StringBody.subString("test.user")))
@@ -63,8 +78,7 @@ public class WollMuxFilesTest
               .withHeader(new Header("Content-Type", "application/json; charset=utf-8"))
               .withBody("DEFAULT_CONTEXT \"test_server_user\""));
 
-      ConfigThingy test = WollMuxFiles
-          .parseWollMuxConf(new File(getClass().getResource("wollmuxConfTest2.conf").toURI()));
+      ConfigThingy test = WollMuxFiles.parseWollMuxConf(file);
       assertEquals("test_server_user", test.getString("DEFAULT_CONTEXT", null),
           "Got wrong DEFAULT_CONTEXT");
     }
@@ -73,11 +87,14 @@ public class WollMuxFilesTest
   @Test
   public void doNothingWithOutServerPara() throws Exception
   {
-    try (MockServerClient client = new MockServerClient("localhost", 7549))
+    File file = File.createTempFile("wollmuxTest", ".conf");
+    try (MockServerClient client = new MockServerClient("localhost", port);
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file)))
     {
+      writer.write("DEFAULT_CONTEXT \"default_server\"");
+      writer.flush();
       client.verify(HttpRequest.request().withMethod("POST"), VerificationTimes.exactly(0));
-      ConfigThingy test = WollMuxFiles
-          .parseWollMuxConf(new File(getClass().getResource("wollmuxConfTest3.conf").toURI()));
+      ConfigThingy test = WollMuxFiles.parseWollMuxConf(file);
       assertEquals("default_server", test.getString("DEFAULT_CONTEXT", null),
           "Got wrong DEFAULT_CONTEXT");
     }

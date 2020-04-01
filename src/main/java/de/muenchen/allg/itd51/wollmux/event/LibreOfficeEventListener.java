@@ -4,17 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.document.XEventListener;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
-import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
-import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
@@ -22,9 +18,7 @@ import de.muenchen.allg.itd51.wollmux.document.DocumentManager.Info;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCheckInstallation;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnInitialize;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnNotifyDocumentEventListener;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnProcessTextDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
 
 /**
  * A listener for LibreOffice events of documents like OnNew or OnLoad. <a href=
@@ -44,8 +38,6 @@ public class LibreOfficeEventListener implements XEventListener
   private static final String ON_SAVE = "OnSave";
 
   private static final String ON_UNLOAD = "OnUnload";
-
-  private static final String ON_CREATE = "OnCreate";
 
   private static final String ON_VIEW_CREATED = "OnViewCreated";
 
@@ -79,9 +71,6 @@ public class LibreOfficeEventListener implements XEventListener
 
       switch (event)
       {
-      case ON_CREATE:
-        onCreate(docEvent.Source);
-        break;
       case ON_VIEW_CREATED:
         onViewCreated(docEvent.Source);
         break;
@@ -99,44 +88,6 @@ public class LibreOfficeEventListener implements XEventListener
     catch (Throwable t)
     {
       LOGGER.error("", t);
-    }
-  }
-
-  /**
-   * OnCreate is the first event emitted as soon as a new empty document is created. The following
-   * actions cause such an event:
-   * <ul>
-   * <li>{@code loadComponentFromURL("private:factory/swriter", ...) }</li>
-   * <li>file &gt; new, if there's no default template</li>
-   * <li>LibreOffice mailmerge</li>
-   * <li>Insertion of auto texts (bt&lt;F3&gt;)</li>
-   * </ul>
-   *
-   * Opening a file or a template doesn't create this event.
-   */
-  private void onCreate(Object source)
-  {
-    XComponent compo = UNO.XComponent(source);
-    if (compo == null)
-    {
-      return;
-    }
-
-    XModel compoModel = UNO.XModel(compo);
-
-    if (compoModel == null || isTempMailMergeDocument(compoModel))
-    {
-      return;
-    }
-
-    // we add the document to the manager, so we know in onViewCreated that it's a new document
-    XTextDocument xTextDoc = UNO.XTextDocument(source);
-    if (xTextDoc != null)
-    {
-      docManager.addTextDocument(xTextDoc);
-    } else
-    {
-      docManager.add(compo);
     }
   }
 
@@ -162,44 +113,28 @@ public class LibreOfficeEventListener implements XEventListener
       return;
     }
 
-    XTextDocument xTextDoc = UNO.XTextDocument(compo);
-    if (xTextDoc != null)
-    {
-      registerDispatcher(compo.getCurrentController().getFrame());
-    }
-
     // Check installation is only executed on first event because the listener is unregistered
     // afterwards.
     new OnCheckInstallation().emit();
     new OnInitialize().emit();
 
     Info docInfo = docManager.getInfo(compo);
-    if (xTextDoc != null && docInfo != null && isDocumentLoadedHidden(compo))
-    {
-      docManager.remove(compo);
-      return;
-    }
 
     // start processing
     if (docInfo == null)
     {
+      XTextDocument xTextDoc = UNO.XTextDocument(compo);
+
       if (xTextDoc != null)
       {
+        registerDispatcher(compo.getCurrentController().getFrame());
         docManager.addTextDocument(xTextDoc);
-        new OnProcessTextDocument(DocumentManager.getTextDocumentController(xTextDoc),
-            !isDocumentLoadedHidden(compo)).emit();
       } else
       {
         docManager.add(compo);
         new OnNotifyDocumentEventListener(null, WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED,
             compo).emit();
       }
-    }
-
-    if (xTextDoc != null)
-    {
-      new OnTextDocumentControllerInitialized(DocumentManager.getTextDocumentController(xTextDoc))
-          .emit();
     }
   }
 
@@ -283,31 +218,6 @@ public class LibreOfficeEventListener implements XEventListener
 
     return tmp || mmService || wmMailmerge
         || (fileName.equals("private:object") && hidden);
-  }
-
-  /**
-   * Check whether a document is loaded invisible.
-   *
-   * @param compo
-   *          A document.
-   * @return True if it's hidden, false otherwise.
-   */
-  private boolean isDocumentLoadedHidden(XModel compo)
-  {
-    UnoProps props = new UnoProps(compo.getArgs());
-    try
-    {
-      return AnyConverter.toBoolean(props.getPropertyValue("Hidden"));
-    }
-    catch (UnknownPropertyException e)
-    {
-      return false;
-    }
-    catch (IllegalArgumentException e)
-    {
-      LOGGER.error(L.m("das darf nicht vorkommen!"), e);
-      return false;
-    }
   }
 
   @Override

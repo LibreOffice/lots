@@ -61,13 +61,19 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XNameContainer;
 import com.sun.star.container.XNamed;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
+import com.sun.star.frame.XDispatch;
+import com.sun.star.frame.XDispatchProvider;
+import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.style.XStyle;
 import com.sun.star.text.XTextCursor;
@@ -81,8 +87,10 @@ import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.XModifiable2;
+import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer.DataID;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.SetJumpMark;
@@ -92,6 +100,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.itd51.wollmux.dispatch.PrintDispatch;
 
 /**
  * Diese Klasse repräsentiert das Modell eines aktuell geöffneten TextDokuments und
@@ -1392,6 +1401,71 @@ public class TextDocumentModel
   }
 
   /**
+   * Get the name of the currently selected printer in the document.
+   */
+  public String getCurrentPrinterName()
+  {
+    XPrintable printable = UNO.XPrintable(doc);
+    PropertyValue[] printer = null;
+    if (printable != null)
+    {
+      printer = printable.getPrinter();
+    }
+    UnoProps printerInfo = new UnoProps(printer);
+    try
+    {
+      return (String) printerInfo.getPropertyValue("Name");
+    } catch (UnknownPropertyException e)
+    {
+      return L.m("unbekannt");
+    }
+  }
+
+  /**
+   * Get the frame of the document and execute {link
+   * {@link XDispatchProvider#queryDispatch(com.sun.star.util.URL, String, int)}.
+   *
+   * @param urlStr
+   *          The command URL of the dispatch.
+   * @return A dispatch or null, if no such dispatch exists.
+   */
+  private XDispatch getDispatchForModel(com.sun.star.util.URL url)
+  {
+    XDispatchProvider dispProv = null;
+
+    dispProv = UNO.XDispatchProvider(UNO.XModel(doc).getCurrentController().getFrame());
+
+    if (dispProv != null)
+    {
+      return dispProv.queryDispatch(url, "_self", com.sun.star.frame.FrameSearchFlag.SELF);
+    }
+    return null;
+  }
+
+  /**
+   * Show the LibreOffice dialog for configuring the printer.
+   *
+   * @param listener
+   *          A result listener.
+   */
+  public void configurePrinter(XDispatchResultListener listener)
+  {
+    try
+    {
+      com.sun.star.util.URL url = UNO.getParsedUNOUrl(PrintDispatch.COMMAND_PRINTER_SETUP);
+      XNotifyingDispatch disp = UNO.XNotifyingDispatch(getDispatchForModel(url));
+
+      if (disp != null)
+      {
+        disp.dispatchWithNotification(url, new PropertyValue[] {}, listener);
+      }
+    } catch (java.lang.Exception e)
+    {
+      LOGGER.error("", e);
+    }
+  }
+
+  /**
    * Versucht das Dokument zu schließen, wurde das Dokument jedoch verändert
    * (Modified-Status des Dokuments==true), so erscheint der Dialog
    * "Speichern"/"Verwerfen"/"Abbrechen" über den ein sofortiges Schließen des
@@ -1873,92 +1947,6 @@ public class TextDocumentModel
     public boolean isTransformed()
     {
       return isTransformed;
-    }
-  }
-
-  /**
-   * Diese Klasse beschreibt die Ersetzung eines bestehendes Formularfeldes durch
-   * neue Felder oder konstante Textinhalte. Sie liefert einen Iterator, über den die
-   * einzelnen Elemente (Felder bzw. fester Text) vom Typ SubstElement iteriert
-   * werden können.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public static class FieldSubstitution implements
-      Iterable<FieldSubstitution.SubstElement>
-  {
-    private List<SubstElement> list = new ArrayList<>();
-
-    public void addField(String fieldname)
-    {
-      list.add(new SubstElement(SubstElement.FIELD, fieldname));
-    }
-
-    public void addFixedText(String text)
-    {
-      list.add(new SubstElement(SubstElement.FIXED_TEXT, text));
-    }
-
-    @Override
-    public Iterator<SubstElement> iterator()
-    {
-      return list.iterator();
-    }
-
-    @Override
-    public String toString()
-    {
-      StringBuilder buffy = new StringBuilder();
-      for (SubstElement ele : this)
-        buffy.append(
-            ele.isField() ? "<" + ele.getValue() + ">" : ele.getValue());
-      return buffy.toString();
-    }
-
-    public static class SubstElement
-    {
-      private static final int FIXED_TEXT = 0;
-
-      private static final int FIELD = 1;
-
-      private int type;
-
-      private String value;
-
-      public SubstElement(int type, String value)
-      {
-        this.value = value;
-        this.type = type;
-      }
-
-      public String getValue()
-      {
-        return value;
-      }
-
-      /**
-       * Liefert true gdw das SubstElement ein Feld darstellt. In diesem Fall liefert
-       * {@link #getValue()} die ID des Feldes.
-       */
-      public boolean isField()
-      {
-        return type == FIELD;
-      }
-
-      /**
-       * Liefert true gdw das SubstElement einen einfachen Text darstellt. In diesem
-       * Fall liefert {@link #getValue()} diesen Text.
-       */
-      public boolean isFixedText()
-      {
-        return type == FIXED_TEXT;
-      }
-
-      @Override
-      public String toString()
-      {
-        return (isField() ? "FIELD" : "FIXED_TEXT") + " \"" + value + "\"";
-      }
     }
   }
 

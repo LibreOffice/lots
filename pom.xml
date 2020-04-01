@@ -149,7 +149,7 @@
 									<classpathPrefix>lib/</classpathPrefix>
 								</manifest>
 								<manifestEntries>
-									<RegistrationClassName>de.muenchen.allg.itd51.wollmux.comp.WollMux</RegistrationClassName>
+									<RegistrationClassName>de.muenchen.allg.itd51.wollmux.ComponentRegistration</RegistrationClassName>
 									<Main-Class>com.sun.star.lib.loader.Loader</Main-Class>
 									<UNO-Type-Path>&lt;&gt;</UNO-Type-Path>
 								</manifestEntries>
