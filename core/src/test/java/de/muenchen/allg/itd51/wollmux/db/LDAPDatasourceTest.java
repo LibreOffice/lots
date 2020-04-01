@@ -38,7 +38,7 @@ import com.unboundid.ldap.listener.InMemoryListenerConfig;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 
-class LDAPDatasourceTest
+public class LDAPDatasourceTest
 {
   public static InMemoryDirectoryServer server;
   public static final String BASE_DN = "dc=myorg,dc=com";
@@ -62,7 +62,7 @@ class LDAPDatasourceTest
   }
 
   @Test
-  void testLDAPDatasourceAbsolute() throws Exception
+  public void testLDAPDatasourceAbsolute() throws Exception
   {
     String url = "ldap://localhost:" + server.getListenPort();
     Datasource ds = new LDAPDatasource(null,
@@ -85,7 +85,7 @@ class LDAPDatasourceTest
   }
 
   @Test
-  void testLDAPDatasourceAbsoluteRelative() throws Exception
+  public void testLDAPDatasourceAbsoluteRelative() throws Exception
   {
     String url = "ldap://localhost:" + server.getListenPort();
     Datasource ds = new LDAPDatasource(null, new ConfigThingy("", "NAME \"ldap\" URL \"" + url + "\" BASE_DN \""
@@ -102,7 +102,7 @@ class LDAPDatasourceTest
   }
 
   @Test
-  void testLDAPDatasourceRelative() throws Exception
+  public void testLDAPDatasourceRelative() throws Exception
   {
     String url = "ldap://localhost:" + server.getListenPort();
     Datasource ds = new LDAPDatasource(null, new ConfigThingy("", "NAME \"ldap\" URL \"" + url + "\" BASE_DN \""

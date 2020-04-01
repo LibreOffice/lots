@@ -104,7 +104,7 @@ public interface ComponentRegistration
     try
     {
       for (ComponentRegistration component : ServiceLoader
-          .load(ComponentRegistration.class, WollMux.class.getClassLoader()))
+          .load(ComponentRegistration.class, ComponentRegistration.class.getClassLoader()))
       {
 	FactoryHelper.writeRegistryServiceInfo(component.getName(),
 	    component.getServiceNames(), xRegKey);

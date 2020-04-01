@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 
-class AbsFunctionTest
+public class AbsFunctionTest
 {
 
   @Test

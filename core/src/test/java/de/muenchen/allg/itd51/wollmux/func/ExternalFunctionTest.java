@@ -30,11 +30,11 @@ import org.junit.jupiter.api.Test;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 
-class ExternalFunctionTest
+public class ExternalFunctionTest
 {
 
   @Test
-  void testExternalFunction() throws Exception
+  public void testExternalFunction() throws Exception
   {
     ExternalFunction f = new ExternalFunction(new ConfigThingy("",
         "URL \"java:de.muenchen.allg.itd51.wollmux.func.ExternalFunctionTest.extMethod\""));

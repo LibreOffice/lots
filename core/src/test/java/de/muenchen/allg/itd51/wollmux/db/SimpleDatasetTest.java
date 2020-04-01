@@ -31,11 +31,11 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-class SimpleDatasetTest
+public class SimpleDatasetTest
 {
 
   @Test
-  void testSimpleDataset() throws Exception
+  public void testSimpleDataset() throws Exception
   {
     Map<String, String> data = new HashMap<>();
     data.put("column", "value");

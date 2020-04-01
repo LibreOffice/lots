@@ -40,11 +40,11 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDataset;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDatasource;
 
-class PreferDatasourceTest
+public class PreferDatasourceTest
 {
 
   @Test
-  void testPreferDatasource() throws Exception
+  public void testPreferDatasource() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock", new MockDatasource());
@@ -65,7 +65,7 @@ class PreferDatasourceTest
   }
 
   @Test
-  void testInvalidPreferDatasource() throws Exception
+  public void testInvalidPreferDatasource() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock", new MockDatasource());
@@ -92,7 +92,7 @@ class PreferDatasourceTest
   }
 
   @Test
-  void testPreferDatasourceResults() throws Exception
+  public void testPreferDatasourceResults() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock", new MockDatasource("mock", List.of("column"),

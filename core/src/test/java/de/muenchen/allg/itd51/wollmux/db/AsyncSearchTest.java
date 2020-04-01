@@ -32,11 +32,11 @@ import org.junit.jupiter.api.Test;
 
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDatasource;
 
-class AsyncSearchTest
+public class AsyncSearchTest
 {
 
   @Test
-  void testAsyncLdapSearch() throws Exception
+  public void testAsyncSearch() throws Exception
   {
     AsyncSearch search = new AsyncSearch(Map.of("column", "value"), new MockDatasource());
     CompletableFuture<QueryResults> completable = search.runSearchAsync();

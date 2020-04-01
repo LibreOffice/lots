@@ -32,11 +32,11 @@ import java.util.Iterator;
 
 import org.junit.jupiter.api.Test;
 
-class FunctionLibraryTest
+public class FunctionLibraryTest
 {
 
   @Test
-  void testFunctionLibrary()
+  public void testFunctionLibrary()
   {
     FunctionLibrary baseLib = new FunctionLibrary();
     Function f1 = new StringLiteralFunction("test1");

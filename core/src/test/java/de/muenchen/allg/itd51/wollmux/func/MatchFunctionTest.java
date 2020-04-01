@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
-class MatchFunctionTest
+public class MatchFunctionTest
 {
 
   @Test

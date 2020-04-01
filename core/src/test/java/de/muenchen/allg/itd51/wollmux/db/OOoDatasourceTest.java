@@ -33,11 +33,11 @@ import org.junit.jupiter.api.Test;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.test.OfficeTest;
 
-class OOoDatasourceTest extends OfficeTest
+public class OOoDatasourceTest extends OfficeTest
 {
 
   @Test
-  void testOOoDatasource() throws Exception
+  public void testOOoDatasource() throws Exception
   {
     Datasource ds = new OOoDatasource(null,
         new ConfigThingy("", "NAME \"ooo\" SOURCE \"Bibliography\" TABLE \"biblio\" Schluessel (\"Identifier\")"));

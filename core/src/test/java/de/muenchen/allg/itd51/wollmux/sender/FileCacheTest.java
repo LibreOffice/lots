@@ -44,33 +44,33 @@ import org.junit.jupiter.api.Test;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDataset;
 
-class FileCacheTest
+public class FileCacheTest
 {
   private URL file = FileCacheTest.class.getResource("cache.conf");
 
   @Test
-  void testSchema() throws URISyntaxException
+  public void testSchema() throws URISyntaxException
   {
     FileCache cache = new FileCache(Paths.get(file.toURI()).toFile(), null);
     assertEquals(List.of("column", "column2"), cache.getSchema());
   }
 
   @Test
-  void testSelectedKey() throws URISyntaxException
+  public void testSelectedKey() throws URISyntaxException
   {
     FileCache cache = new FileCache(Paths.get(file.toURI()).toFile(), null);
     assertEquals("ds", cache.getSelectedKey());
   }
 
   @Test
-  void testSelectedKeyIndex() throws URISyntaxException
+  public void testSelectedKeyIndex() throws URISyntaxException
   {
     FileCache cache = new FileCache(Paths.get(file.toURI()).toFile(), null);
     assertEquals(0, cache.getSelectedSameKeyIndex());
   }
 
   @Test
-  void testData() throws URISyntaxException
+  public void testData() throws URISyntaxException
   {
     FileCache cache = new FileCache(Paths.get(file.toURI()).toFile(), null);
     List<SenderConf> dataList = cache.getData();
@@ -82,7 +82,7 @@ class FileCacheTest
   }
 
   @Test
-  void testCreateConfig() throws Exception
+  public void testCreateConfig() throws Exception
   {
     try (Reader reader = new InputStreamReader(new FileInputStream(Paths.get(file.toURI()).toFile()),
         StandardCharsets.UTF_8))
@@ -97,7 +97,7 @@ class FileCacheTest
   }
   
   @Test
-  void testCreateConfigNoSelected() throws Exception
+  public void testCreateConfigNoSelected() throws Exception
   {
     try (Reader reader = new InputStreamReader(new FileInputStream(Paths.get(file.toURI()).toFile()),
         StandardCharsets.UTF_8))
@@ -111,14 +111,14 @@ class FileCacheTest
   }
 
   @Test
-  void testCreateConfigNoSchema() throws Exception
+  public void testCreateConfigNoSchema() throws Exception
   {
     FileCache cache = new FileCache(Paths.get(file.toURI()).toFile(), null);
     assertThrows(SenderException.class, () -> cache.createCacheData(null, null, Collections.emptyList()));
   }
 
   @Test
-  void testFileNotFound() throws Exception
+  public void testFileNotFound() throws Exception
   {
     FileCache cache = new FileCache(new File("unknown"), null);
     assertTrue(cache.getSchema().isEmpty());

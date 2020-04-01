@@ -36,11 +36,11 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDataset;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDatasource;
 
-class FunkyDatasourceTest
+public class FunkyDatasourceTest
 {
 
   @Test
-  void testFunkyDatasource() throws Exception
+  public void testFunkyDatasource() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock",
@@ -62,7 +62,7 @@ class FunkyDatasourceTest
   }
 
   @Test
-  void testInvalidFunkyDatasource() throws Exception
+  public void testInvalidFunkyDatasource() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock",

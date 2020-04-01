@@ -15,7 +15,6 @@
 
   <properties>
     <libreoffice.sdk>${UNO_PATH}/../sdk</libreoffice.sdk>
-    <maven.compiler.release>11</maven.compiler.release>
   </properties>
 
   <build>

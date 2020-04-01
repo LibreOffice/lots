@@ -32,11 +32,11 @@ import org.junit.jupiter.api.Test;
 
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDataset;
 
-class RAMDatasourceTest
+public class RAMDatasourceTest
 {
 
   @Test
-  void testRAMDatasource()
+  public void testRAMDatasource()
   {
     Datasource ds = new RAMDatasource("ram", List.of("column"),
         List.of(new MockDataset(), new MockDataset("ds3", "column", "value3")));
@@ -55,7 +55,7 @@ class RAMDatasourceTest
   }
 
   @Test
-  void testUninitialized()
+  public void testUninitialized()
   {
     Datasource ds = new RAMDatasource();
     assertNull(ds.getName());

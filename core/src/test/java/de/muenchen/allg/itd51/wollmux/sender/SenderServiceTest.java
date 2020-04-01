@@ -47,7 +47,7 @@ import de.muenchen.allg.itd51.wollmux.db.mock.MockDatasource;
 import de.muenchen.allg.itd51.wollmux.func.StringLiteralFunction;
 import de.muenchen.allg.itd51.wollmux.sender.mock.MockCache;
 
-class SenderServiceTest
+public class SenderServiceTest
 {
   private SenderService service;
   private MockCache cache = null;
@@ -65,7 +65,7 @@ class SenderServiceTest
   }
 
   @Test
-  void testCurrentSenderString() throws SenderException
+  public void testCurrentSenderString() throws SenderException
   {
     assertEquals(", " + SenderService.SENDER_KEY_SEPARATOR + "ds", service.getCurrentSender());
     service.selectedSender = null;
@@ -73,7 +73,7 @@ class SenderServiceTest
   }
 
   @Test
-  void testGetCurrentSenderValue() throws ColumnNotFoundException, SenderException
+  public void testGetCurrentSenderValue() throws ColumnNotFoundException, SenderException
   {
     assertThrows(ColumnNotFoundException.class, () -> service.getCurrentSenderValue("unknown"));
     assertEquals(first.get("column"), service.getCurrentSenderValue("column"));
@@ -82,7 +82,7 @@ class SenderServiceTest
   }
 
   @Test
-  void testGetCurrentSenderValues()
+  public void testGetCurrentSenderValues()
   {
     assertEquals(Map.of("column", "value1", "column2", "value2"), service.getCurrentSenderValues());
     service.selectedSender.dataset = null;
@@ -92,7 +92,7 @@ class SenderServiceTest
   }
 
   @Test
-  void testGetSelectedDatasetTransformed() throws Exception
+  public void testGetSelectedDatasetTransformed() throws Exception
   {
     Sender ds = service.getSelectedDatasetTransformed();
     assertEquals(first.get("column"), ds.get("column"));
@@ -104,7 +104,7 @@ class SenderServiceTest
   }
 
   @Test
-  void testGetPalEntries()
+  public void testGetPalEntries()
   {
     String[] pals = service.getPALEntries();
     assertEquals(2, pals.length);
@@ -112,20 +112,20 @@ class SenderServiceTest
   }
 
   @Test
-  void testSaveCache() throws SenderException
+  public void testSaveCache() throws SenderException
   {
     service.notifyListener();
     assertTrue(cache.isSaved());
   }
 
   @Test
-  void testGetLostDatasets()
+  public void testGetLostDatasets()
   {
     assertEquals(List.of(", "), service.getLostDatasetDisplayStrings());
   }
 
   @Test
-  void testSelect() throws SenderException
+  public void testSelect() throws SenderException
   {
     Sender sender = service.data.get(0);
     service.select(sender);
@@ -136,20 +136,20 @@ class SenderServiceTest
   }
 
   @Test
-  void testSchema()
+  public void testSchema()
   {
     assertEquals(List.of("column", "column2"), service.getSchema());
   }
 
   @Test
-  void testFindListOfQueryParts() throws InterruptedException, ExecutionException
+  public void testFindListOfQueryParts() throws InterruptedException, ExecutionException
   {
     List<Sender> results = service.find(Map.of("column", "value1")).get();
     assertEquals(1, results.size());
   }
 
   @Test
-  void testGetAllSender()
+  public void testGetAllSender()
   {
     assertEquals(2, service.getAllSender().size());
     service.data = null;
@@ -157,7 +157,7 @@ class SenderServiceTest
   }
 
   @Test
-  void testSenderListSorted()
+  public void testSenderListSorted()
   {
     List<Sender> sorted = service.getSenderListSorted("column");
     assertEquals("ds", sorted.get(0).getKey());
@@ -165,7 +165,7 @@ class SenderServiceTest
   }
 
   @Test
-  void testNewSender()
+  public void testNewSender()
   {
     Sender s = service.createNewSender();
     assertFalse(service.data.contains(s));
@@ -173,7 +173,7 @@ class SenderServiceTest
   }
 
   @Test
-  void testSelectSender() throws SenderException
+  public void testSelectSender() throws SenderException
   {
     Sender selection = service.data.get(1);
     service.selectSender(service.getPALEntries()[1], 1);
@@ -182,7 +182,7 @@ class SenderServiceTest
   }
 
   @Test
-  void testGetCurrentOverrideFragMap() throws Exception
+  public void testGetCurrentOverrideFragMap() throws Exception
   {
     assertThrows(SenderException.class, () -> service.getCurrentOverrideFragMap());
     String value = "(FRAG_ID \"A\" NEW_FRAG_ID \"B\")";

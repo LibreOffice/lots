@@ -34,11 +34,11 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDataset;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDatasource;
 
-class SearchTest
+public class SearchTest
 {
 
   @Test
-  void testSearchWithStrategy() throws Exception
+  public void testSearchWithStrategy() throws Exception
   {
     SearchStrategy strategy = SearchStrategy
         .parse(new ConfigThingy("", "Suchstrategie(test (column \"${suchanfrage1}\"))"));
@@ -75,5 +75,4 @@ class SearchTest
     results = Search.search("value", strategy, datasources);
     assertEquals(2, results.size());
   }
-
 }

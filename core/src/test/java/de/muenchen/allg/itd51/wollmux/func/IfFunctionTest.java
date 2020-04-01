@@ -31,7 +31,7 @@ import java.util.Collection;
 
 import org.junit.jupiter.api.Test;
 
-class IfFunctionTest
+public class IfFunctionTest
 {
 
   @Test

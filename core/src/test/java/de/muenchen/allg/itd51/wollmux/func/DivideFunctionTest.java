@@ -32,7 +32,7 @@ import java.util.Collection;
 
 import org.junit.jupiter.api.Test;
 
-class DivideFunctionTest
+public class DivideFunctionTest
 {
 
   @Test

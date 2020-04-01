@@ -49,7 +49,8 @@ public class SenderFinderTest
   }
 
   @Test
-  void testFindWithValueEvaluate() throws IOException, SyntaxErrorException, InterruptedException, ExecutionException
+  public void testFindWithValueEvaluate()
+      throws IOException, SyntaxErrorException, InterruptedException, ExecutionException
   {
     SenderFinder dataFinder = new SenderFinder(senderServcie)
     {
@@ -65,7 +66,7 @@ public class SenderFinderTest
   }
 
   @Test
-  void testFindWithNullKey() throws IOException, SyntaxErrorException, InterruptedException, ExecutionException
+  public void testFindWithNullKey() throws IOException, SyntaxErrorException, InterruptedException, ExecutionException
   {
     SenderFinder dataFinder = new SenderFinder(senderServcie)
     {
@@ -81,7 +82,7 @@ public class SenderFinderTest
   }
 
   @Test
-  void testFindWithEmptyKey() throws IOException, SyntaxErrorException, InterruptedException, ExecutionException
+  public void testFindWithEmptyKey() throws IOException, SyntaxErrorException, InterruptedException, ExecutionException
   {
     SenderFinder dataFinder = new SenderFinder(senderServcie)
     {
@@ -97,7 +98,8 @@ public class SenderFinderTest
   }
 
   @Test
-  void testFindWithUnknownKey() throws IOException, SyntaxErrorException, InterruptedException, ExecutionException
+  public void testFindWithUnknownKey()
+      throws IOException, SyntaxErrorException, InterruptedException, ExecutionException
   {
     SenderFinder dataFinder = new SenderFinder(senderServcie)
     {

@@ -32,7 +32,7 @@ public class ByJavaPropertyFinderTest
 {
 
   @Test
-  void testJavaPropertyFinder() throws SenderException
+  public void testJavaPropertyFinder() throws SenderException
   {
     SenderFinder dataFinder = new ByJavaPropertyFinder(null);
     assertFalse(dataFinder.getValueForKey("java.home").isEmpty());

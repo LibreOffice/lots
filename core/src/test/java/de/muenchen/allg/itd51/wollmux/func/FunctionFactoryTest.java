@@ -42,7 +42,7 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 
-class FunctionFactoryTest
+public class FunctionFactoryTest
 {
   private static FunctionLibrary funcLib = new FunctionLibrary();
   private static DialogLibrary dialogLib = new DialogLibrary();
@@ -86,7 +86,7 @@ class FunctionFactoryTest
   }
 
   @Test
-  void testParse() throws Exception
+  public void testParse() throws Exception
   {
     Function f = FunctionFactory.parse(new ConfigThingy("test", ""), funcLib, dialogLib, context);
     assertTrue(f instanceof StringLiteralFunction);

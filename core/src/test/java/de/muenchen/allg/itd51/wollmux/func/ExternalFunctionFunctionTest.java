@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 
-class ExternalFunctionFunctionTest
+public class ExternalFunctionFunctionTest
 {
 
   @Test

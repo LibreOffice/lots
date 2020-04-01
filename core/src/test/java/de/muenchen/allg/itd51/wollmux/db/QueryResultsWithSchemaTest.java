@@ -31,11 +31,11 @@ import org.junit.jupiter.api.Test;
 
 import de.muenchen.allg.itd51.wollmux.db.mock.MockQueryResults;
 
-class QueryResultsWithSchemaTest
+public class QueryResultsWithSchemaTest
 {
 
   @Test
-  void test()
+  public void test()
   {
     QueryResultsWithSchema results = new QueryResultsWithSchema();
     assertTrue(results.isEmpty());

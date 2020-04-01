@@ -59,7 +59,7 @@ public class SenderTest
   }
 
   @Test
-  void testSenderWithoutOverride()
+  public void testSenderWithoutOverride()
   {
     sender = new Sender(ds);
     assertEquals(Collections.emptyMap(), sender.getOverridenValues());
@@ -67,7 +67,7 @@ public class SenderTest
   }
 
   @Test
-  void testGetKey()
+  public void testGetKey()
   {
     assertEquals("key", sender.getKey());
     sender = new Sender(overrideStore);
@@ -75,7 +75,7 @@ public class SenderTest
   }
 
   @Test
-  void testDatasetToString()
+  public void testDatasetToString()
   {
     assertEquals("(override1) value3, value2", sender.getDisplayString());
     sender.overridenValues = Collections.emptyMap();
@@ -90,7 +90,7 @@ public class SenderTest
   }
 
   @Test
-  void testHasBackingStore()
+  public void testHasBackingStore()
   {
     assertTrue(sender.isFromDatabase());
     sender.dataset = null;
@@ -98,7 +98,7 @@ public class SenderTest
   }
 
   @Test
-  void testDatasetGetValue() throws ColumnNotFoundException
+  public void testDatasetGetValue() throws ColumnNotFoundException
   {
     assertEquals("override1", sender.get("Rolle"));
     assertEquals("value2", sender.get("Vorname"));
@@ -109,7 +109,7 @@ public class SenderTest
   }
 
   @Test
-  void testDatasetSetValue() throws ColumnNotFoundException, SenderException
+  public void testDatasetSetValue() throws ColumnNotFoundException, SenderException
   {
     sender.overridenValues = new HashMap<>();
     sender.overrideValue("Rolle", "test");
@@ -118,14 +118,14 @@ public class SenderTest
   }
 
   @Test
-  void testDropColumn()
+  public void testDropColumn()
   {
     sender.drop("Rolle");
     assertEquals("value1", sender.get("Rolle"));
   }
 
   @Test
-  void testCopySender()
+  public void testCopySender()
   {
     Sender copy = new Sender(sender);
     assertEquals(sender.getKey(), copy.getKey());
@@ -136,20 +136,20 @@ public class SenderTest
   }
 
   @Test
-  void testIsOverriden()
+  public void testIsOverriden()
   {
     assertTrue(sender.isOverriden());
   }
 
   @Test
-  void testIsOverridenWithoutOverrideStore()
+  public void testIsOverridenWithoutOverrideStore()
   {
     sender.overridenValues = null;
     assertFalse(sender.isOverriden());
   }
 
   @Test
-  void testIsOverridenWithEmptyOverrideValue()
+  public void testIsOverridenWithEmptyOverrideValue()
   {
     sender.overridenValues = new HashMap<>();
     sender.overridenValues.put("Rolle", "");
@@ -159,14 +159,14 @@ public class SenderTest
   }
 
   @Test
-  void testIsOverrrideNotFromDatabase()
+  public void testIsOverrrideNotFromDatabase()
   {
     sender.dataset = null;
     assertFalse(sender.isOverriden());
   }
 
   @Test
-  void testIsOverridenSameValues()
+  public void testIsOverridenSameValues()
   {
     sender.overridenValues = new HashMap<>();
     sender.overridenValues.put("Rolle", "value1");
@@ -174,7 +174,7 @@ public class SenderTest
   }
 
   @Test
-  void testIsOverridenDifferentValues()
+  public void testIsOverridenDifferentValues()
   {
     sender.overridenValues = new HashMap<>();
     sender.overridenValues.put("Rolle", "override");
@@ -182,7 +182,7 @@ public class SenderTest
   }
 
   @Test
-  void testIsSelected()
+  public void testIsSelected()
   {
     assertFalse(sender.isSelected());
     sender.setSelected(true);
@@ -190,13 +190,13 @@ public class SenderTest
   }
 
   @Test
-  void testHashCode()
+  public void testHashCode()
   {
     assertEquals(Objects.hash(ds, ds.getKey(), overrideStore, false), sender.hashCode());
   }
 
   @Test
-  void testEquals()
+  public void testEquals()
   {
     assertTrue(sender.equals(sender));
     assertFalse(sender.equals(null));
@@ -214,7 +214,7 @@ public class SenderTest
   }
 
   @Test
-  void testComparator()
+  public void testComparator()
   {
     Sender copy = new Sender(sender);
     assertEquals(0, Sender.comparatorByColumn("Rolle").compare(sender, copy));

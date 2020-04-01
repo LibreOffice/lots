@@ -33,11 +33,11 @@ import org.junit.jupiter.api.Test;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDataset;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockQueryResults;
 
-class QueryResultsSetTest
+public class QueryResultsSetTest
 {
 
   @Test
-  void testQueryResultsSet()
+  public void testQueryResultsSet()
   {
     Comparator<Dataset> comparator = new Comparator<Dataset>()
     {

@@ -38,7 +38,7 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 
-class NumberCompareFunctionTest
+public class NumberCompareFunctionTest
 {
 
   @Test

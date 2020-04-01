@@ -28,11 +28,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-class ValuesTest
+public class ValuesTest
 {
 
   @Test
-  void none()
+  public void none()
   {
     Values v = new Values.None();
     assertFalse(v.hasValue("test"));
@@ -41,7 +41,7 @@ class ValuesTest
   }
 
   @Test
-  void simpleMap()
+  public void simpleMap()
   {
     Values.SimpleMap v = new Values.SimpleMap();
     v.put("test", "a");

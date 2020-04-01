@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
-class SplitFunctionTest
+public class SplitFunctionTest
 {
 
   @Test

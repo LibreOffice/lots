@@ -37,11 +37,11 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 
-class IsErrorFunctionTest
+public class IsErrorFunctionTest
 {
 
   @Test
-  void isErrorFunction() throws Exception
+  public void isErrorFunction() throws Exception
   {
     FunctionLibrary funcLib = new FunctionLibrary();
     DialogLibrary dialogLib = new DialogLibrary();

@@ -33,12 +33,12 @@ import org.junit.jupiter.api.Test;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 
-class ThingyDatasourceTest
+public class ThingyDatasourceTest
 {
   URL file = getClass().getResource("thingyDatasource.conf");
 
   @Test
-  void testThingyDatasource() throws Exception
+  public void testThingyDatasource() throws Exception
   {
     Datasource ds = new ThingyDatasource(null,
         new ConfigThingy("", "NAME \"conf\" URL \"" + file + "\" Schluessel(\"column\" \"column2\")"), null);

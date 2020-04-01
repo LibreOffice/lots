@@ -39,11 +39,11 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDataset;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDatasource;
 
-class SchemaDatasourceTest
+public class SchemaDatasourceTest
 {
 
   @Test
-  void testSchemaDatasource() throws Exception
+  public void testSchemaDatasource() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock", new MockDatasource("mock2", List.of("column", "column2", "column3"),
@@ -72,7 +72,7 @@ class SchemaDatasourceTest
   }
 
   @Test
-  void testInvalidSchemaDatasource() throws Exception
+  public void testInvalidSchemaDatasource() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock", new MockDatasource("mock2", List.of("column", "column2", "column3"), List.of()));

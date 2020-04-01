@@ -29,11 +29,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-class QueryTest
+public class QueryTest
 {
 
   @Test
-  void testQuery()
+  public void testQuery()
   {
     Query query = new Query("ds", List.of(new QueryPart("column", "search")));
     assertEquals("ds", query.getDatasourceName());

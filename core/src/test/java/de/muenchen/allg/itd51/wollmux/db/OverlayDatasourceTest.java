@@ -38,11 +38,11 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDataset;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDatasource;
 
-class OverlayDatasourceTest
+public class OverlayDatasourceTest
 {
 
   @Test
-  void testOverlayDatasource() throws Exception
+  public void testOverlayDatasource() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock",
@@ -71,7 +71,7 @@ class OverlayDatasourceTest
   }
 
   @Test
-  void testInvalidOverlayDatasource() throws Exception
+  public void testInvalidOverlayDatasource() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock", new MockDatasource());
@@ -118,7 +118,7 @@ class OverlayDatasourceTest
   }
 
   @Test
-  void testConcatDatset() throws Exception
+  public void testConcatDatset() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock",

@@ -30,7 +30,7 @@ import java.util.Collection;
 
 import org.junit.jupiter.api.Test;
 
-class AlwaysTrueFunctionTest
+public class AlwaysTrueFunctionTest
 {
   @Test
   public void alwaysTrueFunction()

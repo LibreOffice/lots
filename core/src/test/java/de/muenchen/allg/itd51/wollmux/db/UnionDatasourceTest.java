@@ -36,11 +36,11 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDataset;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDatasource;
 
-class UnionDatasourceTest
+public class UnionDatasourceTest
 {
 
   @Test
-  void testUnionDatasource() throws Exception
+  public void testUnionDatasource() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock", new MockDatasource());
@@ -61,7 +61,7 @@ class UnionDatasourceTest
   }
 
   @Test
-  void testInvalidUnionDatasource() throws Exception
+  public void testInvalidUnionDatasource() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock", new MockDatasource());

@@ -33,11 +33,11 @@ import org.junit.jupiter.api.Test;
 
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDataset;
 
-class QueryResultsListTest
+public class QueryResultsListTest
 {
 
   @Test
-  void testQueryResultsList()
+  public void testQueryResultsList()
   {
     List<Dataset> dataList = List.of(new MockDataset());
     QueryResults res = new QueryResultsList(dataList.iterator(), 1);

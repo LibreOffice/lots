@@ -40,11 +40,11 @@ import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.StringLiteralFunction;
 import de.muenchen.allg.itd51.wollmux.func.Values;
 
-class ColumnTransformerTest
+public class ColumnTransformerTest
 {
 
   @Test
-  void testColumnTransformer() throws Exception
+  public void testColumnTransformer() throws Exception
   {
     ColumnTransformer transformer = new ColumnTransformer();
     assertTrue(transformer.getSchema().isEmpty());
@@ -72,7 +72,7 @@ class ColumnTransformerTest
   }
 
   @Test
-  void testColumnTransformerValues() throws Exception
+  public void testColumnTransformerValues() throws Exception
   {
     Map<String, Function> map = new HashMap<>();
     map.put("trafo", new Function()

@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 
-class NotFunctionTest
+public class NotFunctionTest
 {
 
   @Test

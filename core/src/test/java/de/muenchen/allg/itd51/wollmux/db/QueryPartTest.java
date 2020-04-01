@@ -27,11 +27,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-class QueryPartTest
+public class QueryPartTest
 {
 
   @Test
-  void testQueryPart()
+  public void testQueryPart()
   {
     QueryPart part = new QueryPart("column", "search");
     assertEquals("column", part.getColumnName());

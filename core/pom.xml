@@ -51,6 +51,10 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
       </plugin>
       <plugin>
@@ -83,7 +87,6 @@
             </manifest>
             <manifestEntries>
               <RegistrationClassName>de.muenchen.allg.itd51.wollmux.ComponentRegistration</RegistrationClassName>
-              <Main-Class>com.sun.star.lib.loader.Loader</Main-Class>
               <UNO-Type-Path>&lt;&gt;</UNO-Type-Path>
             </manifestEntries>
           </archive>

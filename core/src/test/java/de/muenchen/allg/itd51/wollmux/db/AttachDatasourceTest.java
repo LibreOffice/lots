@@ -37,11 +37,11 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDataset;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDatasource;
 
-class AttachDatasourceTest
+public class AttachDatasourceTest
 {
 
   @Test
-  void testAttachDatasource() throws Exception
+  public void testAttachDatasource() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock", new MockDatasource("mock", List.of("column", "join"),
@@ -64,7 +64,7 @@ class AttachDatasourceTest
   }
 
   @Test
-  void testInvalidAttachDatasource() throws Exception
+  public void testInvalidAttachDatasource() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock", new MockDatasource());
@@ -101,7 +101,7 @@ class AttachDatasourceTest
   }
 
   @Test
-  void testConcatDatset() throws Exception
+  public void testConcatDatset() throws Exception
   {
     Map<String, Datasource> nameToDatasource = new HashMap<>();
     nameToDatasource.put("mock",

@@ -33,7 +33,7 @@ public class ByOOoUserPropertyFinderTest extends OfficeTest
 {
 
   @Test
-  void testOOoUserPropertyFinder() throws SenderException
+  public void testOOoUserPropertyFinder() throws SenderException
   {
     SenderFinder dataFinder = new ByOOoUserProfileFinder(null);
     assertNotNull(dataFinder.getValueForKey("sn").isEmpty());

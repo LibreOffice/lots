@@ -30,11 +30,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-class EmptyDatasourceTest
+public class EmptyDatasourceTest
 {
 
   @Test
-  void testEmptyDatasource()
+  public void testEmptyDatasource()
   {
     List<String> schema = List.of("column");
     Datasource empty = new EmptyDatasource(schema, "empty");
