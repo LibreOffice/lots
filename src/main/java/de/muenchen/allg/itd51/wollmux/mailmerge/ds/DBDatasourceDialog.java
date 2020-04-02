@@ -13,6 +13,7 @@ import com.sun.star.awt.XButton;
 import com.sun.star.awt.XWindow;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.ControlType;
@@ -20,7 +21,6 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
 import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.dialog.AbstractNotifier;
 
 /**

@@ -7,7 +7,7 @@ import com.sun.star.ui.XUIElement;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractSidebarFactory;
+import de.muenchen.allg.dialog.adapter.AbstractSidebarFactory;
 
 /**
  * Factory for the WollMux sidebar. It's mentioned in Factories.xcu.

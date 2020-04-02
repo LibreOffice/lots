@@ -8,7 +8,7 @@ import com.sun.star.ui.XUIElement;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractSidebarFactory;
+import de.muenchen.allg.dialog.adapter.AbstractSidebarFactory;
 
 /**
  * Factory for creating the sidebar.

@@ -17,8 +17,8 @@ import com.sun.star.sheet.XSpreadsheetDocument;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.dialog.adapter.AbstractCloseListener;
 import de.muenchen.allg.itd51.wollmux.core.HashableComponent;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractCloseListener;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.CalcModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DBModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;

@@ -61,11 +61,11 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractAdjustmentListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractFocusListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
+import de.muenchen.allg.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.dialog.adapter.AbstractAdjustmentListener;
+import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
+import de.muenchen.allg.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.ReferencedFieldID;
 import de.muenchen.allg.itd51.wollmux.mailmerge.FieldSubstitution;
 

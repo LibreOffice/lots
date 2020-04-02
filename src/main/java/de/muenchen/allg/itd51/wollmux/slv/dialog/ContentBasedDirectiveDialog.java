@@ -25,11 +25,11 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractAdjustmentListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractSpinListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTopWindowListener;
+import de.muenchen.allg.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.dialog.adapter.AbstractAdjustmentListener;
+import de.muenchen.allg.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.dialog.adapter.AbstractSpinListener;
+import de.muenchen.allg.dialog.adapter.AbstractTopWindowListener;
 import de.muenchen.allg.itd51.wollmux.slv.print.ContentBasedDirective;
 
 /**

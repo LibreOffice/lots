@@ -18,9 +18,9 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
+import de.muenchen.allg.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.dialog.adapter.AbstractTextListener;
+import de.muenchen.allg.dialog.adapter.AbstractXWizardPage;
 
 /**
  * A page of the mail merge wizard. Settings for printing each record in a single file are made
@@ -53,7 +53,7 @@ public class SingleWizardPage extends AbstractXWizardPage
   public SingleWizardPage(XWindow parentWindow, short pageId, MailmergeWizardController controller,
       PrintSettings settings) throws Exception
   {
-    super(pageId, parentWindow, "seriendruck_single");
+    super(pageId, parentWindow, "vnd.sun.star.script:WollMux.seriendruck_single?location=application");
     this.settings = settings;
     XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
     targetDir = UNO.XTextComponent(container.getControl("targetDir"));
