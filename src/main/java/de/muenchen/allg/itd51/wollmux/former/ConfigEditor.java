@@ -162,8 +162,7 @@ public class ConfigEditor extends JFrame implements SearchListener
     replaceToolBar.setSearchContext(context);
 
     KeyStroke keyStroke =
-      KeyStroke.getKeyStroke(KeyEvent.VK_F, getToolkit().getMenuShortcutKeyMask()
-        | InputEvent.SHIFT_MASK);
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, getToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK);
     editor.getInputMap().put(keyStroke, "SHOW_FINDTOOLBAR");
     editor.getActionMap().put("SHOW_FINDTOOLBAR",
       sectionPanel.addBottomComponent(keyStroke, findToolBar));
@@ -301,7 +300,7 @@ public class ConfigEditor extends JFrame implements SearchListener
     public ShowFindDialogAction()
     {
       super(L.m("Suchen..."));
-      int c = getToolkit().getMenuShortcutKeyMask();
+      int c = getToolkit().getMenuShortcutKeyMaskEx();
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, c));
     }
 
@@ -321,7 +320,7 @@ public class ConfigEditor extends JFrame implements SearchListener
     public ShowReplaceDialogAction()
     {
       super(L.m("Ersetzen..."));
-      int c = getToolkit().getMenuShortcutKeyMask();
+      int c = getToolkit().getMenuShortcutKeyMaskEx();
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_H, c));
     }
 
