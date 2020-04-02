@@ -6,6 +6,7 @@ package de.muenchen.allg.itd51.wollmux.core.util;
 public final class PropertyName
 {
 
+  public static final String BOOKMARK = "Bookmark";
   public static final String CHAR_BACK_COLOR = "CharBackColor";
   public static final String CHAR_FONT_NAME = "CharFontName";
   public static final String CHAR_HEIGHT = "CharHeight";
@@ -30,6 +31,8 @@ public final class PropertyName
   public static final String FIXED_LENGTH = "FixedLength";
   public static final String FOLLOW_STYLE = "FollowStyle";
   public static final String HEADER_LINE = "HeaderLine";
+  public static final String IS_COLLAPSED = "IsCollapsed";
+  public static final String IS_START = "IsStart";
   public static final String IS_VISIBLE = "IsVisible";
   public static final String OUTPUT_TYPE = "OutputType";
   public static final String OUTPUT_URL = "OutputURL";
@@ -39,6 +42,7 @@ public final class PropertyName
   public static final String SAVE_AS_SINGLE_FILE = "SaveAsSingleFile";
   public static final String SINGLE_PRINT_JOBS = "SinglePrintJobs";
   public static final String STRING_DELIMITER = "StringDelimiter";
+  public static final String TEXT_PROTION_TYPE = "TextPortionType";
   public static final String THOUSAND_DELIMITER = "ThousandDelimiter";
 
   private PropertyName()

@@ -1,18 +1,29 @@
 package de.muenchen.allg.itd51.wollmux.document.commands;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import com.sun.star.text.XParagraphCursor;
-import com.sun.star.text.XTextRange;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
+import com.sun.star.text.XParagraphCursor;
+import com.sun.star.text.XTextContent;
+import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextRange;
+import com.sun.star.uno.AnyConverter;
+
+import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoCollection;
+import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFrag;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
+import de.muenchen.allg.itd51.wollmux.core.util.PropertyName;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
@@ -21,6 +32,9 @@ import de.muenchen.allg.ooo.TextDocument;
  */
 class SurroundingGarbageCollector extends AbstractExecutor
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(SurroundingGarbageCollector.class);
+
   /**
    *
    */
@@ -58,10 +72,78 @@ class SurroundingGarbageCollector extends AbstractExecutor
       super(range);
     }
 
+    /**
+     * Remove all text but no book marks from the range.
+     */
     @Override
     public void tueDeinePflicht()
     {
-      Bookmark.removeTextFromInside(SurroundingGarbageCollector.this.documentCommandInterpreter.getModel().doc, range);
+      try
+      {
+        XTextDocument doc = SurroundingGarbageCollector.this.documentCommandInterpreter.getModel().doc;
+        // create a book mark, so that the range contains a new text portion
+        Object bookmark = UNO.XMultiServiceFactory(doc).createInstance("com.sun.star.text.Bookmark");
+        UNO.XNamed(bookmark).setName("killer");
+        range.getText().insertTextContent(range, UNO.XTextContent(bookmark), true);
+        String name = UNO.XNamed(bookmark).getName();
+
+        // collect text portions for deletion and book marks which may be accidently removed to
+        List<String> collateral = new ArrayList<>();
+        List<Object> victims = new ArrayList<>();
+        UnoCollection<Object> ranges = UnoCollection.getCollection(range, Object.class);
+        for (Object r : ranges)
+        {
+          UnoCollection<Object> textPortions = UnoCollection.getCollection(r, Object.class);
+          if (textPortions != null)
+          {
+            collectTextPotions(name, collateral, victims, textPortions);
+          }
+        }
+
+        range.setString("");
+        UNO.XTextContent(bookmark).getAnchor().getText().removeTextContent(UNO.XTextContent(bookmark));
+
+        // recreate lost book marks.
+        UnoDictionary<XTextContent> bookmarks = new UnoDictionary<>(UNO.XBookmarksSupplier(doc).getBookmarks());
+        for (String portionName : collateral)
+        {
+          if (!bookmarks.hasKey(portionName))
+          {
+            LOGGER.debug("Regeneriere Bookmark '{}'", portionName);
+            bookmark = UNO.XMultiServiceFactory(doc).createInstance("com.sun.star.text.Bookmark");
+            UNO.XNamed(bookmark).setName(portionName);
+            range.getText().insertTextContent(range, UNO.XTextContent(bookmark), true);
+          }
+        }
+      } catch (Exception x)
+      {
+        LOGGER.error("", x);
+      }
+    }
+
+    private void collectTextPotions(String name, List<String> collateral, List<Object> victims,
+        UnoCollection<Object> textPortions)
+    {
+      boolean kill = false;
+      for (Object textPortion : textPortions)
+      {
+        if ("Bookmark".equals(Utils.getProperty(textPortion, PropertyName.TEXT_PROTION_TYPE)))
+        {
+          String portionName = UNO.XNamed(Utils.getProperty(textPortion, PropertyName.BOOKMARK)).getName();
+          if (name.equals(portionName))
+          {
+            kill = AnyConverter.toBoolean(Utils.getProperty(textPortion, PropertyName.IS_START));
+          } else
+          {
+            collateral.add(portionName);
+          }
+        }
+
+        if (kill && "Text".equals(Utils.getProperty(textPortion, PropertyName.TEXT_PROTION_TYPE)))
+        {
+          victims.add(textPortion);
+        }
+      }
     }
   }
 
