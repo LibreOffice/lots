@@ -31,8 +31,8 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractSidebarPanel;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
+import de.muenchen.allg.dialog.adapter.AbstractSidebarPanel;
+import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModelListener;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;

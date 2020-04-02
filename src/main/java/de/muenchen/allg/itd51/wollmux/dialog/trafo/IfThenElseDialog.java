@@ -75,12 +75,12 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractKeyHandler;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractMouseListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractSelectionChangeListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
+import de.muenchen.allg.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.dialog.adapter.AbstractKeyHandler;
+import de.muenchen.allg.dialog.adapter.AbstractMouseListener;
+import de.muenchen.allg.dialog.adapter.AbstractSelectionChangeListener;
+import de.muenchen.allg.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 

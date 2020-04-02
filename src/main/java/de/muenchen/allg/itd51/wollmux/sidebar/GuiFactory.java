@@ -30,9 +30,9 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
+import de.muenchen.allg.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.dialog.adapter.AbstractTextListener;
 
 /**
  * Factory for creating UNO control elements.

@@ -8,8 +8,8 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
+import de.muenchen.allg.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.dialog.adapter.AbstractXWizardPage;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.dispatch.AbstractDispatchResultListener;
 
@@ -37,7 +37,7 @@ public class PrintWizardPage extends AbstractXWizardPage
   public PrintWizardPage(XWindow parentWindow, short pageId, TextDocumentModel model)
       throws Exception
   {
-    super(pageId, parentWindow, "seriendruck_printer");
+    super(pageId, parentWindow, "vnd.sun.star.script:WollMux.seriendruck_printer?location=application");
     XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
     name = UNO.XTextComponent(container.getControl("name"));
     name.setText(model.getCurrentPrinterName());

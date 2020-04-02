@@ -23,13 +23,13 @@ import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.dialog.adapter.AbstractTextListener;
+import de.muenchen.allg.dialog.adapter.AbstractXWizardPage;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnPALChangedNotify;
 
 public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardPage
@@ -45,7 +45,7 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
   public DatensatzBearbeitenBaseWizardPage(short pageId, XWindow parentWindow, String dialogName,
       DJDataset dataset, List<String> dbSchema) throws Exception
   {
-    super(pageId, parentWindow, dialogName);
+    super(pageId, parentWindow, "vnd.sun.star.script:WollMux." + dialogName + "?location=application");
     this.dataset = (LOSDJDataset) dataset;
     this.dbSchema = dbSchema;
   }

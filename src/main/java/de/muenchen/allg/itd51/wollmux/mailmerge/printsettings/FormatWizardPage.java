@@ -14,9 +14,9 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractXWizardPage;
+import de.muenchen.allg.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.dialog.adapter.AbstractTextListener;
+import de.muenchen.allg.dialog.adapter.AbstractXWizardPage;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.MailMergePrintFunction;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.SetFormValue;
 import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.PrintSettings.FORMAT;
@@ -67,7 +67,7 @@ public class FormatWizardPage extends AbstractXWizardPage
   public FormatWizardPage(XWindow parentWindow, short pageId, MailmergeWizardController controller,
       PrintSettings settings) throws Exception
   {
-    super(pageId, parentWindow, "seriendruck_format");
+    super(pageId, parentWindow, "vnd.sun.star.script:WollMux.seriendruck_format?location=application");
     this.controller = controller;
     this.settings = settings;
     XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
