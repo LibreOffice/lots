@@ -3,7 +3,6 @@ package de.muenchen.allg.itd51.wollmux.document.commands;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,23 +50,26 @@ class SurroundingGarbageCollector extends AbstractExecutor
   /**
    * Speichert Muellmann-Objekte, die zu löschenden Müll entfernen.
    */
-  private List<Muellmann> muellmaenner = new Vector<Muellmann>();
+  private List<Cleaner> muellmaenner = new ArrayList<>();
 
-  private abstract class Muellmann
+  private abstract class Cleaner
   {
     protected XTextRange range;
 
-    public Muellmann(XTextRange range)
+    public Cleaner(XTextRange range)
     {
       this.range = range;
     }
 
-    public abstract void tueDeinePflicht();
+    /**
+     * Cleans the garbage.
+     */
+    public abstract void clean();
   }
 
-  private class RangeMuellmann extends Muellmann
+  private class RangeCleaner extends Cleaner
   {
-    public RangeMuellmann(XTextRange range)
+    public RangeCleaner(XTextRange range)
     {
       super(range);
     }
@@ -76,7 +78,7 @@ class SurroundingGarbageCollector extends AbstractExecutor
      * Remove all text but no book marks from the range.
      */
     @Override
-    public void tueDeinePflicht()
+    public void clean()
     {
       try
       {
@@ -147,15 +149,15 @@ class SurroundingGarbageCollector extends AbstractExecutor
     }
   }
 
-  private class ParagraphMuellmann extends Muellmann
+  private class ParagraphCleaner extends Cleaner
   {
-    public ParagraphMuellmann(XTextRange range)
+    public ParagraphCleaner(XTextRange range)
     {
       super(range);
     }
 
     @Override
-    public void tueDeinePflicht()
+    public void clean()
     {
       TextDocument.deleteParagraph(range);
     }
@@ -185,11 +187,11 @@ class SurroundingGarbageCollector extends AbstractExecutor
    */
   void removeGarbage()
   {
-    Iterator<Muellmann> iter = muellmaenner.iterator();
+    Iterator<Cleaner> iter = muellmaenner.iterator();
     while (iter.hasNext())
     {
-      Muellmann muellmann = iter.next();
-      muellmann.tueDeinePflicht();
+      Cleaner muellmann = iter.next();
+      muellmann.clean();
     }
   }
 
@@ -290,13 +292,13 @@ class SurroundingGarbageCollector extends AbstractExecutor
     // Startmarke auswerten:
     if (start[0].isStartOfParagraph() && start[1].isEndOfParagraph())
     {
-      muellmaenner.add(new ParagraphMuellmann(start[1]));
+      muellmaenner.add(new ParagraphCleaner(start[1]));
     }
     else
     // if start mark is not the only text in the paragraph
     {
       start[1].goLeft((short) 1, true);
-      muellmaenner.add(new RangeMuellmann(start[1]));
+      muellmaenner.add(new RangeCleaner(start[1]));
     }
 
     // Endemarke auswerten:
@@ -309,17 +311,20 @@ class SurroundingGarbageCollector extends AbstractExecutor
     XParagraphCursor docEndTest = cmd.getEndMark()[1];
     boolean isEndOfDocument = !docEndTest.goRight((short) 1, false);
 
-    if (removeAnLastEmptyParagraph == false) isEndOfDocument = false;
+    if (!removeAnLastEmptyParagraph)
+    {
+      isEndOfDocument = false;
+    }
 
     if (end[0].isStartOfParagraph() && end[1].isEndOfParagraph()
       && !isEndOfDocument)
     {
-      muellmaenner.add(new ParagraphMuellmann(end[1]));
+      muellmaenner.add(new ParagraphCleaner(end[1]));
     }
     else
     {
       end[0].goRight(cmd.getEndMarkLength(), true);
-      muellmaenner.add(new RangeMuellmann(end[0]));
+      muellmaenner.add(new RangeCleaner(end[0]));
     }
   }
 }
