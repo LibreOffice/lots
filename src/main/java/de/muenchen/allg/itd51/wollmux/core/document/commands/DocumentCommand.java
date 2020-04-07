@@ -57,7 +57,7 @@ import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
+import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
@@ -224,14 +224,21 @@ public abstract class DocumentCommand
    */
   public XTextCursor getTextCursor()
   {
-    XTextCursor cursor = bookmark.getTextCursor();
-    if (cursor == null)
+    try
     {
-      LOGGER.debug(L.m(
-        "Kann keinen Textcursor erstellen für Dokumentkommando '%1'\nIst das Bookmark vielleicht verschwunden?",
-        this.toString()));
+      XTextCursor cursor = bookmark.getTextCursor();
+      if (cursor == null)
+      {
+        LOGGER.debug(L.m(
+          "Kann keinen Textcursor erstellen für Dokumentkommando '%1'\nIst das Bookmark vielleicht verschwunden?",
+          this.toString()));
+      }
+      return cursor;
+    } catch (UnoHelperException e)
+    {
+      LOGGER.debug("", e);
+      return null;
     }
-    return cursor;
   }
 
   /**
@@ -247,7 +254,14 @@ public abstract class DocumentCommand
    */
   public XTextRange getAnchor()
   {
-    return bookmark.getAnchor();
+    try
+    {
+      return bookmark.getAnchor();
+    } catch (UnoHelperException e)
+    {
+      LOGGER.debug("", e);
+      return null;
+    }
   }
 
   /**
@@ -296,20 +310,26 @@ public abstract class DocumentCommand
    */
   public void setTextRangeString(String text)
   {
-    if (text != null && text.length() > 0)
+    try
     {
-      bookmark.decollapseBookmark();
-    }
+      if (text != null && text.length() > 0)
+      {
+        bookmark.decollapseBookmark();
+      }
 
-    XTextRange range = bookmark.getAnchor();
-    if (range != null)
-    {
-      range.setString(text); // setString(null) kein Problem
-    }
+      XTextRange range = bookmark.getAnchor();
+      if (range != null)
+      {
+        range.setString(text); // setString(null) kein Problem
+      }
 
-    if (text == null || text.length() == 0)
+      if (text == null || text.length() == 0)
+      {
+        bookmark.collapseBookmark();
+      }
+    } catch (UnoHelperException e)
     {
-      bookmark.collapseBookmark();
+      LOGGER.debug("", e);
     }
   }
 
@@ -333,15 +353,21 @@ public abstract class DocumentCommand
    */
   public void insertTextContentIntoBookmark(XTextContent textContent, boolean replace)
   {
-    if (textContent != null)
+    try
     {
-      bookmark.decollapseBookmark();
-      XTextCursor cursor = bookmark.getTextCursor();
-      if (cursor != null)
+      if (textContent != null)
       {
-        XText text = cursor.getText();
-        text.insertTextContent(cursor, textContent, replace);
+        bookmark.decollapseBookmark();
+        XTextCursor cursor = bookmark.getTextCursor();
+        if (cursor != null)
+        {
+          XText text = cursor.getText();
+          text.insertTextContent(cursor, textContent, replace);
+        }
       }
+    } catch (UnoHelperException e)
+    {
+      LOGGER.debug("", e);
     }
   }
 
@@ -368,16 +394,24 @@ public abstract class DocumentCommand
    */
   public XParagraphCursor[] getStartMark()
   {
-    XTextRange range = bookmark.getTextCursor();
-    if (range == null || !hasInsertMarks) {
+    try
+    {
+      XTextRange range = bookmark.getTextCursor();
+      if (range == null || !hasInsertMarks)
+      {
+        return null;
+      }
+      XParagraphCursor[] cursor = new XParagraphCursor[2];
+      XText text = range.getText();
+      cursor[0] = UNO.XParagraphCursor(text.createTextCursorByRange(range.getStart()));
+      cursor[1] = UNO.XParagraphCursor(text.createTextCursorByRange(cursor[0]));
+      cursor[1].goRight(getStartMarkLength(), false);
+      return cursor;
+    } catch (UnoHelperException e)
+    {
+      LOGGER.debug("", e);
       return null;
     }
-    XParagraphCursor[] cursor = new XParagraphCursor[2];
-    XText text = range.getText();
-    cursor[0] = UNO.XParagraphCursor(text.createTextCursorByRange(range.getStart()));
-    cursor[1] = UNO.XParagraphCursor(text.createTextCursorByRange(cursor[0]));
-    cursor[1].goRight(getStartMarkLength(), false);
-    return cursor;
   }
 
   /**
@@ -387,16 +421,24 @@ public abstract class DocumentCommand
    */
   public XParagraphCursor[] getEndMark()
   {
-    XTextRange range = bookmark.getTextCursor();
-    if (range == null || !hasInsertMarks) {
+    try
+    {
+      XTextRange range = bookmark.getTextCursor();
+      if (range == null || !hasInsertMarks)
+      {
+        return null;
+      }
+      XParagraphCursor[] cursor = new XParagraphCursor[2];
+      XText text = range.getText();
+      cursor[0] = UNO.XParagraphCursor(text.createTextCursorByRange(range.getEnd()));
+      cursor[1] = UNO.XParagraphCursor(text.createTextCursorByRange(cursor[0]));
+      cursor[0].goLeft(getStartMarkLength(), false);
+      return cursor;
+    } catch (UnoHelperException e)
+    {
+      LOGGER.debug("", e);
       return null;
     }
-    XParagraphCursor[] cursor = new XParagraphCursor[2];
-    XText text = range.getText();
-    cursor[0] = UNO.XParagraphCursor(text.createTextCursorByRange(range.getEnd()));
-    cursor[1] = UNO.XParagraphCursor(text.createTextCursorByRange(cursor[0]));
-    cursor[0].goLeft(getStartMarkLength(), false);
-    return cursor;
   }
 
   /**
@@ -429,10 +471,17 @@ public abstract class DocumentCommand
    */
   public boolean isRetired()
   {
-    if (bookmark != null) {
-      return bookmark.getAnchor() == null;
+    try
+    {
+      if (bookmark != null)
+      {
+        return bookmark.getAnchor() == null;
+      }
+      return false;
+    } catch (UnoHelperException e)
+    {
+      return true;
     }
-    return false;
   }
 
   /**
@@ -589,23 +638,30 @@ public abstract class DocumentCommand
    */
   protected String flushToBookmark(boolean removeIfDone)
   {
-    if (isDone() && removeIfDone)
+    try
     {
-      bookmark.remove();
-      return null;
-    }
-    else
-    {
-      String wmCmdString = getCommandString(toConfigThingy());
+      if (isDone() && removeIfDone)
+      {
+        bookmark.remove();
+        return null;
+      } else
+      {
+        String wmCmdString = getCommandString(toConfigThingy());
 
-      // Neuen Status rausschreiben, wenn er sich geändert hat:
-      String name = bookmark.getName();
-      name = name.replaceFirst("\\s*\\d+\\s*$", "");
-      if (!wmCmdString.equals(name)) {
-        bookmark.rename(wmCmdString);
+        // Neuen Status rausschreiben, wenn er sich geändert hat:
+        String name = bookmark.getName();
+        name = name.replaceFirst("\\s*\\d+\\s*$", "");
+        if (!wmCmdString.equals(name))
+        {
+          bookmark.rename(wmCmdString);
+        }
+
+        return bookmark.getName();
       }
-
-      return bookmark.getName();
+    } catch (UnoHelperException e)
+    {
+      LOGGER.debug("", e);
+      return null;
     }
   }
 

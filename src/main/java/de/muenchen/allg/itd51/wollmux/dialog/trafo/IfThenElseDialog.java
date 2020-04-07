@@ -64,17 +64,14 @@ import com.sun.star.awt.tree.XMutableTreeDataModel;
 import com.sun.star.awt.tree.XMutableTreeNode;
 import com.sun.star.awt.tree.XTreeControl;
 import com.sun.star.awt.tree.XTreeNode;
-import com.sun.star.beans.PropertyVetoException;
-import com.sun.star.beans.UnknownPropertyException;
-import com.sun.star.beans.XPropertySet;
 import com.sun.star.deployment.PackageInformationProvider;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IndexOutOfBoundsException;
-import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.dialog.adapter.AbstractKeyHandler;
@@ -83,6 +80,7 @@ import de.muenchen.allg.dialog.adapter.AbstractSelectionChangeListener;
 import de.muenchen.allg.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * Erlaubt die Bearbeitung der Funktion eines Wenn-Dann-Sonst-Feldes.
@@ -244,11 +242,10 @@ public class IfThenElseDialog
       treeControl = UnoRuntime.queryInterface(XTreeControl.class,
           controlContainer.getControl("resultTreeControl"));
       XControl treeCtrl = UNO.XControl(treeControl);
-      XPropertySet props = UNO.XPropertySet(treeCtrl.getModel());
 
-      props.setPropertyValue("HideInactiveSelection", Boolean.TRUE);
-      props.setPropertyValue("RootDisplayed", Boolean.TRUE);
-      props.setPropertyValue("RowHeight", 40); // SelectionType?
+      UnoProperty.setProperty(treeCtrl.getModel(), UnoProperty.HIDE_INACTIVE_SELECTION, Boolean.TRUE);
+      UnoProperty.setProperty(treeCtrl.getModel(), UnoProperty.ROOT_DISPLAYED, Boolean.TRUE);
+      UnoProperty.setProperty(treeCtrl.getModel(), UnoProperty.ROW_HEIGHT, 40); // SelectionType?
 
       XControl xTreeControl = UNO.XControl(treeControl);
       XWindow wndTreeControl = UNO.XWindow(xTreeControl);
@@ -264,7 +261,7 @@ public class IfThenElseDialog
 
       dialog = UnoRuntime.queryInterface(XDialog.class, window);
       dialog.execute();
-    } catch (Exception e)
+    } catch (Exception | UnoHelperException e)
     {
       LOGGER.error("", e);
     }
@@ -299,13 +296,10 @@ public class IfThenElseDialog
       {
         XMutableTreeNode root = createRootNode();
         treeNodeModel.setRoot(root);
-        XPropertySet xTreeModelProperty = UnoRuntime.queryInterface(XPropertySet.class,
-            xControlModel);
-        xTreeModelProperty.setPropertyValue("DataModel", treeNodeModel);
+        UnoProperty.setProperty(xControlModel, UnoProperty.DATA_MODEL, treeNodeModel);
         selectedNode = root;
         treeControl.expandNode(root);
-      } catch (UnknownPropertyException | PropertyVetoException | WrappedTargetException
-          | IllegalArgumentException | ExpandVetoException e)
+      } catch (UnoHelperException | IllegalArgumentException | ExpandVetoException e)
       {
         LOGGER.error("", e);
       }
@@ -411,11 +405,9 @@ public class IfThenElseDialog
       try
       {
         XControl frame = controlContainer.getControl("FrameControl1");
-        XPropertySet props = UNO.XPropertySet(frame.getModel());
-        props.setPropertyValue("Label", title);
+        UnoProperty.setProperty(frame.getModel(), UnoProperty.LABEL, title);
         labelVar1.setText(label);
-      } catch (com.sun.star.lang.IllegalArgumentException | UnknownPropertyException
-          | PropertyVetoException | WrappedTargetException e)
+      } catch (UnoHelperException e)
       {
         LOGGER.error("Name der GroupBox konnte nicht geändert werden.", e);
       }

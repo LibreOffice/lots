@@ -7,7 +7,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.container.XNameAccess;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextCursor;
@@ -20,6 +19,7 @@ import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
@@ -29,6 +29,7 @@ import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveItem;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
 import de.muenchen.allg.itd51.wollmux.slv.PrintBlockSignature;
 import de.muenchen.allg.itd51.wollmux.slv.dialog.ContentBasedDirectiveSettings;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * Print function for printing the directives specified in the property {link
@@ -41,8 +42,6 @@ public class ContentBasedDirectivePrintOutput extends PrintFunction
       .getLogger(ContentBasedDirectivePrintOutput.class);
 
   private static final String EXCEPTION_MESSAGE = "Sichtbarkeit konnte nicht geändert werden.";
-
-  private static final String IS_VISIBLE_PROPERTY = "IsVisible";
 
   /**
    * A {@link PrintFunction} with name "SachleitendeVerfuegungOutput" and order 150.
@@ -185,7 +184,7 @@ public class ContentBasedDirectivePrintOutput extends PrintFunction
     {
       Boolean oldState = sectionOldState.get(section);
       if (oldState != null)
-        Utils.setProperty(section, IS_VISIBLE_PROPERTY, oldState);
+        Utils.setProperty(section, UnoProperty.IS_VISIBLE, oldState);
     }
 
     hideTextRange(setInvisibleRange, false);
@@ -223,9 +222,9 @@ public class ContentBasedDirectivePrintOutput extends PrintFunction
   {
     for (XTextSection section : hidingSections)
     {
-      boolean oldState = AnyConverter.toBoolean(Utils.getProperty(section, IS_VISIBLE_PROPERTY));
+      boolean oldState = AnyConverter.toBoolean(Utils.getProperty(section, UnoProperty.IS_VISIBLE));
       sectionOldState.put(section, oldState);
-      Utils.setProperty(section, IS_VISIBLE_PROPERTY, Boolean.FALSE);
+      Utils.setProperty(section, UnoProperty.IS_VISIBLE, Boolean.FALSE);
     }
   }
 
@@ -276,19 +275,9 @@ public class ContentBasedDirectivePrintOutput extends PrintFunction
     if (suppl == null)
       return sectionList;
 
-    XNameAccess sections = suppl.getTextSections();
-    String[] names = sections.getElementNames();
-    for (int i = 0; i < names.length; i++)
+    UnoDictionary<XTextSection> sections = UnoDictionary.create(suppl.getTextSections(), XTextSection.class);
+    for (XTextSection section : sections.values())
     {
-      XTextSection section = null;
-      try
-      {
-        section = UNO.XTextSection(sections.getByName(names[i]));
-      } catch (java.lang.Exception e)
-      {
-        LOGGER.error("", e);
-      }
-
       if (section != null)
       {
         try

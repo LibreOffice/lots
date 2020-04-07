@@ -1,7 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.mailmerge.ds;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -13,15 +12,13 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.sun.star.awt.XTopWindow;
-import com.sun.star.beans.XPropertySet;
-import com.sun.star.container.NoSuchElementException;
-import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
-import com.sun.star.lang.WrappedTargetException;
+import com.sun.star.sdb.CommandType;
 import com.sun.star.sdb.XOfficeDatabaseDocument;
 import com.sun.star.sdbc.SQLException;
+import com.sun.star.sdbc.XColumnLocate;
 import com.sun.star.sdbc.XConnection;
 import com.sun.star.sdbc.XRow;
 import com.sun.star.sdbc.XRowSet;
@@ -31,10 +28,13 @@ import com.sun.star.util.XCloseListener;
 import com.sun.star.util.XModifyListener;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.mailmerge.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
+import de.muenchen.allg.util.UnoComponent;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * A data source model based on LibreOffice Base.
@@ -112,21 +112,19 @@ public class DBModel implements DatasourceModel
    */
   public DBModel(XOfficeDatabaseDocument ds)
   {
-    results = UNO.XRowSet(UNO.createUNOService("com.sun.star.sdb.RowSet"));
+    results = UNO.XRowSet(UnoComponent.createComponentWithContext(UnoComponent.CSS_SDB_ROW_SET));
     try
     {
-      this.datasourceName = UNO.XPropertySet(ds.getDataSource()).getPropertyValue("Name")
-          .toString();
+      this.datasourceName = UnoProperty.getProperty(ds.getDataSource(), UnoProperty.NAME).toString();
       this.document = ds;
       UNO.XModifiable(document).addModifyListener(modifyListener);
 
       ds.getDataSource().setLoginTimeout(DBModel.MAILMERGE_LOGIN_TIMEOUT);
       conn = ds.getDataSource().getConnection("", "");
 
-      XPropertySet xProp = UNO.XPropertySet(results);
-      xProp.setPropertyValue("ActiveConnection", conn);
-      xProp.setPropertyValue("EscapeProcessing", Boolean.FALSE);
-      xProp.setPropertyValue("CommandType", Integer.valueOf(com.sun.star.sdb.CommandType.COMMAND));
+      UnoProperty.setProperty(results, UnoProperty.ACTIVE_CONNECTION, conn);
+      UnoProperty.setProperty(results, UnoProperty.ESCAPE_PROCESSING, false);
+      UnoProperty.setProperty(results, UnoProperty.COMMAND_TYPE, CommandType.COMMAND);
     } catch (SQLException x)
     {
       LOGGER.error("Kann keine Verbindung zur Datenquelle {} herstellen", datasourceName);
@@ -195,12 +193,10 @@ public class DBModel implements DatasourceModel
 
     try
     {
-      XNameAccess tables = UNO.XTablesSupplier(conn).getTables();
-      for (String name : tables.getElementNames())
-        tableNames.add(name);
-      XNameAccess queries = UNO.XQueriesSupplier(conn).getQueries();
-      for (String name : queries.getElementNames())
-        tableNames.add(name);
+      UnoDictionary<Object> tables = UnoDictionary.create(UNO.XTablesSupplier(conn).getTables(), Object.class);
+      tableNames.addAll(tables.keySet());
+      UnoDictionary<Object> queries = UnoDictionary.create(UNO.XQueriesSupplier(conn).getQueries(), Object.class);
+      tableNames.addAll(queries.keySet());
     } catch (Exception x)
     {
       LOGGER.error("", x);
@@ -334,32 +330,30 @@ public class DBModel implements DatasourceModel
     data.clear();
     try
     {
-      XNameAccess tables = UNO.XTablesSupplier(conn).getTables();
-      XColumnsSupplier columnsSupplier = UnoRuntime.queryInterface(XColumnsSupplier.class,
-          tables.getByName(tableName));
+      UnoDictionary<XColumnsSupplier> tables = UnoDictionary.create(UNO.XTablesSupplier(conn)
+          .getTables(), XColumnsSupplier.class);
+      XColumnsSupplier columnsSupplier = tables.get(tableName);
 
       if (columnsSupplier == null)
         return;
-      XNameAccess xColumns = columnsSupplier.getColumns();
-      String[] aColumnNames = xColumns.getElementNames();
-      List<String> columns = Arrays.asList(aColumnNames);
+      UnoDictionary<Object> columns = UnoDictionary.create(columnsSupplier.getColumns(), Object.class);
+      Set<String> columnNames = columns.keySet();
 
-      UNO.setProperty(results, "Command", "SELECT * FROM " + sqlIdentifier(tableName) + ";");
+      UnoProperty.setProperty(results, UnoProperty.COMMAND, "SELECT * FROM " + sqlIdentifier(tableName) + ";");
       results.execute();
       XRow row = UNO.XRow(results);
+      XColumnLocate locate = UnoRuntime.queryInterface(XColumnLocate.class, results);
       int id = 1;
       while (results.next())
       {
-        for (int i = 0; i < columns.size(); i++)
+        for (String column : columnNames)
         {
-          String column = columns.get(i);
-          String value = row.getString(i + 1);
+          String value = row.getString(locate.findColumn(column));
           data.put(id, column, value);
         }
         id++;
       }
-    } catch (SQLException | IllegalArgumentException | UnoHelperException | NoSuchElementException
-        | WrappedTargetException e)
+    } catch (SQLException | IllegalArgumentException | UnoHelperException e)
     {
       LOGGER.error("", e);
     }

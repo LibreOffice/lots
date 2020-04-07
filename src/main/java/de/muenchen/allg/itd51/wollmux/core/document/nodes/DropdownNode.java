@@ -8,9 +8,10 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
+import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.DocumentTreeVisitor;
-import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.util.UnoProperty;
 
 public class DropdownNode extends TextFieldNode implements
     DropdownFormControl
@@ -26,14 +27,21 @@ public class DropdownNode extends TextFieldNode implements
   @Override
   public String[] getItems()
   {
-    return (String[]) Utils.getProperty(textfield, "Items");
+    try
+    {
+    return (String[]) UnoProperty.getProperty(textfield, UnoProperty.ITEMS);
+  } catch (UnoHelperException ex)
+  {
+    LOGGER.trace("", ex);
+    return new String[] {};
+  }
   }
 
   public String getSelectedItem()
   {
     try
     {
-      return (String) UNO.getProperty(textfield, "SelectedItem");
+      return (String) UnoProperty.getProperty(textfield, UnoProperty.SELECTED_ITEM);
     }
     catch (Exception x)
     {
@@ -92,7 +100,7 @@ public class DropdownNode extends TextFieldNode implements
     StringBuilder buf = new StringBuilder();
     try
     {
-      buf.append((String) UNO.getProperty(textfield, "Name"));
+      buf.append((String) UnoProperty.getProperty(textfield, UnoProperty.NAME));
     }
     catch (Exception x)
     {
@@ -107,7 +115,7 @@ public class DropdownNode extends TextFieldNode implements
   }
 
   @Override
-  public String surroundWithBookmark(String bmName)
+  public String surroundWithBookmark(String bmName) throws UnoHelperException
   {
     XTextRange range = UNO.XTextContent(textfield).getAnchor();
     Bookmark bm = new Bookmark(bmName, doc, range);

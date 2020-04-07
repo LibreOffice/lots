@@ -27,6 +27,8 @@ import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dispatch.DispatchHelper;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.util.UnoComponent;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * If a FilenameGeneratorFunction is present the default name of the file is set.
@@ -106,8 +108,8 @@ public class OnSaveAs extends WollMuxEvent
 
     try
     {
-      Object ps = UNO.createUNOService("com.sun.star.util.PathSettings");
-      URL dir = new URL(AnyConverter.toString(Utils.getProperty(ps, "Work")));
+      Object ps = UnoComponent.createComponentWithContext(UnoComponent.CSS_UTIL_PATH_SETTINGS);
+      URL dir = new URL(AnyConverter.toString(Utils.getProperty(ps, UnoProperty.WORK)));
       return new File(dir.getPath(), filename);
     } catch (com.sun.star.lang.IllegalArgumentException
         | MalformedURLException e)

@@ -72,6 +72,7 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.slv.events.OnSetPrintBlocksPropsViaPrintModel;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * Diese Klasse enthält eine Fabrik für die Erzeugung eines XPrintModels, die
@@ -466,10 +467,10 @@ public class PrintModels
      */
     private boolean print(PageRange pr, Short copyCount)
     {
-      UnoProps myProps = new UnoProps("Wait", Boolean.TRUE);
+      UnoProps myProps = new UnoProps(UnoProperty.WAIT, Boolean.TRUE);
 
       // Property "CopyCount" bestimmen:
-      myProps.setPropertyValue("CopyCount", copyCount);
+      myProps.setPropertyValue(UnoProperty.COPY_COUNT, copyCount);
 
       // pr mit aktueller Seite vorbelegen (oder 1 als fallback)
       String prStr = "1";
@@ -484,15 +485,15 @@ public class PrintModels
           break;
 
         case USER_DEFINED:
-          myProps.setPropertyValue("Pages", pr.pageRangeValue);
+          myProps.setPropertyValue(UnoProperty.PAGES, pr.pageRangeValue);
           break;
 
         case CURRENT_PAGE:
-          myProps.setPropertyValue("Pages", prStr);
+          myProps.setPropertyValue(UnoProperty.PAGES, prStr);
           break;
 
         case CURRENT_AND_FOLLOWING:
-          myProps.setPropertyValue("Pages", prStr + "-" + documentController.getModel().getPageCount());
+          myProps.setPropertyValue(UnoProperty.PAGES, prStr + "-" + documentController.getModel().getPageCount());
           break;
       }
 

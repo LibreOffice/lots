@@ -4,9 +4,6 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sun.star.accessibility.XAccessible;
 import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.WindowEvent;
@@ -18,11 +15,7 @@ import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
-import com.sun.star.beans.PropertyVetoException;
-import com.sun.star.beans.UnknownPropertyException;
-import com.sun.star.beans.XPropertySet;
 import com.sun.star.lang.EventObject;
-import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.ui.LayoutSize;
 import com.sun.star.ui.XSidebarPanel;
@@ -33,6 +26,7 @@ import com.sun.star.uno.XComponentContext;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.dialog.adapter.AbstractSidebarPanel;
 import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModelListener;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
@@ -42,6 +36,7 @@ import de.muenchen.allg.itd51.wollmux.sidebar.GuiFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.HorizontalLayout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * The content of the sidebar.
@@ -49,8 +44,6 @@ import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
 public class MailMergeGUI extends AbstractSidebarPanel
     implements XToolPanel, XSidebarPanel, ConnectionModelListener
 {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(MailMergeGUI.class);
 
   private MailMergeController controller;
   private Layout layout;
@@ -239,15 +232,7 @@ public class MailMergeGUI extends AbstractSidebarPanel
    */
   public void updatePreview(boolean enabled, int max)
   {
-    XPropertySet propertySet = UNO.XPropertySet(preview.getModel());
-    try
-    {
-      propertySet.setPropertyValue("State", (short) (enabled ? 1 : 0));
-    } catch (com.sun.star.lang.IllegalArgumentException | UnknownPropertyException
-        | PropertyVetoException | WrappedTargetException e)
-    {
-      LOGGER.debug("", e);
-    }
+    Utils.setProperty(preview.getModel(), UnoProperty.STATE, (short) (enabled ? 1 : 0));
     XTextComponent currentDatasourceCountText = UNO.XTextComponent(printCount);
     currentDatasourceCountText.setText(String.valueOf(max));
     UNO.XWindow(jumpToLast).setEnable(enabled);

@@ -16,6 +16,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.util.UnoProperty;
 
 public class FrameController
 {
@@ -208,9 +209,9 @@ public class FrameController
       LOGGER.debug("", e);
     }
     if (zoomType != null)
-      Utils.setProperty(viewSettings, "ZoomType", zoomType);
+      Utils.setProperty(viewSettings, UnoProperty.ZOOM_TYPE, zoomType);
     else if (zoomValue != null)
-      Utils.setProperty(viewSettings, "ZoomValue", zoomValue);
+      Utils.setProperty(viewSettings, UnoProperty.ZOOM_VALUE, zoomValue);
     else
       throw new ConfigurationErrorException(L.m("Ungültiger ZOOM-Wert '%1'", zoom));
   }
@@ -225,7 +226,7 @@ public class FrameController
     String title = "NoTitle";
     try
     {
-      title = UNO.getProperty(getFrame(), "Title").toString();
+      title = UnoProperty.getProperty(getFrame(), UnoProperty.TITLE).toString();
       // "Untitled1 - OpenOffice.org Writer" -> cut " - OpenOffice.org Writer"
       int i = title.lastIndexOf(" - ");
       if (i >= 0) {

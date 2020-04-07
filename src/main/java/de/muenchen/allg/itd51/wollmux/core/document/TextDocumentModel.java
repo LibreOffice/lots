@@ -63,9 +63,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.UnknownPropertyException;
-import com.sun.star.container.XEnumeration;
-import com.sun.star.container.XEnumerationAccess;
-import com.sun.star.container.XNameContainer;
 import com.sun.star.container.XNamed;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
@@ -75,7 +72,6 @@ import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.lang.IllegalArgumentException;
-import com.sun.star.style.XStyle;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
@@ -90,6 +86,7 @@ import com.sun.star.util.XModifiable2;
 import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer.DataID;
@@ -101,6 +98,8 @@ import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dispatch.PrintDispatch;
+import de.muenchen.allg.util.UnoProperty;
+import de.muenchen.allg.util.UnoService;
 
 /**
  * Diese Klasse repräsentiert das Modell eines aktuell geöffneten TextDokuments und
@@ -116,10 +115,6 @@ public class TextDocumentModel
       .getLogger(TextDocumentModel.class);
 
   public static final String OVERRIDE_FRAG_DB_SPALTE = "OVERRIDE_FRAG_DB_SPALTE";
-
-  private static final String PARAGRAPH_STYLES = "ParagraphStyles";
-
-  private static final String CHARACTER_STYLES = "CharacterStyles";
 
   /**
    * Verwendet für {@link #lastTouchedByOOoVersion} und
@@ -1202,9 +1197,7 @@ public class TextDocumentModel
   {
     try
     {
-      return (int) AnyConverter
-          .toLong(UNO.getProperty(doc.getCurrentController(),
-              "PageCount"));
+      return (int) AnyConverter.toLong(UnoProperty.getProperty(doc.getCurrentController(), UnoProperty.PAGE_COUNT));
     }
     catch (java.lang.Exception e)
     {
@@ -1274,133 +1267,6 @@ public class TextDocumentModel
   }
 
   /**
-   * Get the paragraph style with a given name.
-   *
-   * @param name
-   *          The name of the paragraph style.
-   * @return The style with the name or null if there is no such style.
-   */
-  public XStyle getParagraphStyle(String name)
-  {
-    XStyle style = null;
-
-    XNameContainer pss = getStyleContainer(PARAGRAPH_STYLES);
-    if (pss != null)
-    {
-      try
-      {
-        style = UNO.XStyle(pss.getByName(name));
-      } catch (java.lang.Exception e)
-      {
-        LOGGER.trace("", e);
-      }
-    }
-    return style;
-  }
-
-  /**
-   * Creates a new paragraph style.
-   *
-   * @param name
-   *          The name of the paragraph style.
-   * @param parentStyleName
-   *          The name of the parent paragraph style or null if there is no parent, which defaults
-   *          to "Standard"
-   * @return The style or null if it cloudn't be created.
-   */
-  public XStyle createParagraphStyle(String name, String parentStyleName)
-  {
-    XNameContainer pss = getStyleContainer(PARAGRAPH_STYLES);
-    if (pss != null)
-    {
-      return createStyle(pss, "com.sun.star.style.ParagraphStyle", name, parentStyleName);
-    }
-    return null;
-  }
-
-  /**
-   * Get the character style with a given name.
-   *
-   * @param name
-   *          The name of the character style.
-   * @return The style with the name or null if there is no such style.
-   */
-  public XStyle getCharacterStyle(String name)
-  {
-    XStyle style = null;
-
-    XNameContainer pss = getStyleContainer(CHARACTER_STYLES);
-    if (pss != null)
-    {
-      try
-      {
-        style = UNO.XStyle(pss.getByName(name));
-      } catch (java.lang.Exception e)
-      {
-        LOGGER.trace("", e);
-      }
-    }
-    return style;
-  }
-
-  /**
-   * Creates a new character style.
-   *
-   * @param name
-   *          The name of the character style.
-   * @param parentStyleName
-   *          The name of the parent paragraph style or null if there is no parent, which defaults
-   *          to "Standard"
-   * @return The style or null if it cloudn't be created.
-   */
-  public XStyle createCharacterStyle(String name, String parentStyleName)
-  {
-    XNameContainer pss = getStyleContainer(CHARACTER_STYLES);
-    if (pss != null)
-    {
-      return createStyle(pss, "com.sun.star.style.CharacterStyle", name, parentStyleName);
-    }
-    return null;
-  }
-
-  private XStyle createStyle(XNameContainer styles, String styleType, String name,
-      String parentStyleName)
-  {
-    try
-    {
-      XStyle style = UNO.XStyle(UNO.XMultiServiceFactory(doc).createInstance(styleType));
-      styles.insertByName(name, style);
-      if (style != null && parentStyleName != null)
-        style.setParentStyle(parentStyleName);
-      return UNO.XStyle(styles.getByName(name));
-    } catch (Exception e)
-    {
-      LOGGER.trace("", e);
-      return null;
-    }
-  }
-
-  /**
-   * Get the styles of the document. Liefert den Styles vom Typ type des Dokuments doc.
-   *
-   * @param type
-   *          The type of styles ({@link #CHARACTER_STYLES}, {@link #PARAGRAPH_STYLES})
-   * @return The containter of the styles or null.
-   */
-  private XNameContainer getStyleContainer(String containerName)
-  {
-    try
-    {
-      return UNO.XNameContainer(UNO.XNameAccess(UNO.XStyleFamiliesSupplier(doc).getStyleFamilies())
-          .getByName(containerName));
-    } catch (java.lang.Exception e)
-    {
-      LOGGER.trace("", e);
-    }
-    return null;
-  }
-
-  /**
    * Get the name of the currently selected printer in the document.
    */
   public String getCurrentPrinterName()
@@ -1414,7 +1280,7 @@ public class TextDocumentModel
     UnoProps printerInfo = new UnoProps(printer);
     try
     {
-      return (String) printerInfo.getPropertyValue("Name");
+      return (String) printerInfo.getPropertyValue(UnoProperty.NAME);
     } catch (UnknownPropertyException e)
     {
       return L.m("unbekannt");
@@ -1738,49 +1604,28 @@ public class TextDocumentModel
     {
       return collectedTrafos;
     }
-    XEnumerationAccess parEnumAcc = UNO.XEnumerationAccess(
-        textRange.getText().createTextCursorByRange(textRange));
-    if (parEnumAcc == null)
+    UnoCollection<XTextRange> paragraphs = UnoCollection
+        .getCollection(textRange.getText().createTextCursorByRange(textRange), XTextRange.class);
+    if (paragraphs == null)
     {
       return collectedTrafos;
     }
 
-    XEnumeration parEnum = parEnumAcc.createEnumeration();
-    while (parEnum.hasMoreElements())
+    for (XTextRange paragraph : paragraphs)
     {
-      XEnumerationAccess porEnumAcc = null;
-      try
-      {
-        porEnumAcc = UNO.XEnumerationAccess(parEnum.nextElement());
-      }
-      catch (java.lang.Exception e)
-      {
-        LOGGER.error("", e);
-      }
-      if (porEnumAcc == null)
+      UnoCollection<XTextRange> portions = UnoCollection.getCollection(paragraph, XTextRange.class);
+      if (portions == null)
       {
         continue;
       }
 
-      XEnumeration porEnum = porEnumAcc.createEnumeration();
-      while (porEnum.hasMoreElements())
+      for (XTextRange portion : portions)
       {
-        Object portion = null;
-        try
-        {
-          portion = porEnum.nextElement();
-        }
-        catch (java.lang.Exception e)
-        {
-          LOGGER.error("", e);
-        }
-
         // InputUser-Textfelder verarbeiten
-        XTextField tf = UNO.XTextField(Utils.getProperty(portion, "TextField"));
-        if (tf != null
-            && UNO.supportsService(tf, "com.sun.star.text.TextField.InputUser"))
+        XTextField tf = UNO.XTextField(Utils.getProperty(portion, UnoProperty.TEXT_FIELD));
+        if (tf != null && UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_INPUT_USER))
         {
-          String varName = "" + Utils.getProperty(tf, "Content");
+          String varName = "" + Utils.getProperty(tf, UnoProperty.CONTENT);
           String t = getFunctionNameForUserFieldName(varName);
           if (t != null)
           {
@@ -1789,7 +1634,7 @@ public class TextDocumentModel
         }
 
         // Dokumentkommandos (derzeit insertFormValue) verarbeiten
-        XNamed bm = UNO.XNamed(Utils.getProperty(portion, "Bookmark"));
+        XNamed bm = UNO.XNamed(Utils.getProperty(portion, UnoProperty.BOOKMARK));
         if (bm != null)
         {
           String name = "" + bm.getName();
@@ -1798,11 +1643,8 @@ public class TextDocumentModel
           boolean isEnd = false;
           try
           {
-            boolean isCollapsed = AnyConverter
-                .toBoolean(Utils.getProperty(portion, "IsCollapsed"));
-            isStart = AnyConverter
-                .toBoolean(Utils.getProperty(portion, "IsStart"))
-                || isCollapsed;
+            boolean isCollapsed = AnyConverter.toBoolean(Utils.getProperty(portion, UnoProperty.IS_COLLAPSED));
+            isStart = AnyConverter.toBoolean(Utils.getProperty(portion, UnoProperty.IS_START)) || isCollapsed;
             isEnd = !isStart || isCollapsed;
           }
           catch (IllegalArgumentException e)
@@ -1965,13 +1807,12 @@ public class TextDocumentModel
     // zuerst die Kinder durchsuchen (falls vorhanden):
     if (UNO.XEnumerationAccess(element) != null)
     {
-      XEnumeration xEnum = UNO.XEnumerationAccess(element).createEnumeration();
+      UnoCollection<Object> children = UnoCollection.getCollection(element, Object.class);
 
-      while (xEnum.hasMoreElements())
+      for (Object child : children)
       {
         try
         {
-          Object child = xEnum.nextElement();
           XTextField found = findAnnotationFieldRecursive(child);
           // das erste gefundene Element zurückliefern.
           if (found != null)
@@ -1986,10 +1827,8 @@ public class TextDocumentModel
       }
     }
 
-    Object textField = Utils.getProperty(element, "TextField");
-    if (textField != null
-        && UNO.supportsService(textField,
-            "com.sun.star.text.TextField.Annotation"))
+    Object textField = Utils.getProperty(element, UnoProperty.TEXT_FIELD);
+    if (textField != null && UnoService.supportsService(textField, UnoService.CSS_TEXT_TEXT_FIELD_ANNOTATION))
     {
       return UNO.XTextField(textField);
     }

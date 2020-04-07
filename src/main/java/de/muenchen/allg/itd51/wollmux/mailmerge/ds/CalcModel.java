@@ -40,6 +40,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.mailmerge.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * A {@link DatasourceModel} using a calc file as source.
@@ -122,8 +123,8 @@ public class CalcModel implements DatasourceModel
    */
   public CalcModel(XSpreadsheetDocument spreadSheetDocument)
   {
-    String title = UNO.getPropertyByPropertyValues(UNO.XModel(spreadSheetDocument).getArgs(),
-        "Title");
+    String title = UnoProperty.getPropertyByPropertyValues(UNO.XModel(spreadSheetDocument).getArgs(),
+        UnoProperty.TITLE);
     this.datasourceName = UNO.stripOpenOfficeFromWindowName(title);
     this.spreadSheetDocument = spreadSheetDocument;
     UNO.XModifiable(spreadSheetDocument).addModifyListener(modifyListener);

@@ -27,6 +27,8 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.Upd
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.slv.PrintBlockCommand;
+import de.muenchen.allg.util.UnoProperty;
+import de.muenchen.allg.util.UnoService;
 
 /**
  * Implementiert einen leer-Executor, von dem abgeleitet werden kann, um konkrete
@@ -178,8 +180,8 @@ public abstract class AbstractExecutor implements DocumentCommand.Executor
     }
 
     // Text fett und rot machen:
-    Utils.setProperty(insCursor, "CharColor", Integer.valueOf(0xff0000));
-    Utils.setProperty(insCursor, "CharWeight", Float.valueOf(FontWeight.BOLD));
+    Utils.setProperty(insCursor, UnoProperty.CHAR_COLOR, Integer.valueOf(0xff0000));
+    Utils.setProperty(insCursor, UnoProperty.CHAR_WEIGHT, Float.valueOf(FontWeight.BOLD));
 
     // Ein Annotation-Textfield erzeugen und einfügen:
     try
@@ -187,10 +189,8 @@ public abstract class AbstractExecutor implements DocumentCommand.Executor
       XTextRange range = insCursor.getEnd();
       XTextCursor c = range.getText().createTextCursorByRange(range);
       c.goLeft((short) 2, false);
-      XTextContent note =
-        UNO.XTextContent(UNO.XMultiServiceFactory(doc).createInstance(
-          "com.sun.star.text.TextField.Annotation"));
-      UNO.setProperty(note, "Content", property);
+      XTextContent note = UNO.XTextContent(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_ANNOTATION, doc));
+      UnoProperty.setProperty(note, UnoProperty.CONTENT, property);
       c.getText().insertTextContent(c, note, false);
     }
     catch (java.lang.Exception x)

@@ -40,7 +40,6 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.container.XEnumeration;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextCursor;
@@ -50,7 +49,9 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextRangeCompare;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
+import de.muenchen.allg.afid.UnoCollection;
+import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.TextRangeRelation;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
@@ -59,6 +60,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToMark;
 import de.muenchen.allg.ooo.TextDocument;
+import de.muenchen.allg.util.UnoService;
 
 /**
  * Klasse enthält statische Methoden die für das Textbausteinsystem benötigt werden
@@ -400,7 +402,13 @@ public class TextModule
 
     LOGGER.trace(L.m("Erzeuge Bookmark: '%1'", bookmarkName));
 
-    new Bookmark(bookmarkName, doc, range);
+    try
+    {
+      new Bookmark(bookmarkName, doc, range);
+    } catch (UnoHelperException e)
+    {
+      LOGGER.debug("", e);
+    }
   }
 
   /**
@@ -464,20 +472,15 @@ public class TextModule
   private static XTextField getPlacemarkerStartingWithRange(XTextDocument doc,
       XTextCursor range)
   {
-    if (UNO.XTextFieldsSupplier(doc) == null) return null;
-    XEnumeration xenum =
-      UNO.XTextFieldsSupplier(doc).getTextFields().createEnumeration();
-    while (xenum.hasMoreElements())
+    if (UNO.XTextFieldsSupplier(doc) == null)
     {
-      XTextField tf = null;
-      try
-      {
-        tf = UNO.XTextField(xenum.nextElement());
-      }
-      catch (Exception e)
-      {}
-      if (tf != null
-        && UNO.supportsService(tf, "com.sun.star.text.TextField.JumpEdit"))
+      return null;
+    }
+    UnoCollection<XTextField> textFields = UnoCollection.getCollection(UNO.XTextFieldsSupplier(doc).getTextFields(),
+        XTextField.class);
+    for (XTextField tf : textFields)
+    {
+      if (tf != null && UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_JUMP_EDIT))
       {
         XTextRangeCompare c = UNO.XTextRangeCompare(range.getText());
         try

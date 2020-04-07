@@ -45,14 +45,15 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.container.XNameAccess;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextSection;
 import com.sun.star.text.XTextSectionsSupplier;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
+import de.muenchen.allg.afid.UnoDictionary;
+import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.TextSection;
 import de.muenchen.allg.itd51.wollmux.core.document.TreeRelation;
 import de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement;
@@ -212,7 +213,13 @@ public class DocumentCommands implements Iterable<DocumentCommand>
     if (r == null) {
       return;
     }
-    new Bookmark(cmdStr, UNO.XTextDocument(doc), r);
+    try
+    {
+      new Bookmark(cmdStr, UNO.XTextDocument(doc), r);
+    } catch (UnoHelperException e)
+    {
+      LOGGER.debug("", e);
+    }
     update();
   }
 
@@ -651,7 +658,7 @@ public class DocumentCommands implements Iterable<DocumentCommand>
     if (doc == null) {
       return null;
     }
-    XNameAccess sectionsAccess = doc.getTextSections();
+    UnoDictionary<XTextSection> sections = UnoDictionary.create(doc.getTextSections(), XTextSection.class);
 
     // HashSet mit allen Gruppen GROUPS aufbauen:
     Set<String> groups = new HashSet<>();
@@ -675,7 +682,7 @@ public class DocumentCommands implements Iterable<DocumentCommand>
 
     try
     {
-      XTextSection section = UNO.XTextSection(sectionsAccess.getByName(name));
+      XTextSection section = sections.get(name);
       if (section != null)
       {
         return new TextSection(section, groups);

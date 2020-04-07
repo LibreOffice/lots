@@ -47,6 +47,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
@@ -231,7 +232,7 @@ public class AllInsertionLineViewsPanel implements View
         model.removeBookmark();
         insertionModelList.remove(model);
       }
-      catch (ClassCastException x)
+      catch (ClassCastException | UnoHelperException x)
       {
         // InsertionModel4InputUser can't be deMux'ed
       }

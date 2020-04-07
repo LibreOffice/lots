@@ -40,17 +40,19 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNamed;
 import com.sun.star.lang.XComponent;
+import com.sun.star.text.XTextSection;
 import com.sun.star.text.XTextSectionsSupplier;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupsProvider;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * Stellt einen Bereich da (Format/Bereiche...)
@@ -90,7 +92,7 @@ public class SectionModel
    * Der TextSections Service über den der Bereich zu diesem SectionModel ansprechbar
    * ist.
    */
-  private XNameAccess textSections;
+  private UnoDictionary<XTextSection> textSections;
 
   /**
    * Der vollständige Name des Bereichs unter dem er von {@link #textSections}
@@ -126,7 +128,7 @@ public class SectionModel
   {
     this.formularMax4000 = formularMax4000;
     parseName(sectionName);
-    this.textSections = doc.getTextSections();
+    this.textSections = UnoDictionary.create(doc.getTextSections(), XTextSection.class);
   }
 
   /**
@@ -205,7 +207,7 @@ public class SectionModel
     try
     {
       XComponent textSection =
-        UNO.XComponent(textSections.getByName(sectionNameComplete));
+          UNO.XComponent(textSections.get(sectionNameComplete));
       textSection.dispose();
     }
     catch (Exception x)
@@ -225,12 +227,12 @@ public class SectionModel
   {
     try
     {
-      XNamed textSection = UNO.XNamed(textSections.getByName(sectionNameComplete));
+      XNamed textSection = UNO.XNamed(textSections.get(sectionNameComplete));
       String nameBase = generateCompleteName();
 
       String name = nameBase;
       int count = 1;
-      while (textSections.hasByName(name))
+      while (textSections.containsKey(name))
       {
         /*
          * Wenn unser alter Name ein passender neuer Name ist, müssen wir nix tun.
@@ -258,9 +260,9 @@ public class SectionModel
   {
     try
     {
-      Object textSection = textSections.getByName(sectionNameComplete);
+      Object textSection = textSections.get(sectionNameComplete);
       return textSection != null
-        && Boolean.TRUE.equals(UNO.getProperty(textSection, "IsVisible"));
+          && Boolean.TRUE.equals(UnoProperty.getProperty(textSection, UnoProperty.IS_VISIBLE));
     }
     catch (Exception x)
     {
@@ -276,12 +278,12 @@ public class SectionModel
   {
     try
     {
-      Object textSection = textSections.getByName(sectionNameComplete);
+      Object textSection = textSections.get(sectionNameComplete);
       if (textSection == null)
         LOGGER.error(L.m("Bereich ist plötzlich verschwunden: \"%1\"",
           sectionNameComplete));
       else
-        UNO.setProperty(textSection, "IsVisible", Boolean.valueOf(visible));
+        UnoProperty.setProperty(textSection, UnoProperty.IS_VISIBLE, Boolean.valueOf(visible));
     }
     catch (Exception x)
     {

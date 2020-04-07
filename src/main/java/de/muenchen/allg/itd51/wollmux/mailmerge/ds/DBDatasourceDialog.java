@@ -1,10 +1,10 @@
 package de.muenchen.allg.itd51.wollmux.mailmerge.ds;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +13,7 @@ import com.sun.star.awt.XButton;
 import com.sun.star.awt.XWindow;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
@@ -53,7 +54,7 @@ public class DBDatasourceDialog
       dialogFactory.closeDialog();
     };
 
-    List<String> oooDatasources = getRegisteredDatabaseNames();
+    Set<String> oooDatasources = getRegisteredDatabaseNames();
     layout.addControlsToList(addDBDatasourceButtons(oooDatasources, oooDSActionListener));
 
     layout.draw();
@@ -68,7 +69,7 @@ public class DBDatasourceDialog
    *          Listener to call on click.
    * @return A list of buttons.
    */
-  private ControlModel addDBDatasourceButtons(List<String> oooDatasources,
+  private ControlModel addDBDatasourceButtons(Set<String> oooDatasources,
       AbstractActionListener oooDSActionListener)
   {
     List<ControlProperties> dsButtons = new ArrayList<>();
@@ -92,16 +93,15 @@ public class DBDatasourceDialog
    *
    * @return List of all registered data sources.
    */
-  private List<String> getRegisteredDatabaseNames()
+  private Set<String> getRegisteredDatabaseNames()
   {
     try
     {
-      String[] datasourceNamesA = UNO.XNameAccess(UNO.dbContext).getElementNames();
-      return Arrays.asList(datasourceNamesA);
+      return UnoDictionary.create(UNO.dbContext, Object.class).keySet();
     } catch (Exception x)
     {
       LOGGER.error("", x);
     }
-    return Collections.emptyList();
+    return Collections.emptySet();
   }
 }

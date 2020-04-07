@@ -15,8 +15,8 @@ import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoCollection;
-import de.muenchen.allg.itd51.wollmux.core.util.PropertyName;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * A content based directive line. This class provides utility functions for modifying the
@@ -97,7 +97,7 @@ public class ContentBasedDirectiveItem
    */
   public void formatDefault()
   {
-    Utils.setProperty(textRange, PropertyName.PARA_STYLE_NAME,
+    Utils.setProperty(textRange, UnoProperty.PARA_STYLE_NAME,
         ContentBasedDirectiveModel.PARA_STYLE_NAME_DEFAULT);
     formatNumber();
   }
@@ -107,7 +107,7 @@ public class ContentBasedDirectiveItem
    */
   public void formatCopy()
   {
-    Utils.setProperty(textRange, PropertyName.PARA_STYLE_NAME,
+    Utils.setProperty(textRange, UnoProperty.PARA_STYLE_NAME,
         ContentBasedDirectiveModel.PARA_STYLE_NAME_COPY);
     formatNumber();
   }
@@ -117,7 +117,7 @@ public class ContentBasedDirectiveItem
    */
   public void formatItem()
   {
-    Utils.setProperty(textRange, PropertyName.PARA_STYLE_NAME,
+    Utils.setProperty(textRange, UnoProperty.PARA_STYLE_NAME,
         ContentBasedDirectiveModel.PARA_STYLE_NAME_CBD);
     formatNumber();
   }
@@ -127,7 +127,7 @@ public class ContentBasedDirectiveItem
    */
   public void formatRecipientLine()
   {
-    Utils.setProperty(textRange, PropertyName.PARA_STYLE_NAME,
+    Utils.setProperty(textRange, UnoProperty.PARA_STYLE_NAME,
         ContentBasedDirectiveModel.PARA_STYLE_NAME_RECIPIENT);
     formatNumber();
   }
@@ -137,7 +137,8 @@ public class ContentBasedDirectiveItem
    */
   public void formatVerfuegungspunktWithZuleitung()
   {
-    Utils.setProperty(textRange, PropertyName.PARA_STYLE_NAME,
+    Utils.setProperty(textRange,
+        UnoProperty.PARA_STYLE_NAME,
         ContentBasedDirectiveModel.PARA_STYLE_NAME_CBD_WITH_RECIPIENT);
     formatNumber();
   }
@@ -150,13 +151,14 @@ public class ContentBasedDirectiveItem
     XTextCursor zifferOnly = getZifferOnly();
     if (zifferOnly != null)
     {
-      Utils.setProperty(zifferOnly, PropertyName.CHAR_STYLE_NAME,
+      Utils.setProperty(zifferOnly,
+          UnoProperty.CHAR_STYLE_NAME,
           ContentBasedDirectiveModel.CHAR_STYLE_NAME_NUMBER);
 
       // Zeichen danach auf Standardformatierung setzen, damit der Text, der
       // danach geschrieben wird nicht auch obiges Zeichenformat besitzt:
       // ("Standard" gilt laut DevGuide auch in englischen Versionen)
-      Utils.setProperty(zifferOnly.getEnd(), PropertyName.CHAR_STYLE_NAME, "Standard");
+      Utils.setProperty(zifferOnly.getEnd(), UnoProperty.CHAR_STYLE_NAME, "Standard");
     }
   }
 
@@ -332,7 +334,7 @@ public class ContentBasedDirectiveItem
     try
     {
       paraStyleName = AnyConverter
-          .toString(Utils.getProperty(textRange, PropertyName.PARA_STYLE_NAME));
+          .toString(Utils.getProperty(textRange, UnoProperty.PARA_STYLE_NAME));
     } catch (IllegalArgumentException e)
     {
       LOGGER.trace("", e);

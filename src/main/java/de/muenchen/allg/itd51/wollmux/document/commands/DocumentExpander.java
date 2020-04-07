@@ -10,9 +10,6 @@ import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.beans.XPropertySet;
-import com.sun.star.container.XEnumeration;
-import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.io.IOException;
 import com.sun.star.io.XInputStream;
 import com.sun.star.style.XStyleFamiliesSupplier;
@@ -23,9 +20,9 @@ import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.OverrideFragChainException;
 import de.muenchen.allg.itd51.wollmux.core.document.VisibleTextFragmentList;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
@@ -42,6 +39,8 @@ import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentLoader;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToMark;
+import de.muenchen.allg.util.UnoProperty;
+import de.muenchen.allg.util.UnoService;
 
 /**
  * Builds the whole document by expanding each text fragment.
@@ -281,48 +280,30 @@ class DocumentExpander extends AbstractExecutor
    *          A document command.
    * @param url
    *          The URL of a document.
-   * @throws java.io.IOException
-   *           If URL isn't readable.
    */
   private void insertDocumentFromURL(DocumentCommand cmd, URL url)
-      throws java.io.IOException
   {
-    // TODO: is this workaround still necessary?
-    // Workaround: LO freezes if the resource given to insertDocumentFromURL is not available.
-    // http://qa.openoffice.org/issues/show_bug.cgi?id=57049
-    // Check with Java's URL class first and abort if necessary.
 
     String urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
-
-    if (!DocumentLoader.getInstance().hasDocument(urlStr))
-    {
-      WollMuxSingleton.checkURL(url);
-    }
 
     // TODO: is this workaround still necessary?
     // Workaround: remember old paragraph style, see
     // http://qa.openoffice.org/issues/show_bug.cgi?id=60475
     String paraStyleName = null;
-    XPropertySet endCursor = null;
+    XTextRange endCursor = null;
     XTextRange range = cmd.getTextCursor();
     if (range != null)
     {
-      endCursor =
-         UNO.XPropertySet(range.getText().createTextCursorByRange(range.getEnd()));
+      endCursor = range.getText().createTextCursorByRange(range.getEnd());
     }
     else
       LOGGER.error(
           "insertDocumentFromURL: TextRange des Dokumentkommandos '{}' ist null => Bookmark verschwunden?",
           cmd);
-    try
+
+    if (endCursor != null)
     {
-      if (endCursor != null)
-        paraStyleName =
-          endCursor.getPropertyValue("ParaStyleName").toString();
-    }
-    catch (java.lang.Exception e)
-    {
-      LOGGER.error("", e);
+      paraStyleName = Utils.getProperty(endCursor, UnoProperty.PARA_STYLE_NAME).toString();
     }
 
     XTextCursor insCursor = cmd.getTextCursorWithinInsertMarks();
@@ -334,14 +315,7 @@ class DocumentExpander extends AbstractExecutor
     // Workaround: reset paragraph style (see above)
     if (endCursor != null && paraStyleName != null)
     {
-      try
-      {
-        endCursor.setPropertyValue("ParaStyleName", paraStyleName);
-      }
-      catch (java.lang.Exception e)
-      {
-        LOGGER.error("", e);
-      }
+      Utils.setProperty(endCursor, UnoProperty.PARA_STYLE_NAME, paraStyleName);
     }
   }
 
@@ -356,42 +330,26 @@ class DocumentExpander extends AbstractExecutor
    * @param url
    *          The URL of a document.
    * @throws java.io.IOException
-   * @throws IOException
-   *           If URL isn't readable.
    */
   private void insertStylesFromURL(DocumentCommand cmd, Set<String> styles, URL url)
-      throws java.io.IOException, IOException
+      throws IOException
   {
-    // TODO: is this workaround still necessary?
-    // Workaround: LO freezes if the resource given to insertDocumentFromURL is not available.
-    // http://qa.openoffice.org/issues/show_bug.cgi?id=57049
-    // Check with Java's URL class first and abort if necessary.
 
     String urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
-
-    if (!DocumentLoader.getInstance().hasDocument(urlStr))
-    {
-      WollMuxSingleton.checkURL(url);
-    }
 
     try
     {
       UnoProps props = new UnoProps();
-      props.setPropertyValue("OverwriteStyles", Boolean.TRUE);
-      props.setPropertyValue("LoadCellStyles",
-        Boolean.valueOf(styles.contains("cellstyles")));
-      props.setPropertyValue("LoadTextStyles",
-        Boolean.valueOf(styles.contains("textstyles")));
-      props.setPropertyValue("LoadFrameStyles",
-        Boolean.valueOf(styles.contains("framestyles")));
-      props.setPropertyValue("LoadPageStyles",
-        Boolean.valueOf(styles.contains("pagestyles")));
-      props.setPropertyValue("LoadNumberingStyles",
-        Boolean.valueOf(styles.contains("numberingstyles")));
+      props.setPropertyValue(UnoProperty.OVERWRITE_STYLES, Boolean.TRUE);
+      props.setPropertyValue(UnoProperty.LOAD_CELL_STYLES, Boolean.valueOf(styles.contains("cellstyles")));
+      props.setPropertyValue(UnoProperty.LOAD_TEXT_STYLES, Boolean.valueOf(styles.contains("textstyles")));
+      props.setPropertyValue(UnoProperty.LOAD_FRAME_STYLES, Boolean.valueOf(styles.contains("framestyles")));
+      props.setPropertyValue(UnoProperty.LOAD_PAGE_STYLES, Boolean.valueOf(styles.contains("pagestyles")));
+      props.setPropertyValue(UnoProperty.LOAD_NUMBERING_STYLES, Boolean.valueOf(styles.contains("numberingstyles")));
       XStyleFamiliesSupplier sfs = UNO.XStyleFamiliesSupplier(this.documentCommandInterpreter.getModel().doc);
       XStyleLoader loader = UNO.XStyleLoader(sfs.getStyleFamilies());
       XInputStream stream = DocumentLoader.getInstance().getDocumentStream(urlStr);
-      props.setPropertyValue("InputStream", stream);
+      props.setPropertyValue(UnoProperty.INPUT_STREAM, stream);
       loader.loadStylesFromURL("private:stream", props.getProps());
     }
     catch (NullPointerException | ExecutionException e)
@@ -420,39 +378,27 @@ class DocumentExpander extends AbstractExecutor
 
     List<XTextField> placeholders = new ArrayList<>();
 
-    XEnumeration xEnum = UNO.XEnumerationAccess(range).createEnumeration();
-    XEnumerationAccess enuAccess;
     // Schleife über den Textbereich
-    while (xEnum.hasMoreElements())
+    UnoCollection<XTextRange> paragraphs = UnoCollection.getCollection(range, XTextRange.class);
+    for (XTextRange paragraph : paragraphs)
     {
-      Object ele = null;
-      try
+      UnoCollection<XTextRange> portions = UnoCollection.getCollection(paragraph, XTextRange.class);
+      if (portions != null) // ist wohl ein SwXParagraph
       {
-        ele = xEnum.nextElement();
-      }
-      catch (Exception e)
-      {
-        continue;
-      }
-      enuAccess = UNO.XEnumerationAccess(ele);
-      if (enuAccess != null) // ist wohl ein SwXParagraph
-      {
-        XEnumeration textPortionEnu = enuAccess.createEnumeration();
         // Schleife über SwXParagraph und schauen ob es Platzhalterfelder gibt
         // diese werden dann im Vector placeholders gesammelt
-        while (textPortionEnu.hasMoreElements())
+        for (XTextRange textPortion : portions)
         {
           try
           {
-            Object textPortion = textPortionEnu.nextElement();
-            String textPortionType = (String) Utils.getProperty(textPortion, "TextPortionType");
+            String textPortionType = (String) Utils.getProperty(textPortion, UnoProperty.TEXT_PROTION_TYPE);
             // Wenn es ein Textfeld ist
             if ("TextField".equals(textPortionType))
             {
-              XTextField textField = UNO.XTextField(UNO.getProperty(textPortion, "TextField"));
+              XTextField textField = UNO.XTextField(UnoProperty.getProperty(textPortion, UnoProperty.TEXT_FIELD));
               // Wenn es ein Platzhalterfeld ist, dem Vector placeholders
               // hinzufügen
-              if (UNO.supportsService(textField, "com.sun.star.text.TextField.JumpEdit"))
+              if (UnoService.supportsService(textField, UnoService.CSS_TEXT_TEXT_FIELD_JUMP_EDIT))
               {
                 placeholders.add(textField);
               }

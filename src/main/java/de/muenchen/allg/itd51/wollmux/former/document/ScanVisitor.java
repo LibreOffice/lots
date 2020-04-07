@@ -265,13 +265,12 @@ public class ScanVisitor implements DocumentTreeVisitor
       }
     }
 
-    bookmarkName = control.surroundWithBookmark(bookmarkName);
-
     try
     {
-      InsertionModel imodel =
-        new InsertionModel4InsertXValue(bookmarkName,
-          UNO.XBookmarksSupplier(formularMax4000.getDocumentController().getModel().doc), formularMax4000.getFunctionSelectionProvider(), formularMax4000);
+      bookmarkName = control.surroundWithBookmark(bookmarkName);
+      InsertionModel imodel = new InsertionModel4InsertXValue(bookmarkName,
+          UNO.XBookmarksSupplier(formularMax4000.getDocumentController().getModel().doc),
+          formularMax4000.getFunctionSelectionProvider(), formularMax4000);
       if (doGenderTrafo)
       {
         addGenderTrafo(imodel, (DropdownFormControl) control);

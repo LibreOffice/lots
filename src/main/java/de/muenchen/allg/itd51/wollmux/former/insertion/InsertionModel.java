@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
@@ -63,21 +64,27 @@ public abstract class InsertionModel
   private List<ModelChangeListener> listeners = new Vector<>(1);
 
   /**
-   * Entfernt die Einfügestelle komplett aus dem Dokument, d,h, sowohl das eventuell
-   * vorhandene WollMux-Bookmark als auch den Feldbefehl.
+   * Entfernt die Einfügestelle komplett aus dem Dokument, d,h, sowohl das eventuell vorhandene
+   * WollMux-Bookmark als auch den Feldbefehl.
+   * 
+   * @throws UnoHelperException
+   *           Can't get the view cursor.
    */
-  public abstract void removeFromDocument();
+  public abstract void removeFromDocument() throws UnoHelperException;
 
   /**
-   * Liefert den "Namen" der Einfügestelle. Dies kann z.B. der Name des Bookmarks
-   * sein, das die Einfügestelle umschließt.
+   * Liefert den "Namen" der Einfügestelle. Dies kann z.B. der Name des Bookmarks sein, das die
+   * Einfügestelle umschließt.
    */
   public abstract String getName();
 
   /**
    * Setzt den ViewCursor auf die Einfügestelle.
+   * 
+   * @throws UnoHelperException
+   *           Can't get the view cursor.
    */
-  public abstract void selectWithViewCursor();
+  public abstract void selectWithViewCursor() throws UnoHelperException;
 
   /**
    * Lässt dieses {@link InsertionModel} sein zugehöriges Bookmark bzw, sonstige

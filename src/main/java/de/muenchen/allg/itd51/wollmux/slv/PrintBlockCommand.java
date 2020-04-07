@@ -5,14 +5,15 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.text.XTextCursor;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
+import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
+import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InvalidCommandException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.PropertyName;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * Implementation of print block commands {@link PrintBlockSignature}.
@@ -94,10 +95,10 @@ public class PrintBlockCommand extends DocumentCommand
         {
           Integer bgColor = Integer.valueOf(Integer.parseInt(highlightColor, 16));
           XTextCursor cursor = getTextCursor();
-          Utils.setProperty(cursor, PropertyName.CHAR_BACK_COLOR, bgColor);
+          Utils.setProperty(cursor, UnoProperty.CHAR_BACK_COLOR, bgColor);
           cursor.collapseToEnd();
-          UNO.setPropertyToDefault(cursor, PropertyName.CHAR_BACK_COLOR);
-        } catch (NumberFormatException e)
+          UnoProperty.setPropertyToDefault(cursor, UnoProperty.CHAR_BACK_COLOR);
+        } catch (NumberFormatException | UnoHelperException e)
         {
           LOGGER.error(L.m(
               "Fehler in Dokumentkommando '%1': Die Farbe HIGHLIGHT_COLOR mit dem Wert '%2' ist ungültig.",
@@ -106,7 +107,13 @@ public class PrintBlockCommand extends DocumentCommand
       }
       else
       {
-        UNO.setPropertyToDefault(getTextCursor(), PropertyName.CHAR_BACK_COLOR);
+        try
+        {
+          UnoProperty.setPropertyToDefault(getTextCursor(), UnoProperty.CHAR_BACK_COLOR);
+        } catch (UnoHelperException e)
+        {
+          LOGGER.error("Couldn't set background color.", e);
+        }
       }
     }
   }

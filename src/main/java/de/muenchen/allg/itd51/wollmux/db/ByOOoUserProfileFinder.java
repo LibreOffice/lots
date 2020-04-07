@@ -3,13 +3,9 @@ package de.muenchen.allg.itd51.wollmux.db;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.uno.XComponentContext;
-
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoProps;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.util.UnoConfiguration;
 
 /**
  * Ein konkreter DataFinder, der für die Auflösung der Variable in getValueForKey im Benutzerprofil
@@ -33,24 +29,10 @@ public class ByOOoUserProfileFinder extends DataFinder
   {
     try
     {
-      XComponentContext ctx = WollMuxSingleton.getInstance()
-          .getXComponentContext();
-      Object confProvider = ctx.getServiceManager()
-          .createInstanceWithContext(
-              "com.sun.star.configuration.ConfigurationProvider", ctx);
-      Object confView = UNO.XMultiServiceFactory(confProvider)
-          .createInstanceWithArguments(
-              "com.sun.star.configuration.ConfigurationAccess",
-              new UnoProps("nodepath",
-                  "/org.openoffice.UserProfile/Data").getProps());
-      return UNO.XNameAccess(confView).getByName(key).toString();
+      return UnoConfiguration.getConfiguration("/org.openoffice.UserProfile/Data", key).toString();
     } catch (Exception e)
     {
-      LOGGER.error(
-          L.m(
-              "Konnte den Wert zum Schlüssel '%1' des OOoUserProfils nicht bestimmen:",
-              key),
-          e);
+      LOGGER.error(L.m("Konnte den Wert zum Schlüssel '%1' des OOoUserProfils nicht bestimmen:", key), e);
     }
     return "";
   }

@@ -8,22 +8,19 @@ import java.util.ListIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.container.NoSuchElementException;
-import com.sun.star.container.XNameAccess;
 import com.sun.star.lang.NoSuchMethodException;
-import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextSection;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoCollection;
+import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.itd51.wollmux.SyncActionListener;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.document.TextRangeRelation;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.PropertyName;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
@@ -32,6 +29,7 @@ import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveItem;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
 import de.muenchen.allg.itd51.wollmux.slv.dialog.ContentBasedDirectiveDialog;
 import de.muenchen.allg.itd51.wollmux.slv.dialog.ContentBasedDirectiveSettings;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * Print function for configuration of the content based directive print. It creates a GUI and
@@ -225,31 +223,25 @@ public class ContentBasedDirectivePrint extends PrintFunction
   private boolean isRangeVisible(ContentBasedDirectiveModel model, XTextRange range)
   {
     // text has CharHidden property
-    if ((boolean) Utils.getProperty(range, PropertyName.CHAR_HIDDEN))
+    if ((boolean) Utils.getProperty(range, UnoProperty.CHAR_HIDDEN))
     {
       return false;
     }
 
     // check if range is in an invisible section
-    try
+    UnoDictionary<XTextSection> sections = UnoDictionary
+        .create(UNO.XTextSectionsSupplier(model.getTextDocument()).getTextSections(), XTextSection.class);
+    for (XTextSection section : sections.values())
     {
-      XNameAccess sections = UNO.XTextSectionsSupplier(model.getTextDocument()).getTextSections();
-      for (String sectionName : sections.getElementNames())
+      TextRangeRelation relation = new TextRangeRelation(range, section.getAnchor());
+      if (!(relation.followsOrderschemeAABB() || relation.followsOrderschemeBBAA()))
       {
-        XTextSection section = UNO.XTextSection(sections.getByName(sectionName));
-        TextRangeRelation relation = new TextRangeRelation(range, section.getAnchor());
-        if (!(relation.followsOrderschemeAABB() || relation.followsOrderschemeBBAA()))
+        boolean visible = (boolean) Utils.getProperty(section, UnoProperty.IS_VISIBLE);
+        if (!visible)
         {
-          boolean visible = (boolean) Utils.getProperty(section, PropertyName.IS_VISIBLE);
-          if (!visible)
-          {
-            return false;
-          }
+          return false;
         }
       }
-    } catch (WrappedTargetException | NoSuchElementException ex)
-    {
-      LOGGER.debug("", ex);
     }
     return true;
   }

@@ -10,9 +10,11 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
+import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.DocumentTreeVisitor;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.util.UnoProperty;
 
 public class CheckboxNode implements FormControl, Node
 {
@@ -37,7 +39,7 @@ public class CheckboxNode implements FormControl, Node
 
   public boolean isChecked()
   {
-    return CHECKED_STATE.equals(Utils.getProperty(model, "State"));
+    return CHECKED_STATE.equals(Utils.getProperty(model, UnoProperty.STATE));
   }
 
   @Override
@@ -70,7 +72,7 @@ public class CheckboxNode implements FormControl, Node
     StringBuilder buf = new StringBuilder();
     try
     {
-      buf.append((String) UNO.getProperty(model, "HelpText"));
+      buf.append((String) UnoProperty.getProperty(model, UnoProperty.HELP_TEXT));
     }
     catch (Exception x)
     {
@@ -92,7 +94,7 @@ public class CheckboxNode implements FormControl, Node
   }
 
   @Override
-  public String surroundWithBookmark(String bmName)
+  public String surroundWithBookmark(String bmName) throws UnoHelperException
   {
     XTextRange range = UNO.XTextContent(shape).getAnchor();
     XTextCursor cursor = range.getText().createTextCursorByRange(range);

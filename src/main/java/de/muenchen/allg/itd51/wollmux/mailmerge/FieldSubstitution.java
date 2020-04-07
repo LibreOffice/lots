@@ -10,7 +10,8 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextRange;
 
-import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
+import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
@@ -160,35 +161,40 @@ public class FieldSubstitution implements Iterable<FieldSubstitution.SubstElemen
   private void updateField(TextDocumentController controller, FormField formField,
       boolean isInsertFormValue)
   {
-    XTextRange anchor = formField.getAnchor();
-    if (formField.getAnchor() != null)
+    try
     {
-      // create cursor, delete field and set text.
-      XTextCursor cursor = anchor.getText().createTextCursorByRange(anchor);
-      formField.dispose();
-      cursor.setString(toString());
-
-      // replace fields with book marks
-      cursor.collapseToStart();
-      for (FieldSubstitution.SubstElement ele : elements)
+      XTextRange anchor = formField.getAnchor();
+      if (formField.getAnchor() != null)
       {
-        if (ele.isFixedText())
+        // create cursor, delete field and set text.
+        XTextCursor cursor = anchor.getText().createTextCursorByRange(anchor);
+        formField.dispose();
+        cursor.setString(toString());
+
+        // replace fields with book marks
+        cursor.collapseToStart();
+        for (FieldSubstitution.SubstElement ele : elements)
         {
-          cursor.goRight((short) ele.getValue().length(), false);
-        } else if (ele.isField())
-        {
-          cursor.goRight((short) (1 + ele.getValue().length() + 1), true);
-          if (isInsertFormValue)
+          if (ele.isFixedText())
           {
-            new Bookmark("WM(CMD 'insertFormValue' ID '" + ele.getValue() + "')",
-                controller.getModel().doc, cursor);
-          } else
+            cursor.goRight((short) ele.getValue().length(), false);
+          } else if (ele.isField())
           {
-            controller.insertMailMergeField(ele.getValue(), cursor);
+            cursor.goRight((short) (1 + ele.getValue().length() + 1), true);
+            if (isInsertFormValue)
+            {
+              new Bookmark("WM(CMD 'insertFormValue' ID '" + ele.getValue() + "')", controller.getModel().doc, cursor);
+            } else
+            {
+              controller.insertMailMergeField(ele.getValue(), cursor);
+            }
+            cursor.collapseToEnd();
           }
-          cursor.collapseToEnd();
         }
       }
+    } catch (UnoHelperException e)
+    {
+      LOGGER.debug("", e);
     }
   }
 

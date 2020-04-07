@@ -61,7 +61,6 @@ import de.muenchen.allg.itd51.wollmux.core.document.TransitionModeDataContainer;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
@@ -419,10 +418,10 @@ public class DocumentManager
       if (documentController == null)
       {
         documentController = new TextDocumentController(
-            new TextDocumentModel(doc, createPersistentDataContainer(doc),
-                WollMuxSingleton.getVersion(), Utils.getOOoVersion()),
-            GlobalFunctions.getInstance().getGlobalFunctions(),
-            GlobalFunctions.getInstance().getFunctionDialogs());
+            new TextDocumentModel(doc, createPersistentDataContainer(doc), WollMuxSingleton
+                .getVersion(),
+                UNO.getOOoVersion()),
+            GlobalFunctions.getInstance().getGlobalFunctions(), GlobalFunctions.getInstance().getFunctionDialogs());
       }
     }
 

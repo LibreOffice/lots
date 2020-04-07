@@ -19,6 +19,7 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.util.UnoComponent;
 
 public class UNODialogFactory
 {
@@ -28,13 +29,11 @@ public class UNODialogFactory
 
   public XWindow createDialog(int width, int height, int backgroundColor)
   {
-    Object cont = UNO.createUNOService("com.sun.star.awt.UnoControlContainer");
+    Object cont = UnoComponent.createComponentWithContext(UnoComponent.CSS_AWT_UNO_CONTROL_CONTAINER);
     XControl dialogControl = UnoRuntime.queryInterface(XControl.class, cont);
 
-    Object unoControlContainerModelO = UNO
-        .createUNOService("com.sun.star.awt.UnoControlContainerModel");
     XControlModel unoControlContainerModel = UnoRuntime.queryInterface(XControlModel.class,
-        unoControlContainerModelO);
+        UnoComponent.createComponentWithContext(UnoComponent.CSS_AWT_UNO_CONTROL_CONTAINER_MODEL));
     dialogControl.setModel(unoControlContainerModel);
 
     XWindow contXWindow = UNO.XWindow(dialogControl);
@@ -87,11 +86,17 @@ public class UNODialogFactory
     return contXWindow;
   }
 
-  public static XControl convertToXControl(
-      ControlProperties controlProperties)
+  /**
+   * Create a {@link XControl}.
+   *
+   * @param controlProperties
+   *          The properties of the control.
+   * @return The control.
+   */
+  public static XControl convertToXControl(ControlProperties controlProperties)
   {
     String controlType = controlProperties.getControlType().toString();
-    Object control = UNO.createUNOService(controlType);
+    Object control = UnoComponent.createComponentWithContext(controlType);
 
     Object editModel = null;
     try

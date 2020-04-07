@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.container.NoSuchElementException;
-import com.sun.star.container.XEnumeration;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.rdf.Literal;
 import com.sun.star.rdf.Statement;
@@ -19,6 +18,8 @@ import com.sun.star.rdf.XURI;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoIterator;
+import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer.DataID;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
@@ -183,18 +184,18 @@ public class RDFBasedPersistentDataContainer implements
     }
     try
     {
-      XEnumeration xEnum = null;
+      UnoIterator<Statement> statements = null;
       try
       {
-        xEnum = g.getStatements(xDMA, getDataIdURI(dataId), null);
+        statements = UnoIterator.create(g.getStatements(xDMA, getDataIdURI(dataId), null), Statement.class);
       }
       catch (NoSuchElementException x)
       {
         /* kann regulär vorkommen */
         LOGGER.trace("", x);
       }
-      if (xEnum != null && xEnum.hasMoreElements())
-        return ((Statement) xEnum.nextElement()).Object.getStringValue();
+      if (statements != null && statements.hasNext())
+        return statements.next().Object.getStringValue();
     }
     catch (Exception e)
     {

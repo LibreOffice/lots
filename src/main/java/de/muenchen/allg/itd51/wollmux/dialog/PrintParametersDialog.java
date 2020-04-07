@@ -74,6 +74,7 @@ import de.muenchen.allg.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.dialog.adapter.AbstractTopWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dispatch.PrintDispatch;
+import de.muenchen.allg.util.UnoProperty;
 
 public class PrintParametersDialog
 {
@@ -391,7 +392,7 @@ public class PrintParametersDialog
     UnoProps printerInfo = new UnoProps(printer);
     try
     {
-      return (String) printerInfo.getPropertyValue("Name");
+      return (String) printerInfo.getPropertyValue(UnoProperty.NAME);
     } catch (UnknownPropertyException e)
     {
       return L.m("unbekannt");
@@ -408,7 +409,7 @@ public class PrintParametersDialog
     UnoProps printerInfo = new UnoProps(printer);
     try
     {
-      printerInfo.setPropertyValue("Name", druckerName);
+      printerInfo.setPropertyValue(UnoProperty.NAME, druckerName);
       if (printable != null)
       {
         printable.setPrinter(printerInfo.getProps());

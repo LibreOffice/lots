@@ -104,23 +104,23 @@ import com.sun.jna.platform.win32.ShlObj;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinReg;
 import com.sun.star.beans.Property;
-import com.sun.star.beans.PropertyValue;
-import com.sun.star.container.XNameAccess;
-import com.sun.star.lang.XMultiComponentFactory;
-import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.sdbc.XConnection;
 import com.sun.star.sdbc.XDataSource;
 import com.sun.star.uno.AnyConverter;
-import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XStringSubstitution;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.util.UnoComponent;
+import de.muenchen.allg.util.UnoConfiguration;
+import de.muenchen.allg.util.UnoProperty;
+import de.muenchen.allg.util.UnoService;
 
 /**
  *
@@ -583,7 +583,7 @@ public class WollMuxFiles
       try
       {
         XStringSubstitution subst = UNO
-            .XStringSubstitution(UNO.createUNOService("com.sun.star.util.PathSubstitution"));
+            .XStringSubstitution(UnoComponent.createComponentWithContext(UnoComponent.CSS_UTIL_PATH_SUBSTITUTION));
         String jConfPath = new URL(subst.substituteVariables("$(user)/config", true)).toURI()
             .getPath();
         File[] jConfFiles = new File(jConfPath).listFiles();
@@ -677,19 +677,18 @@ public class WollMuxFiles
       out.write("===================== START OOo datasources ==================\n");
       try
       {
-        String[] datasourceNamesA = UNO.XNameAccess(UNO.dbContext).getElementNames();
-        for (int i = 0; i < datasourceNamesA.length; ++i)
+        UnoDictionary<Object> dataSources = UnoDictionary.create(UNO.dbContext, Object.class);
+        for (String dataSource : dataSources.keySet())
         {
-          out.write(datasourceNamesA[i]);
+          out.write(dataSource);
           out.write("\n");
           try
           {
-            XDataSource ds = UNO
-                .XDataSource(UNO.dbContext.getRegisteredObject(datasourceNamesA[i]));
+            XDataSource ds = UNO.XDataSource(UNO.dbContext.getRegisteredObject(dataSource));
             ds.setLoginTimeout(1);
             XConnection conn = ds.getConnection("", "");
-            XNameAccess tables = UNO.XTablesSupplier(conn).getTables();
-            for (String name : tables.getElementNames())
+            UnoDictionary<Object> tables = UnoDictionary.create(UNO.XTablesSupplier(conn).getTables(), Object.class);
+            for (String name : tables.keySet())
               out.write("  " + name + "\n");
           } catch (Exception x)
           {
@@ -730,23 +729,7 @@ public class WollMuxFiles
   {
     try
     {
-      XMultiComponentFactory xMultiComponentFactory = UNO.defaultContext.getServiceManager();
-      Object oProvider = xMultiComponentFactory.createInstanceWithContext(
-          "com.sun.star.configuration.ConfigurationProvider", UNO.defaultContext);
-      XMultiServiceFactory xConfigurationServiceFactory = UnoRuntime
-          .queryInterface(XMultiServiceFactory.class, oProvider);
-
-      PropertyValue[] lArgs = new PropertyValue[1];
-      lArgs[0] = new PropertyValue();
-      lArgs[0].Name = "nodepath";
-      lArgs[0].Value = path;
-
-      Object configAccess = xConfigurationServiceFactory
-          .createInstanceWithArguments("com.sun.star.configuration.ConfigurationAccess", lArgs);
-
-      XNameAccess xNameAccess = UnoRuntime.queryInterface(XNameAccess.class, configAccess);
-
-      return xNameAccess.getByName(name).toString();
+      return UnoConfiguration.getConfiguration(path, name).toString();
     } catch (Exception ex)
     {
       LOGGER.info("", ex);
@@ -781,12 +764,10 @@ public class WollMuxFiles
   {
     try
     {
-      Object cfgProvider = UNO.createUNOService("com.sun.star.configuration.ConfigurationProvider");
-
-      Object cfgAccess = UNO.XMultiServiceFactory(cfgProvider).createInstanceWithArguments(
-          "com.sun.star.configuration.ConfigurationAccess",
-          new UnoProps("nodepath", nodePath).getProps());
-
+      Object cfgProvider = UnoComponent
+          .createComponentWithContext(UnoComponent.CSS_CONFIGURATION_CONFIGURATION_PROVIDER);
+      Object cfgAccess = UnoService.createServiceWithArguments(UnoService.CSS_CONFIGURATION_CONFIGURATION_ACCESS,
+          new UnoProps(UnoProperty.NODEPATH, nodePath).getProps(), cfgProvider);
       return dumpNode(cfgAccess, "");
     } catch (java.lang.Exception e)
     {
@@ -835,17 +816,17 @@ public class WollMuxFiles
 
     // Kinder durchsuchen.
     StringBuilder childs = new StringBuilder("");
-    XNameAccess xna = UNO.XNameAccess(element);
-    if (xna != null)
+    UnoDictionary<Object> elements = UnoDictionary.create(element, Object.class);
+    if (elements != null)
     {
-      String[] elements = xna.getElementNames();
-      for (int i = 0; i < elements.length; i++)
+    for (Object ele : elements.values())
       {
         try
         {
-          childs.append(dumpNode(xna.getByName(elements[i]), spaces + "|    "));
+          childs.append(dumpNode(ele, spaces + "|    "));
         } catch (java.lang.Exception e)
         {
+          LOGGER.trace("", e);
         }
       }
     }
