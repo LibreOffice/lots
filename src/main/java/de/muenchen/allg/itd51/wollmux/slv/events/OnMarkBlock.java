@@ -8,20 +8,18 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNamed;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextRangeCompare;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.PropertyName;
-import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
@@ -29,6 +27,7 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveConfig;
 import de.muenchen.allg.itd51.wollmux.slv.PrintBlockSignature;
 import de.muenchen.allg.ooo.TextDocument;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * An event that inserts a bookmark with name {@code WM(CMD '<blockname>')}at the current cursor
@@ -141,7 +140,7 @@ public class OnMarkBlock extends WollMuxEvent
           UNO.XBookmarksSupplier(documentController.getModel().doc));
 
       short result = compareBookmarks(bookmarkToDelete, wollBook);
-      UNO.setPropertyToDefault(bookmarkToDelete.getTextCursor(), PropertyName.CHAR_BACK_COLOR);
+      UnoProperty.setPropertyToDefault(bookmarkToDelete.getTextCursor(), UnoProperty.CHAR_BACK_COLOR);
       bookmarkToDelete.remove();
 
       // bookmarkToDelete ends behind wollBook || bookmarkToDelete ends before wollBook
@@ -151,11 +150,11 @@ public class OnMarkBlock extends WollMuxEvent
         setNewDocumentCommand(bookmarkName, range, highlightColor, markChange);
       } else // bookmarkToDelete ends at same position as wollBook
       {
-        InfoDialog.showInfoModal(L.m("Markierung des Blockes aufgehoben"), L.m(
-            "Der ausgewählte Block enthielt bereits eine Markierung 'Block %1'. Die bestehende Markierung wurde aufgehoben.",
-            markChange));
+        InfoDialog.showInfoModal(L.m("Markierung des Blockes aufgehoben"),
+            L.m("Der ausgewählte Block enthielt bereits eine Markierung 'Block %1'. "
+                + "Die bestehende Markierung wurde aufgehoben.", markChange));
       }
-    } catch (NoSuchElementException ex)
+    } catch (UnoHelperException ex)
     {
       LOGGER.error("", ex);
     }
@@ -169,8 +168,11 @@ public class OnMarkBlock extends WollMuxEvent
    * @param second
    *          The second bookmark.
    * @return {@#link XTextRangeCompare#compareRegionStarts(XTextRange, XTextRange)
+   * 
+   * @throws UnoHelperException
+   *           Can't access a book mark.
    */
-  private short compareBookmarks(Bookmark first, Bookmark second)
+  private short compareBookmarks(Bookmark first, Bookmark second) throws UnoHelperException
   {
     XTextRange bookMarkToDeleteAnchor = first.getAnchor();
     XTextRange wollBookAnchor = second.getAnchor();
@@ -195,10 +197,9 @@ public class OnMarkBlock extends WollMuxEvent
       {
         try
         {
-          Bookmark wollBook = new Bookmark(bookmark,
-              UNO.XBookmarksSupplier(documentController.getModel().doc));
+          Bookmark wollBook = new Bookmark(bookmark, UNO.XBookmarksSupplier(documentController.getModel().doc));
           wollBook.remove();
-        } catch (NoSuchElementException e)
+        } catch (UnoHelperException e)
         {
           LOGGER.error("", e);
         }
@@ -241,23 +242,27 @@ public class OnMarkBlock extends WollMuxEvent
    * @param markChange
    *          The message to display.
    */
-  private void setNewDocumentCommand(String bookmarkName, XTextCursor range, String highlightColor,
-      String markChange)
+  private void setNewDocumentCommand(String bookmarkName, XTextCursor range, String highlightColor, String markChange)
   {
     documentController.getModel().addNewDocumentCommand(range, bookmarkName);
     if (highlightColor != null)
     {
-      Utils.setProperty(range, PropertyName.CHAR_BACK_COLOR, Integer.parseInt(highlightColor, 16));
-      // collapse ViewCursor to show unbiased color
-      XTextCursor vc = documentController.getModel().getViewCursor();
-      if (vc != null)
+      try
       {
-        vc.collapseToEnd();
-        UNO.setPropertyToDefault(vc, PropertyName.CHAR_BACK_COLOR);
+        UnoProperty.setProperty(range, UnoProperty.CHAR_BACK_COLOR, Integer.parseInt(highlightColor, 16));
+        // collapse ViewCursor to show unbiased color
+        XTextCursor vc = documentController.getModel().getViewCursor();
+        if (vc != null)
+        {
+          vc.collapseToEnd();
+          UnoProperty.setPropertyToDefault(vc, UnoProperty.CHAR_BACK_COLOR);
+        }
+      } catch (UnoHelperException ex)
+      {
+        LOGGER.error("Couldn't set background color.");
       }
     }
-    InfoDialog.showInfoModal(L.m("Block wurde markiert"),
-        L.m("Der ausgewählte Block %1", markChange));
+    InfoDialog.showInfoModal(L.m("Block wurde markiert"), L.m("Der ausgewählte Block %1", markChange));
   }
 
   @Override

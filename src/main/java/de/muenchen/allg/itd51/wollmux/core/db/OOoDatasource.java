@@ -36,19 +36,19 @@
 package de.muenchen.allg.itd51.wollmux.core.db;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.beans.XPropertySet;
-import com.sun.star.container.XNameAccess;
+import com.sun.star.sdb.CommandType;
+import com.sun.star.sdb.XColumn;
 import com.sun.star.sdbc.SQLException;
 import com.sun.star.sdbc.XColumnLocate;
 import com.sun.star.sdbc.XConnection;
@@ -60,10 +60,13 @@ import com.sun.star.sdbcx.XColumnsSupplier;
 import com.sun.star.sdbcx.XKeysSupplier;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
+import de.muenchen.allg.util.UnoComponent;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * Stellt eine OOo-Datenquelle als WollMux-Datenquelle zur Verfügung.
@@ -297,13 +300,14 @@ public class OOoDatasource implements Datasource
         /*
          * Laut IDL-Doku zu "View" müssen hier auch die Views enthalten sein.
          */
-        XNameAccess tables = UNO.XTablesSupplier(conn).getTables();
-        XNameAccess columns = null;
-        Object table = null;
+        UnoDictionary<XColumnsSupplier> tables = UnoDictionary
+            .create(UNO.XTablesSupplier(conn).getTables(), XColumnsSupplier.class);
+        XColumnsSupplier table = null;
+        UnoDictionary<XColumn> columns = null;
         try
         {
-          table = tables.getByName(oooTableName);
-          columns = UNO.XColumnsSupplier(table).getColumns();
+          table = tables.get(oooTableName);
+          columns = UnoDictionary.create(table.getColumns(), XColumn.class);
         }
         catch (Exception x)
         {
@@ -312,9 +316,10 @@ public class OOoDatasource implements Datasource
               oooTableName), x);
           try
           {
-            XNameAccess queries = UNO.XQueriesSupplier(conn).getQueries();
-            table = queries.getByName(oooTableName);
-            columns = UNO.XColumnsSupplier(table).getColumns();
+            UnoDictionary<XColumnsSupplier> queries = UnoDictionary
+                .create(UNO.XQueriesSupplier(conn).getQueries(), XColumnsSupplier.class);
+            table = queries.get(oooTableName);
+            columns = UnoDictionary.create(table.getColumns(), XColumn.class);
           }
           catch (Exception y)
           {
@@ -324,8 +329,8 @@ public class OOoDatasource implements Datasource
                 oooTableName, oooDatasourceName), y);
           }
         }
-        String[] colNames = columns.getElementNames();
-        Arrays.asList(colNames).forEach(colName -> schema.add(colName));
+        Set<String> colNames = columns.keySet();
+        colNames.forEach(colName -> schema.add(colName));
 
         if (schema.isEmpty())
           throw new ConfigurationErrorException(L.m(
@@ -334,8 +339,9 @@ public class OOoDatasource implements Datasource
 
         if (noKey)
         {
-          if (colNames.length > 0) {
-            keyColumns = new String[] { colNames[0] };
+          if (!colNames.isEmpty())
+          {
+            keyColumns = new String[] { colNames.toArray(new String[] {})[0] };
           }
         }
         else
@@ -352,10 +358,9 @@ public class OOoDatasource implements Datasource
               XKeysSupplier keysSupp = UNO.XKeysSupplier(table);
               XColumnsSupplier colSupp =
                 UNO.XColumnsSupplier(keysSupp.getKeys().getByIndex(0));
-              columns = colSupp.getColumns();
-              colNames = columns.getElementNames();
-              keyColumns = new String[colNames.length];
-              System.arraycopy(colNames, 0, keyColumns, 0, keyColumns.length);
+              columns = UnoDictionary.create(colSupp.getColumns(), XColumn.class);
+              colNames = columns.keySet();
+              keyColumns = colNames.toArray(new String[] {});
             }
             catch (Exception x)
             {
@@ -467,7 +472,7 @@ public class OOoDatasource implements Datasource
     }
 
     StringBuilder buffy =
-      new StringBuilder(this.SQLSelectCommand + sqlIdentifier(oooTableName) + " WHERE ");
+        new StringBuilder(SQLSelectCommand + sqlIdentifier(oooTableName) + " WHERE ");
 
     Iterator<QueryPart> iter = query.iterator();
     boolean first = true;
@@ -510,7 +515,7 @@ public class OOoDatasource implements Datasource
   @Override
   public QueryResults getContents()
   {
-    return sqlQuery(this.SQLSelectCommand + sqlIdentifier(oooTableName) + ";");
+    return sqlQuery(SQLSelectCommand + sqlIdentifier(oooTableName) + ";");
   }
 
   /**
@@ -540,15 +545,12 @@ public class OOoDatasource implements Datasource
         LOGGER.error("Kann keine Verbindung zur Datenquelle herstellen", x);
       }
 
-      Object rowSet = UNO.createUNOService("com.sun.star.sdb.RowSet");
-      results = UNO.XRowSet(rowSet);
+      results = UNO.XRowSet(UnoComponent.createComponentWithContext(UnoComponent.CSS_SDB_ROW_SET));
 
       if (results == null)
         throw new NullPointerException(L.m("Konnte kein RowSet erzeugen"));
 
-      XPropertySet xProp = UNO.XPropertySet(results);
-
-      xProp.setPropertyValue("ActiveConnection", conn);
+      UnoProperty.setProperty(results, UnoProperty.ACTIVE_CONNECTION, conn);
 
       /*
        * EscapeProcessing == false bedeutet, dass OOo die Query nicht selbst anfassen
@@ -558,12 +560,10 @@ public class OOoDatasource implements Datasource
        * http://qa.openoffice.org/issues/show_bug.cgi?id=78522 Entspricht dem Button
        * SQL mit grünem Haken (SQL-Kommando direkt ausführen) im Base-Abfrageentwurf.
        */
-      xProp.setPropertyValue("EscapeProcessing", Boolean.FALSE);
+      UnoProperty.setProperty(results, UnoProperty.ESCAPE_PROCESSING, Boolean.FALSE);
 
-      xProp.setPropertyValue("CommandType",
-        Integer.valueOf(com.sun.star.sdb.CommandType.COMMAND));
-
-      xProp.setPropertyValue("Command", query);
+      UnoProperty.setProperty(results, UnoProperty.COMMAND_TYPE, CommandType.COMMAND);
+      UnoProperty.setProperty(results, UnoProperty.COMMAND, query);
 
       results.execute();
 

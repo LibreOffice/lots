@@ -45,6 +45,7 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * Diese Klasse repräsentiert einen Textbereich (TextSection), dessen Namen um den
@@ -105,7 +106,7 @@ public class TextSection implements VisibilityElement
   {
     try
     {
-      return AnyConverter.toBoolean(UNO.getProperty(section, "IsVisible"));
+      return AnyConverter.toBoolean(UnoProperty.getProperty(section, UnoProperty.IS_VISIBLE));
     }
     catch (java.lang.Exception e)
     {

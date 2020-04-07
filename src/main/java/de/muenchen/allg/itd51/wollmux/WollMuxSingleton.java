@@ -62,22 +62,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.document.XEventBroadcaster;
-import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
-import com.sun.star.util.XChangesBatch;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.event.LibreOfficeEventListener;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.util.UnoConfiguration;
 
 /**
  * Diese Klasse ist ein Singleton, welches den WollMux initialisiert und alle zentralen
@@ -372,7 +372,7 @@ public class WollMuxSingleton
 
       try
       {
-        if (UNO.XNameAccess(UNO.dbContext).hasByName(name))
+        if (UnoDictionary.create(UNO.dbContext, Object.class).containsKey(name))
         {
           try
           {
@@ -412,7 +412,7 @@ public class WollMuxSingleton
 
       try
       {
-        Object datasource = UNO.XNameAccess(UNO.dbContext).getByName(parsedUrl);
+        Object datasource = UnoDictionary.create(UNO.dbContext, Object.class).get(parsedUrl);
         UNO.dbContext.registerObject(name, datasource);
         if (!UnoRuntime.areSame(UNO.dbContext.getRegisteredObject(name), datasource))
           LOGGER.error(
@@ -508,24 +508,12 @@ public class WollMuxSingleton
    */
   private static void setConfigurationValue(String node, String prop, Object value)
   {
-    XChangesBatch updateAccess;
     try
     {
-      updateAccess = UNO.getConfigurationUpdateAccess(node);
+      UnoConfiguration.setConfiguration(node, new UnoProps(prop, value));
     } catch (UnoHelperException e1)
     {
-      LOGGER.error("setConfigurationValue(): updateAccess is NULL.", e1);
-      return;
-    }
-
-    Utils.setProperty(updateAccess, prop, value);
-
-    try
-    {
-      updateAccess.commitChanges();
-    } catch (WrappedTargetException e)
-    {
-      LOGGER.error("", e);
+      LOGGER.error("Can't modify the configuration.", e1);
     }
   }
 

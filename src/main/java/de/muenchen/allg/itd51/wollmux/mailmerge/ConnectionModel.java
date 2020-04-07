@@ -10,13 +10,14 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.container.XEnumeration;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.XComponent;
 import com.sun.star.sdb.XOfficeDatabaseDocument;
 import com.sun.star.sheet.XSpreadsheetDocument;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.dialog.adapter.AbstractCloseListener;
 import de.muenchen.allg.itd51.wollmux.core.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.CalcModel;
@@ -265,12 +266,11 @@ public class ConnectionModel
     try
     {
       XSpreadsheetDocument spread = null;
-      XEnumeration xenu = UNO.desktop.getComponents().createEnumeration();
-
+      UnoCollection<XComponent> components = UnoCollection.getCollection(UNO.desktop.getComponents(), XComponent.class);
       boolean notify = false;
-      while (xenu.hasMoreElements())
+      for (XComponent component : components)
       {
-        spread = UNO.XSpreadsheetDocument(xenu.nextElement());
+        spread = UNO.XSpreadsheetDocument(component);
         if (spread != null)
         {
           HashableComponent hash = new HashableComponent(spread);

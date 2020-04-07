@@ -55,14 +55,13 @@ import com.sun.star.beans.Property;
 import com.sun.star.beans.PropertyAttribute;
 import com.sun.star.beans.XMultiPropertySet;
 import com.sun.star.beans.XPropertySetInfo;
-import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNameContainer;
 import com.sun.star.style.XStyle;
-import com.sun.star.style.XStyleFamiliesSupplier;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.document.text.StyleService;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -281,26 +280,12 @@ public class DocumentCommandInterpreter
    */
   private static void pageStyleWollmuxseiteToStandard(XTextDocument doc)
   {
-
-    XStyleFamiliesSupplier styleFamiliesSupplier = UNO.XStyleFamiliesSupplier(doc);
-
-    XNameContainer nameContainer = null;
-    // Holt die Seitenvorlagen
-    try
-    {
-      XNameAccess nameAccess = styleFamiliesSupplier.getStyleFamilies();
-      nameContainer = UNO.XNameContainer(nameAccess.getByName("PageStyles"));
-    }
-    catch (java.lang.Exception e)
-    {
-      LOGGER.error("", e);
-    }
-
     XStyle styleWollmuxseite = null;
     XStyle styleStandard = null;
     // Holt die Seitenvorlage Wollmuxseite und Standard
     try
     {
+      XNameContainer nameContainer = StyleService.getStyleContainer(doc, StyleService.PAGE_STYLES);
       styleWollmuxseite = UNO.XStyle(nameContainer.getByName("Wollmuxseite"));
       styleStandard = UNO.XStyle(nameContainer.getByName("Standard"));
     }
@@ -317,7 +302,7 @@ public class DocumentCommandInterpreter
       XPropertySetInfo propertySetInfo =
         multiPropertySetWollmuxseite.getPropertySetInfo();
       Property[] propertys = propertySetInfo.getProperties();
-      HashSet<String> set = new HashSet<String>();
+      HashSet<String> set = new HashSet<>();
       // Schleife über die Properties der Wollmuxseite. Wenn die Properties
       // nicht read-only sind werden sie in einem HashSet set
       // zwischengespeichert.

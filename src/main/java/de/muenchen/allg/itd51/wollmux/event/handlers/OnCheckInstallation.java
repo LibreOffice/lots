@@ -22,6 +22,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
+import de.muenchen.allg.util.UnoComponent;
 
 /**
  * Event for checking if WollMux is correctly installed. There should be only one installation.
@@ -76,7 +77,7 @@ public class OnCheckInstallation extends WollMuxEvent
     try
     {
       XStringSubstitution xSS = UNO.XStringSubstitution(
-          UNO.createUNOService("com.sun.star.util.PathSubstitution"));
+          UnoComponent.createComponentWithContext(UnoComponent.CSS_UTIL_PATH_SUBSTITUTION));
       // user installations
       String myPath = xSS.substituteVariables("$(user)/uno_packages/cache/uno_packages/", true);
       // shared installations

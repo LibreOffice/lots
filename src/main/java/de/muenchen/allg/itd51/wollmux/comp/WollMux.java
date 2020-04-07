@@ -40,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.container.XIndexAccess;
 import com.sun.star.container.XIndexContainer;
 import com.sun.star.document.XEventListener;
 import com.sun.star.form.FormButtonType;
@@ -56,6 +55,7 @@ import com.sun.star.ui.XUIConfigurationManager;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoList;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
@@ -75,6 +75,8 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddPALChangeEventListener
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemoveDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemovePALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
+import de.muenchen.allg.util.UnoComponent;
+import de.muenchen.allg.util.UnoProperty;
 
 
 /**
@@ -486,24 +488,23 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     {
       // Menüleiste aus des Moduls com.sun.star.text.TextDocument holen:
       XModuleUIConfigurationManagerSupplier suppl = UNO.XModuleUIConfigurationManagerSupplier(
-          UNO.createUNOService("com.sun.star.ui.ModuleUIConfigurationManagerSupplier"));
+          UnoComponent.createComponentWithContext(UnoComponent.CSS_UI_MODULE_UI_CONFIGURATION_MANAGER_SUPPLIER));
       XUIConfigurationManager cfgMgr = UNO.XUIConfigurationManager(
           suppl.getUIConfigurationManager("com.sun.star.text.TextDocument"));
-      XIndexAccess menubar = UNO.XIndexAccess(cfgMgr.getSettings(settingsUrl, true));
+      UnoList<PropertyValue[]> menubar = UnoList.create(cfgMgr.getSettings(settingsUrl, true), PropertyValue[].class);
 
       int idx = findElementWithCmdURL(menubar, deleteFromMenuUrl);
       if (idx >= 0)
       {
-        UnoProps desc = new UnoProps((PropertyValue[]) menubar.getByIndex(idx));
+        UnoProps desc = new UnoProps(menubar.get(idx));
         // Elemente des .uno:ToolsMenu besorgen:
-        XIndexContainer toolsMenu = UNO
-            .XIndexContainer(desc.getPropertyValue("ItemDescriptorContainer"));
+        XIndexContainer toolsMenu = UNO.XIndexContainer(desc.getPropertyValue(UnoProperty.ITEM_DESCRIPTOR_CONTAINER));
 
-        idx = findElementWithCmdURL(toolsMenu, removeCmdUrl);
+        idx = findElementWithCmdURL(UnoList.create(toolsMenu, PropertyValue[].class), removeCmdUrl);
         if (idx >= 0)
         {
           toolsMenu.removeByIndex(idx);
-          cfgMgr.replaceSettings(settingsUrl, menubar);
+          cfgMgr.replaceSettings(settingsUrl, menubar.getAccess());
           UNO.XUIConfigurationPersistence(cfgMgr).store();
         }
       }
@@ -527,30 +528,30 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     try
     {
       // Menüleiste aus des Moduls com.sun.star.text.TextDocument holen:
-      XModuleUIConfigurationManagerSupplier suppl =
-        UNO.XModuleUIConfigurationManagerSupplier(UNO.createUNOService("com.sun.star.ui.ModuleUIConfigurationManagerSupplier"));
+      XModuleUIConfigurationManagerSupplier suppl = UNO.XModuleUIConfigurationManagerSupplier(
+          UnoComponent.createComponentWithContext(UnoComponent.CSS_UI_MODULE_UI_CONFIGURATION_MANAGER_SUPPLIER));
       XUIConfigurationManager cfgMgr =
         UNO.XUIConfigurationManager(suppl.getUIConfigurationManager("com.sun.star.text.TextDocument"));
-      XIndexAccess menubar = UNO.XIndexAccess(cfgMgr.getSettings(settingsUrl, true));
+      UnoList<PropertyValue[]> menubar = UnoList.create(cfgMgr.getSettings(settingsUrl, true), PropertyValue[].class);
 
       int idx = findElementWithCmdURL(menubar, insertIntoMenuUrl);
       if (idx >= 0)
       {
-        UnoProps desc = new UnoProps((PropertyValue[]) menubar.getByIndex(idx));
+        UnoProps desc = new UnoProps(menubar.get(idx));
         // Elemente des .uno:ToolsMenu besorgen:
         XIndexContainer toolsMenu =
-          UNO.XIndexContainer(desc.getPropertyValue("ItemDescriptorContainer"));
+            UNO.XIndexContainer(desc.getPropertyValue(UnoProperty.ITEM_DESCRIPTOR_CONTAINER));
 
         // SeriendruckAssistent suchen
-        idx = findElementWithCmdURL(toolsMenu, insertBeforeElementUrl);
+        idx = findElementWithCmdURL(UnoList.create(toolsMenu, PropertyValue[].class), insertBeforeElementUrl);
         if (idx >= 0)
         {
           UnoProps newDesc = new UnoProps();
-          newDesc.setPropertyValue("CommandURL", cmdUrl);
-          newDesc.setPropertyValue("Type", FormButtonType.PUSH);
-          newDesc.setPropertyValue("Label", label);
+          newDesc.setPropertyValue(UnoProperty.COMMAND_URL, cmdUrl);
+          newDesc.setPropertyValue(UnoProperty.TYPE, FormButtonType.PUSH);
+          newDesc.setPropertyValue(UnoProperty.LABEL, label);
           toolsMenu.insertByIndex(idx, newDesc.getProps());
-          cfgMgr.replaceSettings(settingsUrl, menubar);
+          cfgMgr.replaceSettings(settingsUrl, menubar.getAccess());
           UNO.XUIConfigurationPersistence(cfgMgr).store();
         }
       }
@@ -568,16 +569,16 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    *
    * @return Liefert den Index des ersten Menüelements mit CommandURL cmdUrl oder -1.
    */
-  private static int findElementWithCmdURL(XIndexAccess menu, String cmdUrl)
+  private static int findElementWithCmdURL(UnoList<PropertyValue[]> menu, String cmdUrl)
   {
     try
     {
-      for (int i = 0; i < menu.getCount(); ++i)
+      for (int i = 0; i < menu.size(); ++i)
       {
-        PropertyValue[] desc = (PropertyValue[]) menu.getByIndex(i);
-        for (int j = 0; j < desc.length; j++)
+        UnoProps desc = new UnoProps(menu.get(i));
+        for (PropertyValue prop : desc.getProps())
         {
-          if ("CommandURL".equals(desc[j].Name) && cmdUrl.equals(desc[j].Value))
+          if (UnoProperty.COMMAND_URL.equals(prop.Name) && cmdUrl.equals(prop.Value))
             return i;
         }
       }

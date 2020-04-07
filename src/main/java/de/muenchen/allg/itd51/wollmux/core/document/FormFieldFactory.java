@@ -49,8 +49,6 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.awt.XControlModel;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
-import com.sun.star.container.XEnumeration;
-import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XNamed;
 import com.sun.star.drawing.XControlShape;
 import com.sun.star.frame.XController;
@@ -64,10 +62,15 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoCollection;
+import de.muenchen.allg.afid.UnoIterator;
+import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.util.UnoProperty;
+import de.muenchen.allg.util.UnoService;
 
 /**
  * Repräsentiert eine Fabrik, die an der Stelle von WM('insertFormValue'...)-Bookmark
@@ -112,8 +115,8 @@ public final class FormFieldFactory
 
     if (range != null)
     {
-      XEnumeration xenum = UNO.XEnumerationAccess(range).createEnumeration();
-      handleParagraphEnumeration(xenum, doc, bookmarkNameToFormField, cmd.getBookmarkName());
+      handleParagraphEnumeration(UnoCollection.getCollection(range, XTextRange.class), doc, bookmarkNameToFormField,
+          cmd.getBookmarkName());
     }
 
     return bookmarkNameToFormField.get(bookmarkName);
@@ -174,26 +177,15 @@ public final class FormFieldFactory
    * @param doc
    *          das Dokument in dem sich die enumierten Objekte befinden.
    */
-  private static void handleParagraphEnumeration(XEnumeration enu,
+  private static void handleParagraphEnumeration(UnoCollection<XTextRange> paragraph,
       XTextDocument doc, Map<String, FormField> mapBookmarkNameToFormField, String bookmarkName)
   {
-    XEnumerationAccess enuAccess;
-    while (enu.hasMoreElements())
+    for (XTextRange para : paragraph)
     {
-      Object ele;
-      try
+      UnoCollection<XTextRange> portions = UnoCollection.getCollection(para, XTextRange.class);
+      if (portions != null) // ist wohl ein SwXParagraph
       {
-        ele = enu.nextElement();
-      }
-      catch (java.lang.Exception x)
-      {
-        LOGGER.trace("", x);
-        continue;
-      }
-      enuAccess = UNO.XEnumerationAccess(ele);
-      if (enuAccess != null) // ist wohl ein SwXParagraph
-      {
-        handleParagraph(enuAccess, doc, mapBookmarkNameToFormField, bookmarkName);
+        handleParagraph(portions, doc, mapBookmarkNameToFormField, bookmarkName);
       }
     }
   }
@@ -207,8 +199,8 @@ public final class FormFieldFactory
    * @param doc
    *          das Dokument in dem sich die enumierten Objekte befinden.
    */
-  private static void handleParagraph(XEnumerationAccess paragraph,
-      XTextDocument doc, Map<String, FormField> mapBookmarkNameToFormField, String bookmarkName)
+  private static void handleParagraph(UnoCollection<XTextRange> paragraph, XTextDocument doc,
+      Map<String, FormField> mapBookmarkNameToFormField, String bookmarkName)
   {
     /*
      * Der Name des zuletzt gestarteten insertFormValue-Bookmarks.
@@ -218,25 +210,9 @@ public final class FormFieldFactory
     /*
      * enumeriere alle TextPortions des Paragraphs
      */
-    XEnumeration textPortionEnu = paragraph.createEnumeration();
-    while (textPortionEnu.hasMoreElements())
+    for (XTextRange textPortion : paragraph)
     {
-      /*
-       * Diese etwas seltsame Konstruktion beugt Exceptions durch Bugs wie 68261 vor.
-       */
-      Object textPortion;
-      try
-      {
-        textPortion = textPortionEnu.nextElement();
-      }
-      catch (java.lang.Exception x)
-      {
-        LOGGER.trace("", x);
-        continue;
-      }
-
-      String textPortionType =
-          (String) Utils.getProperty(textPortion, "TextPortionType");
+      String textPortionType = (String) Utils.getProperty(textPortion, UnoProperty.TEXT_PROTION_TYPE);
       if (textPortionType == null)
       {
         continue;
@@ -249,13 +225,13 @@ public final class FormFieldFactory
         try
         {
           isStart =
-            ((Boolean) UNO.getProperty(textPortion, "IsStart")).booleanValue();
+              ((Boolean) UnoProperty.getProperty(textPortion, UnoProperty.IS_START)).booleanValue();
           isCollapsed =
-            ((Boolean) UNO.getProperty(textPortion, "IsCollapsed")).booleanValue();
+              ((Boolean) UnoProperty.getProperty(textPortion, UnoProperty.IS_COLLAPSED)).booleanValue();
           if (isCollapsed) {
             isStart = true;
           }
-          bookmark = UNO.XNamed(UNO.getProperty(textPortion, "Bookmark"));
+          bookmark = UNO.XNamed(UnoProperty.getProperty(textPortion, UnoProperty.BOOKMARK));
         }
         catch (java.lang.Exception x)
         {
@@ -294,8 +270,7 @@ public final class FormFieldFactory
         int textfieldType = 0; // 0:input, 1:dropdown, 2: reference
         try
         {
-          textField =
-            UNO.XDependentTextField(UNO.getProperty(textPortion, "TextField"));
+          textField = UNO.XDependentTextField(UnoProperty.getProperty(textPortion, UnoProperty.TEXT_FIELD));
           XServiceInfo info = UNO.XServiceInfo(textField);
           if (info.supportsService("com.sun.star.text.TextField.DropDown"))
             textfieldType = 1;
@@ -327,31 +302,16 @@ public final class FormFieldFactory
         XControlModel model = null;
         try
         {
-          XEnumeration contentEnum =
-            UNO.XContentEnumerationAccess(textPortion).createContentEnumeration(
-              "com.sun.star.text.TextPortion");
-          while (contentEnum.hasMoreElements())
+          UnoIterator<XControlShape> contentIter = UnoIterator
+              .create(UNO.XContentEnumerationAccess(textPortion)
+                  .createContentEnumeration("com.sun.star.text.TextPortion"), XControlShape.class);
+          while (contentIter.hasNext())
           {
-            XControlShape tempShape;
-            try
+            XControlModel tempModel = contentIter.next().getControl();
+            XServiceInfo info = UNO.XServiceInfo(tempModel);
+            if (info.supportsService("com.sun.star.form.component.CheckBox"))
             {
-              tempShape = UNO.XControlShape(contentEnum.nextElement());
-            }
-            catch (Exception x)
-            {
-              // Wegen OOo Bugs kann nextElement() werfen auch wenn hasMoreElements()
-              LOGGER.trace("", x);
-              continue;
-            }
-
-            if (tempShape != null)
-            {
-              XControlModel tempModel = tempShape.getControl();
-              XServiceInfo info = UNO.XServiceInfo(tempModel);
-              if (info.supportsService("com.sun.star.form.component.CheckBox"))
-              {
-                model = tempModel;
-              }
+              model = tempModel;
             }
           }
         }
@@ -706,7 +666,7 @@ public final class FormFieldFactory
       if (inputField != null && doc != null)
       {
         // Neuen Inhalt in inputField schreiben
-        Utils.setProperty(inputField, "Content", value);
+        Utils.setProperty(inputField, UnoProperty.CONTENT, value);
       }
     }
 
@@ -715,7 +675,7 @@ public final class FormFieldFactory
     {
       if (inputField != null)
       {
-        Object content = Utils.getProperty(inputField, "Content");
+        Object content = Utils.getProperty(inputField, UnoProperty.CONTENT);
         if (content != null) {
           return content.toString();
         }
@@ -847,9 +807,7 @@ public final class FormFieldFactory
         bookmarkName));
       try
       {
-        XTextField field =
-          UNO.XTextField(UNO.XMultiServiceFactory(doc).createInstance(
-            "com.sun.star.text.TextField.Input"));
+        XTextField field = UNO.XTextField(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_INPUT, doc));
 
         if (field != null)
         {
@@ -889,7 +847,7 @@ public final class FormFieldFactory
       this.dropdownField = dropdownField;
 
       if (dropdownField != null)
-        origItemList = (String[]) Utils.getProperty(dropdownField, "Items");
+        origItemList = (String[]) Utils.getProperty(dropdownField, UnoProperty.ITEMS);
 
     }
 
@@ -907,7 +865,7 @@ public final class FormFieldFactory
       if (dropdownField != null && doc != null)
       {
         extendItemsList(value);
-        Utils.setProperty(dropdownField, "SelectedItem", value);
+        Utils.setProperty(dropdownField, UnoProperty.SELECTED_ITEM, value);
       }
     }
 
@@ -940,7 +898,7 @@ public final class FormFieldFactory
           for (int i = 0; i < origItemList.length; i++)
             extendedItems[i] = origItemList[i];
           extendedItems[origItemList.length] = value;
-          Utils.setProperty(dropdownField, "Items", extendedItems);
+          Utils.setProperty(dropdownField, UnoProperty.ITEMS, extendedItems);
         }
       }
     }
@@ -950,7 +908,7 @@ public final class FormFieldFactory
     {
       if (dropdownField != null)
       {
-        Object content = Utils.getProperty(dropdownField, "SelectedItem");
+        Object content = Utils.getProperty(dropdownField, UnoProperty.SELECTED_ITEM);
         if (content != null) {
           return content.toString();
         }
@@ -1007,7 +965,8 @@ public final class FormFieldFactory
     @Override
     public void setValue(String value)
     {
-      Utils.setProperty(checkbox, "State",
+      Utils.setProperty(checkbox,
+          UnoProperty.STATE,
         Boolean.parseBoolean(value) ? Short.valueOf((short) 1) : Short.valueOf((short) 0));
     }
 
@@ -1021,7 +980,7 @@ public final class FormFieldFactory
     @Override
     public String getFormElementValue()
     {
-      Object state = Utils.getProperty(checkbox, "State");
+      Object state = Utils.getProperty(checkbox, UnoProperty.STATE);
       if (state != null && state.equals(Short.valueOf((short) 1)))
         return "true";
       else
@@ -1084,16 +1043,16 @@ public final class FormFieldFactory
       if (value == null) {
         return;
       }
-      Utils.setProperty(textfield, "Content", value);
-      Utils.setProperty(textfield, "CurrentPresentation", value);
+      Utils.setProperty(textfield, UnoProperty.CONTENT, value);
+      Utils.setProperty(textfield, UnoProperty.CURRENT_PRESENTAITON, value);
     }
 
     @Override
     public String getValue()
     {
-      String cont = (String) Utils.getProperty(textfield, "Content");
+      String cont = (String) Utils.getProperty(textfield, UnoProperty.CONTENT);
       if (cont == null)
-        cont = (String) Utils.getProperty(textfield, "CurrentPresentation");
+        cont = (String) Utils.getProperty(textfield, UnoProperty.CURRENT_PRESENTAITON);
       if (cont != null) {
         return cont;
       }
@@ -1219,7 +1178,7 @@ public final class FormFieldFactory
     {
       if (value != null && textfield != null && doc != null)
       {
-        Utils.setProperty(master, "Content", value);
+        Utils.setProperty(master, UnoProperty.CONTENT, value);
       }
     }
 
@@ -1227,7 +1186,7 @@ public final class FormFieldFactory
     public String getTrafoName()
     {
       return TextDocumentModel.getFunctionNameForUserFieldName(""
-          + Utils.getProperty(textfield, "Content"));
+          + Utils.getProperty(textfield, UnoProperty.CONTENT));
     }
 
     @Override
@@ -1236,7 +1195,7 @@ public final class FormFieldFactory
       if (master == null) {
         return "";
       }
-      return "" + Utils.getProperty(master, "Content");
+      return "" + Utils.getProperty(master, UnoProperty.CONTENT);
     }
 
     @Override

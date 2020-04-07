@@ -18,6 +18,7 @@ import com.sun.star.util.URL;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * A dispatch executed by WollMux.
@@ -113,7 +114,7 @@ public abstract class WollMuxDispatch implements XDispatch
   {
     boolean flag = false;
     XLayoutManager layout = UNO
-        .XLayoutManager(Utils.getProperty(frame, "LayoutManager"));
+        .XLayoutManager(Utils.getProperty(frame, UnoProperty.LAYOUT_MANAGER));
     if (layout != null)
     {
       flag = !layout

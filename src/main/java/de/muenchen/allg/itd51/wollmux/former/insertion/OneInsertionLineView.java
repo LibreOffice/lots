@@ -51,6 +51,7 @@ import javax.swing.text.JTextComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.UnknownIDException;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
@@ -271,7 +272,15 @@ public class OneInsertionLineView extends LineView
       });
 
       if (state == BroadcastObjectSelection.STATE_NORMAL_CLICK)
-        getModel().selectWithViewCursor();
+      {
+        try
+        {
+          getModel().selectWithViewCursor();
+        } catch (UnoHelperException ex)
+        {
+          LOGGER.debug("", ex);
+        }
+      }
     }
 
     @Override

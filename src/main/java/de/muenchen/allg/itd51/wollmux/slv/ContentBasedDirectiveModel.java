@@ -21,13 +21,14 @@ import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoCollection;
+import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.document.text.StyleService;
 import de.muenchen.allg.itd51.wollmux.core.HashableComponent;
-import de.muenchen.allg.itd51.wollmux.core.util.PropertyName;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.document.StyleService;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.slv.print.ContentBasedDirectivePrint;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * A model for working with content based directives. There is only one model per document
@@ -151,7 +152,7 @@ public class ContentBasedDirectiveModel
           }
 
           // set style
-          Utils.setProperty(cursor, PropertyName.PARA_STYLE_NAME, PARA_STYLE_NAME_FIRST_CBD);
+          Utils.setProperty(cursor, UnoProperty.PARA_STYLE_NAME, PARA_STYLE_NAME_FIRST_CBD);
           return item;
         }
       }
@@ -295,26 +296,44 @@ public class ContentBasedDirectiveModel
 	    || item.isItemWithRecipient())
 	{
 	  String oldName = AnyConverter.toString(
-	      Utils.getProperty(cursor, PropertyName.PARA_STYLE_NAME));
+              Utils.getProperty(cursor, UnoProperty.PARA_STYLE_NAME));
 
 	  // create new style based on old if necessary
-	  String newName = mapOldNameToNewName.computeIfAbsent(oldName, key -> {
-	    String name = "";
-	    do
-	    {
-	      name = "NO" + new Random().nextInt(1000) + "_" + key;
-	    } while (StyleService.createParagraphStyle(doc, name, key) == null);
-	    return name;
-	  });
+          String newName = mapOldNameToNewName.computeIfAbsent(oldName, this::createNewStyle);
 	  // Save and restore CharHidden property when changing ParaStyleName
-	  Object hidden = Utils.getProperty(cursor, PropertyName.CHAR_HIDDEN);
-	  Utils.setProperty(cursor, PropertyName.PARA_STYLE_NAME, newName);
-	  Utils.setProperty(cursor, PropertyName.CHAR_HIDDEN, hidden);
+          Object hidden = Utils.getProperty(cursor, UnoProperty.CHAR_HIDDEN);
+          Utils.setProperty(cursor, UnoProperty.PARA_STYLE_NAME, newName);
+          Utils.setProperty(cursor, UnoProperty.CHAR_HIDDEN, hidden);
 	}
       } while (cursor.gotoNextParagraph(false));
     }
 
     renameFirstItem();
+  }
+
+  /**
+   * Create a new style with a random name.
+   *
+   * @param parentName
+   *          The name of the parent style.
+   * @return The name of the new style.
+   */
+  private String createNewStyle(String parentName)
+  {
+    String name = "";
+    XStyle style = null;
+    while (style == null)
+    {
+      name = "NO" + new Random().nextInt(1000) + "_" + parentName;
+      try
+      {
+        style = StyleService.createParagraphStyle(doc, name, parentName);
+      } catch (UnoHelperException e)
+      {
+        LOGGER.trace("Can't create style");
+      }
+    }
+    return name;
   }
 
   /**
@@ -339,101 +358,83 @@ public class ContentBasedDirectiveModel
    */
   private void createUsedStyles()
   {
-    // paragraph styles
-    XStyle style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_DEFAULT);
-    if (style == null)
+    try
     {
-      style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_DEFAULT,
-          null);
-      Utils.setProperty(style, PropertyName.FOLLOW_STYLE,
-          PARA_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.CHAR_HEIGHT, Integer.valueOf(11));
-      Utils.setProperty(style, PropertyName.CHAR_FONT_NAME, "Arial");
-    }
+      // paragraph styles
+      XStyle style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_DEFAULT, null);
+      if (style == null)
+      {
+        style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_DEFAULT, null);
+        UnoProperty.setProperty(style, UnoProperty.FOLLOW_STYLE, PARA_STYLE_NAME_DEFAULT);
+        UnoProperty.setProperty(style, UnoProperty.CHAR_HEIGHT, Integer.valueOf(11));
+        UnoProperty.setProperty(style, UnoProperty.CHAR_FONT_NAME, "Arial");
+      }
 
-    style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_CBD);
-    if (style == null)
-    {
-      style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_CBD,
-          PARA_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.FOLLOW_STYLE,
-          PARA_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.CHAR_WEIGHT,
-          Float.valueOf(FontWeight.BOLD));
-      Utils.setProperty(style, PropertyName.PARA_FIRST_LINE_INDENT,
-          Integer.valueOf(-700));
-      Utils.setProperty(style, PropertyName.PARA_TOP_MARGIN,
-          Integer.valueOf(460));
-    }
+      style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_CBD, null);
+      if (style == null)
+      {
+        style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_CBD, PARA_STYLE_NAME_DEFAULT);
+        UnoProperty.setProperty(style, UnoProperty.FOLLOW_STYLE, PARA_STYLE_NAME_DEFAULT);
+        UnoProperty.setProperty(style, UnoProperty.CHAR_WEIGHT, Float.valueOf(FontWeight.BOLD));
+        UnoProperty.setProperty(style, UnoProperty.PARA_FIRST_LINE_INDENT, Integer.valueOf(-700));
+        UnoProperty.setProperty(style, UnoProperty.PARA_TOP_MARGIN, Integer.valueOf(460));
+      }
 
-    style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_FIRST_CBD);
-    if (style == null)
-    {
-      style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_FIRST_CBD,
-          PARA_STYLE_NAME_CBD);
-      Utils.setProperty(style, PropertyName.FOLLOW_STYLE,
-          PARA_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.PARA_FIRST_LINE_INDENT,
-          Integer.valueOf(0));
-      Utils.setProperty(style, PropertyName.PARA_TOP_MARGIN,
-          Integer.valueOf(0));
-    }
+      style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_FIRST_CBD, null);
+      if (style == null)
+      {
+        style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_FIRST_CBD, PARA_STYLE_NAME_CBD);
+        UnoProperty.setProperty(style, UnoProperty.FOLLOW_STYLE, PARA_STYLE_NAME_DEFAULT);
+        UnoProperty.setProperty(style, UnoProperty.PARA_FIRST_LINE_INDENT, Integer.valueOf(0));
+        UnoProperty.setProperty(style, UnoProperty.PARA_TOP_MARGIN, Integer.valueOf(0));
+      }
 
-    style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_COPY);
-    if (style == null)
-    {
-      style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_COPY,
-          PARA_STYLE_NAME_CBD);
-      Utils.setProperty(style, PropertyName.FOLLOW_STYLE,
-          PARA_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.CHAR_WEIGHT, Integer.valueOf(100));
-      Utils.setProperty(style, PropertyName.PARA_FIRST_LINE_INDENT,
-          Integer.valueOf(-700));
-      Utils.setProperty(style, PropertyName.PARA_TOP_MARGIN,
-          Integer.valueOf(460));
-    }
+      style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_COPY, null);
+      if (style == null)
+      {
+        style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_COPY, PARA_STYLE_NAME_CBD);
+        UnoProperty.setProperty(style, UnoProperty.FOLLOW_STYLE, PARA_STYLE_NAME_DEFAULT);
+        UnoProperty.setProperty(style, UnoProperty.CHAR_WEIGHT, Integer.valueOf(100));
+        UnoProperty.setProperty(style, UnoProperty.PARA_FIRST_LINE_INDENT, Integer.valueOf(-700));
+        UnoProperty.setProperty(style, UnoProperty.PARA_TOP_MARGIN, Integer.valueOf(460));
+      }
 
-    style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_RECIPIENT);
-    if (style == null)
-    {
-      style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_RECIPIENT,
-          PARA_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.FOLLOW_STYLE,
-          PARA_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.CHAR_UNDERLINE, Integer.valueOf(1));
-      Utils.setProperty(style, PropertyName.CHAR_WEIGHT,
-          Float.valueOf(FontWeight.BOLD));
-    }
+      style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_RECIPIENT, null);
+      if (style == null)
+      {
+        style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_RECIPIENT, PARA_STYLE_NAME_DEFAULT);
+        UnoProperty.setProperty(style, UnoProperty.FOLLOW_STYLE, PARA_STYLE_NAME_DEFAULT);
+        UnoProperty.setProperty(style, UnoProperty.CHAR_UNDERLINE, Integer.valueOf(1));
+        UnoProperty.setProperty(style, UnoProperty.CHAR_WEIGHT, Float.valueOf(FontWeight.BOLD));
+      }
 
-    style = StyleService.getParagraphStyle(doc,
-        PARA_STYLE_NAME_CBD_WITH_RECIPIENT);
-    if (style == null)
-    {
-      style = StyleService.createParagraphStyle(doc,
-          PARA_STYLE_NAME_CBD_WITH_RECIPIENT, PARA_STYLE_NAME_CBD);
-      Utils.setProperty(style, PropertyName.FOLLOW_STYLE,
-          PARA_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.CHAR_UNDERLINE, Integer.valueOf(1));
-    }
+      style = StyleService.getParagraphStyle(doc, PARA_STYLE_NAME_CBD_WITH_RECIPIENT, null);
+      if (style == null)
+      {
+        style = StyleService.createParagraphStyle(doc, PARA_STYLE_NAME_CBD_WITH_RECIPIENT, PARA_STYLE_NAME_CBD);
+        UnoProperty.setProperty(style, UnoProperty.FOLLOW_STYLE, PARA_STYLE_NAME_DEFAULT);
+        UnoProperty.setProperty(style, UnoProperty.CHAR_UNDERLINE, Integer.valueOf(1));
+      }
 
-    // character styles
-    style = StyleService.getCharacterStyle(doc, CHAR_STYLE_NAME_DEFAULT);
-    if (style == null)
-    {
-      style = StyleService.createCharacterStyle(doc, CHAR_STYLE_NAME_DEFAULT,
-          null);
-      Utils.setProperty(style, PropertyName.CHAR_HEIGHT, Integer.valueOf(11));
-      Utils.setProperty(style, PropertyName.CHAR_FONT_NAME, "Arial");
-      Utils.setProperty(style, PropertyName.CHAR_UNDERLINE, Integer.valueOf(0));
-    }
+      // character styles
+      style = StyleService.getCharacterStyle(doc, CHAR_STYLE_NAME_DEFAULT, null);
+      if (style == null)
+      {
+        style = StyleService.createCharacterStyle(doc, CHAR_STYLE_NAME_DEFAULT, null);
+        UnoProperty.setProperty(style, UnoProperty.CHAR_HEIGHT, Integer.valueOf(11));
+        UnoProperty.setProperty(style, UnoProperty.CHAR_FONT_NAME, "Arial");
+        UnoProperty.setProperty(style, UnoProperty.CHAR_UNDERLINE, Integer.valueOf(0));
+      }
 
-    style = StyleService.getCharacterStyle(doc, CHAR_STYLE_NAME_NUMBER);
-    if (style == null)
+      style = StyleService.getCharacterStyle(doc, CHAR_STYLE_NAME_NUMBER, null);
+      if (style == null)
+      {
+        style = StyleService.createCharacterStyle(doc, CHAR_STYLE_NAME_NUMBER, CHAR_STYLE_NAME_DEFAULT);
+        UnoProperty.setProperty(style, UnoProperty.CHAR_WEIGHT, Float.valueOf(FontWeight.BOLD));
+      }
+    } catch (UnoHelperException e)
     {
-      style = StyleService.createCharacterStyle(doc, CHAR_STYLE_NAME_NUMBER,
-          CHAR_STYLE_NAME_DEFAULT);
-      Utils.setProperty(style, PropertyName.CHAR_WEIGHT,
-          Float.valueOf(FontWeight.BOLD));
+      LOGGER.debug("Can't create styles", e);
     }
   }
 }

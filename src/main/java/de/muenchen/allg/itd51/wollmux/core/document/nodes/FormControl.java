@@ -1,5 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.core.document.nodes;
 
+import de.muenchen.allg.afid.UnoHelperException;
+
 /**
  * Wird von Nodes implementiert, die Formularsteuerelemente darstellen.
  *
@@ -37,10 +39,17 @@ public interface FormControl
   public String getDescriptor();
 
   /**
-   * Legt ein Bookmark mit gewünschtem Namen bmName um das Steuerelement und
-   * liefert den Namen mit dem das Bookmark tatsächlich erzeugt wurde zurück.
+   * Legt ein Bookmark mit gewünschtem Namen bmName um das Steuerelement und liefert den Namen mit
+   * dem das Bookmark tatsächlich erzeugt wurde zurück.
+   *
+   * @param bmName
+   *          The name of the book mark.
+   * @return The name of the book mark.
+   * 
+   * @throws UnoHelperException
+   *           Can't create a book mark.
    */
-  public String surroundWithBookmark(String bmName);
+  public String surroundWithBookmark(String bmName) throws UnoHelperException;
 
   /**
    * Liefert den aktuell im Steuerelement eingestellten Wert zurück. Boolesche

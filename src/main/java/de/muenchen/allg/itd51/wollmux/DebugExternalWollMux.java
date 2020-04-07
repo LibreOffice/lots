@@ -17,6 +17,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.mailmerge.sidebar.MailMergeFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
+import de.muenchen.allg.util.UnoComponent;
 
 /**
  * Über diese Klasse kann der WollMux zum Debuggen in der lokalen JVM gestartet
@@ -78,11 +79,10 @@ public class DebugExternalWollMux
       }
     });
 
-    XUIElementFactoryRegistration factoryRegistration =
-      UnoRuntime.queryInterface(
-        XUIElementFactoryRegistration.class,
-        UNO.defaultContext.getServiceManager().createInstanceWithContext(
-          "com.sun.star.ui.UIElementFactoryManager", UNO.defaultContext));
+    XUIElementFactoryRegistration factoryRegistration = UnoRuntime.queryInterface(XUIElementFactoryRegistration.class,
+        UnoComponent.createComponentWithContext(
+            UnoComponent.CSS_UI_UI_ELEMENT_FACTORY_MANAGER,
+            UNO.defaultContext.getServiceManager(), UNO.defaultContext));
 
     factoryRegistration.registerFactory("toolpanel", "WollMuxSidebarFactory", null,
         WollMuxSidebarFactory.SERVICE_NAME);

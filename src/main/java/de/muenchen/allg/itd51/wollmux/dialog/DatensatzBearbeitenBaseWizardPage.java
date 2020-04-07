@@ -15,14 +15,11 @@ import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XControlModel;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XWindow;
-import com.sun.star.beans.PropertyVetoException;
-import com.sun.star.beans.UnknownPropertyException;
-import com.sun.star.beans.XPropertySet;
 import com.sun.star.lang.IllegalArgumentException;
-import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.dialog.adapter.AbstractTextListener;
@@ -30,7 +27,9 @@ import de.muenchen.allg.dialog.adapter.AbstractXWizardPage;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnPALChangedNotify;
+import de.muenchen.allg.util.UnoProperty;
 
 public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardPage
 {
@@ -40,7 +39,6 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
   protected List<String> dbSchema;
   private XControlContainer controlContainer;
   private short selectedItemIndex = 0;
-  private static final String TEXT_COLOR = "TextColor";
 
   public DatensatzBearbeitenBaseWizardPage(short pageId, XWindow parentWindow, String dialogName,
       DJDataset dataset, List<String> dbSchema) throws Exception
@@ -73,16 +71,7 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
       return;
     }
 
-    XPropertySet props = UNO.XPropertySet(xControl.getModel());
-
-    try
-    {
-      props.setPropertyValue("EnableVisible", visible);
-    } catch (IllegalArgumentException | UnknownPropertyException | PropertyVetoException
-        | WrappedTargetException e)
-    {
-      LOGGER.error("", e);
-    }
+    Utils.setProperty(xControl.getModel(), UnoProperty.ENABLE_VISIBLE, visible);
   }
 
   protected void setTextColor(XControl xControl, int textColor)
@@ -95,15 +84,7 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
     if (xControlModel == null)
       return;
 
-    XPropertySet propertySet = UNO.XPropertySet(xControlModel);
-    try
-    {
-      propertySet.setPropertyValue(TEXT_COLOR, textColor);
-    } catch (IllegalArgumentException | UnknownPropertyException | PropertyVetoException
-        | WrappedTargetException e)
-    {
-      LOGGER.error("", e);
-    }
+    Utils.setProperty(xControlModel, UnoProperty.TEXT_COLOR, textColor);
   }
 
   protected AbstractActionListener buttonActionListener = new AbstractActionListener()
@@ -117,10 +98,9 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
       if (xControl == null)
         return;
 
-      XPropertySet propertySet = UNO.XPropertySet(xControl.getModel());
       try
       {
-        String label = (String) propertySet.getPropertyValue("Name");
+        String label = (String) UnoProperty.getProperty(xControl.getModel(), UnoProperty.NAME);
 
         // btnVorname -> Vorname
         String buttonLabel = label.substring(3);
@@ -159,7 +139,7 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
           setTextColor(targetTextField, 00000000);
         }
 
-      } catch (UnknownPropertyException | WrappedTargetException e)
+      } catch (UnoHelperException e)
       {
         LOGGER.error("", e);
       }
@@ -181,15 +161,13 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
       if (xControlModel == null)
         return;
 
-      XPropertySet propertySet = UNO.XPropertySet(xControlModel);
-
       try
       {
         XTextComponent xTextComponent = UNO.XTextComponent(xControl);
 
         if (xTextComponent != null)
         {
-          String label = (String) propertySet.getPropertyValue("Name");
+          String label = (String) UnoProperty.getProperty(xControlModel, UnoProperty.NAME);
           String textComponentText = xTextComponent.getText();
           String dataSetValue = dataset.get(label);
 
@@ -205,8 +183,7 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
           }
         }
 
-      } catch (IllegalArgumentException | UnknownPropertyException
-          | WrappedTargetException | ColumnNotFoundException e)
+      } catch (IllegalArgumentException | UnoHelperException | ColumnNotFoundException e)
       {
         LOGGER.error("", e);
       }
@@ -236,15 +213,14 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
         XComboBox xComboBox = UNO.XComboBox(xControl);
 
         XControlModel xControlModel = xControl.getModel();
-        XPropertySet propertySet = UNO.XPropertySet(xControlModel);
-        String label = (String) propertySet.getPropertyValue("Name");
+        String label = (String) UnoProperty.getProperty(xControlModel, UnoProperty.NAME);
 
         if (xTextComponent != null)
           dataset.set(label, xTextComponent.getText());
         else if (xComboBox != null)
           dataset.set(label, xComboBox.getItem(selectedItemIndex));
       }
-    } catch (ColumnNotFoundException | UnknownPropertyException | WrappedTargetException e)
+    } catch (ColumnNotFoundException | UnoHelperException e)
     {
       LOGGER.error("", e);
     }

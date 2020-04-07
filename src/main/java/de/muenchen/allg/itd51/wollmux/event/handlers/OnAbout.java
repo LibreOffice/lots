@@ -11,16 +11,17 @@ import com.sun.star.awt.XFixedText;
 import com.sun.star.awt.XListBox;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
-import com.sun.star.beans.XPropertySet;
 import com.sun.star.deployment.PackageInformationProvider;
 import com.sun.star.deployment.XPackageInformationProvider;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * Shows a modal dialog providing important information about WollMux and its configuration.
@@ -54,10 +55,9 @@ public class OnAbout extends WollMuxEvent
       XFixedText homepage = UNO.XFixedText(container.getControl("homepage"));
       homepage.setText("Homepage: www.wollmux.org");
       XControl logo = UnoRuntime.queryInterface(XControl.class, container.getControl("logo"));
-      XPropertySet logoProperties = UnoRuntime.queryInterface(XPropertySet.class, logo.getModel());
       XPackageInformationProvider xPackageInformationProvider = PackageInformationProvider.get(UNO.defaultContext);
       String location = xPackageInformationProvider.getPackageLocation(EXTENSION_ID);
-      logoProperties.setPropertyValue("ImageURL", location + IMAGE_URL);
+      UnoProperty.setProperty(logo.getModel(), UnoProperty.IMAGE_URL, location + IMAGE_URL);
 
       // Autoren
       XListBox authors = UNO.XListBox(container.getControl("authors"));
@@ -75,7 +75,7 @@ public class OnAbout extends WollMuxEvent
           .setText("DEFAULT_CONTEXT: " + WollMuxFiles.getDEFAULT_CONTEXT().toExternalForm());
 
       UnoRuntime.queryInterface(XDialog.class, window).execute();
-    } catch (Exception e)
+    } catch (UnoHelperException | Exception e)
     {
       LOGGER.error("Info-Dialog konnte nicht angezeigt werden.", e);
     }

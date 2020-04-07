@@ -21,10 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.container.NoSuchElementException;
-import com.sun.star.container.XEnumeration;
-import com.sun.star.container.XEnumerationAccess;
-import com.sun.star.container.XIndexAccess;
-import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNamed;
 import com.sun.star.document.XDocumentProperties;
 import com.sun.star.lang.EventObject;
@@ -33,10 +29,12 @@ import com.sun.star.lang.XServiceInfo;
 import com.sun.star.table.XCell;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XDependentTextField;
+import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
-import com.sun.star.text.XTextFieldsSupplier;
+import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextRangeCompare;
+import com.sun.star.text.XTextSection;
 import com.sun.star.text.XTextSectionsSupplier;
 import com.sun.star.text.XTextTable;
 import com.sun.star.uno.AnyConverter;
@@ -45,6 +43,9 @@ import com.sun.star.view.XSelectionChangeListener;
 import com.sun.star.view.XSelectionSupplier;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoCollection;
+import de.muenchen.allg.afid.UnoDictionary;
+import de.muenchen.allg.afid.UnoList;
 import de.muenchen.allg.itd51.wollmux.core.document.DocumentTreeVisitor;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
@@ -69,6 +70,8 @@ import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModel;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModelList;
 import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
+import de.muenchen.allg.util.UnoProperty;
+import de.muenchen.allg.util.UnoService;
 
 public class FormularMax4kController
 {
@@ -563,23 +566,22 @@ public class FormularMax4kController
   }
 
   /**
-   * Nimmt eine Menge von XTextRange Objekten, sucht alle umschlossenen Bookmarks und
-   * broadcastet eine entsprechende Nachricht, damit sich die entsprechenden Objekte
-   * selektieren.
+   * Nimmt eine Menge von XTextRange Objekten, sucht alle umschlossenen Bookmarks und broadcastet
+   * eine entsprechende Nachricht, damit sich die entsprechenden Objekte selektieren.
+   *
+   * @param access
+   *          Range in which book marks are selected.
    */
-  public void selectionChanged(XIndexAccess access)
+  public void selectionChanged(UnoList<XTextRange> access)
   {
     Set<String> names = new HashSet<>();
 
-    int count = access.getCount();
-    for (int i = 0; i < count; ++i)
+    for (XTextRange range : access)
     {
-      XEnumerationAccess enuAccess = null;
       try
       {
-        XTextRange range = UNO.XTextRange(access.getByIndex(i));
-        enuAccess = UNO.XEnumerationAccess(range);
-        handleParagraphEnumeration(names, enuAccess,
+        UnoCollection<XTextContent> ranges = UnoCollection.getCollection(range, XTextContent.class);
+        handleParagraphEnumeration(names, ranges,
           UNO.XTextRangeCompare(range.getText()), range, false);
       }
       catch (Exception x)
@@ -785,22 +787,20 @@ public class FormularMax4kController
     /*
      * Collect insertions via InputUser textfields
      */
-    XTextFieldsSupplier tfSupp = UNO.XTextFieldsSupplier(documentController.getModel().doc);
-    XEnumeration enu = tfSupp.getTextFields().createEnumeration();
-    while (enu.hasMoreElements())
+    UnoCollection<XTextField> fields = UnoCollection
+        .getCollection(UNO.XTextFieldsSupplier(documentController.getModel().doc).getTextFields(), XTextField.class);
+    for (XTextField field : fields)
     {
       try
       {
-        Object tf = enu.nextElement();
-        XServiceInfo info = UNO.XServiceInfo(tf);
-        if (info.supportsService("com.sun.star.text.TextField.InputUser"))
+        if (UnoService.supportsService(field, UnoService.CSS_TEXT_TEXT_FIELD_INPUT_USER))
         {
-          Matcher m =
-            TextDocumentModel.INPUT_USER_FUNCTION.matcher(UNO.getProperty(tf,
-              "Content").toString());
+          Matcher m = TextDocumentModel.INPUT_USER_FUNCTION
+              .matcher(UnoProperty.getProperty(field, UnoProperty.CONTENT).toString());
 
           if (m.matches())
-            insertionModelList.add(new InsertionModel4InputUser(tf, documentController.getModel().doc,
+            insertionModelList.add(new InsertionModel4InputUser(field,
+                documentController.getModel().doc,
               functionSelectionProvider, this));
         }
       }
@@ -847,9 +847,8 @@ public class FormularMax4kController
 
     sectionModelList.clear();
     XTextSectionsSupplier tsSupp = UNO.XTextSectionsSupplier(documentController.getModel().doc);
-    XNameAccess textSections = tsSupp.getTextSections();
-    String[] sectionNames = textSections.getElementNames();
-    for (String sectionName : sectionNames)
+    UnoDictionary<XTextSection> textSections = UnoDictionary.create(tsSupp.getTextSections(), XTextSection.class);
+    for (String sectionName : textSections.keySet())
     {
       sectionModelList.add(new SectionModel(sectionName, tsSupp, this));
     }
@@ -1043,7 +1042,7 @@ public class FormularMax4kController
         UNO.XDocumentPropertiesSupplier(documentController.getModel().doc).getDocumentProperties();
       try
       {
-        String title = ((String) UNO.getProperty(info, "Title")).trim();
+        String title = ((String) UnoProperty.getProperty(info, UnoProperty.TITLE)).trim();
         if (formTitle == GENERATED_FORM_TITLE && title.length() > 0)
         {
           formTitle = title;
@@ -1079,25 +1078,20 @@ public class FormularMax4kController
    * @throws WrappedTargetException
    */
   private void handleParagraphEnumeration(Set<String> names,
-      XEnumerationAccess enuAccess, XTextRangeCompare compare, XTextRange range,
+      UnoCollection<XTextContent> paragraphs, XTextRangeCompare compare,
+      XTextRange range,
       boolean doCompare) throws NoSuchElementException, WrappedTargetException
   {
-    if (enuAccess != null)
+    if (paragraphs != null)
     {
-      XEnumeration paraEnu = enuAccess.createEnumeration();
-      while (paraEnu.hasMoreElements())
+      for (XTextContent paragraph : paragraphs)
       {
-        Object nextEle = paraEnu.nextElement();
-        if (nextEle == null)
-          throw new NullPointerException(
-            L.m("nextElement() == null obwohl hasMoreElements()==true"));
-
-        XEnumerationAccess xs = UNO.XEnumerationAccess(nextEle);
-        if (xs != null)
-          handleParagraph(names, xs, compare, range, doCompare);
+        UnoCollection<XTextRange> para = UnoCollection.getCollection(paragraph, XTextRange.class);
+        if (para != null)
+          handleParagraph(names, para, compare, range, doCompare);
         else
         {// unterstützt nicht XEnumerationAccess, ist wohl SwXTextTable
-          XTextTable table = UNO.XTextTable(nextEle);
+          XTextTable table = UNO.XTextTable(paragraph);
           if (table != null) handleTextTable(names, table, compare, range);
         }
       }
@@ -1106,8 +1100,8 @@ public class FormularMax4kController
 
   /**
    * Enumeriert über die Zellen von table und ruft für jede
-   * {@link #handleParagraph(Set, XEnumerationAccess, XTextRangeCompare, XTextRange, boolean)}
-   * auf, wobei für doCompare immer true übergeben wird.
+   * {@link #handleParagraph(Set, UnoCollection, XTextRangeCompare, XTextRange, boolean)} auf, wobei
+   * für doCompare immer true übergeben wird.
    *
    * @throws NoSuchElementException
    * @throws WrappedTargetException
@@ -1120,7 +1114,7 @@ public class FormularMax4kController
     for (int i = 0; i < cellNames.length; ++i)
     {
       XCell cell = table.getCellByName(cellNames[i]);
-      handleParagraphEnumeration(names, UNO.XEnumerationAccess(cell), compare,
+      handleParagraphEnumeration(names, UnoCollection.getCollection(cell, XTextContent.class), compare,
         range, true);
     }
   }
@@ -1133,28 +1127,25 @@ public class FormularMax4kController
    *          if true, then text portions will be ignored if they lie outside of
    *          range (as tested with compare). Text portions inside of tables are
    *          always checked, regardless of doCompare.
-   *
-   * @throws NoSuchElementException
-   * @throws WrappedTargetException
    */
-  private void handleParagraph(Set<String> names, XEnumerationAccess para,
-      XTextRangeCompare compare, XTextRange range, boolean doCompare)
-      throws NoSuchElementException, WrappedTargetException
+  private void handleParagraph(Set<String> names, UnoCollection<XTextRange> para, XTextRangeCompare compare,
+      XTextRange range, boolean doCompare)
   {
-    XEnumeration textportionEnu = para.createEnumeration();
-    while (textportionEnu.hasMoreElements())
+    for (XTextRange textportion : para)
     {
-      Object textportion = textportionEnu.nextElement();
+      if (isInvalidRange(compare, range, textportion, doCompare))
+      {
+        continue;
+      }
       String type = (String) Utils.getProperty(textportion, "TextPortionType");
       if ("Bookmark".equals(type)) // String constant first b/c type may be null
       {
-        if (isInvalidRange(compare, range, textportion, doCompare)) continue;
         XNamed bookmark = null;
         try
         {
           // boolean isStart = ((Boolean)UNO.getProperty(textportion,
           // "IsStart")).booleanValue();
-          bookmark = UNO.XNamed(UNO.getProperty(textportion, "Bookmark"));
+          bookmark = UNO.XNamed(UnoProperty.getProperty(textportion, UnoProperty.BOOKMARK));
           names.add(bookmark.getName());
         }
         catch (Exception x)
@@ -1168,12 +1159,11 @@ public class FormularMax4kController
         try
         {
           textField =
-            UNO.XDependentTextField(UNO.getProperty(textportion, "TextField"));
+              UNO.XDependentTextField(UnoProperty.getProperty(textportion, UnoProperty.TEXT_FIELD));
           XServiceInfo info = UNO.XServiceInfo(textField);
           if (info.supportsService("com.sun.star.text.TextField.InputUser"))
           {
-            if (isInvalidRange(compare, range, textportion, doCompare)) continue;
-            names.add((String) UNO.getProperty(textField, "Content"));
+            names.add((String) UnoProperty.getProperty(textField, UnoProperty.CONTENT));
           }
         }
         catch (Exception x)
@@ -1252,21 +1242,18 @@ public class FormularMax4kController
       {
         Object selection =
           AnyConverter.toObject(XInterface.class, selectionSupplier.getSelection());
-        final XIndexAccess access = UNO.XIndexAccess(selection);
-        if (access == null) return;
+        UnoList<XTextRange> ranges = UnoList.create(selection, XTextRange.class);
         try
         {
-          javax.swing.SwingUtilities.invokeLater(new Runnable()
+          javax.swing.SwingUtilities.invokeLater(() ->
           {
-            @Override
-            public void run()
+            try
             {
-              try
-              {
-                FormularMax4kController.this.selectionChanged(access);
-              }
-              catch (Exception x)
-              {}
+              FormularMax4kController.this.selectionChanged(ranges);
+            }
+            catch (Exception x)
+            {
+              LOGGER.trace("", x);
             }
           });
         }

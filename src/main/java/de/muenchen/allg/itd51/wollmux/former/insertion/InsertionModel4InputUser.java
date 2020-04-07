@@ -51,6 +51,8 @@ import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
+import de.muenchen.allg.util.UnoProperty;
+import de.muenchen.allg.util.UnoService;
 
 public class InsertionModel4InputUser extends InsertionModel
 {
@@ -98,7 +100,7 @@ public class InsertionModel4InputUser extends InsertionModel
     try
     {
       this.textField = UNO.XTextContent(textField);
-      this.name = UNO.getProperty(textField, "Content").toString();
+      this.name = UnoProperty.getProperty(textField, UnoProperty.CONTENT).toString();
     }
     catch (Exception x)
     {
@@ -181,19 +183,17 @@ public class InsertionModel4InputUser extends InsertionModel
     String content = "";
     try
     {
-      content = UNO.getProperty(getFieldMaster(), "Content").toString();
+      content = UnoProperty.getProperty(getFieldMaster(), UnoProperty.CONTENT).toString();
     }
     catch (Exception x)
     {}
 
-    XPropertySet master =
-      UNO.XPropertySet(UNO.XMultiServiceFactory(doc).createInstance(
-        "com.sun.star.text.FieldMaster.User"));
-    UNO.setProperty(master, "Value", Integer.valueOf(0));
-    UNO.setProperty(master, "Name", newName);
-    UNO.setProperty(master, "Content", content);
+    XPropertySet master = UNO.XPropertySet(UnoService.createService(UnoService.CSS_TEXT_FIELD_MASTER_USER, doc));
+    UnoProperty.setProperty(master, UnoProperty.VALUE, Integer.valueOf(0));
+    UnoProperty.setProperty(master, UnoProperty.NAME, newName);
+    UnoProperty.setProperty(master, UnoProperty.CONTENT, content);
 
-    UNO.setProperty(textField, "Content", newName);
+    UnoProperty.setProperty(textField, UnoProperty.CONTENT, newName);
     try
     {
       getFieldMaster().dispose(); // clean up old field master

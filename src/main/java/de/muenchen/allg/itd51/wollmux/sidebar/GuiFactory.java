@@ -25,7 +25,6 @@ import com.sun.star.awt.tree.XMutableTreeDataModel;
 import com.sun.star.awt.tree.XTreeControl;
 import com.sun.star.beans.XMultiPropertySet;
 import com.sun.star.lang.XMultiComponentFactory;
-import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
@@ -33,6 +32,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.dialog.adapter.AbstractTextListener;
+import de.muenchen.allg.util.UnoComponent;
 
 /**
  * Factory for creating UNO control elements.
@@ -99,9 +99,8 @@ public class GuiFactory
       String label, AbstractActionListener listener, Rectangle size,
       SortedMap<String, Object> props)
   {
-    XControl buttonCtrl =
-      createControl(xMCF, context, toolkit, windowPeer,
-            "com.sun.star.awt.UnoControlButton", props, size);
+    XControl buttonCtrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_BUTTON,
+        props, size);
     XButton button = UnoRuntime.queryInterface(XButton.class, buttonCtrl);
     button.setLabel(label);
     button.addActionListener(listener);
@@ -139,9 +138,8 @@ public class GuiFactory
     props.put("ReadOnly", false);
     props.put("VScroll", false);
 
-    XControl buttonCtrl =
-      createControl(xMCF, context, toolkit, windowPeer,
-            "com.sun.star.awt.UnoControlEdit", props, size);
+    XControl buttonCtrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_EDIT,
+        props, size);
 
     XTextComponent txt = UnoRuntime.queryInterface(XTextComponent.class, buttonCtrl);
     txt.setText(text);
@@ -177,8 +175,8 @@ public class GuiFactory
     }
     props.put("MultiLine", true);
 
-    XControl buttonCtrl = createControl(xMCF, context, toolkit, windowPeer,
-        "com.sun.star.awt.UnoControlFixedText", props, size);
+    XControl buttonCtrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_FIXED_TEXT,
+        props, size);
 
     XFixedText txt = UNO.XFixedText(buttonCtrl);
     txt.setText(text);
@@ -193,15 +191,12 @@ public class GuiFactory
    * @param context
    *          The context.
    * @return The model.
-   * @throws Exception
-   *           Model can't be created.
    */
   public static XMutableTreeDataModel createTreeModel(XMultiComponentFactory xMCF,
-      XComponentContext context) throws Exception
+      XComponentContext context)
   {
     return UnoRuntime.queryInterface(XMutableTreeDataModel.class,
-      xMCF.createInstanceWithContext("com.sun.star.awt.tree.MutableTreeDataModel",
-        context));
+        UnoComponent.createComponentWithContext(UnoComponent.CSS_AWT_TREE_MUTABLE_TREE_DATA_MODEL, xMCF, context));
   }
 
   /**
@@ -225,9 +220,8 @@ public class GuiFactory
   {
     SortedMap<String, Object> props = new TreeMap<>();
     props.put("DataModel", dataModel);
-    return GuiFactory.createControl(xMCF, context, toolkit, windowPeer,
-            "com.sun.star.awt.tree.TreeControl", props, new Rectangle(0, 0,
-            400, 400));
+    return GuiFactory.createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_TREE_TREE_CONTROL, props,
+        new Rectangle(0, 0, 400, 400));
   }
 
   /**
@@ -257,9 +251,8 @@ public class GuiFactory
       AbstractItemListener listener, Rectangle size,
       SortedMap<String, Object> props)
   {
-    XControl ctrl =
-        createControl(xMCF, context, toolkit, windowPeer,
-            "com.sun.star.awt.UnoControlComboBox", props, size);
+    XControl ctrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_COMBO_BOX, props,
+        size);
     XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, ctrl);
     tf.setText(text);
     XComboBox cmb = UnoRuntime.queryInterface(XComboBox.class, ctrl);
@@ -295,8 +288,8 @@ public class GuiFactory
       XToolkit toolkit, XWindowPeer windowPeer, int value, XTextListener listener, Rectangle size,
       SortedMap<String, Object> props)
   {
-    XControl ctrl = createControl(xMCF, context, toolkit, windowPeer,
-        "com.sun.star.awt.UnoControlNumericField", props, size);
+    XControl ctrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_NUMERIC_FIELD,
+        props, size);
     UNO.XNumericField(ctrl).setValue(value);
     UNO.XTextComponent(ctrl).addTextListener(listener);
 
@@ -359,7 +352,7 @@ public class GuiFactory
   public static XControl createHLine(XMultiComponentFactory xMCF, XComponentContext context,
       XToolkit toolkit, XWindowPeer windowPeer, Rectangle size, SortedMap<String, Object> props)
   {
-    return createControl(xMCF, context, toolkit, windowPeer, "com.sun.star.awt.UnoControlFixedLine",
+    return createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_FIXED_LINE,
         props, size);
   }
 
@@ -382,14 +375,11 @@ public class GuiFactory
    *          Some additional properties.
    * @return A new button.
    */
-  public static XControl createListBox(XMultiComponentFactory xMCF,
-      XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer,
-      AbstractItemListener listener, Rectangle size,
-      SortedMap<String, Object> props)
+  public static XControl createListBox(XMultiComponentFactory xMCF, XComponentContext context, XToolkit toolkit,
+      XWindowPeer windowPeer, AbstractItemListener listener, Rectangle size, SortedMap<String, Object> props)
   {
-    XControl ctrl = createControl(xMCF, context, toolkit, windowPeer,
-        "com.sun.star.awt.UnoControlListBox",
-        props, size);
+    XControl ctrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_LIST_BOX, props,
+        size);
     UNO.XListBox(ctrl).addItemListener(listener);
 
     return ctrl;
@@ -421,12 +411,9 @@ public class GuiFactory
   {
     try
     {
-      XControl control =
-        UnoRuntime.queryInterface(XControl.class,
-          xMCF.createInstanceWithContext(type, xContext));
-      XControlModel controlModel =
-        UnoRuntime.queryInterface(XControlModel.class,
-          xMCF.createInstanceWithContext(type + "Model", xContext));
+      XControl control = UNO.XControl(UnoComponent.createComponentWithContext(type, xMCF, xContext));
+      XControlModel controlModel = UnoRuntime.queryInterface(XControlModel.class,
+          UnoComponent.createComponentWithContext(type + "Model", xMCF, xContext));
       control.setModel(controlModel);
       XMultiPropertySet properties =
         UnoRuntime.queryInterface(XMultiPropertySet.class, control.getModel());

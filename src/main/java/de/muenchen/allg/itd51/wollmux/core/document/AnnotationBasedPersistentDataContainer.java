@@ -9,8 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.Size;
-import com.sun.star.container.XEnumeration;
-import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNamed;
 import com.sun.star.drawing.XShape;
 import com.sun.star.table.BorderLine;
@@ -23,10 +21,16 @@ import com.sun.star.text.XText;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextFramesSupplier;
+import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoCollection;
+import de.muenchen.allg.afid.UnoDictionary;
+import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer.DataID;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.util.UnoProperty;
+import de.muenchen.allg.util.UnoService;
 
 /**
  * Implementiert die alte Zugriffsmethode auf persistente Daten in Notizen.
@@ -39,12 +43,6 @@ public class AnnotationBasedPersistentDataContainer implements
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(AnnotationBasedPersistentDataContainer.class);
-
-  /**
-   * Property von doc zur Steuerung der Änderungsverfolgung, die beim Schreiben von
-   * WollMux-Metadaten temporär ausgeschaltet werden muss.
-   */
-  private static final String RECORD_CHANGES = "RecordChanges";
 
   /**
    * Der Name des Frames in dem der WollMux seine Metadaten speichert.
@@ -94,7 +92,7 @@ public class AnnotationBasedPersistentDataContainer implements
     StringBuilder buffy = new StringBuilder();
     while (iter.hasNext())
     {
-      buffy.append((String) Utils.getProperty(iter.next(), "Content"));
+      buffy.append((String) Utils.getProperty(iter.next(), UnoProperty.CONTENT));
     }
     return buffy.toString();
   }
@@ -125,66 +123,57 @@ public class AnnotationBasedPersistentDataContainer implements
       }
       try
       {
-        XNameAccess frameAccess = supp.getTextFrames();
+        UnoDictionary<XShape> frames = UnoDictionary.create(supp.getTextFrames(), XShape.class);
         XShape frame;
-        if (frameAccess.hasByName(WOLLMUX_FRAME_NAME))
-          frame = UNO.XShape(frameAccess.getByName(WOLLMUX_FRAME_NAME));
+        if (frames.containsKey(WOLLMUX_FRAME_NAME))
+          frame = UNO.XShape(frames.get(WOLLMUX_FRAME_NAME));
         else
         {
           if (!create) {
             return textfields;
           }
 
-          frame =
-            UNO.XShape(UNO.XMultiServiceFactory(doc).createInstance(
-              "com.sun.star.text.TextFrame"));
+          frame = UNO.XShape(UnoService.createService(UnoService.CSS_TEXT_TEXT_FRAME, doc));
           Size frameSize = new Size();
           frameSize.Height = 5;
           frameSize.Width = 5;
           frame.setSize(frameSize);
-          UNO.setProperty(frame, "AnchorType", TextContentAnchorType.AT_PAGE);
+          UnoProperty.setProperty(frame, UnoProperty.ANCHOR_TYPE, TextContentAnchorType.AT_PAGE);
           XText text = doc.getText();
           text.insertTextContent(text.getStart(), UNO.XTextContent(frame), false);
 
-          UNO.setProperty(frame, "BackTransparent", Boolean.TRUE);
-          UNO.setProperty(frame, "BorderDistance", Integer.valueOf(0));
+          UnoProperty.setProperty(frame, UnoProperty.BACK_TRANSPARENT, Boolean.TRUE);
+          UnoProperty.setProperty(frame, UnoProperty.BORDER_DISTANCE, Integer.valueOf(0));
           BorderLine line = new BorderLine(0, (short) 0, (short) 0, (short) 0);
-          UNO.setProperty(frame, "LeftBorder", line);
-          UNO.setProperty(frame, "TopBorder", line);
-          UNO.setProperty(frame, "BottomBorder", line);
-          UNO.setProperty(frame, "RightBorder", line);
-          UNO.setProperty(frame, "TextWrap", WrapTextMode.THROUGHT);
-          UNO.setProperty(frame, "HoriOrient", Short.valueOf(HoriOrientation.NONE));
-          UNO.setProperty(frame, "HoriOrientPosition", Integer.valueOf(0));
-          UNO.setProperty(frame, "HoriOrientRelation",
-            Short.valueOf(RelOrientation.PAGE_LEFT));
-          UNO.setProperty(frame, "VertOrient",
-            Short.valueOf(VertOrientation.BOTTOM));
-          UNO.setProperty(frame, "VertOrientRelation",
-            Short.valueOf(RelOrientation.PAGE_FRAME));
-          UNO.setProperty(frame, "FrameIsAutomaticHeight", Boolean.FALSE);
+          UnoProperty.setProperty(frame, UnoProperty.LEFT_BORDER, line);
+          UnoProperty.setProperty(frame, UnoProperty.TOP_BORDER, line);
+          UnoProperty.setProperty(frame, UnoProperty.BOTTOM_BORDER, line);
+          UnoProperty.setProperty(frame, UnoProperty.RIGHT_BORDER, line);
+          UnoProperty.setProperty(frame, UnoProperty.TEXT_WRAP, WrapTextMode.THROUGHT);
+          UnoProperty.setProperty(frame, UnoProperty.HORI_ORIENT, Short.valueOf(HoriOrientation.NONE));
+          UnoProperty.setProperty(frame, UnoProperty.HORI_ORIENT_POSITION, Integer.valueOf(0));
+          UnoProperty.setProperty(frame, UnoProperty.HORI_ORIENT_RELATION, Short.valueOf(RelOrientation.PAGE_LEFT));
+          UnoProperty.setProperty(frame, UnoProperty.VERT_ORIENT, Short.valueOf(VertOrientation.BOTTOM));
+          UnoProperty.setProperty(frame, UnoProperty.VERT_ORIENT_RELATION, Short.valueOf(RelOrientation.PAGE_FRAME));
+          UnoProperty.setProperty(frame, UnoProperty.FRAME_IS_AUTOMATIC_HEIGHT, Boolean.FALSE);
 
           XNamed frameName = UNO.XNamed(frame);
           frameName.setName(WOLLMUX_FRAME_NAME);
         }
 
-        XEnumeration paragraphEnu =
-          UNO.XEnumerationAccess(frame).createEnumeration();
-        while (paragraphEnu.hasMoreElements())
+        UnoCollection<XTextRange> paragraphs = UnoCollection.getCollection(frame, XTextRange.class);
+        for (XTextRange para : paragraphs)
         {
-          Object para = paragraphEnu.nextElement();
-          if (create) {
-            UNO.setProperty(para, "CharHidden", Boolean.TRUE);
+          if (create)
+          {
+            UnoProperty.setProperty(para, UnoProperty.CHAR_HIDDEN, Boolean.TRUE);
           }
-          XEnumeration textportionEnu =
-            UNO.XEnumerationAccess(para).createEnumeration();
-          while (textportionEnu.hasMoreElements())
+          UnoCollection<XTextRange> portions = UnoCollection.getCollection(para, XTextRange.class);
+          for (XTextRange portion : portions)
           {
             Object textfield =
-              UNO.getProperty(textportionEnu.nextElement(), "TextField");
-            String author = (String) UNO.getProperty(textfield, "Author");
-            // ACHTUNG! author.equals(fieldName) wäre falsch, da author null sein
-            // kann!
+                UnoProperty.getProperty(portion, UnoProperty.TEXT_FIELD);
+            String author = (String) UnoProperty.getProperty(textfield, UnoProperty.AUTHOR);
             if (fieldName.equals(author))
             {
               textfields.add(textfield);
@@ -215,12 +204,10 @@ public class AnnotationBasedPersistentDataContainer implements
           XText frameText = UNO.XTextFrame(frame).getText();
           while (textfields.size() < blockCount)
           {
-            Object annotation =
-              UNO.XMultiServiceFactory(doc).createInstance(
-                "com.sun.star.text.TextField.Annotation");
+            Object annotation = UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_ANNOTATION, doc);
             frameText.insertTextContent(frameText.getEnd(),
               UNO.XTextContent(annotation), false);
-            UNO.setProperty(annotation, "Author", fieldName);
+            UnoProperty.setProperty(annotation, UnoProperty.AUTHOR, fieldName);
             textfields.add(annotation);
           }
         }
@@ -242,14 +229,14 @@ public class AnnotationBasedPersistentDataContainer implements
   @Override
   public void setData(DataID dataId, String dataValue)
   {
-    Object recordChanges = Utils.getProperty(doc, RECORD_CHANGES);
-    Utils.setProperty(doc, RECORD_CHANGES, false);
+    Object recordChanges = Utils.getProperty(doc, UnoProperty.RECORD_CHANGES);
+    Utils.setProperty(doc, UnoProperty.RECORD_CHANGES, false);
     List<Object> textfields =
       getWollMuxTextFields(dataId.getDescriptor(), true, dataValue.length());
     if (textfields.isEmpty())
     {
       LOGGER.error(L.m("Konnte WollMux-Textfeld(er) \"%1\" nicht anlegen", dataId));
-      Utils.setProperty(doc, RECORD_CHANGES, recordChanges);
+      Utils.setProperty(doc, UnoProperty.RECORD_CHANGES, recordChanges);
       return;
     }
 
@@ -272,7 +259,7 @@ public class AnnotationBasedPersistentDataContainer implements
 
       Utils.setProperty(iter.next(), "Content", str);
     }
-    Utils.setProperty(doc, RECORD_CHANGES, recordChanges);
+    Utils.setProperty(doc, UnoProperty.RECORD_CHANGES, recordChanges);
   }
 
   /**
@@ -281,8 +268,8 @@ public class AnnotationBasedPersistentDataContainer implements
   @Override
   public void removeData(DataID dataId)
   {
-    Object recordChanges = Utils.getProperty(doc, RECORD_CHANGES);
-    Utils.setProperty(doc, RECORD_CHANGES, false);
+    Object recordChanges = Utils.getProperty(doc, UnoProperty.RECORD_CHANGES);
+    Utils.setProperty(doc, UnoProperty.RECORD_CHANGES, false);
     List<Object> textfields =
       getWollMuxTextFields(dataId.getDescriptor(), false, 0);
     if (!textfields.isEmpty())
@@ -301,7 +288,7 @@ public class AnnotationBasedPersistentDataContainer implements
         }
       }
     }
-    Utils.setProperty(doc, RECORD_CHANGES, recordChanges);
+    Utils.setProperty(doc, UnoProperty.RECORD_CHANGES, recordChanges);
     modifiedDataIDs.remove(dataId);
   }
 

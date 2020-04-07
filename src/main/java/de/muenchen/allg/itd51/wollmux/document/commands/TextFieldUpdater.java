@@ -3,13 +3,15 @@ package de.muenchen.allg.itd51.wollmux.document.commands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.container.XEnumeration;
 import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoCollection;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.UpdateFields;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * Dieser Executor hat die Aufgabe alle updateFields-Befehle zu verarbeiten.
@@ -66,15 +68,13 @@ class TextFieldUpdater extends AbstractExecutor
   private void updateTextFieldsRecursive(Object element)
   {
     // zuerst die Kinder durchsuchen (falls vorhanden):
-    if (UNO.XEnumerationAccess(element) != null)
+    UnoCollection<Object> children = UnoCollection.getCollection(element, Object.class);
+    if (children != null)
     {
-      XEnumeration xEnum =  UNO.XEnumerationAccess(element).createEnumeration();
-
-      while (xEnum.hasMoreElements())
+      for (Object child : children)
       {
         try
         {
-          Object child = xEnum.nextElement();
           updateTextFieldsRecursive(child);
         }
         catch (java.lang.Exception e)
@@ -87,13 +87,15 @@ class TextFieldUpdater extends AbstractExecutor
     // jetzt noch update selbst aufrufen (wenn verfügbar):
     try
     {
-      Object textField =  UNO.XPropertySet(element).getPropertyValue("TextField");
+      Object textField = UnoProperty.getProperty(element, UnoProperty.TEXT_FIELD);
       if (textField != null && UNO.XUpdatable(textField) != null)
       {
         UNO.XUpdatable(textField).update();
       }
     }
-    catch (Exception e)
-    {}
+    catch (UnoHelperException e)
+    {
+      LOGGER.trace("", e);
+    }
   }
 }

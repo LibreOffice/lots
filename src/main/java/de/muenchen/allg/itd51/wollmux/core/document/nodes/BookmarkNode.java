@@ -1,6 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.core.document.nodes;
 
-import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
+import de.muenchen.allg.document.text.Bookmark;
 
 public class BookmarkNode implements Node
 {

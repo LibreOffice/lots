@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,8 +27,6 @@ import com.sun.star.beans.NamedValue;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
-import com.sun.star.container.XEnumeration;
-import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.XModel;
 import com.sun.star.frame.XStorable;
 import com.sun.star.io.IOException;
@@ -44,6 +43,7 @@ import com.sun.star.text.XMailMergeBroadcaster;
 import com.sun.star.text.XMailMergeListener;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextSection;
 import com.sun.star.text.XTextSectionsSupplier;
@@ -53,9 +53,10 @@ import com.sun.star.uno.XNamingService;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.URL;
 import com.sun.star.util.XCancellable;
-import com.sun.star.util.XChangesBatch;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoCollection;
+import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
@@ -71,13 +72,15 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.PropertyName;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.print.PrintModels;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
+import de.muenchen.allg.util.UnoConfiguration;
+import de.muenchen.allg.util.UnoProperty;
+import de.muenchen.allg.util.UnoService;
 
 /**
  * Performs a mail merge with LibreOffice.
@@ -163,26 +166,28 @@ public class OOoBasedMailMerge implements AutoCloseable
       final XJob mailMerge = createMailMergeJob();
 
       final ArrayList<NamedValue> mmProps = new ArrayList<>();
-      mmProps.add(new NamedValue(PropertyName.DATA_SOURCE_NAME, dbName));
-      mmProps.add(new NamedValue(PropertyName.COMMAND_TYPE, CommandType.TABLE));
-      mmProps.add(new NamedValue(PropertyName.COMMAND, TABLE_NAME));
-      mmProps.add(new NamedValue(PropertyName.DOCUMENT_URL,
+      mmProps.add(new NamedValue(UnoProperty.DATA_SOURCE_NAME, dbName));
+      mmProps.add(new NamedValue(UnoProperty.COMMAND_TYPE, CommandType.TABLE));
+      mmProps.add(new NamedValue(UnoProperty.COMMAND, TABLE_NAME));
+      mmProps.add(new NamedValue(
+          UnoProperty.DOCUMENT_URL,
           UNO.getParsedUNOUrl(inputFile.toURI().toString()).Complete));
-      mmProps.add(new NamedValue(PropertyName.OUTPUT_URL,
+      mmProps.add(new NamedValue(
+          UnoProperty.OUTPUT_URL,
           UNO.getParsedUNOUrl(tmpDir.toURI().toString()).Complete));
-      mmProps.add(new NamedValue(PropertyName.OUTPUT_TYPE, type));
+      mmProps.add(new NamedValue(UnoProperty.OUTPUT_TYPE, type));
       if (type == MailMergeType.FILE)
       {
-        mmProps.add(new NamedValue(PropertyName.SAVE_AS_SINGLE_FILE, Boolean.TRUE));
-        mmProps.add(new NamedValue(PropertyName.FILE_NAME_FROM_COLUMN, Boolean.FALSE));
-        mmProps.add(new NamedValue(PropertyName.FILE_NAME_PREFIX, "output"));
+        mmProps.add(new NamedValue(UnoProperty.SAVE_AS_SINGLE_FILE, Boolean.TRUE));
+        mmProps.add(new NamedValue(UnoProperty.FILE_NAME_FROM_COLUMN, Boolean.FALSE));
+        mmProps.add(new NamedValue(UnoProperty.FILE_NAME_PREFIX, "output"));
       } else if (type == MailMergeType.SHELL)
       {
-        mmProps.add(new NamedValue(PropertyName.SAVE_AS_SINGLE_FILE, Boolean.TRUE));
-        mmProps.add(new NamedValue(PropertyName.FILE_NAME_FROM_COLUMN, Boolean.FALSE));
+        mmProps.add(new NamedValue(UnoProperty.SAVE_AS_SINGLE_FILE, Boolean.TRUE));
+        mmProps.add(new NamedValue(UnoProperty.FILE_NAME_FROM_COLUMN, Boolean.FALSE));
       } else if (type == MailMergeType.PRINTER)
       {
-        mmProps.add(new NamedValue(PropertyName.SINGLE_PRINT_JOBS, Boolean.FALSE));
+        mmProps.add(new NamedValue(UnoProperty.SINGLE_PRINT_JOBS, Boolean.FALSE));
       }
 
       LOGGER.debug("Starting OOo-MailMerge in Verzeichnis {}", tmpDir);
@@ -286,22 +291,14 @@ public class OOoBasedMailMerge implements AutoCloseable
   {
     try
     {
-      Object cp = UNO.createUNOService("com.sun.star.configuration.ConfigurationProvider");
-      com.sun.star.beans.PropertyValue aPathArgument = new com.sun.star.beans.PropertyValue();
-      aPathArgument.Name = "nodepath";
-      aPathArgument.Value = "/org.openoffice.Office.Common/Save/Document";
-
-      Object ca = UNO.XMultiServiceFactory(cp).createInstanceWithArguments(
-          "com.sun.star.configuration.ConfigurationUpdateAccess", new Object[] { aPathArgument });
-      XPropertySet props = UNO.XPropertySet(ca);
-      loadPrintSettings = AnyConverter.toBoolean(props.getPropertyValue("LoadPrinter"));
-      props.setPropertyValue("LoadPrinter", load);
-      UnoRuntime.queryInterface(XChangesBatch.class, ca).commitChanges();
-    } catch (Exception e1)
+      loadPrintSettings = AnyConverter.toBoolean(
+          UnoConfiguration.getConfiguration("/org.openoffice.Office.Common/Save/Document", UnoProperty.LOAD_PRINTER));
+      UnoConfiguration.setConfiguration("/org.openoffice.Office.Common/Save/Document",
+          new UnoProps(UnoProperty.LOAD_PRINTER, load));
+    } catch (UnoHelperException e1)
     {
-      LOGGER.warn(
-          "Die Option 'Laden von Druckeinstellungen mit dem Dokument' konnte nicht gesetzt werden.\n"
-              + "Seriendrucke auf einem Drucker haben eventuell falsche Optionen gesetzt.");
+      LOGGER.warn("Die Option 'Laden von Druckeinstellungen mit dem Dokument' konnte nicht gesetzt werden.\n"
+          + "Seriendrucke auf einem Drucker haben eventuell falsche Optionen gesetzt.");
       LOGGER.debug("", e1);
     }
   }
@@ -382,14 +379,13 @@ public class OOoBasedMailMerge implements AutoCloseable
   private void updateTextSections(XTextDocument doc)
   {
     XTextSectionsSupplier tssupp = UNO.XTextSectionsSupplier(doc);
-    XNameAccess textSections = tssupp.getTextSections();
-    String[] sectionNames = textSections.getElementNames();
+    UnoDictionary<XTextSection> textSections = UnoDictionary.create(tssupp.getTextSections(), XTextSection.class);
 
     Pattern groupPattern = Pattern.compile(".* GROUPS(?:\\s\"(.*)\"|\\((.*)\\)\n?)");
 
-    for (String sectionName : sectionNames)
+    for (Entry<String, XTextSection> section : textSections.entrySet())
     {
-      Matcher matcher = groupPattern.matcher(sectionName);
+      Matcher matcher = groupPattern.matcher(section.getKey());
       if (matcher.matches())
       {
         String res = (matcher.group(1) != null) ? matcher.group(1) : matcher.group(2);
@@ -398,12 +394,8 @@ public class OOoBasedMailMerge implements AutoCloseable
 
         try
         {
-          XTextSection section = UnoRuntime.queryInterface(XTextSection.class,
-              textSections.getByName(sectionName));
-          XPropertySet ps = UNO.XPropertySet(section);
-
-          XTextRange range = section.getAnchor();
-          UNO.setPropertyToDefault(range, PropertyName.CHAR_HIDDEN);
+          XTextRange range = section.getValue().getAnchor();
+          UnoProperty.setPropertyToDefault(range, UnoProperty.CHAR_HIDDEN);
 
           List<String> conditions = new ArrayList<>();
           for (String groupName : groupNames)
@@ -413,8 +405,8 @@ public class OOoBasedMailMerge implements AutoCloseable
           }
 
           String condition = StringUtils.join(conditions, " or ");
-          ps.setPropertyValue(PropertyName.IS_VISIBLE, false);
-          ps.setPropertyValue(PropertyName.CONDITION, condition);
+          UnoProperty.setProperty(section, UnoProperty.IS_VISIBLE, false);
+          UnoProperty.setProperty(section, UnoProperty.CONDITION, condition);
         } catch (Exception e)
         {
           LOGGER.error("", e);
@@ -450,12 +442,12 @@ public class OOoBasedMailMerge implements AutoCloseable
   {
     if (UNO.XBookmarksSupplier(tmpDoc) != null)
     {
-      XNameAccess xna = UNO.XBookmarksSupplier(tmpDoc).getBookmarks();
-      for (String name : xna.getElementNames())
+      UnoDictionary<XTextContent> bookmarks = UnoDictionary
+          .create(UNO.XBookmarksSupplier(tmpDoc).getBookmarks(), XTextContent.class);
+      for (XTextContent bookmark : bookmarks.values())
       {
         try
         {
-          XTextContent bookmark = UNO.XTextContent(xna.getByName(name));
           if (bookmark != null)
           {
             bookmark.getAnchor().getText().removeTextContent(bookmark);
@@ -504,7 +496,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
           // approximate checkboxes with chars of font 'OpenSymbol'
           if (field.getType() == FormFieldType.CHECKBOX_FORM_FIELD)
-            UNO.setProperty(ifvCmd.getTextCursor(), PropertyName.CHAR_FONT_NAME, "OpenSymbol");
+            UnoProperty.setProperty(ifvCmd.getTextCursor(), UnoProperty.CHAR_FONT_NAME, "OpenSymbol");
         } catch (PrintException | UnoHelperException e)
         {
           LOGGER.error("", e);
@@ -551,35 +543,36 @@ public class OOoBasedMailMerge implements AutoCloseable
   {
     if (UNO.XTextFieldsSupplier(tmpDoc) != null)
     {
-      XEnumeration xenum = UNO.XTextFieldsSupplier(tmpDoc).getTextFields().createEnumeration();
-      while (xenum.hasMoreElements())
+      UnoCollection<XTextField> textFields = UnoCollection
+          .getCollection(UNO.XTextFieldsSupplier(tmpDoc).getTextFields(), XTextField.class);
+      for (XTextField field : textFields)
       {
         XDependentTextField tf = null;
         try
         {
-          tf = UNO.XDependentTextField(xenum.nextElement());
+          tf = UNO.XDependentTextField(field);
         } catch (Exception e)
         {
           continue;
         }
 
         // update database fields
-        if (UNO.supportsService(tf, "com.sun.star.text.TextField.Database"))
+        if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_DATA_BASE))
         {
           XPropertySet master = tf.getTextFieldMaster();
-          Utils.setProperty(master, PropertyName.DATA_BASE_NAME, dbName);
-          Utils.setProperty(master, PropertyName.DATA_TABLE_NAME, TABLE_NAME);
+          Utils.setProperty(master, UnoProperty.DATA_BASE_NAME, dbName);
+          Utils.setProperty(master, UnoProperty.DATA_TABLE_NAME, TABLE_NAME);
         }
 
         // update next record fields
-        if (UNO.supportsService(tf, "com.sun.star.text.TextField.DatabaseNextSet"))
+        if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_DATA_BASE_NEXT_SET))
         {
-          Utils.setProperty(tf, PropertyName.DATA_BASE_NAME, dbName);
-          Utils.setProperty(tf, PropertyName.DATA_TABLE_NAME, TABLE_NAME);
+          Utils.setProperty(tf, UnoProperty.DATA_BASE_NAME, dbName);
+          Utils.setProperty(tf, UnoProperty.DATA_TABLE_NAME, TABLE_NAME);
         }
 
         // update user intpu fields
-        else if (UNO.supportsService(tf, "com.sun.star.text.TextField.InputUser"))
+        if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_INPUT_USER))
         {
           adjustInputUserFields(tmpDoc, tf);
         }
@@ -600,7 +593,7 @@ public class OOoBasedMailMerge implements AutoCloseable
     String content = "";
     try
     {
-      content = AnyConverter.toString(Utils.getProperty(tf, "Content"));
+      content = AnyConverter.toString(Utils.getProperty(tf, UnoProperty.CONTENT));
     } catch (IllegalArgumentException e)
     {
       // we assume that there's no content
@@ -631,20 +624,20 @@ public class OOoBasedMailMerge implements AutoCloseable
     int numberOfNextSets = 1;
     if (UNO.XTextFieldsSupplier(pmod.getTextDocument()) != null)
     {
-      XEnumeration xenum = UNO.XTextFieldsSupplier(pmod.getTextDocument()).getTextFields()
-          .createEnumeration();
-      while (xenum.hasMoreElements())
+      UnoCollection<XTextField> textFields = UnoCollection
+          .getCollection(UNO.XTextFieldsSupplier(pmod.getTextDocument()).getTextFields(), XTextField.class);
+      for (XTextField field : textFields)
       {
         XDependentTextField tf = null;
         try
         {
-          tf = UNO.XDependentTextField(xenum.nextElement());
+          tf = UNO.XDependentTextField(field);
         } catch (Exception e)
         {
           continue;
         }
 
-        if (UNO.supportsService(tf, "com.sun.star.text.TextField.DatabaseNextSet"))
+        if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_DATA_BASE_NEXT_SET))
         {
           numberOfNextSets++;
         }
@@ -672,15 +665,14 @@ public class OOoBasedMailMerge implements AutoCloseable
     try
     {
       XDependentTextField dbField = UNO
-          .XDependentTextField(factory.createInstance("com.sun.star.text.TextField.Database"));
-      XPropertySet m = UNO
-          .XPropertySet(factory.createInstance("com.sun.star.text.FieldMaster.Database"));
-      UNO.setProperty(m, PropertyName.DATA_BASE_NAME, dbName);
-      UNO.setProperty(m, PropertyName.DATA_TABLE_NAME, tableName);
-      UNO.setProperty(m, PropertyName.DATA_COLUMN_NAME, columnName);
+          .XDependentTextField(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_DATA_BASE, factory));
+      XPropertySet m = UNO.XPropertySet(UnoService.createService(UnoService.CSS_TEXT_FIELD_MASTER_DATABASE, factory));
+      UnoProperty.setProperty(m, UnoProperty.DATA_BASE_NAME, dbName);
+      UnoProperty.setProperty(m, UnoProperty.DATA_TABLE_NAME, tableName);
+      UnoProperty.setProperty(m, UnoProperty.DATA_COLUMN_NAME, columnName);
       dbField.attachTextFieldMaster(m);
       return dbField;
-    } catch (com.sun.star.uno.Exception | UnoHelperException ex)
+    } catch (UnoHelperException ex)
     {
       throw new PrintException(ex);
     }
@@ -715,14 +707,11 @@ public class OOoBasedMailMerge implements AutoCloseable
   {
     XDocumentDataSource dataSource = ds.createXDocumentDatasource();
     // neuen Zufallsnamen für Datenquelle bestimmen
-    XNameAccess nameAccess = UNO.XNameAccess(UNO.dbContext);
-    if (nameAccess != null)
+    UnoDictionary<Object> names = UnoDictionary.create(UNO.dbContext, Object.class);
+    do
     {
-      do
-      {
-        dbName = TEMP_WOLLMUX_MAILMERGE_PREFIX + new Random().nextInt(100000);
-      } while (nameAccess.hasByName(dbName));
-    }
+      dbName = TEMP_WOLLMUX_MAILMERGE_PREFIX + new Random().nextInt(100000);
+    } while (names.containsKey(dbName));
 
     try
     {
@@ -950,15 +939,15 @@ public class OOoBasedMailMerge implements AutoCloseable
         Utils.setProperty(dataSource, "URL", "sdbc:flat:" + dirURL);
 
         UnoProps p = new UnoProps();
-        p.setPropertyValue(PropertyName.EXTENSION, "csv");
-        p.setPropertyValue(PropertyName.CHAR_SET, "UTF-8");
-        p.setPropertyValue(PropertyName.FIXED_LENGTH, false);
-        p.setPropertyValue(PropertyName.HEADER_LINE, true);
-        p.setPropertyValue(PropertyName.FIELD_DELIMITER, ",");
-        p.setPropertyValue(PropertyName.STRING_DELIMITER, "\"");
-        p.setPropertyValue(PropertyName.DECIMAL_DELIMITER, ".");
-        p.setPropertyValue(PropertyName.THOUSAND_DELIMITER, "");
-        Utils.setProperty(dataSource, "Info", p.getProps());
+        p.setPropertyValue(UnoProperty.EXTENSION, "csv");
+        p.setPropertyValue(UnoProperty.CHAR_SET, "UTF-8");
+        p.setPropertyValue(UnoProperty.FIXED_LENGTH, false);
+        p.setPropertyValue(UnoProperty.HEADER_LINE, true);
+        p.setPropertyValue(UnoProperty.FIELD_DELIMITER, ",");
+        p.setPropertyValue(UnoProperty.STRING_DELIMITER, "\"");
+        p.setPropertyValue(UnoProperty.DECIMAL_DELIMITER, ".");
+        p.setPropertyValue(UnoProperty.THOUSAND_DELIMITER, "");
+        Utils.setProperty(dataSource, UnoProperty.INFO, p.getProps());
 
         XStorable xStorable = UNO.XStorable(dataSource.getDatabaseDocument());
         XModel model = UNO.XModel(xStorable);

@@ -7,25 +7,28 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.XPropertySet;
-import com.sun.star.container.XEnumeration;
-import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.XComponent;
-import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
+import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.RuntimeException;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoCollection;
+import de.muenchen.allg.afid.UnoDictionary;
+import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
@@ -60,6 +63,9 @@ import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormValueChanged;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
+import de.muenchen.allg.util.UnoConfiguration;
+import de.muenchen.allg.util.UnoProperty;
+import de.muenchen.allg.util.UnoService;
 
 public class TextDocumentController implements FormValueChangedListener, VisibilityChangedListener
 {
@@ -469,20 +475,16 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       XPropertySet master = getUserFieldMaster(userFieldName);
       if (master == null)
       {
-        master =
-          UNO.XPropertySet(UNO.XMultiServiceFactory(model.doc).createInstance(
-            "com.sun.star.text.FieldMaster.User"));
-        UNO.setProperty(master, "Value", Double.valueOf(0));
-        UNO.setProperty(master, "Name", userFieldName);
+        master = UNO.XPropertySet(UnoService.createService(UnoService.CSS_TEXT_FIELD_MASTER_USER, model.doc));
+        UnoProperty.setProperty(master, UnoProperty.VALUE, Double.valueOf(0));
+        UnoProperty.setProperty(master, UnoProperty.NAME, userFieldName);
       }
 
       // textField erzeugen
-      XTextContent f =
-        UNO.XTextContent(UNO.XMultiServiceFactory(model.doc).createInstance(
-          "com.sun.star.text.TextField.InputUser"));
-      UNO.setProperty(f, "Content", userFieldName);
+      XTextContent f = UNO.XTextContent(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_INPUT_USER, model.doc));
+      UnoProperty.setProperty(f, UnoProperty.CONTENT, userFieldName);
       if (hint != null) {
-        UNO.setProperty(f, "Hint", hint);
+        UnoProperty.setProperty(f, UnoProperty.HINT, hint);
       }
       r.getText().insertTextContent(r, f, true);
     }
@@ -505,20 +507,20 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
 
     try
     {
-      XEnumeration xenu =
-        UNO.XTextFieldsSupplier(model.doc).getTextFields().createEnumeration();
-      while (xenu.hasMoreElements())
+      UnoCollection<XTextField> textFields = UnoCollection
+          .getCollection(UNO.XTextFieldsSupplier(model.doc).getTextFields(), XTextField.class);
+      for (XTextField textField : textFields)
       {
         try
         {
-          XDependentTextField tf = UNO.XDependentTextField(xenu.nextElement());
+          XDependentTextField tf = UNO.XDependentTextField(textField);
           if (tf == null) {
             continue;
           }
 
-          if (UNO.supportsService(tf, "com.sun.star.text.TextField.InputUser"))
+          if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_INPUT_USER))
           {
-            String varName = UNO.getProperty(tf, "Content").toString();
+            String varName = UnoProperty.getProperty(tf, UnoProperty.CONTENT).toString();
             String funcName = TextDocumentModel.getFunctionNameForUserFieldName(varName);
 
             if (funcName == null) {
@@ -555,10 +557,10 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
             }
           }
 
-          if (UNO.supportsService(tf, "com.sun.star.text.TextField.Database"))
+          if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_DATA_BASE))
           {
             XPropertySet master = tf.getTextFieldMaster();
-            String id = (String) UNO.getProperty(master, "DataColumnName");
+            String id = (String) UnoProperty.getProperty(master, UnoProperty.DATA_COLUMN_NAME);
             if (id != null && id.length() > 0)
             {
               if (!model.getIdToTextFieldFormFields().containsKey(id))
@@ -844,17 +846,14 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     model.updateLastTouchedByVersionInfo();
 
     XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(model.doc);
-    XNameAccess bookmarks = bmSupp.getBookmarks();
-    String[] names = bookmarks.getElementNames();
-    for (int i = 0; i < names.length; ++i)
+    UnoDictionary<XTextContent> bookmarks = UnoDictionary.create(bmSupp.getBookmarks(), XTextContent.class);
+    for (Entry<String, XTextContent> bookmark : bookmarks.entrySet())
     {
       try
       {
-        String bookmark = names[i];
-        if (TextDocumentModel.BOOKMARK_KILL_PATTERN.matcher(bookmark).matches())
+        if (TextDocumentModel.BOOKMARK_KILL_PATTERN.matcher(bookmark.getKey()).matches())
         {
-          XTextContent bm = UNO.XTextContent(bookmarks.getByName(bookmark));
-          bm.getAnchor().getText().removeTextContent(bm);
+          bookmark.getValue().getAnchor().getText().removeTextContent(bookmark.getValue());
         }
 
       }
@@ -912,17 +911,14 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     model.updateLastTouchedByVersionInfo();
 
     XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(model.doc);
-    XNameAccess bookmarks = bmSupp.getBookmarks();
-    String[] names = bookmarks.getElementNames();
-    for (int i = 0; i < names.length; ++i)
+    UnoDictionary<XTextContent> bookmarks = UnoDictionary.create(bmSupp.getBookmarks(), XTextContent.class);
+    for (Entry<String, XTextContent> bookmark : bookmarks.entrySet())
     {
       try
       {
-        String bookmark = names[i];
-        if (!TextDocumentModel.WOLLMUX_BOOKMARK_PATTERN.matcher(bookmark).matches())
+        if (!TextDocumentModel.WOLLMUX_BOOKMARK_PATTERN.matcher(bookmark.getKey()).matches())
         {
-          XTextContent bm = UNO.XTextContent(bookmarks.getByName(bookmark));
-          bm.getAnchor().getText().removeTextContent(bm);
+          bookmark.getValue().getAnchor().getText().removeTextContent(bookmark.getValue());
         }
 
       }
@@ -975,16 +971,15 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     try
     {
       // Feld einfügen
-      XMultiServiceFactory factory = UNO.XMultiServiceFactory(model.doc);
-      XDependentTextField field =
-        UNO.XDependentTextField(factory.createInstance("com.sun.star.text.TextField.Database"));
-      XPropertySet master =
-        UNO.XPropertySet(factory.createInstance("com.sun.star.text.FieldMaster.Database"));
-      UNO.setProperty(master, "DataBaseName", "DataBase");
-      UNO.setProperty(master, "DataTableName", "Table");
-      UNO.setProperty(master, "DataColumnName", fieldId);
+      XDependentTextField field = UNO
+          .XDependentTextField(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_DATA_BASE, model.doc));
+      XPropertySet master = UNO
+          .XPropertySet(UnoService.createService(UnoService.CSS_TEXT_FIELD_MASTER_DATABASE, model.doc));
+      UnoProperty.setProperty(master, UnoProperty.DATA_BASE_NAME, "DataBase");
+      UnoProperty.setProperty(master, UnoProperty.DATA_TABLE_NAME, "Table");
+      UnoProperty.setProperty(master, UnoProperty.DATA_COLUMN_NAME, fieldId);
       if (!formFieldPreviewMode)
-        UNO.setProperty(field, "Content", "<" + fieldId + ">");
+        UnoProperty.setProperty(field, UnoProperty.CONTENT, "<" + fieldId + ">");
       field.attachTextFieldMaster(master);
 
       XTextCursor cursor = range.getText().createTextCursorByRange(range);
@@ -1033,13 +1028,12 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     try
     {
       // Feld einfügen
-      XMultiServiceFactory factory = UNO.XMultiServiceFactory(model.doc);
-      XDependentTextField field =
-        UNO.XDependentTextField(factory.createInstance("com.sun.star.text.TextField.DatabaseNextSet"));
-      UNO.setProperty(field, "DataBaseName", "DataBaseName");
-      UNO.setProperty(field, "DataTableName", "DataTableName");
-      UNO.setProperty(field, "DataCommandType", com.sun.star.sdb.CommandType.TABLE);
-      UNO.setProperty(field, "Condition", "true");
+      XDependentTextField field = UNO
+          .XDependentTextField(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_DATA_BASE_NEXT_SET, model.doc));
+      UnoProperty.setProperty(field, UnoProperty.DATA_BASE_NAME, "DataBaseName");
+      UnoProperty.setProperty(field, UnoProperty.DATA_TABLE_NAME, "DataTableName");
+      UnoProperty.setProperty(field, UnoProperty.DATA_COMMAND_TYPE, com.sun.star.sdb.CommandType.TABLE);
+      UnoProperty.setProperty(field, UnoProperty.CONDITION, "true");
 
       XTextCursor cursor = range.getText().createTextCursorByRange(range);
       cursor.getText().insertTextContent(cursor, field, true);
@@ -1436,23 +1430,22 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
 
     // Nicht mehr benötigte TextFieldMaster von ehemaligen InputUser-Textfeldern
     // löschen:
-    XNameAccess masters = UNO.XTextFieldsSupplier(model.doc).getTextFieldMasters();
+    UnoDictionary<XComponent> masters = UnoDictionary
+        .create(UNO.XTextFieldsSupplier(model.doc).getTextFieldMasters(), XComponent.class);
     String prefix = "com.sun.star.text.FieldMaster.User.";
-    String[] masterNames = masters.getElementNames();
-    for (int i = 0; i < masterNames.length; i++)
+    for (Entry<String, XComponent> master : masters.entrySet())
     {
-      String masterName = masterNames[i];
-      if (masterName == null || !masterName.startsWith(prefix)) {
+      if (master == null || !master.getKey().startsWith(prefix))
+      {
         continue;
       }
-      String varName = masterName.substring(prefix.length());
+      String varName = master.getKey().substring(prefix.length());
       String trafoName = TextDocumentModel.getFunctionNameForUserFieldName(varName);
       if (trafoName != null && !usedFunctions.contains(trafoName))
       {
         try
         {
-          XComponent m = UNO.XComponent(masters.getByName(masterName));
-          m.dispose();
+          master.getValue().dispose();
         }
         catch (java.lang.Exception e)
         {
@@ -1812,13 +1805,14 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    */
   private XPropertySet getUserFieldMaster(String userFieldName)
   {
-    XNameAccess masters = UNO.XTextFieldsSupplier(model.doc).getTextFieldMasters();
+    UnoDictionary<XPropertySet> masters = UnoDictionary
+        .create(UNO.XTextFieldsSupplier(model.doc).getTextFieldMasters(), XPropertySet.class);
     String elementName = "com.sun.star.text.FieldMaster.User." + userFieldName;
-    if (masters.hasByName(elementName))
+    if (masters.containsKey(elementName))
     {
       try
       {
-        return UNO.XPropertySet(masters.getByName(elementName));
+        return masters.get(elementName);
       }
       catch (java.lang.Exception e)
       {
@@ -2073,7 +2067,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     try
     {
       XFrame frame = UNO.XModel(getModel().doc).getCurrentController().getFrame();
-      String frameTitle = (String) UNO.getProperty(frame, "Title");
+      String frameTitle = (String) UnoProperty.getProperty(frame, UnoProperty.TITLE);
       frameTitle = UNO.stripOpenOfficeFromWindowName(frameTitle);
       return frameTitle;
     } catch (Exception x)
@@ -2094,23 +2088,12 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   {
     try
     {
-      Object cp = UNO.createUNOService("com.sun.star.configuration.ConfigurationProvider");
-
-      // creation arguments: nodepath
-      com.sun.star.beans.PropertyValue aPathArgument = new com.sun.star.beans.PropertyValue();
-      aPathArgument.Name = "nodepath";
-      aPathArgument.Value = "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument";
-      Object[] aArguments = new Object[1];
-      aArguments[0] = aPathArgument;
-
-      Object ca = UNO.XMultiServiceFactory(cp).createInstanceWithArguments(
-          "com.sun.star.configuration.ConfigurationAccess", aArguments);
-
-      return UNO.getProperty(ca, "ooSetupFactoryWindowAttributes").toString();
-    } catch (java.lang.Exception e)
+      return UnoConfiguration.getConfiguration("/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument",
+          UnoProperty.OO_SETUP_FACTORY_WINDOW_ATTRIBUTES).toString();
+    } catch (UnoHelperException e)
     {
+      return null;
     }
-    return null;
   }
 
   /**
@@ -2125,22 +2108,9 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   {
     try
     {
-      Object cp = UNO.createUNOService("com.sun.star.configuration.ConfigurationProvider");
-
-      // creation arguments: nodepath
-      com.sun.star.beans.PropertyValue aPathArgument = new com.sun.star.beans.PropertyValue();
-      aPathArgument.Name = "nodepath";
-      aPathArgument.Value = "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument";
-      Object[] aArguments = new Object[1];
-      aArguments[0] = aPathArgument;
-
-      Object ca = UNO.XMultiServiceFactory(cp).createInstanceWithArguments(
-          "com.sun.star.configuration.ConfigurationUpdateAccess", aArguments);
-
-      UNO.setProperty(ca, "ooSetupFactoryWindowAttributes", value);
-
-      UNO.XChangesBatch(ca).commitChanges();
-    } catch (java.lang.Exception e)
+      UnoConfiguration.setConfiguration("/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument",
+          new UnoProps(UnoProperty.OO_SETUP_FACTORY_WINDOW_ATTRIBUTES, value));
+    } catch (UnoHelperException e)
     {
       LOGGER.error("", e);
     }

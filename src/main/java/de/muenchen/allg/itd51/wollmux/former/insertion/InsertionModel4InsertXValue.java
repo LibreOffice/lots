@@ -50,8 +50,9 @@ import com.sun.star.container.NoSuchElementException;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XTextRange;
 
+import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.UnknownIDException;
-import de.muenchen.allg.itd51.wollmux.core.document.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -131,8 +132,8 @@ public class InsertionModel4InsertXValue extends InsertionModel
   private IDManager.IDChangeListener myIDChangeListener = new MyIDChangeListener();
 
   /**
-   * Erzeugt ein neues InsertionModel für das Bookmark mit Namen bookmarkName, das
-   * bereits im Dokument vorhanden sein muss.
+   * Erzeugt ein neues InsertionModel für das Bookmark mit Namen bookmarkName, das bereits im
+   * Dokument vorhanden sein muss.
    *
    * @param doc
    *          das Dokument in dem sich das Bookmark befindet
@@ -142,14 +143,16 @@ public class InsertionModel4InsertXValue extends InsertionModel
    * @param formularMax4000
    *          Der FormularMax4000 zu dem dieses InsertionModel gehört.
    * @throws SyntaxErrorException
-   *           wenn bookmarkName nicht korrekte ConfigThingy-Syntax hat oder kein
-   *           korrektes Einfügekommando ist.
+   *           wenn bookmarkName nicht korrekte ConfigThingy-Syntax hat oder kein korrektes
+   *           Einfügekommando ist.
    * @throws NoSuchElementException
    *           wenn ein Bookmark dieses Namens in doc nicht existiert.
+   * @throws UnoHelperException
+   *           Can't find the book mark.
    */
   public InsertionModel4InsertXValue(String bookmarkName, XBookmarksSupplier doc,
       FunctionSelectionProvider funcSelections, FormularMax4kController formularMax4000)
-      throws SyntaxErrorException, NoSuchElementException
+      throws SyntaxErrorException, NoSuchElementException, UnoHelperException
   {
     this.formularMax4000 = formularMax4000;
     bookmark = new Bookmark(bookmarkName, doc);
@@ -367,13 +370,13 @@ public class InsertionModel4InsertXValue extends InsertionModel
   }
 
   @Override
-  public void selectWithViewCursor()
+  public void selectWithViewCursor() throws UnoHelperException
   {
     bookmark.select();
   }
 
   @Override
-  public void removeFromDocument()
+  public void removeFromDocument() throws UnoHelperException
   {
     XTextRange range = bookmark.getAnchor();
     if (range != null) range.setString("");
@@ -381,10 +384,13 @@ public class InsertionModel4InsertXValue extends InsertionModel
   }
 
   /**
-   * Entfernt das zur Einfügestelle gehörende WollMux-Bookmark, nicht jedoch den
-   * zugehörigen Feldbefehl.
+   * Entfernt das zur Einfügestelle gehörende WollMux-Bookmark, nicht jedoch den zugehörigen
+   * Feldbefehl.
+   *
+   * @throws UnoHelperException
+   *           Can't delete the book mark.
    */
-  public void removeBookmark()
+  public void removeBookmark() throws UnoHelperException
   {
     bookmark.remove();
   }

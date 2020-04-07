@@ -43,7 +43,6 @@ import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XIntrospection;
 import com.sun.star.beans.XIntrospectionAccess;
-import com.sun.star.beans.XPropertySet;
 import com.sun.star.lang.DisposedException;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IndexOutOfBoundsException;
@@ -90,6 +89,7 @@ import de.muenchen.allg.itd51.wollmux.sidebar.controls.UISearchbox;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UISenderbox;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * Erzeugt das Fenster, dass in der WollMux-Sidebar angezeigt wird. Das Fenster
@@ -655,10 +655,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           {
             searchBox.setText(L.m("Suchen..."));
             XControlModel model = UNO.XControl(searchBox).getModel();
-            XPropertySet props =
-              UnoRuntime.queryInterface(XPropertySet.class, model);
-            props.setPropertyValue("TextColor",
-                SystemColor.textInactiveText.getRGB() & ~0xFF000000);
+            UnoProperty.setProperty(model, UnoProperty.TEXT_COLOR, SystemColor.textInactiveText.getRGB() & ~0xFF000000);
           }
 
           windowPeer.invalidate((short)(InvalidateStyle.UPDATE | InvalidateStyle.TRANSPARENT));
@@ -676,15 +673,13 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         {
           XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, event.Source);
           XControlModel model = UNO.XControl(searchBox).getModel();
-          XPropertySet props =
-            UnoRuntime.queryInterface(XPropertySet.class, model);
 
           activate(true);
 
-          int color = (Integer) props.getPropertyValue("TextColor");
+          int color = (Integer) UnoProperty.getProperty(model, UnoProperty.TEXT_COLOR);
           if (color == (SystemColor.textInactiveText.getRGB() & ~0xFF000000))
           {
-            props.setPropertyValue("TextColor", SystemColor.textText.getRGB() & ~0xFF000000);
+            UnoProperty.setProperty(model, UnoProperty.TEXT_COLOR, SystemColor.textText.getRGB() & ~0xFF000000);
             tf.setText("");
           }
           else

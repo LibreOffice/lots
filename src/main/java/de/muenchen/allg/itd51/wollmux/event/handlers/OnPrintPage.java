@@ -3,15 +3,19 @@ package de.muenchen.allg.itd51.wollmux.event.handlers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.beans.XPropertySet;
 import com.sun.star.text.XPageCursor;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.view.XPrintable;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.afid.UnoHelperRuntimeException;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.util.UnoConfiguration;
+import de.muenchen.allg.util.UnoProperty;
+import de.muenchen.allg.util.UnoService;
 
 /**
  * Event for printing the current visible page.
@@ -57,7 +61,7 @@ public class OnPrintPage extends WollMuxEvent
         }
         pageCursor.jumpToPage(currentPage);
       }
-    } catch (com.sun.star.uno.Exception e)
+    } catch (UnoHelperException e)
     {
       LOGGER.trace("", e);
     }
@@ -65,9 +69,9 @@ public class OnPrintPage extends WollMuxEvent
     XPrintable printable = UNO.XPrintable(documentController.getModel().doc);
 
     UnoProps props = new UnoProps();
-    props.setPropertyValue("CopyCount", (short) 1);
-    props.setPropertyValue("Pages", String.valueOf(page));
-    props.setPropertyValue("Collate", false);
+    props.setPropertyValue(UnoProperty.COPY_COUNT, (short) 1);
+    props.setPropertyValue(UnoProperty.PAGES, String.valueOf(page));
+    props.setPropertyValue(UnoProperty.COLLATE, false);
 
     printable.print(props.getProps());
   }
@@ -79,23 +83,17 @@ public class OnPrintPage extends WollMuxEvent
    * @throws com.sun.star.uno.Exception
    *           If we can't access the properties.
    */
-  private boolean isPrintEmptyPages() throws com.sun.star.uno.Exception
+  private boolean isPrintEmptyPages() throws UnoHelperException
   {
     try
     {
-      XPropertySet inSettings = UNO
-          .XPropertySet(UNO.XMultiServiceFactory(documentController.getModel().doc)
-              .createInstance("com.sun.star.document.Settings"));
-      return (boolean) inSettings.getPropertyValue("PrintEmptyPages");
-    } catch (com.sun.star.uno.Exception e)
+      return (boolean) UnoProperty.getProperty(
+          UnoService.createService(UnoService.CSS_DOCUMENT_SETTINGS, documentController.getModel().doc),
+          UnoProperty.PRINT_EMPTY_PAGES);
+    } catch (UnoHelperRuntimeException | UnoHelperException e)
     {
-      Object cfgProvider = UNO
-          .createUNOService("com.sun.star.configuration.ConfigurationProvider");
-
-      Object cfgAccess = UNO.XMultiServiceFactory(cfgProvider).createInstanceWithArguments(
-          "com.sun.star.configuration.ConfigurationAccess",
-          new UnoProps("nodepath", "/org.openoffice.Office.Writer/Print").getProps());
-      return (boolean) UNO.XPropertySet(cfgAccess).getPropertyValue("EmptyPages");
+      return (boolean) UnoConfiguration.getConfiguration("/org.openoffice.Office.Writer/Print",
+          UnoProperty.EMPTY_PAGES);
     }
   }
 }

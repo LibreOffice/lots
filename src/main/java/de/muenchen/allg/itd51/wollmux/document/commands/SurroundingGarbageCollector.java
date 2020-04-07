@@ -21,9 +21,10 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFrag;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
-import de.muenchen.allg.itd51.wollmux.core.util.PropertyName;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.ooo.TextDocument;
+import de.muenchen.allg.util.UnoProperty;
+import de.muenchen.allg.util.UnoService;
 
 /**
  * Der SurroundingGarbageCollector erfasst leere Absätze und Einfügemarker um
@@ -84,7 +85,7 @@ class SurroundingGarbageCollector extends AbstractExecutor
       {
         XTextDocument doc = SurroundingGarbageCollector.this.documentCommandInterpreter.getModel().doc;
         // create a book mark, so that the range contains a new text portion
-        Object bookmark = UNO.XMultiServiceFactory(doc).createInstance("com.sun.star.text.Bookmark");
+        Object bookmark = UnoService.createService(UnoService.CSS_TEXT_BOOKMARK, doc);
         UNO.XNamed(bookmark).setName("killer");
         range.getText().insertTextContent(range, UNO.XTextContent(bookmark), true);
         String name = UNO.XNamed(bookmark).getName();
@@ -106,13 +107,14 @@ class SurroundingGarbageCollector extends AbstractExecutor
         UNO.XTextContent(bookmark).getAnchor().getText().removeTextContent(UNO.XTextContent(bookmark));
 
         // recreate lost book marks.
-        UnoDictionary<XTextContent> bookmarks = new UnoDictionary<>(UNO.XBookmarksSupplier(doc).getBookmarks());
+        UnoDictionary<XTextContent> bookmarks = UnoDictionary
+            .create(UNO.XBookmarksSupplier(doc).getBookmarks(), XTextContent.class);
         for (String portionName : collateral)
         {
-          if (!bookmarks.hasKey(portionName))
+          if (!bookmarks.containsKey(portionName))
           {
             LOGGER.debug("Regeneriere Bookmark '{}'", portionName);
-            bookmark = UNO.XMultiServiceFactory(doc).createInstance("com.sun.star.text.Bookmark");
+            bookmark = UnoService.createService(UnoService.CSS_TEXT_BOOKMARK, doc);
             UNO.XNamed(bookmark).setName(portionName);
             range.getText().insertTextContent(range, UNO.XTextContent(bookmark), true);
           }
@@ -129,19 +131,19 @@ class SurroundingGarbageCollector extends AbstractExecutor
       boolean kill = false;
       for (Object textPortion : textPortions)
       {
-        if ("Bookmark".equals(Utils.getProperty(textPortion, PropertyName.TEXT_PROTION_TYPE)))
+        if ("Bookmark".equals(Utils.getProperty(textPortion, UnoProperty.TEXT_PROTION_TYPE)))
         {
-          String portionName = UNO.XNamed(Utils.getProperty(textPortion, PropertyName.BOOKMARK)).getName();
+          String portionName = UNO.XNamed(Utils.getProperty(textPortion, UnoProperty.BOOKMARK)).getName();
           if (name.equals(portionName))
           {
-            kill = AnyConverter.toBoolean(Utils.getProperty(textPortion, PropertyName.IS_START));
+            kill = AnyConverter.toBoolean(Utils.getProperty(textPortion, UnoProperty.IS_START));
           } else
           {
             collateral.add(portionName);
           }
         }
 
-        if (kill && "Text".equals(Utils.getProperty(textPortion, PropertyName.TEXT_PROTION_TYPE)))
+        if (kill && "Text".equals(Utils.getProperty(textPortion, UnoProperty.TEXT_PROTION_TYPE)))
         {
           victims.add(textPortion);
         }

@@ -50,16 +50,17 @@ import javax.swing.ScrollPaneConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.container.XIndexAccess;
-import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNamed;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextSection;
 import com.sun.star.text.XTextSectionsSupplier;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoDictionary;
+import de.muenchen.allg.afid.UnoList;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
@@ -68,6 +69,8 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
+import de.muenchen.allg.util.UnoProperty;
+import de.muenchen.allg.util.UnoService;
 
 /**
  * Enthält alle OneSectionLineViews.
@@ -205,9 +208,8 @@ public class AllSectionLineViewsPanel implements View
   {
     try
     {
-      // doc.getCurrentSelection() ist ein c.s.s.text.TextRanges Service
-      XIndexAccess textRanges = UNO.XIndexAccess(doc.getCurrentSelection()); // c.s.s.text.TextRanges
-      XTextRange range = UNO.XTextRange(textRanges.getByIndex(0));
+      UnoList<XTextRange> textRanges = UnoList.create(doc.getCurrentSelection(), XTextRange.class);
+      XTextRange range = textRanges.get(0);
       XParagraphCursor cursor1 =
         UNO.XParagraphCursor(range.getText().createTextCursorByRange(range));
       XParagraphCursor cursor2 =
@@ -262,7 +264,7 @@ public class AllSectionLineViewsPanel implements View
     {
       Object paragraph =
         UNO.XEnumerationAccess(range).createEnumeration().nextElement();
-      Object breakType = UNO.getProperty(paragraph, "BreakType");
+      Object breakType = UnoProperty.getProperty(paragraph, UnoProperty.BREAK_TYPE);
       if (breakType != null
         && breakType.equals(com.sun.star.style.BreakType.PAGE_BEFORE)) return true;
     }
@@ -282,9 +284,8 @@ public class AllSectionLineViewsPanel implements View
   {
     try
     {
-      // doc.getCurrentSelection() ist ein c.s.s.text.TextRanges Service
-      XIndexAccess textRanges = UNO.XIndexAccess(doc.getCurrentSelection()); // c.s.s.text.TextRanges
-      XTextRange range = UNO.XTextRange(textRanges.getByIndex(0));
+      UnoList<XTextRange> textRanges = UnoList.create(doc.getCurrentSelection(), XTextRange.class);
+      XTextRange range = textRanges.get(0);
       createNewSectionFromTextRange(range);
     }
     catch (Exception x)
@@ -302,14 +303,12 @@ public class AllSectionLineViewsPanel implements View
    */
   private void createNewSectionFromTextRange(XTextRange range) throws Exception
   {
-    XNamed section =
-      UNO.XNamed(UNO.XMultiServiceFactory(doc).createInstance(
-        "com.sun.star.text.TextSection"));
+    XNamed section = UNO.XNamed(UnoService.createService(UnoService.CSS_TEXT_TEXT_SECTION, doc));
     XTextSectionsSupplier tssupp = UNO.XTextSectionsSupplier(doc);
-    XNameAccess textSections = tssupp.getTextSections();
+    UnoDictionary<XTextSection> textSections = UnoDictionary.create(tssupp.getTextSections(), XTextSection.class);
     String baseName = L.m("Sichtbarkeitsbereich");
     int count = 1;
-    while (textSections.hasByName(baseName + count))
+    while (textSections.containsKey(baseName + count))
       ++count;
     String sectionName = baseName + count;
     section.setName(sectionName);

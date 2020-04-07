@@ -20,10 +20,7 @@ import com.sun.star.awt.ActionEvent;
 import com.sun.star.awt.ItemEvent;
 import com.sun.star.awt.TextEvent;
 import com.sun.star.awt.XWindow;
-import com.sun.star.beans.UnknownPropertyException;
-import com.sun.star.beans.XPropertySet;
 import com.sun.star.frame.XModel;
-import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.sdb.XDocumentDataSource;
 import com.sun.star.sdb.XOfficeDatabaseDocument;
@@ -62,6 +59,7 @@ import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModelListener;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.SetFormValue;
 import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.MailmergeWizardController;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * Controller of the sidebar.
@@ -225,11 +223,9 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
   {
     try
     {
-      XPropertySet propertySet = UNO.XPropertySet(UNO.XControl(event.Source).getModel());
-      short toggleState = (short) propertySet.getPropertyValue("State");
+      short toggleState = (short) UnoProperty.getProperty(UNO.XControl(event.Source).getModel(), UnoProperty.STATE);
       previewModel.setPreview(toggleState == 1);
-    } catch (UnknownPropertyException | WrappedTargetException | IllegalArgumentException
-        | NoTableSelectedException ex)
+    } catch (UnoHelperException | IllegalArgumentException | NoTableSelectedException ex)
     {
       LOGGER.error("", ex);
     }
