@@ -1,5 +1,8 @@
 package de.muenchen.allg.itd51.wollmux.core.document.nodes;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
@@ -11,6 +14,9 @@ import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 
 public class InputNode extends TextFieldNode implements FormControl
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(InputNode.class);
+
   public InputNode(XDependentTextField textField, XTextDocument doc)
   {
     super(textField, doc);
@@ -54,7 +60,9 @@ public class InputNode extends TextFieldNode implements FormControl
       buf.append((String) UNO.getProperty(textfield, "Hint"));
     }
     catch (Exception x)
-    {}
+    {
+      LOGGER.trace("", x);
+    }
     
     if (buf.toString().trim().length() < 2)
     {
@@ -64,7 +72,9 @@ public class InputNode extends TextFieldNode implements FormControl
         buf.append((String) UNO.getProperty(textfield, "Content"));
       }
       catch (Exception x)
-      {}
+      {
+        LOGGER.trace("", x);
+      }
     }
     return buf.toString();
   }

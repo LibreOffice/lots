@@ -53,6 +53,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.text.JTextComponent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
@@ -65,6 +68,9 @@ import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarContent;
  */
 public class UIElementConfigThingyEditor
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(UIElementConfigThingyEditor.class);
+
   /**
    * Dieser String wird herangezogen um die Breite der JLabels mit den Attributnamen
    * zu bestimmen. Kein Attribut sollte je länger sein als dieser String.
@@ -476,7 +482,9 @@ public class UIElementConfigThingyEditor
         }
       }
       catch (NodeNotFoundException x)
-      {}
+      {
+        LOGGER.trace("", x);
+      }
     }
 
     @Override

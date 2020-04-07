@@ -43,6 +43,9 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -62,6 +65,9 @@ import de.muenchen.allg.itd51.wollmux.former.group.GroupsProvider;
  */
 public class FormControlModel
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(FormControlModel.class);
+
   /**
    * {@link Pattern} für legale IDs.
    */
@@ -244,21 +250,27 @@ public class FormControlModel
           lines = Integer.parseInt(str);
         }
         catch (Exception x)
-        {}
+        {
+          LOGGER.trace("", x);
+        }
       else if (name.equals("MINSIZE"))
         try
         {
           minsize = Integer.parseInt(str);
         }
         catch (Exception x)
-        {}
+        {
+          LOGGER.trace("", x);
+        }
       else if (name.equals("MAXSIZE"))
         try
         {
           maxsize = Integer.parseInt(str);
         }
         catch (Exception x)
-        {}
+        {
+          LOGGER.trace("", x);
+        }
       else if (name.equals("VALUES"))
         items = parseValues(attr);
       else if (name.equals("GROUPS"))
@@ -744,7 +756,9 @@ public class FormControlModel
         return;
       }
       catch (DuplicateIDException e)
-      {}
+      {
+        LOGGER.trace("", e);
+      }
       ++count;
       idStr2 = idStr + count;
     }

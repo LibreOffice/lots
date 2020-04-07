@@ -485,7 +485,9 @@ public class TextModule
           if (c.compareRegionStarts(range, tf.getAnchor()) == 0) return tf;
         }
         catch (IllegalArgumentException e)
-        {}
+        {
+          LOGGER.trace("", e);
+        }
       }
     }
     return null;

@@ -182,12 +182,16 @@ public class Common
 
       } // try
       catch ( Exception e )
-      {} // catch
+      {
+        LOGGER.trace("", e);
+      } // catch
 
       UIManager.setLookAndFeel(lafName);
     }
     catch (Exception x)
-    {}
+    {
+      LOGGER.trace("", x);
+    }
 
     // JFrame.setDefaultLookAndFeelDecorated(true); seems to cause problems with
     // undecorated windows in Metal LAF

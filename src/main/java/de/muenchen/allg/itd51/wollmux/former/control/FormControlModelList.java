@@ -41,6 +41,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
@@ -52,6 +55,9 @@ import de.muenchen.allg.itd51.wollmux.former.IDManager;
  */
 public class FormControlModelList implements Iterable<FormControlModel>
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(FormControlModelList.class);
+
   /**
    * Die FormControlModelList erzwingt einen Tab nach spätestens sovielen
    * FormControlModels. Dies sorgt Problemen mit GridBagLayout vor.
@@ -160,7 +166,9 @@ public class FormControlModelList implements Iterable<FormControlModel>
           if (idx >= count) count = idx + 1;
         }
         catch (Exception x)
-        {}
+        {
+          LOGGER.trace("", x);
+        }
       }
     }
 

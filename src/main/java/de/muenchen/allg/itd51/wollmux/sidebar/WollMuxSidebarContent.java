@@ -239,7 +239,9 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           "true");
     }
     catch (NodeNotFoundException e)
-    {}
+    {
+      LOGGER.trace("", e);
+    }
 
     XMultiComponentFactory xMCF =
       UnoRuntime.queryInterface(XMultiComponentFactory.class,
@@ -434,7 +436,9 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         activeIds = activeIds.getLastChild();
       }
       catch (NodeNotFoundException x)
-      {}
+      {
+        LOGGER.trace("", x);
+      }
       for (ConfigThingy idConf : activeIds)
       {
         confIds.add(idConf.getName());

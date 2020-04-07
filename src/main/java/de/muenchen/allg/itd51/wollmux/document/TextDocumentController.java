@@ -168,7 +168,9 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       getFrameController().getFrame().contextChanged();
     }
     catch (java.lang.Exception e)
-    {}
+    {
+      LOGGER.trace("", e);
+    }
   }
 
   /**
@@ -194,7 +196,9 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       getFrameController().getFrame().contextChanged();
     }
     catch (java.lang.Exception e)
-    {}
+    {
+      LOGGER.trace("", e);
+    }
   }
 
   /**
@@ -211,7 +215,9 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
         formConf = model.getFormDescription().get("Formular");
       }
       catch (NodeNotFoundException e)
-      {}
+      {
+        LOGGER.trace("", e);
+      }
       functionLib =
         FunctionFactory.parseFunctions(formConf, getDialogLibrary(), functionContext,
           globalFunctions);
@@ -233,7 +239,9 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
         formConf = model.getFormDescription().get("Formular");
       }
       catch (NodeNotFoundException e)
-      {}
+      {
+        LOGGER.trace("", e);
+      }
       dialogLib =
         DialogFactory.parseFunctionDialogs(formConf,
           globalDialogs, functionContext);
@@ -327,13 +335,17 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
         title = formularConf.get("TITLE", 1).toString();
       }
       catch (Exception x)
-      {}
+      {
+        LOGGER.trace("", x);
+      }
       try
       {
         mergeForms.add(formularAnpassung.getFirstChild());
       }
       catch (NodeNotFoundException x)
-      {}
+      {
+        LOGGER.trace("", x);
+      }
       ConfigThingy buttonAnpassung = conf.query("Buttonanpassung");
       if (buttonAnpassung.count() == 0) {
         buttonAnpassung = null;

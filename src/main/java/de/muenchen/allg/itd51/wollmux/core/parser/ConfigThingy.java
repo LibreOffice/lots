@@ -374,7 +374,9 @@ public class ConfigThingy implements Iterable<ConfigThingy>
         read.close();
       }
       catch (Exception x)
-      {}
+      {
+        LOGGER.trace("", x);
+      }
     }
   }
 
