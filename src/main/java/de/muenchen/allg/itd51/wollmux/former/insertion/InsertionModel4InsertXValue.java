@@ -161,7 +161,9 @@ public class InsertionModel4InsertXValue extends InsertionModel
       url = new URL("file:///");
     }
     catch (MalformedURLException x)
-    {}
+    {
+      LOGGER.trace("", x);
+    }
 
     ConfigThingy conf;
     try

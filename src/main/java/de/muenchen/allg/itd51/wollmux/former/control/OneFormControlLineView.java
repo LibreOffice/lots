@@ -55,6 +55,9 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
@@ -70,6 +73,9 @@ import de.muenchen.allg.itd51.wollmux.former.view.LineView;
  */
 public class OneFormControlLineView extends LineView
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(OneFormControlLineView.class);
+
   /**
    * Standardbreite des Textfelds, das das Label anzeigt.
    */
@@ -753,6 +759,7 @@ public class OneFormControlLineView extends LineView
 	    lines = -1;
 	} catch (NumberFormatException ex)
 	{
+          LOGGER.trace("", ex);
 	}
 	if (lines > 0)
 	{

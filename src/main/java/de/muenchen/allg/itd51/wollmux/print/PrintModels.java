@@ -666,7 +666,9 @@ public class PrintModels
               ps[i++] = getPropertyByName(name);
             }
             catch (UnknownPropertyException e)
-            {}
+            {
+              LOGGER.trace("", e);
+            }
           }
           return ps;
         }

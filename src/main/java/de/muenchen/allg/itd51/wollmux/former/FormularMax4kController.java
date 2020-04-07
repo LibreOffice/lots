@@ -499,8 +499,9 @@ public class FormularMax4kController
             view.toFront();
           }
           catch (Exception x)
-          {}
-          ;
+          {
+            LOGGER.trace("", x);
+          }
         }
       });
     }
@@ -640,7 +641,9 @@ public class FormularMax4kController
       selectionSupplier.removeSelectionChangeListener(myXSelectionChangedListener);
     }
     catch (Exception x)
-    {}
+    {
+      LOGGER.trace("", x);
+    }
   }
 
 
@@ -904,7 +907,9 @@ public class FormularMax4kController
         tempConf = tempConf.getFirstChild();
       }
       catch (Exception x)
-      {}
+      {
+        LOGGER.trace("", x);
+      }
     }
     else
     {
@@ -1045,7 +1050,9 @@ public class FormularMax4kController
         }
       }
       catch (Exception x)
-      {}
+      {
+        LOGGER.trace("", x);
+      }
       DocumentTreeVisitor visitor = new ScanVisitor(this);
       visitor.visit(documentController.getModel().doc);
     }
@@ -1264,7 +1271,9 @@ public class FormularMax4kController
           });
         }
         catch (Exception x)
-        {}
+        {
+          LOGGER.trace("", x);
+        }
       }
       catch (IllegalArgumentException e)
       {
@@ -1274,6 +1283,8 @@ public class FormularMax4kController
 
     @Override
     public void disposing(EventObject arg0)
-    {}
+    {
+      // nothing to do
+    }
   }
 }

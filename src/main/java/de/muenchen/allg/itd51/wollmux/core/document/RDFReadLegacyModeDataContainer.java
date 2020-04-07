@@ -2,6 +2,9 @@ package de.muenchen.allg.itd51.wollmux.core.document;
 
 import java.util.HashSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.text.XTextDocument;
 import com.sun.star.util.XModifiable;
 
@@ -26,6 +29,9 @@ import de.muenchen.allg.afid.UNO;
 public class RDFReadLegacyModeDataContainer implements
     PersistentDataContainer
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(RDFReadLegacyModeDataContainer.class);
+
   private PersistentDataContainer rdfData;
 
   private PersistentDataContainer legacy;
@@ -100,6 +106,7 @@ public class RDFReadLegacyModeDataContainer implements
           mod.setModified(modState);
         } catch (Exception e)
         {
+          LOGGER.trace("", e);
         }
       }
     }
@@ -127,7 +134,9 @@ public class RDFReadLegacyModeDataContainer implements
         mod.setModified(modState);
       }
       catch (Exception e)
-      {}
+      {
+        LOGGER.trace("", e);
+      }
     }
   }
 

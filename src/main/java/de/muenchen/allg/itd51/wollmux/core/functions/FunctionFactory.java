@@ -530,7 +530,9 @@ public class FunctionFactory
       }
     }
     catch (Exception x)
-    {}
+    {
+      LOGGER.trace("", x);
+    }
     if (idx < 0)
       throw new ConfigurationErrorException(L.m(
         "Index-Argument von %1 muss \"<NichtNegativeGanzeZahl>\" sein",
@@ -636,7 +638,9 @@ public class FunctionFactory
           }
         }
         catch (Exception x)
-        {}
+        {
+          LOGGER.trace("", x);
+        }
 
         if (num < 0)
         {
@@ -659,7 +663,9 @@ public class FunctionFactory
           }
         }
         catch (Exception x)
-        {}
+        {
+          LOGGER.trace("", x);
+        }
 
         if (num < 0)
         {

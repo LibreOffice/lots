@@ -1453,7 +1453,9 @@ public abstract class DocumentCommand
         groups = wmCmd.get("GROUPS");
       }
       catch (NodeNotFoundException e)
-      {}
+      {
+        LOGGER.trace("", e);
+      }
 
       // Gruppen aus dem GROUPS-Argument in das Set aufnehmen:
       for (ConfigThingy group : groups)

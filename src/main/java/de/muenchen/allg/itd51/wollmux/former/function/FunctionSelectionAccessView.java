@@ -191,6 +191,7 @@ public class FunctionSelectionAccessView implements View
 
     updateExpertFunctionTimer = new Timer(250, new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         updateExpertFunction();
@@ -367,14 +368,17 @@ public class FunctionSelectionAccessView implements View
 
     combo.addPopupMenuListener(new PopupMenuListener()
     {
+      @Override
       public void popupMenuWillBecomeVisible(PopupMenuEvent e)
       {
         updateParameterBox(combo);
       }
 
+      @Override
       public void popupMenuWillBecomeInvisible(PopupMenuEvent e)
       {}
 
+      @Override
       public void popupMenuCanceled(PopupMenuEvent e)
       {}
     });
@@ -421,16 +425,19 @@ public class FunctionSelectionAccessView implements View
         }
       }
 
+      @Override
       public void insertUpdate(DocumentEvent e)
       {
         update();
       }
 
+      @Override
       public void removeUpdate(DocumentEvent e)
       {
         update();
       }
 
+      @Override
       public void changedUpdate(DocumentEvent e)
       {
         update();
@@ -533,7 +540,9 @@ public class FunctionSelectionAccessView implements View
           selectedIndex = string_index;
       }
       catch (NodeNotFoundException x)
-      {}
+      {
+        LOGGER.trace("", x);
+      }
     }
 
     functionSelectorBox.setSelectedIndex(selectedIndex);
@@ -590,16 +599,19 @@ public class FunctionSelectionAccessView implements View
    */
   private class ExpertFunctionChangeListener implements DocumentListener
   {
+    @Override
     public void insertUpdate(DocumentEvent e)
     {
       updateExpertFunctionTimer.restart();
     }
 
+    @Override
     public void removeUpdate(DocumentEvent e)
     {
       updateExpertFunctionTimer.restart();
     }
 
+    @Override
     public void changedUpdate(DocumentEvent e)
     {
       updateExpertFunctionTimer.restart();
@@ -617,6 +629,7 @@ public class FunctionSelectionAccessView implements View
     /*
      * TESTED
      */
+    @Override
     public void itemStateChanged(ItemEvent e)
     {
       if (e.getStateChange() == ItemEvent.SELECTED)

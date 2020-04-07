@@ -332,11 +332,15 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
           if (val != null) p.setPropertyValue(key, val);
         }
         catch (ColumnNotFoundException x1)
-        {}
+        {
+          LOGGER.trace("", x1);
+        }
       }
     }
     catch (DatasetNotFoundException x)
-    {}
+    {
+      LOGGER.trace("", x);
+    }
     return p.getProps();
   }
 
@@ -505,6 +509,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
       }
     } catch (Exception e)
     {
+      LOGGER.trace("", e);
     }
   }
 
@@ -551,7 +556,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
       }
     }
     catch (Exception e)
-    {}
+    {
+      LOGGER.trace("", e);
+    }
   }
 
   /**
@@ -576,7 +583,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
       }
     }
     catch (Exception e)
-    {}
+    {
+      LOGGER.trace("", e);
+    }
     return -1;
   }
 
