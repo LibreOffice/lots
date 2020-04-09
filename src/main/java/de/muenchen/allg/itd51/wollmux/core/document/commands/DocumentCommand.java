@@ -1,42 +1,3 @@
-/*
- * Dateiname: DocumentCommand.java
- * Projekt  : WollMux
- * Funktion : Beschreibt ein Dokumentkommando mit allen zugehörigen Eigenschaften.
- *
- * Copyright (c) 2009-2015 Landeshauptstadt München
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 07.11.2005 | LUT | Erstellung als WMCommandState
- * 23.01.2006 | LUT | Erweiterung zum hierarchischen WM-Kommando
- * 26.04.2006 | LUT | Komplette Überarbeitung und Umbenennung in DocumentCommand
- * 17.05.2006 | LUT | Doku überarbeitet
- * 13.11.2006 | BAB | Erweitern von 'insertFrag' um optionale Argumente 'ARGS'
- * 08.07.2009 | BED | getTextRange() aus Interface OptionalHighlightColorProvider entfernt
- *                  | getTextRange() in getTextCursor() umgearbeitet
- *                  | -createInsertCursor(boolean)
- *                  | +getTextCursorWithinInsertMarks()
- *                  | +setTextRangeString(String)
- *                  | +insertTextContentIntoBookmark(XTextContent, boolean)
- * -------------------------------------------------------------------
- *
- * @author Christoph Lutz (D-III-ITD 5.1)
- *
- */
 package de.muenchen.allg.itd51.wollmux.core.document.commands;
 
 import java.util.HashSet;
@@ -48,7 +9,6 @@ import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XText;
 import com.sun.star.text.XTextContent;
@@ -66,76 +26,68 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.slv.PrintBlockCommand;
 
 /**
- * Beschreibt ein Dokumentkommando mit allen zugehörigen Eigenschaften wie z.B. die
- * Gruppenzugehörigkeit, Sichtbarkeit und Ausführstatus.
- *
- * @author Christoph Lutz (D-III-ITD 5.1)
+ * A document command with its properties like visibility, execution state and groups.
  */
 public abstract class DocumentCommand
 {
 
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(DocumentCommand.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DocumentCommand.class);
 
-  /**
-   * Das geparste ConfigThingy des zugehörenden Bookmarks.
-   */
-  protected ConfigThingy wmCmd;
+  private static final String STATE = "STATE";
 
-  /**
-   * Das zu diesem DokumentCommand gehörende Bookmark.
-   */
-  private Bookmark bookmark;
-
-  // Status-Attribute:
-
-  /**
-   * Vorbelegung für den Status DONE.
-   */
-  private static final Boolean STATE_DEFAULT_DONE = Boolean.FALSE;
-
-  /**
-   * Vorbelegung für den Status ERROR
-   */
-  private static final Boolean STATE_DEFAULT_ERROR = Boolean.FALSE;
-
-  /**
-   * Enthält den aktuellen DONE-Status oder null, falls der Wert nicht verändert
-   * wurde.
-   */
-  private Boolean done;
-
-  /**
-   * Enthält den aktuellen EROOR-Status oder null, falls der Wert nicht verändert
-   * wurde.
-   */
-  private Boolean error;
-
-  /**
-   * Das Attribut visible gibt an, ob der Textinhalt des Kommandos sichtbar oder
-   * ausgeblendet ist. Es wird nicht persistent im bookmark gespeichert.
-   */
-  private boolean visible = true;
-
-  // Einfügemarken und Status für InsertCursor zum sicheren Einfügen von
-  // Inhalten
-
-  private boolean hasInsertMarks;
+  private static final String ERROR_STRING = "ERROR";
 
   private static final String INSERT_MARK_OPEN = "<";
 
   private static final String INSERT_MARK_CLOSE = ">";
 
-  /* ************************************************************ */
+  /**
+   * Init value of state {@link #done}.
+   */
+  private static final Boolean STATE_DEFAULT_DONE = Boolean.FALSE;
 
   /**
-   * Der Konstruktor liefert eine Instanz eines DocumentCommand an der Stelle des
-   * Bookmarks bookmark mit dem geparsten Kommando wmCmd.
+   * Init value of state {@link #error}.
+   */
+  private static final Boolean STATE_DEFAULT_ERROR = Boolean.FALSE;
+
+  /**
+   * The configuration of the book mark.
+   */
+  protected ConfigThingy wmCmd;
+
+  /**
+   * The book mark in the document.
+   */
+  private Bookmark bookmark;
+
+  /**
+   * The done state of the command or null if unmodified.
+   */
+  private Boolean done;
+
+  /**
+   * The error state of the command or null if unmodified.
+   */
+  private Boolean error;
+
+  /**
+   * Is the text content of the command visible? It's not persisted in the book mar.
+   */
+  private boolean visible = true;
+
+  /**
+   * Has a cursor to put the content.
+   */
+  private boolean hasInsertMarks;
+
+  /**
+   * New command.
    *
    * @param wmCmd
-   *          das geparste WM-Kommando
+   *          The configuration of the command.
    * @param bookmark
-   *          das zugehörige Bookmark
+   *          The book mark of the command.
    */
   protected DocumentCommand(ConfigThingy wmCmd, Bookmark bookmark)
   {
@@ -143,22 +95,17 @@ public abstract class DocumentCommand
     this.bookmark = bookmark;
     this.hasInsertMarks = false;
 
-    // Sicher ist sicher: Fehlermeldung wenn normale Dokumentkommandos ein
-    // GROUPS-Attribut besitzen (die jetzt nicht merh unterstützt werden).
+    // Warn if groups is available although it's unsupported
     if (wmCmd.query("GROUPS").count() > 0 && !canHaveGroupsAttribute())
     {
-      LOGGER.error(L.m(
-        "Das Dokumentkommando '%1' darf kein GROUPS-Attribut besitzen.",
-        getBookmarkName()));
+      LOGGER.error("Das Dokumentkommando '{}' darf kein GROUPS-Attribut besitzen.", getBookmarkName());
     }
   }
 
   /**
-   * Seit der Umstellung auf den neuen Scan über DocumentCommands darf nur noch das
-   * Dokumentkommando SetGroups ein GROUPS-Attribut besitzen. Diese Methode stellt
-   * das sicher und wird vom SetGroups-Kommando mit Rückgabewert true überschrieben.
+   * Does this command support "GROUPS"-property?
    *
-   * @return false außer es ist ein SetGroups-Kommando
+   * @return True if it supports GROUPS, false otherwise. Default is false.
    */
   protected boolean canHaveGroupsAttribute()
   {
@@ -166,8 +113,9 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Liefert true, wenn das Dokumentkommando Textinhalte in das zugehörige Bookmark
-   * einfügen möchte, ansonsten false.
+   * Does this command insert content?
+   *
+   * @return True if it inserts content, false otherwise. Default is false.
    */
   protected boolean insertsTextContent()
   {
@@ -175,52 +123,38 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Liefert den Namen des zugehörigen Bookmarks zurück.
+   * Get the name of the book mark.
    *
-   * @return Liefert den Namen des zugehörigen Bookmarks zurück.
+   * @return The name of the book mark.
    */
   public String getBookmarkName()
   {
     return bookmark.getName();
   }
 
-  /**
-   * Diese Methode liefert eine String-Repräsentation des DokumentCommands zurück.
-   * Die String-Repräsentation hat den Aufbau {@code DocumentCommand[<bookmarkName>]}.
-   */
   @Override
   public String toString()
   {
-    return "" + this.getClass().getSimpleName() + "["
-      + (isRetired() ? "RETIRED:" : "") + (isDone() ? "DONE:" : "")
-      + getBookmarkName() + "]";
+    return "" + this.getClass().getSimpleName() + "[" + (isRetired() ? "RETIRED:" : "") + (isDone() ? "DONE:" : "")
+        + getBookmarkName() + "]";
   }
 
   /**
-   * Callbackfunktion für die Ausführung des Dokumentkommandos in einem
-   * DocumentCommand.Executor wie z.B. dem DocumentCommandInterpreter. Die Methode
-   * liefert die Anzahl der bei der Ausführung entstandenen Fehler zurück.
+   * Executes the command. (callback)
    *
    * @param executor
-   * @return Anzahl der aufgetretenen Fehler
+   *          The caller of this method.
+   * @return Number of errors during execution.
    */
   public abstract int execute(DocumentCommand.Executor executor);
 
   /**
-   * Liefert einen TextCursor für die TextRange, an der das Bookmark dieses
-   * {@link DocumentCommand}s verankert ist, zurück oder <code>null</code>, falls das
-   * Bookmark nicht mehr existiert (zum Beispiel weil es inzwischen gelöscht wurde).
-   * Aufgrund von OOo-Issue #67869 ist es im allgemeinen besser den von dieser
-   * Methode erzeugten Cursor statt direkt die TextRange zu verwenden, da sich mit
-   * dem Cursor der Inhalt des Bookmarks sicherer enumerieren lässt. Der von dieser
-   * Methode zurückgelieferte TextCursor sollte allerdings nicht verwendet werden, um
-   * direkt Text innerhalb eines Bookmarks einzufügen! Dafür sind die Methoden
-   * {@link #setTextRangeString(String)},
-   * {@link #insertTextContentIntoBookmark(XTextContent, boolean)} und
-   * {@link #getTextCursorWithinInsertMarks()} da.
+   * Get the TextCursor of the book mark. It's the best way to iterate through a book mark
+   * (OOo-Issue #67869). If you like to change the content use {@link #setTextRangeString(String)},
+   * {@link #insertTextContentIntoBookmark(XTextContent, boolean)} or
+   * {@link #getTextCursorWithinInsertMarks()}.
    *
-   * @return einen TextCursor für den Anchor des Bookmarks oder <code>null</code>
-   *         wenn das Bookmark nicht mehr existiert
+   * @return The TextCursor of the book mark or null if the book mark doesn't exist.
    */
   public XTextCursor getTextCursor()
   {
@@ -229,9 +163,9 @@ public abstract class DocumentCommand
       XTextCursor cursor = bookmark.getTextCursor();
       if (cursor == null)
       {
-        LOGGER.debug(L.m(
-          "Kann keinen Textcursor erstellen für Dokumentkommando '%1'\nIst das Bookmark vielleicht verschwunden?",
-          this.toString()));
+        LOGGER.debug(
+            "Kann keinen Textcursor erstellen für Dokumentkommando '{}'\nIst das Bookmark vielleicht verschwunden?",
+            this);
       }
       return cursor;
     } catch (UnoHelperException e)
@@ -242,13 +176,12 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Liefert die TextRange an der das Bookmark dieses Kommandos verankert ist oder
-   * null, falls das Bookmark nicht mehr existiert. Die von dieser Methode
-   * zurückgelieferte TextRange sollte nicht verwendet werden, um direkt Text
-   * innerhalb eines Bookmarks einzufügen! Dafür sind die Methoden
+   * Get the TextRange of the book mark. If you like to change the content use
    * {@link #setTextRangeString(String)},
-   * {@link #insertTextContentIntoBookmark(XTextContent, boolean)} und
-   * {@link #getTextCursorWithinInsertMarks()} da.
+   * {@link #insertTextContentIntoBookmark(XTextContent, boolean)} or
+   * {@link #getTextCursorWithinInsertMarks()}.
+   *
+   * @return The TextRange of the book mark or null if the book mark doesn't exist.
    *
    * @see de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement#getAnchor()
    */
@@ -265,27 +198,19 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Liefert einen TextCursor ohne Ausdehnung zum Einfügen von Inhalt innerhalb des
-   * Bookmarks dieses {@link DocumentCommand}s zurück, wobei der ursprünglich
-   * enthaltene Inhalt des Ankers des Bookmarks durch zwei Insert Marks (
-   * {@link #INSERT_MARK_OPEN} und {@link #INSERT_MARK_CLOSE}) ersetzt wird. Sollte
-   * das Bookmark kollabiert gewesen sein, so wird es zunächst dekollabiert, so dass
-   * die Insert Marks innerhalb des Bookmarks eingefügt werden können. Der
-   * zurückgelieferte Cursor besitzt keine Ausdehnung und befindet sich zwischen den
-   * beiden eingefügten Insert Marks. Falls das Bookmark nicht mehr existiert liefert
-   * die Methode <code>null</code> zurück.
+   * Get the TextCursor of the book mark without expansion. The book mark is decolapsed and its
+   * content is replaced with {@link #INSERT_MARK_OPEN} and {@link #INSERT_MARK_CLOSE}. The cursor
+   * is between the two marks.
    *
-   * @return TextCursor zum Einfügen innerhalb von Insert Marks oder
-   *         <code>null</code>
+   * @return The TextCursor of the book mark or null if the book mark doesn't exist.
    */
   public XTextCursor getTextCursorWithinInsertMarks()
   {
-    // Insert Marks hinzufügen
-    // (dabei wird das Bookmark falls nötig dekollabiert)
+    // add insert marks
     this.setTextRangeString(INSERT_MARK_OPEN + INSERT_MARK_CLOSE);
     hasInsertMarks = true;
 
-    XTextCursor cursor = this.getTextCursor(); // Cursor mit Insert Marks
+    XTextCursor cursor = this.getTextCursor();
     if (cursor != null)
     {
       cursor.goRight(getStartMarkLength(), false);
@@ -296,17 +221,10 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Setzt den Inhalt der TextRange, an der das Bookmark dieses Kommandos verankert
-   * ist, auf den übergebenen String-Wert und kollabiert/dekollabiert das Bookmark je
-   * nachdem ob der String leer (bzw. <code>null</code>) oder nicht-leer ist. Bei
-   * einem leeren String wird das Bookmark kollabiert (sofern es dies nicht schon
-   * ist), bei einem nicht-leeren String wird das Bookmark dekollabiert (sofern nicht
-   * schon der Fall) und das dekollabierte Bookmark umfasst anschließend den
-   * übergebenen Text.
+   * Replace to content of the TextRange and collapse or decollapse the book mark.
    *
    * @param text
-   *          der einzufügende String; falls leer (oder <code>null</code>) wird
-   *          Bookmark kollabiert
+   *          The content. If null or empty the book mark is collapsed.
    */
   public void setTextRangeString(String text)
   {
@@ -320,7 +238,7 @@ public abstract class DocumentCommand
       XTextRange range = bookmark.getAnchor();
       if (range != null)
       {
-        range.setString(text); // setString(null) kein Problem
+        range.setString(text);
       }
 
       if (text == null || text.length() == 0)
@@ -334,22 +252,12 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Fügt in die TextRange, an der das Bookmark dieses Kommandos verankert ist, den
-   * übergebenen TextContent ein, wobei das Bookmark zuvor dekollabiert wird (sollte
-   * es das nicht ohnehin schon sein). Über den Parameter replace kann gesteuert
-   * werden, ob beim Einfügen der bisherige Inhalt der TextRange des Bookmarks
-   * ersetzt werden soll oder nicht. Wird <code>false</code> übergeben, so wird der
-   * TextContent an das Ende der TextRange des Bookmarks (aber natürlich noch im
-   * Bookmark) hinzugefügt.
+   * Add or replace to content of the TextRange and decollapse the book mark if necessary.
    *
    * @param textContent
-   *          der einzufügende TextContent
+   *          The content.
    * @param replace
-   *          bestimmt ob der in der TextRange des Bookmarks enthaltene Inhalt von
-   *          textContent ersetzt werden soll. Falls <code>true</code> wird der
-   *          Inhalt ersetzt, ansonsten wird textContent an das Ende der TextRange
-   *          des Bookmarks gehängt
-   * @throws IllegalArgumentException
+   *          If True, the content is replaced, otherwise it is appended at the end.
    */
   public void insertTextContentIntoBookmark(XTextContent textContent, boolean replace)
   {
@@ -372,7 +280,9 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Liefert die Länge des End-Einfügemarkers.
+   * Get the length of {@link #INSERT_MARK_CLOSE}.
+   *
+   * @return The length.
    */
   public short getEndMarkLength()
   {
@@ -380,7 +290,9 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Liefert die Länge des Start-Einfügemarkers.
+   * Get the length of {@link #INSERT_MARK_OPEN}.
+   *
+   * @return The length.
    */
   public short getStartMarkLength()
   {
@@ -388,9 +300,9 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Liefert entweder null falls kein Start-Einfügemarke vorhanden oder liefert 2
-   * Cursor, von denen der erste links neben der zweite rechts neben der
-   * Start-Einfügemarke steht.
+   * Get the marks left and right of {@link #INSERT_MARK_OPEN}.
+   *
+   * @return An array with two cursors if the command has insert marks. Otherwise an empty array.
    */
   public XParagraphCursor[] getStartMark()
   {
@@ -399,7 +311,7 @@ public abstract class DocumentCommand
       XTextRange range = bookmark.getTextCursor();
       if (range == null || !hasInsertMarks)
       {
-        return null;
+        return new XParagraphCursor[] {};
       }
       XParagraphCursor[] cursor = new XParagraphCursor[2];
       XText text = range.getText();
@@ -410,14 +322,14 @@ public abstract class DocumentCommand
     } catch (UnoHelperException e)
     {
       LOGGER.debug("", e);
-      return null;
+      return new XParagraphCursor[] {};
     }
   }
 
   /**
-   * Liefert entweder null falls keine End-Einfügemarke vorhanden oder liefert 2
-   * Cursor, von denen der erste links neben der zweite rechts neben der
-   * End-Einfügemarke steht.
+   * Get the marks left and right of {@link #INSERT_MARK_CLOSE}.
+   *
+   * @return An array with two cursors if the command has insert marks. Otherwise an empty array.
    */
   public XParagraphCursor[] getEndMark()
   {
@@ -426,7 +338,7 @@ public abstract class DocumentCommand
       XTextRange range = bookmark.getTextCursor();
       if (range == null || !hasInsertMarks)
       {
-        return null;
+        return new XParagraphCursor[] {};
       }
       XParagraphCursor[] cursor = new XParagraphCursor[2];
       XText text = range.getText();
@@ -437,14 +349,14 @@ public abstract class DocumentCommand
     } catch (UnoHelperException e)
     {
       LOGGER.debug("", e);
-      return null;
+      return new XParagraphCursor[] {};
     }
   }
 
   /**
-   * Liefert <code>true</code> zurück, wenn das Dokumentkommando insertMarks besitzt,
-   * die zuvor über den Aufruf von {@link #getTextCursorWithinInsertMarks()} erzeugt
-   * worden sind, ansonsten <code>false</code>.
+   * Has the command insert marks created with {@link #getTextCursorWithinInsertMarks()}.
+   *
+   * @return True if it has insert marks, false otherwise.
    */
   public boolean hasInsertMarks()
   {
@@ -452,9 +364,7 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Teilt dem Dokumentkommando mit, dass die insertMarks des Dokumentkommandos
-   * entfernt wurden und {@link #hasInsertMarks()} in Folge dessen <code>false</code>
-   * zurück liefern muss.
+   * Reset information about insert marks.
    */
   public void unsetHasInsertMarks()
   {
@@ -462,12 +372,9 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Liefert true, wenn das Bookmark zu diesem Dokumentkommando nicht mehr existiert
-   * und das Dokumentkommando daher nicht mehr zu gebrauchen ist oder andernfalls
-   * false.
+   * Does the book mark of the command still exist?
    *
-   * @return true, wenn das Bookmark zu diesem Dokumentkommando nicht mehr existiert,
-   *         ansonsten false.
+   * @return True if the book mark doesn't exist anymore, false otherwise.
    */
   public boolean isRetired()
   {
@@ -485,16 +392,16 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Beschreibt ob das Kommando bereits abgearbeitet wurde. Ist DONE bisher noch
-   * nicht definiert oder gesetzt worden, so wird der Defaultwert false
-   * zurückgeliefert.
+   * Has the command been executed?
    *
-   * @return true, falls das Kommando bereits bearbeitet wurde, andernfalls false.
+   * @return True if the command was executed, false otherwise.
    */
   public boolean isDone()
   {
     if (done != null)
+    {
       return done.booleanValue();
+    }
     else if (isDefinedState("DONE"))
     {
       try
@@ -505,58 +412,53 @@ public abstract class DocumentCommand
       {
         return false;
       }
-    }
-    else
+    } else
+    {
       return STATE_DEFAULT_DONE.booleanValue();
+    }
   }
 
   /**
-   * Markiert ein Dokumentkommando als bearbeitet; Das Dokumentkommando wird
-   * daraufhin aus dem Dokument gelöscht, wenn removeBookmark==true oder umbenannt,
-   * wenn removeBookmark==false.
+   * Mark this command as executed and delete the book mark if necessary.
    *
    * @param removeBookmark
-   *          true, signalisiert, dass das zugehörige Bookmark gelöscht werden soll.
-   *          False signalisiert, dass das Bookmark mit dem Zusatz {@code <alterName>
-   *          STATE(DONE 'true')} versehen wird.
+   *          True if it should be executed.
    */
   public void markDone(boolean removeBookmark)
   {
-
     this.done = Boolean.TRUE;
     flushToBookmark(removeBookmark);
   }
 
   /**
-   * Liefert den Fehler-Status der Kommandobearbeitung zurück. Ist das Attribut ERROR
-   * bisher nicht definiert oder kein Fehler gesetzt worden, so wird der Defaultwert
-   * false zurückgliefert.
+   * Were there any errors during command execution.
    *
-   * @return true, wenn bei der Kommandobearbeitung Fehler auftraten; andernfalls
-   *         false
+   * @return True if there have been errors, false otherwise.
    */
   public boolean hasError()
   {
     if (error != null)
       return error.booleanValue();
-    else if (isDefinedState("ERROR"))
+    else if (isDefinedState(ERROR_STRING))
     {
       try
       {
-        return Boolean.parseBoolean(getState("ERROR").toString());
+        return Boolean.parseBoolean(getState(ERROR_STRING).toString());
       } catch (NodeNotFoundException e)
       {
         return false;
       }
-    }
-    else
+    } else
+    {
       return STATE_DEFAULT_ERROR.booleanValue();
+    }
   }
 
   /**
-   * Erlaubt das explizite Setzen des Error-Attributs.
+   * Set the error state.
    *
    * @param error
+   *          True if there were errors, false otherwise.
    */
   public void setErrorState(boolean error)
   {
@@ -564,38 +466,24 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Liefert ein ConfigThingy, das ein "WM"-Kommando mit allen Statusinformationen
-   * enthält. Neue Unterknoten werden dabei nur angelegt, wenn dies unbedingt
-   * erforderlich ist, d.h. wenn ein Wert vom Defaultwert abweicht oder der Wert
-   * bereits vorher gesetzt war.
+   * Create a ConfigThingy describing the current state of the command.
    *
-   * @return Ein ConfigThingy, das das "WM"-Kommando mit allen Statusinformationen
-   *         enthält.
+   * @return The description.
    */
   protected ConfigThingy toConfigThingy()
   {
-    // DONE:
-    // Falls der Knoten existiert und sich der Status geändert hat wird der neue
-    // Status gesetzt. Falls der Knoten nicht existiert wird er nur erzeugt,
-    // wenn der Status vom Standard abweicht.
     if (isDefinedState("DONE") && done != null)
     {
       setOrCreate("DONE", done.toString());
-    }
-    else if (isDone() != STATE_DEFAULT_DONE.booleanValue())
+    } else if (isDone() != STATE_DEFAULT_DONE.booleanValue())
     {
       setOrCreate("DONE", Boolean.toString(isDone()));
     }
 
-    // ERRORS:
-    // Falls der Knoten existiert und sich der Status geändert hat wird der neue
-    // Status gesetzt. Falls der Knoten nicht existiert wird er nur erzeugt,
-    // wenn der Status vom Standard abweicht.
-    if (isDefinedState("ERROR") && error != null)
+    if (isDefinedState(ERROR_STRING) && error != null)
     {
-      setOrCreate("ERROR", error.toString());
-    }
-    else if (hasError() != STATE_DEFAULT_ERROR.booleanValue())
+      setOrCreate(ERROR_STRING, error.toString());
+    } else if (hasError() != STATE_DEFAULT_ERROR.booleanValue())
     {
       setOrCreate("ERRORS", Boolean.toString(hasError()));
     }
@@ -604,37 +492,32 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Liefert den Inhalt des übergebenen ConfigThingy-Objekts (üblicherweise das
-   * wmCmd) als einen String, der geeignet ist, um den ihn in Bookmarknamen verwenden
-   * zu können. D.h. alle Newline, Komma und andere für Bookmarknamen unverträgliche
-   * Zeichen werden entfernt.
+   * Create a string of a ConfigThingy without newlines, commas and other chars, which aren't
+   * supported in book mark names.
    *
    * @param conf
-   *          Das ConfigThingy-Objekt, zu dem die Stringrepräsentation erzeugt werden
-   *          soll.
-   * @return Einen String, der als Bookmarkname verwendet werden kann.
+   *          The ConfigThingy.
+   * @return String representation of the ConfigThingy.
    */
   public static String getCommandString(ConfigThingy conf)
   {
-    // Neues WM-String zusammenbauen, der keine Zeilenvorschübe, Kommas und
-    // abschließende Leerzeichen enthält:
     String wmCmdString = conf.stringRepresentation(true, '\'', true);
     wmCmdString = wmCmdString.replaceAll(",", " ");
     wmCmdString = wmCmdString.replaceAll("[\r\n]+", " ");
     while (wmCmdString.endsWith(" "))
+    {
       wmCmdString = wmCmdString.substring(0, wmCmdString.length() - 1);
+    }
     return wmCmdString;
   }
 
   /**
-   * Schreibt den neuen Status des Dokumentkommandos in das Dokument zurück oder
-   * löscht ein Bookmark, wenn der Status DONE=true gesetzt ist - Die Methode liefert
-   * entweder den Namen des neuen Bookmarks, welches die neuen Statusinformationen
-   * enthält zurück, oder null, wenn das zugehörige Bookmark gelöscht wurde. Ist der
-   * DEBUG-modus gesetzt, so werden in gar keinem Fall Bookmarks gelöscht, womit die
-   * Fehlersuche erleichtert werden soll.
+   * Update a book mark or delete it.
    *
-   * @return der Name des neuen Bookmarks oder null.
+   * @param removeIfDone
+   *          If true and the command is executed ({@link #isDone()}) the book mark is removed.
+   *          Otherwise its name is updated with the state.
+   * @return The name of the book mark or null if it has been removed.
    */
   protected String flushToBookmark(boolean removeIfDone)
   {
@@ -648,7 +531,6 @@ public abstract class DocumentCommand
       {
         String wmCmdString = getCommandString(toConfigThingy());
 
-        // Neuen Status rausschreiben, wenn er sich geändert hat:
         String name = bookmark.getName();
         name = name.replaceFirst("\\s*\\d+\\s*$", "");
         if (!wmCmdString.equals(name))
@@ -666,11 +548,11 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Gibt Auskunft, ob ein Key unterhalb des STATE-Knotens definiert ist. z.B.
-   * "WM(...) STATE (KEY '...')"
+   * Has the command the state.
    *
    * @param key
-   * @return true, falls der Key definiert ist, andernfalls false.
+   *          The name of state ({@link #ERROR_STRING}, or "DONE").
+   * @return True if the state is defined, false otherwise.
    */
   protected boolean isDefinedState(String key)
   {
@@ -684,67 +566,60 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Liefert das ConfigThingy zu dem gesuchten Key key unterhalt des STATE-Knotens.
+   * Get the value of a state.
    *
    * @param key
-   * @return Das ConfigThingy, mit dem Key key.
+   *          The name of state ({@link #ERROR_STRING}, or "DONE").
+   * @return The value.
    * @throws NodeNotFoundException
+   *           The command doesn't have the state.
    */
   protected ConfigThingy getState(String key) throws NodeNotFoundException
   {
-    return wmCmd.get("STATE").get(key);
+    return wmCmd.get(STATE).get(key);
   }
 
   /**
-   * Setzt einen Schlüssel-Wert-Paar unterhalb des STATE-Knotens. Ist der Schlüssel
-   * bereits definiert, wird der bestehende Wert überschrieben. Sind der STATE-Knoten
-   * oder der Schlüssel nicht definiert, so werden die entsprechenden Knoten erzeugt
-   * und der Key key erhält ein Kindknoten mit dem Value value.
+   * Update state information of the command.
    *
    * @param key
+   *          The name of state ({@link #ERROR_STRING}, or "DONE").
    * @param value
+   *          The value of the state.
    */
   protected void setOrCreate(String key, String value)
   {
-    // gewünschte Struktur aufbauen:
-
-    // a) STATE(...)
     ConfigThingy state;
     try
     {
-      state = wmCmd.get("STATE");
-    }
-    catch (NodeNotFoundException e1)
+      state = wmCmd.get(STATE);
+    } catch (NodeNotFoundException e1)
     {
-      state = wmCmd.add("STATE");
+      state = wmCmd.add(STATE);
     }
 
-    // b) STATE(KEY ...)
     ConfigThingy ctKey;
     try
     {
       ctKey = state.get(key);
-    }
-    catch (NodeNotFoundException e)
+    } catch (NodeNotFoundException e)
     {
       ctKey = state.add(key);
     }
 
-    // c) STATE(KEY 'value')
     try
     {
       ctKey.getFirstChild().setName(value);
-    }
-    catch (NodeNotFoundException e)
+    } catch (NodeNotFoundException e)
     {
       ctKey.add(value);
     }
   }
 
   /**
-   * gibt den Sichtbarkeitsstatus des Textinhaltes unter dem Dokumentkommando zurück.
+   * Is the content of the command visible?
    *
-   * @return true=sichtbar, false=ausgeblendet
+   * @return True if it's visible, false otherwise.
    * @see de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement#isVisible()
    */
   public boolean isVisible()
@@ -753,11 +628,10 @@ public abstract class DocumentCommand
   }
 
   /**
-   * Setzt den Sichtbarkeitsstatus des Textinhaltes unter dem Dokumentkommando auf
-   * visible. Der Status visible wird zudem nicht persistent im Bookmark hinterlegt.
+   * Update the visibility of the content of the book mark.
    *
    * @param visible
-   *          true=sichtbar, false=ausgeblendet
+   *          True if the content should be visible, false otherwise.
    * @see de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement#setVisible(boolean)
    */
   public void setVisible(boolean visible)
@@ -769,26 +643,20 @@ public abstract class DocumentCommand
       try
       {
         UNO.hideTextRange(cursor, !visible);
-      }
-      catch (UnoHelperException e)
+      } catch (UnoHelperException e)
       {
         LOGGER.error("Sichtbarkeit konnte nicht geändert werden.", e);
       }
     }
   }
 
-  // ********************************************************************************
   /**
-   * Kommandos werden extern definiert - um das zu ermöglichen greift hier das
-   * Prinzip des Visitor-Designpatterns.
-   *
-   * @author christoph.lutz
+   * Executor of commands. (Visitor design pattern)
    */
   public static interface Executor
   {
     /**
-     * Diese Methode fügt das Textfragment frag_id in den gegebenen Bookmark bookmarkName ein. Im
-     * Fehlerfall wird eine entsprechende Fehlermeldung eingefügt.
+     * Replace the content of command with a text fragment or an error information.
      *
      * @param cmd
      *          The command to execute.
@@ -796,11 +664,17 @@ public abstract class DocumentCommand
      */
     public int executeCommand(DocumentCommand.InsertFrag cmd);
 
+    /**
+     * Replace the content of the command with a database value.
+     *
+     * @param cmd
+     *          The command to execute.
+     * @return The number of errors.
+     */
     public int executeCommand(DocumentCommand.InsertValue cmd);
 
     /**
-     * Diese Methode fügt das nächste Textfragment aus der dem WMCommandInterpreter übergebenen
-     * frag_urls liste ein. Im Fehlerfall wird eine entsprechende Fehlermeldung eingefügt. *
+     * Replace the content of the command with a text fragment.
      *
      * @param cmd
      *          The command to execute.
@@ -808,18 +682,67 @@ public abstract class DocumentCommand
      */
     public int executeCommand(DocumentCommand.InsertContent cmd);
 
+    /**
+     * Add the content to the form description.
+     *
+     * @param cmd
+     *          The command to execute.
+     * @return The number of errors.
+     */
     public int executeCommand(DocumentCommand.Form cmd);
 
+    /**
+     * Replace the content of the command with an error message.
+     *
+     * @param cmd
+     *          The command to execute.
+     * @return The number of errors.
+     */
     public int executeCommand(DocumentCommand.InvalidCommand cmd);
 
+    /**
+     * Update all text fields in the book mark.
+     *
+     * @param cmd
+     *          The command to execute.
+     * @return The number of errors.
+     */
     public int executeCommand(DocumentCommand.UpdateFields cmd);
 
+    /**
+     * Set the type of the document.
+     *
+     * @param cmd
+     *          The command to execute.
+     * @return The number of errors.
+     */
     public int executeCommand(DocumentCommand.SetType cmd);
 
+    /**
+     * Replace the content of the command with a form value.
+     *
+     * @param cmd
+     *          The command to execute.
+     * @return The number of errors.
+     */
     public int executeCommand(DocumentCommand.InsertFormValue cmd);
 
+    /**
+     * Mark the content of the book mark as part of one or more visibility groups.
+     *
+     * @param cmd
+     *          The command to execute.
+     * @return The number of errors.
+     */
     public int executeCommand(DocumentCommand.SetGroups cmd);
 
+    /**
+     * Add a print function to the document.
+     *
+     * @param cmd
+     *          The command to execute.
+     * @return The number of errors.
+     */
     public int executeCommand(DocumentCommand.SetPrintFunction cmd);
 
     /**
@@ -831,13 +754,18 @@ public abstract class DocumentCommand
      */
     public int executeCommand(PrintBlockCommand cmd);
 
+    /**
+     * Mark a place in the document to jump to if there aren't any placeholder.
+     *
+     * @param cmd
+     *          The command to execute.
+     * @return The number of errors.
+     */
     public int executeCommand(DocumentCommand.SetJumpMark cmd);
 
     /**
-     * Wertet ein OverrideFrag-Kommandos aus, über das Fragmente umgemapped werden können, und setzt
-     * das Kommando sofort auf DONE. Dies geschieht vor der Bearbeitung der anderen Kommandos
-     * (insertFrag/insertContent), da das mapping beim insertFrag/insertContent benötigt wird. *
-     * 
+     * Change the mapping of a text fragment id.
+     *
      * @param cmd
      *          The command to execute.
      * @return The number of errors.
@@ -845,26 +773,32 @@ public abstract class DocumentCommand
     public int executeCommand(DocumentCommand.OverrideFrag cmd);
   }
 
-  // ********************************************************************************
   /**
-   * Beschreibt ein Dokumentkommando, das einen Wert in das Dokument einfügt, der
-   * über eine optionale Transformation umgewandelt werden kann (Derzeit
-   * implementieren insertValue und insertFormValue dieses Interface).
+   * A document command which can transform the content before insertion.
    */
   public static interface OptionalTrafoProvider
   {
+    /**
+     * Get the name of the transformation.
+     *
+     * @return The name of the TRAFO.
+     */
     public String getTrafoName();
   }
 
-  // ********************************************************************************
   /**
-   * Eine Exception die geworfen wird, wenn ein Dokumentkommando als ungültig erkannt
-   * wurde, z,b, aufgrund eines fehlenden Parameters.
+   * Exception for invalid commands.
    */
   public static class InvalidCommandException extends com.sun.star.uno.Exception
   {
     private static final long serialVersionUID = -3960668930339529734L;
 
+    /**
+     * New InvalidCommandException with cause.
+     * 
+     * @param message
+     *          The message.
+     */
     public InvalidCommandException(String message)
     {
       super(message);
@@ -884,26 +818,37 @@ public abstract class DocumentCommand
     }
   }
 
-  // ********************************************************************************
   /**
-   * Beschreibt ein Dokumentkommando, das aufgrund eines Syntax-Fehlers oder eines
-   * fehlenden Parameters ungültig ist, jedoch trotzdem im Dokument als Fehlerfeld
-   * dargestellt werden soll.
-   *
-   * @author lut
-   *
+   * Invalid command, which should be displayed in the document.
    */
   public static class InvalidCommand extends DocumentCommand
   {
     private java.lang.Exception exception;
 
-    public InvalidCommand(ConfigThingy wmCmd, Bookmark bookmark,
-        InvalidCommandException exception)
+    /**
+     * Create a new invalid command.
+     *
+     * @param wmCmd
+     *          The configuration of the command.
+     * @param bookmark
+     *          The book mark.
+     * @param exception
+     *          The cause of invalidity.
+     */
+    public InvalidCommand(ConfigThingy wmCmd, Bookmark bookmark, InvalidCommandException exception)
     {
       super(wmCmd, bookmark);
       this.exception = exception;
     }
 
+    /**
+     * Create a new invalid command with empty configuration.
+     *
+     * @param bookmark
+     *          The book mark.
+     * @param exception
+     *          The cause of invalidity.
+     */
     public InvalidCommand(Bookmark bookmark, SyntaxErrorException exception)
     {
       super(new ConfigThingy("WM"), bookmark);
@@ -920,24 +865,21 @@ public abstract class DocumentCommand
     {
       return visitable.executeCommand(this);
     }
-
-    public String updateBookmark()
-    {
-      // der updateBookmark darf in diesem Fall natürlich nichts rausschreiben,
-      // da das Kommando ja nicht mal in einer syntaktisch vollständigen Version
-      // vorliegt.
-      return getBookmarkName();
-    }
   }
 
-  // ********************************************************************************
   /**
-   * Beschreibt ein noch nicht implementiertes Dokumentkommando, das jedoch für die
-   * Zukunft geplant ist und dess Ausführung daher keine Fehler beim Erzeugen des
-   * Briefkopfs liefern darf.
+   * A not yet implemented command, which is no error.
    */
   public static class NotYetImplemented extends DocumentCommand
   {
+    /**
+     * Create a new command.
+     *
+     * @param wmCmd
+     *          The configuration of the command.
+     * @param bookmark
+     *          The book mark.
+     */
     public NotYetImplemented(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
@@ -951,17 +893,20 @@ public abstract class DocumentCommand
     }
   }
 
-  // ********************************************************************************
   /**
-   * Beschreibt das Dokumentkommando Form, welches Zugriff auf die
-   * Formularbeschreibung des Dokuments ermöglicht, die in Form einer Notiz innerhalb
-   * des zum Form-Kommando zugehörigen Bookmarks abgelegt ist.
-   *
-   * @author lut
-   *
+   * A form command, which provides access to the form description of the document. The form
+   * description is stored in a note under the book mark.
    */
   public static class Form extends DocumentCommand
   {
+    /**
+     * Create a new command.
+     *
+     * @param wmCmd
+     *          The configuration of the command.
+     * @param bookmark
+     *          The book mark.
+     */
     public Form(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
@@ -974,9 +919,8 @@ public abstract class DocumentCommand
     }
   }
 
-  // ********************************************************************************
   /**
-   * Das Kommando InsertFrag fügt ein externes Textfragment in das Dokument ein.
+   * Replaces the content of the command with a text fragment or an error information.
    */
   public static class InsertFrag extends DocumentCommand
   {
@@ -988,8 +932,17 @@ public abstract class DocumentCommand
 
     private Set<String> styles = null;
 
-    public InsertFrag(ConfigThingy wmCmd, Bookmark bookmark)
-        throws InvalidCommandException
+    /**
+     * Create a new command.
+     *
+     * @param wmCmd
+     *          The configuration of the command.
+     * @param bookmark
+     *          The book mark.
+     * @throws InvalidCommandException
+     *           The configuraiton is invalid.
+     */
+    public InsertFrag(ConfigThingy wmCmd, Bookmark bookmark) throws InvalidCommandException
     {
       super(wmCmd, bookmark);
 
@@ -998,8 +951,7 @@ public abstract class DocumentCommand
       try
       {
         fragID = wm.get("FRAG_ID").toString();
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
         throw new InvalidCommandException(L.m("Fehlendes Attribut FRAG_ID", e));
       }
@@ -1012,10 +964,9 @@ public abstract class DocumentCommand
         {
           args.add(arg.getName());
         }
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
-        // ARGS sind optional
+        // ARGS are optional
       }
 
       String mode = wm.getString("MODE", "");
@@ -1033,21 +984,20 @@ public abstract class DocumentCommand
             styles.add("textstyles");
             styles.add("pagestyles");
             styles.add("numberingstyles");
-          }
-          else if ("textStyles".equalsIgnoreCase(s) || "pageStyles".equalsIgnoreCase(s)
+          } else if ("textStyles".equalsIgnoreCase(s)
+              || "pageStyles".equalsIgnoreCase(s)
               || "numberingStyles".equalsIgnoreCase(s))
           {
             styles.add(s.toLowerCase());
-          }
-          else
+          } else
+          {
             throw new InvalidCommandException(L.m("STYLE '%1' ist unbekannt.", s));
+          }
         }
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
-        // STYLES ist optional
+        // STYLES are optional
       }
-
     }
 
     public String getFragID()
@@ -1065,6 +1015,11 @@ public abstract class DocumentCommand
       return manualMode;
     }
 
+    /**
+     * Should the command only import styles.
+     *
+     * @return True if any style is given, false otherwise.
+     */
     public boolean importStylesOnly()
     {
       return !styles.isEmpty();
@@ -1088,13 +1043,20 @@ public abstract class DocumentCommand
     }
   }
 
-  // ********************************************************************************
   /**
-   * Das Kommando InsertContent dient zum Mischen von Dokumenten und ist im Handbuch
-   * des WollMux ausführlicher beschrieben.
+   * Replace the content of the command with a text fragment. The text fragment is defined in the
+   * WollMuxBar configuration.
    */
   public static class InsertContent extends DocumentCommand
   {
+    /**
+     * Create a new command.
+     *
+     * @param wmCmd
+     *          The configuration of the command.
+     * @param bookmark
+     *          The book mark.
+     */
     public InsertContent(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
@@ -1113,12 +1075,10 @@ public abstract class DocumentCommand
     }
   }
 
-  // ********************************************************************************
   /**
-   * Dieses Kommando fügt den Wert eines Absenderfeldes in den Briefkopf ein.
+   * Replace the content of the command with a database value.
    */
-  public static class InsertValue extends DocumentCommand implements
-      OptionalTrafoProvider
+  public static class InsertValue extends DocumentCommand implements OptionalTrafoProvider
   {
     private String dbSpalte;
 
@@ -1128,63 +1088,64 @@ public abstract class DocumentCommand
 
     private String trafo = null;
 
-    public InsertValue(ConfigThingy wmCmd, Bookmark bookmark)
-        throws InvalidCommandException
+    /**
+     * Create a new command.
+     *
+     * @param wmCmd
+     *          The configuration of the command.
+     * @param bookmark
+     *          The book mark.
+     * @throws InvalidCommandException
+     *           The configuration is invalid.
+     */
+    public InsertValue(ConfigThingy wmCmd, Bookmark bookmark) throws InvalidCommandException
     {
       super(wmCmd, bookmark);
       try
       {
         dbSpalte = wmCmd.get("WM").get("DB_SPALTE").toString();
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
         throw new InvalidCommandException(L.m("Fehlendes Attribut DB_SPALTE"));
       }
 
-      // Auswertung der AUTOSEP bzw SEPERATOR-Attribute
       Iterator<ConfigThingy> autoseps = wmCmd.query("AUTOSEP").iterator();
       Iterator<ConfigThingy> seps = wmCmd.query("SEPARATOR").iterator();
-      String currentSep = " "; // mit Default-Separator vorbelegt
+      String currentSep = " "; // initialize with default separator
 
       while (autoseps.hasNext())
       {
         ConfigThingy as = autoseps.next();
         String sep = currentSep;
-        if (seps.hasNext()) {
+        if (seps.hasNext())
+        {
           sep = seps.next().toString();
         }
 
         if (as.toString().compareToIgnoreCase("left") == 0)
         {
           leftSeparator = sep;
-        }
-        else if (as.toString().compareToIgnoreCase("right") == 0)
+        } else if (as.toString().compareToIgnoreCase("right") == 0)
         {
           rightSeparator = sep;
-        }
-        else if (as.toString().compareToIgnoreCase("both") == 0)
+        } else if (as.toString().compareToIgnoreCase("both") == 0)
         {
           leftSeparator = sep;
           rightSeparator = sep;
-        }
-        else
+        } else
         {
           throw new InvalidCommandException(
-            L.m(
-              "Unbekannter AUTOSEP-Typ \"%1\". Erwarte \"left\", \"right\" oder \"both\".",
-              as.toString()));
+              L.m("Unbekannter AUTOSEP-Typ \"%1\". Erwarte \"left\", \"right\" oder \"both\".", as.toString()));
         }
         currentSep = sep;
       }
 
-      // Auswertung des optionalen Arguments TRAFO
       try
       {
         trafo = wmCmd.get("WM").get("TRAFO").toString();
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
-        // TRAFO ist optional
+        // TRAFO is optional
       }
     }
 
@@ -1222,27 +1183,33 @@ public abstract class DocumentCommand
     }
   }
 
-  // ********************************************************************************
   /**
-   * Dieses Kommando fügt den Wert eines Absenderfeldes in den Briefkopf ein.
+   * Replace the content of the command with a form value.
    */
-  public static class InsertFormValue extends DocumentCommand implements
-      OptionalTrafoProvider
+  public static class InsertFormValue extends DocumentCommand implements OptionalTrafoProvider
   {
     private String id = null;
 
     private String trafo = null;
 
-    public InsertFormValue(ConfigThingy wmCmd, Bookmark bookmark)
-        throws InvalidCommandException
+    /**
+     * Create a new command.
+     *
+     * @param wmCmd
+     *          The configuration of the command.
+     * @param bookmark
+     *          The book mark.
+     * @throws InvalidCommandException
+     *           The configuration is invalid.
+     */
+    public InsertFormValue(ConfigThingy wmCmd, Bookmark bookmark) throws InvalidCommandException
     {
       super(wmCmd, bookmark);
 
       try
       {
         id = wmCmd.get("WM").get("ID").toString();
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
         throw new InvalidCommandException(L.m("Fehlendes Attribut ID"));
       }
@@ -1250,39 +1217,36 @@ public abstract class DocumentCommand
       try
       {
         trafo = wmCmd.get("WM").get("TRAFO").toString();
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
-        // TRAFO ist optional
+        // TRAFO is optional
       }
     }
 
-    /**
-     * Liefert die im insertFormValues-Kommando gesetzte id, die garantiert != null
-     * ist.
-     */
     public String getID()
     {
       return id;
     }
 
+    /**
+     * Update the id of this command.
+     * 
+     * @param id
+     *          The new id.
+     */
     public void setID(String id)
     {
       this.id = id;
-      // Dokumentkommando anpassen:
       try
       {
         ConfigThingy idConf = wmCmd.query("WM").query("ID").getLastChild();
-        // alten Wert von ID löschen
         for (Iterator<ConfigThingy> iter = idConf.iterator(); iter.hasNext();)
         {
           iter.next();
           iter.remove();
         }
-        // neuen Wert für ID setzen
         idConf.addChild(new ConfigThingy(id));
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
         LOGGER.error("", e);
       }
@@ -1308,13 +1272,19 @@ public abstract class DocumentCommand
     }
   }
 
-  // ********************************************************************************
   /**
-   * Dieses Kommando sorgt dafür, dass alle unter dem Bookmark liegenden TextFields
-   * geupdatet werden.
+   * Update all text fields in the book mark.
    */
   public static class UpdateFields extends DocumentCommand
   {
+    /**
+     * Create a new command.
+     *
+     * @param wmCmd
+     *          The configuration of the command.
+     * @param bookmark
+     *          The book mark.
+     */
     public UpdateFields(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
@@ -1327,36 +1297,40 @@ public abstract class DocumentCommand
     }
   }
 
-  // ********************************************************************************
   /**
-   * Über dieses Dokumentkommando kann der Typ des Dokuments festgelegt werden. Es
-   * gibt die Typen SETTYPE_normalTemplate, SETTYPE_templateTemplate und
-   * SETTYPE_formDocument. Die SetType-Kommandos werden bereits im
-   * OnProcessTextDocument-Event verarbeitet und spielen daher keine Rolle mehr für
-   * den DocumentCommandInterpreter.
+   * Set the type of the document.
    */
   public static class SetType extends DocumentCommand
   {
     private String type;
 
-    public SetType(ConfigThingy wmCmd, Bookmark bookmark)
-        throws InvalidCommandException
+    /**
+     * Create a new command.
+     *
+     * @param wmCmd
+     *          The configuration of the command.
+     * @param bookmark
+     *          The book mark.
+     * @throws InvalidCommandException
+     *           The configuration is invalid.
+     */
+    public SetType(ConfigThingy wmCmd, Bookmark bookmark) throws InvalidCommandException
     {
       super(wmCmd, bookmark);
       type = "";
       try
       {
         type = wmCmd.get("WM").get("TYPE").toString();
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
         throw new InvalidCommandException(L.m("Fehlendes Attribut TYPE"));
       }
-      if (type.compareToIgnoreCase("templateTemplate") != 0
-        && type.compareToIgnoreCase("normalTemplate") != 0
-        && type.compareToIgnoreCase("formDocument") != 0)
-        throw new InvalidCommandException(
-          L.m("Angegebener TYPE ist ungültig oder falsch geschrieben. Erwarte \"templateTemplate\", \"normalTemplate\" oder \"formDocument\"!"));
+      if (type.compareToIgnoreCase("templateTemplate") != 0 && type.compareToIgnoreCase("normalTemplate") != 0
+          && type.compareToIgnoreCase("formDocument") != 0)
+      {
+        throw new InvalidCommandException(L.m("Angegebener TYPE ist ungültig oder falsch geschrieben. "
+            + "Erwarte \"templateTemplate\", \"normalTemplate\" oder \"formDocument\"!"));
+      }
     }
 
     public String getType()
@@ -1371,10 +1345,8 @@ public abstract class DocumentCommand
     }
   }
 
-  // ********************************************************************************
   /**
-   * Dieses Kommando dient zum Überschreiben von FRAG_IDs, die mit insertFrag oder
-   * insertContent eingefügt werden sollen.
+   * Change the mapping of a text fragment id.
    */
   public static class OverrideFrag extends DocumentCommand
   {
@@ -1382,26 +1354,33 @@ public abstract class DocumentCommand
 
     private String newFragId = null;
 
-    public OverrideFrag(ConfigThingy wmCmd, Bookmark bookmark)
-        throws InvalidCommandException
+    /**
+     * Create a new command.
+     *
+     * @param wmCmd
+     *          The configuration of the command.
+     * @param bookmark
+     *          The book mark.
+     * @throws InvalidCommandException
+     *           The configuration is invalid.
+     */
+    public OverrideFrag(ConfigThingy wmCmd, Bookmark bookmark) throws InvalidCommandException
     {
       super(wmCmd, bookmark);
       fragId = "";
       try
       {
         fragId = wmCmd.get("WM").get("FRAG_ID").toString();
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
         throw new InvalidCommandException(L.m("Fehlendes Attribut FRAG_ID"));
       }
       try
       {
         newFragId = wmCmd.get("WM").get("NEW_FRAG_ID").toString();
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
-        // NEW_FRAG_ID ist optional
+        // NEW_FRAG_ID is optional
       }
     }
 
@@ -1411,12 +1390,14 @@ public abstract class DocumentCommand
     }
 
     /**
-     * Liefert die neue FragID oder den Leerstring, wenn keine FragID angegeben
-     * wurde.
+     * Get the new FRAG_ID.
+     * 
+     * @return The new FRAG_ID or the empty String if no FRAG_ID was given.
      */
     public String getNewFragID()
     {
-      if (newFragId == null) {
+      if (newFragId == null)
+      {
         return "";
       }
       return newFragId;
@@ -1429,27 +1410,31 @@ public abstract class DocumentCommand
     }
   }
 
-  // ********************************************************************************
   /**
-   * Über dieses Dokumentkommando können Druckfunktionen festgelegt werden, die beim
-   * Drucken ausgeführt werden sollen. Die SetPrintFunction-Kommandos werden bereits
-   * im OnProcessTextDocument-Event verarbeitet und spielen daher keine Rolle mehr
-   * für den DocumentCommandInterpreter.
+   * Add a print function to the document.
    */
   public static class SetPrintFunction extends DocumentCommand
   {
     private String funcName;
 
-    public SetPrintFunction(ConfigThingy wmCmd, Bookmark bookmark)
-        throws InvalidCommandException
+    /**
+     * Create a new command.
+     *
+     * @param wmCmd
+     *          The configuration of the command.
+     * @param bookmark
+     *          The book mark.
+     * @throws InvalidCommandException
+     *           The configuration is invalid.
+     */
+    public SetPrintFunction(ConfigThingy wmCmd, Bookmark bookmark) throws InvalidCommandException
     {
       super(wmCmd, bookmark);
       funcName = "";
       try
       {
         funcName = wmCmd.get("WM").get("FUNCTION").toString();
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
         throw new InvalidCommandException(L.m("Fehlendes Attribut FUNCTION"));
       }
@@ -1467,17 +1452,21 @@ public abstract class DocumentCommand
     }
   }
 
-  // ********************************************************************************
   /**
-   * Das Kommando SetGroups dient dazu, dem vom Bookmark umschlossenen Textinhalt
-   * eine oder mehrere Gruppen zuweisen zu können. Im Gegensatz zu anderen
-   * Dokumentkommandos, die auch das GROUPS Attribut unterstützen, besitzt dieses
-   * Kommando ausser der Zuordnung von Gruppen keine weitere Funktion.
+   * Mark the content of the book mark as part of one or more visibility groups.
    */
   public static class SetGroups extends DocumentCommand implements VisibilityElement
   {
     private Set<String> groupsSet;
 
+    /**
+     * Create a new command.
+     *
+     * @param wmCmd
+     *          The configuration of the command.
+     * @param bookmark
+     *          The book mark.
+     */
     public SetGroups(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
@@ -1490,30 +1479,18 @@ public abstract class DocumentCommand
       return visitable.executeCommand(this);
     }
 
-    /**
-     * Liefert alle Gruppen, die dem Dokumentkommando zugeordnet sind, wobei jede
-     * Gruppe auch die Gruppenzugehörigkeit des Vaterelements im DocumentCommand-Baum
-     * erbt.
-     *
-     * @return Ein Set, das alle zugeordneten groupId's, einschließlich der vom Vater
-     *         geerbten, als Strings enthält.
-     * @see de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement#getGroups()
-     */
     @Override
     public Set<String> getGroups()
     {
-      // GROUPS-Attribut auslesen falls vorhanden.
       ConfigThingy groups = new ConfigThingy("");
       try
       {
         groups = wmCmd.get("GROUPS");
-      }
-      catch (NodeNotFoundException e)
+      } catch (NodeNotFoundException e)
       {
         LOGGER.trace("", e);
       }
 
-      // Gruppen aus dem GROUPS-Argument in das Set aufnehmen:
       for (ConfigThingy group : groups)
       {
         String groupId = group.toString();
@@ -1535,28 +1512,27 @@ public abstract class DocumentCommand
       return true;
     }
 
-    /**
-     * Diese Methode liefert eine String-Repräsentation des DokumentCommands zurück.
-     * Die String-Repräsentation hat den Aufbau {@code DocumentCommand[<bookmarkName>]}.
-     */
     @Override
     public String toString()
     {
-      return "" + this.getClass().getSimpleName() + "["
-        + (isRetired() ? "RETIRED:" : "") + (isDone() ? "DONE:" : "") + "GROUPS:"
-        + groupsSet.toString() + getBookmarkName() + "]";
+      return "" + this.getClass().getSimpleName() + "[" + (isRetired() ? "RETIRED:" : "") + (isDone() ? "DONE:" : "")
+          + "GROUPS:" + groupsSet.toString() + getBookmarkName() + "]";
     }
   }
 
-  // ********************************************************************************
   /**
-   * Falls nach dem Einfügen eines Textbausteines keine Einfügestelle vorhanden ist
-   * wird die Marke 'setJumpMark' falls vorhanden angesprungen. Wird auch falls
-   * vorhanden und keine Platzhalter vorhanden ist, mit PlatzhalterAnspringen
-   * angesprungen.
+   * Mark a place in the document to jump to if there aren't any placeholder.
    */
   public static class SetJumpMark extends DocumentCommand
   {
+    /**
+     * Create a new command.
+     *
+     * @param wmCmd
+     *          The configuration of the command.
+     * @param bookmark
+     *          The book mark.
+     */
     public SetJumpMark(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);

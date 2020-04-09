@@ -289,7 +289,10 @@ class SurroundingGarbageCollector extends AbstractExecutor
      */
     XParagraphCursor[] start = cmd.getStartMark();
     XParagraphCursor[] end = cmd.getEndMark();
-    if (start == null || end == null) return;
+    if (start.length == 0 || end.length == 0)
+    {
+      return;
+    }
 
     // Startmarke auswerten:
     if (start[0].isStartOfParagraph() && start[1].isEndOfParagraph())
