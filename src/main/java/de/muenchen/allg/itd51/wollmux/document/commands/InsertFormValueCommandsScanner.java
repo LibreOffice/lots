@@ -65,8 +65,6 @@ class InsertFormValueCommandsScanner extends AbstractExecutor
 
     if (field != null)
     {
-      field.setCommand(cmd);
-
       // sortiertes Hinzufügen des neuen FormFields zur Liste:
       ListIterator<FormField> iter = fields.listIterator();
       while (iter.hasNext())

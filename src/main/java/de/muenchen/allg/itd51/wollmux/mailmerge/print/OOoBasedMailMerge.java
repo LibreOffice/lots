@@ -482,7 +482,6 @@ public class OOoBasedMailMerge implements AutoCloseable
         FormField field = FormFieldFactory.createFormField(doc, ifvCmd, bookmarkNameToFormField);
         if (field == null)
           continue;
-        field.setCommand(ifvCmd);
 
         String columnName = getSpecialColumnNameForFormField(field);
         if (columnName == null)
