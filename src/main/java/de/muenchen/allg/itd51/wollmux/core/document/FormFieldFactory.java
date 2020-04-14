@@ -1,43 +1,3 @@
-/*
- * Dateiname: FormFieldFactory.java
- * Projekt  : WollMux
- * Funktion : Repräsentiert eine Fabrik, die an der Stelle von
- *            WM('insertFormValue'...)-Bookmark entsprechende FormField-Elemente
- *            erzeugt.
- *
- * Copyright (c) 2011-2015 Landeshauptstadt München
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 08.06.2006 | LUT | Erstellung als FormField
- * 14.06.2006 | LUT | Umbenennung in FormFieldFactory und Unterstützung
- *                    von Checkboxen.
- * 07.09.2006 | BNK | Rewrite
- * 12.09.2006 | BNK | Bugfix: Bookmarks ohne Ausdehnung wurden nicht gefunden.
- * 03.01.2007 | BNK | +TextFieldFormField
- *                  | +createFormField(doc, textfield)
- * 08.07.2009 | BED | Änderungen im Rahmen von R48539 (#2867)
- * 12.05.2011 | BED | Refresh von Textfeldern mit XRefreshable.refresh() [#6840]
- * 17.06.2011 | BED | Nachbesserungen für [#6840], überall XRefreshable.refresh()
- * -------------------------------------------------------------------
- *
- * @author Christoph Lutz (D-III-ITD 5.1)
- *
- */
 package de.muenchen.allg.itd51.wollmux.core.document;
 
 import java.util.Map;
@@ -52,7 +12,6 @@ import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNamed;
 import com.sun.star.drawing.XControlShape;
 import com.sun.star.frame.XController;
-import com.sun.star.lang.XServiceInfo;
 import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
@@ -66,48 +25,39 @@ import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.afid.UnoIterator;
 import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFormValue;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.util.UnoProperty;
 import de.muenchen.allg.util.UnoService;
 
 /**
- * Repräsentiert eine Fabrik, die an der Stelle von WM('insertFormValue'...)-Bookmark
- * entsprechende FormField-Elemente erzeugt.
- *
- * @author lut
+ * Factory for creating form fields from book marks with name WM(CMD 'insertFormValue' ...).
  */
 public final class FormFieldFactory
 {
 
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(FormFieldFactory.class);
-
-  public static final Pattern INSERTFORMVALUE =
-    DocumentCommands.getPatternForCommand("insertFormValue");
+  private static final Logger LOGGER = LoggerFactory.getLogger(FormFieldFactory.class);
 
   /**
-   * Erzeugt ein Formularfeld im Dokument doc an der Stelle des
-   * InsertFormValue-Kommandos cmd. Ist unter dem bookmark bereits ein
-   * Formularelement (derzeit TextFeld vom Typ Input, DropDown oder eine Checkbox)
-   * vorhanden, so wird dieses Feld als Formularelement für die Darstellung des
-   * Wertes des Formularfeldes genutzt. Ist innerhalb des Bookmarks noch kein
-   * Formularelement vorhanden, so wird ein DynamicInputFormField an der Stelle des
-   * Bookmarks erzeugt, das erst dann ein InputField-Textfeld im Dokument anlegt,
-   * wenn auf das Textfeld schreibend zugegriffen wird.
+   * Create a form field in the document at InsertFormValue-command. If there's already a form
+   * element (textfield, dropdown or checkbox), this element is used, otherwise a
+   * DynamicInputFormField is created. This element is replaced with an InputField as soon as it has
+   * to be written.
    *
    * @param doc
-   *          das Dokument, zu dem das Formularfeld gehört.
+   *          The document.
    * @param cmd
-   *          das zugehörige insertFormValue-Kommando.
+   *          The InsertFormValue-command.
+   * @param bookmarkNameToFormField
+   *          Mapping from book marks to form fields.
+   * @return A form field.
    */
   public static FormField createFormField(XTextDocument doc, InsertFormValue cmd,
       Map<String, FormField> bookmarkNameToFormField)
   {
     String bookmarkName = cmd.getBookmarkName();
     FormField formField = bookmarkNameToFormField.get(bookmarkName);
-    if (formField != null) {
+    if (formField != null)
+    {
       return formField;
     }
 
@@ -116,101 +66,90 @@ public final class FormFieldFactory
     if (range != null)
     {
       handleParagraphEnumeration(UnoCollection.getCollection(range, XTextRange.class), doc, bookmarkNameToFormField,
-          cmd.getBookmarkName());
+          cmd);
     }
 
     return bookmarkNameToFormField.get(bookmarkName);
   }
 
   /**
-   * Erzeugt ein neues FormField für das Serienbrieffeld textfield vom Typ
-   * c,s,s,text,textfield,Database, das im Dokument doc liegt. Die Methoden
-   * {@link Object#equals(java.lang.Object)} und {@link Object#hashCode()} beziehen
-   * sich auf das zugrundeliegende UNO-Objekt, wobei verschiedene Proxies des selben
-   * Objekts als gleich behandelt werden.
+   * Create a form field in a document for a mail merge field.
    *
    * @param doc
-   *          das zugehörige Dokument doc
+   *          The document.
    * @param textfield
-   *          ein Serienbrieffeld vom Typ css.text.textfield.Database.
+   *          The mail merge field.
+   * @return field A form field.
    */
-  public static FormField createDatabaseFormField(XTextDocument doc,
-      XTextField textfield)
+  public static FormField createDatabaseFormField(XTextDocument doc, XTextField textfield)
   {
     return new DatabaseFormField(doc, textfield);
   }
 
   /**
-   * Erzeugt ein neues FormField für ein Eingabefeld einer Benutzervariablen vom Typ
-   * c,s,s,text,textfield,InputUser und den zugehörigen TextFieldMaster master die im
-   * Dokument doc liegen. Die Methoden {@link Object#equals(java.lang.Object)} und
-   * {@link Object#hashCode()} beziehen sich auf das zugrundeliegende UNO-Objekt,
-   * wobei verschiedene Proxies des selben Objekts als gleich behandelt werden.
+   * Create a form field in the document using a user variable.
    *
    * @param doc
-   *          das zugehörige Dokument doc
+   *          The document.
    * @param textfield
-   *          das InputUser-Objekt.
+   *          The text field.
    * @param master
-   *          bei InputUser-Objekten kann auf den angezeigten Wert nicht direkt
-   *          zugegriffen werden. Diese Zugriffe erfolgen über einen TextFieldMaster,
-   *          der dem InputUser-Objekt zugeordnet ist. VORSICHT: Das Objekt
-   *          textfield.TextFieldMaster ist dabei nicht als Master geeignet, da
-   *          dieser Master keine direkte Möglichkeit zum Setzen der Anzeigewerte
-   *          anbietet. Das statt dessen geeignete TextFieldMaster-Objekt muss über
-   *          doc.getTextFieldMasters() bezogen werden, wobei textfield und master
-   *          dann zusammen gehören, wenn textfield.Content.equals(master.Name) gilt.
-   * @return Das neue FormField.
+   *          The TextFieldMaster of the text field. The property {@code textfield.TextFieldMaster}
+   *          can't be used because it can't be modified. The TextFieldMaster has to be taken form
+   *          {@code doc.getTextFieldMasters()}. The text field and its master belong together if
+   *          {@code textfield.Content.equals(master.Name)} is true.
+   * @return A form field.
    */
-  public static FormField createInputUserFormField(XTextDocument doc,
-      XTextField textfield, XPropertySet master)
+  public static FormField createInputUserFormField(XTextDocument doc, XTextField textfield, XPropertySet master)
   {
     return new InputUserFormField(doc, textfield, master);
   }
 
   /**
-   * Geht die XEnumeration enu von Absätzen und TextTables durch und erzeugt für alle
-   * in Absätzen (nicht TextTables) enthaltenen insertFormValue-Bookmarks
-   * entsprechende Einträge in mapBookmarkNameToFormField. Falls nötig wird das
-   * entsprechende FormField erzeugt.
+   * Iterate through all paragraphs (no tables) of a document and create form fields for a
+   * InsertFormValue-command if necessary.
    *
+   * @param paragraph
+   *          The paragraphs.
    * @param doc
-   *          das Dokument in dem sich die enumierten Objekte befinden.
+   *          The document.
+   * @param mapBookmarkNameToFormField
+   *          Collection of InsertFormValue-commands.
+   * @param cmd
+   *          The InsertFormValue-command.
    */
-  private static void handleParagraphEnumeration(UnoCollection<XTextRange> paragraph,
-      XTextDocument doc, Map<String, FormField> mapBookmarkNameToFormField, String bookmarkName)
+  private static void handleParagraphEnumeration(UnoCollection<XTextRange> paragraph, XTextDocument doc,
+      Map<String, FormField> mapBookmarkNameToFormField, InsertFormValue cmd)
   {
     for (XTextRange para : paragraph)
     {
       UnoCollection<XTextRange> portions = UnoCollection.getCollection(para, XTextRange.class);
-      if (portions != null) // ist wohl ein SwXParagraph
+      if (portions != null) // seems to be a text paragraph
       {
-        handleParagraph(portions, doc, mapBookmarkNameToFormField, bookmarkName);
+        handleParagraph(portions, doc, mapBookmarkNameToFormField, cmd);
       }
     }
   }
 
   /**
-   * Geht die XEnumeration enuAccess von TextPortions durch und erzeugt für alle
-   * enthaltenen insertFormValue-Bookmarks entsprechende Einträge in
-   * mapBookmarkNameToFormField. Falls nötig wird das entsprechende FormField
-   * erzeugt.
+   * Iterate through all text portions of a paragraph and create form fields for a
+   * InsertFormValue-command if necessary.
    *
+   * @param textportions
+   *          The text portion.
    * @param doc
-   *          das Dokument in dem sich die enumierten Objekte befinden.
+   *          The document.
+   * @param mapBookmarkNameToFormField
+   *          Collection of InsertFormValue-commands.
+   * @param cmd
+   *          The InsertFormValue-command.
    */
-  private static void handleParagraph(UnoCollection<XTextRange> paragraph, XTextDocument doc,
-      Map<String, FormField> mapBookmarkNameToFormField, String bookmarkName)
+  private static void handleParagraph(UnoCollection<XTextRange> textportions, XTextDocument doc,
+      Map<String, FormField> mapBookmarkNameToFormField, InsertFormValue cmd)
   {
-    /*
-     * Der Name des zuletzt gestarteten insertFormValue-Bookmarks.
-     */
-    String lastInsertFormValueStart = null;
+    boolean foundFormField = false;
 
-    /*
-     * enumeriere alle TextPortions des Paragraphs
-     */
-    for (XTextRange textPortion : paragraph)
+    for (XTextRange textPortion : textportions)
     {
       String textPortionType = (String) Utils.getProperty(textPortion, UnoProperty.TEXT_PROTION_TYPE);
       if (textPortionType == null)
@@ -219,286 +158,380 @@ public final class FormFieldFactory
       }
       if ("Bookmark".equals(textPortionType))
       {
-        XNamed bookmark = null;
-        boolean isStart = false;
-        boolean isCollapsed = false;
-        try
-        {
-          isStart =
-              ((Boolean) UnoProperty.getProperty(textPortion, UnoProperty.IS_START)).booleanValue();
-          isCollapsed =
-              ((Boolean) UnoProperty.getProperty(textPortion, UnoProperty.IS_COLLAPSED)).booleanValue();
-          if (isCollapsed) {
-            isStart = true;
-          }
-          bookmark = UNO.XNamed(UnoProperty.getProperty(textPortion, UnoProperty.BOOKMARK));
-        }
-        catch (java.lang.Exception x)
-        {
-          LOGGER.trace("", x);
-          continue;
-        }
-        if (bookmark == null) {
-          continue;
-        }
-
-        String name = bookmark.getName();
-        if (!name.equals(bookmarkName))
-        {
-          continue;
-        }
-
-        if (isStart)
-        {
-          lastInsertFormValueStart = name;
-          LOGGER.debug(L.m("Found Bookmark-Start for %1", name));
-        }
-        if (!isStart || isCollapsed)
-        {
-          LOGGER.debug(L.m("Found Bookmark-End or Collapsed-Bookmark for %1", name));
-          if (name.equals(lastInsertFormValueStart))
-          {
-            handleNewInputField(lastInsertFormValueStart,
-                mapBookmarkNameToFormField, doc);
-            lastInsertFormValueStart = null;
-          }
-        }
-      }
-      else if ("TextField".equals(textPortionType))
+        foundFormField = handleBookmark(doc, mapBookmarkNameToFormField, textPortion, cmd, foundFormField);
+      } else if ("TextField".equals(textPortionType))
       {
-        XDependentTextField textField = null;
-        int textfieldType = 0; // 0:input, 1:dropdown, 2: reference
-        try
-        {
-          textField = UNO.XDependentTextField(UnoProperty.getProperty(textPortion, UnoProperty.TEXT_FIELD));
-          XServiceInfo info = UNO.XServiceInfo(textField);
-          if (info.supportsService("com.sun.star.text.TextField.DropDown"))
-            textfieldType = 1;
-          else if (info.supportsService("com.sun.star.text.TextField.Input"))
-            textfieldType = 0;
-          else
-            continue; // sonstiges TextField
-        }
-        catch (java.lang.Exception x)
-        {
-          LOGGER.trace("", x);
-          continue;
-        }
-
-        switch (textfieldType)
-        {
-        case 0:
-          handleInputField(textField, lastInsertFormValueStart, mapBookmarkNameToFormField, doc);
-          break;
-        case 1:
-            handleDropdown(textField, lastInsertFormValueStart,
-              mapBookmarkNameToFormField, doc);
-            break;
-        }
-        lastInsertFormValueStart = null;
-      }
-      else if ("Frame".equals(textPortionType))
+        handleTextField(doc, mapBookmarkNameToFormField, textPortion, cmd);
+        foundFormField = false;
+      } else if ("Frame".equals(textPortionType))
       {
-        XControlModel model = null;
-        try
-        {
-          UnoIterator<XControlShape> contentIter = UnoIterator
-              .create(UNO.XContentEnumerationAccess(textPortion)
-                  .createContentEnumeration("com.sun.star.text.TextPortion"), XControlShape.class);
-          while (contentIter.hasNext())
-          {
-            XControlModel tempModel = contentIter.next().getControl();
-            XServiceInfo info = UNO.XServiceInfo(tempModel);
-            if (info.supportsService("com.sun.star.form.component.CheckBox"))
-            {
-              model = tempModel;
-            }
-          }
-        }
-        catch (java.lang.Exception x)
-        {
-          LOGGER.trace("", x);
-          continue;
-        }
-
-        handleCheckbox(model, lastInsertFormValueStart, mapBookmarkNameToFormField,
-          doc);
-        lastInsertFormValueStart = null;
+        handleFrame(doc, mapBookmarkNameToFormField, textPortion, cmd);
+        foundFormField = false;
       }
-      else
-        // sonstige TextPortion
-        continue;
     }
 
-    if (lastInsertFormValueStart != null)
-      handleNewInputField(lastInsertFormValueStart, mapBookmarkNameToFormField,
-          doc);
+    if (foundFormField)
+    {
+      handleNewInputField(mapBookmarkNameToFormField, doc, cmd);
+    }
 
   }
 
   /**
-   * Fügt ein neues Eingabefeld innerhalb des Bookmarks bookmark ein, erzeugt ein
-   * dazugehöriges FormField und setzt ein passendes Mapping von bookmarkName auf
-   * dieses FormField in mapBookmarkNameToFormField.
+   * Create a form field in a document for a book mark if necessary.
+   *
+   * @param doc
+   *          The document.
+   * @param mapBookmarkNameToFormField
+   *          Mapping from book mark to form field. The new form field is added.
+   * @param textPortion
+   *          The text portion of the book mark.
+   * @param cmd
+   *          The InsertFormValue-command.
+   * @param startedBookmark
+   *          Is there a book mark that has been started.
+   * @return True if a position for a form field was found.
    */
-  private static void handleNewInputField(String bookmarkName,
-      Map<String, FormField> mapBookmarkNameToFormField, XTextDocument doc)
+  private static boolean handleBookmark(XTextDocument doc,
+      Map<String, FormField> mapBookmarkNameToFormField,
+      XTextRange textPortion, InsertFormValue cmd, boolean startedBookmark)
   {
-    FormField formField = new DynamicInputFormField(doc);
-    mapBookmarkNameToFormField.put(bookmarkName, formField);
+    XNamed bookmark = null;
+    boolean isStart = false;
+    boolean isCollapsed = false;
+    try
+    {
+      isStart = ((Boolean) UnoProperty.getProperty(textPortion, UnoProperty.IS_START)).booleanValue();
+      isCollapsed = ((Boolean) UnoProperty.getProperty(textPortion, UnoProperty.IS_COLLAPSED)).booleanValue();
+      if (isCollapsed)
+      {
+        isStart = true;
+      }
+      bookmark = UNO.XNamed(UnoProperty.getProperty(textPortion, UnoProperty.BOOKMARK));
+    } catch (java.lang.Exception x)
+    {
+      LOGGER.trace("", x);
+      return startedBookmark;
+    }
+    if (bookmark == null)
+    {
+      return startedBookmark;
+    }
+
+    String name = bookmark.getName();
+    if (!name.equals(cmd.getBookmarkName()))
+    {
+      return startedBookmark;
+    }
+
+    if (isStart)
+    {
+      LOGGER.debug("Found Bookmark-Start for {}", name);
+      startedBookmark = true;
+    }
+    if (!isStart || isCollapsed)
+    {
+      LOGGER.debug("Found Bookmark-End or Collapsed-Bookmark for {}", name);
+      if (startedBookmark)
+      {
+        handleNewInputField(mapBookmarkNameToFormField, doc, cmd);
+        return false;
+      }
+    }
+    return startedBookmark;
   }
 
-  private static void handleInputField(XDependentTextField textfield,
-      String bookmarkName, Map<String, FormField> mapBookmarkNameToFormField,
-      XTextDocument doc)
+  /**
+   * Create a form field in a document for a frame if necessary.
+   *
+   * @param doc
+   *          The document.
+   * @param mapBookmarkNameToFormField
+   *          Mapping from book mark to form field. The new form field is added.
+   * @param textPortion
+   *          The text portion of the frame.
+   * @param cmd
+   *          The InsertFormValue-command.
+   */
+  private static void handleFrame(XTextDocument doc, Map<String, FormField> mapBookmarkNameToFormField,
+      XTextRange textPortion, InsertFormValue cmd)
   {
-    if (textfield != null)
+    XControlModel model = null;
+    try
     {
-      FormField formField = new InputFormField(doc, null, textfield);
-      mapBookmarkNameToFormField.put(bookmarkName, formField);
+      UnoIterator<XControlShape> contentIter = UnoIterator.create(
+          UNO.XContentEnumerationAccess(textPortion).createContentEnumeration("com.sun.star.text.TextPortion"),
+          XControlShape.class);
+      while (contentIter.hasNext())
+      {
+        XControlModel tempModel = contentIter.next().getControl();
+        if (UnoService.supportsService(tempModel, UnoService.CSS_FORM_COMPONENT_CHECK_BOX))
+        {
+          model = tempModel;
+        }
+      }
+    } catch (java.lang.Exception x)
+    {
+      LOGGER.trace("", x);
+      return;
+    }
+
+    handleCheckbox(model, mapBookmarkNameToFormField, doc, cmd);
+  }
+
+  /**
+   * Create a form field in a document for a text field if necessary.
+   *
+   * @param doc
+   *          The document.
+   * @param mapBookmarkNameToFormField
+   *          Mapping from book mark to form field. The new form field is added.
+   * @param textPortion
+   *          The text portion of the text field.
+   * @param cmd
+   *          The InsertFormValue-command.
+   */
+  private static void handleTextField(XTextDocument doc, Map<String, FormField> mapBookmarkNameToFormField,
+      XTextRange textPortion, InsertFormValue cmd)
+  {
+    try
+    {
+      XDependentTextField textField = UNO
+          .XDependentTextField(UnoProperty.getProperty(textPortion, UnoProperty.TEXT_FIELD));
+      if (UnoService.supportsService(textField, UnoService.CSS_TEXT_TEXT_FIELD_DROP_DOWN))
+      {
+        handleDropdown(textField, mapBookmarkNameToFormField, doc, cmd);
+      } else if (UnoService.supportsService(textField, UnoService.CSS_TEXT_TEXT_FIELD_INPUT))
+      {
+        handleInputField(textField, mapBookmarkNameToFormField, doc, cmd);
+      } else
+      {
+        return;
+      }
+    } catch (java.lang.Exception x)
+    {
+      LOGGER.trace("", x);
+      return;
     }
   }
 
-  private static void handleDropdown(XDependentTextField textfield,
-      String bookmarkName, Map<String, FormField> mapBookmarkNameToFormField,
-      XTextDocument doc)
+  /**
+   * Create a new form field in a document in a book mark.
+   *
+   * @param bookmarkName
+   *          The name of the book mark.
+   * @param mapBookmarkNameToFormField
+   *          Mapping from book mark to form field. The new form field is added.
+   * @param doc
+   *          The document.
+   * @param cmd
+   *          The InsertFormValue-command.
+   */
+  private static void handleNewInputField(Map<String, FormField> mapBookmarkNameToFormField, XTextDocument doc,
+      InsertFormValue cmd)
+  {
+    FormField formField = new DynamicInputFormField(doc, cmd);
+    mapBookmarkNameToFormField.put(cmd.getBookmarkName(), formField);
+  }
+
+  /**
+   * Handle a form field in a document in a book mark.
+   *
+   * @param textfield
+   *          The existing form field.
+   * @param mapBookmarkNameToFormField
+   *          Mapping from book mark to form field. The new form field is added.
+   * @param doc
+   *          The document.
+   * @param cmd
+   *          The InsertFormValue-command.
+   */
+  private static void handleInputField(XDependentTextField textfield, Map<String, FormField> mapBookmarkNameToFormField,
+      XTextDocument doc, InsertFormValue cmd)
   {
     if (textfield != null)
     {
-      FormField formField = new DropDownFormField(doc, null, textfield);
-      mapBookmarkNameToFormField.put(bookmarkName, formField);
+      FormField formField = new InputFormField(doc, cmd, textfield);
+      mapBookmarkNameToFormField.put(cmd.getBookmarkName(), formField);
     }
   }
 
-  private static void handleCheckbox(XControlModel checkbox, String bookmarkName,
-      Map<String, FormField> mapBookmarkNameToFormField, XTextDocument doc)
+  /**
+   * Handle a form field drop down in a document in a book mark.
+   *
+   * @param textfield
+   *          The existing form field drop down.
+   * @param mapBookmarkNameToFormField
+   *          Mapping from book mark to form field. The new form field is added.
+   * @param doc
+   *          The document.
+   * @param cmd
+   *          The InsertFormValue-command.
+   */
+  private static void handleDropdown(XDependentTextField textfield, Map<String, FormField> mapBookmarkNameToFormField,
+      XTextDocument doc, InsertFormValue cmd)
+  {
+    if (textfield != null)
+    {
+      FormField formField = new DropDownFormField(doc, cmd, textfield);
+      mapBookmarkNameToFormField.put(cmd.getBookmarkName(), formField);
+    }
+  }
+
+  /**
+   * Handle a form field check box in a document in a book mark.
+   *
+   * @param textfield
+   *          The existing form field check box.
+   * @param mapBookmarkNameToFormField
+   *          Mapping from book mark to form field. The new form field is added.
+   * @param doc
+   *          The document.
+   * @param cmd
+   *          The InsertFormValue-command.
+   */
+  private static void handleCheckbox(XControlModel checkbox, Map<String, FormField> mapBookmarkNameToFormField,
+      XTextDocument doc, InsertFormValue cmd)
   {
     if (checkbox != null)
     {
-      FormField formField = new CheckboxFormField(doc, null, checkbox);
-      mapBookmarkNameToFormField.put(bookmarkName, formField);
+      FormField formField = new CheckboxFormField(doc, cmd, checkbox);
+      mapBookmarkNameToFormField.put(cmd.getBookmarkName(), formField);
     }
   }
 
+
   /**
-   * Dieses Interface beschreibt die Eigenschaften eines Formularfeldes unter einem
-   * WM(CMD'insertFormValue'...)-Kommando.
-   *
-   * @author Christoph Lutz (D-III-ITD 5.1)
+   * A form field describes the properties of a form element of an InsertFromValue-command.
    */
   public interface FormField extends Comparable<FormField>
   {
     /**
-     * FIXME Unschöne Fixup-Funktion, die in FormScanner.executeCommand() aufgerufen
-     * wird, da der Scan von Tabellenzellen nur die Bookmarks, aber nicht die
-     * zugehörigen Commands kennt.
+     * Replace the ID of the InsertFormValue-command.
+     *
+     * @param oldFieldId
+     *          The old ID.
+     * @param newFieldId
+     *          The new ID.
+     * @return True if the field supports a 1-by-1 substitution of the ID, false otherwise. If false
+     *         the ID hasn't been replaced.
      */
-    public abstract void setCommand(InsertFormValue cmd);
+    public boolean substituteFieldID(String oldFieldId, String newFieldId);
 
     /**
-     * Wenn das Feld die 1-zu-1 Ersetzung der Referenz auf die ID oldFieldId durch
-     * eine neue ID newFieldId unterstützt, dann wird diese Ersetzung vorgenommen und
-     * true zurückgeliefert, ansonsten false.
-     */
-    public abstract boolean substituteFieldID(String oldFieldId, String newFieldId);
-
-    /**
-     * Liefert die XTextRange, an der das Formularfeld verankert ist.
+     * Get the text range of the form field.
+     *
+     * @return The text range.
      */
     public XTextRange getAnchor();
 
     /**
-     * Liefert für alle aus insertFormValue-Bookmarks entstandenen FormField-Objekte
-     * die im insertFormValue-Kommando angegebene ID, und andernfalls null.
+     * Get the Id of an InsertFormValue-command.
+     *
+     * @return id The ID or null.
      */
-    public abstract String getId();
+    public String getId();
 
     /**
-     * Die Methode liefert den Namen der Trafo, die auf dieses Formularfeld gesetzt
-     * ist oder null, wenn keine Trafo gesetzt ist.
+     * Get the name of the TRAFO function.
+     *
+     * @return The name of the TRAFO or null if there's no TRAFO.
      */
-    public abstract String getTrafoName();
+    public String getTrafoName();
 
     /**
-     * Eine Rückgabe von true gibt an, dass die Trafo (falls definiert) nur einen
-     * Parameter sinnvoll verarbeiten kann. Ein derartiges Verhalten ist für alle
-     * Dokumentkommandos {@code WM(CMD'insertFormValue' ID'<id>' TRAFO '<trafo>')}
-     * spezifiziert. In diesem Fall erwartet die Trafo für jeden in der Funktion
-     * geforderten Parameter den Wert von {@code <id>}; Eine Rückgabe von false beschreibt,
-     * dass die Trafo auch mehrere Parameter verarbeiten kann (wie z.B.
-     * InputUserFields der Fall).
+     * Does the TRAFO function only use the value of the form field?
+     *
+     * @return True if only the form value can be used by the TRAFO, false otherwise.
      */
-    public abstract boolean singleParameterTrafo();
+    public boolean singleParameterTrafo();
 
     /**
-     * Diese Methode belegt den Wert des Formularfeldes im Dokument mit dem neuen
-     * Inhalt value.
+     * Set a new value in the form element of the document.
      *
      * @param value
+     *          The new value.
      */
-    public abstract void setValue(String value);
+    public void setValue(String value);
 
     /**
-     * Diese Methode liefert den aktuellen Wert des Formularfeldes als String zurück
-     * oder den Leerstring, falls der Wert nicht bestimmt werden kann.
+     * Get the value of the form element of the document.
      *
-     * @return der aktuelle Wert des Formularfeldes als String
+     * @return The value of the form element or the empty string.
      */
-    public abstract String getValue();
+    public String getValue();
 
     /**
-     * Setzt den ViewCursor auf die Position des InputFields.
+     * Set the cursor to the position of the form element.
      */
-    public abstract void focus();
+    public void focus();
 
     /**
-     * Löscht das Formularfeld aus dem Dokument
+     * Delete the form element from the document.
      */
-    public abstract void dispose();
+    public void dispose();
 
     /**
-     * Liefert den Typ des FormField-Objekts zurück
+     * Get the type of the form element.
+     *
+     * @return The type.
      */
     public FormFieldType getType();
   }
 
   /**
-   * Beschreibt mögliche Typen von FormField-Objekten
-   *
-   * @author Christoph Lutz (D-III-ITD-D101)
+   * Possible form element types.
    */
-  public enum FormFieldType {
+  public enum FormFieldType
+  {
+    /**
+     * A text input field.
+     */
     INPUT_FORM_FIELD,
+    /**
+     * A field which can be replaced by every other form field.
+     */
     DYNAMIC_INPUT_FORM_FIELD,
+    /**
+     * A drop down.
+     */
     DROPDOWN_FORM_FIELD,
+    /**
+     * A check box.
+     */
     CHECKBOX_FORM_FIELD,
+    /**
+     * A mail merge field.
+     */
     DATABASE_FORM_FIELD,
-    INPUT_USER_FORM_FIELD
+    /**
+     * A text form field.
+     */
+    INPUT_USER_FORM_FIELD;
   }
 
+  /**
+   * Default implementation of form fields.
+   */
   private abstract static class BasicFormField implements FormField
   {
+    /**
+     * The containing document.
+     */
     protected XTextDocument doc;
 
+    /**
+     * The InsertFormValue-command.
+     */
     protected InsertFormValue cmd;
 
     /**
-     * Erzeugt ein Formularfeld im Dokument doc an der Stelle des
-     * InsertFormValue-Kommandos cmd. Ist unter dem bookmark bereits ein TextFeld vom
-     * Typ InputField vorhanden, so wird dieses Feld als inputField für die
-     * Darstellung des Wertes des Formularfeldes genutzt. Ist innerhalb des Bookmarks
-     * noch kein InputField vorhanden, so wird ein neues InputField in den Bookmark
-     * eingefügt.
+     * Create a new form field in a document at the position of the InsertFormValue-command.
      *
      * @param doc
-     *          das Dokument, zu dem das Formularfeld gehört.
+     *          The document.
      * @param cmd
-     *          das zugehörige insertFormValue-Kommando.
-     * @param focusRange
-     *          Beschreibt die range, auf die der ViewCursor beim Aufruf der
-     *          focus()-methode gesetzt werden soll. Der Parameter ist erforderlich,
-     *          da das Setzen des viewCursors auf die TextRanges des Kommandos cmd
-     *          unter Linux nicht sauber funktioniert.
+     *          The InsertFormValue-command.
      */
     public BasicFormField(XTextDocument doc, InsertFormValue cmd)
     {
@@ -507,60 +540,26 @@ public final class FormFieldFactory
     }
 
     @Override
-    public void setCommand(InsertFormValue cmd)
-    {
-      this.cmd = cmd;
-    }
-
-    @Override
     public String getId()
     {
-      if (cmd != null) {
+      if (cmd != null)
+      {
         return cmd.getID();
       }
       return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see de.muenchen.allg.itd51.wollmux.FormField#getTrafoName()
-     */
     @Override
     public String getTrafoName()
     {
       return cmd.getTrafoName();
     }
 
-    /**
-     * Diese Methode liest den Inhalt des internen Formularelements und liefert den
-     * Wert als String zurück.
-     *
-     * @param value
-     *          der neue Wert des Formularelements.
-     */
-    public abstract String getFormElementValue();
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see de.muenchen.allg.itd51.wollmux.FormField#getValue()
-     */
-    @Override
-    public String getValue()
-    {
-      return getFormElementValue();
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see de.muenchen.allg.itd51.wollmux.FormField#focus()
-     */
     @Override
     public void focus()
     {
-      if (cmd == null) {
+      if (cmd == null)
+      {
         return;
       }
       try
@@ -568,27 +567,23 @@ public final class FormFieldFactory
         XController controller = UNO.XModel(doc).getCurrentController();
         XTextCursor cursor = UNO.XTextViewCursorSupplier(controller).getViewCursor();
         XTextRange focusRange = cmd.getTextCursor();
-        if (focusRange != null) {
+        if (focusRange != null)
+        {
           cursor.gotoRange(focusRange, false);
         }
-      }
-      catch (java.lang.Exception e)
+      } catch (java.lang.Exception e)
       {
         LOGGER.trace("", e);
       }
     }
 
     /**
-     * Vergleicht die Positionen der Dokumentkommandos der Formularfelder im Dokument
-     * liefert -1 zurück, wenn this vor other liegt, 1, wenn this nach other liegt
-     * und beide Formularfelder dem selben Text-Objekt zugeordnet sind und 0, wenn
-     * sich die Dokumentkommandos überlappen; lässt sich die Ordnung nicht bestimmen,
-     * da die Text-Objekte sich unterscheiden, dann wird -1 geliefert.
+     * Compare the position of the document commands.
      *
      * @param other
-     *          Das Vergleichsobjekt.
-     *
-     * @return
+     *          The other form field.
+     * @return -1 if this is before other or they are in different text objects. 1 if this is after
+     *         other. 0 if they overlap.
      */
     @Override
     public int compareTo(FormField other)
@@ -597,8 +592,7 @@ public final class FormFieldFactory
       try
       {
         other2 = (BasicFormField) other;
-      }
-      catch (Exception x)
+      } catch (Exception x)
       {
         LOGGER.trace("", x);
         return -1;
@@ -609,7 +603,8 @@ public final class FormFieldFactory
         return 1;
       else if (rel.isALessThanB())
         return -1;
-      else if (rel.isAEqualB()) {
+      else if (rel.isAEqualB())
+      {
         return 0;
       }
 
@@ -619,7 +614,8 @@ public final class FormFieldFactory
     @Override
     public boolean substituteFieldID(String oldFieldId, String newFieldId)
     {
-      if (oldFieldId == null || newFieldId == null) {
+      if (oldFieldId == null || newFieldId == null)
+      {
         return false;
       }
       if (cmd.getID().equals(oldFieldId))
@@ -644,17 +640,13 @@ public final class FormFieldFactory
   }
 
   /**
-   * Repräsentiert ein FormField, das den Formularwert in einem Input-Field
-   * darstellt.
-   *
-   * @author Christoph Lutz (D-III-ITD 5.1)
+   * Puts the form value in an Input-Field.
    */
   private static class InputFormField extends BasicFormField
   {
     protected XTextField inputField;
 
-    public InputFormField(XTextDocument doc, InsertFormValue cmd,
-        XTextField inputField)
+    public InputFormField(XTextDocument doc, InsertFormValue cmd, XTextField inputField)
     {
       super(doc, cmd);
       this.inputField = inputField;
@@ -665,18 +657,18 @@ public final class FormFieldFactory
     {
       if (inputField != null && doc != null)
       {
-        // Neuen Inhalt in inputField schreiben
         Utils.setProperty(inputField, UnoProperty.CONTENT, value);
       }
     }
 
     @Override
-    public String getFormElementValue()
+    public String getValue()
     {
       if (inputField != null)
       {
         Object content = Utils.getProperty(inputField, UnoProperty.CONTENT);
-        if (content != null) {
+        if (content != null)
+        {
           return content.toString();
         }
       }
@@ -703,8 +695,7 @@ public final class FormFieldFactory
       {
         XTextContent xTextContent = UNO.XTextContent(inputField);
         xTextContent.getAnchor().getText().removeTextContent(xTextContent);
-      }
-      catch (NoSuchElementException e)
+      } catch (NoSuchElementException e)
       {
         LOGGER.info("", e);
       }
@@ -712,59 +703,37 @@ public final class FormFieldFactory
   }
 
   /**
-   * Repräsentiert ein FormField-Objekt, das zunächst kein Formularelement enthält,
-   * aber eines vom Typ c,s,s,text,TextField,InputField erzeugt, wenn mittels focus()
-   * oder setFormElementValue(...) darauf zugegriffen wird und der zu setzende Wert
-   * nicht der Leerstring ist.
-   *
-   * @author Christoph Lutz (D-III-ITD 5.1)
+   * A form field, which has no element at the beginning. An InputField is created as soon as the
+   * field is focused or a value set.
    */
   private static class DynamicInputFormField extends InputFormField
   {
 
-    public DynamicInputFormField(XTextDocument doc)
+    public DynamicInputFormField(XTextDocument doc, InsertFormValue cmd)
     {
-      super(doc, null, null);
-    }
+      super(doc, cmd, null);
+      XTextCursor cursor = cmd.getTextCursor();
 
-    @Override
-    public void setCommand(InsertFormValue cmd)
-    {
-      super.setCommand(cmd);
-      // ursprünglich R43846 (#2439), überarbeitet nach R48539 (#2867)
-      if (inputField == null)
+      if (cursor != null)
       {
-        XTextCursor cursor = cmd.getTextCursor();
-
-        if (cursor != null)
+        try
         {
-          try
+          Bookmark bookmark = new Bookmark(cmd.getBookmarkName(), UNO.XBookmarksSupplier(doc));
+          String textSurroundedByBookmark = cursor.getString();
+
+          String trimmedText = textSurroundedByBookmark.trim();
+          Pattern p = Pattern.compile("\\A[<\\[{].*[\\]>}]\\z");
+
+          if (textSurroundedByBookmark.length() > 0 && !p.matcher(trimmedText).matches())
           {
-            Bookmark bookmark =
-              new Bookmark(cmd.getBookmarkName(), UNO.XBookmarksSupplier(doc));
-            String textSurroundedByBookmark = cursor.getString();
+            LOGGER.info("Kollabiere Textmarke \"{}\", die um den Text \"{}\" herum liegt.", cmd.getBookmarkName(),
+                textSurroundedByBookmark);
 
-            String trimmedText = textSurroundedByBookmark.trim();
-            Pattern p = Pattern.compile("\\A[<\\[{].*[\\]>}]\\z");
-            // Für die Überprüfung des Patterns verwenden wir den getrimmten Text, da
-            // wir auch die Fälle erwischen wollen, wo vielleicht aus Versehen ein
-            // Leerzeichen am Anfang reingerutscht ist. Besser wäre es aber eventuell
-            // das direkt ins Pattern einzubauen, statt hier zu trimmen.
-
-            if (textSurroundedByBookmark.length() > 0
-              && !p.matcher(trimmedText).matches())
-            {
-              LOGGER.info(L.m(
-                "Kollabiere Textmarke \"%2\", die um den Text \"%1\" herum liegt.",
-                textSurroundedByBookmark, cmd.getBookmarkName()));
-
-              bookmark.collapseBookmark();
-            }
+            bookmark.collapseBookmark();
           }
-          catch (Exception x)
-          {
-            LOGGER.trace("", x);
-          }
+        } catch (Exception x)
+        {
+          LOGGER.trace("", x);
         }
       }
     }
@@ -772,23 +741,21 @@ public final class FormFieldFactory
     @Override
     public void setValue(String value)
     {
-      if (cmd == null) {
+      if (cmd == null)
+      {
         return;
       }
 
-      if (value.length() == 0)
+      if (value.isEmpty())
       {
-        // wenn kein inputField vorhanden ist, so wird der Inhalt des Bookmarks
-        // gelöscht
         if (inputField == null)
         {
           cmd.setTextRangeString("");
         }
-      }
-      else
+      } else
       {
-        // Erzeuge Formularelement wenn notwendig
-        if (inputField == null) {
+        if (inputField == null)
+        {
           createInputField();
         }
       }
@@ -797,14 +764,14 @@ public final class FormFieldFactory
 
     private void createInputField()
     {
-      if (cmd == null) {
+      if (cmd == null)
+      {
         return;
       }
 
       String bookmarkName = cmd.getBookmarkName();
 
-      LOGGER.trace(L.m("Erzeuge neues Input-Field für Bookmark \"%1\"",
-        bookmarkName));
+      LOGGER.trace("Erzeuge neues Input-Field für Bookmark \"{}\"", bookmarkName);
       try
       {
         XTextField field = UNO.XTextField(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_INPUT, doc));
@@ -814,8 +781,7 @@ public final class FormFieldFactory
           cmd.insertTextContentIntoBookmark(field, true);
           inputField = field;
         }
-      }
-      catch (java.lang.Exception e)
+      } catch (java.lang.Exception e)
       {
         LOGGER.error("", e);
       }
@@ -829,10 +795,7 @@ public final class FormFieldFactory
   }
 
   /**
-   * Repräsentiert ein FormField, das den Formularwert in einem DropDown-Field
-   * darstellt.
-   *
-   * @author Christoph Lutz (D-III-ITD 5.1)
+   * Puts the form value in a Drop-Down-Field.
    */
   private static class DropDownFormField extends BasicFormField
   {
@@ -840,8 +803,7 @@ public final class FormFieldFactory
 
     private String[] origItemList = null;
 
-    public DropDownFormField(XTextDocument doc, InsertFormValue cmd,
-        XTextField dropdownField)
+    public DropDownFormField(XTextDocument doc, InsertFormValue cmd, XTextField dropdownField)
     {
       super(doc, cmd);
       this.dropdownField = dropdownField;
@@ -854,11 +816,9 @@ public final class FormFieldFactory
     @Override
     public void setValue(String value)
     {
-      // DropDownFormFelder können in OOo nicht mit dem Leerstring belegt
-      // werden. Die Verwendung des Leerstrings fürht dazu, dass ein anderes als
-      // das ausgewählte Element angezeigt wird. Daher werden Leerstrings auf
-      // ein Leerzeichen umgeschrieben. OOo-Issue: #70087
-      if (value.isEmpty()) {
+      // ISSUE: empty strings are permitted as drop down values.
+      if (value.isEmpty())
+      {
         value = " ";
       }
 
@@ -870,13 +830,10 @@ public final class FormFieldFactory
     }
 
     /**
-     * Die Methode prüft, ob der String value bereits in der zum Zeitpunkt des
-     * Konstruktoraufrufs eingelesenen Liste oritItemList der erlaubten Einträge der
-     * ComboBox vorhanden ist und erweitert die Liste um value, falls nicht.
+     * Add a new item if it isn't already there.
      *
      * @param value
-     *          der Wert, der ggf. an in die Liste der erlaubten Einträge aufgenommen
-     *          wird.
+     *          The new item.
      */
     private void extendItemsList(String value)
     {
@@ -896,7 +853,9 @@ public final class FormFieldFactory
         {
           String[] extendedItems = new String[origItemList.length + 1];
           for (int i = 0; i < origItemList.length; i++)
+          {
             extendedItems[i] = origItemList[i];
+          }
           extendedItems[origItemList.length] = value;
           Utils.setProperty(dropdownField, UnoProperty.ITEMS, extendedItems);
         }
@@ -904,12 +863,13 @@ public final class FormFieldFactory
     }
 
     @Override
-    public String getFormElementValue()
+    public String getValue()
     {
       if (dropdownField != null)
       {
         Object content = Utils.getProperty(dropdownField, UnoProperty.SELECTED_ITEM);
-        if (content != null) {
+        if (content != null)
+        {
           return content.toString();
         }
       }
@@ -930,31 +890,12 @@ public final class FormFieldFactory
   }
 
   /**
-   * Repräsentiert ein FormField, das den Formularwert in einer Checkbox darstellt.
-   *
-   * @author Christoph Lutz (D-III-ITD 5.1)
+   * Puts the form value in a Check-Box-Field.
    */
   private static class CheckboxFormField extends BasicFormField
   {
     private Object checkbox;
 
-    /**
-     * Erzeugt eine neue CheckboxFormField, das eine bereits im Dokument doc
-     * bestehende Checkbox checkbox vom Service-Typ
-     * com.sun.star.form.component.CheckBox an der Stelle des Kommandos cmd
-     * repräsentiert.
-     *
-     * @param doc
-     *          Das Dokument in dem sich das Checkbox-Formularfeld-Kommando befindet
-     * @param cmd
-     *          das zum Formularfeld zugehörige insertFormValue-Kommando
-     * @param checkbox
-     *          Ein UNO-Service vom Typ von com.sun.star.form.component.CheckBox das
-     *          den Zugriff auf das entsprechende FormControl-Element ermöglicht.
-     * @param focusRange
-     *          Beschreibt die range, auf die der ViewCursor beim Aufruf der
-     *          focus()-methode gesetzt werden soll.
-     */
     public CheckboxFormField(XTextDocument doc, InsertFormValue cmd, Object checkbox)
     {
       super(doc, cmd);
@@ -965,26 +906,22 @@ public final class FormFieldFactory
     @Override
     public void setValue(String value)
     {
-      Utils.setProperty(checkbox,
-          UnoProperty.STATE,
-        Boolean.parseBoolean(value) ? Short.valueOf((short) 1) : Short.valueOf((short) 0));
+      Utils.setProperty(checkbox, UnoProperty.STATE,
+          Boolean.parseBoolean(value) ? Short.valueOf((short) 1) : Short.valueOf((short) 0));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * de.muenchen.allg.itd51.wollmux.FormFieldFactory.BasicFormField#getFormElementValue
-     * ()
-     */
     @Override
-    public String getFormElementValue()
+    public String getValue()
     {
       Object state = Utils.getProperty(checkbox, UnoProperty.STATE);
       if (state != null && state.equals(Short.valueOf((short) 1)))
+      {
         return "true";
+      }
       else
+      {
         return "false";
+      }
     }
 
     @Override
@@ -1001,13 +938,7 @@ public final class FormFieldFactory
   }
 
   /**
-   * Kapselt ein Serienbrieffeld UNO-Objekt vom Typ c,s,s,text,textfield,Database als
-   * FormField. In einem Serienbrieffeld kann keine TRAFO-Funktion gesetzt werden -
-   * deshalb liefert die Methode getTrafoName() immer null zurück. Die Objekte dieser
-   * Klasse betrachten zum Zwecke von equals() und hashCode() die zugrundeliegenden
-   * UNO-Objekte.
-   *
-   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
+   * Puts the form value in a mail merge field. Mail merge fields doesn't support TRAFOs.
    */
   private static class DatabaseFormField implements FormField
   {
@@ -1021,26 +952,17 @@ public final class FormFieldFactory
       this.doc = doc;
     }
 
-    /**
-     * Nicht verwendet.
-     */
-    @Override
-    public void setCommand(InsertFormValue cmd)
-    {
-    // nicht verwendet
-    }
-
     @Override
     public String getTrafoName()
     {
-      // diese Felder sind immer untransformiert
       return null;
     }
 
     @Override
     public void setValue(String value)
     {
-      if (value == null) {
+      if (value == null)
+      {
         return;
       }
       Utils.setProperty(textfield, UnoProperty.CONTENT, value);
@@ -1053,7 +975,8 @@ public final class FormFieldFactory
       String cont = (String) Utils.getProperty(textfield, UnoProperty.CONTENT);
       if (cont == null)
         cont = (String) Utils.getProperty(textfield, UnoProperty.CURRENT_PRESENTAITON);
-      if (cont != null) {
+      if (cont != null)
+      {
         return cont;
       }
       return "";
@@ -1067,11 +990,11 @@ public final class FormFieldFactory
         XController controller = UNO.XModel(doc).getCurrentController();
         XTextCursor cursor = UNO.XTextViewCursorSupplier(controller).getViewCursor();
         XTextRange focusRange = UNO.XTextContent(textfield).getAnchor();
-        if (focusRange != null) {
+        if (focusRange != null)
+        {
           cursor.gotoRange(focusRange, false);
         }
-      }
-      catch (java.lang.Exception e)
+      } catch (java.lang.Exception e)
       {
         LOGGER.trace("", e);
       }
@@ -1104,7 +1027,8 @@ public final class FormFieldFactory
     @Override
     public void dispose()
     {
-      if (textfield != null) {
+      if (textfield != null)
+      {
         textfield.dispose();
       }
     }
@@ -1118,8 +1042,6 @@ public final class FormFieldFactory
     @Override
     public boolean singleParameterTrafo()
     {
-      // Der Rückgabewert spielt keine Rolle da diese Felder immer untransformiert
-      // sind.
       return false;
     }
 
@@ -1137,19 +1059,7 @@ public final class FormFieldFactory
   }
 
   /**
-   * Kapselt ein Eingabefeld für eine Benutzervariable vom Typ
-   * c,s,s,text,textfield,InputUser und den zugehörigen TextFieldMaster master als
-   * FormField. Bei InputUser-Objekten kann auf den angezeigten Wert nicht direkt
-   * zugegriffen werden. Diese Zugriffe erfolgen über einen TextFieldMaster, der dem
-   * InputUser-Objekt zugeordnet ist. VORSICHT: Das Objekt textfield.TextFieldMaster
-   * ist dabei nicht als Master geeignet, da dieser Master keine direkte Möglichkeit
-   * zum Setzen der Anzeigewerte anbietet. Das statt dessen geeignete
-   * TextFieldMaster-Objekt muss über doc.getTextFieldMasters() bezogen werden, wobei
-   * textfield und master dann zusammen gehören, wenn
-   * textfield.Content.equals(master.Name) gilt. Die Objekte dieser Klasse betrachten
-   * zum Zwecke von equals() und hashCode() die zugrundeliegenden UNO-Objekte.
-   *
-   * @author Christoph Lutz (D-III-ITD-5.1)
+   * Puts the user variable in an Input-Field.
    */
   private static class InputUserFormField implements FormField
   {
@@ -1159,18 +1069,11 @@ public final class FormFieldFactory
 
     private XPropertySet master;
 
-    public InputUserFormField(XTextDocument doc, XTextField textfield,
-        XPropertySet master)
+    public InputUserFormField(XTextDocument doc, XTextField textfield, XPropertySet master)
     {
       this.doc = doc;
       this.textfield = textfield;
       this.master = master;
-    }
-
-    @Override
-    public void setCommand(InsertFormValue cmd)
-    {
-    // nicht notwendig
     }
 
     @Override
@@ -1185,14 +1088,14 @@ public final class FormFieldFactory
     @Override
     public String getTrafoName()
     {
-      return TextDocumentModel.getFunctionNameForUserFieldName(""
-          + Utils.getProperty(textfield, UnoProperty.CONTENT));
+      return TextDocumentModel.getFunctionNameForUserFieldName("" + Utils.getProperty(textfield, UnoProperty.CONTENT));
     }
 
     @Override
     public String getValue()
     {
-      if (master == null) {
+      if (master == null)
+      {
         return "";
       }
       return "" + Utils.getProperty(master, UnoProperty.CONTENT);
@@ -1206,11 +1109,11 @@ public final class FormFieldFactory
         XController controller = UNO.XModel(doc).getCurrentController();
         XTextCursor cursor = UNO.XTextViewCursorSupplier(controller).getViewCursor();
         XTextRange focusRange = UNO.XTextContent(textfield).getAnchor();
-        if (focusRange != null) {
+        if (focusRange != null)
+        {
           cursor.gotoRange(focusRange, false);
         }
-      }
-      catch (java.lang.Exception e)
+      } catch (java.lang.Exception e)
       {
         LOGGER.trace("", e);
       }
@@ -1243,7 +1146,8 @@ public final class FormFieldFactory
     @Override
     public void dispose()
     {
-      if (textfield != null) {
+      if (textfield != null)
+      {
         textfield.dispose();
       }
     }
