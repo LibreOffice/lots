@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Tag;
 
 import de.muenchen.allg.afid.UNO;
 
-@Tag("de.muenchen.allg.itd51.wollmux.core.OfficeTests")
+@Tag("de.muenchen.allg.itd51.wollmux.OfficeTests")
 public abstract class OfficeTest
 {
   @BeforeAll
