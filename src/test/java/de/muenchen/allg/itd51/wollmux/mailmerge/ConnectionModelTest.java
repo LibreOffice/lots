@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import com.sun.star.sheet.XSpreadsheetDocument;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.OfficeTest;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
+import de.muenchen.allg.itd51.wollmux.test.OfficeTest;
 
 public class ConnectionModelTest extends OfficeTest
 {
@@ -25,7 +25,7 @@ public class ConnectionModelTest extends OfficeTest
   @BeforeEach
   public void setUp() throws Exception
   {
-    xDoc = UNO.XSpreadsheetDocument(UNO.loadComponentFromURL(file.toString(), false, false, true));
+    xDoc = UNO.XSpreadsheetDocument(loadComponent(file.toString()));
     model = ConnectionModel.addAndSelectDatasource(xDoc, Optional.empty());
   }
 

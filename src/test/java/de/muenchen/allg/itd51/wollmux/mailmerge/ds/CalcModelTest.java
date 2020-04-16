@@ -21,8 +21,8 @@ import com.sun.star.util.XCloseListener;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.dialog.adapter.AbstractCloseListener;
-import de.muenchen.allg.itd51.wollmux.OfficeTest;
 import de.muenchen.allg.itd51.wollmux.mailmerge.FieldSubstitution;
+import de.muenchen.allg.itd51.wollmux.test.OfficeTest;
 
 public class CalcModelTest extends OfficeTest
 {
@@ -41,7 +41,7 @@ public class CalcModelTest extends OfficeTest
   @BeforeEach
   public void setUp() throws Exception
   {
-    xDoc = UNO.XSpreadsheetDocument(UNO.loadComponentFromURL(file.toString(), false, false, true));
+    xDoc = UNO.XSpreadsheetDocument(loadComponent(file.toString()));
     model = new CalcModel(xDoc);
     model.addCloseListener(closeListener);
     model.activateTable("Tabelle1");
