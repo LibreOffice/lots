@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.OfficeTest;
+import de.muenchen.allg.itd51.wollmux.test.OfficeTest;
 
 public class DocumentTreeTest extends OfficeTest
 {
@@ -22,7 +22,7 @@ public class DocumentTreeTest extends OfficeTest
   public void setUp() throws Exception
   {
     URL file = getClass().getResource("ExternerBriefkopf.odt");
-    xDoc = UNO.XTextDocument(UNO.loadComponentFromURL(file.toString(), false, false, true));
+    xDoc = UNO.XTextDocument(loadComponent(file.toString()));
   }
 
   @AfterEach

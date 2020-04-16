@@ -20,7 +20,7 @@ import com.sun.star.util.XCloseListener;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.dialog.adapter.AbstractCloseListener;
-import de.muenchen.allg.itd51.wollmux.OfficeTest;
+import de.muenchen.allg.itd51.wollmux.test.OfficeTest;
 
 public class DBModelTest extends OfficeTest
 {
@@ -40,8 +40,7 @@ public class DBModelTest extends OfficeTest
   @BeforeEach
   public void setUp() throws Exception
   {
-    xDoc = UnoRuntime.queryInterface(XOfficeDatabaseDocument.class,
-        UNO.loadComponentFromURL(file.toString(), false, false, true));
+    xDoc = UnoRuntime.queryInterface(XOfficeDatabaseDocument.class, loadComponent(file.toString()));
     UNO.dbContext.registerObject(dbName, xDoc.getDataSource());
     model = new DBModel(xDoc);
     model.addCloseListener(closeListener);
