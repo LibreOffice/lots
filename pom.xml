@@ -13,6 +13,10 @@
     <libreoffice.version>6.4.0-SNAPSHOT</libreoffice.version>
     <wollmux.oxt.id>de.muenchen.allg.d101.wollmux</wollmux.oxt.id>
     <wollmux.oxt.name>WollMux</wollmux.oxt.name>
+    <wollmux.test.conf.url>https://github.com/WollMux/wollmux-config/releases/download/</wollmux.test.conf.url>
+    <wollmux.test.conf.release>v18.1.0/wollmux-config-18.1.0.tar.gz</wollmux.test.conf.release>
+    <wollmux.test.conf>${project.build.directory}/config/.wollmux/wollmux.conf</wollmux.test.conf>
+    <office.user.profile>${project.build.directory}/office</office.user.profile>
     <maven.javadoc.failOnWarnings>true</maven.javadoc.failOnWarnings>
   </properties>
 
@@ -38,6 +42,18 @@
         <filtering>true</filtering>
       </resource>
     </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <includes>
+          <include>*.properties</include>
+        </includes>
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
@@ -111,6 +127,7 @@
         <version>0.8.5</version>
         <executions>
           <execution>
+            <id>prepare-agent-report</id>
             <goals>
               <goal>prepare-agent</goal>
             </goals>
@@ -120,6 +137,19 @@
             <phase>test</phase>
             <goals>
               <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>prepare-agent-integration-report</id>
+            <goals>
+              <goal>prepare-agent-integration</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report-integration-test</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>report-integration</goal>
             </goals>
           </execution>
         </executions>
@@ -194,7 +224,67 @@
               <goal>run</goal>
             </goals>
           </execution>
+          <execution>
+            <id>download-config</id>
+            <phase>generate-test-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <taskdef resource="net/sf/antcontrib/antcontrib.properties" />
+                <if>
+                  <not>
+                    <available file="${project.build.directory}/config/.wollmux/wollmux.conf" />
+                  </not>
+                  <then>
+                    <get
+                      src="${wollmux.test.conf.url}${wollmux.test.conf.release}"
+                      dest="${project.build.directory}" />
+                    <untar src="${project.build.directory}/wollmux-config-18.1.0.tar.gz"
+                      dest="${project.build.directory}/config" compression="gzip" />
+                  </then>
+                </if>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install-wollmux</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <echo level="info">unopkg add:</echo>
+                <exec executable="unopkg" failifexecutionfails="false">
+                  <arg line="add -f -env:UserInstallation=file://${office.user.profile} dist/WollMux.oxt" />
+                </exec>
+                <replaceregexp>
+                  <regexp pattern="&lt;vmParameters xsi:nil=&quot;true&quot;/&gt;" />
+                  <substitution
+                    expression="&lt;vmParameters xsi:nil=&quot;false&quot;&gt;
+                  &lt;param&gt;-DWOLLMUX_CONF_PATH=${wollmux.test.conf}&lt;/param&gt;
+                  &lt;param&gt;
+                  -Dlog4j.configuration=file://${project.build.testOutputDirectory}/log4j.properties
+                  &lt;/param&gt;
+                  &lt;/vmParameters&gt;
+                  " />
+                  <fileset dir="${office.user.profile}/user/config">
+                    <include name="javasettings*.xml" />
+                  </fileset>
+                </replaceregexp>
+              </target>
+            </configuration>
+          </execution>
         </executions>
+        <dependencies>
+          <dependency>
+            <groupId>ant-contrib</groupId>
+            <artifactId>ant-contrib</artifactId>
+            <version>20020829</version>
+          </dependency>
+        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -209,6 +299,40 @@
             <additionalClasspathElement>${env.UNO_PATH}/classes/unoil.jar</additionalClasspathElement>
             <additionalClasspathElement>${env.UNO_PATH}/classes/unoloader.jar</additionalClasspathElement>
           </additionalClasspathElements>
+          <excludedGroups>de.muenchen.allg.itd51.wollmux.test.OfficeTest</excludedGroups>
+          <systemPropertyVariables>
+            <WOLLMUX_CONF_PATH>${wollmux.test.conf}</WOLLMUX_CONF_PATH>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>3.0.0-M4</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <additionalClasspathElements>
+            <additionalClasspathElement>${env.UNO_PATH}/classes/java_uno.jar</additionalClasspathElement>
+            <additionalClasspathElement>${env.UNO_PATH}/classes/juh.jar</additionalClasspathElement>
+            <additionalClasspathElement>${env.UNO_PATH}/classes/jurt.jar</additionalClasspathElement>
+            <additionalClasspathElement>${env.UNO_PATH}/classes/ridl.jar</additionalClasspathElement>
+            <additionalClasspathElement>${env.UNO_PATH}/classes/unoil.jar</additionalClasspathElement>
+            <additionalClasspathElement>${env.UNO_PATH}/classes/unoloader.jar</additionalClasspathElement>
+          </additionalClasspathElements>
+          <groups>de.muenchen.allg.itd51.wollmux.test.OfficeTest</groups>
+          <includes>
+            <include>*.java</include>
+          </includes>
+          <systemPropertyVariables>
+            <WOLLMUX_CONF_PATH>${wollmux.test.conf}</WOLLMUX_CONF_PATH>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
     </plugins>
