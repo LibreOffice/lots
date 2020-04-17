@@ -12,6 +12,10 @@ pipeline {
   tools {
     jdk 'Java11'
   }
+
+  environment {
+    UNO_PATH = '/opt/libreoffice6.4/program/'
+  }
 	
   stages {
     stage('Build') {
@@ -35,7 +39,7 @@ pipeline {
               mavenLocalRepo: '.repo',
               mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
               publisherStrategy: 'EXPLICIT') {
-              sh "mvn -P OfficeTests test"
+              sh "mvn -Dmaven.javadoc.skip=true test verify"
             }
           }
         }
@@ -67,7 +71,7 @@ pipeline {
               sh "mvn $SONAR_MAVEN_GOAL \
                 -Dsonar.host.url=$SONAR_HOST_URL \
                 -Dsonar.branch.name=${GIT_BRANCH} \
-                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml \
                 -Dsonar.junit.reportPaths=target/surefire-reports"
               }
             }
@@ -82,7 +86,7 @@ pipeline {
                 -Dsonar.host.url=$SONAR_HOST_URL \
                 -Dsonar.branch.name=${GIT_BRANCH} \
                 -Dsonar.branch.target=${env.CHANGE_TARGET} \
-                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml \
                 -Dsonar.junit.reportPaths=target/surefire-reports"
               }
             }
