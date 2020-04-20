@@ -3,6 +3,7 @@ package de.muenchen.allg.itd51.wollmux.core.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 
 import org.apache.log4j.Appender;
 import org.apache.log4j.EnhancedPatternLayout;
@@ -11,6 +12,7 @@ import org.apache.log4j.Layout;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.WriterAppender;
+import org.apache.log4j.config.PropertyPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,6 +109,17 @@ public class LogConfig
     }
     Level mode = Level.toLevel(loggingMode, Level.INFO);
     ROOT_LOGGER.setLevel(mode);
+  }
+
+  /**
+   * Dump the log4j configuration.
+   *
+   * @param out
+   *          The writer to dump to.
+   */
+  public static void dumpConfiguration(PrintWriter out)
+  {
+    new PropertyPrinter(out).print(out);
   }
 
   /**

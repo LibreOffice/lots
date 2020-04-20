@@ -83,6 +83,7 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.net.http.HttpTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -94,7 +95,6 @@ import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,11 +165,6 @@ public class WollMuxFiles
    * Das Verzeichnis ,wollmux.
    */
   private static File wollmuxDir;
-
-  /**
-   * Enthält einen PrintStream in den die Log-Nachrichten geschrieben werden.
-   */
-  private static File wollmuxLogFile;
 
   /**
    * Enthält das File der Konfigurationsdatei wollmux.conf
@@ -253,11 +248,6 @@ public class WollMuxFiles
     }
 
     return true;
-  }
-
-  public static void initLoggerOutputFile(File wollmuxLogFile, Level logLevel)
-  {
-    LogConfig.init(wollmuxLogFile, logLevel);
   }
 
   private static File findWollMuxConf(File wollMuxDir)
@@ -364,19 +354,6 @@ public class WollMuxFiles
       wollmuxConfFile = findWollMuxConf(getWollMuxDir());
 
     return wollmuxConfFile;
-  }
-
-  /**
-   * Liefert das File-Objekt der Logdatei zurück. Darf erst nach setupWollMuxDir() aufgerufen
-   * werden.
-   *
-   */
-  public static File getWollMuxLogFile()
-  {
-    if (wollmuxLogFile == null || !wollmuxLogFile.exists())
-      wollmuxLogFile = new File(getWollMuxDir(), "wollmux.log");
-
-    return wollmuxLogFile;
   }
 
   /**
@@ -528,8 +505,8 @@ public class WollMuxFiles
         + cal.get(Calendar.DAY_OF_MONTH) + "_" + cal.getTimeInMillis();
     File dumpFile = new File(getWollMuxDir(), "dump" + date);
     try (OutputStream outStream = new FileOutputStream(dumpFile);
-        BufferedWriter out = new BufferedWriter(
-            new OutputStreamWriter(outStream, ConfigThingy.CHARSET));)
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outStream, StandardCharsets.UTF_8));
+        PrintWriter printWriter = new PrintWriter(out);)
     {
       out.write("Dump time: " + date + "\n");
       out.write(WollMuxSingleton.getBuildInfo() + "\n");
@@ -572,12 +549,15 @@ public class WollMuxFiles
       out.write("DEFAULT_CONTEXT: \"" + getDEFAULT_CONTEXT() + "\" (" + buffy + ")\n");
       out.write("CONF_VERSION: " + WollMuxSingleton.getInstance().getConfVersionInfo() + "\n");
       out.write("wollmuxDir: " + getWollMuxDir() + "\n");
-      out.write("wollmuxLogFile: " + getWollMuxLogFile() + "\n");
       if (getWollMuxConfFile() != null)
       {
         out.write("wollmuxConfFile: " + getWollMuxConfFile() + "\n");
       }
       out.write("losCacheFile: " + getLosCacheFile() + "\n");
+
+      out.write("===================== START LOG4J-Settings ==================\n");
+      LogConfig.dumpConfiguration(printWriter);
+      out.write("===================== END LOG4J-Settings ==================\n");
 
       out.write("===================== START JVM-Settings ==================\n");
       try
@@ -658,13 +638,6 @@ public class WollMuxFiles
       outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
       out.write("\n");
       out.write("===================== END losCacheFile ==================\n");
-
-      out.write("===================== START wollmux.log ==================\n");
-      out.flush(); // weil wir gleich direkt auf den Stream zugreifen
-      copyFile(getWollMuxLogFile(), outStream);
-      outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
-      out.write("\n");
-      out.write("===================== END wollmux.log ==================\n");
 
       out.write("===================== START OOo-Configuration dump ==================\n");
       out.write(dumpOOoConfiguration("/org.openoffice.Setup/Product") + "\n");

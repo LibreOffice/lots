@@ -14,7 +14,6 @@
       <outputDirectory>.</outputDirectory>
       <excludes>
         <exclude>.keep</exclude>
-        <exclude>log4j.properties</exclude>
         <exclude>**/DebugExternalWollMux*</exclude>
       </excludes>
     </fileSet>
