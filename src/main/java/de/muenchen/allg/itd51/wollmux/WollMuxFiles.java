@@ -268,6 +268,13 @@ public class WollMuxFiles
       searchPaths.add(wollmuxConfPath);
     }
 
+    // wollmux.conf set by system property "WOLLMUX_CONF_PATH"
+    if (System.getProperty("WOLLMUX_CONF_PATH") != null)
+    {
+      wollmuxConfPath = System.getProperty("WOLLMUX_CONF_PATH");
+      searchPaths.add(wollmuxConfPath);
+    }
+
     searchPaths.add(new File(wollMuxDir, "wollmux.conf").getAbsolutePath());
     searchPaths.add(System.getProperty("user.dir") + "/.wollmux/wollmux.conf");
     searchPaths.add(ETC_WOLLMUX_WOLLMUX_CONF);
