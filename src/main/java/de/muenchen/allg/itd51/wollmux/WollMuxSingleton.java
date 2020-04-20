@@ -57,7 +57,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Iterator;
 
-import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +71,7 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
@@ -129,7 +129,7 @@ public class WollMuxSingleton
 
     // init Logging.
     String logLevel = WollMuxFiles.getWollMuxConfLoggingMode(WollMuxFiles.getWollmuxConf());
-    WollMuxFiles.initLoggerOutputFile(WollMuxFiles.getWollMuxLogFile(), Level.toLevel(logLevel));
+    LogConfig.init(logLevel);
 
     // init Localization
     if (!WollMuxFiles.initLocalization(WollMuxFiles.getWollmuxConf()))
