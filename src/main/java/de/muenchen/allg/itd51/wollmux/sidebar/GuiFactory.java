@@ -101,7 +101,7 @@ public class GuiFactory
   {
     XControl buttonCtrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_BUTTON,
         props, size);
-    XButton button = UnoRuntime.queryInterface(XButton.class, buttonCtrl);
+    XButton button = UNO.XButton(buttonCtrl);
     button.setLabel(label);
     button.addActionListener(listener);
     return buttonCtrl;
@@ -141,7 +141,7 @@ public class GuiFactory
     XControl buttonCtrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_EDIT,
         props, size);
 
-    XTextComponent txt = UnoRuntime.queryInterface(XTextComponent.class, buttonCtrl);
+    XTextComponent txt = UNO.XTextComponent(buttonCtrl);
     txt.setText(text);
     return buttonCtrl;
   }
@@ -253,9 +253,9 @@ public class GuiFactory
   {
     XControl ctrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_COMBO_BOX, props,
         size);
-    XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, ctrl);
+    XTextComponent tf = UNO.XTextComponent(ctrl);
     tf.setText(text);
-    XComboBox cmb = UnoRuntime.queryInterface(XComboBox.class, ctrl);
+    XComboBox cmb = UNO.XComboBox(ctrl);
     cmb.addItemListener(listener);
     cmb.setDropDownLineCount((short) 10);
 
@@ -416,7 +416,7 @@ public class GuiFactory
           UnoComponent.createComponentWithContext(type + "Model", xMCF, xContext));
       control.setModel(controlModel);
       XMultiPropertySet properties =
-        UnoRuntime.queryInterface(XMultiPropertySet.class, control.getModel());
+        UNO.XMultiPropertySet(control.getModel());
       if (props != null && props.size() > 0)
       {
         properties.setPropertyValues(
@@ -424,7 +424,7 @@ public class GuiFactory
           props.values().toArray(new Object[props.size()]));
       }
       control.createPeer(toolkit, windowPeer);
-      XWindow controlWindow = UnoRuntime.queryInterface(XWindow.class, control);
+      XWindow controlWindow = UNO.XWindow(control);
       setWindowPosSize(controlWindow, rectangle);
       return control;
     }

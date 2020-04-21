@@ -55,7 +55,7 @@ public class SingleWizardPage extends AbstractXWizardPage
   {
     super(pageId, parentWindow, "vnd.sun.star.script:WollMux.seriendruck_single?location=application");
     this.settings = settings;
-    XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
+    XControlContainer container = UNO.XControlContainer(window);
     targetDir = UNO.XTextComponent(container.getControl("targetDir"));
     targetDir.addTextListener(new AbstractTextListener()
     {

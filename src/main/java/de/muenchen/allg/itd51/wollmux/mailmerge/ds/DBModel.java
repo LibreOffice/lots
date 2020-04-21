@@ -23,7 +23,6 @@ import com.sun.star.sdbc.XConnection;
 import com.sun.star.sdbc.XRow;
 import com.sun.star.sdbc.XRowSet;
 import com.sun.star.sdbcx.XColumnsSupplier;
-import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XCloseListener;
 import com.sun.star.util.XModifyListener;
 
@@ -342,7 +341,7 @@ public class DBModel implements DatasourceModel
       UnoProperty.setProperty(results, UnoProperty.COMMAND, "SELECT * FROM " + sqlIdentifier(tableName) + ";");
       results.execute();
       XRow row = UNO.XRow(results);
-      XColumnLocate locate = UnoRuntime.queryInterface(XColumnLocate.class, results);
+      XColumnLocate locate = UNO.XColumnLocate(results);
       int id = 1;
       while (results.next())
       {

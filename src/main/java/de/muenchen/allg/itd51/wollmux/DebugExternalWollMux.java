@@ -91,7 +91,7 @@ public class DebugExternalWollMux
         MailMergeFactory.SERVICE_NAME);
 
     XSet set =
-      UnoRuntime.queryInterface(XSet.class, UNO.defaultContext.getServiceManager());
+      UNO.XSet(UNO.defaultContext.getServiceManager());
     set.insert(ComponentRegistration.__getComponentFactory(WollMux.class.getName()));
     set.insert(ComponentRegistration
         .__getComponentFactory(WollMuxSidebarFactory.class.getName()));

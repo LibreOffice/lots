@@ -92,7 +92,7 @@ public class GenderDialog
 
       XWindow window = provider.createContainerWindow(
           "vnd.sun.star.script:WollMux.gender_dialog?location=application", "", peer, null);
-      controlContainer = UnoRuntime.queryInterface(XControlContainer.class, window);
+      controlContainer = UNO.XControlContainer(window);
 
       XComboBox cbAnrede = UNO.XComboBox(controlContainer.getControl("cbSerienbrieffeld"));
       cbAnrede.addItems(fieldNames.toArray(new String[fieldNames.size()]), (short) 0);
@@ -103,7 +103,7 @@ public class GenderDialog
       XButton btnOK = UNO.XButton(controlContainer.getControl("btnOK"));
       btnOK.addActionListener(btnOKActionListener);
 
-      dialog = UnoRuntime.queryInterface(XDialog.class, window);
+      dialog = UNO.XDialog(window);
       dialog.execute();
     } catch (com.sun.star.uno.Exception e)
     {

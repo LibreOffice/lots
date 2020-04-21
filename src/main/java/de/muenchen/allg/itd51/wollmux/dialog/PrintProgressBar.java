@@ -151,9 +151,9 @@ public class PrintProgressBar
           cancel();
         }
       });
-      XControlContainer controlContainer = UnoRuntime.queryInterface(XControlContainer.class, window);
+      XControlContainer controlContainer = UNO.XControlContainer(window);
 
-      progressBar = UnoRuntime.queryInterface(XProgressBar.class, controlContainer.getControl("progress"));
+      progressBar = UNO.XProgressBar(controlContainer.getControl("progress"));
       statusLabel = UNO.XFixedText(controlContainer.getControl("progressText"));
       UNO.XButton(controlContainer.getControl("abort")).addActionListener(new AbstractActionListener()
       {

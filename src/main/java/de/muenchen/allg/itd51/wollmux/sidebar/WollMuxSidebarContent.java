@@ -247,7 +247,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       UnoRuntime.queryInterface(XMultiComponentFactory.class,
         context.getServiceManager());
     XWindowPeer parentWindowPeer =
-      UnoRuntime.queryInterface(XWindowPeer.class, parentWindow);
+      UNO.XWindowPeer(parentWindow);
 
     if (parentWindowPeer == null)
     {
@@ -257,7 +257,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     toolkit = parentWindowPeer.getToolkit();
     windowPeer = GuiFactory.createWindow(toolkit, parentWindowPeer);
     windowPeer.setBackground(0xffffffff);
-    window = UnoRuntime.queryInterface(XWindow.class, windowPeer);
+    window = UNO.XWindow(windowPeer);
 
     if (window != null)
     {
@@ -282,10 +282,10 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
           XControl treeCtrl =
             GuiFactory.createTree(xMCF, context, toolkit, windowPeer, dataModel);
-          tree = UnoRuntime.queryInterface(XTreeControl.class, treeCtrl);
+          tree = UNO.XTreeControl(treeCtrl);
           layout.addControl(treeCtrl, 6);
 
-          XWindow treeWnd = UnoRuntime.queryInterface(XWindow.class, treeCtrl);
+          XWindow treeWnd = UNO.XWindow(treeCtrl);
           treeWnd.addMouseListener(xMouseListener);
 
           XControl line =
@@ -338,7 +338,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     // TODO: the following is wrong, since it doesn't respect i_rParentAccessible. In
     // a real extension, you should
     // implement this correctly :)
-    return UnoRuntime.queryInterface(XAccessible.class, getWindow());
+    return UNO.XAccessible(getWindow());
   }
 
   @Override
@@ -464,7 +464,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           GuiFactory.createButton(UNO.xMCF, context, toolkit, windowPeer,
                 uiButton.getLabel(), null, new Rectangle(0, 0, 100, 32), null);
 
-        XButton xbutton = UnoRuntime.queryInterface(XButton.class, button);
+        XButton xbutton = UNO.XButton(button);
         AbstractActionListener xButtonAction = event -> uiButton.getAction().performAction();
         xbutton.addActionListener(xButtonAction);
         layout.addControl(button);
@@ -570,8 +570,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     AbstractItemListener resultListener = event -> {
       try
       {
-        XControl ctrl = UnoRuntime.queryInterface(XControl.class, event.Source);
-        XItemList items = UnoRuntime.queryInterface(XItemList.class, ctrl.getModel());
+        XControl ctrl = UNO.XControl(event.Source);
+        XItemList items = UNO.XItemList(ctrl.getModel());
         String uuid = (String) items.getItemData(event.Selected);
         UIElementAction action = searchActions.get(uuid);
         if (action != null)
@@ -587,7 +587,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         windowPeer, resultListener, new Rectangle(0, 0, 100, 0), propsResult));
     UNO.XWindow(resultBox).setVisible(false);
 
-    final XWindow wnd = UnoRuntime.queryInterface(XWindow.class, searchBox);
+    final XWindow wnd = UNO.XWindow(searchBox);
 
     AbstractTextListener tfListener = event -> {
       String text = searchBox.getText();
@@ -647,7 +647,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       {
         try
         {
-          XTextComponent searchBox = UnoRuntime.queryInterface(XTextComponent.class, event.Source);
+          XTextComponent searchBox = UNO.XTextComponent(event.Source);
 
           activate(false);
 
@@ -671,7 +671,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       {
         try
         {
-          XTextComponent tf = UnoRuntime.queryInterface(XTextComponent.class, event.Source);
+          XTextComponent tf = UNO.XTextComponent(event.Source);
           XControlModel model = UNO.XControl(searchBox).getModel();
 
           activate(true);
@@ -722,14 +722,14 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     XControl button =
         GuiFactory.createButton(UNO.xMCF, context, toolkit, windowPeer,
             uiSenderbox.getLabel(), null, new Rectangle(0, 0, 100, 32), props);
-    final XButton xbutton = UnoRuntime.queryInterface(XButton.class, button);
+    final XButton xbutton = UNO.XButton(button);
 
     String[] palEntries = PersoenlicheAbsenderliste.getInstance().getPALEntries();
 
-    final XPopupMenu menu = UnoRuntime.queryInterface(XPopupMenu.class, UNO.xMCF.createInstanceWithContext("com.sun.star.awt.PopupMenu", context));
-    XMenu xMenu = UnoRuntime.queryInterface(XMenu.class, menu);
+    final XPopupMenu menu = UNO.XPopupMenu(UNO.xMCF.createInstanceWithContext("com.sun.star.awt.PopupMenu", context));
+    XMenu xMenu = UNO.XMenu(menu);
 
-    XIntrospection intro = UnoRuntime.queryInterface(XIntrospection.class, UNO.xMSF.createInstance("com.sun.star.beans.Introspection"));
+    XIntrospection intro = UNO.XIntrospection(UNO.xMSF.createInstance("com.sun.star.beans.Introspection"));
     XIntrospectionAccess access = intro.inspect(xMenu);
     final XIdlMethod m_execute = access.getMethod("execute", MethodConcept.ALL);
 
@@ -738,7 +738,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       @Override
       public void itemSelected(MenuEvent event)
       {
-        XMenu menu = UnoRuntime.queryInterface(XMenu.class, event.Source);
+        XMenu menu = UNO.XMenu(event.Source);
         try
         {
           String name = menu.getCommand(event.MenuId);
@@ -792,7 +792,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     AbstractActionListener xButtonAction = event -> {
       try
       {
-        final XWindow wndButton = UnoRuntime.queryInterface(XWindow.class, event.Source);
+        final XWindow wndButton = UNO.XWindow(event.Source);
         Rectangle posSize = wndButton.getPosSize();
         // short n = menu.execute(windowPeer, new Rectangle(posSize.X, posSize.Height, 0, 0),
         // (short)0);

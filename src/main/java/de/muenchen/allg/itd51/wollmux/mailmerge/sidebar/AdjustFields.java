@@ -135,8 +135,8 @@ public class AdjustFields
               UNO.defaultContext));
       XWindow window = provider.createContainerWindow(
           "vnd.sun.star.script:WollMux.edit_table_columns?location=application", "", peer, null);
-      XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
-      XDialog dialog = UnoRuntime.queryInterface(XDialog.class, window);
+      XControlContainer container = UNO.XControlContainer(window);
+      XDialog dialog = UNO.XDialog(window);
       dialog.setTitle(title);
 
       XTextComponent[] currentField = new XTextComponent[] { null };

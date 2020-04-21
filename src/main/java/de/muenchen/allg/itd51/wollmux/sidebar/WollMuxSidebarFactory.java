@@ -4,9 +4,9 @@ import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.ui.XUIElement;
-import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.dialog.adapter.AbstractSidebarFactory;
 
 /**
@@ -43,7 +43,7 @@ public class WollMuxSidebarFactory extends AbstractSidebarFactory
       if (arguments[i].Name.equals("ParentWindow"))
       {
         parentWindow =
-          UnoRuntime.queryInterface(XWindow.class, arguments[i].Value);
+          UNO.XWindow(arguments[i].Value);
         break;
       }
     }

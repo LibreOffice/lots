@@ -30,7 +30,7 @@ public class UNODialogFactory
   public XWindow createDialog(int width, int height, int backgroundColor)
   {
     Object cont = UnoComponent.createComponentWithContext(UnoComponent.CSS_AWT_UNO_CONTROL_CONTAINER);
-    XControl dialogControl = UnoRuntime.queryInterface(XControl.class, cont);
+    XControl dialogControl = UNO.XControl(cont);
 
     XControlModel unoControlContainerModel = UnoRuntime.queryInterface(XControlModel.class,
         UnoComponent.createComponentWithContext(UnoComponent.CSS_AWT_UNO_CONTROL_CONTAINER_MODEL));
@@ -43,7 +43,7 @@ public class UNODialogFactory
     try
     {
       toolkit = UNO.xMCF.createInstanceWithContext("com.sun.star.awt.Toolkit", UNO.defaultContext);
-      xToolkit = UnoRuntime.queryInterface(XToolkit.class, toolkit);
+      xToolkit = UNO.XToolkit(toolkit);
     } catch (Exception e)
     {
       LOGGER.error("", e);
@@ -107,10 +107,10 @@ public class UNODialogFactory
       LOGGER.error("", e1);
     }
 
-    XControlModel modelX = UnoRuntime.queryInterface(XControlModel.class, editModel);
+    XControlModel modelX = UNO.XControlModel(editModel);
 
-    XControl xControl = UnoRuntime.queryInterface(XControl.class, control);
-    XWindow wnd = UnoRuntime.queryInterface(XWindow.class, xControl);
+    XControl xControl = UNO.XControl(control);
+    XWindow wnd = UNO.XWindow(xControl);
     wnd.setPosSize(0, 0, 
         controlProperties.getControlSize().getWidth() > 0
         ? controlProperties.getControlSize().getWidth()

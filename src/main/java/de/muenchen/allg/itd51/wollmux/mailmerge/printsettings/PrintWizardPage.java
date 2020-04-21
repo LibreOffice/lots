@@ -5,7 +5,6 @@ import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XWindow;
 import com.sun.star.uno.Exception;
-import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
@@ -38,7 +37,7 @@ public class PrintWizardPage extends AbstractXWizardPage
       throws Exception
   {
     super(pageId, parentWindow, "vnd.sun.star.script:WollMux.seriendruck_printer?location=application");
-    XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
+    XControlContainer container = UNO.XControlContainer(window);
     name = UNO.XTextComponent(container.getControl("name"));
     name.setText(model.getCurrentPrinterName());
     change = UNO.XButton(container.getControl("change"));
