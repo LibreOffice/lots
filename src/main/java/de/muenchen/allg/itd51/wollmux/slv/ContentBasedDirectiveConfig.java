@@ -31,12 +31,12 @@ public class ContentBasedDirectiveConfig
   /**
    * The format of the numbers. One of {@link NumberFormat}.
    */
-  private static final NumberFormat FORMAT;
+  private static NumberFormat format;
 
   /**
    * The name of copies.
    */
-  private static final String COPY_NAME;
+  private static String copyName;
 
   /**
    * The highlight colors for each {@link PrintBlockSignature}.
@@ -47,17 +47,28 @@ public class ContentBasedDirectiveConfig
   // statically initialize the properties
   static
   {
-    String format = "roman";
-    String name = "Abdruck";
+    configure(WollMuxFiles.getWollmuxConf());
+  }
+
+  /**
+   * Configure Content Based Directives
+   *
+   * @param config
+   *          The configuration.
+   */
+  public static void configure(ConfigThingy config)
+  {
+    String formatOption = "roman";
+    String nameOption = "Abdruck";
     for (PrintBlockSignature pbName : PrintBlockSignature.values())
     {
       highlightColors.put(pbName, null);
     }
     try
     {
-      if (WollMuxFiles.getWollmuxConf() != null)
+      if (config != null)
       {
-        ConfigThingy conf = WollMuxFiles.getWollmuxConf().query("SachleitendeVerfuegungen");
+        ConfigThingy conf = config.query("SachleitendeVerfuegungen");
         if (conf.count() > 0)
         {
           conf = conf.getLastChild();
@@ -66,10 +77,10 @@ public class ContentBasedDirectiveConfig
             switch (child.getName())
             {
             case "NUMBERS":
-              format = child.toString();
+              formatOption = child.toString();
               break;
             case "ABDRUCK_NAME":
-              name = child.toString();
+              nameOption = child.toString();
               break;
             case "ALL_VERSIONS_HIGHLIGHT_COLOR":
               highlightColors.put(PrintBlockSignature.ALL_VERSIONS,
@@ -101,11 +112,11 @@ public class ContentBasedDirectiveConfig
       LOGGER.debug("", e);
     } finally
     {
-      FORMAT = NumberFormat.valueOf(format.toUpperCase());
-      LOGGER.debug("\"Verwende Zahlenformat '{}' aus Attribut NUMBERS.\"", FORMAT);
+      format = NumberFormat.valueOf(formatOption.toUpperCase());
+      LOGGER.debug("\"Verwende Zahlenformat '{}' aus Attribut NUMBERS.\"", format);
 
-      COPY_NAME = name;
-      LOGGER.debug("Verwende ABDRUCK_NAME '{}'", COPY_NAME);
+      copyName = nameOption;
+      LOGGER.debug("Verwende ABDRUCK_NAME '{}'", copyName);
     }
   }
 
@@ -134,7 +145,7 @@ public class ContentBasedDirectiveConfig
   }
 
   /**
-   * Get the number according to {@link #FORMAT}.
+   * Get the number according to {@link #format}.
    *
    * @param i
    *          The number to get in the correct format.
@@ -143,7 +154,7 @@ public class ContentBasedDirectiveConfig
   public static String getNumber(int i)
   {
     String number = Integer.toString(i);
-    if (FORMAT == NumberFormat.ROMAN)
+    if (format == NumberFormat.ROMAN)
     {
       try
       {
@@ -158,7 +169,7 @@ public class ContentBasedDirectiveConfig
 
   public static String getName()
   {
-    return COPY_NAME;
+    return copyName;
   }
 
   /**
