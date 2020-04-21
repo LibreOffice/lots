@@ -189,10 +189,10 @@ public class IfThenElseDialog
       Object toolkit = UNO.xMCF.createInstanceWithContext("com.sun.star.awt.Toolkit",
           UNO.defaultContext);
       XToolkit xToolkit = UNO.XToolkit(toolkit);
-      XExtendedToolkit extToolkit = UnoRuntime.queryInterface(XExtendedToolkit.class, xToolkit);
+      XExtendedToolkit extToolkit = UNO.XExtendedToolkit(xToolkit);
       extToolkit.addKeyHandler(keyHandler);
 
-      controlContainer = UnoRuntime.queryInterface(XControlContainer.class, window);
+      controlContainer = UNO.XControlContainer(window);
 
       removeConditionBtn = UNO.XButton(controlContainer.getControl("removeConditionBtn"));
       removeConditionBtn.addActionListener(removeConditionBtnActionListener);
@@ -259,7 +259,7 @@ public class IfThenElseDialog
 
       newConditionBtnActionListener.actionPerformed(new ActionEvent());
 
-      dialog = UnoRuntime.queryInterface(XDialog.class, window);
+      dialog = UNO.XDialog(window);
       dialog.execute();
     } catch (Exception | UnoHelperException e)
     {
@@ -640,7 +640,7 @@ public class IfThenElseDialog
         XTreeNode currentChildNode = currentNode.getChildAt(i);
 
         String[] dataChildNode = nodeDataValueToStringArray(
-            UnoRuntime.queryInterface(XMutableTreeNode.class, currentChildNode));
+            UNO.XMutableTreeNode(currentChildNode));
 
         String conditionType = dataChildNode[0];
 

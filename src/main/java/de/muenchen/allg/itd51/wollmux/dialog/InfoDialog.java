@@ -9,7 +9,6 @@ import com.sun.star.awt.MessageBoxType;
 import com.sun.star.awt.XMessageBox;
 import com.sun.star.awt.XToolkit2;
 import com.sun.star.awt.XWindow;
-import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperRuntimeException;
@@ -130,7 +129,7 @@ public class InfoDialog
     XToolkit2 toolkit = null;
     try
     {
-      toolkit = UnoRuntime.queryInterface(XToolkit2.class, UnoComponent.createComponentWithContext(
+      toolkit = UNO.XToolkit2(UnoComponent.createComponentWithContext(
           UnoComponent.CSS_AWT_TOOLKIT, UNO.defaultContext.getServiceManager(), UNO.defaultContext));
     } catch (UnoHelperRuntimeException e)
     {

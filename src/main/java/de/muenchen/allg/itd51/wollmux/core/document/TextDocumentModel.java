@@ -1250,7 +1250,7 @@ public class TextDocumentModel
   {
     try
     {
-      XModifiable2 mod2 = UnoRuntime.queryInterface(XModifiable2.class, doc);
+      XModifiable2 mod2 = UNO.XModifiable2(doc);
       if (state)
       {
         mod2.enableSetModified();

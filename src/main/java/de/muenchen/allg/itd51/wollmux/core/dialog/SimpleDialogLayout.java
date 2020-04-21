@@ -14,7 +14,6 @@ import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XWindow;
 import com.sun.star.lang.EventObject;
-import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
@@ -42,7 +41,7 @@ public class SimpleDialogLayout extends AbstractWindowListener
   {
     this.containerWindow = dialogWindow;
     this.containerWindow.addWindowListener(this);
-    this.controlContainer = UnoRuntime.queryInterface(XControlContainer.class, dialogWindow);
+    this.controlContainer = UNO.XControlContainer(dialogWindow);
   }
 
   public void draw()
@@ -137,7 +136,7 @@ public class SimpleDialogLayout extends AbstractWindowListener
   private void modifyHorizontalControl(Rectangle windowRect, XControl control,
       ControlProperties controlProperties, Align alignment, int controlCount)
   {
-    XWindow wnd = UnoRuntime.queryInterface(XWindow.class, control);
+    XWindow wnd = UNO.XWindow(control);
 
     if (alignment == Align.RIGHT)
     {
@@ -208,7 +207,7 @@ public class SimpleDialogLayout extends AbstractWindowListener
   private void modifyVerticalControl(Rectangle windowRect, XControl control,
       ControlProperties controlProperties, Align alignment)
   {
-    XWindow wnd = UnoRuntime.queryInterface(XWindow.class, control);
+    XWindow wnd = UNO.XWindow(control);
 
     Rectangle cr = wnd.getPosSize();
 

@@ -9,7 +9,6 @@ import com.sun.star.awt.XNumericField;
 import com.sun.star.awt.XRadioButton;
 import com.sun.star.awt.XWindow;
 import com.sun.star.uno.Exception;
-import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.dialog.adapter.AbstractItemListener;
@@ -80,7 +79,7 @@ public class StartWizardPage extends AbstractXWizardPage
     super(pageId, parentWindow, "vnd.sun.star.script:WollMux.seriendruck_start?location=application");
     this.controller = controller;
     this.settings = settings;
-    XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
+    XControlContainer container = UNO.XControlContainer(window);
     singleDocument = UNO.XRadio(container.getControl("gesamtDoc"));
     singleDocument.addItemListener(new ActionItemListener(PATH.STANDARD));
     singleDocumentPDF = UNO.XRadio(container.getControl("gesamtDocPDF"));

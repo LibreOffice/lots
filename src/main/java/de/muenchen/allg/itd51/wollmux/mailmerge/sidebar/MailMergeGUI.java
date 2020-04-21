@@ -20,7 +20,6 @@ import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.ui.LayoutSize;
 import com.sun.star.ui.XSidebarPanel;
 import com.sun.star.ui.XToolPanel;
-import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
@@ -108,13 +107,13 @@ public class MailMergeGUI extends AbstractSidebarPanel
       }
     };
     parentWindow.addWindowListener(windowAdapter);
-    xMCF = UnoRuntime.queryInterface(XMultiComponentFactory.class, context.getServiceManager());
-    XWindowPeer parentWindowPeer = UnoRuntime.queryInterface(XWindowPeer.class, parentWindow);
+    xMCF = UNO.XMultiComponentFactory(context.getServiceManager());
+    XWindowPeer parentWindowPeer = UNO.XWindowPeer(parentWindow);
 
     toolkit = parentWindowPeer.getToolkit();
     windowPeer = GuiFactory.createWindow(toolkit, parentWindowPeer);
     windowPeer.setBackground(0xffffffff);
-    window = UnoRuntime.queryInterface(XWindow.class, windowPeer);
+    window = UNO.XWindow(windowPeer);
   }
 
   @Override
@@ -123,7 +122,7 @@ public class MailMergeGUI extends AbstractSidebarPanel
     // TODO: the following is wrong, since it doesn't respect
     // i_rParentAccessible. In
     // a real extension, you should implement this correctly :)
-    return UnoRuntime.queryInterface(XAccessible.class, getWindow());
+    return UNO.XAccessible(getWindow());
   }
 
   @Override

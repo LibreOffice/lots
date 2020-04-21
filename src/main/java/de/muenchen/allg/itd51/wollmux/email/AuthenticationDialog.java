@@ -38,13 +38,13 @@ public class AuthenticationDialog
 
       window = provider.createContainerWindow(
           "vnd.sun.star.script:WollMux.email_auth?location=application", "", peer, null);
-      controlContainer = UnoRuntime.queryInterface(XControlContainer.class, window);
+      controlContainer = UNO.XControlContainer(window);
 
       UNO.XTextComponent(controlContainer.getControl("txtUsername")).setText(username);
       UNO.XButton(controlContainer.getControl("btnOK")).addActionListener(okActionListener);
       UNO.XButton(controlContainer.getControl("btnAbort")).addActionListener(abortActionListener);
 
-      dialog = UnoRuntime.queryInterface(XDialog.class, window);
+      dialog = UNO.XDialog(window);
       dialog.execute();
     } catch (Exception e)
     {

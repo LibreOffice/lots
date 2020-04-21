@@ -9,8 +9,9 @@ import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XNotifyingDispatch;
-import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.URL;
+
+import de.muenchen.allg.afid.UNO;
 
 /**
  * A dispatch executed by WollMux. Registered Listeners are notified after completion.
@@ -52,7 +53,7 @@ public abstract class WollMuxNotifyingDispatch extends WollMuxDispatch
         origDisp.dispatch(origUrl, newProps);
       } else
       {
-        final XNotifyingDispatch nd = UnoRuntime.queryInterface(XNotifyingDispatch.class, origDisp);
+        final XNotifyingDispatch nd = UNO.XNotifyingDispatch(origDisp);
         nd.dispatchWithNotification(origUrl, newProps, listener);
       }
     }

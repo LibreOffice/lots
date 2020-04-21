@@ -6,21 +6,19 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.awt.XContainerWindowProvider;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlContainer;
-import com.sun.star.awt.XDialog;
 import com.sun.star.awt.XFixedText;
 import com.sun.star.awt.XListBox;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
 import com.sun.star.deployment.PackageInformationProvider;
 import com.sun.star.deployment.XPackageInformationProvider;
-import com.sun.star.uno.Exception;
-import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
+import de.muenchen.allg.util.UnoComponent;
 import de.muenchen.allg.util.UnoProperty;
 
 /**
@@ -38,12 +36,11 @@ public class OnAbout extends WollMuxEvent
     try
     {
       XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
-      XContainerWindowProvider provider = UnoRuntime.queryInterface(XContainerWindowProvider.class,
-          UNO.xMCF.createInstanceWithContext("com.sun.star.awt.ContainerWindowProvider",
-              UNO.defaultContext));
+      XContainerWindowProvider provider = UNO.XContainerWindowProvider(
+          UnoComponent.createComponentWithContext(UnoComponent.CSS_AWT_CONTAINER_WINDOW_PROVIDER));
       XWindow window = provider.createContainerWindow(
           "vnd.sun.star.script:WollMux.about?location=application", "", peer, null);
-      XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
+      XControlContainer container = UNO.XControlContainer(window);
 
       // allgemeiner Teil
       XFixedText introLabel = UNO.XFixedText(container.getControl("introLabel"));
@@ -54,7 +51,7 @@ public class OnAbout extends WollMuxEvent
       license.setText("Lizenz: European Union Public License");
       XFixedText homepage = UNO.XFixedText(container.getControl("homepage"));
       homepage.setText("Homepage: www.wollmux.org");
-      XControl logo = UnoRuntime.queryInterface(XControl.class, container.getControl("logo"));
+      XControl logo = UNO.XControl(container.getControl("logo"));
       XPackageInformationProvider xPackageInformationProvider = PackageInformationProvider.get(UNO.defaultContext);
       String location = xPackageInformationProvider.getPackageLocation(EXTENSION_ID);
       UnoProperty.setProperty(logo.getModel(), UnoProperty.IMAGE_URL, location + IMAGE_URL);
@@ -74,8 +71,8 @@ public class OnAbout extends WollMuxEvent
       defaultContext
           .setText("DEFAULT_CONTEXT: " + WollMuxFiles.getDefaultContext().toExternalForm());
 
-      UnoRuntime.queryInterface(XDialog.class, window).execute();
-    } catch (UnoHelperException | Exception e)
+      UNO.XDialog(window).execute();
+    } catch (UnoHelperException e)
     {
       LOGGER.error("Info-Dialog konnte nicht angezeigt werden.", e);
     }

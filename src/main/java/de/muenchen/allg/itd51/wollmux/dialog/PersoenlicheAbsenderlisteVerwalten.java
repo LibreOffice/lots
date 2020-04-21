@@ -203,10 +203,10 @@ public class PersoenlicheAbsenderlisteVerwalten
       LOGGER.error("", e);
     }
 
-    XExtendedToolkit extToolkit = UnoRuntime.queryInterface(XExtendedToolkit.class, xToolkit);
+    XExtendedToolkit extToolkit = UNO.XExtendedToolkit(xToolkit);
     extToolkit.addKeyHandler(keyHandler);
 
-    XControlContainer controlContainer = UnoRuntime.queryInterface(XControlContainer.class, window);
+    XControlContainer controlContainer = UNO.XControlContainer(window);
 
     palListe = UNO.XListBox(controlContainer.getControl("palListe"));
     palListe.setMultipleMode(true);
@@ -254,7 +254,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       }
     });
 
-    dialog = UnoRuntime.queryInterface(XDialog.class, window);
+    dialog = UNO.XDialog(window);
     dialog.execute();
   }
 

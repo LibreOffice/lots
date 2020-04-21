@@ -116,7 +116,7 @@ public class AbsenderAuswaehlen
 
     XWindow window = provider.createContainerWindow(
         "vnd.sun.star.script:WollMux.absender_auswahl?location=application", "", peer, null);
-    XControlContainer controlContainer = UnoRuntime.queryInterface(XControlContainer.class, window);
+    XControlContainer controlContainer = UNO.XControlContainer(window);
 
     absAuswahl = UNO.XListBox(controlContainer.getControl("absAuswahl"));
 
@@ -138,7 +138,7 @@ public class AbsenderAuswaehlen
       setListElements();
     }
 
-    dialog = UnoRuntime.queryInterface(XDialog.class, window);
+    dialog = UNO.XDialog(window);
     dialog.execute();
   }
 

@@ -220,8 +220,8 @@ public class PrintParametersDialog
               UNO.defaultContext));
       XWindow window = provider.createContainerWindow(
           "vnd.sun.star.script:WollMux.print_parameter?location=application", "", peer, null);
-      container = UnoRuntime.queryInterface(XControlContainer.class, window);
-      XDialog dialog = UnoRuntime.queryInterface(XDialog.class, window);
+      container = UNO.XControlContainer(window);
+      XDialog dialog = UNO.XDialog(window);
       UNO.XTopWindow(dialog).addTopWindowListener(new AbstractTopWindowListener()
       {
         @Override

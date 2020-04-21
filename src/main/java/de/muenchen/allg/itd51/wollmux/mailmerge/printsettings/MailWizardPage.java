@@ -11,7 +11,6 @@ import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XWindow;
 import com.sun.star.uno.Exception;
-import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.dialog.adapter.AbstractItemListener;
@@ -73,7 +72,7 @@ public class MailWizardPage extends AbstractXWizardPage
     super(pageId, parentWindow, "vnd.sun.star.script:WollMux.seriendruck_mail?location=application");
     this.controller = controller;
     this.settings = settings;
-    container = UnoRuntime.queryInterface(XControlContainer.class, window);
+    container = UNO.XControlContainer(window);
     sender = UNO.XTextComponent(container.getControl("sender"));
     String senderName = "";
     try

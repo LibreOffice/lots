@@ -11,7 +11,6 @@ import com.sun.star.awt.XRadioButton;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XWindow;
 import com.sun.star.uno.Exception;
-import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.dialog.adapter.AbstractItemListener;
@@ -70,7 +69,7 @@ public class FormatWizardPage extends AbstractXWizardPage
     super(pageId, parentWindow, "vnd.sun.star.script:WollMux.seriendruck_format?location=application");
     this.controller = controller;
     this.settings = settings;
-    XControlContainer container = UnoRuntime.queryInterface(XControlContainer.class, window);
+    XControlContainer container = UNO.XControlContainer(window);
     odt = UNO.XRadio(container.getControl("odt"));
     odt.addItemListener(formatListener);
     pdf = UNO.XRadio(container.getControl("pdf"));

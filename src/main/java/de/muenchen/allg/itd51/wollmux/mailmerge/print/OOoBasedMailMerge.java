@@ -721,7 +721,7 @@ public class OOoBasedMailMerge implements AutoCloseable
       pmod.setPrintProgressMaxValue((short) maxDatasets);
       pmod.setPrintProgressValue((short) 0);
 
-      XCancellable mailMergeCancellable = UnoRuntime.queryInterface(XCancellable.class, mailMerge);
+      XCancellable mailMergeCancellable = UNO.XCancellable(mailMerge);
 
       // Register MailMergeEventListener
       XMailMergeBroadcaster xmmb = UnoRuntime.queryInterface(XMailMergeBroadcaster.class,

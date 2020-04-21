@@ -161,8 +161,8 @@ public class ContentBasedDirectiveDialog
               UNO.defaultContext));
       XWindow window = provider.createContainerWindow(
           "vnd.sun.star.script:WollMux.slv_count?location=application", "", peer, null);
-      container = UnoRuntime.queryInterface(XControlContainer.class, window);
-      dialog = UnoRuntime.queryInterface(XDialog.class, window);
+      container = UNO.XControlContainer(window);
+      dialog = UNO.XDialog(window);
       UNO.XTopWindow(dialog).addTopWindowListener(new AbstractTopWindowListener()
       {
         @Override
