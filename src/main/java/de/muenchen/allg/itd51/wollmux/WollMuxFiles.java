@@ -1,65 +1,3 @@
-/*
- * Dateiname: WollMuxFiles.java
- * Projekt  : WollMux
- * Funktion : Managed die Dateien auf die der WollMux zugreift (z.B. wollmux.conf)
- *
- * Copyright (c) 2009-2019 Landeshauptstadt München
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 13.04.2006 | BNK | Erstellung
- * 20.04.2006 | BNK | [R1200] .wollmux-Verzeichnis als Vorbelegung für DEFAULT_CONTEXT
- * 26.05.2006 | BNK | +DJ Initialisierung
- * 20.06.2006 | BNK | keine wollmux.conf mehr anlegen wenn nicht vorhanden
- *                  | /etc/wollmux/wollmux.conf auswerten
- * 26.06.2006 | BNK | Dialoge/FONT_ZOOM auswerten. LookAndFeel setzen.
- * 07.09.2006 | BNK | isDebugMode effizienter gemacht.
- * 21.09.2006 | BNK | Unter Windows nach c:\programme\wollmux\wollmux.conf schauen
- * 19.10.2006 | BNK | +dumpInfo()
- * 05.12.2006 | BNK | +getClassPath()
- * 20.12.2006 | BNK | CLASSPATH:Falls keine Dateierweiterung angegeben, / ans Ende setzen, weil nur so Verzeichnisse erkannt werden.
- * 09.07.2007 | BNK | [R7134]Popup, wenn Server langsam
- * 09.07.2007 | BNK | [R7137]IP-Adresse in Dumpinfo
- * 17.07.2007 | BNK | [R7605]Dateien binär kopieren in dumpInfo(), außerdem immer als UTF-8 schreiben
- * 18.07.2007 | BNK | Alle Java-Properties in dumpInfo() ausgeben
- * 27.07.2007 | BNK | [P1448]WollMuxClassLoader.class.getClassLoader() als parent verwenden
- * 01.09.2008 | BNK | [R28149]Klassen im CLASSPATH aus wollmux.conf haben vorrang vor WollMux-internen.
- * 18.08.2009 | BED | -defaultWollmuxConf
- *                  | andere Strategie für Suche nach wollmux.conf in setupWollMuxDir()
- *                  | Verzeichnis der wollmux.conf als Default für DEFAULT_CONTEXT
- * 12.01.2010 | BED | dumpInfo() gibt nun auch JVM Heap Size + verwendeten Speicher aus
- * 07.10.2010 | ERT | dumpInfo() erweitert um No. of Processors, Physical Memory und Swap Size
- * 19.10.2010 | ERT | dumpInfo() erweitert um IP-Adresse und OOo-Version
- * 22.02.2011 | ERT | dumpInfo() erweitert um LHM-Version
- * 08.05.2012 | jub | fakeSymLink behandlung eingebaut: der verweis auf fragmente, wie er in der
- *                    config datei steht, kann auf einen sog. fake SymLink gehen, eine text-
- *                    datei, in der auf ein anderes fragment inkl. relativem pfad verwiesen wird.
- * 11.12.2012 | jub | fakeSymLinks werden doch nicht gebraucht; wieder aus dem code entfernt
- * 17.05.2013 | ukt | Fontgröße wird jetzt immer gesetzt, unabhängig davon, ob der Wert in der
- *                    wollmuxbar.conf gesetzt ist oder nicht.
- *                    Andernfalls wird die Änderung der Fontgröße von einem Nicht-Defaultwert auf
- *                    den Default-Wert nicht angezeigt, wenn alle anderen Optionswerte ebenfalls
- *                    den Default-Wert haben.
- *
- * -------------------------------------------------------------------
- *
- * @author Matthias Benkmann (D-III-ITD 5.1)
- *
- */
 package de.muenchen.allg.itd51.wollmux;
 
 import java.io.BufferedWriter;
@@ -86,15 +24,21 @@ import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,10 +67,7 @@ import de.muenchen.allg.util.UnoProperty;
 import de.muenchen.allg.util.UnoService;
 
 /**
- *
- * Managed die Dateien auf die der WollMux zugreift (z,B, wollmux,conf)
- *
- * @author Matthias Benkmann (D-III-ITD 5.1)
+ * Collection of files used by WollMux.
  */
 public class WollMuxFiles
 {
@@ -135,53 +76,60 @@ public class WollMuxFiles
 
   private static final String ETC_WOLLMUX_WOLLMUX_CONF = "/etc/wollmux/wollmux.conf";
 
-  /**
-   * Der Pfad (ohne Wurzel wie HKCU oder HKLM) zu dem Registrierungsschlüssel, unter dem der WollMux
-   * seine Registry-Werte speichert
-   */
-  private static final String WOLLMUX_KEY = "Software\\WollMux";
+  private static final String WOLLMUX_CONF_PATH = "WOLLMUX_CONF_PATH";
 
   private static boolean debugMode = false;
 
   /**
-   * Der Name des String-Wertes, unter dem der WollMux in der Registry den Ort der wollmux.conf
-   * speichert
+   * Windows registry key.
+   */
+  private static final String WOLLMUX_KEY = "Software\\WollMux";
+
+  /**
+   * Windows registry option.
    */
   private static final String WOLLMUX_CONF_PATH_VALUE_NAME = "ConfigPath";
 
   private static final String WOLLMUX_NOCONF = L.m(
       "Es wurde keine WollMux-Konfiguration (wollmux.conf) gefunden - deshalb läuft WollMux im NoConfig-Modus.");
+
   /**
-   * Die in der wollmux.conf mit DEFAULT_CONTEXT festgelegte URL.
+   * Default context defined in wollmux.conf.
    */
   private static URL defaultContextURL;
 
   /**
-   * Enthält den geparsten Konfigruationsbaum der wollmux.conf
+   * The configuration.
    */
   private static ConfigThingy wollmuxConf;
 
   /**
-   * Das Verzeichnis ,wollmux.
+   * The .wollmux folder in user space.
    */
   private static File wollmuxDir;
 
   /**
-   * Enthält das File der Konfigurationsdatei wollmux.conf
+   * The configuration file.
    */
   private static File wollmuxConfFile;
 
   /**
-   * Enthält das File in des local-overwrite-storage-caches.
+   * File of the local override storage.
    */
   private static File losCacheFile;
 
   private WollMuxFiles()
   {
+    // nothing to initialize.
+  }
+
+  public static boolean isDebugMode()
+  {
+    return debugMode;
   }
 
   /**
-   * Creates the '.wollmux' directory in user's home if it not exists.
+   * Creates the '.wollmux' directory in user's home if it doesn't exists.
    *
    * @return File newly created wollmux-Folder file reference.
    */
@@ -191,20 +139,29 @@ public class WollMuxFiles
     wollmuxDir = new File(userHome, ".wollmux");
 
     if (!wollmuxDir.exists())
+    {
       wollmuxDir.mkdirs();
+    }
 
     return wollmuxDir;
   }
 
+  /**
+   * Load a configuration.
+   *
+   * @param wollMuxConfigFile
+   *          The configuration file.
+   * @return The configuraiton.
+   */
   protected static ConfigThingy parseWollMuxConf(File wollMuxConfigFile)
   {
-    wollmuxConf = new ConfigThingy("wollmuxConf");
+    wollmuxConf = new ConfigThingy("");
 
     if (wollMuxConfigFile != null && wollMuxConfigFile.exists() && wollMuxConfigFile.isFile())
     {
       try
       {
-        wollmuxConf = new ConfigThingy("wollmuxConf", wollMuxConfigFile.toURI().toURL());
+        wollmuxConf = new ConfigThingy("", wollMuxConfigFile.toURI().toURL());
 	String serverURI = wollmuxConf.getString("CONF_SERVER", null);
         if (serverURI != null)
         {
@@ -217,7 +174,7 @@ public class WollMuxFiles
 
           HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
 
-          wollmuxConf = new ConfigThingy("wollmuxConf", response.body());
+          wollmuxConf = new ConfigThingy("", response.body());
         }
       } catch (HttpTimeoutException ex) {
         LOGGER.error("Serverrespond takes more than 5 seconds", ex);
@@ -233,6 +190,13 @@ public class WollMuxFiles
     return wollmuxConf;
   }
 
+  /**
+   * Initialize localization.
+   *
+   * @param config
+   *          The localization configuration.
+   * @return True if successfully initialized, false otherwise.
+   */
   public static boolean initLocalization(ConfigThingy config)
   {
     if (config == null)
@@ -240,7 +204,6 @@ public class WollMuxFiles
       return false;
     }
 
-    // Lokalisierung initialisieren
     ConfigThingy l10n = config.query("L10n", 1);
     if (l10n.count() > 0)
     {
@@ -252,34 +215,31 @@ public class WollMuxFiles
 
   private static File findWollMuxConf(File wollMuxDir)
   {
-    // Überprüfen, ob das Betriebssystem Windows ist
-    boolean windowsOS = System.getProperty("os.name").toLowerCase().contains("windows");
-
-    // Zum Aufsammeln der Pfade, an denen die wollmux.conf gesucht wurde:
+    String relativeWollMuxConf = "/.wollmux/wollmux.conf";
     ArrayList<String> searchPaths = new ArrayList<>();
 
-    // Pfad zur wollmux.conf
     String wollmuxConfPath = null;
 
-    // wollmux.conf wird über die Umgebungsvariable "WOLLMUX_CONF_PATH" gesetzt.
-    if (System.getenv("WOLLMUX_CONF_PATH") != null)
+    // wollmux.conf set by environment "WOLLMUX_CONF_PATH".
+    if (System.getenv(WOLLMUX_CONF_PATH) != null)
     {
-      wollmuxConfPath = System.getenv("WOLLMUX_CONF_PATH");
+      wollmuxConfPath = System.getenv(WOLLMUX_CONF_PATH);
       searchPaths.add(wollmuxConfPath);
     }
 
     // wollmux.conf set by system property "WOLLMUX_CONF_PATH"
-    if (System.getProperty("WOLLMUX_CONF_PATH") != null)
+    if (System.getProperty(WOLLMUX_CONF_PATH) != null)
     {
-      wollmuxConfPath = System.getProperty("WOLLMUX_CONF_PATH");
+      wollmuxConfPath = System.getProperty(WOLLMUX_CONF_PATH);
       searchPaths.add(wollmuxConfPath);
     }
 
     searchPaths.add(new File(wollMuxDir, "wollmux.conf").getAbsolutePath());
-    searchPaths.add(System.getProperty("user.dir") + "/.wollmux/wollmux.conf");
+    searchPaths.add(System.getProperty("user.dir") + relativeWollMuxConf);
     searchPaths.add(ETC_WOLLMUX_WOLLMUX_CONF);
 
-    if (windowsOS)
+    // Check if windows
+    if (System.getProperty("os.name").toLowerCase().contains("windows"))
     {
       // try reading path to wollmux.conf from HKCU registry
       if (Advapi32Util.registryKeyExists(WinReg.HKEY_CURRENT_USER, WOLLMUX_KEY))
@@ -308,22 +268,22 @@ public class WollMuxFiles
       char[] arrWollmuxConfPath = new char[WinDef.MAX_PATH];
       shell.SHGetFolderPath(null, ShlObj.CSIDL_APPDATA, null, ShlObj.SHGFP_TYPE_CURRENT,
           arrWollmuxConfPath);
-      searchPaths.add(String.valueOf(arrWollmuxConfPath) + "/.wollmux/wollmux.conf");
+      searchPaths.add(String.valueOf(arrWollmuxConfPath) + relativeWollMuxConf);
 
       arrWollmuxConfPath = new char[WinDef.MAX_PATH];
       shell.SHGetFolderPath(null, ShlObj.CSIDL_COMMON_APPDATA, null, ShlObj.SHGFP_TYPE_CURRENT,
           arrWollmuxConfPath);
-      searchPaths.add(String.valueOf(arrWollmuxConfPath) + "/.wollmux/wollmux.conf");
+      searchPaths.add(String.valueOf(arrWollmuxConfPath) + relativeWollMuxConf);
 
       arrWollmuxConfPath = new char[WinDef.MAX_PATH];
       shell.SHGetFolderPath(null, ShlObj.CSIDL_PROGRAM_FILESX86, null, ShlObj.SHGFP_TYPE_CURRENT,
           arrWollmuxConfPath);
-      searchPaths.add(String.valueOf(arrWollmuxConfPath) + "/.wollmux/wollmux.conf");
+      searchPaths.add(String.valueOf(arrWollmuxConfPath) + relativeWollMuxConf);
 
       arrWollmuxConfPath = new char[WinDef.MAX_PATH];
       shell.SHGetFolderPath(null, ShlObj.CSIDL_PROGRAM_FILES, null, ShlObj.SHGFP_TYPE_CURRENT,
           arrWollmuxConfPath);
-      searchPaths.add(String.valueOf(arrWollmuxConfPath) + "/.wollmux/wollmux.conf");
+      searchPaths.add(String.valueOf(arrWollmuxConfPath) + relativeWollMuxConf);
 
     }
 
@@ -341,12 +301,16 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert das Verzeichnis ,wollmux zurück.
+   * Get main folder of WollMux.
+   *
+   * @return Folder '.wollmux'.
    */
   public static File getWollMuxDir()
   {
     if (wollmuxDir == null)
+    {
       wollmuxDir = setupWollMuxDir();
+    }
 
     return wollmuxDir;
   }
@@ -389,34 +353,35 @@ public class WollMuxFiles
   }
 
   /**
-   * Diese Methode liefert den letzten in der Konfigurationsdatei definierten DEFAULT_CONTEXT
-   * zurück. Ist in der Konfigurationsdatei keine URL definiert bzw. ist die Angabe fehlerhaft, so
-   * wird die URL des .wollmux Verzeichnisses zurückgeliefert.
+   * Get default context of WollMux.
+   *
+   * @return The URL of the default context.
    */
-  public static URL getDEFAULT_CONTEXT()
+  public static URL getDefaultContext()
   {
     return defaultContextURL;
   }
 
   /**
-   * Liefert eine URL zum String urlStr, wobei relative Pfade relativ zum DEFAULT_CONTEXT aufgelöst
-   * werden.
-   * 
+   * Convert a URL String to a {@link URL}. Relative paths are resolved relative to
+   * {@link #getDefaultContext()}.
+   *
+   * @param urlStr
+   *          The string to convert.
+   * @return The converted URL.
    * @throws MalformedURLException
-   *           falls urlStr keine legale URL darstellt.
+   *           The string isn't a valid URL.
    */
   public static URL makeURL(String urlStr) throws MalformedURLException
   {
-    return new URL(WollMuxFiles.getDEFAULT_CONTEXT(), ConfigThingy.urlEncode(urlStr));
+    return new URL(WollMuxFiles.getDefaultContext(), ConfigThingy.urlEncode(urlStr));
   }
 
   /**
-   * Wertet den DEFAULT_CONTEXT aus wollmux.conf aus und erstellt eine entsprechende URL, mit der
-   * {@link #defaultContextURL} initialisiert wird. Wenn in der wollmux.conf kein DEFAULT_CONTEXT
-   * angegeben ist, so wird das Verzeichnis, in dem die wollmux.conf gefunden wurde, als Default
-   * Context verwendet.
+   * Initialize default context from configuration. If no default context is provided in the
+   * configuration the folder of the configuration file is used.
    *
-   * Sollte {{@link #defaultContextURL} nicht <code>null</code> sein, tut diese Methode nichts.
+   * If {@link #defaultContextURL} is already set nothing is done.
    */
   public static void determineDefaultContext()
   {
@@ -432,21 +397,19 @@ public class WollMuxFiles
         urlStr = "./";
       }
 
-      // url mit einem "/" aufhören lassen (falls noch nicht angegeben).
       String urlVerzStr;
       if (urlStr.endsWith("/") || urlStr.endsWith("\\"))
+      {
         urlVerzStr = urlStr;
+      }
       else
+      {
         urlVerzStr = urlStr + "/";
+      }
 
       try
       {
-        /*
-         * Die folgenden 3 Statements realisieren ein Fallback-Verhalten. Falls das letzte Statement
-         * eine MalformedURLException wirft, dann gilt das vorige Statement. Hat dieses schon eine
-         * MalformedURLException geworfen (sollte eigentlich nicht passieren können), so gilt immer
-         * noch das erste.
-         */
+        // Save initialization in case of MalformedURLExceptions
         defaultContextURL = new URL("file:///");
 
         File file = getWollMuxConfFile();
@@ -463,17 +426,20 @@ public class WollMuxFiles
   }
 
   /**
-   * Wertet die wollmux,conf-Direktive LOGGING_MODE aus und setzt den Logging-Modus entsprechend.
-   * Ist kein LOGGING_MODE gegeben, so greift der Standard (siehe Logger.java)
+   * Get the log level from the configuration.
    *
-   * @param ct
+   * @param config
+   *          The configuration.
+   * @return The log level as string. Defaults to "info".
    */
-  public static String getWollMuxConfLoggingMode(ConfigThingy ct)
+  public static String getWollMuxConfLoggingMode(ConfigThingy config)
   {
-    if (ct == null || ct.count() == 0)
+    if (config == null || config.count() == 0)
+    {
       return "info";
+    }
 
-    ConfigThingy log = ct.query("LOGGING_MODE");
+    ConfigThingy log = config.query("LOGGING_MODE");
     if (log.count() > 0)
     {
       try
@@ -495,15 +461,10 @@ public class WollMuxFiles
     return "info";
   }
 
-  public static boolean isDebugMode()
-  {
-    return debugMode;
-  }
-
   /**
-   * Erstellt eine Dump-Datei im WollMux-Verzeichnis, die wichtige Informationen zur Fehlersuche
-   * enthält und liefert den Namen dieser Datei als String zurück, oder null falls bei der
-   * Erstellung Fehler auftraten.
+   * Dump information about WollMux in the directory {@link #getWollMuxDir()}.
+   *
+   * @return The name of the generated file.
    */
   public static String dumpInfo()
   {
@@ -517,43 +478,12 @@ public class WollMuxFiles
     {
       out.write("Dump time: " + date + "\n");
       out.write(WollMuxSingleton.getBuildInfo() + "\n");
-      StringBuilder buffy = new StringBuilder();
 
-      // IP-Adresse für localhost
-      try
-      {
-        InetAddress addr = InetAddress.getLocalHost();
-        out.write("Host: " + addr.getHostName() + " (" + addr.getHostAddress() + ")\n");
-      } catch (UnknownHostException ex)
-      {
-        LOGGER.error("", ex);
-        buffy.append("------");
-      }
+      deterimeIP(out);
 
-      /*
-       * IP-Adressen bestimmen
-       */
-      try
-      {
-        InetAddress[] addresses = InetAddress.getAllByName(getDEFAULT_CONTEXT().getHost());
-        for (int i = 0; i < addresses.length; ++i)
-        {
-          if (i > 0)
-          {
-            buffy.append(", ");
-          }
-          buffy.append(addresses[i].getHostAddress());
-        }
-      } catch (UnknownHostException e)
-      {
-        LOGGER.error("", e);
-        buffy.append("------");
-      }
+      out.write("OOo-Version: \"" + getConfigValue("/org.openoffice.Setup/Product", "ooSetupVersion") + "\n");
 
-      out.write("OOo-Version: \""
-          + getConfigValue("/org.openoffice.Setup/Product", "ooSetupVersion") + "\n");
-
-      out.write("DEFAULT_CONTEXT: \"" + getDEFAULT_CONTEXT() + "\" (" + buffy + ")\n");
+      out.write("DEFAULT_CONTEXT: \"" + getDefaultContext() + "\"\n");
       out.write("CONF_VERSION: " + WollMuxSingleton.getInstance().getConfVersionInfo() + "\n");
       out.write("wollmuxDir: " + getWollMuxDir() + "\n");
       if (getWollMuxConfFile() != null)
@@ -567,34 +497,7 @@ public class WollMuxFiles
       out.write("===================== END LOG4J-Settings ==================\n");
 
       out.write("===================== START JVM-Settings ==================\n");
-      try
-      {
-        XStringSubstitution subst = UNO
-            .XStringSubstitution(UnoComponent.createComponentWithContext(UnoComponent.CSS_UTIL_PATH_SUBSTITUTION));
-        String jConfPath = new URL(subst.substituteVariables("$(user)/config", true)).toURI()
-            .getPath();
-        File[] jConfFiles = new File(jConfPath).listFiles();
-        Pattern p = Pattern.compile("^javasettings_.*\\.xml$", Pattern.CASE_INSENSITIVE);
-        boolean found = false;
-        for (int i = 0; i < jConfFiles.length; i++)
-        {
-          if (p.matcher(jConfFiles[i].getName()).matches())
-          {
-            out.flush(); // weil wir gleich direkt auf den Stream zugreifen
-            copyFile(jConfFiles[i], outStream);
-            outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
-            out.write("\n");
-            found = true;
-            break;
-          }
-        }
-        if (!found)
-          out.write(
-              L.m("Datei '%1' konnte nicht gefunden werden.\n", jConfPath + "/javasettings_*.xml"));
-      } catch (java.lang.Exception e)
-      {
-        out.write(L.m("Kann JVM-Settings nicht bestimmen: %1\n", "" + e));
-      }
+      dumpJVMSettings(outStream, out);
       out.write("===================== END JVM-Settings ==================\n");
 
       out.write("===================== START java-properties ==================\n");
@@ -611,27 +514,24 @@ public class WollMuxFiles
       long maxMemory = Runtime.getRuntime().maxMemory();
       long totalMemory = Runtime.getRuntime().totalMemory();
       long freeMemory = Runtime.getRuntime().freeMemory();
-      out.write("No. of Processors: "
-          + ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors() + "\n");
-      out.write("Maximum Heap Size: " + (maxMemory / 1024) + " KB\n");
-      out.write("Currently Allocated Heap Size: " + (totalMemory / 1024) + " KB\n");
-      out.write("Currently Used Memory: " + ((totalMemory - freeMemory) / 1024) + " KB\n");
-      out.write("Maximum Physical Memory: " + getSystemMemoryAttribut("TotalPhysicalMemorySize")
-          + " KB\n");
-      out.write(
-          "Free Physical Memory: " + getSystemMemoryAttribut("FreePhysicalMemorySize") + " KB\n");
-      out.write("Maximum Swap Size: " + getSystemMemoryAttribut("TotalSwapSpaceSize") + " KB\n");
-      out.write("Free Swap Size: " + getSystemMemoryAttribut("FreeSwapSpaceSize") + " KB\n");
+      out.write("No. of Processors: " + ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors() + "\n");
+      out.write("Maximum Heap Size: " + FileUtils.byteCountToDisplaySize(maxMemory) + "\n");
+      out.write("Currently Allocated Heap Size: " + FileUtils.byteCountToDisplaySize(totalMemory) + "\n");
+      out.write("Currently Used Memory: " + FileUtils.byteCountToDisplaySize(totalMemory - freeMemory) + "\n");
+      out.write("Maximum Physical Memory: " + getSystemMemoryAttribut("TotalPhysicalMemorySize") + " KB\n");
+      out.write("Free Physical Memory: " + getSystemMemoryAttribut("FreePhysicalMemorySize") + "\n");
+      out.write("Maximum Swap Size: " + getSystemMemoryAttribut("TotalSwapSpaceSize") + "\n");
+      out.write("Free Swap Size: " + getSystemMemoryAttribut("FreeSwapSpaceSize") + "\n");
 
       out.write("===================== END java-memoryinfo ==================\n");
 
       out.write("===================== START wollmuxConfFile ==================\n");
-      out.flush(); // weil wir gleich direkt auf den Stream zugreifen
+      out.flush();
       if (getWollMuxConfFile() != null)
       {
         copyFile(getWollMuxConfFile(), outStream);
       }
-      outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
+      outStream.flush();
       out.write("\n");
       out.write("===================== END wollmuxConfFile ==================\n");
 
@@ -640,9 +540,9 @@ public class WollMuxFiles
       out.write("===================== END wollmux.conf ==================\n");
 
       out.write("===================== START losCacheFile ==================\n");
-      out.flush(); // weil wir gleich direkt auf den Stream zugreifen
+      out.flush();
       copyFile(getLosCacheFile(), outStream);
-      outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
+      outStream.flush();
       out.write("\n");
       out.write("===================== END losCacheFile ==================\n");
 
@@ -655,30 +555,7 @@ public class WollMuxFiles
       out.write("===================== END OOo-Configuration dump ==================\n");
 
       out.write("===================== START OOo datasources ==================\n");
-      try
-      {
-        UnoDictionary<Object> dataSources = UnoDictionary.create(UNO.dbContext, Object.class);
-        for (String dataSource : dataSources.keySet())
-        {
-          out.write(dataSource);
-          out.write("\n");
-          try
-          {
-            XDataSource ds = UNO.XDataSource(UNO.dbContext.getRegisteredObject(dataSource));
-            ds.setLoginTimeout(1);
-            XConnection conn = ds.getConnection("", "");
-            UnoDictionary<Object> tables = UnoDictionary.create(UNO.XTablesSupplier(conn).getTables(), Object.class);
-            for (String name : tables.keySet())
-              out.write("  " + name + "\n");
-          } catch (Exception x)
-          {
-            out.write("  " + x.toString() + "\n");
-          }
-        }
-      } catch (Exception x)
-      {
-        out.write(x.toString() + "\n");
-      }
+      dumpOfficeDatasources(out);
       out.write("===================== END OOo datasources ==================\n");
     } catch (IOException | NumberFormatException | JMException x)
     {
@@ -686,6 +563,77 @@ public class WollMuxFiles
       return null;
     }
     return dumpFile.getAbsolutePath();
+  }
+
+  private static void dumpOfficeDatasources(BufferedWriter out) throws IOException
+  {
+    UnoDictionary<Object> dataSources = UnoDictionary.create(UNO.dbContext, Object.class);
+    if (dataSources != null)
+    {
+      for (String dataSource : dataSources.keySet())
+      {
+        out.write(dataSource);
+        out.write("\n");
+        try
+        {
+          XDataSource ds = UNO.XDataSource(UNO.dbContext.getRegisteredObject(dataSource));
+          ds.setLoginTimeout(1);
+          XConnection conn = ds.getConnection("", "");
+          UnoDictionary<Object> tables = UnoDictionary.create(UNO.XTablesSupplier(conn).getTables(), Object.class);
+          for (String name : tables.keySet())
+          {
+            out.write("  " + name + "\n");
+          }
+        } catch (Exception x)
+        {
+          out.write("  " + x.toString() + "\n");
+        }
+      }
+    }
+  }
+
+  private static void dumpJVMSettings(OutputStream outStream, BufferedWriter out) throws IOException
+  {
+    try
+    {
+      XStringSubstitution subst = UNO
+          .XStringSubstitution(UnoComponent.createComponentWithContext(UnoComponent.CSS_UTIL_PATH_SUBSTITUTION));
+      String jConfPath = new URL(subst.substituteVariables("$(user)/config", true)).toURI()
+          .getPath();
+      File[] jConfFiles = new File(jConfPath).listFiles();
+      Pattern p = Pattern.compile("^javasettings_.*\\.xml$", Pattern.CASE_INSENSITIVE);
+      boolean found = false;
+      for (int i = 0; i < jConfFiles.length; i++)
+      {
+        if (p.matcher(jConfFiles[i].getName()).matches())
+        {
+          out.flush();
+          copyFile(jConfFiles[i], outStream);
+          outStream.flush();
+          out.write("\n");
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+        out.write(
+            L.m("Datei '%1' konnte nicht gefunden werden.\n", jConfPath + "/javasettings_*.xml"));
+    } catch (java.lang.Exception e)
+    {
+      out.write(L.m("Kann JVM-Settings nicht bestimmen: %1\n", "" + e));
+    }
+  }
+
+  private static void deterimeIP(BufferedWriter out) throws IOException
+  {
+    try
+    {
+      InetAddress addr = InetAddress.getLocalHost();
+      out.write("Host: " + addr.getHostName() + " (" + addr.getHostAddress() + ")\n");
+    } catch (UnknownHostException ex)
+    {
+      LOGGER.error("", ex);
+    }
   }
 
   /**
@@ -718,7 +666,12 @@ public class WollMuxFiles
   }
 
   /**
-   * Kopiert den Inhalt von file nach out (binär).
+   * Copy content of a file to a output stream.
+   *
+   * @param file
+   *          The file.
+   * @param out
+   *          The output stream.
    */
   private static void copyFile(File file, OutputStream out)
   {
@@ -737,8 +690,11 @@ public class WollMuxFiles
   }
 
   /**
-   * Gibt den Inhalt der OOo-Konfiguration einschließlich aller Unterknoten am Knoten nodePath
-   * zurück.
+   * Get the Office configuration with all its children.
+   *
+   * @param nodePath
+   *          The request configuration.
+   * @return The configuration as string.
    */
   public static String dumpOOoConfiguration(String nodePath)
   {
@@ -757,77 +713,67 @@ public class WollMuxFiles
   }
 
   /**
-   * Gibt den Inhalt eines Knotens element der OOo-Konfiguration mit dem Knotennamen und allen
-   * enthaltenen Properties zurück, wobei die Inhalte pro Zeile um den String spaces eingerückt
-   * werden.
+   * Return content of one Office configuration node.
    *
    * @param element
+   *          The configuration node.
    * @param spaces
-   * @return String-Repräsentation des Knotens aus der OOo-Konfiguration.
+   *          Indent for children.
+   * @return String representation of the node.
    * @throws Exception
+   *           Can't access the configuration node.
    */
   public static String dumpNode(Object element, String spaces)
   {
-    // Properties (Elemente mit Werten) durchsuchen:
     StringBuilder properties = new StringBuilder("");
     if (UNO.XPropertySet(element) != null)
     {
-      Property[] props = UNO.XPropertySet(element).getPropertySetInfo().getProperties();
-      for (int i = 0; i < props.length; i++)
-      {
-        Object prop = Utils.getProperty(element, props[i].Name);
-        if (UNO.XInterface(prop) != null || AnyConverter.isVoid(prop))
+      Predicate<Pair<String, Object>> predicate = (Pair<String, Object> p) -> UNO.XInterface(p.getValue()) == null
+          && !AnyConverter.isVoid(p.getValue());
+      Consumer<Pair<String, Object>> elementPrinter = (Pair<String, Object> p) -> {
+        StringBuilder propStr = new StringBuilder("'" + p.getValue() + "'");
+        if (p.getValue() instanceof Object[])
         {
-          continue;
-        }
-        StringBuilder propStr = new StringBuilder("'" + prop + "'");
-        // arrays anzeigen:
-        if (prop instanceof Object[])
-        {
-          Object[] arr = (Object[]) prop;
+          Object[] arr = (Object[]) p.getValue();
           propStr.append("[");
-          for (int j = 0; j < arr.length; j++)
-            propStr.append("'" + arr[j] + "'" + ((j == arr.length - 1) ? "" : ", "));
+          propStr.append(Arrays.stream(arr).map(Object::toString).collect(Collectors.joining(", ")));
           propStr.append("]");
         }
-        properties.append(spaces + "|    " + props[i].Name + ": " + propStr + "\n");
-      }
+        properties.append(spaces + "|    " + p.getKey() + ": " + propStr + "\n");
+      };
+      Property[] props = UNO.XPropertySet(element).getPropertySetInfo().getProperties();
+      Arrays.stream(props).map((Property prop) -> Pair.of(prop.Name, Utils.getProperty(element, prop.Name)))
+          .filter(predicate).sorted().forEach(elementPrinter);
     }
 
-    // Kinder durchsuchen.
-    StringBuilder childs = new StringBuilder("");
+    StringBuilder children = new StringBuilder("");
     UnoDictionary<Object> elements = UnoDictionary.create(element, Object.class);
     if (elements != null)
     {
-    for (Object ele : elements.values())
-      {
-        try
-        {
-          childs.append(dumpNode(ele, spaces + "|    "));
-        } catch (java.lang.Exception e)
-        {
-          LOGGER.trace("", e);
-        }
-      }
+      elements.values().forEach((Object ele) -> children.append(dumpNode(ele, spaces + "|    ")));
     }
 
-    // Knoten zusammenbauen: Eigener Name + properties + kinder (nur wenn der
-    // Knoten auch angezeigte Properties oder Kinder hat):
-    if (UNO.XNamed(element) != null && (properties.length() > 0 || childs.length() > 0))
-      return spaces + "+ " + UNO.XNamed(element).getName() + "\n" + properties + childs;
+    if (UNO.XNamed(element) != null && (properties.length() > 0 || children.length() > 0))
+    {
+      return spaces + "+ " + UNO.XNamed(element).getName() + "\n" + properties + children;
+    }
 
     return "";
   }
 
   /**
-   * Schreibt die Kinder von conf (also keinen umschließenden Wurzel-Abschnitt) in die Datei file.
-   * 
+   * Write children of the configuration to the file.
+   *
+   * @param file
+   *          The file to write into.
+   * @param conf
+   *          The configuration to write.
    * @throws IOException
+   *           Can't write the file.
    */
   public static void writeConfToFile(File file, ConfigThingy conf) throws IOException
   {
-    try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(file),
-        ConfigThingy.CHARSET))
+    try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))
     {
       out.write("\uFEFF");
       out.write(conf.stringRepresentation(true, '"'));

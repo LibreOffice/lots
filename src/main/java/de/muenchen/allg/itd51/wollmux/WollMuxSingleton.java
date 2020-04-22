@@ -149,7 +149,7 @@ public class WollMuxSingleton
     {
       LOGGER.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
     }
-    LOGGER.debug("DEFAULT_CONTEXT \"{}\"", WollMuxFiles.getDEFAULT_CONTEXT());
+    LOGGER.debug("DEFAULT_CONTEXT \"{}\"", WollMuxFiles.getDefaultContext());
     LOGGER.debug("CONF_VERSION: " + getConfVersionInfo());
 
     /*
@@ -157,7 +157,7 @@ public class WollMuxSingleton
      * geschehen, da die entsprechenden Datenquellen womöglich schon für WollMux-Datenquellen
      * benötigt werden.
      */
-    registerDatasources(WollMuxFiles.getWollmuxConf(), WollMuxFiles.getDEFAULT_CONTEXT());
+    registerDatasources(WollMuxFiles.getWollmuxConf(), WollMuxFiles.getDefaultContext());
 
     // Versuchen, den DJ zu initialisieren und Flag setzen, falls nicht
     // erfolgreich.

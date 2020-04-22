@@ -98,9 +98,9 @@ public class DatasourceJoinerFactory
           senderSourceStr = DatasourceJoiner.NOCONFIG;
 
         datasourceJoiner = new DatasourceJoiner(
-            collectDatasources(WollMuxFiles.getWollmuxConf(), WollMuxFiles.getDEFAULT_CONTEXT()),
+            collectDatasources(WollMuxFiles.getWollmuxConf(), WollMuxFiles.getDefaultContext()),
             senderSourceStr, createLocalOverrideStorage(senderSourceStr,
-                WollMuxFiles.getLosCacheFile(), WollMuxFiles.getDEFAULT_CONTEXT()));
+                WollMuxFiles.getLosCacheFile(), WollMuxFiles.getDefaultContext()));
 
         FunctionLibrary funcLib = new FunctionLibrary();
         DialogLibrary dialogLib = new DialogLibrary();
