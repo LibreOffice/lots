@@ -72,7 +72,7 @@ public class OnAbout extends WollMuxEvent
           .setText("WollMux-Konfiguration: " + WollMuxSingleton.getInstance().getConfVersionInfo());
       XFixedText defaultContext = UNO.XFixedText(container.getControl("default"));
       defaultContext
-          .setText("DEFAULT_CONTEXT: " + WollMuxFiles.getDEFAULT_CONTEXT().toExternalForm());
+          .setText("DEFAULT_CONTEXT: " + WollMuxFiles.getDefaultContext().toExternalForm());
 
       UnoRuntime.queryInterface(XDialog.class, window).execute();
     } catch (UnoHelperException | Exception e)
