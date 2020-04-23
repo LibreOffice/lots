@@ -939,7 +939,7 @@ public class MailMergeDatasource
       XSpreadsheets sheets = spread.getSheets();
       String[] sheetNames = sheets.getElementNames();
 
-      String title = UNO.getPropertyByPropertyValues(UNO.XModel(spread).getArgs(), "Title");
+      String title = UNO.getProperty(UNO.XModel(spread).getCurrentController().getFrame(), "Title").toString();
       calcModel = new CalcModel(stripOpenOfficeFromWindowName(title), UNO.XModel(spread).getURL(),
           spread.getSheets().getElementNames(), spread);
 
@@ -1044,9 +1044,9 @@ public class MailMergeDatasource
         spread = UNO.XSpreadsheetDocument(xenu.nextElement());
         if (spread != null)
         {
-          String title = UNO.getPropertyByPropertyValues(UNO.XModel(spread).getArgs(), "Title");
-          models.add(new CalcModel(stripOpenOfficeFromWindowName(title),
-              UNO.XModel(spread).getURL(), spread.getSheets().getElementNames(), spread));
+          String title = UNO.getProperty(UNO.XModel(spread).getCurrentController().getFrame(), "Title").toString();
+          models.add(new CalcModel(stripOpenOfficeFromWindowName(title), UNO.XModel(spread).getURL(),
+              spread.getSheets().getElementNames(), spread));
         }
       }
     } catch (Exception x)
