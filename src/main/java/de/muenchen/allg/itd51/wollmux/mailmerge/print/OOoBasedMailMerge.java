@@ -782,12 +782,16 @@ public class OOoBasedMailMerge implements AutoCloseable
    */
   private void createMailMergeTempdir()
   {
-    File sysTmp = new File(System.getProperty("java.io.tmpdir"));
-    do
+    try
     {
-      // create random number with 3 digits
-      tmpDir = new File(sysTmp, TEMP_WOLLMUX_MAILMERGE_PREFIX + (new Random().nextInt(899) + 100));
-    } while (!tmpDir.mkdir());
+      tmpDir = Files.createTempDirectory(TEMP_WOLLMUX_MAILMERGE_PREFIX).toFile();
+    } catch (java.io.IOException e)
+    {
+      LOGGER.error("Can't create directory.", e);
+      pmod.cancel();
+      InfoDialog.showInfoModal(L.m("WollMux-Seriendruck"),
+          "Es konnte kein Ordner für den Seriendruck erstellt werden.");
+    }
   }
 
   /**
