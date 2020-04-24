@@ -540,7 +540,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
         if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_INPUT_USER))
         {
           createTextFieldInputUser(tf);
-        } else if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_DATA_BASE))
+        } else if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_DATABASE))
         {
           createTextFieldDataBase(tf);
         }
@@ -955,7 +955,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     try
     {
       XDependentTextField field = UNO
-          .XDependentTextField(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_DATA_BASE, model.doc));
+          .XDependentTextField(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_DATABASE, model.doc));
       XPropertySet master = UNO
           .XPropertySet(UnoService.createService(UnoService.CSS_TEXT_FIELD_MASTER_DATABASE, model.doc));
       UnoProperty.setProperty(master, UnoProperty.DATA_BASE_NAME, "DataBase");
@@ -1001,7 +1001,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     try
     {
       XDependentTextField field = UNO
-          .XDependentTextField(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_DATA_BASE_NEXT_SET, model.doc));
+          .XDependentTextField(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_DATABASE_NEXT_SET, model.doc));
       UnoProperty.setProperty(field, UnoProperty.DATA_BASE_NAME, "DataBaseName");
       UnoProperty.setProperty(field, UnoProperty.DATA_TABLE_NAME, "DataTableName");
       UnoProperty.setProperty(field, UnoProperty.DATA_COMMAND_TYPE, com.sun.star.sdb.CommandType.TABLE);

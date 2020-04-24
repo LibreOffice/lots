@@ -556,7 +556,7 @@ public class OOoBasedMailMerge implements AutoCloseable
         }
 
         // update database fields
-        if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_DATA_BASE))
+        if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_DATABASE))
         {
           XPropertySet master = tf.getTextFieldMaster();
           Utils.setProperty(master, UnoProperty.DATA_BASE_NAME, dbName);
@@ -564,7 +564,7 @@ public class OOoBasedMailMerge implements AutoCloseable
         }
 
         // update next record fields
-        if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_DATA_BASE_NEXT_SET))
+        if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_DATABASE_NEXT_SET))
         {
           Utils.setProperty(tf, UnoProperty.DATA_BASE_NAME, dbName);
           Utils.setProperty(tf, UnoProperty.DATA_TABLE_NAME, TABLE_NAME);
@@ -636,7 +636,7 @@ public class OOoBasedMailMerge implements AutoCloseable
           continue;
         }
 
-        if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_DATA_BASE_NEXT_SET))
+        if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_DATABASE_NEXT_SET))
         {
           numberOfNextSets++;
         }
@@ -664,7 +664,7 @@ public class OOoBasedMailMerge implements AutoCloseable
     try
     {
       XDependentTextField dbField = UNO
-          .XDependentTextField(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_DATA_BASE, factory));
+          .XDependentTextField(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_DATABASE, factory));
       XPropertySet m = UNO.XPropertySet(UnoService.createService(UnoService.CSS_TEXT_FIELD_MASTER_DATABASE, factory));
       UnoProperty.setProperty(m, UnoProperty.DATA_BASE_NAME, dbName);
       UnoProperty.setProperty(m, UnoProperty.DATA_TABLE_NAME, tableName);
