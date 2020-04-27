@@ -76,6 +76,8 @@ public class FormatWizardPage extends AbstractXWizardPage
     pdf = UNO.XRadio(container.getControl("pdf"));
     pdf.addItemListener(formatListener);
     name = UNO.XTextComponent(container.getControl("name"));
+    name.setText(
+        controller.getDefaultFilename() + MailMergePrintFunction.createMergeFieldTag(SetFormValue.TAG_RECORD_ID));
     name.addTextListener(new AbstractTextListener()
     {
 
@@ -85,8 +87,6 @@ public class FormatWizardPage extends AbstractXWizardPage
         controller.updateTravelUI();
       }
     });
-    name.setText(controller.getDefaultFilename()
-        + MailMergePrintFunction.createMergeFieldTag(SetFormValue.TAG_RECORD_ID));
     mailmerge = UNO.XComboBox(container.getControl("mailmerge"));
     new MailMergeField(mailmerge).setMailMergeDatasource(controller.getModel());
     mailmerge.addItemListener(new AbstractItemListener()
