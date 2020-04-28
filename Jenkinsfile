@@ -76,6 +76,7 @@ pipeline {
               }
             }
           } else {
+            archiveArtifacts artifacts: 'dist/WollMux.oxt'
             withMaven(
               maven: 'mvn',
               mavenLocalRepo: '.repo',
@@ -93,10 +94,15 @@ pipeline {
             timeout(time: 1, unit: 'HOURS') {
               waitForQualityGate abortPipeline: true
             }
-            archiveArtifacts artifacts: 'dist/WollMux.oxt', onlyIfSuccessful: true
           }
         }
       }
+    }
+  }
+
+  post {
+    cleanup {
+      cleanWs()
     }
   }
 }
