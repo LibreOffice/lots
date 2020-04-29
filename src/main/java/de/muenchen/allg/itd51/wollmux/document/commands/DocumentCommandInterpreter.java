@@ -125,9 +125,9 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Diese Methode sollte vor {@link #executeTemplateCommands()} aufgerufen werden
-   * und sorgt dafür, dass alle globalen Einstellungen des Dokuments (setType,
-   * setPrintFunction) an das TextDocumentModel weitergereicht werden.
+   * Diese Methode sollte vor {@link #executeTemplateCommands()} aufgerufen werden und sorgt dafür,
+   * dass alle globalen Einstellungen des Dokuments (setType, setPrintFunction) an das
+   * TextDocumentModel weitergereicht werden.
    */
   public void scanGlobalDocumentCommands()
   {

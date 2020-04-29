@@ -4,7 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
+import com.sun.star.frame.XController2;
+import com.sun.star.ui.XDeck;
 
+import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
@@ -14,6 +18,9 @@ import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnNotifyDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
+import de.muenchen.allg.itd51.wollmux.form.sidebar.FormSidebarController;
+import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarPanel;
+import de.muenchen.allg.util.UnoSidebar;
 
 /**
  * Processes text documents.
@@ -81,6 +88,14 @@ public class OnProcessTextDocument implements WollMuxEventListener
     new OnNotifyDocumentEventListener(null, WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED,
         documentController.getModel().doc).emit();
 
+    XController2 controller = UNO.XController2(documentController.getModel().doc.getCurrentController());
+    if (documentController.getModel().isFormDocument())
+    {
+      this.activateSidebarPanel(controller, FormSidebarController.WM_FORM_GUI);
+    } else {
+      this.activateSidebarPanel(controller, WollMuxSidebarPanel.WM_Bar);
+    }
+
     // ContextChanged to update dispatches
     try
     {
@@ -88,6 +103,21 @@ public class OnProcessTextDocument implements WollMuxEventListener
     } catch (java.lang.Exception e)
     {
       LOGGER.debug("", e);
+    }
+  }
+
+  private void activateSidebarPanel(XController2 controller, String panel)
+  {
+    try
+    {
+      XDeck formGuiDeck = UnoSidebar.getDeckByName(panel, controller);
+      if (formGuiDeck != null)
+      {
+        formGuiDeck.activate(true);
+      }
+    } catch (UnoHelperException e)
+    {
+      LOGGER.trace("", e);
     }
   }
 

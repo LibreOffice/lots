@@ -45,6 +45,8 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
 {
   private static final Logger LOGGER = LoggerFactory.getLogger(FormSidebarController.class);
 
+  public static final String WM_FORM_GUI = "FormularGuiDeck";
+
   /**
    * The controlled panel.
    */

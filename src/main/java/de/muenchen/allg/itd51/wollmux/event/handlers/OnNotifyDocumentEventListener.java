@@ -5,14 +5,10 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.document.XEventListener;
 import com.sun.star.lang.XComponent;
-import com.sun.star.text.XTextDocument;
-import com.sun.star.ui.XDeck;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
-import de.muenchen.allg.itd51.wollmux.sidebar.SidebarHelper;
 
 /**
  * Event for notifying listeners registered on an object.
@@ -68,23 +64,6 @@ public class OnNotifyDocumentEventListener extends WollMuxEvent
     if (compo != null && eventName.equals(WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED))
     {
       DocumentManager.getDocumentManager().setProcessingFinished(compo);
-      XTextDocument xTextDoc = UNO.XTextDocument(source);
-      if (xTextDoc != null)
-      {
-        TextDocumentController documentController = DocumentManager
-            .getTextDocumentController(xTextDoc);
-
-        if (documentController.getModel().isFormDocument())
-        {
-          XDeck formGuiDeck = SidebarHelper.getDeckByName(SidebarHelper.WM_FORM_GUI,
-              UNO.getCurrentTextDocument().getCurrentController());
-
-          if (formGuiDeck != null)
-          {
-            formGuiDeck.activate(true);
-          }
-        }
-      }
     }
   }
 }
