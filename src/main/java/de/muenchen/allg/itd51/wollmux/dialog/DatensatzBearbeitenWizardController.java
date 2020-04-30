@@ -5,7 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
 import com.sun.star.ui.dialogs.XWizardController;
 import com.sun.star.ui.dialogs.XWizardPage;
@@ -54,7 +53,6 @@ public class DatensatzBearbeitenWizardController implements XWizardController
   @Override
   public XWizardPage createPage(XWindow arg0, short arg1)
   {
-    arg0.setPosSize(0, 0, 1000, 800, PosSize.POSSIZE);
     LOGGER.debug("createPage");
     XWizardPage page = null;
     try
