@@ -692,13 +692,13 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
         throw new UnsupportedOperationException(
             L.m("Versuch, einen Datensatz, der nicht aus dem LOS kommt zu entfernen"));
 
-      LocalOverrideStorageStandardImpl.this.data.remove(this);
+      data.remove(this);
       if (selectedDataset == this)
       {
-        if (LocalOverrideStorageStandardImpl.this.data.isEmpty())
+        if (data.isEmpty())
           selectedDataset = null;
         else
-          selectedDataset = LocalOverrideStorageStandardImpl.this.data.get(0);
+          selectedDataset = data.get(0);
       }
     }
 

@@ -89,6 +89,7 @@ import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl;
 import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -152,7 +153,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    * @param dj
    *          der DatasourceJoiner, der die zu bearbeitende Liste verwaltet.
    * @param palListener
-   *          Listener, which is called if a pal is changed.
+   *          Listener which is called when contact list has changed.
    */
   public PersoenlicheAbsenderlisteVerwalten(DatasourceJoiner dj,
       INotify palListener)
@@ -164,9 +165,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * Erzeugt das GUI.
-   *
-   * @author Björn Ranft
+   * Creates a dialog to manage personal contacts.
    */
   private void createGUI()
   {
@@ -258,6 +257,9 @@ public class PersoenlicheAbsenderlisteVerwalten
     dialog.execute();
   }
 
+  /**
+   * Add datasets from {@link LocalOverrideStorageStandardImpl} into a {@link XListBox}.
+   */
   private void addPalEntriesToListBox()
   {
     cachedPAL.clear();
@@ -437,12 +439,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     {
       try
       {
-        // Es kann im produktiven LDAP eigentlich nicht vorkommen das OID leer oder '*'
-        // ist (Pflichtfeld produktiv, wird automatisch beim Anlegen eines neuen Users erzeugt).
-        // Der LDAP im Entwicklungs und Testnetz lässt das allerdings zu, die LDAP-Abfrage bei
-        // nicht gesetzter OID ist dann eine wildcard-Abfrage (*), es tauchen dann daher
-        // alle User in der PAL auf.
-        // Wildcard-Suche ist daher erlaubt, in die PAL übernehmen jedoch nicht.
+        // wildcard search is not allowed
         String oid = entry.get("OID");
         if (oid == null || oid.isEmpty() || "*".equals(oid))
         {
@@ -513,15 +510,34 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     short result = editDSWizard.executeWizard();
 
-    if (result == ExecutableDialogResults.OK)
+    boolean dsData = false;
+    try
     {
-      new OnPALChangedNotify().emit();
+      dsData = djDataset.get("Vorname").equals("Vorname");
+    } catch (ColumnNotFoundException e)
+    {
+      LOGGER.trace("", e);
+    }
+
+    // prevents saving invalid dataset ("Name", "Surname") in cache.conf
+    if (result == ExecutableDialogResults.OK && !dsData)
+    {
       addPalEntriesToListBox();
-      LOGGER.debug("Datensatz bearbeiten: DatensatzBearbeiten(): ExecutableDialogResult.OK");
+      LOGGER.trace("Datensatz bearbeiten: DatensatzBearbeiten(): ExecutableDialogResult.OK");
+    } else if (dsData)
+    {
+      cachedPAL.remove(index);
+      palListe.removeItems(index, (short) 1);
+      djDataset.select();
+      djDataset.remove();
+
+      LOGGER.trace("Datensatz bearbeiten: DatensatzBearbeiten(): ExecutableDialogResult.CANCEL");
     } else
     {
-      LOGGER.debug("Datensatz bearbeiten: DatensatzBearbeiten(): ExecutableDialogResult.CANCEL");
+      LOGGER.trace("entry not changed. nop.");
     }
+
+    new OnPALChangedNotify().emit();
   }
 
   private AbstractActionListener copyBtnActionListener = event -> copyEntry();
@@ -553,6 +569,8 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   private AbstractActionListener newBtnActionListener = event -> {
+    // fyi: newDataset() stores a new empty dataset in {@link LocalOverrideStorageStandardImpl} and
+    // must be explicitly removed if not required anymore.
     DJDataset newDataset = dj.newDataset();
 
     cachedPAL.add(newDataset);
