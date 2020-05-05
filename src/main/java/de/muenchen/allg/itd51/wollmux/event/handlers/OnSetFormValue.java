@@ -49,7 +49,7 @@ public class OnSetFormValue extends WollMuxEvent
   {
     TextDocumentController documentController = DocumentManager.getTextDocumentController(doc);
 
-    FormController formModel = DocumentManager.getDocumentManager().getFormModel(doc);
+    FormController formModel = DocumentManager.getDocumentManager().getFormController(doc);
     if (formModel != null && formModel.hasFieldId(id))
     {
       formModel.setValue(id, value, e -> new OnSetFormValueFinished(listener).emit());
