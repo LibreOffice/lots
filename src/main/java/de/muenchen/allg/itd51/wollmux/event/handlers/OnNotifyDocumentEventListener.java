@@ -86,7 +86,7 @@ public class OnNotifyDocumentEventListener extends WollMuxEvent
         {
 
           FormController formController = DocumentManager.getDocumentManager()
-              .getFormModel(xTextDoc);
+              .getFormController(xTextDoc);
           formController.showFormGUI();
 
           setWindowPosSize(documentController);

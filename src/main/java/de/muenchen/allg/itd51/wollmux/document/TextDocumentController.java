@@ -1293,7 +1293,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     for (FormField ff : ffs)
       simulationResult.setFormFieldContent(ff, ff.getValue());
 
-    FormController formController = DocumentManager.getDocumentManager().getFormModel(model.doc);
+    FormController formController = DocumentManager.getDocumentManager().getFormController(model.doc);
 
     if (formController != null)
     {
@@ -1920,7 +1920,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    */
   public FormController getFormController() throws FormModelException
   {
-    FormController formController = DocumentManager.getDocumentManager().getFormModel(getModel().doc);
+    FormController formController = DocumentManager.getDocumentManager().getFormController(getModel().doc);
     if (formController == null)
     {
       ConfigThingy formFensterConf;
@@ -1932,7 +1932,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
         formFensterConf = new ConfigThingy("");
       }
       formController = new FormController(getFormModel(), formFensterConf, this);
-      DocumentManager.getDocumentManager().setFormModel(getModel().doc, formController);
+      DocumentManager.getDocumentManager().setFormController(getModel().doc, formController);
     }
     return formController;
   }
