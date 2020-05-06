@@ -611,8 +611,19 @@ public class FormModel
     if (notify)
     {
       formControls.values().forEach(c -> {
-        l.valueChanged(c.getId(), c.getValue());
-        l.statusChanged(c.getId(), c.isOkay());
+        switch (c.getType())
+        {
+        case TEXTFIELD:
+        case TEXTAREA:
+        case COMBOBOX:
+        case CHECKBOX:
+        case LISTBOX:
+          l.valueChanged(c.getId(), c.getValue());
+          l.statusChanged(c.getId(), c.isOkay());
+          break;
+        default:
+          break;
+        }
       });
     }
   }
