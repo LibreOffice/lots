@@ -1,20 +1,38 @@
 package de.muenchen.allg.itd51.wollmux.form.control;
 
-import java.io.Serializable;
+import com.sun.star.awt.FontDescriptor;
 
 /**
  * Represents the model of an Html Element.
  *
  */
-public class HTMLElement implements Serializable
+public class HTMLElement
 {
-  private static final long serialVersionUID = -4140645761673580822L;
-
   private String tagName = "";
   private String text = "";
-  private String color = "";
-  private String size;
   private String href = "";
+  private int rgbColor;
+  private FontDescriptor fontDescriptor;
+
+  public FontDescriptor getFontDescriptor()
+  {
+    return fontDescriptor;
+  }
+
+  public void setFontDescriptor(FontDescriptor fontDescriptor)
+  {
+    this.fontDescriptor = fontDescriptor;
+  }
+
+  public int getRGBColor()
+  {
+    return this.rgbColor;
+  }
+
+  public void setRGBColor(int color)
+  {
+    this.rgbColor = color;
+  }
 
   public void setHref(String href)
   {
@@ -31,16 +49,6 @@ public class HTMLElement implements Serializable
     this.text = text;
   }
 
-  public void setColor(String color)
-  {
-    this.color = color;
-  }
-
-  public void setSize(String size)
-  {
-    this.size = size;
-  }
-
   public String getHref()
   {
     return this.href;
@@ -54,16 +62,6 @@ public class HTMLElement implements Serializable
   public String getText()
   {
     return this.text;
-  }
-
-  public String getColor()
-  {
-    return this.color;
-  }
-
-  public String getSize()
-  {
-    return this.size;
   }
 
 }

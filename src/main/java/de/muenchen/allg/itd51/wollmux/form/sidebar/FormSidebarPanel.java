@@ -1,6 +1,5 @@
 package de.muenchen.allg.itd51.wollmux.form.sidebar;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -10,9 +9,8 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.StyleSheet;
+import javax.swing.text.html.parser.ParserDelegator;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -47,7 +45,7 @@ import de.muenchen.allg.itd51.wollmux.core.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.core.form.model.Tab;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.form.control.HTMLElement;
-import de.muenchen.allg.itd51.wollmux.form.control.HTMLParser;
+import de.muenchen.allg.itd51.wollmux.form.control.HTMLParserCallback;
 import de.muenchen.allg.itd51.wollmux.sidebar.GuiFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.ControlLayout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.HorizontalLayout;
@@ -166,8 +164,9 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       for (Map.Entry<String, Tab> entry : model.getTabs().entrySet())
       {
         Tab tab = entry.getValue();
-
-        GuiFactory.createTab(this.xMCF, this.context, UNO.XTabPageContainerModel(tabControl.getModel()), tab.getTitle(),
+        HTMLElement htmlElement = parseHtmlLabel(tab.getTitle());
+        GuiFactory.createTab(this.xMCF, this.context, UNO.XTabPageContainerModel(tabControl.getModel()), htmlElement
+            .getText(),
             tabId);
         XTabPage xTabPage = tabControlContainer.getTabPageByID(tabId);
 
@@ -250,6 +249,25 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     }
   }
 
+
+  private HTMLElement parseHtmlLabel(String label)
+  {
+    HTMLElement htmlElement = new HTMLElement();
+
+    if (label.contains("<html>"))
+    {
+      List<HTMLElement> htmlElements = parseHtml(label);
+
+      if (!htmlElements.isEmpty())
+      {
+        return htmlElements.get(0);
+      }
+    }
+
+    htmlElement.setText(label);
+
+    return htmlElement;
+  }
   /**
    * Creates LO's UI controls by type of {@link ControlModel}. In general this method returns a
    * ControlLayout which contains a single {@link XControl}. Type TEXTFIELD returns an
@@ -265,12 +283,14 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   {
     Layout layout = null;
 
+    HTMLElement htmlElement = parseHtmlLabel(control.getLabel());
+
     switch (control.getType())
     {
     case TEXTFIELD:
       layout = new HorizontalLayout();
 
-      XControl xLabel = createLabelForControl(control, page, layout);
+      XControl xLabel = createLabelForControl(htmlElement.getText(), page, layout);
 
       SortedMap<String, Object> props = new TreeMap<>();
       props.put(UnoProperty.DEFAULT_CONTROL, control.getId());
@@ -296,42 +316,28 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       propsButton.put(UnoProperty.ENABLED, !control.isReadonly());
 
       XControl xControl = GuiFactory.createButton(xMCF, context, page.getPeer().getToolkit(), page.getPeer(),
-          control.getLabel(), formSidebarController::buttonPressed, new Rectangle(0, 0, 150, 20), propsButton);
+          htmlElement.getText(), formSidebarController::buttonPressed, new Rectangle(0, 0, 150, 20), propsButton);
       layout = new ControlLayout(xControl);
       UNO.XButton(xControl).setActionCommand(control.getAction());
       controls.put(control.getId(), Pair.of(null, xControl));
       break;
 
     case LABEL:
-      String label = control.getLabel();
-      List<HTMLElement> htmlElements = null;
-      Color textColor = null;
 
-      if (label.contains("<html>"))
+      if (htmlElement != null && !htmlElement.getHref().isEmpty())
       {
-        htmlElements = parseHtml(label);
+        SortedMap<String, Object> propsHyperlinkLabel = new TreeMap<>();
 
-        if (!htmlElements.isEmpty())
-        {
-          for (HTMLElement htmlElement : htmlElements)
-          {
-            label = convertLineBreaks(htmlElement.getText());
-            textColor = getRGBByColorName(htmlElement.getColor());
+        propsHyperlinkLabel.put(UnoProperty.DEFAULT_CONTROL, control.getId());
+        propsHyperlinkLabel.put(UnoProperty.TEXT_COLOR, Math.abs(htmlElement.getRGBColor()) & ~0xFF000000);
+        propsHyperlinkLabel.put(UnoProperty.URL, htmlElement.getHref());
+        propsHyperlinkLabel.put(UnoProperty.MULTILINE, true);
+        propsHyperlinkLabel.put(UnoProperty.HELP_TEXT, control.getTip());
 
-            SortedMap<String, Object> propsHyperlinkLabel = new TreeMap<>();
-
-            propsHyperlinkLabel.put(UnoProperty.DEFAULT_CONTROL, control.getId());
-            propsHyperlinkLabel.put(UnoProperty.TEXT_COLOR, textColor.getRGB() & ~0xFF000000);
-            propsHyperlinkLabel.put(UnoProperty.URL, htmlElement.getHref());
-            propsHyperlinkLabel.put(UnoProperty.MULTILINE, true);
-            propsHyperlinkLabel.put(UnoProperty.HELP_TEXT, control.getTip());
-
-            xControl = GuiFactory.createHyperLinkLabel(xMCF, context, page.getPeer().getToolkit(), page.getPeer(),
-                new Rectangle(0, 0, 100, 20), propsHyperlinkLabel);
-            controls.put(control.getId(), Pair.of(xControl, null));
-            layout = new ControlLayout(xControl);
-          }
-        }
+        xControl = GuiFactory.createHyperLinkLabel(xMCF, context, page.getPeer().getToolkit(), page.getPeer(),
+            new Rectangle(0, 0, 100, 20), propsHyperlinkLabel);
+        controls.put(control.getId(), Pair.of(xControl, null));
+        layout = new ControlLayout(xControl);
       } else
       {
         SortedMap<String, Object> propsLabel = new TreeMap<>();
@@ -340,20 +346,30 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
         propsLabel.put(UnoProperty.MULTILINE, true);
         propsLabel.put(UnoProperty.HELP_TEXT, control.getTip());
 
-        xControl = GuiFactory.createLabel(xMCF, context, page.getPeer().getToolkit(), page.getPeer(), label,
+        if (htmlElement != null)
+        {
+          if (htmlElement.getFontDescriptor() != null)
+            propsLabel.put("FontDescriptor", htmlElement.getFontDescriptor());
+
+          propsLabel.put(UnoProperty.TEXT_COLOR, Math.abs(htmlElement.getRGBColor()) & ~0xFF000000);
+        }
+
+        xControl = GuiFactory.createLabel(xMCF, context, page.getPeer().getToolkit(), page.getPeer(), htmlElement
+            .getText(),
             new Rectangle(0, 0, 100, 20), propsLabel);
         controls.put(control.getId(), Pair.of(xControl, null));
         layout = new ControlLayout(xControl);
       }
+
       break;
 
     case COMBOBOX:
       if (control.isEditable())
       {
-        layout = createComboBox(control, page);
+        layout = createComboBox(control, htmlElement.getText(), page);
       } else
       {
-        layout = createListBox(control, page);
+        layout = createListBox(control, htmlElement.getText(), page);
       }
       break;
     case CHECKBOX:
@@ -362,7 +378,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       propsCheckBox.put(UnoProperty.DEFAULT_CONTROL, control.getId());
 
       propsCheckBox.put(UnoProperty.HELP_TEXT, control.getTip());
-      propsCheckBox.put(UnoProperty.LABEL, control.getLabel());
+      propsCheckBox.put(UnoProperty.LABEL, htmlElement.getText());
       propsCheckBox.put(UnoProperty.STATE, (short) 0);
       propsCheckBox.put(UnoProperty.ENABLED, !control.isReadonly());
       propsCheckBox.put(UnoProperty.MULTILINE, true);
@@ -378,7 +394,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     case TEXTAREA:
       layout = new VerticalLayout();
 
-      XControl xLabelTextArea = createLabelForControl(control, page, layout);
+      XControl xLabelTextArea = createLabelForControl(htmlElement.getText(), page, layout);
 
       SortedMap<String, Object> propsTextArea = new TreeMap<>();
 
@@ -398,7 +414,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       break;
 
     case LISTBOX:
-      layout = createListBox(control, page);
+      layout = createListBox(control, htmlElement.getText(), page);
       break;
 
     default:
@@ -408,22 +424,23 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     return layout;
   }
 
-  private XControl createLabelForControl(Control control, XControl page, Layout layout)
+  private XControl createLabelForControl(String label, XControl page, Layout layout)
   {
     XControl xLabel = null;
-    if (!control.getLabel().isEmpty())
+    if (!label.isEmpty())
     {
-      xLabel = GuiFactory.createLabel(xMCF, context, page.getPeer().getToolkit(), page.getPeer(), control.getLabel(),
+      xLabel = GuiFactory.createLabel(xMCF, context, page.getPeer().getToolkit(), page.getPeer(),
+          label,
           new Rectangle(0, 0, 50, 20), null);
       layout.addControl(xLabel);
     }
     return xLabel;
   }
 
-  private Layout createListBox(Control control, XControl page)
+  private Layout createListBox(Control control, String label, XControl page)
   {
     Layout layout = new HorizontalLayout();
-    XControl xLabel = createLabelForControl(control, page, layout);
+    XControl xLabel = createLabelForControl(label, page, layout);
 
     SortedMap<String, Object> propsListBox = new TreeMap<>();
     propsListBox.put(UnoProperty.DEFAULT_CONTROL, control.getId());
@@ -448,10 +465,10 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     return layout;
   }
 
-  private Layout createComboBox(Control control, XControl page)
+  private Layout createComboBox(Control control, String label, XControl page)
   {
     Layout layout = new HorizontalLayout();
-    XControl xLabel = createLabelForControl(control, page, layout);
+    XControl xLabel = createLabelForControl(label, page, layout);
 
     SortedMap<String, Object> propsComboBox = new TreeMap<>();
     propsComboBox.put(UnoProperty.DEFAULT_CONTROL, control.getId());
@@ -633,26 +650,6 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   }
 
   /**
-   * Get RGB Color values by color's string representation. Color name must be css valid.
-   *
-   * @param color
-   *          Name of the color.
-   * @return @{link Color}
-   */
-  private Color getRGBByColorName(String color)
-  {
-    StyleSheet s = new StyleSheet();
-    Color result = s.stringToColor(color);
-
-    if (result == null)
-    {
-      return new Color(0, 0, 0);
-    }
-
-    return result;
-  }
-
-  /**
    * Parses an html string with java swing's {@link HTMLEditorKit} to {@link HTMLElement}-Model.
    *
    * @param html
@@ -662,20 +659,27 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   private List<HTMLElement> parseHtml(String html)
   {
     Reader stringReader = new StringReader(html);
-    HTMLEditorKit htmlKit = new HTMLEditorKit();
-
-    HTMLParser htmlDoc = new HTMLParser();
+    HTMLEditorKit.Parser parser = new ParserDelegator();
+    HTMLParserCallback callback = new HTMLParserCallback();
 
     try
     {
-      htmlKit.read(stringReader, htmlDoc, 0);
-
-    } catch (IOException | BadLocationException e)
+      parser.parse(stringReader, callback, true);
+    } catch (IOException e)
     {
-      LOGGER.error("", e);
+      LOGGER.trace("", e);
+    } finally
+    {
+      try
+      {
+        stringReader.close();
+      } catch (IOException e)
+      {
+        LOGGER.trace("", e);
+      }
     }
 
-    return htmlDoc.getHtmlElement();
+    return callback.getHtmlElement();
   }
 
   /**
