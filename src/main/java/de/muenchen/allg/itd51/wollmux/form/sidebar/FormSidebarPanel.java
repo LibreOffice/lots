@@ -116,9 +116,8 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   /**
    * Paint the tabs and their content.
    */
-  public void paint()
+  private void paint()
   {
-    window.setVisible(false);
     Rectangle rect = window.getPosSize();
     LOGGER.debug("width {}, height {}", rect.Width, rect.Height);
     if (tabControlContainer != null)
@@ -139,7 +138,6 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     {
       vLayout.layout(rect);
     }
-    window.setVisible(true);
   }
 
   /**
@@ -296,8 +294,6 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       props.put(UnoProperty.DEFAULT_CONTROL, control.getId());
       props.put(UnoProperty.READ_ONLY, control.isReadonly());
       props.put(UnoProperty.HELP_TEXT, control.getTip());
-
-      props.put(UnoProperty.BORDER_COLOR, 16711680);
 
       XControl xTextField = GuiFactory.createTextfield(xMCF, context, page.getPeer().getToolkit(), page.getPeer(),
           control.getValue(), new Rectangle(0, 0, 100, 20), props, formSidebarController::textChanged);

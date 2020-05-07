@@ -438,7 +438,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
       String controlId = control.getId();
       formSidebarPanel.setVisible(controlId, control.getGroups().stream().allMatch(VisibilityGroup::isVisible));
     }
-    formSidebarPanel.paint();
+    requestLayout();
   }
 
 }
