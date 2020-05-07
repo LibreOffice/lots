@@ -8,7 +8,6 @@ import com.sun.star.awt.Size;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XLayoutConstrains;
 import com.sun.star.awt.XWindow;
-import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 
@@ -38,7 +37,7 @@ public class ControlLayout implements Layout
   {
     int h = height;
     int w = rect.Width;
-    XLayoutConstrains lc = UnoRuntime.queryInterface(XLayoutConstrains.class, control);
+    XLayoutConstrains lc = UNO.XLayoutConstrains(control);
     if (lc != null)
     {
       Size size = lc.calcAdjustedSize(new Size(rect.Width, 0));
@@ -69,7 +68,7 @@ public class ControlLayout implements Layout
     if (UNO.XWindow2(control) != null && UNO.XWindow2(control).isVisible())
     {
       h = height;
-      XLayoutConstrains lc = UNO.XLayoutContrains(control);
+      XLayoutConstrains lc = UNO.XLayoutConstrains(control);
       if (lc != null)
       {
         Size size = lc.calcAdjustedSize(new Size(width, 0));
@@ -83,7 +82,7 @@ public class ControlLayout implements Layout
   public int getMinimalWidth(int maxWidth)
   {
     int w = 0;
-    XLayoutConstrains lc = UNO.XLayoutContrains(control);
+    XLayoutConstrains lc = UNO.XLayoutConstrains(control);
     if (lc != null)
     {
       Size size = lc.getMinimumSize();
