@@ -381,14 +381,8 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
         formController.openTemplateOrDocument(fragIds, false);
         break;
       case "openExt":
-        try
-        {
-          OpenExt openExInstance = OpenExt.getInstance(formControl.getExt(), formControl.getUrl());
-          openExInstance.launch(x -> LOGGER.error("", x));
-        } catch (MalformedURLException ex)
-        {
-          LOGGER.error("", ex);
-        }
+        OpenExt openExInstance = OpenExt.getInstance(formControl.getExt(), formControl.getUrl());
+        openExInstance.launch(x -> LOGGER.error("", x));
         break;
       case "form2EMail":
         formController.sendAsEmail();
@@ -396,7 +390,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
       default:
         break;
       }
-    } catch (UnoHelperException x)
+    } catch (UnoHelperException | MalformedURLException x)
     {
       LOGGER.error("", x);
     } finally
@@ -442,7 +436,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
       String controlId = control.getId();
       formSidebarPanel.setVisible(controlId, control.getGroups().stream().allMatch(VisibilityGroup::isVisible));
     }
-    requestLayout();
+    formSidebarPanel.paint();
   }
 
 }

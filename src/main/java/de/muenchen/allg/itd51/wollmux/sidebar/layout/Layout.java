@@ -77,8 +77,10 @@ public interface Layout
   /**
    * The minimal width of the layout.
    *
+   * @param maxWidth
+   *          The maximal width.
    * @return The minimal width.
    */
-  int getMinimalWidth();
+  int getMinimalWidth(int maxWidth);
 
 }

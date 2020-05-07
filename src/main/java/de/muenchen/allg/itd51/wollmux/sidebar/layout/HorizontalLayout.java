@@ -65,8 +65,7 @@ public class HorizontalLayout implements Layout
     for (Map.Entry<Layout, Integer> entry : layouts.entrySet())
     {
       Pair<Integer, Integer> size = entry.getKey()
-          .layout(new Rectangle(rect.X + xOffset, rect.Y + marginTop,
-              Integer.max(entry.getKey().getMinimalWidth(), width * entry.getValue()), rect.Height));
+          .layout(new Rectangle(rect.X + xOffset, rect.Y + marginTop, width * entry.getValue(), rect.Height));
       height = Integer.max(height, size.getLeft());
       xOffset += size.getRight() + marginBetween;
     }
@@ -88,10 +87,16 @@ public class HorizontalLayout implements Layout
   }
 
   @Override
-  public int getMinimalWidth()
+  public int getMinimalWidth(int maxWidth)
   {
     int margin = (layouts.size() - 1) * marginBetween;
-    return layouts.keySet().stream().mapToInt(Layout::getMinimalWidth).sum() + margin;
+    int width = (maxWidth - margin) / layouts.values().stream().reduce(0, Integer::sum);
+    int minWidth = 0;
+    for (Map.Entry<Layout, Integer> l : layouts.entrySet())
+    {
+      minWidth += l.getKey().getMinimalWidth(l.getValue() * width);
+    }
+    return minWidth;
   }
 
   @Override

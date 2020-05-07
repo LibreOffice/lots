@@ -76,7 +76,7 @@ public class ControlLayout implements Layout
   }
 
   @Override
-  public int getMinimalWidth()
+  public int getMinimalWidth(int maxWidth)
   {
     int w = 0;
     XLayoutConstrains lc = UNO.XLayoutContrains(control);
@@ -85,7 +85,7 @@ public class ControlLayout implements Layout
       Size size = lc.getMinimumSize();
       w = size.Width;
     }
-    return w;
+    return Integer.min(maxWidth, w);
   }
 
   @Override

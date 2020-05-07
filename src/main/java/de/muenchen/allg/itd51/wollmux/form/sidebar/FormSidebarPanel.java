@@ -53,6 +53,7 @@ import de.muenchen.allg.itd51.wollmux.sidebar.layout.ControlLayout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.HorizontalLayout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
+import de.muenchen.allg.util.UnoConfiguration;
 import de.muenchen.allg.util.UnoProperty;
 
 /**
@@ -109,27 +110,38 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       @Override
       public void windowResized(WindowEvent e)
       {
-        Rectangle rect = window.getPosSize();
-        if (tabControlContainer != null)
-        {
-          short activeTab = tabControlContainer.getActiveTabPageID();
-          Rectangle tabRect = UNO.XWindow(tabControlContainer.getTabPageByID(activeTab)).getPosSize();
-          Rectangle newRect = new Rectangle(tabRect.X, rect.Y, rect.Width - tabRect.X - 18, rect.Height);
-
-          tabPageLayouts.get(activeTab).layout(newRect);
-          newRect.Width += 15;
-          vLayout.layout(newRect);
-          UNO.XWindow(tabControlContainer.getTabPageByID(activeTab)).setPosSize(tabRect.X, tabRect.Y,
-              rect.Width - tabRect.X - 13, rect.Height, PosSize.POSSIZE);
-          Rectangle r = UNO.XWindow(tabControlContainer).getPosSize();
-          UNO.XWindow(tabControlContainer).setPosSize(r.X, r.Y, rect.Width - tabRect.X - 3, rect.Height,
-              PosSize.POSSIZE);
-        } else
-        {
-          vLayout.layout(rect);
-        }
+        paint();
       }
     });
+  }
+
+  /**
+   * Paint the tabs and their content.
+   */
+  public void paint()
+  {
+    window.setVisible(false);
+    Rectangle rect = window.getPosSize();
+    LOGGER.debug("width {}, height {}", rect.Width, rect.Height);
+    if (tabControlContainer != null)
+    {
+      short activeTab = tabControlContainer.getActiveTabPageID();
+      Rectangle tabRect = UNO.XWindow(tabControlContainer.getTabPageByID(activeTab)).getPosSize();
+      Rectangle newRect = new Rectangle(tabRect.X, rect.Y, Integer.max(0, rect.Width - tabRect.X - 18), rect.Height);
+
+      tabPageLayouts.get(activeTab).layout(newRect);
+      newRect.Width += 15;
+      vLayout.layout(newRect);
+      UNO.XWindow(tabControlContainer.getTabPageByID(activeTab)).setPosSize(tabRect.X, tabRect.Y,
+          Integer.max(0, rect.Width - tabRect.X - 13), rect.Height, PosSize.POSSIZE);
+      Rectangle r = UNO.XWindow(tabControlContainer).getPosSize();
+      UNO.XWindow(tabControlContainer).setPosSize(r.X, r.Y, Integer.max(0, rect.Width - tabRect.X - 3), rect.Height,
+          PosSize.POSSIZE);
+    } else
+    {
+      vLayout.layout(rect);
+    }
+    window.setVisible(true);
   }
 
   /**
@@ -258,8 +270,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     case TEXTFIELD:
       layout = new HorizontalLayout();
 
-      XControl xLabel = GuiFactory.createLabel(xMCF, context, page.getPeer().getToolkit(), page.getPeer(),
-          control.getLabel(), new Rectangle(0, 0, 50, 20), null);
+      XControl xLabel = createLabelForControl(control, page, layout);
 
       SortedMap<String, Object> props = new TreeMap<>();
       props.put(UnoProperty.DEFAULT_CONTROL, control.getId());
@@ -272,7 +283,6 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
           control.getValue(), new Rectangle(0, 0, 100, 20), props, formSidebarController::textChanged);
       UNO.XWindow(xTextField).addFocusListener(formSidebarController.getFocusListener());
 
-      layout.addControl(xLabel);
       layout.addControl(xTextField);
       controls.put(control.getId(), Pair.of(xLabel, xTextField));
 
@@ -368,8 +378,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     case TEXTAREA:
       layout = new VerticalLayout();
 
-      XControl xLabelTextArea = GuiFactory.createLabel(xMCF, context, page.getPeer().getToolkit(), page.getPeer(),
-          control.getLabel(), new Rectangle(0, 0, 50, 20), null);
+      XControl xLabelTextArea = createLabelForControl(control, page, layout);
 
       SortedMap<String, Object> propsTextArea = new TreeMap<>();
 
@@ -383,7 +392,6 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
           formSidebarController::textChanged);
       UNO.XWindow(xControlTextField).addFocusListener(formSidebarController.getFocusListener());
 
-      layout.addControl(xLabelTextArea);
       layout.addControl(xControlTextField);
       controls.put(control.getId(), Pair.of(xLabelTextArea, xControlTextField));
 
@@ -400,13 +408,24 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     return layout;
   }
 
+  private XControl createLabelForControl(Control control, XControl page, Layout layout)
+  {
+    XControl xLabel = null;
+    if (!control.getLabel().isEmpty())
+    {
+      xLabel = GuiFactory.createLabel(xMCF, context, page.getPeer().getToolkit(), page.getPeer(), control.getLabel(),
+          new Rectangle(0, 0, 50, 20), null);
+      layout.addControl(xLabel);
+    }
+    return xLabel;
+  }
+
   private Layout createListBox(Control control, XControl page)
   {
     Layout layout = new HorizontalLayout();
-    XControl xLabel = GuiFactory.createLabel(xMCF, context, page.getPeer().getToolkit(), page.getPeer(),
-        control.getLabel(), new Rectangle(0, 0, 50, 20), null);
-    SortedMap<String, Object> propsListBox = new TreeMap<>();
+    XControl xLabel = createLabelForControl(control, page, layout);
 
+    SortedMap<String, Object> propsListBox = new TreeMap<>();
     propsListBox.put(UnoProperty.DEFAULT_CONTROL, control.getId());
     propsListBox.put(UnoProperty.LABEL, control.getLabel());
     propsListBox.put(UnoProperty.READ_ONLY, control.isReadonly());
@@ -424,7 +443,6 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     }
     UNO.XWindow(xControl).addFocusListener(formSidebarController.getFocusListener());
 
-    layout.addControl(xLabel);
     layout.addControl(xControl);
     controls.put(control.getId(), Pair.of(xLabel, xControl));
     return layout;
@@ -433,8 +451,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   private Layout createComboBox(Control control, XControl page)
   {
     Layout layout = new HorizontalLayout();
-    XControl xLabel = GuiFactory.createLabel(xMCF, context, page.getPeer().getToolkit(), page.getPeer(),
-        control.getLabel(), new Rectangle(0, 0, 50, 20), null);
+    XControl xLabel = createLabelForControl(control, page, layout);
 
     SortedMap<String, Object> propsComboBox = new TreeMap<>();
     propsComboBox.put(UnoProperty.DEFAULT_CONTROL, control.getId());
@@ -452,7 +469,6 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       UNO.XComboBox(xControl).addItems(cmbValues, (short) 0);
     }
 
-    layout.addControl(xLabel);
     layout.addControl(xControl);
     controls.put(control.getId(), Pair.of(xLabel, xControl));
     return layout;
@@ -475,6 +491,9 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     } else if (UNO.XListBox(control) != null)
     {
       UNO.XListBox(control).selectItem(text, true);
+    } else if (UNO.XCheckBox(control) != null)
+    {
+      UNO.XCheckBox(control).setState((short) (Boolean.parseBoolean(text) ? 1 : 0));
     } else
     {
       LOGGER.debug("Unknown control type");
@@ -498,7 +517,21 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   @Override
   public int getMinimalWidth()
   {
-    return tabPageLayouts.values().stream().mapToInt(Layout::getMinimalWidth).max().orElse(400) + 10;
+    int width = 0;
+    try
+    {
+      int maxWidth = (int) UnoConfiguration.getConfiguration("org.openoffice.Office.UI.Sidebar/General",
+          "MaximumWidth") - 60;
+      for (Map.Entry<Short, Layout> e : tabPageLayouts.entrySet())
+      {
+        width = Integer.max(width, e.getValue().getMinimalWidth(maxWidth));
+      }
+    } catch (UnoHelperException e)
+    {
+      LOGGER.debug("", e);
+      return width;
+    }
+    return width;
   }
 
   @Override

@@ -89,9 +89,9 @@ public class VerticalLayout implements Layout
   }
 
   @Override
-  public int getMinimalWidth()
+  public int getMinimalWidth(int maxWidth)
   {
-    return layouts.keySet().stream().mapToInt(Layout::getMinimalWidth).max().orElse(0);
+    return layouts.keySet().stream().mapToInt(l -> l.getMinimalWidth(maxWidth)).max().orElse(0);
   }
 
   @Override
