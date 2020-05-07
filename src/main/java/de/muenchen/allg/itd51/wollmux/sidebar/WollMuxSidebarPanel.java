@@ -11,7 +11,7 @@ import de.muenchen.allg.dialog.adapter.AbstractSidebarPanel;
 public class WollMuxSidebarPanel extends AbstractSidebarPanel
 {
   
-  public static final String WM_Bar = "WollMuxDeck";
+  public static final String WM_BAR = "WollMuxDeck";
 
   /**
    * Create the panel.
