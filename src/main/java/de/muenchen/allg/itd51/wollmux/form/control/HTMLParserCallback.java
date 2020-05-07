@@ -35,20 +35,26 @@ public class HTMLParserCallback extends HTMLEditorKit.ParserCallback
     if (t.equals(HTML.Tag.FONT))
     {
       String colorAttr = (String) a.getAttribute(HTML.Attribute.COLOR);
-      java.awt.Color color = null;
-
-      if (colorAttr.contains("#"))
-      {
-        color = java.awt.Color.decode(colorAttr);
-      } else
-      {
-        color = getRGBByColorName(colorAttr);
-      }
 
       htmlElement = new HTMLElement();
       htmlElement.setTagName(t.toString());
-      htmlElement.setRGBColor(color.getRGB());
 
+      if (colorAttr != null)
+      {
+        java.awt.Color color = null;
+
+        if (colorAttr.contains("#"))
+        {
+          color = java.awt.Color.decode(colorAttr);
+        } else
+        {
+          color = getRGBByColorName(colorAttr);
+        }
+
+        htmlElement.setRGBColor(color.getRGB());
+      }
+
+      // TODO: Exception mit "style=font-size: 13pt", css parser verwenden?
       String fontSize = (String) a.getAttribute(javax.swing.text.html.CSS.Attribute.FONT_SIZE);
 
       if (fontSize != null && !fontSize.isEmpty())
@@ -58,7 +64,6 @@ public class HTMLParserCallback extends HTMLEditorKit.ParserCallback
         htmlElement.setFontDescriptor(desc);
       }
 
-      // registerTag(t, new BlockAction());
     } else if (t.equals(HTML.Tag.A))
     {
       htmlElement = new HTMLElement();

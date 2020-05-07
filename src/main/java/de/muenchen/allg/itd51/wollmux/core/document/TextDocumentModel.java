@@ -929,7 +929,7 @@ public class TextDocumentModel
    *          Das Sichtbarkeitselement, auf dessen Anfang des Ankers der ViewCursor
    *          gesetzt werden soll.
    */
-  public synchronized void focusRangeStart(VisibilityElement visibleElement)
+  public void focusRangeStart(VisibilityElement visibleElement)
   {
     try
     {

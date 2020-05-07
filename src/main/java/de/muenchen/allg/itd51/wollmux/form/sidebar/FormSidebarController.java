@@ -169,9 +169,14 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
       {
         this.formController = documentController.getFormController();
         formModel = documentController.getFormModel();
-        formSidebarPanel.createTabControl(formModel);
-        formModel.addFormModelChangedListener(this, true);
-        formModel.addVisibilityChangedListener(this, true);
+
+        CompletableFuture.runAsync(() -> {
+          formSidebarPanel.createTabControl(formModel);
+        }).thenAcceptAsync(s -> {
+          formModel.addFormModelChangedListener(this, true);
+          formModel.addVisibilityChangedListener(this, true);
+        });
+
       } catch (FormModelException e)
       {
         LOGGER.trace("", e);

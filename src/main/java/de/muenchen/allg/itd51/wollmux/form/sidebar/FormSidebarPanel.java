@@ -341,22 +341,16 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       } else
       {
         SortedMap<String, Object> propsLabel = new TreeMap<>();
-
         propsLabel.put(UnoProperty.DEFAULT_CONTROL, control.getId());
         propsLabel.put(UnoProperty.MULTILINE, true);
         propsLabel.put(UnoProperty.HELP_TEXT, control.getTip());
+        propsLabel.put(UnoProperty.TEXT_COLOR, Math.abs(htmlElement.getRGBColor()) & ~0xFF000000);
 
-        if (htmlElement != null)
-        {
-          if (htmlElement.getFontDescriptor() != null)
-            propsLabel.put("FontDescriptor", htmlElement.getFontDescriptor());
+        if (htmlElement.getFontDescriptor() != null)
+          propsLabel.put("FontDescriptor", htmlElement.getFontDescriptor());
 
-          propsLabel.put(UnoProperty.TEXT_COLOR, Math.abs(htmlElement.getRGBColor()) & ~0xFF000000);
-        }
-
-        xControl = GuiFactory.createLabel(xMCF, context, page.getPeer().getToolkit(), page.getPeer(), htmlElement
-            .getText(),
-            new Rectangle(0, 0, 100, 20), propsLabel);
+        xControl = GuiFactory.createLabel(xMCF, context, page.getPeer().getToolkit(), page.getPeer(),
+            htmlElement.getText(), new Rectangle(0, 0, 100, 20), propsLabel);
         controls.put(control.getId(), Pair.of(xControl, null));
         layout = new ControlLayout(xControl);
       }
