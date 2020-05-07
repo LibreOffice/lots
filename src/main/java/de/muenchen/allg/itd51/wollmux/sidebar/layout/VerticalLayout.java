@@ -58,16 +58,23 @@ public class VerticalLayout implements Layout
   @Override
   public Pair<Integer, Integer> layout(Rectangle rect)
   {
-    int yOffset = marginTop;
+    int yOffset = 0;
 
     for (Map.Entry<Layout, Integer> entry : layouts.entrySet())
     {
       Pair<Integer, Integer> size = entry.getKey()
-          .layout(new Rectangle(rect.X, rect.Y + yOffset, rect.Width, rect.Height));
-      yOffset += size.getLeft() + marginBetween;
+          .layout(new Rectangle(rect.X, rect.Y + yOffset + marginTop, rect.Width, rect.Height));
+      if (size.getLeft() > 0)
+      {
+        yOffset += size.getLeft() + marginBetween;
+      }
     }
 
-    yOffset -= marginBetween;
+    if (yOffset > 0)
+    {
+      yOffset -= marginBetween;
+      yOffset += marginTop;
+    }
 
     return Pair.of(yOffset, rect.Width);
   }

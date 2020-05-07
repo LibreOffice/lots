@@ -83,7 +83,12 @@ public class HorizontalLayout implements Layout
   @Override
   public int getHeightForWidth(int width)
   {
-    return layouts.keySet().stream().mapToInt(l -> l.getHeightForWidth(width)).max().orElse(0) + marginTop;
+    int h = layouts.keySet().stream().mapToInt(l -> l.getHeightForWidth(width)).max().orElse(0);
+    if (h > 0)
+    {
+      h += marginTop;
+    }
+    return h;
   }
 
   @Override

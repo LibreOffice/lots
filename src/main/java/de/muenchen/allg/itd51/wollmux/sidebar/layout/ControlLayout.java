@@ -65,12 +65,16 @@ public class ControlLayout implements Layout
   @Override
   public int getHeightForWidth(int width)
   {
-    int h = height;
-    XLayoutConstrains lc = UNO.XLayoutContrains(control);
-    if (lc != null)
+    int h = 0;
+    if (UNO.XWindow2(control) != null && UNO.XWindow2(control).isVisible())
     {
-      Size size = lc.calcAdjustedSize(new Size(width, 0));
-      h = Integer.max(h, size.Height);
+      h = height;
+      XLayoutConstrains lc = UNO.XLayoutContrains(control);
+      if (lc != null)
+      {
+        Size size = lc.calcAdjustedSize(new Size(width, 0));
+        h = Integer.max(h, size.Height);
+      }
     }
     return h;
   }
