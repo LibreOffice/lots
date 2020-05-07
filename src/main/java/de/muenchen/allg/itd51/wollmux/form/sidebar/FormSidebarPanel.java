@@ -410,6 +410,16 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     case LISTBOX:
       layout = createListBox(control, htmlElement.getText(), page);
       break;
+    case SEPARATOR:
+      SortedMap<String, Object> propsSeparator = new TreeMap<>();
+      propsSeparator.put(UnoProperty.DEFAULT_CONTROL, control.getId());
+      XControl line = GuiFactory.createHLine(xMCF, context, page.getPeer().getToolkit(),
+          page.getPeer(),
+          new Rectangle(0, 0, 100, 5),
+          propsSeparator);
+      layout = new ControlLayout(line);
+      controls.put(control.getId(), Pair.of(null, line));
+      break;
 
     default:
       break;
