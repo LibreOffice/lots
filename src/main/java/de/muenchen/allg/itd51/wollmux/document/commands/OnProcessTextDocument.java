@@ -93,7 +93,7 @@ public class OnProcessTextDocument implements WollMuxEventListener
     {
       this.activateSidebarPanel(controller, FormSidebarController.WM_FORM_GUI);
     } else {
-      this.activateSidebarPanel(controller, WollMuxSidebarPanel.WM_Bar);
+      this.activateSidebarPanel(controller, WollMuxSidebarPanel.WM_BAR);
     }
 
     // ContextChanged to update dispatches
