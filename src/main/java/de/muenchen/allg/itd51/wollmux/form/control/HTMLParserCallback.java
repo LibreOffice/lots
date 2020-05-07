@@ -8,6 +8,9 @@ import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.star.awt.FontDescriptor;
 
 import javafx.css.CssParser;
@@ -18,8 +21,14 @@ import javafx.css.Stylesheet;
 import javafx.scene.Group;
 import javafx.scene.Node;
 
+/**
+ * Parses HTML-Tags / css-inline-style.
+ *
+ */
 public class HTMLParserCallback extends HTMLEditorKit.ParserCallback
 {
+  private static final Logger LOGGER = LoggerFactory.getLogger(HTMLParserCallback.class);
+
   private CssParser cssParser = new CssParser();
   private HTMLElement htmlElement;
   private List<HTMLElement> htmlElements = new ArrayList<>();
@@ -32,11 +41,11 @@ public class HTMLParserCallback extends HTMLEditorKit.ParserCallback
   @Override
   public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos)
   {
+    htmlElement = new HTMLElement();
+
     if (t.equals(HTML.Tag.FONT))
     {
       String colorAttr = (String) a.getAttribute(HTML.Attribute.COLOR);
-
-      htmlElement = new HTMLElement();
       htmlElement.setTagName(t.toString());
 
       if (colorAttr != null)
@@ -54,7 +63,6 @@ public class HTMLParserCallback extends HTMLEditorKit.ParserCallback
         htmlElement.setRGBColor(color.getRGB());
       }
 
-      // TODO: Exception mit "style=font-size: 13pt", css parser verwenden?
       String fontSize = (String) a.getAttribute(javax.swing.text.html.CSS.Attribute.FONT_SIZE);
 
       if (fontSize != null && !fontSize.isEmpty())
@@ -66,52 +74,65 @@ public class HTMLParserCallback extends HTMLEditorKit.ParserCallback
 
     } else if (t.equals(HTML.Tag.A))
     {
-      htmlElement = new HTMLElement();
       htmlElement.setTagName(t.toString());
       htmlElement.setHref((String) a.getAttribute(HTML.Attribute.HREF));
     } else if (t.equals(HTML.Tag.SPAN))
     {
-      Object val = a.getAttribute(HTML.Attribute.STYLE);
+      htmlElement.setTagName(t.toString());
+    }
 
-      if (val != null)
+    String val = (String) a.getAttribute(HTML.Attribute.STYLE);
+    parseCss(val);
+
+    super.handleStartTag(t, a, pos);
+  }
+
+  private void parseCss(String style)
+  {
+    if (style == null || style.isEmpty())
+    {
+      return;
+    }
+
+    Node node = new Group();
+    node.setStyle(style);
+    Stylesheet sheet2 = cssParser.parseInlineStyle(node);
+
+    for (Rule rule : sheet2.getRules())
+    {
+      for (Declaration dec : rule.getDeclarations())
       {
-        String style = val.toString();
-        Node node = new Group();
-        node.setStyle(style);
-        Stylesheet sheet2 = cssParser.parseInlineStyle(node);
+        String property = dec.getProperty();
 
-        for (Rule rule : sheet2.getRules())
+        if (property.equalsIgnoreCase("font-size"))
         {
-          for (Declaration dec : rule.getDeclarations())
+          ParsedValue parsedVal = (ParsedValue) dec.getParsedValue().getValue();
+          String realVal = parsedVal.getValue().toString();
+
+          FontDescriptor desc = new FontDescriptor();
+          // HTMLEditorKit transforms "18pt" to "18.0pt"
+          realVal = realVal.replace("pt", "").trim();
+
+          double asDouble = 0;
+
+          try
           {
-            String property = dec.getProperty();
-
-            if (property.equalsIgnoreCase("font-size"))
-            {
-              ParsedValue parsedVal = (ParsedValue) dec.getParsedValue().getValue();
-              String realVal = parsedVal.getValue().toString();
-
-              htmlElement = new HTMLElement();
-              FontDescriptor desc = new FontDescriptor();
-              // HTMLEditorKit transforms "18pt" to "18.0pt"
-              realVal = realVal.replace("pt", "").trim();
-              double asDouble = Double.valueOf(realVal);
-              desc.Height = (short) asDouble;
-              htmlElement.setFontDescriptor(desc);
-            } else if (property.equalsIgnoreCase("color"))
-            {
-              javafx.scene.paint.Color parsedColor = (javafx.scene.paint.Color) dec.getParsedValue().getValue();
-
-              java.awt.Color awtColor = convertColorType(parsedColor);
-              htmlElement = new HTMLElement();
-              htmlElement.setRGBColor(awtColor.getRGB());
-
-            }
+            asDouble = Double.parseDouble(realVal);
+          } catch (NumberFormatException e)
+          {
+            LOGGER.trace("", e);
           }
+
+          desc.Height = (short) asDouble;
+          htmlElement.setFontDescriptor(desc);
+        } else if (property.equalsIgnoreCase("color"))
+        {
+          javafx.scene.paint.Color parsedColor = (javafx.scene.paint.Color) dec.getParsedValue().getValue();
+          java.awt.Color awtColor = convertColorType(parsedColor);
+          htmlElement.setRGBColor(awtColor.getRGB());
         }
       }
     }
-    super.handleStartTag(t, a, pos);
   }
 
   @Override
