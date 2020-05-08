@@ -41,7 +41,7 @@ public class CalcModelTest extends OfficeTest
   @BeforeEach
   public void setUp() throws Exception
   {
-    xDoc = UNO.XSpreadsheetDocument(loadComponent(file.toString()));
+    xDoc = UNO.XSpreadsheetDocument(loadComponent(file.toString(), false, true));
     model = new CalcModel(xDoc);
     model.addCloseListener(closeListener);
     model.activateTable("Tabelle1");

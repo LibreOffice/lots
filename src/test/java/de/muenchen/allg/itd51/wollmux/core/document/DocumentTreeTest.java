@@ -22,7 +22,7 @@ public class DocumentTreeTest extends OfficeTest
   public void setUp() throws Exception
   {
     URL file = getClass().getResource("ExternerBriefkopf.odt");
-    xDoc = UNO.XTextDocument(loadComponent(file.toString()));
+    xDoc = UNO.XTextDocument(loadComponent(file.toString(), false, true));
   }
 
   @AfterEach

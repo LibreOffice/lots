@@ -25,7 +25,7 @@ public class ConnectionModelTest extends OfficeTest
   @BeforeEach
   public void setUp() throws Exception
   {
-    xDoc = UNO.XSpreadsheetDocument(loadComponent(file.toString()));
+    xDoc = UNO.XSpreadsheetDocument(loadComponent(file.toString(), false, true));
     model = ConnectionModel.addAndSelectDatasource(xDoc, Optional.empty());
   }
 
