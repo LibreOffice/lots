@@ -306,7 +306,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
     {
       processUIElementEvents = false;
       noProcessValueChangedEvents.add(id);
-      CompletableFuture.runAsync(() -> formController.setValue(id, value, null));
+      formController.setValue(id, value, null);
       noProcessValueChangedEvents.remove(id);
       processUIElementEvents = true;
     }
@@ -410,7 +410,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
     if (!noProcessValueChangedEvents.contains(id))
     {
       processUIElementEvents = false;
-      CompletableFuture.runAsync(() -> formSidebarPanel.setText(id, value));
+      formSidebarPanel.setText(id, value);
       processUIElementEvents = true;
     }
   }
@@ -421,8 +421,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   @Override
   public void statusChanged(String id, boolean okay)
   {
-    CompletableFuture.runAsync(
-        () -> formSidebarPanel.setBackgroundColor(id, okay, formModel.getPlausiMarkerColor().getRGB() & ~0xFF000000));
+    formSidebarPanel.setBackgroundColor(id, okay, formModel.getPlausiMarkerColor().getRGB() & ~0xFF000000);
   }
 
   /**
