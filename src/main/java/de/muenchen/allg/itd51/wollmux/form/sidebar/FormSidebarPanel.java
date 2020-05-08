@@ -325,7 +325,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
         SortedMap<String, Object> propsHyperlinkLabel = new TreeMap<>();
 
         propsHyperlinkLabel.put(UnoProperty.DEFAULT_CONTROL, control.getId());
-        propsHyperlinkLabel.put(UnoProperty.TEXT_COLOR, Math.abs(htmlElement.getRGBColor()) & ~0xFF000000);
+        propsHyperlinkLabel.put(UnoProperty.TEXT_COLOR, Math.abs(htmlElement.getRGBColor()));
         propsHyperlinkLabel.put(UnoProperty.URL, htmlElement.getHref());
         propsHyperlinkLabel.put(UnoProperty.MULTILINE, true);
         propsHyperlinkLabel.put(UnoProperty.HELP_TEXT, control.getTip());
@@ -340,7 +340,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
         propsLabel.put(UnoProperty.DEFAULT_CONTROL, control.getId());
         propsLabel.put(UnoProperty.MULTILINE, true);
         propsLabel.put(UnoProperty.HELP_TEXT, control.getTip());
-        propsLabel.put(UnoProperty.TEXT_COLOR, Math.abs(htmlElement.getRGBColor()) & ~0xFF000000);
+        propsLabel.put(UnoProperty.TEXT_COLOR, Math.abs(htmlElement.getRGBColor()));
 
         if (htmlElement.getFontDescriptor() != null)
           propsLabel.put("FontDescriptor", htmlElement.getFontDescriptor());
