@@ -8,9 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
-import com.sun.star.awt.WindowAttribute;
-import com.sun.star.awt.WindowClass;
-import com.sun.star.awt.WindowDescriptor;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
@@ -18,9 +15,7 @@ import com.sun.star.awt.XControlModel;
 import com.sun.star.awt.XFixedText;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XTextListener;
-import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
-import com.sun.star.awt.XWindowPeer;
 import com.sun.star.awt.tree.XMutableTreeDataModel;
 import com.sun.star.awt.tree.XTreeControl;
 import com.sun.star.beans.XMultiPropertySet;
@@ -33,6 +28,7 @@ import de.muenchen.allg.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.util.UnoComponent;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
  * Factory for creating UNO control elements.
@@ -40,36 +36,11 @@ import de.muenchen.allg.util.UnoComponent;
 public class GuiFactory
 {
 
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(GuiFactory.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(GuiFactory.class);
 
   private GuiFactory()
   {
     // nothing to initialize.
-  }
-
-  /**
-   * Create a window without decoration. The window can be used as content of a
-   * sidebar panel.
-   *
-   * @param toolkit
-   *          The toolkit to create the window.
-   * @param parentWindow
-   *          The parent window.
-   * @return A new {@link XWindowPeer}.
-   */
-  public static XWindowPeer createWindow(XToolkit toolkit, XWindowPeer parentWindow)
-  {
-    WindowDescriptor aWindow = new WindowDescriptor();
-    aWindow.Type = WindowClass.CONTAINER;
-    aWindow.WindowServiceName = "";
-    aWindow.Parent = parentWindow;
-    aWindow.ParentIndex = -1;
-    aWindow.Bounds = new Rectangle(0, 0, 10, 10);
-    aWindow.WindowAttributes =
-      WindowAttribute.SIZEABLE | WindowAttribute.MOVEABLE
-        | WindowAttribute.NODECORATION;
-    return toolkit.createWindow(aWindow);
   }
 
   /**
@@ -79,10 +50,6 @@ public class GuiFactory
    *          The factory.
    * @param context
    *          The context.
-   * @param toolkit
-   *          The toolkit.
-   * @param windowPeer
-   *          The window in which the control is located.
    * @param label
    *          The label.
    * @param listener
@@ -93,14 +60,10 @@ public class GuiFactory
    *          Some additional properties.
    * @return A new button.
    */
-  @SuppressWarnings("squid:S00107")
-  public static XControl createButton(XMultiComponentFactory xMCF,
-      XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer,
-      String label, AbstractActionListener listener, Rectangle size,
-      SortedMap<String, Object> props)
+  public static XControl createButton(XMultiComponentFactory xMCF, XComponentContext context, String label,
+      AbstractActionListener listener, Rectangle size, SortedMap<String, Object> props)
   {
-    XControl buttonCtrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_BUTTON,
-        props, size);
+    XControl buttonCtrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_BUTTON, props, size);
     XButton button = UNO.XButton(buttonCtrl);
     button.setLabel(label);
     button.addActionListener(listener);
@@ -114,10 +77,6 @@ public class GuiFactory
    *          The factory.
    * @param context
    *          The context.
-   * @param toolkit
-   *          The toolkit.
-   * @param windowPeer
-   *          The window in which the control is located.
    * @param text
    *          The text.
    * @param size
@@ -126,9 +85,8 @@ public class GuiFactory
    *          Some additional properties.
    * @return A new text field.
    */
-  public static XControl createTextfield(XMultiComponentFactory xMCF,
-      XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer,
-      String text, Rectangle size, SortedMap<String, Object> props)
+  public static XControl createTextfield(XMultiComponentFactory xMCF, XComponentContext context, String text,
+      Rectangle size, SortedMap<String, Object> props)
   {
     if (props == null)
     {
@@ -138,8 +96,7 @@ public class GuiFactory
     props.put("ReadOnly", false);
     props.put("VScroll", false);
 
-    XControl buttonCtrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_EDIT,
-        props, size);
+    XControl buttonCtrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_EDIT, props, size);
 
     XTextComponent txt = UNO.XTextComponent(buttonCtrl);
     txt.setText(text);
@@ -153,10 +110,6 @@ public class GuiFactory
    *          The factory.
    * @param context
    *          The context.
-   * @param toolkit
-   *          The toolkit.
-   * @param windowPeer
-   *          The window in which the control is located.
    * @param text
    *          The text of the label.
    * @param size
@@ -165,9 +118,8 @@ public class GuiFactory
    *          Some additional properties.
    * @return A new label.
    */
-  public static XControl createLabel(XMultiComponentFactory xMCF, XComponentContext context,
-      XToolkit toolkit, XWindowPeer windowPeer, String text, Rectangle size,
-      SortedMap<String, Object> props)
+  public static XControl createLabel(XMultiComponentFactory xMCF, XComponentContext context, String text,
+      Rectangle size, SortedMap<String, Object> props)
   {
     if (props == null)
     {
@@ -175,8 +127,7 @@ public class GuiFactory
     }
     props.put("MultiLine", true);
 
-    XControl buttonCtrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_FIXED_TEXT,
-        props, size);
+    XControl buttonCtrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_FIXED_TEXT, props, size);
 
     XFixedText txt = UNO.XFixedText(buttonCtrl);
     txt.setText(text);
@@ -192,8 +143,7 @@ public class GuiFactory
    *          The context.
    * @return The model.
    */
-  public static XMutableTreeDataModel createTreeModel(XMultiComponentFactory xMCF,
-      XComponentContext context)
+  public static XMutableTreeDataModel createTreeModel(XMultiComponentFactory xMCF, XComponentContext context)
   {
     return UnoRuntime.queryInterface(XMutableTreeDataModel.class,
         UnoComponent.createComponentWithContext(UnoComponent.CSS_AWT_TREE_MUTABLE_TREE_DATA_MODEL, xMCF, context));
@@ -207,20 +157,16 @@ public class GuiFactory
    *          The factory.
    * @param context
    *          The context.
-   * @param toolkit
-   *          The toolkit.
-   * @param windowPeer
-   *          The window in which the control is located.
    * @param dataModel
    *          The data model.
    * @return A new tree control.
    */
   public static XControl createTree(XMultiComponentFactory xMCF, XComponentContext context,
-      XToolkit toolkit, XWindowPeer windowPeer, XMutableTreeDataModel dataModel)
+      XMutableTreeDataModel dataModel)
   {
     SortedMap<String, Object> props = new TreeMap<>();
-    props.put("DataModel", dataModel);
-    return GuiFactory.createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_TREE_TREE_CONTROL, props,
+    props.put(UnoProperty.DATA_MODEL, dataModel);
+    return GuiFactory.createControl(xMCF, context, UnoComponent.CSS_AWT_TREE_TREE_CONTROL, props,
         new Rectangle(0, 0, 400, 400));
   }
 
@@ -231,10 +177,6 @@ public class GuiFactory
    *          The factory.
    * @param context
    *          The context.
-   * @param toolkit
-   *          The toolkit.
-   * @param windowPeer
-   *          The window in which the control is located.
    * @param text
    *          The selected text.
    * @param listener
@@ -245,14 +187,10 @@ public class GuiFactory
    *          Some additional properties.
    * @return A new combo box.
    */
-  @SuppressWarnings("squid:S00107")
-  public static XControl createCombobox(XMultiComponentFactory xMCF,
-      XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer, String text,
-      AbstractItemListener listener, Rectangle size,
-      SortedMap<String, Object> props)
+  public static XControl createCombobox(XMultiComponentFactory xMCF, XComponentContext context, String text,
+      AbstractItemListener listener, Rectangle size, SortedMap<String, Object> props)
   {
-    XControl ctrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_COMBO_BOX, props,
-        size);
+    XControl ctrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_COMBO_BOX, props, size);
     XTextComponent tf = UNO.XTextComponent(ctrl);
     tf.setText(text);
     XComboBox cmb = UNO.XComboBox(ctrl);
@@ -269,10 +207,6 @@ public class GuiFactory
    *          The factory.
    * @param context
    *          The context.
-   * @param toolkit
-   *          The toolkit.
-   * @param windowPeer
-   *          The window in which the control is located.
    * @param value
    *          The value.
    * @param listener
@@ -283,13 +217,10 @@ public class GuiFactory
    *          Some additional properties.
    * @return A new numeric field.
    */
-  @SuppressWarnings("squid:S00107")
-  public static XControl createNumericField(XMultiComponentFactory xMCF, XComponentContext context,
-      XToolkit toolkit, XWindowPeer windowPeer, int value, XTextListener listener, Rectangle size,
-      SortedMap<String, Object> props)
+  public static XControl createNumericField(XMultiComponentFactory xMCF, XComponentContext context, int value,
+      XTextListener listener, Rectangle size, SortedMap<String, Object> props)
   {
-    XControl ctrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_NUMERIC_FIELD,
-        props, size);
+    XControl ctrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_NUMERIC_FIELD, props, size);
     UNO.XNumericField(ctrl).setValue(value);
     UNO.XTextComponent(ctrl).addTextListener(listener);
 
@@ -303,10 +234,6 @@ public class GuiFactory
    *          The factory.
    * @param context
    *          The context.
-   * @param toolkit
-   *          The toolkit.
-   * @param windowPeer
-   *          The window in which the control is located.
    * @param value
    *          The value.
    * @param listener
@@ -317,11 +244,8 @@ public class GuiFactory
    *          Some additional properties.
    * @return A new button.
    */
-  @SuppressWarnings("squid:S00107")
-  public static XControl createSpinField(XMultiComponentFactory xMCF,
-      XComponentContext context, XToolkit toolkit, XWindowPeer windowPeer,
-      int value, AbstractTextListener listener, Rectangle size,
-      SortedMap<String, Object> props)
+  public static XControl createSpinField(XMultiComponentFactory xMCF, XComponentContext context, int value,
+      AbstractTextListener listener, Rectangle size, SortedMap<String, Object> props)
   {
     if (props == null)
     {
@@ -329,7 +253,7 @@ public class GuiFactory
     }
     props.put("Spin", Boolean.TRUE);
 
-    return createNumericField(xMCF, context, toolkit, windowPeer, value, listener, size, props);
+    return createNumericField(xMCF, context, value, listener, size, props);
   }
 
   /**
@@ -339,21 +263,16 @@ public class GuiFactory
    *          The factory.
    * @param context
    *          The context.
-   * @param toolkit
-   *          The toolkit.
-   * @param windowPeer
-   *          The window in which the control is located.
    * @param size
    *          The size.
    * @param props
    *          Some additional properties.
    * @return A new horizontal line.
    */
-  public static XControl createHLine(XMultiComponentFactory xMCF, XComponentContext context,
-      XToolkit toolkit, XWindowPeer windowPeer, Rectangle size, SortedMap<String, Object> props)
+  public static XControl createLine(XMultiComponentFactory xMCF, XComponentContext context, Rectangle size,
+      SortedMap<String, Object> props)
   {
-    return createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_FIXED_LINE,
-        props, size);
+    return createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_FIXED_LINE, props, size);
   }
 
   /**
@@ -363,10 +282,6 @@ public class GuiFactory
    *          The factory.
    * @param context
    *          The context.
-   * @param toolkit
-   *          The toolkit.
-   * @param windowPeer
-   *          The window in which the control is located.
    * @param listener
    *          The item listener.
    * @param size
@@ -375,14 +290,32 @@ public class GuiFactory
    *          Some additional properties.
    * @return A new button.
    */
-  public static XControl createListBox(XMultiComponentFactory xMCF, XComponentContext context, XToolkit toolkit,
-      XWindowPeer windowPeer, AbstractItemListener listener, Rectangle size, SortedMap<String, Object> props)
+  public static XControl createListBox(XMultiComponentFactory xMCF, XComponentContext context,
+      AbstractItemListener listener, Rectangle size, SortedMap<String, Object> props)
   {
-    XControl ctrl = createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_LIST_BOX, props,
-        size);
+    XControl ctrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_LIST_BOX, props, size);
     UNO.XListBox(ctrl).addItemListener(listener);
 
     return ctrl;
+  }
+
+  /**
+   * Create a control container.
+   *
+   * @param xMCF
+   *          The factory.
+   * @param context
+   *          The context.
+   * @param size
+   *          The size of the control.
+   * @param props
+   *          Some additional properties.
+   * @return A new control container.
+   */
+  public static XControl createControlContainer(XMultiComponentFactory xMCF, XComponentContext context, Rectangle size,
+      SortedMap<String, Object> props)
+  {
+    return createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_CONTAINER, props, size);
   }
 
   /**
@@ -392,22 +325,16 @@ public class GuiFactory
    *          The factory.
    * @param xContext
    *          The context.
-   * @param toolkit
-   *          The toolkit.
-   * @param windowPeer
-   *          The window in which the control is located.
    * @param type
-   *          The type of control (FQDN), eg.
-   *          com.sun.star.awt.UnoControlFixedText.
+   *          The type of control (FQDN), eg. com.sun.star.awt.UnoControlFixedText.
    * @param props
    *          Some additional properties of the control.
    * @param rectangle
    *          The size of the control.
    * @return A control or null.
    */
-  public static XControl createControl(XMultiComponentFactory xMCF,
-      XComponentContext xContext, XToolkit toolkit, XWindowPeer windowPeer,
-      String type, SortedMap<String, Object> props, Rectangle rectangle)
+  public static XControl createControl(XMultiComponentFactory xMCF, XComponentContext xContext, String type,
+      SortedMap<String, Object> props, Rectangle rectangle)
   {
     try
     {
@@ -415,20 +342,16 @@ public class GuiFactory
       XControlModel controlModel = UnoRuntime.queryInterface(XControlModel.class,
           UnoComponent.createComponentWithContext(type + "Model", xMCF, xContext));
       control.setModel(controlModel);
-      XMultiPropertySet properties =
-        UNO.XMultiPropertySet(control.getModel());
+      XMultiPropertySet properties = UNO.XMultiPropertySet(control.getModel());
       if (props != null && props.size() > 0)
       {
-        properties.setPropertyValues(
-          props.keySet().toArray(new String[props.size()]),
-          props.values().toArray(new Object[props.size()]));
+        properties.setPropertyValues(props.keySet().toArray(new String[props.size()]),
+            props.values().toArray(new Object[props.size()]));
       }
-      control.createPeer(toolkit, windowPeer);
       XWindow controlWindow = UNO.XWindow(control);
       setWindowPosSize(controlWindow, rectangle);
       return control;
-    }
-    catch (com.sun.star.uno.Exception ex)
+    } catch (com.sun.star.uno.Exception ex)
     {
       LOGGER.debug("", ex);
       return null;
@@ -445,8 +368,7 @@ public class GuiFactory
    */
   public static void setWindowPosSize(XWindow window, Rectangle posSize)
   {
-    window.setPosSize(posSize.X, posSize.Y, posSize.Width, posSize.Height,
-        PosSize.POSSIZE);
+    window.setPosSize(posSize.X, posSize.Y, posSize.Width, posSize.Height, PosSize.POSSIZE);
   }
 
 }

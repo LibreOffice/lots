@@ -26,6 +26,7 @@ import com.sun.star.awt.Selection;
 import com.sun.star.awt.WindowEvent;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XControl;
+import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XControlModel;
 import com.sun.star.awt.XItemList;
 import com.sun.star.awt.XListBox;
@@ -39,18 +40,13 @@ import com.sun.star.awt.tree.XMutableTreeDataModel;
 import com.sun.star.awt.tree.XMutableTreeNode;
 import com.sun.star.awt.tree.XTreeControl;
 import com.sun.star.beans.MethodConcept;
-import com.sun.star.beans.PropertyVetoException;
-import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XIntrospection;
 import com.sun.star.beans.XIntrospectionAccess;
 import com.sun.star.lang.DisposedException;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IndexOutOfBoundsException;
-import com.sun.star.lang.NoSuchMethodException;
-import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.lib.uno.helper.ComponentBase;
-import com.sun.star.reflection.InvocationTargetException;
 import com.sun.star.reflection.XIdlMethod;
 import com.sun.star.ui.LayoutSize;
 import com.sun.star.ui.XSidebarPanel;
@@ -59,6 +55,7 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
 import de.muenchen.allg.dialog.adapter.AbstractItemListener;
@@ -89,20 +86,18 @@ import de.muenchen.allg.itd51.wollmux.sidebar.controls.UISearchbox;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UISenderbox;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
+import de.muenchen.allg.util.UnoConfiguration;
 import de.muenchen.allg.util.UnoProperty;
 
 /**
- * Erzeugt das Fenster, dass in der WollMux-Sidebar angezeigt wird. Das Fenster
- * enthält einen Baum zur Auswahl von Vorlagen und darunter eine Reihe von
- * Buttons für häufig benutzte Funktionen.
+ * Erzeugt das Fenster, dass in der WollMux-Sidebar angezeigt wird. Das Fenster enthält einen Baum
+ * zur Auswahl von Vorlagen und darunter eine Reihe von Buttons für häufig benutzte Funktionen.
  *
  */
-public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
-    XSidebarPanel, UIElementCreateListener
+public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, XSidebarPanel, UIElementCreateListener
 {
 
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(WollMuxSidebarContent.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(WollMuxSidebarContent.class);
 
   public static final String ALLOW_USER_CONFIG = "ALLOW_USER_CONFIG";
 
@@ -126,12 +121,12 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     SUPPORTED_ACTIONS.add("options");
   }
 
-  public static final String WOLLMUX_CONFIG_ERROR_MESSAGE =
-      L.m("Aus Ihrer WollMux-Konfiguration konnte kein Abschnitt \"Symbolleisten\" gelesen werden. "
-        + "Die WollMux-Leiste kann daher nicht gestartet werden. Bitte überprüfen Sie, ob in Ihrer wollmux.conf "
-        + "der %include für die Konfiguration der WollMuxBar (z.B. wollmuxbar_standard.conf) vorhanden ist und "
-        + "überprüfen Sie anhand der wollmux.log ob evtl. beim Verarbeiten eines %includes ein Fehler "
-        + "aufgetreten ist.");
+  public static final String WOLLMUX_CONFIG_ERROR_MESSAGE = L
+      .m("Aus Ihrer WollMux-Konfiguration konnte kein Abschnitt \"Symbolleisten\" gelesen werden. "
+          + "Die WollMux-Leiste kann daher nicht gestartet werden. Bitte überprüfen Sie, ob in Ihrer wollmux.conf "
+          + "der %include für die Konfiguration der WollMuxBar (z.B. wollmuxbar_standard.conf) vorhanden ist und "
+          + "überprüfen Sie anhand der wollmux.log ob evtl. beim Verarbeiten eines %includes ein Fehler "
+          + "aufgetreten ist.");
 
   /**
    * Die aktiven CONF_IDs.
@@ -142,13 +137,11 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
   private XWindow parentWindow;
 
-  private XWindow window;
+  private XControlContainer controlContainer;
 
   private Layout layout;
 
   private XWindowPeer windowPeer;
-
-  private XToolkit toolkit;
 
   private XMutableTreeDataModel dataModel;
 
@@ -213,16 +206,16 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     if (dj.getLOS().size() > 0)
     {
       // Liste der nicht zuordnenbaren Datensätze erstellen und ausgeben:
-      String names = "";
-      List<String> lost = DatasourceJoinerFactory
-          .getLostDatasetDisplayStrings();
+      StringBuilder names = new StringBuilder();
+      List<String> lost = DatasourceJoinerFactory.getLostDatasetDisplayStrings();
       if (!lost.isEmpty())
       {
         for (String l : lost)
-          names += "- " + l + "\n";
-        String message = L.m("Die folgenden Datensätze konnten nicht "
-            + "aus der Datenbank aktualisiert werden:\n\n" + "%1\n"
-            + "Wenn dieses Problem nicht temporärer "
+        {
+          names.append("- " + l + "\n");
+        }
+        String message = L.m("Die folgenden Datensätze konnten nicht " + "aus der Datenbank aktualisiert werden:\n\n"
+            + "%1\n" + "Wenn dieses Problem nicht temporärer "
             + "Natur ist, sollten Sie diese Datensätze aus "
             + "ihrer Absenderliste löschen und neu hinzufügen!", names);
         InfoDialog.showInfoModal(this.parentWindow, L.m("WollMux-Info"), message);
@@ -234,107 +227,87 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     boolean allowUserConfig = true;
     try
     {
-      allowUserConfig =
-        conf.query(ALLOW_USER_CONFIG, 1).getLastChild().toString().equalsIgnoreCase(
-          "true");
-    }
-    catch (NodeNotFoundException e)
+      allowUserConfig = conf.query(ALLOW_USER_CONFIG, 1).getLastChild().toString().equalsIgnoreCase("true");
+    } catch (NodeNotFoundException e)
     {
       LOGGER.trace("", e);
     }
 
-    XMultiComponentFactory xMCF =
-      UnoRuntime.queryInterface(XMultiComponentFactory.class,
-        context.getServiceManager());
-    XWindowPeer parentWindowPeer =
-      UNO.XWindowPeer(parentWindow);
+    XMultiComponentFactory xMCF = UnoRuntime.queryInterface(XMultiComponentFactory.class, context.getServiceManager());
+    XWindowPeer parentWindowPeer = UNO.XWindowPeer(parentWindow);
 
     if (parentWindowPeer == null)
     {
       return;
     }
 
-    toolkit = parentWindowPeer.getToolkit();
-    windowPeer = GuiFactory.createWindow(toolkit, parentWindowPeer);
-    windowPeer.setBackground(0xffffffff);
-    window = UNO.XWindow(windowPeer);
+    XToolkit parentToolkit = parentWindowPeer.getToolkit();
+    controlContainer = UNO
+        .XControlContainer(GuiFactory.createControlContainer(xMCF, context, new Rectangle(0, 0, 0, 0), null));
+    UNO.XControl(controlContainer).createPeer(parentToolkit, parentWindowPeer);
+    windowPeer = UNO.XControl(controlContainer).getPeer();
 
-    if (window != null)
+    try
     {
-      try
+
+      if (WollMuxSingleton.getInstance().isNoConfig())
       {
+        String text = L.m("WollMux läuft ohne wollmux.conf !\n"
+            + "Aus diesem Grund ist leider nicht der komplette Funktionsumfang verfügbar.");
+        XControl txt = GuiFactory.createLabel(xMCF, context, text, new Rectangle(5, 15, 10, 80), null);
+        controlContainer.addControl("txt", txt);
+        layout.addControl(txt);
+      } else
+      {
+        readWollMuxBarConf(allowUserConfig, conf);
 
-        if (WollMuxSingleton.getInstance().isNoConfig())
+        dataModel = GuiFactory.createTreeModel(xMCF, context);
+
+        XMutableTreeNode root = dataModel.createNode("Vorlagen", false);
+        dataModel.setRoot(root);
+
+        XControl treeCtrl = GuiFactory.createTree(xMCF, context, dataModel);
+        tree = UNO.XTreeControl(treeCtrl);
+        controlContainer.addControl("treeCtrl", treeCtrl);
+        layout.addControl(treeCtrl, 6);
+
+        XWindow treeWnd = UNO.XWindow(treeCtrl);
+        treeWnd.addMouseListener(xMouseListener);
+
+        XControl line = GuiFactory.createLine(xMCF, context, new Rectangle(0, 0, 10, 4), null);
+        controlContainer.addControl("line", line);
+        layout.addControl(line, 1);
+
+        uiFactory = new UIFactory();
+        uiFactory.addElementCreateListener(this);
+
+        ConfigThingy menubar = conf.query("Menueleiste");
+        ConfigThingy menuConf = conf.query("Menues");
+
+        if (menubar.count() > 0)
         {
-          String text = L.m("WollMux läuft ohne wollmux.conf !\n"
-              + "Aus diesem Grund ist leider nicht der komplette Funktionsumfang verfügbar.");
-          XControl txt = GuiFactory.createLabel(xMCF, context, toolkit, windowPeer,
-              text, new Rectangle(5, 15, 10, 80), null);
-          layout.addControl(txt);
-        } else
-        {
-          readWollMuxBarConf(allowUserConfig, conf);
+          uiFactory.createUIElements(new UIElementContext(), null, menubar.getLastChild(), false, confIds);
 
-          dataModel = GuiFactory.createTreeModel(xMCF, context);
-
-          XMutableTreeNode root = dataModel.createNode("Vorlagen", false);
-          dataModel.setRoot(root);
-
-          XControl treeCtrl =
-            GuiFactory.createTree(xMCF, context, toolkit, windowPeer, dataModel);
-          tree = UNO.XTreeControl(treeCtrl);
-          layout.addControl(treeCtrl, 6);
-
-          XWindow treeWnd = UNO.XWindow(treeCtrl);
-          treeWnd.addMouseListener(xMouseListener);
-
-          XControl line =
-              GuiFactory.createHLine(xMCF, context, toolkit, parentWindowPeer,
-                  new Rectangle(0, 0, 10, 4), null);
-
-          layout.addControl(line, 1);
-
-          uiFactory = new UIFactory();
-          uiFactory.addElementCreateListener(this);
-
-          ConfigThingy menubar = conf.query("Menueleiste");
-          ConfigThingy menuConf = conf.query("Menues");
-
-          if (menubar.count() > 0)
+          for (ConfigThingy menuDef : menuConf.getLastChild())
           {
-            uiFactory.createUIElements(new UIElementContext(), null,
-              menubar.getLastChild(), false, confIds);
-
-            for (ConfigThingy menuDef : menuConf.getLastChild())
-            {
-              uiFactory.createUIElements(new UIElementContext(), menuDef,
-                menuDef.getLastChild(), true, confIds);
-            }
+            uiFactory.createUIElements(new UIElementContext(), menuDef, menuDef.getLastChild(), true, confIds);
           }
-
-          ConfigThingy bkl = conf.query("Symbolleisten").query("Briefkopfleiste");
-          uiFactory.createUIElements(new UIElementContext(), menuConf,
-            bkl.getLastChild(), false, confIds);
-
-          tree.expandNode(root);
         }
 
-        window.setVisible(true);
+        ConfigThingy bkl = conf.query("Symbolleisten").query("Briefkopfleiste");
+        uiFactory.createUIElements(new UIElementContext(), menuConf, bkl.getLastChild(), false, confIds);
+
+        tree.expandNode(root);
       }
-      catch (Exception ex)
-      {
-        LOGGER.error("", ex);
-      }
+    } catch (Exception ex)
+    {
+      LOGGER.error("", ex);
     }
   }
 
   @Override
   public XAccessible createAccessible(XAccessible arg0)
   {
-    if (window == null)
-    {
-      throw new DisposedException("", this);
-    }
     // TODO: the following is wrong, since it doesn't respect i_rParentAccessible. In
     // a real extension, you should
     // implement this correctly :)
@@ -344,11 +317,11 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
   @Override
   public XWindow getWindow()
   {
-    if (window == null)
+    if (controlContainer == null)
     {
       throw new DisposedException("", this);
     }
-    return window;
+    return UNO.XWindow(controlContainer);
   }
 
   @Override
@@ -361,14 +334,22 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
   @Override
   public int getMinimalWidth()
   {
-    return 300;
+    try
+    {
+      int maxWidth = (int) UnoConfiguration.getConfiguration("org.openoffice.Office.UI.Sidebar/General",
+          "MaximumWidth");
+      return layout.getMinimalWidth(maxWidth);
+    } catch (UnoHelperException e)
+    {
+      LOGGER.debug("", e);
+      return 300;
+    }
   }
 
   private void readWollMuxBarConf(boolean allowUserConfig, ConfigThingy wollmuxConf)
   {
     ConfigThingy wollmuxbarConf = null;
-    File wollmuxbarConfFile =
-      new File(WollMuxFiles.getWollMuxDir(), WOLLMUXBAR_CONF);
+    File wollmuxbarConfFile = new File(WollMuxFiles.getWollMuxDir(), WOLLMUXBAR_CONF);
 
     if (wollmuxbarConfFile.exists())
     {
@@ -376,24 +357,21 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       {
         try
         {
-          wollmuxbarConf =
-            new ConfigThingy("wollmuxbarConf", wollmuxbarConfFile.toURI().toURL());
-        }
-        catch (Exception x)
+          wollmuxbarConf = new ConfigThingy("wollmuxbarConf", wollmuxbarConfFile.toURI().toURL());
+        } catch (Exception x)
         {
-          LOGGER.error(
-            L.m("Fehler beim Lesen von '%1'", wollmuxbarConfFile.toString()), x);
+          LOGGER.error(L.m("Fehler beim Lesen von '%1'", wollmuxbarConfFile.toString()), x);
         }
-      }
-      else
+      } else
       {
         LOGGER.debug(L.m(
-          "Die Verwendung der Konfigurationsdatei '%1' ist deaktiviert. Sie wird nicht ausgewertet!",
-          wollmuxbarConfFile.toString()));
+            "Die Verwendung der Konfigurationsdatei '%1' ist deaktiviert. Sie wird nicht ausgewertet!",
+            wollmuxbarConfFile.toString()));
       }
     }
 
-    if (wollmuxbarConf == null) wollmuxbarConf = new ConfigThingy("wollmuxbarConf");
+    if (wollmuxbarConf == null)
+      wollmuxbarConf = new ConfigThingy("wollmuxbarConf");
 
     ConfigThingy combinedConf = new ConfigThingy("combinedConf");
     combinedConf.addChild(wollmuxConf);
@@ -407,13 +385,11 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       {
         LOGGER.error(WOLLMUX_CONFIG_ERROR_MESSAGE);
         InfoDialog.showInfoModal(L.m("Fehlerhafte Konfiguration"), WOLLMUX_CONFIG_ERROR_MESSAGE);
-      }
-      else
+      } else
       {
         readConfIds(wollmuxConf, wollmuxbarConf);
       }
-    }
-    catch (Exception x)
+    } catch (Exception x)
     {
       LOGGER.error("", x);
     }
@@ -426,16 +402,14 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     if (userConf != null)
       activeIds = userConf.query("WollMuxBarKonfigurationen", 1).query("Aktiv", 2);
     if (activeIds.count() == 0)
-      activeIds =
-        defaultConf.query("WollMuxBarKonfigurationen", 1).query("Aktiv", 2);
+      activeIds = defaultConf.query("WollMuxBarKonfigurationen", 1).query("Aktiv", 2);
 
     if (activeIds.count() > 0)
     {
       try
       {
         activeIds = activeIds.getLastChild();
-      }
-      catch (NodeNotFoundException x)
+      } catch (NodeNotFoundException x)
       {
         LOGGER.trace("", x);
       }
@@ -460,24 +434,21 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       if (element.getClass().equals(UIButton.class))
       {
         final UIButton uiButton = (UIButton) element;
-        XControl button =
-          GuiFactory.createButton(UNO.xMCF, context, toolkit, windowPeer,
-                uiButton.getLabel(), null, new Rectangle(0, 0, 100, 32), null);
+        XControl button = GuiFactory.createButton(UNO.xMCF, context, uiButton.getLabel(), null,
+            new Rectangle(0, 0, 100, 32), null);
 
         XButton xbutton = UNO.XButton(button);
         AbstractActionListener xButtonAction = event -> uiButton.getAction().performAction();
         xbutton.addActionListener(xButtonAction);
+        controlContainer.addControl(element.getId(), button);
         layout.addControl(button);
-      }
-      else if (element.getClass().equals(UISenderbox.class))
+      } else if (element.getClass().equals(UISenderbox.class))
       {
         createSenderbox((UISenderbox) element);
-      }
-      else if (element instanceof UISearchbox)
+      } else if (element instanceof UISearchbox)
       {
         createSearchbox((UISearchbox) element);
-      }
-      else if (element.getClass().equals(UIMenu.class))
+      } else if (element.getClass().equals(UIMenu.class))
       {
         UIMenu menu = (UIMenu) element;
 
@@ -485,14 +456,12 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         if (menu.getParent() == null)
         {
           ((XMutableTreeNode) dataModel.getRoot()).appendChild(node);
-        }
-        else
+        } else
         {
           menus.get(menu.getParent()).appendChild(node);
         }
         menus.put(menu.getId(), node);
-      }
-      else if (element.getClass().equals(UIMenuItem.class))
+      } else if (element.getClass().equals(UIMenuItem.class))
       {
         UIMenuItem menuItem = (UIMenuItem) element;
         if (menus.get(menuItem.getParent()) != null)
@@ -505,29 +474,29 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           node.setDataValue(uuid.toString());
         }
       }
-    }
-    catch (com.sun.star.uno.Exception e)
+    } catch (com.sun.star.uno.Exception e)
     {
       LOGGER.error("", e);
     }
   }
 
   /**
-   * Liefert true gdw. das durch button beschriebene Element ein button ist
-   * (TYPE-Attribut muss "button" sein) und alle in words enthaltenen strings ohne
-   * Beachtung der Groß-/Kleinschreibung im Wert des LABEL-Attributs (das natürlich
-   * vorhanden sein muss) vorkommen.
+   * Liefert true gdw. das durch button beschriebene Element ein button ist (TYPE-Attribut muss
+   * "button" sein) und alle in words enthaltenen strings ohne Beachtung der Groß-/Kleinschreibung
+   * im Wert des LABEL-Attributs (das natürlich vorhanden sein muss) vorkommen.
    *
    * @param button
-   *          Den ConfigThingy-Knoten, der ein UI-Element beschreibt, wie z.B.
-   *          "(TYPE 'button' LABEL 'Hallo' ...)"
+   *          Den ConfigThingy-Knoten, der ein UI-Element beschreibt, wie z.B. "(TYPE 'button' LABEL
+   *          'Hallo' ...)"
    * @param words
    *          Diese Wörter müssen ALLE im LABEL vorkommen (ohne Beachtung der
    *          Groß-/Kleinschreibung).
+   * @return If the element is a button.
    */
   public static boolean buttonMatches(ConfigThingy button, String[] words)
   {
-    if (words == null || words.length == 0) return false;
+    if (words == null || words.length == 0)
+      return false;
     String type = button.getString("TYPE", "");
     if (!type.equals("button"))
     {
@@ -551,8 +520,6 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
   }
 
   private void createSearchbox(UISearchbox element)
-      throws com.sun.star.uno.Exception, UnknownPropertyException,
-      PropertyVetoException, WrappedTargetException
   {
     String label = L.m("Suchen...");
 
@@ -560,9 +527,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     props.put("TextColor", SystemColor.textInactiveText.getRGB() & ~0xFF000000);
     props.put("Autocomplete", false);
     props.put("HideInactiveSelection", true);
-    XTextComponent searchBox = UNO
-        .XTextComponent(GuiFactory.createTextfield(UNO.xMCF, context, toolkit,
-        windowPeer, label, new Rectangle(0, 0, 100, 32), props));
+    XTextComponent searchBox = UNO.XTextComponent(
+        GuiFactory.createTextfield(UNO.xMCF, context, label, new Rectangle(0, 0, 100, 32), props));
 
     SortedMap<String, Object> propsResult = new TreeMap<>();
     propsResult.put("Enabled", false);
@@ -583,16 +549,15 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         LOGGER.error("", e);
       }
     };
-    XListBox resultBox = UNO.XListBox(GuiFactory.createListBox(UNO.xMCF, context, toolkit,
-        windowPeer, resultListener, new Rectangle(0, 0, 100, 0), propsResult));
+    XListBox resultBox = UNO.XListBox(
+        GuiFactory.createListBox(UNO.xMCF, context, resultListener, new Rectangle(0, 0, 100, 0), propsResult));
     UNO.XWindow(resultBox).setVisible(false);
 
     final XWindow wnd = UNO.XWindow(searchBox);
 
     AbstractTextListener tfListener = event -> {
       String text = searchBox.getText();
-      XItemList items = UnoRuntime.queryInterface(XItemList.class,
-          UNO.XControl(resultBox).getModel());
+      XItemList items = UnoRuntime.queryInterface(XItemList.class, UNO.XControl(resultBox).getModel());
 
       if (text.length() > 0)
       {
@@ -609,16 +574,14 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           for (ConfigThingy l : labels)
           {
             ConfigThingy type = l.query("TYPE");
-            if (type.count() != 0 && (type.getLastChild().toString().equals("button") || type.getLastChild().toString().equals("menu")))
+            if (type.count() != 0
+                && (type.getLastChild().toString().equals("button") || type.getLastChild().toString().equals("menu")))
             {
               ConfigThingy action = l.query("ACTION");
-              if (action.count() != 0)
+              if (action.count() != 0 && buttonMatches(l, words))
               {
-                if (buttonMatches(l, words))
-                {
-                  UIMenuItem item = (UIMenuItem) uiFactory.createUIMenuElement(null, l, "");
-                  newItems.add(item);
-                }
+                UIMenuItem item = (UIMenuItem) uiFactory.createUIMenuElement(null, l, "");
+                newItems.add(item);
               }
             }
           }
@@ -631,8 +594,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
             searchActions.put(uuid.toString(), newItems.get(n).getAction());
             items.setItemData(n, uuid.toString());
           }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
           LOGGER.error("", e);
         }
@@ -658,9 +620,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
             UnoProperty.setProperty(model, UnoProperty.TEXT_COLOR, SystemColor.textInactiveText.getRGB() & ~0xFF000000);
           }
 
-          windowPeer.invalidate((short)(InvalidateStyle.UPDATE | InvalidateStyle.TRANSPARENT));
-        }
-        catch (Exception e)
+          windowPeer.invalidate((short) (InvalidateStyle.UPDATE | InvalidateStyle.TRANSPARENT));
+        } catch (Exception e)
         {
           LOGGER.error("", e);
         }
@@ -681,15 +642,13 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           {
             UnoProperty.setProperty(model, UnoProperty.TEXT_COLOR, SystemColor.textText.getRGB() & ~0xFF000000);
             tf.setText("");
-          }
-          else
+          } else
           {
             tf.setSelection(new Selection(0, tf.getText().length()));
           }
 
-          windowPeer.invalidate((short)(InvalidateStyle.UPDATE | InvalidateStyle.TRANSPARENT));
-        }
-        catch (Exception e)
+          windowPeer.invalidate((short) (InvalidateStyle.UPDATE | InvalidateStyle.TRANSPARENT));
+        } catch (Exception e)
         {
           LOGGER.error("", e);
         }
@@ -704,13 +663,13 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     };
     wnd.addFocusListener(wndListener);
 
+    controlContainer.addControl(element.getId(), UNO.XControl(searchBox));
+    controlContainer.addControl("resultBox", UNO.XControl(searchBox));
     layout.addControl(UNO.XControl(searchBox));
     layout.addControl(UNO.XControl(resultBox));
   }
 
-  private void createSenderbox(UISenderbox uiSenderbox)
-      throws com.sun.star.uno.Exception, NoSuchMethodException,
-      InvocationTargetException
+  private void createSenderbox(UISenderbox uiSenderbox) throws com.sun.star.uno.Exception
   {
     if (!PersoenlicheAbsenderliste.getInstance().getCurrentSender().isEmpty())
     {
@@ -719,9 +678,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
     SortedMap<String, Object> props = new TreeMap<>();
     props.put("FocusOnClick", false);
-    XControl button =
-        GuiFactory.createButton(UNO.xMCF, context, toolkit, windowPeer,
-            uiSenderbox.getLabel(), null, new Rectangle(0, 0, 100, 32), props);
+    XControl button = GuiFactory.createButton(UNO.xMCF, context, uiSenderbox.getLabel(), null,
+        new Rectangle(0, 0, 100, 32), props);
     final XButton xbutton = UNO.XButton(button);
 
     String[] palEntries = PersoenlicheAbsenderliste.getInstance().getPALEntries();
@@ -731,7 +689,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
 
     XIntrospection intro = UNO.XIntrospection(UNO.xMSF.createInstance("com.sun.star.beans.Introspection"));
     XIntrospectionAccess access = intro.inspect(xMenu);
-    final XIdlMethod m_execute = access.getMethod("execute", MethodConcept.ALL);
+    final XIdlMethod executeMethod = access.getMethod("execute", MethodConcept.ALL);
 
     xMenu.addMenuListener(new AbstractMenuListener()
     {
@@ -744,19 +702,18 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
           String name = menu.getCommand(event.MenuId);
           short pos = menu.getItemPos(event.MenuId);
           new OnSetSender(name, pos).emit();
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
           LOGGER.error("", e);
         }
       }
     });
 
-
     short n = 0;
     for (String entry : palEntries)
     {
-      menu.insertItem((short)(n+1), entry.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0], (short) 0, (short) (n+1));
+      menu.insertItem((short) (n + 1), entry.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0], (short) 0,
+          (short) (n + 1));
       menu.setCommand((short) (n + 1), entry);
       n++;
     }
@@ -765,7 +722,9 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     {
       @Override
       public void disposing(EventObject arg0)
-      {}
+      {
+        // nothing to do
+      }
 
       @Override
       public void updateContent(EventObject eventObject)
@@ -780,8 +739,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
         short n = 0;
         for (String entry : entries)
         {
-          menu.insertItem((short) (n + 1),
-              entry.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0], (short) 0,
+          menu.insertItem((short) (n + 1), entry.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0],
+              (short) 0,
               (short) (n + 1));
           menu.setCommand((short) (n + 1), entry);
           n++;
@@ -794,18 +753,16 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
       {
         final XWindow wndButton = UNO.XWindow(event.Source);
         Rectangle posSize = wndButton.getPosSize();
-        // short n = menu.execute(windowPeer, new Rectangle(posSize.X, posSize.Height, 0, 0),
-        // (short)0);
-        m_execute.invoke(menu, new Object[][] { new Object[] { windowPeer,
-            new Rectangle(posSize.X, posSize.Y + posSize.Height, 0, 0), (short) 0 } });
+        executeMethod.invoke(menu, new Object[][] {
+            new Object[] { windowPeer, new Rectangle(posSize.X, posSize.Y + posSize.Height, 0, 0), (short) 0 } });
       } catch (Exception e)
       {
-        e.printStackTrace();
+        LOGGER.trace("", e);
       }
     };
 
     xbutton.addActionListener(xButtonAction);
-
+    controlContainer.addControl(uiSenderbox.getId(), UNO.XControl(xbutton));
     layout.addControl(button);
   }
 
