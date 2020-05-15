@@ -84,7 +84,7 @@ public class MailMergeGUI extends AbstractSidebarPanel
     panel = this;
     this.controller = controller;
     this.context = context;
-    layout = new VerticalLayout(5, 15);
+    layout = new VerticalLayout(5, 5, 5, 5, 15);
     AbstractWindowListener windowAdapter = new AbstractWindowListener()
     {
       @Override
@@ -134,7 +134,7 @@ public class MailMergeGUI extends AbstractSidebarPanel
   @Override
   public LayoutSize getHeightForWidth(int width)
   {
-    int height = layout.getHeight();
+    int height = layout.getHeightForWidth(width);
     return new LayoutSize(height, height, height);
   }
 

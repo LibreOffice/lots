@@ -206,7 +206,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
     searchActions = new HashMap<>();
 
     this.parentWindow.addWindowListener(this.windowAdapter);
-    layout = new VerticalLayout(5, 5);
+    layout = new VerticalLayout(5, 5, 5, 5, 5);
 
     DatasourceJoiner dj = DatasourceJoinerFactory.getDatasourceJoiner();
 
@@ -354,7 +354,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel,
   @Override
   public LayoutSize getHeightForWidth(int width)
   {
-    int height = layout.getHeight();
+    int height = layout.getHeightForWidth(width);
     return new LayoutSize(height, height, height);
   }
 

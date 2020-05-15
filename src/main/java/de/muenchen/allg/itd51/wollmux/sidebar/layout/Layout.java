@@ -1,5 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.sidebar.layout;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.XControl;
 
@@ -11,13 +13,13 @@ import com.sun.star.awt.XControl;
 public interface Layout
 {
   /**
-   * Ordnet die Controls neu an.
+   * Reorder the controls
    *
    * @param rect
-   *          Legt die Rahmenbedingungen für die Position und Größe der Controls fest.
-   * @return Die Höhe der Controls.
+   *          Conditions for position and height.
+   * @return A pair of height and width.
    */
-  int layout(Rectangle rect);
+  Pair<Integer, Integer> layout(Rectangle rect);
 
   /**
    * Fügt den Layout ein weiteres Sub-Layout hinzu.
@@ -33,6 +35,8 @@ public interface Layout
    * {@link #addLayout(Layout, int)} mit {@link ControlLayout} und Gewicht 1.
    *
    * @see #addLayout(Layout, int)
+   * @param control
+   *          {@link XControl} XControl which will be wrapped in an {@link ControlLayout}.
    */
   default void addControl(XControl control)
   {
@@ -43,6 +47,10 @@ public interface Layout
    * {@link #addLayout(Layout, int)} mit {@link ControlLayout}.
    *
    * @see #addLayout(Layout, int)
+   * @param control
+   *          {@link XControl} XControl which will be wrapped in an {@link ControlLayout}.
+   * @param weight
+   *          The weight (Size) in relation to other layouts.
    */
   default void addControl(XControl control, int weight)
   {
@@ -52,7 +60,21 @@ public interface Layout
   /**
    * Die Höhe des Layouts.
    *
+   * @param width
+   *          The requested width.
    * @return Die Höhe.
    */
-  int getHeight();
+  int getHeightForWidth(int width);
+
+  /**
+   * The minimal width of the layout.
+   *
+   * @param maxWidth
+   *          The maximal width.
+   * @return The minimal width.
+   */
+  int getMinimalWidth(int maxWidth);
+
+  boolean isVisible();
+
 }
