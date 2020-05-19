@@ -557,6 +557,7 @@ public class FunctionFactory
     Function strFun;
     Function reFun;
 
+    // TODO doesn't work as described. Exception isn't thrown by 1 or more than 2 parameters.
     try
     {
       strFun = parse(conf.getFirstChild(), funcLib, dialogLib, context);
@@ -585,6 +586,7 @@ public class FunctionFactory
       DialogLibrary dialogLib, Map<Object, Object> context)
   {
     Function valueNameFun;
+    // TODO doesn't work as described. Exception isn't thrown by 0 or more than 1 parameters.
     try
     {
       valueNameFun = parse(conf.getFirstChild(), funcLib, dialogLib, context);
