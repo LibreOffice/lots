@@ -71,7 +71,7 @@ pipeline {
               sh "mvn $SONAR_MAVEN_GOAL \
                 -Dsonar.host.url=$SONAR_HOST_URL \
                 -Dsonar.branch.name=${GIT_BRANCH} \
-                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml \
+                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
                 -Dsonar.junit.reportPaths=target/surefire-reports"
               }
             }
@@ -87,7 +87,7 @@ pipeline {
                 -Dsonar.host.url=$SONAR_HOST_URL \
                 -Dsonar.branch.name=${GIT_BRANCH} \
                 -Dsonar.branch.target=${env.CHANGE_TARGET} \
-                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml \
+                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
                 -Dsonar.junit.reportPaths=target/surefire-reports"
               }
             }
