@@ -1,6 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.core.db;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -91,6 +92,26 @@ public class DatasetPredicateTest
     }
 
     assertEquals(1, count, "Given datasets have a wrong match count with given QueryParts:");
+  }
+
+  @Test
+  public void unknwonColumn()
+  {
+    List<QueryPart> query = new ArrayList<>();
+
+    query.add(new QueryPart("Vorname", "*Sheldon"));
+    query.add(new QueryPart("Vorname", "Sheldon*"));
+
+    Predicate<Dataset> pred = DatasetPredicate.makePredicate(query);
+
+    Map<String, String> testMap = new HashMap<>();
+    testMap.put("Nachname", "Couper");
+
+    Dataset ds = new SimpleDataset("Test", testMap);
+
+    boolean result = pred.test(ds);
+
+    assertFalse(result, "Given dataset does not match with a given QueryPart:");
   }
 
   @Test
