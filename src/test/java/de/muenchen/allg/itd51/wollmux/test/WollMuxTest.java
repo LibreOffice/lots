@@ -1,7 +1,15 @@
 package de.muenchen.allg.itd51.wollmux.test;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.util.concurrent.CompletableFuture;
 
+import org.jacoco.core.data.ExecutionDataWriter;
+import org.jacoco.core.runtime.RemoteControlReader;
+import org.jacoco.core.runtime.RemoteControlWriter;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
 import com.sun.star.document.EventObject;
@@ -17,6 +25,7 @@ import de.muenchen.allg.util.UnoComponent;
 
 public abstract class WollMuxTest extends OfficeTest
 {
+
   protected static XWollMux wollmux;
 
   @BeforeAll
@@ -24,6 +33,27 @@ public abstract class WollMuxTest extends OfficeTest
   {
     wollmux = UnoRuntime.queryInterface(XWollMux.class,
         UnoComponent.createComponentWithContext("de.muenchen.allg.itd51.wollmux.WollMux"));
+  }
+
+  @AfterAll
+  public static void dumpJacoco() throws Exception
+  {
+    try (FileOutputStream localFile = new FileOutputStream("/srv/WollMux/WollMux/target/jacoco-office.exec",
+        true);
+        Socket socket = new Socket(InetAddress.getByName("localhost"), 6300);)
+    {
+      ExecutionDataWriter localWriter = new ExecutionDataWriter(localFile);
+      RemoteControlWriter writer = new RemoteControlWriter(socket.getOutputStream());
+      RemoteControlReader reader = new RemoteControlReader(socket.getInputStream());
+      reader.setSessionInfoVisitor(localWriter);
+      reader.setExecutionDataVisitor(localWriter);
+
+      writer.visitDumpCommand(true, false);
+      if (!reader.read())
+      {
+        throw new IOException("Socket closed unexpectedly.");
+      }
+    }
   }
 
   /**

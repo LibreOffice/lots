@@ -155,11 +155,34 @@
             </goals>
           </execution>
           <execution>
+            <id>prepare-agent-integration-report-office</id>
+            <goals>
+              <goal>prepare-agent-integration</goal>
+            </goals>
+            <configuration>
+              <address>localhost</address>
+              <output>tcpserver</output>
+              <port>6300</port>
+              <propertyName>jacocoOffice</propertyName>
+            </configuration>
+          </execution>
+          <execution>
             <id>report-integration-test</id>
             <phase>post-integration-test</phase>
             <goals>
-              <goal>report-integration</goal>
+              <goal>merge</goal>
+              <goal>report</goal>
             </goals>
+            <configuration>
+              <fileSets>
+                <fileSet>
+                  <directory>${project.build.directory}</directory>
+                  <includes>
+                    <include>*.exec</include>
+                  </includes>
+                </fileSet>
+              </fileSets>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -271,14 +294,14 @@
                 </exec>
                 <replaceregexp>
                   <regexp pattern="&lt;vmParameters xsi:nil=&quot;true&quot;/&gt;" />
-                  <substitution
-                    expression="&lt;vmParameters xsi:nil=&quot;false&quot;&gt;
-                  &lt;param&gt;-DWOLLMUX_CONF_PATH=${wollmux.test.conf}&lt;/param&gt;
-                  &lt;param&gt;
-                  -Dlog4j.configuration=file://${project.build.testOutputDirectory}/log4j.properties
-                  &lt;/param&gt;
-                  &lt;/vmParameters&gt;
-                  " />
+                  <substitution expression="&lt;vmParameters xsi:nil=&quot;false&quot;&gt;${line.separator}
+&lt;param&gt;-DWOLLMUX_CONF_PATH=${wollmux.test.conf}&lt;/param&gt;${line.separator}
+&lt;param&gt;${line.separator}
+-Dlog4j.configuration=file://${project.build.testOutputDirectory}/log4j.properties${line.separator}
+&lt;/param&gt;${line.separator}
+&lt;param&gt;${jacocoOffice}&lt;/param&gt;${line.separator}
+&lt;/vmParameters&gt;
+" />
                   <fileset dir="${office.user.profile}/user/config">
                     <include name="javasettings*.xml" />
                   </fileset>
@@ -560,6 +583,12 @@
       <groupId>com.unboundid</groupId>
       <artifactId>unboundid-ldapsdk</artifactId>
       <version>5.0.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jacoco</groupId>
+      <artifactId>org.jacoco.core</artifactId>
+      <version>0.8.5</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
