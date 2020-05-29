@@ -388,8 +388,8 @@ public class OOoBasedMailMerge implements AutoCloseable
           }
 
           String condition = StringUtils.join(conditions, " or ");
-          UnoProperty.setProperty(section, UnoProperty.IS_VISIBLE, false);
-          UnoProperty.setProperty(section, UnoProperty.CONDITION, condition);
+          UnoProperty.setProperty(section.getValue(), UnoProperty.IS_VISIBLE, false);
+          UnoProperty.setProperty(section.getValue(), UnoProperty.CONDITION, condition);
         } catch (Exception e)
         {
           LOGGER.error("", e);
