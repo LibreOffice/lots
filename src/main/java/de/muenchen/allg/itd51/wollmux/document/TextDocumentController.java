@@ -312,7 +312,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
 
     for (ConfigThingy conf : anpassungen)
     {
-      if (formAdaptationsApplies(formularConf, conf))
+      if (!formAdaptationsApplies(formularConf, conf))
       {
         continue;
       }
