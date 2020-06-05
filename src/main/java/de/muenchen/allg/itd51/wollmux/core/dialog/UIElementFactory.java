@@ -100,8 +100,6 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.controls.Separator;
 import de.muenchen.allg.itd51.wollmux.core.dialog.controls.Textarea;
 import de.muenchen.allg.itd51.wollmux.core.dialog.controls.Textfield;
 import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
-import de.muenchen.allg.itd51.wollmux.core.form.model.Control;
-import de.muenchen.allg.itd51.wollmux.core.form.model.FormType;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 
@@ -194,17 +192,19 @@ public class UIElementFactory
    *          Map kein Mapping angegeben (auch kein null-Wert), so wird erst geschaut, ob ein
    *          Mapping für "default" vorhanden ist. Falls ja, so wird dieses der entsprechenden
    *          Eigenschaft des erzeugten UIElements zugewiesen, ansonsten null.
+   * @param config
+   *          The configuration of the element.
    * 
    * @return niemals null.
    * @throws ConfigurationErrorException
    *           falls irgendein Fehler in der Beschreibung des UI Elements gefunden wird.
    */
-  public UIElement createUIElement(UIElementContext context, Control control)
+  public UIElement createUIElement(UIElementContext context, UIElementConfig config)
   {
     /*
      * Den richtigen type aus dem context bestimmen.
      */
-    FormType type = context.getMappedType(control.getType());
+    UIElementType type = context.getMappedType(config.getType());
 
     Object layoutConstraints = context.getLayoutConstraints(type);
     Object labelLayoutConstraints = context.getLabelLayoutConstraints(type);
@@ -214,45 +214,47 @@ public class UIElementFactory
     {
     case BUTTON:
     case MENUITEM:
-      return createButton(context, control, layoutConstraints);
+      return createButton(context, config, layoutConstraints);
     case LABEL:
-      return createLabel(control, layoutConstraints);
+      return createLabel(config, layoutConstraints);
     case TEXTFIELD:
-      return createTextfield(context, control, layoutConstraints, labelLayoutConstraints,
+      return createTextfield(context, config, layoutConstraints,
+          labelLayoutConstraints,
           labelType);
     case TEXTAREA:
-      return createTextarea(context, control, layoutConstraints, labelLayoutConstraints, labelType);
+      return createTextarea(context, config, layoutConstraints, labelLayoutConstraints, labelType);
     case COMBOBOX:
-      return createCombobox(context, control, layoutConstraints, labelLayoutConstraints, labelType);
+      return createCombobox(context, config, layoutConstraints, labelLayoutConstraints, labelType);
     case CHECKBOX:
-      return createCheckbox(context, control, layoutConstraints);
+      return createCheckbox(context, config, layoutConstraints);
     case H_SEPARATOR:
       JSeparator wurzelSepp = new JSeparator(SwingConstants.HORIZONTAL);
-      return new Separator(control.getId(), wurzelSepp, layoutConstraints);
+      return new Separator(config.getId(), wurzelSepp, layoutConstraints);
     case V_SEPARATOR:
       JSeparator sepp = new JSeparator(SwingConstants.VERTICAL);
-      return new Separator(control.getId(), sepp, layoutConstraints);
+      return new Separator(config.getId(), sepp, layoutConstraints);
     case H_GLUE:
-      return new Box(control.getId(),
-          new javax.swing.Box.Filler(new Dimension(control.getMinsize(), 0),
-              new Dimension(control.getPrefsize(), 0),
-              new Dimension(control.getMaxsize(), Integer.MAX_VALUE)),
+      return new Box(config.getId(),
+          new javax.swing.Box.Filler(new Dimension(config.getMinsize(), 0), new Dimension(config.getPrefsize(), 0),
+              new Dimension(config.getMaxsize(),
+                  Integer.MAX_VALUE)),
           layoutConstraints);
     case V_GLUE:
-      return new Box(control.getId(),
-          new javax.swing.Box.Filler(new Dimension(0, control.getMinsize()),
-              new Dimension(0, control.getPrefsize()),
-              new Dimension(Integer.MAX_VALUE, control.getMaxsize())),
+      return new Box(config.getId(),
+          new javax.swing.Box.Filler(new Dimension(0, config.getMinsize()), new Dimension(0, config.getPrefsize()),
+              new Dimension(Integer.MAX_VALUE, config
+                  .getMaxsize())),
           layoutConstraints);
     case LISTBOX:
-      return createListbox(context, control, layoutConstraints, labelLayoutConstraints, labelType);
+      return createListbox(context, config, layoutConstraints, labelLayoutConstraints, labelType);
     default:
       throw new ConfigurationErrorException(
           L.m("Ununterstützter TYPE für GUI Element: \"%1\"", type));
     }
   }
 
-  private UIElement createListbox(UIElementContext context, Control control,
+  private UIElement createListbox(UIElementContext context,
+      UIElementConfig control,
       Object layoutConstraints, Object labelLayoutConstraints,
       UIElement.LabelPosition labelType)
   {
@@ -288,7 +290,8 @@ public class UIElementFactory
     return uiElement;
   }
 
-  private UIElement createCheckbox(UIElementContext context, Control control,
+  private UIElement createCheckbox(UIElementContext context,
+      UIElementConfig control,
       Object layoutConstraints)
   {
     UIElement uiElement;
@@ -313,7 +316,8 @@ public class UIElementFactory
     return uiElement;
   }
 
-  private UIElement createCombobox(UIElementContext context, Control control,
+  private UIElement createCombobox(UIElementContext context,
+      UIElementConfig control,
       Object layoutConstraints, Object labelLayoutConstraints, UIElement.LabelPosition labelType)
   {
     UIElement uiElement;
@@ -352,7 +356,8 @@ public class UIElementFactory
     return uiElement;
   }
 
-  private UIElement createTextarea(UIElementContext context, Control control,
+  private UIElement createTextarea(UIElementContext context,
+      UIElementConfig control,
       Object layoutConstraints, Object labelLayoutConstraints, UIElement.LabelPosition labelType)
   {
     UIElement uiElement;
@@ -395,7 +400,8 @@ public class UIElementFactory
     return uiElement;
   }
 
-  private UIElement createTextfield(UIElementContext context, Control control, 
+  private UIElement createTextfield(UIElementContext context,
+      UIElementConfig control, 
       Object layoutConstraints, Object labelLayoutConstraints, UIElement.LabelPosition labelType)
   {
     UIElement uiElement;
@@ -423,19 +429,19 @@ public class UIElementFactory
     return uiElement;
   }
 
-  private UIElement createLabel(Control control, Object layoutConstraints)
+  private UIElement createLabel(UIElementConfig control, Object layoutConstraints)
   {
     UIElement uiElement;
     uiElement = new Label(control.getId(), control.getLabel(), layoutConstraints);
     return uiElement;
   }
 
-  private UIElement createButton(UIElementContext context, Control control,
+  private UIElement createButton(UIElementContext context, UIElementConfig control,
       Object layoutConstraints)
   {
     UIElement uiElement;
     AbstractButton button;
-    if (FormType.BUTTON == context.getMappedType(control.getType()))
+    if (UIElementType.BUTTON == context.getMappedType(control.getType()))
     {
       button = new JButton(control.getLabel());
       copySpaceBindingToEnter(button);
@@ -483,10 +489,8 @@ public class UIElementFactory
    * @param uiElement
    *          das uiElement zu dem der ActionListener gehört. Achtung! der ActionListener wird durch
    *          diese Methode nicht auf uiElement registriert!
-   * @param action
-   *          wird als erstes Element des args Arrays an die Funktion
-   *          {@link UIElementEventHandler#processUiElementEvent(UIElement, String, Object[])}
-   *          übergeben.
+   * @param config
+   *          The configuration of the element.
    * @param handler
    *          der {@link UIElementEventHandler} an den die Events weitergereicht werden sollen.
    * @param supportedActions
@@ -495,78 +499,78 @@ public class UIElementFactory
    *         an handler weiterreicht. Im Falle eines Fehlers (z.B. fehlende Zusatzangaben für ACTION
    *         die dieses erfordert) wird null geliefert.
    */
-  private ActionListener getAction(UIElement uiElement, Control control,
-      UIElementEventHandler handler, Set<String> supportedActions)
+  @SuppressWarnings("java:S3776")
+  private ActionListener getAction(UIElement uiElement, UIElementConfig config, UIElementEventHandler handler,
+      Set<String> supportedActions)
   {
-    if (!supportedActions.contains(control.getAction()))
+    if (!supportedActions.contains(config.getAction()))
     {
-      LOGGER.error(L.m("Ununterstützte ACTION \"%1\"", control.getAction()));
+      LOGGER.error("Ununterstützte ACTION \"{}\"", config.getAction());
       return null;
     }
 
-    if ("switchWindow".equals(control.getAction()))
+    if ("switchWindow".equals(config.getAction()))
     {
-      if (control.getWindow() != null)
+      if (config.getWindow() != null)
       {
         return new UIElementActionListener(handler, uiElement, false, "action",
-            new Object[] { control.getAction(), control.getWindow() });
+            new Object[] { config.getAction(), config.getWindow() });
       } else
       {
-        LOGGER.error(L.m("ACTION \"switchWindow\" erfordert WINDOW-Attribut"));
+        LOGGER.error("ACTION \"switchWindow\" erfordert WINDOW-Attribut");
       }
-    } else if ("openTemplate".equals(control.getAction())
-        || "openDocument".equals(control.getAction()))
+    } else if ("openTemplate".equals(config.getAction())
+        || "openDocument".equals(config.getAction()))
     {
-      if (control.getFragId() != null && !control.getFragId().isEmpty())
+      if (config.getFragId() != null && !config.getFragId().isEmpty())
       {
         return new UIElementActionListener(handler, uiElement, false, "action",
-            new Object[] { control.getAction(), control.getFragId() });
+            new Object[] { config.getAction(), config.getFragId() });
       } else
       {
-        LOGGER.error(
-            L.m("ACTION \"%1\" erfordert mindestens ein Attribut FRAG_ID", control.getAction()));
+        LOGGER.error("ACTION \"{}\" erfordert mindestens ein Attribut FRAG_ID", config.getAction());
       }
-    } else if ("openExt".equals(control.getAction()))
+    } else if ("openExt".equals(config.getAction()))
     {
-      if (control.getExt() == null)
+      if (config.getExt() == null)
       {
-        LOGGER.error(L.m("ACTION \"%1\" erfordert genau ein Attribut EXT", control.getAction()));
+        LOGGER.error("ACTION \"{}\" erfordert genau ein Attribut EXT", config.getAction());
       } else
       {
-        if (control.getUrl() == null)
+        if (config.getUrl() == null)
         {
-          LOGGER.error(L.m("ACTION \"%1\" erfordert genau ein Attribut URL", control.getAction()));
+          LOGGER.error("ACTION \"{}\" erfordert genau ein Attribut URL", config.getAction());
         } else
         {
           return new UIElementActionListener(handler, uiElement, false, "action",
-              new Object[] { control.getAction(), control.getExt(), control.getUrl() });
+              new Object[] { config.getAction(), config.getExt(), config.getUrl() });
         }
       }
-    } else if ("closeAndOpenExt".equals(control.getAction())
-        || "saveTempAndOpenExt".equals(control.getAction()))
+    } else if ("closeAndOpenExt".equals(config.getAction())
+        || "saveTempAndOpenExt".equals(config.getAction()))
     {
-      if (control.getExt() != null)
+      if (config.getExt() != null)
       {
-        LOGGER.error(L.m("ACTION \"%1\" erfordert genau ein Attribut EXT", control.getAction()));
+        LOGGER.error("ACTION \"{}\" erfordert genau ein Attribut EXT", config.getAction());
       } else
       {
         return new UIElementActionListener(handler, uiElement, false, "action",
-            new Object[] { control.getAction(), control.getExt() });
+            new Object[] { config.getAction(), config.getExt() });
       }
-    } else if ("funcDialog".equals(control.getAction()))
+    } else if ("funcDialog".equals(config.getAction()))
     {
-      if (control.getDialog() != null)
+      if (config.getDialog() != null)
       {
         return new UIElementActionListener(handler, uiElement, false, "action",
-            new Object[] { control.getAction(), control.getDialog() });
+            new Object[] { config.getAction(), config.getDialog() });
       } else
       {
-        LOGGER.error(L.m("ACTION \"funcDialog\" erfordert DIALOG-Attribut"));
+        LOGGER.error("ACTION \"funcDialog\" erfordert DIALOG-Attribut");
       }
     } else
     {
       return new UIElementActionListener(handler, uiElement, false, "action",
-          new Object[] { control.getAction() });
+          new Object[] { config.getAction() });
     }
 
     return null;

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -21,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.form.config.FormConfig;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
@@ -113,7 +113,8 @@ public class TestFormModel
     Map<Object, Object> functionContext = new HashMap<>();
     DialogLibrary dialogLib = new DialogLibrary();
     dialogLib.add("Empfaengerauswahl", dialog);
-    model = new FormModel(conf, frameTitle, functionContext, funcLib, dialogLib, presetValues);
+    FormConfig config = new FormConfig(conf, frameTitle);
+    model = new FormModel(config, functionContext, funcLib, dialogLib, presetValues);
     model.addFormModelChangedListener(valueListener, true);
     model.addVisibilityChangedListener(visibilityListener, true);
   }
@@ -121,9 +122,6 @@ public class TestFormModel
   @Test
   public void testInit() throws FormModelException
   {
-    assertEquals(frameTitle + " - Abtretungserklärung", model.getTitle(), "Falscher Titel");
-    assertEquals(Color.RED, model.getPlausiMarkerColor(), "Falsche Plausi Frabe");
-    assertEquals(4, model.getTabs().size(), "Falsche Anzahl an Tabs");
     assertEquals("zeile6", model.getValue("EmpfaengerZeile6"),
         "Falscher gesetzter Wert für EmpfaengerZeile6");
     assertTrue(model.getStatus("EmpfaengerZeile6"), "Falscher Status für EmpfaengerZeile6");
@@ -136,9 +134,6 @@ public class TestFormModel
   @Test
   public void testAutofill() throws FormModelException
   {
-    assertTrue(model.getTabs().containsKey("Empfaengerauswahl"), "Empfaengerauswahltab fehlt");
-    Tab tab = model.getTabs().get("Empfaengerauswahl");
-    assertEquals(11, tab.getControls().size(), "Tab 1 falsche Anzahl an Controls");
     model.setDialogAutofills("Empfaengerauswahl");
     assertEquals("zeile1", model.getValue("EmpfaengerZeile1"),
         "flascher Wert für EmpfaengerZeile1");

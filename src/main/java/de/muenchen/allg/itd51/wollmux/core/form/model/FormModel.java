@@ -49,7 +49,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.core.form.model;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -57,7 +56,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -65,15 +63,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.core.functions.Function;
-import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
+import de.muenchen.allg.itd51.wollmux.core.form.config.FormConfig;
+import de.muenchen.allg.itd51.wollmux.core.form.config.TabConfig;
+import de.muenchen.allg.itd51.wollmux.core.form.config.VisibilityGroupConfig;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values.SimpleMap;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
  * Beschreibung eines Formulars. Enthält auch die Business-Logik.
@@ -114,21 +110,6 @@ public class FormModel
   private final Map<String, Control> formControls = new LinkedHashMap<>();
 
   /**
-   * Bildet Tabs auf die entsprechenden Tab-Instanzen ab. Key ist die ID des Tab.s
-   */
-  private Map<String, Tab> tabs = new LinkedHashMap<>();
-
-  /**
-   * Der Titel des Formulars.
-   */
-  private String title;
-
-  /**
-   * Die Farbe mit der Felder mit fehlerhafter Eingabe (PLAUSI) eingefärbt werden.
-   */
-  private Color plausiMarkerColor;
-
-  /**
    * Bildet Namen von Funktionsdialogen auf Lists von Controls ab, deren AUTOFILL von diesem
    * Funktionsdialog abhängen.
    */
@@ -165,60 +146,38 @@ public class FormModel
    *           Fehlerhaftes Formular.
    */
   @SuppressWarnings("squid:S3776")
-  public FormModel(ConfigThingy conf, String frameTitle,
-      Map<Object, Object> functionContext, FunctionLibrary funcLib, DialogLibrary dialogLib,
-      Map<String, String> presetValues) throws FormModelException
+  public FormModel(FormConfig conf, Map<Object, Object> functionContext, FunctionLibrary funcLib,
+      DialogLibrary dialogLib, Map<String, String> presetValues) throws FormModelException
   {
     this.functionContext = functionContext;
     this.funcLib = funcLib;
     this.dialogLib = dialogLib;
 
-    // Formulartitle auswerten
-    String formTitle = conf.getString("TITLE", L.m("Unbenanntes Formular"));
-    if (frameTitle != null)
+    for (VisibilityGroupConfig config : conf.getVisibilities())
     {
-      title = frameTitle + " - " + formTitle;
-    } else
-    {
-      title = formTitle;
+      VisibilityGroup group = new VisibilityGroup(config, funcLib, dialogLib, functionContext);
+      if (!visiblities.containsKey(config.getGroupId()))
+      {
+        visiblities.put(config.getGroupId(), group);
+      }
     }
 
-    // Tabs auswerten
-    final ConfigThingy fensterDesc = conf.query("Fenster");
-    try
+    for (TabConfig tab : conf.getTabs())
     {
-      tabs = new LinkedHashMap<>(fensterDesc.count());
-      for (ConfigThingy tabConf : fensterDesc.getLastChild())
+      for (UIElementConfig config : tab.getControls())
       {
-        Tab tab = Tab.create(tabConf, this);
-        tabs.put(tab.getId(), tab);
-        for (Control control : tab.getControls())
-        {
-          addFormField(control);
-        }
-        for (Control control : tab.getButtons())
-        {
-          addFormField(control);
-        }
+        Control control = new Control(config, funcLib, dialogLib, functionContext);
+        config.getGroups().forEach(id -> control.addGroup(visiblities.get(id)));
+        addFormField(control);
       }
-      for (Control control : formControls.values())
+      for (UIElementConfig config : tab.getButtons())
       {
-        storeDepsForFormField(control);
+        addFormField(new Control(config, funcLib, dialogLib, functionContext));
       }
-    } catch (NodeNotFoundException e)
-    {
-      throw new FormModelException(L.m("Schlüssel 'Fenster' fehlt in %1", conf.getName()),
-          e);
     }
-
-    // Farbe für fehlerhafte Formularwerte auswerten
-    try
+    for (Control control : formControls.values())
     {
-      plausiMarkerColor = Color
-          .decode(conf.get("PLAUSI_MARKER_COLOR", 1).getLastChild().toString());
-    } catch (Exception x)
-    {
-      plausiMarkerColor = Color.RED;
+      storeDepsForFormField(control);
     }
 
     // Gespeicherte Werte und/oder Autofill setzen
@@ -240,39 +199,14 @@ public class FormModel
       }
     }
 
-    for (Map.Entry<String, Control> entry : formControls.entrySet())
+    for (Control control : formControls.values())
     {
-      entry.getValue().setOkay(values);
+      control.setOkay(values);
     }
-
-    // Sichtbarkeiten auswerten
-    try
+    for (VisibilityGroup group : visiblities.values())
     {
-      ConfigThingy visibilityDesc = conf.query("Sichtbarkeit");
-      if (visibilityDesc.count() > 0)
-      {
-        visibilityDesc = visibilityDesc.getLastChild();
-      }
-      setVisibility(visibilityDesc);
-    } catch (NodeNotFoundException x)
-    {
-      LOGGER.error("", x);
+      storeDepsForVisibility(group);
     }
-  }
-
-  public String getTitle()
-  {
-    return title;
-  }
-
-  public Map<String, Tab> getTabs()
-  {
-    return tabs;
-  }
-
-  public Color getPlausiMarkerColor()
-  {
-    return plausiMarkerColor;
   }
 
   public DialogLibrary getDialogLib()
@@ -291,8 +225,7 @@ public class FormModel
   }
 
   /**
-   * Liefert eine Sichtbarkeitsgruppe mit der ID groupId. Wenn die ID bisher nicht existiert, wird
-   * eine neue Gruppe angelegt.
+   * Liefert eine Sichtbarkeitsgruppe mit der ID groupId.
    *
    * @param groupId
    *          Die ID der Gruppe.
@@ -300,11 +233,6 @@ public class FormModel
    */
   public VisibilityGroup getGroup(String groupId)
   {
-    if (!visiblities.containsKey(groupId))
-    {
-      visiblities.put(groupId, new VisibilityGroup(groupId));
-    }
-
     return visiblities.get(groupId);
   }
 
@@ -318,26 +246,6 @@ public class FormModel
   public Control getControl(String controlId)
   {
     return formControls.get(controlId);
-  }
-
-  /**
-   * Parst die Funktion im Kontext dieses Models.
-   *
-   * @param func
-   *          Die Funktionsbeschreibung.
-   * @return Die Funktion.
-   */
-  public Function createFunction(ConfigThingy func)
-  {
-    try
-    {
-      return FunctionFactory.parseGrandchildren(func, getFuncLib(), getDialogLib(),
-        getFunctionContext());
-    } catch (ConfigurationErrorException e)
-    {
-      LOGGER.info("Funktion konnte nicht geparst werden.", e);
-      return null;
-    }
   }
 
   /**
@@ -527,7 +435,7 @@ public class FormModel
   {
     if (formControls.containsKey(control.getId()))
     {
-      LOGGER.error(L.m("ID \"%1\" mehrfach vergeben", control.getId()));
+      LOGGER.error("ID \"{}\" mehrfach vergeben", control.getId());
     }
     formControls.put(control.getId(), control);
   }
@@ -553,52 +461,20 @@ public class FormModel
    *          der Sichtbarkeit-Knoten der Formularbeschreibung oder ein leeres ConfigThingy falls
    *          der Knoten nicht existiert.
    */
-  private void setVisibility(ConfigThingy visibilityDesc)
+  private void storeDepsForVisibility(VisibilityGroup group)
   {
-    for (ConfigThingy visRule : visibilityDesc)
+    String[] deps = group.getCondition().parameters();
+    for (int i = 0; i < deps.length; ++i)
     {
-      // Sichtbarkeitsfunktion parsen.
-      String groupId = visRule.getName();
-      Function cond;
-      try
+      String elementId = deps[i];
+      if (formControls.containsKey(elementId))
       {
-        cond = FunctionFactory.parseChildren(visRule, getFuncLib(), getDialogLib(), getFunctionContext());
-      } catch (ConfigurationErrorException x)
-      {
-        LOGGER.error("", x);
-        continue;
+        formControls.get(elementId).addDependingGroup(group);
       }
-
-      // Falls keine Gruppe mit entsprechender Id existiert, dann legen wir einfach eine leere
-      // Gruppe an.
-      if (!visiblities.containsKey(groupId))
-        visiblities.put(groupId, new VisibilityGroup(groupId));
-
-      // Group mit der entsprechenden Bezeichnung heraussuchen und ihr condition-Feld setzten.
-      // Fehler ausgeben wenn condition bereits gesetzt.
-      VisibilityGroup group = visiblities.get(groupId);
-      try
-      {
-        group.setCondition(Optional.ofNullable(cond));
-      } catch (FormModelException e)
-      {
-        LOGGER.error(e.getMessage(), e);
-      }
-
-      // Für jeden Parameter der condition-Funktion eine Abhängigkeit im FormControl registrieren.
-      String[] deps = cond.parameters();
-      for (int i = 0; i < deps.length; ++i)
-      {
-        String elementId = deps[i];
-        if (formControls.containsKey(elementId))
-        {
-          formControls.get(elementId).addDependingGroup(group);
-        }
-      }
-
-      // Sichtbarkeitsstatus setzen
-      group.computeVisibility(idToValue());
     }
+
+    // Sichtbarkeitsstatus setzen
+    group.computeVisibility(idToValue());
   }
 
   /**
@@ -610,20 +486,20 @@ public class FormModel
    */
   private void storeDeps(Control control)
   {
-    control.getAutofill().ifPresent(autofill -> Stream.of(autofill.parameters())
+    control.getAutofill().ifPresent(autofill -> Stream.of(autofill
+        .parameters())
         .filter(id -> {
           if (!formControls.containsKey(id))
             LOGGER.warn("Unbekanntes Controlelement {} wird referenziert in {}", id,
-                control.getId());
+                    control.getId());
           return formControls.containsKey(id);
         }).map(formControls::get).forEach(f -> f.addDependingAutoFillFormField(control)));
-    control.getPlausi().ifPresent(plausi -> Stream.of(plausi.parameters())
-        .filter(id -> {
-          if (!formControls.containsKey(id))
-            LOGGER.warn("Unbekanntes Controlelement {} wird referenziert in {}", id,
+    Stream.of(control.getPlausi().parameters()).filter(id -> {
+      if (!formControls.containsKey(id))
+        LOGGER.warn("Unbekanntes Controlelement {} wird referenziert in {}", id,
                 control.getId());
-          return formControls.containsKey(id);
-        }).map(formControls::get).forEach(f -> f.addDependingPlausiFormField(control)));
+      return formControls.containsKey(id);
+    }).map(formControls::get).forEach(f -> f.addDependingPlausiFormField(control));
     control.addDependingPlausiFormField(control);
   }
 

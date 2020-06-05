@@ -1,53 +1,72 @@
 package de.muenchen.allg.itd51.wollmux.core.form.model;
 
-import java.util.Optional;
+import java.util.Map;
 
+import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.form.config.VisibilityGroupConfig;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 
 /**
- * Eine Sichtbarkeit im Formular-Model.
- * 
- * @author daniel.sikeler
- *
+ * A visibility in a form.
  */
 public class VisibilityGroup
 {
-
   /**
-   * Die Bedingung für die Sichtbarkeit (true = sichtbar), wenn keine Sichtbarkeitsbedingung
-   * definiert ist wird immer true geliefert.
+   * The condition of the group.
    */
-  private Optional<Function> condition;
+  private Function condition;
 
   /**
-   * true, wenn die Gruppe im Augenblick sichtbar ist.
+   * True if the group is visible, false otherwise.
    */
   private boolean visible = true;
 
   /**
-   * Die GROUP id dieser Gruppe.
+   * DThe id of the group.
    */
   private String groupId;
 
   /**
-   * Initialisiert die Gruppe. Dabei wird keine Bedingung gesetzt, also ist die Gruppe erstmal immer
-   * sichtbar.
-   * 
-   * @param groupId
-   *          Die Id der Gruppe.
+   * Create a new visibility group.
+   *
+   * @param conf
+   *          The configuration.
+   * @param funcLib
+   *          The function library.
+   * @param dialogLib
+   *          The dialog library.
+   * @param functionContext
+   *          The function context.
    */
-  public VisibilityGroup(String groupId)
+  public VisibilityGroup(VisibilityGroupConfig conf, FunctionLibrary funcLib, DialogLibrary dialogLib,
+      Map<Object, Object> functionContext)
   {
-    this.groupId = groupId;
-    this.condition = Optional.ofNullable(null);
+    groupId = conf.getGroupId();
+    try
+    {
+      condition = FunctionFactory.parseChildren(conf.getCondition(), funcLib, dialogLib, functionContext);
+      if (condition == null)
+      {
+        condition = FunctionFactory.alwaysTrueFunction();
+      }
+    } catch (ConfigurationErrorException e)
+    {
+      condition = FunctionFactory.alwaysTrueFunction();
+    }
   }
 
   public String getGroupId()
   {
     return groupId;
+  }
+
+  public Function getCondition()
+  {
+    return condition;
   }
 
   public boolean isVisible()
@@ -56,32 +75,13 @@ public class VisibilityGroup
   }
 
   /**
-   * Eine neue Bedigung für die Sichtbarkeit setzen.
-   * 
-   * @param condition
-   *          Die neue Bedigung.
-   * @throws FormModelException
-   *           Wenn bereits eine Bedignung definiert wurde.
-   */
-  public void setCondition(Optional<Function> condition) throws FormModelException
-  {
-    if (this.condition.isPresent())
-    {
-      throw new FormModelException(
-          L.m("Mehrere Sichtbarkeitsregeln für Gruppe \"%1\" angegeben.", groupId));
-    }
-    this.condition = condition;
-  }
-
-  /**
-   * Berechnet anhand der Formularwerte values die Sichtbarkeit dieser Gruppe. Alle
-   * Gruppenmitglieder werden über die Änderung informiert.
-   * 
+   * Compute the visibility of this group.
+   *
    * @param values
-   *          Die Formularwerte.
+   *          The form values.
    */
   public void computeVisibility(Values values)
   {
-    visible = condition.orElse(FunctionFactory.alwaysTrueFunction()).getBoolean(values);
+    visible = condition.getBoolean(values);
   }
 }

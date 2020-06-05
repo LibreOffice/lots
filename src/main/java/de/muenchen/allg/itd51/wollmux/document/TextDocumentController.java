@@ -47,6 +47,7 @@ import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.OverrideFr
 import de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
+import de.muenchen.allg.itd51.wollmux.core.form.config.FormConfig;
 import de.muenchen.allg.itd51.wollmux.core.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.core.form.model.FormValueChangedListener;
@@ -113,6 +114,8 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   private DialogLibrary globalDialogs;
 
   private FunctionLibrary globalFunctions;
+
+  private FormConfig formConfig;
 
   private FormModel formModel;
 
@@ -1889,6 +1892,29 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   /**
    * Get a model of the form.
    *
+   * @return The form configuration.
+   * @throws FormModelException
+   *           The description of the form is invalid.
+   */
+  public FormConfig getFormConfig() throws FormModelException
+  {
+    if (formConfig == null)
+    {
+      try
+      {
+        ConfigThingy formConf = getFormDescription().get(FORMULAR);
+        formConfig = new FormConfig(formConf, getWindowTitle());
+      } catch (NodeNotFoundException e)
+      {
+        throw new FormModelException(L.m("Kein Abschnitt 'Formular' in der Formularbeschreibung vorhanden"));
+      }
+    }
+    return formConfig;
+  }
+
+  /**
+   * Get a model of the form.
+   *
    * @return The model.
    * @throws FormModelException
    *           The description of the model is invalid.
@@ -1897,17 +1923,10 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   {
     if (formModel == null)
     {
-      try
-      {
-        ConfigThingy formConf = getFormDescription().get(FORMULAR);
-        formModel = new FormModel(formConf, getWindowTitle(), getFunctionContext(), getFunctionLibrary(),
-            getDialogLibrary(), getIDToPresetValue());
-        formModel.addFormModelChangedListener(this, true);
-        formModel.addVisibilityChangedListener(this, true);
-      } catch (NodeNotFoundException e)
-      {
-        throw new FormModelException(L.m("Kein Abschnitt 'Formular' in der Formularbeschreibung vorhanden"));
-      }
+      formModel = new FormModel(getFormConfig(), getFunctionContext(), getFunctionLibrary(), getDialogLibrary(),
+          getIDToPresetValue());
+      formModel.addFormModelChangedListener(this, true);
+      formModel.addVisibilityChangedListener(this, true);
     }
     return formModel;
   }

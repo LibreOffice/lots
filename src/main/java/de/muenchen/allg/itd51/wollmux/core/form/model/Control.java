@@ -1,21 +1,19 @@
 package de.muenchen.allg.itd51.wollmux.core.form.model;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.lang3.RandomStringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementType;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
+import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values.SimpleMap;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 
 /**
  * Beschreibung eines Formularelementes samt Business-Logik (Plausis)
@@ -25,89 +23,18 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
  */
 public class Control
 {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(Control.class);
-
   /**
    * Die Id.
    */
   private String id;
   /**
-   * Das Label.
-   */
-  private String label;
-  /**
    * Der Typ.
    */
-  private FormType type;
-  /**
-   * Ein Tipp, kann null sein.
-   */
-  private String tip;
-  /**
-   * Eine Liste von Optionen für Comboboxen. Kann null sein.
-   */
-  private List<String> options = new ArrayList<>();
-  /**
-   * Anzahl der Zeilen für Textareas.
-   */
-  private int lines = 3;
-  /**
-   * Wird der Text automatischen umgebrochen in Textareas?
-   */
-  private boolean wrap = true;
-  /**
-   * Ist das Formularelement bearbeitbar?
-   */
-  private boolean readonly = false;
-  /**
-   * Können einer Combobox weitere Element hinzugefügt werden?
-   */
-  private boolean editable = false;
-  /**
-   * Die mindest Größe.
-   */
-  private int minsize = 0;
-  /**
-   * Die bevorzugte Größe.
-   */
-  private int prefsize = 0;
-  /**
-   * Die maximale Größe.
-   */
-  private int maxsize = Integer.MAX_VALUE;
-  /**
-   * Der Hotkey.
-   */
-  private char hotkey = 0;
-  /**
-   * Die Aktion, die beim Drücken des Buttons ausgelöst wird.
-   */
-  private String action;
-  /**
-   * Der Dialog, der bei der Aktion funcDialog geöffnet wird.
-   */
-  private String dialog;
-  /**
-   * Die externe Anwendung, die ausgeführt wird.
-   */
-  private String ext;
-  /**
-   * Die URL, die mit der externen Anwendung ausgeführt werden soll.
-   */
-  private String url;
+  private UIElementType type;
   /**
    * Die Plausi.
    */
-  private Optional<Function> plausi = Optional.ofNullable(null);
-  /**
-   * Das zu aktivierende Dialogfenster für die Aktion switchWindow.
-   */
-  private String window;
-  /**
-   * Die FragId für die Aktionen openTemplate und openDocument.
-   */
-  private String fragId;
+  private Function plausi;
   /**
    * Die Funtkion, aus der der initiale Wert berechnet wird.
    */
@@ -128,6 +55,11 @@ public class Control
   private String value = "";
 
   /**
+   * Options of ComboBoxes.
+   */
+  private List<String> options;
+
+  /**
    * Eine Liste der abhängigen Sichtbarkeitsgruppen.
    */
   private List<VisibilityGroup> dependingGroups = new ArrayList<>(1);
@@ -142,125 +74,74 @@ public class Control
    */
   private List<Control> dependingPlausiFormFields = new ArrayList<>(1);
 
+  /**
+   * A form control
+   *
+   * @param conf
+   *          The configuration of the control.
+   * @param funcLib
+   *          The function library.
+   * @param dialogLib
+   *          The dialog library.
+   * @param functionContext
+   *          The function context.
+   */
+  public Control(UIElementConfig conf, FunctionLibrary funcLib, DialogLibrary dialogLib,
+      Map<Object, Object> functionContext)
+  {
+    id = conf.getId();
+    type = conf.getType();
+    try
+    {
+      plausi = FunctionFactory.parseGrandchildren(conf.getPlausi(), funcLib, dialogLib, functionContext);
+      if (plausi == null)
+      {
+        plausi = FunctionFactory.alwaysTrueFunction();
+      }
+    } catch (ConfigurationErrorException e)
+    {
+      plausi = FunctionFactory.alwaysTrueFunction();
+    }
+    try
+    {
+      autofill = Optional
+          .ofNullable(FunctionFactory.parseGrandchildren(conf.getAutofill(), funcLib, dialogLib, functionContext));
+    } catch (ConfigurationErrorException e)
+    {
+      autofill = Optional.empty();
+    }
+    this.options = conf.getOptions();
+  }
+
   public String getId()
   {
     return id;
   }
 
-  public String getLabel()
-  {
-    return label;
-  }
-
-  public FormType getType()
+  public UIElementType getType()
   {
     return type;
   }
 
-  public String getTip()
-  {
-    return tip;
-  }
-
-  public List<String> getOptions()
-  {
-    return options;
-  }
-
-  /**
-   * Fügt eine neue Option hinzu. Wenn bisher noch keine Option gesetzt wurde, dann wird die Option
-   * zusätzlich als value gesetzt.
-   *
-   * @param option
-   *          Die Option.
-   */
-  public void addOption(String option)
-  {
-    if (options.isEmpty())
-    {
-      value = option;
-    }
-    options.add(option);
-  }
-
-  public int getLines()
-  {
-    return lines;
-  }
-
-  public boolean isWrap()
-  {
-    return wrap;
-  }
-
-  public boolean isReadonly()
-  {
-    return readonly;
-  }
-
-  public boolean isEditable()
-  {
-    return editable;
-  }
-
-  public int getMinsize()
-  {
-    return minsize;
-  }
-
-  public char getHotkey()
-  {
-    return hotkey;
-  }
-
-  public String getAction()
-  {
-    return action;
-  }
-
-  public String getDialog()
-  {
-    return dialog;
-  }
-
-  public String getExt()
-  {
-    return ext;
-  }
-
-  public Optional<Function> getPlausi()
+  public Function getPlausi()
   {
     return plausi;
-  }
-
-  public int getPrefsize()
-  {
-    return prefsize;
-  }
-
-  public int getMaxsize()
-  {
-    return maxsize;
-  }
-
-  public String getWindow()
-  {
-    return window;
-  }
-
-  public String getFragId()
-  {
-    return fragId;
-  }
-
-  public String getUrl()
-  {
-    return url;
   }
 
   public boolean isOkay()
   {
     return okay;
+  }
+
+  /**
+   * Überprüft ob das Element, ein gültigen Wert enthält und informiert die Listener.
+   *
+   * @param values
+   *          Die Werte aus dem Model.
+   */
+  public void setOkay(Values values)
+  {
+    okay = plausi.getBoolean(values);
   }
 
   public Optional<Function> getAutofill()
@@ -273,14 +154,25 @@ public class Control
     return value;
   }
 
-  public void addDependingAutoFillFormField(Control control)
+  public void setValue(String value)
   {
-    dependingAutoFillFormFields.add(control);
+    this.value = value;
   }
 
-  public void addDependingPlausiFormField(Control control)
+  public List<VisibilityGroup> getGroups()
   {
-    dependingPlausiFormFields.add(control);
+    return groups;
+  }
+
+  /**
+   * Mark this control as part of the group.
+   *
+   * @param group
+   *          The group.
+   */
+  public void addGroup(VisibilityGroup group)
+  {
+    groups.add(group);
   }
 
   public List<VisibilityGroup> getDependingGroups()
@@ -288,6 +180,12 @@ public class Control
     return dependingGroups;
   }
 
+  /**
+   * Add a dependency for a visibility group.
+   *
+   * @param group
+   *          The dependent group.
+   */
   public void addDependingGroup(VisibilityGroup group)
   {
     if (!dependingGroups.contains(group))
@@ -297,14 +195,25 @@ public class Control
   }
 
   /**
-   * Setzt den Wert des Formularelementes.
+   * Add a dependency for an AUTOFILL function.
    *
-   * @param value
-   *          Der neue Wert.
+   * @param control
+   *          The dependent control.
    */
-  public void setValue(String value)
+  public void addDependingAutoFillFormField(Control control)
   {
-    this.value = value;
+    dependingAutoFillFormFields.add(control);
+  }
+
+  /**
+   * Add a dependency for a PLAUSI function.
+   *
+   * @param control
+   *          The dependent control.
+   */
+  public void addDependingPlausiFormField(Control control)
+  {
+    dependingPlausiFormFields.add(control);
   }
 
   /**
@@ -348,25 +257,10 @@ public class Control
   {
     if (autofill.isPresent())
       return autofill.get().getString(values);
-    else if (type == FormType.COMBOBOX && !options.isEmpty())
+    else if (type == UIElementType.COMBOBOX && !options.isEmpty())
       return options.get(0);
     else
       return "";
-  }
-
-  /**
-   * Überprüft ob das Element, ein gültigen Wert enthält und informiert die Listener.
-   *
-   * @param values
-   *          Die Werte aus dem Model.
-   */
-  public void setOkay(Values values)
-  {
-    boolean newOkay = plausi.orElse(FunctionFactory.alwaysTrueFunction()).getBoolean(values);
-    if (newOkay == okay)
-      return;
-
-    okay = newOkay;
   }
 
   public boolean isVisible()
@@ -381,102 +275,8 @@ public class Control
     case TEXTAREA:
     case TEXTFIELD:
       return groups.stream().allMatch(VisibilityGroup::isVisible);
-    case MENUITEM:
-    case DEFAULT:
-    case GLUE:
-    case H_GLUE:
-    case V_GLUE:
-    case SEPARATOR:
-    case H_SEPARATOR:
-    case V_SEPARATOR:
     default:
       return false;
     }
-  }
-
-  public List<VisibilityGroup> getGroups()
-  {
-    return groups;
-  }
-
-  /**
-   * Parst ein Formularelement.
-   *
-   * @param controlConf
-   *          Die Beschreibung des Fromularelementes.
-   * @return Ein Control, das dem Formularelement entspricht.
-   * @throws FormModelException
-   *           Unbekannte Type-Angabe.
-   */
-  public static Control create(ConfigThingy controlConf, FormModel model) throws FormModelException
-  {
-    Control control = new Control();
-    control.type = FormType.getType(controlConf.getString("TYPE", ""));
-    control.id = controlConf.getString("ID", RandomStringUtils.randomAlphanumeric(10));
-    control.label = controlConf.getString("LABEL", "");
-    control.tip = controlConf.getString("TIP", "");
-    String hotkeyString = controlConf.getString("HOTKEY", "");
-    if (!hotkeyString.isEmpty())
-    {
-      control.hotkey = hotkeyString.toUpperCase().charAt(0);
-    }
-    control.action = controlConf.getString("ACTION", null);
-    control.dialog = controlConf.getString("DIALOG", null);
-    control.window = controlConf.getString("WINDOW", null);
-    ConfigThingy fids = controlConf.query("FRAG_ID");
-    StringBuilder fragId = new StringBuilder();
-    Iterator<ConfigThingy> i = fids.iterator();
-    if (i.hasNext())
-    {
-      fragId.append(i.next().toString());
-      while (i.hasNext())
-      {
-        fragId.append("&");
-        fragId.append(i.next().toString());
-      }
-    }
-    control.fragId = fragId.toString();
-    control.ext = controlConf.getString("EXT", null);
-    control.url = controlConf.getString("URL", null);
-    control.readonly = Boolean.parseBoolean(controlConf.getString("READONLY", ""));
-    control.editable = Boolean.parseBoolean(controlConf.getString("EDIT", ""));
-    control.lines = Integer.parseInt(controlConf.getString("LINES", "3"));
-    control.wrap = Boolean.parseBoolean(controlConf.getString("WRAP", "true"));
-    control.minsize = Integer.parseInt(controlConf.getString("MINSIZE", "0"));
-    control.prefsize = Integer.parseInt(controlConf.getString("PREFSIZE", "0"));
-    control.maxsize = Integer.parseInt(controlConf.getString("MAXSIZE", "" + Integer.MAX_VALUE));
-    try
-    {
-      for (ConfigThingy val : controlConf.get("VALUES"))
-      {
-        control.addOption(val.toString());
-      }
-    } catch (NodeNotFoundException x)
-    {
-      if (control.getType() == FormType.COMBOBOX)
-      {
-        LOGGER.error(L.m("Fehlerhaftes Element des Typs \"combobox\""), x);
-      }
-    }
-    if (model != null)
-    {
-      control.plausi = Optional.ofNullable(model.createFunction(controlConf.query("PLAUSI")));
-      control.autofill = Optional.ofNullable(model.createFunction(controlConf.query("AUTOFILL")));
-      ConfigThingy groupsConf = controlConf.query("GROUPS");
-      for (ConfigThingy groups : groupsConf)
-      {
-        for (ConfigThingy group : groups)
-        {
-          String groupId = group.toString();
-          VisibilityGroup g = model.getGroup(groupId);
-          control.groups.add(g);
-        }
-      }
-    } else
-    {
-      control.plausi = Optional.ofNullable(null);
-      control.autofill = Optional.ofNullable(null);
-    }
-    return control;
   }
 }
