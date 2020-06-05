@@ -11,6 +11,10 @@
     <libreoffice.sdk>${env.UNO_PATH}/../sdk</libreoffice.sdk>
   </properties>
 
+  <scm>
+    <developerConnection>scm:git:https://github.com/WollMux/WollMux.git</developerConnection>
+  </scm>
+
   <build>
     <plugins>
       <plugin>
