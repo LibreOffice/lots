@@ -1,10 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.form.control;
 
-import java.awt.Insets;
-import java.awt.Rectangle;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,7 +23,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnFocusFormField;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnResetDocumentState;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveTempAndOpenExt;
-import de.muenchen.allg.itd51.wollmux.form.dialog.GUI;
 
 /**
  * Der Controller für die FormularGUI.
@@ -46,11 +41,6 @@ public class FormController
   private static final Logger LOGGER = LoggerFactory.getLogger(FormController.class);
 
   /**
-   * Die FormularGUI, die diesem Controller zugeordnet ist.
-   */
-  private GUI gui;
-
-  /**
    * Das Model, das diesem Controller zugeordnet ist.
    */
   private FormModel model;
@@ -59,50 +49,6 @@ public class FormController
    * Der LibreOffice-Controller für das Writer-Dokument.
    */
   private final TextDocumentController documentController;
-
-  /**
-   * Die default Einstellung des LibreOffice-Fensters bevor die GUI geöffnet wird.
-   */
-  private String defaultWindowAttributes;
-
-  private PropertyChangeSupport changes = new PropertyChangeSupport( this );
-
-  private Rectangle frameBounds;
-  private Rectangle maxWindowBounds;
-  private Insets windowInsets;
-
-  public Rectangle getFrameBounds()
-  {
-    return frameBounds;
-  }
-  public Rectangle getMaxWindowBounds()
-  {
-    return maxWindowBounds;
-  }
-
-  public Insets getWindowInsets()
-  {
-    return windowInsets;
-  }
-
-  public void setFrameBounds(Rectangle frameBounds, Rectangle maxWindowBounds, Insets windowInsets)
-  {
-    this.frameBounds = frameBounds;
-    this.maxWindowBounds = maxWindowBounds;
-    this.windowInsets = windowInsets;
-    changes.firePropertyChange("name", null, null);
-  }
-
-  public void addPropertyChangeListener( PropertyChangeListener l )
-  {
-    changes.addPropertyChangeListener( l );
-  }
-
-  public void removePropertyChangeListener( PropertyChangeListener l )
-  {
-    changes.removePropertyChangeListener( l );
-  }
-
 
   /**
    * Erzeugt einen neuen Controller. Hierin wird auch die GUI initialisiert, aber noch nicht
@@ -115,18 +61,11 @@ public class FormController
    * @param documentController
    *          Der LibreOffice-Controller.
    */
-  public FormController(final FormModel model, final ConfigThingy formFensterConf, final TextDocumentController documentController)
+  public FormController(final FormModel model, final ConfigThingy formFensterConf,
+      final TextDocumentController documentController)
   {
-    gui = new GUI(this, model, formFensterConf);
     this.model = model;
     this.documentController = documentController;
-    // Standard-Fensterattribute vor dem Start der Form-GUI sichern um nach
-    // dem Schließen des Formulardokuments die Standard-Werte wieder
-    // herstellen zu können. Die Standard-Attribute ändern sich (OOo-seitig)
-    // immer dann, wenn ein Dokument (mitsamt Fenster) geschlossen wird. Dann
-    // merkt sich OOo die Position und Größe des zuletzt geschlossenen
-    // Fensters.
-    defaultWindowAttributes = this.documentController.getDefaultWindowAttributes();
   }
 
   /**
@@ -230,71 +169,6 @@ public class FormController
   public void focusGained(String fieldId)
   {
     new OnFocusFormField(documentController, fieldId).emit();
-  }
-
-  /**
-   * Not Yet Implemented: Nimmt dem Formularfeld mit der ID fieldId den Fokus wieder weg - ergibt
-   * aber bisher keinen Sinn.
-   *
-   * @param fieldId
-   *          id des Formularfeldes, das den Fokus verlieren soll.
-   */
-  public void focusLost(String fieldId)
-  {
-    // wird bisher nicht benötigt.
-  }
-
-  /**
-   * Informiert das FormModel, dass das zugrundeliegende Dokument source geschlossen wird und das
-   * FormModel entsprechend handeln soll um sicherzustellen, dass das Dokument in Zukunft nicht mehr
-   * angesprochen wird.
-   *
-   * Abhängig von der Implementierung des FormModels werden unterschiedliche Aktionen erledigt. Dazu
-   * gehören z.B. das Beenden einer bereits gestarteten FormGUI oder das Wiederherstellen der
-   * Fensterattribute des Dokumentfensters auf die Werte, die das Fenster vor dem Starten der
-   * FormGUI hatte.
-   *
-   * @param sender
-   *          Das Dokument das geschlossen wurde.
-   */
-  public void closing(Object sender)
-  {
-    if (documentController.getModel().doc.equals(sender))
-    {
-      if (gui != null)
-      {
-        gui.dispose();
-        gui = null;
-      }
-
-      // Rücksetzen des defaultWindowAttributes auf den Wert vor dem Schließen
-      // des Formulardokuments.
-      if (defaultWindowAttributes != null)
-        documentController.setDefaultWindowAttributes(defaultWindowAttributes);
-    }
-  }
-
-  /**
-   * Baut die GUI zusammen und zeigt diese an. Sobald, die GUI angezeigt wurde wird die Methode
-   * {@link #formControllerInitCompleted()} aufgerufen.
-   */
-  public void createFormGUI()
-  {
-    Runnable runner = () -> {
-      try
-      {
-        gui.create();
-      } catch (Exception x)
-      {
-        LOGGER.error("", x);
-      }
-    };
-    gui.createGUI(runner);
-  }
-
-  public void showFormGUI()
-  {
-    gui.show(true);
   }
 
   /**

@@ -34,7 +34,7 @@ public class MarkBlockDispatchTest extends WollMuxTest
       throws InvalidCommandException, UnoHelperException, InterruptedException, ExecutionException, TimeoutException,
       IOException, SyntaxErrorException
   {
-    XComponent comp = loadAsyncComponent("private:factory/swriter").get(5, TimeUnit.SECONDS);
+    XComponent comp = loadAsyncComponent("private:factory/swriter", false, true).get(5, TimeUnit.SECONDS);
     wollmux.getWollMuxDocument(UNO.XComponent(comp));
     XTextDocument xDoc = UNO.XTextDocument(comp);
     XTextViewCursor viewCursor = UNO.XTextViewCursorSupplier(xDoc.getCurrentController()).getViewCursor();

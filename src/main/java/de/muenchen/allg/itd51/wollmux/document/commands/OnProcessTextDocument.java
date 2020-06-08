@@ -4,20 +4,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
+import com.sun.star.frame.XController2;
+import com.sun.star.ui.XDeck;
 
+import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
-import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnNotifyDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
-import de.muenchen.allg.itd51.wollmux.form.control.FormController;
+import de.muenchen.allg.itd51.wollmux.form.sidebar.FormSidebarController;
+import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarPanel;
+import de.muenchen.allg.util.UnoSidebar;
 
 /**
  * Processes text documents.
@@ -76,11 +79,6 @@ public class OnProcessTextDocument implements WollMuxEventListener
       }
       dci.scanInsertFormValueCommands();
 
-      // if it is a form execute form commands
-      if (actions != 0 && documentController.getModel().isFormDocument())
-      {
-	startForm(documentController);
-      }
     } catch (java.lang.Exception e)
     {
       LOGGER.error("", e);
@@ -89,6 +87,22 @@ public class OnProcessTextDocument implements WollMuxEventListener
     // notify listeners about processing finished
     new OnNotifyDocumentEventListener(null, WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED,
         documentController.getModel().doc).emit();
+
+    XController2 controller = UNO.XController2(documentController.getModel().doc.getCurrentController());
+    if (documentController.getModel().isFormDocument())
+    {
+      this.activateSidebarPanel(controller, FormSidebarController.WM_FORM_GUI);
+      try
+      {
+        documentController.getFrameController().setDocumentZoom(
+            WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild().query("ZOOM"));
+      } catch (java.lang.Exception e)
+      {
+        // configuration for Fenster isn't mandatory
+      }
+    } else {
+      this.activateSidebarPanel(controller, WollMuxSidebarPanel.WM_BAR);
+    }
 
     // ContextChanged to update dispatches
     try
@@ -100,35 +114,18 @@ public class OnProcessTextDocument implements WollMuxEventListener
     }
   }
 
-  /**
-   * Start form processing.
-   *
-   * @param documentController
-   *          The controller of the document.
-   * @throws WMCommandsFailedException
-   *           The form is invalid.
-   */
-  private void startForm(TextDocumentController documentController)
-      throws WMCommandsFailedException
+  private void activateSidebarPanel(XController2 controller, String panel)
   {
     try
     {
-      documentController.getFrameController().setDocumentZoom(WollMuxFiles.getWollmuxConf()
-          .query("Fenster").query("Formular").getLastChild().query("ZOOM"));
-    } catch (java.lang.Exception e)
+      XDeck formGuiDeck = UnoSidebar.getDeckByName(panel, controller);
+      if (formGuiDeck != null)
+      {
+        formGuiDeck.activate(true);
+      }
+    } catch (UnoHelperException e)
     {
-      // configuration for Fenster isn't mandatory
-    }
-
-    try
-    {
-      FormController formController = documentController.getFormController();
-      formController.createFormGUI();
-      formController.formControllerInitCompleted();
-    } catch (FormModelException e)
-    {
-      throw new WMCommandsFailedException(L.m(
-          "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\nBitte kontaktieren Sie Ihre Systemadministration."));
+      LOGGER.trace("", e);
     }
   }
 

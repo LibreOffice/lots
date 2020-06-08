@@ -32,6 +32,20 @@
 					<value>de.muenchen.allg.itd51.wollmux.mailmerge.sidebar.SeriendruckSidebarFactory</value>
 				</prop>
 			</node>
+			<node oor:name="FormFactory" oor:op="replace">
+				<prop oor:name="Type">
+					<value>toolpanel</value>
+				</prop>
+				<prop oor:name="Name">
+					<value>FormFactory</value>
+				</prop>
+				<prop oor:name="Module">
+					<value />
+				</prop>
+				<prop oor:name="FactoryImplementation">
+					<value>de.muenchen.allg.itd51.wollmux.form.sidebar.FormFactory</value>
+				</prop>
+			</node>
 		</node>
 	</node>
 </oor:component-data>

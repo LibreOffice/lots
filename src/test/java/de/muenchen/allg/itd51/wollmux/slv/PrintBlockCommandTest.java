@@ -29,7 +29,7 @@ public class PrintBlockCommandTest extends OfficeTest
   public void testPrintBlockCommand()
       throws UnoHelperException, InvalidCommandException, IOException, SyntaxErrorException
   {
-    XTextDocument doc = UNO.XTextDocument(loadComponent("private:factory/swriter"));
+    XTextDocument doc = UNO.XTextDocument(loadComponent("private:factory/swriter", false, true));
     XTextCursor cursor = doc.getText().createTextCursor();
     cursor.setString("ABC");
     String conf = "WM(CMD 'allVersions' HIGHLIGHT_COLOR 'ffffc8')";

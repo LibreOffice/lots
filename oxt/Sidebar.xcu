@@ -52,6 +52,25 @@
 					</value>
 				</prop>
 				<prop oor:name="OrderIndex" oor:type="xs:int">
+					<value>2</value>
+				</prop>
+			</node>
+			<node oor:name="FormularGuiDeck" oor:op="replace">
+				<prop oor:name="Title" oor:type="xs:string">
+					<value xml:lang="en-US">Formular</value>
+				</prop>
+				<prop oor:name="Id" oor:type="xs:string">
+					<value>FormularGuiDeck</value>
+				</prop>
+				<prop oor:name="IconURL" oor:type="xs:string">
+					<value>vnd.sun.star.extension://${wollmux.oxt.id}/icons/form.png</value>
+				</prop>
+				<prop oor:name="ContextList">
+					<value oor:separator=";">
+						Writer, any, visible ;
+					</value>
+				</prop>
+				<prop oor:name="OrderIndex" oor:type="xs:int">
 					<value>1</value>
 				</prop>
 			</node>
@@ -107,13 +126,44 @@
 					<value>private:resource/toolpanel/SeriendruckSidebarFactory/SeriendruckSidebarPanel</value>
 				</prop>
 				<prop oor:name="OrderIndex" oor:type="xs:int">
-					<value>1</value>
+					<value>2</value>
 				</prop>
 				<prop oor:name="TitleBarIsOptional" oor:type="xs:boolean">
 					<value>true</value>
 				</prop>
 				<prop oor:name="ShowForReadOnlyDocument" oor:type="xs:boolean">
 					<value>true</value>
+				</prop>
+				<prop oor:name="WantsCanvas" oor:type="xs:boolean">
+					<value>false</value>
+				</prop>
+			</node>
+			<node oor:name="FormularGuiSidebarPanel" oor:op="replace">
+				<prop oor:name="Title" oor:type="xs:string">
+					<value xml:lang="en-US">Formular</value>
+				</prop>
+				<prop oor:name="Id" oor:type="xs:string">
+					<value>FormularGuiSidebarPanel</value>
+				</prop>
+				<prop oor:name="DeckId" oor:type="xs:string">
+					<value>FormularGuiDeck</value>
+				</prop>
+				<prop oor:name="ContextList">
+					<value oor:separator=";">
+						any, any, visible ;
+					</value>
+				</prop>
+				<prop oor:name="ImplementationURL" oor:type="xs:string">
+					<value>private:resource/toolpanel/FormFactory/FormSidebarPanel</value>
+				</prop>
+				<prop oor:name="OrderIndex" oor:type="xs:int">
+					<value>1</value>
+				</prop>
+				<prop oor:name="TitleBarIsOptional" oor:type="xs:boolean">
+					<value>true</value>
+				</prop>
+				<prop oor:name="ShowForReadOnlyDocument" oor:type="xs:boolean">
+					<value>false</value>
 				</prop>
 				<prop oor:name="WantsCanvas" oor:type="xs:boolean">
 					<value>false</value>

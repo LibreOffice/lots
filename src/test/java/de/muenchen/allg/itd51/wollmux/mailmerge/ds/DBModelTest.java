@@ -40,7 +40,7 @@ public class DBModelTest extends OfficeTest
   @BeforeEach
   public void setUp() throws Exception
   {
-    xDoc = UnoRuntime.queryInterface(XOfficeDatabaseDocument.class, loadComponent(file.toString()));
+    xDoc = UnoRuntime.queryInterface(XOfficeDatabaseDocument.class, loadComponent(file.toString(), false, true));
     UNO.dbContext.registerObject(dbName, xDoc.getDataSource());
     model = new DBModel(xDoc);
     model.addCloseListener(closeListener);

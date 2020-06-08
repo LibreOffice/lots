@@ -243,7 +243,7 @@ public class DocumentManager
    *
    * @return Die FormularGUI des Formulardokuments oder null
    */
-  public synchronized FormController getFormModel(XTextDocument doc)
+  public synchronized FormController getFormController(XTextDocument doc)
   {
     return controller.get(doc);
   }
@@ -256,7 +256,7 @@ public class DocumentManager
    * @param doc
    * @param formModel
    */
-  public synchronized void setFormModel(XTextDocument doc, FormController formModel)
+  public synchronized void setFormController(XTextDocument doc, FormController formModel)
   {
     this.controller.put(doc, formModel);
   }
@@ -460,10 +460,6 @@ public class DocumentManager
     }
     fm4k.remove(doc);
 
-    if (controller.containsKey(doc) && controller.get(doc) != null)
-    {
-      controller.get(doc).closing(doc);
-    }
     controller.remove(doc);
   }
 

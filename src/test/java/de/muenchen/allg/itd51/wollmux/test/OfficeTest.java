@@ -51,12 +51,16 @@ public abstract class OfficeTest
    *
    * @param filename
    *          The name of the component to load.
+   * @param template
+   *          If true, create a new document form the file.
+   * @param hidden
+   *          If true, don't create windows and frames.
    * @return The component.
    * @throws UnoHelperException
    *           Component can't be loaded.
    */
-  public static XComponent loadComponent(String filename) throws UnoHelperException
+  public static XComponent loadComponent(String filename, boolean template, boolean hidden) throws UnoHelperException
   {
-    return UNO.loadComponentFromURL(filename, false, false, true);
+    return UNO.loadComponentFromURL(filename, template, false, hidden);
   }
 }

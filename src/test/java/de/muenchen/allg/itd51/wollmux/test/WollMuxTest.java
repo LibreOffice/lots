@@ -61,11 +61,16 @@ public abstract class WollMuxTest extends OfficeTest
    *
    * @param filename
    *          The name of the component to load.
+   * @param template
+   *          If true, create a new document form the file.
+   * @param hidden
+   *          If true, don't create windows and frames.
    * @return A future to be completed with a component as soon as WollMux processed the file.
    * @throws UnoHelperException
    *           Component can't be loaded.
    */
-  public static CompletableFuture<XComponent> loadAsyncComponent(String filename) throws UnoHelperException
+  public static CompletableFuture<XComponent> loadAsyncComponent(String filename, boolean template, boolean hidden)
+      throws UnoHelperException
   {
     CompletableFuture<XComponent> future = new CompletableFuture<>();
     wollmux.addEventListener(new XEventListener()
@@ -86,7 +91,7 @@ public abstract class WollMuxTest extends OfficeTest
         }
       }
     });
-    OfficeTest.loadComponent(filename);
+    OfficeTest.loadComponent(filename, template, hidden);
     return future;
   }
 
