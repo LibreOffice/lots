@@ -39,6 +39,8 @@ public class FormatWizardPage extends AbstractXWizardPage
   private final MailmergeWizardController controller;
   private final PrintSettings settings;
 
+  private boolean inConstructor;
+
   private final AbstractItemListener formatListener = new AbstractItemListener()
   {
 
@@ -67,6 +69,7 @@ public class FormatWizardPage extends AbstractXWizardPage
       PrintSettings settings) throws Exception
   {
     super(pageId, parentWindow, "vnd.sun.star.script:WollMux.seriendruck_format?location=application");
+    inConstructor = true;
     this.controller = controller;
     this.settings = settings;
     XControlContainer container = UNO.XControlContainer(window);
@@ -83,7 +86,9 @@ public class FormatWizardPage extends AbstractXWizardPage
       @Override
       public void textChanged(TextEvent arg0)
       {
-        controller.updateTravelUI();
+        // avoid cascade of calls between LO and WollMux
+        if(!inConstructor)
+          controller.updateTravelUI();
       }
     });
     mailmerge = UNO.XComboBox(container.getControl("mailmerge"));
@@ -121,6 +126,7 @@ public class FormatWizardPage extends AbstractXWizardPage
         name.setText(name.getText() + append);
       }
     });
+    inConstructor = false;
   }
 
   private FORMAT getSelectedFormat()
