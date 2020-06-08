@@ -1,9 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.muenchen</groupId>
   <artifactId>wollmux</artifactId>
-  <version>18.2.0-SNAPSHOT</version>
+  <version>18.2.0~alpha</version>
   <name>WollMux</name>
 
   <properties>
@@ -22,6 +21,7 @@
 
   <scm>
     <developerConnection>scm:git:https://github.com/WollMux/WollMux.git</developerConnection>
+    <tag>wollmux-18.2.0-alpha</tag>
   </scm>
 
   <repositories>
@@ -271,11 +271,8 @@
                     <available file="${project.build.directory}/config/.wollmux/wollmux.conf" />
                   </not>
                   <then>
-                    <get
-                      src="${wollmux.test.conf.url}${wollmux.test.conf.release}"
-                      dest="${project.build.directory}" />
-                    <untar src="${project.build.directory}/wollmux-config-18.1.0.tar.gz"
-                      dest="${project.build.directory}/config" compression="gzip" />
+                    <get src="${wollmux.test.conf.url}${wollmux.test.conf.release}" dest="${project.build.directory}" />
+                    <untar src="${project.build.directory}/wollmux-config-18.1.0.tar.gz" dest="${project.build.directory}/config" compression="gzip" />
                   </then>
                 </if>
               </target>
@@ -295,14 +292,7 @@
                 </exec>
                 <replaceregexp>
                   <regexp pattern="&lt;vmParameters xsi:nil=&quot;true&quot;/&gt;" />
-                  <substitution expression="&lt;vmParameters xsi:nil=&quot;false&quot;&gt;${line.separator}
-&lt;param&gt;-DWOLLMUX_CONF_PATH=${wollmux.test.conf}&lt;/param&gt;${line.separator}
-&lt;param&gt;${line.separator}
--Dlog4j.configuration=file://${project.build.testOutputDirectory}/log4j.properties${line.separator}
-&lt;/param&gt;${line.separator}
-&lt;param&gt;${jacocoOffice}&lt;/param&gt;${line.separator}
-&lt;/vmParameters&gt;
-" />
+                  <substitution expression="&lt;vmParameters xsi:nil=&quot;false&quot;&gt;${line.separator} &lt;param&gt;-DWOLLMUX_CONF_PATH=${wollmux.test.conf}&lt;/param&gt;${line.separator} &lt;param&gt;${line.separator} -Dlog4j.configuration=file://${project.build.testOutputDirectory}/log4j.properties${line.separator} &lt;/param&gt;${line.separator} &lt;param&gt;${jacocoOffice}&lt;/param&gt;${line.separator} &lt;/vmParameters&gt; " />
                   <fileset dir="${office.user.profile}/user/config">
                     <include name="javasettings*.xml" />
                   </fileset>
