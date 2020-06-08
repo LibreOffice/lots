@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -243,6 +244,7 @@ public class UIFactory
   private Map<String, String> parseElementConf(ConfigThingy conf)
   {
     Map<String, String> props = new HashMap<>();
+    props.put(ID, RandomStringUtils.randomAlphanumeric(10));
 
     for (ConfigThingy node : conf)
     {
