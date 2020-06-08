@@ -1,5 +1,10 @@
 package de.muenchen.allg.itd51.wollmux.mailmerge.printsettings;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.Timer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,6 +89,8 @@ public class MailmergeWizardController implements XWizardController
 
   private TextDocumentController textDocumentController;
 
+  private Timer initPathTimer;
+
   /**
    * Create a new wizard controller.
    *
@@ -100,6 +107,19 @@ public class MailmergeWizardController implements XWizardController
     this.model = model;
     this.textDocumentController = textDocumentController;
     settings = new PrintSettings(model.getNumberOfRecords());
+    
+    // Timer to set the path initially, this disables "Continue"-button if path has only one element
+    initPathTimer = new Timer(250, new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        initPathTimer.stop();
+        changePath(PATH.STANDARD);
+        updateTravelUI();
+      }
+    });
+    initPathTimer.setCoalesce(true);
+    initPathTimer.setRepeats(false);
   }
 
   public DatasourceModel getModel()
@@ -182,6 +202,7 @@ public class MailmergeWizardController implements XWizardController
     wizard = Wizard.createMultiplePathsWizard(UNO.defaultContext, paths, this);
     wizard.enableButton(WizardButton.HELP, false);
     wizard.setTitle("WollMux Seriendruck - Optionen");
+    initPathTimer.restart();
     short result = wizard.execute();
     if (result == ExecutableDialogResults.OK)
     {
