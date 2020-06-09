@@ -348,6 +348,8 @@ public class Control
   {
     if (autofill.isPresent())
       return autofill.get().getString(values);
+    else if (type == FormType.COMBOBOX && !options.isEmpty())
+      return options.get(0);
     else
       return "";
   }

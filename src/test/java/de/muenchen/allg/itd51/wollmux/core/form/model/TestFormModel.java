@@ -127,6 +127,7 @@ public class TestFormModel
     assertEquals("zeile6", model.getValue("EmpfaengerZeile6"),
         "Falscher gesetzter Wert für EmpfaengerZeile6");
     assertTrue(model.getStatus("EmpfaengerZeile6"), "Falscher Status für EmpfaengerZeile6");
+    assertEquals("Arbeitgeber", model.getValue("ArbeitgeberDienstherren"));
     assertFalse(model.getStatus("SGVorname"), "Falscher Status für SGVorname");
     assertTrue(model.getGroup("AbtretungNotOK").isVisible(), "AbtretungNotOK");
     assertFalse(model.getGroup("AbtretungOK").isVisible(), "AbtretungOK");
