@@ -47,7 +47,7 @@
  * @author Matthias Benkmann (D-III-ITD 5.1)
  *
  */
-package de.muenchen.allg.itd51.wollmux.core.form.model;
+package de.muenchen.allg.itd51.wollmux.form.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,12 +64,12 @@ import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
-import de.muenchen.allg.itd51.wollmux.core.form.config.FormConfig;
-import de.muenchen.allg.itd51.wollmux.core.form.config.TabConfig;
-import de.muenchen.allg.itd51.wollmux.core.form.config.VisibilityGroupConfig;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values.SimpleMap;
+import de.muenchen.allg.itd51.wollmux.form.config.FormConfig;
+import de.muenchen.allg.itd51.wollmux.form.config.TabConfig;
+import de.muenchen.allg.itd51.wollmux.form.config.VisibilityGroupConfig;
 
 /**
  * Beschreibung eines Formulars. Enthält auch die Business-Logik.

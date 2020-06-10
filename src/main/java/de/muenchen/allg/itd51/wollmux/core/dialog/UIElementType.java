@@ -1,6 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.core.dialog;
 
-import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
+import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 
 /**
  * Types of control elements.

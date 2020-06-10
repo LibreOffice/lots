@@ -1,4 +1,4 @@
-package de.muenchen.allg.itd51.wollmux.core.form.config;
+package de.muenchen.allg.itd51.wollmux.form.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

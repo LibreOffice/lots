@@ -1,14 +1,14 @@
-package de.muenchen.allg.itd51.wollmux.core.form.model;
+package de.muenchen.allg.itd51.wollmux.form.model;
 
 import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.core.form.config.VisibilityGroupConfig;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.form.config.VisibilityGroupConfig;
 
 /**
  * A visibility in a form.

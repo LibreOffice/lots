@@ -1,4 +1,4 @@
-package de.muenchen.allg.itd51.wollmux.core.form.model;
+package de.muenchen.allg.itd51.wollmux.form.model;
 
 /**
  * Ein Listener für Änderungen von Sichtbarkeiten.

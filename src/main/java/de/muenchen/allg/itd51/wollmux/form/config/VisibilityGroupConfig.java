@@ -1,4 +1,4 @@
-package de.muenchen.allg.itd51.wollmux.core.form.config;
+package de.muenchen.allg.itd51.wollmux.form.config;
 
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 

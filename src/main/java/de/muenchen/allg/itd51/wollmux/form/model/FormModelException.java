@@ -1,4 +1,4 @@
-package de.muenchen.allg.itd51.wollmux.core.form.model;
+package de.muenchen.allg.itd51.wollmux.form.model;
 
 /**
  * Ein Fehler in der Konfiguration des Formulars.

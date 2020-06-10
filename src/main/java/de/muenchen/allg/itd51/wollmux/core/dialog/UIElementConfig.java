@@ -8,10 +8,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 
 /**
  * Description of a control element (menu entry, button, input field, ...)

@@ -25,18 +25,18 @@ import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
-import de.muenchen.allg.itd51.wollmux.core.form.config.FormConfig;
-import de.muenchen.allg.itd51.wollmux.core.form.model.Control;
-import de.muenchen.allg.itd51.wollmux.core.form.model.FormModel;
-import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
-import de.muenchen.allg.itd51.wollmux.core.form.model.FormValueChangedListener;
-import de.muenchen.allg.itd51.wollmux.core.form.model.VisibilityChangedListener;
-import de.muenchen.allg.itd51.wollmux.core.form.model.VisibilityGroup;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
+import de.muenchen.allg.itd51.wollmux.form.config.FormConfig;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
+import de.muenchen.allg.itd51.wollmux.form.model.Control;
+import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
+import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
+import de.muenchen.allg.itd51.wollmux.form.model.FormValueChangedListener;
+import de.muenchen.allg.itd51.wollmux.form.model.VisibilityChangedListener;
+import de.muenchen.allg.itd51.wollmux.form.model.VisibilityGroup;
 import de.muenchen.allg.util.UnoProperty;
 
 /**

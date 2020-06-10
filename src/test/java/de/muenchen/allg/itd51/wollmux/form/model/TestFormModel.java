@@ -1,4 +1,4 @@
-package de.muenchen.allg.itd51.wollmux.core.form.model;
+package de.muenchen.allg.itd51.wollmux.form.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -20,10 +20,10 @@ import org.junit.jupiter.api.Test;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.core.form.config.FormConfig;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
+import de.muenchen.allg.itd51.wollmux.form.config.FormConfig;
 
 /**
  * Test für das Formular-Model.
