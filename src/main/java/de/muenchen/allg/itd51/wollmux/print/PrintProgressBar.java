@@ -27,7 +27,7 @@
  * @author Christoph Lutz (D-III-ITD 5.1)
  *
  */
-package de.muenchen.allg.itd51.wollmux.dialog;
+package de.muenchen.allg.itd51.wollmux.print;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
