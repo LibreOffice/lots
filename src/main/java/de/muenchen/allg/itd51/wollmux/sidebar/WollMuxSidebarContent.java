@@ -69,7 +69,6 @@ import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
-import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementType;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
@@ -77,8 +76,6 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
-import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIElementCreateListener;
-import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.WollMuxSidebarUIElementEventHandler;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
@@ -90,7 +87,7 @@ import de.muenchen.allg.util.UnoProperty;
  * zur Auswahl von Vorlagen und darunter eine Reihe von Buttons für häufig benutzte Funktionen.
  *
  */
-public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, XSidebarPanel, UIElementCreateListener
+public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, XSidebarPanel
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WollMuxSidebarContent.class);
@@ -168,8 +165,6 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
       }
     }
   };
-
-  private UIFactory uiFactory;
 
   private WollMuxSidebarUIElementEventHandler eventHandler = new WollMuxSidebarUIElementEventHandler();
 
@@ -271,24 +266,21 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
         controlContainer.addControl("line", line);
         layout.addControl(line, 1);
 
-        uiFactory = new UIFactory();
-        uiFactory.addElementCreateListener(this);
-
         ConfigThingy menubar = conf.query("Menueleiste");
         ConfigThingy menuConf = conf.query("Menues");
 
         if (menubar.count() > 0)
         {
-          uiFactory.createUIElements(new UIElementContext(), null, menubar.getLastChild(), false);
+          createUIElements(null, menubar.getLastChild(), false);
 
           for (ConfigThingy menuDef : menuConf.getLastChild())
           {
-            uiFactory.createUIElements(new UIElementContext(), menuDef, menuDef.getLastChild(), true);
+            createUIElements(menuDef, menuDef.getLastChild(), true);
           }
         }
 
         ConfigThingy bkl = conf.query("Symbolleisten").query("Briefkopfleiste");
-        uiFactory.createUIElements(new UIElementContext(), menuConf, bkl.getLastChild(), false);
+        createUIElements(menuConf, bkl.getLastChild(), false);
 
         tree.expandNode(root);
       }
@@ -385,8 +377,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     }
   }
 
-  @Override
-  public void createControl(UIElementConfig element, boolean isMenu, String parentEntry)
+  private void createControl(UIElementConfig element, boolean isMenu, String parentEntry)
   {
     if (element == null)
     {
@@ -722,6 +713,40 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     xbutton.addActionListener(xButtonAction);
     controlContainer.addControl(uiSenderbox.getId(), UNO.XControl(xbutton));
     layout.addControl(button);
+  }
+
+  /**
+   * Die Funktion wird aufgerufen, um einen Bereich der Konfiguration zu parsen und
+   * {@link UIControl}s zu erzeugen. Für jedes erzeugte Element werden alle Listener aufgerufen.
+   *
+   * @param menuConf
+   * @param elementParent
+   *          Die Konfiguration, die geparst werden soll. Muss eine Liste von Menüs oder Buttons
+   *          enthalten.
+   * @param isMenu
+   *          Wenn true, werden button und menuitem in {@link UIMenuItem} umgewandelt, sonst in
+   *          {@link UIButton}.
+   */
+  private void createUIElements(ConfigThingy menuConf, ConfigThingy elementParent,
+      boolean isMenu)
+  {
+    for (ConfigThingy uiElementDesc : elementParent)
+    {
+      UIElementConfig config = new UIElementConfig(uiElementDesc);
+
+      if (!config.isSidebar())
+      {
+        continue;
+      }
+
+      if (isMenu)
+      {
+        createControl(config, isMenu, menuConf.getName());
+      } else
+      {
+        createControl(config, isMenu, null);
+      }
+    }
   }
 
 }
