@@ -1,35 +1,3 @@
-/*
- * Dateiname: PrintParametersDialog.java
- * Projekt  : WollMux
- * Funktion : Dialog für Druckeinstellungen
- *
- * Copyright (c) 2008-2019 Landeshauptstadt München
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 03.05.2008 | LUT | Erstellung
- * 08.08.2006 | BNK | Viel Arbeit reingesteckt.
- * 23.01.2014 | loi | Set Methode hinzugefügt.
- * -------------------------------------------------------------------
- *
- * @author Christoph Lutz (D-III-ITD-D101)
- * @version 1.0
- *
- */
 package de.muenchen.allg.itd51.wollmux.print;
 
 import java.awt.event.ActionEvent;
@@ -76,6 +44,9 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dispatch.PrintDispatch;
 import de.muenchen.allg.util.UnoProperty;
 
+/**
+ * Dialog for configuring a print.
+ */
 public class PrintParametersDialog
 {
 
@@ -158,10 +129,24 @@ public class PrintParametersDialog
    */
   public static class PageRange
   {
+    /**
+     * The type of the given page range.
+     */
     public final PageRangeType pageRangeType;
 
+    /**
+     * The value
+     */
     public final String pageRangeValue;
 
+    /**
+     * A new page range.
+     *
+     * @param pageRangeType
+     *          The type.
+     * @param pageRangeValue
+     *          The value.
+     */
     public PageRange(PageRangeType pageRangeType, String pageRangeValue)
     {
       this.pageRangeType = pageRangeType;
@@ -379,7 +364,11 @@ public class PrintParametersDialog
   };
 
   /**
-   * Liefert den Namen des aktuell zu diesem Dokument eingestellten Druckers.
+   * Get the name of the printer.
+   *
+   * @param doc
+   *          The document.
+   * @return The name of the printer.
    */
   public static String getCurrentPrinterName(XTextDocument doc)
   {
@@ -400,7 +389,12 @@ public class PrintParametersDialog
   }
 
   /**
-   * Setzt den Namen des aktuell zu diesem Dokument eingestellten Druckers.
+   * Set the printer for the document.
+   *
+   * @param doc
+   *          The document.
+   * @param druckerName
+   *          The name of the printer.
    */
   public static void setCurrentPrinterName(XTextDocument doc, String druckerName)
   {
