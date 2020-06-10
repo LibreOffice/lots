@@ -77,15 +77,9 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
-import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIButton;
-import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIControl;
-import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIElementAction;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIElementCreateListener;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIFactory;
-import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIMenu;
-import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIMenuItem;
-import de.muenchen.allg.itd51.wollmux.sidebar.controls.UISearchbox;
-import de.muenchen.allg.itd51.wollmux.sidebar.controls.UISenderbox;
+import de.muenchen.allg.itd51.wollmux.sidebar.controls.WollMuxSidebarUIElementEventHandler;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
 import de.muenchen.allg.util.UnoConfiguration;
@@ -143,8 +137,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
   private XMutableTreeDataModel dataModel;
 
   private Map<String, XMutableTreeNode> menus;
-  private Map<String, UIElementAction> actions;
-  private Map<String, UIElementAction> searchActions;
+  private Map<String, Runnable> actions;
+  private Map<String, Runnable> searchActions;
 
   private XTreeControl tree;
 
@@ -162,10 +156,10 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
         {
           tree.clearSelection();
           tree.addSelection(node);
-          UIElementAction action = actions.get(node.getDataValue());
+          Runnable action = actions.get(node.getDataValue());
           if (action != null)
           {
-            action.performAction();
+            action.run();
           }
         }
       } catch (Exception ex)
@@ -176,6 +170,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
   };
 
   private UIFactory uiFactory;
+
+  private WollMuxSidebarUIElementEventHandler eventHandler = new WollMuxSidebarUIElementEventHandler();
 
   private AbstractWindowListener windowAdapter = new AbstractWindowListener()
   {
@@ -390,7 +386,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
   }
 
   @Override
-  public void createControl(UIControl<?> element)
+  public void createControl(UIElementConfig element, boolean isMenu, String parentEntry)
   {
     if (element == null)
     {
@@ -400,48 +396,44 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
 
     try
     {
-      if (element.getClass().equals(UIButton.class))
+      if (!isMenu && (element.getType() == UIElementType.MENUITEM || element.getType() == UIElementType.BUTTON))
       {
-        final UIButton uiButton = (UIButton) element;
-        XControl button = GuiFactory.createButton(UNO.xMCF, context, uiButton.getLabel(), null,
+        XControl button = GuiFactory.createButton(UNO.xMCF, context, element.getLabel(), null,
             new Rectangle(0, 0, 100, 32), null);
 
         XButton xbutton = UNO.XButton(button);
-        AbstractActionListener xButtonAction = event -> uiButton.getAction().performAction();
+        AbstractActionListener xButtonAction = event -> eventHandler.processUiElementEvent(null, "action",
+            new Object[] { element.getAction(), element });
         xbutton.addActionListener(xButtonAction);
         controlContainer.addControl(element.getId(), button);
         layout.addControl(button);
-      } else if (element.getClass().equals(UISenderbox.class))
+      } else if (element.getType() == UIElementType.SENDERBOX)
       {
-        createSenderbox((UISenderbox) element);
-      } else if (element instanceof UISearchbox)
+        createSenderbox(element);
+      } else if (element.getType() == UIElementType.SEARCHBOX)
       {
-        createSearchbox((UISearchbox) element);
-      } else if (element.getClass().equals(UIMenu.class))
+        createSearchbox(element);
+      } else if (element.getType() == UIElementType.MENU)
       {
-        UIMenu menu = (UIMenu) element;
-
-        XMutableTreeNode node = dataModel.createNode(menu.getLabel(), false);
-        if (menu.getParent() == null)
+        XMutableTreeNode node = dataModel.createNode(element.getLabel(), false);
+        if (parentEntry == null)
         {
           ((XMutableTreeNode) dataModel.getRoot()).appendChild(node);
         } else
         {
-          menus.get(menu.getParent()).appendChild(node);
+          menus.get(parentEntry).appendChild(node);
         }
-        menus.put(menu.getId(), node);
-      } else if (element.getClass().equals(UIMenuItem.class))
+        menus.put(element.getMenu(), node);
+      } else if (isMenu && menus.get(parentEntry) != null
+          && (element.getType() == UIElementType.MENUITEM || element.getType() == UIElementType.BUTTON))
       {
-        UIMenuItem menuItem = (UIMenuItem) element;
-        if (menus.get(menuItem.getParent()) != null)
-        {
-          XMutableTreeNode node = dataModel.createNode(menuItem.getLabel(), false);
-          menus.get(menuItem.getParent()).appendChild(node);
+        XMutableTreeNode node = dataModel.createNode(element.getLabel(), false);
+        menus.get(parentEntry).appendChild(node);
 
-          UUID uuid = UUID.randomUUID();
-          actions.put(uuid.toString(), menuItem.getAction());
-          node.setDataValue(uuid.toString());
-        }
+        UUID uuid = UUID.randomUUID();
+        actions.put(uuid.toString(),
+            () -> eventHandler.processUiElementEvent(null, "action", new Object[] { element.getAction(), element }));
+        node.setDataValue(uuid.toString());
       }
     } catch (com.sun.star.uno.Exception e)
     {
@@ -488,7 +480,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     return true;
   }
 
-  private void createSearchbox(UISearchbox element)
+  private void createSearchbox(UIElementConfig element)
   {
     String label = L.m("Suchen...");
 
@@ -508,10 +500,10 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
         XControl ctrl = UNO.XControl(event.Source);
         XItemList items = UNO.XItemList(ctrl.getModel());
         String uuid = (String) items.getItemData(event.Selected);
-        UIElementAction action = searchActions.get(uuid);
+        Runnable action = searchActions.get(uuid);
         if (action != null)
         {
-          action.performAction();
+          action.run();
         }
       } catch (IndexOutOfBoundsException e)
       {
@@ -539,17 +531,14 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
           ConfigThingy menues = WollMuxFiles.getWollmuxConf().get("Menues");
           ConfigThingy labels = menues.queryAll("LABEL", 4, true);
 
-          List<UIMenuItem> newItems = new ArrayList<>(labels.count());
+          List<UIElementConfig> newItems = new ArrayList<>(labels.count());
           for (ConfigThingy l : labels)
           {
             UIElementConfig conf = new UIElementConfig(l);
-            if (conf.getType() == UIElementType.BUTTON || conf.getType() == UIElementType.MENUITEM)
+            if ((conf.getType() == UIElementType.BUTTON || conf.getType() == UIElementType.MENUITEM)
+                && conf.getAction() != null && buttonMatches(l, words))
             {
-              if (conf.getAction() != null && buttonMatches(l, words))
-              {
-                UIMenuItem item = (UIMenuItem) uiFactory.createUIMenuElement(null, conf, "");
-                newItems.add(item);
-              }
+              newItems.add(conf);
             }
           }
 
@@ -557,8 +546,10 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
           for (short n = 0; n < newItems.size(); n++)
           {
             items.insertItemText(n, newItems.get(n).getLabel());
+            UIElementConfig item = newItems.get(n);
             UUID uuid = UUID.randomUUID();
-            searchActions.put(uuid.toString(), newItems.get(n).getAction());
+            searchActions.put(uuid.toString(), () -> eventHandler.processUiElementEvent(null, "action",
+                new Object[] { item.getAction(), item }));
             items.setItemData(n, uuid.toString());
           }
         } catch (Exception e)
@@ -636,17 +627,17 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     layout.addControl(UNO.XControl(resultBox));
   }
 
-  private void createSenderbox(UISenderbox uiSenderbox) throws com.sun.star.uno.Exception
+  private void createSenderbox(UIElementConfig uiSenderbox) throws com.sun.star.uno.Exception
   {
+    String label = uiSenderbox.getLabel();
     if (!PersoenlicheAbsenderliste.getInstance().getCurrentSender().isEmpty())
     {
-      uiSenderbox.setLabel(PersoenlicheAbsenderliste.getInstance().getCurrentSender().split("§§%=%§§")[0]);
+      label = PersoenlicheAbsenderliste.getInstance().getCurrentSender().split("§§%=%§§")[0];
     }
 
     SortedMap<String, Object> props = new TreeMap<>();
     props.put("FocusOnClick", false);
-    XControl button = GuiFactory.createButton(UNO.xMCF, context, uiSenderbox.getLabel(), null,
-        new Rectangle(0, 0, 100, 32), props);
+    XControl button = GuiFactory.createButton(UNO.xMCF, context, label, null, new Rectangle(0, 0, 100, 32), props);
     final XButton xbutton = UNO.XButton(button);
 
     String[] palEntries = PersoenlicheAbsenderliste.getInstance().getPALEntries();
