@@ -1,30 +1,27 @@
 package de.muenchen.allg.itd51.wollmux.form.model;
 
 /**
- * Ein Listener für Änderungen an den Formularwerten.
- * 
- * @author daniel.sikeler
- *
+ * Listener which is called when a form value or form field state has changed.
  */
 public interface FormValueChangedListener
 {
   /**
-   * Wird aufgerufen, wenn sich der Wert von {@link Control#getValue()} ändert.
-   * 
+   * Called if the return value of {@link Control#getValue()} has changed.
+   *
    * @param id
-   *          Die Id des Formularfeldes das sich geändert hat.
+   *          The ID of the control.
    * @param value
-   *          Der neue Wert des Formularfeldes.
+   *          The new value of the control.
    */
   public void valueChanged(String id, String value);
 
   /**
-   * Wird aufgerufen, wenn sich der Wert von {@link Control#isOkay()} ändert.
-   * 
+   * Called if the return value of {@link Control#isOkay()} has changed.
+   *
    * @param id
-   *          Die Id des Formularfeldes das sich geändert hat.
+   *          The ID of the control.
    * @param okay
-   *          Der neue Zustand des Formularfeldes.
+   *          The new state of the control.
    */
   public void statusChanged(String id, boolean okay);
 }

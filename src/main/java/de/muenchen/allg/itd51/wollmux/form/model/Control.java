@@ -16,61 +16,62 @@ import de.muenchen.allg.itd51.wollmux.core.functions.Values.SimpleMap;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 
 /**
- * Beschreibung eines Formularelementes samt Business-Logik (Plausis)
- *
- * @author daniel.sikeler
- *
+ * Representation of a form control.
  */
 public class Control
 {
   /**
-   * Die Id.
+   * The ID.
    */
   private String id;
+
   /**
-   * Der Typ.
+   * The type of the control.
    */
   private UIElementType type;
+
   /**
-   * Die Plausi.
+   * The plausibility function.
    */
   private Function plausi;
+
   /**
-   * Die Funtkion, aus der der initiale Wert berechnet wird.
+   * The function to compute the value.
    */
   private Optional<Function> autofill;
+
   /**
-   * Die Sichtbarkeitsgruppen, in denen das Formularelement ist.
+   * Visibility groups to which this control belongs.
    */
   private List<VisibilityGroup> groups = new ArrayList<>(1);
 
   /**
-   * Ist das Element gerade in einem validen Zustand (Plausi).
+   * Is the control in a valid state. So {@link #plausi} would return true.
    */
   private boolean okay = true;
 
   /**
-   * Der aktuelle Wert des Elements.
+   * The value of the control.
    */
   private String value = "";
 
   /**
-   * Options of ComboBoxes.
+   * If {@link #tpye} is {@link UIElementType#COMBOBOX} this field holds the options.
    */
   private List<String> options;
 
   /**
-   * Eine Liste der abhängigen Sichtbarkeitsgruppen.
+   * List of visibility groups which depend on this control.
    */
   private List<VisibilityGroup> dependingGroups = new ArrayList<>(1);
 
   /**
-   * Eine Liste der Formularfelder deren Autofill von diesem ab hängt.
+   * List of controls which {@link #autofill} depend on this control.
    */
   private List<Control> dependingAutoFillFormFields = new ArrayList<>(1);
 
   /**
-   * Eine Liste der Formularfelder deren Plausi von diesem ab hängt.
+   * List of controls which {@link #plausi} depend on this control.
    */
   private List<Control> dependingPlausiFormFields = new ArrayList<>(1);
 
@@ -134,10 +135,10 @@ public class Control
   }
 
   /**
-   * Überprüft ob das Element, ein gültigen Wert enthält und informiert die Listener.
+   * Check if the control is valid based on the given values.
    *
    * @param values
-   *          Die Werte aus dem Model.
+   *          The form values.
    */
   public void setOkay(Values values)
   {
@@ -217,15 +218,14 @@ public class Control
   }
 
   /**
-   * Berechnet für alle abhängigen Felder die Werte neu. Dabei werden Zyklen aufgelöst. Für jedes
-   * Feld wird nur einmal der Wert berechnet.
+   * Compute the value of all dependent fields. The value is only computed once for each control.
    *
    * @param value
-   *          Der neue Wert dieses Feldes.
+   *          The new value of this control.
    * @param values
-   *          Die bisherigen Werte aller Felder.
+   *          The values of all fields.
    * @param modified
-   *          Eine Map, in die alle geänderten Felder eingetragen werden.
+   *          Already computed fields.
    */
   public void computeNewValues(String value, SimpleMap values, SimpleMap modified)
   {
@@ -246,12 +246,13 @@ public class Control
   }
 
   /**
-   * Berechnet den Wert aus der Autofill-Funtkion und den bisherigen Werten aus dem Model.
+   * Compute the value of the control based on {@link #autofill} and the provided values. The value
+   * has to be set with {@link #setValue(String)}.
    *
    * @param values
-   *          Die Werte aus dem Model.
-   * @return Den berechneten Wert oder null wenn keine Autofill-Funktion vorhanden ist. Der Wert
-   *         muss mit {@link #setValue(String)} gesetzt werden.
+   *          The values of the model.
+   * @return The result of the AUTOFILL function if there's one. Otherwise the first option if it's
+   *         a {@link UIElementType#COMBOBOX} or the empty string.
    */
   public String computeValue(SimpleMap values)
   {
@@ -263,6 +264,12 @@ public class Control
       return "";
   }
 
+  /**
+   * Is this control visible?
+   *
+   * @return True if all groups in which this control is are visible. False otherwise or if the
+   *         control has no visible element.
+   */
   public boolean isVisible()
   {
     switch (type)

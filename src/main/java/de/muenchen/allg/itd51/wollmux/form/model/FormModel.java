@@ -1,52 +1,3 @@
-/*
- * Dateiname: FormController.java
- * Projekt  : WollMux
- * Funktion : Stellt UI bereit, um ein Formulardokument zu bearbeiten.
- *
- * Copyright (c) 2010-2018 Landeshauptstadt München
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 27.12.2005 | BNK | Erstellung
- * 27.01.2006 | BNK | JFrame-Verwaltung nach FormGUI ausgelagert.
- * 02.02.2006 | BNK | Ein/Ausblendungen begonnen
- * 05.05.2006 | BNK | Condition -> Function, kommentiert
- * 17.05.2006 | BNK | AUTOFILL, PLAUSI, Übergabe an FormModel
- * 18.05.2006 | BNK | Fokus-Änderungen an formModel kommunizieren
- *                  | TIP und HOTKEY bei Tabs unterstützen
- *                  | leere Tabs ausgrauen
- *                  | nextTab und prevTab implementiert
- * 29.05.2006 | BNK | Umstellung auf UIElementFactory.Context
- * 31.05.2006 | BNK | ACTION "funcDialog"
- * 19.06.2006 | BNK | Auch Werte für Felder, die nicht geautofilled sind an FormModel kommunizieren bei Startup
- * 10.09.2006 | BNK | [P1007]Abfangen von mehr als 512 Elementen auf einem Tab.
- * 10.09.2006 | BNK | Tabs scrollen, nicht hintereinander gruppieren.
- * 17.11.2006 | BNK | +setValue()
- * 08.01.2007 | BNK | intelligentere Behandlung der TAB-Taste
- * 28.03.2007 | BNK | Buttonanpassung verarbeiten bei mergeFormDescriptors().
- * 10.12.2007 | BNK | [R3582]Vertikale Scrollbar immer anzeigen
- * 28.04.2008 | BNK | [R19465]Fokus auf erstem Element, nicht auf Tab
- * 08.03.2010 | ERT | [R6331]Scrollfunktion in der wollmux formular gui
- * 02.06.2010 | BED | Unterstützung von ACTION "saveTempAndOpenExt"
- * -------------------------------------------------------------------
- *
- * @author Matthias Benkmann (D-III-ITD 5.1)
- *
- */
 package de.muenchen.allg.itd51.wollmux.form.model;
 
 import java.util.ArrayList;
@@ -72,9 +23,7 @@ import de.muenchen.allg.itd51.wollmux.form.config.TabConfig;
 import de.muenchen.allg.itd51.wollmux.form.config.VisibilityGroupConfig;
 
 /**
- * Beschreibung eines Formulars. Enthält auch die Business-Logik.
- *
- * @author Matthias Benkmann (D-III-ITD 5.1)
+ * Model of a form.
  */
 public class FormModel
 {
@@ -82,72 +31,62 @@ public class FormModel
   private static final Logger LOGGER = LoggerFactory.getLogger(FormModel.class);
 
   /**
-   * Die Funktionsbibliothek, die für das Interpretieren von Plausis etc, herangezogen wird.
+   * The function library.
    */
   private final FunctionLibrary funcLib;
 
   /**
-   * Die Dialogbibliothek, die die Dialoge liefert, die für die automatische Befüllung von
-   * Formularfeldern benötigt werden.
+   * The dialog library.
    */
   private final DialogLibrary dialogLib;
 
   /**
-   * Der Kontext, in dem Funktionen geparst werden.
+   * The context of functions.
    */
   private final Map<Object, Object> functionContext;
 
   /**
-   * Bildet GROUPS Bezeichner auf die entsprechenden Group-Instanzen ab. Key ist die ID der
-   * Sichtbarkeitsgruppe.
+   * Mapping form visibility group IDs to visibility groups.
    */
   private final Map<String, VisibilityGroup> visiblities = new HashMap<>();
 
   /**
-   * Bildet Formularelemente auf die entsprechenden Control-Instanzen ab. Key ist die ID des
-   * Formularelementes.
+   * Mapping from control element IDs to form controls.
    */
   private final Map<String, Control> formControls = new LinkedHashMap<>();
 
   /**
-   * Bildet Namen von Funktionsdialogen auf Lists von Controls ab, deren AUTOFILL von diesem
-   * Funktionsdialog abhängen.
+   * Mapping from function dialog names to controls whose AUTOFILL dependens on this dialog.
    */
   private Map<String, List<Control>> mapDialogNameToListOfControlsWithDependingAutofill = new HashMap<>();
 
   /**
-   * Sammlung aller Listener, die informiert werden, wenn sich ein Formularfeld ändert (Wert oder
-   * Status).
+   * All listeners which have to be notified if a form value or state changes.
    */
   private List<FormValueChangedListener> listener = new ArrayList<>();
 
   /**
-   * Sammlung aller Listener, die informiert werden, wenn sich eine Sichtbarkeit verändert.
+   * All listener which have to be notified if a visibility has changed.
    */
   private List<VisibilityChangedListener> vListener = new ArrayList<>(1);
 
   /**
-   * Ein neues Formular.
+   * A new form model.
    *
    * @param conf
-   *          Die Beschreibung des Formulars.
-   * @param frameTitle
-   *          Der Title des LibreOffice Fensters.
+   *          The configuration of the model.
    * @param functionContext
-   *          der Kontext für Funktionen, die einen benötigen.
+   *          The context of functions.
    * @param funcLib
-   *          die Funktionsbibliothek, die zur Auswertung von Plausis etc. herangezogen werden soll.
+   *          The function library.
    * @param dialogLib
-   *          die Dialogbibliothek, die die Dialoge bereitstellt, die für automatisch zu befüllende
-   *          Formularfelder benötigt werden.
+   *          The dialog library.
    * @param presetValues
-   *          Die gesetzten Werte im Dokument.
-   * @throws FormModelException
-   *           Fehlerhaftes Formular.
+   *          The values already set in the document.
    */
   @SuppressWarnings("squid:S3776")
   public FormModel(FormConfig conf, Map<Object, Object> functionContext, FunctionLibrary funcLib,
-      DialogLibrary dialogLib, Map<String, String> presetValues) throws FormModelException
+      DialogLibrary dialogLib, Map<String, String> presetValues)
   {
     this.functionContext = functionContext;
     this.funcLib = funcLib;
@@ -180,7 +119,7 @@ public class FormModel
       storeDepsForFormField(control);
     }
 
-    // Gespeicherte Werte und/oder Autofill setzen
+    // Initialize controls with preset values or AUTOFILL function
     SimpleMap values = idToValue();
     for (Control control : formControls.values())
     {
@@ -225,11 +164,11 @@ public class FormModel
   }
 
   /**
-   * Liefert eine Sichtbarkeitsgruppe mit der ID groupId.
+   * Get a visibility group.
    *
    * @param groupId
-   *          Die ID der Gruppe.
-   * @return Die Sichtbarkeitsgruppe mit ID groupId.
+   *          The ID of the group.
+   * @return The group or null if there's no group with this id.
    */
   public VisibilityGroup getGroup(String groupId)
   {
@@ -238,10 +177,10 @@ public class FormModel
 
   /**
    * Get a control.
-   * 
+   *
    * @param controlId
    *          The id of the control.
-   * @return The cotnrol or null if there is no control with this id.
+   * @return The control or null if there's no control with this id.
    */
   public Control getControl(String controlId)
   {
@@ -249,13 +188,13 @@ public class FormModel
   }
 
   /**
-   * Setzt den Wert des Formularelementes mit ID id auf den Wert value und informiert die Listener
-   * entsprechend.
+   * Set the value of a control and notify the listeners. All depending controls are updated. For
+   * all changed controls the state is computed.
    *
    * @param id
-   *          Die ID des Formularelementes.
+   *          The ID of the control.
    * @param value
-   *          Der neue Wert.
+   *          The value of the control.
    */
   public void setValue(final String id, final String value)
   {
@@ -264,13 +203,13 @@ public class FormModel
       Control field = formControls.get(id);
       SimpleMap modified = new SimpleMap();
 
-      // Abhängige Felder berechnen
+      // compute dependent controls
       field.computeNewValues(value, idToValue(), modified);
       SimpleMap newValues = idToValue();
       newValues.putAll(modified);
       List<VisibilityGroup> modifiedGroups = new ArrayList<>();
 
-      // Neue Werte übernehmen und Listener informieren
+      // update values and notify listener
       for (Map.Entry<String, String> changedEntries : modified)
       {
         Control control = formControls.get(changedEntries.getKey());
@@ -296,13 +235,13 @@ public class FormModel
   }
 
   /**
-   * Liefert den Wert des Formularelementes mit der Id id.
+   * Get the value of a control.
    *
    * @param id
-   *          Die Id des Formularelementes.
-   * @return Der Wert des Formularelementes.
+   *          The ID of the control.
+   * @return The value of the control.
    * @throws FormModelException
-   *           Ein Formularelement mit der Id id existiert nicht.
+   *           There's no control with the given ID.
    */
   public String getValue(final String id) throws FormModelException
   {
@@ -314,10 +253,10 @@ public class FormModel
   }
 
   /**
-   * Get collection of {@link Control} with equal group id.
+   * Get a collection of {@link Control} with belong to the group.
    * 
    * @param groupId
-   *          Group id.
+   *          The ID of the group.
    * @return Collection of {@link Control}.
    */
   public Collection<Control> getControlsByGroupId(String groupId)
@@ -339,13 +278,13 @@ public class FormModel
   }
 
   /**
-   * Liefert den Status (Plausi) des Formularelementes mit der Id id.
+   * Get the state of a control.
    *
    * @param id
-   *          Die Id des Formularelementes.
-   * @return Der Status des Formularelementes.
+   *          The ID of the control.
+   * @return The state of the control.
    * @throws FormModelException
-   *           Ein Formularelement mit der Id id existiert nicht.
+   *           There's no control with the given ID.
    */
   public boolean getStatus(final String id) throws FormModelException
   {
@@ -357,11 +296,10 @@ public class FormModel
   }
 
   /**
-   * Setzt für die Controls, die vom Dialog dialogName abhängigen, die Werte entsprechend ihrer
-   * Autofill-Funktion.
+   * Set the value of all controls which depend on the dialog.
    *
    * @param dialogName
-   *          Der Name des Dialogs.
+   *          The name of the dialog.
    */
   public void setDialogAutofills(String dialogName)
   {
@@ -373,11 +311,11 @@ public class FormModel
   }
 
   /**
-   * Besitzt das Formular ein Feld mit der ID fieldId?
+   * Has the form a control with the given ID.
    *
    * @param fieldId
-   *          Die ID des gesuchten Feldes.
-   * @return True falls ein solches Feld existiert, sonst False.
+   *          The ID of a control.
+   * @return True if there's a conrol with this ID, false otherwise.
    */
   public boolean hasFieldId(String fieldId)
   {
@@ -385,9 +323,9 @@ public class FormModel
   }
 
   /**
-   * Erzeugt aus den Werten eine Map für die Funktionen.
+   * Create a mapping from control ID to control value.
    *
-   * @return Ein Map mit Werten die Funktionen als Parameter übergeben werden können.
+   * @return A mapping which can be used as function parameter.
    */
   private SimpleMap idToValue()
   {

@@ -1,20 +1,17 @@
 package de.muenchen.allg.itd51.wollmux.form.model;
 
 /**
- * Ein Listener für Änderungen von Sichtbarkeiten.
- * 
- * @author daniel.sikeler
- *
+ * Listener which is called when a visibility has changed.
  */
 public interface VisibilityChangedListener
 {
   /**
-   * Wird aufgerufen sobald sich die Sichtbarkeit einer Gruppe ändert.
-   * 
+   * Called when a visibility has changed.
+   *
    * @param id
-   *          Die Id der Gruppe.
+   *          The ID of the visibility group.
    * @param visible
-   *          Der neue Zustand (true = sichtbar, false = unsichtbar).
+   *          True if the group is visible, false otherwise.
    */
   public void visibilityChanged(String id, boolean visible);
 }

@@ -26,7 +26,7 @@ public class VisibilityGroup
   private boolean visible = true;
 
   /**
-   * DThe id of the group.
+   * The id of the group.
    */
   private String groupId;
 
