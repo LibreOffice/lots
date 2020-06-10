@@ -128,11 +128,6 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
           + "überprüfen Sie anhand der wollmux.log ob evtl. beim Verarbeiten eines %includes ein Fehler "
           + "aufgetreten ist.");
 
-  /**
-   * Die aktiven CONF_IDs.
-   */
-  private Set<String> confIds;
-
   private XComponentContext context;
 
   private XWindow parentWindow;
@@ -286,16 +281,16 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
 
         if (menubar.count() > 0)
         {
-          uiFactory.createUIElements(new UIElementContext(), null, menubar.getLastChild(), false, confIds);
+          uiFactory.createUIElements(new UIElementContext(), null, menubar.getLastChild(), false);
 
           for (ConfigThingy menuDef : menuConf.getLastChild())
           {
-            uiFactory.createUIElements(new UIElementContext(), menuDef, menuDef.getLastChild(), true, confIds);
+            uiFactory.createUIElements(new UIElementContext(), menuDef, menuDef.getLastChild(), true);
           }
         }
 
         ConfigThingy bkl = conf.query("Symbolleisten").query("Briefkopfleiste");
-        uiFactory.createUIElements(new UIElementContext(), menuConf, bkl.getLastChild(), false, confIds);
+        uiFactory.createUIElements(new UIElementContext(), menuConf, bkl.getLastChild(), false);
 
         tree.expandNode(root);
       }
@@ -385,38 +380,10 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
       {
         LOGGER.error(WOLLMUX_CONFIG_ERROR_MESSAGE);
         InfoDialog.showInfoModal(L.m("Fehlerhafte Konfiguration"), WOLLMUX_CONFIG_ERROR_MESSAGE);
-      } else
-      {
-        readConfIds(wollmuxConf, wollmuxbarConf);
       }
     } catch (Exception x)
     {
       LOGGER.error("", x);
-    }
-  }
-
-  private void readConfIds(ConfigThingy defaultConf, ConfigThingy userConf)
-  {
-    this.confIds = new HashSet<>();
-    ConfigThingy activeIds = new ConfigThingy("aciveIDs");
-    if (userConf != null)
-      activeIds = userConf.query("WollMuxBarKonfigurationen", 1).query("Aktiv", 2);
-    if (activeIds.count() == 0)
-      activeIds = defaultConf.query("WollMuxBarKonfigurationen", 1).query("Aktiv", 2);
-
-    if (activeIds.count() > 0)
-    {
-      try
-      {
-        activeIds = activeIds.getLastChild();
-      } catch (NodeNotFoundException x)
-      {
-        LOGGER.trace("", x);
-      }
-      for (ConfigThingy idConf : activeIds)
-      {
-        confIds.add(idConf.getName());
-      }
     }
   }
 

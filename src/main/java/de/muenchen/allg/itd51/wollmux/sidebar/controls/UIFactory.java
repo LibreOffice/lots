@@ -92,7 +92,7 @@ public class UIFactory
    *          umgewandelt, sonst in {@link UIButton}.
    */
   public void createUIElements(UIElementContext context, ConfigThingy menuConf,
-      ConfigThingy elementParent, boolean isMenu, Set<String> confIds)
+      ConfigThingy elementParent, boolean isMenu)
   {
     for (ConfigThingy uiElementDesc : elementParent)
     {
@@ -108,24 +108,6 @@ public class UIFactory
       if (!isSidebar)
       {
         continue;
-      }
-
-      /*
-       * Falls kein CONF_ID vorhanden ist, wird das Element angezeigt, ansonsten nur
-       * dann wenn mindestens eine CONF_ID aktiv ist.
-       */
-      ConfigThingy conf_ids = uiElementDesc.query("CONF_ID");
-      if (conf_ids.count() > 0)
-      {
-        boolean active = false;
-        for (ConfigThingy conf_id_group : conf_ids)
-          for (ConfigThingy conf_id : conf_id_group)
-            if (confIds.contains(conf_id.getName()))
-            {
-              active = true;
-              break;
-            }
-        if (!active) continue;
       }
 
       if (isMenu)
