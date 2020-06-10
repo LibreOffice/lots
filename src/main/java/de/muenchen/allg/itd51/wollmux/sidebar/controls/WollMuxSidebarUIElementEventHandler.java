@@ -2,15 +2,14 @@ package de.muenchen.allg.itd51.wollmux.sidebar.controls;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Iterator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.OpenExt;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementEventHandler;
 import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnAbout;
@@ -48,16 +47,23 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     }
     else if (action.equals("openDocument"))
     {
-      String fragId = getFragId((ConfigThingy) args[1], action);
-      if (fragId != null)
+      String fragId = ((UIElementConfig) args[1]).getFragId();
+      if (fragId.isEmpty())
+      {
+        LOGGER.error(L.m("ACTION \"%1\" erfordert mindestens ein Attribut FRAG_ID",
+          action));
+      } else
       {
         new OnOpenDocument(Arrays.asList(fragId), false).emit();
       }
     }
     else if (action.equals("openTemplate"))
     {
-      String fragId = getFragId((ConfigThingy) args[1], action);
-      if (fragId != null)
+      String fragId = ((UIElementConfig) args[1]).getFragId();
+      if (fragId.isEmpty())
+      {
+        LOGGER.error(L.m("ACTION \"%1\" erfordert mindestens ein Attribut FRAG_ID", action));
+      } else
       {
         new OnOpenDocument(Arrays.asList(fragId), true).emit();
       }
@@ -71,10 +77,8 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
     }
     else if (action.equals("openExt"))
     {
-      ConfigThingy conf = (ConfigThingy)args[1];
-      ConfigThingy ext = conf.query("EXT");
-      ConfigThingy url = conf.query("URL");
-      executeOpenExt(ext.toString(), url.toString());
+      UIElementConfig conf = (UIElementConfig) args[1];
+      executeOpenExt(conf.getExt(), conf.getUrl());
     }
     else if (action.equals("dumpInfo"))
     {
@@ -135,28 +139,6 @@ public class WollMuxSidebarUIElementEventHandler implements UIElementEventHandle
       LOGGER.error("", x);
       showError(x.getMessage());
     }
-  }
-
-  private String getFragId(ConfigThingy conf, String action)
-  {
-    ConfigThingy fids = conf.query("FRAG_ID");
-    StringBuilder fragId = new StringBuilder();
-    if (fids.count() > 0)
-    {
-      Iterator<ConfigThingy> i = fids.iterator();
-      fragId.append(i.next().toString());
-      while (i.hasNext())
-      {
-        fragId.append("&");
-        fragId.append(i.next().toString());
-      }
-    }
-    else
-    {
-      LOGGER.error(L.m("ACTION \"%1\" erfordert mindestens ein Attribut FRAG_ID",
-        action));
-    }
-    return fragId.toString();
   }
 
   private void showError(String errorMsg)

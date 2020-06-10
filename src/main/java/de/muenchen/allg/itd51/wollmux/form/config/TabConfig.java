@@ -5,6 +5,7 @@ import java.util.List;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 
 /**
@@ -67,22 +68,29 @@ public class TabConfig
     {
       hotkey = hotkeyString.toUpperCase().charAt(0);
     }
-    ConfigThingy inputFields = tabConf.query("Eingabefelder");
-    for (ConfigThingy fields : inputFields)
-    {
-      for (ConfigThingy controlConf : fields)
-      {
-        controls.add(new UIElementConfig(controlConf));
-      }
-    }
 
-    ConfigThingy buttonConf = tabConf.query("Buttons");
-    for (ConfigThingy fields : buttonConf)
+    try
     {
-      for (ConfigThingy controlConf : fields)
+      ConfigThingy inputFields = tabConf.query("Eingabefelder");
+      for (ConfigThingy fields : inputFields)
       {
-        buttons.add(new UIElementConfig(controlConf));
+        for (ConfigThingy controlConf : fields)
+        {
+          controls.add(new UIElementConfig(controlConf));
+        }
       }
+
+      ConfigThingy buttonConf = tabConf.query("Buttons");
+      for (ConfigThingy fields : buttonConf)
+      {
+        for (ConfigThingy controlConf : fields)
+        {
+          buttons.add(new UIElementConfig(controlConf));
+        }
+      }
+    } catch (ConfigurationErrorException e)
+    {
+      throw new FormModelException("Invalid tab", e);
     }
   }
 

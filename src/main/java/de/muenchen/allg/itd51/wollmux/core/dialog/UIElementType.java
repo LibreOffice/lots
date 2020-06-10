@@ -1,6 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.core.dialog;
 
-import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 
 /**
  * Types of control elements.
@@ -80,6 +80,21 @@ public enum UIElementType
   LISTBOX,
 
   /**
+   * A menu.
+   */
+  MENU,
+
+  /**
+   * A sender box.
+   */
+  SENDERBOX,
+
+  /**
+   * A search box.
+   */
+  SEARCHBOX,
+
+  /**
    * Default-Type.
    */
   DEFAULT;
@@ -90,17 +105,17 @@ public enum UIElementType
    * @param type
    *          The string.
    * @return The type.
-   * @throws FormModelException
+   * @throws ConfigurationErrorException
    *           There's no type for the given string.
    */
-  public static UIElementType getType(String type) throws FormModelException
+  public static UIElementType getType(String type)
   {
     try
     {
       return UIElementType.valueOf(UIElementType.class, type.toUpperCase().replaceAll("-", "_"));
     } catch (IllegalArgumentException e)
     {
-      throw new FormModelException("Unbekannte TYPE-Angabe für ein Formularelement.", e);
+      throw new ConfigurationErrorException("Unbekannte TYPE-Angabe für ein Element.", e);
     }
   }
 

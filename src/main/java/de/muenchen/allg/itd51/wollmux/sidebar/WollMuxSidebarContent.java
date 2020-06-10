@@ -68,7 +68,9 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementType;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -540,14 +542,12 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
           List<UIMenuItem> newItems = new ArrayList<>(labels.count());
           for (ConfigThingy l : labels)
           {
-            ConfigThingy type = l.query("TYPE");
-            if (type.count() != 0
-                && (type.getLastChild().toString().equals("button") || type.getLastChild().toString().equals("menu")))
+            UIElementConfig conf = new UIElementConfig(l);
+            if (conf.getType() == UIElementType.BUTTON || conf.getType() == UIElementType.MENUITEM)
             {
-              ConfigThingy action = l.query("ACTION");
-              if (action.count() != 0 && buttonMatches(l, words))
+              if (conf.getAction() != null && buttonMatches(l, words))
               {
-                UIMenuItem item = (UIMenuItem) uiFactory.createUIMenuElement(null, l, "");
+                UIMenuItem item = (UIMenuItem) uiFactory.createUIMenuElement(null, conf, "");
                 newItems.add(item);
               }
             }

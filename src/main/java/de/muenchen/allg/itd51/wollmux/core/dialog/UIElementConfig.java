@@ -9,9 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 
 /**
  * Description of a control element (menu entry, button, input field, ...)
@@ -132,14 +132,24 @@ public class UIElementConfig
   private List<String> groups = new ArrayList<>(1);
 
   /**
+   * The sub menu to show.
+   */
+  private String menu;
+
+  /**
+   * Is this element visible in the sidebar?
+   */
+  private boolean sidebar;
+
+  /**
    * Create a new control element configuration.
    *
    * @param controlConf
    *          The description of the control element.
-   * @throws FormModelException
+   * @throws ConfigurationErrorException
    *           Invalid control type.
    */
-  public UIElementConfig(ConfigThingy controlConf) throws FormModelException
+  public UIElementConfig(ConfigThingy controlConf)
   {
     type = UIElementType.getType(controlConf.getString("TYPE", ""));
     id = controlConf.getString("ID", RandomStringUtils.randomAlphanumeric(10));
@@ -197,6 +207,8 @@ public class UIElementConfig
         groups.add(groupConf.toString());
       }
     }
+    menu = controlConf.getString("MENU", null);
+    sidebar = Boolean.parseBoolean(controlConf.getString("SIDEBAR", "true"));
   }
 
   public String getId()
@@ -307,5 +319,15 @@ public class UIElementConfig
   public List<String> getGroups()
   {
     return groups;
+  }
+
+  public String getMenu()
+  {
+    return menu;
+  }
+
+  public boolean isSidebar()
+  {
+    return sidebar;
   }
 }

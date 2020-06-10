@@ -1,20 +1,14 @@
 package de.muenchen.allg.itd51.wollmux.sidebar.controls;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.RandomStringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementType;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 
 /**
@@ -30,26 +24,6 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
  */
 public class UIFactory
 {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(UIFactory.class);
-
-  private static final String EDIT = "EDIT";
-
-  private static final String READONLY = "READONLY";
-
-  private static final String ACTION = "ACTION";
-
-  private static final String HOTKEY = "HOTKEY";
-
-  private static final String TYPE = "TYPE";
-
-  private static final String ID = "ID";
-
-  private static final String TIP = "TIP";
-
-  private static final String LABEL = "LABEL";
-
-  private static final String MENU = "MENU";
 
   private List<UIElementCreateListener> listeners;
 
@@ -79,33 +53,25 @@ public class UIFactory
 
   /**
    * Die Funktion wird aufgerufen, um einen Bereich der Konfiguration zu parsen und
-   * {@link UIControl}s zu erzeugen. Für jedes erzeugte Element werden alle Listener
-   * aufgerufen.
+   * {@link UIControl}s zu erzeugen. Für jedes erzeugte Element werden alle Listener aufgerufen.
    *
    * @param context
    * @param menuConf
    * @param elementParent
-   *          Die Konfiguration, die geparst werden soll. Muss eine Liste von Menüs
-   *          oder Buttons enthalten.
+   *          Die Konfiguration, die geparst werden soll. Muss eine Liste von Menüs oder Buttons
+   *          enthalten.
    * @param isMenu
-   *          Wenn true, werden button und menuitem in {@link UIMenuItem}
-   *          umgewandelt, sonst in {@link UIButton}.
+   *          Wenn true, werden button und menuitem in {@link UIMenuItem} umgewandelt, sonst in
+   *          {@link UIButton}.
    */
   public void createUIElements(UIElementContext context, ConfigThingy menuConf,
       ConfigThingy elementParent, boolean isMenu)
   {
     for (ConfigThingy uiElementDesc : elementParent)
     {
-      // Mit dem Config-Parameter "SIDEBAR" können Elemente in der Sidebar unterdrückt werden.
-      ConfigThingy sidebar = uiElementDesc.query("SIDEBAR");
-      boolean isSidebar = true;
+      UIElementConfig config = new UIElementConfig(uiElementDesc);
 
-      if (sidebar.count() > 0)
-      {
-        isSidebar = Boolean.getBoolean(sidebar.getString("SIDEBAR", "true"));
-      }
-
-      if (!isSidebar)
+      if (!config.isSidebar())
       {
         continue;
       }
@@ -113,133 +79,85 @@ public class UIFactory
       if (isMenu)
       {
         UIControl<?> control =
-          createUIMenuElement(context, uiElementDesc, menuConf.getName());
+            createUIMenuElement(context, config, menuConf.getName());
         fireElementCreated(control);
       }
       else
       {
-        UIControl<?> control = createUIElement(context, uiElementDesc);
+        UIControl<?> control = createUIElement(context, config);
         fireElementCreated(control);
       }
     }
   }
 
   public UIControl<?> createUIMenuElement(UIElementContext context,
-      ConfigThingy conf, String parent)
+      UIElementConfig conf, String parent)
   {
-    Map<String, String> props = parseElementConf(conf);
-
-    String type = props.get(TYPE);
-
-    if (type.isEmpty())
-      throw new ConfigurationErrorException(L.m(
-        "TYPE-Angabe fehlt bei Element mit Label \"%1\"", props.get(LABEL)));
-
     UIControl<?> uiElement = null;
 
-    if (type.equals("button") || type.equals("menuitem"))
+    if (conf.getType() == UIElementType.BUTTON || conf.getType() == UIElementType.MENUITEM)
     {
       UIElementAction action = null;
-      String actionName = props.get(ACTION);
+      String actionName = conf.getAction();
       if (actionName != null)
       {
-        ConfigThingy actionConf = conf;
-        try
-        {
-          if (actionName.equals("open"))
-          {
-            actionConf = conf.get("OPEN");
-          }
-        }
-        catch (NodeNotFoundException e)
-        {
-          LOGGER.error(L.m("ACTION \"open\" erfordert die Angabe OPEN \"...\""));
-        }
-
         action = new UIElementAction(eventHandler, false, "action", new Object[] {
-            actionName, actionConf });
+            actionName, conf });
       }
 
-      uiElement = new UIMenuItem(props.get(ID), props.get(LABEL), parent, action);
+      uiElement = new UIMenuItem(conf.getId(), conf.getLabel(), parent, action);
 
       if (action != null)
       {
         action.setControl(uiElement);
       }
-    } else if (type.equals("menu"))
+    } else if (conf.getType() == UIElementType.MENU)
     {
-      uiElement = new UIMenu(props.get(MENU), props.get(LABEL), parent, null);
+      uiElement = new UIMenu(conf.getMenu(), conf.getLabel(), parent, null);
     }
 
     return uiElement;
   }
 
-  private UIControl<?> createUIElement(UIElementContext context, ConfigThingy conf)
+  private UIControl<?> createUIElement(UIElementContext context, UIElementConfig conf)
   {
-    Map<String, String> props = parseElementConf(conf);
-
-    String type = props.get(TYPE);
-
-    if (type.isEmpty())
-      throw new ConfigurationErrorException(L.m(
-        "TYPE-Angabe fehlt bei Element mit Label \"%1\"", props.get(LABEL)));
-
     UIControl<?> uiElement = null;
 
-    if (type.equals("button") || type.equals("menuitem"))
+    if (conf.getType() == UIElementType.BUTTON || conf.getType() == UIElementType.MENUITEM)
     {
       UIElementAction action =
         new UIElementAction(eventHandler, false, "action", new Object[] {
-          props.get(ACTION), conf });
-      uiElement = new UIButton(props.get(ID), props.get(LABEL), action);
+              conf.getAction(), conf });
+      uiElement = new UIButton(conf.getId(), conf.getLabel(), action);
       action.setControl(uiElement);
     }
-    else if (type.equals("menu"))
+    else if (conf.getType() == UIElementType.MENU)
     {
       UIElementAction action = null;
-      if (props.get(ACTION) != null)
+      if (conf.getAction() != null)
       {
         action = new UIElementAction(eventHandler, false, "action", new Object[] {
-          props.get(ACTION), conf });
+            conf.getAction(), conf });
       }
 
-      uiElement = new UIMenu(props.get(MENU), props.get(LABEL), action);
+      uiElement = new UIMenu(conf.getMenu(), conf.getLabel(), action);
 
       if (action != null)
       {
         action.setControl(uiElement);
       }
     }
-    else if (type.equals("senderbox"))
+    else if (conf.getType() == UIElementType.SENDERBOX)
     {
       String label = L.m("Bitte warten...");
-      uiElement = new UISenderbox(props.get(ID), label, null);
+      uiElement = new UISenderbox(conf.getId(), label, null);
     }
-    else if (type.equals("searchbox"))
+    else if (conf.getType() == UIElementType.SEARCHBOX)
     {
-      uiElement = new UISearchbox(props.get(ID), "", null);
+      uiElement = new UISearchbox(conf.getId(), "", null);
     }
 
     return uiElement;
-  }
-
-  private Map<String, String> parseElementConf(ConfigThingy conf)
-  {
-    Map<String, String> props = new HashMap<>();
-    props.put(ID, RandomStringUtils.randomAlphanumeric(10));
-
-    for (ConfigThingy node : conf)
-    {
-      String name = node.getName();
-      String str = node.toString();
-
-      if (name.equals(LABEL) || name.equals(TIP))
-        props.put(name, L.m(str));
-      else
-        props.put(name, str);
-    }
-
-    return props;
   }
 
   public void addElementCreateListener(UIElementCreateListener listener)

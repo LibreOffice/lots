@@ -19,7 +19,7 @@ public class TestUIElementConfig
         "TYPE \"LABEL\" ID \"id\" LABEL \"label\" TIP \"tip\" HOTKEY \"key\" ACTION \"action\" DIALOG \"dialog\" "
             + "WINDOW \"window\" FRAG_ID \"id1\" FRAG_ID \"id2\" EXT \"ext\" URL \"url\" READONLY \"false\" EDIT \"false\" "
             + "LINES \"3\" WRAP \"false\" MINSIZE \"1\" PREFSIZE \"1\" MAXSIZE \"1\" VALUES(\"value1\" \"value2\") "
-            + "GROUPS(\"group1\" \"group2\")");
+            + "GROUPS(\"group1\" \"group2\") MENU \"menu\" SIDEBAR \"false\"");
     ConfigThingy plausiConf = new ConfigThingy("PLAUSI", "\"plausi\"");
     conf.addChild(plausiConf);
     ConfigThingy autofillConf = new ConfigThingy("AUTOFILL", "\"autofill\"");
@@ -47,6 +47,8 @@ public class TestUIElementConfig
     assertEquals(plausiConf, control.getPlausi().getFirstChild());
     assertEquals(autofillConf, control.getAutofill().getFirstChild());
     assertEquals(List.of("group1", "group2"), control.getGroups());
+    assertEquals("menu", control.getMenu());
+    assertFalse(control.isSidebar());
   }
 
 }

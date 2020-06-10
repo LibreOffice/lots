@@ -94,7 +94,6 @@ import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 
 /**
  * Dialog zur Suche nach Daten in einer Datenquelle, die über DIALOG-Funktion verfügbar gemacht
@@ -576,7 +575,7 @@ public class DatasourceSearchDialog implements Dialog
             {
               mapSpalteToUIElement.put(dbSpalte, uiElement);
             }
-          } catch (ConfigurationErrorException | FormModelException e)
+          } catch (ConfigurationErrorException e)
           {
             LOGGER.error("", e);
             continue;
