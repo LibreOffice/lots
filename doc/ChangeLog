@@ -1,3 +1,15 @@
+ ==================== Neu in Version 18.1.12 ====================
+    * Neue Features
+          o Das Plugin PDFMailMerge wurde in den WollMux integriert. Dies
+            ermöglicht es sowohl Seriendrucke als auch SLV-Drucke zu einem
+            PDF Gesamtdokument zu vereinen. Dazu wurde der Seriendruck-Dialog
+            und der Komfortdruck angepasst.
+    * Bugfixes
+          o Beim Auswählen einer neuen Datenquelle im Seriendruck kam es zu
+            einem Fehler der behoben wurde.
+          o Bei ComboBoxen in der FormularGUI wird das erste Element wieder
+            ausgewählt beim Öffnen von Formularen.
+
  ==================== Neu in Version 18.1.11 ====================
 
     * Bugfixes
