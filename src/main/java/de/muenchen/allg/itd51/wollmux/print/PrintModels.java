@@ -62,14 +62,13 @@ import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.SyncActionListener;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog;
-import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRange;
-import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRangeType;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCollectNonWollMuxFormFieldsViaPrintModel;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
+import de.muenchen.allg.itd51.wollmux.print.PrintParametersDialog.PageRange;
+import de.muenchen.allg.itd51.wollmux.print.PrintParametersDialog.PageRangeType;
 import de.muenchen.allg.itd51.wollmux.slv.events.OnSetPrintBlocksPropsViaPrintModel;
 import de.muenchen.allg.util.UnoProperty;
 
