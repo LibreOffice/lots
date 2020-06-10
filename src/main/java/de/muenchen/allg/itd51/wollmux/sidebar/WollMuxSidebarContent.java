@@ -2,7 +2,9 @@ package de.muenchen.allg.itd51.wollmux.sidebar;
 
 import java.awt.SystemColor;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -63,6 +65,7 @@ import de.muenchen.allg.dialog.adapter.AbstractMenuListener;
 import de.muenchen.allg.dialog.adapter.AbstractMouseListener;
 import de.muenchen.allg.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
+import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
@@ -75,8 +78,12 @@ import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnAbout;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnDumpInfo;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnKill;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
-import de.muenchen.allg.itd51.wollmux.sidebar.controls.WollMuxSidebarUIElementEventHandler;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogAbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
 import de.muenchen.allg.util.UnoConfiguration;
@@ -165,8 +172,6 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
       }
     }
   };
-
-  private WollMuxSidebarUIElementEventHandler eventHandler = new WollMuxSidebarUIElementEventHandler();
 
   private AbstractWindowListener windowAdapter = new AbstractWindowListener()
   {
@@ -393,8 +398,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
             new Rectangle(0, 0, 100, 32), null);
 
         XButton xbutton = UNO.XButton(button);
-        AbstractActionListener xButtonAction = event -> eventHandler.processUiElementEvent(null, "action",
-            new Object[] { element.getAction(), element });
+        AbstractActionListener xButtonAction = event -> processUiElementEvent(element);
         xbutton.addActionListener(xButtonAction);
         controlContainer.addControl(element.getId(), button);
         layout.addControl(button);
@@ -422,8 +426,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
         menus.get(parentEntry).appendChild(node);
 
         UUID uuid = UUID.randomUUID();
-        actions.put(uuid.toString(),
-            () -> eventHandler.processUiElementEvent(null, "action", new Object[] { element.getAction(), element }));
+        actions.put(uuid.toString(), () -> processUiElementEvent(element));
         node.setDataValue(uuid.toString());
       }
     } catch (com.sun.star.uno.Exception e)
@@ -539,8 +542,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
             items.insertItemText(n, newItems.get(n).getLabel());
             UIElementConfig item = newItems.get(n);
             UUID uuid = UUID.randomUUID();
-            searchActions.put(uuid.toString(), () -> eventHandler.processUiElementEvent(null, "action",
-                new Object[] { item.getAction(), item }));
+            searchActions.put(uuid.toString(), () -> processUiElementEvent(item));
             items.setItemData(n, uuid.toString());
           }
         } catch (Exception e)
@@ -749,4 +751,96 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     }
   }
 
+  private void processUiElementEvent(UIElementConfig config)
+  {
+    String action = config.getAction();
+    if (action.equals("absenderAuswaehlen"))
+    {
+      new OnShowDialogAbsenderAuswaehlen().emit();
+    } else if (action.equals("openDocument"))
+    {
+      String fragId = config.getFragId();
+      if (fragId.isEmpty())
+      {
+        LOGGER.error(L.m("ACTION \"%1\" erfordert mindestens ein Attribut FRAG_ID", action));
+      } else
+      {
+        new OnOpenDocument(Arrays.asList(fragId), false).emit();
+      }
+    } else if (action.equals("openTemplate"))
+    {
+      String fragId = config.getFragId();
+      if (fragId.isEmpty())
+      {
+        LOGGER.error(L.m("ACTION \"%1\" erfordert mindestens ein Attribut FRAG_ID", action));
+      } else
+      {
+        new OnOpenDocument(Arrays.asList(fragId), true).emit();
+      }
+    } else if (action.equals("open"))
+    {
+      InfoDialog.showInfoModal("Multiformulare werden nicht mehr unterstützt",
+          "Multiformulare werden nicht mehr unterstützt. " + "Bitte kontaktieren Sie Ihren Administrator. "
+              + "Sie müssen jedes Formular einzeln öffnen und ausfüllen.");
+    } else if (action.equals("openExt"))
+    {
+      executeOpenExt(config.getExt(), config.getUrl());
+    } else if (action.equals("dumpInfo"))
+    {
+      new OnDumpInfo().emit();
+    } else if (action.equals("abort"))
+    {
+      // abort();
+    } else if (action.equals("kill"))
+    {
+      new OnKill().emit();
+      // abort();
+    } else if (action.equals("about"))
+    {
+      new OnAbout().emit();
+    } else if (action.equals("options"))
+    {
+      // options();
+    }
+  }
+
+  /**
+   * Führt die gleichnamige ACTION aus.
+   *
+   * TESTED
+   */
+  private void executeOpenExt(String ext, String url)
+  {
+    try
+    {
+      final OpenExt openExt = OpenExt.getInstance(ext, url);
+
+      try
+      {
+        openExt.storeIfNecessary();
+      } catch (IOException x)
+      {
+        LOGGER.error("", x);
+        showError(L.m("Fehler beim Download der Datei:\n%1", x.getMessage()));
+        return;
+      }
+
+      Runnable launch = () -> openExt.launch((Exception x) -> {
+        LOGGER.error("", x);
+        showError(x.getMessage());
+      });
+
+      launch.run();
+    } catch (Exception x)
+    {
+      LOGGER.error("", x);
+      showError(x.getMessage());
+    }
+  }
+
+  private void showError(String errorMsg)
+  {
+    InfoDialog.showInfoModal(L.m("Fehlerhafte Konfiguration"),
+        L.m("%1\nVerständigen Sie Ihre Systemadministration.", errorMsg));
+  }
 }
