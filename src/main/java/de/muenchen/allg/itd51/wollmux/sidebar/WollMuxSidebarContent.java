@@ -631,7 +631,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     wnd.addFocusListener(wndListener);
 
     controlContainer.addControl(element.getId(), UNO.XControl(searchBox));
-    controlContainer.addControl("resultBox", UNO.XControl(searchBox));
+    controlContainer.addControl("resultBox", UNO.XControl(resultBox));
     layout.addControl(UNO.XControl(searchBox));
     layout.addControl(UNO.XControl(resultBox));
   }
