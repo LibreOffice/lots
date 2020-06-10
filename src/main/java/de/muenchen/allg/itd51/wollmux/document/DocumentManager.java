@@ -49,7 +49,6 @@ import com.sun.star.uno.XInterface;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.core.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.core.document.AnnotationBasedPersistentDataContainer;
 import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer;
@@ -418,9 +417,7 @@ public class DocumentManager
       if (documentController == null)
       {
         documentController = new TextDocumentController(
-            new TextDocumentModel(doc, createPersistentDataContainer(doc), WollMuxSingleton
-                .getVersion(),
-                UNO.getOOoVersion()),
+            new TextDocumentModel(doc, createPersistentDataContainer(doc)),
             GlobalFunctions.getInstance().getGlobalFunctions(), GlobalFunctions.getInstance().getFunctionDialogs());
       }
     }
