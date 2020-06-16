@@ -33,10 +33,10 @@ import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModelListener;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ui.MailMergeField;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ui.SpecialField;
-import de.muenchen.allg.itd51.wollmux.sidebar.GuiFactory;
-import de.muenchen.allg.itd51.wollmux.sidebar.layout.HorizontalLayout;
-import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
-import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
+import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
+import de.muenchen.allg.itd51.wollmux.ui.layout.HorizontalLayout;
+import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
+import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
 import de.muenchen.allg.util.UnoConfiguration;
 import de.muenchen.allg.util.UnoProperty;
 

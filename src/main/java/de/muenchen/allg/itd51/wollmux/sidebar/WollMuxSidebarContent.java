@@ -84,8 +84,9 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnKill;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogAbsenderAuswaehlen;
-import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
-import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
+import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
+import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
+import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
 import de.muenchen.allg.util.UnoConfiguration;
 import de.muenchen.allg.util.UnoProperty;
 

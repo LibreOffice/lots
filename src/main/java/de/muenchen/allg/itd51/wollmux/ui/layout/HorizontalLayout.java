@@ -1,4 +1,4 @@
-package de.muenchen.allg.itd51.wollmux.sidebar.layout;
+package de.muenchen.allg.itd51.wollmux.ui.layout;
 
 import java.util.LinkedHashMap;
 import java.util.List;

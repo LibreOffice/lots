@@ -40,10 +40,10 @@ import de.muenchen.allg.itd51.wollmux.form.config.TabConfig;
 import de.muenchen.allg.itd51.wollmux.form.control.HTMLElement;
 import de.muenchen.allg.itd51.wollmux.form.model.Control;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
-import de.muenchen.allg.itd51.wollmux.sidebar.GuiFactory;
-import de.muenchen.allg.itd51.wollmux.sidebar.layout.HorizontalLayout;
-import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
-import de.muenchen.allg.itd51.wollmux.sidebar.layout.VerticalLayout;
+import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
+import de.muenchen.allg.itd51.wollmux.ui.layout.HorizontalLayout;
+import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
+import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
 import de.muenchen.allg.util.UnoConfiguration;
 import de.muenchen.allg.util.UnoProperty;
 
