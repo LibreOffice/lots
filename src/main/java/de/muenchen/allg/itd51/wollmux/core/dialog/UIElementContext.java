@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
-import de.muenchen.allg.itd51.wollmux.core.form.model.FormType;
 
 public class UIElementContext
 {
@@ -19,7 +18,7 @@ public class UIElementContext
    * entsprechenden Eigenschaft des erzeugten UIElements zugewiesen, ansonsten
    * null.
    */
-  private Map<FormType, ?> mapTypeToLayoutConstraints;
+  private Map<UIElementType, ?> mapTypeToLayoutConstraints;
 
   /**
    * Bildet einen TYPE auf einen Integer ab, der angibt, ob das UI Element ein
@@ -31,7 +30,7 @@ public class UIElementContext
    * dieses der entsprechenden Eigenschaft des erzeugten UIElements zugewiesen,
    * ansonsten null.
    */
-  private Map<FormType, UIElement.LabelPosition> mapTypeToLabelType;
+  private Map<UIElementType, UIElement.LabelPosition> mapTypeToLabelType;
 
   /**
    * Für UI Elemente, die ein zusätzliches Label links oder rechts bekommen sollen
@@ -44,7 +43,7 @@ public class UIElementContext
    * der entsprechenden Eigenschaft des erzeugten UIElements zugewiesen, ansonsten
    * null.
    */
-  private Map<FormType, ?> mapTypeToLabelLayoutConstraints;
+  private Map<UIElementType, ?> mapTypeToLabelLayoutConstraints;
 
   /**
    * Die Menge (von Strings) der ACTIONs, die akzeptiert werden sollen. Alle
@@ -63,16 +62,23 @@ public class UIElementContext
    * der andere TYPE verwendet. Dies ist nützlich, um abhängig vom Kontext den TYPE
    * "separator" entweder auf "h-separator" oder "v-separator" abzubilden.
    */
-  private Map<FormType, FormType> mapTypeToType;
+  private Map<UIElementType, UIElementType> mapTypeToType;
 
-  public Object getLayoutConstraints(FormType type)
+  /**
+   * Get the layout constraints for a type.
+   *
+   * @param type
+   *          The type.
+   * @return The constraints.
+   */
+  public Object getLayoutConstraints(UIElementType type)
   {
     Object layoutConstraints;
     
     if (mapTypeToLayoutConstraints.containsKey(type))
       layoutConstraints = mapTypeToLayoutConstraints.get(type);
     else
-      layoutConstraints = mapTypeToLayoutConstraints.get(FormType.DEFAULT);
+      layoutConstraints = mapTypeToLayoutConstraints.get(UIElementType.DEFAULT);
     
     if (layoutConstraints instanceof GridBagConstraints)
       layoutConstraints = ((GridBagConstraints) layoutConstraints).clone();
@@ -80,31 +86,45 @@ public class UIElementContext
     return layoutConstraints;
   }
 
-  public void setMapTypeToLayoutConstraints(Map<FormType, ?> mapTypeToLayoutConstraints)
+  public void setMapTypeToLayoutConstraints(Map<UIElementType, ?> mapTypeToLayoutConstraints)
   {
     this.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
   }
 
-  public UIElement.LabelPosition getLabelType(FormType type)
+  /**
+   * Get the type of the label for an element type.
+   *
+   * @param type
+   *          The element type.
+   * @return The label type.
+   */
+  public UIElement.LabelPosition getLabelType(UIElementType type)
   {
     if (mapTypeToLabelType.containsKey(type))
       return mapTypeToLabelType.get(type);
     else
-      return mapTypeToLabelType.get(FormType.DEFAULT);
+      return mapTypeToLabelType.get(UIElementType.DEFAULT);
   }
 
-  public void setMapTypeToLabelType(Map<FormType, UIElement.LabelPosition> mapTypeToLabelType)
+  public void setMapTypeToLabelType(Map<UIElementType, UIElement.LabelPosition> mapTypeToLabelType)
   {
     this.mapTypeToLabelType = mapTypeToLabelType;
   }
 
-  public Object getLabelLayoutConstraints(FormType type)
+  /**
+   * Get the layout constraints for the label of an element type.
+   *
+   * @param type
+   *          The element type.
+   * @return The layout constraints of its lable.
+   */
+  public Object getLabelLayoutConstraints(UIElementType type)
   {
     Object labelLayoutConstraints;
     if (mapTypeToLabelLayoutConstraints.containsKey(type))
       labelLayoutConstraints = mapTypeToLabelLayoutConstraints.get(type);
     else
-      labelLayoutConstraints = mapTypeToLabelLayoutConstraints.get(FormType.DEFAULT);
+      labelLayoutConstraints = mapTypeToLabelLayoutConstraints.get(UIElementType.DEFAULT);
 
     if (labelLayoutConstraints instanceof GridBagConstraints)
       labelLayoutConstraints = ((GridBagConstraints) labelLayoutConstraints).clone();
@@ -112,7 +132,7 @@ public class UIElementContext
     return labelLayoutConstraints;
   }
 
-  public void setMapTypeToLabelLayoutConstraints(Map<FormType, ?> mapTypeToLabelLayoutConstraints)
+  public void setMapTypeToLabelLayoutConstraints(Map<UIElementType, ?> mapTypeToLabelLayoutConstraints)
   {
     this.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
   }
@@ -137,14 +157,21 @@ public class UIElementContext
     this.uiElementEventHandler = uiElementEventHandler;
   }
 
-  public FormType getMappedType(FormType type)
+  /**
+   * Map an element type to another type.
+   *
+   * @param type
+   *          The type to map.
+   * @return The new type.
+   */
+  public UIElementType getMappedType(UIElementType type)
   {
     if (mapTypeToType != null && mapTypeToType.containsKey(type))
       return mapTypeToType.get(type);
     return type;
   }
 
-  public void setMapTypeToType(Map<FormType, FormType> mapTypeToType)
+  public void setMapTypeToType(Map<UIElementType, UIElementType> mapTypeToType)
   {
     this.mapTypeToType = mapTypeToType;
   }

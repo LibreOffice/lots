@@ -33,11 +33,13 @@ import de.muenchen.allg.dialog.adapter.AbstractSidebarPanel;
 import de.muenchen.allg.dialog.adapter.AbstractTabPageContainerListener;
 import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
-import de.muenchen.allg.itd51.wollmux.core.form.model.Control;
-import de.muenchen.allg.itd51.wollmux.core.form.model.FormModel;
-import de.muenchen.allg.itd51.wollmux.core.form.model.Tab;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.form.config.FormConfig;
+import de.muenchen.allg.itd51.wollmux.form.config.TabConfig;
 import de.muenchen.allg.itd51.wollmux.form.control.HTMLElement;
+import de.muenchen.allg.itd51.wollmux.form.model.Control;
+import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.sidebar.GuiFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.HorizontalLayout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
@@ -155,13 +157,15 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
 
   /**
    * Creates the tab control with its content controls.
-   * 
+   *
+   * @param config
+   *          The UI configuration of the form.
    * @param model
    *          {@link FormModel} FormModel from @{link {@link TextDocumentController}.
    */
-  public void createTabControl(FormModel model)
+  public void createTabControl(FormConfig config, FormModel model)
   {
-    if (model != null)
+    if (config != null && model != null)
     {
       XControl tabControl = GuiFactory.createTabPageContainer(xMCF, context);
       controlContainer.addControl("tabControl", tabControl);
@@ -174,9 +178,8 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       vLayout.addLayout(buttonLayout, 1);
 
       short tabId = 1;
-      for (Map.Entry<String, Tab> entry : model.getTabs().entrySet())
+      for (TabConfig tab : config.getTabs())
       {
-        Tab tab = entry.getValue();
         HTMLElement htmlElement = HTMLElement.parseHtml(tab.getTitle());
         GuiFactory.createTab(this.xMCF, this.context, UNO.XTabPageContainerModel(tabControl.getModel()),
             htmlElement.getText(), tabId);
@@ -186,7 +189,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
 
         Layout controlsVLayout = new VerticalLayout(5, 5, 0, 0, 6);
         setControls(tab, tabPageControlContainer, controlsVLayout);
-        addButtonsToLayout(tab, controlContainer, buttonLayout, tabId);
+        addButtonsToLayout(tab, model, controlContainer, buttonLayout, tabId);
 
         tabPageLayouts.put(tabId, controlsVLayout);
 
@@ -205,17 +208,17 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   }
 
   /**
-   * Add controls from {@link Tab} description to {link Layout}.
+   * Add controls from {@link TabConfig} description to {link Layout}.
    * 
    * @param tab
-   *          {@link Tab} Tab from {@link FormModel}.
+   *          {@link TabConfig} Tab from {@link FormModel}.
    * @param tabPageControlContainer
    *          {@link XControlContainer} ControlContainer in which the controls will be inserted.
    * @param layout
    *          The {@link Layout} in which newly created Layouts by this method will be inserted.
    * @return The generated Layout.
    */
-  private void setControls(Tab tab, XControlContainer tabPageControlContainer, Layout layout)
+  private void setControls(TabConfig tab, XControlContainer tabPageControlContainer, Layout layout)
   {
     tab.getControls().forEach(control -> {
       Layout controlLayout = createXControlByType(control, tabPageControlContainer);
@@ -242,7 +245,8 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
    * @param tabId
    *          The ID of the tab.
    */
-  private void addButtonsToLayout(Tab tab, XControlContainer tabPageControlContainer, Layout layout, short tabId)
+  private void addButtonsToLayout(TabConfig tab, FormModel model, XControlContainer tabPageControlContainer,
+      Layout layout, short tabId)
   {
     if (!tab.getButtons().isEmpty())
     {
@@ -254,7 +258,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
           LOGGER.trace("layout with control id '{}' is null.", control.getId());
         } else
         {
-          buttons.put(control, tabId);
+          buttons.put(model.getControl(control.getId()), tabId);
           layout.addLayout(controlLayout, 1);
         }
       });
@@ -270,7 +274,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
    *          {@link XTabPage} as XControl
    * @return Layout with one or more Controls.
    */
-  private Layout createXControlByType(Control control, XControlContainer pageContainer)
+  private Layout createXControlByType(UIElementConfig control, XControlContainer pageContainer)
   {
     Layout layout = new HorizontalLayout(0, 0, 5, 10, 5);
     XControl xLabel = null;
@@ -288,7 +292,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       props.put(UnoProperty.DEFAULT_CONTROL, control.getId());
       props.put(UnoProperty.READ_ONLY, control.isReadonly());
       props.put(UnoProperty.HELP_TEXT, control.getTip());
-      xControl = GuiFactory.createTextfield(xMCF, context, control.getValue(), new Rectangle(0, 0, 100, 20), props,
+      xControl = GuiFactory.createTextfield(xMCF, context, "", new Rectangle(0, 0, 100, 20), props,
           formSidebarController::textChanged);
       UNO.XWindow(xControl).addFocusListener(formSidebarController.getFocusListener());
       break;
@@ -342,7 +346,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       props.put(UnoProperty.MULTILINE, true);
       props.put(UnoProperty.READ_ONLY, control.isReadonly());
       props.put(UnoProperty.HELP_TEXT, control.getTip());
-      xControl = GuiFactory.createTextfield(xMCF, context, control.getValue(),
+      xControl = GuiFactory.createTextfield(xMCF, context, "",
           new Rectangle(0, 0, 100, control.getLines() * 20), props, formSidebarController::textChanged);
       UNO.XWindow(xControl).addFocusListener(formSidebarController.getFocusListener());
       break;
@@ -375,7 +379,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     return layout;
   }
 
-  private XControl createLabel(Control control, HTMLElement htmlElement)
+  private XControl createLabel(UIElementConfig control, HTMLElement htmlElement)
   {
     if (htmlElement != null)
     {
@@ -401,7 +405,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     return null;
   }
 
-  private XControl createListBox(Control control)
+  private XControl createListBox(UIElementConfig control)
   {
     SortedMap<String, Object> propsListBox = new TreeMap<>();
     propsListBox.put(UnoProperty.DEFAULT_CONTROL, control.getId());
@@ -422,7 +426,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     return xControl;
   }
 
-  private XControl createComboBox(Control control)
+  private XControl createComboBox(UIElementConfig control)
   {
     SortedMap<String, Object> propsComboBox = new TreeMap<>();
     propsComboBox.put(UnoProperty.DEFAULT_CONTROL, control.getId());

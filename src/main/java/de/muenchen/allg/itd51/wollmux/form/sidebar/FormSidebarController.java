@@ -24,17 +24,19 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
-import de.muenchen.allg.itd51.wollmux.core.form.model.Control;
-import de.muenchen.allg.itd51.wollmux.core.form.model.FormModel;
-import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
-import de.muenchen.allg.itd51.wollmux.core.form.model.FormValueChangedListener;
-import de.muenchen.allg.itd51.wollmux.core.form.model.VisibilityChangedListener;
-import de.muenchen.allg.itd51.wollmux.core.form.model.VisibilityGroup;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
+import de.muenchen.allg.itd51.wollmux.form.config.FormConfig;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
+import de.muenchen.allg.itd51.wollmux.form.model.Control;
+import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
+import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
+import de.muenchen.allg.itd51.wollmux.form.model.FormValueChangedListener;
+import de.muenchen.allg.itd51.wollmux.form.model.VisibilityChangedListener;
+import de.muenchen.allg.itd51.wollmux.form.model.VisibilityGroup;
 import de.muenchen.allg.util.UnoProperty;
 
 /**
@@ -70,6 +72,8 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
    * The model of the form.
    */
   private FormModel formModel;
+
+  private FormConfig formConfig;
 
   /**
    * Are ui elements handled by the controller.
@@ -167,9 +171,10 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
       try
       {
         this.formController = documentController.getFormController();
+        formConfig = documentController.getFormConfig();
         formModel = documentController.getFormModel();
 
-        formSidebarPanel.createTabControl(formModel);
+        formSidebarPanel.createTabControl(formConfig, formModel);
         formModel.addFormModelChangedListener(this, true);
         formModel.addVisibilityChangedListener(this, true);
 
@@ -179,7 +184,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
       }
     } else
     {
-      formSidebarPanel.createTabControl(null);
+      formSidebarPanel.createTabControl(null, null);
     }
     unregisterListener();
   }
@@ -337,8 +342,11 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
     {
       XControl xControl = UNO.XControl(actionEvent.Source);
       String id = (String) UnoProperty.getProperty(xControl.getModel(), UnoProperty.DEFAULT_CONTROL);
-
-      Control formControl = formModel.getControl(id);
+      UIElementConfig formControl = formConfig.getControls().filter(c -> id.equals(c.getId())).findFirst().orElse(null);
+      if (formControl == null)
+      {
+        return;
+      }
 
       switch (action)
       {
@@ -419,7 +427,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   @Override
   public void statusChanged(String id, boolean okay)
   {
-    formSidebarPanel.setBackgroundColor(id, okay, formModel.getPlausiMarkerColor().getRGB() & ~0xFF000000);
+    formSidebarPanel.setBackgroundColor(id, okay, formConfig.getPlausiMarkerColor().getRGB() & ~0xFF000000);
   }
 
   /**

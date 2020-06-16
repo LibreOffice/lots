@@ -82,19 +82,19 @@ import de.muenchen.allg.itd51.wollmux.core.db.Search;
 import de.muenchen.allg.itd51.wollmux.core.db.SearchStrategy;
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementEventHandler;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementFactory;
+import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementType;
 import de.muenchen.allg.itd51.wollmux.core.dialog.controls.Listbox;
 import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
-import de.muenchen.allg.itd51.wollmux.core.form.model.Control;
-import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
-import de.muenchen.allg.itd51.wollmux.core.form.model.FormType;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 
 /**
  * Dialog zur Suche nach Daten in einer Datenquelle, die über DIALOG-Funktion verfügbar gemacht
@@ -570,7 +570,7 @@ public class DatasourceSearchDialog implements Dialog
           UIElement uiElement;
           try
           {
-            uiElement = uiElementFactory.createUIElement(context, Control.create(uiConf, null));
+            uiElement = uiElementFactory.createUIElement(context, new UIElementConfig(uiConf));
             String dbSpalte = uiConf.getString("DB_SPALTE", null);
             if (dbSpalte != null)
             {
@@ -892,10 +892,10 @@ public class DatasourceSearchDialog implements Dialog
      */
     private void initFactories()
     {
-      Map<FormType, GridBagConstraints> mapTypeToLayoutConstraints = new EnumMap<>(FormType.class);
-      Map<FormType, UIElement.LabelPosition> mapTypeToLabelType = new EnumMap<>(FormType.class);
-      Map<FormType, GridBagConstraints> mapTypeToLabelLayoutConstraints = new EnumMap<>(
-          FormType.class);
+      Map<UIElementType, GridBagConstraints> mapTypeToLayoutConstraints = new EnumMap<>(UIElementType.class);
+      Map<UIElementType, UIElement.LabelPosition> mapTypeToLabelType = new EnumMap<>(UIElementType.class);
+      Map<UIElementType, GridBagConstraints> mapTypeToLabelLayoutConstraints = new EnumMap<>(
+          UIElementType.class);
 
       // int gridx, int gridy, int gridwidth, int gridheight, double weightx, double
       // weighty, int anchor, int fill, Insets insets, int ipadx, int ipady)
@@ -940,51 +940,51 @@ public class DatasourceSearchDialog implements Dialog
       GridBagConstraints gbcPreviewGlue = new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0,
           GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0);
 
-      mapTypeToLayoutConstraints.put(FormType.DEFAULT, gbcTextfield);
-      mapTypeToLabelType.put(FormType.DEFAULT, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(FormType.DEFAULT, null);
+      mapTypeToLayoutConstraints.put(UIElementType.DEFAULT, gbcTextfield);
+      mapTypeToLabelType.put(UIElementType.DEFAULT, UIElement.LabelPosition.NONE);
+      mapTypeToLabelLayoutConstraints.put(UIElementType.DEFAULT, null);
 
-      mapTypeToLayoutConstraints.put(FormType.TEXTFIELD, gbcTextfield);
-      mapTypeToLabelType.put(FormType.TEXTFIELD, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(FormType.TEXTFIELD, null);
+      mapTypeToLayoutConstraints.put(UIElementType.TEXTFIELD, gbcTextfield);
+      mapTypeToLabelType.put(UIElementType.TEXTFIELD, UIElement.LabelPosition.NONE);
+      mapTypeToLabelLayoutConstraints.put(UIElementType.TEXTFIELD, null);
 
-      mapTypeToLayoutConstraints.put(FormType.COMBOBOX, gbcCombobox);
-      mapTypeToLabelType.put(FormType.COMBOBOX, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(FormType.COMBOBOX, null);
+      mapTypeToLayoutConstraints.put(UIElementType.COMBOBOX, gbcCombobox);
+      mapTypeToLabelType.put(UIElementType.COMBOBOX, UIElement.LabelPosition.NONE);
+      mapTypeToLabelLayoutConstraints.put(UIElementType.COMBOBOX, null);
 
-      mapTypeToLayoutConstraints.put(FormType.H_GLUE, gbcGlue);
-      mapTypeToLabelType.put(FormType.H_GLUE, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(FormType.H_GLUE, null);
-      mapTypeToLayoutConstraints.put(FormType.V_GLUE, gbcGlue);
-      mapTypeToLabelType.put(FormType.V_GLUE, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(FormType.V_GLUE, null);
+      mapTypeToLayoutConstraints.put(UIElementType.H_GLUE, gbcGlue);
+      mapTypeToLabelType.put(UIElementType.H_GLUE, UIElement.LabelPosition.NONE);
+      mapTypeToLabelLayoutConstraints.put(UIElementType.H_GLUE, null);
+      mapTypeToLayoutConstraints.put(UIElementType.V_GLUE, gbcGlue);
+      mapTypeToLabelType.put(UIElementType.V_GLUE, UIElement.LabelPosition.NONE);
+      mapTypeToLabelLayoutConstraints.put(UIElementType.V_GLUE, null);
 
-      mapTypeToLayoutConstraints.put(FormType.TEXTAREA, gbcTextarea);
-      mapTypeToLabelType.put(FormType.TEXTAREA, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(FormType.TEXTAREA, null);
+      mapTypeToLayoutConstraints.put(UIElementType.TEXTAREA, gbcTextarea);
+      mapTypeToLabelType.put(UIElementType.TEXTAREA, UIElement.LabelPosition.NONE);
+      mapTypeToLabelLayoutConstraints.put(UIElementType.TEXTAREA, null);
 
-      mapTypeToLayoutConstraints.put(FormType.LISTBOX, gbcListbox);
-      mapTypeToLabelType.put(FormType.LISTBOX, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(FormType.LISTBOX, null);
+      mapTypeToLayoutConstraints.put(UIElementType.LISTBOX, gbcListbox);
+      mapTypeToLabelType.put(UIElementType.LISTBOX, UIElement.LabelPosition.NONE);
+      mapTypeToLabelLayoutConstraints.put(UIElementType.LISTBOX, null);
 
-      mapTypeToLayoutConstraints.put(FormType.LABEL, gbcLabel);
-      mapTypeToLabelType.put(FormType.LABEL, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(FormType.LABEL, null);
+      mapTypeToLayoutConstraints.put(UIElementType.LABEL, gbcLabel);
+      mapTypeToLabelType.put(UIElementType.LABEL, UIElement.LabelPosition.NONE);
+      mapTypeToLabelLayoutConstraints.put(UIElementType.LABEL, null);
 
-      mapTypeToLayoutConstraints.put(FormType.CHECKBOX, gbcCheckbox);
-      mapTypeToLabelType.put(FormType.CHECKBOX, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(FormType.CHECKBOX, null); // hat label integriert
+      mapTypeToLayoutConstraints.put(UIElementType.CHECKBOX, gbcCheckbox);
+      mapTypeToLabelType.put(UIElementType.CHECKBOX, UIElement.LabelPosition.NONE);
+      mapTypeToLabelLayoutConstraints.put(UIElementType.CHECKBOX, null); // hat label integriert
 
-      mapTypeToLayoutConstraints.put(FormType.BUTTON, gbcButton);
-      mapTypeToLabelType.put(FormType.BUTTON, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(FormType.BUTTON, null);
+      mapTypeToLayoutConstraints.put(UIElementType.BUTTON, gbcButton);
+      mapTypeToLabelType.put(UIElementType.BUTTON, UIElement.LabelPosition.NONE);
+      mapTypeToLabelLayoutConstraints.put(UIElementType.BUTTON, null);
 
-      mapTypeToLayoutConstraints.put(FormType.H_SEPARATOR, gbcHsep);
-      mapTypeToLabelType.put(FormType.H_SEPARATOR, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(FormType.H_SEPARATOR, null);
-      mapTypeToLayoutConstraints.put(FormType.V_SEPARATOR, gbcVsep);
-      mapTypeToLabelType.put(FormType.V_SEPARATOR, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(FormType.V_SEPARATOR, null);
+      mapTypeToLayoutConstraints.put(UIElementType.H_SEPARATOR, gbcHsep);
+      mapTypeToLabelType.put(UIElementType.H_SEPARATOR, UIElement.LabelPosition.NONE);
+      mapTypeToLabelLayoutConstraints.put(UIElementType.H_SEPARATOR, null);
+      mapTypeToLayoutConstraints.put(UIElementType.V_SEPARATOR, gbcVsep);
+      mapTypeToLabelType.put(UIElementType.V_SEPARATOR, UIElement.LabelPosition.NONE);
+      mapTypeToLabelLayoutConstraints.put(UIElementType.V_SEPARATOR, null);
 
       Set<String> supportedActions = new HashSet<>();
       supportedActions.add("abort");
@@ -997,9 +997,9 @@ public class DatasourceSearchDialog implements Dialog
       vertiContext.setMapTypeToLabelType(mapTypeToLabelType);
       vertiContext.setMapTypeToLayoutConstraints(mapTypeToLayoutConstraints);
       vertiContext.setUiElementEventHandler(this);
-      Map<FormType, FormType> vertiMapTypeToType = new EnumMap<>(FormType.class);
-      vertiMapTypeToType.put(FormType.SEPARATOR, FormType.H_SEPARATOR);
-      vertiMapTypeToType.put(FormType.GLUE, FormType.V_GLUE);
+      Map<UIElementType, UIElementType> vertiMapTypeToType = new EnumMap<>(UIElementType.class);
+      vertiMapTypeToType.put(UIElementType.SEPARATOR, UIElementType.H_SEPARATOR);
+      vertiMapTypeToType.put(UIElementType.GLUE, UIElementType.V_GLUE);
       vertiContext.setMapTypeToType(vertiMapTypeToType);
       vertiContext.setSupportedActions(supportedActions);
 
@@ -1008,31 +1008,31 @@ public class DatasourceSearchDialog implements Dialog
       horiContext.setMapTypeToLabelType(mapTypeToLabelType);
       horiContext.setMapTypeToLayoutConstraints(mapTypeToLayoutConstraints);
       horiContext.setUiElementEventHandler(this);
-      Map<FormType, FormType> horiMapTypeToType = new EnumMap<>(FormType.class);
-      horiMapTypeToType.put(FormType.SEPARATOR, FormType.V_SEPARATOR);
-      horiMapTypeToType.put(FormType.GLUE, FormType.H_GLUE);
+      Map<UIElementType, UIElementType> horiMapTypeToType = new EnumMap<>(UIElementType.class);
+      horiMapTypeToType.put(UIElementType.SEPARATOR, UIElementType.V_SEPARATOR);
+      horiMapTypeToType.put(UIElementType.GLUE, UIElementType.H_GLUE);
       horiContext.setMapTypeToType(horiMapTypeToType);
       horiContext.setSupportedActions(supportedActions);
 
-      Map<FormType, GridBagConstraints> previewLabelLayoutConstraints = new EnumMap<>(
+      Map<UIElementType, GridBagConstraints> previewLabelLayoutConstraints = new EnumMap<>(
           mapTypeToLabelLayoutConstraints);
-      previewLabelLayoutConstraints.put(FormType.TEXTFIELD, gbcLabelLeft);
-      Map<FormType, UIElement.LabelPosition> previewLabelType = new EnumMap<>(mapTypeToLabelType);
-      previewLabelType.put(FormType.TEXTFIELD, UIElement.LabelPosition.LEFT);
-      Map<FormType, GridBagConstraints> previewLayoutConstraints = new EnumMap<>(
+      previewLabelLayoutConstraints.put(UIElementType.TEXTFIELD, gbcLabelLeft);
+      Map<UIElementType, UIElement.LabelPosition> previewLabelType = new EnumMap<>(mapTypeToLabelType);
+      previewLabelType.put(UIElementType.TEXTFIELD, UIElement.LabelPosition.LEFT);
+      Map<UIElementType, GridBagConstraints> previewLayoutConstraints = new EnumMap<>(
           mapTypeToLayoutConstraints);
-      previewLayoutConstraints.put(FormType.H_GLUE, gbcPreviewGlue);
-      previewLayoutConstraints.put(FormType.V_GLUE, gbcPreviewGlue);
-      previewLayoutConstraints.put(FormType.LABEL, gbcPreviewLabel);
-      previewLayoutConstraints.put(FormType.H_SEPARATOR, gbcPreviewHsep);
+      previewLayoutConstraints.put(UIElementType.H_GLUE, gbcPreviewGlue);
+      previewLayoutConstraints.put(UIElementType.V_GLUE, gbcPreviewGlue);
+      previewLayoutConstraints.put(UIElementType.LABEL, gbcPreviewLabel);
+      previewLayoutConstraints.put(UIElementType.H_SEPARATOR, gbcPreviewHsep);
       previewContext = new UIElementContext();
       previewContext.setMapTypeToLabelLayoutConstraints(previewLabelLayoutConstraints);
       previewContext.setMapTypeToLabelType(previewLabelType);
       previewContext.setMapTypeToLayoutConstraints(previewLayoutConstraints);
       previewContext.setUiElementEventHandler(this);
-      Map<FormType, FormType> previewMapTypeToType = new EnumMap<>(FormType.class);
-      previewMapTypeToType.put(FormType.SEPARATOR, FormType.H_SEPARATOR);
-      previewMapTypeToType.put(FormType.GLUE, FormType.V_GLUE);
+      Map<UIElementType, UIElementType> previewMapTypeToType = new EnumMap<>(UIElementType.class);
+      previewMapTypeToType.put(UIElementType.SEPARATOR, UIElementType.H_SEPARATOR);
+      previewMapTypeToType.put(UIElementType.GLUE, UIElementType.V_GLUE);
       previewContext.setMapTypeToType(previewMapTypeToType);
       previewContext.setSupportedActions(supportedActions);
 

@@ -6,8 +6,8 @@ import java.awt.Component;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 
-import de.muenchen.allg.itd51.wollmux.core.form.model.Control;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
+import de.muenchen.allg.itd51.wollmux.form.model.Control;
 
 /**
  * Abstrakte Basis-Klasse für UIElemente.
