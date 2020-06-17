@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.dialog.trafo;
+package de.muenchen.allg.itd51.wollmux.mailmerge.sidebar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
