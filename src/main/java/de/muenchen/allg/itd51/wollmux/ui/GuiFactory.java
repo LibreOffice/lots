@@ -1,4 +1,4 @@
-package de.muenchen.allg.itd51.wollmux.sidebar;
+package de.muenchen.allg.itd51.wollmux.ui;
 
 import java.util.SortedMap;
 import java.util.TreeMap;

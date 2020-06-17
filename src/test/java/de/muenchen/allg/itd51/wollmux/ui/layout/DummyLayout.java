@@ -1,10 +1,12 @@
-package de.muenchen.allg.itd51.wollmux.sidebar.layout;
+package de.muenchen.allg.itd51.wollmux.ui.layout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.sun.star.awt.Rectangle;
+
+import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
 
 public class DummyLayout implements Layout
 {

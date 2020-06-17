@@ -1,4 +1,4 @@
-package de.muenchen.allg.itd51.wollmux.sidebar.layout;
+package de.muenchen.allg.itd51.wollmux.ui.layout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Test;
 
 import com.sun.star.awt.Rectangle;
 
-public class HorizontalLayoutTest
+public class VerticalLayoutTest
 {
 
   @Test
   public void empty()
   {
-    Layout layout = new HorizontalLayout(10, 10, 10, 10, 10);
+    Layout layout = new VerticalLayout(10, 10, 10, 10, 10);
     assertFalse(layout.isVisible(), "should be invisible");
     assertEquals(0, layout.getMinimalWidth(100), "width");
     assertEquals(0, layout.getHeightForWidth(100), "height");
@@ -27,7 +27,7 @@ public class HorizontalLayoutTest
   @Test
   public void oneElement()
   {
-    Layout layout = new HorizontalLayout(10, 10, 10, 10, 10);
+    Layout layout = new VerticalLayout(10, 10, 10, 10, 10);
     layout.addLayout(new DummyLayout(true, 10, 10, 80, 80), 1);
     assertTrue(layout.isVisible(), "should be visible");
     assertEquals(30, layout.getMinimalWidth(100), "width");
@@ -36,7 +36,7 @@ public class HorizontalLayoutTest
     assertEquals(30, size.getLeft(), "height");
     assertEquals(100, size.getRight(), "width");
 
-    layout = new HorizontalLayout();
+    layout = new VerticalLayout();
     layout.addLayout(new DummyLayout(true, 0, 0, 100, 100), 1);
     assertTrue(layout.isVisible(), "should be visible");
     assertEquals(10, layout.getMinimalWidth(100), "width");
@@ -49,21 +49,21 @@ public class HorizontalLayoutTest
   @Test
   public void twoElements()
   {
-    Layout layout = new HorizontalLayout(10, 10, 10, 10, 20);
-    layout.addLayout(new DummyLayout(true, 10, 10, 15, 80), 1);
-    layout.addLayout(new DummyLayout(true, 40, 10, 45, 80), 3);
+    Layout layout = new VerticalLayout(10, 10, 10, 10, 10);
+    layout.addLayout(new DummyLayout(true, 10, 10, 80, 80), 1);
+    layout.addLayout(new DummyLayout(true, 10, 30, 80, 80), 3);
     assertTrue(layout.isVisible(), "should be visible");
-    assertEquals(60, layout.getMinimalWidth(100), "width");
-    assertEquals(30, layout.getHeightForWidth(100), "height");
+    assertEquals(30, layout.getMinimalWidth(100), "width");
+    assertEquals(50, layout.getHeightForWidth(100), "height");
     Pair<Integer, Integer> size = layout.layout(new Rectangle(0, 0, 100, 100));
-    assertEquals(30, size.getLeft());
-    assertEquals(100, size.getRight());
+    assertEquals(50, size.getLeft(), "height");
+    assertEquals(100, size.getRight(), "width");
   }
 
   @Test
   public void invisibleElement()
   {
-    Layout layout = new HorizontalLayout(10, 10, 10, 10, 10);
+    Layout layout = new VerticalLayout(10, 10, 10, 10, 10);
     layout.addLayout(new DummyLayout(false, 10, 10, 80, 80), 1);
     assertFalse(layout.isVisible(), "should be invisible");
     assertEquals(0, layout.getMinimalWidth(100), "width");
