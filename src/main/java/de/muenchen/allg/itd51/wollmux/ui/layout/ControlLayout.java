@@ -18,12 +18,32 @@ import de.muenchen.allg.afid.UNO;
 public class ControlLayout implements Layout
 {
 
+  /**
+   * The control as {@link XWindow}.
+   */
   private XWindow control;
+
+  /**
+   * The control as {@link XWindow2}.
+   */
   private XWindow2 control2;
+
+  /**
+   * The control as {@link XLayoutContrains}.
+   */
   private XLayoutConstrains constrains;
 
+  /**
+   * The initial height of the control.
+   */
   private int height;
 
+  /**
+   * A new layout for a single control.
+   *
+   * @param control
+   *          The control as {@link XWindow}.
+   */
   public ControlLayout(XWindow control)
   {
     this.control = control;
@@ -32,6 +52,12 @@ public class ControlLayout implements Layout
     height = control.getPosSize().Height;
   }
 
+  /**
+   * A new layout for a single control.
+   *
+   * @param control
+   *          The control as {@link XControl}.
+   */
   public ControlLayout(XControl control)
   {
     this(UNO.XWindow(control));
