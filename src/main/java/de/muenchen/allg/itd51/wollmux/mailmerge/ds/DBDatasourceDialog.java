@@ -1,28 +1,29 @@
 package de.muenchen.allg.itd51.wollmux.mailmerge.ds;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.awt.XButton;
+import com.sun.star.awt.PosSize;
+import com.sun.star.awt.Rectangle;
+import com.sun.star.awt.XContainerWindowProvider;
+import com.sun.star.awt.XControl;
+import com.sun.star.awt.XControlContainer;
+import com.sun.star.awt.XDialog;
 import com.sun.star.awt.XWindow;
+import com.sun.star.awt.XWindowPeer;
+import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Align;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.ControlType;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlModel.Orientation;
-import de.muenchen.allg.itd51.wollmux.core.dialog.ControlProperties;
-import de.muenchen.allg.itd51.wollmux.core.dialog.SimpleDialogLayout;
-import de.muenchen.allg.itd51.wollmux.core.dialog.UNODialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.AbstractNotifier;
+import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
+import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
+import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
 
 /**
  * A dialog for selecting a data source which is registered in LibreOffice as database.
@@ -39,53 +40,44 @@ public class DBDatasourceDialog
    */
   public DBDatasourceDialog(AbstractNotifier listener)
   {
-    UNODialogFactory dialogFactory = new UNODialogFactory();
-    XWindow dialogWindow = dialogFactory.createDialog(600, 400, 0xF2F2F2);
-    dialogFactory.showDialog();
+    XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
+    XContainerWindowProvider provider = null;
 
-    SimpleDialogLayout layout = new SimpleDialogLayout(dialogWindow);
-    layout.setMarginBetweenControls(15);
-    layout.setMarginTop(20);
-    layout.setMarginLeft(20);
-    layout.setWindowBottomMargin(10);
+    try
+    {
+      provider = UnoRuntime.queryInterface(XContainerWindowProvider.class,
+          UNO.xMCF.createInstanceWithContext("com.sun.star.awt.ContainerWindowProvider", UNO.defaultContext));
+    } catch (com.sun.star.uno.Exception e)
+    {
+      LOGGER.error("", e);
+    }
+
+    if (provider == null)
+      return;
+
+    XWindow window = provider
+        .createContainerWindow("vnd.sun.star.script:WollMux.DBDatasourceDialog?location=application", "", peer, null);
+    XControlContainer controlContainer = UNO.XControlContainer(window);
+    XDialog dialog = UNO.XDialog(window);
+    Layout layout = new VerticalLayout(20, 10, 20, 20, 15);
 
     AbstractActionListener oooDSActionListener = event -> {
       listener.notify(event.ActionCommand);
-      dialogFactory.closeDialog();
+      dialog.endExecute();
     };
 
-    Set<String> oooDatasources = getRegisteredDatabaseNames();
-    layout.addControlsToList(addDBDatasourceButtons(oooDatasources, oooDSActionListener));
-
-    layout.draw();
-  }
-
-  /**
-   * Add a button for each list entry.
-   *
-   * @param oooDatasources
-   *          List of entries.
-   * @param oooDSActionListener
-   *          Listener to call on click.
-   * @return A list of buttons.
-   */
-  private ControlModel addDBDatasourceButtons(Set<String> oooDatasources,
-      AbstractActionListener oooDSActionListener)
-  {
-    List<ControlProperties> dsButtons = new ArrayList<>();
-
-    for (String ds : oooDatasources)
+    for (String ds : getRegisteredDatabaseNames())
     {
-      ControlProperties oooDS = new ControlProperties(ControlType.BUTTON, ds);
-      oooDS.setControlPercentSize(50, 40);
-      oooDS.setLabel(ds);
-      XButton dsButton = UNO.XButton(oooDS.getXControl());
-      dsButton.setActionCommand(ds);
-      dsButton.addActionListener(oooDSActionListener);
-      dsButtons.add(oooDS);
+      XControl control = GuiFactory.createButton(UNO.xMCF, UNO.defaultContext, ds, oooDSActionListener,
+          new Rectangle(0, 0, 200, 30), null);
+      UNO.XButton(control).setActionCommand(ds);
+      layout.addControl(control);
+      controlContainer.addControl(ds, control);
     }
 
-    return new ControlModel(Orientation.VERTICAL, Align.NONE, dsButtons, Optional.empty());
+    Pair<Integer, Integer> newSize = layout.layout(UNO.XWindow2(window).getPosSize());
+    window.setPosSize(0, 0, newSize.getRight(), newSize.getLeft(), PosSize.SIZE);
+    dialog.execute();
   }
 
   /**
