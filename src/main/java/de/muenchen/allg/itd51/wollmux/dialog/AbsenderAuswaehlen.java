@@ -128,14 +128,7 @@ public class AbsenderAuswaehlen
 
   private AbstractActionListener abortActionListener = event -> dialog.endExecute();
 
-  private AbstractNotifier palListener = new AbstractNotifier()
-  {
-    @Override
-    public void dialogClosed()
-    {
-      setListElements();
-    }
-  };
+  private AbstractNotifier palListener = m -> setListElements();
 
   private AbstractActionListener okActionListener = event -> {
     DJDataset selectedElement = elements.get(absAuswahl.getSelectedItemPos());

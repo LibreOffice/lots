@@ -63,7 +63,6 @@ import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.Referenced
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.AbstractNotifier;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
@@ -316,20 +315,14 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
    */
   public void openDatasourceDialog(ActionEvent event)
   {
-    new DBDatasourceDialog(new AbstractNotifier()
-    {
-      @Override
-      public void notify(String dbName)
+    new DBDatasourceDialog(dbName -> {
+      try
       {
-        try
-        {
-          setDatasource(
-              ConnectionModel.addAndSelectDatasource(loadDataSource(dbName), Optional.empty()));
-          gui.selectDatasource(ConnectionModel.buildConnectionName(datasourceModel));
-        } catch (NoTableSelectedException e)
-        {
-          LOGGER.debug("", e);
-        }
+        setDatasource(ConnectionModel.addAndSelectDatasource(loadDataSource(dbName), Optional.empty()));
+        gui.selectDatasource(ConnectionModel.buildConnectionName(datasourceModel));
+      } catch (NoTableSelectedException e)
+      {
+        LOGGER.debug("", e);
       }
     });
   }

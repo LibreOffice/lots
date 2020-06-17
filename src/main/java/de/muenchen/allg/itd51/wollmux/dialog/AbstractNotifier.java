@@ -22,21 +22,18 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-public class AbstractNotifier implements INotify
+/**
+ * Listener for dialogs.
+ */
+@FunctionalInterface
+public interface AbstractNotifier
 {
 
-  @Override
-  public void dialogClosed()
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void notify(String message)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
+  /**
+   * Should be called as soon as a dialog is closed.
+   *
+   * @param message
+   *          The message for the listener. Could be a command for example.
+   */
+  public void notify(String message);
 }
