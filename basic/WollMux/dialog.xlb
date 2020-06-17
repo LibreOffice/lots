@@ -7,6 +7,7 @@
 	<library:element library:name="DatensatzBearbeitenPerson"/>
 	<library:element library:name="DatensatzBearbeitenOrga"/>
 	<library:element library:name="DatensatzBearbeitenFusszeile"/>
+  <library:element library:name="DBDatasourceDialog"/>
 	<library:element library:name="print_progress"/>
 	<library:element library:name="gender_dialog"/>
 	<library:element library:name="if_then_else"/>
