@@ -41,6 +41,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -149,7 +151,8 @@ public class UnionDatasource implements Datasource
   @Override
   public QueryResults getDatasetsByKey(Collection<String> keys)
   {
-    return new QueryResultsUnion(source1.getDatasetsByKey(keys), source2.getDatasetsByKey(keys));
+    Collection<Dataset> result = CollectionUtils.union(source1.getDatasetsByKey(keys), source2.getDatasetsByKey(keys));
+    return new QueryResultsList(result.iterator(), 0);
   }
 
   @Override
@@ -161,7 +164,8 @@ public class UnionDatasource implements Datasource
   @Override
   public QueryResults find(List<QueryPart> query)
   {
-    return new QueryResultsUnion(source1.find(query), source2.find(query));
+    Collection<Dataset> result = CollectionUtils.union(source1.find(query), source2.find(query));
+    return new QueryResultsList(result.iterator(), 0);
   }
 
   @Override
