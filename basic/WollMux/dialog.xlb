@@ -4,6 +4,7 @@
 	<library:element library:name="about"/>
 	<library:element library:name="absender_auswahl"/>
 	<library:element library:name="email_auth"/>
+  <library:element library:name="DatasourceSearchDialog"/>
 	<library:element library:name="DatensatzBearbeitenPerson"/>
 	<library:element library:name="DatensatzBearbeitenOrga"/>
 	<library:element library:name="DatensatzBearbeitenFusszeile"/>

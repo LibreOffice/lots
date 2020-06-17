@@ -56,8 +56,7 @@ public class DialogFactory
         dialogsInBlock.add(name);
         try
         {
-          funcDialogs.add(name,
-            DatasourceSearchDialog.create(dialogConf, DatasourceJoinerFactory.getDatasourceJoiner()));
+          funcDialogs.add(name, new DatasourceSearchDialog(dialogConf, DatasourceJoinerFactory.getDatasourceJoiner()));
         }
         catch (ConfigurationErrorException e)
         {

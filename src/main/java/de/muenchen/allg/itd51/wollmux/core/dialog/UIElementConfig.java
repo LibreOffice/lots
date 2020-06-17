@@ -142,6 +142,16 @@ public class UIElementConfig
   private boolean sidebar;
 
   /**
+   * The data source column this element contains.
+   */
+  private String dbSpalte;
+
+  /**
+   * The format of the column value.
+   */
+  private String display;
+
+  /**
    * Create a new control element configuration.
    *
    * @param controlConf
@@ -208,6 +218,8 @@ public class UIElementConfig
       }
     }
     menu = controlConf.getString("MENU", null);
+    dbSpalte = controlConf.getString("DB_SPALTE", null);
+    display = controlConf.getString("DISPLAY", null);
     sidebar = Boolean.parseBoolean(controlConf.getString("SIDEBAR", "true"));
   }
 
@@ -324,6 +336,16 @@ public class UIElementConfig
   public String getMenu()
   {
     return menu;
+  }
+
+  public String getDbSpalte()
+  {
+    return dbSpalte;
+  }
+
+  public String getDisplay()
+  {
+    return display;
   }
 
   public boolean isSidebar()
