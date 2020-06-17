@@ -40,9 +40,9 @@ import javax.swing.ScrollPaneConstants;
 
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
+import de.muenchen.allg.itd51.wollmux.former.Common;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;

@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.dialog;
+package de.muenchen.allg.itd51.wollmux.former;
 
 import java.awt.AWTEvent;
 import java.awt.Toolkit;

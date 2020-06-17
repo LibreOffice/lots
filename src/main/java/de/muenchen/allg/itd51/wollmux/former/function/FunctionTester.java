@@ -65,7 +65,7 @@ import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.Values;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.dialog.Common;
+import de.muenchen.allg.itd51.wollmux.former.Common;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 
 /**

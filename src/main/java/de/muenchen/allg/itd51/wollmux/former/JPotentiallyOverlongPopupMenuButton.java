@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core.dialog;
+package de.muenchen.allg.itd51.wollmux.former;
 
 import java.awt.Component;
 import java.awt.Dimension;

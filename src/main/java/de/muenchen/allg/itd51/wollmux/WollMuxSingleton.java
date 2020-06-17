@@ -44,10 +44,10 @@ import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
-import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.event.LibreOfficeEventListener;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.former.Common;
 import de.muenchen.allg.util.UnoConfiguration;
 
 /**
