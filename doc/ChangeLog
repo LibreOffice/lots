@@ -1,3 +1,7 @@
+ ==================== Neu in Version 18.1.13 ====================
+    * Bugfixes
+          o EventListener werden wieder in einem eigenen Thread informiert
+
  ==================== Neu in Version 18.1.12 ====================
     * Neue Features
           o Das Plugin PDFMailMerge wurde in den WollMux integriert. Dies
