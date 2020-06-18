@@ -46,7 +46,6 @@ import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.OverrideFragChainException;
 import de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
-import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.functions.Function;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
@@ -1583,55 +1582,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
 
     // delete note and content of the book mark.
     formCmd.setTextRangeString("");
-  }
-
-  /**
-   * Update a trafo definition. Subsquent calls to {@link #setFormFieldValue(String, String)} use
-   * the new definition.
-   *
-   * @param trafoName
-   *          The name of the trafo.
-   * @param trafoConf
-   *          A definition of function in the form "Name(FUNCTION_DEFINITION)", where Name is a
-   *          valid identifier and FUNCTION_DEFINITION a valid parameter for
-   *          {@link de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}.
-   *          The first child of FUNCTION_DEFINITION has to be a valid function name like "AND".
-   * @throws UnavailableException
-   *           The TRAFO with this name can't be modified.
-   */
-  public synchronized void setTrafo(String trafoName, ConfigThingy trafoConf)
-      throws UnavailableException
-  {
-    ConfigThingy func;
-    try
-    {
-      func = model.getFormDescription().query(FORMULAR).query(FUNKTIONEN).query(trafoName, 2).getLastChild();
-    } catch (NodeNotFoundException e)
-    {
-      throw new UnavailableException(e);
-    }
-
-    FunctionLibrary funcLib = getFunctionLibrary();
-    Function function = FunctionFactory.parseChildren(trafoConf, funcLib, getDialogLibrary(), getFunctionContext());
-    funcLib.add(trafoName, function);
-
-    // remove children of func, so that we can reset them later
-    for (Iterator<ConfigThingy> iter = func.iterator(); iter.hasNext();)
-    {
-      iter.next();
-      iter.remove();
-    }
-
-    for (ConfigThingy f : trafoConf)
-    {
-      func.addChild(new ConfigThingy(f));
-    }
-
-    storeCurrentFormDescription();
-
-    // The new function can depend on other IDs. So we have update the dependencies.
-    collectNonWollMuxFormFields();
-    updateAllFormFields();
   }
 
   /**
