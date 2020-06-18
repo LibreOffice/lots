@@ -3,9 +3,6 @@ package de.muenchen.allg.itd51.wollmux.document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.awt.DeviceInfo;
-import com.sun.star.awt.PosSize;
-import com.sun.star.awt.XWindow;
 import com.sun.star.frame.XFrame;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.view.DocumentZoomType;
@@ -13,7 +10,6 @@ import com.sun.star.view.DocumentZoomType;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.util.UnoProperty;
@@ -61,77 +57,6 @@ public class FrameController
     {
       frame.getContainerWindow().setVisible(visible);
     }
-  }
-
-  /**
-   * Diese Methode liest die (optionalen) Attribute X, Y, WIDTH, HEIGHT und ZOOM aus
-   * dem übergebenen Konfigurations-Abschnitt settings und setzt die
-   * Fenstereinstellungen des Dokuments entsprechend um. Bei den Pärchen X/Y bzw.
-   * SIZE/WIDTH müssen jeweils beide Komponenten im Konfigurationsabschnitt angegeben
-   * sein.
-   *
-   * @param settings
-   *          der Konfigurationsabschnitt, der X, Y, WIDHT, HEIGHT und ZOOM als
-   *          direkte Kinder enthält.
-   */
-  public synchronized void setWindowViewSettings(ConfigThingy settings)
-  {
-    // Fenster holen (zum setzen der Fensterposition und des Zooms)
-    XWindow window = null;
-    try
-    {
-      window = getFrame().getContainerWindow();
-    }
-    catch (java.lang.Exception e)
-    {
-      LOGGER.debug("", e);
-    }
-
-    // Insets bestimmen (Rahmenmaße des Windows)
-    int insetLeft = 0;
-    int insetTop = 0;
-    int insetRight = 0;
-    int insetButtom = 0;
-
-    if (UNO.XDevice(window) != null)
-    {
-      DeviceInfo di = UNO.XDevice(window).getInfo();
-      insetButtom = di.BottomInset;
-      insetTop = di.TopInset;
-      insetRight = di.RightInset;
-      insetLeft = di.LeftInset;
-    }
-
-    // Position setzen:
-    try
-    {
-      int xPos = Integer.parseInt(settings.get("X").toString());
-      int yPos = Integer.parseInt(settings.get("Y").toString());
-      if (window != null)
-      {
-        window.setPosSize(xPos + insetLeft, yPos + insetTop, 0, 0, PosSize.POS);
-      }
-    }
-    catch (NumberFormatException | NodeNotFoundException e)
-    {
-      LOGGER.debug("", e);
-    }
-    // Dimensions setzen:
-    try
-    {
-      int width = Integer.parseInt(settings.get("WIDTH").toString());
-      int height = Integer.parseInt(settings.get("HEIGHT").toString());
-      if (window != null)
-        window.setPosSize(0, 0, width - insetLeft - insetRight, height - insetTop
-          - insetButtom, PosSize.SIZE);
-    }
-    catch (NumberFormatException | NodeNotFoundException e)
-    {
-      LOGGER.debug("", e);
-    }
-
-    // Zoom setzen:
-    setDocumentZoom(settings);
   }
 
   /**

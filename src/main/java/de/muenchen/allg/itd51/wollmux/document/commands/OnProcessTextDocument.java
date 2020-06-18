@@ -11,8 +11,6 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventListener;
@@ -45,16 +43,6 @@ public class OnProcessTextDocument implements WollMuxEventListener
     {
       LOGGER.trace("{} : DocumentController is NULL.", this.getClass().getSimpleName());
       return;
-    }
-
-    try
-    {
-      ConfigThingy tds = WollMuxFiles.getWollmuxConf().query("Fenster").query("Textdokument")
-          .getLastChild();
-      documentController.getFrameController().setWindowViewSettings(tds);
-    } catch (NodeNotFoundException e)
-    {
-      // configuration for Fenster isn't mandatory
     }
 
     DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
