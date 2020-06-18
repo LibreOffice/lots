@@ -1,4 +1,4 @@
-package de.muenchen.allg.itd51.wollmux.form.control;
+package de.muenchen.allg.itd51.wollmux.ui;
 
 import java.io.IOException;
 import java.io.Reader;
