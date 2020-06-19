@@ -1,36 +1,3 @@
-/*
- * Dateiname: ExternalFunction.java
- * Projekt  : WollMux
- * Funktion : Eine durch ein ConfigThingy beschriebene externe Funktion.
- *
- * Copyright (c) 2008-2015 Landeshauptstadt München
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 25.01.2006 | BNK | Erstellung
- * 05.12.2006 | BNK | ClassLoader kann übergeben werden
- *                  | +invoke(Object[])
- * 28.12.2006 | BNK | nur noch public Methoden als ExternalFunctions finden.
- * -------------------------------------------------------------------
- *
- * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
- *
- */
 package de.muenchen.allg.itd51.wollmux.core.functions;
 
 import java.lang.reflect.Method;

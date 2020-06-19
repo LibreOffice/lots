@@ -1,37 +1,3 @@
-/*
- * Dateiname: InsertionModel.java
- * Projekt  : WollMux
- * Funktion : Stellt eine Einfügestelle im Dokument (insertValue oder insertFormValue) dar.
- *
- * Copyright (c) 2008-2019 Landeshauptstadt München
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 06.09.2006 | BNK | Erstellung
- * 08.02.2007 | BNK | Beim Generieren von Trafo-Funktionsnamen Timestamp in den Namen codieren.
- * 16.03.2007 | BNK | +getFormularMax4000()
- *                  | +MyTrafoAccess.updateFieldReferences()
- * 29.06.2007 | BNK | [R7343]AUTOSEP unterstützt
- * -------------------------------------------------------------------
- *
- * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
- *
- */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
 import java.io.IOException;

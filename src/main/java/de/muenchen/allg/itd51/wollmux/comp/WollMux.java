@@ -1,39 +1,3 @@
-/*
- * Dateiname: WollMux.java
- * Projekt  : WollMux
- * Funktion : zentraler UNO-Service WollMux
- *
- * Copyright (c) 2008-2019 Landeshauptstadt München
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 14.10.2005 | LUT | Erstellung
- * 09.11.2005 | LUT | + Logfile wird jetzt erweitert (append-modus)
- *                    + verwenden des Konfigurationsparameters SENDER_SOURCE
- *                    + Erster Start des wollmux über wm_configured feststellen.
- * 05.12.2005 | BNK | line.separator statt \n                 |
- * 06.06.2006 | LUT | + Ablösung der Event-Klasse durch saubere Objektstruktur
- * -------------------------------------------------------------------
- *
- * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
- *
- */
-
 package de.muenchen.allg.itd51.wollmux.comp;
 
 import org.slf4j.Logger;

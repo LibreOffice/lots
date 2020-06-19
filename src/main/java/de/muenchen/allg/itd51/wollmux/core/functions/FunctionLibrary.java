@@ -1,37 +1,3 @@
-/*
- * Dateiname: FunctionLibrary.java
- * Projekt  : WollMux
- * Funktion : Eine Bibliothek von benannten Functions
- *
- * Copyright (c) 2008-2015 Landeshauptstadt München
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 03.05.2006 | BNK | Erstellung
- * 08.05.2006 | BNK | Fertig implementiert.
- * 26.09.2006 | BNK | +hasFunction()
- * 27.09.2006 | BNK | +getFunctionNames()
- * 15.11.2007 | BNK | +remove()
- * -------------------------------------------------------------------
- *
- * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
- *
- */
 package de.muenchen.allg.itd51.wollmux.core.functions;
 
 import java.util.HashMap;

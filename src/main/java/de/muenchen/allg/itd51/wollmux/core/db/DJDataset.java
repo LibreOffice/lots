@@ -1,36 +1,3 @@
-/*
- * Dateiname: DJDataset.java
- * Projekt  : WollMux
- * Funktion : Ein vom DJ gelieferter Datensatz, der zu den Methoden von
- *            Dataset noch DJ-spezifische Methoden anbietet.
- * 
- * Copyright (c) 2008-2015 Landeshauptstadt München
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 14.10.2005 | BNK | Erstellung
- * 24.10.2005 | BNK | +copy()
- *                  | +remove()
- * 28.10.2005 | BNK | bessere Doku
- *                  | set() wirft jetzt IllegalArgumentException, wenn
- *                  | versucht wird, die Spalte mit null zu overriden
- * -------------------------------------------------------------------
- * 
- */
 package de.muenchen.allg.itd51.wollmux.core.db;
 
 /**
