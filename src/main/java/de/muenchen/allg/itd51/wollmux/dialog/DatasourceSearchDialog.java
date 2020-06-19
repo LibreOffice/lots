@@ -1,78 +1,48 @@
-/*
- * Dateiname: DatasourceSearchDialog.java
- * Projekt  : WollMux
- * Funktion : Dialog zur Suche nach Daten in einer Datenquelle, die über DIALOG-Funktion verfügbar gemacht werden.
- * 
- * Copyright (c) 2010-2019 Landeshauptstadt München
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 22.05.2006 | BNK | Erstellung
- * 23.05.2006 | BNK | Rohbau
- * 24.05.2006 | BNK | angefangen mit Suchstrategie auswerten etc.
- * 26.05.2006 | BNK | Suchstrategie,... fertig implementiert
- * 29.05.2006 | BNK | Umstellung auf UIElementFactory.Context
- * 30.05.2006 | BNK | Suche implementiert
- * 29.06.2006 | BNK | setResizable(true)
- * 10.07.2006 | BNK | suchanfrageX statt wortX als Platzhalter.
- * 03.08.2006 | BNK | +getSchema()
- * 11.03.2010 | BED | Einsatz von FrameWorker für Suche + Meldung bei Timeout
- * -------------------------------------------------------------------
- *
- * @author Matthias Benkmann (D-III-ITD 5.1)
- *
- */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
-
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import com.sun.star.awt.Key;
+import com.sun.star.awt.KeyEvent;
+import com.sun.star.awt.PosSize;
+import com.sun.star.awt.Rectangle;
+import com.sun.star.awt.XContainerWindowProvider;
+import com.sun.star.awt.XControl;
+import com.sun.star.awt.XControlContainer;
+import com.sun.star.awt.XDialog;
+import com.sun.star.awt.XKeyListener;
+import com.sun.star.awt.XListBox;
+import com.sun.star.awt.XTextComponent;
+import com.sun.star.awt.XWindow;
+import com.sun.star.awt.XWindowPeer;
+import com.sun.star.awt.tab.XTabPage;
+import com.sun.star.awt.tab.XTabPageContainer;
+import com.sun.star.awt.tab.XTabPageContainerModel;
+import com.sun.star.lang.EventObject;
+import com.sun.star.uno.UnoRuntime;
+
+import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.dialog.adapter.AbstractActionListener;
+import de.muenchen.allg.dialog.adapter.AbstractItemListener;
+import de.muenchen.allg.dialog.adapter.AbstractTabPageContainerListener;
+import de.muenchen.allg.dialog.adapter.AbstractTopWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnTransformer;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
@@ -83,159 +53,113 @@ import de.muenchen.allg.itd51.wollmux.core.db.SearchStrategy;
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
-import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementContext;
-import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementEventHandler;
-import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementFactory;
-import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementType;
-import de.muenchen.allg.itd51.wollmux.core.dialog.controls.Listbox;
-import de.muenchen.allg.itd51.wollmux.core.dialog.controls.UIElement;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
+import de.muenchen.allg.itd51.wollmux.ui.layout.ControlLayout;
+import de.muenchen.allg.itd51.wollmux.ui.layout.HorizontalLayout;
+import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
+import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
- * Dialog zur Suche nach Daten in einer Datenquelle, die über DIALOG-Funktion verfügbar gemacht
- * werden.
- *
- * @author Matthias Benkmann (D-III-ITD 5.1)
+ * Dialog for searching data sources.
  */
 public class DatasourceSearchDialog implements Dialog
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DatasourceSearchDialog.class);
 
-  /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
-   */
-  private static final int TF_BORDER = 4;
+  private static final String ABORT = "abort";
 
   /**
-   * Rand um Buttons (in Pixeln).
-   */
-  private static final int BUTTON_BORDER = 2;
-
-  /**
-   * Das ConfigThingy, das die Beschreibung des Dialogs enthält.
+   * The description of the dialog.
    */
   private ConfigThingy myConf;
 
   /**
-   * Der Instantiator, der diesen Dialog instanziiert hat und auch für die Erstellung weiterer
-   * Instanzen herangezogen wird.
-   */
-  private Instantiator ilse;
-
-  /**
-   * Alle ids, die durch Spaltenumsetzungsabschnitte definiert werden.
+   * All IDs provided by Spaltenumsetzung
    */
   private Set<String> schema;
 
   /**
-   * data[0] speichert die aktuell ausgewählten Formulardaten. ACHTUNG! Nur in
-   * synchronized(data)-Blöcken verwenden!
+   * The currently selected data.
    */
-  private Map<String, String>[] data;
+  private Map<String, String> data;
 
   /**
-   * Der Rahmen des gesamten Dialogs.
-   */
-  private JFrame myFrame;
-
-  /**
-   * Der DatasourceJoiner, den dieser Dialog anspricht.
+   * Used to perform queries.
    */
   private DatasourceJoiner dj;
 
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(UIElementContext, ConfigThingy)}, der
-   * verwendet wird für das Erzeugen von vertikal angeordneten UI Elementen (mit Ausnahme der
-   * Vorschau).
-   */
-  private UIElementContext vertiContext;
-
-  /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(UIElementContext, ConfigThingy)}, der
-   * verwendet wird für das Erzeugen der vertikal angeordneten UI Elemente der Vorschau.
-   */
-  private UIElementContext previewContext;
-
-  /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(UIElementContext, ConfigThingy)}, der
-   * verwendet wird für das Erzeugen von horizontal angeordneten Elementen.
-   */
-  private UIElementContext horiContext;
-
-  /**
-   * Solange dieses Flag false ist, werden Events von UI Elementen ignoriert.
+   * If true UI actions have no effect.
    */
   private boolean processUIElementEvents = false;
 
   /**
-   * Wird zur Auflösung von Funktionsreferenzen in Spaltenumsetzung-Abschnitten verwendet.
+   * The function library.
    */
   private FunctionLibrary funcLib;
 
   /**
-   * Zur Zeit noch nicht unterstützt, aber im Prinzip könnte man in einem Datenquellensuchdialog
-   * ebenfalls wieder Funktionsdialoge verwenden. Diese würden dann aus dieser Bibliothek bezogen.
+   * The dialog library for functions.
    */
   private DialogLibrary dialogLib;
 
   /**
-   * Werden durch diesen Funktionsdialog weitere Funktionsdialoge erzeugt, so wird dieser Kontext
-   * übergeben.
+   * Context in which functions are executed.
    */
   private Map<Object, Object> context = new HashMap<>();
 
   /**
-   * Der show übergebene dialogEndListener.
+   * The listener to call as soon as the dialog is closed.
    */
   private ActionListener dialogEndListener;
 
   /**
-   * Wird von show() getestet und auf true gesetzt um mehrfache gleichzeitige show()s zu verhindern.
+   * The container of the tab pages.
    */
-  private boolean[] shown = new boolean[] { false };
+  private XTabPageContainer tabPageContainer;
 
   /**
-   * Erzeugt einen neuen DSD.
-   *
-   * @param ilse
-   *          der Instantiator, der für instanceFor()-Aufrufe verwendet werden soll.
-   * @param conf
-   *          die Beschreibung des Dialogs.
+   * Mapping from tab ID to tab.
    */
-  @SuppressWarnings("unchecked")
-  private DatasourceSearchDialog(Instantiator ilse, Set<String> schema, ConfigThingy conf,
-      DatasourceJoiner dj)
+  private Map<Short, Tab> tabs;
+
+  /**
+   * The UNO dialog.
+   */
+  private XDialog dialog;
+
+  /**
+   * A new data source search dialog.
+   *
+   * @param conf
+   *          The configuration of the dialog.
+   * @param dj
+   *          Used to perform the queries.
+   */
+  public DatasourceSearchDialog(ConfigThingy conf, DatasourceJoiner dj)
   {
     this.myConf = conf;
-    this.ilse = ilse;
     this.dj = dj;
-    this.schema = schema;
-    // Unfortunately, creating generic arrays is not possible, i.e.
-    // new Map<String,String>[] doesn't work.
-    this.data = new Map[] { new HashMap<String, String>() };
-  }
-
-  /**
-   * Erzeugt einen neuen Dialog, dessen Instanzen Datenquellensuchdialoge gemäß der Beschreibung in
-   * conf darstellen. Die Suchergebnisse liefert dj.
-   *
-   * @throws ConfigurationErrorException
-   *           falls ein Fehler in der Dialogbeschreibung vorliegt.
-   */
-  public static Dialog create(ConfigThingy conf, DatasourceJoiner dj)
-  {
-    return new Instantiator(conf, dj);
+    schema = parseSchema(conf);
+    if (schema.isEmpty())
+    {
+      throw new ConfigurationErrorException(
+          L.m("Fehler in Funktionsdialog: Abschnitt 'Spaltenumsetzung' konnte nicht geparst werden!"));
+    }
+    this.data = new HashMap<>();
   }
 
   @Override
   public Dialog instanceFor(Map<Object, Object> context)
   {
-    return ilse.instanceFor(context);
+    return this;
   }
 
   @Override
@@ -247,15 +171,11 @@ public class DatasourceSearchDialog implements Dialog
   @Override
   public Object getData(String id)
   {
-    String str;
-    synchronized (data)
+    if (!schema.contains(id))
     {
-      if (!schema.contains(id))
-      {
-        return null;
-      }
-      str = data[0].get(id);
+      return null;
     }
+    String str = data.get(id);
     if (str == null)
     {
       return "";
@@ -264,17 +184,8 @@ public class DatasourceSearchDialog implements Dialog
   }
 
   @Override
-  public void show(ActionListener dialogEndListener, FunctionLibrary funcLib,
-      DialogLibrary dialogLib)
+  public void show(ActionListener dialogEndListener, FunctionLibrary funcLib, DialogLibrary dialogLib)
   {
-    synchronized (shown)
-    {
-      if (shown[0])
-      {
-        return;
-      }
-      shown[0] = true;
-    }
     this.dialogEndListener = dialogEndListener;
     this.funcLib = funcLib;
     this.dialogLib = dialogLib;
@@ -302,22 +213,11 @@ public class DatasourceSearchDialog implements Dialog
 
     final ConfigThingy fensterDesc = myConf.query("Fenster");
     if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException(
-          L.m("Schlüssel 'Fenster' fehlt in %1", myConf.getName()));
+      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1", myConf.getName()));
 
-    // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try
     {
-      final String title2 = title;
-      javax.swing.SwingUtilities.invokeLater(() -> {
-        try
-        {
-          createGUI(title2, fensterDesc.getLastChild());
-        } catch (Exception x)
-        {
-          LOGGER.error("", x);
-        }
-      });
+      createGUI(title, fensterDesc.getLastChild());
     } catch (Exception x)
     {
       LOGGER.error("", x);
@@ -325,167 +225,170 @@ public class DatasourceSearchDialog implements Dialog
   }
 
   /**
-   * Erzeugt das GUI. Muss im EDT aufgerufen werden.
+   * Create the dialog.
    *
    * @param title
-   *          der Titel des Fensters.
+   *          The title of the dialog.
    * @param fensterDesc
-   *          der "Fenster" Abschnitt, der die Tabs der GUI beschreibt.
+   *          The configuration of the dialog.
    */
   private void createGUI(String title, ConfigThingy fensterDesc)
   {
-    Common.setLookAndFeelOnce();
+    XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
+    XContainerWindowProvider provider = null;
 
-    // Create and set up the window.
-    myFrame = new JFrame(title);
-    // leave handling of close request to WindowListener.windowClosing
-    myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    MyWindowListener oehrchen = new MyWindowListener();
-    // der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
-    myFrame.addWindowListener(oehrchen);
-
-    // WollMux-Icon für den Frame
-    Common.setWollMuxIcon(myFrame);
-
-    JPanel contentPanel = new JPanel();
-    myFrame.getContentPane().add(contentPanel);
-    JTabbedPane myTabbedPane = new JTabbedPane();
-    contentPanel.add(myTabbedPane);
-
-    /********************************************************************************
-     * Tabs erzeugen.
-     *******************************************************************************/
-    Iterator<ConfigThingy> iter = fensterDesc.iterator();
-    int tabIndex = 0;
-    while (iter.hasNext())
+    try
     {
-      ConfigThingy neuesFenster = iter.next();
+      provider = UnoRuntime.queryInterface(XContainerWindowProvider.class,
+          UNO.xMCF.createInstanceWithContext("com.sun.star.awt.ContainerWindowProvider", UNO.defaultContext));
+    } catch (com.sun.star.uno.Exception e)
+    {
+      LOGGER.error("", e);
+    }
 
-      /*
-       * Die folgende Schleife ist nicht nur eleganter als mehrere try-catch-Blöcke um
-       * get()-Befehle, sie verhindert auch, dass TIP oder HOTKEY aus Versehen von einem enthaltenen
-       * Button aufgeschnappt werden.
-       */
-      String tabTitle = L.m("Eingabe");
-      char hotkey = 0;
-      String tip = "";
-      Iterator<ConfigThingy> childIter = neuesFenster.iterator();
-      while (childIter.hasNext())
+    if (provider == null)
+      return;
+
+    XWindow window = provider.createContainerWindow(
+        "vnd.sun.star.script:WollMux.DatasourceSearchDialog?location=application", "", peer, null);
+    UNO.XTopWindow(window).addTopWindowListener(new AbstractTopWindowListener()
+    {
+      @Override
+      public void windowClosed(EventObject arg0)
       {
-        ConfigThingy childConf = childIter.next();
+        dialogEnd(ABORT);
+      }
+    });
+    XControlContainer controlContainer = UNO.XControlContainer(window);
+    dialog = UNO.XDialog(window);
+    dialog.setTitle(title);
+
+    tabs = new HashMap<>();
+    tabPageContainer = UNO.XTabPageContainer(GuiFactory.createTabPageContainer(UNO.xMCF, UNO.defaultContext));
+    XTabPageContainerModel tabPageContainerModel = UNO
+        .XTabPageContainerModel(UNO.XControl(tabPageContainer).getModel());
+    AbstractTabPageContainerListener listener = event -> paint();
+    tabPageContainer.addTabPageContainerListener(listener);
+    controlContainer.addControl("tabPages", UNO.XControl(tabPageContainer));
+
+    short tabId = 1;
+    for (ConfigThingy neuesFenster : fensterDesc)
+    {
+      String tabTitle = L.m("Eingabe");
+      String tip = "";
+      for (ConfigThingy childConf : neuesFenster)
+      {
         String name = childConf.getName();
         if ("TIP".equals(name))
-          tip = childConf.toString();
-        else if ("TITLE".equals(name))
-          tabTitle = L.m(childConf.toString());
-        else if ("HOTKEY".equals(name))
         {
-          String str = childConf.toString();
-          if (str.length() > 0)
-          {
-            hotkey = str.toUpperCase().charAt(0);
-          }
+          tip = childConf.toString();
+        } else if ("TITLE".equals(name))
+        {
+          tabTitle = L.m(childConf.toString());
         }
       }
 
-      DialogWindow newWindow = new DialogWindow(tabIndex, neuesFenster);
+      GuiFactory.createTab(UNO.xMCF, UNO.defaultContext, tabPageContainerModel, tabTitle, tabId);
+      XTabPage xTabPage = UNO.XTabPageContainer(tabPageContainer).getTabPageByID(tabId);
+      UNO.XTabPageModel(UNO.XControl(xTabPage).getModel()).setToolTip(tip);
+      XControlContainer tabPageControlContainer = UNO.XControlContainer(xTabPage);
+      Tab newWindow = new Tab(neuesFenster, tabPageControlContainer);
+      tabs.put(tabId, newWindow);
 
-      myTabbedPane.addTab(tabTitle, null, newWindow.jPanel(), tip);
-      if (hotkey != 0)
-      {
-        myTabbedPane.setMnemonicAt(tabIndex, hotkey);
-      }
-
-      ++tabIndex;
+      ++tabId;
     }
 
-    /*
-     * Event-Verarbeitung starten.
-     */
+    Rectangle r = window.getPosSize();
+    int h = tabs.values().stream().map(Tab::getLayout).mapToInt(l -> l.getHeightForWidth(r.Width)).max()
+        .orElse(r.Height);
+    r.Height = h + UNO.XWindow(tabPageContainer.getTabPageByID(tabPageContainer.getActiveTabPageID())).getPosSize().Y;
+    window.setPosSize(0, 0, r.Width, r.Height, PosSize.SIZE);
+    UNO.XWindow(tabPageContainer).setPosSize(r.X, r.Y, r.Width, r.Height, PosSize.POSSIZE);
+    tabPageContainer.setActiveTabPageID((short) 1);
+    paint();
     processUIElementEvents = true;
-
-    myFrame.pack();
-    myFrame.setAlwaysOnTop(true);
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int frameWidth = myFrame.getWidth();
-    int frameHeight = myFrame.getHeight();
-    int x = screenSize.width / 2 - frameWidth / 2;
-    int y = screenSize.height / 2 - frameHeight / 2;
-    myFrame.setLocation(x, y);
-    myFrame.setResizable(true);
-    myFrame.setAlwaysOnTop(true);
-    myFrame.setVisible(true);
+    dialog.execute();
   }
 
   /**
-   * Ein Tab der GUI.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * Update the window after the tab was changed.
    */
-  private class DialogWindow implements UIElementEventHandler
+  private void paint()
   {
-    /**
-     * Das Panel das die GUI-Elemente enthält.
-     */
-    private JPanel myPanel;
+    short activeTab = tabPageContainer.getActiveTabPageID();
+    Rectangle tabRect = UNO.XWindow(tabPageContainer.getTabPageByID(activeTab)).getPosSize();
+    tabRect.Y = 0;
+    Pair<Integer, Integer> tabSize = tabs.get(activeTab).getLayout().layout(tabRect);
+
+    UNO.XWindow(tabPageContainer.getTabPageByID(activeTab)).setPosSize(0, tabRect.Y, tabSize.getRight(),
+        tabSize.getLeft() + tabRect.Y, PosSize.SIZE);
+  }
+
+  /**
+   * Tab of the GUI containing a search for a defined data source.
+   */
+  private class Tab
+  {
 
     /**
-     * Die durch den Spaltenumsetzung-Abschnitt definierten Spaltennamen.
+     * The layout of the tab.
+     */
+    private Layout layout;
+
+    /**
+     * The columns defined in the section Spaltenumsetzung.
      */
     private List<String> dialogWindowSchema;
 
     /**
-     * Die Suchstrategie für Suchanfragen.
+     * The search strategy.
      */
     private SearchStrategy searchStrategy;
 
     /**
-     * Der für die Spaltenumsetzung verantwortliche {@link ColumnTransformer}.
+     * The {@link ColumnTransformer} for the columns.
      */
     private ColumnTransformer columnTransformer;
 
     /**
-     * Legt fest, wie die Datensätze in der Ergebnisliste dargestellt werden sollen. Kann Variablen
-     * der Form "${name}" enthalten.
+     * The template for showing the search results. Can contain variables like {@code ${name}}.
      */
     private String displayTemplate = L.m("<Datensatz>");
 
     /**
-     * Die Listbox mit den Suchresultaten.
+     * The control containing the results.
      */
-    private Listbox resultsList = null;
+    private XListBox resultsList = null;
 
     /**
-     * Das Textfeld in dem der Benutzer seine Suchanfrage eintippt.
+     * The field containing the search parameters.
      */
-    private UIElement query = null;
+    private XTextComponent query = null;
 
     /**
-     * Suche automatisch ausführen, nach Aufbau des Tabs.
+     * If true a search is started after the tab has been build.
      */
     private boolean autosearch = false;
 
     /**
-     * Die für die Erzeugung der UI Elemente verwendete Factory.
+     * Mapping from data source column to control in which the value should be displayed.
      */
-    private UIElementFactory uiElementFactory;
+    private Map<String, XControl> mapSpalteToUIElement = new HashMap<>();
 
     /**
-     * Bildet DB_SPALTE Werte des Vorschau-Abschnitts auf die entsprechenden UIElemente ab (jeweils
-     * 1 UIElement pro DB_SPALTE, keine Liste).
+     * Mapping from search results display string to the actual data set.
      */
-    private Map<String, UIElement> mapSpalteToUIElement;
+    Map<String, Dataset> datasets = new TreeMap<>();
 
     /**
-     * Erzeugt ein neues Tab.
+     * Create a new tab.
      *
-     * @param tabIndex
-     *          Die Nummer (von 0 gezählt) des Tabs, das dieses DialogWindow darstellt.
      * @param conf
-     *          der Kind-Knoten des Fenster-Knotens der das Tab beschreibt. conf ist direkter
-     *          Elternknoten der Knoten "Intro" et al.
+     *          The configuration of the tab.
+     * @param controlContainer
+     *          The control container of the dialog.
      */
-    public DialogWindow(int tabIndex, ConfigThingy conf)
+    public Tab(ConfigThingy conf, XControlContainer controlContainer)
     {
       searchStrategy = SearchStrategy.parse(conf);
       try
@@ -497,37 +400,27 @@ public class DatasourceSearchDialog implements Dialog
         LOGGER.error(L.m("Fehler beim Parsen des Abschnitts 'Spaltenumsetzung'"), x);
       }
       dialogWindowSchema = columnTransformer.getSchema();
-      initFactories();
+      layout = new VerticalLayout();
+      Layout introLayout = new VerticalLayout(5, 0, 5, 5, 5);
+      addUIElements(conf.query("Intro"), controlContainer, introLayout);
+      layout.addLayout(introLayout, 1);
 
-      myPanel = new JPanel(new BorderLayout());
+      Layout searchLayout = new HorizontalLayout(10, 0, 5, 5, 15);
+      addUIElements(conf.query("Suche"), controlContainer, searchLayout);
+      layout.addLayout(searchLayout, 1);
 
-      JPanel introSuche = new JPanel();
-      introSuche.setLayout(new BoxLayout(introSuche, BoxLayout.PAGE_AXIS));
-      JPanel suchergebnisUndVorschau = new JPanel();
-      suchergebnisUndVorschau
-          .setLayout(new BoxLayout(suchergebnisUndVorschau, BoxLayout.LINE_AXIS));
-      JPanel fussbereich = new JPanel(new GridBagLayout());
-      JPanel intro = new JPanel(new GridBagLayout());
-      JPanel suche = new JPanel(new GridBagLayout());
-      JPanel suchergebnis = new JPanel(new GridBagLayout());
-      JPanel vorschau = new JPanel(new GridBagLayout());
+      Layout mainLayout = new HorizontalLayout(10, 0, 5, 5, 15);
+      layout.addLayout(mainLayout, 1);
+      Layout resultLayout = new VerticalLayout();
+      addUIElements(conf.query("Suchergebnis"), controlContainer, resultLayout);
+      mainLayout.addLayout(resultLayout, 1);
+      Layout previewLayout = new VerticalLayout(0, 0, 0, 0, 5);
+      addUIElements(conf.query("Vorschau"), controlContainer, previewLayout);
+      mainLayout.addLayout(previewLayout, 1);
 
-      myPanel.add(introSuche, BorderLayout.PAGE_START);
-      myPanel.add(suchergebnisUndVorschau, BorderLayout.CENTER);
-      myPanel.add(fussbereich, BorderLayout.PAGE_END);
-
-      introSuche.add(intro);
-      introSuche.add(suche);
-
-      suchergebnisUndVorschau.add(suchergebnis);
-      suchergebnisUndVorschau.add(vorschau);
-
-      addUIElements(conf, "Intro", intro, 0, 1, vertiContext, null);
-      addUIElements(conf, "Suche", suche, 1, 0, horiContext, null);
-      addUIElements(conf, "Suchergebnis", suchergebnis, 0, 1, vertiContext, null);
-      mapSpalteToUIElement = new HashMap<>();
-      addUIElements(conf, "Vorschau", vorschau, 0, 1, previewContext, mapSpalteToUIElement);
-      addUIElements(conf, "Fussbereich", fussbereich, 1, 0, horiContext, null);
+      Layout footerLayout = new HorizontalLayout(10, 0, 5, 5, 15);
+      addUIElements(conf.query("Fussbereich"), controlContainer, footerLayout);
+      layout.addLayout(footerLayout, 1);
 
       if (autosearch)
       {
@@ -535,198 +428,238 @@ public class DatasourceSearchDialog implements Dialog
       }
     }
 
-    /**
-     * Liefert das JPanel, das die Elemente dieses Tabs enthält.
-     */
-    public JPanel jPanel()
+    public Layout getLayout()
     {
-      return myPanel;
+      return layout;
     }
 
     /**
-     * Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu. compo muss ein
-     * GridBagLayout haben. stepx und stepy geben an um wieviel mit jedem UI Element die x und die y
-     * Koordinate der Zelle erhöht werden soll. Wirklich sinnvoll sind hier nur (0,1) und (1,0).
+     * Add all controls in the configuration to the container and the layout.
      *
-     * @param context
-     *          ist der Kontext, der
-     *          {@link UIElementFactory#createUIElement(UIElementContext, ConfigThingy)} übergeben
-     *          werden soll für die Erzeugung der UIElemente.
-     * @param in
-     *          dieser Map werden all erzeugten UIElemente registriert, die ein DB_SPALTE Attribut
-     *          haben. null ist nicht erlaubt. TESTED
+     * @param conf
+     *          The configuration of a part of the tab.
+     * @param container
+     *          The control container for the controls.
+     * @param layout
+     *          The layout to which the controls should be added.
      */
-    private void addUIElements(ConfigThingy conf, String key, JComponent compo, int stepx,
-        int stepy, UIElementContext context, Map<String, UIElement> mapSpalteToUIElement)
+    private void addUIElements(ConfigThingy conf, XControlContainer container, Layout layout)
     {
-      int y = 0;
-      int x = 0;
-
-      for (ConfigThingy parent : conf.query(key))
+      for (ConfigThingy parent : conf)
       {
         for (ConfigThingy uiConf : parent)
         {
-          UIElement uiElement;
           try
           {
-            uiElement = uiElementFactory.createUIElement(context, new UIElementConfig(uiConf));
-            String dbSpalte = uiConf.getString("DB_SPALTE", null);
-            if (dbSpalte != null)
-            {
-              mapSpalteToUIElement.put(dbSpalte, uiElement);
-            }
+            UIElementConfig config = new UIElementConfig(uiConf);
+            XControl uiElement = createControl(container, layout, config);
+            treatSpecialId(config, uiElement);
           } catch (ConfigurationErrorException e)
           {
             LOGGER.error("", e);
             continue;
           }
-
-          /*
-           * Besondere IDs auswerten.
-           */
-          String id = uiElement.getId();
-          if (id.equals("suchanfrage"))
-          {
-            autosearch = false;
-            query = uiElement;
-            String autofill = uiConf.getString("AUTOFILL", null);
-            if (autofill != null)
-            {
-              query.setString(autofill);
-              autosearch = true;
-            }
-          }
-
-          if ("suchergebnis".equals(id))
-          {
-            try
-            {
-              resultsList = (Listbox) uiElement;
-              displayTemplate = uiConf.getString("DISPLAY", L.m("<Datensatz>"));
-            } catch (ClassCastException e)
-            {
-              LOGGER
-                  .error(L.m("UI Element mit ID \"suchergebnis\" muss vom TYPE \"listbox\" sein!"));
-            }
-          }
-
-          /**************************************************************************
-           * UI Element und evtl. vorhandenes Zusatzlabel zum GUI hinzufügen.
-           *************************************************************************/
-          int compoX = 0;
-          int labelmod = 1;
-          if (!uiElement.getLabelType().equals(UIElement.LabelPosition.NONE))
-          {
-            labelmod = 2;
-            int labelX = 0;
-            if (uiElement.getLabelType().equals(UIElement.LabelPosition.LEFT))
-            {
-              compoX = 1;
-            } else
-            {
-              labelX = 1;
-            }
-
-            Component label = uiElement.getLabel();
-            if (label != null)
-            {
-              GridBagConstraints gbc = (GridBagConstraints) uiElement.getLabelLayoutConstraints();
-              gbc.gridx = x + labelX;
-              gbc.gridy = y;
-              compo.add(label, gbc);
-            }
-          }
-          GridBagConstraints gbc = (GridBagConstraints) uiElement.getLayoutConstraints();
-          gbc.gridx = x + compoX;
-          gbc.gridy = y;
-          x += stepx * labelmod;
-          y += stepy;
-          compo.add(uiElement.getComponent(), gbc);
         }
       }
     }
 
     /**
-     * Geht alle Elemente von {@link #mapSpalteToUIElement} durch und updated die Felder mit den
-     * entsprechenden Werten aus dem Datensatz, der an ele dranhängt.
+     * The controls with the ID suchanfrage and sucherergebnis are treated specially.
+     *
+     * @param config
+     *          The configuration of the control.
+     * @param uiElement
+     *          The control.
      */
-    private void updatePreview(ListElement ele)
+    private void treatSpecialId(UIElementConfig config, XControl uiElement)
     {
-      Dataset ds = null;
-      if (ele != null)
+      String id = config.getId();
+      if (id.equals("suchanfrage"))
       {
-        ds = ele.getDataset();
+        autosearch = false;
+        query = UNO.XTextComponent(uiElement);
+        XKeyListener handler = new XKeyListener()
+        {
+          @Override
+          public void keyPressed(KeyEvent event)
+          {
+            if (event.KeyCode == Key.RETURN)
+            {
+              search();
+            }
+          }
+
+          @Override
+          public void disposing(EventObject arg0)
+          {
+            // nothing to do
+          }
+
+          @Override
+          public void keyReleased(KeyEvent arg0)
+          {
+            // nothing to do
+          }
+        };
+        UNO.XWindow(uiElement).addKeyListener(handler);
+        ConfigThingy autofill = config.getAutofill();
+        if (autofill.count() > 0)
+        {
+          query.setText(autofill.toString());
+          autosearch = true;
+        }
+      } else if ("suchergebnis".equals(id))
+      {
+        resultsList = UNO.XListBox(uiElement);
+        if (resultsList == null)
+        {
+          LOGGER.error("UI Element mit ID \"suchergebnis\" muss vom TYPE \"listbox\" sein!");
+        }
+        displayTemplate = config.getDisplay();
+        if (displayTemplate == null)
+        {
+          displayTemplate = L.m("<Datensatz>");
+        }
       }
-      Iterator<Map.Entry<String, UIElement>> iter = mapSpalteToUIElement.entrySet().iterator();
-      while (iter.hasNext())
+    }
+
+    /**
+     * Create a control.
+     *
+     * @param container
+     *          The container for the control.
+     * @param layout
+     *          The layout to which the control belongs.
+     * @param config
+     *          The configuration of the control.
+     * @return The control.
+     */
+    private XControl createControl(XControlContainer container, Layout layout, UIElementConfig config)
+    {
+      Layout uiLayout = null;
+      XControl uiElement = null;
+      switch (config.getType())
       {
-        Map.Entry<String, UIElement> entry = iter.next();
+      case LABEL:
+        uiElement = GuiFactory.createLabel(UNO.xMCF, UNO.defaultContext, config.getLabel(),
+            new Rectangle(0, 0, 300, 20), null);
+        uiLayout = new ControlLayout(uiElement);
+        break;
+      case TEXTFIELD:
+        uiLayout = new HorizontalLayout(0, 0, 0, 0, 5);
+        if (config.getLabel() != null && !config.getLabel().isEmpty())
+        {
+          XControl label = GuiFactory.createLabel(UNO.xMCF, UNO.defaultContext, config.getLabel(),
+              new Rectangle(0, 0, 300, 20), null);
+          uiLayout.addControl(label);
+          container.addControl(config.getId() + "label", label);
+        }
+        SortedMap<String, Object> props = new TreeMap<>();
+        props.put(UnoProperty.DEFAULT_CONTROL, config.getId());
+        props.put(UnoProperty.READ_ONLY, config.isReadonly());
+        props.put(UnoProperty.HELP_TEXT, config.getTip());
+        uiElement = GuiFactory.createTextfield(UNO.xMCF, UNO.defaultContext, "", new Rectangle(0, 0, 300, 20), props,
+            null);
+        uiLayout.addControl(uiElement);
+        break;
+      case BUTTON:
+        AbstractActionListener listener = event -> processUiElementEvent(config.getAction());
+        uiElement = GuiFactory.createButton(UNO.xMCF, UNO.defaultContext, config.getLabel(), listener,
+            new Rectangle(0, 0, 300, 20), null);
+        uiLayout = new ControlLayout(uiElement);
+        break;
+      case LISTBOX:
+        AbstractItemListener itemlistener = event -> {
+          List<String> selected = Arrays.asList(resultsList.getSelectedItems());
+          if (!selected.isEmpty())
+          {
+            updatePreview(datasets.get(selected.get(0)));
+          }
+        };
+        uiElement = GuiFactory.createListBox(UNO.xMCF, UNO.defaultContext, itemlistener, new Rectangle(0, 0, 300, 300),
+            null);
+        uiLayout = new ControlLayout(uiElement);
+        break;
+      default:
+        break;
+      }
+      if (uiElement != null)
+      {
+        container.addControl(config.getId(), uiElement);
+        layout.addLayout(uiLayout, 1);
+        if (config.getDbSpalte() != null)
+        {
+          mapSpalteToUIElement.put(config.getDbSpalte(), uiElement);
+        }
+      }
+      return uiElement;
+    }
+
+    /**
+     * Write the data of a data set in the preview controls.
+     *
+     * @param ds
+     *          The data set.
+     */
+    private void updatePreview(Dataset ds)
+    {
+      for (Map.Entry<String, XControl> entry : mapSpalteToUIElement.entrySet())
+      {
         String dbSpalte = entry.getKey();
-        UIElement uiElement = entry.getValue();
+        XControl uiElement = entry.getValue();
         try
         {
           if (ds == null)
-            uiElement.setString("");
-          else
-            uiElement.setString(ds.get(dbSpalte));
+          {
+            UNO.XTextComponent(uiElement).setText("");
+          } else
+          {
+            UNO.XTextComponent(uiElement).setText(ds.get(dbSpalte));
+          }
         } catch (ColumnNotFoundException e)
         {
-          LOGGER.error(L.m(
-              "Fehler im Abschnitt \"Spaltenumsetzung\" oder \"Vorschau\". Spalte \"%1\" soll in Vorschau angezeigt werden ist aber nicht in der Spaltenumsetzung definiert.",
-              dbSpalte));
+          LOGGER.error("Fehler im Abschnitt \"Spaltenumsetzung\" oder \"Vorschau\". Spalte \"{}\" soll in "
+              + "Vorschau angezeigt werden ist aber nicht in der Spaltenumsetzung definiert.", dbSpalte);
         }
       }
     }
 
     /**
-     * Ändert die Werteliste von list so, dass sie data entspricht. Die Datasets aus data werden
-     * nicht direkt als Werte verwendet, sondern in {@link ListElement} Objekte gewrappt. data ==
-     * null wird interpretiert als leere Liste. list kann null sein (dann tut diese Funktion
-     * nichts).
+     * Display the search results in the control {@link #resultsList}.
+     *
+     * @param data
+     *          The results of the search
      */
-    private void setListElements(Listbox list, QueryResults data)
+    private void setListElements(QueryResults data)
     {
-      if (list == null)
+      datasets.clear();
+      if (resultsList == null)
       {
         return;
       }
-      ListElement[] elements;
-      if (data == null)
-        elements = new ListElement[] {};
-      else
+      if (data != null)
       {
-        elements = new ListElement[data.size()];
-        Iterator<Dataset> iter = data.iterator();
-        int i = 0;
-        while (iter.hasNext())
-          elements[i++] = new ListElement(iter.next());
-        Arrays.sort(elements, (Object o1, Object o2) -> o1.toString().compareTo(o2.toString()));
+        for (Dataset d : data)
+        {
+          datasets.put(substituteVars(d), d);
+        }
       }
 
-      list.setList(Arrays.asList(elements));
+      resultsList.removeItems((short) 0, resultsList.getItemCount());
+      resultsList.addItems(datasets.keySet().toArray(String[]::new), (short) 0);
       updatePreview(null);
     }
 
     /**
-     * Implementiert die gleichnamige ACTION.
-     */
-    private void back()
-    {
-      dialogEnd("back");
-    }
-
-    /**
-     * Implementiert die gleichnamige ACTION.
+     * Select a data set.
      */
     private void select(Collection<String> schema, Dataset ds)
     {
       if (ds != null)
       {
         Map<String, String> newData = new HashMap<>();
-        Iterator<String> iter = schema.iterator();
-        while (iter.hasNext())
+        for (String columnName : schema)
         {
-          String columnName = iter.next();
           try
           {
             newData.put(columnName, ds.get(columnName));
@@ -735,101 +668,51 @@ public class DatasourceSearchDialog implements Dialog
             LOGGER.error(L.m("Huh? Dies sollte nicht passieren können"), x);
           }
         }
-
-        synchronized (data)
-        {
-          data[0] = newData;
-        }
+        data = newData;
       }
       dialogEnd("select");
     }
 
     /**
-     * Wrapper um ein Dataset zum Einfügen in eine JList.
+     * Start the query and update the result list.
      */
-    private class ListElement
-    {
-      private String displayString;
-
-      private Dataset ds;
-
-      public ListElement(Dataset ds)
-      {
-        displayString = getDisplayString(ds);
-        this.ds = ds;
-      }
-
-      @Override
-      public String toString()
-      {
-        return displayString;
-      }
-
-      public Dataset getDataset()
-      {
-        return ds;
-      }
-
-      /**
-       * Liefert zu einem Datensatz den in einer Listbox anzuzeigenden String.
-       */
-      private String getDisplayString(Dataset ds)
-      {
-        return substituteVars(displayTemplate, ds);
-      }
-    }
-
-    /**
-     * Führt die Suchanfrage im Feld {@link #query} aus (falls dieses nicht null ist) gemäß
-     * {@link #searchStrategy} und ändert {@link #resultsList} (falls nicht null) so dass sie die
-     * Suchergebnisse enthält.
-     */
-    public void search()
+    private void search()
     {
       if (query == null)
       {
         return;
       }
 
-      // Erzeugen eines Runnable-Objekts, das die Geschäftslogik enthält und nachher
-      // an FrameWorker.disableFrameAndWork übergeben werden kann.
-      Runnable r = () -> {
-        QueryResults results = null;
+      CompletableFuture.supplyAsync(() -> {
+        QueryResults r = null;
         try
         {
-          results = Search.search(query.getString(), searchStrategy, dj, false);
+          r = Search.search(query.getText(), searchStrategy, dj, false);
         } catch (IllegalArgumentException x)
         {
           LOGGER.error("", x);
-          InfoDialog.showInfoModal(L.m("Timeout bei Suchanfrage"), L.m(
-              "Das Bearbeiten Ihrer Suchanfrage hat zu lange gedauert und wurde deshalb abgebrochen.\n"
+          InfoDialog.showInfoModal(L.m("Timeout bei Suchanfrage"),
+              L.m("Das Bearbeiten Ihrer Suchanfrage hat zu lange gedauert und wurde deshalb abgebrochen.\n"
                   + "Grund hierfür könnte ein Problem mit der Datenquelle sein oder mit dem verwendeten\n"
                   + "Suchbegriff, der auf zu viele Ergebnisse zutrifft.\n"
                   + "Bitte versuchen Sie eine andere, präzisere Suchanfrage."));
         }
-
-        if (results != null && resultsList != null)
+        return r;
+      }).thenAcceptAsync(r -> {
+        if (r != null && resultsList != null)
         {
-          // Wir benötigen finalResults, da eine nicht-finale Variable nicht in der
-          // unten definierten anonymen Runnable-Klasse referenziert werden darf.
-          final QueryResults finalResults = results;
-
-          // Folgendes muss im Event Dispatch Thread ausgeführt werden
-          SwingUtilities.invokeLater(
-              () -> setListElements(resultsList, columnTransformer.transform(finalResults)));
+          setListElements(columnTransformer.transform(r));
         }
-      }; // Ende des Erzeugens des Runnable-Objekts r
-
-      // Frame disablen und Suche in eigenem Thread starten
-      FrameWorker.disableFrameAndWork(myFrame, r, true);
+      });
     }
 
     /**
-     * Die zentrale Anlaufstelle für alle von UIElementen ausgelösten Events (siehe
-     * {@link UIElementEventHandler#processUiElementEvent(UIElement, String, Object[])} ).
+     * Process the actions of the buttons.
+     *
+     * @param action
+     *          The action to perform.
      */
-    @Override
-    public void processUiElementEvent(UIElement source, String eventType, Object[] args)
+    private void processUiElementEvent(String action)
     {
       if (!processUIElementEvents)
       {
@@ -837,46 +720,28 @@ public class DatasourceSearchDialog implements Dialog
       }
       try
       {
-        processUIElementEvents = false; // Reentranz bei setString() unterbinden
+        processUIElementEvents = false;
 
-        if (WollMuxFiles.isDebugMode())
+        if (ABORT.equals(action))
         {
-          StringBuilder buffy = new StringBuilder("UIElementEvent: " + eventType + "(");
-          for (int i = 0; i < args.length; ++i)
-            buffy.append((i == 0 ? "" : ",") + args[i]);
-          buffy.append(") on UIElement " + source.getId());
-          LOGGER.debug(buffy.toString());
-        }
-
-        if ("action".equals(eventType))
+          dialogEnd(ABORT);
+        } else if ("back".equals(action))
         {
-          String action = (String) args[0];
-          if ("abort".equals(action))
-            abort();
-          else if ("back".equals(action))
-            back();
-          else if ("search".equals(action))
-            search();
-          else if ("select".equals(action))
+          dialogEnd("back");
+        } else if ("search".equals(action))
+        {
+          search();
+        } else if ("select".equals(action))
+        {
+          Dataset ds = null;
+          if (resultsList != null)
           {
-            Dataset ds = null;
-            if (resultsList != null)
-            {
-              List<Object> selected = resultsList.getSelected();
-              if (!selected.isEmpty())
-                ds = ((ListElement) selected.get(0)).getDataset();
-            }
-            select(dialogWindowSchema, ds);
+            List<String> selected = Arrays.asList(resultsList.getSelectedItems());
+            if (!selected.isEmpty())
+              ds = datasets.get(selected.get(0));
           }
-        } else if ("listSelectionChanged".equals(eventType))
-        {
-          List<Object> selected = ((Listbox) source).getSelected();
-          if (!selected.isEmpty())
-          {
-            updatePreview((ListElement) selected.get(0));
-          }
+          select(dialogWindowSchema, ds);
         }
-
       } catch (Exception x)
       {
         LOGGER.error("", x);
@@ -887,179 +752,18 @@ public class DatasourceSearchDialog implements Dialog
     }
 
     /**
-     * Initialisiert die UIElementFactory, die zur Erzeugung der UIElements verwendet wird.
+     * Replace {@code ${SPALTENNAME}} in {@link #displayTemplate} with the values from the datas et.
+     *
+     * @param ds
+     *          Associated data set.
+     * @return String without '$' characters.
      */
-    private void initFactories()
+    private String substituteVars(Dataset ds)
     {
-      Map<UIElementType, GridBagConstraints> mapTypeToLayoutConstraints = new EnumMap<>(UIElementType.class);
-      Map<UIElementType, UIElement.LabelPosition> mapTypeToLabelType = new EnumMap<>(UIElementType.class);
-      Map<UIElementType, GridBagConstraints> mapTypeToLabelLayoutConstraints = new EnumMap<>(
-          UIElementType.class);
-
-      // int gridx, int gridy, int gridwidth, int gridheight, double weightx, double
-      // weighty, int anchor, int fill, Insets insets, int ipadx, int ipady)
-      GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
-          GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
-          new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
-      GridBagConstraints gbcListbox = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
-          GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-          new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
-      GridBagConstraints gbcCombobox = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
-          GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
-          new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
-      GridBagConstraints gbcTextarea = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
-          GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
-          new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
-      GridBagConstraints gbcLabelLeft = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-          GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-          new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
-      GridBagConstraints gbcCheckbox = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
-          GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
-          new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
-      GridBagConstraints gbcLabel = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
-          GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
-          new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
-      GridBagConstraints gbcPreviewLabel = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0,
-          GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
-          new Insets(TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
-      GridBagConstraints gbcButton = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-          GridBagConstraints.LINE_START, GridBagConstraints.NONE,
-          new Insets(BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER), 0, 0);
-      GridBagConstraints gbcHsep = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
-          GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
-          new Insets(3 * TF_BORDER, 0, 2 * TF_BORDER, 0), 0, 0);
-      GridBagConstraints gbcPreviewHsep = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0,
-          GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,
-          new Insets(3 * TF_BORDER, 0, 2 * TF_BORDER, 0), 0, 0);
-      GridBagConstraints gbcVsep = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0,
-          GridBagConstraints.CENTER, GridBagConstraints.VERTICAL,
-          new Insets(0, TF_BORDER, 0, TF_BORDER), 0, 0);
-      GridBagConstraints gbcGlue = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
-          GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0);
-      GridBagConstraints gbcPreviewGlue = new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0,
-          GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0);
-
-      mapTypeToLayoutConstraints.put(UIElementType.DEFAULT, gbcTextfield);
-      mapTypeToLabelType.put(UIElementType.DEFAULT, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(UIElementType.DEFAULT, null);
-
-      mapTypeToLayoutConstraints.put(UIElementType.TEXTFIELD, gbcTextfield);
-      mapTypeToLabelType.put(UIElementType.TEXTFIELD, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(UIElementType.TEXTFIELD, null);
-
-      mapTypeToLayoutConstraints.put(UIElementType.COMBOBOX, gbcCombobox);
-      mapTypeToLabelType.put(UIElementType.COMBOBOX, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(UIElementType.COMBOBOX, null);
-
-      mapTypeToLayoutConstraints.put(UIElementType.H_GLUE, gbcGlue);
-      mapTypeToLabelType.put(UIElementType.H_GLUE, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(UIElementType.H_GLUE, null);
-      mapTypeToLayoutConstraints.put(UIElementType.V_GLUE, gbcGlue);
-      mapTypeToLabelType.put(UIElementType.V_GLUE, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(UIElementType.V_GLUE, null);
-
-      mapTypeToLayoutConstraints.put(UIElementType.TEXTAREA, gbcTextarea);
-      mapTypeToLabelType.put(UIElementType.TEXTAREA, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(UIElementType.TEXTAREA, null);
-
-      mapTypeToLayoutConstraints.put(UIElementType.LISTBOX, gbcListbox);
-      mapTypeToLabelType.put(UIElementType.LISTBOX, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(UIElementType.LISTBOX, null);
-
-      mapTypeToLayoutConstraints.put(UIElementType.LABEL, gbcLabel);
-      mapTypeToLabelType.put(UIElementType.LABEL, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(UIElementType.LABEL, null);
-
-      mapTypeToLayoutConstraints.put(UIElementType.CHECKBOX, gbcCheckbox);
-      mapTypeToLabelType.put(UIElementType.CHECKBOX, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(UIElementType.CHECKBOX, null); // hat label integriert
-
-      mapTypeToLayoutConstraints.put(UIElementType.BUTTON, gbcButton);
-      mapTypeToLabelType.put(UIElementType.BUTTON, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(UIElementType.BUTTON, null);
-
-      mapTypeToLayoutConstraints.put(UIElementType.H_SEPARATOR, gbcHsep);
-      mapTypeToLabelType.put(UIElementType.H_SEPARATOR, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(UIElementType.H_SEPARATOR, null);
-      mapTypeToLayoutConstraints.put(UIElementType.V_SEPARATOR, gbcVsep);
-      mapTypeToLabelType.put(UIElementType.V_SEPARATOR, UIElement.LabelPosition.NONE);
-      mapTypeToLabelLayoutConstraints.put(UIElementType.V_SEPARATOR, null);
-
-      Set<String> supportedActions = new HashSet<>();
-      supportedActions.add("abort");
-      supportedActions.add("back");
-      supportedActions.add("search");
-      supportedActions.add("select");
-
-      vertiContext = new UIElementContext();
-      vertiContext.setMapTypeToLabelLayoutConstraints(mapTypeToLabelLayoutConstraints);
-      vertiContext.setMapTypeToLabelType(mapTypeToLabelType);
-      vertiContext.setMapTypeToLayoutConstraints(mapTypeToLayoutConstraints);
-      vertiContext.setUiElementEventHandler(this);
-      Map<UIElementType, UIElementType> vertiMapTypeToType = new EnumMap<>(UIElementType.class);
-      vertiMapTypeToType.put(UIElementType.SEPARATOR, UIElementType.H_SEPARATOR);
-      vertiMapTypeToType.put(UIElementType.GLUE, UIElementType.V_GLUE);
-      vertiContext.setMapTypeToType(vertiMapTypeToType);
-      vertiContext.setSupportedActions(supportedActions);
-
-      horiContext = new UIElementContext();
-      horiContext.setMapTypeToLabelLayoutConstraints(mapTypeToLabelLayoutConstraints);
-      horiContext.setMapTypeToLabelType(mapTypeToLabelType);
-      horiContext.setMapTypeToLayoutConstraints(mapTypeToLayoutConstraints);
-      horiContext.setUiElementEventHandler(this);
-      Map<UIElementType, UIElementType> horiMapTypeToType = new EnumMap<>(UIElementType.class);
-      horiMapTypeToType.put(UIElementType.SEPARATOR, UIElementType.V_SEPARATOR);
-      horiMapTypeToType.put(UIElementType.GLUE, UIElementType.H_GLUE);
-      horiContext.setMapTypeToType(horiMapTypeToType);
-      horiContext.setSupportedActions(supportedActions);
-
-      Map<UIElementType, GridBagConstraints> previewLabelLayoutConstraints = new EnumMap<>(
-          mapTypeToLabelLayoutConstraints);
-      previewLabelLayoutConstraints.put(UIElementType.TEXTFIELD, gbcLabelLeft);
-      Map<UIElementType, UIElement.LabelPosition> previewLabelType = new EnumMap<>(mapTypeToLabelType);
-      previewLabelType.put(UIElementType.TEXTFIELD, UIElement.LabelPosition.LEFT);
-      Map<UIElementType, GridBagConstraints> previewLayoutConstraints = new EnumMap<>(
-          mapTypeToLayoutConstraints);
-      previewLayoutConstraints.put(UIElementType.H_GLUE, gbcPreviewGlue);
-      previewLayoutConstraints.put(UIElementType.V_GLUE, gbcPreviewGlue);
-      previewLayoutConstraints.put(UIElementType.LABEL, gbcPreviewLabel);
-      previewLayoutConstraints.put(UIElementType.H_SEPARATOR, gbcPreviewHsep);
-      previewContext = new UIElementContext();
-      previewContext.setMapTypeToLabelLayoutConstraints(previewLabelLayoutConstraints);
-      previewContext.setMapTypeToLabelType(previewLabelType);
-      previewContext.setMapTypeToLayoutConstraints(previewLayoutConstraints);
-      previewContext.setUiElementEventHandler(this);
-      Map<UIElementType, UIElementType> previewMapTypeToType = new EnumMap<>(UIElementType.class);
-      previewMapTypeToType.put(UIElementType.SEPARATOR, UIElementType.H_SEPARATOR);
-      previewMapTypeToType.put(UIElementType.GLUE, UIElementType.V_GLUE);
-      previewContext.setMapTypeToType(previewMapTypeToType);
-      previewContext.setSupportedActions(supportedActions);
-
-      uiElementFactory = new UIElementFactory();
-
-    }
-
-  }
-
-  /**********************************************************************************
-   * end of class DialogWindow
-   *********************************************************************************/
-
-  /**
-   * Ersetzt "${SPALTENNAME}" in str durch den Wert der entsprechenden Spalte im datensatz.
-   * 
-   * @param displayTemplate
-   *          A String template that matches with a dataset column.
-   * @param ds
-   *          Associated dataset.
-   * @return String without '$' characters.
-   */
-  public String substituteVars(String displayTemplate, Dataset ds)
-  {
-    Pattern p = Pattern.compile("\\$\\{([a-zA-Z_][a-zA-Z_0-9]*)\\}");
-    Matcher m = p.matcher(displayTemplate);
-    if (m.find())
-      do
+      Pattern p = Pattern.compile("\\$\\{([a-zA-Z_][a-zA-Z_0-9]*)\\}");
+      String display = displayTemplate;
+      Matcher m = p.matcher(display);
+      while (m.find())
       {
         String spalte = m.group(1);
         String wert = spalte;
@@ -1072,134 +776,58 @@ public class DatasourceSearchDialog implements Dialog
           }
         } catch (ColumnNotFoundException e)
         {
-          LOGGER.error(L.m(
-              "Fehler beim Auflösen des Platzhalters \"${%1}\": Spalte für den Datensatz nicht definiert",
-              spalte));
+          LOGGER.error(
+              L.m("Fehler beim Auflösen des Platzhalters \"${%1}\": Spalte für den Datensatz nicht definiert", spalte));
         }
-        displayTemplate = displayTemplate.substring(0, m.start()) + wert
-            + displayTemplate.substring(m.end());
-        m = p.matcher(displayTemplate);
-      } while (m.find());
-    return displayTemplate;
+        display = display.substring(0, m.start()) + wert + display.substring(m.end());
+        m = p.matcher(display);
+      }
+      return display;
+    }
   }
 
   /**
-   * Implementiert die gleichnamige ACTION.
-   */
-  private void abort()
-  {
-    dialogEnd("abort");
-  }
-
-  /**
-   * Beendet den Dialog und ruft falls nötig den dialogEndListener auf wobei das gegebene
-   * actionCommand übergeben wird.
+   * Terminate the dialog and call the listener.
+   *
+   * @param actionComand
+   *          The command for the listener.
    */
   private void dialogEnd(String actionCommand)
   {
-    myFrame.dispose();
-    synchronized (shown)
+    if (dialog != null)
     {
-      shown[0] = false;
+      dialog.endExecute();
     }
     if (dialogEndListener != null)
+    {
       dialogEndListener.actionPerformed(new ActionEvent(this, 0, actionCommand));
+    }
   }
 
   /**
-   * Liefert neue Instanzen eines DatasourceSearchDialogs. Alle Dialoge, die über den selben
-   * Instantiator erzeugt wurden erzeugen ihrerseits wieder neue Instanzen über diesen Instantiator,
-   * d.h. insbesondere dass instanceFor(context).instanceFor(context).instanceFor(context) den
-   * selben Dialog liefert wie instanceFor(context).
+   * Parse the column mapping of all tabs.
    *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @param conf
+   *          The configuration.
+   * @return The column schema.
    */
-  private static class Instantiator implements Dialog
+  private HashSet<String> parseSchema(ConfigThingy conf)
   {
-    private ConfigThingy conf;
-
-    private DatasourceJoiner dj;
-
-    private Set<String> schema;
-
-    public Instantiator(ConfigThingy conf, DatasourceJoiner dj)
+    HashSet<String> newSchema = new HashSet<>();
+    for (ConfigThingy fenster : conf.query("Fenster"))
     {
-      this.conf = conf;
-      this.dj = dj;
-      schema = parseSchema(conf);
-      if (schema.isEmpty())
-        throw new ConfigurationErrorException(L.m(
-            "Fehler in Funktionsdialog: Abschnitt 'Spaltenumsetzung' konnte nicht geparst werden!"));
-    }
-
-    @Override
-    public Dialog instanceFor(Map<Object, Object> context)
-    {
-      if (!context.containsKey(this))
-        context.put(this, new DatasourceSearchDialog(this, schema, conf, dj));
-      return (Dialog) context.get(this);
-    }
-
-    @Override
-    public Object getData(String id)
-    {
-      return null;
-    }
-
-    @Override
-    public void show(ActionListener dialogEndListener, FunctionLibrary funcLib,
-        DialogLibrary dialogLib)
-    {
-      // nothing to show
-    }
-
-    @Override
-    public Collection<String> getSchema()
-    {
-      return new HashSet<>(schema);
-    }
-
-    private HashSet<String> parseSchema(ConfigThingy conf)
-    {
-      HashSet<String> newSchema = new HashSet<>();
-      Iterator<ConfigThingy> fensterIter = conf.query("Fenster").iterator();
-      while (fensterIter.hasNext())
+      for (ConfigThingy tab : fenster)
       {
-        ConfigThingy fenster = fensterIter.next();
-        Iterator<ConfigThingy> tabIter = fenster.iterator();
-        while (tabIter.hasNext())
+        for (ConfigThingy columnMapping : tab.query("Spaltenumsetzung", 1))
         {
-          ConfigThingy tab = tabIter.next();
-          Iterator<ConfigThingy> suIter = tab.query("Spaltenumsetzung", 1).iterator();
-          while (suIter.hasNext())
+          for (ConfigThingy column : columnMapping)
           {
-            Iterator<ConfigThingy> spaltenIterator = suIter.next().iterator();
-            while (spaltenIterator.hasNext())
-            {
-              ConfigThingy spalte = spaltenIterator.next();
-              newSchema.add(spalte.getName());
-            }
+            newSchema.add(column.getName());
           }
         }
       }
-
-      return newSchema;
     }
 
-  }
-
-  /**
-   * Ein WindowListener, der auf den JFrame registriert wird, damit als Reaktion auf den
-   * Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private class MyWindowListener extends WindowAdapter
-  {
-    @Override
-    public void windowClosing(WindowEvent e)
-    {
-      abort();
-    }
+    return newSchema;
   }
 }
