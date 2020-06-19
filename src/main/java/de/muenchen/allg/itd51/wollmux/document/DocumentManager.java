@@ -180,7 +180,7 @@ public class DocumentManager
    *
    * @return Liste aller registrierten XEventListener-Objekte.
    */
-  public List<XEventListener> getDocumentEventListener()
+  public synchronized List<XEventListener> getDocumentEventListener()
   {
     return registeredDocumentEventListener;
   }
@@ -196,7 +196,7 @@ public class DocumentManager
    * sondern jeder Aufruf muss über den EventHandler laufen. Deswegen exportiert
    * WollMuxSingleton auch nicht das XEventBroadcaster-Interface.
    */
-  public void addDocumentEventListener(XEventListener listener)
+  public synchronized void addDocumentEventListener(XEventListener listener)
   {
     LOGGER.trace("DocumentManager::addDocumentEventListener()");
 
@@ -223,7 +223,7 @@ public class DocumentManager
    * sondern jeder Aufruf muss über den EventHandler laufen. Deswegen exportiert
    * WollMuxSingleton auch nicht das XEventBroadcaster-Interface.
    */
-  public void removeDocumentEventListener(XEventListener listener)
+  public synchronized void removeDocumentEventListener(XEventListener listener)
   {
     LOGGER.trace("DocumentManager::removeDocumentEventListener()");
     Iterator<XEventListener> i = registeredDocumentEventListener.iterator();
