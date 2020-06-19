@@ -11,7 +11,6 @@ import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
-import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoCollection;
@@ -92,14 +91,14 @@ class SurroundingGarbageCollector extends AbstractExecutor
 
         // collect text portions for deletion and book marks which may be accidently removed to
         List<String> collateral = new ArrayList<>();
-        List<Object> victims = new ArrayList<>();
         UnoCollection<Object> ranges = UnoCollection.getCollection(range, Object.class);
+
         for (Object r : ranges)
         {
           UnoCollection<Object> textPortions = UnoCollection.getCollection(r, Object.class);
           if (textPortions != null)
           {
-            collectTextPotions(name, collateral, victims, textPortions);
+            collectTextPotions(name, collateral, textPortions);
           }
         }
 
@@ -125,27 +124,17 @@ class SurroundingGarbageCollector extends AbstractExecutor
       }
     }
 
-    private void collectTextPotions(String name, List<String> collateral, List<Object> victims,
-        UnoCollection<Object> textPortions)
+    private void collectTextPotions(String name, List<String> collateral, UnoCollection<Object> textPortions)
     {
-      boolean kill = false;
       for (Object textPortion : textPortions)
       {
         if ("Bookmark".equals(Utils.getProperty(textPortion, UnoProperty.TEXT_PROTION_TYPE)))
         {
           String portionName = UNO.XNamed(Utils.getProperty(textPortion, UnoProperty.BOOKMARK)).getName();
-          if (name.equals(portionName))
-          {
-            kill = AnyConverter.toBoolean(Utils.getProperty(textPortion, UnoProperty.IS_START));
-          } else
+          if (!name.equals(portionName))
           {
             collateral.add(portionName);
           }
-        }
-
-        if (kill && "Text".equals(Utils.getProperty(textPortion, UnoProperty.TEXT_PROTION_TYPE)))
-        {
-          victims.add(textPortion);
         }
       }
     }
