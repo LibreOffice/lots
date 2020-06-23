@@ -58,7 +58,6 @@ import com.sun.star.awt.tab.XTabPage;
 import com.sun.star.awt.tab.XTabPageContainer;
 import com.sun.star.awt.tab.XTabPageContainerModel;
 import com.sun.star.lang.EventObject;
-import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
@@ -85,6 +84,7 @@ import de.muenchen.allg.itd51.wollmux.ui.layout.ControlLayout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.HorizontalLayout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
+import de.muenchen.allg.util.UnoComponent;
 import de.muenchen.allg.util.UnoProperty;
 
 /**
@@ -257,16 +257,8 @@ public class DatasourceSearchDialog implements Dialog
   private void createGUI(String title, ConfigThingy fensterDesc)
   {
     XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
-    XContainerWindowProvider provider = null;
-
-    try
-    {
-      provider = UnoRuntime.queryInterface(XContainerWindowProvider.class,
-          UNO.xMCF.createInstanceWithContext("com.sun.star.awt.ContainerWindowProvider", UNO.defaultContext));
-    } catch (com.sun.star.uno.Exception e)
-    {
-      LOGGER.error("", e);
-    }
+    XContainerWindowProvider provider = UNO.XContainerWindowProvider(
+        UnoComponent.createComponentWithContext(UnoComponent.CSS_AWT_CONTAINER_WINDOW_PROVIDER));
 
     if (provider == null)
       return;
