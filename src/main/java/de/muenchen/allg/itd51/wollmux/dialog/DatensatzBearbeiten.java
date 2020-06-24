@@ -1,51 +1,24 @@
-/*
- * Dateiname: DatensatzBearbeiten.java
- * Projekt  : WollMux
- * Funktion : Dynamisches Erzeugen eines Swing-GUIs für das Bearbeiten eines Datensatzes anhand von ConfigThingy
+/*-
+ * #%L
+ * WollMux
+ * %%
+ * Copyright (C) 2005 - 2020 Landeshauptstadt München
+ * %%
+ * Licensed under the EUPL, Version 1.1 or – as soon they will be
+ * approved by the European Commission - subsequent versions of the
+ * EUPL (the "Licence");
  *
- * Copyright (c) 2010-2019 Landeshauptstadt München
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
+ * http://ec.europa.eu/idabc/eupl5
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 11.10.2005 | BNK | Erstellung
- * 14.10.2005 | BNK | Interaktion mit DJDataset
- * 14.10.2005 | BNK | Kommentiert
- * 17.10.2005 | BNK | Unterstützung für immer ausgegraute Buttons.
- * 17.10.2005 | BNK | Unterstützung für READONLY
- * 18.10.2005 | BNK | Zusätzliche Exceptions loggen
- * 24.10.2005 | BNK | dialogEndListener wird am Ende aufgerufen
- *                  | show() entfernt zur Vermeidung von Thread-Problemen
- * 24.10.2005 | BNK | restoreStandard() Buttons nicht mehr ausgegraut, wenn
- *                  | Werte nicht geändert wurden, aber bereits aus dem LOS sind.
- * 27.10.2005 | BNK | back + CLOSEACTION
- * 02.11.2005 | BNK | +saveAndBack()
- * 15.11.2005 | BNK | Endlosschleife beseitigt durch vertauschen der || Operanden
- * 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
- * 11.01.2006 | BNK | EDIT "true" bei comboboxen unterstützt
- * 25.01.2006 | BNK | Auch editierbare Comboboxen ändern nun den Hintergrund korrekt.
- * 19.04.2006 | BNK | [R1337]Fehlermeldung, bei unbekanntem TYPE
- * 15.05.2006 | BNK | nicht-editierbare Comboboxen funktionieren jetzt hoffentlich
- *                  | richtig mit Vorgabewerten, die nicht in der Liste sind.
- * 29.09.2006 | BNK | Verbessertes Auslesen von ComboBox-Daten
- * 23.07.2006 | BNK | [R2551][23097]Scrollbar machen
- * -------------------------------------------------------------------
- *
- * @author Matthias Benkmann (D-III-ITD 5.1)
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ * #L%
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 

@@ -30,6 +30,13 @@ mvn clean package
 
 The compiled extension can be found at dist/WollMux.oxt
 
+### Build errors
+* **There are files with header to update**: Some of the source files don't have a license header. The header can be updated with:
+
+```
+mvn license:update-file-header
+```
+
 ## Debugging
 ### External WollMux (Eclipse)
 WollMux.oxt extension is not installed in LibreOffice, but is loaded from external by starting a debug session in eclipse. There exist an additional extension **WollMux_ButtonsOnly.oxt**, which only contains the toolbars and dialogs. This extension must be installed in LibreOffice. Therefore call

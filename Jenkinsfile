@@ -25,7 +25,7 @@ pipeline {
           mavenLocalRepo: '.repo',
           mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
           publisherStrategy: 'EXPLICIT') {
-          sh "mvn -Dmaven.javadoc.skip=true -DskipTests clean package"
+          sh "mvn -Dmaven.javadoc.skip=true -DskipTests -DdryRun clean package"
         }
       }
     }
@@ -39,7 +39,7 @@ pipeline {
               mavenLocalRepo: '.repo',
               mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
               publisherStrategy: 'EXPLICIT') {
-              sh "mvn -Dmaven.javadoc.skip=true test verify"
+              sh "mvn -Dmaven.javadoc.skip=true -DdryRun test verify"
             }
           }
         }

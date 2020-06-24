@@ -1,35 +1,24 @@
-/*
- * Dateiname: JTextFieldWithTags.java
- * Projekt  : WollMux
- * Funktion : Erweiterte eine JTextComponent um die Fähigkeit, Tags, die als
- *            <tag> angezeigt werden, wie atomare Elemente zu behandeln.
+/*-
+ * #%L
+ * WollMux
+ * %%
+ * Copyright (C) 2005 - 2020 Landeshauptstadt München
+ * %%
+ * Licensed under the EUPL, Version 1.1 or – as soon they will be
+ * approved by the European Commission - subsequent versions of the
+ * EUPL (the "Licence");
  *
- * Copyright (c) 2008-2015 Landeshauptstadt München
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
+ * http://ec.europa.eu/idabc/eupl5
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 13.02.2008 | LUT | Erstellung als JTextFieldWithTags
- * 13.02.2008 | LUT | Verallgemeinerung zur Klasse TextComponentTags
- * 13.02.2008 | BNK | public Methoden zusammengruppiert, Ortografie
- * -------------------------------------------------------------------
- *
- * @author Christoph Lutz (D-III-ITD D.10)
- * @version 1.0
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ * #L%
  */
 package de.muenchen.allg.itd51.wollmux.core.dialog;
 

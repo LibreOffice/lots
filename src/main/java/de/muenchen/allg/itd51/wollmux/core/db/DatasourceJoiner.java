@@ -1,56 +1,24 @@
-/*
- * Dateiname: DatasourceJoiner.java
- * Projekt  : WollMux
- * Funktion : stellt eine virtuelle Datenbank zur Verfügung, die ihre Daten
- *            aus verschiedenen Hintergrunddatenbanken zieht.
+/*-
+ * #%L
+ * WollMux
+ * %%
+ * Copyright (C) 2005 - 2020 Landeshauptstadt München
+ * %%
+ * Licensed under the EUPL, Version 1.1 or – as soon they will be
+ * approved by the European Commission - subsequent versions of the
+ * EUPL (the "Licence");
  *
- * Copyright (c) 2010-2015 Landeshauptstadt München
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
+ * http://ec.europa.eu/idabc/eupl5
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 06.10.2005 | BNK | Erstellung
- * 24.10.2005 | BNK | +newDataset()
- * 28.10.2005 | BNK | Arbeit an der Baustelle
- * 02.11.2005 | BNK | Testen und Debuggen
- *                  | Aus Cache wird jetzt auch der ausgewählte gelesen
- * 03.11.2005 | BNK | saveCacheAndLOS kriegt jetzt File-Argument
- *                  | saveCacheAndLos implementiert
- * 03.11.2005 | BNK | besser kommentiert
- * 07.11.2005 | BNK | +type "union"
- * 10.11.2005 | BNK | das Suchen der Datensätze für den Refresh hinter die
- *                  |  Schemaanpassung verschoben.
- *                  | Und nochmal die Reihenfolge umgewürfelt, hoffentlich stimmt's
- *                  | jetzt.
- * 10.11.2005 | BNK | Unicode-Marker an den Anfang der Cache-Datei schreiben
- * 06.12.2005 | BNK | +getStatus() (enthält momentan Info über Datensätze, die nicht
- *                  |   in der Datenbank wiedergefunden werden konnten und deshalb
- *                  |   vermutlich neu eingefügt werden sollten, weil sonst auf
- *                  |   Ewigkeit nur der Cache verwendet wird.
- *                  | LOS-only Datensätze werden nun korrekt in dumpData()
- *                  |   wiedergegeben und im Konstruktor restauriert.
- * 12.04.2006 | BNK | [P766]mehrere Datensätze mit gleichem Schlüssel korrekt in
- *                  | cache.conf gespeichert und wieder restauriert, ohne LDAP
- *                  | Anbindung zu verlieren.
- * 18.04.2006 | BNK | Bugfix zur Behebung von P766: ausgewaehlten Datensatz richtig merken
- * 26.05.2006 | BNK | +find(Query)
- * 30.01.2007 | BNK | Timeout nicht mehr statisch, sondern an Konstruktor übergeben.
- * 19.03.2010 | BED | +getContentsOfMainDatasource()
- * -------------------------------------------------------------------
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ * #L%
  */
 package de.muenchen.allg.itd51.wollmux.core.db;
 

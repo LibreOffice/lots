@@ -1,47 +1,24 @@
-/*
- * Dateiname: FunctionFactory.java
- * Projekt  : WollMux
- * Funktion : Erzeugt Functions aus ConfigThingys.
- * 
- * Copyright (c) 2008-2018 Landeshauptstadt München
+/*-
+ * #%L
+ * WollMux
+ * %%
+ * Copyright (C) 2005 - 2020 Landeshauptstadt München
+ * %%
+ * Licensed under the EUPL, Version 1.1 or – as soon they will be
+ * approved by the European Commission - subsequent versions of the
+ * EUPL (the "Licence");
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
+ * http://ec.europa.eu/idabc/eupl5
  *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 03.05.2006 | BNK | Erstellung
- * 08.05.2006 | BNK | Testing und Debugging, mehr Grund-Funktionen
- * 09.05.2006 | BNK | weitere Grundfunktionen
- * 11.05.2006 | BNK | NOT implementiert
- *                  | MATCH.getString() kann jetzt Function.ERROR liefern
- * 31.05.2006 | BNK | +getFunctionDialogReferences()
- * 26.07.2006 | BNK | +REPLACE-Grundfunktion
- * 05.12.2006 | BNK | WollMuxFiles.getClassLoader() wird für ExternalFunctions übergeben.
- * 21.03.2007 | BNK | BIND erweitert so dass auch direkt eine Funktion als FUNCTION verwendet werden kann.
- * 25.07.2007 | BNK | +DIVIDE/FORMAT
- * 03.08.2007 | BNK | +SUM,MINUS,PRODUCT,DIFF,ABS,SIGN
- * 08.08.2007 | BNK | SELECT-Verhalten im Fehlerfalle entsprechend Doku implementiert
- *                  | +NUMCMP, LE, GE, GT, LT 
- * 09.08.2007 | BNK | +ISERROR, ISERRORSTRING, ONERROR (für SELECT)
- * 01.02.2008 | BNK | +LENGTH
- * 07.03.2008 | BNK | [R16048] doppelte Parameter eliminieren
- * -------------------------------------------------------------------
- *
- * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
- * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ * #L%
  */
 package de.muenchen.allg.itd51.wollmux.core.functions;
 

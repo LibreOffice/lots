@@ -1,54 +1,25 @@
-/*
- * Dateiname: WollMuxSingleton.java
- * Projekt  : WollMux
- * Funktion : Singleton für zentrale WollMux-Methoden.
+/*-
+ * #%L
+ * WollMux
+ * %%
+ * Copyright (C) 2005 - 2020 Landeshauptstadt München
+ * %%
+ * Licensed under the EUPL, Version 1.1 or – as soon they will be
+ * approved by the European Commission - subsequent versions of the
+ * EUPL (the "Licence");
  *
- * Copyright (c) 2010-2019 Landeshauptstadt München
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
+ * http://ec.europa.eu/idabc/eupl5
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
- *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 14.10.2005 | LUT | Erstellung
- * 09.11.2005 | LUT | + Logfile wird jetzt erweitert (append-modus)
- *                    + verwenden des Konfigurationsparameters SENDER_SOURCE
- *                    + Erster Start des wollmux über wm_configured feststellen.
- * 05.12.2005 | BNK | line.separator statt \n
- * 13.04.2006 | BNK | .wollmux/ Handling ausgegliedert in WollMuxFiles.
- * 20.04.2006 | LUT | Überarbeitung Code-Kommentare
- * 20.04.2006 | BNK | DEFAULT_CONTEXT ausgegliedert nach WollMuxFiles
- * 21.04.2006 | LUT | + Robusteres Verhalten bei Fehlern während dem Einlesen
- *                    von Konfigurationsdateien;
- *                    + wohldefinierte Datenstrukturen
- *                    + Flag für EventProcessor: acceptEvents
- * 08.05.2006 | LUT | + isDebugMode()
- * 10.05.2006 | BNK | +parseGlobalFunctions()
- *                  | +parseFunctionDialogs()
- * 26.05.2006 | BNK | DJ initialisierung ausgelagert nacht WollMuxFiles
- * 06.06.2006 | LUT | + Ablösung der Event-Klasse durch saubere Objektstruktur
- * 19.12.2006 | BAB | + setzen von Shortcuts im Konstruktor
- * 29.12.2006 | BNK | +registerDatasources()
- * 27.03.2007 | BNK | Default-oooEinstellungen ausgelagert nach data/...
- * 16.12.2009 | ERT | Cast XTextField-Interface entfernt
- * 07.04.2010 | BED | Konfigurierbares SENDER_DISPLAYTEMPLATE
- * -------------------------------------------------------------------
- *
- * @author Christoph Lutz (D-III-ITD 5.1)
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ * #L%
  */
-
 package de.muenchen.allg.itd51.wollmux;
 
 import java.io.BufferedReader;

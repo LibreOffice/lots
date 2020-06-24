@@ -1,44 +1,24 @@
-/*
- * Dateiname: LDAPDatasource.java
- * Projekt  : WollMux
- * Funktion : Verschafft Zugriff auf LDAP-Verzeichnisdienst als Datasource.
- * 
- * Copyright (c) 2008-2015 Landeshauptstadt München
+/*-
+ * #%L
+ * WollMux
+ * %%
+ * Copyright (C) 2005 - 2020 Landeshauptstadt München
+ * %%
+ * Licensed under the EUPL, Version 1.1 or – as soon they will be
+ * approved by the European Commission - subsequent versions of the
+ * EUPL (the "Licence");
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL),
- * version 1.0 (or any later version).
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
+ * http://ec.europa.eu/idabc/eupl5
  *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330
- *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 03.11.2005 | BNK | Erstellung
- * 16.11.2005 | BNK | Ctrl-Shift-F
- *                  | besser kommentiert
- * 24.11.2005 | BNK | escapen von Werten in LDAP-Suchanfragen
- * 28.11.2005 | BNK | mehr testing und fixing und optimizing
- * 30.11.2005 | BNK | mehr testing und bugfixing
- * 02.12.2005 | BNK | Schlüssel umgestellt und dadurch robuster und 
- *                  | effizienter gemacht 
- * 05.12.2005 | BNK | Schlüssel mit RE überprüfen und ignorieren falls kein Match
- * 16.02.2006 | BNK | mehr Debug-Output
- * 16.02.2006 | BNK | Timeout auch bei new InitialLdapContext()
- * 20.02.2006 | BNK | setTimeout() Funktion
- * 10.05.2006 | BNK | bessere Debug-Meldungen
- * -------------------------------------------------------------------
- *
- * @author Max Meier (D-III-ITD 5.1)
- * @version 1.0
- * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ * #L%
  */
 package de.muenchen.allg.itd51.wollmux.core.db;
 

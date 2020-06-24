@@ -1,31 +1,24 @@
-/*
- * Dateiname: SearchStrategy.java
- * Projekt  : WollMux
- * Funktion : Suchstrategie für Suchanfragen in Datenquellen
- * 
- * Copyright (c) 2010-2015 Landeshauptstadt München
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL), 
- * version 1.0 (or any later version).
+/*-
+ * #%L
+ * WollMux
+ * %%
+ * Copyright (C) 2005 - 2020 Landeshauptstadt München
+ * %%
+ * Licensed under the EUPL, Version 1.1 or – as soon they will be
+ * approved by the European Commission - subsequent versions of the
+ * EUPL (the "Licence");
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * European Union Public Licence for more details.
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
  *
- * You should have received a copy of the European Union Public Licence
- * along with this program. If not, see 
- * http://ec.europa.eu/idabc/en/document/7330
+ * http://ec.europa.eu/idabc/eupl5
  *
- * Änderungshistorie:
- * Datum      | Wer | Änderungsgrund
- * -------------------------------------------------------------------
- * 18.03.2010 | BED | Erstellung
- * -------------------------------------------------------------------
- *
- * @author Daniel Benkmann (D-III-ITD-D101)
- * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ * #L%
  */
 package de.muenchen.allg.itd51.wollmux.core.db;
 
