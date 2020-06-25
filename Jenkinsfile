@@ -25,6 +25,7 @@ pipeline {
           mavenLocalRepo: '.repo',
           mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
           publisherStrategy: 'EXPLICIT') {
+          sh "mvn org.apache.maven.plugins:maven-enforcer-plugin:3.0.0-M3:enforce -Drules=requireReleaseDeps"
           sh "mvn -Dmaven.javadoc.skip=true -DskipTests -DdryRun clean package"
         }
       }
