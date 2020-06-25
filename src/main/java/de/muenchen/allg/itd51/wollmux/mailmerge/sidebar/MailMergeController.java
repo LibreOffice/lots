@@ -523,8 +523,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
       datasourceModel.ifPresent(ds -> {
         try
         {
-          new IfThenElseDialog(new ArrayList<String>(ds.getColumnNames()), textDocumentController);
-
+          IfThenElseDialog.startDialog(new ArrayList<String>(ds.getColumnNames()), textDocumentController);
         } catch (NoTableSelectedException ex)
         {
           LOGGER.debug("", ex);
