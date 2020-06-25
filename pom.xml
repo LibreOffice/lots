@@ -621,6 +621,12 @@
 
   <profiles>
     <profile>
+      <id>development</id>
+      <properties>
+        <wollmux.oxt.id>de.muenchen.allg.d101.wollmux.debug</wollmux.oxt.id>
+      </properties>
+    </profile>
+    <profile>
       <id>ButtonsOnly</id>
       <properties>
         <wollmux.oxt.id>de.muenchen.allg.d101.wollmux.debug</wollmux.oxt.id>

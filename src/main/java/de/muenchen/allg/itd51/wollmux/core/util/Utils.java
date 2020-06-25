@@ -22,6 +22,9 @@
  */
 package de.muenchen.allg.itd51.wollmux.core.util;
 
+import java.io.IOException;
+import java.util.Properties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +32,7 @@ import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.afid.UnoIterator;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.util.UnoProperty;
 
 public class Utils
@@ -82,5 +86,23 @@ public class Utils
       str = textRange.getString();
     }
     return str;
+  }
+
+  /**
+   * Load WollMux properties.
+   *
+   * @return The properties.
+   */
+  public static Properties getWollMuxProperties()
+  {
+    Properties props = new Properties();
+    try
+    {
+      props.load(WollMuxSingleton.class.getClassLoader().getResourceAsStream("wollmux.properties"));
+    } catch (IOException e)
+    {
+      LOGGER.error("Missing wollmux properties", e);
+    }
+    return props;
   }
 }

@@ -47,6 +47,8 @@ mvn -P ButtonsOnly generate-sources
 
 and the extension is build and installed, if the program `unopkg` is availble. Otherwise you have to manually install the extension, which can be found at dist/WollMux_ButtonsOnly.oxt.
 
+Activate the maven profile "development" in Project > Properties > Maven > Active Maven Profiles.
+
 Configure a debug-configuration of type "Java Application" with main class **de.muenchen.allg.itd51.wollmux.DebugExternalWollMux**. Add a user defined library to the classpath. The library must contain these jars of LibreOffice which can be found at <path_to_LibreOffice>/program/classes:
 * java_uno.jar
 * juh.jar
