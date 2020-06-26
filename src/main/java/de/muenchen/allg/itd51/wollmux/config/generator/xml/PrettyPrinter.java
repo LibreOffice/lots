@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core.parser.generator.xml;
+package de.muenchen.allg.itd51.wollmux.config.generator.xml;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

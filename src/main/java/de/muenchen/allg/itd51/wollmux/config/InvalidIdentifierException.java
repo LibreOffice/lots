@@ -20,17 +20,26 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core.parser;
+package de.muenchen.allg.itd51.wollmux.config;
 
-/**
- * Signalisiert, dass ein gesuchter Knoten nicht gefunden wurde.
- * @author Matthias Benkmann (D-III-ITD 5.1)
- */
-public class NodeNotFoundException extends Exception
+import de.muenchen.allg.itd51.wollmux.util.L;
+
+public class InvalidIdentifierException extends Exception
 {
-  private static final long serialVersionUID = 3441011738115879891L;
-  public NodeNotFoundException() {super();}
-  public NodeNotFoundException(String message) {super(message);}
-  public NodeNotFoundException(String message, Throwable cause) {super(message,cause);}
-  public NodeNotFoundException(Throwable cause) {super(cause);}
+  private static final long serialVersionUID = 495666967644874471L;
+
+  private final String invalidId;
+
+  public InvalidIdentifierException(String invalidId)
+  {
+    this.invalidId = invalidId;
+  }
+
+  @Override
+  public String getMessage()
+  {
+    return L.m(
+      "Der Bezeichner '%1' ist ungültig, und darf nur die Zeichen a-z, A-Z, _ und 0-9 enthalten, wobei das erste Zeichen keine Ziffer sein darf.",
+      invalidId);
+  }
 }

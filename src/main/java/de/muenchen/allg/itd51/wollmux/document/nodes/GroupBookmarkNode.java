@@ -23,7 +23,7 @@
 package de.muenchen.allg.itd51.wollmux.document.nodes;
 
 import de.muenchen.allg.document.text.Bookmark;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 
 public class GroupBookmarkNode extends WollmuxBookmarkNode
 {

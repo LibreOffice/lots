@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core.parser.generator.xml;
+package de.muenchen.allg.itd51.wollmux.config.generator.xml;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -37,7 +37,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import de.muenchen.allg.itd51.wollmux.core.parser.Trimmer;
+import de.muenchen.allg.itd51.wollmux.config.Trimmer;
 
 /**
  * Generates a configuration out of a XML-document.

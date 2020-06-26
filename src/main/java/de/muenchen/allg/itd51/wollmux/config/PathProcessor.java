@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core.parser;
+package de.muenchen.allg.itd51.wollmux.config;
 
 
 /**

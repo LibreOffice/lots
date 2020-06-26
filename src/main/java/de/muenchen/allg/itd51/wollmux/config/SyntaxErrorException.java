@@ -20,26 +20,20 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core.parser;
+package de.muenchen.allg.itd51.wollmux.config;
 
-import de.muenchen.allg.itd51.wollmux.util.L;
-
-public class InvalidIdentifierException extends Exception
+/**
+ * Signalisiert einen Fehler in einer zu parsenden Zeichenfolge
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ */
+public class SyntaxErrorException extends Exception
 {
-  private static final long serialVersionUID = 495666967644874471L;
-
-  private final String invalidId;
-
-  public InvalidIdentifierException(String invalidId)
-  {
-    this.invalidId = invalidId;
-  }
-
-  @Override
-  public String getMessage()
-  {
-    return L.m(
-      "Der Bezeichner '%1' ist ungültig, und darf nur die Zeichen a-z, A-Z, _ und 0-9 enthalten, wobei das erste Zeichen keine Ziffer sein darf.",
-      invalidId);
-  }
+  /**
+   * keine Ahnung was das soll, aber es macht Eclipse glücklich.
+   */
+  private static final long serialVersionUID = 7215084024054862356L;
+  public SyntaxErrorException() {super();}
+  public SyntaxErrorException(String message) {super(message);}
+  public SyntaxErrorException(String message, Throwable cause) {super(message,cause);}
+  public SyntaxErrorException(Throwable cause) {super(cause);}
 }

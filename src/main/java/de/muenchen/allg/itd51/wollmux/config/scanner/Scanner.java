@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core.parser.scanner;
+package de.muenchen.allg.itd51.wollmux.config.scanner;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -34,7 +34,7 @@ import java.util.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.core.parser.PathProcessor;
+import de.muenchen.allg.itd51.wollmux.config.PathProcessor;
 
 /**
  * Reads a file and included ones and and produces a list of tokens in order

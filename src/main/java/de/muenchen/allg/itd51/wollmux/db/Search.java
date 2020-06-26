@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 
 /**
  * Diese Klasse stellt Methoden zur Verfügung um in Datenquellen Suchen durchzuführen.

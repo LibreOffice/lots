@@ -29,7 +29,7 @@ import java.util.Map;
 
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 
 /**
  * Funktionen zur Lokalisierung.

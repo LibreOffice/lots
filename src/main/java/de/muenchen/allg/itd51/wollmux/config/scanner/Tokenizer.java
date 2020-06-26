@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core.parser.scanner;
+package de.muenchen.allg.itd51.wollmux.config.scanner;
 
 import java.io.BufferedReader;
 import java.io.Closeable;

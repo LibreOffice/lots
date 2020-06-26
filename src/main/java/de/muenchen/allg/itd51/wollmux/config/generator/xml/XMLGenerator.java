@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core.parser.generator.xml;
+package de.muenchen.allg.itd51.wollmux.config.generator.xml;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -46,12 +46,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import de.muenchen.allg.itd51.wollmux.core.parser.PathProcessor;
-import de.muenchen.allg.itd51.wollmux.core.parser.Trimmer;
-import de.muenchen.allg.itd51.wollmux.core.parser.scanner.Scanner;
-import de.muenchen.allg.itd51.wollmux.core.parser.scanner.ScannerException;
-import de.muenchen.allg.itd51.wollmux.core.parser.scanner.Token;
-import de.muenchen.allg.itd51.wollmux.core.parser.scanner.TokenType;
+import de.muenchen.allg.itd51.wollmux.config.PathProcessor;
+import de.muenchen.allg.itd51.wollmux.config.Trimmer;
+import de.muenchen.allg.itd51.wollmux.config.scanner.Scanner;
+import de.muenchen.allg.itd51.wollmux.config.scanner.ScannerException;
+import de.muenchen.allg.itd51.wollmux.config.scanner.Token;
+import de.muenchen.allg.itd51.wollmux.config.scanner.TokenType;
 
 /**
  * Generates a XML-document from a configuration.

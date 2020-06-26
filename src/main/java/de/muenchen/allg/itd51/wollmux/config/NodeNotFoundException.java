@@ -20,20 +20,17 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core.parser;
+package de.muenchen.allg.itd51.wollmux.config;
 
 /**
- * Signalisiert einen Fehler in einer zu parsenden Zeichenfolge
+ * Signalisiert, dass ein gesuchter Knoten nicht gefunden wurde.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class SyntaxErrorException extends Exception
+public class NodeNotFoundException extends Exception
 {
-  /**
-   * keine Ahnung was das soll, aber es macht Eclipse glücklich.
-   */
-  private static final long serialVersionUID = 7215084024054862356L;
-  public SyntaxErrorException() {super();}
-  public SyntaxErrorException(String message) {super(message);}
-  public SyntaxErrorException(String message, Throwable cause) {super(message,cause);}
-  public SyntaxErrorException(Throwable cause) {super(cause);}
+  private static final long serialVersionUID = 3441011738115879891L;
+  public NodeNotFoundException() {super();}
+  public NodeNotFoundException(String message) {super(message);}
+  public NodeNotFoundException(String message, Throwable cause) {super(message,cause);}
+  public NodeNotFoundException(Throwable cause) {super(cause);}
 }

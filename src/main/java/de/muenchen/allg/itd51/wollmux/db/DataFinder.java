@@ -33,7 +33,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 
 /**
  * Ein DataFinder sucht Datensätze im übergebenen dsj, wobei in der Beschreibung der gesuchten Werte

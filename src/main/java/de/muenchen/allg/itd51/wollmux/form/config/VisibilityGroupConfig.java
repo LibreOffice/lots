@@ -22,7 +22,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.form.config;
 
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 
 /**
  * A description of a visibility group.

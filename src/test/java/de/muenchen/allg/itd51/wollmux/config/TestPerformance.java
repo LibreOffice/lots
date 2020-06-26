@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core.parser;
+package de.muenchen.allg.itd51.wollmux.config;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,8 +29,8 @@ import java.io.IOException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import de.muenchen.allg.itd51.wollmux.core.parser.generator.xml.XMLGenerator;
-import de.muenchen.allg.itd51.wollmux.core.parser.generator.xml.XMLGeneratorException;
+import de.muenchen.allg.itd51.wollmux.config.generator.xml.XMLGenerator;
+import de.muenchen.allg.itd51.wollmux.config.generator.xml.XMLGeneratorException;
 
 /**
  * A Test class to verify that the scanner performance is ok.

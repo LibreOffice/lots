@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core.parser;
+package de.muenchen.allg.itd51.wollmux.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -48,13 +48,13 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import de.muenchen.allg.itd51.wollmux.core.parser.generator.xml.ConfGenerator;
-import de.muenchen.allg.itd51.wollmux.core.parser.generator.xml.XMLGenerator;
-import de.muenchen.allg.itd51.wollmux.core.parser.generator.xml.XMLGeneratorException;
-import de.muenchen.allg.itd51.wollmux.core.parser.scanner.Scanner;
-import de.muenchen.allg.itd51.wollmux.core.parser.scanner.ScannerException;
-import de.muenchen.allg.itd51.wollmux.core.parser.scanner.Token;
-import de.muenchen.allg.itd51.wollmux.core.parser.scanner.TokenType;
+import de.muenchen.allg.itd51.wollmux.config.generator.xml.ConfGenerator;
+import de.muenchen.allg.itd51.wollmux.config.generator.xml.XMLGenerator;
+import de.muenchen.allg.itd51.wollmux.config.generator.xml.XMLGeneratorException;
+import de.muenchen.allg.itd51.wollmux.config.scanner.Scanner;
+import de.muenchen.allg.itd51.wollmux.config.scanner.ScannerException;
+import de.muenchen.allg.itd51.wollmux.config.scanner.Token;
+import de.muenchen.allg.itd51.wollmux.config.scanner.TokenType;
 
 /**
  * A Test class to verify that the scanner works correctly without includes.

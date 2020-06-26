@@ -20,39 +20,52 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core.parser.generator.xml;
+package de.muenchen.allg.itd51.wollmux.config.scanner;
+
+import java.io.IOException;
 
 /**
- * A Exception produced by the generator.
+ * Exception class for the scanner module.
  * 
  * @author Daniel Sikeler
  */
-public class XMLGeneratorException extends Exception
+public class ScannerException extends IOException
 {
 
-  /** Serial version ID. */
-  private static final long serialVersionUID = 6474901851185961604L;
+  /** Serial Version ID. */
+  private static final long serialVersionUID = 6441716168137433335L;
 
   /**
-   * Constructor for generator exceptions.
+   * Constructor for scanner exceptions.
    * 
    * @param message
-   *          The description of the exception.
+   *          Description of the error.
    */
-  public XMLGeneratorException(final String message)
+  public ScannerException(final String message)
   {
     super(message);
   }
 
   /**
-   * Constructor for generator exceptions.
+   * Constructor for scanner exceptions.
+   * 
+   * @param cause
+   *          The error, which preceeds this exception.
+   */
+  public ScannerException(final Throwable cause)
+  {
+    super(cause);
+  }
+
+  /**
+   * Constructor for scanner exceptions.
    * 
    * @param message
-   *          Description of the exception.
+   *          Description of the error.
    * @param cause
-   *          The exception which caused this one.
+   *          An other exception, which caused this one.
    */
-  public XMLGeneratorException(final String message, final Throwable cause)
+  public ScannerException(final String message, final Throwable cause)
   {
     super(message, cause);
   }

@@ -22,7 +22,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 
 /**
  * Types of control elements.
