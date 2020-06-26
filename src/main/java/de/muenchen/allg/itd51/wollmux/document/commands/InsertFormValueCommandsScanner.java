@@ -28,11 +28,9 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory;
-import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory.FormField;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InsertFormValue;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
+import de.muenchen.allg.itd51.wollmux.document.FormFieldFactory;
+import de.muenchen.allg.itd51.wollmux.document.FormFieldFactory.FormField;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.InsertFormValue;
 
 /**
  * Scanner, der die InsertFormValue-Kommandos des Dokuments abarbeitet und ein

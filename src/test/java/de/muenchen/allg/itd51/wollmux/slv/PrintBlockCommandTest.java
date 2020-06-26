@@ -39,9 +39,9 @@ import de.muenchen.allg.afid.TextRangeRelation;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.document.text.Bookmark;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.InvalidCommandException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.InvalidCommandException;
 import de.muenchen.allg.itd51.wollmux.test.OfficeTest;
 import de.muenchen.allg.util.UnoProperty;
 

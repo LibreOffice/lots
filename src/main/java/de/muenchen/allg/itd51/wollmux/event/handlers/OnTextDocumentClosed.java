@@ -23,8 +23,8 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
 
 /**
  * Event for removing text documents from WollMux.

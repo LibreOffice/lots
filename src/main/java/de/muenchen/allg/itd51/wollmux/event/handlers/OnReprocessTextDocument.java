@@ -27,9 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.document.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 
 /**

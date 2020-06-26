@@ -39,9 +39,9 @@ import com.sun.star.lang.WrappedTargetException;
 
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.document.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintException;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 

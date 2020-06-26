@@ -31,9 +31,9 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand;
 
 /**
  * Updates all insertValue commands, even already executed commands.
