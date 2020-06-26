@@ -53,7 +53,7 @@ import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.document.text.StyleService;
-import de.muenchen.allg.itd51.wollmux.core.HashableComponent;
+import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;

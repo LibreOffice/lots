@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core;
+package de.muenchen.allg.itd51.wollmux;
 
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XInterface;
