@@ -20,9 +20,11 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.email;
+package de.muenchen.allg.itd51.wollmux.mailmerge.mail;
 
-
+/**
+ * Settings of the mail server used by mail merge.
+ */
 public class MailServerSettings
 {
   private String mailserver;

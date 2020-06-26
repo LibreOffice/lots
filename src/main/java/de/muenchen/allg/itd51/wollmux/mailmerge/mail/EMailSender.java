@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.email;
+package de.muenchen.allg.itd51.wollmux.mailmerge.mail;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +46,9 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 
+/**
+ * Service for sending mails.
+ */
 public class EMailSender
 {
   private static final Logger LOGGER = LoggerFactory.getLogger(EMailSender.class);
@@ -56,6 +59,9 @@ public class EMailSender
 
   private Session session;
 
+  /**
+   * Creates a new service.
+   */
   public EMailSender()
   {
     props = new Properties();
@@ -63,8 +69,21 @@ public class EMailSender
     email = new MimeMessage(session);
   }
 
-  public void createNewMultipartMail(String from, String to, String subject,
-      String message) throws MessagingException
+  /**
+   * Create a new mail.
+   *
+   * @param from
+   *          The sender.
+   * @param to
+   *          The recipient.
+   * @param subject
+   *          The subject.
+   * @param message
+   *          The body.
+   * @throws MessagingException
+   *           Can't create the mail.
+   */
+  public void createNewMultipartMail(String from, String to, String subject, String message) throws MessagingException
   {
     InternetAddress addressFrom = new InternetAddress(from);
     email.setFrom(addressFrom);
@@ -80,6 +99,16 @@ public class EMailSender
     email.setContent(multipart);
   }
 
+  /**
+   * Add an attachment to the mail.
+   *
+   * @param attachment
+   *          The attachment.
+   * @throws MessagingException
+   *           Problems with the mail message.
+   * @throws IOException
+   *           The attachment can't be found.
+   */
   public void addAttachment(File attachment) throws MessagingException, IOException
   {
     MimeBodyPart messageBodyPart = new MimeBodyPart();
@@ -87,17 +116,22 @@ public class EMailSender
     ((Multipart) email.getContent()).addBodyPart(messageBodyPart);
   }
 
-  public void sendMessage(MailServerSettings mailServerSettings) throws ConfigurationErrorException,
-      MessagingException
+  /**
+   * Send a message.
+   *
+   * @param mailServerSettings
+   *          The mail server to use.
+   * @throws MessagingException
+   *           Problems while sending the mail.
+   */
+  public void sendMessage(MailServerSettings mailServerSettings) throws MessagingException
   {
     try
     {
-      // Notwendig um MIME Types auf Java-Klassen zu mappen.
-      // Manchmal funktioniert der ClassLoader nicht richtig
+      // Necessary for mapping MIME types to Java classes.
       Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
       Transport tr = session.getTransport("smtp");
-      // FYI: falls getUsername() || getPassword() = "" muss NULL übergeben werden,
-      // auch bei "" glaubt javamail AUTH aktivieren zu müssen was zu einer Auth-Exception führt.
+      // Empty String activates AUTH so use null if no authentication is required.
       tr.connect(mailServerSettings.getMailserver(), mailServerSettings.getMailserverport(),
           mailServerSettings.getUsername(), mailServerSettings.getPassword());
       email.saveChanges();
@@ -143,19 +177,15 @@ public class EMailSender
         mailserver.setMailserverport(wollmuxconf.getString("PORT", ""));
       }
 
-      if (wollmuxconf.query("AUTH_USER_PATTERN").count() == 1
-          && !wollmuxconf.getString("AUTH_USER_PATTERN", "").equals(""))
+      if (!wollmuxconf.getString("AUTH_USER_PATTERN", "").isEmpty())
       {
         String username = email.getFrom()[0].toString();
-        Pattern pattern =
-            Pattern.compile(wollmuxconf.getString("AUTH_USER_PATTERN", ""));
-        try
+        Pattern pattern = Pattern.compile(wollmuxconf.getString("AUTH_USER_PATTERN", ""));
+        Matcher result = pattern.matcher(username);
+        if (result.find())
         {
-          Matcher result = pattern.matcher(username);
-          result.find();
           username = result.group(1);
-        }
-        catch (IllegalStateException e)
+        } else
         {
           username = pattern.pattern();
         }
