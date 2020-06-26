@@ -41,12 +41,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import de.muenchen.allg.itd51.wollmux.core.functions.StringLiteralFunction;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDataset;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockDatasource;
 import de.muenchen.allg.itd51.wollmux.db.mock.MockQueryResults;
+import de.muenchen.allg.itd51.wollmux.func.StringLiteralFunction;
 
 public class DatasourceJoinerTest
 {

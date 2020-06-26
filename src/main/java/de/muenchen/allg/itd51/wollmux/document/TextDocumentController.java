@@ -56,11 +56,6 @@ import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.core.functions.Function;
-import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
-import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.core.functions.Values;
-import de.muenchen.allg.itd51.wollmux.core.functions.Values.SimpleMap;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
@@ -83,6 +78,11 @@ import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.form.model.FormValueChangedListener;
 import de.muenchen.allg.itd51.wollmux.form.model.VisibilityChangedListener;
+import de.muenchen.allg.itd51.wollmux.func.Function;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.Values;
+import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
 import de.muenchen.allg.util.UnoConfiguration;
@@ -1529,7 +1529,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    *          The TRAFO of the for form field. Can be null. A TRAFO definition is in the form
    *          "Name(FUNCTION_DEFINITION)", where Name is a valid identifier and FUNCTION_DEFINITION
    *          a valid parameter for
-   *          {@link de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}.
+   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}.
    *          The first child of FUNCTION_DEFINITION has to be a valid function name like "AND".
    * @param hint
    *          Tooltip of the new form field. Can be null.
@@ -1611,7 +1611,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * @param funcConf
    *          A definition of function in the form "Name(FUNCTION_DEFINITION)", where Name is a
    *          valid identifier and FUNCTION_DEFINITION a valid parameter for
-   *          {@link de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}.
+   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}.
    *          The first child of FUNCTION_DEFINITION has to be a valid function name like "AND".
    * 
    * @return The name of the function or null if the definition is erroneous.

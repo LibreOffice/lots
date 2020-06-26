@@ -26,8 +26,8 @@ import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.Map;
 
-import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Ein Dialog, der dem Benutzer erlaubt verschiedenen Werte zu setzen.
