@@ -42,6 +42,7 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
+import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.util.UnoComponent;
 
@@ -54,7 +55,7 @@ public abstract class WollMuxTest extends OfficeTest
   public static void initWollMux() throws Exception
   {
     wollmux = UnoRuntime.queryInterface(XWollMux.class,
-        UnoComponent.createComponentWithContext("de.muenchen.allg.itd51.wollmux.WollMux"));
+        UnoComponent.createComponentWithContext(WollMux.SERVICENAME));
   }
 
   @AfterAll
