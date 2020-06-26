@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dispatch.PrintDispatch;
 import de.muenchen.allg.itd51.wollmux.dispatch.SaveDispatch;
@@ -45,6 +44,7 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnResetDocumentState;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveTempAndOpenExt;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Der Controller für die FormularGUI.

@@ -28,7 +28,6 @@ import javax.swing.SwingConstants;
 
 import com.sun.star.text.XTextDocument;
 
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.former.control.AllFormControlLineViewsPanel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
@@ -42,6 +41,7 @@ import de.muenchen.allg.itd51.wollmux.former.section.AllSectionLineViewsPanel;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModel;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModelList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Der Übercontainer für die linke Hälfte des FormularMax 4000.

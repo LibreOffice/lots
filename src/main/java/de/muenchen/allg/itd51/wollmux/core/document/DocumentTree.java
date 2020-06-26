@@ -62,8 +62,8 @@ import de.muenchen.allg.itd51.wollmux.core.document.nodes.Node;
 import de.muenchen.allg.itd51.wollmux.core.document.nodes.ParagraphNode;
 import de.muenchen.allg.itd51.wollmux.core.document.nodes.TextRangeNode;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.itd51.wollmux.util.L;
+import de.muenchen.allg.itd51.wollmux.util.Utils;
 import de.muenchen.allg.util.UnoProperty;
 
 /**

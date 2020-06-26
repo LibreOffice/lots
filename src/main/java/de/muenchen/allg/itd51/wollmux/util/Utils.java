@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.core.util;
+package de.muenchen.allg.itd51.wollmux.util;
 
 import java.io.IOException;
 import java.util.Properties;

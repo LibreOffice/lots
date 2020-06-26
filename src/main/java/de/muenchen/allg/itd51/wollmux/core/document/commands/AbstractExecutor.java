@@ -46,9 +46,9 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.Set
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.UpdateFields;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.slv.PrintBlockCommand;
+import de.muenchen.allg.itd51.wollmux.util.L;
+import de.muenchen.allg.itd51.wollmux.util.Utils;
 import de.muenchen.allg.util.UnoProperty;
 import de.muenchen.allg.util.UnoService;
 

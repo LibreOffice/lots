@@ -44,8 +44,8 @@ import de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.slv.PrintBlockCommand;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * A document command with its properties like visibility, execution state and groups.

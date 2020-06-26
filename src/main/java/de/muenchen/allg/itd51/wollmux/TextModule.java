@@ -48,8 +48,8 @@ import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnJumpToMark;
+import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.ooo.TextDocument;
 import de.muenchen.allg.util.UnoService;
 

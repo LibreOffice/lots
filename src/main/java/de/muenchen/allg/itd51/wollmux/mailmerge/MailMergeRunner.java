@@ -39,7 +39,6 @@ import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.lang.WrappedTargetException;
 
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.email.EMailSender;
@@ -51,6 +50,7 @@ import de.muenchen.allg.itd51.wollmux.mailmerge.print.PrintToEmail;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.SetFormValue;
 import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.PrintSettings;
 import de.muenchen.allg.itd51.wollmux.print.PrintModels;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Configures and performs a mail merge.

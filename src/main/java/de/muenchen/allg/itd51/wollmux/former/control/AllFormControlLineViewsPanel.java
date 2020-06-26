@@ -47,7 +47,6 @@ import javax.swing.SwingConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.ComboboxMergeDescriptor;
@@ -59,6 +58,7 @@ import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.ViewVisibilityDescriptor;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList.ItemListener;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Hält in einem Panel FormControlModelLineViews für alle
