@@ -35,12 +35,12 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
+import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 
 public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALChangeEventListener>
 {

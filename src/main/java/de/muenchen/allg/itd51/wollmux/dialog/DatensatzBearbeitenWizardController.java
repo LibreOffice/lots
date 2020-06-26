@@ -35,7 +35,7 @@ import com.sun.star.ui.dialogs.XWizardController;
 import com.sun.star.ui.dialogs.XWizardPage;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
+import de.muenchen.allg.itd51.wollmux.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 
 public class DatensatzBearbeitenWizardController implements XWizardController
 {

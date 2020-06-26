@@ -32,9 +32,9 @@ import com.sun.star.lang.EventObject;
 import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
-import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorage;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
+import de.muenchen.allg.itd51.wollmux.db.LocalOverrideStorage;
 
 /**
  * Event for notification that the personal sender list has changed.

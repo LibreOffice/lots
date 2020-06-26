@@ -27,10 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.muenchen.allg.itd51.wollmux.core.db.ColumnTransformer;
-import de.muenchen.allg.itd51.wollmux.core.db.Datasource;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryPart;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
