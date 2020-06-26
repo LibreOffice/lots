@@ -27,7 +27,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
+import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 
 public class DialogFunction implements Function
 {

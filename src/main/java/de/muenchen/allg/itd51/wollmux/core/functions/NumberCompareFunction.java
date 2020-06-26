@@ -28,10 +28,10 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 
 public class NumberCompareFunction extends NumberFunction
 {

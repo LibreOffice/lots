@@ -25,9 +25,9 @@ package de.muenchen.allg.itd51.wollmux.form.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 
 /**
