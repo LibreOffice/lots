@@ -254,4 +254,10 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
     return true;
   }
 
+  @Override
+  public boolean canAdvance()
+  {
+    return true;
+  }
+
 }
