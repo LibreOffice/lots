@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
-<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="DatensatzBearbeitenFusszeile" dlg:left="73" dlg:top="27" dlg:width="413" dlg:height="278" dlg:closeable="true" dlg:moveable="true" dlg:withtitlebar="false">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="DatensatzBearbeitenFusszeile" dlg:left="73" dlg:top="27" dlg:width="337" dlg:height="127" dlg:closeable="true" dlg:moveable="true" dlg:withtitlebar="false">
  <dlg:bulletinboard>
-  <dlg:text dlg:id="Label1" dlg:tab-index="15" dlg:left="15" dlg:top="9" dlg:width="60" dlg:height="15" dlg:value="Spalte 1, Teil 1"/>
-  <dlg:text dlg:id="Label2" dlg:tab-index="16" dlg:left="15" dlg:top="29" dlg:width="60" dlg:height="15" dlg:value="Spalte 1, Teil 2"/>
-  <dlg:text dlg:id="Label3" dlg:tab-index="17" dlg:left="15" dlg:top="49" dlg:width="60" dlg:height="15" dlg:value="Spalte 2, Teil 1"/>
-  <dlg:text dlg:id="Label4" dlg:tab-index="18" dlg:left="15" dlg:top="69" dlg:width="60" dlg:height="15" dlg:value="Spalte 2, Teil 2"/>
-  <dlg:text dlg:id="Label5" dlg:tab-index="19" dlg:left="15" dlg:top="89" dlg:width="60" dlg:height="15" dlg:value="Spalte 3, Teil 1"/>
-  <dlg:text dlg:id="Label6" dlg:tab-index="20" dlg:left="15" dlg:top="109" dlg:width="60" dlg:height="15" dlg:value="Spalte 3, Teil 2"/>
-  <dlg:text dlg:id="Label7" dlg:tab-index="21" dlg:left="15" dlg:top="129" dlg:width="60" dlg:height="15" dlg:value="Spalte 4, Teil 1"/>
-  <dlg:text dlg:id="Label8" dlg:tab-index="22" dlg:left="15" dlg:top="149" dlg:width="60" dlg:height="15" dlg:value="Spalte 4, Teil 2"/>
-  <dlg:textfield dlg:id="FussSpalte1" dlg:tab-index="1" dlg:left="92" dlg:top="9" dlg:width="250" dlg:height="15" dlg:multiline="true"/>
-  <dlg:textfield dlg:id="FussSpalte12" dlg:tab-index="3" dlg:left="92" dlg:top="29" dlg:width="250" dlg:height="15" dlg:multiline="true"/>
-  <dlg:textfield dlg:id="FussSpalte2" dlg:tab-index="5" dlg:left="92" dlg:top="49" dlg:width="250" dlg:height="15" dlg:multiline="true"/>
-  <dlg:textfield dlg:id="FussSpalte22" dlg:tab-index="7" dlg:left="92" dlg:top="69" dlg:width="250" dlg:height="15" dlg:multiline="true"/>
-  <dlg:textfield dlg:id="FussSpalte3" dlg:tab-index="9" dlg:left="92" dlg:top="89" dlg:width="250" dlg:height="15" dlg:multiline="true"/>
-  <dlg:textfield dlg:id="FussSpalte32" dlg:tab-index="11" dlg:left="92" dlg:top="109" dlg:width="250" dlg:height="15" dlg:multiline="true"/>
-  <dlg:textfield dlg:id="FussSpalte4" dlg:tab-index="13" dlg:left="92" dlg:top="129" dlg:width="250" dlg:height="15" dlg:multiline="true"/>
-  <dlg:textfield dlg:id="FussSpalte42" dlg:tab-index="15" dlg:left="92" dlg:top="149" dlg:width="250" dlg:height="15" dlg:multiline="true"/>
-  <dlg:button dlg:id="btnFussSpalte1" dlg:tab-index="0" dlg:visible="false" dlg:left="79" dlg:top="12" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnFussSpalte12" dlg:tab-index="2" dlg:visible="false" dlg:left="79" dlg:top="32" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnFussSpalte2" dlg:tab-index="4" dlg:visible="false" dlg:left="79" dlg:top="52" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnFussSpalte22" dlg:tab-index="6" dlg:visible="false" dlg:left="79" dlg:top="72" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnFussSpalte3" dlg:tab-index="8" dlg:visible="false" dlg:left="79" dlg:top="92" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnFussSpalte32" dlg:tab-index="10" dlg:visible="false" dlg:left="79" dlg:top="112" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnFussSpalte4" dlg:tab-index="12" dlg:visible="false" dlg:left="79" dlg:top="132" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnFussSpalte42" dlg:tab-index="14" dlg:visible="false" dlg:left="79" dlg:top="152" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:text dlg:id="Label1" dlg:tab-index="15" dlg:left="5" dlg:top="5" dlg:width="60" dlg:height="12" dlg:value="Spalte 1, Teil 1"/>
+  <dlg:text dlg:id="Label2" dlg:tab-index="17" dlg:left="5" dlg:top="20" dlg:width="60" dlg:height="12" dlg:value="Spalte 1, Teil 2"/>
+  <dlg:text dlg:id="Label3" dlg:tab-index="18" dlg:left="5" dlg:top="35" dlg:width="60" dlg:height="12" dlg:value="Spalte 2, Teil 1"/>
+  <dlg:text dlg:id="Label4" dlg:tab-index="19" dlg:left="5" dlg:top="50" dlg:width="60" dlg:height="12" dlg:value="Spalte 2, Teil 2"/>
+  <dlg:text dlg:id="Label5" dlg:tab-index="20" dlg:left="5" dlg:top="65" dlg:width="60" dlg:height="12" dlg:value="Spalte 3, Teil 1"/>
+  <dlg:text dlg:id="Label6" dlg:tab-index="21" dlg:left="5" dlg:top="80" dlg:width="60" dlg:height="12" dlg:value="Spalte 3, Teil 2"/>
+  <dlg:text dlg:id="Label7" dlg:tab-index="22" dlg:left="5" dlg:top="95" dlg:width="60" dlg:height="12" dlg:value="Spalte 4, Teil 1"/>
+  <dlg:text dlg:id="Label8" dlg:tab-index="23" dlg:left="5" dlg:top="110" dlg:width="60" dlg:height="12" dlg:value="Spalte 4, Teil 2"/>
+  <dlg:textfield dlg:id="FussSpalte1" dlg:tab-index="1" dlg:left="82" dlg:top="5" dlg:width="250" dlg:height="12" dlg:multiline="true"/>
+  <dlg:textfield dlg:id="FussSpalte12" dlg:tab-index="3" dlg:left="82" dlg:top="20" dlg:width="250" dlg:height="12" dlg:multiline="true"/>
+  <dlg:textfield dlg:id="FussSpalte2" dlg:tab-index="5" dlg:left="82" dlg:top="35" dlg:width="250" dlg:height="12" dlg:multiline="true"/>
+  <dlg:textfield dlg:id="FussSpalte22" dlg:tab-index="7" dlg:left="82" dlg:top="50" dlg:width="250" dlg:height="12" dlg:multiline="true"/>
+  <dlg:textfield dlg:id="FussSpalte3" dlg:tab-index="9" dlg:left="82" dlg:top="65" dlg:width="250" dlg:height="12" dlg:multiline="true"/>
+  <dlg:textfield dlg:id="FussSpalte32" dlg:tab-index="11" dlg:left="82" dlg:top="80" dlg:width="250" dlg:height="12" dlg:multiline="true"/>
+  <dlg:textfield dlg:id="FussSpalte4" dlg:tab-index="13" dlg:left="82" dlg:top="95" dlg:width="250" dlg:height="12" dlg:multiline="true"/>
+  <dlg:textfield dlg:id="FussSpalte42" dlg:tab-index="16" dlg:left="82" dlg:top="110" dlg:width="250" dlg:height="12" dlg:multiline="true"/>
+  <dlg:button dlg:id="btnFussSpalte1" dlg:tab-index="0" dlg:visible="false" dlg:left="69" dlg:top="6" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnFussSpalte12" dlg:tab-index="2" dlg:visible="false" dlg:left="69" dlg:top="21" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnFussSpalte2" dlg:tab-index="4" dlg:visible="false" dlg:left="69" dlg:top="36" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnFussSpalte22" dlg:tab-index="6" dlg:visible="false" dlg:left="69" dlg:top="51" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnFussSpalte3" dlg:tab-index="8" dlg:visible="false" dlg:left="69" dlg:top="66" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnFussSpalte32" dlg:tab-index="10" dlg:visible="false" dlg:left="69" dlg:top="81" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnFussSpalte4" dlg:tab-index="12" dlg:visible="false" dlg:left="69" dlg:top="96" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnFussSpalte42" dlg:tab-index="14" dlg:visible="false" dlg:left="69" dlg:top="111" dlg:width="10" dlg:height="10" dlg:value=" *"/>
  </dlg:bulletinboard>
 </dlg:window>
