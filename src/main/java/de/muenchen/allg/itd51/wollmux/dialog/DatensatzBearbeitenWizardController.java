@@ -27,11 +27,14 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
+import com.sun.star.ui.dialogs.Wizard;
+import com.sun.star.ui.dialogs.WizardButton;
+import com.sun.star.ui.dialogs.XWizard;
 import com.sun.star.ui.dialogs.XWizardController;
 import com.sun.star.ui.dialogs.XWizardPage;
 
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 
 public class DatensatzBearbeitenWizardController implements XWizardController
@@ -42,8 +45,9 @@ public class DatensatzBearbeitenWizardController implements XWizardController
   private XWizardPage[] pages = new XWizardPage[PAGE_COUNT];
   private LOSDJDataset dataset;
   private List<String> dbSchema;
+  private XWizard wizard;
 
-  protected static final short[] PATHS = { 0, 1, 2 };
+  private static final short[] paths = { 0, 1, 2 };
 
   private enum PAGE_ID
   {
@@ -74,31 +78,30 @@ public class DatensatzBearbeitenWizardController implements XWizardController
   }
 
   @Override
-  public XWizardPage createPage(XWindow arg0, short arg1)
+  public XWizardPage createPage(XWindow parentWindow, short pageId)
   {
-    arg0.setPosSize(0, 0, 1000, 800, PosSize.POSSIZE);
     LOGGER.debug("createPage");
     XWizardPage page = null;
     try
     {
-      switch (getPageId(arg1))
+      switch (getPageId(pageId))
       {
       case PERSON:
-        page = new DatensatzBearbeitenPersonWizardPage(arg0, arg1, dataset, dbSchema);
+        page = new DatensatzBearbeitenPersonWizardPage(parentWindow, pageId, dataset, dbSchema);
         break;
         
       case ORGA:
-        page = new DatensatzBearbeitenOrgaWizardPage(arg0, arg1, dataset, dbSchema);
+        page = new DatensatzBearbeitenOrgaWizardPage(parentWindow, pageId, dataset, dbSchema);
         break;
         
       case FUSSZEILE:
-        page = new DatensatzBearbeitenFusszeileWizardPage(arg0, arg1, dataset, dbSchema);
+        page = new DatensatzBearbeitenFusszeileWizardPage(parentWindow, pageId, dataset, dbSchema);
         break;
       }
-      pages[arg1] = page;
+      pages[pageId] = page;
     } catch (Exception ex)
     {
-      LOGGER.error("Page {} konnte nicht erstellt werden", arg1);
+      LOGGER.error("Page {} konnte nicht erstellt werden", pageId);
       LOGGER.error("", ex);
     }
     return page;
@@ -114,6 +117,8 @@ public class DatensatzBearbeitenWizardController implements XWizardController
   public void onActivatePage(short arg0)
   {
     pages[arg0].activatePage();
+    wizard.updateTravelUI();
+    wizard.enableButton(WizardButton.HELP, false);
   }
 
   @Override
@@ -125,6 +130,19 @@ public class DatensatzBearbeitenWizardController implements XWizardController
   private PAGE_ID getPageId(short pageId)
   {
     return PAGE_ID.values()[pageId];
+  }
+
+  /**
+   * Show the wizard.
+   *
+   * @return The return code of the wizard ({@link XWizard#execute()}).
+   */
+  public short startWizard()
+  {
+    wizard = Wizard.createSinglePathWizard(UNO.defaultContext, paths, this);
+    wizard.setTitle("Datensatz bearbeiten");
+
+    return wizard.execute();
   }
 
 }
