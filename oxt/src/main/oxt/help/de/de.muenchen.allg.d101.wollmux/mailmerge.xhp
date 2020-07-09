@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<helpdocument version="1.0">
+  <meta>
+    <topic id="WollMux_MailMerge_Main" indexer="include" status="PUBLISH">
+      <title id="tit" xml-lang="de-DE">WollMux Seriendruck</title>
+      <filename>/de.muenchen.allg.d101.wollmux/mailmerge.xhp</filename>
+    </topic>
+  </meta>
+  <body>
+    <bookmark branch="index" id="wm_id811594126609967">
+      <bookmark_value>WollMux;Seriendruck</bookmark_value>
+    </bookmark>
+    <section id="MailMerge_Main">
+      <paragraph role="heading" level="1">WollMux Seriendruck</paragraph>
+      <paragraph role="paragraph">
+        Sie finden den WollMux Seriendruck hinter dem
+        <emph>Briefumschlag in der Sidebar</emph>
+        .
+        Der LibreOffice Seriendruck wird hier nicht weiter beschrieben..
+      </paragraph>
+      <paragraph role="paragraph">
+        Mit dem WollMux Seriendruck können zeitsparend weitgehend gleich lautende Briefe oder Texte auch an eine
+        Großzahl von Adressaten versenden werden. Ebenso wird der Etikettendruck, den Sie unter
+        <emph>Datei → Neu → Etiketten</emph>
+        finden und dann mithilfe des WollMux Seriendrucks befüllen, beschrieben.
+      </paragraph>
+      <paragraph role="paragraph">
+        Zusätzlich kann der WollMux Seriendruck mit den Sachleitenden Verfügungen
+        (SLVs) und der
+        Formularfunktion des WollMux verknüpft werden. Diese Punkte werden in den jeweiligen Handbüchern
+        zu diesen Themen
+        erläutert.
+      </paragraph>
+    </section>
+    <section id="data">
+      <paragraph role="heading" level="2">Die Datenquelle</paragraph>
+      <paragraph role="paragraph">Die Datenquelle (Calc Tabelle) beinhaltet alle variablen Daten (z. B.
+        Adressen) die Sie in
+        Ihrem Serienbrief nutzen möchten. Der Aufbau der Datenquelle beeinflusst die Erstellung des
+        Ausgangsdokuments
+        bzw. der Ausgangsvorlage und die Möglichkeiten, die Ihnen dort zur Verfügung stehen erheblich.
+      </paragraph>
+      <paragraph role="paragraph">Sie sollten - wenn möglich immer - die Felder, die schon in der
+        Ausgangsvorlage bzw. im
+        Ausgangsdokument vorhanden sind, verwenden. Dies betrifft. insb. die Felder, die schon
+        im Briefkopf enthalten
+        sind. Wir empfehlen diese Felder nicht zu ändern – also nicht „EmpfaengerZeile1“ in
+        „Anrede“ umzubenennen. Viel
+        besser und auch flexibler ist es die Datenquelle entsprechend anzupassen.
+      </paragraph>
+    </section>
+    <section id="basics">
+      <paragraph role="heading" level="3">Grundlagen</paragraph>
+      <paragraph role="paragraph">Als Datenquelle können Sie Tabellen aus Tabellendokumenten, wie Sie sie
+        mit Calc
+        erstellen, verwenden. In diesem Handbuch wird primär die Nutzung der WollMux-Seriendruckfunktion mit
+        Tabellen aus
+        Tabellendokumenten beschrieben. Tabellen aus Textdokumenten (Writer) können nicht für den
+        Seriendruck verwendet
+        werden.
+      </paragraph>
+      <paragraph role="paragraph">Jede Datenquelle besteht aus einer Tabelle, z. B. aus einer Tabelle eines
+        Calc-Tabellendokuments. Diese Tabelle wiederum besteht aus Spalten und Zeilen. Dabei ist es notwendig, dass jede
+        Spalte eine Überschrift hat. Diese Überschrift erklärt sozusagen, welche Informationen in der entsprechenden
+        Spalte eingetragen werden müssen. Die Überschrift gibt der Spalte also ihren Feldnamen. Die Feldnamen stehen
+        immer in der ersten Zeile der Tabelle. Diese heißt daher auch Feldnamenszeile. Der Feldname entspricht dem Namen
+        des Seriendruckfeldes im Ausgangsdokument. Die weiteren Zeilen sind die sog. Datensätze, in denen die variablen
+        Informationen des Briefes eingetragen sind.
+      </paragraph>
+      <image src="de.muenchen.allg.d101.wollmux/mailmerge_datasource.png"></image>
+    </section>
+  </body>
+</helpdocument>

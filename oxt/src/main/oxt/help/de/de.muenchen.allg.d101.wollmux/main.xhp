@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<helpdocument version="1.0">
+  <meta>
+    <topic id="WollMux_Main" indexer="include" status="PUBLISH">
+      <title id="tit">WollMux</title>
+      <filename>/de.muenchen.allg.d101.wollmux/main.xhp</filename>
+    </topic>
+  </meta>
+  <body>
+    <bookmark branch="index" id="wm_id761594126716718">
+      <bookmark_value>WollMux</bookmark_value>
+    </bookmark>
+    <section id="Main">
+      Der WollMux erweitert LibreOffice um zahlreiche Funktionen, welche die Arbeit mit Vorlagen,
+      Formularen und Briefköpfen wesentlich erleichtern.
+    </section>
+  </body>
+</helpdocument>

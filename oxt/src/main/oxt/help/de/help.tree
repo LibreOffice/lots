@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tree_view version="24-Aug-2004">
+  <help_section application="wollmux" id="02" title="WollMux">
+    <topic id="de/de.muenchen.allg.d101.wollmux/main.xhp">WollMux Übersicht</topic>
+    <topic id="de/de.muenchen.allg.d101.wollmux/mailmerge.xhp">WollMux Seriendruck</topic>
+  </help_section>
+</tree_view>

@@ -23,8 +23,9 @@
       <includes>
         <include>*.xcu</include>
         <include>icons/*</include>
-        <include>image/*</include>
         <include>basic/**/*</include>
+        <include>image/**</include>
+        <include>help/**</include>
         <include>pkg-desc/*</include>
       </includes>
       <excludes>
