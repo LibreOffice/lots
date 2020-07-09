@@ -22,9 +22,9 @@
       <outputDirectory>.</outputDirectory>
       <includes>
         <include>*.xcu</include>
-        <include>help/component*.txt</include>
         <include>icons/*</include>
         <include>image/*</include>
+        <include>pkg-desc/*</include>
         <include>basic/**/*</include>
       </includes>
       <excludes>

@@ -25,6 +25,7 @@
         <include>icons/*</include>
         <include>image/*</include>
         <include>basic/**/*</include>
+        <include>pkg-desc/*</include>
       </includes>
       <excludes>
         <exclude>Factories.xcu</exclude>
