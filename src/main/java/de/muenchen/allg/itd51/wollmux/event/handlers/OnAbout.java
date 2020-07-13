@@ -40,6 +40,7 @@ import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.util.UnoComponent;
 import de.muenchen.allg.util.UnoProperty;
 
@@ -50,7 +51,7 @@ public class OnAbout extends WollMuxEvent
 {
   private static final Logger LOGGER = LoggerFactory.getLogger(OnAbout.class);
   private static final String IMAGE_URL = "/image/wollmux.jpg";
-  private static final String EXTENSION_ID = "de.muenchen.allg.d101.wollmux";
+  private static final String EXTENSION_ID = Utils.getWollMuxProperties().getProperty("extension.id");
 
   @Override
   protected void doit() throws WollMuxFehlerException

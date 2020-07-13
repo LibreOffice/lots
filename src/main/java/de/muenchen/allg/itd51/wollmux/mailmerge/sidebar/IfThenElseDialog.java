@@ -70,6 +70,7 @@ import de.muenchen.allg.dialog.adapter.AbstractMouseListener;
 import de.muenchen.allg.dialog.adapter.AbstractSelectionChangeListener;
 import de.muenchen.allg.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
 import de.muenchen.allg.util.UnoComponent;
@@ -103,10 +104,8 @@ public class IfThenElseDialog
 
   private static final String SONST = "SONST";
 
-  private static final String EXTENSION_ID = "de.muenchen.allg.d101.wollmux";
-
   private static final String IMAGE_LOCATION = PackageInformationProvider.get(UNO.defaultContext)
-      .getPackageLocation(EXTENSION_ID) + "/image/";
+      .getPackageLocation(Utils.getWollMuxProperties().getProperty("extension.id")) + "/image/";
 
   private IfThenElseDialog()
   {
