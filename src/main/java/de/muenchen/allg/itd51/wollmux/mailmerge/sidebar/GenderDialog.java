@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.dialog.trafo;
+package de.muenchen.allg.itd51.wollmux.mailmerge.sidebar;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,57 +45,61 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 
 /**
- * Erlaubt die Bearbeitung der Funktion eines Gender-Feldes.
- *
- * @author Christoph Lutz (D-III-ITD 5.1)
+ * Dialog for creating a gender field.
  */
 public class GenderDialog
 {
   private static final Logger LOGGER = LoggerFactory.getLogger(GenderDialog.class);
 
-  private XControlContainer controlContainer;
-
-  private XDialog dialog;
-
-  private TextDocumentController documentController;
-
-  public GenderDialog(List<String> fieldNames, TextDocumentController documentController)
+  private GenderDialog()
   {
-    this.documentController = documentController;
+    // nothing to do
+  }
 
+  /**
+   * Start the dialog.
+   *
+   * @param fieldNames
+   *          The fields of the document.
+   * @param documentController
+   *          The controller of the document.
+   */
+  public static void startDialog(List<String> fieldNames, TextDocumentController documentController)
+  {
     HashSet<String> uniqueFieldNames = new HashSet<>(fieldNames);
     List<String> sortedNames = new ArrayList<>(uniqueFieldNames);
     Collections.sort(sortedNames);
 
-    buildGUI(sortedNames);
-  }
-
-  /**
-   * Baut das genderPanel auf.
-   */
-  private void buildGUI(final List<String> fieldNames)
-  {
     try
     {
       XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
       XContainerWindowProvider provider = UnoRuntime.queryInterface(XContainerWindowProvider.class,
-          UNO.xMCF.createInstanceWithContext("com.sun.star.awt.ContainerWindowProvider",
-              UNO.defaultContext));
+          UNO.xMCF.createInstanceWithContext("com.sun.star.awt.ContainerWindowProvider", UNO.defaultContext));
 
-      XWindow window = provider.createContainerWindow(
-          "vnd.sun.star.script:WollMux.gender_dialog?location=application", "", peer, null);
-      controlContainer = UNO.XControlContainer(window);
+      XWindow window = provider.createContainerWindow("vnd.sun.star.script:WollMux.gender_dialog?location=application",
+          "", peer, null);
+      XControlContainer controlContainer = UNO.XControlContainer(window);
+      XDialog dialog = UNO.XDialog(window);
 
       XComboBox cbAnrede = UNO.XComboBox(controlContainer.getControl("cbSerienbrieffeld"));
       cbAnrede.addItems(fieldNames.toArray(new String[fieldNames.size()]), (short) 0);
 
       XButton btnAbort = UNO.XButton(controlContainer.getControl("btnAbort"));
+      AbstractActionListener btnAbortActionListener = event -> dialog.endExecute();
       btnAbort.addActionListener(btnAbortActionListener);
 
       XButton btnOK = UNO.XButton(controlContainer.getControl("btnOK"));
+      AbstractActionListener btnOKActionListener = event -> {
+        ConfigThingy conf = generateGenderTrafoConf(
+            UNO.XTextComponent(controlContainer.getControl("cbSerienbrieffeld")).getText(),
+            UNO.XTextComponent(controlContainer.getControl("txtMale")).getText(),
+            UNO.XTextComponent(controlContainer.getControl("txtFemale")).getText(),
+            UNO.XTextComponent(controlContainer.getControl("txtOthers")).getText());
+        documentController.replaceSelectionWithTrafoField(conf, "Gender");
+        dialog.endExecute();
+      };
       btnOK.addActionListener(btnOKActionListener);
 
-      dialog = UNO.XDialog(window);
       dialog.execute();
     } catch (com.sun.star.uno.Exception e)
     {
@@ -103,34 +107,24 @@ public class GenderDialog
     }
   }
 
-  private AbstractActionListener btnAbortActionListener = event -> dialog.endExecute();
-
-  private AbstractActionListener btnOKActionListener = event -> {
-    ConfigThingy conf = generateGenderTrafoConf(
-        UNO.XTextComponent(controlContainer.getControl("cbSerienbrieffeld")).getText(),
-        UNO.XTextComponent(controlContainer.getControl("txtMale")).getText(),
-        UNO.XTextComponent(controlContainer.getControl("txtFemale")).getText(),
-        UNO.XTextComponent(controlContainer.getControl("txtOthers")).getText());
-    documentController.replaceSelectionWithTrafoField(conf, "Gender");
-    dialog.endExecute();
-  };
-
   /**
-   * Erzeugt ein ConfigThingy mit dem Aufbau BIND(FUNCTION "Gender" SET("Anrede", VALUE
+   * Generate the gender field describtion in the form
+   * {@code BIND(FUNCTION "Gender" SET("Anrede", VALUE
    * "<anredeFieldId>") SET("Falls_Anrede_HerrN", "<textHerr>") SET("Falls_Anrede_Frau",
-   * "<textFrau>") SET("Falls_sonstige_Anrede", "<textSonst>"))
+   * "<textFrau>") SET("Falls_sonstige_Anrede", "<textSonst>"))}
    *
    * @param anredeId
-   *          Id des geschlechtsbestimmenden Feldes
+   *          ID of the field to determine the gender.
    * @param textHerr
-   *          Text für Herr
+   *          Male text.
    * @param textFrau
-   *          Text für Frau
+   *          Female text.
    * @param textSonst
-   *          Text für sonstige Anreden
+   *          Text if neither male nor female.
+   * @return A {@link ConfigThingy} describing the gender field.
    */
-  public static ConfigThingy generateGenderTrafoConf(String anredeId, String textHerr,
-      String textFrau, String textSonst)
+  private static ConfigThingy generateGenderTrafoConf(String anredeId, String textHerr, String textFrau,
+      String textSonst)
   {
     ConfigThingy conf = new ConfigThingy("Func");
     ConfigThingy bind = new ConfigThingy("BIND");

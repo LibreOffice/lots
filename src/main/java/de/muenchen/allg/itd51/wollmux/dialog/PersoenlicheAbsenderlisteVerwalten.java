@@ -92,7 +92,7 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private List<DJDataset> cachedPAL = new ArrayList<>();
 
-  private INotify palListener;
+  private AbstractNotifier palListener;
 
   private XButton searchBtn;
 
@@ -124,8 +124,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    * @param palListener
    *          Listener, which is called if a pal is changed.
    */
-  public PersoenlicheAbsenderlisteVerwalten(DatasourceJoiner dj,
-      INotify palListener)
+  public PersoenlicheAbsenderlisteVerwalten(DatasourceJoiner dj, AbstractNotifier palListener)
   {
     this.dj = dj;
     this.palListener = palListener;
@@ -346,7 +345,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     @Override
     public void disposing(EventObject arg0)
     {
-      palListener.dialogClosed();
+      palListener.notify(null);
       new OnPALChangedNotify().emit();
       dialog.endExecute();
     }
