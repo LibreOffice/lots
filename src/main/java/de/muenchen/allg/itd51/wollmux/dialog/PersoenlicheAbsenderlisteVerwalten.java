@@ -192,18 +192,30 @@ public class PersoenlicheAbsenderlisteVerwalten
     searchBtn.addActionListener(startSearchBtnActionListener);
 
     XButton newBtn = UNO.XButton(controlContainer.getControl("btnNew"));
+    AbstractActionListener newBtnActionListener = event -> {
+      DJDataset newDataset = dj.newDataset();
+
+      cachedPAL.add(newDataset);
+      short newItemIndex = (palListe.getItemCount());
+      palListe.addItem("Neuer Datensatz", newItemIndex);
+      editEntry(newItemIndex);
+    };
     newBtn.addActionListener(newBtnActionListener);
 
     XButton editBtn = UNO.XButton(controlContainer.getControl("btnEdit"));
+    AbstractActionListener editBtnActionListener = event -> editEntry(palListe.getSelectedItemPos());
     editBtn.addActionListener(editBtnActionListener);
 
     XButton copyBtn = UNO.XButton(controlContainer.getControl("btnCopy"));
+    AbstractActionListener copyBtnActionListener = event -> copyEntry();
     copyBtn.addActionListener(copyBtnActionListener);
 
     XButton delBtn = UNO.XButton(controlContainer.getControl("btnDel"));
+    AbstractActionListener deleteBtnActionListener = event -> removeFromPAL();
     delBtn.addActionListener(deleteBtnActionListener);
 
     XButton addToPalBtn = UNO.XButton(controlContainer.getControl("addToPALBtn"));
+    AbstractActionListener addToPalActionListener = event -> addToPAL();
     addToPalBtn.addActionListener(addToPalActionListener);
 
     addPalEntriesToListBox();
@@ -360,8 +372,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     });
   };
 
-  private AbstractActionListener addToPalActionListener = event -> addToPAL();
-
   private void addToPAL()
   {
     short[] selectedItemsPos = searchResultList.getSelectedItemsPos();
@@ -431,8 +441,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     addPalEntriesToListBox();
   }
 
-  private AbstractActionListener deleteBtnActionListener = event -> removeFromPAL();
-
   private void removeFromPAL()
   {
     short[] selectedItemsPos = palListe.getSelectedItemsPos();
@@ -463,9 +471,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     new OnPALChangedNotify().emit();
   }
 
-  private AbstractActionListener editBtnActionListener = event -> editEntry(
-      palListe.getSelectedItemPos());
-
   private void editEntry(short index)
   {
     if (index == -1)
@@ -492,8 +497,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
   }
 
-  private AbstractActionListener copyBtnActionListener = event -> copyEntry();
-
   private void copyEntry()
   {
     short[] sel = palListe.getSelectedItemsPos();
@@ -519,15 +522,6 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     return newDS;
   }
-
-  private AbstractActionListener newBtnActionListener = event -> {
-    DJDataset newDataset = dj.newDataset();
-
-    cachedPAL.add(newDataset);
-    short newItemIndex = (palListe.getItemCount());
-    palListe.addItem("Neuer Datensatz", newItemIndex);
-    editEntry(newItemIndex);
-  };
 
   private void setLdapSearchResults(QueryResults data)
   {
