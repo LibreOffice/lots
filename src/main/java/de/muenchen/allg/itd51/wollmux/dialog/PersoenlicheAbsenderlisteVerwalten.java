@@ -482,9 +482,8 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     DJDataset djDataset = cachedPAL.get(index);
 
-    DatensatzBearbeitenWizardController controller = new DatensatzBearbeitenWizardController((LOSDJDataset) djDataset,
-        dj.getMainDatasourceSchema());
-    short result = controller.startWizard();
+    DatensatzBearbeitenWizard wizard = new DatensatzBearbeitenWizard((LOSDJDataset) djDataset, dj.getMainDatasourceSchema());
+    short result = wizard.show();
 
     if (result == ExecutableDialogResults.OK)
     {

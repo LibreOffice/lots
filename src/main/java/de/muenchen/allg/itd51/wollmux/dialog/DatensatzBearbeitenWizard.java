@@ -37,10 +37,12 @@ import com.sun.star.ui.dialogs.XWizardPage;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 
-public class DatensatzBearbeitenWizardController implements XWizardController
+/**
+ * Wizard for modifying data sets.
+ */
+public class DatensatzBearbeitenWizard implements XWizardController
 {
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(DatensatzBearbeitenWizardController.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DatensatzBearbeitenWizard.class);
   private static final int PAGE_COUNT = 3;
   private XWizardPage[] pages = new XWizardPage[PAGE_COUNT];
   private LOSDJDataset dataset;
@@ -58,8 +60,15 @@ public class DatensatzBearbeitenWizardController implements XWizardController
 
   private String[] title = { "Person", "Orga", "Fusszeile" };
 
-  public DatensatzBearbeitenWizardController(LOSDJDataset dataset,
-      List<String> dbSchema)
+  /**
+   * A wizard for modifying the data set.
+   *
+   * @param dataset
+   *          The data set to modify.
+   * @param dbSchema
+   *          The schema of the data set.
+   */
+  public DatensatzBearbeitenWizard(LOSDJDataset dataset, List<String> dbSchema)
   {
     this.dataset = dataset;
     this.dbSchema = dbSchema;
@@ -138,7 +147,7 @@ public class DatensatzBearbeitenWizardController implements XWizardController
    *
    * @return The return code of the wizard ({@link XWizard#execute()}).
    */
-  public short startWizard()
+  public short show()
   {
     wizard = Wizard.createSinglePathWizard(UNO.defaultContext, paths, this);
     wizard.setTitle("Datensatz bearbeiten");
