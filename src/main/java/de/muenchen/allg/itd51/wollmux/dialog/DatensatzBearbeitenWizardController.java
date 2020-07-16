@@ -87,15 +87,16 @@ public class DatensatzBearbeitenWizardController implements XWizardController
       switch (getPageId(pageId))
       {
       case PERSON:
-        page = new DatensatzBearbeitenPersonWizardPage(parentWindow, pageId, dataset, dbSchema);
+        page = new DatensatzBearbeitenWizardPage(pageId, parentWindow, "DatensatzBearbeitenPerson", dataset, dbSchema);
         break;
         
       case ORGA:
-        page = new DatensatzBearbeitenOrgaWizardPage(parentWindow, pageId, dataset, dbSchema);
+        page = new DatensatzBearbeitenWizardPage(pageId, parentWindow, "DatensatzBearbeitenOrga", dataset, dbSchema);
         break;
         
       case FUSSZEILE:
-        page = new DatensatzBearbeitenFusszeileWizardPage(parentWindow, pageId, dataset, dbSchema);
+        page = new DatensatzBearbeitenWizardPage(pageId, parentWindow, "DatensatzBearbeitenFusszeile", dataset,
+            dbSchema);
         break;
       }
       pages[pageId] = page;

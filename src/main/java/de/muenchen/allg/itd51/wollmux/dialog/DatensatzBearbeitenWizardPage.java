@@ -52,9 +52,9 @@ import de.muenchen.allg.util.UnoProperty;
 /**
  * Pages for modifying the content of a data set.
  */
-public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardPage
+public class DatensatzBearbeitenWizardPage extends AbstractXWizardPage
 {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DatensatzBearbeitenBaseWizardPage.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DatensatzBearbeitenWizardPage.class);
   private LOSDJDataset dataset;
   private List<String> dbSchema;
   private XControlContainer controlContainer;
@@ -75,7 +75,7 @@ public abstract class DatensatzBearbeitenBaseWizardPage extends AbstractXWizardP
    * @throws Exception
    *           The page can't be created.
    */
-  public DatensatzBearbeitenBaseWizardPage(short pageId, XWindow parentWindow, String dialogName, DJDataset dataset,
+  public DatensatzBearbeitenWizardPage(short pageId, XWindow parentWindow, String dialogName, DJDataset dataset,
       List<String> dbSchema) throws Exception
   {
     super(pageId, parentWindow, "vnd.sun.star.script:WollMux." + dialogName + "?location=application");
