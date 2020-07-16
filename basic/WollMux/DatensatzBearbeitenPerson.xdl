@@ -18,6 +18,7 @@
   <dlg:text dlg:id="Label13" dlg:tab-index="41" dlg:left="188" dlg:top="185" dlg:width="40" dlg:height="12" dlg:value="Dienstbez. lang"/>
   <dlg:text dlg:id="Label14" dlg:tab-index="43" dlg:left="5" dlg:top="170" dlg:width="60" dlg:height="12" dlg:value="Funktion"/>
   <dlg:text dlg:id="Label15" dlg:tab-index="45" dlg:left="188" dlg:top="170" dlg:width="40" dlg:height="12" dlg:value="Zuständigkeit"/>
+  <dlg:text dlg:id="Label16" dlg:tab-index="45" dlg:left="5" dlg:top="200" dlg:width="60" dlg:height="12" dlg:value="Benutzerkürzel"/>
   <dlg:textfield dlg:id="Rolle" dlg:tab-index="2" dlg:left="82" dlg:top="5" dlg:width="100" dlg:height="12"/>
   <dlg:combobox dlg:id="Anrede" dlg:tab-index="4" dlg:left="245" dlg:top="5" dlg:width="87" dlg:height="12" dlg:spin="true"/>
   <dlg:textfield dlg:id="Vorname" dlg:tab-index="6" dlg:left="82" dlg:top="20" dlg:width="250" dlg:height="12"/>
@@ -34,6 +35,7 @@
   <dlg:textfield dlg:id="Funktion" dlg:tab-index="40" dlg:left="82" dlg:top="170" dlg:width="100" dlg:height="12"/>
   <dlg:textfield dlg:id="DienstBezKurz" dlg:tab-index="44" dlg:left="82" dlg:top="185" dlg:width="100" dlg:height="12"/>
   <dlg:textfield dlg:id="DienstBezLang" dlg:tab-index="47" dlg:left="245" dlg:top="185" dlg:width="87" dlg:height="12"/>
+  <dlg:textfield dlg:id="Benutzerkuerzel" dlg:tab-index="48" dlg:left="82" dlg:top="200" dlg:width="250" dlg:height="12"/>
   <dlg:button dlg:id="btnRolle" dlg:tab-index="1" dlg:visible="false" dlg:left="69" dlg:top="6" dlg:width="10" dlg:height="10" dlg:value=" *"/>
   <dlg:button dlg:id="btnVorname" dlg:tab-index="3" dlg:visible="false" dlg:left="69" dlg:top="21" dlg:width="10" dlg:height="10" dlg:value=" *"/>
   <dlg:button dlg:id="btnNachname" dlg:tab-index="5" dlg:visible="false" dlg:left="69" dlg:top="36" dlg:width="10" dlg:height="10" dlg:value=" *"/>
@@ -50,5 +52,6 @@
   <dlg:button dlg:id="btnDienstBezKurz" dlg:tab-index="30" dlg:visible="false" dlg:left="69" dlg:top="171" dlg:width="10" dlg:height="10" dlg:value=" *"/>
   <dlg:button dlg:id="btnDienstBezLang" dlg:tab-index="42" dlg:visible="false" dlg:left="232" dlg:top="186" dlg:width="10" dlg:height="10" dlg:value=" *"/>
   <dlg:button dlg:id="btnAnrede" dlg:tab-index="46" dlg:visible="false" dlg:left="232" dlg:top="6" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnBenutzerkuerzel" dlg:tab-index="49" dlg:visible="false" dlg:left="69" dlg:top="201" dlg:width="10" dlg:height="10" dlg:value=" *"/>
  </dlg:bulletinboard>
 </dlg:window>
