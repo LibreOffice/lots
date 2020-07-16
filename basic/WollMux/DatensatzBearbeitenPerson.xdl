@@ -20,7 +20,12 @@
   <dlg:text dlg:id="Label15" dlg:tab-index="45" dlg:left="188" dlg:top="170" dlg:width="40" dlg:height="12" dlg:value="Zuständigkeit"/>
   <dlg:text dlg:id="Label16" dlg:tab-index="45" dlg:left="5" dlg:top="200" dlg:width="60" dlg:height="12" dlg:value="Benutzerkürzel"/>
   <dlg:textfield dlg:id="Rolle" dlg:tab-index="2" dlg:left="82" dlg:top="5" dlg:width="100" dlg:height="12"/>
-  <dlg:combobox dlg:id="Anrede" dlg:tab-index="4" dlg:left="245" dlg:top="5" dlg:width="87" dlg:height="12" dlg:spin="true"/>
+  <dlg:combobox dlg:id="Anrede" dlg:tab-index="4" dlg:left="245" dlg:top="5" dlg:width="87" dlg:height="12" dlg:spin="true">
+    <dlg:menupopup>
+      <dlg:menuitem dlg:value="Herr"/>
+      <dlg:menuitem dlg:value="Frau"/>
+   </dlg:menupopup>
+  </dlg:combobox>
   <dlg:textfield dlg:id="Vorname" dlg:tab-index="6" dlg:left="82" dlg:top="20" dlg:width="250" dlg:height="12"/>
   <dlg:textfield dlg:id="Nachname" dlg:tab-index="8" dlg:left="82" dlg:top="35" dlg:width="250" dlg:height="12"/>
   <dlg:textfield dlg:id="Titel" dlg:tab-index="10" dlg:left="82" dlg:top="50" dlg:width="250" dlg:height="12"/>

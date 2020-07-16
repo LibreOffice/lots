@@ -24,11 +24,9 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.util.List;
 
-import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XWindow;
 import com.sun.star.uno.Exception;
 
-import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 
 /**
@@ -55,10 +53,5 @@ public class DatensatzBearbeitenPersonWizardPage extends DatensatzBearbeitenBase
       List<String> dbSchema) throws Exception
   {
     super(pageId, parentWindow, "DatensatzBearbeitenPerson", dataset, dbSchema);
-
-    XComboBox anredeComboBox = UNO.XComboBox(UNO.XControlContainer(window).getControl("Anrede"));
-
-    anredeComboBox.removeItems((short) 0, anredeComboBox.getItemCount());
-    anredeComboBox.addItems(new String[] { "Herr", "Frau" }, (short) 0);
   }
 }
