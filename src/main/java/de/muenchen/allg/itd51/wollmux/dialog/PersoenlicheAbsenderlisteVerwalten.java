@@ -196,14 +196,15 @@ public class PersoenlicheAbsenderlisteVerwalten
       DJDataset newDataset = dj.newDataset();
 
       cachedPAL.add(newDataset);
-      short newItemIndex = (palListe.getItemCount());
+      short newItemIndex = palListe.getItemCount();
       palListe.addItem("Neuer Datensatz", newItemIndex);
-      editEntry(newItemIndex);
+      editDataset((LOSDJDataset) cachedPAL.get(newItemIndex));
     };
     newBtn.addActionListener(newBtnActionListener);
 
     XButton editBtn = UNO.XButton(controlContainer.getControl("btnEdit"));
-    AbstractActionListener editBtnActionListener = event -> editEntry(palListe.getSelectedItemPos());
+    AbstractActionListener editBtnActionListener = event -> editDataset(
+        (LOSDJDataset) cachedPAL.get(palListe.getSelectedItemPos()));
     editBtn.addActionListener(editBtnActionListener);
 
     XButton copyBtn = UNO.XButton(controlContainer.getControl("btnCopy"));
@@ -471,18 +472,9 @@ public class PersoenlicheAbsenderlisteVerwalten
     new OnPALChangedNotify().emit();
   }
 
-  private void editEntry(short index)
+  private void editDataset(LOSDJDataset djDataset)
   {
-    if (index == -1)
-    {
-      LOGGER.debug(
-          "PersoenlicheAbsenderListe: editEntry(): index -1 is not a valid value.returning..");
-      return;
-    }
-
-    DJDataset djDataset = cachedPAL.get(index);
-
-    DatensatzBearbeitenWizard wizard = new DatensatzBearbeitenWizard((LOSDJDataset) djDataset, dj.getMainDatasourceSchema());
+    DatensatzBearbeitenWizard wizard = new DatensatzBearbeitenWizard(djDataset, dj.getMainDatasourceSchema());
     short result = wizard.show();
 
     if (result == ExecutableDialogResults.OK)
