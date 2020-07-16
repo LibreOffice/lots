@@ -25,8 +25,7 @@ package de.muenchen.allg.itd51.wollmux.db;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Ein konkreter DataFinder, der für die Auflösung der Variable in getValueForKey

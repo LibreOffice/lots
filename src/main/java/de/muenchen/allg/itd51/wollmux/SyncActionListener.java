@@ -25,9 +25,6 @@ package de.muenchen.allg.itd51.wollmux;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Diese Klasse vereinfacht die Synchronisation verschiedener Threads über einen
  * ActionListener. Die Anwendung erfolgt in der Regel in folgenden Schritten:
@@ -44,9 +41,6 @@ import org.slf4j.LoggerFactory;
  */
 public class SyncActionListener implements ActionListener
 {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(SyncActionListener.class);
-
   /**
    * Das lock-Flag über das die Synchronisierung erfolgt.
    */
@@ -67,13 +61,14 @@ public class SyncActionListener implements ActionListener
     {
       synchronized (lock)
       {
-        while (lock[0] == true)
+        while (lock[0])
           lock.wait();
       }
     }
     catch (InterruptedException e)
     {
-      LOGGER.trace("", e);
+      Thread.currentThread().interrupt();
+      // nothing to do
     }
     return result;
   }

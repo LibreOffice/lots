@@ -56,31 +56,20 @@ import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory;
-import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory.FormField;
-import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer.DataID;
-import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.OverrideFragChainException;
-import de.muenchen.allg.itd51.wollmux.core.document.VisibilityElement;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
-import de.muenchen.allg.itd51.wollmux.core.functions.Function;
-import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
-import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.core.functions.Values;
-import de.muenchen.allg.itd51.wollmux.core.functions.Values.SimpleMap;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
-import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
+import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
+import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.document.FormFieldFactory.FormField;
+import de.muenchen.allg.itd51.wollmux.document.PersistentDataContainer.DataID;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel.OverrideFragChainException;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormValueChanged;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
 import de.muenchen.allg.itd51.wollmux.form.config.FormConfig;
@@ -89,6 +78,13 @@ import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.form.model.FormValueChangedListener;
 import de.muenchen.allg.itd51.wollmux.form.model.VisibilityChangedListener;
+import de.muenchen.allg.itd51.wollmux.func.Function;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.Values;
+import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
+import de.muenchen.allg.itd51.wollmux.util.L;
+import de.muenchen.allg.itd51.wollmux.util.Utils;
 import de.muenchen.allg.util.UnoConfiguration;
 import de.muenchen.allg.util.UnoProperty;
 import de.muenchen.allg.util.UnoService;
@@ -1533,7 +1529,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    *          The TRAFO of the for form field. Can be null. A TRAFO definition is in the form
    *          "Name(FUNCTION_DEFINITION)", where Name is a valid identifier and FUNCTION_DEFINITION
    *          a valid parameter for
-   *          {@link de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}.
+   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}.
    *          The first child of FUNCTION_DEFINITION has to be a valid function name like "AND".
    * @param hint
    *          Tooltip of the new form field. Can be null.
@@ -1615,7 +1611,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * @param funcConf
    *          A definition of function in the form "Name(FUNCTION_DEFINITION)", where Name is a
    *          valid identifier and FUNCTION_DEFINITION a valid parameter for
-   *          {@link de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}.
+   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}.
    *          The first child of FUNCTION_DEFINITION has to be a valid function name like "AND".
    * 
    * @return The name of the function or null if the definition is erroneous.

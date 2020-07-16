@@ -31,20 +31,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.document.DocumentTreeVisitor;
-import de.muenchen.allg.itd51.wollmux.core.document.InsertionBookmark;
-import de.muenchen.allg.itd51.wollmux.core.document.TextRange;
-import de.muenchen.allg.itd51.wollmux.core.document.nodes.Container;
-import de.muenchen.allg.itd51.wollmux.core.document.nodes.DropdownFormControl;
-import de.muenchen.allg.itd51.wollmux.core.document.nodes.FormControl;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.document.DocumentTreeVisitor;
+import de.muenchen.allg.itd51.wollmux.document.InsertionBookmark;
+import de.muenchen.allg.itd51.wollmux.document.TextRange;
+import de.muenchen.allg.itd51.wollmux.document.nodes.Container;
+import de.muenchen.allg.itd51.wollmux.document.nodes.DropdownFormControl;
+import de.muenchen.allg.itd51.wollmux.document.nodes.FormControl;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXValue;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 public class ScanVisitor implements DocumentTreeVisitor
 {
@@ -205,7 +205,7 @@ public class ScanVisitor implements DocumentTreeVisitor
   
   /**
    * Fügt der {@link #formControlModelList} ein neues {@link FormControlModel} hinzu
-   * für das {@link de.muenchen.allg.itd51.wollmux.core.document.nodes.FormControl}
+   * für das {@link de.muenchen.allg.itd51.wollmux.document.nodes.FormControl}
    * control, wobei text der Text sein sollte, der im Dokument vor control steht.
    * Dieser Text wird zur Generierung des Labels herangezogen. Es wird ebenfalls der
    * {@link #insertionModelList} ein entsprechendes {@link InsertionModel}
@@ -314,7 +314,7 @@ public class ScanVisitor implements DocumentTreeVisitor
    * 
    * @param control
    *          das entsprechende
-   *          {@link de.muenchen.allg.itd51.wollmux.core.document.nodes.FormControl}
+   *          {@link de.muenchen.allg.itd51.wollmux.document.nodes.FormControl}
    * @param label
    *          das Label
    * @param id
@@ -342,7 +342,7 @@ public class ScanVisitor implements DocumentTreeVisitor
    * 
    * @param control
    *          das entsprechende
-   *          {@link de.muenchen.allg.itd51.wollmux.core.document.nodes.FormControl}
+   *          {@link de.muenchen.allg.itd51.wollmux.document.nodes.FormControl}
    * @param label
    *          das Label
    * @param id
@@ -386,7 +386,7 @@ public class ScanVisitor implements DocumentTreeVisitor
    * 
    * @param control
    *          das entsprechende
-   *          {@link de.muenchen.allg.itd51.wollmux.core.document.nodes.FormControl}
+   *          {@link de.muenchen.allg.itd51.wollmux.document.nodes.FormControl}
    * @param label
    *          das Label
    * @param id

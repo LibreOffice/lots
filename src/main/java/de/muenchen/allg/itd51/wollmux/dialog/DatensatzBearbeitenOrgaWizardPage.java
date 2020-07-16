@@ -36,8 +36,8 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
+import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
 
 public class DatensatzBearbeitenOrgaWizardPage extends DatensatzBearbeitenBaseWizardPage
 {

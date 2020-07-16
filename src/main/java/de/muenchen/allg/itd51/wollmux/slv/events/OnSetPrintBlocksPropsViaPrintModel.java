@@ -27,8 +27,8 @@ import java.util.Set;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
 import de.muenchen.allg.itd51.wollmux.slv.PrintBlockCommand;
 

@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 public class PrintBlockSignatureTest
 {

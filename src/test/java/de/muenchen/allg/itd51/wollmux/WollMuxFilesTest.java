@@ -39,7 +39,7 @@ import org.mockserver.model.HttpResponse;
 import org.mockserver.model.StringBody;
 import org.mockserver.verify.VerificationTimes;
 
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 
 public class WollMuxFilesTest
 {

@@ -31,8 +31,8 @@ import com.sun.star.uno.Exception;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.dialog.adapter.AbstractXWizardPage;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.dispatch.AbstractDispatchResultListener;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
 
 /**
  * A page of the mail merge wizard. Settings of the printer can be done here.

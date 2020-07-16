@@ -30,8 +30,8 @@ import java.io.StringReader;
 
 import org.junit.jupiter.api.Test;
 
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 
 public class ContentBasedDirectiveConfigTest
 {

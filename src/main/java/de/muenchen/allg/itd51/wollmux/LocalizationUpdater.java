@@ -40,9 +40,9 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Diese Klasse liest alle zu lokalisierenden Strings des WollMux aus dem Source-Code

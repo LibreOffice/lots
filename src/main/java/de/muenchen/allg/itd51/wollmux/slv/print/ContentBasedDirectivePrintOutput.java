@@ -44,13 +44,13 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.core.util.Utils;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveItem;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
 import de.muenchen.allg.itd51.wollmux.slv.PrintBlockSignature;
 import de.muenchen.allg.itd51.wollmux.slv.dialog.ContentBasedDirectiveSettings;
+import de.muenchen.allg.itd51.wollmux.util.Utils;
 import de.muenchen.allg.util.UnoProperty;
 
 /**

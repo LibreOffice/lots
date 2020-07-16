@@ -22,8 +22,8 @@
  */
 package de.muenchen.allg.itd51.wollmux.slv;
 
-import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
+import de.muenchen.allg.itd51.wollmux.document.commands.AbstractExecutor;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommands;
 
 /**
  * Processing step for print block commands.

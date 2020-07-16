@@ -22,10 +22,8 @@
  */
 package de.muenchen.allg.itd51.wollmux.document.commands;
 
-import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.SetPrintFunction;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.SetType;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.SetPrintFunction;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.SetType;
 
 /**
  * Hierbei handelt es sich um einen minimalen Scanner, der zu aller erst abläuft

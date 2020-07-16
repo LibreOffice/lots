@@ -23,7 +23,7 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Exception if a dialog can't start.

@@ -44,7 +44,7 @@ import com.sun.star.ui.dialogs.XFilePicker3;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.SyncActionListener;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;

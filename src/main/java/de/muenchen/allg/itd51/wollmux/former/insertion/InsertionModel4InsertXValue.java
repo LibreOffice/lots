@@ -41,14 +41,14 @@ import com.sun.star.text.XTextRange;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.UnknownIDException;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.SyntaxErrorException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Stellt eine Einfügestelle im Dokument (insertValue oder insertFormValue) dar.

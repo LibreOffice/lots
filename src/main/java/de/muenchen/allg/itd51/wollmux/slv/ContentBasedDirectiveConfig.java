@@ -33,9 +33,9 @@ import com.github.chaosfirebolt.converter.constants.IntegerType;
 import com.sun.star.lang.IllegalArgumentException;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * The configuration for content based directives.

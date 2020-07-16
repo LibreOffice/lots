@@ -24,15 +24,12 @@ package de.muenchen.allg.itd51.wollmux.document.commands;
 
 import com.sun.star.text.XTextCursor;
 
-import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Der Hauptverarbeitungsschritt, in dem vor allem die Textinhalte gefüllt werden.

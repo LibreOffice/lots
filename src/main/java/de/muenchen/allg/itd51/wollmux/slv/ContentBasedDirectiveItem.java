@@ -37,7 +37,7 @@ import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoCollection;
-import de.muenchen.allg.itd51.wollmux.core.util.Utils;
+import de.muenchen.allg.itd51.wollmux.util.Utils;
 import de.muenchen.allg.util.UnoProperty;
 
 /**

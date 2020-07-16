@@ -41,21 +41,14 @@ import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
+import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.core.HashableComponent;
-import de.muenchen.allg.itd51.wollmux.core.document.AnnotationBasedPersistentDataContainer;
-import de.muenchen.allg.itd51.wollmux.core.document.PersistentDataContainer;
-import de.muenchen.allg.itd51.wollmux.core.document.RDFBasedPersistentDataContainer;
-import de.muenchen.allg.itd51.wollmux.core.document.RDFMetadataNotSupportedException;
-import de.muenchen.allg.itd51.wollmux.core.document.RDFReadLegacyModeDataContainer;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.core.document.TransitionModeDataContainer;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Verwaltet Informationen zu allen offenen OOo-Dokumenten.

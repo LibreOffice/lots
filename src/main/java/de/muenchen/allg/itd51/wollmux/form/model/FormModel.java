@@ -35,14 +35,14 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
-import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.core.functions.Values;
-import de.muenchen.allg.itd51.wollmux.core.functions.Values.SimpleMap;
+import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.form.config.FormConfig;
 import de.muenchen.allg.itd51.wollmux.form.config.TabConfig;
 import de.muenchen.allg.itd51.wollmux.form.config.VisibilityGroupConfig;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.Values;
+import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
 
 /**
  * Model of a form.

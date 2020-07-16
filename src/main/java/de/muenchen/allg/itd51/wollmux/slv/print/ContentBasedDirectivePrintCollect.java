@@ -41,9 +41,9 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
+import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.util.UnoProperty;
 
 /**

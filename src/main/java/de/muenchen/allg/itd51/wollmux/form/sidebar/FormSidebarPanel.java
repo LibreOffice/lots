@@ -54,7 +54,7 @@ import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.dialog.adapter.AbstractSidebarPanel;
 import de.muenchen.allg.dialog.adapter.AbstractTabPageContainerListener;
 import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
-import de.muenchen.allg.itd51.wollmux.core.dialog.UIElementConfig;
+import de.muenchen.allg.itd51.wollmux.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.form.config.FormConfig;
 import de.muenchen.allg.itd51.wollmux.form.config.TabConfig;

@@ -48,11 +48,10 @@ import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
 import de.muenchen.allg.itd51.wollmux.XWollMuxDocument;
-import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dispatch.AboutDispatch;
 import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
@@ -61,6 +60,7 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddPALChangeEventListener
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemoveDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemovePALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
+import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.util.UnoComponent;
 import de.muenchen.allg.util.UnoProperty;
 

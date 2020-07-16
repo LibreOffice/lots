@@ -29,9 +29,9 @@ import com.sun.star.text.XTextCursor;
 
 import de.muenchen.allg.itd51.wollmux.TextModule;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Event for inserting a boilerplate. It can be inserted as a reference or the reference can be

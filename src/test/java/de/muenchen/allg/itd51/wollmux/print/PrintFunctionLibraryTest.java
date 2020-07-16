@@ -31,7 +31,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintException;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 

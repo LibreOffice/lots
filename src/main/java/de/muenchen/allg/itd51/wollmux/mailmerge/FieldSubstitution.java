@@ -34,14 +34,14 @@ import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.document.text.Bookmark;
-import de.muenchen.allg.itd51.wollmux.core.document.FormFieldFactory.FormField;
-import de.muenchen.allg.itd51.wollmux.core.functions.Function;
-import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
-import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.document.FormFieldFactory.FormField;
+import de.muenchen.allg.itd51.wollmux.func.Function;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Description of a replacement of a form field by new fields or text. A description can be combined

@@ -30,9 +30,7 @@ import com.sun.star.text.XTextRange;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.AbstractExecutor;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommand.UpdateFields;
-import de.muenchen.allg.itd51.wollmux.core.document.commands.DocumentCommands;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.UpdateFields;
 import de.muenchen.allg.util.UnoProperty;
 
 /**

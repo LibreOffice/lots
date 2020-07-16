@@ -59,13 +59,12 @@ import com.sun.star.uno.XComponentContext;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.ReferencedFieldID;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel.ReferencedFieldID;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
@@ -78,6 +77,7 @@ import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModelListener;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.SetFormValue;
 import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.MailmergeWizardController;
+import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.util.UnoProperty;
 
 /**

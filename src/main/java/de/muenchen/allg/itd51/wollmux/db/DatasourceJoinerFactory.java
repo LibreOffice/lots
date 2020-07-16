@@ -33,29 +33,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.core.db.AttachDatasource;
-import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.db.ColumnTransformer;
-import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.core.db.Datasource;
-import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.core.db.LDAPDatasource;
-import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorage;
-import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageDummyImpl;
-import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl;
-import de.muenchen.allg.itd51.wollmux.core.db.OOoDatasource;
-import de.muenchen.allg.itd51.wollmux.core.db.OverlayDatasource;
-import de.muenchen.allg.itd51.wollmux.core.db.PreferDatasource;
-import de.muenchen.allg.itd51.wollmux.core.db.SchemaDatasource;
-import de.muenchen.allg.itd51.wollmux.core.db.ThingyDatasource;
-import de.muenchen.allg.itd51.wollmux.core.db.UnionDatasource;
-import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
-import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 public class DatasourceJoinerFactory
 {

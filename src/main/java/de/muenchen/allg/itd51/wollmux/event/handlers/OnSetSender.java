@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
-import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Event for selecting a new sender.

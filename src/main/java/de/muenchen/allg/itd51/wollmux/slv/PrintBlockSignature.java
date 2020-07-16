@@ -22,7 +22,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.slv;
 
-import de.muenchen.allg.itd51.wollmux.core.util.L;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * The command names of print block commands.

@@ -62,8 +62,8 @@ import de.muenchen.allg.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.dialog.adapter.AbstractSpinListener;
 import de.muenchen.allg.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.dialog.adapter.AbstractTopWindowListener;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dispatch.PrintDispatch;
+import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.util.UnoProperty;
 
 /**

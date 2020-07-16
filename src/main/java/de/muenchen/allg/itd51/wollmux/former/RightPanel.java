@@ -27,7 +27,6 @@ import java.awt.CardLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.former.control.AllFormControlExtViewsPanel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
 import de.muenchen.allg.itd51.wollmux.former.group.AllGroupFuncViewsPanel;
@@ -37,6 +36,7 @@ import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
 import de.muenchen.allg.itd51.wollmux.former.section.AllSectionExtViewsPanel;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModelList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Managet die rechte Hälfte des FM4000.

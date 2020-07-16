@@ -22,10 +22,10 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.control;
 
-import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccessView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Stellt das PLAUSI-Attribut eines FormControlModels dar und erlaubt seine
