@@ -76,13 +76,13 @@ public abstract class MailMergePrintFunction extends PrintFunction
   /**
    * Replaces all occurrences of <code>{{<tag>}}</code> with the value specified in the data set.
    *
-   * @param text
-   *          Text, which contains tags to be replaced.
    * @param dataset
    *          Map of key-value pairs, where the key is <code><tag></code>.
+   * @param text
+   *          Text, which contains tags to be replaced.
    * @return Text where all occurrences are replaced, if there exists a record in data set.
    */
-  public String replaceTextByMergeFieldValue(String text, Map<String, String> dataset)
+  public static String replaceMergeFieldInText(Map<String, String> dataset, String text)
   {
     for (Entry<String, String> entry : dataset.entrySet())
     {
@@ -99,7 +99,7 @@ public abstract class MailMergePrintFunction extends PrintFunction
 
   /**
    * Creates a <code><tag></code>, which can be replaced by
-   * {@link #replaceTextByMergeFieldValue(String, Map)}.
+   * {@link #replaceMergeFieldInText(Map, String)}.
    *
    * @param mergeField
    *          The name of the tag.
@@ -129,8 +129,8 @@ public abstract class MailMergePrintFunction extends PrintFunction
     HashMap<String, String> dataset = new HashMap<>((HashMap<String, String>) pmod
         .getProp(SetFormValue.PROP_DATASET_EXPORT, new HashMap<String, String>()));
 
-    String filename = replaceTextByMergeFieldValue((String) pmod.getProp(PROP_FILEPATTERN, null),
-        dataset);
+    String filename = replaceMergeFieldInText(dataset,
+        (String) pmod.getProp(PROP_FILEPATTERN, null));
 
     if (!filename.toLowerCase().endsWith(".odt") && !filename.toLowerCase().endsWith(".pdf"))
     {
