@@ -48,6 +48,8 @@ public abstract class PrintFunction implements Comparable<PrintFunction>
 
   public static final String PRINT_RESULT = "WollMux_Print_Result";
 
+  public static final String PRINT_RESULT_FILE = "WollMux_Print_Result_File";
+
   private String functionName;
 
   private int order;

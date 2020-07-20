@@ -22,10 +22,10 @@
  */
 package de.muenchen.allg.itd51.wollmux.slv.print;
 
-import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -35,23 +35,23 @@ import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.beans.PropertyVetoException;
+import com.sun.star.beans.UnknownPropertyException;
+import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.NoSuchMethodException;
-import com.sun.star.ucb.XFileIdentifierConverter;
-import com.sun.star.ui.dialogs.FilePicker;
-import com.sun.star.ui.dialogs.TemplateDescription;
-import com.sun.star.ui.dialogs.XFilePicker3;
+import com.sun.star.lang.WrappedTargetException;
 
-import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.SyncActionListener;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.func.print.PrintException;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
 import de.muenchen.allg.itd51.wollmux.slv.dialog.ContentBasedDirectiveDialog;
 import de.muenchen.allg.itd51.wollmux.slv.dialog.ContentBasedDirectiveSettings;
-import de.muenchen.allg.util.UnoComponent;
 
 /**
  * Print function for configuration of the content based directive print. It creates a GUI and
@@ -96,7 +96,7 @@ public class ContentBasedDirectivePrint extends PrintFunction
   }
 
   @Override
-  public void print(XPrintModel printModel)
+  public void print(XPrintModel printModel) throws PrintException
   {
     // add print function SachleitendeVerfuegungOutput
     ContentBasedDirectiveModel model = ContentBasedDirectiveModel
@@ -136,6 +136,11 @@ public class ContentBasedDirectivePrint extends PrintFunction
       if (collect)
       {
         collectPrints(printModel);
+        PrintFunction showFileFunc = GlobalFunctions.getInstance().getGlobalPrintFunctions().get("ShowDocument");
+        if (showFileFunc != null)
+        {
+          showFileFunc.print(printModel);
+        }
       }
     }
   }
@@ -153,28 +158,12 @@ public class ContentBasedDirectivePrint extends PrintFunction
         LOGGER.debug(doc.getAbsolutePath());
         merger.addSource(doc);
       }
-
-      XFilePicker3 picker = FilePicker.createWithMode(UNO.defaultContext, TemplateDescription.FILESAVE_AUTOEXTENSION);
-      String filterName = "PDF Dokument";
-      picker.appendFilter(filterName, "*.pdf");
-      picker.appendFilter("Alle Dateien", "*");
-      picker.setCurrentFilter(filterName);
-      short res = picker.execute();
-      if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)
-      {
-        String[] files = picker.getFiles();
-        XFileIdentifierConverter xFileConverter = UNO.XFileIdentifierConverter(
-            UnoComponent.createComponentWithContext(UnoComponent.CSS_UCB_FILE_CONTENT_PROVIDER));
-        String outputFile = xFileConverter.getSystemPathFromFileURL(files[0]);
-        merger.setDestinationFileName(outputFile);
-        merger.mergeDocuments(null);
-        Desktop.getDesktop().open(new File(outputFile));
-      } else
-      {
-        InfoDialog.showInfoModal("Sachleitende Verfügungen drucken",
-            "PDF Dokument mit allen Ausdrucken wurde nicht gespeichert.");
-      }
-    } catch (IOException e)
+      File outputFile = Files.createTempFile("WollMux_SLV_", ".pdf").toFile();
+      merger.setDestinationFileName(outputFile.getAbsolutePath());
+      merger.mergeDocuments(null);
+      printModel.setPropertyValue(PrintFunction.PRINT_RESULT_FILE, outputFile);
+    } catch (IOException | IllegalArgumentException | UnknownPropertyException | PropertyVetoException
+        | WrappedTargetException e)
     {
       LOGGER.error("PDF Dokumente konnten nicht zusammengefügt werden.", e);
       InfoDialog.showInfoModal("Sachleitende Verfügungen drucken",
