@@ -104,6 +104,7 @@ public abstract class DataFinder
    */
   public QueryResults find(List<Pair<String, String>> query)
   {
+    List<Pair<String, String>> evaluatedQuery = new ArrayList<>(query.size());
     for (Pair<String, String> pair : query)
     {
       LOGGER.trace(this.getClass().getSimpleName() + ".find(" + pair.getKey() + ", "
@@ -113,9 +114,10 @@ public abstract class DataFinder
       {
         return null;
       }
+      evaluatedQuery.add(ImmutablePair.of(evaluate(pair.getKey()), evaluate(pair.getValue())));
     }
 
-    return dsj.find(dsj.buildQuery(query));
+    return dsj.find(dsj.buildQuery(evaluatedQuery));
   }
 
   /**
