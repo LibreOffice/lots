@@ -22,7 +22,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.document;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,16 +58,10 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.document.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.document.PersistentDataContainer.DataID;
-import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel.OverrideFragChainException;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormValueChanged;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
@@ -154,8 +147,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     this.globalDialogs = globalDialogs;
 
     functionContext = new HashMap<>();
-
-    parseInitialOverrideFragMap(getInitialOverrideFragMap());
   }
 
   public TextDocumentModel getModel()
@@ -1758,103 +1749,6 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
         return false;
       }
     }
-  }
-
-  /**
-   * Parse an OverrideFrag configuration like
-   *
-   * <pre>
-   * overrideFrag(
-   *   (FRAG_ID 'A' NEW_FRAG_ID 'B')
-   *   (FRAG_ID 'C' NEW_FRAG_ID 'D')
-   *   ...
-   * )
-   * </pre>
-   *
-   * Initilizes {@link #overrideFragMap}.
-   *
-   * @param iniinitialOverrideFragMap
-   *          The configuration.
-   */
-  private void parseInitialOverrideFragMap(ConfigThingy initialOverrideFragMap)
-  {
-    for (ConfigThingy conf : initialOverrideFragMap)
-    {
-      String oldFragId;
-      try
-      {
-        oldFragId = conf.get("FRAG_ID").toString();
-      } catch (NodeNotFoundException x)
-      {
-        LOGGER.error(L.m(
-            "FRAG_ID Angabe fehlt in einem Eintrag der %1: %2\n"
-                + "Vielleicht haben Sie die Klammern um (FRAG_ID 'A' NEW_FRAG_ID 'B') vergessen?",
-            TextDocumentModel.OVERRIDE_FRAG_DB_SPALTE, conf.stringRepresentation()));
-        continue;
-      }
-
-      String newFragId = conf.getString("NEW_FRAG_ID", "");
-
-      try
-      {
-        model.setOverrideFrag(oldFragId, newFragId);
-      } catch (OverrideFragChainException x)
-      {
-        LOGGER.error(
-            L.m("Fehlerhafte Angabe in %1: %2", TextDocumentModel.OVERRIDE_FRAG_DB_SPALTE, conf.stringRepresentation()),
-            x);
-      }
-    }
-  }
-
-  /**
-   * Get the personal OverrideFrag list of the sender.
-   *
-   * @return The configuration of the OverrideFrag list.
-   */
-  private ConfigThingy getInitialOverrideFragMap()
-  {
-    ConfigThingy overrideFragConf = new ConfigThingy("overrideFrag");
-
-    String overrideFragDbSpalte = null;
-    ConfigThingy overrideFragDbSpalteConf = WollMuxFiles.getWollmuxConf()
-        .query(TextDocumentModel.OVERRIDE_FRAG_DB_SPALTE, 1);
-    try
-    {
-      overrideFragDbSpalte = overrideFragDbSpalteConf.getLastChild().toString();
-    } catch (NodeNotFoundException x)
-    {
-      // keine OVERRIDE_FRAG_DB_SPALTE Direktive gefunden
-      overrideFragDbSpalte = "";
-    }
-
-    if (!overrideFragDbSpalte.isEmpty())
-    {
-      try
-      {
-        Dataset ds = DatasourceJoinerFactory.getDatasourceJoiner().getSelectedDatasetTransformed();
-        String value = ds.get(overrideFragDbSpalte);
-        if (value == null)
-        {
-          value = "";
-        }
-        overrideFragConf = new ConfigThingy("overrideFrag", value);
-      } catch (DatasetNotFoundException e)
-      {
-        LOGGER
-            .info(L.m("Kein Absender ausgewählt => %1 bleibt wirkungslos", TextDocumentModel.OVERRIDE_FRAG_DB_SPALTE));
-      } catch (ColumnNotFoundException e)
-      {
-        LOGGER.error(L.m("%2 spezifiziert Spalte '%1', die nicht vorhanden ist", overrideFragDbSpalte,
-            TextDocumentModel.OVERRIDE_FRAG_DB_SPALTE), e);
-      } catch (IOException | SyntaxErrorException x)
-      {
-        LOGGER.error(
-            L.m("Fehler beim Parsen der %2 '%1'", overrideFragDbSpalte, TextDocumentModel.OVERRIDE_FRAG_DB_SPALTE), x);
-      }
-    }
-
-    return overrideFragConf;
   }
 
   /**

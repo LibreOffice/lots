@@ -22,6 +22,8 @@
  */
 package de.muenchen.allg.itd51.wollmux.comp;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,22 +45,19 @@ import com.sun.star.uno.XComponentContext;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoList;
 import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
 import de.muenchen.allg.itd51.wollmux.XWollMuxDocument;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
+import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dispatch.AboutDispatch;
 import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddDocumentEventListener;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemoveDocumentEventListener;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemovePALChangeEventListener;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
+import de.muenchen.allg.itd51.wollmux.sender.SenderException;
+import de.muenchen.allg.itd51.wollmux.sender.SenderService;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.util.UnoComponent;
 import de.muenchen.allg.util.UnoProperty;
@@ -130,13 +129,23 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   @Override
   public void addPALChangeEventListener(XPALChangeEventListener l)
   {
-    new OnAddPALChangeEventListener(l, null).emit();
+    SenderService.getInstance().addPALChangeEventListener(l);
   }
 
   @Override
   public void addPALChangeEventListenerWithConsistencyCheck(XPALChangeEventListener l, int wollmuxConfHashCode)
   {
-    new OnAddPALChangeEventListener(l, wollmuxConfHashCode).emit();
+    addPALChangeEventListener(l);
+
+    // Check if calling and my configuration are the same
+    int myWmConfHash = WollMuxFiles.getWollmuxConf().stringRepresentation().hashCode();
+    if (myWmConfHash != wollmuxConfHashCode)
+    {
+      InfoDialog.showInfoModal(L.m("WollMux-Fehler"),
+          L.m("Die Konfiguration des WollMux muss neu eingelesen werden.\n\n"
+              + "Bitte beenden Sie den WollMux und Office und schießen "
+              + "Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab."));
+    }
   }
 
   /**
@@ -164,7 +173,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   @Override
   public void removePALChangeEventListener(XPALChangeEventListener l)
   {
-    new OnRemovePALChangeEventListener(l).emit();
+    SenderService.getInstance().removePALChangeEventListener(l);
   }
 
   @Override
@@ -177,34 +186,16 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   public void setCurrentSender(String sender, short idx)
   {
     LOGGER.trace("WollMux.setCurrentSender(\"{}\", \"{}\")", sender, idx);
-    new OnSetSender(sender, idx).emit();
+    SenderService.getInstance().selectSender(sender, idx);
   }
 
   @Override
   public PropertyValue[] getInsertValues()
   {
-    // No synchronization with WollMuxEventHandler as reading isn't critical.
-    DatasourceJoiner dj = DatasourceJoinerFactory.getDatasourceJoiner();
     UnoProps p = new UnoProps();
-    try
+    for (Map.Entry<String, String> value : SenderService.getInstance().getCurrentSenderValues().entrySet())
     {
-      DJDataset ds = dj.getSelectedDataset();
-      dj.getMainDatasourceSchema().forEach(key -> {
-        try
-        {
-          String val = ds.get(key);
-          if (val != null)
-          {
-            p.setPropertyValue(key, val);
-          }
-        } catch (ColumnNotFoundException x1)
-        {
-          LOGGER.trace("", x1);
-        }
-      });
-    } catch (DatasetNotFoundException x)
-    {
-      LOGGER.trace("", x);
+      p.setPropertyValue(value.getKey(), value.getValue());
     }
     return p.getProps();
   }
@@ -212,18 +203,14 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   @Override
   public String getValue(String dbSpalte)
   {
-    // No synchronization with WollMuxEventHandler as reading isn't critical.
     try
     {
-      String value = DatasourceJoinerFactory.getDatasourceJoiner().getSelectedDatasetTransformed().get(dbSpalte);
-      if (value == null)
-        value = "";
-      return value;
-    } catch (java.lang.Exception e)
+      return SenderService.getInstance().getCurrentSenderValue(dbSpalte);
+    } catch (SenderException | ColumnNotFoundException e)
     {
-      LOGGER.error("", e);
-      return "";
+      LOGGER.error(e.getMessage(), e);
     }
+    return "";
   }
 
   @Deprecated(since = "10.8")

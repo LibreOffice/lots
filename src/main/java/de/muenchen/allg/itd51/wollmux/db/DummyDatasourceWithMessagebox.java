@@ -34,7 +34,7 @@ import java.util.Vector;
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class DummyDatasourceWithMessagebox implements Datasource
+public class DummyDatasourceWithMessagebox extends Datasource
 {
   private static QueryResults emptyResults = new QueryResultsList(
     new Vector<Dataset>(0));

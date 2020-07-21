@@ -87,14 +87,11 @@ import de.muenchen.allg.dialog.adapter.AbstractMouseListener;
 import de.muenchen.allg.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
-import de.muenchen.allg.itd51.wollmux.PersoenlicheAbsenderliste;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.dialog.UIElementType;
@@ -102,8 +99,7 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnAbout;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnDumpInfo;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnKill;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogAbsenderAuswaehlen;
+import de.muenchen.allg.itd51.wollmux.sender.SenderService;
 import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
 import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
@@ -197,6 +193,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
    */
   private Map<String, Runnable> searchActions;
 
+  private SenderService senderService;
+
   /**
    * Create the sidebar.
    *
@@ -209,6 +207,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
   {
     this.context = context;
     this.parentWindow = parentWindow;
+    senderService = SenderService.getInstance();
 
     menus = new HashMap<>();
     actions = new HashMap<>();
@@ -224,27 +223,6 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     };
     this.parentWindow.addWindowListener(windowAdapter);
     layout = new VerticalLayout(5, 5, 5, 5, 5);
-
-    DatasourceJoiner dj = DatasourceJoinerFactory.getDatasourceJoiner();
-
-    if (dj.getLOS().size() > 0)
-    {
-      // Liste der nicht zuordnenbaren Datensätze erstellen und ausgeben:
-      StringBuilder names = new StringBuilder();
-      List<String> lost = DatasourceJoinerFactory.getLostDatasetDisplayStrings();
-      if (!lost.isEmpty())
-      {
-        for (String l : lost)
-        {
-          names.append("- " + l + "\n");
-        }
-        String message = L.m("Die folgenden Datensätze konnten nicht " + "aus der Datenbank aktualisiert werden:\n\n"
-            + "%1\n" + "Wenn dieses Problem nicht temporärer "
-            + "Natur ist, sollten Sie diese Datensätze aus "
-            + "ihrer Absenderliste löschen und neu hinzufügen!", names);
-        InfoDialog.showInfoModal(this.parentWindow, L.m("WollMux-Info"), message);
-      }
-    }
 
     ConfigThingy conf = WollMuxFiles.getWollmuxConf();
 
@@ -727,9 +705,9 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
   private void createSenderbox(UIElementConfig uiSenderbox) throws com.sun.star.uno.Exception
   {
     String label = uiSenderbox.getLabel();
-    if (!PersoenlicheAbsenderliste.getInstance().getCurrentSender().isEmpty())
+    if (!senderService.getCurrentSender().isEmpty())
     {
-      label = PersoenlicheAbsenderliste.getInstance().getCurrentSender().split("§§%=%§§")[0];
+      label = senderService.getCurrentSender().split("§§%=%§§")[0];
     }
 
     SortedMap<String, Object> props = new TreeMap<>();
@@ -737,7 +715,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     XControl button = GuiFactory.createButton(UNO.xMCF, context, label, null, new Rectangle(0, 0, 100, 32), props);
     final XButton xbutton = UNO.XButton(button);
 
-    String[] palEntries = PersoenlicheAbsenderliste.getInstance().getPALEntries();
+    String[] palEntries = senderService.getPALEntries();
 
     final XPopupMenu menu = UNO
         .XPopupMenu(UnoComponent.createComponentWithContext("com.sun.star.awt.PopupMenu", xMCF, context));
@@ -757,7 +735,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
         {
           String name = menu.getCommand(event.MenuId);
           short pos = menu.getItemPos(event.MenuId);
-          new OnSetSender(name, pos).emit();
+          SenderService.getInstance().selectSender(name, pos);
         } catch (Exception e)
         {
           LOGGER.error("", e);
@@ -768,13 +746,13 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     short n = 0;
     for (String entry : palEntries)
     {
-      menu.insertItem((short) (n + 1), entry.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0], (short) 0,
-          (short) (n + 1));
+      menu.insertItem((short) (n + 1), entry.split(SenderService.SENDER_KEY_SEPARATOR)[0],
+          (short) 0, (short) (n + 1));
       menu.setCommand((short) (n + 1), entry);
       n++;
     }
 
-    PersoenlicheAbsenderliste.getInstance().addPALChangeEventListener(new XPALChangeEventListener()
+    senderService.addPALChangeEventListener(new XPALChangeEventListener()
     {
       @Override
       public void disposing(EventObject arg0)
@@ -786,18 +764,17 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
       public void updateContent(EventObject eventObject)
       {
 
-        String[] entries = PersoenlicheAbsenderliste.getInstance().getPALEntries();
-        String current = PersoenlicheAbsenderliste.getInstance().getCurrentSender();
+        String[] entries = senderService.getPALEntries();
+        String current = senderService.getCurrentSender();
 
-        xbutton.setLabel(current.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0]);
+        xbutton.setLabel(current.split(SenderService.SENDER_KEY_SEPARATOR)[0]);
         menu.clear();
 
         short n = 0;
         for (String entry : entries)
         {
-          menu.insertItem((short) (n + 1), entry.split(PersoenlicheAbsenderliste.SENDER_KEY_SEPARATOR)[0],
-              (short) 0,
-              (short) (n + 1));
+          menu.insertItem((short) (n + 1), entry.split(SenderService.SENDER_KEY_SEPARATOR)[0],
+              (short) 0, (short) (n + 1));
           menu.setCommand((short) (n + 1), entry);
           n++;
         }
@@ -866,7 +843,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     String action = config.getAction();
     if (action.equals("absenderAuswaehlen"))
     {
-      new OnShowDialogAbsenderAuswaehlen().emit();
+      senderService.showSelectSenderDialog();
     } else if (action.equals("openDocument"))
     {
       String fragId = config.getFragId();

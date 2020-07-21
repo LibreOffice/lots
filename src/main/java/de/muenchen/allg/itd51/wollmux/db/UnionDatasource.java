@@ -41,7 +41,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 /**
  * Datasource, die die Vereinigung 2er Datasources darstellt
  */
-public class UnionDatasource implements Datasource
+public class UnionDatasource extends Datasource
 {
   private Datasource source1;
 

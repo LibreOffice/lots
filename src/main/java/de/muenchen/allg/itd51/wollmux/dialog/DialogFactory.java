@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
+import de.muenchen.allg.itd51.wollmux.db.Datasources;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 public class DialogFactory
@@ -77,7 +77,7 @@ public class DialogFactory
         dialogsInBlock.add(name);
         try
         {
-          funcDialogs.add(name, new DatasourceSearchDialog(dialogConf, DatasourceJoinerFactory.getDatasourceJoiner()));
+          funcDialogs.add(name, new DatasourceSearchDialog(dialogConf, Datasources.getDatasources()));
         }
         catch (ConfigurationErrorException e)
         {

@@ -31,7 +31,7 @@ import java.util.Vector;
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class EmptyDatasource implements Datasource
+public class EmptyDatasource extends Datasource
 {
   private static QueryResults emptyResults =
     new QueryResultsList(new Vector<Dataset>(0));

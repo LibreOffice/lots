@@ -32,7 +32,7 @@ import java.util.function.Predicate;
 /**
  * Oberklasse für Datasources, die ihre Daten vollständig im Speicher halten
  */
-public class RAMDatasource implements Datasource
+public class RAMDatasource extends Datasource
 {
   /**
    * Das Schema dieser Datenquelle.

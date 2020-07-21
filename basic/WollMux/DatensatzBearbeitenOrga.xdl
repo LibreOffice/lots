@@ -22,15 +22,15 @@
   <dlg:textfield dlg:id="OrgaEmail" dlg:tab-index="15" dlg:left="82" dlg:top="110" dlg:width="250" dlg:height="12"/>
   <dlg:textfield dlg:id="OrgaTelefon" dlg:tab-index="17" dlg:left="82" dlg:top="125" dlg:width="250" dlg:height="12"/>
   <dlg:textfield dlg:id="OrgaFax" dlg:tab-index="19" dlg:left="82" dlg:top="140" dlg:width="250" dlg:height="12"/>
-  <dlg:button dlg:id="btnReferat" dlg:tab-index="0" dlg:visible="false" dlg:left="69" dlg:top="6" dlg:width="10" dlg:height="10" dlg:value="*"/>
-  <dlg:button dlg:id="btnOrgaKurz" dlg:tab-index="2" dlg:visible="false" dlg:left="69" dlg:top="21" dlg:width="10" dlg:height="10" dlg:value="*"/>
-  <dlg:button dlg:id="btnOrgaLang" dlg:tab-index="4" dlg:visible="false" dlg:left="69" dlg:top="36" dlg:width="10" dlg:height="10" dlg:value="*"/>
-  <dlg:button dlg:id="btnOrgaName" dlg:tab-index="6" dlg:visible="false" dlg:left="69" dlg:top="51" dlg:width="10" dlg:height="10" dlg:value="*"/>
-  <dlg:button dlg:id="btnPostanschrift" dlg:tab-index="8" dlg:visible="false" dlg:left="69" dlg:top="66" dlg:width="10" dlg:height="10" dlg:value="*"/>
-  <dlg:button dlg:id="btnPostPLZ" dlg:tab-index="10" dlg:visible="false" dlg:left="69" dlg:top="81" dlg:width="10" dlg:height="10" dlg:value="*"/>
-  <dlg:button dlg:id="btnPostOrt" dlg:tab-index="12" dlg:visible="false" dlg:left="69" dlg:top="96" dlg:width="10" dlg:height="10" dlg:value="*"/>
-  <dlg:button dlg:id="btnOrgaEmail" dlg:tab-index="14" dlg:visible="false" dlg:left="69" dlg:top="111" dlg:width="10" dlg:height="10" dlg:value="*"/>
-  <dlg:button dlg:id="btnOrgaTelefon" dlg:tab-index="16" dlg:visible="false" dlg:left="69" dlg:top="126" dlg:width="10" dlg:height="10" dlg:value="*"/>
-  <dlg:button dlg:id="btnOrgaFax" dlg:tab-index="18" dlg:visible="false" dlg:left="69" dlg:top="141" dlg:width="10" dlg:height="10" dlg:value="*"/>
+  <dlg:button dlg:id="btnReferat" dlg:tab-index="0" dlg:left="69" dlg:top="6" dlg:width="10" dlg:height="10" dlg:value="*"/>
+  <dlg:button dlg:id="btnOrgaKurz" dlg:tab-index="2" dlg:left="69" dlg:top="21" dlg:width="10" dlg:height="10" dlg:value="*"/>
+  <dlg:button dlg:id="btnOrgaLang" dlg:tab-index="4" dlg:left="69" dlg:top="36" dlg:width="10" dlg:height="10" dlg:value="*"/>
+  <dlg:button dlg:id="btnOrgaName" dlg:tab-index="6" dlg:left="69" dlg:top="51" dlg:width="10" dlg:height="10" dlg:value="*"/>
+  <dlg:button dlg:id="btnPostanschrift" dlg:tab-index="8" dlg:left="69" dlg:top="66" dlg:width="10" dlg:height="10" dlg:value="*"/>
+  <dlg:button dlg:id="btnPostPLZ" dlg:tab-index="10" dlg:left="69" dlg:top="81" dlg:width="10" dlg:height="10" dlg:value="*"/>
+  <dlg:button dlg:id="btnPostOrt" dlg:tab-index="12" dlg:left="69" dlg:top="96" dlg:width="10" dlg:height="10" dlg:value="*"/>
+  <dlg:button dlg:id="btnOrgaEmail" dlg:tab-index="14" dlg:left="69" dlg:top="111" dlg:width="10" dlg:height="10" dlg:value="*"/>
+  <dlg:button dlg:id="btnOrgaTelefon" dlg:tab-index="16" dlg:left="69" dlg:top="126" dlg:width="10" dlg:height="10" dlg:value="*"/>
+  <dlg:button dlg:id="btnOrgaFax" dlg:tab-index="18" dlg:left="69" dlg:top="141" dlg:width="10" dlg:height="10" dlg:value="*"/>
  </dlg:bulletinboard>
 </dlg:window>

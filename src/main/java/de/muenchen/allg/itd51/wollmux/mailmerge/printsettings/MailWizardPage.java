@@ -39,11 +39,11 @@ import de.muenchen.allg.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.dialog.adapter.AbstractXWizardPage;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.MailMergePrintFunction;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ui.MailMergeField;
+import de.muenchen.allg.itd51.wollmux.sender.SenderException;
+import de.muenchen.allg.itd51.wollmux.sender.SenderService;
 
 /**
  * A page of the mail merge wizard. Settings for mails can be done here.
@@ -99,8 +99,8 @@ public class MailWizardPage extends AbstractXWizardPage
     String senderName = "";
     try
     {
-      senderName = DatasourceJoinerFactory.getDatasourceJoiner().getSelectedDataset().get("Mail");
-    } catch (ColumnNotFoundException | DatasetNotFoundException e)
+      senderName = SenderService.getInstance().getCurrentSenderValue("Mail");
+    } catch (SenderException | ColumnNotFoundException e)
     {
       LOGGER.debug("Kein Eintrag für Mail vorhanden", e);
     }

@@ -43,7 +43,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
-public class FunkyDatasource implements Datasource
+public class FunkyDatasource extends Datasource
 {
   private Datasource source;
 
