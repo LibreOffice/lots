@@ -59,7 +59,7 @@ public class MockDataset implements DJDataset
     {
       return data.get(columnName);
     }
-    throw new ColumnNotFoundException();
+    throw new ColumnNotFoundException("");
   }
 
   @Override
