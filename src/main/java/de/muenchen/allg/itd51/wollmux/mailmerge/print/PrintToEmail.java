@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -44,11 +45,10 @@ import com.sun.star.lang.WrappedTargetException;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
-import de.muenchen.allg.itd51.wollmux.email.AuthenticationDialog;
-import de.muenchen.allg.itd51.wollmux.email.EMailSender;
-import de.muenchen.allg.itd51.wollmux.email.IAuthenticationDialogListener;
-import de.muenchen.allg.itd51.wollmux.email.MailServerSettings;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintException;
+import de.muenchen.allg.itd51.wollmux.mailmerge.mail.AuthenticationDialog;
+import de.muenchen.allg.itd51.wollmux.mailmerge.mail.EMailSender;
+import de.muenchen.allg.itd51.wollmux.mailmerge.mail.MailServerSettings;
 import de.muenchen.allg.itd51.wollmux.print.PrintModels;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
@@ -263,7 +263,7 @@ public abstract class PrintToEmail extends MailMergePrintFunction
       }
     }
 
-    IAuthenticationDialogListener authDialogListener = (String username, String password) -> {
+    BiConsumer<String, String> authDialogListener = (String username, String password) -> {
       if (username == null || password == null)
         return;
 
@@ -281,7 +281,9 @@ public abstract class PrintToEmail extends MailMergePrintFunction
 
     if ((smtpSettings.getUsername() != null && !smtpSettings.getUsername().isEmpty())
         && (smtpSettings.getPassword() == null || smtpSettings.getPassword().isEmpty()))
-      new AuthenticationDialog(smtpSettings.getUsername(), authDialogListener);
+    {
+      AuthenticationDialog.show(smtpSettings.getUsername(), authDialogListener);
+    }
     return smtpSettings;
   }
 

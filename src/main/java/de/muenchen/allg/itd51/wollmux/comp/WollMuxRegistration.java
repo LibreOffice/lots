@@ -45,7 +45,7 @@ public class WollMuxRegistration implements ComponentRegistration
   @Override
   public String[] getServiceNames()
   {
-    return WollMux.SERVICENAMES;
+    return new String[] { WollMux.SERVICENAME };
   }
 
 }
