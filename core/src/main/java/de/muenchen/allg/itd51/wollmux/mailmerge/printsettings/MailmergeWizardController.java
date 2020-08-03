@@ -26,7 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.PosSize;
+import com.sun.star.awt.WindowEvent;
 import com.sun.star.awt.XWindow;
+import com.sun.star.awt.Rectangle;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.ui.dialogs.ExecutableDialogResults;
 import com.sun.star.ui.dialogs.Wizard;
@@ -37,6 +39,7 @@ import com.sun.star.ui.dialogs.XWizardPage;
 import com.sun.star.util.InvalidStateException;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeRunner;
@@ -106,6 +109,11 @@ public class MailmergeWizardController implements XWizardController
 
   private TextDocumentController textDocumentController;
 
+  private boolean initSize = true;
+  private boolean sizeChanged = false;
+  private boolean pathChanged = false;
+  private Rectangle lastRectangle;
+
   /**
    * Create a new wizard controller.
    *
@@ -145,7 +153,6 @@ public class MailmergeWizardController implements XWizardController
   public XWizardPage createPage(XWindow parentWindow, short pageId)
   {
     LOGGER.debug("createPage with id {}", pageId);
-    parentWindow.setPosSize(0, 0, 650, 550, PosSize.SIZE);
     XWizardPage page = null;
     try
     {
@@ -188,6 +195,35 @@ public class MailmergeWizardController implements XWizardController
     LOGGER.debug("Aktiviere Page {} mit Titel {}", pageId, title[pageId]);
     pages[pageId].activatePage();
     updateTravelUI();
+    if(!sizeChanged)
+    {
+      wizard.getDialogWindow().setPosSize(0, 0, 900, 550, PosSize.SIZE);
+      lastRectangle = wizard.getDialogWindow().getPosSize();
+    }
+    else
+    {
+      wizard.getDialogWindow().setPosSize(0, 0, lastRectangle.Width, lastRectangle.Height, PosSize.SIZE);
+    }
+    if(initSize)
+    {
+      AbstractWindowListener windowAdapter = new AbstractWindowListener()
+      {
+        @Override
+        public void windowResized(WindowEvent e)
+        {
+          sizeChanged = true;
+          if(pathChanged)
+          {
+            wizard.getDialogWindow().setPosSize(0, 0, lastRectangle.Width, lastRectangle.Height, PosSize.SIZE);
+            pathChanged = false;
+          }
+          else
+            lastRectangle = wizard.getDialogWindow().getPosSize();
+        }
+      };
+      wizard.getDialogWindow().addWindowListener(windowAdapter);
+      initSize=false;
+    }
   }
 
   @Override
@@ -204,6 +240,7 @@ public class MailmergeWizardController implements XWizardController
     wizard = Wizard.createMultiplePathsWizard(UNO.defaultContext, paths, this);
     wizard.enableButton(WizardButton.HELP, false);
     wizard.setTitle("WollMux Seriendruck - Optionen");
+    
     short result = wizard.execute();
     if (result == ExecutableDialogResults.OK)
     {
@@ -233,6 +270,8 @@ public class MailmergeWizardController implements XWizardController
       try
       {
         wizard.activatePath((short) newPath.ordinal(), true);
+        lastRectangle = wizard.getDialogWindow().getPosSize();
+        pathChanged = true;
       } catch (NoSuchElementException | InvalidStateException e)
       {
         LOGGER.error("Seriendruck Dialog Pfad {} konnte nicht aktiviert werden", newPath);

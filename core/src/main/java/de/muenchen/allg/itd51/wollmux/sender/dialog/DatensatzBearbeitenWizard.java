@@ -27,7 +27,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.awt.PosSize;
+import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.XWindow;
+import com.sun.star.awt.WindowEvent;
 import com.sun.star.ui.dialogs.Wizard;
 import com.sun.star.ui.dialogs.WizardButton;
 import com.sun.star.ui.dialogs.XWizard;
@@ -36,6 +39,7 @@ import com.sun.star.ui.dialogs.XWizardPage;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.sender.Sender;
+import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
 
 /**
  * Wizard for modifying data sets.
@@ -48,6 +52,9 @@ public class DatensatzBearbeitenWizard implements XWizardController
   private Sender dataset;
   private List<String> dbSchema;
   private XWizard wizard;
+  private boolean initSize = true;
+  private int sizeChanged = 0;
+  private Rectangle lastRectangle;
 
   private static final short[] paths = { 0, 1, 2 };
 
@@ -129,6 +136,33 @@ public class DatensatzBearbeitenWizard implements XWizardController
     pages[arg0].activatePage();
     wizard.updateTravelUI();
     wizard.enableButton(WizardButton.HELP, false);
+    if(sizeChanged==0)
+    {
+      wizard.getDialogWindow().setPosSize(0, 0, 900, 550, PosSize.SIZE);
+      lastRectangle = wizard.getDialogWindow().getPosSize();
+    }
+    else
+    {
+      wizard.getDialogWindow().setPosSize(0, 0, lastRectangle.Width, lastRectangle.Height, PosSize.SIZE);
+    }
+    // No need for this with LO 6.1, as the dialog is not resizable in 6.1, but in LO 6.4
+    if(initSize)
+    {
+      AbstractWindowListener windowAdapter = new AbstractWindowListener()
+      {
+        @Override
+        public void windowResized(WindowEvent e)
+        {
+          sizeChanged ++;
+          if(sizeChanged>2)
+            lastRectangle = wizard.getDialogWindow().getPosSize();
+          else
+            wizard.getDialogWindow().setPosSize(0, 0, lastRectangle.Width, lastRectangle.Height, PosSize.SIZE);
+        }
+      };
+      wizard.getDialogWindow().addWindowListener(windowAdapter);
+      initSize=false;
+    }
   }
 
   @Override
