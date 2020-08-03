@@ -106,6 +106,8 @@ public class MailmergeWizardController implements XWizardController
 
   private TextDocumentController textDocumentController;
 
+  private boolean initSize = true;
+
   /**
    * Create a new wizard controller.
    *
@@ -145,7 +147,6 @@ public class MailmergeWizardController implements XWizardController
   public XWizardPage createPage(XWindow parentWindow, short pageId)
   {
     LOGGER.debug("createPage with id {}", pageId);
-    parentWindow.setPosSize(0, 0, 650, 550, PosSize.SIZE);
     XWizardPage page = null;
     try
     {
@@ -188,6 +189,11 @@ public class MailmergeWizardController implements XWizardController
     LOGGER.debug("Aktiviere Page {} mit Titel {}", pageId, title[pageId]);
     pages[pageId].activatePage();
     updateTravelUI();
+    if(initSize)
+    {
+      wizard.getDialogWindow().setPosSize(0, 0, 750, 550, PosSize.SIZE);
+      initSize = false;
+    }
   }
 
   @Override
@@ -204,6 +210,7 @@ public class MailmergeWizardController implements XWizardController
     wizard = Wizard.createMultiplePathsWizard(UNO.defaultContext, paths, this);
     wizard.enableButton(WizardButton.HELP, false);
     wizard.setTitle("WollMux Seriendruck - Optionen");
+    
     short result = wizard.execute();
     if (result == ExecutableDialogResults.OK)
     {

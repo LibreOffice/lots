@@ -27,6 +27,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
 import com.sun.star.ui.dialogs.Wizard;
 import com.sun.star.ui.dialogs.WizardButton;
@@ -48,6 +49,7 @@ public class DatensatzBearbeitenWizard implements XWizardController
   private Sender dataset;
   private List<String> dbSchema;
   private XWizard wizard;
+  private boolean initSize = true;
 
   private static final short[] paths = { 0, 1, 2 };
 
@@ -129,6 +131,11 @@ public class DatensatzBearbeitenWizard implements XWizardController
     pages[arg0].activatePage();
     wizard.updateTravelUI();
     wizard.enableButton(WizardButton.HELP, false);
+    if (initSize)
+    {
+      wizard.getDialogWindow().setPosSize(0, 0, 1000, 550, PosSize.SIZE);
+      initSize = false;
+    }
   }
 
   @Override
