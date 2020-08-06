@@ -236,10 +236,6 @@ public class SachleitendeVerfuegungenDruckdialog
       XCheckBox printOrder = UNO.XCheckBox(container.getControl("printOrderCheckbox"));
       AbstractItemListener printOrderListener = event -> printOrderAsc = printOrder.getState() == 0;
       printOrder.addItemListener(printOrderListener);
-      
-      XCheckBox collectBox = UNO.XCheckBox(container.getControl("collect"));
-      AbstractItemListener collectListener = event -> collect = collectBox.getState() == 1;
-      collectBox.addItemListener(collectListener);
 
       XButton abort = UNO.XButton(container.getControl("Abort"));
       AbstractActionListener abortListener = event -> {
@@ -249,9 +245,19 @@ public class SachleitendeVerfuegungenDruckdialog
       };
       abort.addActionListener(abortListener);
 
+      XButton collectButton = UNO.XButton(container.getControl("collectAll"));
+      AbstractActionListener collectAllListener = event -> {
+        action = CMD_SUBMIT;
+        collect = true;
+        config = new Triplet<>(settings, getPrintOrderAsc(), isCollect());
+        dialog.endExecute();
+      };
+      collectButton.addActionListener(collectAllListener);
+
       XButton print = UNO.XButton(container.getControl("PrintAll"));
       AbstractActionListener printAllListener = event -> {
         action = CMD_SUBMIT;
+        collect = false;
         config = new Triplet<>(settings, getPrintOrderAsc(), isCollect());
         dialog.endExecute();
       };

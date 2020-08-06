@@ -33,10 +33,13 @@ package de.muenchen.allg.itd51.wollmux.func;
 
 import java.awt.Desktop;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -49,11 +52,10 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.UnknownPropertyException;
-import com.sun.star.frame.XStorable;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XTextDocument;
-import com.sun.star.ucb.XFileIdentifierConverter;
+import com.sun.star.ui.dialogs.ExecutableDialogResults;
 import com.sun.star.ui.dialogs.FilePicker;
 import com.sun.star.ui.dialogs.TemplateDescription;
 import com.sun.star.ui.dialogs.XFilePicker3;
@@ -62,6 +64,7 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
@@ -140,6 +143,10 @@ public class StandardPrint
       {
         @SuppressWarnings("unchecked")
         List<File> collection = (List<File>) pmod.getProp(PROP_SLV_COLLECT, new ArrayList<File>());
+        if (collection.isEmpty())
+        {
+          return;
+        }
         PDFMergerUtility merger = new PDFMergerUtility();
         for (File doc : collection)
         {
@@ -147,27 +154,17 @@ public class StandardPrint
           merger.addSource(doc);
         }
 
-        XFilePicker3 picker = FilePicker.createWithMode(UNO.defaultContext, TemplateDescription.FILESAVE_AUTOEXTENSION);
-        String filterName = "PDF Dokument";
-        picker.appendFilter(filterName, "*.pdf");
-        picker.appendFilter("Alle Dateien", "*");
-        picker.setCurrentFilter(filterName);
-        short res = picker.execute();
-        if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)
+        File outputFile = Files.createTempFile("WollMux_SLV_", ".pdf").toFile();
+        merger.setDestinationFileName(outputFile.getAbsolutePath());
+        merger.mergeDocuments(null);
+        pmod.setPropertyValue(PrintFunction.PROP_PRINT_RESULT_FILE, outputFile);
+        PrintFunction showFileFunc = GlobalFunctions.getInstance().getGlobalPrintFunctions().get("ShowDocument");
+        if (showFileFunc != null)
         {
-          String[] files = picker.getFiles();
-          XFileIdentifierConverter xFileConverter = UnoRuntime.queryInterface(XFileIdentifierConverter.class,
-              UNO.createUNOService("com.sun.star.ucb.FileContentProvider"));
-          String outputFile = xFileConverter.getSystemPathFromFileURL(files[0]);
-          merger.setDestinationFileName(outputFile);
-          merger.mergeDocuments(null);
-          Desktop.getDesktop().open(new File(outputFile));
-        } else
-        {
-          InfoDialog.showInfoModal("Sachleitende Verfügungen drucken",
-              "PDF Dokument mit allen Ausdrucken wurde nicht gespeichert.");
+          showFileFunc.invoke(pmod);
         }
-      } catch (java.io.IOException e)
+      } catch (java.io.IOException | IllegalArgumentException | UnknownPropertyException | PropertyVetoException
+          | WrappedTargetException e)
       {
         LOGGER.error("PDF Dokumente konnten nicht zusammengefügt werden.", e);
         InfoDialog.showInfoModal("Sachleitende Verfügungen drucken",
@@ -184,8 +181,8 @@ public class StandardPrint
       List<File> collection = (List<File>) pmod.getProp(PROP_SLV_COLLECT, new ArrayList<File>());
       File outputFile = Files.createTempFile("WollMux_SLV_", ".pdf").toFile();
       UnoProps props = new UnoProps("FilterName", "writer_pdf_Export");
-      XStorable doc = UNO.XStorable(pmod.getProp(PrintFunction.PROP_PRINT_RESULT, pmod.getTextDocument()));
-      doc.storeToURL(UNO.convertFilePathToURL(outputFile.getAbsolutePath()), props.getProps());
+      XTextDocument doc = UNO.XTextDocument(pmod.getProp(PrintFunction.PROP_PRINT_RESULT, pmod.getTextDocument()));
+      UNO.XStorable(doc).storeToURL(UNO.convertFilePathToURL(outputFile.getAbsolutePath()), props.getProps());
       collection.add(outputFile);
       pmod.setPropertyValue(PROP_SLV_COLLECT, collection);
     } catch (IllegalArgumentException | UnknownPropertyException | PropertyVetoException | WrappedTargetException
@@ -323,25 +320,45 @@ public class StandardPrint
 
   public static void oooMailMergeToPdfFile(final XPrintModel pmod) throws Exception
   {
-    XFilePicker3 picker = FilePicker.createWithMode(UNO.defaultContext, TemplateDescription.FILESAVE_AUTOEXTENSION);
-    String filterName = "PDF Dokument";
-    picker.appendFilter(filterName, "*.pdf");
-    picker.appendFilter("Alle Dateien", "*");
-    picker.setCurrentFilter(filterName);
-    short res = picker.execute();
-    if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)
+    File outputFile = Files.createTempFile("WollMux_SLV_", ".pdf").toFile();
+    UnoProps props = new UnoProps("FilterName", "writer_pdf_Export");
+    XTextDocument doc = UNO.XTextDocument(pmod.getProp(PrintFunction.PROP_PRINT_RESULT, pmod.getTextDocument()));
+    UNO.XStorable(doc).storeToURL(UNO.convertFilePathToURL(outputFile.getAbsolutePath()), props.getProps());
+    pmod.setPropertyValue(PrintFunction.PROP_PRINT_RESULT_FILE, outputFile);
+    pmod.printWithProps();
+  }
+
+  public static void showDocument(final XPrintModel pmod) throws Exception
+  {
+    try
     {
-      String[] files = picker.getFiles();
-      Path outputPath = Paths.get(new URI(files[0]));
-      UnoProps props = new UnoProps("FilterName", "writer_pdf_Export");
-      XStorable result = UNO
-          .XStorable(pmod.getProp(PrintFunction.PROP_PRINT_RESULT, pmod.getTextDocument()));
-      result.storeToURL(files[0], props.getProps());
-      LOGGER.debug("Öffne erzeugtes Gesamtdokument {}", outputPath);
-      Desktop.getDesktop().open(outputPath.toFile());
-    } else
+      File file = (File) pmod.getProp(PrintFunction.PROP_PRINT_RESULT_FILE, null);
+      if (file != null)
+      {
+        XFilePicker3 picker = FilePicker.createWithMode(UNO.defaultContext, TemplateDescription.FILESAVE_AUTOEXTENSION);
+        String filterName = "PDF Dokument";
+        picker.appendFilter(filterName, "*.pdf");
+        picker.appendFilter("Alle Dateien", "*");
+        picker.setCurrentFilter(filterName);
+        short res = picker.execute();
+        if (res == ExecutableDialogResults.OK)
+        {
+          String[] files = picker.getFiles();
+          Path outputPath = Paths.get(new URI(files[0]));
+          Files.move(file.toPath(), outputPath, StandardCopyOption.REPLACE_EXISTING);
+          LOGGER.debug("Öffne erzeugtes Gesamtdokument {}", outputPath);
+          Desktop.getDesktop().open(outputPath.toFile());
+        } else
+        {
+          InfoDialog.showInfoModal("WollMux", "Dokument konnte nicht angezeigt werden.");
+        }
+      } else
+      {
+        InfoDialog.showInfoModal("WollMux", "Dokument konnte nicht angezeigt werden.");
+      }
+    } catch (IOException | URISyntaxException e)
     {
-      InfoDialog.showInfoModal("WollMux Seriendruck", "PDF Dokument konnte nicht angezeigt werden.");
+      LOGGER.error("", e);
     }
   }
 
@@ -525,10 +542,11 @@ public class StandardPrint
 
     OOoMailMergeToOdtFile("oooMailMergeToOdtFile", 200),
 
-    OOoMailMergeToShowOdtFile("oooMailMergeToShowOdtFile",
-        350),
+    OOoMailMergeToPdfFile("oooMailMergeToPdfFile", 210),
 
-    OOoMailMergeToPdfFile("oooMailMergeToPdfFile", 210);
+    OOoMailMergeToShowOdtFile("oooMailMergeToShowOdtFile", 350),
+
+    ShowDocument("showDocument", 400);
 
     private String intMethodName;
 

@@ -225,6 +225,7 @@ public class MailMergeController
       ignoreDocPrintFuncs = false;
       usePrintFunctions.add("OOoMailMergeToOdtFile");
       usePrintFunctions.add("OOoMailMergeToPdfFile");
+      usePrintFunctions.add("ShowDocument");
       break;
     case DIRECT:
       ignoreDocPrintFuncs = false;
