@@ -40,7 +40,7 @@ public class DatensatzBearbeitenPersonWizardPage extends DatensatzBearbeitenBase
       anredeTextComponent.setText(dataset.get("Anrede") == null ? "" : dataset.get("Anrede"));
 
       anredeComboBox.removeItems((short) 0, anredeComboBox.getItemCount());
-      anredeComboBox.addItems(new String[] { "Herr", "Frau" }, (short) 0);
+      anredeComboBox.addItems(new String[] { "Herr", "Frau", "" }, (short) 0);
 
       anredeComboBox.addItemListener(itemListener);
 
