@@ -24,6 +24,7 @@
     <dlg:menupopup>
       <dlg:menuitem dlg:value="Herr"/>
       <dlg:menuitem dlg:value="Frau"/>
+      <!-- empty option is added via code because empty values are discarded during import in LO -->
    </dlg:menupopup>
   </dlg:combobox>
   <dlg:textfield dlg:id="Vorname" dlg:tab-index="6" dlg:left="82" dlg:top="20" dlg:width="250" dlg:height="12"/>
