@@ -135,23 +135,22 @@ public class ContentBasedDirectivePrint extends PrintFunction
       // Handle Collection
       if (collect)
       {
-        collectPrints(printModel);
-        PrintFunction showFileFunc = GlobalFunctions.getInstance().getGlobalPrintFunctions().get("ShowDocument");
-        if (showFileFunc != null)
-        {
-          showFileFunc.print(printModel);
-        }
+        collectPrintsAndShowResult(printModel);
       }
     }
   }
 
-  private void collectPrints(XPrintModel printModel)
+  private void collectPrintsAndShowResult(XPrintModel printModel) throws PrintException
   {
     try
     {
       @SuppressWarnings("unchecked")
       List<File> collection = (List<File>) printModel.getProp(ContentBasedDirectivePrint.PROP_SLV_COLLECT,
           new ArrayList<File>());
+      if (collection.isEmpty())
+      {
+        return;
+      }
       PDFMergerUtility merger = new PDFMergerUtility();
       for (File doc : collection)
       {
@@ -162,6 +161,11 @@ public class ContentBasedDirectivePrint extends PrintFunction
       merger.setDestinationFileName(outputFile.getAbsolutePath());
       merger.mergeDocuments(null);
       printModel.setPropertyValue(PrintFunction.PRINT_RESULT_FILE, outputFile);
+      PrintFunction showFileFunc = GlobalFunctions.getInstance().getGlobalPrintFunctions().get("ShowDocument");
+      if (showFileFunc != null)
+      {
+        showFileFunc.print(printModel);
+      }
     } catch (IOException | IllegalArgumentException | UnknownPropertyException | PropertyVetoException
         | WrappedTargetException e)
     {
