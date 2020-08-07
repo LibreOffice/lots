@@ -33,26 +33,23 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.sun.star.awt.Key;
+import com.sun.star.awt.KeyEvent;
 import com.sun.star.awt.MessageBoxResults;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XContainerWindowProvider;
 import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XDialog;
-import com.sun.star.awt.XExtendedToolkit;
-import com.sun.star.awt.XKeyHandler;
+import com.sun.star.awt.XKeyListener;
 import com.sun.star.awt.XListBox;
 import com.sun.star.awt.XTextComponent;
-import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
 import com.sun.star.lang.EventObject;
 import com.sun.star.ui.dialogs.ExecutableDialogResults;
-import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
 import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.db.AsyncLdapSearch;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
@@ -60,8 +57,8 @@ import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
-import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
+import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnPALChangedNotify;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
@@ -114,8 +111,6 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private short itemToHighlightPos = 0;
 
-  private boolean palListeHasFocus = false;
-
   /**
    * Erzeugt einen neuen Dialog.
    *
@@ -162,31 +157,23 @@ public class PersoenlicheAbsenderlisteVerwalten
         "vnd.sun.star.script:WollMux.pal_dialog?location=application", "", peer, null);
     window.addWindowListener(xWindowListener);
 
-    XToolkit xToolkit = null;
-    try
-    {
-      xToolkit = UNO.XToolkit(
-          UNO.xMCF.createInstanceWithContext("com.sun.star.awt.Toolkit", UNO.defaultContext));
-    } catch (Exception e)
-    {
-      LOGGER.error("", e);
-    }
-
-    XExtendedToolkit extToolkit = UNO.XExtendedToolkit(xToolkit);
-    extToolkit.addKeyHandler(keyHandler);
-
     XControlContainer controlContainer = UNO.XControlContainer(window);
 
     palListe = UNO.XListBox(controlContainer.getControl("palListe"));
     palListe.setMultipleMode(true);
+    UNO.XWindow(palListe).addKeyListener(deleteSenderListener);
 
     searchResultList = UNO.XListBox(controlContainer.getControl("searchResultList"));
     searchResultList.setMultipleMode(true);
 
     txtFieldNachname = UNO.XTextComponent(controlContainer.getControl("txtNachname"));
+    UNO.XWindow(txtFieldNachname).addKeyListener(startSearchListener);
     txtFieldVorname = UNO.XTextComponent(controlContainer.getControl("txtVorname"));
+    UNO.XWindow(txtFieldVorname).addKeyListener(startSearchListener);
     txtFieldEMail = UNO.XTextComponent(controlContainer.getControl("txtEmail"));
+    UNO.XWindow(txtFieldEMail).addKeyListener(startSearchListener);
     txtFieldOrga = UNO.XTextComponent(controlContainer.getControl("txtOrga"));
+    UNO.XWindow(txtFieldOrga).addKeyListener(startSearchListener);
 
     searchBtn = UNO.XButton(controlContainer.getControl("btnSearch"));
     searchBtn.addActionListener(startSearchBtnActionListener);
@@ -220,21 +207,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     addToPalBtn.addActionListener(addToPalActionListener);
 
     addPalEntriesToListBox();
-
-    UNO.XWindow(palListe).addFocusListener(new AbstractFocusListener()
-    {
-      @Override
-      public void focusGained(com.sun.star.awt.FocusEvent event)
-      {
-        palListeHasFocus = true;
-      }
-
-      @Override
-      public void focusLost(com.sun.star.awt.FocusEvent event)
-      {
-        palListeHasFocus = false;
-      }
-    });
 
     dialog = UNO.XDialog(window);
     dialog.execute();
@@ -284,7 +256,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     palListe.selectItemPos(itemToHighlightPos, true);
   }
 
-  private XKeyHandler keyHandler = new XKeyHandler()
+  private XKeyListener startSearchListener = new XKeyListener()
   {
     @Override
     public void disposing(EventObject arg0)
@@ -293,26 +265,47 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
 
     @Override
-    public boolean keyReleased(com.sun.star.awt.KeyEvent arg0)
+    public void keyReleased(KeyEvent event)
     {
-      if (arg0.KeyCode == Key.RETURN)
+      if (event.KeyCode == Key.RETURN)
       {
         // visuelle Rückmeldung. Fokusiert den Suchknopf beim Drücken von Return.
         // Suchknopf wird je nach OS-Theme farbig markiert.
         XWindow xWnd = UNO.XWindow(searchBtn);
 
-        if (xWnd == null)
-          return false;
+        if (xWnd != null)
+        {
+          xWnd.setFocus();
 
-        xWnd.setFocus();
+          AsyncLdapSearch ldapSearchAsync = new AsyncLdapSearch(buildSearchQuery(),
+              DatasourceJoinerFactory.getDatasourceJoiner());
+          ldapSearchAsync.runLdapSearchAsync().thenAcceptAsync(result -> {
+            setLdapSearchResults(result);
+            showInfoDialog(result);
+          });
+        }
+      }
+    }
 
-        AsyncLdapSearch ldapSearchAsync = new AsyncLdapSearch(buildSearchQuery(),
-            DatasourceJoinerFactory.getDatasourceJoiner());
-        ldapSearchAsync.runLdapSearchAsync().thenAcceptAsync(result -> {
-          setLdapSearchResults(result);
-          showInfoDialog(result);
-        });
-      } else if (arg0.KeyCode == Key.DELETE && palListeHasFocus)
+    @Override
+    public void keyPressed(com.sun.star.awt.KeyEvent arg0)
+    {
+      // nothing to do
+    }
+  };
+
+  private XKeyListener deleteSenderListener = new XKeyListener()
+  {
+    @Override
+    public void disposing(EventObject arg0)
+    {
+      // unused
+    }
+
+    @Override
+    public void keyReleased(KeyEvent event)
+    {
+      if (event.KeyCode == Key.DELETE)
       {
         // Einträge aus PAL-Listbox entfernen
         short[] selectedItems = palListe.getSelectedItemsPos();
@@ -342,14 +335,12 @@ public class PersoenlicheAbsenderlisteVerwalten
 
         new OnPALChangedNotify().emit();
       }
-
-      return true;
     }
 
     @Override
-    public boolean keyPressed(com.sun.star.awt.KeyEvent arg0)
+    public void keyPressed(com.sun.star.awt.KeyEvent arg0)
     {
-      return false;
+      // nothing to do
     }
   };
 

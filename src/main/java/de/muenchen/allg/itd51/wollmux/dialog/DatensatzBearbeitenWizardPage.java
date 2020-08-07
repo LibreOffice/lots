@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.MessageBoxResults;
 import com.sun.star.awt.XButton;
+import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XControlModel;
@@ -111,6 +112,16 @@ public class DatensatzBearbeitenWizardPage extends AbstractXWizardPage
 
         if (xTextComponent == null)
           continue;
+
+        // TODO LO allow import of empty values in MenuPopupElement::startChildElement
+        if ("Anrede".equals(columnName))
+        {
+          XComboBox comboBox = UNO.XComboBox(xTextComponent);
+          if (comboBox != null)
+          {
+            comboBox.addItem("", comboBox.getItemCount());
+          }
+        }
 
         xTextComponent.setText(dataset.get(columnName) == null ? "" : dataset.get(columnName));
       }
