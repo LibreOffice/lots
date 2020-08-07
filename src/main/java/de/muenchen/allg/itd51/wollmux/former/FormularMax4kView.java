@@ -716,7 +716,7 @@ public class FormularMax4kView extends JFrame
     
     final URL EMPFAENGER_TAB_URL =
       this.getClass().getClassLoader().getResource(
-        "data/empfaengerauswahl_controls.conf");
+            "default_buttons/empfaengerauswahl_controls.conf");
     
     menuItem.addActionListener(new ActionListener()
     {
@@ -732,7 +732,7 @@ public class FormularMax4kView extends JFrame
     menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, Weiter->"));
     
     final URL STANDARD_BUTTONS_MIDDLE_URL =
-        this.getClass().getClassLoader().getResource("data/standardbuttons_mitte.conf");
+        this.getClass().getClassLoader().getResource("default_buttons/standardbuttons_mitte.conf");
 
     menuItem.addActionListener(new ActionListener()
     {
@@ -749,7 +749,7 @@ public class FormularMax4kView extends JFrame
     
     final URL STANDARD_BUTTONS_LAST_URL =
       this.getClass().getClassLoader().getResource(
-        "data/standardbuttons_letztes.conf");
+            "default_buttons/standardbuttons_letztes.conf");
     
     menuItem.addActionListener(new ActionListener()
     {
@@ -766,7 +766,7 @@ public class FormularMax4kView extends JFrame
     
     final URL STANDARD_BUTTONS_EMAIL =
     	      this.getClass().getClassLoader().getResource(
-    	        "data/standardbuttons_email.conf");
+            "default_buttons/standardbuttons_email.conf");
     	    
     	    menuItem.addActionListener(new ActionListener()
     	    {
