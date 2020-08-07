@@ -19,8 +19,24 @@ The following applications have to be installed to compile WollMux:
 * [Git](http://git-scm.com/downloads/)
 * [LibreOffice SDK](https://api.libreoffice.org/docs/install.html)
 
-Perform the following commands to download the sources and build the LibreOffice extension. Special dependencies of WollMux are hosted at
-[Bintray](https://bintray.com/wollmux/WollMux), which is already configured as maven repository in pom.xml
+Afterwards the property `UNO_PATH` has to be set in the maven settings.
+* open `~\.m2\settings.xml`
+* add a profile
+
+```
+<profile>
+  <id>UNO</id>
+  <activation>
+    <activeByDefault>true</activeByDefault>
+  </activation>
+  <properties>
+    <UNO_PATH>/opt/libreoffice/program</UNO_PATH>
+  </properties>
+</profile>
+```
+* `<UNO_PATH>` is the folder, where the LibreOffice executable is located (eg. /opt/libreoffice/program)
+
+Perform the following commands to download the sources and build the LibreOffice extension. Special dependencies of WollMux are hosted at [Bintray](https://bintray.com/wollmux/WollMux), which is already configured as maven repository in pom.xml
 
 ```
 git clone https://github.com/WollMux/WollMux.git

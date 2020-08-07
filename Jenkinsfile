@@ -25,7 +25,6 @@ pipeline {
           mavenLocalRepo: '.repo',
           mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
           publisherStrategy: 'EXPLICIT') {
-          sh "mvn org.apache.maven.plugins:maven-enforcer-plugin:3.0.0-M3:enforce -Drules=requireReleaseDeps"
           sh "mvn -DskipTests -DdryRun clean package"
         }
       }
@@ -54,7 +53,7 @@ pipeline {
               publisherStrategy: 'EXPLICIT') {
               withSonarQubeEnv('SonarQube') {
               sh "mvn $SONAR_MAVEN_GOAL \
-                -Dsonar.host.url=$SONAR_HOST_URL \
+                -Dsonar.projectKey=de.muenchen:wollmux \
                 -Dsonar.branch.name=${GIT_BRANCH} \
                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
                 -Dsonar.junit.reportPaths=target/surefire-reports"
@@ -69,7 +68,7 @@ pipeline {
               publisherStrategy: 'EXPLICIT') {
               withSonarQubeEnv('SonarQube') {
               sh "mvn $SONAR_MAVEN_GOAL \
-                -Dsonar.host.url=$SONAR_HOST_URL \
+                -Dsonar.projectKey=de.muenchen:wollmux \
                 -Dsonar.branch.name=${GIT_BRANCH} \
                 -Dsonar.branch.target=${env.CHANGE_TARGET} \
                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
