@@ -4,9 +4,6 @@ localizedConfigStrings.conf
 oxt/WollMux.rdb
 idl/de/muenchen/allg/itd51/wollmux/*.urd
 idl/de/muenchen/allg/itd51/wollmux/*.class
-bin/de
-bin/data
-bin/com
 dist/WollMux.oxt
 dist/WollMux.uno.pkg
 dist/WollMuxBar.jar
