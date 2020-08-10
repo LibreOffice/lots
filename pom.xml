@@ -65,17 +65,6 @@
     </testResources>
     <plugins>
       <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>2.6.1</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>dist</directory>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
         <version>2.0.0</version>
@@ -222,7 +211,6 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.5.5</version>
         <configuration>
-          <outputDirectory>dist</outputDirectory>
           <recompressZippedFiles>true</recompressZippedFiles>
         </configuration>
         <executions>
@@ -282,7 +270,7 @@
             <phase>prepare-package</phase>
             <configuration>
               <target>
-                <copy file="dist/WollMux.zip" tofile="dist/WollMux.oxt" />
+                <copy file="target/WollMux.zip" tofile="target/WollMux.oxt" />
               </target>
             </configuration>
             <goals>
@@ -320,7 +308,7 @@
               <target>
                 <echo level="info">unopkg add:</echo>
                 <exec executable="unopkg" failifexecutionfails="false">
-                  <arg line="add -f -env:UserInstallation=file://${office.user.profile} dist/WollMux.oxt" />
+                  <arg line="add -f -env:UserInstallation=file://${office.user.profile} target/WollMux.oxt" />
                 </exec>
                 <replaceregexp>
                   <regexp pattern="&lt;vmParameters xsi:nil=&quot;true&quot;/&gt;" />
@@ -641,7 +629,6 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <version>2.5.5</version>
             <configuration>
-              <outputDirectory>dist</outputDirectory>
               <recompressZippedFiles>true</recompressZippedFiles>
             </configuration>
             <executions>
@@ -673,10 +660,10 @@
                 </goals>
                 <configuration>
                   <target>
-                    <move file="dist/WollMux_ButtonsOnly.zip" tofile="dist/WollMux_ButtonsOnly.oxt" />
+                    <move file="target/WollMux_ButtonsOnly.zip" tofile="target/WollMux_ButtonsOnly.oxt" />
                     <echo level="info">unopkg add:</echo>
                     <exec executable="unopkg" failifexecutionfails="false">
-                      <arg line="add -f dist/WollMux_ButtonsOnly.oxt" />
+                      <arg line="add -f target/WollMux_ButtonsOnly.oxt" />
                     </exec>
 
                     <tstamp>

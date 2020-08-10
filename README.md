@@ -28,7 +28,7 @@ git checkout WollMux_18.2
 mvn clean package
 ```
 
-The compiled extension can be found at dist/WollMux.oxt
+The compiled extension can be found at target/WollMux.oxt
 
 ### Build errors
 * **There are files with header to update**: Some of the source files don't have a license header. The header can be updated with:
@@ -45,7 +45,7 @@ WollMux.oxt extension is not installed in LibreOffice, but is loaded from extern
 mvn -P ButtonsOnly generate-sources
 ```
 
-and the extension is build and installed, if the program `unopkg` is availble. Otherwise you have to manually install the extension, which can be found at dist/WollMux_ButtonsOnly.oxt.
+and the extension is build and installed, if the program `unopkg` is availble. Otherwise you have to manually install the extension, which can be found at target/WollMux_ButtonsOnly.oxt.
 
 Activate the maven profile "development" in Project > Properties > Maven > Active Maven Profiles.
 
