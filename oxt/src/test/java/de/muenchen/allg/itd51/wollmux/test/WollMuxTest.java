@@ -22,10 +22,13 @@
  */
 package de.muenchen.allg.itd51.wollmux.test;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
 import org.jacoco.core.data.ExecutionDataWriter;
@@ -33,6 +36,9 @@ import org.jacoco.core.runtime.RemoteControlReader;
 import org.jacoco.core.runtime.RemoteControlWriter;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.star.document.EventObject;
 import com.sun.star.document.XEventListener;
@@ -42,28 +48,44 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
-import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.util.UnoComponent;
 
-public abstract class WollMuxTest extends OfficeTest
+@Tag("de.muenchen.allg.itd51.wollmux.test.WollMuxTest")
+public abstract class WollMuxTest
 {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(WollMuxTest.class);
+  private static final Properties prop = new Properties();
   protected static XWollMux wollmux;
 
   @BeforeAll
-  public static void initWollMux() throws Exception
+  public static void initUNO() throws Exception
   {
-    wollmux = UnoRuntime.queryInterface(XWollMux.class,
-        UnoComponent.createComponentWithContext(WollMux.SERVICENAME));
+    try
+    {
+      ArrayList<String> options = new ArrayList<>();
+      options.add("--headless");
+      options.add("--norestore");
+      options.add("--nocrashreport");
+      options.add("--nolockcheck");
+      prop.load(WollMuxTest.class.getClassLoader().getResourceAsStream("libreoffice.properties"));
+      options.add("-env:UserInstallation=file://" + prop.getProperty("office.profile"));
+      UNO.init(options);
+      wollmux = UnoRuntime.queryInterface(XWollMux.class,
+          UnoComponent.createComponentWithContext("de.muenchen.allg.itd51.wollmux.WollMux"));
+    } catch (Exception e)
+    {
+      fail("Can't start office", e);
+    }
   }
 
   @AfterAll
-  public static void dumpJacoco() throws Exception
+  public static void shutDown() throws Exception
   {
-    try (FileOutputStream localFile = new FileOutputStream("/srv/WollMux/WollMux/target/jacoco-office.exec",
-        true);
-        Socket socket = new Socket(InetAddress.getByName("localhost"), 6300);)
+    try (FileOutputStream localFile = new FileOutputStream(prop.getProperty("jacoco.report.file"), true);
+        Socket socket = new Socket(InetAddress.getByName("localhost"),
+            Integer.parseInt(prop.getProperty("jacoco.report.port")));)
     {
       ExecutionDataWriter localWriter = new ExecutionDataWriter(localFile);
       RemoteControlWriter writer = new RemoteControlWriter(socket.getOutputStream());
@@ -74,8 +96,12 @@ public abstract class WollMuxTest extends OfficeTest
       writer.visitDumpCommand(true, false);
       if (!reader.read())
       {
-        throw new IOException("Socket closed unexpectedly.");
+        fail("Socket closed unexpectedly.");
       }
+    }
+    if (!UNO.desktop.terminate())
+    {
+      fail();
     }
   }
 
@@ -114,7 +140,7 @@ public abstract class WollMuxTest extends OfficeTest
         }
       }
     });
-    OfficeTest.loadComponent(filename, template, hidden);
+    UNO.loadComponentFromURL(filename, template, false, hidden);
     return future;
   }
 

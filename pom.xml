@@ -2,7 +2,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
   <groupId>de.muenchen</groupId>
   <artifactId>wollmux-parent</artifactId>
   <version>18.2.0-SNAPSHOT</version>
@@ -26,6 +26,7 @@
   <modules>
     <module>core.xml</module>
     <module>idl</module>
+    <module>oxt</module>
   </modules>
 
   <scm>
@@ -45,30 +46,6 @@
   </repositories>
 
   <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-      <resource>
-        <directory>src/main/resources</directory>
-        <includes>
-          <include>*.properties</include>
-        </includes>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
-    <testResources>
-      <testResource>
-        <directory>src/test/resources</directory>
-      </testResource>
-      <testResource>
-        <directory>src/test/resources</directory>
-        <includes>
-          <include>*.properties</include>
-        </includes>
-        <filtering>true</filtering>
-      </testResource>
-    </testResources>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -113,11 +90,6 @@
           <version>2.0.0</version>
           <configuration>
             <licenseName>eupl_v1_1</licenseName>
-            <roots>
-              <root>src/main</root>
-              <root>src/test</root>
-            </roots>
-            <extraExtensions><idl>java</idl></extraExtensions>
             <inceptionYear>2005</inceptionYear>
             <organizationName>Landeshauptstadt München</organizationName>
             <trimHeaderLine>true</trimHeaderLine>
@@ -128,7 +100,7 @@
           </configuration>
           <executions>
             <execution>
-              <id>first</id>
+              <id>check-file-header</id>
               <goals>
                 <goal>update-file-header</goal>
               </goals>
@@ -143,32 +115,6 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.1.2</version>
-          <executions>
-            <execution>
-              <id>include-rdb</id>
-              <phase>generate-resources</phase>
-              <goals>
-                <goal>copy</goal>
-              </goals>
-              <configuration>
-                <artifactItems>
-                  <artifactItem>
-                    <groupId>de.muenchen</groupId>
-                    <artifactId>wollmux-interfaces</artifactId>
-                    <version>${project.version}</version>
-                    <type>rdb</type>
-                    <outputDirectory>${basedir}/oxt</outputDirectory>
-                    <destFileName>WollMux.rdb</destFileName>
-                  </artifactItem>
-                </artifactItems>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
           <version>3.2.1</version>
           <executions>
@@ -180,6 +126,28 @@
               </goals>
             </execution>
           </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>3.3.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>3.0.0</version>
+          <dependencies>
+            <dependency>
+              <groupId>ant-contrib</groupId>
+              <artifactId>ant-contrib</artifactId>
+              <version>20020829</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.2.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -201,125 +169,6 @@
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>0.8.5</version>
-          <executions>
-            <execution>
-              <id>prepare-agent-report</id>
-              <goals>
-                <goal>prepare-agent</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>report</id>
-              <phase>test</phase>
-              <goals>
-                <goal>report</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>prepare-agent-integration-report</id>
-              <goals>
-                <goal>prepare-agent-integration</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>prepare-agent-integration-report-office</id>
-              <goals>
-                <goal>prepare-agent-integration</goal>
-              </goals>
-              <configuration>
-                <address>localhost</address>
-                <output>tcpserver</output>
-                <port>6300</port>
-                <propertyName>jacocoOffice</propertyName>
-              </configuration>
-            </execution>
-            <execution>
-              <id>report-integration-test</id>
-              <phase>post-integration-test</phase>
-              <goals>
-                <goal>merge</goal>
-                <goal>report</goal>
-              </goals>
-              <configuration>
-                <fileSets>
-                  <fileSet>
-                    <directory>${project.build.directory}</directory>
-                    <includes>
-                      <include>*.exec</include>
-                    </includes>
-                  </fileSet>
-                </fileSets>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-assembly-plugin</artifactId>
-          <version>3.3.0</version>
-          <configuration>
-            <recompressZippedFiles>true</recompressZippedFiles>
-          </configuration>
-          <executions>
-            <execution>
-              <id>assemble-wollmuxbar</id>
-              <phase>prepare-package</phase>
-              <goals>
-                <goal>single</goal>
-              </goals>
-              <configuration>
-                <finalName>WollMuxBar</finalName>
-                <appendAssemblyId>false</appendAssemblyId>
-                <attach>false</attach>
-                <archive>
-                  <addMavenDescriptor>false</addMavenDescriptor>
-                  <manifest>
-                    <addClasspath>false</addClasspath>
-                    <classpathPrefix>lib/</classpathPrefix>
-                  </manifest>
-                  <manifestEntries>
-                    <Multi-Release>true</Multi-Release>
-                    <RegistrationClassName>de.muenchen.allg.itd51.wollmux.ComponentRegistration</RegistrationClassName>
-                    <Main-Class>com.sun.star.lib.loader.Loader</Main-Class>
-                    <UNO-Type-Path>&lt;&gt;</UNO-Type-Path>
-                  </manifestEntries>
-                </archive>
-                <archiverConfig>
-                  <compress>false</compress>
-                </archiverConfig>
-                <descriptors>
-                  <descriptor>misc/assembly.xml</descriptor>
-                </descriptors>
-              </configuration>
-            </execution>
-            <execution>
-              <id>assemble-oxt</id>
-              <phase>prepare-package</phase>
-              <goals>
-                <goal>single</goal>
-              </goals>
-              <configuration>
-                <finalName>WollMux</finalName>
-                <appendAssemblyId>false</appendAssemblyId>
-                <attach>false</attach>
-                <descriptors>
-                  <descriptor>misc/assembly-oxt.xml</descriptor>
-                </descriptors>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-antrun-plugin</artifactId>
-          <version>3.0.0</version>
-          <dependencies>
-            <dependency>
-              <groupId>ant-contrib</groupId>
-              <artifactId>ant-contrib</artifactId>
-              <version>20020829</version>
-            </dependency>
-          </dependencies>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -331,7 +180,6 @@
               <additionalClasspathElement>${UNO_PATH}/classes/libreoffice.jar</additionalClasspathElement>
               <additionalClasspathElement>${UNO_PATH}/classes/unoloader.jar</additionalClasspathElement>
             </additionalClasspathElements>
-            <excludedGroups>de.muenchen.allg.itd51.wollmux.test.OfficeTest</excludedGroups>
             <systemPropertyVariables>
               <WOLLMUX_CONF_PATH>${wollmux.test.conf}</WOLLMUX_CONF_PATH>
             </systemPropertyVariables>
@@ -356,7 +204,7 @@
               <additionalClasspathElement>${UNO_PATH}/classes/libreoffice.jar</additionalClasspathElement>
               <additionalClasspathElement>${UNO_PATH}/classes/unoloader.jar</additionalClasspathElement>
             </additionalClasspathElements>
-            <groups>de.muenchen.allg.itd51.wollmux.test.OfficeTest</groups>
+            <groups>de.muenchen.allg.itd51.wollmux.test.WollMuxTest</groups>
             <includes>
               <include>*.java</include>
             </includes>
@@ -512,68 +360,6 @@
       <properties>
         <wollmux.oxt.id>de.muenchen.allg.d101.wollmux.debug</wollmux.oxt.id>
       </properties>
-    </profile>
-    <profile>
-      <id>ButtonsOnly</id>
-      <properties>
-        <wollmux.oxt.id>de.muenchen.allg.d101.wollmux.debug</wollmux.oxt.id>
-        <wollmux.oxt.name>WollMux-ButtonsOnly</wollmux.oxt.name>
-      </properties>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <version>3.2.0</version>
-            <configuration>
-              <recompressZippedFiles>true</recompressZippedFiles>
-            </configuration>
-            <executions>
-              <execution>
-                <id>buttons-only</id>
-                <phase>generate-sources</phase>
-                <goals>
-                  <goal>single</goal>
-                </goals>
-                <configuration>
-                  <finalName>WollMux_ButtonsOnly</finalName>
-                  <appendAssemblyId>false</appendAssemblyId>
-                  <descriptors>
-                    <descriptor>misc/assembly-buttons-only.xml</descriptor>
-                  </descriptors>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <version>1.8</version>
-            <executions>
-              <execution>
-                <id>buttons-only</id>
-                <phase>generate-sources</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <target>
-                    <move file="target/WollMux_ButtonsOnly.zip" tofile="target/WollMux_ButtonsOnly.oxt" />
-                    <echo level="info">unopkg add:</echo>
-                    <exec executable="unopkg" failifexecutionfails="false">
-                      <arg line="add -f target/WollMux_ButtonsOnly.oxt" />
-                    </exec>
-
-                    <tstamp>
-                      <format property="mytime" pattern="HH:mm:ss" />
-                    </tstamp>
-                    <echo level="info" message="Install finished at ">${mytime}</echo>
-                  </target>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
     </profile>
     <profile>
       <id>release</id>

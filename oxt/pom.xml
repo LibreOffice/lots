@@ -1,0 +1,321 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>de.muenchen</groupId>
+    <artifactId>wollmux-parent</artifactId>
+    <version>18.2.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <properties>
+    <jacoco.report.file>${project.build.directory}/jacoco-office.exec</jacoco.report.file>
+  </properties>
+
+  <artifactId>wollmux-oxt</artifactId>
+  <name>WollMux LibreOffice Extension</name>
+
+  <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <includes>
+          <include>*.properties</include>
+        </includes>
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>reserve-jacoco-port</id>
+            <goals>
+              <goal>reserve-network-port</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <portNames>jacoco.report.port</portNames>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>prepare-agent-integration-report-office</id>
+            <goals>
+              <goal>prepare-agent-integration</goal>
+            </goals>
+            <configuration>
+              <address>localhost</address>
+              <output>tcpserver</output>
+              <port>${jacoco.report.port}</port>
+              <propertyName>jacocoOffice</propertyName>
+            </configuration>
+          </execution>
+          <execution>
+            <id>prepare-agent-integration-report</id>
+            <goals>
+              <goal>prepare-agent-integration</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report-integration-test</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>report-aggregate</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+              <fileSets>
+                <fileSet>
+                  <directory>${project.build.directory}</directory>
+                  <includes>
+                    <include>*.exec</include>
+                  </includes>
+                </fileSet>
+              </fileSets>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <recompressZippedFiles>true</recompressZippedFiles>
+        </configuration>
+        <executions>
+          <execution>
+            <id>assemble-oxt</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <finalName>WollMux</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+              <descriptors>
+                <descriptor>assembly-oxt.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>oxt</id>
+            <phase>prepare-package</phase>
+            <configuration>
+              <target>
+                <copy file="${project.build.directory}/WollMux.zip" tofile="${project.build.directory}/WollMux.oxt" />
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>download-config</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <taskdef resource="net/sf/antcontrib/antcontrib.properties" />
+                <if>
+                  <not>
+                    <available file="${project.build.directory}/config/.wollmux/wollmux.conf" />
+                  </not>
+                  <then>
+                    <get src="${wollmux.test.conf.url}${wollmux.test.conf.release}"
+                      dest="${project.build.directory}" />
+                    <untar src="${project.build.directory}/wollmux-config-18.1.0.tar.gz"
+                      dest="${project.build.directory}/config" compression="gzip" />
+                  </then>
+                </if>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install-wollmux</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <echo level="info">unopkg add:</echo>
+                <mkdir dir="${office.user.profile}" />
+                <exec executable="${UNO_PATH}/unopkg" failifexecutionfails="false">
+                  <arg line="add -f -env:UserInstallation=file://${office.user.profile} ${project.build.directory}/WollMux.oxt" />
+                </exec>
+                <replaceregexp>
+                  <regexp pattern="&lt;vmParameters xsi:nil=&quot;true&quot;/&gt;" />
+                  <substitution
+                    expression="&lt;vmParameters xsi:nil=&quot;false&quot;&gt;${line.separator} &lt;param&gt;-DWOLLMUX_CONF_PATH=${wollmux.test.conf}&lt;/param&gt;${line.separator} &lt;param&gt;-Dlog4j2.configurationFile=file://${project.build.testOutputDirectory}/log4j2.xml&lt;/param&gt;${line.separator} &lt;param&gt;${jacocoOffice}&lt;/param&gt;${line.separator} &lt;/vmParameters&gt; " />
+                  <fileset dir="${office.user.profile}/user/config">
+                    <include name="javasettings*.xml" />
+                  </fileset>
+                </replaceregexp>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <!--This plugin's configuration is used to store Eclipse m2e settings
+          only. It has no influence on the Maven build itself. -->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <versionRange>[1.8,)</versionRange>
+                    <goals>
+                      <goal>reserve-network-port</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute />
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>de.muenchen</groupId>
+          <artifactId>wollmux</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>de.muenchen</groupId>
+          <artifactId>wollmux-interfaces</artifactId>
+          <version>${project.version}</version>
+          <type>rdb</type>
+        </dependency>
+        <dependency>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>junit-jupiter-engine</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.jacoco</groupId>
+          <artifactId>org.jacoco.core</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>ButtonsOnly</id>
+      <properties>
+        <wollmux.oxt.id>de.muenchen.allg.d101.wollmux.debug</wollmux.oxt.id>
+        <wollmux.oxt.name>WollMux-ButtonsOnly</wollmux.oxt.name>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <configuration>
+              <recompressZippedFiles>true</recompressZippedFiles>
+            </configuration>
+            <executions>
+              <execution>
+                <id>buttons-only</id>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <finalName>WollMux_ButtonsOnly</finalName>
+                  <appendAssemblyId>false</appendAssemblyId>
+                  <descriptors>
+                    <descriptor>assembly-buttons-only.xml</descriptor>
+                  </descriptors>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>buttons-only</id>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <move file="${project.build.directory}/WollMux_ButtonsOnly.zip" tofile="${project.build.directory}/WollMux_ButtonsOnly.oxt" />
+                    <echo level="info">unopkg add:</echo>
+                    <exec executable="${UNO_PATH}/unopkg" failifexecutionfails="false">
+                      <arg line="add -f ${project.build.directory}/WollMux_ButtonsOnly.oxt" />
+                    </exec>
+
+                    <tstamp>
+                      <format property="mytime" pattern="HH:mm:ss" />
+                    </tstamp>
+                    <echo level="info" message="Install finished at ">${mytime}</echo>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

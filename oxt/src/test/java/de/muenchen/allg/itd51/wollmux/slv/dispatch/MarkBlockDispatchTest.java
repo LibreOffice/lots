@@ -24,10 +24,7 @@ package de.muenchen.allg.itd51.wollmux.slv.dispatch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 
@@ -40,9 +37,6 @@ import com.sun.star.text.XTextViewCursor;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoDictionary;
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
-import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.InvalidCommandException;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveConfig;
 import de.muenchen.allg.itd51.wollmux.slv.PrintBlockSignature;
 import de.muenchen.allg.itd51.wollmux.test.WollMuxTest;
@@ -52,9 +46,7 @@ public class MarkBlockDispatchTest extends WollMuxTest
 {
 
   @Test
-  public void testMarkBlock()
-      throws InvalidCommandException, UnoHelperException, InterruptedException, ExecutionException, TimeoutException,
-      IOException, SyntaxErrorException
+  public void testMarkBlock() throws Exception
   {
     XComponent comp = loadAsyncComponent("private:factory/swriter", false, true).get(5, TimeUnit.SECONDS);
     wollmux.getWollMuxDocument(UNO.XComponent(comp));

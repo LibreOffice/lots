@@ -1,0 +1,46 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
+  <id>oxt</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>src/main/oxt</directory>
+      <outputDirectory>.</outputDirectory>
+      <filtered>true</filtered>
+      <includes>
+        <include>Sidebar.xcu</include>
+        <include>description.xml</include>
+        <include>META-INF/manifest.xml</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>src/main/oxt</directory>
+      <outputDirectory>.</outputDirectory>
+      <includes>
+        <include>*.xcu</include>
+        <!-- <include>*.rdb</include> -->
+        <include>help/component*.txt</include>
+        <include>icons/*</include>
+        <include>image/*</include>
+        <include>basic/**/*</include>
+      </includes>
+      <excludes>
+        <exclude>Sidebar.xcu</exclude>
+      </excludes>
+    </fileSet>
+  </fileSets>
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>lib</outputDirectory>
+      <useProjectArtifact>false</useProjectArtifact>
+      <excludes>
+        <exclude>org.libreoffice:*</exclude>
+      </excludes>
+      <useStrictFiltering>true</useStrictFiltering>
+    </dependencySet>
+  </dependencySets>
+</assembly>

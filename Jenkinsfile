@@ -56,11 +56,11 @@ pipeline {
                 -Dsonar.projectKey=de.muenchen:wollmux \
                 -Dsonar.branch.name=${GIT_BRANCH} \
                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-                -Dsonar.junit.reportPaths=target/surefire-reports"
+                -Dsonar.junit.reportPaths=target/surefire-reports,target/failsafe-reports"
               }
             }
           } else {
-            archiveArtifacts artifacts: 'target/WollMux.oxt'
+            archiveArtifacts artifacts: 'oxt/target/WollMux.oxt'
             withMaven(
               maven: 'mvn',
               mavenLocalRepo: '.repo',
@@ -71,8 +71,8 @@ pipeline {
                 -Dsonar.projectKey=de.muenchen:wollmux \
                 -Dsonar.branch.name=${GIT_BRANCH} \
                 -Dsonar.branch.target=${env.CHANGE_TARGET} \
-                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-                -Dsonar.junit.reportPaths=target/surefire-reports"
+                -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco/jacoco.xml \
+                -Dsonar.junit.reportPaths=target/surefire-reports,target/failsafe-reports"
               }
             }
             timeout(time: 1, unit: 'HOURS') {
