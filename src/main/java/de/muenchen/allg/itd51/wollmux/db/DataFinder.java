@@ -46,6 +46,12 @@ public abstract class DataFinder
 
   private DatasourceJoiner dsj;
 
+  /**
+   * Create a finder.
+   *
+   * @param dsj
+   *          The data source to scan.
+   */
   public DataFinder(DatasourceJoiner dsj)
   {
     this.dsj = dsj;
@@ -104,18 +110,19 @@ public abstract class DataFinder
    */
   public QueryResults find(List<Pair<String, String>> query)
   {
+    List<Pair<String, String>> evaluatedQuery = new ArrayList<>(query.size());
     for (Pair<String, String> pair : query)
     {
-      LOGGER.trace(this.getClass().getSimpleName() + ".find(" + pair.getKey() + ", "
-          + pair.getValue() + ")");
+      LOGGER.trace("{}.find({}, {})", this.getClass().getSimpleName(), pair.getKey(), pair.getValue() + ")");
 
       if (pair.getKey() == null || evaluate(pair.getKey()).isEmpty())
       {
         return null;
       }
+      evaluatedQuery.add(ImmutablePair.of(evaluate(pair.getKey()), evaluate(pair.getValue())));
     }
 
-    return dsj.find(dsj.buildQuery(query));
+    return dsj.find(dsj.buildQuery(evaluatedQuery));
   }
 
   /**
@@ -131,20 +138,25 @@ public abstract class DataFinder
    */
   protected String evaluate(String exp)
   {
-    final Pattern VAR_PATTERN = Pattern.compile("\\$\\{([^\\}]*)\\}");
+    final Pattern pattern = Pattern.compile("\\$\\{([^\\}]*)\\}");
     while (true)
     {
-      Matcher m = VAR_PATTERN.matcher(exp);
+      Matcher m = pattern.matcher(exp);
       if (!m.find())
         break;
       String key = m.group(1);
       String value = getValueForKey(key);
-      // keine Variablenbegrenzer "${" und "}" in value zulassen:
-      value = value.replaceAll("\\$\\{", "<");
-      value = value.replaceAll("\\}", ">");
+      value = replaceVariableBoundaries(value);
       exp = m.replaceFirst(value);
     }
     return exp;
+  }
+
+  private String replaceVariableBoundaries(String value)
+  {
+    value = value.replaceAll("\\$\\{", "<");
+    value = value.replaceAll("\\}", ">");
+    return value;
   }
 
 }

@@ -1490,7 +1490,7 @@ public class LDAPDatasource implements Datasource
     {
       if (!schema.contains(columnName))
       {
-        throw new ColumnNotFoundException();
+        throw new ColumnNotFoundException(L.m("Spalte \"%1\" ist nicht im Schema", columnName));
       }
 
       return relation.get(columnName);

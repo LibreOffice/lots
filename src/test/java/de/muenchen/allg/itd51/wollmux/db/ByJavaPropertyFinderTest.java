@@ -22,17 +22,21 @@
  */
 package de.muenchen.allg.itd51.wollmux.db;
 
-/**
- * Wird geworfen beim Versuch, auf eine Spalte zuzugreifen, die nicht existiert.
- * 
- * @author Matthias Benkmann (D-III-ITD 5.1)
- */
-public class ColumnNotFoundException extends Exception
-{
-  private static final long serialVersionUID = -5096388185337055277L;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-  public ColumnNotFoundException(String message)
+import org.junit.jupiter.api.Test;
+
+public class ByJavaPropertyFinderTest
+{
+
+  @Test
+  void testJavaPropertyFinder()
   {
-    super(message);
+    DataFinder dataFinder = new ByJavaPropertyFinder(null);
+    assertFalse(dataFinder.getValueForKey("java.home").isEmpty());
+    assertNull(dataFinder.getValueForKey("unknown"));
+    assertTrue(dataFinder.getValueForKey(null).isEmpty());
   }
 }
