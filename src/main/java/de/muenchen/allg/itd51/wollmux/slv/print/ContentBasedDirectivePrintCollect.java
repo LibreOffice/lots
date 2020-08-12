@@ -24,7 +24,6 @@ package de.muenchen.allg.itd51.wollmux.slv.print;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,18 +32,16 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.UnknownPropertyException;
-import com.sun.star.frame.XStorable;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.WrappedTargetException;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.document.text.TextDocument;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.util.L;
-import de.muenchen.allg.util.UnoProperty;
 
 /**
  * Print function for collecting all content based directive prints. Each content based directive is
@@ -71,10 +68,9 @@ public class ContentBasedDirectivePrintCollect extends PrintFunction
       @SuppressWarnings("unchecked")
       List<File> collection = (List<File>) printModel.getProp(ContentBasedDirectivePrint.PROP_SLV_COLLECT,
           new ArrayList<File>());
-      File outputFile = Files.createTempFile("WollMux_SLV_", ".pdf").toFile();
-      UnoProps props = new UnoProps(UnoProperty.FILTER_NAME, "writer_pdf_Export");
-      XStorable doc = UNO.XStorable(printModel.getProp(PrintFunction.PRINT_RESULT, printModel.getTextDocument()));
-      doc.storeToURL(UNO.convertFilePathToURL(outputFile.getAbsolutePath()), props.getProps());
+      TextDocument doc = new TextDocument(
+          UNO.XTextDocument(printModel.getProp(PrintFunction.PRINT_RESULT, printModel.getTextDocument())));
+      File outputFile = doc.saveAsTemporaryPDF();
       collection.add(outputFile);
       printModel.setPropertyValue(ContentBasedDirectivePrint.PROP_SLV_COLLECT, collection);
     } catch (IllegalArgumentException | UnknownPropertyException | PropertyVetoException | WrappedTargetException

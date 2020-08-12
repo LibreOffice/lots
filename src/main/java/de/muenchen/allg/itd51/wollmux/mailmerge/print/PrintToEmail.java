@@ -171,8 +171,8 @@ public abstract class PrintToEmail extends MailMergePrintFunction
     try
     {
       EMailSender mail = new EMailSender();
-      mail.createNewMultipartMail(from, to, replaceTextByMergeFieldValue(subject, ds),
-          replaceTextByMergeFieldValue(message, ds));
+      mail.createNewMultipartMail(from, to, replaceMergeFieldInText(ds, subject),
+          replaceMergeFieldInText(ds, message));
 
       MailServerSettings smtpSettings = getMailServerSettings(pmod, mail);
 

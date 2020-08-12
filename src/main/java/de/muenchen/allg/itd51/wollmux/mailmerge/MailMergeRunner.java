@@ -232,6 +232,7 @@ public class MailMergeRunner implements Runnable
         ignoreDocPrintFuncs = false;
         pmod.usePrintFunction("OOoMailMergeToOdtFile");
         pmod.usePrintFunction("OOoMailMergeToPdfFile");
+        pmod.usePrintFunction("ShowDocument");
         break;
       case DIRECT:
         ignoreDocPrintFuncs = false;

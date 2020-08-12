@@ -10,3 +10,4 @@ de.muenchen.allg.itd51.wollmux.mailmerge.print.ToPrinter
 de.muenchen.allg.itd51.wollmux.mailmerge.print.ToShowOdtFile
 de.muenchen.allg.itd51.wollmux.mailmerge.print.ToSingleODT
 de.muenchen.allg.itd51.wollmux.mailmerge.print.ToSinglePDF
+de.muenchen.allg.itd51.wollmux.print.ShowDocument

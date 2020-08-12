@@ -23,6 +23,8 @@
 package de.muenchen.allg.itd51.wollmux.print;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -54,18 +56,15 @@ public class PrintFunctionLibraryTest
   {
     PrintFunctionLibrary library = new PrintFunctionLibrary();
     PrintFunction.addPrintFunctions(library);
-    assertEquals(12, library.getFunctionNames().size(), "Not enough print functions");
+    assertEquals(13, library.getFunctionNames().size(), "Not enough print functions");
   }
 
   @Test
   public void testAddPrintFunction()
   {
     PrintFunctionLibrary library = new PrintFunctionLibrary();
-    assertThrows(NullPointerException.class, () -> library.add("test", null),
-        "No function was given");
-    assertThrows(NullPointerException.class,
-        () -> library.add(null, testFunction),
-        "No name was given");
+    assertThrows(NullPointerException.class, () -> library.add("test", null), "No function was given");
+    assertThrows(NullPointerException.class, () -> library.add(null, testFunction), "No name was given");
   }
 
   @Test
@@ -78,17 +77,16 @@ public class PrintFunctionLibraryTest
     Set<String> names = library.getFunctionNames();
     assertTrue(names.contains("baseTest"), "Missing base function name");
     assertTrue(names.contains("libraryTest"), "Missing library function name");
-    assertTrue(library.get("test") == null, "Contains undefined method");
-    assertTrue(library.get("baseTest") != null, "Missing base function");
-    assertTrue(library.get("libraryTest") != null, "Missing library function");
+    assertNull(library.get("test"), "Contains undefined method");
+    assertNotNull(library.get("baseTest"), "Missing base function");
+    assertNotNull(library.get("libraryTest"), "Missing library function");
   }
 
   @Test
   public void testParsePrintFunctions() throws Exception
   {
-    PrintFunctionLibrary library = PrintFunctionLibrary
-        .parsePrintFunctions(new ConfigThingy("test", confString));
-    assertTrue(library.get("TestFunction") != null, "Missing function by parser");
+    PrintFunctionLibrary library = PrintFunctionLibrary.parsePrintFunctions(new ConfigThingy("test", confString));
+    assertNotNull(library.get("TestFunction"), "Missing function by parser");
   }
 
 }
