@@ -22,6 +22,8 @@
  */
 package de.muenchen.allg.itd51.wollmux.test;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -65,7 +67,10 @@ public abstract class OfficeTest
   @AfterAll
   public static void terminateDesktop() throws Exception
   {
-    UNO.desktop.terminate();
+    if (!UNO.desktop.terminate())
+    {
+      fail();
+    }
   }
 
   /**

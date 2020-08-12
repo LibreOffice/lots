@@ -24,7 +24,7 @@
   </properties>
 
   <modules>
-    <module>core.xml</module>
+    <module>core</module>
     <module>idl</module>
     <module>oxt</module>
   </modules>
@@ -221,14 +221,14 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.openjfx</groupId>
-        <artifactId>javafx-graphics</artifactId>
-        <version>16-ea+1</version>
+        <groupId>de.muenchen</groupId>
+        <artifactId>wollmux-interfaces</artifactId>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>jakarta.mail</groupId>
-        <artifactId>jakarta.mail-api</artifactId>
-        <version>1.6.5</version>
+        <groupId>de.muenchen</groupId>
+        <artifactId>wollmux</artifactId>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.libreoffice</groupId>
@@ -246,9 +246,14 @@
         <version>4.0.0</version>
       </dependency>
       <dependency>
-        <groupId>de.muenchen</groupId>
-        <artifactId>wollmux-interfaces</artifactId>
-        <version>${project.version}</version>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-graphics</artifactId>
+        <version>16-ea+1</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.mail</groupId>
+        <artifactId>jakarta.mail-api</artifactId>
+        <version>1.6.5</version>
       </dependency>
       <dependency>
         <groupId>net.java.dev.jna</groupId>

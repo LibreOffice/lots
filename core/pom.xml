@@ -1,13 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
   <parent>
     <groupId>de.muenchen</groupId>
     <artifactId>wollmux-parent</artifactId>
     <version>18.2.0-SNAPSHOT</version>
-    <relativePath>./pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>wollmux</artifactId>
@@ -58,7 +56,6 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.5</version>
         <executions>
           <execution>
             <id>prepare-agent-report</id>
@@ -85,7 +82,6 @@
               <addClasspath>true</addClasspath>
             </manifest>
             <manifestEntries>
-              <Multi-Release>true</Multi-Release>
               <RegistrationClassName>de.muenchen.allg.itd51.wollmux.ComponentRegistration</RegistrationClassName>
               <Main-Class>com.sun.star.lib.loader.Loader</Main-Class>
               <UNO-Type-Path>&lt;&gt;</UNO-Type-Path>
@@ -102,12 +98,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-graphics</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>jakarta.mail</groupId>
-      <artifactId>jakarta.mail-api</artifactId>
+      <groupId>de.muenchen</groupId>
+      <artifactId>wollmux-interfaces</artifactId>
     </dependency>
     <dependency>
       <groupId>org.libreoffice</groupId>
@@ -122,8 +114,12 @@
       <artifactId>unohelper</artifactId>
     </dependency>
     <dependency>
-      <groupId>de.muenchen</groupId>
-      <artifactId>wollmux-interfaces</artifactId>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-graphics</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.mail</groupId>
+      <artifactId>jakarta.mail-api</artifactId>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
