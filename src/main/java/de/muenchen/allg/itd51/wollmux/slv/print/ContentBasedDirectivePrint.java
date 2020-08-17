@@ -136,6 +136,7 @@ public class ContentBasedDirectivePrint extends PrintFunction
       {
         collectPrintsAndShowResult(printModel);
       }
+      model.adoptNumbers();
     }
   }
 
