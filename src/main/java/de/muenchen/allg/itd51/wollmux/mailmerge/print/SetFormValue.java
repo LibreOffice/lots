@@ -40,8 +40,8 @@ import com.sun.star.lang.WrappedTargetException;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
-import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.SimulationResults.SimulationResultsProcessor;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintException;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 
@@ -145,10 +145,12 @@ public class SetFormValue extends PrintFunction
     }
 
     int mailMergeNumber = 1;
+    documentController.setFormFieldsPreviewMode(true);
     for (int sel : selection)
     {
       if (pmod.isCanceled())
       {
+        documentController.setFormFieldsPreviewMode(false);
         return;
       }
 
@@ -169,8 +171,7 @@ public class SetFormValue extends PrintFunction
       dataSetExport.put(TAG_MAILMERGE_ID, "" + mailMergeNumber);
 
       // Pass to next print function, if there is no simProc. Otherwise
-      // processing is done by
-      // simProc.
+      // processing is done by simProc.
       if (simProc == null)
       {
         pmod.printWithProps();
@@ -182,5 +183,7 @@ public class SetFormValue extends PrintFunction
       pmod.setPrintProgressValue((short) mailMergeNumber);
       ++mailMergeNumber;
     }
+
+    documentController.setFormFieldsPreviewMode(false);
   }
 }
