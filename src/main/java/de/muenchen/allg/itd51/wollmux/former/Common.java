@@ -488,7 +488,7 @@ public class Common
   {
     try
     {
-      URL url = Common.class.getClassLoader().getResource("data/wollmux_icon32x32.png");
+      URL url = Common.class.getClassLoader().getResource("wollmux_icon32x32.png");
       
       if (url == null) {
         LOGGER.error("Could not retrieve Image from resource.");
