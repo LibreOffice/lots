@@ -103,7 +103,7 @@ public class OnProcessTextDocument extends BasicEvent
         // FormGUI starten
         try
         {
-          FormController formController = documentController.getFormController();
+          FormController formController = documentController.getFormController(visible);
           formController.createFormGUI();
           formController.formControllerInitCompleted();
         } catch (FormModelException e)

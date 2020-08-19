@@ -55,6 +55,11 @@ public class FormController
   private final TextDocumentController documentController;
 
   /**
+   * Is the document visible?
+   */
+  private final boolean documentVisible;
+
+  /**
    * Die default Einstellung des LibreOffice-Fensters bevor die GUI geöffnet wird.
    */
   private String defaultWindowAttributes;
@@ -109,11 +114,13 @@ public class FormController
    * @param documentController
    *          Der LibreOffice-Controller.
    */
-  public FormController(final FormModel model, final ConfigThingy formFensterConf, final TextDocumentController documentController)
+  public FormController(final FormModel model, final ConfigThingy formFensterConf,
+      final TextDocumentController documentController, final boolean documentVisible)
   {
     gui = new GUI(this, model, formFensterConf);
     this.model = model;
     this.documentController = documentController;
+    this.documentVisible = documentVisible;
     // Standard-Fensterattribute vor dem Start der Form-GUI sichern um nach
     // dem Schließen des Formulardokuments die Standard-Werte wieder
     // herstellen zu können. Die Standard-Attribute ändern sich (OOo-seitig)
@@ -286,7 +293,7 @@ public class FormController
 
   public void showFormGUI()
   {
-    gui.show(true);
+    gui.show(documentVisible);
   }
 
   /**

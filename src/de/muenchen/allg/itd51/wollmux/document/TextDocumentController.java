@@ -2423,7 +2423,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     return formModel;
   }
 
-  public FormController getFormController() throws FormModelException
+  public FormController getFormController(boolean documentVisible) throws FormModelException
   {
     FormController formController = DocumentManager.getDocumentManager()
         .getFormModel(getModel().doc);
@@ -2439,7 +2439,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       {
         formFensterConf = new ConfigThingy("");
       }
-      formController = new FormController(getFormModel(), formFensterConf, this);
+      formController = new FormController(getFormModel(), formFensterConf, this, documentVisible);
       DocumentManager.getDocumentManager().setFormModel(getModel().doc, formController);
     }
     return formController;
