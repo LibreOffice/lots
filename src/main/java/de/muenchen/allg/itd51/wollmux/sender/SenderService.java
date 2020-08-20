@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -65,7 +64,6 @@ import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.sender.dialog.AbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.sender.dialog.PersoenlicheAbsenderlisteVerwalten;
 
 /**
@@ -527,52 +525,9 @@ public class SenderService implements XPALProvider
   }
 
   /**
-   * Show the dialog for selecting a sender and handle its return value.
-   */
-  public void showSelectSenderDialog()
-  {
-    AbsenderAuswaehlen dialog = new AbsenderAuswaehlen(getAllSender());
-    short result = dialog.execute();
-    if (result == ExecutableDialogResults.OK)
-    {
-      int index = -1;
-      Map<String, Integer> keys = new HashMap<>();
-      for (Sender sender : data)
-      {
-        int i = keys.compute(sender.getKey(), (k, v) -> v == null ? 0 : v++);
-        if (sender.equals(selectedSender))
-        {
-          index = i;
-          break;
-        }
-      }
-      try
-      {
-        selectByKeyAndIndex(dialog.getSelectedSender().getKey(), index);
-      } catch (SenderException e)
-      {
-        LOGGER.error(e.getMessage(), e);
-        InfoDialog.showInfoModal("WollMux", "Sender konnte nicht ausgewählt werden");
-      }
-    }
-  }
-
-  /**
    * Show the dialog for managing the sender list.
    */
   public void showManageSenderListDialog()
-  {
-    showManageSenderListDialog(l -> {
-    });
-  }
-
-  /**
-   * Show the dialog for managing the sender list.
-   * 
-   * @param listener
-   *          The listener
-   */
-  public void showManageSenderListDialog(Consumer<List<Sender>> listener)
   {
     PersoenlicheAbsenderlisteVerwalten dialog = new PersoenlicheAbsenderlisteVerwalten(getAllSender());
     dialog.execute();

@@ -39,19 +39,17 @@ public class SenderDispatcher extends Dispatcher
    */
   public SenderDispatcher()
   {
-    super(AbsenderAuswaehlenDispatch.COMMAND, PALVerwaltenDispatch.COMMAND);
+    super(PALVerwaltenDispatch.COMMAND);
   }
 
   @Override
   public WollMuxDispatch create(XDispatch origDisp, URL origUrl, XFrame frame)
   {
-    switch (getDispatchMethodName(origUrl))
+    if (PALVerwaltenDispatch.COMMAND.equals(getDispatchMethodName(origUrl)))
     {
-    case AbsenderAuswaehlenDispatch.COMMAND:
-      return new AbsenderAuswaehlenDispatch(origDisp, origUrl, frame);
-    case PALVerwaltenDispatch.COMMAND:
       return new PALVerwaltenDispatch(origDisp, origUrl, frame);
-    default:
+    } else
+    {
       return null;
     }
   }

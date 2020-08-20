@@ -52,7 +52,10 @@ public class SenderEventListener implements WollMuxEventListener
       long found = service.searchDefaultSender();
       if (found != 1)
       {
-        SenderService.getInstance().showSelectSenderDialog();
+        InfoDialog.showInfoModal(L.m("WollMux-Info"),
+            "Es wurde mehr als ein Absender gefunden. Der erste wurde ausgewählt.\n"
+                + "Bitte vergewissern Sie sich, dass es der richtige ist. "
+                + "Dazu können Sie das Dropdown in der WollMux-Sidebar verwenden.");
       }
     } else
     {
