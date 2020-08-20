@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.ActionEvent;
 import com.sun.star.awt.SpinEvent;
+import com.sun.star.awt.TextEvent;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XCheckBox;
 import com.sun.star.awt.XContainerWindowProvider;
@@ -60,6 +61,7 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractAdjustmentListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractSpinListener;
+import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTopWindowListener;
 
 /**
@@ -229,6 +231,7 @@ public class SachleitendeVerfuegungenDruckdialog
       {
         spinListener[i - 1] = new MySpinListener();
         UNO.XSpinField(container.getControl("Count" + i)).addSpinListener(spinListener[i - 1]);
+        UNO.XTextComponent(container.getControl("Count" + i)).addTextListener(spinListener[i - 1]);
         printListener[i - 1] = new MyActionListener();
         UNO.XButton(container.getControl("Print" + i)).addActionListener(printListener[i - 1]);
       }
@@ -336,7 +339,7 @@ public class SachleitendeVerfuegungenDruckdialog
    *
    * @author daniel.sikeler
    */
-  private class MySpinListener extends AbstractSpinListener
+  private class MySpinListener extends AbstractSpinListener implements AbstractTextListener
   {
     /**
      * Der Verfügungspunkt, bei dem die Anzahl der Kopien geänder werden soll.
@@ -370,6 +373,19 @@ public class SachleitendeVerfuegungenDruckdialog
     {
       info.setCopyCount(copyCount);
       updateSum();
+    }
+
+    @Override
+    public void textChanged(TextEvent event)
+    {
+      try
+      {
+        short count = Short.parseShort(UNO.XTextComponent(event.Source).getText());
+        updateCount(count);
+      } catch (NumberFormatException e)
+      {
+        LOGGER.error("Keine Zahl", e);
+      }
     }
   }
 
