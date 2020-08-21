@@ -152,17 +152,12 @@ class SlavePrintModel extends WeakBase implements XPrintModel
   public void setPropertyValue(String key, Object val)
       throws UnknownPropertyException, PropertyVetoException, WrappedTargetException
   {
-    if (PrintModels.STAGE.equalsIgnoreCase(key))
+    if (PrintModels.STAGE.equalsIgnoreCase(key) && val != null)
     {
-      if (val != null)
-      {
-        stage = val.toString();
-        master.setStage(stage);
-      }
-    } else
-    {
-      master.setPropertyValue(key, val);
+      stage = val.toString();
+      master.setStage(stage);
     }
+    master.setPropertyValue(key, val);
   }
 
   @Override

@@ -22,7 +22,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.slv.print;
 
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,9 +39,9 @@ import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.lang.WrappedTargetException;
+import com.sun.star.ui.dialogs.ExecutableDialogResults;
 
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
-import de.muenchen.allg.itd51.wollmux.SyncActionListener;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
@@ -137,6 +136,7 @@ public class ContentBasedDirectivePrint extends PrintFunction
       {
         collectPrintsAndShowResult(printModel);
       }
+      model.adoptNumbers();
     }
   }
 
@@ -193,13 +193,11 @@ public class ContentBasedDirectivePrint extends PrintFunction
     // call dialog and wait for return.
     try
     {
-      SyncActionListener s = new SyncActionListener();
-      new ContentBasedDirectiveDialog(directives, s);
-      ActionEvent result = s.synchronize();
+      ContentBasedDirectiveDialog dialog = new ContentBasedDirectiveDialog(directives);
+      short result = dialog.execute();
 
-      if (ContentBasedDirectiveDialog.CMD_SUBMIT.equals(result.getActionCommand()))
+      if (ExecutableDialogResults.OK == result)
       {
-        ContentBasedDirectiveDialog dialog = (ContentBasedDirectiveDialog) result.getSource();
         settings = dialog.getSettings();
         collect = dialog.isCollect();
 

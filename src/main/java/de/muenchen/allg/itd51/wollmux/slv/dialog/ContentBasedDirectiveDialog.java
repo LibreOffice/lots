@@ -22,7 +22,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.slv.dialog;
 
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,27 +31,30 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.ActionEvent;
 import com.sun.star.awt.SpinEvent;
+import com.sun.star.awt.TextEvent;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XCheckBox;
 import com.sun.star.awt.XContainerWindowProvider;
 import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XDialog;
+import com.sun.star.awt.XDialog2;
 import com.sun.star.awt.XFixedText;
 import com.sun.star.awt.XNumericField;
 import com.sun.star.awt.XScrollBar;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
-import com.sun.star.lang.EventObject;
-import com.sun.star.uno.Exception;
+import com.sun.star.ui.dialogs.ExecutableDialogResults;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperRuntimeException;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.dialog.adapter.AbstractAdjustmentListener;
 import de.muenchen.allg.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.dialog.adapter.AbstractSpinListener;
-import de.muenchen.allg.dialog.adapter.AbstractTopWindowListener;
+import de.muenchen.allg.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.slv.print.ContentBasedDirective;
+import de.muenchen.allg.util.UnoComponent;
 
 /**
  * A dialog for printing documents with content based directives.
@@ -60,16 +62,6 @@ import de.muenchen.allg.itd51.wollmux.slv.print.ContentBasedDirective;
 public class ContentBasedDirectiveDialog
 {
   private static final Logger LOGGER = LoggerFactory.getLogger(ContentBasedDirectiveDialog.class);
-
-  /**
-   * Command, if the dialog has succeeded.
-   */
-  public static final String CMD_SUBMIT = "submit";
-
-  /**
-   * Command, if the dialog is aborted.
-   */
-  public static final String CMD_CANCEL = "cancel";
 
   /**
    * Maximum number of chars for each {@link ContentBasedDirective}.
@@ -104,7 +96,7 @@ public class ContentBasedDirectiveDialog
   /**
    * The dialog.
    */
-  private XDialog dialog;
+  private XDialog2 dialog;
 
   /**
    * Listener of the print buttons.
@@ -117,31 +109,14 @@ public class ContentBasedDirectiveDialog
   private final MySpinListener[] spinListener = new MySpinListener[4];
 
   /**
-   * Listener, which is called as soon as the dialog is closed.
-   */
-  private java.awt.event.ActionListener dialogEndListener;
-
-  /**
-   * The action for the {@link #dialogEndListener}.
-   */
-  private String action = CMD_CANCEL;
-
-  /**
    * Create a new dialog.
    *
-   * @param dialogEndListener
-   *          if not null, {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)} is
-   *          called after the dialog has been closed. The {@link ActionEvent#ActionCommand}
-   *          contains the action, how the dialog was closed. Possible values are
-   *          {@link #CMD_CANCEL} and {@link #CMD_SUBMIT}.
    * @param items
    *          List of Content Based Directives.
    */
-  public ContentBasedDirectiveDialog(List<ContentBasedDirective> items,
-      ActionListener dialogEndListener)
+  public ContentBasedDirectiveDialog(List<ContentBasedDirective> items)
   {
     this.items = items;
-    this.dialogEndListener = dialogEndListener;
 
     for (int i = 0; i < items.size(); i++)
     {
@@ -179,24 +154,11 @@ public class ContentBasedDirectiveDialog
     {
       XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
       XContainerWindowProvider provider = UnoRuntime.queryInterface(XContainerWindowProvider.class,
-          UNO.xMCF.createInstanceWithContext("com.sun.star.awt.ContainerWindowProvider",
-              UNO.defaultContext));
+          UnoComponent.createComponentWithContext(UnoComponent.CSS_AWT_CONTAINER_WINDOW_PROVIDER));
       XWindow window = provider.createContainerWindow(
           "vnd.sun.star.script:WollMux.slv_count?location=application", "", peer, null);
       container = UNO.XControlContainer(window);
-      dialog = UNO.XDialog(window);
-      UNO.XTopWindow(dialog).addTopWindowListener(new AbstractTopWindowListener()
-      {
-        @Override
-        public void windowClosed(EventObject arg0)
-        {
-          if (dialogEndListener != null)
-          {
-            dialogEndListener.actionPerformed(
-                new java.awt.event.ActionEvent(ContentBasedDirectiveDialog.this, 0, action));
-          }
-        }
-      });
+      dialog = UNO.XDialog2(window);
 
       XScrollBar scrollBar = UnoRuntime.queryInterface(XScrollBar.class,
           container.getControl("ScrollBar"));
@@ -208,6 +170,7 @@ public class ContentBasedDirectiveDialog
       {
         spinListener[i - 1] = new MySpinListener();
         UNO.XSpinField(container.getControl("Count" + i)).addSpinListener(spinListener[i - 1]);
+        UNO.XTextComponent(container.getControl("Count" + i)).addTextListener(spinListener[i - 1]);
         printListener[i - 1] = new MyActionListener();
         UNO.XButton(container.getControl("Print" + i)).addActionListener(printListener[i - 1]);
       }
@@ -217,32 +180,26 @@ public class ContentBasedDirectiveDialog
       printOrder.addItemListener(printOrderListener);
 
       XButton abort = UNO.XButton(container.getControl("Abort"));
-      AbstractActionListener abortListener = event -> {
-        action = CMD_CANCEL;
-        dialog.endExecute();
-      };
+      AbstractActionListener abortListener = event -> dialog.endDialog(ExecutableDialogResults.CANCEL);
       abort.addActionListener(abortListener);
 
       XButton collectButton = UNO.XButton(container.getControl("collectAll"));
       AbstractActionListener collectAllListener = event -> {
-        action = CMD_SUBMIT;
         collect = true;
-        dialog.endExecute();
+        dialog.endDialog(ExecutableDialogResults.OK);
       };
       collectButton.addActionListener(collectAllListener);
 
       XButton print = UNO.XButton(container.getControl("PrintAll"));
       AbstractActionListener printAllListener = event -> {
-        action = CMD_SUBMIT;
         collect = false;
-        dialog.endExecute();
+        dialog.endDialog(ExecutableDialogResults.OK);
       };
       print.addActionListener(printAllListener);
 
       update(0);
       updateSum();
-      dialog.execute();
-    } catch (Exception e)
+    } catch (UnoHelperRuntimeException e)
     {
       LOGGER.error("SLV-Druck-Dialog konnte nicht angezeigt werden.", e);
     }
@@ -310,9 +267,20 @@ public class ContentBasedDirectiveDialog
   }
 
   /**
+   * Show the dialog.
+   *
+   * @return The result of the dialog.
+   * @see XDialog#execute()
+   */
+  public short execute()
+  {
+    return dialog.execute();
+  }
+
+  /**
    * Listener for setting new copy-count-values of single {@link ContentBasedDirectiveSettings}.
    */
-  private class MySpinListener extends AbstractSpinListener
+  private class MySpinListener extends AbstractSpinListener implements AbstractTextListener
   {
     /**
      * The {@link ContentBasedDirectiveSettings} to modify.
@@ -353,6 +321,19 @@ public class ContentBasedDirectiveDialog
       info.setCopyCount(copyCount);
       updateSum();
     }
+
+    @Override
+    public void textChanged(TextEvent event)
+    {
+      try
+      {
+        short count = Short.parseShort(UNO.XTextComponent(event.Source).getText());
+        updateCount(count);
+      } catch (NumberFormatException e)
+      {
+        LOGGER.error("Keine Zahl", e);
+      }
+    }
   }
 
   /**
@@ -381,8 +362,7 @@ public class ContentBasedDirectiveDialog
     {
       // Remove all content based directive, except the one of this print button.
       settings.removeIf(s -> !s.equals(info));
-      action = CMD_SUBMIT;
-      dialog.endExecute();
+      dialog.endDialog(ExecutableDialogResults.OK);
     }
   }
 }
