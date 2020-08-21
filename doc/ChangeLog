@@ -1,3 +1,23 @@
+ ==================== Neu in Version 18.1.14 ====================
+    * Neue Features
+          o Die Seriendruck-Option PDF-Gesamtdokumen wurde nochmals
+            verbessert.
+          o Die Option Sachleitende Verfügungen in enem PDF Dokument zu
+            sammeln wurde nochmals verbessert.
+          o Es gibt ein zusätzliches Feld "Benutzerkürzel" im Dialog zum
+            Bearbeiten der Absenderdaten. Dieses wird nur gespeichert wenn die
+            Datenquelle dieses Feld ebenfalls angibt.
+    * Bugfixes
+          o Im Komfortdruckdailog kann die Anzahl der Ausdrucke auch durch
+            Schreiben in den Textfeldern ud nicht nur über die PSin-Buttons
+            angegeben werden.
+          o Im Dialog zum Bearbeiten der Absenderdaten kann nun zwischen
+            "Herr", "Frau" und "" als Anrede ausgewählte werden. "" beduetet,
+            dass keine Anrede verwendet wird.
+          o Die Suche nach Absendern wird nicht mehr jedes Mal beim Drücken von
+            Enter gestartet.
+          o Die FormularGUI wird für verstekt geöffnete Dokumente nicht angezeigt.
+
  ==================== Neu in Version 18.1.13 ====================
     * Bugfixes
           o EventListener werden wieder in einem eigenen Thread informiert
