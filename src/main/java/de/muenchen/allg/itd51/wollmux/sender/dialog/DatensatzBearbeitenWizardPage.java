@@ -182,10 +182,12 @@ public class DatensatzBearbeitenWizardPage extends AbstractXWizardPage
       if (ldapValue == null || ldapValue.isEmpty())
       {
         ldapValue = "";
-        res = InfoDialog.showYesNoModal("LDAP Datensatz", "Leeren Wert aus LDAP-Datensatz übernehmen?");
+        res = InfoDialog.showYesNoModal(xControl.getPeer(), "LDAP Datensatz",
+            "Leeren Wert aus LDAP-Datensatz übernehmen?");
       } else
       {
-        res = InfoDialog.showYesNoModal("LDAP Datensatz", "Wert \"" + ldapValue + "\" aus LDAP-Datensatz übernehmen?");
+        res = InfoDialog.showYesNoModal(xControl.getPeer(), "LDAP Datensatz",
+            "Wert \"" + ldapValue + "\" aus LDAP-Datensatz übernehmen?");
       }
 
       if (res == MessageBoxResults.YES)

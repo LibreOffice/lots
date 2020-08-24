@@ -30,12 +30,15 @@ import com.sun.star.awt.MessageBoxResults;
 import com.sun.star.awt.MessageBoxType;
 import com.sun.star.awt.XMessageBox;
 import com.sun.star.awt.XToolkit2;
-import com.sun.star.awt.XWindow;
+import com.sun.star.awt.XWindowPeer;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperRuntimeException;
 import de.muenchen.allg.util.UnoComponent;
 
+/**
+ * Helper for creating simple, modal dialogs.
+ */
 public class InfoDialog
 {
 
@@ -47,84 +50,102 @@ public class InfoDialog
   }
 
   /**
-   * Diese Methode erzeugt einen modalen Dialog zur Anzeige von Informationen und kehrt erst nach
-   * Beendigung des Dialogs wieder zurück.
+   * Show some information and wait until dialog has been closed. Uses the window of the current
+   * frame.
    *
    * @param title
-   *          Titelzeile des Dialogs
+   *          The title.
    * @param message
-   *          die Nachricht, die im Dialog angezeigt werden soll.
+   *          The information.
    */
-  public static void showInfoModal(XWindow window, String title, String message)
-  {
-    createDialog(window, title, message, MessageBoxType.INFOBOX, MessageBoxButtons.BUTTONS_OK);
-  }
-
   public static void showInfoModal(String title, String message)
   {
-    createDialog(title, message, MessageBoxType.INFOBOX, MessageBoxButtons.BUTTONS_OK);
+    showInfoModal(UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow()), title, message);
   }
 
   /**
-   * Diese Methode erzeugt einen modalen Dialog zur Anzeige von Informationen und kehrt erst nach
-   * Beendigung mit dem Ergebnis zurück
+   * Show some information and wait until dialog has been closed.
+   *
+   * @param windowPeer
+   *          The calling window.
+   * @param title
+   *          The title.
+   * @param message
+   *          The information.
+   */
+  public static void showInfoModal(XWindowPeer windowPeer, String title, String message)
+  {
+    createDialog(windowPeer, title, message, MessageBoxType.INFOBOX, MessageBoxButtons.BUTTONS_OK);
+  }
+
+  /**
+   * Show some information and wait until dialog has been closed and return the result. Uses the
+   * window of the current frame.
    *
    * @param title
-   *          Titelzeile des Dialogs
+   *          The title.
    * @param message
-   *          die Nachricht, die im Dialog angezeigt werden soll.
-   * @return true, wenn der Dialog abgebrochen wurde (Cancel oder X-Button), ansonsten false.
+   *          The information.
+   * @return True if the dialog has been canceled, false otherwise.
    */
   public static boolean showCancelModal(String title, String message)
   {
-    short res = createDialog(title, message, MessageBoxType.MESSAGEBOX,
-        MessageBoxButtons.BUTTONS_OK_CANCEL);
-    return res == MessageBoxResults.CANCEL;
-  }
-  
-  public static short showYesNoModal(String title, String message)
-  {
-    return createDialog(title, message, MessageBoxType.MESSAGEBOX,
-        MessageBoxButtons.BUTTONS_YES_NO);
+    return showCancelModal(UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow()), title, message);
   }
 
   /**
-   * Erzeugt eine Libreoffice MessageBox und führt sie aus.
+   * Show some information and wait until dialog has been closed and return the result.
    *
+   * @param windowPeer
+   *          The calling window.
    * @param title
-   *          Titelzeile des Dialogs
+   *          The title.
    * @param message
-   *          die Nachricht, die im Dialog angezeigt werden soll.
-   * @param type
-   *          Der Type der MessageBox {@link MessageBoxType}
-   * @param buttons
-   *          Die Buttons der MessageBox {@link MessageBoxButtons}
-   * @return Ein MessageBoxResult {@link MessageBoxResults}
+   *          The information.
+   * @return True if the dialog has been canceled, false otherwise.
    */
-  private static short createDialog(String title, String message, MessageBoxType type, int buttons)
+  public static boolean showCancelModal(XWindowPeer windowPeer, String title, String message)
   {
-    try
-    {
-      XToolkit2 toolkit = createToolkit();
-
-      if (toolkit == null)
-        return -1;
-
-      XMessageBox messageBox = toolkit.createMessageBox(
-          UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow()), type, buttons, title,
-          message);
-
-      return messageBox.execute();
-    } catch (NullPointerException e)
-    {
-      LOGGER.error("Info Dialog {} konnte nicht erstellt werden.", title);
-      LOGGER.error("", e);
-    }
-    return -1;
+    short res = createDialog(windowPeer, title, message, MessageBoxType.MESSAGEBOX,
+        MessageBoxButtons.BUTTONS_OK_CANCEL);
+    return res == MessageBoxResults.CANCEL;
   }
 
-  private static short createDialog(XWindow window, String title, String message,
-      MessageBoxType type, int buttons)
+  /**
+   * Show some information and ask to user for submission. Wait until dialog has been closed and
+   * return the result. Uses the window of the current frame.
+   *
+   * @param title
+   *          The title.
+   * @param message
+   *          The information.
+   * @return One of {@link MessageBoxResults}.
+   */
+  public static short showYesNoModal(String title, String message)
+  {
+    return showYesNoModal(UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow()), title, message);
+  }
+
+  /**
+   * Show some information and ask to user for submission. Wait until dialog has been closed and
+   * return the result.
+   *
+   * @param windowPeer
+   *          The calling window.
+   * @param title
+   *          The title.
+   * @param message
+   *          The information.
+   * @return One of {@link MessageBoxResults}.
+   */
+  public static short showYesNoModal(XWindowPeer windowPeer, String title, String message)
+  {
+    return createDialog(windowPeer, title, message, MessageBoxType.MESSAGEBOX,
+        MessageBoxButtons.BUTTONS_YES_NO);
+  }
+
+  private static short createDialog(XWindowPeer windowPeer, String title, String message, MessageBoxType type,
+      int buttons)
   {
     try
     {
@@ -133,9 +154,7 @@ public class InfoDialog
       if (toolkit == null)
         return -1;
 
-      XMessageBox messageBox = toolkit.createMessageBox(
-          UNO.XWindowPeer(window), type, buttons, title,
-          message);
+      XMessageBox messageBox = toolkit.createMessageBox(windowPeer, type, buttons, title, message);
 
       return messageBox.execute();
     } catch (NullPointerException e)
@@ -151,8 +170,7 @@ public class InfoDialog
     XToolkit2 toolkit = null;
     try
     {
-      toolkit = UNO.XToolkit2(UnoComponent.createComponentWithContext(
-          UnoComponent.CSS_AWT_TOOLKIT, UNO.defaultContext.getServiceManager(), UNO.defaultContext));
+      toolkit = UNO.XToolkit2(UnoComponent.createComponentWithContext(UnoComponent.CSS_AWT_TOOLKIT));
     } catch (UnoHelperRuntimeException e)
     {
       LOGGER.error("", e);
