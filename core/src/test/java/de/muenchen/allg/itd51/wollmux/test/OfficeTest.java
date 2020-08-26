@@ -30,8 +30,6 @@ import java.util.Properties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sun.star.lang.XComponent;
 
@@ -41,8 +39,6 @@ import de.muenchen.allg.afid.UnoHelperException;
 @Tag("de.muenchen.allg.itd51.wollmux.test.OfficeTest")
 public abstract class OfficeTest
 {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(OfficeTest.class);
 
   @BeforeAll
   public static void initUNO() throws Exception
@@ -60,7 +56,7 @@ public abstract class OfficeTest
       UNO.init(options);
     } catch (Exception e)
     {
-      LOGGER.debug("Can't start office", e);
+      fail("Can't start office", e);
     }
   }
 
