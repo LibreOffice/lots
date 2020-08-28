@@ -9,7 +9,7 @@
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<files>
 		<file>
-			<source>dist/WollMuxBar.jar</source>
+			<source>target/WollMuxBar.jar</source>
 			<destName>WollMuxBar.jar</destName>
 		</file>
 		<file>

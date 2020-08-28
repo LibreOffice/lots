@@ -77,7 +77,7 @@ pipeline {
               }
             }
           } else {
-            archiveArtifacts artifacts: 'dist/WollMux.oxt'
+            archiveArtifacts artifacts: 'target/WollMux.oxt'
             withMaven(
               maven: 'mvn',
               mavenLocalRepo: '.repo',

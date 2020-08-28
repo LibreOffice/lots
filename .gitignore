@@ -4,13 +4,6 @@ localizedConfigStrings.conf
 oxt/WollMux.rdb
 idl/de/muenchen/allg/itd51/wollmux/*.urd
 idl/de/muenchen/allg/itd51/wollmux/*.class
-dist/WollMux.oxt
-dist/WollMux.uno.pkg
-dist/WollMuxBar.jar
-dist/WollMuxInterfaces.jar
-dist/md5sums.txt
-dist/WollMux.update.xml
-dist/TerminateOOo.jar
 oxt/WollMux.uno.jar
 *~
 /target
@@ -20,9 +13,4 @@ oxt/WollMux.uno.jar
 .classpath
 /.settings
 .vscode/
-dist/WollMux.oxt
-dist/WollMux.zip
-dist/WollMux_ButtonsOnly.oxt
-dist/WollMux*manual_installation.tgz
-dist/wollmuxbar.exe
 release.properties

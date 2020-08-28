@@ -22,7 +22,9 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import org.apache.log4j.Level;
+import java.io.OutputStreamWriter;
+
+import org.apache.logging.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +76,7 @@ public class DebugExternalWollMux
   {
     // Logger zum Debuggen auf stdout initialisieren und die zukünftigen
     // Logger-Einstellungen aus der wollmuxconfig ignorieren.
-    LogConfig.init(System.out, Level.DEBUG);
+    LogConfig.init(new OutputStreamWriter(System.out), Level.DEBUG);
     LogConfig.setIgnoreInit(true);
 
     UNO.init();

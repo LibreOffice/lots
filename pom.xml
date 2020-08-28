@@ -1,15 +1,18 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.muenchen</groupId>
   <artifactId>wollmux</artifactId>
-  <version>18.2.1-SNAPSHOT</version>
+  <version>18.2.0-SNAPSHOT</version>
   <name>WollMux</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.target>11</maven.compiler.target>
     <maven.compiler.source>11</maven.compiler.source>
-    <libreoffice.version>6.4.3</libreoffice.version>
+    <libreoffice.version>6.4.5-lhm1700</libreoffice.version>
+    <wollmux.interfaces.version>18.2.0~alpha</wollmux.interfaces.version>
     <wollmux.oxt.id>de.muenchen.allg.d101.wollmux</wollmux.oxt.id>
     <wollmux.oxt.name>WollMux</wollmux.oxt.name>
     <wollmux.test.conf.url>https://github.com/WollMux/wollmux-config/releases/download/</wollmux.test.conf.url>
@@ -39,16 +42,13 @@
     <resources>
       <resource>
         <directory>src/main/resources</directory>
-        <excludes>
-          <exclude>log4j.properties</exclude>
-        </excludes>
-        <filtering>true</filtering>
       </resource>
       <resource>
         <directory>src/main/resources</directory>
         <includes>
-          <include>log4j.properties</include>
+          <include>*.properties</include>
         </includes>
+        <filtering>true</filtering>
       </resource>
     </resources>
     <testResources>
@@ -65,15 +65,24 @@
     </testResources>
     <plugins>
       <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>2.6.1</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>dist</directory>
-            </fileset>
-          </filesets>
-        </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.0.0-M3</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>3.6.0</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -108,7 +117,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.10</version>
+        <version>3.1.2</version>
         <executions>
           <execution>
             <id>include-rdb</id>
@@ -121,7 +130,7 @@
                 <artifactItem>
                   <groupId>de.muenchen</groupId>
                   <artifactId>wollmux-interfaces</artifactId>
-                  <version>15.4.0-SNAPSHOT</version>
+                  <version>${wollmux.interfaces.version}</version>
                   <type>rdb</type>
                   <outputDirectory>${basedir}/oxt</outputDirectory>
                   <destFileName>WollMux.rdb</destFileName>
@@ -134,7 +143,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>2.4</version>
+        <version>3.2.1</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -148,7 +157,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.1.1</version>
+        <version>3.2.0</version>
         <configuration>
           <quiet>true</quiet>
         </configuration>
@@ -220,9 +229,8 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.5.5</version>
+        <version>3.3.0</version>
         <configuration>
-          <outputDirectory>dist</outputDirectory>
           <recompressZippedFiles>true</recompressZippedFiles>
         </configuration>
         <executions>
@@ -235,6 +243,7 @@
             <configuration>
               <finalName>WollMuxBar</finalName>
               <appendAssemblyId>false</appendAssemblyId>
+              <attach>false</attach>
               <archive>
                 <addMavenDescriptor>false</addMavenDescriptor>
                 <manifest>
@@ -242,6 +251,7 @@
                   <classpathPrefix>lib/</classpathPrefix>
                 </manifest>
                 <manifestEntries>
+                  <Multi-Release>true</Multi-Release>
                   <RegistrationClassName>de.muenchen.allg.itd51.wollmux.ComponentRegistration</RegistrationClassName>
                   <Main-Class>com.sun.star.lib.loader.Loader</Main-Class>
                   <UNO-Type-Path>&lt;&gt;</UNO-Type-Path>
@@ -264,6 +274,7 @@
             <configuration>
               <finalName>WollMux</finalName>
               <appendAssemblyId>false</appendAssemblyId>
+              <attach>false</attach>
               <descriptors>
                 <descriptor>misc/assembly-oxt.xml</descriptor>
               </descriptors>
@@ -272,15 +283,16 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.8</version>
+        <version>3.0.0</version>
         <executions>
           <execution>
             <id>oxt</id>
             <phase>prepare-package</phase>
             <configuration>
               <target>
-                <copy file="dist/WollMux.zip" tofile="dist/WollMux.oxt" />
+                <copy file="target/WollMux.zip" tofile="target/WollMux.oxt" />
               </target>
             </configuration>
             <goals>
@@ -318,11 +330,11 @@
               <target>
                 <echo level="info">unopkg add:</echo>
                 <exec executable="unopkg" failifexecutionfails="false">
-                  <arg line="add -f -env:UserInstallation=file://${office.user.profile} dist/WollMux.oxt" />
+                  <arg line="add -f -env:UserInstallation=file://${office.user.profile} target/WollMux.oxt" />
                 </exec>
                 <replaceregexp>
                   <regexp pattern="&lt;vmParameters xsi:nil=&quot;true&quot;/&gt;" />
-                  <substitution expression="&lt;vmParameters xsi:nil=&quot;false&quot;&gt;${line.separator} &lt;param&gt;-DWOLLMUX_CONF_PATH=${wollmux.test.conf}&lt;/param&gt;${line.separator} &lt;param&gt;${line.separator} -Dlog4j.configuration=file://${project.build.testOutputDirectory}/log4j.properties${line.separator} &lt;/param&gt;${line.separator} &lt;param&gt;${jacocoOffice}&lt;/param&gt;${line.separator} &lt;/vmParameters&gt; " />
+                  <substitution expression="&lt;vmParameters xsi:nil=&quot;false&quot;&gt;${line.separator} &lt;param&gt;-DWOLLMUX_CONF_PATH=${wollmux.test.conf}&lt;/param&gt;${line.separator} &lt;param&gt;-Dlog4j2.configurationFile=file://${project.build.testOutputDirectory}/log4j2.xml&lt;/param&gt;${line.separator} &lt;param&gt;${jacocoOffice}&lt;/param&gt;${line.separator} &lt;/vmParameters&gt; " />
                   <fileset dir="${office.user.profile}/user/config">
                     <include name="javasettings*.xml" />
                   </fileset>
@@ -342,7 +354,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M4</version>
+        <version>3.0.0-M5</version>
         <configuration>
           <additionalClasspathElements>
             <additionalClasspathElement>${env.UNO_PATH}/classes/java_uno.jar</additionalClasspathElement>
@@ -402,25 +414,6 @@
               <pluginExecutions>
                 <pluginExecution>
                   <pluginExecutionFilter>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <versionRange>[1.9,)</versionRange>
-                    <goals>
-                      <goal>parse-version</goal>
-                      <goal>regex-property</goal>
-                      <goal>add-source</goal>
-                      <goal>add-resource</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <execute>
-                      <runOnIncremental>true</runOnIncremental>
-                      <runOnConfiguration>true</runOnConfiguration>
-                    </execute>
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
                     <groupId>
                       org.apache.maven.plugins
                     </groupId>
@@ -440,34 +433,9 @@
                 </pluginExecution>
                 <pluginExecution>
                   <pluginExecutionFilter>
-                    <groupId>
-                      de.andrena.tools.macker
-                    </groupId>
-                    <artifactId>
-                      macker-maven-plugin
-                    </artifactId>
-                    <versionRange>
-                      [1.0.2,)
-                    </versionRange>
-                    <goals>
-                      <goal>macker</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore />
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>
-                      org.apache.maven.plugins
-                    </groupId>
-                    <artifactId>
-                      maven-dependency-plugin
-                    </artifactId>
-                    <versionRange>
-                      [2.10,)
-                    </versionRange>
+                    <groupId>org.apache.maven.plugins </groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <versionRange>[2.10,)</versionRange>
                     <goals>
                       <goal>unpack</goal>
                       <goal>copy</goal>
@@ -488,43 +456,38 @@
   <dependencies>
     <dependency>
       <groupId>org.openjfx</groupId>
-      <artifactId>javafx-controls</artifactId>
-      <version>12.0.2</version>
+      <artifactId>javafx-graphics</artifactId>
+      <version>16-ea+1</version>
     </dependency>
     <dependency>
-      <groupId>javax.mail</groupId>
-      <artifactId>javax.mail-api</artifactId>
-      <version>1.6.2</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.mail</groupId>
-      <artifactId>javax.mail</artifactId>
-      <version>1.6.2</version>
+      <groupId>jakarta.mail</groupId>
+      <artifactId>jakarta.mail-api</artifactId>
+      <version>1.6.5</version>
     </dependency>
     <dependency>
       <groupId>org.libreoffice</groupId>
-      <artifactId>ridl</artifactId>
+      <artifactId>libreoffice</artifactId>
       <version>${libreoffice.version}</version>
     </dependency>
     <dependency>
       <groupId>org.libreoffice</groupId>
-      <artifactId>juh</artifactId>
+      <artifactId>unoloader</artifactId>
       <version>${libreoffice.version}</version>
     </dependency>
     <dependency>
       <groupId>de.muenchen</groupId>
       <artifactId>unohelper</artifactId>
-      <version>3.0.3</version>
+      <version>4.0.0</version>
     </dependency>
     <dependency>
       <groupId>de.muenchen</groupId>
       <artifactId>wollmux-interfaces</artifactId>
-      <version>18.2.0~alpha</version>
+      <version>${wollmux.interfaces.version}</version>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
-      <version>5.5.0</version>
+      <version>5.6.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
@@ -539,42 +502,47 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.9</version>
+      <version>3.11</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.6</version>
+      <version>2.7</version>
     </dependency>
     <dependency>
       <groupId>com.fifesoft</groupId>
       <artifactId>rsyntaxtextarea</artifactId>
-      <version>3.0.4</version>
+      <version>3.1.1</version>
     </dependency>
     <dependency>
       <groupId>com.fifesoft</groupId>
       <artifactId>autocomplete</artifactId>
-      <version>3.0.2</version>
+      <version>3.1.0</version>
     </dependency>
     <dependency>
       <groupId>com.fifesoft</groupId>
       <artifactId>rstaui</artifactId>
-      <version>3.0.2</version>
+      <version>3.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.pdfbox</groupId>
       <artifactId>pdfbox</artifactId>
-      <version>2.0.19</version>
+      <version>2.0.20</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>28.1-jre</version>
+      <version>29.0-jre</version>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.29</version>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>2.13.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.13.1</version>
     </dependency>
     <dependency>
       <groupId>com.github.chaosfirebolt.converter</groupId>
@@ -584,31 +552,31 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.5.2</version>
+      <version>5.6.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>3.2.0</version>
+      <version>3.5.6</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-netty</artifactId>
-      <version>5.9.0</version>
+      <version>5.11.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-client-java</artifactId>
-      <version>5.9.0</version>
+      <version>5.11.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.unboundid</groupId>
       <artifactId>unboundid-ldapsdk</artifactId>
-      <version>5.0.1</version>
+      <version>5.1.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -637,9 +605,8 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-assembly-plugin</artifactId>
-            <version>2.5.5</version>
+            <version>3.2.0</version>
             <configuration>
-              <outputDirectory>dist</outputDirectory>
               <recompressZippedFiles>true</recompressZippedFiles>
             </configuration>
             <executions>
@@ -671,10 +638,10 @@
                 </goals>
                 <configuration>
                   <target>
-                    <move file="dist/WollMux_ButtonsOnly.zip" tofile="dist/WollMux_ButtonsOnly.oxt" />
+                    <move file="target/WollMux_ButtonsOnly.zip" tofile="target/WollMux_ButtonsOnly.oxt" />
                     <echo level="info">unopkg add:</echo>
                     <exec executable="unopkg" failifexecutionfails="false">
-                      <arg line="add -f dist/WollMux_ButtonsOnly.oxt" />
+                      <arg line="add -f target/WollMux_ButtonsOnly.oxt" />
                     </exec>
 
                     <tstamp>
@@ -696,7 +663,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-release-plugin</artifactId>
-            <version>2.5.2</version>
+            <version>3.0.0-M1</version>
             <configuration>
               <tagNameFormat>RELEASE_@{project.version}</tagNameFormat>
               <releaseProfiles>release</releaseProfiles>
