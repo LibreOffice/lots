@@ -129,7 +129,7 @@ public class ConnectionModel
     {
       for (String tableName : ds.getTableNames())
       {
-        if (name.contains(ds.getName()) && name.contains(tableName))
+        if (name.startsWith(ds.getName()) && name.endsWith(tableName))
         {
           LOGGER.info("Datenquelle {} ist ausgewählt.", ds.getName());
           ds.activateTable(tableName);
