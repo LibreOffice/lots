@@ -26,35 +26,19 @@ pipeline {
           mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
           publisherStrategy: 'EXPLICIT') {
           sh "mvn org.apache.maven.plugins:maven-enforcer-plugin:3.0.0-M3:enforce -Drules=requireReleaseDeps"
-          sh "mvn -Dmaven.javadoc.skip=true -DskipTests -DdryRun clean package"
+          sh "mvn -DskipTests -DdryRun clean package"
         }
       }
     }
 
-    stage('Parallel') {
-      parallel {
-        stage('Junit') {
-          steps {
-            withMaven(
-              maven: 'mvn',
-              mavenLocalRepo: '.repo',
-              mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
-              publisherStrategy: 'EXPLICIT') {
-              sh "mvn -Dmaven.javadoc.skip=true -DdryRun test verify"
-            }
-          }
-        }
-
-        stage('Javadoc') {
-          steps {
-            withMaven(
-              maven: 'mvn',
-              mavenLocalRepo: '.repo',
-              mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
-              publisherStrategy: 'EXPLICIT') {
-              sh "mvn javadoc:javadoc"
-            }
-          }
+    stage('Junit') {
+      steps {
+        withMaven(
+          maven: 'mvn',
+          mavenLocalRepo: '.repo',
+          mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
+          publisherStrategy: 'EXPLICIT') {
+          sh "mvn -Dmaven.javadoc.skip=true -DdryRun test verify"
         }
       }
     }
