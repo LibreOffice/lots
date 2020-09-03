@@ -29,9 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 
 /**
@@ -39,7 +36,6 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
  */
 public class Search
 {
-  private static final Logger LOGGER = LoggerFactory.getLogger(Search.class);
 
   private Search()
   {
@@ -56,21 +52,16 @@ public class Search
    *          die Suchanfrage
    * @param searchStrategy
    *          die zu verwendende Suchstrategie
-   * @param dj
-   *          die virtuelle Datenbank (siehe {@link DatasourceJoiner}), in der gesucht werden soll
-   * @param useDjMainDatasource
-   *          gibt an, ob unabhängig von den eventuell in der Suchstrategie festgelegten
-   *          Datenquellen auf jeden Fall immer in der Hauptdatenquelle von dj gesucht werden soll.
-   *          Wenn hier <code>true</code> übergeben wird, enthalten die als Ergebnis der Suche
-   *          zurückgelieferten QueryResults auf jeden Fall {@link DJDataset}s.
+   * @param datasources
+   *          Data source to use.
    * @throws IllegalArgumentException
    *           falls eine Datenquelle, in der gesucht werden soll, nicht existiert
    * @return Results as an Iterable of Dataset as {@link QueryResults}
    */
   public static QueryResults search(String queryString, SearchStrategy searchStrategy,
-      DatasourceJoiner dj, boolean useDjMainDatasource)
+      Map<String, Datasource> datasources)
   {
-    if (queryString == null || searchStrategy == null || dj == null)
+    if (queryString == null || searchStrategy == null || datasources == null)
     {
       return null;
     }
@@ -84,82 +75,14 @@ public class Search
     {
       if (query.numberOfQueryParts() == 0)
       {
-        results = (useDjMainDatasource ? dj.getContentsOfMainDatasource()
-            : dj.getContentsOf(query.getDatasourceName()));
+        results = datasources.get(query.getDatasourceName()).getContents();
       } else
       {
-        results = (useDjMainDatasource ? dj.find(query.getQueryParts()) : dj.find(query));
+        results = datasources.get(query.getDatasourceName()).find(query.getQueryParts());
       }
       listOfQueryResultsList.add(results);
     }
     return mergeListOfQueryResultsList(listOfQueryResultsList);
-  }
-
-  /**
-   * Führt die übergebene Suchanfrage gemäß der übergebenen Suchstrategie aus und liefert die
-   * Ergebnisse in einem {@link QueryResults}-Objekt zurück. Falls einer der übergebenen Parameter
-   * <code>null</code> ist oder falls der queryString leer ist, wird <code>null</code>
-   * zurückgeliefert.
-   * 
-   * @param query
-   *          die Suchanfrage
-   * @param dj
-   *          die virtuelle Datenbank (siehe {@link DatasourceJoiner}), in der gesucht werden soll
-   * @return Results as an Iterable of Dataset as {@link QueryResults}
-   */
-  public static QueryResults search(Map<String, String> query, DatasourceJoiner dj)
-  {
-    List<QueryPart> parts = new ArrayList<>();
-
-    for (String key : query.keySet())
-    {
-      QueryPart qp = new QueryPart(key, query.get(key));
-      parts.add(qp);
-    }
-
-    return dj.find(parts);
-  }
-
-  /**
-   * Compares two given datasets. If one of the values within a dataset is different from the second
-   * dataset, true will be returned.
-   * 
-   * @param dataset
-   *          First dataset.
-   * @param ldapDataset
-   *          A second dataset to compare with.
-   * @param dj
-   *          An instance of the {@link DatasourceJoiner}
-   * @return Returns true if different values were detected.
-   */
-  public static boolean hasLDAPDataChanged(Dataset dataset, Dataset ldapDataset,
-      DatasourceJoiner dj)
-  {
-    boolean hasChanged = false;
-
-    if (dj == null || dataset == null || ldapDataset == null)
-      return hasChanged;
-
-    for (String columnName : dj.getMainDatasourceSchema())
-    {
-      try
-      {
-        String ldapDSValue = ldapDataset.get(columnName);
-        String datasetValue = dataset.get(columnName);
-
-        if ((ldapDSValue == null && datasetValue != null && !datasetValue.isEmpty())
-            || (ldapDSValue != null && datasetValue != null && !ldapDSValue.equals(datasetValue)))
-        {
-          hasChanged = true;
-          break;
-        }
-      } catch (ColumnNotFoundException e)
-      {
-        LOGGER.error("", e);
-      }
-    }
-
-    return hasChanged;
   }
 
   /**

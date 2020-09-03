@@ -46,7 +46,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class SchemaDatasource implements Datasource
+public class SchemaDatasource extends Datasource
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SchemaDatasource.class);

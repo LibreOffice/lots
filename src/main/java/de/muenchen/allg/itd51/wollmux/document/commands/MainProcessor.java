@@ -26,9 +26,8 @@ import com.sun.star.text.XTextCursor;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
+import de.muenchen.allg.itd51.wollmux.sender.SenderException;
+import de.muenchen.allg.itd51.wollmux.sender.SenderService;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
@@ -108,18 +107,14 @@ class MainProcessor extends AbstractExecutor
     String value = null;
     try
     {
-      Dataset ds = DatasourceJoinerFactory.getDatasourceJoiner().getSelectedDatasetTransformed();
-      value = ds.get(spaltenname);
-      if (value == null) value = "";
-
+      value = SenderService.getInstance().getCurrentSenderValue(spaltenname);
       // ggf. TRAFO durchführen
       value = this.documentCommandInterpreter.getDocumentController().getTransformedValue(cmd.getTrafoName(), value);
     }
-    catch (DatasetNotFoundException e)
+    catch (SenderException e)
     {
-      value = L.m("<FEHLER: Kein Absender ausgewählt!>");
-    }
-    catch (ColumnNotFoundException e)
+      value = L.m("<Fehler: Kein Absendre ausgewählt!>");
+    } catch (ColumnNotFoundException e)
     {
       AbstractExecutor.insertErrorField(cmd, documentCommandInterpreter.getModel().doc, e);
       cmd.setErrorState(true);

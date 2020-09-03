@@ -48,7 +48,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class PreferDatasource implements Datasource
+public class PreferDatasource extends Datasource
 {
   private Datasource source1;
 

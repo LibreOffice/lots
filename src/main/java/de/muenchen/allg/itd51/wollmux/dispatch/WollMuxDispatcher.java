@@ -42,8 +42,7 @@ public class WollMuxDispatcher extends Dispatcher
         TextbausteinDispatch.COMMAND_REFERENCE, PlatzhalterAnspringenDispatch.COMMAND,
         FormularMaxDispatch.COMMAND, SeriendruckDispatch.COMMAND, FunctionDialogDispatch.COMAND,
         DumpInfoDispatch.COMMAND, AboutDispatch.COMMAND, OpenTemplateDispatch.COMMAND_TEMPLATE,
-        OpenTemplateDispatch.COMMAND_DOCUMENT, KillDispatch.COMMAND,
-        AbsenderAuswaehlenDispatch.COMMAND, PALVerwaltenDispatch.COMMAND);
+        OpenTemplateDispatch.COMMAND_DOCUMENT, KillDispatch.COMMAND);
   }
 
   @Override
@@ -83,10 +82,6 @@ public class WollMuxDispatcher extends Dispatcher
       return new OpenTemplateDispatch(origDisp, origUrl, frame, false);
     case KillDispatch.COMMAND:
       return new KillDispatch(origDisp, origUrl, frame);
-    case AbsenderAuswaehlenDispatch.COMMAND:
-      return new AbsenderAuswaehlenDispatch(origDisp, origUrl, frame);
-    case PALVerwaltenDispatch.COMMAND:
-      return new PALVerwaltenDispatch(origDisp, origUrl, frame);
     default:
       return null;
     }

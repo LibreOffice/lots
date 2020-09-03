@@ -26,10 +26,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.db.NoBackingStoreException;
+import de.muenchen.allg.itd51.wollmux.db.Dataset;
 
-public class MockDataset implements DJDataset
+public class MockDataset implements Dataset
 {
   private String key;
   private Map<String, String> data;
@@ -66,56 +65,6 @@ public class MockDataset implements DJDataset
   public String getKey()
   {
     return key;
-  }
-
-  @Override
-  public void set(String columnName, String newValue) throws ColumnNotFoundException
-  {
-  }
-
-  @Override
-  public boolean hasLocalOverride(String columnName) throws ColumnNotFoundException
-  {
-    return false;
-  }
-
-  @Override
-  public boolean hasBackingStore()
-  {
-    return false;
-  }
-
-  @Override
-  public boolean isFromLOS()
-  {
-    return false;
-  }
-
-  @Override
-  public boolean isSelectedDataset()
-  {
-    return false;
-  }
-
-  @Override
-  public void select()
-  {
-  }
-
-  @Override
-  public void discardLocalOverride(String columnName) throws ColumnNotFoundException, NoBackingStoreException
-  {
-  }
-
-  @Override
-  public DJDataset copy()
-  {
-    return null;
-  }
-
-  @Override
-  public void remove()
-  {
   }
 
 }

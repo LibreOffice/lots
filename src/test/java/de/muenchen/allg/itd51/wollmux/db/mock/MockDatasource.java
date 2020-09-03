@@ -32,7 +32,7 @@ import de.muenchen.allg.itd51.wollmux.db.Datasource;
 import de.muenchen.allg.itd51.wollmux.db.QueryPart;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 
-public class MockDatasource implements Datasource
+public class MockDatasource extends Datasource
 {
 
   private List<Dataset> datasets;

@@ -26,7 +26,6 @@ import com.google.common.eventbus.Subscribe;
 
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnAbout;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddDocumentEventListener;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseAndOpenExt;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseTextDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCollectNonWollMuxFormFieldsViaPrintModel;
@@ -42,12 +41,10 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnKill;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnManagePrintFunction;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnNotifyDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnPALChangedNotify;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnPrint;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnPrintPage;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemoveDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemoveFormularMax;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnRemovePALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnReprocessTextDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnResetDocumentState;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveAs;
@@ -55,11 +52,8 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveTempAndOpenExt;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValueFinished;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetInsertValues;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetSender;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetWindowVisible;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogAbsenderAuswaehlen;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnShowDialogPersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextbausteinEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnUpdateInputFields;
@@ -88,45 +82,7 @@ public class WollMuxEventListenerImpl implements WollMuxEventListener
    *          The event.
    */
   @Subscribe
-  public void onShowDialogPersoenlicheAbsenderlisteVerwalten(
-      OnShowDialogPersoenlicheAbsenderlisteVerwalten event)
-  {
-    event.process();
-  }
-
-  /**
-   * Execute the event
-   *
-   * @param event
-   *          The event.
-   */
-  @Subscribe
-  public void onShowDialogAbsenderAuswaehlen(
-      OnShowDialogAbsenderAuswaehlen event)
-  {
-    event.process();
-  }
-
-  /**
-   * Execute the event
-   *
-   * @param event
-   *          The event.
-   */
-  @Subscribe
   public void onSetWindowVisible(OnSetWindowVisible event)
-  {
-    event.process();
-  }
-
-  /**
-   * Execute the event
-   *
-   * @param event
-   *          The event.
-   */
-  @Subscribe
-  public void onSetSender(OnSetSender event)
   {
     event.process();
   }
@@ -198,32 +154,7 @@ public class WollMuxEventListenerImpl implements WollMuxEventListener
    *          The event.
    */
   @Subscribe
-  public void onRemovePALChangeEventListener(
-      OnRemovePALChangeEventListener event)
-  {
-    event.process();
-  }
-
-  /**
-   * Execute the event
-   *
-   * @param event
-   *          The event.
-   */
-  @Subscribe
   public void onPrintPage(OnPrintPage event)
-  {
-    event.process();
-  }
-
-  /**
-   * Execute the event
-   *
-   * @param event
-   *          The event.
-   */
-  @Subscribe
-  public void onPALChangedNotify(OnPALChangedNotify event)
   {
     event.process();
   }
@@ -368,18 +299,6 @@ public class WollMuxEventListenerImpl implements WollMuxEventListener
    */
   @Subscribe
   public void onDumpInfo(OnDumpInfo event)
-  {
-    event.process();
-  }
-
-  /**
-   * Execute the event
-   *
-   * @param event
-   *          The event.
-   */
-  @Subscribe
-  public void onAddPALChangeEventListener(OnAddPALChangeEventListener event)
   {
     event.process();
   }

@@ -57,7 +57,7 @@ import de.muenchen.allg.util.UnoProperty;
 /**
  * Stellt eine OOo-Datenquelle als WollMux-Datenquelle zur Verfügung.
  */
-public class OOoDatasource implements Datasource
+public class OOoDatasource extends Datasource
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OOoDatasource.class);
@@ -523,7 +523,7 @@ public class OOoDatasource implements Datasource
         XDataSource ds =
           UNO.XDataSource(UNO.dbContext.getRegisteredObject(oooDatasourceName));
 
-        ds.setLoginTimeout((int) DatasourceJoinerFactory.getDatasourceTimeout());
+        ds.setLoginTimeout((int) Datasource.getDatasourceTimeout());
         conn = ds.getConnection(userName, password);
       }
       catch (SQLException x)

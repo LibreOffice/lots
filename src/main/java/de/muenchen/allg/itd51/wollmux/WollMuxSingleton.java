@@ -41,11 +41,11 @@ import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.event.LibreOfficeEventListener;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.former.Common;
+import de.muenchen.allg.itd51.wollmux.sender.SenderService;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.LogConfig;
 import de.muenchen.allg.util.UnoConfiguration;
@@ -91,8 +91,6 @@ public class WollMuxSingleton
       LOGGER.error("", e);
     }
 
-    boolean successfulStartup = true;
-
     noConfig = WollMuxFiles.getWollmuxConf() != null && WollMuxFiles.getWollmuxConf().count() == 0;
 
     // set font's zoom mode
@@ -130,15 +128,11 @@ public class WollMuxSingleton
      */
     registerDatasources(WollMuxFiles.getWollmuxConf(), WollMuxFiles.getDefaultContext());
 
-    // Versuchen, den DJ zu initialisieren und Flag setzen, falls nicht
-    // erfolgreich.
-    if (DatasourceJoinerFactory.getDatasourceJoiner() == null)
-    {
-      successfulStartup = false;
-    } else
+    // Versuchen, den DJ zu initialisieren
+    if (SenderService.getInstance() != null)
     {
       // Initialisiere EventProcessor
-      WollMuxEventHandler.getInstance().setAcceptEvents(successfulStartup);
+      WollMuxEventHandler.getInstance().setAcceptEvents(true);
 
       // register global EventListener
       try

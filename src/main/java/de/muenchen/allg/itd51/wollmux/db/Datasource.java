@@ -26,8 +26,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Interface für Datenquellen, die der DJ verwalten kann. ACHTUNG! Die Konstruktoren dieser Klasse
@@ -51,12 +57,17 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
  * implementieren - würde vermutlich dazu führen, dass Daten im LDAP schlechter gepflegt werden,
  * weil es einfacher ist, einen Override einzuführen
  */
-public interface Datasource
+public abstract class Datasource
 {
+  
+  private static final Logger LOGGER = LoggerFactory.getLogger(Datasource.class);
+
+  private static Long datasourceTimeout = null;
+
   /**
    * Liefert eine Liste, die die Titel aller Spalten der Datenquelle enthält.
    */
-  public List<String> getSchema();
+  public abstract List<String> getSchema();
 
   /**
    * Liefert alle Datensätze, deren Schlüssel in der Collection keys enthalten sind. Man beachte,
@@ -67,7 +78,7 @@ public interface Datasource
    *          Keys to search against.
    * @return Results as {@link QueryResults}
    */
-  public QueryResults getDatasetsByKey(Collection<String> keys);
+  public abstract QueryResults getDatasetsByKey(Collection<String> keys);
 
   /**
    * Liefert alle Datensätze, die alle Bedingungen von query (Liste von {@link QueryPart}s)
@@ -78,19 +89,19 @@ public interface Datasource
    *          Query to search against the main datasource.
    * @return Results as {@link QueryResults}
    */
-  public QueryResults find(List<QueryPart> query);
+  public abstract QueryResults find(List<QueryPart> query);
 
   /**
    * Liefert eine implementierungsabhängige Teilmenge der Datensätze der Datenquelle. Wenn möglich
    * sollte die Datenquelle hier all ihre Datensätze zurückliefern oder zumindest soviele wie
    * möglich. Es ist jedoch auch erlaubt, dass hier gar keine Datensätze zurückgeliefert werden.
    */
-  public QueryResults getContents();
+  public abstract QueryResults getContents();
 
   /**
    * Liefert den Namen dieser Datenquelle.
    */
-  public String getName();
+  public abstract String getName();
 
   /**
    * Gets datasource value by given {@link ConfigThingy} and key.
@@ -103,8 +114,36 @@ public interface Datasource
    *          ErrorMessage that is thrown if configuration could not be parsed successfully.
    * @return Value of the datasource, i.e. 'ldap://test.ip'
    */
-  public default String parseConfig(ConfigThingy source, String key, Supplier<String> errorMessage)
+  public String parseConfig(ConfigThingy source, String key, Supplier<String> errorMessage)
   {
     return source.get(key, ConfigurationErrorException.class, errorMessage.get()).toString();
+  }
+  
+  public static long getDatasourceTimeout()
+  {
+    if (datasourceTimeout == null)
+    {
+      datasourceTimeout = 10000l;
+      ConfigThingy dataSourceTimeout = WollMuxFiles.getWollmuxConf().query("DATASOURCE_TIMEOUT", 1);
+      try
+      {
+        long timeout = Long.parseLong(dataSourceTimeout.getLastChild().toString());
+  
+        if (timeout <= 0)
+        {
+          LOGGER.error("DATASOURCE_TIMEOUT muss größer als 0 sein!");
+        } else
+        {
+          datasourceTimeout = timeout;
+        }
+      } catch (NodeNotFoundException e)
+      {
+        LOGGER.error("", e);
+      } catch (NumberFormatException e)
+      {
+        LOGGER.error(L.m("DATASOURCE_TIMEOUT muss eine ganze Zahl sein"));
+      }
+    }
+    return datasourceTimeout;
   }
 }

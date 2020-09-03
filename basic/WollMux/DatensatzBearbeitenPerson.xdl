@@ -42,22 +42,22 @@
   <dlg:textfield dlg:id="DienstBezKurz" dlg:tab-index="44" dlg:left="82" dlg:top="185" dlg:width="100" dlg:height="12"/>
   <dlg:textfield dlg:id="DienstBezLang" dlg:tab-index="47" dlg:left="245" dlg:top="185" dlg:width="87" dlg:height="12"/>
   <dlg:textfield dlg:id="Benutzerkuerzel" dlg:tab-index="48" dlg:left="82" dlg:top="200" dlg:width="250" dlg:height="12"/>
-  <dlg:button dlg:id="btnRolle" dlg:tab-index="1" dlg:visible="false" dlg:left="69" dlg:top="6" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnVorname" dlg:tab-index="3" dlg:visible="false" dlg:left="69" dlg:top="21" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnNachname" dlg:tab-index="5" dlg:visible="false" dlg:left="69" dlg:top="36" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnTitel" dlg:tab-index="7" dlg:visible="false" dlg:left="69" dlg:top="51" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnTelefon" dlg:tab-index="9" dlg:visible="false" dlg:left="69" dlg:top="66" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnFax" dlg:tab-index="11" dlg:visible="false" dlg:left="69" dlg:top="81" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnZimmer" dlg:tab-index="13" dlg:visible="false" dlg:left="69" dlg:top="96" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnDienstgebaeude" dlg:tab-index="15" dlg:visible="false" dlg:left="69" dlg:top="111" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnDienstgebaeudePLZ" dlg:tab-index="18" dlg:visible="false" dlg:left="69" dlg:top="126" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnDienstgebaeudeOrt" dlg:tab-index="22" dlg:visible="false" dlg:left="69" dlg:top="141" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnMail" dlg:tab-index="26" dlg:visible="false" dlg:left="69" dlg:top="156" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnZustaendigkeit" dlg:tab-index="38" dlg:visible="false" dlg:left="232" dlg:top="171" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnFunktion" dlg:tab-index="34" dlg:visible="false" dlg:left="69" dlg:top="186" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnDienstBezKurz" dlg:tab-index="30" dlg:visible="false" dlg:left="69" dlg:top="171" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnDienstBezLang" dlg:tab-index="42" dlg:visible="false" dlg:left="232" dlg:top="186" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnAnrede" dlg:tab-index="46" dlg:visible="false" dlg:left="232" dlg:top="6" dlg:width="10" dlg:height="10" dlg:value=" *"/>
-  <dlg:button dlg:id="btnBenutzerkuerzel" dlg:tab-index="49" dlg:visible="false" dlg:left="69" dlg:top="201" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnRolle" dlg:tab-index="1" dlg:left="69" dlg:top="6" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnVorname" dlg:tab-index="3" dlg:left="69" dlg:top="21" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnNachname" dlg:tab-index="5" dlg:left="69" dlg:top="36" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnTitel" dlg:tab-index="7" dlg:left="69" dlg:top="51" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnTelefon" dlg:tab-index="9" dlg:left="69" dlg:top="66" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnFax" dlg:tab-index="11" dlg:left="69" dlg:top="81" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnZimmer" dlg:tab-index="13" dlg:left="69" dlg:top="96" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnDienstgebaeude" dlg:tab-index="15" dlg:left="69" dlg:top="111" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnDienstgebaeudePLZ" dlg:tab-index="18" dlg:left="69" dlg:top="126" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnDienstgebaeudeOrt" dlg:tab-index="22" dlg:left="69" dlg:top="141" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnMail" dlg:tab-index="26" dlg:left="69" dlg:top="156" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnFunktion" dlg:tab-index="30" dlg:left="69" dlg:top="171" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnZustaendigkeit" dlg:tab-index="38" dlg:left="232" dlg:top="171" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnDienstBezKurz" dlg:tab-index="34" dlg:left="69" dlg:top="186" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnDienstBezLang" dlg:tab-index="42" dlg:left="232" dlg:top="186" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnAnrede" dlg:tab-index="46" dlg:left="232" dlg:top="6" dlg:width="10" dlg:height="10" dlg:value=" *"/>
+  <dlg:button dlg:id="btnBenutzerkuerzel" dlg:tab-index="49" dlg:left="69" dlg:top="201" dlg:width="10" dlg:height="10" dlg:value=" *"/>
  </dlg:bulletinboard>
 </dlg:window>

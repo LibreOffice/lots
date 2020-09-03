@@ -69,7 +69,7 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnTransformer;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.db.Datasource;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.Search;
 import de.muenchen.allg.itd51.wollmux.db.SearchStrategy;
@@ -110,9 +110,9 @@ public class DatasourceSearchDialog implements Dialog
   private Map<String, String> data;
 
   /**
-   * Used to perform queries.
+   * Used to perform queries. Mapping from data source name to data source.
    */
-  private DatasourceJoiner dj;
+  private Map<String, Datasource> datasources;
 
   /**
    * If true UI actions have no effect.
@@ -159,13 +159,13 @@ public class DatasourceSearchDialog implements Dialog
    *
    * @param conf
    *          The configuration of the dialog.
-   * @param dj
+   * @param datasources
    *          Used to perform the queries.
    */
-  public DatasourceSearchDialog(ConfigThingy conf, DatasourceJoiner dj)
+  public DatasourceSearchDialog(ConfigThingy conf, Map<String, Datasource> datasources)
   {
     this.myConf = conf;
-    this.dj = dj;
+    this.datasources = datasources;
     schema = parseSchema(conf);
     if (schema.isEmpty())
     {
@@ -698,7 +698,7 @@ public class DatasourceSearchDialog implements Dialog
         QueryResults r = null;
         try
         {
-          r = Search.search(query.getText(), searchStrategy, dj, false);
+          r = Search.search(query.getText(), searchStrategy, datasources);
         } catch (IllegalArgumentException x)
         {
           LOGGER.error("", x);

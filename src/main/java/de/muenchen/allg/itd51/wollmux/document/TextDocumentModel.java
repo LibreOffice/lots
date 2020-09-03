@@ -83,8 +83,10 @@ import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.dispatch.PrintDispatch;
 import de.muenchen.allg.itd51.wollmux.document.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.document.PersistentDataContainer.DataID;
-import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.SetJumpMark;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommands;
+import de.muenchen.allg.itd51.wollmux.sender.SenderException;
+import de.muenchen.allg.itd51.wollmux.sender.SenderService;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
 import de.muenchen.allg.util.UnoProperty;
@@ -97,8 +99,6 @@ public class TextDocumentModel
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TextDocumentModel.class);
-
-  public static final String OVERRIDE_FRAG_DB_SPALTE = "OVERRIDE_FRAG_DB_SPALTE";
 
   private static final String FUNCTION = "FUNCTION";
 
@@ -260,6 +260,13 @@ public class TextDocumentModel
     this.formFieldValues = new HashMap<>();
     this.mapGroupIdToVisibilityState = new HashMap<>();
     this.overrideFragMap = new HashMap<>();
+    try
+    {
+      parseInitialOverrideFragMap(SenderService.getInstance().getCurrentOverrideFragMap());
+    } catch (SenderException e)
+    {
+      LOGGER.error(e.getMessage(), e);
+    }
 
     // parse document commands without changing modified state
     boolean modified = isDocumentModified();
@@ -277,6 +284,51 @@ public class TextDocumentModel
     this.isFormDocument = false;
 
     setType(setTypeData);
+  }
+
+  /**
+   * Parse an OverrideFrag configuration like
+   *
+   * <pre>
+   * overrideFrag(
+   *   (FRAG_ID 'A' NEW_FRAG_ID 'B')
+   *   (FRAG_ID 'C' NEW_FRAG_ID 'D')
+   *   ...
+   * )
+   * </pre>
+   *
+   * Initilizes {@link #overrideFragMap}.
+   *
+   * @param iniinitialOverrideFragMap
+   *          The configuration.
+   */
+  private void parseInitialOverrideFragMap(ConfigThingy initialOverrideFragMap)
+  {
+    for (ConfigThingy conf : initialOverrideFragMap)
+    {
+      String oldFragId;
+      try
+      {
+        oldFragId = conf.get("FRAG_ID").toString();
+      } catch (NodeNotFoundException x)
+      {
+        LOGGER.error(
+            "FRAG_ID Angabe fehlt in einem Eintrag: {}\n"
+                + "Vielleicht haben Sie die Klammern um (FRAG_ID 'A' NEW_FRAG_ID 'B') vergessen?",
+            conf.stringRepresentation());
+        continue;
+      }
+
+      String newFragId = conf.getString("NEW_FRAG_ID", "");
+
+      try
+      {
+        setOverrideFrag(oldFragId, newFragId);
+      } catch (OverrideFragChainException x)
+      {
+        LOGGER.error("Fehlerhafte Angabe: {}", conf.stringRepresentation(), x);
+      }
+    }
   }
 
   public Map<String, List<FormField>> getIdToTextFieldFormFields()

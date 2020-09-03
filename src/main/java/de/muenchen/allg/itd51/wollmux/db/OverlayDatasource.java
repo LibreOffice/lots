@@ -61,7 +61,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
-public class OverlayDatasource implements Datasource
+public class OverlayDatasource extends Datasource
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OverlayDatasource.class);

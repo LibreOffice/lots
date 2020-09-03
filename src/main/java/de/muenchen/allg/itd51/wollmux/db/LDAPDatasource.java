@@ -62,7 +62,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  * 
  * @author Max Meier (D-III-ITD 5.1)
  */
-public class LDAPDatasource implements Datasource
+public class LDAPDatasource extends Datasource
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LDAPDatasource.class);
@@ -153,7 +153,7 @@ public class LDAPDatasource implements Datasource
   public LDAPDatasource(Map<String, Datasource> nameToDatasource, ConfigThingy sourceDesc,
       URL context)
   {
-    setTimeout(DatasourceJoinerFactory.getDatasourceTimeout());
+    setTimeout(Datasource.getDatasourceTimeout());
 
     datasourceName = parseConfig(sourceDesc, "NAME", () -> L.m("NAME der Datenquelle fehlt"));
     url = parseConfig(sourceDesc, "URL", () -> errorMessage() + L.m("URL des LDAP-Servers fehlt."));
@@ -561,7 +561,7 @@ public class LDAPDatasource implements Datasource
       SearchControls sc = new SearchControls();
       sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
-      sc.setTimeLimit((int) DatasourceJoinerFactory.getDatasourceTimeout());
+      sc.setTimeLimit((int) Datasource.getDatasourceTimeout());
 
       LOGGER.trace("ctx.search({}, {}, sc) mit Zeitlimit {}", baseDN, filter, sc.getTimeLimit());
       NamingEnumeration<SearchResult> enumer = ctx.search(baseDN, filter, sc);
@@ -1303,7 +1303,7 @@ public class LDAPDatasource implements Datasource
 
     searchControls.setSearchScope(searchScope);
 
-    searchControls.setTimeLimit((int) DatasourceJoinerFactory.getDatasourceTimeout());
+    searchControls.setTimeLimit((int) Datasource.getDatasourceTimeout());
 
     if (onlyObjectClass)
     {
