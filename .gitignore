@@ -8,9 +8,6 @@ idl/de/muenchen/allg/itd51/wollmux/*.class
 /idl/target
 /oxt/target
 *.urd
-**/.project
-**/.classpath
-**/.settings
 .vscode/
 release.properties
 /target/
