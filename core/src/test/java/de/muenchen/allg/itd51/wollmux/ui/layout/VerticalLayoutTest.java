@@ -80,6 +80,7 @@ public class VerticalLayoutTest
     Pair<Integer, Integer> size = layout.layout(new Rectangle(0, 0, 100, 100));
     assertEquals(50, size.getLeft(), "height");
     assertEquals(100, size.getRight(), "width");
+    assertEquals(2, layout.size());
   }
 
   @Test

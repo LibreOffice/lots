@@ -170,6 +170,12 @@ public class HorizontalLayout implements Layout
     return minWidth;
   }
 
+  @Override
+  public int size()
+  {
+    return layouts.size();
+  }
+
   private List<Map.Entry<Layout, Integer>> getVisibleLayouts()
   {
     return layouts.entrySet().stream().filter(e -> e.getKey().isVisible()).collect(Collectors.toList());

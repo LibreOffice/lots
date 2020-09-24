@@ -150,4 +150,10 @@ public class ControlLayout implements Layout
     }
     return true;
   }
+
+  @Override
+  public int size()
+  {
+    return 1;
+  }
 }

@@ -99,4 +99,11 @@ public interface Layout
 
   boolean isVisible();
 
+  /**
+   * Number of elements managed by the layout.
+   *
+   * @return Number of elements.
+   */
+  int size();
+
 }

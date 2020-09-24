@@ -80,6 +80,7 @@ public class HorizontalLayoutTest
     Pair<Integer, Integer> size = layout.layout(new Rectangle(0, 0, 100, 100));
     assertEquals(30, size.getLeft());
     assertEquals(100, size.getRight());
+    assertEquals(2, layout.size());
   }
 
   @Test
