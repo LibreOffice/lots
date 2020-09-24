@@ -74,6 +74,7 @@ import de.muenchen.allg.util.UnoProperty;
 public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel, XSidebarPanel
 {
   private static final Logger LOGGER = LoggerFactory.getLogger(FormSidebarPanel.class);
+  private static final int BUTTONS_PER_ROW = 2;
   private XWindow parentWindow;
   private XControlContainer controlContainer;
   private Layout vLayout;
@@ -108,7 +109,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     this.xMCF = UNO.XMultiComponentFactory(context.getServiceManager());
 
     vLayout = new VerticalLayout();
-    buttonLayout = new HorizontalLayout(20, 5, 0, 0, 5);
+    buttonLayout = new VerticalLayout(20, 5, 0, 0, 5);
 
     this.parentWindow = parentWindow;
     controlContainer = UNO
@@ -271,18 +272,26 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   {
     if (!tab.getButtons().isEmpty())
     {
-      tab.getButtons().forEach(control -> {
-        Layout controlLayout = createXControlByType(control, tabPageControlContainer);
+      Layout tabButtonLayout = null;
+      for (int i = 0; i < tab.getButtons().size(); i++)
+      {
+        if (i % (BUTTONS_PER_ROW + 1) == 0)
+        {
+          tabButtonLayout = new HorizontalLayout(0, 0, 0, 0, 5);
+          layout.addLayout(tabButtonLayout, 1);
+        }
 
+        UIElementConfig control = tab.getButtons().get(i);
+        Layout controlLayout = createXControlByType(control, tabPageControlContainer);
         if (controlLayout == null)
         {
           LOGGER.trace("layout with control id '{}' is null.", control.getId());
         } else
         {
           buttons.put(model.getControl(control.getId()), tabId);
-          layout.addLayout(controlLayout, 1);
+          tabButtonLayout.addLayout(controlLayout, 1);
         }
-      });
+      }
     }
   }
 
