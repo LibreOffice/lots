@@ -418,6 +418,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       props.put(UnoProperty.MULTILINE, true);
       props.put(UnoProperty.HELP_TEXT, control.getTip());
       props.put(UnoProperty.FONT_DESCRIPTOR, htmlElement.getFontDescriptor());
+      props.put("TabIndex", -1);
       if (!htmlElement.getHref().isEmpty())
       {
         props.put(UnoProperty.URL, htmlElement.getHref());
