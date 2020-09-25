@@ -113,16 +113,16 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   private AbstractFocusListener focusListener = new AbstractFocusListener()
   {
     @Override
-    public void focusGained(FocusEvent arg0)
+    public void focusGained(FocusEvent event)
     {
       if (processUIElementEvents)
       {
         processUIElementEvents = false;
-        XControl control = UNO.XControl(arg0.Source);
+        XControl control = UNO.XControl(event.Source);
         try
         {
-          String focusedTextField = (String) UnoProperty.getProperty(control.getModel(), UnoProperty.DEFAULT_CONTROL);
-          documentController.getModel().focusFormField(focusedTextField);
+          String focusedField = (String) UnoProperty.getProperty(control.getModel(), UnoProperty.DEFAULT_CONTROL);
+          documentController.getModel().focusFormField(focusedField);
         } catch (UnoHelperException e)
         {
           LOGGER.trace("", e);
