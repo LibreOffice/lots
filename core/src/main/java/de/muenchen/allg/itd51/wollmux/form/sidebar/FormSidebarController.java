@@ -100,7 +100,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   /**
    * Are ui elements handled by the controller.
    */
-  private boolean processUIElementEvents = true;
+  private boolean processUIElementEvents = false;
 
   /**
    * Don't process value changes on these IDs.
@@ -199,7 +199,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
         formSidebarPanel.createTabControl(formConfig, formModel);
         formModel.addFormModelChangedListener(this, true);
         formModel.addVisibilityChangedListener(this, true);
-
+        processUIElementEvents = true;
       } catch (FormModelException e)
       {
         LOGGER.trace("", e);
