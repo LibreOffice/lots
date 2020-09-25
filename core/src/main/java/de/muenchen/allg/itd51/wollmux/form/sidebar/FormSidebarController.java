@@ -250,7 +250,6 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
     } catch (UnoHelperException e)
     {
       LOGGER.error("", e);
-      return;
     }
   }
 
@@ -271,7 +270,6 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
     } catch (UnoHelperException e)
     {
       LOGGER.error("", e);
-      return;
     }
   }
 
@@ -292,7 +290,6 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
     } catch (UnoHelperException e)
     {
       LOGGER.error("", e);
-      return;
     }
   }
 
@@ -313,7 +310,6 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
     } catch (UnoHelperException e)
     {
       LOGGER.error("", e);
-      return;
     }
   }
 
