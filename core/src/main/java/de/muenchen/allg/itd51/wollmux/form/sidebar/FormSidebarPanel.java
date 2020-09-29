@@ -23,15 +23,20 @@
 package de.muenchen.allg.itd51.wollmux.form.sidebar;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.accessibility.XAccessible;
+import com.sun.star.awt.FocusEvent;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.WindowEvent;
@@ -40,6 +45,7 @@ import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XControlModel;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
+import com.sun.star.awt.XWindow2;
 import com.sun.star.awt.XWindowPeer;
 import com.sun.star.awt.tab.XTabPage;
 import com.sun.star.awt.tab.XTabPageContainer;
@@ -51,10 +57,12 @@ import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
 import de.muenchen.allg.dialog.adapter.AbstractSidebarPanel;
 import de.muenchen.allg.dialog.adapter.AbstractTabPageContainerListener;
 import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.dialog.UIElementConfig;
+import de.muenchen.allg.itd51.wollmux.dialog.UIElementType;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.form.config.FormConfig;
 import de.muenchen.allg.itd51.wollmux.form.config.TabConfig;
@@ -62,6 +70,7 @@ import de.muenchen.allg.itd51.wollmux.form.model.Control;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
 import de.muenchen.allg.itd51.wollmux.ui.HTMLElement;
+import de.muenchen.allg.itd51.wollmux.ui.layout.ControlLayout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.HorizontalLayout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
@@ -87,6 +96,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   private FormSidebarController formSidebarController;
   private Map<String, Pair<XControl, XControl>> controls = new HashMap<>();
   private boolean visibilityChanged = false;
+  private boolean tabChanged = true;
 
   /**
    * Creates a new form panel.
@@ -200,19 +210,36 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       vLayout.addLayout(buttonLayout, 1);
 
       short tabId = 1;
-      for (TabConfig tab : config.getTabs())
+      List<TabConfig> tabs = config.getTabs();
+      for (int i = 0; i < tabs.size(); i++)
       {
+        TabConfig tab = tabs.get(i);
         HTMLElement element = new HTMLElement(tab.getTitle());
         GuiFactory.createTab(this.xMCF, this.context, UNO.XTabPageContainerModel(tabControl.getModel()),
             element.getText(), tabId);
         XTabPage xTabPage = tabControlContainer.getTabPageByID(tabId);
-
         XControlContainer tabPageControlContainer = UNO.XControlContainer(xTabPage);
-
         Layout controlsVLayout = new VerticalLayout(5, 5, 0, 0, 6);
-        setControls(tab, tabPageControlContainer, controlsVLayout);
-        addButtonsToLayout(tab, model, controlContainer, buttonLayout, tabId);
 
+        if (i > 0)
+        {
+          addTabSwitcher("backward", tabs.get(i - 1), s -> {
+            previousTab();
+            s.reduce((f, se) -> se).ifPresent(XWindow::setFocus);
+          }, tabPageControlContainer, controlsVLayout);
+        }
+
+        setControls(tab, tabPageControlContainer, controlsVLayout);
+
+        if (i < tabs.size() - 1)
+        {
+          addTabSwitcher("forward", tabs.get(i + 1), s -> {
+            nextTab();
+            s.findFirst().ifPresent(XWindow::setFocus);
+          }, tabPageControlContainer, controlsVLayout);
+        }
+
+        addButtonsToLayout(tab, model, controlContainer, buttonLayout, tabId);
         tabPageLayouts.put(tabId, controlsVLayout);
 
         tabId++;
@@ -253,6 +280,44 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
         layout.addLayout(controlLayout, 1);
       }
     });
+  }
+
+  /**
+   * Add a control that performs the supplied action if it gets the focus. The action gets a
+   * {@link Stream} of the controls which are visible on the given tab.
+   *
+   * @param id
+   *          The ID of the control.
+   * @param tab
+   *          The tab which has the controls for the action.
+   * @param action
+   *          The action.
+   * @param tabPageControlContainer
+   *          {@link XControlContainer} ControlContainer in which the control will be inserted.
+   * @param layout
+   *          The {@link Layout} in which in which the control will be inserted.
+   */
+  private void addTabSwitcher(String id, TabConfig tab, Consumer<Stream<XWindow2>> action,
+      XControlContainer tabPageControlContainer, Layout layout)
+  {
+    XControl tabSwithcer = GuiFactory.createTextfield(xMCF, context, id + tab.getId(), new Rectangle(0, 0, 0, 0), null,
+        null);
+    UNO.XWindow(tabSwithcer).addFocusListener(new AbstractFocusListener()
+    {
+      @Override
+      public void focusGained(FocusEvent event)
+      {
+        Stream<XWindow2> controlConfigs = tab.getControls().stream()
+            .filter(c -> c.getType() == UIElementType.BUTTON || c.getType() == UIElementType.CHECKBOX
+                || c.getType() == UIElementType.COMBOBOX || c.getType() == UIElementType.LISTBOX
+                || c.getType() == UIElementType.TEXTAREA || c.getType() == UIElementType.TEXTFIELD)
+            .map(c -> controls.get(c.getId())).filter(Objects::nonNull).map(p -> UNO.XWindow2(p.getRight()))
+            .filter(Objects::nonNull).filter(XWindow2::isVisible);
+        action.accept(controlConfigs);
+      }
+    });
+    layout.addLayout(new ControlLayout(UNO.XWindow(tabSwithcer), 0), 1);
+    tabPageControlContainer.addControl(id, tabSwithcer);
   }
 
   /**
@@ -564,14 +629,19 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
    */
   public void previousTab()
   {
-    short currentabPageId = tabControlContainer.getActiveTabPageID();
-    short prev = (short) (currentabPageId - 1);
-
-    if (prev > 0)
+    if (tabChanged)
     {
-      tabControlContainer.setActiveTabPageID(prev);
+      tabChanged = false;
+      short currentabPageId = tabControlContainer.getActiveTabPageID();
+      short prev = (short) (currentabPageId - 1);
+
+      if (prev > 0)
+      {
+        tabControlContainer.setActiveTabPageID(prev);
+      }
+      formSidebarController.requestLayout();
+      tabChanged = true;
     }
-    formSidebarController.requestLayout();
   }
 
   /**
@@ -579,17 +649,22 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
    */
   public void nextTab()
   {
-    short currentabPageId = tabControlContainer.getActiveTabPageID();
-    short next = (short) (currentabPageId + 1);
+    if (tabChanged)
+    {
+      tabChanged = false;
+      short currentabPageId = tabControlContainer.getActiveTabPageID();
+      short next = (short) (currentabPageId + 1);
 
-    if (next > tabControlContainer.getTabPageCount())
-    {
-      tabControlContainer.setActiveTabPageID((short) 1);
-    } else
-    {
-      tabControlContainer.setActiveTabPageID(next);
+      if (next > tabControlContainer.getTabPageCount())
+      {
+        tabControlContainer.setActiveTabPageID((short) 1);
+      } else
+      {
+        tabControlContainer.setActiveTabPageID(next);
+      }
+      formSidebarController.requestLayout();
+      tabChanged = true;
     }
-    formSidebarController.requestLayout();
   }
 
   /**
