@@ -25,36 +25,19 @@ pipeline {
           mavenLocalRepo: '.repo',
           mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
           publisherStrategy: 'EXPLICIT') {
-          sh "mvn org.apache.maven.plugins:maven-enforcer-plugin:3.0.0-M3:enforce -Drules=requireReleaseDeps"
-          sh "mvn -Dmaven.javadoc.skip=true -DskipTests -DdryRun clean package"
+          sh "mvn -DskipTests -DdryRun clean package"
         }
       }
     }
 
-    stage('Parallel') {
-      parallel {
-        stage('Junit') {
-          steps {
-            withMaven(
-              maven: 'mvn',
-              mavenLocalRepo: '.repo',
-              mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
-              publisherStrategy: 'EXPLICIT') {
-              sh "mvn -Dmaven.javadoc.skip=true -DdryRun test verify"
-            }
-          }
-        }
-
-        stage('Javadoc') {
-          steps {
-            withMaven(
-              maven: 'mvn',
-              mavenLocalRepo: '.repo',
-              mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
-              publisherStrategy: 'EXPLICIT') {
-              sh "mvn javadoc:javadoc"
-            }
-          }
+    stage('Junit') {
+      steps {
+        withMaven(
+          maven: 'mvn',
+          mavenLocalRepo: '.repo',
+          mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
+          publisherStrategy: 'EXPLICIT') {
+          sh "mvn -Dmaven.javadoc.skip=true -DdryRun test verify"
         }
       }
     }
@@ -70,14 +53,16 @@ pipeline {
               publisherStrategy: 'EXPLICIT') {
               withSonarQubeEnv('SonarQube') {
               sh "mvn $SONAR_MAVEN_GOAL \
-                -Dsonar.host.url=$SONAR_HOST_URL \
+                -Dsonar.projectKey=de.muenchen:wollmux \
                 -Dsonar.branch.name=${GIT_BRANCH} \
+                -Dsonar.java.source=11 \
+                -Dsonar.java.target=11 \
                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-                -Dsonar.junit.reportPaths=target/surefire-reports"
+                -Dsonar.junit.reportPaths=target/surefire-reports,target/failsafe-reports"
               }
             }
           } else {
-            archiveArtifacts artifacts: 'target/WollMux.oxt'
+            archiveArtifacts artifacts: 'oxt/target/WollMux.oxt'
             withMaven(
               maven: 'mvn',
               mavenLocalRepo: '.repo',
@@ -85,11 +70,13 @@ pipeline {
               publisherStrategy: 'EXPLICIT') {
               withSonarQubeEnv('SonarQube') {
               sh "mvn $SONAR_MAVEN_GOAL \
-                -Dsonar.host.url=$SONAR_HOST_URL \
+                -Dsonar.projectKey=de.muenchen:wollmux \
                 -Dsonar.branch.name=${GIT_BRANCH} \
                 -Dsonar.branch.target=${env.CHANGE_TARGET} \
-                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-                -Dsonar.junit.reportPaths=target/surefire-reports"
+                -Dsonar.java.source=11 \
+                -Dsonar.java.target=11 \
+                -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco/jacoco.xml \
+                -Dsonar.junit.reportPaths=target/surefire-reports,target/failsafe-reports"
               }
             }
             timeout(time: 1, unit: 'HOURS') {

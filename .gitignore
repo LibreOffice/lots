@@ -1,16 +1,15 @@
 syntax: glob
 localization.conf
 localizedConfigStrings.conf
-oxt/WollMux.rdb
 idl/de/muenchen/allg/itd51/wollmux/*.urd
 idl/de/muenchen/allg/itd51/wollmux/*.class
-oxt/WollMux.uno.jar
 *~
-/target
+/core/target
 /idl/target
+/oxt/target
 *.urd
-.project
-.classpath
-/.settings
 .vscode/
 release.properties
+/target/
+**/.settings/org.sonarlint.eclipse.core.prefs
+**/bin

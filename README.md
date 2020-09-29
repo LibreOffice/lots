@@ -19,8 +19,24 @@ The following applications have to be installed to compile WollMux:
 * [Git](http://git-scm.com/downloads/)
 * [LibreOffice SDK](https://api.libreoffice.org/docs/install.html)
 
-Perform the following commands to download the sources and build the LibreOffice extension. Special dependencies of WollMux are hosted at
-[Bintray](https://bintray.com/wollmux/WollMux), which is already configured as maven repository in pom.xml
+Afterwards the property `UNO_PATH` has to be set in the maven settings.
+* open `~\.m2\settings.xml`
+* add a profile
+
+```
+<profile>
+  <id>UNO</id>
+  <activation>
+    <activeByDefault>true</activeByDefault>
+  </activation>
+  <properties>
+    <UNO_PATH>/opt/libreoffice/program</UNO_PATH>
+  </properties>
+</profile>
+```
+* `<UNO_PATH>` is the folder, where the LibreOffice executable is located (eg. /opt/libreoffice/program)
+
+Perform the following commands to download the sources and build the LibreOffice extension. Special dependencies of WollMux are hosted at [Bintray](https://bintray.com/wollmux/WollMux), which is already configured as maven repository in pom.xml
 
 ```
 git clone https://github.com/WollMux/WollMux.git
@@ -28,7 +44,7 @@ git checkout WollMux_18.2
 mvn clean package
 ```
 
-The compiled extension can be found at target/WollMux.oxt
+The compiled extension can be found at oxt/target/WollMux.oxt
 
 ### Build errors
 * **There are files with header to update**: Some of the source files don't have a license header. The header can be updated with:
@@ -45,7 +61,7 @@ WollMux.oxt extension is not installed in LibreOffice, but is loaded from extern
 mvn -P ButtonsOnly generate-sources
 ```
 
-and the extension is build and installed, if the program `unopkg` is availble. Otherwise you have to manually install the extension, which can be found at target/WollMux_ButtonsOnly.oxt.
+and the extension is build and installed, if the program `unopkg` is availble. Otherwise you have to manually install the extension, which can be found at oxt/target/WollMux_ButtonsOnly.oxt.
 
 Activate the maven profile "development" in Project > Properties > Maven > Active Maven Profiles.
 

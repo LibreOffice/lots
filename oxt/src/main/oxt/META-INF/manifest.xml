@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE manifest:manifest PUBLIC "-//OpenOffice.org//DTD Manifest 1.0//EN" "Manifest.dtd">
+<manifest:manifest>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="ProtocolHandler.xcu"/>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="Factories.xcu"/>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="Sidebar.xcu"/> 
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.uno-component;type=Java" manifest:full-path="lib/wollmux-${project.version}.jar"/>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.uno-typelibrary;type=RDB" manifest:full-path="lib/wollmux-interfaces-${project.version}.rdb"/>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.basic-library" manifest:full-path="basic/WollMux/"/>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="Addons.xcu"/>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="WriterWindowState.xcu"/>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="CalcWindowState.xcu"/>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="DrawWindowState.xcu"/>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="ImpressWindowState.xcu"/>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.package-bundle-description;locale=de" manifest:full-path="help/component_de.txt"/>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.package-bundle-description;locale=en" manifest:full-path="help/component_en.txt"/>
+</manifest:manifest>
