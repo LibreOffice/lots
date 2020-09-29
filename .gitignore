@@ -11,3 +11,5 @@ idl/de/muenchen/allg/itd51/wollmux/*.class
 .vscode/
 release.properties
 /target/
+**/.settings/org.sonarlint.eclipse.core.prefs
+**/bin
