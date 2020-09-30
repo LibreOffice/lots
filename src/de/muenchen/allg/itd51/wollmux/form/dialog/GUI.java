@@ -128,7 +128,6 @@ public class GUI
     public void windowClosing(WindowEvent e)
     {
       controller.close();
-      dispose();
     }
 
     @Override
