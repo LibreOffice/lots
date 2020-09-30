@@ -201,9 +201,9 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       short tabId = 1;
       for (TabConfig tab : config.getTabs())
       {
-        HTMLElement htmlElement = HTMLElement.parseHtml(tab.getTitle());
+        HTMLElement element = new HTMLElement(tab.getTitle());
         GuiFactory.createTab(this.xMCF, this.context, UNO.XTabPageContainerModel(tabControl.getModel()),
-            htmlElement.getText(), tabId);
+            element.getText(), tabId);
         XTabPage xTabPage = tabControlContainer.getTabPageByID(tabId);
 
         XControlContainer tabPageControlContainer = UNO.XControlContainer(xTabPage);
@@ -303,8 +303,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     SortedMap<String, Object> props = new TreeMap<>();
 
     String controlLabel = control.getLabel();
-    String result = HTMLElement.convertLineBreaks(controlLabel);
-    HTMLElement htmlElement = HTMLElement.parseHtml(result);
+    HTMLElement htmlElement = new HTMLElement(controlLabel);
 
     switch (control.getType())
     {
@@ -413,7 +412,8 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       if (!htmlElement.getHref().isEmpty())
       {
         props.put(UnoProperty.URL, htmlElement.getHref());
-        return GuiFactory.createHyperLinkLabel(xMCF, context, new Rectangle(0, 0, 100, 20), props);
+        return GuiFactory.createHyperLinkLabel(xMCF, context, htmlElement.getText(), new Rectangle(0, 0, 100, 20),
+            props);
       } else
       {
         return GuiFactory.createLabel(xMCF, context, htmlElement.getText(), new Rectangle(0, 0, 100, 20), props);
