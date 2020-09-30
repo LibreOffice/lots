@@ -34,6 +34,7 @@ import com.sun.star.awt.XButton;
 import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlModel;
+import com.sun.star.awt.XFixedHyperlink;
 import com.sun.star.awt.XFixedText;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XTextListener;
@@ -394,16 +395,22 @@ public class GuiFactory
    *          The factory.
    * @param context
    *          The context.
+   * @param text
+   *          The text of the label.
    * @param size
    *          The size of the control.
    * @param props
    *          Some additional properties.
    * @return A new label with a hyper link.
    */
-  public static XControl createHyperLinkLabel(XMultiComponentFactory xMCF, XComponentContext context, Rectangle size,
-      SortedMap<String, Object> props)
+  public static XControl createHyperLinkLabel(XMultiComponentFactory xMCF, XComponentContext context, String text,
+      Rectangle size, SortedMap<String, Object> props)
   {
-    return createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_FIXED_HYPER_LINK, props, size);
+    XControl control = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_FIXED_HYPER_LINK, props, size);
+
+    XFixedHyperlink txt = UnoRuntime.queryInterface(XFixedHyperlink.class, control);
+    txt.setText(text);
+    return control;
   }
 
   /**

@@ -412,7 +412,8 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       if (!htmlElement.getHref().isEmpty())
       {
         props.put(UnoProperty.URL, htmlElement.getHref());
-        return GuiFactory.createHyperLinkLabel(xMCF, context, new Rectangle(0, 0, 100, 20), props);
+        return GuiFactory.createHyperLinkLabel(xMCF, context, htmlElement.getText(), new Rectangle(0, 0, 100, 20),
+            props);
       } else
       {
         return GuiFactory.createLabel(xMCF, context, htmlElement.getText(), new Rectangle(0, 0, 100, 20), props);
