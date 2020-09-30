@@ -24,6 +24,8 @@ package de.muenchen.allg.itd51.wollmux.ui;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
@@ -123,7 +125,20 @@ public class HTMLElement
     HTMLDocument.Iterator iter = htmlDocument.getIterator(HTML.Tag.A);
     if (iter != null && iter.isValid() && iter.getAttributes().isDefined(HTML.Attribute.HREF))
     {
-      return (String) iter.getAttributes().getAttribute(HTML.Attribute.HREF);
+      String href = (String) iter.getAttributes().getAttribute(HTML.Attribute.HREF);
+      try
+      {
+        URI uri = new URI(href);
+        if (!uri.isAbsolute())
+        {
+          uri = new URI("http://" + href);
+        }
+        return uri.toString();
+      } catch (URISyntaxException e)
+      {
+        LOGGER.error("Invalide URL {}", href, e);
+        return "";
+      }
     }
     return "";
   }

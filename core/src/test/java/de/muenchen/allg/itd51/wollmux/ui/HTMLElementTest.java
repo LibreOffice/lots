@@ -68,9 +68,13 @@ public class HTMLElementTest
   @Test
   public void parseWithA()
   {
-    HTMLElement element = new HTMLElement("<html>test <a href=\"url\">link</a> test</html>");
+    HTMLElement element = new HTMLElement("<html>test <a href=\"file://test.txt\">link</a> test</html>");
     assertEquals("test link test", element.getText());
-    assertEquals("url", element.getHref());
+    assertEquals("file://test.txt", element.getHref());
+    element = new HTMLElement("<html>test <a href=\"http://www.google.com\">link</a> test</html>");
+    assertEquals("http://www.google.com", element.getHref());
+    element = new HTMLElement("<html>test <a href=\"www.google.com\">link</a> test</html>");
+    assertEquals("http://www.google.com", element.getHref());
   }
 
   @Test
