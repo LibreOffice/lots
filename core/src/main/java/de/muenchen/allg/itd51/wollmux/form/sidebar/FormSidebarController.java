@@ -100,7 +100,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   /**
    * Are ui elements handled by the controller.
    */
-  private boolean processUIElementEvents = true;
+  private boolean processUIElementEvents = false;
 
   /**
    * Don't process value changes on these IDs.
@@ -113,16 +113,16 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   private AbstractFocusListener focusListener = new AbstractFocusListener()
   {
     @Override
-    public void focusGained(FocusEvent arg0)
+    public void focusGained(FocusEvent event)
     {
       if (processUIElementEvents)
       {
         processUIElementEvents = false;
-        XControl control = UNO.XControl(arg0.Source);
+        XControl control = UNO.XControl(event.Source);
         try
         {
-          String focusedTextField = (String) UnoProperty.getProperty(control.getModel(), UnoProperty.DEFAULT_CONTROL);
-          documentController.getModel().focusFormField(focusedTextField);
+          String focusedField = (String) UnoProperty.getProperty(control.getModel(), UnoProperty.DEFAULT_CONTROL);
+          documentController.getModel().focusFormField(focusedField);
         } catch (UnoHelperException e)
         {
           LOGGER.trace("", e);
@@ -199,7 +199,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
         formSidebarPanel.createTabControl(formConfig, formModel);
         formModel.addFormModelChangedListener(this, true);
         formModel.addVisibilityChangedListener(this, true);
-
+        processUIElementEvents = true;
       } catch (FormModelException e)
       {
         LOGGER.trace("", e);
@@ -250,7 +250,6 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
     } catch (UnoHelperException e)
     {
       LOGGER.error("", e);
-      return;
     }
   }
 
@@ -271,7 +270,6 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
     } catch (UnoHelperException e)
     {
       LOGGER.error("", e);
-      return;
     }
   }
 
@@ -292,7 +290,6 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
     } catch (UnoHelperException e)
     {
       LOGGER.error("", e);
-      return;
     }
   }
 
@@ -313,7 +310,6 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
     } catch (UnoHelperException e)
     {
       LOGGER.error("", e);
-      return;
     }
   }
 

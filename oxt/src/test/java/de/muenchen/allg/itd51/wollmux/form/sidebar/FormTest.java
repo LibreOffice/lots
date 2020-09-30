@@ -86,7 +86,7 @@ public class FormTest extends WollMuxTest
     assertEquals(1, tabPageContainer.getActiveTabPageID(), "wrong tab is active");
     XTabPage tabPage = tabPageContainer.getTabPageByID((short) 1);
     XControlContainer tabControlContainer = UNO.XControlContainer(tabPage);
-    assertEquals(10, tabControlContainer.getControls().length, "tab should have 10 controls");
+    assertEquals(11, tabControlContainer.getControls().length, "tab should have 10 controls");
 
     String name = "WM(CMD 'insertFormValue' ID '%s')\n";
     XBookmarksSupplier supplier = UNO.XBookmarksSupplier(xDoc);

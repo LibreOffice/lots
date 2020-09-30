@@ -61,6 +61,11 @@ public class ControlLayout implements Layout
   private int height;
 
   /**
+   * The maximal height of the control.
+   */
+  private int maxHeight = Integer.MAX_VALUE;
+
+  /**
    * A new layout for a single control.
    *
    * @param control
@@ -72,6 +77,20 @@ public class ControlLayout implements Layout
     this.control2 = UNO.XWindow2(control);
     this.constrains = UNO.XLayoutConstrains(control);
     height = control.getPosSize().Height;
+  }
+
+  /**
+   * A new layout for a single control with a maximal height.
+   *
+   * @param control
+   *          The control as {@link XWindow}
+   * @param maxHeight
+   *          The maximal height.
+   */
+  public ControlLayout(XWindow control, int maxHeight)
+  {
+    this(control);
+    this.maxHeight = maxHeight;
   }
 
   /**
@@ -93,7 +112,7 @@ public class ControlLayout implements Layout
     if (constrains != null)
     {
       Size size = constrains.calcAdjustedSize(new Size(rect.Width, height));
-      h = Integer.max(h, size.Height);
+      h = Integer.min(Integer.max(h, size.Height), maxHeight);
       w = Integer.max(w, size.Width);
     }
     control.setPosSize(rect.X, rect.Y, w, h, PosSize.POSSIZE);
@@ -123,7 +142,7 @@ public class ControlLayout implements Layout
       if (constrains != null)
       {
         Size size = constrains.calcAdjustedSize(new Size(width, height));
-        h = Integer.max(h, size.Height);
+        h = Integer.min(Integer.max(h, size.Height), maxHeight);
       }
     }
     return h;
@@ -149,5 +168,11 @@ public class ControlLayout implements Layout
       return control2.isVisible();
     }
     return true;
+  }
+
+  @Override
+  public int size()
+  {
+    return 1;
   }
 }

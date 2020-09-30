@@ -157,4 +157,10 @@ public class VerticalLayout implements Layout
     }
     return width;
   }
+
+  @Override
+  public int size()
+  {
+    return layouts.size();
+  }
 }

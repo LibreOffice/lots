@@ -28,8 +28,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.sun.star.awt.Rectangle;
 
-import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
-
 public class DummyLayout implements Layout
 {
   private boolean visible;
@@ -97,6 +95,12 @@ public class DummyLayout implements Layout
   public boolean isVisible()
   {
     return visible;
+  }
+
+  @Override
+  public int size()
+  {
+    return 0;
   }
 
 }
