@@ -561,6 +561,10 @@ public class SenderService implements XPALProvider
     } else
     {
       data = newSenderList;
+      if (!newSenderList.isEmpty())
+      {
+        select(newSenderList.get(0));
+      }
     }
     notifyListener();
   }
@@ -610,19 +614,20 @@ public class SenderService implements XPALProvider
    */
   public void select(Sender sender) throws SenderException
   {
-    if (data.contains(sender))
-    {
-      if (this.selectedSender != null)
-      {
-        this.selectedSender.setSelected(false);
-      }
-      this.selectedSender = sender;
-      this.selectedSender.setSelected(true);
-      notifyListener();
-    } else
+    if (sender != null && !data.contains(sender))
     {
       throw new SenderException("Unbekannter Sender wurde ausgewählt.");
     }
+    if (this.selectedSender != null)
+    {
+      this.selectedSender.setSelected(false);
+    }
+    this.selectedSender = sender;
+    if (this.selectedSender != null)
+    {
+      this.selectedSender.setSelected(true);
+    }
+    notifyListener();
   }
 
   /**
