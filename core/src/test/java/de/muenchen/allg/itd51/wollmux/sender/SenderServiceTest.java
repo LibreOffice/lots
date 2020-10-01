@@ -25,6 +25,7 @@ package de.muenchen.allg.itd51.wollmux.sender;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -133,6 +134,8 @@ public class SenderServiceTest
     assertEquals(service.selectedSender, sender);
     Sender s = new Sender(new MockDataset());
     assertThrows(SenderException.class, () -> service.select(s));
+    service.select(null);
+    assertNull(service.selectedSender);
   }
 
   @Test
