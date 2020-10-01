@@ -498,7 +498,7 @@ public class WollMuxFiles
         PrintWriter printWriter = new PrintWriter(out);)
     {
       out.write("Dump time: " + date + "\n");
-      out.write(WollMuxSingleton.getBuildInfo() + "\n");
+      out.write(WollMuxSingleton.getVersion() + "\n");
 
       deterimeIP(out);
 

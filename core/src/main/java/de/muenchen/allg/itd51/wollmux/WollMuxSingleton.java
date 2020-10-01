@@ -22,9 +22,7 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Iterator;
 
@@ -48,6 +46,7 @@ import de.muenchen.allg.itd51.wollmux.former.Common;
 import de.muenchen.allg.itd51.wollmux.sender.SenderService;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.LogConfig;
+import de.muenchen.allg.itd51.wollmux.util.Utils;
 import de.muenchen.allg.util.UnoConfiguration;
 
 /**
@@ -113,7 +112,6 @@ public class WollMuxSingleton
     WollMuxClassLoader.initClassLoader();
 
     LOGGER.debug(L.m("StartupWollMux"));
-    LOGGER.debug("Build-Info: " + getBuildInfo());
     if (WollMuxFiles.getWollMuxConfFile() != null)
     {
       LOGGER.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
@@ -225,43 +223,7 @@ public class WollMuxSingleton
    */
   public static String getVersion()
   {
-    return getBuildInfo();
-  }
-
-  /**
-   * Diese Methode liefert die erste Zeile aus der buildinfo-Datei der aktuellen
-   * WollMux-Installation zurück. Der Build-Status wird während dem Build-Prozess mit dem Kommando
-   * "svn info" auf das Projektverzeichnis erstellt. Die Buildinfo-Datei buildinfo enthält die
-   * Paketnummer und die svn-Revision und ist im WollMux.oxt-Paket sowie in der
-   * WollMux.uno.jar-Datei abgelegt.
-   *
-   * Kann dieses File nicht gelesen werden, so wird eine entsprechende Ersatzmeldung erzeugt (siehe
-   * Sourcecode).
-   *
-   * @return Der Build-Status der aktuellen WollMux-Installation.
-   */
-  public static String getBuildInfo()
-  {
-    URL url = WollMuxSingleton.class.getClassLoader().getResource("buildinfo");
-
-    if (url == null)
-    {
-      return L.m("Version: unbekannt");
-    }
-
-    try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream())))
-    {
-      String str = in.readLine();
-      if (str != null)
-      {
-        return str;
-      }
-    } catch (Exception x)
-    {
-      LOGGER.trace("", x);
-    }
-
-    return L.m("Version: unbekannt");
+    return Utils.getWollMuxProperties().getProperty("wollmux.version");
   }
 
   /**
