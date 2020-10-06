@@ -300,7 +300,7 @@ public class DatasourceSearchDialog implements Dialog
         }
       }
 
-      GuiFactory.createTab(UNO.xMCF, UNO.defaultContext, tabPageContainerModel, tabTitle, tabId);
+      GuiFactory.createTab(UNO.xMCF, UNO.defaultContext, tabPageContainerModel, tabTitle, tabId, -1);
       XTabPage xTabPage = UNO.XTabPageContainer(tabPageContainer).getTabPageByID(tabId);
       UNO.XTabPageModel(UNO.XControl(xTabPage).getModel()).setToolTip(tip);
       XControlContainer tabPageControlContainer = UNO.XControlContainer(xTabPage);

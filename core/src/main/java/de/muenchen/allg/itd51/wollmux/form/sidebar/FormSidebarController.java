@@ -216,15 +216,6 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   }
 
   /**
-   * Requests the sidebar to be layouted.
-   */
-  public void requestLayout()
-  {
-    UNO.XController2(documentController.getModel().doc.getCurrentController()).getSidebar().getSidebar()
-        .requestLayout();
-  }
-
-  /**
    * Unregister the listener on the WollMux Event Bus.
    */
   public void unregisterListener()
@@ -464,7 +455,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
       String controlId = control.getId();
       formSidebarPanel.setVisible(controlId, control.getGroups().stream().allMatch(VisibilityGroup::isVisible));
     }
-    requestLayout();
+    formSidebarPanel.paint();
   }
 
 }

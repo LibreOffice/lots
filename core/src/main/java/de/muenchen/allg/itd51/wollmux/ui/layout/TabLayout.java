@@ -26,19 +26,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
+import com.sun.star.awt.Size;
+import com.sun.star.awt.XUnitConversion;
 import com.sun.star.awt.XWindow;
+import com.sun.star.awt.tab.XTabPage;
 import com.sun.star.awt.tab.XTabPageContainer;
+import com.sun.star.uno.AnyConverter;
+import com.sun.star.util.MeasureUnit;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.util.UnoProperty;
 
 /**
- * A vertical layout. The layouts are shown in one column.
+ * A tab layout. The tab container always uses the whole place. A single tag page is displayed.
  */
 public class TabLayout implements Layout
 {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(TabLayout.class);
 
   /**
    * Container for layouts.
@@ -76,25 +87,42 @@ public class TabLayout implements Layout
   @Override
   public Pair<Integer, Integer> layout(Rectangle rect)
   {
-    Rectangle tabRect = getActivetTabPage().getPosSize();
+    XTabPage activePage = getActivetTabPage();
+    // Properties use logical coordinates so we have to convert them.
+    // XWindow.setPosSize use pixels.
+    XUnitConversion converter = UNO.XUnitConversion(getActivetTabPage());
+    Rectangle tabRect = UNO.XWindow(activePage).getPosSize();
     for (int i = 0; i < layouts.size(); i++)
     {
       UNO.XTabPageModel(UNO.XControl(tabPageContainer.getTabPageByID((short) (i + 1))).getModel())
           .setEnabled(layouts.get(i).isVisible());
     }
-    Pair<Integer, Integer> size = getLayoutForActiveTabPageId().layout(
-        new Rectangle(tabRect.X, rect.Y, rect.Width, getLayoutForActiveTabPageId().getHeightForWidth(rect.Width)));
-    getActivetTabPage().setPosSize(tabRect.X, tabRect.Y, size.getRight(), size.getLeft() + tabRect.Y, PosSize.POSSIZE);
-    UNO.XWindow(tabPageContainer).setPosSize(rect.X, rect.Y, size.getRight(), size.getLeft() + tabRect.Y,
-        PosSize.POSSIZE);
-    return Pair.of(size.getLeft() + tabRect.Y, size.getRight());
+    try
+    {
+      Object o = UnoProperty.getProperty(UNO.XControl(activePage).getModel(), UnoProperty.SCROLL_TOP);
+      int scrollTop = 0;
+      if (AnyConverter.isInt(o))
+      {
+        scrollTop = converter.convertSizeToPixel(new Size(0, AnyConverter.toInt(o)), MeasureUnit.APPFONT).Height;
+      }
+      UNO.XWindow(tabPageContainer).setPosSize(rect.X, rect.Y, rect.Width, rect.Height, PosSize.POSSIZE);
+      Pair<Integer, Integer> size = getLayoutForActiveTabPageId().layout(new Rectangle(tabRect.X, rect.Y - scrollTop,
+          rect.Width, getLayoutForActiveTabPageId().getHeightForWidth(rect.Width)));
+      Size scrollableSize = converter.convertSizeToLogic(new Size(0, size.getLeft()), MeasureUnit.APPFONT);
+      UnoProperty.setProperty(UNO.XControl(getActivetTabPage()).getModel(), UnoProperty.SCROLL_HEIGHT,
+          scrollableSize.Height);
+    } catch (UnoHelperException e)
+    {
+      LOGGER.error("", e);
+    }
+    return Pair.of(rect.Height, rect.Width);
   }
 
   @Override
   public int getHeightForWidth(int width)
   {
     int height = getLayoutForActiveTabPageId().getHeightForWidth(width);
-    height += getActivetTabPage().getPosSize().Y;
+    height += UNO.XWindow(getActivetTabPage()).getPosSize().Y;
     return height;
   }
 
@@ -115,9 +143,9 @@ public class TabLayout implements Layout
     return layouts.get(getActiveTabPageId());
   }
 
-  private XWindow getActivetTabPage()
+  private XTabPage getActivetTabPage()
   {
-    return UNO.XWindow(tabPageContainer.getTabPage((short) getActiveTabPageId()));
+    return tabPageContainer.getTabPage((short) getActiveTabPageId());
   }
 
   private int getActiveTabPageId()
