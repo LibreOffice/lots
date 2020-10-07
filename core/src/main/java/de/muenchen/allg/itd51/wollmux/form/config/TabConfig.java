@@ -27,8 +27,8 @@ import java.util.List;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
+import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
 
 /**
  * A tab of a form.

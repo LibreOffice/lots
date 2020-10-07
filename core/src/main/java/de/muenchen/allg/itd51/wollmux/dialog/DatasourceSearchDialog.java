@@ -76,6 +76,7 @@ import de.muenchen.allg.itd51.wollmux.db.SearchStrategy;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
+import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.ui.layout.ControlLayout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.HorizontalLayout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
