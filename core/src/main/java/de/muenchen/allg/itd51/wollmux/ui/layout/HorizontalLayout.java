@@ -80,13 +80,13 @@ public class HorizontalLayout implements Layout
    * Horizontal layout with space between the elements.
    *
    * @param marginTop
-   *          Space before the first element.
+   *          Space above.
    * @param marginBottom
-   *          Space below the last element.
+   *          Space below.
    * @param marginLeft
    *          Space before the first element.
    * @param marginRight
-   *          Space before the first element.
+   *          Space after the last element.
    * @param marginBetween
    *          Space between the elements
    */
