@@ -112,9 +112,10 @@ public class ControlLayout implements Layout
     if (constrains != null)
     {
       Size size = constrains.calcAdjustedSize(new Size(rect.Width, height));
-      h = Integer.min(Integer.max(h, size.Height), maxHeight);
+      h = Integer.max(h, size.Height);
       w = Integer.max(w, size.Width);
     }
+    h = Integer.min(h, maxHeight);
     control.setPosSize(rect.X, rect.Y, w, h, PosSize.POSSIZE);
     if (UNO.XWindow2(control) != null && !UNO.XWindow2(control).isVisible())
     {
