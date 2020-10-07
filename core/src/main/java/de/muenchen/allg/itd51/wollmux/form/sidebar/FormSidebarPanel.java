@@ -316,7 +316,14 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
         action.accept(controlConfigs);
       }
     });
-    layout.addLayout(new ControlLayout(UNO.XWindow(tabSwithcer), 0), 1);
+    layout.addLayout(new ControlLayout(UNO.XWindow(tabSwithcer), 0)
+    {
+      @Override
+      public boolean isVisible()
+      {
+        return false;
+      }
+    }, 1);
     tabPageControlContainer.addControl(id, tabSwithcer);
   }
 
