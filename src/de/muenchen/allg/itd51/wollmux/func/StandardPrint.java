@@ -360,6 +360,7 @@ public class StandardPrint
         }
       } else
       {
+        LOGGER.debug("Property {} is null", PrintFunction.PROP_PRINT_RESULT_FILE);
         InfoDialog.showInfoModal("WollMux", "Dokument konnte nicht angezeigt werden.");
       }
     } catch (IOException | URISyntaxException e)
