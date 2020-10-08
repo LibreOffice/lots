@@ -356,7 +356,7 @@ public class StandardPrint
           Desktop.getDesktop().open(outputPath.toFile());
         } else
         {
-          InfoDialog.showInfoModal("WollMux", "Dokument konnte nicht angezeigt werden.");
+          LOGGER.info("PDF wurde nicht gespeichert, da der Dialog abgebrochen wurde.");
         }
       } else
       {
