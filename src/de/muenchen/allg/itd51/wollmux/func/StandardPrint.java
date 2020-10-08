@@ -113,6 +113,12 @@ public class StandardPrint
   {
     Triplet<List<VerfuegungspunktInfo>, Boolean, Boolean> settings = SachleitendeVerfuegung
         .callPrintDialog(pmod.getTextDocument());
+
+    if (settings == null)
+    {
+      return;
+    }
+
     boolean collect = settings.getValue2();
     List<VerfuegungspunktInfo> items = settings.getValue0();
     if (!settings.getValue1())
