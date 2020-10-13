@@ -983,7 +983,7 @@ public class MailMergeDatasource
     {
       for (String tableName : model.getTableNames())
       {
-        if (name.contains(model.getDatasourceName()) && name.contains(tableName))
+        if (name.startsWith(model.getDatasourceName()) && name.endsWith(tableName))
         {
           if (model instanceof DBModel)
           {
