@@ -49,9 +49,6 @@ pipeline {
 	              -Dsonar.branch.target=${env.CHANGE_TARGET} "
 	          }
             }
-            timeout(time: 1, unit: 'HOURS') {
-             waitForQualityGate abortPipeline: true
-            }
             archiveArtifacts artifacts: 'dist/WollMux.oxt', onlyIfSuccessful: true
           }
         }
