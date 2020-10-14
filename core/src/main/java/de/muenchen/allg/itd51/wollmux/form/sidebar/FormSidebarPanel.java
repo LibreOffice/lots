@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.accessibility.XAccessible;
+import com.sun.star.awt.FocusChangeReason;
 import com.sun.star.awt.FocusEvent;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
@@ -307,13 +308,16 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       @Override
       public void focusGained(FocusEvent event)
       {
-        Stream<XWindow2> controlConfigs = tab.getControls().stream()
-            .filter(c -> c.getType() == UIElementType.BUTTON || c.getType() == UIElementType.CHECKBOX
-                || c.getType() == UIElementType.COMBOBOX || c.getType() == UIElementType.LISTBOX
-                || c.getType() == UIElementType.TEXTAREA || c.getType() == UIElementType.TEXTFIELD)
-            .map(c -> controls.get(c.getId())).filter(Objects::nonNull).map(p -> UNO.XWindow2(p.getRight()))
-            .filter(Objects::nonNull).filter(XWindow2::isVisible);
-        action.accept(controlConfigs);
+        if ((event.FocusFlags & FocusChangeReason.TAB) == 1)
+        {
+          Stream<XWindow2> controlConfigs = tab.getControls().stream()
+              .filter(c -> c.getType() == UIElementType.BUTTON || c.getType() == UIElementType.CHECKBOX
+                  || c.getType() == UIElementType.COMBOBOX || c.getType() == UIElementType.LISTBOX
+                  || c.getType() == UIElementType.TEXTAREA || c.getType() == UIElementType.TEXTFIELD)
+              .map(c -> controls.get(c.getId())).filter(Objects::nonNull).map(p -> UNO.XWindow2(p.getRight()))
+              .filter(Objects::nonNull).filter(XWindow2::isVisible);
+          action.accept(controlConfigs);
+        }
       }
     });
     layout.addLayout(new ControlLayout(UNO.XWindow(tabSwithcer), 0)
