@@ -113,6 +113,12 @@ public class StandardPrint
   {
     Triplet<List<VerfuegungspunktInfo>, Boolean, Boolean> settings = SachleitendeVerfuegung
         .callPrintDialog(pmod.getTextDocument());
+
+    if (settings == null)
+    {
+      return;
+    }
+
     boolean collect = settings.getValue2();
     List<VerfuegungspunktInfo> items = settings.getValue0();
     if (!settings.getValue1())
@@ -350,10 +356,11 @@ public class StandardPrint
           Desktop.getDesktop().open(outputPath.toFile());
         } else
         {
-          InfoDialog.showInfoModal("WollMux", "Dokument konnte nicht angezeigt werden.");
+          LOGGER.info("PDF wurde nicht gespeichert, da der Dialog abgebrochen wurde.");
         }
       } else
       {
+        LOGGER.debug("Property {} is null", PrintFunction.PROP_PRINT_RESULT_FILE);
         InfoDialog.showInfoModal("WollMux", "Dokument konnte nicht angezeigt werden.");
       }
     } catch (IOException | URISyntaxException e)
