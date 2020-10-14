@@ -645,10 +645,18 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       tabChanged = false;
       short currentabPageId = tabControlContainer.getActiveTabPageID();
       short prev = (short) (currentabPageId - 1);
+      while (prev > 0
+          && !UNO.XTabPageModel(UNO.XControl(tabControlContainer.getTabPageByID(prev)).getModel()).getEnabled())
+      {
+        prev--;
+      }
 
       if (prev > 0)
       {
         tabControlContainer.setActiveTabPageID(prev);
+      } else
+      {
+        tabControlContainer.setActiveTabPageID(tabControlContainer.getTabPageCount());
       }
       formSidebarController.requestLayout();
       tabChanged = true;
