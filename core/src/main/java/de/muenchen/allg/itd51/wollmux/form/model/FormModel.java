@@ -469,22 +469,33 @@ public class FormModel
     this.listener.add(l);
     if (notify)
     {
-      formControls.values().forEach(c -> {
-        switch (c.getType())
-        {
-        case TEXTFIELD:
-        case TEXTAREA:
-        case COMBOBOX:
-        case CHECKBOX:
-        case LISTBOX:
-          l.valueChanged(c.getId(), c.getValue());
-          l.statusChanged(c.getId(), c.isOkay());
-          break;
-        default:
-          break;
-        }
-      });
+      notifyWithCurrentValues(l);
     }
+  }
+
+  /**
+   * Notifies the listener with the current values and states.
+   *
+   * @param l
+   *          The listener.
+   */
+  public void notifyWithCurrentValues(FormValueChangedListener l)
+  {
+    formControls.values().forEach(c -> {
+      switch (c.getType())
+      {
+      case TEXTFIELD:
+      case TEXTAREA:
+      case COMBOBOX:
+      case CHECKBOX:
+      case LISTBOX:
+        l.valueChanged(c.getId(), c.getValue());
+        l.statusChanged(c.getId(), c.isOkay());
+        break;
+      default:
+        break;
+      }
+    });
   }
 
   /**
@@ -500,7 +511,18 @@ public class FormModel
     this.vListener.add(l);
     if (notify)
     {
-      visiblities.values().forEach(g -> l.visibilityChanged(g.getGroupId(), g.isVisible()));
+      notifyWithCurrentVisibilites(l);
     }
+  }
+
+  /**
+   * Notifies the listener with the current visibility states.
+   *
+   * @param l
+   *          The listener.
+   */
+  public void notifyWithCurrentVisibilites(VisibilityChangedListener l)
+  {
+    visiblities.values().forEach(g -> l.visibilityChanged(g.getGroupId(), g.isVisible()));
   }
 }
