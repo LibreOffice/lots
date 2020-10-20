@@ -180,8 +180,7 @@ public abstract class PrintToEmail extends MailMergePrintFunction
 
       sendMail(mail, smtpSettings, document);
 
-      // Wenn Properties noch nicht gesetzt worden sind initial setzen da
-      // sonst bei getPropertyValue() UnknownPropertyException geworfen wird.
+      // Initialize properties if not already set.
       if (!pmod.getPropertySetInfo().hasPropertyByName(PROP_EMAIL_REPORT_RECIPIENT_LIST))
       {
         pmod.setPropertyValue(PROP_EMAIL_REPORT_RECIPIENT_LIST, new ArrayList<String>());
