@@ -107,6 +107,8 @@ public class IfThenElseDialog
   private static final String IMAGE_LOCATION = PackageInformationProvider.get(UNO.defaultContext)
       .getPackageLocation(Utils.getWollMuxProperties().getProperty("extension.id")) + "/image/";
 
+  private static final Random rand = new Random();
+
   private IfThenElseDialog()
   {
     // nothing to do
@@ -245,7 +247,6 @@ public class IfThenElseDialog
 
   private static void addNewCondition(XControlContainer controlContainer, List<String> randomImages)
   {
-      Random rand = new Random();
       int randomNumber = rand.nextInt(randomImages.size());
 
       String randomImageFileName = randomImages.get(randomNumber);
