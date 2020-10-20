@@ -82,6 +82,8 @@ import de.muenchen.allg.util.UnoProperty;
 public class IfThenElseDialog
 {
 
+  private static final String CONTROL_CONDITION = "txtValueIf";
+
   private static final String CONTROL_CBSERIENBRIEFFELD2 = "cbSerienbrieffeld2";
 
   private static final String CONTROL_RESULTTREE = "resultTreeControl";
@@ -106,6 +108,8 @@ public class IfThenElseDialog
 
   private static final String IMAGE_LOCATION = PackageInformationProvider.get(UNO.defaultContext)
       .getPackageLocation(Utils.getWollMuxProperties().getProperty("extension.id")) + "/image/";
+
+  private static final Random rand = new Random();
 
   private IfThenElseDialog()
   {
@@ -214,7 +218,7 @@ public class IfThenElseDialog
       XTextComponent txtValue = UNO.XTextComponent(controlContainer.getControl(CONTROL_TXTVALUE));
       AbstractTextListener txtValueWennListener = e -> textFieldChanged(controlContainer, e);
       txtValue.addTextListener(txtValueWennListener);
-      XTextComponent txtValueIf = UNO.XTextComponent(controlContainer.getControl("txtValueIf"));
+      XTextComponent txtValueIf = UNO.XTextComponent(controlContainer.getControl(CONTROL_CONDITION));
       txtValueIf.addTextListener(txtValueWennListener);
 
       XComboBox cbComparator = UNO.XComboBox(controlContainer.getControl(CONTROL_CBCOMPARATOR));
@@ -245,7 +249,6 @@ public class IfThenElseDialog
 
   private static void addNewCondition(XControlContainer controlContainer, List<String> randomImages)
   {
-      Random rand = new Random();
       int randomNumber = rand.nextInt(randomImages.size());
 
       String randomImageFileName = randomImages.get(randomNumber);
@@ -287,6 +290,7 @@ public class IfThenElseDialog
       }
 
       UNO.XTextComponent(cbSerienbrieffeld).setText(cbSerienbrieffeld.getItem((short) 0));
+      UNO.XTextComponent(controlContainer.getControl(CONTROL_CONDITION)).setText("");
   }
 
   private static void compartorChanged(XControlContainer controlContainer, ItemEvent event)
@@ -546,7 +550,6 @@ public class IfThenElseDialog
   private static void nodeSelected(XControlContainer controlContainer)
   {
     XMutableTreeNode selectedNode = getSelectedNode(controlContainer);
-    XTextComponent txtValue = UNO.XTextComponent(controlContainer.getControl(CONTROL_TXTVALUE));
 
     if (selectedNode.getParent() == null)
     {
@@ -568,13 +571,13 @@ public class IfThenElseDialog
       UNO.XTextComponent(controlContainer.getControl(CONTROL_CBSERIENBRIEFFELD)).setText(data[2]);
       UNO.XCheckBox(controlContainer.getControl(CONTROL_CBNOT)).setState((short) (NOT.equals(data[3]) ? 1 : 0));
       UNO.XTextComponent(controlContainer.getControl(CONTROL_CBCOMPARATOR)).setText(data[4]);
-      txtValue.setText(data[5]);
+      UNO.XTextComponent(controlContainer.getControl(CONTROL_CONDITION)).setText(data[5]);
       activeWennControls(controlContainer, true);
       changeText(controlContainer, "Wenn", "Serienbrieffeld:");
     } else
     {
       // dest[1] = id, [2] = txtfieldvalue
-      txtValue.setText(data[2]);
+      UNO.XTextComponent(controlContainer.getControl(CONTROL_TXTVALUE)).setText(data[2]);
       activeWennControls(controlContainer, false);
       if (DANN.equals(data[0]))
       {
@@ -612,7 +615,7 @@ public class IfThenElseDialog
     UNO.XWindow(controlContainer.getControl("labelVar2")).setVisible(!active);
     UNO.XWindow(controlContainer.getControl(CONTROL_CBSERIENBRIEFFELD2)).setVisible(!active);
     UNO.XWindow(controlContainer.getControl(CONTROL_TXTVALUE)).setVisible(!active);
-    UNO.XWindow(controlContainer.getControl("txtValueIf")).setVisible(active);
+    UNO.XWindow(controlContainer.getControl(CONTROL_CONDITION)).setVisible(active);
   }
 
   private static ConfigThingy buildTrafo(XTreeNode currentNode, ConfigThingy rootConfig)
