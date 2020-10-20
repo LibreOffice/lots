@@ -344,7 +344,7 @@ public class CalcModel implements DatasourceModel
           for (int y : rowIndexes)
           {
             UNO.XCell(sheetCellRange.getCellByPosition(newColumnX, y))
-                .setFormula(formulaStr.replaceAll(rowNumPlaceholder, "" + (y + 1)));
+                .setFormula(formulaStr.replace(rowNumPlaceholder, "" + (y + 1)));
           }
         }
         UNO.XTextRange(sheetCellRange.getCellByPosition(newColumnX, ymin)).setString(fieldId);
@@ -527,7 +527,7 @@ public class CalcModel implements DatasourceModel
       if (substEle.isFixedText())
       {
         formula.append('"');
-        formula.append(substEle.getValue().replaceAll("\"", "\"\""));
+        formula.append(substEle.getValue().replace("\"", "\"\""));
         formula.append('"');
       } else if (substEle.isField())
       {
@@ -539,7 +539,7 @@ public class CalcModel implements DatasourceModel
         } else
         {
           formula.append("\"<");
-          formula.append(substEle.getValue().replaceAll("\"", "\"\""));
+          formula.append(substEle.getValue().replace("\"", "\"\""));
           formula.append(rowNumPlaceholder);
           formula.append(">\"");
         }
