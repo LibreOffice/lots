@@ -212,19 +212,16 @@ public abstract class PrintToEmail extends MailMergePrintFunction
           "Es konnten keine Angaben zum Mailserver gefunden werden - eventuell ist die WollMux-Konfiguration "
               + "nicht vollständig."));
       pmod.cancel();
-      return;
     } catch (MessagingException e)
     {
       LOGGER.error("Email versenden fehlgeschlagen", e);
       InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE,
           L.m("Der Versand der E-Mail ist fehlgeschlagen."));
       pmod.cancel();
-      return;
     } catch (Exception e)
     {
       LOGGER.error("", e);
       pmod.cancel();
-      return;
     }
   }
 
