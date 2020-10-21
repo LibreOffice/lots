@@ -176,6 +176,7 @@ public abstract class PrintToEmail extends MailMergePrintFunction
 
       MailServerSettings smtpSettings = getMailServerSettings(pmod, mail);
 
+      pmod.setPropertyValue(PROP_TARGETDIR, Files.createTempDirectory("MailMerge").toString());
       File document = saveOutputFile(createTempDocument(pmod, isODT), pmod.getTextDocument());
 
       sendMail(mail, smtpSettings, document);
