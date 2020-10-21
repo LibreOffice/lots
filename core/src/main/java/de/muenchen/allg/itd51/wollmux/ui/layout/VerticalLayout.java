@@ -22,8 +22,8 @@
  */
 package de.muenchen.allg.itd51.wollmux.ui.layout;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -38,7 +38,7 @@ public class VerticalLayout implements Layout
   /**
    * Container for layouts.
    */
-  private Map<Layout, Integer> layouts = new LinkedHashMap<>();
+  private List<Layout> layouts = new ArrayList<>();
 
   /**
    * Margin above first layout.
@@ -99,22 +99,22 @@ public class VerticalLayout implements Layout
   @Override
   public boolean isVisible()
   {
-    return layouts.keySet().stream().anyMatch(Layout::isVisible);
+    return layouts.stream().anyMatch(Layout::isVisible);
   }
 
   @Override
   public void addLayout(Layout layout, int weight)
   {
-    layouts.put(layout, weight);
+    layouts.add(layout);
   }
 
   @Override
   public Pair<Integer, Integer> layout(Rectangle rect)
   {
     int yOffset = marginTop;
-    for (Map.Entry<Layout, Integer> entry : layouts.entrySet())
+    for (Layout layout : layouts)
     {
-      Pair<Integer, Integer> size = entry.getKey().layout(new Rectangle(rect.X + marginLeft, rect.Y + yOffset,
+      Pair<Integer, Integer> size = layout.layout(new Rectangle(rect.X + marginLeft, rect.Y + yOffset,
           rect.Width - marginLeft - marginRight, rect.Height - marginTop - marginBottom));
       if (size.getLeft() > 0)
       {
@@ -135,7 +135,7 @@ public class VerticalLayout implements Layout
   @Override
   public int getHeightForWidth(int width)
   {
-    int height = layouts.keySet().stream().mapToInt(l -> {
+    int height = layouts.stream().mapToInt(l -> {
       int h = l.getHeightForWidth(width);
       return h > 0 ? h + marginBetween : 0;
     }).sum();
@@ -149,8 +149,7 @@ public class VerticalLayout implements Layout
   @Override
   public int getMinimalWidth(int maxWidth)
   {
-    int width = layouts.keySet().stream().mapToInt(l -> l.getMinimalWidth(maxWidth - marginLeft - marginRight)).max()
-        .orElse(0);
+    int width = layouts.stream().mapToInt(l -> l.getMinimalWidth(maxWidth - marginLeft - marginRight)).max().orElse(0);
     if (width > 0)
     {
       width += marginLeft + marginRight;
