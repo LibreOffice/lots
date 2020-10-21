@@ -73,4 +73,20 @@ public class TestUIElementConfig
     assertFalse(control.isSidebar());
   }
 
+  @Test
+  public void testEmptyId() throws Exception
+  {
+    ConfigThingy conf = new ConfigThingy("", "TYPE \"LABEL\" ID \"\"");
+    UIElementConfig control = new UIElementConfig(conf);
+    assertFalse(control.getId().isEmpty());
+  }
+
+  @Test
+  public void testMissingId() throws Exception
+  {
+    ConfigThingy conf = new ConfigThingy("", "TYPE \"LABEL\"");
+    UIElementConfig control = new UIElementConfig(conf);
+    assertFalse(control.getId().isEmpty());
+  }
+
 }

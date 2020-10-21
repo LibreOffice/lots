@@ -185,6 +185,10 @@ public class UIElementConfig
   {
     type = UIElementType.getType(controlConf.getString("TYPE", ""));
     id = controlConf.getString("ID", RandomStringUtils.randomAlphanumeric(10));
+    if (id.isEmpty())
+    {
+      id = RandomStringUtils.randomAlphanumeric(10);
+    }
     label = controlConf.getString("LABEL", "");
     tip = controlConf.getString("TIP", "");
     String hotkeyString = controlConf.getString("HOTKEY", "");
