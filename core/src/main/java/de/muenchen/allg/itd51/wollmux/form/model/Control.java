@@ -195,7 +195,10 @@ public class Control
    */
   public void addGroup(VisibilityGroup group)
   {
-    groups.add(group);
+    if (group != null)
+    {
+      groups.add(group);
+    }
   }
 
   public List<VisibilityGroup> getDependingGroups()
