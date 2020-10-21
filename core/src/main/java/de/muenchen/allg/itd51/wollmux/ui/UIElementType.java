@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.dialog;
+package de.muenchen.allg.itd51.wollmux.ui;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 

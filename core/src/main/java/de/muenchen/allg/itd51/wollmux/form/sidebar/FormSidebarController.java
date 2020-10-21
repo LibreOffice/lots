@@ -46,7 +46,6 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
-import de.muenchen.allg.itd51.wollmux.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -59,6 +58,7 @@ import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.form.model.FormValueChangedListener;
 import de.muenchen.allg.itd51.wollmux.form.model.VisibilityChangedListener;
 import de.muenchen.allg.itd51.wollmux.form.model.VisibilityGroup;
+import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
 import de.muenchen.allg.util.UnoProperty;
 
 /**

@@ -32,8 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.dialog.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
+import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**

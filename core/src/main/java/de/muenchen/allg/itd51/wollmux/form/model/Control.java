@@ -29,13 +29,13 @@ import java.util.Optional;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.dialog.UIElementConfig;
-import de.muenchen.allg.itd51.wollmux.dialog.UIElementType;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.Values;
 import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
+import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
+import de.muenchen.allg.itd51.wollmux.ui.UIElementType;
 
 /**
  * Representation of a form control.

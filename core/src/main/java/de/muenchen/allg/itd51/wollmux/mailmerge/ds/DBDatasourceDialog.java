@@ -24,6 +24,7 @@ package de.muenchen.allg.itd51.wollmux.mailmerge.ds;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -42,7 +43,6 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.dialog.AbstractNotifier;
 import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
 import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
@@ -60,7 +60,7 @@ public class DBDatasourceDialog
    * @param listener
    *          The listener is called when the dialog is closed.
    */
-  public DBDatasourceDialog(AbstractNotifier listener)
+  public DBDatasourceDialog(Consumer<String> listener)
   {
     XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
     XContainerWindowProvider provider = null;
@@ -84,7 +84,7 @@ public class DBDatasourceDialog
     Layout layout = new VerticalLayout(20, 10, 20, 20, 15);
 
     AbstractActionListener oooDSActionListener = event -> {
-      listener.notify(event.ActionCommand);
+      listener.accept(event.ActionCommand);
       dialog.endExecute();
     };
 

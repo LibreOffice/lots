@@ -81,9 +81,9 @@ public class VerticalLayout implements Layout
    * @param marginBottom
    *          Space below the last element.
    * @param marginLeft
-   *          Space before the first element.
+   *          Space to the left.
    * @param marginRight
-   *          Space before the first element.
+   *          Space to the right.
    * @param marginBetween
    *          Space between the elements
    */
