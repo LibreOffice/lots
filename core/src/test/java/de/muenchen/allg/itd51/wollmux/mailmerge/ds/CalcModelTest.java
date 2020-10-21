@@ -108,12 +108,15 @@ public class CalcModelTest extends OfficeTest
   {
     model.activateTable("Tabelle2");
     assertEquals("Tabelle2", model.getActivatedTable(), "different activated table");
+
+    Set<String> columns = Set.of("Test", "Column with 2 rows", "1", "2.0", "3.5");
+    assertEquals(columns, model.getColumnNames());
+
     Table<Integer, String, String> data = model.getData();
     assertEquals("1", data.get(1, "Test"), "wrong data");
     // second record is hidden, so it doesn't count
     assertEquals("3.5", data.get(2, "Test"), "wrong data");
 
-    assertTrue(model.getColumnNames().contains("Column with 2 rows"), "column with line break");
     assertEquals("A", data.get(1, "Column with 2 rows"));
   }
 

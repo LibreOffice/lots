@@ -344,7 +344,7 @@ public class CalcModel implements DatasourceModel
           for (int y : rowIndexes)
           {
             UNO.XCell(sheetCellRange.getCellByPosition(newColumnX, y))
-                .setFormula(formulaStr.replaceAll(rowNumPlaceholder, "" + (y + 1)));
+                .setFormula(formulaStr.replace(rowNumPlaceholder, "" + (y + 1)));
           }
         }
         UNO.XTextRange(sheetCellRange.getCellByPosition(newColumnX, ymin)).setString(fieldId);
@@ -462,7 +462,7 @@ public class CalcModel implements DatasourceModel
       {
         if (columnIndexes.contains(j + columnIndexes.first()))
         {
-          String column = cellData[rows.get(0)][j].toString();
+          String column = parseValue(cellData[rows.get(0)][j]);
           column = CharMatcher.breakingWhitespace().replaceFrom(column, " ");
           // first row contains the header
           if (record == 0)
@@ -470,7 +470,7 @@ public class CalcModel implements DatasourceModel
             mapColumnNameToCalcColumnName.put(column, getCalcColumnNameForColumnIndex(j + 1));
           } else
           {
-            parseValue(record, column, cellData[row][j].toString());
+            data.put(record, column, parseValue(cellData[row][j]));
           }
         }
       }
@@ -481,28 +481,30 @@ public class CalcModel implements DatasourceModel
    * Parse the value from the calc file. Integers are given as doubles but we don't want the decimal
    * part if it's an integer so we have to do some casting.
    *
-   * @param record
-   *          The record id.
-   * @param column
-   *          The column id.
    * @param value
    *          The value.
    */
-  private void parseValue(int record, String column, String value)
+  private String parseValue(Object value)
   {
-    try
+    if (value instanceof String)
     {
-      double doubleValue = Double.parseDouble(value);
-      if (DoubleMath.isMathematicalInteger(doubleValue))
+      return (String) value;
+    } else
+    {
+      try
       {
-        data.put(record, column, Integer.toString((int) doubleValue));
-      } else
+        double doubleValue = (double) value;
+        if (DoubleMath.isMathematicalInteger(doubleValue))
+        {
+          return Integer.toString((int) doubleValue);
+        } else
+        {
+          return Double.toString(doubleValue);
+        }
+      } catch (NumberFormatException ex)
       {
-        data.put(record, column, Double.toString(doubleValue));
+        return "";
       }
-    } catch (NumberFormatException ex)
-    {
-      data.put(record, column, value);
     }
   }
 
@@ -527,7 +529,7 @@ public class CalcModel implements DatasourceModel
       if (substEle.isFixedText())
       {
         formula.append('"');
-        formula.append(substEle.getValue().replaceAll("\"", "\"\""));
+        formula.append(substEle.getValue().replace("\"", "\"\""));
         formula.append('"');
       } else if (substEle.isField())
       {
@@ -539,7 +541,7 @@ public class CalcModel implements DatasourceModel
         } else
         {
           formula.append("\"<");
-          formula.append(substEle.getValue().replaceAll("\"", "\"\""));
+          formula.append(substEle.getValue().replace("\"", "\"\""));
           formula.append(rowNumPlaceholder);
           formula.append(">\"");
         }
