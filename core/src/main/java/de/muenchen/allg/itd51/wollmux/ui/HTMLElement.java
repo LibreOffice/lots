@@ -23,19 +23,15 @@
 package de.muenchen.allg.itd51.wollmux.ui;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Element;
-import javax.swing.text.ElementIterator;
+import javax.swing.text.AttributeSet;
 import javax.swing.text.html.CSS;
-import javax.swing.text.html.HTML;
-import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.StyleSheet;
-import javax.swing.text.html.parser.ParserDelegator;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,11 +45,10 @@ public class HTMLElement
 
   private static final Logger LOGGER = LoggerFactory.getLogger(HTMLElement.class);
 
-  private String html;
-  private HTMLDocument htmlDocument;
+  private Document doc;
 
   /**
-   * Parses an HTML string with java swing's {@link HTMLDocument}. {@code <br>
+   * Parses an HTML string. {@code <br>
    * } is replaced by {@code \n}.
    *
    * @param html
@@ -61,71 +56,63 @@ public class HTMLElement
    */
   public HTMLElement(String html)
   {
-    this.html = html;
-    try
-    {
-      htmlDocument = new HTMLDocument();
-      htmlDocument.setParser(new ParserDelegator());
-      html = "<html>" + html.replaceAll("<html>", "").replaceAll("</html>", "") + "</html>";
-      htmlDocument.insertAfterStart(htmlDocument.getDefaultRootElement(), html);
-      replaceBR(htmlDocument);
-    } catch (BadLocationException | IOException e)
-    {
-      LOGGER.debug("", e);
-    }
-  }
-
-  private void replaceBR(HTMLDocument doc) throws BadLocationException
-  {
-    HTMLDocument.Iterator iter = doc.getIterator(HTML.Tag.BR);
-    while (iter != null && iter.isValid())
-    {
-      doc.replace(iter.getStartOffset(), iter.getEndOffset() - iter.getStartOffset(), "\n", null);
-      iter.next();
-    }
+    doc = Jsoup.parse(html);
+    Document.OutputSettings outputSettings = new Document.OutputSettings();
+    outputSettings.prettyPrint(false);
+    doc.outputSettings(outputSettings);
+    doc.select("br").after("\n");
+    doc.select("p").after("\n");
   }
 
   public FontDescriptor getFontDescriptor()
   {
+    org.jsoup.nodes.Element element = doc.selectFirst("[style]");
     FontDescriptor fontDescriptor = new FontDescriptor();
-    ElementIterator iterator = new ElementIterator(htmlDocument);
-    Element elem = iterator.next();
-    while (elem != null)
+    if (element != null)
     {
-      if (elem.getAttributes().isDefined(CSS.Attribute.FONT_SIZE))
+      String style = element.attr("style");
+      StyleSheet styleSheet = new StyleSheet();
+      AttributeSet attributes = styleSheet.getDeclaration(style);
+      Object o = attributes.getAttribute(CSS.Attribute.FONT_SIZE);
+      if (o != null)
       {
-        String size = elem.getAttributes().getAttribute(CSS.Attribute.FONT_SIZE).toString();
-        fontDescriptor.Height = Short.valueOf(size.replaceAll("pt", ""));
-        break;
+        fontDescriptor.Height = Short.valueOf(o.toString().replaceAll("pt", ""));
       }
-      elem = iterator.next();
     }
     return fontDescriptor;
   }
 
   public int getRGBColor()
   {
-    ElementIterator iterator = new ElementIterator(htmlDocument);
-    Element elem = iterator.next();
-    while (elem != null)
+    org.jsoup.nodes.Element element = doc.selectFirst("[color], [style]");
+    if (element != null)
     {
-      if (elem.getAttributes().isDefined(CSS.Attribute.COLOR))
+      StyleSheet styleSheet = new StyleSheet();
+      String colorAttr = "";
+      if (element.hasAttr("color"))
       {
-        String colorAttr = elem.getAttributes().getAttribute(CSS.Attribute.COLOR).toString();
-        Color color = new StyleSheet().stringToColor(colorAttr);
-        return color.getRGB() & ~0xFF000000;
+        colorAttr = element.attr("color");
+      } else
+      {
+        String style = element.attr("style");
+        AttributeSet attributes = styleSheet.getDeclaration(style);
+        if (attributes.isDefined(CSS.Attribute.COLOR))
+        {
+          colorAttr = attributes.getAttribute(CSS.Attribute.COLOR).toString();
+        }
       }
-      elem = iterator.next();
+      Color color = styleSheet.stringToColor(colorAttr);
+      return color.getRGB() & ~0xFF000000;
     }
     return 0;
   }
 
   public String getHref()
   {
-    HTMLDocument.Iterator iter = htmlDocument.getIterator(HTML.Tag.A);
-    if (iter != null && iter.isValid() && iter.getAttributes().isDefined(HTML.Attribute.HREF))
+    org.jsoup.nodes.Element link = doc.selectFirst("a[href]");
+    if (link != null)
     {
-      String href = (String) iter.getAttributes().getAttribute(HTML.Attribute.HREF);
+      String href = link.attr("href");
       try
       {
         URI uri = new URI(href);
@@ -137,7 +124,6 @@ public class HTMLElement
       } catch (URISyntaxException e)
       {
         LOGGER.error("Invalide URL {}", href, e);
-        return "";
       }
     }
     return "";
@@ -145,12 +131,6 @@ public class HTMLElement
 
   public String getText()
   {
-    try
-    {
-      return htmlDocument.getText(0, htmlDocument.getLength()).strip();
-    } catch (BadLocationException e)
-    {
-      return html;
-    }
+    return doc.body().wholeText().trim();
   }
 }

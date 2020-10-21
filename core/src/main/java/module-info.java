@@ -127,6 +127,7 @@ module wollmux
   requires org.apache.commons.collections4;
   requires org.apache.pdfbox;
   requires javafx.graphics;
+  requires org.jsoup;
 
   uses ComponentRegistration;
   uses Dispatcher;

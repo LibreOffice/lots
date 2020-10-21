@@ -39,6 +39,13 @@ public class HTMLElementTest
   }
 
   @Test
+  public void parseWithSpecialCharaters()
+  {
+    HTMLElement element = new HTMLElement("<&>\"\'");
+    assertEquals("<&>\"\'", element.getText());
+  }
+
+  @Test
   public void parseSimpleHtml()
   {
     HTMLElement element = new HTMLElement("<html>test");
@@ -66,6 +73,13 @@ public class HTMLElementTest
   }
 
   @Test
+  public void parseWithP()
+  {
+    HTMLElement element = new HTMLElement("<p>p1</p><p>p2</p>");
+    assertEquals("p1\np2", element.getText());
+  }
+
+  @Test
   public void parseWithA()
   {
     HTMLElement element = new HTMLElement("<html>test <a href=\"file://test.txt\">link</a> test</html>");
@@ -83,11 +97,14 @@ public class HTMLElementTest
     HTMLElement element = new HTMLElement(
         "<html><font color =#000099>Örtlicher Ausbildungsplan für den <br>Studiengang</font></html>");
     assertEquals(153, element.getRGBColor());
-    assertEquals("Örtlicher Ausbildungsplan für den\nStudiengang", element.getText());
+    assertEquals("Örtlicher Ausbildungsplan für den \nStudiengang", element.getText());
     element = new HTMLElement(
         "<html><p style=\"color:navy\">Örtlicher Ausbildungsplan für den <br>Studiengang</html>");
     assertEquals(128, element.getRGBColor());
     element = new HTMLElement("<html>Örtlicher Ausbildungsplan für den <br>Studiengang</html>");
+    assertEquals(0, element.getRGBColor());
+    element = new HTMLElement(
+        "<html><p style=\\\"font-size: 24pt;\\\">Örtlicher Ausbildungsplan für den <br>Studiengang</p></html>");
     assertEquals(0, element.getRGBColor());
   }
 
@@ -98,7 +115,7 @@ public class HTMLElementTest
         "<html><font style=\"font-size: 24pt;\">Örtlicher Ausbildungsplan für den <br>Studiengang</font></html>");
     FontDescriptor fontDesc = element.getFontDescriptor();
     assertEquals(24, fontDesc.Height);
-    assertEquals("Örtlicher Ausbildungsplan für den\nStudiengang", element.getText());
+    assertEquals("Örtlicher Ausbildungsplan für den \nStudiengang", element.getText());
 
     element = new HTMLElement(
         "<html><p style=\"font-size: 24pt;\">Örtlicher Ausbildungsplan für den <br>Studiengang</font></html>");
