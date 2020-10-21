@@ -1787,8 +1787,28 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     {
       formModel = new FormModel(getFormConfig(), getFunctionContext(), getFunctionLibrary(), getDialogLibrary(),
           getIDToPresetValue());
-      formModel.addFormModelChangedListener(this, true);
-      formModel.addVisibilityChangedListener(this, true);
+      boolean modified = model.isDocumentModified();
+      model.setDocumentModifiable(false);
+      formModel.notifyWithCurrentValues(new FormValueChangedListener()
+      {
+
+        @Override
+        public void valueChanged(String id, String value)
+        {
+          addFormFieldValue(id, value);
+        }
+
+        @Override
+        public void statusChanged(String id, boolean okay)
+        {
+          // nothing to do
+        }
+      });
+      formModel.notifyWithCurrentVisibilites(this::setVisibleState);
+      formModel.addFormModelChangedListener(this, false);
+      formModel.addVisibilityChangedListener(this, false);
+      model.setDocumentModified(modified);
+      model.setDocumentModifiable(true);
     }
     return formModel;
   }

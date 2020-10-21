@@ -24,6 +24,8 @@ package de.muenchen.allg.itd51.wollmux.form.sidebar;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
@@ -81,6 +83,8 @@ public class FormTest extends WollMuxTest
   @Test
   public void testFormSidebar() throws Exception
   {
+    assertFalse(UNO.XModifiable(xDoc).isModified());
+
     XTabPageContainer tabPageContainer = UNO.XTabPageContainer(controlContainer.getControl("tabControl"));
     assertEquals(2, tabPageContainer.getTabPageCount(), "should have two tabs");
     assertEquals(1, tabPageContainer.getActiveTabPageID(), "wrong tab is active");
@@ -96,6 +100,7 @@ public class FormTest extends WollMuxTest
     textField.setText("test");
     XTextContent contentTextField = bookmarks.get(String.format(name, "text"));
     assertEquals("test", contentTextField.getAnchor().getString(), "wrong text");
+    assertTrue(UNO.XModifiable(xDoc).isModified());
 
     XTextComponent textArea = UNO.XTextComponent(tabControlContainer.getControl("area"));
     textArea.setText("test\narea");

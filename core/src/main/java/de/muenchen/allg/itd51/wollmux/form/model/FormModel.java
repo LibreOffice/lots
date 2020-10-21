@@ -360,12 +360,10 @@ public class FormModel
   }
 
   /**
-   * Falls das Control einen Autofill hat, wird das Control für alle Funktionsdialoge, die der
-   * Autofill referenziert in die entsprechende Liste in
-   * {@link #mapDialogNameToListOfControlsWithDependingAutofill} beingetragen.
+   * Add a dependencies for all function dialogs which are referenced by the AUTOFILL function.
    *
    * @param contro
-   *          Das Control mit dem Autofill.
+   *          The control with the AUTOFILL function.
    */
   private void storeAutofillFunctionDialogDeps(Control control)
   {
@@ -385,11 +383,10 @@ public class FormModel
   }
 
   /**
-   * Fügt diesem Model ein Formularelement hinzu und berechnet den initialen Wert so wie die
-   * Abhängigkeiten.
+   * Add a new control to the model and compute its initial value and dependencies.
    *
    * @param control
-   *          Das neue Formularelement.
+   *          The new control.
    */
   private void addFormField(Control control)
   {
@@ -401,12 +398,11 @@ public class FormModel
   }
 
   /**
-   * Speichert für ein Formularelement die Abhängigkeiten zu anderen Formularelementen. Sollte erst
-   * aufgerufen werden, nachdem alle Formularelemente angelegt wruden.
+   * Computes for a control the dependency to other controls. Should be called after all controls
+   * have been added to the model.
    *
    * @param control
-   *          Das Formularelement, für das die Abhängigkeiten in anderen Formularelementen
-   *          eingetragen werden sollen.
+   *          The new control for which we want the dependencies.
    */
   private void storeDepsForFormField(Control control)
   {
@@ -415,11 +411,10 @@ public class FormModel
   }
 
   /**
-   * Parst die Sichtbarkeitsinformationen und berechnet den aktuellen Wert (sichtbar, unsichtbar).
+   * Compute the visibility of a visibility group and add the dependencies to the controls.
    *
-   * @param visibilityDesc
-   *          der Sichtbarkeit-Knoten der Formularbeschreibung oder ein leeres ConfigThingy falls
-   *          der Knoten nicht existiert.
+   * @param group
+   *          A visibility group.
    */
   private void storeDepsForVisibility(VisibilityGroup group)
   {
@@ -433,16 +428,14 @@ public class FormModel
       }
     }
 
-    // Sichtbarkeitsstatus setzen
     group.computeVisibility(idToValue());
   }
 
   /**
-   * Falls ein Formularelement eine Plausi und/oder ein Autofill hat, werden entsprechende
-   * Abhängigkeiten in den Maps erfasst.
+   * Compute the dependency on other controls based on the PLAUSI and AUTOFILL function.
    *
    * @param control
-   *          Das zu betrachtende Formularelement.
+   *          The control which may depend on others.
    */
   private void storeDeps(Control control)
   {
@@ -464,50 +457,72 @@ public class FormModel
   }
 
   /**
-   * Fügt dem Modell einen weiteren Listener für Wert- oder Statusänderungen hinzu.
+   * Add a {@link FormValueChangedListener} to the model.
    *
    * @param l
-   *          Der neue Listener.
+   *          The listener.
    * @param notify
-   *          Soll der Listener über den aktuellen Zustand des Modells informiert werden?
+   *          If true the listener is notified with the current values and states.
    */
   public void addFormModelChangedListener(FormValueChangedListener l, boolean notify)
   {
     this.listener.add(l);
     if (notify)
     {
-      formControls.values().forEach(c -> {
-        switch (c.getType())
-        {
-        case TEXTFIELD:
-        case TEXTAREA:
-        case COMBOBOX:
-        case CHECKBOX:
-        case LISTBOX:
-          l.valueChanged(c.getId(), c.getValue());
-          l.statusChanged(c.getId(), c.isOkay());
-          break;
-        default:
-          break;
-        }
-      });
+      notifyWithCurrentValues(l);
     }
   }
 
   /**
-   * Fügt dem Modell einen weiteren Listener für Sichtbarkeitsänderungen hinzu.
+   * Notifies the listener with the current values and states.
    *
    * @param l
-   *          Der neue Listener.
+   *          The listener.
+   */
+  public void notifyWithCurrentValues(FormValueChangedListener l)
+  {
+    formControls.values().forEach(c -> {
+      switch (c.getType())
+      {
+      case TEXTFIELD:
+      case TEXTAREA:
+      case COMBOBOX:
+      case CHECKBOX:
+      case LISTBOX:
+        l.valueChanged(c.getId(), c.getValue());
+        l.statusChanged(c.getId(), c.isOkay());
+        break;
+      default:
+        break;
+      }
+    });
+  }
+
+  /**
+   * Add a {@link VisibilityChangedListener} to the model.
+   *
+   * @param l
+   *          The listener.
    * @param notify
-   *          Soll der Listener über den aktuellen Zustand des Modells informiert werden?
+   *          If true the listener is notified with the current visibility states.
    */
   public void addVisibilityChangedListener(VisibilityChangedListener l, boolean notify)
   {
     this.vListener.add(l);
     if (notify)
     {
-      visiblities.values().forEach(g -> l.visibilityChanged(g.getGroupId(), g.isVisible()));
+      notifyWithCurrentVisibilites(l);
     }
+  }
+
+  /**
+   * Notifies the listener with the current visibility states.
+   *
+   * @param l
+   *          The listener.
+   */
+  public void notifyWithCurrentVisibilites(VisibilityChangedListener l)
+  {
+    visiblities.values().forEach(g -> l.visibilityChanged(g.getGroupId(), g.isVisible()));
   }
 }
