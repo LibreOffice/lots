@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.accessibility.XAccessible;
+import com.sun.star.awt.FocusChangeReason;
 import com.sun.star.awt.FocusEvent;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
@@ -307,16 +308,26 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       @Override
       public void focusGained(FocusEvent event)
       {
-        Stream<XWindow2> controlConfigs = tab.getControls().stream()
-            .filter(c -> c.getType() == UIElementType.BUTTON || c.getType() == UIElementType.CHECKBOX
-                || c.getType() == UIElementType.COMBOBOX || c.getType() == UIElementType.LISTBOX
-                || c.getType() == UIElementType.TEXTAREA || c.getType() == UIElementType.TEXTFIELD)
-            .map(c -> controls.get(c.getId())).filter(Objects::nonNull).map(p -> UNO.XWindow2(p.getRight()))
-            .filter(Objects::nonNull).filter(XWindow2::isVisible);
-        action.accept(controlConfigs);
+        if ((event.FocusFlags & FocusChangeReason.TAB) == 1)
+        {
+          Stream<XWindow2> controlConfigs = tab.getControls().stream()
+              .filter(c -> c.getType() == UIElementType.BUTTON || c.getType() == UIElementType.CHECKBOX
+                  || c.getType() == UIElementType.COMBOBOX || c.getType() == UIElementType.LISTBOX
+                  || c.getType() == UIElementType.TEXTAREA || c.getType() == UIElementType.TEXTFIELD)
+              .map(c -> controls.get(c.getId())).filter(Objects::nonNull).map(p -> UNO.XWindow2(p.getRight()))
+              .filter(Objects::nonNull).filter(XWindow2::isVisible);
+          action.accept(controlConfigs);
+        }
       }
     });
-    layout.addLayout(new ControlLayout(UNO.XWindow(tabSwithcer), 0), 1);
+    layout.addLayout(new ControlLayout(UNO.XWindow(tabSwithcer), 0)
+    {
+      @Override
+      public boolean isVisible()
+      {
+        return false;
+      }
+    }, 1);
     tabPageControlContainer.addControl(id, tabSwithcer);
   }
 
@@ -634,10 +645,18 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       tabChanged = false;
       short currentabPageId = tabControlContainer.getActiveTabPageID();
       short prev = (short) (currentabPageId - 1);
+      while (prev > 0
+          && !UNO.XTabPageModel(UNO.XControl(tabControlContainer.getTabPageByID(prev)).getModel()).getEnabled())
+      {
+        prev--;
+      }
 
       if (prev > 0)
       {
         tabControlContainer.setActiveTabPageID(prev);
+      } else
+      {
+        tabControlContainer.setActiveTabPageID(tabControlContainer.getTabPageCount());
       }
       formSidebarController.requestLayout();
       tabChanged = true;
