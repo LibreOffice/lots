@@ -77,6 +77,20 @@ public class DatasetPredicateTest
   }
 
   @Test
+  public void makePredicateIgnoreCase() throws Exception
+  {
+    List<QueryPart> query = List.of(new QueryPart("Vorname", "sheldon"));
+    Predicate<Dataset> pred = DatasetPredicate.makePredicate(query);
+    Dataset ds = new SimpleDataset("Test", Map.of("Vorname", "Sheldon"));
+    assertTrue(pred.test(ds));
+
+    query = List.of(new QueryPart("Vorname", "Sheldon"));
+    pred = DatasetPredicate.makePredicate(query);
+    ds = new SimpleDataset("Test", Map.of("Vorname", "sheldon"));
+    assertTrue(pred.test(ds));
+  }
+
+  @Test
   public void makePredicateCheckCount() throws Exception
   {
     List<QueryPart> query = new ArrayList<>();
@@ -94,7 +108,7 @@ public class DatasetPredicateTest
     testMap.put("Vorname", "Sheldon");
 
     Map<String, String> testMap1 = new HashMap<>();
-    testMap1.put("Vorname", "Sheldon*");
+    testMap1.put("Vorname", "Lennard");
 
     List<Dataset> datasetList = new ArrayList<>();
 

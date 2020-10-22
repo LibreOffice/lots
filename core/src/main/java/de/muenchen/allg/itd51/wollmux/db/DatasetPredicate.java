@@ -54,8 +54,9 @@ public class DatasetPredicate
       Predicate<Dataset> pred = (Dataset ds) -> {
         try
         {
-          return Pattern.matches(part.getSearchString().replaceAll("\\*", ""),
-              ds.get(part.getColumnName()));
+          return Pattern.compile(part.getSearchString().replace("*", "").toLowerCase())
+              .matcher(ds.get(part.getColumnName()).toLowerCase())
+              .find();
         } catch (ColumnNotFoundException ex)
         {
           return false;

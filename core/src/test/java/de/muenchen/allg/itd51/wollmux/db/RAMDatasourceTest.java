@@ -47,7 +47,7 @@ public class RAMDatasourceTest
     results = ds.getDatasetsByKey(List.of("ds", "ds2"));
     assertEquals(1, results.size());
     results = ds.find(List.of(new QueryPart("column", "value")));
-    assertEquals(1, results.size());
+    assertEquals(2, results.size());
     results = ds.find(List.of());
     assertEquals(0, results.size());
     results = ds.find(List.of(new QueryPart("column", "value2")));
