@@ -141,10 +141,12 @@ public class ContentBasedDirectivePrintOutput extends PrintFunction
       oldViewCursor = vc.getText().createTextCursorByRange(vc);
 
     // Initialize counter
-    ContentBasedDirectiveItem punkt1 = model.getFirstItem();
+    ContentBasedDirectiveItem frameItem = model.getFirstItem();
     int count = 0;
-    if (punkt1 != null)
+    if (frameItem != null)
+    {
       count++;
+    }
 
     // Get invisible section
     XTextRange setInvisibleRange = getInvisibleRange(model, verfPunkt, count);
@@ -175,6 +177,14 @@ public class ContentBasedDirectivePrintOutput extends PrintFunction
     pmod.setGroupVisible(PrintBlockSignature.ALL_VERSIONS.getGroupName(), true);
     pmod.setGroupVisible(PrintBlockSignature.COPY_ONLY.getGroupName(), !isDraft && !isOriginal);
 
+    ContentBasedDirectiveItem punkt1;
+    if (frameItem == null)
+    {
+      punkt1 = getFirstContent(model);
+    } else
+    {
+      punkt1 = frameItem;
+    }
     // hide first number if necessary
     setVisibilityFirst(isOriginal, punkt1, true);
 
@@ -230,8 +240,7 @@ public class ContentBasedDirectivePrintOutput extends PrintFunction
     }
   }
 
-  private void setVisibilityFirst(boolean isOriginal, ContentBasedDirectiveItem punkt1,
-      boolean hide)
+  private void setVisibilityFirst(boolean isOriginal, ContentBasedDirectiveItem punkt1, boolean hide)
   {
     if (isOriginal && punkt1 != null)
     {
@@ -248,6 +257,25 @@ public class ContentBasedDirectivePrintOutput extends PrintFunction
       sectionOldState.put(section, oldState);
       Utils.setProperty(section, UnoProperty.IS_VISIBLE, Boolean.FALSE);
     }
+  }
+
+  private ContentBasedDirectiveItem getFirstContent(ContentBasedDirectiveModel model)
+  {
+    XParagraphCursor cursor = UNO.XParagraphCursor(
+        model.getTextDocument().getText().createTextCursorByRange(model.getTextDocument().getText().getStart()));
+    ContentBasedDirectiveItem item = new ContentBasedDirectiveItem(cursor);
+    if (cursor != null)
+    {
+      do
+      {
+        cursor.gotoEndOfParagraph(true);
+        if (item.isItem() && model.isItemVisible(item))
+        {
+          return new ContentBasedDirectiveItem(cursor.getText().createTextCursorByRange(cursor));
+        }
+      } while (cursor.gotoNextParagraph(false));
+    }
+    return null;
   }
 
   private XTextRange getInvisibleRange(ContentBasedDirectiveModel model, int verfPunkt, int count)
