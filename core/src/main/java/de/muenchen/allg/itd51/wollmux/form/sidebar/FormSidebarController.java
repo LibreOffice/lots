@@ -400,11 +400,10 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
         formController.saveAs();
         break;
       case "openTemplate":
+        formController.openTemplateOrDocument(List.of(formControl.getFragId()), true);
+        break;
       case "openDocument":
-        String fragId = formControl.getFragId();
-        List<String> fragIds = new ArrayList<>();
-        fragIds.add(fragId);
-        formController.openTemplateOrDocument(fragIds, false);
+        formController.openTemplateOrDocument(List.of(formControl.getFragId()), false);
         break;
       case "openExt":
         OpenExt openExInstance = OpenExt.getInstance(formControl.getExt(), formControl.getUrl());
