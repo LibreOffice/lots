@@ -156,19 +156,19 @@ public abstract class MailMergePrintFunction extends PrintFunction
   {
     try
     {
-      String outFilePath = outFile.getPath();
+      String url = UNO.getParsedUNOUrl(outFile.toURI().toString()).Complete;
       XStorable store = UNO.XStorable(doc);
       PropertyValue[] options;
 
       // fyi: http://wiki.services.openoffice.org/wiki/API/Tutorials/PDF_export
-      if (outFilePath.endsWith(".pdf"))
+      if (url.endsWith(".pdf"))
       {
         options = new PropertyValue[1];
 
         options[0] = new PropertyValue();
         options[0].Name = "FilterName";
         options[0].Value = "writer_pdf_Export";
-      } else if (outFilePath.endsWith(".doc"))
+      } else if (url.endsWith(".doc"))
       {
         options = new PropertyValue[1];
 
@@ -177,23 +177,16 @@ public abstract class MailMergePrintFunction extends PrintFunction
         options[0].Value = "MS Word 97";
       } else
       {
-        if (!outFilePath.endsWith(".odt"))
+        if (!url.endsWith(".odt"))
         {
-          outFilePath = outFilePath + ".odt";
+          url = url + ".odt";
         }
 
         options = new PropertyValue[0];
       }
 
-      if (System.getProperty("os.name").toLowerCase().contains("windows"))
-      {
-        outFilePath = outFilePath.replace("\\", "/");
-      }
-
-      com.sun.star.util.URL url = UNO.getParsedUNOUrl(outFilePath);
-
       // storeTOurl() has to be used instead of storeASurl() for PDF export
-      store.storeToURL(url.Complete, options);
+      store.storeToURL(url, options);
     } catch (Exception x)
     {
       LOGGER.error("", x);

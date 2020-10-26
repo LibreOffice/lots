@@ -125,6 +125,10 @@
       <artifactId>jakarta.mail-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>javax.mail</artifactId>
+    </dependency>
+    <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
     </dependency>

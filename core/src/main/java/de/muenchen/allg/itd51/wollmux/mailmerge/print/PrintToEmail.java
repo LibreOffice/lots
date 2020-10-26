@@ -176,12 +176,12 @@ public abstract class PrintToEmail extends MailMergePrintFunction
 
       MailServerSettings smtpSettings = getMailServerSettings(pmod, mail);
 
+      pmod.setPropertyValue(PROP_TARGETDIR, Files.createTempDirectory("MailMerge").toString());
       File document = saveOutputFile(createTempDocument(pmod, isODT), pmod.getTextDocument());
 
       sendMail(mail, smtpSettings, document);
 
-      // Wenn Properties noch nicht gesetzt worden sind initial setzen da
-      // sonst bei getPropertyValue() UnknownPropertyException geworfen wird.
+      // Initialize properties if not already set.
       if (!pmod.getPropertySetInfo().hasPropertyByName(PROP_EMAIL_REPORT_RECIPIENT_LIST))
       {
         pmod.setPropertyValue(PROP_EMAIL_REPORT_RECIPIENT_LIST, new ArrayList<String>());
@@ -212,19 +212,16 @@ public abstract class PrintToEmail extends MailMergePrintFunction
           "Es konnten keine Angaben zum Mailserver gefunden werden - eventuell ist die WollMux-Konfiguration "
               + "nicht vollständig."));
       pmod.cancel();
-      return;
     } catch (MessagingException e)
     {
       LOGGER.error("Email versenden fehlgeschlagen", e);
       InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE,
           L.m("Der Versand der E-Mail ist fehlgeschlagen."));
       pmod.cancel();
-      return;
     } catch (Exception e)
     {
       LOGGER.error("", e);
       pmod.cancel();
-      return;
     }
   }
 

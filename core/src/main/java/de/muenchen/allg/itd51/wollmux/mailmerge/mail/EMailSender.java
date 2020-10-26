@@ -126,11 +126,10 @@ public class EMailSender
    */
   public void sendMessage(MailServerSettings mailServerSettings) throws MessagingException
   {
-    try
+    // Necessary for mapping MIME types to Java classes.
+    Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+    try (Transport tr = session.getTransport("smtp");)
     {
-      // Necessary for mapping MIME types to Java classes.
-      Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-      Transport tr = session.getTransport("smtp");
       // Empty String activates AUTH so use null if no authentication is required.
       tr.connect(mailServerSettings.getMailserver(), mailServerSettings.getMailserverport(),
           mailServerSettings.getUsername(), mailServerSettings.getPassword());
