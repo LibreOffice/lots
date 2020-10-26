@@ -28,6 +28,7 @@ import java.util.TreeMap;
 
 import com.sun.star.accessibility.XAccessible;
 import com.sun.star.awt.Rectangle;
+import com.sun.star.awt.Selection;
 import com.sun.star.awt.WindowEvent;
 import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
@@ -263,7 +264,9 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
   {
     Utils.setProperty(preview.getModel(), UnoProperty.STATE, (short) (enabled ? 1 : 0));
     XTextComponent currentDatasourceCountText = UNO.XTextComponent(printCount);
-    currentDatasourceCountText.setText(String.valueOf(max));
+    String maxText = String.valueOf(max);
+    currentDatasourceCountText.setText(maxText);
+    currentDatasourceCountText.setSelection(new Selection(maxText.length(), maxText.length()));
     UNO.XWindow(jumpToLast).setEnable(enabled);
     UNO.XWindow(jumpToFirst).setEnable(enabled);
     UNO.XWindow(printCount).setEnable(enabled);
