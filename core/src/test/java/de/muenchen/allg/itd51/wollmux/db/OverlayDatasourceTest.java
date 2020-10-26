@@ -129,7 +129,7 @@ public class OverlayDatasourceTest
         List.of(new MockDataset("ds2", Map.of("column", "value2", "column2", "value4", "join", "join")))));
     Datasource ds = new OverlayDatasource(nameToDatasource, new ConfigThingy("",
         "NAME \"overlay\" SOURCE \"mock\" OVERLAY \"mock2\" MODE \"so\" MATCH (\"join\" \"join\")"), null);
-    QueryResults results = ds.find(List.of(new QueryPart("column", "value")));
+    QueryResults results = ds.find(List.of(new QueryPart("column", "foo")));
     assertEquals(0, results.size());
     results = ds.find(List.of(new QueryPart("column", "value2")));
     assertEquals(1, results.size());
