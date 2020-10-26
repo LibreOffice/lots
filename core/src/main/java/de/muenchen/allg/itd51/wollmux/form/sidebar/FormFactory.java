@@ -68,9 +68,9 @@ public class FormFactory extends AbstractSidebarFactory
       if (arguments[i].Name.equals("ParentWindow"))
       {
         parentWindow = UNO.XWindow(arguments[i].Value);
-      } else if (arguments[i].Name.equals("Controller"))
+      } else if (arguments[i].Name.equals("Frame"))
       {
-        model = UNO.XController(arguments[i].Value).getModel();
+        model = UNO.XFrame(arguments[i].Value).getController().getModel();
       }
     }
 
