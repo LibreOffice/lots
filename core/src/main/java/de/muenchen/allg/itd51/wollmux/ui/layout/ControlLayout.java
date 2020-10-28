@@ -113,7 +113,6 @@ public class ControlLayout implements Layout
     {
       Size size = constrains.calcAdjustedSize(new Size(rect.Width, height));
       h = Integer.max(h, size.Height);
-      w = Integer.max(w, size.Width);
     }
     h = Integer.min(h, maxHeight);
     control.setPosSize(rect.X, rect.Y, w, h, PosSize.POSSIZE);
