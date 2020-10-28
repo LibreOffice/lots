@@ -244,7 +244,7 @@ public class ContentBasedDirectiveItem
         short goRight = 2; // . and tab
         cursor.goRight(goRight, true);
         return cursor;
-      } catch (IllegalArgumentException e)
+      } catch (IllegalArgumentException | NumberFormatException e)
       {
         return null;
       }
