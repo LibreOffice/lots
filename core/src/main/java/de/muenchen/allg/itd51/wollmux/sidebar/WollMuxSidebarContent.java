@@ -74,7 +74,6 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
 import de.muenchen.allg.dialog.adapter.AbstractItemListener;
@@ -101,7 +100,6 @@ import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.util.UnoComponent;
-import de.muenchen.allg.util.UnoConfiguration;
 import de.muenchen.allg.util.UnoProperty;
 
 /**
@@ -295,16 +293,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
   @Override
   public int getMinimalWidth()
   {
-    try
-    {
-      int maxWidth = (int) UnoConfiguration.getConfiguration("org.openoffice.Office.UI.Sidebar/General",
-          "MaximumWidth");
-      return layout.getMinimalWidth(maxWidth);
-    } catch (UnoHelperException e)
-    {
-      LOGGER.debug("", e);
-      return 300;
-    }
+    return 300;
   }
 
   /**
