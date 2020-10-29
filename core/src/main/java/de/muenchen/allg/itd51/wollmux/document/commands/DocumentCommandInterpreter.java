@@ -234,15 +234,14 @@ public class DocumentCommandInterpreter
       // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
       getDocumentController().getModel().setDocumentModified(modified);
       getDocumentController().getModel().setDocumentModifiable(true);
+    }
 
-      // ggf. eine WMCommandsFailedException werfen:
-      if (errors != 0)
-      {
-        throw new WMCommandsFailedException(
-          L.m(
-            "Die verwendete Vorlage enthält %1 Fehler.\n\nBitte kontaktieren Sie Ihre Systemadministration.",
-            ((errors == 1) ? "einen" : "" + errors)));
-      }
+    // ggf. eine WMCommandsFailedException werfen:
+    if (errors != 0)
+    {
+      throw new WMCommandsFailedException(
+          L.m("Die verwendete Vorlage enthält %1 Fehler.\n\nBitte kontaktieren Sie Ihre Systemadministration.",
+              ((errors == 1) ? "einen" : "" + errors)));
     }
   }
 
