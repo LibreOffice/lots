@@ -61,7 +61,10 @@ import de.muenchen.allg.util.UnoComponent;
  */
 public class ContentBasedDirectiveDialog
 {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(ContentBasedDirectiveDialog.class);
+
+  private static final String SPINFIELD_NAME = "Count";
 
   /**
    * Maximum number of chars for each {@link ContentBasedDirective}.
@@ -169,8 +172,8 @@ public class ContentBasedDirectiveDialog
       for (int i = 1; i <= 4; i++)
       {
         spinListener[i - 1] = new MySpinListener();
-        UNO.XSpinField(container.getControl("Count" + i)).addSpinListener(spinListener[i - 1]);
-        UNO.XTextComponent(container.getControl("Count" + i)).addTextListener(spinListener[i - 1]);
+        UNO.XSpinField(container.getControl(SPINFIELD_NAME + i)).addSpinListener(spinListener[i - 1]);
+        UNO.XTextComponent(container.getControl(SPINFIELD_NAME + i)).addTextListener(spinListener[i - 1]);
         printListener[i - 1] = new MyActionListener();
         UNO.XButton(container.getControl("Print" + i)).addActionListener(printListener[i - 1]);
       }
@@ -216,7 +219,7 @@ public class ContentBasedDirectiveDialog
     for (int i = 1; i <= 4; i++)
     {
       int index = value - 1 + i;
-      XNumericField countNum = UNO.XNumericField(container.getControl("Count" + i));
+      XNumericField countNum = UNO.XNumericField(container.getControl(SPINFIELD_NAME + i));
       XFixedText label = UNO.XFixedText(container.getControl("Label" + i));
 
       if (index < items.size())
