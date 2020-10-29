@@ -67,7 +67,9 @@ public class OneGroupFuncView extends FunctionSelectionAccessView
 
     @Override
     public void attributeChanged(GroupModel model, int attributeId, Object newValue)
-    {}
+    {
+      // nothing to do
+    }
   }
 
   /**

@@ -186,7 +186,9 @@ public class OneFormControlExtView implements LazyView
     @Override
     public void attributeChanged(FormControlModel model, int attributeId,
         Object newValue)
-    {}
+    {
+      // nothing to do
+    }
   }
 
 }

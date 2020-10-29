@@ -25,8 +25,8 @@ package de.muenchen.allg.itd51.wollmux.former.group;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -208,11 +208,8 @@ public class OneGroupLineView extends LineView
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class MyMouseListener implements MouseListener
+  private class MyMouseListener extends MouseAdapter
   {
-    @Override
-    public void mouseClicked(MouseEvent e)
-    {}
 
     @Override
     public void mousePressed(MouseEvent e)
@@ -233,17 +230,5 @@ public class OneGroupLineView extends LineView
         }
       });
     }
-
-    @Override
-    public void mouseReleased(MouseEvent e)
-    {}
-
-    @Override
-    public void mouseEntered(MouseEvent e)
-    {}
-
-    @Override
-    public void mouseExited(MouseEvent e)
-    {}
   }
 }

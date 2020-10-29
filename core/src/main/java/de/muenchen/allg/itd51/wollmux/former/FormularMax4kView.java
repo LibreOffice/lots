@@ -28,8 +28,8 @@ import java.awt.HeadlessException;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.net.URL;
 
 import javax.swing.AbstractButton;
@@ -533,38 +533,14 @@ public class FormularMax4kView extends JFrame
     dispose();
   }
 
-  private class MyWindowListener implements WindowListener
+  private class MyWindowListener extends WindowAdapter
   {
-    @Override
-    public void windowOpened(WindowEvent e)
-    {}
 
     @Override
     public void windowClosing(WindowEvent e)
     {
       closeAction.actionPerformed(null);
     }
-
-    @Override
-    public void windowClosed(WindowEvent e)
-    {}
-
-    @Override
-    public void windowIconified(WindowEvent e)
-    {}
-
-    @Override
-    public void windowDeiconified(WindowEvent e)
-    {}
-
-    @Override
-    public void windowActivated(WindowEvent e)
-    {}
-
-    @Override
-    public void windowDeactivated(WindowEvent e)
-    {}
-
   }
 
   /**

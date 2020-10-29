@@ -29,8 +29,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -918,7 +918,7 @@ public class OneFormControlLineView extends LineView
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class MyMouseListener implements MouseListener
+  private class MyMouseListener extends MouseAdapter
   {
     /*
      * Beim Klicken in Feld "ID" oder "Label" wird der automatisch vorbefüllte
@@ -966,21 +966,6 @@ public class OneFormControlLineView extends LineView
 	  listener.broadcastFormControlModelSelection(this);
 	}
       });
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e)
-    {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e)
-    {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e)
-    {
     }
   }
 }

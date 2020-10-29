@@ -27,8 +27,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -213,19 +213,25 @@ public class FunctionTester
     combo.setEditable(true);
 
     updateParameterBox(combo);
-
     combo.addPopupMenuListener(new PopupMenuListener()
     {
+      @Override
       public void popupMenuWillBecomeVisible(PopupMenuEvent e)
       {
         updateParameterBox(combo);
       }
 
+      @Override
       public void popupMenuWillBecomeInvisible(PopupMenuEvent e)
-      {}
+      {
+        // nothing to do
+      }
 
+      @Override
       public void popupMenuCanceled(PopupMenuEvent e)
-      {}
+      {
+        // nothing to do
+      }
     });
 
     hbox.add(combo);
@@ -235,6 +241,7 @@ public class FunctionTester
     JButton butsi = new JButton("VALUE");
     butsi.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         insertCode("VALUE \"" + getComboBoxValue(combo, "ERROR") + "\"");
@@ -407,6 +414,7 @@ public class FunctionTester
 
     button.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         stringResult.setText("");
@@ -449,6 +457,7 @@ public class FunctionTester
     JButton butsi = new JButton(label);
     butsi.addActionListener(new ActionListener()
     {
+      @Override
       public void actionPerformed(ActionEvent e)
       {
         insertCode(code);
@@ -507,30 +516,14 @@ public class FunctionTester
     }
   }
 
-  private class MyWindowListener implements WindowListener
+  private class MyWindowListener extends WindowAdapter
   {
-    public void windowOpened(WindowEvent e)
-    {}
 
+    @Override
     public void windowClosing(WindowEvent e)
     {
       abort();
     }
-
-    public void windowClosed(WindowEvent e)
-    {}
-
-    public void windowIconified(WindowEvent e)
-    {}
-
-    public void windowDeiconified(WindowEvent e)
-    {}
-
-    public void windowActivated(WindowEvent e)
-    {}
-
-    public void windowDeactivated(WindowEvent e)
-    {}
   }
 
   public void abort()
@@ -559,6 +552,7 @@ public class FunctionTester
    */
   private class ValueBoxesValues implements Values
   {
+    @Override
     public boolean hasValue(String id)
     {
       ValueBox box = getValueBox(id);
@@ -577,6 +571,7 @@ public class FunctionTester
       return null;
     }
 
+    @Override
     public String getString(String id)
     {
       ValueBox box = getValueBox(id);
@@ -584,6 +579,7 @@ public class FunctionTester
       return box.text.getText();
     }
 
+    @Override
     public boolean getBoolean(String id)
     {
       ValueBox box = getValueBox(id);

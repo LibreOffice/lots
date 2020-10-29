@@ -247,7 +247,9 @@ public class AllInsertionLineViewsPanel implements View
 
     @Override
     public void itemRemoved(InsertionModel model, int index)
-    {}
+    {
+      // nothing to do
+    }
 
   }
 
@@ -266,7 +268,9 @@ public class AllInsertionLineViewsPanel implements View
   {
     @Override
     public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
-    {}
+    {
+      // nothing to do
+    }
 
     @Override
     public void broadcastInsertionModelSelection(BroadcastObjectSelection b)

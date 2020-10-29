@@ -40,7 +40,9 @@ public class StringLiteralFunction implements Function
 
   @Override
   public void getFunctionDialogReferences(Collection<String> set)
-  {}
+  {
+    // this function can't have any function dialog references
+  }
 
   public StringLiteralFunction(String str)
   {

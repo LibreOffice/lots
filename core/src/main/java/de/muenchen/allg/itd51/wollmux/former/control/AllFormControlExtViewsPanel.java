@@ -102,7 +102,9 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
 
     @Override
     public void itemSwapped(int index1, int index2)
-    {}
+    {
+      // nothing to do
+    }
   }
 
   private class MyBroadcastListener extends BroadcastListener

@@ -66,9 +66,10 @@ public class OneInsertionTrafoView extends FunctionSelectionAccessView
     }
 
     @Override
-    public void attributeChanged(InsertionModel model, int attributeId,
-        Object newValue)
-    {}
+    public void attributeChanged(InsertionModel model, int attributeId, Object newValue)
+    {
+      // nothing to do
+    }
   }
 
   /**
