@@ -528,10 +528,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     int index = getInsertionIndex();
     formControlModelList.add(comboModel, index);
     deleteSelectedElements();
-    ComboboxMergeDescriptor desc = new ComboboxMergeDescriptor();
-    desc.combo = comboModel;
-    desc.mapCheckboxId2ComboboxEntry = mapCheckboxId2ComboboxEntry;
-    return desc;
+    return new ComboboxMergeDescriptor(comboModel, mapCheckboxId2ComboboxEntry);
   }
 
   /**
@@ -745,22 +742,22 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     /**
      * Die View des Elements.
      */
-    public OneFormControlLineView view;
+    private OneFormControlLineView view;
 
     /**
      * Der Index des Elements innerhalb seines Tabs.
      */
-    public int gridY;
+    private int gridY;
 
     /**
      * Der Index des Tabs in {@link AllFormControlLineViewsPanel#tabPane}.
      */
-    public int containingTabIndex;
+    private int containingTabIndex;
 
     /**
      * true gdw das Element ein Tab ist.
      */
-    public boolean isTab;
+    private boolean isTab;
 
     /**
      * Erzeugt einen neuen ViewDescriptor.

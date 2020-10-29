@@ -147,7 +147,7 @@ public class DocumentCommandInterpreter
       InsertFormValueCommandsScanner s = new InsertFormValueCommandsScanner(this);
       s.execute(getDocumentController().getModel().getDocumentCommands());
 
-      getDocumentController().getModel().setIDToFormFields(s.idToFormFields);
+      getDocumentController().getModel().setIDToFormFields(s.getIdToFormFields());
       getDocumentController().collectNonWollMuxFormFields();
     }
     finally

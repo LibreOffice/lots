@@ -221,41 +221,40 @@ public class OneFormControlLineView extends LineView
      */
 
     idTextfield.setVisible(model.isTab() || viewVisibilityDescriptor == null
-	|| viewVisibilityDescriptor.formControlLineViewId);
+        || viewVisibilityDescriptor.isFormControlLineViewId());
 
     labelTextfield.setVisible(model.isTab() || viewVisibilityDescriptor == null
-	|| viewVisibilityDescriptor.formControlLineViewLabel);
+        || viewVisibilityDescriptor.isFormControlLineViewLabel());
 
     tipTextfield.setVisible(!model.isTab() && viewVisibilityDescriptor != null
-	&& viewVisibilityDescriptor.formControlLineViewTooltip);
+        && viewVisibilityDescriptor.isFormControlLineViewTooltip());
 
     typeView.setVisible(!model.isTab() && (viewVisibilityDescriptor == null
-	|| viewVisibilityDescriptor.formControlLineViewType));
+        || viewVisibilityDescriptor.isFormControlLineViewType()));
 
     comboBoxAdditionalView
 	.setVisible(model.isCombo() && (viewVisibilityDescriptor == null
-	    || viewVisibilityDescriptor.formControlLineViewAdditional));
+            || viewVisibilityDescriptor.isFormControlLineViewAdditional()));
 
     textAreaAdditionalView
 	.setVisible(model.isTextArea() && (viewVisibilityDescriptor == null
-	    || viewVisibilityDescriptor.formControlLineViewAdditional));
+            || viewVisibilityDescriptor.isFormControlLineViewAdditional()));
 
     readOnlyfield.setVisible(!model.isTab() && viewVisibilityDescriptor != null
-	&& viewVisibilityDescriptor.formControlLineViewReadonly);
+        && viewVisibilityDescriptor.isFormControlLineViewReadonly());
 
     buttonAdditionalView.setVisible(model.isButton() && (viewVisibilityDescriptor == null
-        || viewVisibilityDescriptor.formControlLineViewAdditional));
+        || viewVisibilityDescriptor.isFormControlLineViewAdditional()));
 
     /*
      * Wenn alle abgeschaltet sind, aktiviere zumindest das ID-Feld
      */
     if (viewVisibilityDescriptor != null
-	&& !viewVisibilityDescriptor.formControlLineViewAdditional
-	&& !viewVisibilityDescriptor.formControlLineViewId
-	&& !viewVisibilityDescriptor.formControlLineViewLabel
-	&& !viewVisibilityDescriptor.formControlLineViewTooltip
-	&& !viewVisibilityDescriptor.formControlLineViewType
-	&& !viewVisibilityDescriptor.formControlLineViewReadonly)
+        && !viewVisibilityDescriptor.isFormControlLineViewAdditional()
+        && !viewVisibilityDescriptor.isFormControlLineViewId() && !viewVisibilityDescriptor.isFormControlLineViewLabel()
+        && !viewVisibilityDescriptor.isFormControlLineViewTooltip()
+        && !viewVisibilityDescriptor.isFormControlLineViewType()
+        && !viewVisibilityDescriptor.isFormControlLineViewReadonly())
     {
       idTextfield.setVisible(true);
     }
