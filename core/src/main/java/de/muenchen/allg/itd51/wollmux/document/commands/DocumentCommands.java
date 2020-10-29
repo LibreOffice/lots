@@ -504,7 +504,6 @@ public class DocumentCommands implements Iterable<DocumentCommand>
   private void removeRetiredDocumentCommands(HashSet<DocumentCommand> retired)
   {
     allCommands.removeAll(retired);
-    visibilityElements.removeAll(retired);
     setJumpMarkCommands.removeAll(retired);
     printBlocks.removeAll(retired);
   }
