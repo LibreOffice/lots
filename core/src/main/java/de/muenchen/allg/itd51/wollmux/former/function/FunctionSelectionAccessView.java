@@ -639,8 +639,10 @@ public class FunctionSelectionAccessView implements View
           if (func == null)
           {
             LOGGER.error(L.m("Funktion \"%1\"\" ist verschwunden ?!?", functionName));
+          } else
+          {
+            paramNames = func.parameters();
           }
-          paramNames = func.parameters();
         }
 
         funcSel.setFunction(functionName, paramNames);
