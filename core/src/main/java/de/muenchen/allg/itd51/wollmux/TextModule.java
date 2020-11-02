@@ -22,7 +22,6 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -109,10 +108,8 @@ public class TextModule
     // Textbaustein Abschnitte immer Vorrang haben.
     LinkedList<ConfigThingy> tbListe = new LinkedList<>();
     ConfigThingy tbConf = conf.query("Textbausteine");
-    Iterator<ConfigThingy> iter = tbConf.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy confTextbaustein : tbConf)
     {
-      ConfigThingy confTextbaustein = iter.next();
       tbListe.addFirst(confTextbaustein);
     }
 
@@ -232,11 +229,8 @@ public class TextModule
   private static String[] parseIdentifier(String identifierWithArgs,
       List<ConfigThingy> tbListe)
   {
-    Iterator<ConfigThingy> iterTbListe = tbListe.iterator();
-    while (iterTbListe.hasNext())
+    for (ConfigThingy textbausteine : tbListe)
     {
-      ConfigThingy textbausteine = iterTbListe.next();
-
       String[] results =
         parseIdentifierInTextbausteine(identifierWithArgs, textbausteine);
       if (results != null) return results;
@@ -286,11 +280,8 @@ public class TextModule
 
     // Iterieren über alle Knoten der Form "(MATCH ... FRAG_ID ...)"
     ConfigThingy mappingsConf = textbausteine.queryByChild("MATCH");
-    Iterator<ConfigThingy> iterMappings = mappingsConf.iterator();
-    while (iterMappings.hasNext())
+    for (ConfigThingy mappingConf : mappingsConf)
     {
-      ConfigThingy mappingConf = iterMappings.next();
-
       String frag_id = null;
       try
       {

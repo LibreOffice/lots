@@ -339,10 +339,8 @@ public class OverlayDatasource extends Datasource
       List<Dataset> finalResults = new ArrayList<>(results1.size() + results2.size());
 
       List<String> dupKeys = new ArrayList<>();
-      Iterator<Dataset> iter = results2.iterator();
-      while (iter.hasNext())
+      for (Dataset ds : results2)
       {
-        Dataset ds = iter.next();
         String key = ds.getKey();
         if (results1Keys.contains(key))
           dupKeys.add(key);
@@ -426,11 +424,8 @@ public class OverlayDatasource extends Datasource
   {
     List<Dataset> resultsWithOverlayments = new ArrayList<>(results.size());
 
-    Iterator<Dataset> iter = results.iterator();
-    while (iter.hasNext())
+    for (Dataset ds : results)
     {
-      Dataset ds = iter.next();
-
       List<QueryPart> query = new ArrayList<>(match1.length);
       for (int i = 0; i < match1.length; ++i)
       {
@@ -456,10 +451,9 @@ public class OverlayDatasource extends Datasource
         }
       } else
       {
-        Iterator<Dataset> appendixIter = appendix.iterator();
-        while (appendixIter.hasNext())
+        for (Dataset appendixDs : appendix)
         {
-          newDataset = new ConcatDataset(ds, appendixIter.next());
+          newDataset = new ConcatDataset(ds, appendixDs);
           if (filter.test(newDataset))
           {
             resultsWithOverlayments.add(newDataset);

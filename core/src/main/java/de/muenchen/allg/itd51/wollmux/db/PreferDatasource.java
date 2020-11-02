@@ -109,28 +109,10 @@ public class PreferDatasource extends Datasource
       difference1.removeAll(schema2);
       Set<String> difference2 = new HashSet<>(schema2);
       difference2.removeAll(schema1);
-      StringBuilder buf1 = new StringBuilder();
-      Iterator<String> iter = difference1.iterator();
-      while (iter.hasNext())
-      {
-        buf1.append(iter.next());
-        if (iter.hasNext()) {
-          buf1.append(", ");
-        }
-      }
-      StringBuilder buf2 = new StringBuilder();
-      iter = difference2.iterator();
-      while (iter.hasNext())
-      {
-        buf2.append(iter.next());
-        if (iter.hasNext()) {
-          buf2.append(", ");
-        }
-      }
       throw new ConfigurationErrorException(L.m(
-        "Datenquelle \"%1\" fehlen die Spalten: %2", source1Name, buf2)
+        "Datenquelle \"%1\" fehlen die Spalten: %2", source1Name, String.join(", ", difference2))
         + L.m(" und ")
-        + L.m("Datenquelle \"%1\" fehlen die Spalten: %2", source2Name, buf1));
+        + L.m("Datenquelle \"%1\" fehlen die Spalten: %2", source2Name, String.join(", ", difference1)));
     }
 
     schema = new ArrayList<>(schema1);
@@ -186,10 +168,8 @@ public class PreferDatasource extends Datasource
 
       Map<String, int[]> keyToCount = new HashMap<>(); // of int[]
 
-      Iterator<Dataset> iter = results.iterator();
-      while (iter.hasNext())
+      for (Dataset ds : results)
       {
-        Dataset ds = iter.next();
         String key = ds.getKey();
         if (!keyToCount.containsKey(key)) {
           keyToCount.put(key, new int[] { 0 });
@@ -214,10 +194,8 @@ public class PreferDatasource extends Datasource
 
       for (int i = 0; i < oResults.length; ++i)
       {
-        iter = oResults[i].iterator();
-        while (iter.hasNext())
+        for (Dataset ds : oResults[i])
         {
-          Dataset ds = iter.next();
           String key = ds.getKey();
 
           int[] count = keyToCount.get(key);

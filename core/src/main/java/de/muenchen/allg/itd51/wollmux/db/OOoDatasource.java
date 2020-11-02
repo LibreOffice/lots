@@ -241,11 +241,10 @@ public class OOoDatasource extends Datasource
     ConfigThingy schemaConf = sourceDesc.query("Schema");
     if (schemaConf.count() != 0)
     {
-      Iterator<ConfigThingy> iter = schemaConf.iterator().next().iterator();
       String firstColumnName = null;
-      while (iter.hasNext())
+      for (ConfigThingy columnConf : schemaConf.iterator().next())
       {
-        String columnName = iter.next().toString();
+        String columnName = columnConf.toString();
         if (firstColumnName == null) {
           firstColumnName = columnName;
         }
@@ -380,11 +379,10 @@ public class OOoDatasource extends Datasource
   private void parseKey(ConfigThingy conf)
   {
     conf = conf.iterator().next();
-    Iterator<ConfigThingy> iter = conf.iterator();
     ArrayList<String> columns = new ArrayList<>();
-    while (iter.hasNext())
+    for (ConfigThingy columnConf : conf)
     {
-      String column = iter.next().toString();
+      String column = columnConf.toString();
       if (!schema.contains(column))
         throw new ConfigurationErrorException(L.m(
           "Schluessel-Spalte \"%1\" nicht im Schema enthalten", column));
@@ -415,15 +413,13 @@ public class OOoDatasource extends Datasource
     StringBuilder buffy =
         new StringBuilder(SQL_SELECT_COMMAND + sqlIdentifier(oooTableName) + " WHERE ");
 
-    Iterator<String> iter = keys.iterator();
     boolean first = true;
-    while (iter.hasNext())
+    for (String key : keys)
     {
       if (!first) {
         buffy.append(" OR ");
       }
       first = false;
-      String key = iter.next();
       String[] parts = key.split("#", -1);
       buffy.append('(');
       for (int i = 1; i < parts.length; i += 2)
@@ -552,11 +548,8 @@ public class OOoDatasource extends Datasource
       while (results.next())
       {
         Map<String, String> data = new HashMap<>();
-        Iterator<Map.Entry<String, Integer>> iter =
-          mapColumnNameToIndex.entrySet().iterator();
-        while (iter.hasNext())
+        for (Map.Entry<String, Integer> entry : mapColumnNameToIndex.entrySet())
         {
-          Map.Entry<String, Integer> entry = iter.next();
           String column = entry.getKey();
           int idx = entry.getValue().intValue();
           String value = null;
@@ -603,10 +596,8 @@ public class OOoDatasource extends Datasource
   {
     Map<String, Integer> mapColumnNameToIndex = new HashMap<>();
     XColumnLocate loc = UNO.XColumnLocate(results);
-    Iterator<String> iter = getSchema().iterator();
-    while (iter.hasNext())
+    for (String column : getSchema())
     {
-      String column = iter.next();
       int idx = -1;
       try
       {

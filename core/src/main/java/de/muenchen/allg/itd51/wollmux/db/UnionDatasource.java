@@ -26,7 +26,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -102,28 +101,10 @@ public class UnionDatasource extends Datasource
       difference1.removeAll(schema2);
       Set<String> difference2 = new HashSet<>(schema2);
       difference2.removeAll(schema1);
-      StringBuilder buf1 = new StringBuilder();
-      Iterator<String> iter = difference1.iterator();
-      while (iter.hasNext())
-      {
-        buf1.append(iter.next());
-        if (iter.hasNext()) {
-          buf1.append(", ");
-        }
-      }
-      StringBuilder buf2 = new StringBuilder();
-      iter = difference2.iterator();
-      while (iter.hasNext())
-      {
-        buf2.append(iter.next());
-        if (iter.hasNext()) {
-          buf2.append(", ");
-        }
-      }
       throw new ConfigurationErrorException(
         L.m(
           "Datenquelle \"%1\" fehlen die Spalten: %2 und Datenquelle \"%3\" fehlen die Spalten: %4",
-          source1Name, buf2, source2Name, buf1));
+              source1Name, String.join(", ", difference2), source2Name, String.join(", ", difference1)));
     }
 
     schema = new ArrayList<>(schema1);

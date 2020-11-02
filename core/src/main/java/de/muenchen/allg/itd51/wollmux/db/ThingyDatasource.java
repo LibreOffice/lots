@@ -27,7 +27,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -222,10 +221,8 @@ public class ThingyDatasource extends RAMDatasource
   private Dataset createDatasetUnordered(ConfigThingy dsDesc, List<String> schema, String[] keyCols)
   { // TESTED
     Map<String, String> data = new HashMap<>();
-    Iterator<ConfigThingy> iter = dsDesc.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy spaltenDaten : dsDesc)
     {
-      ConfigThingy spaltenDaten = iter.next();
       String spalte = spaltenDaten.getName();
       if (!schema.contains(spalte))
       {
@@ -253,11 +250,10 @@ public class ThingyDatasource extends RAMDatasource
 
     Map<String, String> data = new HashMap<>();
     int i = 0;
-    Iterator<ConfigThingy> iter = dsDesc.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy child : dsDesc)
     {
       String spalte = schemaOrdered[i];
-      String wert = iter.next().toString();
+      String wert = child.toString();
       data.put(spalte, wert);
       ++i;
     }

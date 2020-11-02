@@ -24,7 +24,6 @@ package de.muenchen.allg.itd51.wollmux;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Iterator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -261,10 +260,8 @@ public class WollMuxSingleton
    */
   private static void registerDatasources(ConfigThingy conf, URL context)
   {
-    Iterator<ConfigThingy> iter = conf.query("Datenquellen").query("Registriere").iterator();
-    while (iter.hasNext())
+    for (ConfigThingy regConf : conf.query("Datenquellen").query("Registriere"))
     {
-      ConfigThingy regConf = iter.next();
       String name;
       try
       {

@@ -23,7 +23,6 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -80,12 +79,8 @@ public class Shortcuts
     ConfigThingy shortcutConf = tastenkombinationenConf.queryByChild("SHORTCUT");
 
     // Iterieren über die Knoten SHORTCUT
-    Iterator<ConfigThingy> iterShortcut = shortcutConf.iterator();
-    while (iterShortcut.hasNext())
+    for (ConfigThingy tastenkombination : shortcutConf)
     {
-
-      ConfigThingy tastenkombination = iterShortcut.next();
-
       String shortcut = null;
       // lesen der Knoten SHORTCUT
       try

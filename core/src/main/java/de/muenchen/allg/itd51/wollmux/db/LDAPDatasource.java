@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -282,9 +281,7 @@ public class LDAPDatasource extends Datasource
           L.m("Unmöglich. Ich hab doch vorher count() überprüft."), e);
     }
 
-    Iterator<ConfigThingy> keyIterator = keySpalten.iterator();
-
-    if (!keyIterator.hasNext())
+    if (keySpalten.count() == 0)
     {
       throw new ConfigurationErrorException(
           errorMessage() + L.m("Keine Schluesselspalten angegeben."));
@@ -294,9 +291,9 @@ public class LDAPDatasource extends Datasource
     boolean onlyAbsolute = true; // true, falls nur Attributspfade der Form 0:*
 
     // speichere die Schluesselattribute
-    while (keyIterator.hasNext())
+    for (ConfigThingy keyColumn : keySpalten)
     {
-      String currentName = keyIterator.next().toString();
+      String currentName = keyColumn.toString();
 
       ColumnDefinition currentKeyLDAPAttribute = columnDefinitions.get(currentName);
 
@@ -1048,10 +1045,8 @@ public class LDAPDatasource extends Datasource
   private String generateKey(Map<String, String> data)
   {
     List<ColumnDefinition> keyColumns = new ArrayList<>();
-    Iterator<Object> iter = keyAttributes.iterator();
-    while (iter.hasNext())
+    for (Object keyAttr : keyAttributes)
     {
-      String keyAttr = (String) iter.next();
       ColumnDefinition colDef = columnDefinitions.get(keyAttr);
       keyColumns.add(colDef);
     }

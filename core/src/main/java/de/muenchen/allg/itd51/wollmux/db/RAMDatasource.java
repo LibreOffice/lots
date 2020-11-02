@@ -24,7 +24,6 @@ package de.muenchen.allg.itd51.wollmux.db;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import java.util.function.Predicate;
@@ -95,10 +94,8 @@ public class RAMDatasource extends Datasource
   public QueryResults getDatasetsByKey(Collection<String> keys)
   {
     List<Dataset> res = new ArrayList<>();
-    Iterator<Dataset> iter = data.iterator();
-    while (iter.hasNext())
+    for (Dataset ds : data)
     {
-      Dataset ds = iter.next();
       if (keys.contains(ds.getKey()))
       {
         res.add(ds);

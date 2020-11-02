@@ -30,7 +30,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -446,11 +445,8 @@ public class OpenExt
         }
 
         StringBuilder errors = new StringBuilder();
-        Iterator<String> iter = programs.iterator();
-        while (iter.hasNext())
+        for (String command : programs)
         {
-          String command = iter.next();
-
           if (command.startsWith("/loadComponentFromURL/") && command.endsWith("/"))
           {
             if (loadComponentFromURL(command, appArgument, errors)) return;
