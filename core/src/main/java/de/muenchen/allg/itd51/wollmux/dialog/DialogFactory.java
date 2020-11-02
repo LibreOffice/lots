@@ -41,6 +41,11 @@ public class DialogFactory
   private static final Logger LOGGER = LoggerFactory
       .getLogger(DialogFactory.class);
 
+  private DialogFactory()
+  {
+    // hide public constructor
+  }
+
   /**
    * Parst die "Funktionsdialoge" Abschnitte aus conf und liefert als Ergebnis eine
    * DialogLibrary zurück.

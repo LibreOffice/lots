@@ -61,14 +61,18 @@ import de.muenchen.allg.util.UnoService;
 public class TextModule
 {
 
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(TextModule.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(TextModule.class);
 
   /**
    * Pattern, das insertFrag-Bookmarks matcht.
    */
   private static final Pattern INSERTFRAG_PATTERN =
     DocumentCommands.getPatternForCommand("insertFrag");
+
+  private TextModule()
+  {
+    // hide public constructor
+  }
 
   /**
    * Sucht ab der Stelle range rückwarts nach gültigen Textfragmentbezeichnern mit

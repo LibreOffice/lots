@@ -108,6 +108,11 @@ public class Common
    */
   private static HashMap<Object, Float> defaultFontsizes;
 
+  private Common()
+  {
+    // hide public constructor
+  }
+
   /**
    * Führt {@link #setLookAndFeel()} aus, aber nur, wenn es bisher noch nicht
    * ausgeführt wurde.

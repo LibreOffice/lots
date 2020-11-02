@@ -47,6 +47,11 @@ public class Shortcuts
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Shortcuts.class);
 
+  private Shortcuts()
+  {
+    // hide public constructor
+  }
+
   /**
    * Liest alle Attribute SHORTCUT und URL aus tastenkombinationenConf aus, löscht
    * alle bisher vorhandenen Tastenkombinationen deren URL mit "wollmux:" beginnt und
