@@ -338,23 +338,14 @@ public class AllGroupLineViewsPanel implements View
 
           break;
         }
-        else if (b.getState() == BroadcastObjectSelection.STATE_SHIFT_CLICK)
+        else if (b.getState() == BroadcastObjectSelection.STATE_SHIFT_CLICK
+            && ((selindex == -1 && (index > selection.firstElement() || index > selection.lastElement()))
+                || (selindex != -1
+                    && (index > selindex && (index < selection.firstElement() || index < selection.lastElement())))))
         {
-          boolean sel = false;
-          if ((selindex == -1 && (index > selection.firstElement() || index > selection.lastElement())))
-            sel = true;
-          else if (selindex != -1
-            && (index > selindex && (index < selection.firstElement() || index < selection.lastElement())))
-            sel = true;
-
-          if (sel)
-          {
-            view.mark();
-            selection.add(index);
-          }
+          view.mark();
+          selection.add(index);
         }
-
       }
-    }
   }
-}
+}}
