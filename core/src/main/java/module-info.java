@@ -117,7 +117,7 @@ module wollmux
   requires com.google.common;
   requires transitive rstaui;
   requires autocomplete;
-  requires rsyntaxtextarea;
+  requires transitive rsyntaxtextarea;
   requires org.apache.commons.lang3;
   requires org.apache.commons.io;
   requires jakarta.mail.api;

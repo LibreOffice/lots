@@ -71,6 +71,8 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 
 public class ConfigEditor extends JFrame implements SearchListener
 {
+  private static final long serialVersionUID = -3765690712489895132L;
+
   private transient FormularMax4kController controller;
 
   private CollapsibleSectionPanel sectionPanel;
@@ -303,6 +305,8 @@ public class ConfigEditor extends JFrame implements SearchListener
 
   private class ShowFindDialogAction extends AbstractAction
   {
+    private static final long serialVersionUID = -2826790564466421965L;
+
     public ShowFindDialogAction()
     {
       super(L.m("Suchen..."));
@@ -323,6 +327,8 @@ public class ConfigEditor extends JFrame implements SearchListener
 
   private class ShowReplaceDialogAction extends AbstractAction
   {
+    private static final long serialVersionUID = -2109749012293037703L;
+
     public ShowReplaceDialogAction()
     {
       super(L.m("Ersetzen..."));
