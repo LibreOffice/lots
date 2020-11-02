@@ -171,7 +171,7 @@ public class OOoDatasource extends Datasource
    */
   private String userName = "";
 
-  private static final String SQLSelectCommand = "SELECT * FROM ";
+  private static final String SQL_SELECT_COMMAND = "SELECT * FROM ";
 
   /**
    * Passwort für den Login bei der Datenbank.
@@ -420,7 +420,7 @@ public class OOoDatasource extends Datasource
     }
 
     StringBuilder buffy =
-        new StringBuilder(SQLSelectCommand + sqlIdentifier(oooTableName) + " WHERE ");
+        new StringBuilder(SQL_SELECT_COMMAND + sqlIdentifier(oooTableName) + " WHERE ");
 
     Iterator<String> iter = keys.iterator();
     boolean first = true;
@@ -458,7 +458,7 @@ public class OOoDatasource extends Datasource
     }
 
     StringBuilder buffy =
-        new StringBuilder(SQLSelectCommand + sqlIdentifier(oooTableName) + " WHERE ");
+        new StringBuilder(SQL_SELECT_COMMAND + sqlIdentifier(oooTableName) + " WHERE ");
 
     Iterator<QueryPart> iter = query.iterator();
     boolean first = true;
@@ -501,7 +501,7 @@ public class OOoDatasource extends Datasource
   @Override
   public QueryResults getContents()
   {
-    return sqlQuery(SQLSelectCommand + sqlIdentifier(oooTableName) + ";");
+    return sqlQuery(SQL_SELECT_COMMAND + sqlIdentifier(oooTableName) + ";");
   }
 
   /**
