@@ -276,7 +276,7 @@ public class ConfigEditor extends JFrame implements SearchListener
     switch (event.getType())
     {
       case MARK_ALL:
-        result = SearchEngine.markAll(editor, event.getSearchContext());
+        SearchEngine.markAll(editor, event.getSearchContext());
         break;
       case FIND:
         result = SearchEngine.find(editor, event.getSearchContext());

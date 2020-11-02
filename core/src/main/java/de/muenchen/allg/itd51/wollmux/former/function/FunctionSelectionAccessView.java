@@ -309,7 +309,7 @@ public class FunctionSelectionAccessView implements View
 
     Component glue = Box.createGlue();
     gbcGlue.gridx = 0;
-    gbcGlue.gridy = y++;
+    gbcGlue.gridy = y + 1;
     myPanel.add(glue, gbcGlue);
 
     myPanel.validate();

@@ -325,7 +325,6 @@ public class AllGroupLineViewsPanel implements View
           else if (state == BroadcastObjectSelection.STATE_SHIFT_CLICK)
           {
             state = 1;
-            selindex = index;
           }
 
           if (state == -1) {

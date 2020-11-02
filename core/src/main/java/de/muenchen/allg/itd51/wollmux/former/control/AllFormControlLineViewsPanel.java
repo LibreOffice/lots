@@ -286,7 +286,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     tab.validate();
 
     fixTabStructure();
-    tab = null; // tab ist eventuell entfernt worden!
 
     tabPane.validate();
     scrollPane.validate();
@@ -380,7 +379,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     tab.validate();
 
     fixTabStructure();
-    tab = null; // tab ist eventuell entfernt worden!
 
     tabPane.validate();
     scrollPane.validate();
@@ -678,7 +676,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
           else if (state == BroadcastObjectSelection.STATE_SHIFT_CLICK)
           {
             state = 1;
-            selindex = index;
           }
 
 
