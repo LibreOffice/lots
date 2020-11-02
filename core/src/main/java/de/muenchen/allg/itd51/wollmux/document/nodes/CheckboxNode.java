@@ -77,9 +77,9 @@ public class CheckboxNode implements FormControl, Node
   }
 
   @Override
-  public int getType()
+  public FormControlType getType()
   {
-    return CHECKBOX_CONTROL;
+    return FormControlType.CHECKBOX_CONTROL;
   }
 
   @Override

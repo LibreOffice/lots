@@ -58,8 +58,28 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 public class DocumentManager
 {
 
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(DocumentManager.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DocumentManager.class);
+
+  /**
+   * Attributname zur Einstellung des Speichermodus für persistente Daten
+   */
+  private static final String PERSISTENT_DATA_MODE = "PERSISTENT_DATA_MODE";
+  /**
+   * Wert 'annotation' des Attributs PERSISTENT_DATA_MODE
+   */
+  private static final String PERSISTENT_DATA_MODE_ANNOTATION = "annotation";
+  /**
+   * Wert 'transition' des Attributs PERSISTENT_DATA_MODE
+   */
+  private static final String PERSISTENT_DATA_MODE_TRANSITION = "transition";
+  /**
+   * Wert 'rdf' des Attributs PERSISTENT_DATA_MODE
+   */
+  private static final String PERSISTENT_DATA_MODE_RDF = "rdf";
+  /**
+   * Wert 'rdfReadLegacy' des Attributs PERSISTENT_DATA_MODE
+   */
+  private static final String PERSISTENT_DATA_MODE_RDFREADLEGACY = "rdfReadLegacy";
 
   /**
    * Verwaltet Informationen zu allen offenen OOo-Dokumenten.
@@ -508,30 +528,30 @@ public class DocumentManager
     String pdMode;
     try
     {
-      pdMode = wmConf.query(PersistentDataContainer.PERSISTENT_DATA_MODE).getLastChild().toString();
+      pdMode = wmConf.query(PERSISTENT_DATA_MODE).getLastChild().toString();
     }
     catch (NodeNotFoundException e)
     {
-      pdMode = PersistentDataContainer.PERSISTENT_DATA_MODE_RDFREADLEGACY;
+      pdMode = PERSISTENT_DATA_MODE_RDFREADLEGACY;
       LOGGER.debug(L.m("Attribut %1 nicht gefunden. Verwende Voreinstellung '%2'.",
-        PersistentDataContainer.PERSISTENT_DATA_MODE, pdMode));
+          PERSISTENT_DATA_MODE, pdMode));
     }
 
     try
     {
-      if (PersistentDataContainer.PERSISTENT_DATA_MODE_TRANSITION.equalsIgnoreCase(pdMode))
+      if (PERSISTENT_DATA_MODE_TRANSITION.equalsIgnoreCase(pdMode))
       {
         return new TransitionModeDataContainer(doc);
       }
-      else if (PersistentDataContainer.PERSISTENT_DATA_MODE_RDFREADLEGACY.equalsIgnoreCase(pdMode))
+      else if (PERSISTENT_DATA_MODE_RDFREADLEGACY.equalsIgnoreCase(pdMode))
       {
         return new RDFReadLegacyModeDataContainer(doc);
       }
-      else if (PersistentDataContainer.PERSISTENT_DATA_MODE_RDF.equalsIgnoreCase(pdMode))
+      else if (PERSISTENT_DATA_MODE_RDF.equalsIgnoreCase(pdMode))
       {
         return new RDFBasedPersistentDataContainer(doc);
       }
-      else if (PersistentDataContainer.PERSISTENT_DATA_MODE_ANNOTATION.equalsIgnoreCase(pdMode))
+      else if (PERSISTENT_DATA_MODE_ANNOTATION.equalsIgnoreCase(pdMode))
       {
         return new AnnotationBasedPersistentDataContainer(doc);
       }
@@ -539,7 +559,7 @@ public class DocumentManager
       {
         LOGGER.error(L.m(
           "Ungültiger Wert '%1' für Attribut %2. Verwende Voreinstellung '%3' statt dessen.",
-          pdMode, PersistentDataContainer.PERSISTENT_DATA_MODE, PersistentDataContainer.PERSISTENT_DATA_MODE_RDFREADLEGACY));
+            pdMode, PERSISTENT_DATA_MODE, PERSISTENT_DATA_MODE_RDFREADLEGACY));
         return new RDFReadLegacyModeDataContainer(doc);
       }
     }
@@ -547,7 +567,7 @@ public class DocumentManager
     {
       LOGGER.info(L.m(
         "Die Einstellung '%1' für Attribut %2 ist mit dieser Office-Version nicht kompatibel. Verwende Einstellung '%3' statt dessen.",
-        pdMode, PersistentDataContainer.PERSISTENT_DATA_MODE, PersistentDataContainer.PERSISTENT_DATA_MODE_ANNOTATION));
+          pdMode, PERSISTENT_DATA_MODE, PERSISTENT_DATA_MODE_ANNOTATION));
       return new AnnotationBasedPersistentDataContainer(doc);
     }
   }

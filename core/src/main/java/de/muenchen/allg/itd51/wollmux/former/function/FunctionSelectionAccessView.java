@@ -634,9 +634,9 @@ public class FunctionSelectionAccessView implements View
         String functionName = item;
         String[] paramNames = null;
         if (item.equals(EXPERT_ITEM) || item.equals(STRING_ITEM))
-          functionName = FunctionSelectionAccess.EXPERT_FUNCTION;
+          functionName = FunctionSelection.EXPERT_FUNCTION;
         else if (item.equals(NONE_ITEM))
-          functionName = FunctionSelectionAccess.NO_FUNCTION;
+          functionName = FunctionSelection.NO_FUNCTION;
         else
         {
           Function func = funcLib.get(functionName);

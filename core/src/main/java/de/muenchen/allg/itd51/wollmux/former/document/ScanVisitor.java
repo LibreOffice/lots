@@ -237,7 +237,7 @@ public class ScanVisitor implements DocumentTreeVisitor
     }
     else
     {
-      if (control.getType() == FormControl.CHECKBOX_CONTROL)
+      if (control.getType() == FormControl.FormControlType.CHECKBOX_CONTROL)
         label = ""; // immer fixUp-Text von hinter der Checkbox benutzen, weil
       // meist bessere Ergebnisse als Text von vorne
       else
@@ -253,13 +253,13 @@ public class ScanVisitor implements DocumentTreeVisitor
     {
       switch (control.getType())
       {
-        case FormControl.CHECKBOX_CONTROL:
+      case CHECKBOX_CONTROL:
           model = registerCheckbox(control, label, id);
           break;
-        case FormControl.DROPDOWN_CONTROL:
+        case DROPDOWN_CONTROL:
           model = registerDropdown((DropdownFormControl) control, label, id);
           break;
-        case FormControl.INPUT_CONTROL:
+        case INPUT_CONTROL:
           model = registerInput(control, label, id);
           break;
         default:
@@ -282,7 +282,7 @@ public class ScanVisitor implements DocumentTreeVisitor
       {
         id = id.substring(GENDER_PREFIX.length());
         bookmarkName = insertFormValue(id);
-        if (control.getType() == FormControl.DROPDOWN_CONTROL)
+        if (control.getType() == FormControl.FormControlType.DROPDOWN_CONTROL)
           doGenderTrafo = true;
       }
     }

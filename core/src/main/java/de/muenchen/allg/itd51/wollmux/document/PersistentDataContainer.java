@@ -30,26 +30,6 @@ package de.muenchen.allg.itd51.wollmux.document;
  */
 public interface PersistentDataContainer
 {
-  /**
-   * Attributname zur Einstellung des Speichermodus für persistente Daten
-   */
-  static final String PERSISTENT_DATA_MODE = "PERSISTENT_DATA_MODE";
-  /**
-   * Wert 'annotation' des Attributs PERSISTENT_DATA_MODE
-   */
-  static final String PERSISTENT_DATA_MODE_ANNOTATION = "annotation";
-  /**
-   * Wert 'transition' des Attributs PERSISTENT_DATA_MODE
-   */
-  static final String PERSISTENT_DATA_MODE_TRANSITION = "transition";
-  /**
-   * Wert 'rdf' des Attributs PERSISTENT_DATA_MODE
-   */
-  static final String PERSISTENT_DATA_MODE_RDF = "rdf";
-  /**
-   * Wert 'rdfReadLegacy' des Attributs PERSISTENT_DATA_MODE
-   */
-  static final String PERSISTENT_DATA_MODE_RDFREADLEGACY = "rdfReadLegacy";
 
   /**
    * Die Methode liefert die unter ID dataId gespeicherten Daten zurück oder null,
