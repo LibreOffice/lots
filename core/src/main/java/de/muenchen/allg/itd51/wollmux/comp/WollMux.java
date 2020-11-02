@@ -213,24 +213,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     return "";
   }
 
-  @Deprecated(since = "10.8")
-  @Override
-  public void addPrintFunction(XTextDocument doc, String functionName)
-  {
-    XWollMuxDocument wdoc = getWollMuxDocument(doc);
-    if (wdoc != null)
-      wdoc.removePrintFunction(functionName);
-  }
-
-  @Deprecated(since = "10.8")
-  @Override
-  public void removePrintFunction(XTextDocument doc, String functionName)
-  {
-    XWollMuxDocument wdoc = getWollMuxDocument(doc);
-    if (wdoc != null)
-      wdoc.removePrintFunction(functionName);
-  }
-
   @Override
   public XWollMuxDocument getWollMuxDocument(XComponent doc)
   {
