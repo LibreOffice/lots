@@ -26,7 +26,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
 
@@ -103,28 +102,18 @@ public class PrintFunctionDialog extends JDialog
 
       printFunctionEditorContentPanel.add(printFunctionComboBox, BorderLayout.NORTH);
 
-      ActionListener removeFunc = new ActionListener()
-      {
-        @Override
-        public void actionPerformed(ActionEvent e)
+      ActionListener removeFunc = e -> {
+        for (Object o : printFunctionCurrentList.getSelectedValuesList())
         {
-          for (Object o : printFunctionCurrentList.getSelectedValuesList())
-            documentController.removePrintFunction("" + o);
-          printFunctionCurrentList.setListData(new Vector<String>(
-            documentController.getModel().getPrintFunctions()));
+          documentController.removePrintFunction("" + o);
         }
+        printFunctionCurrentList.setListData(new Vector<String>(documentController.getModel().getPrintFunctions()));
       };
 
-      ActionListener addFunc = new ActionListener()
-      {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          String newFunctionName = printFunctionComboBox.getSelectedItem().toString();
-          documentController.addPrintFunction(newFunctionName);
-          printFunctionCurrentList.setListData(new Vector<String>(
-            documentController.getModel().getPrintFunctions()));
-        }
+      ActionListener addFunc = e -> {
+        String newFunctionName = printFunctionComboBox.getSelectedItem().toString();
+        documentController.addPrintFunction(newFunctionName);
+        printFunctionCurrentList.setListData(new Vector<String>(documentController.getModel().getPrintFunctions()));
       };
 
       JButton wegDamit = new JButton(L.m("Entfernen"));
@@ -134,14 +123,7 @@ public class PrintFunctionDialog extends JDialog
       machDazu.addActionListener(addFunc);
 
       JButton ok = new JButton(L.m("OK"));
-      ok.addActionListener(new ActionListener()
-      {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          dispose();
-        }
-      });
+      ok.addActionListener(e -> dispose());
 
       Box buttons = Box.createHorizontalBox();
       buttons.add(wegDamit);

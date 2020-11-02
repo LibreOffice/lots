@@ -273,14 +273,7 @@ public class FormularMax4kController
     groupModelList = new GroupModelList(this);
     sectionModelList = new SectionModelList(this);
 
-    writeChangesTimer = new Timer(500, new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        updateDocument(FormularMax4kController.this.documentController);
-      }
-    });
+    writeChangesTimer = new Timer(500, e -> updateDocument(FormularMax4kController.this.documentController));
     writeChangesTimer.setCoalesce(true);
     writeChangesTimer.setRepeats(false);
 
@@ -308,24 +301,18 @@ public class FormularMax4kController
   {
     try
     {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
+      javax.swing.SwingUtilities.invokeLater(() -> {
+        try
         {
-          try
-          {
-            view = new FormularMax4kView("FormularMax 4000", FormularMax4kController.this);
+          view = new FormularMax4kView("FormularMax 4000", FormularMax4kController.this);
 
-            writeChangesTimer.stop();
+          writeChangesTimer.stop();
 
-            view.setFrameSize();
-            view.setVisible(true);
-          }
-          catch (Exception x)
-          {
-            LOGGER.error("", x);
-          }
+          view.setFrameSize();
+          view.setVisible(true);
+        } catch (Exception x)
+        {
+          LOGGER.error("", x);
         }
       });
     }
@@ -492,14 +479,8 @@ public class FormularMax4kController
   {
     if (functionTester == null)
     {
-      functionTester = new FunctionTester(functionLibrary, new ActionListener()
-      {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          functionTester = null;
-        }
-      }, idManager, NAMESPACE_FORMCONTROLMODEL);
+      functionTester = new FunctionTester(functionLibrary, e -> functionTester = null, idManager,
+          NAMESPACE_FORMCONTROLMODEL);
     }
     else
     {
@@ -514,19 +495,13 @@ public class FormularMax4kController
   {
     try
     {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
+      javax.swing.SwingUtilities.invokeLater(() -> {
+        try
         {
-          try
-          {
-            view.toFront();
-          }
-          catch (Exception x)
-          {
-            LOGGER.trace("", x);
-          }
+          view.toFront();
+        } catch (Exception x)
+        {
+          LOGGER.trace("", x);
         }
       });
     }

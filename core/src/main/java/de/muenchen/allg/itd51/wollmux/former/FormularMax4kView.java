@@ -26,8 +26,6 @@ import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URL;
@@ -150,69 +148,41 @@ public class FormularMax4kView extends JFrame
     JMenu menu = new JMenu(L.m("Formular"));
 
     JMenuItem menuItem = new JMenuItem(L.m("Formularfelder aus Vorlage einlesen"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        controller.scan();
-        setFrameSize();
-      }
+    menuItem.addActionListener(e -> {
+      controller.scan();
+      setFrameSize();
     });
     menu.add(menuItem);
 
     menuItem = new JMenuItem(L.m("Formulartitel setzen"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        String newTitle =
-          JOptionPane.showInputDialog(FormularMax4kView.this, L.m("Bitte Formulartitel eingeben"),
-            controller.getFormTitle());
+    menuItem.addActionListener(e -> {
+      String newTitle = JOptionPane.showInputDialog(FormularMax4kView.this, L.m("Bitte Formulartitel eingeben"),
+          controller.getFormTitle());
 
-        if (newTitle != null && !newTitle.isEmpty())
-        {
-          controller.setFormTitle(newTitle);
-          setFrameSize();
-        }
+      if (newTitle != null && !newTitle.isEmpty())
+      {
+        controller.setFormTitle(newTitle);
+        setFrameSize();
       }
     });
     menu.add(menuItem);
 
     menuItem = new JMenuItem(L.m("Druckfunktionen setzen"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        controller.setPrintFunction();
-        setFrameSize();
-      }
+    menuItem.addActionListener(e -> {
+      controller.setPrintFunction();
+      setFrameSize();
     });
     menu.add(menuItem);
 
     menuItem = new JMenuItem(L.m("Dateiname vorgeben"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        controller.setFilenameGeneratorFunction();
-        setFrameSize();
-      }
+    menuItem.addActionListener(e -> {
+      controller.setFilenameGeneratorFunction();
+      setFrameSize();
     });
     menu.add(menuItem);
 
     menuItem = new JMenuItem(L.m("WollMux-Formularmerkmale aus Vorlage entfernen"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        controller.deForm();
-      }
-    });
+    menuItem.addActionListener(e -> controller.deForm());
     menu.add(menuItem);
 
     /*
@@ -223,26 +193,12 @@ public class FormularMax4kView extends JFrame
     if (Integer.valueOf(3).equals(Integer.valueOf(0)))
     {
       menuItem = new JMenuItem(L.m("Ladezeit des Dokuments optimieren"));
-      menuItem.addActionListener(new ActionListener()
-      {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          controller.removeNonWMBookmarks();
-        }
-      });
+      menuItem.addActionListener(e -> controller.removeNonWMBookmarks());
       menu.add(menuItem);
     }
 
     menuItem = new JMenuItem(L.m("Formularbeschreibung editieren"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        controller.editFormDescriptor();
-      }
-    });
+    menuItem.addActionListener(e -> controller.editFormDescriptor());
     menu.add(menuItem);
     return menu;
   }
@@ -255,116 +211,73 @@ public class FormularMax4kView extends JFrame
       new ViewVisibilityDescriptor();
 
     JMenuItem menuItem = new JCheckBoxMenuItem("ID");
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        viewVisibilityDescriptor.setFormControlLineViewId(((AbstractButton) e.getSource()).isSelected());
-        controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
-      }
+    menuItem.addActionListener(e -> {
+      viewVisibilityDescriptor.setFormControlLineViewId(((AbstractButton) e.getSource()).isSelected());
+      controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
     });
     menuItem.setSelected(viewVisibilityDescriptor.isFormControlLineViewId());
     menu.add(menuItem);
 
     menuItem = new JCheckBoxMenuItem("LABEL");
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        viewVisibilityDescriptor.setFormControlLineViewLabel(((AbstractButton) e.getSource()).isSelected());
-        controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
-      }
+    menuItem.addActionListener(e -> {
+      viewVisibilityDescriptor.setFormControlLineViewLabel(((AbstractButton) e.getSource()).isSelected());
+      controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
     });
     menuItem.setSelected(viewVisibilityDescriptor.isFormControlLineViewLabel());
     menu.add(menuItem);
 
     menuItem = new JCheckBoxMenuItem("TOOLTIP");
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        viewVisibilityDescriptor.setFormControlLineViewTooltip(((AbstractButton) e.getSource()).isSelected());
-        controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
-      }
+    menuItem.addActionListener(e -> {
+      viewVisibilityDescriptor.setFormControlLineViewTooltip(((AbstractButton) e.getSource()).isSelected());
+      controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
     });
     menuItem.setSelected(viewVisibilityDescriptor.isFormControlLineViewTooltip());
     menu.add(menuItem);
 
     menuItem = new JCheckBoxMenuItem("TYPE");
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        viewVisibilityDescriptor.setFormControlLineViewType(((AbstractButton) e.getSource()).isSelected());
-        controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
-      }
+    menuItem.addActionListener(e -> {
+      viewVisibilityDescriptor.setFormControlLineViewType(((AbstractButton) e.getSource()).isSelected());
+      controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
     });
     menuItem.setSelected(viewVisibilityDescriptor.isFormControlLineViewType());
     menu.add(menuItem);
 
     menuItem = new JCheckBoxMenuItem(L.m("Elementspezifische Felder"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        viewVisibilityDescriptor.setFormControlLineViewAdditional(((AbstractButton) e.getSource()).isSelected());
-        controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
-      }
+    menuItem.addActionListener(e -> {
+      viewVisibilityDescriptor.setFormControlLineViewAdditional(((AbstractButton) e.getSource()).isSelected());
+      controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
     });
     menuItem.setSelected(viewVisibilityDescriptor.isFormControlLineViewAdditional());
     menu.add(menuItem);
 
     menuItem = new JCheckBoxMenuItem("READONLY");
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        viewVisibilityDescriptor.setFormControlLineViewReadonly(((AbstractButton) e.getSource()).isSelected());
-        controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
-      }
+    menuItem.addActionListener(e -> {
+      viewVisibilityDescriptor.setFormControlLineViewReadonly(((AbstractButton) e.getSource()).isSelected());
+      controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
     });
     menuItem.setSelected(viewVisibilityDescriptor.isFormControlLineViewReadonly());
     menu.add(menuItem);
 
     menuItem = new JCheckBoxMenuItem("TRAFO, PLAUSI, AUTOFILL, GROUPS");
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
+    menuItem.addActionListener(e -> {
+      if (((AbstractButton) e.getSource()).isSelected())
       {
-        if (((AbstractButton) e.getSource()).isSelected())
-        {
-          mainContentPanel.setDividerSize(defaultDividerSize);
-          mainContentPanel.setRightComponent(rightPanel.getComponent());
-          mainContentPanel.setResizeWeight(0.6);
-        }
-        else
-        {
-          mainContentPanel.setDividerSize(0);
-          mainContentPanel.setRightComponent(nonExistingRightPanel);
-          mainContentPanel.setResizeWeight(1.0);
-        }
-        setFrameSize();
+        mainContentPanel.setDividerSize(defaultDividerSize);
+        mainContentPanel.setRightComponent(rightPanel.getComponent());
+        mainContentPanel.setResizeWeight(0.6);
+      } else
+      {
+        mainContentPanel.setDividerSize(0);
+        mainContentPanel.setRightComponent(nonExistingRightPanel);
+        mainContentPanel.setResizeWeight(1.0);
       }
+      setFrameSize();
     });
     menu.add(menuItem);
 
     menu.addSeparator();
     menuItem = new JMenuItem(L.m("Funktionstester"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        controller.showFunctionTester();
-      }
-    });
+    menuItem.addActionListener(e -> controller.showFunctionTester());
     menu.add(menuItem);
     return menu;
   }
@@ -383,14 +296,9 @@ public class FormularMax4kView extends JFrame
     menu.addSeparator();
 
     JMenuItem menuItem = new JMenuItem(L.m("Checkboxen zu ComboBox"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        ComboboxMergeDescriptor desc = leftPanel.mergeCheckboxesIntoCombobox();
-        controller.mergeCheckBoxesIntoComboBox(desc);
-      }
+    menuItem.addActionListener(e -> {
+      ComboboxMergeDescriptor desc = leftPanel.mergeCheckboxesIntoCombobox();
+      controller.mergeCheckBoxesIntoComboBox(desc);
     });
 
     menu.add(menuItem);
@@ -402,36 +310,15 @@ public class FormularMax4kView extends JFrame
     JMenu menu = new JMenu(L.m("Datei"));
 
     JMenuItem menuItem = new JMenuItem(L.m("Speichern"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        controller.save();
-      }
-    });
+    menuItem.addActionListener(e -> controller.save());
     menu.add(menuItem);
 
     menuItem = new JMenuItem(L.m("Speichern unter..."));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        controller.saveAs();
-      }
-    });
+    menuItem.addActionListener(e -> controller.saveAs());
     menu.add(menuItem);
 
     menuItem = new JMenuItem(L.m("Beenden"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        controller.abort();
-      }
-    });
+    menuItem.addActionListener(e -> controller.abort());
 
     menu.add(menuItem);
     return menu;
@@ -605,14 +492,9 @@ public class FormularMax4kView extends JFrame
               menuItem = new JMenuItem(L.m(label));
               final ConfigThingy tabConfEntry =
                 tabConf.getFirstChild().getFirstChild();
-              menuItem.addActionListener(new ActionListener()
-              {
-                @Override
-                public void actionPerformed(ActionEvent e)
-                {
-                  controller.insertStandardTab(tabConfEntry, null);
-                  setFrameSize();
-                }
+              menuItem.addActionListener(e -> {
+                controller.insertStandardTab(tabConfEntry, null);
+                setFrameSize();
               });
               submenu.add(menuItem);
 
@@ -630,14 +512,9 @@ public class FormularMax4kView extends JFrame
               final ConfigThingy buttonsConfEntry = buttonsConf.getFirstChild();
 
               JMenuItem menuItem = new JMenuItem(L.m(label));
-              menuItem.addActionListener(new ActionListener()
-              {
-                @Override
-                public void actionPerformed(ActionEvent e)
-                {
-                  controller.insertStandardButtons(buttonsConfEntry, null, leftPanel.getButtonInsertionIndex());
-                  setFrameSize();
-                }
+              menuItem.addActionListener(e -> {
+                controller.insertStandardButtons(buttonsConfEntry, null, leftPanel.getButtonInsertionIndex());
+                setFrameSize();
               });
               submenu.add(menuItem);
 
@@ -671,14 +548,9 @@ public class FormularMax4kView extends JFrame
       this.getClass().getClassLoader().getResource(
             "default_buttons/empfaengerauswahl_controls.conf");
     
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        controller.insertStandardTab(null, EMPFAENGER_TAB_URL);
-        setFrameSize();
-      }
+    menuItem.addActionListener(e -> {
+      controller.insertStandardTab(null, EMPFAENGER_TAB_URL);
+      setFrameSize();
     });
     submenu.add(menuItem);
 
@@ -687,14 +559,9 @@ public class FormularMax4kView extends JFrame
     final URL STANDARD_BUTTONS_MIDDLE_URL =
         this.getClass().getClassLoader().getResource("default_buttons/standardbuttons_mitte.conf");
 
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        controller.insertStandardButtons(null, STANDARD_BUTTONS_MIDDLE_URL, leftPanel.getButtonInsertionIndex());
-        setFrameSize();
-      }
+    menuItem.addActionListener(e -> {
+      controller.insertStandardButtons(null, STANDARD_BUTTONS_MIDDLE_URL, leftPanel.getButtonInsertionIndex());
+      setFrameSize();
     });
     submenu.add(menuItem);
 
@@ -704,14 +571,9 @@ public class FormularMax4kView extends JFrame
       this.getClass().getClassLoader().getResource(
             "default_buttons/standardbuttons_letztes.conf");
     
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        controller.insertStandardButtons(null, STANDARD_BUTTONS_LAST_URL, leftPanel.getButtonInsertionIndex());
-        setFrameSize();
-      }
+    menuItem.addActionListener(e -> {
+      controller.insertStandardButtons(null, STANDARD_BUTTONS_LAST_URL, leftPanel.getButtonInsertionIndex());
+      setFrameSize();
     });
     submenu.add(menuItem);
     
@@ -721,15 +583,10 @@ public class FormularMax4kView extends JFrame
     	      this.getClass().getClassLoader().getResource(
             "default_buttons/standardbuttons_email.conf");
     	    
-    	    menuItem.addActionListener(new ActionListener()
-    	    {
-    	      @Override
-    	      public void actionPerformed(ActionEvent e)
-    	      {
-    	        controller.insertStandardButtons(null, STANDARD_BUTTONS_EMAIL, leftPanel.getButtonInsertionIndex());
-    	        setFrameSize();
-    	      }
-    	    });
+    menuItem.addActionListener(e -> {
+      controller.insertStandardButtons(null, STANDARD_BUTTONS_EMAIL, leftPanel.getButtonInsertionIndex());
+      setFrameSize();
+    });
     submenu.add(menuItem);
   }
 }

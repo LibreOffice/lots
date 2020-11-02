@@ -30,8 +30,6 @@ import java.awt.KeyboardFocusManager;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -237,19 +235,14 @@ public class Common
     // KeyEventPostProcessor hinzu, der beim Loslassen (KeyEvent.KEY_RELEASED)
     // der Tabulator-Taste überprüft, ob das KeyEvent von einem JTextField ausgelöst
     // wurde und in diesem Fall allen Text in dem Textfeld selektiert.
-    kfm.addKeyEventPostProcessor(new KeyEventPostProcessor()
-    {
-      @Override
-      public boolean postProcessKeyEvent(KeyEvent e)
-      {
-        if (e.getKeyCode() == KeyEvent.VK_TAB && e.getID() == KeyEvent.KEY_RELEASED
+    kfm.addKeyEventPostProcessor(e -> {
+      if (e.getKeyCode() == KeyEvent.VK_TAB && e.getID() == KeyEvent.KEY_RELEASED
           && e.getComponent() instanceof JTextField)
-        {
-          JTextField textField = (JTextField) e.getComponent();
-          textField.selectAll();
-        }
-        return false;
+      {
+        JTextField textField = (JTextField) e.getComponent();
+        textField.selectAll();
       }
+      return false;
     });
 
     // Wir melden am aktuellen KeyboardFocusManager einen PropertyChangeListener an,
@@ -257,22 +250,17 @@ public class Common
     // löscht.
     // Das darf nicht passieren wenn in ein JTextField das recht Mouse Taste geklickt ist
     // und ein PopUp Menu angezeigt wird.
-    kfm.addPropertyChangeListener("focusOwner", new PropertyChangeListener()
-    {
-      @Override
-      public void propertyChange(PropertyChangeEvent evt)
+    kfm.addPropertyChangeListener("focusOwner", evt -> {
+      if (evt.getOldValue() instanceof JTextField && !isPopupVisible)
       {
-        if (evt.getOldValue() instanceof JTextField && !isPopupVisible)
-        {
-          JTextField textField = (JTextField) evt.getOldValue();
+        JTextField textField = (JTextField) evt.getOldValue();
 
-          // Aufruf von setCaretPosition löscht die Selektion.
-          textField.setCaretPosition(textField.getCaretPosition());
+        // Aufruf von setCaretPosition löscht die Selektion.
+        textField.setCaretPosition(textField.getCaretPosition());
 
-          // eigentlich sollte folgendes ausreichen:
-          // textField.getCaret().setSelectionVisible(false);
-          // geht aber aus irgendeinem Grund nicht
-        }
+        // eigentlich sollte folgendes ausreichen:
+        // textField.getCaret().setSelectionVisible(false);
+        // geht aber aus irgendeinem Grund nicht
       }
     });
   }

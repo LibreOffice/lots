@@ -27,10 +27,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -166,23 +163,17 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     else if (functionName != null)
     {
       adjustFuncCombo.addItem(functionName);
-      adjustFuncCombo.addItemListener(new ItemListener()
-      {
-        @Override
-        public void itemStateChanged(ItemEvent e)
+      adjustFuncCombo.addItemListener(e -> {
+        if (adjustFuncCombo.getSelectedIndex() == adjustFuncs.size())
         {
-          if (adjustFuncCombo.getSelectedIndex() == adjustFuncs.size())
-          {
-            adjustFuncCombo.setBackground(Color.red);
-            adjustFuncCombo.setToolTipText(L.m("Achtung: Funktion nicht definiert!"));
-          }
-          else
-          {
-            adjustFuncCombo.setBackground(null);
-            adjustFuncCombo.setToolTipText(null);
-          }
-
+          adjustFuncCombo.setBackground(Color.red);
+          adjustFuncCombo.setToolTipText(L.m("Achtung: Funktion nicht definiert!"));
+        } else
+        {
+          adjustFuncCombo.setBackground(null);
+          adjustFuncCombo.setToolTipText(null);
         }
+
       });
       adjustFuncCombo.setSelectedIndex(adjustFuncs.size());
     }
@@ -190,32 +181,18 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     vbox.add(adjustFuncCombo);
 
     JButton cancel = new JButton(L.m("Abbrechen"));
-    cancel.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        dispose();
-      }
-    });
+    cancel.addActionListener(e -> dispose());
 
-    ActionListener submitActionListener = new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
+    ActionListener submitActionListener = e -> {
+      try
       {
-        try
-        {
-          ConfigThingy functionConf =
-            createFilenameGeneratorFunctionConf(tt, adjustFuncCombo);
-          documentController.setFilenameGeneratorFunc(functionConf);
-        }
-        catch (Exception e1)
-        {
-          LOGGER.error("", e1);
-        }
-        dispose();
+        ConfigThingy functionConf = createFilenameGeneratorFunctionConf(tt, adjustFuncCombo);
+        documentController.setFilenameGeneratorFunc(functionConf);
+      } catch (Exception e1)
+      {
+        LOGGER.error("", e1);
       }
+      dispose();
     };
 
     JButton ok = new JButton(L.m("OK"));

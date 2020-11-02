@@ -27,8 +27,6 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.StringReader;
@@ -179,14 +177,7 @@ public class FunctionSelectionAccessView implements View
     this.namespace = namespace;
     myPanel = new JPanel(new GridBagLayout());
 
-    updateExpertFunctionTimer = new Timer(250, new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        updateExpertFunction();
-      }
-    });
+    updateExpertFunctionTimer = new Timer(250, e -> updateExpertFunction());
     updateExpertFunctionTimer.setCoalesce(true);
     updateExpertFunctionTimer.setRepeats(false);
 
