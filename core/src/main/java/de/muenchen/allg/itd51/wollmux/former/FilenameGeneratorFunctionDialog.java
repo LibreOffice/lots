@@ -63,10 +63,10 @@ public class FilenameGeneratorFunctionDialog extends JDialog
       .getLogger(FilenameGeneratorFunctionDialog.class);
 
 
-  private TextDocumentController documentController;
-  private AdjustorFunction func;
+  private transient TextDocumentController documentController;
+  private transient AdjustorFunction func;
   private String functionName;
-  private IDManager idManager;
+  private transient IDManager idManager;
 
   public FilenameGeneratorFunctionDialog(Frame owner, boolean modal, TextDocumentController documentController, IDManager idManager)
   {

@@ -72,7 +72,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 
 public class ConfigEditor extends JFrame implements SearchListener
 {
-  private FormularMax4kController controller;
+  private transient FormularMax4kController controller;
 
   private CollapsibleSectionPanel sectionPanel;
 

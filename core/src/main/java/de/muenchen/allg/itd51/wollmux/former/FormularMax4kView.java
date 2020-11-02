@@ -59,32 +59,15 @@ public class FormularMax4kView extends JFrame
   private static final Logger LOGGER = LoggerFactory
       .getLogger(FormularMax4kView.class);
 
-  /**
-   * ActionListener für Buttons mit der ACTION "abort".
-   */
-  private ActionListener actionListener_abort = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-      controller.abort();
-    }
-  };
-
-  /**
-   * wird getriggert bei windowClosing() Event.
-   */
-  private ActionListener closeAction = actionListener_abort;
-
   private static final long serialVersionUID = 1L;
 
-  private final FormularMax4kController controller;
+  private final transient FormularMax4kController controller;
 
-  private MyWindowListener windowCloseListener;
+  private transient MyWindowListener windowCloseListener;
 
-  private LeftPanel leftPanel;
+  private transient LeftPanel leftPanel;
 
-  private RightPanel rightPanel;
+  private transient RightPanel rightPanel;
 
   private JPanel nonExistingRightPanel;
 
@@ -539,7 +522,7 @@ public class FormularMax4kView extends JFrame
     @Override
     public void windowClosing(WindowEvent e)
     {
-      closeAction.actionPerformed(null);
+      controller.abort();
     }
   }
 

@@ -46,8 +46,8 @@ public class PrintFunctionDialog extends JDialog
 {
   private static final long serialVersionUID = 1L;
   
-  private TextDocumentController documentController;
-  PrintFunctionLibrary printFunctionLibrary;
+  private transient TextDocumentController documentController;
+  transient PrintFunctionLibrary printFunctionLibrary;
 
   public PrintFunctionDialog(Frame owner, boolean modal, TextDocumentController documentController, PrintFunctionLibrary printFuncLib)
   {
