@@ -314,7 +314,6 @@ public class TextModule
       {
         String match = it.toString();
 
-        // if (identifierWithArgs.matches(match)) {
         if (first.matches(match))
         {
           try

@@ -117,8 +117,6 @@ public class FormularMax4kView extends JFrame
 
     setJMenuBar(createMainMenu());
 
-    initEditor();
-
     setFrameSize();
     setResizable(true);
     SwingUtilities.invokeLater(this::toFront);
@@ -322,69 +320,6 @@ public class FormularMax4kView extends JFrame
 
     menu.add(menuItem);
     return menu;
-  }
-  
-  /**
-   * Initialisiert die GUI für den Quelltexteditor.
-   */
-  private void initEditor()
-  {
-//    JMenu menu;
-//    JMenuItem menuItem;
-//    editorMenuBar = new JMenuBar();
-//    // ========================= Datei ============================
-//    menu = new JMenu(L.m("Datei"));
-//
-//    menuItem = new JMenuItem(L.m("Speichern"));
-//    menuItem.addActionListener(new ActionListener()
-//    {
-//      public void actionPerformed(ActionEvent e)
-//      {
-//        try
-//        {
-//          ConfigThingy conf =
-//            new ConfigThingy("", null, new StringReader(editor.getText()));
-//          myFrame.setJMenuBar(mainMenuBar);
-//          myFrame.getContentPane().remove(editorContentPanel);
-//          myFrame.getContentPane().add(mainContentPanel);
-//          initModelsAndViews(conf);
-//          documentNeedsUpdating();
-//        }
-//        catch (Exception e1)
-//        {
-//          JOptionPane.showMessageDialog(myFrame, e1.getMessage(),
-//            L.m("Fehler beim Parsen der Formularbeschreibung"),
-//            JOptionPane.WARNING_MESSAGE);
-//        }
-//      }
-//    });
-//    menu.add(menuItem);
-//
-//    menuItem = new JMenuItem(L.m("Abbrechen"));
-//    menuItem.addActionListener(new ActionListener()
-//    {
-//      public void actionPerformed(ActionEvent e)
-//      {
-//        myFrame.setJMenuBar(mainMenuBar);
-//        myFrame.getContentPane().remove(editorContentPanel);
-//        myFrame.getContentPane().add(mainContentPanel);
-//        setFrameSize();
-//      }
-//    });
-//    menu.add(menuItem);
-//
-//    editorMenuBar.add(menu);
-//
-//    Workarounds.applyWorkaroundForOOoIssue102164();
-//    editor = new JEditorPane("text/plain", "");
-//    editor.setEditorKit(new NoWrapEditorKit());
-//
-//    editor.setFont(new Font("Monospaced", Font.PLAIN, editor.getFont().getSize() + 2));
-//    JScrollPane scrollPane =
-//      new JScrollPane(editor, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-//        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-//    editorContentPanel = new JPanel(new BorderLayout());
-//    editorContentPanel.add(scrollPane, BorderLayout.CENTER);
   }
   
   public void close()

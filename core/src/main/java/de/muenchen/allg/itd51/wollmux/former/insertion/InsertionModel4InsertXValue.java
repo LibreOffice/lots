@@ -335,7 +335,6 @@ public class InsertionModel4InsertXValue extends InsertionModel
       dataId.addIDChangeListener(myIDChangeListener);
     }
     else
-    // if (sourceType == DATABASE_TYPE)
     {
       dataId.removeIDChangeListener(myIDChangeListener);
       dataId =

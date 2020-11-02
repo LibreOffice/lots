@@ -93,17 +93,7 @@ public class FunkyDatasource extends Datasource
           + "Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, sourceName));
 
     /*
-     * Kommentar kopiert von der entsprechenden Stelle aus WollMuxFiles:
-     * 
-     * Zum Zeitpunkt wo der DJ initialisiert wird sind die Funktions- und
-     * Dialogbibliothek des WollMuxSingleton noch nicht initialisiert, deswegen
-     * können sie hier nicht verwendet werden. Man könnte die Reihenfolge natürlich
-     * ändern, aber diese Reihenfolgeabhängigkeit gefällt mir nicht. Besser wäre auch
-     * bei den Funktionen WollMuxSingleton.getFunctionDialogs() und
-     * WollMuxSingleton.getGlobalFunctions() eine on-demand initialisierung nach dem
-     * Prinzip if (... == null) initialisieren. Aber das heben wir uns für einen
-     * Zeitpunkt auf, wo es benötigt wird und nehmen jetzt erst mal leere
-     * Dummy-Bibliotheken.
+     * TODO why not use global FunctionLibrary and global DialogLibrary?
      */
     FunctionLibrary funcLib = new FunctionLibrary();
     DialogLibrary dialogLib = new DialogLibrary();

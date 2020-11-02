@@ -147,9 +147,6 @@ public class Common
   private static void setLookAndFeel()
   {
     LOGGER.debug("setLookAndFeel");
-    // String lafName = UIManager.getSystemLookAndFeelClassName();
-    // if (lafName.equals("javax.swing.plaf.metal.MetalLookAndFeel"))
-    // lafName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
 
     // Das Standard-LAF für den WollMux
     String lafName = "javax.swing.plaf.metal.MetalLookAndFeel";
@@ -257,10 +254,6 @@ public class Common
 
         // Aufruf von setCaretPosition löscht die Selektion.
         textField.setCaretPosition(textField.getCaretPosition());
-
-        // eigentlich sollte folgendes ausreichen:
-        // textField.getCaret().setSelectionVisible(false);
-        // geht aber aus irgendeinem Grund nicht
       }
     });
   }

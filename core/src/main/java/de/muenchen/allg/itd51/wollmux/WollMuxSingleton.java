@@ -144,15 +144,6 @@ public class WollMuxSingleton
         LOGGER.error("", e);
       }
 
-      /*
-       * FIXME: Darf nur im Falle des externen WollMux gemacht werden, da ansonsten endlosschleifen
-       * mit dem ProtocolHandler möglich sind. Evtl. auch lösbar dadurch, dass URLS, die mit
-       * ignorecase("wollmux:") anfangen, niemals an den Slave delegiert werden. Ist aber nicht so
-       * schön als Lösung. UNO.XDispatchProviderInterception
-       * (UNO.desktop).registerDispatchProviderInterceptor(
-       * DispatchHandler.globalWollMuxDispatches);
-       */
-
       // setzen von shortcuts
       ConfigThingy tastenkuerzel = new ConfigThingy("");
       try
