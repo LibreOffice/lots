@@ -38,8 +38,7 @@ public class InvalidIdentifierException extends Exception
   @Override
   public String getMessage()
   {
-    return L.m(
-      "Der Bezeichner '%1' ist ungültig, und darf nur die Zeichen a-z, A-Z, _ und 0-9 enthalten, wobei das erste Zeichen keine Ziffer sein darf.",
-      invalidId);
+    return L.m("Der Bezeichner '%1' ist ungültig, und darf nur die Zeichen a-z, A-Z, _ und 0-9 enthalten, "
+        + "wobei das erste Zeichen keine Ziffer sein darf.", invalidId);
   }
 }

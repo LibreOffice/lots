@@ -89,10 +89,8 @@ public class FunkyDatasource extends Datasource
     source = nameToDatasource.get(sourceName);
 
     if (source == null)
-      throw new ConfigurationErrorException(
-        L.m(
-          "Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert",
-          name, sourceName));
+      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": "
+          + "Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, sourceName));
 
     /*
      * Kommentar kopiert von der entsprechenden Stelle aus WollMuxFiles:

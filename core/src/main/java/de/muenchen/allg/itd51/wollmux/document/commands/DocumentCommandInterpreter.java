@@ -176,8 +176,8 @@ public class DocumentCommandInterpreter
       // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
       // können, damit der DocumentCommandTree vollständig aufgebaut werden
       // kann.
-      errors +=
-        new DocumentExpander(this, getDocumentController().getModel().getFragUrls()).execute(getDocumentController().getModel().getDocumentCommands());
+      errors += new DocumentExpander(this, getDocumentController().getModel().getFragUrls())
+          .execute(getDocumentController().getModel().getDocumentCommands());
 
       // Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
       // Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls

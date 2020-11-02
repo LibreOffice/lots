@@ -184,7 +184,8 @@ public class RDFBasedPersistentDataContainer implements
    */
   private XURI getDataIdURI(DataID dataId)
   {
-    return mapDataIdToURI.computeIfAbsent(dataId, key -> URI.create(UNO.defaultContext, WM_METADATA_XMLNS + key.getDescriptor()));
+    return mapDataIdToURI.computeIfAbsent(dataId,
+        key -> URI.create(UNO.defaultContext, WM_METADATA_XMLNS + key.getDescriptor()));
   }
 
   /*

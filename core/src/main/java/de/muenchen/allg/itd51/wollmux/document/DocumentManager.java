@@ -317,9 +317,8 @@ public class DocumentManager
     Info info = getDocumentManager().getInfo(doc);
     if (info == null)
     {
-      LOGGER.error(
-        L.m("Irgendwer will hier ein TextDocumentModel für ein Objekt was der DocumentManager nicht kennt. Das sollte nicht passieren!"),
-        new Exception());
+      LOGGER.error(L.m("Irgendwer will hier ein TextDocumentModel für ein Objekt was der DocumentManager nicht kennt. "
+          + "Das sollte nicht passieren!"), new Exception());
 
       // Wir versuchen trotzdem sinnvoll weiterzumachen.
       getDocumentManager().addTextDocument(doc);

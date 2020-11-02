@@ -323,8 +323,8 @@ public class TextModule
           }
           catch (java.lang.Exception e)
           {
-            LOGGER.error(L.m("Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet wird gibt es nicht in MATCH. ")
-              ,e);
+            LOGGER.error(L.m("Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet "
+                + "wird gibt es nicht in MATCH. "), e);
           }
           return args;
         }

@@ -490,7 +490,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
       FormControlModel model = view.getModel();
       if (model.getType() != FormControlModel.CHECKBOX_TYPE)
       {
-        LOGGER.info(L.m("FM4000: Beim Aufruf von Checkbox->Combobox ist ein Element selektiert, das keine Checkbox ist"));
+        LOGGER.info(
+            L.m("FM4000: Beim Aufruf von Checkbox->Combobox ist ein Element selektiert, das keine Checkbox ist"));
         return null;
       }
       else
@@ -504,7 +505,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
         String label = model.getLabel();
         if (mapCheckboxId2ComboboxEntry.containsValue(label))
         {
-          LOGGER.info(L.m("FM4000: Beim Aufruf von Checkbox->Combobox sind 2 Checkboxen mit gleichem Label selektiert"));
+          LOGGER
+              .info(L.m("FM4000: Beim Aufruf von Checkbox->Combobox sind 2 Checkboxen mit gleichem Label selektiert"));
           return null;
         }
         mapCheckboxId2ComboboxEntry.put(id, label);

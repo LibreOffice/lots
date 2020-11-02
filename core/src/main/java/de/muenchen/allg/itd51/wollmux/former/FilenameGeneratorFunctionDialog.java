@@ -68,7 +68,20 @@ public class FilenameGeneratorFunctionDialog extends JDialog
   private String functionName;
   private transient IDManager idManager;
 
-  public FilenameGeneratorFunctionDialog(Frame owner, boolean modal, TextDocumentController documentController, IDManager idManager)
+  /**
+   * A new dialog for editing the filename generator function.
+   *
+   * @param owner
+   *          The owning frame.
+   * @param modal
+   *          If true the dialog is modal.
+   * @param documentController
+   *          The controller of the document.
+   * @param idManager
+   *          The id manager.
+   */
+  public FilenameGeneratorFunctionDialog(Frame owner, boolean modal, TextDocumentController documentController,
+      IDManager idManager)
   {
     super(owner, modal);
 

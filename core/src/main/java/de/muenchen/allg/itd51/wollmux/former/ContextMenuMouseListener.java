@@ -148,7 +148,8 @@ public class ContextMenuMouseListener implements AWTEventListener {
               boolean nonempty = !(textComponent.getText() == null || textComponent.getText().isEmpty());
               boolean marked = textComponent.getSelectedText() != null;
 
-              boolean pasteAvailable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).isDataFlavorSupported(DataFlavor.stringFlavor);
+              boolean pasteAvailable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null)
+                  .isDataFlavorSupported(DataFlavor.stringFlavor);
 
               cutAction.setEnabled(enabled && editable && marked);
               copyAction.setEnabled(enabled && marked);

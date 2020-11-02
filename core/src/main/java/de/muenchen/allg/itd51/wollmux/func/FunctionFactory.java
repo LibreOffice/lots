@@ -352,8 +352,8 @@ public class FunctionFactory
       throw new ConfigurationErrorException(
         L.m("Bei Funktionen vom Typ \"BIND\" muss nach \"FUNCTION\" ein Funktionsname oder eine Funktion folgen."));
     if (funcConf.count() > 1)
-      throw new ConfigurationErrorException(
-        L.m("Bei Funktionen vom Typ \"BIND\" darf nach \"FUNCTION\" keine Liste sondern nur ein Funktionsname oder eine Funktion folgen."));
+      throw new ConfigurationErrorException(L.m("Bei Funktionen vom Typ \"BIND\" darf nach \"FUNCTION\" "
+          + "keine Liste sondern nur ein Funktionsname oder eine Funktion folgen."));
 
     funcConf = funcConf.iterator().next(); // <Funktionsname>|<Funktion> - ...
 
@@ -659,9 +659,9 @@ public class FunctionFactory
       {
         if (dividendFun != null)
         {
-          throw new ConfigurationErrorException(
-            L.m(
-              "Bei %1-Funktion wurde mehr als eine unqualifizierte Funktion angegeben. Beachten Sie, dass der Divisor mit BY(...) umschlossen sein muss.",
+          throw new ConfigurationErrorException(L.m(
+              "Bei %1-Funktion wurde mehr als eine unqualifizierte Funktion angegeben. Beachten Sie, "
+                  + "dass der Divisor mit BY(...) umschlossen sein muss.",
               conf.getName()));
         }
         dividendFun = parse(funConf, funcLib, dialogLib, context);
@@ -763,8 +763,8 @@ public class FunctionFactory
     return funcs;
   }
 
-  public static Map<String, Function> parseTrafos(ConfigThingy trafoConf, String nodeName, FunctionLibrary funcLib, DialogLibrary dialogLib,
-      Map<Object, Object> context)
+  public static Map<String, Function> parseTrafos(ConfigThingy trafoConf, String nodeName, FunctionLibrary funcLib,
+      DialogLibrary dialogLib, Map<Object, Object> context)
   {
     Map<String, Function> trafos = new HashMap<>();
     Iterator<ConfigThingy> suIter = trafoConf.query(nodeName, 1).iterator();

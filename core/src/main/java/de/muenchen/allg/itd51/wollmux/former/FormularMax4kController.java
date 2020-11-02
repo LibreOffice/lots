@@ -1237,16 +1237,19 @@ public class FormularMax4kController
     if (formControlCount > CRITICAL_NUMBER_OF_FORMCONTROLS
       && maxMemory < LOWEST_ALLOWED_HEAP_SIZE)
     {
-      LOGGER.info(L.m(
-        "Starten von FormularMax beim Bearbeiten von Dokument '%1' abgebrochen, da maximale Java Heap Size = %2 bytes und Anzahl FormControls = %3",
-        documentController.getFrameController().getTitle(), maxMemory, formControlCount));
+      LOGGER.info("Starten von FormularMax beim Bearbeiten von Dokument '{}' abgebrochen, "
+              + "da maximale Java Heap Size = {} bytes und Anzahl FormControls = {}",
+          documentController.getFrameController().getTitle(), maxMemory, formControlCount);
       JOptionPane.showMessageDialog(
         view,
-        L.m("Der FormularMax 4000 kann nicht ausgeführt werden, da der Java-Laufzeitumgebung zu wenig Hauptspeicher zur Verfügung steht.\n"
-          + "Bitte ändern Sie in Office Ihre Java-Einstellungen. Sie finden diese unter \"Extras->Optionen->LibreOffice->Erweitert\".\n"
-          + "Dort wählen Sie in der Liste Ihre aktuelle Java-Laufzeitumgebung aus, klicken auf den Button \"Parameter\",\n"
-          + "tragen den neuen Parameter \"-Xmx256m\" ein (Groß-/Kleinschreibung beachten!) und klicken auf \"Zuweisen\".\n"
-          + "Danach ist ein Neustart von Office nötig."),
+          L.m("Der FormularMax 4000 kann nicht ausgeführt werden, da der Java-Laufzeitumgebung zu wenig Hauptspeicher"
+              + " zur Verfügung steht.\n" + "Bitte ändern Sie in Office Ihre Java-Einstellungen. Sie finden diese unter"
+              + "\"Extras->Optionen->LibreOffice->Erweitert\".\n"
+              + "Dort wählen Sie in der Liste Ihre aktuelle Java-Laufzeitumgebung aus, "
+              + "klicken auf den Button \"Parameter\",\n"
+              + "tragen den neuen Parameter \"-Xmx256m\" ein (Groß-/Kleinschreibung beachten!) und "
+              + "klicken auf \"Zuweisen\".\n"
+              + "Danach ist ein Neustart von Office nötig."),
         L.m("Java Heap Size zu gering"), JOptionPane.ERROR_MESSAGE);
       DocumentManager.getDocumentManager().setCurrentFormularMax4000(documentController.getModel().doc, null);
       return false;

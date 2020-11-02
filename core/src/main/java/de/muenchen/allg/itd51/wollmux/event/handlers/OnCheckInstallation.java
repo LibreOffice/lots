@@ -59,8 +59,10 @@ public class OnCheckInstallation extends WollMuxEvent
   {
     // default values
     String title = L.m("Mehrfachinstallation des WollMux");
-    String msg = L.m(
-        "Es wurden eine systemweite und eine benutzerlokale Installation des WollMux (oder Überreste von einer unvollständigen Deinstallation) gefunden.\nDiese Konstellation kann obskure Fehler verursachen.\n\nEntfernen Sie eine der beiden Installationen.\n\nDie wollmux.log enthält nähere Informationen zu den betroffenen Pfaden.");
+    String msg = L.m("Es wurden eine systemweite und eine benutzerlokale Installation des WollMux "
+        + "(oder Überreste von einer unvollständigen Deinstallation) gefunden.\n"
+        + "Diese Konstellation kann obskure Fehler verursachen.\n\nEntfernen Sie eine der beiden Installationen.\n\n"
+        + "Die wollmux.log enthält nähere Informationen zu den betroffenen Pfaden.");
     String logMsg = msg;
 
     // get all installations

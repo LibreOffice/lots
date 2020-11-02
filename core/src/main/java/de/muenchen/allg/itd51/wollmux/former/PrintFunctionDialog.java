@@ -49,7 +49,20 @@ public class PrintFunctionDialog extends JDialog
   private transient TextDocumentController documentController;
   transient PrintFunctionLibrary printFunctionLibrary;
 
-  public PrintFunctionDialog(Frame owner, boolean modal, TextDocumentController documentController, PrintFunctionLibrary printFuncLib)
+  /**
+   * A new dialog for editing the print function.
+   *
+   * @param owner
+   *          The owning frame.
+   * @param modal
+   *          If true the dialog is modal.
+   * @param documentController
+   *          The controller of the document.
+   * @param printFuncLib
+   *          The print function library.
+   */
+  public PrintFunctionDialog(Frame owner, boolean modal, TextDocumentController documentController,
+      PrintFunctionLibrary printFuncLib)
   {
     super(owner, modal);
     
@@ -84,7 +97,8 @@ public class PrintFunctionDialog extends JDialog
       printFunctionEditorContentPanel.add(printFunctionCurrentList,
         BorderLayout.CENTER);
 
-      final JComboBox<String> printFunctionComboBox = new JComboBox<String>(printFunctionLibrary.getFunctionNames().toArray(new String[]{}));
+      final JComboBox<String> printFunctionComboBox = new JComboBox<String>(
+          printFunctionLibrary.getFunctionNames().toArray(new String[] {}));
       printFunctionComboBox.setEditable(true);
 
       printFunctionEditorContentPanel.add(printFunctionComboBox, BorderLayout.NORTH);

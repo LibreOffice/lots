@@ -150,7 +150,8 @@ public class OnOpenDocument extends WollMuxEvent
         } catch (MalformedURLException e)
         {
           LOGGER.info("", e);
-          errors.append(L.m("Die URL '%1' ist ungültig:", urlStr)).append("\n").append(e.getLocalizedMessage()).append("\n\n");
+          errors.append(L.m("Die URL '%1' ist ungültig:", urlStr)).append("\n").append(e.getLocalizedMessage())
+              .append("\n\n");
           continue;
         } catch (IOException e)
         {

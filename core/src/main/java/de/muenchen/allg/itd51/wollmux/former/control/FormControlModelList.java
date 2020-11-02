@@ -301,9 +301,12 @@ public class FormControlModelList implements Iterable<FormControlModel>
       {
         tabConf = outputTab(currentTab, export);
 
-        //wenn der Button ein trac#20601 Button ist, soll dieser nicht in einen eigenen Knoten Button( ... ) exportiert werden
-        //da er sonst in der Fusszeile der FormularGUI auftauchen würde in der auch die Standardbuttons gezeigt werden.
-        //der button wird dadurch ohne expliziten Button-Knoten in den Knoten "Eingabefelder" exportiert.
+        /*
+         * wenn der Button ein trac#20601 Button ist, soll dieser nicht in einen eigenen Knoten
+         * Button( ... ) exportiert werden da er sonst in der Fusszeile der FormularGUI auftauchen
+         * würde in der auch die Standardbuttons gezeigt werden. der button wird dadurch ohne
+         * expliziten Button-Knoten in den Knoten "Eingabefelder" exportiert.
+         */
         if(model.getAction().equals("openExt") || model.getAction().equals("openTemplate")) {
           conf = tabConf.add("Eingabefelder");
         }

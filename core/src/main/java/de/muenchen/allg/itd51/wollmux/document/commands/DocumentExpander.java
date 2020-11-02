@@ -224,8 +224,8 @@ class DocumentExpander extends AbstractExecutor
         throw new Exception(errors.toString());
       }
 
-      fillPlaceholders(this.documentCommandInterpreter.getModel().doc, this.documentCommandInterpreter.getModel().getViewCursor(), cmd.getTextCursor(),
-        cmd.getArgs());
+      fillPlaceholders(this.documentCommandInterpreter.getModel().doc,
+          this.documentCommandInterpreter.getModel().getViewCursor(), cmd.getTextCursor(), cmd.getArgs());
     }
     catch (java.lang.Exception e)
     {

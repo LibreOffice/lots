@@ -60,7 +60,8 @@ public class ThingyDatasource extends RAMDatasource
    * @param context
    *          der Kontext relativ zu dem URLs aufgelöst werden sollen.
    */
-  public ThingyDatasource(Map<String, Datasource> nameToDatasource, ConfigThingy sourceDesc, URL context) throws IOException
+  public ThingyDatasource(Map<String, Datasource> nameToDatasource, ConfigThingy sourceDesc, URL context)
+      throws IOException
   {
     String name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME der Datenquelle fehlt"));
     String urlStr = parseConfig(sourceDesc, "URL", () -> L.m("URL der Datenquelle \"%1\" fehlt", name));
@@ -139,7 +140,8 @@ public class ThingyDatasource extends RAMDatasource
     }
     catch (NodeNotFoundException x)
     {
-      throw new ConfigurationErrorException(L.m("Fehler in Conf-Datei von Datenquelle %1: Abschnitt 'Daten' fehlt", name), x);
+      throw new ConfigurationErrorException(
+          L.m("Fehler in Conf-Datei von Datenquelle %1: Abschnitt 'Daten' fehlt", name), x);
     }
 
     return data;
@@ -159,13 +161,15 @@ public class ThingyDatasource extends RAMDatasource
         keyCols.add(spalte);
         if (!schema.contains(spalte))
         {
-          throw new ConfigurationErrorException(
-              L.m("Fehler in Definition von Datenquelle %1: Schluessel-Spalte \"%2\" ist nicht im Schema aufgeführt", name, spalte));
+          throw new ConfigurationErrorException(L.m(
+              "Fehler in Definition von Datenquelle %1: Schluessel-Spalte \"%2\" ist nicht im Schema aufgeführt",
+              name, spalte));
         }
       }
     } catch (NodeNotFoundException x)
     {
-      throw new ConfigurationErrorException(L.m("Fehlende oder fehlerhafte Schluessel(...) Spezifikation für Datenquelle %1", name), x);
+      throw new ConfigurationErrorException(
+          L.m("Fehlende oder fehlerhafte Schluessel(...) Spezifikation für Datenquelle %1", name), x);
     }
     return keyCols.toArray(new String[keyCols.size()]);
   }
@@ -224,7 +228,10 @@ public class ThingyDatasource extends RAMDatasource
       ConfigThingy spaltenDaten = iter.next();
       String spalte = spaltenDaten.getName();
       if (!schema.contains(spalte))
-        throw new ConfigurationErrorException(L.m("Datensatz hat Spalte \"%1\", die nicht im Schema aufgeführt ist", spalte));
+      {
+        throw new ConfigurationErrorException(
+            L.m("Datensatz hat Spalte \"%1\", die nicht im Schema aufgeführt ist", spalte));
+      }
       String wert = spaltenDaten.toString();
       data.put(spalte, wert);
     }
