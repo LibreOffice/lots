@@ -221,12 +221,9 @@ public class OneInsertionLineView extends LineView
     public void attributeChanged(InsertionModel model, int attributeId,
         Object newValue)
     {
-      if (ignoreAttributeChanged) return;
-      switch (attributeId)
+      if (!ignoreAttributeChanged && attributeId == InsertionModel4InsertXValue.ID_ATTR)
       {
-        case InsertionModel4InsertXValue.ID_ATTR:
-          idChangedDueToExternalReasons((IDManager.ID) newValue);
-          break;
+        idChangedDueToExternalReasons((IDManager.ID) newValue);
       }
     }
   }

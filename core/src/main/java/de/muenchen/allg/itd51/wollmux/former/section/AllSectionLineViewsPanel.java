@@ -444,6 +444,8 @@ public class AllSectionLineViewsPanel implements View
               view.mark();
               selection.add(index);
               break;
+            default:
+              break;
           }
         }
         else if (b.getState() == BroadcastObjectSelection.STATE_SHIFT_CLICK)

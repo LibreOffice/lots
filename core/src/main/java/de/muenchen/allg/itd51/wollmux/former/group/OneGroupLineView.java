@@ -190,12 +190,9 @@ public class OneGroupLineView extends LineView
     @Override
     public void attributeChanged(GroupModel model, int attributeId, Object newValue)
     {
-      if (ignoreAttributeChanged) return;
-      switch (attributeId)
+      if (!ignoreAttributeChanged && attributeId == GroupModel.ID_ATTR)
       {
-        case GroupModel.ID_ATTR:
-          idChangedDueToExternalReasons((IDManager.ID) newValue);
-          break;
+        idChangedDueToExternalReasons((IDManager.ID) newValue);
       }
     }
   }

@@ -976,6 +976,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
           case '%':
             repstr = "%%";
             break;
+          default:
+            break;
         }
       }
       buffy.replace(idx, idx + 1, repstr);
@@ -1279,13 +1281,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
               repstr = parseUnicode(buffy, idx + 2);
               replen = 6;
               break;
-            /*
-             * darf nicht gemacht werden, weil zum Beispiel in URLs %-escapes
-             * vorkommen:
-             *
-             * default: throw new IllegalArgumentException("Unknown escape in string
-             * token '%" + buffy.charAt(idx)+"'!");
-             */
+            default:
+              break;
           }
         }
         buffy.replace(idx, idx + replen, repstr);

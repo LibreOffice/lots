@@ -209,12 +209,9 @@ public class OneSectionLineView extends LineView
     @Override
     public void attributeChanged(SectionModel model, int attributeId, Object newValue)
     {
-      if (ignoreAttributeChanged) return;
-      switch (attributeId)
+      if (!ignoreAttributeChanged && attributeId == SectionModel.NAME_ATTR)
       {
-        case SectionModel.NAME_ATTR:
-          nameChangedDueToExternalReasons(newValue.toString());
-          break;
+        nameChangedDueToExternalReasons(newValue.toString());
       }
     }
   }
