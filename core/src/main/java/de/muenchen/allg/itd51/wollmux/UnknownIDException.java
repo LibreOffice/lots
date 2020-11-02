@@ -33,8 +33,19 @@ public class UnknownIDException extends Exception
    * keine Ahnung, was das soll, aber es macht Eclipse glücklich.
    */
   private static final long serialVersionUID = -6185698424679725505L;
-  public UnknownIDException() {};
-  public UnknownIDException(String message) {super(message);}
-  public UnknownIDException(String message, Throwable cause) {super(message,cause);}
-  public UnknownIDException(Throwable cause) {super(cause);}
+
+  public UnknownIDException()
+  {
+  }
+
+  /**
+   * New unknown ID exception.
+   *
+   * @param message
+   *          The exception message.
+   */
+  public UnknownIDException(String message)
+  {
+    super(message);
+  }
 }
