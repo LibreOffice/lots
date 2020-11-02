@@ -705,11 +705,10 @@ public class FormControlModel
     int count = 1;
     while (true)
     {
-      IDManager.ID id =
-        idMan.getID(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, idStr2);
-      if (!id.isActive())
+      IDManager.ID inactiveId = idMan.getID(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, idStr2);
+      if (!inactiveId.isActive())
       {
-        this.id = id;
+        this.id = inactiveId;
         return;
       }
       ++count;
@@ -738,9 +737,7 @@ public class FormControlModel
     {
       try
       {
-        IDManager.ID id =
-          idMan.getActiveID(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, idStr2);
-        this.id = id;
+        this.id = idMan.getActiveID(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, idStr2);
         return;
       }
       catch (DuplicateIDException e)
@@ -914,8 +911,8 @@ public class FormControlModel
     ConfigThingy conf = new ConfigThingy("");
     conf.add("LABEL").add(getLabel());
     conf.add("TYPE").add(getType().toLowerCase());
-    IDManager.ID id = getId();
-    if (id != null) conf.add("ID").add(id.toString());
+    if (getId() != null)
+      conf.add("ID").add(getId().toString());
     conf.add("TIP").add(getTooltip());
     conf.add("READONLY").add("" + getReadonly());
     if (isCombo()) conf.add("EDIT").add("" + getEditable());
@@ -933,14 +930,14 @@ public class FormControlModel
     if (getFragID().length() > 0) conf.add("FRAG_ID").add("" + getFragID());
     if (getUrl().length() > 0) conf.add("URL").add("" + getUrl());
 
-    List<String> items = getItems();
-    if (!items.isEmpty())
+    List<String> values = getItems();
+    if (!values.isEmpty())
     {
-      ConfigThingy values = conf.add("VALUES");
-      Iterator<String> iter = items.iterator();
+      ConfigThingy valuesConf = conf.add("VALUES");
+      Iterator<String> iter = values.iterator();
       while (iter.hasNext())
       {
-        values.add(iter.next());
+        valuesConf.add(iter.next());
       }
     }
 
@@ -956,7 +953,8 @@ public class FormControlModel
     if (!autofill.isNone()) conf.addChild(autofill.export("AUTOFILL"));
 
     String idStr = null;
-    if (id != null) idStr = id.toString();
+    if (getId() != null)
+      idStr = getId().toString();
     if (!plausi.isNone()) conf.addChild(plausi.export("PLAUSI", idStr));
 
     return conf;

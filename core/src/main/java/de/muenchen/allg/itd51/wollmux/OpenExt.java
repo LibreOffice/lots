@@ -292,7 +292,7 @@ public class OpenExt
 
     if (doc != null)
     {
-      File destFile = prepareTempFile(null);
+      File tempFile = prepareTempFile(null);
 
       PropertyValue[] storeProps = new PropertyValue[] { new PropertyValue() };
       storeProps[0].Name = "FilterName";
@@ -300,7 +300,7 @@ public class OpenExt
       try
       {
         String parsedURL =
-          UNO.getParsedUNOUrl(destFile.toURI().toURL().toString()).Complete;
+          UNO.getParsedUNOUrl(tempFile.toURI().toURL().toString()).Complete;
         doc.storeToURL(parsedURL, storeProps);
       }
       catch (Exception x)
@@ -317,11 +317,11 @@ public class OpenExt
       if (idx2 > idx1) idx1 = idx2;
       if (idx1 >= 0) fileName = fileName.substring(idx1 + 1);
 
-      File destFile = prepareTempFile(fileName);
+      File tempFile = prepareTempFile(fileName);
 
-      if (!destFile.createNewFile())
-        throw new IOException(L.m("Konnte temporäre Datei \"%1\" nicht anlegen", destFile.getPath()));
-      try (InputStream istream = url.openStream(); FileOutputStream out = new FileOutputStream(destFile);)
+      if (!tempFile.createNewFile())
+        throw new IOException(L.m("Konnte temporäre Datei \"%1\" nicht anlegen", tempFile.getPath()));
+      try (InputStream istream = url.openStream(); FileOutputStream out = new FileOutputStream(tempFile);)
       {
         byte[] buffy = new byte[4096];
         int len;
