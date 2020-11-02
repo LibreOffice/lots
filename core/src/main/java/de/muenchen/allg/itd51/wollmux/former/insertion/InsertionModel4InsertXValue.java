@@ -400,8 +400,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
     {
       if (id != dataId)
       {
-        LOGGER.error(L.m("Event für eine ID erhalten, die ich nicht kenne: %1",
-          id.toString()));
+        LOGGER.error("Event für eine ID erhalten, die ich nicht kenne: {}", id);
         return;
       }
       notifyListeners(ID_ATTR, dataId);

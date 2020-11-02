@@ -89,10 +89,7 @@ public class VisibleTextFragmentList
       }
     }
 
-    // Debug-Ausgabe:
-    LOGGER.trace(L.m("Variablenset an Knoten %1 '%2':", node.getName(),
-      node.toString()));
-
+    LOGGER.trace("Variablenset an Knoten {} '{}':", node.getName(), node);
     for (Map.Entry<String, String> ent : variables.entrySet())
     {
       LOGGER.trace("  {}=\"{}\"", ent.getKey(), ent.getValue());
@@ -112,10 +109,11 @@ public class VisibleTextFragmentList
       String key = m.group(1);
       if (variables.containsKey(key))
       {
-        string =
-          string.substring(0, m.start()) + variables.get(key)
-            + string.substring(m.end());
-        LOGGER.trace(L.m("  Ersetzen der Variable %1 --> %2", m.group(0), string));
+        string = string.substring(0, m.start()) + variables.get(key) + string.substring(m.end());
+        if (LOGGER.isTraceEnabled())
+        {
+          LOGGER.trace("  Ersetzen der Variable {} --> {}", m.group(0), string);
+        }
         // Nach jeder Ersetzung wieder von vorne anfangen.
         m = var.matcher(string);
       }
@@ -124,8 +122,7 @@ public class VisibleTextFragmentList
         // Die Variable kann nicht ersetzt werden und wird auch nicht
         // ersetzt. Eine Exception muss deswegen nicht geworfen werden, es ist
         // aber sinnvoll, die Fehlermeldung in einem Logger rauszuschreiben.
-        LOGGER.error(L.m("Die Variable '%1' in der URL '%2' ist nicht definiert.",
-          key, string));
+        LOGGER.error("Die Variable '{}' in der URL '{}' ist nicht definiert.", key, string);
       }
     }
     if (count == MAXCOUNT)

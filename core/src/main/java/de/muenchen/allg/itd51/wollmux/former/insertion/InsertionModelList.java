@@ -154,7 +154,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
     IDManager.ID comboIdd = combo.getId();
     if (comboIdd == null)
     {
-      LOGGER.error(L.m("Programmfehler: Durch Merge erstellte ComboBox hat keine ID bekommen"));
+      LOGGER.error("Programmfehler: Durch Merge erstellte ComboBox hat keine ID bekommen");
       return;
     }
     String comboId = comboIdd.toString();

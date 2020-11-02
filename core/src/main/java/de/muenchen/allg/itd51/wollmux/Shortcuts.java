@@ -122,9 +122,7 @@ public class Shortcuts
       }
       else
       {
-        LOGGER.error(L.m(
-          "Ungültige Tastenkombination '%1' im .conf Abschnitt Tastenkuerzel",
-          shortcut));
+        LOGGER.error("Ungültige Tastenkombination '{}' im .conf Abschnitt Tastenkuerzel", shortcut);
       }
     }
 
@@ -195,8 +193,8 @@ public class Shortcuts
     {
       for (int i = 0; i < keys.length; i++)
       {
-        LOGGER.trace("Modifiers: " + keys[i].Modifiers + " KeyCode: "
-          + keys[i].KeyCode + " --> " + xac.getCommandByKeyEvent(keys[i]));
+        LOGGER.trace("Modifiers: {} KeyCode: {} --> {}", keys[i].Modifiers, keys[i].KeyCode,
+            xac.getCommandByKeyEvent(keys[i]));
 
       }
     }

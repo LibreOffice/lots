@@ -108,8 +108,7 @@ public class ExternalFunction
           {
             if (method != null)
             {
-              LOGGER.error(L.m("Klasse \"%1\" enthält 2 Methoden namens \"%2\"",
-                classStr, methodStr));
+              LOGGER.error("Klasse \"{}\" enthält 2 Methoden namens \"{}\"", classStr, methodStr);
               break;
             }
             method = methods[i];

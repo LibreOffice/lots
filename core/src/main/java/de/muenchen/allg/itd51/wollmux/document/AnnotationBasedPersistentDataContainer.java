@@ -48,8 +48,6 @@ import com.sun.star.text.XTextRange;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.afid.UnoDictionary;
-import de.muenchen.allg.itd51.wollmux.document.PersistentDataContainer.DataID;
-import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
 import de.muenchen.allg.util.UnoProperty;
 import de.muenchen.allg.util.UnoService;
@@ -257,7 +255,7 @@ public class AnnotationBasedPersistentDataContainer implements
       getWollMuxTextFields(dataId.getDescriptor(), true, dataValue.length());
     if (textfields.isEmpty())
     {
-      LOGGER.error(L.m("Konnte WollMux-Textfeld(er) \"%1\" nicht anlegen", dataId));
+      LOGGER.error("Konnte WollMux-Textfeld(er) \"{}\" nicht anlegen", dataId);
       Utils.setProperty(doc, UnoProperty.RECORD_CHANGES, recordChanges);
       return;
     }

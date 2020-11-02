@@ -391,7 +391,7 @@ public class TextModule
 
     String bookmarkName = DocumentCommand.getCommandString(root);
 
-    LOGGER.trace(L.m("Erzeuge Bookmark: '%1'", bookmarkName));
+    LOGGER.trace("Erzeuge Bookmark: '{}'", bookmarkName);
 
     try
     {

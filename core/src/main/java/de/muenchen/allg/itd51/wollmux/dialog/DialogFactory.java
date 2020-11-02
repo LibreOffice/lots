@@ -71,9 +71,7 @@ public class DialogFactory
         ConfigThingy dialogConf = iter.next();
         String name = dialogConf.getName();
         if (dialogsInBlock.contains(name))
-          LOGGER.error(L.m(
-            "Funktionsdialog \"%1\" im selben Funktionsdialoge-Abschnitt mehrmals definiert",
-            name));
+          LOGGER.error("Funktionsdialog \"{}\" im selben Funktionsdialoge-Abschnitt mehrmals definiert", name);
         dialogsInBlock.add(name);
         try
         {

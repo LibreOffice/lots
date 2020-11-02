@@ -274,10 +274,9 @@ public class DocumentCommands implements Iterable<DocumentCommand>
       LOGGER.trace("", e);
     }
 
-    LOGGER.trace(L.m(
-      "updateBookmarks fertig nach %1 ms. Entfernte/Neue Dokumentkommandos: ",
-      Integer.valueOf((int) (System.currentTimeMillis() - startTime)))
-      + retiredDocumentCommands.size() + " / " + newDocumentCommands.size());
+    LOGGER.trace("updateBookmarks fertig nach {} ms. Entfernte/Neue Dokumentkommandos: {} / {}",
+        Integer.valueOf((int) (System.currentTimeMillis() - startTime)), retiredDocumentCommands.size(),
+        newDocumentCommands.size());
     return !retiredDocumentCommands.isEmpty() || !newDocumentCommands.isEmpty();
   }
 
@@ -333,10 +332,9 @@ public class DocumentCommands implements Iterable<DocumentCommand>
     removeInvalidTextSections(invalidTextSections);
     addNewTextSections(newTextSections);
 
-    LOGGER.trace(L.m(
-      "updateTextSections fertig nach %1 ms. Entfernte/Neue TextSections: ",
-      Integer.valueOf((int) (System.currentTimeMillis() - startTime)))
-      + invalidTextSections.size() + " / " + newTextSections.size());
+    LOGGER.trace("updateTextSections fertig nach {} ms. Entfernte/Neue TextSections: {} / {}",
+        Integer.valueOf((int) (System.currentTimeMillis() - startTime)), invalidTextSections.size(),
+        newTextSections.size());
     return !invalidTextSections.isEmpty() || !newTextSections.isEmpty();
   }
 

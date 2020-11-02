@@ -263,7 +263,7 @@ public class ScanVisitor implements DocumentTreeVisitor
           model = registerInput(control, label, id);
           break;
         default:
-          LOGGER.error(L.m("Unbekannter Typ Formular-Steuerelement"));
+          LOGGER.error("Unbekannter Typ Formular-Steuerelement");
           return null;
       }
     }

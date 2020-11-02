@@ -654,7 +654,7 @@ public class FormularMax4kController
   {
     if (writeChangesTimer.isRunning())
     {
-      LOGGER.debug(L.m("Schreibe wartende Änderungen ins Dokument"));
+      LOGGER.debug("Schreibe wartende Änderungen ins Dokument");
       writeChangesTimer.stop();
       try
       {
@@ -675,7 +675,7 @@ public class FormularMax4kController
    */
   private ConfigThingy updateDocument(TextDocumentController documentController)
   {
-    LOGGER.debug(L.m("Übertrage Formularbeschreibung ins Dokument"));
+    LOGGER.debug("Übertrage Formularbeschreibung ins Dokument");
     Map<String, ConfigThingy> mapFunctionNameToConfigThingy = new HashMap<>();
     insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
     sectionModelList.updateDocument();

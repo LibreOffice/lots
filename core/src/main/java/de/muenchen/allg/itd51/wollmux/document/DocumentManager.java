@@ -48,7 +48,6 @@ import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
-import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Verwaltet Informationen zu allen offenen OOo-Dokumenten.
@@ -317,8 +316,8 @@ public class DocumentManager
     Info info = getDocumentManager().getInfo(doc);
     if (info == null)
     {
-      LOGGER.error(L.m("Irgendwer will hier ein TextDocumentModel für ein Objekt was der DocumentManager nicht kennt. "
-          + "Das sollte nicht passieren!"), new Exception());
+      LOGGER.error("Irgendwer will hier ein TextDocumentModel für ein Objekt was der DocumentManager nicht kennt. "
+          + "Das sollte nicht passieren!", new Exception());
 
       // Wir versuchen trotzdem sinnvoll weiterzumachen.
       getDocumentManager().addTextDocument(doc);
@@ -532,8 +531,7 @@ public class DocumentManager
     catch (NodeNotFoundException e)
     {
       pdMode = PERSISTENT_DATA_MODE_RDFREADLEGACY;
-      LOGGER.debug(L.m("Attribut %1 nicht gefunden. Verwende Voreinstellung '%2'.",
-          PERSISTENT_DATA_MODE, pdMode));
+      LOGGER.debug("Attribut {} nicht gefunden. Verwende Voreinstellung '{}'.", PERSISTENT_DATA_MODE, pdMode);
     }
 
     try
@@ -556,17 +554,15 @@ public class DocumentManager
       }
       else
       {
-        LOGGER.error(L.m(
-          "Ungültiger Wert '%1' für Attribut %2. Verwende Voreinstellung '%3' statt dessen.",
-            pdMode, PERSISTENT_DATA_MODE, PERSISTENT_DATA_MODE_RDFREADLEGACY));
+        LOGGER.error("Ungültiger Wert '{}' für Attribut {}. Verwende Voreinstellung '{}' statt dessen.", pdMode,
+            PERSISTENT_DATA_MODE, PERSISTENT_DATA_MODE_RDFREADLEGACY);
         return new RDFReadLegacyModeDataContainer(doc);
       }
     }
     catch (RDFMetadataNotSupportedException e)
     {
-      LOGGER.info(L.m(
-        "Die Einstellung '%1' für Attribut %2 ist mit dieser Office-Version nicht kompatibel. Verwende Einstellung '%3' statt dessen.",
-          pdMode, PERSISTENT_DATA_MODE, PERSISTENT_DATA_MODE_ANNOTATION));
+      LOGGER.info("Die Einstellung '{}' für Attribut {} ist mit dieser Office-Version nicht kompatibel. "
+          + "Verwende Einstellung '{}' statt dessen.", pdMode, PERSISTENT_DATA_MODE, PERSISTENT_DATA_MODE_ANNOTATION);
       return new AnnotationBasedPersistentDataContainer(doc);
     }
   }

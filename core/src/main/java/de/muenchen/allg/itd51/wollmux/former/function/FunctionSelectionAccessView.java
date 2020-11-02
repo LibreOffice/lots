@@ -633,7 +633,7 @@ public class FunctionSelectionAccessView implements View
           Function func = funcLib.get(functionName);
           if (func == null)
           {
-            LOGGER.error(L.m("Funktion \"%1\"\" ist verschwunden ?!?", functionName));
+            LOGGER.error("Funktion \"{}\"\" ist verschwunden ?!?", functionName);
           } else
           {
             paramNames = func.parameters();

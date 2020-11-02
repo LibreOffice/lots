@@ -271,9 +271,8 @@ public class OOoDatasource extends Datasource
     }
     else
     {
-      LOGGER.debug(L.m(
-        "Schema der Datenquelle %1 nicht angegeben. Versuche, es von der Datenquelle zu erfragen.",
-        datasourceName));
+      LOGGER.debug("Schema der Datenquelle {} nicht angegeben. Versuche, es von der Datenquelle zu erfragen.",
+          datasourceName);
       try
       {
         XDataSource ds =

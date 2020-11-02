@@ -272,8 +272,7 @@ public class SectionModel
     {
       Object textSection = textSections.get(sectionNameComplete);
       if (textSection == null)
-        LOGGER.error(L.m("Bereich ist plötzlich verschwunden: \"%1\"",
-          sectionNameComplete));
+        LOGGER.error("Bereich ist plötzlich verschwunden: \"{}\"", sectionNameComplete);
       else
         UnoProperty.setProperty(textSection, UnoProperty.IS_VISIBLE, Boolean.valueOf(visible));
     }

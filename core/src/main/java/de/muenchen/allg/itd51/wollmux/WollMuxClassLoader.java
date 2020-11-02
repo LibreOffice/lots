@@ -86,7 +86,7 @@ public class WollMuxClassLoader extends ConfClassLoader
       WollMuxClassLoader.getClassLoader().addWhitelisted(w.toString());
     }
 
-    LOGGER.debug("CLASSPATH=" + urllist);
+    LOGGER.debug("CLASSPATH={}", urllist);
   }
 
 }

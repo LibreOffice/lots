@@ -111,13 +111,13 @@ public class WollMuxSingleton
 
     WollMuxClassLoader.initClassLoader();
 
-    LOGGER.debug(L.m("StartupWollMux"));
+    LOGGER.debug("StartupWollMux");
     if (WollMuxFiles.getWollMuxConfFile() != null)
     {
-      LOGGER.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
+      LOGGER.debug("wollmuxConfFile = {}", WollMuxFiles.getWollMuxConfFile());
     }
     LOGGER.debug("DEFAULT_CONTEXT \"{}\"", WollMuxFiles.getDefaultContext());
-    LOGGER.debug("CONF_VERSION: " + getConfVersionInfo());
+    LOGGER.debug("CONF_VERSION: {}", getConfVersionInfo());
 
     /*
      * Datenquellen/Registriere Abschnitte verarbeiten. ACHTUNG! Dies muss vor getDatasourceJoiner()
@@ -321,8 +321,7 @@ public class WollMuxSingleton
             L.m("Fehler beim Überprüfen, ob Datenquelle '%1' bereits registriert ist", name), x);
       }
 
-      LOGGER.debug(
-          L.m("Versuche, Datenquelle '%1' bei OOo zu registrieren für URL '%2'", name, urlStr));
+      LOGGER.debug("Versuche, Datenquelle '{}' bei OOo zu registrieren für URL '{}'", name, urlStr);
 
       String parsedUrl;
       try
@@ -342,8 +341,7 @@ public class WollMuxSingleton
         Object datasource = UnoDictionary.create(UNO.dbContext, Object.class).get(parsedUrl);
         UNO.dbContext.registerObject(name, datasource);
         if (!UnoRuntime.areSame(UNO.dbContext.getRegisteredObject(name), datasource))
-          LOGGER.error(
-              L.m("Testzugriff auf Datenquelle '%1' nach Registrierung fehlgeschlagen", name));
+          LOGGER.error("Testzugriff auf Datenquelle '{}' nach Registrierung fehlgeschlagen", name);
       } catch (Exception x)
       {
         LOGGER.error(L.m(
