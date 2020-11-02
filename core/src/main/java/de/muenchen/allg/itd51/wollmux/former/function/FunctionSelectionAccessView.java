@@ -336,7 +336,7 @@ public class FunctionSelectionAccessView implements View
    */
   private JComboBox<String> buildParameterBox(final String paramName, ParamValue startValue)
   {
-    final JComboBox<String> combo = new JComboBox<String>();
+    final JComboBox<String> combo = new JComboBox<>();
     combo.setEditable(true);
 
     combo.addItem(UNSPECIFIED_ITEM);
@@ -496,7 +496,7 @@ public class FunctionSelectionAccessView implements View
    */
   private JComboBox<String> buildFunctionSelector()
   {
-    functionSelectorBox = new JComboBox<String>();
+    functionSelectorBox = new JComboBox<>();
     int selectedIndex = 0;
     int none_index = functionSelectorBox.getItemCount();
     functionSelectorBox.addItem(NONE_ITEM);

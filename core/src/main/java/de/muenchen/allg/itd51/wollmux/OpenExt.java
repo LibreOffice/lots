@@ -87,7 +87,7 @@ public class OpenExt
    * Listenreihenfolge ausprobiert werden. Das erste gefundene Programm wird
    * genommen.
    */
-  private List<String> programs = new Vector<String>();
+  private List<String> programs = new Vector<>();
 
   /**
    * Falls vorhanden, die FILTER-Angabe. Mögliche FILTER sind hier zu
@@ -187,7 +187,7 @@ public class OpenExt
 
         if (!found) continue;
 
-        List<String> commands = new ArrayList<String>();
+        List<String> commands = new ArrayList<>();
         try
         {
           ConfigThingy programConf = appConf.get("PROGRAM");

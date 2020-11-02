@@ -262,7 +262,7 @@ public class Shortcuts
   private static Short returnKeyCode(String shortcut)
   {
 
-    final Map<String, Short> myMap = new HashMap<String, Short>();
+    final Map<String, Short> myMap = new HashMap<>();
 
     // Zahlen 0-9
     myMap.put("0", Short.valueOf(Key.NUM0));
@@ -380,9 +380,7 @@ public class Shortcuts
     myMap.put("EQUAL", Short.valueOf(Key.EQUAL));
     myMap.put("=", Short.valueOf(Key.EQUAL));
 
-    final Short keyCode = myMap.get(shortcut.toUpperCase());
-
-    return keyCode;
+    return myMap.get(shortcut.toUpperCase());
   }
 
   /**
@@ -396,7 +394,7 @@ public class Shortcuts
   private static Short returnKeyModifier(String shortcut)
   {
 
-    final Map<String, Short> myMap = new HashMap<String, Short>();
+    final Map<String, Short> myMap = new HashMap<>();
 
     // SHIFT, CTRL und ALT
     myMap.put("SHIFT", Short.valueOf(KeyModifier.SHIFT));
@@ -405,8 +403,6 @@ public class Shortcuts
     myMap.put("STRG", Short.valueOf(KeyModifier.MOD1));
     myMap.put("ALT", Short.valueOf(KeyModifier.MOD2));
 
-    final Short keyModifier = myMap.get(shortcut.toUpperCase());
-
-    return keyModifier;
+    return myMap.get(shortcut.toUpperCase());
   }
 }

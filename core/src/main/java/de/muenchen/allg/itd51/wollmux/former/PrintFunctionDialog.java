@@ -92,12 +92,12 @@ public class PrintFunctionDialog extends JDialog
   private void createGui()
   {
     final JList<String> printFunctionCurrentList =
-        new JList<String>(new Vector<String>(documentController.getModel().getPrintFunctions()));
+        new JList<>(new Vector<String>(documentController.getModel().getPrintFunctions()));
       JPanel printFunctionEditorContentPanel = new JPanel(new BorderLayout());
       printFunctionEditorContentPanel.add(printFunctionCurrentList,
         BorderLayout.CENTER);
 
-      final JComboBox<String> printFunctionComboBox = new JComboBox<String>(
+      final JComboBox<String> printFunctionComboBox = new JComboBox<>(
           printFunctionLibrary.getFunctionNames().toArray(new String[] {}));
       printFunctionComboBox.setEditable(true);
 

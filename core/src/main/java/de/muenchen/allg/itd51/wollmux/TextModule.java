@@ -103,7 +103,7 @@ public class TextModule
     // holt sich Textbausteine aus .conf und sammelt sie in umgekehrter
     // Reihenfolge in der LinkedList tbListe. Damit später definierte
     // Textbaustein Abschnitte immer Vorrang haben.
-    LinkedList<ConfigThingy> tbListe = new LinkedList<ConfigThingy>();
+    LinkedList<ConfigThingy> tbListe = new LinkedList<>();
     ConfigThingy tbConf = conf.query("Textbausteine");
     Iterator<ConfigThingy> iter = tbConf.iterator();
     while (iter.hasNext())
