@@ -22,10 +22,10 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
@@ -53,7 +53,7 @@ public abstract class InsertionModel
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert
    * werden wollen.
    */
-  private List<ModelChangeListener> listeners = new Vector<>(1);
+  private List<ModelChangeListener> listeners = new ArrayList<>(1);
 
   /**
    * Entfernt die Einfügestelle komplett aus dem Dokument, d,h, sowohl das eventuell vorhandene

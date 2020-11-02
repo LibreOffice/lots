@@ -24,15 +24,15 @@ package de.muenchen.allg.itd51.wollmux.former;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.ListIterator;
-import java.util.Vector;
 
 public class IndexList
 {
   /**
    * Die (immer aufsteigend sortierte) Liste der Indizes.
    */
-  private Vector<Integer> indices = new Vector<>();
+  private LinkedList<Integer> indices = new LinkedList<>();
 
   /**
    * Addiert auf alle Indizes in der {@link #indices} Liste größer gleich start den offset. Indizes
@@ -124,14 +124,14 @@ public class IndexList
   {
     if (indices.isEmpty())
       return -1;
-    return indices.firstElement().intValue();
+    return indices.getFirst().intValue();
   }
 
   public int lastElement()
   {
     if (indices.isEmpty())
       return -1;
-    return indices.lastElement().intValue();
+    return indices.getLast().intValue();
   }
 
   public void clear()

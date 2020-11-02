@@ -26,10 +26,10 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,7 +110,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
   /**
    * Liste von {@link InsertionModel.AutosepInfo} Objekten.
    */
-  private List<AutosepInfo> autosep = new Vector<>();
+  private List<AutosepInfo> autosep = new ArrayList<>();
 
   /**
    * Das Bookmark, das diese Einfügestelle umschließt.

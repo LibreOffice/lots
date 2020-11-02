@@ -32,7 +32,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -87,7 +86,7 @@ public class OpenExt
    * Listenreihenfolge ausprobiert werden. Das erste gefundene Programm wird
    * genommen.
    */
-  private List<String> programs = new Vector<>();
+  private List<String> programs = new ArrayList<>();
 
   /**
    * Falls vorhanden, die FILTER-Angabe. Mögliche FILTER sind hier zu

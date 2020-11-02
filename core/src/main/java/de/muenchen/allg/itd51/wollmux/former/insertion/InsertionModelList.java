@@ -30,7 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -212,7 +211,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
     if (comboId == null) return;
     Collection<String> items = combo.getItems();
     Collection<String> unusedItems = new HashSet<>(items);
-    Collection<InsertionModel> brokenInsertionModels = new Vector<>();
+    Collection<InsertionModel> brokenInsertionModels = new ArrayList<>();
     Iterator<InsertionModel> iter = iterator();
     while (iter.hasNext())
     {
@@ -325,7 +324,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
    */
   public void updateDocument(Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
   {
-    List<InsertionModel> defunct = new Vector<>();
+    List<InsertionModel> defunct = new ArrayList<>();
     Iterator<InsertionModel> iter = models.iterator();
     while (iter.hasNext())
     {

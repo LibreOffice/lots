@@ -30,9 +30,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -123,7 +123,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   /**
    * Enthält die {@link ViewDescriptor}s in der richtigen Reihenfolge.
    */
-  private Vector<Object> viewDescriptors = new Vector<>();
+  private List<Object> viewDescriptors = new ArrayList<>();
 
   /**
    * Die Indizes der ausgewählten Elemente in {@link #viewDescriptors}.
@@ -637,8 +637,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   {
     ViewDescriptor desc1 = (ViewDescriptor) viewDescriptors.get(index1);
     ViewDescriptor desc2 = (ViewDescriptor) viewDescriptors.get(index2);
-    viewDescriptors.setElementAt(desc1, index2);
-    viewDescriptors.setElementAt(desc2, index1);
+    viewDescriptors.set(index2, desc1);
+    viewDescriptors.set(index1, desc2);
 
     fixTabStructure();
 

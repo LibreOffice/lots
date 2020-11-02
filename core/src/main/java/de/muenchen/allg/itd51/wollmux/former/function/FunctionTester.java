@@ -28,11 +28,11 @@ import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -117,7 +117,7 @@ public class FunctionTester
   /**
    * Liste aller angezeigten {@link FunctionTester.ValueBox}es.
    */
-  private List<ValueBox> valueBoxes = new Vector<>();
+  private List<ValueBox> valueBoxes = new ArrayList<>();
 
   /**
    * Die Funktionsbibliothek, deren Funktionen für BIND zur Verfügung stehen.

@@ -26,9 +26,9 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -92,7 +92,7 @@ public class AllGroupLineViewsPanel implements View
   /**
    * Die Liste der {@link OneGroupLineView}s in dieser View.
    */
-  private List<OneGroupLineView> views = new Vector<>();
+  private List<OneGroupLineView> views = new ArrayList<>();
 
   /**
    * Liste von Indizes der selektierten Objekte in der {@link #views} Liste.

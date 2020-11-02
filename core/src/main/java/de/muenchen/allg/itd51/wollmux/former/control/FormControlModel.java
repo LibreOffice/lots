@@ -22,6 +22,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.control;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -139,7 +140,7 @@ public class FormControlModel
   private char hotkey = 0;
 
   /** VALUES. */
-  private List<String> items = new Vector<>(0);
+  private List<String> items = new ArrayList<>(0);
 
   /** EDIT. */
   private boolean editable = false;
@@ -172,7 +173,7 @@ public class FormControlModel
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert
    * werden wollen.
    */
-  private List<ModelChangeListener> listeners = new Vector<>(1);
+  private List<ModelChangeListener> listeners = new ArrayList<>(1);
 
   /**
    * Der FormularMax4000 zu dem dieses Model gehört. Dieser wird über Änderungen des
@@ -285,7 +286,7 @@ public class FormControlModel
    */
   private List<String> parseValues(ConfigThingy conf)
   {
-    Vector<String> list = new Vector<>(conf.count());
+    List<String> list = new ArrayList<>(conf.count());
     Iterator<ConfigThingy> iter = conf.iterator();
     while (iter.hasNext())
     {

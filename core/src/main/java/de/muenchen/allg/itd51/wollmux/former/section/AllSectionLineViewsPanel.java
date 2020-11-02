@@ -26,9 +26,9 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -109,7 +109,7 @@ public class AllSectionLineViewsPanel implements View
   /**
    * Die Liste der {@link OneSectionLineView}s in dieser View.
    */
-  private List<OneSectionLineView> views = new Vector<>();
+  private List<OneSectionLineView> views = new ArrayList<>();
 
   /**
    * Liste von Indizes der selektierten Objekte in der {@link #views} Liste.

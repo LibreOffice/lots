@@ -22,10 +22,10 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.section;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -75,7 +75,7 @@ public class SectionModel
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert
    * werden wollen.
    */
-  private List<ModelChangeListener> listeners = new Vector<>(1);
+  private List<ModelChangeListener> listeners = new ArrayList<>(1);
 
   /** GROUPS. */
   private GroupsProvider groups;

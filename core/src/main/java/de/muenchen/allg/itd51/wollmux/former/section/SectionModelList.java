@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
@@ -112,7 +111,7 @@ public class SectionModelList implements Iterable<SectionModel>
    */
   public void updateDocument()
   {
-    List<SectionModel> defunct = new Vector<>();
+    List<SectionModel> defunct = new ArrayList<>();
     Iterator<SectionModel> iter = models.iterator();
     while (iter.hasNext())
     {
