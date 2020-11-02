@@ -122,8 +122,7 @@ public class Scanner implements Iterator<Token>, Closeable
             PathProcessor.processInclude(token.getContent()))));
       } catch (final IOException e)
       {
-        LOGGER.error("Could not open file for token " + token.getContent()
-            + ".", e);
+        LOGGER.error("Could not open file for token {}.", token.getContent(), e);
         throw new NoSuchElementException("No more tokens avaiable");
       }
     } else if (token.getType() == TokenType.END_FILE)
