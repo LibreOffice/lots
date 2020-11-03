@@ -27,8 +27,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -209,12 +209,9 @@ public class OneSectionLineView extends LineView
     @Override
     public void attributeChanged(SectionModel model, int attributeId, Object newValue)
     {
-      if (ignoreAttributeChanged) return;
-      switch (attributeId)
+      if (!ignoreAttributeChanged && attributeId == SectionModel.NAME_ATTR)
       {
-        case SectionModel.NAME_ATTR:
-          nameChangedDueToExternalReasons(newValue.toString());
-          break;
+        nameChangedDueToExternalReasons(newValue.toString());
       }
     }
   }
@@ -225,11 +222,8 @@ public class OneSectionLineView extends LineView
    * Je nachdem ob CTRL gedrückt ist oder nicht wird die Selektion erweitert oder
    * ersetzt.
    */
-  private class MyMouseListener implements MouseListener
+  private class MyMouseListener extends MouseAdapter
   {
-    @Override
-    public void mouseClicked(MouseEvent e)
-    {}
 
     @Override
     public void mousePressed(MouseEvent e)
@@ -250,17 +244,5 @@ public class OneSectionLineView extends LineView
         }
       });
     }
-
-    @Override
-    public void mouseReleased(MouseEvent e)
-    {}
-
-    @Override
-    public void mouseEntered(MouseEvent e)
-    {}
-
-    @Override
-    public void mouseExited(MouseEvent e)
-    {}
   }
 }

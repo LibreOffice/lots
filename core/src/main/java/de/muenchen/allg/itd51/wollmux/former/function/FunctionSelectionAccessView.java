@@ -366,11 +366,15 @@ public class FunctionSelectionAccessView implements View
 
       @Override
       public void popupMenuWillBecomeInvisible(PopupMenuEvent e)
-      {}
+      {
+        // nothing to do
+      }
 
       @Override
       public void popupMenuCanceled(PopupMenuEvent e)
-      {}
+      {
+        // nothing to do
+      }
     });
 
     JTextComponent tc = ((JTextComponent) combo.getEditor().getEditorComponent());
@@ -639,8 +643,10 @@ public class FunctionSelectionAccessView implements View
           if (func == null)
           {
             LOGGER.error(L.m("Funktion \"%1\"\" ist verschwunden ?!?", functionName));
+          } else
+          {
+            paramNames = func.parameters();
           }
-          paramNames = func.parameters();
         }
 
         funcSel.setFunction(functionName, paramNames);
@@ -649,6 +655,7 @@ public class FunctionSelectionAccessView implements View
     }
   }
 
+  @Override
   public JComponent getComponent()
   {
     return myPanel;

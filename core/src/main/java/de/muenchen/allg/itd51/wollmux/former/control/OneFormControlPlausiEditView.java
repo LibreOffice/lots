@@ -93,7 +93,9 @@ public class OneFormControlPlausiEditView extends FunctionSelectionAccessView
     @Override
     public void attributeChanged(FormControlModel model, int attributeId,
         Object newValue)
-    {}
+    {
+      // nothing to do
+    }
   }
 
   /**

@@ -150,7 +150,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
    */
   public void mergeCheckboxesIntoCombobox(ComboboxMergeDescriptor desc)
   {
-    FormControlModel combo = desc.combo;
+    FormControlModel combo = desc.getCombo();
     IDManager.ID comboIdd = combo.getId();
     if (comboIdd == null)
     {
@@ -165,7 +165,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
       {
         InsertionModel4InsertXValue model =
           (InsertionModel4InsertXValue) iter.next();
-        String comboValue = desc.mapCheckboxId2ComboboxEntry.get(model.getDataID());
+        String comboValue = desc.getMapCheckboxId2ComboboxEntry().get(model.getDataID());
         if (comboValue != null)
         {
           try

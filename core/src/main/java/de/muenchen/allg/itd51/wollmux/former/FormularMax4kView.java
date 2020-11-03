@@ -28,8 +28,8 @@ import java.awt.HeadlessException;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.net.URL;
 
 import javax.swing.AbstractButton;
@@ -277,12 +277,11 @@ public class FormularMax4kView extends JFrame
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        viewVisibilityDescriptor.formControlLineViewId =
-          ((AbstractButton) e.getSource()).isSelected();
+        viewVisibilityDescriptor.setFormControlLineViewId(((AbstractButton) e.getSource()).isSelected());
         controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
       }
     });
-    menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewId);
+    menuItem.setSelected(viewVisibilityDescriptor.isFormControlLineViewId());
     menu.add(menuItem);
 
     menuItem = new JCheckBoxMenuItem("LABEL");
@@ -291,12 +290,11 @@ public class FormularMax4kView extends JFrame
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        viewVisibilityDescriptor.formControlLineViewLabel =
-          ((AbstractButton) e.getSource()).isSelected();
+        viewVisibilityDescriptor.setFormControlLineViewLabel(((AbstractButton) e.getSource()).isSelected());
         controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
       }
     });
-    menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewLabel);
+    menuItem.setSelected(viewVisibilityDescriptor.isFormControlLineViewLabel());
     menu.add(menuItem);
 
     menuItem = new JCheckBoxMenuItem("TOOLTIP");
@@ -305,12 +303,11 @@ public class FormularMax4kView extends JFrame
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        viewVisibilityDescriptor.formControlLineViewTooltip =
-          ((AbstractButton) e.getSource()).isSelected();
+        viewVisibilityDescriptor.setFormControlLineViewTooltip(((AbstractButton) e.getSource()).isSelected());
         controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
       }
     });
-    menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewTooltip);
+    menuItem.setSelected(viewVisibilityDescriptor.isFormControlLineViewTooltip());
     menu.add(menuItem);
 
     menuItem = new JCheckBoxMenuItem("TYPE");
@@ -319,12 +316,11 @@ public class FormularMax4kView extends JFrame
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        viewVisibilityDescriptor.formControlLineViewType =
-          ((AbstractButton) e.getSource()).isSelected();
+        viewVisibilityDescriptor.setFormControlLineViewType(((AbstractButton) e.getSource()).isSelected());
         controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
       }
     });
-    menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewType);
+    menuItem.setSelected(viewVisibilityDescriptor.isFormControlLineViewType());
     menu.add(menuItem);
 
     menuItem = new JCheckBoxMenuItem(L.m("Elementspezifische Felder"));
@@ -333,12 +329,11 @@ public class FormularMax4kView extends JFrame
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        viewVisibilityDescriptor.formControlLineViewAdditional =
-          ((AbstractButton) e.getSource()).isSelected();
+        viewVisibilityDescriptor.setFormControlLineViewAdditional(((AbstractButton) e.getSource()).isSelected());
         controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
       }
     });
-    menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewAdditional);
+    menuItem.setSelected(viewVisibilityDescriptor.isFormControlLineViewAdditional());
     menu.add(menuItem);
 
     menuItem = new JCheckBoxMenuItem("READONLY");
@@ -347,12 +342,11 @@ public class FormularMax4kView extends JFrame
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        viewVisibilityDescriptor.formControlLineViewReadonly =
-          ((AbstractButton) e.getSource()).isSelected();
+        viewVisibilityDescriptor.setFormControlLineViewReadonly(((AbstractButton) e.getSource()).isSelected());
         controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
       }
     });
-    menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewReadonly);
+    menuItem.setSelected(viewVisibilityDescriptor.isFormControlLineViewReadonly());
     menu.add(menuItem);
 
     menuItem = new JCheckBoxMenuItem("TRAFO, PLAUSI, AUTOFILL, GROUPS");
@@ -539,38 +533,14 @@ public class FormularMax4kView extends JFrame
     dispose();
   }
 
-  private class MyWindowListener implements WindowListener
+  private class MyWindowListener extends WindowAdapter
   {
-    @Override
-    public void windowOpened(WindowEvent e)
-    {}
 
     @Override
     public void windowClosing(WindowEvent e)
     {
       closeAction.actionPerformed(null);
     }
-
-    @Override
-    public void windowClosed(WindowEvent e)
-    {}
-
-    @Override
-    public void windowIconified(WindowEvent e)
-    {}
-
-    @Override
-    public void windowDeiconified(WindowEvent e)
-    {}
-
-    @Override
-    public void windowActivated(WindowEvent e)
-    {}
-
-    @Override
-    public void windowDeactivated(WindowEvent e)
-    {}
-
   }
 
   /**

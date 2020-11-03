@@ -320,17 +320,15 @@ public class OpenExt
 
       File destFile = prepareTempFile(fileName);
 
-      InputStream istream = url.openStream();
       if (!destFile.createNewFile())
-        throw new IOException(L.m("Konnte temporäre Datei \"%1\" nicht anlegen",
-          destFile.getPath()));
-      FileOutputStream out = new FileOutputStream(destFile);
-      byte[] buffy = new byte[4096];
-      int len;
-      while (0 <= (len = istream.read(buffy)))
-        out.write(buffy, 0, len);
-      out.close();
-      istream.close();
+        throw new IOException(L.m("Konnte temporäre Datei \"%1\" nicht anlegen", destFile.getPath()));
+      try (InputStream istream = url.openStream(); FileOutputStream out = new FileOutputStream(destFile);)
+      {
+        byte[] buffy = new byte[4096];
+        int len;
+        while (0 <= (len = istream.read(buffy)))
+          out.write(buffy, 0, len);
+      }
     }
   }
 

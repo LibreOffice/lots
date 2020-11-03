@@ -78,6 +78,7 @@ public class OneSectionExtView implements View
     model.addListener(new MyModelChangeListener());
   }
 
+  @Override
   public JComponent getComponent()
   {
     return myTabbedPane;
@@ -93,9 +94,13 @@ public class OneSectionExtView implements View
 
   private class MyModelChangeListener implements SectionModel.ModelChangeListener
   {
+    @Override
     public void attributeChanged(SectionModel model, int attributeId, Object newValue)
-    {}
+    {
+      // nothing to do
+    }
 
+    @Override
     public void modelRemoved(SectionModel model)
     {
       if (bigDaddy != null) bigDaddy.viewShouldBeRemoved(OneSectionExtView.this);

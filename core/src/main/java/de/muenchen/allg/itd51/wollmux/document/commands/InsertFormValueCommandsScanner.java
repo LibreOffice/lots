@@ -54,11 +54,14 @@ class InsertFormValueCommandsScanner extends AbstractExecutor
   }
 
   /** Mapping von IDs zu FormFields */
-  public HashMap<String, List<FormField>> idToFormFields =
-    new HashMap<String, List<FormField>>();
+  private Map<String, List<FormField>> idToFormFields = new HashMap<>();
 
-  private Map<String, FormField> bookmarkNameToFormField =
-    new HashMap<String, FormField>();
+  private Map<String, FormField> bookmarkNameToFormField = new HashMap<>();
+
+  public Map<String, List<FormField>> getIdToFormFields()
+  {
+    return idToFormFields;
+  }
 
   public int execute(DocumentCommands commands)
   {

@@ -85,9 +85,9 @@ public abstract class OnDemandCardView implements View
 
   private static class ViewCardIdPair
   {
-    public View view;
+    private View view;
 
-    public String cardId;
+    private String cardId;
 
     public ViewCardIdPair(View view, String cardId)
     {
@@ -205,6 +205,7 @@ public abstract class OnDemandCardView implements View
     return inactivePanel;
   }
 
+  @Override
   public JComponent getComponent()
   {
     return myPanel;
@@ -254,6 +255,7 @@ public abstract class OnDemandCardView implements View
   private class MyViewChangeListener implements ViewChangeListener
   {
 
+    @Override
     public void viewShouldBeRemoved(View view)
     {
       removeItem(view);

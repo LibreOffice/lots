@@ -508,9 +508,9 @@ public class LDAPDatasource extends Datasource
   private static class RelativePaths
   {
 
-    public int relative;
+    private final int relative;
 
-    public List<Name> paths; // of (Ldap)Names
+    private final List<Name> paths; // of (Ldap)Names
 
     RelativePaths(int relative, List<Name> paths)
     {
@@ -530,9 +530,9 @@ public class LDAPDatasource extends Datasource
   private static class RelativePath
   {
 
-    public int relative;
+    private final int relative;
 
-    public Name name;
+    private final Name name;
 
     RelativePath(int relative, Name name)
     {

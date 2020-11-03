@@ -385,12 +385,12 @@ public class InsertionModel4InsertXValue extends InsertionModel
 
   private static class AutosepInfo
   {
-    public int autosep = AUTOSEP_LEFT;
+    private int autosep = AUTOSEP_LEFT;
 
     /**
      * Defaultwert Leerzeichen, wenn nicht definiert (siehe WollMux-Doku).
      */
-    public String separator = " ";
+    private String separator = " ";
   }
 
   private class MyIDChangeListener implements IDManager.IDChangeListener

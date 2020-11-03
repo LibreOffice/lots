@@ -350,6 +350,8 @@ public class DocumentTree
       case TEXFIELD_TYPE_DROPDOWN:
         textPortions.add(new DropdownNode(textField, doc));
         break;
+      default:
+        break;
     }
   }
 

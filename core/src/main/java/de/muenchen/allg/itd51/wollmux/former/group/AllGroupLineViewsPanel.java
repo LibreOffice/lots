@@ -287,7 +287,9 @@ public class AllGroupLineViewsPanel implements View
 
     @Override
     public void itemRemoved(GroupModel model, int index)
-    {}
+    {
+      // nothing to do
+    }
 
   }
 

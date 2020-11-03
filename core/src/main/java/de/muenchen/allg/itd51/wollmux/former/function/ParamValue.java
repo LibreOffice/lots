@@ -31,20 +31,23 @@ import de.muenchen.allg.itd51.wollmux.former.IDManager;
  */
 public class ParamValue
 {
-  /**
-   * Der Wert wurde vom Benutzer nicht spezifiziert.
-   */
-  public static final int UNSPECIFIED = 0;
+  private enum ParamValueType
+  {
+    /**
+     * Der Wert wurde vom Benutzer nicht spezifiziert.
+     */
+    UNSPECIFIED,
 
-  /**
-   * Als Wert soll der Wert des Feldes mit ID {@link #fieldId} verwendet werden.
-   */
-  public static final int FIELD = 1;
+    /**
+     * Als Wert soll der Wert des Feldes mit ID {@link #fieldId} verwendet werden.
+     */
+    FIELD,
 
-  /**
-   * Als Wert soll {@link #literal} als Literal verwendet werden.
-   */
-  public static final int LITERAL = 2;
+    /**
+     * Als Wert soll {@link #literal} als Literal verwendet werden.
+     */
+    LITERAL;
+  }
 
   /**
    * Falls {@link #type} == {@link #LITERAL} enthält dies ein Literal.
@@ -59,9 +62,9 @@ public class ParamValue
   /**
    * Der Typ dieses Parameter-Wertes.
    */
-  private int type;
+  private ParamValueType type;
 
-  private ParamValue(int type, String str, IDManager.ID fieldId)
+  private ParamValue(ParamValueType type, String str, IDManager.ID fieldId)
   {
     this.type = type;
     this.literal = str;
@@ -70,6 +73,9 @@ public class ParamValue
 
   /**
    * Copy Constructor.
+   *
+   * @param orig
+   *          The original {@link ParamValue},
    */
   public ParamValue(ParamValue orig)
   {
@@ -83,7 +89,7 @@ public class ParamValue
    */
   public boolean isUnspecified()
   {
-    return type == UNSPECIFIED;
+    return type == ParamValueType.UNSPECIFIED;
   }
 
   /**
@@ -92,7 +98,7 @@ public class ParamValue
    */
   public boolean isFieldReference()
   {
-    return type == FIELD;
+    return type == ParamValueType.FIELD;
   }
 
   /**
@@ -101,7 +107,7 @@ public class ParamValue
    */
   public boolean isLiteral()
   {
-    return type == LITERAL;
+    return type == ParamValueType.LITERAL;
   }
 
   /**
@@ -120,7 +126,7 @@ public class ParamValue
    */
   public static ParamValue unspecified()
   {
-    return new ParamValue(UNSPECIFIED, "", null);
+    return new ParamValue(ParamValueType.UNSPECIFIED, "", null);
   }
 
   /**
@@ -128,7 +134,7 @@ public class ParamValue
    */
   public static ParamValue field(IDManager.ID id)
   {
-    return new ParamValue(FIELD, "", id);
+    return new ParamValue(ParamValueType.FIELD, "", id);
   }
 
   /**
@@ -136,6 +142,6 @@ public class ParamValue
    */
   public static ParamValue literal(String str)
   {
-    return new ParamValue(LITERAL, str, null);
+    return new ParamValue(ParamValueType.LITERAL, str, null);
   }
 }

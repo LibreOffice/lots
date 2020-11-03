@@ -504,7 +504,7 @@ public class SenderService implements XPALProvider
         throw new SenderException("Kein Absender ausgewählt => OVERRIDE_FRAG_DB_SPALTE bleibt wirkungslos", e);
       } catch (ColumnNotFoundException e)
       {
-        LOGGER.debug("OVERRIDE_FRAG_DB_SPALTE " + overrideFragDbSpalte + " ist nicht vorhanden", e);
+        LOGGER.debug("OVERRIDE_FRAG_DB_SPALTE {} ist nicht vorhanden", overrideFragDbSpalte, e);
       } catch (IOException | SyntaxErrorException e)
       {
         throw new SenderException("Fehler beim Parsen der OVERRIDE_FRAG_DB_SPALTE " + overrideFragDbSpalte, e);

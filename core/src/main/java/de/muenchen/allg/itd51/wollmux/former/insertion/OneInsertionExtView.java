@@ -81,6 +81,7 @@ public class OneInsertionExtView implements View
     model.addListener(new MyModelChangeListener());
   }
 
+  @Override
   public JComponent getComponent()
   {
     return myTabbedPane;
@@ -96,14 +97,17 @@ public class OneInsertionExtView implements View
 
   private class MyModelChangeListener implements InsertionModel.ModelChangeListener
   {
+    @Override
     public void modelRemoved(InsertionModel model)
     {
       if (bigDaddy != null) bigDaddy.viewShouldBeRemoved(OneInsertionExtView.this);
     }
 
-    public void attributeChanged(InsertionModel model, int attributeId,
-        Object newValue)
-    {}
+    @Override
+    public void attributeChanged(InsertionModel model, int attributeId, Object newValue)
+    {
+      // nothing to do
+    }
   }
 
 }
