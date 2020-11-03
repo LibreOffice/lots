@@ -113,34 +113,6 @@ interface XWollMux
               oder "", wenn der Wert nicht bestimmt werden kann.
      */	
     string getValue([in] string dbSpalte);
-
-    /**
-      Macht das selbe wie XWollMuxDocument wdoc = getWollMuxDocument(doc); if (wdoc !=
-      null) wdoc.addPrintFunction(functionName) und sollte durch diese Anweisungen
-      entsprechend ersetzt werden.
-       
-      @param doc
-               Das Dokument, dem die Druckfunktion functionName hinzugefügt werden
-               soll.
-      @param functionName
-               der Name einer Druckfunktion, die im Abschnitt "Druckfunktionen" der
-               WollMux-Konfiguration definiert sein muss.
-      @deprecated since 2009-09-18
-     */
-    void addPrintFunction([in] com::sun::star::text::XTextDocument doc, [in] string functionName);
-
-    /**
-      Macht das selbe wie XWollMuxDocument wdoc = getWollMuxDocument(doc); if (wdoc !=
-      null) wdoc.removePrintFunction(functionName) und sollte durch diese Anweisungen
-      entsprechend ersetzt werden.
-      
-      @param doc
-               Das Dokument, dem die Druckfunktion functionName genommen werden soll.
-      @param functionName
-               der Name einer Druckfunktion, die im Dokument gesetzt ist.
-      @deprecated since 2009-09-18
-     */
-    void removePrintFunction([in] com::sun::star::text::XTextDocument doc, [in] string functionName);
         
     /**
       Ermöglicht den Zugriff auf WollMux-Funktionen, die spezifisch für das Dokument
