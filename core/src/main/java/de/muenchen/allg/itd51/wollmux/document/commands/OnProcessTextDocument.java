@@ -110,22 +110,13 @@ public class OnProcessTextDocument implements WollMuxEventListener
     new OnNotifyDocumentEventListener(null, WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED,
         documentController.getModel().doc).emit();
 
-    XController2 controller = UNO.XController2(documentController.getModel().doc.getCurrentController());
-    if (documentController.getModel().isFormDocument())
-    {
-      this.activateSidebarPanel(controller, FormSidebarController.WM_FORM_GUI);
-      try
-      {
-        documentController.getFrameController().setDocumentZoom(
-            WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild().query("ZOOM"));
-      } catch (java.lang.Exception e)
-      {
-        // configuration for Fenster isn't mandatory
-      }
-    } else {
-      this.activateSidebarPanel(controller, WollMuxSidebarPanel.WM_BAR);
-    }
+    activateSidebar(documentController);
 
+    notifyContextChanged(documentController);
+  }
+
+  private void notifyContextChanged(TextDocumentController documentController)
+  {
     // ContextChanged to update dispatches
     try
     {
@@ -136,14 +127,57 @@ public class OnProcessTextDocument implements WollMuxEventListener
     }
   }
 
-  private void activateSidebarPanel(XController2 controller, String panel)
+  private void activateSidebar(TextDocumentController documentController)
+  {
+    XController2 controller = UNO.XController2(documentController.getModel().doc.getCurrentController());
+    controller.getSidebar().showDecks(true);
+    controller.getSidebar().setVisible(true);
+    Thread activatePanel = new Thread(() -> {
+      try
+      {
+        int count = 0;
+        while (controller.getSidebar().getSidebar() == null && count < 10)
+        {
+          Thread.sleep(100);
+          count++;
+        }
+      } catch (InterruptedException e)
+      {
+        LOGGER.debug("Thread interrupted before sidebar decks are available", e);
+        Thread.currentThread().interrupt();
+      }
+      if (controller.getSidebar().getSidebar() != null)
+      {
+        if (documentController.getModel().isFormDocument())
+        {
+          this.activateSidebarPanel(controller, FormSidebarController.WM_FORM_GUI);
+          try
+          {
+            documentController.getFrameController().setDocumentZoom(
+                WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild().query("ZOOM"));
+          } catch (java.lang.Exception e)
+          {
+            // configuration for Fenster isn't mandatory
+          }
+        } else
+        {
+          this.activateSidebarPanel(controller, WollMuxSidebarPanel.WM_BAR);
+        }
+        controller.getSidebar().getSidebar().requestLayout();
+      }
+    });
+    activatePanel.setDaemon(true);
+    activatePanel.start();
+  }
+
+  private void activateSidebarPanel(XController2 controller, String deckName)
   {
     try
     {
-      XDeck formGuiDeck = UnoSidebar.getDeckByName(panel, controller);
-      if (formGuiDeck != null)
+      XDeck deck = UnoSidebar.getDeckByName(deckName, controller);
+      if (deck != null)
       {
-        formGuiDeck.activate(true);
+        deck.activate(true);
       }
     } catch (UnoHelperException e)
     {
