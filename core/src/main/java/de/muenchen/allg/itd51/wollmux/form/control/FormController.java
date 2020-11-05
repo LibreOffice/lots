@@ -39,7 +39,6 @@ import de.muenchen.allg.itd51.wollmux.dispatch.SaveDispatch;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseAndOpenExt;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseTextDocument;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnFocusFormField;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnResetDocumentState;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveTempAndOpenExt;
@@ -178,19 +177,6 @@ public class FormController
   public void saveTempAndOpenExt(String ext)
   {
     new OnSaveTempAndOpenExt(documentController, ext).emit();
-  }
-
-  /**
-   * Das Formularfeld im Dokument mit der ID fieldId erhält den Fokus. Gibt es im Dokument mehrere
-   * Formularfelder, die von der ID abhängen, so erhält immer das erste Formularfeld den Fokus -
-   * bevorzugt werden dabei auch die nicht transformierten Formularfelder.
-   *
-   * @param fieldId
-   *          id des Formularfeldes, das den Fokus bekommen soll.
-   */
-  public void focusGained(String fieldId)
-  {
-    new OnFocusFormField(documentController, fieldId).emit();
   }
 
   /**
