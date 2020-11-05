@@ -31,7 +31,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseTextDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCollectNonWollMuxFormFieldsViaPrintModel;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnDumpInfo;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnExecutePrintFunction;
-import de.muenchen.allg.itd51.wollmux.event.handlers.OnFocusFormField;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormValueChanged;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFormularMax4000Show;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnFunctionDialog;
@@ -275,18 +274,6 @@ public class WollMuxEventListenerImpl implements WollMuxEventListener
    */
   @Subscribe
   public void onFormControllerInitCompleted(OnResetDocumentState event)
-  {
-    event.process();
-  }
-
-  /**
-   * Execute the event
-   *
-   * @param event
-   *          The event.
-   */
-  @Subscribe
-  public void onFocusFormField(OnFocusFormField event)
   {
     event.process();
   }

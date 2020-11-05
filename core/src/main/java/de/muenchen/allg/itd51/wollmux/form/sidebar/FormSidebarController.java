@@ -39,6 +39,7 @@ import com.sun.star.awt.XControl;
 import com.sun.star.awt.XFocusListener;
 import com.sun.star.awt.XWindow;
 import com.sun.star.frame.XModel;
+import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.XComponentContext;
 
@@ -123,6 +124,9 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
         {
           String focusedField = (String) UnoProperty.getProperty(control.getModel(), UnoProperty.DEFAULT_CONTROL);
           documentController.getModel().focusFormField(focusedField);
+          XTextCursor cursor = UNO.XTextViewCursorSupplier(documentController.getModel().doc.getCurrentController())
+              .getViewCursor();
+          cursor.collapseToEnd();
         } catch (UnoHelperException e)
         {
           LOGGER.trace("", e);
