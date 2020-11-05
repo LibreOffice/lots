@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,10 +54,8 @@ public class BindFunction implements Function
     Set<String> setFuncParams = new HashSet<>();
 
     ConfigThingy sets = conf.query("SET");
-    Iterator<ConfigThingy> iter = sets.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy set : sets)
     {
-      ConfigThingy set = iter.next();
       if (set.count() != 2)
         throw new ConfigurationErrorException(
           L.m("BIND: SET benötigt genau 2 Parameter"));

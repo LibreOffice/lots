@@ -175,10 +175,8 @@ public class L
       }
 
       ConfigThingy aliases = l10n.get("LanguageAliases", 2);
-      Iterator<?> iter = aliases.iterator();
-      while (iter.hasNext())
+      for (ConfigThingy aliasConf : aliases)
       {
-        ConfigThingy aliasConf = (ConfigThingy) iter.next();
         if (aliasConf.count() > 1)
         {
           Iterator<?> subIter = aliasConf.iterator();
@@ -209,11 +207,9 @@ public class L
       ConfigThingy messages = l10n.query("Messages", 2);
       for (ConfigThingy msg : messages)
       {
-        iter = msg.iterator();
         String original = "foo";
-        while (iter.hasNext())
+        for (ConfigThingy conf : msg)
         {
-          ConfigThingy conf = (ConfigThingy) iter.next();
           if ("original".equalsIgnoreCase(conf.getName()))
             original = conf.toString();
 

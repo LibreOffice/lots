@@ -23,7 +23,6 @@
 package de.muenchen.allg.itd51.wollmux.func;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
@@ -46,10 +45,8 @@ public class NotFunction extends MultiFunction
   @Override
   public String getString(Values parameters)
   {
-    Iterator<Function> iter = subFunction.iterator();
-    while (iter.hasNext())
+    for (Function func : subFunction)
     {
-      Function func = iter.next();
       String str = func.getString(parameters);
       if (str == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
       if (!str.equalsIgnoreCase("true")) return "true";

@@ -24,7 +24,6 @@ package de.muenchen.allg.itd51.wollmux.func;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -45,10 +44,8 @@ public abstract class MultiFunction implements Function
       DialogLibrary dialogLib, Map<Object, Object> context)
   {
     List<Function> subFunc = new ArrayList<>(conf.count());
-    Iterator<ConfigThingy> iter = conf.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy subFunConf : conf)
     {
-      ConfigThingy subFunConf = iter.next();
       if (handleParam(subFunConf, funcLib, dialogLib, context)) continue;
       Function fun = FunctionFactory.parse(subFunConf, funcLib, dialogLib, context);
       subFunc.add(fun);
@@ -140,10 +137,9 @@ public abstract class MultiFunction implements Function
   @Override
   public void getFunctionDialogReferences(Collection<String> set)
   {
-    Iterator<Function> iter = subFunction.iterator();
-    while (iter.hasNext())
+    for (Function func : subFunction)
     {
-      iter.next().getFunctionDialogReferences(set);
+      func.getFunctionDialogReferences(set);
     }
   }
 }

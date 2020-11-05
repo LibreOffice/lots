@@ -23,7 +23,6 @@
 package de.muenchen.allg.itd51.wollmux.func;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -77,11 +76,9 @@ public class SelectFunction extends MultiFunction
   @Override
   public String getString(Values parameters)
   {
-    Iterator<Function> iter = subFunction.iterator();
     String result = FunctionLibrary.ERROR;
-    while (iter.hasNext())
+    for (Function func : subFunction)
     {
-      Function func = iter.next();
       String str = func.getString(parameters);
       if (str != FunctionLibrary.ERROR)
       {

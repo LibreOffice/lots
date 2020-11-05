@@ -25,7 +25,6 @@ package de.muenchen.allg.itd51.wollmux.func;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Iterator;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
@@ -84,10 +83,8 @@ abstract class NumberFunction extends MultiFunction
   {
     String result = initComputation(parameters);
     if (result != null) return result;
-    Iterator<Function> iter = subFunction.iterator();
-    while (iter.hasNext())
+    for (Function func : subFunction)
     {
-      Function func = iter.next();
       String str = func.getString(parameters);
       if (str == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
       try

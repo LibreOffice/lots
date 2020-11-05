@@ -737,13 +737,10 @@ public class FunctionFactory
       Map<Object, Object> context)
   {
     conf = conf.query(section);
-    Iterator<ConfigThingy> parentIter = conf.iterator();
-    while (parentIter.hasNext())
+    for (ConfigThingy child : conf)
     {
-      Iterator<ConfigThingy> iter = parentIter.next().iterator();
-      while (iter.hasNext())
+      for (ConfigThingy funcConf : child)
       {
-        ConfigThingy funcConf = iter.next();
         String name = funcConf.getName();
         try
         {
@@ -767,11 +764,8 @@ public class FunctionFactory
       DialogLibrary dialogLib, Map<Object, Object> context)
   {
     Map<String, Function> trafos = new HashMap<>();
-    Iterator<ConfigThingy> suIter = trafoConf.query(nodeName, 1).iterator();
-    while (suIter.hasNext())
+    for (ConfigThingy spaltenumsetzung : trafoConf.query(nodeName, 1))
     {
-      ConfigThingy spaltenumsetzung = suIter.next();
-
       for (ConfigThingy transConf : spaltenumsetzung)
       {
         String name = transConf.getName();
