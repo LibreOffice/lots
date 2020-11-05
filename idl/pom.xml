@@ -49,17 +49,39 @@
                 <property name="idlcOutput" value="${project.build.directory}/generated-sources/urd/de/muenchen/allg/itd51/wollmux/interfaces" />
                 <fail unless="UNO_PATH" message="No UNO_PATH set! Set UNO_PATH as property in maven settings." />
                 <echo message="Using UNO_PATH: ${UNO_PATH}" />
-                <exec executable="sh" failonerror="true">
-                  <arg value="-c" />
-                  <arg value="${libreoffice.sdk}/bin/idlc -O ${idlcOutput} -I ${libreoffice.sdk}/idl -I src/main/idl src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/*.idl" />
+                <echo message="Create urd files" />
+                <exec executable="${libreoffice.sdk}/bin/idlc" failonerror="true">
+                  <arg value="-verbose" />
+                  <arg value="-O${idlcOutput}" />
+                  <arg value="-I${libreoffice.sdk}/idl;src/main/idl" />
+                  <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XPALChangeEventBroadcaster.idl" />
+                  <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XPALChangeEventListener.idl" />
+                  <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XPALProvider.idl" />
+                  <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XPrintModel.idl" />
+                  <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XWollMux.idl" />
+                  <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XWollMuxDocument.idl" />
                 </exec>
-                <exec executable="sh" failonerror="true">
-                  <arg value="-c" />
-                  <arg value="${UNO_PATH}/regmerge target/WollMux.rdb /UCR ${idlcOutput}/*" />
+                <echo message="Create registry library" />
+                <exec executable="${UNO_PATH}/regmerge" failonerror="true">
+                  <arg value="-v" />
+                  <arg value="target/WollMux.rdb" />
+                  <arg value="/UCR" />
+                  <arg value="${idlcOutput}/XPALChangeEventBroadcaster.urd" />
+                  <arg value="${idlcOutput}/XPALChangeEventListener.urd" />
+                  <arg value="${idlcOutput}/XPALProvider.urd" />
+                  <arg value="${idlcOutput}/XPrintModel.urd" />
+                  <arg value="${idlcOutput}/XWollMux.urd" />
+                  <arg value="${idlcOutput}/XWollMuxDocument.urd" />
                 </exec>
-                <exec executable="sh" failonerror="true">
-                  <arg value="-c" />
-                  <arg value="${libreoffice.sdk}/bin/javamaker -Tde.muenchen.allg.itd51.wollmux.interfaces.* -nD -Gc -O ${project.build.directory}/generated-sources/idl ${project.build.directory}/WollMux.rdb -X${UNO_PATH}/types.rdb -X${UNO_PATH}/types/offapi.rdb" />
+                <echo message="Create class files" />
+                <exec executable="${libreoffice.sdk}/bin/javamaker" failonerror="true">
+                  <arg value="-Tde.muenchen.allg.itd51.wollmux.interfaces.*" />
+                  <arg value="-nD" />
+                  <arg value="-Gc" />
+                  <arg value="-O${project.build.directory}/generated-sources/idl" />
+                  <arg value="-X${UNO_PATH}/types.rdb" />
+                  <arg value="-X${UNO_PATH}/types/offapi.rdb" />
+                  <arg value="${project.build.directory}/WollMux.rdb" />
                 </exec>
               </target>
             </configuration>
